@@ -7,7 +7,7 @@ const File = `
     size: Int
     usageCount: Int @defaultValue(value: 0)
     uri: String! @unique
-    fileKind: FileKind! @defaultValue(value: "appOne")
+    fileKind: FileKind! @defaultValue(value: "content")
     type: FileType!
     usageKind: FileUsageKind
     mimeType: String!

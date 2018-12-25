@@ -1,7 +1,6 @@
 const FileKind = `
   enum FileKind {
-    profilePic
-    maxContent
+      content
   }`;
 
 export default FileKind;

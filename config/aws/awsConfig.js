@@ -1,8 +1,10 @@
+const accessKeyId = 'AKIAJ5KTKINUGBG2KXBA';
+const secretAccessKey = '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';
 const awsConfig = {
   production: {
     aws: {
-      accessKeyId: 'AKIAIZKYV2S3WCCTWNYA',
-      secretAccessKey: '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',
+      accessKeyId,
+      secretAccessKey,
       region: 'us-east-2',
     },
     s3: {
@@ -13,12 +15,13 @@ const awsConfig = {
       publicRead: 'public-read',
       authenticatedRead: 'authenticated-read',
       private: 'private',
+      public: 'public',
     },
   },
   staging: {
     aws: {
-      accessKeyId: 'AKIAIZKYV2S3WCCTWNYA',
-      secretAccessKey: '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',
+      accessKeyId,
+      secretAccessKey,
       region: 'us-east-2',
     },
     s3: {
@@ -29,28 +32,30 @@ const awsConfig = {
       publicRead: 'public-read',
       authenticatedRead: 'authenticated-read',
       private: 'private',
+      public: 'public',
     },
   },
   development: {
     aws: {
-      accessKeyId: 'AKIAIZKYV2S3WCCTWNYA',
-      secretAccessKey: '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',
+      accessKeyId,
+      secretAccessKey,
       region: 'us-east-2',
     },
     s3: {
-      bucket: 'bucket-dev',
+      bucket: 'tekie-dev',
     },
     ACL: {
       publicReadWrite: 'public-read-write',
       publicRead: 'public-read',
       authenticatedRead: 'authenticated-read',
       private: 'private',
+      public: 'public',
     },
   },
   test: {
     aws: {
-      accessKeyId: 'AKIAIZKYV2S3WCCTWNYA',
-      secretAccessKey: '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',
+      accessKeyId,
+      secretAccessKey,
       region: 'us-east-2',
     },
     s3: {
@@ -61,6 +66,7 @@ const awsConfig = {
       publicRead: 'public-read',
       authenticatedRead: 'authenticated-read',
       private: 'private',
+      public: 'public',
     },
   },
 };
