@@ -1,0 +1,24 @@
+{
+  "extends": "airbnb-base",
+  "parserOptions": {
+    "ecmaVersion": 8
+  },
+  "env": {
+    "mocha" : true
+  },
+  "rules": {
+    "semi": 2,
+    "no-unused-vars": 2,
+    "import/prefer-default-export": 0,
+    "arrow-body-style": 2,
+    "no-console": 2,
+    "no-debugger": 2,
+    "no-restricted-properties": [2, {
+        "object": "describe",
+        "property": "only"
+    }, {
+        "object": "describe",
+        "property": "skip"
+    }]
+  }
+}

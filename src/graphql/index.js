@@ -1,0 +1,84 @@
+/* File for defining Graphql Schema(queries and mutations)  */
+import { getArgumentValues } from 'graphql/execution/values';
+import { makeExecutableSchema, forEachField } from 'graphql-tools';
+import Directives from './directives';
+import directiveResolvers from './directiveResolvers';
+import { query, mutation, filterTypes, relationTypes, sort,
+  resolvers, typesWithRelationFilters, groupByTypes } from '../autoGenerate';
+import { META } from '../../constants';
+
+const graphqlTypes =
+  [...typesWithRelationFilters, ...relationTypes, sort, ...filterTypes, ...groupByTypes];
+const SchemaDefinition = `
+  schema {
+    query: Query
+    mutation: Mutation
+  }
+`;
+
+const appResolvers = Object.assign({}, resolvers);
+const appMutation = mutation;
+
+const scalarDefinition = 'scalar Date';
+const schema = makeExecutableSchema({
+  typeDefs: [
+    scalarDefinition,
+    SchemaDefinition,
+    Directives,
+    query,
+    appMutation,
+    ...graphqlTypes,
+  ],
+  resolvers: appResolvers,
+});
+
+// The utility iterator that patches the original,
+// resolver of a field  to apply any directive resolvers.
+forEachField(schema, (field) => {
+  const directives = field.astNode.directives || [];
+
+  directives.forEach((directive) => {
+    const directiveName = directive.name.value;
+    const resolver = directiveResolvers[directiveName];
+    if (resolver) {
+      const oldResolve = field.resolve;
+
+      const Directive = schema.getDirective(directiveName);
+      // Resolve the arguments for the directive
+      // (ex. for @authenticated it will be { roles: ['admin'] }
+      let argumentValues = {};
+      if (Directive) {
+        argumentValues = getArgumentValues(Directive, directive);
+      }
+      /* eslint-disable no-param-reassign */
+      field.resolve = (root, args, context, info) => {
+        /* eslint-enable no-param-reassign */
+        const finalArgs = { ...argumentValues, ...args };
+        let resolverPromise;
+        // the first arg passed still remains root
+        if (oldResolve) {
+          resolverPromise = oldResolve.call(field, root, finalArgs, context, info);
+        } else if (directiveName === 'relationalMeta') {
+          /* relationalMeta will send the result same as that of relation
+          for fetching count from query
+           */
+          resolverPromise = root[field.name.split(META)[0]];
+        } else {
+          resolverPromise = root[field.name];
+        }
+
+        // If you return a primitive from the default resolver
+        const isPrimitive = !(resolverPromise instanceof Promise);
+        if (isPrimitive) {
+          resolverPromise = Promise.resolve(resolverPromise);
+        }
+        // call to the directive resolver with result from default resolver as first arg
+
+        return resolverPromise.then(result => resolver(result, root, finalArgs, context, info),
+        );
+      };
+    }
+  });
+});
+
+export default schema;

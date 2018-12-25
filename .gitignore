@@ -1,0 +1,10 @@
+build
+node_modules/
+.vscode/
+coverage*
+.nyc_output
+.DS_Store
+.migrate.json
+.idea/
+uploads/
+mongoMigration/oldVersioningMigrationFiles/*

@@ -1,0 +1,17 @@
+import Enum from './enum';
+import Phone from './Phone';
+import BooleanResult from './BooleanResult';
+import MobileDeviceInformation from './MobileDeviceInformation';
+import AggregationResult from './AggregationResult';
+import TokenType from './TokenType';
+import GroupByAggregationResult from './GroupByAggregationResult';
+
+export default [
+  ...Enum,
+  ...Phone,
+  BooleanResult,
+  ...MobileDeviceInformation,
+  AggregationResult,
+  TokenType,
+  GroupByAggregationResult,
+];

@@ -1,0 +1,138 @@
+import { camelCase, find } from 'lodash';
+import pluralize from 'pluralize';
+import { QueryController, RemoteController } from '../../controllers';
+import { toObject } from '../../../../../utils';
+import { validate } from '../../validation';
+import { getFieldsBeingFetched, filterRemoteFields } from '../../../utils';
+import { operationName } from '../../../../../constants';
+
+// To find if filters have remote fields.
+// @TODO this function assumes only one parameter in filter,
+// has to be enhances if there are more parameters.
+const hasParamFilterRemoteFields = (
+  params,
+  ast,
+  typeName,
+) => {
+  let result = false;
+  const { filter } = params;
+  const { remoteFields } = ast[typeName];
+  if (filter) {
+    Object.keys(filter).forEach((filterKey) => {
+      // Split the filter with '_'
+      const filterKeyArray = filterKey.split('_');
+      const hasRemote = remoteFields[filterKeyArray[0]];
+      result = hasRemote && hasRemote.name;
+    });
+  }
+  return result;
+};
+
+const fetchListQueryResolver = (
+  root,
+  params,
+  typeName,
+  info,
+  ast,
+  authentication,
+) => {
+  const { remoteFields, remoteFieldsApplicationWise } = ast[typeName];
+  const modelQueries = new QueryController(typeName, authentication);
+  const queryName = info.fieldName;
+  const { fieldNodes } = info; // Fields which are requested.
+  const feildsFetched = getFieldsBeingFetched(fieldNodes);
+
+  const typeAST = ast[typeName];
+  validate(operationName.read, typeAST, feildsFetched, authentication);
+
+  const singularQueryName = camelCase(pluralize.singular(queryName));
+
+  // If there are no remote fields, return the result.
+  if (!Object.keys(remoteFields).length) {
+    return modelQueries.fetchMany(params);
+  }
+
+  // If there are remote fields
+  // Check if filter params have remote fields
+  const paramFilterHasRemoteFields = hasParamFilterRemoteFields(
+    params,
+    ast,
+    typeName,
+  );
+  // If filter param has remote fields, query remote app first and then query local applicaiton
+  if (paramFilterHasRemoteFields) {
+    // Query remote first.
+    const modelRemote = new RemoteController(paramFilterHasRemoteFields, authentication);
+    // Out of all the fields requested, get the fields required.
+    const fieldsToQuery = filterRemoteFields(
+      typeName,
+      paramFilterHasRemoteFields,
+      ast,
+      feildsFetched,
+    );
+    return modelRemote.query(queryName, params, fieldsToQuery).then((values) => {
+      if (values.length > 0) {
+        // Take out all the id's in an array
+        const idArray = values.map(value => value.id);
+        // Fetch local with a list of id's
+        const localParams = {
+          filter: {
+            id_in: idArray,
+          },
+        };
+        return modelQueries.fetchMany(localParams).then((localValues) => {
+          if (localValues.length > 0) {
+            return localValues.map((localValue) => {
+              const remoteValue = find(values, ['id', localValue.id]);
+              return Object.assign({}, toObject(localValue), remoteValue);
+            });
+          }
+          return localValues;
+        });
+      }
+      return values;
+    }).catch(err => err);
+  }
+
+  // If filter param does not have remote fields
+  return modelQueries.fetchMany(params).then((results) => {
+    // @TODO can implement a better method using list queries,
+    // to avoid multiple calls.
+    const promiseArray = results.map((result) => {
+      // Create params object.
+      const id = result.id;
+      const newParam = {
+        id,
+      };
+      const remoteQueryPromiseArray =
+        Object.keys(remoteFieldsApplicationWise).map((applicationName) => {
+          const modelRemote = new RemoteController(applicationName, authentication);
+          // Out of all the fields requested, get the fields required.
+          const fieldsToQuery = filterRemoteFields(
+            typeName,
+            applicationName,
+            ast,
+            feildsFetched,
+          );
+          return modelRemote.query(singularQueryName, newParam, fieldsToQuery);
+        });
+      return Promise.all(remoteQueryPromiseArray).then((values) => {
+        let mergedValue = {};
+        if (values && values.length > 0) {
+          values.map((value) => {
+            mergedValue = Object.assign({}, mergedValue, value);
+            return null;
+          });
+        }
+        // @ TODO In relation fields are queried for,
+        // and some fields in relations are local and some are remote,
+        // in that case only remote fields are returned.
+        return Object.assign({}, mergedValue, toObject(result));
+      });
+    });
+
+    return Promise.all(promiseArray);
+  }).catch(err => err);
+};
+
+export default fetchListQueryResolver;
