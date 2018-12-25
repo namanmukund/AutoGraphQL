@@ -5,6 +5,7 @@ import MobileDeviceInformation from './MobileDeviceInformation';
 import AggregationResult from './AggregationResult';
 import TokenType from './TokenType';
 import GroupByAggregationResult from './GroupByAggregationResult';
+import QuestionBankOption from './QuestionBankOption';
 
 export default [
   ...Enum,
@@ -14,4 +15,5 @@ export default [
   AggregationResult,
   TokenType,
   GroupByAggregationResult,
+  ...QuestionBankOption,
 ];

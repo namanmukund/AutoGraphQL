@@ -19,6 +19,7 @@ class MasterController {
   }
 
   validate() {
+    return;
     // Return true if bypass.
     if (this.bypass) {
       return true;
