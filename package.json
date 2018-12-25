@@ -46,9 +46,7 @@
     "start:core": {
       "command": "nodemon src/serverCloud.js --exec babel-node",
       "env": {
-        "APPLICATION": "core",
-        "NODE_ENV": "development",
-        "PORT": 3000
+        "APPLICATION": "core"
       }
     },
     "start-debug": {
