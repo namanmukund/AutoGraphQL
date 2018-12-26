@@ -1,4 +1,4 @@
-import { callConnectMutationPreHook } from './callConnectMutationPreHook';
+import callConnectMutationPreHook from './callConnectMutationPreHook';
 
 const callPrehooksForRelationsAddedInRecord = async (inputMap, recordId,
   mutationType, ast, context) => {
