@@ -10,7 +10,7 @@ const expiry = awsConfig.s3.signedExpiry;
 const uploadToS3 = (Key, Body) => new Promise((resolve, reject) => {
   S3.putObject({
     Bucket: s3Bucket,
-    ACL: awsConfig.ACL.private,
+    ACL: awsConfig.ACL.publicReadWrite,
     Key,
     Body,
   }, (err) => {
