@@ -2,14 +2,19 @@ const QuestionBank = `
   type QuestionBank @model {
     order: Int!
     statement: String!
-    explanation: String
-    type: QuestionBankType! @defaultValue(value: "mcq")
+    hint: String
+    questionType: QuestionBankType! @defaultValue(value: "mcq")
+    difficulty: Int
+    assessmentType: AssessmentType!
+    layout: QuestionBankLayoutType
+    layoutText: String
     createdAt: Date @readOnly
     updatedAt: Date @readOnly
-    options: [QuestionBankOption]
-    learningObjectives: LearningObjective @relation(name: "LearningObjectiveQuestionBank")
-    conceptCard: ConceptCard @relation(name: "ConceptCardPracticeQuestions")
-    topic: Topic @relation(name: "QuestionBankTopic" isSubset: true)
+    mcqOptions: [McqOption]
+    fibBlocksOptions: [FibBlocksOption]
+    fibInputOptions: [FibInputOption]
+    arrangeOptions: [ArrangeOption]
+    learningObjectiveQuestionBank: LearningObjective @relation(name: "LearningObjectiveQuestionBank")
     status: ContentStatus! @defaultValue(value: "unpublished")
   }
 `;
