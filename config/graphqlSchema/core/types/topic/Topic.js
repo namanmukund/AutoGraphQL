@@ -8,7 +8,7 @@ const Topic = `
     updatedAt: Date @readOnly
     chapter: Chapter @relation(name: "ChapterTopic")
     learningObjectives: [LearningObjective] @relation(name: "TopicLearningObjective", isSubset: true)
-    quizQuestionBank: [QuestionBank] @relation(name: "QuizQuestionBank", direction: "OneWay")
+    quiz: [QuestionBank] @relation(name: "QuizQuestionBank", direction: "OneWay")
     episode: Episode @relation(name: "TopicEpisode")
     thumbnail: File @relation(name: "TopicThumbnail", direction: "OneWay")
   }

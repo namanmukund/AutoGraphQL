@@ -1,5 +1,6 @@
 const QuestionBank = `
   type QuestionBank @model {
+    order: Int!
     statement: String!
     hint: String
     questionType: QuestionBankType! @defaultValue(value: "mcq")
