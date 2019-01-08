@@ -8,10 +8,10 @@ import AppName from './AppName';
 import ApplicationType from './ApplicationType';
 import FileKind from './FileKind';
 import QuestionBankType from './QuestionBankType';
-import ChatAlignmentType from './ChatAlignmentType';
-import ChatType from './ChatType';
-import TestType from './TestType';
-import LayoutType from './LayoutType';
+import MessageAlignmentType from './MessageAlignmentType';
+import MessageType from './MessageType';
+import AssessmentType from './AssessmentType';
+import QuestionBankLayoutType from './QuestionBankLayoutType';
 
 export default [
   Status,
@@ -24,8 +24,8 @@ export default [
   AppName,
   QuestionBankType,
   ContentStatus,
-  ChatAlignmentType,
-  ChatType,
-  TestType,
-  LayoutType,
+  MessageAlignmentType,
+  MessageType,
+  AssessmentType,
+  QuestionBankLayoutType,
 ];

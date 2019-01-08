@@ -2,7 +2,7 @@ const FibBlocksOption = `
   type FibBlocksOption {
    displayOrder: Int
    statement: String
-   answerIndex: [Int]
+   correctPositions: [Int]
  }`;
 
 export default FibBlocksOption;

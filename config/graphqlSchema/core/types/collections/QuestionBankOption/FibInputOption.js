@@ -1,6 +1,6 @@
 const FibInputOption = `
   type FibInputOption {
-   order: Int
+   correctPosition: Int
    answer: String
  }`;
 

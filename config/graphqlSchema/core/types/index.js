@@ -8,7 +8,7 @@ import Chapter from './chapter';
 import Topic from './topic';
 import LearningObjective from './learningObjective';
 import QuestionBank from './questionBank';
-import Chat from './chat';
+import Message from './message';
 import Episode from './episode';
 import TechTalk from './techTalk';
 
@@ -23,7 +23,7 @@ export default [
   ...Topic,
   ...QuestionBank,
   ...LearningObjective,
-  ...Chat,
+  ...Message,
   ...Episode,
   ...TechTalk,
 ];

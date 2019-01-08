@@ -1,12 +1,11 @@
 const QuestionBank = `
   type QuestionBank @model {
-    order: Int
     statement: String!
     hint: String
     questionType: QuestionBankType! @defaultValue(value: "mcq")
     difficulty: Int
-    testType: TestType!
-    layout: LayoutType
+    assessmentType: AssessmentType!
+    layout: QuestionBankLayoutType
     layoutText: String
     createdAt: Date @readOnly
     updatedAt: Date @readOnly
@@ -14,8 +13,7 @@ const QuestionBank = `
     fibBlocksOptions: [FibBlocksOption]
     fibInputOptions: [FibInputOption]
     arrangeOptions: [ArrangeOption]
-    learningObjective: LearningObjective @relation(name: "LearningObjectivePracticeQuestion")
-    topic: Topic @relation(name: "TopicQuiz" isSubset: true)
+    learningObjectiveQuestionBank: LearningObjective @relation(name: "LearningObjectiveQuestionBank")
     status: ContentStatus! @defaultValue(value: "unpublished")
   }
 `;
