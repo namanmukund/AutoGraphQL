@@ -4,14 +4,13 @@ import Collections from './collections';
 import AppToken from './appToken';
 import BlacklistedToken from './blacklistedToken';
 import AppVersion from './appVersion';
-import Library from './library';
 import Chapter from './chapter';
 import Topic from './topic';
 import LearningObjective from './learningObjective';
-import ConceptCard from './conceptCard';
-import Visual from './visual';
-import TechnicalQuestion from './technicalQuestion';
 import QuestionBank from './questionBank';
+import Chat from './chat';
+import Episode from './episode';
+import TechTalk from './techTalk';
 
 export default [
   ...User,
@@ -20,12 +19,11 @@ export default [
   ...AppToken,
   ...BlacklistedToken,
   ...AppVersion,
-  ...Library,
   ...Chapter,
   ...Topic,
-  ...ConceptCard,
-  ...Visual,
-  ...TechnicalQuestion,
   ...QuestionBank,
   ...LearningObjective,
+  ...Chat,
+  ...Episode,
+  ...TechTalk,
 ];

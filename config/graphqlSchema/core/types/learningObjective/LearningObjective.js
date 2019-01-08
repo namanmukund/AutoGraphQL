@@ -1,13 +1,17 @@
 const LearningObjective = `
   type LearningObjective @model {
     order: Int!
-    title: String!
+    title: String! @unique
+    description: String @unique
     createdAt: Date @readOnly
     updatedAt: Date @readOnly
-    topic: Topic @relation(name: "LearningObjectiveTopic" isSubset: true)
-    conceptCard: ConceptCard @relation(name: "LearningObjectiveConceptCards")
-    questionBank: [QuestionBank] @relation(name: "LearningObjectiveQuestionBank")
+    videoStartTime: Int
+    videoEndTime: Int
+    topic: Topic @relation(name: "TopicLearningObjective")
+    techTalk: TechTalk @relation(name: "LearningObjectiveTechTalk" isSubset: true)
+    practiceQuestions: [QuestionBank] @relation(name: "LearningObjectivePracticeQuestion")
     status: ContentStatus! @defaultValue(value: "unpublished")
+    thumbnail: File @relation(name: "LearningObjectiveThumbnail", direction: "OneWay")
   }
 `;
 

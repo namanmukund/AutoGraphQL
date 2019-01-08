@@ -8,6 +8,10 @@ import AppName from './AppName';
 import ApplicationType from './ApplicationType';
 import FileKind from './FileKind';
 import QuestionBankType from './QuestionBankType';
+import ChatAlignmentType from './ChatAlignmentType';
+import ChatType from './ChatType';
+import TestType from './TestType';
+import LayoutType from './LayoutType';
 
 export default [
   Status,
@@ -20,4 +24,8 @@ export default [
   AppName,
   QuestionBankType,
   ContentStatus,
+  ChatAlignmentType,
+  ChatType,
+  TestType,
+  LayoutType,
 ];
