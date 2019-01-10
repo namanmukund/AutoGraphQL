@@ -9,7 +9,7 @@ const LearningObjective = `
     videoEndTime: Int
     topic: Topic @relation(name: "TopicLearningObjective")
     techTalk: TechTalk @relation(name: "LearningObjectiveTechTalk", isSubset: true)
-    learningObjectiveQuestionBank: [QuestionBank] @relation(name: "LearningObjectiveQuestionBank", isSubset: true)
+    questionBank: [QuestionBank] @relation(name: "LearningObjectiveQuestionBank", isSubset: true)
     status: ContentStatus! @defaultValue(value: "unpublished")
     thumbnail: File @relation(name: "LearningObjectiveThumbnail", direction: "OneWay")
   }
