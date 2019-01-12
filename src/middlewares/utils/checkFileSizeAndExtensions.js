@@ -7,8 +7,17 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
     audio: audioSizeLimit,
     video: videoSizeLimit,
     excel: excelSizeLimit,
+    subtitle: subtitleSizeLimit,
   } = fileSizeLimitInMB;
-  const { imageExtensions, audioExtensions, videoExtensions, excelExtensions } = fileExtensions;
+
+  const {
+    imageExtensions,
+    audioExtensions,
+    videoExtensions,
+    excelExtensions,
+    subtitleExtensions,
+  } = fileExtensions;
+
   const doc = {};
   doc.isValidSize = false;
   doc.isValidExtension = false;
@@ -50,6 +59,16 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
       }
       break;
     }
+    case 'subtitle': {
+      if (size <= (subtitleSizeLimit * 1024 * 1024)) {
+        doc.isValidSize = true;
+      }
+      if (includes(subtitleExtensions, caseInsensitiveExt)) {
+        doc.isValidExtension = true;
+      }
+      break;
+    }
+
     default:
   }
   return doc;
