@@ -1,4 +1,5 @@
 import { includes } from 'lodash';
+import { log } from '../../../utils';
 
 const getFileTypeName = (type) => {
   let fileType;
@@ -10,8 +11,11 @@ const getFileTypeName = (type) => {
     fileType = 'video';
   } else if (includes(type, 'sheet') || includes(type, 'excel')) {
     fileType = 'excel';
-  } else {
+  } else if (includes(type, 'octet-stream')) {
     // if invalid fileType then graphql will give the required error
+    fileType = 'subtitle';
+  } else {
+    log('File Type is not defined');
     fileType = '';
   }
   return fileType;

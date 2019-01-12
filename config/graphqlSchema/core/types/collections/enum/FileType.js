@@ -3,6 +3,7 @@ const FileType = `
     audio
     video
     image
+    subtitle
   }`;
 
 export default FileType;
