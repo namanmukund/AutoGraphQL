@@ -2,8 +2,7 @@ const MessageType = `
   enum MessageType {
     text
     image
-    terminalInput
-    terminalOutput
+    terminal
   }`;
 
 export default MessageType;
