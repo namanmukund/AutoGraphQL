@@ -5,6 +5,7 @@ const Episode = `
     subtitle: File @relation(name: "EpisodeSubtitle", direction: "OneWay")
     video: File @relation(name: "EpisodeVideo", direction: "OneWay")
     topic: Topic @relation(name: "TopicEpisode")
+    thumbnail: File @relation(name: "EpisodeThumbnail", direction: "OneWay")
   }
 `;
 
