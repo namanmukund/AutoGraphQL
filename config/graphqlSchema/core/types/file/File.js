@@ -3,7 +3,7 @@ import FileUsageKind from '../collections/enum/FileUsageKind';
 
 const File = `
   type File @model {
-    name: String! @unique
+    name: String!
     size: Int
     usageCount: Int @defaultValue(value: 0)
     uri: String! @unique
