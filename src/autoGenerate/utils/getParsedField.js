@@ -1,4 +1,24 @@
-// maps the nested field's type object to a simplified object
+/* replace type field from something like this to
+{
+  "kind": "NamedType",
+  "name": {
+    "kind": "Name",
+    "value": "Int",
+    "loc": {
+      "start": 33,
+      "end": 36
+    }
+  },
+  "loc": {
+    "start": 33,
+    "end": 36
+  }
+}
+to type
+{
+  "dataType": "Int"
+}
+ */
 const getParsedField = (field) => {
   const fieldObject = Object.assign({}, field);
   const finalFieldObject = Object.assign({}, field);

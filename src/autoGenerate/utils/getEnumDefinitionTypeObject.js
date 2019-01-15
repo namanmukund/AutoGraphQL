@@ -3,8 +3,8 @@ import {
 } from 'graphql';
 import { concatenateTypeDefs } from 'graphql-tools';
 // returns all the object which are of types 'enum' with its value
-const getEnumDefinitionTypeObject = (schematypes) => {
-  const initialAST = parse(concatenateTypeDefs(schematypes));
+const getEnumDefinitionTypeObject = (graphqlSchemaTypes) => {
+  const initialAST = parse(concatenateTypeDefs(graphqlSchemaTypes));
   const { definitions } = initialAST;
   const allEnumTypesObject = {};
   definitions.forEach((definition) => {
@@ -13,11 +13,11 @@ const getEnumDefinitionTypeObject = (schematypes) => {
       return null;
     }
     const enumNameArray = [];
-    const fieldname = definition.name.value;
+    const fieldName = definition.name.value;
     values.forEach((field) => {
       enumNameArray.push(field.name.value);
     });
-    allEnumTypesObject[fieldname] = Object.assign({}, { enum: enumNameArray });
+    allEnumTypesObject[fieldName] = Object.assign({}, { enum: enumNameArray });
     return null;
   });
   return allEnumTypesObject;

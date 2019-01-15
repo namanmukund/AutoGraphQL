@@ -9,8 +9,12 @@ import {
 } from 'graphql';
 import getParsedField from './getParsedField';
 
-const getParsedASTMap = (schematypes) => {
-  const initialAST = parse(concatenateTypeDefs(schematypes));
+const getParsedASTMap = (graphqlSchemaTypes) => {
+  const initialAST = parse(concatenateTypeDefs(graphqlSchemaTypes));
+  /*
+  Definitions can be ObjectTypeDefinition, InputObjectTypeDefinition, EnumTypeDefinition
+  and contains other graphql properties like directives, fields, interfaces, and typeName
+   */
   const { definitions } = initialAST;
 
   // To store final parsed AST Object.
@@ -67,7 +71,7 @@ const getParsedASTMap = (schematypes) => {
       if (fieldDefinition.kind !== 'FieldDefinition') {
         return null;
       }
-      const fieldname = fieldDefinition.name.value;
+      const fieldName = fieldDefinition.name.value;
       const parsedField = getParsedField(fieldDefinition);
       // To store field directives as object per field.
       const directivesObject = {};
@@ -75,14 +79,17 @@ const getParsedASTMap = (schematypes) => {
       let isRemote = false;
       let isUnique = false;
       let isRelation = false;
-      let remoteApplicaitonValue = null;
+      let remoteApplicationValue = null;
+      /*
+      Collecting all the directives
+       */
       if (parsedField.directives.length > 0) {
         parsedField.directives.forEach((directive) => {
           const directivesMap = Object.assign({}, directive);
           const directiveName = directive.name.value;
           const directiveArguments = directive.arguments;
           if (directiveName === 'defaultValue') {
-            defaultFieldsWithValue[fieldname] = directiveArguments[0].value.value;
+            defaultFieldsWithValue[fieldName] = directiveArguments[0].value.value;
           }
           const argsObject = {};
           // Convert directiveArguments into Object.
@@ -96,16 +103,16 @@ const getParsedASTMap = (schematypes) => {
           switch (directiveName) {
             case 'remote':
               isRemote = true;
-              remoteFields[fieldname] = remoteFields[fieldname] || {};
+              remoteFields[fieldName] = remoteFields[fieldName] || {};
               // Storing directive arguments as object.
               directiveArguments.forEach((directiveArgument) => {
                 const directiveArgumentName = directiveArgument.name.value;
                 const directiveArgumentValue = directiveArgument.value.value;
                 argsObject[directiveArgument] = directiveArgument;
-                remoteFields[fieldname][directiveArgumentName] = directiveArgumentValue;
+                remoteFields[fieldName][directiveArgumentName] = directiveArgumentValue;
                 // If directive remote name is set.
                 if (directiveArgumentName === 'name') {
-                  remoteApplicaitonValue = directiveArgumentValue;
+                  remoteApplicationValue = directiveArgumentValue;
                 }
               });
               break;
@@ -122,7 +129,7 @@ const getParsedASTMap = (schematypes) => {
               directiveArguments.forEach((directiveArgument) => {
                 const directiveArgumentName = directiveArgument.name.value;
                 if (directiveArgumentName === 'fields') {
-                  additionalRelationFields[fieldname] = additionalRelationFields[fieldname] || {};
+                  additionalRelationFields[fieldName] = additionalRelationFields[fieldName] || {};
                   const argumentFields = directiveArgument.value.fields;
                   argumentFields.forEach((relationField) => {
                     const relationFieldName = relationField.name.value;
@@ -135,26 +142,26 @@ const getParsedASTMap = (schematypes) => {
                     } else {
                       fieldTypeString = `${fieldType}`;
                     }
-                    additionalRelationFields[fieldname][relationFieldName] = fieldTypeString;
+                    additionalRelationFields[fieldName][relationFieldName] = fieldTypeString;
                   });
                 } else if (directiveArgumentName === 'isSubset') {
                   const isSubset = directiveArgument.value.value === true;
                   if (isSubset) {
-                    localSubsetFields.push(fieldname);
+                    localSubsetFields.push(fieldName);
                   }
                 }
               });
               break;
 
             case 'readOnly':
-              readOnlyFields.push(fieldname);
+              readOnlyFields.push(fieldName);
               break;
 
             case 'writeOnly':
-              writeOnlyFields.push(fieldname);
+              writeOnlyFields.push(fieldName);
               break;
             case 'defaultValue':
-              defaultFields.push(fieldname);
+              defaultFields.push(fieldName);
               break;
 
             default:
@@ -163,65 +170,65 @@ const getParsedASTMap = (schematypes) => {
         });
       }
       if (!isRemote) {
-        localFields[fieldname] = true;
+        localFields[fieldName] = true;
         // If isRelation
         if (isRelation) {
           const directiveName = directivesObject.relation.argument.name.value.value;
-          localRelationFields[fieldname] = directiveName;
-          relationFields[fieldname] = directiveName;
+          localRelationFields[fieldName] = directiveName;
+          relationFields[fieldName] = directiveName;
         }
         // If isUnique
         if (isUnique) {
-          localUniqueFields[fieldname] = true;
+          localUniqueFields[fieldName] = true;
         }
         // If nonNull
         if (isNonNull) {
-          localNonNullFields[fieldname] = true;
+          localNonNullFields[fieldName] = true;
         }
         // If nonNull && Ubique
         if (isNonNull && isUnique) {
-          localNonNullAndUniqueFields[fieldname] = true;
+          localNonNullAndUniqueFields[fieldName] = true;
         }
-      } else if (remoteApplicaitonValue) {
-        remoteFieldsApplicationWise[remoteApplicaitonValue] =
-          remoteFieldsApplicationWise[remoteApplicaitonValue] || {};
-        remoteFieldsApplicationWise[remoteApplicaitonValue][fieldname] = true;
+      } else if (remoteApplicationValue) {
+        remoteFieldsApplicationWise[remoteApplicationValue] =
+          remoteFieldsApplicationWise[remoteApplicationValue] || {};
+        remoteFieldsApplicationWise[remoteApplicationValue][fieldName] = true;
 
         // If isRelation
         if (isRelation) {
           const directiveName = directivesObject.relation.argument.name.value.value;
           const fieldType = parsedField.type.dataType;
-          remoteRelationFields[fieldname] = {
+          remoteRelationFields[fieldName] = {
             type: fieldType,
             relationName: directiveName,
           };
-          relationFields[fieldname] = directiveName;
-          remoteRelationFieldsApplicationWise[remoteApplicaitonValue] =
-            remoteRelationFieldsApplicationWise[remoteApplicaitonValue] || {};
-          remoteRelationFieldsApplicationWise[remoteApplicaitonValue][fieldname] = true;
+          relationFields[fieldName] = directiveName;
+          remoteRelationFieldsApplicationWise[remoteApplicationValue] =
+            remoteRelationFieldsApplicationWise[remoteApplicationValue] || {};
+          remoteRelationFieldsApplicationWise[remoteApplicationValue][fieldName] = true;
         }
         // If isUnique
         if (isUnique) {
-          remoteUniqueFieldsApplicationWise[remoteApplicaitonValue] =
-            remoteUniqueFieldsApplicationWise[remoteApplicaitonValue] || {};
-          remoteUniqueFieldsApplicationWise[remoteApplicaitonValue][fieldname] = true;
+          remoteUniqueFieldsApplicationWise[remoteApplicationValue] =
+            remoteUniqueFieldsApplicationWise[remoteApplicationValue] || {};
+          remoteUniqueFieldsApplicationWise[remoteApplicationValue][fieldName] = true;
         }
         // If nonNull
         if (isNonNull) {
-          remoteNonNullFieldsApplicationWise[remoteApplicaitonValue] =
-            remoteNonNullFieldsApplicationWise[remoteApplicaitonValue] || {};
-          remoteNonNullFieldsApplicationWise[remoteApplicaitonValue][fieldname] = true;
+          remoteNonNullFieldsApplicationWise[remoteApplicationValue] =
+            remoteNonNullFieldsApplicationWise[remoteApplicationValue] || {};
+          remoteNonNullFieldsApplicationWise[remoteApplicationValue][fieldName] = true;
         }
         // If nonNull && Unique
         if (isNonNull && isUnique) {
-          remoteNonNullAndUniqueFieldsApplicationWise[remoteApplicaitonValue] =
-            remoteNonNullAndUniqueFieldsApplicationWise[remoteApplicaitonValue] || {};
-          remoteNonNullAndUniqueFieldsApplicationWise[remoteApplicaitonValue][fieldname] = true;
+          remoteNonNullAndUniqueFieldsApplicationWise[remoteApplicationValue] =
+            remoteNonNullAndUniqueFieldsApplicationWise[remoteApplicationValue] || {};
+          remoteNonNullAndUniqueFieldsApplicationWise[remoteApplicationValue][fieldName] = true;
         }
       }
       parsedField.directive = directivesObject; // this is object of directives.
 
-      fieldsObject[fieldname] = parsedField;
+      fieldsObject[fieldName] = parsedField;
       return null;
     });
     let fieldsParsedArray = fields.map((fieldDefinition) => {

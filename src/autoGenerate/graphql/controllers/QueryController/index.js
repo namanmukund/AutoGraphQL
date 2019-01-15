@@ -67,7 +67,24 @@ class QueryController extends MasterController {
       .then(res => res)
       .catch(err => err);
   }
-
+  /*
+Sample paramsForFetch argument
+{
+  "filter": {
+    "and": [
+      {
+        "status_exists": true
+      },
+      {
+        "order_gt": 0
+      }
+    ]
+  },
+  "orderBy": "order_ASC",
+  "first": 5,
+  "skip": 1
+}
+ */
   fetchMany(paramsForFetch = {}) {
     let inputParams = Object.assign({}, paramsForFetch);
     return this.validatePermissions(inputParams, true)
@@ -86,6 +103,27 @@ class QueryController extends MasterController {
         if (isAllowed.status && isAllowed.data) {
           inputParams = isAllowed.data;
         }
+        /* Parsed inputParams post paginationKeys method execution
+        {
+        "afterId": undefined,
+        "beforeId": undefined,
+        "skipValue": 1,
+        "firstValue": 5,
+        "lastValue": undefined,
+        "inputParams": {
+            "filter": {
+                "and": [{
+                        "status_exists": true
+                    },
+                    {
+                        "order_gt": 0
+                    }
+                ]
+            },
+            "orderBy": "order_ASC"
+        }
+       }
+     */
         const allParams = paginationKeys(inputParams);
         const { lastValue, skipValue, afterId, beforeId } = allParams;
         let firstValue = allParams.firstValue;
@@ -94,6 +132,11 @@ class QueryController extends MasterController {
           firstValue = defaultLimitValue;
         }
         firstValue = firstValue > defaultLimitValue ? defaultLimitValue : firstValue;
+        /* querySort for above example will be
+           {
+            "order": 1
+           }
+         */
         let querySort = params && params.orderBy ? getSortOrder(params.orderBy) : {};
         if (Object.keys(querySort).length === 0 && (firstValue || lastValue || skipValue
           || afterId || beforeId)) {
@@ -104,6 +147,22 @@ class QueryController extends MasterController {
         if (params.filter) {
           const queryParams = getQueryParams(params, this.modelName);
           return queryParams.then((query) => {
+            /* queryParams or query for above examples
+          {
+              "$and": [
+                {
+                  "status": {
+                    "$exists": true
+                  }
+                },
+                {
+                  "order": {
+                    "$gt": 0
+                  }
+                }
+              ]
+            }
+           */
             const data = query;
             if (afterId) { data.id = { $gt: `${afterId}` }; } else if (beforeId) { data.id = { $lt: `${beforeId}` }; }
             if (lastValue) {

@@ -7,14 +7,13 @@ import getAdditionFieldsSchemaFromAst from './getAdditionFieldsSchemaFromAst';
 import getArrayItemsToAppendFromMutationInput from './getArrayItemsToAppendFromMutationInput';
 import getDirectiveArgumentValue from './getDirectiveArgumentValue';
 import getEnumDefinitionTypeObject from './getEnumDefinitionTypeObject';
-import getEnumTypeSchema from './getEnumTypeSchema';
+import getEnumTypeMongooseSchema from './getEnumTypeMongooseSchema';
 import getFieldNodeObject from './getFieldNodeObject';
 import getFieldNodesObject from './getFieldNodesObject';
 import getFieldsBeingFetched from './getFieldsBeingFetched';
 import getMutationNames from './getMutationNames';
 import getParsedASTMap from './getParsedASTMap';
 import getParsedField from './getParsedField';
-import getParsedAST from './getParsedAST';
 import getRelationFieldDefinition from './getRelationFieldDefinition';
 import getRelationMutationNames from './getRelationMutationNames';
 import getScalarFieldDefinition from './getScalarFieldDefinition';
@@ -41,12 +40,11 @@ export {
   getArrayItemsToAppendFromMutationInput,
   getDirectiveArgumentValue,
   getEnumDefinitionTypeObject,
-  getEnumTypeSchema,
+  getEnumTypeMongooseSchema,
   getFieldNodeObject,
   getFieldNodesObject,
   getFieldsBeingFetched,
   getMutationNames,
-  getParsedAST,
   getRelationFieldDefinition,
   getRelationMutationNames,
   getScalarFieldDefinition,

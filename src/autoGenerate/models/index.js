@@ -7,7 +7,7 @@ import getParsedASTMap from './../utils/getParsedASTMap';
 import { log, types } from '../../../utils';
 import RollbackSchema from '../../mongooseRollback/models/rollback';
 import getDirectiveArgumentValue from '../utils/getDirectiveArgumentValue';
-import { getEnumTypeSchema, visitField, hasDirective, getEnumDefinitionTypeObject } from '../utils';
+import { getEnumTypeMongooseSchema, visitField, hasDirective, getEnumDefinitionTypeObject } from '../utils';
 
 const rollback = require('../../mongooseRollback/mongooseRollback');
 
@@ -74,7 +74,7 @@ const getFieldSchema = (fieldDefinition, typesSchema, allModelsSchema, allEnumTy
       "default": "inactive"
     }
      */
-    const enumInfo = getEnumTypeSchema(fieldDefinitionObject, enumArray);
+    const enumInfo = getEnumTypeMongooseSchema(fieldDefinitionObject, enumArray);
     finalFieldModelDefinition = isFieldDefinitionArray ? [enumInfo] : enumInfo;
   } else if (typesSchema[fieldType]) {
     /*

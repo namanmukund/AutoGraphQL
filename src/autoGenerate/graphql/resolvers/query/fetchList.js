@@ -27,27 +27,51 @@ const hasParamFilterRemoteFields = (
   }
   return result;
 };
+/*
+params contain information like {
+  "filter": {
+    "order_gt": 0
+  }
+}
+ */
 
+/*
+Info contains data related to following fields
+["fieldName","fieldNodes","returnType","parentType","path",
+"schema","fragments","operation","variableValues"]
+ */
 const fetchListQueryResolver = (
   root,
   params,
   typeName,
   info,
-  ast,
+  parsedASTMap,
   authentication,
 ) => {
-  const { remoteFields, remoteFieldsApplicationWise } = ast[typeName];
-  const modelQueries = new QueryController(typeName, authentication);
+  const { remoteFields, remoteFieldsApplicationWise } = parsedASTMap[typeName];
   const queryName = info.fieldName;
   const { fieldNodes } = info; // Fields which are requested.
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
+  /*
+  fieldsForFetch contains all the fields asked by the client in the following sample format
+      {
+      "id": true,
+      "title": true,
+      "topics": {
+        "id": true,
+        "description": true
+      }
+    }
+   */
+  const fieldsForFetch = getFieldsBeingFetched(fieldNodes);
 
-  const typeAST = ast[typeName];
-  validate(operationName.read, typeAST, feildsFetched, authentication);
+  const typeAST = parsedASTMap[typeName];
+  validate(operationName.read, typeAST, fieldsForFetch, authentication);
 
   const singularQueryName = camelCase(pluralize.singular(queryName));
 
   // If there are no remote fields, return the result.
+  const modelQueries = new QueryController(typeName, authentication);
+
   if (!Object.keys(remoteFields).length) {
     return modelQueries.fetchMany(params);
   }
@@ -56,10 +80,10 @@ const fetchListQueryResolver = (
   // Check if filter params have remote fields
   const paramFilterHasRemoteFields = hasParamFilterRemoteFields(
     params,
-    ast,
+    parsedASTMap,
     typeName,
   );
-  // If filter param has remote fields, query remote app first and then query local applicaiton
+  // If filter param has remote fields, query remote app first and then query local application
   if (paramFilterHasRemoteFields) {
     // Query remote first.
     const modelRemote = new RemoteController(paramFilterHasRemoteFields, authentication);
@@ -67,8 +91,8 @@ const fetchListQueryResolver = (
     const fieldsToQuery = filterRemoteFields(
       typeName,
       paramFilterHasRemoteFields,
-      ast,
-      feildsFetched,
+      parsedASTMap,
+      fieldsForFetch,
     );
     return modelRemote.query(queryName, params, fieldsToQuery).then((values) => {
       if (values.length > 0) {
@@ -111,8 +135,8 @@ const fetchListQueryResolver = (
           const fieldsToQuery = filterRemoteFields(
             typeName,
             applicationName,
-            ast,
-            feildsFetched,
+            parsedASTMap,
+            fieldsForFetch,
           );
           return modelRemote.query(singularQueryName, newParam, fieldsToQuery);
         });
