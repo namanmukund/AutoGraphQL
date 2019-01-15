@@ -116,6 +116,23 @@ const commonFunctionForRelationAndMeta = async (
         authentication,
       );
     }
+    /* In relation newParams will carry the parent id info
+        {
+      "AND": [
+        {
+          "and": [
+            {"status": "unpublished"},
+            {"order_lt": 10}
+          ]
+        },
+        {
+          "id_in": [
+            "cjqqm5hhb00046w4uasc4wegh"
+          ]
+        }
+      ]
+    }
+     */
     return fetchListQueryResolver(
       root,
       newParams,

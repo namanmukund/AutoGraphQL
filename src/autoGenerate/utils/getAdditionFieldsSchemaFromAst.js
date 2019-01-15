@@ -2,7 +2,7 @@ import { has } from 'lodash';
 import types from '../graphql/types';
 import getEnumDefinitionTypeObject from './getEnumDefinitionTypeObject';
 import getScalarFieldDefinition from './getScalarFieldDefinition';
-import getEnumTypeSchema from './getEnumTypeSchema';
+import getEnumTypeMongooseSchema from './getEnumTypeMongooseSchema';
 // make model schema and query fetch params from field definition
 const getAdditionFieldsSchemaFromAst = (ast, relatedModelType, additionalRelationFields) => {
   const fieldsSchemaObject = {};
@@ -20,7 +20,7 @@ const getAdditionFieldsSchemaFromAst = (ast, relatedModelType, additionalRelatio
     const isFieldEnumType = has(allEnumTypesObject, fieldModelDefinition.type);
     if (isFieldEnumType) {
       const enumArray = allEnumTypesObject[fieldType].enum;
-      fieldModelDefinition = getEnumTypeSchema(fieldModelDefinition, enumArray);
+      fieldModelDefinition = getEnumTypeMongooseSchema(fieldModelDefinition, enumArray);
     }
     if (isFieldListKind) {
       fieldModelDefinition = [fieldModelDefinition];

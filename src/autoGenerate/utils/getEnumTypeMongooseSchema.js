@@ -1,5 +1,5 @@
 // returns schema map for additional fields
-const getEnumTypeSchema = (fieldDefinition, enumArray) => {
+const getEnumTypeMongooseSchema = (fieldDefinition, enumArray) => {
   const enumInfo = Object.keys(fieldDefinition)
     .indexOf('default') < 0 ? {
       type: 'String', enum: enumArray,
@@ -13,4 +13,4 @@ const getEnumTypeSchema = (fieldDefinition, enumArray) => {
   return enumInfo;
 };
 
-export default getEnumTypeSchema;
+export default getEnumTypeMongooseSchema;
