@@ -14,7 +14,7 @@ const QuestionBank = `
     fibBlocksOptions: [FibBlocksOption]
     fibInputOptions: [FibInputOption]
     arrangeOptions: [ArrangeOption]
-    learningObjectiveQuestionBank: LearningObjective @relation(name: "LearningObjectiveQuestionBank")
+    learningObjective: LearningObjective @relation(name: "LearningObjectiveQuestionBank")
     status: ContentStatus! @defaultValue(value: "unpublished")
   }
 `;
