@@ -15,12 +15,12 @@ import { filterLocalInputForMutation } from '../utils/filterLocalInputForMutatio
 import { getConnectInputFieldsMap } from '../utils/getConnectInputFieldsMap';
 import { rollBackDocumentSaves } from '../utils/rollBackDocumentSaves';
 
-// Returns remote delete mutaiton promises.
+// Returns remote delete mutation promises.
 const remoteAddMutationPromises = (
   id,
   input,
   typeName,
-  feildsFetched,
+  fieldsFetched,
   mutationName,
   controllerFunctionName,
   remoteFieldsApplicationWise,
@@ -29,11 +29,11 @@ const remoteAddMutationPromises = (
 ) => {
   // Loop through all applicaiton fields to delete.
   const promiseArray = Object.keys(remoteFieldsApplicationWise).map((appApplicationName) => {
-    const appFieldsToMutatue = filterRemoteFields(
+    const appFieldsToMutate = filterRemoteFields(
       typeName,
       appApplicationName,
       ast,
-      feildsFetched,
+      fieldsFetched,
     );
     // Check if input has remote relation fields.
     // const remoteRelationFields = ast[typeName].remoteRelationFields;
@@ -53,7 +53,7 @@ const remoteAddMutationPromises = (
       typeName,
       mutationName,
       appInputCore,
-      appFieldsToMutatue,
+      appFieldsToMutate,
     )
       .then((appResultRemote) => {
         const appData = appResultRemote.data;
@@ -162,10 +162,10 @@ const addMutationResolver = (
   // Fields which are requested.
   const { input, ...connectArguments } = params;
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
   // const fields = ast[typeName].fields;
   const accessFields = ast[typeName];
-  validate(operationName.add, accessFields, feildsFetched, authentication, input);
+  validate(operationName.add, accessFields, fieldsFetched, authentication, input);
   // get a map of connect arguments with field names as key and array of ids as value
   const connectInputFieldsMap = getConnectInputFieldsMap(connectArguments);
   const { remoteFields, remoteFieldsApplicationWise } = ast[typeName];
@@ -190,7 +190,7 @@ const addMutationResolver = (
     id,
     input,
     typeName,
-    feildsFetched,
+    fieldsFetched,
     mutationName,
     controllerFunctionName,
     remoteFieldsApplicationWise,
