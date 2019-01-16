@@ -10,7 +10,6 @@ import LearningObjective from './learningObjective';
 import QuestionBank from './questionBank';
 import Message from './message';
 import Episode from './episode';
-import TechTalk from './techTalk';
 
 export default [
   ...User,
@@ -25,5 +24,4 @@ export default [
   ...LearningObjective,
   ...Message,
   ...Episode,
-  ...TechTalk,
 ];
