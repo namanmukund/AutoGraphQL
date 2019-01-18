@@ -1,7 +1,7 @@
 const FibInputOption = `
   type FibInputOption {
    correctPosition: Int
-   answer: [String]
+   answers: [String]
  }`;
 
 export default FibInputOption;
