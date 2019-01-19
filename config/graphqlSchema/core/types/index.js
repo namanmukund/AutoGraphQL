@@ -9,7 +9,6 @@ import Topic from './topic';
 import LearningObjective from './learningObjective';
 import QuestionBank from './questionBank';
 import Message from './message';
-import Episode from './episode';
 
 export default [
   ...User,
@@ -23,5 +22,4 @@ export default [
   ...QuestionBank,
   ...LearningObjective,
   ...Message,
-  ...Episode,
 ];

@@ -2,7 +2,7 @@ const LearningObjective = `
   type LearningObjective @model {
     order: Int!
     title: String! @unique
-    description: String @unique
+    description: String @uniqueOrEmpty
     createdAt: Date @readOnly
     updatedAt: Date @readOnly
     videoStartTime: Int
