@@ -124,7 +124,7 @@ const getSchemaStringFromSchemaMap = (schemaMap, typeOfInput) =>
     });
 
     if (typeOfInput === 'UpdateAll') {
-      typeString += `id: ID!, fields: ${type}${inputType} `;
+      typeString += `id: ID!, fields: ${type}${inputType}! `;
     } else {
       typeString += restString;
     }
