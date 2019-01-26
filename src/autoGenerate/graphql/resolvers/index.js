@@ -15,7 +15,6 @@ import {
   finishForgotPasswordMutationResolver,
   resendForgotPasswordOTPMutationResolver,
   deleteMultipleMutationResolver,
-  updateMultipleMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import { types, authenticateUser, ifAuthorized, toObject, isErrorThrown, getRandomNumber } from '../../../../utils';
@@ -46,7 +45,6 @@ const defaultMutationsResolvers = {
   addMutationResolver,
   deleteMutationResolver,
   updateMutationResolver,
-  updateMultipleMutationResolver,
   deleteMultipleMutationResolver,
 };
 
@@ -59,7 +57,7 @@ const defaultMutationsResolverWrapper = async (
   info,
   mutationName,
   mutationResolverName,
-  isMultiple
+  isMultiple,
 ) => {
   const authentication = ifAuthorized(context);
   Object.assign(authentication, {
@@ -86,7 +84,7 @@ const defaultMutationsResolverWrapper = async (
     parsedASTMap,
     authentication,
     context,
-      isMultiple
+    isMultiple,
   ).then((result) => {
     let newResult;
     if (isArray(result)) {
@@ -200,7 +198,7 @@ Object.keys(parsedASTMap).forEach((type) => {
           info,
           mutationName,
           mutationResolverName,
-            isMultiple
+          isMultiple,
         );
       },
       [mutationNames.deleteMutation]: (root, params, context, info) => {

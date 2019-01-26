@@ -86,7 +86,7 @@ const localUpdateMutationPromise = async (
   const relationFieldsArray = getRelationFields(input, ast, typeName);
   /* eslint-disable no-param-reassign */
   context.mutationOrQueryName = `update${typeName}`;
-  /* eslint-enabke no-param-reassign */
+  /* eslint-enable no-param-reassign */
   /*  if fields found with relations or connect args present,
  create relation document & return relation type object */
   if ((relationFieldsArray && relationFieldsArray.length) ||
@@ -144,8 +144,8 @@ const localUpdateMutationPromise = async (
     finalInput, [], relationAdditionalFieldsArray, arrayFieldsArray, historyObject);
 };
 
-const updateMutationResolver = (
-  root,
+
+const updateGenericMutation = (root,
   params,
   typeName,
   info,
@@ -153,54 +153,12 @@ const updateMutationResolver = (
   ast,
   authentication,
   context,
-  isMultiple
-) => {
-
-  if(isMultiple){
-    const promiseArray = [];
-    for (const param of params.input) {
-      console.log(11111, param);
-      promiseArray.push(abc(root,
-          param,
-          typeName,
-          info,
-          mutationName,
-          ast,
-          authentication,
-          context,
-          isMultiple));
-    }
-    return Promise.all(promiseArray);
-  }
-  else {
-   return abc(root,
-        params,
-        typeName,
-        info,
-        mutationName,
-        ast,
-        authentication,
-        context,
-        isMultiple)
-  }
-};
-
-
-const abc = (root,
-             params,
-             typeName,
-             info,
-             mutationName,
-             ast,
-             authentication,
-             context,
-             isMultiple) => {
+  isMultiple) => {
   const { id, history, ...connectArguments } = params;
   let input;
-  if(isMultiple){
+  if (isMultiple) {
     input = params.fields;
-  }
-  else {
+  } else {
     input = params.input;
   }
   if (!input) {
@@ -217,28 +175,28 @@ const abc = (root,
   // If there are no remote fields, return the result.
   if (!Object.keys(remoteFields).length) {
     return localUpdateMutationPromise(
-        id,
-        input,
-        history,
-        typeName,
-        connectInputFieldsMap,
-        ast,
-        authentication,
-        context,
+      id,
+      input,
+      history,
+      typeName,
+      connectInputFieldsMap,
+      ast,
+      authentication,
+      context,
     );
   }
   // Loop through all applicaiton fields to delete.
   const controllerFunctionName = 'updateMutation';
   const promiseArray = remoteUpdateMutationPromises(
-      id,
-      input,
-      typeName,
-      feildsFetched,
-      mutationName,
-      controllerFunctionName,
-      remoteFieldsApplicationWise,
-      authentication,
-      ast,
+    id,
+    input,
+    typeName,
+    feildsFetched,
+    mutationName,
+    controllerFunctionName,
+    remoteFieldsApplicationWise,
+    authentication,
+    ast,
   );
   // Delete in local database.
   // promiseArray.push(
@@ -250,27 +208,66 @@ const abc = (root,
     // Filter out values, when there are relation fields
     // remote mutation output.
     const localInput = filterLocalInputForMutation(
-        typeName,
-        input,
-        mergedValue,
-        ast,
+      typeName,
+      input,
+      mergedValue,
+      ast,
     );
     // Input to local database.
     return localUpdateMutationPromise(
-        id,
-        localInput,
+      id,
+      localInput,
+      typeName,
+      connectInputFieldsMap,
+      ast,
+      authentication,
+      context,
+    ).then(result => mergeMutationsPromisesResults([mergedValue, toObject(result)]));
+  })
+    .catch((err) => {
+      // Roll back in case of any error.
+      rollBack();
+      return err;
+    });
+};
+
+const updateMutationResolver = (
+  root,
+  params,
+  typeName,
+  info,
+  mutationName,
+  ast,
+  authentication,
+  context,
+  isMultiple,
+) => {
+  if (isMultiple) {
+    const promiseArray = [];
+    /* eslint "no-restricted-syntax": 0 */
+    for (const param of params.input) {
+      promiseArray.push(updateGenericMutation(root,
+        param,
         typeName,
-        connectInputFieldsMap,
+        info,
+        mutationName,
         ast,
         authentication,
         context,
-    ).then(result => mergeMutationsPromisesResults([mergedValue, toObject(result)]));
-  })
-      .catch((err) => {
-        // Roll back in case of any error.
-        rollBack();
-        return err;
-      });
+        isMultiple));
+    }
+    return Promise.all(promiseArray);
+  }
+
+  return updateGenericMutation(root,
+    params,
+    typeName,
+    info,
+    mutationName,
+    ast,
+    authentication,
+    context,
+    isMultiple);
 };
 
 
