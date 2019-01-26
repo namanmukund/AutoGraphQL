@@ -15,6 +15,7 @@ import {
   finishForgotPasswordMutationResolver,
   resendForgotPasswordOTPMutationResolver,
   deleteMultipleMutationResolver,
+  updateMultipleMutationResolver
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import { types, authenticateUser, ifAuthorized, toObject, isErrorThrown, getRandomNumber } from '../../../../utils';
@@ -45,6 +46,7 @@ const defaultMutationsResolvers = {
   addMutationResolver,
   deleteMutationResolver,
   updateMutationResolver,
+  updateMultipleMutationResolver,
   deleteMultipleMutationResolver,
 };
 
