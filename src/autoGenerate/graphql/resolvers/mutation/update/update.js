@@ -155,15 +155,12 @@ const updateGenericMutation = (root,
   context,
   isMultiple) => {
   const { id, history, ...connectArguments } = params;
-  let input;
+
+  let input = params.input || {};
   if (isMultiple) {
     input = params.fields;
-  } else {
-    input = params.input;
   }
-  if (!input) {
-    input = {};
-  }
+
   const { remoteFields, remoteFieldsApplicationWise } = ast[typeName];
   // Fields which are requested.
   const { fieldNodes } = info;

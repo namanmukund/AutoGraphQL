@@ -187,7 +187,7 @@ Object.keys(parsedASTMap).forEach((type) => {
     }
     mutationString += `${addModelMutationName} ( input: ${modelInputTypeName}!,${nestedConnectMutationString}): ${typeName},`;
     mutationString += `${updateModelMutationName} (id: ID!, input: ${modelUpdateTypeName},${nestedConnectMutationString} ${saveHistoryArgumentString} ${forceUpdate}) : ${typeName},`;
-    mutationString += `${updateMultipleModelMutationName} (input: [${modelUpdateAllTypeName}], ${nestedConnectMutationString} ${saveHistoryArgumentString}) : [${typeName}],`;
+    mutationString += `${updateMultipleModelMutationName} (input: [${modelUpdateAllTypeName}]!, ${nestedConnectMutationString} ${saveHistoryArgumentString}) : [${typeName}],`;
     mutationString += `${deleteModelMutationName} (id: ID!, ${forceDelete}) : ${typeName},`;
     mutationString += `${deleteMultipleMutation} (filter: ${typeName}Filter!, last: Int, first:Int, skip:Int, after: ID, before:ID) : [${typeName}],`;
 
