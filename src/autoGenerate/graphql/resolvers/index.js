@@ -184,6 +184,19 @@ Object.keys(parsedASTMap).forEach((type) => {
           mutationResolverName,
         );
       },
+      [mutationNames.updateMultipleMutation]: (root, params, context, info) => {
+        const mutationName = mutationNames.updateMultipleMutation;
+        const mutationResolverName = 'updateMultipleMutationResolver';
+        return defaultMutationsResolverWrapper(
+          root,
+          params,
+          context,
+          typeName,
+          info,
+          mutationName,
+          mutationResolverName,
+        );
+      },
       [mutationNames.deleteMutation]: (root, params, context, info) => {
         const mutationName = mutationNames.deleteMutation;
         const mutationResolverName = 'deleteMutationResolver';
