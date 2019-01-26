@@ -86,7 +86,7 @@ const localUpdateMutationPromise = async (
   const relationFieldsArray = getRelationFields(input, ast, typeName);
   /* eslint-disable no-param-reassign */
   context.mutationOrQueryName = `update${typeName}`;
-  /* eslint-enabke no-param-reassign */
+  /* eslint-enable no-param-reassign */
   /*  if fields found with relations or connect args present,
  create relation document & return relation type object */
   if ((relationFieldsArray && relationFieldsArray.length) ||
@@ -144,8 +144,8 @@ const localUpdateMutationPromise = async (
     finalInput, [], relationAdditionalFieldsArray, arrayFieldsArray, historyObject);
 };
 
-const updateMutationResolver = (
-  root,
+
+const updateGenericMutation = (root,
   params,
   typeName,
   info,
@@ -153,12 +153,14 @@ const updateMutationResolver = (
   ast,
   authentication,
   context,
-) => {
+  isMultiple) => {
   const { id, history, ...connectArguments } = params;
-  let input = params.input;
-  if (!input) {
-    input = {};
+
+  let input = params.input || {};
+  if (isMultiple) {
+    input = params.fields;
   }
+
   const { remoteFields, remoteFieldsApplicationWise } = ast[typeName];
   // Fields which are requested.
   const { fieldNodes } = info;
@@ -225,5 +227,45 @@ const updateMutationResolver = (
       return err;
     });
 };
+
+const updateMutationResolver = (
+  root,
+  params,
+  typeName,
+  info,
+  mutationName,
+  ast,
+  authentication,
+  context,
+  isMultiple,
+) => {
+  if (isMultiple) {
+    const promiseArray = [];
+    /* eslint "no-restricted-syntax": 0 */
+    for (const param of params.input) {
+      promiseArray.push(updateGenericMutation(root,
+        param,
+        typeName,
+        info,
+        mutationName,
+        ast,
+        authentication,
+        context,
+        isMultiple));
+    }
+    return Promise.all(promiseArray);
+  }
+
+  return updateGenericMutation(root,
+    params,
+    typeName,
+    info,
+    mutationName,
+    ast,
+    authentication,
+    context,
+    isMultiple);
+};
+
 
 export default updateMutationResolver;

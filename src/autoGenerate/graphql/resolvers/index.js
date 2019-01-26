@@ -57,6 +57,7 @@ const defaultMutationsResolverWrapper = async (
   info,
   mutationName,
   mutationResolverName,
+  isMultiple,
 ) => {
   const authentication = ifAuthorized(context);
   Object.assign(authentication, {
@@ -83,6 +84,7 @@ const defaultMutationsResolverWrapper = async (
     parsedASTMap,
     authentication,
     context,
+    isMultiple,
   ).then((result) => {
     let newResult;
     if (isArray(result)) {
@@ -182,6 +184,21 @@ Object.keys(parsedASTMap).forEach((type) => {
           info,
           mutationName,
           mutationResolverName,
+        );
+      },
+      [mutationNames.updateMultipleMutation]: (root, params, context, info) => {
+        const mutationName = mutationNames.updateMutation;
+        const mutationResolverName = 'updateMutationResolver';
+        const isMultiple = true;
+        return defaultMutationsResolverWrapper(
+          root,
+          params,
+          context,
+          typeName,
+          info,
+          mutationName,
+          mutationResolverName,
+          isMultiple,
         );
       },
       [mutationNames.deleteMutation]: (root, params, context, info) => {

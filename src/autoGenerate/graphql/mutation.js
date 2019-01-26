@@ -1,6 +1,6 @@
 /* file for autogenerating mutations from schema types */
-
-import { trimEnd, includes } from 'lodash';
+import pluralize from 'pluralize';
+import { trimEnd, includes, camelCase } from 'lodash';
 import getParsedASTMap from '../utils/getParsedASTMap';
 import getRelationMutationNames from '../utils/getRelationMutationNames';
 import { types } from '../../../utils';
@@ -158,6 +158,8 @@ Object.keys(parsedASTMap).forEach((type) => {
   if (isModel) {
     const modelInputTypeName = `${typeName}Input`;
     const modelUpdateTypeName = `${typeName}Update`;
+    const pluralTypeName = camelCase(pluralize(typeName));
+    const modelUpdateAllTypeName = `${pluralTypeName}Update`;
     const isVersionModelToBeMade = hasDirective(directives, 'history');
     // add save history arg for models where history is to be made
     let saveHistoryArgumentString = '';
@@ -172,6 +174,7 @@ Object.keys(parsedASTMap).forEach((type) => {
     // add relation mutations
     const addModelMutationName = mutationNames.addMutation;
     const updateModelMutationName = mutationNames.updateMutation;
+    const updateMultipleModelMutationName = mutationNames.updateMultipleMutation;
     const deleteModelMutationName = mutationNames.deleteMutation;
     const deleteMultipleMutation = mutationNames.deleteMultipleMutation;
     let forceUpdate = '';
@@ -184,6 +187,7 @@ Object.keys(parsedASTMap).forEach((type) => {
     }
     mutationString += `${addModelMutationName} ( input: ${modelInputTypeName}!,${nestedConnectMutationString}): ${typeName},`;
     mutationString += `${updateModelMutationName} (id: ID!, input: ${modelUpdateTypeName},${nestedConnectMutationString} ${saveHistoryArgumentString} ${forceUpdate}) : ${typeName},`;
+    mutationString += `${updateMultipleModelMutationName} (input: [${modelUpdateAllTypeName}]!) : [${typeName}],`;
     mutationString += `${deleteModelMutationName} (id: ID!, ${forceDelete}) : ${typeName},`;
     mutationString += `${deleteMultipleMutation} (filter: ${typeName}Filter!, last: Int, first:Int, skip:Int, after: ID, before:ID) : [${typeName}],`;
 
