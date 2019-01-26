@@ -102,12 +102,16 @@ Object.keys(parsedASTMap).forEach((type) => {
 // get schema strings from input schema maps
 const inputTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlInputTypeObject, 'Input');
 const updateTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlUpdateTypeObject, 'Update');
+const updateAllTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlUpdateTypeObject, 'UpdateAll');
 const additionalRelationFieldsTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlAdditionalRelationFieldsInputTypeObject, 'Input');
 const additionalRelationFieldsUpdateTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlAdditionalRelationFieldsUpdateTypeObject, 'Update');
 const arrayTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlArrayTypeObject, 'ArrayUpdate');
 // remove nulls from input types array
-const inputTypesArray = [...inputTypesSchemaArray,
-  ...updateTypesSchemaArray, ...additionalRelationFieldsTypesSchemaArray,
+const inputTypesArray = [
+  ...inputTypesSchemaArray,
+  ...updateTypesSchemaArray,
+  ...updateAllTypesSchemaArray,
+  ...additionalRelationFieldsTypesSchemaArray,
   ...additionalRelationFieldsUpdateTypesSchemaArray, ...arrayTypesSchemaArray];
 
 export default inputTypesArray;
