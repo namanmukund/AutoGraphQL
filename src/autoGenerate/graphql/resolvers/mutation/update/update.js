@@ -153,9 +153,56 @@ const updateMutationResolver = (
   ast,
   authentication,
   context,
+  isMultiple
 ) => {
+
+  if(isMultiple){
+    const promiseArraya = [];
+    for (const param of params.input) {
+      console.log(11111, param);
+      promiseArray.push(abc(root,
+          params,
+          typeName,
+          info,
+          mutationName,
+          ast,
+          authentication,
+          context,
+          isMultiple));
+    }
+    return Promise.all(promiseArraya);
+  }
+  else {
+    abc(root,
+        params,
+        typeName,
+        info,
+        mutationName,
+        ast,
+        authentication,
+        context,
+        isMultiple)
+  }
+};
+
+
+const abc = (root,
+             params,
+             typeName,
+             info,
+             mutationName,
+             ast,
+             authentication,
+             context,
+             isMultiple) => {
   const { id, history, ...connectArguments } = params;
-  let input = params.input;
+  let input;
+  if(isMultiple){
+    input = params.fields;
+  }
+  else {
+    input = params.input;
+  }
   if (!input) {
     input = {};
   }
@@ -170,28 +217,28 @@ const updateMutationResolver = (
   // If there are no remote fields, return the result.
   if (!Object.keys(remoteFields).length) {
     return localUpdateMutationPromise(
-      id,
-      input,
-      history,
-      typeName,
-      connectInputFieldsMap,
-      ast,
-      authentication,
-      context,
+        id,
+        input,
+        history,
+        typeName,
+        connectInputFieldsMap,
+        ast,
+        authentication,
+        context,
     );
   }
   // Loop through all applicaiton fields to delete.
   const controllerFunctionName = 'updateMutation';
   const promiseArray = remoteUpdateMutationPromises(
-    id,
-    input,
-    typeName,
-    feildsFetched,
-    mutationName,
-    controllerFunctionName,
-    remoteFieldsApplicationWise,
-    authentication,
-    ast,
+      id,
+      input,
+      typeName,
+      feildsFetched,
+      mutationName,
+      controllerFunctionName,
+      remoteFieldsApplicationWise,
+      authentication,
+      ast,
   );
   // Delete in local database.
   // promiseArray.push(
@@ -203,27 +250,28 @@ const updateMutationResolver = (
     // Filter out values, when there are relation fields
     // remote mutation output.
     const localInput = filterLocalInputForMutation(
-      typeName,
-      input,
-      mergedValue,
-      ast,
+        typeName,
+        input,
+        mergedValue,
+        ast,
     );
     // Input to local database.
     return localUpdateMutationPromise(
-      id,
-      localInput,
-      typeName,
-      connectInputFieldsMap,
-      ast,
-      authentication,
-      context,
+        id,
+        localInput,
+        typeName,
+        connectInputFieldsMap,
+        ast,
+        authentication,
+        context,
     ).then(result => mergeMutationsPromisesResults([mergedValue, toObject(result)]));
   })
-    .catch((err) => {
-      // Roll back in case of any error.
-      rollBack();
-      return err;
-    });
+      .catch((err) => {
+        // Roll back in case of any error.
+        rollBack();
+        return err;
+      });
 };
+
 
 export default updateMutationResolver;
