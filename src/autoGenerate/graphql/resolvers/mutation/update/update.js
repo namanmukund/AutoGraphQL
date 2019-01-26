@@ -157,11 +157,11 @@ const updateMutationResolver = (
 ) => {
 
   if(isMultiple){
-    const promiseArraya = [];
+    const promiseArray = [];
     for (const param of params.input) {
       console.log(11111, param);
       promiseArray.push(abc(root,
-          params,
+          param,
           typeName,
           info,
           mutationName,
@@ -170,10 +170,10 @@ const updateMutationResolver = (
           context,
           isMultiple));
     }
-    return Promise.all(promiseArraya);
+    return Promise.all(promiseArray);
   }
   else {
-    abc(root,
+   return abc(root,
         params,
         typeName,
         info,
