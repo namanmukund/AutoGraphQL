@@ -15,7 +15,7 @@ import {
   finishForgotPasswordMutationResolver,
   resendForgotPasswordOTPMutationResolver,
   deleteMultipleMutationResolver,
-  updateMultipleMutationResolver
+  updateMultipleMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import { types, authenticateUser, ifAuthorized, toObject, isErrorThrown, getRandomNumber } from '../../../../utils';

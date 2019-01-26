@@ -2,7 +2,7 @@ import addMutationResolver from './add/add';
 import deleteMutationResolver from './delete/delete';
 import deleteMultipleMutationResolver from './delete/deleteMany';
 import updateMutationResolver from './update/update';
-import updateMultipleMutationResolver from "./update/updateMultiple";
+import updateMultipleMutationResolver from './update/updateMultiple';
 import addRelationMutationResolver from './add/addRelation';
 import removeRelationMutationResolver from './delete/removeRelation';
 import signupMutationResolver from './user/signup';

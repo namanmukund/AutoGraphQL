@@ -1,4 +1,5 @@
-import { without, upperFirst, has, get } from 'lodash';
+import { without, upperFirst, has, get, camelCase } from 'lodash';
+import pluralize from 'pluralize';
 
 // returns type string of a field
 const getFieldTypeString = (fieldName, fieldType, isFieldList,
@@ -100,17 +101,34 @@ const getSchemaStringFromSchemaMap = (schemaMap, typeOfInput) =>
     if (!allFields.length) {
       return null;
     }
-    let typeString = `input ${type}${typeOfInput} {`;
+
+    let typeName = type;
+    let inputType = typeOfInput;
+
+    if (typeOfInput === 'UpdateAll') {
+      typeName = camelCase(pluralize(type));
+      inputType = 'Update';
+    }
+
+    let restString = '';
+    let typeString = `input ${typeName}${inputType} {`;
     allFields.forEach((field) => {
       if (!field.endsWith('__description')) {
         const fieldType = typeSchema[field];
         if (has(typeSchema, `${field}__description`)) {
           const description = get(typeSchema, `${field}__description`);
-          typeString += `\n #  ${description} \n`;
+          restString += `\n #  ${description} \n`;
         }
-        typeString += `${field}: ${fieldType} `;
+        restString += `${field}: ${fieldType} `;
       }
     });
+
+    if (typeOfInput === 'UpdateAll') {
+      typeString += `id: ID!, fields: ${type}${inputType} `;
+    } else {
+      typeString += restString;
+    }
+
     typeString += '}';
     return typeString;
   }), null);
