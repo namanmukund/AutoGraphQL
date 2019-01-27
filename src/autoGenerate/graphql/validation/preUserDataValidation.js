@@ -1,5 +1,6 @@
 import { QueryController } from '../controllers';
 import { authenticateUser, toObject } from '../../../../utils';
+import pluralize from "pluralize";
 /*
 The function fetches a userdate according to the input given, so that required
 validation can be performed before hitting the db

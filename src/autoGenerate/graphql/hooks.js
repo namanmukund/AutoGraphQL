@@ -10,6 +10,7 @@ import {
   getUserData,
   validateForgotPassword,
   addUserValidation,
+  deleteGenericValidation
 } from './validation';
 import {
   UserAlreadyExistsError,
@@ -53,7 +54,7 @@ const hook = (data, mutationName, hookName) => {
 
 // This hook is used to transform input argument for a mutation.
 // params contain all the arguments whatever you are passing in mutation query
-const prehook = async (input, mutationOrQueryName, context, params) => {
+const prehook =   async (input, mutationOrQueryName, context, params, typeName) => {
   switch (mutationOrQueryName) {
     case 'addUser' : {
       // validate username, phone, email and name and returns email or phone verified accordingly
@@ -65,6 +66,18 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         }
         return hook(input, mutationOrQueryName, 'PreHook');
       });
+    }
+    case 'deleteChapter' : {
+      // validate username, phone, email and name and returns email or phone verified accordingly
+       await deleteGenericValidation(input,params,typeName);
+       break;
+      // Object.assign(input, verifiedData);
+      // return preUserDataValidation(input, mutationOrQueryName).then((userData) => {
+      //   if (userData) {
+      //     throw new UserAlreadyExistsError();
+      //   }
+      //   return hook(input, mutationOrQueryName, 'PreHook');
+      // });
     }
     case 'setUserPassword' : {
       return preUserDataValidation(input, mutationOrQueryName).then((userData) => {

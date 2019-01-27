@@ -56,3 +56,6 @@ export const ConnectIdsArleadyRelatedError = createError('ConnectIdsArleadyRelat
   message: 'Connect Ids sent in input have already been connected to the type',
 });
 
+export const CannotDeleteChapter = createError('ChildrenStillPublished', {
+  message: 'Cannot delete Chapter as some Topics are published',
+});
