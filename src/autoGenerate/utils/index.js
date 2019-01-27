@@ -26,7 +26,7 @@ import makeFinalArrayFromUpdateInputAndExistingArray from './makeFinalArrayFromU
 import validateFieldToAddForConnectMutationGeneration from './validateFieldToAddForConnectMutationGeneration';
 import visitField from './visitField';
 import checkIfArgumentsAreFromSameType from './checkIfArgumentsAreFromSameType';
-
+import getNestedConnectMutationString from './getNestedConnectMutationString';
 
 export {
   getParsedASTMap,
@@ -57,4 +57,5 @@ export {
   validateFieldToAddForConnectMutationGeneration,
   visitField,
   checkIfArgumentsAreFromSameType,
+  getNestedConnectMutationString,
 };
