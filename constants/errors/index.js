@@ -15,6 +15,7 @@ import {
   UserAlreadyExistsError,
   AdditionalFieldUpdateDeniedError,
   FileWriteError,
+  DeleteChapter
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -115,4 +116,5 @@ export {
   DatabaseRecordNotFoundError,
   ConnectRecordsNotFoundInDBError,
   UserAlreadyExistsError,
+  DeleteChapter
 };

@@ -64,7 +64,7 @@ const defaultMutationsResolverWrapper = async (
     mutationOrQueryName: mutationName,
   });
   const { input } = params;
-  const hookInput = await prehook(input, mutationName, context, params, typeName);
+  const hookInput = await prehook(input, mutationName, context, params);
   // error in preHook return;
   if (isErrorThrown(hookInput)) {
     return hookInput;

@@ -19,3 +19,7 @@ export const AdditionalFieldUpdateDeniedError = createError('AdditionalFieldUpda
 export const FileWriteError = createError('FileWriteError', {
   message: 'File write could not happen',
 });
+
+export const DeleteChapter = createError('DeleteChapter', {
+  message: 'Cannot delete Chapter as some Topics are published',
+});

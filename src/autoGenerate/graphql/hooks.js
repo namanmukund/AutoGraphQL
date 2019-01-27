@@ -10,7 +10,7 @@ import {
   getUserData,
   validateForgotPassword,
   addUserValidation,
-  deleteGenericValidation
+  deleteChapterValidation
 } from './validation';
 import {
   UserAlreadyExistsError,
@@ -54,7 +54,7 @@ const hook = (data, mutationName, hookName) => {
 
 // This hook is used to transform input argument for a mutation.
 // params contain all the arguments whatever you are passing in mutation query
-const prehook =   async (input, mutationOrQueryName, context, params, typeName) => {
+const prehook =   async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
     case 'addUser' : {
       // validate username, phone, email and name and returns email or phone verified accordingly
@@ -66,18 +66,6 @@ const prehook =   async (input, mutationOrQueryName, context, params, typeName) 
         }
         return hook(input, mutationOrQueryName, 'PreHook');
       });
-    }
-    case 'deleteChapter' : {
-      // validate username, phone, email and name and returns email or phone verified accordingly
-       await deleteGenericValidation(input,params,typeName);
-       break;
-      // Object.assign(input, verifiedData);
-      // return preUserDataValidation(input, mutationOrQueryName).then((userData) => {
-      //   if (userData) {
-      //     throw new UserAlreadyExistsError();
-      //   }
-      //   return hook(input, mutationOrQueryName, 'PreHook');
-      // });
     }
     case 'setUserPassword' : {
       return preUserDataValidation(input, mutationOrQueryName).then((userData) => {
@@ -243,6 +231,11 @@ const prehook =   async (input, mutationOrQueryName, context, params, typeName) 
         }
         return hook(input, mutationOrQueryName, 'PreHook');
       });
+    }
+    case 'deleteChapter' : {
+      // validate chapter and check if topics are published
+      await deleteChapterValidation(params);
+      break;
     }
     default : {
       /* If context is not present then it means user is not authenticated and the
