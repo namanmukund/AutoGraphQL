@@ -6,6 +6,8 @@ import {
   getSchemaStringFromSchemaMap } from './utils';
 import { historyFieldName } from '../../../../constants';
 import getDirectiveArgumentValue from '../../utils/getDirectiveArgumentValue';
+import hasDirective from '../../utils/hasDirective';
+import getNestedConnectMutationString from '../../utils/getNestedConnectMutationString';
 
 const parsedASTMap = getParsedASTMap(schemaTypes);
 // make a input types map of input and update type schema objects
@@ -13,17 +15,34 @@ const parsedASTMap = getParsedASTMap(schemaTypes);
 
 let graphqlInputTypeObject = {};
 const graphqlUpdateTypeObject = {};
+const graphqlUpdateAllTypeObject = {};
 let graphqlAdditionalRelationFieldsInputTypeObject = {};
 let graphqlAdditionalRelationFieldsUpdateTypeObject = {};
 const graphqlArrayTypeObject = {};
+const nestedConnectMutationStringObject = {};
 // Walk through AST map
 Object.keys(parsedASTMap).forEach((type) => {
   const definition = parsedASTMap[type];
-  const { name, field } = definition;
+  const { name, field, directives } = definition;
+  const isModel = directives && hasDirective(directives, 'model');
+  if (isModel) {
+    // generate nestedConnectMutationStringObject to be made available for updateAll connect purpose
+    const relationFields = definition.relationFields;
+    const nestedConnectMutationString = getNestedConnectMutationString(
+      relationFields,
+      type,
+      parsedASTMap,
+    );
+    nestedConnectMutationStringObject[type] = nestedConnectMutationString;
+  }
   const typeName = name.value;
+  // for generating connect type data
   // Initialize type objects
   graphqlInputTypeObject[typeName] = graphqlInputTypeObject[typeName] || {};
   graphqlUpdateTypeObject[typeName] = graphqlUpdateTypeObject[typeName] || {};
+  if (isModel) {
+    graphqlUpdateAllTypeObject[typeName] = graphqlUpdateAllTypeObject[typeName] || {};
+  }
   graphqlAdditionalRelationFieldsInputTypeObject[typeName] =
     graphqlAdditionalRelationFieldsInputTypeObject[typeName] || {};
   graphqlAdditionalRelationFieldsUpdateTypeObject[typeName] =
@@ -69,6 +88,9 @@ Object.keys(parsedASTMap).forEach((type) => {
     // add field schema to input type object
     graphqlInputTypeObject[typeName][fieldName] = fieldInputTypeString;
     graphqlUpdateTypeObject[typeName][fieldName] = fieldUpdateTypeString;
+    if (isModel) {
+      graphqlUpdateAllTypeObject[typeName][fieldName] = fieldUpdateTypeString;
+    }
     // if relation field, check for additional fields and add them.
     if (additionalRelationFields) {
       haveAdditionalFields = true;
@@ -96,13 +118,17 @@ Object.keys(parsedASTMap).forEach((type) => {
         graphqlArrayTypeObject);
       graphqlUpdateTypeObject[typeName][additionalFieldName] =
         additionalFieldUpdateTypeString;
+      if (isModel) {
+        graphqlUpdateAllTypeObject[typeName][additionalFieldName] =
+            additionalFieldUpdateTypeString;
+      }
     }
   });
 });
 // get schema strings from input schema maps
 const inputTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlInputTypeObject, 'Input');
 const updateTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlUpdateTypeObject, 'Update');
-const updateAllTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlUpdateTypeObject, 'UpdateAll');
+const updateAllTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlUpdateAllTypeObject, 'UpdateAll', nestedConnectMutationStringObject);
 const additionalRelationFieldsTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlAdditionalRelationFieldsInputTypeObject, 'Input');
 const additionalRelationFieldsUpdateTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlAdditionalRelationFieldsUpdateTypeObject, 'Update');
 const arrayTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlArrayTypeObject, 'ArrayUpdate');

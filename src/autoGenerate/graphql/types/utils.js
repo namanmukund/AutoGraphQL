@@ -94,7 +94,11 @@ const appendAdditionalRelationFieldsToTypeObject = (additionalRelationFields, ty
 };
 
 // args: typeOfInput: input or update type, schemaMap
-const getSchemaStringFromSchemaMap = (schemaMap, typeOfInput) =>
+const getSchemaStringFromSchemaMap = (
+  schemaMap,
+  typeOfInput,
+  nestedConnectMutationStringObject = {},
+) =>
   without(Object.keys(schemaMap).map((type) => {
     const typeSchema = schemaMap[type];
     const allFields = Object.keys(typeSchema);
@@ -124,7 +128,8 @@ const getSchemaStringFromSchemaMap = (schemaMap, typeOfInput) =>
     });
 
     if (typeOfInput === 'UpdateAll') {
-      typeString += `id: ID!, fields: ${type}${inputType}! `;
+      typeString += `id: ID!, fields: ${type}${inputType}!, 
+      ${(nestedConnectMutationStringObject && nestedConnectMutationStringObject[type]) ? nestedConnectMutationStringObject[type] : ''} `;
     } else {
       typeString += restString;
     }
