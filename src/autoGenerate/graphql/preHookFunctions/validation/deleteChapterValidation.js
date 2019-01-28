@@ -40,10 +40,12 @@ const deleteChapterValidation = async (params) => {
     if (isDocContainsGivenKeyValue(chapter, 'status', PUBLISHED)) {
       throw new ChapterIsPublishedError();
     }
-
+    // check topics delete status
     const { topics } = chapter;
-    for (const topic of topics) {
-      checkDeleteStatusOfATopic(topic);
+    if (topics && topics.length) {
+      for (const topic of topics) {
+        checkDeleteStatusOfATopic(topic);
+      }
     }
   }
   return true;
