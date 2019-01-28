@@ -15,6 +15,7 @@ import validateAppTokenInput from './validateAppTokenInput';
 import isFileDeleteAllowed from './isFileDeleteAllowed';
 import getUserData from './getUserData';
 import validateIncomingAppToken from './validateIncomingAppToken';
+import deleteChapterValidation from './deleteChapterValidation';
 
 export { validate,
   isBackendApp,
@@ -36,4 +37,5 @@ export { validate,
   getUserData,
   validateIncomingAppToken,
   addUserValidation,
+  deleteChapterValidation,
 };

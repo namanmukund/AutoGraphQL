@@ -10,6 +10,7 @@ import {
   getUserData,
   validateForgotPassword,
   addUserValidation,
+  deleteChapterValidation,
 } from './validation';
 import {
   UserAlreadyExistsError,
@@ -230,6 +231,11 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         }
         return hook(input, mutationOrQueryName, 'PreHook');
       });
+    }
+    case 'deleteChapter' : {
+      // validate chapter and check if topics are published
+      await deleteChapterValidation(params);
+      break;
     }
     default : {
       /* If context is not present then it means user is not authenticated and the
