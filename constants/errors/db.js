@@ -23,3 +23,19 @@ export const FileWriteError = createError('FileWriteError', {
 export const DeleteChapterError = createError('DeleteChapterError', {
   message: 'Cannot delete Chapter as some Topics are published',
 });
+
+export const ChapterIsPublishedError = createError('ChapterIsPublishedError', {
+  message: 'Cannot delete Chapter as Chapter is published',
+});
+export const ChapterTopicVideoIsPublishedError = createError('ChapterTopicVideoIsPublishedError', {
+  message: 'Cannot delete Chapter as some Topic Videos are published',
+});
+export const ChapterTopicLoIsPublishedError = createError('ChapterTopicLoIsPublishedError', {
+  message: 'Cannot delete Chapter as some Learning Objectives are published',
+});
+export const ChapterTopicLoMessageIsPublishedError = createError('ChapterTopicLoMessageIsPublishedError', {
+  message: 'Cannot delete Chapter as some Learning Objective Messages are published',
+});
+export const ChapterTopicLoQuestionIsPublishedError = createError('ChapterTopicLoQuestionPublishedError', {
+  message: 'Cannot delete Chapter as some Learning Objective Question Banks are published',
+});
