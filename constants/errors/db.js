@@ -20,6 +20,6 @@ export const FileWriteError = createError('FileWriteError', {
   message: 'File write could not happen',
 });
 
-export const DeleteChapter = createError('DeleteChapter', {
+export const DeleteChapterError = createError('DeleteChapterError', {
   message: 'Cannot delete Chapter as some Topics are published',
 });

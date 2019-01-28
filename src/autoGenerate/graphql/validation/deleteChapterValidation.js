@@ -1,12 +1,12 @@
-import callGraphqlApi from '../../../api/callGraphqlApi';
-import { DeleteChapter } from '../../../../constants/errors';
 import { get } from 'lodash';
+import callGraphqlApi from '../../../api/callGraphqlApi';
+import { DeleteChapterError } from '../../../../constants/errors';
 
 
 const deleteChapterValidation = async (params) => {
-    // const queryTypeName = lowerCase(typeName);
-    const { id } = params;
-    const query = `
+  // const queryTypeName = lowerCase(typeName);
+  const { id } = params;
+  const query = `
   query{
     chapter(id:"${id}"){
       topicsMeta(filter:{
@@ -19,12 +19,12 @@ const deleteChapterValidation = async (params) => {
   `;
 
 
-    const response = await callGraphqlApi(query);
+  const response = await callGraphqlApi(query);
 
-    const publishedTopicsCount = get(response, 'data.chapter.topicsMeta.count', 0);
-    if (publishedTopicsCount && publishedTopicsCount > 0) {
-        throw new DeleteChapter();
-    }
+  const publishedTopicsCount = get(response, 'data.chapter.topicsMeta.count', 0);
+  if (publishedTopicsCount && publishedTopicsCount > 0) {
+    throw new DeleteChapterError();
+  }
 };
 
 export default deleteChapterValidation;
