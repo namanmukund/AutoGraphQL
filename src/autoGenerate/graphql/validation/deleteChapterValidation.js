@@ -4,7 +4,6 @@ import { DeleteChapterError } from '../../../../constants/errors';
 
 
 const deleteChapterValidation = async (params) => {
-  // const queryTypeName = lowerCase(typeName);
   const { id } = params;
   const query = `
   query{
