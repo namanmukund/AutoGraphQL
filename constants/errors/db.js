@@ -20,22 +20,27 @@ export const FileWriteError = createError('FileWriteError', {
   message: 'File write could not happen',
 });
 
-export const DeleteChapterError = createError('DeleteChapterError', {
-  message: 'Cannot delete Chapter as some Topics are published',
+export const ChapterIsPublishedError = createError('ChapterIsPublishedError', {
+  message: 'Can not perform the current operation as chapter is published',
 });
 
-export const ChapterIsPublishedError = createError('ChapterIsPublishedError', {
-  message: 'Cannot delete Chapter as Chapter is published',
+export const TopicIsPublishedError = createError('TopicIsPublishedError', {
+  message: 'Can not perform the current operation as topic is published',
 });
-export const ChapterTopicVideoIsPublishedError = createError('ChapterTopicVideoIsPublishedError', {
-  message: 'Cannot delete Chapter as some Topic Videos are published',
+
+export const VideoIsPublishedError = createError('VideoIsPublishedError', {
+  message: 'Can not perform the current operation as video is published',
 });
-export const ChapterTopicLoIsPublishedError = createError('ChapterTopicLoIsPublishedError', {
-  message: 'Cannot delete Chapter as some Learning Objectives are published',
+
+export const LearningObjectiveIsPublishedError = createError('LearningObjectiveIsPublishedError', {
+  message: 'Can not perform the current operation as learning objective is published',
 });
-export const ChapterTopicLoMessageIsPublishedError = createError('ChapterTopicLoMessageIsPublishedError', {
-  message: 'Cannot delete Chapter as some Learning Objective Messages are published',
+
+export const QuestionIsPublishedError = createError('QuestionIsPublishedError', {
+  message: 'Can not perform the current operation as question is published',
 });
-export const ChapterTopicLoQuestionIsPublishedError = createError('ChapterTopicLoQuestionPublishedError', {
-  message: 'Cannot delete Chapter as some Learning Objective Question Banks are published',
+
+export const MessageIsPublishedError = createError('MessageIsPublishedError', {
+  message: 'Can not perform the current operation as message is published',
 });
+

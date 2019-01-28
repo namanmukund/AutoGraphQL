@@ -5,16 +5,15 @@ import getParsedASTMap from '../utils/getParsedASTMap';
 import getRelationMutationNames from '../utils/getRelationMutationNames';
 import { types } from '../../../utils';
 import {
-  connectMutationsArgumentsSuffix,
   forceUpdateTypeNames,
   forceDeleteTypeNames,
-  historyFieldName,
 } from '../../../constants';
 import findFieldWithTheRelation from '../utils/findFieldWithTheRelation';
 import validateFieldToAddForConnectMutationGeneration from '../utils/validateFieldToAddForConnectMutationGeneration';
 import hasDirective from '../utils/hasDirective';
 import getMutationNames from '../utils/getMutationNames';
 import getDirectiveArgumentValue from '../utils/getDirectiveArgumentValue';
+import getNestedConnectMutationString from '../utils/getNestedConnectMutationString';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -113,22 +112,6 @@ const nestedAddToRemoveFromMutationString = (addRelationMutationName,
   return string;
 };
 
-const getNestedConnectMutationString = (relationFields, type) => {
-  let connectMutationString = '';
-  Object.keys(relationFields).forEach((fieldName) => {
-    if (fieldName === historyFieldName) {
-      return;
-    }
-    // if field type is array
-    if (parsedASTMap[type].field[fieldName].type.isList) {
-      connectMutationString += `${fieldName}${connectMutationsArgumentsSuffix.plural} : [ID], `;
-    } else {
-      connectMutationString += `${fieldName}${connectMutationsArgumentsSuffix.singular} : ID, `;
-    }
-  });
-  connectMutationString = trimEnd(connectMutationString, ',');
-  return connectMutationString;
-};
 // make graphql types for connect mutations,
 // payload is used when multiple types are appended in one type(for connect mutations)
 const makeRelationTypePayload = (typeName, fieldName = '', relatedType,
@@ -170,7 +153,11 @@ Object.keys(parsedASTMap).forEach((type) => {
     // get relation fields
     const relationFields = definition.relationFields;
 
-    const nestedConnectMutationString = getNestedConnectMutationString(relationFields, type);
+    const nestedConnectMutationString = getNestedConnectMutationString(
+      relationFields,
+      type,
+      parsedASTMap,
+    );
     // add relation mutations
     const addModelMutationName = mutationNames.addMutation;
     const updateModelMutationName = mutationNames.updateMutation;

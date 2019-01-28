@@ -9,6 +9,7 @@ const Topic = `
     videoDescription: String @uniqueOrEmpty
     videoSubtitle: File @relation(name: "VideoSubtitle", direction: "OneWay")
     videoThumbnail: File @relation(name: "VideoThumbnail", direction: "OneWay")
+    videoStatus: ContentStatus! @defaultValue(value: "unpublished")
     createdAt: Date @readOnly
     updatedAt: Date @readOnly
     chapter: Chapter @relation(name: "ChapterTopic")

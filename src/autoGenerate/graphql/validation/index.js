@@ -15,7 +15,7 @@ import validateAppTokenInput from './validateAppTokenInput';
 import isFileDeleteAllowed from './isFileDeleteAllowed';
 import getUserData from './getUserData';
 import validateIncomingAppToken from './validateIncomingAppToken';
-import deleteChapterValidation from './deleteChapterValidation';
+import deleteChapterValidation from '../preHookFunctions/validation/deleteChapterValidation';
 
 export { validate,
   isBackendApp,
