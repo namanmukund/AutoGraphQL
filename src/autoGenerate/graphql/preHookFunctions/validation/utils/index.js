@@ -3,6 +3,8 @@ import getFinalConnectedRecordsForARelationFromInput
 import getHookValidationFunctionName from '../../../../utils/getHookValidationFunctionName';
 import { callAddUpdateHookValidationFunction, callConnectHookValidationFunction } from '../../../../utils/callHookValidationFunction';
 import commonUserValidation from './commonUserValidation';
+import checkDeleteStatusOfALearningObjective from './checkDeleteStatusOfALearningObjective';
+import checkDeleteStatusOfATopic from './checkDeleteStatusOfATopic';
 
 export {
   getFinalConnectedRecordsForARelationFromInput,
@@ -10,4 +12,6 @@ export {
   callAddUpdateHookValidationFunction,
   callConnectHookValidationFunction,
   commonUserValidation,
+  checkDeleteStatusOfALearningObjective,
+  checkDeleteStatusOfATopic,
 };

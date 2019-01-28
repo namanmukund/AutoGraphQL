@@ -27,6 +27,7 @@ import validateFieldToAddForConnectMutationGeneration from './validateFieldToAdd
 import visitField from './visitField';
 import checkIfArgumentsAreFromSameType from './checkIfArgumentsAreFromSameType';
 import getNestedConnectMutationString from './getNestedConnectMutationString';
+import isDocContainsGivenKeyValue from './isDocContainsGivenKeyValue';
 
 export {
   getParsedASTMap,
@@ -58,4 +59,5 @@ export {
   visitField,
   checkIfArgumentsAreFromSameType,
   getNestedConnectMutationString,
+  isDocContainsGivenKeyValue,
 };

@@ -20,6 +20,27 @@ export const FileWriteError = createError('FileWriteError', {
   message: 'File write could not happen',
 });
 
-export const DeleteChapterError = createError('DeleteChapterError', {
-  message: 'Cannot delete Chapter as some Topics are published',
+export const ChapterIsPublishedError = createError('ChapterIsPublishedError', {
+  message: 'Can not perform the current operation as chapter is published',
 });
+
+export const TopicIsPublishedError = createError('TopicIsPublishedError', {
+  message: 'Can not perform the current operation as topic is published',
+});
+
+export const VideoIsPublishedError = createError('VideoIsPublishedError', {
+  message: 'Can not perform the current operation as video is published',
+});
+
+export const LearningObjectiveIsPublishedError = createError('LearningObjectiveIsPublishedError', {
+  message: 'Can not perform the current operation as learning objective is published',
+});
+
+export const QuestionIsPublishedError = createError('QuestionIsPublishedError', {
+  message: 'Can not perform the current operation as question is published',
+});
+
+export const MessageIsPublishedError = createError('MessageIsPublishedError', {
+  message: 'Can not perform the current operation as message is published',
+});
+

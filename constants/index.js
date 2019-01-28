@@ -118,6 +118,9 @@ const graphQlOperations = {
 const META = 'Meta';
 const userProfiles = ['sampleProfile'];
 
+const PUBLISHED = 'published';
+const UNPUBLISHED = 'unpublished';
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -138,4 +141,6 @@ export {
   userProfiles,
   forceUpdateTypeNames,
   forceDeleteTypeNames,
+  PUBLISHED,
+  UNPUBLISHED,
 };

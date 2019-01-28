@@ -15,7 +15,12 @@ import {
   UserAlreadyExistsError,
   AdditionalFieldUpdateDeniedError,
   FileWriteError,
-  DeleteChapterError,
+  ChapterIsPublishedError,
+  TopicIsPublishedError,
+  VideoIsPublishedError,
+  LearningObjectiveIsPublishedError,
+  QuestionIsPublishedError,
+  MessageIsPublishedError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -116,5 +121,10 @@ export {
   DatabaseRecordNotFoundError,
   ConnectRecordsNotFoundInDBError,
   UserAlreadyExistsError,
-  DeleteChapterError,
+  ChapterIsPublishedError,
+  TopicIsPublishedError,
+  VideoIsPublishedError,
+  LearningObjectiveIsPublishedError,
+  QuestionIsPublishedError,
+  MessageIsPublishedError,
 };
