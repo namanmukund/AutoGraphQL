@@ -1,4 +1,14 @@
 import updateUserValidation from './updateUserValidation';
+import deleteChapterValidation from './deleteChapterValidation';
+import deleteTopicValidation from './deleteTopicValidation';
+import deleteLearningObjectiveValidation from './deleteLearningObjectiveValidation';
+import deleteQuestionBankValidation from './deleteQuestionBankValidation';
 
-export default updateUserValidation;
+export {
+  updateUserValidation,
+  deleteChapterValidation,
+  deleteTopicValidation,
+  deleteLearningObjectiveValidation,
+  deleteQuestionBankValidation,
+};
 
