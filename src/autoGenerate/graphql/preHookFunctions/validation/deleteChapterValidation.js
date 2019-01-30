@@ -24,7 +24,7 @@ const deleteChapterValidation = async (params) => {
         id
         status
         messageStatus
-        questionBankMeta(filter: {status: published}) {
+        questionBankMeta(filter: {status: ${PUBLISHED}}}) {
           count
         }
       }

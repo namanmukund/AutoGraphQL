@@ -29,6 +29,9 @@ import { BYPASS } from '../../../constants';
 import { createStaticAppToken } from '../../auth';
 import deleteFromS3 from '../../middlewares/utils/deleteFromS3';
 import { callAddUpdateHookValidationFunction } from './preHookFunctions/validation/utils';
+import deleteTopicValidation from './preHookFunctions/validation/deleteTopicValidation';
+import deleteLearningObjectiveValidation from './preHookFunctions/validation/deleteLearningObjectiveValidation';
+import deleteQuestionBankValidation from './preHookFunctions/validation/deleteQuestionBankValidation';
 
 const { hookFunctions } = functions || {};
 
@@ -233,8 +236,19 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       });
     }
     case 'deleteChapter' : {
-      // validate chapter and check if topics are published
       await deleteChapterValidation(params);
+      break;
+    }
+    case 'deleteTopic' : {
+      await deleteTopicValidation(params);
+      break;
+    }
+    case 'deleteLearningObjective' : {
+      await deleteLearningObjectiveValidation(params);
+      break;
+    }
+    case 'deleteQuestionBank' : {
+      await deleteQuestionBankValidation(params);
       break;
     }
     default : {
