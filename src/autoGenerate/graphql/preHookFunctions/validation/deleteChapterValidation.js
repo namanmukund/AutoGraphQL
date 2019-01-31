@@ -24,7 +24,7 @@ const deleteChapterValidation = async (params) => {
         id
         status
         messageStatus
-        questionBankMeta(filter: {status: ${PUBLISHED}}}) {
+        questionBankMeta(filter: {status: ${PUBLISHED}}) {
           count
         }
       }
@@ -33,6 +33,7 @@ const deleteChapterValidation = async (params) => {
 }
 `;
 
+  console.log(1111, query);
   const res = await callGraphqlApi(query);
   const chapter = get(res, 'data.chapter');
   if (chapter) {
