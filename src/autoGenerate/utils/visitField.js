@@ -1,4 +1,4 @@
-import { includes } from 'lodash';
+import { get, includes } from 'lodash';
 import types from '../graphql/types';
 import { scalarTypes } from '../../../constants';
 import { log } from '../../../utils/log';
@@ -21,6 +21,7 @@ const visitField = (field, ast, typeName) => {
   const isDefaultField = directivesObject.defaultValue;
   const isUniqueOrEmptyField = directivesObject.uniqueOrEmpty;
   const isAdditionalRelationFields = directivesObject.isRelationField;
+  const isFieldLengths = directivesObject.length;
   if (isAdditionalRelationFields) {
     return null;
   }
@@ -58,6 +59,22 @@ const visitField = (field, ast, typeName) => {
     }
   } else {
     fieldModelDefinition = getScalarFieldDefinition(fieldType.dataType);
+    // check if String or Int field has min or max length check
+    if (isFieldLengths && fieldType && fieldType.dataType === 'String') {
+      if (get(directivesObject, 'length.argument.min.value.value')) {
+        fieldModelDefinition.minlength = Number(directivesObject.length.argument.min.value.value);
+      }
+      if (get(directivesObject, 'length.argument.max.value.value')) {
+        fieldModelDefinition.maxlength = Number(directivesObject.length.argument.max.value.value);
+      }
+    } else if (isFieldLengths && fieldType && fieldType.dataType === 'Int') {
+      if (get(directivesObject, 'length.argument.min.value.value')) {
+        fieldModelDefinition.min = Number(directivesObject.length.argument.min.value.value);
+      }
+      if (get(directivesObject, 'length.argument.max.value.value')) {
+        fieldModelDefinition.max = Number(directivesObject.length.argument.max.value.value);
+      }
+    }
     if (!fieldType.isList) {
       // add required in definition if nonNull
       if (fieldType.isNonNull) {
