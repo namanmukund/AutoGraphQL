@@ -59,20 +59,36 @@ const visitField = (field, ast, typeName) => {
     }
   } else {
     fieldModelDefinition = getScalarFieldDefinition(fieldType.dataType);
-    // check if String or Int field has min or max length check
+    // generate mongoose schema for min max length field
     if (isFieldLengths && fieldType && fieldType.dataType === 'String') {
       if (get(directivesObject, 'length.argument.min.value.value')) {
-        fieldModelDefinition.minlength = Number(directivesObject.length.argument.min.value.value);
+        const minLength = Number(directivesObject.length.argument.min.value.value);
+        fieldModelDefinition.minlength = [
+          minLength,
+          `minimum required length is ${minLength}`,
+        ];
       }
       if (get(directivesObject, 'length.argument.max.value.value')) {
-        fieldModelDefinition.maxlength = Number(directivesObject.length.argument.max.value.value);
+        const maxLength = Number(directivesObject.length.argument.max.value.value);
+        fieldModelDefinition.maxlength = [
+          maxLength,
+          `maximum required length is ${maxLength}`,
+        ];
       }
     } else if (isFieldLengths && fieldType && fieldType.dataType === 'Int') {
       if (get(directivesObject, 'length.argument.min.value.value')) {
-        fieldModelDefinition.min = Number(directivesObject.length.argument.min.value.value);
+        const min = Number(directivesObject.length.argument.min.value.value);
+        fieldModelDefinition.min = [
+          min,
+          `minimum required value is ${min}`,
+        ];
       }
       if (get(directivesObject, 'length.argument.max.value.value')) {
-        fieldModelDefinition.max = Number(directivesObject.length.argument.max.value.value);
+        const max = Number(directivesObject.length.argument.max.value.value);
+        fieldModelDefinition.max = [
+          max,
+          `maximum required value is ${max}`,
+        ];
       }
     }
     if (!fieldType.isList) {

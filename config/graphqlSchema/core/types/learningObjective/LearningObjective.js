@@ -1,8 +1,8 @@
 const LearningObjective = `
   type LearningObjective @model {
     order: Int!
-    title: String! @unique
-    description: String @uniqueOrEmpty
+    title: String! @unique @length(min: 6, max: 120)
+    description: String @uniqueOrEmpty @unique @length(min: 6, max: 120)
     createdAt: Date @readOnly
     updatedAt: Date @readOnly
     videoStartTime: Int
