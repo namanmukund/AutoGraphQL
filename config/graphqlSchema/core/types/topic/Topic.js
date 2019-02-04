@@ -1,12 +1,12 @@
 const Topic = `
   type Topic @model {
-    order: Int! @unique
-    title: String! @unique
-    description: String @uniqueOrEmpty
+    order: Int! @unique @length(min: 1, max: 50)
+    title: String! @unique @length(min: 6, max: 120)
+    description: String @uniqueOrEmpty @length(min: 6, max: 120)
     status: ContentStatus! @defaultValue(value: "unpublished")
     video: File @relation(name: "TopicVideo", direction: "OneWay")
-    videoTitle: String @uniqueOrEmpty
-    videoDescription: String @uniqueOrEmpty
+    videoTitle: String @uniqueOrEmpty @length(min: 6, max: 120)
+    videoDescription: String @uniqueOrEmpty @length(min: 6, max: 120)
     videoSubtitle: File @relation(name: "VideoSubtitle", direction: "OneWay")
     videoThumbnail: File @relation(name: "VideoThumbnail", direction: "OneWay")
     videoStatus: ContentStatus! @defaultValue(value: "unpublished")
