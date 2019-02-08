@@ -1,9 +1,11 @@
+import { indexOf } from 'lodash';
 import schemaTypes from './schemaTypes';
 import getParsedASTMap from '../../utils/getParsedASTMap';
 import {
   getFieldTypeString,
   appendAdditionalRelationFieldsToTypeObject,
-  getSchemaStringFromSchemaMap } from './utils';
+  getSchemaStringFromSchemaMap, getFileUploadEnumType,
+} from './utils';
 import { historyFieldName } from '../../../../constants';
 import getDirectiveArgumentValue from '../../utils/getDirectiveArgumentValue';
 import hasDirective from '../../utils/hasDirective';
@@ -20,6 +22,9 @@ let graphqlAdditionalRelationFieldsInputTypeObject = {};
 let graphqlAdditionalRelationFieldsUpdateTypeObject = {};
 const graphqlArrayTypeObject = {};
 const nestedConnectMutationStringObject = {};
+// Enum types for uploadFile
+const fileConnectedTypeEnumArray = [];
+const fileConnectedTypeFieldEnumArray = [];
 // Walk through AST map
 Object.keys(parsedASTMap).forEach((type) => {
   const definition = parsedASTMap[type];
@@ -123,8 +128,18 @@ Object.keys(parsedASTMap).forEach((type) => {
             additionalFieldUpdateTypeString;
       }
     }
+    // create enum types for uploadFile
+    if (isModel && isRelationField && fieldType === 'File') {
+      if (indexOf(fileConnectedTypeFieldEnumArray, fieldName) === -1) {
+        fileConnectedTypeFieldEnumArray.push(fieldName);
+      }
+      if (indexOf(fileConnectedTypeEnumArray, type) === -1) {
+        fileConnectedTypeEnumArray.push(type);
+      }
+    }
   });
 });
+
 // get schema strings from input schema maps
 const inputTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlInputTypeObject, 'Input');
 const updateTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlUpdateTypeObject, 'Update');
@@ -132,12 +147,26 @@ const updateAllTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlUpdateAllT
 const additionalRelationFieldsTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlAdditionalRelationFieldsInputTypeObject, 'Input');
 const additionalRelationFieldsUpdateTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlAdditionalRelationFieldsUpdateTypeObject, 'Update');
 const arrayTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlArrayTypeObject, 'ArrayUpdate');
+
+// uploadFile enumSchema
+const fileConnectedTypeEnumSchema = getFileUploadEnumType(
+  'FileConnectedType',
+  fileConnectedTypeEnumArray,
+);
+const fileConnectedTypeFieldEnumSchema = getFileUploadEnumType(
+  'FileConnectedTypeField',
+  fileConnectedTypeFieldEnumArray,
+);
 // remove nulls from input types array
 const inputTypesArray = [
   ...inputTypesSchemaArray,
   ...updateTypesSchemaArray,
   ...updateAllTypesSchemaArray,
   ...additionalRelationFieldsTypesSchemaArray,
-  ...additionalRelationFieldsUpdateTypesSchemaArray, ...arrayTypesSchemaArray];
+  ...additionalRelationFieldsUpdateTypesSchemaArray,
+  ...arrayTypesSchemaArray,
+  fileConnectedTypeEnumSchema,
+  fileConnectedTypeFieldEnumSchema,
+];
 
 export default inputTypesArray;

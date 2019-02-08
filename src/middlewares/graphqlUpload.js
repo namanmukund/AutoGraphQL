@@ -40,7 +40,6 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
         operations = request.headers.querystring;
       }
       operations = JSON.parse(operations);
-
       /* eslint-enable no-param-reassign */
       // Check if files were uploaded
       const filesKeys = Object.keys(files);
@@ -65,12 +64,21 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
             ext,
           );
           // fileKind has value like profilePic to know what kind of resizing is required
-          const { variables: { fileKind } } = operations;
-          const filePath = `${fileKind}/${name}`;
+          const {
+            variables: {
+              fileKind,
+              connectType,
+              connectTypeField,
+              connectTypeId,
+            },
+          } = operations;
+
+          const modifiedFileName = `${connectTypeField}_${connectTypeId}`;
+          const filePath = `${fileKind}/${connectType}/${modifiedFileName}`;
 
           // get authentication message
           const authenticationErrorMsg = getAuthenticationErrorMessage(request);
-          if (fileKind) {
+          if (fileKind && connectType && connectTypeField && connectTypeId) {
             if (!authenticationErrorMsg) {
               if (!isValidSize || !isValidExtension || !fileTypeName) {
                 middlewareErrorType = getFileSizeExtErrorName(isValidSize, isValidExtension);
@@ -90,7 +98,7 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
             }
           }
           const fileInfo = {
-            name,
+            name: modifiedFileName,
             type: fileTypeName,
             size,
             uri: filePath,

@@ -314,6 +314,9 @@ Object.keys(parsedASTMap).forEach((type) => {
 });
 
 resolvers.Mutation.signUp = async (root, params, context, info) => {
+  const { field } = parsedASTMap.Topic;
+  console.log(11111, JSON.stringify(field));
+  throw new Error('bye');
   const authentication = ifAuthorized(context);
   const typeName = 'User';
   const mutationName = 'addUser';
@@ -586,7 +589,7 @@ resolvers.Mutation.uploadFile = (root, params, context) => {
   checkMiddlewareErrors(middlewareErrorType, middlewareErrorMessage);
   // check authentication
   const authentication = ifAuthorized(context);
-  return uploadFileResolver(root, params, authentication);
+  return uploadFileResolver(root, params, authentication, context);
 };
 
 // queries
