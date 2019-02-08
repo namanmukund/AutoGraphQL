@@ -6,7 +6,7 @@ import FileType from './FileType';
 import FileUsageKind from './FileUsageKind';
 import AppName from './AppName';
 import ApplicationType from './ApplicationType';
-import FileKind from './FileKind';
+import FileBucket from './FileBucket';
 import QuestionBankType from './QuestionBankType';
 import MessageAlignmentType from './MessageAlignmentType';
 import MessageType from './MessageType';
@@ -20,7 +20,7 @@ export default [
   FileType, FileUsageKind,
   AppName,
   ApplicationType,
-  FileKind,
+  FileBucket,
   AppName,
   QuestionBankType,
   ContentStatus,

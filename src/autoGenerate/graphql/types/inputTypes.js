@@ -157,6 +157,13 @@ const fileConnectedTypeFieldEnumSchema = getFileUploadEnumType(
   'FileConnectedTypeField',
   fileConnectedTypeFieldEnumArray,
 );
+const fileConnectInputSchema = `
+  input FileConnectInput {
+      typeId: ID!, 
+      type: FileConnectedType!, 
+      typeField: FileConnectedTypeField!
+  }
+`;
 // remove nulls from input types array
 const inputTypesArray = [
   ...inputTypesSchemaArray,
@@ -167,6 +174,7 @@ const inputTypesArray = [
   ...arrayTypesSchemaArray,
   fileConnectedTypeEnumSchema,
   fileConnectedTypeFieldEnumSchema,
+  fileConnectInputSchema,
 ];
 
 export default inputTypesArray;

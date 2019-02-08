@@ -59,11 +59,11 @@ app.use(`/graphql/${application}`,
     let middlewareErrorType = '';
     let middlewareErrorMessage = '';
     if (req.body && req.body.variables) {
-      if (req.body.variables.file) {
-        middlewareErrorType = req.body.variables.file.middlewareErrorType;
-        middlewareErrorMessage = req.body.variables.file.middlewareErrorMessage;
-        delete req.body.variables.file.middlewareErrorType;
-        delete req.body.variables.file.middlewareErrorMessage;
+      if (req.body.variables.fileInput) {
+        middlewareErrorType = req.body.variables.fileInput.middlewareErrorType;
+        middlewareErrorMessage = req.body.variables.fileInput.middlewareErrorMessage;
+        delete req.body.variables.fileInput.middlewareErrorType;
+        delete req.body.variables.fileInput.middlewareErrorMessage;
       } else if (req.body.variables.middlewareErrorType) {
         middlewareErrorType = req.body.variables.middlewareErrorType;
         middlewareErrorMessage = req.body.variables.middlewareErrorMessage;

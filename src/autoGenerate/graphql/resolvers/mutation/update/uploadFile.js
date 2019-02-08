@@ -3,25 +3,25 @@ import { DatabaseRecordNotFoundError, FileUploadError } from '../../../../../../
 import { generateCuid } from '../../../../../../utils';
 // resolver for file upload
 const connectFileWithTheGivenType = (params, authentication, fileId) => {
-  const { connectType, connectTypeId, connectTypeField } = params;
-  const modelMutations = new MutationController(connectType, authentication);
+  const { connectInput: { type, typeId, typeField } } = params;
+  const modelMutations = new MutationController(type, authentication);
   const updateObj = {
-    [`${connectTypeField}`]: {
+    [`${typeField}`]: {
       type: 'File',
       typeId: fileId,
     },
   };
-  return modelMutations.update({ id: connectTypeId }, updateObj);
+  return modelMutations.update({ id: typeId }, updateObj);
 };
 const uploadFileResolver = (root, params, authentication) => {
   const typeName = 'File';
   const modelMutations = new MutationController(typeName, authentication);
-  const { file } = params;
-  if (!file) {
+  const { fileInput } = params;
+  if (!fileInput) {
     throw new FileUploadError();
   }
 
-  const fileWithId = generateCuid(file);
+  const fileWithId = generateCuid(fileInput);
   return modelMutations.addDocument(fileWithId).then(async (res) => {
     const { id: fileId } = res;
     return connectFileWithTheGivenType(params, authentication, fileId)
