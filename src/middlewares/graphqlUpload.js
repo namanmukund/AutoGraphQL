@@ -40,7 +40,6 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
         operations = request.headers.querystring;
       }
       operations = JSON.parse(operations);
-
       /* eslint-enable no-param-reassign */
       // Check if files were uploaded
       const filesKeys = Object.keys(files);
@@ -65,12 +64,25 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
             ext,
           );
           // fileKind has value like profilePic to know what kind of resizing is required
-          const { variables: { fileKind } } = operations;
-          const filePath = `${fileKind}/${name}`;
+          const {
+            variables: {
+              fileInput: {
+                fileBucket,
+              },
+              connectInput: {
+                typeId,
+                type: connectType,
+                typeField,
+              },
+            },
+          } = operations;
+
+          const modifiedFileName = `${typeField}_${typeId}.${ext}`;
+          const filePath = `${fileBucket}/${connectType.toLowerCase()}/${modifiedFileName}`;
 
           // get authentication message
           const authenticationErrorMsg = getAuthenticationErrorMessage(request);
-          if (fileKind) {
+          if (fileBucket && typeId && connectType && typeField) {
             if (!authenticationErrorMsg) {
               if (!isValidSize || !isValidExtension || !fileTypeName) {
                 middlewareErrorType = getFileSizeExtErrorName(isValidSize, isValidExtension);
@@ -78,7 +90,7 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
                 try {
                   const fileContent = fs.readFileSync(path);
                   if (fileContent) {
-                    resizeAndUpload(fileTypeName, name, fileContent, fileKind, filePath);
+                    resizeAndUpload(fileTypeName, name, fileContent, fileBucket, filePath);
                   }
                 } catch (err) {
                   log(err);
@@ -90,20 +102,23 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
             }
           }
           const fileInfo = {
-            name,
+            name: modifiedFileName,
             type: fileTypeName,
             size,
             uri: filePath,
             middlewareErrorType,
-            fileKind,
+            fileBucket,
             mimeType: ext,
           };
           if (includes(variablesPath, 'variables')) {
             operationsPath.set(variablesPath, fileInfo);
           } else {
-            Object.assign(operations.variables, {
-              file: fileInfo,
-            });
+            const { fileInput, connectInput } = operations.variables;
+            if (fileInput && connectInput) {
+              Object.assign(operations.variables, {
+                fileInput: fileInfo,
+              });
+            }
           }
         });
       }

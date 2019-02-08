@@ -586,7 +586,7 @@ resolvers.Mutation.uploadFile = (root, params, context) => {
   checkMiddlewareErrors(middlewareErrorType, middlewareErrorMessage);
   // check authentication
   const authentication = ifAuthorized(context);
-  return uploadFileResolver(root, params, authentication);
+  return uploadFileResolver(root, params, authentication, context);
 };
 
 // queries

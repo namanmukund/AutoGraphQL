@@ -145,8 +145,19 @@ const getTypeNameFromSchemaString = (typeString) => {
   return typeName;
 };
 
+// generate enum type graphql schema
+const getFileUploadEnumType = (enumTypeName, enumArray) => {
+  let typeString = `enum ${enumTypeName} {`;
+  enumArray.forEach((enumVal) => {
+    typeString += `${enumVal} `;
+  });
+  typeString += '}';
+  return typeString;
+};
+
 export {
   getFieldTypeString,
   appendAdditionalRelationFieldsToTypeObject,
   getSchemaStringFromSchemaMap, getTypeNameFromSchemaString,
+  getFileUploadEnumType,
 };

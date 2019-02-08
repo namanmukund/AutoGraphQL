@@ -7,7 +7,7 @@ const File = `
     size: Int
     usageCount: Int @defaultValue(value: 0)
     uri: String! @unique
-    fileKind: FileKind! @defaultValue(value: "content")
+    fileBucket: FileBucket! @defaultValue(value: "python")
     type: FileType!
     usageKind: FileUsageKind
     mimeType: String!

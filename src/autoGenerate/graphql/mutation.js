@@ -231,7 +231,7 @@ mutationString += 'finishForgotPassword (input: PhoneInput, phoneOtp: Int, email
 
 // Backend Token only password update mutation
 mutationString += 'tcirtSdrowssaPtes ( id: ID!, password: String! ): User,';
-mutationString += 'uploadFile (file: FileInput): File! ,';
+mutationString += 'uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,';
 
 mutationString = trimEnd(mutationString, ',');
 mutationString += '}';
