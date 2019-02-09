@@ -38,6 +38,10 @@ const deleteRecordReferences = async (relationFields, relationSubsetFields,
           /* eslint-enable no-await-in-loop */
             const { usageCount, uri } = file;
             if (usageCount === 0) {
+              // remove file from db
+              const modelMutation = new MutationController('File', authentication);
+              await modelMutation.deleteDocument(typeId);
+              // remove file from S3
               await deleteFromS3(uri);
             }
           });

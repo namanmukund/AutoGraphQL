@@ -124,6 +124,8 @@ const removeRelationMutationResolver = (
             });
             // if usageCount value before decrement is 1 then this is the case of usage zero
             if (usageCount === 1) {
+              const modelMutation = new MutationController('File', authentication);
+              await modelMutation.deleteDocument(id);
               await deleteFromS3(uri);
             }
           }
