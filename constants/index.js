@@ -5,6 +5,7 @@ import fileSizeLimitInMB from './fileSizeLimitInMB';
 import fileExtensions from './fileExtensions';
 import forceUpdateTypeNames from './forceUpdateTypeNames';
 import forceDeleteTypeNames from './forceDeleteTypeNames';
+import regexValidation from './regexValidation';
 
 
 const FRONTEND_APP_ONE = 'frontendAppOne';
@@ -143,4 +144,5 @@ export {
   forceDeleteTypeNames,
   PUBLISHED,
   UNPUBLISHED,
+  regexValidation,
 };
