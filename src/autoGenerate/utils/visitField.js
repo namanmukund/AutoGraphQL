@@ -191,11 +191,11 @@ const visitField = (field, ast, typeName) => {
 
     if (!fieldType.isList) {
       // implementing mongoose validation
-      const updatedFieldDefinition = getMongooseDefaultValidations(
+      const fieldDefinitionWithMoongoseValidation = getMongooseDefaultValidations(
         directivesObject,
         fieldType,
       );
-      Object.assign(fieldModelDefinition, updatedFieldDefinition);
+      Object.assign(fieldModelDefinition, fieldDefinitionWithMoongoseValidation);
     } else {
       if (fieldType.isListIsNonNull) {
         fieldModelDefinition.required = true;

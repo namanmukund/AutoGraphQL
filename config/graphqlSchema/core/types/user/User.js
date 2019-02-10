@@ -6,9 +6,9 @@ const User = `
     status: Status! @defaultValue(value: "inactive") @readOnly
     username: String! @unique @auto
     password: String @filterOff
-    email: String @uniqueOrNull @trim
+    email: String @uniqueOrEmpty @trim
     emailVerified: Boolean @defaultValue(value: "false") @readOnly
-    phone: Phone @uniqueOrNull
+    phone: Phone @uniqueOrEmpty
     phoneVerified: Boolean @defaultValue(value: "false")
     dateOfBirth: Date
     gender: Gender
