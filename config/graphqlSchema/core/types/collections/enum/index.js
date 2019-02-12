@@ -12,6 +12,8 @@ import MessageAlignmentType from './MessageAlignmentType';
 import MessageType from './MessageType';
 import AssessmentType from './AssessmentType';
 import QuestionBankLayoutType from './QuestionBankLayoutType';
+import SubjectTItle from './SubjectTItle';
+import SubjectCategory from './SubjectCategory';
 
 export default [
   Status,
@@ -28,4 +30,6 @@ export default [
   MessageType,
   AssessmentType,
   QuestionBankLayoutType,
+  SubjectTItle,
+  SubjectCategory,
 ];

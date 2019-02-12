@@ -8,8 +8,8 @@ import forceDeleteTypeNames from './forceDeleteTypeNames';
 import regexValidation from './regexValidation';
 
 
-const FRONTEND_APP_ONE = 'frontendAppOne';
-const FRONTEND_APP_TWO = 'frontendAppTwo';
+const FRONTEND_APP_ONE = 'tekieTms';
+const FRONTEND_APP_TWO = 'tekieLearningApp';
 const backendApps = ['core'];
 
 const frontEndApps = [FRONTEND_APP_TWO, FRONTEND_APP_ONE];
