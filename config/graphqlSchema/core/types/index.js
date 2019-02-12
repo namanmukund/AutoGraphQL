@@ -9,7 +9,7 @@ import Topic from './topic';
 import LearningObjective from './learningObjective';
 import QuestionBank from './questionBank';
 import Message from './message';
-import Subject from './subject';
+import Course from './course';
 
 export default [
   ...User,
@@ -23,5 +23,5 @@ export default [
   ...QuestionBank,
   ...LearningObjective,
   ...Message,
-  ...Subject,
+  ...Course,
 ];
