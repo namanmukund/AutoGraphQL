@@ -143,7 +143,7 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
               },
             },
           } = operations;
-          const modifiedFileName = (data && data.uri) ?
+          const modifiedFileName = (data && data.name) ?
             data.name :
             `${typeField}_${typeId}_${Date.now()}.${ext}`;
           const filePath = `${fileBucket}/${connectType.toLowerCase()}/${modifiedFileName}`;
