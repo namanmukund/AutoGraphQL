@@ -6,7 +6,6 @@ const Course = `
     description: String @uniqueOrEmpty @length(min: 6, max: 120) @trim
     status: ContentStatus! @defaultValue(value: "unpublished")
     chapters: [Chapter] @relation(name: "CourseChapter")
-    topics: [Topic] @relation(name: "CourseTopic")
     thumbnail: File @relation(name: "CourseThumbnail", direction: "OneWay")
   }
 `;
