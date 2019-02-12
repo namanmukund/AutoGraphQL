@@ -1,5 +1,5 @@
 import { MutationController } from '../../../controllers';
-import { DatabaseRecordNotFoundError, FileUploadError } from '../../../../../../constants/errors';
+import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
 import { generateCuid } from '../../../../../../utils';
 // resolver for file upload
 const connectFileWithTheGivenType = (params, authentication, fileId) => {
@@ -13,13 +13,20 @@ const connectFileWithTheGivenType = (params, authentication, fileId) => {
   };
   return modelMutations.update({ id: typeId }, updateObj);
 };
-const uploadFileResolver = (root, params, authentication) => {
+const uploadFileResolver = (root, params, authentication, context) => {
   const typeName = 'File';
   const modelMutations = new MutationController(typeName, authentication);
-  const { fileInput } = params;
-  if (!fileInput) {
-    throw new FileUploadError();
+  const { filePayload: { action } } = context;
+  if (action === 'edit') {
+    const { filePayload: { data: { id, name, uri } } } = context;
+    return modelMutations.updateDocument(id, {
+      name,
+      uri,
+      updatedAt: new Date(),
+    });
   }
+
+  const { fileInput } = params;
 
   const fileWithId = generateCuid(fileInput);
   Object.assign(fileWithId, { usageCount: 1 });

@@ -33,6 +33,7 @@ import { FileUploadError,
   InvalidFileUploadExtensionError,
   InvalidFileUploadSizeAndExtensionError,
   FileUsageCountNotZeroError,
+  FileIdIsMandatoryError,
 } from './files';
 import { InvalidWriteAccessError, InvalidReadAccessError, InvalidActionOnDefaultFieldsError,
   UnauthorizedOperationError, BlockedOperationError, PermissionDeniedError,
@@ -127,4 +128,5 @@ export {
   LearningObjectiveIsPublishedError,
   QuestionIsPublishedError,
   MessageIsPublishedError,
+  FileIdIsMandatoryError,
 };

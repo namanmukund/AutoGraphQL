@@ -1,5 +1,7 @@
 // Check middleware errors
 import {
+  DatabaseRecordNotFoundError,
+  FileIdIsMandatoryError,
   FileUploadError,
   InvalidFileUploadExtensionError,
   InvalidFileUploadSizeAndExtensionError,
@@ -10,7 +12,7 @@ import {
 } from '../../../../../constants/errors';
 import { fileExtensions, fileSizeLimitInMB } from '../../../../../constants';
 
-const checkMiddlewareErrors = (middlewareErrorType, middlewareErrorMessage) => {
+const checkMiddlewareErrors = (middlewareErrorType) => {
   if (middlewareErrorType) {
     switch (middlewareErrorType) {
       case 'FileUploadError':
@@ -20,7 +22,7 @@ const checkMiddlewareErrors = (middlewareErrorType, middlewareErrorMessage) => {
       case 'InvalidFileUploadExtensionError':
         throw new InvalidFileUploadExtensionError({ data: { message: `Only allowed extensions:  ${fileExtensions}` } });
       case 'InvalidFileUploadSizeAndExtensionError':
-        throw new InvalidFileUploadSizeAndExtensionError({ data: { message: `Only allowed size in mb and extesnsions :${fileSizeLimitInMB}`,
+        throw new InvalidFileUploadSizeAndExtensionError({ data: { message: `Only allowed size in mb and extensions :${fileSizeLimitInMB}`,
           fileExtensions } });
       case 'InvalidStaticToken':
         throw new InvalidStaticToken();
@@ -28,13 +30,11 @@ const checkMiddlewareErrors = (middlewareErrorType, middlewareErrorMessage) => {
         throw new UnauthenticatedAppError();
       case 'UnauthenticatedUserError':
         throw new UnauthenticatedUserError();
+      case 'DatabaseRecordNotFoundError':
+        throw new DatabaseRecordNotFoundError();
+      case 'FileIdIsMandatoryError':
+        throw new FileIdIsMandatoryError();
       default:
-        throw new Error({
-          data: {
-            message: middlewareErrorMessage,
-          },
-        },
-        );
     }
   }
 };

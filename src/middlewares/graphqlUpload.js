@@ -2,7 +2,7 @@ import mkdirp from 'mkdirp';
 import formidable from 'formidable';
 import objectPath from 'object-path';
 import fs from 'fs';
-import { includes } from 'lodash';
+import { includes, camelCase, get, find } from 'lodash';
 import { log } from '../../utils';
 import {
   checkFileSizeAndExtensions,
@@ -11,7 +11,71 @@ import {
   getFileTypeName,
   resizeAndUpload,
 } from './utils';
+import callGraphqlApi from '../api/callGraphqlApi';
 
+const checkActionTypeBeforeFileUpload = async (operations) => {
+  const {
+    variables: {
+      connectInput: {
+        typeId,
+        type,
+        typeField,
+        fileId,
+      },
+    },
+  } = operations;
+  const typeName = camelCase(type);
+  const query = `
+  query{
+      ${typeName}(id:"${typeId}"){
+        id
+        ${typeField} {
+          id
+          name
+          uri
+        }
+      }
+    }
+  `;
+  const res = await callGraphqlApi(query);
+  // if connected type is not present
+  if (!get(res, `data.${typeName}`)) {
+    return {
+      middlewareErrorType: 'DatabaseRecordNotFoundError',
+    };
+  }
+
+  const file = get(res, `data.${typeName}.${typeField}`);
+
+  // if fileId is sent then it should be available in res in both array and object case
+  if (fileId) {
+    if (!file ||
+        (file && (!Array.isArray(file) && file.id !== fileId)) ||
+         (file && Array.isArray(file) && !find(file, { id: fileId }))) {
+      return {
+        middlewareErrorType: 'DatabaseRecordNotFoundError',
+      };
+    }
+  }
+  // fileId is mandatory in case of an array
+  if (file && Array.isArray(file) && file.length && !fileId) {
+    return {
+      middlewareErrorType: 'FileIdIsMandatoryError',
+    };
+  }
+
+  // if res is not available and fileId is not present then the action required is add
+  if (!file || (file && Array.isArray(file) && !file.length)) {
+    return {
+      action: 'add',
+    };
+  }
+
+  return {
+    action: 'edit',
+    data: fileId ? find(file, { id: fileId }) : file,
+  };
+};
 /* processes file in request; saves in local;
 reads the file from local and then uploads to s3 */
 function processRequestAndUploadFile(request, { uploadDir } = {}) {
@@ -27,7 +91,7 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
   // form.maxFieldsSize = 2;
   // Parse the multipart form request
   return new Promise((resolve, reject) => {
-    form.parse(request, (error, { operations }, files) => {
+    form.parse(request, async (error, { operations }, files) => {
       if (error) { reject(new Error(error)); }
       /*   Decode the GraphQL operation(s). This is an array if batching is
       enabled. */
@@ -40,6 +104,9 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
         operations = request.headers.querystring;
       }
       operations = JSON.parse(operations);
+      const filePayload = await checkActionTypeBeforeFileUpload(operations);
+      const { data, middlewareErrorType: errorBeforeUpload } = filePayload;
+      middlewareErrorType = errorBeforeUpload;
       /* eslint-enable no-param-reassign */
       // Check if files were uploaded
       const filesKeys = Object.keys(files);
@@ -63,7 +130,7 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
             size,
             ext,
           );
-          // fileKind has value like profilePic to know what kind of resizing is required
+
           const {
             variables: {
               fileInput: {
@@ -76,16 +143,20 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
               },
             },
           } = operations;
-
-          const modifiedFileName = `${typeField}_${typeId}.${ext}`;
+          const modifiedFileName = (data && data.name) ?
+            data.name :
+            `${typeField}_${typeId}_${Date.now()}.${ext}`;
           const filePath = `${fileBucket}/${connectType.toLowerCase()}/${modifiedFileName}`;
 
           // get authentication message
           const authenticationErrorMsg = getAuthenticationErrorMessage(request);
-          if (fileBucket && typeId && connectType && typeField) {
+          if (fileBucket && typeId && connectType && typeField && !middlewareErrorType) {
             if (!authenticationErrorMsg) {
               if (!isValidSize || !isValidExtension || !fileTypeName) {
-                middlewareErrorType = getFileSizeExtErrorName(isValidSize, isValidExtension);
+                filePayload.middlewareErrorType = getFileSizeExtErrorName(
+                  isValidSize,
+                  isValidExtension,
+                );
               } else {
                 try {
                   const fileContent = fs.readFileSync(path);
@@ -94,11 +165,11 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
                   }
                 } catch (err) {
                   log(err);
-                  middlewareErrorType = 'FileUploadError';
+                  filePayload.middlewareErrorType = 'FileUploadError';
                 }
               }
             } else {
-              middlewareErrorType = authenticationErrorMsg;
+              filePayload.middlewareErrorType = authenticationErrorMsg;
             }
           }
           const fileInfo = {
@@ -106,9 +177,9 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
             type: fileTypeName,
             size,
             uri: filePath,
-            middlewareErrorType,
             fileBucket,
             mimeType: ext,
+            filePayload,
           };
           if (includes(variablesPath, 'variables')) {
             operationsPath.set(variablesPath, fileInfo);
