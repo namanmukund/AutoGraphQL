@@ -65,7 +65,7 @@ const checkActionTypeBeforeFileUpload = async (operations) => {
   }
 
   // if res is not available and fileId is not present then the action required is add
-  if (!file || !file.length) {
+  if (!file || (file && Array.isArray(file) && !file.length)) {
     return {
       action: 'add',
     };

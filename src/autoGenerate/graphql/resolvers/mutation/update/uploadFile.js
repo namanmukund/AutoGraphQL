@@ -16,13 +16,13 @@ const connectFileWithTheGivenType = (params, authentication, fileId) => {
 const uploadFileResolver = (root, params, authentication, context) => {
   const typeName = 'File';
   const modelMutations = new MutationController(typeName, authentication);
-
   const { filePayload: { action } } = context;
   if (action === 'edit') {
     const { filePayload: { data: { id, name, uri } } } = context;
     return modelMutations.updateDocument(id, {
       name,
       uri,
+      updatedAt: new Date(),
     });
   }
 
