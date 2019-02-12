@@ -13,7 +13,7 @@ const FRONTEND_APP_TWO = 'tekieLearningApp';
 const backendApps = ['core'];
 
 const frontEndApps = [FRONTEND_APP_TWO, FRONTEND_APP_ONE];
-const permissionIntegratedApps = [FRONTEND_APP_ONE];
+const permissionIntegratedApps = [];
 const firebaseExcludedApps = [];
 
 const BYPASS = 'bypass';

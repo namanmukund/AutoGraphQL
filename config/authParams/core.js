@@ -1,5 +1,5 @@
 const coreAuthParams = {
-  SECRET: 'bdfkaevfkadvsfvalhdfjhzvmvb.kfbKJVBkdsBVKJbksdvkljbls',
+  SECRET: 'bdfkaevfkadvsfvbkfjbsdfbsbdkfbkdsvzxnalhdfjhzvmvb.kfbKJVBkdsBVKJbksdvkljbls',
   TOKEN_EXPIRY_DATE: '1y',
   FRONTEND_STATIC_APP_TOKEN_EXPIRY_DATE: '10y',
   BACKEND_STATIC_APP_TOKEN_EXPIRY_DATE: '10y',
