@@ -55,20 +55,15 @@ app.use(`/graphql/${application}`,
   bodyParser.json(),
   graphqlUpload({ uploadDir: './uploads' }),
   graphqlHTTP((req, res, params) => {
-    // error type for file upload
-    let middlewareErrorType = '';
-    let middlewareErrorMessage = '';
+    // file info from middleware
+    let filePayload = '';
     if (req.body && req.body.variables) {
       if (req.body.variables.fileInput) {
-        middlewareErrorType = req.body.variables.fileInput.middlewareErrorType;
-        middlewareErrorMessage = req.body.variables.fileInput.middlewareErrorMessage;
-        delete req.body.variables.fileInput.middlewareErrorType;
-        delete req.body.variables.fileInput.middlewareErrorMessage;
-      } else if (req.body.variables.middlewareErrorType) {
-        middlewareErrorType = req.body.variables.middlewareErrorType;
-        middlewareErrorMessage = req.body.variables.middlewareErrorMessage;
-        delete req.body.variables.middlewareErrorType;
-        delete req.body.variables.middlewareErrorMessage;
+        filePayload = req.body.variables.fileInput.filePayload;
+        delete req.body.variables.fileInput.filePayload;
+      } else if (req.body.variables.filePayload) {
+        filePayload = req.body.variables.filePayload;
+        delete req.body.variables.filePayload;
       }
     }
     let formatErrorWrapper;
@@ -129,8 +124,7 @@ app.use(`/graphql/${application}`,
       context: {
         decodedUser: req.currentUser,
         decodedApp: req.currentApp,
-        middlewareErrorType,
-        middlewareErrorMessage,
+        filePayload,
         mutationCallRoute: req.mutationCallRoute,
         authorization: req.authorization,
         xForwardedBy: req.xForwardedBy,

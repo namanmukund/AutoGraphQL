@@ -162,6 +162,7 @@ const fileConnectInputSchema = `
       typeId: ID!, 
       type: FileConnectedType!, 
       typeField: FileConnectedTypeField!
+      fileId: ID
   }
 `;
 // remove nulls from input types array

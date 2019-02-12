@@ -581,9 +581,9 @@ resolvers.Mutation.tcirtSdrowssaPtes = async (root, params, context, info) => {
 };
 
 resolvers.Mutation.uploadFile = (root, params, context) => {
-  const { middlewareErrorType, middlewareErrorMessage } = context;
+  const { filePayload: { middlewareErrorType } } = context;
   // throw error coming from middleware
-  checkMiddlewareErrors(middlewareErrorType, middlewareErrorMessage);
+  checkMiddlewareErrors(middlewareErrorType);
   // check authentication
   const authentication = ifAuthorized(context);
   return uploadFileResolver(root, params, authentication, context);

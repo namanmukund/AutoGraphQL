@@ -19,3 +19,7 @@ export const InvalidFileUploadSizeAndExtensionError = createError('InvalidFileUp
 export const FileUsageCountNotZeroError = createError('FileUsageCountNotZeroError', {
   message: 'The file can not be deleted as its usage count is not zero',
 });
+
+export const FileIdIsMandatoryError = createError('FileIdIsMandatoryError', {
+  message: 'File id in input is mandatory here',
+});
