@@ -5,7 +5,7 @@ const User = `
     name: String! @trim
     status: Status! @defaultValue(value: "inactive") @readOnly
     username: String! @unique @auto
-    password: String @filterOff
+    password: String @filterOff @writeOnly
     email: String @uniqueOrEmpty @trim
     emailVerified: Boolean @defaultValue(value: "false") @readOnly
     phone: Phone @uniqueOrEmpty
