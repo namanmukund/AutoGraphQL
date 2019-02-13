@@ -17,16 +17,11 @@ const uploadFileResolver = (root, params, authentication, context) => {
   const typeName = 'File';
   const modelMutations = new MutationController(typeName, authentication);
   const { filePayload: { action } } = context;
-  if (action === 'edit') {
-    const { filePayload: { data: { id, name, uri } } } = context;
-    return modelMutations.updateDocument(id, {
-      name,
-      uri,
-      updatedAt: new Date(),
-    });
-  }
-
   const { fileInput } = params;
+  if (action === 'edit') {
+    const { filePayload: { data: { id } } } = context;
+    return modelMutations.updateDocument(id, fileInput);
+  }
 
   const fileWithId = generateCuid(fileInput);
   Object.assign(fileWithId, { usageCount: 1 });
