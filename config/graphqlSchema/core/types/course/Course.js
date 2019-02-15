@@ -1,7 +1,7 @@
 const Course = `
   type Course @model {
     order: Int
-    title: CourseTitle!
+    title: CourseTitle! @unique
     category: CourseCategory!
     description: String @uniqueOrEmpty @length(min: 6, max: 120) @trim
     status: ContentStatus! @defaultValue(value: "unpublished")
