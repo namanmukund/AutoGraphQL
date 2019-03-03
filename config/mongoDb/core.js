@@ -23,7 +23,7 @@ const config = {
     database: {
       host: DATABASE_HOST,
       port: DATABASE_PORT,
-      db: MONGODB_URI || `mongodb://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}`,
+      db: 'mongodb://heroku_tkwxph83:b0rvud1cn60t8rh5fluijsl1op@ds141623.mlab.com:41623/heroku_tkwxph83?authSource=heroku_tkwxph83',
     },
   },
   staging: {

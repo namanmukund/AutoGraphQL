@@ -10,6 +10,7 @@ import LearningObjective from './learningObjective';
 import QuestionBank from './questionBank';
 import Message from './message';
 import Course from './course';
+import Dump from './dump';
 
 export default [
   ...User,
@@ -24,4 +25,5 @@ export default [
   ...LearningObjective,
   ...Message,
   ...Course,
+  ...Dump,
 ];
