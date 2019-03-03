@@ -7,6 +7,11 @@ const getNestedConnectMutationString = (relationFields, type, parsedASTMap) => {
     if (fieldName === historyFieldName) {
       return;
     }
+    const abc = parsedASTMap[type].field[fieldName];
+
+    if (fieldName === 'user' || fieldName === 'pqAttemptedQuestions') {
+      console.log(11111, abc);
+    }
     // if field type is array
     if (parsedASTMap[type].field[fieldName].type.isList) {
       connectMutationString += `${fieldName}${connectMutationsArgumentsSuffix.plural} : [ID], `;

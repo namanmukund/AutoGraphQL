@@ -49,6 +49,8 @@ const removeRelationMutationResolver = (
   typeName,
   relatedType,
   relationName,
+  typeField,
+  relatedTypeField,
   info,
   ast,
   authentication,
@@ -68,11 +70,11 @@ const removeRelationMutationResolver = (
   /* params are modified because in the arguments if we are passing code then
    modify that argument to its type id */
   return createModifiedParamsBasedOnParams(params, typeName, relatedType).then((modifiedParams) => {
-    const relationFieldAndIdObject =
+    const relationIdObject =
     getTypeAndRelatedTypesObjectFromConnectArguments(modifiedParams, typeName, relatedType);
-    const { typeField, relatedTypeField, typeId, relatedTypeId } = relationFieldAndIdObject;
+    const { typeId, relatedTypeId } = relationIdObject;
     // check if relation exists and if not then throw error
-    return isRelationBetweenTwoModelsOrNot(relationFieldAndIdObject,
+    return isRelationBetweenTwoModelsOrNot(relationIdObject,
       typeName).then(() => {
       // Fields which are requested.
       const { fieldName, fieldNodes } = info;

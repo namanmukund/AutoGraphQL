@@ -1,5 +1,5 @@
 // parses args and return argument Ids for both relatedTypes
-const getTypeAndRelatedTypesObjectFromConnectArguments = (args, typeName, relatedType) => {
+const getTypeAndRelatedTypesObjectFromConnectArguments = (args, typeName) => {
   const argumentKeys = Object.keys(args);
   // can have id, code, or addtnl relation fields args
   // find which argument is for type, and which for related
@@ -12,13 +12,11 @@ const getTypeAndRelatedTypesObjectFromConnectArguments = (args, typeName, relate
     typeArgumentIndex = 1;
     relatedTypeArgumentIndex = 0;
   }
-  // argument format:- ${relatedField}${typeName}Id
-  const relatedTypeField = argumentKeys[typeArgumentIndex].split(`${typeName}Id`)[0];
-  const typeField = argumentKeys[relatedTypeArgumentIndex].split(`${relatedType}Id`)[0];
+
   const typeId = args[argumentKeys[typeArgumentIndex]];
   const relatedTypeId = args[argumentKeys[relatedTypeArgumentIndex]];
 
-  const relationFieldAndIdObject = { typeId, relatedTypeId, typeField, relatedTypeField };
+  const relationFieldAndIdObject = { typeId, relatedTypeId };
   return relationFieldAndIdObject;
 };
 export { getTypeAndRelatedTypesObjectFromConnectArguments };

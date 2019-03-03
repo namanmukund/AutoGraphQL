@@ -91,15 +91,15 @@ const nestedAddToRemoveFromMutationString = (addRelationMutationName,
   if (relatedType.includes('History')) {
     return '';
   }
-  let typeNameString = typeName;
-  let relatedTypeString = relatedType;
-  // if one way relation then string 'field' is added instead of the field name which wont be found
-  if (relatedTypeField === '') {
-    typeNameString = `field${typeNameString}`;
-  }
-  if (fieldName === '') {
-    relatedTypeString = `field${relatedTypeString}`;
-  }
+  const typeNameString = camelCase(typeName);
+  const relatedTypeString = camelCase(relatedType);
+  // // if one way relation then string 'field' is added instead of the field name which wont be found
+  // if (relatedTypeField === '') {
+  //   typeNameString = `${camelCase(typeNameString)}`;
+  // }
+  // if (fieldName === '') {
+  //   relatedTypeString = `${camelCase(relatedTypeString)}`;
+  // }
   /* If the field is present in the modal and related modal also */
   const typeNameHasCodeField = hasField(typeName, fieldNameToBeChecked);
   const relatedTypeHasCodeField = hasField(relatedType, fieldNameToBeChecked);
@@ -107,8 +107,8 @@ const nestedAddToRemoveFromMutationString = (addRelationMutationName,
     fieldName, relatedTypeField, typeName, relatedType);
   additionalRelationFieldsArguments = additionalRelationFieldsArguments || '';
   let string;
-  string = `${addRelationMutationName} (${relatedTypeField}${typeNameString}Id: ID${toAddCodeField(relatedTypeField, typeNameString, typeNameHasCodeField)}, ${fieldName}${relatedTypeString}Id: ID${toAddCodeField(fieldName, relatedTypeString, relatedTypeHasCodeField)} ${additionalRelationFieldsArguments} ${saveHistoryArgument}):${relationPayload}, `;
-  string += `${removeRelationMutationName} (${relatedTypeField}${typeNameString}Id: ID${toAddCodeField(relatedTypeField, typeNameString, typeNameHasCodeField)}, ${fieldName}${relatedTypeString}Id: ID${toAddCodeField(fieldName, relatedTypeString, relatedTypeHasCodeField)} ${saveHistoryArgument}):${relationPayload}, `;
+  string = `${addRelationMutationName} (${typeNameString}Id: ID${toAddCodeField(relatedTypeField, typeNameString, typeNameHasCodeField)}, ${relatedTypeString}Id: ID${toAddCodeField(fieldName, relatedTypeString, relatedTypeHasCodeField)} ${additionalRelationFieldsArguments} ${saveHistoryArgument}):${relationPayload}, `;
+  string += `${removeRelationMutationName} (${typeNameString}Id: ID${toAddCodeField(relatedTypeField, typeNameString, typeNameHasCodeField)}, ${relatedTypeString}Id: ID${toAddCodeField(fieldName, relatedTypeString, relatedTypeHasCodeField)} ${saveHistoryArgument}):${relationPayload}, `;
   return string;
 };
 
@@ -117,17 +117,17 @@ const nestedAddToRemoveFromMutationString = (addRelationMutationName,
 const makeRelationTypePayload = (typeName, fieldName = '', relatedType,
   relatedTypeField = '', relationPayload) => {
   // make camel case for mobile app
-  let typeNameString = typeName;
-  let relatedTypeString = relatedType;
-  if (relatedTypeField === '') {
-    typeNameString = `field${typeNameString}`;
-  }
-  if (fieldName === '') {
-    relatedTypeString = `field${relatedTypeString}`;
-  }
+  const typeNameString = camelCase(typeName);
+  const relatedTypeString = camelCase(relatedType);
+  // if (relatedTypeField === '') {
+  //   typeNameString = `field${typeNameString}`;
+  // }
+  // if (fieldName === '') {
+  //   relatedTypeString = `field${relatedTypeString}`;
+  // }
   const relationType = `type ${relationPayload}{
-    ${relatedTypeField}${typeNameString}: ${typeName},
-    ${fieldName}${relatedTypeString}: ${relatedType}
+    ${typeNameString}: ${typeName},
+    ${relatedTypeString}: ${relatedType}
   }`;
   return relationType;
 };

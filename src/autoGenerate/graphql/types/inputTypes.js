@@ -27,6 +27,9 @@ const fileConnectedTypeEnumArray = [];
 const fileConnectedTypeFieldEnumArray = [];
 // Walk through AST map
 Object.keys(parsedASTMap).forEach((type) => {
+  if (type === 'UserActivityDump') {
+    console.log('type.....', type);
+  }
   const definition = parsedASTMap[type];
   const { name, field, directives } = definition;
   const isModel = directives && hasDirective(directives, 'model');

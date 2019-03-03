@@ -2,8 +2,14 @@ import { getRelatedFieldName } from './getRelatedFieldName';
 import { prehook } from '../../../hooks';
 import { isErrorThrown } from '../../../../../../utils';
 
-const callConnectMutationPreHook = async (updateRecordId, relationObjectMap,
-  finalInput, mutationType, ast, context) => {
+const callConnectMutationPreHook = async (
+  updateRecordId,
+  relationObjectMap,
+  finalInput,
+  mutationType,
+  ast,
+  context,
+) => {
   // data will contain the 2 arguments which are used in addTo api
   const {
     type: relatedTypeName,
