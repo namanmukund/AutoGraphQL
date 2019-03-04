@@ -2,12 +2,9 @@ import pluralize from 'pluralize';
 import { camelCase } from 'lodash';
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import { genericFilterQueryToGetIds } from '../../../../../api/queries';
-import { QueryController, MutationController } from '../../../controllers';
-import {
-  remoteConnectDisconnectRelationHandler,
-  updateAndIncreaseUsageCountInFile,
-} from '../utils';
-import { getFieldsBeingFetched, getDirectiveArgumentValue } from '../../../../utils';
+import { MutationController, QueryController } from '../../../controllers';
+import { remoteConnectDisconnectRelationHandler, updateAndIncreaseUsageCountInFile } from '../utils';
+import { getDirectiveArgumentValue, getFieldsBeingFetched } from '../../../../utils';
 import { relationDirections } from '../../../../../../constants';
 import { ConnectionAlreadyExistError } from '../../../../../../constants/errors';
 import { removeConnectionFromType } from '../delete/removeRelation';
@@ -227,7 +224,8 @@ const addRelationMutationResolver = (
                 });
               }
             }
-            const returnObject = getReturnObjectForConnectMutation(
+
+            return getReturnObjectForConnectMutation(
               values,
               typeNameString,
               typeField,
@@ -236,7 +234,6 @@ const addRelationMutationResolver = (
               relatedTypeField,
               relatedTypeId,
             );
-            return returnObject;
           });
         });
     }).catch((err) => {

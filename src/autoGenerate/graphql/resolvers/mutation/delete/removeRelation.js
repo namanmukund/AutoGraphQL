@@ -1,9 +1,7 @@
-import { get, camelCase } from 'lodash';
-import { QueryController, MutationController } from '../../../controllers';
-import {
-  remoteConnectDisconnectRelationHandler,
-} from '../utils';
-import { getFieldsBeingFetched, getDirectiveArgumentValue, hasDirective } from '../../../../utils';
+import { camelCase, get } from 'lodash';
+import { MutationController, QueryController } from '../../../controllers';
+import { remoteConnectDisconnectRelationHandler } from '../utils';
+import { getDirectiveArgumentValue, getFieldsBeingFetched, hasDirective } from '../../../../utils';
 import { relationDirections } from '../../../../../../constants';
 import { ConnectMutationsArgumentsLimitError } from '../../../../../../constants/errors';
 import updateAndDecreaseUsageCountInFile from '../utils/updateAndDecreaseUsageCountInFile';
@@ -144,9 +142,16 @@ const removeRelationMutationResolver = (
             }
           }
         }
-        const returnObject = getReturnObjectForConnectMutation(values, typeName, typeField, typeId,
-          relatedType, relatedTypeField, relatedTypeId);
-        return returnObject;
+
+        return getReturnObjectForConnectMutation(
+          values,
+          typeNameString,
+          typeField,
+          typeId,
+          relatedTypeString,
+          relatedTypeField,
+          relatedTypeId,
+        );
       });
     });
   }).catch((err) => {
