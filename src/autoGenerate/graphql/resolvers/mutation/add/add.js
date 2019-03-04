@@ -140,69 +140,81 @@ const localAddMutationPromise = async (
   create relation document & return relation type object */
   if ((relationFieldsArray && relationFieldsArray.length) ||
     Object.keys(connectInputFieldsMap).length) {
-    const promiseArray = createAndReturnRelationObjectsPromiseArray(relationFieldsArray,
-      typeName, ast, authentication, context);
+    const promiseArray = createAndReturnRelationObjectsPromiseArray(
+      relationFieldsArray,
+      typeName,
+      ast,
+      authentication,
+      context,
+    );
     // processes promise array and return final input
+    /*
+    inputMap: {
+    "finalInput": {
+      "type": "video",
+      "learningObjective": {
+        "type": "LearningObjective",
+        "typeId": "cjst9qqpb0001gcrunbi90iot"
+      },
+      "currentVideoTime": 19000,
+      "id": "cjst9lcnt0000gcruxuo2g9te",
+      "user": {
+        "type": "User",
+        "typeId": "cjj0zpybo00001f0ckk9zrpxr"
+      },
+      "topic": {
+        "type": "Topic",
+        "typeId": "cjss0o4wo00011h03blrjmn2p"
+      }
+    },
+    "allRelationObjectsArray1to1": [
+      {
+        "type": "LearningObjective",
+        "recordType": "UserActivityDump",
+        "typeId": "cjst9qqpb0001gcrunbi90iot",
+        "field": "learningObjective",
+        "relationName": "LearningObjectiveDump",
+        "additionalRelationFieldsObject": {}
+      },
+      {
+        "type": "User",
+        "recordType": "UserActivityDump",
+        "typeId": "cjj0zpybo00001f0ckk9zrpxr",
+        "field": "user",
+        "relationName": "UserDump"
+      },
+      {
+        "type": "Topic",
+        "recordType": "UserActivityDump",
+        "typeId": "cjss0o4wo00011h03blrjmn2p",
+        "field": "topic",
+        "relationName": "TopicDump"
+      }
+    ],
+    "allRelationObjectsArray1toM": [],
+    "allSavedRelationRecords": [
+      {
+        "type": "LearningObjective",
+        "recordType": "UserActivityDump",
+        "typeId": "cjst9qqpb0001gcrunbi90iot",
+        "field": "learningObjective",
+        "relationName": "LearningObjectiveDump",
+        "additionalRelationFieldsObject": {}
+      }
+    ]
+    }
+     */
     let inputMap;
     try {
-      /*
-     inputMap: {
-      "finalInput": {
-        "type": "video",
-        "learningObjective": {
-          "type": "LearningObjective",
-          "typeId": "cjst9qqpb0001gcrunbi90iot"
-        },
-        "currentVideoTime": 19000,
-        "id": "cjst9lcnt0000gcruxuo2g9te",
-        "user": {
-          "type": "User",
-          "typeId": "cjj0zpybo00001f0ckk9zrpxr"
-        },
-        "topic": {
-          "type": "Topic",
-          "typeId": "cjss0o4wo00011h03blrjmn2p"
-        }
-      },
-      "allRelationObjectsArray1to1": [
-        {
-          "type": "LearningObjective",
-          "recordType": "UserActivityDump",
-          "typeId": "cjst9qqpb0001gcrunbi90iot",
-          "field": "learningObjective",
-          "relationName": "LearningObjectiveDump",
-          "additionalRelationFieldsObject": {}
-        },
-        {
-          "type": "User",
-          "recordType": "UserActivityDump",
-          "typeId": "cjj0zpybo00001f0ckk9zrpxr",
-          "field": "user",
-          "relationName": "UserDump"
-        },
-        {
-          "type": "Topic",
-          "recordType": "UserActivityDump",
-          "typeId": "cjss0o4wo00011h03blrjmn2p",
-          "field": "topic",
-          "relationName": "TopicDump"
-        }
-      ],
-      "allRelationObjectsArray1toM": [],
-      "allSavedRelationRecords": [
-        {
-          "type": "LearningObjective",
-          "recordType": "UserActivityDump",
-          "typeId": "cjst9qqpb0001gcrunbi90iot",
-          "field": "learningObjective",
-          "relationName": "LearningObjectiveDump",
-          "additionalRelationFieldsObject": {}
-        }
-      ]
-    }
-       */
-      inputMap = await processRelationInputFields(promiseArray,
-        typeName, input, ast, connectInputFieldsMap, null, authentication);
+      inputMap = await processRelationInputFields(
+        promiseArray,
+        typeName,
+        input,
+        ast,
+        connectInputFieldsMap,
+        null,
+        authentication,
+      );
       // if error return error
       if (isErrorThrown(inputMap)) {
         return inputMap;
@@ -212,10 +224,19 @@ const localAddMutationPromise = async (
     }
     // call connection prehooks for all relations added in the record
     const mutationType = 'add';
-    await callPrehooksForRelationsAddedInRecord(inputMap, input.id,
-      mutationType, ast, context);
-    const { finalInput, allRelationObjectsArray1to1,
-      allRelationObjectsArray1toM, allSavedRelationRecords } = inputMap;
+    await callPrehooksForRelationsAddedInRecord(
+      inputMap,
+      input.id,
+      mutationType,
+      ast,
+      context,
+    );
+    const {
+      finalInput,
+      allRelationObjectsArray1to1,
+      allRelationObjectsArray1toM,
+      allSavedRelationRecords,
+    } = inputMap;
     return modelMutations.addDocument(finalInput)
       .then((savedRecord) => {
         /*
@@ -253,14 +274,18 @@ const localAddMutationPromise = async (
             }
          */
         allSavedRelationRecords.push(savedObject);
-        return saveRecordReferenceInRelatedObjects(allRelationObjectsArray1to1,
+        return saveRecordReferenceInRelatedObjects(
+          allRelationObjectsArray1to1,
           allRelationObjectsArray1toM,
           savedRecord,
           ast,
           authentication,
         ).then(() => savedRecord);
       }).catch((err) => {
-        rollBackDocumentSaves(allSavedRelationRecords, authentication);
+        rollBackDocumentSaves(
+          allSavedRelationRecords,
+          authentication,
+        );
         return err;
       });
   }

@@ -91,26 +91,47 @@ const localUpdateMutationPromise = async (
  create relation document & return relation type object */
   if ((relationFieldsArray && relationFieldsArray.length) ||
     Object.keys(connectInputFieldsMap).length) {
-    const promiseArray = createAndReturnRelationObjectsPromiseArray(relationFieldsArray,
-      typeName, ast, authentication, context);
+    const promiseArray = createAndReturnRelationObjectsPromiseArray(
+      relationFieldsArray,
+      typeName,
+      ast,
+      authentication,
+      context,
+    );
     // get array of relation field names
     const relationFieldNamesArray = relationFieldsArray.map(obj => obj.fieldName);
     Object.keys(connectInputFieldsMap).forEach((field) => {
       relationFieldNamesArray.push(field);
     });
     // processes promise array and return final input
-    const inputMap = await processRelationInputFields(promiseArray,
-      typeName, input, ast, connectInputFieldsMap, id, authentication);
+    const inputMap = await processRelationInputFields(
+      promiseArray,
+      typeName,
+      input,
+      ast,
+      connectInputFieldsMap,
+      id,
+      authentication,
+    );
 
     if (isErrorThrown(inputMap)) {
       throw inputMap;
     }
-    const { allRelationObjectsArray1to1,
-      allRelationObjectsArray1toM, allSavedRelationRecords } = inputMap;
+    const {
+      allRelationObjectsArray1to1,
+      allRelationObjectsArray1toM,
+      allSavedRelationRecords,
+    } = inputMap;
     let finalInput = inputMap.finalInput;
     // call connect prehooks for all relations added to the record
     const mutationType = 'update';
-    await callPrehooksForRelationsAddedInRecord(inputMap, id, mutationType, ast, context);
+    await callPrehooksForRelationsAddedInRecord(
+      inputMap,
+      id,
+      mutationType,
+      ast,
+      context,
+    );
 
     // handle additional relation fields sent in input
     const additionalFieldsToUpdateObject =
@@ -120,28 +141,55 @@ const localUpdateMutationPromise = async (
     // update final input etc.
     finalInput = additionalFieldsToUpdateObject.finalInput;
     // add array input fields
-    let arrayFieldsArray = getArrayFieldsFromDocumentInput(finalInput, ast, typeName);
-    arrayFieldsArray = [...arrayFieldsArray,
-      ...arrayAdditionalFields];
+    let arrayFieldsArray = getArrayFieldsFromDocumentInput(
+      finalInput,
+      ast,
+      typeName,
+    );
+    arrayFieldsArray = [
+      ...arrayFieldsArray,
+      ...arrayAdditionalFields,
+    ];
     return modelMutations
-      .updateDocument(id, finalInput, relationFieldNamesArray,
-        relationAdditionalFieldsArray, arrayFieldsArray, historyObject)
-      .then(savedRecord => saveRecordReferenceInRelatedObjects(allRelationObjectsArray1to1,
+      .updateDocument(
+        id,
+        finalInput,
+        relationFieldNamesArray,
+        relationAdditionalFieldsArray,
+        arrayFieldsArray,
+        historyObject,
+      )
+      .then(savedRecord => saveRecordReferenceInRelatedObjects(
+        allRelationObjectsArray1to1,
         allRelationObjectsArray1toM,
         savedRecord,
         ast,
         authentication,
       ).then(() => savedRecord)).catch((err) => {
-        rollBackDocumentSaves(allSavedRelationRecords, authentication);
+        rollBackDocumentSaves(
+          allSavedRelationRecords,
+          authentication,
+        );
         return err;
       });
   }
-  const { finalInput, relationAdditionalFieldsArray, arrayAdditionalFields = [] } =
-    handleAdditionalFieldsToUpdate(input, ast, typeName);
-  const arrayFieldsArray = [...getArrayFieldsFromDocumentInput(finalInput, ast, typeName),
-    ...arrayAdditionalFields];
-  return modelMutations.updateDocument(id,
-    finalInput, [], relationAdditionalFieldsArray, arrayFieldsArray, historyObject);
+  const {
+    finalInput,
+    relationAdditionalFieldsArray,
+    arrayAdditionalFields = [],
+  } = handleAdditionalFieldsToUpdate(input, ast, typeName);
+  const arrayFieldsArray = [
+    ...getArrayFieldsFromDocumentInput(finalInput, ast, typeName),
+    ...arrayAdditionalFields,
+  ];
+  return modelMutations.updateDocument(
+    id,
+    finalInput,
+    [],
+    relationAdditionalFieldsArray,
+    arrayFieldsArray,
+    historyObject,
+  );
 };
 
 

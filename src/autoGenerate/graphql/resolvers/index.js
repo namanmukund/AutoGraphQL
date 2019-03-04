@@ -280,7 +280,12 @@ Object.keys(parsedASTMap).forEach((type) => {
               authentication,
             ).then((result) => {
               const newResult = toObject(result);
-
+              Object.assign(newResult, {
+                typeName,
+                fieldName: typeField,
+                connectedTypeName: relatedType,
+                connectedFieldName: relatedTypeField,
+              });
               return posthook(newResult, addRelationMutationName);
             });
           },
@@ -306,8 +311,13 @@ Object.keys(parsedASTMap).forEach((type) => {
               parsedASTMap,
               authentication,
             ).then((result) => {
-              console.log(33333333, result);
               const newResult = toObject(result);
+              Object.assign(newResult, {
+                typeName,
+                fieldName: typeField,
+                connectedTypeName: relatedType,
+                connectedFieldName: relatedTypeField,
+              });
 
               return posthook(newResult, removeRelationMutationName);
             });

@@ -1,4 +1,4 @@
-import { getRelatedFieldName } from './getRelatedFieldName';
+import { camelCase } from 'lodash';
 import { prehook } from '../../../hooks';
 import { isErrorThrown } from '../../../../../../utils';
 
@@ -15,15 +15,12 @@ const callConnectMutationPreHook = async (
     type: relatedTypeName,
     recordType: typeName,
     typeId: idToConnect,
-    field,
     relationName,
   } = relationObjectMap;
 
   const data = {};
-  const relatedFieldName = getRelatedFieldName(ast[relatedTypeName].relationFields,
-    relationName);
-  const relationFieldType = `${relatedFieldName}${typeName}Id`;
-  const relatedRelationFieldName = `${field}${relatedTypeName}Id`;
+  const relationFieldType = `${camelCase(typeName)}Id`;
+  const relatedRelationFieldName = `${camelCase(relatedTypeName)}Id`;
   data[relationFieldType] = updateRecordId;
   data[relatedRelationFieldName] = idToConnect;
 

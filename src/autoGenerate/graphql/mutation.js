@@ -93,13 +93,6 @@ const nestedAddToRemoveFromMutationString = (addRelationMutationName,
   }
   const typeNameString = camelCase(typeName);
   const relatedTypeString = camelCase(relatedType);
-  // // if one way relation then string 'field' is added instead of the field name which wont be found
-  // if (relatedTypeField === '') {
-  //   typeNameString = `${camelCase(typeNameString)}`;
-  // }
-  // if (fieldName === '') {
-  //   relatedTypeString = `${camelCase(relatedTypeString)}`;
-  // }
   /* If the field is present in the modal and related modal also */
   const typeNameHasCodeField = hasField(typeName, fieldNameToBeChecked);
   const relatedTypeHasCodeField = hasField(relatedType, fieldNameToBeChecked);
@@ -114,22 +107,22 @@ const nestedAddToRemoveFromMutationString = (addRelationMutationName,
 
 // make graphql types for connect mutations,
 // payload is used when multiple types are appended in one type(for connect mutations)
-const makeRelationTypePayload = (typeName, fieldName = '', relatedType,
-  relatedTypeField = '', relationPayload) => {
+const makeRelationTypePayload = (
+  typeName,
+  relatedType,
+  relationPayload,
+) => {
   // make camel case for mobile app
   const typeNameString = camelCase(typeName);
   const relatedTypeString = camelCase(relatedType);
-  // if (relatedTypeField === '') {
-  //   typeNameString = `field${typeNameString}`;
-  // }
-  // if (fieldName === '') {
-  //   relatedTypeString = `field${relatedTypeString}`;
-  // }
-  const relationType = `type ${relationPayload}{
+  return `type ${relationPayload}{
+     typeName: String,
     ${typeNameString}: ${typeName},
-    ${relatedTypeString}: ${relatedType}
+    fieldName: String,
+    connectedTypeName: String,
+    ${relatedTypeString}: ${relatedType},
+     connectedFieldName: String
   }`;
-  return relationType;
 };
 
 Object.keys(parsedASTMap).forEach((type) => {
