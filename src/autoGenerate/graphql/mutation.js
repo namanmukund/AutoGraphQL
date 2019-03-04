@@ -195,8 +195,11 @@ Object.keys(parsedASTMap).forEach((type) => {
       const removeRelationMutationName = relationMutationNames.removeFromRelationMutation;
       // graphql type which has both the related types
       const relationPayload = getRelationPayloadName(relationName);
-      const relationType = makeRelationTypePayload(typeName, fieldName, relatedType,
-        relatedTypeField, relationPayload);
+      const relationType = makeRelationTypePayload(
+        typeName,
+        relatedType,
+        relationPayload,
+      );
       // push type to relation types array
       relationTypes.push(relationType);
       // check that the field code is present in the modal and its related modal
