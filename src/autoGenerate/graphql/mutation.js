@@ -134,7 +134,7 @@ Object.keys(parsedASTMap).forEach((type) => {
   if (isModel) {
     const modelInputTypeName = `${typeName}Input`;
     const modelUpdateTypeName = `${typeName}Update`;
-    const pluralTypeName = camelCase(pluralize(typeName));
+    const pluralTypeName = pluralize(typeName);
     const modelUpdateAllTypeName = `${pluralTypeName}Update`;
     const isVersionModelToBeMade = hasDirective(directives, 'history');
     // add save history arg for models where history is to be made
