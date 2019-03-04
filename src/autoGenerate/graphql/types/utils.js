@@ -2,10 +2,19 @@ import { without, upperFirst, has, get } from 'lodash';
 import pluralize from 'pluralize';
 
 // returns type string of a field
-const getFieldTypeString = (fieldName, fieldType, isFieldList,
-  isObjectTypeField, isRelationField, isRequiredField,
-  hasDefaultDirective, hasAutoDirective, isUpdateType, isAdditionalField,
-  graphqlArrayTypeObject = {}) => {
+const getFieldTypeString = (
+  fieldName,
+  fieldType,
+  isFieldList,
+  isObjectTypeField,
+  isRelationField,
+  isRequiredField,
+  hasDefaultDirective,
+  hasAutoDirective,
+  isUpdateType,
+  isAdditionalField,
+  graphqlArrayTypeObject = {},
+) => {
   let fieldTypeString;
   // Check if array type and updateType but not relation
   if (isFieldList && isUpdateType && !isRelationField) {

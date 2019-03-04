@@ -24,7 +24,10 @@ const relationTypes = [];
 const getRelationPayloadName = relationName => `${relationName}Payload`;
 
 /* Check if the fieldName is present in the modal or not */
-const hasField = (typeName, fieldName) => {
+const hasField = (
+  typeName,
+  fieldName,
+) => {
   // checking whether the field is present in the model
   if (parsedASTMap[typeName].field[fieldName]) {
     return true;
@@ -33,7 +36,11 @@ const hasField = (typeName, fieldName) => {
 };
 /* This function is checking if the condition that code field is present in
 the modal then adding the code argument for that else making its id argument mandatory */
-const toAddCodeField = (fieldName, typeName, condition) => {
+const toAddCodeField = (
+  fieldName,
+  typeName,
+  condition,
+) => {
   if (condition) {
     return `, ${fieldName}${typeName}Code: String`;
   }
@@ -44,28 +51,53 @@ const toAddCodeField = (fieldName, typeName, condition) => {
 or not */
 
 const getAdditionalRelationFieldsIfPresent = (field, type) => {
-  const additionalRelationFields = getDirectiveArgumentValue(parsedASTMap, type, field, 'relation', 'fields');
+  const additionalRelationFields = getDirectiveArgumentValue(
+    parsedASTMap,
+    type,
+    field,
+    'relation',
+    'fields',
+  );
   if (!additionalRelationFields) {
     return null;
   }
   return additionalRelationFields;
 };
 
-const appendToadditionalRelationFieldsArgumentsString = (fieldName, typeName,
-  argumentString, relatedField, relatedType) => {
-  const relationName = getDirectiveArgumentValue(parsedASTMap, relatedType,
-    fieldName, 'relation', 'name');
+const appendToadditionalRelationFieldsArgumentsString = (
+  fieldName,
+  typeName,
+  argumentString,
+  relatedField,
+  relatedType,
+) => {
+  const relationName = getDirectiveArgumentValue(
+    parsedASTMap,
+    relatedType,
+    fieldName,
+    'relation',
+    'name',
+  );
   let additionalRelationFieldsArgumentString = argumentString;
   additionalRelationFieldsArgumentString += `, ${fieldName}${typeName}Fields: ${relatedType}_${relationName}Input`;
   return additionalRelationFieldsArgumentString;
 };
 
-const getAdditionalRelationFieldsArguments = (fieldName, relatedTypeField,
-  typeName, relatedType) => {
+const getAdditionalRelationFieldsArguments = (
+  fieldName,
+  relatedTypeField,
+  typeName,
+  relatedType,
+) => {
   let additionalRelationFieldsArgumentsString = '';
-  const additionalRelationFields = getAdditionalRelationFieldsIfPresent(fieldName, typeName);
+  const additionalRelationFields = getAdditionalRelationFieldsIfPresent(
+    fieldName,
+    typeName,
+  );
   const additionalRelationFieldsInRelatedField = getAdditionalRelationFieldsIfPresent(
-    relatedTypeField, relatedType);
+    relatedTypeField,
+    relatedType,
+  );
   if (!additionalRelationFields && !additionalRelationFieldsInRelatedField) {
     return null;
   }
@@ -73,31 +105,57 @@ const getAdditionalRelationFieldsArguments = (fieldName, relatedTypeField,
   if (additionalRelationFields) {
     // send field and the type of field in arguments
     additionalRelationFieldsArgumentsString = appendToadditionalRelationFieldsArgumentsString(
-      fieldName, relatedType, additionalRelationFieldsArgumentsString, relatedTypeField,
-      typeName);
+      fieldName,
+      relatedType,
+      additionalRelationFieldsArgumentsString,
+      relatedTypeField,
+      typeName,
+    );
   }
   // append related additional fields
   if (additionalRelationFieldsInRelatedField) {
     additionalRelationFieldsArgumentsString = appendToadditionalRelationFieldsArgumentsString(
-      relatedTypeField, typeName, additionalRelationFieldsArgumentsString, fieldName,
-      relatedType);
+      relatedTypeField,
+      typeName,
+      additionalRelationFieldsArgumentsString,
+      fieldName,
+      relatedType,
+    );
   }
   return additionalRelationFieldsArgumentsString;
 };
 
-const nestedAddToRemoveFromMutationString = (addRelationMutationName,
-  removeRelationMutationName, relatedTypeField = '', typeName, fieldName = '', relatedType,
-  relationPayload, fieldNameToBeChecked, saveHistoryArgument) => {
+const nestedAddToRemoveFromMutationString = (
+  addRelationMutationName,
+  removeRelationMutationName,
+  relatedTypeField = '',
+  typeName,
+  fieldName = '',
+  relatedType,
+  relationPayload,
+  fieldNameToBeChecked,
+  saveHistoryArgument,
+) => {
   if (relatedType.includes('History')) {
     return '';
   }
   const typeNameString = camelCase(typeName);
   const relatedTypeString = camelCase(relatedType);
   /* If the field is present in the modal and related modal also */
-  const typeNameHasCodeField = hasField(typeName, fieldNameToBeChecked);
-  const relatedTypeHasCodeField = hasField(relatedType, fieldNameToBeChecked);
+  const typeNameHasCodeField = hasField(
+    typeName,
+    fieldNameToBeChecked,
+  );
+  const relatedTypeHasCodeField = hasField(
+    relatedType,
+    fieldNameToBeChecked,
+  );
   let additionalRelationFieldsArguments = getAdditionalRelationFieldsArguments(
-    fieldName, relatedTypeField, typeName, relatedType);
+    fieldName,
+    relatedTypeField,
+    typeName,
+    relatedType,
+  );
   additionalRelationFieldsArguments = additionalRelationFieldsArguments || '';
   let string;
   string = `${addRelationMutationName} (${typeNameString}Id: ID${toAddCodeField(relatedTypeField, typeNameString, typeNameHasCodeField)}, ${relatedTypeString}Id: ID${toAddCodeField(fieldName, relatedTypeString, relatedTypeHasCodeField)} ${additionalRelationFieldsArguments} ${saveHistoryArgument}):${relationPayload}, `;
@@ -129,7 +187,9 @@ Object.keys(parsedASTMap).forEach((type) => {
   const definition = parsedASTMap[type];
   const { name, field, directives } = definition;
   const typeName = name.value;
-
+  if (typeName === 'UserActivityDump') {
+    console.log('------------------------------------typeName', typeName);
+  }
   const isModel = directives && hasDirective(directives, 'model');
   if (isModel) {
     const modelInputTypeName = `${typeName}Input`;
@@ -182,10 +242,16 @@ Object.keys(parsedASTMap).forEach((type) => {
       const relatedType = field[fieldName].type.dataType;
 
       // get related type's related Field
-      const relatedTypeField = findFieldWithTheRelation(relatedType, relationName,
-        parsedASTMap, fieldName);
-      const isFieldValid = validateFieldToAddForConnectMutationGeneration(fieldName,
-        relatedTypeField);
+      const relatedTypeField = findFieldWithTheRelation(
+        relatedType,
+        relationName,
+        parsedASTMap,
+        fieldName,
+      );
+      const isFieldValid = validateFieldToAddForConnectMutationGeneration(
+        fieldName,
+        relatedTypeField,
+      );
       if (!isFieldValid) {
         return null;
       }
@@ -203,9 +269,17 @@ Object.keys(parsedASTMap).forEach((type) => {
       // push type to relation types array
       relationTypes.push(relationType);
       // check that the field code is present in the modal and its related modal
-      mutationString += nestedAddToRemoveFromMutationString(addRelationMutationName,
-        removeRelationMutationName, relatedTypeField, typeName, fieldName, relatedType,
-        relationPayload, 'code', saveHistoryArgumentString);
+      mutationString += nestedAddToRemoveFromMutationString(
+        addRelationMutationName,
+        removeRelationMutationName,
+        relatedTypeField,
+        typeName,
+        fieldName,
+        relatedType,
+        relationPayload,
+        'code',
+        saveHistoryArgumentString,
+      );
       // push relation name to array
       relationsAddedInMutation.push(relationName);
       return null;
