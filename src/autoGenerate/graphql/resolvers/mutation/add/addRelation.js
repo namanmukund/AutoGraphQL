@@ -2,12 +2,9 @@ import pluralize from 'pluralize';
 import { camelCase } from 'lodash';
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import { genericFilterQueryToGetIds } from '../../../../../api/queries';
-import { QueryController, MutationController } from '../../../controllers';
-import {
-  remoteConnectDisconnectRelationHandler,
-  updateAndIncreaseUsageCountInFile,
-} from '../utils';
-import { getFieldsBeingFetched, getDirectiveArgumentValue } from '../../../../utils';
+import { MutationController, QueryController } from '../../../controllers';
+import { remoteConnectDisconnectRelationHandler, updateAndIncreaseUsageCountInFile } from '../utils';
+import { getDirectiveArgumentValue, getFieldsBeingFetched } from '../../../../utils';
 import { relationDirections } from '../../../../../../constants';
 import { ConnectionAlreadyExistError } from '../../../../../../constants/errors';
 import { removeConnectionFromType } from '../delete/removeRelation';
@@ -95,8 +92,8 @@ export const getAdditionalRelationFieldsFromConnectArgs = (field, type, params) 
 
 /* return true if the id is present with which you want to create the connection
 else return false */
-const isConnectionAlreadyPresentBetweenModels = (relationObject, typeName) => {
-  const { typeField, typeId, relatedTypeId } = relationObject;
+const isConnectionAlreadyPresentBetweenModels = (relationObject, typeName, typeField) => {
+  const { typeId, relatedTypeId } = relationObject;
   const modelPlural = camelCase(pluralize(typeName));
   const typeFilterQuery = genericFilterQueryToGetIds(modelPlural, typeField, relatedTypeId);
   return callGraphqlApi(typeFilterQuery).then((res) => {
@@ -111,21 +108,28 @@ const addRelationMutationResolver = (
   typeName,
   relatedType,
   relationName,
+  typeField,
+  relatedTypeField,
   info,
   ast,
   authentication,
 ) => {
   const inputParams = params;
   const { history } = params;
+  const typeNameString = camelCase(typeName);
+  const relatedTypeString = camelCase(relatedType);
   /* params are modified because in the arguments if we are passing code then
    modify that argument to its type id */
-  return createModifiedParamsBasedOnParams(inputParams, typeName, relatedType)
+  return createModifiedParamsBasedOnParams(inputParams, typeNameString, relatedTypeString)
     .then((modifiedParams) => {
-      const relationFieldAndIdObject =
-    getTypeAndRelatedTypesObjectFromConnectArguments(modifiedParams, typeName, relatedType);
-      const { typeField, relatedTypeField, typeId, relatedTypeId } = relationFieldAndIdObject;
+      const relationIdObject = getTypeAndRelatedTypesObjectFromConnectArguments(
+        modifiedParams,
+        typeNameString,
+      );
+
+      const { typeId, relatedTypeId } = relationIdObject;
       // to know if the connection ids already exist then throw error
-      return isConnectionAlreadyPresentBetweenModels(relationFieldAndIdObject, typeName)
+      return isConnectionAlreadyPresentBetweenModels(relationIdObject, typeName, typeField)
         .then(async (relationExistOrNot) => {
           if (relationExistOrNot) {
             throw new ConnectionAlreadyExistError({
@@ -165,6 +169,7 @@ const addRelationMutationResolver = (
             relatedType, params);
           const additionalRelationFieldsInRelated = getAdditionalRelationFieldsFromConnectArgs(
             relatedTypeField, typeName, params);
+
           // If typeField is local field
           const promiseArray = [];
           // remove connection from Type
@@ -219,9 +224,16 @@ const addRelationMutationResolver = (
                 });
               }
             }
-            const returnObject = getReturnObjectForConnectMutation(
-              values, typeName, typeField, typeId, relatedType, relatedTypeField, relatedTypeId);
-            return returnObject;
+
+            return getReturnObjectForConnectMutation(
+              values,
+              typeNameString,
+              typeField,
+              typeId,
+              relatedTypeString,
+              relatedTypeField,
+              relatedTypeId,
+            );
           });
         });
     }).catch((err) => {

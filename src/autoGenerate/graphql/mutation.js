@@ -91,15 +91,8 @@ const nestedAddToRemoveFromMutationString = (addRelationMutationName,
   if (relatedType.includes('History')) {
     return '';
   }
-  let typeNameString = typeName;
-  let relatedTypeString = relatedType;
-  // if one way relation then string 'field' is added instead of the field name which wont be found
-  if (relatedTypeField === '') {
-    typeNameString = `field${typeNameString}`;
-  }
-  if (fieldName === '') {
-    relatedTypeString = `field${relatedTypeString}`;
-  }
+  const typeNameString = camelCase(typeName);
+  const relatedTypeString = camelCase(relatedType);
   /* If the field is present in the modal and related modal also */
   const typeNameHasCodeField = hasField(typeName, fieldNameToBeChecked);
   const relatedTypeHasCodeField = hasField(relatedType, fieldNameToBeChecked);
@@ -107,29 +100,29 @@ const nestedAddToRemoveFromMutationString = (addRelationMutationName,
     fieldName, relatedTypeField, typeName, relatedType);
   additionalRelationFieldsArguments = additionalRelationFieldsArguments || '';
   let string;
-  string = `${addRelationMutationName} (${relatedTypeField}${typeNameString}Id: ID${toAddCodeField(relatedTypeField, typeNameString, typeNameHasCodeField)}, ${fieldName}${relatedTypeString}Id: ID${toAddCodeField(fieldName, relatedTypeString, relatedTypeHasCodeField)} ${additionalRelationFieldsArguments} ${saveHistoryArgument}):${relationPayload}, `;
-  string += `${removeRelationMutationName} (${relatedTypeField}${typeNameString}Id: ID${toAddCodeField(relatedTypeField, typeNameString, typeNameHasCodeField)}, ${fieldName}${relatedTypeString}Id: ID${toAddCodeField(fieldName, relatedTypeString, relatedTypeHasCodeField)} ${saveHistoryArgument}):${relationPayload}, `;
+  string = `${addRelationMutationName} (${typeNameString}Id: ID${toAddCodeField(relatedTypeField, typeNameString, typeNameHasCodeField)}, ${relatedTypeString}Id: ID${toAddCodeField(fieldName, relatedTypeString, relatedTypeHasCodeField)} ${additionalRelationFieldsArguments} ${saveHistoryArgument}):${relationPayload}, `;
+  string += `${removeRelationMutationName} (${typeNameString}Id: ID${toAddCodeField(relatedTypeField, typeNameString, typeNameHasCodeField)}, ${relatedTypeString}Id: ID${toAddCodeField(fieldName, relatedTypeString, relatedTypeHasCodeField)} ${saveHistoryArgument}):${relationPayload}, `;
   return string;
 };
 
 // make graphql types for connect mutations,
 // payload is used when multiple types are appended in one type(for connect mutations)
-const makeRelationTypePayload = (typeName, fieldName = '', relatedType,
-  relatedTypeField = '', relationPayload) => {
+const makeRelationTypePayload = (
+  typeName,
+  relatedType,
+  relationPayload,
+) => {
   // make camel case for mobile app
-  let typeNameString = typeName;
-  let relatedTypeString = relatedType;
-  if (relatedTypeField === '') {
-    typeNameString = `field${typeNameString}`;
-  }
-  if (fieldName === '') {
-    relatedTypeString = `field${relatedTypeString}`;
-  }
-  const relationType = `type ${relationPayload}{
-    ${relatedTypeField}${typeNameString}: ${typeName},
-    ${fieldName}${relatedTypeString}: ${relatedType}
+  const typeNameString = camelCase(typeName);
+  const relatedTypeString = camelCase(relatedType);
+  return `type ${relationPayload}{
+     typeName: String,
+    ${typeNameString}: ${typeName},
+    fieldName: String,
+    connectedTypeName: String,
+    ${relatedTypeString}: ${relatedType},
+     connectedFieldName: String
   }`;
-  return relationType;
 };
 
 Object.keys(parsedASTMap).forEach((type) => {
@@ -141,7 +134,7 @@ Object.keys(parsedASTMap).forEach((type) => {
   if (isModel) {
     const modelInputTypeName = `${typeName}Input`;
     const modelUpdateTypeName = `${typeName}Update`;
-    const pluralTypeName = camelCase(pluralize(typeName));
+    const pluralTypeName = pluralize(typeName);
     const modelUpdateAllTypeName = `${pluralTypeName}Update`;
     const isVersionModelToBeMade = hasDirective(directives, 'history');
     // add save history arg for models where history is to be made
@@ -202,8 +195,11 @@ Object.keys(parsedASTMap).forEach((type) => {
       const removeRelationMutationName = relationMutationNames.removeFromRelationMutation;
       // graphql type which has both the related types
       const relationPayload = getRelationPayloadName(relationName);
-      const relationType = makeRelationTypePayload(typeName, fieldName, relatedType,
-        relatedTypeField, relationPayload);
+      const relationType = makeRelationTypePayload(
+        typeName,
+        relatedType,
+        relationPayload,
+      );
       // push type to relation types array
       relationTypes.push(relationType);
       // check that the field code is present in the modal and its related modal

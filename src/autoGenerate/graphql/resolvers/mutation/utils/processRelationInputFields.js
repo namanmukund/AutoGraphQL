@@ -54,8 +54,15 @@ const processRelationInputFields = (promiseArray, typeName, input,
         finalInput[relationField] = relationValueToInput;
       });
       // check if the records, whose id is sent in connect inputs, exist in db
-      const { connectPromiseArray, connectIdsCount } = checkConnectRecordsExistenceInDb(
-        connectInputFieldsMap, ast, typeName, authentication);
+      const {
+        connectPromiseArray,
+        connectIdsCount,
+      } = checkConnectRecordsExistenceInDb(
+        connectInputFieldsMap,
+        ast,
+        typeName,
+        authentication,
+      );
       let connectDbRecords;
       try {
         connectDbRecords = await Promise.all(connectPromiseArray);
@@ -150,16 +157,18 @@ const processRelationInputFields = (promiseArray, typeName, input,
           }
         });
 
-      const returnObject = {
+      return {
         finalInput,
         allRelationObjectsArray1to1,
         allRelationObjectsArray1toM,
         allSavedRelationRecords,
       };
-      return returnObject;
     })
     .catch((err) => {
-      rollBackDocumentSaves(allSavedRelationRecords, authentication);
+      rollBackDocumentSaves(
+        allSavedRelationRecords,
+        authentication,
+      );
       return err;
     });
 };

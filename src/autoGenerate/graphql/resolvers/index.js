@@ -242,6 +242,7 @@ Object.keys(parsedASTMap).forEach((type) => {
       // get related field and validate
       const relatedTypeField = findFieldWithTheRelation(relatedType, relationName,
         parsedASTMap, fieldName);
+      const typeField = fieldName;
       const isFieldValid = validateFieldToAddForConnectMutationGeneration(fieldName,
         relatedTypeField);
       if (!isFieldValid) {
@@ -272,12 +273,19 @@ Object.keys(parsedASTMap).forEach((type) => {
               typeName,
               relatedType,
               relationName,
+              typeField,
+              relatedTypeField,
               info,
               parsedASTMap,
               authentication,
             ).then((result) => {
               const newResult = toObject(result);
-
+              Object.assign(newResult, {
+                typeName,
+                fieldName: typeField,
+                connectedTypeName: relatedType,
+                connectedFieldName: relatedTypeField,
+              });
               return posthook(newResult, addRelationMutationName);
             });
           },
@@ -297,11 +305,19 @@ Object.keys(parsedASTMap).forEach((type) => {
               typeName,
               relatedType,
               relationName,
+              typeField,
+              relatedTypeField,
               info,
               parsedASTMap,
               authentication,
             ).then((result) => {
               const newResult = toObject(result);
+              Object.assign(newResult, {
+                typeName,
+                fieldName: typeField,
+                connectedTypeName: relatedType,
+                connectedFieldName: relatedTypeField,
+              });
 
               return posthook(newResult, removeRelationMutationName);
             });

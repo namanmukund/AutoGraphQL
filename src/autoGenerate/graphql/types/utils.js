@@ -1,4 +1,4 @@
-import { without, upperFirst, has, get, camelCase } from 'lodash';
+import { without, upperFirst, has, get } from 'lodash';
 import pluralize from 'pluralize';
 
 // returns type string of a field
@@ -110,7 +110,7 @@ const getSchemaStringFromSchemaMap = (
     let inputType = typeOfInput;
 
     if (typeOfInput === 'UpdateAll') {
-      typeName = camelCase(pluralize(type));
+      typeName = pluralize(type);
       inputType = 'Update';
     }
 
