@@ -306,6 +306,7 @@ Object.keys(parsedASTMap).forEach((type) => {
               parsedASTMap,
               authentication,
             ).then((result) => {
+              console.log(33333333, result);
               const newResult = toObject(result);
 
               return posthook(newResult, removeRelationMutationName);
