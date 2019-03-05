@@ -15,8 +15,124 @@ import { createAndReturnRelationObjectsPromiseArray } from '../utils/createAndRe
 import { filterLocalInputForMutation } from '../utils/filterLocalInputForMutation';
 import { getConnectInputFieldsMap } from '../utils/getConnectInputFieldsMap';
 import { rollBackDocumentSaves } from '../utils/rollBackDocumentSaves';
-import getDirectiveArgumentValue from '../../../../utils/getDirectiveArgumentValue';
 import relationDirections from '../../../../../../constants/relations';
+
+const updateInputInCaseOfNestedConnect = (
+  ast,
+  typeName,
+  inputFieldName,
+  modifiedInput,
+  arrayObjects,
+  targetObj,
+  mappingInfo,
+) => {
+  // mappingInfo to store unique mapping inside nested key
+  Object.keys(targetObj).forEach((key) => {
+    if (key && key.includes('ConnectId')) {
+      // question
+      const nestedFieldName = key.split('ConnectId')[0];
+      if (!mappingInfo[nestedFieldName]) {
+        // PQAttemptedQuestion
+        const nestedFieldDataType = ast[typeName].field[inputFieldName].type.dataType;
+        // info like type or directive
+        const nestedFieldInfo = ast[nestedFieldDataType].field[nestedFieldName];
+        // QuestionBank
+        const nestedFieldNameRelatedTypeName = nestedFieldInfo.type.dataType;
+        // direction
+        const relationInfo = nestedFieldInfo.directive.relation.argument;
+        const relationName = relationInfo.name.value.value;
+        const direction = get(relationInfo, 'direction.value.value', relationDirections.twoWay);
+        // update mappingInfo so that it can be uniquely used
+        Object.assign(mappingInfo, {
+          [nestedFieldName]: {
+            nestedFieldDataType,
+            nestedFieldNameRelatedTypeName,
+            relationName,
+            direction,
+          },
+        });
+      }
+      // to maintain the current structure of 1to1 and 1toM
+      arrayObjects.push({
+        typeId: targetObj[key],
+        type: mappingInfo[nestedFieldName].nestedFieldNameRelatedTypeName,
+        recordType: typeName,
+        field: nestedFieldName,
+        relationName: mappingInfo[nestedFieldName].relationName,
+        direction: mappingInfo[nestedFieldName].direction,
+      });
+      // to update input with the required data
+      Object.assign(modifiedInput, {
+        [nestedFieldName]: {
+          typeId: targetObj[key],
+          type: mappingInfo[nestedFieldName].nestedFieldNameRelatedTypeName,
+        },
+      });
+    } else {
+      Object.assign(modifiedInput, { [key]: targetObj[key] });
+    }
+  });
+  return null;
+};
+
+
+const nestedConnectIdHandler = (
+  ast,
+  typeName,
+  input,
+) => {
+  const finalInput = Object.assign({}, input);
+  const allRelationObjectsArray1to1Data = [];
+  const allRelationObjectsArray1toMData = [];
+  Object.keys(finalInput).forEach((inputFieldName) => {
+    if (
+      Array.isArray(finalInput[inputFieldName]) &&
+        finalInput[inputFieldName].length
+    ) {
+      const typeTypeIdArray = [];
+      const arrayObjects = [];
+      const mappingInfo = {};
+      finalInput[inputFieldName].forEach((doc) => {
+        const modifiedInput = {};
+        updateInputInCaseOfNestedConnect(
+          ast,
+          typeName,
+          inputFieldName,
+          modifiedInput,
+          arrayObjects,
+          doc,
+          mappingInfo,
+        );
+        typeTypeIdArray.push(modifiedInput);
+      });
+      //
+      allRelationObjectsArray1toMData.push(arrayObjects);
+      finalInput[inputFieldName] = typeTypeIdArray;
+    } else if (typeof finalInput[inputFieldName] === 'object') {
+      const modifiedInput = {};
+      const mappingInfo = {};
+      const arrayObjects = [];
+      updateInputInCaseOfNestedConnect(
+        ast,
+        typeName,
+        inputFieldName,
+        modifiedInput,
+        arrayObjects,
+        finalInput[inputFieldName],
+        mappingInfo,
+      );
+      finalInput[inputFieldName] = modifiedInput;
+      Object.assign(allRelationObjectsArray1to1Data, [...arrayObjects]);
+    }
+  });
+
+  return {
+    finalInput,
+    allRelationObjectsArray1to1Data,
+    allRelationObjectsArray1toMData,
+  };
+};
+
 
 // Returns remote delete mutation promises.
 const remoteAddMutationPromises = (
@@ -118,7 +234,6 @@ const localAddMutationPromise = async (
   authentication,
   context,
 ) => {
-  console.log(33333333, input);
   const modelMutations = new MutationController(typeName, authentication);
   // get fields from input which have relation directive
   /*
@@ -137,67 +252,18 @@ const localAddMutationPromise = async (
   ]
    */
 
-
-  // #input fields iterate and check if it's subdoc/array of objects
-  // question_QuestionBank_ConnectId
-  // pqAttemptedQuestion_UserActivityDump_connectId
-  const mappingInfo = {};
-  const allRelationObjectsArray1toMData = [];
-  Object.keys(input).forEach((inputFieldName) => {
-    if (Array.isArray(input[inputFieldName]) && input[inputFieldName].length) {
-      const typeTypeIdArray = [];
-      const arrayObjects = [];
-      input[inputFieldName].forEach((doc) => {
-        const modifiedInput = {};
-        Object.keys(doc).forEach((key) => {
-          if (key && key.includes('ConnectId')) {
-            // question
-            const nestedFieldName = key.split('ConnectId')[0];
-            if (!mappingInfo[nestedFieldName]) {
-              // PQAttemptedQuestion
-              const nestedFieldDataType = ast[typeName].field[inputFieldName].type.dataType;
-              // info like type or directive
-              const nestedFieldInfo = ast[nestedFieldDataType].field[nestedFieldName];
-              // QuestionBank
-              const nestedFieldNameRelatedTypeName = nestedFieldInfo.type.dataType;
-              // direction
-              const relationInfo = nestedFieldInfo.directive.relation.argument;
-              const relationName = relationInfo.name.value.value;
-              const direction = get(relationInfo, 'direction.value.value', relationDirections.twoWay);
-
-              mappingInfo[nestedFieldName] = Object.assign({}, {
-                nestedFieldDataType,
-                nestedFieldNameRelatedTypeName,
-                relationName,
-                direction,
-              });
-            }
-
-            arrayObjects.push({
-              typeId: doc[key],
-              type: mappingInfo[nestedFieldName].nestedFieldNameRelatedTypeName,
-              recordType: typeName,
-              field: nestedFieldName,
-              relationName: mappingInfo[nestedFieldName].relationName,
-              direction: mappingInfo[nestedFieldName].direction,
-            });
-            Object.assign(modifiedInput, {
-              [nestedFieldName]: {
-                typeId: doc[key],
-                type: mappingInfo[nestedFieldName].nestedFieldNameRelatedTypeName,
-              },
-            });
-          } else {
-            modifiedInput[key] = doc[key];
-          }
-        });
-        typeTypeIdArray.push(modifiedInput);
-      });
-      //
-      allRelationObjectsArray1toMData.push(arrayObjects);
-      input[inputFieldName] = typeTypeIdArray;
-    }
-  });
+  const {
+    finalInput: modifiedInput,
+    allRelationObjectsArray1to1Data,
+    allRelationObjectsArray1toMData,
+  } = nestedConnectIdHandler(
+    ast,
+    typeName,
+    input,
+  );
+  if (modifiedInput) {
+    Object.assign(input, modifiedInput);
+  }
 
   const relationFieldsArray = getRelationFields(input, ast, typeName);
   /* eslint-disable no-param-reassign */
@@ -281,6 +347,7 @@ const localAddMutationPromise = async (
         connectInputFieldsMap,
         null,
         authentication,
+        allRelationObjectsArray1to1Data,
         allRelationObjectsArray1toMData,
       );
       // if error return error
@@ -305,7 +372,6 @@ const localAddMutationPromise = async (
       allRelationObjectsArray1toM,
       allSavedRelationRecords,
     } = inputMap;
-    console.log('.....cjhsvdjCVHJVJdcjhvsdjhvcjsvhjdvc......', allRelationObjectsArray1toM[0]);
     return modelMutations.addDocument(finalInput)
       .then((savedRecord) => {
         /*

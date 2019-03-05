@@ -187,9 +187,6 @@ Object.keys(parsedASTMap).forEach((type) => {
   const definition = parsedASTMap[type];
   const { name, field, directives } = definition;
   const typeName = name.value;
-  if (typeName === 'UserActivityDump') {
-    console.log('------------------------------------typeName', typeName);
-  }
   const isModel = directives && hasDirective(directives, 'model');
   if (isModel) {
     const modelInputTypeName = `${typeName}Input`;

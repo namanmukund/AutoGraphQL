@@ -33,6 +33,7 @@ const arrangeAnswer = `
 const pqAttemptedQuestion = `
   type PQAttemptedQuestion {
    question: QuestionBank @relation(name: "QuestionDump")
+   abcd: LearningObjective @relation(name: "LosdsdsDump", direction: "OneWay")
    attemptCount: Int
    isHintUsed: Boolean @defaultValue(value: "false")
    isAnswerUsed: Boolean @defaultValue(value: "false")
@@ -40,13 +41,15 @@ const pqAttemptedQuestion = `
 
 const quizAttemptedQuestion = `
   type QuizAttemptedQuestion {
-   question: [QuestionBank] @relation(name: "QuestionDump", direction: "OneWay")
+   question: QuestionBank @relation(name: "QuestionDump", direction: "OneWay")
    isCorrect: Boolean
    isAttempted: Boolean @defaultValue(value: "false")
    mcqAnswer: [McqAnswerType]
    fibInputAnswer: [FibInputAnswerType]
    fibBlocksAnswer: [FibBlocksAnswerType]
    arrangeAnswer: [ArrangeAnswerType]
+   defg: LearningObjective @relation(name: "SksdjsbdJd", direction: "OneWay")
+
  }`;
 
 const UserActivityDump = `
@@ -55,7 +58,7 @@ const UserActivityDump = `
     user: User @relation(name: "UserDump", direction: "OneWay")
     topic: Topic @relation(name: "TopicDump", direction: "OneWay")
     learningObjective: LearningObjective @relation(name: "LearningObjectiveDump")
-    pqAttemptedQuestions: [PQAttemptedQuestion]
+    pqAttemptedQuestions: PQAttemptedQuestion
     quizAttemptedQuestions: [QuizAttemptedQuestion]
     currentMessage: Message @relation(name: "MessageDump", direction: "OneWay")
     currentVideoTime: Int

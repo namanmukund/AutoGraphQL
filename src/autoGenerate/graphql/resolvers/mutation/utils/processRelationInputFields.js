@@ -11,10 +11,18 @@ import QueryController from '../../../controllers/QueryController';
 import { getRelationObjectMap } from './getRelationObjectMap';
 import { rollBackDocumentSaves } from './rollBackDocumentSaves';
 
-const processRelationInputFields = (promiseArray, typeName, input,
-  ast, connectInputFieldsMap, updateRecordId, authentication, allRelationObjectsArray1toM = []) => {
+const processRelationInputFields = (
+  promiseArray,
+  typeName,
+  input,
+  ast,
+  connectInputFieldsMap,
+  updateRecordId,
+  authentication,
+  allRelationObjectsArray1to1 = [],
+  allRelationObjectsArray1toM = [],
+) => {
   const finalInput = Object.assign({}, input);
-  const allRelationObjectsArray1to1 = [];
   // const allRelationObjectsArray1toM = [];
   const allSavedRelationRecords = [];
   return Promise.all(promiseArray)

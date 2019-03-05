@@ -29,9 +29,6 @@ const fileConnectedTypeFieldEnumArray = [];
 Object.keys(parsedASTMap).forEach((type) => {
   const definition = parsedASTMap[type];
   const { name, field, directives } = definition;
-  if (type === 'QuizAttemptedQuestion') {
-    console.log('-------------------------graphqlInputTypeObject');
-  }
   const isModel = directives && hasDirective(directives, 'model');
   if (isModel) {
     // generate nestedConnectMutationStringObject to be made available for updateAll connect purpose
@@ -94,7 +91,6 @@ Object.keys(parsedASTMap).forEach((type) => {
       const relationFields = definition.relationFields;
 
       Object.keys(relationFields).forEach((relationalField) => {
-        console.log('.....relationalField', relationalField);
         let key;
         if (relationalField === historyFieldName) {
           return;
@@ -102,8 +98,6 @@ Object.keys(parsedASTMap).forEach((type) => {
         // if field type is array
         if (parsedASTMap[type].field[fieldName].type.isList) {
           key = `${relationalField}${connectMutationsArgumentsSuffix.plural}`;
-          console.log('---------------------------typeName', typeName);
-          console.log('---------------------------key', key);
           graphqlInputTypeObject[typeName][key] = '[ID]';
         } else {
           key = `${relationalField}${connectMutationsArgumentsSuffix.singular}`;

@@ -88,17 +88,14 @@ const createAndReturnRelationObject = async (
   const cuidInput = generateCuid(inputValue);
   const valueToSave = await prehook(cuidInput, mutationName, context, { input: cuidInput });
   // create the relation document
-  console.log('valueToSave................', valueToSave);
   return relatedModelMutations.addDocument(valueToSave)
     .then((savedObject) => {
-      console.log('savedObject............', savedObject);
       if (typeof savedObject.id === 'undefined') {
         throw new Error(savedObject);
       }
       const typeId = savedObject.id;
       const relationObjectMap = getRelationObjectMap(schemaType, typeName, typeId,
         fieldName, relationName, additionalRelationFieldsObject);
-      console.log('relationObjectMap............', relationObjectMap);
       /*
       relationObjectMap: { type: 'LearningObjective',
           recordType: 'UserActivityDump',

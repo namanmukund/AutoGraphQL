@@ -23,17 +23,22 @@ export const saveReferenceInRelatedTypeField = async (relationObject, ast, authe
   }
 
   // if relation is one way then dont save reference in related type
-  console.log('****************************');
-  console.log(recordType, field);
-  const relationDirection = direction || getDirectiveArgumentValue(ast, recordType,
-    field, 'relation', 'direction');
-  console.log('relationDirection.....', relationDirection);
+  const relationDirection = direction || getDirectiveArgumentValue(
+    ast,
+    recordType,
+    field,
+    'relation',
+    'direction',
+  );
   if (relationDirection === relationDirections.oneWay) {
     return null;
   }
   // find field with the relation in related type
-  const fieldWithRelation = findFieldWithTheRelation(relatedSchemaType, relationName, ast);
-  console.log('.......findFieldWithTheRelation', fieldWithRelation);
+  const fieldWithRelation = findFieldWithTheRelation(
+    relatedSchemaType,
+    relationName,
+    ast,
+  );
   // if relation not found in any of the type fields return error
   if (!fieldWithRelation) {
     throw new BiDirectionalRelationsRequiredError();
