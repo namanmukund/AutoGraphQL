@@ -15,6 +15,7 @@ const fibInputAnswer = `
   type FibInputAnswerType {
    position: Int
    answer: String
+   topic: [Topic] @relation(name: "QuestionsssDump", direction: "OneWay")
  }`;
 
 const fibBlocksAnswer = `
@@ -31,7 +32,7 @@ const arrangeAnswer = `
 
 const pqAttemptedQuestion = `
   type PQAttemptedQuestion {
-   question: QuestionBank @relation(name: "QuestionDump", direction: "OneWay")
+   question: QuestionBank @relation(name: "QuestionDump")
    attemptCount: Int
    isHintUsed: Boolean @defaultValue(value: "false")
    isAnswerUsed: Boolean @defaultValue(value: "false")
@@ -39,7 +40,7 @@ const pqAttemptedQuestion = `
 
 const quizAttemptedQuestion = `
   type QuizAttemptedQuestion {
-   question: QuestionBank @relation(name: "QuestionDump", direction: "OneWay")
+   question: [QuestionBank] @relation(name: "QuestionDump", direction: "OneWay")
    isCorrect: Boolean
    isAttempted: Boolean @defaultValue(value: "false")
    mcqAnswer: [McqAnswerType]
@@ -51,9 +52,9 @@ const quizAttemptedQuestion = `
 const UserActivityDump = `
   type UserActivityDump @model {
     type: DumpType!
-    user: User! @relation(name: "UserDump", direction: "OneWay")
+    user: User @relation(name: "UserDump", direction: "OneWay")
     topic: Topic @relation(name: "TopicDump", direction: "OneWay")
-    learningObjective: LearningObjective @relation(name: "LearningObjectiveDump", direction: "OneWay")
+    learningObjective: LearningObjective @relation(name: "LearningObjectiveDump")
     pqAttemptedQuestions: [PQAttemptedQuestion]
     quizAttemptedQuestions: [QuizAttemptedQuestion]
     currentMessage: Message @relation(name: "MessageDump", direction: "OneWay")

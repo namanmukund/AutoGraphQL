@@ -12,14 +12,22 @@ import { getRelationObjectMap } from './getRelationObjectMap';
 import { rollBackDocumentSaves } from './rollBackDocumentSaves';
 
 const processRelationInputFields = (promiseArray, typeName, input,
-  ast, connectInputFieldsMap, updateRecordId, authentication) => {
+  ast, connectInputFieldsMap, updateRecordId, authentication, allRelationObjectsArray1toM = []) => {
   const finalInput = Object.assign({}, input);
   const allRelationObjectsArray1to1 = [];
-  const allRelationObjectsArray1toM = [];
+  // const allRelationObjectsArray1toM = [];
   const allSavedRelationRecords = [];
   return Promise.all(promiseArray)
     .then(async (values) => {
       // replacing value in relation fields with relation type objects
+      /*
+         values: [ { type: 'LearningObjective',
+    recordType: 'UserActivityDump',
+    typeId: 'cjsuws2xn000163rujil1mfcz',
+    field: 'learningObjective',
+    relationName: 'LearningObjectiveDump',
+    additionalRelationFieldsObject: {} } ]
+         */
       values.forEach((value) => {
         if (isErrorThrown(value)) {
           throw value;
@@ -42,8 +50,8 @@ const processRelationInputFields = (promiseArray, typeName, input,
           });
           allRelationObjectsArray1toM.push(value);
         } else {
-          relationField = value.field;
-          const { type, typeId, additionalRelationFieldsObject } = value;
+          const { type, typeId, additionalRelationFieldsObject, field } = value;
+          relationField = field;
 
           // add additionalRelationFields if present, along with typeId
           relationValueToInput = Object.assign({ type, typeId }, additionalRelationFieldsObject);
