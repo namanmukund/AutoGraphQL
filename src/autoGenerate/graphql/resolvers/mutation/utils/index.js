@@ -7,6 +7,8 @@ import updateAndIncreaseUsageCountInFile from './updateAndIncreaseUsageCountInFi
 import updateAndDecreaseUsageCountInFile from './updateAndDecreaseUsageCountInFile';
 import validateSignupExistingUserStatus from './validateSignupExistingUserStatus';
 import checkAndDeleteReferences from './deleteUtils';
+import nestedConnectIdHandler from './nestedConnectIdHandler';
+import updateInputInCaseOfNestedConnect from './updateInputInCaseOfNestedConnect';
 
 
 export {
@@ -17,4 +19,6 @@ export {
   updateAndDecreaseUsageCountInFile,
   validateSignupExistingUserStatus,
   checkAndDeleteReferences,
+  nestedConnectIdHandler,
+  updateInputInCaseOfNestedConnect,
 };

@@ -16,6 +16,7 @@ import { createAndReturnRelationObjectsPromiseArray } from '../utils/createAndRe
 import { filterLocalInputForMutation } from '../utils/filterLocalInputForMutation';
 import { getConnectInputFieldsMap } from '../utils/getConnectInputFieldsMap';
 import { rollBackDocumentSaves } from '../utils/rollBackDocumentSaves';
+import nestedConnectIdHandler from '../utils/nestedConnectIdHandler';
 
 // Returns remote delete mutation promises.
 const remoteUpdateMutationPromises = (
@@ -82,6 +83,19 @@ const localUpdateMutationPromise = async (
   context,
 ) => {
   const modelMutations = new MutationController(typeName, authentication);
+  const {
+    finalInput: modifiedInput,
+    allRelationObjectsArray1to1Data,
+    allRelationObjectsArray1toMData,
+    nestedDisconnectObjInfo,
+  } = nestedConnectIdHandler(
+    ast,
+    typeName,
+    input,
+  );
+  if (modifiedInput) {
+    Object.assign(input, modifiedInput);
+  }
   // get relation fields in input if existing
   const relationFieldsArray = getRelationFields(input, ast, typeName);
   /* eslint-disable no-param-reassign */
@@ -89,8 +103,12 @@ const localUpdateMutationPromise = async (
   /* eslint-enable no-param-reassign */
   /*  if fields found with relations or connect args present,
  create relation document & return relation type object */
-  if ((relationFieldsArray && relationFieldsArray.length) ||
-    Object.keys(connectInputFieldsMap).length) {
+  if (
+    (relationFieldsArray && relationFieldsArray.length) ||
+    Object.keys(connectInputFieldsMap).length ||
+      allRelationObjectsArray1to1Data.length ||
+      allRelationObjectsArray1toMData.length
+  ) {
     const promiseArray = createAndReturnRelationObjectsPromiseArray(
       relationFieldsArray,
       typeName,
@@ -112,6 +130,8 @@ const localUpdateMutationPromise = async (
       connectInputFieldsMap,
       id,
       authentication,
+      allRelationObjectsArray1to1Data,
+      allRelationObjectsArray1toMData,
     );
 
     if (isErrorThrown(inputMap)) {
@@ -158,6 +178,7 @@ const localUpdateMutationPromise = async (
         relationAdditionalFieldsArray,
         arrayFieldsArray,
         historyObject,
+        nestedDisconnectObjInfo,
       )
       .then(savedRecord => saveRecordReferenceInRelatedObjects(
         allRelationObjectsArray1to1,

@@ -77,6 +77,12 @@ const allFilters = {
   notArray: 'notArray',
 };
 
+const arrayUpdateAddTypes = [
+  'push', 'pushMany', 'replace', 'pushToSet', 'updateAll', 'updateWhere', 'updateWith',
+];
+const arrayUpdateRemoveTypes = ['popFront', 'popBack', 'popAll', 'pop',
+];
+
 const sortBy = ['ASC', 'DESC'];
 const smsOTPMessage = {
   bodyBeforeName: 'Dear ',
@@ -145,4 +151,6 @@ export {
   PUBLISHED,
   UNPUBLISHED,
   regexValidation,
+  arrayUpdateAddTypes,
+  arrayUpdateRemoveTypes,
 };

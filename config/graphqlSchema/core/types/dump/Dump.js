@@ -39,7 +39,9 @@ const pqAttemptedQuestion = `
 
 const quizAttemptedQuestion = `
   type QuizAttemptedQuestion {
-   question: QuestionBank @relation(name: "QuestionDump", direction: "OneWay")
+   question: [QuestionBank] @relation(name: "QuestionQuizDump")
+   lo: LearningObjective @relation(name: "QuizLo")
+   thumbnail: File @relation(name: "QuizThumbnail", direction: "OneWay")
    isCorrect: Boolean
    isAttempted: Boolean @defaultValue(value: "false")
    mcqAnswer: [McqAnswerType]

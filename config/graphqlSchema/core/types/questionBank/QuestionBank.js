@@ -15,6 +15,7 @@ const QuestionBank = `
     learningObjective: LearningObjective @relation(name: "LearningObjectiveQuestionBank")
     topic: Topic @relation(name: "TopicQuestionBank")
     status: ContentStatus! @defaultValue(value: "unpublished")
+    fromQuizInDump: [UserActivityDump] @relation(name: "QuestionQuizDump")
   }
 `;
 

@@ -11,6 +11,7 @@ const LearningObjective = `
     status: ContentStatus! @defaultValue(value: "unpublished")
     thumbnail: File @relation(name: "LearningObjectiveThumbnail", direction: "OneWay")
     messageStatus: ContentStatus! @defaultValue(value: "unpublished")
+    usd: UserActivityDump @relation(name: "QuizLo")
   }
 `;
 
