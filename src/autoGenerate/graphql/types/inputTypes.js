@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { indexOf } from 'lodash';
 import schemaTypes from './schemaTypes';
 import getParsedASTMap from '../../utils/getParsedASTMap';
@@ -7,7 +6,7 @@ import {
   appendAdditionalRelationFieldsToTypeObject,
   getSchemaStringFromSchemaMap, getFileUploadEnumType,
 } from './utils';
-import { connectMutationsArgumentsSuffix, historyFieldName } from '../../../../constants';
+import { connectMutationsArgumentsSuffix, historyFieldName, scalarTypes } from '../../../../constants';
 import getDirectiveArgumentValue from '../../utils/getDirectiveArgumentValue';
 import hasDirective from '../../utils/hasDirective';
 import getNestedConnectMutationString from '../../utils/getNestedConnectMutationString';
@@ -30,9 +29,6 @@ const fileConnectedTypeFieldEnumArray = [];
 Object.keys(parsedASTMap).forEach((type) => {
   const definition = parsedASTMap[type];
   const { name, field, directives } = definition;
-  if (type === 'QuizAttemptedQuestion') {
-    console.log('-------------------------graphqlInputTypeObject', graphqlInputTypeObject);
-  }
   const isModel = directives && hasDirective(directives, 'model');
   if (isModel) {
     // generate nestedConnectMutationStringObject to be made available for updateAll connect purpose
@@ -76,7 +72,7 @@ Object.keys(parsedASTMap).forEach((type) => {
       typeName,
       fieldName,
       'relation',
-      'fields'
+      'fields',
     );
     const isAdditionalField = directivesObject && directivesObject.isRelationField;
     // have Additional fields
@@ -90,28 +86,25 @@ Object.keys(parsedASTMap).forEach((type) => {
     }
     // Fill input type strings
     let isUpdateType = false;
-    if (isRelationField && type === 'QuizAttemptedQuestion') {
+    if (!isModel && isRelationField && !scalarTypes.includes(type)) {
       // generate nestedConnectMutationStringObject to be made available for relation type
       const relationFields = definition.relationFields;
 
-      Object.keys(relationFields).forEach((fieldName) => {
-        let key
-        if (fieldName === historyFieldName) {
+      Object.keys(relationFields).forEach((relationalField) => {
+        let key;
+        if (relationalField === historyFieldName) {
           return;
         }
         // if field type is array
         if (parsedASTMap[type].field[fieldName].type.isList) {
-          key = `${fieldName}${connectMutationsArgumentsSuffix.plural}`;
-          console.log('---------------------------typeName', typeName)
-          console.log('---------------------------key', key)
+          key = `${relationalField}${connectMutationsArgumentsSuffix.plural}`;
           graphqlInputTypeObject[typeName][key] = '[ID]';
         } else {
-          key = `${fieldName}${connectMutationsArgumentsSuffix.singular}`;
+          key = `${relationalField}${connectMutationsArgumentsSuffix.singular}`;
           graphqlInputTypeObject[typeName][key] = 'ID';
         }
-
       });
-    }else {
+    } else {
       const fieldInputTypeString = getFieldTypeString(
         fieldName,
         fieldType,
@@ -122,7 +115,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         hasDefaultDirective,
         hasAutoDirective,
         isUpdateType,
-        haveAdditionalFields
+        haveAdditionalFields,
       );
       graphqlInputTypeObject[typeName][fieldName] = fieldInputTypeString;
     }
@@ -139,7 +132,7 @@ Object.keys(parsedASTMap).forEach((type) => {
       hasAutoDirective,
       isUpdateType,
       haveAdditionalFields,
-      graphqlArrayTypeObject
+      graphqlArrayTypeObject,
     );
     // add field schema to input type object
     graphqlUpdateTypeObject[typeName][fieldName] = fieldUpdateTypeString;
@@ -154,7 +147,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         typeName,
         fieldName,
         'relation',
-        'name'
+        'name',
       );
       graphqlInputTypeObject = appendAdditionalRelationFieldsToTypeObject(
         additionalRelationFields,
@@ -164,7 +157,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         parsedASTMap,
         fieldType,
         false,
-        graphqlArrayTypeObject
+        graphqlArrayTypeObject,
       );
       const additionalTypeName = `${typeName}_${relationName}`;
       graphqlAdditionalRelationFieldsInputTypeObject = appendAdditionalRelationFieldsToTypeObject(
@@ -175,7 +168,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         parsedASTMap,
         additionalTypeName,
         false,
-        graphqlArrayTypeObject
+        graphqlArrayTypeObject,
       );
       graphqlAdditionalRelationFieldsUpdateTypeObject = appendAdditionalRelationFieldsToTypeObject(
         additionalRelationFields,
@@ -185,7 +178,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         parsedASTMap,
         additionalTypeName,
         true,
-        graphqlArrayTypeObject
+        graphqlArrayTypeObject,
       );
       // Add additionalFields Update fields
       const additionalFieldName = `${fieldName}_AdditionalFields`;
@@ -203,7 +196,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         hasAutoDirective,
         isUpdateType,
         haveAdditionalFields,
-        graphqlArrayTypeObject
+        graphqlArrayTypeObject,
       );
       graphqlUpdateTypeObject[typeName][additionalFieldName] =
         additionalFieldUpdateTypeString;

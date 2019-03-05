@@ -14,7 +14,7 @@ export const saveReferenceInRelatedTypeField = async (relationObject, ast, authe
     await updateAndIncreaseUsageCountInFile(relationObject.typeId, authentication);
   }
   // saved record type
-  const { recordId, recordType, field, relationName } = relationObject;
+  const { recordId, recordType, field, relationName, direction } = relationObject;
   const relatedModelMutations = new MutationController(relatedSchemaType, { bypass: true });
   const relatedModelQueries = new QueryController(relatedSchemaType, { bypass: true });
   const typeFields = ast[relatedSchemaType] && ast[relatedSchemaType].fields;
@@ -23,13 +23,22 @@ export const saveReferenceInRelatedTypeField = async (relationObject, ast, authe
   }
 
   // if relation is one way then dont save reference in related type
-  const relationDirection = getDirectiveArgumentValue(ast, recordType,
-    field, 'relation', 'direction');
+  const relationDirection = direction || getDirectiveArgumentValue(
+    ast,
+    recordType,
+    field,
+    'relation',
+    'direction',
+  );
   if (relationDirection === relationDirections.oneWay) {
     return null;
   }
   // find field with the relation in related type
-  const fieldWithRelation = findFieldWithTheRelation(relatedSchemaType, relationName, ast);
+  const fieldWithRelation = findFieldWithTheRelation(
+    relatedSchemaType,
+    relationName,
+    ast,
+  );
   // if relation not found in any of the type fields return error
   if (!fieldWithRelation) {
     throw new BiDirectionalRelationsRequiredError();
