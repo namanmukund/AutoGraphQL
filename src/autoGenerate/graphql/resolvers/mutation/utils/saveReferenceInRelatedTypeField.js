@@ -16,7 +16,6 @@ export const saveReferenceInRelatedTypeField = async (relationObject, ast, authe
     field,
     relationName,
     direction,
-    updateOperationType,
   } = relationObject;
   if (relatedSchemaType === 'File') {
     await updateAndIncreaseUsageCountInFile(relationObject.typeId, authentication);

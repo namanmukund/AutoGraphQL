@@ -10,10 +10,11 @@ const nestedConnectIdHandler = (
   const allRelationObjectsArray1to1Data = [];
   const allRelationObjectsArray1toMData = [];
   const nestedDisconnectObjInfo = {};
+  let isArrayUpdate = false;
+
   Object.keys(finalInput).forEach((inputFieldName) => {
     // special case for update
     const fieldKeys = Object.keys(finalInput[inputFieldName]);
-    let isArrayUpdate = false;
     // for operations like push, pushMany and all
     if (
       fieldKeys &&
@@ -32,10 +33,6 @@ const nestedConnectIdHandler = (
           fieldKeys.length &&
         arrayUpdateRemoveTypes.includes(fieldKeys[0])
     ) {
-      isArrayUpdate = true;
-      Object.assign(finalInput, {
-        [inputFieldName]: finalInput[inputFieldName][fieldKeys[0]],
-      });
       const nestedFieldDataType = ast[typeName].field[inputFieldName].type.dataType;
       // info like type or directive
       const nestedFieldRelationFieldsObj = ast[nestedFieldDataType].relationFields;

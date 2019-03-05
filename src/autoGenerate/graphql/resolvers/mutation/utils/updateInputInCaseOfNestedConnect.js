@@ -9,7 +9,6 @@ const updateInputInCaseOfNestedConnect = (
   arrayObjects,
   targetObj,
   mappingInfo,
-  updateOperationType,
 ) => {
   // mappingInfo to store unique mapping inside nested key
   Object.keys(targetObj).forEach((key) => {
@@ -45,7 +44,6 @@ const updateInputInCaseOfNestedConnect = (
         field: nestedFieldName,
         relationName: mappingInfo[nestedFieldName].relationName,
         direction: mappingInfo[nestedFieldName].direction,
-        updateOperationType,
       });
       // to update input with the required data
       Object.assign(modifiedInput, {
