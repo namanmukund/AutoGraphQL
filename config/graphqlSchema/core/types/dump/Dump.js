@@ -39,7 +39,7 @@ const pqAttemptedQuestion = `
 
 const quizAttemptedQuestion = `
   type QuizAttemptedQuestion {
-   question: [QuestionBank] @relation(name: "QuestionQuizDump")
+   question: QuestionBank @relation(name: "QuestionQuizDump")
    lo: LearningObjective @relation(name: "QuizLo")
    thumbnail: File @relation(name: "QuizThumbnail", direction: "OneWay")
    isCorrect: Boolean
@@ -57,7 +57,7 @@ const UserActivityDump = `
     topic: Topic @relation(name: "TopicDump", direction: "OneWay")
     learningObjective: LearningObjective @relation(name: "LearningObjectiveDump", direction: "OneWay")
     pqAttemptedQuestions: PQAttemptedQuestion
-    quizAttemptedQuestions: [QuizAttemptedQuestion]
+    quizAttemptedQuestions: QuizAttemptedQuestion
     currentMessage: Message @relation(name: "MessageDump", direction: "OneWay")
     currentVideoTime: Int
   }

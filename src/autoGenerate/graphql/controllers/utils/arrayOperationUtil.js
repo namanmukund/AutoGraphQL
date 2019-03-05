@@ -1,7 +1,8 @@
 import { find, isMatch, omit } from 'lodash';
 import { processFilter } from './processFilter';
 import { customMerge, validateClassItemsUniqueness } from './utils';
-import { MutationController } from '../index';
+// import MutationController from '../MutationController';
+import models from '../../../models';
 // Omit _id field for pushToSet check
 const omitId = (value) => {
   if (typeof value === 'object') {
@@ -16,6 +17,82 @@ const omitId = (value) => {
   return value;
 };
 
+const removeReferencesWhenDisconnected = (
+  dataToBePopped,
+  nestedDisconnectObjInfo,
+  targetUpdateId,
+) => {
+  if (dataToBePopped && dataToBePopped.length) {
+    dataToBePopped.forEach((data) => {
+      Object.keys(data).forEach((key) => {
+        if (Object.keys(nestedDisconnectObjInfo).includes(key)) {
+          // initialize data
+          const tempDisconnectObj = nestedDisconnectObjInfo[key];
+          if (!nestedDisconnectObjInfo[key].data) {
+            Object.assign(nestedDisconnectObjInfo, {
+              [key]: {
+                data: [],
+              },
+            });
+          }
+          // collect all ids of same type
+          Object.assign(nestedDisconnectObjInfo, {
+            [key]: {
+              ...tempDisconnectObj,
+
+              data: Array.isArray(data[key]) ?
+                [...nestedDisconnectObjInfo[key].data, ...data[key]] :
+                [...nestedDisconnectObjInfo[key].data, data[key]],
+            },
+          });
+        }
+      });
+    });
+  }
+  /*
+question:{ relationName: 'QuestionQuizDump',
+  nestedFieldName: 'question',
+  nestedDataType: 'QuizAttemptedQuestion',
+  typeName: 'UserActivityDump',
+  relatedDataType: 'QuestionBank',
+  removeOperationType: 'pop',
+  relatedFieldName: 'fromQuizInDump',
+  isRelatedFieldAList: true,
+  data:
+   [ { _id: 5c7ef22f3ffc36e02c18bc6a,
+       typeId: 'cjrthr04t001j1ht9n75x6hdk',
+       type: 'QuestionBank' } ] }
+ */
+  //
+  const promiseArray = [];
+  Object.keys(nestedDisconnectObjInfo).forEach((nestedField) => {
+    const { data, relatedFieldName, relatedDataType, isRelatedFieldAList } = nestedField;
+    const idToBePulled = data.map(doc => doc.typeId);
+    const searchObj = {
+      id: {
+        $in: idToBePulled,
+      },
+    };
+    let updateObject = {};
+    if (isRelatedFieldAList) {
+      updateObject = {
+        $pull: {
+          [relatedFieldName]: { typeId: targetUpdateId },
+        },
+      };
+    } else {
+      updateObject = {
+        $set: {
+          [relatedFieldName]: {},
+        },
+      };
+    }
+    // const modelMutations = new MutationController(relatedDataType, { bypass: true });
+    promiseArray.push(models[relatedDataType].update(searchObj, updateObject));
+  });
+
+  return Promise.all(promiseArray);
+};
 
 // All array operations
 const arrayOperationFunctions = {
@@ -81,6 +158,12 @@ const arrayOperationFunctions = {
     if (record === null || input === false) {
       return record;
     }
+    const dataToBePopped = record.map(d => d.toObject())[0];
+    removeReferencesWhenDisconnected(
+      dataToBePopped,
+      nestedDisconnectObjInfo,
+      targetUpdateId,
+    );
     return record.slice(1);
   },
   // Delete last element from array
@@ -94,6 +177,12 @@ const arrayOperationFunctions = {
     if (record === null || input === false) {
       return record;
     }
+    const dataToBePopped = record.map(d => d.toObject())[record.length - 1];
+    removeReferencesWhenDisconnected(
+      dataToBePopped,
+      nestedDisconnectObjInfo,
+      targetUpdateId,
+    );
     return record.slice(0, record.length - 1);
   },
   // Delete all elements of array
@@ -107,6 +196,12 @@ const arrayOperationFunctions = {
     if (record === null || input === false) {
       return record;
     }
+    const dataToBePopped = record.map(d => d.toObject());
+    removeReferencesWhenDisconnected(
+      dataToBePopped,
+      nestedDisconnectObjInfo,
+      targetUpdateId,
+    );
     return [];
   },
   // Find and delete elements of array
@@ -120,77 +215,14 @@ const arrayOperationFunctions = {
     if (record === null) {
       return record;
     }
-    console.log(3333333, record);
     const dataToBePopped = record.filter(rec => processFilter(rec, input)).map(d => d.toObject());
-    abc(dataToBePopped, nestedDisconnectObjInfo, targetUpdateId);
+    removeReferencesWhenDisconnected(
+      dataToBePopped,
+      nestedDisconnectObjInfo,
+      targetUpdateId,
+    );
     return record.filter(rec => !processFilter(rec, input));
   },
 };
-const abc = (
-  dataToBePopped,
-  nestedDisconnectObjInfo,
-  targetUpdateId,
-) => {
-  if (dataToBePopped && dataToBePopped.length) {
-    dataToBePopped.forEach((data) => {
-      console.log(22222222, data);
-      Object.keys(data).forEach((key) => {
-        if (Object.keys(nestedDisconnectObjInfo).includes(key)) {
-          // initialize data
-          const tempDisconnectObj = nestedDisconnectObjInfo[key];
-          if (!nestedDisconnectObjInfo[key].data) {
-            Object.assign(nestedDisconnectObjInfo, {
-              [key]: {
-                data: [],
-              },
-            });
-          }
-          // collect all ids of same type
-          Object.assign(nestedDisconnectObjInfo, {
-            [key]: {
-              ...tempDisconnectObj,
 
-              data: Array.isArray(data[key]) ?
-                [...nestedDisconnectObjInfo[key].data, ...data[key]] :
-                [...nestedDisconnectObjInfo[key].data, data[key]],
-            },
-          });
-        }
-      });
-    });
-  }
-  /*
-question:{ relationName: 'QuestionQuizDump',
-  nestedFieldName: 'question',
-  nestedDataType: 'QuizAttemptedQuestion',
-  typeName: 'UserActivityDump',
-  relatedDataType: 'QuestionBank',
-  removeOperationType: 'pop',
-  relatedFieldName: 'fromQuizInDump',
-  isRelatedFieldAList: true,
-  data:
-   [ { _id: 5c7ef22f3ffc36e02c18bc6a,
-       typeId: 'cjrthr04t001j1ht9n75x6hdk',
-       type: 'QuestionBank' } ] }
- */
-  //
-  const promiseArray = [];
-  Object.keys(nestedDisconnectObjInfo).forEach((nestedField) => {
-    const { data, relatedFieldName, relatedDataType } = nestedField;
-    const idToBePulled = data.map(doc => doc.typeId);
-    const searchObj = {
-      id: {
-        $in: idToBePulled,
-      },
-    };
-    const updateObject = {
-      $pull: {
-        [relatedFieldName]: { typeId: targetUpdateId },
-      },
-    };
-    const modelMutations = new MutationController(relatedDataType, { bypass: true });
-    promiseArray.push(modelMutations.update(searchObj, updateObject));
-  });
-  return Promise.all(promiseArray);
-};
 export default arrayOperationFunctions;
