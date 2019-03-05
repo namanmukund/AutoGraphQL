@@ -9,10 +9,12 @@ import { generateCuid } from '../../../../../../utils';
 import { prehook } from '../../../hooks';
 import { getRelationObjectMap } from './getRelationObjectMap';
 
-// { fieldName: 'learningObjective',
-//   fieldType: { dataType: 'LearningObjective' },
-//   fieldValue: { order: 23, title: 'fsfsfsdsdfsfs' },
-//   relationName: 'LearningObjectiveDump' }
+/*
+{ fieldName: 'learningObjective',
+  fieldType: { dataType: 'LearningObjective' },
+  fieldValue: { order: 23, title: 'test' },
+  relationName: 'LearningObjectiveDump' }
+ */
 
 const createAndReturnRelationObject = async (
   fieldName,

@@ -15,7 +15,6 @@ const fibInputAnswer = `
   type FibInputAnswerType {
    position: Int
    answer: String
-   topic: [Topic] @relation(name: "QuestionsssDump", direction: "OneWay")
  }`;
 
 const fibBlocksAnswer = `
@@ -32,8 +31,7 @@ const arrangeAnswer = `
 
 const pqAttemptedQuestion = `
   type PQAttemptedQuestion {
-   question: QuestionBank @relation(name: "QuestionDump")
-   abcd: LearningObjective @relation(name: "LosdsdsDump", direction: "OneWay")
+   question: QuestionBank @relation(name: "QuestionDump", direction: "OneWay")
    attemptCount: Int
    isHintUsed: Boolean @defaultValue(value: "false")
    isAnswerUsed: Boolean @defaultValue(value: "false")
@@ -48,8 +46,6 @@ const quizAttemptedQuestion = `
    fibInputAnswer: [FibInputAnswerType]
    fibBlocksAnswer: [FibBlocksAnswerType]
    arrangeAnswer: [ArrangeAnswerType]
-   defg: LearningObjective @relation(name: "SksdjsbdJd", direction: "OneWay")
-
  }`;
 
 const UserActivityDump = `
@@ -57,8 +53,8 @@ const UserActivityDump = `
     type: DumpType!
     user: User @relation(name: "UserDump", direction: "OneWay")
     topic: Topic @relation(name: "TopicDump", direction: "OneWay")
-    learningObjective: LearningObjective @relation(name: "LearningObjectiveDump")
-    pqAttemptedQuestions: PQAttemptedQuestion
+    learningObjective: LearningObjective @relation(name: "LearningObjectiveDump", direction: "OneWay")
+    pqAttemptedQuestions: [PQAttemptedQuestion]
     quizAttemptedQuestions: [QuizAttemptedQuestion]
     currentMessage: Message @relation(name: "MessageDump", direction: "OneWay")
     currentVideoTime: Int

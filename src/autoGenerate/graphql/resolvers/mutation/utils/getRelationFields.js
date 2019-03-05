@@ -1,11 +1,13 @@
 // returns fields which have relation directive
 import isFieldDirectivePresent from '../../../../utils/isFieldDirectivePresent';
 import getDirectiveArgumentValue from '../../../../utils/getDirectiveArgumentValue';
-// relationFieldsArray: [ { fieldName: 'learningObjective',
-//   fieldType: { dataType: 'LearningObjective' },
-//   fieldValue: { order: 23, title: 'fsfsfsdsdfsfs' },
-//   relationName: 'LearningObjectiveDump' }
-//   ]
+/*
+relationFieldsArray: [ { fieldName: 'learningObjective',
+  fieldType: { dataType: 'LearningObjective' },
+  fieldValue: { order: 23, title: 'fsfsfsdsdfsfs' },
+  relationName: 'LearningObjectiveDump' }
+  ]
+ */
 const getRelationFields = (input, ast, typeName) => {
   const relationFieldsArray = [];
 

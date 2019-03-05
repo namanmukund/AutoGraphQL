@@ -105,7 +105,6 @@ const nestedConnectIdHandler = (
         );
         typeTypeIdArray.push(modifiedInput);
       });
-      //
       allRelationObjectsArray1toMData.push(arrayObjects);
       finalInput[inputFieldName] = typeTypeIdArray;
     } else if (typeof finalInput[inputFieldName] === 'object') {
