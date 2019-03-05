@@ -54,7 +54,7 @@ const UserActivityDump = `
     user: User @relation(name: "UserDump", direction: "OneWay")
     topic: Topic @relation(name: "TopicDump", direction: "OneWay")
     learningObjective: LearningObjective @relation(name: "LearningObjectiveDump", direction: "OneWay")
-    pqAttemptedQuestions: [PQAttemptedQuestion]
+    pqAttemptedQuestions: PQAttemptedQuestion
     quizAttemptedQuestions: [QuizAttemptedQuestion]
     currentMessage: Message @relation(name: "MessageDump", direction: "OneWay")
     currentVideoTime: Int
