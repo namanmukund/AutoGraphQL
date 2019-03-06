@@ -210,6 +210,7 @@ const localUpdateMutationPromise = async (
     relationAdditionalFieldsArray,
     arrayFieldsArray,
     historyObject,
+    nestedDisconnectObjInfo,
   );
 };
 

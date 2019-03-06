@@ -10,7 +10,7 @@ import { BiDirectionalRelationsRequiredError } from '../../../../../../constants
 export const saveReferenceInRelatedTypeField = async (relationObject, ast, authentication) => {
   // saved record type
   const {
-    type: { relatedSchemaType },
+    type: relatedSchemaType,
     recordId,
     recordType,
     field,

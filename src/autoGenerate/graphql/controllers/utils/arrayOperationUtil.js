@@ -31,6 +31,7 @@ const removeReferencesWhenDisconnected = (
           if (!nestedDisconnectObjInfo[key].data) {
             Object.assign(nestedDisconnectObjInfo, {
               [key]: {
+                ...tempDisconnectObj,
                 data: [],
               },
             });
@@ -39,7 +40,6 @@ const removeReferencesWhenDisconnected = (
           Object.assign(nestedDisconnectObjInfo, {
             [key]: {
               ...tempDisconnectObj,
-
               data: Array.isArray(data[key]) ?
                 [...nestedDisconnectObjInfo[key].data, ...data[key]] :
                 [...nestedDisconnectObjInfo[key].data, data[key]],
@@ -65,30 +65,37 @@ question:{ relationName: 'QuestionQuizDump',
  */
   //
   const promiseArray = [];
+
   Object.keys(nestedDisconnectObjInfo).forEach((nestedField) => {
-    const { data, relatedFieldName, relatedDataType, isRelatedFieldAList } = nestedField;
-    const idToBePulled = data.map(doc => doc.typeId);
-    const searchObj = {
-      id: {
-        $in: idToBePulled,
-      },
-    };
-    let updateObject = {};
-    if (isRelatedFieldAList) {
-      updateObject = {
-        $pull: {
-          [relatedFieldName]: { typeId: targetUpdateId },
+    const {
+      data,
+      relatedFieldName,
+      relatedDataType,
+      isRelatedFieldAList,
+    } = nestedDisconnectObjInfo[nestedField];
+    if (data && data.length) {
+      const idToBePulled = data.map(doc => doc.typeId);
+      const searchObj = {
+        id: {
+          $in: idToBePulled,
         },
       };
-    } else {
-      updateObject = {
-        $set: {
-          [relatedFieldName]: {},
-        },
-      };
+      let updateObject = {};
+      if (isRelatedFieldAList) {
+        updateObject = {
+          $pull: {
+            [relatedFieldName]: { typeId: targetUpdateId },
+          },
+        };
+      } else {
+        updateObject = {
+          $unset: {
+            [relatedFieldName]: '',
+          },
+        };
+      }
+      promiseArray.push(models[relatedDataType].update(searchObj, updateObject));
     }
-    // const modelMutations = new MutationController(relatedDataType, { bypass: true });
-    promiseArray.push(models[relatedDataType].update(searchObj, updateObject));
   });
 
   return Promise.all(promiseArray);
