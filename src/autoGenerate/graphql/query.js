@@ -180,6 +180,8 @@ const getFieldFilters = (fieldName, typeASTFields) => {
         fieldFilter += `${fieldName}_${allFilters.none}: ${relatedFieldFilterName},`;
         fieldFilter += `${fieldName}_${allFilters.some}: ${relatedFieldFilterName},`;
         fieldFilter += `${fieldName}_${allFilters.exists}: Boolean,`;
+        // for nested update in case of updateWhere and all
+        fieldFilter += `${fieldName}${allFilters.referenceId}: ID,`;
       }
     } else if (includes(parsedEnumTypes, fieldType)) {
       fieldFilter += generateFieldFilterForEnumTypes(fieldName, fieldType, isFielListType);

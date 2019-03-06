@@ -1,3 +1,4 @@
+import { findIndex } from 'lodash';
 import { recursiveFilter } from './processFilter';
 
 // Get single key value from object
@@ -63,6 +64,10 @@ const compileFilter = {
   // equal filter
   equal(data, key, value) {
     return [].concat(key === 'this' ? data : data[key]).some(val => val === value);
+  },
+  // find inside an object
+  checkIndex(data, key, value) {
+    return findIndex([].concat(key === 'this' ? data : data[key]), value) !== -1;
   },
 };
 

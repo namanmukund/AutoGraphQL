@@ -75,10 +75,11 @@ const allFilters = {
   exists: 'exists',
   array: 'array',
   notArray: 'notArray',
+  referenceId: 'ReferenceId',
 };
 
 const arrayUpdateAddTypes = [
-  'push', 'pushMany', 'replace', 'pushToSet', 'updateAll', 'updateWhere', 'updateWith',
+  'push', 'pushMany', 'replace', 'pushToSet', 'updateAll',
 ];
 const arrayUpdateRemoveTypes = ['popFront', 'popBack', 'popAll', 'pop',
 ];
