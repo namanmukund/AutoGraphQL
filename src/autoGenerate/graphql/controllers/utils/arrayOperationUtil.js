@@ -87,6 +87,12 @@ question:{ relationName: 'QuestionQuizDump',
             [relatedFieldName]: { typeId: targetUpdateId },
           },
         };
+      } else if (relatedDataType === 'File') {
+        updateObject = {
+          $inc: {
+            usageCount: -1,
+          },
+        };
       } else {
         updateObject = {
           $unset: {

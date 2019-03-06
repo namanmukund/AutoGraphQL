@@ -79,9 +79,10 @@ const allFilters = {
 };
 
 const arrayUpdateAddTypes = [
-  'push', 'pushMany', 'replace', 'pushToSet', 'updateAll',
+  'push', 'pushMany', 'pushToSet',
 ];
-const arrayUpdateRemoveTypes = ['popFront', 'popBack', 'popAll', 'pop',
+const arrayUpdateRemoveTypes = [
+  'popFront', 'popBack', 'popAll', 'pop',
 ];
 
 const sortBy = ['ASC', 'DESC'];
