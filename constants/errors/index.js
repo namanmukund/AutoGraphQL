@@ -45,7 +45,9 @@ import { InvalidSortFieldError, InvalidFilterArgumentsError, NotFilterRequiredEr
 import {
   NestingLevelExceedingError, BiDirectionalRelationsRequiredError, NoUniqueFieldError,
   RelationAppliedOnSameFieldsError, RemoteRelationError, DefaultDirectiveAppliedOnWrongFieldError,
-  InvalidDateFormatError } from './types';
+  InvalidDateFormatError,
+  UnsupportedListFieldInsideSubDocumentObjectError,
+} from './types';
 import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   EitherUsernameEmailOrPhoneRequiredError, InvalidNameError, InvalidNameLengthError,
   InvalidUsernameError, InvalidUsernameLengthError, EitherEmailOrPhoneNotBothRequiredError,
