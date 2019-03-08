@@ -237,7 +237,6 @@ const localAddMutationPromise = async (
         allRelationObjectsArray1to1Data,
         allRelationObjectsArray1toMData,
       );
-      console.log('.................inputMap', inputMap);
       // if error return error
       if (isErrorThrown(inputMap)) {
         return inputMap;

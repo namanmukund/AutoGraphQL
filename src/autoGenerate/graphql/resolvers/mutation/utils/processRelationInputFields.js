@@ -33,7 +33,6 @@ const validateConnectRecordCount = async (
   let connectDbRecords;
   try {
     connectDbRecords = await Promise.all(connectPromiseArray);
-    console.log(333443333, connectDbRecords, connectIdsCount);
   } catch (err) {
     throw err;
   }
@@ -44,6 +43,38 @@ const validateConnectRecordCount = async (
   });
   if (connectIdsCount !== totalRecordsPresent) {
     throw new ConnectRecordsNotFoundInDBError();
+  }
+  return true;
+};
+
+const validateNestedAlreadyConnectedIds = (
+  nestedRelationArray,
+  recordToUpdate,
+) => {
+  const connectIdsAlreadyRelated = [];
+  // check if record exist in nested  1to1 or 1toM doc
+  if (nestedRelationArray && nestedRelationArray.length) {
+    nestedRelationArray.forEach((doc) => {
+      const { parentFieldName, typeId, field } = doc;
+      const targetField = get(recordToUpdate, `${parentFieldName}`);
+      if (targetField) {
+        // typeOf can be object and array too
+        if (typeof targetField === 'object' && !Array.isArray(targetField)) {
+          if (targetField[field] && targetField[field].typeId === typeId) {
+            connectIdsAlreadyRelated.push(typeId);
+          }
+        } else if (Array.isArray(targetField)) {
+          const dataToCheck = { [field]: { typeId } };
+          if (findIndex(targetField, dataToCheck) !== -1) {
+            connectIdsAlreadyRelated.push(typeId);
+          }
+        }
+        // throw error if connect ids already related
+        if (connectIdsAlreadyRelated.length) {
+          throw new ConnectIdsArleadyRelatedError({ data: { connectIdsAlreadyRelated } });
+        }
+      }
+    });
   }
   return true;
 };
@@ -122,31 +153,18 @@ const processRelationInputFields = (
         const queryModel = new QueryController(typeName, { bypass: true });
         recordToUpdate = await queryModel.fetchById(updateRecordId);
 
-        const connectIdsAlreadyRelated = [];
-        // check if record exist in nested  1to1 or 1toM doc
-        if (allRelationObjectsArray1to1 && allRelationObjectsArray1to1.length) {
-          allRelationObjectsArray1to1.forEach((doc) => {
-            const { parentFieldName, typeId, field } = doc;
-            const targetField = get(recordToUpdate, `${parentFieldName}`);
-            if (targetField) {
-              // typeOf can be object and array too
-              if (typeof targetField === 'object' && !Array.isArray(targetField)) {
-                if (targetField[field].typeId === typeId) {
-                  connectIdsAlreadyRelated.push(typeId);
-                }
-              } else if (Array.isArray(targetField)) {
-                const dataToCheck = { [field]: { typeId } };
-                if (findIndex(targetField, dataToCheck) !== -1) {
-                  connectIdsAlreadyRelated.push(typeId);
-                }
-              }
-              // throw error if connect ids already related
-              if (connectIdsAlreadyRelated.length) {
-                throw new ConnectIdsArleadyRelatedError({ data: { connectIdsAlreadyRelated } });
-              }
-            }
-          });
-        }
+        // in case of 1to1 nested array
+        validateNestedAlreadyConnectedIds(
+          allRelationObjectsArray1to1Nested,
+          recordToUpdate,
+        );
+        // in case of 1toM nested array
+        allRelationObjectsArray1toMNested.forEach((nestedRelationArray) => {
+          validateNestedAlreadyConnectedIds(
+            nestedRelationArray,
+            recordToUpdate,
+          );
+        });
       }
 
       // logic for adding connect mutation Ids to input relation fields

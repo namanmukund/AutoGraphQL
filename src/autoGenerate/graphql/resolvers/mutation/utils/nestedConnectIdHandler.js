@@ -25,7 +25,6 @@ const nestedConnectIdHandler = (
       Object.assign(finalInput, {
         [inputFieldName]: [finalInput[inputFieldName][fieldKeys[0]]],
       });
-      console.log('before............', finalInput);
     }
     // for operations like pop, popMany and all
     if (
@@ -117,7 +116,6 @@ const nestedConnectIdHandler = (
         },
       });
     }
-    console.log('after............', finalInput);
   });
 
 

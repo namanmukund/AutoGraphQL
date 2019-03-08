@@ -82,8 +82,6 @@ const localUpdateMutationPromise = async (
   authentication,
   context,
 ) => {
-  console.log(111111, connectInputFieldsMap);
-
   const modelMutations = new MutationController(typeName, authentication);
   const {
     finalInput: modifiedInput,

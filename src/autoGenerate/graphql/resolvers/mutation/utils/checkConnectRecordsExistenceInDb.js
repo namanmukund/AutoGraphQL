@@ -46,8 +46,6 @@ const getRelatedTypeWithConnectIds = (
       throw new Error('Duplicate error');
     }
     // update the count
-    console.log(3333333, connectIdsCount, '......connectIds', connectIds);
-
     connectIdsCount += connectIds.length;
     // update connectPromiseArray
     getConnectCountInfo(
@@ -79,7 +77,6 @@ export const checkConnectRecordsExistenceInDb = (
       if (connectIds.length !== uniq(connectIds).length) {
         throw new Error('Duplicate error');
       }
-      console.log(connectIdsCount, '......connectIds', connectIds);
       connectIdsCount += connectIds.length;
       getConnectCountInfo(
         authentication,
@@ -106,8 +103,6 @@ export const checkConnectRecordsExistenceInDb = (
       );
     });
   }
-  console.log('connectPromiseArray', connectPromiseArray);
-  console.log('connectIdsCount', connectIdsCount);
 
   return { connectPromiseArray, connectIdsCount };
 };
