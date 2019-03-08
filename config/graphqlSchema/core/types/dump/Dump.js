@@ -39,9 +39,7 @@ const pqAttemptedQuestion = `
 
 const quizAttemptedQuestion = `
   type QuizAttemptedQuestion {
-   question: QuestionBank @relation(name: "AbcdEfg")
-   lo: LearningObjective @relation(name: "QuizLo")
-   thumbnail: File @relation(name: "QuizThumbnail", direction: "OneWay")
+   question: QuestionBank @relation(name: "QuestiosssnDump", direction: "OneWay")
    isCorrect: Boolean
    isAttempted: Boolean @defaultValue(value: "false")
    mcqAnswer: [McqAnswerType]
@@ -60,6 +58,7 @@ const UserActivityDump = `
     quizAttemptedQuestions: [QuizAttemptedQuestion]
     currentMessage: Message @relation(name: "MessageDump", direction: "OneWay")
     currentVideoTime: Int
+    chapter: [Chapter] @relation(name: "UsdChap", direction: "OneWay")
   }
 `;
 

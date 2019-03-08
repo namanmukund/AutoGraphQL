@@ -23,10 +23,10 @@ const nestedConnectIdHandler = (
     ) {
       isArrayUpdate = true;
       Object.assign(finalInput, {
-        [inputFieldName]: finalInput[inputFieldName][fieldKeys[0]],
+        [inputFieldName]: [finalInput[inputFieldName][fieldKeys[0]]],
       });
+      console.log('before............', finalInput);
     }
-
     // for operations like pop, popMany and all
     if (
       fieldKeys &&
@@ -36,7 +36,6 @@ const nestedConnectIdHandler = (
       const nestedFieldDataType = ast[typeName].field[inputFieldName].type.dataType;
       // info like type or directive
       const nestedFieldRelationFieldsObj = ast[nestedFieldDataType].relationFields;
-
 
       Object.keys(nestedFieldRelationFieldsObj).forEach((nestedField) => {
         const nestedFieldInfo = ast[nestedFieldDataType].field[nestedField];
@@ -69,6 +68,8 @@ const nestedConnectIdHandler = (
         }
       });
     }
+
+
     if (
       Array.isArray(finalInput[inputFieldName]) &&
             finalInput[inputFieldName].length
@@ -112,11 +113,13 @@ const nestedConnectIdHandler = (
     if (isArrayUpdate) {
       Object.assign(finalInput, {
         [inputFieldName]: {
-          [fieldKeys[0]]: finalInput[inputFieldName],
+          [fieldKeys[0]]: finalInput[inputFieldName][0],
         },
       });
     }
+    console.log('after............', finalInput);
   });
+
 
   return {
     finalInput,

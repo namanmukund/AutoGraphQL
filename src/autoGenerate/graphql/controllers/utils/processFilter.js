@@ -51,7 +51,7 @@ const recursiveFilter = (data, filterKey, filterValue) => {
   // ConnectId filter
   if (filterKeyParam.includes(allFilters.referenceId)) {
     const splitFilterKeyParam = filterKeyParam.split(allFilters.referenceId);
-    return compileFilter.checkIndex(data, splitFilterKeyParam[0], { typeId: filterValue });
+    return compileFilter.checkReferenceIndex(data, splitFilterKeyParam[0], { typeId: filterValue });
   }
 
   // not_contains filter

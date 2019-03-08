@@ -42,7 +42,9 @@ class QueryController extends MasterController {
             },
           });
         }
-        return this.Model.findOne({ id }).exec();
+        return this.Model.findOne({ id })
+          .lean()
+          .exec();
       })
       .then(res => res)
       .catch(err => err);

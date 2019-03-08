@@ -44,6 +44,7 @@ const updateInputInCaseOfNestedConnect = (
         field: nestedFieldName,
         relationName: mappingInfo[nestedFieldName].relationName,
         direction: mappingInfo[nestedFieldName].direction,
+        parentFieldName: inputFieldName,
       });
       // to update input with the required data
       Object.assign(modifiedInput, {

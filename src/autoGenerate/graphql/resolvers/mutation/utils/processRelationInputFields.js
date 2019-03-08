@@ -1,5 +1,5 @@
 // replaces relation fields in input with the relation object types
-import { findIndex } from 'lodash';
+import { findIndex, get } from 'lodash';
 import { isErrorThrown } from '../../../../../../utils';
 import { checkConnectRecordsExistenceInDb } from './checkConnectRecordsExistenceInDb';
 import {
@@ -11,6 +11,42 @@ import QueryController from '../../../controllers/QueryController';
 import { getRelationObjectMap } from './getRelationObjectMap';
 import { rollBackDocumentSaves } from './rollBackDocumentSaves';
 
+const validateConnectRecordCount = async (
+  connectInputFieldsMap,
+  ast,
+  typeName,
+  authentication,
+  allRelationObjectsArray1to1Nested,
+  allRelationObjectsArray1toMNested,
+) => {
+  const {
+    connectPromiseArray,
+    connectIdsCount,
+  } = checkConnectRecordsExistenceInDb(
+    connectInputFieldsMap,
+    ast,
+    typeName,
+    authentication,
+    allRelationObjectsArray1to1Nested,
+    allRelationObjectsArray1toMNested,
+  );
+  let connectDbRecords;
+  try {
+    connectDbRecords = await Promise.all(connectPromiseArray);
+    console.log(333443333, connectDbRecords, connectIdsCount);
+  } catch (err) {
+    throw err;
+  }
+
+  let totalRecordsPresent = 0;
+  connectDbRecords.forEach((val) => {
+    totalRecordsPresent += val;
+  });
+  if (connectIdsCount !== totalRecordsPresent) {
+    throw new ConnectRecordsNotFoundInDBError();
+  }
+  return true;
+};
 const processRelationInputFields = (
   promiseArray,
   typeName,
@@ -22,6 +58,8 @@ const processRelationInputFields = (
   allRelationObjectsArray1to1 = [],
   allRelationObjectsArray1toM = [],
 ) => {
+  const allRelationObjectsArray1to1Nested = allRelationObjectsArray1to1;
+  const allRelationObjectsArray1toMNested = allRelationObjectsArray1toM;
   const finalInput = Object.assign({}, input);
   // const allRelationObjectsArray1toM = [];
   const allSavedRelationRecords = [];
@@ -70,34 +108,45 @@ const processRelationInputFields = (
         finalInput[relationField] = relationValueToInput;
       });
       // check if the records, whose id is sent in connect inputs, exist in db
-      const {
-        connectPromiseArray,
-        connectIdsCount,
-      } = checkConnectRecordsExistenceInDb(
+      await validateConnectRecordCount(
         connectInputFieldsMap,
         ast,
         typeName,
         authentication,
+        allRelationObjectsArray1to1Nested,
+        allRelationObjectsArray1toMNested,
       );
-      let connectDbRecords;
-      try {
-        connectDbRecords = await Promise.all(connectPromiseArray);
-      } catch (err) {
-        throw err;
-      }
-
-      let totalRecordsPresent = 0;
-      connectDbRecords.forEach((val) => {
-        totalRecordsPresent += val;
-      });
-      if (connectIdsCount !== totalRecordsPresent) {
-        throw new ConnectRecordsNotFoundInDBError();
-      }
       // for update record, fetch record to be updated
       let recordToUpdate;
       if (updateRecordId) {
         const queryModel = new QueryController(typeName, { bypass: true });
         recordToUpdate = await queryModel.fetchById(updateRecordId);
+
+        const connectIdsAlreadyRelated = [];
+        // check if record exist in nested  1to1 or 1toM doc
+        if (allRelationObjectsArray1to1 && allRelationObjectsArray1to1.length) {
+          allRelationObjectsArray1to1.forEach((doc) => {
+            const { parentFieldName, typeId, field } = doc;
+            const targetField = get(recordToUpdate, `${parentFieldName}`);
+            if (targetField) {
+              // typeOf can be object and array too
+              if (typeof targetField === 'object' && !Array.isArray(targetField)) {
+                if (targetField[field].typeId === typeId) {
+                  connectIdsAlreadyRelated.push(typeId);
+                }
+              } else if (Array.isArray(targetField)) {
+                const dataToCheck = { [field]: { typeId } };
+                if (findIndex(targetField, dataToCheck) !== -1) {
+                  connectIdsAlreadyRelated.push(typeId);
+                }
+              }
+              // throw error if connect ids already related
+              if (connectIdsAlreadyRelated.length) {
+                throw new ConnectIdsArleadyRelatedError({ data: { connectIdsAlreadyRelated } });
+              }
+            }
+          });
+        }
       }
 
       // logic for adding connect mutation Ids to input relation fields
