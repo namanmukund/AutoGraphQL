@@ -31,7 +31,7 @@ const arrangeAnswer = `
 
 const pqAttemptedQuestion = `
   type PQAttemptedQuestion {
-   question: QuestionBank @relation(name: "QuestionDump", direction: "OneWay")
+   question: QuestionBank @relation(name: "QuestionAbcDump")
    attemptCount: Int
    isHintUsed: Boolean @defaultValue(value: "false")
    isAnswerUsed: Boolean @defaultValue(value: "false")

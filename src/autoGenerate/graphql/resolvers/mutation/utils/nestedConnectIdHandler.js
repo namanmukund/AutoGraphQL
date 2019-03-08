@@ -92,7 +92,11 @@ const nestedConnectIdHandler = (
       });
       allRelationObjectsArray1toMData.push(arrayObjects);
       finalInput[inputFieldName] = typeTypeIdArray;
-    } else if (typeof finalInput[inputFieldName] === 'object') {
+    } else if (
+      typeof finalInput[inputFieldName] === 'object' &&
+        !Array.isArray(finalInput[inputFieldName],
+        )
+    ) {
       const modifiedInput = {};
       const mappingInfo = {};
       const arrayObjects = [];

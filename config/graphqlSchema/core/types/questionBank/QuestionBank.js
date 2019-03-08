@@ -16,6 +16,7 @@ const QuestionBank = `
     topic: Topic @relation(name: "TopicQuestionBank")
     status: ContentStatus! @defaultValue(value: "unpublished")
     fromQuizInDump: UserActivityDump @relation(name: "AbcdEfg")
+    pqAttemptedQues: QuestionBank @relation(name: "QuestionAbcDump")
   }
 `;
 

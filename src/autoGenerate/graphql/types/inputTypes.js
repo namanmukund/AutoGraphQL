@@ -10,6 +10,7 @@ import { connectMutationsArgumentsSuffix, historyFieldName, scalarTypes } from '
 import getDirectiveArgumentValue from '../../utils/getDirectiveArgumentValue';
 import hasDirective from '../../utils/hasDirective';
 import getNestedConnectMutationString from '../../utils/getNestedConnectMutationString';
+import { UnsupportedListFieldInsideSubDocumentObjectError } from '../../../../constants/errors/types';
 
 const parsedASTMap = getParsedASTMap(schemaTypes);
 // make a input types map of input and update type schema objects
@@ -97,11 +98,14 @@ Object.keys(parsedASTMap).forEach((type) => {
         }
         // if field type is array
         if (parsedASTMap[type].field[fieldName].type.isList) {
-          key = `${relationalField}${connectMutationsArgumentsSuffix.plural}`;
-          // pushing connect [ID] field in graphql Input TypeObject
-          graphqlInputTypeObject[typeName][key] = '[ID]';
-          // pushing connect [ID] field in graphql Update TypeObject
-          graphqlUpdateTypeObject[typeName][key] = '[ID]';
+          throw new UnsupportedListFieldInsideSubDocumentObjectError(
+            {
+              data: {
+                type,
+                fieldName,
+              },
+            },
+          );
         } else {
           key = `${relationalField}${connectMutationsArgumentsSuffix.singular}`;
           // pushing connect ID field in graphql Input TypeObject
