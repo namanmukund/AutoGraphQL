@@ -37,7 +37,7 @@ const quizReportType = `
 
 const UserQuizReport = `
   type UserQuizReport @model {
-    user: User! @relation(name: "UserActivityQuizDump", direction: "OneWay")
+    user: User! @relation(name: "UserQuizReport", direction: "OneWay")
     firstQuizReport: [QuizReportType]
     latestQuizReport: [QuizReportType]
     attemptedQuestionCount: Int

@@ -12,7 +12,7 @@ const bookmarkChatType = `
 
 const UserBookmark = `
   type UserBookmark @model {
-    user: User! @relation(name: "UserActivityQuizDump", direction: "OneWay")
+    user: User! @relation(name: "UserBookmark", direction: "OneWay")
     videos: [BookmarkVideoType]
     chat: [BookmarkChatType]
   }

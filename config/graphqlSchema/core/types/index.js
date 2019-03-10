@@ -17,6 +17,7 @@ import UserActivityQuizDump from './userActivityQuizDump';
 import UserSyllabus from './userSyllabus';
 import UserQuizReport from './userQuizReport';
 import UserBookmark from './userBookmark';
+import UserProfile from './userProfile';
 
 export default [
   ...User,
@@ -38,4 +39,5 @@ export default [
   ...UserSyllabus,
   ...UserQuizReport,
   ...UserBookmark,
+  ...UserProfile,
 ];
