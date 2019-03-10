@@ -294,14 +294,13 @@ const processRelationInputFields = (
                 }
               });
             }
-            // replace input field value
-            finalInput[fieldName] = relationValueToInput;
-            allRelationObjectsArray1to1.push(relationObjectMap);
-
             // throw error if connect ids already related
             if (connectIdsAlreadyRelated.length) {
               throw new ConnectIdsArleadyRelatedError({ data: { connectIdsAlreadyRelated } });
             }
+            // replace input field value
+            finalInput[fieldName] = relationValueToInput;
+            allRelationObjectsArray1to1.push(relationObjectMap);
           }
         });
 
