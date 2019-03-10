@@ -17,6 +17,7 @@ const QuestionBank = `
     status: ContentStatus! @defaultValue(value: "unpublished")
     fromQuizInDump: UserActivityDump @relation(name: "AbcdEfg")
     pqQuestion: UserActivityDump @relation(name: "pqUserActivity")
+    questionPq: UserActivityDump @relation(name: "QuestionAbcDump")
   }
 `;
 

@@ -1,5 +1,7 @@
 import updateInputInCaseOfNestedConnect from './updateInputInCaseOfNestedConnect';
 import { arrayUpdateAddTypes, arrayUpdateRemoveTypes } from '../../../../../../constants';
+import generateObjectToBeDisconnected from './generateObjectToBeDisconnected';
+
 
 const nestedConnectIdHandler = (
   ast,
@@ -32,40 +34,12 @@ const nestedConnectIdHandler = (
           fieldKeys.length &&
         arrayUpdateRemoveTypes.includes(fieldKeys[0])
     ) {
-      const nestedFieldDataType = ast[typeName].field[inputFieldName].type.dataType;
-      // info like type or directive
-      const nestedFieldRelationFieldsObj = ast[nestedFieldDataType].relationFields;
-
-      Object.keys(nestedFieldRelationFieldsObj).forEach((nestedField) => {
-        const nestedFieldInfo = ast[nestedFieldDataType].field[nestedField];
-        const relatedDataType = nestedFieldInfo.type.dataType;
-        const relationName = nestedFieldRelationFieldsObj[nestedField];
-        const relatedDataTypeRelationalFields = ast[relatedDataType].relationFields;
-        let relatedFieldName = '';
-        let isRelatedFieldAList = false;
-        Object.keys(relatedDataTypeRelationalFields).forEach((relationObjKey) => {
-          if (relatedDataTypeRelationalFields[relationObjKey] === relationName) {
-            relatedFieldName = relationObjKey;
-          }
-        });
-        if (relatedFieldName) {
-          isRelatedFieldAList = ast[relatedDataType].field[relatedFieldName].type.isList || false;
-        }
-        if (relatedFieldName || relatedDataType === 'File') {
-          Object.assign(nestedDisconnectObjInfo, {
-            [nestedField]: {
-              relationName,
-              nestedFieldName: nestedField,
-              nestedDataType: nestedFieldDataType,
-              typeName,
-              relatedDataType,
-              removeOperationType: fieldKeys[0],
-              relatedFieldName,
-              isRelatedFieldAList,
-            },
-          });
-        }
-      });
+      generateObjectToBeDisconnected(
+        ast,
+        typeName,
+        inputFieldName,
+        nestedDisconnectObjInfo,
+      );
     }
 
 

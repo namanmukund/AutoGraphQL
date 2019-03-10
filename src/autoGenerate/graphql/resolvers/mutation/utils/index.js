@@ -9,7 +9,7 @@ import validateSignupExistingUserStatus from './validateSignupExistingUserStatus
 import checkAndDeleteReferences from './deleteUtils';
 import nestedConnectIdHandler from './nestedConnectIdHandler';
 import updateInputInCaseOfNestedConnect from './updateInputInCaseOfNestedConnect';
-
+import generateObjectToBeDisconnected from './generateObjectToBeDisconnected';
 
 export {
   remoteConnectDisconnectRelationHandler,
@@ -21,4 +21,5 @@ export {
   checkAndDeleteReferences,
   nestedConnectIdHandler,
   updateInputInCaseOfNestedConnect,
+  generateObjectToBeDisconnected,
 };

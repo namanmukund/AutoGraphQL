@@ -10,6 +10,7 @@ import {
 import QueryController from '../../../controllers/QueryController';
 import { getRelationObjectMap } from './getRelationObjectMap';
 import { rollBackDocumentSaves } from './rollBackDocumentSaves';
+import generateObjectToBeDisconnected from './generateObjectToBeDisconnected';
 
 const validateConnectRecordCount = async (
   connectInputFieldsMap,
@@ -92,6 +93,7 @@ const processRelationInputFields = (
   const allRelationObjectsArray1to1Nested = allRelationObjectsArray1to1;
   const allRelationObjectsArray1toMNested = allRelationObjectsArray1toM;
   const finalInput = Object.assign({}, input);
+  const nestedDisconnectObjInfo1to1 = {};
   // const allRelationObjectsArray1toM = [];
   const allSavedRelationRecords = [];
   return Promise.all(promiseArray)
@@ -165,6 +167,38 @@ const processRelationInputFields = (
             recordToUpdate,
           );
         });
+        // id connected from before but different id sent
+        if (allRelationObjectsArray1to1Nested && allRelationObjectsArray1to1Nested.length) {
+          allRelationObjectsArray1to1Nested.forEach((obj) => {
+            const { relationName, parentFieldName, field } = obj;
+            // if two way replace and remove connection
+            if (
+              recordToUpdate && recordToUpdate[parentFieldName] &&
+                recordToUpdate[parentFieldName][field] &&
+            recordToUpdate[parentFieldName][field].typeId &&
+                recordToUpdate[parentFieldName][field].typeId
+            ) {
+              generateObjectToBeDisconnected(
+                ast,
+                typeName,
+                parentFieldName,
+                nestedDisconnectObjInfo1to1,
+                relationName,
+              );
+              Object.keys(nestedDisconnectObjInfo1to1).forEach((key) => {
+                Object.assign(nestedDisconnectObjInfo1to1, {
+                  [key]: {
+                    ...nestedDisconnectObjInfo1to1[key],
+                    data: [{
+                      type: recordToUpdate[parentFieldName][key].type,
+                      typeId: recordToUpdate[parentFieldName][key].typeId,
+                    }],
+                  },
+                });
+              });
+            }
+          });
+        }
       }
 
       // logic for adding connect mutation Ids to input relation fields
@@ -212,11 +246,11 @@ const processRelationInputFields = (
             };
 
             /* if a reference already exists(field data also sent in input)
-             then throw error  */
+               then throw error  */
             if (
               finalInput[fieldName] &&
-              finalInput[fieldName].type &&
-              finalInput[fieldName].typeId
+                  finalInput[fieldName].type &&
+                  finalInput[fieldName].typeId
             ) {
               throw new OneToOneRelationSentInInputAndAsConnectError({
                 data: {
@@ -225,18 +259,49 @@ const processRelationInputFields = (
               });
             }
             if (recordToUpdate && recordToUpdate[fieldName] &&
-              recordToUpdate[fieldName].typeId === idToConnect) {
+                  recordToUpdate[fieldName].typeId === idToConnect) {
               // dont push if already connected
               connectIdsAlreadyRelated.push(idToConnect);
-            } else {
-              // replace input field value
-              finalInput[fieldName] = relationValueToInput;
-              allRelationObjectsArray1to1.push(relationObjectMap);
+            } else if (recordToUpdate && recordToUpdate[fieldName] &&
+                      recordToUpdate[fieldName].typeId) {
+              generateObjectToBeDisconnected(
+                ast,
+                typeName,
+                fieldName,
+                nestedDisconnectObjInfo1to1,
+                fieldRelationName,
+              );
+              // in this primary and not sub doc, relatedField will act as nestedField
+              Object.keys(nestedDisconnectObjInfo1to1).forEach((key) => {
+                const {
+                  relatedFieldName,
+                  nestedFieldName,
+                  nestedDataType,
+                  isNestedFieldAList,
+                } = nestedDisconnectObjInfo1to1[key];
+                if (relatedFieldName === fieldName) {
+                  Object.assign(nestedDisconnectObjInfo1to1, {
+                    [nestedFieldName]: {
+                      relatedFieldName: nestedFieldName,
+                      relatedDataType: nestedDataType,
+                      isRelatedFieldAList: isNestedFieldAList,
+                      data: [{
+                        type: recordToUpdate[fieldName].type,
+                        typeId: recordToUpdate[fieldName].typeId,
+                      }],
+                    },
+                  });
+                }
+              });
             }
-          }
-          // throw error if connect ids already related
-          if (connectIdsAlreadyRelated.length) {
-            throw new ConnectIdsArleadyRelatedError({ data: { connectIdsAlreadyRelated } });
+            // replace input field value
+            finalInput[fieldName] = relationValueToInput;
+            allRelationObjectsArray1to1.push(relationObjectMap);
+
+            // throw error if connect ids already related
+            if (connectIdsAlreadyRelated.length) {
+              throw new ConnectIdsArleadyRelatedError({ data: { connectIdsAlreadyRelated } });
+            }
           }
         });
 
@@ -245,6 +310,7 @@ const processRelationInputFields = (
         allRelationObjectsArray1to1,
         allRelationObjectsArray1toM,
         allSavedRelationRecords,
+        nestedDisconnectObjInfo1to1,
       };
     })
     .catch((err) => {

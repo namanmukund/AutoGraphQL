@@ -131,4 +131,5 @@ export {
   QuestionIsPublishedError,
   MessageIsPublishedError,
   FileIdIsMandatoryError,
+  UnsupportedListFieldInsideSubDocumentObjectError,
 };
