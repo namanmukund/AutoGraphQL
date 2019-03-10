@@ -70,13 +70,14 @@ const arrangeAnswer = `
    isAttempted: Boolean @defaultValue(value: "false")
    attemptNumber: Int
    arrange1: ArrangeType
-   arrange1: ArrangeType
-   arrange1: ArrangeType
-   arrange1: ArrangeType
-   arrange1: ArrangeType
-   arrange1: ArrangeType
-   arrange1: ArrangeType
-   arrange1: ArrangeType
+   arrange2: ArrangeType
+   arrange3: ArrangeType
+   arrange4: ArrangeType
+   arrange5: ArrangeType
+   arrange6: ArrangeType
+   arrange7: ArrangeType
+   arrange8: ArrangeType
+   arrange9: ArrangeType
  }`;
 
 const quizQuestionsType = `
