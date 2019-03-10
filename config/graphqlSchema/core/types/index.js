@@ -10,6 +10,10 @@ import LearningObjective from './learningObjective';
 import QuestionBank from './questionBank';
 import Message from './message';
 import Course from './course';
+import UserActivityVideoDump from './UserActivityVideoDump';
+import UserActivityChatDump from './UserActivityChatDump';
+import UserActivityPQDump from './UserActivityPQDump';
+import UserActivityQuizDump from './UserActivityQuizDump';
 
 export default [
   ...User,
@@ -24,4 +28,8 @@ export default [
   ...LearningObjective,
   ...Message,
   ...Course,
+  ...UserActivityVideoDump,
+  ...UserActivityChatDump,
+  ...UserActivityPQDump,
+  ...UserActivityQuizDump,
 ];
