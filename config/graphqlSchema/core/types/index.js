@@ -16,6 +16,7 @@ import UserActivityPQDump from './userActivityPQDump';
 import UserActivityQuizDump from './userActivityQuizDump';
 import UserSyllabus from './userSyllabus';
 import UserQuizReport from './userQuizReport';
+import UserBookmark from './userBookmark';
 
 export default [
   ...User,
@@ -36,4 +37,5 @@ export default [
   ...UserActivityQuizDump,
   ...UserSyllabus,
   ...UserQuizReport,
+  ...UserBookmark,
 ];
