@@ -15,6 +15,8 @@ import QuestionBankLayoutType from './QuestionBankLayoutType';
 import CourseTitle from './CourseTitle';
 import CourseCategory from './CourseCategory';
 import AssetActionType from './AssetActionType';
+import EnrollmentType from './EnrollmentType';
+import CurrentComponentType from './CurrentComponentType';
 
 export default [
   Status,
@@ -34,4 +36,6 @@ export default [
   CourseTitle,
   CourseCategory,
   AssetActionType,
+  EnrollmentType,
+  CurrentComponentType,
 ];
