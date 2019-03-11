@@ -121,7 +121,8 @@ const arrayOperationFunctions = {
     if (record === null || input === false) {
       return record;
     }
-    const dataToBePopped = record.map(d => d.toObject())[0];
+    const dataToBePopped = [];
+    dataToBePopped.push(record.map(d => d.toObject())[0]);
     removeReferencesWhenDisconnected(
       dataToBePopped,
       nestedDisconnectObjInfo,
@@ -140,7 +141,8 @@ const arrayOperationFunctions = {
     if (record === null || input === false) {
       return record;
     }
-    const dataToBePopped = record.map(d => d.toObject())[record.length - 1];
+    const dataToBePopped = [];
+    dataToBePopped.push(record.map(d => d.toObject())[record.length - 1]);
     removeReferencesWhenDisconnected(
       dataToBePopped,
       nestedDisconnectObjInfo,
