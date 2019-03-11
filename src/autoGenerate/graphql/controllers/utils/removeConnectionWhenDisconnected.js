@@ -54,7 +54,7 @@ const removeConnectionWhenDisconnected = (
           },
         };
       }
-      promiseArray.push(models[relatedDataType].update(searchObj, updateObject));
+      promiseArray.push(models[relatedDataType].updateMany(searchObj, updateObject));
     }
   });
 

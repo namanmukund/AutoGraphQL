@@ -24,9 +24,17 @@ const nestedConnectIdHandler = (
         arrayUpdateAddTypes.includes(fieldKeys[0])
     ) {
       isArrayUpdate = true;
-      Object.assign(finalInput, {
-        [inputFieldName]: [finalInput[inputFieldName][fieldKeys[0]]],
-      });
+      // case of pushMany
+      if (Array.isArray(finalInput[inputFieldName][fieldKeys[0]])) {
+        Object.assign(finalInput, {
+          [inputFieldName]: finalInput[inputFieldName][fieldKeys[0]],
+        });
+      } else {
+        // case of push
+        Object.assign(finalInput, {
+          [inputFieldName]: [finalInput[inputFieldName][fieldKeys[0]]],
+        });
+      }
     }
     // for operations like pop, popMany and all
     if (
@@ -88,11 +96,20 @@ const nestedConnectIdHandler = (
     }
     // if case of push or push many then restore the keywords and proceed
     if (isArrayUpdate) {
-      Object.assign(finalInput, {
-        [inputFieldName]: {
-          [fieldKeys[0]]: finalInput[inputFieldName][0],
-        },
-      });
+      // send the object as an array
+      if (fieldKeys[0] === 'pushMany') {
+        Object.assign(finalInput, {
+          [inputFieldName]: {
+            [fieldKeys[0]]: finalInput[inputFieldName],
+          },
+        });
+      } else {
+        Object.assign(finalInput, {
+          [inputFieldName]: {
+            [fieldKeys[0]]: finalInput[inputFieldName][0],
+          },
+        });
+      }
     }
   });
 
