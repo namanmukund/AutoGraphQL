@@ -11,6 +11,11 @@ const LearningObjective = `
     status: ContentStatus! @defaultValue(value: "unpublished")
     thumbnail: File @relation(name: "LearningObjectiveThumbnail", direction: "OneWay")
     messageStatus: ContentStatus! @defaultValue(value: "unpublished")
+    testQuizLO: UserActivityDump @relation(name: "QuizLo")
+    testNoFieldsInParalleltwo1to1U: [UserActivityDump] @relation(name: "RTestNoFieldsInParalleltwo1to1")
+    testNoFieldsInParalleltwo1tomU: UserActivityDump @relation(name: "RTestNoFieldsInParalleltwo1tom")
+    testNoFieldsInParalleltwo1to1UA: UserActivityDump @relation(name: "RTestNoFieldsInParalleltwo1to1A")
+    testNoFieldsInParalleltwo1tomUA: UserActivityDump @relation(name: "RTestNoFieldsInParalleltwo1tomA")
   }
 `;
 

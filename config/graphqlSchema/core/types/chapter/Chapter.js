@@ -7,6 +7,7 @@ const Chapter = `
     topics: [Topic] @relation(name: "ChapterTopic", isSubset: true)
     thumbnail: File @relation(name: "ChapterThumbnail", direction: "OneWay")
     courses: [Course] @relation(name: "CourseChapter")
+    pqUserActivity: UserActivityDump @relation(name: "chapteruserActivity")
   }
 `;
 

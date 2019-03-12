@@ -25,7 +25,13 @@ const customMerge = (record, input, arrayFieldsArray = []) => {
 /* eslint-enable no-use-before-define */
 
 // Get array field objects
-const handleArrayField = (record, input, arrayFieldsArray) => {
+const handleArrayField = (
+  record,
+  input,
+  arrayFieldsArray,
+  nestedDisconnectObjInfo = {},
+  targetUpdateId,
+) => {
   if (isPlainObject(input)) {
     const keys = Object.keys(input);
     if (keys.length > 1) {
@@ -48,7 +54,13 @@ const handleArrayField = (record, input, arrayFieldsArray) => {
         throw new InvalidArrayUpdateOperationError();
       } else if (arrayOperationFunctions[keys[0]] &&
         typeof arrayOperationFunctions[keys[0]] === 'function') {
-        return arrayOperationFunctions[keys[0]](record, input[keys[0]], arrayFieldsArray);
+        return arrayOperationFunctions[keys[0]](
+          record,
+          input[keys[0]],
+          arrayFieldsArray,
+          nestedDisconnectObjInfo,
+          targetUpdateId,
+        );
       }
     }
   }
@@ -56,8 +68,14 @@ const handleArrayField = (record, input, arrayFieldsArray) => {
 };
 
 // Get updated record object
-const getUpdatedRecordObject = (input, record, relationFieldsArray,
-  additionalRelationFieldsArray, arrayFieldsArray) => {
+const getUpdatedRecordObject = (
+  input,
+  record,
+  relationFieldsArray,
+  additionalRelationFieldsArray,
+  arrayFieldsArray,
+  nestedDisconnectObjInfo,
+) => {
   const recordDoc = record;
   Object.keys(input).forEach((field) => {
     // to make sure same reference is not added
@@ -124,7 +142,13 @@ const getUpdatedRecordObject = (input, record, relationFieldsArray,
         }
       } else {
         // Check and handle array field
-        recordDoc[field] = handleArrayField(record[field], input[field], arrayFieldsArray);
+        recordDoc[field] = handleArrayField(
+          record[field],
+          input[field],
+          arrayFieldsArray,
+          nestedDisconnectObjInfo,
+          recordDoc.id,
+        );
       }
     } else if (!input[field]) {
       /* by setting the empty field value to undefined, mongoose will

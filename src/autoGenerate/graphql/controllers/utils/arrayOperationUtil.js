@@ -1,6 +1,7 @@
 import { find, isMatch, omit } from 'lodash';
 import { processFilter } from './processFilter';
 import { customMerge, validateClassItemsUniqueness } from './utils';
+import removeConnectionWhenDisconnected from './removeConnectionWhenDisconnected';
 // Omit _id field for pushToSet check
 const omitId = (value) => {
   if (typeof value === 'object') {
@@ -15,6 +16,46 @@ const omitId = (value) => {
   return value;
 };
 
+const removeReferencesWhenDisconnected = (
+  dataToBePopped,
+  nestedDisconnectObjInfo,
+  targetUpdateId,
+) => {
+  // generate data for removing references when data is popped
+  if (dataToBePopped && dataToBePopped.length) {
+    dataToBePopped.forEach((data) => {
+      Object.keys(data).forEach((key) => {
+        if (Object.keys(nestedDisconnectObjInfo).includes(key)) {
+          // initialize data
+          const tempDisconnectObj = nestedDisconnectObjInfo[key];
+          if (!nestedDisconnectObjInfo[key].data) {
+            Object.assign(nestedDisconnectObjInfo, {
+              [key]: {
+                ...tempDisconnectObj,
+                data: [],
+              },
+            });
+          }
+          // collect all ids of same type
+          Object.assign(nestedDisconnectObjInfo, {
+            [key]: {
+              ...tempDisconnectObj,
+              data: Array.isArray(data[key]) ?
+                [...nestedDisconnectObjInfo[key].data, ...data[key]] :
+                [...nestedDisconnectObjInfo[key].data, data[key]],
+            },
+          });
+        }
+      });
+    });
+  }
+
+  // remove disconnected relation
+  removeConnectionWhenDisconnected(
+    targetUpdateId,
+    nestedDisconnectObjInfo,
+  );
+};
 
 // All array operations
 const arrayOperationFunctions = {
@@ -36,7 +77,19 @@ const arrayOperationFunctions = {
     return record;
   },
   // Replace array altogether
-  replace(record, input) {
+  replace(
+    record,
+    input,
+    arrayFieldsArray,
+    nestedDisconnectObjInfo,
+    targetUpdateId,
+  ) {
+    const dataToBePopped = record.map(d => d.toObject());
+    removeReferencesWhenDisconnected(
+      dataToBePopped,
+      nestedDisconnectObjInfo,
+      targetUpdateId,
+    );
     return input;
   },
   // Find and update an element in array
@@ -70,31 +123,81 @@ const arrayOperationFunctions = {
     });
   },
   // Delete 1st element from array
-  popFront(record, input) {
+  popFront(
+    record,
+    input,
+    arrayFieldsArray,
+    nestedDisconnectObjInfo,
+    targetUpdateId,
+  ) {
     if (record === null || input === false) {
       return record;
     }
+    const dataToBePopped = [];
+    dataToBePopped.push(record.map(d => d.toObject())[0]);
+    removeReferencesWhenDisconnected(
+      dataToBePopped,
+      nestedDisconnectObjInfo,
+      targetUpdateId,
+    );
     return record.slice(1);
   },
   // Delete last element from array
-  popBack(record, input) {
+  popBack(
+    record,
+    input,
+    arrayFieldsArray,
+    nestedDisconnectObjInfo,
+    targetUpdateId,
+  ) {
     if (record === null || input === false) {
       return record;
     }
+    const dataToBePopped = [];
+    dataToBePopped.push(record.map(d => d.toObject())[record.length - 1]);
+    removeReferencesWhenDisconnected(
+      dataToBePopped,
+      nestedDisconnectObjInfo,
+      targetUpdateId,
+    );
     return record.slice(0, record.length - 1);
   },
   // Delete all elements of array
-  popAll(record, input) {
+  popAll(
+    record,
+    input,
+    arrayFieldsArray,
+    nestedDisconnectObjInfo,
+    targetUpdateId,
+  ) {
     if (record === null || input === false) {
       return record;
     }
+    const dataToBePopped = record.map(d => d.toObject());
+    removeReferencesWhenDisconnected(
+      dataToBePopped,
+      nestedDisconnectObjInfo,
+      targetUpdateId,
+    );
     return [];
   },
   // Find and delete elements of array
-  pop(record, input) {
+  pop(
+    record,
+    input,
+    arrayFieldsArray,
+    nestedDisconnectObjInfo,
+    targetUpdateId,
+  ) {
     if (record === null) {
       return record;
     }
+    const dataToBePopped = record.filter(rec => processFilter(rec, input)).map(d => d.toObject());
+    removeReferencesWhenDisconnected(
+      dataToBePopped,
+      nestedDisconnectObjInfo,
+      targetUpdateId,
+    );
     return record.filter(rec => !processFilter(rec, input));
   },
 };

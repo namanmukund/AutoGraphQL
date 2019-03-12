@@ -7,7 +7,9 @@ import updateAndIncreaseUsageCountInFile from './updateAndIncreaseUsageCountInFi
 import updateAndDecreaseUsageCountInFile from './updateAndDecreaseUsageCountInFile';
 import validateSignupExistingUserStatus from './validateSignupExistingUserStatus';
 import checkAndDeleteReferences from './deleteUtils';
-
+import nestedConnectIdHandler from './nestedConnectIdHandler';
+import updateInputInCaseOfNestedConnect from './updateInputInCaseOfNestedConnect';
+import generateObjectToBeDisconnected from './generateObjectToBeDisconnected';
 
 export {
   remoteConnectDisconnectRelationHandler,
@@ -17,4 +19,7 @@ export {
   updateAndDecreaseUsageCountInFile,
   validateSignupExistingUserStatus,
   checkAndDeleteReferences,
+  nestedConnectIdHandler,
+  updateInputInCaseOfNestedConnect,
+  generateObjectToBeDisconnected,
 };

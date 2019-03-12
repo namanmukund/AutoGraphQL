@@ -8,13 +8,19 @@ import findFieldWithTheRelation from '../../../../utils/findFieldWithTheRelation
 import { BiDirectionalRelationsRequiredError } from '../../../../../../constants/errors';
 
 export const saveReferenceInRelatedTypeField = async (relationObject, ast, authentication) => {
-  // related record type
-  const relatedSchemaType = relationObject.type;
+  // saved record type
+  const {
+    type: relatedSchemaType,
+    recordId,
+    recordType,
+    field,
+    relationName,
+    direction,
+  } = relationObject;
   if (relatedSchemaType === 'File') {
     await updateAndIncreaseUsageCountInFile(relationObject.typeId, authentication);
   }
-  // saved record type
-  const { recordId, recordType, field, relationName, direction } = relationObject;
+
   const relatedModelMutations = new MutationController(relatedSchemaType, { bypass: true });
   const relatedModelQueries = new QueryController(relatedSchemaType, { bypass: true });
   const typeFields = ast[relatedSchemaType] && ast[relatedSchemaType].fields;

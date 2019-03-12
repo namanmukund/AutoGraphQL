@@ -1,4 +1,3 @@
-import { get } from 'lodash';
 import { MutationController, RemoteController } from '../../../controllers';
 import {
   callPrehooksForRelationsAddedInRecord,
@@ -15,122 +14,7 @@ import { createAndReturnRelationObjectsPromiseArray } from '../utils/createAndRe
 import { filterLocalInputForMutation } from '../utils/filterLocalInputForMutation';
 import { getConnectInputFieldsMap } from '../utils/getConnectInputFieldsMap';
 import { rollBackDocumentSaves } from '../utils/rollBackDocumentSaves';
-import relationDirections from '../../../../../../constants/relations';
-
-const updateInputInCaseOfNestedConnect = (
-  ast,
-  typeName,
-  inputFieldName,
-  modifiedInput,
-  arrayObjects,
-  targetObj,
-  mappingInfo,
-) => {
-  // mappingInfo to store unique mapping inside nested key
-  Object.keys(targetObj).forEach((key) => {
-    if (key && key.includes('ConnectId')) {
-      // question
-      const nestedFieldName = key.split('ConnectId')[0];
-      if (!mappingInfo[nestedFieldName]) {
-        // PQAttemptedQuestion
-        const nestedFieldDataType = ast[typeName].field[inputFieldName].type.dataType;
-        // info like type or directive
-        const nestedFieldInfo = ast[nestedFieldDataType].field[nestedFieldName];
-        // QuestionBank
-        const nestedFieldNameRelatedTypeName = nestedFieldInfo.type.dataType;
-        // direction
-        const relationInfo = nestedFieldInfo.directive.relation.argument;
-        const relationName = relationInfo.name.value.value;
-        const direction = get(relationInfo, 'direction.value.value', relationDirections.twoWay);
-        // update mappingInfo so that it can be uniquely used
-        Object.assign(mappingInfo, {
-          [nestedFieldName]: {
-            nestedFieldDataType,
-            nestedFieldNameRelatedTypeName,
-            relationName,
-            direction,
-          },
-        });
-      }
-      // to maintain the current structure of 1to1 and 1toM
-      arrayObjects.push({
-        typeId: targetObj[key],
-        type: mappingInfo[nestedFieldName].nestedFieldNameRelatedTypeName,
-        recordType: typeName,
-        field: nestedFieldName,
-        relationName: mappingInfo[nestedFieldName].relationName,
-        direction: mappingInfo[nestedFieldName].direction,
-      });
-      // to update input with the required data
-      Object.assign(modifiedInput, {
-        [nestedFieldName]: {
-          typeId: targetObj[key],
-          type: mappingInfo[nestedFieldName].nestedFieldNameRelatedTypeName,
-        },
-      });
-    } else {
-      Object.assign(modifiedInput, { [key]: targetObj[key] });
-    }
-  });
-  return null;
-};
-
-
-const nestedConnectIdHandler = (
-  ast,
-  typeName,
-  input,
-) => {
-  const finalInput = Object.assign({}, input);
-  const allRelationObjectsArray1to1Data = [];
-  const allRelationObjectsArray1toMData = [];
-  Object.keys(finalInput).forEach((inputFieldName) => {
-    if (
-      Array.isArray(finalInput[inputFieldName]) &&
-        finalInput[inputFieldName].length
-    ) {
-      const typeTypeIdArray = [];
-      const arrayObjects = [];
-      const mappingInfo = {};
-      finalInput[inputFieldName].forEach((doc) => {
-        const modifiedInput = {};
-        updateInputInCaseOfNestedConnect(
-          ast,
-          typeName,
-          inputFieldName,
-          modifiedInput,
-          arrayObjects,
-          doc,
-          mappingInfo,
-        );
-        typeTypeIdArray.push(modifiedInput);
-      });
-      allRelationObjectsArray1toMData.push(arrayObjects);
-      finalInput[inputFieldName] = typeTypeIdArray;
-    } else if (typeof finalInput[inputFieldName] === 'object') {
-      const modifiedInput = {};
-      const mappingInfo = {};
-      const arrayObjects = [];
-      updateInputInCaseOfNestedConnect(
-        ast,
-        typeName,
-        inputFieldName,
-        modifiedInput,
-        arrayObjects,
-        finalInput[inputFieldName],
-        mappingInfo,
-      );
-      finalInput[inputFieldName] = modifiedInput;
-      Object.assign(allRelationObjectsArray1to1Data, [...arrayObjects]);
-    }
-  });
-
-  return {
-    finalInput,
-    allRelationObjectsArray1to1Data,
-    allRelationObjectsArray1toMData,
-  };
-};
+import nestedConnectIdHandler from '../utils/nestedConnectIdHandler';
 
 
 // Returns remote delete mutation promises.
@@ -270,8 +154,12 @@ const localAddMutationPromise = async (
   /* eslint-enabke no-param-reassign */
   /*  if fields found with relations or connect args present,
   create relation document & return relation type object */
-  if ((relationFieldsArray && relationFieldsArray.length) ||
-    Object.keys(connectInputFieldsMap).length) {
+  if (
+    (relationFieldsArray && relationFieldsArray.length) ||
+      Object.keys(connectInputFieldsMap).length ||
+      allRelationObjectsArray1to1Data.length ||
+      allRelationObjectsArray1toMData.length
+  ) {
     const promiseArray = createAndReturnRelationObjectsPromiseArray(
       relationFieldsArray,
       typeName,
