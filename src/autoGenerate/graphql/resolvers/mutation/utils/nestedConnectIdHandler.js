@@ -40,7 +40,10 @@ const nestedConnectIdHandler = (
     if (
       fieldKeys &&
           fieldKeys.length &&
-        (arrayUpdateRemoveTypes.includes(fieldKeys[0]) || 'replace')
+        (
+          arrayUpdateRemoveTypes.includes(fieldKeys[0]) ||
+            arrayUpdateRemoveTypes.includes('replace')
+        )
     ) {
       generateObjectToBeDisconnected(
         ast,
