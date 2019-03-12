@@ -18,6 +18,7 @@ const QuestionBank = `
     fromQuizInDump: UserActivityDump @relation(name: "AbcdEfg")
     pqQuestion: UserActivityDump @relation(name: "pqUserActivity")
     usdQuiz: UserActivityDump @relation(name: "QuizUsd")
+    pqQ: QuestionBank @relation(name: "QuestionAbcDump")
   }
 `;
 

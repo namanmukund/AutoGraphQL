@@ -1,4 +1,5 @@
 import models from '../../../models';
+import deleteFromS3 from '../../../../middlewares/utils/deleteFromS3';
 
 /* nestedDisconnectObjInfo
 question:{ relationName: 'QuestionQuizDump',
@@ -36,25 +37,43 @@ const removeConnectionWhenDisconnected = (
       };
       let updateObject = {};
       if (isRelatedFieldAList) {
+        // extract relation from array
         updateObject = {
           $pull: {
             [relatedFieldName]: { typeId: targetUpdateId },
           },
         };
       } else if (relatedDataType === 'File') {
-        updateObject = {
-          $inc: {
-            usageCount: -1,
-          },
-        };
+        // find file and remove if usageCount is zero
+        const fileId = idToBePulled[0];
+        models[relatedDataType].findOne({ id: fileId })
+          .lean()
+          .exec()
+          .then((fileObj) => {
+            const { usageCount, uri } = fileObj;
+            if (usageCount > 1) {
+              updateObject = {
+                $inc: {
+                  usageCount: -1,
+                },
+              };
+            } else {
+              promiseArray.push(models[relatedDataType].findOneAndRemove({ id: fileId }).exec());
+              promiseArray.push(deleteFromS3(uri));
+            }
+          });
       } else {
+        // delete field
         updateObject = {
           $unset: {
             [relatedFieldName]: '',
           },
         };
       }
-      promiseArray.push(models[relatedDataType].updateMany(searchObj, updateObject));
+      // if the case is of file deletion then updateObject will be empty
+      if (Object.keys(updateObject).length) {
+        promiseArray.push(models[relatedDataType].updateMany(searchObj, updateObject));
+      }
     }
   });
 

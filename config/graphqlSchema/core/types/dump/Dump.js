@@ -32,6 +32,7 @@ const arrangeAnswer = `
 const pqAttemptedQuestion = `
   type PQAttemptedQuestion {
    question: QuestionBank @relation(name: "QuestionAbcDump")
+   thumbnail: File @relation(name: "PqThumbnail", direction: "OneWay")
    attemptCount: Int
    isHintUsed: Boolean @defaultValue(value: "false")
    isAnswerUsed: Boolean @defaultValue(value: "false")
@@ -40,6 +41,7 @@ const pqAttemptedQuestion = `
 const quizAttemptedQuestion = `
   type QuizAttemptedQuestion {
    question: QuestionBank @relation(name: "QuizUsd")
+   thumbnail: File @relation(name: "QuizThumbnail", direction: "OneWay")
    isCorrect: Boolean
    isAttempted: Boolean @defaultValue(value: "false")
    mcqAnswer: [McqAnswerType]
