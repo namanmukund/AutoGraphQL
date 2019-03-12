@@ -77,7 +77,19 @@ const arrayOperationFunctions = {
     return record;
   },
   // Replace array altogether
-  replace(record, input) {
+  replace(
+    record,
+    input,
+    arrayFieldsArray,
+    nestedDisconnectObjInfo,
+    targetUpdateId,
+  ) {
+    const dataToBePopped = record.map(d => d.toObject());
+    removeReferencesWhenDisconnected(
+      dataToBePopped,
+      nestedDisconnectObjInfo,
+      targetUpdateId,
+    );
     return input;
   },
   // Find and update an element in array

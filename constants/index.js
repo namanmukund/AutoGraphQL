@@ -79,7 +79,7 @@ const allFilters = {
 };
 
 const arrayUpdateAddTypes = [
-  'push', 'pushMany', 'pushToSet',
+  'push', 'pushMany', 'pushToSet', 'replace',
 ];
 const arrayUpdateRemoveTypes = [
   'popFront', 'popBack', 'popAll', 'pop',

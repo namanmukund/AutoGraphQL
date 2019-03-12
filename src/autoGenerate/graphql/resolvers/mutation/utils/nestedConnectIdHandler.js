@@ -36,11 +36,11 @@ const nestedConnectIdHandler = (
         });
       }
     }
-    // for operations like pop, popMany and all
+    // for operations like pop, popMany and replace too
     if (
       fieldKeys &&
           fieldKeys.length &&
-        arrayUpdateRemoveTypes.includes(fieldKeys[0])
+        (arrayUpdateRemoveTypes.includes(fieldKeys[0]) || 'replace')
     ) {
       generateObjectToBeDisconnected(
         ast,
@@ -97,7 +97,7 @@ const nestedConnectIdHandler = (
     // if case of push or push many then restore the keywords and proceed
     if (isArrayUpdate) {
       // send the object as an array
-      if (fieldKeys[0] === 'pushMany') {
+      if (fieldKeys[0] === 'pushMany' || fieldKeys[0] === 'replace') {
         Object.assign(finalInput, {
           [inputFieldName]: {
             [fieldKeys[0]]: finalInput[inputFieldName],
