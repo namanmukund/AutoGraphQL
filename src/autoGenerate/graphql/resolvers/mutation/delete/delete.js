@@ -53,9 +53,9 @@ const localDeleteMutationPromise = (
 ) => {
   const modelMutations = new MutationController(typeName, authentication);
   return modelMutations.deleteDocument(id).then(async (record) => {
-    // if (!record) {
-    //   return null;
-    // }
+    if (!record) {
+      return null;
+    }
     const relationFields = ast[typeName].localRelationFields;
     const relationSubsetFields = ast[typeName].localSubsetFields;
     const relationFieldNames = Object.keys(relationFields);
