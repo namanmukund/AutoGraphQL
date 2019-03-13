@@ -18,6 +18,9 @@ import UserSyllabus from './userSyllabus';
 import UserQuizReport from './userQuizReport';
 import UserBookmark from './userBookmark';
 import UserProfile from './userProfile';
+import UserHomepage from './userHomepage';
+import UserVideo from './userVideo';
+import UserLO from './userLO';
 
 export default [
   ...User,
@@ -40,4 +43,7 @@ export default [
   ...UserQuizReport,
   ...UserBookmark,
   ...UserProfile,
+  ...UserHomepage,
+  ...UserVideo,
+  ...UserLO,
 ];

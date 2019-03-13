@@ -17,6 +17,7 @@ import CourseCategory from './CourseCategory';
 import AssetActionType from './AssetActionType';
 import EnrollmentType from './EnrollmentType';
 import CurrentComponentType from './CurrentComponentType';
+import UserComponentStatus from './UserComponentStatus';
 
 export default [
   Status,
@@ -38,4 +39,5 @@ export default [
   AssetActionType,
   EnrollmentType,
   CurrentComponentType,
+  UserComponentStatus,
 ];

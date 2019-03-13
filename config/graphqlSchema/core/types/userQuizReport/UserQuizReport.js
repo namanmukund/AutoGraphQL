@@ -35,17 +35,23 @@ const quizReportType = `
    learningObjective: LearningObjective @relation(name: "LearningObjectiveUserQuizReport", direction: "OneWay")
  }`;
 
+const quizStat = `
+  type QuizStat {
+    attemptedQuestionCount: Int
+    correctQuestionCount: Int
+    totalQuestionCount: Int
+ }`;
+
 const UserQuizReport = `
   type UserQuizReport @model {
     user: User! @relation(name: "UserQuizReport", direction: "OneWay")
     firstQuizReport: [QuizReportType]
     latestQuizReport: [QuizReportType]
-    attemptedQuestionCount: Int
-    correctQuestionCount: Int
-    totalQuestionCount: Int
+    firstQuizStats: QuizStat
+    latestQuizStats: QuizStat
     topic: Topic @relation(name: "TopicUserQuizReport", direction: "OneWay")
   }
 `;
 
 export default [UserQuizReport, quizReportType, reportMcqAnswerType,
-  reportFibInputAnswerType, reportFibBlockAnswerType, reportArrangeAnswerType];
+  reportFibInputAnswerType, reportFibBlockAnswerType, reportArrangeAnswerType, quizStat];
