@@ -4,8 +4,8 @@ import { genericApiToFetchRelatedObjectQueryBasedOnTypeId } from '../../../../..
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import { ConnectionNotExistError } from '../../../../../../constants/errors';
 
-const isRelationBetweenTwoModelsOrNot = async (relationObject, typeName) => {
-  const { typeField, typeId, relatedTypeId } = relationObject;
+const isRelationBetweenTwoModelsOrNot = async (relationObject, typeName, typeField) => {
+  const { typeId, relatedTypeId } = relationObject;
   const pluralTypeName = camelCase(pluralize(typeName));
   const queryBasedOnTypeAndRelatedField = genericApiToFetchRelatedObjectQueryBasedOnTypeId(
     camelCase(typeField), relatedTypeId, pluralTypeName, typeId);

@@ -6,10 +6,11 @@ import {
   appendAdditionalRelationFieldsToTypeObject,
   getSchemaStringFromSchemaMap, getFileUploadEnumType,
 } from './utils';
-import { historyFieldName } from '../../../../constants';
+import { connectMutationsArgumentsSuffix, historyFieldName, scalarTypes } from '../../../../constants';
 import getDirectiveArgumentValue from '../../utils/getDirectiveArgumentValue';
 import hasDirective from '../../utils/hasDirective';
 import getNestedConnectMutationString from '../../utils/getNestedConnectMutationString';
+import { UnsupportedListFieldInsideSubDocumentObjectError } from '../../../../constants/errors/types';
 
 const parsedASTMap = getParsedASTMap(schemaTypes);
 // make a input types map of input and update type schema objects
@@ -67,8 +68,13 @@ Object.keys(parsedASTMap).forEach((type) => {
 
     const hasDefaultDirective = directivesObject && directivesObject.defaultValue;
     const hasAutoDirective = directivesObject && directivesObject.auto;
-    const additionalRelationFields = getDirectiveArgumentValue(parsedASTMap, typeName,
-      fieldName, 'relation', 'fields');
+    const additionalRelationFields = getDirectiveArgumentValue(
+      parsedASTMap,
+      typeName,
+      fieldName,
+      'relation',
+      'fields',
+    );
     const isAdditionalField = directivesObject && directivesObject.isRelationField;
     // have Additional fields
     let haveAdditionalFields = false;
@@ -81,46 +87,130 @@ Object.keys(parsedASTMap).forEach((type) => {
     }
     // Fill input type strings
     let isUpdateType = false;
-    const fieldInputTypeString = getFieldTypeString(fieldName, fieldType, isFieldList,
-      isObjectTypeField, isRelationField, isRequiredField, hasDefaultDirective, hasAutoDirective,
-      isUpdateType, haveAdditionalFields);
-    // Fill update type strings
-    isUpdateType = true;
-    const fieldUpdateTypeString = getFieldTypeString(fieldName, fieldType, isFieldList,
-      isObjectTypeField, isRelationField, isRequiredField,
-      hasDefaultDirective, hasAutoDirective, isUpdateType, haveAdditionalFields,
-      graphqlArrayTypeObject);
-    // add field schema to input type object
-    graphqlInputTypeObject[typeName][fieldName] = fieldInputTypeString;
-    graphqlUpdateTypeObject[typeName][fieldName] = fieldUpdateTypeString;
-    if (isModel) {
-      graphqlUpdateAllTypeObject[typeName][fieldName] = fieldUpdateTypeString;
+    if (!isModel && isRelationField && !scalarTypes.includes(type)) {
+      // generate nestedConnectMutationStringObject to be made available for relation type
+      const relationFields = definition.relationFields;
+
+      Object.keys(relationFields).forEach((relationalField) => {
+        let key;
+        if (relationalField === historyFieldName) {
+          return;
+        }
+        // if field type is array
+        if (parsedASTMap[type].field[fieldName].type.isList) {
+          throw new UnsupportedListFieldInsideSubDocumentObjectError(
+            {
+              data: {
+                type,
+                fieldName,
+              },
+            },
+          );
+        } else {
+          key = `${relationalField}${connectMutationsArgumentsSuffix.singular}`;
+          // pushing connect ID field in graphql Input TypeObject
+          graphqlInputTypeObject[typeName][key] = 'ID';
+          // pushing connect ID field in graphql Update TypeObject
+          graphqlUpdateTypeObject[typeName][key] = 'ID';
+        }
+      });
+    } else {
+      const fieldInputTypeString = getFieldTypeString(
+        fieldName,
+        fieldType,
+        isFieldList,
+        isObjectTypeField,
+        isRelationField,
+        isRequiredField,
+        hasDefaultDirective,
+        hasAutoDirective,
+        isUpdateType,
+        haveAdditionalFields,
+      );
+      // Fill update type strings
+      isUpdateType = true;
+
+      const fieldUpdateTypeString = getFieldTypeString(
+        fieldName,
+        fieldType,
+        isFieldList,
+        isObjectTypeField,
+        isRelationField,
+        isRequiredField,
+        hasDefaultDirective,
+        hasAutoDirective,
+        isUpdateType,
+        haveAdditionalFields,
+        graphqlArrayTypeObject,
+      );
+      // add field schema to input type object
+      graphqlInputTypeObject[typeName][fieldName] = fieldInputTypeString;
+      // add field schema to update type object
+      graphqlUpdateTypeObject[typeName][fieldName] = fieldUpdateTypeString;
+      if (isModel) {
+        graphqlUpdateAllTypeObject[typeName][fieldName] = fieldUpdateTypeString;
+      }
     }
+
     // if relation field, check for additional fields and add them.
     if (additionalRelationFields) {
       haveAdditionalFields = true;
-      const relationName = getDirectiveArgumentValue(parsedASTMap, typeName,
-        fieldName, 'relation', 'name');
-      graphqlInputTypeObject = appendAdditionalRelationFieldsToTypeObject(additionalRelationFields,
-        graphqlInputTypeObject, fieldType, relationName, parsedASTMap, fieldType, false,
-        graphqlArrayTypeObject);
+      const relationName = getDirectiveArgumentValue(
+        parsedASTMap,
+        typeName,
+        fieldName,
+        'relation',
+        'name',
+      );
+      graphqlInputTypeObject = appendAdditionalRelationFieldsToTypeObject(
+        additionalRelationFields,
+        graphqlInputTypeObject,
+        fieldType,
+        relationName,
+        parsedASTMap,
+        fieldType,
+        false,
+        graphqlArrayTypeObject,
+      );
       const additionalTypeName = `${typeName}_${relationName}`;
       graphqlAdditionalRelationFieldsInputTypeObject = appendAdditionalRelationFieldsToTypeObject(
-        additionalRelationFields, graphqlAdditionalRelationFieldsInputTypeObject,
-        fieldType, relationName, parsedASTMap, additionalTypeName, false, graphqlArrayTypeObject);
+        additionalRelationFields,
+        graphqlAdditionalRelationFieldsInputTypeObject,
+        fieldType,
+        relationName,
+        parsedASTMap,
+        additionalTypeName,
+        false,
+        graphqlArrayTypeObject,
+      );
       graphqlAdditionalRelationFieldsUpdateTypeObject = appendAdditionalRelationFieldsToTypeObject(
-        additionalRelationFields, graphqlAdditionalRelationFieldsUpdateTypeObject,
-        fieldType, relationName, parsedASTMap, additionalTypeName, true, graphqlArrayTypeObject);
+        additionalRelationFields,
+        graphqlAdditionalRelationFieldsUpdateTypeObject,
+        fieldType,
+        relationName,
+        parsedASTMap,
+        additionalTypeName,
+        true,
+        graphqlArrayTypeObject,
+      );
       // Add additionalFields Update fields
       const additionalFieldName = `${fieldName}_AdditionalFields`;
 
       // additionalFieldType is not a List
       const isAdditionalFieldTypeList = false;
-      const additionalFieldUpdateTypeString = getFieldTypeString(additionalFieldName,
-        `${typeName}_${relationName}`, isAdditionalFieldTypeList,
-        isObjectTypeField, false, isRequiredField,
-        hasDefaultDirective, hasAutoDirective, isUpdateType, haveAdditionalFields,
-        graphqlArrayTypeObject);
+      const additionalFieldUpdateTypeString = getFieldTypeString(
+        additionalFieldName,
+        `${typeName}_${relationName}`,
+        isAdditionalFieldTypeList,
+        isObjectTypeField,
+        false,
+        isRequiredField,
+        hasDefaultDirective,
+        hasAutoDirective,
+        isUpdateType,
+        haveAdditionalFields,
+        graphqlArrayTypeObject,
+      );
       graphqlUpdateTypeObject[typeName][additionalFieldName] =
         additionalFieldUpdateTypeString;
       if (isModel) {

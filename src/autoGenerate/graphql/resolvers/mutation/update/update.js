@@ -16,6 +16,8 @@ import { createAndReturnRelationObjectsPromiseArray } from '../utils/createAndRe
 import { filterLocalInputForMutation } from '../utils/filterLocalInputForMutation';
 import { getConnectInputFieldsMap } from '../utils/getConnectInputFieldsMap';
 import { rollBackDocumentSaves } from '../utils/rollBackDocumentSaves';
+import nestedConnectIdHandler from '../utils/nestedConnectIdHandler';
+import removeConnectionWhenDisconnected from '../../../controllers/utils/removeConnectionWhenDisconnected';
 
 // Returns remote delete mutation promises.
 const remoteUpdateMutationPromises = (
@@ -82,6 +84,19 @@ const localUpdateMutationPromise = async (
   context,
 ) => {
   const modelMutations = new MutationController(typeName, authentication);
+  const {
+    finalInput: modifiedInput,
+    allRelationObjectsArray1to1Data,
+    allRelationObjectsArray1toMData,
+    nestedDisconnectObjInfo,
+  } = nestedConnectIdHandler(
+    ast,
+    typeName,
+    input,
+  );
+  if (modifiedInput) {
+    Object.assign(input, modifiedInput);
+  }
   // get relation fields in input if existing
   const relationFieldsArray = getRelationFields(input, ast, typeName);
   /* eslint-disable no-param-reassign */
@@ -89,28 +104,56 @@ const localUpdateMutationPromise = async (
   /* eslint-enable no-param-reassign */
   /*  if fields found with relations or connect args present,
  create relation document & return relation type object */
-  if ((relationFieldsArray && relationFieldsArray.length) ||
-    Object.keys(connectInputFieldsMap).length) {
-    const promiseArray = createAndReturnRelationObjectsPromiseArray(relationFieldsArray,
-      typeName, ast, authentication, context);
+  if (
+    (relationFieldsArray && relationFieldsArray.length) ||
+    Object.keys(connectInputFieldsMap).length ||
+      allRelationObjectsArray1to1Data.length ||
+      allRelationObjectsArray1toMData.length
+  ) {
+    const promiseArray = createAndReturnRelationObjectsPromiseArray(
+      relationFieldsArray,
+      typeName,
+      ast,
+      authentication,
+      context,
+    );
     // get array of relation field names
     const relationFieldNamesArray = relationFieldsArray.map(obj => obj.fieldName);
     Object.keys(connectInputFieldsMap).forEach((field) => {
       relationFieldNamesArray.push(field);
     });
     // processes promise array and return final input
-    const inputMap = await processRelationInputFields(promiseArray,
-      typeName, input, ast, connectInputFieldsMap, id, authentication);
+    const inputMap = await processRelationInputFields(
+      promiseArray,
+      typeName,
+      input,
+      ast,
+      connectInputFieldsMap,
+      id,
+      authentication,
+      allRelationObjectsArray1to1Data,
+      allRelationObjectsArray1toMData,
+    );
 
     if (isErrorThrown(inputMap)) {
       throw inputMap;
     }
-    const { allRelationObjectsArray1to1,
-      allRelationObjectsArray1toM, allSavedRelationRecords } = inputMap;
+    const {
+      allRelationObjectsArray1to1,
+      allRelationObjectsArray1toM,
+      allSavedRelationRecords,
+      nestedDisconnectObjInfo1to1,
+    } = inputMap;
     let finalInput = inputMap.finalInput;
     // call connect prehooks for all relations added to the record
     const mutationType = 'update';
-    await callPrehooksForRelationsAddedInRecord(inputMap, id, mutationType, ast, context);
+    await callPrehooksForRelationsAddedInRecord(
+      inputMap,
+      id,
+      mutationType,
+      ast,
+      context,
+    );
 
     // handle additional relation fields sent in input
     const additionalFieldsToUpdateObject =
@@ -120,28 +163,70 @@ const localUpdateMutationPromise = async (
     // update final input etc.
     finalInput = additionalFieldsToUpdateObject.finalInput;
     // add array input fields
-    let arrayFieldsArray = getArrayFieldsFromDocumentInput(finalInput, ast, typeName);
-    arrayFieldsArray = [...arrayFieldsArray,
-      ...arrayAdditionalFields];
+    let arrayFieldsArray = getArrayFieldsFromDocumentInput(
+      finalInput,
+      ast,
+      typeName,
+    );
+    arrayFieldsArray = [
+      ...arrayFieldsArray,
+      ...arrayAdditionalFields,
+    ];
     return modelMutations
-      .updateDocument(id, finalInput, relationFieldNamesArray,
-        relationAdditionalFieldsArray, arrayFieldsArray, historyObject)
-      .then(savedRecord => saveRecordReferenceInRelatedObjects(allRelationObjectsArray1to1,
+      .updateDocument(
+        id,
+        finalInput,
+        relationFieldNamesArray,
+        relationAdditionalFieldsArray,
+        arrayFieldsArray,
+        historyObject,
+        nestedDisconnectObjInfo,
+      )
+      .then(savedRecord => saveRecordReferenceInRelatedObjects(
+        allRelationObjectsArray1to1,
         allRelationObjectsArray1toM,
         savedRecord,
         ast,
         authentication,
-      ).then(() => savedRecord)).catch((err) => {
-        rollBackDocumentSaves(allSavedRelationRecords, authentication);
+      )
+      // nestedDisconnectObjInfo1to1 for two way connection for replacing existing connection
+        .then(() => {
+          // remove disconnected relation
+          if (Object.keys(nestedDisconnectObjInfo1to1).length) {
+            removeConnectionWhenDisconnected(
+              savedRecord.id,
+              nestedDisconnectObjInfo1to1,
+            );
+          }
+          return savedRecord;
+        })
+        .then(() => savedRecord))
+      .catch((err) => {
+        rollBackDocumentSaves(
+          allSavedRelationRecords,
+          authentication,
+        );
         return err;
       });
   }
-  const { finalInput, relationAdditionalFieldsArray, arrayAdditionalFields = [] } =
-    handleAdditionalFieldsToUpdate(input, ast, typeName);
-  const arrayFieldsArray = [...getArrayFieldsFromDocumentInput(finalInput, ast, typeName),
-    ...arrayAdditionalFields];
-  return modelMutations.updateDocument(id,
-    finalInput, [], relationAdditionalFieldsArray, arrayFieldsArray, historyObject);
+  const {
+    finalInput,
+    relationAdditionalFieldsArray,
+    arrayAdditionalFields = [],
+  } = handleAdditionalFieldsToUpdate(input, ast, typeName);
+  const arrayFieldsArray = [
+    ...getArrayFieldsFromDocumentInput(finalInput, ast, typeName),
+    ...arrayAdditionalFields,
+  ];
+  return modelMutations.updateDocument(
+    id,
+    finalInput,
+    [],
+    relationAdditionalFieldsArray,
+    arrayFieldsArray,
+    historyObject,
+    nestedDisconnectObjInfo,
+  );
 };
 
 
