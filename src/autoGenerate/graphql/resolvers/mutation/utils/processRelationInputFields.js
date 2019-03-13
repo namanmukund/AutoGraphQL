@@ -3,7 +3,7 @@ import { findIndex, get } from 'lodash';
 import { isErrorThrown } from '../../../../../../utils';
 import { checkConnectRecordsExistenceInDb } from './checkConnectRecordsExistenceInDb';
 import {
-  ConnectIdsArleadyRelatedError,
+  ConnectIdsAlreadyRelatedError,
   ConnectRecordsNotFoundInDBError,
   OneToOneRelationSentInInputAndAsConnectError,
 } from '../../../../../../constants/errors';
@@ -72,7 +72,7 @@ const validateNestedAlreadyConnectedIds = (
         }
         // throw error if connect ids already related
         if (connectIdsAlreadyRelated.length) {
-          throw new ConnectIdsArleadyRelatedError({ data: { connectIdsAlreadyRelated } });
+          throw new ConnectIdsAlreadyRelatedError({ data: { connectIdsAlreadyRelated } });
         }
       }
     });
@@ -296,7 +296,7 @@ const processRelationInputFields = (
             }
             // throw error if connect ids already related
             if (connectIdsAlreadyRelated.length) {
-              throw new ConnectIdsArleadyRelatedError({ data: { connectIdsAlreadyRelated } });
+              throw new ConnectIdsAlreadyRelatedError({ data: { connectIdsAlreadyRelated } });
             }
             // replace input field value
             finalInput[fieldName] = relationValueToInput;

@@ -52,7 +52,11 @@ export const EitherPhoneOrEmailOtpRequiredError = createError('EitherPhoneOrEmai
   message: 'Either of phoneOtp or emailOtp field is mandatory',
 });
 
-export const ConnectIdsArleadyRelatedError = createError('ConnectIdsArleadyRelatedError', {
+export const ConnectIdsAlreadyRelatedError = createError('ConnectIdsAlreadyRelatedError', {
   message: 'Connect Ids sent in input have already been connected to the type',
+});
+
+export const DuplicateConnectIdsError = createError('DuplicateConnectIdsError', {
+  message: 'Duplicate connect ids sent in input',
 });
 

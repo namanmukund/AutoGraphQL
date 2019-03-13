@@ -1,6 +1,7 @@
 import { camelCase, uniq } from 'lodash';
 import pluralize from 'pluralize';
 import QueryController from '../../../controllers/QueryController';
+import { DuplicateConnectIdsError } from '../../../../../../constants/errors';
 
 const getConnectCountInfo = (
   authentication,
@@ -43,7 +44,7 @@ const getRelatedTypeWithConnectIds = (
     const { connectIds } = getRelatedConnectObj[relatedTypeName];
     // check for unique connectIds in input
     if (connectIds.length !== uniq(connectIds).length) {
-      throw new Error('Duplicate error');
+      throw new DuplicateConnectIdsError();
     }
     // update the count
     connectIdsCount += connectIds.length;
@@ -75,7 +76,7 @@ export const checkConnectRecordsExistenceInDb = (
       let connectIds = connectInputFieldsMap[fieldName];
       connectIds = Array.isArray(connectIds) ? connectIds : [connectIds];
       if (connectIds.length !== uniq(connectIds).length) {
-        throw new Error('Duplicate error');
+        throw new DuplicateConnectIdsError();
       }
       connectIdsCount += connectIds.length;
       getConnectCountInfo(

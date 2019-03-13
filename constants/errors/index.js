@@ -53,7 +53,8 @@ import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   InvalidUsernameError, InvalidUsernameLengthError, EitherEmailOrPhoneNotBothRequiredError,
   PhoneNumberAndCountryCodeRequiredError, EitherPhoneOrEmailOtpRequiredError,
   EmailNotVerifiedError, PhoneNotVerifiedError,
-  ConnectIdsArleadyRelatedError,
+  ConnectIdsAlreadyRelatedError,
+  DuplicateConnectIdsError,
 } from './input';
 
 
@@ -111,7 +112,7 @@ export {
   InvalidFileUploadExtensionError,
   InvalidFileUploadSizeAndExtensionError,
   InvalidFieldType,
-  ConnectIdsArleadyRelatedError,
+  ConnectIdsAlreadyRelatedError,
   FileUsageCountNotZeroError,
   PhoneNotVerifiedError,
   EmailNotVerifiedError,
@@ -132,4 +133,5 @@ export {
   MessageIsPublishedError,
   FileIdIsMandatoryError,
   UnsupportedListFieldInsideSubDocumentObjectError,
+  DuplicateConnectIdsError,
 };

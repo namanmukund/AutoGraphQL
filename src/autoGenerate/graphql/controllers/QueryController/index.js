@@ -42,6 +42,7 @@ class QueryController extends MasterController {
             },
           });
         }
+        // use lean to get working object instead of mongoose
         return this.Model.findOne({ id })
           .lean()
           .exec();
