@@ -39,9 +39,15 @@ class MutationController extends MasterController {
       .then(result => result);
   }
   // accepts id of doc to update along with the fields that have to be modified
-  updateDocument(id, input, relationFieldsArray = [],
-    additionalRelationFieldsArray = [], arrayFieldsArray = [],
-    historyObject = {}) {
+  updateDocument(
+    id,
+    input,
+    relationFieldsArray = [],
+    additionalRelationFieldsArray = [],
+    arrayFieldsArray = [],
+    historyObject = {},
+    nestedDisconnectObjInfo = {},
+  ) {
     return this.validatePermissions({ id,
       input,
       relationFieldsArray,
@@ -69,12 +75,19 @@ class MutationController extends MasterController {
           already exist in the relation field and then
          replace the fields in record with the input fields
          */
-        record = getUpdatedRecordObject(input, record, relationFieldsArray,
-          additionalRelationFieldsArray, arrayFieldsArray);
+        record = getUpdatedRecordObject(
+          input,
+          record,
+          relationFieldsArray,
+          additionalRelationFieldsArray,
+          arrayFieldsArray,
+          nestedDisconnectObjInfo,
+        );
         const hookMetaData = {
           ...historyObject,
           authentication: this.authentication,
         };
+
         return record.save(hookMetaData);
       })
       .then(updated => updated);

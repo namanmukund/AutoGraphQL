@@ -1,6 +1,7 @@
 import { map } from 'lodash';
 import compileFilter from './compileFilter';
 import { splitOnFirstUnderscore } from './utils';
+import { allFilters } from '../../../../../constants';
 
 // Processes a filter
 const processFilter = (data, filterParam) => {
@@ -47,6 +48,12 @@ const recursiveFilter = (data, filterKey, filterValue) => {
   if (filterKeyParam === 'contains') {
     return compileFilter.contains(data, filterKeyName, filterValue);
   }
+  // ConnectId filter
+  if (filterKeyParam.includes(allFilters.referenceId)) {
+    const splitFilterKeyParam = filterKeyParam.split(allFilters.referenceId);
+    return compileFilter.checkReferenceIndex(data, splitFilterKeyParam[0], { typeId: filterValue });
+  }
+
   // not_contains filter
   if (filterKeyParam === 'not_contains') {
     return compileFilter.not_contains(data, filterKeyName, filterValue);

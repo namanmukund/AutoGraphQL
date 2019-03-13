@@ -1,7 +1,11 @@
 import { trimEnd } from 'lodash';
 import { connectMutationsArgumentsSuffix, historyFieldName } from '../../../constants';
 
-const getNestedConnectMutationString = (relationFields, type, parsedASTMap) => {
+const getNestedConnectMutationString = (
+  relationFields,
+  type,
+  parsedASTMap,
+) => {
   let connectMutationString = '';
   Object.keys(relationFields).forEach((fieldName) => {
     if (fieldName === historyFieldName) {

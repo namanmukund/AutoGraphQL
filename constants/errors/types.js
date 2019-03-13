@@ -26,3 +26,7 @@ export const DefaultDirectiveAppliedOnWrongFieldError = createError('DefaultDire
 export const InvalidDateFormatError = createError('InvalidDateFormatError', {
   message: 'Input Date is of invalid format',
 });
+
+export const UnsupportedListFieldInsideSubDocumentObjectError = createError('UnsupportedListFieldInsideSubDocumentObjectError', {
+  message: 'List field inside sub document object is not supported. Prefer flat hierarchy here.',
+});

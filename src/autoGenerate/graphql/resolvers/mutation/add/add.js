@@ -14,6 +14,8 @@ import { createAndReturnRelationObjectsPromiseArray } from '../utils/createAndRe
 import { filterLocalInputForMutation } from '../utils/filterLocalInputForMutation';
 import { getConnectInputFieldsMap } from '../utils/getConnectInputFieldsMap';
 import { rollBackDocumentSaves } from '../utils/rollBackDocumentSaves';
+import nestedConnectIdHandler from '../utils/nestedConnectIdHandler';
+
 
 // Returns remote delete mutation promises.
 const remoteAddMutationPromises = (
@@ -90,7 +92,22 @@ const rollBack = (
   //   return null;
   // });
 };
-
+/*
+typeName: "UserActivityDump"
+connectInputFieldsMap: {
+  "user": "cjj0zpybo00001f0ckk9zrpxr",
+  "topic": "cjss0o4wo00011h03blrjmn2p"
+}
+input: {
+  "type": "video",
+  "learningObjective": {
+    "order": 3,
+    "title": "test"
+  },
+  "currentVideoTime": 19000,
+  "id": "cjst9lcnt0000gcruxuo2g9te"
+}
+ */
 
 const localAddMutationPromise = async (
   typeName,
@@ -102,21 +119,124 @@ const localAddMutationPromise = async (
 ) => {
   const modelMutations = new MutationController(typeName, authentication);
   // get fields from input which have relation directive
+  /*
+    relationFieldsArray: [
+    {
+      "fieldName": "learningObjective",
+      "fieldType": {
+        "dataType": "LearningObjective"
+      },
+      "fieldValue": {
+        "order": 3,
+        "title": "test"
+      },
+      "relationName": "LearningObjectiveDump"
+    }
+  ]
+   */
+
+  const {
+    finalInput: modifiedInput,
+    allRelationObjectsArray1to1Data,
+    allRelationObjectsArray1toMData,
+  } = nestedConnectIdHandler(
+    ast,
+    typeName,
+    input,
+  );
+  if (modifiedInput) {
+    Object.assign(input, modifiedInput);
+  }
+
   const relationFieldsArray = getRelationFields(input, ast, typeName);
   /* eslint-disable no-param-reassign */
   context.mutationOrQueryName = `add${typeName}`;
   /* eslint-enabke no-param-reassign */
   /*  if fields found with relations or connect args present,
   create relation document & return relation type object */
-  if ((relationFieldsArray && relationFieldsArray.length) ||
-    Object.keys(connectInputFieldsMap).length) {
-    const promiseArray = createAndReturnRelationObjectsPromiseArray(relationFieldsArray,
-      typeName, ast, authentication, context);
+  if (
+    (relationFieldsArray && relationFieldsArray.length) ||
+      Object.keys(connectInputFieldsMap).length ||
+      allRelationObjectsArray1to1Data.length ||
+      allRelationObjectsArray1toMData.length
+  ) {
+    const promiseArray = createAndReturnRelationObjectsPromiseArray(
+      relationFieldsArray,
+      typeName,
+      ast,
+      authentication,
+      context,
+    );
     // processes promise array and return final input
+    /*
+    inputMap: {
+    "finalInput": {
+      "type": "video",
+      "learningObjective": {
+        "type": "LearningObjective",
+        "typeId": "cjst9qqpb0001gcrunbi90iot"
+      },
+      "currentVideoTime": 19000,
+      "id": "cjst9lcnt0000gcruxuo2g9te",
+      "user": {
+        "type": "User",
+        "typeId": "cjj0zpybo00001f0ckk9zrpxr"
+      },
+      "topic": {
+        "type": "Topic",
+        "typeId": "cjss0o4wo00011h03blrjmn2p"
+      }
+    },
+    "allRelationObjectsArray1to1": [
+      {
+        "type": "LearningObjective",
+        "recordType": "UserActivityDump",
+        "typeId": "cjst9qqpb0001gcrunbi90iot",
+        "field": "learningObjective",
+        "relationName": "LearningObjectiveDump",
+        "additionalRelationFieldsObject": {}
+      },
+      {
+        "type": "User",
+        "recordType": "UserActivityDump",
+        "typeId": "cjj0zpybo00001f0ckk9zrpxr",
+        "field": "user",
+        "relationName": "UserDump"
+      },
+      {
+        "type": "Topic",
+        "recordType": "UserActivityDump",
+        "typeId": "cjss0o4wo00011h03blrjmn2p",
+        "field": "topic",
+        "relationName": "TopicDump"
+      }
+    ],
+    "allRelationObjectsArray1toM": [],
+    "allSavedRelationRecords": [
+      {
+        "type": "LearningObjective",
+        "recordType": "UserActivityDump",
+        "typeId": "cjst9qqpb0001gcrunbi90iot",
+        "field": "learningObjective",
+        "relationName": "LearningObjectiveDump",
+        "additionalRelationFieldsObject": {}
+      }
+    ]
+    }
+     */
     let inputMap;
     try {
-      inputMap = await processRelationInputFields(promiseArray,
-        typeName, input, ast, connectInputFieldsMap, null, authentication);
+      inputMap = await processRelationInputFields(
+        promiseArray,
+        typeName,
+        input,
+        ast,
+        connectInputFieldsMap,
+        null,
+        authentication,
+        allRelationObjectsArray1to1Data,
+        allRelationObjectsArray1toMData,
+      );
       // if error return error
       if (isErrorThrown(inputMap)) {
         return inputMap;
@@ -126,23 +246,68 @@ const localAddMutationPromise = async (
     }
     // call connection prehooks for all relations added in the record
     const mutationType = 'add';
-    await callPrehooksForRelationsAddedInRecord(inputMap, input.id,
-      mutationType, ast, context);
-    const { finalInput, allRelationObjectsArray1to1,
-      allRelationObjectsArray1toM, allSavedRelationRecords } = inputMap;
+    await callPrehooksForRelationsAddedInRecord(
+      inputMap,
+      input.id,
+      mutationType,
+      ast,
+      context,
+    );
+    const {
+      finalInput,
+      allRelationObjectsArray1to1,
+      allRelationObjectsArray1toM,
+      allSavedRelationRecords,
+    } = inputMap;
     return modelMutations.addDocument(finalInput)
       .then((savedRecord) => {
+        /*
+        savedRecord: {
+            "currentMessage": {},
+            "_id": "5c7c22550844edc2acad4566",
+            "type": "video",
+            "learningObjective": {
+              "type": "LearningObjective",
+              "typeId": "cjst9qqpb0001gcrunbi90iot"
+            },
+            "currentVideoTime": 19000,
+            "id": "cjst9lcnt0000gcruxuo2g9te",
+            "user": {
+              "type": "User",
+              "typeId": "cjj0zpybo00001f0ckk9zrpxr"
+            },
+            "topic": {
+              "type": "Topic",
+              "typeId": "cjss0o4wo00011h03blrjmn2p"
+            },
+            "pqAttemptedQuestions": [],
+            "quizAttemptedQuestions": [],
+            "createdAt": "2019-03-03T18:52:05.639Z",
+            "updatedAt": "2019-03-03T18:52:05.639Z",
+            "__v": 0
+          }
+         */
         // TODO: add save additional fields logic in saved related records
         const savedObject = { type: typeName, typeId: savedRecord.id };
+        /*
+        savedObject: {
+              "type": "UserActivityDump",
+              "typeId": "cjst9lcnt0000gcruxuo2g9te"
+            }
+         */
         allSavedRelationRecords.push(savedObject);
-        return saveRecordReferenceInRelatedObjects(allRelationObjectsArray1to1,
+        return saveRecordReferenceInRelatedObjects(
+          allRelationObjectsArray1to1,
           allRelationObjectsArray1toM,
           savedRecord,
           ast,
           authentication,
         ).then(() => savedRecord);
       }).catch((err) => {
-        rollBackDocumentSaves(allSavedRelationRecords, authentication);
+        rollBackDocumentSaves(
+          allSavedRelationRecords,
+          authentication,
+        );
         return err;
       });
   }

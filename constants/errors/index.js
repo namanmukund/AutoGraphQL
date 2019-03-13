@@ -45,13 +45,16 @@ import { InvalidSortFieldError, InvalidFilterArgumentsError, NotFilterRequiredEr
 import {
   NestingLevelExceedingError, BiDirectionalRelationsRequiredError, NoUniqueFieldError,
   RelationAppliedOnSameFieldsError, RemoteRelationError, DefaultDirectiveAppliedOnWrongFieldError,
-  InvalidDateFormatError } from './types';
+  InvalidDateFormatError,
+  UnsupportedListFieldInsideSubDocumentObjectError,
+} from './types';
 import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   EitherUsernameEmailOrPhoneRequiredError, InvalidNameError, InvalidNameLengthError,
   InvalidUsernameError, InvalidUsernameLengthError, EitherEmailOrPhoneNotBothRequiredError,
   PhoneNumberAndCountryCodeRequiredError, EitherPhoneOrEmailOtpRequiredError,
   EmailNotVerifiedError, PhoneNotVerifiedError,
-  ConnectIdsArleadyRelatedError,
+  ConnectIdsAlreadyRelatedError,
+  DuplicateConnectIdsError,
 } from './input';
 
 
@@ -109,7 +112,7 @@ export {
   InvalidFileUploadExtensionError,
   InvalidFileUploadSizeAndExtensionError,
   InvalidFieldType,
-  ConnectIdsArleadyRelatedError,
+  ConnectIdsAlreadyRelatedError,
   FileUsageCountNotZeroError,
   PhoneNotVerifiedError,
   EmailNotVerifiedError,
@@ -129,4 +132,6 @@ export {
   QuestionIsPublishedError,
   MessageIsPublishedError,
   FileIdIsMandatoryError,
+  UnsupportedListFieldInsideSubDocumentObjectError,
+  DuplicateConnectIdsError,
 };

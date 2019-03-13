@@ -1,9 +1,7 @@
-import { get } from 'lodash';
-import { QueryController, MutationController } from '../../../controllers';
-import {
-  remoteConnectDisconnectRelationHandler,
-} from '../utils';
-import { getFieldsBeingFetched, getDirectiveArgumentValue, hasDirective } from '../../../../utils';
+import { camelCase, get } from 'lodash';
+import { MutationController, QueryController } from '../../../controllers';
+import { remoteConnectDisconnectRelationHandler } from '../utils';
+import { getDirectiveArgumentValue, getFieldsBeingFetched, hasDirective } from '../../../../utils';
 import { relationDirections } from '../../../../../../constants';
 import { ConnectMutationsArgumentsLimitError } from '../../../../../../constants/errors';
 import updateAndDecreaseUsageCountInFile from '../utils/updateAndDecreaseUsageCountInFile';
@@ -49,12 +47,16 @@ const removeRelationMutationResolver = (
   typeName,
   relatedType,
   relationName,
+  typeField,
+  relatedTypeField,
   info,
   ast,
   authentication,
 ) => {
   const argumentKeys = Object.keys(params);
   const { history } = params;
+  const typeNameString = camelCase(typeName);
+  const relatedTypeString = camelCase(relatedType);
   // check for only two fields allowed in connect mutation
   const { directives } = ast[typeName];
   const isVersionModelToBeMade = hasDirective(directives, 'history');
@@ -67,13 +69,23 @@ const removeRelationMutationResolver = (
   }
   /* params are modified because in the arguments if we are passing code then
    modify that argument to its type id */
-  return createModifiedParamsBasedOnParams(params, typeName, relatedType).then((modifiedParams) => {
-    const relationFieldAndIdObject =
-    getTypeAndRelatedTypesObjectFromConnectArguments(modifiedParams, typeName, relatedType);
-    const { typeField, relatedTypeField, typeId, relatedTypeId } = relationFieldAndIdObject;
+  return createModifiedParamsBasedOnParams(
+    params,
+    typeNameString,
+    relatedTypeString,
+  ).then((modifiedParams) => {
+    const relationIdObject =
+    getTypeAndRelatedTypesObjectFromConnectArguments(
+      modifiedParams,
+      typeNameString,
+    );
+    const { typeId, relatedTypeId } = relationIdObject;
     // check if relation exists and if not then throw error
-    return isRelationBetweenTwoModelsOrNot(relationFieldAndIdObject,
-      typeName).then(() => {
+    return isRelationBetweenTwoModelsOrNot(
+      relationIdObject,
+      typeName,
+      typeField,
+    ).then(() => {
       // Fields which are requested.
       const { fieldName, fieldNodes } = info;
       const fieldsFetched = getFieldsBeingFetched(fieldNodes);
@@ -130,9 +142,16 @@ const removeRelationMutationResolver = (
             }
           }
         }
-        const returnObject = getReturnObjectForConnectMutation(values, typeName, typeField, typeId,
-          relatedType, relatedTypeField, relatedTypeId);
-        return returnObject;
+
+        return getReturnObjectForConnectMutation(
+          values,
+          typeNameString,
+          typeField,
+          typeId,
+          relatedTypeString,
+          relatedTypeField,
+          relatedTypeId,
+        );
       });
     });
   }).catch((err) => {

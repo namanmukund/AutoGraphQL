@@ -75,7 +75,15 @@ const allFilters = {
   exists: 'exists',
   array: 'array',
   notArray: 'notArray',
+  referenceId: 'ReferenceId',
 };
+
+const arrayUpdateAddTypes = [
+  'push', 'pushMany', 'pushToSet', 'replace',
+];
+const arrayUpdateRemoveTypes = [
+  'popFront', 'popBack', 'popAll', 'pop',
+];
 
 const sortBy = ['ASC', 'DESC'];
 const smsOTPMessage = {
@@ -145,4 +153,6 @@ export {
   PUBLISHED,
   UNPUBLISHED,
   regexValidation,
+  arrayUpdateAddTypes,
+  arrayUpdateRemoveTypes,
 };
