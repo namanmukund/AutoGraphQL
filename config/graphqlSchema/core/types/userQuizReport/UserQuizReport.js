@@ -49,6 +49,7 @@ const UserQuizReport = `
     latestQuizReport: [QuizReportType]
     firstQuizStats: QuizStat
     latestQuizStats: QuizStat
+    quizStatus: UserComponentStatus
     topic: Topic @relation(name: "TopicUserQuizReport", direction: "OneWay")
   }
 `;
