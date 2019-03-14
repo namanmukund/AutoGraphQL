@@ -1,6 +1,11 @@
 const LearningObjective = `
-  type LearningObjective @model {
-    order: Int!
+  type LearningObjective @model 
+  @allowedApps(list:["appOne", "appTwo"]) 
+  @allowedUsers(list:["admin", "student"])
+  {
+    order: Int! 
+           @allowedApps(list:["appOne", "appTwo"])
+           @allowedUsers(list:["tekie", "student"])
     title: String! @unique @length(min: 6, max: 120) @trim
     description: String @uniqueOrEmpty @unique @length(min: 6, max: 120) @trim
     videoStartTime: Int

@@ -3,12 +3,40 @@
 object maps of the arrays present in the unparsed graphql ast
 examples: field : fields, argument : arguments, directive : directives
 Here fields is an object map of fields array with field names as the keys of the map */
+import { get } from 'lodash';
 import { concatenateTypeDefs } from 'graphql-tools';
 import {
   parse,
 } from 'graphql';
 import getParsedField from './getParsedField';
 
+const getAllowedAppOrUserInfo = (
+  directives,
+  allowedDirectiveName,
+) => {
+  const allowedDirectiveArray = [];
+  if (directives && directives.length) {
+    directives.forEach((directive) => {
+      if (get(directive, 'name.value') === allowedDirectiveName) {
+        if (get(directive, 'arguments[0].name.value') === 'list') {
+          const values = get(directive, 'arguments[0].value.values');
+          if (values && values.length) {
+            values.forEach((listValue) => {
+              const { value } = listValue;
+              if (value) {
+                allowedDirectiveArray.push(value);
+              }
+            });
+          }
+        }
+      }
+    });
+  }
+  return (
+    (allowedDirectiveArray && allowedDirectiveArray.length) ?
+      allowedDirectiveArray : 'all'
+  );
+};
 const getParsedASTMap = (graphqlSchemaTypes) => {
   const initialAST = parse(concatenateTypeDefs(graphqlSchemaTypes));
   /*
@@ -20,11 +48,21 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
   // To store final parsed AST Object.
   const parsedASTObject = {};
   definitions.forEach((definition) => {
-    const { kind, fields, ...props } = definition;
+    const { name: { value: typeName }, directives, kind, fields, ...props } = definition;
     // not making type ast for graphql input types(remove check if input types ast required)
     if (kind !== 'ObjectTypeDefinition' || !fields || !fields.length) {
       return null;
     }
+    // on typeName level
+    const allowedApps = getAllowedAppOrUserInfo(
+      directives,
+      'allowedApps',
+    );
+
+    const allowedUsers = getAllowedAppOrUserInfo(
+      directives,
+      'allowedUsers',
+    );
     // To store fields Object for each field.
     const fieldsObject = {};
     // To Store all relation fields.
@@ -164,6 +202,20 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
               defaultFields.push(fieldName);
               break;
 
+            case 'allowedApps':
+              parsedField.allowedApps = getAllowedAppOrUserInfo(
+                parsedField.directives,
+                'allowedApps',
+              );
+              break;
+
+            case 'allowedUsers':
+              parsedField.allowedUsers = getAllowedAppOrUserInfo(
+                parsedField.directives,
+                'allowedUsers',
+              );
+              break;
+
             default:
             // Do nothing.
           }
@@ -264,6 +316,8 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
       remoteNonNullAndUniqueFieldsApplicationWise,
       defaultFieldsWithValue,
       additionalRelationFields,
+      allowedApps,
+      allowedUsers,
     });
 
     return null;
