@@ -21,6 +21,7 @@ import UserProfile from './userProfile';
 import UserHomepage from './userHomepage';
 import UserVideo from './userVideo';
 import UserLO from './userLO';
+import UserJourney from './userJourney';
 
 export default [
   ...User,
@@ -46,4 +47,5 @@ export default [
   ...UserHomepage,
   ...UserVideo,
   ...UserLO,
+  ...UserJourney,
 ];
