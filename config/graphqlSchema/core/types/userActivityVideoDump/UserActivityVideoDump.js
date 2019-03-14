@@ -25,7 +25,7 @@ const UserActivityVideoDump = `
     videoShare: [VideoShareType]
     bookmarkCount: Int
     isLiked: Boolean @defaultValue(value: "false")
-    videoAction: AssetActionType
+    videoAction: UserActionType
     videoWatchTime: [VideoWatchTimeType]
     maxMinVideoCollapseTime: Int
     playPauseCount: Int

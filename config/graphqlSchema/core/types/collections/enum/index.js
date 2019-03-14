@@ -14,7 +14,7 @@ import AssessmentType from './AssessmentType';
 import QuestionBankLayoutType from './QuestionBankLayoutType';
 import CourseTitle from './CourseTitle';
 import CourseCategory from './CourseCategory';
-import AssetActionType from './AssetActionType';
+import UserActionType from './UserActionType';
 import EnrollmentType from './EnrollmentType';
 import CurrentComponentType from './CurrentComponentType';
 import UserComponentStatus from './UserComponentStatus';
@@ -36,7 +36,7 @@ export default [
   QuestionBankLayoutType,
   CourseTitle,
   CourseCategory,
-  AssetActionType,
+  UserActionType,
   EnrollmentType,
   CurrentComponentType,
   UserComponentStatus,

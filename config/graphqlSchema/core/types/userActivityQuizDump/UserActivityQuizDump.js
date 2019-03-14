@@ -21,8 +21,6 @@ const arrangeType = `
 
 const mcqAnswer = `
   type McqAnswerType {
-   isCorrect: Boolean @defaultValue(value: "false")
-   isAttempted: Boolean @defaultValue(value: "false")
    attemptNumber: Int
    option1: OptionType
    option2: OptionType
@@ -34,8 +32,6 @@ const mcqAnswer = `
 
 const fibInputAnswer = `
   type FibInputAnswerType {
-   isCorrect: Boolean @defaultValue(value: "false")
-   isAttempted: Boolean @defaultValue(value: "false")
    attemptNumber: Int
    blank1: BlankType
    blank2: BlankType
@@ -50,8 +46,6 @@ const fibInputAnswer = `
 
 const fibBlockAnswer = `
   type FibBlockAnswerType {
-   isCorrect: Boolean @defaultValue(value: "false")
-   isAttempted: Boolean @defaultValue(value: "false")
    attemptNumber: Int
    block1: BlockType
    block2: BlockType
@@ -66,8 +60,6 @@ const fibBlockAnswer = `
 
 const arrangeAnswer = `
   type ArrangeAnswerType {
-   isCorrect: Boolean @defaultValue(value: "false")
-   isAttempted: Boolean @defaultValue(value: "false")
    attemptNumber: Int
    arrange1: ArrangeType
    arrange2: ArrangeType
@@ -83,8 +75,9 @@ const arrangeAnswer = `
 const quizQuestionsType = `
   type QuizQuestionsType {
    question: QuestionBank @relation(name: "QuestionUserActivityQuizDump", direction: "OneWay")
-   questionAction: AssetActionType
+   questionAction: UserActionType
    questionDisplayOrder: Int
+   isAttempted: Boolean @defaultValue(value: "false")
    mcqAnswer: [McqAnswerType]
    fibInputAnswer: [FibInputAnswerType]
    fibBlockAnswer: [FibBlockAnswerType]
@@ -93,9 +86,9 @@ const quizQuestionsType = `
 
 const UserActivityQuizDump = `
   type UserActivityQuizDump @model {
-    user: User @relation(name: "UserActivityQuizDump", direction: "OneWay")
+    user: User! @relation(name: "UserActivityQuizDump", direction: "OneWay")
     quizQuestions: [QuizQuestionsType]
-    quizAction: AssetActionType
+    quizAction: UserActionType
     topic: Topic @relation(name: "TopicUserActivityQuizDump", direction: "OneWay")
   }
 `;

@@ -86,7 +86,7 @@ const pqArrangeAnswer = `
 const practiceQuestionsType = `
   type PracticeQuestionsType {
    question: QuestionBank @relation(name: "QuestionUserActivityPQDump", direction: "OneWay")
-   questionAction: AssetActionType
+   questionAction: UserActionType
    questionDisplayOrder: Int
    mcqAnswer: [PQMcqAnswerType]
    fibInputAnswer: [PQFibInputAnswerType]
@@ -108,7 +108,7 @@ const UserActivityPQDump = `
     pqShare: [PQShareType]
     bookmarkCount: Int
     practiceQuestions: [PracticeQuestionsType]
-    pqAction: AssetActionType
+    pqAction: UserActionType
     learningObjective: LearningObjective @relation(name: "LearningObjectiveUserActivityPQDump", direction: "OneWay")
     topic: Topic @relation(name: "TopicUserActivityPQDump", direction: "OneWay")
   }

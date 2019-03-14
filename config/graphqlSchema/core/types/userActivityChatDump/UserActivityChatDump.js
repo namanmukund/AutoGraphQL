@@ -19,7 +19,7 @@ const UserActivityChatDump = `
     bookmarkCount: Int
     currentMessage: Message @relation(name: "MessageUserActivityChatDump", direction: "OneWay")
     terminalTryMessage: [TerminalTryMessageType]
-    chatAction: AssetActionType
+    chatAction: UserActionType
     learningObjective: LearningObjective @relation(name: "LearningObjectiveUserActivityChatDump", direction: "OneWay")
     topic: Topic @relation(name: "TopicUserActivityChatDump", direction: "OneWay")
   }

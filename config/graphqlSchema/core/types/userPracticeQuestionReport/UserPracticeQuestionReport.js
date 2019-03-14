@@ -1,13 +1,13 @@
-const UserPQReport = `
-  type UserPQReport @model {
+const UserPracticeQuestionReport = `
+  type UserPracticeQuestionReport {
     learningObjective: LearningObjective @relation(name: "UserPQReport", direction: "OneWay")
     user: User! @relation(name: "UserLO", direction: "OneWay")
-    firstTryQuestionCount: Int
-    secondTryQuestionCount: Int
-    laterTryQuestionCount: Int
+    firstTryCount: Int
+    secondTryCount: Int
+    threeOrMoreTryCount: Int
     helpUsedCount: Int
     answerUsedCount: Int
   }
 `;
 
-export default UserPQReport;
+export default UserPracticeQuestionReport;

@@ -1,22 +1,22 @@
-const reportMcqAnswerType = `
+const mcqAnswerType = `
   type ReportMcqAnswerType {
    statement: String
    isSelected: Boolean @defaultValue(value: "false")
  }`;
 
-const reportFibInputAnswerType = `
+const fibInputAnswerType = `
   type ReportFibInputAnswerType {
    answer: String
    position: Int
  }`;
 
-const reportFibBlockAnswerType = `
+const fibBlockAnswerType = `
   type ReportFibBlockAnswerType {
    statement: String
    position: Int
  }`;
 
-const reportArrangeAnswerType = `
+const arrangeAnswerType = `
   type ReportArrangeAnswerType {
    statement: String
    order: Int
@@ -28,10 +28,10 @@ const quizReportType = `
    questionDisplayOrder: Int
    isAttempted: Boolean
    isCorrect: Boolean
-   reportMcqAnswer: [ReportMcqAnswerType]
-   reportFibInputAnswer: [ReportFibInputAnswerType]
-   reportFibBlockAnswer: [ReportFibBlockAnswerType]
-   reportArrangeAnswer: [ReportArrangeAnswerType]
+   mcqAnswer: [McqAnswerType]
+   fibInputAnswer: [FibInputAnswerType]
+   fibBlockAnswer: [FibBlockAnswerType]
+   arrangeAnswer: [ArrangeAnswerType]
    learningObjective: LearningObjective @relation(name: "LearningObjectiveUserQuizReport", direction: "OneWay")
  }`;
 
@@ -49,10 +49,10 @@ const UserQuizReport = `
     latestQuizReport: [QuizReportType]
     firstQuizStats: QuizStat
     latestQuizStats: QuizStat
-    quizStatus: UserComponentStatus
+    quizStatus: UserComponentStatus @defaultValue(value: "incomplete")
     topic: Topic @relation(name: "TopicUserQuizReport", direction: "OneWay")
   }
 `;
 
-export default [UserQuizReport, quizReportType, reportMcqAnswerType,
-  reportFibInputAnswerType, reportFibBlockAnswerType, reportArrangeAnswerType, quizStat];
+export default [UserQuizReport, quizReportType, mcqAnswerType,
+  fibInputAnswerType, fibBlockAnswerType, arrangeAnswerType, quizStat];

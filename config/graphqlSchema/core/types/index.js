@@ -14,14 +14,15 @@ import UserActivityVideoDump from './userActivityVideoDump';
 import UserActivityChatDump from './userActivityChatDump';
 import UserActivityPQDump from './userActivityPQDump';
 import UserActivityQuizDump from './userActivityQuizDump';
-import UserSyllabus from './userSyllabus';
+import UserCurrentComponentStatus from './userCurrentComponentStatus';
 import UserQuizReport from './userQuizReport';
 import UserBookmark from './userBookmark';
 import UserProfile from './userProfile';
-import UserHomepage from './userHomepage';
+import UserCourseSyllabus from './userCourseSyllabus';
 import UserVideo from './userVideo';
 import UserLO from './userLO';
-import UserJourney from './userJourney';
+import UserTopicJourney from './userTopicJourney';
+import UserPracticeQuestionReport from './userPracticeQuestionReport';
 
 export default [
   ...User,
@@ -40,12 +41,13 @@ export default [
   ...UserActivityChatDump,
   ...UserActivityPQDump,
   ...UserActivityQuizDump,
-  ...UserSyllabus,
+  ...UserCurrentComponentStatus,
   ...UserQuizReport,
   ...UserBookmark,
   ...UserProfile,
-  ...UserHomepage,
+  ...UserCourseSyllabus,
   ...UserVideo,
   ...UserLO,
-  ...UserJourney,
+  ...UserTopicJourney,
+  ...UserPracticeQuestionReport,
 ];
