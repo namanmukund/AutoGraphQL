@@ -17,6 +17,7 @@ const parsedASTMap = getParsedASTMap(schemaTypes);
 // generated from types and their fields
 
 let graphqlInputTypeObject = {};
+const graphqlScalarTypeObject = {};
 const graphqlUpdateTypeObject = {};
 const graphqlUpdateAllTypeObject = {};
 let graphqlAdditionalRelationFieldsInputTypeObject = {};
@@ -45,6 +46,7 @@ Object.keys(parsedASTMap).forEach((type) => {
   // for generating connect type data
   // Initialize type objects
   graphqlInputTypeObject[typeName] = graphqlInputTypeObject[typeName] || {};
+  graphqlScalarTypeObject[typeName] = graphqlScalarTypeObject[typeName] || {};
   graphqlUpdateTypeObject[typeName] = graphqlUpdateTypeObject[typeName] || {};
   if (isModel) {
     graphqlUpdateAllTypeObject[typeName] = graphqlUpdateAllTypeObject[typeName] || {};
@@ -87,6 +89,11 @@ Object.keys(parsedASTMap).forEach((type) => {
     }
     // Fill input type strings
     let isUpdateType = false;
+    // for scalar type
+    if (scalarTypes.includes(fieldType)) {
+      graphqlScalarTypeObject[typeName][fieldName] = fieldType;
+    }
+    // for subdoc type
     if (!isModel && isRelationField && !scalarTypes.includes(type)) {
       // generate nestedConnectMutationStringObject to be made available for relation type
       const relationFields = definition.relationFields;
@@ -232,6 +239,7 @@ Object.keys(parsedASTMap).forEach((type) => {
 
 // get schema strings from input schema maps
 const inputTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlInputTypeObject, 'Input');
+const scalarTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlScalarTypeObject, 'ScalarType');
 const updateTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlUpdateTypeObject, 'Update');
 const updateAllTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlUpdateAllTypeObject, 'UpdateAll', nestedConnectMutationStringObject);
 const additionalRelationFieldsTypesSchemaArray = getSchemaStringFromSchemaMap(graphqlAdditionalRelationFieldsInputTypeObject, 'Input');
@@ -258,6 +266,7 @@ const fileConnectInputSchema = `
 // remove nulls from input types array
 const inputTypesArray = [
   ...inputTypesSchemaArray,
+  ...scalarTypesSchemaArray,
   ...updateTypesSchemaArray,
   ...updateAllTypesSchemaArray,
   ...additionalRelationFieldsTypesSchemaArray,

@@ -122,7 +122,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         info,
         parsedASTMap,
         authentication,
-      )
+      );
     });
 
     // Fetch list query resolver.
@@ -657,9 +657,7 @@ resolvers.Mutation.getUserCourseSyllabus = async (root, params, context, info) =
     mutationName,
     parsedASTMap,
     context,
-  ).then((result) => {
-    return toObject(result);
-  });
+  ).then(result => toObject(result));
 };
 
 // Resolver for a custom scalar type 'Date'

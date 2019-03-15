@@ -117,14 +117,17 @@ const getSchemaStringFromSchemaMap = (
 
     let typeName = type;
     let inputType = typeOfInput;
-
+    let graphqlType = 'input';
     if (typeOfInput === 'UpdateAll') {
       typeName = pluralize(type);
       inputType = 'Update';
+    } else if (typeOfInput === 'ScalarType') {
+      inputType = 'ScalarType';
+      graphqlType = 'type';
     }
 
     let restString = '';
-    let typeString = `input ${typeName}${inputType} {`;
+    let typeString = `${graphqlType} ${typeName}${inputType} {`;
     allFields.forEach((field) => {
       if (!field.endsWith('__description')) {
         const fieldType = typeSchema[field];
