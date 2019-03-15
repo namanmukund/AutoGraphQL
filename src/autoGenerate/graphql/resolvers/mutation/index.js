@@ -17,6 +17,7 @@ import sendForgotPasswordOTPMutationResolver from './forgotPassword/sendForgotPa
 import validateForgotPasswordOTPMutationResolver from './forgotPassword/validateForgotPasswordOTP';
 import finishForgotPasswordMutationResolver from './forgotPassword/finishForgotPassword';
 import resendForgotPasswordOTPMutationResolver from './forgotPassword/resendForgotPasswordOTP';
+import getUserCourseSyllabusMutationResolver from './userData/getUserCourseSyllabus';
 
 export {
   addMutationResolver,
@@ -38,4 +39,5 @@ export {
   resendForgotPasswordOTPMutationResolver,
   setPasswordStrictMutationPromise,
   deleteMultipleMutationResolver,
+  getUserCourseSyllabusMutationResolver,
 };

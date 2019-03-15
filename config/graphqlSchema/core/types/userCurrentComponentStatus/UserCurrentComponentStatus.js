@@ -1,6 +1,6 @@
 const UserCurrentComponentStatus = `
   type UserCurrentComponentStatus @model {
-    user: User! @relation(name: "UserCurrentComponentStatus")
+    user: User! @relation(name: "UserCurrentComponentStatus", direction: "OneWay")
     currentCourse: Course! @relation(name: "UserCurrentComponentStatusCourse", direction: "OneWay")
     enrollmentType: EnrollmentType! @defaultValue(value: "free")
     currentTopic: Topic! @relation(name: "UserCurrentComponentStatusTopic", direction: "OneWay")

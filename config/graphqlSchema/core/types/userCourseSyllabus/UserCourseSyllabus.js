@@ -1,27 +1,28 @@
 const topicsUserCourseSyllabusType = `
   type TopicsUserCourseSyllabusType {
-   topic: Topic @relation(name: "UserCourseSyllabusTopic", direction: "OneWay")
+   topic: Topic
    isUnlocked: Boolean @defaultValue(value: "false")
  }`;
 
 const chaptersUserCourseSyllabusType = `
   type ChaptersUserCourseSyllabusType {
+   chapter: Chapter
    topics: [TopicsUserCourseSyllabusType]
-   isUnlocked: Boolean @defaultValue(value: "false")
  }`;
 
 const currentComponentDataType = `
   type CurrentComponentDataType {
-   title: String
-   thumbnail: File @relation(name: "UserHomepageThumbnail", direction: "OneWay")
+   componentTitle: String
+   topicTitle: String
+   thumbnail: File 
    percentageCovered: Int
    description: String
  }`;
 
 const UserCourseSyllabus = `
   type UserCourseSyllabus {
-    user: User! @relation(name: "UserCourseSyllabus", direction: "OneWay")
-    course: Course! @relation(name: "UserCourseSyllabusCourse", direction: "OneWay")
+    user: User!
+    currentCourse: Course!
     currentComponent: CurrentComponentType!
     currentComponentData: CurrentComponentDataType
     chapters: [ChaptersUserCourseSyllabusType]

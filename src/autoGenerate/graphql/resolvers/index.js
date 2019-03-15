@@ -14,7 +14,7 @@ import {
   validateForgotPasswordOTPMutationResolver,
   finishForgotPasswordMutationResolver,
   resendForgotPasswordOTPMutationResolver,
-  deleteMultipleMutationResolver,
+  deleteMultipleMutationResolver, getUserCourseSyllabusMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import { types, authenticateUser, ifAuthorized, toObject, isErrorThrown, getRandomNumber } from '../../../../utils';
@@ -122,7 +122,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         info,
         parsedASTMap,
         authentication,
-      );
+      )
     });
 
     // Fetch list query resolver.
@@ -641,6 +641,26 @@ resolvers.Query.me = ((root, params, context, info) => {
     authentication,
   );
 });
+
+// Resolver for a custom homepage data for user
+resolvers.Mutation.getUserCourseSyllabus = async (root, params, context, info) => {
+  const typeName = 'UserCurrentComponentStatus';
+  const mutationName = 'getUserCourseSyllabus';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return getUserCourseSyllabusMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+  ).then((result) => {
+    return toObject(result);
+  });
+};
 
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
