@@ -55,6 +55,7 @@ import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   EmailNotVerifiedError, PhoneNotVerifiedError,
   ConnectIdsAlreadyRelatedError,
   DuplicateConnectIdsError,
+  UnauthorizedFieldOrTypeAccessByAppError,
 } from './input';
 
 
@@ -134,4 +135,5 @@ export {
   FileIdIsMandatoryError,
   UnsupportedListFieldInsideSubDocumentObjectError,
   DuplicateConnectIdsError,
+  UnauthorizedFieldOrTypeAccessByAppError,
 };

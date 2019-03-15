@@ -16,6 +16,7 @@ import isFileDeleteAllowed from './isFileDeleteAllowed';
 import getUserData from './getUserData';
 import validateIncomingAppToken from './validateIncomingAppToken';
 import deleteChapterValidation from '../preHookFunctions/validation/deleteChapterValidation';
+import validateAppAndUserPermissionOnFields from './validateAppAndUserPermissionOnFields';
 
 export { validate,
   isBackendApp,
@@ -38,4 +39,5 @@ export { validate,
   validateIncomingAppToken,
   addUserValidation,
   deleteChapterValidation,
+  validateAppAndUserPermissionOnFields,
 };

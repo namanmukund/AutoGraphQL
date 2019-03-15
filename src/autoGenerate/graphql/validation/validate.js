@@ -7,6 +7,7 @@ import {
   InvalidReadAccessError, InvalidWriteAccessError,
   InvalidActionOnDefaultFieldsError,
 } from '../../../../constants/errors';
+import validateAppAndUserPermissionOnFields from './validateAppAndUserPermissionOnFields';
 
 const isBackendApp = (authentication) => {
   const app = authentication && authentication.app;
@@ -78,11 +79,28 @@ const validateDefaultInput = (input) => {
   return true;
 };
 
-const validate = (operation, accessFields, queryFields, authentication, input) => {
+
+const validate = (
+  typeName,
+  parsedASTMap,
+  operation,
+  queryFields,
+  authentication,
+  input,
+) => {
+  // if backend app allow everything
   if (isBackendApp(authentication)) {
     return true;
   }
+  // check for app and user accessibility on fields
+  validateAppAndUserPermissionOnFields(
+    typeName,
+    parsedASTMap,
+    queryFields,
+    authentication,
+  );
 
+  const accessFields = parsedASTMap[typeName];
   if (operation === operationName.read || operation === operationName.delete) {
     // check if user is not trying to fetch writeOnly fields
     const validAccess = validateAccess(

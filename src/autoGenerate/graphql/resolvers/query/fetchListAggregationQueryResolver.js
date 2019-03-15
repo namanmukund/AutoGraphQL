@@ -15,8 +15,13 @@ const fetchListAggregationQueryResolver = (
   const { fieldNodes } = info; // Fields which are requested.
   const feildsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const typeAST = ast[typeName];
-  validate(operationName.read, typeAST, feildsFetched, authentication);
+  validate(
+    typeName,
+    ast,
+    operationName.read,
+    feildsFetched,
+    authentication,
+  );
 
   return modelQueries.fetchCount(params).then((res) => {
     const { groupByFieldName, groupByResult } = res;

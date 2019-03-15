@@ -64,8 +64,13 @@ const fetchListQueryResolver = (
    */
   const fieldsForFetch = getFieldsBeingFetched(fieldNodes);
 
-  const typeAST = parsedASTMap[typeName];
-  validate(operationName.read, typeAST, fieldsForFetch, authentication);
+  validate(
+    typeName,
+    parsedASTMap,
+    operationName.read,
+    fieldsForFetch,
+    authentication,
+  );
 
   const singularQueryName = camelCase(pluralize.singular(queryName));
 

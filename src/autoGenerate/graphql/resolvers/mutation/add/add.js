@@ -328,9 +328,15 @@ const addMutationResolver = (
   const { input, ...connectArguments } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
-  // const fields = ast[typeName].fields;
-  const accessFields = ast[typeName];
-  validate(operationName.add, accessFields, fieldsFetched, authentication, input);
+
+  validate(
+    typeName,
+    ast,
+    operationName.add,
+    fieldsFetched,
+    authentication,
+    input,
+  );
   // get a map of connect arguments with field names as key and array of ids as value
   const connectInputFieldsMap = getConnectInputFieldsMap(connectArguments);
   const { remoteFields, remoteFieldsApplicationWise } = ast[typeName];

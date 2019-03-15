@@ -48,21 +48,21 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
   // To store final parsed AST Object.
   const parsedASTObject = {};
   definitions.forEach((definition) => {
-    const { directives, kind, fields, ...props } = definition;
+    const { kind, fields, ...props } = definition;
     // not making type ast for graphql input types(remove check if input types ast required)
     if (kind !== 'ObjectTypeDefinition' || !fields || !fields.length) {
       return null;
     }
     // on typeName level
-    // const allowedApps = getAllowedAppOrUserInfo(
-    //   directives,
-    //   'allowedApps',
-    // );
-    //
-    // const allowedUsers = getAllowedAppOrUserInfo(
-    //   directives,
-    //   'allowedUsers',
-    // );
+    const allowedApps = getAllowedAppOrUserInfo(
+      definition.directives,
+      'allowedApps',
+    );
+
+    const allowedUsers = getAllowedAppOrUserInfo(
+      definition.directives,
+      'allowedUsers',
+    );
     // To store fields Object for each field.
     const fieldsObject = {};
     // To Store all relation fields.
@@ -202,19 +202,19 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
               defaultFields.push(fieldName);
               break;
 
-              // case 'allowedApps':
-              //   parsedField.allowedApps = getAllowedAppOrUserInfo(
-              //     parsedField.directives,
-              //     'allowedApps',
-              //   );
-              //   break;
-              //
-              // case 'allowedUsers':
-              //   parsedField.allowedUsers = getAllowedAppOrUserInfo(
-              //     parsedField.directives,
-              //     'allowedUsers',
-              //   );
-              // break;
+            case 'allowedApps':
+              parsedField.allowedApps = getAllowedAppOrUserInfo(
+                parsedField.directives,
+                'allowedApps',
+              );
+              break;
+
+            case 'allowedUsers':
+              parsedField.allowedUsers = getAllowedAppOrUserInfo(
+                parsedField.directives,
+                'allowedUsers',
+              );
+              break;
 
             default:
             // Do nothing.
@@ -316,8 +316,8 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
       remoteNonNullAndUniqueFieldsApplicationWise,
       defaultFieldsWithValue,
       additionalRelationFields,
-      // allowedApps,
-      // allowedUsers,
+      allowedApps,
+      allowedUsers,
     });
 
     return null;

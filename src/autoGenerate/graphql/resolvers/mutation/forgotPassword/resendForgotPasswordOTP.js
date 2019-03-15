@@ -55,10 +55,15 @@ export default function resendForgotPasswordOTPMutationResolver(
   authentication,
 ) {
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
-
-  const accessFields = ast[typeName];
-  validate(operationName.update, accessFields, feildsFetched, authentication, {});
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
+  validate(
+    typeName,
+    ast,
+    operationName.update,
+    fieldsFetched,
+    authentication,
+    {},
+  );
 
   const decodedUser = authentication && authentication.user;
   if (decodedUser) {

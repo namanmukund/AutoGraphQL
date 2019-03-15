@@ -92,8 +92,13 @@ const deleteMutationResolver = (
   const { fieldNodes } = info;
   const feildsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const accessFields = ast[typeName];
-  validate(operationName.delete, accessFields, feildsFetched, authentication);
+  validate(
+    typeName,
+    ast,
+    operationName.delete,
+    feildsFetched,
+    authentication,
+  );
   // If there are no remote fields, return the result.
   if (!Object.keys(remoteFields).length) {
     return localDeleteMutationPromise(

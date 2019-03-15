@@ -16,10 +16,15 @@ export default function validateForgotPasswordOTPMutationResolver(
   authentication,
 ) {
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const accessFields = ast[typeName];
-  validate(operationName.read, accessFields, feildsFetched, authentication);
+  validate(
+    typeName,
+    ast,
+    operationName.read,
+    fieldsFetched,
+    authentication,
+  );
 
   const decodedUser = authentication && authentication.user;
   if (decodedUser) {

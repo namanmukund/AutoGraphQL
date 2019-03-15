@@ -71,9 +71,15 @@ const fetchSingleQueryResolver = (
   allowMultiple,
 ) => {
   const { fieldNodes } = info; // Fields which are requested.
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
   const typeAST = ast[typeName];
-  validate(operationName.read, typeAST, feildsFetched, authentication);
+  validate(
+    typeName,
+    ast,
+    operationName.read,
+    fieldsFetched,
+    authentication,
+  );
   const modelQueries = new QueryController(typeName, authentication);
   const { remoteFields, remoteFieldsApplicationWise } = ast[typeName];
   const queryName = info.fieldName;
@@ -92,7 +98,7 @@ const fetchSingleQueryResolver = (
     const modelRemote = new RemoteController(applicationName, authentication);
     // Out of all the fields requested, get the fields required.
     const fieldsToQuery =
-      pick(feildsFetched, Object.keys(remoteFieldsApplicationWise[applicationName]));
+      pick(fieldsFetched, Object.keys(remoteFieldsApplicationWise[applicationName]));
     return modelRemote.query(queryName, params, fieldsToQuery).then((resultRemote) => {
       if (!(resultRemote && resultRemote.id)) {
         return null;
@@ -110,7 +116,7 @@ const fetchSingleQueryResolver = (
         resultRemote,
         queryName,
         newParam,
-        feildsFetched,
+        fieldsFetched,
         remoteFieldsApplicationWise,
         existingPromise,
         applicationName,
@@ -143,7 +149,7 @@ const fetchSingleQueryResolver = (
       objectResult,
       queryName,
       newParam,
-      feildsFetched,
+      fieldsFetched,
       remoteFieldsApplicationWise,
       existingPromise,
       applicationName,

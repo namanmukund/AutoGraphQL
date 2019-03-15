@@ -71,10 +71,16 @@ export default function signupMutationResolver(
   const { input } = params;
   const { localFields, remoteFields, remoteFieldsApplicationWise } = ast[typeName];
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const accessFields = ast[typeName];
-  validate(operationName.add, accessFields, feildsFetched, authentication, input);
+  validate(
+    typeName,
+    ast,
+    operationName.add,
+    fieldsFetched,
+    authentication,
+    {},
+  );
 
   const decodedUser = authentication && authentication.user;
 
@@ -114,7 +120,7 @@ export default function signupMutationResolver(
     typeName,
     mutationName,
     controllerFunctionName,
-    feildsFetched,
+    fieldsFetched,
     remoteFieldsApplicationWise,
     authentication,
   );

@@ -20,10 +20,16 @@ export default function validateUserOTPMutationResolver(
   authentication,
 ) {
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const accessFields = ast[typeName];
-  validate(operationName.read, accessFields, feildsFetched, authentication);
+  validate(
+    typeName,
+    ast,
+    operationName.read,
+    fieldsFetched,
+    authentication,
+  );
+
   const queryController = new QueryController(typeName, authentication);
   const { id, phoneOtp, emailOtp } = params;
   return queryController.fetchOne({ id }).then((res) => {

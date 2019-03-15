@@ -1,7 +1,11 @@
 const Topic = `
   type Topic @model {
     order: Int! @unique @length(min: 1, max: 50)
-    title: String! @unique @length(min: 6, max: 120) @trim
+    title: String! 
+        @unique 
+        @length(min: 6, max: 120) 
+        @trim
+        @allowedApps(list:["tekieTms", "appTwo"]) 
     description: String @uniqueOrEmpty @length(min: 6, max: 120) @trim
     status: ContentStatus! @defaultValue(value: "unpublished")
     video: File @relation(name: "TopicVideo", direction: "OneWay")

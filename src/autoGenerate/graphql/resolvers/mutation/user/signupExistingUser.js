@@ -57,10 +57,16 @@ export default function signupExistingUserMutationResolver(
 ) {
   const { input, stopOtpTrigger } = params;
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const accessFields = ast[typeName];
-  validate(operationName.add, accessFields, feildsFetched, authentication, input);
+  validate(
+    typeName,
+    ast,
+    operationName.add,
+    fieldsFetched,
+    authentication,
+    {},
+  );
 
   const decodedUser = authentication && authentication.user;
   if (decodedUser) {

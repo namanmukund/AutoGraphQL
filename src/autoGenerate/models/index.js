@@ -13,7 +13,7 @@ const rollback = require('../../mongooseRollback/mongooseRollback');
 
 const Schema = mongoose.Schema;
 // uncomment below code to debug mongodb queries
-// mongoose.set('debug', true);
+mongoose.set('debug', true);
 // recursive function, returns final field schema definition for each field in model
 const getFieldSchema = (fieldDefinition, typesSchema, allModelsSchema, allEnumTypesObject) => {
   let finalFieldModelDefinition;

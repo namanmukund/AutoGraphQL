@@ -23,10 +23,17 @@ export default function sendForgotPasswordOTPMutationResolver(
   authentication,
 ) {
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const accessFields = ast[typeName];
-  validate(operationName.update, accessFields, feildsFetched, authentication, {});
+  validate(
+    typeName,
+    ast,
+    operationName.update,
+    fieldsFetched,
+    authentication,
+    {},
+  );
+
 
   const decodedUser = authentication && authentication.user;
   if (decodedUser) {

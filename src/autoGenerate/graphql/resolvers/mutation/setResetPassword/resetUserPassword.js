@@ -21,9 +21,15 @@ export default function resetUserPasswordMutationResolver(
   authentication,
 ) {
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
-  const accessFields = ast[typeName];
-  validate(operationName.update, accessFields, feildsFetched, authentication, {});
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
+  validate(
+    typeName,
+    ast,
+    operationName.update,
+    fieldsFetched,
+    authentication,
+    {},
+  );
 
   /* Setting user to true if not preset, as reset user password does
    not require user authentication. */

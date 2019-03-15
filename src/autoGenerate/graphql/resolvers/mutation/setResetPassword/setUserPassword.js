@@ -20,10 +20,16 @@ export default function setUserPasswordMutationResolver(
   authentication,
 ) {
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
-  const accessFields = ast[typeName];
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
-  validate(operationName.update, accessFields, feildsFetched, authentication, {});
+  validate(
+    typeName,
+    ast,
+    operationName.update,
+    fieldsFetched,
+    authentication,
+    {},
+  );
 
   // Setting user to true if not preset, as set user password does not require user authentication.
   Object.assign(authentication, {

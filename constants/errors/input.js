@@ -60,3 +60,6 @@ export const DuplicateConnectIdsError = createError('DuplicateConnectIdsError', 
   message: 'Duplicate connect ids sent in input',
 });
 
+export const UnauthorizedFieldOrTypeAccessByAppError = createError('UnauthorizedFieldAccessByAppError', {
+  message: 'App is not authorized to access some of the fields or types',
+});

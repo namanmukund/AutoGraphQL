@@ -20,10 +20,16 @@ export default function setPasswordStrictMutationResolver(
   authentication,
 ) {
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
-  const accessFields = ast[typeName];
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
-  validate(operationName.update, accessFields, feildsFetched, authentication, {});
+  validate(
+    typeName,
+    ast,
+    operationName.update,
+    fieldsFetched,
+    authentication,
+    {},
+  );
 
   const modelMutations = new MutationController(typeName, authentication);
   const { id, password } = params;
