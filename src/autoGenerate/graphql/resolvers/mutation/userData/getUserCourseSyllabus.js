@@ -50,6 +50,7 @@ const getUserCourseSyllabusMutationResolver = async (
             topics{
               title
               order
+              isFreeForAllUserTypes
               thumbnail{
                 id
                 uri
@@ -82,6 +83,7 @@ const getUserCourseSyllabusMutationResolver = async (
           }
         }
         currentComponentType
+        enrollmentType
       }
     }
     `;
@@ -102,6 +104,7 @@ const getUserCourseSyllabusMutationResolver = async (
         currentComponentType: currentComponent,
         currentTopic,
         currentLearningObjective,
+        enrollmentType,
       } = currentStatus;
       // this object will be returned in output
       const currentUserSyllabus = {};
@@ -111,10 +114,14 @@ const getUserCourseSyllabusMutationResolver = async (
       }
       if (chapters.length) {
         for (let i = 0; i < chapters.length;) {
-          if (chapters[i].topics.length) {
+          if (chapters[i].topics.length && currentTopic && enrollmentType) {
             for (let j = 0; j < chapters[i].topics.length;) {
               let isUnlocked = false;
-              if (chapters[i].topics[j].order <= currentTopic.order) {
+              if ((enrollmentType === 'pro' &&
+                chapters[i].topics[j].order <= currentTopic.order
+              ) || (enrollmentType === 'free' && chapters[i].topics[j].order <= currentTopic.order &&
+                chapters[i].topics[j].isFreeForAllUserTypes === true)
+              ) {
                 isUnlocked = true;
               }
               chapters[i].topics[j].isUnlocked = isUnlocked;

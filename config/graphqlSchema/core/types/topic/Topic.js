@@ -14,6 +14,7 @@ const Topic = `
     learningObjectives: [LearningObjective] @relation(name: "TopicLearningObjective", isSubset: true)
     questions: [QuestionBank] @relation(name: "TopicQuestionBank")
     thumbnail: File @relation(name: "TopicThumbnail", direction: "OneWay")
+    isFreeForAllUserTypes: Boolean @defaultValue(value: "false")
   }
 `;
 
