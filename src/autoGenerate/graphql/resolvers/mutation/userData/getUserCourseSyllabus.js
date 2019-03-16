@@ -42,14 +42,11 @@ const getUserCourseSyllabusMutationResolver = async (
           name
         }
         currentCourse{
-          id
           title
           chapters{
-            id
             title
             order
             topics{
-              id
               title
               order
               thumbnail{
@@ -105,25 +102,13 @@ const getUserCourseSyllabusMutationResolver = async (
       currentLearningObjective } = currentStatus;
     const currentUserSyllabus = {};
     const chapters = currentCourse.chapters;
-    const modifiedChapters = [];
     for (let i = 0; i < chapters.length;) {
-      const chapter = {};
-      const topics = [];
-      chapter.id = chapters[i].id;
-      chapter.title = chapters[i].title;
-      chapter.order = chapters[i].order;
       for (let j = 0; j < chapters[i].topics.length;) {
-        let topic = {};
         let isUnlocked = false;
         if (chapters[i].topics[j].order <= currentTopic.order) { isUnlocked = true; }
-        topic = {
-          ...chapters[i].topics[j],
-          isUnlocked,
-        };
-        topics.push({ topic, isUnlocked });
+        chapters[i].topics[j].isUnlocked = isUnlocked;
         j += 1;
       }
-      modifiedChapters.push({ chapter, topics });
       i += 1;
     }
 
@@ -132,7 +117,7 @@ const getUserCourseSyllabusMutationResolver = async (
     currentUserSyllabus.currentCourse.id = currentCourse.id;
     currentUserSyllabus.currentCourse.title = currentCourse.title;
     currentUserSyllabus.currentComponent = currentComponent;
-    currentUserSyllabus.chapters = modifiedChapters;
+    currentUserSyllabus.chapters = chapters;
     currentUserSyllabus.currentComponentData = {};
 
     let componentTitle;

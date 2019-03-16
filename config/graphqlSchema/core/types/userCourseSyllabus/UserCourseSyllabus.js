@@ -1,12 +1,17 @@
 const topicsUserCourseSyllabusType = `
   type TopicsUserCourseSyllabusType {
-   topic: Topic
+   title: String
+   order: Int
+   thumbnail: File
+   description: String
+   videoTitle: String
    isUnlocked: Boolean @defaultValue(value: "false")
  }`;
 
 const chaptersUserCourseSyllabusType = `
   type ChaptersUserCourseSyllabusType {
-   chapter: Chapter
+   title: String
+   order: Int
    topics: [TopicsUserCourseSyllabusType]
  }`;
 
@@ -19,10 +24,15 @@ const currentComponentDataType = `
    description: String
  }`;
 
+const courseUserCourseSyllabus = `
+  type CourseUserCourseSyllabus {
+   title: String
+ }`;
+
 const UserCourseSyllabus = `
   type UserCourseSyllabus {
     user: User!
-    currentCourse: Course!
+    currentCourse: CourseUserCourseSyllabus
     currentComponent: CurrentComponentType!
     currentComponentData: CurrentComponentDataType
     chapters: [ChaptersUserCourseSyllabusType]
@@ -30,4 +40,4 @@ const UserCourseSyllabus = `
 `;
 
 export default [UserCourseSyllabus, currentComponentDataType,
-  chaptersUserCourseSyllabusType, topicsUserCourseSyllabusType];
+  chaptersUserCourseSyllabusType, topicsUserCourseSyllabusType, courseUserCourseSyllabus];
