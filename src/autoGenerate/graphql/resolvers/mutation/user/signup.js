@@ -1,6 +1,12 @@
 import bcrypt from 'bcrypt';
-import { pick } from 'lodash';
-import { operationName } from '../../../../../../constants';
+import { get, pick } from 'lodash';
+import {
+  componentTypes,
+  enrollmentTypes,
+  GLOBAL_COURSE_ID,
+  operationName,
+  PUBLISHED,
+} from '../../../../../../constants';
 import { UserTokenNotRequiredError } from '../../../../../../constants/errors';
 import allAuthParams from '../../../../../../config/authParams';
 import { MutationController, RemoteController } from '../../../controllers';
@@ -13,6 +19,7 @@ import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import localSignUpMutationPromise from '../utils/localSignUpMutationPromise';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
+import callGraphqlApi from '../../../../../api/callGraphqlApi';
 
 const application = process.env.APPLICATION || 'core';
 const authParams = allAuthParams[application];
@@ -59,7 +66,7 @@ const remoteSignUpMutationPromises = (
   return promiseArray;
 };
 
-export default function signupMutationResolver(
+const signupMutationResolver = async (
   root,
   params,
   typeName,
@@ -67,7 +74,7 @@ export default function signupMutationResolver(
   mutationName,
   ast,
   authentication,
-) {
+) => {
   const { input } = params;
   const { localFields, remoteFields, remoteFieldsApplicationWise } = ast[typeName];
   const { fieldNodes } = info;
@@ -100,10 +107,67 @@ export default function signupMutationResolver(
   // If there are no remote fields, return the result.
   if (!Object.keys(remoteFields).length) {
     const cuidInput = generateCuid(newUser);
-    return localSignUpMutationPromise(
+    const savedUser = await localSignUpMutationPromise(
       cuidInput,
       modelMutations,
-    ).then(savedUser => createUserTokenTypeData(savedUser));
+    );
+    const token = createUserTokenTypeData(savedUser);
+    const query = `
+    query{
+      topics(filter:{
+        and:[
+          {order:1},
+          {status: ${PUBLISHED} }
+        ]
+      }){
+        id
+      }
+    }
+    `;
+    const topic = await callGraphqlApi(query);
+    const firstTopicId = get(topic, 'data.topics[0].id');
+    const { id: userId } = savedUser;
+    // mutation to create current component status of user
+    const mutation = `
+      mutation{
+        addUserCurrentComponentStatus(
+          input: {
+            enrollmentType: ${enrollmentTypes.free}
+            currentComponentType: ${componentTypes.video}
+          }
+          userConnectId:"${userId}"
+          currentCourseConnectId:"${GLOBAL_COURSE_ID}"
+          currentTopicConnectId:"${firstTopicId}"
+        ){
+          id
+          currentCourse{
+            title
+            chaptersMeta{
+              count
+            }
+            chapters{
+              topicsMeta{
+                count
+              }
+            }
+          }
+          currentTopic{
+            id
+            title
+            description
+            thumbnail{
+              id
+              name
+              uri
+            }
+            description
+          }
+          currentComponentType
+        }
+      }
+    `;
+    await callGraphqlApi(mutation);
+    return token;
   }
 
   // If there are remote fields.
@@ -136,4 +200,6 @@ export default function signupMutationResolver(
     ).then(val => mergeMutationsPromisesResults([value, toObject(val)]))
       .then(savedUser => createUserTokenTypeData(savedUser));
   }).catch(error => error);
-}
+};
+
+export default signupMutationResolver;

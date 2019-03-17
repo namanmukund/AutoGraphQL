@@ -26,9 +26,6 @@ const userCourseSyllabusMutationResolver = async (
   const { authorization: token } = context;
   const authentication = ifAuthorized(context);
 
-  // console.log('--------------------------------accessFields', accessFields);
-
-
   validate(operationName.read, accessFields, feildsFetched, authentication, {});
   const decodedUser = authentication && authentication.user;
   const { id: userId } = decodedUser;
@@ -123,7 +120,7 @@ const userCourseSyllabusMutationResolver = async (
       token,
     );
     // Ideally each user wull have 1 document in the collection. Fetching the same document
-    const currentComponentInfo = get(res, 'data.userCurrentComponentStatuses[0]', null);
+    const currentComponentInfo = get(res, 'data.userCurrentComponentStatuses[0]');
     if (currentComponentInfo) {
       const {
         user,
