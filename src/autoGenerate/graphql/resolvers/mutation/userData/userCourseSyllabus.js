@@ -1,12 +1,17 @@
 import { get } from 'lodash';
-import { operationName } from '../../../../../../constants';
+import {
+  componentTypes,
+  enrollmentTypes,
+  GLOBAL_COURSE_ID,
+  operationName,
+} from '../../../../../../constants';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { UnauthenticatedUserError, UnknownUserError } from '../../../../../../constants/errors';
 import { validate } from '../../../validation';
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import { ifAuthorized } from '../../../../../../utils';
 
-const getUserCourseSyllabusMutationResolver = async (
+const userCourseSyllabusMutationResolver = async (
   root,
   params,
   typeName,
@@ -20,19 +25,30 @@ const getUserCourseSyllabusMutationResolver = async (
   const accessFields = ast[typeName];
   const { authorization: token } = context;
   const authentication = ifAuthorized(context);
+
+  // console.log('--------------------------------accessFields', accessFields);
+
+
   validate(operationName.read, accessFields, feildsFetched, authentication, {});
   const decodedUser = authentication && authentication.user;
-  if (decodedUser && decodedUser.id) {
-    // query to get current compoenent status of user
+  const { id: userId } = decodedUser;
+  if (userId) {
+    // query to get current component status of user
     const query = `
     query{
       userCurrentComponentStatuses(filter:{
         and:[
           {user_some:{
-          id:"${decodedUser.id}"
+          id:"${userId}"
           }},
         {currentCourse_some:{
-          status: published
+          and:[
+            {status: published},
+            {id:"${GLOBAL_COURSE_ID}"}
+            {chapters_some:{
+              status: published
+            }}
+          ]
         }}
         ]
       }){
@@ -41,16 +57,27 @@ const getUserCourseSyllabusMutationResolver = async (
           id
           username
           name
+          status
+          email
+          phone{
+            number
+            countryCode
+          }
+          dateOfBirth
+          gender
         }
         currentCourse{
+          id
           title
           chapters{
+            id
             title
             order
             topics{
+              id
               title
               order
-              isFreeForAllUserTypes
+              isTrial
               thumbnail{
                 id
                 uri
@@ -96,8 +123,8 @@ const getUserCourseSyllabusMutationResolver = async (
       token,
     );
     // Ideally each user wull have 1 document in the collection. Fetching the same document
-    const currentStatus = get(res, 'data.userCurrentComponentStatuses[0]', null);
-    if (currentStatus) {
+    const currentComponentInfo = get(res, 'data.userCurrentComponentStatuses[0]', null);
+    if (currentComponentInfo) {
       const {
         user,
         currentCourse,
@@ -105,7 +132,7 @@ const getUserCourseSyllabusMutationResolver = async (
         currentTopic,
         currentLearningObjective,
         enrollmentType,
-      } = currentStatus;
+      } = currentComponentInfo;
       // this object will be returned in output
       const currentUserSyllabus = {};
       let chapters;
@@ -113,32 +140,32 @@ const getUserCourseSyllabusMutationResolver = async (
         chapters = currentCourse.chapters;
       }
       if (chapters.length) {
-        for (let i = 0; i < chapters.length;) {
-          if (chapters[i].topics.length && currentTopic && enrollmentType) {
-            for (let j = 0; j < chapters[i].topics.length;) {
+        chapters.forEach((chapter) => {
+          if (chapter && chapter.topics &&
+            chapter.topics.length &&
+            currentTopic &&
+            enrollmentType) {
+            chapter.topics.forEach((topic) => {
               let isUnlocked = false;
-              if ((enrollmentType === 'pro' &&
-                chapters[i].topics[j].order <= currentTopic.order
-              ) || (enrollmentType === 'free' && chapters[i].topics[j].order <= currentTopic.order &&
-                chapters[i].topics[j].isFreeForAllUserTypes === true)
+              if ((enrollmentType === enrollmentTypes.pro &&
+                topic.order <= currentTopic.order
+              ) || (enrollmentType === enrollmentTypes.free
+                && topic.order <= currentTopic.order &&
+                topic.isTrial === true)
               ) {
                 isUnlocked = true;
               }
-              chapters[i].topics[j].isUnlocked = isUnlocked;
-              j += 1;
-            }
+              Object.assign(topic, { isUnlocked });
+            });
           }
-          i += 1;
-        }
+        });
       }
-      if (user) { currentUserSyllabus.user = user; }
-      currentUserSyllabus.currentCourse = {};
+      if (user) { Object.assign(currentUserSyllabus, { user }); }
       if (currentCourse) {
-        currentUserSyllabus.currentCourse.id = currentCourse.id;
-        currentUserSyllabus.currentCourse.title = currentCourse.title;
+        Object.assign(currentUserSyllabus, { currentCourse });
       }
-      currentUserSyllabus.currentComponent = currentComponent;
-      currentUserSyllabus.chapters = chapters;
+      Object.assign(currentUserSyllabus, { currentComponent, chapters });
+      Object.assign(currentUserSyllabus, { currentCourse });
       currentUserSyllabus.currentComponentData = {};
 
       let componentTitle;
@@ -146,49 +173,54 @@ const getUserCourseSyllabusMutationResolver = async (
       let percentageCovered;
       let description;
 
+      const { title: topicTitle,
+        videoTitle,
+        videoThumbnail,
+        thumbnail: topicThumbnail,
+        description: topicDescription,
+        videoDescription } = currentTopic;
+      const { title: LOtitle,
+        thumbnail: LOthumbnail,
+        description: LOdescription } = currentLearningObjective;
+
       switch (currentComponent) {
-        case 'video':
+        case componentTypes.video:
           if (currentTopic) {
-            componentTitle = currentTopic.videoTitle;
-            thumbnail = currentTopic.videoThumbnail;
+            componentTitle = videoTitle;
+            thumbnail = videoThumbnail;
             percentageCovered = 0;
-            description = currentTopic.videoDescription;
+            description = videoDescription;
           }
           break;
-        case 'chat':
+        case componentTypes.message:
           if (currentLearningObjective) {
-            componentTitle = currentLearningObjective.title;
-            thumbnail = currentLearningObjective.thumbnail;
+            componentTitle = LOtitle;
+            thumbnail = LOthumbnail;
             percentageCovered = 25;
-            description = currentLearningObjective.description;
+            description = LOdescription;
           }
           break;
-        case 'PQ':
+        case componentTypes.practiceQuestion:
           if (currentLearningObjective) {
-            componentTitle = currentLearningObjective.title;
-            thumbnail = currentLearningObjective.thumbnail;
+            componentTitle = LOtitle;
+            thumbnail = LOthumbnail;
             percentageCovered = 50;
-            description = currentLearningObjective.description;
+            description = LOdescription;
           }
           break;
-        case 'quiz':
+        case componentTypes.quiz:
           if (currentTopic) {
             componentTitle = 'Quiz';
-            thumbnail = currentTopic.videoThumbnail;
+            thumbnail = topicThumbnail;
             percentageCovered = 75;
-            description = currentTopic.videoDescription;
+            description = topicDescription;
           }
           break;
         default:
       }
 
-      currentUserSyllabus.currentComponentData.componentTitle = componentTitle;
-      if (currentTopic) {
-        currentUserSyllabus.currentComponentData.topicTitle = currentTopic.title;
-      }
-      currentUserSyllabus.currentComponentData.thumbnail = thumbnail;
-      currentUserSyllabus.currentComponentData.percentageCovered = percentageCovered;
-      currentUserSyllabus.currentComponentData.description = description;
+      Object.assign(currentUserSyllabus.currentComponentData,
+        { componentTitle, topicTitle, thumbnail, percentageCovered, description });
 
       return currentUserSyllabus;
     }
@@ -197,4 +229,4 @@ const getUserCourseSyllabusMutationResolver = async (
   throw new UnauthenticatedUserError();
 };
 
-export default getUserCourseSyllabusMutationResolver;
+export default userCourseSyllabusMutationResolver;

@@ -1,5 +1,6 @@
 const topicsUserCourseSyllabusType = `
   type TopicsUserCourseSyllabusType {
+   id: ID
    title: String
    order: Int
    thumbnail: File
@@ -10,6 +11,7 @@ const topicsUserCourseSyllabusType = `
 
 const chaptersUserCourseSyllabusType = `
   type ChaptersUserCourseSyllabusType {
+   id: ID
    title: String
    order: Int
    topics: [TopicsUserCourseSyllabusType]
@@ -26,6 +28,7 @@ const currentComponentDataType = `
 
 const courseUserCourseSyllabus = `
   type CourseUserCourseSyllabus {
+   id: ID
    title: String
  }`;
 

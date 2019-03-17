@@ -295,7 +295,7 @@ mutationString += 'sendForgotPasswordOTP (input: PhoneInput, email: String): Boo
 mutationString += 'resendForgotPasswordOTP (input: PhoneInput, email: String): BooleanResult,';
 mutationString += 'validateForgotPasswordOTP (input: PhoneInput, phoneOtp: Int, email: String, emailOtp: Int): BooleanResult,';
 mutationString += 'finishForgotPassword (input: PhoneInput, phoneOtp: Int, email: String, emailOtp: Int, newPassword: String!): BooleanResult,';
-mutationString += 'getUserCourseSyllabus : UserCourseSyllabus,';
+mutationString += 'userCourseSyllabus : UserCourseSyllabus,';
 // Backend Token only password update mutation
 mutationString += 'tcirtSdrowssaPtes ( id: ID!, password: String! ): User,';
 mutationString += 'uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,';

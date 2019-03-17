@@ -1,9 +1,11 @@
+import { componentTypes } from '../../../../../../constants';
+
 const CurrentComponentType = `
   enum CurrentComponentType {
-      video
-      chat
-      PQ
-      quiz
+      ${componentTypes.video}
+      ${componentTypes.message}
+      ${componentTypes.practiceQuestion}
+      ${componentTypes.quiz}
   }`;
 
 export default CurrentComponentType;

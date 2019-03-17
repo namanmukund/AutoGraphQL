@@ -130,6 +130,20 @@ const userProfiles = ['sampleProfile'];
 const PUBLISHED = 'published';
 const UNPUBLISHED = 'unpublished';
 
+const GLOBAL_COURSE_ID = 'cjs8skrd200041huzz78kncz5';
+
+const enrollmentTypes = {
+  free: 'free',
+  pro: 'pro',
+};
+
+const componentTypes = {
+  video: 'video',
+  message: 'message',
+  practiceQuestion: 'practiceQuestion',
+  quiz: 'quiz',
+};
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -155,4 +169,7 @@ export {
   regexValidation,
   arrayUpdateAddTypes,
   arrayUpdateRemoveTypes,
+  GLOBAL_COURSE_ID,
+  enrollmentTypes,
+  componentTypes,
 };
