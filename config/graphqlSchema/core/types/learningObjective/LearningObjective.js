@@ -1,14 +1,54 @@
-import {ADD, META_QUERY, SINGULAR, UPDATE} from '../../../../../constants/graphqlOperations';
+import { ADD, META_QUERY, SINGULAR, UPDATE } from '../../../../../constants/graphqlOperations';
 
 const LearningObjective = `
   type LearningObjective @model 
-  @allowedApps(list:["tekieTms", "appTwo"]) 
-  @allowedUsers(list:["admin", "student"])
+  @allowedApps(list:[{
+        name: "tekieTms"
+        allowedOperations: ["${ADD}", "${SINGULAR}"]
+  }, {
+        name: "appTwo"
+        allowedOperations: ["${ADD}", "${SINGULAR}"]
+  },
+  {
+        name: "three"
+  }
+  ])
+  
+ @allowedUsers(list:[{
+        name: "admin"
+        allowedOperations: ["${ADD}", "${SINGULAR}"]
+  }, {
+        name: "student"
+        allowedOperations: ["${ADD}", "${SINGULAR}"]
+  },
+  {
+        name: "three"
+  }
+  ]) 
   @allowedOperations(list:["${ADD}", "${SINGULAR}", "${META_QUERY}", "${UPDATE}"])
   {
     order: Int! 
-           @allowedApps(list:["tekieTmsw", "appTwo"])
-           @allowedUsers(list:["tekie", "student"])
+             @allowedApps(list:[{
+                    name: "tekieTms1"
+                    allowedOperations: ["${ADD}", "${SINGULAR}"]
+              }, {
+                    name: "appTwo1"
+                    allowedOperations: ["${ADD}", "${SINGULAR}"]
+              },
+              {
+                    name: "three1"
+              }])
+            @allowedUsers(list:[{
+                    name: "admin1"
+                    allowedOperations: ["${ADD}", "${SINGULAR}"]
+              }, {
+                    name: "student1"
+                    allowedOperations: ["${ADD}", "${SINGULAR}"]
+              },
+              {
+                    name: "three1"
+              }
+              ]) 
     title: String! 
            @unique 
            @length(min: 6, max: 120) 

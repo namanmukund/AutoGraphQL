@@ -14,7 +14,7 @@ import hasDirective from '../utils/hasDirective';
 import getMutationNames from '../utils/getMutationNames';
 import getDirectiveArgumentValue from '../utils/getDirectiveArgumentValue';
 import getNestedConnectMutationString from '../utils/getNestedConnectMutationString';
-import { ADD, DELETE, DELETE_MULTIPLE, META_QUERY, UPDATE, UPDATE_MULTIPLE } from '../../../constants/graphqlOperations';
+import { ADD, DELETE, DELETE_MULTIPLE, UPDATE, UPDATE_MULTIPLE } from '../../../constants/graphqlOperations';
 
 const parsedASTMap = getParsedASTMap(types);
 

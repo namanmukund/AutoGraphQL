@@ -10,7 +10,7 @@ import {
 } from 'graphql';
 import getParsedField from './getParsedField';
 
-const getAllowedAppUserOrOperationInfo = (
+const getAllowedOperationsOnType = (
   directives,
   allowedDirectiveName,
 ) => {
@@ -25,6 +25,64 @@ const getAllowedAppUserOrOperationInfo = (
               const { value } = listValue;
               if (value) {
                 allowedDirectiveArray.push(value);
+              }
+            });
+          }
+        }
+      }
+    });
+  }
+  return (
+    (allowedDirectiveArray && allowedDirectiveArray.length) ?
+      allowedDirectiveArray : 'all'
+  );
+};
+
+
+const getAllowedAppOrUserInfo = (
+  directives,
+  allowedDirectiveName,
+) => {
+  const allowedDirectiveArray = [];
+  if (directives && directives.length) {
+    directives.forEach((directive) => {
+      if (get(directive, 'name.value') === allowedDirectiveName) {
+        if (get(directive, 'arguments[0].name.value') === 'list') {
+          const values = get(directive, 'arguments[0].value.values');
+          if (values && values.length) {
+            values.forEach((listValue) => {
+              const permissionInfoObj = {};
+              const { fields } = listValue;
+              if (fields && fields.length) {
+                fields.forEach((field) => {
+                  // if it is name field
+                  if (
+                    field.name && field.name.value === 'name' &&
+                      field.value && field.value.value
+                  ) {
+                    permissionInfoObj.name = field.value.value;
+                  }
+                  // if it is allowedOperations field
+                  if (
+                    field.name && field.name.value === 'allowedOperations'
+
+                  ) {
+                    if (field.value && field.value.values && field.value.values.length) {
+                      const allowedOperationsArray = [];
+                      field.value.values.forEach((allowedOperation) => {
+                        allowedOperationsArray.push(allowedOperation.value);
+                      });
+                      permissionInfoObj.allowedOperations = allowedOperationsArray;
+                    } else {
+                      permissionInfoObj.allowedOperations = 'all';
+                    }
+                  } else {
+                    permissionInfoObj.allowedOperations = 'all';
+                  }
+                });
+              }
+              if (permissionInfoObj) {
+                allowedDirectiveArray.push(permissionInfoObj);
               }
             });
           }
@@ -54,17 +112,17 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
       return null;
     }
     // on typeName level
-    const allowedApps = getAllowedAppUserOrOperationInfo(
+    const allowedApps = getAllowedAppOrUserInfo(
       definition.directives,
       'allowedApps',
     );
-
-    const allowedUsers = getAllowedAppUserOrOperationInfo(
+    // on typeName level
+    const allowedUsers = getAllowedAppOrUserInfo(
       definition.directives,
       'allowedUsers',
     );
-
-    const allowedOperations = getAllowedAppUserOrOperationInfo(
+    // on typeName level
+    const allowedOperations = getAllowedOperationsOnType(
       definition.directives,
       'allowedOperations',
     );
@@ -208,14 +266,14 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
               break;
 
             case 'allowedApps':
-              parsedField.allowedApps = getAllowedAppUserOrOperationInfo(
+              parsedField.allowedApps = getAllowedAppOrUserInfo(
                 parsedField.directives,
                 'allowedApps',
               );
               break;
 
             case 'allowedUsers':
-              parsedField.allowedUsers = getAllowedAppUserOrOperationInfo(
+              parsedField.allowedUsers = getAllowedAppOrUserInfo(
                 parsedField.directives,
                 'allowedUsers',
               );

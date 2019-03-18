@@ -38,7 +38,6 @@ import checkMiddlewareErrors from './utils/checkMiddlewareErrors';
 import scalarDate from './utils/scalarDate';
 import {
   ADD, DELETE, DELETE_MULTIPLE,
-  META,
   META_QUERY,
   PLURAL,
   SINGULAR,
@@ -109,7 +108,6 @@ const defaultMutationsResolverWrapper = async (
 Object.keys(parsedASTMap).forEach((type) => {
   const definition = parsedASTMap[type];
   const { name, field, directives, allowedOperations } = definition;
-  console.log('.....', allowedOperations);
   const typeName = name.value;
   const modelSingular = camelCase(typeName);
   const modelPlural = camelCase(pluralize(typeName));
