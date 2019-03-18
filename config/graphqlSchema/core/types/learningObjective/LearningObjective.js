@@ -1,7 +1,10 @@
+import {ADD, META_QUERY, SINGULAR, UPDATE} from '../../../../../constants/graphqlOperations';
+
 const LearningObjective = `
   type LearningObjective @model 
   @allowedApps(list:["tekieTms", "appTwo"]) 
   @allowedUsers(list:["admin", "student"])
+  @allowedOperations(list:["${ADD}", "${SINGULAR}", "${META_QUERY}", "${UPDATE}"])
   {
     order: Int! 
            @allowedApps(list:["tekieTmsw", "appTwo"])

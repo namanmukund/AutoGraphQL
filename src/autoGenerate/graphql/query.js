@@ -10,6 +10,7 @@ import { scalarTypes, sortBy, allFilters, META } from '../../../constants';
 import { InvalidFieldType } from '../../../constants/errors';
 import hasDirective from '../utils/hasDirective';
 import visitField from '../utils/visitField';
+import { PLURAL, SINGULAR, META_QUERY } from '../../../constants/graphqlOperations';
 
 const parsedASTMap = getParsedASTMap(types);
 const parsedASTTypes = Object.keys(parsedASTMap);
@@ -354,7 +355,7 @@ parsedASTTypes.forEach((type) => {
 
 parsedASTTypes.forEach((type) => {
   const definition = parsedASTMap[type];
-  const { name, field, directives, relationFields } = definition;
+  const { name, field, directives, relationFields, allowedOperations } = definition;
   const typeName = name.value;
   // query
   const modelSingular = camelCase(typeName);
@@ -375,13 +376,34 @@ parsedASTTypes.forEach((type) => {
     // Get unique fields filters
     let singleFetchParamsString = fetchParamsString[type];
     singleFetchParamsString = trimEnd(singleFetchParamsString, ',');
-    queryString += `${modelSingular}(${singleFetchParamsString}): ${typeName},
-    ${modelPlural}(filter : ${filterName}, orderBy:Sort${typeName}, last: Int, first:Int, skip:Int, after: ID, before:ID) : [${typeName}],`;
 
-    if (!groupByType) {
-      queryString += `${modelPlural}${META}(filter : ${filterName}) : AggregationResult,`;
-    } else {
-      queryString += `${modelPlural}${META}(filter : ${filterName}, groupBy : ${groupByName}) : AggregationResult,`;
+
+    if (
+      (allowedOperations && allowedOperations === 'all') ||
+    (allowedOperations && allowedOperations !== 'all' &&
+        allowedOperations.length && allowedOperations.includes(SINGULAR))
+    ) {
+      queryString += `${modelSingular}(${singleFetchParamsString}): ${typeName},`;
+    }
+
+    if (
+      (allowedOperations && allowedOperations === 'all') ||
+        (allowedOperations && allowedOperations !== 'all' &&
+            allowedOperations.length && allowedOperations.includes(PLURAL))
+    ) {
+      queryString += `${modelPlural}(filter : ${filterName}, orderBy:Sort${typeName}, last: Int, first:Int, skip:Int, after: ID, before:ID) : [${typeName}],`;
+    }
+
+    if (
+      (allowedOperations && allowedOperations === 'all') ||
+        (allowedOperations && allowedOperations !== 'all' &&
+            allowedOperations.length && allowedOperations.includes(META_QUERY))
+    ) {
+      if (!groupByType) {
+        queryString += `${modelPlural}${META}(filter : ${filterName}) : AggregationResult,`;
+      } else {
+        queryString += `${modelPlural}${META}(filter : ${filterName}, groupBy : ${groupByName}) : AggregationResult,`;
+      }
     }
     // Fill schema types with filters on relations
     const modelTypeIndex = typesWithRelationFilters.findIndex(typeString => typeString.includes(`type ${type} @model`));

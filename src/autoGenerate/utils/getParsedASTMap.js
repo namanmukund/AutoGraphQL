@@ -10,7 +10,7 @@ import {
 } from 'graphql';
 import getParsedField from './getParsedField';
 
-const getAllowedAppOrUserInfo = (
+const getAllowedAppUserOrOperationInfo = (
   directives,
   allowedDirectiveName,
 ) => {
@@ -54,14 +54,19 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
       return null;
     }
     // on typeName level
-    const allowedApps = getAllowedAppOrUserInfo(
+    const allowedApps = getAllowedAppUserOrOperationInfo(
       definition.directives,
       'allowedApps',
     );
 
-    const allowedUsers = getAllowedAppOrUserInfo(
+    const allowedUsers = getAllowedAppUserOrOperationInfo(
       definition.directives,
       'allowedUsers',
+    );
+
+    const allowedOperations = getAllowedAppUserOrOperationInfo(
+      definition.directives,
+      'allowedOperations',
     );
     // To store fields Object for each field.
     const fieldsObject = {};
@@ -203,14 +208,14 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
               break;
 
             case 'allowedApps':
-              parsedField.allowedApps = getAllowedAppOrUserInfo(
+              parsedField.allowedApps = getAllowedAppUserOrOperationInfo(
                 parsedField.directives,
                 'allowedApps',
               );
               break;
 
             case 'allowedUsers':
-              parsedField.allowedUsers = getAllowedAppOrUserInfo(
+              parsedField.allowedUsers = getAllowedAppUserOrOperationInfo(
                 parsedField.directives,
                 'allowedUsers',
               );
@@ -318,6 +323,7 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
       additionalRelationFields,
       allowedApps,
       allowedUsers,
+      allowedOperations,
     });
 
     return null;

@@ -14,6 +14,7 @@ import hasDirective from '../utils/hasDirective';
 import getMutationNames from '../utils/getMutationNames';
 import getDirectiveArgumentValue from '../utils/getDirectiveArgumentValue';
 import getNestedConnectMutationString from '../utils/getNestedConnectMutationString';
+import { ADD, DELETE, DELETE_MULTIPLE, META_QUERY, UPDATE, UPDATE_MULTIPLE } from '../../../constants/graphqlOperations';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -185,7 +186,7 @@ const makeRelationTypePayload = (
 
 Object.keys(parsedASTMap).forEach((type) => {
   const definition = parsedASTMap[type];
-  const { name, field, directives } = definition;
+  const { name, field, directives, allowedOperations } = definition;
   const typeName = name.value;
   const isModel = directives && hasDirective(directives, 'model');
   if (isModel) {
@@ -222,11 +223,50 @@ Object.keys(parsedASTMap).forEach((type) => {
     if (forceDeleteTypeNames.includes(typeName)) {
       forceDelete = ',force: Boolean';
     }
-    mutationString += `${addModelMutationName} ( input: ${modelInputTypeName}!,${nestedConnectMutationString}): ${typeName},`;
-    mutationString += `${updateModelMutationName} (id: ID!, input: ${modelUpdateTypeName},${nestedConnectMutationString} ${saveHistoryArgumentString} ${forceUpdate}) : ${typeName},`;
-    mutationString += `${updateMultipleModelMutationName} (input: [${modelUpdateAllTypeName}]!) : [${typeName}],`;
-    mutationString += `${deleteModelMutationName} (id: ID!, ${forceDelete}) : ${typeName},`;
-    mutationString += `${deleteMultipleMutation} (filter: ${typeName}Filter!, last: Int, first:Int, skip:Int, after: ID, before:ID) : [${typeName}],`;
+    // add operation
+    if (
+      (allowedOperations && allowedOperations === 'all') ||
+        (allowedOperations && allowedOperations !== 'all' &&
+            allowedOperations.length && allowedOperations.includes(ADD))
+    ) {
+      mutationString += `${addModelMutationName} ( input: ${modelInputTypeName}!,${nestedConnectMutationString}): ${typeName},`;
+    }
+
+    // update operation
+    if (
+      (allowedOperations && allowedOperations === 'all') ||
+        (allowedOperations && allowedOperations !== 'all' &&
+            allowedOperations.length && allowedOperations.includes(UPDATE))
+    ) {
+      mutationString += `${updateModelMutationName} (id: ID!, input: ${modelUpdateTypeName},${nestedConnectMutationString} ${saveHistoryArgumentString} ${forceUpdate}) : ${typeName},`;
+    }
+
+    // updateMultiple operation
+    if (
+      (allowedOperations && allowedOperations === 'all') ||
+        (allowedOperations && allowedOperations !== 'all' &&
+            allowedOperations.length && allowedOperations.includes(UPDATE_MULTIPLE))
+    ) {
+      mutationString += `${updateMultipleModelMutationName} (input: [${modelUpdateAllTypeName}]!) : [${typeName}],`;
+    }
+
+    // delete operation
+    if (
+      (allowedOperations && allowedOperations === 'all') ||
+        (allowedOperations && allowedOperations !== 'all' &&
+            allowedOperations.length && allowedOperations.includes(DELETE))
+    ) {
+      mutationString += `${deleteModelMutationName} (id: ID!, ${forceDelete}) : ${typeName},`;
+    }
+
+    // deleteMultiple operation
+    if (
+      (allowedOperations && allowedOperations === 'all') ||
+        (allowedOperations && allowedOperations !== 'all' &&
+            allowedOperations.length && allowedOperations.includes(DELETE_MULTIPLE))
+    ) {
+      mutationString += `${deleteMultipleMutation} (filter: ${typeName}Filter!, last: Int, first:Int, skip:Int, after: ID, before:ID) : [${typeName}],`;
+    }
 
     // add relations connect mutations for all relations in the type
     Object.keys(relationFields).forEach((fieldName) => {
