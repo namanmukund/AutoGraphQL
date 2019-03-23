@@ -1,3 +1,5 @@
+/* eslint no-restricted-syntax: ["error", "FunctionExpression", "WithStatement",
+"BinaryExpression[operator='in']"] */
 import { get } from 'lodash';
 import {
   OrderAlreadyExistsError,
@@ -24,11 +26,11 @@ const addLearningObjectiveValidation = async (params) => {
   const res = await callGraphqlApi(query);
   const learningObjectives = get(res, 'data.topic.learningObjectives');
   if (learningObjectives) {
-    learningObjectives.forEach((lo) => {
-      if (lo.order === order) {
+    for (const learningObjective of learningObjectives) {
+      if (learningObjective.order === order) {
         throw new OrderAlreadyExistsError();
       }
-    });
+    }
   }
   return true;
 };
