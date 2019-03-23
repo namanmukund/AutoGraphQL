@@ -22,6 +22,7 @@ import {
   QuestionIsPublishedError,
   MessageIsPublishedError,
   OrderAlreadyExistsError,
+  TopicIdRequiredError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -136,4 +137,5 @@ export {
   UnsupportedListFieldInsideSubDocumentObjectError,
   DuplicateConnectIdsError,
   OrderAlreadyExistsError,
+  TopicIdRequiredError,
 };

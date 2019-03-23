@@ -25,7 +25,7 @@ import {
 }
   from '../../../constants/errors';
 
-import { learningObjectiveOrderValidation } from './preHookFunctions/validation';
+import { addLearningObjectiveValidation } from './preHookFunctions/validation';
 import { BYPASS } from '../../../constants';
 
 import { createStaticAppToken } from '../../auth';
@@ -254,7 +254,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'addLearningObjective': {
-      await learningObjectiveOrderValidation(params);
+      await addLearningObjectiveValidation(params);
       break;
     }
     default : {

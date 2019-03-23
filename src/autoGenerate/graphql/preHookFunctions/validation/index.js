@@ -3,7 +3,7 @@ import deleteChapterValidation from './deleteChapterValidation';
 import deleteTopicValidation from './deleteTopicValidation';
 import deleteLearningObjectiveValidation from './deleteLearningObjectiveValidation';
 import deleteQuestionBankValidation from './deleteQuestionBankValidation';
-import learningObjectiveOrderValidation from './learningObjectiveOrderValidation';
+import addLearningObjectiveValidation from './addLearningObjectiveValidation';
 
 export {
   updateUserValidation,
@@ -11,6 +11,6 @@ export {
   deleteTopicValidation,
   deleteLearningObjectiveValidation,
   deleteQuestionBankValidation,
-  learningObjectiveOrderValidation,
+  addLearningObjectiveValidation,
 };
 

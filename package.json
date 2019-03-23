@@ -74,7 +74,6 @@
     "@sendgrid/mail": "^6.2.1",
     "@sentry/webpack-plugin": "^1.5.2",
     "agenda": "^1.0.3",
-    "ajv": "^6.10.0",
     "apollo-errors": "^1.9.0",
     "apollo-fetch": "^0.6.0",
     "async.queue": "^0.5.2",
@@ -130,7 +129,6 @@
     "object-path": "^0.11.4",
     "path": "^0.12.7",
     "phantomjs-prebuilt": "^2.1.13",
-    "phone": "^2.0.0",
     "pluralize": "^7.0.0",
     "pretty-error": "^2.1.1",
     "prompt": "^1.0.0",
@@ -143,7 +141,8 @@
     "twilio": "^3.9.2",
     "username": "^3.0.0",
     "validator": "^9.0.0",
-    "xlsx-to-json": "^0.3.0"
+    "xlsx-to-json": "^0.3.0",
+    "phone": "^2.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
