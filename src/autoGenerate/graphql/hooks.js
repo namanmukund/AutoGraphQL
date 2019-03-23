@@ -24,6 +24,8 @@ import {
   FileUsageCountNotZeroError,
 }
   from '../../../constants/errors';
+
+import { addLearningObjectiveValidation } from './preHookFunctions/validation';
 import { BYPASS } from '../../../constants';
 
 import { createStaticAppToken } from '../../auth';
@@ -249,6 +251,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'deleteQuestionBank' : {
       await deleteQuestionBankValidation(params);
+      break;
+    }
+    case 'addLearningObjective': {
+      await addLearningObjectiveValidation(params);
       break;
     }
     default : {
