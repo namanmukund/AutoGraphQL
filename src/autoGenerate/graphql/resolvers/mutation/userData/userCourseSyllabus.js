@@ -133,15 +133,19 @@ const userCourseSyllabusMutationResolver = async (
       // this object will be returned in output
       const currentUserSyllabus = {};
       let chapters;
+      let chaptersMeta = 0;
+      let topicsMeta = 0;
       if (currentCourse) {
         chapters = currentCourse.chapters;
       }
       if (chapters.length) {
+        chaptersMeta += chapters.length;
         chapters.forEach((chapter) => {
           if (chapter && chapter.topics &&
             chapter.topics.length &&
             currentTopic &&
             enrollmentType) {
+            topicsMeta += chapter.topics.length;
             chapter.topics.forEach((topic) => {
               let isUnlocked = false;
               if ((enrollmentType === enrollmentTypes.pro &&
@@ -163,8 +167,9 @@ const userCourseSyllabusMutationResolver = async (
       }
       Object.assign(currentUserSyllabus, { currentComponent, chapters });
       Object.assign(currentUserSyllabus, { currentCourse });
+      Object.assign(currentUserSyllabus, { chaptersMeta });
+      Object.assign(currentUserSyllabus, { topicsMeta });
       currentUserSyllabus.currentComponentData = {};
-
       let componentTitle;
       let thumbnail;
       let percentageCovered;
@@ -176,9 +181,15 @@ const userCourseSyllabusMutationResolver = async (
         thumbnail: topicThumbnail,
         description: topicDescription,
         videoDescription } = currentTopic;
-      const { title: LOtitle,
-        thumbnail: LOthumbnail,
-        description: LOdescription } = currentLearningObjective;
+      let LOtitle;
+      let LOthumbnail;
+      let LOdescription;
+      if (currentLearningObjective) {
+        LOtitle = currentLearningObjective.title;
+        LOthumbnail = currentLearningObjective.thumbnail;
+        LOdescription = currentLearningObjective.description;
+      }
+
 
       switch (currentComponent) {
         case componentTypes.video:
@@ -218,7 +229,6 @@ const userCourseSyllabusMutationResolver = async (
 
       Object.assign(currentUserSyllabus.currentComponentData,
         { componentTitle, topicTitle, thumbnail, percentageCovered, description });
-
       return currentUserSyllabus;
     }
     throw new UnknownUserError();

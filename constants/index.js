@@ -144,6 +144,17 @@ const componentTypes = {
   quiz: 'quiz',
 };
 
+const userActionType = {
+  next: 'next',
+  back: 'back',
+  appClose: 'appClose',
+};
+
+const userComponentStatus = {
+  complete: 'complete',
+  incomplete: 'incomplete',
+};
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -172,4 +183,6 @@ export {
   GLOBAL_COURSE_ID,
   enrollmentTypes,
   componentTypes,
+  userActionType,
+  userComponentStatus,
 };

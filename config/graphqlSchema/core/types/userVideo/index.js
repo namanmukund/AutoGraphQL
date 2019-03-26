@@ -1,3 +1,3 @@
 import UserVideo from './UserVideo';
 
-export default [UserVideo];
+export default [...UserVideo];

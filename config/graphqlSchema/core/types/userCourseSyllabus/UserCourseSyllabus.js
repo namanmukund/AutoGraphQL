@@ -39,6 +39,8 @@ const UserCourseSyllabus = `
     currentComponent: CurrentComponentType!
     currentComponentData: CurrentComponentDataType
     chapters: [ChaptersUserCourseSyllabusType]
+    chaptersMeta: Int
+    topicsMeta: Int
   }
 `;
 

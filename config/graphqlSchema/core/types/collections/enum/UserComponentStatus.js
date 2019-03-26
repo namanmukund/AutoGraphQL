@@ -1,7 +1,9 @@
+import { userComponentStatus } from '../../../../../../constants';
+
 const UserComponentStatus = `
   enum UserComponentStatus {
-    complete
-    incomplete
+    ${userComponentStatus.complete}
+    ${userComponentStatus.incomplete}
   }`;
 
 export default UserComponentStatus;

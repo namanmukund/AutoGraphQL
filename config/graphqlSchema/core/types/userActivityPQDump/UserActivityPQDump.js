@@ -21,10 +21,6 @@ const pqArrangeType = `
 
 const pqMcqAnswer = `
   type PQMcqAnswerType {
-   isHintused: Boolean @defaultValue(value: "false")
-   isAnswerUsed: Boolean @defaultValue(value: "false")
-   isRecommendationUsed: Boolean @defaultValue(value: "false")
-   attemptNumber: Int
    option1: PQMCQOptionType
    option2: PQMCQOptionType
    option3: PQMCQOptionType
@@ -35,10 +31,6 @@ const pqMcqAnswer = `
 
 const pqFibInputAnswer = `
   type PQFibInputAnswerType {
-   isHintused: Boolean @defaultValue(value: "false")
-   isAnswerUsed: Boolean @defaultValue(value: "false")
-   isRecommendationUsed: Boolean @defaultValue(value: "false")
-   attemptNumber: Int
    blank1: PQBlankType
    blank2: PQBlankType
    blank3: PQBlankType
@@ -52,10 +44,6 @@ const pqFibInputAnswer = `
 
 const pqFibBlockAnswer = `
   type PQFibBlockAnswerType {
-   isHintused: Boolean @defaultValue(value: "false")
-   isAnswerUsed: Boolean @defaultValue(value: "false")
-   isRecommendationUsed: Boolean @defaultValue(value: "false")
-   attemptNumber: Int
    block1: PQBlockType
    block2: PQBlockType
    block3: PQBlockType
@@ -69,18 +57,14 @@ const pqFibBlockAnswer = `
 
 const pqArrangeAnswer = `
   type PQArrangeAnswerType {
-   isHintused: Boolean @defaultValue(value: "false")
-   isAnswerUsed: Boolean @defaultValue(value: "false")
-   isRecommendationUsed: Boolean @defaultValue(value: "false")
-   attemptNumber: Int
    arrange1: PQArrangeType
-   arrange1: PQArrangeType
-   arrange1: PQArrangeType
-   arrange1: PQArrangeType
-   arrange1: PQArrangeType
-   arrange1: PQArrangeType
-   arrange1: PQArrangeType
-   arrange1: PQArrangeType
+   arrange2: PQArrangeType
+   arrange3: PQArrangeType
+   arrange4: PQArrangeType
+   arrange5: PQArrangeType
+   arrange6: PQArrangeType
+   arrange7: PQArrangeType
+   arrange8: PQArrangeType
  }`;
 
 const practiceQuestionsType = `
@@ -88,10 +72,16 @@ const practiceQuestionsType = `
    question: QuestionBank @relation(name: "QuestionUserActivityPQDump", direction: "OneWay")
    questionAction: UserActionType
    questionDisplayOrder: Int
+   isCorrect: Boolean
+   isHintused: Boolean @defaultValue(value: "false")
+   isAnswerUsed: Boolean @defaultValue(value: "false")
+   isRecommendationUsed: Boolean @defaultValue(value: "false")
+   attemptNumber: Int
    mcqAnswer: [PQMcqAnswerType]
    fibInputAnswer: [PQFibInputAnswerType]
    fibBlockAnswer: [PQFibBlockAnswerType]
    arrangeAnswer: [PQArrangeAnswerType]
+   status: UserComponentStatus @defaultValue(value: "incomplete")
  }`;
 
 const PQShareType = `
@@ -102,14 +92,14 @@ const PQShareType = `
 
 const UserActivityPQDump = `
   type UserActivityPQDump @model {
-    user: User @relation(name: "UserActivityPQDump", direction: "OneWay")
+    user: User! @relation(name: "UserActivityPQDump", direction: "OneWay")
     isBookmarked: Boolean @defaultValue(value: "false")
     isShared: Boolean @defaultValue(value: "false")
     pqShare: [PQShareType]
     bookmarkCount: Int
     practiceQuestions: [PracticeQuestionsType]
     pqAction: UserActionType
-    learningObjective: LearningObjective @relation(name: "LearningObjectiveUserActivityPQDump", direction: "OneWay")
+    learningObjective: LearningObjective! @relation(name: "LearningObjectiveUserActivityPQDump", direction: "OneWay")
     topic: Topic @relation(name: "TopicUserActivityPQDump", direction: "OneWay")
   }
 `;

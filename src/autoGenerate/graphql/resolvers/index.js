@@ -109,12 +109,14 @@ Object.keys(parsedASTMap).forEach((type) => {
   const isModel = directives && hasDirective(directives, 'model');
   if (isModel) {
     // Fetch single query resolver.
-    resolvers.Query[modelSingular] = ((root, params, context, info) => {
+    resolvers.Query[modelSingular] = (async (root, params, context, info) => {
       // Query Resolvers
       const authentication = ifAuthorized(context);
       Object.assign(authentication, {
         mutationOrQueryName: modelSingular,
       });
+      console.log('----------------------------1111111111', JSON.stringify(params));
+      await prehook('', modelSingular, context, params);
       return fetchSingleQueryResolver(
         root,
         params,
@@ -122,15 +124,22 @@ Object.keys(parsedASTMap).forEach((type) => {
         info,
         parsedASTMap,
         authentication,
-      );
+      ).then(async (result) => {
+        const newResult = toObject(result);
+        const postHookResult = await posthook(newResult, modelSingular, params);
+        console.log('----------------------------postHookResult', postHookResult);
+        return postHookResult;
+      });
     });
 
     // Fetch list query resolver.
-    resolvers.Query[modelPlural] = ((root, params, context, info) => {
+    resolvers.Query[modelPlural] = (async (root, params, context, info) => {
       const authentication = ifAuthorized(context);
       Object.assign(authentication, {
         mutationOrQueryName: modelPlural,
       });
+      console.log('----------------------------1111111111', JSON.stringify(params));
+      await prehook('', modelSingular, context, params);
       return fetchListQueryResolver(
         root,
         params,
@@ -138,7 +147,12 @@ Object.keys(parsedASTMap).forEach((type) => {
         info,
         parsedASTMap,
         authentication,
-      );
+      ).then(async (result) => {
+        const newResult = toObject(result);
+        const postHookResult = await posthook(newResult, modelSingular, params);
+        console.log('----------------------------postHookResult', postHookResult);
+        return postHookResult;
+      });
     });
 
     // Fetch count query resolver.

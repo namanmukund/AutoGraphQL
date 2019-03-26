@@ -44,3 +44,7 @@ export const MessageIsPublishedError = createError('MessageIsPublishedError', {
   message: 'Can not perform the current operation as message is published',
 });
 
+export const ComponentLockedError = createError('ComponentLockedError', {
+  message: 'Component is locked',
+});
+

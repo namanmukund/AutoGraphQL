@@ -1,5 +1,5 @@
 const UserPracticeQuestionReport = `
-  type UserPracticeQuestionReport {
+  type UserPracticeQuestionReport @model {
     learningObjective: LearningObjective @relation(name: "UserPQReport", direction: "OneWay")
     user: User! @relation(name: "UserLO", direction: "OneWay")
     firstTryCount: Int

@@ -42,6 +42,12 @@ const quizStat = `
     totalQuestionCount: Int
  }`;
 
+const userQuizReportNextComponentType = `
+  type UserQuizReportNextComponentType {
+   topic: Topic @relation(name: "UserQuizReportNextComponentTypeTopic", direction: "OneWay")
+   nextComponentType: CurrentComponentType!
+ }`;
+
 const UserQuizReport = `
   type UserQuizReport @model {
     user: User! @relation(name: "UserQuizReport", direction: "OneWay")
@@ -51,8 +57,10 @@ const UserQuizReport = `
     latestQuizStats: QuizStat
     quizStatus: UserComponentStatus @defaultValue(value: "incomplete")
     topic: Topic @relation(name: "TopicUserQuizReport", direction: "OneWay")
+    nextComponent: UserQuizReportNextComponentType
   }
 `;
 
 export default [UserQuizReport, quizReportType, mcqAnswerType,
-  fibInputAnswerType, fibBlockAnswerType, arrangeAnswerType, quizStat];
+  fibInputAnswerType, fibBlockAnswerType, arrangeAnswerType, quizStat,
+  userQuizReportNextComponentType];

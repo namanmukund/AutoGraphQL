@@ -1,8 +1,10 @@
+import { userActionType } from '../../../../../../constants';
+
 const UserActionType = `
   enum UserActionType {
-      next
-      back
-      appClose
+      ${userActionType.next}
+      ${userActionType.back}
+      ${userActionType.appClose}
   }`;
 
 export default UserActionType;
