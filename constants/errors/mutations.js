@@ -24,3 +24,11 @@ export const MultipleArrayOperationDeniedError = createError('MultipleArrayOpera
 export const InvalidArrayUpdateOperationError = createError('InvalidArrayUpdateOperationError', {
   message: 'updateWhere and updateWith inside array update can only be used in conjunction',
 });
+
+export const InvalidTopicLOConnectionError = createError('InvalidTopicLOConnectionError', {
+  message: 'Relation between learning objective and topic does not exist',
+});
+
+export const InvalidTopicPassedInCurrentComponent = createError('InvalidTopicPassedInCurrentComponent', {
+  message: 'Order of topic passed is less than or equal to current topic order',
+});

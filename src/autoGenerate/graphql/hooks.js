@@ -10,7 +10,7 @@ import {
   getUserData,
   validateForgotPassword,
   addUserValidation,
-  deleteChapterValidation, validate,
+  deleteChapterValidation,
 } from './validation';
 import {
   UserAlreadyExistsError,
@@ -23,6 +23,9 @@ import {
   EitherPhoneOrEmailOtpRequiredError,
   FileUsageCountNotZeroError,
   ComponentLockedError,
+  RelationValuesExistError,
+  InvalidTopicLOConnectionError,
+  InvalidTopicPassedInCurrentComponent,
 }
   from '../../../constants/errors';
 import {
@@ -31,7 +34,7 @@ import {
   GLOBAL_COURSE_ID,
   userActionType,
   userComponentStatus,
-  componentTypes, PUBLISHED, operationName,
+  componentTypes, PUBLISHED,
 } from '../../../constants';
 
 import { createStaticAppToken } from '../../auth';
@@ -70,19 +73,129 @@ const hook = (data, mutationName, hookName) => {
 const prehook = async (input, mutationOrQueryName, context, params) => {
   console.log('-----------------1111111mutationOrQueryName', mutationOrQueryName);
   switch (mutationOrQueryName) {
+    case 'addUserCurrentComponentStatus' : {
+      console.log('-------------------------addUserCurrentComponentStatus params', params);
+      const userId = get(params, 'userConnectId');
+      const courseId = get(params, 'currentCourseConnectId');
+      const topicId = get(params, 'currentTopicConnectId');
+      const learningObjectiveId = get(params, 'currentLearningObjectiveConnectId');
+      console.log('-------------------------userId params', userId);
+      console.log('-------------------------courseId params', courseId);
+      if (userId && courseId) {
+        const userCurrentComponentStatusQuery = `
+          query{
+            userCurrentComponentStatuses(filter:{
+              and:[
+                {user_some:{
+                id:"${userId}"
+                }},
+              {currentCourse_some:{
+                  id:"${courseId}"
+              }}
+              ]
+            }){
+              id
+            }
+          }
+        `;
+        console.log('-------------------------userCurrentComponentStatusQuery', userCurrentComponentStatusQuery);
+        const userCurrentComponentStatusData = await callGraphqlApi(
+          userCurrentComponentStatusQuery);
+        console.log('---------------------------- userCurrentComponentStatusData', userCurrentComponentStatusData);
+        const userCurrentComponentStatusesResult = get(
+          userCurrentComponentStatusData,
+          'data.userCurrentComponentStatuses');
+        if (userCurrentComponentStatusesResult && userCurrentComponentStatusesResult.length) {
+          throw new RelationValuesExistError();
+        }
+        if (topicId && learningObjectiveId) {
+          const learningObjectiveQuery = `
+          query{
+            learningObjective(id:"${learningObjectiveId}"){
+              id
+              order
+              topic{
+                id
+                order
+                isTrial
+              }
+            }
+          }
+          `;
+          console.log('-------------------------learningObjectiveQuery', learningObjectiveQuery);
+          const learningObjectiveData = await callGraphqlApi(
+            learningObjectiveQuery);
+          console.log('---------------------------- learningObjectiveData', learningObjectiveData);
+          const topicIdConnectedToLO = get(
+            learningObjectiveData,
+            'data.learningObjective.topic.id');
+          if (topicIdConnectedToLO && topicIdConnectedToLO !== topicId) {
+            throw new InvalidTopicLOConnectionError();
+          }
+        }
+      }
+      break;
+    }
+    case 'updateUserCurrentComponentStatus' : {
+      console.log('-------------------------updateUserCurrentComponentStatus params', params);
+      const userCurrentComponentStatusId = get(params, 'id');
+      const topicId = get(params, 'currentTopicConnectId');
+      // const learningObjectiveId = get(params, 'currentLearningObjectiveConnectId');
+      if (userCurrentComponentStatusId && topicId) {
+        const topicQuery = `
+          query{
+            topic(id:"${topicId}"){
+              id
+              order
+            }
+          }
+          `;
+        const topicData = await callGraphqlApi(
+          topicQuery);
+        const topicOrder = get(
+          topicData,
+          'data.topic.order');
+
+        const userCurrentComponentStatusQuery = `
+          query{
+            userCurrentComponentStatus(id:"${userCurrentComponentStatusId}"){
+              id
+              currentTopic{
+                id
+                title
+                order
+              }
+            }
+          }
+        `;
+        console.log('-------------------------userCurrentComponentStatusQuery', userCurrentComponentStatusQuery);
+        const userCurrentComponentStatusData = await callGraphqlApi(
+          userCurrentComponentStatusQuery);
+        console.log('---------------------------- userCurrentComponentStatusData', userCurrentComponentStatusData);
+        const userCurrentComponentTopicOrder = get(
+          userCurrentComponentStatusData,
+          'data.userCurrentComponentStatus.currentTopic.order');
+        if (userCurrentComponentTopicOrder &&
+          topicOrder &&
+          topicOrder <= userCurrentComponentTopicOrder) {
+          throw new InvalidTopicPassedInCurrentComponent();
+        }
+      }
+      break;
+    }
     case 'userCourseSyllabus' : {
       const query = `
-    query{
-      topics(filter:{
-        and:[
-          {order:1},
-          {status: ${PUBLISHED} }
-        ]
-      }){
-        id
-      }
-    }
-    `;
+        query{
+          topics(filter:{
+            and:[
+              {order:1},
+              {status: ${PUBLISHED} }
+            ]
+          }){
+            id
+          }
+        }
+        `;
       const topic = await callGraphqlApi(query);
       const firstTopicId = get(topic, 'data.topics[0].id');
       const authentication = ifAuthorized(context);

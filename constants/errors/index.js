@@ -27,6 +27,7 @@ import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
   OneToOneRelationSentInInputAndAsConnectError, RelationMutationSimilarTypeArgumentError,
   MultipleArrayOperationDeniedError, InvalidArrayUpdateOperationError,
+  InvalidTopicLOConnectionError, InvalidTopicPassedInCurrentComponent,
 } from './mutations';
 
 import { FileUploadError,
@@ -136,4 +137,6 @@ export {
   UnsupportedListFieldInsideSubDocumentObjectError,
   DuplicateConnectIdsError,
   ComponentLockedError,
+  InvalidTopicLOConnectionError,
+  InvalidTopicPassedInCurrentComponent,
 };
