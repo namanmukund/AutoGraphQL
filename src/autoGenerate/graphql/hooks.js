@@ -525,6 +525,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       // check if the called user and topic is unlocked
       const userId = get(params, 'userConnectId');
       const topicId = get(params, 'topicConnectId');
+      console.log('-----------------------------userId', userId);
+      console.log('-----------------------------topicId', topicId);
       if (userId && topicId) {
         const topicQuery = `
           query{
@@ -581,6 +583,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
         const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
         console.log('-----------------1111111currentComponentInfo', JSON.stringify(currentComponentInfo));
+        console.log('-----------------1111111currenttopicInfo', JSON.stringify(topicInfo));
         if (topicInfo && currentComponentInfo) {
           let isUnlocked = false;
           const {
@@ -1922,27 +1925,12 @@ const posthook = async (input, mutationName, params) => {
       // create a common function to check if the called component is unlocked or not
       // user video collection will be created/updated
       // current component status will also get updated if action type is next
-      let learningObjectiveConnectId;
       const userId = get(input, 'user.typeId');
       const topicId = get(input, 'topic.typeId');
       if (userId && topicId) {
-        const topicQuery = `
-          query{
-            topic(id:"${topicId}"){
-              id
-              order
-              learningObjectives(filter:{
-                order: 1
-              }){
-                id
-              }
-            }
-          }
-          `;
-        const topicQueryRes = await callGraphqlApi(topicQuery);
-        const topicInfo = get(topicQueryRes, 'data.topic');
-
         // query to get current component status of user
+        let nextTopicId;
+        let restQuery = '';
         const userCurrentComponentStatusQuery = `
           query{
             userCurrentComponentStatuses(filter:{
@@ -1977,40 +1965,7 @@ const posthook = async (input, mutationName, params) => {
           `;
         const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
         const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
-
-        const userVideoQuery = `
-          query{
-            userVideos(filter:{
-              and:[
-                {user_some:{
-                id:"${userId}"
-                }},
-              {topic_some:{
-                id:"${topicId}"
-              }}
-              ]
-            }){
-              id
-              status
-            }
-          }
-          `;
-        const userVideoQueryRes = await callGraphqlApi(userVideoQuery);
-        // Ideally it should have only 1 document
-        const userVideoInfo = get(userVideoQueryRes, 'data.userVideos[0]');
-        const userVideoId = get(userVideoInfo, 'id');
-        let isBookmarked = false;
-        let isLiked = false;
-        let videoCurrentTime = 0;
-        let status = userComponentStatus.incomplete;
-
-        isBookmarked = get(input, 'isBookmarked');
-        isLiked = get(input, 'isLiked');
-        videoCurrentTime = get(input, 'videoCurrentTime');
-        const videoAction = get(input, 'videoAction');
-        if (videoAction && videoAction === userActionType.next) {
-          status = userComponentStatus.complete;
-        }
+        const quizAction = get(input, 'quizAction');
         const {
           id: currentComponentId,
           currentComponentType: currentComponent,
@@ -2018,124 +1973,56 @@ const posthook = async (input, mutationName, params) => {
         } = currentComponentInfo;
         if (currentComponent &&
           currentTopic &&
-          topicInfo &&
-          videoAction === userActionType.next &&
+          quizAction === userActionType.next &&
           currentComponent === componentTypes.quiz &&
-          currentTopic.id === topicInfo.id
+          currentTopic.id === topicId
         ) {
-          learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
-          if (learningObjectiveConnectId) {
-            const updateUserCurrentComponentStatusMutation = `
+          const currentTopicOrder = currentTopic.order;
+          if (currentTopicOrder) {
+            const nextTopicOrder = currentTopic.order + 1;
+            // query to get next topic
+            const nextTopicQuery = `
+              query{
+                topics(filter:{
+                  order: ${nextTopicOrder}
+                }){
+                  id
+                }
+              }
+            `;
+            const nextTopicResult = await callGraphqlApi(nextTopicQuery);
+            nextTopicId = get(nextTopicResult, 'data.topics[0].id');
+            console.log('-----------------------------------nextTopicId', nextTopicId);
+            if (nextTopicId) {
+              restQuery = `nextComponent:{
+                     currentTopicConnectId:"${nextTopicId}"
+                     nextComponentType: ${componentTypes.video}
+                   }`;
+              const updateUserCurrentComponentStatusMutation = `
               mutation{
                 updateUserCurrentComponentStatus(id:"${currentComponentId}",  input:{
                   currentComponentType: ${componentTypes.video}
                 },
-                currentLearningObjectiveConnectId:"${learningObjectiveConnectId}"
+                currentTopicConnectId:"${nextTopicId}"
                 ){
                   id
                 }
               }
               `;
-            await callGraphqlApi(updateUserCurrentComponentStatusMutation);
+              await callGraphqlApi(updateUserCurrentComponentStatusMutation);
+            }
           } else {
-            // log error that no lo is present in the topic with order = 1
+            // log error if unable to fetch order
           }
         }
-        if (userVideoId) {
-          // update
-          if (userVideoInfo.status === userComponentStatus.complete) {
-            status = userComponentStatus.complete;
-          }
-          let updateUserVideoMutation;
-          if (learningObjectiveConnectId) {
-            updateUserVideoMutation = `
-          mutation{
-            updateUserVideo(id:"${userVideoId}",  input:{
-              videoCurrentTime: ${videoCurrentTime}
-              isBookmarked: ${isBookmarked}
-              isLiked: ${isLiked}
-              status: ${status}
-              nextComponent:{
-                learningObjectiveConnectId:"${learningObjectiveConnectId}"
-                nextComponentType: ${componentTypes.video}
-              }
-            }){
-              id
-              status
-              isBookmarked
-              isLiked
-              videoCurrentTime
-            }
-          }
-          `;
-          } else {
-            updateUserVideoMutation = `
-          mutation{
-            updateUserVideo(id:"${userVideoId}",  input:{
-              videoCurrentTime: ${videoCurrentTime}
-              isBookmarked: ${isBookmarked}
-              isLiked: ${isLiked}
-              status: ${status}
-            }){
-              id
-              status
-              isBookmarked
-              isLiked
-              videoCurrentTime
-            }
-          }
-          `;
-          }
-
-          await callGraphqlApi(updateUserVideoMutation);
-          // log should be added here to confirm whether doc was created
-        } else {
-          // create
-          let addUserVideoMutation;
-          if (learningObjectiveConnectId) {
-            addUserVideoMutation = `
-              mutation{
-                  addUserVideo(
-                  userConnectId:"${userId}"
-                  topicConnectId:"${topicId}"
-                  input:{
-                      videoCurrentTime: ${videoCurrentTime}
-                      isBookmarked: ${isBookmarked}
-                      isLiked: ${isLiked}
-                      status: ${status}
-                      nextComponent:{
-                        learningObjectiveConnectId:"${learningObjectiveConnectId}"
-                        nextComponentType: ${componentTypes.video}
-                      }
-                  }
-              ){
-                    id
-                      
-                  }
-              }
-              `;
-          } else {
-            addUserVideoMutation = `
-              mutation{
-                  addUserVideo(
-                  userConnectId:"${userId}"
-                  topicConnectId:"${topicId}"
-                  input:{
-                      videoCurrentTime: ${videoCurrentTime}
-                      isBookmarked: ${isBookmarked}
-                      isLiked: ${isLiked}
-                      status: ${status}
-                  }
-              ){
-                    id
-                      
-                  }
-              }
-              `;
-          }
-
-          await callGraphqlApi(addUserVideoMutation);
-          // log should be added here to confirm whether doc was created
+        console.log('-----------------------restQuery', restQuery);
+        // code to evaluate report of quiz
+        const quizQuestions = get(input, 'quizQuestions');
+        if (// quizAction === userActionType.next &&
+          quizQuestions.length) {
+          quizQuestions.forEach((quizQuestion) => {
+            console.log('----------------------------------------quizQuestion', quizQuestion);
+          });
         }
       }
       break;

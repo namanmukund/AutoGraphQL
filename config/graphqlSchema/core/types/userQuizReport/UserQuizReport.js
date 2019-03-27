@@ -51,10 +51,8 @@ const userQuizReportNextComponentType = `
 const UserQuizReport = `
   type UserQuizReport @model {
     user: User! @relation(name: "UserQuizReport", direction: "OneWay")
-    firstQuizReport: [QuizReportType]
-    latestQuizReport: [QuizReportType]
-    firstQuizStats: QuizStat
-    latestQuizStats: QuizStat
+    quizReport: [QuizReportType]
+    quizStats: QuizStat
     quizStatus: UserComponentStatus @defaultValue(value: "incomplete")
     topic: Topic @relation(name: "TopicUserQuizReport", direction: "OneWay")
     nextComponent: UserQuizReportNextComponentType

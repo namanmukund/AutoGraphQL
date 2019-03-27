@@ -1,81 +1,30 @@
-const optionType = `
-  type OptionType {
+const mcqAnswer = `
+  type McqAnswerType {
    statement: String
    isSelected: Boolean @defaultValue(value: "false")
  }`;
 
-const blankType = `
-  type BlankType {
-   answer: String
- }`;
-
-const blockType = `
-  type BlockType {
-   statement: String
- }`;
-
-const arrangeType = `
-  type ArrangeType {
-   statement: String
- }`;
-
-const mcqAnswer = `
-  type McqAnswerType {
-   attemptNumber: Int
-   option1: OptionType
-   option2: OptionType
-   option3: OptionType
-   option4: OptionType
-   option5: OptionType
-   option6: OptionType
- }`;
-
 const fibInputAnswer = `
   type FibInputAnswerType {
-   attemptNumber: Int
-   blank1: BlankType
-   blank2: BlankType
-   blank3: BlankType
-   blank4: BlankType
-   blank5: BlankType
-   blank6: BlankType
-   blank7: BlankType
-   blank8: BlankType
-   blank9: BlankType
+   answer: String
+   position: Int
  }`;
 
 const fibBlockAnswer = `
   type FibBlockAnswerType {
-   attemptNumber: Int
-   block1: BlockType
-   block2: BlockType
-   block3: BlockType
-   block4: BlockType
-   block5: BlockType
-   block6: BlockType
-   block7: BlockType
-   block8: BlockType
-   block9: BlockType
+   statement: String
+   position: Int
  }`;
 
 const arrangeAnswer = `
   type ArrangeAnswerType {
-   attemptNumber: Int
-   arrange1: ArrangeType
-   arrange2: ArrangeType
-   arrange3: ArrangeType
-   arrange4: ArrangeType
-   arrange5: ArrangeType
-   arrange6: ArrangeType
-   arrange7: ArrangeType
-   arrange8: ArrangeType
-   arrange9: ArrangeType
+   statement: String
+   position: Int
  }`;
 
 const quizQuestionsType = `
   type QuizQuestionsType {
    question: QuestionBank @relation(name: "QuestionUserActivityQuizDump", direction: "OneWay")
-   questionAction: UserActionType
    questionDisplayOrder: Int
    isAttempted: Boolean @defaultValue(value: "false")
    mcqAnswer: [McqAnswerType]
@@ -94,5 +43,4 @@ const UserActivityQuizDump = `
 `;
 
 export default [UserActivityQuizDump, quizQuestionsType, mcqAnswer,
-  fibInputAnswer, fibBlockAnswer, arrangeAnswer, optionType, blankType, blockType,
-  arrangeType];
+  fibInputAnswer, fibBlockAnswer, arrangeAnswer];
