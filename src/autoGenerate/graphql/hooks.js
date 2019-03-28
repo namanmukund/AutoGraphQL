@@ -150,11 +150,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
             }
           }
           `;
-        const topicData = await callGraphqlApi(
-          topicQuery);
-        const topicOrder = get(
-          topicData,
-          'data.topic.order');
+        const topicData = await callGraphqlApi(topicQuery);
+        const topicOrder = get(topicData, 'data.topic.order');
 
         const userCurrentComponentStatusQuery = `
           query{
@@ -253,11 +250,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
             topic(id:"${topicId}"){
               id
               order
-              learningObjectives(filter:{
-                order: 1
-              }){
-                id
-              }
+              isTrial
             }
           }
           `;
@@ -432,13 +425,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
                 id
                 order
                 isTrial
-                learningObjectives{
-                  id
-                  order
-                }
-              }
-              questionBank(filter:{assessmentType:${componentTypes.practiceQuestion}}){
-                id
               }
             }
           }
@@ -533,11 +519,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
             topic(id:"${topicId}"){
               id
               order
-              learningObjectives(filter:{
-                order: 1
-              }){
-                id
-              }
+              isTrial
             }
           }
           `;
@@ -623,11 +605,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
             topic(id:"${topicId}"){
               id
               order
-              learningObjectives(filter:{
-                order: 1
-              }){
-                id
-              }
+              isTrial
             }
           }
           `;
@@ -784,6 +762,88 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
               (currentComponentType === componentTypes.quiz) ||
               (currentComponentType !== componentTypes.video &&
                 learningObjectiveOrder <= currentLearningObjective.order)) {
+              isUnlocked = true;
+            }
+          }
+          console.log('-----------------1111111isUnlocked', isUnlocked);
+          if (!isUnlocked) throw new ComponentLockedError();
+        }
+      }
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'userQuiz' : {
+      // check if the called user and topic is unlocked
+      const userId = get(params, 'userConnectId');
+      const topicId = get(params, 'topicConnectId');
+      console.log('-----------------------------userId', userId);
+      console.log('-----------------------------topicId', topicId);
+      if (userId && topicId) {
+        const topicQuery = `
+          query{
+            topic(id:"${topicId}"){
+              id
+              isTrial
+              order
+            }
+          }
+          `;
+        const topicQueryRes = await callGraphqlApi(topicQuery);
+        const topicInfo = get(topicQueryRes, 'data.topic');
+        // query to get current component status of user
+        const userCurrentComponentStatusQuery = `
+          query{
+            userCurrentComponentStatuses(filter:{
+              and:[
+                {user_some:{
+                id:"${userId}"
+                }},
+              {currentCourse_some:{
+                and:[
+                  {status: published},
+                  {id:"${GLOBAL_COURSE_ID}"}
+                  {chapters_some:{
+                    status: published
+                  }}
+                ]
+              }}
+              ]
+            }){
+              id
+              user{
+                id
+                username
+              }
+              currentTopic{
+                id
+                order
+              }
+              currentComponentType
+              enrollmentType
+            }
+          }
+          `;
+        const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
+        const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
+        console.log('-----------------1111111currentComponentInfo', JSON.stringify(currentComponentInfo));
+        console.log('-----------------1111111currenttopicInfo', JSON.stringify(topicInfo));
+        if (topicInfo && currentComponentInfo) {
+          let isUnlocked = false;
+          const {
+            order: topicOrder,
+            isTrial,
+          } = topicInfo;
+          const {
+            currentTopic,
+            currentComponentType,
+            enrollmentType,
+          } = currentComponentInfo;
+          if ((enrollmentType === enrollmentTypes.pro &&
+            topicOrder <= currentTopic.order
+          ) || (enrollmentType === enrollmentTypes.free
+            && topicOrder <= currentTopic.order &&
+            isTrial === true)) {
+            if (topicOrder < currentTopic.order ||
+              (currentComponentType === componentTypes.quiz)) {
               isUnlocked = true;
             }
           }
@@ -1034,8 +1094,33 @@ const posthook = async (input, mutationName, params) => {
       const topicSome = filterArray.find(obj => obj.topic_some);
       const userId = get(userSome, 'user_some.id');
       const topicId = get(topicSome, 'topic_some.id');
+      // value of input in case of query is result of the query
+      // so we are adding new document if document is not already present
       if (userId && topicId && input && input.length === 0) {
+        const topicQuery = `
+          query{
+            topic(id:"${topicId}"){
+              id
+              order
+              learningObjectives(filter:{
+                order: 1
+              }){
+                id
+              }
+            }
+          }
+          `;
+        const topicQueryRes = await callGraphqlApi(topicQuery);
+        const topicInfo = get(topicQueryRes, 'data.topic');
+        const learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
+        let restQuerv = '';
         console.log('-------------------------------------result', input);
+        if (learningObjectiveConnectId) {
+          restQuerv = `nextComponent:{
+                     learningObjectiveConnectId:"${learningObjectiveConnectId}"
+                     nextComponentType: ${componentTypes.message}
+                   }`;
+        }
         const addUserVideoMutation = `
               mutation{
                   addUserVideo(
@@ -1043,6 +1128,7 @@ const posthook = async (input, mutationName, params) => {
                   topicConnectId:"${topicId}"
                   input:{
                       status: ${userComponentStatus.incomplete}
+                      ${restQuerv}
                   }
               ){
                     id
@@ -1109,6 +1195,12 @@ const posthook = async (input, mutationName, params) => {
           `;
         const learningObjectiveQueryRes = await callGraphqlApi(learningObjectiveQuery);
         const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
+        const topicInfo = get(learningObjectiveInfo, 'topic');
+        const topicId = get(topicInfo, 'id');
+        const learningObjectivetId = get(learningObjectiveInfo, 'id');
+        const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
+
+
         console.log('-------------------------------------result', input);
         let practiceQuestionsQuery = 'practiceQuestions:[';
         if (learningObjectiveInfo) {
@@ -1119,12 +1211,46 @@ const posthook = async (input, mutationName, params) => {
         }
         practiceQuestionsQuery += ']';
         console.log('-----------------practiceQuestionsQuery', practiceQuestionsQuery);
+
+
+        let restQuerv = '';
+        const learningObjectives = get(topicInfo, 'learningObjectives');
+        const nextLearningObjectiveOrder = parseInt(learningObjectiveOrder, 10) + 1;
+        let nextLOId;
+        let nextCurrentComponentType;
+        let learningObjectiveConnectIdQuerv = '';
+        let topicConnectIdQuerv = '';
+        learningObjectives.forEach((learningObjective) => {
+          if (learningObjective &&
+            learningObjective.order === nextLearningObjectiveOrder
+          ) {
+            nextLOId = learningObjective.id;
+            console.log('--------------------------44444444', nextLOId);
+          }
+        });
+        if (nextLOId) {
+          nextCurrentComponentType = componentTypes.message;
+          learningObjectiveConnectIdQuerv = `learningObjectiveConnectId:"${nextLOId}"`;
+        } else {
+          topicConnectIdQuerv = `topicConnectId:"${topicId}"`;
+          nextCurrentComponentType = componentTypes.quiz;
+        }
+        // restQuery is for when we ceate/update userLO
+        if (learningObjectivetId) {
+          restQuerv = `nextComponent:{
+                     ${learningObjectiveConnectIdQuerv}
+                     ${topicConnectIdQuerv}
+                     nextComponentType: ${nextCurrentComponentType}
+                   }`;
+        }
+
         const addUserLOMutation = `
               mutation{
                   addUserLO(
                   userConnectId:"${userId}"
                   learningObjectiveConnectId:"${learningObjectiveId}"
                   input:{
+                      ${restQuerv}
                       ${practiceQuestionsQuery}
                   }
               ){
@@ -1298,8 +1424,7 @@ const posthook = async (input, mutationName, params) => {
         const nextComponent = get(userVideoInfo, 'nextComponent.learningObjective.id');
         // this condition is to check that next component is populated only once on next
         if (learningObjectiveConnectId &&
-          !nextComponent &&
-          status === userComponentStatus.complete) {
+          !nextComponent) {
           restQuerv = `nextComponent:{
                      learningObjectiveConnectId:"${learningObjectiveConnectId}"
                      nextComponentType: ${componentTypes.message}
@@ -1372,6 +1497,13 @@ const posthook = async (input, mutationName, params) => {
                 id
                 order
                 isTrial
+                learningObjectives{
+                  id
+                  order
+                }
+              }
+              questionBank(filter:{assessmentType:${componentTypes.practiceQuestion}}){
+                id
               }
             }
           }
@@ -1380,8 +1512,9 @@ const posthook = async (input, mutationName, params) => {
         const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
         console.log('-----------------1111111', JSON.stringify(learningObjectiveInfo));
         const topicInfo = get(learningObjectiveInfo, 'topic');
-        // const topicId = get(topicInfo, 'id');
+        const topicId = get(topicInfo, 'id');
         const learningObjectivetId = get(learningObjectiveInfo, 'id');
+        const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
         // query to get current component status of user
         const userCurrentComponentStatusQuery = `
           query{
@@ -1477,7 +1610,7 @@ const posthook = async (input, mutationName, params) => {
           currentLearningObjective &&
           chatAction === userActionType.next &&
           currentComponent === componentTypes.message &&
-          currentTopic.id === topicInfo.id &&
+          currentTopic.id === topicId &&
           currentLearningObjective.id === learningObjectiveInfo.id
         ) {
           console.log('-----------------1111111userLOInfo', JSON.stringify(userLOInfo));
@@ -1498,11 +1631,33 @@ const posthook = async (input, mutationName, params) => {
         }
         let restQuerv = '';
         const nextComponent = get(userLOInfo, 'nextComponent.learningObjective.id');
-        console.log('-----------------nextComponent', JSON.stringify(nextComponent));
-        if (learningObjectivetId && !nextComponent && chatStatus === userComponentStatus.complete) {
+        const learningObjectives = get(topicInfo, 'learningObjectives');
+        const nextLearningObjectiveOrder = parseInt(learningObjectiveOrder, 10) + 1;
+        let nextLOId;
+        let nextCurrentComponentType;
+        let learningObjectiveConnectIdQuerv = '';
+        let topicConnectIdQuerv = '';
+        learningObjectives.forEach((learningObjective) => {
+          if (learningObjective &&
+            learningObjective.order === nextLearningObjectiveOrder
+          ) {
+            nextLOId = learningObjective.id;
+            console.log('--------------------------44444444', nextLOId);
+          }
+        });
+        if (nextLOId) {
+          nextCurrentComponentType = componentTypes.message;
+          learningObjectiveConnectIdQuerv = `learningObjectiveConnectId:"${nextLOId}"`;
+        } else {
+          topicConnectIdQuerv = `topicConnectId:"${topicId}"`;
+          nextCurrentComponentType = componentTypes.quiz;
+        }
+        // restQuery is for when we ceate/update userLO
+        if (learningObjectivetId && !nextComponent) {
           restQuerv = `nextComponent:{
-                     learningObjectiveConnectId:"${learningObjectivetId}"
-                     nextComponentType: ${componentTypes.practiceQuestion}
+                     ${learningObjectiveConnectIdQuerv}
+                     ${topicConnectIdQuerv}
+                     nextComponentType: ${nextCurrentComponentType}
                    }`;
         }
 
@@ -1529,6 +1684,17 @@ const posthook = async (input, mutationName, params) => {
         } else {
           // create
           console.log('-----------------create');
+          // create
+          console.log('-----------------create');
+          let practiceQuestionsQuery = 'practiceQuestions:[';
+          if (learningObjectiveInfo) {
+            const practiceQuestionsinLO = get(learningObjectiveInfo, 'questionBank');
+            practiceQuestionsinLO.forEach((practiceQuestion) => {
+              practiceQuestionsQuery += `{ questionConnectId: "${practiceQuestion.id}" }, `;
+            });
+          }
+          practiceQuestionsQuery += ']';
+          console.log('-----------------practiceQuestionsQuery', practiceQuestionsQuery);
           const addUserLOMutation = `
               mutation{
                   addUserLO(
@@ -1537,6 +1703,7 @@ const posthook = async (input, mutationName, params) => {
                   input:{
                       isChatBookmarked: ${isChatBookmarked}
                       chatStatus: ${chatStatus}
+                      ${practiceQuestionsQuery}
                       ${restQuerv}
                   }
               ){
@@ -1584,7 +1751,7 @@ const posthook = async (input, mutationName, params) => {
         const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
         console.log('-----------------1111111', JSON.stringify(learningObjectiveInfo));
         const topicInfo = get(learningObjectiveInfo, 'topic');
-        // const topicId = get(topicInfo, 'id');
+        const topicId = get(topicInfo, 'id');
         const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
         const learningObjectivetId = get(learningObjectiveInfo, 'id');
         // query to get current component status of user
@@ -1691,7 +1858,38 @@ const posthook = async (input, mutationName, params) => {
         let restQuerv = '';
         const nextComponent = get(userLOInfo, 'nextComponent.learningObjective.id');
         console.log('-----------------nextComponent', JSON.stringify(nextComponent));
-
+        console.log('-----------------1111111userLOInfo', JSON.stringify(userLOInfo));
+        const learningObjectives = get(topicInfo, 'learningObjectives');
+        const nextLearningObjectiveOrder = parseInt(learningObjectiveOrder, 10) + 1;
+        let nextLOId;
+        let nextCurrentComponentType;
+        let restUserCurrentComponentStatusQuerv = '';
+        let learningObjectiveConnectIdQuerv = '';
+        let topicConnectIdQuerv = '';
+        learningObjectives.forEach((learningObjective) => {
+          if (learningObjective &&
+            learningObjective.order === nextLearningObjectiveOrder
+          ) {
+            nextLOId = learningObjective.id;
+            console.log('--------------------------44444444', nextLOId);
+          }
+        });
+        if (nextLOId) {
+          nextCurrentComponentType = componentTypes.message;
+          restUserCurrentComponentStatusQuerv = `currentLearningObjectiveConnectId:"${nextLOId}"`;
+          learningObjectiveConnectIdQuerv = `learningObjectiveConnectId:"${nextLOId}"`;
+        } else {
+          topicConnectIdQuerv = `topicConnectId:"${topicId}"`;
+          nextCurrentComponentType = componentTypes.quiz;
+        }
+        // restQuery is for when we ceate/update userLO
+        if (learningObjectivetId && !nextComponent) {
+          restQuerv = `nextComponent:{
+                     ${learningObjectiveConnectIdQuerv}
+                     ${topicConnectIdQuerv}
+                     nextComponentType: ${nextCurrentComponentType}
+                   }`;
+        }
 
         if (currentComponent &&
           currentTopic &&
@@ -1702,37 +1900,6 @@ const posthook = async (input, mutationName, params) => {
           currentTopic.id === topicInfo.id &&
           currentLearningObjective.id === learningObjectiveInfo.id
         ) {
-          console.log('-----------------1111111userLOInfo', JSON.stringify(userLOInfo));
-          const learningObjectives = get(topicInfo, 'learningObjectives');
-          const nextLearningObjectiveOrder = parseInt(learningObjectiveOrder, 10) + 1;
-          let nextLOId;
-          let nextCurrentComponentType;
-          let restUserCurrentComponentStatusQuerv = '';
-          let learningObjectiveConnectIdQuerv = '';
-          learningObjectives.forEach((learningObjective) => {
-            if (learningObjective &&
-              learningObjective.order === nextLearningObjectiveOrder
-            ) {
-              nextLOId = learningObjective.id;
-              console.log('--------------------------44444444', nextLOId);
-            }
-          });
-          if (nextLOId) {
-            nextCurrentComponentType = componentTypes.message;
-            restUserCurrentComponentStatusQuerv = `currentLearningObjectiveConnectId:"${nextLOId}"`;
-            learningObjectiveConnectIdQuerv = `learningObjectiveConnectId:"${nextLOId}"`;
-          } else {
-            nextCurrentComponentType = componentTypes.quiz;
-          }
-          // restQuery is for when we ceate/update userLO
-          if (learningObjectivetId &&
-            practiceQuestionStatus === userComponentStatus.complete) {
-            restQuerv = `nextComponent:{
-                     ${learningObjectiveConnectIdQuerv}
-                     nextComponentType: ${nextCurrentComponentType}
-                   }`;
-          }
-
           const updateUserCurrentComponentStatusMutation = `
               mutation{
                 updateUserCurrentComponentStatus(id:"${currentComponentId}",  input:{

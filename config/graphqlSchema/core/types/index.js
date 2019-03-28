@@ -15,6 +15,7 @@ import UserActivityChatDump from './userActivityChatDump';
 import UserActivityPQDump from './userActivityPQDump';
 import UserActivityQuizDump from './userActivityQuizDump';
 import UserCurrentComponentStatus from './userCurrentComponentStatus';
+import UserQuiz from './userQuiz';
 import UserQuizReport from './userQuizReport';
 import UserBookmark from './userBookmark';
 import UserProfile from './userProfile';
@@ -42,7 +43,7 @@ export default [
   ...UserActivityPQDump,
   ...UserActivityQuizDump,
   ...UserCurrentComponentStatus,
-  ...UserQuizReport,
+  ...UserQuiz,
   ...UserBookmark,
   ...UserProfile,
   ...UserCourseSyllabus,
@@ -50,4 +51,5 @@ export default [
   ...UserLO,
   ...UserTopicJourney,
   ...UserPracticeQuestionReport,
+  ...UserQuizReport,
 ];
