@@ -1287,6 +1287,130 @@ const posthook = async (input, mutationName, params) => {
       break;
       // return hook(input, mutationOrQueryName, 'PreHook');
     }
+    case 'userQuiz' : {
+      const filterArray = get(params, 'filter.and');
+      console.log('-----------------------------------filterArray', JSON.stringify(filterArray));
+      const userSome = filterArray.find(obj => obj.user_some);
+      const loSome = filterArray.find(obj => obj.topic_some);
+      console.log('-----------------------------------userSome', userSome);
+      console.log('-----------------------------------loSome', loSome);
+      const userId = get(userSome, 'user_some.id');
+      const topicId = get(loSome, 'topic_some.id');
+      if (userId && topicId && input && input.length === 0) {
+        const topicQuery = `
+          query{
+            topic(id:"${topicId}"){
+              id
+              order
+              questions(filter:{assessmentType:${componentTypes.quiz}}){
+                id
+                order
+              }
+            }
+          }
+          `;
+        const topicQueryRes = await callGraphqlApi(topicQuery);
+        const topicInfo = get(topicQueryRes, 'data.topic');
+        const topicOrder = get(topicInfo, 'order');
+
+
+        console.log('-------------------------------------result', input);
+        let quizQuery = 'quiz:[';
+        if (topicInfo) {
+          const quizQuestionsinTopic = get(topicInfo, 'questions');
+          quizQuestionsinTopic.forEach((quizQuestion) => {
+            quizQuery += `{ questionConnectId: "${quizQuestion.id}"
+                            questionDisplayOrder: ${quizQuestion.order}
+                          }, `;
+          });
+        }
+        quizQuery += ']';
+        console.log('-----------------quizQuery', quizQuery);
+
+
+        let restQuerv = '';
+        if (topicOrder) {
+          const nextTopicOrder = topicOrder + 1;
+          const nextTopicQuery = `
+          query{
+            topics(filter:{
+              and:[
+                {order:${nextTopicOrder}},
+                {status: ${PUBLISHED}}
+              ]
+            }){
+              id
+            }
+          }
+          `;
+          const nextTopicQueryRes = await callGraphqlApi(nextTopicQuery);
+          const nextTopicInfo = get(nextTopicQueryRes, 'data.topics[0]');
+          const nextTopicId = get(nextTopicInfo, 'id');
+          restQuerv = `nextComponent:{
+                     topicConnectId:"${nextTopicId}"
+                     nextComponentType: ${componentTypes.video}
+                   }`;
+        }
+
+        const addUserQuizMutation = `
+              mutation{
+                  addUserQuiz(
+                  userConnectId:"${userId}"
+                  topicConnectId:"${topicId}"
+                  input:{
+                      ${restQuerv}
+                      ${quizQuery}
+                  }
+              ){
+                    id
+                    user{
+                      id
+                    }
+                    topic{
+                      id
+                    }
+                    quizStatus
+                    quiz{
+                      question{
+                        id
+                      }
+                      questionDisplayOrder
+                    }
+                  }
+              }
+              `;
+        const resultArray = [];
+        const result = await callGraphqlApi(addUserQuizMutation);
+        console.log('-------------------------------------new data', result.data);
+        console.log('-------------------------------------new result', JSON.stringify(result.data.addUserQuiz));
+        console.log('-------------------------------------quiz', JSON.stringify(result.data.addUserQuiz.quiz));
+        if (result) {
+          const parsedData = get(result, 'data.addUserQuiz');
+          if (parsedData) {
+            const topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
+            const user = { type: 'User', typeId: `${parsedData.user.id}` };
+            const quiz = [];
+            const quizRes = parsedData.quiz;
+            if (quizRes) {
+              quizRes.forEach((quizQuestion) => {
+                const question = { question: { type: 'QuestionBank',
+                  typeId: `${quizQuestion.question.id}` },
+                questionDisplayOrder: `${quizQuestion.questionDisplayOrder}` };
+                quiz.push(question);
+              });
+            }
+            console.log('----------------quiz after', JSON.stringify(quiz));
+            parsedData.topic = topic;
+            parsedData.user = user;
+            parsedData.quiz = quiz;
+            resultArray.push(parsedData);
+          }
+        }
+        return hook(resultArray, mutationName, 'PostHook');
+      }
+      break;
+      // return hook(input, mutationOrQueryName, 'PreHook');
+    }
     case 'addUserActivityVideoDump' : {
       // create a common function to check if the called component is unlocked or not
       // user video collection will be created/updated
