@@ -2394,12 +2394,20 @@ const posthook = async (input, mutationName, params) => {
           const questionBankQueryRes = await callGraphqlApi(questionBankQuery);
           const questionBankInfo = get(questionBankQueryRes, 'data.questionBanks');
           // console.log('-----------------questionBankInfo', JSON.stringify(questionBankInfo));
+          const learningObjectiveReportObject = {};
+          const quizReport = {};
+          quizReport.totalQuestionCount = 0;
+          quizReport.correctQuestionCount = 0;
+          quizReport.inCorrectQuestionCount = 0;
+          quizReport.unansweredQuestionCount = 0;
+          const loArray = [];
           let pushManyQuery = 'quiz:{ pushMany: [';
           quizQuestions.forEach((quizQuestion) => {
             const currentQuestionId = get(quizQuestion, 'question.typeId');
             questionBankInfo.forEach((questionBank) => {
               const questionBankId = get(questionBank, 'id');
               if (currentQuestionId === questionBankId) {
+                quizReport.totalQuestionCount += 1;
                 pushManyQuery += `{ questionConnectId: "${currentQuestionId}", `;
                 console.log('----------------------------------------quizQuestion', quizQuestion);
                 console.log('----------------------------------------questionBank', JSON.stringify(questionBank));
@@ -2413,6 +2421,16 @@ const posthook = async (input, mutationName, params) => {
                   pushManyQuery += `questionDisplayOrder: ${questionDisplayOrder}, `;
                 }
                 const loId = get(questionBank, 'learningObjective.id');
+                if (!learningObjectiveReportObject[loId]) {
+                  loArray.push(loId);
+                  learningObjectiveReportObject[loId] = {};
+                  learningObjectiveReportObject[loId].totalQuestionCount = 0;
+                  learningObjectiveReportObject[loId].correctQuestionCount = 0;
+                  learningObjectiveReportObject[loId].inCorrectQuestionCount = 0;
+                  learningObjectiveReportObject[loId].unansweredQuestionCount = 0;
+                  learningObjectiveReportObject[loId].learningObjective = loId;
+                }
+                console.log('----------------learningObjectiveReportObject', learningObjectiveReportObject);
                 console.log(`isAttempted= ${isAttempted} questionDisplayOrder= ${questionDisplayOrder} loId= ${loId}`);
                 const userMcqAnswers = get(quizQuestion, 'userMcqAnswer');
                 const mcqOptions = get(questionBank, 'mcqOptions');
@@ -2584,9 +2602,57 @@ const posthook = async (input, mutationName, params) => {
                   default:
                 }
                 pushManyQuery += '}, ';
+                learningObjectiveReportObject[loId].totalQuestionCount += 1;
+                if (!isAttempted) {
+                  learningObjectiveReportObject[loId].unansweredQuestionCount += 1;
+                  quizReport.unansweredQuestionCount += 1;
+                }
+                if (isCorrect) {
+                  learningObjectiveReportObject[loId].correctQuestionCount += 1;
+                  quizReport.correctQuestionCount += 1;
+                }
+                if (isAttempted && !isCorrect) {
+                  learningObjectiveReportObject[loId].inCorrectQuestionCount += 1;
+                  quizReport.inCorrectQuestionCount += 1;
+                }
+                // commented code for calculating quiz lo report accuracy
+                // const loTotalQuestionCount =
+                // learningObjectiveReportObject[loId].totalQuestionCount;
+                // const loCorrectQuestionCount =
+                //   learningObjectiveReportObject[loId].correctQuestionCount;
+                // if (loTotalQuestionCount > 0) {
+                //   learningObjectiveReportObject[loId].accuracy =
+                //     (loCorrectQuestionCount / loTotalQuestionCount) * 100;
+                // }
               }
             });
           });
+          console.log('----------------------learningObjectiveReportObject', learningObjectiveReportObject);
+          // commented code for calculating total quiz report accuracy
+          // const totalQuestionCount = quizReport.totalQuestionCount;
+          // const correctQuestionCount = quizReport.correctQuestionCount;
+          // if (totalQuestionCount > 0) {
+          //   quizReport.accuracy =
+          //     (correctQuestionCount / totalQuestionCount) * 100;
+          // }
+          console.log('----------------------quizReport', quizReport);
+          const quizReportQuery = `quizReport:{
+                                    totalQuestionCount: ${quizReport.totalQuestionCount}
+                                    inCorrectQuestionCount: ${quizReport.inCorrectQuestionCount}
+                                    correctQuestionCount: ${quizReport.correctQuestionCount}
+                                    unansweredQuestionCount: ${quizReport.unansweredQuestionCount}
+                                  }`;
+          let learningObjectiveReportQuery = 'learningObjectiveReport: ['
+          loArray.forEach((loIdInArray) => {
+            learningObjectiveReportQuery += `{
+                                    totalQuestionCount: ${learningObjectiveReportObject[loIdInArray].totalQuestionCount}
+                                    inCorrectQuestionCount: ${learningObjectiveReportObject[loIdInArray].inCorrectQuestionCount}
+                                    correctQuestionCount: ${learningObjectiveReportObject[loIdInArray].correctQuestionCount}
+                                    unansweredQuestionCount: ${learningObjectiveReportObject[loIdInArray].unansweredQuestionCount}
+                                    learningObjectiveConnectId: "${loIdInArray}"
+                                  }, `;
+          });
+          learningObjectiveReportQuery += ']';
           pushManyQuery += ']}';
           let popAllQuery = '';
           popAllQuery = `quiz:{
@@ -2622,6 +2688,23 @@ const posthook = async (input, mutationName, params) => {
               `;
             console.log('----------------------updateUserQuizMutationQuiz', updateUserQuizMutationQuiz);
             await callGraphqlApi(updateUserQuizMutationQuiz);
+
+            // generating quiz report of user
+            const addUserQuizReport = `
+              mutation{
+                addUserQuizReport(
+                userConnectId: "${userId}"
+                topicConnectId: "${topicId}"
+                input:{
+                  ${quizReportQuery}
+                  ${learningObjectiveReportQuery}
+                }){
+                  id
+                }
+              }
+              `;
+            console.log('----------------------addUserQuizReport', addUserQuizReport);
+            await callGraphqlApi(addUserQuizReport);
           }
         }
       }

@@ -1,9 +1,9 @@
 const quizReportLearningObjective = `
   type QuizReportLearningObjective {
+    totalQuestionCount: Int
     correctQuestionCount: Int
     inCorrectQuestionCount: Int
     unansweredQuestionCount: Int
-    accuracy: Int
     learningObjective: LearningObjective @relation(name: "UserQuizReportPageLO", direction: "OneWay")
  }`;
 
@@ -13,11 +13,10 @@ const quizReportType = `
     correctQuestionCount: Int
     inCorrectQuestionCount: Int
     unansweredQuestionCount: Int
-    accuracy: Int
  }`;
 
 const UserQuizReport = `
-  type UserQuizReport {
+  type UserQuizReport @model {
     user: User! @relation(name: "UserQuizReport", direction: "OneWay")
     quizReport: QuizReportType
     learningObjectiveReport: [QuizReportLearningObjective]
