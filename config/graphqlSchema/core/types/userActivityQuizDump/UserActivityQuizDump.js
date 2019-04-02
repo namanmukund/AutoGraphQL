@@ -27,10 +27,10 @@ const quizQuestionsType = `
    question: QuestionBank @relation(name: "QuestionUserActivityQuizDump", direction: "OneWay")
    questionDisplayOrder: Int
    isAttempted: Boolean @defaultValue(value: "false")
-   mcqAnswer: [McqAnswerType]
-   fibInputAnswer: [FibInputAnswerType]
-   fibBlockAnswer: [FibBlockAnswerType]
-   arrangeAnswer: [ArrangeAnswerType]
+   userMcqAnswer: [McqAnswerType]
+   userFibInputAnswer: [FibInputAnswerType]
+   userFibBlockAnswer: [FibBlockAnswerType]
+   userArrangeAnswer: [ArrangeAnswerType]
  }`;
 
 const UserActivityQuizDump = `

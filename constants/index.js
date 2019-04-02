@@ -155,6 +155,13 @@ const userComponentStatus = {
   incomplete: 'incomplete',
 };
 
+const questionTypes = {
+  mcq: 'mcq',
+  fibInput: 'fibInput',
+  fibBlock: 'fibBlock',
+  arrange: 'arrange',
+};
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -185,4 +192,5 @@ export {
   componentTypes,
   userActionType,
   userComponentStatus,
+  questionTypes,
 };

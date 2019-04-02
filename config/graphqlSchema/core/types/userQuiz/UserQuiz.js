@@ -26,12 +26,16 @@ const quizType = `
   type QuizType {
    question: QuestionBank @relation(name: "QuestionUserQuiz", direction: "OneWay")
    questionDisplayOrder: Int
-   isAttempted: Boolean
+   isAttempted: Boolean @defaultValue(value: false)
    isCorrect: Boolean
-   mcqAnswer: [QuizMcqAnswerType]
-   fibInputAnswer: [QuizFibInputAnswerType]
-   fibBlockAnswer: [QuizFibBlockAnswerType]
-   arrangeAnswer: [QuizArrangeAnswerType]
+   userMcqAnswer: [QuizMcqAnswerType]
+   userFibInputAnswer: [QuizFibInputAnswerType]
+   userFibBlockAnswer: [QuizFibBlockAnswerType]
+   userArrangeAnswer: [QuizArrangeAnswerType]
+   mcqOptions: [McqOption]
+   fibBlocksOptions: [FibBlocksOption]
+   fibInputOptions: [FibInputOption]
+   arrangeOptions: [ArrangeOption]
    learningObjective: LearningObjective @relation(name: "LearningObjectiveUserQuiz", direction: "OneWay")
  }`;
 

@@ -19,9 +19,8 @@ const quizReportType = `
 const UserQuizReport = `
   type UserQuizReport {
     user: User! @relation(name: "UserQuizReport", direction: "OneWay")
-    firstQuizReport: QuizReportType
-    latestQuizReport: QuizReportType
-    LOReport: [QuizReportLearningObjective]
+    quizReport: QuizReportType
+    learningObjectiveReport: [QuizReportLearningObjective]
     topic: Topic @relation(name: "TopicUserQuizReport", direction: "OneWay")
   }
 `;

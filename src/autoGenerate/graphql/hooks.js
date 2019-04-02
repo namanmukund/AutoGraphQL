@@ -34,7 +34,9 @@ import {
   GLOBAL_COURSE_ID,
   userActionType,
   userComponentStatus,
-  componentTypes, PUBLISHED,
+  componentTypes,
+  PUBLISHED,
+  questionTypes,
 } from '../../../constants';
 
 import { createStaticAppToken } from '../../auth';
@@ -1296,6 +1298,7 @@ const posthook = async (input, mutationName, params) => {
       console.log('-----------------------------------loSome', loSome);
       const userId = get(userSome, 'user_some.id');
       const topicId = get(loSome, 'topic_some.id');
+      console.log('-------------input', JSON.stringify(input));
       if (userId && topicId && input && input.length === 0) {
         const topicQuery = `
           query{
@@ -2278,12 +2281,21 @@ const posthook = async (input, mutationName, params) => {
                   order: ${nextTopicOrder}
                 }){
                   id
+                  learningObjectives(filter:{
+                    order: 1
+                  }){
+                    id
+                  }
                 }
               }
             `;
             const nextTopicResult = await callGraphqlApi(nextTopicQuery);
-            nextTopicId = get(nextTopicResult, 'data.topics[0].id');
+            const nextTopicInfo = get(nextTopicResult, 'data.topics[0]');
+            nextTopicId = get(nextTopicInfo, 'id');
             console.log('-----------------------------------nextTopicId', nextTopicId);
+            const learningObjectiveConnectId = get(nextTopicInfo, 'learningObjectives[0].id');
+            let loQuery = '';
+            if (learningObjectiveConnectId) { loQuery = `currentLearningObjectiveConnectId:"${learningObjectiveConnectId}"`; }
             if (nextTopicId) {
               restQuery = `nextComponent:{
                      currentTopicConnectId:"${nextTopicId}"
@@ -2295,6 +2307,7 @@ const posthook = async (input, mutationName, params) => {
                   currentComponentType: ${componentTypes.video}
                 },
                 currentTopicConnectId:"${nextTopicId}"
+                ${loQuery}
                 ){
                   id
                 }
@@ -2306,14 +2319,310 @@ const posthook = async (input, mutationName, params) => {
             // log error if unable to fetch order
           }
         }
+
+
+        const userQuizQuery = `
+          query{
+            userQuizs(filter:{
+              and:[
+                {user_some:{
+                id:"${userId}"
+                }},
+                {topic_some:{
+                  id:"${topicId}"
+                }},
+                {
+                  quizStatus: ${userComponentStatus.incomplete}
+                }
+              ]
+            }){
+              id
+              quizStatus
+            }
+          }
+          `;
+        const userQuizQueryRes = await callGraphqlApi(userQuizQuery);
+        // Ideally it should have only 1 document
+        const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
+        const userQuizId = get(userQuizInfo, 'id');
+
+
         console.log('-----------------------restQuery', restQuery);
         // code to evaluate report of quiz
         const quizQuestions = get(input, 'quizQuestions');
-        if (// quizAction === userActionType.next &&
+        let questionIdsQuery = '[';
+        if (quizAction === userActionType.next &&
           quizQuestions.length) {
           quizQuestions.forEach((quizQuestion) => {
-            console.log('----------------------------------------quizQuestion', quizQuestion);
+            // console.log('----------------------------------------quizQuestion', quizQuestion);
+            const questionId = get(quizQuestion, 'question.typeId');
+            if (questionId) {
+              questionIdsQuery += `"${questionId}", `;
+            }
           });
+          questionIdsQuery += ']';
+          const questionBankQuery = `
+            query{
+              questionBanks(filter:{
+                id_in: ${questionIdsQuery}
+              }){
+                id
+                order
+                questionType
+                mcqOptions{
+                  statement
+                  isCorrect
+                }
+                fibInputOptions{
+                  answers
+                  correctPosition
+                }
+                fibBlocksOptions{
+                  statement
+                  correctPositions
+                }
+                arrangeOptions{
+                  statement
+                  correctPosition
+                }
+                learningObjective{
+                  id
+                }
+              }
+            }
+            `;
+          const questionBankQueryRes = await callGraphqlApi(questionBankQuery);
+          const questionBankInfo = get(questionBankQueryRes, 'data.questionBanks');
+          // console.log('-----------------questionBankInfo', JSON.stringify(questionBankInfo));
+          let pushManyQuery = 'quiz:{ pushMany: [';
+          quizQuestions.forEach((quizQuestion) => {
+            const currentQuestionId = get(quizQuestion, 'question.typeId');
+            questionBankInfo.forEach((questionBank) => {
+              const questionBankId = get(questionBank, 'id');
+              if (currentQuestionId === questionBankId) {
+                pushManyQuery += `{ questionConnectId: "${currentQuestionId}", `;
+                console.log('----------------------------------------quizQuestion', quizQuestion);
+                console.log('----------------------------------------questionBank', JSON.stringify(questionBank));
+                const questionType = get(questionBank, 'questionType');
+                const isAttempted = get(quizQuestion, 'isAttempted');
+                if (isAttempted) {
+                  pushManyQuery += `isAttempted: ${isAttempted}, `;
+                }
+                const questionDisplayOrder = get(quizQuestion, 'questionDisplayOrder');
+                if (questionDisplayOrder) {
+                  pushManyQuery += `questionDisplayOrder: ${questionDisplayOrder}, `;
+                }
+                const loId = get(questionBank, 'learningObjective.id');
+                console.log(`isAttempted= ${isAttempted} questionDisplayOrder= ${questionDisplayOrder} loId= ${loId}`);
+                const userMcqAnswers = get(quizQuestion, 'userMcqAnswer');
+                const mcqOptions = get(questionBank, 'mcqOptions');
+                const userFibBlockAnswers = get(quizQuestion, 'userFibBlockAnswer');
+                const fibBlocksOptions = get(questionBank, 'fibBlocksOptions');
+                const userFibInputAnswers = get(quizQuestion, 'userFibInputAnswer');
+                const fibInputOptions = get(questionBank, 'fibInputOptions');
+                const userArrangeAnswers = get(quizQuestion, 'userArrangeAnswer');
+                const arrangeOptions = get(questionBank, 'arrangeOptions');
+                let isCorrect;
+                let userStatement;
+                let isOptionSelected;
+                let statement;
+                let isOptionCorrect;
+                let userStatementPosition;
+                let optionCorrectPositions;
+                let optionPosition;
+                let userAnswer;
+                let answers;
+                console.log('----------------------questionType', questionType);
+
+                switch (questionType) {
+                  case questionTypes.mcq:
+                    if (mcqOptions) {
+                      isCorrect = true;
+                      let userMcqQuery = 'userMcqAnswer: [';
+                      let mcqOptionQuery = 'mcqOptions: [';
+                      mcqOptions.forEach((mcqOption) => {
+                        statement = get(mcqOption, 'statement');
+                        isOptionCorrect = get(mcqOption, 'isCorrect');
+                        userMcqAnswers.forEach((userMcqAnswer) => {
+                          if (isAttempted && userMcqAnswers) {
+                            userStatement = get(userMcqAnswer, 'statement');
+                            isOptionSelected = get(userMcqAnswer, 'isSelected');
+                            if (userStatement === statement) {
+                              userMcqQuery += `{statement: "${userStatement}", `;
+                              userMcqQuery += `isSelected: ${isOptionSelected}}, `;
+                              if (isOptionSelected !== isOptionCorrect) { isCorrect = false; }
+                            }
+                          } else {
+                            isCorrect = false;
+                          }
+                        });
+                        mcqOptionQuery += `{statement: "${statement}", `;
+                        mcqOptionQuery += `isCorrect: ${isOptionCorrect}}, `;
+                      });
+                      userMcqQuery += ']';
+                      mcqOptionQuery += ']';
+                      pushManyQuery += `isCorrect: ${isCorrect},
+                                          ${userMcqQuery}
+                                          ${mcqOptionQuery}
+                                         `;
+                      console.log('----------------------pushManyQuery mcq', pushManyQuery);
+                    }
+                    break;
+                  case questionTypes.fibBlock:
+                    if (fibBlocksOptions) {
+                      isCorrect = true;
+                      let userFibBlockQuery = 'userFibBlockAnswer: [';
+                      let fibBlockOptionQuery = 'fibBlocksOptions: [';
+                      fibBlocksOptions.forEach((fibBlocksOption) => {
+                        statement = get(fibBlocksOption, 'statement');
+                        optionCorrectPositions = get(fibBlocksOption, 'correctPositions');
+                        userFibBlockAnswers.forEach((userFibBlockAnswer) => {
+                          if (isAttempted && userFibBlockAnswers) {
+                            userStatement = get(userFibBlockAnswer, 'statement');
+                            userStatementPosition = get(userFibBlockAnswer, 'position');
+                            if (userStatement === statement) {
+                              userFibBlockQuery += `{statement: "${userStatement}", `;
+                              userFibBlockQuery += `position: ${userStatementPosition}}, `;
+                              if (optionCorrectPositions.indexOf(userStatementPosition) === -1) {
+                                isCorrect = false;
+                              }
+                            }
+                          } else {
+                            isCorrect = false;
+                          }
+                        });
+                        let correctPositionsQuery = '[';
+                        optionCorrectPositions.forEach((optionCorrectPosition) => {
+                          correctPositionsQuery += `${optionCorrectPosition}, `;
+                        });
+                        correctPositionsQuery += ']';
+                        fibBlockOptionQuery += `{statement: "${statement}", `;
+                        fibBlockOptionQuery += `correctPositions: ${correctPositionsQuery}}, `;
+                      });
+                      userFibBlockQuery += ']';
+                      fibBlockOptionQuery += ']';
+                      pushManyQuery += `isCorrect: ${isCorrect},
+                                          ${userFibBlockQuery}
+                                          ${fibBlockOptionQuery}
+                                         `;
+                      console.log('----------------------pushManyQuery fib block', pushManyQuery);
+                    }
+                    break;
+                  case questionTypes.fibInput:
+                    if (fibInputOptions) {
+                      isCorrect = true;
+                      let userFibInputQuery = 'userFibInputAnswer: [';
+                      let fibInputOptionQuery = 'fibInputOptions: [';
+                      fibInputOptions.forEach((fibInputOption) => {
+                        answers = get(fibInputOption, 'answers');
+                        optionPosition = get(fibInputOption, 'correctPosition');
+                        userFibInputAnswers.forEach((userFibInputAnswer) => {
+                          if (isAttempted && userFibInputAnswers) {
+                            userAnswer = get(userFibInputAnswer, 'answer');
+                            userStatementPosition = get(userFibInputAnswer, 'position');
+                            if (userStatementPosition === optionPosition) {
+                              userFibInputQuery += `{answer: "${userAnswer}", `;
+                              userFibInputQuery += `position: ${userStatementPosition}}, `;
+                              if (answers.indexOf(userAnswer) === -1) {
+                                isCorrect = false;
+                              }
+                            }
+                          } else {
+                            isCorrect = false;
+                          }
+                        });
+                        let answersQuery = '[';
+                        answers.forEach((answer) => {
+                          answersQuery += `"${answer}", `;
+                        });
+                        answersQuery += ']';
+                        fibInputOptionQuery += `{correctPosition: ${optionPosition}, `;
+                        fibInputOptionQuery += `answers: ${answersQuery}}, `;
+                      });
+                      userFibInputQuery += ']';
+                      fibInputOptionQuery += ']';
+                      pushManyQuery += `isCorrect: ${isCorrect},
+                                          ${userFibInputQuery}
+                                          ${fibInputOptionQuery}
+                                         `;
+                      console.log('----------------------pushManyQuery fib input', pushManyQuery);
+                    }
+                    break;
+                  case questionTypes.arrange:
+                    if (arrangeOptions) {
+                      isCorrect = true;
+                      let userArrangeQuery = 'userArrangeAnswer: [';
+                      let arrangeOptionsQuery = 'arrangeOptions: [';
+                      arrangeOptions.forEach((arrangeOption) => {
+                        statement = get(arrangeOption, 'statement');
+                        optionPosition = get(arrangeOption, 'correctPosition');
+                        userArrangeAnswers.forEach((userArrangeAnswer) => {
+                          if (isAttempted && userArrangeAnswers) {
+                            userStatement = get(userArrangeAnswer, 'statement');
+                            userStatementPosition = get(userArrangeAnswer, 'position');
+                            if (userStatement === statement) {
+                              userArrangeQuery += `{statement: "${userStatement}", `;
+                              userArrangeQuery += `order: ${userStatementPosition}}, `;
+                              if (userStatementPosition !== optionPosition) { isCorrect = false; }
+                            }
+                          } else {
+                            isCorrect = false;
+                          }
+                        });
+                        arrangeOptionsQuery += `{statement: "${statement}", `;
+                        arrangeOptionsQuery += `correctPosition: ${optionPosition}}, `;
+                      });
+                      userArrangeQuery += ']';
+                      arrangeOptionsQuery += ']';
+                      pushManyQuery += `isCorrect: ${isCorrect},
+                                          ${userArrangeQuery}
+                                          ${arrangeOptionsQuery}
+                                         `;
+                      console.log('----------------------pushManyQuery arrange', pushManyQuery);
+                    }
+                    break;
+                  default:
+                }
+                pushManyQuery += '}, ';
+              }
+            });
+          });
+          pushManyQuery += ']}';
+          let popAllQuery = '';
+          popAllQuery = `quiz:{
+                     popAll: true
+                   }`;
+
+          if (userQuizId) {
+            // popping all the existing value present in quiz
+            console.log('----------------------popAllQuery', popAllQuery);
+            const updateUserQuizMutation = `
+            mutation{
+              updateUserQuiz(id:"${userQuizId}",  input:{
+                quizStatus: ${userComponentStatus.complete}
+                ${popAllQuery}
+              }){
+                id
+              }
+            }
+            `;
+
+            await callGraphqlApi(updateUserQuizMutation);
+
+            console.log('----------------------pushManyQuery', pushManyQuery);
+            // pushing all the questions with result in the collection
+            const updateUserQuizMutationQuiz = `
+              mutation{
+                updateUserQuiz(id:"${userQuizId}",  input:{
+                  ${pushManyQuery}
+                }){
+                  id
+                }
+              }
+              `;
+            console.log('----------------------updateUserQuizMutationQuiz', updateUserQuizMutationQuiz);
+            await callGraphqlApi(updateUserQuizMutationQuiz);
+          }
         }
       }
       break;
