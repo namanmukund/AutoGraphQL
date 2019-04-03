@@ -34,66 +34,108 @@ const getAllowedOperationsOnType = (
   }
   return (
     (allowedDirectiveArray && allowedDirectiveArray.length) ?
-      allowedDirectiveArray : 'all'
+      allowedDirectiveArray : '*'
   );
 };
 
-
-const getAllowedAppOrUserInfo = (
+const getAppAndUserPermissionsFromDirective = (
   directives,
   allowedDirectiveName,
 ) => {
-  const allowedDirectiveArray = [];
+  const permissionRuleObject = {};
+  const permissionsArray = [];
+  let rule = 'allow';
   if (directives && directives.length) {
     directives.forEach((directive) => {
+      // allowedDirectiveName --> appPermissions & userPermissions
       if (get(directive, 'name.value') === allowedDirectiveName) {
-        if (get(directive, 'arguments[0].name.value') === 'list') {
-          const values = get(directive, 'arguments[0].value.values');
-          if (values && values.length) {
-            values.forEach((listValue) => {
-              const permissionInfoObj = {};
-              const { fields } = listValue;
-              if (fields && fields.length) {
-                fields.forEach((field) => {
-                  // if it is name field
-                  if (
-                    field.name && field.name.value === 'name' &&
-                      field.value && field.value.value
-                  ) {
-                    permissionInfoObj.name = field.value.value;
-                  }
-                  // if it is allowedOperations field
-                  if (
-                    field.name && field.name.value === 'allowedOperations'
+        // permissions and rule arguments are required
+        if (directive[arguments] && directive[arguments].length !== 2) {
+          throw new Error(`Invalid arguments in ${allowedDirectiveName}`);
+        }
+        if (
+          !(get(directive, 'arguments[0].name.value') === 'permissions') &&
+            !(get(directive, 'arguments[1].name.value') === 'rule')
+        ) {
+          throw new Error(`Permission and rule required schema in ${allowedDirectiveName}`);
+        }
 
-                  ) {
-                    if (field.value && field.value.values && field.value.values.length) {
-                      const allowedOperationsArray = [];
-                      field.value.values.forEach((allowedOperation) => {
-                        allowedOperationsArray.push(allowedOperation.value);
-                      });
-                      permissionInfoObj.allowedOperations = allowedOperationsArray;
-                    } else {
-                      permissionInfoObj.allowedOperations = 'all';
-                    }
-                  } else {
-                    permissionInfoObj.allowedOperations = 'all';
-                  }
-                });
+        const permissionValue = get(directive, 'arguments[0].value');
+        const ruleValue = get(directive, 'arguments[1].value.value');
+
+        if (['allow', 'deny'].includes(ruleValue)) {
+          rule = ruleValue;
+        } else {
+          throw new Error('Invalid rule value');
+        }
+
+        const { kind, value, values } = permissionValue;
+        if (kind === 'StringValue' && value && value === '*') {
+          permissionRuleObject.permissions = value;
+        } else if (kind === 'ListValue' && values && values.length) {
+          values.forEach((listValue) => {
+            const permissionInfoObj = {};
+            const { fields } = listValue;
+            if (
+              !fields ||
+              (allowedDirectiveName === 'userPermissions' && !(fields.length === 3)) ||
+                (allowedDirectiveName === 'appPermissions' && !(fields.length === 2))
+            ) {
+              throw new Error('Invalid count');
+            }
+
+            fields.forEach((field) => {
+              // if it is userRole
+              if (
+                field.name && field.name.value === 'userRole' &&
+                    field.value && field.value.value
+              ) {
+                permissionInfoObj.userRole = field.value.value;
               }
-              if (permissionInfoObj) {
-                allowedDirectiveArray.push(permissionInfoObj);
+
+              // if it is name field
+              if (
+                field.name && field.name.value === 'appName' &&
+                    field.value && field.value.value
+              ) {
+                permissionInfoObj.appName = field.value.value;
+              }
+              // if it is operations field
+              if (
+                field.name && field.name.value === 'operations'
+
+              ) {
+                // if operations is an array
+                if (field.value && field.value.values && field.value.values.length) {
+                  const operationsArray = [];
+                  field.value.values.forEach((operation) => {
+                    operationsArray.push(operation.value);
+                  });
+                  permissionInfoObj.operations = operationsArray;
+                } else if (field.value.value === '*') {
+                  permissionInfoObj.operations = '*';
+                } else {
+                  throw new Error('Invalid operation field format');
+                }
               }
             });
-          }
+            if (permissionInfoObj) {
+              permissionsArray.push(permissionInfoObj);
+            }
+          });
+        } else {
+          throw new Error('Invalid permission format');
         }
       }
     });
   }
-  return (
-    (allowedDirectiveArray && allowedDirectiveArray.length) ?
-      allowedDirectiveArray : 'all'
-  );
+  if (permissionsArray && permissionsArray.length) {
+    permissionRuleObject.permissions = permissionsArray;
+  } else {
+    permissionRuleObject.permissions = '*';
+  }
+  permissionRuleObject.rule = rule;
+  return permissionRuleObject;
 };
 const getParsedASTMap = (graphqlSchemaTypes) => {
   const initialAST = parse(concatenateTypeDefs(graphqlSchemaTypes));
@@ -102,24 +144,26 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
   and contains other graphql properties like directives, fields, interfaces, and typeName
    */
   const { definitions } = initialAST;
-
   // To store final parsed AST Object.
   const parsedASTObject = {};
   definitions.forEach((definition) => {
+    if (definition.name && definition.name.value === 'LearningObjective') {
+      console.log(definition.name.value);
+    }
     const { kind, fields, ...props } = definition;
     // not making type ast for graphql input types(remove check if input types ast required)
     if (kind !== 'ObjectTypeDefinition' || !fields || !fields.length) {
       return null;
     }
     // on typeName level
-    const allowedApps = getAllowedAppOrUserInfo(
+    const appPermissions = getAppAndUserPermissionsFromDirective(
       definition.directives,
-      'allowedApps',
+      'appPermissions',
     );
     // on typeName level
-    const allowedUsers = getAllowedAppOrUserInfo(
+    const userPermissions = getAppAndUserPermissionsFromDirective(
       definition.directives,
-      'allowedUsers',
+      'userPermissions',
     );
     // on typeName level
     const allowedOperations = getAllowedOperationsOnType(
@@ -265,17 +309,17 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
               defaultFields.push(fieldName);
               break;
 
-            case 'allowedApps':
-              parsedField.allowedApps = getAllowedAppOrUserInfo(
+            case 'appPermissions':
+              parsedField.appPermissions = getAppAndUserPermissionsFromDirective(
                 parsedField.directives,
-                'allowedApps',
+                'appPermissions',
               );
               break;
 
-            case 'allowedUsers':
-              parsedField.allowedUsers = getAllowedAppOrUserInfo(
+            case 'userPermissions':
+              parsedField.userPermissions = getAppAndUserPermissionsFromDirective(
                 parsedField.directives,
-                'allowedUsers',
+                'userPermissions',
               );
               break;
 
@@ -379,8 +423,8 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
       remoteNonNullAndUniqueFieldsApplicationWise,
       defaultFieldsWithValue,
       additionalRelationFields,
-      allowedApps,
-      allowedUsers,
+      appPermissions,
+      userPermissions,
       allowedOperations,
     });
 

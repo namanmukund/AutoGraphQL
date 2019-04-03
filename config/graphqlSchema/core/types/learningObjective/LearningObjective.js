@@ -2,61 +2,84 @@ import { ADD, META_QUERY, SINGULAR, UPDATE } from '../../../../../constants/grap
 
 const LearningObjective = `
   type LearningObjective @model 
-  @allowedApps(list:[{
-        name: "tekieTms"
-        allowedOperations: ["${ADD}", "${SINGULAR}"]
+  @appPermissions(permissions:[{
+        appName: "tekieTms"
+        operations: ["${ADD}", "${SINGULAR}"]
   }, {
-        name: "appTwo"
-        allowedOperations: ["${ADD}", "${SINGULAR}"]
-  },
+        appName: "appTwo"
+        operations: ["${ADD}", "${SINGULAR}"]
+  },  
   {
-        name: "three"
+        appName: "three"
+        operations: "*"
+  },
+    {
+        appName: "four"
+        operations: "*"
   }
-  ])
+  ], rule: allow)
   
- @allowedUsers(list:[{
-        name: "admin"
-        allowedOperations: ["${ADD}", "${SINGULAR}"]
+ @userPermissions(permissions:[{
+        userRole: "admin"
+        operations: ["${ADD}", "${SINGULAR}"]
+        appName: "appTwo" 
   }, {
-        name: "student"
-        allowedOperations: ["${ADD}", "${SINGULAR}"]
+        userRole: "admin"
+        appName: "student"
+        operations: "*"
   },
   {
-        name: "three"
+    userRole: "admin"
+        appName: "student"
+        operations: "*"
   }
-  ]) 
+  ], rule: allow) 
+  
+  
   @allowedOperations(list:["${ADD}", "${SINGULAR}", "${META_QUERY}", "${UPDATE}"])
   {
     order: Int! 
-             @allowedApps(list:[{
-                    name: "tekieTms1"
-                    allowedOperations: ["${ADD}", "${SINGULAR}"]
-              }, {
-                    name: "appTwo1"
-                    allowedOperations: ["${ADD}", "${SINGULAR}"]
-              },
-              {
-                    name: "three1"
-              }])
-            @allowedUsers(list:[{
-                    name: "admin1"
-                    allowedOperations: ["${ADD}", "${SINGULAR}"]
-              }, {
-                    name: "student1"
-                    allowedOperations: ["${ADD}", "${SINGULAR}"]
-              },
-              {
-                    name: "three1"
-              }
-              ]) 
     title: String! 
            @unique 
            @length(min: 6, max: 120) 
            @trim
+           @appPermissions(permissions: "*", rule: deny)
     description: String 
            @uniqueOrEmpty 
            @unique @length(min: 6, max: 120) 
            @trim
+             @appPermissions(permissions:[{
+        appName: "tekieTms"
+        operations: ["${ADD}", "${SINGULAR}"]
+  }, {
+        appName: "appTwo"
+        operations: ["${ADD}", "${SINGULAR}"]
+  },  
+  {
+        appName: "three"
+        operations: "*"
+  },
+    {
+        appName: "four"
+        operations: "*"
+  }
+  ], rule: allow)
+  
+ @userPermissions(permissions:[{
+        userRole: "admin"
+        operations: ["${ADD}", "${SINGULAR}"]
+        appName: "appTwo" 
+  }, {
+        userRole: "admin"
+        appName: "student"
+        operations: "*"
+  },
+  {
+    userRole: "admin"
+        appName: "student"
+        operations: "*"
+  }
+  ], rule: allow) 
     videoStartTime: Int
     videoEndTime: Int
     topic: Topic @relation(name: "TopicLearningObjective") 
