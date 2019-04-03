@@ -37,6 +37,8 @@ import {
   componentTypes,
   PUBLISHED,
   questionTypes,
+  scholarshipThreshHolds,
+  freeTopicCount,
 } from '../../../constants';
 
 import { createStaticAppToken } from '../../auth';
@@ -1349,10 +1351,13 @@ const posthook = async (input, mutationName, params) => {
           const nextTopicQueryRes = await callGraphqlApi(nextTopicQuery);
           const nextTopicInfo = get(nextTopicQueryRes, 'data.topics[0]');
           const nextTopicId = get(nextTopicInfo, 'id');
-          restQuerv = `nextComponent:{
+          if (nextTopicId) {
+            restQuerv = `nextComponent:{
                      topicConnectId:"${nextTopicId}"
                      nextComponentType: ${componentTypes.video}
                    }`;
+          }
+          // what will happen in case of last published topic
         }
 
         const addUserQuizMutation = `
@@ -2278,7 +2283,10 @@ const posthook = async (input, mutationName, params) => {
             const nextTopicQuery = `
               query{
                 topics(filter:{
-                  order: ${nextTopicOrder}
+                  and:[
+                  {order:${nextTopicOrder}},
+                  {status: ${PUBLISHED}}
+                ]
                 }){
                   id
                   learningObjectives(filter:{
@@ -2628,13 +2636,6 @@ const posthook = async (input, mutationName, params) => {
             });
           });
           console.log('----------------------learningObjectiveReportObject', learningObjectiveReportObject);
-          // commented code for calculating total quiz report accuracy
-          // const totalQuestionCount = quizReport.totalQuestionCount;
-          // const correctQuestionCount = quizReport.correctQuestionCount;
-          // if (totalQuestionCount > 0) {
-          //   quizReport.accuracy =
-          //     (correctQuestionCount / totalQuestionCount) * 100;
-          // }
           console.log('----------------------quizReport', quizReport);
           const quizReportQuery = `quizReport:{
                                     totalQuestionCount: ${quizReport.totalQuestionCount}
@@ -2642,7 +2643,7 @@ const posthook = async (input, mutationName, params) => {
                                     correctQuestionCount: ${quizReport.correctQuestionCount}
                                     unansweredQuestionCount: ${quizReport.unansweredQuestionCount}
                                   }`;
-          let learningObjectiveReportQuery = 'learningObjectiveReport: ['
+          let learningObjectiveReportQuery = 'learningObjectiveReport: [';
           loArray.forEach((loIdInArray) => {
             learningObjectiveReportQuery += `{
                                     totalQuestionCount: ${learningObjectiveReportObject[loIdInArray].totalQuestionCount}
@@ -2705,6 +2706,135 @@ const posthook = async (input, mutationName, params) => {
               `;
             console.log('----------------------addUserQuizReport', addUserQuizReport);
             await callGraphqlApi(addUserQuizReport);
+
+            // logic for evaluating scholarship of user
+            if (currentComponent === componentTypes.quiz &&
+              currentTopic.id === topicId) {
+              // code for calculating total quiz report accuracy for scholarship
+              const totalQuestionCount = quizReport.totalQuestionCount;
+              const correctQuestionCount = quizReport.correctQuestionCount;
+              let topicsCompleted = 0;
+              let proficientTopicCount = 0;
+              let masteredTopicCount = 0;
+              let familiarTopicCount = 0;
+              let freeProficientTopicCount = freeTopicCount;
+              let freeMasteredTopicCount = freeTopicCount;
+              let freeFamiliarTopicCount = freeTopicCount;
+              let accuracy = 0;
+              if (totalQuestionCount > 0) {
+                accuracy =
+                  (correctQuestionCount / totalQuestionCount) * 100;
+              }
+              const userProfileQuery = `
+              query{
+                userProfiles(filter:{
+                  user_some:{
+                    id: "${userId}"
+                  }
+                }){
+                  id
+                  topicsCompleted
+                  proficientTopicCount
+                  freeProficientTopicCount
+                  masteredTopicCount
+                  freeMasteredTopicCount
+                  familiarTopicCount
+                  freeFamiliarTopicCount
+                }
+              }
+            `;
+              const userProfileResult = await callGraphqlApi(userProfileQuery);
+              const userProfileInfo = get(userProfileResult, 'data.userProfiles[0]');
+              const userProfileId = get(userProfileInfo, 'id');
+              if (userProfileInfo && userProfileInfo.topicsCompleted) {
+                topicsCompleted = userProfileInfo.topicsCompleted;
+              }
+              if (userProfileInfo && userProfileInfo.proficientTopicCount) {
+                proficientTopicCount = userProfileInfo.proficientTopicCount;
+              }
+              if (userProfileInfo && userProfileInfo.freeProficientTopicCount) {
+                freeProficientTopicCount = userProfileInfo.freeProficientTopicCount;
+              }
+              if (userProfileInfo && userProfileInfo.masteredTopicCount) {
+                masteredTopicCount = userProfileInfo.masteredTopicCount;
+              }
+              if (userProfileInfo && userProfileInfo.freeMasteredTopicCount) {
+                freeMasteredTopicCount = userProfileInfo.freeMasteredTopicCount;
+              }
+              if (userProfileInfo && userProfileInfo.familiarTopicCount) {
+                familiarTopicCount = userProfileInfo.familiarTopicCount;
+              }
+              if (userProfileInfo && userProfileInfo.freeFamiliarTopicCount) {
+                freeFamiliarTopicCount = userProfileInfo.freeFamiliarTopicCount;
+              }
+              let userProfileTopicConnectQuery = '';
+              topicsCompleted += 1;
+              // proficient topic logic
+              if (accuracy === scholarshipThreshHolds.proficient) {
+                proficientTopicCount += 1;
+                userProfileTopicConnectQuery += `proficientTopicsConnectIds:["${topicId}"] `;
+              } else if (freeProficientTopicCount > 0) {
+                freeProficientTopicCount -= 1;
+              }
+              // mastered topic logic
+              if (accuracy > scholarshipThreshHolds.master) {
+                masteredTopicCount += 1;
+                userProfileTopicConnectQuery += `masteredTopicsConnectIds:["${topicId}"] `;
+              } else if (freeMasteredTopicCount > 0) {
+                freeMasteredTopicCount -= 1;
+              }
+              // familiar topic logic
+              if (accuracy > scholarshipThreshHolds.familiar) {
+                familiarTopicCount += 1;
+                userProfileTopicConnectQuery += `familiarTopicsConnectIds:["${topicId}"] `;
+              } else if (freeFamiliarTopicCount > 0) {
+                freeFamiliarTopicCount -= 1;
+              }
+
+              if (userProfileId) {
+                const updateUserProfile = `
+                mutation{
+                  updateUserProfile(id:"${userProfileId}"
+                  ${userProfileTopicConnectQuery}
+                    input:{
+                      topicsCompleted: ${topicsCompleted}
+                      proficientTopicCount: ${proficientTopicCount}
+                      freeProficientTopicCount: ${freeProficientTopicCount}
+                      masteredTopicCount: ${masteredTopicCount}
+                      freeMasteredTopicCount: ${freeMasteredTopicCount}
+                      familiarTopicCount: ${familiarTopicCount}
+                      freeFamiliarTopicCount: ${freeFamiliarTopicCount}
+                    }
+                  ){
+                   id 
+                  }
+                }
+                `;
+                console.log('----------------------updateUserProfile', updateUserProfile);
+                await callGraphqlApi(updateUserProfile);
+              } else {
+                const addUserProfile = `
+                  mutation{
+                    addUserProfile(
+                      userConnectId:"${userId}"
+                      ${userProfileTopicConnectQuery}
+                      input:{
+                        topicsCompleted: ${topicsCompleted}
+                        proficientTopicCount: ${proficientTopicCount}
+                        freeProficientTopicCount: ${freeProficientTopicCount}
+                        masteredTopicCount: ${masteredTopicCount}
+                        freeMasteredTopicCount: ${freeMasteredTopicCount}
+                        familiarTopicCount: ${familiarTopicCount}
+                        freeFamiliarTopicCount: ${freeFamiliarTopicCount}
+                      }){
+                      id
+                    }
+                  }
+                  `;
+                console.log('----------------------addUserProfile', addUserProfile);
+                await callGraphqlApi(addUserProfile);
+              }
+            }
           }
         }
       }

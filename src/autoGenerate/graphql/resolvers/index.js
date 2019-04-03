@@ -115,7 +115,6 @@ Object.keys(parsedASTMap).forEach((type) => {
       Object.assign(authentication, {
         mutationOrQueryName: modelSingular,
       });
-      console.log('----------------------------1111111111', JSON.stringify(params));
       await prehook('', modelSingular, context, params);
       return fetchSingleQueryResolver(
         root,
@@ -127,7 +126,6 @@ Object.keys(parsedASTMap).forEach((type) => {
       ).then(async (result) => {
         const newResult = toObject(result);
         const postHookResult = await posthook(newResult, modelSingular, params);
-        console.log('----------------------------postHookResult', postHookResult);
         return postHookResult;
       });
     });
@@ -138,7 +136,6 @@ Object.keys(parsedASTMap).forEach((type) => {
       Object.assign(authentication, {
         mutationOrQueryName: modelPlural,
       });
-      console.log('----------------------------1111111111', JSON.stringify(params));
       await prehook('', modelSingular, context, params);
       return fetchListQueryResolver(
         root,
@@ -150,7 +147,6 @@ Object.keys(parsedASTMap).forEach((type) => {
       ).then(async (result) => {
         const newResult = toObject(result);
         const postHookResult = await posthook(newResult, modelSingular, params);
-        console.log('----------------------------postHookResult', postHookResult);
         return postHookResult;
       });
     });

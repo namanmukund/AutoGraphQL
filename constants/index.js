@@ -162,6 +162,14 @@ const questionTypes = {
   arrange: 'arrange',
 };
 
+const scholarshipThreshHolds = {
+  proficient: 100,
+  master: 80,
+  familiar: 60,
+};
+
+const freeTopicCount = 5;
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -193,4 +201,6 @@ export {
   userActionType,
   userComponentStatus,
   questionTypes,
+  scholarshipThreshHolds,
+  freeTopicCount,
 };
