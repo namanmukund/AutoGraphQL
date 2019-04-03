@@ -44,3 +44,10 @@ export const MessageIsPublishedError = createError('MessageIsPublishedError', {
   message: 'Can not perform the current operation as message is published',
 });
 
+export const OrderAlreadyExistsError = createError('OrderAlreadyExistsError', {
+  message: 'Cannot perform the current operation as order already exists, order has to be unique',
+});
+
+export const TopicIdRequiredError = createError('TopicIdRequiredError', {
+  message: 'Cannot perform the current operation as TopicConnectId is not provided',
+});

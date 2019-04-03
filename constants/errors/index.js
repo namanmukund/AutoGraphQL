@@ -21,6 +21,8 @@ import {
   LearningObjectiveIsPublishedError,
   QuestionIsPublishedError,
   MessageIsPublishedError,
+  OrderAlreadyExistsError,
+  TopicIdRequiredError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -135,5 +137,7 @@ export {
   FileIdIsMandatoryError,
   UnsupportedListFieldInsideSubDocumentObjectError,
   DuplicateConnectIdsError,
+  OrderAlreadyExistsError,
+  TopicIdRequiredError,
   UnauthorizedFieldOrTypeAccessByAppError,
 };
