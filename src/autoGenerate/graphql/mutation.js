@@ -225,8 +225,8 @@ Object.keys(parsedASTMap).forEach((type) => {
     }
     // add operation
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(ADD))
     ) {
       mutationString += `${addModelMutationName} ( input: ${modelInputTypeName}!,${nestedConnectMutationString}): ${typeName},`;
@@ -234,8 +234,8 @@ Object.keys(parsedASTMap).forEach((type) => {
 
     // update operation
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(UPDATE))
     ) {
       mutationString += `${updateModelMutationName} (id: ID!, input: ${modelUpdateTypeName},${nestedConnectMutationString} ${saveHistoryArgumentString} ${forceUpdate}) : ${typeName},`;
@@ -243,8 +243,8 @@ Object.keys(parsedASTMap).forEach((type) => {
 
     // updateMultiple operation
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(UPDATE_MULTIPLE))
     ) {
       mutationString += `${updateMultipleModelMutationName} (input: [${modelUpdateAllTypeName}]!) : [${typeName}],`;
@@ -252,8 +252,8 @@ Object.keys(parsedASTMap).forEach((type) => {
 
     // delete operation
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(DELETE))
     ) {
       mutationString += `${deleteModelMutationName} (id: ID!, ${forceDelete}) : ${typeName},`;
@@ -261,8 +261,8 @@ Object.keys(parsedASTMap).forEach((type) => {
 
     // deleteMultiple operation
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(DELETE_MULTIPLE))
     ) {
       mutationString += `${deleteMultipleMutation} (filter: ${typeName}Filter!, last: Int, first:Int, skip:Int, after: ID, before:ID) : [${typeName}],`;

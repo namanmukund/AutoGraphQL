@@ -118,8 +118,8 @@ Object.keys(parsedASTMap).forEach((type) => {
   if (isModel) {
     // Fetch single query resolver.
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(SINGULAR))
     ) {
       resolvers.Query[modelSingular] = ((root, params, context, info) => {
@@ -141,8 +141,8 @@ Object.keys(parsedASTMap).forEach((type) => {
 
     // Fetch list query resolver.
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(PLURAL))
     ) {
       resolvers.Query[modelPlural] = ((root, params, context, info) => {
@@ -163,8 +163,8 @@ Object.keys(parsedASTMap).forEach((type) => {
 
     // Fetch count query resolver.
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(META_QUERY))
     ) {
       resolvers.Query[modelMeta] = ((root, params, context, info) => {
@@ -186,8 +186,8 @@ Object.keys(parsedASTMap).forEach((type) => {
     // Mutation Resolvers
     const mutationNames = getMutationNames(typeName);
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(ADD))
     ) {
       resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
@@ -208,8 +208,8 @@ Object.keys(parsedASTMap).forEach((type) => {
     }
 
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(UPDATE))
     ) {
       resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
@@ -230,8 +230,8 @@ Object.keys(parsedASTMap).forEach((type) => {
     }
 
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(UPDATE_MULTIPLE))
     ) {
       resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
@@ -253,8 +253,8 @@ Object.keys(parsedASTMap).forEach((type) => {
       });
     }
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(DELETE))
     ) {
       resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
@@ -275,8 +275,8 @@ Object.keys(parsedASTMap).forEach((type) => {
     }
 
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(DELETE_MULTIPLE))
     ) {
       resolvers.Mutation = Object.assign({}, resolvers.Mutation, {

@@ -379,24 +379,24 @@ parsedASTTypes.forEach((type) => {
 
 
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-    (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+    (allowedOperations && allowedOperations !== '*' &&
         allowedOperations.length && allowedOperations.includes(SINGULAR))
     ) {
       queryString += `${modelSingular}(${singleFetchParamsString}): ${typeName},`;
     }
 
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(PLURAL))
     ) {
       queryString += `${modelPlural}(filter : ${filterName}, orderBy:Sort${typeName}, last: Int, first:Int, skip:Int, after: ID, before:ID) : [${typeName}],`;
     }
 
     if (
-      (allowedOperations && allowedOperations === 'all') ||
-        (allowedOperations && allowedOperations !== 'all' &&
+      (allowedOperations && allowedOperations === '*') ||
+        (allowedOperations && allowedOperations !== '*' &&
             allowedOperations.length && allowedOperations.includes(META_QUERY))
     ) {
       if (!groupByType) {
