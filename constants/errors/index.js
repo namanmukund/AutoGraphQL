@@ -58,6 +58,7 @@ import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   ConnectIdsAlreadyRelatedError,
   DuplicateConnectIdsError,
   UnauthorizedFieldOrTypeAccessByAppError,
+  InsufficientPermissionError,
 } from './input';
 
 
@@ -140,4 +141,5 @@ export {
   OrderAlreadyExistsError,
   TopicIdRequiredError,
   UnauthorizedFieldOrTypeAccessByAppError,
+  InsufficientPermissionError,
 };

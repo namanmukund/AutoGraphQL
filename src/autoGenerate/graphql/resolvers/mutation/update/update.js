@@ -18,6 +18,7 @@ import { getConnectInputFieldsMap } from '../utils/getConnectInputFieldsMap';
 import { rollBackDocumentSaves } from '../utils/rollBackDocumentSaves';
 import nestedConnectIdHandler from '../utils/nestedConnectIdHandler';
 import removeConnectionWhenDisconnected from '../../../controllers/utils/removeConnectionWhenDisconnected';
+import {UPDATE} from "../../../../../../constants/graphqlOperations";
 
 // Returns remote delete mutation promises.
 const remoteUpdateMutationPromises = (
@@ -254,7 +255,7 @@ const updateGenericMutation = (root,
   validate(
     typeName,
     ast,
-    operationName.update,
+    UPDATE,
     fieldsFetched,
     authentication,
     input,

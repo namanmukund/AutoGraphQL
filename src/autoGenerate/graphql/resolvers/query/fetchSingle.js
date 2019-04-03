@@ -5,8 +5,9 @@ import { toObject } from '../../../../../utils';
 import { validate } from '../../validation';
 import { operationName } from '../../../../../constants';
 import { InvalidParamsError } from '../../../../../constants/errors';
+import {SINGULAR} from "../../../../../constants/graphqlOperations";
 // Validate that the params used for single fetch are unique.
-const validateParamsUniqueness = (paramKey, typeAST) => {
+const   validateParamsUniqueness = (paramKey, typeAST) => {
   let isUniqueField = false;
   // Id field is always unique.
   if (paramKey === 'id') {
@@ -76,7 +77,7 @@ const fetchSingleQueryResolver = (
   validate(
     typeName,
     ast,
-    operationName.read,
+    SINGULAR,
     fieldsFetched,
     authentication,
   );

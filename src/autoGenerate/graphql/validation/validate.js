@@ -1,6 +1,6 @@
 import { includes } from 'lodash';
 import {
-  backendApps, frontEndApps, defaultFields, operationName,
+  backendApps, frontEndApps, defaultFields,
   permissionIntegratedApps,
 } from '../../../../constants';
 import {
@@ -8,6 +8,7 @@ import {
   InvalidActionOnDefaultFieldsError,
 } from '../../../../constants/errors';
 import validateAppAndUserPermissionOnFields from './validateAppAndUserPermissionOnFields';
+import { ADD, DELETE, PLURAL, SINGULAR, UPDATE } from '../../../../constants/graphqlOperations';
 
 const isBackendApp = (authentication) => {
   const app = authentication && authentication.app;
@@ -98,10 +99,11 @@ const validate = (
     parsedASTMap,
     queryFields,
     authentication,
+    operation,
   );
 
   const accessFields = parsedASTMap[typeName];
-  if (operation === operationName.read || operation === operationName.delete) {
+  if (operation === SINGULAR || operation === PLURAL || operation === DELETE) {
     // check if user is not trying to fetch writeOnly fields
     const validAccess = validateAccess(
       accessFields.writeOnlyFields,
@@ -110,7 +112,7 @@ const validate = (
     if (!validAccess) {
       throw new InvalidReadAccessError();
     }
-  } else if (operation === operationName.add || operation === operationName.update) {
+  } else if (operation === ADD || operation === UPDATE) {
     // check if user is not trying to add readOnly fields
     const writeValidation = validateAccess(
       accessFields.readOnlyFields,

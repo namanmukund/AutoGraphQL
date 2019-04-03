@@ -15,6 +15,7 @@ import { filterLocalInputForMutation } from '../utils/filterLocalInputForMutatio
 import { getConnectInputFieldsMap } from '../utils/getConnectInputFieldsMap';
 import { rollBackDocumentSaves } from '../utils/rollBackDocumentSaves';
 import nestedConnectIdHandler from '../utils/nestedConnectIdHandler';
+import { ADD } from '../../../../../../constants/graphqlOperations';
 
 
 // Returns remote delete mutation promises.
@@ -332,7 +333,7 @@ const addMutationResolver = (
   validate(
     typeName,
     ast,
-    operationName.add,
+    ADD,
     fieldsFetched,
     authentication,
     input,

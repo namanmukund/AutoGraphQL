@@ -1,7 +1,7 @@
 import { QueryController } from '../../controllers';
 import { validate } from '../../validation';
 import { getFieldsBeingFetched } from '../../../utils';
-import { operationName } from '../../../../../constants';
+import { META_QUERY } from '../../../../../constants/graphqlOperations';
 
 const fetchListAggregationQueryResolver = (
   root,
@@ -18,7 +18,7 @@ const fetchListAggregationQueryResolver = (
   validate(
     typeName,
     ast,
-    operationName.read,
+    META_QUERY,
     feildsFetched,
     authentication,
   );

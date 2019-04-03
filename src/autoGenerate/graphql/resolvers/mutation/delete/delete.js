@@ -5,6 +5,7 @@ import { log, toObject } from '../../../../../../utils';
 import { validate } from '../../../validation';
 import { operationName } from '../../../../../../constants';
 import { mergeMutationsPromisesResults } from '../utils/mergeMutationsPromisesResults';
+import {DELETE} from "../../../../../../constants/graphqlOperations";
 
 // Roll back the changes made by deleteMutationResolver
 const rollBack = () => {
@@ -95,7 +96,7 @@ const deleteMutationResolver = (
   validate(
     typeName,
     ast,
-    operationName.delete,
+    DELETE,
     feildsFetched,
     authentication,
   );
