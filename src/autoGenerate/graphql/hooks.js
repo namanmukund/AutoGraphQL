@@ -48,7 +48,6 @@ import deleteTopicValidation from './preHookFunctions/validation/deleteTopicVali
 import deleteLearningObjectiveValidation from './preHookFunctions/validation/deleteLearningObjectiveValidation';
 import deleteQuestionBankValidation from './preHookFunctions/validation/deleteQuestionBankValidation';
 import callGraphqlApi from '../../api/callGraphqlApi';
-import { log } from '../../../utils/log';
 
 const { hookFunctions } = functions || {};
 
@@ -75,16 +74,12 @@ const hook = (data, mutationName, hookName) => {
 // This hook is used to transform input argument for a mutation.
 // params contain all the arguments whatever you are passing in mutation query
 const prehook = async (input, mutationOrQueryName, context, params) => {
-  console.log('-----------------1111111mutationOrQueryName', mutationOrQueryName);
   switch (mutationOrQueryName) {
     case 'addUserCurrentComponentStatus' : {
-      console.log('-------------------------addUserCurrentComponentStatus params', params);
       const userId = get(params, 'userConnectId');
       const courseId = get(params, 'currentCourseConnectId');
       const topicId = get(params, 'currentTopicConnectId');
       const learningObjectiveId = get(params, 'currentLearningObjectiveConnectId');
-      console.log('-------------------------userId params', userId);
-      console.log('-------------------------courseId params', courseId);
       if (userId && courseId) {
         const userCurrentComponentStatusQuery = `
           query{
@@ -102,16 +97,16 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
             }
           }
         `;
-        console.log('-------------------------userCurrentComponentStatusQuery', userCurrentComponentStatusQuery);
         const userCurrentComponentStatusData = await callGraphqlApi(
           userCurrentComponentStatusQuery);
-        console.log('---------------------------- userCurrentComponentStatusData', userCurrentComponentStatusData);
         const userCurrentComponentStatusesResult = get(
           userCurrentComponentStatusData,
           'data.userCurrentComponentStatuses');
+        // checking if course and user document already exists
         if (userCurrentComponentStatusesResult && userCurrentComponentStatusesResult.length) {
           throw new RelationValuesExistError();
         }
+        // logic to check if lo and topic passed are related to each other
         if (topicId && learningObjectiveId) {
           const learningObjectiveQuery = `
           query{
@@ -126,10 +121,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
             }
           }
           `;
-          console.log('-------------------------learningObjectiveQuery', learningObjectiveQuery);
           const learningObjectiveData = await callGraphqlApi(
             learningObjectiveQuery);
-          console.log('---------------------------- learningObjectiveData', learningObjectiveData);
           const topicIdConnectedToLO = get(
             learningObjectiveData,
             'data.learningObjective.topic.id');
@@ -141,10 +134,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'updateUserCurrentComponentStatus' : {
-      console.log('-------------------------updateUserCurrentComponentStatus params', params);
       const userCurrentComponentStatusId = get(params, 'id');
       const topicId = get(params, 'currentTopicConnectId');
-      // const learningObjectiveId = get(params, 'currentLearningObjectiveConnectId');
       if (userCurrentComponentStatusId && topicId) {
         const topicQuery = `
           query{
@@ -169,13 +160,12 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
             }
           }
         `;
-        console.log('-------------------------userCurrentComponentStatusQuery', userCurrentComponentStatusQuery);
         const userCurrentComponentStatusData = await callGraphqlApi(
           userCurrentComponentStatusQuery);
-        console.log('---------------------------- userCurrentComponentStatusData', userCurrentComponentStatusData);
         const userCurrentComponentTopicOrder = get(
           userCurrentComponentStatusData,
           'data.userCurrentComponentStatus.currentTopic.order');
+        // checking if topic passed order is greater than current topic's
         if (userCurrentComponentTopicOrder &&
           topicOrder &&
           topicOrder <= userCurrentComponentTopicOrder) {
@@ -202,6 +192,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       const authentication = ifAuthorized(context);
       const decodedUser = authentication && authentication.user;
       const { id: userId } = decodedUser;
+      // condition is already present in pre hook of addUserCurrentComponentStatus
+      // to check if course and user combination already exits
       // mutation to create current component status of user
       const mutation = `
       mutation{
@@ -307,6 +299,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
             currentTopic,
             enrollmentType,
           } = currentComponentInfo;
+          // condition to check if topic is free, if not then user should be pro
+          // type to access that topic
           if ((enrollmentType === enrollmentTypes.pro &&
             order <= currentTopic.order
           ) || (enrollmentType === enrollmentTypes.free
@@ -315,7 +309,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
           ) {
             isUnlocked = true;
           }
-          console.log('-----------------locked or unlocked', mutationOrQueryName);
+          // throwing component is locked error
           if (!isUnlocked) throw new ComponentLockedError();
         }
       }
@@ -341,9 +335,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
           `;
         const learningObjectiveQueryRes = await callGraphqlApi(learningObjectiveQuery);
         const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
-        console.log('-----------------1111111', JSON.stringify(learningObjectiveInfo));
         const topicInfo = get(learningObjectiveInfo, 'topic');
-        // const topicId = get(topicInfo, 'id');
         const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
         // query to get current component status of user
         const userCurrentComponentStatusQuery = `
@@ -384,7 +376,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
           `;
         const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
         const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
-        console.log('-----------------1111111currentComponentInfo', JSON.stringify(currentComponentInfo));
         if (learningObjectiveInfo && topicInfo && currentComponentInfo) {
           let isUnlocked = false;
           const {
@@ -397,11 +388,17 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
             currentComponentType,
             enrollmentType,
           } = currentComponentInfo;
+          // condition to check if topic is free, if not then user should be pro
+          // type to access that topic
           if ((enrollmentType === enrollmentTypes.pro &&
             topicOrder <= currentTopic.order
           ) || (enrollmentType === enrollmentTypes.free
             && topicOrder <= currentTopic.order &&
             isTrial === true)) {
+            // condition to check if chat can be accessed:
+            // if called topic order is less than current topic order or
+            // other case is when called topic order is equal to current topic order
+            // in that case we are checking current component type and lo order
             if (topicOrder < currentTopic.order ||
               (currentComponentType === componentTypes.quiz) ||
               (currentComponentType !== componentTypes.video &&
@@ -409,7 +406,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
               isUnlocked = true;
             }
           }
-          console.log('-----------------1111111isUnlocked', isUnlocked);
           if (!isUnlocked) throw new ComponentLockedError();
         }
       }
@@ -435,11 +431,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
           `;
         const learningObjectiveQueryRes = await callGraphqlApi(learningObjectiveQuery);
         const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
-        console.log('-----------------1111111', JSON.stringify(learningObjectiveInfo));
         const topicInfo = get(learningObjectiveInfo, 'topic');
-        // const topicId = get(topicInfo, 'id');
         const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
-        // query to get current component status of user
         const userCurrentComponentStatusQuery = `
           query{
             userCurrentComponentStatuses(filter:{
@@ -478,7 +471,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
           `;
         const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
         const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
-        console.log('-----------------1111111currentComponentInfo', JSON.stringify(currentComponentInfo));
         if (learningObjectiveInfo && topicInfo && currentComponentInfo) {
           let isUnlocked = false;
           const {
@@ -491,11 +483,17 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
             currentComponentType,
             enrollmentType,
           } = currentComponentInfo;
+          // condition to check if topic is free, if not then user should be pro
+          // type to access that topic
           if ((enrollmentType === enrollmentTypes.pro &&
             topicOrder <= currentTopic.order
           ) || (enrollmentType === enrollmentTypes.free
             && topicOrder <= currentTopic.order &&
             isTrial === true)) {
+            // condition to check if pq can be accessed:
+            // if called topic order is less than current topic order or
+            // other case is when called topic order is equal to current topic order
+            // in that case we are checking current component type and lo order
             if (topicOrder < currentTopic.order ||
               (currentComponentType === componentTypes.quiz) ||
               (currentComponentType !== componentTypes.video &&
@@ -505,7 +503,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
               isUnlocked = true;
             }
           }
-          console.log('-----------------1111111isUnlocked', isUnlocked);
           if (!isUnlocked) throw new ComponentLockedError();
         }
       }
@@ -515,8 +512,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       // check if the called user and topic is unlocked
       const userId = get(params, 'userConnectId');
       const topicId = get(params, 'topicConnectId');
-      console.log('-----------------------------userId', userId);
-      console.log('-----------------------------topicId', topicId);
       if (userId && topicId) {
         const topicQuery = `
           query{
@@ -568,8 +563,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
           `;
         const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
         const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
-        console.log('-----------------1111111currentComponentInfo', JSON.stringify(currentComponentInfo));
-        console.log('-----------------1111111currenttopicInfo', JSON.stringify(topicInfo));
         if (topicInfo && currentComponentInfo) {
           let isUnlocked = false;
           const {
@@ -581,23 +574,30 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
             currentComponentType,
             enrollmentType,
           } = currentComponentInfo;
+          // condition to check if topic is free, if not then user should be pro
+          // type to access that topic
           if ((enrollmentType === enrollmentTypes.pro &&
             topicOrder <= currentTopic.order
           ) || (enrollmentType === enrollmentTypes.free
             && topicOrder <= currentTopic.order &&
             isTrial === true)) {
+            // condition to check if quiz can be accessed:
+            // if called topic order is less than current topic order or
+            // other case is when called topic order is equal to current topic order
+            // in that case we are checking current component type is quiz
             if (topicOrder < currentTopic.order ||
               (currentComponentType === componentTypes.quiz)) {
               isUnlocked = true;
             }
           }
-          console.log('-----------------1111111isUnlocked', isUnlocked);
           if (!isUnlocked) throw new ComponentLockedError();
         }
       }
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'userVideo' : {
+      // userVideo collection is used to store and get video page info
+      // checking if called topic and user combination in accessible
       const filterArray = get(params, 'filter.and');
       const userSome = filterArray.find(obj => obj.user_some);
       const topicSome = filterArray.find(obj => obj.topic_some);
@@ -662,6 +662,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
             currentTopic,
             enrollmentType,
           } = currentComponentInfo;
+          // logic is same as that of user video dump
           if ((enrollmentType === enrollmentTypes.pro &&
             order <= currentTopic.order
           ) || (enrollmentType === enrollmentTypes.free
@@ -670,19 +671,17 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
           ) {
             isUnlocked = true;
           }
-          console.log('-----------------locked or unlocked', mutationOrQueryName);
           if (!isUnlocked) throw new ComponentLockedError();
         }
       }
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'userLo' : {
+      // userLo collection is used to store and get chat and pq page info
+      // checking if called lo and user combination in accessible
       const filterArray = get(params, 'filter.and');
-      console.log('-----------------------------------filterArray', JSON.stringify(filterArray));
       const userSome = filterArray.find(obj => obj.user_some);
       const loSome = filterArray.find(obj => obj.learningObjective_some);
-      console.log('-----------------------------------userSome', userSome);
-      console.log('-----------------------------------loSome', loSome);
       const userId = get(userSome, 'user_some.id');
       const learningObjectiveId = get(loSome, 'learningObjective_some.id');
       if (userId && learningObjectiveId) {
@@ -701,9 +700,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
           `;
         const learningObjectiveQueryRes = await callGraphqlApi(learningObjectiveQuery);
         const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
-        console.log('-----------------1111111', JSON.stringify(learningObjectiveInfo));
         const topicInfo = get(learningObjectiveInfo, 'topic');
-        // const topicId = get(topicInfo, 'id');
         const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
         // query to get current component status of user
         const userCurrentComponentStatusQuery = `
@@ -744,7 +741,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
           `;
         const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
         const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
-        console.log('-----------------1111111currentComponentInfo', JSON.stringify(currentComponentInfo));
         if (learningObjectiveInfo && topicInfo && currentComponentInfo) {
           let isUnlocked = false;
           const {
@@ -757,6 +753,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
             currentComponentType,
             enrollmentType,
           } = currentComponentInfo;
+          // same logic as that of User chat dump
           if ((enrollmentType === enrollmentTypes.pro &&
             topicOrder <= currentTopic.order
           ) || (enrollmentType === enrollmentTypes.free
@@ -769,7 +766,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
               isUnlocked = true;
             }
           }
-          console.log('-----------------1111111isUnlocked', isUnlocked);
           if (!isUnlocked) throw new ComponentLockedError();
         }
       }
@@ -779,8 +775,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       // check if the called user and topic is unlocked
       const userId = get(params, 'userConnectId');
       const topicId = get(params, 'topicConnectId');
-      console.log('-----------------------------userId', userId);
-      console.log('-----------------------------topicId', topicId);
       if (userId && topicId) {
         const topicQuery = `
           query{
@@ -828,8 +822,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
           `;
         const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
         const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
-        console.log('-----------------1111111currentComponentInfo', JSON.stringify(currentComponentInfo));
-        console.log('-----------------1111111currenttopicInfo', JSON.stringify(topicInfo));
         if (topicInfo && currentComponentInfo) {
           let isUnlocked = false;
           const {
@@ -841,6 +833,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
             currentComponentType,
             enrollmentType,
           } = currentComponentInfo;
+          // logic same as that of User quiz dump
           if ((enrollmentType === enrollmentTypes.pro &&
             topicOrder <= currentTopic.order
           ) || (enrollmentType === enrollmentTypes.free
@@ -851,7 +844,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
               isUnlocked = true;
             }
           }
-          console.log('-----------------1111111isUnlocked', isUnlocked);
           if (!isUnlocked) throw new ComponentLockedError();
         }
       }
@@ -1118,7 +1110,6 @@ const posthook = async (input, mutationName, params) => {
         const topicInfo = get(topicQueryRes, 'data.topic');
         const learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
         let restQuerv = '';
-        console.log('-------------------------------------result', input);
         if (learningObjectiveConnectId) {
           restQuerv = `nextComponent:{
                      learningObjectiveConnectId:"${learningObjectiveConnectId}"
@@ -1151,8 +1142,9 @@ const posthook = async (input, mutationName, params) => {
               `;
         const resultArray = [];
         const result = await callGraphqlApi(addUserVideoMutation);
-        console.log('-------------------------------------new result', result.data.addUserVideo);
         if (result) {
+          // parsing data 'addUserVideo' so that the logic implemented ahead can read data is
+          // desired format and return the same
           const parsedData = get(result, 'data.addUserVideo');
           if (parsedData) {
             const topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
@@ -1165,17 +1157,15 @@ const posthook = async (input, mutationName, params) => {
         return hook(resultArray, mutationName, 'PostHook');
       }
       break;
-      // return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'userLo' : {
       const filterArray = get(params, 'filter.and');
-      console.log('-----------------------------------filterArray', JSON.stringify(filterArray));
       const userSome = filterArray.find(obj => obj.user_some);
       const loSome = filterArray.find(obj => obj.learningObjective_some);
-      console.log('-----------------------------------userSome', userSome);
-      console.log('-----------------------------------loSome', loSome);
       const userId = get(userSome, 'user_some.id');
       const learningObjectiveId = get(loSome, 'learningObjective_some.id');
+      // value of input in case of query is result of the query
+      // so we are adding new document if document is not already present
       if (userId && learningObjectiveId && input && input.length === 0) {
         const learningObjectiveQuery = `
           query{
@@ -1203,9 +1193,7 @@ const posthook = async (input, mutationName, params) => {
         const topicId = get(topicInfo, 'id');
         const learningObjectivetId = get(learningObjectiveInfo, 'id');
         const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
-
-
-        console.log('-------------------------------------result', input);
+        // adding PQs to the userLO document
         let practiceQuestionsQuery = 'practiceQuestions:[';
         if (learningObjectiveInfo) {
           const practiceQuestionsinLO = get(learningObjectiveInfo, 'questionBank');
@@ -1214,11 +1202,9 @@ const posthook = async (input, mutationName, params) => {
           });
         }
         practiceQuestionsQuery += ']';
-        console.log('-----------------practiceQuestionsQuery', practiceQuestionsQuery);
-
-
         let restQuerv = '';
         const learningObjectives = get(topicInfo, 'learningObjectives');
+        // obtaining next LO
         const nextLearningObjectiveOrder = parseInt(learningObjectiveOrder, 10) + 1;
         let nextLOId;
         let nextCurrentComponentType;
@@ -1229,9 +1215,9 @@ const posthook = async (input, mutationName, params) => {
             learningObjective.order === nextLearningObjectiveOrder
           ) {
             nextLOId = learningObjective.id;
-            console.log('--------------------------44444444', nextLOId);
           }
         });
+        // if next LO is not present in that case, quiz will be next component
         if (nextLOId) {
           nextCurrentComponentType = componentTypes.message;
           learningObjectiveConnectIdQuerv = `learningObjectiveConnectId:"${nextLOId}"`;
@@ -1274,9 +1260,9 @@ const posthook = async (input, mutationName, params) => {
               `;
         const resultArray = [];
         const result = await callGraphqlApi(addUserLOMutation);
-        console.log('-------------------------------------new data', result.data);
-        console.log('-------------------------------------new result', result.data.addUserLO);
         if (result) {
+          // parsing data 'addUserVideo' so that the logic implemented ahead can read data is
+          // desired format and return the same
           const parsedData = get(result, 'data.addUserLO');
           if (parsedData) {
             const lo = { type: 'LearningObjective', typeId: `${parsedData.learningObjective.id}` };
@@ -1289,18 +1275,15 @@ const posthook = async (input, mutationName, params) => {
         return hook(resultArray, mutationName, 'PostHook');
       }
       break;
-      // return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'userQuiz' : {
       const filterArray = get(params, 'filter.and');
-      console.log('-----------------------------------filterArray', JSON.stringify(filterArray));
       const userSome = filterArray.find(obj => obj.user_some);
       const loSome = filterArray.find(obj => obj.topic_some);
-      console.log('-----------------------------------userSome', userSome);
-      console.log('-----------------------------------loSome', loSome);
       const userId = get(userSome, 'user_some.id');
       const topicId = get(loSome, 'topic_some.id');
-      console.log('-------------input', JSON.stringify(input));
+      // value of input in case of query is result of the query
+      // so we are adding new document if document is not already present
       if (userId && topicId && input && input.length === 0) {
         const topicQuery = `
           query{
@@ -1317,9 +1300,8 @@ const posthook = async (input, mutationName, params) => {
         const topicQueryRes = await callGraphqlApi(topicQuery);
         const topicInfo = get(topicQueryRes, 'data.topic');
         const topicOrder = get(topicInfo, 'order');
-
-
-        console.log('-------------------------------------result', input);
+        // adding quiz questions in the document
+        // this logic will be changed based on set
         let quizQuery = 'quiz:[';
         if (topicInfo) {
           const quizQuestionsinTopic = get(topicInfo, 'questions');
@@ -1330,9 +1312,6 @@ const posthook = async (input, mutationName, params) => {
           });
         }
         quizQuery += ']';
-        console.log('-----------------quizQuery', quizQuery);
-
-
         let restQuerv = '';
         if (topicOrder) {
           const nextTopicOrder = topicOrder + 1;
@@ -1357,7 +1336,7 @@ const posthook = async (input, mutationName, params) => {
                      nextComponentType: ${componentTypes.video}
                    }`;
           }
-          // what will happen in case of last published topic
+          // In case of last topic quiz, next component in not populated
         }
 
         const addUserQuizMutation = `
@@ -1389,10 +1368,9 @@ const posthook = async (input, mutationName, params) => {
               `;
         const resultArray = [];
         const result = await callGraphqlApi(addUserQuizMutation);
-        console.log('-------------------------------------new data', result.data);
-        console.log('-------------------------------------new result', JSON.stringify(result.data.addUserQuiz));
-        console.log('-------------------------------------quiz', JSON.stringify(result.data.addUserQuiz.quiz));
         if (result) {
+          // parsing data 'addUserVideo' so that the logic implemented ahead can read data is
+          // desired format and return the same
           const parsedData = get(result, 'data.addUserQuiz');
           if (parsedData) {
             const topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
@@ -1407,7 +1385,6 @@ const posthook = async (input, mutationName, params) => {
                 quiz.push(question);
               });
             }
-            console.log('----------------quiz after', JSON.stringify(quiz));
             parsedData.topic = topic;
             parsedData.user = user;
             parsedData.quiz = quiz;
@@ -1417,13 +1394,8 @@ const posthook = async (input, mutationName, params) => {
         return hook(resultArray, mutationName, 'PostHook');
       }
       break;
-      // return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUserActivityVideoDump' : {
-      // create a common function to check if the called component is unlocked or not
-      // user video collection will be created/updated
-      // current component status will also get updated if action type is next
-      let learningObjectiveConnectId;
       const userId = get(input, 'user.typeId');
       const topicId = get(input, 'topic.typeId');
       // query to get topic info
@@ -1503,14 +1475,13 @@ const posthook = async (input, mutationName, params) => {
           }
           `;
         const userVideoQueryRes = await callGraphqlApi(userVideoQuery);
-        // Ideally it should have only 1 document
         const userVideoInfo = get(userVideoQueryRes, 'data.userVideos[0]');
         const userVideoId = get(userVideoInfo, 'id');
         let isBookmarked = false;
         let isLiked = false;
         let videoCurrentTime = 0;
         let status = userComponentStatus.incomplete;
-
+        let learningObjectiveConnectId;
         isBookmarked = get(input, 'isBookmarked');
         isLiked = get(input, 'isLiked');
         videoCurrentTime = get(input, 'videoCurrentTime');
@@ -1544,9 +1515,6 @@ const posthook = async (input, mutationName, params) => {
               }
               `;
             await callGraphqlApi(updateUserCurrentComponentStatusMutation);
-          } else {
-            // log error that no lo is present in the topic with order = 1
-            // log(element);
           }
         }
         if (userVideoInfo && userVideoInfo.status === userComponentStatus.complete) {
@@ -1564,7 +1532,6 @@ const posthook = async (input, mutationName, params) => {
         }
         if (userVideoId) {
           // update
-
           const updateUserVideoMutation = `
           mutation{
             updateUserVideo(id:"${userVideoId}",  input:{
@@ -1584,7 +1551,6 @@ const posthook = async (input, mutationName, params) => {
           `;
 
           await callGraphqlApi(updateUserVideoMutation);
-          // log should be added here to confirm whether doc was created
         } else {
           // create
           const addUserVideoMutation = `
@@ -1601,22 +1567,16 @@ const posthook = async (input, mutationName, params) => {
                   }
               ){
                     id
-                      
                   }
               }
               `;
 
           await callGraphqlApi(addUserVideoMutation);
-          // log should be added here to confirm whether doc was created
         }
       }
       break;
     }
     case 'addUserActivityChatDump' : {
-      // create a common function to check if the called component is unlocked or not
-      // user video collection will be created/updated
-      // current component status will also get updated if action type is next
-      console.log('------------------------------------------kpkpkpkpkp');
       const userId = get(input, 'user.typeId');
       const learningObjectiveId = get(input, 'learningObjective.typeId');
       if (userId && learningObjectiveId) {
@@ -1642,7 +1602,6 @@ const posthook = async (input, mutationName, params) => {
           `;
         const learningObjectiveQueryRes = await callGraphqlApi(learningObjectiveQuery);
         const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
-        console.log('-----------------1111111', JSON.stringify(learningObjectiveInfo));
         const topicInfo = get(learningObjectiveInfo, 'topic');
         const topicId = get(topicInfo, 'id');
         const learningObjectivetId = get(learningObjectiveInfo, 'id');
@@ -1686,8 +1645,6 @@ const posthook = async (input, mutationName, params) => {
           `;
         const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
         const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
-        console.log('-----------------1111111currentComponentInfo', JSON.stringify(currentComponentInfo));
-        // log error in else
         const userLOQuery = `
           query{
             userLos(filter:{
@@ -1712,9 +1669,7 @@ const posthook = async (input, mutationName, params) => {
           }
           `;
         const userLOQueryRes = await callGraphqlApi(userLOQuery);
-        // Ideally it should have only 1 document
         const userLOInfo = get(userLOQueryRes, 'data.userLos[0]');
-        console.log('-----------------1111111userLOInfo', JSON.stringify(userLOInfo));
         const userLOId = get(userLOInfo, 'id');
         let isChatBookmarked = false;
         let chatStatus = userComponentStatus.incomplete;
@@ -1729,13 +1684,6 @@ const posthook = async (input, mutationName, params) => {
           currentLearningObjective,
           currentTopic,
         } = currentComponentInfo;
-        console.log('-----------------2chatAction', JSON.stringify(chatAction));
-        console.log('-----------------3currentComponent', JSON.stringify(currentComponent));
-        console.log('-----------------4currentTopic.id', JSON.stringify(currentTopic.id));
-        console.log('-----------------5topicInfo.id ', JSON.stringify(topicInfo.id));
-        console.log('-----------------6currentLearningObjective.id', JSON.stringify(currentLearningObjective.id));
-        console.log('-----------------7learningObjectiveInfo.id', JSON.stringify(learningObjectiveInfo.id));
-
         if (currentComponent &&
           currentTopic &&
           topicInfo &&
@@ -1745,7 +1693,6 @@ const posthook = async (input, mutationName, params) => {
           currentTopic.id === topicId &&
           currentLearningObjective.id === learningObjectiveInfo.id
         ) {
-          console.log('-----------------1111111userLOInfo', JSON.stringify(userLOInfo));
           const updateUserCurrentComponentStatusMutation = `
               mutation{
                 updateUserCurrentComponentStatus(id:"${currentComponentId}",  input:{
@@ -1774,9 +1721,9 @@ const posthook = async (input, mutationName, params) => {
             learningObjective.order === nextLearningObjectiveOrder
           ) {
             nextLOId = learningObjective.id;
-            console.log('--------------------------44444444', nextLOId);
           }
         });
+        // checking if next component is quiz or message
         if (nextLOId) {
           nextCurrentComponentType = componentTypes.message;
           learningObjectiveConnectIdQuerv = `learningObjectiveConnectId:"${nextLOId}"`;
@@ -1795,8 +1742,6 @@ const posthook = async (input, mutationName, params) => {
 
         if (userLOId) {
           // update
-          console.log('-----------------update');
-
           const updateUserLOMutation = `
           mutation{
             updateUserLO(id:"${userLOId}",  input:{
@@ -1812,50 +1757,11 @@ const posthook = async (input, mutationName, params) => {
           `;
 
           await callGraphqlApi(updateUserLOMutation);
-          // log should be added here to confirm whether doc was created
-        } else {
-          // create
-          console.log('-----------------create');
-          // create
-          console.log('-----------------create');
-          let practiceQuestionsQuery = 'practiceQuestions:[';
-          if (learningObjectiveInfo) {
-            const practiceQuestionsinLO = get(learningObjectiveInfo, 'questionBank');
-            practiceQuestionsinLO.forEach((practiceQuestion) => {
-              practiceQuestionsQuery += `{ questionConnectId: "${practiceQuestion.id}" }, `;
-            });
-          }
-          practiceQuestionsQuery += ']';
-          console.log('-----------------practiceQuestionsQuery', practiceQuestionsQuery);
-          const addUserLOMutation = `
-              mutation{
-                  addUserLO(
-                  userConnectId:"${userId}"
-                  learningObjectiveConnectId:"${learningObjectivetId}"
-                  input:{
-                      isChatBookmarked: ${isChatBookmarked}
-                      chatStatus: ${chatStatus}
-                      ${practiceQuestionsQuery}
-                      ${restQuerv}
-                  }
-              ){
-                    id
-                      
-                  }
-              }
-              `;
-
-          await callGraphqlApi(addUserLOMutation);
-          // log should be added here to confirm whether doc was created
         }
       }
       break;
     }
     case 'addUserActivityPQDump' : {
-      // create a common function to check if the called component is unlocked or not
-      // user video collection will be created/updated
-      // current component status will also get updated if action type is next
-      console.log('------------------------------------------ioioioioioioio');
       const userId = get(input, 'user.typeId');
       const learningObjectiveId = get(input, 'learningObjective.typeId');
       if (userId && learningObjectiveId) {
@@ -1881,7 +1787,6 @@ const posthook = async (input, mutationName, params) => {
           `;
         const learningObjectiveQueryRes = await callGraphqlApi(learningObjectiveQuery);
         const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
-        console.log('-----------------1111111', JSON.stringify(learningObjectiveInfo));
         const topicInfo = get(learningObjectiveInfo, 'topic');
         const topicId = get(topicInfo, 'id');
         const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
@@ -1925,8 +1830,6 @@ const posthook = async (input, mutationName, params) => {
           `;
         const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
         const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
-        console.log('-----------------1111111currentComponentInfo', JSON.stringify(currentComponentInfo));
-        // log error in else
         const userLOQuery = `
           query{
             userLos(filter:{
@@ -1960,9 +1863,7 @@ const posthook = async (input, mutationName, params) => {
           }
           `;
         const userLOQueryRes = await callGraphqlApi(userLOQuery);
-        // Ideally it should have only 1 document
         const userLOInfo = get(userLOQueryRes, 'data.userLos[0]');
-        console.log('-----------------1111111userLOInfo', JSON.stringify(userLOInfo));
         const userLOId = get(userLOInfo, 'id');
         let isPracticeQuestionBookmarked = false;
         let practiceQuestionStatus = get(userLOInfo, 'practiceQuestionStatus', userComponentStatus.incomplete);
@@ -1978,19 +1879,11 @@ const posthook = async (input, mutationName, params) => {
           currentLearningObjective,
           currentTopic,
         } = currentComponentInfo;
-        console.log('-----------------2chatAction', JSON.stringify(pqAction));
-        console.log('-----------------3currentComponent', JSON.stringify(currentComponent));
-        console.log('-----------------4currentTopic.id', JSON.stringify(currentTopic.id));
-        console.log('-----------------5topicInfo.id ', JSON.stringify(topicInfo.id));
-        console.log('-----------------6currentLearningObjective.id', JSON.stringify(currentLearningObjective.id));
-        console.log('-----------------7learningObjectiveInfo.id', JSON.stringify(learningObjectiveInfo.id));
         if (userLOInfo && userLOInfo.practiceQuestionStatus === userComponentStatus.complete) {
           practiceQuestionStatus = userComponentStatus.complete;
         }
         let restQuerv = '';
         const nextComponent = get(userLOInfo, 'nextComponent.learningObjective.id');
-        console.log('-----------------nextComponent', JSON.stringify(nextComponent));
-        console.log('-----------------1111111userLOInfo', JSON.stringify(userLOInfo));
         const learningObjectives = get(topicInfo, 'learningObjectives');
         const nextLearningObjectiveOrder = parseInt(learningObjectiveOrder, 10) + 1;
         let nextLOId;
@@ -2003,9 +1896,9 @@ const posthook = async (input, mutationName, params) => {
             learningObjective.order === nextLearningObjectiveOrder
           ) {
             nextLOId = learningObjective.id;
-            console.log('--------------------------44444444', nextLOId);
           }
         });
+        // logic for checking the next component
         if (nextLOId) {
           nextCurrentComponentType = componentTypes.message;
           restUserCurrentComponentStatusQuerv = `currentLearningObjectiveConnectId:"${nextLOId}"`;
@@ -2047,7 +1940,6 @@ const posthook = async (input, mutationName, params) => {
         }
         if (userLOId) {
           // update userLO
-          console.log('-----------------update');
           let firstTryCount = 0;
           let secondTryCount = 0;
           let threeOrMoreTryCount = 0;
@@ -2065,7 +1957,7 @@ const posthook = async (input, mutationName, params) => {
           const practiceQuestionsInUserLO = get(userLOInfo, 'practiceQuestions');
           if (inputPracticeQuestions.length && practiceQuestionsInUserLO.length) {
             practiceQuestionsInUserLO.forEach((practiceQuestionInUserLO) => {
-              console.log('*********************************************', practiceQuestionInUserLO);
+              // storing all the passed info in input in newPracticeQuestionInUserLO
               const { question, ...newPracticeQuestionInUserLO } = practiceQuestionInUserLO;
               const questionConnectId = get(practiceQuestionInUserLO, 'question.id');
               pushManyQuery += `{ questionConnectId: "${questionConnectId}", `;
@@ -2078,16 +1970,12 @@ const posthook = async (input, mutationName, params) => {
                 status = get(inputPracticeQuestion, 'status');
                 inputQuestionConnectId = get(inputQuestion, 'typeId');
                 if (questionConnectId === inputQuestionConnectId) {
-                  console.log('*********************************************kp11111', JSON.stringify(newPracticeQuestionInUserLO));
                   Object.assign(newPracticeQuestionInUserLO, { questionConnectId });
+                  // case when individual question is incomplete and
+                  // practice question is also incomplete
                   if (practiceQuestionStatusBeforeUpdate === userComponentStatus.incomplete &&
                     practiceQuestionInUserLO.status === userComponentStatus.incomplete
                   ) {
-                    console.log('***********************************kp11111', isHintused);
-                    console.log('***********************************kp11111', isAnswerUsed);
-                    console.log('***********************************kp11111', status);
-                    console.log('***********************************kp11111', isCorrect);
-                    console.log('***********************************kp11111', attemptNumber);
                     if (isHintused === true) {
                       Object.assign(newPracticeQuestionInUserLO, { isHintused });
                     }
@@ -2100,6 +1988,7 @@ const posthook = async (input, mutationName, params) => {
                     if (isCorrect === true && attemptNumber) {
                       Object.assign(newPracticeQuestionInUserLO, { attemptNumber });
                     }
+                    // case when PQ is already completed and user is reattempting
                   } else if (practiceQuestionStatus === userComponentStatus.complete &&
                     practiceQuestionInUserLO.status === userComponentStatus.complete) {
                     Object.assign(newPracticeQuestionInUserLO, { isHintused });
@@ -2110,12 +1999,15 @@ const posthook = async (input, mutationName, params) => {
                   }
                 }
               });
-              console.log('*********************************************kp22222', JSON.stringify(newPracticeQuestionInUserLO));
+              // ceating query which will be sent in UserLO
               pushManyQuery += `isHintused: ${newPracticeQuestionInUserLO.isHintused}, 
                                                isAnswerUsed: ${newPracticeQuestionInUserLO.isAnswerUsed}, 
                                                attemptNumber: ${newPracticeQuestionInUserLO.attemptNumber}, 
                                                status: ${newPracticeQuestionInUserLO.status}, 
                                               }, `;
+
+              // these properties will be used in UserPracticeQuestionReport
+              // PQ report will only be generated when user hits next
               if (pqAction === userActionType.next) {
                 if (newPracticeQuestionInUserLO.isHintused) helpUsedCount += 1;
                 if (newPracticeQuestionInUserLO.isAnswerUsed) answerUsedCount += 1;
@@ -2131,6 +2023,7 @@ const posthook = async (input, mutationName, params) => {
           }
           pushManyQuery += ']}';
           let popAllQuery = '';
+          // popping all the practice questions
           popAllQuery = `practiceQuestions:{
                      popAll: true
                    }`;
@@ -2148,7 +2041,7 @@ const posthook = async (input, mutationName, params) => {
           `;
 
           await callGraphqlApi(updateUserLOMutation);
-
+          // pushing updated practice questions
           const updateUserLOMutationPracticeQuestions = `
               mutation{
                 updateUserLO(id:"${userLOId}",  input:{
@@ -2160,6 +2053,7 @@ const posthook = async (input, mutationName, params) => {
               `;
 
           await callGraphqlApi(updateUserLOMutationPracticeQuestions);
+          // PQ report will only be generated when user hits next
           if (pqAction === userActionType.next) {
             const addUserPracticeQuestionReportMutation = `
               mutation{
@@ -2175,61 +2069,22 @@ const posthook = async (input, mutationName, params) => {
                   }
               ){
                     id
-                      
                   }
               }
               `;
 
             await callGraphqlApi(addUserPracticeQuestionReportMutation);
           }
-
-          // log should be added here to confirm whether doc was created
-        } else {
-          // create
-          console.log('-----------------create');
-          let practiceQuestionsQuery = 'practiceQuestions:[';
-          if (learningObjectiveInfo) {
-            const practiceQuestionsinLO = get(learningObjectiveInfo, 'questionBank');
-            practiceQuestionsinLO.forEach((practiceQuestion) => {
-              practiceQuestionsQuery += `{ questionConnectId: "${practiceQuestion.id}" }, `;
-            });
-          }
-          practiceQuestionsQuery += ']';
-          console.log('-----------------practiceQuestionsQuery', practiceQuestionsQuery);
-          const addUserLOMutation = `
-              mutation{
-                  addUserLO(
-                  userConnectId:"${userId}"
-                  learningObjectiveConnectId:"${learningObjectivetId}"
-                  input:{
-                      isPracticeQuestionBookmarked: ${isPracticeQuestionBookmarked}
-                      practiceQuestionStatus: ${practiceQuestionStatus}
-                      ${practiceQuestionsQuery}
-                      ${restQuerv}
-                  }
-              ){
-                    id
-                      
-                  }
-              }
-              `;
-
-          await callGraphqlApi(addUserLOMutation);
-          // log should be added here to confirm whether doc was created
         }
       }
       break;
     }
     case 'addUserActivityQuizDump' : {
-      // create a common function to check if the called component is unlocked or not
-      // user video collection will be created/updated
-      // current component status will also get updated if action type is next
       const userId = get(input, 'user.typeId');
       const topicId = get(input, 'topic.typeId');
       if (userId && topicId) {
         // query to get current component status of user
         let nextTopicId;
-        let restQuery = '';
         const userCurrentComponentStatusQuery = `
           query{
             userCurrentComponentStatuses(filter:{
@@ -2300,15 +2155,11 @@ const posthook = async (input, mutationName, params) => {
             const nextTopicResult = await callGraphqlApi(nextTopicQuery);
             const nextTopicInfo = get(nextTopicResult, 'data.topics[0]');
             nextTopicId = get(nextTopicInfo, 'id');
-            console.log('-----------------------------------nextTopicId', nextTopicId);
             const learningObjectiveConnectId = get(nextTopicInfo, 'learningObjectives[0].id');
             let loQuery = '';
             if (learningObjectiveConnectId) { loQuery = `currentLearningObjectiveConnectId:"${learningObjectiveConnectId}"`; }
+            // updating current component in case quiz is completed by user
             if (nextTopicId) {
-              restQuery = `nextComponent:{
-                     currentTopicConnectId:"${nextTopicId}"
-                     nextComponentType: ${componentTypes.video}
-                   }`;
               const updateUserCurrentComponentStatusMutation = `
               mutation{
                 updateUserCurrentComponentStatus(id:"${currentComponentId}",  input:{
@@ -2323,11 +2174,8 @@ const posthook = async (input, mutationName, params) => {
               `;
               await callGraphqlApi(updateUserCurrentComponentStatusMutation);
             }
-          } else {
-            // log error if unable to fetch order
           }
         }
-
 
         const userQuizQuery = `
           query{
@@ -2350,25 +2198,21 @@ const posthook = async (input, mutationName, params) => {
           }
           `;
         const userQuizQueryRes = await callGraphqlApi(userQuizQuery);
-        // Ideally it should have only 1 document
         const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
         const userQuizId = get(userQuizInfo, 'id');
-
-
-        console.log('-----------------------restQuery', restQuery);
         // code to evaluate report of quiz
         const quizQuestions = get(input, 'quizQuestions');
         let questionIdsQuery = '[';
         if (quizAction === userActionType.next &&
           quizQuestions.length) {
           quizQuestions.forEach((quizQuestion) => {
-            // console.log('----------------------------------------quizQuestion', quizQuestion);
             const questionId = get(quizQuestion, 'question.typeId');
             if (questionId) {
               questionIdsQuery += `"${questionId}", `;
             }
           });
           questionIdsQuery += ']';
+          // getting questions from question bank to evaluate quiz report
           const questionBankQuery = `
             query{
               questionBanks(filter:{
@@ -2401,8 +2245,8 @@ const posthook = async (input, mutationName, params) => {
             `;
           const questionBankQueryRes = await callGraphqlApi(questionBankQuery);
           const questionBankInfo = get(questionBankQueryRes, 'data.questionBanks');
-          // console.log('-----------------questionBankInfo', JSON.stringify(questionBankInfo));
           const learningObjectiveReportObject = {};
+          // Initializing quiz report
           const quizReport = {};
           quizReport.totalQuestionCount = 0;
           quizReport.correctQuestionCount = 0;
@@ -2414,11 +2258,11 @@ const posthook = async (input, mutationName, params) => {
             const currentQuestionId = get(quizQuestion, 'question.typeId');
             questionBankInfo.forEach((questionBank) => {
               const questionBankId = get(questionBank, 'id');
+              // iterating over questions from input and question bank and
+              // comparing for same question and evaluating if it is correct
               if (currentQuestionId === questionBankId) {
                 quizReport.totalQuestionCount += 1;
                 pushManyQuery += `{ questionConnectId: "${currentQuestionId}", `;
-                console.log('----------------------------------------quizQuestion', quizQuestion);
-                console.log('----------------------------------------questionBank', JSON.stringify(questionBank));
                 const questionType = get(questionBank, 'questionType');
                 const isAttempted = get(quizQuestion, 'isAttempted');
                 if (isAttempted) {
@@ -2429,6 +2273,7 @@ const posthook = async (input, mutationName, params) => {
                   pushManyQuery += `questionDisplayOrder: ${questionDisplayOrder}, `;
                 }
                 const loId = get(questionBank, 'learningObjective.id');
+                // initializing learning objective report it is not already populated
                 if (!learningObjectiveReportObject[loId]) {
                   loArray.push(loId);
                   learningObjectiveReportObject[loId] = {};
@@ -2438,8 +2283,6 @@ const posthook = async (input, mutationName, params) => {
                   learningObjectiveReportObject[loId].unansweredQuestionCount = 0;
                   learningObjectiveReportObject[loId].learningObjective = loId;
                 }
-                console.log('----------------learningObjectiveReportObject', learningObjectiveReportObject);
-                console.log(`isAttempted= ${isAttempted} questionDisplayOrder= ${questionDisplayOrder} loId= ${loId}`);
                 const userMcqAnswers = get(quizQuestion, 'userMcqAnswer');
                 const mcqOptions = get(questionBank, 'mcqOptions');
                 const userFibBlockAnswers = get(quizQuestion, 'userFibBlockAnswer');
@@ -2458,8 +2301,7 @@ const posthook = async (input, mutationName, params) => {
                 let optionPosition;
                 let userAnswer;
                 let answers;
-                console.log('----------------------questionType', questionType);
-
+                // checking question type and checking for correctness
                 switch (questionType) {
                   case questionTypes.mcq:
                     if (mcqOptions) {
@@ -2491,7 +2333,6 @@ const posthook = async (input, mutationName, params) => {
                                           ${userMcqQuery}
                                           ${mcqOptionQuery}
                                          `;
-                      console.log('----------------------pushManyQuery mcq', pushManyQuery);
                     }
                     break;
                   case questionTypes.fibBlock:
@@ -2531,7 +2372,6 @@ const posthook = async (input, mutationName, params) => {
                                           ${userFibBlockQuery}
                                           ${fibBlockOptionQuery}
                                          `;
-                      console.log('----------------------pushManyQuery fib block', pushManyQuery);
                     }
                     break;
                   case questionTypes.fibInput:
@@ -2571,7 +2411,6 @@ const posthook = async (input, mutationName, params) => {
                                           ${userFibInputQuery}
                                           ${fibInputOptionQuery}
                                          `;
-                      console.log('----------------------pushManyQuery fib input', pushManyQuery);
                     }
                     break;
                   case questionTypes.arrange:
@@ -2604,12 +2443,13 @@ const posthook = async (input, mutationName, params) => {
                                           ${userArrangeQuery}
                                           ${arrangeOptionsQuery}
                                          `;
-                      console.log('----------------------pushManyQuery arrange', pushManyQuery);
                     }
                     break;
                   default:
                 }
                 pushManyQuery += '}, ';
+                // calculating quiz report lo wise and topic wise on basis of
+                // isAttempted and isCorrect
                 learningObjectiveReportObject[loId].totalQuestionCount += 1;
                 if (!isAttempted) {
                   learningObjectiveReportObject[loId].unansweredQuestionCount += 1;
@@ -2635,8 +2475,6 @@ const posthook = async (input, mutationName, params) => {
               }
             });
           });
-          console.log('----------------------learningObjectiveReportObject', learningObjectiveReportObject);
-          console.log('----------------------quizReport', quizReport);
           const quizReportQuery = `quizReport:{
                                     totalQuestionCount: ${quizReport.totalQuestionCount}
                                     inCorrectQuestionCount: ${quizReport.inCorrectQuestionCount}
@@ -2644,6 +2482,7 @@ const posthook = async (input, mutationName, params) => {
                                     unansweredQuestionCount: ${quizReport.unansweredQuestionCount}
                                   }`;
           let learningObjectiveReportQuery = 'learningObjectiveReport: [';
+          // creating lo report query on basis of objects in loArray
           loArray.forEach((loIdInArray) => {
             learningObjectiveReportQuery += `{
                                     totalQuestionCount: ${learningObjectiveReportObject[loIdInArray].totalQuestionCount}
@@ -2656,13 +2495,13 @@ const posthook = async (input, mutationName, params) => {
           learningObjectiveReportQuery += ']';
           pushManyQuery += ']}';
           let popAllQuery = '';
+          // popping all the existing value present in quiz
           popAllQuery = `quiz:{
                      popAll: true
                    }`;
 
           if (userQuizId) {
             // popping all the existing value present in quiz
-            console.log('----------------------popAllQuery', popAllQuery);
             const updateUserQuizMutation = `
             mutation{
               updateUserQuiz(id:"${userQuizId}",  input:{
@@ -2673,10 +2512,8 @@ const posthook = async (input, mutationName, params) => {
               }
             }
             `;
-
             await callGraphqlApi(updateUserQuizMutation);
 
-            console.log('----------------------pushManyQuery', pushManyQuery);
             // pushing all the questions with result in the collection
             const updateUserQuizMutationQuiz = `
               mutation{
@@ -2687,7 +2524,6 @@ const posthook = async (input, mutationName, params) => {
                 }
               }
               `;
-            console.log('----------------------updateUserQuizMutationQuiz', updateUserQuizMutationQuiz);
             await callGraphqlApi(updateUserQuizMutationQuiz);
 
             // generating quiz report of user
@@ -2704,10 +2540,10 @@ const posthook = async (input, mutationName, params) => {
                 }
               }
               `;
-            console.log('----------------------addUserQuizReport', addUserQuizReport);
             await callGraphqlApi(addUserQuizReport);
 
             // logic for evaluating scholarship of user
+            // and it will be done on first attempt of quiz
             if (currentComponent === componentTypes.quiz &&
               currentTopic.id === topicId) {
               // code for calculating total quiz report accuracy for scholarship
@@ -2810,7 +2646,6 @@ const posthook = async (input, mutationName, params) => {
                   }
                 }
                 `;
-                console.log('----------------------updateUserProfile', updateUserProfile);
                 await callGraphqlApi(updateUserProfile);
               } else {
                 const addUserProfile = `
@@ -2831,7 +2666,6 @@ const posthook = async (input, mutationName, params) => {
                     }
                   }
                   `;
-                console.log('----------------------addUserProfile', addUserProfile);
                 await callGraphqlApi(addUserProfile);
               }
             }
