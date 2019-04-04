@@ -27,9 +27,38 @@ const userCourseSyllabusMethod = async (context) => {
   const decodedUser = authentication && authentication.user;
   const { id: userId } = decodedUser;
   // condition is already present in pre hook of addUserCurrentComponentStatus
-  // to check if course and user combination already exits
-  // mutation to create current component status of user
-  const mutation = `
+  // checking if course and user combination already exits
+  const userCurrentComponentStatusesQuery = `
+    query{
+      userCurrentComponentStatuses(filter:{
+        and:[
+          {user_some:{
+          id:"${userId}"
+          }},
+        {currentCourse_some:{
+          and:[
+            {status: published},
+            {id:"${GLOBAL_COURSE_ID}"}
+            {chapters_some:{
+              status: published
+            }}
+          ]
+        }}
+        ]
+      }){
+        id
+      }
+    }
+    `;
+
+  const userCurrentComponentStatusesRes = await callGraphqlApi(userCurrentComponentStatusesQuery);
+  // Ideally each user will have 1 document in the collection. Fetching the same document
+  const currentComponentInfo = get(userCurrentComponentStatusesRes,
+    'data.userCurrentComponentStatuses[0]');
+
+  if (!currentComponentInfo) {
+    // mutation to create current component status of user
+    const mutation = `
       mutation{
         addUserCurrentComponentStatus(
           input: {
@@ -67,7 +96,8 @@ const userCourseSyllabusMethod = async (context) => {
         }
       }
     `;
-  await callGraphqlApi(mutation);
+    await callGraphqlApi(mutation);
+  }
 };
 
 export default userCourseSyllabusMethod;
