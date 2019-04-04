@@ -57,6 +57,7 @@ import addUserActivityPQDumpPostHookMethod
   from './postHookFunctions/addUserActivityPQDumpPostHookMethod';
 import addUserActivityQuizDumpPostHookMethod
   from './postHookFunctions/addUserActivityQuizDumpPostHookMethod';
+import userProfilePostHookMethod from './postHookFunctions/userProfilePostHookMethod';
 
 const { hookFunctions } = functions || {};
 
@@ -371,6 +372,11 @@ const posthook = async (input, mutationName, params) => {
     }
     case 'userQuiz' : {
       const resultArray = await userQuizPostHookMethod(input, params);
+      if (resultArray.length) { return hook(resultArray, mutationName, 'PostHook'); }
+      break;
+    }
+    case 'userProfile' : {
+      const resultArray = await userProfilePostHookMethod(input, params);
       if (resultArray.length) { return hook(resultArray, mutationName, 'PostHook'); }
       break;
     }
