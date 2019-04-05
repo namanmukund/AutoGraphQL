@@ -1,4 +1,3 @@
-import { operationName } from '../../../../../../constants';
 import { UserTokenNotRequiredError,
   DatabaseRecordNotFoundError,
   UnauthorizedOperationError,
@@ -9,6 +8,7 @@ import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { getQueryForResendValidateAndFinishForgotPassword,
   sendEmailSmsForSendResendForgotPasswordOTP } from '../utils';
+import { UPDATE } from '../../../../../../constants/graphqlOperations';
 
 const resendForgotPasswordOTPQueryPromise = (input, modelQueries) =>
   modelQueries.fetchOne(input);
@@ -59,7 +59,7 @@ export default function resendForgotPasswordOTPMutationResolver(
   validate(
     typeName,
     ast,
-    operationName.update,
+    UPDATE,
     fieldsFetched,
     authentication,
     {},

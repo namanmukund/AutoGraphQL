@@ -1,9 +1,9 @@
 import bcrypt from 'bcrypt';
 import allAuthParams from '../../../../../../config/authParams';
-import { operationName } from '../../../../../../constants';
 import { MutationController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
+import { UPDATE } from '../../../../../../constants/graphqlOperations';
 
 const application = process.env.APPLICATION || 'core';
 const authParams = allAuthParams[application];
@@ -25,7 +25,7 @@ export default function setPasswordStrictMutationResolver(
   validate(
     typeName,
     ast,
-    operationName.update,
+    UPDATE,
     fieldsFetched,
     authentication,
     {},

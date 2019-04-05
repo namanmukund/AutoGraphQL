@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
 import { pick } from 'lodash';
-import { operationName } from '../../../../../../constants';
 import { UserTokenNotRequiredError } from '../../../../../../constants/errors';
 import allAuthParams from '../../../../../../config/authParams';
 import { MutationController, RemoteController } from '../../../controllers';
@@ -13,6 +12,7 @@ import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import localSignUpMutationPromise from '../utils/localSignUpMutationPromise';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
+import { ADD } from '../../../../../../constants/graphqlOperations';
 
 const application = process.env.APPLICATION || 'core';
 const authParams = allAuthParams[application];
@@ -76,7 +76,7 @@ export default function signupMutationResolver(
   validate(
     typeName,
     ast,
-    operationName.add,
+    ADD,
     fieldsFetched,
     authentication,
     {},

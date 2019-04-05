@@ -4,8 +4,7 @@ import { QueryController, RemoteController } from '../../controllers';
 import { toObject } from '../../../../../utils';
 import { validate } from '../../validation';
 import { getFieldsBeingFetched, filterRemoteFields } from '../../../utils';
-import { operationName } from '../../../../../constants';
-import {PLURAL} from "../../../../../constants/graphqlOperations";
+import { PLURAL } from '../../../../../constants/graphqlOperations';
 
 // To find if filters have remote fields.
 // @TODO this function assumes only one parameter in filter,

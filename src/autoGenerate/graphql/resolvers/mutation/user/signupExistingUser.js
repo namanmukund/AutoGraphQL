@@ -1,4 +1,3 @@
-import { operationName } from '../../../../../../constants';
 import {
   UserTokenNotRequiredError,
   DatabaseRecordNotFoundError,
@@ -12,6 +11,7 @@ import { validate } from '../../../validation';
 import { getNumberAndSendSms } from '../../../../../sms';
 import { sendEmailOtpToUser } from '../../../../../email/messages';
 import validateSignupExistingUserStatus from '../utils/validateSignupExistingUserStatus';
+import { ADD } from '../../../../../../constants/graphqlOperations';
 
 
 const updateExistingUserOTP = (
@@ -62,7 +62,7 @@ export default function signupExistingUserMutationResolver(
   validate(
     typeName,
     ast,
-    operationName.add,
+    ADD,
     fieldsFetched,
     authentication,
     {},

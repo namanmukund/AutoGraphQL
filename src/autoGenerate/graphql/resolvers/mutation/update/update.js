@@ -6,7 +6,6 @@ import getArrayFieldsFromDocumentInput from '../utils/getArrayFieldsFromDocument
 import { toObject, isErrorThrown } from '../../../../../../utils';
 import { validate } from '../../../validation';
 import { getFieldsBeingFetched, filterRemoteFields, filterRemoteInput } from '../../../../utils';
-import { operationName } from '../../../../../../constants';
 import { mergeMutationsPromisesResults } from '../utils/mergeMutationsPromisesResults';
 import { getRelationFields } from '../utils/getRelationFields';
 import { handleAdditionalFieldsToUpdate } from '../utils/handleAdditionalFieldsToUpdate';
@@ -18,7 +17,7 @@ import { getConnectInputFieldsMap } from '../utils/getConnectInputFieldsMap';
 import { rollBackDocumentSaves } from '../utils/rollBackDocumentSaves';
 import nestedConnectIdHandler from '../utils/nestedConnectIdHandler';
 import removeConnectionWhenDisconnected from '../../../controllers/utils/removeConnectionWhenDisconnected';
-import {UPDATE} from "../../../../../../constants/graphqlOperations";
+import { UPDATE } from '../../../../../../constants/graphqlOperations';
 
 // Returns remote delete mutation promises.
 const remoteUpdateMutationPromises = (

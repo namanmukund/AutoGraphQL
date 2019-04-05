@@ -1,10 +1,10 @@
-import { operationName } from '../../../../../../constants';
 import { DatabaseRecordNotFoundError,
   OTPMismatchError, UserTokenNotRequiredError, UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { QueryController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { getQueryForResendValidateAndFinishForgotPassword } from '../utils';
+import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 
 export default function validateForgotPasswordOTPMutationResolver(
   root,
@@ -21,7 +21,7 @@ export default function validateForgotPasswordOTPMutationResolver(
   validate(
     typeName,
     ast,
-    operationName.read,
+    SINGULAR,
     fieldsFetched,
     authentication,
   );

@@ -1,8 +1,8 @@
-import { operationName } from '../../../../../../constants';
 import { DatabaseRecordNotFoundError, OTPMismatchError } from '../../../../../../constants/errors';
 import { QueryController, MutationController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
+import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 
 const validateUserOTPMutationPromise = (
   searchObj,
@@ -25,7 +25,7 @@ export default function validateUserOTPMutationResolver(
   validate(
     typeName,
     ast,
-    operationName.read,
+    SINGULAR,
     fieldsFetched,
     authentication,
   );

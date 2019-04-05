@@ -1,10 +1,10 @@
-import { operationName } from '../../../../../../constants';
 import { DatabaseRecordNotFoundError,
   MandatoryFieldNotSetError } from '../../../../../../constants/errors';
 import { QueryController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { getNumberAndSendSms } from '../../../../../sms';
+import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 
 export default function resendUserOTPMutationResolver(
   root,
@@ -21,7 +21,7 @@ export default function resendUserOTPMutationResolver(
   validate(
     typeName,
     ast,
-    operationName.read,
+    SINGULAR,
     fieldsFetched,
     authentication,
   );

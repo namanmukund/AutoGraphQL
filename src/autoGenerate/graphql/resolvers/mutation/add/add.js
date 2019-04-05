@@ -5,7 +5,6 @@ import {
 import { generateCuid, toObject, isErrorThrown } from '../../../../../../utils';
 import { getFieldsBeingFetched, filterRemoteFields, filterRemoteInput } from '../../../../utils';
 import { validate } from '../../../validation';
-import { operationName } from '../../../../../../constants';
 import { mergeMutationsPromisesResults } from '../utils/mergeMutationsPromisesResults';
 import { getRelationFields } from '../utils/getRelationFields';
 import { processRelationInputFields } from '../utils/processRelationInputFields';
