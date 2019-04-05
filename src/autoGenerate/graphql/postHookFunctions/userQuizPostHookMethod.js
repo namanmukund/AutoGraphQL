@@ -4,6 +4,74 @@ import {
   topicTypes, PUBLISHED,
 } from '../../../../constants';
 
+// query to get quiz questions associated with topic
+const topicQuery = async topicId => `
+  query{
+    topic(id:"${topicId}"){
+      id
+      order
+      questions(filter:{assessmentType:${topicTypes.quiz}}){
+        id
+        order
+      }
+    }
+  }
+  `;
+
+// query to get topic with passed order. This will be used for next component
+const nextTopicQuery = async nextTopicOrder => `
+  query{
+    topics(filter:{
+      and:[
+        {order:${nextTopicOrder}},
+        {status: ${PUBLISHED}}
+      ]
+    }){
+      id
+    }
+  }
+  `;
+
+// query to add UserQuiz if it is not already present for user and topic id
+const addUserQuizMutation = async (
+  userId,
+  topicId,
+  restQuerv,
+  quizQuery,
+) => `
+  mutation{
+    addUserQuiz(
+    userConnectId:"${userId}"
+    topicConnectId:"${topicId}"
+    input:{
+        ${restQuerv}
+        ${quizQuery}
+    }
+    ){
+      id
+      user{
+        id
+      }
+      topic{
+        id
+      }
+      quizStatus
+      quiz{
+        question{
+          id
+        }
+        questionDisplayOrder
+      }
+    }
+    }
+    `;
+
+/*
+If userQuiz document does not exist for provided combination of user id and topic id.
+It will be created and returned to tekie app with all the questions.
+Document contains all the necessary information needed on page along
+with the next component.
+*/
 const userQuizPostHookMethod = async (input, params) => {
   const resultArray = [];
   const filterArray = get(params, 'filter.and');
@@ -14,19 +82,7 @@ const userQuizPostHookMethod = async (input, params) => {
   // value of input in case of query is result of the query
   // so we are adding new document if document is not already present
   if (userId && topicId && input && input.length === 0) {
-    const topicQuery = `
-          query{
-            topic(id:"${topicId}"){
-              id
-              order
-              questions(filter:{assessmentType:${topicTypes.quiz}}){
-                id
-                order
-              }
-            }
-          }
-          `;
-    const topicQueryRes = await callGraphqlApi(topicQuery);
+    const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
     const topicInfo = get(topicQueryRes, 'data.topic');
     const topicOrder = get(topicInfo, 'order');
     // adding quiz questions in the document
@@ -44,19 +100,7 @@ const userQuizPostHookMethod = async (input, params) => {
     let restQuerv = '';
     if (topicOrder) {
       const nextTopicOrder = topicOrder + 1;
-      const nextTopicQuery = `
-          query{
-            topics(filter:{
-              and:[
-                {order:${nextTopicOrder}},
-                {status: ${PUBLISHED}}
-              ]
-            }){
-              id
-            }
-          }
-          `;
-      const nextTopicQueryRes = await callGraphqlApi(nextTopicQuery);
+      const nextTopicQueryRes = await callGraphqlApi(await nextTopicQuery(nextTopicOrder));
       const nextTopicInfo = get(nextTopicQueryRes, 'data.topics[0]');
       const nextTopicId = get(nextTopicInfo, 'id');
       if (nextTopicId) {
@@ -67,35 +111,12 @@ const userQuizPostHookMethod = async (input, params) => {
       }
       // In case of last topic quiz, next component in not populated
     }
-
-    const addUserQuizMutation = `
-              mutation{
-                  addUserQuiz(
-                  userConnectId:"${userId}"
-                  topicConnectId:"${topicId}"
-                  input:{
-                      ${restQuerv}
-                      ${quizQuery}
-                  }
-              ){
-                    id
-                    user{
-                      id
-                    }
-                    topic{
-                      id
-                    }
-                    quizStatus
-                    quiz{
-                      question{
-                        id
-                      }
-                      questionDisplayOrder
-                    }
-                  }
-              }
-              `;
-    const result = await callGraphqlApi(addUserQuizMutation);
+    const result = await callGraphqlApi(await addUserQuizMutation(
+      userId,
+      topicId,
+      restQuerv,
+      quizQuery,
+    ));
     if (result) {
       // parsing data 'addUserVideo' so that the logic implemented ahead can read data is
       // desired format and return the same

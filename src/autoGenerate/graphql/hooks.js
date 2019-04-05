@@ -34,18 +34,7 @@ import { callAddUpdateHookValidationFunction } from './preHookFunctions/validati
 import deleteTopicValidation from './preHookFunctions/validation/deleteTopicValidation';
 import deleteLearningObjectiveValidation from './preHookFunctions/validation/deleteLearningObjectiveValidation';
 import deleteQuestionBankValidation from './preHookFunctions/validation/deleteQuestionBankValidation';
-import addUserCurrentTopicComponentStatusMethod
-  from './preHookFunctions/addUserCurrentTopicComponentStatusMethod';
-import updateUserCurrentTopicComponentStatusMethod
-  from './preHookFunctions/updateUserCurrentTopicComponentStatusMethod';
 import userCourseSyllabusMethod from './preHookFunctions/userCourseSyllabusMethod';
-import addUserActivityVideoDumpMethod from './preHookFunctions/addUserActivityVideoDumpMethod';
-import addUserActivityChatDumpMethod from './preHookFunctions/addUserActivityChatDumpMethod';
-import addUserActivityPQDumpMethod from './preHookFunctions/addUserActivityPQDumpMethod';
-import addUserActivityQuizDumpMethod from './preHookFunctions/addUserActivityQuizDumpMethod';
-import userVideoMethod from './preHookFunctions/userVideoMethod';
-import userLearningObjectiveMethod from './preHookFunctions/userLearningObjectiveMethod';
-import userQuizMethod from './preHookFunctions/userQuizMethod';
 import userVideoPostHookMethod from './postHookFunctions/userVideoPostHookMethod';
 import userLearningObjectivePostHookMethod from './postHookFunctions/userLearningObjectivePostHookMethod';
 import userQuizPostHookMethod from './postHookFunctions/userQuizPostHookMethod';
@@ -58,6 +47,22 @@ import addUserActivityPQDumpPostHookMethod
 import addUserActivityQuizDumpPostHookMethod
   from './postHookFunctions/addUserActivityQuizDumpPostHookMethod';
 import userProfilePostHookMethod from './postHookFunctions/userProfilePostHookMethod';
+import addUserActivityChatDumpValidation
+  from './preHookFunctions/validation/addUserActivityChatDumpValidation';
+import addUserCurrentTopicComponentStatusValidation
+  from './preHookFunctions/validation/addUserCurrentTopicComponentStatusValidation';
+import updateUserCurrentTopicComponentStatusValidation
+  from './preHookFunctions/validation/updateUserCurrentTopicComponentStatusValidation';
+import addUserActivityVideoDumpValidation
+  from './preHookFunctions/validation/addUserActivityVideoDumpValidation';
+import addUserActivityPQDumpValidation
+  from './preHookFunctions/validation/addUserActivityPQDumpValidation';
+import addUserActivityQuizDumpValidation
+  from './preHookFunctions/validation/addUserActivityQuizDumpValidation';
+import userVideoValidation from './preHookFunctions/validation/userVideoValidation';
+import userLearningObjectiveValidation
+  from './preHookFunctions/validation/userLearningObjectiveValidation';
+import userQuizValidation from './preHookFunctions/validation/userQuizValidation';
 
 const { hookFunctions } = functions || {};
 
@@ -86,11 +91,11 @@ const hook = (data, mutationName, hookName) => {
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
     case 'addUserCurrentTopicComponentStatus' : {
-      await addUserCurrentTopicComponentStatusMethod(params);
+      await addUserCurrentTopicComponentStatusValidation(params);
       break;
     }
     case 'updateUserCurrentTopicComponentStatus' : {
-      await updateUserCurrentTopicComponentStatusMethod(params);
+      await updateUserCurrentTopicComponentStatusValidation(params);
       break;
     }
     case 'userCourseSyllabus' : {
@@ -98,31 +103,31 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'addUserActivityVideoDump' : {
-      await addUserActivityVideoDumpMethod(params);
+      await addUserActivityVideoDumpValidation(params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUserActivityChatDump' : {
-      await addUserActivityChatDumpMethod(params);
+      await addUserActivityChatDumpValidation(params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUserActivityPQDump' : {
-      await addUserActivityPQDumpMethod(params);
+      await addUserActivityPQDumpValidation(params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUserActivityQuizDump' : {
-      await addUserActivityQuizDumpMethod(params);
+      await addUserActivityQuizDumpValidation(params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'userVideo' : {
-      await userVideoMethod(params);
+      await userVideoValidation(params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'userLearningObjective' : {
-      await userLearningObjectiveMethod(params);
+      await userLearningObjectiveValidation(params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'userQuiz' : {
-      await userQuizMethod(params);
+      await userQuizValidation(params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUser' : {

@@ -7,109 +7,201 @@ import {
   userTopicTypeStatus,
 } from '../../../../constants';
 
+// query to get learning objective and all the learning objectives of the topic associated
+// query needs optimization
+const learningObjectiveQuery = async learningObjectiveId => `
+  query{
+    learningObjective(id:"${learningObjectiveId}"){
+      id
+      order
+      topic{
+        id
+        order
+        isTrial
+        learningObjectives{
+          id
+          order
+        }
+      }
+      questionBank(filter:{assessmentType:${topicTypes.practiceQuestion}}){
+        id
+      }
+    }
+  }
+  `;
+
+// query to get current topic component status so that we can change the next component accordingly
+const userCurrentTopicComponentStatusQuery = async userId => `
+  query{
+    userCurrentTopicComponentStatuses(filter:{
+      and:[
+        {user_some:{
+        id:"${userId}"
+        }},
+      {currentCourse_some:{
+        and:[
+          {status: published},
+          {id:"${GLOBAL_COURSE_ID}"}
+          {chapters_some:{
+            status: published
+          }}
+        ]
+      }}
+      ]
+    }){
+      id
+      user{
+        id
+        username
+      }
+      currentTopic{
+        id
+        order
+      }
+      currentLearningObjective{
+        id
+        order
+      }
+      currentTopicComponentType
+      enrollmentType
+    }
+  }
+  `;
+
+/* query to get userLO to check if document exists for userId and learningObjectiveId
+also we are doing computationfor chatStatus and next component for this */
+const userLearningObjectiveQuery = async (userId, learningObjectiveId) => `
+  query{
+    userLearningObjectives(filter:{
+      and:[
+        {user_some:{
+        id:"${userId}"
+        }},
+      {learningObjective_some:{
+        id:"${learningObjectiveId}"
+      }}
+      ]
+    }){
+      id
+      practiceQuestionStatus
+      practiceQuestions{
+        question{
+          id
+        }
+        isHintused
+        isAnswerUsed
+        attemptNumber
+        status
+      }
+      nextComponent{
+        learningObjective{
+          id
+        }
+        nextComponentType
+      }
+    }
+  }
+  `;
+
+// query to update user current topic component status
+const updateUserCurrentTopicComponentStatusMutation = async (
+  currentTopicComponentId,
+  nextCurrentTopicComponentType,
+  restUserCurrentTopicComponentStatusQuerv,
+) => `
+  mutation{
+    updateUserCurrentTopicComponentStatus(id:"${currentTopicComponentId}",  input:{
+      currentTopicComponentType: ${nextCurrentTopicComponentType}
+    }
+    ${restUserCurrentTopicComponentStatusQuerv}
+    ){
+      id
+    }
+  }
+  `;
+
+// mutation to update User Learning Objective, popping all practice questions
+const updateUserLearningObjectiveMutation = async (
+  userLearningObjectiveId,
+  isPracticeQuestionBookmarked,
+  practiceQuestionStatus,
+  restQuerv,
+  popAllQuery,
+) => `
+  mutation{
+    updateUserLearningObjective(id:"${userLearningObjectiveId}",  input:{
+      isPracticeQuestionBookmarked: ${isPracticeQuestionBookmarked}
+      practiceQuestionStatus: ${practiceQuestionStatus}
+      ${restQuerv}
+      ${popAllQuery}
+    }){
+      id
+    }
+  }
+  `;
+
+// mutation to update User Learning Objective, pushing updated practice questions
+const updateUserLearningObjectiveMutationPracticeQuestions = async (
+  userLearningObjectiveId, pushManyQuery) => `
+  mutation{
+    updateUserLearningObjective(id:"${userLearningObjectiveId}",  input:{
+      ${pushManyQuery}
+    }){
+      id
+    }
+  }
+  `;
+
+// mutation to add UserPracticeQuestionReport
+const addUserPracticeQuestionReportMutation = async (
+  userId,
+  learningObjectivetId,
+  firstTryCount,
+  secondTryCount,
+  threeOrMoreTryCount,
+  helpUsedCount,
+  answerUsedCount,
+) => `
+  mutation{
+    addUserPracticeQuestionReport(
+    userConnectId:"${userId}"
+    learningObjectiveConnectId:"${learningObjectivetId}"
+    input:{
+        firstTryCount: ${firstTryCount}
+        secondTryCount: ${secondTryCount}
+        threeOrMoreTryCount: ${threeOrMoreTryCount}
+        helpUsedCount: ${helpUsedCount}
+        answerUsedCount: ${answerUsedCount}
+    }
+  ){
+      id
+    }
+  }
+  `;
+
+/*
+Current topic component status and
+UserLearningObjective(bookmark, practiceQuestionStatus etc) is updated based on-
+  -current topic component status
+  -user Learning Objective for provided userId and learning objective id
+  -learning objectives and topic
+*/
 const addUserActivityPQDumpPostHookMethod = async (input) => {
   const userId = get(input, 'user.typeId');
   const learningObjectiveId = get(input, 'learningObjective.typeId');
   if (userId && learningObjectiveId) {
-    const learningObjectiveQuery = `
-          query{
-            learningObjective(id:"${learningObjectiveId}"){
-              id
-              order
-              topic{
-                id
-                order
-                isTrial
-                learningObjectives{
-                  id
-                  order
-                }
-              }
-              questionBank(filter:{assessmentType:${topicTypes.practiceQuestion}}){
-                id
-              }
-            }
-          }
-          `;
-    const learningObjectiveQueryRes = await callGraphqlApi(learningObjectiveQuery);
+    const learningObjectiveQueryRes = await callGraphqlApi(
+      await learningObjectiveQuery(learningObjectiveId));
     const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
     const topicInfo = get(learningObjectiveInfo, 'topic');
     const topicId = get(topicInfo, 'id');
     const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
     const learningObjectivetId = get(learningObjectiveInfo, 'id');
-    // query to get current component status of user
-    const userCurrentTopicComponentStatusQuery = `
-          query{
-            userCurrentTopicComponentStatuses(filter:{
-              and:[
-                {user_some:{
-                id:"${userId}"
-                }},
-              {currentCourse_some:{
-                and:[
-                  {status: published},
-                  {id:"${GLOBAL_COURSE_ID}"}
-                  {chapters_some:{
-                    status: published
-                  }}
-                ]
-              }}
-              ]
-            }){
-              id
-              user{
-                id
-                username
-              }
-              currentTopic{
-                id
-                order
-              }
-              currentLearningObjective{
-                id
-                order
-              }
-              currentTopicComponentType
-              enrollmentType
-            }
-          }
-          `;
     const userCurrentTopicComponentStatusRes =
-      await callGraphqlApi(userCurrentTopicComponentStatusQuery);
+      await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
     const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
-    const userLearningObjectiveQuery = `
-          query{
-            userLearningObjectives(filter:{
-              and:[
-                {user_some:{
-                id:"${userId}"
-                }},
-              {learningObjective_some:{
-                id:"${learningObjectiveId}"
-              }}
-              ]
-            }){
-              id
-              practiceQuestionStatus
-              practiceQuestions{
-                question{
-                  id
-                }
-                isHintused
-                isAnswerUsed
-                attemptNumber
-                status
-              }
-              nextComponent{
-                learningObjective{
-                  id
-                }
-                nextComponentType
-              }
-            }
-          }
-          `;
-    const userLearningObjectiveQueryRes = await callGraphqlApi(userLearningObjectiveQuery);
+    const userLearningObjectiveQueryRes = await callGraphqlApi(
+      await userLearningObjectiveQuery(userId, learningObjectiveId));
     const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
     const userLearningObjectiveId = get(userLearningObjectiveInfo, 'id');
     let isPracticeQuestionBookmarked = false;
@@ -130,7 +222,7 @@ const addUserActivityPQDumpPostHookMethod = async (input) => {
       userLearningObjectiveInfo.practiceQuestionStatus === userTopicTypeStatus.complete) {
       practiceQuestionStatus = userTopicTypeStatus.complete;
     }
-    let restQuerv = '';
+    let restQuery = '';
     const nextComponent = get(userLearningObjectiveInfo, 'nextComponent.learningObjective.id');
     const learningObjectives = get(topicInfo, 'learningObjectives');
     const nextLearningObjectiveOrder = parseInt(learningObjectiveOrder, 10) + 1;
@@ -157,7 +249,7 @@ const addUserActivityPQDumpPostHookMethod = async (input) => {
     }
     // restQuery is for when we ceate/update userLearningObjective
     if (learningObjectivetId && !nextComponent) {
-      restQuerv = `nextComponent:{
+      restQuery = `nextComponent:{
                      ${learningObjectiveConnectIdQuerv}
                      ${topicConnectIdQuerv}
                      nextComponentType: ${nextCurrentTopicComponentType}
@@ -173,18 +265,11 @@ const addUserActivityPQDumpPostHookMethod = async (input) => {
       currentTopic.id === topicInfo.id &&
       currentLearningObjective.id === learningObjectiveInfo.id
     ) {
-      const updateUserCurrentTopicComponentStatusMutation = `
-              mutation{
-                updateUserCurrentTopicComponentStatus(id:"${currentTopicComponentId}",  input:{
-                  currentTopicComponentType: ${nextCurrentTopicComponentType}
-                }
-                ${restUserCurrentTopicComponentStatusQuerv}
-                ){
-                  id
-                }
-              }
-              `;
-      await callGraphqlApi(updateUserCurrentTopicComponentStatusMutation);
+      await callGraphqlApi(await updateUserCurrentTopicComponentStatusMutation(
+        currentTopicComponentId,
+        nextCurrentTopicComponentType,
+        restUserCurrentTopicComponentStatusQuerv,
+      ));
     }
     if (userLearningObjectiveId) {
       // update userLearningObjective
@@ -278,53 +363,31 @@ const addUserActivityPQDumpPostHookMethod = async (input) => {
       popAllQuery = `practiceQuestions:{
                      popAll: true
                    }`;
-      const updateUserLearningObjectiveMutation = `
-          mutation{
-            updateUserLearningObjective(id:"${userLearningObjectiveId}",  input:{
-              isPracticeQuestionBookmarked: ${isPracticeQuestionBookmarked}
-              practiceQuestionStatus: ${practiceQuestionStatus}
-              ${restQuerv}
-              ${popAllQuery}
-            }){
-              id
-            }
-          }
-          `;
 
-      await callGraphqlApi(updateUserLearningObjectiveMutation);
+      await callGraphqlApi(await updateUserLearningObjectiveMutation(
+        userLearningObjectiveId,
+        isPracticeQuestionBookmarked,
+        practiceQuestionStatus,
+        restQuery,
+        popAllQuery,
+      ));
       // pushing updated practice questions
-      const updateUserLearningObjectiveMutationPracticeQuestions = `
-              mutation{
-                updateUserLearningObjective(id:"${userLearningObjectiveId}",  input:{
-                  ${pushManyQuery}
-                }){
-                  id
-                }
-              }
-              `;
 
-      await callGraphqlApi(updateUserLearningObjectiveMutationPracticeQuestions);
+      await callGraphqlApi(updateUserLearningObjectiveMutationPracticeQuestions(
+        userLearningObjectiveId,
+        pushManyQuery,
+      ));
       // PQ report will only be generated when user hits next
       if (pqAction === userActionType.next) {
-        const addUserPracticeQuestionReportMutation = `
-              mutation{
-                  addUserPracticeQuestionReport(
-                  userConnectId:"${userId}"
-                  learningObjectiveConnectId:"${learningObjectivetId}"
-                  input:{
-                      firstTryCount: ${firstTryCount}
-                      secondTryCount: ${secondTryCount}
-                      threeOrMoreTryCount: ${threeOrMoreTryCount}
-                      helpUsedCount: ${helpUsedCount}
-                      answerUsedCount: ${answerUsedCount}
-                  }
-              ){
-                    id
-                  }
-              }
-              `;
-
-        await callGraphqlApi(addUserPracticeQuestionReportMutation);
+        await callGraphqlApi(await addUserPracticeQuestionReportMutation(
+          userId,
+          learningObjectivetId,
+          firstTryCount,
+          secondTryCount,
+          threeOrMoreTryCount,
+          helpUsedCount,
+          answerUsedCount,
+        ));
       }
     }
   }

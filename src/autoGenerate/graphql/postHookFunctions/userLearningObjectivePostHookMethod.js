@@ -4,6 +4,64 @@ import {
   topicTypes,
 } from '../../../../constants';
 
+// query to get learning objective and all the learning objectives of the topic associated
+const learningObjectiveQuery = async learningObjectiveId => `
+  query{
+    learningObjective(id:"${learningObjectiveId}"){
+      id
+      order
+      topic{
+        id
+        order
+        isTrial
+        learningObjectives{
+          id
+          order
+        }
+      }
+      questionBank(filter:{assessmentType:${topicTypes.practiceQuestion}}){
+        id
+      }
+    }
+  }
+  `;
+
+// query to add User LO if it is not already present for user and LO id
+const addUserLearningObjectiveMutation = async (
+  userId,
+  learningObjectiveId,
+  restQuery,
+  practiceQuestionsQuery,
+) => `
+  mutation{
+    addUserLearningObjective(
+    userConnectId:"${userId}"
+    learningObjectiveConnectId:"${learningObjectiveId}"
+    input:{
+        ${restQuery}
+        ${practiceQuestionsQuery}
+    }
+    ){
+      id
+      user{
+        id
+      }
+      learningObjective{
+        id
+      }
+      chatStatus
+      isChatBookmarked
+      practiceQuestionStatus
+      isPracticeQuestionBookmarked
+    }
+    }
+    `;
+/*
+if userLO document does not exist for provided combination of user id and LO id.
+It will be created and returned to tekie app.
+Document contains all the necessary information needed on page along
+with the next component.
+*/
 const userLearningObjectivePostHookMethod = async (input, params) => {
   const resultArray = [];
   const filterArray = get(params, 'filter.and');
@@ -14,27 +72,8 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
   // value of input in case of query is result of the query
   // so we are adding new document if document is not already present
   if (userId && learningObjectiveId && input && input.length === 0) {
-    const learningObjectiveQuery = `
-          query{
-            learningObjective(id:"${learningObjectiveId}"){
-              id
-              order
-              topic{
-                id
-                order
-                isTrial
-                learningObjectives{
-                  id
-                  order
-                }
-              }
-              questionBank(filter:{assessmentType:${topicTypes.practiceQuestion}}){
-                id
-              }
-            }
-          }
-          `;
-    const learningObjectiveQueryRes = await callGraphqlApi(learningObjectiveQuery);
+    const learningObjectiveQueryRes = await callGraphqlApi(
+      await learningObjectiveQuery(learningObjectiveId));
     const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
     const topicInfo = get(learningObjectiveInfo, 'topic');
     const topicId = get(topicInfo, 'id');
@@ -81,31 +120,13 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
                    }`;
     }
 
-    const addUserLearningObjectiveMutation = `
-              mutation{
-                  addUserLearningObjective(
-                  userConnectId:"${userId}"
-                  learningObjectiveConnectId:"${learningObjectiveId}"
-                  input:{
-                      ${restQuerv}
-                      ${practiceQuestionsQuery}
-                  }
-              ){
-                    id
-                    user{
-                      id
-                    }
-                    learningObjective{
-                      id
-                    }
-                    chatStatus
-                    isChatBookmarked
-                    practiceQuestionStatus
-                    isPracticeQuestionBookmarked
-                  }
-              }
-              `;
-    const result = await callGraphqlApi(addUserLearningObjectiveMutation);
+    const result = await callGraphqlApi(
+      await addUserLearningObjectiveMutation(
+        userId,
+        learningObjectiveId,
+        restQuerv,
+        practiceQuestionsQuery,
+      ));
     if (result) {
       // parsing data 'addUserVideo' so that the logic implemented ahead can read data is
       // desired format and return the same

@@ -1,67 +1,71 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../api/callGraphqlApi';
+import callGraphqlApi from '../../../../api/callGraphqlApi';
 import {
   topicTypes,
   enrollmentTypes,
   GLOBAL_COURSE_ID,
-} from '../../../../constants';
-import { ComponentLockedError } from '../../../../constants/errors';
+} from '../../../../../constants';
+import { ComponentLockedError } from '../../../../../constants/errors';
 
-const addUserActivityQuizDumpMethod = async (params) => {
+// query to get topic order info
+const topicQuery = async topicId => `
+  query{
+    topic(id:"${topicId}"){
+      id
+      order
+      isTrial
+    }
+  }
+  `;
+
+// query to get current component status of user
+const userCurrentTopicComponentStatusQuery = async userId => `
+  query{
+    userCurrentTopicComponentStatuses(filter:{
+      and:[
+        {user_some:{
+        id:"${userId}"
+        }},
+      {currentCourse_some:{
+        and:[
+          {status: published},
+          {id:"${GLOBAL_COURSE_ID}"}
+          {chapters_some:{
+            status: published
+          }}
+        ]
+      }}
+      ]
+    }){
+      id
+      user{
+        id
+        username
+      }
+      currentTopic{
+        id
+        order
+      }
+      currentLearningObjective{
+        id
+        order
+      }
+      currentTopicComponentType
+      enrollmentType
+    }
+  }
+  `;
+
+// preehook logic to check if requested quiz(user and topic id) is unlocked
+const addUserActivityQuizDumpValidation = async (params) => {
   // check if the called user and topic is unlocked
   const userId = get(params, 'userConnectId');
   const topicId = get(params, 'topicConnectId');
   if (userId && topicId) {
-    const topicQuery = `
-          query{
-            topic(id:"${topicId}"){
-              id
-              order
-              isTrial
-            }
-          }
-          `;
-    const topicQueryRes = await callGraphqlApi(topicQuery);
+    const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
     const topicInfo = get(topicQueryRes, 'data.topic');
-    // query to get current component status of user
-    const userCurrentTopicComponentStatusQuery = `
-          query{
-            userCurrentTopicComponentStatuses(filter:{
-              and:[
-                {user_some:{
-                id:"${userId}"
-                }},
-              {currentCourse_some:{
-                and:[
-                  {status: published},
-                  {id:"${GLOBAL_COURSE_ID}"}
-                  {chapters_some:{
-                    status: published
-                  }}
-                ]
-              }}
-              ]
-            }){
-              id
-              user{
-                id
-                username
-              }
-              currentTopic{
-                id
-                order
-              }
-              currentLearningObjective{
-                id
-                order
-              }
-              currentTopicComponentType
-              enrollmentType
-            }
-          }
-          `;
     const userCurrentTopicComponentStatusRes =
-      await callGraphqlApi(userCurrentTopicComponentStatusQuery);
+      await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
     const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
     if (topicInfo && currentTopicComponentInfo) {
       let isUnlocked = false;
@@ -95,4 +99,4 @@ const addUserActivityQuizDumpMethod = async (params) => {
   }
 };
 
-export default addUserActivityQuizDumpMethod;
+export default addUserActivityQuizDumpValidation;

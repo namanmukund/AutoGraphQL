@@ -32,3 +32,7 @@ export const InvalidTopicLOConnectionError = createError('InvalidTopicLOConnecti
 export const InvalidTopicPassedInCurrentTopicComponent = createError('InvalidTopicPassedInCurrentTopicComponent', {
   message: 'Order of topic passed is less than or equal to current topic order',
 });
+
+export const UserCourseCombinationExistError = createError('UserCourseCobinationExistError', {
+  message: 'Document with given user and course combination already exists',
+});

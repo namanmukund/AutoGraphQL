@@ -28,6 +28,7 @@ import {
   OneToOneRelationSentInInputAndAsConnectError, RelationMutationSimilarTypeArgumentError,
   MultipleArrayOperationDeniedError, InvalidArrayUpdateOperationError,
   InvalidTopicLOConnectionError, InvalidTopicPassedInCurrentTopicComponent,
+  UserCourseCombinationExistError,
 } from './mutations';
 
 import { FileUploadError,
@@ -139,4 +140,5 @@ export {
   ComponentLockedError,
   InvalidTopicLOConnectionError,
   InvalidTopicPassedInCurrentTopicComponent,
+  UserCourseCombinationExistError,
 };

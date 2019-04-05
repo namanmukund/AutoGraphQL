@@ -7,46 +7,283 @@ import {
   userTopicTypeStatus,
 } from '../../../../constants';
 
+// query to get current component status of user
+const userCurrentTopicComponentStatusQuery = async userId => `
+  query{
+    userCurrentTopicComponentStatuses(filter:{
+      and:[
+        {user_some:{
+        id:"${userId}"
+        }},
+      {currentCourse_some:{
+        and:[
+          {status: published},
+          {id:"${GLOBAL_COURSE_ID}"}
+          {chapters_some:{
+            status: published
+          }}
+        ]
+      }}
+      ]
+    }){
+      id
+      user{
+        id
+        username
+      }
+      currentTopic{
+        id
+        order
+      }
+      currentTopicComponentType
+      enrollmentType
+    }
+  }
+  `;
+
+/*
+query to get topic and it's first lo to get populated in user topic current component status
+we use order of topic to fetch the document
+*/
+const nextTopicQuery = async nextTopicOrder => `
+  query{
+    topics(filter:{
+      and:[
+      {order:${nextTopicOrder}},
+      {status: ${PUBLISHED}}
+    ]
+    }){
+      id
+      learningObjectives(filter:{
+        order: 1
+      }){
+        id
+      }
+    }
+  }
+`;
+
+// query to update user current topic component status
+const updateUserCurrentTopicComponentStatusMutation = async (
+  currentTopicComponentId,
+  nextTopicId,
+  loQuery,
+) => `
+  mutation{
+    updateUserCurrentTopicComponentStatus(id:"${currentTopicComponentId}",  input:{
+      currentTopicComponentType: ${topicTypes.video}
+    },
+    currentTopicConnectId:"${nextTopicId}"
+    ${loQuery}
+    ){
+      id
+    }
+  }
+  `;
+
+// query to fetch user quiz info
+const userQuizQuery = async (
+  userId,
+  topicId,
+) => `
+   query{
+      userQuizs(filter:{
+        and:[
+          {user_some:{
+          id:"${userId}"
+          }},
+          {topic_some:{
+            id:"${topicId}"
+          }},
+          {
+            quizStatus: ${userTopicTypeStatus.incomplete}
+          }
+        ]
+      }){
+        id
+        quizStatus
+      }
+    }
+    `;
+
+// getting questions from question bank to evaluate quiz report
+const questionBankQuery = async questionIdsQuery => `
+  query{
+    questionBanks(filter:{
+      id_in: ${questionIdsQuery}
+    }){
+      id
+      order
+      questionType
+      mcqOptions{
+        statement
+        isCorrect
+      }
+      fibInputOptions{
+        answers
+        correctPosition
+      }
+      fibBlocksOptions{
+        statement
+        correctPositions
+      }
+      arrangeOptions{
+        statement
+        correctPosition
+      }
+      learningObjective{
+        id
+      }
+    }
+  }
+  `;
+
+// mutation to update UserQuiz, popping all quiz questions
+const updateUserQuizMutation = async (
+  userQuizId,
+  popAllQuery,
+) => `
+   mutation{
+      updateUserQuiz(id:"${userQuizId}",  input:{
+        quizStatus: ${userTopicTypeStatus.complete}
+        ${popAllQuery}
+      }){
+        id
+      }
+    }
+    `;
+
+// mutation to update UserQuiz, pushing updated quiz questions
+const updateUserQuizMutationQuiz = async (
+  userQuizId,
+  pushManyQuery) => `
+  mutation{
+    updateUserQuiz(id:"${userQuizId}",  input:{
+      ${pushManyQuery}
+    }){
+      id
+    }
+  }
+  `;
+
+// mutation to add UserQuizReport
+const addUserQuizReport = async (
+  userId,
+  topicId,
+  quizReportQuery,
+  learningObjectiveReportQuery,
+) => `
+  mutation{
+    addUserQuizReport(
+    userConnectId: "${userId}"
+    topicConnectId: "${topicId}"
+    input:{
+      ${quizReportQuery}
+      ${learningObjectiveReportQuery}
+    }){
+      id
+    }
+  }
+  `;
+
+// query to get current user profile to get current scholarship status
+const userProfileQuery = async userId => `
+  query{
+    userProfiles(filter:{
+      user_some:{
+        id: "${userId}"
+      }
+    }){
+      id
+      topicsCompleted
+      proficientTopicCount
+      freeProficientTopicCount
+      masteredTopicCount
+      freeMasteredTopicCount
+      familiarTopicCount
+      freeFamiliarTopicCount
+    }
+  }
+`;
+
+// query to create user profile if it does not exist already
+const addUserProfile = async (
+  userId,
+  userProfileTopicConnectQuery,
+  topicsCompleted,
+  proficientTopicCount,
+  freeProficientTopicCount,
+  masteredTopicCount,
+  freeMasteredTopicCount,
+  familiarTopicCount,
+  freeFamiliarTopicCount,
+) => `
+  mutation{
+    addUserProfile(
+      userConnectId:"${userId}"
+      ${userProfileTopicConnectQuery}
+      input:{
+        topicsCompleted: ${topicsCompleted}
+        proficientTopicCount: ${proficientTopicCount}
+        freeProficientTopicCount: ${freeProficientTopicCount}
+        masteredTopicCount: ${masteredTopicCount}
+        freeMasteredTopicCount: ${freeMasteredTopicCount}
+        familiarTopicCount: ${familiarTopicCount}
+        freeFamiliarTopicCount: ${freeFamiliarTopicCount}
+      }){
+      id
+    }
+  }
+  `;
+
+// query to update user profile if it exists already
+const updateUserProfile = async (
+  userProfileId,
+  userProfileTopicConnectQuery,
+  topicsCompleted,
+  proficientTopicCount,
+  freeProficientTopicCount,
+  masteredTopicCount,
+  freeMasteredTopicCount,
+  familiarTopicCount,
+  freeFamiliarTopicCount,
+) => `
+  mutation{
+    updateUserProfile(id:"${userProfileId}"
+    ${userProfileTopicConnectQuery}
+      input:{
+        topicsCompleted: ${topicsCompleted}
+        proficientTopicCount: ${proficientTopicCount}
+        freeProficientTopicCount: ${freeProficientTopicCount}
+        masteredTopicCount: ${masteredTopicCount}
+        freeMasteredTopicCount: ${freeMasteredTopicCount}
+        familiarTopicCount: ${familiarTopicCount}
+        freeFamiliarTopicCount: ${freeFamiliarTopicCount}
+      }
+    ){
+     id 
+    }
+  }
+  `;
+
+/*
+UserActivityQuizDump, current component topic status and
+UserQuiz is updated according to -
+  -current topic component status
+  -userQuiz for provided userId and topic id
+  -topic.
+Report for quiz(topic and Lo wise) is generated according to the questions array
+ (Collection: UserQuizReport).
+UserProfile is also updated if user is attempting quiz for the first time,
+ which contains scholarship information.
+*/
 const addUserActivityQuizDumpPostHookMethod = async (input) => {
   const userId = get(input, 'user.typeId');
   const topicId = get(input, 'topic.typeId');
   if (userId && topicId) {
-    // query to get current component status of user
     let nextTopicId;
-    const userCurrentTopicComponentStatusQuery = `
-          query{
-            userCurrentTopicComponentStatuses(filter:{
-              and:[
-                {user_some:{
-                id:"${userId}"
-                }},
-              {currentCourse_some:{
-                and:[
-                  {status: published},
-                  {id:"${GLOBAL_COURSE_ID}"}
-                  {chapters_some:{
-                    status: published
-                  }}
-                ]
-              }}
-              ]
-            }){
-              id
-              user{
-                id
-                username
-              }
-              currentTopic{
-                id
-                order
-              }
-              currentTopicComponentType
-              enrollmentType
-            }
-          }
-          `;
     const userCurrentTopicComponentStatusRes =
-      await callGraphqlApi(userCurrentTopicComponentStatusQuery);
+      await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
     const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
     const quizAction = get(input, 'quizAction');
     const {
@@ -63,25 +300,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
       const currentTopicOrder = currentTopic.order;
       if (currentTopicOrder) {
         const nextTopicOrder = currentTopic.order + 1;
-        // query to get next topic
-        const nextTopicQuery = `
-              query{
-                topics(filter:{
-                  and:[
-                  {order:${nextTopicOrder}},
-                  {status: ${PUBLISHED}}
-                ]
-                }){
-                  id
-                  learningObjectives(filter:{
-                    order: 1
-                  }){
-                    id
-                  }
-                }
-              }
-            `;
-        const nextTopicResult = await callGraphqlApi(nextTopicQuery);
+        const nextTopicResult = await callGraphqlApi(await nextTopicQuery(nextTopicOrder));
         const nextTopicInfo = get(nextTopicResult, 'data.topics[0]');
         nextTopicId = get(nextTopicInfo, 'id');
         const learningObjectiveConnectId = get(nextTopicInfo, 'learningObjectives[0].id');
@@ -89,44 +308,16 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
         if (learningObjectiveConnectId) { loQuery = `currentLearningObjectiveConnectId:"${learningObjectiveConnectId}"`; }
         // updating current component in case quiz is completed by user
         if (nextTopicId) {
-          const updateUserCurrentTopicComponentStatusMutation = `
-              mutation{
-                updateUserCurrentTopicComponentStatus(id:"${currentTopicComponentId}",  input:{
-                  currentTopicComponentType: ${topicTypes.video}
-                },
-                currentTopicConnectId:"${nextTopicId}"
-                ${loQuery}
-                ){
-                  id
-                }
-              }
-              `;
-          await callGraphqlApi(updateUserCurrentTopicComponentStatusMutation);
+          await callGraphqlApi(await updateUserCurrentTopicComponentStatusMutation(
+            currentTopicComponentId,
+            nextTopicId,
+            loQuery,
+          ));
         }
       }
     }
 
-    const userQuizQuery = `
-          query{
-            userQuizs(filter:{
-              and:[
-                {user_some:{
-                id:"${userId}"
-                }},
-                {topic_some:{
-                  id:"${topicId}"
-                }},
-                {
-                  quizStatus: ${userTopicTypeStatus.incomplete}
-                }
-              ]
-            }){
-              id
-              quizStatus
-            }
-          }
-          `;
-    const userQuizQueryRes = await callGraphqlApi(userQuizQuery);
+    const userQuizQueryRes = await callGraphqlApi(await userQuizQuery(userId, topicId));
     const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
     const userQuizId = get(userQuizInfo, 'id');
     // code to evaluate report of quiz
@@ -141,38 +332,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
         }
       });
       questionIdsQuery += ']';
-      // getting questions from question bank to evaluate quiz report
-      const questionBankQuery = `
-            query{
-              questionBanks(filter:{
-                id_in: ${questionIdsQuery}
-              }){
-                id
-                order
-                questionType
-                mcqOptions{
-                  statement
-                  isCorrect
-                }
-                fibInputOptions{
-                  answers
-                  correctPosition
-                }
-                fibBlocksOptions{
-                  statement
-                  correctPositions
-                }
-                arrangeOptions{
-                  statement
-                  correctPosition
-                }
-                learningObjective{
-                  id
-                }
-              }
-            }
-            `;
-      const questionBankQueryRes = await callGraphqlApi(questionBankQuery);
+      const questionBankQueryRes = await callGraphqlApi(await questionBankQuery(questionIdsQuery));
       const questionBankInfo = get(questionBankQueryRes, 'data.questionBanks');
       const learningObjectiveReportObject = {};
       // Initializing quiz report
@@ -430,46 +590,16 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
                    }`;
 
       if (userQuizId) {
-        // popping all the existing value present in quiz
-        const updateUserQuizMutation = `
-            mutation{
-              updateUserQuiz(id:"${userQuizId}",  input:{
-                quizStatus: ${userTopicTypeStatus.complete}
-                ${popAllQuery}
-              }){
-                id
-              }
-            }
-            `;
-        await callGraphqlApi(updateUserQuizMutation);
-
-        // pushing all the questions with result in the collection
-        const updateUserQuizMutationQuiz = `
-              mutation{
-                updateUserQuiz(id:"${userQuizId}",  input:{
-                  ${pushManyQuery}
-                }){
-                  id
-                }
-              }
-              `;
-        await callGraphqlApi(updateUserQuizMutationQuiz);
-
+        // updating UserQuiz
+        await callGraphqlApi(await updateUserQuizMutation(userQuizId, popAllQuery));
+        await callGraphqlApi(await updateUserQuizMutationQuiz(userQuizId, pushManyQuery));
         // generating quiz report of user
-        const addUserQuizReport = `
-              mutation{
-                addUserQuizReport(
-                userConnectId: "${userId}"
-                topicConnectId: "${topicId}"
-                input:{
-                  ${quizReportQuery}
-                  ${learningObjectiveReportQuery}
-                }){
-                  id
-                }
-              }
-              `;
-        await callGraphqlApi(addUserQuizReport);
+        await callGraphqlApi(await addUserQuizReport(
+          userId,
+          topicId,
+          quizReportQuery,
+          learningObjectiveReportQuery,
+        ));
 
         // logic for evaluating scholarship of user
         // and it will be done on first attempt of quiz
@@ -490,25 +620,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
             accuracy =
               (correctQuestionCount / totalQuestionCount) * 100;
           }
-          const userProfileQuery = `
-              query{
-                userProfiles(filter:{
-                  user_some:{
-                    id: "${userId}"
-                  }
-                }){
-                  id
-                  topicsCompleted
-                  proficientTopicCount
-                  freeProficientTopicCount
-                  masteredTopicCount
-                  freeMasteredTopicCount
-                  familiarTopicCount
-                  freeFamiliarTopicCount
-                }
-              }
-            `;
-          const userProfileResult = await callGraphqlApi(userProfileQuery);
+          const userProfileResult = await callGraphqlApi(await userProfileQuery(userId));
           const userProfileInfo = get(userProfileResult, 'data.userProfiles[0]');
           const userProfileId = get(userProfileInfo, 'id');
           if (userProfileInfo && userProfileInfo.topicsCompleted) {
@@ -557,45 +669,29 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
           }
 
           if (userProfileId) {
-            const updateUserProfile = `
-                mutation{
-                  updateUserProfile(id:"${userProfileId}"
-                  ${userProfileTopicConnectQuery}
-                    input:{
-                      topicsCompleted: ${topicsCompleted}
-                      proficientTopicCount: ${proficientTopicCount}
-                      freeProficientTopicCount: ${freeProficientTopicCount}
-                      masteredTopicCount: ${masteredTopicCount}
-                      freeMasteredTopicCount: ${freeMasteredTopicCount}
-                      familiarTopicCount: ${familiarTopicCount}
-                      freeFamiliarTopicCount: ${freeFamiliarTopicCount}
-                    }
-                  ){
-                   id 
-                  }
-                }
-                `;
-            await callGraphqlApi(updateUserProfile);
+            await callGraphqlApi(await updateUserProfile(
+              userProfileId,
+              userProfileTopicConnectQuery,
+              topicsCompleted,
+              proficientTopicCount,
+              freeProficientTopicCount,
+              masteredTopicCount,
+              freeMasteredTopicCount,
+              familiarTopicCount,
+              freeFamiliarTopicCount,
+            ));
           } else {
-            const addUserProfile = `
-                  mutation{
-                    addUserProfile(
-                      userConnectId:"${userId}"
-                      ${userProfileTopicConnectQuery}
-                      input:{
-                        topicsCompleted: ${topicsCompleted}
-                        proficientTopicCount: ${proficientTopicCount}
-                        freeProficientTopicCount: ${freeProficientTopicCount}
-                        masteredTopicCount: ${masteredTopicCount}
-                        freeMasteredTopicCount: ${freeMasteredTopicCount}
-                        familiarTopicCount: ${familiarTopicCount}
-                        freeFamiliarTopicCount: ${freeFamiliarTopicCount}
-                      }){
-                      id
-                    }
-                  }
-                  `;
-            await callGraphqlApi(addUserProfile);
+            await callGraphqlApi(await addUserProfile(
+              userId,
+              userProfileTopicConnectQuery,
+              topicsCompleted,
+              proficientTopicCount,
+              freeProficientTopicCount,
+              masteredTopicCount,
+              freeMasteredTopicCount,
+              familiarTopicCount,
+              freeFamiliarTopicCount,
+            ));
           }
         }
       }

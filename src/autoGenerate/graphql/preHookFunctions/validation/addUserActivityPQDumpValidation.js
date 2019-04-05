@@ -1,72 +1,78 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../api/callGraphqlApi';
+import callGraphqlApi from '../../../../api/callGraphqlApi';
 import {
   topicTypes,
   enrollmentTypes,
   GLOBAL_COURSE_ID,
-} from '../../../../constants';
-import { ComponentLockedError } from '../../../../constants/errors';
+} from '../../../../../constants';
+import { ComponentLockedError } from '../../../../../constants/errors';
 
-const addUserActivityPQDumpMethod = async (params) => {
+// query to get learning objective and it's topic order info
+const learningObjectiveQuery = async learningObjectiveId => `
+  query{
+    learningObjective(id:"${learningObjectiveId}"){
+      id
+      order
+      topic{
+        id
+        order
+        isTrial
+      }
+    }
+  }
+  `;
+
+// query to get current component status of user
+const userCurrentTopicComponentStatusQuery = async userId => `
+  query{
+    userCurrentTopicComponentStatuses(filter:{
+      and:[
+        {user_some:{
+        id:"${userId}"
+        }},
+      {currentCourse_some:{
+        and:[
+          {status: published},
+          {id:"${GLOBAL_COURSE_ID}"}
+          {chapters_some:{
+            status: published
+          }}
+        ]
+      }}
+      ]
+    }){
+      id
+      user{
+        id
+        username
+      }
+      currentTopic{
+        id
+        order
+      }
+      currentLearningObjective{
+        id
+        order
+      }
+      currentTopicComponentType
+      enrollmentType
+    }
+  }
+  `;
+
+// preehook logic to check if requested PQ(user and LO id) is unlocked
+const addUserActivityPQDumpValidation = async (params) => {
   // check if the called user and topic is unlocked
   const userId = get(params, 'userConnectId');
   const learningObjectiveId = get(params, 'learningObjectiveConnectId');
   if (userId && learningObjectiveId) {
-    const learningObjectiveQuery = `
-          query{
-            learningObjective(id:"${learningObjectiveId}"){
-              id
-              order
-              topic{
-                id
-                order
-                isTrial
-              }
-            }
-          }
-          `;
-    const learningObjectiveQueryRes = await callGraphqlApi(learningObjectiveQuery);
+    const learningObjectiveQueryRes = await callGraphqlApi(
+      await learningObjectiveQuery(learningObjectiveId));
     const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
     const topicInfo = get(learningObjectiveInfo, 'topic');
     const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
-    const userCurrentTopicComponentStatusQuery = `
-          query{
-            userCurrentTopicComponentStatuses(filter:{
-              and:[
-                {user_some:{
-                id:"${userId}"
-                }},
-              {currentCourse_some:{
-                and:[
-                  {status: published},
-                  {id:"${GLOBAL_COURSE_ID}"}
-                  {chapters_some:{
-                    status: published
-                  }}
-                ]
-              }}
-              ]
-            }){
-              id
-              user{
-                id
-                username
-              }
-              currentTopic{
-                id
-                order
-              }
-              currentLearningObjective{
-                id
-                order
-              }
-              currentTopicComponentType
-              enrollmentType
-            }
-          }
-          `;
     const userCurrentTopicComponentStatusRes =
-      await callGraphqlApi(userCurrentTopicComponentStatusQuery);
+      await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
     const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
     if (learningObjectiveInfo && topicInfo && currentTopicComponentInfo) {
       let isUnlocked = false;
@@ -105,4 +111,4 @@ const addUserActivityPQDumpMethod = async (params) => {
   }
 };
 
-export default addUserActivityPQDumpMethod;
+export default addUserActivityPQDumpValidation;

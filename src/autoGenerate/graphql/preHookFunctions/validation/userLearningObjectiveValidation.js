@@ -1,13 +1,67 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../api/callGraphqlApi';
+import callGraphqlApi from '../../../../api/callGraphqlApi';
 import {
   topicTypes,
   enrollmentTypes,
   GLOBAL_COURSE_ID,
-} from '../../../../constants';
-import { ComponentLockedError } from '../../../../constants/errors';
+} from '../../../../../constants';
+import { ComponentLockedError } from '../../../../../constants/errors';
 
-const userLearningObjectiveMethod = async (params) => {
+// query to get learning objective and it's topic order info
+const learningObjectiveQuery = async learningObjectiveId => `
+  query{
+    learningObjective(id:"${learningObjectiveId}"){
+      id
+      order
+      topic{
+        id
+        order
+        isTrial
+      }
+    }
+  }
+  `;
+
+// query to get current component status of user
+const userCurrentTopicComponentStatusQuery = async userId => `
+  query{
+    userCurrentTopicComponentStatuses(filter:{
+      and:[
+        {user_some:{
+        id:"${userId}"
+        }},
+      {currentCourse_some:{
+        and:[
+          {status: published},
+          {id:"${GLOBAL_COURSE_ID}"}
+          {chapters_some:{
+            status: published
+          }}
+        ]
+      }}
+      ]
+    }){
+      id
+      user{
+        id
+        username
+      }
+      currentTopic{
+        id
+        order
+      }
+      currentLearningObjective{
+        id
+        order
+      }
+      currentTopicComponentType
+      enrollmentType
+    }
+  }
+  `;
+
+// preehook logic to check if requested UserLO(user and LO id) is unlocked
+const userLearningObjectiveValidation = async (params) => {
   // userLearningObjective collection is used to store and get chat and pq page info
   // checking if called lo and user combination in accessible
   const filterArray = get(params, 'filter.and');
@@ -16,62 +70,13 @@ const userLearningObjectiveMethod = async (params) => {
   const userId = get(userSome, 'user_some.id');
   const learningObjectiveId = get(loSome, 'learningObjective_some.id');
   if (userId && learningObjectiveId) {
-    const learningObjectiveQuery = `
-          query{
-            learningObjective(id:"${learningObjectiveId}"){
-              id
-              order
-              topic{
-                id
-                order
-                isTrial
-              }
-            }
-          }
-          `;
-    const learningObjectiveQueryRes = await callGraphqlApi(learningObjectiveQuery);
+    const learningObjectiveQueryRes = await callGraphqlApi(
+      await learningObjectiveQuery(learningObjectiveId));
     const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
     const topicInfo = get(learningObjectiveInfo, 'topic');
     const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
-    // query to get current component status of user
-    const userCurrentTopicComponentStatusQuery = `
-          query{
-            userCurrentTopicComponentStatuses(filter:{
-              and:[
-                {user_some:{
-                id:"${userId}"
-                }},
-              {currentCourse_some:{
-                and:[
-                  {status: published},
-                  {id:"${GLOBAL_COURSE_ID}"}
-                  {chapters_some:{
-                    status: published
-                  }}
-                ]
-              }}
-              ]
-            }){
-              id
-              user{
-                id
-                username
-              }
-              currentTopic{
-                id
-                order
-              }
-              currentLearningObjective{
-                id
-                order
-              }
-              currentTopicComponentType
-              enrollmentType
-            }
-          }
-          `;
     const userCurrentTopicComponentStatusRes =
-      await callGraphqlApi(userCurrentTopicComponentStatusQuery);
+      await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
     const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
     if (learningObjectiveInfo && topicInfo && currentTopicComponentInfo) {
       let isUnlocked = false;
@@ -103,4 +108,4 @@ const userLearningObjectiveMethod = async (params) => {
   }
 };
 
-export default userLearningObjectiveMethod;
+export default userLearningObjectiveValidation;
