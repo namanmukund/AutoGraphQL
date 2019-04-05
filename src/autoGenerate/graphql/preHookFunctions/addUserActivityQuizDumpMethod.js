@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
-  componentTypes,
+  topicTypes,
   enrollmentTypes,
   GLOBAL_COURSE_ID,
 } from '../../../../constants';
@@ -24,9 +24,9 @@ const addUserActivityQuizDumpMethod = async (params) => {
     const topicQueryRes = await callGraphqlApi(topicQuery);
     const topicInfo = get(topicQueryRes, 'data.topic');
     // query to get current component status of user
-    const userCurrentComponentStatusQuery = `
+    const userCurrentTopicComponentStatusQuery = `
           query{
-            userCurrentComponentStatuses(filter:{
+            userCurrentTopicComponentStatuses(filter:{
               and:[
                 {user_some:{
                 id:"${userId}"
@@ -55,14 +55,15 @@ const addUserActivityQuizDumpMethod = async (params) => {
                 id
                 order
               }
-              currentComponentType
+              currentTopicComponentType
               enrollmentType
             }
           }
           `;
-    const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
-    const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
-    if (topicInfo && currentComponentInfo) {
+    const userCurrentTopicComponentStatusRes =
+      await callGraphqlApi(userCurrentTopicComponentStatusQuery);
+    const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
+    if (topicInfo && currentTopicComponentInfo) {
       let isUnlocked = false;
       const {
         order: topicOrder,
@@ -70,9 +71,9 @@ const addUserActivityQuizDumpMethod = async (params) => {
       } = topicInfo;
       const {
         currentTopic,
-        currentComponentType,
+        currentTopicComponentType,
         enrollmentType,
-      } = currentComponentInfo;
+      } = currentTopicComponentInfo;
       // condition to check if topic is free, if not then user should be pro
       // type to access that topic
       if ((enrollmentType === enrollmentTypes.pro &&
@@ -85,7 +86,7 @@ const addUserActivityQuizDumpMethod = async (params) => {
         // other case is when called topic order is equal to current topic order
         // in that case we are checking current component type is quiz
         if (topicOrder < currentTopic.order ||
-          (currentComponentType === componentTypes.quiz)) {
+          (currentTopicComponentType === topicTypes.quiz)) {
           isUnlocked = true;
         }
       }

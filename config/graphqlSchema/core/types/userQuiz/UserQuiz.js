@@ -42,14 +42,14 @@ const quizType = `
 const userQuizNextComponentType = `
   type UserQuizNextComponentType {
    topic: Topic @relation(name: "UserQuizNextComponentTypeTopic", direction: "OneWay")
-   nextComponentType: CurrentComponentType!
+   nextComponentType: CurrentTopicComponentType!
  }`;
 
 const UserQuiz = `
   type UserQuiz @model {
     user: User! @relation(name: "UserQuiz", direction: "OneWay")
     quiz: [QuizType]
-    quizStatus: UserComponentStatus @defaultValue(value: "incomplete")
+    quizStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
     topic: Topic! @relation(name: "TopicUserQuiz", direction: "OneWay")
     nextComponent: UserQuizNextComponentType
   }

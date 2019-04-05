@@ -1,10 +1,10 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
-  componentTypes,
+  topicTypes,
   GLOBAL_COURSE_ID,
   userActionType,
-  userComponentStatus,
+  userTopicTypeStatus,
 } from '../../../../constants';
 
 const addUserActivityVideoDumpPostHookMethod = async (input) => {
@@ -29,9 +29,9 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
     const topicInfo = get(topicQueryRes, 'data.topic');
 
     // query to get current component status of user
-    const userCurrentComponentStatusQuery = `
+    const userCurrentTopicComponentStatusQuery = `
           query{
-            userCurrentComponentStatuses(filter:{
+            userCurrentTopicComponentStatuses(filter:{
               and:[
                 {user_some:{
                 id:"${userId}"
@@ -56,13 +56,14 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
                 id
                 order
               }
-              currentComponentType
+              currentTopicComponentType
               enrollmentType
             }
           }
           `;
-    const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
-    const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
+    const userCurrentTopicComponentStatusRes =
+      await callGraphqlApi(userCurrentTopicComponentStatusQuery);
+    const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
     const userVideoQuery = `
           query{
             userVideos(filter:{
@@ -92,33 +93,33 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
     let isBookmarked = false;
     let isLiked = false;
     let videoCurrentTime = 0;
-    let status = userComponentStatus.incomplete;
+    let status = userTopicTypeStatus.incomplete;
     let learningObjectiveConnectId;
     isBookmarked = get(input, 'isBookmarked');
     isLiked = get(input, 'isLiked');
     videoCurrentTime = get(input, 'videoCurrentTime');
     const videoAction = get(input, 'videoAction');
     if (videoAction && videoAction === userActionType.next) {
-      status = userComponentStatus.complete;
+      status = userTopicTypeStatus.complete;
     }
     const {
-      id: currentComponentId,
-      currentComponentType: currentComponent,
+      id: currentTopicComponentId,
+      currentTopicComponentType: currentTopicComponent,
       currentTopic,
-    } = currentComponentInfo;
-    if (currentComponent &&
+    } = currentTopicComponentInfo;
+    if (currentTopicComponent &&
       currentTopic &&
       topicInfo &&
       videoAction === userActionType.next &&
-      currentComponent === componentTypes.video &&
+      currentTopicComponent === topicTypes.video &&
       currentTopic.id === topicInfo.id
     ) {
       learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
       if (learningObjectiveConnectId) {
-        const updateUserCurrentComponentStatusMutation = `
+        const updateUserCurrentTopicComponentStatusMutation = `
               mutation{
-                updateUserCurrentComponentStatus(id:"${currentComponentId}",  input:{
-                  currentComponentType: ${componentTypes.message}
+                updateUserCurrentTopicComponentStatus(id:"${currentTopicComponentId}",  input:{
+                  currentTopicComponentType: ${topicTypes.message}
                 },
                 currentLearningObjectiveConnectId:"${learningObjectiveConnectId}"
                 ){
@@ -126,11 +127,11 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
                 }
               }
               `;
-        await callGraphqlApi(updateUserCurrentComponentStatusMutation);
+        await callGraphqlApi(updateUserCurrentTopicComponentStatusMutation);
       }
     }
-    if (userVideoInfo && userVideoInfo.status === userComponentStatus.complete) {
-      status = userComponentStatus.complete;
+    if (userVideoInfo && userVideoInfo.status === userTopicTypeStatus.complete) {
+      status = userTopicTypeStatus.complete;
     }
     let restQuerv = '';
     const nextComponent = get(userVideoInfo, 'nextComponent.learningObjective.id');
@@ -139,7 +140,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
       !nextComponent) {
       restQuerv = `nextComponent:{
                      learningObjectiveConnectId:"${learningObjectiveConnectId}"
-                     nextComponentType: ${componentTypes.message}
+                     nextComponentType: ${topicTypes.message}
                    }`;
     }
     if (userVideoId) {

@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
-  componentTypes,
+  topicTypes,
   enrollmentTypes,
   GLOBAL_COURSE_ID,
 } from '../../../../constants';
@@ -24,9 +24,9 @@ const userQuizMethod = async (params) => {
     const topicQueryRes = await callGraphqlApi(topicQuery);
     const topicInfo = get(topicQueryRes, 'data.topic');
     // query to get current component status of user
-    const userCurrentComponentStatusQuery = `
+    const userCurrentTopicComponentStatusQuery = `
           query{
-            userCurrentComponentStatuses(filter:{
+            userCurrentTopicComponentStatuses(filter:{
               and:[
                 {user_some:{
                 id:"${userId}"
@@ -51,14 +51,15 @@ const userQuizMethod = async (params) => {
                 id
                 order
               }
-              currentComponentType
+              currentTopicComponentType
               enrollmentType
             }
           }
           `;
-    const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
-    const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
-    if (topicInfo && currentComponentInfo) {
+    const userCurrentTopicComponentStatusRes =
+      await callGraphqlApi(userCurrentTopicComponentStatusQuery);
+    const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
+    if (topicInfo && currentTopicComponentInfo) {
       let isUnlocked = false;
       const {
         order: topicOrder,
@@ -66,9 +67,9 @@ const userQuizMethod = async (params) => {
       } = topicInfo;
       const {
         currentTopic,
-        currentComponentType,
+        currentTopicComponentType,
         enrollmentType,
-      } = currentComponentInfo;
+      } = currentTopicComponentInfo;
       // logic same as that of User quiz dump
       if ((enrollmentType === enrollmentTypes.pro &&
         topicOrder <= currentTopic.order
@@ -76,7 +77,7 @@ const userQuizMethod = async (params) => {
         && topicOrder <= currentTopic.order &&
         isTrial === true)) {
         if (topicOrder < currentTopic.order ||
-          (currentComponentType === componentTypes.quiz)) {
+          (currentTopicComponentType === topicTypes.quiz)) {
           isUnlocked = true;
         }
       }

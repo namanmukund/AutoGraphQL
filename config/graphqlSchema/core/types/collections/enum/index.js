@@ -16,8 +16,8 @@ import CourseTitle from './CourseTitle';
 import CourseCategory from './CourseCategory';
 import UserActionType from './UserActionType';
 import EnrollmentType from './EnrollmentType';
-import CurrentComponentType from './CurrentComponentType';
-import UserComponentStatus from './UserComponentStatus';
+import CurrentTopicComponentType from './CurrentTopicComponentType';
+import UserTopicTypeStatus from './UserTopicTypeStatus';
 
 export default [
   Status,
@@ -38,6 +38,6 @@ export default [
   CourseCategory,
   UserActionType,
   EnrollmentType,
-  CurrentComponentType,
-  UserComponentStatus,
+  CurrentTopicComponentType,
+  UserTopicTypeStatus,
 ];

@@ -654,7 +654,7 @@ resolvers.Query.me = ((root, params, context, info) => {
 
 // Resolver for a custom homepage data for user
 resolvers.Mutation.userCourseSyllabus = async (root, params, context, info) => {
-  const typeName = 'UserCurrentComponentStatus';
+  const typeName = 'UserCurrentTopicComponentStatus';
   const mutationName = 'userCourseSyllabus';
 
   const hookInput = await prehook(params, mutationName, context, params);

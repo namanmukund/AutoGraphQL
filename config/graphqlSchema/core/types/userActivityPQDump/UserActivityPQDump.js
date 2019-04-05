@@ -81,7 +81,7 @@ const practiceQuestionsType = `
    fibInputAnswer: [PQFibInputAnswerType]
    fibBlockAnswer: [PQFibBlockAnswerType]
    arrangeAnswer: [PQArrangeAnswerType]
-   status: UserComponentStatus @defaultValue(value: "incomplete")
+   status: UserTopicTypeStatus @defaultValue(value: "incomplete")
  }`;
 
 const PQShareType = `

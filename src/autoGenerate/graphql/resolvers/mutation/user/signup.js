@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { get, pick } from 'lodash';
 import {
-  componentTypes,
+  topicTypes,
   enrollmentTypes,
   GLOBAL_COURSE_ID,
   operationName,
@@ -130,10 +130,10 @@ const signupMutationResolver = async (
     // mutation to create current component status of user
     const mutation = `
       mutation{
-        addUserCurrentComponentStatus(
+        addUserCurrentTopicComponentStatus(
           input: {
             enrollmentType: ${enrollmentTypes.free}
-            currentComponentType: ${componentTypes.video}
+            currentTopicComponentType: ${topicTypes.video}
           }
           userConnectId:"${userId}"
           currentCourseConnectId:"${GLOBAL_COURSE_ID}"
@@ -142,11 +142,11 @@ const signupMutationResolver = async (
           id
           currentCourse{
             title
-            chaptersMeta{
+            totalChapters{
               count
             }
             chapters{
-              topicsMeta{
+              totalTopics{
                 count
               }
             }
@@ -162,7 +162,7 @@ const signupMutationResolver = async (
             }
             description
           }
-          currentComponentType
+          currentTopicComponentType
         }
       }
     `;

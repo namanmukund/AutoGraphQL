@@ -1,7 +1,7 @@
 const userVideoNextComponentType = `
   type UserVideoNextComponentType {
    learningObjective: LearningObjective @relation(name: "UserVideoLearningObjective", direction: "OneWay")
-   nextComponentType: CurrentComponentType
+   nextComponentType: CurrentTopicComponentType
  }`;
 
 const UserVideo = `
@@ -11,7 +11,7 @@ const UserVideo = `
     isLiked: Boolean @defaultValue(value: "false")
     isBookmarked: Boolean @defaultValue(value: "false")
     videoCurrentTime: Int @defaultValue(value: "0")
-    status: UserComponentStatus @defaultValue(value: "incomplete")
+    status: UserTopicTypeStatus @defaultValue(value: "incomplete")
     nextComponent: UserVideoNextComponentType
   }
 `;

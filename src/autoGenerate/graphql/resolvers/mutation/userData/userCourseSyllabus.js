@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import {
-  componentTypes,
+  topicTypes,
   enrollmentTypes,
   GLOBAL_COURSE_ID,
   operationName,
@@ -33,7 +33,7 @@ const userCourseSyllabusMutationResolver = async (
     // query to get current component status of user
     const query = `
     query{
-      userCurrentComponentStatuses(filter:{
+      userCurrentTopicComponentStatuses(filter:{
         and:[
           {user_some:{
           id:"${userId}"
@@ -106,7 +106,7 @@ const userCourseSyllabusMutationResolver = async (
             name
           }
         }
-        currentComponentType
+        currentTopicComponentType
         enrollmentType
       }
     }
@@ -120,32 +120,32 @@ const userCourseSyllabusMutationResolver = async (
       token,
     );
     // Ideally each user wull have 1 document in the collection. Fetching the same document
-    const currentComponentInfo = get(res, 'data.userCurrentComponentStatuses[0]');
-    if (currentComponentInfo) {
+    const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
+    if (currentTopicComponentInfo) {
       const {
         user,
         currentCourse,
-        currentComponentType: currentComponent,
+        currentTopicComponentType: currentTopicComponent,
         currentTopic,
         currentLearningObjective,
         enrollmentType,
-      } = currentComponentInfo;
+      } = currentTopicComponentInfo;
       // this object will be returned in output
       const currentUserSyllabus = {};
       let chapters;
-      let chaptersMeta = 0;
-      let topicsMeta = 0;
+      let totalChapters = 0;
+      let totalTopics = 0;
       if (currentCourse) {
         chapters = currentCourse.chapters;
       }
       if (chapters.length) {
-        chaptersMeta += chapters.length;
+        totalChapters += chapters.length;
         chapters.forEach((chapter) => {
           if (chapter && chapter.topics &&
             chapter.topics.length &&
             currentTopic &&
             enrollmentType) {
-            topicsMeta += chapter.topics.length;
+            totalTopics += chapter.topics.length;
             chapter.topics.forEach((topic) => {
               let isUnlocked = false;
               if ((enrollmentType === enrollmentTypes.pro &&
@@ -165,11 +165,11 @@ const userCourseSyllabusMutationResolver = async (
       if (currentCourse) {
         Object.assign(currentUserSyllabus, { currentCourse });
       }
-      Object.assign(currentUserSyllabus, { currentComponent, chapters });
+      Object.assign(currentUserSyllabus, { currentTopicComponent, chapters });
       Object.assign(currentUserSyllabus, { currentCourse });
-      Object.assign(currentUserSyllabus, { chaptersMeta });
-      Object.assign(currentUserSyllabus, { topicsMeta });
-      currentUserSyllabus.currentComponentData = {};
+      Object.assign(currentUserSyllabus, { totalChapters });
+      Object.assign(currentUserSyllabus, { totalTopics });
+      currentUserSyllabus.currentTopicComponentDetail = {};
       let componentTitle;
       let thumbnail;
       let percentageCovered;
@@ -191,8 +191,8 @@ const userCourseSyllabusMutationResolver = async (
       }
 
 
-      switch (currentComponent) {
-        case componentTypes.video:
+      switch (currentTopicComponent) {
+        case topicTypes.video:
           if (currentTopic) {
             componentTitle = videoTitle;
             thumbnail = videoThumbnail;
@@ -200,7 +200,7 @@ const userCourseSyllabusMutationResolver = async (
             description = videoDescription;
           }
           break;
-        case componentTypes.message:
+        case topicTypes.message:
           if (currentLearningObjective) {
             componentTitle = LOtitle;
             thumbnail = LOthumbnail;
@@ -208,7 +208,7 @@ const userCourseSyllabusMutationResolver = async (
             description = LOdescription;
           }
           break;
-        case componentTypes.practiceQuestion:
+        case topicTypes.practiceQuestion:
           if (currentLearningObjective) {
             componentTitle = LOtitle;
             thumbnail = LOthumbnail;
@@ -216,7 +216,7 @@ const userCourseSyllabusMutationResolver = async (
             description = LOdescription;
           }
           break;
-        case componentTypes.quiz:
+        case topicTypes.quiz:
           if (currentTopic) {
             componentTitle = 'Quiz';
             thumbnail = topicThumbnail;
@@ -227,7 +227,7 @@ const userCourseSyllabusMutationResolver = async (
         default:
       }
 
-      Object.assign(currentUserSyllabus.currentComponentData,
+      Object.assign(currentUserSyllabus.currentTopicComponentDetail,
         { componentTitle, topicTitle, thumbnail, percentageCovered, description });
       return currentUserSyllabus;
     }

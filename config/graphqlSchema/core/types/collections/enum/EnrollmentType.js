@@ -1,9 +1,10 @@
 import { enrollmentTypes } from '../../../../../../constants';
 
+const { pro, free } = enrollmentTypes;
 const EnrollmentType = `
   enum EnrollmentType {
-      ${enrollmentTypes.pro}
-      ${enrollmentTypes.free}
+      ${pro}
+      ${free}
   }`;
 
 export default EnrollmentType;

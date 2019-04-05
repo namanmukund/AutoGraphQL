@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
-  componentTypes, PUBLISHED,
+  topicTypes, PUBLISHED,
 } from '../../../../constants';
 
 const userQuizPostHookMethod = async (input, params) => {
@@ -19,7 +19,7 @@ const userQuizPostHookMethod = async (input, params) => {
             topic(id:"${topicId}"){
               id
               order
-              questions(filter:{assessmentType:${componentTypes.quiz}}){
+              questions(filter:{assessmentType:${topicTypes.quiz}}){
                 id
                 order
               }
@@ -62,7 +62,7 @@ const userQuizPostHookMethod = async (input, params) => {
       if (nextTopicId) {
         restQuerv = `nextComponent:{
                      topicConnectId:"${nextTopicId}"
-                     nextComponentType: ${componentTypes.video}
+                     nextComponentType: ${topicTypes.video}
                    }`;
       }
       // In case of last topic quiz, next component in not populated

@@ -5,15 +5,15 @@ import {
   RelationValuesExistError,
 } from '../../../../constants/errors';
 
-const addUserCurrentComponentStatusMethod = async (params) => {
+const addUserCurrentTopicComponentStatusMethod = async (params) => {
   const userId = get(params, 'userConnectId');
   const courseId = get(params, 'currentCourseConnectId');
   const topicId = get(params, 'currentTopicConnectId');
   const learningObjectiveId = get(params, 'currentLearningObjectiveConnectId');
   if (userId && courseId) {
-    const userCurrentComponentStatusQuery = `
+    const userCurrentTopicComponentStatusQuery = `
           query{
-            userCurrentComponentStatuses(filter:{
+            userCurrentTopicComponentStatuses(filter:{
               and:[
                 {user_some:{
                 id:"${userId}"
@@ -27,13 +27,13 @@ const addUserCurrentComponentStatusMethod = async (params) => {
             }
           }
         `;
-    const userCurrentComponentStatusData = await callGraphqlApi(
-      userCurrentComponentStatusQuery);
-    const userCurrentComponentStatusesResult = get(
-      userCurrentComponentStatusData,
-      'data.userCurrentComponentStatuses');
+    const userCurrentTopicComponentStatusData = await callGraphqlApi(
+      userCurrentTopicComponentStatusQuery);
+    const userCurrentTopicComponentStatusesResult = get(
+      userCurrentTopicComponentStatusData,
+      'data.userCurrentTopicComponentStatuses');
     // checking if course and user document already exists
-    if (userCurrentComponentStatusesResult && userCurrentComponentStatusesResult.length) {
+    if (userCurrentTopicComponentStatusesResult && userCurrentTopicComponentStatusesResult.length) {
       throw new RelationValuesExistError();
     }
     // logic to check if lo and topic passed are related to each other
@@ -63,4 +63,4 @@ const addUserCurrentComponentStatusMethod = async (params) => {
   }
 };
 
-export default addUserCurrentComponentStatusMethod;
+export default addUserCurrentTopicComponentStatusMethod;

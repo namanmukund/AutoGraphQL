@@ -1,8 +1,8 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
-  componentTypes,
-  userComponentStatus,
+  topicTypes,
+  userTopicTypeStatus,
 } from '../../../../constants';
 
 const userVideoPostHookMethod = async (input, params) => {
@@ -35,7 +35,7 @@ const userVideoPostHookMethod = async (input, params) => {
     if (learningObjectiveConnectId) {
       restQuerv = `nextComponent:{
                      learningObjectiveConnectId:"${learningObjectiveConnectId}"
-                     nextComponentType: ${componentTypes.message}
+                     nextComponentType: ${topicTypes.message}
                    }`;
     }
     const addUserVideoMutation = `
@@ -44,7 +44,7 @@ const userVideoPostHookMethod = async (input, params) => {
                   userConnectId:"${userId}"
                   topicConnectId:"${topicId}"
                   input:{
-                      status: ${userComponentStatus.incomplete}
+                      status: ${userTopicTypeStatus.incomplete}
                       ${restQuerv}
                   }
               ){

@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
-  componentTypes,
+  topicTypes,
   enrollmentTypes,
   GLOBAL_COURSE_ID,
   PUBLISHED,
@@ -26,11 +26,11 @@ const userCourseSyllabusMethod = async (context) => {
   const authentication = ifAuthorized(context);
   const decodedUser = authentication && authentication.user;
   const { id: userId } = decodedUser;
-  // condition is already present in pre hook of addUserCurrentComponentStatus
+  // condition is already present in pre hook of addUserCurrentTopicComponentStatus
   // checking if course and user combination already exits
-  const userCurrentComponentStatusesQuery = `
+  const userCurrentTopicComponentStatusesQuery = `
     query{
-      userCurrentComponentStatuses(filter:{
+      userCurrentTopicComponentStatuses(filter:{
         and:[
           {user_some:{
           id:"${userId}"
@@ -51,19 +51,20 @@ const userCourseSyllabusMethod = async (context) => {
     }
     `;
 
-  const userCurrentComponentStatusesRes = await callGraphqlApi(userCurrentComponentStatusesQuery);
+  const userCurrentTopicComponentStatusesRes =
+    await callGraphqlApi(userCurrentTopicComponentStatusesQuery);
   // Ideally each user will have 1 document in the collection. Fetching the same document
-  const currentComponentInfo = get(userCurrentComponentStatusesRes,
-    'data.userCurrentComponentStatuses[0]');
+  const currentTopicComponentInfo = get(userCurrentTopicComponentStatusesRes,
+    'data.userCurrentTopicComponentStatuses[0]');
 
-  if (!currentComponentInfo) {
+  if (!currentTopicComponentInfo) {
     // mutation to create current component status of user
     const mutation = `
       mutation{
-        addUserCurrentComponentStatus(
+        addUserCurrentTopicComponentStatus(
           input: {
             enrollmentType: ${enrollmentTypes.free}
-            currentComponentType: ${componentTypes.video}
+            currentTopicComponentType: ${topicTypes.video}
           }
           userConnectId:"${userId}"
           currentCourseConnectId:"${GLOBAL_COURSE_ID}"
@@ -72,11 +73,11 @@ const userCourseSyllabusMethod = async (context) => {
           id
           currentCourse{
             title
-            chaptersMeta{
+            totalChapters{
               count
             }
             chapters{
-              topicsMeta{
+              totalTopics{
                 count
               }
             }
@@ -92,7 +93,7 @@ const userCourseSyllabusMethod = async (context) => {
             }
             description
           }
-          currentComponentType
+          currentTopicComponentType
         }
       }
     `;

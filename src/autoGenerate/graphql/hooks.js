@@ -34,20 +34,20 @@ import { callAddUpdateHookValidationFunction } from './preHookFunctions/validati
 import deleteTopicValidation from './preHookFunctions/validation/deleteTopicValidation';
 import deleteLearningObjectiveValidation from './preHookFunctions/validation/deleteLearningObjectiveValidation';
 import deleteQuestionBankValidation from './preHookFunctions/validation/deleteQuestionBankValidation';
-import addUserCurrentComponentStatusMethod
-  from './preHookFunctions/addUserCurrentComponentStatusMethod';
-import updateUserCurrentComponentStatusMethod
-  from './preHookFunctions/updateUserCurrentComponentStatusMethod';
+import addUserCurrentTopicComponentStatusMethod
+  from './preHookFunctions/addUserCurrentTopicComponentStatusMethod';
+import updateUserCurrentTopicComponentStatusMethod
+  from './preHookFunctions/updateUserCurrentTopicComponentStatusMethod';
 import userCourseSyllabusMethod from './preHookFunctions/userCourseSyllabusMethod';
 import addUserActivityVideoDumpMethod from './preHookFunctions/addUserActivityVideoDumpMethod';
 import addUserActivityChatDumpMethod from './preHookFunctions/addUserActivityChatDumpMethod';
 import addUserActivityPQDumpMethod from './preHookFunctions/addUserActivityPQDumpMethod';
 import addUserActivityQuizDumpMethod from './preHookFunctions/addUserActivityQuizDumpMethod';
 import userVideoMethod from './preHookFunctions/userVideoMethod';
-import userLoMethod from './preHookFunctions/userLoMethod';
+import userLearningObjectiveMethod from './preHookFunctions/userLearningObjectiveMethod';
 import userQuizMethod from './preHookFunctions/userQuizMethod';
 import userVideoPostHookMethod from './postHookFunctions/userVideoPostHookMethod';
-import userLoPostHookMethod from './postHookFunctions/userLoPostHookMethod';
+import userLearningObjectivePostHookMethod from './postHookFunctions/userLearningObjectivePostHookMethod';
 import userQuizPostHookMethod from './postHookFunctions/userQuizPostHookMethod';
 import addUserActivityVideoDumpPostHookMethod
   from './postHookFunctions/addUserActivityVideoDumpPostHookMethod';
@@ -85,12 +85,12 @@ const hook = (data, mutationName, hookName) => {
 // params contain all the arguments whatever you are passing in mutation query
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
-    case 'addUserCurrentComponentStatus' : {
-      await addUserCurrentComponentStatusMethod(params);
+    case 'addUserCurrentTopicComponentStatus' : {
+      await addUserCurrentTopicComponentStatusMethod(params);
       break;
     }
-    case 'updateUserCurrentComponentStatus' : {
-      await updateUserCurrentComponentStatusMethod(params);
+    case 'updateUserCurrentTopicComponentStatus' : {
+      await updateUserCurrentTopicComponentStatusMethod(params);
       break;
     }
     case 'userCourseSyllabus' : {
@@ -117,8 +117,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await userVideoMethod(params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
-    case 'userLo' : {
-      await userLoMethod(params);
+    case 'userLearningObjective' : {
+      await userLearningObjectiveMethod(params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'userQuiz' : {
@@ -365,8 +365,8 @@ const posthook = async (input, mutationName, params) => {
       if (resultArray.length) { return hook(resultArray, mutationName, 'PostHook'); }
       break;
     }
-    case 'userLo' : {
-      const resultArray = await userLoPostHookMethod(input, params);
+    case 'userLearningObjective' : {
+      const resultArray = await userLearningObjectivePostHookMethod(input, params);
       if (resultArray.length) { return hook(resultArray, mutationName, 'PostHook'); }
       break;
     }

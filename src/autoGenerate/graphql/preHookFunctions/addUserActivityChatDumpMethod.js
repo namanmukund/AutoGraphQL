@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
-  componentTypes,
+  topicTypes,
   enrollmentTypes,
   GLOBAL_COURSE_ID,
 } from '../../../../constants';
@@ -30,9 +30,9 @@ const addUserActivityChatDumpMethod = async (params) => {
     const topicInfo = get(learningObjectiveInfo, 'topic');
     const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
     // query to get current component status of user
-    const userCurrentComponentStatusQuery = `
+    const userCurrentTopicComponentStatusQuery = `
           query{
-            userCurrentComponentStatuses(filter:{
+            userCurrentTopicComponentStatuses(filter:{
               and:[
                 {user_some:{
                 id:"${userId}"
@@ -61,14 +61,15 @@ const addUserActivityChatDumpMethod = async (params) => {
                 id
                 order
               }
-              currentComponentType
+              currentTopicComponentType
               enrollmentType
             }
           }
           `;
-    const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
-    const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
-    if (learningObjectiveInfo && topicInfo && currentComponentInfo) {
+    const userCurrentTopicComponentStatusRes =
+      await callGraphqlApi(userCurrentTopicComponentStatusQuery);
+    const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
+    if (learningObjectiveInfo && topicInfo && currentTopicComponentInfo) {
       let isUnlocked = false;
       const {
         order: topicOrder,
@@ -77,9 +78,9 @@ const addUserActivityChatDumpMethod = async (params) => {
       const {
         currentTopic,
         currentLearningObjective,
-        currentComponentType,
+        currentTopicComponentType,
         enrollmentType,
-      } = currentComponentInfo;
+      } = currentTopicComponentInfo;
       // condition to check if topic is free, if not then user should be pro
       // type to access that topic
       if ((enrollmentType === enrollmentTypes.pro &&
@@ -92,8 +93,8 @@ const addUserActivityChatDumpMethod = async (params) => {
         // other case is when called topic order is equal to current topic order
         // in that case we are checking current component type and lo order
         if (topicOrder < currentTopic.order ||
-          (currentComponentType === componentTypes.quiz) ||
-          (currentComponentType !== componentTypes.video &&
+          (currentTopicComponentType === topicTypes.quiz) ||
+          (currentTopicComponentType !== topicTypes.video &&
             learningObjectiveOrder <= currentLearningObjective.order)) {
           isUnlocked = true;
         }

@@ -1,10 +1,10 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
-  componentTypes, freeTopicCount,
+  topicTypes, freeTopicCount,
   GLOBAL_COURSE_ID, PUBLISHED, questionTypes, scholarshipThreshHolds,
   userActionType,
-  userComponentStatus,
+  userTopicTypeStatus,
 } from '../../../../constants';
 
 const addUserActivityQuizDumpPostHookMethod = async (input) => {
@@ -13,9 +13,9 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
   if (userId && topicId) {
     // query to get current component status of user
     let nextTopicId;
-    const userCurrentComponentStatusQuery = `
+    const userCurrentTopicComponentStatusQuery = `
           query{
-            userCurrentComponentStatuses(filter:{
+            userCurrentTopicComponentStatuses(filter:{
               and:[
                 {user_some:{
                 id:"${userId}"
@@ -40,23 +40,24 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
                 id
                 order
               }
-              currentComponentType
+              currentTopicComponentType
               enrollmentType
             }
           }
           `;
-    const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
-    const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
+    const userCurrentTopicComponentStatusRes =
+      await callGraphqlApi(userCurrentTopicComponentStatusQuery);
+    const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
     const quizAction = get(input, 'quizAction');
     const {
-      id: currentComponentId,
-      currentComponentType: currentComponent,
+      id: currentTopicComponentId,
+      currentTopicComponentType: currentTopicComponent,
       currentTopic,
-    } = currentComponentInfo;
-    if (currentComponent &&
+    } = currentTopicComponentInfo;
+    if (currentTopicComponent &&
       currentTopic &&
       quizAction === userActionType.next &&
-      currentComponent === componentTypes.quiz &&
+      currentTopicComponent === topicTypes.quiz &&
       currentTopic.id === topicId
     ) {
       const currentTopicOrder = currentTopic.order;
@@ -88,10 +89,10 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
         if (learningObjectiveConnectId) { loQuery = `currentLearningObjectiveConnectId:"${learningObjectiveConnectId}"`; }
         // updating current component in case quiz is completed by user
         if (nextTopicId) {
-          const updateUserCurrentComponentStatusMutation = `
+          const updateUserCurrentTopicComponentStatusMutation = `
               mutation{
-                updateUserCurrentComponentStatus(id:"${currentComponentId}",  input:{
-                  currentComponentType: ${componentTypes.video}
+                updateUserCurrentTopicComponentStatus(id:"${currentTopicComponentId}",  input:{
+                  currentTopicComponentType: ${topicTypes.video}
                 },
                 currentTopicConnectId:"${nextTopicId}"
                 ${loQuery}
@@ -100,7 +101,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
                 }
               }
               `;
-          await callGraphqlApi(updateUserCurrentComponentStatusMutation);
+          await callGraphqlApi(updateUserCurrentTopicComponentStatusMutation);
         }
       }
     }
@@ -116,7 +117,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
                   id:"${topicId}"
                 }},
                 {
-                  quizStatus: ${userComponentStatus.incomplete}
+                  quizStatus: ${userTopicTypeStatus.incomplete}
                 }
               ]
             }){
@@ -433,7 +434,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
         const updateUserQuizMutation = `
             mutation{
               updateUserQuiz(id:"${userQuizId}",  input:{
-                quizStatus: ${userComponentStatus.complete}
+                quizStatus: ${userTopicTypeStatus.complete}
                 ${popAllQuery}
               }){
                 id
@@ -472,7 +473,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
 
         // logic for evaluating scholarship of user
         // and it will be done on first attempt of quiz
-        if (currentComponent === componentTypes.quiz &&
+        if (currentTopicComponent === topicTypes.quiz &&
           currentTopic.id === topicId) {
           // code for calculating total quiz report accuracy for scholarship
           const totalQuestionCount = quizReport.totalQuestionCount;

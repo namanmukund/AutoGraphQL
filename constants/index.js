@@ -137,7 +137,7 @@ const enrollmentTypes = {
   pro: 'pro',
 };
 
-const componentTypes = {
+const topicTypes = {
   video: 'video',
   message: 'message',
   practiceQuestion: 'practiceQuestion',
@@ -150,7 +150,7 @@ const userActionType = {
   appClose: 'appClose',
 };
 
-const userComponentStatus = {
+const userTopicTypeStatus = {
   complete: 'complete',
   incomplete: 'incomplete',
 };
@@ -197,9 +197,9 @@ export {
   arrayUpdateRemoveTypes,
   GLOBAL_COURSE_ID,
   enrollmentTypes,
-  componentTypes,
+  topicTypes,
   userActionType,
-  userComponentStatus,
+  userTopicTypeStatus,
   questionTypes,
   scholarshipThreshHolds,
   freeTopicCount,

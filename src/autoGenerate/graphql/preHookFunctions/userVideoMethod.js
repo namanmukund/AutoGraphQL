@@ -28,9 +28,9 @@ const userVideoMethod = async (params) => {
     const topicInfo = get(topicQueryRes, 'data.topic');
 
     // query to get current component status of user
-    const userCurrentComponentStatusQuery = `
+    const userCurrentTopicComponentStatusQuery = `
           query{
-            userCurrentComponentStatuses(filter:{
+            userCurrentTopicComponentStatuses(filter:{
               and:[
                 {user_some:{
                 id:"${userId}"
@@ -55,15 +55,16 @@ const userVideoMethod = async (params) => {
                 id
                 order
               }
-              currentComponentType
+              currentTopicComponentType
               enrollmentType
             }
           }
           `;
-    const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
-    const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
+    const userCurrentTopicComponentStatusRes =
+      await callGraphqlApi(userCurrentTopicComponentStatusQuery);
+    const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
 
-    if (topicInfo && currentComponentInfo) {
+    if (topicInfo && currentTopicComponentInfo) {
       let isUnlocked = false;
       const {
         order,
@@ -72,7 +73,7 @@ const userVideoMethod = async (params) => {
       const {
         currentTopic,
         enrollmentType,
-      } = currentComponentInfo;
+      } = currentTopicComponentInfo;
       // logic is same as that of user video dump
       if ((enrollmentType === enrollmentTypes.pro &&
         order <= currentTopic.order

@@ -1,14 +1,14 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
-  componentTypes,
+  topicTypes,
   enrollmentTypes,
   GLOBAL_COURSE_ID,
 } from '../../../../constants';
 import { ComponentLockedError } from '../../../../constants/errors';
 
-const userLoMethod = async (params) => {
-  // userLo collection is used to store and get chat and pq page info
+const userLearningObjectiveMethod = async (params) => {
+  // userLearningObjective collection is used to store and get chat and pq page info
   // checking if called lo and user combination in accessible
   const filterArray = get(params, 'filter.and');
   const userSome = filterArray.find(obj => obj.user_some);
@@ -34,9 +34,9 @@ const userLoMethod = async (params) => {
     const topicInfo = get(learningObjectiveInfo, 'topic');
     const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
     // query to get current component status of user
-    const userCurrentComponentStatusQuery = `
+    const userCurrentTopicComponentStatusQuery = `
           query{
-            userCurrentComponentStatuses(filter:{
+            userCurrentTopicComponentStatuses(filter:{
               and:[
                 {user_some:{
                 id:"${userId}"
@@ -65,14 +65,15 @@ const userLoMethod = async (params) => {
                 id
                 order
               }
-              currentComponentType
+              currentTopicComponentType
               enrollmentType
             }
           }
           `;
-    const userCurrentComponentStatusRes = await callGraphqlApi(userCurrentComponentStatusQuery);
-    const currentComponentInfo = get(userCurrentComponentStatusRes, 'data.userCurrentComponentStatuses[0]');
-    if (learningObjectiveInfo && topicInfo && currentComponentInfo) {
+    const userCurrentTopicComponentStatusRes =
+      await callGraphqlApi(userCurrentTopicComponentStatusQuery);
+    const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
+    if (learningObjectiveInfo && topicInfo && currentTopicComponentInfo) {
       let isUnlocked = false;
       const {
         order: topicOrder,
@@ -81,9 +82,9 @@ const userLoMethod = async (params) => {
       const {
         currentTopic,
         currentLearningObjective,
-        currentComponentType,
+        currentTopicComponentType,
         enrollmentType,
-      } = currentComponentInfo;
+      } = currentTopicComponentInfo;
       // same logic as that of User chat dump
       if ((enrollmentType === enrollmentTypes.pro &&
         topicOrder <= currentTopic.order
@@ -91,8 +92,8 @@ const userLoMethod = async (params) => {
         && topicOrder <= currentTopic.order &&
         isTrial === true)) {
         if (topicOrder < currentTopic.order ||
-          (currentComponentType === componentTypes.quiz) ||
-          (currentComponentType !== componentTypes.video &&
+          (currentTopicComponentType === topicTypes.quiz) ||
+          (currentTopicComponentType !== topicTypes.video &&
             learningObjectiveOrder <= currentLearningObjective.order)) {
           isUnlocked = true;
         }
@@ -102,4 +103,4 @@ const userLoMethod = async (params) => {
   }
 };
 
-export default userLoMethod;
+export default userLearningObjectiveMethod;

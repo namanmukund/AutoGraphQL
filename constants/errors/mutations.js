@@ -29,6 +29,6 @@ export const InvalidTopicLOConnectionError = createError('InvalidTopicLOConnecti
   message: 'Relation between learning objective and topic does not exist',
 });
 
-export const InvalidTopicPassedInCurrentComponent = createError('InvalidTopicPassedInCurrentComponent', {
+export const InvalidTopicPassedInCurrentTopicComponent = createError('InvalidTopicPassedInCurrentTopicComponent', {
   message: 'Order of topic passed is less than or equal to current topic order',
 });

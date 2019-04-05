@@ -17,8 +17,8 @@ const chaptersUserCourseSyllabusType = `
    topics: [TopicsUserCourseSyllabusType]
  }`;
 
-const currentComponentDataType = `
-  type CurrentComponentDataType {
+const currentTopicComponentDetailType = `
+  type CurrentTopicComponentDetailType {
    componentTitle: String
    topicTitle: String
    thumbnail: File 
@@ -36,13 +36,13 @@ const UserCourseSyllabus = `
   type UserCourseSyllabus {
     user: User!
     currentCourse: CourseUserCourseSyllabus
-    currentComponent: CurrentComponentType!
-    currentComponentData: CurrentComponentDataType
+    currentTopicComponent: CurrentTopicComponentType!
+    currentTopicComponentDetail: CurrentTopicComponentDetailType
     chapters: [ChaptersUserCourseSyllabusType]
-    chaptersMeta: Int
-    topicsMeta: Int
+    totalChapters: Int
+    totalTopics: Int
   }
 `;
 
-export default [UserCourseSyllabus, currentComponentDataType,
+export default [UserCourseSyllabus, currentTopicComponentDetailType,
   chaptersUserCourseSyllabusType, topicsUserCourseSyllabusType, courseUserCourseSyllabus];

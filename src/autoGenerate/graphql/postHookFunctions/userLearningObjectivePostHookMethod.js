@@ -1,10 +1,10 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
-  componentTypes,
+  topicTypes,
 } from '../../../../constants';
 
-const userLoPostHookMethod = async (input, params) => {
+const userLearningObjectivePostHookMethod = async (input, params) => {
   const resultArray = [];
   const filterArray = get(params, 'filter.and');
   const userSome = filterArray.find(obj => obj.user_some);
@@ -28,7 +28,7 @@ const userLoPostHookMethod = async (input, params) => {
                   order
                 }
               }
-              questionBank(filter:{assessmentType:${componentTypes.practiceQuestion}}){
+              questionBank(filter:{assessmentType:${topicTypes.practiceQuestion}}){
                 id
               }
             }
@@ -40,7 +40,7 @@ const userLoPostHookMethod = async (input, params) => {
     const topicId = get(topicInfo, 'id');
     const learningObjectivetId = get(learningObjectiveInfo, 'id');
     const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
-    // adding PQs to the userLO document
+    // adding PQs to the userLearningObjective document
     let practiceQuestionsQuery = 'practiceQuestions:[';
     if (learningObjectiveInfo) {
       const practiceQuestionsinLO = get(learningObjectiveInfo, 'questionBank');
@@ -54,7 +54,7 @@ const userLoPostHookMethod = async (input, params) => {
     // obtaining next LO
     const nextLearningObjectiveOrder = parseInt(learningObjectiveOrder, 10) + 1;
     let nextLOId;
-    let nextCurrentComponentType;
+    let nextCurrentTopicComponentType;
     let learningObjectiveConnectIdQuerv = '';
     let topicConnectIdQuerv = '';
     learningObjectives.forEach((learningObjective) => {
@@ -66,24 +66,24 @@ const userLoPostHookMethod = async (input, params) => {
     });
     // if next LO is not present in that case, quiz will be next component
     if (nextLOId) {
-      nextCurrentComponentType = componentTypes.message;
+      nextCurrentTopicComponentType = topicTypes.message;
       learningObjectiveConnectIdQuerv = `learningObjectiveConnectId:"${nextLOId}"`;
     } else {
       topicConnectIdQuerv = `topicConnectId:"${topicId}"`;
-      nextCurrentComponentType = componentTypes.quiz;
+      nextCurrentTopicComponentType = topicTypes.quiz;
     }
-    // restQuery is for when we ceate/update userLO
+    // restQuery is for when we ceate/update userLearningObjective
     if (learningObjectivetId) {
       restQuerv = `nextComponent:{
                      ${learningObjectiveConnectIdQuerv}
                      ${topicConnectIdQuerv}
-                     nextComponentType: ${nextCurrentComponentType}
+                     nextComponentType: ${nextCurrentTopicComponentType}
                    }`;
     }
 
-    const addUserLOMutation = `
+    const addUserLearningObjectiveMutation = `
               mutation{
-                  addUserLO(
+                  addUserLearningObjective(
                   userConnectId:"${userId}"
                   learningObjectiveConnectId:"${learningObjectiveId}"
                   input:{
@@ -105,11 +105,11 @@ const userLoPostHookMethod = async (input, params) => {
                   }
               }
               `;
-    const result = await callGraphqlApi(addUserLOMutation);
+    const result = await callGraphqlApi(addUserLearningObjectiveMutation);
     if (result) {
       // parsing data 'addUserVideo' so that the logic implemented ahead can read data is
       // desired format and return the same
-      const parsedData = get(result, 'data.addUserLO');
+      const parsedData = get(result, 'data.addUserLearningObjective');
       if (parsedData) {
         const lo = { type: 'LearningObjective', typeId: `${parsedData.learningObjective.id}` };
         const user = { type: 'User', typeId: `${parsedData.user.id}` };
@@ -122,4 +122,4 @@ const userLoPostHookMethod = async (input, params) => {
   return resultArray;
 };
 
-export default userLoPostHookMethod;
+export default userLearningObjectivePostHookMethod;
