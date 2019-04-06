@@ -297,9 +297,9 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
       currentTopicComponent === topicTypes.quiz &&
       currentTopic.id === topicId
     ) {
-      const currentTopicOrder = currentTopic.order;
+      const { order: currentTopicOrder } = currentTopic;
       if (currentTopicOrder) {
-        const nextTopicOrder = currentTopic.order + 1;
+        const nextTopicOrder = parseInt(currentTopicOrder, 10) + 1;
         const nextTopicResult = await callGraphqlApi(await nextTopicQuery(nextTopicOrder));
         const nextTopicInfo = get(nextTopicResult, 'data.topics[0]');
         nextTopicId = get(nextTopicInfo, 'id');

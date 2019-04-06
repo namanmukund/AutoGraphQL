@@ -1,7 +1,7 @@
 const practiceQuestionsUserLearningObjectiveType = `
   type PracticeQuestionsUserLearningObjectiveType {
    question: QuestionBank @relation(name: "QuestionUserLearningObjective", direction: "OneWay")
-   isHintused: Boolean @defaultValue(value: "false")
+   isHintUsed: Boolean @defaultValue(value: "false")
    isAnswerUsed: Boolean @defaultValue(value: "false")
    attemptNumber: Int @defaultValue(value: 0)
    status: UserTopicTypeStatus @defaultValue(value: "incomplete")

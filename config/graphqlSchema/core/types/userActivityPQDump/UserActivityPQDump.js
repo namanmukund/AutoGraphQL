@@ -73,7 +73,7 @@ const practiceQuestionsType = `
    questionAction: UserActionType
    questionDisplayOrder: Int
    isCorrect: Boolean
-   isHintused: Boolean @defaultValue(value: "false")
+   isHintUsed: Boolean @defaultValue(value: "false")
    isAnswerUsed: Boolean @defaultValue(value: "false")
    isRecommendationUsed: Boolean @defaultValue(value: "false")
    attemptNumber: Int

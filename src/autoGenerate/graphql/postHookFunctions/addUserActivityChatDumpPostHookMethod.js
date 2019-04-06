@@ -7,23 +7,12 @@ import {
   userTopicTypeStatus,
 } from '../../../../constants';
 
-// query to get learning objective and all the learning objectives of the topic associated
-// query needs optimization
+// query to get learning objective and the topic associated with it
 const learningObjectiveQuery = async learningObjectiveId => `
   query{
     learningObjective(id:"${learningObjectiveId}"){
       id
-      order
       topic{
-        id
-        order
-        isTrial
-        learningObjectives{
-          id
-          order
-        }
-      }
-      questionBank(filter:{assessmentType:${topicTypes.practiceQuestion}}){
         id
       }
     }
@@ -50,26 +39,18 @@ const userCurrentTopicComponentStatusQuery = async userId => `
       ]
     }){
       id
-      user{
-        id
-        username
-      }
       currentTopic{
         id
-        order
       }
       currentLearningObjective{
         id
-        order
       }
       currentTopicComponentType
-      enrollmentType
     }
   }
   `;
 
-/* query to get userLO to check if document exists for userId and learningObjectiveId
-also we are doing computationfor chatStatus and next component for this */
+// query to get userLO to check if document exists for userId and learningObjectiveId
 const userLearningObjectiveQuery = async (userId, learningObjectiveId) => `
   query{
     userLearningObjectives(filter:{
@@ -84,21 +65,18 @@ const userLearningObjectiveQuery = async (userId, learningObjectiveId) => `
     }){
       id
       chatStatus
-      nextComponent{
-        learningObjective{
-          id
-        }
-        nextComponentType
-      }
     }
   }
   `;
 
 // query to update user current topic component status
-const updateUserCurrentTopicComponentStatusMutation = async currentTopicComponentId => `
+const updateUserCurrentTopicComponentStatusMutation = async (
+  currentTopicComponentId,
+  practiceQuestion,
+) => `
   mutation{
     updateUserCurrentTopicComponentStatus(id:"${currentTopicComponentId}",  input:{
-      currentTopicComponentType: ${topicTypes.practiceQuestion}
+      currentTopicComponentType: ${practiceQuestion}
     }
     ){
       id
@@ -110,13 +88,11 @@ const updateUserCurrentTopicComponentStatusMutation = async currentTopicComponen
 const updateUserLearningObjectiveMutation = async (userLearningObjectiveId,
   isChatBookmarked,
   chatStatus,
-  restQuerv,
 ) => `
   mutation{
     updateUserLearningObjective(id:"${userLearningObjectiveId}",  input:{
       isChatBookmarked: ${isChatBookmarked}
       chatStatus: ${chatStatus}
-      ${restQuerv}
     }){
       id
       chatStatus
@@ -127,10 +103,10 @@ const updateUserLearningObjectiveMutation = async (userLearningObjectiveId,
 
 /*
 Current topic component status and
-UserLearningObjective(bookmark, chatStatus etc) is updated based on-
+UserLearningObjective(bookmark, chatStatus) is updated based on-
   -current topic component status
   -user Learning Objective for provided userId and learning objective id
-  -learning objectives and topic
+  -learning objective and topic
 */
 const addUserActivityChatDumpPostHookMethod = async (input) => {
   const userId = get(input, 'user.typeId');
@@ -140,9 +116,8 @@ const addUserActivityChatDumpPostHookMethod = async (input) => {
     await callGraphqlApi(await learningObjectiveQuery(learningObjectiveId));
     const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
     const topicInfo = get(learningObjectiveInfo, 'topic');
-    const topicId = get(topicInfo, 'id');
-    const learningObjectivetId = get(learningObjectiveInfo, 'id');
-    const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
+    const { id: topicId } = topicInfo;
+    const { id: learningObjectiveIdInResult } = learningObjectiveInfo;
     // query to get current component status of user
     const userCurrentTopicComponentStatusRes =
     await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
@@ -150,13 +125,17 @@ const addUserActivityChatDumpPostHookMethod = async (input) => {
     const userLearningObjectiveQueryRes =
     await callGraphqlApi(await userLearningObjectiveQuery(userId, learningObjectiveId));
     const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
-    const userLearningObjectiveId = get(userLearningObjectiveInfo, 'id');
+    const { id: userLearningObjectiveId,
+      chatStatus: existingChatStatus } = userLearningObjectiveInfo;
     let isChatBookmarked = false;
-    let chatStatus = userTopicTypeStatus.incomplete;
-    const chatAction = get(input, 'chatAction');
+    const { complete, incomplete } = userTopicTypeStatus;
+    const { message, practiceQuestion } = topicTypes;
+    const { next } = userActionType;
+    let chatStatus = incomplete;
+    const { chatAction } = input;
     isChatBookmarked = get(input, 'isBookmarked');
-    if (chatAction && chatAction === userActionType.next) {
-      chatStatus = userTopicTypeStatus.complete;
+    if (chatAction && chatAction === next) {
+      chatStatus = complete;
     }
     const {
       id: currentTopicComponentId,
@@ -168,56 +147,25 @@ const addUserActivityChatDumpPostHookMethod = async (input) => {
       currentTopic &&
       topicInfo &&
       currentLearningObjective &&
-      chatAction === userActionType.next &&
-      currentTopicComponent === topicTypes.message &&
+      chatAction === next &&
+      currentTopicComponent === message &&
       currentTopic.id === topicId &&
-      currentLearningObjective.id === learningObjectiveInfo.id
+      currentLearningObjective.id === learningObjectiveIdInResult
     ) {
       await callGraphqlApi(await updateUserCurrentTopicComponentStatusMutation(
-        currentTopicComponentId));
+        currentTopicComponentId, practiceQuestion));
     }
+    // if existing chatStatus is complete, it will remain complete
     if (userLearningObjectiveInfo &&
-      userLearningObjectiveInfo.chatStatus === userTopicTypeStatus.complete) {
-      chatStatus = userTopicTypeStatus.complete;
-    }
-    let restQuerv = '';
-    const nextComponent = get(userLearningObjectiveInfo, 'nextComponent.learningObjective.id');
-    const learningObjectives = get(topicInfo, 'learningObjectives');
-    const nextLearningObjectiveOrder = parseInt(learningObjectiveOrder, 10) + 1;
-    let nextLOId;
-    let nextCurrentTopicComponentType;
-    let learningObjectiveConnectIdQuerv = '';
-    let topicConnectIdQuerv = '';
-    learningObjectives.forEach((learningObjective) => {
-      if (learningObjective &&
-        learningObjective.order === nextLearningObjectiveOrder
-      ) {
-        nextLOId = learningObjective.id;
-      }
-    });
-    // checking if next component is quiz or message
-    if (nextLOId) {
-      nextCurrentTopicComponentType = topicTypes.message;
-      learningObjectiveConnectIdQuerv = `learningObjectiveConnectId:"${nextLOId}"`;
-    } else {
-      topicConnectIdQuerv = `topicConnectId:"${topicId}"`;
-      nextCurrentTopicComponentType = topicTypes.quiz;
-    }
-    // restQuery is for when we ceate/update userLearningObjective
-    if (learningObjectivetId && !nextComponent) {
-      restQuerv = `nextComponent:{
-                     ${learningObjectiveConnectIdQuerv}
-                     ${topicConnectIdQuerv}
-                     nextComponentType: ${nextCurrentTopicComponentType}
-                   }`;
+      existingChatStatus === complete) {
+      chatStatus = complete;
     }
 
     if (userLearningObjectiveId) {
       // update
       await callGraphqlApi(await updateUserLearningObjectiveMutation(userLearningObjectiveId,
         isChatBookmarked,
-        chatStatus,
-        restQuerv));
+        chatStatus));
     }
   }
 };

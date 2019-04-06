@@ -12,8 +12,6 @@ const learningObjectiveQuery = async learningObjectiveId => `
       order
       topic{
         id
-        order
-        isTrial
         learningObjectives{
           id
           order
@@ -65,8 +63,8 @@ with the next component.
 const userLearningObjectivePostHookMethod = async (input, params) => {
   const resultArray = [];
   const filterArray = get(params, 'filter.and');
-  const userSome = filterArray.find(obj => obj.user_some);
-  const loSome = filterArray.find(obj => obj.learningObjective_some);
+  const userSome = filterArray.find(filterElem => filterElem.user_some);
+  const loSome = filterArray.find(filterElem => filterElem.learningObjective_some);
   const userId = get(userSome, 'user_some.id');
   const learningObjectiveId = get(loSome, 'learningObjective_some.id');
   // value of input in case of query is result of the query
@@ -76,15 +74,19 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
       await learningObjectiveQuery(learningObjectiveId));
     const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
     const topicInfo = get(learningObjectiveInfo, 'topic');
-    const topicId = get(topicInfo, 'id');
-    const learningObjectivetId = get(learningObjectiveInfo, 'id');
-    const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
+    const { id: topicId } = topicInfo;
+    const { message, quiz } = topicTypes;
+    const {
+      id: learningObjectiveIdInResult,
+      order: learningObjectiveOrder,
+      questionBank: practiceQuestionsinLO,
+    } = learningObjectiveInfo;
     // adding PQs to the userLearningObjective document
     let practiceQuestionsQuery = 'practiceQuestions:[';
-    if (learningObjectiveInfo) {
-      const practiceQuestionsinLO = get(learningObjectiveInfo, 'questionBank');
+    if (learningObjectiveInfo && practiceQuestionsinLO) {
       practiceQuestionsinLO.forEach((practiceQuestion) => {
-        practiceQuestionsQuery += `{ questionConnectId: "${practiceQuestion.id}" }, `;
+        const { id: practiceQuestionId } = practiceQuestion;
+        practiceQuestionsQuery += `{ questionConnectId: "${practiceQuestionId}" }, `;
       });
     }
     practiceQuestionsQuery += ']';
@@ -97,22 +99,23 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
     let learningObjectiveConnectIdQuerv = '';
     let topicConnectIdQuerv = '';
     learningObjectives.forEach((learningObjective) => {
+      const { id, order } = learningObjective;
       if (learningObjective &&
-        learningObjective.order === nextLearningObjectiveOrder
+        order === nextLearningObjectiveOrder
       ) {
-        nextLOId = learningObjective.id;
+        nextLOId = id;
       }
     });
     // if next LO is not present in that case, quiz will be next component
     if (nextLOId) {
-      nextCurrentTopicComponentType = topicTypes.message;
+      nextCurrentTopicComponentType = message;
       learningObjectiveConnectIdQuerv = `learningObjectiveConnectId:"${nextLOId}"`;
     } else {
-      topicConnectIdQuerv = `topicConnectId:"${topicId}"`;
-      nextCurrentTopicComponentType = topicTypes.quiz;
+      nextCurrentTopicComponentType = quiz;
     }
-    // restQuery is for when we ceate/update userLearningObjective
-    if (learningObjectivetId) {
+    if (topicId) { topicConnectIdQuerv = `topicConnectId:"${topicId}"`; }
+    // restQuery is for when we ceating userLearningObjective
+    if (learningObjectiveIdInResult) {
       restQuerv = `nextComponent:{
                      ${learningObjectiveConnectIdQuerv}
                      ${topicConnectIdQuerv}
