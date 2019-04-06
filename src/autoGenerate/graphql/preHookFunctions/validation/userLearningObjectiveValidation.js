@@ -73,8 +73,7 @@ const userLearningObjectiveValidation = async (params) => {
     const learningObjectiveQueryRes = await callGraphqlApi(
       await learningObjectiveQuery(learningObjectiveId));
     const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
-    const topicInfo = get(learningObjectiveInfo, 'topic');
-    const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
+    const { topic: topicInfo, order: learningObjectiveOrder } = learningObjectiveInfo;
     const userCurrentTopicComponentStatusRes =
       await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
     const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
