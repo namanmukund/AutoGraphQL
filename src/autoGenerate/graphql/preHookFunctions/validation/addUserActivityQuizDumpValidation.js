@@ -59,8 +59,10 @@ const userCurrentTopicComponentStatusQuery = async userId => `
 // preehook logic to check if requested quiz(user and topic id) is unlocked
 const addUserActivityQuizDumpValidation = async (params) => {
   // check if the called user and topic is unlocked
-  const userId = get(params, 'userConnectId');
-  const topicId = get(params, 'topicConnectId');
+  const {
+    userConnectId: userId,
+    topicConnectId: topicId,
+  } = params;
   if (userId && topicId) {
     const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
     const topicInfo = get(topicQueryRes, 'data.topic');

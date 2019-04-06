@@ -31,8 +31,8 @@ const userCurrentTopicComponentStatusQuery = async userCurrentTopicComponentStat
 // pre hook logic to check if passed topic's order is not less than already present in
 // user current topic component status
 const updateUserCurrentTopicComponentStatusValidation = async (params) => {
-  const userCurrentTopicComponentStatusId = get(params, 'id');
-  const topicId = get(params, 'currentTopicConnectId');
+  const { id: userCurrentTopicComponentStatusId } = params;
+  const { currentTopicConnectId: topicId } = params;
   if (userCurrentTopicComponentStatusId && topicId) {
     const topicData = await callGraphqlApi(await topicQuery(topicId));
     const topicOrder = get(topicData, 'data.topic.order');

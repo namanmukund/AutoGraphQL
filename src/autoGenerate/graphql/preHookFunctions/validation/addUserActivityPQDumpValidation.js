@@ -63,14 +63,18 @@ const userCurrentTopicComponentStatusQuery = async userId => `
 // preehook logic to check if requested PQ(user and LO id) is unlocked
 const addUserActivityPQDumpValidation = async (params) => {
   // check if the called user and topic is unlocked
-  const userId = get(params, 'userConnectId');
-  const learningObjectiveId = get(params, 'learningObjectiveConnectId');
+  const {
+    userConnectId: userId,
+    learningObjectiveConnectId: learningObjectiveId,
+  } = params;
   if (userId && learningObjectiveId) {
     const learningObjectiveQueryRes = await callGraphqlApi(
       await learningObjectiveQuery(learningObjectiveId));
     const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
-    const topicInfo = get(learningObjectiveInfo, 'topic');
-    const learningObjectiveOrder = get(learningObjectiveInfo, 'order');
+    const {
+      topic: topicInfo,
+      order: learningObjectiveOrder,
+    } = learningObjectiveInfo;
     const userCurrentTopicComponentStatusRes =
       await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
     const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
