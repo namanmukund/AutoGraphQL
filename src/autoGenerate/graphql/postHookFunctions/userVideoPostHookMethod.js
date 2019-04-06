@@ -69,9 +69,9 @@ const userVideoPostHookMethod = async (input, params) => {
     const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
     const topicInfo = get(topicQueryRes, 'data.topic');
     const learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
-    let restQuerv = '';
+    let restQuery = '';
     if (learningObjectiveConnectId) {
-      restQuerv = `nextComponent:{
+      restQuery = `nextComponent:{
                      learningObjectiveConnectId:"${learningObjectiveConnectId}"
                      nextComponentType: ${topicTypes.message}
                    }`;
@@ -79,7 +79,7 @@ const userVideoPostHookMethod = async (input, params) => {
     const result = await callGraphqlApi(await addUserVideoMutation(
       userId,
       topicId,
-      restQuerv,
+      restQuery,
     ));
     if (result) {
       // parsing data 'addUserVideo' so that the logic implemented ahead can read data is

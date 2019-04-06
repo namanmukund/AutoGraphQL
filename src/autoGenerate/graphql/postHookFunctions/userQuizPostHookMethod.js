@@ -36,7 +36,7 @@ const nextTopicQuery = async nextTopicOrder => `
 const addUserQuizMutation = async (
   userId,
   topicId,
-  restQuerv,
+  restQuery,
   quizQuery,
 ) => `
   mutation{
@@ -44,7 +44,7 @@ const addUserQuizMutation = async (
     userConnectId:"${userId}"
     topicConnectId:"${topicId}"
     input:{
-        ${restQuerv}
+        ${restQuery}
         ${quizQuery}
     }
     ){
@@ -97,14 +97,14 @@ const userQuizPostHookMethod = async (input, params) => {
       });
     }
     quizQuery += ']';
-    let restQuerv = '';
+    let restQuery = '';
     if (topicOrder) {
       const nextTopicOrder = topicOrder + 1;
       const nextTopicQueryRes = await callGraphqlApi(await nextTopicQuery(nextTopicOrder));
       const nextTopicInfo = get(nextTopicQueryRes, 'data.topics[0]');
       const nextTopicId = get(nextTopicInfo, 'id');
       if (nextTopicId) {
-        restQuerv = `nextComponent:{
+        restQuery = `nextComponent:{
                      topicConnectId:"${nextTopicId}"
                      nextComponentType: ${topicTypes.video}
                    }`;
@@ -114,7 +114,7 @@ const userQuizPostHookMethod = async (input, params) => {
     const result = await callGraphqlApi(await addUserQuizMutation(
       userId,
       topicId,
-      restQuerv,
+      restQuery,
       quizQuery,
     ));
     if (result) {

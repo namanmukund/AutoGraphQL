@@ -58,7 +58,7 @@ const userQuizValidation = async (params) => {
   const {
     userConnectId: userId,
     topicConnectId: topicId,
-  } = params
+  } = params;
   if (userId && topicId) {
     const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
     const topicInfo = get(topicQueryRes, 'data.topic');

@@ -90,7 +90,7 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
       });
     }
     practiceQuestionsQuery += ']';
-    let restQuerv = '';
+    let restQuery = '';
     const learningObjectives = get(topicInfo, 'learningObjectives');
     // obtaining next LO
     const nextLearningObjectiveOrder = parseInt(learningObjectiveOrder, 10) + 1;
@@ -116,7 +116,7 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
     if (topicId) { topicConnectIdQuerv = `topicConnectId:"${topicId}"`; }
     // restQuery is for when we ceating userLearningObjective
     if (learningObjectiveIdInResult) {
-      restQuerv = `nextComponent:{
+      restQuery = `nextComponent:{
                      ${learningObjectiveConnectIdQuerv}
                      ${topicConnectIdQuerv}
                      nextComponentType: ${nextCurrentTopicComponentType}
@@ -127,7 +127,7 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
       await addUserLearningObjectiveMutation(
         userId,
         learningObjectiveId,
-        restQuerv,
+        restQuery,
         practiceQuestionsQuery,
       ));
     if (result) {

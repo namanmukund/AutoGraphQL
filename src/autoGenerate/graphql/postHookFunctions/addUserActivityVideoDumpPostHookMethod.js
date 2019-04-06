@@ -107,14 +107,14 @@ const updateUserVideoMutation = async (userVideoId,
   isBookmarked,
   isLiked,
   status,
-  restQuerv) => `
+  restQuery) => `
   mutation{
     updateUserVideo(id:"${userVideoId}",  input:{
       videoCurrentTime: ${videoCurrentTime}
       isBookmarked: ${isBookmarked}
       isLiked: ${isLiked}
       status: ${status}
-      ${restQuerv}
+      ${restQuery}
     }){
       id
       status
@@ -132,7 +132,7 @@ const addUserVideoMutation = async (userId,
   isBookmarked,
   isLiked,
   status,
-  restQuerv) => `
+  restQuery) => `
   mutation{
     addUserVideo(
     userConnectId:"${userId}"
@@ -142,7 +142,7 @@ const addUserVideoMutation = async (userId,
         isBookmarked: ${isBookmarked}
         isLiked: ${isLiked}
         status: ${status}
-        ${restQuerv}
+        ${restQuery}
     }
   ){
       id
@@ -205,12 +205,12 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
     if (userVideoInfo && userVideoInfo.status === userTopicTypeStatus.complete) {
       status = userTopicTypeStatus.complete;
     }
-    let restQuerv = '';
+    let restQuery = '';
     const nextComponent = get(userVideoInfo, 'nextComponent.learningObjective.id');
     // this condition is to check that next component is populated only once on next
     if (learningObjectiveConnectId &&
       !nextComponent) {
-      restQuerv = `nextComponent:{
+      restQuery = `nextComponent:{
                      learningObjectiveConnectId:"${learningObjectiveConnectId}"
                      nextComponentType: ${topicTypes.message}
                    }`;
@@ -222,7 +222,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
         isBookmarked,
         isLiked,
         status,
-        restQuerv));
+        restQuery));
     } else {
       // create
       await callGraphqlApi(await addUserVideoMutation(userId,
@@ -231,7 +231,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
         isBookmarked,
         isLiked,
         status,
-        restQuerv));
+        restQuery));
     }
   }
 };

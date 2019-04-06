@@ -47,7 +47,7 @@ const addUserCurrentTopicComponentStatusValidation = async (params) => {
     currentCourseConnectId: courseId,
     currentTopicConnectId: topicId,
     currentLearningObjectiveConnectId: learningObjectiveId,
-  } = params
+  } = params;
   if (userId && courseId) {
     const userCurrentTopicComponentStatusData = await callGraphqlApi(
       await userCurrentTopicComponentStatusQuery(userId, courseId));
