@@ -282,6 +282,8 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
   const topicId = get(input, 'topic.typeId');
   if (userId && topicId) {
     let nextTopicId;
+    const { next } = userActionType;
+    const { quiz } = topicTypes;
     const userCurrentTopicComponentStatusRes =
       await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
     const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
@@ -293,8 +295,8 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
     } = currentTopicComponentInfo;
     if (currentTopicComponent &&
       currentTopic &&
-      quizAction === userActionType.next &&
-      currentTopicComponent === topicTypes.quiz &&
+      quizAction === next &&
+      currentTopicComponent === quiz &&
       currentTopic.id === topicId
     ) {
       const { order: currentTopicOrder } = currentTopic;
@@ -319,11 +321,11 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
 
     const userQuizQueryRes = await callGraphqlApi(await userQuizQuery(userId, topicId));
     const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
-    const userQuizId = get(userQuizInfo, 'id');
+    const { id: userQuizId } = userQuizInfo;
     // code to evaluate report of quiz
-    const quizQuestions = get(input, 'quizQuestions');
+    const { quizQuestions } = input;
     let questionIdsQuery = '[';
-    if (quizAction === userActionType.next &&
+    if (quizAction === next &&
       quizQuestions.length) {
       quizQuestions.forEach((quizQuestion) => {
         const questionId = get(quizQuestion, 'question.typeId');
@@ -336,28 +338,32 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
       const questionBankInfo = get(questionBankQueryRes, 'data.questionBanks');
       const learningObjectiveReportObject = {};
       // Initializing quiz report
-      const quizReport = {};
-      quizReport.totalQuestionCount = 0;
-      quizReport.correctQuestionCount = 0;
-      quizReport.inCorrectQuestionCount = 0;
-      quizReport.unansweredQuestionCount = 0;
+      const quizReport = {
+        totalQuestionCount: 0,
+        correctQuestionCount: 0,
+        inCorrectQuestionCount: 0,
+        unansweredQuestionCount: 0,
+      };
+      // quizReport.totalQuestionCount = 0;
+      // quizReport.correctQuestionCount = 0;
+      // quizReport.inCorrectQuestionCount = 0;
+      // quizReport.unansweredQuestionCount = 0;
       const loArray = [];
       let pushManyQuery = 'quiz:{ pushMany: [';
       quizQuestions.forEach((quizQuestion) => {
         const currentQuestionId = get(quizQuestion, 'question.typeId');
         questionBankInfo.forEach((questionBank) => {
-          const questionBankId = get(questionBank, 'id');
+          const { id: questionBankId } = questionBank;
           // iterating over questions from input and question bank and
           // comparing for same question and evaluating if it is correct
           if (currentQuestionId === questionBankId) {
             quizReport.totalQuestionCount += 1;
             pushManyQuery += `{ questionConnectId: "${currentQuestionId}", `;
-            const questionType = get(questionBank, 'questionType');
-            const isAttempted = get(quizQuestion, 'isAttempted');
+            const { questionType, isAttempted } = questionBank;
             if (isAttempted) {
               pushManyQuery += `isAttempted: ${isAttempted}, `;
             }
-            const questionDisplayOrder = get(quizQuestion, 'questionDisplayOrder');
+            const { questionDisplayOrder } = quizQuestion;
             if (questionDisplayOrder) {
               pushManyQuery += `questionDisplayOrder: ${questionDisplayOrder}, `;
             }
@@ -365,21 +371,31 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
             // initializing learning objective report it is not already populated
             if (!learningObjectiveReportObject[loId]) {
               loArray.push(loId);
-              learningObjectiveReportObject[loId] = {};
-              learningObjectiveReportObject[loId].totalQuestionCount = 0;
-              learningObjectiveReportObject[loId].correctQuestionCount = 0;
-              learningObjectiveReportObject[loId].inCorrectQuestionCount = 0;
-              learningObjectiveReportObject[loId].unansweredQuestionCount = 0;
-              learningObjectiveReportObject[loId].learningObjective = loId;
+              learningObjectiveReportObject[loId] = {
+                totalQuestionCount: 0,
+                correctQuestionCount: 0,
+                inCorrectQuestionCount: 0,
+                unansweredQuestionCount: 0,
+                learningObjective: loId,
+              };
+              // learningObjectiveReportObject[loId].totalQuestionCount = 0;
+              // learningObjectiveReportObject[loId].correctQuestionCount = 0;
+              // learningObjectiveReportObject[loId].inCorrectQuestionCount = 0;
+              // learningObjectiveReportObject[loId].unansweredQuestionCount = 0;
+              // learningObjectiveReportObject[loId].learningObjective = loId;
             }
-            const userMcqAnswers = get(quizQuestion, 'userMcqAnswer');
-            const mcqOptions = get(questionBank, 'mcqOptions');
-            const userFibBlockAnswers = get(quizQuestion, 'userFibBlockAnswer');
-            const fibBlocksOptions = get(questionBank, 'fibBlocksOptions');
-            const userFibInputAnswers = get(quizQuestion, 'userFibInputAnswer');
-            const fibInputOptions = get(questionBank, 'fibInputOptions');
-            const userArrangeAnswers = get(quizQuestion, 'userArrangeAnswer');
-            const arrangeOptions = get(questionBank, 'arrangeOptions');
+            const {
+              userMcqAnswer: userMcqAnswers,
+              userFibBlockAnswer: userFibBlockAnswers,
+              userFibInputAnswer: userFibInputAnswers,
+              userArrangeAnswer: userArrangeAnswers,
+            } = quizQuestion;
+            const {
+              mcqOptions,
+              fibBlocksOptions,
+              fibInputOptions,
+              arrangeOptions,
+            } = questionBank;
             let isCorrect;
             let userStatement;
             let isOptionSelected;
@@ -564,20 +580,32 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
           }
         });
       });
+      const {
+        totalQuestionCount: totalQuestionCountQuizReport,
+        inCorrectQuestionCount: inCorrectQuestionCountQuizReport,
+        correctQuestionCount: correctQuestionCountQuizReport,
+        unansweredQuestionCount: unansweredQuestionCountQuizReport,
+      } = quizReport;
       const quizReportQuery = `quizReport:{
-                                    totalQuestionCount: ${quizReport.totalQuestionCount}
-                                    inCorrectQuestionCount: ${quizReport.inCorrectQuestionCount}
-                                    correctQuestionCount: ${quizReport.correctQuestionCount}
-                                    unansweredQuestionCount: ${quizReport.unansweredQuestionCount}
+                                    totalQuestionCount: ${totalQuestionCountQuizReport}
+                                    inCorrectQuestionCount: ${inCorrectQuestionCountQuizReport}
+                                    correctQuestionCount: ${correctQuestionCountQuizReport}
+                                    unansweredQuestionCount: ${unansweredQuestionCountQuizReport}
                                   }`;
       let learningObjectiveReportQuery = 'learningObjectiveReport: [';
       // creating lo report query on basis of objects in loArray
       loArray.forEach((loIdInArray) => {
+        const {
+          totalQuestionCount: totalQuestionCountLOReport,
+          inCorrectQuestionCount: inCorrectQuestionCountLOReport,
+          correctQuestionCount: correctQuestionCountLOReport,
+          unansweredQuestionCount: unansweredQuestionCountLOReport,
+        } = learningObjectiveReportObject[loIdInArray];
         learningObjectiveReportQuery += `{
-                                    totalQuestionCount: ${learningObjectiveReportObject[loIdInArray].totalQuestionCount}
-                                    inCorrectQuestionCount: ${learningObjectiveReportObject[loIdInArray].inCorrectQuestionCount}
-                                    correctQuestionCount: ${learningObjectiveReportObject[loIdInArray].correctQuestionCount}
-                                    unansweredQuestionCount: ${learningObjectiveReportObject[loIdInArray].unansweredQuestionCount}
+                                    totalQuestionCount: ${totalQuestionCountLOReport}
+                                    inCorrectQuestionCount: ${inCorrectQuestionCountLOReport}
+                                    correctQuestionCount: ${correctQuestionCountLOReport}
+                                    unansweredQuestionCount: ${unansweredQuestionCountLOReport}
                                     learningObjectiveConnectId: "${loIdInArray}"
                                   }, `;
       });
@@ -603,11 +631,10 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
 
         // logic for evaluating scholarship of user
         // and it will be done on first attempt of quiz
-        if (currentTopicComponent === topicTypes.quiz &&
+        if (currentTopicComponent === quiz &&
           currentTopic.id === topicId) {
           // code for calculating total quiz report accuracy for scholarship
-          const totalQuestionCount = quizReport.totalQuestionCount;
-          const correctQuestionCount = quizReport.correctQuestionCount;
+          const { totalQuestionCount, correctQuestionCount } = quizReport;
           let topicsCompleted = 0;
           let proficientTopicCount = 0;
           let masteredTopicCount = 0;
@@ -623,26 +650,37 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
           const userProfileResult = await callGraphqlApi(await userProfileQuery(userId));
           const userProfileInfo = get(userProfileResult, 'data.userProfiles[0]');
           const userProfileId = get(userProfileInfo, 'id');
-          if (userProfileInfo && userProfileInfo.topicsCompleted) {
-            topicsCompleted = userProfileInfo.topicsCompleted;
-          }
-          if (userProfileInfo && userProfileInfo.proficientTopicCount) {
-            proficientTopicCount = userProfileInfo.proficientTopicCount;
-          }
-          if (userProfileInfo && userProfileInfo.freeProficientTopicCount) {
-            freeProficientTopicCount = userProfileInfo.freeProficientTopicCount;
-          }
-          if (userProfileInfo && userProfileInfo.masteredTopicCount) {
-            masteredTopicCount = userProfileInfo.masteredTopicCount;
-          }
-          if (userProfileInfo && userProfileInfo.freeMasteredTopicCount) {
-            freeMasteredTopicCount = userProfileInfo.freeMasteredTopicCount;
-          }
-          if (userProfileInfo && userProfileInfo.familiarTopicCount) {
-            familiarTopicCount = userProfileInfo.familiarTopicCount;
-          }
-          if (userProfileInfo && userProfileInfo.freeFamiliarTopicCount) {
-            freeFamiliarTopicCount = userProfileInfo.freeFamiliarTopicCount;
+          if (userProfileInfo) {
+            const {
+              topicsCompleted: topicsCompletedInUserProfile,
+              proficientTopicCount: proficientTopicCountInUserProfile,
+              freeProficientTopicCount: freeProficientTopicCountInUserProfile,
+              masteredTopicCount: masteredTopicCountInUserProfile,
+              freeMasteredTopicCount: freeMasteredTopicCountInUserProfile,
+              familiarTopicCount: familiarTopicCountInUserProfile,
+              freeFamiliarTopicCount: freeFamiliarTopicCountInUserProfile,
+            } = userProfileInfo;
+            if (topicsCompletedInUserProfile) {
+              topicsCompleted = topicsCompletedInUserProfile;
+            }
+            if (proficientTopicCountInUserProfile) {
+              proficientTopicCount = proficientTopicCountInUserProfile;
+            }
+            if (freeProficientTopicCountInUserProfile) {
+              freeProficientTopicCount = freeProficientTopicCountInUserProfile;
+            }
+            if (masteredTopicCountInUserProfile) {
+              masteredTopicCount = masteredTopicCountInUserProfile;
+            }
+            if (freeMasteredTopicCountInUserProfile) {
+              freeMasteredTopicCount = freeMasteredTopicCountInUserProfile;
+            }
+            if (familiarTopicCountInUserProfile) {
+              familiarTopicCount = familiarTopicCountInUserProfile;
+            }
+            if (freeFamiliarTopicCountInUserProfile) {
+              freeFamiliarTopicCount = freeFamiliarTopicCountInUserProfile;
+            }
           }
           let userProfileTopicConnectQuery = '';
           topicsCompleted += 1;
