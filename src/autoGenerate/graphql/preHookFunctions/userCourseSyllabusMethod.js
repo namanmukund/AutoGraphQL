@@ -1,26 +1,15 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
-  topicTypes,
-  enrollmentTypes,
   GLOBAL_COURSE_ID,
-  PUBLISHED,
 } from '../../../../constants';
 import { ifAuthorized } from '../../../../utils';
-
-// query to get topic with order=1
-const topicQuery = async order => `
-  query{
-    topics(filter:{
-      and:[
-        {order:${order}},
-        {status: ${PUBLISHED} }
-      ]
-    }){
-      id
-    }
-  }
-  `;
+import {
+  DatabaseRecordNotFoundError,
+  UnauthenticatedUserError,
+} from '../../../../constants/errors';
+import getFirstTopicAndLearningObjective from '../../utils/getFirstTopicAndLearningObjective';
+import addUserCurrentTopicComponentStatus from '../../utils/addUserCurrentTopicComponentStatus';
 
 // query to get current component status of user
 const userCurrentTopicComponentStatusesQuery = async userId => `
@@ -34,9 +23,6 @@ const userCurrentTopicComponentStatusesQuery = async userId => `
         and:[
           {status: published},
           {id:"${GLOBAL_COURSE_ID}"}
-          {chapters_some:{
-            status: published
-          }}
         ]
       }}
       ]
@@ -46,43 +32,42 @@ const userCurrentTopicComponentStatusesQuery = async userId => `
   }
   `;
 
-// mutation to add userCurrentTopicComponentStatus
-const addUserCurrentTopicComponentStatusMutation = async (userId, firstTopicId) => `
-  mutation{
-    addUserCurrentTopicComponentStatus(
-      input: {
-        enrollmentType: ${enrollmentTypes.free}
-        currentTopicComponentType: ${topicTypes.video}
-      }
-      userConnectId:"${userId}"
-      currentCourseConnectId:"${GLOBAL_COURSE_ID}"
-      currentTopicConnectId:"${firstTopicId}"
-    ){
-      id
-    }
-  }
-`;
-
-// mutation to return user couse syllabus based on user current topic component status
-// also adding userCurrentTopicComponentStatus if not already present
+/*
+Logic to add userCurrentTopicComponentStatus if it not already present and
+the first published topic and first published learning objective corresponding to that topic
+will get populated in the document
+*/
 const userCourseSyllabusMethod = async (context) => {
-  const topic = await callGraphqlApi(await topicQuery(1));
+  const topic = await getFirstTopicAndLearningObjective;
   const firstTopicId = get(topic, 'data.topics[0].id');
+  const firstLearningObjectiveId = get(topic, 'data.topics[0].learningObjectives[0].id');
   const authentication = ifAuthorized(context);
   const decodedUser = authentication && authentication.user;
   const { id: userId } = decodedUser;
-  // condition is already present in pre hook of addUserCurrentTopicComponentStatus
-  // checking if course and user combination already exits
+  if (!userId) {
+    throw new UnauthenticatedUserError();
+  }
   const userCurrentTopicComponentStatusesRes =
     await callGraphqlApi(await userCurrentTopicComponentStatusesQuery(userId));
-  // Ideally each user will have 1 document in the collection. Fetching the same document
+  /*
+  Ideally each user will have 1 document in the collection. Fetching the same document
+  Also we have logic in addUserCurrentTopicComponentStatusValidation to check that
+  user and course combination being added is not already present
+  */
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusesRes,
     'data.userCurrentTopicComponentStatuses[0]');
 
   if (!currentTopicComponentInfo) {
+    // returning error if there is no published topic or no published LO for topic
+    if (!firstTopicId) {
+      throw new DatabaseRecordNotFoundError('FirstTopicId: ');
+    }
+    if (!firstLearningObjectiveId) {
+      throw new DatabaseRecordNotFoundError('FirstTopicId.firstLearningObjectiveId: ');
+    }
     // mutation to create current component status of user
-    await callGraphqlApi(
-      await addUserCurrentTopicComponentStatusMutation(userId, firstTopicId));
+    await addUserCurrentTopicComponentStatus(
+      userId, firstTopicId, firstLearningObjectiveId);
   }
 };
 

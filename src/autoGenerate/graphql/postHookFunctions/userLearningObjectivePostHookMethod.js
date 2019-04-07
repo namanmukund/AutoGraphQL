@@ -96,8 +96,8 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
     const nextLearningObjectiveOrder = parseInt(learningObjectiveOrder, 10) + 1;
     let nextLOId;
     let nextCurrentTopicComponentType;
-    let learningObjectiveConnectIdQuerv = '';
-    let topicConnectIdQuerv = '';
+    let learningObjectiveConnectIdQuery = '';
+    let topicConnectIdQuery = '';
     learningObjectives.forEach((learningObjective) => {
       const { id, order } = learningObjective;
       if (learningObjective &&
@@ -109,16 +109,16 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
     // if next LO is not present in that case, quiz will be next component
     if (nextLOId) {
       nextCurrentTopicComponentType = message;
-      learningObjectiveConnectIdQuerv = `learningObjectiveConnectId:"${nextLOId}"`;
+      learningObjectiveConnectIdQuery = `learningObjectiveConnectId:"${nextLOId}"`;
     } else {
       nextCurrentTopicComponentType = quiz;
     }
-    if (topicId) { topicConnectIdQuerv = `topicConnectId:"${topicId}"`; }
+    if (topicId) { topicConnectIdQuery = `topicConnectId:"${topicId}"`; }
     // restQuery is for when we ceating userLearningObjective
     if (learningObjectiveIdInResult) {
       restQuery = `nextComponent:{
-                     ${learningObjectiveConnectIdQuerv}
-                     ${topicConnectIdQuerv}
+                     ${learningObjectiveConnectIdQuery}
+                     ${topicConnectIdQuery}
                      nextComponentType: ${nextCurrentTopicComponentType}
                    }`;
     }

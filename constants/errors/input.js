@@ -60,3 +60,14 @@ export const DuplicateConnectIdsError = createError('DuplicateConnectIdsError', 
   message: 'Duplicate connect ids sent in input',
 });
 
+export const UserOrCourseNotPresentError = createError('UserOrCourseNotPresentError', {
+  message: 'User or course id is missing in input',
+});
+
+export const TopicOrLONotPresentError = createError('TopicOrLONotPresentError', {
+  message: 'Topic or learning objective id is missing in input',
+});
+
+export const TopicOrUserCurrentTopicComponentNotPresentError = createError('TopicOrUserCurrentTopicComponentNotPresentError', {
+  message: 'Topic or UserCurrentTopicComponent id is missing in input',
+});

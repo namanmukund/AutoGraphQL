@@ -1,16 +1,12 @@
 import bcrypt from 'bcrypt';
 import { get, pick } from 'lodash';
 import {
-  topicTypes,
-  enrollmentTypes,
-  GLOBAL_COURSE_ID,
   operationName,
-  PUBLISHED,
 } from '../../../../../../constants';
 import { UserTokenNotRequiredError } from '../../../../../../constants/errors';
 import allAuthParams from '../../../../../../config/authParams';
 import { MutationController, RemoteController } from '../../../controllers';
-import { generateCuid, toObject } from '../../../../../../utils';
+import { generateCuid, log, toObject } from '../../../../../../utils';
 import {
   mergeMutationsPromisesResults,
 } from '../utils/mergeMutationsPromisesResults';
@@ -19,7 +15,9 @@ import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import localSignUpMutationPromise from '../utils/localSignUpMutationPromise';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
+import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
+import addUserCurrentTopicComponentStatus
+  from '../../../../utils/addUserCurrentTopicComponentStatus';
 
 const application = process.env.APPLICATION || 'core';
 const authParams = allAuthParams[application];
@@ -112,61 +110,23 @@ const signupMutationResolver = async (
       modelMutations,
     );
     const token = createUserTokenTypeData(savedUser);
-    const query = `
-    query{
-      topics(filter:{
-        and:[
-          {order:1},
-          {status: ${PUBLISHED} }
-        ]
-      }){
-        id
-      }
-    }
-    `;
-    const topic = await callGraphqlApi(query);
+    /*
+    logic to add current user topic component status
+    the first published topic and first published learning objective corresponding to that topic
+    will get populated in the document
+    */
+    const topic = await getFirstTopicAndLearningObjective;
     const firstTopicId = get(topic, 'data.topics[0].id');
+    const firstLearningObjectiveId = get(topic, 'data.topics[0].learningObjectives[0].id');
     const { id: userId } = savedUser;
-    // mutation to create current component status of user
-    const mutation = `
-      mutation{
-        addUserCurrentTopicComponentStatus(
-          input: {
-            enrollmentType: ${enrollmentTypes.free}
-            currentTopicComponentType: ${topicTypes.video}
-          }
-          userConnectId:"${userId}"
-          currentCourseConnectId:"${GLOBAL_COURSE_ID}"
-          currentTopicConnectId:"${firstTopicId}"
-        ){
-          id
-          currentCourse{
-            title
-            totalChapters{
-              count
-            }
-            chapters{
-              totalTopics{
-                count
-              }
-            }
-          }
-          currentTopic{
-            id
-            title
-            description
-            thumbnail{
-              id
-              name
-              uri
-            }
-            description
-          }
-          currentTopicComponentType
-        }
-      }
-    `;
-    await callGraphqlApi(mutation);
+    // we are not throwing any error here because it will seem that sign up failed if
+    // firstTopicId and firstLearningObjectiveId is not present. Just adding log
+    if (firstTopicId && firstLearningObjectiveId) {
+      await addUserCurrentTopicComponentStatus(
+        userId, firstTopicId, firstLearningObjectiveId);
+    } else {
+      log('Failed to get first published topic or first published learning objective corresponding to it');
+    }
     return token;
   }
 

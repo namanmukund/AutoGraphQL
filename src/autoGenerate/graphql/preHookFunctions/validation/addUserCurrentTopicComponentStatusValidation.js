@@ -1,8 +1,8 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../../api/callGraphqlApi';
 import {
-  InvalidTopicLOConnectionError,
-  UserCourseCombinationExistError,
+  InvalidTopicLOConnectionError, TopicOrLONotPresentError,
+  UserCourseCombinationExistError, UserOrCourseNotPresentError,
 } from '../../../../../constants/errors';
 
 // query to get userCurrentTopicComponentStatus for given user and course id
@@ -48,27 +48,29 @@ const addUserCurrentTopicComponentStatusValidation = async (params) => {
     currentTopicConnectId: topicId,
     currentLearningObjectiveConnectId: learningObjectiveId,
   } = params;
-  if (userId && courseId) {
-    const userCurrentTopicComponentStatusData = await callGraphqlApi(
-      await userCurrentTopicComponentStatusQuery(userId, courseId));
-    const userCurrentTopicComponentStatusesResult = get(
-      userCurrentTopicComponentStatusData,
-      'data.userCurrentTopicComponentStatuses');
+  if (!userId || !courseId) {
+    throw new UserOrCourseNotPresentError();
+  }
+  const userCurrentTopicComponentStatusData = await callGraphqlApi(
+    await userCurrentTopicComponentStatusQuery(userId, courseId));
+  const userCurrentTopicComponentStatusesResult = get(
+    userCurrentTopicComponentStatusData,
+    'data.userCurrentTopicComponentStatuses');
     // checking if course and user document already exists
-    if (userCurrentTopicComponentStatusesResult && userCurrentTopicComponentStatusesResult.length) {
-      throw new UserCourseCombinationExistError();
-    }
-    // logic to check if lo and topic passed are related to each other
-    if (topicId && learningObjectiveId) {
-      const learningObjectiveData = await callGraphqlApi(
-        await learningObjectiveQuery(topicId, learningObjectiveId));
-      const learningObjectiveCount = get(
-        learningObjectiveData,
-        'data.topic.learningObjectivesMeta.count');
-      if (learningObjectiveCount && learningObjectiveCount > 0) {
-        throw new InvalidTopicLOConnectionError();
-      }
-    }
+  if (userCurrentTopicComponentStatusesResult && userCurrentTopicComponentStatusesResult.length) {
+    throw new UserCourseCombinationExistError();
+  }
+  // logic to check if lo and topic passed are related to each other
+  if (!topicId || !learningObjectiveId) {
+    throw new TopicOrLONotPresentError();
+  }
+  const learningObjectiveData = await callGraphqlApi(
+    await learningObjectiveQuery(topicId, learningObjectiveId));
+  const learningObjectiveCount = get(
+    learningObjectiveData,
+    'data.topic.learningObjectivesMeta.count');
+  if (learningObjectiveCount && learningObjectiveCount > 0) {
+    throw new InvalidTopicLOConnectionError();
   }
 };
 

@@ -2,6 +2,7 @@ import { get } from 'lodash';
 import callGraphqlApi from '../../../../api/callGraphqlApi';
 import {
   InvalidTopicPassedInCurrentTopicComponent,
+  TopicOrUserCurrentTopicComponentNotPresentError,
 } from '../../../../../constants/errors';
 
 // query to get topic order info
@@ -33,20 +34,21 @@ const userCurrentTopicComponentStatusQuery = async userCurrentTopicComponentStat
 const updateUserCurrentTopicComponentStatusValidation = async (params) => {
   const { id: userCurrentTopicComponentStatusId } = params;
   const { currentTopicConnectId: topicId } = params;
-  if (userCurrentTopicComponentStatusId && topicId) {
-    const topicData = await callGraphqlApi(await topicQuery(topicId));
-    const topicOrder = get(topicData, 'data.topic.order');
-    const userCurrentTopicComponentStatusData = await callGraphqlApi(
-      await userCurrentTopicComponentStatusQuery(userCurrentTopicComponentStatusId));
-    const userCurrentTopicComponentTopicOrder = get(
-      userCurrentTopicComponentStatusData,
-      'data.userCurrentTopicComponentStatus.currentTopic.order');
+  if (!userCurrentTopicComponentStatusId || !topicId) {
+    throw new TopicOrUserCurrentTopicComponentNotPresentError();
+  }
+  const topicData = await callGraphqlApi(await topicQuery(topicId));
+  const topicOrder = get(topicData, 'data.topic.order');
+  const userCurrentTopicComponentStatusData = await callGraphqlApi(
+    await userCurrentTopicComponentStatusQuery(userCurrentTopicComponentStatusId));
+  const userCurrentTopicComponentTopicOrder = get(
+    userCurrentTopicComponentStatusData,
+    'data.userCurrentTopicComponentStatus.currentTopic.order');
     // checking if topic passed order is greater than current topic's
-    if (userCurrentTopicComponentTopicOrder &&
+  if (userCurrentTopicComponentTopicOrder &&
       topicOrder &&
       topicOrder <= userCurrentTopicComponentTopicOrder) {
-      throw new InvalidTopicPassedInCurrentTopicComponent();
-    }
+    throw new InvalidTopicPassedInCurrentTopicComponent();
   }
 };
 

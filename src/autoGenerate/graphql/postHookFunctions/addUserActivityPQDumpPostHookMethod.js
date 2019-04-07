@@ -89,13 +89,13 @@ const userLearningObjectiveQuery = async (userId, learningObjectiveId) => `
 const updateUserCurrentTopicComponentStatusMutation = async (
   currentTopicComponentId,
   nextCurrentTopicComponentType,
-  restUserCurrentTopicComponentStatusQuerv,
+  restUserCurrentTopicComponentStatusQuery,
 ) => `
   mutation{
     updateUserCurrentTopicComponentStatus(id:"${currentTopicComponentId}",  input:{
       currentTopicComponentType: ${nextCurrentTopicComponentType}
     }
-    ${restUserCurrentTopicComponentStatusQuerv}
+    ${restUserCurrentTopicComponentStatusQuery}
     ){
       id
     }
@@ -211,13 +211,13 @@ const addUserActivityPQDumpPostHookMethod = async (input) => {
     const nextComponentLearningObjectiveId = get(userLearningObjectiveInfo, 'nextComponent.learningObjective.id');
     const nextComponentType = get(userLearningObjectiveInfo, 'nextComponent.nextComponentType');
     let nextCurrentTopicComponentType;
-    let restUserCurrentTopicComponentStatusQuerv = '';
+    let restUserCurrentTopicComponentStatusQuery = '';
     // logic for checking the next component
     if (nextComponentType === quiz) {
       nextCurrentTopicComponentType = quiz;
     } else if (nextComponentLearningObjectiveId) {
       nextCurrentTopicComponentType = message;
-      restUserCurrentTopicComponentStatusQuerv = `currentLearningObjectiveConnectId:"${nextComponentLearningObjectiveId}"`;
+      restUserCurrentTopicComponentStatusQuery = `currentLearningObjectiveConnectId:"${nextComponentLearningObjectiveId}"`;
     }
 
     if (currentTopicComponent &&
@@ -233,7 +233,7 @@ const addUserActivityPQDumpPostHookMethod = async (input) => {
       await callGraphqlApi(await updateUserCurrentTopicComponentStatusMutation(
         currentTopicComponentId,
         nextCurrentTopicComponentType,
-        restUserCurrentTopicComponentStatusQuerv,
+        restUserCurrentTopicComponentStatusQuery,
       ));
     }
     if (userLearningObjectiveId) {
