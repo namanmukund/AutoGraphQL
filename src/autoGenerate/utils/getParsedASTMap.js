@@ -9,12 +9,14 @@ import {
   parse,
 } from 'graphql';
 import getParsedField from './getParsedField';
+import { InvalidRuleValueError } from '../../../constants/errors';
 
 const getAllowedOperationsOnType = (
-  directives,
+  definition,
   allowedDirectiveName,
 ) => {
   const allowedDirectiveArray = [];
+  const { directives } = definition;
   if (directives && directives.length) {
     directives.forEach((directive) => {
       if (get(directive, 'name.value') === allowedDirectiveName) {
@@ -39,25 +41,26 @@ const getAllowedOperationsOnType = (
 };
 
 const getAppAndUserPermissionsFromDirective = (
-  directives,
-  allowedDirectiveName,
+  definition,
+  permissionsRelatedDirectiveName,
 ) => {
   const permissionRuleObject = {};
   const permissionsArray = [];
   let rule = 'allow';
+  const { directives } = definition;
   if (directives && directives.length) {
     directives.forEach((directive) => {
       // allowedDirectiveName --> appPermissions & userPermissions
-      if (get(directive, 'name.value') === allowedDirectiveName) {
+      if (get(directive, 'name.value') === permissionsRelatedDirectiveName) {
         // permissions and rule arguments are required
         if (directive[arguments] && directive[arguments].length !== 2) {
-          throw new Error(`Invalid arguments in ${allowedDirectiveName}`);
+          throw new Error(`Invalid arguments in ${permissionsRelatedDirectiveName} in ${definition.name.value}`);
         }
         if (
           !(get(directive, 'arguments[0].name.value') === 'permissions') &&
             !(get(directive, 'arguments[1].name.value') === 'rule')
         ) {
-          throw new Error(`Permission and rule required schema in ${allowedDirectiveName}`);
+          throw new Error(`Permission and rule arguments are required in ${permissionsRelatedDirectiveName} in ${definition.name.value}`);
         }
 
         const permissionValue = get(directive, 'arguments[0].value');
@@ -66,7 +69,7 @@ const getAppAndUserPermissionsFromDirective = (
         if (['allow', 'deny'].includes(ruleValue)) {
           rule = ruleValue;
         } else {
-          throw new Error('Invalid rule value');
+          throw new InvalidRuleValueError();
         }
 
         const { kind, value, values } = permissionValue;
@@ -78,10 +81,10 @@ const getAppAndUserPermissionsFromDirective = (
             const { fields } = listValue;
             if (
               !fields ||
-              (allowedDirectiveName === 'userPermissions' && !(fields.length === 3)) ||
-                (allowedDirectiveName === 'appPermissions' && !(fields.length === 2))
+              (permissionsRelatedDirectiveName === 'userPermissions' && !(fields.length === 3)) ||
+                (permissionsRelatedDirectiveName === 'appPermissions' && !(fields.length === 2))
             ) {
-              throw new Error('Invalid count');
+              throw new Error(`Invalid count in ${permissionsRelatedDirectiveName} in ${definition.name.value}`);
             }
 
             fields.forEach((field) => {
@@ -115,7 +118,7 @@ const getAppAndUserPermissionsFromDirective = (
                 } else if (field.value.value === '*') {
                   permissionInfoObj.operations = '*';
                 } else {
-                  throw new Error('Invalid operation field format');
+                  throw new Error(`Invalid operation field format  in ${permissionsRelatedDirectiveName} in ${definition.name.value}`);
                 }
               }
             });
@@ -124,7 +127,7 @@ const getAppAndUserPermissionsFromDirective = (
             }
           });
         } else {
-          throw new Error('Invalid permission format');
+          throw new Error(`Invalid permission format in ${permissionsRelatedDirectiveName} in ${definition.name.value}`);
         }
       }
     });
@@ -154,17 +157,17 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
     }
     // on typeName level
     const appPermissions = getAppAndUserPermissionsFromDirective(
-      definition.directives,
+      definition,
       'appPermissions',
     );
     // on typeName level
     const userPermissions = getAppAndUserPermissionsFromDirective(
-      definition.directives,
+      definition,
       'userPermissions',
     );
     // on typeName level
     const allowedOperations = getAllowedOperationsOnType(
-      definition.directives,
+      definition,
       'allowedOperations',
     );
     // To store fields Object for each field.

@@ -30,3 +30,7 @@ export const InvalidDateFormatError = createError('InvalidDateFormatError', {
 export const UnsupportedListFieldInsideSubDocumentObjectError = createError('UnsupportedListFieldInsideSubDocumentObjectError', {
   message: 'List field inside sub document object is not supported. Prefer flat hierarchy here.',
 });
+
+export const InvalidRuleValueError = createError('InvalidRuleValueError', {
+  message: 'Only accepted rules are allow and deny',
+});
