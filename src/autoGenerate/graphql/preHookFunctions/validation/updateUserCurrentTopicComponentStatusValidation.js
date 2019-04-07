@@ -50,6 +50,7 @@ const updateUserCurrentTopicComponentStatusValidation = async (params) => {
       topicOrder <= userCurrentTopicComponentTopicOrder) {
     throw new InvalidTopicPassedInCurrentTopicComponent();
   }
+  return true;
 };
 
 export default updateUserCurrentTopicComponentStatusValidation;

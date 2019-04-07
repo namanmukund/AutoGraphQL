@@ -55,9 +55,10 @@ import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   EitherUsernameEmailOrPhoneRequiredError, InvalidNameError, InvalidNameLengthError,
   InvalidUsernameError, InvalidUsernameLengthError, EitherEmailOrPhoneNotBothRequiredError,
   PhoneNumberAndCountryCodeRequiredError, EitherPhoneOrEmailOtpRequiredError,
-  EmailNotVerifiedError, PhoneNotVerifiedError,
+  EmailNotVerifiedError, PhoneNotVerifiedError, UserOrLearningObjectiveNotPresentError,
   ConnectIdsAlreadyRelatedError, TopicOrUserCurrentTopicComponentNotPresentError,
   DuplicateConnectIdsError, UserOrCourseNotPresentError, TopicOrLONotPresentError,
+  UserOrTopicNotPresentError,
 } from './input';
 
 
@@ -144,4 +145,6 @@ export {
   UserOrCourseNotPresentError,
   TopicOrLONotPresentError,
   TopicOrUserCurrentTopicComponentNotPresentError,
+  UserOrLearningObjectiveNotPresentError,
+  UserOrTopicNotPresentError,
 };

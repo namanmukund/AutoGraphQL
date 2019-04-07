@@ -227,12 +227,10 @@ const userCourseSyllabusMutationResolver = async (
   // logic for populating current component detail based on current topic component
   switch (currentTopicComponent) {
     case video:
-      if (currentTopic) {
-        componentTitle = videoTitle;
-        thumbnail = videoThumbnail;
-        percentageCovered = 0;
-        description = videoDescription;
-      }
+      componentTitle = videoTitle;
+      thumbnail = videoThumbnail;
+      percentageCovered = 0;
+      description = videoDescription;
       break;
     case message:
       componentTitle = LOTitle;
@@ -247,12 +245,10 @@ const userCourseSyllabusMutationResolver = async (
       description = LODescription;
       break;
     case quiz:
-      if (currentTopic) {
-        componentTitle = 'Quiz';
-        thumbnail = topicThumbnail;
-        percentageCovered = 75;
-        description = topicDescription;
-      }
+      componentTitle = 'Quiz';
+      thumbnail = topicThumbnail;
+      percentageCovered = 75;
+      description = topicDescription;
       break;
     default:
   }

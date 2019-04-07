@@ -71,3 +71,11 @@ export const TopicOrLONotPresentError = createError('TopicOrLONotPresentError', 
 export const TopicOrUserCurrentTopicComponentNotPresentError = createError('TopicOrUserCurrentTopicComponentNotPresentError', {
   message: 'Topic or UserCurrentTopicComponent id is missing in input',
 });
+
+export const UserOrLearningObjectiveNotPresentError = createError('UserOrLearningObjectiveNotPresentError', {
+  message: 'User or learning objective id is missing in input',
+});
+
+export const UserOrTopicNotPresentError = createError('UserOrTopicNotPresentError', {
+  message: 'User or topic id is missing in input',
+});

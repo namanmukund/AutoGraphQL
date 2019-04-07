@@ -2,10 +2,13 @@ import { get } from 'lodash';
 import callGraphqlApi from '../../../../api/callGraphqlApi';
 import {
   topicTypes,
-  enrollmentTypes,
-  GLOBAL_COURSE_ID,
+  GLOBAL_COURSE_ID, PUBLISHED,
 } from '../../../../../constants';
-import { ComponentLockedError } from '../../../../../constants/errors';
+import {
+  ComponentLockedError, DatabaseRecordNotFoundError,
+  UserOrTopicNotPresentError,
+} from '../../../../../constants/errors';
+import isTopicUnlocked from '../../../utils/isTopicUnlocked';
 
 // query to get topic order info
 const topicQuery = async topicId => `
@@ -28,11 +31,8 @@ const userCurrentTopicComponentStatusQuery = async userId => `
         }},
       {currentCourse_some:{
         and:[
-          {status: published},
+          {status: ${PUBLISHED}},
           {id:"${GLOBAL_COURSE_ID}"}
-          {chapters_some:{
-            status: published
-          }}
         ]
       }}
       ]
@@ -63,42 +63,62 @@ const addUserActivityQuizDumpValidation = async (params) => {
     userConnectId: userId,
     topicConnectId: topicId,
   } = params;
-  if (userId && topicId) {
-    const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
-    const topicInfo = get(topicQueryRes, 'data.topic');
-    const userCurrentTopicComponentStatusRes =
-      await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
-    const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
-    if (topicInfo && currentTopicComponentInfo) {
-      let isUnlocked = false;
-      const {
-        order: topicOrder,
-        isTrial,
-      } = topicInfo;
-      const {
-        currentTopic,
-        currentTopicComponentType,
-        enrollmentType,
-      } = currentTopicComponentInfo;
-      // condition to check if topic is free, if not then user should be pro
-      // type to access that topic
-      if ((enrollmentType === enrollmentTypes.pro &&
-        topicOrder <= currentTopic.order
-      ) || (enrollmentType === enrollmentTypes.free
-        && topicOrder <= currentTopic.order &&
-        isTrial === true)) {
-        // condition to check if quiz can be accessed:
-        // if called topic order is less than current topic order or
-        // other case is when called topic order is equal to current topic order
-        // in that case we are checking current component type is quiz
-        if (topicOrder < currentTopic.order ||
-          (currentTopicComponentType === topicTypes.quiz)) {
-          isUnlocked = true;
-        }
-      }
-      if (!isUnlocked) throw new ComponentLockedError();
-    }
+  if (!userId || !topicId) {
+    throw new UserOrTopicNotPresentError();
   }
+  const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
+  const topicInfo = get(topicQueryRes, 'data.topic');
+  const userCurrentTopicComponentStatusRes =
+      await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
+  const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
+  if (!topicInfo) {
+    throw new DatabaseRecordNotFoundError('LearningObjective.topicInfo: ');
+  }
+  if (!currentTopicComponentInfo) {
+    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo: ');
+  }
+  const {
+    order: topicOrder,
+    isTrial,
+  } = topicInfo;
+  const {
+    currentTopic,
+    currentTopicComponentType,
+    enrollmentType,
+  } = currentTopicComponentInfo;
+  if (!currentTopic) {
+    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentTopic: ');
+  }
+  if (!currentTopicComponentType) {
+    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentTopicComponentType: ');
+  }
+  if (!enrollmentType) {
+    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.EnrollmentType: ');
+  }
+  // condition to check if topic is free, if not then user should be pro
+  // type to access that topic
+  const { order: currentTopicOrder } = currentTopic;
+  if (!isTopicUnlocked(enrollmentType, currentTopicOrder, topicOrder, isTrial)) {
+    throw new ComponentLockedError();
+  }
+  // will remove commented code after review and testing
+  // if (topicOrder < currentTopic.order ||
+  //   (currentTopicComponentType === topicTypes.quiz)) {
+  //   isUnlocked = true;
+  // }
+  /*
+      code will only reach here in case if passed topic order
+       is less than or equal to current topic order.
+      Here we are checking the case when passed topic order and current topic order are equal
+      and current component type is not quiz
+      For all above cases we will throw locked error
+      */
+  if (topicOrder === currentTopicOrder &&
+        currentTopicComponentType !== topicTypes.quiz
+  ) {
+    throw new ComponentLockedError();
+  }
+  return true;
 };
 
 export default addUserActivityQuizDumpValidation;

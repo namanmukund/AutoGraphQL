@@ -72,6 +72,7 @@ const addUserCurrentTopicComponentStatusValidation = async (params) => {
   if (learningObjectiveCount && learningObjectiveCount > 0) {
     throw new InvalidTopicLOConnectionError();
   }
+  return true;
 };
 
 export default addUserCurrentTopicComponentStatusValidation;
