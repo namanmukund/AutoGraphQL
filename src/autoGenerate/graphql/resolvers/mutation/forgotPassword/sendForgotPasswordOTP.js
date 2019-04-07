@@ -1,9 +1,9 @@
-import { operationName } from '../../../../../../constants';
 import { UserTokenNotRequiredError, DatabaseRecordNotFoundError, UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { QueryController, MutationController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { sendEmailSmsForSendResendForgotPasswordOTP } from '../utils';
+import { UPDATE } from '../../../../../../constants/graphqlOperations';
 
 const sendForgotPasswordOTPMutationPromise = (input, modelQueries) => modelQueries.fetchOne(input);
 
@@ -23,10 +23,17 @@ export default function sendForgotPasswordOTPMutationResolver(
   authentication,
 ) {
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const accessFields = ast[typeName];
-  validate(operationName.update, accessFields, feildsFetched, authentication, {});
+  validate(
+    typeName,
+    ast,
+    UPDATE,
+    fieldsFetched,
+    authentication,
+    {},
+  );
+
 
   const decodedUser = authentication && authentication.user;
   if (decodedUser) {

@@ -1,8 +1,8 @@
-import { operationName } from '../../../../../../constants';
 import { DatabaseRecordNotFoundError, OTPMismatchError } from '../../../../../../constants/errors';
 import { QueryController, MutationController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
+import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 
 const validateUserOTPMutationPromise = (
   searchObj,
@@ -20,10 +20,16 @@ export default function validateUserOTPMutationResolver(
   authentication,
 ) {
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const accessFields = ast[typeName];
-  validate(operationName.read, accessFields, feildsFetched, authentication);
+  validate(
+    typeName,
+    ast,
+    SINGULAR,
+    fieldsFetched,
+    authentication,
+  );
+
   const queryController = new QueryController(typeName, authentication);
   const { id, phoneOtp, emailOtp } = params;
   return queryController.fetchOne({ id }).then((res) => {

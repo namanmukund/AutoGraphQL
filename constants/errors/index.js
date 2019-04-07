@@ -49,6 +49,7 @@ import {
   RelationAppliedOnSameFieldsError, RemoteRelationError, DefaultDirectiveAppliedOnWrongFieldError,
   InvalidDateFormatError,
   UnsupportedListFieldInsideSubDocumentObjectError,
+  InvalidRuleValueError,
 } from './types';
 import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   EitherUsernameEmailOrPhoneRequiredError, InvalidNameError, InvalidNameLengthError,
@@ -57,6 +58,8 @@ import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   EmailNotVerifiedError, PhoneNotVerifiedError,
   ConnectIdsAlreadyRelatedError,
   DuplicateConnectIdsError,
+  UnauthorizedFieldOrTypeAccessByAppError,
+  InsufficientPermissionError,
 } from './input';
 
 
@@ -138,4 +141,7 @@ export {
   DuplicateConnectIdsError,
   OrderAlreadyExistsError,
   TopicIdRequiredError,
+  UnauthorizedFieldOrTypeAccessByAppError,
+  InsufficientPermissionError,
+  InvalidRuleValueError,
 };

@@ -1,4 +1,3 @@
-import { operationName } from '../../../../../../constants';
 import {
   UserTokenNotRequiredError,
   DatabaseRecordNotFoundError,
@@ -12,6 +11,7 @@ import { validate } from '../../../validation';
 import { getNumberAndSendSms } from '../../../../../sms';
 import { sendEmailOtpToUser } from '../../../../../email/messages';
 import validateSignupExistingUserStatus from '../utils/validateSignupExistingUserStatus';
+import { ADD } from '../../../../../../constants/graphqlOperations';
 
 
 const updateExistingUserOTP = (
@@ -57,10 +57,16 @@ export default function signupExistingUserMutationResolver(
 ) {
   const { input, stopOtpTrigger } = params;
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const accessFields = ast[typeName];
-  validate(operationName.add, accessFields, feildsFetched, authentication, input);
+  validate(
+    typeName,
+    ast,
+    ADD,
+    fieldsFetched,
+    authentication,
+    {},
+  );
 
   const decodedUser = authentication && authentication.user;
   if (decodedUser) {

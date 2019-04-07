@@ -3,8 +3,8 @@ import { QueryController, RemoteController } from '../../controllers';
 import { getFieldsBeingFetched, filterRemoteFields } from '../../../utils';
 import { toObject } from '../../../../../utils';
 import { validate } from '../../validation';
-import { operationName } from '../../../../../constants';
 import { InvalidParamsError } from '../../../../../constants/errors';
+import { SINGULAR } from '../../../../../constants/graphqlOperations';
 // Validate that the params used for single fetch are unique.
 const validateParamsUniqueness = (paramKey, typeAST) => {
   let isUniqueField = false;
@@ -71,9 +71,15 @@ const fetchSingleQueryResolver = (
   allowMultiple,
 ) => {
   const { fieldNodes } = info; // Fields which are requested.
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
   const typeAST = ast[typeName];
-  validate(operationName.read, typeAST, feildsFetched, authentication);
+  validate(
+    typeName,
+    ast,
+    SINGULAR,
+    fieldsFetched,
+    authentication,
+  );
   const modelQueries = new QueryController(typeName, authentication);
   const { remoteFields, remoteFieldsApplicationWise } = ast[typeName];
   const queryName = info.fieldName;
@@ -92,7 +98,7 @@ const fetchSingleQueryResolver = (
     const modelRemote = new RemoteController(applicationName, authentication);
     // Out of all the fields requested, get the fields required.
     const fieldsToQuery =
-      pick(feildsFetched, Object.keys(remoteFieldsApplicationWise[applicationName]));
+      pick(fieldsFetched, Object.keys(remoteFieldsApplicationWise[applicationName]));
     return modelRemote.query(queryName, params, fieldsToQuery).then((resultRemote) => {
       if (!(resultRemote && resultRemote.id)) {
         return null;
@@ -110,7 +116,7 @@ const fetchSingleQueryResolver = (
         resultRemote,
         queryName,
         newParam,
-        feildsFetched,
+        fieldsFetched,
         remoteFieldsApplicationWise,
         existingPromise,
         applicationName,
@@ -143,7 +149,7 @@ const fetchSingleQueryResolver = (
       objectResult,
       queryName,
       newParam,
-      feildsFetched,
+      fieldsFetched,
       remoteFieldsApplicationWise,
       existingPromise,
       applicationName,

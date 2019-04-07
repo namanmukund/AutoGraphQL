@@ -1,7 +1,7 @@
 import { QueryController } from '../../controllers';
 import { validate } from '../../validation';
 import { getFieldsBeingFetched } from '../../../utils';
-import { operationName } from '../../../../../constants';
+import { META_QUERY } from '../../../../../constants/graphqlOperations';
 
 const fetchListAggregationQueryResolver = (
   root,
@@ -15,8 +15,13 @@ const fetchListAggregationQueryResolver = (
   const { fieldNodes } = info; // Fields which are requested.
   const feildsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const typeAST = ast[typeName];
-  validate(operationName.read, typeAST, feildsFetched, authentication);
+  validate(
+    typeName,
+    ast,
+    META_QUERY,
+    feildsFetched,
+    authentication,
+  );
 
   return modelQueries.fetchCount(params).then((res) => {
     const { groupByFieldName, groupByResult } = res;

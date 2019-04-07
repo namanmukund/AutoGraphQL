@@ -5,7 +5,6 @@ import {
 import { generateCuid, toObject, isErrorThrown } from '../../../../../../utils';
 import { getFieldsBeingFetched, filterRemoteFields, filterRemoteInput } from '../../../../utils';
 import { validate } from '../../../validation';
-import { operationName } from '../../../../../../constants';
 import { mergeMutationsPromisesResults } from '../utils/mergeMutationsPromisesResults';
 import { getRelationFields } from '../utils/getRelationFields';
 import { processRelationInputFields } from '../utils/processRelationInputFields';
@@ -15,6 +14,7 @@ import { filterLocalInputForMutation } from '../utils/filterLocalInputForMutatio
 import { getConnectInputFieldsMap } from '../utils/getConnectInputFieldsMap';
 import { rollBackDocumentSaves } from '../utils/rollBackDocumentSaves';
 import nestedConnectIdHandler from '../utils/nestedConnectIdHandler';
+import { ADD } from '../../../../../../constants/graphqlOperations';
 
 
 // Returns remote delete mutation promises.
@@ -328,9 +328,15 @@ const addMutationResolver = (
   const { input, ...connectArguments } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
-  // const fields = ast[typeName].fields;
-  const accessFields = ast[typeName];
-  validate(operationName.add, accessFields, fieldsFetched, authentication, input);
+
+  validate(
+    typeName,
+    ast,
+    ADD,
+    fieldsFetched,
+    authentication,
+    input,
+  );
   // get a map of connect arguments with field names as key and array of ids as value
   const connectInputFieldsMap = getConnectInputFieldsMap(connectArguments);
   const { remoteFields, remoteFieldsApplicationWise } = ast[typeName];
