@@ -147,9 +147,6 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
   // To store final parsed AST Object.
   const parsedASTObject = {};
   definitions.forEach((definition) => {
-    if (definition.name && definition.name.value === 'LearningObjective') {
-      console.log(definition.name.value);
-    }
     const { kind, fields, ...props } = definition;
     // not making type ast for graphql input types(remove check if input types ast required)
     if (kind !== 'ObjectTypeDefinition' || !fields || !fields.length) {

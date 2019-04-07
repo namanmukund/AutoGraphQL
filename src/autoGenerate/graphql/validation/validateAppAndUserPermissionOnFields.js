@@ -40,7 +40,7 @@ const validateAllowDenyRuleOnApp = (
     if (permissions && permissions === '*') {
       throw new InsufficientPermissionError();
     } else if (permissions && permissions.length) {
-      // if index exist then check for operation and operation exist then it should be denied
+      // if index exist then check for operation and if operation exist then it should be denied
       const index = findIndex(permissions, { appName });
       if (index !== -1) {
         const { operations } = permissions[index];
@@ -63,7 +63,7 @@ const validateAppPermission = (
 ) => {
   const { appPermissions, field } = parsedASTMap[typeName];
   const { app: { name: appName } } = authentication;
-  // on the typename level
+  // permission check on the typename level
   if (appPermissions && Object.keys(appPermissions)) {
     validateAllowDenyRuleOnApp(
       appPermissions,
@@ -72,7 +72,7 @@ const validateAppPermission = (
     );
   }
 
-  // on the fields
+  // permission check on the fields
   const queryFieldKeys = Object.keys(queryFields);
   for (const key of queryFieldKeys) {
     const { appPermissions: appPermissionsOnField } = field[key];
@@ -80,6 +80,20 @@ const validateAppPermission = (
       validateAllowDenyRuleOnApp(
         appPermissionsOnField,
         appName,
+        operation,
+      );
+    }
+
+    /* if field key is relation field then recursive strategy will be used
+        to check the permission and throw error at once
+   */
+    if (Object.keys(parsedASTMap[typeName].relationFields).includes(key)) {
+      const subTypeName = parsedASTMap[typeName].field[key].type.dataType;
+      validateAppPermission(
+        subTypeName,
+        parsedASTMap,
+        queryFields[key],
+        authentication,
         operation,
       );
     }
@@ -95,6 +109,7 @@ const validateAppAndUserPermissionOnFields = (
   authentication,
   operation,
 ) => {
+  // checking for app permissions on type and fields and relational fields
   validateAppPermission(
     typeName,
     parsedASTMap,

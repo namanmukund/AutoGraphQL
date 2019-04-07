@@ -8,7 +8,7 @@ const LearningObjective = `
   { appName: "three" operations: "*" },
   { appName: "four" operations: "*" }
   ], 
-  rule: deny)
+  rule: allow)
  @userPermissions(permissions:[
   { userRole: "admin" operations: ["${ADD}", "${SINGULAR}"] appName: "appTwo" }, 
   { userRole: "admin" appName: "student" operations: "*" },
