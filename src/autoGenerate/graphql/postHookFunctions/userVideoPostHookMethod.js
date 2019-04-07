@@ -1,9 +1,11 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
+  PUBLISHED,
   topicTypes,
   userTopicTypeStatus,
 } from '../../../../constants';
+import { UserOrTopicNotPresentError } from '../../../../constants/errors';
 
 // query to get topic and it's Lo with order 1
 const topicQuery = async topicId => `
@@ -12,8 +14,11 @@ const topicQuery = async topicId => `
       id
       order
       learningObjectives(filter:{
-        order: 1
-      }){
+        status: ${PUBLISHED}
+        }
+        orderBy: order_ASC
+        first: 1
+      ){
         id
       }
     }
@@ -65,7 +70,10 @@ const userVideoPostHookMethod = async (input, params) => {
   const topicId = get(topicSome, 'topic_some.id');
   // value of input in case of query is result of the query
   // so we are adding new document if document is not already present
-  if (userId && topicId && input && input.length === 0) {
+  if (!userId || !topicId) {
+    throw new UserOrTopicNotPresentError();
+  }
+  if (input && input.length === 0) {
     const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
     const topicInfo = get(topicQueryRes, 'data.topic');
     const learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');

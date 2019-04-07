@@ -79,3 +79,11 @@ export const UserOrLearningObjectiveNotPresentError = createError('UserOrLearnin
 export const UserOrTopicNotPresentError = createError('UserOrTopicNotPresentError', {
   message: 'User or topic id is missing in input',
 });
+
+export const PracticeQuestionsNotPresentError = createError('PracticeQuestionsNotPresentError', {
+  message: 'PracticeQuestions are missing in input',
+});
+
+export const QuizQuestionsNotPresentError = createError('QuizQuestionsNotPresentError', {
+  message: 'QuizQuestions are missing in input',
+});

@@ -56,10 +56,11 @@ const userCurrentTopicComponentStatusQuery = async userId => `
 // prehook logic to check if requested UserQuiz(user and topic id) is unlocked
 const userQuizValidation = async (params) => {
   // check if the called user and topic is unlocked
-  const {
-    userConnectId: userId,
-    topicConnectId: topicId,
-  } = params;
+  const filterArray = get(params, 'filter.and');
+  const userSome = filterArray.find(obj => obj.user_some);
+  const topicSome = filterArray.find(obj => obj.topic_some);
+  const userId = get(userSome, 'user_some.id');
+  const topicId = get(topicSome, 'topic_some.id');
   if (!userId || !topicId) {
     throw new UserOrTopicNotPresentError();
   }

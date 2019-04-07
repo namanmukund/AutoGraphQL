@@ -58,7 +58,7 @@ import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   EmailNotVerifiedError, PhoneNotVerifiedError, UserOrLearningObjectiveNotPresentError,
   ConnectIdsAlreadyRelatedError, TopicOrUserCurrentTopicComponentNotPresentError,
   DuplicateConnectIdsError, UserOrCourseNotPresentError, TopicOrLONotPresentError,
-  UserOrTopicNotPresentError,
+  UserOrTopicNotPresentError, PracticeQuestionsNotPresentError, QuizQuestionsNotPresentError,
 } from './input';
 
 
@@ -147,4 +147,6 @@ export {
   TopicOrUserCurrentTopicComponentNotPresentError,
   UserOrLearningObjectiveNotPresentError,
   UserOrTopicNotPresentError,
+  PracticeQuestionsNotPresentError,
+  QuizQuestionsNotPresentError,
 };

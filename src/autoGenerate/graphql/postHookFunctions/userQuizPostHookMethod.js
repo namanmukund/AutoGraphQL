@@ -3,6 +3,7 @@ import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   topicTypes, PUBLISHED,
 } from '../../../../constants';
+import { UserOrTopicNotPresentError } from '../../../../constants/errors';
 
 // query to get quiz questions associated with topic
 const topicQuery = async topicId => `
@@ -19,17 +20,19 @@ const topicQuery = async topicId => `
   `;
 
 // query to get topic with passed order. This will be used for next component
-const nextTopicQuery = async nextTopicOrder => `
+const nextTopicQuery = async topicId => `
   query{
-    topics(filter:{
-      and:[
-        {order:${nextTopicOrder}},
-        {status: ${PUBLISHED}}
-      ]
-    }){
-      id
+  topics(
+    filter:{
+      status: ${PUBLISHED}
     }
+    after:"${topicId}", 
+    orderBy:order_ASC, 
+    first:1
+  ){
+    id
   }
+}
   `;
 
 // query to add UserQuiz if it is not already present for user and topic id
@@ -81,35 +84,36 @@ const userQuizPostHookMethod = async (input, params) => {
   const topicId = get(loSome, 'topic_some.id');
   // value of input in case of query is result of the query
   // so we are adding new document if document is not already present
-  if (userId && topicId && input && input.length === 0) {
+  if (!userId || !topicId) {
+    throw new UserOrTopicNotPresentError();
+  }
+  if (input && input.length === 0) {
     const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
     const topicInfo = get(topicQueryRes, 'data.topic');
-    const topicOrder = get(topicInfo, 'order');
     // adding quiz questions in the document
     // this logic will be changed based on set
     let quizQuery = 'quiz:[';
     if (topicInfo) {
       const quizQuestionsinTopic = get(topicInfo, 'questions');
       quizQuestionsinTopic.forEach((quizQuestion) => {
-        quizQuery += `{ questionConnectId: "${quizQuestion.id}"
-                            questionDisplayOrder: ${quizQuestion.order}
+        const {
+          id: quizQuestionId,
+          order: quizQuestionOrder,
+        } = quizQuestion;
+        quizQuery += `{ questionConnectId: "${quizQuestionId}"
+                            questionDisplayOrder: ${quizQuestionOrder}
                           }, `;
       });
     }
     quizQuery += ']';
     let restQuery = '';
-    if (topicOrder) {
-      const nextTopicOrder = topicOrder + 1;
-      const nextTopicQueryRes = await callGraphqlApi(await nextTopicQuery(nextTopicOrder));
-      const nextTopicInfo = get(nextTopicQueryRes, 'data.topics[0]');
-      const nextTopicId = get(nextTopicInfo, 'id');
-      if (nextTopicId) {
-        restQuery = `nextComponent:{
+    const nextTopicQueryRes = await callGraphqlApi(await nextTopicQuery(topicId));
+    const nextTopicId = get(nextTopicQueryRes, 'data.topics[0].id');
+    if (nextTopicId) {
+      restQuery = `nextComponent:{
                      topicConnectId:"${nextTopicId}"
                      nextComponentType: ${topicTypes.video}
                    }`;
-      }
-      // In case of last topic quiz, next component in not populated
     }
     const result = await callGraphqlApi(await addUserQuizMutation(
       userId,

@@ -1,8 +1,10 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
+  PUBLISHED,
   topicTypes,
 } from '../../../../constants';
+import { UserOrLearningObjectiveNotPresentError } from '../../../../constants/errors';
 
 // query to get learning objective and all the learning objectives of the topic associated
 const learningObjectiveQuery = async learningObjectiveId => `
@@ -12,9 +14,15 @@ const learningObjectiveQuery = async learningObjectiveId => `
       order
       topic{
         id
-        learningObjectives{
+        learningObjectives(
+          filter:{
+            status: ${PUBLISHED}
+          }
+          after:"${learningObjectiveId}", 
+          orderBy:order_ASC, 
+          first:1
+        ){
           id
-          order
         }
       }
       questionBank(filter:{assessmentType:${topicTypes.practiceQuestion}}){
@@ -69,7 +77,10 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
   const learningObjectiveId = get(loSome, 'learningObjective_some.id');
   // value of input in case of query is result of the query
   // so we are adding new document if document is not already present
-  if (userId && learningObjectiveId && input && input.length === 0) {
+  if (!userId || !learningObjectiveId) {
+    throw new UserOrLearningObjectiveNotPresentError();
+  }
+  if (input && input.length === 0) {
     const learningObjectiveQueryRes = await callGraphqlApi(
       await learningObjectiveQuery(learningObjectiveId));
     const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
@@ -78,7 +89,6 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
     const { message, quiz } = topicTypes;
     const {
       id: learningObjectiveIdInResult,
-      order: learningObjectiveOrder,
       questionBank: practiceQuestionsinLO,
     } = learningObjectiveInfo;
     // adding PQs to the userLearningObjective document
@@ -91,25 +101,15 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
     }
     practiceQuestionsQuery += ']';
     let restQuery = '';
-    const learningObjectives = get(topicInfo, 'learningObjectives');
-    // obtaining next LO
-    const nextLearningObjectiveOrder = parseInt(learningObjectiveOrder, 10) + 1;
-    let nextLOId;
     let nextCurrentTopicComponentType;
     let learningObjectiveConnectIdQuery = '';
     let topicConnectIdQuery = '';
-    learningObjectives.forEach((learningObjective) => {
-      const { id, order } = learningObjective;
-      if (learningObjective &&
-        order === nextLearningObjectiveOrder
-      ) {
-        nextLOId = id;
-      }
-    });
+    // obtaining next LO
+    const nextLearningObjectiveId = get(topicInfo, 'learningObjectives[0].id');
     // if next LO is not present in that case, quiz will be next component
-    if (nextLOId) {
+    if (nextLearningObjectiveId) {
       nextCurrentTopicComponentType = message;
-      learningObjectiveConnectIdQuery = `learningObjectiveConnectId:"${nextLOId}"`;
+      learningObjectiveConnectIdQuery = `learningObjectiveConnectId:"${nextLearningObjectiveId}"`;
     } else {
       nextCurrentTopicComponentType = quiz;
     }
