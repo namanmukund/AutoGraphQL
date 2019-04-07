@@ -4,7 +4,6 @@ const QuestionBank = `
     statement: String! 
         @length(min: 6, max: 300) 
         @trim
-        @allowedApps(list:["tekieTms", "appTwo"]) 
     hint: String @length(min: 6, max: 300) @trim
     questionType: QuestionBankType! @defaultValue(value: "mcq")
     difficulty: Int

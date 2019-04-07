@@ -94,12 +94,13 @@ export default function loginMutationResolver(
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const accessFields = ast[typeName];
   validate(
+    typeName,
+    ast,
     SINGULAR,
-    accessFields,
     fieldsFetched,
     authentication,
+    input,
   );
   const decodedUser = authentication && authentication.user;
   // FIX: Should this not be a null check
