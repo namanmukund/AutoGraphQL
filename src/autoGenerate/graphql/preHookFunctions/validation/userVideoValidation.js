@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../../api/callGraphqlApi';
 import {
 } from '../../../../../constants';
 import {
@@ -9,17 +8,7 @@ import {
 } from '../../../../../constants/errors';
 import isTopicUnlocked from '../../../utils/isTopicUnlocked';
 import getUserCurrentTopicComponentStatus from '../../../utils/getUserCurrentTopicComponentStatus';
-
-// query to get topic order info
-const topicQuery = async topicId => `
-  query{
-    topic(id:"${topicId}"){
-      id
-      order
-      isTrial
-    }
-  }
-  `;
+import getTopicForValidation from './utils/getTopicForValidation';
 
 // prehook logic to check if requested UserVideo(user and topic id) is unlocked
 const userVideoValidation = async (params) => {
@@ -33,7 +22,7 @@ const userVideoValidation = async (params) => {
   if (!userId || !topicId) {
     throw new UserOrTopicNotPresentError();
   }
-  const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
+  const topicQueryRes = await getTopicForValidation(topicId);
   const topicInfo = get(topicQueryRes, 'data.topic');
   const currentTopicQuery = `currentTopic{
                                 id

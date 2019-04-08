@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../../api/callGraphqlApi';
 import {
   topicTypes,
 } from '../../../../../constants';
@@ -9,23 +8,10 @@ import {
 } from '../../../../../constants/errors';
 import isTopicUnlocked from '../../../utils/isTopicUnlocked';
 import getUserCurrentTopicComponentStatus from '../../../utils/getUserCurrentTopicComponentStatus';
+import getLearningObjectiveAndTopicForValidation
+  from './utils/getLearningObjectiveAndTopicForValidation';
 
-// query to get learning objective and it's topic order info
-const learningObjectiveQuery = async learningObjectiveId => `
-  query{
-    learningObjective(id:"${learningObjectiveId}"){
-      id
-      order
-      topic{
-        id
-        order
-        isTrial
-      }
-    }
-  }
-  `;
-
-// preehook logic to check if requested UserLO(user and LO id) is unlocked
+// prehook logic to check if requested UserLO(user and LO id) is unlocked
 const userLearningObjectiveValidation = async (params) => {
   // userLearningObjective collection is used to store and get chat and pq page info
   // checking if called lo and user combination in accessible
@@ -37,8 +23,8 @@ const userLearningObjectiveValidation = async (params) => {
   if (!userId || !learningObjectiveId) {
     throw new UserOrLearningObjectiveNotPresentError();
   }
-  const learningObjectiveQueryRes = await callGraphqlApi(
-    await learningObjectiveQuery(learningObjectiveId));
+  const learningObjectiveQueryRes =
+    await getLearningObjectiveAndTopicForValidation(learningObjectiveId);
   const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
   const { topic: topicInfo, order: learningObjectiveOrder } = learningObjectiveInfo;
   const currentTopicQuery = `currentTopic{

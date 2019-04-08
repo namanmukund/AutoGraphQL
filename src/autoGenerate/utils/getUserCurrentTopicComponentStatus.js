@@ -1,8 +1,7 @@
 import { GLOBAL_COURSE_ID, PUBLISHED } from '../../../constants';
 import callGraphqlApi from '../../api/callGraphqlApi';
 
-// mutation to add userCurrentTopicComponentStatus
-// query to get current topic component status so that we can change the next component accordingly
+// query to get current topic component status
 const userCurrentTopicComponentStatusQuery = async (
   userId,
   currentTopic,
@@ -32,7 +31,7 @@ const userCurrentTopicComponentStatusQuery = async (
   }
   `;
 
-// mutation to create current component status of user
+// query to get current topic component status
 const getUserCurrentTopicComponentStatus = async (
   userId,
   currentTopic,
