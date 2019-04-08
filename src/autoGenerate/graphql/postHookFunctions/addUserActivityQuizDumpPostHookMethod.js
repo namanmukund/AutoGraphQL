@@ -2,7 +2,7 @@ import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   topicTypes, freeTopicCount,
-  GLOBAL_COURSE_ID, PUBLISHED, questionTypes, scholarshipThreshHolds,
+  PUBLISHED, questionTypes, scholarshipThreshHolds,
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
@@ -11,37 +11,7 @@ import {
   UserOrTopicNotPresentError,
 } from '../../../../constants/errors';
 import { log } from '../../../../utils';
-
-// query to get current component status of user
-const userCurrentTopicComponentStatusQuery = async userId => `
-  query{
-    userCurrentTopicComponentStatuses(filter:{
-      and:[
-        {user_some:{
-        id:"${userId}"
-        }},
-      {currentCourse_some:{
-        and:[
-          {status: ${PUBLISHED}},
-          {id:"${GLOBAL_COURSE_ID}"}
-        ]
-      }}
-      ]
-    }){
-      id
-      user{
-        id
-        username
-      }
-      currentTopic{
-        id
-        order
-      }
-      currentTopicComponentType
-      enrollmentType
-    }
-  }
-  `;
+import getUserCurrentTopicComponentStatus from '../../utils/getUserCurrentTopicComponentStatus';
 
 // query to update user current topic component status
 const updateUserCurrentTopicComponentStatusMutation = async (
@@ -280,8 +250,16 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
   }
   const { next } = userActionType;
   const { quiz } = topicTypes;
+  const currentTopicQuery = `currentTopic{
+                                id 
+                             }`;
   const userCurrentTopicComponentStatusRes =
-      await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
+    await getUserCurrentTopicComponentStatus(
+      userId,
+      currentTopicQuery,
+      '',
+      '',
+    );
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
   const { quizAction, quizQuestions } = input;
   const {
@@ -289,7 +267,6 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
     currentTopicComponentType: currentTopicComponent,
     currentTopic,
   } = currentTopicComponentInfo;
-  const { id: currentTopicId } = currentTopic;
   const userQuizQueryRes = await callGraphqlApi(await userQuizQuery(userId, topicId));
   const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
   const nextTopicId = get(userQuizInfo, 'nextComponent.topic.id');
@@ -302,6 +279,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
     log('Not able to fetch currentTopicComponent in addUserActivityQuizDumpPostHookMethod');
     throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentTopicComponentType: ');
   }
+  const { id: currentTopicId } = currentTopic;
   if (quizAction === next &&
       currentTopicComponent === quiz &&
       currentTopicId === topicId &&
@@ -635,7 +613,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
     // logic for evaluating scholarship of user
     // and it will be done on first attempt of quiz
     if (currentTopicComponent === quiz &&
-        currentTopic.id === topicId) {
+        currentTopicId === topicId) {
       // code for calculating total quiz report accuracy for scholarship
       const { totalQuestionCount, correctQuestionCount } = quizReport;
       let topicsCompleted = 0;

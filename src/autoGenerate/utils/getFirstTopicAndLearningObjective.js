@@ -29,7 +29,7 @@ Getting the first published topic and first published learning objective corresp
 This will get populated in addUserCurrentTopicComponentStatusMutation
 */
 const getFirstTopicAndLearningObjective = async () => {
-  const topicQueryResult = await callGraphqlApi(topicQuery(1));
+  const topicQueryResult = await callGraphqlApi(await topicQuery(1));
   return topicQueryResult;
 };
 

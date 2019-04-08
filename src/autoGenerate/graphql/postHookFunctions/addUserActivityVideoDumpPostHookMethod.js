@@ -2,15 +2,15 @@ import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   topicTypes,
-  GLOBAL_COURSE_ID,
   userActionType,
-  userTopicTypeStatus, PUBLISHED,
+  userTopicTypeStatus,
 } from '../../../../constants';
 import { log } from '../../../../utils';
 import {
   DatabaseRecordNotFoundError,
   UserOrTopicNotPresentError,
 } from '../../../../constants/errors';
+import getUserCurrentTopicComponentStatus from '../../utils/getUserCurrentTopicComponentStatus';
 
 /*
 query to get topic and it's first lo to get populated in nextComponent of UserVideo
@@ -20,37 +20,6 @@ const topicQuery = async topicId => `
   query{
     topic(id:"${topicId}"){
       id
-    }
-  }
-  `;
-
-// query to get current component status of user
-const userCurrentTopicComponentStatusQuery = async userId => `
-  query{
-    userCurrentTopicComponentStatuses(filter:{
-      and:[
-        {user_some:{
-        id:"${userId}"
-        }},
-      {currentCourse_some:{
-        and:[
-          {status: ${PUBLISHED}},
-          {id:"${GLOBAL_COURSE_ID}"}
-        ]
-      }}
-      ]
-    }){
-      id
-      user{
-        id
-        username
-      }
-      currentTopic{
-        id
-        order
-      }
-      currentTopicComponentType
-      enrollmentType
     }
   }
   `;
@@ -130,8 +99,16 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
   }
   const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
   const topicInfo = get(topicQueryRes, 'data.topic');
+  const currentTopicQuery = `currentTopic{
+                                id 
+                             }`;
   const userCurrentTopicComponentStatusRes =
-      await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
+    await getUserCurrentTopicComponentStatus(
+      userId,
+      currentTopicQuery,
+      '',
+      '',
+    );
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
   const userVideoQueryRes = await callGraphqlApi(await userVideoQuery(userId, topicId));
   const userVideoInfo = get(userVideoQueryRes, 'data.userVideos[0]');

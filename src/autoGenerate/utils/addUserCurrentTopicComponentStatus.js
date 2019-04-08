@@ -32,7 +32,7 @@ const addUserCurrentTopicComponentStatus = async (
   firstLearningObjectiveId,
 ) => {
   const addUserCurrentTopicComponentStatusResult =
-    await callGraphqlApi(addUserCurrentTopicComponentStatusMutation(
+    await callGraphqlApi(await addUserCurrentTopicComponentStatusMutation(
       userId,
       firstTopicId,
       firstLearningObjectiveId,

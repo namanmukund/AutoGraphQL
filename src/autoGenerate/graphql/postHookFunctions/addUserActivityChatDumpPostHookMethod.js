@@ -2,15 +2,15 @@ import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   topicTypes,
-  GLOBAL_COURSE_ID,
   userActionType,
-  userTopicTypeStatus, PUBLISHED,
+  userTopicTypeStatus,
 } from '../../../../constants';
 import {
   DatabaseRecordNotFoundError,
   UserOrLearningObjectiveNotPresentError,
 } from '../../../../constants/errors';
 import { log } from '../../../../utils';
+import getUserCurrentTopicComponentStatus from '../../utils/getUserCurrentTopicComponentStatus';
 
 // query to get learning objective and the topic associated with it
 const learningObjectiveQuery = async learningObjectiveId => `
@@ -20,34 +20,6 @@ const learningObjectiveQuery = async learningObjectiveId => `
       topic{
         id
       }
-    }
-  }
-  `;
-
-// query to get current topic component status so that we can change the next component accordingly
-const userCurrentTopicComponentStatusQuery = async userId => `
-  query{
-    userCurrentTopicComponentStatuses(filter:{
-      and:[
-        {user_some:{
-        id:"${userId}"
-        }},
-      {currentCourse_some:{
-        and:[
-          {status: ${PUBLISHED}},
-          {id:"${GLOBAL_COURSE_ID}"}
-        ]
-      }}
-      ]
-    }){
-      id
-      currentTopic{
-        id
-      }
-      currentLearningObjective{
-        id
-      }
-      currentTopicComponentType
     }
   }
   `;
@@ -123,8 +95,19 @@ const addUserActivityChatDumpPostHookMethod = async (input) => {
   const topicId = get(learningObjectiveInfo, 'topic.id');
   const { id: learningObjectiveIdInResult } = learningObjectiveInfo;
   // query to get current component status of user
+  const currentTopicQuery = `currentTopic{
+                                id 
+                             }`;
+  const currentLearningObjectiveQuery = `currentLearningObjective{
+                                            id 
+                                         }`;
   const userCurrentTopicComponentStatusRes =
-    await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
+    await getUserCurrentTopicComponentStatus(
+      userId,
+      currentTopicQuery,
+      currentLearningObjectiveQuery,
+      '',
+    );
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
   const userLearningObjectiveQueryRes =
     await callGraphqlApi(await userLearningObjectiveQuery(userId, learningObjectiveId));

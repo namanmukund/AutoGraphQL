@@ -2,13 +2,13 @@ import { get } from 'lodash';
 import callGraphqlApi from '../../../../api/callGraphqlApi';
 import {
   topicTypes,
-  GLOBAL_COURSE_ID, PUBLISHED,
 } from '../../../../../constants';
 import {
   ComponentLockedError, DatabaseRecordNotFoundError,
   UserOrTopicNotPresentError,
 } from '../../../../../constants/errors';
 import isTopicUnlocked from '../../../utils/isTopicUnlocked';
+import getUserCurrentTopicComponentStatus from '../../../utils/getUserCurrentTopicComponentStatus';
 
 // query to get topic order info
 const topicQuery = async topicId => `
@@ -21,42 +21,7 @@ const topicQuery = async topicId => `
   }
   `;
 
-// query to get current component status of user
-const userCurrentTopicComponentStatusQuery = async userId => `
-  query{
-    userCurrentTopicComponentStatuses(filter:{
-      and:[
-        {user_some:{
-        id:"${userId}"
-        }},
-      {currentCourse_some:{
-        and:[
-          {status: ${PUBLISHED}},
-          {id:"${GLOBAL_COURSE_ID}"}
-        ]
-      }}
-      ]
-    }){
-      id
-      user{
-        id
-        username
-      }
-      currentTopic{
-        id
-        order
-      }
-      currentLearningObjective{
-        id
-        order
-      }
-      currentTopicComponentType
-      enrollmentType
-    }
-  }
-  `;
-
-// preehook logic to check if requested quiz(user and topic id) is unlocked
+// prehook logic to check if requested quiz(user and topic id) is unlocked
 const addUserActivityQuizDumpValidation = async (params) => {
   // check if the called user and topic is unlocked
   const {
@@ -68,8 +33,17 @@ const addUserActivityQuizDumpValidation = async (params) => {
   }
   const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
   const topicInfo = get(topicQueryRes, 'data.topic');
+  const currentTopicQuery = `currentTopic{
+                                id
+                                order
+                             }`;
   const userCurrentTopicComponentStatusRes =
-      await callGraphqlApi(await userCurrentTopicComponentStatusQuery(userId));
+    await getUserCurrentTopicComponentStatus(
+      userId,
+      currentTopicQuery,
+      '',
+      'enrollmentType',
+    );
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
   if (!topicInfo) {
     throw new DatabaseRecordNotFoundError('LearningObjective.topicInfo: ');

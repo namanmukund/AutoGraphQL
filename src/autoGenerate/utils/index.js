@@ -31,6 +31,7 @@ import isDocContainsGivenKeyValue from './isDocContainsGivenKeyValue';
 import isTopicUnlocked from './isTopicUnlocked';
 import getFirstTopicAndLearningObjective from './getFirstTopicAndLearningObjective';
 import addUserCurrentTopicComponentStatus from './addUserCurrentTopicComponentStatus';
+import getUserCurrentTopicComponentStatus from './getUserCurrentTopicComponentStatus';
 
 export {
   getParsedASTMap,
@@ -66,4 +67,5 @@ export {
   isTopicUnlocked,
   getFirstTopicAndLearningObjective,
   addUserCurrentTopicComponentStatus,
+  getUserCurrentTopicComponentStatus,
 };
