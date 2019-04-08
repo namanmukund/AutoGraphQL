@@ -211,23 +211,43 @@ const addUserActivityPQDumpPostHookMethod = async (input) => {
   }
   if (!currentTopic) {
     log('Not able to fetch currentTopic in addUserActivityPQDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentTopic: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo.CurrentTopic: is not present',
+      },
+    });
   }
   if (!currentLearningObjective) {
     log('Not able to fetch currentLearningObjective in addUserActivityPQDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentLearningObjective: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo.CurrentLearningObjective: is not present',
+      },
+    });
   }
   if (!currentTopicComponent) {
     log('Not able to fetch currentTopicComponent in addUserActivityPQDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentTopicComponentType: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo.CurrentTopicComponentType: is not present',
+      },
+    });
   }
   if (!topicId) {
     log('Not able to fetch topicInfo in addUserActivityPQDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('LearningObjective.topic: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'LearningObjective.topic: is not present',
+      },
+    });
   }
   if (!learningObjectiveInfo) {
     log('Not able to fetch topicInfo in addUserActivityPQDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('LearningObjectiveInfo: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'LearningObjectiveInfo: is not present',
+      },
+    });
   }
   const { id: currentTopicId } = currentTopic;
   const { id: currentLearningObjectiveId } = currentLearningObjective;
@@ -244,7 +264,11 @@ const addUserActivityPQDumpPostHookMethod = async (input) => {
   }
   if (!userLearningObjectiveId) {
     log('Not able to fetch userLearningObjectiveId in addUserActivityPQDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('LearningObjective.topic: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'LearningObjective.topic: is not present',
+      },
+    });
   }
   // initializing fields for user PQ report
   let firstTryCount = 0;
@@ -261,7 +285,11 @@ const addUserActivityPQDumpPostHookMethod = async (input) => {
   if (!practiceQuestionsInUserLearningObjective ||
     !practiceQuestionsInUserLearningObjective.length) {
     log('PracticeQuestions are not present in UserLearningObjective in addUserActivityPQDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('UserLearningObjective.practiceQuestions: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'UserLearningObjective.practiceQuestions: is not present',
+      },
+    });
   }
   practiceQuestionsInUserLearningObjective.forEach(
     (practiceQuestionInUserLearningObjective) => {

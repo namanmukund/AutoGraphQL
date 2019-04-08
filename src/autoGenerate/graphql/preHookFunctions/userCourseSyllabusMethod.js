@@ -38,7 +38,7 @@ the first published topic and first published learning objective corresponding t
 will get populated in the document
 */
 const userCourseSyllabusMethod = async (context) => {
-  const topic = await getFirstTopicAndLearningObjective;
+  const topic = await getFirstTopicAndLearningObjective();
   const firstTopicId = get(topic, 'data.topics[0].id');
   const firstLearningObjectiveId = get(topic, 'data.topics[0].learningObjectives[0].id');
   const authentication = ifAuthorized(context);
@@ -60,10 +60,18 @@ const userCourseSyllabusMethod = async (context) => {
   if (!currentTopicComponentInfo) {
     // returning error if there is no published topic or no published LO for topic
     if (!firstTopicId) {
-      throw new DatabaseRecordNotFoundError('FirstTopicId: ');
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'FirstTopicId is not present',
+        },
+      });
     }
     if (!firstLearningObjectiveId) {
-      throw new DatabaseRecordNotFoundError('FirstTopicId.firstLearningObjectiveId: ');
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'FirstTopicId.firstLearningObjectiveId: is not present',
+        },
+      });
     }
     // mutation to create current component status of user
     await addUserCurrentTopicComponentStatus(

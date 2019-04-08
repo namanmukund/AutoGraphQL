@@ -44,13 +44,25 @@ const userLearningObjectiveValidation = async (params) => {
     );
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
   if (!learningObjectiveInfo) {
-    throw new DatabaseRecordNotFoundError('LearningObjective: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'LearningObjective: is not present',
+      },
+    });
   }
   if (!topicInfo) {
-    throw new DatabaseRecordNotFoundError('LearningObjective.topicInfo: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'LearningObjective.topicInfo: is not present',
+      },
+    });
   }
   if (!currentTopicComponentInfo) {
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo: is not present',
+      },
+    });
   }
   const {
     order: topicOrder,
@@ -63,16 +75,32 @@ const userLearningObjectiveValidation = async (params) => {
     enrollmentType,
   } = currentTopicComponentInfo;
   if (!currentTopic) {
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentTopic: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo.CurrentTopic: is not present',
+      },
+    });
   }
   if (!currentLearningObjective) {
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentLearningObjective: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo.CurrentLearningObjective: is not present',
+      },
+    });
   }
   if (!currentTopicComponentType) {
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentTopicComponentType: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo.CurrentTopicComponentType: is not present',
+      },
+    });
   }
   if (!enrollmentType) {
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.EnrollmentType: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo.EnrollmentType: is not present',
+      },
+    });
   }
   const { order: currentTopicOrder } = currentTopic;
   // condition to check if topic is free, if not then user should be pro

@@ -139,15 +139,27 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
   } = currentTopicComponentInfo;
   if (!currentTopic) {
     log('Not able to fetch currentTopic in addUserActivityVideoDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentTopic: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo.CurrentTopic: is not present',
+      },
+    });
   }
   if (!currentTopicComponent) {
     log('Not able to fetch currentTopicComponent in addUserActivityVideoDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentTopicComponentType: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo.CurrentTopicComponentType: is not present',
+      },
+    });
   }
   if (!topicInfo) {
     log('Not able to fetch topicInfo in addUserActivityVideoDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('TopicInfo: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'TopicInfo: is not present',
+      },
+    });
   }
   if (videoAction === next &&
       currentTopicComponent === video &&
@@ -162,7 +174,11 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
   }
   if (!userVideoId) {
     log('Not able to fetch UserVideoId in addUserActivityVideoDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('UserVideoId: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'UserVideoId: is not present',
+      },
+    });
   }
   // update
   await callGraphqlApi(await updateUserVideoMutation(userVideoId,

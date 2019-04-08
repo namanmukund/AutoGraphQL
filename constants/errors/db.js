@@ -1,7 +1,7 @@
 import { createError } from 'apollo-errors';
 
-export const DatabaseRecordNotFoundError = (recordName = '') => createError('DatabaseRecordNotFoundError', {
-  message: `${recordName}Database record not found`,
+export const DatabaseRecordNotFoundError = createError('DatabaseRecordNotFoundError', {
+  message: 'Database record not found',
 });
 
 export const UserAlreadyExistsError = createError('UserAlreadyExistsError', {

@@ -131,19 +131,35 @@ const addUserActivityChatDumpPostHookMethod = async (input) => {
   } = currentTopicComponentInfo;
   if (!currentTopic) {
     log('Not able to fetch currentTopic in addUserActivityChatDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentTopic: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo.CurrentTopic: is not present',
+      },
+    });
   }
   if (!currentLearningObjective) {
     log('Not able to fetch currentLearningObjective in addUserActivityChatDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentLearningObjective: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo.CurrentLearningObjective: is not present',
+      },
+    });
   }
   if (!currentTopicComponent) {
     log('Not able to fetch currentTopicComponent in addUserActivityChatDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentTopicComponentType: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo.CurrentTopicComponentType: is not present',
+      },
+    });
   }
   if (!topicId) {
     log('Not able to fetch topicInfo in addUserActivityChatDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('LearningObjective.topic: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'LearningObjective.topic: is not present',
+      },
+    });
   }
   const { id: currentTopicId } = currentTopic;
   const { id: currentLearningObjectiveId } = currentLearningObjective;
@@ -163,7 +179,11 @@ const addUserActivityChatDumpPostHookMethod = async (input) => {
 
   if (!userLearningObjectiveId) {
     log('Not able to fetch userLearningObjectiveId in addUserActivityChatDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('LearningObjective.topic: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'LearningObjective.topic: is not present',
+      },
+    });
   }
   // update
   await callGraphqlApi(await updateUserLearningObjectiveMutation(

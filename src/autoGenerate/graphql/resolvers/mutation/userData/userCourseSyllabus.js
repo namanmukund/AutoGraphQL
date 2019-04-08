@@ -144,7 +144,11 @@ const userCourseSyllabusMutationResolver = async (
   will get populated in the document
   */
   if (!currentTopicComponentInfo) {
-    throw new DatabaseRecordNotFoundError('UserCurrentTopicComponentStatus: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'UserCurrentTopicComponentStatus: is not present',
+      },
+    });
   }
   const {
     user,
@@ -156,22 +160,46 @@ const userCourseSyllabusMutationResolver = async (
   } = currentTopicComponentInfo;
   // throwing errors if some data is missing in User current topic component status
   if (!currentCourse) {
-    throw new DatabaseRecordNotFoundError('CurrentCourse: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentCourse: is not present',
+      },
+    });
   }
   if (!currentTopicComponent) {
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponent: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponent: is not present',
+      },
+    });
   }
   if (!currentTopic) {
-    throw new DatabaseRecordNotFoundError('CurrentTopic: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopic: is not present',
+      },
+    });
   }
   if (!currentLearningObjective) {
-    throw new DatabaseRecordNotFoundError('CurrentLearningObjective: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentLearningObjective: is not present',
+      },
+    });
   }
   if (!enrollmentType) {
-    throw new DatabaseRecordNotFoundError('EnrollmentType: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'EnrollmentType: is not present',
+      },
+    });
   }
   if (!user) {
-    throw new DatabaseRecordNotFoundError('User: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'User: is not present',
+      },
+    });
   }
   // this object will be returned in output
   const currentUserSyllabus = {};
@@ -180,13 +208,21 @@ const userCourseSyllabusMutationResolver = async (
   const chapters = currentCourse.chapters;
   const { order: currentTopicOrder } = currentTopic;
   if (!chapters || !chapters.length) {
-    throw new DatabaseRecordNotFoundError('CurrentCourse.chapters: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentCourse.chapters: is not present',
+      },
+    });
   }
   totalChapters += chapters.length;
   // iterating over chapters to construct data for homepage
   chapters.forEach((chapter) => {
     if (!chapter || !chapter.topics || !chapter.topics.length) {
-      throw new DatabaseRecordNotFoundError('CurrentCourse.chapter.topics: ');
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'CurrentCourse.chapter.topics: is not present',
+        },
+      });
     }
     totalTopics += chapter.topics.length;
     // iterating over topics of each chapter  and setting isUnlocked field

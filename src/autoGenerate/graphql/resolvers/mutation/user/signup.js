@@ -115,7 +115,7 @@ const signupMutationResolver = async (
     the first published topic and first published learning objective corresponding to that topic
     will get populated in the document
     */
-    const topic = await getFirstTopicAndLearningObjective;
+    const topic = await getFirstTopicAndLearningObjective();
     const firstTopicId = get(topic, 'data.topics[0].id');
     const firstLearningObjectiveId = get(topic, 'data.topics[0].learningObjectives[0].id');
     const { id: userId } = savedUser;

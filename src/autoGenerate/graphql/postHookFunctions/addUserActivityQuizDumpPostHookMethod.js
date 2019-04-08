@@ -273,11 +273,19 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
   const { id: userQuizId } = userQuizInfo;
   if (!currentTopic) {
     log('Not able to fetch currentTopic in addUserActivityQuizDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentTopic: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo.CurrentTopic: is not present',
+      },
+    });
   }
   if (!currentTopicComponent) {
     log('Not able to fetch currentTopicComponent in addUserActivityQuizDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError('CurrentTopicComponentInfo.CurrentTopicComponentType: ');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'CurrentTopicComponentInfo.CurrentTopicComponentType: is not present',
+      },
+    });
   }
   const { id: currentTopicId } = currentTopic;
   if (quizAction === next &&
@@ -597,7 +605,11 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
                    }`;
     if (!userQuizId) {
       log('Not able to fetch userQuizId in addUserActivityQuizDumpPostHookMethod');
-      throw new DatabaseRecordNotFoundError('UserQuizId: ');
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'UserQuizId: is not present',
+        },
+      });
     }
     // updating UserQuiz
     await callGraphqlApi(await updateUserQuizMutation(userQuizId, popAllQuery));
