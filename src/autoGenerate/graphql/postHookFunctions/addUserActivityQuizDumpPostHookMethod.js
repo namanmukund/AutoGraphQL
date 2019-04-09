@@ -131,6 +131,7 @@ const addUserQuizReport = async (
   topicId,
   quizReportQuery,
   learningObjectiveReportQuery,
+  pushManyQuery,
 ) => `
   mutation{
     addUserQuizReport(
@@ -139,6 +140,7 @@ const addUserQuizReport = async (
     input:{
       ${quizReportQuery}
       ${learningObjectiveReportQuery}
+      ${pushManyQuery}
     }){
       id
     }
@@ -610,6 +612,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       topicId,
       quizReportQuery,
       learningObjectiveReportQuery,
+      pushManyQuery,
     ));
 
     // logic for evaluating scholarship of user
