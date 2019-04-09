@@ -77,8 +77,20 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
   if (!userId || !topicId) {
     log('Either one of userId or topicId is missing in input of addUserActivityVideoDumpPostHookMethod');
   }
-  // getting data for user current topic component status from context based on mutationName
+  /*
+  Getting data for user current topic component status from context based on mutationName
+  This will be used to cover the case that current component status will only get changed, if
+  called component is equal to current component and user has just consumed(next action) it
+  And current component status will not get changed when it is already consumed in past
+  */
   const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
+  /*
+  we are getting userVideo for below purpose:
+  -we get userVideo id , which will be used further to update the document
+  -we use staus field to cover the scenario, if user is coming back to a completed video
+    in that case if he is hitting back after video consumption, status will not get updated
+    if it is already completed
+  */
   const userVideoQueryRes = await callGraphqlApi(await userVideoQuery(userId, topicId));
   const userVideoInfo = get(userVideoQueryRes, 'data.userVideos[0]');
   const {
@@ -112,6 +124,15 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
   if (!currentTopicComponent) {
     log('Not able to fetch CurrentTopicComponentInfo.CurrentTopicComponentType in addUserActivityVideoDumpPostHookMethod');
   }
+  /*
+  We are checking whether user current topic status should be updated, below are the conditions:
+  -user is hitting next and
+  -current topic component should be 'video'
+  -called topic in input should be equal to current topic
+  Above conditions covers the case that current component status will only get changed, if
+  called component is equal to  current component and user has just consumed(next action) it
+  and current component status will not get changed when it is already consumed in past
+  */
   if (videoAction === next &&
       currentTopicComponent === video &&
       currentTopic.id === topicId

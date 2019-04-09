@@ -134,8 +134,21 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   const {
     id: learningObjectiveIdInResult,
   } = learningObjectiveInfo;
-  // getting data for user current topic component status from context based on mutationName
+  /*
+  Getting data for user current topic component status from context based on mutationName
+  This will be used to cover the case that current component status will only get changed, if
+  called component is equal to current component and user has just consumed(next action) it
+  And current component status will not get changed when it is already consumed in past
+  */
   const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
+  /*
+  we are getting userLearningObjective for below purpose:
+  -we get userLearningObjective id , which will be used further to update the document
+  -we use practiceQuestionStatus to cover the scenario, if user is coming back to a completed pq
+    in that case if he is hitting back after pq consumption, status will not get updated
+    if it is already completed
+  -we get next component from the document and update user current topic component status with same
+  */
   const userLearningObjectiveQueryRes = await callGraphqlApi(
     await userLearningObjectiveQuery(userId, learningObjectiveId));
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
@@ -194,6 +207,16 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   }
   const { id: currentTopicId } = currentTopic;
   const { id: currentLearningObjectiveId } = currentLearningObjective;
+  /*
+  We are checking whether user current topic status should be updated, below are the conditions:
+  -user is hitting next and
+  -current topic component should be 'practiceQuestion'
+  -called topic in input should be equal to current topic and
+  -called learningObjective in input should be equal to current learningObjective
+  Above conditions covers the case that current component status will only get changed, if
+  called component is equal to current component and user has just consumed(next action) it
+  and current component status will not get changed when it is already consumed in past
+  */
   if (pqAction === next &&
       currentTopicComponent === practiceQuestion &&
       currentTopicId === topicId &&

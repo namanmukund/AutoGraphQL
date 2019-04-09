@@ -244,7 +244,12 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   }
   const { next } = userActionType;
   const { quiz } = topicTypes;
-  // getting data for user current topic component status from context based on mutationName
+  /*
+  Getting data for user current topic component status from context based on mutationName
+  This will be used to cover the case that current component status will only get changed, if
+  called component is equal to current component and user has just consumed(next action) it
+  And current component status will not get changed when it is already consumed in past
+  */
   const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
   const { quizAction, quizQuestions } = input;
   const {
@@ -252,6 +257,11 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     currentTopicComponentType: currentTopicComponent,
     currentTopic,
   } = currentTopicComponentInfo;
+  /*
+  we are getting userQuiz for below purpose:
+  -we get userQuiz id , which will be used further to update the document
+  -we get next component from the document and update user current topic component status with same
+  */
   const userQuizQueryRes = await callGraphqlApi(await userQuizQuery(userId, topicId));
   const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
   const nextTopicId = get(userQuizInfo, 'nextComponent.topic.id');
@@ -263,6 +273,17 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     log('Not able to fetch CurrentTopicComponentInfo.CurrentTopicComponentType in addUserActivityQuizDumpPostHookMethod');
   }
   const { id: currentTopicId } = currentTopic;
+  /*
+  We are checking whether user current topic status should be updated, below are the conditions:
+  -user is hitting next and
+  -current topic component should be 'quiz'
+  -called topic in input should be equal to current topic and
+  -next published topic is present in the database, if it is not present we are assuming that it
+  -was the last topic in the course
+  Above conditions covers the case that current component status will only get changed, if
+  called component is  is equal to current component and user has just consumed(next action) it
+  And current component status will not get changed when it is already consumed in past
+  */
   if (quizAction === next &&
       currentTopicComponent === quiz &&
       currentTopicId === topicId &&
