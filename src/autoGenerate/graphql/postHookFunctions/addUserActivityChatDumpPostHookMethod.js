@@ -88,7 +88,7 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
   /*
   we are getting userLearningObjective for below purpose:
   -we get userLearningObjective id , which will be used further to update the document
-  -we use chatStaus field to cover the scenario, if user is coming back to a completed chat
+  -we use chatStatus field to cover the scenario, if user is coming back to a completed chat
     in that case if he is hitting back after chat consumption, status will not get updated
     if it is already completed
   */
@@ -153,7 +153,10 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
   if (!userLearningObjectiveId) {
     log('Not able to fetch LearningObjective.topic in addUserActivityChatDumpPostHookMethod');
   }
-  // update
+  /*
+  updating user Learning Objective document on the basis of
+  isChatBookmarked, user action(next, back etc) in input
+  */
   await callGraphqlApi(await updateUserLearningObjectiveMutation(
     userLearningObjectiveId,
     isChatBookmarked,

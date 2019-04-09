@@ -166,6 +166,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
     practiceQuestions: inputPracticeQuestions,
   } = input;
   const isPracticeQuestionBookmarked = isBookmarkedFromInput || false;
+  // practiceQuestionStatus will change to complete if user hits next
   if (pqAction && pqAction === next) {
     practiceQuestionStatus = complete;
   }
@@ -175,15 +176,22 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
     currentLearningObjective,
     currentTopic,
   } = currentTopicComponentInfo;
+  // if existing practiceQuestionStatus is complete, it will remain complete
   if (userLearningObjectiveInfo &&
       practiceQuestionStatusBeforeUpdate === complete) {
     practiceQuestionStatus = complete;
   }
+  /*
+  For next user component topic status, we are using next component stored
+  in userLearningObjective document when it was created. Next component here can
+  either be chat of next Lo or quiz. Logic for this is already written when
+  userLearningObjective document gets created
+  */
   const nextComponentLearningObjectiveId = get(userLearningObjectiveInfo, 'nextComponent.learningObjective.id');
   const nextComponentType = get(userLearningObjectiveInfo, 'nextComponent.nextComponentType');
   let nextCurrentTopicComponentType;
   let restUserCurrentTopicComponentStatusQuery = '';
-  // logic for checking the next component
+  // logic for checking the next component, it will either be chat of next LO or quiz
   if (nextComponentType === quiz) {
     nextCurrentTopicComponentType = quiz;
   } else if (nextComponentLearningObjectiveId) {
@@ -237,6 +245,11 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   let threeOrMoreTryCount = 0;
   let helpUsedCount = 0;
   let answerUsedCount = 0;
+  /*
+  creating push many query which will be used while updating userLearningObjective
+  it will contain all info about practice questions(isHintUsed, isAnswerUser, try count etc.)
+  based on input sent by client in array of objects
+  */
   let pushManyQuery = 'practiceQuestions:{ pushMany: [';
   const practiceQuestionsInUserLearningObjective = get(userLearningObjectiveInfo, 'practiceQuestions');
   if (!inputPracticeQuestions || !inputPracticeQuestions.length) {
@@ -246,6 +259,10 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
     !practiceQuestionsInUserLearningObjective.length) {
     log('PracticeQuestions are not present in UserLearningObjective in addUserActivityPQDumpPostHookMethod');
   }
+  /*
+  We get practiceQuestions from UserLearningObjective and iterate on each one of them and
+  update the same on the basis of question's status and whole PQ status and PQ from input.
+  */
   practiceQuestionsInUserLearningObjective.forEach(
     (practiceQuestionInUserLearningObjective) => {
       // storing all the passed info in input in newPracticeQuestionInUserLearningObjective
@@ -256,6 +273,10 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
       const { status: pqStatusInUserLearningObjective } =
               practiceQuestionInUserLearningObjective;
       pushManyQuery += `{ questionConnectId: "${questionConnectId}", `;
+      /*
+      Iterating over each practice question from input and will update question in
+      userLearningobjective on basis of input(isCorrect, isHIntUsed, attemptNumber etc.)
+      */
       inputPracticeQuestions.forEach((inputPracticeQuestion) => {
         const inputQuestionConnectId = get(inputPracticeQuestion, 'question.typeId');
         const {
@@ -265,10 +286,20 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
           attemptNumber,
           status,
         } = inputPracticeQuestion;
+        /*
+        As we are iterating over each question from userLearningObjective and input
+        So, checking here for same question in both
+        */
         if (questionConnectId === inputQuestionConnectId) {
           Object.assign(newPracticeQuestionInUserLearningObjective, { questionConnectId });
-          // case when individual question is incomplete and
-          // practice question is also incomplete
+          /*
+          Case: When individual question is incomplete and whole PQ is also incomplete.
+          In that case user first attempt to correct the question is considered.
+          Case example: user attempts and answers 2 PQ out of total 5 PQs and closes app.
+          In this case when he comes back the status of 2 attempted question in already complete.
+          Now, the status will not change for these 2 questions until the wholePQ is completed
+          even he decide to re-answer them
+          */
           if (practiceQuestionStatusBeforeUpdate === incomplete &&
                   pqStatusInUserLearningObjective === incomplete
           ) {
@@ -284,7 +315,11 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
             if (isCorrect === true && attemptNumber) {
               Object.assign(newPracticeQuestionInUserLearningObjective, { attemptNumber });
             }
-            // case when PQ is already completed and user is reattempting
+            /*
+            Case: when whole PQ is already completed and user is reattempting
+            In this case the question user reattempts will get updated with new values
+            rest of the questions will remain same if user skips them.
+            */
           } else if (practiceQuestionStatus === complete &&
                   pqStatusInUserLearningObjective === complete) {
             Object.assign(newPracticeQuestionInUserLearningObjective, { isHintUsed });
@@ -295,21 +330,28 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
           }
         }
       });
-      // creating query which will be sent in UserLearningObjective
+      /*
+      creating query which will be sent in UserLearningObjective on basis of ifno stored
+      in newPracticeQuestionInUserLearningObjective
+      */
       const {
         isHintUsed: updatedIsHintUsed,
         isAnswerUsed: updatedIsAnswerUsed,
         attemptNumber: updatedAttemptNumber,
         status: updatedStatus,
       } = newPracticeQuestionInUserLearningObjective;
+      // adding each upadated question in push many query
       pushManyQuery += `isHintUsed: ${updatedIsHintUsed}, 
                                                isAnswerUsed: ${updatedIsAnswerUsed}, 
                                                attemptNumber: ${updatedAttemptNumber}, 
                                                status: ${updatedStatus}, 
                                               }, `;
 
-      // these properties will be used in UserPracticeQuestionReport
-      // PQ report will only be generated when user hits next
+      /*
+      These properties will be used in UserPracticeQuestionReport
+      PQ report will only be generated when user hits next
+      And a new PQ report will be created every time users hits next
+      */
       if (pqAction === next) {
         if (updatedIsHintUsed) helpUsedCount += 1;
         if (updatedIsAnswerUsed) answerUsedCount += 1;
@@ -323,25 +365,23 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
       }
     });
   pushManyQuery += ']}';
-  let popAllQuery = '';
-  // popping all the practice questions
-  popAllQuery = `practiceQuestions:{
+  const popAllQuery = `practiceQuestions:{
                      popAll: true
                    }`;
 
+  // popping all the practice questions and sending rest of the fields for update
   await callGraphqlApi(await updateUserLearningObjectiveMutation(
     userLearningObjectiveId,
     isPracticeQuestionBookmarked,
     practiceQuestionStatus,
     popAllQuery,
   ));
-  // pushing updated practice questions
-
+  // pushing new array of objects(updated questions)
   await callGraphqlApi(updateUserLearningObjectiveMutationPracticeQuestions(
     userLearningObjectiveId,
     pushManyQuery,
   ));
-  // PQ report will only be generated when user hits next
+  // PQ report will be generated every time when user hits next
   if (pqAction === next) {
     await callGraphqlApi(await addUserPracticeQuestionReportMutation(
       userId,

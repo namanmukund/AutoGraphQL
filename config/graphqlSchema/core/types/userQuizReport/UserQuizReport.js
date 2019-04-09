@@ -15,8 +15,8 @@ const quizReportType = `
     unansweredQuestionCount: Int
  }`;
 
-const quizAnswersType = `
-  type QuizAnswersType {
+const quizType = `
+  type QuizType {
    question: QuestionBank @relation(name: "QuestionUserQuiz", direction: "OneWay")
    questionDisplayOrder: Int
    isAttempted: Boolean @defaultValue(value: false)
@@ -35,11 +35,11 @@ const quizAnswersType = `
 const UserQuizReport = `
   type UserQuizReport @model {
     user: User! @relation(name: "UserQuizReport", direction: "OneWay")
-    quiz: [QuizAnswersType]
+    quiz: [QuizType]
     quizReport: QuizReportType
     learningObjectiveReport: [QuizReportLearningObjective]
     topic: Topic @relation(name: "TopicUserQuizReport", direction: "OneWay")
   }
 `;
 
-export default [UserQuizReport, quizReportType, quizReportLearningObjective, quizAnswersType];
+export default [UserQuizReport, quizReportType, quizReportLearningObjective, quizType];

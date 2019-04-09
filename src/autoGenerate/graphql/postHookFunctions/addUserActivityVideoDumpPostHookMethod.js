@@ -87,7 +87,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
   /*
   we are getting userVideo for below purpose:
   -we get userVideo id , which will be used further to update the document
-  -we use staus field to cover the scenario, if user is coming back to a completed video
+  -we use status field to cover the scenario, if user is coming back to a completed video
     in that case if he is hitting back after video consumption, status will not get updated
     if it is already completed
   */
@@ -141,13 +141,17 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
       currentTopicComponentId,
     ));
   }
+  // if existing status for video is complete, it will remain complete
   if (userVideoInfo && userVideoInfoStatus === complete) {
     status = complete;
   }
   if (!userVideoId) {
     log('Not able to fetch UserVideoId in addUserActivityVideoDumpPostHookMethod');
   }
-  // update
+  /*
+  updating userVideo document on the basis of
+  isBookmarked, user action(next, back etc) in input
+  */
   await callGraphqlApi(await updateUserVideoMutation(userVideoId,
     videoCurrentTime,
     isBookmarked,
