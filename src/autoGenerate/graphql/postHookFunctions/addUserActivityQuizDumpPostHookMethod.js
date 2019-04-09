@@ -517,7 +517,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
                       userStatementPosition = get(userArrangeAnswer, 'position');
                       if (userStatement === statement) {
                         userArrangeQuery += `{statement: "${userStatement}", `;
-                        userArrangeQuery += `order: ${userStatementPosition}}, `;
+                        userArrangeQuery += `position: ${userStatementPosition}}, `;
                         if (userStatementPosition !== optionPosition) {
                           isCorrect = false;
                         }

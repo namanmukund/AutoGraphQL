@@ -141,7 +141,19 @@ const addUserActivityChatDumpValidation = async (params) => {
     throw new ComponentLockedError();
   }
 
-
+  // Object.assign(context, {
+  //   mutationOrQueryName: {
+  //     userCurrentTopicComponentStatuses: data
+  //   }
+  // })
+  //   {
+  //     mutationOrQueryName: {
+  //       name:mutationOrQueryName,
+  //         userCurrentTopicComponentStatuses
+  //     :
+  //       userCurrentTopicComponentStatuses
+  //     }
+  //   }
   return true;
 };
 

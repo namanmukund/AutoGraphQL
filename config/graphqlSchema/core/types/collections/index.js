@@ -6,6 +6,7 @@ import AggregationResult from './AggregationResult';
 import TokenType from './TokenType';
 import GroupByAggregationResult from './GroupByAggregationResult';
 import QuestionBankOption from './QuestionBankOption';
+import QuestionBankAnswer from './QuestionBankAnswer';
 
 export default [
   ...Enum,
@@ -16,4 +17,5 @@ export default [
   TokenType,
   GroupByAggregationResult,
   ...QuestionBankOption,
+  ...QuestionBankAnswer,
 ];
