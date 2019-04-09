@@ -9,7 +9,7 @@ import getUserCurrentTopicComponentStatus from '../../../utils/getUserCurrentTop
 import getTopicForValidation from './utils/getTopicForValidation';
 
 // prehook logic to check if requested video(user and topic id) is unlocked
-const addUserActivityVideoDumpValidation = async (params) => {
+const addUserActivityVideoDumpValidation = async (params, mutationOrQueryName, context) => {
   // check if the called user and topic is unlocked
   const {
     userConnectId: userId,
@@ -75,6 +75,13 @@ const addUserActivityVideoDumpValidation = async (params) => {
   if (!isTopicUnlocked(enrollmentType, currentTopicOrder, topicOrder, isTrial)) {
     throw new ComponentLockedError();
   }
+  // passing data in context which can be used further in post hook methods
+  // this will prevent a further query
+  const userCurrentTopicComponentStatusData = {};
+  userCurrentTopicComponentStatusData[mutationOrQueryName] = {
+    userCurrentTopicComponentStatuses: currentTopicComponentInfo,
+  };
+  Object.assign(context, userCurrentTopicComponentStatusData);
   return true;
 };
 

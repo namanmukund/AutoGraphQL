@@ -6,19 +6,6 @@ import {
   userTopicTypeStatus,
 } from '../../../../constants';
 import { log } from '../../../../utils';
-import getUserCurrentTopicComponentStatus from '../../utils/getUserCurrentTopicComponentStatus';
-
-/*
-query to get topic and it's first lo to get populated in nextComponent of UserVideo
-we also use order of topic to check if current topic component should be updated
-*/
-const topicQuery = async topicId => `
-  query{
-    topic(id:"${topicId}"){
-      id
-    }
-  }
-  `;
 
 /*
 query to get User video for given user and topic id
@@ -59,15 +46,13 @@ const updateUserVideoMutation = async (userVideoId,
   videoCurrentTime,
   isBookmarked,
   isLiked,
-  status,
-  restQuery) => `
+  status) => `
   mutation{
     updateUserVideo(id:"${userVideoId}",  input:{
       videoCurrentTime: ${videoCurrentTime}
       isBookmarked: ${isBookmarked}
       isLiked: ${isLiked}
       status: ${status}
-      ${restQuery}
     }){
       id
       status
@@ -85,26 +70,15 @@ UserVideo(bookmark, status etc) is updated based on-
   -user Video for provided userId and topic id
   -learning objective whose order is 1
 */
-const addUserActivityVideoDumpPostHookMethod = async (input) => {
+const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, context) => {
   const userId = get(input, 'user.typeId');
   const topicId = get(input, 'topic.typeId');
   // query to get topic info
   if (!userId || !topicId) {
     log('Either one of userId or topicId is missing in input of addUserActivityVideoDumpPostHookMethod');
   }
-  const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
-  const topicInfo = get(topicQueryRes, 'data.topic');
-  const currentTopicQuery = `currentTopic{
-                                id 
-                             }`;
-  const userCurrentTopicComponentStatusRes =
-    await getUserCurrentTopicComponentStatus(
-      userId,
-      currentTopicQuery,
-      '',
-      '',
-    );
-  const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
+  // getting data for user current topic component status from context based on mutationName
+  const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
   const userVideoQueryRes = await callGraphqlApi(await userVideoQuery(userId, topicId));
   const userVideoInfo = get(userVideoQueryRes, 'data.userVideos[0]');
   const {
@@ -138,12 +112,9 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
   if (!currentTopicComponent) {
     log('Not able to fetch CurrentTopicComponentInfo.CurrentTopicComponentType in addUserActivityVideoDumpPostHookMethod');
   }
-  if (!topicInfo) {
-    log('Not able to fetch TopicInfo in addUserActivityVideoDumpPostHookMethod');
-  }
   if (videoAction === next &&
       currentTopicComponent === video &&
-      currentTopic.id === topicInfo.id
+      currentTopic.id === topicId
   ) {
     await callGraphqlApi(await updateUserCurrentTopicComponentStatusMutation(
       currentTopicComponentId,

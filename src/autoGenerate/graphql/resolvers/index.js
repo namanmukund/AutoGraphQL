@@ -125,7 +125,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         authentication,
       ).then(async (result) => {
         const newResult = toObject(result);
-        const postHookResult = await posthook(newResult, modelSingular, params);
+        const postHookResult = await posthook(newResult, modelSingular, context, params);
         return postHookResult;
       });
     });
@@ -146,7 +146,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         authentication,
       ).then(async (result) => {
         const newResult = toObject(result);
-        const postHookResult = await posthook(newResult, modelSingular, params);
+        const postHookResult = await posthook(newResult, modelSingular, context, params);
         return postHookResult;
       });
     });
@@ -296,7 +296,7 @@ Object.keys(parsedASTMap).forEach((type) => {
                 connectedTypeName: relatedType,
                 connectedFieldName: relatedTypeField,
               });
-              return posthook(newResult, addRelationMutationName);
+              return posthook(newResult, addRelationMutationName, context, params);
             });
           },
           [removeRelationMutationName]: async (root, params, context, info) => {
@@ -329,7 +329,7 @@ Object.keys(parsedASTMap).forEach((type) => {
                 connectedFieldName: relatedTypeField,
               });
 
-              return posthook(newResult, removeRelationMutationName);
+              return posthook(newResult, removeRelationMutationName, context, params);
             });
           },
         },

@@ -69,7 +69,11 @@ const addUserCurrentTopicComponentStatusValidation = async (params) => {
   const learningObjectiveCount = get(
     learningObjectiveData,
     'data.topic.learningObjectivesMeta.count');
-  if (learningObjectiveCount && learningObjectiveCount > 0) {
+  /*
+  if learning objective count is not present or the count is less than 1
+  that means LO and topic are not related to each other
+  */
+  if (!learningObjectiveCount || learningObjectiveCount < 1) {
     throw new InvalidTopicLOConnectionError();
   }
   return true;

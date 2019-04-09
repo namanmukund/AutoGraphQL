@@ -103,19 +103,19 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'addUserActivityVideoDump' : {
-      await addUserActivityVideoDumpValidation(params);
+      await addUserActivityVideoDumpValidation(params, mutationOrQueryName, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUserActivityChatDump' : {
-      await addUserActivityChatDumpValidation(params);
+      await addUserActivityChatDumpValidation(params, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUserActivityPQDump' : {
-      await addUserActivityPQDumpValidation(params);
+      await addUserActivityPQDumpValidation(params, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUserActivityQuizDump' : {
-      await addUserActivityQuizDumpValidation(params);
+      await addUserActivityQuizDumpValidation(params, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'userVideo' : {
@@ -347,7 +347,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
 /*
 Params: input,mutationName,context,params
  */
-const posthook = async (input, mutationName, params) => {
+const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
     case 'deleteFile' : {
       const { uri } = input;
@@ -386,19 +386,19 @@ const posthook = async (input, mutationName, params) => {
       break;
     }
     case 'addUserActivityVideoDump' : {
-      await addUserActivityVideoDumpPostHookMethod(input);
+      await addUserActivityVideoDumpPostHookMethod(input, mutationName, context);
       break;
     }
     case 'addUserActivityChatDump' : {
-      await addUserActivityChatDumpPostHookMethod(input);
+      await addUserActivityChatDumpPostHookMethod(input, mutationName, context);
       break;
     }
     case 'addUserActivityPQDump' : {
-      await addUserActivityPQDumpPostHookMethod(input);
+      await addUserActivityPQDumpPostHookMethod(input, mutationName, context);
       break;
     }
     case 'addUserActivityQuizDump' : {
-      await addUserActivityQuizDumpPostHookMethod(input);
+      await addUserActivityQuizDumpPostHookMethod(input, mutationName, context);
       break;
     }
     default :

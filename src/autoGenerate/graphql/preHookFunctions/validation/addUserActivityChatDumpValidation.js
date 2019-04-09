@@ -12,7 +12,7 @@ import getLearningObjectiveAndTopicForValidation
   from './utils/getLearningObjectiveAndTopicForValidation';
 
 // prehook logic to check if requested chat(user and LO id) is unlocked
-const addUserActivityChatDumpValidation = async (params) => {
+const addUserActivityChatDumpValidation = async (params, mutationOrQueryName, context) => {
   // check if the called user and topic is unlocked
   const {
     userConnectId: userId,
@@ -140,20 +140,18 @@ const addUserActivityChatDumpValidation = async (params) => {
   ) {
     throw new ComponentLockedError();
   }
-
-  // Object.assign(context, {
-  //   mutationOrQueryName: {
-  //     userCurrentTopicComponentStatuses: data
-  //   }
-  // })
-  //   {
-  //     mutationOrQueryName: {
-  //       name:mutationOrQueryName,
-  //         userCurrentTopicComponentStatuses
-  //     :
-  //       userCurrentTopicComponentStatuses
-  //     }
-  //   }
+  // passing data in context which can be used further in post hook methods
+  // this will prevent a further query
+  const userCurrentTopicComponentStatusData = {};
+  userCurrentTopicComponentStatusData[mutationOrQueryName] = {
+    userCurrentTopicComponentStatuses: currentTopicComponentInfo,
+  };
+  Object.assign(context, userCurrentTopicComponentStatusData);
+  const learningObjectiveData = {};
+  learningObjectiveData[mutationOrQueryName] = {
+    learningObjective: learningObjectiveInfo,
+  };
+  Object.assign(context, learningObjectiveData);
   return true;
 };
 

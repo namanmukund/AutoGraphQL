@@ -6,19 +6,6 @@ import {
   userTopicTypeStatus,
 } from '../../../../constants';
 import { log } from '../../../../utils';
-import getUserCurrentTopicComponentStatus from '../../utils/getUserCurrentTopicComponentStatus';
-
-// query to get learning objective and the topic associated
-const learningObjectiveQuery = async learningObjectiveId => `
-  query{
-    learningObjective(id:"${learningObjectiveId}"){
-      id
-      topic{
-        id
-      }
-    }
-  }
-  `;
 
 /* query to get userLO to check if document exists for userId and learningObjectiveId
 also we are doing computation for chatStatus and next component for this */
@@ -136,33 +123,19 @@ UserLearningObjective(bookmark, practiceQuestionStatus etc) is updated based on-
   -user Learning Objective for provided userId and learning objective id
   -learning objectives and topic
 */
-const addUserActivityPQDumpPostHookMethod = async (input) => {
+const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context) => {
   const userId = get(input, 'user.typeId');
   const learningObjectiveId = get(input, 'learningObjective.typeId');
   if (!userId || !learningObjectiveId) {
     log('Either one of userId or learningObjectiveId is missing in input of addUserActivityPQDumpPostHookMethod');
   }
-  const learningObjectiveQueryRes = await callGraphqlApi(
-    await learningObjectiveQuery(learningObjectiveId));
-  const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
+  const learningObjectiveInfo = get(context, `${mutationName}.learningObjective`);
   const topicId = get(learningObjectiveInfo, 'topic.id');
   const {
     id: learningObjectiveIdInResult,
   } = learningObjectiveInfo;
-  const currentTopicQuery = `currentTopic{
-                                id 
-                             }`;
-  const currentLearningObjectiveQuery = `currentLearningObjective{
-                                            id 
-                                         }`;
-  const userCurrentTopicComponentStatusRes =
-    await getUserCurrentTopicComponentStatus(
-      userId,
-      currentTopicQuery,
-      currentLearningObjectiveQuery,
-      '',
-    );
-  const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
+  // getting data for user current topic component status from context based on mutationName
+  const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
   const userLearningObjectiveQueryRes = await callGraphqlApi(
     await userLearningObjectiveQuery(userId, learningObjectiveId));
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');

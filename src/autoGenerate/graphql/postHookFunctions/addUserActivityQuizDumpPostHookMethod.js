@@ -7,7 +7,6 @@ import {
   userTopicTypeStatus,
 } from '../../../../constants';
 import { log } from '../../../../utils';
-import getUserCurrentTopicComponentStatus from '../../utils/getUserCurrentTopicComponentStatus';
 
 // query to update user current topic component status
 const updateUserCurrentTopicComponentStatusMutation = async (
@@ -237,7 +236,7 @@ Report for quiz(topic and Lo wise) is generated according to the questions array
 UserProfile is also updated if user is attempting quiz for the first time,
  which contains scholarship information.
 */
-const addUserActivityQuizDumpPostHookMethod = async (input) => {
+const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, context) => {
   const userId = get(input, 'user.typeId');
   const topicId = get(input, 'topic.typeId');
   if (!userId || !topicId) {
@@ -245,17 +244,8 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
   }
   const { next } = userActionType;
   const { quiz } = topicTypes;
-  const currentTopicQuery = `currentTopic{
-                                id 
-                             }`;
-  const userCurrentTopicComponentStatusRes =
-    await getUserCurrentTopicComponentStatus(
-      userId,
-      currentTopicQuery,
-      '',
-      '',
-    );
-  const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
+  // getting data for user current topic component status from context based on mutationName
+  const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
   const { quizAction, quizQuestions } = input;
   const {
     id: currentTopicComponentId,

@@ -12,7 +12,7 @@ import getLearningObjectiveAndTopicForValidation
   from './utils/getLearningObjectiveAndTopicForValidation';
 
 // prehook logic to check if requested PQ(user and LO id) is unlocked
-const addUserActivityPQDumpValidation = async (params) => {
+const addUserActivityPQDumpValidation = async (params, mutationOrQueryName, context) => {
   // check if the called user and topic is unlocked
   const {
     userConnectId: userId,
@@ -138,6 +138,18 @@ const addUserActivityPQDumpValidation = async (params) => {
   ) {
     throw new ComponentLockedError();
   }
+  // passing data in context which can be used further in post hook methods
+  // this will prevent a further query
+  const userCurrentTopicComponentStatusData = {};
+  userCurrentTopicComponentStatusData[mutationOrQueryName] = {
+    userCurrentTopicComponentStatuses: currentTopicComponentInfo,
+  };
+  Object.assign(context, userCurrentTopicComponentStatusData);
+  const learningObjectiveData = {};
+  learningObjectiveData[mutationOrQueryName] = {
+    learningObjective: learningObjectiveInfo,
+  };
+  Object.assign(context, learningObjectiveData);
   return true;
 };
 
