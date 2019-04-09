@@ -6,10 +6,6 @@ import {
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
-import {
-  DatabaseRecordNotFoundError, QuizQuestionsNotPresentError,
-  UserOrTopicNotPresentError,
-} from '../../../../constants/errors';
 import { log } from '../../../../utils';
 import getUserCurrentTopicComponentStatus from '../../utils/getUserCurrentTopicComponentStatus';
 
@@ -246,7 +242,6 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
   const topicId = get(input, 'topic.typeId');
   if (!userId || !topicId) {
     log('Either one of userId or topicId is missing in input of addUserActivityQuizDumpPostHookMethod');
-    throw new UserOrTopicNotPresentError();
   }
   const { next } = userActionType;
   const { quiz } = topicTypes;
@@ -272,20 +267,10 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
   const nextTopicId = get(userQuizInfo, 'nextComponent.topic.id');
   const { id: userQuizId } = userQuizInfo;
   if (!currentTopic) {
-    log('Not able to fetch currentTopic in addUserActivityQuizDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentTopicComponentInfo.CurrentTopic: is not present',
-      },
-    });
+    log('Not able to fetch CurrentTopicComponentInfo.currentTopic in addUserActivityQuizDumpPostHookMethod');
   }
   if (!currentTopicComponent) {
-    log('Not able to fetch currentTopicComponent in addUserActivityQuizDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentTopicComponentInfo.CurrentTopicComponentType: is not present',
-      },
-    });
+    log('Not able to fetch CurrentTopicComponentInfo.CurrentTopicComponentType in addUserActivityQuizDumpPostHookMethod');
   }
   const { id: currentTopicId } = currentTopic;
   if (quizAction === next &&
@@ -305,7 +290,6 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
   }
   if (!quizQuestions || !quizQuestions.length) {
     log('QuizQuestions are not present in input in addUserActivityQuizDumpPostHookMethod');
-    throw new QuizQuestionsNotPresentError();
   }
   // code to evaluate report of quiz
   let questionIdsQuery = '[';
@@ -605,11 +589,6 @@ const addUserActivityQuizDumpPostHookMethod = async (input) => {
                    }`;
     if (!userQuizId) {
       log('Not able to fetch userQuizId in addUserActivityQuizDumpPostHookMethod');
-      throw new DatabaseRecordNotFoundError({
-        data: {
-          error: 'UserQuizId: is not present',
-        },
-      });
     }
     // updating UserQuiz
     await callGraphqlApi(await updateUserQuizMutation(userQuizId, popAllQuery));

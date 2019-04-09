@@ -5,10 +5,6 @@ import {
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
-import {
-  DatabaseRecordNotFoundError,
-  UserOrLearningObjectiveNotPresentError,
-} from '../../../../constants/errors';
 import { log } from '../../../../utils';
 import getUserCurrentTopicComponentStatus from '../../utils/getUserCurrentTopicComponentStatus';
 
@@ -87,7 +83,6 @@ const addUserActivityChatDumpPostHookMethod = async (input) => {
   const learningObjectiveId = get(input, 'learningObjective.typeId');
   if (!userId || !learningObjectiveId) {
     log('Either one of userId or learningObjectiveId is missing in input of addUserActivityChatDumpPostHookMethod');
-    throw new UserOrLearningObjectiveNotPresentError();
   }
   const learningObjectiveQueryRes =
     await callGraphqlApi(await learningObjectiveQuery(learningObjectiveId));
@@ -130,36 +125,16 @@ const addUserActivityChatDumpPostHookMethod = async (input) => {
     currentTopic,
   } = currentTopicComponentInfo;
   if (!currentTopic) {
-    log('Not able to fetch currentTopic in addUserActivityChatDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentTopicComponentInfo.CurrentTopic: is not present',
-      },
-    });
+    log('Not able to fetch CurrentTopicComponentInfo.CurrentTopic in addUserActivityChatDumpPostHookMethod');
   }
   if (!currentLearningObjective) {
-    log('Not able to fetch currentLearningObjective in addUserActivityChatDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentTopicComponentInfo.CurrentLearningObjective: is not present',
-      },
-    });
+    log('Not able to fetch CurrentTopicComponentInfo.currentLearningObjective in addUserActivityChatDumpPostHookMethod');
   }
   if (!currentTopicComponent) {
-    log('Not able to fetch currentTopicComponent in addUserActivityChatDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentTopicComponentInfo.CurrentTopicComponentType: is not present',
-      },
-    });
+    log('Not able to fetch CurrentTopicComponentInfo.CurrentTopicComponentType in addUserActivityChatDumpPostHookMethod');
   }
   if (!topicId) {
-    log('Not able to fetch topicInfo in addUserActivityChatDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'LearningObjective.topic: is not present',
-      },
-    });
+    log('Not able to fetch LearningObjective.topic in addUserActivityChatDumpPostHookMethod');
   }
   const { id: currentTopicId } = currentTopic;
   const { id: currentLearningObjectiveId } = currentLearningObjective;
@@ -178,12 +153,7 @@ const addUserActivityChatDumpPostHookMethod = async (input) => {
   }
 
   if (!userLearningObjectiveId) {
-    log('Not able to fetch userLearningObjectiveId in addUserActivityChatDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'LearningObjective.topic: is not present',
-      },
-    });
+    log('Not able to fetch LearningObjective.topic in addUserActivityChatDumpPostHookMethod');
   }
   // update
   await callGraphqlApi(await updateUserLearningObjectiveMutation(

@@ -6,10 +6,6 @@ import {
   userTopicTypeStatus,
 } from '../../../../constants';
 import { log } from '../../../../utils';
-import {
-  DatabaseRecordNotFoundError,
-  UserOrTopicNotPresentError,
-} from '../../../../constants/errors';
 import getUserCurrentTopicComponentStatus from '../../utils/getUserCurrentTopicComponentStatus';
 
 /*
@@ -95,7 +91,6 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
   // query to get topic info
   if (!userId || !topicId) {
     log('Either one of userId or topicId is missing in input of addUserActivityVideoDumpPostHookMethod');
-    throw new UserOrTopicNotPresentError();
   }
   const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
   const topicInfo = get(topicQueryRes, 'data.topic');
@@ -138,28 +133,13 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
     currentTopic,
   } = currentTopicComponentInfo;
   if (!currentTopic) {
-    log('Not able to fetch currentTopic in addUserActivityVideoDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentTopicComponentInfo.CurrentTopic: is not present',
-      },
-    });
+    log('Not able to fetch CurrentTopicComponentInfo.currentTopic in addUserActivityVideoDumpPostHookMethod');
   }
   if (!currentTopicComponent) {
-    log('Not able to fetch currentTopicComponent in addUserActivityVideoDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentTopicComponentInfo.CurrentTopicComponentType: is not present',
-      },
-    });
+    log('Not able to fetch CurrentTopicComponentInfo.CurrentTopicComponentType in addUserActivityVideoDumpPostHookMethod');
   }
   if (!topicInfo) {
-    log('Not able to fetch topicInfo in addUserActivityVideoDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'TopicInfo: is not present',
-      },
-    });
+    log('Not able to fetch TopicInfo in addUserActivityVideoDumpPostHookMethod');
   }
   if (videoAction === next &&
       currentTopicComponent === video &&
@@ -174,11 +154,6 @@ const addUserActivityVideoDumpPostHookMethod = async (input) => {
   }
   if (!userVideoId) {
     log('Not able to fetch UserVideoId in addUserActivityVideoDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'UserVideoId: is not present',
-      },
-    });
   }
   // update
   await callGraphqlApi(await updateUserVideoMutation(userVideoId,

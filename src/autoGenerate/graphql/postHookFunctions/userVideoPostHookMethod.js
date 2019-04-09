@@ -5,7 +5,7 @@ import {
   topicTypes,
   userTopicTypeStatus,
 } from '../../../../constants';
-import { UserOrTopicNotPresentError } from '../../../../constants/errors';
+import { log } from '../../../../utils';
 
 // query to get topic and it's Lo with order 1
 const topicQuery = async topicId => `
@@ -71,7 +71,7 @@ const userVideoPostHookMethod = async (input, params) => {
   // value of input in case of query is result of the query
   // so we are adding new document if document is not already present
   if (!userId || !topicId) {
-    throw new UserOrTopicNotPresentError();
+    log('Either one of userId or topicId is missing in input of userLearningObjectivePostHookMethod');
   }
   if (input && input.length === 0) {
     const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));

@@ -4,7 +4,7 @@ import {
   PUBLISHED,
   topicTypes,
 } from '../../../../constants';
-import { UserOrLearningObjectiveNotPresentError } from '../../../../constants/errors';
+import { log } from '../../../../utils';
 
 // query to get learning objective and all the learning objectives of the topic associated
 const learningObjectiveQuery = async learningObjectiveId => `
@@ -78,7 +78,7 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
   // value of input in case of query is result of the query
   // so we are adding new document if document is not already present
   if (!userId || !learningObjectiveId) {
-    throw new UserOrLearningObjectiveNotPresentError();
+    log('Either one of userId or learningObjectiveId is missing in input of userLearningObjectivePostHookMethod');
   }
   if (input && input.length === 0) {
     const learningObjectiveQueryRes = await callGraphqlApi(

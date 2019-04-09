@@ -3,7 +3,7 @@ import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   topicTypes, PUBLISHED,
 } from '../../../../constants';
-import { UserOrTopicNotPresentError } from '../../../../constants/errors';
+import { log } from '../../../../utils';
 
 // query to get quiz questions associated with topic
 const topicQuery = async topicId => `
@@ -85,7 +85,7 @@ const userQuizPostHookMethod = async (input, params) => {
   // value of input in case of query is result of the query
   // so we are adding new document if document is not already present
   if (!userId || !topicId) {
-    throw new UserOrTopicNotPresentError();
+    log('Either one of userId or topicId is missing in input of userQuizPostHookMethod');
   }
   if (input && input.length === 0) {
     const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
