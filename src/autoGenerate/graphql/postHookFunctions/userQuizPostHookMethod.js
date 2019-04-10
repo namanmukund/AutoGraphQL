@@ -74,6 +74,12 @@ const addUserQuizMutation = async (
         }
         questionDisplayOrder
       }
+      nextComponent{
+        topic{
+          id
+        }
+        nextComponentType
+      }
     }
     }
     `;
@@ -164,16 +170,18 @@ const userQuizPostHookMethod = async (userQuizResult, params) => {
           });
         }
         // constructing data for next component whenever userVideo document is just created
-        const nextComponent = { topic: {
-          type: 'Topic', typeId: `${parsedData.nextComponent.topic.id}`,
-        },
-        nextComponentType: `${parsedData.nextComponent.nextComponentType}`,
-        };
+        if (parsedData.nextComponent && parsedData.nextComponent.topic) {
+          const nextComponent = { topic: {
+            type: 'Topic', typeId: `${parsedData.nextComponent.topic.id}`,
+          },
+          nextComponentType: `${parsedData.nextComponent.nextComponentType}`,
+          };
+          parsedData.nextComponent = nextComponent;
+        }
 
         parsedData.topic = topic;
         parsedData.user = user;
         parsedData.quiz = quiz;
-        parsedData.nextComponent = nextComponent;
         resultArray.push(parsedData);
       }
     }

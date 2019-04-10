@@ -68,6 +68,15 @@ const addUserLearningObjectiveMutation = async (
       isChatBookmarked
       practiceQuestionStatus
       isPracticeQuestionBookmarked
+      nextComponent{
+        learningObjective{
+          id
+        }
+        topic{
+          id
+        }
+        nextComponentType
+      }
     }
     }
     `;
@@ -164,18 +173,25 @@ const userLearningObjectivePostHookMethod = async (userLearningObjectiveResult, 
         const lo = { type: 'LearningObjective', typeId: `${parsedData.learningObjective.id}` };
         const user = { type: 'User', typeId: `${parsedData.user.id}` };
         // constructing data for next component whenever userLearningObjective document is created
-        const nextComponent = { learningObjective: {
-          type: 'LearningObjective', typeId: `${parsedData.nextComponent.learningObjective.id}`,
-        },
-        topic: {
-          type: 'Topic', typeId: `${parsedData.nextComponent.topic.id}`,
-        },
-        nextComponentType: `${parsedData.nextComponent.nextComponentType}`,
-        };
+        if (parsedData.nextComponent) {
+          const nextComponent = {
+            nextComponentType: `${parsedData.nextComponent.nextComponentType}`,
+          };
+          if (parsedData.nextComponent.learningObjective) {
+            nextComponent.learningObjective = {
+              type: 'LearningObjective', typeId: `${parsedData.nextComponent.learningObjective.id}`,
+            };
+          }
+          if (parsedData.nextComponent.topic) {
+            nextComponent.topic = {
+              type: 'Topic', typeId: `${parsedData.nextComponent.topic.id}`,
+            };
+          }
+          parsedData.nextComponent = nextComponent;
+        }
 
         parsedData.learningObjective = lo;
         parsedData.user = user;
-        parsedData.nextComponent = nextComponent;
         resultArray.push(parsedData);
       }
     }

@@ -29,6 +29,13 @@ const userLearningObjectiveValidation = async (params) => {
   const learningObjectiveQueryRes =
     await getLearningObjectiveAndTopicForValidation(learningObjectiveId);
   const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
+  if (!learningObjectiveInfo) {
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'LearningObjective: is not present',
+      },
+    });
+  }
   const { topic: topicInfo, order: learningObjectiveOrder } = learningObjectiveInfo;
   // Fetching user current topic component status which will be compared against called LO
   const currentTopicQuery = `currentTopic{
@@ -47,13 +54,6 @@ const userLearningObjectiveValidation = async (params) => {
       'enrollmentType',
     );
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
-  if (!learningObjectiveInfo) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'LearningObjective: is not present',
-      },
-    });
-  }
   if (!topicInfo) {
     throw new DatabaseRecordNotFoundError({
       data: {

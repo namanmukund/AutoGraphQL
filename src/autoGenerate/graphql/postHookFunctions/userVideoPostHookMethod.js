@@ -119,14 +119,16 @@ const userVideoPostHookMethod = async (userVideoResult, params) => {
         const topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
         const user = { type: 'User', typeId: `${parsedData.user.id}` };
         // constructing data for next component whenever userVideo document is just created
-        const nextComponent = { learningObjective: {
-          type: 'LearningObjective', typeId: `${parsedData.nextComponent.learningObjective.id}`,
-        },
-        nextComponentType: `${parsedData.nextComponent.nextComponentType}`,
-        };
+        if (parsedData.nextComponent && parsedData.nextComponent.learningObjective) {
+          const nextComponent = { learningObjective: {
+            type: 'LearningObjective', typeId: `${parsedData.nextComponent.learningObjective.id}`,
+          },
+          nextComponentType: `${parsedData.nextComponent.nextComponentType}`,
+          };
+          parsedData.nextComponent = nextComponent;
+        }
         parsedData.topic = topic;
         parsedData.user = user;
-        parsedData.nextComponent = nextComponent;
         resultArray.push(parsedData);
       }
     }
