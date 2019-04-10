@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
+import { log } from '../../../../utils';
 
 // query to add UserProfile with default values
 const addUserProfileMutation = async userId => `
@@ -31,12 +32,15 @@ const addUserProfileMutation = async userId => `
   `;
 
 // We have logic to create a new document if it does not exist for UserProfile
-const userProfilePostHookMethod = async (input, params) => {
+const userProfilePostHookMethod = async (userProfileResult, params) => {
   const resultArray = [];
   const userId = get(params, 'filter.user_some.id');
-  // value of input in case of query is result of the query
+  if (!userId) {
+    log('userId is missing in input of userProfilePostHookMethod');
+  }
+  // userProfileResult is the document returned by the query
   // so we are adding new document if document is not already present
-  if (userId && input && input.length === 0) {
+  if (userProfileResult && userProfileResult.length === 0) {
     const result = await callGraphqlApi(await addUserProfileMutation(userId));
     if (result) {
       const data = get(result, 'data.addUserProfile');

@@ -11,7 +11,16 @@ const topicQuery = async topicId => `
     topic(id:"${topicId}"){
       id
       order
-      questions(filter:{assessmentType:${topicTypes.quiz}}){
+      questions(filter:{
+        and:[
+          {
+            assessmentType:${topicTypes.quiz}
+          },
+          {
+            status: ${PUBLISHED}
+          }
+        ]
+      }){
         id
         order
       }
@@ -75,23 +84,29 @@ It will be created and returned to tekie app with all the questions.
 Document contains all the necessary information needed on page along
 with the next component.
 */
-const userQuizPostHookMethod = async (input, params) => {
+const userQuizPostHookMethod = async (userQuizResult, params) => {
   const resultArray = [];
   const filterArray = get(params, 'filter.and');
   const userSome = filterArray.find(obj => obj.user_some);
   const loSome = filterArray.find(obj => obj.topic_some);
   const userId = get(userSome, 'user_some.id');
   const topicId = get(loSome, 'topic_some.id');
-  // value of input in case of query is result of the query
-  // so we are adding new document if document is not already present
   if (!userId || !topicId) {
     log('Either one of userId or topicId is missing in input of userQuizPostHookMethod');
   }
-  if (input && input.length === 0) {
+  /*
+  checking if document is not already present in collection for user and topic id
+  if it is not already present, we will add a new document with default data
+  */
+  if (userQuizResult && userQuizResult.length === 0) {
+    /*
+    we are getting below fields in topicQuery:
+    -all published quiz questions of the topic
+    */
     const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
     const topicInfo = get(topicQueryRes, 'data.topic');
     // adding quiz questions in the document
-    // this logic will be changed based on set
+    // this logic will be changed based on question sets
     let quizQuery = 'quiz:[';
     if (topicInfo) {
       const quizQuestionsinTopic = get(topicInfo, 'questions');
@@ -107,6 +122,10 @@ const userQuizPostHookMethod = async (input, params) => {
     }
     quizQuery += ']';
     let restQuery = '';
+    /*
+    we are getting next published topic id through this query.
+    If it is not present, next component will be empty
+    */
     const nextTopicQueryRes = await callGraphqlApi(await nextTopicQuery(topicId));
     const nextTopicId = get(nextTopicQueryRes, 'data.topics[0].id');
     if (nextTopicId) {
@@ -122,8 +141,13 @@ const userQuizPostHookMethod = async (input, params) => {
       quizQuery,
     ));
     if (result) {
-      // parsing data 'addUserVideo' so that the logic implemented ahead can read data is
-      // desired format and return the same
+      /*
+      parsing data 'addUserQuiz' so that the logic implemented ahead can read data is
+      desired format and return the same.
+      Example: suppose client has asked for title and order of topic,
+      In that case he will get title and order only. And this is happening when we parse
+      data as below. If parsing is not done, it is returning empty data.
+      */
       const parsedData = get(result, 'data.addUserQuiz');
       if (parsedData) {
         const topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };

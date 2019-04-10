@@ -28,6 +28,7 @@ const addUserActivityPQDumpValidation = async (params, mutationOrQueryName, cont
     topic: topicInfo,
     order: learningObjectiveOrder,
   } = learningObjectiveInfo;
+  // Fetching user current topic component status which will be compared against called LO
   const currentTopicQuery = `currentTopic{
                                 id
                                 order

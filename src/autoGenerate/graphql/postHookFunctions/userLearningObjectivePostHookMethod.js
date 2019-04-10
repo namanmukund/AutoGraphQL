@@ -25,7 +25,16 @@ const learningObjectiveQuery = async learningObjectiveId => `
           id
         }
       }
-      questionBank(filter:{assessmentType:${topicTypes.practiceQuestion}}){
+      questionBank(filter:{
+        and:[
+          {
+            assessmentType:${topicTypes.practiceQuestion}
+          },
+          {
+            status: ${PUBLISHED}
+          }
+        ]
+      }){
         id
       }
     }
@@ -64,23 +73,30 @@ const addUserLearningObjectiveMutation = async (
     `;
 /*
 if userLO document does not exist for provided combination of user id and LO id.
-It will be created and returned to tekie app.
+It will be created and returned.
 Document contains all the necessary information needed on page along
 with the next component.
 */
-const userLearningObjectivePostHookMethod = async (input, params) => {
+const userLearningObjectivePostHookMethod = async (userLearningObjectiveResult, params) => {
   const resultArray = [];
   const filterArray = get(params, 'filter.and');
   const userSome = filterArray.find(filterElem => filterElem.user_some);
   const loSome = filterArray.find(filterElem => filterElem.learningObjective_some);
   const userId = get(userSome, 'user_some.id');
   const learningObjectiveId = get(loSome, 'learningObjective_some.id');
-  // value of input in case of query is result of the query
-  // so we are adding new document if document is not already present
   if (!userId || !learningObjectiveId) {
     log('Either one of userId or learningObjectiveId is missing in input of userLearningObjectivePostHookMethod');
   }
-  if (input && input.length === 0) {
+  /*
+  checking if document is not already present in collection for user and LO id
+  if it is not already present, we will add a new document with default data
+  */
+  if (userLearningObjectiveResult && userLearningObjectiveResult.length === 0) {
+    /*
+    we are getting below fields in learningObjectiveQuery:
+    -topic and it's next LO if present, which will be populated in nextComponent
+    -all published practice questions of the LO
+    */
     const learningObjectiveQueryRes = await callGraphqlApi(
       await learningObjectiveQuery(learningObjectiveId));
     const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
@@ -114,7 +130,7 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
       nextCurrentTopicComponentType = quiz;
     }
     if (topicId) { topicConnectIdQuery = `topicConnectId:"${topicId}"`; }
-    // restQuery is for when we ceating userLearningObjective
+    // restQuery is for when we create userLearningObjective
     if (learningObjectiveIdInResult) {
       restQuery = `nextComponent:{
                      ${learningObjectiveConnectIdQuery}
@@ -122,7 +138,10 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
                      nextComponentType: ${nextCurrentTopicComponentType}
                    }`;
     }
-
+    /*
+    adding addUserLearningObjective document on the basis of
+    restQuery(next component data), practiceQuestionsQuery(published practice questions of LO)
+    */
     const result = await callGraphqlApi(
       await addUserLearningObjectiveMutation(
         userId,
@@ -131,8 +150,15 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
         practiceQuestionsQuery,
       ));
     if (result) {
-      // parsing data 'addUserVideo' so that the logic implemented ahead can read data is
-      // desired format and return the same
+      /*
+      parsing data 'addUserLearningObjective' so that the logic implemented ahead can read data is
+      desired format and return the same.
+      Example: suppose client has asked for title and order of learningObjective,
+      In that case he will get title and order only. And this is happening when we parse
+      data as below. If parsing is not done, it is returning empty data.
+      And here we have not parsed data for practice questions because userLO will be created
+      when user attempts chat, and he will not need PQ there.
+      */
       const parsedData = get(result, 'data.addUserLearningObjective');
       if (parsedData) {
         const lo = { type: 'LearningObjective', typeId: `${parsedData.learningObjective.id}` };

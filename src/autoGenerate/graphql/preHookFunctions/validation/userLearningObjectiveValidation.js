@@ -14,7 +14,7 @@ import getLearningObjectiveAndTopicForValidation
 // prehook logic to check if requested UserLO(user and LO id) is unlocked
 const userLearningObjectiveValidation = async (params) => {
   // userLearningObjective collection is used to store and get chat and pq page info
-  // checking if called lo and user combination in accessible
+  // checking if called lo and user combination is accessible
   const filterArray = get(params, 'filter.and');
   const userSome = filterArray.find(obj => obj.user_some);
   const loSome = filterArray.find(obj => obj.learningObjective_some);
@@ -27,6 +27,7 @@ const userLearningObjectiveValidation = async (params) => {
     await getLearningObjectiveAndTopicForValidation(learningObjectiveId);
   const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
   const { topic: topicInfo, order: learningObjectiveOrder } = learningObjectiveInfo;
+  // Fetching user current topic component status which will be compared against called LO
   const currentTopicQuery = `currentTopic{
                                 id
                                 order

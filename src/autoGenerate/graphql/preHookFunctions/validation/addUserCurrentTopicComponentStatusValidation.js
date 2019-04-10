@@ -38,7 +38,7 @@ const learningObjectiveQuery = async (topicId, learningObjectiveId) => `
   `;
 
 /*
-Pre hook logic to check if provided user and course combination does not exist
+Pre hook contains logic to check if provided user and course combination does not exist and
 logic to check if topic and LO passed are related to each other
 */
 const addUserCurrentTopicComponentStatusValidation = async (params) => {
@@ -53,6 +53,7 @@ const addUserCurrentTopicComponentStatusValidation = async (params) => {
   }
   const userCurrentTopicComponentStatusData = await callGraphqlApi(
     await userCurrentTopicComponentStatusQuery(userId, courseId));
+  // Fetching userCurrentTopicComponentStatus to check if it already exists or not
   const userCurrentTopicComponentStatusesResult = get(
     userCurrentTopicComponentStatusData,
     'data.userCurrentTopicComponentStatuses');
@@ -64,6 +65,10 @@ const addUserCurrentTopicComponentStatusValidation = async (params) => {
   if (!topicId || !learningObjectiveId) {
     throw new TopicOrLONotPresentError();
   }
+  /*
+  this query returns the count of the learning objective id inside topic id
+  So, basically it returns 1 if LO and topic are related otherwise 0
+  */
   const learningObjectiveData = await callGraphqlApi(
     await learningObjectiveQuery(topicId, learningObjectiveId));
   const learningObjectiveCount = get(

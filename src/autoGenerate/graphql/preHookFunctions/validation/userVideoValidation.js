@@ -24,6 +24,7 @@ const userVideoValidation = async (params) => {
   }
   const topicQueryRes = await getTopicForValidation(topicId);
   const topicInfo = get(topicQueryRes, 'data.topic');
+  // Fetching user current topic component status which will be compared against called topic
   const currentTopicQuery = `currentTopic{
                                 id
                                 order

@@ -13,7 +13,6 @@ import getLearningObjectiveAndTopicForValidation
 
 // prehook logic to check if requested chat(user and LO id) is unlocked
 const addUserActivityChatDumpValidation = async (params, mutationOrQueryName, context) => {
-  // check if the called user and topic is unlocked
   const {
     userConnectId: userId,
     learningObjectiveConnectId: learningObjectiveId,
@@ -28,6 +27,7 @@ const addUserActivityChatDumpValidation = async (params, mutationOrQueryName, co
     topic: topicInfo,
     order: learningObjectiveOrder,
   } = learningObjectiveInfo;
+  // Fetching user current topic component status which will be compared against called LO
   const currentTopicQuery = `currentTopic{
                                 id
                                 order

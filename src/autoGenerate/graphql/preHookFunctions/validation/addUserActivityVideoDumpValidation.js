@@ -20,6 +20,7 @@ const addUserActivityVideoDumpValidation = async (params, mutationOrQueryName, c
   }
   const topicQueryRes = await getTopicForValidation(topicId);
   const topicInfo = get(topicQueryRes, 'data.topic');
+  // Fetching user current topic component status which will be compared against called topic
   const currentTopicQuery = `currentTopic{
                                 id
                                 order
@@ -69,7 +70,7 @@ const addUserActivityVideoDumpValidation = async (params, mutationOrQueryName, c
     });
   }
   // condition to check if topic is free, if not then user should be pro
-  // type to access that topic
+  // to access that topic
   const { order: currentTopicOrder } = currentTopic;
   // throwing component is locked error
   if (!isTopicUnlocked(enrollmentType, currentTopicOrder, topicOrder, isTrial)) {

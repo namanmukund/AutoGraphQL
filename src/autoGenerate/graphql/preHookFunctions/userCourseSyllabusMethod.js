@@ -73,7 +73,8 @@ const userCourseSyllabusMethod = async (context) => {
         },
       });
     }
-    // mutation to create current component status of user
+    // mutation to create current component status of user with current topic as first topic
+    // and current LO as first LO of topic and video as current component type
     await addUserCurrentTopicComponentStatus(
       userId, firstTopicId, firstLearningObjectiveId);
   }

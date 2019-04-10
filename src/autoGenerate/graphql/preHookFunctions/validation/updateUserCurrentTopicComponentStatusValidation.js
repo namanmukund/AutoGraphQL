@@ -29,7 +29,7 @@ const userCurrentTopicComponentStatusQuery = async userCurrentTopicComponentStat
   }
 `;
 
-// pre hook logic to check if passed topic's order is not less than already present in
+// pre hook contains logic to check if passed topic's order is not less than already present in
 // user current topic component status
 const updateUserCurrentTopicComponentStatusValidation = async (params) => {
   const { id: userCurrentTopicComponentStatusId } = params;
@@ -37,8 +37,10 @@ const updateUserCurrentTopicComponentStatusValidation = async (params) => {
   if (!userCurrentTopicComponentStatusId || !topicId) {
     throw new TopicOrUserCurrentTopicComponentNotPresentError();
   }
+  // fetching order of the topic called
   const topicData = await callGraphqlApi(await topicQuery(topicId));
   const topicOrder = get(topicData, 'data.topic.order');
+  // Fetching userCurrentTopicComponentStatus to get order of current topic
   const userCurrentTopicComponentStatusData = await callGraphqlApi(
     await userCurrentTopicComponentStatusQuery(userCurrentTopicComponentStatusId));
   const userCurrentTopicComponentTopicOrder = get(
