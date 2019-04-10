@@ -15,6 +15,9 @@ import getTopicForValidation from './utils/getTopicForValidation';
 const userQuizValidation = async (params) => {
   // check if the called user and topic is unlocked
   const filterArray = get(params, 'filter.and');
+  if (!filterArray) {
+    throw new UserOrTopicNotPresentError();
+  }
   const userSome = filterArray.find(obj => obj.user_some);
   const topicSome = filterArray.find(obj => obj.topic_some);
   const userId = get(userSome, 'user_some.id');

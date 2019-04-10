@@ -15,6 +15,9 @@ const userVideoValidation = async (params) => {
   // userVideo collection is used to store and get video page info
   // checking if called topic and user combination in accessible
   const filterArray = get(params, 'filter.and');
+  if (!filterArray) {
+    throw new UserOrTopicNotPresentError();
+  }
   const userSome = filterArray.find(obj => obj.user_some);
   const topicSome = filterArray.find(obj => obj.topic_some);
   const userId = get(userSome, 'user_some.id');
