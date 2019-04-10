@@ -101,7 +101,7 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
   const { message, practiceQuestion } = topicTypes;
   const { next } = userActionType;
   let chatStatus = incomplete;
-  const { chatAction, isChatBookmarked: isChatBookmarkedFromInput } = input;
+  const { chatAction, isBookmarked: isChatBookmarkedFromInput } = input;
   const isChatBookmarked = isChatBookmarkedFromInput || false;
   if (chatAction && chatAction === next) {
     chatStatus = complete;

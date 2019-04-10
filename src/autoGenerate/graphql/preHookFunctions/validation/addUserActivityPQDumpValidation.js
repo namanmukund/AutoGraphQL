@@ -24,6 +24,13 @@ const addUserActivityPQDumpValidation = async (params, mutationOrQueryName, cont
   const learningObjectiveQueryRes =
     await getLearningObjectiveAndTopicForValidation(learningObjectiveId);
   const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
+  if (!learningObjectiveInfo) {
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'LearningObjective: is not present',
+      },
+    });
+  }
   const {
     topic: topicInfo,
     order: learningObjectiveOrder,
@@ -45,13 +52,6 @@ const addUserActivityPQDumpValidation = async (params, mutationOrQueryName, cont
       'enrollmentType',
     );
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
-  if (!learningObjectiveInfo) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'LearningObjective: is not present',
-      },
-    });
-  }
   if (!topicInfo) {
     throw new DatabaseRecordNotFoundError({
       data: {
@@ -144,13 +144,9 @@ const addUserActivityPQDumpValidation = async (params, mutationOrQueryName, cont
   const userCurrentTopicComponentStatusData = {};
   userCurrentTopicComponentStatusData[mutationOrQueryName] = {
     userCurrentTopicComponentStatuses: currentTopicComponentInfo,
-  };
-  Object.assign(context, userCurrentTopicComponentStatusData);
-  const learningObjectiveData = {};
-  learningObjectiveData[mutationOrQueryName] = {
     learningObjective: learningObjectiveInfo,
   };
-  Object.assign(context, learningObjectiveData);
+  Object.assign(context, userCurrentTopicComponentStatusData);
   return true;
 };
 

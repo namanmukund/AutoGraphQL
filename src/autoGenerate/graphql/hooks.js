@@ -107,15 +107,15 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUserActivityChatDump' : {
-      await addUserActivityChatDumpValidation(params, context);
+      await addUserActivityChatDumpValidation(params, mutationOrQueryName, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUserActivityPQDump' : {
-      await addUserActivityPQDumpValidation(params, context);
+      await addUserActivityPQDumpValidation(params, mutationOrQueryName, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUserActivityQuizDump' : {
-      await addUserActivityQuizDumpValidation(params, context);
+      await addUserActivityQuizDumpValidation(params, mutationOrQueryName, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'userVideo' : {
