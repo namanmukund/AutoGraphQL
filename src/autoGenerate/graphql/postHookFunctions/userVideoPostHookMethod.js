@@ -51,6 +51,12 @@ const addUserVideoMutation = async (
       isBookmarked
       isLiked
       status
+      nextComponent{
+        learningObjective{
+          id
+        }
+        nextComponentType
+      }
     }
     }
     `;
@@ -112,8 +118,15 @@ const userVideoPostHookMethod = async (userVideoResult, params) => {
       if (parsedData) {
         const topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
         const user = { type: 'User', typeId: `${parsedData.user.id}` };
+        // constructing data for next component whenever userVideo document is just created
+        const nextComponent = { learningObjective: {
+          type: 'LearningObjective', typeId: `${parsedData.nextComponent.learningObjective.id}`,
+        },
+        nextComponentType: `${parsedData.nextComponent.nextComponentType}`,
+        };
         parsedData.topic = topic;
         parsedData.user = user;
+        parsedData.nextComponent = nextComponent;
         resultArray.push(parsedData);
       }
     }

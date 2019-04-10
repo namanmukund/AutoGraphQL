@@ -153,6 +153,7 @@ const userQuizPostHookMethod = async (userQuizResult, params) => {
         const topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
         const user = { type: 'User', typeId: `${parsedData.user.id}` };
         const quiz = [];
+        // constructing data for quiz whenever userQuiz document is just created
         const quizRes = parsedData.quiz;
         if (quizRes) {
           quizRes.forEach((quizQuestion) => {
@@ -162,9 +163,17 @@ const userQuizPostHookMethod = async (userQuizResult, params) => {
             quiz.push(question);
           });
         }
+        // constructing data for next component whenever userVideo document is just created
+        const nextComponent = { topic: {
+          type: 'Topic', typeId: `${parsedData.nextComponent.topic.id}`,
+        },
+        nextComponentType: `${parsedData.nextComponent.nextComponentType}`,
+        };
+
         parsedData.topic = topic;
         parsedData.user = user;
         parsedData.quiz = quiz;
+        parsedData.nextComponent = nextComponent;
         resultArray.push(parsedData);
       }
     }
