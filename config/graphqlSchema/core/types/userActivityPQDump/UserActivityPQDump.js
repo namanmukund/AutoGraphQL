@@ -12,7 +12,6 @@ const practiceQuestionsType = `
    userFibInputAnswer: [FibInputAnswer]
    userFibBlockAnswer: [FibBlocksAnswer]
    userArrangeAnswer: [ArrangeAnswer]
-   status: UserTopicTypeStatus @defaultValue(value: "incomplete")
  }`;
 
 const PQShareType = `
@@ -28,7 +27,7 @@ const UserActivityPQDump = `
     isShared: Boolean @defaultValue(value: "false")
     pqShare: [PQShareType]
     bookmarkCount: Int
-    practiceQuestions: [PracticeQuestionsType]
+    practiceQuestionsDump: [PracticeQuestionsType]
     pqAction: UserActionType
     learningObjective: LearningObjective! @relation(name: "LearningObjectiveUserActivityPQDump", direction: "OneWay")
     topic: Topic @relation(name: "TopicUserActivityPQDump", direction: "OneWay")

@@ -6,6 +6,10 @@ import {
   userTopicTypeStatus,
 } from '../../../../constants';
 import { log } from '../../../../utils';
+import {
+  DatabaseRecordNotFoundError,
+  PracticeQuestionsNotPresentError,
+} from '../../../../constants/errors';
 
 /* query to get userLO to check if document exists for userId and learningObjectiveId
 also we are doing computation for chatStatus and next component for this */
@@ -163,24 +167,15 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   const {
     pqAction,
     isBookmarked: isBookmarkedFromInput,
-    practiceQuestions: inputPracticeQuestions,
+    practiceQuestionsDump: inputPracticeQuestions,
   } = input;
   const isPracticeQuestionBookmarked = isBookmarkedFromInput || false;
-  // practiceQuestionStatus will change to complete if user hits next
-  if (pqAction && pqAction === next) {
-    practiceQuestionStatus = complete;
-  }
   const {
     id: currentTopicComponentId,
     currentTopicComponentType: currentTopicComponent,
     currentLearningObjective,
     currentTopic,
   } = currentTopicComponentInfo;
-  // if existing practiceQuestionStatus is complete, it will remain complete
-  if (userLearningObjectiveInfo &&
-      practiceQuestionStatusBeforeUpdate === complete) {
-    practiceQuestionStatus = complete;
-  }
   /*
   For next user component topic status, we are using next component stored
   in userLearningObjective document when it was created. Next component here can
@@ -215,27 +210,6 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   }
   const { id: currentTopicId } = currentTopic;
   const { id: currentLearningObjectiveId } = currentLearningObjective;
-  /*
-  We are checking whether user current topic status should be updated, below are the conditions:
-  -user is hitting next and
-  -current topic component should be 'practiceQuestion'
-  -called topic in input should be equal to current topic and
-  -called learningObjective in input should be equal to current learningObjective
-  Above conditions covers the case that current component status will only get changed, if
-  called component is equal to current component and user has just consumed(next action) it
-  and current component status will not get changed when it is already consumed in past
-  */
-  if (pqAction === next &&
-      currentTopicComponent === practiceQuestion &&
-      currentTopicId === topicId &&
-      currentLearningObjectiveId === learningObjectiveIdInResult
-  ) {
-    await callGraphqlApi(await updateUserCurrentTopicComponentStatusMutation(
-      currentTopicComponentId,
-      nextCurrentTopicComponentType,
-      restUserCurrentTopicComponentStatusQuery,
-    ));
-  }
   if (!userLearningObjectiveId) {
     log('Not able to fetch LearningObjective.topic in addUserActivityPQDumpPostHookMethod');
   }
@@ -245,20 +219,28 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   let threeOrMoreTryCount = 0;
   let helpUsedCount = 0;
   let answerUsedCount = 0;
+  let completedQuestionCount = 0;
   /*
   creating push many query which will be used while updating userLearningObjective
   it will contain all info about practice questions(isHintUsed, isAnswerUser, try count etc.)
   based on input sent by client in array of objects
   */
-  let pushManyQuery = 'practiceQuestions:{ pushMany: [';
   const practiceQuestionsInUserLearningObjective = get(userLearningObjectiveInfo, 'practiceQuestions');
   if (!inputPracticeQuestions || !inputPracticeQuestions.length) {
     log('PracticeQuestions are not present in input in addUserActivityPQDumpPostHookMethod');
+    throw new PracticeQuestionsNotPresentError();
   }
   if (!practiceQuestionsInUserLearningObjective ||
     !practiceQuestionsInUserLearningObjective.length) {
     log('PracticeQuestions are not present in UserLearningObjective in addUserActivityPQDumpPostHookMethod');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'LearningObjective.PracticeQuestions: is not present',
+      },
+    });
   }
+  const totalQuestions = practiceQuestionsInUserLearningObjective.length;
+  let pushManyQuery = 'practiceQuestions:{ pushMany: [';
   /*
   We get practiceQuestions from UserLearningObjective and iterate on each one of them and
   update the same on the basis of question's status and whole PQ status and PQ from input.
@@ -284,7 +266,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
           isHintUsed,
           isAnswerUsed,
           attemptNumber,
-          status,
+          questionAction,
         } = inputPracticeQuestion;
         /*
         As we are iterating over each question from userLearningObjective and input
@@ -309,7 +291,8 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
             if (isAnswerUsed === true) {
               Object.assign(newPracticeQuestionInUserLearningObjective, { isAnswerUsed });
             }
-            if (status === userTopicTypeStatus.complete) {
+            if (questionAction === next && isCorrect === true) {
+              const status = complete;
               Object.assign(newPracticeQuestionInUserLearningObjective, { status });
             }
             if (isCorrect === true && attemptNumber) {
@@ -340,6 +323,14 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
         attemptNumber: updatedAttemptNumber,
         status: updatedStatus,
       } = newPracticeQuestionInUserLearningObjective;
+      /*
+      Storing count of all questions in completed state. We will use this in validating
+      whether user current topic status should change. It will only change if all questions are
+      in completed state and user hits next
+      */
+      if (updatedStatus === complete) {
+        completedQuestionCount += 1;
+      }
       // adding each upadated question in push many query
       pushManyQuery += `isHintUsed: ${updatedIsHintUsed}, 
                                                isAnswerUsed: ${updatedIsAnswerUsed}, 
@@ -368,6 +359,38 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   const popAllQuery = `practiceQuestions:{
                      popAll: true
                    }`;
+  // practiceQuestionStatus will change to complete if user hits next
+  if (pqAction && pqAction === next && completedQuestionCount === totalQuestions) {
+    practiceQuestionStatus = complete;
+  }
+  // if existing practiceQuestionStatus is complete, it will remain complete
+  if (userLearningObjectiveInfo &&
+    practiceQuestionStatusBeforeUpdate === complete) {
+    practiceQuestionStatus = complete;
+  }
+  /*
+  We are checking whether user current topic status should be updated, below are the conditions:
+  -user is hitting next and
+  -all practice questions whould be in completed state
+  -current topic component should be 'practiceQuestion'
+  -called topic in input should be equal to current topic and
+  -called learningObjective in input should be equal to current learningObjective
+  Above conditions covers the case that current component status will only get changed, if
+  called component is equal to current component and user has just consumed(next action) it
+  and current component status will not get changed when it is already consumed in past
+  */
+  if (pqAction === next &&
+    completedQuestionCount === totalQuestions &&
+    currentTopicComponent === practiceQuestion &&
+    currentTopicId === topicId &&
+    currentLearningObjectiveId === learningObjectiveIdInResult
+  ) {
+    await callGraphqlApi(await updateUserCurrentTopicComponentStatusMutation(
+      currentTopicComponentId,
+      nextCurrentTopicComponentType,
+      restUserCurrentTopicComponentStatusQuery,
+    ));
+  }
 
   // popping all the practice questions and sending rest of the fields for update
   await callGraphqlApi(await updateUserLearningObjectiveMutation(
@@ -377,12 +400,12 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
     popAllQuery,
   ));
   // pushing new array of objects(updated questions)
-  await callGraphqlApi(updateUserLearningObjectiveMutationPracticeQuestions(
+  await callGraphqlApi(await updateUserLearningObjectiveMutationPracticeQuestions(
     userLearningObjectiveId,
     pushManyQuery,
   ));
   // PQ report will be generated every time when user hits next
-  if (pqAction === next) {
+  if (pqAction === next && completedQuestionCount === totalQuestions) {
     await callGraphqlApi(await addUserPracticeQuestionReportMutation(
       userId,
       learningObjectiveIdInResult,
