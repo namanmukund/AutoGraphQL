@@ -7,6 +7,10 @@ import {
   userTopicTypeStatus,
 } from '../../../../constants';
 import { log } from '../../../../utils';
+import {
+  DatabaseRecordNotFoundError,
+  QuizQuestionsNotPresentError,
+} from '../../../../constants/errors';
 
 // query to update user current topic component status
 const updateUserCurrentTopicComponentStatusMutation = async (
@@ -46,6 +50,11 @@ const userQuizQuery = async (
         ]
       }){
         id
+        quiz{
+          question{
+            id
+          }
+        }
         quizStatus
         nextComponent{
         topic{
@@ -219,6 +228,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   */
   const userQuizQueryRes = await callGraphqlApi(await userQuizQuery(userId, topicId));
   const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
+  const quizQuestionsInUserQuiz = get(userQuizInfo, 'quiz');
   const nextTopicId = get(userQuizInfo, 'nextComponent.topic.id');
   const { id: userQuizId } = userQuizInfo;
   if (!currentTopic) {
@@ -254,8 +264,20 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       loQuery,
     ));
   }
+  // throwing error if client has not send any question in input
   if (!quizQuestions || !quizQuestions.length) {
     log('QuizQuestions are not present in input in addUserActivityQuizDumpPostHookMethod');
+    throw new QuizQuestionsNotPresentError();
+  }
+  // throwing error if there are no published questions in database
+  if (!quizQuestionsInUserQuiz ||
+    !quizQuestionsInUserQuiz.length) {
+    log('Quiz Questions are not present in UserQuiz in addUserActivityQuizDumpPostHookMethod');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'Topic.QuizQuestions: is not present',
+      },
+    });
   }
   // code to evaluate report of quiz
   let questionIdsQuery = '[';
@@ -265,13 +287,15 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   And there will be no record present for abandoned quiz in DB as well
   */
   if (quizAction === next) {
+    const totalQuestions = quizQuestionsInUserQuiz.length;
+    let questionsInInput = 0;
     /*
     Creating quiz question query with all questions in quiz to fetch them from
     QuestionBank collection to get answers for each of question. We will use output
     of this query to evaluate quiz against user's answer in input
     */
-    quizQuestions.forEach((quizQuestion) => {
-      const questionId = get(quizQuestion, 'question.typeId');
+    quizQuestionsInUserQuiz.forEach((quizQuestion) => {
+      const questionId = get(quizQuestion, 'question.id');
       if (questionId) {
         questionIdsQuery += `"${questionId}", `;
       }
@@ -298,7 +322,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     quiz field will be used by client when user hits view answers on report page
     And it will get genrated for each report(when user hits next)
     */
-    let pushManyQuery = 'quiz:{ pushMany: [';
+    let pushManyQuery = 'quizAnswers:[';
     /*
     Iterating over each quiz question from input and will update question in
     userQuizReport on basis of input(isCorrect, isAttempted etc.)
@@ -316,15 +340,18 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
         comparing for same question and evaluating if it is correct
         */
         if (currentQuestionId === questionBankId) {
+          // this field will be used for validation if all questions present in userQuiz is
+          // sent by client
+          questionsInInput += 1;
           quizReport.totalQuestionCount += 1;
           pushManyQuery += `{ questionConnectId: "${currentQuestionId}", `;
-          const { questionType, isAttempted } = questionBank;
-          if (isAttempted) {
-            pushManyQuery += `isAttempted: ${isAttempted}, `;
-          }
-          const { questionDisplayOrder } = quizQuestion;
+          const { questionType } = questionBank;
+          const { isAttempted, questionDisplayOrder } = quizQuestion;
           if (questionDisplayOrder) {
             pushManyQuery += `questionDisplayOrder: ${questionDisplayOrder}, `;
+          }
+          if (isAttempted) {
+            pushManyQuery += `isAttempted: ${isAttempted}, `;
           }
           const loId = get(questionBank, 'learningObjective.id');
           // initializing learning objective report it is not already populated
@@ -607,6 +634,10 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       });
     });
     // both for loop end here
+    // checking if all questions present in userQuiz is sent by client
+    if (totalQuestions !== questionsInInput) {
+      throw new QuizQuestionsNotPresentError();
+    }
     const {
       totalQuestionCount: totalQuestionCountQuizReport,
       inCorrectQuestionCount: inCorrectQuestionCountQuizReport,
@@ -637,7 +668,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
                                   }, `;
     });
     learningObjectiveReportQuery += ']';
-    pushManyQuery += ']}';
+    pushManyQuery += ']';
     if (!userQuizId) {
       log('Not able to fetch userQuizId in addUserActivityQuizDumpPostHookMethod');
     }
