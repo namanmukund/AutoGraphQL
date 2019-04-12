@@ -2,8 +2,9 @@ import { get } from 'lodash';
 import callGraphqlApi from '../../../../api/callGraphqlApi';
 import {
   InvalidTopicLOConnectionError, TopicOrLONotPresentError,
-  UserCourseCombinationExistError, UserOrCourseNotPresentError,
+  UserCourseCombinationExistError, UserMismatchError, UserOrCourseNotPresentError,
 } from '../../../../../constants/errors';
+import getInfoFromContext from './utils/getInfoFromContext';
 
 // query to get userCurrentTopicComponentStatus for given user and course id
 const userCurrentTopicComponentStatusQuery = (userId, courseId) => `
@@ -41,7 +42,17 @@ const learningObjectiveQuery = (topicId, learningObjectiveId) => `
 Pre hook contains logic to check if provided user and course combination does not exist and
 logic to check if topic and LO passed are related to each other
 */
-const addUserCurrentTopicComponentStatusValidation = async (params) => {
+const addUserCurrentTopicComponentStatusValidation = async (params, context) => {
+  /*
+  Calling method to validate token and retun userId and isRequestFromBackend
+  we will compare this userId against userId passed in input
+  both should be equal to perform action
+  */
+  const contextInfo = getInfoFromContext(context);
+  const {
+    userIdFromContext,
+    isRequestFromBackend,
+  } = contextInfo;
   const {
     userConnectId: userId,
     currentCourseConnectId: courseId,
@@ -50,6 +61,9 @@ const addUserCurrentTopicComponentStatusValidation = async (params) => {
   } = params;
   if (!userId || !courseId) {
     throw new UserOrCourseNotPresentError();
+  }
+  if (isRequestFromBackend && userIdFromContext !== userId) {
+    throw new UserMismatchError();
   }
   const userCurrentTopicComponentStatusData = await callGraphqlApi(
     userCurrentTopicComponentStatusQuery(userId, courseId));

@@ -59,6 +59,7 @@ import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   ConnectIdsAlreadyRelatedError, TopicOrUserCurrentTopicComponentNotPresentError,
   DuplicateConnectIdsError, UserOrCourseNotPresentError, TopicOrLONotPresentError,
   UserOrTopicNotPresentError, PracticeQuestionsNotPresentError, QuizQuestionsNotPresentError,
+  UserMismatchError,
 } from './input';
 
 
@@ -149,4 +150,5 @@ export {
   UserOrTopicNotPresentError,
   PracticeQuestionsNotPresentError,
   QuizQuestionsNotPresentError,
+  UserMismatchError,
 };

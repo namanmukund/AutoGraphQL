@@ -3,14 +3,12 @@ import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   GLOBAL_COURSE_ID,
 } from '../../../../constants';
-import { ifAuthorized } from '../../../../utils';
 import {
   DatabaseRecordNotFoundError,
-  UnauthenticatedUserError,
 } from '../../../../constants/errors';
 import getFirstTopicAndLearningObjective from '../../utils/getFirstTopicAndLearningObjective';
 import addUserCurrentTopicComponentStatus from '../../utils/addUserCurrentTopicComponentStatus';
-import MasterController from '../controllers/MasterController';
+import getInfoFromContext from './validation/utils/getInfoFromContext';
 
 // query to get current component status of user
 const userCurrentTopicComponentStatusesQuery = userId => `
@@ -39,17 +37,14 @@ the first published topic and first published learning objective corresponding t
 will get populated in the document
 */
 const userCourseSyllabusMethod = async (context) => {
-  const authentication = ifAuthorized(context);
-  const controller = new MasterController('', authentication);
-  controller.validate();
-  const decodedUser = authentication && authentication.user;
-  const { id: userId } = decodedUser;
+  // method to validate get user id
+  const contextInfo = getInfoFromContext(context);
+  const {
+    userIdFromContext: userId,
+  } = contextInfo;
   const topic = await getFirstTopicAndLearningObjective();
   const firstTopicId = get(topic, 'data.topics[0].id');
   const firstLearningObjectiveId = get(topic, 'data.topics[0].learningObjectives[0].id');
-  if (!userId) {
-    throw new UnauthenticatedUserError();
-  }
   const userCurrentTopicComponentStatusesRes =
     await callGraphqlApi(userCurrentTopicComponentStatusesQuery(userId));
   /*

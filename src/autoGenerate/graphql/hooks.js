@@ -90,46 +90,6 @@ const hook = (data, mutationName, hookName) => {
 // params contain all the arguments whatever you are passing in mutation query
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
-    case 'addUserCurrentTopicComponentStatus' : {
-      await addUserCurrentTopicComponentStatusValidation(params);
-      break;
-    }
-    case 'updateUserCurrentTopicComponentStatus' : {
-      await updateUserCurrentTopicComponentStatusValidation(params);
-      break;
-    }
-    case 'userCourseSyllabus' : {
-      await userCourseSyllabusMethod(context);
-      break;
-    }
-    case 'addUserActivityVideoDump' : {
-      await addUserActivityVideoDumpValidation(params, mutationOrQueryName, context);
-      return hook(input, mutationOrQueryName, 'PreHook');
-    }
-    case 'addUserActivityChatDump' : {
-      await addUserActivityChatDumpValidation(params, mutationOrQueryName, context);
-      return hook(input, mutationOrQueryName, 'PreHook');
-    }
-    case 'addUserActivityPQDump' : {
-      await addUserActivityPQDumpValidation(params, mutationOrQueryName, context);
-      return hook(input, mutationOrQueryName, 'PreHook');
-    }
-    case 'addUserActivityQuizDump' : {
-      await addUserActivityQuizDumpValidation(params, mutationOrQueryName, context);
-      return hook(input, mutationOrQueryName, 'PreHook');
-    }
-    case 'userVideo' : {
-      await userVideoValidation(params);
-      return hook(input, mutationOrQueryName, 'PreHook');
-    }
-    case 'userLearningObjective' : {
-      await userLearningObjectiveValidation(params);
-      return hook(input, mutationOrQueryName, 'PreHook');
-    }
-    case 'userQuiz' : {
-      await userQuizValidation(params);
-      return hook(input, mutationOrQueryName, 'PreHook');
-    }
     case 'addUser' : {
       // validate username, phone, email and name and returns email or phone verified accordingly
       const verifiedData = await addUserValidation(input);
@@ -321,6 +281,46 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     case 'deleteQuestionBank' : {
       await deleteQuestionBankValidation(params);
       break;
+    }
+    case 'addUserCurrentTopicComponentStatus' : {
+      await addUserCurrentTopicComponentStatusValidation(params, context);
+      break;
+    }
+    case 'updateUserCurrentTopicComponentStatus' : {
+      await updateUserCurrentTopicComponentStatusValidation(params);
+      break;
+    }
+    case 'userCourseSyllabus' : {
+      await userCourseSyllabusMethod(context);
+      break;
+    }
+    case 'addUserActivityVideoDump' : {
+      await addUserActivityVideoDumpValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addUserActivityChatDump' : {
+      await addUserActivityChatDumpValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addUserActivityPQDump' : {
+      await addUserActivityPQDumpValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addUserActivityQuizDump' : {
+      await addUserActivityQuizDumpValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'userVideo' : {
+      await userVideoValidation(params, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'userLearningObjective' : {
+      await userLearningObjectiveValidation(params, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'userQuiz' : {
+      await userQuizValidation(params, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
     }
     default : {
       /* If context is not present then it means user is not authenticated and the

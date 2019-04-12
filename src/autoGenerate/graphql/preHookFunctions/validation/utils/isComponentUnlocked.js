@@ -11,6 +11,10 @@ import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
 import { topicTypes } from '../../../../../../constants';
 import getTopicForValidation from './getTopicForValidation';
 
+/*
+This is a common method to check whether the called topic component is locked or not
+here page is component type(video, quiz, chat or practice question)
+*/
 const isComponentUnlocked = async (
   userId,
   learningObjectiveId,

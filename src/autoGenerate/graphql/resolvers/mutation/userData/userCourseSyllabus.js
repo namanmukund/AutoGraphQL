@@ -6,12 +6,10 @@ import {
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError,
-  UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
-import { ifAuthorized } from '../../../../../../utils';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
-import MasterController from '../../../controllers/MasterController';
+import getInfoFromContext from '../../../preHookFunctions/validation/utils/getInfoFromContext';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = userId => `
@@ -118,16 +116,12 @@ const userCourseSyllabusMutationResolver = async (
   // const { fieldNodes } = info;
   // const feildsFetched = getFieldsBeingFetched(fieldNodes);
   // const accessFields = ast[typeName];
+  // method to validate get user id
+  const contextInfo = getInfoFromContext(context);
+  const {
+    userIdFromContext: userId,
+  } = contextInfo;
   const { authorization: token } = context;
-  const authentication = ifAuthorized(context);
-  const controller = new MasterController('', authentication);
-  controller.validate();
-  // validate(operationName.read, accessFields, feildsFetched, authentication, {});
-  const decodedUser = authentication && authentication.user;
-  const { id: userId } = decodedUser;
-  if (!userId) {
-    throw new UnauthenticatedUserError();
-  }
   const res = await callGraphqlApi(
     getUserCurrentTopicComponentStatus(userId),
     '',

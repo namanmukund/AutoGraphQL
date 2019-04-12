@@ -87,3 +87,7 @@ export const PracticeQuestionsNotPresentError = createError('PracticeQuestionsNo
 export const QuizQuestionsNotPresentError = createError('QuizQuestionsNotPresentError', {
   message: 'QuizQuestions are missing in input',
 });
+
+export const UserMismatchError = createError('UserMismatchError', {
+  message: 'User id passed in input does not belong to logged in user',
+});
