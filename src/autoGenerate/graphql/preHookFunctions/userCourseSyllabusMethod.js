@@ -10,6 +10,7 @@ import {
 } from '../../../../constants/errors';
 import getFirstTopicAndLearningObjective from '../../utils/getFirstTopicAndLearningObjective';
 import addUserCurrentTopicComponentStatus from '../../utils/addUserCurrentTopicComponentStatus';
+import MasterController from '../controllers/MasterController';
 
 // query to get current component status of user
 const userCurrentTopicComponentStatusesQuery = userId => `
@@ -38,12 +39,14 @@ the first published topic and first published learning objective corresponding t
 will get populated in the document
 */
 const userCourseSyllabusMethod = async (context) => {
+  const authentication = ifAuthorized(context);
+  const controller = new MasterController('', authentication);
+  controller.validate();
+  const decodedUser = authentication && authentication.user;
+  const { id: userId } = decodedUser;
   const topic = await getFirstTopicAndLearningObjective();
   const firstTopicId = get(topic, 'data.topics[0].id');
   const firstLearningObjectiveId = get(topic, 'data.topics[0].learningObjectives[0].id');
-  const authentication = ifAuthorized(context);
-  const decodedUser = authentication && authentication.user;
-  const { id: userId } = decodedUser;
   if (!userId) {
     throw new UnauthenticatedUserError();
   }

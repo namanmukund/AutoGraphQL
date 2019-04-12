@@ -7,6 +7,7 @@ import checkDeleteStatusOfALearningObjective from './checkDeleteStatusOfALearnin
 import checkDeleteStatusOfATopic from './checkDeleteStatusOfATopic';
 import getLearningObjectiveAndTopicForValidation from './getLearningObjectiveAndTopicForValidation';
 import getTopicForValidation from './getTopicForValidation';
+import isComponentUnlocked from './isComponentUnlocked';
 
 export {
   getFinalConnectedRecordsForARelationFromInput,
@@ -18,4 +19,5 @@ export {
   checkDeleteStatusOfATopic,
   getLearningObjectiveAndTopicForValidation,
   getTopicForValidation,
+  isComponentUnlocked,
 };

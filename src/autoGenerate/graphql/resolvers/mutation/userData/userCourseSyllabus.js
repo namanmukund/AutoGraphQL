@@ -2,17 +2,16 @@ import { get } from 'lodash';
 import {
   topicTypes,
   GLOBAL_COURSE_ID,
-  operationName, PUBLISHED,
+  PUBLISHED,
 } from '../../../../../../constants';
-import { getFieldsBeingFetched } from '../../../../utils';
 import {
   DatabaseRecordNotFoundError,
   UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
-import { validate } from '../../../validation';
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import { ifAuthorized } from '../../../../../../utils';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
+import MasterController from '../../../controllers/MasterController';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = userId => `
@@ -116,13 +115,14 @@ const userCourseSyllabusMutationResolver = async (
   ast,
   context,
 ) => {
-  const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
-  const accessFields = ast[typeName];
+  // const { fieldNodes } = info;
+  // const feildsFetched = getFieldsBeingFetched(fieldNodes);
+  // const accessFields = ast[typeName];
   const { authorization: token } = context;
   const authentication = ifAuthorized(context);
-
-  validate(operationName.read, accessFields, feildsFetched, authentication, {});
+  const controller = new MasterController('', authentication);
+  controller.validate();
+  // validate(operationName.read, accessFields, feildsFetched, authentication, {});
   const decodedUser = authentication && authentication.user;
   const { id: userId } = decodedUser;
   if (!userId) {
