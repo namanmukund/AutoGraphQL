@@ -13,7 +13,7 @@ import {
 
 /* query to get userLO to check if document exists for userId and learningObjectiveId
 also we are doing computation for chatStatus and next component for this */
-const userLearningObjectiveQuery = async (userId, learningObjectiveId) => `
+const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
   query{
     userLearningObjectives(filter:{
       and:[
@@ -47,7 +47,7 @@ const userLearningObjectiveQuery = async (userId, learningObjectiveId) => `
   `;
 
 // query to update user current topic component status
-const updateUserCurrentTopicComponentStatusMutation = async (
+const updateUserCurrentTopicComponentStatusMutation = (
   currentTopicComponentId,
   nextCurrentTopicComponentType,
   restUserCurrentTopicComponentStatusQuery,
@@ -64,7 +64,7 @@ const updateUserCurrentTopicComponentStatusMutation = async (
   `;
 
 // mutation to update User Learning Objective, popping all practice questions
-const updateUserLearningObjectiveMutation = async (
+const updateUserLearningObjectiveMutation = (
   userLearningObjectiveId,
   isPracticeQuestionBookmarked,
   practiceQuestionStatus,
@@ -82,7 +82,7 @@ const updateUserLearningObjectiveMutation = async (
   `;
 
 // mutation to update User Learning Objective, pushing updated practice questions
-const updateUserLearningObjectiveMutationPracticeQuestions = async (
+const updateUserLearningObjectiveMutationPracticeQuestions = (
   userLearningObjectiveId, pushManyQuery) => `
   mutation{
     updateUserLearningObjective(id:"${userLearningObjectiveId}",  input:{
@@ -94,9 +94,9 @@ const updateUserLearningObjectiveMutationPracticeQuestions = async (
   `;
 
 // mutation to add UserPracticeQuestionReport
-const addUserPracticeQuestionReportMutation = async (
+const addUserPracticeQuestionReportMutation = (
   userId,
-  learningObjectivetId,
+  learningObjectiveId,
   firstTryCount,
   secondTryCount,
   threeOrMoreTryCount,
@@ -106,7 +106,7 @@ const addUserPracticeQuestionReportMutation = async (
   mutation{
     addUserPracticeQuestionReport(
     userConnectId:"${userId}"
-    learningObjectiveConnectId:"${learningObjectivetId}"
+    learningObjectiveConnectId:"${learningObjectiveId}"
     input:{
         firstTryCount: ${firstTryCount}
         secondTryCount: ${secondTryCount}
@@ -154,7 +154,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   -we get next component from the document and update user current topic component status with same
   */
   const userLearningObjectiveQueryRes = await callGraphqlApi(
-    await userLearningObjectiveQuery(userId, learningObjectiveId));
+    userLearningObjectiveQuery(userId, learningObjectiveId));
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
     id: userLearningObjectiveId,
@@ -385,7 +385,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
     currentTopicId === topicId &&
     currentLearningObjectiveId === learningObjectiveIdInResult
   ) {
-    await callGraphqlApi(await updateUserCurrentTopicComponentStatusMutation(
+    await callGraphqlApi(updateUserCurrentTopicComponentStatusMutation(
       currentTopicComponentId,
       nextCurrentTopicComponentType,
       restUserCurrentTopicComponentStatusQuery,
@@ -393,20 +393,20 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   }
 
   // popping all the practice questions and sending rest of the fields for update
-  await callGraphqlApi(await updateUserLearningObjectiveMutation(
+  await callGraphqlApi(updateUserLearningObjectiveMutation(
     userLearningObjectiveId,
     isPracticeQuestionBookmarked,
     practiceQuestionStatus,
     popAllQuery,
   ));
   // pushing new array of objects(updated questions)
-  await callGraphqlApi(await updateUserLearningObjectiveMutationPracticeQuestions(
+  await callGraphqlApi(updateUserLearningObjectiveMutationPracticeQuestions(
     userLearningObjectiveId,
     pushManyQuery,
   ));
   // PQ report will be generated every time when user hits next
   if (pqAction === next && completedQuestionCount === totalQuestions) {
-    await callGraphqlApi(await addUserPracticeQuestionReportMutation(
+    await callGraphqlApi(addUserPracticeQuestionReportMutation(
       userId,
       learningObjectiveIdInResult,
       firstTryCount,

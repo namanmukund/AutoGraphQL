@@ -2,7 +2,7 @@ import { GLOBAL_COURSE_ID, PUBLISHED } from '../../../constants';
 import callGraphqlApi from '../../api/callGraphqlApi';
 
 // query to get current topic component status
-const userCurrentTopicComponentStatusQuery = async (
+const userCurrentTopicComponentStatusQuery = (
   userId,
   currentTopic,
   currentLearningObjective,
@@ -39,7 +39,7 @@ const getUserCurrentTopicComponentStatus = async (
   enrollmentType,
 ) => {
   const userCurrentTopicComponentStatusResult =
-    await callGraphqlApi(await userCurrentTopicComponentStatusQuery(
+    await callGraphqlApi(userCurrentTopicComponentStatusQuery(
       userId,
       currentTopic,
       currentLearningObjective,

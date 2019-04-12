@@ -3,7 +3,7 @@ import callGraphqlApi from '../../../api/callGraphqlApi';
 import { log } from '../../../../utils';
 
 // query to add UserProfile with default values
-const addUserProfileMutation = async userId => `
+const addUserProfileMutation = userId => `
   mutation{
     addUserProfile(
       userConnectId:"${userId}"
@@ -41,7 +41,7 @@ const userProfilePostHookMethod = async (userProfileResult, params) => {
   // userProfileResult is the document returned by the query
   // so we are adding new document if document is not already present
   if (userProfileResult && userProfileResult.length === 0) {
-    const result = await callGraphqlApi(await addUserProfileMutation(userId));
+    const result = await callGraphqlApi(addUserProfileMutation(userId));
     if (result) {
       const data = get(result, 'data.addUserProfile');
       if (data) {

@@ -1,7 +1,7 @@
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
 
 // query to get learning objective and it's topic order info
-const learningObjectiveAndTopicQuery = async learningObjectiveId => `
+const learningObjectiveAndTopicQuery = learningObjectiveId => `
   query{
     learningObjective(id:"${learningObjectiveId}"){
       id
@@ -20,7 +20,7 @@ const getLearningObjectiveAndTopicForValidation = async (
   learningObjectiveId,
 ) => {
   const learningObjectiveAndTopicResult =
-    await callGraphqlApi(await learningObjectiveAndTopicQuery(
+    await callGraphqlApi(learningObjectiveAndTopicQuery(
       learningObjectiveId));
   return learningObjectiveAndTopicResult;
 };

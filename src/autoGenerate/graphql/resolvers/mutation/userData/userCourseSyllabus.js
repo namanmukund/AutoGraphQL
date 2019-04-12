@@ -15,7 +15,7 @@ import { ifAuthorized } from '../../../../../../utils';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = async userId => `
+const getUserCurrentTopicComponentStatus = userId => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -129,7 +129,7 @@ const userCourseSyllabusMutationResolver = async (
     throw new UnauthenticatedUserError();
   }
   const res = await callGraphqlApi(
-    await getUserCurrentTopicComponentStatus(userId),
+    getUserCurrentTopicComponentStatus(userId),
     '',
     '',
     '',

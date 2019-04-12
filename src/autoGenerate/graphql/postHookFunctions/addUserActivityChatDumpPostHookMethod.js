@@ -8,7 +8,7 @@ import {
 import { log } from '../../../../utils';
 
 // query to get userLO to check if document exists for userId and learningObjectiveId
-const userLearningObjectiveQuery = async (userId, learningObjectiveId) => `
+const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
   query{
     userLearningObjectives(filter:{
       and:[
@@ -27,7 +27,7 @@ const userLearningObjectiveQuery = async (userId, learningObjectiveId) => `
   `;
 
 // query to update user current topic component status
-const updateUserCurrentTopicComponentStatusMutation = async (
+const updateUserCurrentTopicComponentStatusMutation = (
   currentTopicComponentId,
   practiceQuestion,
 ) => `
@@ -42,7 +42,7 @@ const updateUserCurrentTopicComponentStatusMutation = async (
   `;
 
 // query to update user LO based on activity done by user
-const updateUserLearningObjectiveMutation = async (userLearningObjectiveId,
+const updateUserLearningObjectiveMutation = (userLearningObjectiveId,
   isChatBookmarked,
   chatStatus,
 ) => `
@@ -93,7 +93,7 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
     if it is already completed
   */
   const userLearningObjectiveQueryRes =
-    await callGraphqlApi(await userLearningObjectiveQuery(userId, learningObjectiveId));
+    await callGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId));
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const { id: userLearningObjectiveId,
     chatStatus: existingChatStatus } = userLearningObjectiveInfo;
@@ -141,7 +141,7 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
       currentTopicId === topicId &&
       currentLearningObjectiveId === learningObjectiveIdInResult
   ) {
-    await callGraphqlApi(await updateUserCurrentTopicComponentStatusMutation(
+    await callGraphqlApi(updateUserCurrentTopicComponentStatusMutation(
       currentTopicComponentId, practiceQuestion));
   }
   // if existing chatStatus is complete, it will remain complete
@@ -157,7 +157,7 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
   updating user Learning Objective document on the basis of
   isChatBookmarked, user action(next, back etc) in input
   */
-  await callGraphqlApi(await updateUserLearningObjectiveMutation(
+  await callGraphqlApi(updateUserLearningObjectiveMutation(
     userLearningObjectiveId,
     isChatBookmarked,
     chatStatus));

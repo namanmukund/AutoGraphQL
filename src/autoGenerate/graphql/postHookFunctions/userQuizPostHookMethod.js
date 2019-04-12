@@ -6,7 +6,7 @@ import {
 import { log } from '../../../../utils';
 
 // query to get quiz questions associated with topic
-const topicQuery = async topicId => `
+const topicQuery = topicId => `
   query{
     topic(id:"${topicId}"){
       id
@@ -29,7 +29,7 @@ const topicQuery = async topicId => `
   `;
 
 // query to get topic with passed order. This will be used for next component
-const nextTopicQuery = async topicId => `
+const nextTopicQuery = topicId => `
   query{
   topics(
     filter:{
@@ -45,7 +45,7 @@ const nextTopicQuery = async topicId => `
   `;
 
 // query to add UserQuiz if it is not already present for user and topic id
-const addUserQuizMutation = async (
+const addUserQuizMutation = (
   userId,
   topicId,
   restQuery,
@@ -109,7 +109,7 @@ const userQuizPostHookMethod = async (userQuizResult, params) => {
     we are getting below fields in topicQuery:
     -all published quiz questions of the topic
     */
-    const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
+    const topicQueryRes = await callGraphqlApi(topicQuery(topicId));
     const topicInfo = get(topicQueryRes, 'data.topic');
     // adding quiz questions in the document
     // this logic will be changed based on question sets
@@ -132,7 +132,7 @@ const userQuizPostHookMethod = async (userQuizResult, params) => {
     we are getting next published topic id through this query.
     If it is not present, next component will be empty
     */
-    const nextTopicQueryRes = await callGraphqlApi(await nextTopicQuery(topicId));
+    const nextTopicQueryRes = await callGraphqlApi(nextTopicQuery(topicId));
     const nextTopicId = get(nextTopicQueryRes, 'data.topics[0].id');
     if (nextTopicId) {
       restQuery = `nextComponent:{
@@ -140,7 +140,7 @@ const userQuizPostHookMethod = async (userQuizResult, params) => {
                      nextComponentType: ${topicTypes.video}
                    }`;
     }
-    const result = await callGraphqlApi(await addUserQuizMutation(
+    const result = await callGraphqlApi(addUserQuizMutation(
       userId,
       topicId,
       restQuery,

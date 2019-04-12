@@ -8,7 +8,7 @@ import {
 import { log } from '../../../../utils';
 
 // query to get topic and it's Lo with order 1
-const topicQuery = async topicId => `
+const topicQuery = topicId => `
   query{
     topic(id:"${topicId}"){
       id
@@ -26,7 +26,7 @@ const topicQuery = async topicId => `
   `;
 
 // query to add UserVideo if it is not already present for user and topic id
-const addUserVideoMutation = async (
+const addUserVideoMutation = (
   userId,
   topicId,
   restQuery,
@@ -86,7 +86,7 @@ const userVideoPostHookMethod = async (userVideoResult, params) => {
     we are getting below fields in topicQuery:
     -first published learning objective of the query to be populated in next component
     */
-    const topicQueryRes = await callGraphqlApi(await topicQuery(topicId));
+    const topicQueryRes = await callGraphqlApi(topicQuery(topicId));
     const topicInfo = get(topicQueryRes, 'data.topic');
     const learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
     let restQuery = '';
@@ -101,7 +101,7 @@ const userVideoPostHookMethod = async (userVideoResult, params) => {
     adding addUserVideo document on the basis of
     restQuery(next component data), rest data will take default values from schema
     */
-    const result = await callGraphqlApi(await addUserVideoMutation(
+    const result = await callGraphqlApi(addUserVideoMutation(
       userId,
       topicId,
       restQuery,

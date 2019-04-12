@@ -11,7 +11,7 @@ import { log } from '../../../../utils';
 query to get User video for given user and topic id
 we use status and next component to update thses based on value fetched
 */
-const userVideoQuery = async (userId, topicId) => `
+const userVideoQuery = (userId, topicId) => `
   query{
     userVideos(filter:{
       and:[
@@ -30,7 +30,7 @@ const userVideoQuery = async (userId, topicId) => `
   `;
 
 // query to update user current topic component status
-const updateUserCurrentTopicComponentStatusMutation = async currentTopicComponentId => `
+const updateUserCurrentTopicComponentStatusMutation = currentTopicComponentId => `
   mutation{
     updateUserCurrentTopicComponentStatus(id:"${currentTopicComponentId}",  input:{
       currentTopicComponentType: ${topicTypes.message}
@@ -42,7 +42,7 @@ const updateUserCurrentTopicComponentStatusMutation = async currentTopicComponen
   `;
 
 // mutation to update User Video
-const updateUserVideoMutation = async (userVideoId,
+const updateUserVideoMutation = (userVideoId,
   videoCurrentTime,
   isBookmarked,
   isLiked,
@@ -91,7 +91,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
     in that case if he is hitting back after video consumption, status will not get updated
     if it is already completed
   */
-  const userVideoQueryRes = await callGraphqlApi(await userVideoQuery(userId, topicId));
+  const userVideoQueryRes = await callGraphqlApi(userVideoQuery(userId, topicId));
   const userVideoInfo = get(userVideoQueryRes, 'data.userVideos[0]');
   const {
     id: userVideoId,
@@ -137,7 +137,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
       currentTopicComponent === video &&
       currentTopic.id === topicId
   ) {
-    await callGraphqlApi(await updateUserCurrentTopicComponentStatusMutation(
+    await callGraphqlApi(updateUserCurrentTopicComponentStatusMutation(
       currentTopicComponentId,
     ));
   }
@@ -152,7 +152,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
   updating userVideo document on the basis of
   isBookmarked, user action(next, back etc) in input
   */
-  await callGraphqlApi(await updateUserVideoMutation(userVideoId,
+  await callGraphqlApi(updateUserVideoMutation(userVideoId,
     videoCurrentTime,
     isBookmarked,
     isLiked,

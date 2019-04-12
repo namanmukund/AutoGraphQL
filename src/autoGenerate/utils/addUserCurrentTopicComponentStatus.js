@@ -4,7 +4,7 @@ import callGraphqlApi from '../../api/callGraphqlApi';
 const { free } = enrollmentTypes;
 const { video } = topicTypes;
 // mutation to add userCurrentTopicComponentStatus
-const addUserCurrentTopicComponentStatusMutation = async (
+const addUserCurrentTopicComponentStatusMutation = (
   userId,
   firstTopicId,
   firstLearningObjectiveId,
@@ -32,7 +32,7 @@ const addUserCurrentTopicComponentStatus = async (
   firstLearningObjectiveId,
 ) => {
   const addUserCurrentTopicComponentStatusResult =
-    await callGraphqlApi(await addUserCurrentTopicComponentStatusMutation(
+    await callGraphqlApi(addUserCurrentTopicComponentStatusMutation(
       userId,
       firstTopicId,
       firstLearningObjectiveId,

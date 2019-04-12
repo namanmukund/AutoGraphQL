@@ -6,7 +6,7 @@ import {
 } from '../../../../../constants/errors';
 
 // query to get userCurrentTopicComponentStatus for given user and course id
-const userCurrentTopicComponentStatusQuery = async (userId, courseId) => `
+const userCurrentTopicComponentStatusQuery = (userId, courseId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -24,7 +24,7 @@ const userCurrentTopicComponentStatusQuery = async (userId, courseId) => `
 `;
 
 // query to get topic and LO meta provided in input
-const learningObjectiveQuery = async (topicId, learningObjectiveId) => `
+const learningObjectiveQuery = (topicId, learningObjectiveId) => `
   query{
     topic(id:"${topicId}"){
       id
@@ -52,7 +52,7 @@ const addUserCurrentTopicComponentStatusValidation = async (params) => {
     throw new UserOrCourseNotPresentError();
   }
   const userCurrentTopicComponentStatusData = await callGraphqlApi(
-    await userCurrentTopicComponentStatusQuery(userId, courseId));
+    userCurrentTopicComponentStatusQuery(userId, courseId));
   // Fetching userCurrentTopicComponentStatus to check if it already exists or not
   const userCurrentTopicComponentStatusesResult = get(
     userCurrentTopicComponentStatusData,
@@ -70,7 +70,7 @@ const addUserCurrentTopicComponentStatusValidation = async (params) => {
   So, basically it returns 1 if LO and topic are related otherwise 0
   */
   const learningObjectiveData = await callGraphqlApi(
-    await learningObjectiveQuery(topicId, learningObjectiveId));
+    learningObjectiveQuery(topicId, learningObjectiveId));
   const learningObjectiveCount = get(
     learningObjectiveData,
     'data.topic.learningObjectivesMeta.count');

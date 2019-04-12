@@ -13,7 +13,7 @@ import {
 } from '../../../../constants/errors';
 
 // query to update user current topic component status
-const updateUserCurrentTopicComponentStatusMutation = async (
+const updateUserCurrentTopicComponentStatusMutation = (
   currentTopicComponentId,
   nextTopicId,
   loQuery,
@@ -31,7 +31,7 @@ const updateUserCurrentTopicComponentStatusMutation = async (
   `;
 
 // query to fetch user quiz info
-const userQuizQuery = async (
+const userQuizQuery = (
   userId,
   topicId,
 ) => `
@@ -75,7 +75,7 @@ const userQuizQuery = async (
     `;
 
 // getting questions from question bank to evaluate quiz report
-const questionBankQuery = async questionIdsQuery => `
+const questionBankQuery = questionIdsQuery => `
   query{
     questionBanks(filter:{
       id_in: ${questionIdsQuery}
@@ -107,7 +107,7 @@ const questionBankQuery = async questionIdsQuery => `
   `;
 
 // mutation to update UserQuiz, pushing updated quiz questions
-const updateUserQuizMutation = async userQuizId => `
+const updateUserQuizMutation = userQuizId => `
   mutation{
     updateUserQuiz(id:"${userQuizId}",  input:{
       quizStatus: ${userTopicTypeStatus.complete}
@@ -118,7 +118,7 @@ const updateUserQuizMutation = async userQuizId => `
   `;
 
 // mutation to add UserQuizReport
-const addUserQuizReport = async (
+const addUserQuizReport = (
   userId,
   topicId,
   quizReportQuery,
@@ -140,7 +140,7 @@ const addUserQuizReport = async (
   `;
 
 // query to get current user profile to get current scholarship status
-const userProfileQuery = async userId => `
+const userProfileQuery = userId => `
   query{
     userProfiles(filter:{
       user_some:{
@@ -160,7 +160,7 @@ const userProfileQuery = async userId => `
 `;
 
 // query to update user profile if it exists already
-const updateUserProfile = async (
+const updateUserProfile = (
   userProfileId,
   userProfileTopicConnectQuery,
   topicsCompleted,
@@ -226,7 +226,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   -we get userQuiz id , which will be used further to update the document
   -we get next component from the document and update user current topic component status with same
   */
-  const userQuizQueryRes = await callGraphqlApi(await userQuizQuery(userId, topicId));
+  const userQuizQueryRes = await callGraphqlApi(userQuizQuery(userId, topicId));
   const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
   const quizQuestionsInUserQuiz = get(userQuizInfo, 'quiz');
   const nextTopicId = get(userQuizInfo, 'nextComponent.topic.id');
@@ -258,7 +258,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     let loQuery = '';
     if (learningObjectiveConnectId) { loQuery = `currentLearningObjectiveConnectId:"${learningObjectiveConnectId}"`; }
     // updating current component in case quiz is completed by user
-    await callGraphqlApi(await updateUserCurrentTopicComponentStatusMutation(
+    await callGraphqlApi(updateUserCurrentTopicComponentStatusMutation(
       currentTopicComponentId,
       nextTopicId,
       loQuery,
@@ -301,7 +301,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       }
     });
     questionIdsQuery += ']';
-    const questionBankQueryRes = await callGraphqlApi(await questionBankQuery(questionIdsQuery));
+    const questionBankQueryRes = await callGraphqlApi(questionBankQuery(questionIdsQuery));
     const questionBankInfo = get(questionBankQueryRes, 'data.questionBanks');
     const learningObjectiveReportObject = {};
     // Initializing quiz report with default count as 0 for all of fields
@@ -673,9 +673,9 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       log('Not able to fetch userQuizId in addUserActivityQuizDumpPostHookMethod');
     }
     // updating UserQuiz to change status to complete
-    await callGraphqlApi(await updateUserQuizMutation(userQuizId));
+    await callGraphqlApi(updateUserQuizMutation(userQuizId));
     // generating quiz report of user
-    await callGraphqlApi(await addUserQuizReport(
+    await callGraphqlApi(addUserQuizReport(
       userId,
       topicId,
       quizReportQuery,
@@ -712,7 +712,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       // there is logic in post hook of userProfile to create userProfile with
       // default data if it was not present. So we will always get this
       //
-      const userProfileResult = await callGraphqlApi(await userProfileQuery(userId));
+      const userProfileResult = await callGraphqlApi(userProfileQuery(userId));
       const userProfileInfo = get(userProfileResult, 'data.userProfiles[0]');
       const userProfileId = get(userProfileInfo, 'id');
       if (!userProfileId) {
@@ -762,7 +762,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       }
 
       // updating user profile
-      await callGraphqlApi(await updateUserProfile(
+      await callGraphqlApi(updateUserProfile(
         userProfileId,
         userProfileTopicConnectQuery,
         topicsCompleted,

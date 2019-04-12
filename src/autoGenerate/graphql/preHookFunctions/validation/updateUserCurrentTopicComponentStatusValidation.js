@@ -6,7 +6,7 @@ import {
 } from '../../../../../constants/errors';
 
 // query to get topic order info
-const topicQuery = async topicId => `
+const topicQuery = topicId => `
   query{
     topic(id:"${topicId}"){
       id
@@ -16,7 +16,7 @@ const topicQuery = async topicId => `
   `;
 
 // query to get user current topic component status
-const userCurrentTopicComponentStatusQuery = async userCurrentTopicComponentStatusId => `
+const userCurrentTopicComponentStatusQuery = userCurrentTopicComponentStatusId => `
   query{
     userCurrentTopicComponentStatus(id:"${userCurrentTopicComponentStatusId}"){
       id
@@ -43,11 +43,11 @@ const updateUserCurrentTopicComponentStatusValidation = async (params) => {
   In that case this validation will not get fired
   */
   if (topicId) {
-    const topicData = await callGraphqlApi(await topicQuery(topicId));
+    const topicData = await callGraphqlApi(topicQuery(topicId));
     const topicOrder = get(topicData, 'data.topic.order');
     // Fetching userCurrentTopicComponentStatus to get order of current topic
     const userCurrentTopicComponentStatusData = await callGraphqlApi(
-      await userCurrentTopicComponentStatusQuery(userCurrentTopicComponentStatusId));
+      userCurrentTopicComponentStatusQuery(userCurrentTopicComponentStatusId));
     const userCurrentTopicComponentTopicOrder = get(
       userCurrentTopicComponentStatusData,
       'data.userCurrentTopicComponentStatus.currentTopic.order');

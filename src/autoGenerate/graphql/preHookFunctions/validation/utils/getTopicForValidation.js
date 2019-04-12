@@ -1,7 +1,7 @@
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
 
 // query to get topic info
-const topicQuery = async topicId => `
+const topicQuery = topicId => `
   query{
     topic(id:"${topicId}"){
       id
@@ -16,7 +16,7 @@ const getTopicForValidation = async (
   topicId,
 ) => {
   const topicResult =
-    await callGraphqlApi(await topicQuery(
+    await callGraphqlApi(topicQuery(
       topicId));
   return topicResult;
 };

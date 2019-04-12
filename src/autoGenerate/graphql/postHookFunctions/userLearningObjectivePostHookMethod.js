@@ -7,7 +7,7 @@ import {
 import { log } from '../../../../utils';
 
 // query to get learning objective and all the learning objectives of the topic associated
-const learningObjectiveQuery = async learningObjectiveId => `
+const learningObjectiveQuery = learningObjectiveId => `
   query{
     learningObjective(id:"${learningObjectiveId}"){
       id
@@ -42,7 +42,7 @@ const learningObjectiveQuery = async learningObjectiveId => `
   `;
 
 // query to add User LO if it is not already present for user and LO id
-const addUserLearningObjectiveMutation = async (
+const addUserLearningObjectiveMutation = (
   userId,
   learningObjectiveId,
   restQuery,
@@ -107,7 +107,7 @@ const userLearningObjectivePostHookMethod = async (userLearningObjectiveResult, 
     -all published practice questions of the LO
     */
     const learningObjectiveQueryRes = await callGraphqlApi(
-      await learningObjectiveQuery(learningObjectiveId));
+      learningObjectiveQuery(learningObjectiveId));
     const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
     const topicInfo = get(learningObjectiveInfo, 'topic');
     const { id: topicId } = topicInfo;
@@ -152,7 +152,7 @@ const userLearningObjectivePostHookMethod = async (userLearningObjectiveResult, 
     restQuery(next component data), practiceQuestionsQuery(published practice questions of LO)
     */
     const result = await callGraphqlApi(
-      await addUserLearningObjectiveMutation(
+      addUserLearningObjectiveMutation(
         userId,
         learningObjectiveId,
         restQuery,

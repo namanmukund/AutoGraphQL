@@ -12,7 +12,7 @@ import getFirstTopicAndLearningObjective from '../../utils/getFirstTopicAndLearn
 import addUserCurrentTopicComponentStatus from '../../utils/addUserCurrentTopicComponentStatus';
 
 // query to get current component status of user
-const userCurrentTopicComponentStatusesQuery = async userId => `
+const userCurrentTopicComponentStatusesQuery = userId => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -48,7 +48,7 @@ const userCourseSyllabusMethod = async (context) => {
     throw new UnauthenticatedUserError();
   }
   const userCurrentTopicComponentStatusesRes =
-    await callGraphqlApi(await userCurrentTopicComponentStatusesQuery(userId));
+    await callGraphqlApi(userCurrentTopicComponentStatusesQuery(userId));
   /*
   Ideally each user will have 1 document in the collection. Fetching the same document
   Also we have logic in addUserCurrentTopicComponentStatusValidation to check that
