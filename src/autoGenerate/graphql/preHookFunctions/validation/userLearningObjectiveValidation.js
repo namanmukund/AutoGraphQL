@@ -4,22 +4,23 @@ import {
   UserOrLearningObjectiveNotPresentError,
 } from '../../../../../constants/errors';
 import isComponentUnlocked from './utils/isComponentUnlocked';
-import getInfoFromContext from './utils/getInfoFromContext';
+import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
+import { backendApps } from '../../../../../constants';
 
 // prehook logic to check if requested UserLO(user and LO id) is unlocked
 const userLearningObjectiveValidation = async (params, context) => {
   // userLearningObjective collection is used to store and get chat and pq page info
   // checking if called lo and user combination is accessible
   /*
-  Calling method to validate token and retun userId and isRequestFromBackend
+  Calling method to validate token and return userId and appName
   we will compare this userId against userId passed in input
-  both should be equal to perform action
+  both should be equal to perform further action
   */
-  const contextInfo = getInfoFromContext(context);
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
   const {
     userIdFromContext,
-    isRequestFromBackend,
-  } = contextInfo;
+    appName,
+  } = userAndAppInfo;
   const filterArray = get(params, 'filter.and');
   if (!filterArray) {
     throw new UserOrLearningObjectiveNotPresentError();
@@ -31,7 +32,7 @@ const userLearningObjectiveValidation = async (params, context) => {
   if (!userId || !learningObjectiveId) {
     throw new UserOrLearningObjectiveNotPresentError();
   }
-  if (!isRequestFromBackend && userIdFromContext !== userId) {
+  if (!backendApps.includes(appName) && userIdFromContext !== userId) {
     throw new UserMismatchError();
   }
   await isComponentUnlocked(

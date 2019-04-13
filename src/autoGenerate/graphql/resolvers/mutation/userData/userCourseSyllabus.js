@@ -9,7 +9,8 @@ import {
 } from '../../../../../../constants/errors';
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
-import getInfoFromContext from '../../../preHookFunctions/validation/utils/getInfoFromContext';
+import getUserIdandAppNameAfterValidation
+  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = userId => `
@@ -113,14 +114,15 @@ const userCourseSyllabusMutationResolver = async (
   ast,
   context,
 ) => {
-  // const { fieldNodes } = info;
-  // const feildsFetched = getFieldsBeingFetched(fieldNodes);
-  // const accessFields = ast[typeName];
-  // method to validate get user id
-  const contextInfo = getInfoFromContext(context);
+  /*
+  Calling method to validate token and return userId.
+  we will compare this userId against userId passed in input
+  both should be equal to perform further action
+  */
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
   const {
     userIdFromContext: userId,
-  } = contextInfo;
+  } = userAndAppInfo;
   const { authorization: token } = context;
   const res = await callGraphqlApi(
     getUserCurrentTopicComponentStatus(userId),

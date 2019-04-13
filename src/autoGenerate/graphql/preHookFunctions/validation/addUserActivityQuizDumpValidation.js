@@ -3,21 +3,23 @@ import {
   UserOrTopicNotPresentError,
 } from '../../../../../constants/errors';
 import isComponentUnlocked from './utils/isComponentUnlocked';
-import getInfoFromContext from './utils/getInfoFromContext';
+import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
+import { backendApps } from '../../../../../constants';
 
 // prehook logic to check if requested quiz(user and topic id) is unlocked
 const addUserActivityQuizDumpValidation = async (params, mutationOrQueryName, context) => {
   // check if the called user and topic is unlocked
   /*
-  Calling method to validate token and retun userId and isRequestFromBackend
+  /*
+  Calling method to validate token and return userId and appName
   we will compare this userId against userId passed in input
-  both should be equal to perform action
+  both should be equal to perform further action
   */
-  const contextInfo = getInfoFromContext(context);
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
   const {
     userIdFromContext,
-    isRequestFromBackend,
-  } = contextInfo;
+    appName,
+  } = userAndAppInfo;
   const {
     userConnectId: userId,
     topicConnectId: topicId,
@@ -25,7 +27,7 @@ const addUserActivityQuizDumpValidation = async (params, mutationOrQueryName, co
   if (!userId || !topicId) {
     throw new UserOrTopicNotPresentError();
   }
-  if (isRequestFromBackend && userIdFromContext !== userId) {
+  if (!backendApps.includes(appName) && userIdFromContext !== userId) {
     throw new UserMismatchError();
   }
   await isComponentUnlocked(

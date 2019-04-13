@@ -4,7 +4,8 @@ import {
   InvalidTopicLOConnectionError, TopicOrLONotPresentError,
   UserCourseCombinationExistError, UserMismatchError, UserOrCourseNotPresentError,
 } from '../../../../../constants/errors';
-import getInfoFromContext from './utils/getInfoFromContext';
+import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
+import { backendApps } from '../../../../../constants';
 
 // query to get userCurrentTopicComponentStatus for given user and course id
 const userCurrentTopicComponentStatusQuery = (userId, courseId) => `
@@ -44,15 +45,15 @@ logic to check if topic and LO passed are related to each other
 */
 const addUserCurrentTopicComponentStatusValidation = async (params, context) => {
   /*
-  Calling method to validate token and retun userId and isRequestFromBackend
+  Calling method to validate token and return userId and appName
   we will compare this userId against userId passed in input
-  both should be equal to perform action
+  both should be equal to perform further action
   */
-  const contextInfo = getInfoFromContext(context);
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
   const {
     userIdFromContext,
-    isRequestFromBackend,
-  } = contextInfo;
+    appName,
+  } = userAndAppInfo;
   const {
     userConnectId: userId,
     currentCourseConnectId: courseId,
@@ -62,7 +63,7 @@ const addUserCurrentTopicComponentStatusValidation = async (params, context) => 
   if (!userId || !courseId) {
     throw new UserOrCourseNotPresentError();
   }
-  if (isRequestFromBackend && userIdFromContext !== userId) {
+  if (!backendApps.includes(appName) && userIdFromContext !== userId) {
     throw new UserMismatchError();
   }
   const userCurrentTopicComponentStatusData = await callGraphqlApi(

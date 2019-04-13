@@ -8,6 +8,8 @@ import checkDeleteStatusOfATopic from './checkDeleteStatusOfATopic';
 import getLearningObjectiveAndTopicForValidation from './getLearningObjectiveAndTopicForValidation';
 import getTopicForValidation from './getTopicForValidation';
 import isComponentUnlocked from './isComponentUnlocked';
+import validateTokenAndExtractInformation from './validateTokenAndExtractInformation';
+import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
 
 export {
   getFinalConnectedRecordsForARelationFromInput,
@@ -20,4 +22,6 @@ export {
   getLearningObjectiveAndTopicForValidation,
   getTopicForValidation,
   isComponentUnlocked,
+  validateTokenAndExtractInformation,
+  getUserIdandAppNameAfterValidation,
 };

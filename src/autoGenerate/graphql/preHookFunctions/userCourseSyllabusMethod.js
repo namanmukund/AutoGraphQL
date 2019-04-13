@@ -8,7 +8,8 @@ import {
 } from '../../../../constants/errors';
 import getFirstTopicAndLearningObjective from '../../utils/getFirstTopicAndLearningObjective';
 import addUserCurrentTopicComponentStatus from '../../utils/addUserCurrentTopicComponentStatus';
-import getInfoFromContext from './validation/utils/getInfoFromContext';
+import getUserIdandAppNameAfterValidation
+  from './validation/utils/getUserIdandAppNameAfterValidation';
 
 // query to get current component status of user
 const userCurrentTopicComponentStatusesQuery = userId => `
@@ -38,10 +39,15 @@ will get populated in the document
 */
 const userCourseSyllabusMethod = async (context) => {
   // method to validate get user id
-  const contextInfo = getInfoFromContext(context);
+  /*
+  Calling method to validate token and return userId.
+  we will compare this userId against userId passed in input
+  both should be equal to perform further action
+  */
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
   const {
     userIdFromContext: userId,
-  } = contextInfo;
+  } = userAndAppInfo;
   const topic = await getFirstTopicAndLearningObjective();
   const firstTopicId = get(topic, 'data.topics[0].id');
   const firstLearningObjectiveId = get(topic, 'data.topics[0].learningObjectives[0].id');
