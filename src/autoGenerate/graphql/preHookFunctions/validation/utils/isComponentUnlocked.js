@@ -4,21 +4,23 @@ import getLearningObjectiveAndTopicForValidation from './getLearningObjectiveAnd
 import {
   ComponentLockedError,
   DatabaseRecordNotFoundError,
+  UserMismatchError,
+  UserOrLearningObjectiveNotPresentError,
+  UserOrTopicNotPresentError,
 } from '../../../../../../constants/errors';
 import getUserCurrentTopicComponentStatus
   from '../../../../utils/getUserCurrentTopicComponentStatus';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
-import { topicTypes } from '../../../../../../constants';
+import { backendApps, topicTypes } from '../../../../../../constants';
 import getTopicForValidation from './getTopicForValidation';
+import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
 
 /*
 This is a common method to check whether the called topic component is locked or not
 here page is component type(video, quiz, chat or practice question)
 */
 const isComponentUnlocked = async (
-  userId,
-  learningObjectiveId,
-  topicId,
+  params,
   mutationOrQueryName,
   context,
   page,
@@ -28,7 +30,31 @@ const isComponentUnlocked = async (
   let topicInfo;
   let learningObjectiveOrder;
   let learningObjectiveInfo;
+  let userId;
+  let learningObjectiveId;
+  let topicId;
+  /*
+  Calling method to validate token and return userId and appName
+  we will compare this userId against userId passed in input
+  both should be equal to perform further action
+  */
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+  const {
+    userIdFromContext,
+    appName,
+  } = userAndAppInfo;
   if (page === 'chat' || page === 'practiceQuestion') {
+    const filterArray = get(params, 'filter.and');
+    if (!filterArray) {
+      throw new UserOrLearningObjectiveNotPresentError();
+    }
+    const userSome = filterArray.find(obj => obj.user_some);
+    const loSome = filterArray.find(obj => obj.learningObjective_some);
+    userId = get(userSome, 'user_some.id');
+    learningObjectiveId = get(loSome, 'learningObjective_some.id');
+    if (!userId || !learningObjectiveId) {
+      throw new UserOrLearningObjectiveNotPresentError();
+    }
     const learningObjectiveQueryRes =
       await getLearningObjectiveAndTopicForValidation(learningObjectiveId);
     learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
@@ -55,6 +81,17 @@ const isComponentUnlocked = async (
                                             order
                                          }`;
   } else if (page === 'video' || page === 'quiz') {
+    const filterArray = get(params, 'filter.and');
+    if (!filterArray) {
+      throw new UserOrTopicNotPresentError();
+    }
+    const userSome = filterArray.find(obj => obj.user_some);
+    const topicSome = filterArray.find(obj => obj.topic_some);
+    userId = get(userSome, 'user_some.id');
+    topicId = get(topicSome, 'topic_some.id');
+    if (!userId || !topicId) {
+      throw new UserOrTopicNotPresentError();
+    }
     const topicQueryRes = await getTopicForValidation(topicId);
     topicInfo = get(topicQueryRes, 'data.topic');
     if (!topicInfo) {
@@ -69,6 +106,9 @@ const isComponentUnlocked = async (
                                 id
                                 order
                              }`;
+  }
+  if (!backendApps.includes(appName) && userIdFromContext !== userId) {
+    throw new UserMismatchError();
   }
   const userCurrentTopicComponentStatusRes =
     await getUserCurrentTopicComponentStatus(
