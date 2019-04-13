@@ -86,7 +86,15 @@ It will be created and returned.
 Document contains all the necessary information needed on page along
 with the next component.
 */
-const userLearningObjectivePostHookMethod = async (userLearningObjectiveResult, params) => {
+const userLearningObjectivePostHookMethod = async (input, params) => {
+  /*
+  checking if document is already present in collection for user and LO id,
+  returning input in that case
+  if it is not already present, we will add a new document with default data
+  */
+  if (input && input.length) {
+    return input;
+  }
   const resultArray = [];
   const filterArray = get(params, 'filter.and');
   const userSome = filterArray.find(filterElem => filterElem.user_some);
@@ -97,69 +105,64 @@ const userLearningObjectivePostHookMethod = async (userLearningObjectiveResult, 
     log('Either one of userId or learningObjectiveId is missing in input of userLearningObjectivePostHookMethod');
   }
   /*
-  checking if document is not already present in collection for user and LO id
-  if it is not already present, we will add a new document with default data
-  */
-  if (userLearningObjectiveResult && userLearningObjectiveResult.length === 0) {
-    /*
     we are getting below fields in learningObjectiveQuery:
     -topic and it's next LO if present, which will be populated in nextComponent
     -all published practice questions of the LO
     */
-    const learningObjectiveQueryRes = await callGraphqlApi(
-      learningObjectiveQuery(learningObjectiveId));
-    const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
-    const topicInfo = get(learningObjectiveInfo, 'topic');
-    const { id: topicId } = topicInfo;
-    const { message, quiz } = topicTypes;
-    const {
-      id: learningObjectiveIdInResult,
-      questionBank: practiceQuestionsinLO,
-    } = learningObjectiveInfo;
+  const learningObjectiveQueryRes = await callGraphqlApi(
+    learningObjectiveQuery(learningObjectiveId));
+  const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
+  const topicInfo = get(learningObjectiveInfo, 'topic');
+  const { id: topicId } = topicInfo;
+  const { message, quiz } = topicTypes;
+  const {
+    id: learningObjectiveIdInResult,
+    questionBank: practiceQuestionsinLO,
+  } = learningObjectiveInfo;
     // adding PQs to the userLearningObjective document
-    let practiceQuestionsQuery = 'practiceQuestions:[';
-    if (learningObjectiveInfo && practiceQuestionsinLO) {
-      practiceQuestionsinLO.forEach((practiceQuestion) => {
-        const { id: practiceQuestionId } = practiceQuestion;
-        practiceQuestionsQuery += `{ questionConnectId: "${practiceQuestionId}" }, `;
-      });
-    }
-    practiceQuestionsQuery += ']';
-    let restQuery = '';
-    let nextCurrentTopicComponentType;
-    let learningObjectiveConnectIdQuery = '';
-    let topicConnectIdQuery = '';
-    // obtaining next LO
-    const nextLearningObjectiveId = get(topicInfo, 'learningObjectives[0].id');
-    // if next LO is not present in that case, quiz will be next component
-    if (nextLearningObjectiveId) {
-      nextCurrentTopicComponentType = message;
-      learningObjectiveConnectIdQuery = `learningObjectiveConnectId:"${nextLearningObjectiveId}"`;
-    } else {
-      nextCurrentTopicComponentType = quiz;
-    }
-    if (topicId) { topicConnectIdQuery = `topicConnectId:"${topicId}"`; }
-    // restQuery is for when we create userLearningObjective
-    if (learningObjectiveIdInResult) {
-      restQuery = `nextComponent:{
+  let practiceQuestionsQuery = 'practiceQuestions:[';
+  if (learningObjectiveInfo && practiceQuestionsinLO) {
+    practiceQuestionsinLO.forEach((practiceQuestion) => {
+      const { id: practiceQuestionId } = practiceQuestion;
+      practiceQuestionsQuery += `{ questionConnectId: "${practiceQuestionId}" }, `;
+    });
+  }
+  practiceQuestionsQuery += ']';
+  let restQuery = '';
+  let nextCurrentTopicComponentType;
+  let learningObjectiveConnectIdQuery = '';
+  let topicConnectIdQuery = '';
+  // obtaining next LO
+  const nextLearningObjectiveId = get(topicInfo, 'learningObjectives[0].id');
+  // if next LO is not present in that case, quiz will be next component
+  if (nextLearningObjectiveId) {
+    nextCurrentTopicComponentType = message;
+    learningObjectiveConnectIdQuery = `learningObjectiveConnectId:"${nextLearningObjectiveId}"`;
+  } else {
+    nextCurrentTopicComponentType = quiz;
+  }
+  if (topicId) { topicConnectIdQuery = `topicConnectId:"${topicId}"`; }
+  // restQuery is for when we create userLearningObjective
+  if (learningObjectiveIdInResult) {
+    restQuery = `nextComponent:{
                      ${learningObjectiveConnectIdQuery}
                      ${topicConnectIdQuery}
                      nextComponentType: ${nextCurrentTopicComponentType}
                    }`;
-    }
-    /*
+  }
+  /*
     adding addUserLearningObjective document on the basis of
     restQuery(next component data), practiceQuestionsQuery(published practice questions of LO)
     */
-    const result = await callGraphqlApi(
-      addUserLearningObjectiveMutation(
-        userId,
-        learningObjectiveId,
-        restQuery,
-        practiceQuestionsQuery,
-      ));
-    if (result) {
-      /*
+  const result = await callGraphqlApi(
+    addUserLearningObjectiveMutation(
+      userId,
+      learningObjectiveId,
+      restQuery,
+      practiceQuestionsQuery,
+    ));
+  if (result) {
+    /*
       parsing data 'addUserLearningObjective' so that the logic implemented ahead can read data is
       desired format and return the same.
       Example: suppose client has asked for title and order of learningObjective,
@@ -168,32 +171,31 @@ const userLearningObjectivePostHookMethod = async (userLearningObjectiveResult, 
       And here we have not parsed data for practice questions because userLO will be created
       when user attempts chat, and he will not need PQ there.
       */
-      const parsedData = get(result, 'data.addUserLearningObjective');
-      if (parsedData) {
-        const lo = { type: 'LearningObjective', typeId: `${parsedData.learningObjective.id}` };
-        const user = { type: 'User', typeId: `${parsedData.user.id}` };
-        // constructing data for next component whenever userLearningObjective document is created
-        if (parsedData.nextComponent) {
-          const nextComponent = {
-            nextComponentType: `${parsedData.nextComponent.nextComponentType}`,
+    const parsedData = get(result, 'data.addUserLearningObjective');
+    if (parsedData) {
+      const lo = { type: 'LearningObjective', typeId: `${parsedData.learningObjective.id}` };
+      const user = { type: 'User', typeId: `${parsedData.user.id}` };
+      // constructing data for next component whenever userLearningObjective document is created
+      if (parsedData.nextComponent) {
+        const nextComponent = {
+          nextComponentType: `${parsedData.nextComponent.nextComponentType}`,
+        };
+        if (parsedData.nextComponent.learningObjective) {
+          nextComponent.learningObjective = {
+            type: 'LearningObjective', typeId: `${parsedData.nextComponent.learningObjective.id}`,
           };
-          if (parsedData.nextComponent.learningObjective) {
-            nextComponent.learningObjective = {
-              type: 'LearningObjective', typeId: `${parsedData.nextComponent.learningObjective.id}`,
-            };
-          }
-          if (parsedData.nextComponent.topic) {
-            nextComponent.topic = {
-              type: 'Topic', typeId: `${parsedData.nextComponent.topic.id}`,
-            };
-          }
-          parsedData.nextComponent = nextComponent;
         }
-
-        parsedData.learningObjective = lo;
-        parsedData.user = user;
-        resultArray.push(parsedData);
+        if (parsedData.nextComponent.topic) {
+          nextComponent.topic = {
+            type: 'Topic', typeId: `${parsedData.nextComponent.topic.id}`,
+          };
+        }
+        parsedData.nextComponent = nextComponent;
       }
+
+      parsedData.learningObjective = lo;
+      parsedData.user = user;
+      resultArray.push(parsedData);
     }
   }
   return resultArray;

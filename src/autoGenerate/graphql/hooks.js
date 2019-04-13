@@ -367,23 +367,19 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'userVideo' : {
       const resultArray = await userVideoPostHookMethod(input, params);
-      if (resultArray.length) { return hook(resultArray, mutationName, 'PostHook'); }
-      break;
+      return hook(resultArray, mutationName, 'PostHook');
     }
     case 'userLearningObjective' : {
       const resultArray = await userLearningObjectivePostHookMethod(input, params);
-      if (resultArray.length) { return hook(resultArray, mutationName, 'PostHook'); }
-      break;
+      return hook(resultArray, mutationName, 'PostHook');
     }
     case 'userQuiz' : {
       const resultArray = await userQuizPostHookMethod(input, params);
-      if (resultArray.length) { return hook(resultArray, mutationName, 'PostHook'); }
-      break;
+      return hook(resultArray, mutationName, 'PostHook');
     }
     case 'userProfile' : {
       const resultArray = await userProfilePostHookMethod(input, params);
-      if (resultArray.length) { return hook(resultArray, mutationName, 'PostHook'); }
-      break;
+      return hook(resultArray, mutationName, 'PostHook');
     }
     case 'addUserActivityVideoDump' : {
       await addUserActivityVideoDumpPostHookMethod(input, mutationName, context);

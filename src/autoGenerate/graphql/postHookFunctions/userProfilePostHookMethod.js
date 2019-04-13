@@ -32,7 +32,15 @@ const addUserProfileMutation = userId => `
   `;
 
 // We have logic to create a new document if it does not exist for UserProfile
-const userProfilePostHookMethod = async (userProfileResult, params) => {
+const userProfilePostHookMethod = async (input, params) => {
+  /*
+  checking if document is already present in collection for user,
+  returning input in that case
+  if it is not already present, we will add a new document with default data
+  */
+  if (input && input.length) {
+    return input;
+  }
   const resultArray = [];
   const userId = get(params, 'filter.user_some.id');
   if (!userId) {
@@ -40,13 +48,11 @@ const userProfilePostHookMethod = async (userProfileResult, params) => {
   }
   // userProfileResult is the document returned by the query
   // so we are adding new document if document is not already present
-  if (userProfileResult && userProfileResult.length === 0) {
-    const result = await callGraphqlApi(addUserProfileMutation(userId));
-    if (result) {
-      const data = get(result, 'data.addUserProfile');
-      if (data) {
-        resultArray.push(data);
-      }
+  const result = await callGraphqlApi(addUserProfileMutation(userId));
+  if (result) {
+    const data = get(result, 'data.addUserProfile');
+    if (data) {
+      resultArray.push(data);
     }
   }
   return resultArray;
