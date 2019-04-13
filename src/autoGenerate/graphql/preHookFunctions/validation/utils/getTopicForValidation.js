@@ -12,13 +12,7 @@ const topicQuery = topicId => `
   `;
 
 // quey to get topic info
-const getTopicForValidation = async (
-  topicId,
-) => {
-  const topicResult =
-    await callGraphqlApi(topicQuery(
-      topicId));
-  return topicResult;
-};
+const getTopicForValidation = topicId => callGraphqlApi(topicQuery(
+  topicId));
 
 export default getTopicForValidation;

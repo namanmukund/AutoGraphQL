@@ -16,13 +16,7 @@ const learningObjectiveAndTopicQuery = learningObjectiveId => `
   `;
 
 // quey to get learning objective and related topic
-const getLearningObjectiveAndTopicForValidation = async (
-  learningObjectiveId,
-) => {
-  const learningObjectiveAndTopicResult =
-    await callGraphqlApi(learningObjectiveAndTopicQuery(
-      learningObjectiveId));
-  return learningObjectiveAndTopicResult;
-};
+const getLearningObjectiveAndTopicForValidation = learningObjectiveId =>
+  callGraphqlApi(learningObjectiveAndTopicQuery(learningObjectiveId));
 
 export default getLearningObjectiveAndTopicForValidation;

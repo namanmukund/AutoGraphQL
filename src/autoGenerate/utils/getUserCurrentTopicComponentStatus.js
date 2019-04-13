@@ -32,19 +32,15 @@ const userCurrentTopicComponentStatusQuery = (
   `;
 
 // query to get current topic component status
-const getUserCurrentTopicComponentStatus = async (
+const getUserCurrentTopicComponentStatus = (
   userId,
   currentTopic,
   currentLearningObjective,
   enrollmentType,
-) => {
-  const userCurrentTopicComponentStatusResult =
-    await callGraphqlApi(userCurrentTopicComponentStatusQuery(
-      userId,
-      currentTopic,
-      currentLearningObjective,
-      enrollmentType));
-  return userCurrentTopicComponentStatusResult;
-};
+) => callGraphqlApi(userCurrentTopicComponentStatusQuery(
+  userId,
+  currentTopic,
+  currentLearningObjective,
+  enrollmentType));
 
 export default getUserCurrentTopicComponentStatus;

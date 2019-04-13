@@ -26,18 +26,14 @@ const addUserCurrentTopicComponentStatusMutation = (
 `;
 
 // mutation to create current component status of user
-const addUserCurrentTopicComponentStatus = async (
+const addUserCurrentTopicComponentStatus = (
   userId,
   firstTopicId,
   firstLearningObjectiveId,
-) => {
-  const addUserCurrentTopicComponentStatusResult =
-    await callGraphqlApi(addUserCurrentTopicComponentStatusMutation(
-      userId,
-      firstTopicId,
-      firstLearningObjectiveId,
-    ));
-  return addUserCurrentTopicComponentStatusResult;
-};
+) => callGraphqlApi(addUserCurrentTopicComponentStatusMutation(
+  userId,
+  firstTopicId,
+  firstLearningObjectiveId,
+));
 
 export default addUserCurrentTopicComponentStatus;
