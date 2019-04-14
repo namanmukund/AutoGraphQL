@@ -1,29 +1,37 @@
 const parseTopicComponentResultData = (result, page) => {
   const parsedData = result;
-  if (page === 'learningObjective') {
-    const lo = { type: 'LearningObjective', typeId: `${parsedData.learningObjective.id}` };
-    parsedData.learningObjective = lo;
-  } else if (page === 'quiz') {
-    const topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
-    parsedData.topic = topic;
-    const quiz = [];
-    // constructing data for quiz whenever userQuiz document is just created
-    const quizRes = parsedData.quiz;
-    if (quizRes) {
-      quizRes.forEach((quizQuestion) => {
-        const question = { question: { type: 'QuestionBank',
-          typeId: `${quizQuestion.question.id}` },
-        questionDisplayOrder: `${quizQuestion.questionDisplayOrder}` };
-        quiz.push(question);
-      });
-    }
-    parsedData.quiz = quiz;
-  } else if (page === 'video') {
-    const topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
-    parsedData.topic = topic;
+  let topic;
+  let learningObjective;
+  const quiz = [];
+  let quizRes;
+  switch (page) {
+    case 'learningObjective':
+      learningObjective = { type: 'LearningObjective', typeId: `${parsedData.learningObjective.id}` };
+      parsedData.learningObjective = learningObjective;
+      break;
+    case 'quiz':
+      topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
+      parsedData.topic = topic;
+      // constructing data for quiz whenever userQuiz document is just created
+      quizRes = parsedData.quiz;
+      if (quizRes) {
+        quizRes.forEach((quizQuestion) => {
+          const question = { question: { type: 'QuestionBank',
+            typeId: `${quizQuestion.question.id}` },
+          questionDisplayOrder: `${quizQuestion.questionDisplayOrder}` };
+          quiz.push(question);
+        });
+      }
+      parsedData.quiz = quiz;
+      break;
+    case 'video':
+      topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
+      parsedData.topic = topic;
+      break;
+    default:
   }
 
-
+  // Common data to be parsed for all topic components
   const user = { type: 'User', typeId: `${parsedData.user.id}` };
   // constructing data for next component whenever userLearningObjective document is created
   if (parsedData.nextComponent) {

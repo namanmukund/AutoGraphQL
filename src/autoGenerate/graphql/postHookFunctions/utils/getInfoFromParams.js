@@ -1,12 +1,8 @@
 import { get } from 'lodash';
 import { log } from '../../../../../utils';
-import { UserOrLearningObjectiveNotPresentError } from '../../../../../constants/errors';
 
 const getInfoFromParams = (params, page) => {
   const filterArray = get(params, 'filter.and');
-  if (!filterArray) {
-    throw new UserOrLearningObjectiveNotPresentError();
-  }
   const userSome = filterArray.find(filterElem => filterElem.user_some);
   const loSome = filterArray.find(filterElem => filterElem.learningObjective_some);
   const topicSome = filterArray.find(filterElem => filterElem.topic_some);
