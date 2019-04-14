@@ -6,6 +6,7 @@ import {
 } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
 import getNextComponent from './utils/getNextComponent';
+import parseResultData from './utils/parseResultData';
 
 // query to get topic and it's Lo with order 1
 const topicQuery = topicId => `
@@ -111,22 +112,9 @@ const userVideoPostHookMethod = async (input, params) => {
       In that case he will get title and order only. And this is happening when we parse
       data as below. If parsing is not done, it is returning empty data.
       */
-    const parsedData = get(result, 'data.addUserVideo');
-    if (parsedData) {
-      const topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
-      const user = { type: 'User', typeId: `${parsedData.user.id}` };
-      // constructing data for next component whenever userVideo document is just created
-      if (parsedData.nextComponent && parsedData.nextComponent.learningObjective) {
-        const nextComponent = { learningObjective: {
-          type: 'LearningObjective', typeId: `${parsedData.nextComponent.learningObjective.id}`,
-        },
-        nextComponentType: `${parsedData.nextComponent.nextComponentType}`,
-        };
-        parsedData.nextComponent = nextComponent;
-      }
-      parsedData.topic = topic;
-      parsedData.user = user;
-      resultArray.push(parsedData);
+    const addUserVideoResult = get(result, 'data.addUserVideo');
+    if (addUserVideoResult) {
+      resultArray.push(parseResultData(addUserVideoResult, 'video'));
     }
   }
   return resultArray;

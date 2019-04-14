@@ -5,6 +5,7 @@ import {
 } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
 import getNextComponent from './utils/getNextComponent';
+import parseResultData from './utils/parseResultData';
 
 // query to get quiz questions associated with topic
 const topicQuery = topicId => `
@@ -153,35 +154,9 @@ const userQuizPostHookMethod = async (input, params) => {
       In that case he will get title and order only. And this is happening when we parse
       data as below. If parsing is not done, it is returning empty data.
       */
-    const parsedData = get(result, 'data.addUserQuiz');
-    if (parsedData) {
-      const topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
-      const user = { type: 'User', typeId: `${parsedData.user.id}` };
-      const quiz = [];
-      // constructing data for quiz whenever userQuiz document is just created
-      const quizRes = parsedData.quiz;
-      if (quizRes) {
-        quizRes.forEach((quizQuestion) => {
-          const question = { question: { type: 'QuestionBank',
-            typeId: `${quizQuestion.question.id}` },
-          questionDisplayOrder: `${quizQuestion.questionDisplayOrder}` };
-          quiz.push(question);
-        });
-      }
-      // constructing data for next component whenever userVideo document is just created
-      if (parsedData.nextComponent && parsedData.nextComponent.topic) {
-        const nextComponent = { topic: {
-          type: 'Topic', typeId: `${parsedData.nextComponent.topic.id}`,
-        },
-        nextComponentType: `${parsedData.nextComponent.nextComponentType}`,
-        };
-        parsedData.nextComponent = nextComponent;
-      }
-
-      parsedData.topic = topic;
-      parsedData.user = user;
-      parsedData.quiz = quiz;
-      resultArray.push(parsedData);
+    const addUserQuizResult = get(result, 'data.addUserQuiz');
+    if (addUserQuizResult) {
+      resultArray.push(parseResultData(addUserQuizResult, 'quiz'));
     }
   }
   return resultArray;

@@ -16,7 +16,7 @@ const getInfoFromParams = (params, page) => {
   if (!userId) {
     log('userId is missing in input of postHook');
   }
-  if (page === 'chat' && !learningObjectiveId) {
+  if (page === 'learningObjective' && !learningObjectiveId) {
     log('LearningObjectiveId is missing in input of postHook');
   } else if ((page === 'video' || page === 'quiz') && !topicId) {
     log('TopicId is missing in input of postHook');

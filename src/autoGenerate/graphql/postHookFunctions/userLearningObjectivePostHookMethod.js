@@ -7,6 +7,7 @@ import {
 import getInfoFromParams from './utils/getInfoFromParams';
 import getNextComponent from './utils/getNextComponent';
 import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
+import parseResultData from './utils/parseResultData';
 
 // query to get learning objective and all the learning objectives of the topic associated
 const learningObjectiveQuery = learningObjectiveId => `
@@ -106,7 +107,7 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
   const {
     userId,
     learningObjectiveId,
-  } = getInfoFromParams(params, 'chat');
+  } = getInfoFromParams(params, 'learningObjective');
   const learningObjectiveQueryRes = await callGraphqlApi(
     learningObjectiveQuery(learningObjectiveId));
   const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
@@ -159,31 +160,9 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
       And here we have not parsed data for practice questions because userLO will be created
       when user attempts chat, and he will not need PQ there.
       */
-    const parsedData = get(result, 'data.addUserLearningObjective');
-    if (parsedData) {
-      const lo = { type: 'LearningObjective', typeId: `${parsedData.learningObjective.id}` };
-      const user = { type: 'User', typeId: `${parsedData.user.id}` };
-      // constructing data for next component whenever userLearningObjective document is created
-      if (parsedData.nextComponent) {
-        const nextComponent = {
-          nextComponentType: `${parsedData.nextComponent.nextComponentType}`,
-        };
-        if (parsedData.nextComponent.learningObjective) {
-          nextComponent.learningObjective = {
-            type: 'LearningObjective', typeId: `${parsedData.nextComponent.learningObjective.id}`,
-          };
-        }
-        if (parsedData.nextComponent.topic) {
-          nextComponent.topic = {
-            type: 'Topic', typeId: `${parsedData.nextComponent.topic.id}`,
-          };
-        }
-        parsedData.nextComponent = nextComponent;
-      }
-
-      parsedData.learningObjective = lo;
-      parsedData.user = user;
-      resultArray.push(parsedData);
+    const addUserLearningObjectiveResult = get(result, 'data.addUserLearningObjective');
+    if (addUserLearningObjectiveResult) {
+      resultArray.push(parseResultData(addUserLearningObjectiveResult, 'learningObjective'));
     }
   }
   return resultArray;
