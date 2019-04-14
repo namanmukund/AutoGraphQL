@@ -4,7 +4,9 @@ import {
   PUBLISHED,
   topicTypes,
 } from '../../../../constants';
-import { log } from '../../../../utils';
+import getInfoFromParams from './utils/getInfoFromParams';
+import getNextComponent from './utils/getNextComponent';
+import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 
 // query to get learning objective and all the learning objectives of the topic associated
 const learningObjectiveQuery = learningObjectiveId => `
@@ -96,60 +98,46 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
     return input;
   }
   const resultArray = [];
-  const filterArray = get(params, 'filter.and');
-  const userSome = filterArray.find(filterElem => filterElem.user_some);
-  const loSome = filterArray.find(filterElem => filterElem.learningObjective_some);
-  const userId = get(userSome, 'user_some.id');
-  const learningObjectiveId = get(loSome, 'learningObjective_some.id');
-  if (!userId || !learningObjectiveId) {
-    log('Either one of userId or learningObjectiveId is missing in input of userLearningObjectivePostHookMethod');
-  }
   /*
     we are getting below fields in learningObjectiveQuery:
     -topic and it's next LO if present, which will be populated in nextComponent
     -all published practice questions of the LO
     */
+  const {
+    userId,
+    learningObjectiveId,
+  } = getInfoFromParams(params, 'chat');
   const learningObjectiveQueryRes = await callGraphqlApi(
     learningObjectiveQuery(learningObjectiveId));
   const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
-  const topicInfo = get(learningObjectiveInfo, 'topic');
-  const { id: topicId } = topicInfo;
-  const { message, quiz } = topicTypes;
   const {
-    id: learningObjectiveIdInResult,
-    questionBank: practiceQuestionsinLO,
+    topic: topicInfo,
+    questionBank: practiceQuestionsInLO,
   } = learningObjectiveInfo;
-    // adding PQs to the userLearningObjective document
+  if (!topicInfo) {
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'LearningObjective.topic: is not present',
+      },
+    });
+  }
+  const { id: topicId } = topicInfo;
+  // adding PQs to the userLearningObjective document
   let practiceQuestionsQuery = 'practiceQuestions:[';
-  if (learningObjectiveInfo && practiceQuestionsinLO) {
-    practiceQuestionsinLO.forEach((practiceQuestion) => {
+  if (learningObjectiveInfo && practiceQuestionsInLO) {
+    practiceQuestionsInLO.forEach((practiceQuestion) => {
       const { id: practiceQuestionId } = practiceQuestion;
       practiceQuestionsQuery += `{ questionConnectId: "${practiceQuestionId}" }, `;
     });
   }
   practiceQuestionsQuery += ']';
-  let restQuery = '';
-  let nextCurrentTopicComponentType;
-  let learningObjectiveConnectIdQuery = '';
-  let topicConnectIdQuery = '';
   // obtaining next LO
   const nextLearningObjectiveId = get(topicInfo, 'learningObjectives[0].id');
-  // if next LO is not present in that case, quiz will be next component
-  if (nextLearningObjectiveId) {
-    nextCurrentTopicComponentType = message;
-    learningObjectiveConnectIdQuery = `learningObjectiveConnectId:"${nextLearningObjectiveId}"`;
-  } else {
-    nextCurrentTopicComponentType = quiz;
-  }
-  if (topicId) { topicConnectIdQuery = `topicConnectId:"${topicId}"`; }
-  // restQuery is for when we create userLearningObjective
-  if (learningObjectiveIdInResult) {
-    restQuery = `nextComponent:{
-                     ${learningObjectiveConnectIdQuery}
-                     ${topicConnectIdQuery}
-                     nextComponentType: ${nextCurrentTopicComponentType}
-                   }`;
-  }
+  const restQuery = getNextComponent(
+    nextLearningObjectiveId,
+    topicId,
+    'learningObjective',
+  );
   /*
     adding addUserLearningObjective document on the basis of
     restQuery(next component data), practiceQuestionsQuery(published practice questions of LO)

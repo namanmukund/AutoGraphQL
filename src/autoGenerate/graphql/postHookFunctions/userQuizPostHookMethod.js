@@ -3,7 +3,8 @@ import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   topicTypes, PUBLISHED,
 } from '../../../../constants';
-import { log } from '../../../../utils';
+import getInfoFromParams from './utils/getInfoFromParams';
+import getNextComponent from './utils/getNextComponent';
 
 // query to get quiz questions associated with topic
 const topicQuery = topicId => `
@@ -100,14 +101,11 @@ const userQuizPostHookMethod = async (input, params) => {
     return input;
   }
   const resultArray = [];
-  const filterArray = get(params, 'filter.and');
-  const userSome = filterArray.find(obj => obj.user_some);
-  const loSome = filterArray.find(obj => obj.topic_some);
-  const userId = get(userSome, 'user_some.id');
-  const topicId = get(loSome, 'topic_some.id');
-  if (!userId || !topicId) {
-    log('Either one of userId or topicId is missing in input of userQuizPostHookMethod');
-  }
+  const {
+    userId,
+    topicId,
+  } = getInfoFromParams(params, 'quiz');
+
   /*
     we are getting below fields in topicQuery:
     -all published quiz questions of the topic
@@ -130,19 +128,17 @@ const userQuizPostHookMethod = async (input, params) => {
     });
   }
   quizQuery += ']';
-  let restQuery = '';
   /*
     we are getting next published topic id through this query.
     If it is not present, next component will be empty
     */
   const nextTopicQueryRes = await callGraphqlApi(nextTopicQuery(topicId));
   const nextTopicId = get(nextTopicQueryRes, 'data.topics[0].id');
-  if (nextTopicId) {
-    restQuery = `nextComponent:{
-                     topicConnectId:"${nextTopicId}"
-                     nextComponentType: ${topicTypes.video}
-                   }`;
-  }
+  const restQuery = getNextComponent(
+    '',
+    nextTopicId,
+    'quiz',
+  );
   const result = await callGraphqlApi(addUserQuizMutation(
     userId,
     topicId,

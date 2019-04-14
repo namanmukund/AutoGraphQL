@@ -2,10 +2,10 @@ import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   PUBLISHED,
-  topicTypes,
   userTopicTypeStatus,
 } from '../../../../constants';
-import { log } from '../../../../utils';
+import getInfoFromParams from './utils/getInfoFromParams';
+import getNextComponent from './utils/getNextComponent';
 
 // query to get topic and it's Lo with order 1
 const topicQuery = topicId => `
@@ -77,14 +77,10 @@ const userVideoPostHookMethod = async (input, params) => {
     return input;
   }
   const resultArray = [];
-  const filterArray = get(params, 'filter.and');
-  const userSome = filterArray.find(obj => obj.user_some);
-  const topicSome = filterArray.find(obj => obj.topic_some);
-  const userId = get(userSome, 'user_some.id');
-  const topicId = get(topicSome, 'topic_some.id');
-  if (!userId || !topicId) {
-    log('Either one of userId or topicId is missing in input of userLearningObjectivePostHookMethod');
-  }
+  const {
+    userId,
+    topicId,
+  } = getInfoFromParams(params, 'video');
   /*
     we are getting below fields in topicQuery:
     -first published learning objective of the query to be populated in next component
@@ -92,14 +88,12 @@ const userVideoPostHookMethod = async (input, params) => {
   const topicQueryRes = await callGraphqlApi(topicQuery(topicId));
   const topicInfo = get(topicQueryRes, 'data.topic');
   const learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
-  let restQuery = '';
   // next component will be chat of first published LO
-  if (learningObjectiveConnectId) {
-    restQuery = `nextComponent:{
-                     learningObjectiveConnectId:"${learningObjectiveConnectId}"
-                     nextComponentType: ${topicTypes.message}
-                   }`;
-  }
+  const restQuery = getNextComponent(
+    learningObjectiveConnectId,
+    '',
+    'video',
+  );
   /*
     adding addUserVideo document on the basis of
     restQuery(next component data), rest data will take default values from schema
