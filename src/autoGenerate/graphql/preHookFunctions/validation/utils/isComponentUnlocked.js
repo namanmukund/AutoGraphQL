@@ -44,14 +44,19 @@ const isComponentUnlocked = async (
     appName,
   } = userAndAppInfo;
   if (page === 'chat' || page === 'practiceQuestion') {
-    const filterArray = get(params, 'filter.and');
-    if (!filterArray) {
-      throw new UserOrLearningObjectiveNotPresentError();
+    if (mutationOrQueryName) {
+      userId = get(params, 'userConnectId');
+      learningObjectiveId = get(params, 'learningObjectiveConnectId');
+    } else {
+      const filterArray = get(params, 'filter.and');
+      if (!filterArray) {
+        throw new UserOrLearningObjectiveNotPresentError();
+      }
+      const userSome = filterArray.find(obj => obj.user_some);
+      const loSome = filterArray.find(obj => obj.learningObjective_some);
+      userId = get(userSome, 'user_some.id');
+      learningObjectiveId = get(loSome, 'learningObjective_some.id');
     }
-    const userSome = filterArray.find(obj => obj.user_some);
-    const loSome = filterArray.find(obj => obj.learningObjective_some);
-    userId = get(userSome, 'user_some.id');
-    learningObjectiveId = get(loSome, 'learningObjective_some.id');
     if (!userId || !learningObjectiveId) {
       throw new UserOrLearningObjectiveNotPresentError();
     }
@@ -81,14 +86,19 @@ const isComponentUnlocked = async (
                                             order
                                          }`;
   } else if (page === 'video' || page === 'quiz') {
-    const filterArray = get(params, 'filter.and');
-    if (!filterArray) {
-      throw new UserOrTopicNotPresentError();
+    if (mutationOrQueryName) {
+      userId = get(params, 'userConnectId');
+      topicId = get(params, 'topicConnectId');
+    } else {
+      const filterArray = get(params, 'filter.and');
+      if (!filterArray) {
+        throw new UserOrTopicNotPresentError();
+      }
+      const userSome = filterArray.find(obj => obj.user_some);
+      const topicSome = filterArray.find(obj => obj.topic_some);
+      userId = get(userSome, 'user_some.id');
+      topicId = get(topicSome, 'topic_some.id');
     }
-    const userSome = filterArray.find(obj => obj.user_some);
-    const topicSome = filterArray.find(obj => obj.topic_some);
-    userId = get(userSome, 'user_some.id');
-    topicId = get(topicSome, 'topic_some.id');
     if (!userId || !topicId) {
       throw new UserOrTopicNotPresentError();
     }

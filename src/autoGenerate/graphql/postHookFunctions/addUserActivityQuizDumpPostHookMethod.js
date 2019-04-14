@@ -11,24 +11,7 @@ import {
   DatabaseRecordNotFoundError,
   QuizQuestionsNotPresentError,
 } from '../../../../constants/errors';
-
-// query to update user current topic component status
-const updateUserCurrentTopicComponentStatusMutation = (
-  currentTopicComponentId,
-  nextTopicId,
-  loQuery,
-) => `
-  mutation{
-    updateUserCurrentTopicComponentStatus(id:"${currentTopicComponentId}",  input:{
-      currentTopicComponentType: ${topicTypes.video}
-    },
-    currentTopicConnectId:"${nextTopicId}"
-    ${loQuery}
-    ){
-      id
-    }
-  }
-  `;
+import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
 
 // query to fetch user quiz info
 const userQuizQuery = (
@@ -209,19 +192,6 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   const { next } = userActionType;
   const { quiz } = topicTypes;
   /*
-  Getting data for user current topic component status from context based on mutationName
-  This will be used to cover the case that current component status will only get changed, if
-  called component is equal to current component and user has just consumed(next action) it
-  And current component status will not get changed when it is already consumed in past
-  */
-  const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
-  const { quizAction, quizQuestions } = input;
-  const {
-    id: currentTopicComponentId,
-    currentTopicComponentType: currentTopicComponent,
-    currentTopic,
-  } = currentTopicComponentInfo;
-  /*
   we are getting userQuiz for below purpose:
   -we get userQuiz id , which will be used further to update the document
   -we get next component from the document and update user current topic component status with same
@@ -231,39 +201,30 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   const quizQuestionsInUserQuiz = get(userQuizInfo, 'quiz');
   const nextTopicId = get(userQuizInfo, 'nextComponent.topic.id');
   const { id: userQuizId } = userQuizInfo;
-  if (!currentTopic) {
-    log('Not able to fetch CurrentTopicComponentInfo.currentTopic in addUserActivityQuizDumpPostHookMethod');
-  }
-  if (!currentTopicComponent) {
-    log('Not able to fetch CurrentTopicComponentInfo.CurrentTopicComponentType in addUserActivityQuizDumpPostHookMethod');
-  }
-  const { id: currentTopicId } = currentTopic;
+  const learningObjectiveConnectId = get(userQuizInfo, 'nextComponent.topic.learningObjectives[0].id');
   /*
-  We are checking whether user current topic status should be updated, below are the conditions:
-  -user is hitting next and
-  -current topic component should be 'quiz'
-  -called topic in input should be equal to current topic and
-  -next published topic is present in the database, if it is not present we are assuming that it
-  -was the last topic in the course
-  Above conditions covers the case that current component status will only get changed, if
-  called component is  is equal to current component and user has just consumed(next action) it
+  Getting data for user current topic component status from context based on mutationName
+  This will be used to cover the case that current component status will only get changed, if
+  called component is equal to current component and user has just consumed(next action) it
   And current component status will not get changed when it is already consumed in past
   */
-  if (quizAction === next &&
-      currentTopicComponent === quiz &&
-      currentTopicId === topicId &&
-      nextTopicId
-  ) {
-    const learningObjectiveConnectId = get(userQuizInfo, 'nextComponent.topic.learningObjectives[0].id');
-    let loQuery = '';
-    if (learningObjectiveConnectId) { loQuery = `currentLearningObjectiveConnectId:"${learningObjectiveConnectId}"`; }
-    // updating current component in case quiz is completed by user
-    await callGraphqlApi(updateUserCurrentTopicComponentStatusMutation(
-      currentTopicComponentId,
-      nextTopicId,
-      loQuery,
-    ));
-  }
+  const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
+  const { quizAction, quizQuestions } = input;
+  /*
+  Calling method to update current user Topic Component status
+  */
+  await updateCurrentComponentStatus(
+    currentTopicComponentInfo,
+    quizAction,
+    topicId,
+    '',
+    'quiz',
+    '',
+    '',
+    '',
+    learningObjectiveConnectId,
+    nextTopicId,
+  );
   // throwing error if client has not send any question in input
   if (!quizQuestions || !quizQuestions.length) {
     log('QuizQuestions are not present in input in addUserActivityQuizDumpPostHookMethod');
@@ -688,6 +649,11 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     and it will be done only on first attempt of quiz so we are checking if the called topic
     is current topic or not and current topic component should be quiz
     */
+    const {
+      currentTopicComponentType: currentTopicComponent,
+      currentTopic,
+    } = currentTopicComponentInfo;
+    const { id: currentTopicId } = currentTopic;
     if (currentTopicComponent === quiz &&
         currentTopicId === topicId) {
       // code for calculating total quiz report accuracy for scholarship

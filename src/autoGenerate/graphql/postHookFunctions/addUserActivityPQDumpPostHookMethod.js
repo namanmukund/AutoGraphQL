@@ -1,7 +1,6 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
-  topicTypes,
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
@@ -10,6 +9,7 @@ import {
   DatabaseRecordNotFoundError,
   PracticeQuestionsNotPresentError,
 } from '../../../../constants/errors';
+import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
 
 /* query to get userLO to check if document exists for userId and learningObjectiveId
 also we are doing computation for chatStatus and next component for this */
@@ -42,23 +42,6 @@ const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
         }
         nextComponentType
       }
-    }
-  }
-  `;
-
-// query to update user current topic component status
-const updateUserCurrentTopicComponentStatusMutation = (
-  currentTopicComponentId,
-  nextCurrentTopicComponentType,
-  restUserCurrentTopicComponentStatusQuery,
-) => `
-  mutation{
-    updateUserCurrentTopicComponentStatus(id:"${currentTopicComponentId}",  input:{
-      currentTopicComponentType: ${nextCurrentTopicComponentType}
-    }
-    ${restUserCurrentTopicComponentStatusQuery}
-    ){
-      id
     }
   }
   `;
@@ -135,16 +118,15 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   }
   const learningObjectiveInfo = get(context, `${mutationName}.learningObjective`);
   const topicId = get(learningObjectiveInfo, 'topic.id');
+  if (!topicId) {
+    log('Not able to fetch LearningObjective.topic in addUserActivityPQDumpPostHookMethod');
+  }
   const {
     id: learningObjectiveIdInResult,
   } = learningObjectiveInfo;
-  /*
-  Getting data for user current topic component status from context based on mutationName
-  This will be used to cover the case that current component status will only get changed, if
-  called component is equal to current component and user has just consumed(next action) it
-  And current component status will not get changed when it is already consumed in past
-  */
-  const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
+  if (!learningObjectiveInfo) {
+    log('Not able to fetch LearningObjectiveInfo in addUserActivityPQDumpPostHookMethod');
+  }
   /*
   we are getting userLearningObjective for below purpose:
   -we get userLearningObjective id , which will be used further to update the document
@@ -162,7 +144,6 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   } = userLearningObjectiveInfo;
   const { next } = userActionType;
   const { complete, incomplete } = userTopicTypeStatus;
-  const { message, quiz, practiceQuestion } = topicTypes;
   let practiceQuestionStatus = get(userLearningObjectiveInfo, 'practiceQuestionStatus', incomplete);
   const {
     pqAction,
@@ -170,49 +151,6 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
     practiceQuestionsDump: inputPracticeQuestions,
   } = input;
   const isPracticeQuestionBookmarked = isBookmarkedFromInput || false;
-  const {
-    id: currentTopicComponentId,
-    currentTopicComponentType: currentTopicComponent,
-    currentLearningObjective,
-    currentTopic,
-  } = currentTopicComponentInfo;
-  /*
-  For next user component topic status, we are using next component stored
-  in userLearningObjective document when it was created. Next component here can
-  either be chat of next Lo or quiz. Logic for this is already written when
-  userLearningObjective document gets created
-  */
-  const nextComponentLearningObjectiveId = get(userLearningObjectiveInfo, 'nextComponent.learningObjective.id');
-  const nextComponentType = get(userLearningObjectiveInfo, 'nextComponent.nextComponentType');
-  let nextCurrentTopicComponentType;
-  let restUserCurrentTopicComponentStatusQuery = '';
-  // logic for checking the next component, it will either be chat of next LO or quiz
-  if (nextComponentType === quiz) {
-    nextCurrentTopicComponentType = quiz;
-  } else if (nextComponentLearningObjectiveId) {
-    nextCurrentTopicComponentType = message;
-    restUserCurrentTopicComponentStatusQuery = `currentLearningObjectiveConnectId:"${nextComponentLearningObjectiveId}"`;
-  }
-  if (!currentTopic) {
-    log('Not able to fetch CurrentTopicComponentInfo.CurrentTopic in addUserActivityPQDumpPostHookMethod');
-  }
-  if (!currentLearningObjective) {
-    log('Not able to fetch CurrentTopicComponentInfo.CurrentLearningObjective in addUserActivityPQDumpPostHookMethod');
-  }
-  if (!currentTopicComponent) {
-    log('Not able to fetch CurrentTopicComponentInfo.CurrentTopicComponentType in addUserActivityPQDumpPostHookMethod');
-  }
-  if (!topicId) {
-    log('Not able to fetch LearningObjective.topic in addUserActivityPQDumpPostHookMethod');
-  }
-  if (!learningObjectiveInfo) {
-    log('Not able to fetch LearningObjectiveInfo in addUserActivityPQDumpPostHookMethod');
-  }
-  const { id: currentTopicId } = currentTopic;
-  const { id: currentLearningObjectiveId } = currentLearningObjective;
-  if (!userLearningObjectiveId) {
-    log('Not able to fetch LearningObjective.topic in addUserActivityPQDumpPostHookMethod');
-  }
   // initializing fields for user PQ report
   let firstTryCount = 0;
   let secondTryCount = 0;
@@ -369,29 +307,34 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
     practiceQuestionStatus = complete;
   }
   /*
-  We are checking whether user current topic status should be updated, below are the conditions:
-  -user is hitting next and
-  -all practice questions whould be in completed state
-  -current topic component should be 'practiceQuestion'
-  -called topic in input should be equal to current topic and
-  -called learningObjective in input should be equal to current learningObjective
-  Above conditions covers the case that current component status will only get changed, if
-  called component is equal to current component and user has just consumed(next action) it
-  and current component status will not get changed when it is already consumed in past
+Getting data for user current topic component status from context based on mutationName
+This will be used to cover the case that current component status will only get changed, if
+called component is equal to current component and user has just consumed(next action) it
+And current component status will not get changed when it is already consumed in past
+*/
+  const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
+  /*
+  For next user component topic status, we are using next component stored
+  in userLearningObjective document when it was created. Next component here can
+  either be chat of next Lo or quiz. Logic for this is already written when
+  userLearningObjective document gets created
   */
-  if (pqAction === next &&
-    completedQuestionCount === totalQuestions &&
-    currentTopicComponent === practiceQuestion &&
-    currentTopicId === topicId &&
-    currentLearningObjectiveId === learningObjectiveIdInResult
-  ) {
-    await callGraphqlApi(updateUserCurrentTopicComponentStatusMutation(
-      currentTopicComponentId,
-      nextCurrentTopicComponentType,
-      restUserCurrentTopicComponentStatusQuery,
-    ));
-  }
-
+  const nextComponentLearningObjectiveId = get(userLearningObjectiveInfo, 'nextComponent.learningObjective.id');
+  const nextComponentType = get(userLearningObjectiveInfo, 'nextComponent.nextComponentType');
+  /*
+  Calling method to update current user Topic Component status
+  */
+  await updateCurrentComponentStatus(
+    currentTopicComponentInfo,
+    pqAction,
+    topicId,
+    learningObjectiveIdInResult,
+    'practiceQuestion',
+    nextComponentType,
+    completedQuestionCount,
+    totalQuestions,
+    nextComponentLearningObjectiveId,
+  );
   // popping all the practice questions and sending rest of the fields for update
   await callGraphqlApi(updateUserLearningObjectiveMutation(
     userLearningObjectiveId,
