@@ -1,4 +1,4 @@
-const parseResultData = (result, page) => {
+const parseTopicComponentResultData = (result, page) => {
   const parsedData = result;
   if (page === 'learningObjective') {
     const lo = { type: 'LearningObjective', typeId: `${parsedData.learningObjective.id}` };
@@ -46,5 +46,5 @@ const parseResultData = (result, page) => {
   return parsedData;
 };
 
-export default parseResultData;
+export default parseTopicComponentResultData;
 

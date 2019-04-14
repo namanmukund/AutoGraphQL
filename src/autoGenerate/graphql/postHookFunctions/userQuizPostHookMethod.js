@@ -5,7 +5,7 @@ import {
 } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
 import getNextComponent from './utils/getNextComponent';
-import parseResultData from './utils/parseResultData';
+import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 
 // query to get quiz questions associated with topic
 const topicQuery = topicId => `
@@ -156,7 +156,7 @@ const userQuizPostHookMethod = async (input, params) => {
       */
     const addUserQuizResult = get(result, 'data.addUserQuiz');
     if (addUserQuizResult) {
-      resultArray.push(parseResultData(addUserQuizResult, 'quiz'));
+      resultArray.push(parseTopicComponentResultData(addUserQuizResult, 'quiz'));
     }
   }
   return resultArray;

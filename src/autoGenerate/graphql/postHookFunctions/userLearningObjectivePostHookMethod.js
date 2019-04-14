@@ -7,7 +7,7 @@ import {
 import getInfoFromParams from './utils/getInfoFromParams';
 import getNextComponent from './utils/getNextComponent';
 import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
-import parseResultData from './utils/parseResultData';
+import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 
 // query to get learning objective and all the learning objectives of the topic associated
 const learningObjectiveQuery = learningObjectiveId => `
@@ -162,7 +162,7 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
       */
     const addUserLearningObjectiveResult = get(result, 'data.addUserLearningObjective');
     if (addUserLearningObjectiveResult) {
-      resultArray.push(parseResultData(addUserLearningObjectiveResult, 'learningObjective'));
+      resultArray.push(parseTopicComponentResultData(addUserLearningObjectiveResult, 'learningObjective'));
     }
   }
   return resultArray;

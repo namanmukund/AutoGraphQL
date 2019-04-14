@@ -6,7 +6,7 @@ import {
 } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
 import getNextComponent from './utils/getNextComponent';
-import parseResultData from './utils/parseResultData';
+import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 
 // query to get topic and it's Lo with order 1
 const topicQuery = topicId => `
@@ -114,7 +114,7 @@ const userVideoPostHookMethod = async (input, params) => {
       */
     const addUserVideoResult = get(result, 'data.addUserVideo');
     if (addUserVideoResult) {
-      resultArray.push(parseResultData(addUserVideoResult, 'video'));
+      resultArray.push(parseTopicComponentResultData(addUserVideoResult, 'video'));
     }
   }
   return resultArray;
