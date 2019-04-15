@@ -66,6 +66,10 @@ const addUserCurrentTopicComponentStatusValidation = async (params, context) => 
   if (!backendApps.includes(appName) && userIdFromContext !== userId) {
     throw new UserMismatchError();
   }
+  // logic to check if lo and topic passed are related to each other
+  if (!topicId || !learningObjectiveId) {
+    throw new TopicOrLONotPresentError();
+  }
   const userCurrentTopicComponentStatusData = await callGraphqlApi(
     userCurrentTopicComponentStatusQuery(userId, courseId));
   // Fetching userCurrentTopicComponentStatus to check if it already exists or not
@@ -75,10 +79,6 @@ const addUserCurrentTopicComponentStatusValidation = async (params, context) => 
     // checking if course and user document already exists
   if (userCurrentTopicComponentStatusesResult && userCurrentTopicComponentStatusesResult.length) {
     throw new UserCourseCombinationExistError();
-  }
-  // logic to check if lo and topic passed are related to each other
-  if (!topicId || !learningObjectiveId) {
-    throw new TopicOrLONotPresentError();
   }
   /*
   this query returns the count of the learning objective id inside topic id

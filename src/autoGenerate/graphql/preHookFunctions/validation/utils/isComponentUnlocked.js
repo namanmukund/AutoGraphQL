@@ -104,13 +104,6 @@ const isComponentUnlocked = async (
     }
     const topicQueryRes = await getTopicForValidation(topicId);
     topicInfo = get(topicQueryRes, 'data.topic');
-    if (!topicInfo) {
-      throw new DatabaseRecordNotFoundError({
-        data: {
-          error: 'LearningObjective.topicInfo: is not present',
-        },
-      });
-    }
     // Fetching user current topic component status which will be compared against called topic
     currentTopicQuery = `currentTopic{
                                 id
@@ -120,6 +113,13 @@ const isComponentUnlocked = async (
   if (!backendApps.includes(appName) && userIdFromContext !== userId) {
     throw new UserMismatchError();
   }
+  if (!topicInfo) {
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'LearningObjective.topicInfo: is not present',
+      },
+    });
+  }
   const userCurrentTopicComponentStatusRes =
     await getUserCurrentTopicComponentStatus(
       userId,
@@ -128,13 +128,6 @@ const isComponentUnlocked = async (
       'enrollmentType',
     );
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
-  if (!topicInfo) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'LearningObjective.topicInfo: is not present',
-      },
-    });
-  }
   if (!currentTopicComponentInfo) {
     throw new DatabaseRecordNotFoundError({
       data: {
