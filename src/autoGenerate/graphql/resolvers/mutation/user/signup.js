@@ -77,7 +77,7 @@ const signupMutationResolver = async (
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
   validate(
-    typeName,
+    'UserToken',
     ast,
     ADD,
     fieldsFetched,
