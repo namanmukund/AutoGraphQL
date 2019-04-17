@@ -1,12 +1,14 @@
 import { includes } from 'lodash';
 import {
-  backendApps, frontEndApps, defaultFields, operationName,
+  backendApps, frontEndApps, defaultFields,
   permissionIntegratedApps,
 } from '../../../../constants';
 import {
   InvalidReadAccessError, InvalidWriteAccessError,
   InvalidActionOnDefaultFieldsError,
 } from '../../../../constants/errors';
+import validateAppAndUserPermissionOnFields from './validateAppAndUserPermissionOnFields';
+import { ADD, DELETE, PLURAL, SINGULAR, UPDATE } from '../../../../constants/graphqlOperations';
 
 const isBackendApp = (authentication) => {
   const app = authentication && authentication.app;
@@ -78,12 +80,30 @@ const validateDefaultInput = (input) => {
   return true;
 };
 
-const validate = (operation, accessFields, queryFields, authentication, input) => {
+
+const validate = (
+  typeName,
+  parsedASTMap,
+  operation,
+  queryFields,
+  authentication,
+  input,
+) => {
+  // if backend app allow everything
   if (isBackendApp(authentication)) {
     return true;
   }
+  // check for app and user accessibility on fields
+  validateAppAndUserPermissionOnFields(
+    typeName,
+    parsedASTMap,
+    queryFields,
+    authentication,
+    operation,
+  );
 
-  if (operation === operationName.read || operation === operationName.delete) {
+  const accessFields = parsedASTMap[typeName];
+  if (operation === SINGULAR || operation === PLURAL || operation === DELETE) {
     // check if user is not trying to fetch writeOnly fields
     const validAccess = validateAccess(
       accessFields.writeOnlyFields,
@@ -92,7 +112,7 @@ const validate = (operation, accessFields, queryFields, authentication, input) =
     if (!validAccess) {
       throw new InvalidReadAccessError();
     }
-  } else if (operation === operationName.add || operation === operationName.update) {
+  } else if (operation === ADD || operation === UPDATE) {
     // check if user is not trying to add readOnly fields
     const writeValidation = validateAccess(
       accessFields.readOnlyFields,

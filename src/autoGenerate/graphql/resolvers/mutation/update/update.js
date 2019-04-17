@@ -6,7 +6,6 @@ import getArrayFieldsFromDocumentInput from '../utils/getArrayFieldsFromDocument
 import { toObject, isErrorThrown } from '../../../../../../utils';
 import { validate } from '../../../validation';
 import { getFieldsBeingFetched, filterRemoteFields, filterRemoteInput } from '../../../../utils';
-import { operationName } from '../../../../../../constants';
 import { mergeMutationsPromisesResults } from '../utils/mergeMutationsPromisesResults';
 import { getRelationFields } from '../utils/getRelationFields';
 import { handleAdditionalFieldsToUpdate } from '../utils/handleAdditionalFieldsToUpdate';
@@ -18,6 +17,7 @@ import { getConnectInputFieldsMap } from '../utils/getConnectInputFieldsMap';
 import { rollBackDocumentSaves } from '../utils/rollBackDocumentSaves';
 import nestedConnectIdHandler from '../utils/nestedConnectIdHandler';
 import removeConnectionWhenDisconnected from '../../../controllers/utils/removeConnectionWhenDisconnected';
+import { UPDATE } from '../../../../../../constants/graphqlOperations';
 
 // Returns remote delete mutation promises.
 const remoteUpdateMutationPromises = (
@@ -249,9 +249,16 @@ const updateGenericMutation = (root,
   const { remoteFields, remoteFieldsApplicationWise } = ast[typeName];
   // Fields which are requested.
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
-  const fields = ast[typeName].fields;
-  validate(operationName.update, fields, feildsFetched, authentication, input);
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
+
+  validate(
+    typeName,
+    ast,
+    UPDATE,
+    fieldsFetched,
+    authentication,
+    input,
+  );
   // get a map of connect arguments with field names as key and array of ids as value
   const connectInputFieldsMap = getConnectInputFieldsMap(connectArguments);
   // If there are no remote fields, return the result.
@@ -273,7 +280,7 @@ const updateGenericMutation = (root,
     id,
     input,
     typeName,
-    feildsFetched,
+    fieldsFetched,
     mutationName,
     controllerFunctionName,
     remoteFieldsApplicationWise,

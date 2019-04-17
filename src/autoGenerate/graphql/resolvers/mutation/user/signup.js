@@ -1,8 +1,5 @@
 import bcrypt from 'bcrypt';
 import { get, pick } from 'lodash';
-import {
-  operationName,
-} from '../../../../../../constants';
 import { UserTokenNotRequiredError } from '../../../../../../constants/errors';
 import allAuthParams from '../../../../../../config/authParams';
 import { MutationController, RemoteController } from '../../../controllers';
@@ -18,6 +15,7 @@ import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
 import addUserCurrentTopicComponentStatus
   from '../../../../utils/addUserCurrentTopicComponentStatus';
+import { ADD } from '../../../../../../constants/graphqlOperations';
 
 const application = process.env.APPLICATION || 'core';
 const authParams = allAuthParams[application];
@@ -76,10 +74,16 @@ const signupMutationResolver = async (
   const { input } = params;
   const { localFields, remoteFields, remoteFieldsApplicationWise } = ast[typeName];
   const { fieldNodes } = info;
-  const feildsFetched = getFieldsBeingFetched(fieldNodes);
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const accessFields = ast[typeName];
-  validate(operationName.add, accessFields, feildsFetched, authentication, input);
+  validate(
+    typeName,
+    ast,
+    ADD,
+    fieldsFetched,
+    authentication,
+    {},
+  );
 
   const decodedUser = authentication && authentication.user;
 
@@ -138,7 +142,7 @@ const signupMutationResolver = async (
     typeName,
     mutationName,
     controllerFunctionName,
-    feildsFetched,
+    fieldsFetched,
     remoteFieldsApplicationWise,
     authentication,
   );

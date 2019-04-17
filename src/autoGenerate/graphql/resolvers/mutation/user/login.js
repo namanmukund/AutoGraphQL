@@ -1,5 +1,4 @@
 import { pick } from 'lodash';
-import { operationName } from '../../../../../../constants';
 import {
   UserTokenNotRequiredError,
   BlockedOperationError,
@@ -13,6 +12,7 @@ import {
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { checkPasswordAndReturnUserWithToken } from '../utils/checkPasswordAndReturnUserWithToken';
+import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 
 const localLoginMutationPromise = (
   typeName,
@@ -94,8 +94,14 @@ export default function loginMutationResolver(
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const accessFields = ast[typeName];
-  validate(operationName.read, accessFields, fieldsFetched, authentication);
+  validate(
+    typeName,
+    ast,
+    SINGULAR,
+    fieldsFetched,
+    authentication,
+    input,
+  );
   const decodedUser = authentication && authentication.user;
   // FIX: Should this not be a null check
   if (decodedUser) {

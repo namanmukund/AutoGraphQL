@@ -22,6 +22,8 @@ import {
   QuestionIsPublishedError,
   MessageIsPublishedError,
   ComponentLockedError,
+  OrderAlreadyExistsError,
+  TopicIdRequiredError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -50,6 +52,7 @@ import {
   RelationAppliedOnSameFieldsError, RemoteRelationError, DefaultDirectiveAppliedOnWrongFieldError,
   InvalidDateFormatError,
   UnsupportedListFieldInsideSubDocumentObjectError,
+  InvalidRuleValueError,
 } from './types';
 import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   EitherUsernameEmailOrPhoneRequiredError, InvalidNameError, InvalidNameLengthError,
@@ -60,6 +63,8 @@ import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   DuplicateConnectIdsError, UserOrCourseNotPresentError, TopicOrLONotPresentError,
   UserOrTopicNotPresentError, PracticeQuestionsNotPresentError, QuizQuestionsNotPresentError,
   UserMismatchError,
+  UnauthorizedFieldOrTypeAccessByAppError,
+  InsufficientPermissionError,
 } from './input';
 
 
@@ -151,4 +156,9 @@ export {
   PracticeQuestionsNotPresentError,
   QuizQuestionsNotPresentError,
   UserMismatchError,
+  OrderAlreadyExistsError,
+  TopicIdRequiredError,
+  UnauthorizedFieldOrTypeAccessByAppError,
+  InsufficientPermissionError,
+  InvalidRuleValueError,
 };

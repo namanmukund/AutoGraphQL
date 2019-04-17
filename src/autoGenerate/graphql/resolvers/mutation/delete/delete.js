@@ -3,8 +3,8 @@ import { getFieldsBeingFetched, filterRemoteFields } from '../../../../utils';
 import { checkAndDeleteReferences } from '../utils';
 import { log, toObject } from '../../../../../../utils';
 import { validate } from '../../../validation';
-import { operationName } from '../../../../../../constants';
 import { mergeMutationsPromisesResults } from '../utils/mergeMutationsPromisesResults';
+import { DELETE } from '../../../../../../constants/graphqlOperations';
 
 // Roll back the changes made by deleteMutationResolver
 const rollBack = () => {
@@ -92,8 +92,13 @@ const deleteMutationResolver = (
   const { fieldNodes } = info;
   const feildsFetched = getFieldsBeingFetched(fieldNodes);
 
-  const accessFields = ast[typeName];
-  validate(operationName.delete, accessFields, feildsFetched, authentication);
+  validate(
+    typeName,
+    ast,
+    DELETE,
+    feildsFetched,
+    authentication,
+  );
   // If there are no remote fields, return the result.
   if (!Object.keys(remoteFields).length) {
     return localDeleteMutationPromise(

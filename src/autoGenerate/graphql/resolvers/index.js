@@ -14,7 +14,8 @@ import {
   validateForgotPasswordOTPMutationResolver,
   finishForgotPasswordMutationResolver,
   resendForgotPasswordOTPMutationResolver,
-  deleteMultipleMutationResolver, userCourseSyllabusMutationResolver,
+  deleteMultipleMutationResolver,
+  userCourseSyllabusMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import { types, authenticateUser, ifAuthorized, toObject, isErrorThrown, getRandomNumber } from '../../../../utils';
@@ -36,6 +37,14 @@ import getSendResendForgotPasswordOTPInput from '../../utils/getSendResendForgot
 import getMutationNames from '../../utils/getMutationNames';
 import checkMiddlewareErrors from './utils/checkMiddlewareErrors';
 import scalarDate from './utils/scalarDate';
+import {
+  ADD, DELETE, DELETE_MULTIPLE,
+  META_QUERY,
+  PLURAL,
+  SINGULAR,
+  UPDATE,
+  UPDATE_MULTIPLE,
+} from '../../../../constants/graphqlOperations';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -99,7 +108,7 @@ const defaultMutationsResolverWrapper = async (
 
 Object.keys(parsedASTMap).forEach((type) => {
   const definition = parsedASTMap[type];
-  const { name, field, directives } = definition;
+  const { name, field, directives, allowedOperations } = definition;
   const typeName = name.value;
   const modelSingular = camelCase(typeName);
   const modelPlural = camelCase(pluralize(typeName));
@@ -109,135 +118,194 @@ Object.keys(parsedASTMap).forEach((type) => {
   const isModel = directives && hasDirective(directives, 'model');
   if (isModel) {
     // Fetch single query resolver.
-    resolvers.Query[modelSingular] = (async (root, params, context, info) => {
-      // Query Resolvers
-      const authentication = ifAuthorized(context);
-      Object.assign(authentication, {
-        mutationOrQueryName: modelSingular,
+    if (
+      (allowedOperations && allowedOperations === '*') ||
+      (allowedOperations && allowedOperations !== '*' &&
+        allowedOperations.length && allowedOperations.includes(SINGULAR))
+    ) {
+      resolvers.Query[modelSingular] = (async (root, params, context, info) => {
+        // Query Resolvers
+        const authentication = ifAuthorized(context);
+        Object.assign(authentication, {
+          mutationOrQueryName: modelSingular,
+        });
+        await prehook('', modelSingular, context, params);
+        return fetchSingleQueryResolver(
+          root,
+          params,
+          typeName,
+          info,
+          parsedASTMap,
+          authentication,
+        ).then(async (result) => {
+          const newResult = toObject(result);
+          const postHookResult = await posthook(newResult, modelSingular, context, params);
+          return postHookResult;
+        });
       });
-      await prehook('', modelSingular, context, params);
-      return fetchSingleQueryResolver(
-        root,
-        params,
-        typeName,
-        info,
-        parsedASTMap,
-        authentication,
-      ).then(async (result) => {
-        const newResult = toObject(result);
-        const postHookResult = await posthook(newResult, modelSingular, context, params);
-        return postHookResult;
-      });
-    });
+    }
 
     // Fetch list query resolver.
-    resolvers.Query[modelPlural] = (async (root, params, context, info) => {
-      const authentication = ifAuthorized(context);
-      Object.assign(authentication, {
-        mutationOrQueryName: modelPlural,
+    if (
+      (allowedOperations && allowedOperations === '*') ||
+      (allowedOperations && allowedOperations !== '*' &&
+        allowedOperations.length && allowedOperations.includes(PLURAL))
+    ) {
+      resolvers.Query[modelPlural] = (async (root, params, context, info) => {
+        const authentication = ifAuthorized(context);
+        Object.assign(authentication, {
+          mutationOrQueryName: modelPlural,
+        });
+        await prehook('', modelSingular, context, params);
+        return fetchListQueryResolver(
+          root,
+          params,
+          typeName,
+          info,
+          parsedASTMap,
+          authentication,
+        ).then(async (result) => {
+          const newResult = toObject(result);
+          const postHookResult = await posthook(newResult, modelSingular, context, params);
+          return postHookResult;
+        });
       });
-      await prehook('', modelSingular, context, params);
-      return fetchListQueryResolver(
-        root,
-        params,
-        typeName,
-        info,
-        parsedASTMap,
-        authentication,
-      ).then(async (result) => {
-        const newResult = toObject(result);
-        const postHookResult = await posthook(newResult, modelSingular, context, params);
-        return postHookResult;
-      });
-    });
+    }
 
     // Fetch count query resolver.
-    resolvers.Query[modelMeta] = ((root, params, context, info) => {
-      const authentication = ifAuthorized(context);
-      Object.assign(authentication, {
-        mutationOrQueryName: modelMeta,
+    if (
+      (allowedOperations && allowedOperations === '*') ||
+      (allowedOperations && allowedOperations !== '*' &&
+        allowedOperations.length && allowedOperations.includes(META_QUERY))
+    ) {
+      resolvers.Query[modelMeta] = ((root, params, context, info) => {
+        const authentication = ifAuthorized(context);
+        Object.assign(authentication, {
+          mutationOrQueryName: modelMeta,
+        });
+        return fetchListAggregationQueryResolver(
+          root,
+          params,
+          typeName,
+          info,
+          parsedASTMap,
+          authentication,
+        );
       });
-      return fetchListAggregationQueryResolver(
-        root,
-        params,
-        typeName,
-        info,
-        parsedASTMap,
-        authentication,
-      );
-    });
+    }
 
     // Mutation Resolvers
     const mutationNames = getMutationNames(typeName);
-    resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
-      [mutationNames.addMutation]: (root, params, context, info) => {
-        const mutationName = mutationNames.addMutation;
-        const mutationResolverName = 'addMutationResolver';
-        return defaultMutationsResolverWrapper(
-          root,
-          params,
-          context,
-          typeName,
-          info,
-          mutationName,
-          mutationResolverName,
-        );
-      },
-      [mutationNames.updateMutation]: (root, params, context, info) => {
-        const mutationName = mutationNames.updateMutation;
-        const mutationResolverName = 'updateMutationResolver';
-        return defaultMutationsResolverWrapper(
-          root,
-          params,
-          context,
-          typeName,
-          info,
-          mutationName,
-          mutationResolverName,
-        );
-      },
-      [mutationNames.updateMultipleMutation]: (root, params, context, info) => {
-        const mutationName = mutationNames.updateMutation;
-        const mutationResolverName = 'updateMutationResolver';
-        const isMultiple = true;
-        return defaultMutationsResolverWrapper(
-          root,
-          params,
-          context,
-          typeName,
-          info,
-          mutationName,
-          mutationResolverName,
-          isMultiple,
-        );
-      },
-      [mutationNames.deleteMutation]: (root, params, context, info) => {
-        const mutationName = mutationNames.deleteMutation;
-        const mutationResolverName = 'deleteMutationResolver';
-        return defaultMutationsResolverWrapper(
-          root,
-          params,
-          context,
-          typeName,
-          info,
-          mutationName,
-          mutationResolverName,
-        );
-      },
-      [mutationNames.deleteMultipleMutation]: (root, params, context, info) => {
-        const mutationName = mutationNames.deleteMultipleMutation;
-        const mutationResolverName = 'deleteMultipleMutationResolver';
-        return defaultMutationsResolverWrapper(
-          root,
-          params,
-          context,
-          typeName,
-          info,
-          mutationName,
-          mutationResolverName,
-        );
-      },
-    });
+    if (
+      (allowedOperations && allowedOperations === '*') ||
+      (allowedOperations && allowedOperations !== '*' &&
+        allowedOperations.length && allowedOperations.includes(ADD))
+    ) {
+      resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
+        [mutationNames.addMutation]: (root, params, context, info) => {
+          const mutationName = mutationNames.addMutation;
+          const mutationResolverName = 'addMutationResolver';
+          return defaultMutationsResolverWrapper(
+            root,
+            params,
+            context,
+            typeName,
+            info,
+            mutationName,
+            mutationResolverName,
+          );
+        },
+      });
+    }
+
+    if (
+      (allowedOperations && allowedOperations === '*') ||
+      (allowedOperations && allowedOperations !== '*' &&
+        allowedOperations.length && allowedOperations.includes(UPDATE))
+    ) {
+      resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
+        [mutationNames.updateMutation]: (root, params, context, info) => {
+          const mutationName = mutationNames.updateMutation;
+          const mutationResolverName = 'updateMutationResolver';
+          return defaultMutationsResolverWrapper(
+            root,
+            params,
+            context,
+            typeName,
+            info,
+            mutationName,
+            mutationResolverName,
+          );
+        },
+      });
+    }
+
+    if (
+      (allowedOperations && allowedOperations === '*') ||
+      (allowedOperations && allowedOperations !== '*' &&
+        allowedOperations.length && allowedOperations.includes(UPDATE_MULTIPLE))
+    ) {
+      resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
+        [mutationNames.updateMultipleMutation]: (root, params, context, info) => {
+          const mutationName = mutationNames.updateMutation;
+          const mutationResolverName = 'updateMutationResolver';
+          const isMultiple = true;
+          return defaultMutationsResolverWrapper(
+            root,
+            params,
+            context,
+            typeName,
+            info,
+            mutationName,
+            mutationResolverName,
+            isMultiple,
+          );
+        },
+      });
+    }
+    if (
+      (allowedOperations && allowedOperations === '*') ||
+      (allowedOperations && allowedOperations !== '*' &&
+        allowedOperations.length && allowedOperations.includes(DELETE))
+    ) {
+      resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
+        [mutationNames.deleteMutation]: (root, params, context, info) => {
+          const mutationName = mutationNames.deleteMutation;
+          const mutationResolverName = 'deleteMutationResolver';
+          return defaultMutationsResolverWrapper(
+            root,
+            params,
+            context,
+            typeName,
+            info,
+            mutationName,
+            mutationResolverName,
+          );
+        },
+      });
+    }
+
+    if (
+      (allowedOperations && allowedOperations === '*') ||
+      (allowedOperations && allowedOperations !== '*' &&
+        allowedOperations.length && allowedOperations.includes(DELETE_MULTIPLE))
+    ) {
+      resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
+        [mutationNames.deleteMultipleMutation]: (root, params, context, info) => {
+          const mutationName = mutationNames.deleteMultipleMutation;
+          const mutationResolverName = 'deleteMultipleMutationResolver';
+          return defaultMutationsResolverWrapper(
+            root,
+            params,
+            context,
+            typeName,
+            info,
+            mutationName,
+            mutationResolverName,
+          );
+        },
+      });
+    }
     // add relation mutations resolvers
 
     // get all fields with with relation directive

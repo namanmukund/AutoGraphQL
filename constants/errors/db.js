@@ -48,3 +48,10 @@ export const ComponentLockedError = createError('ComponentLockedError', {
   message: 'Component is locked',
 });
 
+export const OrderAlreadyExistsError = createError('OrderAlreadyExistsError', {
+  message: 'Cannot perform the current operation as order already exists, order has to be unique',
+});
+
+export const TopicIdRequiredError = createError('TopicIdRequiredError', {
+  message: 'Cannot perform the current operation as TopicConnectId is not provided',
+});

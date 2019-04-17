@@ -91,3 +91,11 @@ export const QuizQuestionsNotPresentError = createError('QuizQuestionsNotPresent
 export const UserMismatchError = createError('UserMismatchError', {
   message: 'User id passed in input does not belong to logged in user',
 });
+
+export const UnauthorizedFieldOrTypeAccessByAppError = createError('UnauthorizedFieldAccessByAppError', {
+  message: 'App is not authorized to access some of the fields or types',
+});
+
+export const InsufficientPermissionError = createError('InsufficientPermissionError', {
+  message: 'Insufficient permission error',
+});

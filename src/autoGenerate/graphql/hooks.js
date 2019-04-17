@@ -24,9 +24,9 @@ import {
   FileUsageCountNotZeroError,
 }
   from '../../../constants/errors';
-import {
-  BYPASS,
-} from '../../../constants';
+
+import { addLearningObjectiveValidation } from './preHookFunctions/validation';
+import { BYPASS } from '../../../constants';
 
 import { createStaticAppToken } from '../../auth';
 import deleteFromS3 from '../../middlewares/utils/deleteFromS3';
@@ -321,6 +321,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     case 'userQuiz' : {
       await userQuizValidation(params, context);
       return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addLearningObjective': {
+      await addLearningObjectiveValidation(params);
+      break;
     }
     default : {
       /* If context is not present then it means user is not authenticated and the
