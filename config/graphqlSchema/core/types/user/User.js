@@ -2,11 +2,11 @@ const User = `
   type User @model {
     phoneOtp: Int @writeOnly
     emailOtp: Int @writeOnly
-    name: String! @trim
-    status: Status! @defaultValue(value: "inactive") @readOnly
+    name: String @trim
+    status: Status! @defaultValue(value: "active") @readOnly
     username: String! @unique @auto
     password: String @filterOff @writeOnly
-    email: String @uniqueOrEmpty @trim
+    email: String! @uniqueOrEmpty @trim
     emailVerified: Boolean @defaultValue(value: "false") @readOnly
     phone: Phone @uniqueOrEmpty
     phoneVerified: Boolean @defaultValue(value: "false")
