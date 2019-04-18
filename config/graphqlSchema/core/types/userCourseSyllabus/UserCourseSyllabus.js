@@ -34,7 +34,6 @@ const courseUserCourseSyllabus = `
 
 const UserCourseSyllabus = `
   type UserCourseSyllabus {
-    user: User!
     currentCourse: CourseUserCourseSyllabus
     currentTopicComponent: CurrentTopicComponentType!
     currentTopicComponentDetail: CurrentTopicComponentDetailType

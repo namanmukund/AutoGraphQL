@@ -3,6 +3,7 @@ import {
   topicTypes,
   GLOBAL_COURSE_ID,
   PUBLISHED,
+  enrollmentTypes,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError,
@@ -11,6 +12,7 @@ import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = userId => `
@@ -29,19 +31,6 @@ const getUserCurrentTopicComponentStatus = userId => `
       ]
     }){
       id
-      user{
-        id
-        username
-        name
-        status
-        email
-        phone{
-          number
-          countryCode
-        }
-        dateOfBirth
-        gender
-      }
       currentCourse{
         id
         title
@@ -99,6 +88,41 @@ const getUserCurrentTopicComponentStatus = userId => `
   }
   `;
 
+// query to get chapters and topics belomngin to a course
+const getCourseQuery = () => `
+    query{
+    course(id: "${GLOBAL_COURSE_ID}"){
+      id
+      title
+      chapters(
+          filter: {
+            status: ${PUBLISHED}
+          }
+        ){
+        id
+        title
+        order
+        topics(
+          filter: {
+            status: ${PUBLISHED}
+          }
+        ){
+          id
+          title
+          order
+          isTrial
+          thumbnail{
+            id
+            uri
+            name
+          }
+        }
+      }
+    }
+  }
+  `;
+
+
 /*
 This is called when user tries to load homepage
 It will return all the chapters and topics
@@ -119,35 +143,72 @@ const userCourseSyllabusMutationResolver = async (
   we will compare this userId against userId passed in input
   both should be equal to perform further action
   */
-  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+  const { video, message, practiceQuestion, quiz } = topicTypes;
+  const { free } = enrollmentTypes;
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context, 'userCourseSyllabus');
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;
-  const { authorization: token } = context;
-  const res = await callGraphqlApi(
-    getUserCurrentTopicComponentStatus(userId),
-    '',
-    '',
-    '',
-    token,
-  );
+  let currentTopicComponentInfo;
+  // if we get userId through token, then we will return syllabus for that user
+  if (userId) {
+    const { authorization: token } = context;
+    const res = await callGraphqlApi(
+      getUserCurrentTopicComponentStatus(userId),
+      '',
+      '',
+      '',
+      token,
+    );
 
-  const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
+    currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
+    /*
+    This case should not occur as we have added logic in prehook userCourseSyllabusMethod
+    to add userCurrentTopicComponentStatus if it not already present and
+    the first published topic and first published learning objective corresponding to that topic
+    will get populated in the document
+    */
+    if (!currentTopicComponentInfo) {
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'UserCurrentTopicComponentStatus: is not present',
+        },
+      });
+    }
   /*
-  This case should not occur as we have added logic in prehook userCourseSyllabusMethod
-  to add userCurrentTopicComponentStatus if it not already present and
-  the first published topic and first published learning objective corresponding to that topic
-  will get populated in the document
+  If user is not logged in and asking for course syllabus then we will not add
+  any document in Db and will return default data with first topic as unlocked
   */
-  if (!currentTopicComponentInfo) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'UserCurrentTopicComponentStatus: is not present',
-      },
-    });
+  } else {
+    const topic = await getFirstTopicAndLearningObjective('userCourseSyllabus');
+    const firstTopic = get(topic, 'data.topics[0]');
+    const firstLearningObjective = get(topic, 'data.topics[0].learningObjectives[0]');
+    if (!firstTopic) {
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'FirstTopic is not present',
+        },
+      });
+    }
+    if (!firstLearningObjective) {
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'FirstTopicId.firstLearningObjective: is not present',
+        },
+      });
+    }
+    const courseResult = await callGraphqlApi(getCourseQuery());
+    const course = get(courseResult, 'data.course');
+    // constructing data when a not logged in user fetches userCourseSyllabus
+    currentTopicComponentInfo = {
+      currentCourse: course,
+      currentTopicComponentType: video,
+      currentTopic: firstTopic,
+      currentLearningObjective: firstLearningObjective,
+      enrollmentType: free,
+    };
   }
   const {
-    user,
     currentCourse,
     currentTopicComponentType: currentTopicComponent,
     currentTopic,
@@ -190,13 +251,6 @@ const userCourseSyllabusMutationResolver = async (
       },
     });
   }
-  if (!user) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'User: is not present',
-      },
-    });
-  }
   // this object will be returned in output
   const currentUserSyllabus = {};
   let totalChapters = 0;
@@ -230,7 +284,6 @@ const userCourseSyllabusMutationResolver = async (
     });
   });
   Object.assign(currentUserSyllabus, {
-    user,
     currentCourse,
     currentTopicComponent,
     chapters,
@@ -255,7 +308,6 @@ const userCourseSyllabusMutationResolver = async (
     thumbnail: LOThumbnail,
     description: LODescription,
   } = currentLearningObjective;
-  const { video, message, practiceQuestion, quiz } = topicTypes;
   // logic for populating current component detail based on current topic component
   switch (currentTopicComponent) {
     case video:
