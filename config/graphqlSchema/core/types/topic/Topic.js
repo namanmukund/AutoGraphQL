@@ -1,5 +1,3 @@
-import { ADD, PLURAL, SINGULAR } from '../../../../../constants/graphqlOperations';
-
 const Topic = `
   type Topic @model {
     order: Int! @unique @length(min: 1, max: 50)
@@ -17,13 +15,6 @@ const Topic = `
     videoStatus: ContentStatus! @defaultValue(value: "unpublished")
     chapter: Chapter @relation(name: "ChapterTopic")
     learningObjectives: [LearningObjective] @relation(name: "TopicLearningObjective", isSubset: true)
-      @appPermissions(permissions:[
-      { appName: "tekieTms" operations: ["${ADD}", "${SINGULAR}", "${PLURAL}"] }, 
-      { appName: "appTwo" operations: ["${ADD}", "${SINGULAR}"] },  
-      { appName: "three" operations: "*" },
-      { appName: "four" operations: "*" }
-      ], 
-      rule: allow)
     questions: [QuestionBank] @relation(name: "TopicQuestionBank")
     thumbnail: File @relation(name: "TopicThumbnail", direction: "OneWay")
     isTrial: Boolean @defaultValue(value: "false")
