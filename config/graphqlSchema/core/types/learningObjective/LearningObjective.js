@@ -1,51 +1,11 @@
-import { ADD, META_QUERY, PLURAL, SINGULAR, UPDATE } from '../../../../../constants/graphqlOperations';
-
 const LearningObjective = `
-  type LearningObjective @model 
-  @appPermissions(permissions:[
-  { appName: "tekieTms" operations: ["${ADD}", "${SINGULAR}", "${PLURAL}"] }, 
-  { appName: "appTwo" operations: ["${ADD}", "${SINGULAR}"] },  
-  { appName: "three" operations: "*" },
-  { appName: "four" operations: "*" }
-  ], 
-  rule: allow)
- @userPermissions(permissions:[
-  { userRole: "admin" operations: ["${ADD}", "${SINGULAR}"] appName: "appTwo" }, 
-  { userRole: "admin" appName: "student" operations: "*" },
-  { userRole: "admin" appName: "student" operations: "*" }
-  ], 
-  rule: allow) 
-  @allowedOperations(list:["${ADD}", "${SINGULAR}","${PLURAL}", "${META_QUERY}", "${UPDATE}"])
-  {
-    order: Int! 
-    title: String! 
-           @unique 
-           @length(min: 6, max: 120) 
-           @trim
-    @appPermissions(permissions: "*", rule: allow)
-    
-    description: String 
-           @uniqueOrEmpty 
-           @unique @length(min: 6, max: 120) 
-           @trim
-  @appPermissions(permissions:[
-  { appName: "tekieTms" operations: ["${ADD}", "${SINGULAR}", "${PLURAL}"] }, 
-  { appName: "appTwo" operations: ["${ADD}", "${SINGULAR}"] },  
-  { appName: "three" operations: "*" },
-  { appName: "four" operations: "*" }
-  ], 
-  rule: allow)
-  
- @userPermissions(permissions:[
-  { userRole: "admin" operations: ["${ADD}", "${SINGULAR}"] appName: "appTwo" }, 
-  { userRole: "admin" appName: "student" operations: "*" },
-  { userRole: "admin" appName: "student" operations: "*" }
-  ], 
-  rule: allow) 
-  
+  type LearningObjective @model {
+    order: Int!
+    title: String! @unique @length(min: 6, max: 120) @trim
+    description: String @uniqueOrEmpty @unique @length(min: 6, max: 120) @trim
     videoStartTime: Int
     videoEndTime: Int
-    topic: Topic @relation(name: "TopicLearningObjective") 
+    topic: Topic @relation(name: "TopicLearningObjective")
     messages: [Message] @relation(name: "LearningObjectiveMessage", isSubset: true)
     questionBank: [QuestionBank] @relation(name: "LearningObjectiveQuestionBank", isSubset: true)
     status: ContentStatus! @defaultValue(value: "unpublished")

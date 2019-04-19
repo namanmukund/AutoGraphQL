@@ -95,7 +95,7 @@ export default function loginMutationResolver(
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
   validate(
-    typeName,
+    'UserToken',
     ast,
     SINGULAR,
     fieldsFetched,
