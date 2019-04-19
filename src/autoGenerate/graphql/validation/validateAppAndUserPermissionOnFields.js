@@ -2,6 +2,7 @@
 "BinaryExpression[operator='in']"] */
 import { findIndex } from 'lodash';
 import { InsufficientPermissionError } from '../../../../constants/errors';
+import { META } from '../../../../constants';
 
 
 const validateAllowDenyRuleOnApp = (
@@ -75,19 +76,22 @@ const validateAppPermission = (
   // permission check on the fields
   const queryFieldKeys = Object.keys(queryFields);
   for (const key of queryFieldKeys) {
-    const { appPermissions: appPermissionsOnField } = field[key];
-    if (appPermissionsOnField && Object.keys(appPermissionsOnField)) {
-      validateAllowDenyRuleOnApp(
-        appPermissionsOnField,
-        appName,
-        operation,
-      );
+    if (key && !(key.includes(META) || key.includes('count'))) {
+      const { appPermissions: appPermissionsOnField } = field[key];
+      if (appPermissionsOnField && Object.keys(appPermissionsOnField)) {
+        validateAllowDenyRuleOnApp(
+          appPermissionsOnField,
+          appName,
+          operation,
+        );
+      }
     }
 
     /* if field key is relation field then recursive strategy will be used
         to check the permission and throw error at once
    */
-    if (Object.keys(parsedASTMap[typeName].relationFields).includes(key)) {
+    if (Object.keys(parsedASTMap[typeName].relationFields)
+      .includes(key)) {
       const subTypeName = parsedASTMap[typeName].field[key].type.dataType;
       validateAppPermission(
         subTypeName,
