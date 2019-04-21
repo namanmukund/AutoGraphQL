@@ -43,7 +43,7 @@ const userCourseSyllabusMethod = async (context) => {
   we will compare this userId against userId passed in input
   both should be equal to perform further action
   */
-  const userAndAppInfo = getUserIdandAppNameAfterValidation(context, 'userCourseSyllabus');
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;

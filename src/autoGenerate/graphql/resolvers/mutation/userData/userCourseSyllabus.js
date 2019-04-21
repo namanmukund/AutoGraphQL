@@ -145,7 +145,7 @@ const userCourseSyllabusMutationResolver = async (
   */
   const { video, message, practiceQuestion, quiz } = topicTypes;
   const { free } = enrollmentTypes;
-  const userAndAppInfo = getUserIdandAppNameAfterValidation(context, 'userCourseSyllabus');
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;

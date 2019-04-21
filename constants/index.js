@@ -203,4 +203,6 @@ export {
   questionTypes,
   scholarshipThreshHolds,
   freeTopicCount,
+  FRONTEND_APP_ONE,
+  FRONTEND_APP_TWO,
 };

@@ -7,9 +7,9 @@ import validateSpecificAppToken from '../../../resolvers/mutation/utils/validate
 this method validates user and app passed in the tokenand then returns
 user and app info
 */
-const validateTokenAndExtractInformation = (context, mutationOrQueryName) => {
+const validateTokenAndExtractInformation = (context, skipUserValidation) => {
   const authentication = ifAuthorized(context);
-  if (mutationOrQueryName === 'userCourseSyllabus' && authentication && !authentication.user) {
+  if (skipUserValidation === true && authentication && !authentication.user) {
     validateSpecificAppToken(
       authentication,
       frontEndApps,
