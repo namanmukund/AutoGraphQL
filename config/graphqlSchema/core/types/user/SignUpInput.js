@@ -1,6 +1,6 @@
 const SignUpInput = `
   input SignUpInput {
-    name: String!
+    name: String
     username: String
     password: String!
     email: String
