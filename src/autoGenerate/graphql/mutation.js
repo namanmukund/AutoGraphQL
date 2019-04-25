@@ -328,6 +328,7 @@ mutationString += 'signUp ( input: SignUpInput ): UserToken,';
 mutationString += 'setUserPassword ( id: ID!, password: String! ): User,';
 mutationString += 'resetUserPassword ( id: ID!, oldPassword: String!, newPassword: String!  ): User,';
 mutationString += 'login ( input: LoginInput ): UserToken,';
+mutationString += 'socialLogin ( input: SocialLoginInput ): UserToken,';
 mutationString += 'signupExistingUser ( input: ExistingUserInput, stopOtpTrigger:Boolean ): UserToken,';
 mutationString += 'validateUserOTP ( id: ID!, phoneOtp: Int, emailOtp: Int ): User,';
 mutationString += 'resendUserOTP ( id: ID!): User,';
