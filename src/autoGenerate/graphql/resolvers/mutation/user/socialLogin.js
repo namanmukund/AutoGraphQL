@@ -17,6 +17,15 @@ const { OAuth2Client } = require('google-auth-library');
 
 const client = new OAuth2Client(CLIENT_ID);
 
+const getFieldStrings = (fieldsFetched) => {
+  let fields = '';
+  Object.keys(fieldsFetched).forEach((field) => {
+    if (field !== 'token') {
+      fields += `${field} `;
+    }
+  });
+  return fields;
+};
 const verifyGmailAuthAndReturnUser = async (idToken) => {
   try {
     const ticket = await client.verifyIdToken({
@@ -56,13 +65,12 @@ const generateUserInfoFromGmailResponse = (payload) => {
   return userInfo;
 };
 
-const getUserData = async (email) => {
+const getUserData = async (email, fields) => {
   const query = `query{
   users(filter:{
     email:"${email}"
   }){
-    id
-    name
+  ${fields}
   }
 }`;
   const res = await callGraphqlApi(query);
@@ -114,7 +122,8 @@ const socialLoginMutationResolver = async (
     default:
   }
   const { email } = schemaPayload;
-  const userData = await getUserData(email);
+  const fields = getFieldStrings(fieldsFetched);
+  const userData = await getUserData(email, fields);
   // if user does not exist then add user
   let result = userData;
   if (!userData) {
