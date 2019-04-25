@@ -99,3 +99,7 @@ export const UnauthorizedFieldOrTypeAccessByAppError = createError('Unauthorized
 export const InsufficientPermissionError = createError('InsufficientPermissionError', {
   message: 'Insufficient permission error',
 });
+
+export const InvalidGmailTokenError = createError('InvalidGmailTokenError', {
+  message: 'Invalid gmail token error',
+});
