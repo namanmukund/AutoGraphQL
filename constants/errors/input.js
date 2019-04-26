@@ -103,3 +103,7 @@ export const InsufficientPermissionError = createError('InsufficientPermissionEr
 export const InvalidGmailTokenError = createError('InvalidGmailTokenError', {
   message: 'Invalid gmail token error',
 });
+
+export const InvalidFacebookTokenError = createError('InvalidFacebookTokenError', {
+  message: 'Invalid facebook token error',
+});

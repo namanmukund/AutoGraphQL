@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import {
+  InvalidFacebookTokenError,
   InvalidGmailTokenError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
@@ -142,7 +143,11 @@ const socialLoginMutationResolver = async (
       // get short-term access token
       const facebook = new Facebook();
       const fields = 'id, email, name, picture';
-      payload = await facebook.call('me', { access_token: userToken, fields });
+      try {
+        payload = await facebook.call('me', { access_token: userToken, fields });
+      } catch (e) {
+        throw new InvalidFacebookTokenError();
+      }
       schemaPayload = generateUserInfoFromFacebookResponse(payload);
       break;
     }
