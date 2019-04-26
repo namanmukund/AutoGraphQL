@@ -11,6 +11,7 @@ import { generateCuid } from '../../../../../../utils';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import localSignUpMutationPromise from '../utils/localSignUpMutationPromise';
 import { MutationController } from '../../../controllers';
+import Facebook from './Facebook';
 
 const CLIENT_ID = '948144838611-najsguugb41q0ugs18tt9joous9kbqdg.apps.googleusercontent.com';
 const { OAuth2Client } = require('google-auth-library');
@@ -61,6 +62,27 @@ const generateUserInfoFromGmailResponse = (payload) => {
     socialProfilePic: picture,
     isGmailLogin: true,
     status: 'active',
+  };
+  return userInfo;
+};
+
+const generateUserInfoFromFacebookResponse = (payload) => {
+  const {
+    id: facebookId,
+    name,
+    email,
+    picture,
+  } = payload;
+
+  const userInfo = {
+    facebookId,
+    name,
+    email: email || (`${facebookId}@autogenerate.com`),
+    username: email ? email.split('@')[0] : facebookId,
+    emailVerified: !!email,
+    status: 'active',
+    socialProfilePic: get(picture, 'data.url', ''),
+    isFacebookLogin: true,
   };
   return userInfo;
 };
@@ -117,7 +139,12 @@ const socialLoginMutationResolver = async (
       break;
     }
     case 'facebook': {
-      throw new Error('Coming Soon');
+      // get short-term access token
+      const facebook = new Facebook();
+      const fields = 'id, email, name, picture';
+      payload = await facebook.call('me', { access_token: userToken, fields });
+      schemaPayload = generateUserInfoFromFacebookResponse(payload);
+      break;
     }
     default:
   }
