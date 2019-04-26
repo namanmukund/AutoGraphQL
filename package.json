@@ -128,6 +128,8 @@
     "node-uuid": "^1.4.8",
     "npm": "^6.9.0",
     "object-path": "^0.11.4",
+    "passport": "^0.4.0",
+    "passport-facebook": "^3.0.0",
     "path": "^0.12.7",
     "phantomjs-prebuilt": "^2.1.13",
     "phone": "^2.0.0",

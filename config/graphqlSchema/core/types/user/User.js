@@ -20,6 +20,7 @@ const User = `
     gmailLocale: String @writeOnly
     isGmailLogin: Boolean @defaultValue(value: "false") @writeOnly
     isFacebookLogin: Boolean @defaultValue(value: "false") @writeOnly
+    facebookId: String @writeOnly
   }
 `;
 
