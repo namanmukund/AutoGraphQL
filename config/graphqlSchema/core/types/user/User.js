@@ -18,8 +18,8 @@ const User = `
     gmailAud: String @writeOnly
     gmailSub: String @writeOnly
     gmailLocale: String @writeOnly
-    isGmailLogin: Boolean @defaultValue(value: "false") @writeOnly
-    isFacebookLogin: Boolean @defaultValue(value: "false") @writeOnly
+    isGmailLogin: Boolean @defaultValue(value: "false")
+    isFacebookLogin: Boolean @defaultValue(value: "false")
     facebookId: String @writeOnly
   }
 `;

@@ -66,6 +66,7 @@ import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   UnauthorizedFieldOrTypeAccessByAppError,
   InsufficientPermissionError,
   InvalidGmailTokenError,
+  InvalidFacebookTokenError,
 } from './input';
 
 
@@ -163,4 +164,5 @@ export {
   InsufficientPermissionError,
   InvalidRuleValueError,
   InvalidGmailTokenError,
+  InvalidFacebookTokenError,
 };
