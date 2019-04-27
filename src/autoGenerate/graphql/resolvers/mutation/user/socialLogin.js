@@ -12,7 +12,7 @@ import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import localSignUpMutationPromise from '../utils/localSignUpMutationPromise';
 import { MutationController } from '../../../controllers';
 import Facebook from './Facebook';
-import QueryController from '../../../controllers/QueryController';
+import getUserData from './utils/getUserData';
 
 const CLIENT_ID = '948144838611-najsguugb41q0ugs18tt9joous9kbqdg.apps.googleusercontent.com';
 const { OAuth2Client } = require('google-auth-library');
@@ -46,7 +46,6 @@ const generateUserInfoFromGmailResponse = (payload) => {
   const userInfo = {
     name,
     email,
-    username: email.split('@')[0],
     emailVerified,
     gmailAzp: azp,
     gmailAud: aud,
@@ -71,18 +70,12 @@ const generateUserInfoFromFacebookResponse = (payload) => {
     facebookId,
     name,
     email: email || (`${facebookId}@autogenerate.com`),
-    username: email ? email.split('@')[0] : facebookId,
     emailVerified: !!email,
     status: 'active',
     socialProfilePic: get(picture, 'data.url', ''),
     isFacebookLogin: true,
   };
   return userInfo;
-};
-
-const getUserData = async (email) => {
-  const queryController = new QueryController('User', { bypass: true });
-  return queryController.fetchOne({ email });
 };
 
 const getNewDataFromSocialLogin = (
@@ -152,7 +145,7 @@ const socialLoginMutationResolver = async (
     default:
   }
   const { email } = schemaPayload;
-  const userData = await getUserData(email);
+  const userData = await getUserData(email, { bypass: true });
   // if user does not exist then add user
   let result = userData;
   const modelMutations = new MutationController('User', { bypass: true });

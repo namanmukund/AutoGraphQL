@@ -44,6 +44,10 @@ export const InvalidUsernameLengthError = createError('InvalidUsernameLengthErro
   message: 'The username should be more than 3 and less than 30 characters in length',
 });
 
+export const InvalidPasswordLengthError = createError('InvalidPasswordLengthError', {
+  message: 'Password must be at least 6 characters',
+});
+
 export const PhoneNumberAndCountryCodeRequiredError = createError('PhoneNumberAndCountryCodeRequiredError', {
   message: 'Both country code and phone number is mandatory',
 });
