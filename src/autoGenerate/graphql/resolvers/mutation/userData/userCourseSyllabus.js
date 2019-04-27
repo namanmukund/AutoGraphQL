@@ -296,7 +296,9 @@ const userCourseSyllabusMutationResolver = async (
   let percentageCovered;
   let description;
 
-  const { title: topicTitle,
+  const {
+    id: currentTopicId,
+    title: topicTitle,
     videoTitle,
     videoThumbnail,
     thumbnail: topicThumbnail,
@@ -304,6 +306,7 @@ const userCourseSyllabusMutationResolver = async (
     videoDescription,
   } = currentTopic;
   const {
+    id: currentLearningObjectiveId,
     title: LOTitle,
     thumbnail: LOThumbnail,
     description: LODescription,
@@ -337,8 +340,15 @@ const userCourseSyllabusMutationResolver = async (
     default:
   }
 
-  Object.assign(currentUserSyllabus.currentTopicComponentDetail,
-    { componentTitle, topicTitle, thumbnail, percentageCovered, description });
+  Object.assign(currentUserSyllabus.currentTopicComponentDetail, {
+    currentTopicId,
+    currentLearningObjectiveId,
+    componentTitle,
+    topicTitle,
+    thumbnail,
+    percentageCovered,
+    description,
+  });
   return currentUserSyllabus;
 };
 

@@ -19,6 +19,8 @@ const chaptersUserCourseSyllabusType = `
 
 const currentTopicComponentDetailType = `
   type CurrentTopicComponentDetailType {
+   currentTopicId: ID
+   currentLearningObjectiveId: ID
    componentTitle: String
    topicTitle: String
    thumbnail: File 
