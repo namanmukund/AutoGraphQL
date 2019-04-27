@@ -7,27 +7,19 @@ import {
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import { generateCuid } from '../../../../../../utils';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import localSignUpMutationPromise from '../utils/localSignUpMutationPromise';
 import { MutationController } from '../../../controllers';
 import Facebook from './Facebook';
+import QueryController from '../../../controllers/QueryController';
 
 const CLIENT_ID = '948144838611-najsguugb41q0ugs18tt9joous9kbqdg.apps.googleusercontent.com';
 const { OAuth2Client } = require('google-auth-library');
 
 const client = new OAuth2Client(CLIENT_ID);
 
-const getFieldStrings = (fieldsFetched) => {
-  let fields = '';
-  Object.keys(fieldsFetched).forEach((field) => {
-    if (field !== 'token') {
-      fields += `${field} `;
-    }
-  });
-  return fields;
-};
+
 const verifyGmailAuthAndReturnUser = async (idToken) => {
   try {
     const ticket = await client.verifyIdToken({
@@ -88,16 +80,22 @@ const generateUserInfoFromFacebookResponse = (payload) => {
   return userInfo;
 };
 
-const getUserData = async (email, fields) => {
-  const query = `query{
-  users(filter:{
-    email:"${email}"
-  }){
-  ${fields}
-  }
-}`;
-  const res = await callGraphqlApi(query);
-  return get(res, 'data.users[0]');
+const getUserData = async (email) => {
+  const queryController = new QueryController('User', { bypass: true });
+  return queryController.fetchOne({ email });
+};
+
+const getNewDataFromSocialLogin = (
+  userData,
+  schemaPayload,
+) => {
+  const newItems = {};
+  Object.keys(schemaPayload).forEach((field) => {
+    if (!get(userData, `${field}`)) {
+      newItems[field] = schemaPayload[field];
+    }
+  });
+  return newItems;
 };
 
 const socialLoginMutationResolver = async (
@@ -121,6 +119,7 @@ const socialLoginMutationResolver = async (
     authentication,
     input,
   );
+
   const decodedUser = authentication && authentication.user;
   if (decodedUser) {
     throw new UserTokenNotRequiredError();
@@ -140,32 +139,36 @@ const socialLoginMutationResolver = async (
       break;
     }
     case 'facebook': {
-      // get short-term access token
       const facebook = new Facebook();
       const fields = 'id, email, name, picture';
       try {
         payload = await facebook.call('me', { access_token: userToken, fields });
+        schemaPayload = generateUserInfoFromFacebookResponse(payload);
       } catch (e) {
         throw new InvalidFacebookTokenError();
       }
-      schemaPayload = generateUserInfoFromFacebookResponse(payload);
       break;
     }
     default:
   }
   const { email } = schemaPayload;
-  const fields = getFieldStrings(fieldsFetched);
-  const userData = await getUserData(email, fields);
+  const userData = await getUserData(email);
   // if user does not exist then add user
   let result = userData;
+  const modelMutations = new MutationController('User', { bypass: true });
   if (!userData) {
     const cuidInput = generateCuid(schemaPayload);
-    const modelMutations = new MutationController('User', { bypass: true });
     result = await localSignUpMutationPromise(cuidInput, modelMutations);
+  } else {
+    const updateObj = getNewDataFromSocialLogin(userData, schemaPayload);
+    // if new data comes from social login then update that data with user
+    if (Object.keys(updateObj)) {
+      const { id } = userData;
+      result = await modelMutations.updateDocument(id, updateObj);
+    }
   }
-
-  const userWithToken = createUserTokenTypeData(result);
-  return userWithToken;
+  // return user with token info
+  return createUserTokenTypeData(result);
 };
 
 export default socialLoginMutationResolver;
