@@ -4,7 +4,7 @@ const User = `
     emailOtp: Int @writeOnly
     name: String @trim
     status: Status! @defaultValue(value: "active") @readOnly
-    username: String! @unique @auto
+    username: String @uniqueOrEmpty @trim
     password: String @filterOff @writeOnly
     email: String! @uniqueOrEmpty @trim
     emailVerified: Boolean @defaultValue(value: "true") @readOnly

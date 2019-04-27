@@ -411,7 +411,7 @@ Object.keys(parsedASTMap).forEach((type) => {
 resolvers.Mutation.signUp = async (root, params, context, info) => {
   const authentication = ifAuthorized(context);
   const typeName = 'User';
-  const mutationName = 'addUser';
+  const mutationName = 'signUp';
   const { input } = params;
   const hookInput = await prehook(input, mutationName, context, params);
   const newParams = params;
