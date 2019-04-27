@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import {
   InvalidFacebookTokenError,
-  InvalidGmailTokenError,
+  InvalidGmailTokenError, UnauthenticatedAppError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
 import { getFieldsBeingFetched } from '../../../../utils';
@@ -114,6 +114,11 @@ const socialLoginMutationResolver = async (
   );
 
   const decodedUser = authentication && authentication.user;
+  const decodedApp = authentication && authentication.app;
+
+  if (!decodedApp) {
+    throw new UnauthenticatedAppError();
+  }
   if (decodedUser) {
     throw new UserTokenNotRequiredError();
   }
