@@ -82,6 +82,10 @@ const userVideoPostHookMethod = async (input, params) => {
     userId,
     topicId,
   } = getInfoFromParams(params, 'video');
+  // In case there is no topic id, empty data will be sent
+  if (!topicId) {
+    return resultArray;
+  }
   /*
     we are getting below fields in topicQuery:
     -first published learning objective of the query to be populated in next component

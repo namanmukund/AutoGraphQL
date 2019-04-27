@@ -106,7 +106,10 @@ const userQuizPostHookMethod = async (input, params) => {
     userId,
     topicId,
   } = getInfoFromParams(params, 'quiz');
-
+  // In case there is no topic id, empty data will be sent
+  if (!topicId) {
+    return resultArray;
+  }
   /*
     we are getting below fields in topicQuery:
     -all published quiz questions of the topic
