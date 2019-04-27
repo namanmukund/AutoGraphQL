@@ -65,13 +65,14 @@ const signupMutationResolver = async (
 
   const { email } = input;
   const userData = await getUserData(email, { bypass: true });
-  const { isGmailLogin, isFacebookLogin, isSetPassword } = userData;
-
   /* if password is already present or if password
     is not present and also user is not socially logged in
     */
-  if (userData && (isSetPassword || (!isSetPassword && !isGmailLogin && !isFacebookLogin))) {
-    throw new UserAlreadyExistsError();
+  if (userData) {
+    const { isGmailLogin, isFacebookLogin, isSetPassword } = userData;
+    if ((isSetPassword || (!isSetPassword && !isGmailLogin && !isFacebookLogin))) {
+      throw new UserAlreadyExistsError();
+    }
   }
   /* Setting user to true if not preset, as signup
   does not require user authentication.
@@ -79,7 +80,6 @@ const signupMutationResolver = async (
   Object.assign(authentication, {
     user: true,
   });
-
   const userObj = {};
   const hashedPwd = bcrypt.hashSync(input.password, authParams.SALT);
   userObj.password = hashedPwd;
@@ -88,9 +88,12 @@ const signupMutationResolver = async (
   let result = '';
   const modelMutations = new MutationController(typeName, authentication);
   // update password only if previously socially logged in
-  if (userData && (!isSetPassword && (isGmailLogin || isFacebookLogin))) {
-    const { id } = userData;
-    result = await modelMutations.updateDocument(id, userObj);
+  if (userData) {
+    const { isGmailLogin, isFacebookLogin, isSetPassword } = userData;
+    if (!isSetPassword && (isGmailLogin || isFacebookLogin)) {
+      const { id } = userData;
+      result = await modelMutations.updateDocument(id, userObj);
+    }
   } else {
     const { password, ...restObj } = input;
     const newUser = { ...restObj, ...userObj };
