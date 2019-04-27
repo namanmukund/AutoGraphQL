@@ -50,13 +50,18 @@ const isComponentUnlocked = async (
       learningObjectiveId = get(params, 'learningObjectiveConnectId');
     } else {
       const filterArray = get(params, 'filter.and');
+      // if there is no filterArray, we do not need to validate whether component is unlocked
       if (!filterArray) {
-        throw new UserOrLearningObjectiveNotPresentError();
+        return true;
       }
       const userSome = filterArray.find(obj => obj.user_some);
       const loSome = filterArray.find(obj => obj.learningObjective_some);
       userId = get(userSome, 'user_some.id');
       learningObjectiveId = get(loSome, 'learningObjective_some.id');
+      // if there is no learningObjectiveId, no need to validate whether component is unlocked
+      if (!learningObjectiveId) {
+        return true;
+      }
     }
     if (!userId || !learningObjectiveId) {
       throw new UserOrLearningObjectiveNotPresentError();
@@ -92,13 +97,18 @@ const isComponentUnlocked = async (
       topicId = get(params, 'topicConnectId');
     } else {
       const filterArray = get(params, 'filter.and');
+      // if there is no filterArray, we do not need to validate whether component is unlocked
       if (!filterArray) {
-        throw new UserOrTopicNotPresentError();
+        return true;
       }
       const userSome = filterArray.find(obj => obj.user_some);
       const topicSome = filterArray.find(obj => obj.topic_some);
       userId = get(userSome, 'user_some.id');
       topicId = get(topicSome, 'topic_some.id');
+      // if there is no topicId, we do not need to validate whether component is unlocked
+      if (!topicId) {
+        return true;
+      }
     }
     if (!userId || !topicId) {
       throw new UserOrTopicNotPresentError();

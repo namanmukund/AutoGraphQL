@@ -108,6 +108,10 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
     userId,
     learningObjectiveId,
   } = getInfoFromParams(params, 'learningObjective');
+  // In case there is no learning objective id, empty data will be sent
+  if (!learningObjectiveId) {
+    return resultArray;
+  }
   const learningObjectiveQueryRes = await callGraphqlApi(
     learningObjectiveQuery(learningObjectiveId));
   const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
