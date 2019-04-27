@@ -13,6 +13,14 @@ const User = `
     dateOfBirth: Date
     gender: Gender
     isSetPassword: Boolean @defaultValue(value: "false")
+    socialProfilePic: String
+    gmailAzp: String @writeOnly
+    gmailAud: String @writeOnly
+    gmailSub: String @writeOnly
+    gmailLocale: String @writeOnly
+    isGmailLogin: Boolean @defaultValue(value: "false")
+    isFacebookLogin: Boolean @defaultValue(value: "false")
+    facebookId: String @writeOnly
   }
 `;
 

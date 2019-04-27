@@ -6,6 +6,7 @@ import fileExtensions from './fileExtensions';
 import forceUpdateTypeNames from './forceUpdateTypeNames';
 import forceDeleteTypeNames from './forceDeleteTypeNames';
 import regexValidation from './regexValidation';
+import loginType from './loginType';
 
 
 const FRONTEND_APP_ONE = 'tekieTms';
@@ -205,4 +206,5 @@ export {
   freeTopicCount,
   FRONTEND_APP_ONE,
   FRONTEND_APP_TWO,
+  loginType,
 };

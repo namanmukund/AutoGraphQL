@@ -18,6 +18,7 @@ import UserActionType from './UserActionType';
 import EnrollmentType from './EnrollmentType';
 import CurrentTopicComponentType from './CurrentTopicComponentType';
 import UserTopicTypeStatus from './UserTopicTypeStatus';
+import LoginType from './LoginType';
 
 export default [
   Status,
@@ -40,4 +41,5 @@ export default [
   EnrollmentType,
   CurrentTopicComponentType,
   UserTopicTypeStatus,
+  LoginType,
 ];
