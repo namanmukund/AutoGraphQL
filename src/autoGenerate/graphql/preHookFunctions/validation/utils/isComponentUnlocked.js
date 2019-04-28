@@ -261,7 +261,7 @@ const isComponentUnlocked = async (
         (learningObjectiveOrder > currentLearningObjectiveOrder ||
           (learningObjectiveOrder === currentLearningObjectiveOrder &&
             (currentTopicComponentType === topicTypes.video ||
-              currentTopicComponentType === topicTypes.chat
+              currentTopicComponentType === topicTypes.message
             )
           )
         )
@@ -297,7 +297,7 @@ const isComponentUnlocked = async (
   if (mutationOrQueryName) {
     // initialising object to be passed in context to save query
     const userCurrentTopicComponentStatusData = {};
-    if (page === 'chat' || page === 'practiceQuestion') {
+    if (page === 'message' || page === 'practiceQuestion') {
       // passing data in context which can be used further in post hook methods
       // this will prevent a further query
       userCurrentTopicComponentStatusData[mutationOrQueryName] = {
