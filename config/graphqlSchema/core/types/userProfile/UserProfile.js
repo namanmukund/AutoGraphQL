@@ -4,6 +4,7 @@ const UserProfile = `
   type UserProfile @model {
     user: User! @relation(name: "UserProfile", direction: "OneWay")
     topicsCompleted: Int
+    totalTopics: [Topic] @relation(name: "TotalTopicUserProfile", direction: "OneWay")
     charactersUnlocked: [String]
     proficientTopics: [Topic] @relation(name: "ProficientTopicUserProfile", direction: "OneWay")
     proficientTopicCount: Int @length(min: 0, max: 50) @defaultValue(value: 0)

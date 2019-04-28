@@ -662,7 +662,8 @@ const evaluateUserScholarship = async (
     let familiarTopicCount = familiarTopicCountInUserProfile;
     let freeFamiliarTopicCount = freeFamiliarTopicCountInUserProfile;
 
-    let userProfileTopicConnectQuery = '';
+    // adding topic in total topics completed by user
+    let userProfileTopicConnectQuery = `totalTopicsConnectIds:["${topicId}"] `;
     const { proficient, master, familiar } = scholarshipThreshHolds;
     topicsCompleted += 1;
     // proficient topic logic, proficient is 100 defined in config
