@@ -92,7 +92,7 @@ const smsOTPMessage = {
   bodyAfterName: ', your xyz OTP is ',
 };
 
-const fromEmail = 'xyz@gmail.com';
+const fromEmail = 'namanmukund@gmail.com';
 const STATIC = 'static';
 
 const fetchRetries = 5;
