@@ -98,7 +98,7 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
     chatAction,
     topicId,
     learningObjectiveIdInResult,
-    'chat',
+    'message',
   );
   // if existing chatStatus is complete, it will remain complete
   if (userLearningObjectiveInfo &&
