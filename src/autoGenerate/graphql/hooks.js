@@ -326,6 +326,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await addLearningObjectiveValidation(params);
       break;
     }
+    case 'userTopicJourney' : {
+      await userCourseSyllabusMethod(context);
+      break;
+    }
     default : {
       /* If context is not present then it means user is not authenticated and the
       user won't be able to make any db query

@@ -16,6 +16,7 @@ import {
   resendForgotPasswordOTPMutationResolver,
   deleteMultipleMutationResolver,
   userCourseSyllabusMutationResolver,
+  userTopicJourneyMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import { types, authenticateUser, ifAuthorized, toObject, isErrorThrown, getRandomNumber } from '../../../../utils';
@@ -761,6 +762,25 @@ resolvers.Mutation.userCourseSyllabus = async (root, params, context, info) => {
     mutationName,
     parsedASTMap,
     context,
+  ).then(result => toObject(result));
+};
+
+// Resolver for a custom journey page for user
+resolvers.Mutation.userTopicJourney = async (root, params, context, info) => {
+  const typeName = 'UserCurrentTopicComponentStatus';
+  const mutationName = 'userTopicJourney';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return userTopicJourneyMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+    params,
   ).then(result => toObject(result));
 };
 
