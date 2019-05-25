@@ -13,6 +13,7 @@ import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
+import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = userId => `
@@ -162,19 +163,8 @@ const userCourseSyllabusMutationResolver = async (
     );
 
     currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
-    /*
-    This case should not occur as we have added logic in prehook userCourseSyllabusMethod
-    to add userCurrentTopicComponentStatus if it not already present and
-    the first published topic and first published learning objective corresponding to that topic
-    will get populated in the document
-    */
-    if (!currentTopicComponentInfo) {
-      throw new DatabaseRecordNotFoundError({
-        data: {
-          error: 'UserCurrentTopicComponentStatus: is not present',
-        },
-      });
-    }
+    // calling method to validate user current topic component status
+    validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
   /*
   If user is not logged in and asking for course syllabus then we will not add
   any document in Db and will return default data with first topic as unlocked
@@ -215,42 +205,7 @@ const userCourseSyllabusMutationResolver = async (
     currentLearningObjective,
     enrollmentType,
   } = currentTopicComponentInfo;
-  // throwing errors if some data is missing in User current topic component status
-  if (!currentCourse) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentCourse: is not present',
-      },
-    });
-  }
-  if (!currentTopicComponent) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentTopicComponent: is not present',
-      },
-    });
-  }
-  if (!currentTopic) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentTopic: is not present',
-      },
-    });
-  }
-  if (!currentLearningObjective) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentLearningObjective: is not present',
-      },
-    });
-  }
-  if (!enrollmentType) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'EnrollmentType: is not present',
-      },
-    });
-  }
+
   // this object will be returned in output
   const currentUserSyllabus = {};
   let totalChapters = 0;

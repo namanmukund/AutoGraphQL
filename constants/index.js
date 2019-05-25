@@ -169,6 +169,13 @@ const scholarshipThreshHolds = {
   familiar: 60,
 };
 
+const masteryLevels = {
+  proficient: 'proficient',
+  master: 'master',
+  familiar: 'familiar',
+  defaultMastery: 'none',
+};
+
 const freeTopicCount = 5;
 
 export {
@@ -207,4 +214,5 @@ export {
   FRONTEND_APP_ONE,
   FRONTEND_APP_TWO,
   loginType,
+  masteryLevels,
 };
