@@ -173,6 +173,7 @@ const masteryLevels = {
   proficient: 'proficient',
   master: 'master',
   familiar: 'familiar',
+  defaultMastery: 'defaultMastery',
 };
 
 const freeTopicCount = 5;

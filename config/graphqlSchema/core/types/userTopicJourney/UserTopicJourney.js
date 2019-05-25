@@ -10,7 +10,6 @@ const userJourneyLearningObjectiveType = `
 
 const userQuizType = `
   type UserQuizType {
-   id: ID
    masteryLevel: String
    title: String
    description: String
@@ -20,7 +19,6 @@ const userQuizType = `
 
 const userVideoType = `
   type UserVideoType {
-   id: ID
    title: String
    description: String
    thumbnail: File

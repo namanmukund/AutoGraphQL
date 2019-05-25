@@ -3,14 +3,17 @@ import {
   topicTypes,
   GLOBAL_COURSE_ID,
   PUBLISHED,
-  enrollmentTypes, scholarshipThreshHolds, masteryLevels,
+  enrollmentTypes, masteryLevels,
 } from '../../../../../../constants';
 import {
-  DatabaseRecordNotFoundError,
+  DatabaseRecordNotFoundError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
+import { log } from '../../../../../../utils';
+import getMasteryLevel from '../../utils/getMasteryLevel';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = userId => `
@@ -132,11 +135,6 @@ const userTopicJourneyMutationResolver = async (
   /*
   Calling method to validate token and return userId.
   */
-  const { pro } = enrollmentTypes;
-  const { video, quiz } = topicTypes;
-  const { proficient: proficientPercent, master: masterPercent, familiar: familiarPercent }
-  = scholarshipThreshHolds;
-  const { proficient, master, familiar } = masteryLevels;
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
   const {
     userIdFromContext: userId,
@@ -151,11 +149,7 @@ const userTopicJourneyMutationResolver = async (
   }
 
   if (!userId) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'userId is not present',
-      },
-    });
+    throw new UnauthenticatedUserError();
   }
 
   const { authorization: token } = context;
@@ -168,19 +162,10 @@ const userTopicJourneyMutationResolver = async (
   );
 
   const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
-  /*
-    This case should not occur as we have added logic in prehook userTopicJourneyMethod
-    to add userCurrentTopicComponentStatus if it not already present and
-    the first published topic and first published learning objective corresponding to that topic
-    will get populated in the document
-    */
-  if (!currentTopicComponentInfo) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'UserCurrentTopicComponentStatus: is not present',
-      },
-    });
-  }
+
+  // calling method to validate user current topic component status
+  validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
+
   // calling API to get data of fetched topic
   const topicRes = await callGraphqlApi(
     getTopicQuery(topicId),
@@ -200,44 +185,14 @@ const userTopicJourneyMutationResolver = async (
   }
   const {
     currentTopicComponentType: currentTopicComponent,
-    currentTopic,
-    currentLearningObjective,
+    currentTopic: currentRunningTopic,
+    currentLearningObjective: currentRunningLearningObjective,
     enrollmentType,
   } = currentTopicComponentInfo;
-  // throwing errors if some data is missing in User current topic component status
-  if (!currentTopicComponent) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentTopicComponent: is not present',
-      },
-    });
-  }
-  if (!currentTopic) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentTopic: is not present',
-      },
-    });
-  }
-  if (!currentLearningObjective) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentLearningObjective: is not present',
-      },
-    });
-  }
-  if (!enrollmentType) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'EnrollmentType: is not present',
-      },
-    });
-  }
   // this object will be returned in output
   const userTopicData = {};
   // constructing data for video component
   const videoData = {
-    id: topicInfo.id,
     title: topicInfo.videoTitle,
     description: topicInfo.videoDescription,
     thumbnail: topicInfo.videoThumbnail,
@@ -262,7 +217,6 @@ const userTopicJourneyMutationResolver = async (
   });
   // constructing data for quiz component
   const quizData = {
-    id: topicInfo.id,
     title: topicInfo.title,
     description: topicInfo.description,
     thumbnail: topicInfo.thumbnail,
@@ -272,8 +226,11 @@ const userTopicJourneyMutationResolver = async (
   Logic for getting locked status of different components for a topic
   if called topic order is less than that of current topic order,
    that means all components are unlocked for that topic
+   topicInfo - this is topic requested by user in API
+   currentRunningTopic - this is topic in UserCurrentTopicComponentStatus
   */
-  if (topicInfo.order < currentTopic.order) {
+  const { defaultMastery } = masteryLevels;
+  if (topicInfo.order < currentRunningTopic.order) {
     videoData.isUnlocked = true;
     learningObjectivesData.forEach((loInArray, index) => {
       learningObjectivesData[index].isUnlocked = true;
@@ -289,45 +246,31 @@ const userTopicJourneyMutationResolver = async (
     );
     const quizInfo = get(quizRes, 'data.userQuizReports[0]');
     if (!quizInfo) {
-      throw new DatabaseRecordNotFoundError({
-        data: {
-          error: 'Topic quiz report is not present',
-        },
-      });
+      log('Topic quiz report is not present');
     }
     // logic to calculate mastery level on basis of percentage
-    let percentage = 0;
-    if (quizInfo.quizReport) {
-      percentage =
-        (quizInfo.quizReport.correctQuestionCount / quizInfo.quizReport.totalQuestionCount) * 100;
-    }
-    if (percentage === proficientPercent) {
-      quizData.masteryLevel = proficient;
-    } else if (percentage >= masterPercent) {
-      quizData.masteryLevel = master;
-    } else if (percentage >= familiarPercent) {
-      quizData.masteryLevel = familiar;
-    } else {
-      quizData.masteryLevel = 'none';
-    }
+    const masteryLevel = getMasteryLevel(quizInfo);
+    quizData.masteryLevel = masteryLevel;
     /*
     if called topic order is greater than that of current topic order,
      that means all components are locked for that topic
     */
-  } else if (topicInfo.order > currentTopic.order) {
+  } else if (topicInfo.order > currentRunningTopic.order) {
     videoData.isUnlocked = false;
     learningObjectivesData.forEach((loInArray, index) => {
       learningObjectivesData[index].isUnlocked = false;
     });
     quizData.isUnlocked = false;
-    quizData.masteryLevel = 'none';
+    quizData.masteryLevel = defaultMastery;
     /*
     if called topic order is equal to than that of current topic order,
      In that case we will check currentTopicComponent and will get locked/unlocked
      status on basis of that
     */
   } else {
-    quizData.masteryLevel = 'none';
+    const { pro } = enrollmentTypes;
+    const { video, quiz } = topicTypes;
+    quizData.masteryLevel = defaultMastery;
     // components are unlocked only if topic is free or user is pro
     if (topicInfo.isTrial || enrollmentType === pro) {
       // video will always be unlocked since it is first component of topic
@@ -355,7 +298,7 @@ const userTopicJourneyMutationResolver = async (
           // case when messgae or practiceQuestion is current component
           // in that case we are checking order of LOs
           learningObjectivesData.forEach((loInArray, index) => {
-            if (loInArray.order <= currentLearningObjective.order) {
+            if (loInArray.order <= currentRunningLearningObjective.order) {
               learningObjectivesData[index].isUnlocked = true;
             } else {
               learningObjectivesData[index].isUnlocked = false;
