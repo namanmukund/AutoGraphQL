@@ -1,14 +1,14 @@
 import { masteryLevels, scholarshipThreshHolds } from '../../../../../constants';
 
-const getMasteryLevel = (quizInfo) => {
+const getMasteryLevel = (correctQuestionCount, totalQuestionCount) => {
   // logic to calculate mastery level on basis of percentage
   const { proficient: proficientPercent, master: masterPercent, familiar: familiarPercent }
     = scholarshipThreshHolds;
   const { proficient, master, familiar, defaultMastery } = masteryLevels;
   let percentage = 0;
-  if (quizInfo.quizReport) {
+  if (correctQuestionCount && totalQuestionCount && totalQuestionCount !== 0) {
     percentage =
-      (quizInfo.quizReport.correctQuestionCount / quizInfo.quizReport.totalQuestionCount) * 100;
+      (correctQuestionCount / totalQuestionCount) * 100;
   }
   if (percentage === proficientPercent) {
     return proficient;

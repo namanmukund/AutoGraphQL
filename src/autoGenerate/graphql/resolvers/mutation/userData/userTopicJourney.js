@@ -248,8 +248,14 @@ const userTopicJourneyMutationResolver = async (
     if (!quizInfo) {
       log('Topic quiz report is not present');
     }
+    let correctQuestionCount = 0;
+    let totalQuestionCount = 0;
+    if (quizInfo.quizReport) {
+      correctQuestionCount = quizInfo.quizReport.correctQuestionCount;
+      totalQuestionCount = quizInfo.quizReport.totalQuestionCount;
+    }
     // logic to calculate mastery level on basis of percentage
-    const masteryLevel = getMasteryLevel(quizInfo);
+    const masteryLevel = getMasteryLevel(correctQuestionCount, totalQuestionCount);
     quizData.masteryLevel = masteryLevel;
     /*
     if called topic order is greater than that of current topic order,

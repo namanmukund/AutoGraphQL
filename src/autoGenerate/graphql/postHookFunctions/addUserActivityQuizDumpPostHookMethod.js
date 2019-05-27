@@ -12,6 +12,7 @@ import {
   QuizQuestionsNotPresentError,
 } from '../../../../constants/errors';
 import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
+import getMasteryLevel from '../resolvers/utils/getMasteryLevel';
 
 // query to fetch user quiz info
 const userQuizQuery = (
@@ -232,8 +233,8 @@ const createQueryForUserAnswersAndOptions = (
           if they do not match setting isCorrect to false
           similar logic follows for all question types ahead
           */
-          userMcqAnswers.forEach((userMcqAnswer) => {
-            if (isAttempted && userMcqAnswers) {
+          if (isAttempted && userMcqAnswers.length) {
+            userMcqAnswers.forEach((userMcqAnswer) => {
               userStatement = get(userMcqAnswer, 'statement');
               isOptionSelected = get(userMcqAnswer, 'isSelected');
               if (userStatement === statement) {
@@ -244,10 +245,10 @@ const createQueryForUserAnswersAndOptions = (
                   isCorrect = false;
                 }
               }
-            } else {
-              isCorrect = false;
-            }
-          });
+            });
+          } else {
+            isCorrect = false;
+          }
           // constructing query for correct mcqOptions
           // replicating info from question Bank
           mcqOptionQuery += `{statement: "${statement}", `;
@@ -271,8 +272,8 @@ const createQueryForUserAnswersAndOptions = (
         fibBlocksOptions.forEach((fibBlocksOption) => {
           statement = get(fibBlocksOption, 'statement');
           optionCorrectPositions = get(fibBlocksOption, 'correctPositions');
-          userFibBlockAnswers.forEach((userFibBlockAnswer) => {
-            if (isAttempted && userFibBlockAnswers) {
+          if (isAttempted && userFibBlockAnswers.length) {
+            userFibBlockAnswers.forEach((userFibBlockAnswer) => {
               userStatement = get(userFibBlockAnswer, 'statement');
               userStatementPosition = get(userFibBlockAnswer, 'position');
               if (userStatement === statement) {
@@ -284,10 +285,10 @@ const createQueryForUserAnswersAndOptions = (
                   isCorrect = false;
                 }
               }
-            } else {
-              isCorrect = false;
-            }
-          });
+            });
+          } else {
+            isCorrect = false;
+          }
           // constructing query for correct fibBlockOptions
           // replicating info from question Bank
           let correctPositionsQuery = '[';
@@ -316,8 +317,8 @@ const createQueryForUserAnswersAndOptions = (
         fibInputOptions.forEach((fibInputOption) => {
           answers = get(fibInputOption, 'answers');
           optionPosition = get(fibInputOption, 'correctPosition');
-          userFibInputAnswers.forEach((userFibInputAnswer) => {
-            if (isAttempted && userFibInputAnswers) {
+          if (isAttempted && userFibInputAnswers.length) {
+            userFibInputAnswers.forEach((userFibInputAnswer) => {
               userAnswer = get(userFibInputAnswer, 'answer');
               userStatementPosition = get(userFibInputAnswer, 'position');
               if (userStatementPosition === optionPosition) {
@@ -329,10 +330,10 @@ const createQueryForUserAnswersAndOptions = (
                   isCorrect = false;
                 }
               }
-            } else {
-              isCorrect = false;
-            }
-          });
+            });
+          } else {
+            isCorrect = false;
+          }
           // constructing query for correct fibInputOptions
           // replicating info from question Bank
           let answersQuery = '[';
@@ -361,8 +362,8 @@ const createQueryForUserAnswersAndOptions = (
         arrangeOptions.forEach((arrangeOption) => {
           statement = get(arrangeOption, 'statement');
           optionPosition = get(arrangeOption, 'correctPosition');
-          userArrangeAnswers.forEach((userArrangeAnswer) => {
-            if (isAttempted && userArrangeAnswers) {
+          if (isAttempted && userArrangeAnswers.length) {
+            userArrangeAnswers.forEach((userArrangeAnswer) => {
               userStatement = get(userArrangeAnswer, 'statement');
               userStatementPosition = get(userArrangeAnswer, 'position');
               if (userStatement === statement) {
@@ -374,10 +375,10 @@ const createQueryForUserAnswersAndOptions = (
                   isCorrect = false;
                 }
               }
-            } else {
-              isCorrect = false;
-            }
-          });
+            });
+          } else {
+            isCorrect = false;
+          }
           // constructing query for correct arrangeOptions
           // replicating info from question Bank
           arrangeOptionsQuery += `{statement: "${statement}", `;
@@ -473,6 +474,8 @@ const evaluateUserQuiz = async (
         }
         if (isAttempted) {
           pushManyQuery += `isAttempted: ${isAttempted}, `;
+        } else {
+          pushManyQuery += 'isAttempted: false, ';
         }
         const loId = get(questionBank, 'learningObjective.id');
         // initializing learning objective report it is not already populated
@@ -564,11 +567,14 @@ const evaluateUserQuiz = async (
     correctQuestionCount: correctQuestionCountQuizReport,
     unansweredQuestionCount: unansweredQuestionCountQuizReport,
   } = quizReport;
+  const masteryLevel =
+    getMasteryLevel(correctQuestionCountQuizReport, totalQuestionCountQuizReport);
   const quizReportQuery = `quizReport:{
                                     totalQuestionCount: ${totalQuestionCountQuizReport}
                                     inCorrectQuestionCount: ${inCorrectQuestionCountQuizReport}
                                     correctQuestionCount: ${correctQuestionCountQuizReport}
                                     unansweredQuestionCount: ${unansweredQuestionCountQuizReport}
+                                    masteryLevel: ${masteryLevel}
                                   }`;
   let learningObjectiveReportQuery = 'learningObjectiveReport: [';
   // creating lo report query on basis of objects in learningObjectiveReportObject
