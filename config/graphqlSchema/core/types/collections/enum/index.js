@@ -19,6 +19,7 @@ import EnrollmentType from './EnrollmentType';
 import CurrentTopicComponentType from './CurrentTopicComponentType';
 import UserTopicTypeStatus from './UserTopicTypeStatus';
 import LoginType from './LoginType';
+import MasteryLevelsType from './MasteryLevelsType';
 
 export default [
   Status,
@@ -42,4 +43,5 @@ export default [
   CurrentTopicComponentType,
   UserTopicTypeStatus,
   LoginType,
+  MasteryLevelsType,
 ];

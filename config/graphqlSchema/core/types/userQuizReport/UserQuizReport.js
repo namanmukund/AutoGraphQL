@@ -13,6 +13,7 @@ const quizReportType = `
     correctQuestionCount: Int
     inCorrectQuestionCount: Int
     unansweredQuestionCount: Int
+    masteryLevel: MasteryLevelsType
  }`;
 
 const quizAnswersType = `
