@@ -20,11 +20,11 @@ const UserActivityVideoDump = `
   type UserActivityVideoDump @model {
     user: User! @relation(name: "UserActivityVideoDump", direction: "OneWay")
     videoCurrentTime: Int
-    isBookmarked: Boolean @defaultValue(value: "false")
-    isShared: Boolean @defaultValue(value: "false")
+    isBookmarked: Boolean
+    isShared: Boolean
     videoShare: [VideoShareType]
     bookmarkCount: Int
-    isLiked: Boolean @defaultValue(value: "false")
+    isLiked: Boolean
     videoAction: UserActionType!
     videoWatchTime: [VideoWatchTimeType]
     maxMinVideoCollapseTime: Int

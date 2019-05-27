@@ -13,8 +13,8 @@ const ChatShareType = `
 const UserActivityChatDump = `
   type UserActivityChatDump @model {
     user: User! @relation(name: "UserActivityChatDump", direction: "OneWay")
-    isBookmarked: Boolean @defaultValue(value: "false")
-    isShared: Boolean @defaultValue(value: "false")
+    isBookmarked: Boolean
+    isShared: Boolean
     chatShares: [ChatShareType]
     bookmarkCount: Int
     currentMessage: Message @relation(name: "MessageUserActivityChatDump", direction: "OneWay")

@@ -23,8 +23,8 @@ const PQShareType = `
 const UserActivityPQDump = `
   type UserActivityPQDump @model {
     user: User! @relation(name: "UserActivityPQDump", direction: "OneWay")
-    isBookmarked: Boolean @defaultValue(value: "false")
-    isShared: Boolean @defaultValue(value: "false")
+    isBookmarked: Boolean
+    isShared: Boolean
     pqShare: [PQShareType]
     bookmarkCount: Int
     practiceQuestionsDump: [PracticeQuestionsType]
