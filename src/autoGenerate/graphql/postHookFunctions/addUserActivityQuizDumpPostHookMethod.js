@@ -224,6 +224,8 @@ const createQueryForUserAnswersAndOptions = (
         // This query will contain info for correct and user answer
         let userMcqQuery = 'userMcqAnswer: [';
         let mcqOptionQuery = 'mcqOptions: [';
+        const macqOptionsLength = mcqOptions.length;
+        const userMcqAnswersLength = userMcqAnswers.length;
         mcqOptions.forEach((mcqOption) => {
           statement = get(mcqOption, 'statement').trim();
           isOptionCorrect = get(mcqOption, 'isCorrect');
@@ -249,6 +251,9 @@ const createQueryForUserAnswersAndOptions = (
           } else {
             isCorrect = false;
           }
+          if (macqOptionsLength !== userMcqAnswersLength) {
+            isCorrect = false;
+          }
           // constructing query for correct mcqOptions
           // replicating info from question Bank
           mcqOptionQuery += `{statement: "${statement}", `;
@@ -269,6 +274,8 @@ const createQueryForUserAnswersAndOptions = (
         isCorrect = true;
         let userFibBlockQuery = 'userFibBlockAnswer: [';
         let fibBlockOptionQuery = 'fibBlocksOptions: [';
+        const fibBlocksOptionsLength = fibBlocksOptions.length;
+        const userFibBlockAnswersLength = userFibBlockAnswers.length;
         fibBlocksOptions.forEach((fibBlocksOption) => {
           statement = get(fibBlocksOption, 'statement').trim();
           optionCorrectPositions = get(fibBlocksOption, 'correctPositions');
@@ -299,6 +306,9 @@ const createQueryForUserAnswersAndOptions = (
           fibBlockOptionQuery += `{statement: "${statement}", `;
           fibBlockOptionQuery += `correctPositions: ${correctPositionsQuery}}, `;
         });
+        if (fibBlocksOptionsLength !== userFibBlockAnswersLength) {
+          isCorrect = false;
+        }
         userFibBlockQuery += ']';
         fibBlockOptionQuery += ']';
         userAnswersAndQuestionOptionsQuery += `isCorrect: ${isCorrect},
@@ -314,6 +324,8 @@ const createQueryForUserAnswersAndOptions = (
         isCorrect = true;
         let userFibInputQuery = 'userFibInputAnswer: [';
         let fibInputOptionQuery = 'fibInputOptions: [';
+        const fibInputOptionsLength = fibInputOptions.length;
+        const userFibInputAnswersLength = userFibInputAnswers.length;
         fibInputOptions.forEach((fibInputOption) => {
           let isUserSelectedOptionCorrect = false;
           answers = get(fibInputOption, 'answers');
@@ -348,6 +360,9 @@ const createQueryForUserAnswersAndOptions = (
           fibInputOptionQuery += `{correctPosition: ${optionPosition}, `;
           fibInputOptionQuery += `answers: ${answersQuery}}, `;
         });
+        if (fibInputOptionsLength !== userFibInputAnswersLength) {
+          isCorrect = false;
+        }
         userFibInputQuery += ']';
         fibInputOptionQuery += ']';
         userAnswersAndQuestionOptionsQuery += `isCorrect: ${isCorrect},
@@ -363,6 +378,8 @@ const createQueryForUserAnswersAndOptions = (
         isCorrect = true;
         let userArrangeQuery = 'userArrangeAnswer: [';
         let arrangeOptionsQuery = 'arrangeOptions: [';
+        const arrangeOptionsLength = arrangeOptions.length;
+        const userArrangeAnswersLength = userArrangeAnswers.length;
         arrangeOptions.forEach((arrangeOption) => {
           statement = get(arrangeOption, 'statement').trim();
           optionPosition = get(arrangeOption, 'correctPosition');
@@ -388,6 +405,9 @@ const createQueryForUserAnswersAndOptions = (
           arrangeOptionsQuery += `{statement: "${statement}", `;
           arrangeOptionsQuery += `correctPosition: ${optionPosition}}, `;
         });
+        if (arrangeOptionsLength !== userArrangeAnswersLength) {
+          isCorrect = false;
+        }
         userArrangeQuery += ']';
         arrangeOptionsQuery += ']';
         userAnswersAndQuestionOptionsQuery += `isCorrect: ${isCorrect},
