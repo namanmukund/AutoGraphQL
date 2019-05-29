@@ -224,8 +224,10 @@ const createQueryForUserAnswersAndOptions = (
         // This query will contain info for correct and user answer
         let userMcqQuery = 'userMcqAnswer: [';
         let mcqOptionQuery = 'mcqOptions: [';
+        const macqOptionsLength = mcqOptions.length;
+        const userMcqAnswersLength = userMcqAnswers.length;
         mcqOptions.forEach((mcqOption) => {
-          statement = get(mcqOption, 'statement');
+          statement = get(mcqOption, 'statement').trim();
           isOptionCorrect = get(mcqOption, 'isCorrect');
           /*
           Iterating over each option in question in Question Bank and user answer and
@@ -235,7 +237,7 @@ const createQueryForUserAnswersAndOptions = (
           */
           if (isAttempted && userMcqAnswers.length) {
             userMcqAnswers.forEach((userMcqAnswer) => {
-              userStatement = get(userMcqAnswer, 'statement');
+              userStatement = get(userMcqAnswer, 'statement').trim();
               isOptionSelected = get(userMcqAnswer, 'isSelected');
               if (userStatement === statement) {
                 userMcqQuery += `{statement: "${userStatement}", `;
@@ -247,6 +249,9 @@ const createQueryForUserAnswersAndOptions = (
               }
             });
           } else {
+            isCorrect = false;
+          }
+          if (macqOptionsLength !== userMcqAnswersLength) {
             isCorrect = false;
           }
           // constructing query for correct mcqOptions
@@ -269,12 +274,14 @@ const createQueryForUserAnswersAndOptions = (
         isCorrect = true;
         let userFibBlockQuery = 'userFibBlockAnswer: [';
         let fibBlockOptionQuery = 'fibBlocksOptions: [';
+        const fibBlocksOptionsLength = fibBlocksOptions.length;
+        const userFibBlockAnswersLength = userFibBlockAnswers.length;
         fibBlocksOptions.forEach((fibBlocksOption) => {
-          statement = get(fibBlocksOption, 'statement');
+          statement = get(fibBlocksOption, 'statement').trim();
           optionCorrectPositions = get(fibBlocksOption, 'correctPositions');
           if (isAttempted && userFibBlockAnswers.length) {
             userFibBlockAnswers.forEach((userFibBlockAnswer) => {
-              userStatement = get(userFibBlockAnswer, 'statement');
+              userStatement = get(userFibBlockAnswer, 'statement').trim();
               userStatementPosition = get(userFibBlockAnswer, 'position');
               if (userStatement === statement) {
                 userFibBlockQuery += `{statement: "${userStatement}", `;
@@ -299,6 +306,9 @@ const createQueryForUserAnswersAndOptions = (
           fibBlockOptionQuery += `{statement: "${statement}", `;
           fibBlockOptionQuery += `correctPositions: ${correctPositionsQuery}}, `;
         });
+        if (fibBlocksOptionsLength !== userFibBlockAnswersLength) {
+          isCorrect = false;
+        }
         userFibBlockQuery += ']';
         fibBlockOptionQuery += ']';
         userAnswersAndQuestionOptionsQuery += `isCorrect: ${isCorrect},
@@ -314,21 +324,27 @@ const createQueryForUserAnswersAndOptions = (
         isCorrect = true;
         let userFibInputQuery = 'userFibInputAnswer: [';
         let fibInputOptionQuery = 'fibInputOptions: [';
+        const fibInputOptionsLength = fibInputOptions.length;
+        const userFibInputAnswersLength = userFibInputAnswers.length;
         fibInputOptions.forEach((fibInputOption) => {
+          let isUserSelectedOptionCorrect = false;
           answers = get(fibInputOption, 'answers');
           optionPosition = get(fibInputOption, 'correctPosition');
           if (isAttempted && userFibInputAnswers.length) {
             userFibInputAnswers.forEach((userFibInputAnswer) => {
-              userAnswer = get(userFibInputAnswer, 'answer');
+              userAnswer = get(userFibInputAnswer, 'answer').trim();
               userStatementPosition = get(userFibInputAnswer, 'position');
               if (userStatementPosition === optionPosition) {
                 userFibInputQuery += `{answer: "${userAnswer}", `;
                 userFibInputQuery += `position: ${userStatementPosition}}, `;
                 // if user answer doesn't match with any of possible answers for a position
                 // setting isCorrect to false
-                if (answers.indexOf(userAnswer) === -1) {
-                  isCorrect = false;
-                }
+                answers.forEach((answer) => {
+                  if (answer.trim() === userAnswer) {
+                    isUserSelectedOptionCorrect = true;
+                  }
+                });
+                if (!isUserSelectedOptionCorrect) isCorrect = false;
               }
             });
           } else {
@@ -338,12 +354,15 @@ const createQueryForUserAnswersAndOptions = (
           // replicating info from question Bank
           let answersQuery = '[';
           answers.forEach((answer) => {
-            answersQuery += `"${answer}", `;
+            answersQuery += `"${answer.trim()}", `;
           });
           answersQuery += ']';
           fibInputOptionQuery += `{correctPosition: ${optionPosition}, `;
           fibInputOptionQuery += `answers: ${answersQuery}}, `;
         });
+        if (fibInputOptionsLength !== userFibInputAnswersLength) {
+          isCorrect = false;
+        }
         userFibInputQuery += ']';
         fibInputOptionQuery += ']';
         userAnswersAndQuestionOptionsQuery += `isCorrect: ${isCorrect},
@@ -359,12 +378,14 @@ const createQueryForUserAnswersAndOptions = (
         isCorrect = true;
         let userArrangeQuery = 'userArrangeAnswer: [';
         let arrangeOptionsQuery = 'arrangeOptions: [';
+        const arrangeOptionsLength = arrangeOptions.length;
+        const userArrangeAnswersLength = userArrangeAnswers.length;
         arrangeOptions.forEach((arrangeOption) => {
-          statement = get(arrangeOption, 'statement');
+          statement = get(arrangeOption, 'statement').trim();
           optionPosition = get(arrangeOption, 'correctPosition');
           if (isAttempted && userArrangeAnswers.length) {
             userArrangeAnswers.forEach((userArrangeAnswer) => {
-              userStatement = get(userArrangeAnswer, 'statement');
+              userStatement = get(userArrangeAnswer, 'statement').trim();
               userStatementPosition = get(userArrangeAnswer, 'position');
               if (userStatement === statement) {
                 userArrangeQuery += `{statement: "${userStatement}", `;
@@ -384,6 +405,9 @@ const createQueryForUserAnswersAndOptions = (
           arrangeOptionsQuery += `{statement: "${statement}", `;
           arrangeOptionsQuery += `correctPosition: ${optionPosition}}, `;
         });
+        if (arrangeOptionsLength !== userArrangeAnswersLength) {
+          isCorrect = false;
+        }
         userArrangeQuery += ']';
         arrangeOptionsQuery += ']';
         userAnswersAndQuestionOptionsQuery += `isCorrect: ${isCorrect},

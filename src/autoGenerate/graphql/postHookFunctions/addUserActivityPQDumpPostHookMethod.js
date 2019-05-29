@@ -55,7 +55,7 @@ const updateUserLearningObjectiveMutation = (
 ) => `
   mutation{
     updateUserLearningObjective(id:"${userLearningObjectiveId}",  input:{
-      isPracticeQuestionBookmarked: ${isPracticeQuestionBookmarked}
+      ${typeof isPracticeQuestionBookmarked === 'boolean' ? `isPracticeQuestionBookmarked: ${isPracticeQuestionBookmarked}` : ''}
       practiceQuestionStatus: ${practiceQuestionStatus}
       ${popAllQuery}
     }){
@@ -147,10 +147,9 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   let practiceQuestionStatus = get(userLearningObjectiveInfo, 'practiceQuestionStatus', incomplete);
   const {
     pqAction,
-    isBookmarked: isBookmarkedFromInput,
+    isBookmarked: isPracticeQuestionBookmarked,
     practiceQuestionsDump: inputPracticeQuestions,
   } = input;
-  const isPracticeQuestionBookmarked = isBookmarkedFromInput || false;
   // initializing fields for user PQ report
   let firstTryCount = 0;
   let secondTryCount = 0;

@@ -33,7 +33,7 @@ const updateUserLearningObjectiveMutation = (userLearningObjectiveId,
 ) => `
   mutation{
     updateUserLearningObjective(id:"${userLearningObjectiveId}",  input:{
-      isChatBookmarked: ${isChatBookmarked}
+      ${typeof isChatBookmarked === 'boolean' ? `isChatBookmarked: ${isChatBookmarked}` : ''}
       chatStatus: ${chatStatus}
     }){
       id
@@ -78,8 +78,7 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
   const { complete, incomplete } = userTopicTypeStatus;
   const { next } = userActionType;
   let chatStatus = incomplete;
-  const { chatAction, isBookmarked: isChatBookmarkedFromInput } = input;
-  const isChatBookmarked = isChatBookmarkedFromInput || false;
+  const { chatAction, isBookmarked: isChatBookmarked } = input;
   if (chatAction && chatAction === next) {
     chatStatus = complete;
   }
