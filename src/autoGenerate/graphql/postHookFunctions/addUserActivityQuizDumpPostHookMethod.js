@@ -78,6 +78,7 @@ const questionBankQuery = questionIdsQuery => `
       fibBlocksOptions{
         statement
         correctPositions
+        displayOrder
       }
       arrangeOptions{
         statement
@@ -272,6 +273,7 @@ const createQueryForUserAnswersAndOptions = (
     case fibBlock:
       if (fibBlocksOptions) {
         isCorrect = true;
+        let optionDisplayOrder;
         let userFibBlockQuery = 'userFibBlockAnswer: [';
         let fibBlockOptionQuery = 'fibBlocksOptions: [';
         const fibBlocksOptionsLength = fibBlocksOptions.length;
@@ -279,6 +281,7 @@ const createQueryForUserAnswersAndOptions = (
         fibBlocksOptions.forEach((fibBlocksOption) => {
           statement = get(fibBlocksOption, 'statement').trim();
           optionCorrectPositions = get(fibBlocksOption, 'correctPositions');
+          optionDisplayOrder = get(fibBlocksOption, 'displayOrder');
           if (isAttempted && userFibBlockAnswers.length) {
             userFibBlockAnswers.forEach((userFibBlockAnswer) => {
               userStatement = get(userFibBlockAnswer, 'statement').trim();
@@ -304,6 +307,7 @@ const createQueryForUserAnswersAndOptions = (
           });
           correctPositionsQuery += ']';
           fibBlockOptionQuery += `{statement: "${statement}", `;
+          fibBlockOptionQuery += `displayOrder: ${optionDisplayOrder}, `;
           fibBlockOptionQuery += `correctPositions: ${correctPositionsQuery}}, `;
         });
         if (fibBlocksOptionsLength !== userFibBlockAnswersLength) {
