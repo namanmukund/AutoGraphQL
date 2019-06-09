@@ -72,6 +72,12 @@ const getUserCurrentTopicComponentStatus = userId => `
           uri
         }
         description
+        videoDescription
+        videoThumbnail{
+          id
+          name
+          uri
+        }
       }
       currentLearningObjective{
         id
