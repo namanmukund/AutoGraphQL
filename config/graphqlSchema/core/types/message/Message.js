@@ -2,11 +2,11 @@ const Message = `
   type Message @model {
     order: Int!
     type: MessageType!
-    statement: String @length(min: 6, max: 300) @trim
+    statement: String @trim
     image: File @relation(name: "MessageImage", direction: "OneWay")
     learningObjective: LearningObjective @relation(name: "LearningObjectiveMessage")
-    terminalInput: String @length(min: 6, max: 300) @trim
-    terminalOutput: String @length(min: 6, max: 300) @trim
+    terminalInput: String @trim
+    terminalOutput: String @trim
     alignment: MessageAlignmentType!
   }
 `;
