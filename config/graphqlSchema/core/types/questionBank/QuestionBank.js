@@ -6,8 +6,8 @@ const QuestionBank = `
     questionType: QuestionBankType! @defaultValue(value: "mcq")
     difficulty: Int
     assessmentType: AssessmentType!
-    layout: QuestionBankLayoutType
-    layoutText: String @trim
+    codeSnippet: String @trim
+    explanation: String @trim
     mcqOptions: [McqOption]
     fibBlocksOptions: [FibBlocksOption]
     fibInputOptions: [FibInputOption]

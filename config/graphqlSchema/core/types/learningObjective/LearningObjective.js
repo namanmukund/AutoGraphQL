@@ -3,6 +3,8 @@ const LearningObjective = `
     order: Int!
     title: String! @unique @trim
     description: String @uniqueOrEmpty @unique @trim
+    pqStory: String! @unique @trim
+    pqStoryImage: File @relation(name: "LearningObjectivePqStoryImage", direction: "OneWay")
     videoStartTime: Int
     videoEndTime: Int
     topic: Topic @relation(name: "TopicLearningObjective")
