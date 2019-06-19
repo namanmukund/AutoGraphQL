@@ -1,8 +1,8 @@
 const LearningObjective = `
   type LearningObjective @model {
     order: Int!
-    title: String! @unique @length(min: 6, max: 120) @trim
-    description: String @uniqueOrEmpty @unique @length(min: 6, max: 120) @trim
+    title: String! @unique @trim
+    description: String @uniqueOrEmpty @unique @trim
     videoStartTime: Int
     videoEndTime: Int
     topic: Topic @relation(name: "TopicLearningObjective")
