@@ -1,8 +1,8 @@
 const Chapter = `
   type Chapter @model {
-    order: Int! @unique @length(min: 1, max: 10)
-    title: String! @unique @length(min: 6, max: 120) @trim
-    description: String @uniqueOrEmpty @length(min: 6, max: 120) @trim
+    order: Int! @unique
+    title: String! @unique @trim
+    description: String @uniqueOrEmpty @trim
     status: ContentStatus! @defaultValue(value: "unpublished")
     topics: [Topic] @relation(name: "ChapterTopic", isSubset: true)
     thumbnail: File @relation(name: "ChapterThumbnail", direction: "OneWay")
