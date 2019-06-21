@@ -3,7 +3,7 @@ const LearningObjective = `
     order: Int!
     title: String! @unique @trim
     description: String @uniqueOrEmpty @unique @trim
-    pqStory: String! @trim
+    pqStory: String @trim
     pqStoryImage: File @relation(name: "LearningObjectivePqStoryImage", direction: "OneWay")
     videoStartTime: Int
     videoEndTime: Int
