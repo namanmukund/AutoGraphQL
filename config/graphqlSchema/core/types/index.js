@@ -24,6 +24,8 @@ import UserVideo from './userVideo';
 import UserLearningObjective from './userLearningObjective';
 import UserTopicJourney from './userTopicJourney';
 import UserPracticeQuestionReport from './userPracticeQuestionReport';
+import UserFirstAndLatestQuizReport from './userFirstAndLatestQuizReport';
+
 
 export default [
   ...User,
@@ -52,4 +54,5 @@ export default [
   ...UserTopicJourney,
   ...UserPracticeQuestionReport,
   ...UserQuizReport,
+  ...UserFirstAndLatestQuizReport,
 ];

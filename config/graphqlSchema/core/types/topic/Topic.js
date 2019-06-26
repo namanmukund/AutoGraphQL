@@ -12,6 +12,10 @@ const Topic = `
     videoSubtitle: File @relation(name: "VideoSubtitle", direction: "OneWay")
     videoThumbnail: File @relation(name: "VideoThumbnail", direction: "OneWay")
     videoStatus: ContentStatus! @defaultValue(value: "unpublished")
+    videoStartTime: Int
+    videoEndTime: Int
+    storyStartTime: Int
+    storyEndTime: Int
     chapter: Chapter @relation(name: "ChapterTopic")
     learningObjectives: [LearningObjective] @relation(name: "TopicLearningObjective", isSubset: true)
     questions: [QuestionBank] @relation(name: "TopicQuestionBank")
