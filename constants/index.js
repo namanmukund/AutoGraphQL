@@ -169,6 +169,18 @@ const scholarshipThreshHolds = {
   familiar: 60,
 };
 
+const learningObjectiveQuizReportThreshHolds = {
+  proficient: 100,
+  master: 80,
+  familiar: 60,
+};
+
+const learningObjectiveRecommendationTexts = {
+  proficient: 'Excellent',
+  master: 'Almost there',
+  familiar: 'Need work',
+};
+
 const masteryLevels = {
   proficient: 'proficient',
   master: 'master',
@@ -215,4 +227,6 @@ export {
   FRONTEND_APP_TWO,
   loginType,
   masteryLevels,
+  learningObjectiveQuizReportThreshHolds,
+  learningObjectiveRecommendationTexts,
 };
