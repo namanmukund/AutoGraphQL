@@ -263,8 +263,8 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   // this object will be returned in output
   const userQuizReportData = {};
   const quizData = [];
-  let parsedLatestQuizReport = {};
-  let parsedFirstQuizReport = {};
+  let parsedLatestQuizReport;
+  let parsedFirstQuizReport;
   const quizRes = await callGraphqlApi(
     getQuizReportQuery(userId, topicId),
     '',
