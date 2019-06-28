@@ -1,6 +1,8 @@
 import { get } from 'lodash';
 import {
   GLOBAL_COURSE_ID,
+  learningObjectiveQuizReportThreshHolds,
+  learningObjectiveRecommendationTexts,
   PUBLISHED,
 } from '../../../../../../constants';
 import {
@@ -147,14 +149,32 @@ const getQuizReportQuery = (userId, topicId) => `
   Example: suppose client has asked for title and order of topic,
   In that case he will get title and order only. And this is happening when we parse
   data as below. If parsing is not done, it is returning empty data.
+  Also evaluating recommendation text on basis of correct/total ques percentage for LO
   */
 const parseQuizReport = async (
   quizReport,
 ) => {
+  const { familiar, master } = learningObjectiveQuizReportThreshHolds;
+  const { familiar: familiarText, master: masterText, proficient: proficientText } =
+    learningObjectiveRecommendationTexts;
   if (quizReport.learningObjectiveReport
     && quizReport.learningObjectiveReport.length) {
     quizReport.learningObjectiveReport.forEach((loReport, index) => {
+      let loRecommendationText = '';
+      let percentage = 0;
       Object.assign(quizReport.learningObjectiveReport[index].learningObjective, { type: 'LearningObjective', typeId: `${loReport.learningObjective.id}` });
+      if (loReport.totalQuestionCount > 0) {
+        percentage = (loReport.correctQuestionCount / loReport.totalQuestionCount) * 100;
+      }
+      if (percentage >= master) {
+        loRecommendationText = proficientText;
+      } else if (percentage < master && percentage > familiar) {
+        loRecommendationText = masterText;
+      } else {
+        loRecommendationText = familiarText;
+      }
+      Object.assign(quizReport.learningObjectiveReport[index],
+        { recommendationText: loRecommendationText });
     });
   }
   if (quizReport.quizAnswers
@@ -243,8 +263,8 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   // this object will be returned in output
   const userQuizReportData = {};
   const quizData = [];
-  let parsedLatestQuizReport;
-  let parsedFirstQuizReport;
+  let parsedLatestQuizReport = {};
+  let parsedFirstQuizReport = {};
   const quizRes = await callGraphqlApi(
     getQuizReportQuery(userId, topicId),
     '',

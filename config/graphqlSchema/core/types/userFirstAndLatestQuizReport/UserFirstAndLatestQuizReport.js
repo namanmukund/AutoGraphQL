@@ -1,14 +1,15 @@
-const quizReportLearningObjective = `
-  type QuizReportLearningObjective {
+const firstandLastQuizReportLearningObjective = `
+  type FirstandLastQuizReportLearningObjective {
     totalQuestionCount: Int
     correctQuestionCount: Int
     inCorrectQuestionCount: Int
     unansweredQuestionCount: Int
+    recommendationText: String
     learningObjective: LearningObjective @relation(name: "UserQuizReportPageLO", direction: "OneWay")
  }`;
 
-const quizReportType = `
-  type QuizReportType {
+const firstandLastQuizReportType = `
+  type FirstandLastQuizReportType {
     totalQuestionCount: Int
     correctQuestionCount: Int
     inCorrectQuestionCount: Int
@@ -16,8 +17,8 @@ const quizReportType = `
     masteryLevel: MasteryLevelsType
  }`;
 
-const quizAnswersType = `
-  type QuizAnswersType {
+const firstandLastQuizAnswersType = `
+  type FirstandLastQuizAnswersType {
    question: QuestionBank @relation(name: "QuestionUserQuiz", direction: "OneWay")
    questionDisplayOrder: Int
    isAttempted: Boolean @defaultValue(value: false)
@@ -30,27 +31,25 @@ const quizAnswersType = `
    fibBlocksOptions: [FibBlocksOption]
    fibInputOptions: [FibInputOption]
    arrangeOptions: [ArrangeOption]
-   learningObjective: LearningObjective @relation(name: "LearningObjectiveUserQuiz", direction: "OneWay")
  }`;
 
-const reportType = `
-  type ReportType {
-    quizAnswers: [QuizAnswersType]
-    quizReport: QuizReportType
-    learningObjectiveReport: [QuizReportLearningObjective]
-    quizReportNumber: String
+const firstandLastReportType = `
+  type FirstandLastReportType {
+    quizAnswers: [FirstandLastQuizAnswersType]
+    quizReport: FirstandLastQuizReportType
+    learningObjectiveReport: [FirstandLastQuizReportLearningObjective]
  }`;
 
 const UserFirstAndLatestQuizReport = `
   type UserFirstAndLatestQuizReport {
     user: User! @relation(name: "UserQuizReport", direction: "OneWay")
-    firstQuizReport: ReportType
-    latestQuizReport: ReportType
+    firstQuizReport: FirstandLastReportType
+    latestQuizReport: FirstandLastReportType
     topic: Topic @relation(name: "TopicUserQuizReport", direction: "OneWay")
   }
 `;
 
 export default [UserFirstAndLatestQuizReport,
-  quizReportType,
-  quizReportLearningObjective,
-  quizAnswersType, reportType];
+  firstandLastQuizReportType,
+  firstandLastQuizReportLearningObjective,
+  firstandLastQuizAnswersType, firstandLastReportType];
