@@ -176,9 +176,10 @@ const learningObjectiveQuizReportThreshHolds = {
 };
 
 const learningObjectiveRecommendationTexts = {
-  proficient: 'Excellent',
-  master: 'Almost there',
-  familiar: 'Need work',
+  learningObjectiveProficientText: 'Excellent',
+  learningObjectiveMasterText: 'Great going',
+  learningObjectiveFamiliarText: 'Almost there',
+  learningObjectiveDefaultText: 'Need work',
 };
 
 const masteryLevels = {

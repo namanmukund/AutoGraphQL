@@ -708,14 +708,14 @@ const evaluateUserScholarship = async (
       freeProficientTopicCount -= 1;
     }
     // mastered topic logic, master is 80 defined in config
-    if (accuracy > master) {
+    if (accuracy >= master) {
       masteredTopicCount += 1;
       userProfileTopicConnectQuery += `masteredTopicsConnectIds:["${topicId}"] `;
     } else if (freeMasteredTopicCount > 0) {
       freeMasteredTopicCount -= 1;
     }
     // familiar topic logic, familiar is 60 defined in config
-    if (accuracy > familiar) {
+    if (accuracy >= familiar) {
       familiarTopicCount += 1;
       userProfileTopicConnectQuery += `familiarTopicsConnectIds:["${topicId}"] `;
     } else if (freeFamiliarTopicCount > 0) {

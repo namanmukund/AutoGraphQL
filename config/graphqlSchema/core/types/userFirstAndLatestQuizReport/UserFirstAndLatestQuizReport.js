@@ -5,6 +5,7 @@ const firstandLastQuizReportLearningObjective = `
     inCorrectQuestionCount: Int
     unansweredQuestionCount: Int
     recommendationText: String
+    masteryLevel: MasteryLevelsType
     learningObjective: LearningObjective @relation(name: "UserQuizReportPageLO", direction: "OneWay")
  }`;
 

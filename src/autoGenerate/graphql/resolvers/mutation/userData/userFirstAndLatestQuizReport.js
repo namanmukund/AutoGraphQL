@@ -4,6 +4,7 @@ import {
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
   PUBLISHED,
+  masteryLevels,
 } from '../../../../../../constants';
 import {
   ComponentLockedError,
@@ -154,27 +155,45 @@ const getQuizReportQuery = (userId, topicId) => `
 const parseQuizReport = async (
   quizReport,
 ) => {
-  const { familiar, master } = learningObjectiveQuizReportThreshHolds;
-  const { familiar: familiarText, master: masterText, proficient: proficientText } =
+  const {
+    familiar: familiarPercentage,
+    master: masterPercentage,
+    proficient: proficientPercentage,
+  } = learningObjectiveQuizReportThreshHolds;
+  const { learningObjectiveDefaultText,
+    learningObjectiveFamiliarText,
+    learningObjectiveMasterText,
+    learningObjectiveProficientText,
+  } =
     learningObjectiveRecommendationTexts;
+  const { familiar, master, proficient, defaultMastery } = masteryLevels;
   if (quizReport.learningObjectiveReport
     && quizReport.learningObjectiveReport.length) {
     quizReport.learningObjectiveReport.forEach((loReport, index) => {
       let loRecommendationText = '';
+      let masteryLevelText = '';
       let percentage = 0;
       Object.assign(quizReport.learningObjectiveReport[index].learningObjective, { type: 'LearningObjective', typeId: `${loReport.learningObjective.id}` });
       if (loReport.totalQuestionCount > 0) {
         percentage = (loReport.correctQuestionCount / loReport.totalQuestionCount) * 100;
       }
-      if (percentage >= master) {
-        loRecommendationText = proficientText;
-      } else if (percentage < master && percentage > familiar) {
-        loRecommendationText = masterText;
+      if (percentage === proficientPercentage) {
+        loRecommendationText = learningObjectiveProficientText;
+        masteryLevelText = proficient;
+      } else if (percentage >= masterPercentage) {
+        loRecommendationText = learningObjectiveMasterText;
+        masteryLevelText = master;
+      } else if (percentage < masterPercentage && percentage >= familiarPercentage) {
+        loRecommendationText = learningObjectiveFamiliarText;
+        masteryLevelText = familiar;
       } else {
-        loRecommendationText = familiarText;
+        loRecommendationText = learningObjectiveDefaultText;
+        masteryLevelText = defaultMastery;
       }
       Object.assign(quizReport.learningObjectiveReport[index],
-        { recommendationText: loRecommendationText });
+        { recommendationText: loRecommendationText,
+          masteryLevel: masteryLevelText,
+        });
     });
   }
   if (quizReport.quizAnswers
