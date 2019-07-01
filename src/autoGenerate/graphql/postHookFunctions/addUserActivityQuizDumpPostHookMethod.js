@@ -276,11 +276,14 @@ const createQueryForUserAnswersAndOptions = (
         let optionDisplayOrder;
         let userFibBlockQuery = 'userFibBlockAnswer: [';
         let fibBlockOptionQuery = 'fibBlocksOptions: [';
-        const fibBlocksOptionsLength = fibBlocksOptions.length;
+        const totalNumberOfBlanksArray = [];
         const userFibBlockAnswersLength = userFibBlockAnswers.length;
         fibBlocksOptions.forEach((fibBlocksOption) => {
           statement = get(fibBlocksOption, 'statement').trim();
           optionCorrectPositions = get(fibBlocksOption, 'correctPositions');
+          if (optionCorrectPositions.length > 0) {
+            totalNumberOfBlanksArray.push(...optionCorrectPositions);
+          }
           optionDisplayOrder = get(fibBlocksOption, 'displayOrder');
           if (isAttempted && userFibBlockAnswers.length) {
             userFibBlockAnswers.forEach((userFibBlockAnswer) => {
@@ -310,7 +313,10 @@ const createQueryForUserAnswersAndOptions = (
           fibBlockOptionQuery += `displayOrder: ${optionDisplayOrder}, `;
           fibBlockOptionQuery += `correctPositions: ${correctPositionsQuery}}, `;
         });
-        if (fibBlocksOptionsLength !== userFibBlockAnswersLength) {
+        // Handling case that answer for every blank is sent by user
+        const totalUniqueNumberOfBlanksArray =
+          totalNumberOfBlanksArray.filter((elem, index, array) => array.indexOf(elem) === index);
+        if (totalUniqueNumberOfBlanksArray.length !== userFibBlockAnswersLength) {
           isCorrect = false;
         }
         userFibBlockQuery += ']';
