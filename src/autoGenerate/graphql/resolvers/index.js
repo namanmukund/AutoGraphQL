@@ -17,6 +17,7 @@ import {
   deleteMultipleMutationResolver,
   userCourseSyllabusMutationResolver,
   userTopicJourneyMutationResolver,
+  userFirstAndLatestQuizReportMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import { types, authenticateUser, ifAuthorized, toObject, isErrorThrown, getRandomNumber } from '../../../../utils';
@@ -773,6 +774,25 @@ resolvers.Mutation.userTopicJourney = async (root, params, context, info) => {
   const hookInput = await prehook(params, mutationName, context, params);
 
   return userTopicJourneyMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+    params,
+  ).then(result => toObject(result));
+};
+
+// Resolver for custom quiz reports for user
+resolvers.Mutation.userFirstAndLatestQuizReport = async (root, params, context, info) => {
+  const typeName = 'UserCurrentTopicComponentStatus';
+  const mutationName = 'userFirstAndLatestQuizReport';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return userFirstAndLatestQuizReportMutationResolver(
     root,
     hookInput,
     typeName,

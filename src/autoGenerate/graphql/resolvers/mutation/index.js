@@ -19,6 +19,7 @@ import finishForgotPasswordMutationResolver from './forgotPassword/finishForgotP
 import resendForgotPasswordOTPMutationResolver from './forgotPassword/resendForgotPasswordOTP';
 import userCourseSyllabusMutationResolver from './userData/userCourseSyllabus';
 import userTopicJourneyMutationResolver from './userData/userTopicJourney';
+import userFirstAndLatestQuizReportMutationResolver from './userData/userFirstAndLatestQuizReport';
 
 export {
   addMutationResolver,
@@ -42,4 +43,5 @@ export {
   deleteMultipleMutationResolver,
   userCourseSyllabusMutationResolver,
   userTopicJourneyMutationResolver,
+  userFirstAndLatestQuizReportMutationResolver,
 };
