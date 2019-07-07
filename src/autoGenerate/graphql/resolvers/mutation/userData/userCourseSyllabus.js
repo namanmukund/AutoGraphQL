@@ -9,7 +9,6 @@ import {
   DatabaseRecordNotFoundError,
 } from '../../../../../../constants/errors';
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
-import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
@@ -209,7 +208,6 @@ const userCourseSyllabusMutationResolver = async (
     currentTopicComponentType: currentTopicComponent,
     currentTopic,
     currentLearningObjective,
-    enrollmentType,
   } = currentTopicComponentInfo;
 
   // this object will be returned in output
@@ -238,9 +236,14 @@ const userCourseSyllabusMutationResolver = async (
     totalTopics += chapter.topics.length;
     // iterating over topics of each chapter  and setting isUnlocked field
     chapter.topics.forEach((topic) => {
-      const { order: topicOrder, isTrial } = topic;
+      const { order: topicOrder } = topic;
       // checking logic for is topic Unlocked or not
-      const isUnlocked = isTopicUnlocked(enrollmentType, currentTopicOrder, topicOrder, isTrial);
+      let isUnlocked = false;
+      if (
+        topicOrder <= currentTopicOrder
+      ) {
+        isUnlocked = true;
+      }
       Object.assign(topic, { isUnlocked });
     });
   });
