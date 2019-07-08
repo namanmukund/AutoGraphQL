@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
-  GLOBAL_COURSE_ID,
+  GLOBAL_COURSE_TITLE,
 } from '../../../../constants';
 import {
   DatabaseRecordNotFoundError,
@@ -22,7 +22,7 @@ const userCurrentTopicComponentStatusesQuery = userId => `
       {currentCourse_some:{
         and:[
           {status: published},
-          {id:"${GLOBAL_COURSE_ID}"}
+          {title: ${GLOBAL_COURSE_TITLE}}
         ]
       }}
       ]

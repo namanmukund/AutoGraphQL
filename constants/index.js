@@ -131,7 +131,7 @@ const userProfiles = ['sampleProfile'];
 const PUBLISHED = 'published';
 const UNPUBLISHED = 'unpublished';
 
-const GLOBAL_COURSE_ID = 'cjs8skrd200041huzz78kncz5';
+const GLOBAL_COURSE_TITLE = 'python';
 
 const enrollmentTypes = {
   free: 'free',
@@ -216,7 +216,7 @@ export {
   regexValidation,
   arrayUpdateAddTypes,
   arrayUpdateRemoveTypes,
-  GLOBAL_COURSE_ID,
+  GLOBAL_COURSE_TITLE,
   enrollmentTypes,
   topicTypes,
   userActionType,
