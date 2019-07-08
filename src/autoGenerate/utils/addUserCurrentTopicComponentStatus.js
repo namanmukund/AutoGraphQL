@@ -1,11 +1,19 @@
-import { enrollmentTypes, GLOBAL_COURSE_ID, topicTypes } from '../../../constants';
+import { get } from 'lodash';
+import {
+  enrollmentTypes,
+  GLOBAL_COURSE_TITLE,
+  PUBLISHED,
+  topicTypes,
+} from '../../../constants';
 import callGraphqlApi from '../../api/callGraphqlApi';
+import { DatabaseRecordNotFoundError } from '../../../constants/errors';
 
 const { free } = enrollmentTypes;
 const { video } = topicTypes;
 // mutation to add userCurrentTopicComponentStatus
 const addUserCurrentTopicComponentStatusMutation = (
   userId,
+  courseId,
   firstTopicId,
   firstLearningObjectiveId,
 ) => `
@@ -16,7 +24,7 @@ const addUserCurrentTopicComponentStatusMutation = (
         currentTopicComponentType: ${video}
       }
       userConnectId:"${userId}"
-      currentCourseConnectId:"${GLOBAL_COURSE_ID}"
+      currentCourseConnectId:"${courseId}"
       currentTopicConnectId:"${firstTopicId}"
       currentLearningObjectiveConnectId: "${firstLearningObjectiveId}"
     ){
@@ -25,15 +33,42 @@ const addUserCurrentTopicComponentStatusMutation = (
   }
 `;
 
+// query to get chapters and topics belomngin to a course
+const getCourseQuery = () => `
+    query{
+      courses(filter:{
+        and:[
+          {title: ${GLOBAL_COURSE_TITLE}},
+          {status: ${PUBLISHED}}
+        ]
+      }){
+        id
+      }
+    }
+  `;
+
 // mutation to create current component status of user
-const addUserCurrentTopicComponentStatus = (
+const addUserCurrentTopicComponentStatus = async (
   userId,
   firstTopicId,
   firstLearningObjectiveId,
-) => callGraphqlApi(addUserCurrentTopicComponentStatusMutation(
-  userId,
-  firstTopicId,
-  firstLearningObjectiveId,
-));
+) => {
+  const courseResult = await callGraphqlApi(getCourseQuery());
+  const course = get(courseResult, 'data.courses');
+  if (course.length <= 0) {
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'Published course is not present with title as python',
+      },
+    });
+  }
+  const { id: courseId } = course[0];
+  await callGraphqlApi(addUserCurrentTopicComponentStatusMutation(
+    userId,
+    courseId,
+    firstTopicId,
+    firstLearningObjectiveId,
+  ));
+};
 
 export default addUserCurrentTopicComponentStatus;

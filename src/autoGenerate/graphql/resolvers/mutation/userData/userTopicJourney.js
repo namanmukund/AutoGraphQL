@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import {
   topicTypes,
-  GLOBAL_COURSE_ID,
+  GLOBAL_COURSE_TITLE,
   PUBLISHED,
   enrollmentTypes, masteryLevels,
 } from '../../../../../../constants';
@@ -26,7 +26,7 @@ const getUserCurrentTopicComponentStatus = userId => `
       {currentCourse_some:{
         and:[
           {status: ${PUBLISHED}},
-          {id:"${GLOBAL_COURSE_ID}"}
+          {title: ${GLOBAL_COURSE_TITLE}}
         ]
       }}
       ]
