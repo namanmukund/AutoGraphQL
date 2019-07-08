@@ -1,4 +1,4 @@
-import { GLOBAL_COURSE_ID, PUBLISHED } from '../../../constants';
+import { GLOBAL_COURSE_TITLE, PUBLISHED } from '../../../constants';
 import callGraphqlApi from '../../api/callGraphqlApi';
 
 // query to get current topic component status
@@ -17,7 +17,7 @@ const userCurrentTopicComponentStatusQuery = (
       {currentCourse_some:{
         and:[
           {status: ${PUBLISHED}},
-          {id:"${GLOBAL_COURSE_ID}"}
+          {title: ${GLOBAL_COURSE_TITLE}}
         ]
       }}
       ]

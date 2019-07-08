@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import {
   topicTypes,
-  GLOBAL_COURSE_ID,
+  GLOBAL_COURSE_TITLE,
   PUBLISHED,
   enrollmentTypes,
 } from '../../../../../../constants';
@@ -25,7 +25,7 @@ const getUserCurrentTopicComponentStatus = userId => `
       {currentCourse_some:{
         and:[
           {status: ${PUBLISHED}},
-          {id:"${GLOBAL_COURSE_ID}"}
+          {title: ${GLOBAL_COURSE_TITLE}}
         ]
       }}
       ]
@@ -97,7 +97,7 @@ const getUserCurrentTopicComponentStatus = userId => `
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
     query{
-    course(id: "${GLOBAL_COURSE_ID}"){
+    course(title: ${GLOBAL_COURSE_TITLE}){
       id
       title
       chapters(
@@ -166,7 +166,6 @@ const userCourseSyllabusMutationResolver = async (
       '',
       token,
     );
-
     currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
     // calling method to validate user current topic component status
     validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
