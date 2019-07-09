@@ -250,7 +250,7 @@ const userTopicJourneyMutationResolver = async (
     }
     let correctQuestionCount = 0;
     let totalQuestionCount = 0;
-    if (quizInfo.quizReport) {
+    if (quizInfo && quizInfo.quizReport) {
       correctQuestionCount = quizInfo.quizReport.correctQuestionCount;
       totalQuestionCount = quizInfo.quizReport.totalQuestionCount;
     }
