@@ -20,6 +20,7 @@ import resendForgotPasswordOTPMutationResolver from './forgotPassword/resendForg
 import userCourseSyllabusMutationResolver from './userData/userCourseSyllabus';
 import userTopicJourneyMutationResolver from './userData/userTopicJourney';
 import userFirstAndLatestQuizReportMutationResolver from './userData/userFirstAndLatestQuizReport';
+import skipVideoMutationResolver from './userData/skipVideo';
 
 export {
   addMutationResolver,
@@ -44,4 +45,5 @@ export {
   userCourseSyllabusMutationResolver,
   userTopicJourneyMutationResolver,
   userFirstAndLatestQuizReportMutationResolver,
+  skipVideoMutationResolver,
 };

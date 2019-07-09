@@ -18,6 +18,7 @@ import {
   userCourseSyllabusMutationResolver,
   userTopicJourneyMutationResolver,
   userFirstAndLatestQuizReportMutationResolver,
+  skipVideoMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import { types, authenticateUser, ifAuthorized, toObject, isErrorThrown, getRandomNumber } from '../../../../utils';
@@ -793,6 +794,25 @@ resolvers.Mutation.userFirstAndLatestQuizReport = async (root, params, context, 
   const hookInput = await prehook(params, mutationName, context, params);
 
   return userFirstAndLatestQuizReportMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+    params,
+  ).then(result => toObject(result));
+};
+
+// Resolver for custom skip video by user
+resolvers.Mutation.skipVideo = async (root, params, context, info) => {
+  const typeName = 'SkipVideo';
+  const mutationName = 'skipVideo';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return skipVideoMutationResolver(
     root,
     hookInput,
     typeName,
