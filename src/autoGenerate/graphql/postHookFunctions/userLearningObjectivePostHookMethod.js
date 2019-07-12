@@ -67,6 +67,16 @@ const addUserLearningObjectiveMutation = (
       learningObjective{
         id
       }
+      practiceQuestions {
+        question {
+          id
+          order
+        }
+        status
+        isHintUsed
+        isAnswerUsed
+        attemptNumber
+      }
       chatStatus
       isChatBookmarked
       practiceQuestionStatus
