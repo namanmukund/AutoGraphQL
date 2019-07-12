@@ -2,18 +2,35 @@ const parseTopicComponentResultData = (result, page) => {
   const parsedData = result;
   let topic;
   let learningObjective;
+  const practiceQuestions = [];
+  let practiceQuestionsRes;
   const quiz = [];
   let quizRes;
   switch (page) {
     case 'learningObjective':
       learningObjective = { type: 'LearningObjective', typeId: `${parsedData.learningObjective.id}` };
       parsedData.learningObjective = learningObjective;
+      practiceQuestionsRes = parsedData.practiceQuestions;
+      // parsing practice questions to be returned first time
+      if (practiceQuestionsRes) {
+        practiceQuestionsRes.forEach((practiceQuestion) => {
+          const question = { question: { type: 'QuestionBank',
+            typeId: `${practiceQuestion.question.id}` },
+          status: practiceQuestion.status,
+          isHintUsed: practiceQuestion.isHintUsed,
+          isAnswerUsed: practiceQuestion.isAnswerUsed,
+          attemptNumber: practiceQuestion.attemptNumber };
+          practiceQuestions.push(question);
+        });
+      }
+      parsedData.practiceQuestions = practiceQuestions;
       break;
     case 'quiz':
       topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
       parsedData.topic = topic;
       // constructing data for quiz whenever userQuiz document is just created
       quizRes = parsedData.quiz;
+      // parsing quiz questions to be returned
       if (quizRes) {
         quizRes.forEach((quizQuestion) => {
           const question = { question: { type: 'QuestionBank',
