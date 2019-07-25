@@ -18,7 +18,6 @@ const topicQuery = topicId => `
         status: ${PUBLISHED}
         }
         orderBy: order_ASC
-        first: 1
       ){
         id
       }
@@ -93,6 +92,7 @@ const userVideoPostHookMethod = async (input, params) => {
   const topicQueryRes = await callGraphqlApi(topicQuery(topicId));
   const topicInfo = get(topicQueryRes, 'data.topic');
   const learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
+
   // next component will be chat of first published LO
   const restQuery = getNextComponent(
     learningObjectiveConnectId,

@@ -47,7 +47,6 @@ const userQuizQuery = (
             status: ${PUBLISHED}
             }
             orderBy: order_ASC
-            first: 1
           ){
             id
           }
