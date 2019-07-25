@@ -47,7 +47,7 @@ const getUserCurrentTopicComponentStatus = userId => `
   `;
 
 // query to get topic and it's first published learning objective
-const getTopicQuery = (topicId, order) => `
+const getTopicQuery = topicId => `
   query{
     topic(id:"${topicId}"){
       id
@@ -56,7 +56,6 @@ const getTopicQuery = (topicId, order) => `
         status: ${PUBLISHED}
         }
         orderBy: order_ASC
-        first: ${order}
       ){
         id
       }
@@ -106,7 +105,7 @@ const skipVideoMutationResolver = async (
 
   // calling API to get data of fetched topic
   const topicRes = await callGraphqlApi(
-    getTopicQuery(topicId, 1),
+    getTopicQuery(topicId),
     '',
     '',
     '',
