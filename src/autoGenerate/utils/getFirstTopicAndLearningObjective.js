@@ -6,17 +6,26 @@ const topicQuery = order => `
   query{
     topics(
       filter:{
-        status: ${PUBLISHED}
+        and:[
+          {
+            status: ${PUBLISHED}
+          },{
+             order: ${order}
+          }
+        ]
       }
-      orderBy:order_ASC, 
-      first: ${order}
     ){
       id
-      learningObjectives(filter:{
-        status: ${PUBLISHED}
+      learningObjectives(
+        filter:{
+          and:[
+            {
+              status: ${PUBLISHED}
+            },{
+               order: ${order}
+            }
+          ]
         }
-        orderBy: order_ASC
-        first: ${order}
       ){
         id
       }
@@ -33,10 +42,14 @@ const topicQueryWithExtraInfo = order => `
   query{
     topics(
       filter:{
-        status: ${PUBLISHED}
+        and:[
+          {
+            status: ${PUBLISHED}
+          },{
+             order: ${order}
+          }
+        ]
       }
-      orderBy:order_ASC, 
-      first: ${order}
     ){
       id
       title
@@ -49,11 +62,16 @@ const topicQueryWithExtraInfo = order => `
         uri
       }
       description
-      learningObjectives(filter:{
-        status: ${PUBLISHED}
+      learningObjectives(
+        filter:{
+          and:[
+            {
+              status: ${PUBLISHED}
+            },{
+               order: ${order}
+            }
+          ]
         }
-        orderBy: order_ASC
-        first: ${order}
       ){
         id
         title
