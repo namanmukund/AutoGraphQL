@@ -1,3 +1,10 @@
+const UserPracticeQuestionReportNextComponentType = `
+  type UserPracticeQuestionReportNextComponentType {
+   learningObjective: LearningObjective @relation(name: "UserPracticeQuestionReportNextComponentTypeLO", direction: "OneWay")
+   nextComponentType: CurrentTopicComponentType
+   topic: Topic @relation(name: "UserPracticeQuestionReportNextComponentTypeTopic", direction: "OneWay")
+ }`;
+
 const UserPracticeQuestionReport = `
   type UserPracticeQuestionReport @model {
     learningObjective: LearningObjective @relation(name: "UserPQReport", direction: "OneWay")
@@ -7,7 +14,8 @@ const UserPracticeQuestionReport = `
     threeOrMoreTryCount: Int
     helpUsedCount: Int
     answerUsedCount: Int
+    nextComponent: UserPracticeQuestionReportNextComponentType @readOnly
   }
 `;
 
-export default UserPracticeQuestionReport;
+export default [UserPracticeQuestionReport, UserPracticeQuestionReportNextComponentType];

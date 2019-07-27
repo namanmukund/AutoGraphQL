@@ -63,6 +63,7 @@ import userVideoValidation from './preHookFunctions/validation/userVideoValidati
 import userLearningObjectiveValidation
   from './preHookFunctions/validation/userLearningObjectiveValidation';
 import userQuizValidation from './preHookFunctions/validation/userQuizValidation';
+import userPracticeQuestionReportPostHookMethod from './postHookFunctions/userPracticeQuestionReportPostHookMethod';
 
 const { hookFunctions } = functions || {};
 
@@ -404,6 +405,10 @@ const posthook = async (input, mutationName, context, params) => {
     case 'addUserActivityQuizDump' : {
       await addUserActivityQuizDumpPostHookMethod(input, mutationName, context);
       break;
+    }
+    case 'userPracticeQuestionReport' : {
+      const resultArray = await userPracticeQuestionReportPostHookMethod(input, params);
+      return hook(resultArray, mutationName, 'PostHook');
     }
     default :
       break;

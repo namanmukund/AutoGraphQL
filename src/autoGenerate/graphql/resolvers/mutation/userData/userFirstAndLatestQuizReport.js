@@ -57,18 +57,27 @@ const getTopicQuery = topicId => `
   }
   `;
 
-// query to get published topic list
-const nextTopicQuery = () => `
+// query to get user quiz to get next component
+const userQuizQuery = (userId, topicId) => `
   query{
-  topics(
-    filter:{
-      status: ${PUBLISHED}
+    userQuizs(
+      filter: {
+        and: [
+          { user_some: { id: "${userId}" } }
+          { topic_some: { id: "${topicId}" } }
+        ]
+      }
+      orderBy: createdAt_DESC
+      first: 1
+    ){
+      id
+      nextComponent {
+        topic {
+            id
+        }
+      }
     }
-    orderBy:order_ASC,
-  ){
-    id
   }
-}
   `;
 
 // query to get user quiz report of a topic
@@ -318,22 +327,12 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     }
   }
   /*
-  We are getting published topics list through this query.
+  We are getting latest user quiz through this query.
   Then we will get next published topic
   */
-  const nextTopicQueryRes = await callGraphqlApi(nextTopicQuery());
-  const topicsList = get(nextTopicQueryRes, 'data.topics');
+  const userQuizQueryRes = await callGraphqlApi(userQuizQuery(userId, topicId));
+  const nextTopicId = get(userQuizQueryRes, 'data.userQuizs[0].nextComponent.topic.id');
 
-  let currentTopicIndex;
-  topicsList.forEach((topic, index) => {
-    if (topic.id === topicId) {
-      currentTopicIndex = index;
-    }
-  });
-  let nextTopicId = '';
-  if (currentTopicIndex + 1 < topicsList.length) {
-    nextTopicId = topicsList[currentTopicIndex + 1].id;
-  }
   const { video } = topicTypes;
   // parsing data for topic
   const topicData = { type: 'Topic', typeId: `${topicInfo.id}` };
