@@ -20,6 +20,8 @@ import CurrentTopicComponentType from './CurrentTopicComponentType';
 import UserTopicTypeStatus from './UserTopicTypeStatus';
 import LoginType from './LoginType';
 import MasteryLevelsType from './MasteryLevelsType';
+import BadgeType from './BadgeType';
+
 
 export default [
   Status,
@@ -44,4 +46,5 @@ export default [
   UserTopicTypeStatus,
   LoginType,
   MasteryLevelsType,
+  BadgeType,
 ];
