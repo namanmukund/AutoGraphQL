@@ -4,7 +4,7 @@ import {
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
   PUBLISHED,
-  masteryLevels,
+  masteryLevels, topicTypes,
 } from '../../../../../../constants';
 import {
   ComponentLockedError,
@@ -53,6 +53,29 @@ const getTopicQuery = topicId => `
       id
       order
       title
+    }
+  }
+  `;
+
+// query to get user quiz to get next component
+const userQuizQuery = (userId, topicId) => `
+  query{
+    userQuizs(
+      filter: {
+        and: [
+          { user_some: { id: "${userId}" } }
+          { topic_some: { id: "${topicId}" } }
+        ]
+      }
+      orderBy: createdAt_DESC
+      first: 1
+    ){
+      id
+      nextComponent {
+        topic {
+            id
+        }
+      }
     }
   }
   `;
@@ -303,16 +326,31 @@ const userFirstAndLatestQuizReportMutationResolver = async (
       parsedFirstQuizReport.quizReportNumber = 'first';
     }
   }
+  /*
+  We are getting latest user quiz through this query.
+  Then we will get next published topic
+  */
+  const userQuizQueryRes = await callGraphqlApi(userQuizQuery(userId, topicId));
+  const nextTopicId = get(userQuizQueryRes, 'data.userQuizs[0].nextComponent.topic.id');
+
+  const { video } = topicTypes;
   // parsing data for topic
   const topicData = { type: 'Topic', typeId: `${topicInfo.id}` };
   // parsing data for user
   const userData = { type: 'User', typeId: `${userId}` };
+  // parsing data for next topic
+  const nextTopicData = { type: 'Topic', typeId: `${nextTopicId}` };
+  const nextComponentData = {
+    topic: nextTopicData,
+    nextComponentType: video };
+
   // Constructing data as per schema
   Object.assign(userQuizReportData, {
     topic: topicData,
     user: userData,
     firstQuizReport: parsedFirstQuizReport,
     latestQuizReport: parsedLatestQuizReport,
+    nextComponent: nextComponentData,
   });
 
   return userQuizReportData;
