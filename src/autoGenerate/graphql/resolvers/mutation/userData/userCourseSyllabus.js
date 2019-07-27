@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import {
   topicTypes,
-  GLOBAL_COURSE_ID,
+  GLOBAL_COURSE_TITLE,
   PUBLISHED,
   enrollmentTypes,
 } from '../../../../../../constants';
@@ -9,7 +9,6 @@ import {
   DatabaseRecordNotFoundError,
 } from '../../../../../../constants/errors';
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
-import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
@@ -26,7 +25,7 @@ const getUserCurrentTopicComponentStatus = userId => `
       {currentCourse_some:{
         and:[
           {status: ${PUBLISHED}},
-          {id:"${GLOBAL_COURSE_ID}"}
+          {title: ${GLOBAL_COURSE_TITLE}}
         ]
       }}
       ]
@@ -98,7 +97,7 @@ const getUserCurrentTopicComponentStatus = userId => `
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
     query{
-    course(id: "${GLOBAL_COURSE_ID}"){
+    course(title: ${GLOBAL_COURSE_TITLE}){
       id
       title
       chapters(
@@ -167,7 +166,6 @@ const userCourseSyllabusMutationResolver = async (
       '',
       token,
     );
-
     currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
     // calling method to validate user current topic component status
     validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
@@ -209,7 +207,6 @@ const userCourseSyllabusMutationResolver = async (
     currentTopicComponentType: currentTopicComponent,
     currentTopic,
     currentLearningObjective,
-    enrollmentType,
   } = currentTopicComponentInfo;
 
   // this object will be returned in output
@@ -238,9 +235,14 @@ const userCourseSyllabusMutationResolver = async (
     totalTopics += chapter.topics.length;
     // iterating over topics of each chapter  and setting isUnlocked field
     chapter.topics.forEach((topic) => {
-      const { order: topicOrder, isTrial } = topic;
+      const { order: topicOrder } = topic;
       // checking logic for is topic Unlocked or not
-      const isUnlocked = isTopicUnlocked(enrollmentType, currentTopicOrder, topicOrder, isTrial);
+      let isUnlocked = false;
+      if (
+        topicOrder <= currentTopicOrder
+      ) {
+        isUnlocked = true;
+      }
       Object.assign(topic, { isUnlocked });
     });
   });

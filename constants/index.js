@@ -131,7 +131,7 @@ const userProfiles = ['sampleProfile'];
 const PUBLISHED = 'published';
 const UNPUBLISHED = 'unpublished';
 
-const GLOBAL_COURSE_ID = 'cjs8skrd200041huzz78kncz5';
+const GLOBAL_COURSE_TITLE = 'python';
 
 const enrollmentTypes = {
   free: 'free',
@@ -169,6 +169,19 @@ const scholarshipThreshHolds = {
   familiar: 60,
 };
 
+const learningObjectiveQuizReportThreshHolds = {
+  proficient: 100,
+  master: 80,
+  familiar: 60,
+};
+
+const learningObjectiveRecommendationTexts = {
+  learningObjectiveProficientText: 'Excellent',
+  learningObjectiveMasterText: 'Great going',
+  learningObjectiveFamiliarText: 'Almost there',
+  learningObjectiveDefaultText: 'Need work',
+};
+
 const masteryLevels = {
   proficient: 'proficient',
   master: 'master',
@@ -203,7 +216,7 @@ export {
   regexValidation,
   arrayUpdateAddTypes,
   arrayUpdateRemoveTypes,
-  GLOBAL_COURSE_ID,
+  GLOBAL_COURSE_TITLE,
   enrollmentTypes,
   topicTypes,
   userActionType,
@@ -215,4 +228,6 @@ export {
   FRONTEND_APP_TWO,
   loginType,
   masteryLevels,
+  learningObjectiveQuizReportThreshHolds,
+  learningObjectiveRecommendationTexts,
 };

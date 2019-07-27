@@ -25,6 +25,8 @@ import UserLearningObjective from './userLearningObjective';
 import UserTopicJourney from './userTopicJourney';
 import UserPracticeQuestionReport from './userPracticeQuestionReport';
 import Badge from './badge';
+import UserFirstAndLatestQuizReport from './userFirstAndLatestQuizReport';
+import SkipVideo from './skipVideo';
 
 export default [
   ...User,
@@ -54,4 +56,6 @@ export default [
   ...UserPracticeQuestionReport,
   ...UserQuizReport,
   ...Badge,
+  ...UserFirstAndLatestQuizReport,
+  ...SkipVideo,
 ];

@@ -1,15 +1,13 @@
 const QuestionBank = `
   type QuestionBank @model {
     order: Int!
-    statement: String! 
-        @length(min: 6, max: 300) 
-        @trim
-    hint: String @length(min: 6, max: 300) @trim
+    statement: String! @trim
+    hint: String @trim
     questionType: QuestionBankType! @defaultValue(value: "mcq")
     difficulty: Int
     assessmentType: AssessmentType!
-    layout: QuestionBankLayoutType
-    layoutText: String @length(min: 6, max: 300) @trim
+    codeSnippet: String @trim
+    explanation: String @trim
     mcqOptions: [McqOption]
     fibBlocksOptions: [FibBlocksOption]
     fibInputOptions: [FibInputOption]

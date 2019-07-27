@@ -21,9 +21,7 @@ const learningObjectiveQuery = learningObjectiveId => `
           filter:{
             status: ${PUBLISHED}
           }
-          after:"${learningObjectiveId}", 
-          orderBy:order_ASC, 
-          first:1
+          orderBy:order_ASC,
         ){
           id
         }
@@ -66,6 +64,16 @@ const addUserLearningObjectiveMutation = (
       }
       learningObjective{
         id
+      }
+      practiceQuestions {
+        question {
+          id
+          order
+        }
+        status
+        isHintUsed
+        isAnswerUsed
+        attemptNumber
       }
       chatStatus
       isChatBookmarked
@@ -137,7 +145,18 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
   }
   practiceQuestionsQuery += ']';
   // obtaining next LO
-  const nextLearningObjectiveId = get(topicInfo, 'learningObjectives[0].id');
+  const learningObjectivesInTopic = get(topicInfo, 'learningObjectives');
+  let currentLearningObjectiveIndex;
+  learningObjectivesInTopic.forEach((learningObjective, index) => {
+    if (learningObjective.id === learningObjectiveId) {
+      currentLearningObjectiveIndex = index;
+    }
+  });
+  let nextLearningObjectiveId = '';
+  if (currentLearningObjectiveIndex + 1 < learningObjectivesInTopic.length) {
+    nextLearningObjectiveId = learningObjectivesInTopic[currentLearningObjectiveIndex + 1].id;
+  }
+
   const restQuery = getNextComponent(
     nextLearningObjectiveId,
     topicId,
