@@ -6,6 +6,7 @@ const Badge = `
     activeImage: File @relation(name: "BadgeActiveImage", direction: "OneWay")
     inactiveImage: File @relation(name: "BadgeInactiveImage", direction: "OneWay")
     topic: Topic! @relation(name: "TopicBadge")
+    status: ContentStatus! @defaultValue(value: "unpublished")
   }
 `;
 
