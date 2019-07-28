@@ -221,7 +221,7 @@ const userTopicJourneyMutationResolver = async (
     description: topicInfo.description,
     thumbnail: topicInfo.thumbnail,
   };
-
+  const { pro } = enrollmentTypes;
   /*
   Logic for getting locked status of different components for a topic
   if called topic order is less than that of current topic order,
@@ -231,7 +231,12 @@ const userTopicJourneyMutationResolver = async (
   */
   const { defaultMastery } = masteryLevels;
   if (topicInfo.order < currentRunningTopic.order) {
-    videoData.isUnlocked = true;
+    if (topicInfo.isTrial || enrollmentType === pro) {
+      videoData.isUnlocked = true;
+    } else {
+      videoData.isUnlocked = false;
+    }
+
     learningObjectivesData.forEach((loInArray, index) => {
       learningObjectivesData[index].isUnlocked = true;
     });
@@ -274,52 +279,46 @@ const userTopicJourneyMutationResolver = async (
      status on basis of that
     */
   } else {
-    const { pro } = enrollmentTypes;
     const { video, quiz } = topicTypes;
     quizData.masteryLevel = defaultMastery;
-    // components are unlocked only if topic is free or user is pro
+    // video is unlocked only if topic is free or user is pro
     if (topicInfo.isTrial || enrollmentType === pro) {
-      // video will always be unlocked since it is first component of topic
       videoData.isUnlocked = true;
-      switch (currentTopicComponent) {
-        // since video is first component, if that is current topic component
-        // that means all components are locked
-        case video: {
-          learningObjectivesData.forEach((loInArray, index) => {
-            learningObjectivesData[index].isUnlocked = false;
-          });
-          quizData.isUnlocked = false;
-          break;
-        }
-        // since quiz is last component, if that is current topic component
-        // that means all components are unlocked
-        case quiz: {
-          learningObjectivesData.forEach((loInArray, index) => {
-            learningObjectivesData[index].isUnlocked = true;
-          });
-          quizData.isUnlocked = true;
-          break;
-        }
-        default: {
-          // case when messgae or practiceQuestion is current component
-          // in that case we are checking order of LOs
-          learningObjectivesData.forEach((loInArray, index) => {
-            if (loInArray.order <= currentRunningLearningObjective.order) {
-              learningObjectivesData[index].isUnlocked = true;
-            } else {
-              learningObjectivesData[index].isUnlocked = false;
-            }
-          });
-          quizData.isUnlocked = false;
-          break;
-        }
-      }
     } else {
       videoData.isUnlocked = false;
-      learningObjectivesData.forEach((loInArray, index) => {
-        learningObjectivesData[index].isUnlocked = false;
-      });
-      quizData.isUnlocked = false;
+    }
+    switch (currentTopicComponent) {
+      // since video is first component, if that is current topic component
+      // that means all components are locked
+      case video: {
+        learningObjectivesData.forEach((loInArray, index) => {
+          learningObjectivesData[index].isUnlocked = false;
+        });
+        quizData.isUnlocked = false;
+        break;
+      }
+      // since quiz is last component, if that is current topic component
+      // that means all components are unlocked
+      case quiz: {
+        learningObjectivesData.forEach((loInArray, index) => {
+          learningObjectivesData[index].isUnlocked = true;
+        });
+        quizData.isUnlocked = true;
+        break;
+      }
+      default: {
+        // case when messgae or practiceQuestion is current component
+        // in that case we are checking order of LOs
+        learningObjectivesData.forEach((loInArray, index) => {
+          if (loInArray.order <= currentRunningLearningObjective.order) {
+            learningObjectivesData[index].isUnlocked = true;
+          } else {
+            learningObjectivesData[index].isUnlocked = false;
+          }
+        });
+        quizData.isUnlocked = false;
+        break;
+      }
     }
   }
   // Constructing data as per schema
