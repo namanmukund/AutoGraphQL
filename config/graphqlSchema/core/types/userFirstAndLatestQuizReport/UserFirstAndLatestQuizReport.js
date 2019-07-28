@@ -1,3 +1,9 @@
+const UserFirstAndLatestQuizNextComponentType = `
+  type UserFirstAndLatestQuizNextComponentType {
+   topic: Topic @relation(name: "UserFirstAndLatestQuizNextComponentTypeTopic", direction: "OneWay")
+   nextComponentType: CurrentTopicComponentType!
+ }`;
+
 const firstandLastQuizReportLearningObjective = `
   type FirstandLastQuizReportLearningObjective {
     totalQuestionCount: Int
@@ -47,10 +53,12 @@ const UserFirstAndLatestQuizReport = `
     firstQuizReport: FirstandLastReportType
     latestQuizReport: FirstandLastReportType
     topic: Topic @relation(name: "TopicUserQuizReport", direction: "OneWay")
+    nextComponent: UserFirstAndLatestQuizNextComponentType
   }
 `;
 
 export default [UserFirstAndLatestQuizReport,
   firstandLastQuizReportType,
   firstandLastQuizReportLearningObjective,
-  firstandLastQuizAnswersType, firstandLastReportType];
+  firstandLastQuizAnswersType, firstandLastReportType,
+  UserFirstAndLatestQuizNextComponentType];

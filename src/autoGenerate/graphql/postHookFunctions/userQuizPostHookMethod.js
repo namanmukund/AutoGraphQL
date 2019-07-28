@@ -30,16 +30,14 @@ const topicQuery = topicId => `
   }
   `;
 
-// query to get topic with passed order. This will be used for next component
-const nextTopicQuery = topicId => `
+// query to get published topic list
+const nextTopicQuery = () => `
   query{
   topics(
     filter:{
       status: ${PUBLISHED}
     }
-    after:"${topicId}", 
-    orderBy:order_ASC, 
-    first:1
+    orderBy:order_ASC,
   ){
     id
   }
@@ -133,11 +131,23 @@ const userQuizPostHookMethod = async (input, params) => {
   }
   quizQuery += ']';
   /*
-    we are getting next published topic id through this query.
-    If it is not present, next component will be empty
+    We are getting published topics list through this query.
+    Then we will get next published topic
     */
-  const nextTopicQueryRes = await callGraphqlApi(nextTopicQuery(topicId));
-  const nextTopicId = get(nextTopicQueryRes, 'data.topics[0].id');
+  const nextTopicQueryRes = await callGraphqlApi(nextTopicQuery());
+  const topicsList = get(nextTopicQueryRes, 'data.topics');
+
+  let currentTopicIndex;
+  topicsList.forEach((topic, index) => {
+    if (topic.id === topicId) {
+      currentTopicIndex = index;
+    }
+  });
+  let nextTopicId = '';
+  if (currentTopicIndex + 1 < topicsList.length) {
+    nextTopicId = topicsList[currentTopicIndex + 1].id;
+  }
+
   const restQuery = getNextComponent(
     '',
     nextTopicId,
