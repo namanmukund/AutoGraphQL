@@ -127,7 +127,8 @@ const getQuizReportQuery = (userId, topicId) => `
           statement
           questionType
           hint
-          codeSnippet
+          questionCodeSnippet
+          answerCodeSnippet
         }
         mcqOptions {
           isCorrect
