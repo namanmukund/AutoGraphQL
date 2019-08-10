@@ -21,6 +21,7 @@ import userCourseSyllabusMutationResolver from './userData/userCourseSyllabus';
 import userTopicJourneyMutationResolver from './userData/userTopicJourney';
 import userFirstAndLatestQuizReportMutationResolver from './userData/userFirstAndLatestQuizReport';
 import skipVideoMutationResolver from './userData/skipVideo';
+import userBadgeMutationResolver from './userData/userBadge';
 
 export {
   addMutationResolver,
@@ -46,4 +47,5 @@ export {
   userTopicJourneyMutationResolver,
   userFirstAndLatestQuizReportMutationResolver,
   skipVideoMutationResolver,
+  userBadgeMutationResolver,
 };
