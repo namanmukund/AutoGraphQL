@@ -1,49 +1,23 @@
-const topicsUserCourseSyllabusType = `
-  type TopicsUserCourseSyllabusType {
-   id: ID
-   title: String
+const userBadgeArray = `
+  type UserBadgeArray {
+   name: String
    order: Int
-   thumbnail: File
-   description: String
-   videoTitle: String
+   image: File @relation(name: "UserBadgeImage", direction: "OneWay")
    isUnlocked: Boolean @defaultValue(value: "false")
  }`;
 
-const chaptersUserCourseSyllabusType = `
-  type ChaptersUserCourseSyllabusType {
-   id: ID
-   title: String
-   order: Int
-   topics: [TopicsUserCourseSyllabusType]
- }`;
-
-const currentTopicComponentDetailType = `
-  type CurrentTopicComponentDetailType {
-   currentTopicId: ID
-   currentLearningObjectiveId: ID
-   componentTitle: String
-   topicTitle: String
-   thumbnail: File 
-   percentageCovered: Int
-   description: String
- }`;
-
-const courseUserCourseSyllabus = `
-  type CourseUserCourseSyllabus {
+const courseUserBadge = `
+  type CourseUserBadge {
    id: ID
    title: String
  }`;
 
 const UserBadge = `
   type UserBadge {
-    currentCourse: CourseUserCourseSyllabus
-    currentTopicComponent: CurrentTopicComponentType!
-    currentTopicComponentDetail: CurrentTopicComponentDetailType
-    chapters: [ChaptersUserCourseSyllabusType]
-    totalChapters: Int
-    totalTopics: Int
+    currentCourse: CourseUserBadge
+    characters: [UserBadgeArray]
+    equipments: [UserBadgeArray]
   }
 `;
 
-export default [UserBadge, currentTopicComponentDetailType,
-  chaptersUserCourseSyllabusType, topicsUserCourseSyllabusType, courseUserCourseSyllabus];
+export default [UserBadge, userBadgeArray, courseUserBadge];
