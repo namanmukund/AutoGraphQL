@@ -2,8 +2,10 @@ import { get } from 'lodash';
 import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
+  badgeTypes,
 } from '../../../../../../constants';
 import {
+  DatabaseRecordNotFoundError,
   UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
@@ -47,35 +49,84 @@ const getUserCurrentTopicComponentStatus = userId => `
   `;
 
 // query to get all badges in a course along with the topic
-// const getBadgeQuery = () => `
-//     query{
-//       badges(
-//         filter:{
-//           status:${PUBLISHED}
-//         }
-//       ){
-//         id
-//         name
-//         order
-//         type
-//         activeImage{
-//           id
-//           uri
-//           name
-//         }
-//         inactiveImage{
-//           id
-//           uri
-//           name
-//         }
-//         topic{
-//           id
-//           order
-//         }
-//       }
-//     }
-//   `;
+const getBadgeQuery = () => `
+    query{
+      badges(
+        filter:{
+          status:${PUBLISHED}
+        }
+      ){
+        id
+        name
+        order
+        type
+        activeImage{
+          id
+          uri
+          name
+        }
+        inactiveImage{
+          id
+          uri
+          name
+        }
+        topic{
+          id
+          order
+        }
+      }
+    }
+  `;
 
+// method to sort bade array according to topic order and order inside of a topic
+// it will take a array which is already sorted topic order wise
+const sortBadges = (badges) => {
+  const sortedArray = [];
+  // tempArray is storing objects of same topic temporarily
+  const tempArray = [];
+  badges.forEach((badge, index) => {
+    if (index === 0) {
+      tempArray.push(badge);
+    } else if (badge.topic.order === badges[index - 1].topic.order) {
+      tempArray.push(badge);
+    } else {
+      // sorting badges of a topic which are stored in tempArray
+      tempArray.sort((a, b) => a.order - b.order);
+      sortedArray.push(...tempArray);
+      tempArray.length = 0;
+      tempArray.push(badge);
+    }
+  });
+  // after end of loop there will be entries left in tempArray for last topic
+  if (tempArray.length) {
+    tempArray.sort((a, b) => a.order - b.order);
+    sortedArray.push(...tempArray);
+    tempArray.length = 0;
+  }
+  return sortedArray;
+};
+
+// method to parse badges according to return type
+const parseBadges = (badges, currentTopicOrder) => {
+  const finalCharacters = [];
+  badges.forEach((badge, index) => {
+    const tempObj = {};
+    const { name, activeImage, inactiveImage, topic } = badge;
+    let isUnlocked = false;
+    let imageId = '';
+    if (inactiveImage) { imageId = inactiveImage.id; }
+    // badge will be unlocked if that topic is unlocked
+    if (topic.order <= currentTopicOrder) {
+      isUnlocked = true;
+      if (activeImage) { imageId = activeImage.id; }
+    }
+    const image = { type: 'File', typeId: `${imageId}` };
+    const order = index + 1;
+    Object.assign(tempObj, { name, isUnlocked, image, order });
+    finalCharacters.push(tempObj);
+  });
+  return finalCharacters;
+};
 
 /*
 This is called when user tries to get badges on profile
@@ -119,49 +170,53 @@ const userBadgeMutationResolver = async (
 
   const {
     currentCourse,
-    // currentTopic,
+    currentTopic,
   } = currentTopicComponentInfo;
-  // const { order: currentTopicOrder } = currentTopic;
-  // console.log('---------------------------currentTopicOrder', currentTopicOrder);
+  const { order: currentTopicOrder } = currentTopic;
+
   // calling method to get all published badges
-  // const userBadgeRes = await callGraphqlApi(
-  //   getBadgeQuery(),
-  //   '',
-  //   '',
-  //   '',
-  //   token,
-  // );
-  // console.log('---------------------------userBadgeRes', userBadgeRes);
-  // const userBadgeInfo = get(userBadgeRes, 'data.badges');
-  // console.log('---------------------------userBadgeInfo', userBadgeInfo);
+  const badgeRes = await callGraphqlApi(
+    getBadgeQuery(),
+    '',
+    '',
+    '',
+    token,
+  );
+  const badgeInfo = get(badgeRes, 'data.badges');
   // this object will be returned in output
   const userBadgeDocument = {};
-  // const characters = [];
-  // const equipments = [];
-
-  // iterating over chapters to construct data for homepage
-  // chapters.forEach((chapter) => {
-  //   if (!chapter || !chapter.topics || !chapter.topics.length) {
-  //     throw new DatabaseRecordNotFoundError({
-  //       data: {
-  //         error: 'CurrentCourse.chapter.topics: is not present',
-  //       },
-  //     });
-  //   }
-  //   totalTopics += chapter.topics.length;
-  //   // iterating over topics of each chapter  and setting isUnlocked field
-  //   chapter.topics.forEach((topic) => {
-  //     const { order: topicOrder } = topic;
-  //     // checking logic for is topic Unlocked or not
-  //     let isUnlocked = false;
-  //     if (
-  //       topicOrder <= currentTopicOrder
-  //     ) {
-  //       isUnlocked = true;
-  //     }
-  //     Object.assign(topic, { isUnlocked });
-  //   });
-  // });
+  // storing characters and equipments in separate arrays, initialising both arrays
+  const charactersFromBadgeInfo = [];
+  const equipmentsFromBadgeInfo = [];
+  const { character, equipment } = badgeTypes;
+  badgeInfo.forEach((badge) => {
+    if (
+      !badge ||
+      !badge.type ||
+      !badge.topic ||
+      !badge.name ||
+      !badge.order ||
+      !badge.topic.order) {
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'Badge: Wrong/Incomplete information stored in badge',
+        },
+      });
+    }
+    if (badge.type === character) {
+      charactersFromBadgeInfo.push(badge);
+    } else if (badge.type === equipment) {
+      equipmentsFromBadgeInfo.push(badge);
+    }
+  });
+  // sorting each badge array according to topic order
+  charactersFromBadgeInfo.sort((a, b) => a.topic.order - b.topic.order);
+  equipmentsFromBadgeInfo.sort((a, b) => a.topic.order - b.topic.order);
+  // getting parsed characters and equipments to be sent in result
+  const characters = parseBadges(sortBadges(charactersFromBadgeInfo), currentTopicOrder);
+  const equipments = parseBadges(sortBadges(equipmentsFromBadgeInfo), currentTopicOrder);
+  userBadgeDocument.characters = characters;
+  userBadgeDocument.equipments = equipments;
   Object.assign(userBadgeDocument, {
     currentCourse,
   });

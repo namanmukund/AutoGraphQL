@@ -191,6 +191,11 @@ const masteryLevels = {
 
 const freeTopicCount = 5;
 
+const badgeTypes = {
+  character: 'character',
+  equipment: 'equipment',
+};
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -230,4 +235,5 @@ export {
   masteryLevels,
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
+  badgeTypes,
 };
