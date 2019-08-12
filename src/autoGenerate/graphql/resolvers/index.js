@@ -49,6 +49,7 @@ import {
   UPDATE_MULTIPLE,
 } from '../../../../constants/graphqlOperations';
 import socialLoginMutationResolver from './mutation/user/socialLogin';
+import userBadgeMutationResolver from './mutation/userData/userBadge';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -821,6 +822,24 @@ resolvers.Mutation.skipVideo = async (root, params, context, info) => {
     parsedASTMap,
     context,
     params,
+  ).then(result => toObject(result));
+};
+
+// Resolver for a custom badges implementation for user
+resolvers.Mutation.userBadge = async (root, params, context, info) => {
+  const typeName = 'UserCurrentTopicComponentStatus';
+  const mutationName = 'userBadge';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return userBadgeMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
   ).then(result => toObject(result));
 };
 

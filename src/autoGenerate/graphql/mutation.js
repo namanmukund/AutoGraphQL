@@ -340,6 +340,7 @@ mutationString += 'userCourseSyllabus : UserCourseSyllabus,';
 mutationString += 'userTopicJourney ( topicId: ID!): UserTopicJourney,';
 mutationString += 'userFirstAndLatestQuizReport ( topicId: ID!): UserFirstAndLatestQuizReport,';
 mutationString += 'skipVideo ( topicId: ID!): SkipVideo,';
+mutationString += 'userBadge : UserBadge,';
 // Backend Token only password update mutation
 mutationString += 'tcirtSdrowssaPtes ( id: ID!, password: String! ): User,';
 mutationString += 'uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,';
