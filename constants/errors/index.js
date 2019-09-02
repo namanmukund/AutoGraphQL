@@ -7,6 +7,9 @@ import {
   InvalidApplicationNameError,
   InvalidStaticToken,
   MandatoryFieldNotSetError,
+  UserTokenNotPresentError,
+  WrongUserInTokenError,
+  UserTokenExpiredError,
 } from './auth';
 
 import {
@@ -167,4 +170,7 @@ export {
   InvalidGmailTokenError,
   InvalidFacebookTokenError,
   InvalidPasswordLengthError,
+  UserTokenNotPresentError,
+  WrongUserInTokenError,
+  UserTokenExpiredError,
 };

@@ -240,6 +240,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       const newInput = validateForgotPassword(input);
       return hook(newInput, mutationOrQueryName, 'PreHook');
     }
+    case 'sendForgotPasswordLink': {
+      const newInput = validateForgotPassword(input);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
     case 'addAppToken': {
       const { decodedUser } = context;
       const authentication = ifAuthorized(context);
