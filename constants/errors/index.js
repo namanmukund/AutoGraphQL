@@ -8,7 +8,7 @@ import {
   InvalidStaticToken,
   MandatoryFieldNotSetError,
   UserTokenNotPresentError,
-  WrongUserInTokenError,
+  WrongUserTokenError,
   UserTokenExpiredError,
 } from './auth';
 
@@ -171,6 +171,6 @@ export {
   InvalidFacebookTokenError,
   InvalidPasswordLengthError,
   UserTokenNotPresentError,
-  WrongUserInTokenError,
+  WrongUserTokenError,
   UserTokenExpiredError,
 };

@@ -54,7 +54,7 @@ export const UserTokenNotPresentError = createError('UserTokenNotPresentError', 
   message: 'User token is not present',
 });
 
-export const WrongUserInTokenError = createError('WrongUserInTokenError', {
+export const WrongUserTokenError = createError('WrongUserTokenError', {
   message: 'Error processing user token. Wrong user token is being used.',
 });
 

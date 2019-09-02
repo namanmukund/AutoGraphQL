@@ -5,7 +5,7 @@ import { getFieldsBeingFetched } from '../../../../utils';
 import {
   DatabaseRecordNotFoundError, UnauthorizedOperationError,
   UserTokenNotPresentError,
-  WrongUserInTokenError,
+  WrongUserTokenError,
   UserTokenExpiredError,
 } from '../../../../../../constants/errors';
 import { validate } from '../../../validation';
@@ -55,7 +55,7 @@ export default function resetPasswordFromForgotPasswordLinkMutationResolver(
   }
   const { id } = decoded.userInfo;
   if (!id) {
-    throw new WrongUserInTokenError();
+    throw new WrongUserTokenError();
   }
   const { newPassword } = params;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
