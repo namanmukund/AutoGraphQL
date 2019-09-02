@@ -1,6 +1,6 @@
 import { FRONTEND_APP_TWO, FRONTEND_APP_ONE } from '../../constants';
 
-const getExpiryDateForUserToken = (authParams, authentication, isForgotPassToken) => {
+const getExpiryDateForUserToken = (authParams, authentication, isForgotPassToken = false) => {
   let expiresIn = authParams.TOKEN_EXPIRY_DATE;
   if (!authentication || !authentication.app) {
     return expiresIn;
