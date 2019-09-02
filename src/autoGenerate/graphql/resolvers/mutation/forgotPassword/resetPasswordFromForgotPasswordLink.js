@@ -4,7 +4,7 @@ import { MutationController, QueryController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import {
   DatabaseRecordNotFoundError, UnauthorizedOperationError,
-  UnauthenticatedUserError, InvalidStaticToken,
+  UnauthenticatedUserError, InvalidToken,
 } from '../../../../../../constants/errors';
 import { validate } from '../../../validation';
 import allAuthParams from '../../../../../../config/authParams';
@@ -44,11 +44,11 @@ export default function resetPasswordFromForgotPasswordLinkMutationResolver(
 
   const decoded = verifyToken(userToken, true);
   if (!decoded) {
-    throw new InvalidStaticToken();
+    throw new InvalidToken();
   }
   const { id } = decoded.userInfo;
   if (!id) {
-    throw new InvalidStaticToken();
+    throw new InvalidToken();
   }
   const { newPassword } = params;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
