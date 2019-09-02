@@ -10,7 +10,7 @@ import checkAndDeleteReferences from './deleteUtils';
 import nestedConnectIdHandler from './nestedConnectIdHandler';
 import updateInputInCaseOfNestedConnect from './updateInputInCaseOfNestedConnect';
 import generateObjectToBeDisconnected from './generateObjectToBeDisconnected';
-import sendEmailLinkForSendForgotPasswordLink from './sendEmailLinkForSendForgotPasswordLink';
+import sendEmailForSendForgotPasswordLink from './sendEmailForSendForgotPasswordLink';
 
 export {
   remoteConnectDisconnectRelationHandler,
@@ -23,5 +23,5 @@ export {
   nestedConnectIdHandler,
   updateInputInCaseOfNestedConnect,
   generateObjectToBeDisconnected,
-  sendEmailLinkForSendForgotPasswordLink,
+  sendEmailForSendForgotPasswordLink,
 };

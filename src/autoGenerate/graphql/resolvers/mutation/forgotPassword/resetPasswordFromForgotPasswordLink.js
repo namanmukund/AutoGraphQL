@@ -4,9 +4,7 @@ import { MutationController, QueryController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import {
   DatabaseRecordNotFoundError, UnauthorizedOperationError,
-  UserTokenNotPresentError,
-  WrongUserTokenError,
-  UserTokenExpiredError,
+  UnauthenticatedUserError, InvalidStaticToken,
 } from '../../../../../../constants/errors';
 import { validate } from '../../../validation';
 import allAuthParams from '../../../../../../config/authParams';
@@ -34,28 +32,23 @@ export default function resetPasswordFromForgotPasswordLinkMutationResolver(
 ) {
   const { fieldNodes } = info;
   const { authorization: token } = context;
-  let decodeAuth = '';
-  try {
-    decodeAuth = token && base64.decode(token);
-  } catch (err) {
-    // Decode fails. Do nothing.
-  }
+  const decodeAuth = token && base64.decode(token);
   const authorizationArray = decodeAuth && decodeAuth.split('::');
   // Decode authorization
   // Second token is for user token
   const userToken = authorizationArray && authorizationArray[1];
 
   if (!userToken) {
-    throw new UserTokenNotPresentError();
+    throw new UnauthenticatedUserError();
   }
 
   const decoded = verifyToken(userToken, true);
   if (!decoded) {
-    throw new UserTokenExpiredError();
+    throw new InvalidStaticToken();
   }
   const { id } = decoded.userInfo;
   if (!id) {
-    throw new WrongUserTokenError();
+    throw new InvalidStaticToken();
   }
   const { newPassword } = params;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
@@ -67,9 +60,6 @@ export default function resetPasswordFromForgotPasswordLinkMutationResolver(
     authentication,
     {},
   );
-  /* Setting user to true if not preset, as finish forgot password
-  does not require user authentication.
-  */
   Object.assign(authentication, {
     user: true,
   });

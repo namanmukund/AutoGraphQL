@@ -50,14 +50,3 @@ export const MandatoryFieldNotSetError = createError('MandatoryFieldNotSetError'
   message: 'Mandatory field is not provided',
 });
 
-export const UserTokenNotPresentError = createError('UserTokenNotPresentError', {
-  message: 'User token is not present',
-});
-
-export const WrongUserTokenError = createError('WrongUserTokenError', {
-  message: 'Error processing user token. Wrong user token is being used.',
-});
-
-export const UserTokenExpiredError = createError('UserTokenExpiredError', {
-  message: 'User Token is expired.',
-});

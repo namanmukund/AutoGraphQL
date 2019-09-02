@@ -75,6 +75,7 @@ const validateAppPermission = (
   // permission check on the fields
   const queryFieldKeys = Object.keys(queryFields);
   for (const key of queryFieldKeys) {
+    // including 'result' and 'error' fields as exceptions to be sent in response like count & meta
     if (key &&
       !(key.includes(META) ||
         key.includes('count') ||

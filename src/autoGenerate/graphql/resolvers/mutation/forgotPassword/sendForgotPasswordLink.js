@@ -2,7 +2,7 @@ import { UserTokenNotRequiredError, DatabaseRecordNotFoundError, UnauthorizedOpe
 import { QueryController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
-import { sendEmailLinkForSendForgotPasswordLink } from '../utils';
+import { sendEmailForSendForgotPasswordLink } from '../utils';
 import { UPDATE } from '../../../../../../constants/graphqlOperations';
 import createToken from '../../../../../auth/createToken';
 import { forgotPassWebURL } from '../../../../../../constants';
@@ -34,9 +34,6 @@ export default function sendForgotPasswordLinkMutationResolver(
   if (decodedUser) {
     throw new UserTokenNotRequiredError();
   }
-  /* Setting user to true if not preset, as send forgot password
-  does not require user authentication.
-  */
   Object.assign(authentication, {
     user: true,
   });
@@ -61,7 +58,7 @@ export default function sendForgotPasswordLinkMutationResolver(
     const token = createToken(fetchedUser, authentication, false, true);
     const forgotPassLink = forgotPassWebURL[nodeEnv] + token;
     // Send email to user with forgot password link
-    sendEmailLinkForSendForgotPasswordLink(fetchedUser, authentication, forgotPassLink);
+    sendEmailForSendForgotPasswordLink(fetchedUser, authentication, forgotPassLink);
 
     return {
       result: true,
