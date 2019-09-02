@@ -196,6 +196,12 @@ const badgeTypes = {
   equipment: 'equipment',
 };
 
+const forgotPassWebURL = {
+  development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword/',
+  staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
+  production: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
+};
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -236,4 +242,5 @@ export {
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
   badgeTypes,
+  forgotPassWebURL,
 };

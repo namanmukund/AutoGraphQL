@@ -6,8 +6,8 @@ import getExpiryDateForUserToken from './getExpiryDateForUserToken';
 const application = process.env.APPLICATION || 'core';
 const authParams = allAuthParams[application];
 
-export default function createToken(user, authentication, toPhone) {
-  const expiresIn = getExpiryDateForUserToken(authParams, authentication);
+export default function createToken(user, authentication, toPhone, isForgotPasswordToken = false) {
+  const expiresIn = getExpiryDateForUserToken(authParams, authentication, isForgotPasswordToken);
   let userInfo = pick(user, ['id', 'username']);
   // Assign information whether token is created by phone login or email login
   if (toPhone === true) {
@@ -21,11 +21,14 @@ export default function createToken(user, authentication, toPhone) {
       byEmail: true,
     };
   }
+  let secret = authParams.SECRET;
+  if (isForgotPasswordToken) secret = authParams.FORGOT_PASSWORD_SECRET;
+
   const token = jwt.sign(
     {
       userInfo,
     },
-    authParams.SECRET,
+    secret,
     {
       expiresIn,
       algorithm: authParams.ALGORITHM,

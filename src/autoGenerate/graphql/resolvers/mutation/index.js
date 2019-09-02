@@ -22,6 +22,8 @@ import userTopicJourneyMutationResolver from './userData/userTopicJourney';
 import userFirstAndLatestQuizReportMutationResolver from './userData/userFirstAndLatestQuizReport';
 import skipVideoMutationResolver from './userData/skipVideo';
 import userBadgeMutationResolver from './userData/userBadge';
+import sendForgotPasswordLinkMutationResolver from './forgotPassword/sendForgotPasswordLink';
+import resetPasswordFromForgotPasswordLinkMutationResolver from './forgotPassword/resetPasswordFromForgotPasswordLink';
 
 export {
   addMutationResolver,
@@ -48,4 +50,6 @@ export {
   userFirstAndLatestQuizReportMutationResolver,
   skipVideoMutationResolver,
   userBadgeMutationResolver,
+  sendForgotPasswordLinkMutationResolver,
+  resetPasswordFromForgotPasswordLinkMutationResolver,
 };
