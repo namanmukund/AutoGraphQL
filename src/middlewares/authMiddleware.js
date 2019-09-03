@@ -66,12 +66,14 @@ const handleUserToken = async (id, currentApp, currentUser) => {
   let { status } = user;
   // Check if user token have phone login or email login information and update status accordingly
   if (typeof currentUser === 'object' && status === 'active') {
-    const { phoneVerified, emailVerified } = user;
+    // commenting emailVerifed true logic as unverified email user can be active too
+    const { phoneVerified } = user;
     if (currentUser.byPhone === true && !phoneVerified) {
       status = 'inactive';
-    } else if (currentUser.byEmail === true && !emailVerified) {
-      status = 'inactive';
     }
+    // else if (currentUser.byEmail === true && !emailVerified) {
+    //   status = 'inactive';
+    // }
   }
   // Put status info in userInfo object
   userInfo.status = status;
