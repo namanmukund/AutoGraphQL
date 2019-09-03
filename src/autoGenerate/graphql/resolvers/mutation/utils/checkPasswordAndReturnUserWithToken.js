@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
 import {
-  EmailNotVerifiedError,
   PasswordMismatchError,
   PhoneNotVerifiedError,
   UnknownUserError,
@@ -15,11 +14,18 @@ const checkPasswordAndReturnUserWithToken = (fetchedUser, input, authentication)
     throw new UserPasswordNotSetError();
   }
 
-  const { password, email, phone } = input;
+  const { password, phone } = input;
   // If logging in using email, check whether email is verified or not
+  /*
+  Commenting below code as we are allowing unverfied user to login for few days
+   */
+
+  /*
   if (email && !fetchedUser.emailVerified) {
     throw new EmailNotVerifiedError();
   }
+   */
+
   // If logging in using phone, check whether phone is verified or not
   if (phone && !fetchedUser.phoneVerified) {
     throw new PhoneNotVerifiedError();
