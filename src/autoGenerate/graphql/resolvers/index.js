@@ -19,6 +19,8 @@ import {
   userTopicJourneyMutationResolver,
   userFirstAndLatestQuizReportMutationResolver,
   skipVideoMutationResolver,
+  sendForgotPasswordLinkMutationResolver,
+  resetPasswordFromForgotPasswordLinkMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import { types, authenticateUser, ifAuthorized, toObject, isErrorThrown, getRandomNumber } from '../../../../utils';
@@ -839,6 +841,43 @@ resolvers.Mutation.userBadge = async (root, params, context, info) => {
     info,
     mutationName,
     parsedASTMap,
+    context,
+  ).then(result => toObject(result));
+};
+
+// Resolver for sending link on mail in case user forgets password
+resolvers.Mutation.sendForgotPasswordLink = async (root, params, context, info) => {
+  const authentication = ifAuthorized(context);
+  const typeName = 'User';
+  const mutationName = 'sendForgotPasswordLink';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return sendForgotPasswordLinkMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    authentication,
+  ).then(result => toObject(result));
+};
+
+// Resolver for resetting user password through forgot password link
+resolvers.Mutation.resetPasswordFromForgotPasswordLink = async (root, params, context, info) => {
+  const authentication = ifAuthorized(context);
+  const typeName = 'User';
+  const mutationName = 'resetPasswordFromForgotPasswordLink';
+
+  return resetPasswordFromForgotPasswordLinkMutationResolver(
+    root,
+    params,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    authentication,
     context,
   ).then(result => toObject(result));
 };

@@ -50,3 +50,6 @@ export const MandatoryFieldNotSetError = createError('MandatoryFieldNotSetError'
   message: 'Mandatory field is not provided',
 });
 
+export const InvalidToken = createError('InvalidToken', {
+  message: 'User Token is invalid.',
+});

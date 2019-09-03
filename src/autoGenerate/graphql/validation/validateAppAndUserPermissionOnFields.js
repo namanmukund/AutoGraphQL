@@ -72,11 +72,16 @@ const validateAppPermission = (
       operation,
     );
   }
-
   // permission check on the fields
   const queryFieldKeys = Object.keys(queryFields);
   for (const key of queryFieldKeys) {
-    if (key && !(key.includes(META) || key.includes('count'))) {
+    // including 'result' and 'error' fields as exceptions to be sent in response like count & meta
+    if (key &&
+      !(key.includes(META) ||
+        key.includes('count') ||
+        key.includes('result') ||
+        key.includes('error')
+      )) {
       const { appPermissions: appPermissionsOnField } = field[key];
       if (appPermissionsOnField && Object.keys(appPermissionsOnField)) {
         validateAllowDenyRuleOnApp(

@@ -7,7 +7,7 @@ const User = `
     username: String @uniqueOrEmpty @trim
     password: String @filterOff @writeOnly
     email: String! @uniqueOrEmpty @trim
-    emailVerified: Boolean @defaultValue(value: "true") @readOnly
+    emailVerified: Boolean @defaultValue(value: "false") @readOnly
     phone: Phone @uniqueOrEmpty
     phoneVerified: Boolean @defaultValue(value: "false")
     dateOfBirth: Date
