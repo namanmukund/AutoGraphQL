@@ -24,6 +24,8 @@ const isComponentUnlocked = async (
   mutationOrQueryName,
   context,
   page,
+  inputUserId = '',
+  inputLearningObjectiveId = '',
 ) => {
   const { video, message, practiceQuestion, quiz } = topicTypes;
   let currentTopicQuery = '';
@@ -45,7 +47,10 @@ const isComponentUnlocked = async (
     appName,
   } = userAndAppInfo;
   if (page === message || page === practiceQuestion) {
-    if (mutationOrQueryName) {
+    if (inputUserId && inputLearningObjectiveId) {
+      userId = inputUserId;
+      learningObjectiveId = inputLearningObjectiveId;
+    } else if (mutationOrQueryName) {
       userId = get(params, 'userConnectId');
       learningObjectiveId = get(params, 'learningObjectiveConnectId');
     } else {

@@ -342,6 +342,7 @@ mutationString += 'userCourseSyllabus : UserCourseSyllabus,';
 mutationString += 'userTopicJourney ( topicId: ID!): UserTopicJourney,';
 mutationString += 'userFirstAndLatestQuizReport ( topicId: ID!): UserFirstAndLatestQuizReport,';
 mutationString += 'skipVideo ( topicId: ID!): SkipVideo,';
+mutationString += 'skipPracticeQuestion ( learningObjectiveId: ID!): BooleanResult,';
 mutationString += 'userBadge : UserBadge,';
 // Backend Token only password update mutation
 mutationString += 'tcirtSdrowssaPtes ( id: ID!, password: String! ): User,';

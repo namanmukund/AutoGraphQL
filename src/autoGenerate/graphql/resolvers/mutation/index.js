@@ -21,6 +21,7 @@ import userCourseSyllabusMutationResolver from './userData/userCourseSyllabus';
 import userTopicJourneyMutationResolver from './userData/userTopicJourney';
 import userFirstAndLatestQuizReportMutationResolver from './userData/userFirstAndLatestQuizReport';
 import skipVideoMutationResolver from './userData/skipVideo';
+import skipPracticeQuestionMutationResolver from './userData/skipPracticeQuestion';
 import userBadgeMutationResolver from './userData/userBadge';
 import sendForgotPasswordLinkMutationResolver from './forgotPassword/sendForgotPasswordLink';
 import resetPasswordFromForgotPasswordLinkMutationResolver from './forgotPassword/resetPasswordFromForgotPasswordLink';
@@ -50,6 +51,7 @@ export {
   userFirstAndLatestQuizReportMutationResolver,
   skipVideoMutationResolver,
   userBadgeMutationResolver,
+  skipPracticeQuestionMutationResolver,
   sendForgotPasswordLinkMutationResolver,
   resetPasswordFromForgotPasswordLinkMutationResolver,
 };

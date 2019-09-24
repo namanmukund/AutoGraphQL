@@ -149,6 +149,7 @@ const userActionType = {
   next: 'next',
   back: 'back',
   appClose: 'appClose',
+  skip: 'skip',
 };
 
 const userTopicTypeStatus = {
