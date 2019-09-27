@@ -94,38 +94,43 @@ const getUserCurrentTopicComponentStatus = userId => `
   }
   `;
 
-// query to get chapters and topics belomngin to a course
+// query to get chapters and topics belonging to a course
 const getCourseQuery = () => `
     query{
-    course(title: ${GLOBAL_COURSE_TITLE}){
-      id
-      title
-      chapters(
-          filter: {
-            status: ${PUBLISHED}
-          }
-        ){
+      courses(filter:{
+        and:[
+          {title: ${GLOBAL_COURSE_TITLE}},
+          {status: ${PUBLISHED}}
+        ]
+      }){
         id
         title
-        order
-        topics(
-          filter: {
-            status: ${PUBLISHED}
-          }
-        ){
+        chapters(
+            filter: {
+              status: ${PUBLISHED}
+            }
+          ){
           id
           title
           order
-          isTrial
-          thumbnail{
+          topics(
+            filter: {
+              status: ${PUBLISHED}
+            }
+          ){
             id
-            uri
-            name
+            title
+            order
+            isTrial
+            thumbnail{
+              id
+              uri
+              name
+            }
           }
         }
       }
     }
-  }
   `;
 
 
@@ -192,10 +197,17 @@ const userCourseSyllabusMutationResolver = async (
       });
     }
     const courseResult = await callGraphqlApi(getCourseQuery());
-    const course = get(courseResult, 'data.course');
+    const course = get(courseResult, 'data.courses');
+    if (course.length <= 0) {
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'Published course is not present with title as python',
+        },
+      });
+    }
     // constructing data when a not logged in user fetches userCourseSyllabus
     currentTopicComponentInfo = {
-      currentCourse: course,
+      currentCourse: course[0],
       currentTopicComponentType: video,
       currentTopic: firstTopic,
       currentLearningObjective: firstLearningObjective,

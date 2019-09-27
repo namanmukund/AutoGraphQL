@@ -19,6 +19,7 @@ import {
   userTopicJourneyMutationResolver,
   userFirstAndLatestQuizReportMutationResolver,
   skipVideoMutationResolver,
+  skipPracticeQuestionMutationResolver,
   sendForgotPasswordLinkMutationResolver,
   resetPasswordFromForgotPasswordLinkMutationResolver,
 } from './mutation';
@@ -816,6 +817,25 @@ resolvers.Mutation.skipVideo = async (root, params, context, info) => {
   const hookInput = await prehook(params, mutationName, context, params);
 
   return skipVideoMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+    params,
+  ).then(result => toObject(result));
+};
+
+// Resolver for custom skip practice question by user
+resolvers.Mutation.skipPracticeQuestion = async (root, params, context, info) => {
+  const typeName = 'SkipPracticeQuestion';
+  const mutationName = 'skipPracticeQuestion';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return skipPracticeQuestionMutationResolver(
     root,
     hookInput,
     typeName,

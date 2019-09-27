@@ -24,6 +24,7 @@ const UserLearningObjective = `
     practiceQuestionStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
     isPracticeQuestionBookmarked: Boolean @defaultValue(value: "false")
     nextComponent: UserLearningObjectiveNextComponentType
+    isSkipped: Boolean @defaultValue(value: "false")
   }
 `;
 

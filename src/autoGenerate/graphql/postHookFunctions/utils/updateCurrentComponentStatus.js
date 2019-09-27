@@ -39,7 +39,7 @@ const updateCurrentComponentStatus = (
   nextComponentTopicId,
 ) => {
   const { video, message, practiceQuestion, quiz } = topicTypes;
-  const { next } = userActionType;
+  const { next, skip } = userActionType;
   const {
     id: currentTopicComponentId,
     currentTopicComponentType: currentTopicComponent,
@@ -71,7 +71,7 @@ const updateCurrentComponentStatus = (
       called component is equal to  current component and user has just consumed(next action) it
       and current component status will not get changed when it is already consumed in past
       */
-      if (userAction === next &&
+      if ((userAction === next || userAction === skip) &&
         currentTopicComponent === video &&
         currentTopicId === topicId
       ) {
@@ -125,11 +125,19 @@ const updateCurrentComponentStatus = (
       called component is equal to current component and user has just consumed(next action) it
       and current component status will not get changed when it is already consumed in past
       */
-      if (userAction === next &&
-        completedQuestionCount === totalQuestions &&
-        currentTopicComponent === practiceQuestion &&
-        currentTopicId === topicId &&
-        currentLearningObjectiveId === learningObjectiveId
+      if (
+        (
+          userAction === skip &&
+          currentTopicId === topicId &&
+          currentLearningObjectiveId === learningObjectiveId
+        ) ||
+        (
+          userAction === next &&
+          completedQuestionCount === totalQuestions &&
+          currentTopicComponent === practiceQuestion &&
+          currentTopicId === topicId &&
+          currentLearningObjectiveId === learningObjectiveId
+        )
       ) {
         updateUserCurrentTopicComponentStatus = true;
       }

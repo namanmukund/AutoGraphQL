@@ -24,6 +24,8 @@ const isComponentUnlocked = async (
   mutationOrQueryName,
   context,
   page,
+  inputUserId = '',
+  inputLearningObjectiveId = '',
 ) => {
   const { video, message, practiceQuestion, quiz } = topicTypes;
   let currentTopicQuery = '';
@@ -45,7 +47,10 @@ const isComponentUnlocked = async (
     appName,
   } = userAndAppInfo;
   if (page === message || page === practiceQuestion) {
-    if (mutationOrQueryName) {
+    if (inputUserId && inputLearningObjectiveId) {
+      userId = inputUserId;
+      learningObjectiveId = inputLearningObjectiveId;
+    } else if (mutationOrQueryName) {
       userId = get(params, 'userConnectId');
       learningObjectiveId = get(params, 'learningObjectiveConnectId');
     } else {
@@ -185,7 +190,7 @@ const isComponentUnlocked = async (
   other case is when called topic order is equal to current topic order
   in that case we are checking current component type and lo order
   */
-  if (!isTopicUnlocked(enrollmentType, currentTopicOrder, topicOrder, isTrial)) {
+  if (!isTopicUnlocked(enrollmentType, currentTopicOrder, topicOrder, isTrial, page)) {
     throw new ComponentLockedError();
   }
 

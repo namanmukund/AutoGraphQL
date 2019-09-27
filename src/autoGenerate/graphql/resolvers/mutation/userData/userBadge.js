@@ -6,7 +6,6 @@ import {
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError,
-  UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import getUserIdandAppNameAfterValidation
@@ -78,7 +77,22 @@ const getBadgeQuery = () => `
     }
   `;
 
-// method to sort bade array according to topic order and order inside of a topic
+// query to get a course
+const getCourseQuery = () => `
+    query{
+      courses(filter:{
+        and:[
+          {title: ${GLOBAL_COURSE_TITLE}},
+          {status: ${PUBLISHED}}
+        ]
+      }){
+        id
+        title
+      }
+    }
+  `;
+
+// method to sort badge array according to topic order and order inside of a topic
 // it will take a array which is already sorted topic order wise
 const sortBadges = (badges) => {
   const sortedArray = [];
@@ -151,37 +165,8 @@ const userBadgeMutationResolver = async (
     userIdFromContext: userId,
   } = userAndAppInfo;
 
-  // throwing error if userId is not present in the token
-  if (!userId) {
-    throw new UnauthenticatedUserError();
-  }
-  // if we get userId through token, then we will return badges for that user
-  const { authorization: token } = context;
-  const res = await callGraphqlApi(
-    getUserCurrentTopicComponentStatus(userId),
-    '',
-    '',
-    '',
-    token,
-  );
-  const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
-  // calling method to validate user current topic component status
-  validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
-
-  const {
-    currentCourse,
-    currentTopic,
-  } = currentTopicComponentInfo;
-  const { order: currentTopicOrder } = currentTopic;
-
   // calling method to get all published badges
-  const badgeRes = await callGraphqlApi(
-    getBadgeQuery(),
-    '',
-    '',
-    '',
-    token,
-  );
+  const badgeRes = await callGraphqlApi(getBadgeQuery());
   const badgeInfo = get(badgeRes, 'data.badges');
   // this object will be returned in output
   const userBadgeDocument = {};
@@ -212,6 +197,43 @@ const userBadgeMutationResolver = async (
   // sorting each badge array according to topic order
   charactersFromBadgeInfo.sort((a, b) => a.topic.order - b.topic.order);
   equipmentsFromBadgeInfo.sort((a, b) => a.topic.order - b.topic.order);
+  let currentCourse;
+  let currentTopicOrder;
+  // Handling cases for guest user, in case guest user is accessing this API
+  // we will return all inactive images
+  if (userId) {
+    // if we get userId through token, then we will return badges for that user
+    const { authorization: token } = context;
+    const res = await callGraphqlApi(
+      getUserCurrentTopicComponentStatus(userId),
+      '',
+      '',
+      '',
+      token,
+    );
+    const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
+    // calling method to validate user current topic component status
+    validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
+    currentCourse = get(currentTopicComponentInfo, 'currentCourse');
+    currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
+  } else {
+    const courseResult = await callGraphqlApi(getCourseQuery());
+    const course = get(courseResult, 'data.courses');
+    if (course.length <= 0) {
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'Published course is not present with title as python',
+        },
+      });
+    }
+    currentCourse = course[0];
+    // Setting topic order as -1 for guest user, this way all inactive images will be returned
+    currentTopicOrder = -1;
+    // Setting app name to that of backend as we are fetching images ahead
+    Object.assign(context.decodedApp, {
+      name: 'core',
+    });
+  }
   // getting parsed characters and equipments to be sent in result
   const characters = parseBadges(sortBadges(charactersFromBadgeInfo), currentTopicOrder);
   const equipments = parseBadges(sortBadges(equipmentsFromBadgeInfo), currentTopicOrder);
