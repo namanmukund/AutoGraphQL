@@ -21,6 +21,7 @@ const UserActivityVideoDump = `
     user: User! @relation(name: "UserActivityVideoDump", direction: "OneWay")
     videoCurrentTime: Int
     isBookmarked: Boolean
+    isSkipped: Boolean
     isShared: Boolean
     videoShare: [VideoShareType]
     bookmarkCount: Int

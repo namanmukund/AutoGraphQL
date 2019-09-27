@@ -26,6 +26,7 @@ const isComponentUnlocked = async (
   page,
   inputUserId = '',
   inputLearningObjectiveId = '',
+  checkForPaidLogic = false,
 ) => {
   const { video, message, practiceQuestion, quiz } = topicTypes;
   let currentTopicQuery = '';
@@ -190,10 +191,15 @@ const isComponentUnlocked = async (
   other case is when called topic order is equal to current topic order
   in that case we are checking current component type and lo order
   */
-  if (!isTopicUnlocked(enrollmentType, currentTopicOrder, topicOrder, isTrial, page)) {
+  if (!isTopicUnlocked(
+    enrollmentType,
+    currentTopicOrder,
+    topicOrder,
+    isTrial,
+    page,
+    checkForPaidLogic)) {
     throw new ComponentLockedError();
   }
-
   switch (page) {
     case message: {
       const {
