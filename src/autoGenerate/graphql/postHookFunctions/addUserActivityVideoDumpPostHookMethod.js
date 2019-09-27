@@ -34,18 +34,21 @@ const updateUserVideoMutation = (userVideoId,
   videoCurrentTime,
   isBookmarked,
   isLiked,
-  status) => `
+  status,
+  isSkipped) => `
   mutation{
     updateUserVideo(id:"${userVideoId}",  input:{
       ${typeof videoCurrentTime === 'boolean' ? `videoCurrentTime: ${videoCurrentTime}` : ''}
       ${typeof isBookmarked === 'boolean' ? `isBookmarked: ${isBookmarked}` : ''}
       ${typeof isLiked === 'boolean' ? `isLiked: ${isLiked}` : ''}
+      ${typeof isSkipped === 'boolean' ? `isSkipped: ${isSkipped}` : ''}
       status: ${status}
     }){
       id
       status
       isBookmarked
       isLiked
+      isSkipped
       videoCurrentTime
     }
   }
@@ -90,6 +93,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
   let status = incomplete;
   const {
     isBookmarked,
+    isSkipped,
     isLiked,
     videoCurrentTime,
     videoAction,
@@ -122,7 +126,8 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
     videoCurrentTime,
     isBookmarked,
     isLiked,
-    status));
+    status,
+    isSkipped));
   return true;
 };
 

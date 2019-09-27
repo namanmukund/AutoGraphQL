@@ -62,6 +62,27 @@ const getTopicQuery = topicId => `
     }
   }
   `;
+
+// mutation to update User Video
+const addUserVideoDump = (userConnectId,
+  topicConnectId,
+  videoAction,
+  isSkipped) => `
+  mutation{
+    addUserActivityVideoDump(
+      userConnectId: "${userConnectId}"
+    topicConnectId:"${topicConnectId}"
+    input:{
+      videoAction: ${videoAction}
+      ${typeof isSkipped === 'boolean' ? `isSkipped: ${isSkipped}` : ''}
+    }
+  ){
+      id
+    }
+  }
+  `;
+
+
 /*
 This is called when user tries to skip video on journey page
 It will just update the userCurrentTopicComponentStatus to message
@@ -162,6 +183,17 @@ const skipVideoMutationResolver = async (
     topicId,
     '',
     'video',
+  );
+
+  // sending dump to add/update userVideo document for isSkipped field
+  const { skip } = userActionType;
+  await callGraphqlApi(
+    addUserVideoDump(
+      userId,
+      topicId,
+      skip,
+      true,
+    ),
   );
 
   // this object will be returned in output

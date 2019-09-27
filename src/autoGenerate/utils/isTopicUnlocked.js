@@ -5,14 +5,22 @@ checking if the topic fetched by user is unlocked or not, logic for isUnlocked=t
 if fetched topic order is less than equal to current topic and user is pro or
 if fetched topic order is less than equal to current topic and user and topic both are free
 */
-const isTopicUnlocked = (enrollmentType, currentTopicOrder, topicOrder, isTrial, page) => {
+const isTopicUnlocked = (
+  enrollmentType,
+  currentTopicOrder,
+  topicOrder,
+  isTrial,
+  page,
+  checkForPaidLogic) => {
   const { free, pro } = enrollmentTypes;
   const { video } = topicTypes;
+  let checkIfTopicIsFree = isTrial;
+  if (!checkForPaidLogic) checkIfTopicIsFree = true;
   if ((enrollmentType === pro &&
       topicOrder <= currentTopicOrder
   ) || (enrollmentType === free
     && topicOrder <= currentTopicOrder &&
-    isTrial === true && page === video)
+    checkIfTopicIsFree === true && page === video)
     || (enrollmentType === free
       && topicOrder <= currentTopicOrder &&
       page !== video)
