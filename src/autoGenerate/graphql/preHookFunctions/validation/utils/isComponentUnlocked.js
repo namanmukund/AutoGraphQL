@@ -271,8 +271,7 @@ const isComponentUnlocked = async (
       if (topicOrder === currentTopicOrder &&
         (learningObjectiveOrder > currentLearningObjectiveOrder ||
           (learningObjectiveOrder === currentLearningObjectiveOrder &&
-            (currentTopicComponentType === topicTypes.video ||
-              currentTopicComponentType === topicTypes.message
+            (currentTopicComponentType === topicTypes.video
             )
           )
         )
