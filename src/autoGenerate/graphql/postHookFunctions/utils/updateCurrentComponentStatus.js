@@ -134,7 +134,9 @@ const updateCurrentComponentStatus = (
         (
           userAction === next &&
           completedQuestionCount === totalQuestions &&
-          currentTopicComponent === practiceQuestion &&
+          (currentTopicComponent === practiceQuestion ||
+            currentTopicComponent === message
+          ) &&
           currentTopicId === topicId &&
           currentLearningObjectiveId === learningObjectiveId
         )
