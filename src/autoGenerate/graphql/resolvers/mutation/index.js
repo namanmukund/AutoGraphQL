@@ -25,6 +25,7 @@ import skipPracticeQuestionMutationResolver from './userData/skipPracticeQuestio
 import userBadgeMutationResolver from './userData/userBadge';
 import sendForgotPasswordLinkMutationResolver from './forgotPassword/sendForgotPasswordLink';
 import resetPasswordFromForgotPasswordLinkMutationResolver from './forgotPassword/resetPasswordFromForgotPasswordLink';
+import getUnlockedUserBadgeMutationResolver from './userData/getUnlockedUserBadge';
 
 export {
   addMutationResolver,
@@ -54,4 +55,5 @@ export {
   skipPracticeQuestionMutationResolver,
   sendForgotPasswordLinkMutationResolver,
   resetPasswordFromForgotPasswordLinkMutationResolver,
+  getUnlockedUserBadgeMutationResolver,
 };

@@ -22,6 +22,8 @@ import {
   skipPracticeQuestionMutationResolver,
   sendForgotPasswordLinkMutationResolver,
   resetPasswordFromForgotPasswordLinkMutationResolver,
+  getUnlockedUserBadgeMutationResolver,
+  userBadgeMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import { types, authenticateUser, ifAuthorized, toObject, isErrorThrown, getRandomNumber } from '../../../../utils';
@@ -52,7 +54,6 @@ import {
   UPDATE_MULTIPLE,
 } from '../../../../constants/graphqlOperations';
 import socialLoginMutationResolver from './mutation/user/socialLogin';
-import userBadgeMutationResolver from './mutation/userData/userBadge';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -855,6 +856,24 @@ resolvers.Mutation.userBadge = async (root, params, context, info) => {
   const hookInput = await prehook(params, mutationName, context, params);
 
   return userBadgeMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+  ).then(result => toObject(result));
+};
+
+// Resolver for a custom user badge getting unlocked at topic component level
+resolvers.Mutation.getUnlockedUserBadge = async (root, params, context, info) => {
+  const typeName = 'GetUnlockedUserBadge';
+  const mutationName = 'getUnlockedUserBadge';
+  const { input } = params;
+  const hookInput = await prehook(input, mutationName, context, params);
+
+  return getUnlockedUserBadgeMutationResolver(
     root,
     hookInput,
     typeName,
