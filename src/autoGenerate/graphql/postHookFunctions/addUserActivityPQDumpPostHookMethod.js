@@ -142,8 +142,8 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
     id: userLearningObjectiveId,
     practiceQuestionStatus: practiceQuestionStatusBeforeUpdate,
   } = userLearningObjectiveInfo;
-  const { next } = userActionType;
-  const { complete, incomplete } = userTopicTypeStatus;
+  const { next, skip } = userActionType;
+  const { complete, incomplete, skip: skipStatus } = userTopicTypeStatus;
   let practiceQuestionStatus = get(userLearningObjectiveInfo, 'practiceQuestionStatus', incomplete);
   const {
     pqAction,
@@ -219,8 +219,10 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
           Now, the status will not change for these 2 questions until the wholePQ is completed
           even he decide to re-answer them
           */
-          if (practiceQuestionStatusBeforeUpdate === incomplete &&
-                  pqStatusInUserLearningObjective === incomplete
+          if ((practiceQuestionStatusBeforeUpdate === incomplete ||
+              practiceQuestionStatusBeforeUpdate === skip
+          ) &&
+              pqStatusInUserLearningObjective === incomplete
           ) {
             if (isHintUsed === true) {
               Object.assign(newPracticeQuestionInUserLearningObjective, { isHintUsed });
@@ -299,6 +301,8 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   // practiceQuestionStatus will change to complete if user hits next
   if (pqAction && pqAction === next && completedQuestionCount === totalQuestions) {
     practiceQuestionStatus = complete;
+  } else if (pqAction && pqAction === skip) {
+    practiceQuestionStatus = skipStatus;
   }
   // if existing practiceQuestionStatus is complete, it will remain complete
   if (userLearningObjectiveInfo &&

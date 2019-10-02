@@ -67,14 +67,13 @@ const getTopicQuery = topicId => `
 const addUserVideoDump = (userConnectId,
   topicConnectId,
   videoAction,
-  isSkipped) => `
+) => `
   mutation{
     addUserActivityVideoDump(
       userConnectId: "${userConnectId}"
     topicConnectId:"${topicConnectId}"
     input:{
       videoAction: ${videoAction}
-      ${typeof isSkipped === 'boolean' ? `isSkipped: ${isSkipped}` : ''}
     }
   ){
       id
@@ -185,14 +184,13 @@ const skipVideoMutationResolver = async (
     'video',
   );
 
-  // sending dump to add/update userVideo document for isSkipped field
+  // sending dump to add/update userVideo document when video is skipped
   const { skip } = userActionType;
   await callGraphqlApi(
     addUserVideoDump(
       userId,
       topicId,
       skip,
-      true,
     ),
   );
 
