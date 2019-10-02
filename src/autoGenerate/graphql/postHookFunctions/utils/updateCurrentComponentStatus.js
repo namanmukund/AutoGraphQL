@@ -94,7 +94,7 @@ const updateCurrentComponentStatus = (
       called component is equal to  current component and user has just consumed(next action) it
       and current component status will not get changed when it is already consumed in past
       */
-      if (userAction === next &&
+      if ((userAction === next || userAction === skip) &&
         currentTopicComponent === message &&
         currentTopicId === topicId &&
         currentLearningObjectiveId === learningObjectiveId

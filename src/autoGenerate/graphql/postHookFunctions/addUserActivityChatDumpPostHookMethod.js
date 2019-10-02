@@ -75,12 +75,14 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const { id: userLearningObjectiveId,
     chatStatus: existingChatStatus } = userLearningObjectiveInfo;
-  const { complete, incomplete } = userTopicTypeStatus;
-  const { next } = userActionType;
+  const { complete, incomplete, skip: skipStatus } = userTopicTypeStatus;
+  const { next, skip } = userActionType;
   let chatStatus = incomplete;
   const { chatAction, isBookmarked: isChatBookmarked } = input;
   if (chatAction && chatAction === next) {
     chatStatus = complete;
+  } else if (chatAction && chatAction === skip) {
+    chatStatus = skipStatus;
   }
   /*
  Getting data for user current topic component status from context based on mutationName
