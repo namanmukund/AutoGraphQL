@@ -4,6 +4,7 @@ const userBadgeArray = `
    order: Int
    image: File @relation(name: "UserBadgeImage", direction: "OneWay")
    isUnlocked: Boolean @defaultValue(value: "false")
+   unlockPoint: CurrentTopicComponentType!
  }`;
 
 const courseUserBadge = `

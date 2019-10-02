@@ -3,6 +3,7 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   badgeTypes,
+  topicTypes,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError,
@@ -59,6 +60,7 @@ const getBadgeQuery = () => `
         name
         order
         type
+        unlockPoint
         activeImage{
           id
           uri
@@ -92,6 +94,8 @@ const getCourseQuery = () => `
     }
   `;
 
+const { video } = topicTypes;
+
 // method to sort badge array according to topic order and order inside of a topic
 // it will take a array which is already sorted topic order wise
 const sortBadges = (badges) => {
@@ -121,22 +125,27 @@ const sortBadges = (badges) => {
 };
 
 // method to parse badges according to return type
-const parseBadges = (badges, currentTopicOrder) => {
+const parseBadges = (badges, currentTopicOrder, currentTopicComponent) => {
   const finalCharacters = [];
   badges.forEach((badge, index) => {
     const tempObj = {};
-    const { name, activeImage, inactiveImage, topic } = badge;
+    const { name, activeImage, inactiveImage, topic, unlockPoint } = badge;
     let isUnlocked = false;
     let imageId = '';
     if (inactiveImage) { imageId = inactiveImage.id; }
     // badge will be unlocked if that topic is unlocked
-    if (topic.order <= currentTopicOrder) {
+    if (topic.order < currentTopicOrder) {
+      isUnlocked = true;
+      if (activeImage) { imageId = activeImage.id; }
+    } else if (topic.order === currentTopicOrder &&
+      (currentTopicComponent !== video && unlockPoint === video)
+    ) {
       isUnlocked = true;
       if (activeImage) { imageId = activeImage.id; }
     }
     const image = { type: 'File', typeId: `${imageId}` };
     const order = index + 1;
-    Object.assign(tempObj, { name, isUnlocked, image, order });
+    Object.assign(tempObj, { name, isUnlocked, image, order, unlockPoint });
     finalCharacters.push(tempObj);
   });
   return finalCharacters;
@@ -181,6 +190,7 @@ const userBadgeMutationResolver = async (
       !badge.topic ||
       !badge.name ||
       !badge.order ||
+      !badge.unlockPoint ||
       !badge.topic.order) {
       throw new DatabaseRecordNotFoundError({
         data: {
@@ -199,6 +209,7 @@ const userBadgeMutationResolver = async (
   equipmentsFromBadgeInfo.sort((a, b) => a.topic.order - b.topic.order);
   let currentCourse;
   let currentTopicOrder;
+  let currentTopicComponentType;
   // Handling cases for guest user, in case guest user is accessing this API
   // we will return all inactive images
   if (userId) {
@@ -216,6 +227,7 @@ const userBadgeMutationResolver = async (
     validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
     currentCourse = get(currentTopicComponentInfo, 'currentCourse');
     currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
+    currentTopicComponentType = get(currentTopicComponentInfo, 'currentTopicComponentType');
   } else {
     const courseResult = await callGraphqlApi(getCourseQuery());
     const course = get(courseResult, 'data.courses');
@@ -227,16 +239,24 @@ const userBadgeMutationResolver = async (
       });
     }
     currentCourse = course[0];
-    // Setting topic order as -1 for guest user, this way all inactive images will be returned
+    // Setting topic order as -1 and currentTopicComponentType as video for guest user,
+    // this way all inactive images will be returned
     currentTopicOrder = -1;
+    currentTopicComponentType = video;
     // Setting app name to that of backend as we are fetching images ahead
     Object.assign(context.decodedApp, {
       name: 'core',
     });
   }
   // getting parsed characters and equipments to be sent in result
-  const characters = parseBadges(sortBadges(charactersFromBadgeInfo), currentTopicOrder);
-  const equipments = parseBadges(sortBadges(equipmentsFromBadgeInfo), currentTopicOrder);
+  const characters = parseBadges(
+    sortBadges(charactersFromBadgeInfo),
+    currentTopicOrder,
+    currentTopicComponentType);
+  const equipments = parseBadges(
+    sortBadges(equipmentsFromBadgeInfo),
+    currentTopicOrder,
+    currentTopicComponentType);
   userBadgeDocument.characters = characters;
   userBadgeDocument.equipments = equipments;
   Object.assign(userBadgeDocument, {
