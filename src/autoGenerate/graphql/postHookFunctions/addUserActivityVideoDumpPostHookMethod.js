@@ -34,21 +34,18 @@ const updateUserVideoMutation = (userVideoId,
   videoCurrentTime,
   isBookmarked,
   isLiked,
-  status,
-  isSkipped) => `
+  status) => `
   mutation{
     updateUserVideo(id:"${userVideoId}",  input:{
       ${typeof videoCurrentTime === 'boolean' ? `videoCurrentTime: ${videoCurrentTime}` : ''}
       ${typeof isBookmarked === 'boolean' ? `isBookmarked: ${isBookmarked}` : ''}
       ${typeof isLiked === 'boolean' ? `isLiked: ${isLiked}` : ''}
-      ${typeof isSkipped === 'boolean' ? `isSkipped: ${isSkipped}` : ''}
       status: ${status}
     }){
       id
       status
       isBookmarked
       isLiked
-      isSkipped
       videoCurrentTime
     }
   }
@@ -88,18 +85,19 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
     id: userVideoId,
     status: userVideoInfoStatus,
   } = userVideoInfo;
-  const { complete, incomplete } = userTopicTypeStatus;
+  const { complete, incomplete, skip } = userTopicTypeStatus;
   const { next } = userActionType;
   let status = incomplete;
   const {
     isBookmarked,
-    isSkipped,
     isLiked,
     videoCurrentTime,
     videoAction,
   } = input;
   if (videoAction && videoAction === next) {
     status = complete;
+  } else if (videoAction && videoAction === skip) {
+    status = skip;
   }
   /*
   Calling method to update current user Topic Component status
@@ -126,8 +124,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
     videoCurrentTime,
     isBookmarked,
     isLiked,
-    status,
-    isSkipped));
+    status));
   return true;
 };
 

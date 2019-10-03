@@ -14,6 +14,11 @@ const isTopicUnlocked = (
   checkForPaidLogic) => {
   const { free, pro } = enrollmentTypes;
   const { video } = topicTypes;
+  // checkForPaidLogic is added to check if we need to validate component for locked/unlocked
+  // on basis of whether topic is paid/free.
+  // If call for addUserActivityVideoDump/userVideo is made from
+  // backend application, we will not check for paid component logic since we will be skipping
+  // the video with status as skipped
   let checkIfTopicIsFree = isTrial;
   if (!checkForPaidLogic) checkIfTopicIsFree = true;
   if ((enrollmentType === pro &&

@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import {
-  topicTypes, userActionType,
+  topicTypes, userActionType, userTopicTypeStatus,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
@@ -41,11 +41,11 @@ const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
 // mutation to update User Learning Objective
 const updateUserLearningObjectiveMutation = (
   userLearningObjectiveId,
-  isPracticeQuestionSkipped,
+  practiceQuestionStatus,
 ) => `
   mutation{
     updateUserLearningObjective(id:"${userLearningObjectiveId}",  input:{
-      isSkipped: ${isPracticeQuestionSkipped}
+      practiceQuestionStatus: ${practiceQuestionStatus}
     }){
       id
     }
@@ -156,12 +156,12 @@ const skipPracticeQuestionMutationResolver = async (
     '',
     nextComponentLearningObjectiveId,
   );
-
+  const { skip: skipStatus } = userTopicTypeStatus;
   // updating isSkipped field to true if user skips practice question
   await callGraphqlApi(
     updateUserLearningObjectiveMutation(
       userLearningObjectiveId,
-      true,
+      skipStatus,
     ),
     '',
     '',

@@ -155,6 +155,7 @@ const userActionType = {
 const userTopicTypeStatus = {
   complete: 'complete',
   incomplete: 'incomplete',
+  skip: 'skip',
 };
 
 const questionTypes = {

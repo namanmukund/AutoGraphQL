@@ -7,6 +7,10 @@ const addUserActivityVideoDumpValidation = async (params, mutationOrQueryName, c
   // check if the called user and topic is unlocked
   const { video } = topicTypes;
   const decodedApp = get(context, 'decodedApp.name');
+  // checkForPaidLogic is added in isComponentUnlocked to check
+  // if we need to validate component for payment, if call for addUserActivityVideoDump is made from
+  // backend application, we will not check for paid component logic since we will be skipping
+  // the video with status as skipped
   await isComponentUnlocked(
     params,
     mutationOrQueryName,
