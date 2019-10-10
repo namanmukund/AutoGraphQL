@@ -58,6 +58,7 @@ const getBadgeQuery = () => `
       ){
         id
         name
+        description
         order
         type
         unlockPoint
@@ -129,7 +130,7 @@ const parseBadges = (badges, currentTopicOrder, currentTopicComponent) => {
   const finalCharacters = [];
   badges.forEach((badge, index) => {
     const tempObj = {};
-    const { name, activeImage, inactiveImage, topic, unlockPoint } = badge;
+    const { name, description, activeImage, inactiveImage, topic, unlockPoint } = badge;
     let isUnlocked = false;
     let imageId = '';
     if (inactiveImage) { imageId = inactiveImage.id; }
@@ -145,7 +146,7 @@ const parseBadges = (badges, currentTopicOrder, currentTopicComponent) => {
     }
     const image = { type: 'File', typeId: `${imageId}` };
     const order = index + 1;
-    Object.assign(tempObj, { name, isUnlocked, image, order, unlockPoint });
+    Object.assign(tempObj, { name, description, isUnlocked, image, order, unlockPoint });
     finalCharacters.push(tempObj);
   });
   return finalCharacters;

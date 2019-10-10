@@ -2,6 +2,7 @@ const userBadgeArray = `
   type UserBadgeArray {
    name: String
    order: Int
+   description: String
    image: File @relation(name: "UserBadgeImage", direction: "OneWay")
    isUnlocked: Boolean @defaultValue(value: "false")
    unlockPoint: CurrentTopicComponentType!
