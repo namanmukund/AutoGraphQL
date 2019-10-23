@@ -1,11 +1,14 @@
-import { isValidEmail,
+import {
+  isValidEmail,
   isValidPhoneNumber,
 } from './index';
 
-import { EitherEmailOrPhoneRequiredError,
+import {
+  EitherEmailOrPhoneRequiredError,
   InvalidEmailError,
   InvalidPhoneError,
-  EitherEmailOrPhoneNotBothRequiredError } from '../../../../constants/errors';
+  EitherEmailOrPhoneNotBothRequiredError,
+} from '../../../../constants/errors';
 
 
 const validateExistingUserInput = (input) => {

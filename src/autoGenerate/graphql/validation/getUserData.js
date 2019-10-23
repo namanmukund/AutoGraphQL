@@ -12,7 +12,7 @@ const getUserData = (id) => {
   };
   const modelQueries = new QueryController(typeName, newAuthentication);
   return modelQueries.fetchOne(query)
-    .then(result => toObject(result));
+    .then((result) => toObject(result));
 };
 
 export default getUserData;

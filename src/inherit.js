@@ -15,7 +15,7 @@ const appInheritanceCheck = (
   }
 
   const promiseArray = inheritedApplicationsArray.map((inheritedApplication) => {
-    const uri = allServerConfig[inheritedApplication][env].backend.uri;
+    const { uri } = allServerConfig[inheritedApplication][env].backend;
     const apolloFetch = createApolloFetchRetry();
     // To create a token,
     // first argument is the application which is requesting access.

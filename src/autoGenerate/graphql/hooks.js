@@ -91,7 +91,7 @@ const hook = (data, mutationName, hookName) => {
 // params contain all the arguments whatever you are passing in mutation query
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
-    case 'addUser' : {
+    case 'addUser': {
       // validate username, phone, email and name and returns email or phone verified accordingly
       const verifiedData = await addUserValidation(input, context);
       Object.assign(input, verifiedData);
@@ -102,7 +102,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         return hook(input, mutationOrQueryName, 'PreHook');
       });
     }
-    case 'setUserPassword' : {
+    case 'setUserPassword': {
       return preUserDataValidation(input, mutationOrQueryName).then((userData) => {
         if (!userData) {
           throw new DatabaseRecordNotFoundError();
@@ -122,7 +122,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         return hook(input, mutationOrQueryName, 'PreHook');
       });
     }
-    case 'resetUserPassword' : {
+    case 'resetUserPassword': {
       return preUserDataValidation(input, mutationOrQueryName).then((userData) => {
         if (!userData) {
           throw new DatabaseRecordNotFoundError();
@@ -162,26 +162,26 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         return hook(input, mutationOrQueryName, 'PreHook');
       });
     }
-    case 'signupExistingUser' : {
+    case 'signupExistingUser': {
       return new Promise((resolve) => {
         const verifiedData = validateExistingUserInput(input);
         Object.assign(input, verifiedData);
         resolve(hook(input, mutationOrQueryName, 'PreHook'));
       });
     }
-    case 'login' : {
+    case 'login': {
       // validates email or phone number
       const verifiedData = validateLogin(input);
       Object.assign(input, verifiedData);
 
       return hook(input, mutationOrQueryName, 'PreHook');
     }
-    case 'updateUser' : {
+    case 'updateUser': {
       await callAddUpdateHookValidationFunction(mutationOrQueryName, params, context);
       break;
     }
 
-    case 'validateUserOTP' :
+    case 'validateUserOTP':
     {
       const { phoneOtp, emailOtp } = input;
       if (!phoneOtp && !emailOtp) {
@@ -263,7 +263,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         return hook(input, mutationOrQueryName, 'PreHook');
       });
     }
-    case 'deleteFile' : {
+    case 'deleteFile': {
       return isFileDeleteAllowed(params).then((res) => {
         if (!res) {
           throw new FileUsageCountNotZeroError();
@@ -271,59 +271,59 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         return hook(input, mutationOrQueryName, 'PreHook');
       });
     }
-    case 'deleteChapter' : {
+    case 'deleteChapter': {
       await deleteChapterValidation(params);
       break;
     }
-    case 'deleteTopic' : {
+    case 'deleteTopic': {
       await deleteTopicValidation(params);
       break;
     }
-    case 'deleteLearningObjective' : {
+    case 'deleteLearningObjective': {
       await deleteLearningObjectiveValidation(params);
       break;
     }
-    case 'deleteQuestionBank' : {
+    case 'deleteQuestionBank': {
       await deleteQuestionBankValidation(params);
       break;
     }
-    case 'addUserCurrentTopicComponentStatus' : {
+    case 'addUserCurrentTopicComponentStatus': {
       await addUserCurrentTopicComponentStatusValidation(params, context);
       break;
     }
-    case 'updateUserCurrentTopicComponentStatus' : {
+    case 'updateUserCurrentTopicComponentStatus': {
       await updateUserCurrentTopicComponentStatusValidation(params);
       break;
     }
-    case 'userCourseSyllabus' : {
+    case 'userCourseSyllabus': {
       await userCourseSyllabusMethod(context);
       break;
     }
-    case 'addUserActivityVideoDump' : {
+    case 'addUserActivityVideoDump': {
       await addUserActivityVideoDumpValidation(params, mutationOrQueryName, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
-    case 'addUserActivityChatDump' : {
+    case 'addUserActivityChatDump': {
       await addUserActivityChatDumpValidation(params, mutationOrQueryName, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
-    case 'addUserActivityPQDump' : {
+    case 'addUserActivityPQDump': {
       await addUserActivityPQDumpValidation(params, mutationOrQueryName, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
-    case 'addUserActivityQuizDump' : {
+    case 'addUserActivityQuizDump': {
       await addUserActivityQuizDumpValidation(params, mutationOrQueryName, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
-    case 'userVideo' : {
+    case 'userVideo': {
       await userVideoValidation(params, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
-    case 'userLearningObjective' : {
+    case 'userLearningObjective': {
       await userLearningObjectiveValidation(params, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
-    case 'userQuiz' : {
+    case 'userQuiz': {
       await userQuizValidation(params, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
@@ -331,11 +331,11 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await addLearningObjectiveValidation(params);
       break;
     }
-    case 'userTopicJourney' : {
+    case 'userTopicJourney': {
       await userCourseSyllabusMethod(context);
       break;
     }
-    default : {
+    default: {
       /* If context is not present then it means user is not authenticated and the
       user won't be able to make any db query
       */
@@ -362,13 +362,13 @@ Params: input,mutationName,context,params
  */
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
-    case 'deleteFile' : {
+    case 'deleteFile': {
       const { uri } = input;
       await deleteFromS3(uri);
       break;
     }
-    case 'deleteFiles' : {
-      const urisToDelete = input.map(record => record.uri);
+    case 'deleteFiles': {
+      const urisToDelete = input.map((record) => record.uri);
       /* eslint no-restricted-syntax: ["error", "FunctionExpression", "WithStatement",
       "BinaryExpression[operator='in']"] */
       for (const uri of urisToDelete) {
@@ -378,43 +378,43 @@ const posthook = async (input, mutationName, context, params) => {
       }
       break;
     }
-    case 'userVideo' : {
+    case 'userVideo': {
       const resultArray = await userVideoPostHookMethod(input, params);
       return hook(resultArray, mutationName, 'PostHook');
     }
-    case 'userLearningObjective' : {
+    case 'userLearningObjective': {
       const resultArray = await userLearningObjectivePostHookMethod(input, params);
       return hook(resultArray, mutationName, 'PostHook');
     }
-    case 'userQuiz' : {
+    case 'userQuiz': {
       const resultArray = await userQuizPostHookMethod(input, params);
       return hook(resultArray, mutationName, 'PostHook');
     }
-    case 'userProfile' : {
+    case 'userProfile': {
       const resultArray = await userProfilePostHookMethod(input, params);
       return hook(resultArray, mutationName, 'PostHook');
     }
-    case 'addUserActivityVideoDump' : {
+    case 'addUserActivityVideoDump': {
       await addUserActivityVideoDumpPostHookMethod(input, mutationName, context);
       break;
     }
-    case 'addUserActivityChatDump' : {
+    case 'addUserActivityChatDump': {
       await addUserActivityChatDumpPostHookMethod(input, mutationName, context);
       break;
     }
-    case 'addUserActivityPQDump' : {
+    case 'addUserActivityPQDump': {
       await addUserActivityPQDumpPostHookMethod(input, mutationName, context);
       break;
     }
-    case 'addUserActivityQuizDump' : {
+    case 'addUserActivityQuizDump': {
       await addUserActivityQuizDumpPostHookMethod(input, mutationName, context);
       break;
     }
-    case 'userPracticeQuestionReport' : {
+    case 'userPracticeQuestionReport': {
       const resultArray = await userPracticeQuestionReportPostHookMethod(input, params);
       return hook(resultArray, mutationName, 'PostHook');
     }
-    default :
+    default:
       break;
   }
   return hook(input, mutationName, 'PostHook');

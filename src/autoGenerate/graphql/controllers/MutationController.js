@@ -6,14 +6,12 @@ import { getUpdatedRecordObject } from './utils/utils';
 import { paginationKeys } from './QueryController/paginate';
 import getQueryParams from './QueryController/filters';
 
-const deleteQueriedResult = (Model, params, limitValue, skipValue) =>
-  Model.remove(params).limit(limitValue).skip(skipValue).exec();
+const deleteQueriedResult = (Model, params, limitValue, skipValue) => Model.remove(params).limit(limitValue).skip(skipValue).exec();
 
-const deleteQueriedResultFromLast = (Model, params, limitValue, skipValue) =>
-  Model.find(params).count().exec().then((result) => {
-    const valueSkip = result - limitValue - skipValue > 0 ? result - limitValue - skipValue : 0;
-    return Model.remove(params).limit(limitValue).skip(valueSkip).exec();
-  });
+const deleteQueriedResultFromLast = (Model, params, limitValue, skipValue) => Model.find(params).count().exec().then((result) => {
+  const valueSkip = result - limitValue - skipValue > 0 ? result - limitValue - skipValue : 0;
+  return Model.remove(params).limit(limitValue).skip(valueSkip).exec();
+});
 
 // Mutation controller
 class MutationController extends MasterController {
@@ -32,12 +30,13 @@ class MutationController extends MasterController {
           });
         }
         // to prevent creating fields with null/undefined/'' values
-        const modifiedInput = pickBy(input, v => v !== null && v !== undefined && v !== '');
+        const modifiedInput = pickBy(input, (v) => v !== null && v !== undefined && v !== '');
         const record = new this.Model(modifiedInput);
         return record.save();
       })
-      .then(result => result);
+      .then((result) => result);
   }
+
   // accepts id of doc to update along with the fields that have to be modified
   updateDocument(
     id,
@@ -48,10 +47,12 @@ class MutationController extends MasterController {
     historyObject = {},
     nestedDisconnectObjInfo = {},
   ) {
-    return this.validatePermissions({ id,
+    return this.validatePermissions({
+      id,
       input,
       relationFieldsArray,
-      additionalRelationFieldsArray }, false)
+      additionalRelationFieldsArray,
+    }, false)
       .then((isAllowedParam) => {
         const isAllowed = isAllowedParam;
         if (!isAllowed.status) {
@@ -90,8 +91,9 @@ class MutationController extends MasterController {
 
         return record.save(hookMetaData);
       })
-      .then(updated => updated);
+      .then((updated) => updated);
   }
+
   deleteDocumentWithAnyKey(param) {
     return this.validatePermissions({ param }, false)
       .then((isAllowedParam) => {
@@ -108,7 +110,7 @@ class MutationController extends MasterController {
         }
         return this.Model.remove(param).exec();
       })
-      .then(result => result);
+      .then((result) => result);
   }
 
   deleteDocument(id) {
@@ -127,11 +129,11 @@ class MutationController extends MasterController {
         }
         return this.Model.findOneAndRemove({ id }).exec();
       })
-      .then(result => result);
+      .then((result) => result);
   }
 
   deleteMany(paramsForFetch) {
-    let inputParams = Object.assign({}, paramsForFetch);
+    let inputParams = { ...paramsForFetch };
     return this.validatePermissions(inputParams, false)
       .then((isAllowedParam) => {
         const isAllowed = isAllowedParam;
@@ -149,7 +151,9 @@ class MutationController extends MasterController {
           inputParams = isAllowed.data;
         }
         const allParams = paginationKeys(inputParams);
-        const { lastValue, skipValue, afterId, beforeId } = allParams;
+        const {
+          lastValue, skipValue, afterId, beforeId,
+        } = allParams;
         const params = allParams.inputParams;
         delete params.orderBy;
         if (afterId) { params.id = { $gt: `${afterId}` }; } else if (beforeId) { params.id = { $lt: `${beforeId}` }; }
@@ -169,8 +173,9 @@ class MutationController extends MasterController {
         }
         return deleteQueriedResult(this.Model, params, params.firstValue, skipValue);
       })
-      .then(result => result);
+      .then((result) => result);
   }
+
   // a generic update query for updating single/multiple docs, return update status
   /* send strict true if you want that your mongoose should strictly follow
   schema else false */
@@ -198,6 +203,7 @@ class MutationController extends MasterController {
         return this.Model.update(searchObj, updateObj, queryOptions);
       });
   }
+
   // updates one and return new updated doc
   updateOne(searchObj, updateObj) {
     return this.validatePermissions({ searchObj, updateObj }, false)
@@ -215,8 +221,9 @@ class MutationController extends MasterController {
         }
         return this.Model.findOneAndUpdate(searchObj, updateObj, { new: true }).exec();
       })
-      .then(result => result);
+      .then((result) => result);
   }
+
   // finds or creates and returns the doc
   findOrCreate(id, input) {
     return this.validatePermissions({ id, input }, false)
@@ -241,6 +248,7 @@ class MutationController extends MasterController {
         return this.addDocument(input);
       });
   }
+
   // finds and updates with new input or creates new
   findAndUpdateOrCreate(id, input) {
     return this.validatePermissions({ id, input }, false)

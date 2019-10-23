@@ -4,7 +4,7 @@ import pluralize from 'pluralize';
 import { MutationController, QueryController } from '../../../controllers';
 import { findFieldWithTheRelation } from '../../../../utils';
 import { toObject, formatToParamString } from '../../../../../../utils';
-import updateAndDecreaseUsageCountInFile from '../utils/updateAndDecreaseUsageCountInFile';
+import updateAndDecreaseUsageCountInFile from './updateAndDecreaseUsageCountInFile';
 import deleteFromS3 from '../../../../../middlewares/utils/deleteFromS3';
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
 
@@ -26,8 +26,8 @@ const deleteRecordReferences = async (relationFields, relationSubsetFields,
         relationFieldValueInDeletedDocument.forEach((referenceObject) => {
           allRefereceTypeIds.push(referenceObject.typeId);
         });
-      } else if (relationFieldValueInDeletedDocument &&
-          relationFieldValueInDeletedDocument.typeId) {
+      } else if (relationFieldValueInDeletedDocument
+          && relationFieldValueInDeletedDocument.typeId) {
         const { type, typeId } = relationFieldValueInDeletedDocument;
         allRefereceTypeIds.push(typeId);
         if (type === 'File') {
@@ -58,8 +58,7 @@ const deleteRecordReferences = async (relationFields, relationSubsetFields,
         const isFieldList = ast[relatedType].field[relationFieldName].type.isList;
         const updateObject = {};
         // find all documents with id in typeIds and update them
-        const searchObject
-      = { id: { $in: allRefereceTypeIds } };
+        const searchObject = { id: { $in: allRefereceTypeIds } };
 
         if (isFieldList) {
           // if list pull from relation field array
@@ -106,7 +105,7 @@ const checkAndDeleteReferences = async (
   // delete record references in referenced types
   const deletePromisesArray = await deleteRecordReferences(relationFields,
     relationSubsetFields, typeName, recordDocument, ast, authentication);
-  await Promise.all(deletePromisesArray).catch(err => err);
+  await Promise.all(deletePromisesArray).catch((err) => err);
   return record;
 };
 

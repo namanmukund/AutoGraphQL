@@ -11,8 +11,8 @@ const isAppTokenExists = (
 const validateAppTokenInput = (input, authentication) => {
   const { name: appName, type } = input;
   // If app name is not in the frontend or backend app list then it will throw an error
-  if ((type === 'frontend' && (!includes(frontEndApps, appName))) ||
-    (type === 'backend' && (!includes(backendApps, appName)))
+  if ((type === 'frontend' && (!includes(frontEndApps, appName)))
+    || (type === 'backend' && (!includes(backendApps, appName)))
   ) {
     throw new InvalidApplicationNameError();
   }

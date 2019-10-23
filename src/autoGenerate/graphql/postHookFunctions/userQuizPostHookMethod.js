@@ -8,7 +8,7 @@ import getNextComponent from './utils/getNextComponent';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 
 // query to get quiz questions associated with topic
-const topicQuery = topicId => `
+const topicQuery = (topicId) => `
   query{
     topic(id:"${topicId}"){
       id

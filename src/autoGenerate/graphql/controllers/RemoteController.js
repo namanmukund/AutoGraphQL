@@ -1,7 +1,9 @@
 import { trimStart } from 'lodash';
 import { createAppToken } from '../../../auth';
-import { encodeToken, getQueryFieldString, formatToParamString,
-  createApolloFetchRetry } from '../../../../utils';
+import {
+  encodeToken, getQueryFieldString, formatToParamString,
+  createApolloFetchRetry,
+} from '../../../../utils';
 import MasterController from './MasterController';
 
 const application = process.env.APPLICATION || 'core';
@@ -51,10 +53,11 @@ class RemoteController extends MasterController {
     });
     /* eslint-enable no-param-reassign */
   }
+
   query(queryName, params, fields) {
     this.validate();
     // Add id field to all query.
-    const newFields = Object.assign({}, fields, { id: true });
+    const newFields = { ...fields, id: true };
     const query = buildGraphQLQuery(queryName, params, newFields);
     const variables = '';
     const operationName = '';
@@ -66,8 +69,9 @@ class RemoteController extends MasterController {
         }
         return data[queryName];
       })
-      .catch(error => error);
+      .catch((error) => error);
   }
+
   deleteMutation(typeName, id, fieldsToMutatue) {
     this.validate();
     const fieldsToQuery = getQueryFieldString(fieldsToMutatue);
@@ -80,9 +84,10 @@ class RemoteController extends MasterController {
 
     const variables = {};
     return this.apolloFetch({ query, variables })
-      .then(result => result)
-      .catch(error => error);
+      .then((result) => result)
+      .catch((error) => error);
   }
+
   addMutation(typeName, mutationName, inputCore, fieldsToMutatue) {
     this.validate();
     const fieldsToQuery = getQueryFieldString(fieldsToMutatue);
@@ -101,9 +106,10 @@ class RemoteController extends MasterController {
     };
 
     return this.apolloFetch({ query, variables })
-      .then(result => result)
-      .catch(error => error);
+      .then((result) => result)
+      .catch((error) => error);
   }
+
   updateMutation(id, input, typeName, mutationName, fieldsToMutatue) {
     this.validate();
     const fieldsToQuery = getQueryFieldString(fieldsToMutatue);
@@ -121,9 +127,10 @@ class RemoteController extends MasterController {
       input,
     };
     return this.apolloFetch({ query, variables })
-      .then(result => result)
-      .catch(error => error);
+      .then((result) => result)
+      .catch((error) => error);
   }
+
   signUpMutation(typeName = 'SignUp', mutationName, inputCore, fieldsToMutatue) {
     this.validate();
     const fieldsToQuery = getQueryFieldString(fieldsToMutatue);
@@ -142,9 +149,10 @@ class RemoteController extends MasterController {
     };
     // @TODO Implement logic of when the user is already found.
     return this.apolloFetch({ query, variables })
-      .then(result => result)
-      .catch(error => error);
+      .then((result) => result)
+      .catch((error) => error);
   }
+
   loginMutation(typeName = 'Login', queryName, inputCore, fieldsToMutatue) {
     this.validate();
     const fieldsToQuery = getQueryFieldString(fieldsToMutatue);
@@ -160,9 +168,10 @@ class RemoteController extends MasterController {
       input: inputCore,
     };
     return this.apolloFetch({ query, variables })
-      .then(result => result)
-      .catch(error => error);
+      .then((result) => result)
+      .catch((error) => error);
   }
+
   relationMutation(mutationName, args, payload) {
     this.validate();
     let query = {};
@@ -178,8 +187,8 @@ class RemoteController extends MasterController {
         }
       `;
     return this.apolloFetch({ query, variables })
-      .then(result => result)
-      .catch(error => error);
+      .then((result) => result)
+      .catch((error) => error);
   }
 }
 

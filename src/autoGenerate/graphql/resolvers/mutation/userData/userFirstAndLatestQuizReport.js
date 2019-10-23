@@ -16,7 +16,7 @@ import getUserIdandAppNameAfterValidation
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = userId => `
+const getUserCurrentTopicComponentStatus = (userId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -47,7 +47,7 @@ const getUserCurrentTopicComponentStatus = userId => `
   `;
 
 // query to get topic and it's order
-const getTopicQuery = topicId => `
+const getTopicQuery = (topicId) => `
   query{
     topic(id:"${topicId}"){
       id
@@ -184,13 +184,15 @@ const parseQuizReport = async (
     master: masterPercentage,
     proficient: proficientPercentage,
   } = learningObjectiveQuizReportThreshHolds;
-  const { learningObjectiveDefaultText,
+  const {
+    learningObjectiveDefaultText,
     learningObjectiveFamiliarText,
     learningObjectiveMasterText,
     learningObjectiveProficientText,
-  } =
-    learningObjectiveRecommendationTexts;
-  const { familiar, master, proficient, defaultMastery } = masteryLevels;
+  } = learningObjectiveRecommendationTexts;
+  const {
+    familiar, master, proficient, defaultMastery,
+  } = masteryLevels;
   if (quizReport.learningObjectiveReport
     && quizReport.learningObjectiveReport.length) {
     quizReport.learningObjectiveReport.forEach((loReport, index) => {
@@ -215,7 +217,8 @@ const parseQuizReport = async (
         masteryLevelText = defaultMastery;
       }
       Object.assign(quizReport.learningObjectiveReport[index],
-        { recommendationText: loRecommendationText,
+        {
+          recommendationText: loRecommendationText,
           masteryLevel: masteryLevelText,
         });
     });
@@ -343,7 +346,8 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   const nextTopicData = { type: 'Topic', typeId: `${nextTopicId}` };
   const nextComponentData = {
     topic: nextTopicData,
-    nextComponentType: video };
+    nextComponentType: video,
+  };
 
   // Constructing data as per schema
   Object.assign(userQuizReportData, {

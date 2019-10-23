@@ -5,7 +5,7 @@ AWS.config.update(awsConfig.aws);
 
 const S3 = new AWS.S3();
 const s3Bucket = awsConfig.s3.bucket;
-const deleteFromS3 = Key => new Promise((resolve, reject) => {
+const deleteFromS3 = (Key) => new Promise((resolve, reject) => {
   S3.deleteObject({
     Bucket: s3Bucket,
     Key,

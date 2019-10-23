@@ -14,7 +14,7 @@ import getUserIdandAppNameAfterValidation
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = userId => `
+const getUserCurrentTopicComponentStatus = (userId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -130,7 +130,9 @@ const parseBadges = (badges, currentTopicOrder, currentTopicComponent) => {
   const finalCharacters = [];
   badges.forEach((badge, index) => {
     const tempObj = {};
-    const { name, description, activeImage, inactiveImage, topic, unlockPoint } = badge;
+    const {
+      name, description, activeImage, inactiveImage, topic, unlockPoint,
+    } = badge;
     let isUnlocked = false;
     let imageId = '';
     if (inactiveImage) { imageId = inactiveImage.id; }
@@ -138,15 +140,17 @@ const parseBadges = (badges, currentTopicOrder, currentTopicComponent) => {
     if (topic.order < currentTopicOrder) {
       isUnlocked = true;
       if (activeImage) { imageId = activeImage.id; }
-    } else if (topic.order === currentTopicOrder &&
-      (currentTopicComponent !== video && unlockPoint === video)
+    } else if (topic.order === currentTopicOrder
+      && (currentTopicComponent !== video && unlockPoint === video)
     ) {
       isUnlocked = true;
       if (activeImage) { imageId = activeImage.id; }
     }
     const image = { type: 'File', typeId: `${imageId}` };
     const order = index + 1;
-    Object.assign(tempObj, { name, description, isUnlocked, image, order, unlockPoint });
+    Object.assign(tempObj, {
+      name, description, isUnlocked, image, order, unlockPoint,
+    });
     finalCharacters.push(tempObj);
   });
   return finalCharacters;
@@ -186,13 +190,13 @@ const userBadgeMutationResolver = async (
   const { character, equipment } = badgeTypes;
   badgeInfo.forEach((badge) => {
     if (
-      !badge ||
-      !badge.type ||
-      !badge.topic ||
-      !badge.name ||
-      !badge.order ||
-      !badge.unlockPoint ||
-      !badge.topic.order) {
+      !badge
+      || !badge.type
+      || !badge.topic
+      || !badge.name
+      || !badge.order
+      || !badge.unlockPoint
+      || !badge.topic.order) {
       throw new DatabaseRecordNotFoundError({
         data: {
           error: 'Badge: Wrong/Incomplete information stored in badge',
@@ -253,11 +257,13 @@ const userBadgeMutationResolver = async (
   const characters = parseBadges(
     sortBadges(charactersFromBadgeInfo),
     currentTopicOrder,
-    currentTopicComponentType);
+    currentTopicComponentType,
+  );
   const equipments = parseBadges(
     sortBadges(equipmentsFromBadgeInfo),
     currentTopicOrder,
-    currentTopicComponentType);
+    currentTopicComponentType,
+  );
   userBadgeDocument.characters = characters;
   userBadgeDocument.equipments = equipments;
   Object.assign(userBadgeDocument, {

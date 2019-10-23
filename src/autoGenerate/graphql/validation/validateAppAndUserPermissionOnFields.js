@@ -16,10 +16,10 @@ const validateAllowDenyRuleOnApp = (
   If rule is allow then check for all the permitted apps and their operations
    */
   if (
-    rule === 'allow' &&
-      permissions &&
-      permissions !== '*' &&
-      permissions.length
+    rule === 'allow'
+      && permissions
+      && permissions !== '*'
+      && permissions.length
   ) {
     const index = findIndex(permissions, { appName });
     if (index === -1) {
@@ -76,11 +76,11 @@ const validateAppPermission = (
   const queryFieldKeys = Object.keys(queryFields);
   for (const key of queryFieldKeys) {
     // including 'result' and 'error' fields as exceptions to be sent in response like count & meta
-    if (key &&
-      !(key.includes(META) ||
-        key.includes('count') ||
-        key.includes('result') ||
-        key.includes('error')
+    if (key
+      && !(key.includes(META)
+        || key.includes('count')
+        || key.includes('result')
+        || key.includes('error')
       )) {
       const { appPermissions: appPermissionsOnField } = field[key];
       if (appPermissionsOnField && Object.keys(appPermissionsOnField)) {

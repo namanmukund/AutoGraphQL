@@ -58,7 +58,7 @@ const userQuizQuery = (
     `;
 
 // getting questions from question bank to evaluate quiz report
-const questionBankQuery = questionIdsQuery => `
+const questionBankQuery = (questionIdsQuery) => `
   query{
     questionBanks(filter:{
       id_in: ${questionIdsQuery}
@@ -91,7 +91,7 @@ const questionBankQuery = questionIdsQuery => `
   `;
 
 // mutation to update UserQuiz, pushing updated quiz questions
-const updateUserQuizMutation = userQuizId => `
+const updateUserQuizMutation = (userQuizId) => `
   mutation{
     updateUserQuiz(id:"${userQuizId}",  input:{
       quizStatus: ${userTopicTypeStatus.complete}
@@ -124,7 +124,7 @@ const addUserQuizReport = (
   `;
 
 // query to get current user profile to get current scholarship status
-const userProfileQuery = userId => `
+const userProfileQuery = (userId) => `
   query{
     userProfiles(filter:{
       user_some:{
@@ -173,7 +173,7 @@ const updateUserProfile = (
   }
   `;
 
-const escapeString = value => value.replace(/\\([\s\S])|(")/g, '\\$1$2');
+const escapeString = (value) => value.replace(/\\([\s\S])|(")/g, '\\$1$2');
 
 // method to create query which will contain user answer and question's options data
 const createQueryForUserAnswersAndOptions = (
@@ -183,7 +183,9 @@ const createQueryForUserAnswersAndOptions = (
   questionBankId,
   isAttempted,
 ) => {
-  const { mcq, fibInput, fibBlock, arrange } = questionTypes;
+  const {
+    mcq, fibInput, fibBlock, arrange,
+  } = questionTypes;
   let userAnswersAndQuestionOptionsQuery = '';
   const {
     userMcqAnswer: userMcqAnswers,
@@ -318,8 +320,7 @@ const createQueryForUserAnswersAndOptions = (
           fibBlockOptionQuery += `correctPositions: ${correctPositionsQuery}}, `;
         });
         // Handling case that answer for every blank is sent by user
-        const totalUniqueNumberOfBlanksArray =
-          totalNumberOfBlanksArray.filter((elem, index, array) => array.indexOf(elem) === index);
+        const totalUniqueNumberOfBlanksArray = totalNumberOfBlanksArray.filter((elem, index, array) => array.indexOf(elem) === index);
         if (totalUniqueNumberOfBlanksArray.length !== userFibBlockAnswersLength) {
           isCorrect = false;
         }
@@ -609,8 +610,7 @@ const evaluateUserQuiz = async (
     correctQuestionCount: correctQuestionCountQuizReport,
     unansweredQuestionCount: unansweredQuestionCountQuizReport,
   } = quizReport;
-  const masteryLevel =
-    getMasteryLevel(correctQuestionCountQuizReport, totalQuestionCountQuizReport);
+  const masteryLevel = getMasteryLevel(correctQuestionCountQuizReport, totalQuestionCountQuizReport);
   const quizReportQuery = `quizReport:{
                                     totalQuestionCount: ${totalQuestionCountQuizReport}
                                     inCorrectQuestionCount: ${inCorrectQuestionCountQuizReport}
@@ -662,8 +662,8 @@ const evaluateUserScholarship = async (
     currentTopic,
   } = currentTopicComponentInfo;
   const { id: currentTopicId } = currentTopic;
-  if (currentTopicComponent === quiz &&
-    currentTopicId === topicId) {
+  if (currentTopicComponent === quiz
+    && currentTopicId === topicId) {
     // code for calculating total quiz report accuracy for scholarship
     const { totalQuestionCount, correctQuestionCount } = quizReport;
     // remove after review and testing
@@ -677,8 +677,7 @@ const evaluateUserScholarship = async (
     // let freeFamiliarTopicCount = freeTopicCount;
     let accuracy = 0;
     if (totalQuestionCount > 0) {
-      accuracy =
-        (correctQuestionCount / totalQuestionCount) * 100;
+      accuracy = (correctQuestionCount / totalQuestionCount) * 100;
     } else {
       log('There are no questions in quiz. Something is wrong');
     }
@@ -810,8 +809,8 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     throw new QuizQuestionsNotPresentError();
   }
   // throwing error if there are no published questions in database
-  if (!quizQuestionsInUserQuiz ||
-    !quizQuestionsInUserQuiz.length) {
+  if (!quizQuestionsInUserQuiz
+    || !quizQuestionsInUserQuiz.length) {
     log('Quiz Questions are not present in UserQuiz in addUserActivityQuizDumpPostHookMethod');
     throw new DatabaseRecordNotFoundError({
       data: {
@@ -860,4 +859,3 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
 };
 
 export default addUserActivityQuizDumpPostHookMethod;
-

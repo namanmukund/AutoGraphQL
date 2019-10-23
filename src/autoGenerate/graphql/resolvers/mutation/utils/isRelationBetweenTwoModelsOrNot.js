@@ -8,7 +8,8 @@ const isRelationBetweenTwoModelsOrNot = async (relationObject, typeName, typeFie
   const { typeId, relatedTypeId } = relationObject;
   const pluralTypeName = camelCase(pluralize(typeName));
   const queryBasedOnTypeAndRelatedField = genericApiToFetchRelatedObjectQueryBasedOnTypeId(
-    camelCase(typeField), relatedTypeId, pluralTypeName, typeId);
+    camelCase(typeField), relatedTypeId, pluralTypeName, typeId,
+  );
 
   const response = await callGraphqlApi(queryBasedOnTypeAndRelatedField);
   if (response && response.data && response.data[pluralTypeName]) {

@@ -6,7 +6,7 @@ import { compareObjects } from '../../../utils';
 import { isBackendApp } from '../../autoGenerate/graphql/validation';
 
 function save(schema) {
-  const RollbackModel = schema.statics.RollbackModel;
+  const { RollbackModel } = schema.statics;
 
   function storeOriginalModel(model = {}, metadata, cb) {
     const id = model._id;
@@ -31,8 +31,7 @@ function save(schema) {
         // append the original model to history
         histModel = hists[0];
         const totalSavedHistoryElements = histModel.data.length;
-        const lastModelHistorySaved = Object.assign({},
-          histModel.data[totalSavedHistoryElements - 1]);
+        const lastModelHistorySaved = { ...histModel.data[totalSavedHistoryElements - 1] };
         delete lastModelHistorySaved.updatedAt;
         // if original and last save hist is same, dont add original model in history
         if (compareObjects(lastModelHistorySaved, originalModel)) {
@@ -41,8 +40,10 @@ function save(schema) {
         }
         histModel.currentVersion += 1;
         Object.assign(originalModel,
-          { updatedAt: model.updatedAt,
-            _version: histModel.currentVersion });
+          {
+            updatedAt: model.updatedAt,
+            _version: histModel.currentVersion,
+          });
         histModel.data.set(totalSavedHistoryElements, originalModel);
       } else {
         // if history for model not present
@@ -80,7 +81,7 @@ function save(schema) {
       // update existing model
       histModel.currentVersion += 1;
       model._version = histModel.currentVersion;
-      const historyModelToAppend = Object.assign({}, model.toObject());
+      const historyModelToAppend = { ...model.toObject() };
       if (category) { historyModelToAppend.category = category; }
       if (subCategory) { historyModelToAppend.subCategory = subCategory; }
       histModel.data.set(histModel.data.length, historyModelToAppend);
@@ -110,7 +111,7 @@ function save(schema) {
   }
 
   schema.pre('save', function (next, metaData) {
-    const modelName = this.constructor.modelName;
+    const { modelName } = this.constructor;
     const isTokenFromBackendApp = isBackendApp(metaData.authentication);
     if (!metaData.category || !isTokenFromBackendApp) {
       next();

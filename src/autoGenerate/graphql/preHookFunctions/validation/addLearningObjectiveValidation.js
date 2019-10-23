@@ -12,7 +12,7 @@ const addLearningObjectiveValidation = async (params) => {
   if (!id) {
     throw new TopicIdRequiredError();
   }
-  const order = params.input.order;
+  const { order } = params.input;
   const query = `
   query{
   topic(id:"${id}"){

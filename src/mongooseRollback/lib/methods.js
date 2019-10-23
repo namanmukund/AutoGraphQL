@@ -3,7 +3,7 @@
 /* eslint-disable func-names */
 
 function methods(schema) {
-  const RollbackModel = schema.statics.RollbackModel;
+  const { RollbackModel } = schema.statics;
 
   // Query hist model for cur version
   schema.methods.currentVersion = function (callback) {
@@ -46,8 +46,7 @@ function methods(schema) {
         }
 
         callback(null, prevModel);
-      },
-    );
+      });
   };
 
   // Return data array in range supplied
@@ -88,8 +87,7 @@ function methods(schema) {
         // XXX: Cuttting based on array index NOT version
         // TODO: Convert version to array range based on specified max stored value
         callback(err, hist.data.slice(skip, max));
-      },
-    );
+      });
   };
 
   // Update state to new version with updates from previous version
@@ -119,8 +117,7 @@ function methods(schema) {
 
         // save changes and callback take care of rest
         self.save(callback);
-      },
-    );
+      });
   };
 
   // Revert state to previous update, remove new revisions
@@ -159,8 +156,10 @@ function methods(schema) {
 
         // remove previous revisions
         schema.statics.RollbackModel.update({ _id: id },
-          { currentVersion: version,
-            $pull: { data: { _version: { $gte: version } } } },
+          {
+            currentVersion: version,
+            $pull: { data: { _version: { $gte: version } } },
+          },
           (err) => {
             if (err) {
               callback(err);
@@ -170,8 +169,7 @@ function methods(schema) {
             // save changes and callback take care of rest
             self.save(callback);
           });
-      },
-    );
+      });
   };
 }
 

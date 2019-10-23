@@ -1,5 +1,7 @@
-import { DatabaseRecordNotFoundError,
-  OTPMismatchError, UserTokenNotRequiredError, UnauthorizedOperationError } from '../../../../../../constants/errors';
+import {
+  DatabaseRecordNotFoundError,
+  OTPMismatchError, UserTokenNotRequiredError, UnauthorizedOperationError,
+} from '../../../../../../constants/errors';
 import { QueryController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';

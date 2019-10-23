@@ -10,7 +10,7 @@ const getConnectCountInfo = (
   connectPromiseArray,
 ) => {
   // Creating new authentication object
-  const newAuthentication = Object.assign({}, authentication);
+  const newAuthentication = { ...authentication };
   // Sending mutationOrQueryName as meta to get count
   newAuthentication.mutationOrQueryName = `${camelCase(pluralize(relatedTypeName))}Meta`;
   const modelQueries = new QueryController(relatedTypeName, newAuthentication);
@@ -107,4 +107,3 @@ export const checkConnectRecordsExistenceInDb = (
 
   return { connectPromiseArray, connectIdsCount };
 };
-

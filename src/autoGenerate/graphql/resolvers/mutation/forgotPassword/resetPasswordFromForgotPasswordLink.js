@@ -13,11 +13,9 @@ import { verifyToken } from '../../../../../auth';
 
 const application = process.env.APPLICATION || 'core';
 const authParams = allAuthParams[application];
-const finishForgotPasswordQueryPromise = (input, modelQueries) =>
-  modelQueries.fetchOne(input);
+const finishForgotPasswordQueryPromise = (input, modelQueries) => modelQueries.fetchOne(input);
 
-const finishForgotPasswordMutationPromise = (searchObj, updateObj, modelMutations) =>
-  modelMutations.updateOne(searchObj, updateObj);
+const finishForgotPasswordMutationPromise = (searchObj, updateObj, modelMutations) => modelMutations.updateOne(searchObj, updateObj);
 
 
 export default function resetPasswordFromForgotPasswordLinkMutationResolver(

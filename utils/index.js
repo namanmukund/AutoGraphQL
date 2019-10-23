@@ -36,7 +36,7 @@ import throwAsyncError from './throwAsyncError';
 const env = process.env.NODE_ENV || 'development';
 const application = process.env.APPLICATION || 'core';
 const dbConfig = allDbConfig[application][env];
-const functions = schema[application].functions;
+const { functions } = schema[application];
 const awsConfig = allAwsConfig[env];
 
 module.exports = {

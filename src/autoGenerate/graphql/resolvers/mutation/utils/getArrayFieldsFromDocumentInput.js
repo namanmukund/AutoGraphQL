@@ -12,9 +12,8 @@ const getArrayFieldsFromDocumentInput = (input, ast, typeName) => {
     const typeNameParam = (fieldType && fieldType.dataType) || typeName;
     // Fill nested arrayFields
     if (isPlainObject(input[fieldName])) {
-      arrayFieldsArray =
-        [...arrayFieldsArray,
-          ...getArrayFieldsFromDocumentInput(input[fieldName], ast, typeNameParam)];
+      arrayFieldsArray = [...arrayFieldsArray,
+        ...getArrayFieldsFromDocumentInput(input[fieldName], ast, typeNameParam)];
     }
     if (!fieldType) {
       return;

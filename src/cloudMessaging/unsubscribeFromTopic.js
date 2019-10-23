@@ -1,5 +1,5 @@
 import { log } from '../../utils';
-import admin from '../../src/firebase';
+import admin from '../firebase';
 
 const unsubscribeFromTopic = (fcmToken, topic) => admin.messaging()
   .unsubscribeFromTopic(fcmToken, topic)

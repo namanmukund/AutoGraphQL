@@ -16,7 +16,7 @@ import updateCurrentComponentStatus
   from '../../../postHookFunctions/utils/updateCurrentComponentStatus';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = userId => `
+const getUserCurrentTopicComponentStatus = (userId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -47,7 +47,7 @@ const getUserCurrentTopicComponentStatus = userId => `
   `;
 
 // query to get topic and it's first published learning objective
-const getTopicQuery = topicId => `
+const getTopicQuery = (topicId) => `
   query{
     topic(id:"${topicId}"){
       id
@@ -66,8 +66,7 @@ const getTopicQuery = topicId => `
 // mutation to update User Video
 const addUserVideoDump = (userConnectId,
   topicConnectId,
-  videoAction,
-) => `
+  videoAction) => `
   mutation{
     addUserActivityVideoDump(
       userConnectId: "${userConnectId}"

@@ -3,7 +3,7 @@ import callGraphqlApi from '../../../api/callGraphqlApi';
 import { log } from '../../../../utils';
 
 // query to add UserProfile with default values
-const addUserProfileMutation = userId => `
+const addUserProfileMutation = (userId) => `
   mutation{
     addUserProfile(
       userConnectId:"${userId}"

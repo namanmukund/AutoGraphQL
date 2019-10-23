@@ -9,7 +9,7 @@ import getNextComponent from './utils/getNextComponent';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 
 // query to get topic and it's Lo with order 1
-const topicQuery = topicId => `
+const topicQuery = (topicId) => `
   query{
     topic(id:"${topicId}"){
       id

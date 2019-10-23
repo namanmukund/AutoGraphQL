@@ -1,11 +1,14 @@
-import { mergeWith, isPlainObject, isMatch, find } from 'lodash';
-import { AdditionalFieldUpdateDeniedError,
-  MultipleArrayOperationDeniedError, InvalidArrayUpdateOperationError } from '../../../../../constants/errors';
+import {
+  mergeWith, isPlainObject, isMatch, find,
+} from 'lodash';
+import {
+  AdditionalFieldUpdateDeniedError,
+  MultipleArrayOperationDeniedError, InvalidArrayUpdateOperationError,
+} from '../../../../../constants/errors';
 import arrayOperationFunctions from './arrayOperationUtil';
 
 // Split on first underscore
-const splitOnFirstUnderscore = str =>
-  [str.substring(0, str.indexOf('_')), str.substring(str.indexOf('_') + 1)];
+const splitOnFirstUnderscore = (str) => [str.substring(0, str.indexOf('_')), str.substring(str.indexOf('_') + 1)];
 
 /* eslint-disable no-use-before-define */
 // Custom merge which merges nested objects, assigns nested arrays and handle array field updates
@@ -38,8 +41,8 @@ const handleArrayField = (
       // Check if an update operation is there
       if (keys.length === 2) {
         if (keys.includes('updateWhere') && keys.includes('updateWith')) {
-          if (arrayOperationFunctions.update &&
-            typeof arrayOperationFunctions.update === 'function') {
+          if (arrayOperationFunctions.update
+            && typeof arrayOperationFunctions.update === 'function') {
             return arrayOperationFunctions.update(record,
               input.updateWhere,
               input.updateWith, arrayFieldsArray);
@@ -52,8 +55,8 @@ const handleArrayField = (
     } else if (keys.length === 1) {
       if (keys.includes('updateWhere') || keys.includes('updateWith')) {
         throw new InvalidArrayUpdateOperationError();
-      } else if (arrayOperationFunctions[keys[0]] &&
-        typeof arrayOperationFunctions[keys[0]] === 'function') {
+      } else if (arrayOperationFunctions[keys[0]]
+        && typeof arrayOperationFunctions[keys[0]] === 'function') {
         return arrayOperationFunctions[keys[0]](
           record,
           input[keys[0]],
@@ -81,7 +84,7 @@ const getUpdatedRecordObject = (
     // to make sure same reference is not added
     if (relationFieldsArray.includes(field) && arrayFieldsArray.includes(field)) {
       // if reference already in record field, then dont push to record
-      const allReferencedIds = record[field].map(reference => reference.typeId);
+      const allReferencedIds = record[field].map((reference) => reference.typeId);
       input[field].forEach((reference) => {
         if (!allReferencedIds.includes(reference.typeId)) {
           record[field].push(reference);
@@ -96,18 +99,19 @@ const getUpdatedRecordObject = (
           // merge all additionalFields
           Object.keys((input[field])).forEach((additionalField) => {
             if (arrayFieldsArray.includes(additionalField)) {
-              recordDoc[field][additionalField] =
-                handleArrayField(record[field][additionalField],
-                  input[field][additionalField],
-                  arrayFieldsArray);
+              recordDoc[field][additionalField] = handleArrayField(record[field][additionalField],
+                input[field][additionalField],
+                arrayFieldsArray);
             } else {
               recordDoc[field][additionalField] = input[field][additionalField];
             }
           });
         } else {
-          throw new AdditionalFieldUpdateDeniedError({ data: {
-            message: `No relation exists for field ${field}`,
-          } });
+          throw new AdditionalFieldUpdateDeniedError({
+            data: {
+              message: `No relation exists for field ${field}`,
+            },
+          });
         }
       } else {
         // update field type object
@@ -119,26 +123,27 @@ const getUpdatedRecordObject = (
       if (additionalRelationFieldsArray.includes(field)) {
         const inputId = input[field].id;
         // Find index by typeId
-        const recordFieldIndex = Array.isArray(record[field]) &&
-          record[field].findIndex(rec => rec.typeId === inputId);
-        if (recordFieldIndex >= 0 && record[field][recordFieldIndex].type &&
-            record[field][recordFieldIndex].typeId) {
+        const recordFieldIndex = Array.isArray(record[field])
+          && record[field].findIndex((rec) => rec.typeId === inputId);
+        if (recordFieldIndex >= 0 && record[field][recordFieldIndex].type
+            && record[field][recordFieldIndex].typeId) {
           Object.keys((input[field])).forEach((additionalField) => {
             if (additionalField === 'id') {
               return;
             }
             if (arrayFieldsArray.includes(additionalField)) {
-              recordDoc[field][recordFieldIndex][additionalField] =
-                handleArrayField(record[field][recordFieldIndex][additionalField],
-                  input[field][additionalField], arrayFieldsArray);
+              recordDoc[field][recordFieldIndex][additionalField] = handleArrayField(record[field][recordFieldIndex][additionalField],
+                input[field][additionalField], arrayFieldsArray);
             } else {
               recordDoc[field][recordFieldIndex][additionalField] = input[field][additionalField];
             }
           });
         } else {
-          throw new AdditionalFieldUpdateDeniedError({ data: {
-            message: `No relation exists for field ${field}`,
-          } });
+          throw new AdditionalFieldUpdateDeniedError({
+            data: {
+              message: `No relation exists for field ${field}`,
+            },
+          });
         }
       } else {
         // Check and handle array field
@@ -182,8 +187,10 @@ const validateClassItemsUniqueness = (record, input) => {
   return !isAExistingClass;
 };
 
-export { handleArrayField,
+export {
+  handleArrayField,
   getUpdatedRecordObject,
   splitOnFirstUnderscore,
   customMerge,
-  validateClassItemsUniqueness };
+  validateClassItemsUniqueness,
+};

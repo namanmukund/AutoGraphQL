@@ -5,7 +5,7 @@ import { fetchRetries, fetchRetryDelay } from '../constants';
 
 const env = process.env.NODE_ENV || 'development';
 const application = process.env.APPLICATION || 'core';
-const uri = allServerConfig[application][env].backend.uri;
+const { uri } = allServerConfig[application][env].backend;
 
 const customFetch = (url, req) => {
   const finalReq = Object.assign(req, { retries: fetchRetries, retryDelay: fetchRetryDelay });

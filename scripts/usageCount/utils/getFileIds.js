@@ -6,7 +6,7 @@ const getFileIds = () => {
   };
   const query = {};
   const modelQuery = new QueryController('File', newAuthentication);
-  return modelQuery.fetchMultiple(query).then(files => files.map(file => file.id));
+  return modelQuery.fetchMultiple(query).then((files) => files.map((file) => file.id));
 };
 
 export default getFileIds;

@@ -6,18 +6,16 @@ import { PermissionDeniedError } from '../../../../../constants/errors';
 import { defaultPermissionErrorMsg, defaultLimitValue, historyFieldName } from '../../../../../constants';
 import appendModelHistoryToQueriedResult from '../utils/appendModelHistoryToQueriedResult';
 
-const getQueriedResult = (Model, params, limitValue, skipValue, querySort) =>
-  Model.find(params).limit(limitValue).skip(skipValue).sort(querySort)
-    .exec()
-    .catch(err => err);
+const getQueriedResult = (Model, params, limitValue, skipValue, querySort) => Model.find(params).limit(limitValue).skip(skipValue).sort(querySort)
+  .exec()
+  .catch((err) => err);
 
-const getQueriedResultFromLast = (Model, params, limitValue, skipValue, querySort) =>
-  Model.find(params).count().exec().then((result) => {
-    const valueSkip = result - limitValue - skipValue > 0 ? result - limitValue - skipValue : 0;
-    return Model.find(params).limit(limitValue).skip(valueSkip).sort(querySort)
-      .exec()
-      .catch(err => err);
-  });
+const getQueriedResultFromLast = (Model, params, limitValue, skipValue, querySort) => Model.find(params).count().exec().then((result) => {
+  const valueSkip = result - limitValue - skipValue > 0 ? result - limitValue - skipValue : 0;
+  return Model.find(params).limit(limitValue).skip(valueSkip).sort(querySort)
+    .exec()
+    .catch((err) => err);
+});
 
 const checkIfModelHistoryInParams = (params) => {
   const stringifiedParams = JSON.stringify(params);
@@ -47,8 +45,8 @@ class QueryController extends MasterController {
           .lean()
           .exec();
       })
-      .then(res => res)
-      .catch(err => err);
+      .then((res) => res)
+      .catch((err) => err);
   }
 
   fetchOne(param) {
@@ -67,9 +65,10 @@ class QueryController extends MasterController {
         }
         return this.Model.findOne(param).exec();
       })
-      .then(res => res)
-      .catch(err => err);
+      .then((res) => res)
+      .catch((err) => err);
   }
+
   /*
 Sample paramsForFetch argument
 {
@@ -89,7 +88,7 @@ Sample paramsForFetch argument
 }
  */
   fetchMany(paramsForFetch = {}) {
-    let inputParams = Object.assign({}, paramsForFetch);
+    let inputParams = { ...paramsForFetch };
     return this.validatePermissions(inputParams, true)
       .then((isAllowedParam) => {
         const isAllowed = isAllowedParam;
@@ -128,8 +127,10 @@ Sample paramsForFetch argument
        }
      */
         const allParams = paginationKeys(inputParams);
-        const { lastValue, skipValue, afterId, beforeId } = allParams;
-        let firstValue = allParams.firstValue;
+        const {
+          lastValue, skipValue, afterId, beforeId,
+        } = allParams;
+        let { firstValue } = allParams;
         const params = allParams.inputParams;
         if (!firstValue) {
           firstValue = defaultLimitValue;
@@ -200,6 +201,7 @@ Sample paramsForFetch argument
         return getQueriedResult(this.Model, params, firstValue, skipValue, querySort);
       });
   }
+
   // for fetching without graphql
   fetchMultiple(inputParams = {}) {
     this.validate();
@@ -208,7 +210,7 @@ Sample paramsForFetch argument
   }
 
   fetchCount(paramsForFetch = {}) {
-    let inputParams = Object.assign({}, paramsForFetch);
+    let inputParams = { ...paramsForFetch };
     return this.validatePermissions(inputParams, true)
       .then((isAllowedParam) => {
         const isAllowed = isAllowedParam;
@@ -229,7 +231,7 @@ Sample paramsForFetch argument
         if (filter) {
           const queryParams = getQueryParams(inputParams, this.modelName);
           if (!groupBy) {
-            return queryParams.then(query => this.Model.count(query).exec());
+            return queryParams.then((query) => this.Model.count(query).exec());
           }
           // filter with groupBy
           return queryParams.then(async (query) => {
@@ -238,15 +240,14 @@ Sample paramsForFetch argument
               groupByResult: await this.Model.aggregate([
                 { $match: query },
                 { $group: { _id: `$${groupBy}`, count: { $sum: 1 } } },
-              ],
-              ).exec(),
+              ]).exec(),
             };
             return data;
           });
         }
 
         return this.Model.count(inputParams).exec();
-      }).catch(err => err);
+      }).catch((err) => err);
   }
 
   aggregate(aggregateQuery) {

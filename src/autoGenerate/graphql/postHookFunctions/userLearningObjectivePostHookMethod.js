@@ -10,7 +10,7 @@ import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 
 // query to get learning objective and all the learning objectives of the topic associated
-const learningObjectiveQuery = learningObjectiveId => `
+const learningObjectiveQuery = (learningObjectiveId) => `
   query{
     learningObjective(id:"${learningObjectiveId}"){
       id
@@ -121,7 +121,8 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
     return resultArray;
   }
   const learningObjectiveQueryRes = await callGraphqlApi(
-    learningObjectiveQuery(learningObjectiveId));
+    learningObjectiveQuery(learningObjectiveId),
+  );
   const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
   const {
     topic: topicInfo,
@@ -172,7 +173,8 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
       learningObjectiveId,
       restQuery,
       practiceQuestionsQuery,
-    ));
+    ),
+  );
   if (result) {
     /*
       parsing data 'addUserLearningObjective' so that the logic implemented ahead can read data is

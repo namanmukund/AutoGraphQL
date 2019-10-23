@@ -5,10 +5,11 @@ function rollbackPlugin(modelSchema, options) {
   const schema = modelSchema;
   /* SCHEMA CHANGES */
 
-  schema.add({ _version: {
-    type: Number,
-    default: 0,
-  },
+  schema.add({
+    _version: {
+      type: Number,
+      default: 0,
+    },
   });
 
   // assumes connection happens before plugin or something? not sure but yea..

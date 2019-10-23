@@ -33,7 +33,7 @@ const fetchOldRelatedTypeId = async (typeName, id, field) => {
   let ids = [];
   if (data) {
     if (Array.isArray(data)) {
-      ids = data.map(singleData => singleData.id);
+      ids = data.map((singleData) => singleData.id);
     } else {
       ids = [data.id];
     }
@@ -168,7 +168,8 @@ const addRelationMutationResolver = (
           const additionalRelationFields = getAdditionalRelationFieldsFromConnectArgs(typeField,
             relatedType, params);
           const additionalRelationFieldsInRelated = getAdditionalRelationFieldsFromConnectArgs(
-            relatedTypeField, typeName, params);
+            relatedTypeField, typeName, params,
+          );
 
           // If typeField is local field
           const promiseArray = [];

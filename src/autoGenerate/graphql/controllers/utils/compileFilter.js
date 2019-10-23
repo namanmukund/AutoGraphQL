@@ -29,41 +29,41 @@ const compileFilter = {
   },
   // not filter
   not(data, key, value) {
-    return [].concat(key === 'this' ? data : data[key]).some(val => val !== value);
+    return [].concat(key === 'this' ? data : data[key]).some((val) => val !== value);
   },
   // in filter
   in(data, key, value) {
-    return [].concat(key === 'this' ? data : data[key]).some(val => value.includes(val));
+    return [].concat(key === 'this' ? data : data[key]).some((val) => value.includes(val));
   },
   // not in filter
   not_in(data, key, value) {
-    return [].concat(key === 'this' ? data : data[key]).some(val => !value.includes(val));
+    return [].concat(key === 'this' ? data : data[key]).some((val) => !value.includes(val));
   },
   // All integer filters
   // less than filter
   lt(data, key, value) {
-    return [].concat(key === 'this' ? data : data[key]).some(val => val < value);
+    return [].concat(key === 'this' ? data : data[key]).some((val) => val < value);
   },
   // greater than filter
   gt(data, key, value) {
-    return [].concat(key === 'this' ? data : data[key]).some(val => val > value);
+    return [].concat(key === 'this' ? data : data[key]).some((val) => val > value);
   },
   // All string filters
   // contains filter
   contains(data, key, value) {
-    return [].concat(key === 'this' ? data : data[key]).some(val => val.includes(value));
+    return [].concat(key === 'this' ? data : data[key]).some((val) => val.includes(value));
   },
   // not contains filter
   not_contains(data, key, value) {
-    return [].concat(key === 'this' ? data : data[key]).some(val => !val.includes(value));
+    return [].concat(key === 'this' ? data : data[key]).some((val) => !val.includes(value));
   },
   // startsWith filter
   startsWith(data, key, value) {
-    return [].concat(key === 'this' ? data : data[key]).some(val => val.startsWith(value));
+    return [].concat(key === 'this' ? data : data[key]).some((val) => val.startsWith(value));
   },
   // equal filter
   equal(data, key, value) {
-    return [].concat(key === 'this' ? data : data[key]).some(val => val === value);
+    return [].concat(key === 'this' ? data : data[key]).some((val) => val === value);
   },
   // find inside an object
   checkReferenceIndex(data, key, value) {

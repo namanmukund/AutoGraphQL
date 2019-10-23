@@ -118,7 +118,8 @@ const signupMutationResolver = async (
   // firstTopicId and firstLearningObjectiveId is not present. Just adding log
   if (firstTopicId && firstLearningObjectiveId) {
     await addUserCurrentTopicComponentStatus(
-      userId, firstTopicId, firstLearningObjectiveId);
+      userId, firstTopicId, firstLearningObjectiveId,
+    );
   } else {
     log('Failed to get first published topic or first published learning objective corresponding to it');
   }

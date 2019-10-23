@@ -13,4 +13,3 @@ export {
   deleteQuestionBankValidation,
   addLearningObjectiveValidation,
 };
-

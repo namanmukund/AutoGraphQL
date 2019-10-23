@@ -41,6 +41,7 @@ const getUserCurrentTopicComponentStatus = (
   userId,
   currentTopic,
   currentLearningObjective,
-  enrollmentType));
+  enrollmentType,
+));
 
 export default getUserCurrentTopicComponentStatus;

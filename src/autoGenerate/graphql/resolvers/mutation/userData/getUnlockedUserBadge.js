@@ -13,7 +13,7 @@ import getUserIdandAppNameAfterValidation
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = userId => `
+const getUserCurrentTopicComponentStatus = (userId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[

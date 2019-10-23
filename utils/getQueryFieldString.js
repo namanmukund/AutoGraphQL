@@ -6,5 +6,4 @@ const getQueryFieldString = (fields) => {
   return fieldsToQuery;
 };
 
-export default getQueryFieldString
-;
+export default getQueryFieldString;

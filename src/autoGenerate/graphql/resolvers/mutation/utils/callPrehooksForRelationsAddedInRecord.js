@@ -12,18 +12,19 @@ const callPrehooksForRelationsAddedInRecord = async (
     allRelationObjectsArray1toM,
     finalInput,
   } = inputMap;
-  const newContext = Object.assign({}, context);
+  const newContext = { ...context };
   newContext.record = finalInput;
   // call prehooks for 1-1 relations added
   const promiseArray1to1 = allRelationObjectsArray1to1.map(
-    relationObject => callConnectMutationPreHook(
+    (relationObject) => callConnectMutationPreHook(
       recordId,
       relationObject,
       finalInput,
       mutationType,
       ast,
       newContext,
-    ));
+    ),
+  );
 
   await Promise.all(promiseArray1to1);
 
@@ -36,16 +37,14 @@ const callPrehooksForRelationsAddedInRecord = async (
     });
   });
 
-  const promiseArray1toM = oneToManyRelationsArray.map(relationObject =>
-    callConnectMutationPreHook(
-      recordId,
-      relationObject,
-      finalInput,
-      mutationType,
-      ast,
-      newContext,
-    ),
-  );
+  const promiseArray1toM = oneToManyRelationsArray.map((relationObject) => callConnectMutationPreHook(
+    recordId,
+    relationObject,
+    finalInput,
+    mutationType,
+    ast,
+    newContext,
+  ));
   await Promise.all(promiseArray1toM);
 };
 export { callPrehooksForRelationsAddedInRecord };

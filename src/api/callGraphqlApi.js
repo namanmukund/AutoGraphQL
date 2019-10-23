@@ -5,7 +5,7 @@ import getTokenForApi from './getTokenForApi';
 
 const application = process.env.APPLICATION || 'core';
 const env = process.env.NODE_ENV || 'development';
-const uri = allServerConfig[application][env].backend.uri;
+const { uri } = allServerConfig[application][env].backend;
 
 // const token = getTokenForApi();
 const callGraphqlApi = (

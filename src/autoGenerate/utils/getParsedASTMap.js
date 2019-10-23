@@ -35,8 +35,8 @@ const getAllowedOperationsOnType = (
     });
   }
   return (
-    (allowedDirectiveArray && allowedDirectiveArray.length) ?
-      allowedDirectiveArray : '*'
+    (allowedDirectiveArray && allowedDirectiveArray.length)
+      ? allowedDirectiveArray : '*'
   );
 };
 
@@ -57,8 +57,8 @@ const getAppAndUserPermissionsFromDirective = (
           throw new Error(`Invalid arguments in ${permissionsRelatedDirectiveName} in ${definition.name.value}`);
         }
         if (
-          !(get(directive, 'arguments[0].name.value') === 'permissions') &&
-            !(get(directive, 'arguments[1].name.value') === 'rule')
+          !(get(directive, 'arguments[0].name.value') === 'permissions')
+            && !(get(directive, 'arguments[1].name.value') === 'rule')
         ) {
           throw new Error(`Permission and rule arguments are required in ${permissionsRelatedDirectiveName} in ${definition.name.value}`);
         }
@@ -80,9 +80,9 @@ const getAppAndUserPermissionsFromDirective = (
             const permissionInfoObj = {};
             const { fields } = listValue;
             if (
-              !fields ||
-              (permissionsRelatedDirectiveName === 'userPermissions' && !(fields.length === 3)) ||
-                (permissionsRelatedDirectiveName === 'appPermissions' && !(fields.length === 2))
+              !fields
+              || (permissionsRelatedDirectiveName === 'userPermissions' && !(fields.length === 3))
+                || (permissionsRelatedDirectiveName === 'appPermissions' && !(fields.length === 2))
             ) {
               throw new Error(`Invalid count in ${permissionsRelatedDirectiveName} in ${definition.name.value}`);
             }
@@ -90,16 +90,16 @@ const getAppAndUserPermissionsFromDirective = (
             fields.forEach((field) => {
               // if it is userRole
               if (
-                field.name && field.name.value === 'userRole' &&
-                    field.value && field.value.value
+                field.name && field.name.value === 'userRole'
+                    && field.value && field.value.value
               ) {
                 permissionInfoObj.userRole = field.value.value;
               }
 
               // if it is name field
               if (
-                field.name && field.name.value === 'appName' &&
-                    field.value && field.value.value
+                field.name && field.name.value === 'appName'
+                    && field.value && field.value.value
               ) {
                 permissionInfoObj.appName = field.value.value;
               }
@@ -230,7 +230,7 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
        */
       if (parsedField.directives.length > 0) {
         parsedField.directives.forEach((directive) => {
-          const directivesMap = Object.assign({}, directive);
+          const directivesMap = { ...directive };
           const directiveName = directive.name.value;
           const directiveArguments = directive.arguments;
           if (directiveName === 'defaultValue') {
@@ -279,8 +279,8 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
                   argumentFields.forEach((relationField) => {
                     const relationFieldName = relationField.name.value;
                     const isFieldListKind = relationField.value.kind === 'ListValue';
-                    const fieldType = isFieldListKind ? relationField.value.values[0].value :
-                      relationField.value.value;
+                    const fieldType = isFieldListKind ? relationField.value.values[0].value
+                      : relationField.value.value;
                     let fieldTypeString;
                     if (isFieldListKind) {
                       fieldTypeString = `[${fieldType}]`;
@@ -349,8 +349,7 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
           localNonNullAndUniqueFields[fieldName] = true;
         }
       } else if (remoteApplicationValue) {
-        remoteFieldsApplicationWise[remoteApplicationValue] =
-          remoteFieldsApplicationWise[remoteApplicationValue] || {};
+        remoteFieldsApplicationWise[remoteApplicationValue] = remoteFieldsApplicationWise[remoteApplicationValue] || {};
         remoteFieldsApplicationWise[remoteApplicationValue][fieldName] = true;
 
         // If isRelation
@@ -362,26 +361,22 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
             relationName: directiveName,
           };
           relationFields[fieldName] = directiveName;
-          remoteRelationFieldsApplicationWise[remoteApplicationValue] =
-            remoteRelationFieldsApplicationWise[remoteApplicationValue] || {};
+          remoteRelationFieldsApplicationWise[remoteApplicationValue] = remoteRelationFieldsApplicationWise[remoteApplicationValue] || {};
           remoteRelationFieldsApplicationWise[remoteApplicationValue][fieldName] = true;
         }
         // If isUnique
         if (isUnique) {
-          remoteUniqueFieldsApplicationWise[remoteApplicationValue] =
-            remoteUniqueFieldsApplicationWise[remoteApplicationValue] || {};
+          remoteUniqueFieldsApplicationWise[remoteApplicationValue] = remoteUniqueFieldsApplicationWise[remoteApplicationValue] || {};
           remoteUniqueFieldsApplicationWise[remoteApplicationValue][fieldName] = true;
         }
         // If nonNull
         if (isNonNull) {
-          remoteNonNullFieldsApplicationWise[remoteApplicationValue] =
-            remoteNonNullFieldsApplicationWise[remoteApplicationValue] || {};
+          remoteNonNullFieldsApplicationWise[remoteApplicationValue] = remoteNonNullFieldsApplicationWise[remoteApplicationValue] || {};
           remoteNonNullFieldsApplicationWise[remoteApplicationValue][fieldName] = true;
         }
         // If nonNull && Unique
         if (isNonNull && isUnique) {
-          remoteNonNullAndUniqueFieldsApplicationWise[remoteApplicationValue] =
-            remoteNonNullAndUniqueFieldsApplicationWise[remoteApplicationValue] || {};
+          remoteNonNullAndUniqueFieldsApplicationWise[remoteApplicationValue] = remoteNonNullAndUniqueFieldsApplicationWise[remoteApplicationValue] || {};
           remoteNonNullAndUniqueFieldsApplicationWise[remoteApplicationValue][fieldName] = true;
         }
       }
@@ -397,10 +392,11 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
       return null;
     });
     // remove nulls
-    fieldsParsedArray = fieldsParsedArray.filter(field => field);
+    fieldsParsedArray = fieldsParsedArray.filter((field) => field);
     const name = definition.name.value;
 
-    parsedASTObject[name] = Object.assign({}, props, {
+    parsedASTObject[name] = {
+      ...props,
       fields: fieldsParsedArray, // this is array of fields
       field: fieldsObject, // this is object of fields
       kind,
@@ -426,7 +422,7 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
       appPermissions,
       userPermissions,
       allowedOperations,
-    });
+    };
 
     return null;
   });

@@ -8,8 +8,7 @@ import { UPDATE } from '../../../../../../constants/graphqlOperations';
 
 const application = process.env.APPLICATION || 'core';
 const authParams = allAuthParams[application];
-const resetUserPasswordMutationPromise = (searchObj, updateObj, modelMutations) =>
-  modelMutations.updateOne(searchObj, updateObj);
+const resetUserPasswordMutationPromise = (searchObj, updateObj, modelMutations) => modelMutations.updateOne(searchObj, updateObj);
 
 export default function resetUserPasswordMutationResolver(
   root,
@@ -37,7 +36,9 @@ export default function resetUserPasswordMutationResolver(
     user: true,
   });
   const modelMutations = new MutationController(typeName, authentication);
-  const { id, oldPassword, newPassword, password } = params;
+  const {
+    id, oldPassword, newPassword, password,
+  } = params;
   const valid = bcrypt.compareSync(oldPassword, password);
   if (!valid) {
     throw new PasswordMismatchError();
@@ -50,6 +51,6 @@ export default function resetUserPasswordMutationResolver(
     searchObj,
     updateObj,
     modelMutations,
-  ).then(user => user)
-    .catch(err => err);
+  ).then((user) => user)
+    .catch((err) => err);
 }

@@ -29,8 +29,7 @@ const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
 // query to update user LO based on activity done by user
 const updateUserLearningObjectiveMutation = (userLearningObjectiveId,
   isChatBookmarked,
-  chatStatus,
-) => `
+  chatStatus) => `
   mutation{
     updateUserLearningObjective(id:"${userLearningObjectiveId}",  input:{
       ${typeof isChatBookmarked === 'boolean' ? `isChatBookmarked: ${isChatBookmarked}` : ''}
@@ -70,11 +69,12 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
     in that case if he is hitting back after chat consumption, status will not get updated
     if it is already completed
   */
-  const userLearningObjectiveQueryRes =
-    await callGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId));
+  const userLearningObjectiveQueryRes = await callGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId));
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
-  const { id: userLearningObjectiveId,
-    chatStatus: existingChatStatus } = userLearningObjectiveInfo;
+  const {
+    id: userLearningObjectiveId,
+    chatStatus: existingChatStatus,
+  } = userLearningObjectiveInfo;
   const { complete, incomplete, skip: skipStatus } = userTopicTypeStatus;
   const { next, skip } = userActionType;
   let chatStatus = incomplete;
@@ -102,8 +102,8 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
     'message',
   );
   // if existing chatStatus is complete, it will remain complete
-  if (userLearningObjectiveInfo &&
-      existingChatStatus === complete) {
+  if (userLearningObjectiveInfo
+      && existingChatStatus === complete) {
     chatStatus = complete;
   }
 
@@ -117,7 +117,8 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
   await callGraphqlApi(updateUserLearningObjectiveMutation(
     userLearningObjectiveId,
     isChatBookmarked,
-    chatStatus));
+    chatStatus,
+  ));
   return true;
 };
 

@@ -40,9 +40,9 @@ const removeReferencesWhenDisconnected = (
           Object.assign(nestedDisconnectObjInfo, {
             [key]: {
               ...tempDisconnectObj,
-              data: Array.isArray(data[key]) ?
-                [...nestedDisconnectObjInfo[key].data, ...data[key]] :
-                [...nestedDisconnectObjInfo[key].data, data[key]],
+              data: Array.isArray(data[key])
+                ? [...nestedDisconnectObjInfo[key].data, ...data[key]]
+                : [...nestedDisconnectObjInfo[key].data, data[key]],
             },
           });
         }
@@ -71,7 +71,7 @@ const arrayOperationFunctions = {
   pushToSet(record = [], input) {
     // added validation to make sure same class, sec is not added
     const isANewClassItem = validateClassItemsUniqueness(record, input);
-    if (find(record, rec => isMatch(omitId(rec), input)) === undefined && isANewClassItem) {
+    if (find(record, (rec) => isMatch(omitId(rec), input)) === undefined && isANewClassItem) {
       return [...record, input];
     }
     return record;
@@ -84,7 +84,7 @@ const arrayOperationFunctions = {
     nestedDisconnectObjInfo,
     targetUpdateId,
   ) {
-    const dataToBePopped = record.map(d => d.toObject());
+    const dataToBePopped = record.map((d) => d.toObject());
     removeReferencesWhenDisconnected(
       dataToBePopped,
       nestedDisconnectObjInfo,
@@ -134,7 +134,7 @@ const arrayOperationFunctions = {
       return record;
     }
     const dataToBePopped = [];
-    dataToBePopped.push(record.map(d => d.toObject())[0]);
+    dataToBePopped.push(record.map((d) => d.toObject())[0]);
     removeReferencesWhenDisconnected(
       dataToBePopped,
       nestedDisconnectObjInfo,
@@ -154,7 +154,7 @@ const arrayOperationFunctions = {
       return record;
     }
     const dataToBePopped = [];
-    dataToBePopped.push(record.map(d => d.toObject())[record.length - 1]);
+    dataToBePopped.push(record.map((d) => d.toObject())[record.length - 1]);
     removeReferencesWhenDisconnected(
       dataToBePopped,
       nestedDisconnectObjInfo,
@@ -173,7 +173,7 @@ const arrayOperationFunctions = {
     if (record === null || input === false) {
       return record;
     }
-    const dataToBePopped = record.map(d => d.toObject());
+    const dataToBePopped = record.map((d) => d.toObject());
     removeReferencesWhenDisconnected(
       dataToBePopped,
       nestedDisconnectObjInfo,
@@ -192,13 +192,13 @@ const arrayOperationFunctions = {
     if (record === null) {
       return record;
     }
-    const dataToBePopped = record.filter(rec => processFilter(rec, input)).map(d => d.toObject());
+    const dataToBePopped = record.filter((rec) => processFilter(rec, input)).map((d) => d.toObject());
     removeReferencesWhenDisconnected(
       dataToBePopped,
       nestedDisconnectObjInfo,
       targetUpdateId,
     );
-    return record.filter(rec => !processFilter(rec, input));
+    return record.filter((rec) => !processFilter(rec, input));
   },
 };
 

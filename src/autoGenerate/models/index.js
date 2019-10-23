@@ -3,15 +3,17 @@
  */
 import mongoose from 'mongoose';
 import { has } from 'lodash';
-import getParsedASTMap from './../utils/getParsedASTMap';
+import getParsedASTMap from '../utils/getParsedASTMap';
 import { log, types } from '../../../utils';
 import RollbackSchema from '../../mongooseRollback/models/rollback';
 import getDirectiveArgumentValue from '../utils/getDirectiveArgumentValue';
-import { getEnumTypeMongooseSchema, visitField, hasDirective, getEnumDefinitionTypeObject } from '../utils';
+import {
+  getEnumTypeMongooseSchema, visitField, hasDirective, getEnumDefinitionTypeObject,
+} from '../utils';
 
 const rollback = require('../../mongooseRollback/mongooseRollback');
 
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 // uncomment below code to debug mongodb queries
 // mongoose.set('debug', true);
 // recursive function, returns final field schema definition for each field in model
@@ -30,9 +32,9 @@ const getFieldSchema = (fieldDefinition, typesSchema, allModelsSchema, allEnumTy
     : fieldDefinition;
   const { type: fieldType } = fieldDefinitionObject;
 
-  const isRelationFieldWithAdditionalRelationFields = fieldDefinitionObject &&
-      fieldDefinitionObject.typeId &&
-      Object.keys(fieldDefinitionObject).length > 2;
+  const isRelationFieldWithAdditionalRelationFields = fieldDefinitionObject
+      && fieldDefinitionObject.typeId
+      && Object.keys(fieldDefinitionObject).length > 2;
 
   if (isRelationFieldWithAdditionalRelationFields) {
     // is relation field
@@ -117,7 +119,7 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema, modelsToBe
        }
      }
    */
-  const schemas = Object.assign({}, allModelsSchema);
+  const schemas = { ...allModelsSchema };
   // get all the enum types before attaching it with the respective schemas
   const allEnumTypesObject = getEnumDefinitionTypeObject(types);
   const models = {};
@@ -146,8 +148,10 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema, modelsToBe
 
       const createdHistoryModel = mongoose.model(historyCollectionName,
         historyModelSchema, historyCollectionName);
-      modelSchema.plugin(rollback, { collectionName: modelName,
-        mongooseModel: createdHistoryModel });
+      modelSchema.plugin(rollback, {
+        collectionName: modelName,
+        mongooseModel: createdHistoryModel,
+      });
       const historyTypeName = `${typeName}History`;
       models[historyTypeName] = createdHistoryModel;
     }
@@ -209,7 +213,8 @@ Object.keys(parsedASTMap).forEach((type) => {
         const isDefaultField = fieldDirectives.defaultValue;
         if (isDefaultField) {
           fieldObject.fieldModelDefinition.default = getDirectiveArgumentValue(
-            parsedASTMap, typeName, fieldDefinition.name.value, 'defaultValue', 'value');
+            parsedASTMap, typeName, fieldDefinition.name.value, 'defaultValue', 'value',
+          );
         }
         const { fieldModelDefinition } = fieldObject;
         // If fields is not remote and has definition.
@@ -265,4 +270,3 @@ if (models) {
 }
 
 export default models;
-

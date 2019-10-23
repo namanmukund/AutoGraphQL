@@ -15,7 +15,7 @@ import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAn
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = userId => `
+const getUserCurrentTopicComponentStatus = (userId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -154,7 +154,9 @@ const userCourseSyllabusMutationResolver = async (
   we will compare this userId against userId passed in input
   both should be equal to perform further action
   */
-  const { video, message, practiceQuestion, quiz } = topicTypes;
+  const {
+    video, message, practiceQuestion, quiz,
+  } = topicTypes;
   const { free } = enrollmentTypes;
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
   const {
@@ -225,7 +227,7 @@ const userCourseSyllabusMutationResolver = async (
   const currentUserSyllabus = {};
   let totalChapters = 0;
   let totalTopics = 0;
-  const chapters = currentCourse.chapters;
+  const { chapters } = currentCourse;
   const { order: currentTopicOrder } = currentTopic;
   if (!chapters || !chapters.length) {
     throw new DatabaseRecordNotFoundError({

@@ -67,8 +67,8 @@ app.use(`/graphql/${application}`,
       }
     }
     let formatErrorWrapper;
-    const query = params.query;
-    const variables = params.variables;
+    const { query } = params;
+    const { variables } = params;
     // initiaize setContext before sending any error to sentry
     if (isSentryAppAndEnv(application, env)) {
       const contextObj = {};

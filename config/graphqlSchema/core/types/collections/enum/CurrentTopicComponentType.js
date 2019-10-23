@@ -1,6 +1,8 @@
 import { topicTypes } from '../../../../../../constants';
 
-const { video, message, practiceQuestion, quiz } = topicTypes;
+const {
+  video, message, practiceQuestion, quiz,
+} = topicTypes;
 const CurrentTopicComponentType = `
   enum CurrentTopicComponentType {
       ${video}

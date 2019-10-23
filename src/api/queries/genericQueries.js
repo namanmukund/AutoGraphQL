@@ -12,7 +12,8 @@ const genericFilterQueryToGetIds = (modal, field, connectionId) => {
 };
 
 const genericApiToFetchRelatedObjectQueryBasedOnTypeId = (
-  typeName, id, relatedField, relatedFieldId) => {
+  typeName, id, relatedField, relatedFieldId,
+) => {
   const query = `
           query {
         ${relatedField}(filter:{
@@ -54,5 +55,7 @@ const genericFilterQuery = (modelName, outputKeys, filter) => {
   return query;
 };
 
-export { genericFilterQueryToGetIds, genericSkipFirstQuery,
-  genericApiToFetchRelatedObjectQueryBasedOnTypeId, genericFilterQuery };
+export {
+  genericFilterQueryToGetIds, genericSkipFirstQuery,
+  genericApiToFetchRelatedObjectQueryBasedOnTypeId, genericFilterQuery,
+};

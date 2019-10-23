@@ -13,8 +13,8 @@ const mutationQuery = (query, variables, token) => {
   });
   /* eslint-enable no-param-reassign */
   return apolloFetch({ query, variables })
-    .then(res => res)
-    .catch(error => error);
+    .then((res) => res)
+    .catch((error) => error);
 };
 const fetchQuery = (query, token) => {
   /* eslint-disable no-param-reassign */
@@ -27,8 +27,8 @@ const fetchQuery = (query, token) => {
   });
   /* eslint-enable no-param-reassign */
   return apolloFetch({ query })
-    .then(res => res)
-    .catch(error => error);
+    .then((res) => res)
+    .catch((error) => error);
 };
 
 export { mutationQuery, fetchQuery };

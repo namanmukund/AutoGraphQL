@@ -2,7 +2,7 @@ import { PUBLISHED } from '../../../constants';
 import callGraphqlApi from '../../api/callGraphqlApi';
 
 // query to get first published topic and first published LO corresponding to it
-const topicQuery = order => `
+const topicQuery = (order) => `
   query{
     topics(
       filter:{
@@ -38,7 +38,7 @@ query to get first published topic and first published LO corresponding to it
 along with info about topic and LO. this will be sent when a not logged in user
 calls userCourseSyllabus
 */
-const topicQueryWithExtraInfo = order => `
+const topicQueryWithExtraInfo = (order) => `
   query{
     topics(
       filter:{

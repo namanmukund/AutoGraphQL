@@ -71,11 +71,13 @@ const addUserCurrentTopicComponentStatusValidation = async (params, context) => 
     throw new TopicOrLONotPresentError();
   }
   const userCurrentTopicComponentStatusData = await callGraphqlApi(
-    userCurrentTopicComponentStatusQuery(userId, courseId));
+    userCurrentTopicComponentStatusQuery(userId, courseId),
+  );
   // Fetching userCurrentTopicComponentStatus to check if it already exists or not
   const userCurrentTopicComponentStatusesResult = get(
     userCurrentTopicComponentStatusData,
-    'data.userCurrentTopicComponentStatuses');
+    'data.userCurrentTopicComponentStatuses',
+  );
     // checking if course and user document already exists
   if (userCurrentTopicComponentStatusesResult && userCurrentTopicComponentStatusesResult.length) {
     throw new UserCourseCombinationExistError();
@@ -85,10 +87,12 @@ const addUserCurrentTopicComponentStatusValidation = async (params, context) => 
   So, basically it returns 1 if LO and topic are related otherwise 0
   */
   const learningObjectiveData = await callGraphqlApi(
-    learningObjectiveQuery(topicId, learningObjectiveId));
+    learningObjectiveQuery(topicId, learningObjectiveId),
+  );
   const learningObjectiveCount = get(
     learningObjectiveData,
-    'data.topic.learningObjectivesMeta.count');
+    'data.topic.learningObjectivesMeta.count',
+  );
   /*
   if learning objective count is not present or the count is less than 1
   that means LO and topic are not related to each other

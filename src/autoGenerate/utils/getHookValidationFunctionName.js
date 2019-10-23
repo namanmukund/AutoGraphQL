@@ -1,3 +1,3 @@
-const getHookValidationFunctionName = mutationOrQueryName => `${mutationOrQueryName}Validation`;
+const getHookValidationFunctionName = (mutationOrQueryName) => `${mutationOrQueryName}Validation`;
 
 export default getHookValidationFunctionName;
