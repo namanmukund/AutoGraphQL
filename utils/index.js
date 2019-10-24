@@ -39,7 +39,7 @@ const dbConfig = allDbConfig[application][env];
 const { functions } = schema[application];
 const awsConfig = allAwsConfig[env];
 
-module.exports = {
+export {
   log,
   logArray,
   logMapOfArrays,

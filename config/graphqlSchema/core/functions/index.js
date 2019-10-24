@@ -1,5 +1,8 @@
 import hooks from './hooks';
 
-module.exports = {
-  hookFunctions: hooks,
+const hookFunctions = {
+  hooks,
+};
+export {
+  hookFunctions,
 };

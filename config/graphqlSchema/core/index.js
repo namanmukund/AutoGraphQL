@@ -1,7 +1,7 @@
 import types from './types';
 import functions from './functions';
 
-module.exports = {
+export {
   types,
   functions,
 };

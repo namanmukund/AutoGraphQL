@@ -5,13 +5,10 @@ import mongoose from 'mongoose';
 import { has } from 'lodash';
 import getParsedASTMap from '../utils/getParsedASTMap';
 import { log, types } from '../../../utils';
-import RollbackSchema from '../../mongooseRollback/models/rollback';
 import getDirectiveArgumentValue from '../utils/getDirectiveArgumentValue';
 import {
   getEnumTypeMongooseSchema, visitField, hasDirective, getEnumDefinitionTypeObject,
 } from '../utils';
-
-const rollback = require('../../mongooseRollback/mongooseRollback');
 
 const { Schema } = mongoose;
 // uncomment below code to debug mongodb queries
@@ -109,7 +106,7 @@ const getFieldSchema = (fieldDefinition, typesSchema, allModelsSchema, allEnumTy
   return finalFieldModelDefinition;
 };
 
-const createMongooseModelsFromSchema = (allModelsSchema, typesSchema, modelsToBeVersioned) => {
+const createMongooseModelsFromSchema = (allModelsSchema, typesSchema) => {
   /* Schemas can be like
    user:{
       "username": {
@@ -125,7 +122,6 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema, modelsToBe
   const models = {};
   Object.keys(schemas).forEach((modelName) => {
     const typeName = modelName;
-    const isModelToBeVersioned = !!modelsToBeVersioned.includes(typeName);
     const model = schemas[typeName];
 
     Object.keys(model).forEach((fieldName) => {
@@ -139,22 +135,6 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema, modelsToBe
     const collectionObject = { collection: typeName, timestamps: true, usePushEach: true };
     const modelSchema = new Schema(model, collectionObject);
 
-    // create history model if model versioning has to be done
-    if (isModelToBeVersioned) {
-      const historyCollectionName = `${typeName}_hist`;
-      const historyCollectionObject = Object.assign(collectionObject,
-        { collection: historyCollectionName });
-      const historyModelSchema = new Schema(RollbackSchema, historyCollectionObject);
-
-      const createdHistoryModel = mongoose.model(historyCollectionName,
-        historyModelSchema, historyCollectionName);
-      modelSchema.plugin(rollback, {
-        collectionName: modelName,
-        mongooseModel: createdHistoryModel,
-      });
-      const historyTypeName = `${typeName}History`;
-      models[historyTypeName] = createdHistoryModel;
-    }
     // create model from schema
     const createdModel = mongoose.model(typeName, modelSchema);
     models[modelName] = createdModel;

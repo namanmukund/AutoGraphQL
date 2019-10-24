@@ -1,7 +1,10 @@
 import coreAuthParams from './core';
 import sendGridApi from '../sendGrid/sendGridApi';
 
-module.exports = {
+const core = {
   core: coreAuthParams,
+};
+export default {
+  core,
   sendGridApi,
 };
