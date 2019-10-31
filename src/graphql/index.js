@@ -1,6 +1,6 @@
 /* File for defining Graphql Schema(queries and mutations)  */
 import { getArgumentValues } from 'graphql/execution/values';
-import { makeExecutableSchema, forEachField } from 'graphql-tools';
+import { makeExecutableSchema, forEachField } from 'apollo-server-express';
 import Directives from './directives';
 import directiveResolvers from './directiveResolvers';
 import {
