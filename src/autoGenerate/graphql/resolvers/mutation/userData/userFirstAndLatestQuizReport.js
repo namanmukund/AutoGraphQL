@@ -119,51 +119,6 @@ const getQuizReportQuery = (userId, topicId) => `
         inCorrectQuestionCount
         unansweredQuestionCount
       }
-      quizAnswers {
-        isAttempted
-        isCorrect
-        question {
-          id
-          statement
-          questionType
-          hint
-          questionCodeSnippet
-          answerCodeSnippet
-        }
-        mcqOptions {
-          isCorrect
-          statement
-        }
-        userMcqAnswer {
-          isSelected
-          statement
-        }
-        fibInputOptions {
-          answers
-          correctPosition
-        }
-        userFibInputAnswer {
-          answer
-          position
-        }
-        fibBlocksOptions {
-          correctPositions
-          statement
-        }
-        userFibBlockAnswer {
-          statement
-          position
-        }
-        arrangeOptions {
-          displayOrder
-          correctPosition
-          statement
-        }
-        userArrangeAnswer {
-          statement
-          position
-        }
-      }
     }
   }
   `;
@@ -220,10 +175,9 @@ const parseQuizReport = async (
         });
     });
   }
-  if (quizReport.quizAnswers
-    && quizReport.quizAnswers.length) {
-    quizReport.quizAnswers.forEach((quizAnswer, index) => {
-      Object.assign(quizReport.quizAnswers[index].question, { type: 'QuestionBank', typeId: `${quizAnswer.question.id}` });
+  if (quizReport.id) {
+    Object.assign(quizReport, {
+      quizReportId: quizReport.id,
     });
   }
   return quizReport;
@@ -233,7 +187,7 @@ const parseQuizReport = async (
 This is called when user tries goes to quiz report page
 It will return the first and last quiz report of the user
 based on User current topic component status which will be used to check
-whther user has attempted quiz or not
+whether user has attempted quiz or not
 It also returns the answers given by the user for that in respective attempt
 */
 const userFirstAndLatestQuizReportMutationResolver = async (
@@ -305,7 +259,6 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   }
   // this object will be returned in output
   const userQuizReportData = {};
-  const quizData = [];
   let parsedLatestQuizReport;
   let parsedFirstQuizReport;
   const quizRes = await callGraphqlApi(
@@ -319,11 +272,11 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   // Constructing data for first and latest quiz report
   if (quizInfo.length) {
     const latestQuizReport = quizInfo[0];
-    parsedLatestQuizReport = parseQuizReport(latestQuizReport, quizData);
+    parsedLatestQuizReport = parseQuizReport(latestQuizReport);
     parsedLatestQuizReport.quizReportNumber = 'latest';
     if (quizInfo.length > 1) {
       const firstQuizReport = quizInfo[quizInfo.length - 1];
-      parsedFirstQuizReport = parseQuizReport(firstQuizReport, quizData);
+      parsedFirstQuizReport = parseQuizReport(firstQuizReport);
       parsedFirstQuizReport.quizReportNumber = 'first';
     }
   }

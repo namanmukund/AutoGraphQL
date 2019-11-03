@@ -24,25 +24,9 @@ const firstandLastQuizReportType = `
     masteryLevel: MasteryLevelsType
  }`;
 
-const firstandLastQuizAnswersType = `
-  type FirstandLastQuizAnswersType {
-   question: QuestionBank @relation(name: "QuestionUserQuiz", direction: "OneWay")
-   questionDisplayOrder: Int
-   isAttempted: Boolean @defaultValue(value: false)
-   isCorrect: Boolean
-   userMcqAnswer: [McqAnswer]
-   userFibInputAnswer: [FibInputAnswer]
-   userFibBlockAnswer: [FibBlocksAnswer]
-   userArrangeAnswer: [ArrangeAnswer]
-   mcqOptions: [McqOption]
-   fibBlocksOptions: [FibBlocksOption]
-   fibInputOptions: [FibInputOption]
-   arrangeOptions: [ArrangeOption]
- }`;
-
 const firstandLastReportType = `
   type FirstandLastReportType {
-    quizAnswers: [FirstandLastQuizAnswersType]
+    quizReportId: ID
     quizReport: FirstandLastQuizReportType
     learningObjectiveReport: [FirstandLastQuizReportLearningObjective]
  }`;
@@ -60,5 +44,5 @@ const UserFirstAndLatestQuizReport = `
 export default [UserFirstAndLatestQuizReport,
   firstandLastQuizReportType,
   firstandLastQuizReportLearningObjective,
-  firstandLastQuizAnswersType, firstandLastReportType,
+  firstandLastReportType,
   UserFirstAndLatestQuizNextComponentType];
