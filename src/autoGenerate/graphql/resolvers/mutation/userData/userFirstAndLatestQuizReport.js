@@ -259,7 +259,6 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   }
   // this object will be returned in output
   const userQuizReportData = {};
-  const quizData = [];
   let parsedLatestQuizReport;
   let parsedFirstQuizReport;
   const quizRes = await callGraphqlApi(
@@ -273,11 +272,11 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   // Constructing data for first and latest quiz report
   if (quizInfo.length) {
     const latestQuizReport = quizInfo[0];
-    parsedLatestQuizReport = parseQuizReport(latestQuizReport, quizData);
+    parsedLatestQuizReport = parseQuizReport(latestQuizReport);
     parsedLatestQuizReport.quizReportNumber = 'latest';
     if (quizInfo.length > 1) {
       const firstQuizReport = quizInfo[quizInfo.length - 1];
-      parsedFirstQuizReport = parseQuizReport(firstQuizReport, quizData);
+      parsedFirstQuizReport = parseQuizReport(firstQuizReport);
       parsedFirstQuizReport.quizReportNumber = 'first';
     }
   }
