@@ -188,7 +188,6 @@ This is called when user tries goes to quiz report page
 It will return the first and last quiz report of the user
 based on User current topic component status which will be used to check
 whether user has attempted quiz or not
-It also returns the answers given by the user for that in respective attempt
 */
 const userFirstAndLatestQuizReportMutationResolver = async (
   root,

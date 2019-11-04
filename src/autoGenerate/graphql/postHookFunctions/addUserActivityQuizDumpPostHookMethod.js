@@ -484,7 +484,7 @@ const evaluateUserQuiz = async (
   /*
   pushMany query to store user's answer and correct answer in User quiz report
   quiz field will be used by client when user hits view answers on report page
-  And it will get genrated for each report(when user hits next)
+  And it will get generated for each report(when user hits next)
   */
   let pushManyQuery = 'quizAnswers:[';
   /*
@@ -841,13 +841,17 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     // updating UserQuiz to change status to complete
     await callGraphqlApi(updateUserQuizMutation(userQuizId));
     // generating quiz report of user
-    await callGraphqlApi(addUserQuizReport(
+    const addUserQuizReportRes = await callGraphqlApi(addUserQuizReport(
       userId,
       topicId,
       quizReportQuery,
       learningObjectiveReportQuery,
       pushManyQuery,
     ));
+    const addUserQuizReportId = get(addUserQuizReportRes, 'data.addUserQuizReport.id');
+    Object.assign(input, {
+      quizReportId: addUserQuizReportId,
+    });
     // calling method to evaluate scholarship of user if he is attempting quiz for the first time
     await evaluateUserScholarship(
       currentTopicComponentInfo,
