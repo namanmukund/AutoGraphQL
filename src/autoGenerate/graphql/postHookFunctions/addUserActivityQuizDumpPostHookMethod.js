@@ -38,6 +38,7 @@ const userQuizQuery = (
           question{
             id
           }
+          questionDisplayOrder
         }
         quizStatus
         nextComponent{
@@ -227,7 +228,7 @@ const createQueryForUserAnswersAndOptions = (
         let userMcqQuery = 'userMcqAnswer: [';
         let mcqOptionQuery = 'mcqOptions: [';
         const macqOptionsLength = mcqOptions.length;
-        const userMcqAnswersLength = userMcqAnswers.length;
+        const userMcqAnswersLength = userMcqAnswers && userMcqAnswers.length;
         mcqOptions.forEach((mcqOption) => {
           statement = get(mcqOption, 'statement').trim();
           isOptionCorrect = get(mcqOption, 'isCorrect');
@@ -237,7 +238,7 @@ const createQueryForUserAnswersAndOptions = (
           if they do not match setting isCorrect to false
           similar logic follows for all question types ahead
           */
-          if (isAttempted && userMcqAnswers.length) {
+          if (isAttempted && userMcqAnswersLength) {
             userMcqAnswers.forEach((userMcqAnswer) => {
               userStatement = get(userMcqAnswer, 'statement').trim();
               isOptionSelected = get(userMcqAnswer, 'isSelected');
@@ -280,7 +281,7 @@ const createQueryForUserAnswersAndOptions = (
         let userFibBlockQuery = 'userFibBlockAnswer: [';
         let fibBlockOptionQuery = 'fibBlocksOptions: [';
         const totalNumberOfBlanksArray = [];
-        const userFibBlockAnswersLength = userFibBlockAnswers.length;
+        const userFibBlockAnswersLength = userFibBlockAnswers && userFibBlockAnswers.length;
         fibBlocksOptions.forEach((fibBlocksOption) => {
           statement = get(fibBlocksOption, 'statement').trim();
           const escapedStatement = escapeString(statement);
@@ -289,7 +290,7 @@ const createQueryForUserAnswersAndOptions = (
             totalNumberOfBlanksArray.push(...optionCorrectPositions);
           }
           optionDisplayOrder = get(fibBlocksOption, 'displayOrder');
-          if (isAttempted && userFibBlockAnswers.length) {
+          if (isAttempted && userFibBlockAnswersLength) {
             userFibBlockAnswers.forEach((userFibBlockAnswer) => {
               userStatement = get(userFibBlockAnswer, 'statement').trim();
               userStatementPosition = get(userFibBlockAnswer, 'position');
@@ -339,12 +340,12 @@ const createQueryForUserAnswersAndOptions = (
         let userFibInputQuery = 'userFibInputAnswer: [';
         let fibInputOptionQuery = 'fibInputOptions: [';
         const fibInputOptionsLength = fibInputOptions.length;
-        const userFibInputAnswersLength = userFibInputAnswers.length;
+        const userFibInputAnswersLength = userFibInputAnswers && userFibInputAnswers.length;
         fibInputOptions.forEach((fibInputOption) => {
           let isUserSelectedOptionCorrect = false;
           answers = get(fibInputOption, 'answers');
           optionPosition = get(fibInputOption, 'correctPosition');
-          if (isAttempted && userFibInputAnswers.length) {
+          if (isAttempted && userFibInputAnswers) {
             userFibInputAnswers.forEach((userFibInputAnswer) => {
               userAnswer = get(userFibInputAnswer, 'answer').trim();
               userStatementPosition = get(userFibInputAnswer, 'position');
@@ -395,11 +396,11 @@ const createQueryForUserAnswersAndOptions = (
         let userArrangeQuery = 'userArrangeAnswer: [';
         let arrangeOptionsQuery = 'arrangeOptions: [';
         const arrangeOptionsLength = arrangeOptions.length;
-        const userArrangeAnswersLength = userArrangeAnswers.length;
+        const userArrangeAnswersLength = userArrangeAnswers && userArrangeAnswers.length;
         arrangeOptions.forEach((arrangeOption) => {
           statement = get(arrangeOption, 'statement').trim();
           optionPosition = get(arrangeOption, 'correctPosition');
-          if (isAttempted && userArrangeAnswers.length) {
+          if (isAttempted && userArrangeAnswersLength) {
             userArrangeAnswers.forEach((userArrangeAnswer) => {
               userStatement = get(userArrangeAnswer, 'statement').trim();
               userStatementPosition = get(userArrangeAnswer, 'position');
@@ -450,9 +451,9 @@ const evaluateUserQuiz = async (
   quizQuestions,
 ) => {
   const totalQuestions = quizQuestionsInUserQuiz.length;
-  let questionsInInput = 0;
   // code to evaluate report of quiz
   let questionIdsQuery = '[';
+  const questionDisplayOrderArray = [];
   /*
   Creating quiz question query with all questions in quiz to fetch them from
   QuestionBank collection to get answers for each of question. We will use output
@@ -460,6 +461,12 @@ const evaluateUserQuiz = async (
   */
   quizQuestionsInUserQuiz.forEach((quizQuestion) => {
     const questionId = get(quizQuestion, 'question.id');
+    const questionDisplayOrder = get(quizQuestion, 'questionDisplayOrder');
+    if (!questionDisplayOrderArray[questionId]) {
+      questionDisplayOrderArray[questionId] = {
+        questionDisplayOrder,
+      };
+    }
     if (questionId) {
       questionIdsQuery += `"${questionId}", `;
     }
@@ -470,16 +477,11 @@ const evaluateUserQuiz = async (
   const learningObjectiveReportObject = {};
   // Initializing quiz report with default count as 0 for all of fields
   const quizReport = {
-    totalQuestionCount: 0,
+    totalQuestionCount: totalQuestions,
     correctQuestionCount: 0,
     inCorrectQuestionCount: 0,
     unansweredQuestionCount: 0,
   };
-  // Remove this after review and testing
-  // quizReport.totalQuestionCount = 0;
-  // quizReport.correctQuestionCount = 0;
-  // quizReport.inCorrectQuestionCount = 0;
-  // quizReport.unansweredQuestionCount = 0;
   const loArray = [];
   /*
   pushMany query to store user's answer and correct answer in User quiz report
@@ -491,118 +493,97 @@ const evaluateUserQuiz = async (
   Iterating over each quiz question from input and will update question in
   userQuizReport on basis of input(isCorrect, isAttempted etc.)
   */
-  quizQuestions.forEach((quizQuestion) => {
-    const currentQuestionId = get(quizQuestion, 'question.typeId');
+  questionBankInfo.forEach((questionBank) => {
+    const { id: questionBankId } = questionBank;
+    let userAnsweredQuizQuestion = {};
+    let isAttempted = false;
+    let isCorrect = false;
     /*
     We get quiz questions from Question Bank and iterate on each one of them and
     use them to know the correct answer of questions, question type etc.
     */
-    questionBankInfo.forEach((questionBank) => {
-      const { id: questionBankId } = questionBank;
+    quizQuestions.forEach((quizQuestion) => {
+      const currentQuestionId = get(quizQuestion, 'question.typeId');
       /*
       iterating over questions from input and question bank and
       comparing for same question and evaluating if it is correct
       */
       if (currentQuestionId === questionBankId) {
+        userAnsweredQuizQuestion = quizQuestion;
         // this field will be used for validation if all questions present in userQuiz is
         // sent by client
-        questionsInInput += 1;
-        quizReport.totalQuestionCount += 1;
-        pushManyQuery += `{ questionConnectId: "${currentQuestionId}", `;
-        const { questionType } = questionBank;
-        const { isAttempted, questionDisplayOrder } = quizQuestion;
-        if (questionDisplayOrder) {
-          pushManyQuery += `questionDisplayOrder: ${questionDisplayOrder}, `;
+        const { isAttempted: isQuestionAttempted } = quizQuestion;
+        if (isQuestionAttempted) {
+          isAttempted = true;
         }
-        if (isAttempted) {
-          pushManyQuery += `isAttempted: ${isAttempted}, `;
-        } else {
-          pushManyQuery += 'isAttempted: false, ';
-        }
-        const loId = get(questionBank, 'learningObjective.id');
-        // initializing learning objective report it is not already populated
-        // Here loId is the learning objective id of the question
-        if (!learningObjectiveReportObject[loId]) {
-          /*
-          we are pushing all the learning objective ids in an array and we will
-          use this array to iterate over each LO and get report of each LO from
-          learningObjectiveReportObject and will construct query accordingly.
-          */
-          loArray.push(loId);
-          learningObjectiveReportObject[loId] = {
-            totalQuestionCount: 0,
-            correctQuestionCount: 0,
-            inCorrectQuestionCount: 0,
-            unansweredQuestionCount: 0,
-            learningObjective: loId,
-          };
-          // remove after review and testing
-          // learningObjectiveReportObject[loId].totalQuestionCount = 0;
-          // learningObjectiveReportObject[loId].correctQuestionCount = 0;
-          // learningObjectiveReportObject[loId].inCorrectQuestionCount = 0;
-          // learningObjectiveReportObject[loId].unansweredQuestionCount = 0;
-          // learningObjectiveReportObject[loId].learningObjective = loId;
-        }
-        // calling method to append user quiz answers and question options to pushMany query
-        const {
-          userAnswersAndQuestionOptionsQuery,
-          isCorrect,
-        } = createQueryForUserAnswersAndOptions(
-          questionType,
-          quizQuestion,
-          questionBank,
-          questionBankId,
-          isAttempted,
-        );
-        pushManyQuery += userAnswersAndQuestionOptionsQuery;
-        pushManyQuery += '}, ';
-        /*
-        calculating quiz report lo wise and topic wise on basis of
-        isAttempted and isCorrect
-        */
-        learningObjectiveReportObject[loId].totalQuestionCount += 1;
-        if (isAttempted) {
-          if (isCorrect) {
-            learningObjectiveReportObject[loId].correctQuestionCount += 1;
-            quizReport.correctQuestionCount += 1;
-          } else {
-            learningObjectiveReportObject[loId].inCorrectQuestionCount += 1;
-            quizReport.inCorrectQuestionCount += 1;
-          }
-        } else {
-          learningObjectiveReportObject[loId].unansweredQuestionCount += 1;
-          quizReport.unansweredQuestionCount += 1;
-        }
-        // remove commented code after review and testing
-        // if (!isAttempted) {
-        //   learningObjectiveReportObject[loId].unansweredQuestionCount += 1;
-        //   quizReport.unansweredQuestionCount += 1;
-        // }
-        // if (isAttempted && isCorrect) {
-        //   learningObjectiveReportObject[loId].correctQuestionCount += 1;
-        //   quizReport.correctQuestionCount += 1;
-        // }
-        // if (isAttempted && !isCorrect) {
-        //   learningObjectiveReportObject[loId].inCorrectQuestionCount += 1;
-        //   quizReport.inCorrectQuestionCount += 1;
-        // }
-        // commented code for calculating quiz lo report accuracy
-        // const loTotalQuestionCount =
-        // learningObjectiveReportObject[loId].totalQuestionCount;
-        // const loCorrectQuestionCount =
-        //   learningObjectiveReportObject[loId].correctQuestionCount;
-        // if (loTotalQuestionCount > 0) {
-        //   learningObjectiveReportObject[loId].accuracy =
-        //     (loCorrectQuestionCount / loTotalQuestionCount) * 100;
-        // }
       }
     });
+    pushManyQuery += `{ questionConnectId: "${questionBankId}", `;
+    const { questionType } = questionBank;
+    const userQuestionDisplayOrder =
+      questionDisplayOrderArray[questionBankId] &&
+      questionDisplayOrderArray[questionBankId].questionDisplayOrder;
+    if (userQuestionDisplayOrder) {
+      pushManyQuery += `questionDisplayOrder: ${userQuestionDisplayOrder}, `;
+    }
+    if (isAttempted) {
+      pushManyQuery += `isAttempted: ${isAttempted}, `;
+    } else {
+      pushManyQuery += 'isAttempted: false, ';
+    }
+    // calling method to append user quiz answers and question options to pushMany query
+    const {
+      userAnswersAndQuestionOptionsQuery,
+      isCorrect: isUserAnswerCorrect,
+    } = createQueryForUserAnswersAndOptions(
+      questionType,
+      userAnsweredQuizQuestion,
+      questionBank,
+      questionBankId,
+      isAttempted,
+    );
+    if (isUserAnswerCorrect) {
+      isCorrect = true;
+    }
+    pushManyQuery += userAnswersAndQuestionOptionsQuery;
+    pushManyQuery += '}, ';
+    const loId = get(questionBank, 'learningObjective.id');
+    // initializing learning objective report it is not already populated
+    // Here loId is the learning objective id of the question
+    if (!learningObjectiveReportObject[loId]) {
+      /*
+      we are pushing all the learning objective ids in an array and we will
+      use this array to iterate over each LO and get report of each LO from
+      learningObjectiveReportObject and will construct query accordingly.
+      */
+      loArray.push(loId);
+      learningObjectiveReportObject[loId] = {
+        totalQuestionCount: 0,
+        correctQuestionCount: 0,
+        inCorrectQuestionCount: 0,
+        unansweredQuestionCount: 0,
+        learningObjective: loId,
+      };
+    }
+    /*
+    calculating quiz report lo wise and topic wise on basis of
+    isAttempted and isCorrect
+    */
+    learningObjectiveReportObject[loId].totalQuestionCount += 1;
+    if (isAttempted) {
+      if (isCorrect) {
+        learningObjectiveReportObject[loId].correctQuestionCount += 1;
+        quizReport.correctQuestionCount += 1;
+      } else {
+        learningObjectiveReportObject[loId].inCorrectQuestionCount += 1;
+        quizReport.inCorrectQuestionCount += 1;
+      }
+    } else {
+      learningObjectiveReportObject[loId].unansweredQuestionCount += 1;
+      quizReport.unansweredQuestionCount += 1;
+    }
   });
   // both for loop end here
-  // checking if all questions present in userQuiz is sent by client
-  if (totalQuestions !== questionsInInput) {
-    throw new QuizQuestionsNotPresentError();
-  }
   const {
     totalQuestionCount: totalQuestionCountQuizReport,
     inCorrectQuestionCount: inCorrectQuestionCountQuizReport,
@@ -666,15 +647,6 @@ const evaluateUserScholarship = async (
     currentTopicId === topicId) {
     // code for calculating total quiz report accuracy for scholarship
     const { totalQuestionCount, correctQuestionCount } = quizReport;
-    // remove after review and testing
-    // let topicsCompleted = 0;
-    // let proficientTopicCount = 0;
-    // let masteredTopicCount = 0;
-    // let familiarTopicCount = 0;
-    // // freeTopicCount is set to 5 in config file
-    // let freeProficientTopicCount = freeTopicCount;
-    // let freeMasteredTopicCount = freeTopicCount;
-    // let freeFamiliarTopicCount = freeTopicCount;
     let accuracy = 0;
     if (totalQuestionCount > 0) {
       accuracy =
