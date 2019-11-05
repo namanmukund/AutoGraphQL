@@ -26,6 +26,7 @@ import userBadgeMutationResolver from './userData/userBadge';
 import sendForgotPasswordLinkMutationResolver from './forgotPassword/sendForgotPasswordLink';
 import resetPasswordFromForgotPasswordLinkMutationResolver from './forgotPassword/resetPasswordFromForgotPasswordLink';
 import getUnlockedUserBadgeMutationResolver from './userData/getUnlockedUserBadge';
+import getQuizReportMutationResolver from './userData/getQuizReport';
 
 export {
   addMutationResolver,
@@ -56,4 +57,5 @@ export {
   sendForgotPasswordLinkMutationResolver,
   resetPasswordFromForgotPasswordLinkMutationResolver,
   getUnlockedUserBadgeMutationResolver,
+  getQuizReportMutationResolver,
 };
