@@ -28,6 +28,7 @@ import Badge from './badge';
 import UserFirstAndLatestQuizReport from './userFirstAndLatestQuizReport';
 import SkipVideo from './skipVideo';
 import UserBadge from './userBadge';
+import QuizReport from './quizReport';
 
 export default [
   ...User,
@@ -60,4 +61,5 @@ export default [
   ...UserFirstAndLatestQuizReport,
   ...SkipVideo,
   ...UserBadge,
+  ...QuizReport,
 ];

@@ -345,6 +345,7 @@ mutationString += 'skipVideo ( topicId: ID!): SkipVideo,';
 mutationString += 'skipPracticeQuestion ( learningObjectiveId: ID!): BooleanResult,';
 mutationString += 'userBadge : UserBadge,';
 mutationString += 'getUnlockedUserBadge ( input: GetUnlockedUserBadgeInput ): GetUnlockedUserBadgeResult,';
+mutationString += 'getQuizReport ( input: GetQuizReportInput): GetQuizReportResult,';
 // Backend Token only password update mutation
 mutationString += 'tcirtSdrowssaPtes ( id: ID!, password: String! ): User,';
 mutationString += 'uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,';

@@ -4,7 +4,7 @@ import {
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
   PUBLISHED,
-  masteryLevels, topicTypes,
+  masteryLevels, topicTypes, userActionType,
 } from '../../../../../../constants';
 import {
   ComponentLockedError,
@@ -14,6 +14,7 @@ import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
+import { log } from '../../../../../../utils';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = userId => `
@@ -71,6 +72,11 @@ const userQuizQuery = (userId, topicId) => `
       first: 1
     ){
       id
+      quiz{
+        question{
+          id
+        }
+      }
       nextComponent {
         topic {
             id
@@ -119,6 +125,25 @@ const getQuizReportQuery = (userId, topicId) => `
         inCorrectQuestionCount
         unansweredQuestionCount
       }
+    }
+  }
+  `;
+
+// mutation to add UserQuizReport
+const addUserQuizDump = (
+  userId,
+  topicId,
+) => `
+  mutation addQuizDump($input: [QuizQuestionsTypeInput]!){
+    addUserActivityQuizDump(
+    userConnectId: "${userId}",
+    topicConnectId: "${topicId}",
+    input: {
+      quizAction: ${userActionType.next},
+       quizQuestions: $input
+    }) {
+      id
+      quizReportId
     }
   }
   `;
@@ -184,12 +209,12 @@ const parseQuizReport = async (
 };
 
 /*
-This is called when user tries goes to quiz report page
-It will return the first and last quiz report of the user
+This is called when user submits a quiz.
+It will return the latest and first quiz report of the user
 based on User current topic component status which will be used to check
 whether user has attempted quiz or not
 */
-const userFirstAndLatestQuizReportMutationResolver = async (
+const getQuizReportMutationResolver = async (
   root,
   input,
   typeName,
@@ -197,7 +222,6 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   mutationName,
   ast,
   context,
-  params,
 ) => {
   /*
   Calling method to validate token and return userId.
@@ -206,17 +230,17 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;
-  const { topicId } = params;
+  if (!userId) {
+    throw new UnauthenticatedUserError();
+  }
+
+  const { topicId, quizQuestions } = input;
   if (!topicId) {
     throw new DatabaseRecordNotFoundError({
       data: {
         error: 'topicId is not present',
       },
     });
-  }
-
-  if (!userId) {
-    throw new UnauthenticatedUserError();
   }
 
   const { authorization: token } = context;
@@ -256,10 +280,36 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   if (topicInfo.order >= currentRunningTopic.order) {
     throw new ComponentLockedError();
   }
-  // this object will be returned in output
-  const userQuizReportData = {};
-  let parsedLatestQuizReport;
+  const userQuizQueryRes = await callGraphqlApi(userQuizQuery(userId, topicId));
+  const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
+  const quizQuestionsInUserQuiz = get(userQuizInfo, 'quiz');
+  if (!quizQuestionsInUserQuiz ||
+    !quizQuestionsInUserQuiz.length) {
+    log('Quiz Questions are not present in UserQuiz in getQuizReport');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'Topic.QuizQuestions: is not present',
+      },
+    });
+  }
+
+  /*
+  Sending and awaiting user quiz dump
+  This is called beforehand so that the userQuizReport document gets created for just sent quiz data
+  */
+  await callGraphqlApi(
+    addUserQuizDump(userId, topicId),
+    {
+      input: quizQuestions,
+    },
+    '',
+    '',
+    token,
+  );
+
+  // Constructing data for first and latest quiz report
   let parsedFirstQuizReport;
+  let parsedLatestQuizReport;
   const quizRes = await callGraphqlApi(
     getQuizReportQuery(userId, topicId),
     '',
@@ -267,9 +317,9 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     '',
     token,
   );
-  const quizInfo = get(quizRes, 'data.userQuizReports');
   // Constructing data for first and latest quiz report
-  if (quizInfo.length) {
+  const quizInfo = get(quizRes, 'data.userQuizReports');
+  if (quizInfo && quizInfo.length) {
     const latestQuizReport = quizInfo[0];
     parsedLatestQuizReport = parseQuizReport(latestQuizReport);
     parsedLatestQuizReport.quizReportNumber = 'latest';
@@ -279,16 +329,14 @@ const userFirstAndLatestQuizReportMutationResolver = async (
       parsedFirstQuizReport.quizReportNumber = 'first';
     }
   }
-  /*
-  We are getting latest user quiz through this query.
-  Then we will get next published topic
-  */
-  const userQuizQueryRes = await callGraphqlApi(userQuizQuery(userId, topicId));
-  const nextTopicId = get(userQuizQueryRes, 'data.userQuizs[0].nextComponent.topic.id');
 
+  // parsing data for user
+  const userQuizReportData = {};
+  /*
+  we are getting get next published topic
+  */
+  const nextTopicId = get(userQuizQueryRes, 'data.userQuizs[0].nextComponent.topic.id');
   const { video } = topicTypes;
-  // parsing data for topic
-  const topicData = { type: 'Topic', typeId: `${topicInfo.id}` };
   // parsing data for user
   const userData = { type: 'User', typeId: `${userId}` };
   // parsing data for next topic
@@ -296,17 +344,17 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   const nextComponentData = {
     topic: nextTopicData,
     nextComponentType: video };
+  // parsing data for topic
+  const topicData = { type: 'Topic', typeId: `${topicId}` };
 
-  // Constructing data as per schema
   Object.assign(userQuizReportData, {
-    topic: topicData,
     user: userData,
+    topic: topicData,
     firstQuizReport: parsedFirstQuizReport,
     latestQuizReport: parsedLatestQuizReport,
     nextComponent: nextComponentData,
   });
-
   return userQuizReportData;
 };
 
-export default userFirstAndLatestQuizReportMutationResolver;
+export default getQuizReportMutationResolver;

@@ -14,6 +14,7 @@ const UserActivityQuizDump = `
     user: User! @relation(name: "UserActivityQuizDump", direction: "OneWay")
     quizQuestions: [QuizQuestionsType]
     quizAction: UserActionType
+    quizReportId: ID
     topic: Topic @relation(name: "TopicUserActivityQuizDump", direction: "OneWay")
   }
 `;
