@@ -293,7 +293,10 @@ const getQuizReportMutationResolver = async (
     });
   }
 
-  // Sending async user quiz dump
+  /*
+  Sending and awaiting user quiz dump
+  This is called beforehand so that the userQuizReport document gets created for just sent quiz data
+  */
   await callGraphqlApi(
     addUserQuizDump(userId, topicId),
     {
@@ -304,8 +307,7 @@ const getQuizReportMutationResolver = async (
     token,
   );
 
-  // Constructing data for first quiz report
-
+  // Constructing data for first and latest quiz report
   let parsedFirstQuizReport;
   let parsedLatestQuizReport;
   const quizRes = await callGraphqlApi(
