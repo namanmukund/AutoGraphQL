@@ -30,6 +30,7 @@ const UserTopicJourney = `
     video: UserVideoType
     learningObjectives: [UserJourneyLearningObjectiveType]
     quiz: UserQuizType
+    topicStatus: UserTopicTypeStatus
   }
 `;
 
