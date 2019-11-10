@@ -277,7 +277,7 @@ const getQuizReportMutationResolver = async (
   const {
     currentTopic: currentRunningTopic,
   } = currentTopicComponentInfo;
-  if (topicInfo.order >= currentRunningTopic.order) {
+  if (topicInfo.order > currentRunningTopic.order) {
     throw new ComponentLockedError();
   }
   const userQuizQueryRes = await callGraphqlApi(userQuizQuery(userId, topicId));
