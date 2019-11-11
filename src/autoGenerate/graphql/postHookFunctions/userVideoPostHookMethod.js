@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   PUBLISHED,
   userTopicTypeStatus,
@@ -7,6 +6,7 @@ import {
 import getInfoFromParams from './utils/getInfoFromParams';
 import getNextComponent from './utils/getNextComponent';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 // query to get topic and it's Lo with order 1
 const topicQuery = (topicId) => `
@@ -89,7 +89,7 @@ const userVideoPostHookMethod = async (input, params) => {
     we are getting below fields in topicQuery:
     -first published learning objective of the query to be populated in next component
     */
-  const topicQueryRes = await callGraphqlApi(topicQuery(topicId));
+  const topicQueryRes = await callLocalGraphqlApi(topicQuery(topicId));
   const topicInfo = get(topicQueryRes, 'data.topic');
   const learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
 
@@ -103,7 +103,7 @@ const userVideoPostHookMethod = async (input, params) => {
     adding addUserVideo document on the basis of
     restQuery(next component data), rest data will take default values from schema
     */
-  const result = await callGraphqlApi(addUserVideoMutation(
+  const result = await callLocalGraphqlApi(addUserVideoMutation(
     userId,
     topicId,
     restQuery,

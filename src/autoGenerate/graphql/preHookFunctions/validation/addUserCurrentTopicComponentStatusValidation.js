@@ -1,11 +1,11 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../../api/callGraphqlApi';
 import {
   InvalidTopicLOConnectionError, TopicOrLONotPresentError,
   UserCourseCombinationExistError, UserMismatchError, UserOrCourseNotPresentError,
 } from '../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import { backendApps } from '../../../../../constants';
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 // query to get userCurrentTopicComponentStatus for given user and course id
 const userCurrentTopicComponentStatusQuery = (userId, courseId) => `
@@ -70,7 +70,7 @@ const addUserCurrentTopicComponentStatusValidation = async (params, context) => 
   if (!topicId || !learningObjectiveId) {
     throw new TopicOrLONotPresentError();
   }
-  const userCurrentTopicComponentStatusData = await callGraphqlApi(
+  const userCurrentTopicComponentStatusData = await callLocalGraphqlApi(
     userCurrentTopicComponentStatusQuery(userId, courseId),
   );
   // Fetching userCurrentTopicComponentStatus to check if it already exists or not
@@ -86,7 +86,7 @@ const addUserCurrentTopicComponentStatusValidation = async (params, context) => 
   this query returns the count of the learning objective id inside topic id
   So, basically it returns 1 if LO and topic are related otherwise 0
   */
-  const learningObjectiveData = await callGraphqlApi(
+  const learningObjectiveData = await callLocalGraphqlApi(
     learningObjectiveQuery(topicId, learningObjectiveId),
   );
   const learningObjectiveCount = get(

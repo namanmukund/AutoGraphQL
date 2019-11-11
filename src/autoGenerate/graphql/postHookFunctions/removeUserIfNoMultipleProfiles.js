@@ -4,7 +4,7 @@
 import { QueryController } from '../controllers';
 import { userProfiles } from '../../../../constants';
 import { deleteUserMutation } from '../../../api/queries/user';
-import callGraphqlApi from '../../../api/callGraphqlApi';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 const removeUserIfNoMultipleProfiles = (userId, currentProfile) => {
   const newAuthentication = {
@@ -29,7 +29,7 @@ const removeUserIfNoMultipleProfiles = (userId, currentProfile) => {
     }
     if (shouldRemoveUser) {
       // graphql call so that everything related to user can get deleted
-      await callGraphqlApi(deleteUserMutation(userId));
+      await callLocalGraphqlApi(deleteUserMutation(userId));
     }
     return null;
   });

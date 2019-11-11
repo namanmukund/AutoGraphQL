@@ -1,11 +1,11 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   topicTypes, PUBLISHED,
 } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
 import getNextComponent from './utils/getNextComponent';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 // query to get quiz questions associated with topic
 const topicQuery = (topicId) => `
@@ -112,7 +112,7 @@ const userQuizPostHookMethod = async (input, params) => {
     we are getting below fields in topicQuery:
     -all published quiz questions of the topic
     */
-  const topicQueryRes = await callGraphqlApi(topicQuery(topicId));
+  const topicQueryRes = await callLocalGraphqlApi(topicQuery(topicId));
   const topicInfo = get(topicQueryRes, 'data.topic');
   // adding quiz questions in the document
   // this logic will be changed based on question sets
@@ -134,7 +134,7 @@ const userQuizPostHookMethod = async (input, params) => {
     We are getting published topics list through this query.
     Then we will get next published topic
     */
-  const nextTopicQueryRes = await callGraphqlApi(nextTopicQuery());
+  const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery());
   const topicsList = get(nextTopicQueryRes, 'data.topics');
 
   let currentTopicIndex;
@@ -153,7 +153,7 @@ const userQuizPostHookMethod = async (input, params) => {
     nextTopicId,
     'quiz',
   );
-  const result = await callGraphqlApi(addUserQuizMutation(
+  const result = await callLocalGraphqlApi(addUserQuizMutation(
     userId,
     topicId,
     restQuery,

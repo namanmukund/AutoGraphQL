@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   GLOBAL_COURSE_TITLE,
 } from '../../../../constants';
@@ -10,6 +9,7 @@ import getFirstTopicAndLearningObjective from '../../utils/getFirstTopicAndLearn
 import addUserCurrentTopicComponentStatus from '../../utils/addUserCurrentTopicComponentStatus';
 import getUserIdandAppNameAfterValidation
   from './validation/utils/getUserIdandAppNameAfterValidation';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 // query to get current component status of user
 const userCurrentTopicComponentStatusesQuery = (userId) => `
@@ -52,7 +52,7 @@ const userCourseSyllabusMethod = async (context) => {
   any document in Db and will return default data with first topic as unlocked
   */
   if (userId) {
-    const userCurrentTopicComponentStatusesRes = await callGraphqlApi(userCurrentTopicComponentStatusesQuery(userId));
+    const userCurrentTopicComponentStatusesRes = await callLocalGraphqlApi(userCurrentTopicComponentStatusesQuery(userId));
     /*
     Ideally each user will have 1 document in the collection. Fetching the same document
     Also we have logic in addUserCurrentTopicComponentStatusValidation to check that

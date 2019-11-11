@@ -8,10 +8,10 @@ import {
 import {
   DatabaseRecordNotFoundError,
 } from '../../../../../../constants/errors';
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = (userId) => `
@@ -180,7 +180,7 @@ const userBadgeMutationResolver = async (
   } = userAndAppInfo;
 
   // calling method to get all published badges
-  const badgeRes = await callGraphqlApi(getBadgeQuery());
+  const badgeRes = await callLocalGraphqlApi(getBadgeQuery());
   const badgeInfo = get(badgeRes, 'data.badges');
   // this object will be returned in output
   const userBadgeDocument = {};
@@ -219,13 +219,10 @@ const userBadgeMutationResolver = async (
   // we will return all inactive images
   if (userId) {
     // if we get userId through token, then we will return badges for that user
-    const { authorization: token } = context;
-    const res = await callGraphqlApi(
+    const res = await callLocalGraphqlApi(
       getUserCurrentTopicComponentStatus(userId),
+      context,
       '',
-      '',
-      '',
-      token,
     );
     const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
     // calling method to validate user current topic component status
@@ -234,7 +231,7 @@ const userBadgeMutationResolver = async (
     currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
     currentTopicComponentType = get(currentTopicComponentInfo, 'currentTopicComponentType');
   } else {
-    const courseResult = await callGraphqlApi(getCourseQuery());
+    const courseResult = await callLocalGraphqlApi(getCourseQuery());
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
       throw new DatabaseRecordNotFoundError({

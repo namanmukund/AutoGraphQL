@@ -6,7 +6,7 @@ import { findFieldWithTheRelation } from '../../../../utils';
 import { toObject, formatToParamString } from '../../../../../../utils';
 import updateAndDecreaseUsageCountInFile from './updateAndDecreaseUsageCountInFile';
 import deleteFromS3 from '../../../../../middlewares/utils/deleteFromS3';
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 const deleteRecordReferences = async (relationFields, relationSubsetFields,
   schemaType, recordDocument, ast, authentication) => {
@@ -83,7 +83,7 @@ const deleteRecordReferences = async (relationFields, relationSubsetFields,
             id
           }
         }`;
-            promiseArray.push(callGraphqlApi(deleteMutation));
+            promiseArray.push(callLocalGraphqlApi(deleteMutation));
           }
         }
       }

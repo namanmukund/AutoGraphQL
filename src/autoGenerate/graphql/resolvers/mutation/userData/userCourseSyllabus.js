@@ -8,11 +8,11 @@ import {
 import {
   DatabaseRecordNotFoundError,
 } from '../../../../../../constants/errors';
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = (userId) => `
@@ -165,13 +165,10 @@ const userCourseSyllabusMutationResolver = async (
   let currentTopicComponentInfo;
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
-    const { authorization: token } = context;
-    const res = await callGraphqlApi(
+    const res = await callLocalGraphqlApi(
       getUserCurrentTopicComponentStatus(userId),
+      context,
       '',
-      '',
-      '',
-      token,
     );
     currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
     // calling method to validate user current topic component status
@@ -198,7 +195,7 @@ const userCourseSyllabusMutationResolver = async (
         },
       });
     }
-    const courseResult = await callGraphqlApi(getCourseQuery());
+    const courseResult = await callLocalGraphqlApi(getCourseQuery());
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
       throw new DatabaseRecordNotFoundError({

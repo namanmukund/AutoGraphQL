@@ -13,7 +13,7 @@ import {
   getFileTypeName,
   resizeAndUpload,
 } from './utils';
-import callGraphqlApi from '../api/callGraphqlApi';
+import callLocalGraphqlApi from '../api/callLocalGraphqlApi';
 
 const checkActionTypeBeforeFileUpload = async (operations) => {
   const {
@@ -39,7 +39,7 @@ const checkActionTypeBeforeFileUpload = async (operations) => {
       }
     }
   `;
-  const res = await callGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query);
   // if connected type is not present
   if (!get(res, `data.${typeName}`)) {
     return {

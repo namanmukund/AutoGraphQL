@@ -1,11 +1,11 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
 import { log } from '../../../../utils';
 import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 // query to get userLO to check if document exists for userId and learningObjectiveId
 const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
@@ -69,7 +69,7 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
     in that case if he is hitting back after chat consumption, status will not get updated
     if it is already completed
   */
-  const userLearningObjectiveQueryRes = await callGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId));
+  const userLearningObjectiveQueryRes = await callLocalGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId));
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
     id: userLearningObjectiveId,
@@ -114,7 +114,7 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
   updating user Learning Objective document on the basis of
   isChatBookmarked, user action(next, back etc) in input
   */
-  await callGraphqlApi(updateUserLearningObjectiveMutation(
+  await callLocalGraphqlApi(updateUserLearningObjectiveMutation(
     userLearningObjectiveId,
     isChatBookmarked,
     chatStatus,

@@ -5,7 +5,7 @@ import {
   OrderAlreadyExistsError,
   TopicIdRequiredError,
 } from '../../../../../constants/errors';
-import callGraphqlApi from '../../../../api/callGraphqlApi';
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 const addLearningObjectiveValidation = async (params) => {
   const { topicConnectId: id } = params;
@@ -23,7 +23,7 @@ const addLearningObjectiveValidation = async (params) => {
  }
 `;
 
-  const res = await callGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query);
   const learningObjectives = get(res, 'data.topic.learningObjectives');
   if (learningObjectives) {
     for (const learningObjective of learningObjectives) {

@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   userActionType,
   userTopicTypeStatus,
@@ -10,6 +9,7 @@ import {
   PracticeQuestionsNotPresentError,
 } from '../../../../constants/errors';
 import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 /* query to get userLO to check if document exists for userId and learningObjectiveId
 also we are doing computation for chatStatus and next component for this */
@@ -136,7 +136,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
     if it is already completed
   -we get next component from the document and update user current topic component status with same
   */
-  const userLearningObjectiveQueryRes = await callGraphqlApi(
+  const userLearningObjectiveQueryRes = await callLocalGraphqlApi(
     userLearningObjectiveQuery(userId, learningObjectiveId),
   );
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
@@ -342,20 +342,20 @@ And current component status will not get changed when it is already consumed in
     nextComponentLearningObjectiveId,
   );
   // popping all the practice questions and sending rest of the fields for update
-  await callGraphqlApi(updateUserLearningObjectiveMutation(
+  await callLocalGraphqlApi(updateUserLearningObjectiveMutation(
     userLearningObjectiveId,
     isPracticeQuestionBookmarked,
     practiceQuestionStatus,
     popAllQuery,
   ));
   // pushing new array of objects(updated questions)
-  await callGraphqlApi(updateUserLearningObjectiveMutationPracticeQuestions(
+  await callLocalGraphqlApi(updateUserLearningObjectiveMutationPracticeQuestions(
     userLearningObjectiveId,
     pushManyQuery,
   ));
   // PQ report will be generated every time when user hits next
   if (pqAction === next && completedQuestionCount === totalQuestions) {
-    await callGraphqlApi(addUserPracticeQuestionReportMutation(
+    await callLocalGraphqlApi(addUserPracticeQuestionReportMutation(
       userId,
       learningObjectiveIdInResult,
       firstTryCount,

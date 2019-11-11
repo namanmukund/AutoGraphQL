@@ -1,7 +1,7 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../../api/callGraphqlApi';
 import { log } from '../../../../../utils';
 import { topicTypes, userActionType } from '../../../../../constants';
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 // query to update user current topic component status
 const updateUserCurrentTopicComponentStatusMutation = (
@@ -177,7 +177,7 @@ const updateCurrentComponentStatus = (
   which becomes only true according to page and conditions above
   */
   if (updateUserCurrentTopicComponentStatus) {
-    callGraphqlApi(updateUserCurrentTopicComponentStatusMutation(
+    callLocalGraphqlApi(updateUserCurrentTopicComponentStatusMutation(
       currentTopicComponentId,
       loQuery,
       topicQuery,

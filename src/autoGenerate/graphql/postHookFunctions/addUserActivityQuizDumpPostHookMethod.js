@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   topicTypes,
   PUBLISHED, questionTypes, scholarshipThreshHolds,
@@ -13,6 +12,7 @@ import {
 } from '../../../../constants/errors';
 import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
 import getMasteryLevel from '../resolvers/utils/getMasteryLevel';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 // query to fetch user quiz info
 const userQuizQuery = (
@@ -466,7 +466,7 @@ const evaluateUserQuiz = async (
     }
   });
   questionIdsQuery += ']';
-  const questionBankQueryRes = await callGraphqlApi(questionBankQuery(questionIdsQuery));
+  const questionBankQueryRes = await callLocalGraphqlApi(questionBankQuery(questionIdsQuery));
   const questionBankInfo = get(questionBankQueryRes, 'data.questionBanks');
   const learningObjectiveReportObject = {};
   // Initializing quiz report with default count as 0 for all of fields
@@ -685,7 +685,7 @@ const evaluateUserScholarship = async (
     // there is logic in post hook of userProfile to create userProfile with
     // default data if it was not present. So we will always get this
     //
-    const userProfileResult = await callGraphqlApi(userProfileQuery(userId));
+    const userProfileResult = await callLocalGraphqlApi(userProfileQuery(userId));
     const userProfileInfo = get(userProfileResult, 'data.userProfiles[0]');
     const userProfileId = get(userProfileInfo, 'id');
     if (!userProfileId) {
@@ -736,7 +736,7 @@ const evaluateUserScholarship = async (
     }
 
     // updating user profile
-    await callGraphqlApi(updateUserProfile(
+    await callLocalGraphqlApi(updateUserProfile(
       userProfileId,
       userProfileTopicConnectQuery,
       topicsCompleted,
@@ -774,7 +774,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   -we get userQuiz id , which will be used further to update the document
   -we get next component from the document and update user current topic component status with same
   */
-  const userQuizQueryRes = await callGraphqlApi(userQuizQuery(userId, topicId));
+  const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId));
   const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
   const quizQuestionsInUserQuiz = get(userQuizInfo, 'quiz');
   const nextTopicId = get(userQuizInfo, 'nextComponent.topic.id');
@@ -838,9 +838,9 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       log('Not able to fetch userQuizId in addUserActivityQuizDumpPostHookMethod');
     }
     // updating UserQuiz to change status to complete
-    await callGraphqlApi(updateUserQuizMutation(userQuizId));
+    await callLocalGraphqlApi(updateUserQuizMutation(userQuizId));
     // generating quiz report of user
-    await callGraphqlApi(addUserQuizReport(
+    await callLocalGraphqlApi(addUserQuizReport(
       userId,
       topicId,
       quizReportQuery,

@@ -1,5 +1,5 @@
 import { GLOBAL_COURSE_TITLE, PUBLISHED } from '../../../constants';
-import callGraphqlApi from '../../api/callGraphqlApi';
+import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
 
 // query to get current topic component status
 const userCurrentTopicComponentStatusQuery = (
@@ -37,7 +37,7 @@ const getUserCurrentTopicComponentStatus = (
   currentTopic,
   currentLearningObjective,
   enrollmentType,
-) => callGraphqlApi(userCurrentTopicComponentStatusQuery(
+) => callLocalGraphqlApi(userCurrentTopicComponentStatusQuery(
   userId,
   currentTopic,
   currentLearningObjective,

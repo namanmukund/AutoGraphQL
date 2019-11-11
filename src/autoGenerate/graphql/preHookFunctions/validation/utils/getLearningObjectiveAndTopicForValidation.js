@@ -1,4 +1,4 @@
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get learning objective and it's topic order info
 const learningObjectiveAndTopicQuery = (learningObjectiveId) => `
@@ -16,6 +16,6 @@ const learningObjectiveAndTopicQuery = (learningObjectiveId) => `
   `;
 
 // quey to get learning objective and related topic
-const getLearningObjectiveAndTopicForValidation = (learningObjectiveId) => callGraphqlApi(learningObjectiveAndTopicQuery(learningObjectiveId));
+const getLearningObjectiveAndTopicForValidation = (learningObjectiveId) => callLocalGraphqlApi(learningObjectiveAndTopicQuery(learningObjectiveId));
 
 export default getLearningObjectiveAndTopicForValidation;

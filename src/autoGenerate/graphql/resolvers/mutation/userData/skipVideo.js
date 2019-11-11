@@ -8,12 +8,12 @@ import {
   ComponentLockedError,
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import updateCurrentComponentStatus
   from '../../../postHookFunctions/utils/updateCurrentComponentStatus';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = (userId) => `
@@ -120,15 +120,11 @@ const skipVideoMutationResolver = async (
     throw new UnauthenticatedUserError();
   }
 
-  const { authorization: token } = context;
-
   // calling API to get data of fetched topic
-  const topicRes = await callGraphqlApi(
+  const topicRes = await callLocalGraphqlApi(
     getTopicQuery(topicId),
+    context,
     '',
-    '',
-    '',
-    token,
   );
   // getting info of called topic
   const topicInfo = get(topicRes, 'data.topic');
@@ -150,12 +146,10 @@ const skipVideoMutationResolver = async (
   }
 
   // getting current  omponent status for user
-  const res = await callGraphqlApi(
+  const res = await callLocalGraphqlApi(
     getUserCurrentTopicComponentStatus(userId),
+    context,
     '',
-    '',
-    '',
-    token,
   );
 
   const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
@@ -185,7 +179,7 @@ const skipVideoMutationResolver = async (
 
   // sending dump to add/update userVideo document when video is skipped
   const { skip } = userActionType;
-  await callGraphqlApi(
+  await callLocalGraphqlApi(
     addUserVideoDump(
       userId,
       topicId,

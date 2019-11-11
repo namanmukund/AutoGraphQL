@@ -1,9 +1,9 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../../api/callGraphqlApi';
 import {
   InvalidTopicPassedInCurrentTopicComponent,
   TopicOrUserCurrentTopicComponentNotPresentError,
 } from '../../../../../constants/errors';
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 // query to get topic order info
 const topicQuery = (topicId) => `
@@ -43,10 +43,10 @@ const updateUserCurrentTopicComponentStatusValidation = async (params) => {
   In that case this validation will not get fired
   */
   if (topicId) {
-    const topicData = await callGraphqlApi(topicQuery(topicId));
+    const topicData = await callLocalGraphqlApi(topicQuery(topicId));
     const topicOrder = get(topicData, 'data.topic.order');
     // Fetching userCurrentTopicComponentStatus to get order of current topic
-    const userCurrentTopicComponentStatusData = await callGraphqlApi(
+    const userCurrentTopicComponentStatusData = await callLocalGraphqlApi(
       userCurrentTopicComponentStatusQuery(userCurrentTopicComponentStatusId),
     );
     const userCurrentTopicComponentTopicOrder = get(

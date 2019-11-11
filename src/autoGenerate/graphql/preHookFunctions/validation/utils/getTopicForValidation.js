@@ -1,4 +1,4 @@
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get topic info
 const topicQuery = (topicId) => `
@@ -12,7 +12,7 @@ const topicQuery = (topicId) => `
   `;
 
 // quey to get topic info
-const getTopicForValidation = (topicId) => callGraphqlApi(topicQuery(
+const getTopicForValidation = (topicId) => callLocalGraphqlApi(topicQuery(
   topicId,
 ));
 

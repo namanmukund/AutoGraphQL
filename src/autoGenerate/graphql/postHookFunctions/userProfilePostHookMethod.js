@@ -1,6 +1,6 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../api/callGraphqlApi';
 import { log } from '../../../../utils';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 // query to add UserProfile with default values
 const addUserProfileMutation = (userId) => `
@@ -48,7 +48,7 @@ const userProfilePostHookMethod = async (input, params) => {
   }
   // userProfileResult is the document returned by the query
   // so we are adding new document if document is not already present
-  const result = await callGraphqlApi(addUserProfileMutation(userId));
+  const result = await callLocalGraphqlApi(addUserProfileMutation(userId));
   if (result) {
     const data = get(result, 'data.addUserProfile');
     if (data) {
