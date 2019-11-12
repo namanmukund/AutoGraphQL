@@ -37,6 +37,7 @@ const server = new ApolloServer({
       'editor.theme': 'light',
     },
   },
+  uploads: false,
   context: ({ req }) => {
     // file info from middleware
     let filePayload = '';
