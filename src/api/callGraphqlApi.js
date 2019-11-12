@@ -39,8 +39,13 @@ const callGraphqlApi = (
     next();
   });
 
+  // To avoid apollo-server-core error
+  if (!variables || variables === '') {
+    variables = {};
+  }
   /* eslint-enable no-param-reassign */
   /* eslint-enable no-unused-vars */
+
   return apolloFetch({ query, variables })
     .then((res) => {
       if (res.errors) {

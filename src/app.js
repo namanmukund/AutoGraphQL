@@ -48,7 +48,11 @@ const server = new ApolloServer({
         filePayload = req.body.variables.filePayload;
         delete req.body.variables.filePayload;
       }
+    } else if (req.body && (!req.body.variables || req.body.variables === '')) {
+      // To avoid apollo-server-core error
+      req.body.variables = {};
     }
+
     return {
       decodedUser: req.currentUser,
       decodedApp: req.currentApp,
