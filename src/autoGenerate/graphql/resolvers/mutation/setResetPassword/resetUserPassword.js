@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import allAuthParams from '../../../../../../config/authParams';
 import { PasswordMismatchError } from '../../../../../../constants/errors';
 import { MutationController } from '../../../controllers';

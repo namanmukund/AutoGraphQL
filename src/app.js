@@ -26,7 +26,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use(path, bodyParser.json(), graphqlUpload({ uploadDir: './uploads' }));
+app.use(path, bodyParser.json(), graphqlUpload({ uploadDir: '/tmp/uploads' }));
 
 // using apollo-server
 const server = new ApolloServer({

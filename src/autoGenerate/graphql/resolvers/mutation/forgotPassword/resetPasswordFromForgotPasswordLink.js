@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import base64 from 'base-64';
 import { MutationController, QueryController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';

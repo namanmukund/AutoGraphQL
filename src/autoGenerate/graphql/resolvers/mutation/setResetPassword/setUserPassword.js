@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import allAuthParams from '../../../../../../config/authParams';
 import { MutationController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';

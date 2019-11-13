@@ -7,4 +7,5 @@ coverage*
 .migrate.json
 .idea/
 uploads/
+.serverless
 mongoMigration/oldVersioningMigrationFiles/*

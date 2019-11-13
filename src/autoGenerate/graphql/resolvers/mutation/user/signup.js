@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { get } from 'lodash';
 import {
   InvalidEmailError,
