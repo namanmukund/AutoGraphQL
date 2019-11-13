@@ -3,7 +3,7 @@ import {
   topicTypes,
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
-  enrollmentTypes, masteryLevels,
+  enrollmentTypes, masteryLevels, userTopicTypeStatus,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
@@ -225,6 +225,8 @@ const userTopicJourneyMutationResolver = async (
    currentRunningTopic - this is topic in UserCurrentTopicComponentStatus
   */
   const { defaultMastery } = masteryLevels;
+  const { incomplete, complete } = userTopicTypeStatus;
+  let topicStatus = incomplete;
   if (topicInfo.order < currentRunningTopic.order) {
     if (topicInfo.isTrial || enrollmentType === pro) {
       videoData.isUnlocked = true;
@@ -255,6 +257,7 @@ const userTopicJourneyMutationResolver = async (
     // logic to calculate mastery level on basis of percentage
     const masteryLevel = getMasteryLevel(correctQuestionCount, totalQuestionCount);
     quizData.masteryLevel = masteryLevel;
+    topicStatus = complete;
     /*
     if called topic order is greater than that of current topic order,
      that means all components are locked for that topic
@@ -319,6 +322,7 @@ const userTopicJourneyMutationResolver = async (
     video: videoData,
     learningObjectives: learningObjectivesData,
     quiz: quizData,
+    topicStatus,
   });
 
   return userTopicData;

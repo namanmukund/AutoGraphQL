@@ -24,6 +24,7 @@ import {
   resetPasswordFromForgotPasswordLinkMutationResolver,
   getUnlockedUserBadgeMutationResolver,
   userBadgeMutationResolver,
+  getQuizReportMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import {
@@ -882,6 +883,24 @@ resolvers.Mutation.getUnlockedUserBadge = async (root, params, context, info) =>
   const hookInput = await prehook(input, mutationName, context, params);
 
   return getUnlockedUserBadgeMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+  ).then((result) => toObject(result));
+};
+
+// Resolver for a custom get user quiz report, when user submits quiz
+resolvers.Mutation.getQuizReport = async (root, params, context, info) => {
+  const typeName = 'GetQuizReport';
+  const mutationName = 'getQuizReport';
+  const { input } = params;
+  const hookInput = await prehook(input, mutationName, context, params);
+
+  return getQuizReportMutationResolver(
     root,
     hookInput,
     typeName,
