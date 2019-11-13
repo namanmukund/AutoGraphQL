@@ -170,4 +170,3 @@ const socialLoginMutationResolver = async (
 };
 
 export default socialLoginMutationResolver;
-

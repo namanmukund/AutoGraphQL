@@ -87,7 +87,7 @@ const authMiddleware = async (req, res, next) => {
   }
   // authorization header set is base64 encoded by adding
   // app token and user token, separated by ::
-  const authorization = req.headers.authorization;
+  const { authorization } = req.headers;
   let isValidToken = false;
   // this is to ensure that only allowed tokens are permitted further
   if (authorization) {

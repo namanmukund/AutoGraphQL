@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   PUBLISHED,
   topicTypes,
@@ -8,9 +7,10 @@ import getInfoFromParams from './utils/getInfoFromParams';
 import getNextComponent from './utils/getNextComponent';
 import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 // query to get learning objective and all the learning objectives of the topic associated
-const learningObjectiveQuery = learningObjectiveId => `
+const learningObjectiveQuery = (learningObjectiveId) => `
   query{
     learningObjective(id:"${learningObjectiveId}"){
       id
@@ -120,8 +120,9 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
   if (!learningObjectiveId) {
     return resultArray;
   }
-  const learningObjectiveQueryRes = await callGraphqlApi(
-    learningObjectiveQuery(learningObjectiveId));
+  const learningObjectiveQueryRes = await callLocalGraphqlApi(
+    learningObjectiveQuery(learningObjectiveId),
+  );
   const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
   const {
     topic: topicInfo,
@@ -166,13 +167,14 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
     adding addUserLearningObjective document on the basis of
     restQuery(next component data), practiceQuestionsQuery(published practice questions of LO)
     */
-  const result = await callGraphqlApi(
+  const result = await callLocalGraphqlApi(
     addUserLearningObjectiveMutation(
       userId,
       learningObjectiveId,
       restQuery,
       practiceQuestionsQuery,
-    ));
+    ),
+  );
   if (result) {
     /*
       parsing data 'addUserLearningObjective' so that the logic implemented ahead can read data is

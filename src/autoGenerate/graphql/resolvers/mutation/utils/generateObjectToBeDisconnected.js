@@ -54,4 +54,3 @@ const generateObjectToBeDisconnected = (
 
 
 export default generateObjectToBeDisconnected;
-

@@ -9,7 +9,8 @@ const sendEmailOtpToUser = (emailTo, userOtp, appName) => {
     appName,
   };
   const templateString = parsedHtmlFromTemplateFileAndObject(
-    templateFileName, templateObject);
+    templateFileName, templateObject,
+  );
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';

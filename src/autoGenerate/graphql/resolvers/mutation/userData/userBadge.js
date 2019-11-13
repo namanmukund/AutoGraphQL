@@ -8,13 +8,13 @@ import {
 import {
   DatabaseRecordNotFoundError,
 } from '../../../../../../constants/errors';
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = userId => `
+const getUserCurrentTopicComponentStatus = (userId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -130,7 +130,9 @@ const parseBadges = (badges, currentTopicOrder, currentTopicComponent) => {
   const finalCharacters = [];
   badges.forEach((badge, index) => {
     const tempObj = {};
-    const { name, description, activeImage, inactiveImage, topic, unlockPoint } = badge;
+    const {
+      name, description, activeImage, inactiveImage, topic, unlockPoint,
+    } = badge;
     let isUnlocked = false;
     let imageId = '';
     if (inactiveImage) { imageId = inactiveImage.id; }
@@ -138,15 +140,17 @@ const parseBadges = (badges, currentTopicOrder, currentTopicComponent) => {
     if (topic.order < currentTopicOrder) {
       isUnlocked = true;
       if (activeImage) { imageId = activeImage.id; }
-    } else if (topic.order === currentTopicOrder &&
-      (currentTopicComponent !== video && unlockPoint === video)
+    } else if (topic.order === currentTopicOrder
+      && (currentTopicComponent !== video && unlockPoint === video)
     ) {
       isUnlocked = true;
       if (activeImage) { imageId = activeImage.id; }
     }
     const image = { type: 'File', typeId: `${imageId}` };
     const order = index + 1;
-    Object.assign(tempObj, { name, description, isUnlocked, image, order, unlockPoint });
+    Object.assign(tempObj, {
+      name, description, isUnlocked, image, order, unlockPoint,
+    });
     finalCharacters.push(tempObj);
   });
   return finalCharacters;
@@ -176,7 +180,7 @@ const userBadgeMutationResolver = async (
   } = userAndAppInfo;
 
   // calling method to get all published badges
-  const badgeRes = await callGraphqlApi(getBadgeQuery());
+  const badgeRes = await callLocalGraphqlApi(getBadgeQuery());
   const badgeInfo = get(badgeRes, 'data.badges');
   // this object will be returned in output
   const userBadgeDocument = {};
@@ -186,13 +190,13 @@ const userBadgeMutationResolver = async (
   const { character, equipment } = badgeTypes;
   badgeInfo.forEach((badge) => {
     if (
-      !badge ||
-      !badge.type ||
-      !badge.topic ||
-      !badge.name ||
-      !badge.order ||
-      !badge.unlockPoint ||
-      !badge.topic.order) {
+      !badge
+      || !badge.type
+      || !badge.topic
+      || !badge.name
+      || !badge.order
+      || !badge.unlockPoint
+      || !badge.topic.order) {
       throw new DatabaseRecordNotFoundError({
         data: {
           error: 'Badge: Wrong/Incomplete information stored in badge',
@@ -215,13 +219,10 @@ const userBadgeMutationResolver = async (
   // we will return all inactive images
   if (userId) {
     // if we get userId through token, then we will return badges for that user
-    const { authorization: token } = context;
-    const res = await callGraphqlApi(
+    const res = await callLocalGraphqlApi(
       getUserCurrentTopicComponentStatus(userId),
+      context,
       '',
-      '',
-      '',
-      token,
     );
     const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
     // calling method to validate user current topic component status
@@ -230,7 +231,7 @@ const userBadgeMutationResolver = async (
     currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
     currentTopicComponentType = get(currentTopicComponentInfo, 'currentTopicComponentType');
   } else {
-    const courseResult = await callGraphqlApi(getCourseQuery());
+    const courseResult = await callLocalGraphqlApi(getCourseQuery());
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
       throw new DatabaseRecordNotFoundError({
@@ -253,11 +254,13 @@ const userBadgeMutationResolver = async (
   const characters = parseBadges(
     sortBadges(charactersFromBadgeInfo),
     currentTopicOrder,
-    currentTopicComponentType);
+    currentTopicComponentType,
+  );
   const equipments = parseBadges(
     sortBadges(equipmentsFromBadgeInfo),
     currentTopicOrder,
-    currentTopicComponentType);
+    currentTopicComponentType,
+  );
   userBadgeDocument.characters = characters;
   userBadgeDocument.equipments = equipments;
   Object.assign(userBadgeDocument, {

@@ -1,9 +1,9 @@
 const addUserPreHook = [
-  input => input,
+  (input) => input,
 ];
 
 const addUserPostHook = [
-  result => result,
+  (result) => result,
 ];
 
 

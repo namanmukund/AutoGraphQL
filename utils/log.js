@@ -96,4 +96,3 @@ const logArray = (array, status = '') => {
 };
 
 export { log, logMapOfArrays, logArray };
-

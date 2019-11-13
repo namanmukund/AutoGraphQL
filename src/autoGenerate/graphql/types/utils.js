@@ -1,4 +1,6 @@
-import { without, upperFirst, has, get } from 'lodash';
+import {
+  without, upperFirst, has, get,
+} from 'lodash';
 import pluralize from 'pluralize';
 
 // returns type string of a field
@@ -77,10 +79,9 @@ const getFieldTypeString = (
 // add addtnl fields to the related types schema object
 const appendAdditionalRelationFieldsToTypeObject = (additionalRelationFields, typeObject,
   relatedTypeName, relationName, ast, typeName, isUpdateType, graphqlArrayTypeObject) => {
-  const inputTypeObject = Object.assign({}, typeObject);
+  const inputTypeObject = { ...typeObject };
   // if related types schema is not already appended, initialize it
-  inputTypeObject[typeName] =
-    inputTypeObject[typeName] || {};
+  inputTypeObject[typeName] = inputTypeObject[typeName] || {};
   // Create input/update type for each additionalField
   additionalRelationFields.forEach((fieldObject) => {
     const fieldName = fieldObject.name.value;
@@ -107,48 +108,47 @@ const getSchemaStringFromSchemaMap = (
   schemaMap,
   typeOfInput,
   nestedConnectMutationStringObject = {},
-) =>
-  without(Object.keys(schemaMap).map((type) => {
-    const typeSchema = schemaMap[type];
-    const allFields = Object.keys(typeSchema);
-    if (!allFields.length) {
-      return null;
-    }
+) => without(Object.keys(schemaMap).map((type) => {
+  const typeSchema = schemaMap[type];
+  const allFields = Object.keys(typeSchema);
+  if (!allFields.length) {
+    return null;
+  }
 
-    let typeName = type;
-    let inputType = typeOfInput;
-    let graphqlType = 'input';
-    if (typeOfInput === 'UpdateAll') {
-      typeName = pluralize(type);
-      inputType = 'Update';
-    } else if (typeOfInput === 'ScalarType') {
-      inputType = 'ScalarType';
-      graphqlType = 'type';
-    }
+  let typeName = type;
+  let inputType = typeOfInput;
+  let graphqlType = 'input';
+  if (typeOfInput === 'UpdateAll') {
+    typeName = pluralize(type);
+    inputType = 'Update';
+  } else if (typeOfInput === 'ScalarType') {
+    inputType = 'ScalarType';
+    graphqlType = 'type';
+  }
 
-    let restString = '';
-    let typeString = `${graphqlType} ${typeName}${inputType} {`;
-    allFields.forEach((field) => {
-      if (!field.endsWith('__description')) {
-        const fieldType = typeSchema[field];
-        if (has(typeSchema, `${field}__description`)) {
-          const description = get(typeSchema, `${field}__description`);
-          restString += `\n #  ${description} \n`;
-        }
-        restString += `${field}: ${fieldType} `;
+  let restString = '';
+  let typeString = `${graphqlType} ${typeName}${inputType} {`;
+  allFields.forEach((field) => {
+    if (!field.endsWith('__description')) {
+      const fieldType = typeSchema[field];
+      if (has(typeSchema, `${field}__description`)) {
+        const description = get(typeSchema, `${field}__description`);
+        restString += `\n #  ${description} \n`;
       }
-    });
-
-    if (typeOfInput === 'UpdateAll') {
-      typeString += `id: ID!, fields: ${type}${inputType}!, 
-      ${(nestedConnectMutationStringObject && nestedConnectMutationStringObject[type]) ? nestedConnectMutationStringObject[type] : ''} `;
-    } else {
-      typeString += restString;
+      restString += `${field}: ${fieldType} `;
     }
+  });
 
-    typeString += '}';
-    return typeString;
-  }), null);
+  if (typeOfInput === 'UpdateAll') {
+    typeString += `id: ID!, fields: ${type}${inputType}!, 
+      ${(nestedConnectMutationStringObject && nestedConnectMutationStringObject[type]) ? nestedConnectMutationStringObject[type] : ''} `;
+  } else {
+    typeString += restString;
+  }
+
+  typeString += '}';
+  return typeString;
+}), null);
 
 const getTypeNameFromSchemaString = (typeString) => {
   // regex to get string b/w type and @model substrings

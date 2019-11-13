@@ -24,15 +24,13 @@ const deleteMultipleMutationResolver = async (
     if (paramsData.first < 0) {
       paramsData.first = 0;
     } else {
-      paramsData.first =
-        (paramsData.first > defaultDeleteLimitValue) ? defaultDeleteLimitValue : paramsData.first;
+      paramsData.first = (paramsData.first > defaultDeleteLimitValue) ? defaultDeleteLimitValue : paramsData.first;
     }
   } else if (paramsData.last != null) {
     if (paramsData.last < 0) {
       paramsData.last = 0;
     } else {
-      paramsData.last =
-        (paramsData.last > defaultDeleteLimitValue) ? defaultDeleteLimitValue : paramsData.last;
+      paramsData.last = (paramsData.last > defaultDeleteLimitValue) ? defaultDeleteLimitValue : paramsData.last;
     }
   } else {
     paramsData.first = defaultDeleteLimitValue;
@@ -48,7 +46,7 @@ const deleteMultipleMutationResolver = async (
     });
   }
   // Map all record ids to be deleted
-  const idsToDelete = recordsData.map(record => record.id);
+  const idsToDelete = recordsData.map((record) => record.id);
   // Get delete params
   paramsData = {
     filter: {
@@ -66,7 +64,7 @@ const deleteMultipleMutationResolver = async (
   if (!relationFieldNames.length) {
     return recordsData;
   }
-  return recordsData.map(record => checkAndDeleteReferences(typeName,
+  return recordsData.map((record) => checkAndDeleteReferences(typeName,
     ast,
     authentication,
     record,

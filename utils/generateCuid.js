@@ -5,9 +5,7 @@ export default function generateCuid(input) {
   if (!input.id) {
     const id = cuid();
     // Set id as input field.
-    cuidInput = Object.assign({}, input, {
-      id,
-    });
+    cuidInput = { ...input, id };
   }
   return cuidInput;
 }

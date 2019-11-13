@@ -29,13 +29,13 @@ const validateForgotPassword = (params) => {
       throw new InvalidPhoneError();
     }
     isPhone = true;
-    newParams = Object.assign({}, { phone }, { isPhone }, rest);
+    newParams = { phone, isPhone, ...rest };
   } else if (!phone && email) {
     const emailFlag = isValidEmail(email);
     if (!emailFlag) {
       throw new InvalidEmailError();
     }
-    newParams = Object.assign({}, { email }, { isPhone }, rest);
+    newParams = { email, isPhone, ...rest };
   } else {
     throw new EitherEmailOrPhoneRequiredError();
   }

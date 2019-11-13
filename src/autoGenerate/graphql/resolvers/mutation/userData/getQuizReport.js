@@ -17,7 +17,7 @@ import validateCurrentTopicComponent from '../../utils/validateCurrentTopicCompo
 import { log } from '../../../../../../utils';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = userId => `
+const getUserCurrentTopicComponentStatus = (userId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -48,7 +48,7 @@ const getUserCurrentTopicComponentStatus = userId => `
   `;
 
 // query to get topic and it's order
-const getTopicQuery = topicId => `
+const getTopicQuery = (topicId) => `
   query{
     topic(id:"${topicId}"){
       id
@@ -164,13 +164,15 @@ const parseQuizReport = async (
     master: masterPercentage,
     proficient: proficientPercentage,
   } = learningObjectiveQuizReportThreshHolds;
-  const { learningObjectiveDefaultText,
+  const {
+    learningObjectiveDefaultText,
     learningObjectiveFamiliarText,
     learningObjectiveMasterText,
     learningObjectiveProficientText,
-  } =
-    learningObjectiveRecommendationTexts;
-  const { familiar, master, proficient, defaultMastery } = masteryLevels;
+  } = learningObjectiveRecommendationTexts;
+  const {
+    familiar, master, proficient, defaultMastery,
+  } = masteryLevels;
   if (quizReport.learningObjectiveReport
     && quizReport.learningObjectiveReport.length) {
     quizReport.learningObjectiveReport.forEach((loReport, index) => {
@@ -195,7 +197,8 @@ const parseQuizReport = async (
         masteryLevelText = defaultMastery;
       }
       Object.assign(quizReport.learningObjectiveReport[index],
-        { recommendationText: loRecommendationText,
+        {
+          recommendationText: loRecommendationText,
           masteryLevel: masteryLevelText,
         });
     });
@@ -283,8 +286,8 @@ const getQuizReportMutationResolver = async (
   const userQuizQueryRes = await callGraphqlApi(userQuizQuery(userId, topicId));
   const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
   const quizQuestionsInUserQuiz = get(userQuizInfo, 'quiz');
-  if (!quizQuestionsInUserQuiz ||
-    !quizQuestionsInUserQuiz.length) {
+  if (!quizQuestionsInUserQuiz
+    || !quizQuestionsInUserQuiz.length) {
     log('Quiz Questions are not present in UserQuiz in getQuizReport');
     throw new DatabaseRecordNotFoundError({
       data: {
@@ -343,7 +346,8 @@ const getQuizReportMutationResolver = async (
   const nextTopicData = { type: 'Topic', typeId: `${nextTopicId}` };
   const nextComponentData = {
     topic: nextTopicData,
-    nextComponentType: video };
+    nextComponentType: video,
+  };
   // parsing data for topic
   const topicData = { type: 'Topic', typeId: `${topicId}` };
 

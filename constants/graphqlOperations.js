@@ -18,4 +18,3 @@ export {
   DELETE,
   DELETE_MULTIPLE,
 };
-

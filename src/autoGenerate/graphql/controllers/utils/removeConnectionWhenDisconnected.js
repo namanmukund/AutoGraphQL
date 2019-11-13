@@ -29,7 +29,7 @@ const removeConnectionWhenDisconnected = (
       isRelatedFieldAList,
     } = nestedDisconnectObjInfo[nestedField];
     if (data && data.length) {
-      const idToBePulled = data.map(doc => doc.typeId);
+      const idToBePulled = data.map((doc) => doc.typeId);
       const searchObj = {
         id: {
           $in: idToBePulled,

@@ -1,11 +1,11 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
 import { log } from '../../../../utils';
 import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 /*
 query to get User video for given user and topic id
@@ -79,7 +79,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
   in that case if he is hitting back after video consumption, status will not get updated
   if it is already completed
   */
-  const userVideoQueryRes = await callGraphqlApi(userVideoQuery(userId, topicId));
+  const userVideoQueryRes = await callLocalGraphqlApi(userVideoQuery(userId, topicId));
   const userVideoInfo = get(userVideoQueryRes, 'data.userVideos[0]');
   const {
     id: userVideoId,
@@ -120,7 +120,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
   updating userVideo document on the basis of
   isBookmarked, user action(next, back etc) in input
   */
-  await callGraphqlApi(updateUserVideoMutation(userVideoId,
+  await callLocalGraphqlApi(updateUserVideoMutation(userVideoId,
     videoCurrentTime,
     isBookmarked,
     isLiked,

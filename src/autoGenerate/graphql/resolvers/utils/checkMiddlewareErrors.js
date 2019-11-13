@@ -22,8 +22,12 @@ const checkMiddlewareErrors = (middlewareErrorType) => {
       case 'InvalidFileUploadExtensionError':
         throw new InvalidFileUploadExtensionError({ data: { message: `Only allowed extensions:  ${fileExtensions}` } });
       case 'InvalidFileUploadSizeAndExtensionError':
-        throw new InvalidFileUploadSizeAndExtensionError({ data: { message: `Only allowed size in mb and extensions :${fileSizeLimitInMB}`,
-          fileExtensions } });
+        throw new InvalidFileUploadSizeAndExtensionError({
+          data: {
+            message: `Only allowed size in mb and extensions :${fileSizeLimitInMB}`,
+            fileExtensions,
+          },
+        });
       case 'InvalidStaticToken':
         throw new InvalidStaticToken();
       case 'UnauthenticatedAppError':

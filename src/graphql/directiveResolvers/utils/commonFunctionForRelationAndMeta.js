@@ -75,7 +75,7 @@ const commonFunctionForRelationAndMeta = async (
   context.decodedUser = authentication.user;
   /* eslint-enable no-param-reassign */
   // Get new params
-  const newParams = Object.assign({}, params);
+  const newParams = { ...params };
   if (newParams.name) {
     delete newParams.name;
   }
@@ -95,7 +95,7 @@ const commonFunctionForRelationAndMeta = async (
       }
       return result;
     }
-    const allTypeIds = result.map(element => element.typeId);
+    const allTypeIds = result.map((element) => element.typeId);
     // Fill authentication object - will be useful for permission filtering output keys
     Object.assign(authentication, {
       mutationOrQueryName: camelCase(pluralize(typeName)),
@@ -147,7 +147,7 @@ const commonFunctionForRelationAndMeta = async (
   }
   const typeName = result.type;
   const model = models[typeName];
-  const typeId = result.typeId;
+  const { typeId } = result;
   // if result is null or empty doc,i.e. reference doesnt exist, then return null
   if (!model) {
     return null;

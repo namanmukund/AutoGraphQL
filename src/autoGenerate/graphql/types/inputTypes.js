@@ -34,7 +34,7 @@ Object.keys(parsedASTMap).forEach((type) => {
   const isModel = directives && hasDirective(directives, 'model');
   if (isModel) {
     // generate nestedConnectMutationStringObject to be made available for updateAll connect purpose
-    const relationFields = definition.relationFields;
+    const { relationFields } = definition;
     const nestedConnectMutationString = getNestedConnectMutationString(
       relationFields,
       type,
@@ -51,10 +51,8 @@ Object.keys(parsedASTMap).forEach((type) => {
   if (isModel) {
     graphqlUpdateAllTypeObject[typeName] = graphqlUpdateAllTypeObject[typeName] || {};
   }
-  graphqlAdditionalRelationFieldsInputTypeObject[typeName] =
-    graphqlAdditionalRelationFieldsInputTypeObject[typeName] || {};
-  graphqlAdditionalRelationFieldsUpdateTypeObject[typeName] =
-    graphqlAdditionalRelationFieldsUpdateTypeObject[typeName] || {};
+  graphqlAdditionalRelationFieldsInputTypeObject[typeName] = graphqlAdditionalRelationFieldsInputTypeObject[typeName] || {};
+  graphqlAdditionalRelationFieldsUpdateTypeObject[typeName] = graphqlAdditionalRelationFieldsUpdateTypeObject[typeName] || {};
 
   // Loop through each field of given type
   Object.keys(field).forEach((fieldName) => {
@@ -96,7 +94,7 @@ Object.keys(parsedASTMap).forEach((type) => {
     // for subdoc type
     if (!isModel && isRelationField && !scalarTypes.includes(type)) {
       // generate nestedConnectMutationStringObject to be made available for relation type
-      const relationFields = definition.relationFields;
+      const { relationFields } = definition;
 
       Object.keys(relationFields).forEach((relationalField) => {
         let key;
@@ -218,11 +216,9 @@ Object.keys(parsedASTMap).forEach((type) => {
         haveAdditionalFields,
         graphqlArrayTypeObject,
       );
-      graphqlUpdateTypeObject[typeName][additionalFieldName] =
-        additionalFieldUpdateTypeString;
+      graphqlUpdateTypeObject[typeName][additionalFieldName] = additionalFieldUpdateTypeString;
       if (isModel) {
-        graphqlUpdateAllTypeObject[typeName][additionalFieldName] =
-            additionalFieldUpdateTypeString;
+        graphqlUpdateAllTypeObject[typeName][additionalFieldName] = additionalFieldUpdateTypeString;
       }
     }
     // create enum types for uploadFile

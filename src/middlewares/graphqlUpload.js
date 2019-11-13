@@ -2,7 +2,9 @@ import mkdirp from 'mkdirp';
 import formidable from 'formidable';
 import objectPath from 'object-path';
 import fs from 'fs';
-import { includes, camelCase, get, find } from 'lodash';
+import {
+  includes, camelCase, get, find,
+} from 'lodash';
 import { log } from '../../utils';
 import {
   checkFileSizeAndExtensions,
@@ -49,9 +51,9 @@ const checkActionTypeBeforeFileUpload = async (operations) => {
 
   // if fileId is sent then it should be available in res in both array and object case
   if (fileId) {
-    if (!file ||
-        (file && (!Array.isArray(file) && file.id !== fileId)) ||
-         (file && Array.isArray(file) && !find(file, { id: fileId }))) {
+    if (!file
+        || (file && (!Array.isArray(file) && file.id !== fileId))
+         || (file && Array.isArray(file) && !find(file, { id: fileId }))) {
       return {
         middlewareErrorType: 'DatabaseRecordNotFoundError',
       };
@@ -117,7 +119,9 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
         file now gets placed back in the variables. */
         const operationsPath = objectPath(operations);
         filesKeys.forEach((variablesPath) => {
-          const { name, type, size, path } = files[variablesPath];
+          const {
+            name, type, size, path,
+          } = files[variablesPath];
           // get file type name like image/video/audio from its metadata
           /* inavlid file type can be handled by graphql I am just blocking the
           upload in case wrong type is defined
@@ -143,9 +147,9 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
               },
             },
           } = operations;
-          const modifiedFileName = (data && data.name) ?
-            data.name :
-            `${typeField}_${typeId}_${Date.now()}.${ext}`;
+          const modifiedFileName = (data && data.name)
+            ? data.name
+            : `${typeField}_${typeId}_${Date.now()}.${ext}`;
           const filePath = `${fileBucket}/${connectType.toLowerCase()}/${modifiedFileName}`;
 
           // get authentication message
@@ -200,7 +204,7 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
   });
 }
 
-export default options => (request, response, next) => {
+export default (options) => (request, response, next) => {
   // Skip if there are no uploads
   if (!request.is('multipart/form-data')) {
     next();

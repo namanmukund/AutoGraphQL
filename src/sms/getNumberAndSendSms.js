@@ -15,4 +15,3 @@ getNumberAndSendSms.sendSms = (...args) => {
 };
 
 export default getNumberAndSendSms;
-

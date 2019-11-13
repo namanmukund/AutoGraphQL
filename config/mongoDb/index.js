@@ -1,5 +1,5 @@
-import coreDbConfig from './core';
+import core from './core';
 
-module.exports = {
-  core: coreDbConfig,
+export default {
+  core,
 };

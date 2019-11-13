@@ -7,8 +7,8 @@ const getConnectInputFieldsMap = (args) => {
     .forEach((arg) => {
       // if not a connect mutation argument, return
       // connectMutationsArgumentsSuffix = 'Ids';
-      if (arg.endsWith(connectMutationsArgumentsSuffix.singular) ||
-        arg.endsWith(connectMutationsArgumentsSuffix.plural)) {
+      if (arg.endsWith(connectMutationsArgumentsSuffix.singular)
+        || arg.endsWith(connectMutationsArgumentsSuffix.plural)) {
         //  get fieldName from arg key
         const fieldName = arg.split(connectMutationsArgumentsSuffix.singular)[0];
         connectMap[fieldName] = args[arg];

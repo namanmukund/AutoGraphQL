@@ -5,13 +5,13 @@ import {
 import {
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import isComponentUnlocked from '../../../preHookFunctions/validation/utils/isComponentUnlocked';
 import { log } from '../../../../../../utils';
 import updateCurrentComponentStatus
   from '../../../postHookFunctions/utils/updateCurrentComponentStatus';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 /* query to get userLO to check if document exists for userId and learningObjectiveId
 also we are doing computation for next component for this */
@@ -90,8 +90,6 @@ const skipPracticeQuestionMutationResolver = async (
     throw new UnauthenticatedUserError();
   }
 
-  const { authorization: token } = context;
-
   // checking if called lo and user combination is accessible
   const { message } = topicTypes;
   await isComponentUnlocked(
@@ -116,12 +114,10 @@ const skipPracticeQuestionMutationResolver = async (
   -we get userLearningObjective id , which will be used further to update the document
   -we get next component from the document and update user current topic component status with same
   */
-  const userLearningObjectiveQueryRes = await callGraphqlApi(
+  const userLearningObjectiveQueryRes = await callLocalGraphqlApi(
     userLearningObjectiveQuery(userId, learningObjectiveId),
+    context,
     '',
-    '',
-    '',
-    token,
   );
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
@@ -158,15 +154,13 @@ const skipPracticeQuestionMutationResolver = async (
   );
   const { skip: skipStatus } = userTopicTypeStatus;
   // updating isSkipped field to true if user skips practice question
-  await callGraphqlApi(
+  await callLocalGraphqlApi(
     updateUserLearningObjectiveMutation(
       userLearningObjectiveId,
       skipStatus,
     ),
+    context,
     '',
-    '',
-    '',
-    token,
   );
 
   return {

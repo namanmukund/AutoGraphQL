@@ -24,7 +24,7 @@ const uploadToS3 = (Key, Body) => new Promise((resolve, reject) => {
   });
 });
 
-const getSignedS3Uri = Key => new Promise((resolve, reject) => {
+const getSignedS3Uri = (Key) => new Promise((resolve, reject) => {
   S3.getSignedUrl('getObject', {
     Bucket: s3Bucket,
     Key,

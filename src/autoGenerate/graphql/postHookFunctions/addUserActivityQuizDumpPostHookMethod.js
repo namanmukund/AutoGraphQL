@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../api/callGraphqlApi';
 import {
   topicTypes,
   PUBLISHED, questionTypes, scholarshipThreshHolds,
@@ -13,6 +12,7 @@ import {
 } from '../../../../constants/errors';
 import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
 import getMasteryLevel from '../resolvers/utils/getMasteryLevel';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 // query to fetch user quiz info
 const userQuizQuery = (
@@ -59,7 +59,7 @@ const userQuizQuery = (
     `;
 
 // getting questions from question bank to evaluate quiz report
-const questionBankQuery = questionIdsQuery => `
+const questionBankQuery = (questionIdsQuery) => `
   query{
     questionBanks(filter:{
       id_in: ${questionIdsQuery}
@@ -92,7 +92,7 @@ const questionBankQuery = questionIdsQuery => `
   `;
 
 // mutation to update UserQuiz, pushing updated quiz questions
-const updateUserQuizMutation = userQuizId => `
+const updateUserQuizMutation = (userQuizId) => `
   mutation{
     updateUserQuiz(id:"${userQuizId}",  input:{
       quizStatus: ${userTopicTypeStatus.complete}
@@ -125,7 +125,7 @@ const addUserQuizReport = (
   `;
 
 // query to get current user profile to get current scholarship status
-const userProfileQuery = userId => `
+const userProfileQuery = (userId) => `
   query{
     userProfiles(filter:{
       user_some:{
@@ -174,7 +174,7 @@ const updateUserProfile = (
   }
   `;
 
-const escapeString = value => value.replace(/\\([\s\S])|(")/g, '\\$1$2');
+const escapeString = (value) => value.replace(/\\([\s\S])|(")/g, '\\$1$2');
 
 // method to create query which will contain user answer and question's options data
 const createQueryForUserAnswersAndOptions = (
@@ -184,7 +184,9 @@ const createQueryForUserAnswersAndOptions = (
   questionBankId,
   isAttempted,
 ) => {
-  const { mcq, fibInput, fibBlock, arrange } = questionTypes;
+  const {
+    mcq, fibInput, fibBlock, arrange,
+  } = questionTypes;
   let userAnswersAndQuestionOptionsQuery = '';
   const {
     userMcqAnswer: userMcqAnswers,
@@ -319,8 +321,7 @@ const createQueryForUserAnswersAndOptions = (
           fibBlockOptionQuery += `correctPositions: ${correctPositionsQuery}}, `;
         });
         // Handling case that answer for every blank is sent by user
-        const totalUniqueNumberOfBlanksArray =
-          totalNumberOfBlanksArray.filter((elem, index, array) => array.indexOf(elem) === index);
+        const totalUniqueNumberOfBlanksArray = totalNumberOfBlanksArray.filter((elem, index, array) => array.indexOf(elem) === index);
         if (totalUniqueNumberOfBlanksArray.length !== userFibBlockAnswersLength) {
           isCorrect = false;
         }
@@ -472,7 +473,7 @@ const evaluateUserQuiz = async (
     }
   });
   questionIdsQuery += ']';
-  const questionBankQueryRes = await callGraphqlApi(questionBankQuery(questionIdsQuery));
+  const questionBankQueryRes = await callLocalGraphqlApi(questionBankQuery(questionIdsQuery));
   const questionBankInfo = get(questionBankQueryRes, 'data.questionBanks');
   const learningObjectiveReportObject = {};
   // Initializing quiz report with default count as 0 for all of fields
@@ -520,9 +521,8 @@ const evaluateUserQuiz = async (
     });
     pushManyQuery += `{ questionConnectId: "${questionBankId}", `;
     const { questionType } = questionBank;
-    const userQuestionDisplayOrder =
-      questionDisplayOrderArray[questionBankId] &&
-      questionDisplayOrderArray[questionBankId].questionDisplayOrder;
+    const userQuestionDisplayOrder = questionDisplayOrderArray[questionBankId]
+      && questionDisplayOrderArray[questionBankId].questionDisplayOrder;
     if (userQuestionDisplayOrder) {
       pushManyQuery += `questionDisplayOrder: ${userQuestionDisplayOrder}, `;
     }
@@ -590,8 +590,7 @@ const evaluateUserQuiz = async (
     correctQuestionCount: correctQuestionCountQuizReport,
     unansweredQuestionCount: unansweredQuestionCountQuizReport,
   } = quizReport;
-  const masteryLevel =
-    getMasteryLevel(correctQuestionCountQuizReport, totalQuestionCountQuizReport);
+  const masteryLevel = getMasteryLevel(correctQuestionCountQuizReport, totalQuestionCountQuizReport);
   const quizReportQuery = `quizReport:{
                                     totalQuestionCount: ${totalQuestionCountQuizReport}
                                     inCorrectQuestionCount: ${inCorrectQuestionCountQuizReport}
@@ -643,14 +642,13 @@ const evaluateUserScholarship = async (
     currentTopic,
   } = currentTopicComponentInfo;
   const { id: currentTopicId } = currentTopic;
-  if (currentTopicComponent === quiz &&
-    currentTopicId === topicId) {
+  if (currentTopicComponent === quiz
+    && currentTopicId === topicId) {
     // code for calculating total quiz report accuracy for scholarship
     const { totalQuestionCount, correctQuestionCount } = quizReport;
     let accuracy = 0;
     if (totalQuestionCount > 0) {
-      accuracy =
-        (correctQuestionCount / totalQuestionCount) * 100;
+      accuracy = (correctQuestionCount / totalQuestionCount) * 100;
     } else {
       log('There are no questions in quiz. Something is wrong');
     }
@@ -658,7 +656,7 @@ const evaluateUserScholarship = async (
     // there is logic in post hook of userProfile to create userProfile with
     // default data if it was not present. So we will always get this
     //
-    const userProfileResult = await callGraphqlApi(userProfileQuery(userId));
+    const userProfileResult = await callLocalGraphqlApi(userProfileQuery(userId));
     const userProfileInfo = get(userProfileResult, 'data.userProfiles[0]');
     const userProfileId = get(userProfileInfo, 'id');
     if (!userProfileId) {
@@ -709,7 +707,7 @@ const evaluateUserScholarship = async (
     }
 
     // updating user profile
-    await callGraphqlApi(updateUserProfile(
+    await callLocalGraphqlApi(updateUserProfile(
       userProfileId,
       userProfileTopicConnectQuery,
       topicsCompleted,
@@ -747,7 +745,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   -we get userQuiz id , which will be used further to update the document
   -we get next component from the document and update user current topic component status with same
   */
-  const userQuizQueryRes = await callGraphqlApi(userQuizQuery(userId, topicId));
+  const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId));
   const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
   const quizQuestionsInUserQuiz = get(userQuizInfo, 'quiz');
   const nextTopicId = get(userQuizInfo, 'nextComponent.topic.id');
@@ -782,8 +780,8 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     throw new QuizQuestionsNotPresentError();
   }
   // throwing error if there are no published questions in database
-  if (!quizQuestionsInUserQuiz ||
-    !quizQuestionsInUserQuiz.length) {
+  if (!quizQuestionsInUserQuiz
+    || !quizQuestionsInUserQuiz.length) {
     log('Quiz Questions are not present in UserQuiz in addUserActivityQuizDumpPostHookMethod');
     throw new DatabaseRecordNotFoundError({
       data: {
@@ -811,9 +809,9 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       log('Not able to fetch userQuizId in addUserActivityQuizDumpPostHookMethod');
     }
     // updating UserQuiz to change status to complete
-    await callGraphqlApi(updateUserQuizMutation(userQuizId));
+    await callLocalGraphqlApi(updateUserQuizMutation(userQuizId));
     // generating quiz report of user
-    const addUserQuizReportRes = await callGraphqlApi(addUserQuizReport(
+    const addUserQuizReportRes = await callLocalGraphqlApi(addUserQuizReport(
       userId,
       topicId,
       quizReportQuery,
@@ -836,4 +834,3 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
 };
 
 export default addUserActivityQuizDumpPostHookMethod;
-

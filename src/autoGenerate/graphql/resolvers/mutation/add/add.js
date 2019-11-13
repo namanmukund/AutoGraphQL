@@ -40,16 +40,16 @@ const remoteAddMutationPromises = (
     // Check if input has remote relation fields.
     // const remoteRelationFields = ast[typeName].remoteRelationFields;
     const appModelRemote = new RemoteController(appApplicationName, authentication);
-    const appInputCore = Object.assign(
-      {},
-      filterRemoteInput(
+    const appInputCore = {
+
+      ...filterRemoteInput(
         typeName,
         appApplicationName,
         ast,
         input,
       ),
-      { id },
-    );
+      id,
+    };
     // Mutate remote applications.
     return appModelRemote[controllerFunctionName](
       typeName,
@@ -155,10 +155,10 @@ const localAddMutationPromise = async (
   /*  if fields found with relations or connect args present,
   create relation document & return relation type object */
   if (
-    (relationFieldsArray && relationFieldsArray.length) ||
-      Object.keys(connectInputFieldsMap).length ||
-      allRelationObjectsArray1to1Data.length ||
-      allRelationObjectsArray1toMData.length
+    (relationFieldsArray && relationFieldsArray.length)
+      || Object.keys(connectInputFieldsMap).length
+      || allRelationObjectsArray1to1Data.length
+      || allRelationObjectsArray1toMData.length
   ) {
     const promiseArray = createAndReturnRelationObjectsPromiseArray(
       relationFieldsArray,
@@ -343,7 +343,7 @@ const addMutationResolver = (
   // Create a new object id if there is no id.
 
   const cuidInput = generateCuid(input);
-  const id = cuidInput.id;
+  const { id } = cuidInput;
   // @TODO incorporate relation logic with multi apps logic
   // If there are no remote fields, return the result.
   if (!Object.keys(remoteFields).length) {
@@ -388,7 +388,7 @@ const addMutationResolver = (
         ast,
         authentication,
         context,
-      ).then(result => mergeMutationsPromisesResults([mergedValue, toObject(result)]));
+      ).then((result) => mergeMutationsPromisesResults([mergedValue, toObject(result)]));
     })
     .catch((err) => {
       // Roll back in case of any error.

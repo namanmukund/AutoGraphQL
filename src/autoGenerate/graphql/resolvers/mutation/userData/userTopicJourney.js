@@ -8,15 +8,15 @@ import {
 import {
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import { log } from '../../../../../../utils';
 import getMasteryLevel from '../../utils/getMasteryLevel';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = userId => `
+const getUserCurrentTopicComponentStatus = (userId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -47,7 +47,7 @@ const getUserCurrentTopicComponentStatus = userId => `
   `;
 
 // query to get chapters and topics belomngin to a course
-const getTopicQuery = topicId => `
+const getTopicQuery = (topicId) => `
   query{
     topic(id:"${topicId}"){
       id
@@ -152,13 +152,10 @@ const userTopicJourneyMutationResolver = async (
     throw new UnauthenticatedUserError();
   }
 
-  const { authorization: token } = context;
-  const res = await callGraphqlApi(
+  const res = await callLocalGraphqlApi(
     getUserCurrentTopicComponentStatus(userId),
+    context,
     '',
-    '',
-    '',
-    token,
   );
 
   const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
@@ -167,12 +164,10 @@ const userTopicJourneyMutationResolver = async (
   validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
 
   // calling API to get data of fetched topic
-  const topicRes = await callGraphqlApi(
+  const topicRes = await callLocalGraphqlApi(
     getTopicQuery(topicId),
+    context,
     '',
-    '',
-    '',
-    token,
   );
   // getting info of called topic
   const topicInfo = get(topicRes, 'data.topic');
@@ -244,12 +239,10 @@ const userTopicJourneyMutationResolver = async (
     });
     quizData.isUnlocked = true;
     // getting user quiz report to get the mastery level of user in quiz
-    const quizRes = await callGraphqlApi(
+    const quizRes = await callLocalGraphqlApi(
       getQuizReportQuery(userId, topicId),
+      context,
       '',
-      '',
-      '',
-      token,
     );
     const quizInfo = get(quizRes, 'data.userQuizReports[0]');
     if (!quizInfo) {

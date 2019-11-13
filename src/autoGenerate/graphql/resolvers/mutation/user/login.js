@@ -47,17 +47,14 @@ const remoteLoginMutationPromises = (
 ) => {
   const promiseArray = Object.keys(remoteFieldsApplicationWise).map((appApplicationName) => {
     const appModelRemote = new RemoteController(appApplicationName, authentication);
-    const appInput = Object.assign({},
-      pick(input, Object.keys(remoteFieldsApplicationWise[appApplicationName])));
-    const appFieldsToMutation = Object.assign(
-      {},
+    const appInput = { ...pick(input, Object.keys(remoteFieldsApplicationWise[appApplicationName])) };
+    const appFieldsToMutation = {
+
       // get only those fields that are requested.
-      pick(fieldsFetched, Object.keys(remoteFieldsApplicationWise[appApplicationName])),
-      {
-        id: true,
-        password: true,
-      },
-    );
+      ...pick(fieldsFetched, Object.keys(remoteFieldsApplicationWise[appApplicationName])),
+      id: true,
+      password: true,
+    };
     // Mutate remote applications.
     const loginSpecificTypeName = 'Login';
     return appModelRemote[controllerFunctionName](
@@ -139,7 +136,7 @@ export default function loginMutationResolver(
       }
       return data;
     })
-      .catch(err => err);
+      .catch((err) => err);
   }
 
   // If there are remote fields.
@@ -158,20 +155,16 @@ export default function loginMutationResolver(
     // Expecting only one value.
 
     const value = values[0];
-    const id = value.id;
-    const cuidInput = Object.assign({}, input, {
-      id,
-    });
+    const { id } = value;
+    const cuidInput = { ...input, id };
     // Input to local database.
-    const localInput = pick(cuidInput, Object.keys(Object.assign({}, localFields, {
-      id: true,
-    })));
+    const localInput = pick(cuidInput, Object.keys({ ...localFields, id: true }));
     return localLoginMutationPromise(
       typeName,
       localInput,
       ast,
       modelMutations,
-    ).then(val => mergeMutationsPromisesResults([value, toObject(val)]))
-      .then(savedUser => checkPasswordAndReturnUserWithToken(savedUser, input, authentication));
-  }).catch(error => error);
+    ).then((val) => mergeMutationsPromisesResults([value, toObject(val)]))
+      .then((savedUser) => checkPasswordAndReturnUserWithToken(savedUser, input, authentication));
+  }).catch((error) => error);
 }

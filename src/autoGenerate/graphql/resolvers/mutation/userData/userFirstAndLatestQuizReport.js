@@ -10,13 +10,13 @@ import {
   ComponentLockedError,
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = userId => `
+const getUserCurrentTopicComponentStatus = (userId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -47,7 +47,7 @@ const getUserCurrentTopicComponentStatus = userId => `
   `;
 
 // query to get topic and it's order
-const getTopicQuery = topicId => `
+const getTopicQuery = (topicId) => `
   query{
     topic(id:"${topicId}"){
       id
@@ -139,13 +139,15 @@ const parseQuizReport = async (
     master: masterPercentage,
     proficient: proficientPercentage,
   } = learningObjectiveQuizReportThreshHolds;
-  const { learningObjectiveDefaultText,
+  const {
+    learningObjectiveDefaultText,
     learningObjectiveFamiliarText,
     learningObjectiveMasterText,
     learningObjectiveProficientText,
-  } =
-    learningObjectiveRecommendationTexts;
-  const { familiar, master, proficient, defaultMastery } = masteryLevels;
+  } = learningObjectiveRecommendationTexts;
+  const {
+    familiar, master, proficient, defaultMastery,
+  } = masteryLevels;
   if (quizReport.learningObjectiveReport
     && quizReport.learningObjectiveReport.length) {
     quizReport.learningObjectiveReport.forEach((loReport, index) => {
@@ -170,7 +172,8 @@ const parseQuizReport = async (
         masteryLevelText = defaultMastery;
       }
       Object.assign(quizReport.learningObjectiveReport[index],
-        { recommendationText: loRecommendationText,
+        {
+          recommendationText: loRecommendationText,
           masteryLevel: masteryLevelText,
         });
     });
@@ -219,13 +222,10 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     throw new UnauthenticatedUserError();
   }
 
-  const { authorization: token } = context;
-  const res = await callGraphqlApi(
+  const res = await callLocalGraphqlApi(
     getUserCurrentTopicComponentStatus(userId),
+    context,
     '',
-    '',
-    '',
-    token,
   );
 
   const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
@@ -234,12 +234,10 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
 
   // calling API to get data of fetched topic
-  const topicRes = await callGraphqlApi(
+  const topicRes = await callLocalGraphqlApi(
     getTopicQuery(topicId),
+    context,
     '',
-    '',
-    '',
-    token,
   );
   // getting info of called topic
   const topicInfo = get(topicRes, 'data.topic');
@@ -260,12 +258,10 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   const userQuizReportData = {};
   let parsedLatestQuizReport;
   let parsedFirstQuizReport;
-  const quizRes = await callGraphqlApi(
+  const quizRes = await callLocalGraphqlApi(
     getQuizReportQuery(userId, topicId),
+    context,
     '',
-    '',
-    '',
-    token,
   );
   const quizInfo = get(quizRes, 'data.userQuizReports');
   // Constructing data for first and latest quiz report
@@ -283,7 +279,7 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   We are getting latest user quiz through this query.
   Then we will get next published topic
   */
-  const userQuizQueryRes = await callGraphqlApi(userQuizQuery(userId, topicId));
+  const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId));
   const nextTopicId = get(userQuizQueryRes, 'data.userQuizs[0].nextComponent.topic.id');
 
   const { video } = topicTypes;
@@ -295,7 +291,8 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   const nextTopicData = { type: 'Topic', typeId: `${nextTopicId}` };
   const nextComponentData = {
     topic: nextTopicData,
-    nextComponentType: video };
+    nextComponentType: video,
+  };
 
   // Constructing data as per schema
   Object.assign(userQuizReportData, {

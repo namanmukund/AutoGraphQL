@@ -47,7 +47,9 @@ export default function sendForgotPasswordOTPMutationResolver(
     user: true,
   });
   const modelQueries = new QueryController(typeName, authentication);
-  const { phone, phoneOtp, isPhone, email, emailOtp } = params;
+  const {
+    phone, phoneOtp, isPhone, email, emailOtp,
+  } = params;
   let searchObj;
   let updateObj;
   if (isPhone) {

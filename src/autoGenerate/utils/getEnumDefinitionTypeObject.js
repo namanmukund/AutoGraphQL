@@ -17,7 +17,7 @@ const getEnumDefinitionTypeObject = (graphqlSchemaTypes) => {
     values.forEach((field) => {
       enumNameArray.push(field.name.value);
     });
-    allEnumTypesObject[fieldName] = Object.assign({}, { enum: enumNameArray });
+    allEnumTypesObject[fieldName] = { enum: enumNameArray };
     return null;
   });
   return allEnumTypesObject;

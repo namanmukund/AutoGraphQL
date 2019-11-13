@@ -5,8 +5,8 @@ import {
   PUBLISHED,
   topicTypes,
 } from '../../../constants';
-import callGraphqlApi from '../../api/callGraphqlApi';
 import { DatabaseRecordNotFoundError } from '../../../constants/errors';
+import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
 
 const { free } = enrollmentTypes;
 const { video } = topicTypes;
@@ -53,7 +53,7 @@ const addUserCurrentTopicComponentStatus = async (
   firstTopicId,
   firstLearningObjectiveId,
 ) => {
-  const courseResult = await callGraphqlApi(getCourseQuery());
+  const courseResult = await callLocalGraphqlApi(getCourseQuery());
   const course = get(courseResult, 'data.courses');
   if (course.length <= 0) {
     throw new DatabaseRecordNotFoundError({
@@ -63,7 +63,7 @@ const addUserCurrentTopicComponentStatus = async (
     });
   }
   const { id: courseId } = course[0];
-  await callGraphqlApi(addUserCurrentTopicComponentStatusMutation(
+  await callLocalGraphqlApi(addUserCurrentTopicComponentStatusMutation(
     userId,
     courseId,
     firstTopicId,

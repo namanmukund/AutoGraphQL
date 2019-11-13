@@ -1,6 +1,6 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../api/callGraphqlApi';
 import getInfoFromParams from './utils/getInfoFromParams';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 // query to get user learning objective
 const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
@@ -39,8 +39,7 @@ const userPracticeQuestionReportPostHookMethod = async (input, params) => {
   } = getInfoFromParams(params, 'learningObjective');
   if (input.length) {
     // getting next topicId, learningObjectiveId and component from userLearningObjective
-    const userLearningObjectiveRes =
-      await callGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId));
+    const userLearningObjectiveRes = await callLocalGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId));
     const nextTopicId = get(userLearningObjectiveRes, 'data.userLearningObjectives[0].nextComponent.topic.id');
     const nextLearningObjectiveId = get(userLearningObjectiveRes, 'data.userLearningObjectives[0].nextComponent.learningObjective.id');
     const nextComponent = get(userLearningObjectiveRes, 'data.userLearningObjectives[0].nextComponent.nextComponentType');

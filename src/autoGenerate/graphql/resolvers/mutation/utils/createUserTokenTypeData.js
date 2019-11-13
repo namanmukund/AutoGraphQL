@@ -5,11 +5,10 @@ import { toObject } from '../../../../../../utils';
 const createUserTokenTypeData = (savedUser, authentication, toPhone) => {
   const token = createToken(savedUser, authentication, toPhone);
 
-  const userTokenData = Object.assign({}, toObject(savedUser),
-    {
-      token,
-    },
-  );
+  const userTokenData = {
+    ...toObject(savedUser),
+    token,
+  };
   return userTokenData;
 };
 export { createUserTokenTypeData };

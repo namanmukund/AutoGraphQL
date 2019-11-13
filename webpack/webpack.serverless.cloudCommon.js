@@ -1,17 +1,24 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const nodeExternals = require('webpack-node-externals');
+const slsw = require('serverless-webpack');
+
 /* eslint-enable import/no-extraneous-dependencies */
 const path = require('path');
 
 // -- Webpack configuration --
 
 const config = {};
+config.performance = { hints: false };
 
 // Application entry point
-config.entry = './src/serverCloud.js';
+config.entry = slsw.lib.entries;
 
 // We build for node
-config.target = 'node';
+config.mode = 'development';
+config.optimization = {
+  minimize: false,
+};
+
 
 config.externals = [nodeExternals()];
 
@@ -27,8 +34,9 @@ config.node = {
 
 // Output files in the build/ folder
 config.output = {
+  libraryTarget: 'commonjs2',
   path: path.join(__dirname, '../build'),
-  filename: '[name]Cloud.js',
+  filename: '[name].js',
 };
 
 config.resolve = {
@@ -49,9 +57,6 @@ config.module.rules = [
     use: [
       {
         loader: 'babel-loader',
-      },
-      {
-        loader: 'eslint-loader',
       },
     ],
   },

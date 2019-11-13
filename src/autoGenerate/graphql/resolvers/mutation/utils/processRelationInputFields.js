@@ -92,7 +92,7 @@ const processRelationInputFields = (
 ) => {
   const allRelationObjectsArray1to1Nested = allRelationObjectsArray1to1;
   const allRelationObjectsArray1toMNested = allRelationObjectsArray1toM;
-  const finalInput = Object.assign({}, input);
+  const finalInput = { ...input };
   const nestedDisconnectObjInfo1to1 = {};
   // const allRelationObjectsArray1toM = [];
   const allSavedRelationRecords = [];
@@ -123,17 +123,22 @@ const processRelationInputFields = (
 
             allSavedRelationRecords.push(elem);
             // make rltn value obj with typeId and additional fields.
-            const relationInputObject = Object.assign({ type, typeId },
-              additionalRelationFieldsObject);
+            const relationInputObject = {
+              type,
+              typeId,
+              ...additionalRelationFieldsObject,
+            };
             return relationInputObject;
           });
           allRelationObjectsArray1toM.push(value);
         } else {
-          const { type, typeId, additionalRelationFieldsObject, field } = value;
+          const {
+            type, typeId, additionalRelationFieldsObject, field,
+          } = value;
           relationField = field;
 
           // add additionalRelationFields if present, along with typeId
-          relationValueToInput = Object.assign({ type, typeId }, additionalRelationFieldsObject);
+          relationValueToInput = { type, typeId, ...additionalRelationFieldsObject };
           allSavedRelationRecords.push(value);
           allRelationObjectsArray1to1.push(value);
         }
@@ -173,10 +178,10 @@ const processRelationInputFields = (
             const { relationName, parentFieldName, field } = obj;
             // if two way replace and remove connection
             if (
-              recordToUpdate && recordToUpdate[parentFieldName] &&
-                recordToUpdate[parentFieldName][field] &&
-            recordToUpdate[parentFieldName][field].typeId &&
-                recordToUpdate[parentFieldName][field].typeId
+              recordToUpdate && recordToUpdate[parentFieldName]
+                && recordToUpdate[parentFieldName][field]
+            && recordToUpdate[parentFieldName][field].typeId
+                && recordToUpdate[parentFieldName][field].typeId
             ) {
               generateObjectToBeDisconnected(
                 ast,
@@ -217,8 +222,8 @@ const processRelationInputFields = (
               const relationObjectMap = getRelationObjectMap(relatedTypeName, typeName,
                 idToConnect, fieldName, fieldRelationName);
               // for update, if connect id is already related the dont add again.
-              if (recordToUpdate && recordToUpdate[fieldName] &&
-                findIndex(recordToUpdate[fieldName], ['typeId', idToConnect]) >= 0) {
+              if (recordToUpdate && recordToUpdate[fieldName]
+                && findIndex(recordToUpdate[fieldName], ['typeId', idToConnect]) >= 0) {
                 connectIdsAlreadyRelated.push(idToConnect);
                 return null;
               }
@@ -248,9 +253,9 @@ const processRelationInputFields = (
             /* if a reference already exists(field data also sent in input)
                then throw error  */
             if (
-              finalInput[fieldName] &&
-                  finalInput[fieldName].type &&
-                  finalInput[fieldName].typeId
+              finalInput[fieldName]
+                  && finalInput[fieldName].type
+                  && finalInput[fieldName].typeId
             ) {
               throw new OneToOneRelationSentInInputAndAsConnectError({
                 data: {
@@ -258,12 +263,12 @@ const processRelationInputFields = (
                 },
               });
             }
-            if (recordToUpdate && recordToUpdate[fieldName] &&
-                  recordToUpdate[fieldName].typeId === idToConnect) {
+            if (recordToUpdate && recordToUpdate[fieldName]
+                  && recordToUpdate[fieldName].typeId === idToConnect) {
               // dont push if already connected
               connectIdsAlreadyRelated.push(idToConnect);
-            } else if (recordToUpdate && recordToUpdate[fieldName] &&
-                      recordToUpdate[fieldName].typeId) {
+            } else if (recordToUpdate && recordToUpdate[fieldName]
+                      && recordToUpdate[fieldName].typeId) {
               generateObjectToBeDisconnected(
                 ast,
                 typeName,

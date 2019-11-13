@@ -25,7 +25,7 @@ export const makeSchemaMap = (remoteSchema) => {
   return schemaMap;
 };
 
-const getRemoteSchema = uriRemote => new Promise(((resolve, reject) => {
+const getRemoteSchema = (uriRemote) => new Promise(((resolve, reject) => {
   const wrappedFetch = (n) => {
     fetchSchema(uriRemote)
       .then((schema) => {

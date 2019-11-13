@@ -2,7 +2,7 @@
 import { isRelationFieldPresent } from './isRelationFieldPresent';
 
 export const nestingLevelCheck = (fieldType, fieldValue, ast, schemaType) => {
-  const isList = fieldType.isList;
+  const { isList } = fieldType;
   let isValidNesting = false;
   // if isList check nesting level for all values
   if (isList) {
