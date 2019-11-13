@@ -11,7 +11,8 @@ const isTopicUnlocked = (
   topicOrder,
   isTrial,
   page,
-  checkForPaidLogic) => {
+  checkForPaidLogic,
+) => {
   const { free, pro } = enrollmentTypes;
   const { video } = topicTypes;
   // checkForPaidLogic is added to check if we need to validate component for locked/unlocked
@@ -21,14 +22,14 @@ const isTopicUnlocked = (
   // the video with status as skipped
   let checkIfTopicIsFree = isTrial;
   if (!checkForPaidLogic) checkIfTopicIsFree = true;
-  if ((enrollmentType === pro &&
-      topicOrder <= currentTopicOrder
+  if ((enrollmentType === pro
+      && topicOrder <= currentTopicOrder
   ) || (enrollmentType === free
-    && topicOrder <= currentTopicOrder &&
-    checkIfTopicIsFree === true && page === video)
+    && topicOrder <= currentTopicOrder
+    && checkIfTopicIsFree === true && page === video)
     || (enrollmentType === free
-      && topicOrder <= currentTopicOrder &&
-      page !== video)
+      && topicOrder <= currentTopicOrder
+      && page !== video)
   ) {
     return true;
   }

@@ -1,6 +1,8 @@
 import { isValidEmail, isValidPhoneNumber } from './index';
-import { EitherUsernameEmailOrPhoneRequiredError, InvalidEmailError,
-  InvalidPhoneError } from '../../../../constants/errors';
+import {
+  EitherUsernameEmailOrPhoneRequiredError, InvalidEmailError,
+  InvalidPhoneError,
+} from '../../../../constants/errors';
 import validateUsername from './validateUsername';
 
 const validateLogin = (input) => {

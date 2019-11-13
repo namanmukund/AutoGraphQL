@@ -1,5 +1,5 @@
 --harmony
 --slow 1000
 --reporter spec
---compilers js:babel-register
+--compilers js:@babel/register
 --timeout 4000

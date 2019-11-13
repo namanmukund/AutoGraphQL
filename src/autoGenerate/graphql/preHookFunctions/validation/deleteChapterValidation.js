@@ -1,13 +1,13 @@
 /* eslint no-restricted-syntax: ["error", "FunctionExpression", "WithStatement",
 "BinaryExpression[operator='in']"] */
 import { get } from 'lodash';
-import callGraphqlApi from '../../../../api/callGraphqlApi';
 import {
   ChapterIsPublishedError,
 } from '../../../../../constants/errors';
 import { PUBLISHED } from '../../../../../constants';
 import isDocContainsGivenKeyValue from '../../../utils/isDocContainsGivenKeyValue';
 import checkDeleteStatusOfATopic from './utils/checkDeleteStatusOfATopic';
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 const deleteChapterValidation = async (params) => {
   const { id } = params;
@@ -33,7 +33,7 @@ const deleteChapterValidation = async (params) => {
 }
 `;
 
-  const res = await callGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query);
   const chapter = get(res, 'data.chapter');
   if (chapter) {
     // prevent delete if chapter status is published

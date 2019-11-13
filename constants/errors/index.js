@@ -34,20 +34,25 @@ import {
   UserCourseCombinationExistError,
 } from './mutations';
 
-import { FileUploadError,
+import {
+  FileUploadError,
   InvalidFileUploadSizeError,
   InvalidFileUploadExtensionError,
   InvalidFileUploadSizeAndExtensionError,
   FileUsageCountNotZeroError,
   FileIdIsMandatoryError,
 } from './files';
-import { InvalidWriteAccessError, InvalidReadAccessError, InvalidActionOnDefaultFieldsError,
+import {
+  InvalidWriteAccessError, InvalidReadAccessError, InvalidActionOnDefaultFieldsError,
   UnauthorizedOperationError, BlockedOperationError, PermissionDeniedError,
-  UserRolesNotFoundError } from './permissions';
+  UserRolesNotFoundError,
+} from './permissions';
 
-import { InvalidSortFieldError, InvalidFilterArgumentsError, NotFilterRequiredError,
+import {
+  InvalidSortFieldError, InvalidFilterArgumentsError, NotFilterRequiredError,
   InvalidParamsError, ConnectionAlreadyExistError, ConnectionNotExistError,
-  FetchError, InvalidFieldType } from './queries';
+  FetchError, InvalidFieldType,
+} from './queries';
 import {
   NestingLevelExceedingError, BiDirectionalRelationsRequiredError, NoUniqueFieldError,
   RelationAppliedOnSameFieldsError, RemoteRelationError, DefaultDirectiveAppliedOnWrongFieldError,
@@ -55,7 +60,8 @@ import {
   UnsupportedListFieldInsideSubDocumentObjectError,
   InvalidRuleValueError,
 } from './types';
-import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
+import {
+  EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   EitherUsernameEmailOrPhoneRequiredError, InvalidNameError, InvalidNameLengthError,
   InvalidUsernameError, InvalidUsernameLengthError, EitherEmailOrPhoneNotBothRequiredError,
   PhoneNumberAndCountryCodeRequiredError, EitherPhoneOrEmailOtpRequiredError,

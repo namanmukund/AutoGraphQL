@@ -9,7 +9,8 @@ const sendForgotPasswordLinkToUser = (emailTo, forgotPassLink, appName) => {
     appName,
   };
   const templateString = parsedHtmlFromTemplateFileAndObject(
-    templateFileName, templateObject);
+    templateFileName, templateObject,
+  );
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';

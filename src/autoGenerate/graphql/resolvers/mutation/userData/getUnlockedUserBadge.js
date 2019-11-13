@@ -7,13 +7,13 @@ import {
   DatabaseRecordNotFoundError,
   UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = userId => `
+const getUserCurrentTopicComponentStatus = (userId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -108,15 +108,8 @@ const getUnlockedUserBadgeMutationResolver = async (
   }
   let displayBadge = false;
   let badgeId = '';
-  // getting token to be sent in callGraphqlApi method
-  const { authorization: token } = context;
-  const res = await callGraphqlApi(
-    getUserCurrentTopicComponentStatus(userId),
-    '',
-    '',
-    '',
-    token,
-  );
+  // getting token to be sent in callLocalGraphqlApi method
+  const res = await callLocalGraphqlApi(getUserCurrentTopicComponentStatus(userId), context, '');
   const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
   // calling method to validate user current topic component status
   validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
@@ -126,12 +119,10 @@ const getUnlockedUserBadgeMutationResolver = async (
   // in alll other cases displayBadge will remain false
   if (inputTopicId === currentTopicId && inputComponent === currentTopicComponent) {
     // calling method to get all published badges
-    const badgeRes = await callGraphqlApi(
+    const badgeRes = await callLocalGraphqlApi(
       getBadgeQuery(inputTopicId, inputComponent),
+      context,
       '',
-      '',
-      '',
-      token,
     );
     const badgeInfo = get(badgeRes, 'data.badges');
     displayBadge = true;

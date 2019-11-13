@@ -1,6 +1,8 @@
 import { masteryLevels } from '../../../../../../constants';
 
-const { proficient, master, familiar, defaultMastery } = masteryLevels;
+const {
+  proficient, master, familiar, defaultMastery,
+} = masteryLevels;
 const MasteryLevelsType = `
   enum MasteryLevelsType {
     ${proficient}

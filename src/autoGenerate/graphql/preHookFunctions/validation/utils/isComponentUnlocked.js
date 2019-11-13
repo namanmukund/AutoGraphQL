@@ -28,7 +28,9 @@ const isComponentUnlocked = async (
   inputLearningObjectiveId = '',
   checkForPaidLogic = false,
 ) => {
-  const { video, message, practiceQuestion, quiz } = topicTypes;
+  const {
+    video, message, practiceQuestion, quiz,
+  } = topicTypes;
   let currentTopicQuery = '';
   let currentLearningObjectiveQuery = '';
   let topicInfo;
@@ -60,8 +62,8 @@ const isComponentUnlocked = async (
       if (!filterArray) {
         return true;
       }
-      const userSome = filterArray.find(obj => obj.user_some);
-      const loSome = filterArray.find(obj => obj.learningObjective_some);
+      const userSome = filterArray.find((obj) => obj.user_some);
+      const loSome = filterArray.find((obj) => obj.learningObjective_some);
       userId = get(userSome, 'user_some.id');
       learningObjectiveId = get(loSome, 'learningObjective_some.id');
       // if there is no learningObjectiveId, no need to validate whether component is unlocked
@@ -72,8 +74,7 @@ const isComponentUnlocked = async (
     if (!userId || !learningObjectiveId) {
       throw new UserOrLearningObjectiveNotPresentError();
     }
-    const learningObjectiveQueryRes =
-      await getLearningObjectiveAndTopicForValidation(learningObjectiveId);
+    const learningObjectiveQueryRes = await getLearningObjectiveAndTopicForValidation(learningObjectiveId);
     learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
     if (!learningObjectiveInfo) {
       throw new DatabaseRecordNotFoundError({
@@ -107,8 +108,8 @@ const isComponentUnlocked = async (
       if (!filterArray) {
         return true;
       }
-      const userSome = filterArray.find(obj => obj.user_some);
-      const topicSome = filterArray.find(obj => obj.topic_some);
+      const userSome = filterArray.find((obj) => obj.user_some);
+      const topicSome = filterArray.find((obj) => obj.topic_some);
       userId = get(userSome, 'user_some.id');
       topicId = get(topicSome, 'topic_some.id');
       // if there is no topicId, we do not need to validate whether component is unlocked
@@ -137,13 +138,12 @@ const isComponentUnlocked = async (
       },
     });
   }
-  const userCurrentTopicComponentStatusRes =
-    await getUserCurrentTopicComponentStatus(
-      userId,
-      currentTopicQuery,
-      currentLearningObjectiveQuery,
-      'enrollmentType',
-    );
+  const userCurrentTopicComponentStatusRes = await getUserCurrentTopicComponentStatus(
+    userId,
+    currentTopicQuery,
+    currentLearningObjectiveQuery,
+    'enrollmentType',
+  );
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
   if (!currentTopicComponentInfo) {
     throw new DatabaseRecordNotFoundError({
@@ -197,7 +197,8 @@ const isComponentUnlocked = async (
     topicOrder,
     isTrial,
     page,
-    checkForPaidLogic)) {
+    checkForPaidLogic,
+  )) {
     throw new ComponentLockedError();
   }
   switch (page) {
@@ -228,10 +229,10 @@ const isComponentUnlocked = async (
       For all above cases we will throw locked error
       */
       const { order: currentLearningObjectiveOrder } = currentLearningObjective;
-      if (topicOrder === currentTopicOrder &&
-        (learningObjectiveOrder > currentLearningObjectiveOrder ||
-          (learningObjectiveOrder === currentLearningObjectiveOrder &&
-            currentTopicComponentType === topicTypes.video
+      if (topicOrder === currentTopicOrder
+        && (learningObjectiveOrder > currentLearningObjectiveOrder
+          || (learningObjectiveOrder === currentLearningObjectiveOrder
+            && currentTopicComponentType === topicTypes.video
           )
         )
       ) {
@@ -268,10 +269,10 @@ const isComponentUnlocked = async (
           For all above cases we will throw locked error
           */
       const { order: currentLearningObjectiveOrder } = currentLearningObjective;
-      if (topicOrder === currentTopicOrder &&
-        (learningObjectiveOrder > currentLearningObjectiveOrder ||
-          (learningObjectiveOrder === currentLearningObjectiveOrder &&
-            currentTopicComponentType === topicTypes.video
+      if (topicOrder === currentTopicOrder
+        && (learningObjectiveOrder > currentLearningObjectiveOrder
+          || (learningObjectiveOrder === currentLearningObjectiveOrder
+            && currentTopicComponentType === topicTypes.video
           )
         )
       ) {
@@ -292,8 +293,8 @@ const isComponentUnlocked = async (
           and current component type is not quiz
           For all above cases we will throw locked error
           */
-      if (topicOrder === currentTopicOrder &&
-        currentTopicComponentType !== topicTypes.quiz
+      if (topicOrder === currentTopicOrder
+        && currentTopicComponentType !== topicTypes.quiz
       ) {
         throw new ComponentLockedError();
       }

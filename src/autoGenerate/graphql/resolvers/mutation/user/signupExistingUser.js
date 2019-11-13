@@ -80,7 +80,9 @@ export default function signupExistingUserMutationResolver(
     user: true,
   });
 
-  const { phone, phoneOtp, email, emailOtp } = input;
+  const {
+    phone, phoneOtp, email, emailOtp,
+  } = input;
   let searchObj;
   let updateObj;
   let isPhone = false;
@@ -112,7 +114,7 @@ export default function signupExistingUserMutationResolver(
       searchObj,
       updateObj,
       modelMutations,
-    ).then(savedUser => existingUserOutput(
+    ).then((savedUser) => existingUserOutput(
       savedUser,
       input,
       isPhone,
@@ -121,4 +123,3 @@ export default function signupExistingUserMutationResolver(
     ));
   });
 }
-

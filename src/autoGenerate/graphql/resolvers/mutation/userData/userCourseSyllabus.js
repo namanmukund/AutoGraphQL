@@ -8,14 +8,14 @@ import {
 import {
   DatabaseRecordNotFoundError,
 } from '../../../../../../constants/errors';
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = userId => `
+const getUserCurrentTopicComponentStatus = (userId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -154,7 +154,9 @@ const userCourseSyllabusMutationResolver = async (
   we will compare this userId against userId passed in input
   both should be equal to perform further action
   */
-  const { video, message, practiceQuestion, quiz } = topicTypes;
+  const {
+    video, message, practiceQuestion, quiz,
+  } = topicTypes;
   const { free } = enrollmentTypes;
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
   const {
@@ -163,13 +165,10 @@ const userCourseSyllabusMutationResolver = async (
   let currentTopicComponentInfo;
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
-    const { authorization: token } = context;
-    const res = await callGraphqlApi(
+    const res = await callLocalGraphqlApi(
       getUserCurrentTopicComponentStatus(userId),
+      context,
       '',
-      '',
-      '',
-      token,
     );
     currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
     // calling method to validate user current topic component status
@@ -196,7 +195,7 @@ const userCourseSyllabusMutationResolver = async (
         },
       });
     }
-    const courseResult = await callGraphqlApi(getCourseQuery());
+    const courseResult = await callLocalGraphqlApi(getCourseQuery());
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
       throw new DatabaseRecordNotFoundError({
@@ -225,7 +224,7 @@ const userCourseSyllabusMutationResolver = async (
   const currentUserSyllabus = {};
   let totalChapters = 0;
   let totalTopics = 0;
-  const chapters = currentCourse.chapters;
+  const { chapters } = currentCourse;
   const { order: currentTopicOrder } = currentTopic;
   if (!chapters || !chapters.length) {
     throw new DatabaseRecordNotFoundError({

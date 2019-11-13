@@ -20,8 +20,8 @@ to type
 }
  */
 const getParsedField = (field) => {
-  const fieldObject = Object.assign({}, field);
-  const finalFieldObject = Object.assign({}, field);
+  const fieldObject = { ...field };
+  const finalFieldObject = { ...field };
   delete finalFieldObject.type;
   const fieldType = {};
   while (fieldObject.type) {

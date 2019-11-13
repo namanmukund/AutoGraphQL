@@ -1,6 +1,5 @@
 const getfileNameWhichArePresent = (imageArray) => {
-  const query =
-          ` query {
+  const query = ` query {
           files(filter:{
             name_in:[${imageArray}]
           }) {
@@ -12,8 +11,7 @@ const getfileNameWhichArePresent = (imageArray) => {
   return query;
 };
 const getAllfilesQuery = (filter) => {
-  const query =
-          ` query {
+  const query = ` query {
                 files(filter:${filter}) {
                     id
                     name
@@ -24,8 +22,7 @@ const getAllfilesQuery = (filter) => {
 };
 
 const fileAddQuery = () => {
-  const query =
-      `mutation($input: FileInput!) {
+  const query = `mutation($input: FileInput!) {
         addFile(input: $input) {
           id
         }
@@ -45,5 +42,7 @@ const getFilesListQuery = () => {
   return query;
 };
 
-export { getfileNameWhichArePresent, fileAddQuery, getFilesListQuery,
-  getAllfilesQuery };
+export {
+  getfileNameWhichArePresent, fileAddQuery, getFilesListQuery,
+  getAllfilesQuery,
+};

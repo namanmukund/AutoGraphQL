@@ -15,7 +15,7 @@ const getAllFileRelationsAndFields = () => {
     }
     const { field, localRelationFields } = parsedASTMap[typeMe];
     Object.keys(localRelationFields).forEach((fieldName) => {
-      const dataType = field[fieldName].type.dataType;
+      const { dataType } = field[fieldName].type;
       if (dataType === 'File') {
         collectionAndFieldArray.push({
           collectionName: typeMe,

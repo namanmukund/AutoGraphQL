@@ -1,7 +1,7 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../../api/callGraphqlApi';
 import { log } from '../../../../../utils';
 import { topicTypes, userActionType } from '../../../../../constants';
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 // query to update user current topic component status
 const updateUserCurrentTopicComponentStatusMutation = (
@@ -38,7 +38,9 @@ const updateCurrentComponentStatus = (
   nextComponentLearningObjectiveId,
   nextComponentTopicId,
 ) => {
-  const { video, message, practiceQuestion, quiz } = topicTypes;
+  const {
+    video, message, practiceQuestion, quiz,
+  } = topicTypes;
   const { next, skip } = userActionType;
   const {
     id: currentTopicComponentId,
@@ -71,9 +73,9 @@ const updateCurrentComponentStatus = (
       called component is equal to  current component and user has just consumed(next action) it
       and current component status will not get changed when it is already consumed in past
       */
-      if ((userAction === next || userAction === skip) &&
-        currentTopicComponent === video &&
-        currentTopicId === topicId
+      if ((userAction === next || userAction === skip)
+        && currentTopicComponent === video
+        && currentTopicId === topicId
       ) {
         updateUserCurrentTopicComponentStatus = true;
       }
@@ -94,10 +96,10 @@ const updateCurrentComponentStatus = (
       called component is equal to  current component and user has just consumed(next action) it
       and current component status will not get changed when it is already consumed in past
       */
-      if ((userAction === next || userAction === skip) &&
-        currentTopicComponent === message &&
-        currentTopicId === topicId &&
-        currentLearningObjectiveId === learningObjectiveId
+      if ((userAction === next || userAction === skip)
+        && currentTopicComponent === message
+        && currentTopicId === topicId
+        && currentLearningObjectiveId === learningObjectiveId
       ) {
         updateUserCurrentTopicComponentStatus = true;
       }
@@ -127,18 +129,18 @@ const updateCurrentComponentStatus = (
       */
       if (
         (
-          userAction === skip &&
-          currentTopicId === topicId &&
-          currentLearningObjectiveId === learningObjectiveId
-        ) ||
-        (
-          userAction === next &&
-          completedQuestionCount === totalQuestions &&
-          (currentTopicComponent === practiceQuestion ||
-            currentTopicComponent === message
-          ) &&
-          currentTopicId === topicId &&
-          currentLearningObjectiveId === learningObjectiveId
+          userAction === skip
+          && currentTopicId === topicId
+          && currentLearningObjectiveId === learningObjectiveId
+        )
+        || (
+          userAction === next
+          && completedQuestionCount === totalQuestions
+          && (currentTopicComponent === practiceQuestion
+            || currentTopicComponent === message
+          )
+          && currentTopicId === topicId
+          && currentLearningObjectiveId === learningObjectiveId
         )
       ) {
         updateUserCurrentTopicComponentStatus = true;
@@ -157,10 +159,10 @@ const updateCurrentComponentStatus = (
       called component is  is equal to current component and user has just consumed(next action) it
       And current component status will not get changed when it is already consumed in past
       */
-      if (userAction === next &&
-        currentTopicComponent === quiz &&
-        currentTopicId === topicId &&
-        nextComponentTopicId
+      if (userAction === next
+        && currentTopicComponent === quiz
+        && currentTopicId === topicId
+        && nextComponentTopicId
       ) {
         if (nextComponentLearningObjectiveId) { loQuery = `currentLearningObjectiveConnectId:"${nextComponentLearningObjectiveId}"`; }
         if (nextComponentTopicId) { topicQuery = `currentTopicConnectId:"${nextComponentTopicId}"`; }
@@ -175,7 +177,7 @@ const updateCurrentComponentStatus = (
   which becomes only true according to page and conditions above
   */
   if (updateUserCurrentTopicComponentStatus) {
-    callGraphqlApi(updateUserCurrentTopicComponentStatusMutation(
+    callLocalGraphqlApi(updateUserCurrentTopicComponentStatusMutation(
       currentTopicComponentId,
       loQuery,
       topicQuery,
@@ -186,4 +188,3 @@ const updateCurrentComponentStatus = (
 };
 
 export default updateCurrentComponentStatus;
-

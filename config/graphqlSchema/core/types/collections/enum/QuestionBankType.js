@@ -1,6 +1,8 @@
 import { questionTypes } from '../../../../../../constants';
 
-const { mcq, fibInput, fibBlock, arrange } = questionTypes;
+const {
+  mcq, fibInput, fibBlock, arrange,
+} = questionTypes;
 const QuestionBankType = `
   enum QuestionBankType {
     ${mcq}

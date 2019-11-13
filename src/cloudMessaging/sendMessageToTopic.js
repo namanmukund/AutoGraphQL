@@ -1,5 +1,5 @@
 import { log } from '../../utils';
-import admin from '../../src/firebase';
+import admin from '../firebase';
 
 const sendMessageToTopic = (topic, payload) => admin.messaging()
   .sendToTopic(topic, payload)
@@ -18,4 +18,3 @@ const sendMessageToTopic = (topic, payload) => admin.messaging()
   });
 
 export default sendMessageToTopic;
-

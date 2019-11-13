@@ -18,7 +18,8 @@ const getMongooseDefaultValidations = (
     unique,
     defaultValue,
     uniqueOrEmpty,
-    length, uppercase, lowercase, trim, match } = directivesObject;
+    length, uppercase, lowercase, trim, match,
+  } = directivesObject;
   const { dataType } = fieldType;
   // check if String, Int or Date field has min or max length check
   const fieldModelDefinition = {};
@@ -130,8 +131,8 @@ const getMongooseDefaultValidations = (
   if (defaultValue) {
     const allEnumTypes = getEnumDefinitionTypeObject(types);
 
-    if ((scalarTypes.indexOf(fieldType.dataType) < 0) &&
-      !(fieldType.dataType in allEnumTypes)) {
+    if ((scalarTypes.indexOf(fieldType.dataType) < 0)
+      && !(fieldType.dataType in allEnumTypes)) {
       log(fieldType.dataType, 'error');
       throw new DefaultDirectiveAppliedOnWrongFieldError();
     }

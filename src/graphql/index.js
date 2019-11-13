@@ -1,14 +1,15 @@
 /* File for defining Graphql Schema(queries and mutations)  */
 import { getArgumentValues } from 'graphql/execution/values';
-import { makeExecutableSchema, forEachField } from 'graphql-tools';
+import { makeExecutableSchema, forEachField } from 'apollo-server-express';
 import Directives from './directives';
 import directiveResolvers from './directiveResolvers';
-import { query, mutation, filterTypes, relationTypes, sort,
-  resolvers, typesWithRelationFilters, groupByTypes } from '../autoGenerate';
+import {
+  query, mutation, filterTypes, relationTypes, sort,
+  resolvers, typesWithRelationFilters, groupByTypes,
+} from '../autoGenerate';
 import { META } from '../../constants';
 
-const graphqlTypes =
-  [...typesWithRelationFilters, ...relationTypes, sort, ...filterTypes, ...groupByTypes];
+const graphqlTypes = [...typesWithRelationFilters, ...relationTypes, sort, ...filterTypes, ...groupByTypes];
 const SchemaDefinition = `
   schema {
     query: Query
@@ -16,7 +17,7 @@ const SchemaDefinition = `
   }
 `;
 
-const appResolvers = Object.assign({}, resolvers);
+const appResolvers = { ...resolvers };
 const appMutation = mutation;
 
 const scalarDefinition = 'scalar Date';
@@ -74,8 +75,7 @@ forEachField(schema, (field) => {
         }
         // call to the directive resolver with result from default resolver as first arg
 
-        return resolverPromise.then(result => resolver(result, root, finalArgs, context, info),
-        );
+        return resolverPromise.then((result) => resolver(result, root, finalArgs, context, info));
       };
     }
   });

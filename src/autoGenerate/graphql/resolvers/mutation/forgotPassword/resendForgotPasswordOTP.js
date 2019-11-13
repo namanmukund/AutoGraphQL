@@ -1,4 +1,5 @@
-import { UserTokenNotRequiredError,
+import {
+  UserTokenNotRequiredError,
   DatabaseRecordNotFoundError,
   UnauthorizedOperationError,
   MandatoryFieldNotSetError,
@@ -6,12 +7,13 @@ import { UserTokenNotRequiredError,
 import { QueryController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
-import { getQueryForResendValidateAndFinishForgotPassword,
-  sendEmailSmsForSendResendForgotPasswordOTP } from '../utils';
+import {
+  getQueryForResendValidateAndFinishForgotPassword,
+  sendEmailSmsForSendResendForgotPasswordOTP,
+} from '../utils';
 import { UPDATE } from '../../../../../../constants/graphqlOperations';
 
-const resendForgotPasswordOTPQueryPromise = (input, modelQueries) =>
-  modelQueries.fetchOne(input);
+const resendForgotPasswordOTPQueryPromise = (input, modelQueries) => modelQueries.fetchOne(input);
 
 const validateUser = (fetchedUser, isPhone) => {
   if (!fetchedUser) {
@@ -91,6 +93,5 @@ export default function resendForgotPasswordOTPMutationResolver(
     return {
       result: true,
     };
-  }).catch(err => err);
+  }).catch((err) => err);
 }
-

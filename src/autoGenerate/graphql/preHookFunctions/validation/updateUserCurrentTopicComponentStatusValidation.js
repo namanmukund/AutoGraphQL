@@ -1,12 +1,12 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../../api/callGraphqlApi';
 import {
   InvalidTopicPassedInCurrentTopicComponent,
   TopicOrUserCurrentTopicComponentNotPresentError,
 } from '../../../../../constants/errors';
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 // query to get topic order info
-const topicQuery = topicId => `
+const topicQuery = (topicId) => `
   query{
     topic(id:"${topicId}"){
       id
@@ -16,7 +16,7 @@ const topicQuery = topicId => `
   `;
 
 // query to get user current topic component status
-const userCurrentTopicComponentStatusQuery = userCurrentTopicComponentStatusId => `
+const userCurrentTopicComponentStatusQuery = (userCurrentTopicComponentStatusId) => `
   query{
     userCurrentTopicComponentStatus(id:"${userCurrentTopicComponentStatusId}"){
       id
@@ -43,18 +43,20 @@ const updateUserCurrentTopicComponentStatusValidation = async (params) => {
   In that case this validation will not get fired
   */
   if (topicId) {
-    const topicData = await callGraphqlApi(topicQuery(topicId));
+    const topicData = await callLocalGraphqlApi(topicQuery(topicId));
     const topicOrder = get(topicData, 'data.topic.order');
     // Fetching userCurrentTopicComponentStatus to get order of current topic
-    const userCurrentTopicComponentStatusData = await callGraphqlApi(
-      userCurrentTopicComponentStatusQuery(userCurrentTopicComponentStatusId));
+    const userCurrentTopicComponentStatusData = await callLocalGraphqlApi(
+      userCurrentTopicComponentStatusQuery(userCurrentTopicComponentStatusId),
+    );
     const userCurrentTopicComponentTopicOrder = get(
       userCurrentTopicComponentStatusData,
-      'data.userCurrentTopicComponentStatus.currentTopic.order');
+      'data.userCurrentTopicComponentStatus.currentTopic.order',
+    );
     // checking if topic passed order is greater than current topic's
-    if (userCurrentTopicComponentTopicOrder &&
-      topicOrder &&
-      topicOrder <= userCurrentTopicComponentTopicOrder) {
+    if (userCurrentTopicComponentTopicOrder
+      && topicOrder
+      && topicOrder <= userCurrentTopicComponentTopicOrder) {
       throw new InvalidTopicPassedInCurrentTopicComponent();
     }
   }

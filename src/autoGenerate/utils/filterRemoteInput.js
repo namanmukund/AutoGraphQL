@@ -19,7 +19,7 @@ const filterRemoteInput = (
         const remoteRemoteInput = remoteInput[key];
         // If relation input is array.
         if (Array.isArray(remoteRemoteInput)) {
-          remoteInput[key] = remoteRemoteInput.map(value => filterRemoteInput(
+          remoteInput[key] = remoteRemoteInput.map((value) => filterRemoteInput(
             remoteRelationFields[key].type,
             appApplicationName,
             ast,

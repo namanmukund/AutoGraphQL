@@ -102,7 +102,7 @@ const fetchListQueryResolver = (
     return modelRemote.query(queryName, params, fieldsToQuery).then((values) => {
       if (values.length > 0) {
         // Take out all the id's in an array
-        const idArray = values.map(value => value.id);
+        const idArray = values.map((value) => value.id);
         // Fetch local with a list of id's
         const localParams = {
           filter: {
@@ -113,14 +113,14 @@ const fetchListQueryResolver = (
           if (localValues.length > 0) {
             return localValues.map((localValue) => {
               const remoteValue = find(values, ['id', localValue.id]);
-              return Object.assign({}, toObject(localValue), remoteValue);
+              return { ...toObject(localValue), ...remoteValue };
             });
           }
           return localValues;
         });
       }
       return values;
-    }).catch(err => err);
+    }).catch((err) => err);
   }
 
   // If filter param does not have remote fields
@@ -129,39 +129,38 @@ const fetchListQueryResolver = (
     // to avoid multiple calls.
     const promiseArray = results.map((result) => {
       // Create params object.
-      const id = result.id;
+      const { id } = result;
       const newParam = {
         id,
       };
-      const remoteQueryPromiseArray =
-        Object.keys(remoteFieldsApplicationWise).map((applicationName) => {
-          const modelRemote = new RemoteController(applicationName, authentication);
-          // Out of all the fields requested, get the fields required.
-          const fieldsToQuery = filterRemoteFields(
-            typeName,
-            applicationName,
-            parsedASTMap,
-            fieldsForFetch,
-          );
-          return modelRemote.query(singularQueryName, newParam, fieldsToQuery);
-        });
+      const remoteQueryPromiseArray = Object.keys(remoteFieldsApplicationWise).map((applicationName) => {
+        const modelRemote = new RemoteController(applicationName, authentication);
+        // Out of all the fields requested, get the fields required.
+        const fieldsToQuery = filterRemoteFields(
+          typeName,
+          applicationName,
+          parsedASTMap,
+          fieldsForFetch,
+        );
+        return modelRemote.query(singularQueryName, newParam, fieldsToQuery);
+      });
       return Promise.all(remoteQueryPromiseArray).then((values) => {
         let mergedValue = {};
         if (values && values.length > 0) {
           values.map((value) => {
-            mergedValue = Object.assign({}, mergedValue, value);
+            mergedValue = { ...mergedValue, ...value };
             return null;
           });
         }
         // @ TODO In relation fields are queried for,
         // and some fields in relations are local and some are remote,
         // in that case only remote fields are returned.
-        return Object.assign({}, mergedValue, toObject(result));
+        return { ...mergedValue, ...toObject(result) };
       });
     });
 
     return Promise.all(promiseArray);
-  }).catch(err => err);
+  }).catch((err) => err);
 };
 
 export default fetchListQueryResolver;

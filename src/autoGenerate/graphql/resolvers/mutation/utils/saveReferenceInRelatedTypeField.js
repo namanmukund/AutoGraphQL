@@ -78,8 +78,8 @@ export const saveReferenceInRelatedTypeField = async (relationObject, ast, authe
   } else {
     // if field not a list type case
     // check if relation object doesnt already exist in the referenced record;
-    if (referencedRecord[fieldWithRelation] &&
-      referencedRecord[fieldWithRelation].typeId === recordId) {
+    if (referencedRecord[fieldWithRelation]
+      && referencedRecord[fieldWithRelation].typeId === recordId) {
       isReferencePresent = true;
     }
     // make update object

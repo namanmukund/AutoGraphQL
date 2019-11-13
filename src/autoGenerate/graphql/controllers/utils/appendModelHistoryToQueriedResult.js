@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import toObject from '../../../../../utils/toObject';
-import { QueryController } from '../../controllers';
+import { QueryController } from '..';
 
 // params: {'_id', typename}
 const getHistoryModelFromId = (historyModelId, typeName) => {

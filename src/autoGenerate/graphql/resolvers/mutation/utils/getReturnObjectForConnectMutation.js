@@ -6,7 +6,8 @@ const getReturnObjectForConnectMutation = (
   typeId,
   relatedType,
   relatedTypeField,
-  relatedTypeId) => {
+  relatedTypeId,
+) => {
   const returnObject = {};
 
   values.forEach((value) => {

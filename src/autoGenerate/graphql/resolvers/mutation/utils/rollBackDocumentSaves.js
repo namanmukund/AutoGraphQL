@@ -7,7 +7,7 @@ const rollBackDocumentSaves = (savedDocs, authentication) => {
       const { type, typeId } = doc;
       const modelMutations = new MutationController(type, authentication);
       modelMutations.deleteDocument(typeId)
-        .catch(error => error);
+        .catch((error) => error);
     });
   }
 };

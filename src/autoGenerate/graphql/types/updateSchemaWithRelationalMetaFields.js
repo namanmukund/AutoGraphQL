@@ -1,7 +1,7 @@
 import insertSubString from '../../../../utils/insertSubString';
 import { META } from '../../../../constants';
 
-const getFilterName = typeName => `${typeName}Filter`;
+const getFilterName = (typeName) => `${typeName}Filter`;
 
 // const parsedASTMap = getParsedASTMap(schemaTypes);
 const updateSchemaWithRelationalMetaFields = (parsedASTMap, schemaTypes) => {

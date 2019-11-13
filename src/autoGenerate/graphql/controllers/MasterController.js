@@ -1,7 +1,9 @@
 import models from '../../models';
 import * as permissionFunctions from '../permissions';
-import { UnauthenticatedUserError, UnauthenticatedAppError, UnauthorizedOperationError,
-  InvalidStaticToken } from '../../../../constants/errors';
+import {
+  UnauthenticatedUserError, UnauthenticatedAppError, UnauthorizedOperationError,
+  InvalidStaticToken,
+} from '../../../../constants/errors';
 import { STATIC, shortAppName, graphQlOperations } from '../../../../constants';
 import { isBackendApp, isFrontEndApp, isPermissionIntegratedApp } from '../validation';
 import { QueryController } from './index';

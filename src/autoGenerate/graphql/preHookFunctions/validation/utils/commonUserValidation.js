@@ -1,5 +1,5 @@
 import { InvalidEmailError, InvalidPhoneError } from '../../../../../../constants/errors';
-import { isValidEmail, isValidPhoneNumber, validateName } from '../../../../graphql/validation';
+import { isValidEmail, isValidPhoneNumber, validateName } from '../../../validation';
 
 const commonUserValidation = ({ email, phone, name }) => {
   if (email) {

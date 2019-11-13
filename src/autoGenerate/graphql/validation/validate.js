@@ -8,7 +8,9 @@ import {
   InvalidActionOnDefaultFieldsError,
 } from '../../../../constants/errors';
 import validateAppAndUserPermissionOnFields from './validateAppAndUserPermissionOnFields';
-import { ADD, DELETE, PLURAL, SINGULAR, UPDATE } from '../../../../constants/graphqlOperations';
+import {
+  ADD, DELETE, PLURAL, SINGULAR, UPDATE,
+} from '../../../../constants/graphqlOperations';
 
 const isBackendApp = (authentication) => {
   const app = authentication && authentication.app;
@@ -142,4 +144,6 @@ const validate = (
   return false;
 };
 
-export { validate, isBackendApp, isFrontEndApp, isPermissionIntegratedApp };
+export {
+  validate, isBackendApp, isFrontEndApp, isPermissionIntegratedApp,
+};

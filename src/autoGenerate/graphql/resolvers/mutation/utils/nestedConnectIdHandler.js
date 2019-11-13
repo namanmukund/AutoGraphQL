@@ -8,7 +8,7 @@ const nestedConnectIdHandler = (
   typeName,
   input,
 ) => {
-  const finalInput = Object.assign({}, input);
+  const finalInput = { ...input };
   const allRelationObjectsArray1to1Data = [];
   const allRelationObjectsArray1toMData = [];
   const nestedDisconnectObjInfo = {};
@@ -19,9 +19,9 @@ const nestedConnectIdHandler = (
     const fieldKeys = Object.keys(finalInput[inputFieldName]);
     // for operations like push, pushMany and all
     if (
-      fieldKeys &&
-        fieldKeys.length &&
-        arrayUpdateAddTypes.includes(fieldKeys[0])
+      fieldKeys
+        && fieldKeys.length
+        && arrayUpdateAddTypes.includes(fieldKeys[0])
     ) {
       isArrayUpdate = true;
       // case of pushMany
@@ -38,11 +38,11 @@ const nestedConnectIdHandler = (
     }
     // for operations like pop, popMany and replace too
     if (
-      fieldKeys &&
-          fieldKeys.length &&
-        (
-          arrayUpdateRemoveTypes.includes(fieldKeys[0]) ||
-            arrayUpdateRemoveTypes.includes('replace')
+      fieldKeys
+          && fieldKeys.length
+        && (
+          arrayUpdateRemoveTypes.includes(fieldKeys[0])
+            || arrayUpdateRemoveTypes.includes('replace')
         )
     ) {
       generateObjectToBeDisconnected(
@@ -55,8 +55,8 @@ const nestedConnectIdHandler = (
 
 
     if (
-      Array.isArray(finalInput[inputFieldName]) &&
-            finalInput[inputFieldName].length
+      Array.isArray(finalInput[inputFieldName])
+            && finalInput[inputFieldName].length
     ) {
       const typeTypeIdArray = [];
       const arrayObjects = [];
@@ -78,9 +78,8 @@ const nestedConnectIdHandler = (
       allRelationObjectsArray1toMData.push(arrayObjects);
       finalInput[inputFieldName] = typeTypeIdArray;
     } else if (
-      typeof finalInput[inputFieldName] === 'object' &&
-        !Array.isArray(finalInput[inputFieldName],
-        )
+      typeof finalInput[inputFieldName] === 'object'
+        && !Array.isArray(finalInput[inputFieldName])
     ) {
       const modifiedInput = {};
       const mappingInfo = {};

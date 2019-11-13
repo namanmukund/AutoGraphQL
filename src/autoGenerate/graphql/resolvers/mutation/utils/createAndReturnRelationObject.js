@@ -30,7 +30,7 @@ const createAndReturnRelationObject = async (
   const schemaType = fieldType.dataType;
   const mutationName = `add${schemaType}`;
   // Creating new authentication object
-  const newAuthentication = Object.assign({}, authentication);
+  const newAuthentication = { ...authentication };
   // Sending mutationOrQueryName
   newAuthentication.mutationOrQueryName = mutationName;
   const relatedModelMutations = new MutationController(schemaType, newAuthentication);
@@ -54,14 +54,12 @@ const createAndReturnRelationObject = async (
     // create each relation object from db
     const promiseArray = fieldValue.map(async (value) => {
       // get additional fields from value
-      const { additionalRelationFieldsObject, inputValue } =
-        getAdditionalRelationFieldsFromRelationInput(value, ast, fieldName, typeName, relationName);
+      const { additionalRelationFieldsObject, inputValue } = getAdditionalRelationFieldsFromRelationInput(value, ast, fieldName, typeName, relationName);
       // omit addtnl fields from input
       const cuidInput = generateCuid(inputValue);
       const valueToSave = await prehook(cuidInput, mutationName, context, { input: cuidInput });
       return relatedModelMutations.addDocument(valueToSave)
-        .then(savedRecord =>
-          ({ savedRecord, additionalRelationFieldsObject }));
+        .then((savedRecord) => ({ savedRecord, additionalRelationFieldsObject }));
     });
     return Promise.all(promiseArray)
       .then((values) => {
@@ -78,14 +76,13 @@ const createAndReturnRelationObject = async (
         });
         return relationArray;
       })
-      .catch(err => err);
+      .catch((err) => err);
   }
   // if field type is not array
 
   // get additional fields from value
-  const { additionalRelationFieldsObject, inputValue } =
-    getAdditionalRelationFieldsFromRelationInput(fieldValue, ast, fieldName,
-      typeName, relationName);
+  const { additionalRelationFieldsObject, inputValue } = getAdditionalRelationFieldsFromRelationInput(fieldValue, ast, fieldName,
+    typeName, relationName);
   // Set id as input field.
   const cuidInput = generateCuid(inputValue);
   const valueToSave = await prehook(cuidInput, mutationName, context, { input: cuidInput });
@@ -108,6 +105,6 @@ const createAndReturnRelationObject = async (
        */
       return relationObjectMap;
     })
-    .catch(err => err);
+    .catch((err) => err);
 };
 export { createAndReturnRelationObject };

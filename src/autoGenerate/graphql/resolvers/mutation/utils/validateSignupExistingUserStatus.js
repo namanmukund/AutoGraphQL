@@ -11,7 +11,9 @@ const validateSignupExistingUserStatus = (searchObj, typeName, authentication, i
     if (!res) {
       throw new DatabaseRecordNotFoundError();
     }
-    const { name, status, phoneVerified, emailVerified } = res;
+    const {
+      name, status, phoneVerified, emailVerified,
+    } = res;
     switch (status) {
       case 'active': {
         /* User is only active if phoneVerified is true in case login

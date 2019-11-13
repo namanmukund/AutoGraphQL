@@ -105,10 +105,10 @@ const localUpdateMutationPromise = async (
   /*  if fields found with relations or connect args present,
  create relation document & return relation type object */
   if (
-    (relationFieldsArray && relationFieldsArray.length) ||
-    Object.keys(connectInputFieldsMap).length ||
-      allRelationObjectsArray1to1Data.length ||
-      allRelationObjectsArray1toMData.length
+    (relationFieldsArray && relationFieldsArray.length)
+    || Object.keys(connectInputFieldsMap).length
+      || allRelationObjectsArray1to1Data.length
+      || allRelationObjectsArray1toMData.length
   ) {
     const promiseArray = createAndReturnRelationObjectsPromiseArray(
       relationFieldsArray,
@@ -118,7 +118,7 @@ const localUpdateMutationPromise = async (
       context,
     );
     // get array of relation field names
-    const relationFieldNamesArray = relationFieldsArray.map(obj => obj.fieldName);
+    const relationFieldNamesArray = relationFieldsArray.map((obj) => obj.fieldName);
     Object.keys(connectInputFieldsMap).forEach((field) => {
       relationFieldNamesArray.push(field);
     });
@@ -144,7 +144,7 @@ const localUpdateMutationPromise = async (
       allSavedRelationRecords,
       nestedDisconnectObjInfo1to1,
     } = inputMap;
-    let finalInput = inputMap.finalInput;
+    let { finalInput } = inputMap;
     // call connect prehooks for all relations added to the record
     const mutationType = 'update';
     await callPrehooksForRelationsAddedInRecord(
@@ -156,8 +156,7 @@ const localUpdateMutationPromise = async (
     );
 
     // handle additional relation fields sent in input
-    const additionalFieldsToUpdateObject =
-      handleAdditionalFieldsToUpdate(finalInput, ast, typeName);
+    const additionalFieldsToUpdateObject = handleAdditionalFieldsToUpdate(finalInput, ast, typeName);
     // arrayAdditionalFields: array relation fields
     const { relationAdditionalFieldsArray, arrayAdditionalFields } = additionalFieldsToUpdateObject;
     // update final input etc.
@@ -182,7 +181,7 @@ const localUpdateMutationPromise = async (
         historyObject,
         nestedDisconnectObjInfo,
       )
-      .then(savedRecord => saveRecordReferenceInRelatedObjects(
+      .then((savedRecord) => saveRecordReferenceInRelatedObjects(
         allRelationObjectsArray1to1,
         allRelationObjectsArray1toM,
         savedRecord,
@@ -311,7 +310,7 @@ const updateGenericMutation = (root,
       ast,
       authentication,
       context,
-    ).then(result => mergeMutationsPromisesResults([mergedValue, toObject(result)]));
+    ).then((result) => mergeMutationsPromisesResults([mergedValue, toObject(result)]));
   })
     .catch((err) => {
       // Roll back in case of any error.

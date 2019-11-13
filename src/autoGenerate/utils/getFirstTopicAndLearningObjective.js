@@ -1,8 +1,8 @@
 import { PUBLISHED } from '../../../constants';
-import callGraphqlApi from '../../api/callGraphqlApi';
+import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
 
 // query to get first published topic and first published LO corresponding to it
-const topicQuery = order => `
+const topicQuery = (order) => `
   query{
     topics(
       filter:{
@@ -38,7 +38,7 @@ query to get first published topic and first published LO corresponding to it
 along with info about topic and LO. this will be sent when a not logged in user
 calls userCourseSyllabus
 */
-const topicQueryWithExtraInfo = order => `
+const topicQueryWithExtraInfo = (order) => `
   query{
     topics(
       filter:{
@@ -92,9 +92,9 @@ This will get populated in addUserCurrentTopicComponentStatusMutation
 */
 const getFirstTopicAndLearningObjective = async (queryOrMutationName) => {
   if (queryOrMutationName === 'userCourseSyllabus') {
-    return callGraphqlApi(topicQueryWithExtraInfo(1));
+    return callLocalGraphqlApi(topicQueryWithExtraInfo(1));
   }
-  return callGraphqlApi(topicQuery(1));
+  return callLocalGraphqlApi(topicQuery(1));
 };
 
 export default getFirstTopicAndLearningObjective;

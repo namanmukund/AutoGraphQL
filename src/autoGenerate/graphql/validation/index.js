@@ -1,5 +1,7 @@
-import { validate, isBackendApp, isFrontEndApp, isOpenQuery,
-  isPermissionIntegratedApp } from './validate';
+import {
+  validate, isBackendApp, isFrontEndApp, isOpenQuery,
+  isPermissionIntegratedApp,
+} from './validate';
 import isValidEmail from './isValidEmail';
 import isValidPhoneNumber from './isValidPhoneNumber';
 import validateUpdateUserOperation from './validateUpdateUserOperation';
@@ -18,7 +20,8 @@ import validateIncomingAppToken from './validateIncomingAppToken';
 import deleteChapterValidation from '../preHookFunctions/validation/deleteChapterValidation';
 import validateAppAndUserPermissionOnFields from './validateAppAndUserPermissionOnFields';
 
-export { validate,
+export {
+  validate,
   isBackendApp,
   isValidEmail,
   isValidPhoneNumber,

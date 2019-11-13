@@ -1,7 +1,7 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../../api/callGraphqlApi';
 import checkDeleteStatusOfATopic from './utils/checkDeleteStatusOfATopic';
 import { PUBLISHED } from '../../../../../constants';
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 const deleteTopicValidation = async (params) => {
   const { id: topicId } = params;
@@ -23,7 +23,7 @@ const deleteTopicValidation = async (params) => {
         }
 `;
 
-  const res = await callGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query);
   const topic = get(res, 'data.topic');
   if (topic) {
     checkDeleteStatusOfATopic(topic);

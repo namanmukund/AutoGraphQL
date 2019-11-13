@@ -1,10 +1,12 @@
-import { validateUsername, validateUpdateUserOperation, preUserDataValidation } from '../../../graphql/validation';
-import { commonUserValidation } from '../validation/utils';
+import { validateUsername, validateUpdateUserOperation, preUserDataValidation } from '../../validation';
+import { commonUserValidation } from './utils';
 import { UserAlreadyExistsError } from '../../../../../constants/errors';
 
 const updateUserValidation = async (params) => {
   const { input = {}, id } = params;
-  const { name, username, email, phone } = input;
+  const {
+    name, username, email, phone,
+  } = input;
   commonUserValidation({ name, email, phone });
   if (username) {
     validateUsername(username);

@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import allAuthParams from '../../../../../../config/authParams';
 import { MutationController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
@@ -7,8 +7,7 @@ import { UPDATE } from '../../../../../../constants/graphqlOperations';
 
 const application = process.env.APPLICATION || 'core';
 const authParams = allAuthParams[application];
-const setUserPasswordMutationPromise = (searchObj, updateObj, modelMutations) =>
-  modelMutations.updateOne(searchObj, updateObj);
+const setUserPasswordMutationPromise = (searchObj, updateObj, modelMutations) => modelMutations.updateOne(searchObj, updateObj);
 
 export default function setUserPasswordMutationResolver(
   root,
@@ -45,6 +44,6 @@ export default function setUserPasswordMutationResolver(
     searchObj,
     updateObj,
     modelMutations,
-  ).then(user => user)
-    .catch(err => err);
+  ).then((user) => user)
+    .catch((err) => err);
 }

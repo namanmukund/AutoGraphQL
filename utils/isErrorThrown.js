@@ -7,5 +7,4 @@ export default (errorObject) => {
     return false;
   }
   return false;
-}
-;
+};

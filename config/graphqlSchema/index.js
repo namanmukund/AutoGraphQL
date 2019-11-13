@@ -1,5 +1,9 @@
-import core from './core';
+import { types, functions } from './core';
 
-module.exports = {
+const core = {
+  types,
+  functions,
+};
+export default {
   core,
 };

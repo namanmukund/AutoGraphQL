@@ -14,12 +14,16 @@ const parseTopicComponentResultData = (result, page) => {
       // parsing practice questions to be returned first time
       if (practiceQuestionsRes) {
         practiceQuestionsRes.forEach((practiceQuestion) => {
-          const question = { question: { type: 'QuestionBank',
-            typeId: `${practiceQuestion.question.id}` },
-          status: practiceQuestion.status,
-          isHintUsed: practiceQuestion.isHintUsed,
-          isAnswerUsed: practiceQuestion.isAnswerUsed,
-          attemptNumber: practiceQuestion.attemptNumber };
+          const question = {
+            question: {
+              type: 'QuestionBank',
+              typeId: `${practiceQuestion.question.id}`,
+            },
+            status: practiceQuestion.status,
+            isHintUsed: practiceQuestion.isHintUsed,
+            isAnswerUsed: practiceQuestion.isAnswerUsed,
+            attemptNumber: practiceQuestion.attemptNumber,
+          };
           practiceQuestions.push(question);
         });
       }
@@ -33,9 +37,13 @@ const parseTopicComponentResultData = (result, page) => {
       // parsing quiz questions to be returned
       if (quizRes) {
         quizRes.forEach((quizQuestion) => {
-          const question = { question: { type: 'QuestionBank',
-            typeId: `${quizQuestion.question.id}` },
-          questionDisplayOrder: `${quizQuestion.questionDisplayOrder}` };
+          const question = {
+            question: {
+              type: 'QuestionBank',
+              typeId: `${quizQuestion.question.id}`,
+            },
+            questionDisplayOrder: `${quizQuestion.questionDisplayOrder}`,
+          };
           quiz.push(question);
         });
       }
@@ -72,4 +80,3 @@ const parseTopicComponentResultData = (result, page) => {
 };
 
 export default parseTopicComponentResultData;
-

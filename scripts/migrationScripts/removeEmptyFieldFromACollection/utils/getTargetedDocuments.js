@@ -4,10 +4,11 @@ const getTargetedDocuments = (targetedCollection, targetedField) => {
   const query = {
     $and: [
       { [targetedField]: { $exists: true } },
-      { $or: [
-        { [targetedField]: null },
-        { [targetedField]: '' },
-      ],
+      {
+        $or: [
+          { [targetedField]: null },
+          { [targetedField]: '' },
+        ],
       },
     ],
   };
