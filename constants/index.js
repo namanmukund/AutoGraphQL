@@ -192,11 +192,17 @@ const masteryLevels = {
 };
 
 const freeTopicCount = 5;
-
 const badgeTypes = {
   character: 'character',
   equipment: 'equipment',
 };
+
+
+const stickerEmojiType = {
+  sticker: 'sticker',
+  emoji: 'emoji',
+};
+
 
 const forgotPassWebURL = {
   development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword/',
@@ -245,4 +251,5 @@ export {
   learningObjectiveRecommendationTexts,
   badgeTypes,
   forgotPassWebURL,
+  stickerEmojiType,
 };

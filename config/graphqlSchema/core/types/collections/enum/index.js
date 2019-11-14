@@ -21,6 +21,7 @@ import UserTopicTypeStatus from './UserTopicTypeStatus';
 import LoginType from './LoginType';
 import MasteryLevelsType from './MasteryLevelsType';
 import BadgeType from './BadgeType';
+import StickerEmojiType from './StickerEmojiType';
 
 
 export default [
@@ -47,4 +48,5 @@ export default [
   LoginType,
   MasteryLevelsType,
   BadgeType,
+  StickerEmojiType,
 ];

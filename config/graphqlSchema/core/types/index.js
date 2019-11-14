@@ -29,6 +29,7 @@ import UserFirstAndLatestQuizReport from './userFirstAndLatestQuizReport';
 import SkipVideo from './skipVideo';
 import UserBadge from './userBadge';
 import QuizReport from './quizReport';
+import StickerEmoji from './stickerEmoji';
 
 export default [
   ...User,
@@ -62,4 +63,5 @@ export default [
   ...SkipVideo,
   ...UserBadge,
   ...QuizReport,
+  ...StickerEmoji,
 ];
