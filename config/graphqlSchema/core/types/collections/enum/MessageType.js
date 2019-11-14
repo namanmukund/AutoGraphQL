@@ -3,6 +3,7 @@ const MessageType = `
     text
     image
     terminal
+    sticker
   }`;
 
 export default MessageType;

@@ -3,6 +3,9 @@ const Message = `
     order: Int!
     type: MessageType!
     statement: String @trim
+    stickerCode: String @trim
+    sticker: StickerEmoji @relation(name: "MessageSticker", direction: "OneWay")
+    emoji: [StickerEmoji] @relation(name: "MessageEmoji", direction: "OneWay")
     image: File @relation(name: "MessageImage", direction: "OneWay")
     learningObjective: LearningObjective @relation(name: "LearningObjectiveMessage")
     terminalInput: String @trim
