@@ -1,10 +1,14 @@
-import { generateUsername,
-  validateUsername } from './index';
+import {
+  generateUsername,
+  validateUsername,
+} from './index';
 import { commonUserValidation } from '../preHookFunctions/validation/utils';
 import { EitherEmailOrPhoneRequiredError } from '../../../../constants/errors';
 
-const addUserValidation = async (input) => {
-  const { name, username, email, phone } = input;
+const addUserValidation = async (input, context) => {
+  const {
+    name, username, email, phone,
+  } = input;
   if (!email && !phone) {
     throw new EitherEmailOrPhoneRequiredError();
   }
@@ -15,7 +19,7 @@ const addUserValidation = async (input) => {
   if (!username) {
     let newUsername;
     try {
-      newUsername = await generateUsername(input);
+      newUsername = await generateUsername(input, context);
     } catch (err) {
       return err;
     }

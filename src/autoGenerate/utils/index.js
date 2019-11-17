@@ -28,6 +28,10 @@ import visitField from './visitField';
 import checkIfArgumentsAreFromSameType from './checkIfArgumentsAreFromSameType';
 import getNestedConnectMutationString from './getNestedConnectMutationString';
 import isDocContainsGivenKeyValue from './isDocContainsGivenKeyValue';
+import isTopicUnlocked from './isTopicUnlocked';
+import getFirstTopicAndLearningObjective from './getFirstTopicAndLearningObjective';
+import addUserCurrentTopicComponentStatus from './addUserCurrentTopicComponentStatus';
+import getUserCurrentTopicComponentStatus from './getUserCurrentTopicComponentStatus';
 
 export {
   getParsedASTMap,
@@ -60,4 +64,8 @@ export {
   checkIfArgumentsAreFromSameType,
   getNestedConnectMutationString,
   isDocContainsGivenKeyValue,
+  isTopicUnlocked,
+  getFirstTopicAndLearningObjective,
+  addUserCurrentTopicComponentStatus,
+  getUserCurrentTopicComponentStatus,
 };

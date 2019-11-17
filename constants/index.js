@@ -6,6 +6,7 @@ import fileExtensions from './fileExtensions';
 import forceUpdateTypeNames from './forceUpdateTypeNames';
 import forceDeleteTypeNames from './forceDeleteTypeNames';
 import regexValidation from './regexValidation';
+import loginType from './loginType';
 
 
 const FRONTEND_APP_ONE = 'tekieTms';
@@ -91,7 +92,7 @@ const smsOTPMessage = {
   bodyAfterName: ', your xyz OTP is ',
 };
 
-const fromEmail = 'xyz@gmail.com';
+const fromEmail = 'namanmukund@gmail.com';
 const STATIC = 'static';
 
 const fetchRetries = 5;
@@ -130,6 +131,85 @@ const userProfiles = ['sampleProfile'];
 const PUBLISHED = 'published';
 const UNPUBLISHED = 'unpublished';
 
+const GLOBAL_COURSE_TITLE = 'python';
+
+const enrollmentTypes = {
+  free: 'free',
+  pro: 'pro',
+};
+
+const topicTypes = {
+  video: 'video',
+  message: 'message',
+  practiceQuestion: 'practiceQuestion',
+  quiz: 'quiz',
+};
+
+const userActionType = {
+  next: 'next',
+  back: 'back',
+  appClose: 'appClose',
+  skip: 'skip',
+};
+
+const userTopicTypeStatus = {
+  complete: 'complete',
+  incomplete: 'incomplete',
+  skip: 'skip',
+};
+
+const questionTypes = {
+  mcq: 'mcq',
+  fibInput: 'fibInput',
+  fibBlock: 'fibBlock',
+  arrange: 'arrange',
+};
+
+const scholarshipThreshHolds = {
+  proficient: 100,
+  master: 80,
+  familiar: 60,
+};
+
+const learningObjectiveQuizReportThreshHolds = {
+  proficient: 100,
+  master: 80,
+  familiar: 60,
+};
+
+const learningObjectiveRecommendationTexts = {
+  learningObjectiveProficientText: 'Excellent',
+  learningObjectiveMasterText: 'Great going',
+  learningObjectiveFamiliarText: 'Almost there',
+  learningObjectiveDefaultText: 'Need work',
+};
+
+const masteryLevels = {
+  proficient: 'proficient',
+  master: 'master',
+  familiar: 'familiar',
+  defaultMastery: 'none',
+};
+
+const freeTopicCount = 5;
+const badgeTypes = {
+  character: 'character',
+  equipment: 'equipment',
+};
+
+
+const stickerEmojiType = {
+  sticker: 'sticker',
+  emoji: 'emoji',
+};
+
+
+const forgotPassWebURL = {
+  development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword/',
+  staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
+  production: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
+};
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -155,4 +235,21 @@ export {
   regexValidation,
   arrayUpdateAddTypes,
   arrayUpdateRemoveTypes,
+  GLOBAL_COURSE_TITLE,
+  enrollmentTypes,
+  topicTypes,
+  userActionType,
+  userTopicTypeStatus,
+  questionTypes,
+  scholarshipThreshHolds,
+  freeTopicCount,
+  FRONTEND_APP_ONE,
+  FRONTEND_APP_TWO,
+  loginType,
+  masteryLevels,
+  learningObjectiveQuizReportThreshHolds,
+  learningObjectiveRecommendationTexts,
+  badgeTypes,
+  forgotPassWebURL,
+  stickerEmojiType,
 };

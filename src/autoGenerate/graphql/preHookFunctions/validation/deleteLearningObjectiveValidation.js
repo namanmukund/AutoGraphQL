@@ -1,7 +1,7 @@
 import { get } from 'lodash';
-import callGraphqlApi from '../../../../api/callGraphqlApi';
 import { PUBLISHED } from '../../../../../constants';
 import checkDeleteStatusOfALearningObjective from './utils/checkDeleteStatusOfALearningObjective';
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 const deleteLearningObjectiveValidation = async (params) => {
   const { id: learningObjectiveId } = params;
@@ -18,7 +18,7 @@ const deleteLearningObjectiveValidation = async (params) => {
         }
 `;
 
-  const res = await callGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query);
   const learningObjective = get(res, 'data.learningObjective');
   if (learningObjective) {
     checkDeleteStatusOfALearningObjective(learningObjective);

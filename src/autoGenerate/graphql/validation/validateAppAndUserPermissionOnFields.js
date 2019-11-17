@@ -2,6 +2,7 @@
 "BinaryExpression[operator='in']"] */
 import { findIndex } from 'lodash';
 import { InsufficientPermissionError } from '../../../../constants/errors';
+import { META } from '../../../../constants';
 
 
 const validateAllowDenyRuleOnApp = (
@@ -15,10 +16,10 @@ const validateAllowDenyRuleOnApp = (
   If rule is allow then check for all the permitted apps and their operations
    */
   if (
-    rule === 'allow' &&
-      permissions &&
-      permissions !== '*' &&
-      permissions.length
+    rule === 'allow'
+      && permissions
+      && permissions !== '*'
+      && permissions.length
   ) {
     const index = findIndex(permissions, { appName });
     if (index === -1) {
@@ -71,23 +72,31 @@ const validateAppPermission = (
       operation,
     );
   }
-
   // permission check on the fields
   const queryFieldKeys = Object.keys(queryFields);
   for (const key of queryFieldKeys) {
-    const { appPermissions: appPermissionsOnField } = field[key];
-    if (appPermissionsOnField && Object.keys(appPermissionsOnField)) {
-      validateAllowDenyRuleOnApp(
-        appPermissionsOnField,
-        appName,
-        operation,
-      );
+    // including 'result' and 'error' fields as exceptions to be sent in response like count & meta
+    if (key
+      && !(key.includes(META)
+        || key.includes('count')
+        || key.includes('result')
+        || key.includes('error')
+      )) {
+      const { appPermissions: appPermissionsOnField } = field[key];
+      if (appPermissionsOnField && Object.keys(appPermissionsOnField)) {
+        validateAllowDenyRuleOnApp(
+          appPermissionsOnField,
+          appName,
+          operation,
+        );
+      }
     }
 
     /* if field key is relation field then recursive strategy will be used
         to check the permission and throw error at once
    */
-    if (Object.keys(parsedASTMap[typeName].relationFields).includes(key)) {
+    if (Object.keys(parsedASTMap[typeName].relationFields)
+      .includes(key)) {
       const subTypeName = parsedASTMap[typeName].field[key].type.dataType;
       validateAppPermission(
         subTypeName,

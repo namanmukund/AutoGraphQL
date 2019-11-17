@@ -1,5 +1,6 @@
-import { getEmailObject, sendEmail, parsedHtmlFromTemplateFileAndObject,
-} from '../../email';
+import parsedHtmlFromTemplateFileAndObject from '../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
+import getEmailObject from '../../../services/email/utils/getEmailObject';
+import sendEmail from '../../../services/email/utils/sendEmail';
 
 const sendEmailOtpToUser = (emailTo, userOtp, appName) => {
   const templateFileName = 'userEmailOtptemplate';
@@ -8,7 +9,8 @@ const sendEmailOtpToUser = (emailTo, userOtp, appName) => {
     appName,
   };
   const templateString = parsedHtmlFromTemplateFileAndObject(
-    templateFileName, templateObject);
+    templateFileName, templateObject,
+  );
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';

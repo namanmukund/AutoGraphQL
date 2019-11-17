@@ -1,12 +1,25 @@
 import { QueryController } from '../controllers';
-import { randomNumberRangeForUsername } from '../../../../constants';
+import { randomNumberRangeForUsername, FRONTEND_APP_TWO } from '../../../../constants';
 import { getRandomNumber } from '../../../../utils';
+import getUserIdandAppNameAfterValidation
+  from '../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 
 
-const generateUsername = (input) => {
-  const { name } = input;
-  // username to always be derived from name
-  let username = name.replace(/\s/g, '').toLowerCase();
+const generateUsername = (input, context) => {
+  // calling method to get app name, we will use app name to determine how username will generate
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
+  const {
+    appName,
+  } = userAndAppInfo;
+  const { name, email } = input;
+  // username to always be derived from name or email
+  // if call is from tekieLearningApp we will use email to generate username
+  let username;
+  if (appName === FRONTEND_APP_TWO) {
+    username = email.replace(/\s/g, '').toLowerCase();
+  } else {
+    username = name.replace(/\s/g, '').toLowerCase();
+  }
 
   const typeName = 'User';
   const newAuthentication = {

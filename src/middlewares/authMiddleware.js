@@ -66,12 +66,14 @@ const handleUserToken = async (id, currentApp, currentUser) => {
   let { status } = user;
   // Check if user token have phone login or email login information and update status accordingly
   if (typeof currentUser === 'object' && status === 'active') {
-    const { phoneVerified, emailVerified } = user;
+    // commenting emailVerified true logic as unverified email user can be active too
+    const { phoneVerified } = user;
     if (currentUser.byPhone === true && !phoneVerified) {
       status = 'inactive';
-    } else if (currentUser.byEmail === true && !emailVerified) {
-      status = 'inactive';
     }
+    // else if (currentUser.byEmail === true && !emailVerified) {
+    //   status = 'inactive';
+    // }
   }
   // Put status info in userInfo object
   userInfo.status = status;
@@ -85,7 +87,7 @@ const authMiddleware = async (req, res, next) => {
   }
   // authorization header set is base64 encoded by adding
   // app token and user token, separated by ::
-  const authorization = req.headers.authorization;
+  const { authorization } = req.headers;
   let isValidToken = false;
   // this is to ensure that only allowed tokens are permitted further
   if (authorization) {

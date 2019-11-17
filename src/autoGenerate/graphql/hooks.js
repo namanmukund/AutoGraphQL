@@ -34,6 +34,36 @@ import { callAddUpdateHookValidationFunction } from './preHookFunctions/validati
 import deleteTopicValidation from './preHookFunctions/validation/deleteTopicValidation';
 import deleteLearningObjectiveValidation from './preHookFunctions/validation/deleteLearningObjectiveValidation';
 import deleteQuestionBankValidation from './preHookFunctions/validation/deleteQuestionBankValidation';
+import userCourseSyllabusMethod from './preHookFunctions/userCourseSyllabusMethod';
+import userVideoPostHookMethod from './postHookFunctions/userVideoPostHookMethod';
+import userLearningObjectivePostHookMethod from './postHookFunctions/userLearningObjectivePostHookMethod';
+import userQuizPostHookMethod from './postHookFunctions/userQuizPostHookMethod';
+import addUserActivityVideoDumpPostHookMethod
+  from './postHookFunctions/addUserActivityVideoDumpPostHookMethod';
+import addUserActivityChatDumpPostHookMethod
+  from './postHookFunctions/addUserActivityChatDumpPostHookMethod';
+import addUserActivityPQDumpPostHookMethod
+  from './postHookFunctions/addUserActivityPQDumpPostHookMethod';
+import addUserActivityQuizDumpPostHookMethod
+  from './postHookFunctions/addUserActivityQuizDumpPostHookMethod';
+import userProfilePostHookMethod from './postHookFunctions/userProfilePostHookMethod';
+import addUserActivityChatDumpValidation
+  from './preHookFunctions/validation/addUserActivityChatDumpValidation';
+import addUserCurrentTopicComponentStatusValidation
+  from './preHookFunctions/validation/addUserCurrentTopicComponentStatusValidation';
+import updateUserCurrentTopicComponentStatusValidation
+  from './preHookFunctions/validation/updateUserCurrentTopicComponentStatusValidation';
+import addUserActivityVideoDumpValidation
+  from './preHookFunctions/validation/addUserActivityVideoDumpValidation';
+import addUserActivityPQDumpValidation
+  from './preHookFunctions/validation/addUserActivityPQDumpValidation';
+import addUserActivityQuizDumpValidation
+  from './preHookFunctions/validation/addUserActivityQuizDumpValidation';
+import userVideoValidation from './preHookFunctions/validation/userVideoValidation';
+import userLearningObjectiveValidation
+  from './preHookFunctions/validation/userLearningObjectiveValidation';
+import userQuizValidation from './preHookFunctions/validation/userQuizValidation';
+import userPracticeQuestionReportPostHookMethod from './postHookFunctions/userPracticeQuestionReportPostHookMethod';
 
 const { hookFunctions } = functions || {};
 
@@ -61,9 +91,9 @@ const hook = (data, mutationName, hookName) => {
 // params contain all the arguments whatever you are passing in mutation query
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
-    case 'addUser' : {
+    case 'addUser': {
       // validate username, phone, email and name and returns email or phone verified accordingly
-      const verifiedData = await addUserValidation(input);
+      const verifiedData = await addUserValidation(input, context);
       Object.assign(input, verifiedData);
       return preUserDataValidation(input, mutationOrQueryName).then((userData) => {
         if (userData) {
@@ -72,7 +102,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         return hook(input, mutationOrQueryName, 'PreHook');
       });
     }
-    case 'setUserPassword' : {
+    case 'setUserPassword': {
       return preUserDataValidation(input, mutationOrQueryName).then((userData) => {
         if (!userData) {
           throw new DatabaseRecordNotFoundError();
@@ -92,7 +122,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         return hook(input, mutationOrQueryName, 'PreHook');
       });
     }
-    case 'resetUserPassword' : {
+    case 'resetUserPassword': {
       return preUserDataValidation(input, mutationOrQueryName).then((userData) => {
         if (!userData) {
           throw new DatabaseRecordNotFoundError();
@@ -132,26 +162,26 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         return hook(input, mutationOrQueryName, 'PreHook');
       });
     }
-    case 'signupExistingUser' : {
+    case 'signupExistingUser': {
       return new Promise((resolve) => {
         const verifiedData = validateExistingUserInput(input);
         Object.assign(input, verifiedData);
         resolve(hook(input, mutationOrQueryName, 'PreHook'));
       });
     }
-    case 'login' : {
+    case 'login': {
       // validates email or phone number
       const verifiedData = validateLogin(input);
       Object.assign(input, verifiedData);
 
       return hook(input, mutationOrQueryName, 'PreHook');
     }
-    case 'updateUser' : {
+    case 'updateUser': {
       await callAddUpdateHookValidationFunction(mutationOrQueryName, params, context);
       break;
     }
 
-    case 'validateUserOTP' :
+    case 'validateUserOTP':
     {
       const { phoneOtp, emailOtp } = input;
       if (!phoneOtp && !emailOtp) {
@@ -210,6 +240,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       const newInput = validateForgotPassword(input);
       return hook(newInput, mutationOrQueryName, 'PreHook');
     }
+    case 'sendForgotPasswordLink': {
+      const newInput = validateForgotPassword(input);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
     case 'addAppToken': {
       const { decodedUser } = context;
       const authentication = ifAuthorized(context);
@@ -229,7 +263,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         return hook(input, mutationOrQueryName, 'PreHook');
       });
     }
-    case 'deleteFile' : {
+    case 'deleteFile': {
       return isFileDeleteAllowed(params).then((res) => {
         if (!res) {
           throw new FileUsageCountNotZeroError();
@@ -237,27 +271,71 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         return hook(input, mutationOrQueryName, 'PreHook');
       });
     }
-    case 'deleteChapter' : {
+    case 'deleteChapter': {
       await deleteChapterValidation(params);
       break;
     }
-    case 'deleteTopic' : {
+    case 'deleteTopic': {
       await deleteTopicValidation(params);
       break;
     }
-    case 'deleteLearningObjective' : {
+    case 'deleteLearningObjective': {
       await deleteLearningObjectiveValidation(params);
       break;
     }
-    case 'deleteQuestionBank' : {
+    case 'deleteQuestionBank': {
       await deleteQuestionBankValidation(params);
       break;
+    }
+    case 'addUserCurrentTopicComponentStatus': {
+      await addUserCurrentTopicComponentStatusValidation(params, context);
+      break;
+    }
+    case 'updateUserCurrentTopicComponentStatus': {
+      await updateUserCurrentTopicComponentStatusValidation(params);
+      break;
+    }
+    case 'userCourseSyllabus': {
+      await userCourseSyllabusMethod(context);
+      break;
+    }
+    case 'addUserActivityVideoDump': {
+      await addUserActivityVideoDumpValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addUserActivityChatDump': {
+      await addUserActivityChatDumpValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addUserActivityPQDump': {
+      await addUserActivityPQDumpValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addUserActivityQuizDump': {
+      await addUserActivityQuizDumpValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'userVideo': {
+      await userVideoValidation(params, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'userLearningObjective': {
+      await userLearningObjectiveValidation(params, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'userQuiz': {
+      await userQuizValidation(params, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addLearningObjective': {
       await addLearningObjectiveValidation(params);
       break;
     }
-    default : {
+    case 'userTopicJourney': {
+      await userCourseSyllabusMethod(context);
+      break;
+    }
+    default: {
       /* If context is not present then it means user is not authenticated and the
       user won't be able to make any db query
       */
@@ -282,15 +360,15 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
 /*
 Params: input,mutationName,context,params
  */
-const posthook = async (input, mutationName) => {
+const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
-    case 'deleteFile' : {
+    case 'deleteFile': {
       const { uri } = input;
       await deleteFromS3(uri);
       break;
     }
-    case 'deleteFiles' : {
-      const urisToDelete = input.map(record => record.uri);
+    case 'deleteFiles': {
+      const urisToDelete = input.map((record) => record.uri);
       /* eslint no-restricted-syntax: ["error", "FunctionExpression", "WithStatement",
       "BinaryExpression[operator='in']"] */
       for (const uri of urisToDelete) {
@@ -300,7 +378,43 @@ const posthook = async (input, mutationName) => {
       }
       break;
     }
-    default :
+    case 'userVideo': {
+      const resultArray = await userVideoPostHookMethod(input, params);
+      return hook(resultArray, mutationName, 'PostHook');
+    }
+    case 'userLearningObjective': {
+      const resultArray = await userLearningObjectivePostHookMethod(input, params);
+      return hook(resultArray, mutationName, 'PostHook');
+    }
+    case 'userQuiz': {
+      const resultArray = await userQuizPostHookMethod(input, params);
+      return hook(resultArray, mutationName, 'PostHook');
+    }
+    case 'userProfile': {
+      const resultArray = await userProfilePostHookMethod(input, params);
+      return hook(resultArray, mutationName, 'PostHook');
+    }
+    case 'addUserActivityVideoDump': {
+      await addUserActivityVideoDumpPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'addUserActivityChatDump': {
+      await addUserActivityChatDumpPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'addUserActivityPQDump': {
+      await addUserActivityPQDumpPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'addUserActivityQuizDump': {
+      await addUserActivityQuizDumpPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'userPracticeQuestionReport': {
+      const resultArray = await userPracticeQuestionReportPostHookMethod(input, params);
+      return hook(resultArray, mutationName, 'PostHook');
+    }
+    default:
       break;
   }
   return hook(input, mutationName, 'PostHook');

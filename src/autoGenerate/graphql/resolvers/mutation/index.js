@@ -17,6 +17,16 @@ import sendForgotPasswordOTPMutationResolver from './forgotPassword/sendForgotPa
 import validateForgotPasswordOTPMutationResolver from './forgotPassword/validateForgotPasswordOTP';
 import finishForgotPasswordMutationResolver from './forgotPassword/finishForgotPassword';
 import resendForgotPasswordOTPMutationResolver from './forgotPassword/resendForgotPasswordOTP';
+import userCourseSyllabusMutationResolver from './userData/userCourseSyllabus';
+import userTopicJourneyMutationResolver from './userData/userTopicJourney';
+import userFirstAndLatestQuizReportMutationResolver from './userData/userFirstAndLatestQuizReport';
+import skipVideoMutationResolver from './userData/skipVideo';
+import skipPracticeQuestionMutationResolver from './userData/skipPracticeQuestion';
+import userBadgeMutationResolver from './userData/userBadge';
+import sendForgotPasswordLinkMutationResolver from './forgotPassword/sendForgotPasswordLink';
+import resetPasswordFromForgotPasswordLinkMutationResolver from './forgotPassword/resetPasswordFromForgotPasswordLink';
+import getUnlockedUserBadgeMutationResolver from './userData/getUnlockedUserBadge';
+import getQuizReportMutationResolver from './userData/getQuizReport';
 
 export {
   addMutationResolver,
@@ -38,4 +48,14 @@ export {
   resendForgotPasswordOTPMutationResolver,
   setPasswordStrictMutationPromise,
   deleteMultipleMutationResolver,
+  userCourseSyllabusMutationResolver,
+  userTopicJourneyMutationResolver,
+  userFirstAndLatestQuizReportMutationResolver,
+  skipVideoMutationResolver,
+  userBadgeMutationResolver,
+  skipPracticeQuestionMutationResolver,
+  sendForgotPasswordLinkMutationResolver,
+  resetPasswordFromForgotPasswordLinkMutationResolver,
+  getUnlockedUserBadgeMutationResolver,
+  getQuizReportMutationResolver,
 };

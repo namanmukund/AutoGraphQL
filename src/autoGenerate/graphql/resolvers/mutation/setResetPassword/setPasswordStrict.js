@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import allAuthParams from '../../../../../../config/authParams';
 import { MutationController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
@@ -7,8 +7,7 @@ import { UPDATE } from '../../../../../../constants/graphqlOperations';
 
 const application = process.env.APPLICATION || 'core';
 const authParams = allAuthParams[application];
-const setPasswordStrictMutationPromise = (searchObj, updateObj, modelMutations) =>
-  modelMutations.updateOne(searchObj, updateObj);
+const setPasswordStrictMutationPromise = (searchObj, updateObj, modelMutations) => modelMutations.updateOne(searchObj, updateObj);
 
 export default function setPasswordStrictMutationResolver(
   root,
@@ -41,5 +40,5 @@ export default function setPasswordStrictMutationResolver(
     searchObj,
     updateObj,
     modelMutations,
-  ).then(user => user).catch(err => err);
+  ).then((user) => user).catch((err) => err);
 }

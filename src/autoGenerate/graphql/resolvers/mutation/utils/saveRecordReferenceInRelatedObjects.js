@@ -10,12 +10,12 @@ const saveRecordReferenceInRelatedObjects = (
   authentication,
 ) => {
   const allRelationObjectsArray1to1 = relationsArray1to1.map((relation) => {
-    const relationObject = Object.assign({}, relation, { recordId: record.id });
+    const relationObject = { ...relation, recordId: record.id };
     return relationObject;
   });
   const allRelationObjectsArray1toM = relationsArray1toM.map((relation) => {
     const relationArray = relation.map((relationObject) => {
-      const relationObj = Object.assign({}, relationObject, { recordId: record.id });
+      const relationObj = { ...relationObject, recordId: record.id };
       return relationObj;
     });
     return relationArray;

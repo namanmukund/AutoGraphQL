@@ -14,8 +14,8 @@ const validateParamsUniqueness = (paramKey, typeAST) => {
   }
   // Loop and find if field is unique.
   // @TODO can be improved using getParsedObjectTypeAST.
-  isUniqueField = !!(typeAST.field[paramKey].directive.unique ||
-    typeAST.field[paramKey].directive.uniqueOrEmpty);
+  isUniqueField = !!(typeAST.field[paramKey].directive.unique
+    || typeAST.field[paramKey].directive.uniqueOrEmpty);
   return isUniqueField;
 };
 
@@ -50,7 +50,7 @@ const remoteApplicationPromises = (
     let returnObject = result;
     if (values && values.length > 0) {
       values.map((value) => {
-        returnObject = Object.assign({}, returnObject, value);
+        returnObject = { ...returnObject, ...value };
         return null;
       });
     }
@@ -97,20 +97,19 @@ const fetchSingleQueryResolver = (
 
     const modelRemote = new RemoteController(applicationName, authentication);
     // Out of all the fields requested, get the fields required.
-    const fieldsToQuery =
-      pick(fieldsFetched, Object.keys(remoteFieldsApplicationWise[applicationName]));
+    const fieldsToQuery = pick(fieldsFetched, Object.keys(remoteFieldsApplicationWise[applicationName]));
     return modelRemote.query(queryName, params, fieldsToQuery).then((resultRemote) => {
       if (!(resultRemote && resultRemote.id)) {
         return null;
       }
-      const id = resultRemote.id;
+      const { id } = resultRemote;
       // Create params object.
       const newParam = {
         id,
       };
 
       // Fetch from local.
-      const existingPromise = modelQueries.fetchById(id).then(result => toObject(result));
+      const existingPromise = modelQueries.fetchById(id).then((result) => toObject(result));
       // Fetch from remote applications.
       return remoteApplicationPromises(
         resultRemote,
@@ -137,7 +136,7 @@ const fetchSingleQueryResolver = (
       return null;
     }
     // Create params object.
-    const id = result.id;
+    const { id } = result;
     const newParam = {
       id,
     };

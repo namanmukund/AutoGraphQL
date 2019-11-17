@@ -5,7 +5,7 @@ import getTokenForApi from './getTokenForApi';
 
 const application = process.env.APPLICATION || 'core';
 const env = process.env.NODE_ENV || 'development';
-const uri = allServerConfig[application][env].backend.uri;
+const { uri } = allServerConfig[application][env].backend;
 
 // const token = getTokenForApi();
 const callGraphqlApi = (
@@ -39,8 +39,13 @@ const callGraphqlApi = (
     next();
   });
 
+  // To avoid apollo-server-core error
+  if (!variables || variables === '') {
+    variables = {};
+  }
   /* eslint-enable no-param-reassign */
   /* eslint-enable no-unused-vars */
+
   return apolloFetch({ query, variables })
     .then((res) => {
       if (res.errors) {

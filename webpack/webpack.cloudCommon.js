@@ -55,13 +55,6 @@ config.module.rules = [
       },
     ],
   },
-
-  // Allow loading of JSON files
-  {
-    test: /\.json$/,
-    exclude: /node_modules/,
-    loader: 'json-loader',
-  },
 ];
 
 module.exports = config;

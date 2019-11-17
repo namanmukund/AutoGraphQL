@@ -6,7 +6,9 @@ import { getParsedASTMap } from '../utils';
 import getEnumDefinitionTypeObject from '../utils/getEnumDefinitionTypeObject';
 
 import { types } from '../../../utils';
-import { scalarTypes, sortBy, allFilters, META } from '../../../constants';
+import {
+  scalarTypes, sortBy, allFilters, META,
+} from '../../../constants';
 import { InvalidFieldType } from '../../../constants/errors';
 import hasDirective from '../utils/hasDirective';
 import visitField from '../utils/visitField';
@@ -23,9 +25,9 @@ const groupByTypes = [];
 // array for all types with relation field filters
 const typesWithRelationFilters = types.slice();
 // filter name
-const getFilterName = typeName => `${typeName}Filter`;
+const getFilterName = (typeName) => `${typeName}Filter`;
 // group by name
-const getGroupByName = typeName => `${typeName}GroupBy`;
+const getGroupByName = (typeName) => `${typeName}GroupBy`;
 
 // adding the _asc and _desc to the modal colections to the scalar types field only
 const getSortFields = (field, typeASTFields) => {
@@ -204,10 +206,10 @@ const getAllFieldsToBeFiltered = (collection, completeFields, parentName) => {
   if (typeASTFields && Object.keys(typeASTFields).length) {
     Object.keys(typeASTFields).forEach((individualField) => {
       let parentJoins = '';
-      const dataType = typeASTFields[individualField].type.dataType;
+      const { dataType } = typeASTFields[individualField].type;
       // if not filter directive then dont add field filter
-      const isFilteringOffForField = typeASTFields[individualField].directive &&
-        typeASTFields[individualField].directive.filterOff;
+      const isFilteringOffForField = typeASTFields[individualField].directive
+        && typeASTFields[individualField].directive.filterOff;
       if (isFilteringOffForField) {
         return;
       }
@@ -243,8 +245,8 @@ const getAllGroupByFields = (collection) => {
   if (typeASTFields && Object.keys(typeASTFields).length) {
     Object.keys(typeASTFields)
       .forEach((individualField) => {
-        const isGroupByField = typeASTFields[individualField].directive &&
-          typeASTFields[individualField].directive.groupBy;
+        const isGroupByField = typeASTFields[individualField].directive
+          && typeASTFields[individualField].directive.groupBy;
         if (isGroupByField) {
           groupByFields += `${individualField} ,`;
         }
@@ -355,7 +357,9 @@ parsedASTTypes.forEach((type) => {
 
 parsedASTTypes.forEach((type) => {
   const definition = parsedASTMap[type];
-  const { name, field, directives, relationFields, allowedOperations } = definition;
+  const {
+    name, field, directives, relationFields, allowedOperations,
+  } = definition;
   const typeName = name.value;
   // query
   const modelSingular = camelCase(typeName);
@@ -379,25 +383,25 @@ parsedASTTypes.forEach((type) => {
 
 
     if (
-      (allowedOperations && allowedOperations === '*') ||
-    (allowedOperations && allowedOperations !== '*' &&
-        allowedOperations.length && allowedOperations.includes(SINGULAR))
+      (allowedOperations && allowedOperations === '*')
+    || (allowedOperations && allowedOperations !== '*'
+        && allowedOperations.length && allowedOperations.includes(SINGULAR))
     ) {
       queryString += `${modelSingular}(${singleFetchParamsString}): ${typeName},`;
     }
 
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(PLURAL))
+      (allowedOperations && allowedOperations === '*')
+        || (allowedOperations && allowedOperations !== '*'
+            && allowedOperations.length && allowedOperations.includes(PLURAL))
     ) {
       queryString += `${modelPlural}(filter : ${filterName}, orderBy:Sort${typeName}, last: Int, first:Int, skip:Int, after: ID, before:ID) : [${typeName}],`;
     }
 
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(META_QUERY))
+      (allowedOperations && allowedOperations === '*')
+        || (allowedOperations && allowedOperations !== '*'
+            && allowedOperations.length && allowedOperations.includes(META_QUERY))
     ) {
       if (!groupByType) {
         queryString += `${modelPlural}${META}(filter : ${filterName}) : AggregationResult,`;
@@ -406,7 +410,7 @@ parsedASTTypes.forEach((type) => {
       }
     }
     // Fill schema types with filters on relations
-    const modelTypeIndex = typesWithRelationFilters.findIndex(typeString => typeString.includes(`type ${type} @model`));
+    const modelTypeIndex = typesWithRelationFilters.findIndex((typeString) => typeString.includes(`type ${type} @model`));
     if (relationFields && Object.keys(relationFields).length) {
       const relationKeys = Object.keys(relationFields);
       relationKeys.forEach((relationKey) => {
@@ -438,8 +442,7 @@ parsedASTTypes.forEach((type) => {
         }
         replaceValue = trimEnd(replaceValue, ',');
         // Replace filter on relations
-        typesWithRelationFilters[modelTypeIndex]
-          = typesWithRelationFilters[modelTypeIndex].replace(findValue, replaceValue);
+        typesWithRelationFilters[modelTypeIndex] = typesWithRelationFilters[modelTypeIndex].replace(findValue, replaceValue);
       });
     }
   }
@@ -457,4 +460,6 @@ createScalarFilters();
 // Create enum filterTypes
 createEnumFilters();
 
-export { query, filterTypes, sort, typesWithRelationFilters, groupByTypes };
+export {
+  query, filterTypes, sort, typesWithRelationFilters, groupByTypes,
+};

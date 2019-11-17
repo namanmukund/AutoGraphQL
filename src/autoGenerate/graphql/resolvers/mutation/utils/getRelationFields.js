@@ -17,7 +17,9 @@ const getRelationFields = (input, ast, typeName) => {
         const fieldType = ast[typeName].field[fieldName].type;
         const fieldValue = input[fieldName];
         const relationName = getDirectiveArgumentValue(ast, typeName, fieldName, 'relation', 'name');
-        const relationFieldsObj = { fieldName, fieldType, fieldValue, relationName };
+        const relationFieldsObj = {
+          fieldName, fieldType, fieldValue, relationName,
+        };
         relationFieldsArray.push(relationFieldsObj);
       }
     });

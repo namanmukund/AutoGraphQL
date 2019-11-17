@@ -15,9 +15,21 @@ import {
   finishForgotPasswordMutationResolver,
   resendForgotPasswordOTPMutationResolver,
   deleteMultipleMutationResolver,
+  userCourseSyllabusMutationResolver,
+  userTopicJourneyMutationResolver,
+  userFirstAndLatestQuizReportMutationResolver,
+  skipVideoMutationResolver,
+  skipPracticeQuestionMutationResolver,
+  sendForgotPasswordLinkMutationResolver,
+  resetPasswordFromForgotPasswordLinkMutationResolver,
+  getUnlockedUserBadgeMutationResolver,
+  userBadgeMutationResolver,
+  getQuizReportMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
-import { types, authenticateUser, ifAuthorized, toObject, isErrorThrown, getRandomNumber } from '../../../../utils';
+import {
+  types, authenticateUser, ifAuthorized, toObject, isErrorThrown, getRandomNumber,
+} from '../../../../utils';
 import { prehook, posthook } from '../hooks';
 import {
   BYPASS,
@@ -44,6 +56,7 @@ import {
   UPDATE,
   UPDATE_MULTIPLE,
 } from '../../../../constants/graphqlOperations';
+import socialLoginMutationResolver from './mutation/user/socialLogin';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -96,7 +109,7 @@ const defaultMutationsResolverWrapper = async (
   ).then((result) => {
     let newResult;
     if (isArray(result)) {
-      newResult = result.map(record => toObject(record));
+      newResult = result.map((record) => toObject(record));
     } else {
       newResult = toObject(result);
     }
@@ -107,7 +120,9 @@ const defaultMutationsResolverWrapper = async (
 
 Object.keys(parsedASTMap).forEach((type) => {
   const definition = parsedASTMap[type];
-  const { name, field, directives, allowedOperations } = definition;
+  const {
+    name, field, directives, allowedOperations,
+  } = definition;
   const typeName = name.value;
   const modelSingular = camelCase(typeName);
   const modelPlural = camelCase(pluralize(typeName));
@@ -118,16 +133,17 @@ Object.keys(parsedASTMap).forEach((type) => {
   if (isModel) {
     // Fetch single query resolver.
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(SINGULAR))
+      (allowedOperations && allowedOperations === '*')
+      || (allowedOperations && allowedOperations !== '*'
+        && allowedOperations.length && allowedOperations.includes(SINGULAR))
     ) {
-      resolvers.Query[modelSingular] = ((root, params, context, info) => {
+      resolvers.Query[modelSingular] = (async (root, params, context, info) => {
         // Query Resolvers
         const authentication = ifAuthorized(context);
         Object.assign(authentication, {
           mutationOrQueryName: modelSingular,
         });
+        await prehook('', modelSingular, context, params);
         return fetchSingleQueryResolver(
           root,
           params,
@@ -135,21 +151,26 @@ Object.keys(parsedASTMap).forEach((type) => {
           info,
           parsedASTMap,
           authentication,
-        );
+        ).then(async (result) => {
+          const newResult = toObject(result);
+          const postHookResult = await posthook(newResult, modelSingular, context, params);
+          return postHookResult;
+        });
       });
     }
 
     // Fetch list query resolver.
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(PLURAL))
+      (allowedOperations && allowedOperations === '*')
+      || (allowedOperations && allowedOperations !== '*'
+        && allowedOperations.length && allowedOperations.includes(PLURAL))
     ) {
-      resolvers.Query[modelPlural] = ((root, params, context, info) => {
+      resolvers.Query[modelPlural] = (async (root, params, context, info) => {
         const authentication = ifAuthorized(context);
         Object.assign(authentication, {
           mutationOrQueryName: modelPlural,
         });
+        await prehook('', modelSingular, context, params);
         return fetchListQueryResolver(
           root,
           params,
@@ -157,15 +178,19 @@ Object.keys(parsedASTMap).forEach((type) => {
           info,
           parsedASTMap,
           authentication,
-        );
+        ).then(async (result) => {
+          const newResult = toObject(result);
+          const postHookResult = await posthook(newResult, modelSingular, context, params);
+          return postHookResult;
+        });
       });
     }
 
     // Fetch count query resolver.
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(META_QUERY))
+      (allowedOperations && allowedOperations === '*')
+      || (allowedOperations && allowedOperations !== '*'
+        && allowedOperations.length && allowedOperations.includes(META_QUERY))
     ) {
       resolvers.Query[modelMeta] = ((root, params, context, info) => {
         const authentication = ifAuthorized(context);
@@ -186,11 +211,12 @@ Object.keys(parsedASTMap).forEach((type) => {
     // Mutation Resolvers
     const mutationNames = getMutationNames(typeName);
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(ADD))
+      (allowedOperations && allowedOperations === '*')
+      || (allowedOperations && allowedOperations !== '*'
+        && allowedOperations.length && allowedOperations.includes(ADD))
     ) {
-      resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
+      resolvers.Mutation = {
+        ...resolvers.Mutation,
         [mutationNames.addMutation]: (root, params, context, info) => {
           const mutationName = mutationNames.addMutation;
           const mutationResolverName = 'addMutationResolver';
@@ -204,15 +230,16 @@ Object.keys(parsedASTMap).forEach((type) => {
             mutationResolverName,
           );
         },
-      });
+      };
     }
 
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(UPDATE))
+      (allowedOperations && allowedOperations === '*')
+      || (allowedOperations && allowedOperations !== '*'
+        && allowedOperations.length && allowedOperations.includes(UPDATE))
     ) {
-      resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
+      resolvers.Mutation = {
+        ...resolvers.Mutation,
         [mutationNames.updateMutation]: (root, params, context, info) => {
           const mutationName = mutationNames.updateMutation;
           const mutationResolverName = 'updateMutationResolver';
@@ -226,15 +253,16 @@ Object.keys(parsedASTMap).forEach((type) => {
             mutationResolverName,
           );
         },
-      });
+      };
     }
 
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(UPDATE_MULTIPLE))
+      (allowedOperations && allowedOperations === '*')
+      || (allowedOperations && allowedOperations !== '*'
+        && allowedOperations.length && allowedOperations.includes(UPDATE_MULTIPLE))
     ) {
-      resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
+      resolvers.Mutation = {
+        ...resolvers.Mutation,
         [mutationNames.updateMultipleMutation]: (root, params, context, info) => {
           const mutationName = mutationNames.updateMutation;
           const mutationResolverName = 'updateMutationResolver';
@@ -250,14 +278,15 @@ Object.keys(parsedASTMap).forEach((type) => {
             isMultiple,
           );
         },
-      });
+      };
     }
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(DELETE))
+      (allowedOperations && allowedOperations === '*')
+      || (allowedOperations && allowedOperations !== '*'
+        && allowedOperations.length && allowedOperations.includes(DELETE))
     ) {
-      resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
+      resolvers.Mutation = {
+        ...resolvers.Mutation,
         [mutationNames.deleteMutation]: (root, params, context, info) => {
           const mutationName = mutationNames.deleteMutation;
           const mutationResolverName = 'deleteMutationResolver';
@@ -271,15 +300,16 @@ Object.keys(parsedASTMap).forEach((type) => {
             mutationResolverName,
           );
         },
-      });
+      };
     }
 
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(DELETE_MULTIPLE))
+      (allowedOperations && allowedOperations === '*')
+      || (allowedOperations && allowedOperations !== '*'
+        && allowedOperations.length && allowedOperations.includes(DELETE_MULTIPLE))
     ) {
-      resolvers.Mutation = Object.assign({}, resolvers.Mutation, {
+      resolvers.Mutation = {
+        ...resolvers.Mutation,
         [mutationNames.deleteMultipleMutation]: (root, params, context, info) => {
           const mutationName = mutationNames.deleteMultipleMutation;
           const mutationResolverName = 'deleteMultipleMutationResolver';
@@ -293,12 +323,12 @@ Object.keys(parsedASTMap).forEach((type) => {
             mutationResolverName,
           );
         },
-      });
+      };
     }
     // add relation mutations resolvers
 
     // get all fields with with relation directive
-    const relationFields = definition.relationFields;
+    const { relationFields } = definition;
     // append add and remove mutation resolvers for each field
     Object.keys(relationFields).forEach((fieldName) => {
       const relationName = relationFields[fieldName];
@@ -320,77 +350,76 @@ Object.keys(parsedASTMap).forEach((type) => {
       const addRelationMutationName = relationMutationNames.addToRelationMutation;
       const removeRelationMutationName = relationMutationNames.removeFromRelationMutation;
       // add Relation resolvers functions to resolver Object
-      resolvers.Mutation = Object.assign({}, resolvers.Mutation,
-        {
-          [addRelationMutationName]: async (root, params, context, info) => {
-            const authentication = ifAuthorized(context);
-            Object.assign(authentication, {
-              mutationOrQueryName: addRelationMutationName,
-            });
-            const argumentKeys = Object.keys(params);
-            checkIfArgumentsAreFromSameType(argumentKeys, typeName);
-            checkIfArgumentsAreFromSameType(argumentKeys, relatedType);
-            /* in prehook implementation connect ids are picked from first arg(input) as well as
+      resolvers.Mutation = {
+        ...resolvers.Mutation,
+        [addRelationMutationName]: async (root, params, context, info) => {
+          const authentication = ifAuthorized(context);
+          Object.assign(authentication, {
+            mutationOrQueryName: addRelationMutationName,
+          });
+          const argumentKeys = Object.keys(params);
+          checkIfArgumentsAreFromSameType(argumentKeys, typeName);
+          checkIfArgumentsAreFromSameType(argumentKeys, relatedType);
+          /* in prehook implementation connect ids are picked from first arg(input) as well as
              * params. Ideally they should just picked from params. Hence sending params
               * in fist arg as well */
-            await prehook(params, addRelationMutationName, context, params);
-            return addRelationMutationResolver(
-              root,
-              params,
+          await prehook(params, addRelationMutationName, context, params);
+          return addRelationMutationResolver(
+            root,
+            params,
+            typeName,
+            relatedType,
+            relationName,
+            typeField,
+            relatedTypeField,
+            info,
+            parsedASTMap,
+            authentication,
+          ).then((result) => {
+            const newResult = toObject(result);
+            Object.assign(newResult, {
               typeName,
-              relatedType,
-              relationName,
-              typeField,
-              relatedTypeField,
-              info,
-              parsedASTMap,
-              authentication,
-            ).then((result) => {
-              const newResult = toObject(result);
-              Object.assign(newResult, {
-                typeName,
-                fieldName: typeField,
-                connectedTypeName: relatedType,
-                connectedFieldName: relatedTypeField,
-              });
-              return posthook(newResult, addRelationMutationName);
+              fieldName: typeField,
+              connectedTypeName: relatedType,
+              connectedFieldName: relatedTypeField,
             });
-          },
-          [removeRelationMutationName]: async (root, params, context, info) => {
-            const authentication = ifAuthorized(context);
-            Object.assign(authentication, {
-              mutationOrQueryName: removeRelationMutationName,
-              mutationOrQuery: graphQlOperations.mutation,
-            });
-            const argumentKeys = Object.keys(params);
-            checkIfArgumentsAreFromSameType(argumentKeys, typeName);
-            checkIfArgumentsAreFromSameType(argumentKeys, relatedType);
-            await prehook(params, removeRelationMutationName, context, params);
-            return removeRelationMutationResolver(
-              root,
-              params,
-              typeName,
-              relatedType,
-              relationName,
-              typeField,
-              relatedTypeField,
-              info,
-              parsedASTMap,
-              authentication,
-            ).then((result) => {
-              const newResult = toObject(result);
-              Object.assign(newResult, {
-                typeName,
-                fieldName: typeField,
-                connectedTypeName: relatedType,
-                connectedFieldName: relatedTypeField,
-              });
-
-              return posthook(newResult, removeRelationMutationName);
-            });
-          },
+            return posthook(newResult, addRelationMutationName, context, params);
+          });
         },
-      );
+        [removeRelationMutationName]: async (root, params, context, info) => {
+          const authentication = ifAuthorized(context);
+          Object.assign(authentication, {
+            mutationOrQueryName: removeRelationMutationName,
+            mutationOrQuery: graphQlOperations.mutation,
+          });
+          const argumentKeys = Object.keys(params);
+          checkIfArgumentsAreFromSameType(argumentKeys, typeName);
+          checkIfArgumentsAreFromSameType(argumentKeys, relatedType);
+          await prehook(params, removeRelationMutationName, context, params);
+          return removeRelationMutationResolver(
+            root,
+            params,
+            typeName,
+            relatedType,
+            relationName,
+            typeField,
+            relatedTypeField,
+            info,
+            parsedASTMap,
+            authentication,
+          ).then((result) => {
+            const newResult = toObject(result);
+            Object.assign(newResult, {
+              typeName,
+              fieldName: typeField,
+              connectedTypeName: relatedType,
+              connectedFieldName: relatedTypeField,
+            });
+
+            return posthook(newResult, removeRelationMutationName, context, params);
+          });
+        },
+      };
       return null;
     });
   }
@@ -399,7 +428,7 @@ Object.keys(parsedASTMap).forEach((type) => {
 resolvers.Mutation.signUp = async (root, params, context, info) => {
   const authentication = ifAuthorized(context);
   const typeName = 'User';
-  const mutationName = 'addUser';
+  const mutationName = 'signUp';
   const { input } = params;
   const hookInput = await prehook(input, mutationName, context, params);
   const newParams = params;
@@ -447,7 +476,7 @@ resolvers.Mutation.signupExistingUser = async (root, params, context, info) => {
     mutationName,
     parsedASTMap,
     authentication,
-  ).then(result => toObject(result));
+  ).then((result) => toObject(result));
 };
 
 resolvers.Mutation.login = async (root, params, context, info) => {
@@ -475,10 +504,35 @@ resolvers.Mutation.login = async (root, params, context, info) => {
   });
 };
 
+resolvers.Mutation.socialLogin = async (root, params, context, info) => {
+  const authentication = ifAuthorized(context);
+  const typeName = 'User';
+  const mutationName = 'socialLogin';
+  const { input } = params;
+  const hookInput = await prehook(input, mutationName, context, params);
+
+  const newParams = params;
+  newParams.input = hookInput;
+
+  return socialLoginMutationResolver(
+    root,
+    params,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    authentication,
+  ).then((result) => {
+    const newResult = toObject(result);
+
+    return posthook(newResult, mutationName);
+  });
+};
+
 resolvers.Mutation.validateUserOTP = (async (root, params, context, info) => {
   const typeName = 'User';
   const authentication = ifAuthorized(context);
-  const fields = parsedASTMap[typeName].fields;
+  const { fields } = parsedASTMap[typeName];
   const mutationName = 'validateUserOTP';
   Object.assign(authentication, {
     mutationOrQueryName: mutationName,
@@ -499,7 +553,7 @@ resolvers.Mutation.validateUserOTP = (async (root, params, context, info) => {
     fields,
     parsedASTMap,
     authentication,
-  ).then(result => toObject(result));
+  ).then((result) => toObject(result));
 });
 
 resolvers.Mutation.resendUserOTP = async (root, params, context, info) => {
@@ -582,7 +636,7 @@ resolvers.Mutation.sendForgotPasswordOTP = async (root, params, context, info) =
     mutationName,
     parsedASTMap,
     authentication,
-  ).then(result => toObject(result));
+  ).then((result) => toObject(result));
 };
 
 resolvers.Mutation.resendForgotPasswordOTP = async (root, params, context, info) => {
@@ -601,7 +655,7 @@ resolvers.Mutation.resendForgotPasswordOTP = async (root, params, context, info)
     mutationName,
     parsedASTMap,
     authentication,
-  ).then(result => toObject(result));
+  ).then((result) => toObject(result));
 };
 
 resolvers.Mutation.validateForgotPasswordOTP = async (root, params, context, info) => {
@@ -619,7 +673,7 @@ resolvers.Mutation.validateForgotPasswordOTP = async (root, params, context, inf
     mutationName,
     parsedASTMap,
     authentication,
-  ).then(result => toObject(result));
+  ).then((result) => toObject(result));
 };
 
 resolvers.Mutation.finishForgotPassword = async (root, params, context, info) => {
@@ -637,7 +691,7 @@ resolvers.Mutation.finishForgotPassword = async (root, params, context, info) =>
     mutationName,
     parsedASTMap,
     authentication,
-  ).then(result => toObject(result));
+  ).then((result) => toObject(result));
 };
 // Backend token strict password set mutation
 resolvers.Mutation.tcirtSdrowssaPtes = async (root, params, context, info) => {
@@ -692,7 +746,7 @@ resolvers.Query.me = ((root, params, context, info) => {
   switch (status) {
     case 'blocked':
       throw new UnauthorizedOperationError();
-    case 'inactive' :
+    case 'inactive':
       // this will prevent inactive status check for me query
       authentication.user.status = BYPASS;
       break;
@@ -708,6 +762,191 @@ resolvers.Query.me = ((root, params, context, info) => {
     authentication,
   );
 });
+
+// Resolver for a custom homepage data for user
+resolvers.Mutation.userCourseSyllabus = async (root, params, context, info) => {
+  const typeName = 'UserCurrentTopicComponentStatus';
+  const mutationName = 'userCourseSyllabus';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return userCourseSyllabusMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+  ).then((result) => toObject(result));
+};
+
+// Resolver for a custom journey page for user
+resolvers.Mutation.userTopicJourney = async (root, params, context, info) => {
+  const typeName = 'UserCurrentTopicComponentStatus';
+  const mutationName = 'userTopicJourney';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return userTopicJourneyMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+    params,
+  ).then((result) => toObject(result));
+};
+
+// Resolver for custom quiz reports for user
+resolvers.Mutation.userFirstAndLatestQuizReport = async (root, params, context, info) => {
+  const typeName = 'UserCurrentTopicComponentStatus';
+  const mutationName = 'userFirstAndLatestQuizReport';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return userFirstAndLatestQuizReportMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+    params,
+  ).then((result) => toObject(result));
+};
+
+// Resolver for custom skip video by user
+resolvers.Mutation.skipVideo = async (root, params, context, info) => {
+  const typeName = 'SkipVideo';
+  const mutationName = 'skipVideo';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return skipVideoMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+    params,
+  ).then((result) => toObject(result));
+};
+
+// Resolver for custom skip practice question by user
+resolvers.Mutation.skipPracticeQuestion = async (root, params, context, info) => {
+  const typeName = 'SkipPracticeQuestion';
+  const mutationName = 'skipPracticeQuestion';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return skipPracticeQuestionMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+    params,
+  ).then((result) => toObject(result));
+};
+
+// Resolver for a custom badges implementation for user
+resolvers.Mutation.userBadge = async (root, params, context, info) => {
+  const typeName = 'UserCurrentTopicComponentStatus';
+  const mutationName = 'userBadge';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return userBadgeMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+  ).then((result) => toObject(result));
+};
+
+// Resolver for a custom user badge getting unlocked at topic component level
+resolvers.Mutation.getUnlockedUserBadge = async (root, params, context, info) => {
+  const typeName = 'GetUnlockedUserBadge';
+  const mutationName = 'getUnlockedUserBadge';
+  const { input } = params;
+  const hookInput = await prehook(input, mutationName, context, params);
+
+  return getUnlockedUserBadgeMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+  ).then((result) => toObject(result));
+};
+
+// Resolver for a custom get user quiz report, when user submits quiz
+resolvers.Mutation.getQuizReport = async (root, params, context, info) => {
+  const typeName = 'GetQuizReport';
+  const mutationName = 'getQuizReport';
+  const { input } = params;
+  const hookInput = await prehook(input, mutationName, context, params);
+
+  return getQuizReportMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+  ).then((result) => toObject(result));
+};
+
+// Resolver for sending link on mail in case user forgets password
+resolvers.Mutation.sendForgotPasswordLink = async (root, params, context, info) => {
+  const authentication = ifAuthorized(context);
+  const typeName = 'User';
+  const mutationName = 'sendForgotPasswordLink';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return sendForgotPasswordLinkMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    authentication,
+  ).then((result) => toObject(result));
+};
+
+// Resolver for resetting user password through forgot password link
+resolvers.Mutation.resetPasswordFromForgotPasswordLink = async (root, params, context, info) => {
+  const authentication = ifAuthorized(context);
+  const typeName = 'User';
+  const mutationName = 'resetPasswordFromForgotPasswordLink';
+
+  return resetPasswordFromForgotPasswordLinkMutationResolver(
+    root,
+    params,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    authentication,
+    context,
+  ).then((result) => toObject(result));
+};
 
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;

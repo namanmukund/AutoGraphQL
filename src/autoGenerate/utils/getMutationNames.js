@@ -6,11 +6,13 @@ const getMutationNames = (typeName) => {
   const updateMultipleMutation = pluralize(updateMutation);
   const deleteMutation = `delete${typeName}`;
   const deleteMultipleMutation = pluralize(deleteMutation);
-  return { addMutation,
+  return {
+    addMutation,
     updateMutation,
     updateMultipleMutation,
     deleteMutation,
-    deleteMultipleMutation };
+    deleteMultipleMutation,
+  };
 };
 
 export default getMutationNames;

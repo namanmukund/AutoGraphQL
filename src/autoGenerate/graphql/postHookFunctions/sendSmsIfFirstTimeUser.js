@@ -12,8 +12,8 @@ const sendSmsIfFirstTimeUser = async (data) => {
   const { lastTimeLoginDate, firstTimeLoginDate } = data;
   const id = data.account.typeId;
   // compare first time login and last login, if equal it is first time user
-  if (lastTimeLoginDate && firstTimeLoginDate &&
-    lastTimeLoginDate.getTime() === firstTimeLoginDate.getTime()) {
+  if (lastTimeLoginDate && firstTimeLoginDate
+    && lastTimeLoginDate.getTime() === firstTimeLoginDate.getTime()) {
     return modelQueries.fetchById(id).then((res) => {
       if (!res.name || !res.phone || !res.phone.countryCode || !res.phone.number) {
         log('Phone Or name is not present in the database');

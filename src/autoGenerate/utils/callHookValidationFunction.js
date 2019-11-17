@@ -13,8 +13,7 @@ const addCalledValidationFunctionToContext = (validationFunctionName, context) =
 // allowHookValidationToBeCalledAgain -> when validation func being called in loop
 // returns true if validation func already been called and allowHookValidationToBeCalledAgain false
 const isHookValidationAlreadyBeenCalled = (hookValidationsCalled,
-  validationFunctionName, allowHookValidationToBeCalledAgain) =>
-  hookValidationsCalled && hookValidationsCalled.includes(validationFunctionName)
+  validationFunctionName, allowHookValidationToBeCalledAgain) => hookValidationsCalled && hookValidationsCalled.includes(validationFunctionName)
    && !allowHookValidationToBeCalledAgain;
 
 const callAddUpdateHookValidationFunction = (mutationOrQueryName, params,

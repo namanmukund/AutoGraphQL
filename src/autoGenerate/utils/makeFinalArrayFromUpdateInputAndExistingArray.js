@@ -15,8 +15,8 @@ const makeFinalArrayFromUpdateInputAndExistingArray = (existingArray = [], array
       finalArray = arrayOperationFunctions[updateKey](recordArray,
         arrayUpdateInput[updateKey], arrayFields);
     }
-  } else if (arrayUpdateKeys.length === 2 &&
-    arrayUpdateKeys.includes('updateWith') && arrayUpdateKeys.includes('updateWith')) {
+  } else if (arrayUpdateKeys.length === 2
+    && arrayUpdateKeys.includes('updateWith') && arrayUpdateKeys.includes('updateWith')) {
     finalArray = arrayOperationFunctions.update(recordArray, arrayUpdateInput.updateWhere,
       arrayUpdateInput.updateWith,
       arrayFields);

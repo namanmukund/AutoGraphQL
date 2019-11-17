@@ -1,5 +1,5 @@
-import coreServerConfig from './core';
+import core from './core';
 
-module.exports = {
-  core: coreServerConfig,
+export default {
+  core,
 };

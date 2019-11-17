@@ -7,6 +7,7 @@ import {
   InvalidApplicationNameError,
   InvalidStaticToken,
   MandatoryFieldNotSetError,
+  InvalidToken,
 } from './auth';
 
 import {
@@ -21,6 +22,7 @@ import {
   LearningObjectiveIsPublishedError,
   QuestionIsPublishedError,
   MessageIsPublishedError,
+  ComponentLockedError,
   OrderAlreadyExistsError,
   TopicIdRequiredError,
 } from './db';
@@ -28,22 +30,29 @@ import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
   OneToOneRelationSentInInputAndAsConnectError, RelationMutationSimilarTypeArgumentError,
   MultipleArrayOperationDeniedError, InvalidArrayUpdateOperationError,
+  InvalidTopicLOConnectionError, InvalidTopicPassedInCurrentTopicComponent,
+  UserCourseCombinationExistError,
 } from './mutations';
 
-import { FileUploadError,
+import {
+  FileUploadError,
   InvalidFileUploadSizeError,
   InvalidFileUploadExtensionError,
   InvalidFileUploadSizeAndExtensionError,
   FileUsageCountNotZeroError,
   FileIdIsMandatoryError,
 } from './files';
-import { InvalidWriteAccessError, InvalidReadAccessError, InvalidActionOnDefaultFieldsError,
+import {
+  InvalidWriteAccessError, InvalidReadAccessError, InvalidActionOnDefaultFieldsError,
   UnauthorizedOperationError, BlockedOperationError, PermissionDeniedError,
-  UserRolesNotFoundError } from './permissions';
+  UserRolesNotFoundError,
+} from './permissions';
 
-import { InvalidSortFieldError, InvalidFilterArgumentsError, NotFilterRequiredError,
+import {
+  InvalidSortFieldError, InvalidFilterArgumentsError, NotFilterRequiredError,
   InvalidParamsError, ConnectionAlreadyExistError, ConnectionNotExistError,
-  FetchError, InvalidFieldType } from './queries';
+  FetchError, InvalidFieldType,
+} from './queries';
 import {
   NestingLevelExceedingError, BiDirectionalRelationsRequiredError, NoUniqueFieldError,
   RelationAppliedOnSameFieldsError, RemoteRelationError, DefaultDirectiveAppliedOnWrongFieldError,
@@ -51,15 +60,21 @@ import {
   UnsupportedListFieldInsideSubDocumentObjectError,
   InvalidRuleValueError,
 } from './types';
-import { EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
+import {
+  EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
   EitherUsernameEmailOrPhoneRequiredError, InvalidNameError, InvalidNameLengthError,
   InvalidUsernameError, InvalidUsernameLengthError, EitherEmailOrPhoneNotBothRequiredError,
   PhoneNumberAndCountryCodeRequiredError, EitherPhoneOrEmailOtpRequiredError,
-  EmailNotVerifiedError, PhoneNotVerifiedError,
-  ConnectIdsAlreadyRelatedError,
-  DuplicateConnectIdsError,
+  EmailNotVerifiedError, PhoneNotVerifiedError, UserOrLearningObjectiveNotPresentError,
+  ConnectIdsAlreadyRelatedError, TopicOrUserCurrentTopicComponentNotPresentError,
+  DuplicateConnectIdsError, UserOrCourseNotPresentError, TopicOrLONotPresentError,
+  UserOrTopicNotPresentError, PracticeQuestionsNotPresentError, QuizQuestionsNotPresentError,
+  UserMismatchError,
   UnauthorizedFieldOrTypeAccessByAppError,
   InsufficientPermissionError,
+  InvalidGmailTokenError,
+  InvalidFacebookTokenError,
+  InvalidPasswordLengthError,
 } from './input';
 
 
@@ -139,9 +154,25 @@ export {
   FileIdIsMandatoryError,
   UnsupportedListFieldInsideSubDocumentObjectError,
   DuplicateConnectIdsError,
+  ComponentLockedError,
+  InvalidTopicLOConnectionError,
+  InvalidTopicPassedInCurrentTopicComponent,
+  UserCourseCombinationExistError,
+  UserOrCourseNotPresentError,
+  TopicOrLONotPresentError,
+  TopicOrUserCurrentTopicComponentNotPresentError,
+  UserOrLearningObjectiveNotPresentError,
+  UserOrTopicNotPresentError,
+  PracticeQuestionsNotPresentError,
+  QuizQuestionsNotPresentError,
+  UserMismatchError,
   OrderAlreadyExistsError,
   TopicIdRequiredError,
   UnauthorizedFieldOrTypeAccessByAppError,
   InsufficientPermissionError,
   InvalidRuleValueError,
+  InvalidGmailTokenError,
+  InvalidFacebookTokenError,
+  InvalidPasswordLengthError,
+  InvalidToken,
 };

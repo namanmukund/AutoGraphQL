@@ -1,5 +1,7 @@
-import { DatabaseRecordNotFoundError,
-  MandatoryFieldNotSetError } from '../../../../../../constants/errors';
+import {
+  DatabaseRecordNotFoundError,
+  MandatoryFieldNotSetError,
+} from '../../../../../../constants/errors';
 import { QueryController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
@@ -50,5 +52,5 @@ export default function resendUserOTPMutationResolver(
     getNumberAndSendSms(phoneInfo, name);
 
     return res;
-  }).catch(err => err);
+  }).catch((err) => err);
 }

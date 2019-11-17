@@ -1,6 +1,5 @@
 import pluralize from 'pluralize';
 import { camelCase } from 'lodash';
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import { genericFilterQueryToGetIds } from '../../../../../api/queries';
 import { MutationController, QueryController } from '../../../controllers';
 import { remoteConnectDisconnectRelationHandler, updateAndIncreaseUsageCountInFile } from '../utils';
@@ -13,6 +12,7 @@ import { getReturnObjectForConnectMutation } from '../utils/getReturnObjectForCo
 import { createModifiedParamsBasedOnParams } from '../utils/createModifiedParamsBasedOnParams';
 import { getIdsFromData } from '../utils/getIdsFromData';
 import { relationObjectFields } from '../utils/relationObjectFields';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 // Roll back the changes made by addConnectionResolver
 const rollBack = () => {
   // @TODO implement rollback.
@@ -28,12 +28,12 @@ const fetchOldRelatedTypeId = async (typeName, id, field) => {
       }
     }
   }`;
-  const res = await callGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query);
   const data = res && res.data && res.data[caseTypeName] && res.data[caseTypeName][field];
   let ids = [];
   if (data) {
     if (Array.isArray(data)) {
-      ids = data.map(singleData => singleData.id);
+      ids = data.map((singleData) => singleData.id);
     } else {
       ids = [data.id];
     }
@@ -96,7 +96,7 @@ const isConnectionAlreadyPresentBetweenModels = (relationObject, typeName, typeF
   const { typeId, relatedTypeId } = relationObject;
   const modelPlural = camelCase(pluralize(typeName));
   const typeFilterQuery = genericFilterQueryToGetIds(modelPlural, typeField, relatedTypeId);
-  return callGraphqlApi(typeFilterQuery).then((res) => {
+  return callLocalGraphqlApi(typeFilterQuery).then((res) => {
     const data = res.data[modelPlural];
     const ids = getIdsFromData(data);
     return ids.includes(`"${typeId}"`);
@@ -168,7 +168,8 @@ const addRelationMutationResolver = (
           const additionalRelationFields = getAdditionalRelationFieldsFromConnectArgs(typeField,
             relatedType, params);
           const additionalRelationFieldsInRelated = getAdditionalRelationFieldsFromConnectArgs(
-            relatedTypeField, typeName, params);
+            relatedTypeField, typeName, params,
+          );
 
           // If typeField is local field
           const promiseArray = [];

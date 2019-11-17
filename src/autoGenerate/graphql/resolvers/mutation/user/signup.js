@@ -1,65 +1,39 @@
-import bcrypt from 'bcrypt';
-import { pick } from 'lodash';
-import { UserTokenNotRequiredError } from '../../../../../../constants/errors';
-import allAuthParams from '../../../../../../config/authParams';
-import { MutationController, RemoteController } from '../../../controllers';
-import { generateCuid, toObject } from '../../../../../../utils';
+import bcrypt from 'bcryptjs';
+import { get } from 'lodash';
 import {
-  mergeMutationsPromisesResults,
-} from '../utils/mergeMutationsPromisesResults';
-
+  InvalidEmailError,
+  InvalidPasswordLengthError, UserAlreadyExistsError,
+  UserTokenNotRequiredError,
+} from '../../../../../../constants/errors';
+import allAuthParams from '../../../../../../config/authParams';
+import { MutationController } from '../../../controllers';
+import { generateCuid, log } from '../../../../../../utils';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import localSignUpMutationPromise from '../utils/localSignUpMutationPromise';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
+import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
+import addUserCurrentTopicComponentStatus
+  from '../../../../utils/addUserCurrentTopicComponentStatus';
 import { ADD } from '../../../../../../constants/graphqlOperations';
+import isValidEmail from '../../../validation/isValidEmail';
+import getUserData from './utils/getUserData';
 
 const application = process.env.APPLICATION || 'core';
 const authParams = allAuthParams[application];
 
-// Returns remote delete mutaiton promises.
-const remoteSignUpMutationPromises = (
-  input,
-  typeName,
-  mutationName,
-  controllerFunctionName,
-  feildsFetched,
-  remoteFieldsApplicationWise,
-  authentication,
-) => {
-  // Loop through all applicaiton fields to delete.
-  const promiseArray = Object.keys(remoteFieldsApplicationWise).map((appApplicationName) => {
-    const appModelRemote = new RemoteController(appApplicationName, authentication);
-    const appInputCore = Object.assign({},
-      pick(input, Object.keys(remoteFieldsApplicationWise[appApplicationName])));
-    const appFieldsToMutatue = Object.assign(
-      {},
-      // get only those fields that are requested.
-      pick(feildsFetched, Object.keys(remoteFieldsApplicationWise[appApplicationName])),
-      {
-        id: true,
-      },
-    );
-    // Mutate remote applications.
-    return appModelRemote[controllerFunctionName](
-      typeName,
-      mutationName,
-      appInputCore,
-      appFieldsToMutatue,
-    )
-      .then((appResultRemote) => {
-        const appData = appResultRemote.data;
-        const appErrors = appResultRemote.errors;
-        if (appErrors) {
-          throw new Error(JSON.stringify(appErrors));
-        }
-        return appData[mutationName];
-      });
-  });
-  return promiseArray;
+const validateSignUpInput = (input) => {
+  const { email, password } = input;
+  if (!isValidEmail(email)) {
+    throw new InvalidEmailError();
+  }
+  if (password.length < 6) {
+    throw new InvalidPasswordLengthError();
+  }
+  return true;
 };
 
-export default function signupMutationResolver(
+const signupMutationResolver = async (
   root,
   params,
   typeName,
@@ -67,14 +41,13 @@ export default function signupMutationResolver(
   mutationName,
   ast,
   authentication,
-) {
+) => {
   const { input } = params;
-  const { localFields, remoteFields, remoteFieldsApplicationWise } = ast[typeName];
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
   validate(
-    typeName,
+    'UserToken',
     ast,
     ADD,
     fieldsFetched,
@@ -88,58 +61,70 @@ export default function signupMutationResolver(
     throw new UserTokenNotRequiredError();
   }
 
+  validateSignUpInput(input);
+
+  const { email } = input;
+  const userData = await getUserData(email, { bypass: true });
+  /* if password is already present or if password
+    is not present and also user is not socially logged in
+    */
+  if (userData) {
+    const { isGmailLogin, isFacebookLogin, isSetPassword } = userData;
+    if ((isSetPassword || (!isSetPassword && !isGmailLogin && !isFacebookLogin))) {
+      throw new UserAlreadyExistsError();
+    }
+  }
   /* Setting user to true if not preset, as signup
   does not require user authentication.
   */
   Object.assign(authentication, {
     user: true,
   });
-  const newUser = input;
-  const hashedPwd = bcrypt.hashSync(newUser.password, authParams.SALT);
-  newUser.password = hashedPwd;
-  newUser.isSetPassword = true;
+  const userObj = {};
+  const hashedPwd = bcrypt.hashSync(input.password, authParams.SALT);
+  userObj.password = hashedPwd;
+  userObj.isSetPassword = true;
 
-  // Create a new object id if there is no id.
+  let result = '';
   const modelMutations = new MutationController(typeName, authentication);
-
-  // @TODO incorporate relation logic with multi apps logic
-  // If there are no remote fields, return the result.
-  if (!Object.keys(remoteFields).length) {
+  // update password only if previously socially logged in
+  if (userData) {
+    const { isGmailLogin, isFacebookLogin, isSetPassword } = userData;
+    if (!isSetPassword && (isGmailLogin || isFacebookLogin)) {
+      const { id } = userData;
+      result = await modelMutations.updateDocument(id, userObj);
+    }
+  } else {
+    const { password, ...restObj } = input;
+    const newUser = { ...restObj, ...userObj };
     const cuidInput = generateCuid(newUser);
-    return localSignUpMutationPromise(
+
+    result = await localSignUpMutationPromise(
       cuidInput,
       modelMutations,
-    ).then(savedUser => createUserTokenTypeData(savedUser));
+    );
   }
 
-  // If there are remote fields.
-  const controllerFunctionName = 'signUpMutation';
+  /*
+    logic to add current user topic component status
+    the first published topic and first published learning objective corresponding to that topic
+    will get populated in the document
+    */
+  const topic = await getFirstTopicAndLearningObjective();
+  const firstTopicId = get(topic, 'data.topics[0].id');
+  const firstLearningObjectiveId = get(topic, 'data.topics[0].learningObjectives[0].id');
+  const { id: userId } = result;
+  // we are not throwing any error here because it will seem that sign up failed if
+  // firstTopicId and firstLearningObjectiveId is not present. Just adding log
+  if (firstTopicId && firstLearningObjectiveId) {
+    await addUserCurrentTopicComponentStatus(
+      userId, firstTopicId, firstLearningObjectiveId,
+    );
+  } else {
+    log('Failed to get first published topic or first published learning objective corresponding to it');
+  }
+  // return user with token
+  return createUserTokenTypeData(result);
+};
 
-  const promiseArray = remoteSignUpMutationPromises(
-    input,
-    typeName,
-    mutationName,
-    controllerFunctionName,
-    fieldsFetched,
-    remoteFieldsApplicationWise,
-    authentication,
-  );
-  // Wait for the promise to resolve.
-  return Promise.all(promiseArray).then((values) => {
-    // Expecting only one value.
-    const value = values[0];
-    const id = value.id;
-    const cuidInput = Object.assign({}, input, {
-      id,
-    });
-    // Input to local database.
-    const localInput = pick(cuidInput, Object.keys(Object.assign({}, localFields, {
-      id: true,
-    })));
-    return localSignUpMutationPromise(
-      localInput,
-      modelMutations,
-    ).then(val => mergeMutationsPromisesResults([value, toObject(val)]))
-      .then(savedUser => createUserTokenTypeData(savedUser));
-  }).catch(error => error);
-}
+export default signupMutationResolver;

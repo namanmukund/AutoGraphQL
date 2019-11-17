@@ -14,6 +14,15 @@ import AssessmentType from './AssessmentType';
 import QuestionBankLayoutType from './QuestionBankLayoutType';
 import CourseTitle from './CourseTitle';
 import CourseCategory from './CourseCategory';
+import UserActionType from './UserActionType';
+import EnrollmentType from './EnrollmentType';
+import CurrentTopicComponentType from './CurrentTopicComponentType';
+import UserTopicTypeStatus from './UserTopicTypeStatus';
+import LoginType from './LoginType';
+import MasteryLevelsType from './MasteryLevelsType';
+import BadgeType from './BadgeType';
+import StickerEmojiType from './StickerEmojiType';
+
 
 export default [
   Status,
@@ -32,4 +41,12 @@ export default [
   QuestionBankLayoutType,
   CourseTitle,
   CourseCategory,
+  UserActionType,
+  EnrollmentType,
+  CurrentTopicComponentType,
+  UserTopicTypeStatus,
+  LoginType,
+  MasteryLevelsType,
+  BadgeType,
+  StickerEmojiType,
 ];

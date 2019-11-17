@@ -70,7 +70,7 @@ const localDeleteMutationPromise = (
       relationFields,
       relationSubsetFields);
   })
-    .then(rec => rec)
+    .then((rec) => rec)
     .catch((err) => {
       log(err);
       return err;
@@ -127,10 +127,10 @@ const deleteMutationResolver = (
       typeName,
       ast,
       authentication,
-    ).then(result => toObject(result)),
+    ).then((result) => toObject(result)),
   );
   // Wait for all mutations to resolve.
-  return Promise.all(promiseArray).then(values => mergeMutationsPromisesResults(values))
+  return Promise.all(promiseArray).then((values) => mergeMutationsPromisesResults(values))
     .catch((err) => {
       // Roll back in case of any error.
       rollBack();

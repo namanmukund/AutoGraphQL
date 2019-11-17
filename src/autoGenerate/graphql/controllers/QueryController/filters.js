@@ -1,6 +1,8 @@
 /* eslint no-restricted-syntax: ["error", "FunctionExpression", "WithStatement",
   "BinaryExpression[operator='in']"] */
-import { includes, split, without, get } from 'lodash';
+import {
+  includes, split, without, get,
+} from 'lodash';
 import { allFilters, historyFieldName } from '../../../../../constants';
 import { InvalidFilterArgumentsError, NotFilterRequiredError } from '../../../../../constants/errors';
 import { types } from '../../../../../utils';
@@ -44,9 +46,9 @@ const getRelatedTypeIdsFromRelationFilter = (relatedType, fieldName, filterValue
   return getQueryParams(relationParams, relatedType)
   /* eslint-enable no-use-before-define  */
   // get all docs that match relation filter in related type
-    .then(query => relatedModel.find(query).exec())
+    .then((query) => relatedModel.find(query).exec())
     // return all type ids
-    .then(values => values.map(value => value.id));
+    .then((values) => values.map((value) => value.id));
 };
 
 const getQueryParamsForRelationFilterSubSet = async (param, relatedType,
@@ -58,8 +60,8 @@ const getQueryParamsForRelationFilterSubSet = async (param, relatedType,
   const additionalFieldAst = parsedASTMap[relatedType].field[filterFieldName];
   let isFieldAnAdditionalField;
   //  is field model history field
-  if (additionalFieldAst && additionalFieldAst.directive &&
-    additionalFieldAst.directive.isRelationField) {
+  if (additionalFieldAst && additionalFieldAst.directive
+    && additionalFieldAst.directive.isRelationField) {
     isFieldAnAdditionalField = true;
   }
   if (isFieldAnAdditionalField) {
@@ -92,7 +94,9 @@ const getQueryParamsForRelationFilterSubSet = async (param, relatedType,
 // get filter for relation filters with and/or
 // params- arrayType : and/or
 const getAndOrArrayRelationFilterValue = async (arrayFilterType, filterObject) => {
-  const { filterValue, relatedType, fieldName, isNoneFilter } = filterObject;
+  const {
+    filterValue, relatedType, fieldName, isNoneFilter,
+  } = filterObject;
   const queryParams = {};
 
   queryParams[`$${arrayFilterType}`] = [];
@@ -101,8 +105,10 @@ const getAndOrArrayRelationFilterValue = async (arrayFilterType, filterObject) =
   // loop through the and filters
   for (const param of filterValue) {
     // queryParamObject will be pushed to the queryParams array
-    const { queryParamObject,
-      isFieldAnAdditionalField } = await getQueryParamsForRelationFilterSubSet(param,
+    const {
+      queryParamObject,
+      isFieldAnAdditionalField,
+    } = await getQueryParamsForRelationFilterSubSet(param,
       relatedType, fieldName, isNoneFilter, true);
     if (isFieldAnAdditionalField) {
       // append query param object to final query object
@@ -208,9 +214,13 @@ const generateQueryParamsForRelationFilter = async (relatedType,
   }
 
   if (filterKey === allFilters.and || filterKey === allFilters.AND) {
-    queryParams = await getAndOrArrayRelationFilterValue('and', { filterValue, relatedType, fieldName, isNoneFilter });
+    queryParams = await getAndOrArrayRelationFilterValue('and', {
+      filterValue, relatedType, fieldName, isNoneFilter,
+    });
   } else if (filterKey === allFilters.or || filterKey === allFilters.OR) {
-    queryParams = await getAndOrArrayRelationFilterValue('or', { filterValue, relatedType, fieldName, isNoneFilter });
+    queryParams = await getAndOrArrayRelationFilterValue('or', {
+      filterValue, relatedType, fieldName, isNoneFilter,
+    });
   } else {
     const { queryParamObject } = await getQueryParamsForRelationFilterSubSet(filterParam,
       relatedType, fieldName, isNoneFilter);
@@ -220,59 +230,58 @@ const generateQueryParamsForRelationFilter = async (relatedType,
   return queryParams;
 };
 
-const generateQueryParamsForFilter =
-  (
-    filterTypeName,
-    filterKey,
-    filterValue,
-  ) => {
-    const queryParams = {};
-    switch (filterTypeName) {
-      case allFilters.not: {
-        queryParams[filterKey] = { $ne: filterValue };
-        break;
-      }
-      case allFilters.in: {
-        queryParams[filterKey] = { $in: filterValue };
-        break;
-      }
-      case allFilters.lt: {
-        queryParams[filterKey] = { $lt: filterValue };
-        break;
-      }
-      case allFilters.lte: {
-        queryParams[filterKey] = { $lte: filterValue };
-        break;
-      }
-      case allFilters.gt: {
-        queryParams[filterKey] = { $gt: filterValue };
-        break;
-      }
-      case allFilters.gte: {
-        queryParams[filterKey] = { $gte: filterValue };
-        break;
-      }
-      case allFilters.contains: {
-        queryParams[filterKey] = { $regex: `.*${filterValue}.*`, $options: 'i' };
-        break;
-      }
-      case allFilters.startsWith: {
-        queryParams[filterKey] = { $regex: `^${filterValue}`, $options: 'i' };
-        break;
-      }
-      case allFilters.endsWith: {
-        queryParams[filterKey] = { $regex: `${filterValue}$`, $options: 'i' };
-        break;
-      }
-      case allFilters.exists: {
-        queryParams[filterKey] = { $exists: filterValue };
-        break;
-      }
-      default:
-        queryParams[filterKey] = filterValue;
+const generateQueryParamsForFilter = (
+  filterTypeName,
+  filterKey,
+  filterValue,
+) => {
+  const queryParams = {};
+  switch (filterTypeName) {
+    case allFilters.not: {
+      queryParams[filterKey] = { $ne: filterValue };
+      break;
     }
-    return queryParams;
-  };
+    case allFilters.in: {
+      queryParams[filterKey] = { $in: filterValue };
+      break;
+    }
+    case allFilters.lt: {
+      queryParams[filterKey] = { $lt: filterValue };
+      break;
+    }
+    case allFilters.lte: {
+      queryParams[filterKey] = { $lte: filterValue };
+      break;
+    }
+    case allFilters.gt: {
+      queryParams[filterKey] = { $gt: filterValue };
+      break;
+    }
+    case allFilters.gte: {
+      queryParams[filterKey] = { $gte: filterValue };
+      break;
+    }
+    case allFilters.contains: {
+      queryParams[filterKey] = { $regex: `.*${filterValue}.*`, $options: 'i' };
+      break;
+    }
+    case allFilters.startsWith: {
+      queryParams[filterKey] = { $regex: `^${filterValue}`, $options: 'i' };
+      break;
+    }
+    case allFilters.endsWith: {
+      queryParams[filterKey] = { $regex: `${filterValue}$`, $options: 'i' };
+      break;
+    }
+    case allFilters.exists: {
+      queryParams[filterKey] = { $exists: filterValue };
+      break;
+    }
+    default:
+      queryParams[filterKey] = filterValue;
+  }
+  return queryParams;
+};
 
 const generateQueryParamsForNotFilter = (filterTypeName, filterKey, filterValue) => {
   const queryParams = {};
@@ -412,18 +421,17 @@ const getResolvedQuery = (queryParams) => {
       return query;
     });
   }
-  return query.then(resolvedQuery => resolvedQuery);
+  return query.then((resolvedQuery) => resolvedQuery);
 };
 
 /* eslint-disable no-use-before-define */
-const getQueryFromFilterArray = (filterValues, modelName) =>
-  Promise.all(filterValues.map((filterObject) => {
-    const object = {
-      filter: filterObject,
-    };
+const getQueryFromFilterArray = (filterValues, modelName) => Promise.all(filterValues.map((filterObject) => {
+  const object = {
+    filter: filterObject,
+  };
     // Recursive AND OR for nested filters
-    return getQueryParams(object, modelName);
-  }));
+  return getQueryParams(object, modelName);
+}));
 /* eslint-enable no-use-before-define */
 
 /* loop through filter keys and replace the filters with mongo queries accordingly

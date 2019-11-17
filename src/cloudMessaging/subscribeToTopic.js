@@ -1,5 +1,5 @@
 import { log } from '../../utils';
-import admin from '../../src/firebase';
+import admin from '../firebase';
 
 const subscribeToTopic = (fcmToken, topic) => admin.messaging()
   .subscribeToTopic(fcmToken, topic)

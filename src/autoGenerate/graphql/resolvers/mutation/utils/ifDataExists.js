@@ -3,7 +3,7 @@ export const ifDataExists = (fieldType, fieldValue, uniqueField, relatedModelQue
   let isValid = false;
   const searchParams = {};
   if (fieldType.isList) {
-    const uniqueFieldValues = fieldValue.map(value => value[uniqueField]);
+    const uniqueFieldValues = fieldValue.map((value) => value[uniqueField]);
     searchParams[uniqueField] = { $in: uniqueFieldValues };
     return relatedModelQueries.fetchMany(searchParams)
       .then((fetchedDocs) => {

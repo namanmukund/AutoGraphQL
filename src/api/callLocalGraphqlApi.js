@@ -7,7 +7,7 @@ const callLocalGraphqlApi = (query, context, variables) => {
   const source = query;
   const rootValue = {};
   const contextValue = context || {};
-  const variableValues = variables || {};
+  let variableValues = variables || {};
 
   // Changes for bypassing validations as this is called, from withing the code.
   // Change app to right core app. Here could have used env variable APPLICATION,
@@ -17,6 +17,11 @@ const callLocalGraphqlApi = (query, context, variables) => {
   };
   // Remove decoded user
   delete contextValue.decodedUser;
+
+  // To avoid apollo-server-core error
+  if (!variableValues || variableValues === '') {
+    variableValues = {};
+  }
 
   return graphql(
     argsOrSchema,

@@ -25,7 +25,7 @@ const awsConfig = {
       region: 'us-east-2',
     },
     s3: {
-      bucket: 'bucket-staging',
+      bucket: 'tekie-tms-staging',
     },
     ACL: {
       publicReadWrite: 'public-read-write',

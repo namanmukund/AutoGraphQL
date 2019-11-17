@@ -44,6 +44,10 @@ export const InvalidUsernameLengthError = createError('InvalidUsernameLengthErro
   message: 'The username should be more than 3 and less than 30 characters in length',
 });
 
+export const InvalidPasswordLengthError = createError('InvalidPasswordLengthError', {
+  message: 'Password must be at least 6 characters',
+});
+
 export const PhoneNumberAndCountryCodeRequiredError = createError('PhoneNumberAndCountryCodeRequiredError', {
   message: 'Both country code and phone number is mandatory',
 });
@@ -60,10 +64,50 @@ export const DuplicateConnectIdsError = createError('DuplicateConnectIdsError', 
   message: 'Duplicate connect ids sent in input',
 });
 
+export const UserOrCourseNotPresentError = createError('UserOrCourseNotPresentError', {
+  message: 'User or course id is missing in input',
+});
+
+export const TopicOrLONotPresentError = createError('TopicOrLONotPresentError', {
+  message: 'Topic or learning objective id is missing in input',
+});
+
+export const TopicOrUserCurrentTopicComponentNotPresentError = createError('TopicOrUserCurrentTopicComponentNotPresentError', {
+  message: 'Topic or UserCurrentTopicComponent id is missing in input',
+});
+
+export const UserOrLearningObjectiveNotPresentError = createError('UserOrLearningObjectiveNotPresentError', {
+  message: 'User or learning objective id is missing in input',
+});
+
+export const UserOrTopicNotPresentError = createError('UserOrTopicNotPresentError', {
+  message: 'User or topic id is missing in input',
+});
+
+export const PracticeQuestionsNotPresentError = createError('PracticeQuestionsNotPresentError', {
+  message: 'PracticeQuestions are missing in input',
+});
+
+export const QuizQuestionsNotPresentError = createError('QuizQuestionsNotPresentError', {
+  message: 'QuizQuestions are missing in input',
+});
+
+export const UserMismatchError = createError('UserMismatchError', {
+  message: 'User id passed in input does not belong to logged in user',
+});
+
 export const UnauthorizedFieldOrTypeAccessByAppError = createError('UnauthorizedFieldAccessByAppError', {
   message: 'App is not authorized to access some of the fields or types',
 });
 
 export const InsufficientPermissionError = createError('InsufficientPermissionError', {
   message: 'Insufficient permission error',
+});
+
+export const InvalidGmailTokenError = createError('InvalidGmailTokenError', {
+  message: 'Invalid gmail token error',
+});
+
+export const InvalidFacebookTokenError = createError('InvalidFacebookTokenError', {
+  message: 'Invalid facebook token error',
 });

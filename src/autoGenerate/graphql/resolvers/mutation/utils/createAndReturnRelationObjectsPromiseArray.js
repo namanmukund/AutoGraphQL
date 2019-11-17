@@ -8,7 +8,9 @@ const createAndReturnRelationObjectsPromiseArray = (
   context,
 ) => {
   const promiseArray = relationFieldsArray.map((fieldObject) => {
-    const { fieldName, fieldValue, fieldType, relationName } = fieldObject;
+    const {
+      fieldName, fieldValue, fieldType, relationName,
+    } = fieldObject;
     return createAndReturnRelationObject(
       fieldName,
       fieldValue,

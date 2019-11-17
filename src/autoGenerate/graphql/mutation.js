@@ -14,7 +14,9 @@ import hasDirective from '../utils/hasDirective';
 import getMutationNames from '../utils/getMutationNames';
 import getDirectiveArgumentValue from '../utils/getDirectiveArgumentValue';
 import getNestedConnectMutationString from '../utils/getNestedConnectMutationString';
-import { ADD, DELETE, DELETE_MULTIPLE, UPDATE, UPDATE_MULTIPLE } from '../../../constants/graphqlOperations';
+import {
+  ADD, DELETE, DELETE_MULTIPLE, UPDATE, UPDATE_MULTIPLE,
+} from '../../../constants/graphqlOperations';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -22,7 +24,7 @@ const relationsAddedInMutation = [];
 let mutationString = 'type Mutation{';
 // array for relation names for whom mutation already made
 const relationTypes = [];
-const getRelationPayloadName = relationName => `${relationName}Payload`;
+const getRelationPayloadName = (relationName) => `${relationName}Payload`;
 
 /* Check if the fieldName is present in the modal or not */
 const hasField = (
@@ -186,7 +188,9 @@ const makeRelationTypePayload = (
 
 Object.keys(parsedASTMap).forEach((type) => {
   const definition = parsedASTMap[type];
-  const { name, field, directives, allowedOperations } = definition;
+  const {
+    name, field, directives, allowedOperations,
+  } = definition;
   const typeName = name.value;
   const isModel = directives && hasDirective(directives, 'model');
   if (isModel) {
@@ -202,7 +206,7 @@ Object.keys(parsedASTMap).forEach((type) => {
     }
     const mutationNames = getMutationNames(typeName);
     // get relation fields
-    const relationFields = definition.relationFields;
+    const { relationFields } = definition;
 
     const nestedConnectMutationString = getNestedConnectMutationString(
       relationFields,
@@ -214,7 +218,7 @@ Object.keys(parsedASTMap).forEach((type) => {
     const updateModelMutationName = mutationNames.updateMutation;
     const updateMultipleModelMutationName = mutationNames.updateMultipleMutation;
     const deleteModelMutationName = mutationNames.deleteMutation;
-    const deleteMultipleMutation = mutationNames.deleteMultipleMutation;
+    const { deleteMultipleMutation } = mutationNames;
     let forceUpdate = '';
     if (forceUpdateTypeNames.includes(typeName)) {
       forceUpdate = ',force: Boolean';
@@ -225,45 +229,45 @@ Object.keys(parsedASTMap).forEach((type) => {
     }
     // add operation
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(ADD))
+      (allowedOperations && allowedOperations === '*')
+        || (allowedOperations && allowedOperations !== '*'
+            && allowedOperations.length && allowedOperations.includes(ADD))
     ) {
       mutationString += `${addModelMutationName} ( input: ${modelInputTypeName}!,${nestedConnectMutationString}): ${typeName},`;
     }
 
     // update operation
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(UPDATE))
+      (allowedOperations && allowedOperations === '*')
+        || (allowedOperations && allowedOperations !== '*'
+            && allowedOperations.length && allowedOperations.includes(UPDATE))
     ) {
       mutationString += `${updateModelMutationName} (id: ID!, input: ${modelUpdateTypeName},${nestedConnectMutationString} ${saveHistoryArgumentString} ${forceUpdate}) : ${typeName},`;
     }
 
     // updateMultiple operation
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(UPDATE_MULTIPLE))
+      (allowedOperations && allowedOperations === '*')
+        || (allowedOperations && allowedOperations !== '*'
+            && allowedOperations.length && allowedOperations.includes(UPDATE_MULTIPLE))
     ) {
       mutationString += `${updateMultipleModelMutationName} (input: [${modelUpdateAllTypeName}]!) : [${typeName}],`;
     }
 
     // delete operation
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(DELETE))
+      (allowedOperations && allowedOperations === '*')
+        || (allowedOperations && allowedOperations !== '*'
+            && allowedOperations.length && allowedOperations.includes(DELETE))
     ) {
       mutationString += `${deleteModelMutationName} (id: ID!, ${forceDelete}) : ${typeName},`;
     }
 
     // deleteMultiple operation
     if (
-      (allowedOperations && allowedOperations === '*') ||
-        (allowedOperations && allowedOperations !== '*' &&
-            allowedOperations.length && allowedOperations.includes(DELETE_MULTIPLE))
+      (allowedOperations && allowedOperations === '*')
+        || (allowedOperations && allowedOperations !== '*'
+            && allowedOperations.length && allowedOperations.includes(DELETE_MULTIPLE))
     ) {
       mutationString += `${deleteMultipleMutation} (filter: ${typeName}Filter!, last: Int, first:Int, skip:Int, after: ID, before:ID) : [${typeName}],`;
     }
@@ -328,6 +332,7 @@ mutationString += 'signUp ( input: SignUpInput ): UserToken,';
 mutationString += 'setUserPassword ( id: ID!, password: String! ): User,';
 mutationString += 'resetUserPassword ( id: ID!, oldPassword: String!, newPassword: String!  ): User,';
 mutationString += 'login ( input: LoginInput ): UserToken,';
+mutationString += 'socialLogin ( input: SocialLoginInput ): UserToken,';
 mutationString += 'signupExistingUser ( input: ExistingUserInput, stopOtpTrigger:Boolean ): UserToken,';
 mutationString += 'validateUserOTP ( id: ID!, phoneOtp: Int, emailOtp: Int ): User,';
 mutationString += 'resendUserOTP ( id: ID!): User,';
@@ -335,7 +340,16 @@ mutationString += 'sendForgotPasswordOTP (input: PhoneInput, email: String): Boo
 mutationString += 'resendForgotPasswordOTP (input: PhoneInput, email: String): BooleanResult,';
 mutationString += 'validateForgotPasswordOTP (input: PhoneInput, phoneOtp: Int, email: String, emailOtp: Int): BooleanResult,';
 mutationString += 'finishForgotPassword (input: PhoneInput, phoneOtp: Int, email: String, emailOtp: Int, newPassword: String!): BooleanResult,';
-
+mutationString += 'sendForgotPasswordLink (email: String!): BooleanResult,';
+mutationString += 'resetPasswordFromForgotPasswordLink (newPassword: String!): BooleanResult,';
+mutationString += 'userCourseSyllabus : UserCourseSyllabus,';
+mutationString += 'userTopicJourney ( topicId: ID!): UserTopicJourney,';
+mutationString += 'userFirstAndLatestQuizReport ( topicId: ID!): UserFirstAndLatestQuizReport,';
+mutationString += 'skipVideo ( topicId: ID!): SkipVideo,';
+mutationString += 'skipPracticeQuestion ( learningObjectiveId: ID!): BooleanResult,';
+mutationString += 'userBadge : UserBadge,';
+mutationString += 'getUnlockedUserBadge ( input: GetUnlockedUserBadgeInput ): GetUnlockedUserBadgeResult,';
+mutationString += 'getQuizReport ( input: GetQuizReportInput): GetQuizReportResult,';
 // Backend Token only password update mutation
 mutationString += 'tcirtSdrowssaPtes ( id: ID!, password: String! ): User,';
 mutationString += 'uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,';

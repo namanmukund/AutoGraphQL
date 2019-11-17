@@ -5,6 +5,11 @@ import { callAddUpdateHookValidationFunction, callConnectHookValidationFunction 
 import commonUserValidation from './commonUserValidation';
 import checkDeleteStatusOfALearningObjective from './checkDeleteStatusOfALearningObjective';
 import checkDeleteStatusOfATopic from './checkDeleteStatusOfATopic';
+import getLearningObjectiveAndTopicForValidation from './getLearningObjectiveAndTopicForValidation';
+import getTopicForValidation from './getTopicForValidation';
+import isComponentUnlocked from './isComponentUnlocked';
+import validateTokenAndExtractInformation from './validateTokenAndExtractInformation';
+import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
 
 export {
   getFinalConnectedRecordsForARelationFromInput,
@@ -14,4 +19,9 @@ export {
   commonUserValidation,
   checkDeleteStatusOfALearningObjective,
   checkDeleteStatusOfATopic,
+  getLearningObjectiveAndTopicForValidation,
+  getTopicForValidation,
+  isComponentUnlocked,
+  validateTokenAndExtractInformation,
+  getUserIdandAppNameAfterValidation,
 };

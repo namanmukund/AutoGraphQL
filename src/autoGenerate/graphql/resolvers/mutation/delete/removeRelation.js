@@ -74,8 +74,7 @@ const removeRelationMutationResolver = (
     typeNameString,
     relatedTypeString,
   ).then((modifiedParams) => {
-    const relationIdObject =
-    getTypeAndRelatedTypesObjectFromConnectArguments(
+    const relationIdObject = getTypeAndRelatedTypesObjectFromConnectArguments(
       modifiedParams,
       typeNameString,
     );
