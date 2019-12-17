@@ -7,7 +7,6 @@ import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
 const release = version || 'norelease';
 const env = process.env.NODE_ENV || 'development';
 const application = process.env.APPLICATION || 'core';
-
 if (isSentryAppAndEnv(application, env)) {
   Raven.config(sentryDSN, {
     release,
