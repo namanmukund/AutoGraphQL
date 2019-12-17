@@ -84,17 +84,7 @@ const server = new ApolloServer({
       req.body.variables = {};
     }
 
-
-    const contextData = {
-      decodedUser: req.currentUser,
-      decodedApp: req.currentApp,
-      filePayload,
-      mutationCallRoute: req.mutationCallRoute,
-      authorization: req.authorization,
-      xForwardedBy: req.xForwardedBy,
-    };
-
-    // initiaize setContext before sending any error to sentry
+    // initiaize setContext to capture all the useful info before sending any error to sentry
     if (isSentryAppAndEnv(application, env)) {
       const contextObj = {};
       // if userId available then send the id to sentry
@@ -108,7 +98,6 @@ const server = new ApolloServer({
       }
       // if appInfo available then send the info to sentry
       if (req.currentApp) {
-        console.log(334444, req.body);
         Object.assign(contextObj, {
           extra: {
             appInfo: req.currentApp,
@@ -122,7 +111,15 @@ const server = new ApolloServer({
       }
       Raven.setContext(contextObj);
     }
-    return contextData;
+    // return context data
+    return {
+      decodedUser: req.currentUser,
+      decodedApp: req.currentApp,
+      filePayload,
+      mutationCallRoute: req.mutationCallRoute,
+      authorization: req.authorization,
+      xForwardedBy: req.xForwardedBy,
+    };
   },
 });
 

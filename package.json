@@ -74,7 +74,6 @@
     "@babel/polyfill": "^7.7.0",
     "@babel/runtime-corejs2": "^7.7.2",
     "@sendgrid/mail": "^6.4.0",
-    "@sentry/node": "^5.10.2",
     "apollo-errors": "^1.9.0",
     "apollo-fetch": "^0.7.0",
     "apollo-server-express": "^2.9.8",
