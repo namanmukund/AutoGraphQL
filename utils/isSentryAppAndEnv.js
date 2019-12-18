@@ -1,6 +1,6 @@
 const isSentryAppAndEnv = (application, env) => {
   let flag = false;
-  if (application !== 'core' && (env === 'staging' || env === 'production')) {
+  if (env === 'development' || env === 'staging' || env === 'production') {
     flag = true;
   }
   return flag;
