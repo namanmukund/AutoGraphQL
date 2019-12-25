@@ -5,7 +5,7 @@ service: tekie-backend
 provider:
   name: aws
   runtime: nodejs8.10
-  stage: dev
+  stage: staging
   region: eu-central-1
 
 functions:

@@ -8,7 +8,7 @@ const awsConfig = {
       region: 'us-east-2',
     },
     s3: {
-      bucket: 'tekie-tms-staging',
+      bucket: 'bucket-staging',
     },
     ACL: {
       publicReadWrite: 'public-read-write',
@@ -42,7 +42,7 @@ const awsConfig = {
       region: 'us-east-2',
     },
     s3: {
-      bucket: 'tekie-dev',
+      bucket: 'bucket-staging',
     },
     ACL: {
       publicReadWrite: 'public-read-write',

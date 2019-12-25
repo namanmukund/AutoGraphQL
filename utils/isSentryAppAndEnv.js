@@ -1,9 +1,3 @@
-const isSentryAppAndEnv = (application, env) => {
-  let flag = false;
-  if (env === 'development' || env === 'staging' || env === 'production') {
-    flag = true;
-  }
-  return flag;
-};
+const isSentryAppAndEnv = () => true;
 
 export default isSentryAppAndEnv;
