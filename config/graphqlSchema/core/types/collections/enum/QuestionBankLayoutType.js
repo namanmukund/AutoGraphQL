@@ -1,7 +1,7 @@
 const QuestionBankLayoutType = `
   enum QuestionBankLayoutType {
       text
-      terminal
+      editor
   }`;
 
 export default QuestionBankLayoutType;

@@ -1,12 +1,12 @@
 const sentryConfig = {
   development: {
-    sentryDSN: 'xxxx',
+    sentryDSN: 'https://ba594c2965dc41a699fdfc0bd4e6b7cc@sentry.io/1859809',
   },
   staging: {
-    sentryDSN: 'xxxx',
+    sentryDSN: 'https://ba594c2965dc41a699fdfc0bd4e6b7cc@sentry.io/1859809',
   },
   test: {
-    sentryDSN: 'xxxx',
+    sentryDSN: 'https://ba594c2965dc41a699fdfc0bd4e6b7cc@sentry.io/1859809',
   },
 };
 
