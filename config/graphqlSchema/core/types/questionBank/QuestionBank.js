@@ -4,6 +4,7 @@ const QuestionBank = `
     statement: String! @trim
     hint: String @trim
     questionType: QuestionBankType! @defaultValue(value: "mcq")
+    questionLayoutType: QuestionBankLayoutType! @defaultValue(value: "editor")
     difficulty: Int
     assessmentType: AssessmentType!
     questionCodeSnippet: String @trim
