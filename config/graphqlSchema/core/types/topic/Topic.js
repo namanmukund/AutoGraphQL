@@ -16,6 +16,7 @@ const Topic = `
     videoEndTime: Int
     storyStartTime: Int
     storyEndTime: Int
+    storyThumbnail: File @relation(name: "StoryThumbnail", direction: "OneWay")
     chapter: Chapter @relation(name: "ChapterTopic")
     learningObjectives: [LearningObjective] @relation(name: "TopicLearningObjective", isSubset: true)
     questions: [QuestionBank] @relation(name: "TopicQuestionBank")
