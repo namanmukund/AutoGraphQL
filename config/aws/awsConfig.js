@@ -1,14 +1,14 @@
-const accessKeyId = 'AKIAJ5KTKINUGBG2KXBA';
-const secretAccessKey = '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';
+const accessKeyId = 'AKIAU6O7VDUCZQAL4Z6T';
+const secretAccessKey = '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';
 const awsConfig = {
   production: {
     aws: {
       accessKeyId,
       secretAccessKey,
-      region: 'us-east-2',
+      region: 'us-east-1',
     },
     s3: {
-      bucket: 'tekie-tms-staging',
+      bucket: 'tekie-tms-test',
     },
     ACL: {
       publicReadWrite: 'public-read-write',
@@ -22,10 +22,10 @@ const awsConfig = {
     aws: {
       accessKeyId,
       secretAccessKey,
-      region: 'us-east-2',
+      region: 'us-east-1',
     },
     s3: {
-      bucket: 'tekie-tms-staging',
+      bucket: 'tekie-tms-test',
     },
     ACL: {
       publicReadWrite: 'public-read-write',
@@ -39,10 +39,10 @@ const awsConfig = {
     aws: {
       accessKeyId,
       secretAccessKey,
-      region: 'us-east-2',
+      region: 'us-east-1',
     },
     s3: {
-      bucket: 'tekie-tms-staging',
+      bucket: 'tekie-tms-test',
     },
     ACL: {
       publicReadWrite: 'public-read-write',
@@ -56,10 +56,10 @@ const awsConfig = {
     aws: {
       accessKeyId,
       secretAccessKey,
-      region: 'us-east-2',
+      region: 'us-east-1',
     },
     s3: {
-      bucket: 'bucket-test',
+      bucket: 'tekie-tms-test',
     },
     ACL: {
       publicReadWrite: 'public-read-write',
