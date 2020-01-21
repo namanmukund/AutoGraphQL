@@ -5,8 +5,13 @@ service: tekie-backend
 provider:
   name: aws
   runtime: nodejs8.10
-  stage: dev
-  region: eu-central-1
+  stage: staging
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - '*'
+      Resource: "arn:aws:s3:::${self:custom.bucket}/*"
 
 functions:
   app:
@@ -28,3 +33,4 @@ custom:
     webpackConfig: /webpack/webpack.serverless.cloudProd.js
   webpackIncludeModules:
     packagePath: './package.json'
+  bucket: 'tekie-tms-staging'
