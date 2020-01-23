@@ -73,7 +73,8 @@ const awsConfig = {
         'fEN1sQKBgQCPrL0COiH/ExSQC6Cl8FMI+K+KoTBBByx/HVyjp3O/uDDXJmDABV/X\n' +
         '868tY+Msmof9svCiDsKLRqMF5cq6oxctM0lDdYi9u7hgV8n1vRttxNPm5sj8i5s0\n' +
         'hL4nMmX3PSuDBRv0YHlIrm/A/mGCOx3Lt3ps9lFUahbVj6wIQp0CIw==\n' +
-        '-----END RSA PRIVATE KEY-----'
+        '-----END RSA PRIVATE KEY-----',
+      expireTime: new Date().getTime() + 8000000000
 
     },
     ACL: {
