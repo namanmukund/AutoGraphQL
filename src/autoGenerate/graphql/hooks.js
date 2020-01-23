@@ -1,5 +1,6 @@
 import { isArray } from 'lodash';
 import { functions, ifAuthorized } from '../../../utils';
+import { get } from 'lodash';
 
 
 import {
@@ -30,6 +31,8 @@ import { BYPASS } from '../../../constants';
 
 import { createStaticAppToken } from '../../auth';
 import deleteFromS3 from '../../middlewares/utils/deleteFromS3';
+import generateSignedUrl from '../../middlewares/utils/getSigned';
+
 import { callAddUpdateHookValidationFunction } from './preHookFunctions/validation/utils';
 import deleteTopicValidation from './preHookFunctions/validation/deleteTopicValidation';
 import deleteLearningObjectiveValidation from './preHookFunctions/validation/deleteLearningObjectiveValidation';
@@ -367,6 +370,15 @@ const posthook = async (input, mutationName, context, params) => {
       await deleteFromS3(uri);
       break;
     }
+    case 'file': {
+      const resultArray = []
+      for (const data of input) {
+        data.signedUri = await generateSignedUrl(get(data,'uri'))
+        resultArray.push(data);
+      }
+      break;
+    }
+
     case 'deleteFiles': {
       const urisToDelete = input.map((record) => record.uri);
       /* eslint no-restricted-syntax: ["error", "FunctionExpression", "WithStatement",
