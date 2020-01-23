@@ -1,5 +1,3 @@
-// eslint-disable-next-line import/no-unresolved
-
 const cf = require('aws-cloudfront-sign');
 import { awsConfig } from '../../../utils/index'
 
