@@ -372,9 +372,15 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'file': {
       const resultArray = []
-      for (const data of input) {
-        data.signedUri = await generateSignedUrl(get(data,'uri'))
-        resultArray.push(data);
+
+      if(input.length > 1) {
+        for (const data of input) {
+          data.signedUri = await generateSignedUrl(get(data, 'uri'))
+          resultArray.push(data);
+        }
+      }else{
+        input.signedUri = await generateSignedUrl(get(input, 'uri'))
+        resultArray.push(input);
       }
       break;
     }
