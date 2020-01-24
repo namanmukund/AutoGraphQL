@@ -76,7 +76,7 @@ const awsConfig = {
         '-----END RSA PRIVATE KEY-----',
       expireTime: new Date().getTime() + 8000000000
 
-    }
+    },
     ACL: {
       publicReadWrite: 'public-read-write',
       publicRead: 'public-read',
