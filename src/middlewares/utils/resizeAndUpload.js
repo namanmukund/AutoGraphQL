@@ -5,11 +5,6 @@ import { uploadToS3 } from './uploadToS3';
 import generateFileNameForResizedImage from './generateFileNameForResizedImage';
 
 const resizeAndUpload = (fileTypeName, name, fileContent, fileKind, path) => {
-  console.log(1111111, 'fileTypeName', fileTypeName)
-  console.log(1111111, 'name', name)
-  console.log(1111111, 'fileContent', fileContent)
-  console.log(1111111, 'fileKind', fileKind)
-  console.log(1111111, 'path', path)
   // upload normal size file to s3
   uploadToS3(path, fileContent);
   // if resize dimension is given upload file according to that size
