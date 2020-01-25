@@ -1,6 +1,6 @@
+import cf from 'aws-cloudfront-sign';
 import { awsConfig } from '../../../utils/index';
-
-const cf = require('aws-cloudfront-sign');
+// const cf = require('aws-cloudfront-sign');
 
 const { cloudFront: { keypairId, privateKeyString, expireTime } } = awsConfig;
 
