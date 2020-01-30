@@ -1,6 +1,5 @@
-import { isArray } from 'lodash';
+import { isArray, get } from 'lodash';
 import { functions, ifAuthorized } from '../../../utils';
-import { get } from 'lodash';
 
 
 import {
@@ -67,6 +66,7 @@ import userLearningObjectiveValidation
   from './preHookFunctions/validation/userLearningObjectiveValidation';
 import userQuizValidation from './preHookFunctions/validation/userQuizValidation';
 import userPracticeQuestionReportPostHookMethod from './postHookFunctions/userPracticeQuestionReportPostHookMethod';
+import isUniqueField from './validation/isUniqueField';
 
 const { hookFunctions } = functions || {};
 
@@ -93,7 +93,31 @@ const hook = (data, mutationName, hookName) => {
 // This hook is used to transform input argument for a mutation.
 // params contain all the arguments whatever you are passing in mutation query
 const prehook = async (input, mutationOrQueryName, context, params) => {
+
   switch (mutationOrQueryName) {
+    case 'updateTopic': {
+      await isUniqueField(params, 'Topic');
+      return hook(input, mutationOrQueryName, 'PreHook');
+
+    }
+
+    case 'updateChapter': {
+      await isUniqueField(params, 'Chapter');
+      return hook(input, mutationOrQueryName, 'PreHook');
+
+    }
+
+    case 'addTopic': {
+      await isUniqueField(params, 'Topic');
+      return hook(input, mutationOrQueryName, 'PreHook');
+
+    }
+
+    case 'addChapter': {
+      await isUniqueField(params, 'Chapter');
+      return hook(input, mutationOrQueryName, 'PreHook');
+
+    }
     case 'addUser': {
       // validate username, phone, email and name and returns email or phone verified accordingly
       const verifiedData = await addUserValidation(input, context);
@@ -371,13 +395,12 @@ const posthook = async (input, mutationName, context, params) => {
       break;
     }
     case 'file': {
-
-      if(input.length > 1) {
+      if (input.length > 1) {
         for (const data of input) {
-          data.signedUri = await generateSignedUrl(get(data, 'uri'))
+          data.signedUri = await generateSignedUrl(get(data, 'uri'));
         }
-      }else{
-        input.signedUri = await generateSignedUrl(get(input, 'uri'))
+      } else {
+        input.signedUri = await generateSignedUrl(get(input, 'uri'));
       }
 
       break;

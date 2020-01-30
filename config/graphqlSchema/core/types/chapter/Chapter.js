@@ -1,6 +1,6 @@
 const Chapter = `
   type Chapter @model {
-    order: Int! @unique
+    order: Int! 
     title: String! @unique @trim
     description: String @uniqueOrEmpty @trim
     status: ContentStatus! @defaultValue(value: "unpublished")
