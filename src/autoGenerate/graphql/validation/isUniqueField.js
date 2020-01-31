@@ -10,7 +10,7 @@ const isUniqueField = (params, collection) => {
   const modelQueries = new QueryController(collection, newAuthentication);
 
   const { order } = get(params, 'input');
-  if (params.input.order) {
+  if (order) {
     return modelQueries.fetchOne({ order })
       .then((result) => {
         if (result) throw new OrderAlreadyExistsError();
