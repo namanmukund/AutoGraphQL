@@ -93,36 +93,32 @@ const hook = (data, mutationName, hookName) => {
 // This hook is used to transform input argument for a mutation.
 // params contain all the arguments whatever you are passing in mutation query
 const prehook = async (input, mutationOrQueryName, context, params) => {
-  console.log(111111,input)
+  console.log(111111, input);
 
-  console.log(22222,mutationOrQueryName)
-  console.log(3333,context)
+  console.log(22222, mutationOrQueryName);
+  console.log(3333, context);
 
-  console.log(444,params)
+  console.log(444, params);
 
   switch (mutationOrQueryName) {
     case 'updateTopic': {
-      await isUniqueField(params, 'topics','update');
+      await isUniqueField(params, 'topics', 'update', 'chapters');
       return hook(input, mutationOrQueryName, 'PreHook');
-
     }
 
     case 'updateChapter': {
-      await isUniqueField(params, 'chapters','update');
+      await isUniqueField(params, 'chapters', 'update', 'courses');
       return hook(input, mutationOrQueryName, 'PreHook');
-
     }
 
     case 'addTopic': {
-      await isUniqueField(params, 'topics','add');
+      await isUniqueField(params, 'chapter', 'addTopic','topics');
       return hook(input, mutationOrQueryName, 'PreHook');
-
     }
 
     case 'addChapter': {
-      await isUniqueField(params, 'chapters','add');
+      await isUniqueField(params, 'chapters', 'addChapter','courses');
       return hook(input, mutationOrQueryName, 'PreHook');
-
     }
     case 'addUser': {
       // validate username, phone, email and name and returns email or phone verified accordingly
