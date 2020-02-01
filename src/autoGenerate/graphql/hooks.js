@@ -93,28 +93,34 @@ const hook = (data, mutationName, hookName) => {
 // This hook is used to transform input argument for a mutation.
 // params contain all the arguments whatever you are passing in mutation query
 const prehook = async (input, mutationOrQueryName, context, params) => {
+  console.log(111111,input)
+
+  console.log(22222,mutationOrQueryName)
+  console.log(3333,context)
+
+  console.log(444,params)
 
   switch (mutationOrQueryName) {
     case 'updateTopic': {
-      await isUniqueField(params, 'Topic');
+      await isUniqueField(params, 'topics','update');
       return hook(input, mutationOrQueryName, 'PreHook');
 
     }
 
     case 'updateChapter': {
-      await isUniqueField(params, 'Chapter');
+      await isUniqueField(params, 'chapters','update');
       return hook(input, mutationOrQueryName, 'PreHook');
 
     }
 
     case 'addTopic': {
-      await isUniqueField(params, 'Topic');
+      await isUniqueField(params, 'topics','add');
       return hook(input, mutationOrQueryName, 'PreHook');
 
     }
 
     case 'addChapter': {
-      await isUniqueField(params, 'Chapter');
+      await isUniqueField(params, 'chapters','add');
       return hook(input, mutationOrQueryName, 'PreHook');
 
     }
