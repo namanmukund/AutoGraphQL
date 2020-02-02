@@ -5,6 +5,7 @@ service: tekie-backend
 provider:
   name: aws
   runtime: nodejs12.x
+  timeout: 30
   stage: staging
   region: us-east-1
   iamRoleStatements:
