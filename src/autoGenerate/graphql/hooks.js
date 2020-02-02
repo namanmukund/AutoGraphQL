@@ -93,12 +93,6 @@ const hook = (data, mutationName, hookName) => {
 // This hook is used to transform input argument for a mutation.
 // params contain all the arguments whatever you are passing in mutation query
 const prehook = async (input, mutationOrQueryName, context, params) => {
-  console.log(111111, input);
-
-  console.log(22222, mutationOrQueryName);
-  console.log(3333, context);
-
-  console.log(444, params);
 
   switch (mutationOrQueryName) {
     case 'updateTopic': {
