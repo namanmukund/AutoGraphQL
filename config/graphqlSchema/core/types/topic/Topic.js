@@ -1,6 +1,6 @@
 const Topic = `
   type Topic @model {
-    order: Int! @unique
+    order: Int! 
     title: String! 
         @unique 
         @trim

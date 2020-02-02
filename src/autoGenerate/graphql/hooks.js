@@ -1,6 +1,5 @@
-import { isArray } from 'lodash';
+import { isArray, get } from 'lodash';
 import { functions, ifAuthorized } from '../../../utils';
-import { get } from 'lodash';
 
 
 import {
@@ -22,7 +21,7 @@ import {
   UserPasswordAlreadySetError,
   AlreadyActiveUser,
   EitherPhoneOrEmailOtpRequiredError,
-  FileUsageCountNotZeroError,
+  FileUsageCountNotZeroError, ConnectIdRequiredError,
 }
   from '../../../constants/errors';
 
@@ -67,6 +66,7 @@ import userLearningObjectiveValidation
   from './preHookFunctions/validation/userLearningObjectiveValidation';
 import userQuizValidation from './preHookFunctions/validation/userQuizValidation';
 import userPracticeQuestionReportPostHookMethod from './postHookFunctions/userPracticeQuestionReportPostHookMethod';
+import isUniqueOrderField from './validation/isUniqueOrderField';
 
 const { hookFunctions } = functions || {};
 
@@ -94,6 +94,31 @@ const hook = (data, mutationName, hookName) => {
 // params contain all the arguments whatever you are passing in mutation query
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
+    case 'updateTopic': {
+      await isUniqueOrderField(params, mutationOrQueryName);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+
+    case 'updateChapter': {
+      await isUniqueOrderField(params, mutationOrQueryName);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+
+    case 'addTopic': {
+      if (!get(params, 'chapterConnectId')) {
+        throw new ConnectIdRequiredError({ data: { message: 'Chapter Id is required' } });
+      }
+      await isUniqueOrderField(params, mutationOrQueryName);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+
+    case 'addChapter': {
+      if (!get(params, 'coursesConnectIds', []).length) {
+        throw new ConnectIdRequiredError({ data: { message: 'Course Id is required' } });
+      }
+      await isUniqueOrderField(params, mutationOrQueryName);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
     case 'addUser': {
       // validate username, phone, email and name and returns email or phone verified accordingly
       const verifiedData = await addUserValidation(input, context);
@@ -371,13 +396,14 @@ const posthook = async (input, mutationName, context, params) => {
       break;
     }
     case 'file': {
-
-      if(input.length > 1) {
+      if (input.length > 1) {
         for (const data of input) {
-          data.signedUri = await generateSignedUrl(get(data, 'uri'))
+          // eslint-disable-next-line no-await-in-loop
+          data.signedUri = await generateSignedUrl(get(data, 'uri'));
         }
-      }else{
-        input.signedUri = await generateSignedUrl(get(input, 'uri'))
+      } else {
+        // eslint-disable-next-line no-param-reassign
+        input.signedUri = await generateSignedUrl(get(input, 'uri'));
       }
 
       break;

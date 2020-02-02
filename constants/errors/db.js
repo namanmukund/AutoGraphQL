@@ -55,3 +55,7 @@ export const OrderAlreadyExistsError = createError('OrderAlreadyExistsError', {
 export const TopicIdRequiredError = createError('TopicIdRequiredError', {
   message: 'Cannot perform the current operation as TopicConnectId is not provided',
 });
+
+export const ConnectIdRequiredError = createError('ConnectIdRequiredError', {
+  message: 'Cannot perform the current operation as one of the mandatory connectId/connectIds is not provided',
+});
