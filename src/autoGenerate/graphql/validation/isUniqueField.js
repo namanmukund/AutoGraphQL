@@ -4,7 +4,7 @@ import callGraphqlApi from '../../../api/callGraphqlApi';
 import { OrderAlreadyExistsError } from '../../../../constants/errors';
 
 
-const topicQ = (topicId, collection, parent) => `{
+const topicQuery = (topicId, collection, parent) => `{
 ${parent}(filter:{
     ${collection}_some:{
       id: "${topicId}"
@@ -18,7 +18,7 @@ ${parent}(filter:{
 `;
 
 
-const chapterQ = (topicId, collection, parent) => `{
+const chapterQuery = (topicId, collection, parent) => `{
   ${parent}(filter:{
       id_in: ${topicId}
   }){
@@ -32,7 +32,7 @@ const chapterQ = (topicId, collection, parent) => `{
 `;
 
 
-const chapterQuery = (topicId, collection, parent) => `{
+const genericQuery = (topicId, collection, parent) => `{
 ${parent}(filter:{
     ${collection}_some:{
       id: "${topicId}"
@@ -58,9 +58,9 @@ const isUniqueField = async (params, collection, type, parent) => {
 
   switch (type) {
     case 'update':
-      const chapterQueryRes = await callGraphqlApi(chapterQuery(params.id, collection, parent));
-      const chapterInfo = get(chapterQueryRes, `data.${parent}[0].${collection}`);
-      const infoMap = convertToMap(chapterInfo)
+      const queryRes = await callGraphqlApi(genericQuery(params.id, collection, parent));
+      const info = get(queryRes, `data.${parent}[0].${collection}`);
+      const infoMap = convertToMap(info)
       const updateOrder = get(params, 'input.order');
       if (Object.prototype.hasOwnProperty.call(infoMap, params.id)) {
         if (infoMap[params.id] !== updateOrder) {
@@ -72,9 +72,9 @@ const isUniqueField = async (params, collection, type, parent) => {
 
 
     case 'addChapter':
-      const topicQueryRes = await callGraphqlApi(chapterQ(JSON.stringify(params.coursesConnectIds), collection, parent), {});
-      const topicInfo = get(topicQueryRes, `data.${parent}`);
-      topicInfo.forEach((data) => {
+      const chapterQueryRes = await callGraphqlApi(chapterQuery(JSON.stringify(params.coursesConnectIds), collection, parent), {});
+      const chapterInfo = get(chapterQueryRes, `data.${parent}`);
+      chapterInfo.forEach((data) => {
         const topicInfoMap = convertToMap(data.chapters)
         const order = get(params, 'input.order');
         if (Object.values(topicInfoMap).indexOf(order) > -1) {
@@ -83,9 +83,9 @@ const isUniqueField = async (params, collection, type, parent) => {
       });
 
     case 'addTopic':
-      const topicQueryRes1 = await callGraphqlApi(topicQ(params.chapterConnectId, collection, parent));
-      const topicInfo1 = get(topicQueryRes1, `data.${parent}`);
-      const topicInfoMap = convertToMap(topicInfo1)
+      const topicQueryRes = await callGraphqlApi(topicQuery(params.chapterConnectId, collection, parent));
+      const topicInfo = get(topicQueryRes, `data.${parent}`);
+      const topicInfoMap = convertToMap(topicInfo)
       const order = get(params, 'input.order');
       if (Object.values(topicInfoMap).indexOf(order) > -1) {
         throw new OrderAlreadyExistsError();
