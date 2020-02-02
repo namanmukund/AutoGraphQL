@@ -25,6 +25,7 @@ import {
   ComponentLockedError,
   OrderAlreadyExistsError,
   TopicIdRequiredError,
+  ConnectIdRequiredError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -175,4 +176,5 @@ export {
   InvalidFacebookTokenError,
   InvalidPasswordLengthError,
   InvalidToken,
+  ConnectIdRequiredError,
 };

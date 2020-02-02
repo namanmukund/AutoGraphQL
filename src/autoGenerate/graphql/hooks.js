@@ -21,7 +21,7 @@ import {
   UserPasswordAlreadySetError,
   AlreadyActiveUser,
   EitherPhoneOrEmailOtpRequiredError,
-  FileUsageCountNotZeroError,
+  FileUsageCountNotZeroError, ConnectIdRequiredError,
 }
   from '../../../constants/errors';
 
@@ -66,7 +66,7 @@ import userLearningObjectiveValidation
   from './preHookFunctions/validation/userLearningObjectiveValidation';
 import userQuizValidation from './preHookFunctions/validation/userQuizValidation';
 import userPracticeQuestionReportPostHookMethod from './postHookFunctions/userPracticeQuestionReportPostHookMethod';
-import isUniqueField from './validation/isUniqueField';
+import isUniqueOrderField from './validation/isUniqueOrderField';
 
 const { hookFunctions } = functions || {};
 
@@ -93,25 +93,30 @@ const hook = (data, mutationName, hookName) => {
 // This hook is used to transform input argument for a mutation.
 // params contain all the arguments whatever you are passing in mutation query
 const prehook = async (input, mutationOrQueryName, context, params) => {
-
   switch (mutationOrQueryName) {
     case 'updateTopic': {
-      await isUniqueField(params, 'topics', 'update', 'chapters');
+      await isUniqueOrderField(params, mutationOrQueryName);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
     case 'updateChapter': {
-      await isUniqueField(params, 'chapters', 'update', 'courses');
+      await isUniqueOrderField(params, mutationOrQueryName);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
     case 'addTopic': {
-      await isUniqueField(params, 'chapter', 'addTopic','topics');
+      if (!get(params, 'chapterConnectId')) {
+        throw new ConnectIdRequiredError({ data: { message: 'Chapter Id is required' } });
+      }
+      await isUniqueOrderField(params, mutationOrQueryName);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
     case 'addChapter': {
-      await isUniqueField(params, 'chapters', 'addChapter','courses');
+      if (!get(params, 'coursesConnectIds', []).length) {
+        throw new ConnectIdRequiredError({ data: { message: 'Course Id is required' } });
+      }
+      await isUniqueOrderField(params, mutationOrQueryName);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUser': {
@@ -393,9 +398,11 @@ const posthook = async (input, mutationName, context, params) => {
     case 'file': {
       if (input.length > 1) {
         for (const data of input) {
+          // eslint-disable-next-line no-await-in-loop
           data.signedUri = await generateSignedUrl(get(data, 'uri'));
         }
       } else {
+        // eslint-disable-next-line no-param-reassign
         input.signedUri = await generateSignedUrl(get(input, 'uri'));
       }
 
