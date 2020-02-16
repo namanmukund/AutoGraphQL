@@ -59,3 +59,7 @@ export const TopicIdRequiredError = createError('TopicIdRequiredError', {
 export const ConnectIdRequiredError = createError('ConnectIdRequiredError', {
   message: 'Cannot perform the current operation as one of the mandatory connectId/connectIds is not provided',
 });
+
+export const PaidComponentLockedError = createError('PaidComponentLockedError', {
+  message: 'Component is not free',
+});
