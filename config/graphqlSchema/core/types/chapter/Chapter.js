@@ -1,5 +1,15 @@
+import { READ } from '../../../../../constants/graphqlOperations';
+import { TLA, TMS } from '../../../../../constants';
+
 const Chapter = `
-  type Chapter @model {
+  type Chapter @model
+  @appPermissions(
+    permissions:[
+      { appName: "${TMS}" operations: "*" },
+      { appName: "${TLA}" operations: ${READ} }], 
+    rule: allow
+  )
+   {
     order: Int! 
     title: String! @unique @trim
     description: String @uniqueOrEmpty @trim

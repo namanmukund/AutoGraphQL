@@ -9,11 +9,11 @@ import regexValidation from './regexValidation';
 import loginType from './loginType';
 
 
-const FRONTEND_APP_ONE = 'tekieTms';
-const FRONTEND_APP_TWO = 'tekieLearningApp';
+const TMS = 'tekieTms';
+const TLA = 'tekieLearningApp';
 const backendApps = ['core'];
 
-const frontEndApps = [FRONTEND_APP_TWO, FRONTEND_APP_ONE];
+const frontEndApps = [TLA, TMS];
 const permissionIntegratedApps = [];
 const firebaseExcludedApps = [];
 
@@ -243,8 +243,8 @@ export {
   questionTypes,
   scholarshipThreshHolds,
   freeTopicCount,
-  FRONTEND_APP_ONE,
-  FRONTEND_APP_TWO,
+  TMS,
+  TLA,
   loginType,
   masteryLevels,
   learningObjectiveQuizReportThreshHolds,

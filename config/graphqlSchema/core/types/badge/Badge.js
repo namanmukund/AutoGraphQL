@@ -1,5 +1,15 @@
+import { TLA, TMS } from '../../../../../constants';
+import { READ } from '../../../../../constants/graphqlOperations';
+
 const Badge = `
-  type Badge @model {
+  type Badge @model
+  @appPermissions(
+    permissions:[
+      { appName: "${TMS}" operations: "*" },
+      { appName: "${TLA}" operations: ${READ} }], 
+    rule: allow
+  ) 
+  {
     order: Int!
     type: BadgeType!
     name: String @length(min: 3, max: 8) @trim

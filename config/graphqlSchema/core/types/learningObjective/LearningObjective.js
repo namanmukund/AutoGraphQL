@@ -1,5 +1,15 @@
+import { TLA, TMS } from '../../../../../constants';
+import { READ } from '../../../../../constants/graphqlOperations';
+
 const LearningObjective = `
-  type LearningObjective @model {
+  type LearningObjective @model
+  @appPermissions(
+    permissions:[
+      { appName: "${TMS}" operations: "*" },
+      { appName: "${TLA}" operations: ${READ} }], 
+    rule: allow
+  ) 
+  {
     order: Int!
     title: String! @unique @trim
     description: String @uniqueOrEmpty @unique @trim

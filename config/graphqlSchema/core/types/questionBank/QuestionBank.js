@@ -1,5 +1,15 @@
+import { TLA, TMS } from '../../../../../constants';
+import { READ } from '../../../../../constants/graphqlOperations';
+
 const QuestionBank = `
-  type QuestionBank @model {
+  type QuestionBank @model 
+  @appPermissions(
+    permissions:[
+      { appName: "${TMS}" operations: "*" },
+      { appName: "${TLA}" operations: ${READ} }], 
+    rule: allow
+  ) 
+  {
     order: Int!
     statement: String! @trim
     hint: String @trim

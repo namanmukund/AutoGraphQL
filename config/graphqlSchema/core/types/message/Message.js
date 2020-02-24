@@ -1,5 +1,15 @@
+import { TLA, TMS } from '../../../../../constants';
+import { READ } from '../../../../../constants/graphqlOperations';
+
 const Message = `
-  type Message @model {
+  type Message @model
+  @appPermissions(
+    permissions:[
+      { appName: "${TMS}" operations: "*" },
+      { appName: "${TLA}" operations: ${READ} }], 
+    rule: allow
+  ) 
+  {
     order: Int!
     type: MessageType!
     statement: String @trim
