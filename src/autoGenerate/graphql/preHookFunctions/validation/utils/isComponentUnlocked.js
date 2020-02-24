@@ -7,11 +7,12 @@ import {
   UserMismatchError,
   UserOrLearningObjectiveNotPresentError,
   UserOrTopicNotPresentError,
+  PaidComponentLockedError,
 } from '../../../../../../constants/errors';
 import getUserCurrentTopicComponentStatus
   from '../../../../utils/getUserCurrentTopicComponentStatus';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
-import { backendApps, topicTypes } from '../../../../../../constants';
+import {backendApps, enrollmentTypes, topicTypes} from '../../../../../../constants';
 import getTopicForValidation from './getTopicForValidation';
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
 
@@ -199,7 +200,17 @@ const isComponentUnlocked = async (
     page,
     checkForPaidLogic,
   )) {
-    throw new ComponentLockedError();
+    // placing logic to send correct message if a paid video is locked coz free user is trying to access it
+    const { free } = enrollmentTypes;
+    const { video } = topicTypes;
+
+    if(enrollmentType === free
+        && topicOrder <= currentTopicOrder
+        && isTrial !== true && page === video){
+      throw new PaidComponentLockedError();
+    } else {
+      throw new ComponentLockedError();
+    }
   }
   switch (page) {
     case message: {

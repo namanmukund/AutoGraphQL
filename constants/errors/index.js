@@ -26,6 +26,7 @@ import {
   OrderAlreadyExistsError,
   TopicIdRequiredError,
   ConnectIdRequiredError,
+  PaidComponentLockedError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -156,6 +157,7 @@ export {
   UnsupportedListFieldInsideSubDocumentObjectError,
   DuplicateConnectIdsError,
   ComponentLockedError,
+  PaidComponentLockedError,
   InvalidTopicLOConnectionError,
   InvalidTopicPassedInCurrentTopicComponent,
   UserCourseCombinationExistError,
