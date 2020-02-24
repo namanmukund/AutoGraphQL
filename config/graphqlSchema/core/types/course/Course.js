@@ -1,5 +1,15 @@
+import { TLA, TMS } from '../../../../../constants';
+import { READ } from '../../../../../constants/graphqlOperations';
+
 const Course = `
-  type Course @model {
+  type Course @model 
+  @appPermissions(
+    permissions:[
+      { appName: "${TMS}" operations: "*" },
+      { appName: "${TLA}" operations: ${READ} }], 
+    rule: allow
+  )
+  {
     order: Int
     title: CourseTitle! @unique
     category: CourseCategory!

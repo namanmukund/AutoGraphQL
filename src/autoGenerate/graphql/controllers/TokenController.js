@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import MasterController from './MasterController';
 import allAuthParams from '../../../../config/authParams';
-import { FRONTEND_APP_ONE, SUPER_ADMIN } from '../../../../constants';
+import { TMS, SUPER_ADMIN } from '../../../../constants';
 
 const application = process.env.APPLICATION || 'core';
 const authParams = allAuthParams[application];
@@ -13,7 +13,7 @@ class TokenController extends MasterController {
     const token = jwt.sign(
       {
         appInfo: {
-          name: FRONTEND_APP_ONE,
+          name: TMS,
           role: SUPER_ADMIN,
         },
       },

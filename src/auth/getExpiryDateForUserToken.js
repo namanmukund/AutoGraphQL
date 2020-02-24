@@ -1,4 +1,4 @@
-import { FRONTEND_APP_TWO, FRONTEND_APP_ONE } from '../../constants';
+import { TLA, TMS } from '../../constants';
 
 const getExpiryDateForUserToken = (authParams, authentication, isForgotPasswordToken = false) => {
   let expiresIn = authParams.TOKEN_EXPIRY_DATE;
@@ -13,10 +13,10 @@ const getExpiryDateForUserToken = (authParams, authentication, isForgotPasswordT
   const { app } = authentication;
   const { name } = app;
   switch (name) {
-    case FRONTEND_APP_TWO:
+    case TLA:
       expiresIn = authParams.TOKEN_EXPIRY_DATE;
       break;
-    case FRONTEND_APP_ONE:
+    case TMS:
       expiresIn = authParams.TOKEN_EXPIRY_DATE;
       break;
     default:

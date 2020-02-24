@@ -11,7 +11,6 @@ const validateAllowDenyRuleOnApp = (
   operation,
 ) => {
   const { permissions, rule } = appPermissions;
-
   /*
   If rule is allow then check for all the permitted apps and their operations
    */
@@ -26,7 +25,7 @@ const validateAllowDenyRuleOnApp = (
       throw new InsufficientPermissionError();
     }
     const { operations } = permissions[index];
-    if (!operations.includes(operation)) {
+    if (operations !== '*' && !operations.includes(operation)) {
       throw new InsufficientPermissionError();
     }
   }
@@ -45,7 +44,7 @@ const validateAllowDenyRuleOnApp = (
       const index = findIndex(permissions, { appName });
       if (index !== -1) {
         const { operations } = permissions[index];
-        if (operations.includes(operation)) {
+        if (operations === '*' || operations.includes(operation)) {
           throw new InsufficientPermissionError();
         }
       }
