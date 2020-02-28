@@ -1,5 +1,6 @@
-import { TLA, TMS } from '../../../../../constants';
 import { READ } from '../../../../../constants/graphqlOperations';
+import { TLA, TMS } from '../../../../../constants';
+import { CMS_HEAD, NOT_CMS_HEAD } from '../../../../../constants/roles';
 
 const Badge = `
   type Badge @model
@@ -7,6 +8,13 @@ const Badge = `
     permissions:[
       { appName: "${TMS}" operations: "*" },
       { appName: "${TLA}" operations: ${READ} }], 
+    rule: allow
+  ) 
+  @userPermissions(
+    permissions:[
+      { userRole: ${CMS_HEAD} appName: "*" operations: "*" },
+      { userRole: ${NOT_CMS_HEAD} appName: "*" operations: ${READ} }
+      ], 
     rule: allow
   ) 
   {

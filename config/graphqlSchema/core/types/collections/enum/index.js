@@ -22,7 +22,9 @@ import LoginType from './LoginType';
 import MasteryLevelsType from './MasteryLevelsType';
 import BadgeType from './BadgeType';
 import StickerEmojiType from './StickerEmojiType';
-
+import Grade from './Grade';
+import Subject from './Subject';
+import UserRole from './UserRole';
 
 export default [
   Status,
@@ -49,4 +51,7 @@ export default [
   MasteryLevelsType,
   BadgeType,
   StickerEmojiType,
+  Grade,
+  Subject,
+  UserRole,
 ];

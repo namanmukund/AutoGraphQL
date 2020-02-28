@@ -1,5 +1,6 @@
 import { READ } from '../../../../../constants/graphqlOperations';
 import { TLA, TMS } from '../../../../../constants';
+import { CMS_HEAD, NOT_CMS_HEAD } from '../../../../../constants/roles';
 
 const Chapter = `
   type Chapter @model
@@ -9,8 +10,15 @@ const Chapter = `
       { appName: "${TLA}" operations: ${READ} }], 
     rule: allow
   )
-   {
-    order: Int! 
+  @userPermissions(
+    permissions:[
+      { userRole: ${CMS_HEAD} appName: "*" operations: "*" },
+      { userRole: ${NOT_CMS_HEAD} appName: "*" operations: ${READ} }
+      ], 
+    rule: allow
+  ) 
+   {  
+    order: Int!
     title: String! @unique @trim
     description: String @uniqueOrEmpty @trim
     status: ContentStatus! @defaultValue(value: "unpublished")

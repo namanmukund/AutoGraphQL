@@ -209,6 +209,8 @@ const forgotPassWebURL = {
   staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
   production: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
 };
+const grades = ['Grade1', 'Grade2', 'Grade3', 'Grade4', 'Grade5', 'Grade6', 'Grade7', 'Grade8'];
+const extraGrades = ['Nursery', 'LKG', 'UKG'];
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
@@ -252,4 +254,6 @@ export {
   badgeTypes,
   forgotPassWebURL,
   stickerEmojiType,
+  grades,
+  extraGrades,
 };
