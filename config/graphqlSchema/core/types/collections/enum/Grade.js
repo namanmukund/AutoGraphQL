@@ -1,11 +1,8 @@
-import { grades, extraGrades } from '../../../../../../constants';
+import grades from '../../../../../../constants/grades';
 
 export const getGradeEnum = () => {
   let gradeNameEnum = 'enum Grade {';
   grades.forEach((grade) => {
-    gradeNameEnum += `${grade} `;
-  });
-  extraGrades.forEach((grade) => {
     gradeNameEnum += `${grade} `;
   });
   gradeNameEnum += '}';

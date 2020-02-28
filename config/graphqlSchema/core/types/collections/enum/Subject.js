@@ -3,8 +3,7 @@ const Subject = `
     math
     science
     english
-    socialScience
-    all
+    computerScience
   }`;
 
 export default Subject;
