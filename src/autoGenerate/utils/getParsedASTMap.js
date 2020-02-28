@@ -91,17 +91,33 @@ const getAppAndUserPermissionsFromDirective = (
               // if it is userRole
               if (
                 field.name && field.name.value === 'userRole'
-                    && field.value && field.value.value
+                    && field.value && (field.value.value || field.value.values)
               ) {
-                permissionInfoObj.userRole = field.value.value;
+                if (field.value.kind === 'StringValue') {
+                  permissionInfoObj.userRole = field.value.value;
+                } else {
+                  const userRoleArray = [];
+                  field.value.values.forEach((userRole) => {
+                    userRoleArray.push(userRole.value);
+                  });
+                  permissionInfoObj.userRole = userRoleArray;
+                }
               }
 
               // if it is name field
               if (
                 field.name && field.name.value === 'appName'
-                    && field.value && field.value.value
+                    && field.value && (field.value.value || field.value.values)
               ) {
-                permissionInfoObj.appName = field.value.value;
+                if (field.value.kind === 'StringValue') {
+                  permissionInfoObj.appName = field.value.value;
+                } else {
+                  const appNameArray = [];
+                  field.value.values.forEach((appName) => {
+                    appNameArray.push(appName.value);
+                  });
+                  permissionInfoObj.appName = appNameArray;
+                }
               }
               // if it is operations field
               if (

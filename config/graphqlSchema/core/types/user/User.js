@@ -3,6 +3,7 @@ const User = `
     phoneOtp: Int @writeOnly
     emailOtp: Int @writeOnly
     name: String @trim
+    role: UserRole! @defaultValue(value: "selfLearner") @readOnly
     status: Status! @defaultValue(value: "active") @readOnly
     username: String @uniqueOrEmpty @trim
     password: String @filterOff @writeOnly
@@ -21,6 +22,8 @@ const User = `
     isGmailLogin: Boolean @defaultValue(value: "false")
     isFacebookLogin: Boolean @defaultValue(value: "false")
     facebookId: String @writeOnly
+    studentProfile: StudentProfile @relation(name:"StudentProfileUser", isSubset: true)
+    parentProfile: ParentProfile @relation(name:"ParentProfileUser", isSubset: true)
   }
 `;
 

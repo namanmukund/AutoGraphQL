@@ -64,6 +64,7 @@ const handleUserToken = async (id, currentApp, currentUser) => {
   const user = await fetchUser(id);
   // Get status
   let { status } = user;
+  const { role } = user;
   // Check if user token have phone login or email login information and update status accordingly
   if (typeof currentUser === 'object' && status === 'active') {
     // commenting emailVerified true logic as unverified email user can be active too
@@ -77,6 +78,10 @@ const handleUserToken = async (id, currentApp, currentUser) => {
   }
   // Put status info in userInfo object
   userInfo.status = status;
+  if (role || role.length) {
+    userInfo.role = role;
+  }
+
   return userInfo;
 };
 

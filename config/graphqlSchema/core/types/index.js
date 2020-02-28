@@ -30,6 +30,9 @@ import SkipVideo from './skipVideo';
 import UserBadge from './userBadge';
 import QuizReport from './quizReport';
 import StickerEmoji from './stickerEmoji';
+import StudentProfile from './studentProfile';
+import ParentProfile from './parentProfile';
+import School from './school';
 
 export default [
   ...User,
@@ -64,4 +67,7 @@ export default [
   ...UserBadge,
   ...QuizReport,
   ...StickerEmoji,
+  ...StudentProfile,
+  ...ParentProfile,
+  ...School,
 ];
