@@ -63,8 +63,8 @@ const validateAllowDenyRuleOnUser = (
   const { permissions, rule } = userPermissions;
   let flag = false;
   if (permissions && rule) {
-    //  if permissions exist but db role is not available
-    if (!dbRole) {
+    //  if permissions exist but db role is not available except for the default case
+    if (!(permissions === '*' && rule === 'allow') && !dbRole) {
       throw new InsufficientPermissionError();
     }
     if (
