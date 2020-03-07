@@ -1,9 +1,19 @@
+import { ADMIN, NOT_ADMIN } from '../../../../../constants/roles';
+import { READ } from '../../../../../constants/graphqlOperations';
+
 const User = `
   type User @model {
     phoneOtp: Int @writeOnly
     emailOtp: Int @writeOnly
     name: String @trim
-    role: UserRole! @defaultValue(value: "selfLearner") @readOnly
+    role: UserRole! @defaultValue(value: "selfLearner") 
+          @userPermissions(
+            permissions:[
+              { userRole: ${ADMIN} appName: "*" operations: "*" },
+              { userRole: ${NOT_ADMIN} appName: "*" operations: ${READ} }
+              ], 
+            rule: allow
+          ) 
     status: Status! @defaultValue(value: "active") @readOnly
     username: String @uniqueOrEmpty @trim
     password: String @filterOff @writeOnly
