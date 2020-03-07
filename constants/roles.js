@@ -9,6 +9,7 @@ const NOT_CMS_HEAD = `["${SELF_LEARNER}", "${STUDENT}", "${USER_MANAGER}"]`;
 const UMS_HEAD = `["${ADMIN}", "${USER_MANAGER}"]`;
 const NOT_UMS_HEAD = `["${CONTENT_MANAGER}", "${SELF_LEARNER}", "${STUDENT}"]`;
 const ALL_ROLES = `["${ADMIN}", "${CONTENT_MANAGER}", "${SELF_LEARNER}", "${STUDENT}", "${USER_MANAGER}"]`;
+const NOT_ADMIN = `["${CONTENT_MANAGER}", "${SELF_LEARNER}", "${STUDENT}", "${USER_MANAGER}"]`;
 
 export {
   CONTENT_MANAGER,
@@ -21,4 +22,5 @@ export {
   UMS_HEAD,
   NOT_UMS_HEAD,
   ALL_ROLES,
+  NOT_ADMIN,
 };

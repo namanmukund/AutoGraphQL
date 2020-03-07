@@ -93,7 +93,7 @@ const getAppAndUserPermissionsFromDirective = (
                 field.name && field.name.value === 'userRole'
                     && field.value && (field.value.value || field.value.values)
               ) {
-                if (field.value.kind === 'StringValue') {
+                if (field.value.kind !== 'ListValue') {
                   permissionInfoObj.userRole = field.value.value;
                 } else {
                   const userRoleArray = [];
@@ -327,14 +327,14 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
 
             case 'appPermissions':
               parsedField.appPermissions = getAppAndUserPermissionsFromDirective(
-                parsedField.directives,
+                { directives: parsedField.directives },
                 'appPermissions',
               );
               break;
 
             case 'userPermissions':
               parsedField.userPermissions = getAppAndUserPermissionsFromDirective(
-                parsedField.directives,
+                { directives: parsedField.directives },
                 'userPermissions',
               );
               break;
