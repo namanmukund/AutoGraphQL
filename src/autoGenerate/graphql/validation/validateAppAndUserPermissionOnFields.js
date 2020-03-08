@@ -62,11 +62,9 @@ const validateAllowDenyRuleOnUser = (
 ) => {
   const { permissions, rule } = userPermissions;
   let flag = false;
-  if (permissions && rule) {
+  if (permissions && rule && dbRole) {
+    // @TODO
     //  if permissions exist but db role is not available except for the default case
-    if (!(permissions === '*' && rule === 'allow') && !dbRole) {
-      throw new InsufficientPermissionError();
-    }
     if (
       permissions !== '*'
       && permissions.length
@@ -90,10 +88,12 @@ const validateAllowDenyRuleOnUser = (
     } else if (permissions === '*') {
       flag = true;
     }
+
+    if ((rule === 'allow' && flag === false) || (rule === 'deny' && flag === true)) {
+      throw new InsufficientPermissionError();
+    }
   }
-  if ((rule === 'allow' && flag === false) || (rule === 'deny' && flag === true)) {
-    throw new InsufficientPermissionError();
-  }
+
   return true;
 };
 
