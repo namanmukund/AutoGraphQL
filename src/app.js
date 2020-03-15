@@ -7,6 +7,7 @@ import { log } from '../utils';
 import { graphqlUpload, authMiddleware } from './middlewares';
 import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
 import Raven from './Raven';
+import dataExtractedFromReq from '../constants/dataExtractedFromReq';
 
 const port = process.env.PORT || 3000;
 const env = process.env.NODE_ENV || 'development';
@@ -112,13 +113,13 @@ const server = new ApolloServer({
       Raven.setContext(contextObj);
     }
     // return context data
+    const obj = {};
+    dataExtractedFromReq.forEach((data) => {
+      obj[data] = req[data];
+    });
     return {
-      decodedUser: req.currentUser,
-      decodedApp: req.currentApp,
+      ...obj,
       filePayload,
-      mutationCallRoute: req.mutationCallRoute,
-      authorization: req.authorization,
-      xForwardedBy: req.xForwardedBy,
     };
   },
 });

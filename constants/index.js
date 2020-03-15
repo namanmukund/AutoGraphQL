@@ -11,9 +11,10 @@ import loginType from './loginType';
 
 const TMS = 'tekieTms';
 const TLA = 'tekieLearningApp';
+const TWA = 'tekieWebApp';
 const backendApps = ['core'];
 
-const frontEndApps = [TLA, TMS];
+const frontEndApps = [TLA, TMS, TWA];
 const permissionIntegratedApps = [];
 const firebaseExcludedApps = [];
 
@@ -245,6 +246,7 @@ export {
   freeTopicCount,
   TMS,
   TLA,
+  TWA,
   loginType,
   masteryLevels,
   learningObjectiveQuizReportThreshHolds,
