@@ -215,8 +215,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       if (!phoneOtp && !emailOtp) {
         throw new EitherPhoneOrEmailOtpRequiredError();
       }
-      const { decodedUser } = context;
-      const { status, id } = decodedUser;
+      const { currentUser } = context;
+      const { status, id } = currentUser;
       switch (status) {
         case 'active': {
           return getUserData(id).then((res) => {
@@ -245,8 +245,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'resendUserOTP': {
-      const { decodedUser } = context;
-      const { status } = decodedUser;
+      const { currentUser } = context;
+      const { status } = currentUser;
       switch (status) {
         case 'active':
           throw new AlreadyActiveUser();
@@ -273,12 +273,12 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(newInput, mutationOrQueryName, 'PreHook');
     }
     case 'addAppToken': {
-      const { decodedUser } = context;
+      const { currentUser } = context;
       const authentication = ifAuthorized(context);
 
       const { name, type } = input;
-      if (decodedUser) {
-        const { status } = decodedUser;
+      if (currentUser) {
+        const { status } = currentUser;
         if (status && status !== 'active') {
           throw new UnauthorizedOperationError();
         }
@@ -369,10 +369,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       */
       /* Queries are without input but they are not calling prehook function */
       if (input) {
-        const { decodedUser } = context;
+        const { currentUser } = context;
         // Backend apps won't be having any decoded user
-        if (decodedUser) {
-          const { status } = decodedUser;
+        if (currentUser) {
+          const { status } = currentUser;
           // for rest of the operations user status need to be inctive state
           if (status && status !== 'active') {
             throw new UnauthorizedOperationError();

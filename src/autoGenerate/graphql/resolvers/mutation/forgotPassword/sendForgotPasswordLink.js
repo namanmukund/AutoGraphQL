@@ -30,8 +30,8 @@ export default function sendForgotPasswordLinkMutationResolver(
     authentication,
     {},
   );
-  const decodedUser = authentication && authentication.user;
-  if (decodedUser) {
+  const currentUser = authentication && authentication.user;
+  if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
   Object.assign(authentication, {

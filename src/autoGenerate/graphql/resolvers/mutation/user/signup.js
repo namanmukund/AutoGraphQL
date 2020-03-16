@@ -55,9 +55,9 @@ const signupMutationResolver = async (
     {},
   );
 
-  const decodedUser = authentication && authentication.user;
+  const currentUser = authentication && authentication.user;
 
-  if (decodedUser) {
+  if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
 

@@ -37,8 +37,8 @@ export default function finishForgotPasswordMutationResolver(
     {},
   );
 
-  const decodedUser = authentication && authentication.user;
-  if (decodedUser) {
+  const currentUser = authentication && authentication.user;
+  if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
   /* Setting user to true if not preset, as finish forgot password

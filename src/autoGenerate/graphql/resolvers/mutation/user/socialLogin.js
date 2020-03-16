@@ -113,13 +113,13 @@ const socialLoginMutationResolver = async (
     input,
   );
 
-  const decodedUser = authentication && authentication.user;
-  const decodedApp = authentication && authentication.app;
+  const currentUser = authentication && authentication.user;
+  const currentApp = authentication && authentication.app;
 
-  if (!decodedApp) {
+  if (!currentApp) {
     throw new UnauthenticatedAppError();
   }
-  if (decodedUser) {
+  if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
   Object.assign(authentication, {

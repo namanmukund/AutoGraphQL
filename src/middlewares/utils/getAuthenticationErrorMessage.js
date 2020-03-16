@@ -5,8 +5,8 @@ import { STATIC } from '../../../constants';
 const getAuthenticationErrorMessage = (request) => {
   const { currentUser, currentApp } = request;
   const doc = {
-    decodedUser: currentUser,
-    decodedApp: currentApp,
+    currentUser,
+    currentApp,
   };
   const authentication = ifAuthorized(doc);
   const app = authentication && authentication.app;
