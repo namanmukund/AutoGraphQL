@@ -14,15 +14,15 @@ import {
 
 const isBackendApp = (authentication) => {
   const app = authentication && authentication.app;
-  const decodedApp = authentication && authentication.decodedApp;
+  const currentApp = authentication && authentication.currentApp;
   let flag = false;
   if (app) {
     const appName = app && app.name;
     if (backendApps.includes(appName)) {
       flag = true;
     }
-  } else if (decodedApp) {
-    const appName = decodedApp && decodedApp.name;
+  } else if (currentApp) {
+    const appName = currentApp && currentApp.name;
     if (backendApps.includes(appName)) {
       flag = true;
     }

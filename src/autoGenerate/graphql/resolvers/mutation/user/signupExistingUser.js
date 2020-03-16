@@ -68,8 +68,8 @@ export default function signupExistingUserMutationResolver(
     {},
   );
 
-  const decodedUser = authentication && authentication.user;
-  if (decodedUser) {
+  const currentUser = authentication && authentication.user;
+  if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
 

@@ -72,8 +72,8 @@ const commonFunctionForRelationAndMeta = async (
   }
   /* eslint-disable no-param-reassign */
   // Put info back to context
-  context.decodedApp = authentication.app;
-  context.decodedUser = authentication.user;
+  context.currentApp = authentication.app;
+  context.currentUser = authentication.user;
   /* eslint-enable no-param-reassign */
   // Get new params
   const newParams = { ...params };

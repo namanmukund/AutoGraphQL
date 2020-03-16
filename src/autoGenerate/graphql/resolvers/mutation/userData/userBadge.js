@@ -246,7 +246,7 @@ const userBadgeMutationResolver = async (
     currentTopicOrder = -1;
     currentTopicComponentType = video;
     // Setting app name to that of backend as we are fetching images ahead
-    Object.assign(context.decodedApp, {
+    Object.assign(context.currentApp, {
       name: 'core',
     });
   }

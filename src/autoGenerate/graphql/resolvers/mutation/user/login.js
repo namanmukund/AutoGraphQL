@@ -99,9 +99,9 @@ export default function loginMutationResolver(
     authentication,
     input,
   );
-  const decodedUser = authentication && authentication.user;
+  const currentUser = authentication && authentication.user;
   // FIX: Should this not be a null check
-  if (decodedUser) {
+  if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
   // Setting user to true if not preset, as login does not require user authentication.
