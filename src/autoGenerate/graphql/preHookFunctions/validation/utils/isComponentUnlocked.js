@@ -15,6 +15,7 @@ import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
 import { backendApps, enrollmentTypes, topicTypes } from '../../../../../../constants';
 import getTopicForValidation from './getTopicForValidation';
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
+import { validateMentorMenteePermissionForVideo } from './index';
 
 /*
 This is a common method to check whether the called topic component is locked or not
@@ -211,6 +212,18 @@ const isComponentUnlocked = async (
       throw new ComponentLockedError();
     }
   }
+
+  // check if mentee should be able to watch a video
+  // check if user has permission to hit API according to his role, if user is mentee and there is
+  // no mentor token, he should not be able to hit API
+  validateMentorMenteePermissionForVideo(
+    context,
+    currentTopicOrder,
+    topicOrder,
+    page,
+    currentTopicComponentType,
+  );
+
   switch (page) {
     case message: {
       const {
