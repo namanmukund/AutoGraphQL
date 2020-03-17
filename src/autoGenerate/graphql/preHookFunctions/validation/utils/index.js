@@ -11,7 +11,7 @@ import isComponentUnlocked from './isComponentUnlocked';
 import validateTokenAndExtractInformation from './validateTokenAndExtractInformation';
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
 import validateMentorMenteePermission from './validateMentorMenteePermission';
-import validateMentorMenteePermissionForVideo from './validateMentorMenteePermissionForVideo';
+import validateMentorMenteePermissionForComponent from './validateMentorMenteePermissionForComponent';
 
 export {
   getFinalConnectedRecordsForARelationFromInput,
@@ -27,5 +27,5 @@ export {
   validateTokenAndExtractInformation,
   getUserIdandAppNameAfterValidation,
   validateMentorMenteePermission,
-  validateMentorMenteePermissionForVideo,
+  validateMentorMenteePermissionForComponent,
 };

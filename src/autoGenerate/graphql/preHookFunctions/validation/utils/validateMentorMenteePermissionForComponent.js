@@ -1,0 +1,93 @@
+import { get } from 'lodash';
+import { MENTEE } from '../../../../../../constants/roles';
+import {
+  DatabaseRecordNotFoundError,
+  InsufficientPermissionError,
+} from '../../../../../../constants/errors';
+import { topicTypes } from '../../../../../../constants';
+
+/*
+this method validates whether user should be able to hit API on basis of user role
+*/
+const validateMentorMenteePermissionForComponent = (
+  context,
+  topicOrder,
+  learningObjectiveOrder,
+  page,
+  currentTopicComponentInfo,
+) => {
+  const {
+    video, message, practiceQuestion,
+  } = topicTypes;
+  const currentUserRole = get(context, 'currentUser.role');
+  const currentMentorId = get(context, 'currentMentor.id');
+
+  const {
+    currentTopic,
+    currentTopicComponentType,
+  } = currentTopicComponentInfo;
+
+  const { order: currentTopicOrder } = currentTopic;
+
+  switch (page) {
+    case video: {
+      // condition if mentee is trying to access a video which is yet to be taught
+      if (currentUserRole === MENTEE
+            && !currentMentorId
+            && topicOrder === currentTopicOrder
+            && currentTopicComponentType === video) {
+        throw new InsufficientPermissionError();
+      }
+      break;
+    }
+    case message: {
+      const {
+        currentLearningObjective,
+      } = currentTopicComponentInfo;
+      if (!currentLearningObjective) {
+        throw new DatabaseRecordNotFoundError({
+          data: {
+            error: 'CurrentTopicComponentInfo.CurrentLearningObjective: is not present',
+          },
+        });
+      }
+      // condition if mentee is trying to access a chat which is yet to be taught
+      const { order: currentLearningObjectiveOrder } = currentLearningObjective;
+      if (currentUserRole === MENTEE
+          && !currentMentorId
+          && topicOrder === currentTopicOrder
+          && learningObjectiveOrder === currentLearningObjectiveOrder
+          && currentTopicComponentType === message) {
+        throw new InsufficientPermissionError();
+      }
+      break;
+    }
+    case practiceQuestion: {
+      const {
+        currentLearningObjective,
+      } = currentTopicComponentInfo;
+      if (!currentLearningObjective) {
+        throw new DatabaseRecordNotFoundError({
+          data: {
+            error: 'CurrentTopicComponentInfo.CurrentLearningObjective: is not present',
+          },
+        });
+      }
+      // condition if mentee is trying to access a PQ which is yet to be taught
+      const { order: currentLearningObjectiveOrder } = currentLearningObjective;
+      if (currentUserRole === MENTEE
+          && !currentMentorId
+          && topicOrder === currentTopicOrder
+          && learningObjectiveOrder === currentLearningObjectiveOrder
+          && currentTopicComponentType === practiceQuestion) {
+        throw new InsufficientPermissionError();
+      }
+      break;
+    }
+    default:
+  }
+
+  return true;
+};
+
+export default validateMentorMenteePermissionForComponent;
