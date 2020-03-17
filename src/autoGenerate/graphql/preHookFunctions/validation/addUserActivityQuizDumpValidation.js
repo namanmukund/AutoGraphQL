@@ -1,12 +1,12 @@
 import isComponentUnlocked from './utils/isComponentUnlocked';
 import { topicTypes } from '../../../../../constants';
-import { checkUserRoleValidation } from './utils';
+import { validateMentorMenteePermission } from './utils';
 
 // prehook logic to check if requested quiz(user and topic id) is unlocked
 const addUserActivityQuizDumpValidation = async (params, mutationOrQueryName, context) => {
   // check if user has permission to hit API according to his role, if user is mentee and there is
   // no mentor token, he should not be able to hit API
-  await checkUserRoleValidation(
+  validateMentorMenteePermission(
     context,
   );
 

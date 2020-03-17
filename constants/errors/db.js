@@ -63,7 +63,3 @@ export const ConnectIdRequiredError = createError('ConnectIdRequiredError', {
 export const PaidComponentLockedError = createError('PaidComponentLockedError', {
   message: 'Component is not free',
 });
-
-export const UserPermissionError = createError('UserPermissionError', {
-  message: 'User does not have permission',
-});

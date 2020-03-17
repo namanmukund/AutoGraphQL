@@ -12,7 +12,7 @@ import { log } from '../../../../../../utils';
 import updateCurrentComponentStatus
   from '../../../postHookFunctions/utils/updateCurrentComponentStatus';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import { checkUserRoleValidation } from '../../../preHookFunctions/validation/utils';
+import { validateMentorMenteePermission } from '../../../preHookFunctions/validation/utils';
 
 /* query to get userLO to check if document exists for userId and learningObjectiveId
 also we are doing computation for next component for this */
@@ -77,7 +77,7 @@ const skipPracticeQuestionMutationResolver = async (
 
   // check if user has permission to hit API according to his role, if user is mentee and there is
   // no mentor token, he should not be able to hit API
-  await checkUserRoleValidation(
+  validateMentorMenteePermission(
     context,
   );
 

@@ -27,7 +27,6 @@ import {
   TopicIdRequiredError,
   ConnectIdRequiredError,
   PaidComponentLockedError,
-  UserPermissionError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -180,5 +179,4 @@ export {
   InvalidPasswordLengthError,
   InvalidToken,
   ConnectIdRequiredError,
-  UserPermissionError,
 };

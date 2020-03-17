@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { isComponentUnlocked, checkUserRoleValidation } from './utils';
+import { isComponentUnlocked, validateMentorMenteePermission } from './utils';
 import { backendApps, topicTypes } from '../../../../../constants';
 
 // prehook logic to check if requested video(user and topic id) is unlocked
@@ -9,7 +9,7 @@ const addUserActivityVideoDumpValidation = async (params, mutationOrQueryName, c
   const currentApp = get(context, 'currentApp.name');
   // check if user has permission to hit API according to his role, if user is mentee and there is
   // no mentor token, he should not be able to hit API
-  await checkUserRoleValidation(
+  validateMentorMenteePermission(
     context,
   );
 

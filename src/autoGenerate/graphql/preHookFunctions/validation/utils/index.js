@@ -10,7 +10,7 @@ import getTopicForValidation from './getTopicForValidation';
 import isComponentUnlocked from './isComponentUnlocked';
 import validateTokenAndExtractInformation from './validateTokenAndExtractInformation';
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
-import checkUserRoleValidation from './checkUserRoleValidation';
+import validateMentorMenteePermission from './validateMentorMenteePermission';
 
 export {
   getFinalConnectedRecordsForARelationFromInput,
@@ -25,5 +25,5 @@ export {
   isComponentUnlocked,
   validateTokenAndExtractInformation,
   getUserIdandAppNameAfterValidation,
-  checkUserRoleValidation,
+  validateMentorMenteePermission,
 };
