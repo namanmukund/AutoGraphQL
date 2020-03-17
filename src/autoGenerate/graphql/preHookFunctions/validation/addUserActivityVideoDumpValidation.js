@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import isComponentUnlocked from './utils/isComponentUnlocked';
+import { isComponentUnlocked, checkUserRoleValidation } from './utils';
 import { backendApps, topicTypes } from '../../../../../constants';
 
 // prehook logic to check if requested video(user and topic id) is unlocked
@@ -7,6 +7,12 @@ const addUserActivityVideoDumpValidation = async (params, mutationOrQueryName, c
   // check if the called user and topic is unlocked
   const { video } = topicTypes;
   const currentApp = get(context, 'currentApp.name');
+  // check if user has permission to hit API according to his role, if user is mentee and there is
+  // no mentor token, he should not be able to hit API
+  await checkUserRoleValidation(
+    context,
+  );
+
   // checkForPaidLogic is added in isComponentUnlocked to check
   // if we need to validate component for payment, if call for addUserActivityVideoDump is made from
   // backend application, we will not check for paid component logic since we will be skipping
