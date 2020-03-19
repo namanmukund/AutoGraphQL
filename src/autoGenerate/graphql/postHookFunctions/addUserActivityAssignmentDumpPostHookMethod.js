@@ -74,7 +74,7 @@ const updateUserAssignment = async (
     const assignmentQuestionId = get(assignmentQuestionElem, 'assignmentQuestion.id');
     const assignmentQuestionDisplayOrder = get(assignmentQuestionElem, 'assignmentQuestionDisplayOrder');
     let isAttempted = false;
-    let userAnswer = '';
+    let userAnswerCodeSnippet = '';
     /*
     Iterate on each one of assignmentQuestions in user Assignment and get answer provided by
     user/mentee for respective assignment question
@@ -83,13 +83,13 @@ const updateUserAssignment = async (
       const currentAssignmentQuestionId = get(assignmentQuestion, 'assignmentQuestion.typeId');
       /*
       iterating over questions from input and assignmentQuestions and
-      comparing for same question and updating userAnswer
+      comparing for same question and updating userAnswerCodeSnippet
       */
       if (currentAssignmentQuestionId === assignmentQuestionId) {
         const { isAttempted: isQuestionAttempted } = assignmentQuestion;
         if (isQuestionAttempted) {
           isAttempted = true;
-          userAnswer = get(assignmentQuestion, 'userAnswer');
+          userAnswerCodeSnippet = get(assignmentQuestion, 'userAnswerCodeSnippet');
         }
       }
     });
@@ -100,11 +100,15 @@ const updateUserAssignment = async (
     } else {
       pushManyQuery += 'isAttempted: false, ';
     }
-    pushManyQuery += `userAnswer: "${userAnswer}", `;
+    pushManyQuery += `userAnswerCodeSnippet: "${userAnswerCodeSnippet}", `;
     pushManyQuery += '}, ';
   });
   // both for loop end here
   pushManyQuery += ']},';
+
+  // next will only be sent by mentor after he checks the assignment and it's complete
+  // we are changing assignmentStatus to complete accordingly. Client should not send next
+  // from  a mentee account.
   if (assignmentStatusInUserAssignment === complete || assignmentAction === next) {
     assignmentStatus = complete;
   }

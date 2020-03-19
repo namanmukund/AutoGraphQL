@@ -22,6 +22,7 @@ const AssignmentQuestion = `
     hint: String @trim
     difficulty: Int
     questionCodeSnippet: String @trim
+    answerCodeSnippet: String @trim
     explanation: String @trim
     topic: Topic! @relation(name: "TopicAssignmentQuestion")
     status: ContentStatus! @defaultValue(value: "unpublished")

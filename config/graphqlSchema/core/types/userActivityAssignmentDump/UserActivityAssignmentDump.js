@@ -3,7 +3,7 @@ const assignmentQuestionsType = `
    assignmentQuestion: AssignmentQuestion @relation(name: "AssignmentQuestionUserActivityAssignmentDump", direction: "OneWay")
    assignmentQuestionDisplayOrder: Int
    isAttempted: Boolean @defaultValue(value: "false")
-   userAnswer: String @trim
+   userAnswerCodeSnippet: String @trim
  }`;
 
 const UserActivityAssignmentDump = `
