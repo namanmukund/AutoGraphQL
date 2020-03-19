@@ -6,14 +6,16 @@ import directiveResolvers from './directiveResolvers';
 import {
   query, mutation, filterTypes, relationTypes, sort,
   resolvers, typesWithRelationFilters, groupByTypes,
+  subscription, subscriptionPayloadTypes,
 } from '../autoGenerate';
 import { META } from '../../constants';
 
-const graphqlTypes = [...typesWithRelationFilters, ...relationTypes, sort, ...filterTypes, ...groupByTypes];
+const graphqlTypes = [...typesWithRelationFilters, ...relationTypes, sort, ...filterTypes, ...groupByTypes, ...subscriptionPayloadTypes];
 const SchemaDefinition = `
   schema {
     query: Query
     mutation: Mutation
+    subscription: Subscription
   }
 `;
 
@@ -29,6 +31,7 @@ const schema = makeExecutableSchema({
     query,
     appMutation,
     ...graphqlTypes,
+    subscription,
   ],
   resolvers: appResolvers,
 });

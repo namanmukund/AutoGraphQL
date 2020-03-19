@@ -17,6 +17,7 @@ const Chapter = `
       ], 
     rule: allow
   ) 
+    @subscribe(events: "*")
    {  
     order: Int!
     title: String! @unique @trim

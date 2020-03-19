@@ -1,5 +1,5 @@
 /* AutoGenerates resolvers for model types  */
-import { camelCase, isArray } from 'lodash';
+import { camelCase, isArray, get } from 'lodash';
 import pluralize from 'pluralize';
 import { getParsedASTMap, checkIfArgumentsAreFromSameType } from '../../utils';
 import getRelationMutationNames from '../../utils/getRelationMutationNames';
@@ -57,16 +57,52 @@ import {
   UPDATE_MULTIPLE,
 } from '../../../../constants/graphqlOperations';
 import socialLoginMutationResolver from './mutation/user/socialLogin';
+import { mappedMutationsWithSubscriptionEvents } from '../../../../constants/subscriptionEvents';
 
 const parsedASTMap = getParsedASTMap(types);
 
-const resolvers = { Query: {}, Mutation: {} };
+const resolvers = {
+  Query: {},
+  Mutation: {},
+  Subscription: {
+    Chapter: {
+      subscribe: (root, params, context, info) => {
+        console.log(1111111);
+        const { pubsub } = context;
+        return pubsub.asyncIterator('Chapter');
+      },
+    },
+  },
+};
 
 const defaultMutationsResolvers = {
   addMutationResolver,
   deleteMutationResolver,
   updateMutationResolver,
   deleteMultipleMutationResolver,
+};
+
+const subscribeToEvents = (
+  typeName,
+  mutationName,
+  context,
+  finalResult,
+) => {
+  const { pubsub } = context;
+  const mutationType = mutationName.split(typeName)[0];
+  const { subscribe } = parsedASTMap[typeName];
+  const subscribedEvents = get(subscribe, 'events', []);
+  if (
+    subscribedEvents.length
+    && subscribedEvents.includes(mappedMutationsWithSubscriptionEvents[mutationType])) {
+    pubsub.publish(typeName, {
+      [typeName]: {
+        mutation: mappedMutationsWithSubscriptionEvents[mutationType],
+        data: finalResult,
+      },
+    });
+  }
+  return true;
 };
 
 // FIX: instead of id and input just take in params object as args
@@ -113,8 +149,16 @@ const defaultMutationsResolverWrapper = async (
     } else {
       newResult = toObject(result);
     }
-
-    return posthook(newResult, mutationName, context, params);
+    const finalResult = posthook(newResult, mutationName, context, params);
+    // allow subscription on defined events
+    subscribeToEvents(
+      typeName,
+      mutationName,
+      context,
+      parsedASTMap,
+      finalResult,
+    );
+    return finalResult;
   });
 };
 
