@@ -33,6 +33,9 @@ import StickerEmoji from './stickerEmoji';
 import StudentProfile from './studentProfile';
 import ParentProfile from './parentProfile';
 import School from './school';
+import AssignmentQuestion from './assignmentQuestion';
+import UserAssignment from './userAssignment';
+import UserActivityAssignmentDump from './userActivityAssignmentDump';
 
 export default [
   ...User,
@@ -70,4 +73,7 @@ export default [
   ...StudentProfile,
   ...ParentProfile,
   ...School,
+  ...AssignmentQuestion,
+  ...UserAssignment,
+  ...UserActivityAssignmentDump,
 ];

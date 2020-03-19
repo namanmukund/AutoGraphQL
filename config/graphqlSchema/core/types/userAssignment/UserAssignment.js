@@ -1,0 +1,18 @@
+const assignmentType = `
+  type AssignmentType {
+   assignmentQuestion: AssignmentQuestion @relation(name: "UserAssignmentQuestion", direction: "OneWay")
+   assignmentQuestionDisplayOrder: Int
+   isAttempted: Boolean @defaultValue(value: "false")
+   userAnswer: String @trim
+ }`;
+
+const UserAssignment = `
+  type UserAssignment @model {
+    user: User! @relation(name: "UserAssignment", direction: "OneWay")
+    assignmentStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
+    assignment: [AssignmentType]
+    topic: Topic! @relation(name: "TopicUserAssignment", direction: "OneWay")
+  }
+`;
+
+export default [UserAssignment, assignmentType];

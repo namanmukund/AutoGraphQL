@@ -41,6 +41,7 @@ const Topic = `
     badges: [Badge] @relation(name: "TopicBadge", isSubset: true)
     thumbnail: File @relation(name: "TopicThumbnail", direction: "OneWay")
     isTrial: Boolean @defaultValue(value: "false")
+    assignmentQuestions: [AssignmentQuestion] @relation(name: "TopicAssignmentQuestion")
   }
 `;
 

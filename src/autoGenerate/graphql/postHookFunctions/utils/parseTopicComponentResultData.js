@@ -6,6 +6,8 @@ const parseTopicComponentResultData = (result, page) => {
   let practiceQuestionsRes;
   const quiz = [];
   let quizRes;
+  const assignment = [];
+  let assignmentRes;
   switch (page) {
     case 'learningObjective':
       learningObjective = { type: 'LearningObjective', typeId: `${parsedData.learningObjective.id}` };
@@ -52,6 +54,26 @@ const parseTopicComponentResultData = (result, page) => {
     case 'video':
       topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
       parsedData.topic = topic;
+      break;
+    case 'assignment':
+      topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
+      parsedData.topic = topic;
+      // constructing data for assignment whenever userAssignment document is just created
+      assignmentRes = parsedData.assignment;
+      // parsing assignment questions to be returned
+      if (assignmentRes) {
+        assignmentRes.forEach((assignmentQuestion) => {
+          const question = {
+            assignmentQuestion: {
+              type: 'AssignmentQuestion',
+              typeId: `${assignmentQuestion.assignmentQuestion.id}`,
+            },
+            assignmentQuestionDisplayOrder: `${assignmentQuestion.assignmentQuestionDisplayOrder}`,
+          };
+          assignment.push(question);
+        });
+      }
+      parsedData.assignment = assignment;
       break;
     default:
   }
