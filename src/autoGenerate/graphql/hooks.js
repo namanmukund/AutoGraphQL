@@ -67,6 +67,12 @@ import userLearningObjectiveValidation
 import userQuizValidation from './preHookFunctions/validation/userQuizValidation';
 import userPracticeQuestionReportPostHookMethod from './postHookFunctions/userPracticeQuestionReportPostHookMethod';
 import isUniqueOrderField from './validation/isUniqueOrderField';
+import userAssignmentValidation from './preHookFunctions/validation/userAssignmentValidation';
+import userAssignmentPostHookMethod from './postHookFunctions/userAssignmentPostHookMethod';
+import addUserActivityAssignmentDumpValidation
+  from './preHookFunctions/validation/addUserActivityAssignmentDumpValidation';
+import addUserActivityAssignmentDumpPostHookMethod
+  from './postHookFunctions/addUserActivityAssignmentDumpPostHookMethod';
 
 const { hookFunctions } = functions || {};
 
@@ -363,6 +369,14 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await userCourseSyllabusMethod(context);
       break;
     }
+    case 'userAssignment': {
+      await userAssignmentValidation(params, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addUserActivityAssignmentDump': {
+      await addUserActivityAssignmentDumpValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
     default: {
       /* If context is not present then it means user is not authenticated and the
       user won't be able to make any db query
@@ -455,6 +469,14 @@ const posthook = async (input, mutationName, context, params) => {
     case 'userPracticeQuestionReport': {
       const resultArray = await userPracticeQuestionReportPostHookMethod(input, params);
       return hook(resultArray, mutationName, 'PostHook');
+    }
+    case 'userAssignment': {
+      const resultArray = await userAssignmentPostHookMethod(input, params);
+      return hook(resultArray, mutationName, 'PostHook');
+    }
+    case 'addUserActivityAssignmentDump': {
+      await addUserActivityAssignmentDumpPostHookMethod(input, mutationName, context);
+      break;
     }
     default:
       break;

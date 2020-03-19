@@ -77,6 +77,7 @@ import {
   InvalidGmailTokenError,
   InvalidFacebookTokenError,
   InvalidPasswordLengthError,
+  AssignmentQuestionsNotPresentError,
 } from './input';
 
 
@@ -179,4 +180,5 @@ export {
   InvalidPasswordLengthError,
   InvalidToken,
   ConnectIdRequiredError,
+  AssignmentQuestionsNotPresentError,
 };
