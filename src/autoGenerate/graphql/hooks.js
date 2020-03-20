@@ -31,8 +31,6 @@ import { BYPASS } from '../../../constants';
 import { createStaticAppToken } from '../../auth';
 import deleteFromS3 from '../../middlewares/utils/deleteFromS3';
 import generateSignedUrl from '../../middlewares/utils/getSigned';
-
-import { callAddUpdateHookValidationFunction } from './preHookFunctions/validation/utils';
 import deleteTopicValidation from './preHookFunctions/validation/deleteTopicValidation';
 import deleteLearningObjectiveValidation from './preHookFunctions/validation/deleteLearningObjectiveValidation';
 import deleteQuestionBankValidation from './preHookFunctions/validation/deleteQuestionBankValidation';
@@ -73,6 +71,7 @@ import addUserActivityAssignmentDumpValidation
   from './preHookFunctions/validation/addUserActivityAssignmentDumpValidation';
 import addUserActivityAssignmentDumpPostHookMethod
   from './postHookFunctions/addUserActivityAssignmentDumpPostHookMethod';
+import updateUserValidation from './preHookFunctions/validation/updateUserValidation';
 
 const { hookFunctions } = functions || {};
 
@@ -211,8 +210,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'updateUser': {
-      await callAddUpdateHookValidationFunction(mutationOrQueryName, params, context);
-      break;
+      // validate username, phone, email and name and returns email or phone verified accordingly
+      const verifiedData = await updateUserValidation(input, context);
+      Object.assign(input, verifiedData);
+      return hook(input, mutationOrQueryName, 'PreHook');
     }
 
     case 'validateUserOTP':
