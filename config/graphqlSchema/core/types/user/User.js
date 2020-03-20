@@ -17,6 +17,13 @@ const User = `
     status: Status! @defaultValue(value: "active") @readOnly
     username: String @uniqueOrEmpty @trim
     password: String @filterOff @writeOnly
+    savedPassword: String @filterOff 
+                 @userPermissions(
+                  permissions:[
+                    { userRole: ${ADMIN} appName: "*" operations: "*" }
+                    ], 
+                  rule: allow
+                )
     email: String! @uniqueOrEmpty @trim
     emailVerified: Boolean @defaultValue(value: "false") @readOnly
     phone: Phone @uniqueOrEmpty
@@ -33,7 +40,7 @@ const User = `
     isFacebookLogin: Boolean @defaultValue(value: "false")
     facebookId: String @writeOnly
     studentProfile: StudentProfile @relation(name:"StudentProfileUser", isSubset: true)
-    parentProfile: ParentProfile @relation(name:"ParentProfileUser", isSubset: true)
+    parentProfile: ParentProfile @relation(name:"ParentProfileUser")
   }
 `;
 
