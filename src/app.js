@@ -1,8 +1,9 @@
 import express from 'express';
+import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { PubSub } from 'graphql-subscriptions';
-import { ApolloServer } from 'apollo-server-express';
+// import { PubSub } from 'graphql-subscriptions';
+import { ApolloServer, PubSub } from 'apollo-server-express';
 import schema from './graphql';
 import { log } from '../utils';
 import { graphqlUpload, authMiddleware } from './middlewares';
@@ -56,9 +57,28 @@ app.use(cors(corsOptions));
 
 app.use(path, bodyParser.json(), graphqlUpload({ uploadDir: '/tmp/uploads' }));
 
+const logInput = async (resolve, root, args, context, info) => {
+  console.log(`1. logInput: ${JSON.stringify(args)}`);
+  const result = await resolve(root, args, context, info);
+  console.log('5. logInput');
+  return result;
+};
+
+const logResult = async (resolve, root, args, context, info) => {
+  console.log('2. logResult');
+  const result = await resolve(root, args, context, info);
+  console.log(`4. logResult: ${JSON.stringify(result)}`);
+  return result;
+};
+const middlewares = [logInput, logResult];
+
+const schemaWithMiddleware = applyMiddleware(
+  schema,
+);
+
 // using apollo-server
 const server = new ApolloServer({
-  schema,
+  schema: schemaWithMiddleware,
   playground: {
     endpoint: `http://localhost:${port}${path}`,
     settings: {
@@ -74,7 +94,19 @@ const server = new ApolloServer({
     }
     return error;
   },
+  // formatResponse: (response, context) => {
+  //   console.log('*********************', response);
+  //   console.log('*********************', context);
+  //   return response;
+  // },
   context: ({ req, connection }) => {
+    if (connection) {
+      // check connection for metadata
+      return {
+        ...connection.context,
+        pubsub,
+      };
+    }
     // file info from middleware
     let filePayload = '';
     if (req.body && req.body.variables) {
@@ -140,9 +172,10 @@ httpServer.listen(port, () => {
   log(`Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`);
 });
 
-// app.listen().then(({ url, subscriptionsUrl }) => {
-//   console.log(`🚀 Server ready at ${url}`);
-//   console.log(`🚀 Subscriptions ready at ${subscriptionsUrl}`);
+// server.applyMiddleware({ app, path });
+
+// app.listen(port, () => {
+//   log(`Server ready at http://localhost:${port}${server.graphqlPath}`);
 // });
 
 

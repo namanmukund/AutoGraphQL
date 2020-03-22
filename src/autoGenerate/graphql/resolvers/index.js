@@ -1,7 +1,8 @@
 /* AutoGenerates resolvers for model types  */
 import { camelCase, isArray, get } from 'lodash';
 import pluralize from 'pluralize';
-import { getParsedASTMap, checkIfArgumentsAreFromSameType } from '../../utils';
+import { withFilter } from 'apollo-server-express';
+import { getParsedASTMap, checkIfArgumentsAreFromSameType, getFieldsBeingFetched } from '../../utils';
 import getRelationMutationNames from '../../utils/getRelationMutationNames';
 import {
   addMutationResolver, updateMutationResolver, resendUserOTPResolver,
@@ -57,20 +58,79 @@ import {
   UPDATE_MULTIPLE,
 } from '../../../../constants/graphqlOperations';
 import socialLoginMutationResolver from './mutation/user/socialLogin';
-import { mappedMutationsWithSubscriptionEvents } from '../../../../constants/subscriptionEvents';
+import { DELETED, mappedMutationsWithSubscriptionEvents } from '../../../../constants/subscriptionEvents';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 const parsedASTMap = getParsedASTMap(types);
+
+let updateToString = '';
+const convertObjectFieldsToStrings = (fieldsFetched) => {
+  if (Object.keys(fieldsFetched).length) {
+    Object.keys(fieldsFetched).map((key) => {
+      updateToString += `${key} `;
+      if (Object.keys(fieldsFetched[key]).length) {
+        updateToString += '{ ';
+        convertObjectFieldsToStrings(fieldsFetched[key], updateToString);
+        updateToString += '} ';
+      }
+      return null;
+    });
+  }
+  return updateToString;
+};
 
 const resolvers = {
   Query: {},
   Mutation: {},
   Subscription: {
-    Chapter: {
-      subscribe: (root, params, context, info) => {
-        console.log(1111111);
+    chapter: {
+      subscribe: (root, params, context) => {
         const { pubsub } = context;
-        return pubsub.asyncIterator('Chapter');
+        return pubsub.asyncIterator(['chapter']);
       },
+      resolve: async (payload, args, context, info) => {
+        const { fieldNodes } = info;
+        const fieldsFetched = getFieldsBeingFetched(fieldNodes);
+        const { typeName, mutation, typeId } = payload;
+        if (typeId && mutation !== DELETED) {
+          const stringFields = convertObjectFieldsToStrings(fieldsFetched.data);
+          const query = `query{
+                        ${typeName}(id:"${typeId}"){
+                          ${stringFields}
+                        }
+                      }`;
+
+          const result = await callLocalGraphqlApi(query);
+          const finalResult = get(result, `data.${typeName}`);
+          // return subscriptionPayload
+          return {
+            mutation,
+            data: finalResult,
+          };
+        }
+        // in case of delete only return ID
+        return {
+          mutation,
+          data: {
+            id: typeId,
+          },
+        };
+      },
+
+      // subscribe: withFilter(
+      //   (root, params, context, info) => {
+      //     const { pubsub } = context;
+      //     return pubsub.asyncIterator(['Chapter'])
+      //   },
+      //       (payload, args) => {
+      //         return payload
+      //       }
+      //   },
+      // ),
+      // resolve: (payload, args) => {
+      //   console.log('.....payload', payload, args);
+      //   return payload;
+      // },
     },
   },
 };
@@ -95,11 +155,10 @@ const subscribeToEvents = (
   if (
     subscribedEvents.length
     && subscribedEvents.includes(mappedMutationsWithSubscriptionEvents[mutationType])) {
-    pubsub.publish(typeName, {
-      [typeName]: {
-        mutation: mappedMutationsWithSubscriptionEvents[mutationType],
-        data: finalResult,
-      },
+    pubsub.publish(camelCase(typeName), {
+      mutation: mappedMutationsWithSubscriptionEvents[mutationType],
+      typeName: camelCase(typeName),
+      typeId: finalResult.id,
     });
   }
   return true;
@@ -142,20 +201,19 @@ const defaultMutationsResolverWrapper = async (
     authentication,
     context,
     isMultiple,
-  ).then((result) => {
+  ).then(async (result) => {
     let newResult;
     if (isArray(result)) {
       newResult = result.map((record) => toObject(record));
     } else {
       newResult = toObject(result);
     }
-    const finalResult = posthook(newResult, mutationName, context, params);
+    const finalResult = await posthook(newResult, mutationName, context, params);
     // allow subscription on defined events
     subscribeToEvents(
       typeName,
       mutationName,
       context,
-      parsedASTMap,
       finalResult,
     );
     return finalResult;

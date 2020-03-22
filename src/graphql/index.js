@@ -21,7 +21,6 @@ const SchemaDefinition = `
 
 const appResolvers = { ...resolvers };
 const appMutation = mutation;
-
 const scalarDefinition = 'scalar Date';
 const schema = makeExecutableSchema({
   typeDefs: [
@@ -34,6 +33,11 @@ const schema = makeExecutableSchema({
     subscription,
   ],
   resolvers: appResolvers,
+  subscriptions: {
+    onConnect: (connectionParams, webSocket) => {
+      console.log(11111, connectionParams, webSocket);
+    },
+  },
 });
 
 // The utility iterator that patches the original,
@@ -77,8 +81,13 @@ forEachField(schema, (field) => {
           resolverPromise = Promise.resolve(resolverPromise);
         }
         // call to the directive resolver with result from default resolver as first arg
-
-        return resolverPromise.then((result) => resolver(result, root, finalArgs, context, info));
+        return resolverPromise.then((result) => {
+          // console.log(1111111, 'result', result);
+          return resolver(result, root, finalArgs, context, info).then((finalR) => {
+            // console.log(222222, 'finalR', finalR);
+            return finalR;
+          });
+        });
       };
     }
   });

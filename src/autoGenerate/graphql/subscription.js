@@ -1,4 +1,4 @@
-import { trimEnd, get } from 'lodash';
+import { trimEnd, get, camelCase } from 'lodash';
 import getParsedASTMap from '../utils/getParsedASTMap';
 import { types } from '../../../utils';
 
@@ -22,7 +22,7 @@ Object.keys(parsedASTMap).forEach((type) => {
     subscribe,
   } = definition;
   if (get(subscribe, 'events', []).length) {
-    subscriptionString += `${type} : ${type}${SUBSCRIPTION_PAYLOAD},`;
+    subscriptionString += `${camelCase(type)} : ${type}${SUBSCRIPTION_PAYLOAD},`;
     subscriptionPayloadTypes.push(makeSubscriptionTypePayload(type));
   }
 });
