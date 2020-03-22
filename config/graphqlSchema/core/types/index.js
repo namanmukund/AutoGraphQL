@@ -38,8 +38,8 @@ import UserAssignment from './userAssignment';
 import UserActivityAssignmentDump from './userActivityAssignmentDump';
 import MentorSession from './mentorSession';
 import MenteeSession from './menteeSession';
-import SlotSession from './slotSession';
-import SessionInformation from './sessionInformation';
+import AvailableSlot from './availableSlot';
+import MentorMenteeSession from './mentorMenteeSession';
 
 export default [
   ...User,
@@ -82,6 +82,6 @@ export default [
   ...UserActivityAssignmentDump,
   ...MentorSession,
   ...MenteeSession,
-  ...SlotSession,
-  ...SessionInformation,
+  ...AvailableSlot,
+  ...MentorMenteeSession,
 ];

@@ -1,9 +1,8 @@
-const SessionInformation = `
-  type SessionInformation @model {
-    topic: Topic! @relation(name: "SessionDataTopic", direction: "OneWay")
+const MentorMenteeSession = `
+  type MentorMenteeSession @model {
     menteeSession: MenteeSession @relation(name: "SessionDataMenteeSession", direction: "OneWay")
     mentorSession: MentorSession @relation(name: "SessionDataMentorSession", direction: "OneWay")
-    slotSession : SlotSession @relation(name: "SessionDataSlotSession", direction: "OneWay")
+    slots: AvailableSlot @relation(name: "SessionDataAvailableSlots", direction: "OneWay")
     startDate: Date
     endDate: Date
     mentorStartTime: Date
@@ -11,4 +10,4 @@ const SessionInformation = `
     isHomeworkChecked: Boolean @defaultValue(value: false)
 }`;
 
-export default [SessionInformation];
+export default [MentorMenteeSession];

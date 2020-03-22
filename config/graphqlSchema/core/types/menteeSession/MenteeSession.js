@@ -1,16 +1,13 @@
-import { slotTimes } from '../../../../../constants';
+import getSlotTimeFields from '../../functions/getSlotTimeFields';
 
-let slotTimeFields = '';
-slotTimes.forEach((slotTime) => {
-  slotTimeFields += `${slotTime}: Boolean @defaultValue(value: false) `;
-});
+const slotTimeFields = getSlotTimeFields('Boolean', false);
 
 const MenteeSession = `
   type MenteeSession @model {
     user: User! @relation(name: "MenteeSessionUser", direction: "OneWay")
     topic: Topic! @relation(name: "MenteeSessionTopic", direction: "OneWay")
     mentor: User @relation(name: "MenteeSessionMentor", direction: "OneWay")
-    date: Date
+    bookingDate: Date
     ${slotTimeFields}
 }`;
 
