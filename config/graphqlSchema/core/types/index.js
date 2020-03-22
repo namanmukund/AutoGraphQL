@@ -36,6 +36,10 @@ import School from './school';
 import AssignmentQuestion from './assignmentQuestion';
 import UserAssignment from './userAssignment';
 import UserActivityAssignmentDump from './userActivityAssignmentDump';
+import MentorSession from './mentorSession';
+import MenteeSession from './menteeSession';
+import SlotSession from './slotSession';
+import SessionInformation from './sessionInformation';
 
 export default [
   ...User,
@@ -76,4 +80,8 @@ export default [
   ...AssignmentQuestion,
   ...UserAssignment,
   ...UserActivityAssignmentDump,
+  ...MentorSession,
+  ...MenteeSession,
+  ...SlotSession,
+  ...SessionInformation,
 ];
