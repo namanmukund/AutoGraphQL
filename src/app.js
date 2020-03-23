@@ -57,21 +57,7 @@ app.use(cors(corsOptions));
 
 app.use(path, bodyParser.json(), graphqlUpload({ uploadDir: '/tmp/uploads' }));
 
-const logInput = async (resolve, root, args, context, info) => {
-  console.log(`1. logInput: ${JSON.stringify(args)}`);
-  const result = await resolve(root, args, context, info);
-  console.log('5. logInput');
-  return result;
-};
-
-const logResult = async (resolve, root, args, context, info) => {
-  console.log('2. logResult');
-  const result = await resolve(root, args, context, info);
-  console.log(`4. logResult: ${JSON.stringify(result)}`);
-  return result;
-};
-const middlewares = [logInput, logResult];
-
+// will be handy for applying middleware for reporting & debuging
 const schemaWithMiddleware = applyMiddleware(
   schema,
 );
@@ -94,11 +80,6 @@ const server = new ApolloServer({
     }
     return error;
   },
-  // formatResponse: (response, context) => {
-  //   console.log('*********************', response);
-  //   console.log('*********************', context);
-  //   return response;
-  // },
   context: ({ req, connection }) => {
     if (connection) {
       // check connection for metadata
@@ -171,12 +152,5 @@ httpServer.listen(port, () => {
   log(`Server ready at http://localhost:${port}${server.graphqlPath}`);
   log(`Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`);
 });
-
-// server.applyMiddleware({ app, path });
-
-// app.listen(port, () => {
-//   log(`Server ready at http://localhost:${port}${server.graphqlPath}`);
-// });
-
 
 export default app;
