@@ -93,7 +93,6 @@
     "formidable": "^1.2.1",
     "google-auth-library": "^5.5.1",
     "graphql": "^0.13.2",
-    "graphql-middleware": "^4.0.2",
     "graphql-subscriptions": "^1.1.0",
     "graphql-tools": "^4.0.6",
     "imagemagick": "^0.1.3",

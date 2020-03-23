@@ -1,5 +1,4 @@
 import express from 'express';
-import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import { ApolloServer, PubSub } from 'apollo-server-express';
@@ -56,14 +55,9 @@ app.use(cors(corsOptions));
 
 app.use(path, bodyParser.json(), graphqlUpload({ uploadDir: '/tmp/uploads' }));
 
-// will be handy for applying middleware for reporting & debuging
-const schemaWithMiddleware = applyMiddleware(
-  schema,
-);
-
 // using apollo-server
 const server = new ApolloServer({
-  schema: schemaWithMiddleware,
+  schema,
   playground: {
     endpoint: `http://localhost:${port}${path}`,
     settings: {
