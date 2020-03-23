@@ -57,9 +57,10 @@ import {
   UPDATE_MULTIPLE,
 } from '../../../../constants/graphqlOperations';
 import socialLoginMutationResolver from './mutation/user/socialLogin';
-import { DELETED, mappedMutationsWithSubscriptionEvents } from '../../../../constants/subscriptionEvents';
+import { DELETED } from '../../../../constants/subscriptionEvents';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import convertObjectFieldsToStrings from './utils/convertObjectFieldsToStrings';
+import subscribeToEvents from './utils/subscribeToEvents';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -76,30 +77,6 @@ const defaultMutationsResolvers = {
   deleteMultipleMutationResolver,
 };
 
-const subscribeToEvents = (
-  typeName,
-  mutationName,
-  context,
-  dbData,
-) => {
-  const { pubsub } = context;
-  const mutationType = mutationName.split(typeName)[0];
-  const { subscribe } = parsedASTMap[typeName];
-  const subscribedEvents = get(subscribe, 'events', []);
-  if (
-    subscribedEvents.length
-    && subscribedEvents.includes(mappedMutationsWithSubscriptionEvents[mutationType])
-    && dbData && dbData.id
-  ) {
-    pubsub.publish(camelCase(typeName), {
-      mutation: mappedMutationsWithSubscriptionEvents[mutationType],
-      typeName: camelCase(typeName),
-      typeId: dbData.id,
-      dbData,
-    });
-  }
-  return true;
-};
 
 // FIX: instead of id and input just take in params object as args
 const defaultMutationsResolverWrapper = async (
@@ -145,15 +122,16 @@ const defaultMutationsResolverWrapper = async (
     } else {
       newResult = toObject(result);
     }
-    const finalResult = await posthook(newResult, mutationName, context, params);
+    const dbData = await posthook(newResult, mutationName, context, params);
     // allow subscription on defined events
     subscribeToEvents(
       typeName,
       mutationName,
       context,
-      finalResult,
+      dbData,
+      parsedASTMap,
     );
-    return finalResult;
+    return dbData;
   });
 };
 
@@ -199,7 +177,6 @@ Object.keys(parsedASTMap).forEach((type) => {
               }
             });
 
-
           if (typeId && mutation !== DELETED) {
             // send db data if there is no relational fields
             if (!hasRelationalField) {
@@ -209,19 +186,20 @@ Object.keys(parsedASTMap).forEach((type) => {
               };
             }
             // send api data in case of relational fields
-            const stringFields = convertObjectFieldsToStrings(requestFields);
+            // eslint-disable-next-line prefer-const
+            // let stringFields = '';
+            const stringFields = convertObjectFieldsToStrings(requestFields).str;
             const query = `query{
                         ${modelSingular}(id:"${typeId}"){
                           ${stringFields}
                         }
                       }`;
-
             const result = await callLocalGraphqlApi(query);
             const finalResultWithRelationalFields = get(result, `data.${modelSingular}`);
             // return subscriptionPayload
             return {
               mutation,
-              data: finalResultWithRelationalFields,
+              data: toObject(finalResultWithRelationalFields),
             };
           }
           // in case of delete only return db data

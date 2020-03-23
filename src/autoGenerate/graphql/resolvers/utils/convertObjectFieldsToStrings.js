@@ -1,18 +1,14 @@
-let updateToString = '';
-const convertObjectFieldsToStrings = (fieldsFetched) => {
-  if (Object.keys(fieldsFetched).length) {
-    Object.keys(fieldsFetched).map((key) => {
-      updateToString += `${key} `;
-      if (Object.keys(fieldsFetched[key]).length) {
-        updateToString += '{ ';
-        convertObjectFieldsToStrings(fieldsFetched[key], updateToString);
-        updateToString += '} ';
-      }
-      return null;
-    });
-  }
-  return updateToString;
+/* eslint-disable no-param-reassign */
+const convertObjectFieldsToStrings = (fieldsFetched, stringFieldsObj = { str: '' }) => {
+  Object.keys(fieldsFetched).forEach((key) => {
+    stringFieldsObj.str += `${key} `;
+    if (typeof fieldsFetched[key] === 'object') {
+      stringFieldsObj.str += '{ ';
+      convertObjectFieldsToStrings(fieldsFetched[key], stringFieldsObj);
+      stringFieldsObj.str += '} ';
+    }
+  });
+  return stringFieldsObj;
 };
-
 
 export default convertObjectFieldsToStrings;

@@ -76,7 +76,7 @@ forEachField(schema, (field) => {
           resolverPromise = Promise.resolve(resolverPromise);
         }
         // call to the directive resolver with result from default resolver as first arg
-        return resolverPromise.then((result) => resolver(result, root, finalArgs, context, info).then((finalR) => finalR));
+        return resolverPromise.then((result) => resolver(result, root, finalArgs, context, info));
       };
     }
   });

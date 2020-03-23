@@ -11,8 +11,8 @@ const parsedASTMap = getParsedASTMap(types);
 const makeSubscriptionTypePayload = (
   type,
 ) => `type ${type}${SUBSCRIPTION_PAYLOAD}{
-     mutation: String,
-     data: ${type}
+     mutation: String!,
+     data: ${type}!
   }`;
 
 

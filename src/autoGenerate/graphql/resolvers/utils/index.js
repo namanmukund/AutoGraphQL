@@ -3,6 +3,7 @@ import checkMiddlewareErrors from './checkMiddlewareErrors';
 import scalarDate from './scalarDate';
 import validateCurrentTopicComponent from './validateCurrentTopicComponent';
 import convertObjectFieldsToStrings from './convertObjectFieldsToStrings';
+import subscribeToEvents from './subscribeToEvents';
 
 
 export {
@@ -11,4 +12,5 @@ export {
   scalarDate,
   validateCurrentTopicComponent,
   convertObjectFieldsToStrings,
+  subscribeToEvents,
 };

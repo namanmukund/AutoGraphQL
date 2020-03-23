@@ -2,7 +2,6 @@ import express from 'express';
 import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-// import { PubSub } from 'graphql-subscriptions';
 import { ApolloServer, PubSub } from 'apollo-server-express';
 import schema from './graphql';
 import { log } from '../utils';
@@ -82,7 +81,7 @@ const server = new ApolloServer({
   },
   context: ({ req, connection }) => {
     if (connection) {
-      // check connection for metadata
+      // context comes in connection in case WS
       return {
         ...connection.context,
         pubsub,
