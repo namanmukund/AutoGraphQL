@@ -186,7 +186,6 @@ Object.keys(parsedASTMap).forEach((type) => {
               };
             }
             // send api data in case of relational fields
-            // eslint-disable-next-line prefer-const
             // let stringFields = '';
             const stringFields = convertObjectFieldsToStrings(requestFields).str;
             const query = `query{
