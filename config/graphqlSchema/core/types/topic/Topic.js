@@ -1,6 +1,7 @@
 import { READ } from '../../../../../constants/graphqlOperations';
 import { TLA, TMS } from '../../../../../constants';
 import { CMS_HEAD, NOT_CMS_HEAD } from '../../../../../constants/roles';
+import { CREATED } from '../../../../../constants/subscriptionEvents';
 
 const Topic = `
   type Topic @model
@@ -17,6 +18,7 @@ const Topic = `
       ], 
     rule: allow
   ) 
+  @subscribe(events: [${CREATED}])
   {
     order: Int! 
     title: String! 

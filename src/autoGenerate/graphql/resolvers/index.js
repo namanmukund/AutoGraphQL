@@ -1,7 +1,7 @@
 /* AutoGenerates resolvers for model types  */
-import { camelCase, isArray } from 'lodash';
+import { camelCase, isArray, get } from 'lodash';
 import pluralize from 'pluralize';
-import { getParsedASTMap, checkIfArgumentsAreFromSameType } from '../../utils';
+import { getParsedASTMap, checkIfArgumentsAreFromSameType, getFieldsBeingFetched } from '../../utils';
 import getRelationMutationNames from '../../utils/getRelationMutationNames';
 import {
   addMutationResolver, updateMutationResolver, resendUserOTPResolver,
@@ -57,10 +57,18 @@ import {
   UPDATE_MULTIPLE,
 } from '../../../../constants/graphqlOperations';
 import socialLoginMutationResolver from './mutation/user/socialLogin';
+import { DELETED } from '../../../../constants/subscriptionEvents';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import convertObjectFieldsToStrings from './utils/convertObjectFieldsToStrings';
+import subscribeToEvents from './utils/subscribeToEvents';
 
 const parsedASTMap = getParsedASTMap(types);
 
-const resolvers = { Query: {}, Mutation: {} };
+const resolvers = {
+  Query: {},
+  Mutation: {},
+  Subscription: {},
+};
 
 const defaultMutationsResolvers = {
   addMutationResolver,
@@ -68,6 +76,7 @@ const defaultMutationsResolvers = {
   updateMutationResolver,
   deleteMultipleMutationResolver,
 };
+
 
 // FIX: instead of id and input just take in params object as args
 const defaultMutationsResolverWrapper = async (
@@ -106,15 +115,23 @@ const defaultMutationsResolverWrapper = async (
     authentication,
     context,
     isMultiple,
-  ).then((result) => {
+  ).then(async (result) => {
     let newResult;
     if (isArray(result)) {
       newResult = result.map((record) => toObject(record));
     } else {
       newResult = toObject(result);
     }
-
-    return posthook(newResult, mutationName, context, params);
+    const dbData = await posthook(newResult, mutationName, context, params);
+    // allow subscription on defined events
+    subscribeToEvents(
+      typeName,
+      mutationName,
+      context,
+      dbData,
+      parsedASTMap,
+    );
+    return dbData;
   });
 };
 
@@ -131,6 +148,67 @@ Object.keys(parsedASTMap).forEach((type) => {
   // model directives logic
   const isModel = directives && hasDirective(directives, 'model');
   if (isModel) {
+    // Subscription query resolver
+    const { subscribe } = parsedASTMap[typeName];
+    const subscribedEvents = get(subscribe, 'events', []);
+    if (subscribedEvents.length) {
+      resolvers.Subscription[modelSingular] = {
+        subscribe: (root, params, context) => {
+          const { pubsub } = context;
+          return pubsub.asyncIterator([modelSingular]);
+        },
+        resolve: async (payload, args, context, info) => {
+          const { fieldNodes } = info;
+          const fieldsFetched = getFieldsBeingFetched(fieldNodes);
+          const { data: requestFields } = fieldsFetched;
+          const {
+            mutation, typeId, dbData,
+          } = payload;
+
+          let hasRelationalField = false;
+          const nonRelationalFieldsData = {};
+          // if relational fields exist then fetch data from api else manipulate db data
+          Object.keys(requestFields)
+            .forEach((key) => {
+              if (Object.keys(requestFields[key]).length) {
+                hasRelationalField = true;
+              } else {
+                nonRelationalFieldsData[key] = dbData[key];
+              }
+            });
+
+          if (typeId && mutation !== DELETED) {
+            // send db data if there is no relational fields
+            if (!hasRelationalField) {
+              return {
+                mutation,
+                data: nonRelationalFieldsData,
+              };
+            }
+            // send api data in case of relational fields
+            // let stringFields = '';
+            const stringFields = convertObjectFieldsToStrings(requestFields).str;
+            const query = `query{
+                        ${modelSingular}(id:"${typeId}"){
+                          ${stringFields}
+                        }
+                      }`;
+            const result = await callLocalGraphqlApi(query);
+            const finalResultWithRelationalFields = get(result, `data.${modelSingular}`);
+            // return subscriptionPayload
+            return {
+              mutation,
+              data: toObject(finalResultWithRelationalFields),
+            };
+          }
+          // in case of delete only return db data
+          return {
+            mutation,
+            data: nonRelationalFieldsData,
+          };
+        },
+      };
+    }
     // Fetch single query resolver.
     if (
       (allowedOperations && allowedOperations === '*')
