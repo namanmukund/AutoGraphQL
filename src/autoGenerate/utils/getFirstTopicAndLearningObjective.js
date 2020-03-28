@@ -55,6 +55,12 @@ const topicQueryWithExtraInfo = (order) => `
       title
       description
       videoTitle
+      videoDescription
+      videoThumbnail{
+        id
+        name
+        uri
+      }
       order
       thumbnail{
         id
