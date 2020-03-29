@@ -1,13 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer, PubSub } from 'apollo-server-express';
 import schema from './graphql';
 import { log } from '../utils';
 import { graphqlUpload, authMiddleware } from './middlewares';
 import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
 import Raven from './Raven';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
+
+const http = require('http');
+
+const pubsub = new PubSub();
 
 const port = process.env.PORT || 3000;
 const env = process.env.NODE_ENV || 'development';
@@ -69,7 +73,14 @@ const server = new ApolloServer({
     }
     return error;
   },
-  context: ({ req }) => {
+  context: ({ req, connection }) => {
+    if (connection) {
+      // context comes in connection in case WS
+      return {
+        ...connection.context,
+        pubsub,
+      };
+    }
     // file info from middleware
     let filePayload = '';
     if (req.body && req.body.variables) {
@@ -120,14 +131,19 @@ const server = new ApolloServer({
     return {
       ...obj,
       filePayload,
+      pubsub,
     };
   },
 });
 
-server.applyMiddleware({ app, path });
+server.applyMiddleware({ app });
 
-app.listen(port, () => {
+const httpServer = http.createServer(app);
+server.installSubscriptionHandlers(httpServer);
+
+httpServer.listen(port, () => {
   log(`Server ready at http://localhost:${port}${server.graphqlPath}`);
+  log(`Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`);
 });
 
 export default app;
