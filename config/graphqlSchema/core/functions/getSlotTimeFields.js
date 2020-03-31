@@ -1,14 +1,14 @@
-import {slotTimes} from "../../../../constants";
+import { slotTimes } from '../../../../constants';
 
 const getSlotTimeFields = (
-    fieldType,
-    defaultValue
+  fieldType,
+  defaultValue,
 ) => {
-    let slotTimeFields = '';
-    slotTimes.forEach((slotTime) => {
-        slotTimeFields += `${slotTime}: ${fieldType} @defaultValue(value: ${defaultValue}) `;
-    });
-    return slotTimeFields;
+  let slotTimeFields = '';
+  slotTimes.forEach((slotTime) => {
+    slotTimeFields += `${slotTime}: ${fieldType} @defaultValue(value: ${defaultValue}) `;
+  });
+  return slotTimeFields;
 };
 
 export default getSlotTimeFields;

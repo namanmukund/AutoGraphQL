@@ -3,6 +3,7 @@
 import { findIndex } from 'lodash';
 import { InsufficientPermissionError } from '../../../../constants/errors';
 import { META } from '../../../../constants';
+import { SINGULAR } from '../../../../constants/graphqlOperations';
 
 
 const validateAllowDenyRuleOnApp = (
@@ -163,7 +164,7 @@ const validateAppAndUserPermission = (
         parsedASTMap,
         queryFields[key],
         authentication,
-        operation,
+        SINGULAR,
       );
     }
   }

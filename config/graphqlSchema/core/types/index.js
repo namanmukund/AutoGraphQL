@@ -40,6 +40,7 @@ import MentorSession from './mentorSession';
 import MenteeSession from './menteeSession';
 import AvailableSlot from './availableSlot';
 import MentorMenteeSession from './mentorMenteeSession';
+import MenteeCourseSyllabus from './menteeCourseSyllabus';
 
 export default [
   ...User,
@@ -84,4 +85,5 @@ export default [
   ...MenteeSession,
   ...AvailableSlot,
   ...MentorMenteeSession,
+  ...MenteeCourseSyllabus,
 ];
