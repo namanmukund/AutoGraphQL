@@ -72,6 +72,10 @@ import addUserActivityAssignmentDumpValidation
 import addUserActivityAssignmentDumpPostHookMethod
   from './postHookFunctions/addUserActivityAssignmentDumpPostHookMethod';
 import updateUserValidation from './preHookFunctions/validation/updateUserValidation';
+import addMenteeSessionValidation
+  from './preHookFunctions/validation/addMenteeSessionValidation';
+import addMentorSessionValidation
+  from './preHookFunctions/validation/addMentorSessionValidation';
 
 const { hookFunctions } = functions || {};
 
@@ -376,6 +380,14 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'addUserActivityAssignmentDump': {
       await addUserActivityAssignmentDumpValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addMenteeSession': {
+      await addMenteeSessionValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addMentorSession': {
+      await addMentorSessionValidation(params, mutationOrQueryName, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     default: {

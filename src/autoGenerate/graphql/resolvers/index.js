@@ -16,6 +16,7 @@ import {
   resendForgotPasswordOTPMutationResolver,
   deleteMultipleMutationResolver,
   userCourseSyllabusMutationResolver,
+  menteeCourseSyllabusMutationResolver,
   userTopicJourneyMutationResolver,
   userFirstAndLatestQuizReportMutationResolver,
   skipVideoMutationResolver,
@@ -849,6 +850,24 @@ resolvers.Mutation.userCourseSyllabus = async (root, params, context, info) => {
   const hookInput = await prehook(params, mutationName, context, params);
 
   return userCourseSyllabusMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+  ).then((result) => toObject(result));
+};
+
+// Resolver for a custom homepage data for mentee
+resolvers.Mutation.menteeCourseSyllabus = async (root, params, context, info) => {
+  const typeName = 'UserCurrentTopicComponentStatus';
+  const mutationName = 'menteeCourseSyllabus';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return menteeCourseSyllabusMutationResolver(
     root,
     hookInput,
     typeName,

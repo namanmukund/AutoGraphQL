@@ -36,6 +36,11 @@ import School from './school';
 import AssignmentQuestion from './assignmentQuestion';
 import UserAssignment from './userAssignment';
 import UserActivityAssignmentDump from './userActivityAssignmentDump';
+import MentorSession from './mentorSession';
+import MenteeSession from './menteeSession';
+import AvailableSlot from './availableSlot';
+import MentorMenteeSession from './mentorMenteeSession';
+import MenteeCourseSyllabus from './menteeCourseSyllabus';
 
 export default [
   ...User,
@@ -76,4 +81,9 @@ export default [
   ...AssignmentQuestion,
   ...UserAssignment,
   ...UserActivityAssignmentDump,
+  ...MentorSession,
+  ...MenteeSession,
+  ...AvailableSlot,
+  ...MentorMenteeSession,
+  ...MenteeCourseSyllabus,
 ];

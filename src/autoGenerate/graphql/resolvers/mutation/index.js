@@ -18,6 +18,7 @@ import validateForgotPasswordOTPMutationResolver from './forgotPassword/validate
 import finishForgotPasswordMutationResolver from './forgotPassword/finishForgotPassword';
 import resendForgotPasswordOTPMutationResolver from './forgotPassword/resendForgotPasswordOTP';
 import userCourseSyllabusMutationResolver from './userData/userCourseSyllabus';
+import menteeCourseSyllabusMutationResolver from './userData/menteeCourseSyllabus';
 import userTopicJourneyMutationResolver from './userData/userTopicJourney';
 import userFirstAndLatestQuizReportMutationResolver from './userData/userFirstAndLatestQuizReport';
 import skipVideoMutationResolver from './userData/skipVideo';
@@ -49,6 +50,7 @@ export {
   setPasswordStrictMutationPromise,
   deleteMultipleMutationResolver,
   userCourseSyllabusMutationResolver,
+  menteeCourseSyllabusMutationResolver,
   userTopicJourneyMutationResolver,
   userFirstAndLatestQuizReportMutationResolver,
   skipVideoMutationResolver,
