@@ -1,9 +1,11 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { log } from '../../../../../utils';
-import { ConnectRecordsNotFoundInDBError, UserMismatchError } from '../../../../../constants/errors';
+import { RelationValuesExistError, UserMismatchError } from '../../../../../constants/errors';
 import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
+import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
+import { ADMIN } from '../../../../../constants/roles';
 
 // query to get mentor Sessions
 const getMentorSessions = (userId, availabilityDate) => `
@@ -40,12 +42,22 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
     we will compare this userId against userId passed in input
     both should be equal to perform further action
     */
+
+    // getting user role from context. We will allow adding mentorSession if logged in user is admin
+    const userInfo = validateTokenAndExtractInformation(context, false);
+    const {
+      currentUser,
+    } = userInfo;
+    const userRoleFromContext = currentUser && currentUser.role;
+
     const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+
     const {
       userIdFromContext,
       appName,
     } = userAndAppInfo;
-    if (!backendApps.includes(appName) && userIdFromContext !== userId) {
+
+    if (!backendApps.includes(appName) && userIdFromContext !== userId && userRoleFromContext !== ADMIN) {
       throw new UserMismatchError();
     }
 
@@ -53,7 +65,7 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
     const getMentorSessionsRes = await callLocalGraphqlApi(getMentorSessions(userId, availabilityDate));
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
     if (mentorSessions && mentorSessions.length) {
-      throw new ConnectRecordsNotFoundInDBError();
+      throw new RelationValuesExistError();
     }
   }
 

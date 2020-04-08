@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { log } from '../../../../../utils';
-import { ConnectRecordsNotFoundInDBError, UserMismatchError } from '../../../../../constants/errors';
+import { RelationValuesExistError, UserMismatchError } from '../../../../../constants/errors';
 import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 
@@ -55,7 +55,7 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
     const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId, topicId));
     const menteeSessions = get(getMenteeSessionsRes, 'data.menteeSessions');
     if (menteeSessions && menteeSessions.length) {
-      throw new ConnectRecordsNotFoundInDBError();
+      throw new RelationValuesExistError();
     }
   }
 
