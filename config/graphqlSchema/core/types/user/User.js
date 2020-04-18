@@ -24,7 +24,7 @@ const User = `
                     ], 
                   rule: allow
                 )
-    email: String! @uniqueOrEmpty @trim
+    email: String @uniqueOrEmpty @trim
     emailVerified: Boolean @defaultValue(value: "false") @readOnly
     phone: Phone @uniqueOrEmpty
     phoneVerified: Boolean @defaultValue(value: "false")

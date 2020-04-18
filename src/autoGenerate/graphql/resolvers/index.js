@@ -26,6 +26,7 @@ import {
   getUnlockedUserBadgeMutationResolver,
   userBadgeMutationResolver,
   getQuizReportMutationResolver,
+  parentChildSignUpMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import {
@@ -1043,6 +1044,32 @@ resolvers.Mutation.resetPasswordFromForgotPasswordLink = async (root, params, co
     authentication,
     context,
   ).then((result) => toObject(result));
+};
+
+resolvers.Mutation.parentChildSignUp = async (root, params, context, info) => {
+  const authentication = ifAuthorized(context);
+  const typeName = 'User';
+  const mutationName = 'parentChildSignUp';
+  const { input } = params;
+  const hookInput = await prehook(input, mutationName, context, params);
+
+  const newParams = params;
+  newParams.input = hookInput;
+
+  return parentChildSignUpMutationResolver(
+    root,
+    params,
+    context,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    authentication,
+  ).then((result) => {
+    const newResult = toObject(result);
+
+    return posthook(newResult, mutationName);
+  });
 };
 
 // Resolver for a custom scalar type 'Date'
