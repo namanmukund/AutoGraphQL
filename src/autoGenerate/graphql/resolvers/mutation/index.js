@@ -28,6 +28,8 @@ import sendForgotPasswordLinkMutationResolver from './forgotPassword/sendForgotP
 import resetPasswordFromForgotPasswordLinkMutationResolver from './forgotPassword/resetPasswordFromForgotPasswordLink';
 import getUnlockedUserBadgeMutationResolver from './userData/getUnlockedUserBadge';
 import getQuizReportMutationResolver from './userData/getQuizReport';
+import parentChildSignUpMutationResolver from './user/parentChildSignUp';
+
 
 export {
   addMutationResolver,
@@ -60,4 +62,5 @@ export {
   resetPasswordFromForgotPasswordLinkMutationResolver,
   getUnlockedUserBadgeMutationResolver,
   getQuizReportMutationResolver,
+  parentChildSignUpMutationResolver,
 };

@@ -24,6 +24,7 @@ const customMutationString = `
    menteeCourseSyllabus : MenteeCourseSyllabus,
    tcirtSdrowssaPtes ( id: ID!, password: String! ): User,
    uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,
+   parentChildSignUp ( input: ParentChildSignUpInput ): UserToken,
    `;
 
 export default customMutationString;

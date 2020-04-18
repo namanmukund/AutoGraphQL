@@ -8,6 +8,7 @@ import GroupByAggregationResult from './GroupByAggregationResult';
 import QuestionBankOption from './QuestionBankOption';
 import QuestionBankAnswer from './QuestionBankAnswer';
 import Class from './Class';
+import ParentChildSignUpInput from './ParentChildSignUpInput';
 
 export default [
   ...Enum,
@@ -20,4 +21,5 @@ export default [
   ...QuestionBankOption,
   ...QuestionBankAnswer,
   Class,
+  ParentChildSignUpInput,
 ];
