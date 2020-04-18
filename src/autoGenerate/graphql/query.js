@@ -190,7 +190,6 @@ const getFieldFilters = (fieldName, typeASTFields) => {
     } else if (includes(parsedEnumTypes, fieldType)) {
       fieldFilter += generateFieldFilterForEnumTypes(fieldName, fieldType, isFielListType);
     } else {
-      console.log(11111, fieldName, typeASTFields)
       throw new InvalidFieldType();
     }
   }

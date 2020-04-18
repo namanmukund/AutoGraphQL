@@ -6,7 +6,6 @@ number should start with 8 or 9. Other checks like phone length is
 also verified.
 */
 const isValidPhoneNumber = (phoneDoc) => {
-  console.log(phoneDoc);
   const { countryCode, number } = phoneDoc;
   if (!countryCode || !number) {
     return false;

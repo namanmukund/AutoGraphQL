@@ -3,8 +3,10 @@ import { getFieldsBeingFetched } from '../../../../utils';
 import { isValidPhoneNumber, validate, validateName } from '../../../validation';
 import { ADD } from '../../../../../../constants/graphqlOperations';
 import {
+  ChildAlreadyRegisteredError,
+  EmailOrPhoneMismatchError,
   InvalidEmailError,
-  InvalidPhoneError, UnknownUserError, UserAlreadyExistsError,
+  InvalidPhoneError, SomethingWentWrongError, UserAlreadyExistsError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
 import isValidEmail from '../../../validation/isValidEmail';
@@ -69,17 +71,6 @@ mutation($input: ParentProfileInput!){
   const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.addParentProfile.id');
 };
-const ifEmailExists = async (email) => {
-  const query = `query{
-  usersMeta(filter:{
-    email: "${email}"
-  }){
-    count
-  }
-}`;
-  const res = get(await callLocalGraphqlApi(query), 'data.usersMeta.count');
-  return res !== 0;
-};
 
 const getParentInfo = async (context, email, phone) => {
   const result = {};
@@ -116,12 +107,12 @@ const getParentInfo = async (context, email, phone) => {
 }
   `;
   const res = get(await callLocalGraphqlApi(query, context), 'data.users');
-  console.log('res', res);
+  // when same users are added with email and number separately
   if (res && res.length) {
     if (res.length > 1) {
       throw new UserAlreadyExistsError();
     }
-    // if res has length 1
+    // if res has length 1 then check if phone and email belogs to the same user
     const {
       id, parentProfile, email: parentEmail, phone: parentPhone,
     } = res[0];
@@ -133,7 +124,7 @@ const getParentInfo = async (context, email, phone) => {
       || parentPhone.number !== number
       || parentEmail !== email
     ) {
-      throw new UserAlreadyExistsError();
+      throw new EmailOrPhoneMismatchError();
     }
 
     if (parentProfile && parentProfile.id) {
@@ -149,10 +140,15 @@ const getParentInfo = async (context, email, phone) => {
       result.childrenNames = childrenNames;
     }
   }
-  console.log('result', result);
   return result;
 };
-
+/*
+- both the parent and a kid is registered
+- email & phone both are required
+- to add a sibling both phone and email of a parent should match
+- user is returned with the kid's token as a role mentee
+- two profiles are also created and mapped with each other
+*/
 const parentChildSignUpMutationResolver = async (
   root,
   params,
@@ -188,7 +184,6 @@ const parentChildSignUpMutationResolver = async (
 
   // check if parent exist in db
   const parentInfo = await getParentInfo(context, parentEmail, parentPhone);
-  console.log(parentInfo, parentInfo);
   let parentId;
   let parentProfileId;
   Object.assign(authentication, {
@@ -200,7 +195,7 @@ const parentChildSignUpMutationResolver = async (
     parentProfileId = parentInfo.parentProfileId;
     const { childrenNames } = parentInfo;
     if (childrenNames && childrenNames.length && childrenNames.includes(childName)) {
-      throw new UserAlreadyExistsError();
+      throw new ChildAlreadyRegisteredError();
     }
   } else {
     const parentData = {
@@ -229,7 +224,6 @@ const parentChildSignUpMutationResolver = async (
       variables,
     );
   }
-  console.log('parentId', parentId);
   const childData = {
     name: childName,
     role: MENTEE,
@@ -237,9 +231,12 @@ const parentChildSignUpMutationResolver = async (
   const childDataWithId = generateCuid(childData);
 
   const childId = await addUserData(authentication, childDataWithId);
-  console.log('childId', childId);
   if (!childId) {
-    throw Error('Some error child id');
+    throw new SomethingWentWrongError({
+      data: {
+        message: 'childId not found',
+      },
+    });
   }
   const studentProfileInputData = {};
   if (grade) {
@@ -249,14 +246,20 @@ const parentChildSignUpMutationResolver = async (
     input: studentProfileInputData,
   };
   const studentProfileId = await addStudentProfile(context, studentProfileInput, childId, parentProfileId);
-  console.log('studentProfileId', studentProfileId);
   if (!studentProfileId) {
-    throw Error('Some error studentProfileId');
+    throw new SomethingWentWrongError({
+      data: {
+        message: 'studentProfileId not found',
+      },
+    });
   }
   // add parentProfile
-  console.log('parentProfileId', parentProfileId);
   if (!parentProfileId) {
-    throw new UnknownUserError;
+    throw new SomethingWentWrongError({
+      data: {
+        message: 'parentProfileId not found',
+      },
+    });
   }
   const queryController = new QueryController(USER_TYPE, authentication);
   const childUserData = await queryController.fetchOne({ id: childId });

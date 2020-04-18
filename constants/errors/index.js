@@ -8,6 +8,7 @@ import {
   InvalidStaticToken,
   MandatoryFieldNotSetError,
   InvalidToken,
+  SomethingWentWrongError,
 } from './auth';
 
 import {
@@ -27,6 +28,8 @@ import {
   TopicIdRequiredError,
   ConnectIdRequiredError,
   PaidComponentLockedError,
+  EmailOrPhoneMismatchError,
+  ChildAlreadyRegisteredError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -181,4 +184,7 @@ export {
   InvalidToken,
   ConnectIdRequiredError,
   AssignmentQuestionsNotPresentError,
+  EmailOrPhoneMismatchError,
+  ChildAlreadyRegisteredError,
+  SomethingWentWrongError,
 };

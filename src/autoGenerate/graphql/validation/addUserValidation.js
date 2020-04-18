@@ -10,7 +10,6 @@ import allAuthParams from '../../../../config/authParams';
 const application = process.env.APPLICATION || 'core';
 const authParams = allAuthParams[application];
 const addUserValidation = async (input, context) => {
-  console.log(3333333, input, context)
   const {
     name, username, email, phone, password,
   } = input;

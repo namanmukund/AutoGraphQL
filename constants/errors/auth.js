@@ -53,3 +53,7 @@ export const MandatoryFieldNotSetError = createError('MandatoryFieldNotSetError'
 export const InvalidToken = createError('InvalidToken', {
   message: 'User Token is invalid.',
 });
+
+export const SomethingWentWrongError = createError('SomethingWentWrongError', {
+  message: 'Something went wrong',
+});
