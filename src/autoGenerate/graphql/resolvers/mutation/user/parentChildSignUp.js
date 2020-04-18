@@ -207,11 +207,11 @@ const parentChildSignUpMutationResolver = async (
     const parentDataWithId = generateCuid(parentData);
     parentId = await addUserData(authentication, parentDataWithId);
     if (!parentId) {
-    throw new SomethingWentWrongError({
-      data: {
-        message: 'parentId not found',
-      },
-    });
+      throw new SomethingWentWrongError({
+        data: {
+          message: 'parentId not found',
+        },
+      });
     }
   }
   if (!parentProfileId) {

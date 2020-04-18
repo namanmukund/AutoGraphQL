@@ -63,6 +63,7 @@ import { DELETED } from '../../../../constants/subscriptionEvents';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import convertObjectFieldsToStrings from './utils/convertObjectFieldsToStrings';
 import subscribeToEvents from './utils/subscribeToEvents';
+import loginViaEmailMutationResolver from './mutation/user/loginViaEmail';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -1057,6 +1058,32 @@ resolvers.Mutation.parentChildSignUp = async (root, params, context, info) => {
   newParams.input = hookInput;
 
   return parentChildSignUpMutationResolver(
+    root,
+    params,
+    context,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    authentication,
+  ).then((result) => {
+    const newResult = toObject(result);
+
+    return posthook(newResult, mutationName);
+  });
+};
+
+resolvers.Mutation.loginViaEmail = async (root, params, context, info) => {
+  const authentication = ifAuthorized(context);
+  const typeName = 'User';
+  const mutationName = 'loginViaEmail';
+  const { input } = params;
+  const hookInput = await prehook(input, mutationName, context, params);
+
+  const newParams = params;
+  newParams.input = hookInput;
+
+  return loginViaEmailMutationResolver(
     root,
     params,
     context,

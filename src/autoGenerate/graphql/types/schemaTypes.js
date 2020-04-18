@@ -4,6 +4,7 @@ import updateSchemaWithDefaultFields from './updateSchemaWithDefaultFields';
 import updateSchemaWithUserToken from './updateSchemaWithUserToken';
 import updateSchemaWithAdditionalRelationalFields from './updateSchemaWithAdditionalRelationalFields';
 import updateSchemaWithRelationalMetaFields from './updateSchemaWithRelationalMetaFields';
+import updateSchemaWithParentChildToken from './updateSchemaWithParentChildToken';
 
 // get schema types from config
 const application = process.env.APPLICATION || 'core';
@@ -17,6 +18,7 @@ const updatedSchemaWithDefaultFields = updateSchemaWithDefaultFields(
 const updatedSchemaWithUserToken = updateSchemaWithUserToken(
   updatedSchemaWithDefaultFields,
 );
+
 // additional relational fields
 const parsedASTMapForAdditionalRelationalFields = getParsedASTMap(updatedSchemaWithUserToken);
 const updatedSchemaWithAdditionalRelationalFields = updateSchemaWithAdditionalRelationalFields(
@@ -32,5 +34,10 @@ const updatedSchemaWithRelationalMetaFields = updateSchemaWithRelationalMetaFiel
   updatedSchemaWithAdditionalRelationalFields,
 );
 
+// parent child token
+const updatedSchemaWithParentChildToken = updateSchemaWithParentChildToken(
+  updatedSchemaWithRelationalMetaFields,
+);
+
 // export final schema
-export default updatedSchemaWithRelationalMetaFields;
+export default updatedSchemaWithParentChildToken;

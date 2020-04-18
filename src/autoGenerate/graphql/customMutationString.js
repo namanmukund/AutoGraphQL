@@ -25,6 +25,7 @@ const customMutationString = `
    tcirtSdrowssaPtes ( id: ID!, password: String! ): User,
    uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,
    parentChildSignUp ( input: ParentChildSignUpInput ): UserToken,
+   loginViaEmail ( input: EmailLoginInput ): ParentChildToken,
    `;
 
 export default customMutationString;
