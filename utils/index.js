@@ -32,6 +32,7 @@ import compareObjects from './compareObjects';
 import isObject from './isObject';
 import isSentryAppAndEnv from './isSentryAppAndEnv';
 import throwAsyncError from './throwAsyncError';
+import getTimeDifferenceWithCurrentDateInSeconds from './getTimeDifferenceWithCurrentDateInSeconds';
 
 const env = process.env.NODE_ENV || 'development';
 const application = process.env.APPLICATION || 'core';
@@ -78,4 +79,5 @@ export {
   isObject,
   isSentryAppAndEnv,
   throwAsyncError,
+  getTimeDifferenceWithCurrentDateInSeconds,
 };

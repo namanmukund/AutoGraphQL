@@ -30,6 +30,7 @@ import {
   PaidComponentLockedError,
   EmailOrPhoneMismatchError,
   ChildAlreadyRegisteredError,
+  SendOtpFirstError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -187,4 +188,5 @@ export {
   EmailOrPhoneMismatchError,
   ChildAlreadyRegisteredError,
   SomethingWentWrongError,
+  SendOtpFirstError,
 };

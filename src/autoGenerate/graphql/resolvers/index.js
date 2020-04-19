@@ -63,7 +63,8 @@ import { DELETED } from '../../../../constants/subscriptionEvents';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import convertObjectFieldsToStrings from './utils/convertObjectFieldsToStrings';
 import subscribeToEvents from './utils/subscribeToEvents';
-import loginViaEmailMutationResolver from './mutation/user/loginViaEmail';
+import loginViaPasswordMutationResolver from './mutation/user/loginViaPassword';
+import loginViaOtpMutationResolver from './mutation/user/loginViaOtp';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -610,33 +611,6 @@ resolvers.Mutation.socialLogin = async (root, params, context, info) => {
   });
 };
 
-resolvers.Mutation.validateUserOTP = (async (root, params, context, info) => {
-  const typeName = 'User';
-  const authentication = ifAuthorized(context);
-  const { fields } = parsedASTMap[typeName];
-  const mutationName = 'validateUserOTP';
-  Object.assign(authentication, {
-    mutationOrQueryName: mutationName,
-  });
-  const hookInput = await prehook(params, mutationName, context, params);
-
-  if (hookInput.status && hookInput.status === BYPASS) {
-    authentication.user.status = BYPASS;
-    delete hookInput.status;
-  }
-
-  const newParams = hookInput;
-  return validateUserOTPMutationResolver(
-    root,
-    newParams,
-    typeName,
-    info,
-    fields,
-    parsedASTMap,
-    authentication,
-  ).then((result) => toObject(result));
-});
-
 resolvers.Mutation.resendUserOTP = async (root, params, context, info) => {
   const authentication = ifAuthorized(context);
   const typeName = 'User';
@@ -1073,17 +1047,17 @@ resolvers.Mutation.parentChildSignUp = async (root, params, context, info) => {
   });
 };
 
-resolvers.Mutation.loginViaEmail = async (root, params, context, info) => {
+resolvers.Mutation.loginViaPassword = async (root, params, context, info) => {
   const authentication = ifAuthorized(context);
   const typeName = 'User';
-  const mutationName = 'loginViaEmail';
+  const mutationName = 'loginViaPassword';
   const { input } = params;
   const hookInput = await prehook(input, mutationName, context, params);
 
   const newParams = params;
   newParams.input = hookInput;
 
-  return loginViaEmailMutationResolver(
+  return loginViaPasswordMutationResolver(
     root,
     params,
     context,
@@ -1098,6 +1072,54 @@ resolvers.Mutation.loginViaEmail = async (root, params, context, info) => {
     return posthook(newResult, mutationName);
   });
 };
+
+resolvers.Mutation.loginViaOtp = async (root, params, context, info) => {
+  const authentication = ifAuthorized(context);
+  const typeName = 'User';
+  const mutationName = 'loginViaOtp';
+  const { input } = params;
+  const hookInput = await prehook(input, mutationName, context, params);
+
+  const newParams = params;
+  newParams.input = hookInput;
+
+  return loginViaOtpMutationResolver(
+    root,
+    params,
+    context,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    authentication,
+  ).then((result) => {
+    const newResult = toObject(result);
+
+    return posthook(newResult, mutationName);
+  });
+};
+
+resolvers.Mutation.validateUserOTP = (async (root, params, context, info) => {
+  const authentication = ifAuthorized(context);
+  const typeName = 'User';
+  const mutationName = 'validateUserOTP';
+  const { input } = params;
+  const hookInput = await prehook(input, mutationName, context, params);
+
+  const newParams = params;
+  newParams.input = hookInput;
+
+  return validateUserOTPMutationResolver(
+    root,
+    params,
+    context,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    authentication,
+  ).then((result) => toObject(result));
+});
 
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;

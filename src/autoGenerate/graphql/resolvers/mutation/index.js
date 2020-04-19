@@ -29,7 +29,7 @@ import resetPasswordFromForgotPasswordLinkMutationResolver from './forgotPasswor
 import getUnlockedUserBadgeMutationResolver from './userData/getUnlockedUserBadge';
 import getQuizReportMutationResolver from './userData/getQuizReport';
 import parentChildSignUpMutationResolver from './user/parentChildSignUp';
-import loginViaEmailMutationResolver from './user/loginViaEmail';
+import loginViaPasswordMutationResolver from './user/loginViaPassword';
 
 
 export {
@@ -64,5 +64,5 @@ export {
   getUnlockedUserBadgeMutationResolver,
   getQuizReportMutationResolver,
   parentChildSignUpMutationResolver,
-  loginViaEmailMutationResolver,
+  loginViaPasswordMutationResolver,
 };

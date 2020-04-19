@@ -3,31 +3,27 @@ import { validate } from '../../../validation';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import {
   DatabaseRecordNotFoundError,
-  InvalidEmailError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
-import isValidEmail from '../../../validation/isValidEmail';
-import { PARENT } from '../../../../../../constants/roles';
-import { QueryController } from '../../../controllers';
+import { MutationController, QueryController } from '../../../controllers';
 import { getUserFromDBQuery } from './utils';
-import { checkPasswordAndReturnUserWithToken } from '../utils/checkPasswordAndReturnUserWithToken';
-import getChildrenToken from './utils/getChildrenToken';
+import { getRandomNumber } from '../../../../../../utils';
+import { rangeOTP } from '../../../../../../constants';
+import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 
 const USER_TYPE = 'User';
 
-const loginViaEmailInputValidation = (input) => {
-  const { email } = input;
-  // check email
-  if (!isValidEmail(email)) {
-    throw new InvalidEmailError();
-  }
-  return true;
-};
+
+const updateExistingUserOTP = (
+  searchObj,
+  updateObj,
+  modelMutations,
+) => modelMutations.updateOne(searchObj, updateObj);
 
 /*
 - if the role is parent then send kids info with their tokens
 */
-const loginViaEmailMutationResolver = async (
+const loginViaOtpMutationResolver = async (
   root,
   params,
   context,
@@ -41,7 +37,7 @@ const loginViaEmailMutationResolver = async (
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
   validate(
-    'ParentChildToken',
+    'BooleanResult',
     ast,
     SINGULAR,
     fieldsFetched,
@@ -54,27 +50,30 @@ const loginViaEmailMutationResolver = async (
   if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
-  loginViaEmailInputValidation(input);
+  loginViaOtpInputValidation(input);
 
   Object.assign(authentication, {
     bypass: true,
   });
 
   const modelQueries = new QueryController(USER_TYPE, authentication);
-
   const userData = await getUserFromDBQuery(input, modelQueries);
+
   if (!userData || !userData.id) {
     throw new DatabaseRecordNotFoundError();
   }
-  const { role, id: userId } = userData;
-
-  const userTokenData = checkPasswordAndReturnUserWithToken(userData, input, authentication);
-  // if user is a parent then get children tokens as well
-  if (role === PARENT) {
-    userTokenData.children = await getChildrenToken(context, userId);
-  }
-//testing
-  return userTokenData;
+  const phoneOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
+  const modelMutations = new MutationController(typeName, authentication);
+  const updateObj = {
+    phoneOtp,
+    phoneOtpCreationDate: new Date(),
+  };
+  // update phoneOtp in db
+  await updateExistingUserOTP({ id: userData.id }, updateObj, modelMutations);
+  // send otp to the client
+  return {
+    result: true,
+  };
 };
 
-export default loginViaEmailMutationResolver;
+export default loginViaOtpMutationResolver;

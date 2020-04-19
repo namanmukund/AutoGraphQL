@@ -7,7 +7,6 @@ import {
   preUserDataValidation,
   validateAppTokenInput,
   isFileDeleteAllowed,
-  getUserData,
   validateForgotPassword,
   addUserValidation,
   deleteChapterValidation,
@@ -20,7 +19,6 @@ import {
   DatabaseRecordNotFoundError,
   UserPasswordAlreadySetError,
   AlreadyActiveUser,
-  EitherPhoneOrEmailOtpRequiredError,
   FileUsageCountNotZeroError, ConnectIdRequiredError,
 }
   from '../../../constants/errors';
@@ -218,42 +216,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       const verifiedData = await updateUserValidation(input, context);
       Object.assign(input, verifiedData);
       return hook(input, mutationOrQueryName, 'PreHook');
-    }
-
-    case 'validateUserOTP':
-    {
-      const { phoneOtp, emailOtp } = input;
-      if (!phoneOtp && !emailOtp) {
-        throw new EitherPhoneOrEmailOtpRequiredError();
-      }
-      const { currentUser } = context;
-      const { status, id } = currentUser;
-      switch (status) {
-        case 'active': {
-          return getUserData(id).then((res) => {
-            if (!res) {
-              throw new DatabaseRecordNotFoundError();
-            }
-            const { emailVerified, phoneVerified } = res;
-
-            /* Active only when either email or phone is verified for
-            validateUserOtp
-            */
-            if ((phoneOtp && phoneVerified) || (emailOtp && emailVerified)) {
-              throw new AlreadyActiveUser();
-            }
-            return hook(input, mutationOrQueryName, 'PreHook');
-          });
-        }
-        case 'blocked':
-          throw new UnauthorizedOperationError();
-        case 'inactive': {
-          Object.assign(input, { status: BYPASS });
-          return hook(input, mutationOrQueryName, 'PreHook');
-        }
-        default:
-      }
-      break;
     }
     case 'resendUserOTP': {
       const { currentUser } = context;

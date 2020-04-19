@@ -14,7 +14,10 @@ const getUserFromDBQuery = (
       'phone.number': number,
     };
   }
-  return modelQueries.fetchOne(query);
+  if (Object.keys(query).length) {
+    return modelQueries.fetchOne(query);
+  }
+  return {};
 };
 
 export default getUserFromDBQuery;

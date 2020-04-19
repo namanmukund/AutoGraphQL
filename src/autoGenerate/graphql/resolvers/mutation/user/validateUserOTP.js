@@ -1,24 +1,39 @@
-import { DatabaseRecordNotFoundError, OTPMismatchError } from '../../../../../../constants/errors';
+import {
+  DatabaseRecordNotFoundError,
+  OTPMismatchError, SendOtpFirstError,
+  UserTokenNotRequiredError,
+} from '../../../../../../constants/errors';
 import { QueryController, MutationController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
+import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
+import { getUserFromDBQuery } from './utils';
+import coreAuthParams from '../../../../../../config/authParams/core';
+import { PARENT } from '../../../../../../constants/roles';
+import getChildrenToken from './utils/getChildrenToken';
+import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
+import getTimeDifferenceWithCurrentDateInSeconds
+  from '../../../../../../utils/getTimeDifferenceWithCurrentDateInSeconds';
 
+const USER_TYPE = 'User';
 const validateUserOTPMutationPromise = (
   searchObj,
   updateObj,
   modelMutations,
 ) => modelMutations.updateOne(searchObj, updateObj);
 
-export default function validateUserOTPMutationResolver(
+const validateUserOTPMutationResolver = async (
   root,
   params,
+  context,
   typeName,
   info,
-  fields,
+  mutationName,
   ast,
   authentication,
-) {
+) => {
+  const { input } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
@@ -30,43 +45,81 @@ export default function validateUserOTPMutationResolver(
     authentication,
   );
 
-  const queryController = new QueryController(typeName, authentication);
-  const { id, phoneOtp, emailOtp } = params;
-  return queryController.fetchOne({ id }).then((res) => {
-    if (!res) {
-      throw new DatabaseRecordNotFoundError();
-    }
-    const searchObj = { id };
-    let updateObj;
-    if (phoneOtp) {
-      if (res.phoneOtp !== phoneOtp) {
-        throw new OTPMismatchError();
-      }
-      updateObj = {
-        phoneVerified: true,
-        status: 'active',
-      };
-    } else {
-      if (res.emailOtp !== emailOtp) {
-        throw new OTPMismatchError();
-      }
-      updateObj = {
-        emailVerified: true,
-        status: 'active',
-      };
-    }
+  const currentUser = authentication && authentication.user;
 
-    const modelMutations = new MutationController(typeName, authentication);
-    return validateUserOTPMutationPromise(
-      searchObj,
-      updateObj,
-      modelMutations,
-    ).then((result) => {
-      if (!result) {
-        throw new DatabaseRecordNotFoundError();
-      }
+  if (currentUser) {
+    throw new UserTokenNotRequiredError();
+  }
+  loginViaOtpInputValidation(input);
 
-      return result;
-    });
+  Object.assign(authentication, {
+    bypass: true,
   });
-}
+  const modelQueries = new QueryController(USER_TYPE, authentication);
+  const userData = await getUserFromDBQuery(input, modelQueries);
+  if (!userData || !userData.id) {
+    throw new DatabaseRecordNotFoundError();
+  }
+
+  const {
+    id,
+    phoneOtpCreationDate,
+    role,
+    phoneVerified,
+    emailVerified,
+    status,
+  } = userData;
+
+  const {
+    phoneOtp,
+    emailOtp,
+  } = input;
+
+  let updateObj;
+  let result;
+
+  if (phoneOtp) {
+    if (userData.phoneOtp !== phoneOtp) {
+      throw new OTPMismatchError();
+    }
+    if (
+      getTimeDifferenceWithCurrentDateInSeconds(phoneOtpCreationDate)
+      > coreAuthParams.OTP_EXPIRATION_TIME_IN_SEC) {
+      throw new Error('Otp expired');
+    }
+    updateObj = {
+      phoneVerified: true,
+      status: 'active',
+    };
+  } else if (emailOtp) {
+    if (userData.emailOtp !== emailOtp) {
+      throw new OTPMismatchError();
+    }
+    updateObj = {
+      emailVerified: true,
+      status: 'active',
+    };
+  } else {
+    throw new SendOtpFirstError();
+  }
+  // if user is already verified
+  if (
+    (phoneOtp && phoneVerified && status === 'active')
+    || (emailOtp && emailVerified && status === 'active')
+  ) {
+    result = userData;
+  } else {
+    const modelMutations = new MutationController(typeName, authentication);
+    result = await validateUserOTPMutationPromise({ id }, updateObj, modelMutations);
+  }
+
+  const userTokenData = createUserTokenTypeData(result, authentication);
+  // if user is a parent then get children tokens as well
+  if (role === PARENT) {
+    userTokenData.children = await getChildrenToken(context, id);
+  }
+  return userTokenData;
+};
+
+
+export default validateUserOTPMutationResolver;

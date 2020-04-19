@@ -8,6 +8,7 @@ const coreAuthParams = {
   SUPER_ADMIN_TOKEN_EXPIRY_DATE: '2h',
   ALGORITHM: 'HS256',
   SALT: 12,
+  OTP_EXPIRATION_TIME_IN_SEC: 300,
 };
 
 export default coreAuthParams;
