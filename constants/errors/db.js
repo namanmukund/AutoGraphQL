@@ -73,5 +73,5 @@ export const PaidComponentLockedError = createError('PaidComponentLockedError', 
 });
 
 export const SendOtpFirstError = createError('SendOtpFirstError', {
-  message: 'To validate trigger otp via login first',
+  message: 'Send otp via login first',
 });
