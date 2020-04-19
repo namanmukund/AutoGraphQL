@@ -1,4 +1,3 @@
-
 const ChildrenToken = `
   type ChildrenToken {
    id: ID!,
