@@ -10,6 +10,7 @@ import { getUserFromDBQuery } from './utils';
 import { getRandomNumber } from '../../../../../../utils';
 import { rangeOTP } from '../../../../../../constants';
 import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
+import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
 
 const USER_TYPE = 'User';
 
@@ -71,6 +72,13 @@ const loginViaOtpMutationResolver = async (
   // update phoneOtp in db
   await updateExistingUserOTP({ id: userData.id }, updateObj, modelMutations);
   // send otp to the client
+  const myPhone = {
+    countryCode: '+91',
+    number: '9654347463',
+  };
+
+  const { name } = userData;
+  getNumberAndSendSms(myPhone, phoneOtp, name);
   return {
     result: true,
   };
