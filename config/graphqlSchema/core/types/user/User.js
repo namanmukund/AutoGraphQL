@@ -4,8 +4,9 @@ import { READ } from '../../../../../constants/graphqlOperations';
 const User = `
   type User @model {
     phoneOtp: Int @writeOnly
-    phoneOtpCreationDate: Date
+    phoneOtpCreationDate: Date @writeOnly
     emailOtp: Int @writeOnly
+    emailOtpCreationDate: Date @writeOnly
     name: String @trim
     role: UserRole! @defaultValue(value: "selfLearner") 
           @userPermissions(

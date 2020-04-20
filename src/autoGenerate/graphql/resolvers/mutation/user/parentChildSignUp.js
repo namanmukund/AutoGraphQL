@@ -44,7 +44,7 @@ const addUserData = async (authentication, dataWithId) => {
     dataWithId,
     modelMutations,
   );
-  return get(result, 'id');
+  return result;
 };
 
 const addStudentProfile = async (context, variables, userConnectId, parentProfileId) => {
@@ -75,6 +75,8 @@ mutation($input: ParentProfileInput!){
 const getParentInfo = async (context, email, phone) => {
   const result = {};
   const { countryCode, number } = phone;
+  const childrenName = [];
+  const childrenToken = [];
   const query = `
   query {
     users(filter:{
@@ -100,13 +102,14 @@ const getParentInfo = async (context, email, phone) => {
         user{
           id
           name
+          role
         }
       }
     }
   }
 }
   `;
-  const res = get(await callLocalGraphqlApi(query, context), 'data.users');
+  const res = get(await callLocalGraphqlApi(query, context), 'data.users', []);
   // when same users are added with email and number separately
   if (res && res.length) {
     if (res.length > 1) {
@@ -130,16 +133,17 @@ const getParentInfo = async (context, email, phone) => {
     if (parentProfile && parentProfile.id) {
       result.parentProfileId = parentProfile.id;
       const { children } = parentProfile;
-      const childrenNames = [];
       if (children && children.length) {
         children.forEach((child) => {
           const { user: { name } } = child;
-          childrenNames.push(name);
+          childrenName.push(name);
+          childrenToken.push(createUserTokenTypeData(child.user));
         });
       }
-      result.childrenNames = childrenNames;
     }
   }
+  result.childrenName = childrenName;
+  result.childrenToken = childrenToken;
   return result;
 };
 /*
@@ -193,8 +197,8 @@ const parentChildSignUpMutationResolver = async (
   if (parentInfo && parentInfo.parentId) {
     parentId = parentInfo.parentId;
     parentProfileId = parentInfo.parentProfileId;
-    const { childrenNames } = parentInfo;
-    if (childrenNames && childrenNames.length && childrenNames.includes(childName)) {
+    const { childrenName } = parentInfo;
+    if (childrenName && childrenName.length && childrenName.includes(childName)) {
       throw new ChildAlreadyRegisteredError();
     }
   } else {
@@ -205,14 +209,16 @@ const parentChildSignUpMutationResolver = async (
       role: PARENT,
     };
     const parentDataWithId = generateCuid(parentData);
-    parentId = await addUserData(authentication, parentDataWithId);
-    if (!parentId) {
+    const parentUserData = await addUserData(authentication, parentDataWithId);
+
+    if (!parentUserData || !parentUserData.id) {
       throw new SomethingWentWrongError({
         data: {
           message: 'parentId not found',
         },
       });
     }
+    parentId = parentUserData.id;
   }
   if (!parentProfileId) {
     const parentProfileInputData = {};
@@ -234,7 +240,8 @@ const parentChildSignUpMutationResolver = async (
   };
   const childDataWithId = generateCuid(childData);
 
-  const childId = await addUserData(authentication, childDataWithId);
+  const childUserData = await addUserData(authentication, childDataWithId);
+  const { id: childId } = childUserData;
   if (!childId) {
     throw new SomethingWentWrongError({
       data: {
@@ -266,8 +273,15 @@ const parentChildSignUpMutationResolver = async (
     });
   }
   const queryController = new QueryController(USER_TYPE, authentication);
-  const childUserData = await queryController.fetchOne({ id: childId });
-  return createUserTokenTypeData(childUserData);
+  const parentUserData = await queryController.fetchOne({ id: parentId });
+  // generate parent token
+  const userTokenData = createUserTokenTypeData(parentUserData);
+  // generate kids token
+  userTokenData.children = [
+    ...parentInfo.childrenToken,
+    createUserTokenTypeData(childUserData),
+  ];
+  return userTokenData;
 };
 
 export default parentChildSignUpMutationResolver;
