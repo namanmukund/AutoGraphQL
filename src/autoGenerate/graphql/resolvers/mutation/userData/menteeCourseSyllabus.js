@@ -304,7 +304,7 @@ const menteeCourseSyllabusMutationResolver = async (
       });
       // checking logic if topic is already consumed or yet to be watched
       if (
-        topicOrder <= currentTopicOrder
+        topicOrder >= currentTopicOrder
       ) {
         const bookedMenteeSession = {
           topicId,
