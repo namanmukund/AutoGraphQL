@@ -71,3 +71,7 @@ export const ConnectIdRequiredError = createError('ConnectIdRequiredError', {
 export const PaidComponentLockedError = createError('PaidComponentLockedError', {
   message: 'Component is not free',
 });
+
+export const SendOtpFirstError = createError('SendOtpFirstError', {
+  message: 'Send otp via login first',
+});

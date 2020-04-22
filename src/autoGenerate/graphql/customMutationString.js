@@ -5,7 +5,6 @@ const customMutationString = `
    login ( input: LoginInput ): UserToken,
    socialLogin ( input: SocialLoginInput ): UserToken,
    signupExistingUser ( input: ExistingUserInput, stopOtpTrigger:Boolean ): UserToken,
-   validateUserOTP ( id: ID!, phoneOtp: Int, emailOtp: Int ): User,
    resendUserOTP ( id: ID!): User,
    sendForgotPasswordOTP (input: PhoneInput, email: String): BooleanResult,
    resendForgotPasswordOTP (input: PhoneInput, email: String): BooleanResult,
@@ -24,7 +23,10 @@ const customMutationString = `
    menteeCourseSyllabus : MenteeCourseSyllabus,
    tcirtSdrowssaPtes ( id: ID!, password: String! ): User,
    uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,
-   parentChildSignUp ( input: ParentChildSignUpInput ): UserToken,
+   parentChildSignUp ( input: ParentChildSignUpInput ): ParentChildToken,
+   loginViaPassword ( input: EmailLoginInput ): ParentChildToken,
+   loginViaOtp ( input: ExistingUserInput ): BooleanResult,
+   validateUserOTP ( input: ValidateUserInput  ): ParentChildToken,
    `;
 
 export default customMutationString;

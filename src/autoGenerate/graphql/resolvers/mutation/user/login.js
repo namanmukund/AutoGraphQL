@@ -13,27 +13,8 @@ import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { checkPasswordAndReturnUserWithToken } from '../utils/checkPasswordAndReturnUserWithToken';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
+import getUserFromDBQuery from './utils/getUserFromDBQuery';
 
-const localLoginMutationPromise = (
-  typeName,
-  input,
-  ast,
-  modelMutations,
-) => {
-  const { username, email, phone } = input;
-
-  let query = {};
-  if (username) query.username = username;
-  if (email) query.email = email;
-  if (phone) {
-    const { countryCode, number } = phone;
-    query = {
-      'phone.countryCode': countryCode,
-      'phone.number': number,
-    };
-  }
-  return modelMutations.fetchOne(query);
-};
 
 // Returns remote delete mutaiton promises.
 const remoteLoginMutationPromises = (
@@ -109,16 +90,14 @@ export default function loginMutationResolver(
     user: true,
   });
   // Create a new object id if there is no id.
-  const modelMutations = new QueryController('User', authentication);
+  const modelQueries = new QueryController('User', authentication);
 
   // @TODO incorporate relation logic with multi apps logic
   // If there are no remote fields, return the result.
   if (!Object.keys(remoteFields).length) {
-    return localLoginMutationPromise(
-      typeName,
+    return getUserFromDBQuery(
       input,
-      ast,
-      modelMutations,
+      modelQueries,
     ).then((fetchedUser) => {
       if (!fetchedUser) {
         throw new DatabaseRecordNotFoundError();
@@ -159,11 +138,9 @@ export default function loginMutationResolver(
     const cuidInput = { ...input, id };
     // Input to local database.
     const localInput = pick(cuidInput, Object.keys({ ...localFields, id: true }));
-    return localLoginMutationPromise(
-      typeName,
+    return getUserFromDBQuery(
       localInput,
-      ast,
-      modelMutations,
+      modelQueries,
     ).then((val) => mergeMutationsPromisesResults([value, toObject(val)]))
       .then((savedUser) => checkPasswordAndReturnUserWithToken(savedUser, input, authentication));
   }).catch((error) => error);

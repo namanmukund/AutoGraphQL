@@ -11,8 +11,10 @@ const sendOTPSms = (receiverNumber, phoneOtp, name) => {
     log(`sendOTPSms method called in ${env} environment`);
     return null;
   }
+
   const { bodyBeforeName, bodyAfterName } = smsOTPMessage;
   const body = bodyBeforeName + name + bodyAfterName + phoneOtp;
+
   return client.messages
     .create({
       to: receiverNumber,

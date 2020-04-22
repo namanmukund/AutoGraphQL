@@ -129,6 +129,7 @@ const validateAppAndUserPermission = (
   for (const key of queryFieldKeys) {
     // including 'result' and 'error' fields as exceptions to be sent in response like count & meta
     if (key
+      && field[key]
       && !(key.includes(META)
         || key.includes('count')
         || key.includes('result')

@@ -9,6 +9,7 @@ import QuestionBankOption from './QuestionBankOption';
 import QuestionBankAnswer from './QuestionBankAnswer';
 import Class from './Class';
 import ParentChildSignUpInput from './ParentChildSignUpInput';
+import ChildrenToken from './ChildrenToken';
 
 export default [
   ...Enum,
@@ -22,4 +23,5 @@ export default [
   ...QuestionBankAnswer,
   Class,
   ParentChildSignUpInput,
+  ChildrenToken,
 ];
