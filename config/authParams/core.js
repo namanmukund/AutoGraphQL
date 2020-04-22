@@ -1,6 +1,6 @@
-const coreAuthParams = {
-  SECRET: 'bdfkaevfkadvsfvbkfjbsdfbsbdkfbkdsvzxnalhdfjhzvmvb.kfbKJVBkdsBVKJbksdvkljbls',
-  FORGOT_PASSWORD_SECRET: 'cludfkpnawdiesxndhlzpukfdhslabfbnesjqlahcnxpmritb.bajDKXPyjoWBKVydlpbzmehap',
+const environment = process.env.NODE_ENV || 'development';
+
+const commonParams = {
   TOKEN_EXPIRY_DATE: '1y',
   FORGOT_PASSWORD_EXPIRY_DATE: '1h',
   FRONTEND_STATIC_APP_TOKEN_EXPIRY_DATE: '10y',
@@ -11,4 +11,27 @@ const coreAuthParams = {
   OTP_EXPIRATION_TIME_IN_SEC: 300,
 };
 
-export default coreAuthParams;
+const coreAuthParams = {
+  test: {
+    SECRET: 'bdfkaevfkadvsfvbkfjbsdfbsbdkfbkdsvzxnalhdfjhzvmvb.kfbKJVBkdsBVKJbksdvkljbls',
+    FORGOT_PASSWORD_SECRET: 'cludfkpnawdiesxndhlzpukfdhslabfbnesjqlahcnxpmritb.bajDKXPyjoWBKVydlpbzmehap',
+    ...commonParams,
+  },
+  development: {
+    SECRET: 'bdfkaevfkadvsfvbkfjbsdfbsbdkfbkdsvzxnalhdfjhzvmvb.kfbKJVBkdsBVKJbksdvkljbls',
+    FORGOT_PASSWORD_SECRET: 'cludfkpnawdiesxndhlzpukfdhslabfbnesjqlahcnxpmritb.bajDKXPyjoWBKVydlpbzmehap',
+    ...commonParams,
+  },
+  staging: {
+    SECRET: 'bdfkaevfkadvsfvbkfjbsdfbsbdkfbkdsvzxnalhdfjhzvmvb.kfbKJVBkdsBVKJbksdvkljbls',
+    FORGOT_PASSWORD_SECRET: 'cludfkpnawdiesxndhlzpukfdhslabfbnesjqlahcnxpmritb.bajDKXPyjoWBKVydlpbzmehap',
+    ...commonParams,
+  },
+  production: {
+    SECRET: 'brjbgkvbsdkjbvkjfdvbc;smx≥n/lerihgihlvkljey49ty24geakbckjwbsdlzc;kwejoiashr43io8twsjcbkasjbzxkiq3408trbwousbciuzf',
+    FORGOT_PASSWORD_SECRET: 'sjvbejcabckjwer304yt8jLcfnkhliboiwhkfnjebfrotuo5utgbvkjdbkvjbdabvk,svkbneljbjlrebv',
+    ...commonParams,
+  },
+};
+
+export default coreAuthParams[environment];
