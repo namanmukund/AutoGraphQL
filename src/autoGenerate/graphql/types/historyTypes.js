@@ -1,6 +1,6 @@
 import { without } from 'lodash';
 
-import schema from '../../../../config/graphqlSchema';
+import schema from '../../../../graphqlSchema';
 import insertSubString from '../../../../utils/insertSubString';
 import { getTypeNameFromSchemaString } from './utils';
 

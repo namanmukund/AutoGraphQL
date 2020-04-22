@@ -1,7 +1,7 @@
 /* AutoGenerates resolvers for model types  */
-import { camelCase, isArray } from 'lodash';
+import { camelCase, isArray, get } from 'lodash';
 import pluralize from 'pluralize';
-import { getParsedASTMap, checkIfArgumentsAreFromSameType } from '../../utils';
+import { getParsedASTMap, checkIfArgumentsAreFromSameType, getFieldsBeingFetched } from '../../utils';
 import getRelationMutationNames from '../../utils/getRelationMutationNames';
 import {
   addMutationResolver, updateMutationResolver, resendUserOTPResolver,
@@ -16,6 +16,7 @@ import {
   resendForgotPasswordOTPMutationResolver,
   deleteMultipleMutationResolver,
   userCourseSyllabusMutationResolver,
+  menteeCourseSyllabusMutationResolver,
   userTopicJourneyMutationResolver,
   userFirstAndLatestQuizReportMutationResolver,
   skipVideoMutationResolver,
@@ -25,6 +26,7 @@ import {
   getUnlockedUserBadgeMutationResolver,
   userBadgeMutationResolver,
   getQuizReportMutationResolver,
+  parentChildSignUpMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import {
@@ -57,10 +59,20 @@ import {
   UPDATE_MULTIPLE,
 } from '../../../../constants/graphqlOperations';
 import socialLoginMutationResolver from './mutation/user/socialLogin';
+import { DELETED } from '../../../../constants/subscriptionEvents';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import convertObjectFieldsToStrings from './utils/convertObjectFieldsToStrings';
+import subscribeToEvents from './utils/subscribeToEvents';
+import loginViaPasswordMutationResolver from './mutation/user/loginViaPassword';
+import loginViaOtpMutationResolver from './mutation/user/loginViaOtp';
 
 const parsedASTMap = getParsedASTMap(types);
 
-const resolvers = { Query: {}, Mutation: {} };
+const resolvers = {
+  Query: {},
+  Mutation: {},
+  Subscription: {},
+};
 
 const defaultMutationsResolvers = {
   addMutationResolver,
@@ -68,6 +80,7 @@ const defaultMutationsResolvers = {
   updateMutationResolver,
   deleteMultipleMutationResolver,
 };
+
 
 // FIX: instead of id and input just take in params object as args
 const defaultMutationsResolverWrapper = async (
@@ -106,15 +119,23 @@ const defaultMutationsResolverWrapper = async (
     authentication,
     context,
     isMultiple,
-  ).then((result) => {
+  ).then(async (result) => {
     let newResult;
     if (isArray(result)) {
       newResult = result.map((record) => toObject(record));
     } else {
       newResult = toObject(result);
     }
-
-    return posthook(newResult, mutationName, context, params);
+    const dbData = await posthook(newResult, mutationName, context, params);
+    // allow subscription on defined events
+    subscribeToEvents(
+      typeName,
+      mutationName,
+      context,
+      dbData,
+      parsedASTMap,
+    );
+    return dbData;
   });
 };
 
@@ -131,6 +152,67 @@ Object.keys(parsedASTMap).forEach((type) => {
   // model directives logic
   const isModel = directives && hasDirective(directives, 'model');
   if (isModel) {
+    // Subscription query resolver
+    const { subscribe } = parsedASTMap[typeName];
+    const subscribedEvents = get(subscribe, 'events', []);
+    if (subscribedEvents.length) {
+      resolvers.Subscription[modelSingular] = {
+        subscribe: (root, params, context) => {
+          const { pubsub } = context;
+          return pubsub.asyncIterator([modelSingular]);
+        },
+        resolve: async (payload, args, context, info) => {
+          const { fieldNodes } = info;
+          const fieldsFetched = getFieldsBeingFetched(fieldNodes);
+          const { data: requestFields } = fieldsFetched;
+          const {
+            mutation, typeId, dbData,
+          } = payload;
+
+          let hasRelationalField = false;
+          const nonRelationalFieldsData = {};
+          // if relational fields exist then fetch data from api else manipulate db data
+          Object.keys(requestFields)
+            .forEach((key) => {
+              if (Object.keys(requestFields[key]).length) {
+                hasRelationalField = true;
+              } else {
+                nonRelationalFieldsData[key] = dbData[key];
+              }
+            });
+
+          if (typeId && mutation !== DELETED) {
+            // send db data if there is no relational fields
+            if (!hasRelationalField) {
+              return {
+                mutation,
+                data: nonRelationalFieldsData,
+              };
+            }
+            // send api data in case of relational fields
+            // let stringFields = '';
+            const stringFields = convertObjectFieldsToStrings(requestFields).str;
+            const query = `query{
+                        ${modelSingular}(id:"${typeId}"){
+                          ${stringFields}
+                        }
+                      }`;
+            const result = await callLocalGraphqlApi(query);
+            const finalResultWithRelationalFields = get(result, `data.${modelSingular}`);
+            // return subscriptionPayload
+            return {
+              mutation,
+              data: toObject(finalResultWithRelationalFields),
+            };
+          }
+          // in case of delete only return db data
+          return {
+            mutation,
+            data: nonRelationalFieldsData,
+          };
+        },
+      };
+    }
     // Fetch single query resolver.
     if (
       (allowedOperations && allowedOperations === '*')
@@ -529,33 +611,6 @@ resolvers.Mutation.socialLogin = async (root, params, context, info) => {
   });
 };
 
-resolvers.Mutation.validateUserOTP = (async (root, params, context, info) => {
-  const typeName = 'User';
-  const authentication = ifAuthorized(context);
-  const { fields } = parsedASTMap[typeName];
-  const mutationName = 'validateUserOTP';
-  Object.assign(authentication, {
-    mutationOrQueryName: mutationName,
-  });
-  const hookInput = await prehook(params, mutationName, context, params);
-
-  if (hookInput.status && hookInput.status === BYPASS) {
-    authentication.user.status = BYPASS;
-    delete hookInput.status;
-  }
-
-  const newParams = hookInput;
-  return validateUserOTPMutationResolver(
-    root,
-    newParams,
-    typeName,
-    info,
-    fields,
-    parsedASTMap,
-    authentication,
-  ).then((result) => toObject(result));
-});
-
 resolvers.Mutation.resendUserOTP = async (root, params, context, info) => {
   const authentication = ifAuthorized(context);
   const typeName = 'User';
@@ -781,6 +836,24 @@ resolvers.Mutation.userCourseSyllabus = async (root, params, context, info) => {
   ).then((result) => toObject(result));
 };
 
+// Resolver for a custom homepage data for mentee
+resolvers.Mutation.menteeCourseSyllabus = async (root, params, context, info) => {
+  const typeName = 'UserCurrentTopicComponentStatus';
+  const mutationName = 'menteeCourseSyllabus';
+
+  const hookInput = await prehook(params, mutationName, context, params);
+
+  return menteeCourseSyllabusMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+  ).then((result) => toObject(result));
+};
+
 // Resolver for a custom journey page for user
 resolvers.Mutation.userTopicJourney = async (root, params, context, info) => {
   const typeName = 'UserCurrentTopicComponentStatus';
@@ -947,6 +1020,106 @@ resolvers.Mutation.resetPasswordFromForgotPasswordLink = async (root, params, co
     context,
   ).then((result) => toObject(result));
 };
+
+resolvers.Mutation.parentChildSignUp = async (root, params, context, info) => {
+  const authentication = ifAuthorized(context);
+  const typeName = 'User';
+  const mutationName = 'parentChildSignUp';
+  const { input } = params;
+  const hookInput = await prehook(input, mutationName, context, params);
+
+  const newParams = params;
+  newParams.input = hookInput;
+
+  return parentChildSignUpMutationResolver(
+    root,
+    params,
+    context,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    authentication,
+  ).then((result) => {
+    const newResult = toObject(result);
+
+    return posthook(newResult, mutationName);
+  });
+};
+
+resolvers.Mutation.loginViaPassword = async (root, params, context, info) => {
+  const authentication = ifAuthorized(context);
+  const typeName = 'User';
+  const mutationName = 'loginViaPassword';
+  const { input } = params;
+  const hookInput = await prehook(input, mutationName, context, params);
+
+  const newParams = params;
+  newParams.input = hookInput;
+
+  return loginViaPasswordMutationResolver(
+    root,
+    params,
+    context,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    authentication,
+  ).then((result) => {
+    const newResult = toObject(result);
+
+    return posthook(newResult, mutationName);
+  });
+};
+
+resolvers.Mutation.loginViaOtp = async (root, params, context, info) => {
+  const authentication = ifAuthorized(context);
+  const typeName = 'User';
+  const mutationName = 'loginViaOtp';
+  const { input } = params;
+  const hookInput = await prehook(input, mutationName, context, params);
+
+  const newParams = params;
+  newParams.input = hookInput;
+
+  return loginViaOtpMutationResolver(
+    root,
+    params,
+    context,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    authentication,
+  ).then((result) => {
+    const newResult = toObject(result);
+
+    return posthook(newResult, mutationName);
+  });
+};
+
+resolvers.Mutation.validateUserOTP = (async (root, params, context, info) => {
+  const authentication = ifAuthorized(context);
+  const typeName = 'User';
+  const mutationName = 'validateUserOTP';
+  const { input } = params;
+  const hookInput = await prehook(input, mutationName, context, params);
+
+  const newParams = params;
+  newParams.input = hookInput;
+
+  return validateUserOTPMutationResolver(
+    root,
+    params,
+    context,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    authentication,
+  ).then((result) => toObject(result));
+});
 
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;

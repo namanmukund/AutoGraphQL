@@ -9,11 +9,12 @@ import regexValidation from './regexValidation';
 import loginType from './loginType';
 
 
-const FRONTEND_APP_ONE = 'tekieTms';
-const FRONTEND_APP_TWO = 'tekieLearningApp';
+const TMS = 'tekieTms';
+const TLA = 'tekieLearningApp';
+const TWA = 'tekieWebApp';
 const backendApps = ['core'];
 
-const frontEndApps = [FRONTEND_APP_TWO, FRONTEND_APP_ONE];
+const frontEndApps = [TLA, TMS, TWA];
 const permissionIntegratedApps = [];
 const firebaseExcludedApps = [];
 
@@ -89,7 +90,7 @@ const arrayUpdateRemoveTypes = [
 const sortBy = ['ASC', 'DESC'];
 const smsOTPMessage = {
   bodyBeforeName: 'Dear ',
-  bodyAfterName: ', your xyz OTP is ',
+  bodyAfterName: ', your login OTP is ',
 };
 
 const fromEmail = 'namanmukund@gmail.com';
@@ -203,12 +204,17 @@ const stickerEmojiType = {
   emoji: 'emoji',
 };
 
-
 const forgotPassWebURL = {
   development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword/',
   staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
   production: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
 };
+
+const slotTimes = [
+  'slot0', 'slot1', 'slot2', 'slot3', 'slot4', 'slot5', 'slot6', 'slot7', 'slot8', 'slot9', 'slot10',
+  'slot11', 'slot12', 'slot13', 'slot14', 'slot15', 'slot16', 'slot17', 'slot18', 'slot19', 'slot20',
+  'slot21', 'slot22', 'slot23',
+];
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
@@ -243,8 +249,9 @@ export {
   questionTypes,
   scholarshipThreshHolds,
   freeTopicCount,
-  FRONTEND_APP_ONE,
-  FRONTEND_APP_TWO,
+  TMS,
+  TLA,
+  TWA,
   loginType,
   masteryLevels,
   learningObjectiveQuizReportThreshHolds,
@@ -252,4 +259,5 @@ export {
   badgeTypes,
   forgotPassWebURL,
   stickerEmojiType,
+  slotTimes,
 };

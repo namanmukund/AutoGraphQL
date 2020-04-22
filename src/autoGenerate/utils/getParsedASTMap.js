@@ -10,6 +10,7 @@ import {
 } from 'graphql';
 import getParsedField from './getParsedField';
 import { InvalidRuleValueError } from '../../../constants/errors';
+import { allEvents } from '../../../constants/subscriptionEvents';
 
 const getAllowedOperationsOnType = (
   definition,
@@ -38,6 +39,44 @@ const getAllowedOperationsOnType = (
     (allowedDirectiveArray && allowedDirectiveArray.length)
       ? allowedDirectiveArray : '*'
   );
+};
+
+const getSubscriptionEventsOnType = (
+  definition,
+  allowedDirectiveName,
+) => {
+  const subscribedEvents = {};
+  const { directives } = definition;
+  if (directives && directives.length) {
+    directives.forEach((directive) => {
+      if (get(directive, 'name.value') === allowedDirectiveName) {
+        if (get(directive, 'arguments[0].name.value') === 'events') {
+          const argumentKind = get(directive, 'arguments[0].value.kind');
+          if (argumentKind && argumentKind === 'ListValue') {
+            const values = get(directive, 'arguments[0].value.values');
+            const allowedEvents = [];
+            if (values && values.length) {
+              values.forEach((listValue) => {
+                const { value } = listValue;
+                if (value) {
+                  allowedEvents.push(value);
+                }
+              });
+              subscribedEvents.events = allowedEvents;
+            }
+          } else if (
+            get(directive, 'arguments[0].value.value')
+            && get(directive, 'arguments[0].value.value') === '*') {
+            subscribedEvents.events = allEvents;
+          } else {
+            throw new Error('Invalid type of events assigned');
+          }
+        }
+      }
+    });
+  }
+
+  return subscribedEvents;
 };
 
 const getAppAndUserPermissionsFromDirective = (
@@ -91,17 +130,33 @@ const getAppAndUserPermissionsFromDirective = (
               // if it is userRole
               if (
                 field.name && field.name.value === 'userRole'
-                    && field.value && field.value.value
+                    && field.value && (field.value.value || field.value.values)
               ) {
-                permissionInfoObj.userRole = field.value.value;
+                if (field.value.kind !== 'ListValue') {
+                  permissionInfoObj.userRole = field.value.value;
+                } else {
+                  const userRoleArray = [];
+                  field.value.values.forEach((userRole) => {
+                    userRoleArray.push(userRole.value);
+                  });
+                  permissionInfoObj.userRole = userRoleArray;
+                }
               }
 
               // if it is name field
               if (
                 field.name && field.name.value === 'appName'
-                    && field.value && field.value.value
+                    && field.value && (field.value.value || field.value.values)
               ) {
-                permissionInfoObj.appName = field.value.value;
+                if (field.value.kind === 'StringValue') {
+                  permissionInfoObj.appName = field.value.value;
+                } else {
+                  const appNameArray = [];
+                  field.value.values.forEach((appName) => {
+                    appNameArray.push(appName.value);
+                  });
+                  permissionInfoObj.appName = appNameArray;
+                }
               }
               // if it is operations field
               if (
@@ -169,6 +224,11 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
     const allowedOperations = getAllowedOperationsOnType(
       definition,
       'allowedOperations',
+    );
+
+    const subscribe = getSubscriptionEventsOnType(
+      definition,
+      'subscribe',
     );
     // To store fields Object for each field.
     const fieldsObject = {};
@@ -311,14 +371,14 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
 
             case 'appPermissions':
               parsedField.appPermissions = getAppAndUserPermissionsFromDirective(
-                parsedField.directives,
+                { directives: parsedField.directives },
                 'appPermissions',
               );
               break;
 
             case 'userPermissions':
               parsedField.userPermissions = getAppAndUserPermissionsFromDirective(
-                parsedField.directives,
+                { directives: parsedField.directives },
                 'userPermissions',
               );
               break;
@@ -422,6 +482,7 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
       appPermissions,
       userPermissions,
       allowedOperations,
+      subscribe,
     };
 
     return null;

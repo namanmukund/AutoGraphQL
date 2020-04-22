@@ -111,3 +111,7 @@ export const InvalidGmailTokenError = createError('InvalidGmailTokenError', {
 export const InvalidFacebookTokenError = createError('InvalidFacebookTokenError', {
   message: 'Invalid facebook token error',
 });
+
+export const AssignmentQuestionsNotPresentError = createError('AssignmentQuestionsNotPresentError', {
+  message: 'AssignmentQuestions are missing in input',
+});

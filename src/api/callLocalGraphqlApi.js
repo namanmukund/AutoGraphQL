@@ -12,11 +12,11 @@ const callLocalGraphqlApi = (query, context, variables) => {
   // Changes for bypassing validations as this is called, from withing the code.
   // Change app to right core app. Here could have used env variable APPLICATION,
   // but that might create problems when APPLICATION=MAX or anything other than core.
-  contextValue.decodedApp = {
+  contextValue.currentApp = {
     name: 'core',
   };
   // Remove decoded user
-  delete contextValue.decodedUser;
+  delete contextValue.currentUser;
 
   // To avoid apollo-server-core error
   if (!variableValues || variableValues === '') {

@@ -7,11 +7,11 @@ user and app info. we will will return userId and app name from this method.
 const getUserIdandAppNameAfterValidation = (context, skipUserValidation = false) => {
   const userAndAppInfo = validateTokenAndExtractInformation(context, skipUserValidation);
   const {
-    decodedUser,
-    decodedApp,
+    currentUser,
+    currentApp,
   } = userAndAppInfo;
-  const userIdFromContext = decodedUser && decodedUser.id;
-  const appName = decodedApp && decodedApp.name;
+  const userIdFromContext = currentUser && currentUser.id;
+  const appName = currentApp && currentApp.name;
   return {
     userIdFromContext,
     appName,

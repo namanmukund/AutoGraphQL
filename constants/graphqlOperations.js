@@ -8,6 +8,9 @@ const UPDATE_MULTIPLE = 'updateMultiple';
 const DELETE = 'delete';
 const DELETE_MULTIPLE = 'deleteMultiple';
 
+const READ = `["${SINGULAR}", "${PLURAL}", "${META_QUERY}"]`;
+const WRITE = `["${ADD}", "${UPDATE}", "${UPDATE_MULTIPLE}", "${DELETE}", "${DELETE_MULTIPLE}"]`;
+
 export {
   SINGULAR,
   PLURAL,
@@ -17,4 +20,6 @@ export {
   UPDATE_MULTIPLE,
   DELETE,
   DELETE_MULTIPLE,
+  READ,
+  WRITE,
 };

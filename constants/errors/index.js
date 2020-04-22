@@ -8,6 +8,7 @@ import {
   InvalidStaticToken,
   MandatoryFieldNotSetError,
   InvalidToken,
+  SomethingWentWrongError,
 } from './auth';
 
 import {
@@ -25,6 +26,11 @@ import {
   ComponentLockedError,
   OrderAlreadyExistsError,
   TopicIdRequiredError,
+  ConnectIdRequiredError,
+  PaidComponentLockedError,
+  EmailOrPhoneMismatchError,
+  ChildAlreadyRegisteredError,
+  SendOtpFirstError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -75,6 +81,7 @@ import {
   InvalidGmailTokenError,
   InvalidFacebookTokenError,
   InvalidPasswordLengthError,
+  AssignmentQuestionsNotPresentError,
 } from './input';
 
 
@@ -155,6 +162,7 @@ export {
   UnsupportedListFieldInsideSubDocumentObjectError,
   DuplicateConnectIdsError,
   ComponentLockedError,
+  PaidComponentLockedError,
   InvalidTopicLOConnectionError,
   InvalidTopicPassedInCurrentTopicComponent,
   UserCourseCombinationExistError,
@@ -175,4 +183,10 @@ export {
   InvalidFacebookTokenError,
   InvalidPasswordLengthError,
   InvalidToken,
+  ConnectIdRequiredError,
+  AssignmentQuestionsNotPresentError,
+  EmailOrPhoneMismatchError,
+  ChildAlreadyRegisteredError,
+  SomethingWentWrongError,
+  SendOtpFirstError,
 };

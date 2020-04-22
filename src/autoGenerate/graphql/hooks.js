@@ -1,4 +1,4 @@
-import { isArray } from 'lodash';
+import { isArray, get } from 'lodash';
 import { functions, ifAuthorized } from '../../../utils';
 
 
@@ -7,7 +7,6 @@ import {
   preUserDataValidation,
   validateAppTokenInput,
   isFileDeleteAllowed,
-  getUserData,
   validateForgotPassword,
   addUserValidation,
   deleteChapterValidation,
@@ -20,8 +19,7 @@ import {
   DatabaseRecordNotFoundError,
   UserPasswordAlreadySetError,
   AlreadyActiveUser,
-  EitherPhoneOrEmailOtpRequiredError,
-  FileUsageCountNotZeroError,
+  FileUsageCountNotZeroError, ConnectIdRequiredError,
 }
   from '../../../constants/errors';
 
@@ -30,7 +28,7 @@ import { BYPASS } from '../../../constants';
 
 import { createStaticAppToken } from '../../auth';
 import deleteFromS3 from '../../middlewares/utils/deleteFromS3';
-import { callAddUpdateHookValidationFunction } from './preHookFunctions/validation/utils';
+import generateSignedUrl from '../../middlewares/utils/getSigned';
 import deleteTopicValidation from './preHookFunctions/validation/deleteTopicValidation';
 import deleteLearningObjectiveValidation from './preHookFunctions/validation/deleteLearningObjectiveValidation';
 import deleteQuestionBankValidation from './preHookFunctions/validation/deleteQuestionBankValidation';
@@ -64,6 +62,18 @@ import userLearningObjectiveValidation
   from './preHookFunctions/validation/userLearningObjectiveValidation';
 import userQuizValidation from './preHookFunctions/validation/userQuizValidation';
 import userPracticeQuestionReportPostHookMethod from './postHookFunctions/userPracticeQuestionReportPostHookMethod';
+import isUniqueOrderField from './validation/isUniqueOrderField';
+import userAssignmentValidation from './preHookFunctions/validation/userAssignmentValidation';
+import userAssignmentPostHookMethod from './postHookFunctions/userAssignmentPostHookMethod';
+import addUserActivityAssignmentDumpValidation
+  from './preHookFunctions/validation/addUserActivityAssignmentDumpValidation';
+import addUserActivityAssignmentDumpPostHookMethod
+  from './postHookFunctions/addUserActivityAssignmentDumpPostHookMethod';
+import updateUserValidation from './preHookFunctions/validation/updateUserValidation';
+import addMenteeSessionValidation
+  from './preHookFunctions/validation/addMenteeSessionValidation';
+import addMentorSessionValidation
+  from './preHookFunctions/validation/addMentorSessionValidation';
 
 const { hookFunctions } = functions || {};
 
@@ -91,6 +101,31 @@ const hook = (data, mutationName, hookName) => {
 // params contain all the arguments whatever you are passing in mutation query
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
+    case 'updateTopic': {
+      await isUniqueOrderField(params, mutationOrQueryName);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+
+    case 'updateChapter': {
+      await isUniqueOrderField(params, mutationOrQueryName);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+
+    case 'addTopic': {
+      if (!get(params, 'chapterConnectId')) {
+        throw new ConnectIdRequiredError({ data: { message: 'Chapter Id is required' } });
+      }
+      await isUniqueOrderField(params, mutationOrQueryName);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+
+    case 'addChapter': {
+      if (!get(params, 'coursesConnectIds', []).length) {
+        throw new ConnectIdRequiredError({ data: { message: 'Course Id is required' } });
+      }
+      await isUniqueOrderField(params, mutationOrQueryName);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
     case 'addUser': {
       // validate username, phone, email and name and returns email or phone verified accordingly
       const verifiedData = await addUserValidation(input, context);
@@ -177,48 +212,14 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'updateUser': {
-      await callAddUpdateHookValidationFunction(mutationOrQueryName, params, context);
-      break;
-    }
-
-    case 'validateUserOTP':
-    {
-      const { phoneOtp, emailOtp } = input;
-      if (!phoneOtp && !emailOtp) {
-        throw new EitherPhoneOrEmailOtpRequiredError();
-      }
-      const { decodedUser } = context;
-      const { status, id } = decodedUser;
-      switch (status) {
-        case 'active': {
-          return getUserData(id).then((res) => {
-            if (!res) {
-              throw new DatabaseRecordNotFoundError();
-            }
-            const { emailVerified, phoneVerified } = res;
-
-            /* Active only when either email or phone is verified for
-            validateUserOtp
-            */
-            if ((phoneOtp && phoneVerified) || (emailOtp && emailVerified)) {
-              throw new AlreadyActiveUser();
-            }
-            return hook(input, mutationOrQueryName, 'PreHook');
-          });
-        }
-        case 'blocked':
-          throw new UnauthorizedOperationError();
-        case 'inactive': {
-          Object.assign(input, { status: BYPASS });
-          return hook(input, mutationOrQueryName, 'PreHook');
-        }
-        default:
-      }
-      break;
+      // validate username, phone, email and name and returns email or phone verified accordingly
+      const verifiedData = await updateUserValidation(input, context);
+      Object.assign(input, verifiedData);
+      return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'resendUserOTP': {
-      const { decodedUser } = context;
-      const { status } = decodedUser;
+      const { currentUser } = context;
+      const { status } = currentUser;
       switch (status) {
         case 'active':
           throw new AlreadyActiveUser();
@@ -245,12 +246,12 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(newInput, mutationOrQueryName, 'PreHook');
     }
     case 'addAppToken': {
-      const { decodedUser } = context;
+      const { currentUser } = context;
       const authentication = ifAuthorized(context);
 
       const { name, type } = input;
-      if (decodedUser) {
-        const { status } = decodedUser;
+      if (currentUser) {
+        const { status } = currentUser;
         if (status && status !== 'active') {
           throw new UnauthorizedOperationError();
         }
@@ -335,16 +336,32 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await userCourseSyllabusMethod(context);
       break;
     }
+    case 'userAssignment': {
+      await userAssignmentValidation(params, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addUserActivityAssignmentDump': {
+      await addUserActivityAssignmentDumpValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addMenteeSession': {
+      await addMenteeSessionValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addMentorSession': {
+      await addMentorSessionValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
     default: {
       /* If context is not present then it means user is not authenticated and the
       user won't be able to make any db query
       */
       /* Queries are without input but they are not calling prehook function */
       if (input) {
-        const { decodedUser } = context;
+        const { currentUser } = context;
         // Backend apps won't be having any decoded user
-        if (decodedUser) {
-          const { status } = decodedUser;
+        if (currentUser) {
+          const { status } = currentUser;
           // for rest of the operations user status need to be inctive state
           if (status && status !== 'active') {
             throw new UnauthorizedOperationError();
@@ -367,6 +384,20 @@ const posthook = async (input, mutationName, context, params) => {
       await deleteFromS3(uri);
       break;
     }
+    case 'file': {
+      if (input.length > 1) {
+        for (const data of input) {
+          // eslint-disable-next-line no-await-in-loop
+          data.signedUri = await generateSignedUrl(get(data, 'uri'));
+        }
+      } else {
+        // eslint-disable-next-line no-param-reassign
+        input.signedUri = await generateSignedUrl(get(input, 'uri'));
+      }
+
+      break;
+    }
+
     case 'deleteFiles': {
       const urisToDelete = input.map((record) => record.uri);
       /* eslint no-restricted-syntax: ["error", "FunctionExpression", "WithStatement",
@@ -413,6 +444,14 @@ const posthook = async (input, mutationName, context, params) => {
     case 'userPracticeQuestionReport': {
       const resultArray = await userPracticeQuestionReportPostHookMethod(input, params);
       return hook(resultArray, mutationName, 'PostHook');
+    }
+    case 'userAssignment': {
+      const resultArray = await userAssignmentPostHookMethod(input, params);
+      return hook(resultArray, mutationName, 'PostHook');
+    }
+    case 'addUserActivityAssignmentDump': {
+      await addUserActivityAssignmentDumpPostHookMethod(input, mutationName, context);
+      break;
     }
     default:
       break;

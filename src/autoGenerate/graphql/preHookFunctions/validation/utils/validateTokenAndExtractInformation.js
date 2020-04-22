@@ -19,11 +19,11 @@ const validateTokenAndExtractInformation = (context, skipUserValidation) => {
     const ms = new MasterController('', authentication);
     ms.validate();
   }
-  const decodedUser = authentication && authentication.user;
-  const decodedApp = authentication && authentication.app;
+  const currentUser = authentication && authentication.user;
+  const currentApp = authentication && authentication.app;
   return {
-    decodedUser,
-    decodedApp,
+    currentUser,
+    currentApp,
   };
 };
 

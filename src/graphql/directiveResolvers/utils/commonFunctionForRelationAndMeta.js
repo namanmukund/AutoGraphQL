@@ -12,6 +12,7 @@ import { handleUserToken } from '../../../middlewares/authMiddleware';
 import fetchListAggregationQueryResolver
   from '../../../autoGenerate/graphql/resolvers/query/fetchListAggregationQueryResolver';
 import addAdditionalRelationFieldsToResponse from './addAdditionalRelationFieldsToResponse';
+import { posthook, prehook } from '../../../autoGenerate/graphql/hooks';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -71,8 +72,8 @@ const commonFunctionForRelationAndMeta = async (
   }
   /* eslint-disable no-param-reassign */
   // Put info back to context
-  context.decodedApp = authentication.app;
-  context.decodedUser = authentication.user;
+  context.currentApp = authentication.app;
+  context.currentUser = authentication.user;
   /* eslint-enable no-param-reassign */
   // Get new params
   const newParams = { ...params };
@@ -133,6 +134,9 @@ const commonFunctionForRelationAndMeta = async (
       ]
     }
      */
+    const modelSingular = camelCase(typeName);
+    await prehook('', modelSingular, context, params);
+
     return fetchListQueryResolver(
       root,
       newParams,
@@ -140,9 +144,10 @@ const commonFunctionForRelationAndMeta = async (
       info,
       parsedASTMap,
       authentication,
-    ).then((res) => {
+    ).then(async (res) => {
       const finalRelationValue = addAdditionalRelationFieldsToResponse(result, res);
-      return finalRelationValue;
+      const postHookResult = await posthook(finalRelationValue, modelSingular, context, params);
+      return postHookResult;
     });
   }
   const typeName = result.type;
@@ -162,6 +167,9 @@ const commonFunctionForRelationAndMeta = async (
   } else {
     return null;
   }
+  const modelSingular = camelCase(typeName);
+  await prehook('', modelSingular, context, params);
+
   return fetchSingleQueryResolver(
     root,
     newParams,
@@ -170,9 +178,10 @@ const commonFunctionForRelationAndMeta = async (
     parsedASTMap,
     authentication,
     true, // Allow multiple
-  ).then((res) => {
+  ).then(async (res) => {
     const finalRelationValue = addAdditionalRelationFieldsToResponse([result], [res]);
-    return finalRelationValue[0];
+    const postHookResult = await posthook(finalRelationValue[0], modelSingular, context, params);
+    return postHookResult;
   });
 };
 

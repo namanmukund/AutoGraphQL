@@ -7,13 +7,15 @@ import {
   UserMismatchError,
   UserOrLearningObjectiveNotPresentError,
   UserOrTopicNotPresentError,
+  PaidComponentLockedError,
 } from '../../../../../../constants/errors';
 import getUserCurrentTopicComponentStatus
   from '../../../../utils/getUserCurrentTopicComponentStatus';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
-import { backendApps, topicTypes } from '../../../../../../constants';
+import { backendApps, enrollmentTypes, topicTypes } from '../../../../../../constants';
 import getTopicForValidation from './getTopicForValidation';
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
+import { validateMentorMenteePermissionForComponent } from './index';
 
 /*
 This is a common method to check whether the called topic component is locked or not
@@ -199,8 +201,29 @@ const isComponentUnlocked = async (
     page,
     checkForPaidLogic,
   )) {
-    throw new ComponentLockedError();
+    // placing logic to send correct message if a paid video is locked coz free user is trying to access it
+    const { free } = enrollmentTypes;
+
+    if (enrollmentType === free
+        && topicOrder <= currentTopicOrder
+        && isTrial !== true && page === video) {
+      throw new PaidComponentLockedError();
+    } else {
+      throw new ComponentLockedError();
+    }
   }
+
+  // check if mentee should be able to watch a video
+  // check if user has permission to hit API according to his role, if user is mentee and there is
+  // no mentor token, he should not be able to hit API
+  validateMentorMenteePermissionForComponent(
+    context,
+    topicOrder,
+    learningObjectiveOrder,
+    page,
+    currentTopicComponentInfo,
+  );
+
   switch (page) {
     case message: {
       const {

@@ -1,9 +1,9 @@
-import { FRONTEND_APP_TWO } from '../../constants';
+import { TLA } from '../../constants';
 
 const getExpiryDateForAppToken = (authParams, applicationName) => {
   let expiresIn = authParams.TOKEN_EXPIRY_DATE;
   switch (applicationName) {
-    case FRONTEND_APP_TWO:
+    case TLA:
       expiresIn = authParams.TOKEN_EXPIRY_DATE;
       break;
     default:
