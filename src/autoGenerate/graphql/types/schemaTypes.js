@@ -1,4 +1,4 @@
-import schema from '../../../../config/graphqlSchema';
+import schema from '../../../../graphqlSchema';
 import getParsedASTMap from '../../utils/getParsedASTMap';
 import updateSchemaWithDefaultFields from './updateSchemaWithDefaultFields';
 import updateSchemaWithUserToken from './updateSchemaWithUserToken';
