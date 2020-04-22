@@ -1,7 +1,7 @@
 import { log, logMapOfArrays, logArray } from './log';
 import { authenticateUser, authenticateApp, ifAuthorized } from './ifAuthorized';
 import generateCuid from './generateCuid';
-import schema from '../config/graphqlSchema';
+import schema from '../graphqlSchema';
 import allDbConfig from '../config/mongoDb';
 import toObject from './toObject';
 import isErrorThrown from './isErrorThrown';
