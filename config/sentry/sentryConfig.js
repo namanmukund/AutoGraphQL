@@ -9,7 +9,7 @@ const sentryConfig = {
     sentryDSN: 'https://ba594c2965dc41a699fdfc0bd4e6b7cc@sentry.io/1859809',
   },
   production: {
-    sentryDSN: 'https://ba594c2965dc41a699fdfc0bd4e6b7cc@sentry.io/1859809',
+    sentryDSN: 'https://dabb8c8fa08e4841be2d193631aca0c0@o381933.ingest.sentry.io/5210051',
   },
 };
 
