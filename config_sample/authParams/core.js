@@ -27,11 +27,6 @@ const coreAuthParams = {
     FORGOT_PASSWORD_SECRET: 'cludfkpnawdiesxndhlzpukfdhslabfbnesjqlahcnxpmritb.bajDKXPyjoWBKVydlpbzmehap',
     ...commonParams,
   },
-  production: {
-    SECRET: 'brjbgkvbsdkjbvkjfdvbc;smx≥n/lerihgihlvkljey49ty24geakbckjwbsdlzc;kwejoiashr43io8twsjcbkasjbzxkiq3408trbwousbciuzf',
-    FORGOT_PASSWORD_SECRET: 'sjvbejcabckjwer304yt8jLcfnkhliboiwhkfnjebfrotuo5utgbvkjdbkvjbdabvk,svkbneljbjlrebv',
-    ...commonParams,
-  },
 };
 
 export default coreAuthParams[environment];

@@ -34,14 +34,6 @@ const config = {
       db: MONGODB_URI || 'mongodb://heroku_25mkw084:nore63drbvb10kjfadcl4bulcr@ds235947.mlab.com:35947/heroku_25mkw084?authSource=heroku_25mkw084',
     },
   },
-  production: {
-    // mongodb connection settings
-    database: {
-      host: DATABASE_HOST,
-      port: DATABASE_PORT,
-      db: MONGODB_URI || 'mongodb+srv://namanmukund:Cx56ZSZeDGF059X5@tekie-4vfzy.mongodb.net/tekie?retryWrites=true&w=majority',
-    },
-  },
 };
 
 export default config;

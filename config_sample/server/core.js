@@ -26,14 +26,6 @@ const config = {
       uri: `http://${applicationHost}:${port}/graphql/${application}`,
     },
   },
-  production: {
-    // server connection settings
-    backend: {
-      applicationHost,
-      port,
-      uri: `http://${applicationHost}:${port}/graphql/${application}`,
-    },
-  },
 };
 
 export default config;
