@@ -1,0 +1,4 @@
+defaults.url=https://sentry.io/
+defaults.org=tekie-logs
+defaults.project=tekie-backend
+auth.token=a0a42599490442ec896c95f7b588885ed2eb08b8d8de4ed88f3f4f15404a1264
