@@ -10,3 +10,4 @@ uploads/
 .serverless
 mongoMigration/oldVersioningMigrationFiles/*
 .env
+config/
