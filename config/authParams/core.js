@@ -34,4 +34,6 @@ const coreAuthParams = {
   },
 };
 
+
+
 export default coreAuthParams[environment];
