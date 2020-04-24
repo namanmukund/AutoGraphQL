@@ -1,13 +1,11 @@
 import bcrypt from 'bcryptjs';
-import allAuthParams from '../../../../../../config/authParams';
+import authParams from '../../../../../../config/authParams';
 import { PasswordMismatchError } from '../../../../../../constants/errors';
 import { MutationController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { UPDATE } from '../../../../../../constants/graphqlOperations';
 
-const application = process.env.APPLICATION || 'core';
-const authParams = allAuthParams[application];
 const resetUserPasswordMutationPromise = (searchObj, updateObj, modelMutations) => modelMutations.updateOne(searchObj, updateObj);
 
 export default function resetUserPasswordMutationResolver(

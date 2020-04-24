@@ -2,7 +2,7 @@ import { log, logMapOfArrays, logArray } from './log';
 import { authenticateUser, authenticateApp, ifAuthorized } from './ifAuthorized';
 import generateCuid from './generateCuid';
 import schema from '../graphqlSchema';
-import allDbConfig from '../config/mongoDb';
+import dbConfig from '../config/mongoDb';
 import toObject from './toObject';
 import isErrorThrown from './isErrorThrown';
 import encodeToken from './encodeToken';
@@ -36,7 +36,6 @@ import getTimeDifferenceWithCurrentDateInSeconds from './getTimeDifferenceWithCu
 
 const env = process.env.NODE_ENV || 'development';
 const application = process.env.APPLICATION || 'core';
-const dbConfig = allDbConfig[application][env];
 const { functions } = schema[application];
 const awsConfig = allAwsConfig[env];
 

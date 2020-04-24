@@ -9,7 +9,7 @@ db.on('error', (err) => {
     setTimeout(() => {
       log(`Retry count ${dbReconnectCount}. Reconnecting to DB`);
       dbReconnectCount += 1;
-      db.open(dbConfig.database.db);
+      db.open(dbConfig.dbUri);
     }, 5 * 1000);
   }
 }).on('reconnected', () => {

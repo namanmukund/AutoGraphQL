@@ -1,10 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { validateUsername } from '../../validation';
 import { commonUserValidation } from './utils';
-import allAuthParams from '../../../../../config/authParams';
-
-const application = process.env.APPLICATION || 'core';
-const authParams = allAuthParams[application];
+import authParams from '../../../../../config/authParams';
 
 const updateUserValidation = async (input) => {
   const userObj = {};

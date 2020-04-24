@@ -1,9 +1,8 @@
 import jwt from 'jsonwebtoken';
-import allAuthParams from '../../config/authParams/index';
+import authParams from '../../config/authParams';
 
-export default function verifyToken(token, application) {
+export default function verifyToken(token) {
   let decoded;
-  const authParams = allAuthParams[application];
   try {
     decoded = jwt.verify(token, authParams.SECRET);
   } catch (err) {
