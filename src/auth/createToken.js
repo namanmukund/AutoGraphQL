@@ -1,10 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { pick } from 'lodash';
-import allAuthParams from '../../config/authParams/index';
+import authParams from '../../config/authParams';
 import getExpiryDateForUserToken from './getExpiryDateForUserToken';
-
-const application = process.env.APPLICATION || 'core';
-const authParams = allAuthParams[application];
 
 export default function createToken(user, authentication, toPhone, isForgotPasswordToken = false) {
   const expiresIn = getExpiryDateForUserToken(authParams, authentication, isForgotPasswordToken);

@@ -1,10 +1,8 @@
 import jwt from 'jsonwebtoken';
 import MasterController from './MasterController';
-import allAuthParams from '../../../../config/authParams';
+import authParams from '../../../../config/authParams';
 import { TMS, SUPER_ADMIN } from '../../../../constants';
 
-const application = process.env.APPLICATION || 'core';
-const authParams = allAuthParams[application];
 class TokenController extends MasterController {
   generateTokenForSuperAdmin() {
     this.validate();

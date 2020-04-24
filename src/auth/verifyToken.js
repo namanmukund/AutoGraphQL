@@ -1,8 +1,6 @@
 import jwt from 'jsonwebtoken';
-import allAuthParams from '../../config/authParams/index';
+import authParams from '../../config/authParams';
 
-const application = process.env.APPLICATION || 'core';
-const authParams = allAuthParams[application];
 export default function verifyToken(token, isForgetPasswordApiCall = false) {
   let decoded;
   let secret = authParams.SECRET;

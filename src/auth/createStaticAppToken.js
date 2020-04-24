@@ -1,10 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { frontEndApps, backendApps, STATIC } from '../../constants';
-import allAuthParams from '../../config/authParams/index';
+import authParams from '../../config/authParams';
 import { InvalidApplicationNameError } from '../../constants/errors';
 
-const application = process.env.APPLICATION || 'core';
-const authParams = allAuthParams[application];
 const validateAppTokenType = (applicationName, type) => {
   switch (type) {
     case 'frontend': {

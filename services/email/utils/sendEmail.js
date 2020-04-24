@@ -1,5 +1,5 @@
 import sgMail from '@sendgrid/mail';
-import { sendGridApi } from '../../../config/authParams';
+import sendGridApi from '../../../config/sendGrid';
 import { log } from '../../../utils/log';
 import allowedEmailEnvironments from '../../../constants/allowedEmailEnvironments';
 
