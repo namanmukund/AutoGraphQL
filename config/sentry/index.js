@@ -1,5 +1,3 @@
-import sentryConfig from './sentryConfig';
+const sentryDSN = process.env.SENTRY_DSN;
 
-const environment = process.env.NODE_ENV || 'development';
-
-export default sentryConfig[environment].sentryDSN;
+export default sentryDSN;

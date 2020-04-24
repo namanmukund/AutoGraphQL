@@ -5,7 +5,7 @@ import {
   InvalidPasswordLengthError, UserAlreadyExistsError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
-import allAuthParams from '../../../../../../config/authParams';
+import authParams from '../../../../../../config/authParams';
 import { MutationController } from '../../../controllers';
 import { generateCuid, log } from '../../../../../../utils';
 import { getFieldsBeingFetched } from '../../../../utils';
@@ -18,9 +18,6 @@ import addUserCurrentTopicComponentStatus
 import { ADD } from '../../../../../../constants/graphqlOperations';
 import isValidEmail from '../../../validation/isValidEmail';
 import getUserData from './utils/getUserData';
-
-const application = process.env.APPLICATION || 'core';
-const authParams = allAuthParams[application];
 
 const validateSignUpInput = (input) => {
   const { email, password } = input;

@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import allAuthParams from '../../config/authParams/index';
+import authParams from '../../config/authParams';
 import getExpiryDateForAppToken from './getExpiryDateForAppToken';
 // applicationName: Name of the application they toked is being generated for
 // application: Name of the application whose key is being used
@@ -17,7 +17,6 @@ const getAppInfoByApplicationName = (applicationName, code, typeName) => {
 };
 
 export default function createAppToken(applicationName, application, code, typeName) {
-  const authParams = allAuthParams[application];
   const appInfo = getAppInfoByApplicationName(applicationName, code, typeName);
   const expiresIn = getExpiryDateForAppToken(authParams, applicationName);
   const token = jwt.sign(

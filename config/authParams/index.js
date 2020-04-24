@@ -1,8 +1,17 @@
-import coreAuthParams from './core';
-import sendGridApi from '../sendGrid/sendGridApi';
+const SECRET = process.env.SECRET;
+const FORGOT_PASSWORD_SECRET = process.env.FORGOT_PASSWORD_SECRET;
 
-const core = coreAuthParams;
-export default {
-  core,
-  sendGridApi,
+const coreAuthParams = {
+  SECRET,
+  FORGOT_PASSWORD_SECRET,
+  TOKEN_EXPIRY_DATE: '1y',
+  FORGOT_PASSWORD_EXPIRY_DATE: '1h',
+  FRONTEND_STATIC_APP_TOKEN_EXPIRY_DATE: '10y',
+  BACKEND_STATIC_APP_TOKEN_EXPIRY_DATE: '10y',
+  SUPER_ADMIN_TOKEN_EXPIRY_DATE: '2h',
+  ALGORITHM: 'HS256',
+  SALT: 12,
+  OTP_EXPIRATION_TIME_IN_SEC: 300,
 };
+
+export default coreAuthParams;

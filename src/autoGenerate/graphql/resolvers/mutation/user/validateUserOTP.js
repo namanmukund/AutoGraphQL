@@ -9,7 +9,7 @@ import { validate } from '../../../validation';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 import { getUserFromDBQuery } from './utils';
-import coreAuthParams from '../../../../../../config/authParams/core';
+import authParams from '../../../../../../config/authParams';
 import { PARENT } from '../../../../../../constants/roles';
 import getChildrenToken from './utils/getChildrenToken';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
@@ -84,7 +84,7 @@ const validateUserOTPMutationResolver = async (
     }
     if (
       getTimeDifferenceWithCurrentDateInSeconds(phoneOtpCreationDate)
-      > coreAuthParams.OTP_EXPIRATION_TIME_IN_SEC) {
+      > authParams.OTP_EXPIRATION_TIME_IN_SEC) {
       throw new Error('Otp expired');
     }
     updateObj = {
