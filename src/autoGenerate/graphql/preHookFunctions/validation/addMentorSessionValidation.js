@@ -2,12 +2,20 @@ import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { log } from '../../../../../utils';
 import { RelationValuesExistError, UserMismatchError } from '../../../../../constants/errors';
-import { backendApps } from '../../../../../constants';
+import { backendApps, slotTimes } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import { ADMIN } from '../../../../../constants/roles';
 
+const getSlotTimesInString = () => {
+  let slotTimesInString = '';
+  slotTimes.forEach((slot) => {
+    slotTimesInString += `${slot} `;
+  });
+  return slotTimesInString;
+};
 // query to get mentor Sessions
+const PRE_BOOKING_HOUR_LIMIT = 0;
 const getMentorSessions = (userId, availabilityDate) => `
   query{
     mentorSessions(filter:{
@@ -21,12 +29,51 @@ const getMentorSessions = (userId, availabilityDate) => `
       ]
     }){
       id
+      ${getSlotTimesInString()}
     }
   }
   `;
 
+// validate mentor session input variables
+const validateMentorSessionInput = (params) => {
+  console.log(333333, params);
+  const { input } = params;
+  const { availabilityDate, ...slots } = input;
+  let latestSlotTime = '';
+  Object.keys(slots).forEach((slot) => {
+    if (slot.includes('slot')) {
+      if (slots[slot]) {
+        latestSlotTime = slot.toString().split('slot')[1];
+      }
+    }
+  });
+
+  if (!latestSlotTime) {
+    throw new Error('No slots selected');
+  }
+
+  const date = new Date(availabilityDate);
+  const currentDate = new Date();
+
+  // if date is same check for hours
+  if (date.getDate() === currentDate.getDate()
+    && date.getMonth() === currentDate.getMonth()
+    && date.getFullYear() === currentDate.getFullYear()
+    && latestSlotTime <= (Math.floor(currentDate.getHours()) + PRE_BOOKING_HOUR_LIMIT)
+  ) {
+    throw new Error("Can't book for past hours");
+  }
+  // if date belongs to the past
+  if (date.setHours(0, 0, 0, 0) < currentDate.setHours(0, 0, 0, 0)) {
+    throw new Error("Can't book for past");
+  }
+
+  return true;
+};
 // prehook logic to check if added MentorSession(user id and availabilityDate) already exists
 const addMentorSessionValidation = async (params, mutationOrQueryName, context) => {
+  validateMentorSessionInput(params);
+  console.log(566665656, params);
   // check if the document for called user and availabilityDate is already present
   const userId = get(params, 'userConnectId');
   const availabilityDate = get(params, 'input.availabilityDate');
@@ -64,6 +111,7 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
     // throw error if document already exists
     const getMentorSessionsRes = await callLocalGraphqlApi(getMentorSessions(userId, availabilityDate));
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+    // if once session created for a day then just update the session
     if (mentorSessions && mentorSessions.length) {
       throw new RelationValuesExistError();
     }

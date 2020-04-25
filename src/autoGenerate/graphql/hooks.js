@@ -349,8 +349,23 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addMentorSession': {
-      await addMentorSessionValidation(params, mutationOrQueryName, context);
-      return hook(input, mutationOrQueryName, 'PreHook');
+      console.log(11111111111, new Date().getTimezoneOffset());
+      const { availabilityDate } = input;
+      const updatedDate = new Date(availabilityDate);
+      updatedDate.setHours(0, 0, 0, 0);
+
+      const newInput = {
+        ...input,
+        availabilityDate: updatedDate.toISOString(),
+      };
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await addMentorSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
     }
     default: {
       /* If context is not present then it means user is not authenticated and the
