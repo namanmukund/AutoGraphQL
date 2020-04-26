@@ -8,7 +8,6 @@ import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfter
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import { ADMIN } from '../../../../../constants/roles';
 import validateMentorSessionInput from './utils/validateMentorSessionInput';
-import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 
@@ -27,7 +26,6 @@ const getMentorSessions = (userId, availabilityDate) => `
       ]
     }){
       id
-      ${getSlotTimesInString()}
     }
   }
   `;
