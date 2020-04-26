@@ -1,3 +1,5 @@
+import { InvalidDateError, InvalidTimeError } from '../../../../../../constants/errors/input';
+
 const validateBookingDate = (
   bookingDate,
   slotTime,
@@ -14,14 +16,14 @@ const validateBookingDate = (
         && date.getFullYear() === currentDate.getFullYear()
         && st <= (Math.floor(currentDate.getHours()) + PRE_BOOKING_HOUR_LIMIT)
       ) {
-        throw new Error("Can't book for past hours");
+        throw new InvalidTimeError();
       }
     }
   }
 
   // if date belongs to the past
   if (date.setHours(0, 0, 0, 0) < currentDate.setHours(0, 0, 0, 0)) {
-    throw new Error("Can't book for past");
+    throw new InvalidDateError();
   }
 };
 

@@ -1,6 +1,7 @@
 // validate mentor session input variables
 import validateBookingDate from './validateBookingDate';
 import getSelectedSlots from './getSelectedSlots';
+import { NoSlotSelectedError } from '../../../../../../constants/errors/input';
 
 const PRE_BOOKING_HOUR_LIMIT = 0;
 const validateMentorSessionInput = (params) => {
@@ -10,7 +11,7 @@ const validateMentorSessionInput = (params) => {
   const slotTimeArray = getSelectedSlots(slots);
 
   if (!slotTimeArray.length) {
-    throw new Error('No slots selected');
+    throw new NoSlotSelectedError();
   }
 
   // availabilityDate can be empty in case of update operation

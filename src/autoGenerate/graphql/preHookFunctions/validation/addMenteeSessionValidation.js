@@ -34,38 +34,37 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
   // check if the document for called user and topic is already present
   const userId = get(params, 'userConnectId');
   const topicId = get(params, 'topicConnectId');
+  const courseId = get(params, 'courseConnectId');
 
   // log in case user or topic id is not present
-  if (!userId || !topicId) {
+  if (!userId || !topicId || !courseId) {
     throw new MissingMandatoryInputInRequestError({
       data: {
-        message: 'Either userConnectId or topicConnectId or both missing in input',
+        message: 'Either userConnectId or topicConnectId or courseId or all missing in input',
       },
     });
   }
 
-  if (userId && topicId) {
-    /*
+  /*
     Calling method to validate token and return userId and appName
     we will compare this userId against userId passed in input
     both should be equal to perform further action
     */
-    const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
-    const {
-      userIdFromContext,
-      appName,
-    } = userAndAppInfo;
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+  const {
+    userIdFromContext,
+    appName,
+  } = userAndAppInfo;
 
-    if (!backendApps.includes(appName) && userIdFromContext !== userId) {
-      throw new UserMismatchError();
-    }
+  if (!backendApps.includes(appName) && userIdFromContext !== userId) {
+    throw new UserMismatchError();
+  }
 
-    // throw error if document already exists
-    const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId, topicId));
-    const menteeSessions = get(getMenteeSessionsRes, 'data.menteeSessions');
-    if (menteeSessions && menteeSessions.length) {
-      throw new SimilarDocumentAlreadyExistError();
-    }
+  // throw error if document already exists
+  const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId, topicId));
+  const menteeSessions = get(getMenteeSessionsRes, 'data.menteeSessions');
+  if (menteeSessions && menteeSessions.length) {
+    throw new SimilarDocumentAlreadyExistError();
   }
 
   return true;

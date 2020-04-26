@@ -456,17 +456,17 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(newInput, mutationOrQueryName, 'PreHook');
     }
     case 'updateMentorMenteeSession': {
-      const newInput = {
-        ...input,
-        sessionEndDate: new Date().toISOString(),
-      };
-      const newParams = {
-        ...params,
-        input: {
-          ...newInput,
-        },
-      };
-      // await updateMentorMenteeSessionValidation(newParams, mutationOrQueryName, context);
+      const { sessionStatus } = input;
+      let newInput;
+      if (sessionStatus === 'completed') {
+        newInput = {
+          ...input,
+          sessionEndDate: new Date().toISOString(),
+        };
+      } else {
+        newInput = { ...input };
+      }
+
       return hook(newInput, mutationOrQueryName, 'PreHook');
     }
     default: {

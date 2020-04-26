@@ -37,49 +37,48 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
   validateMentorSessionInput(params);
   // check if the document for called user and availabilityDate is already present
   const userId = get(params, 'userConnectId');
+  const courseId = get(params, 'courseConnectId');
   const availabilityDate = get(params, 'input.availabilityDate');
 
   // log in case user id or availabilityDate is not present
-  if (!userId || !availabilityDate) {
+  if (!userId || !availabilityDate || !courseId) {
     throw new MissingMandatoryInputInRequestError({
       data: {
-        message: 'Either userConnectId or availabilityDate or both missing in input',
+        message: 'Either userConnectId or courseConnectId or availabilityDate or all missing in input',
       },
     });
   }
 
-  if (userId && availabilityDate) {
-    /*
+  /*
     Calling method to validate token and return userId and appName
     we will compare this userId against userId passed in input
     both should be equal to perform further action
     */
 
-    // getting user role from context. We will allow adding mentorSession if logged in user is admin
-    const userInfo = validateTokenAndExtractInformation(context, false);
-    const {
-      currentUser,
-    } = userInfo;
-    const userRoleFromContext = currentUser && currentUser.role;
+  // getting user role from context. We will allow adding mentorSession if logged in user is admin
+  const userInfo = validateTokenAndExtractInformation(context, false);
+  const {
+    currentUser,
+  } = userInfo;
+  const userRoleFromContext = currentUser && currentUser.role;
 
-    const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
 
-    const {
-      userIdFromContext,
-      appName,
-    } = userAndAppInfo;
+  const {
+    userIdFromContext,
+    appName,
+  } = userAndAppInfo;
 
-    if (!backendApps.includes(appName) && userIdFromContext !== userId && userRoleFromContext !== ADMIN) {
-      throw new UserMismatchError();
-    }
+  if (!backendApps.includes(appName) && userIdFromContext !== userId && userRoleFromContext !== ADMIN) {
+    throw new UserMismatchError();
+  }
 
-    // throw error if document already exists
-    const getMentorSessionsRes = await callLocalGraphqlApi(getMentorSessions(userId, availabilityDate));
-    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-    // if once session created for a day then just update the session
-    if (mentorSessions && mentorSessions.length) {
-      throw new SimilarDocumentAlreadyExistError();
-    }
+  // throw error if document already exists
+  const getMentorSessionsRes = await callLocalGraphqlApi(getMentorSessions(userId, availabilityDate));
+  const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+  // if once session created for a day then just update the session
+  if (mentorSessions && mentorSessions.length) {
+    throw new SimilarDocumentAlreadyExistError();
   }
 
   return true;
