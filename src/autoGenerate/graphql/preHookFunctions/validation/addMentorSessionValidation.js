@@ -2,19 +2,14 @@ import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { log } from '../../../../../utils';
 import { RelationValuesExistError, UserMismatchError } from '../../../../../constants/errors';
-import { backendApps, slotTimes } from '../../../../../constants';
+import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import { ADMIN } from '../../../../../constants/roles';
 import validateMentorSessionInput from './utils/validateMentorSessionInput';
+import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 
-const getSlotTimesInString = () => {
-  let slotTimesInString = '';
-  slotTimes.forEach((slot) => {
-    slotTimesInString += `${slot} `;
-  });
-  return slotTimesInString;
-};
+
 // query to get mentor Sessions
 const getMentorSessions = (userId, availabilityDate) => `
   query{

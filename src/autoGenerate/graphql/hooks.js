@@ -76,6 +76,7 @@ import addMentorSessionValidation
   from './preHookFunctions/validation/addMentorSessionValidation';
 import updateMentorSessionValidation from './preHookFunctions/validation/updateMentorSessionValidation';
 import updateMenteeSessionValidation from './preHookFunctions/validation/updateMenteeSessionValidation';
+import addMentorMenteeSessionValidation from './preHookFunctions/validation/addMentorMenteeSessionValidation';
 
 const { hookFunctions } = functions || {};
 
@@ -438,6 +439,34 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         };
       }
       await updateMentorSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
+    case 'addMentorMenteeSession': {
+      const newInput = {
+        ...input,
+        sessionStartDate: new Date().toISOString(),
+      };
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await addMentorMenteeSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
+    case 'updateMentorMenteeSession': {
+      const newInput = {
+        ...input,
+        sessionEndDate: new Date().toISOString(),
+      };
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      // await updateMentorMenteeSessionValidation(newParams, mutationOrQueryName, context);
       return hook(newInput, mutationOrQueryName, 'PreHook');
     }
     default: {
