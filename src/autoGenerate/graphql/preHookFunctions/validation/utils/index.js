@@ -12,6 +12,7 @@ import validateTokenAndExtractInformation from './validateTokenAndExtractInforma
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
 import validateMentorMenteePermission from './validateMentorMenteePermission';
 import validateMentorMenteePermissionForComponent from './validateMentorMenteePermissionForComponent';
+import validateMentorSessionInput from './validateMentorSessionInput';
 
 export {
   getFinalConnectedRecordsForARelationFromInput,
@@ -28,4 +29,5 @@ export {
   getUserIdandAppNameAfterValidation,
   validateMentorMenteePermission,
   validateMentorMenteePermissionForComponent,
+  validateMentorSessionInput,
 };

@@ -115,3 +115,31 @@ export const InvalidFacebookTokenError = createError('InvalidFacebookTokenError'
 export const AssignmentQuestionsNotPresentError = createError('AssignmentQuestionsNotPresentError', {
   message: 'AssignmentQuestions are missing in input',
 });
+
+export const SessionTopicAndTopicConnectIdMismatchError = createError('SessionTopicAndTopicConnectIdMismatchError', {
+  message: 'Invalid topicConnectId sent in input',
+});
+
+export const InvalidSessionDateTimeError = createError('InvalidSessionDateTimeError', {
+  message: 'Invalid session date or time',
+});
+
+export const MissingMandatoryInputInRequestError = createError('MissingMandatoryInputInRequestError', {
+  message: 'One or more than one input is missing in request',
+});
+
+export const InvalidTimeError = createError('InvalidTimeError', {
+  message: 'Time has to be more than current time',
+});
+
+export const InvalidDateError = createError('InvalidDateError', {
+  message: 'Date can not be less than current date',
+});
+
+export const NoSlotSelectedError = createError('NoSlotSelectedError', {
+  message: 'No slot is selected in input',
+});
+
+export const OnlyOneSlotAllowedError = createError('OnlyOneSlotAllowedError', {
+  message: 'Only one slot can be selected in a day',
+});

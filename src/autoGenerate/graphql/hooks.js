@@ -74,6 +74,9 @@ import addMenteeSessionValidation
   from './preHookFunctions/validation/addMenteeSessionValidation';
 import addMentorSessionValidation
   from './preHookFunctions/validation/addMentorSessionValidation';
+import updateMentorSessionValidation from './preHookFunctions/validation/updateMentorSessionValidation';
+import updateMenteeSessionValidation from './preHookFunctions/validation/updateMenteeSessionValidation';
+import addMentorMenteeSessionValidation from './preHookFunctions/validation/addMentorMenteeSessionValidation';
 
 const { hookFunctions } = functions || {};
 
@@ -345,12 +348,126 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addMenteeSession': {
-      await addMenteeSessionValidation(params, mutationOrQueryName, context);
-      return hook(input, mutationOrQueryName, 'PreHook');
+      const { bookingDate } = input;
+      const updatedDate = new Date(bookingDate);
+      updatedDate.setHours(0, 0, 0, 0);
+
+      const newInput = {
+        ...input,
+        bookingDate: updatedDate.toISOString(),
+      };
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await addMenteeSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
+    case 'updateMenteeSession': {
+      const { bookingDate } = input;
+      let newInput = {};
+      let newParams = {};
+      if (bookingDate) {
+        const updatedDate = new Date(bookingDate);
+        updatedDate.setHours(0, 0, 0, 0);
+
+        newInput = {
+          ...input,
+          bookingDate: updatedDate.toISOString(),
+        };
+        newParams = {
+          ...params,
+          input: {
+            ...newInput,
+          },
+        };
+      } else {
+        newInput = {
+          ...input,
+        };
+        newParams = {
+          ...params,
+        };
+      }
+      await updateMenteeSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
     }
     case 'addMentorSession': {
-      await addMentorSessionValidation(params, mutationOrQueryName, context);
-      return hook(input, mutationOrQueryName, 'PreHook');
+      const { availabilityDate } = input;
+      const updatedDate = new Date(availabilityDate);
+      updatedDate.setHours(0, 0, 0, 0);
+
+      const newInput = {
+        ...input,
+        availabilityDate: updatedDate.toISOString(),
+      };
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await addMentorSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
+    case 'updateMentorSession': {
+      const { availabilityDate } = input;
+      let newParams = {};
+      let newInput = {};
+      if (availabilityDate) {
+        const updatedDate = new Date(availabilityDate);
+        updatedDate.setHours(0, 0, 0, 0);
+
+        newInput = {
+          ...input,
+          availabilityDate: updatedDate.toISOString(),
+        };
+        newParams = {
+          ...params,
+          input: {
+            ...newInput,
+          },
+        };
+      } else {
+        newInput = {
+          ...input,
+        };
+        newParams = {
+          ...params,
+        };
+      }
+      await updateMentorSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
+    case 'addMentorMenteeSession': {
+      const newInput = {
+        ...input,
+        sessionStartDate: new Date().toISOString(),
+      };
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await addMentorMenteeSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
+    case 'updateMentorMenteeSession': {
+      const { sessionStatus } = input;
+      let newInput;
+      if (sessionStatus === 'completed') {
+        newInput = {
+          ...input,
+          sessionEndDate: new Date().toISOString(),
+        };
+      } else {
+        newInput = { ...input };
+      }
+
+      return hook(newInput, mutationOrQueryName, 'PreHook');
     }
     default: {
       /* If context is not present then it means user is not authenticated and the
