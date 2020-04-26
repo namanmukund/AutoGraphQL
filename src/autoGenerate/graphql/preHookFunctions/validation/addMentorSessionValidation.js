@@ -6,6 +6,7 @@ import { backendApps, slotTimes } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import { ADMIN } from '../../../../../constants/roles';
+import validateMentorSessionInput from './utils/validateMentorSessionInput';
 
 const getSlotTimesInString = () => {
   let slotTimesInString = '';
@@ -15,7 +16,6 @@ const getSlotTimesInString = () => {
   return slotTimesInString;
 };
 // query to get mentor Sessions
-const PRE_BOOKING_HOUR_LIMIT = 0;
 const getMentorSessions = (userId, availabilityDate) => `
   query{
     mentorSessions(filter:{
@@ -33,47 +33,10 @@ const getMentorSessions = (userId, availabilityDate) => `
     }
   }
   `;
-
-// validate mentor session input variables
-const validateMentorSessionInput = (params) => {
-  console.log(333333, params);
-  const { input } = params;
-  const { availabilityDate, ...slots } = input;
-  let latestSlotTime = '';
-  Object.keys(slots).forEach((slot) => {
-    if (slot.includes('slot')) {
-      if (slots[slot]) {
-        latestSlotTime = slot.toString().split('slot')[1];
-      }
-    }
-  });
-
-  if (!latestSlotTime) {
-    throw new Error('No slots selected');
-  }
-
-  const date = new Date(availabilityDate);
-  const currentDate = new Date();
-
-  // if date is same check for hours
-  if (date.getDate() === currentDate.getDate()
-    && date.getMonth() === currentDate.getMonth()
-    && date.getFullYear() === currentDate.getFullYear()
-    && latestSlotTime <= (Math.floor(currentDate.getHours()) + PRE_BOOKING_HOUR_LIMIT)
-  ) {
-    throw new Error("Can't book for past hours");
-  }
-  // if date belongs to the past
-  if (date.setHours(0, 0, 0, 0) < currentDate.setHours(0, 0, 0, 0)) {
-    throw new Error("Can't book for past");
-  }
-
-  return true;
-};
 // prehook logic to check if added MentorSession(user id and availabilityDate) already exists
 const addMentorSessionValidation = async (params, mutationOrQueryName, context) => {
+  // validate input before proceeding
   validateMentorSessionInput(params);
-  console.log(566665656, params);
   // check if the document for called user and availabilityDate is already present
   const userId = get(params, 'userConnectId');
   const availabilityDate = get(params, 'input.availabilityDate');

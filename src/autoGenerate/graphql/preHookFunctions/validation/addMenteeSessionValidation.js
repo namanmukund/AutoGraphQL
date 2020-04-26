@@ -4,6 +4,7 @@ import { log } from '../../../../../utils';
 import { RelationValuesExistError, UserMismatchError } from '../../../../../constants/errors';
 import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
+import validateMenteeSessionInput from './utils/validateMenteeSessionInput';
 
 // query to get mentee Sessions
 const getMenteeSessions = (userId, topicId) => `
@@ -27,6 +28,8 @@ const getMenteeSessions = (userId, topicId) => `
 
 // prehook logic to check if added MenteeSession(user and topic id) is already present
 const addMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
+  // validate input
+  validateMenteeSessionInput(params);
   // check if the document for called user and topic is already present
   const userId = get(params, 'userConnectId');
   const topicId = get(params, 'topicConnectId');
@@ -47,9 +50,9 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
       userIdFromContext,
       appName,
     } = userAndAppInfo;
-    if (!backendApps.includes(appName) && userIdFromContext !== userId) {
-      throw new UserMismatchError();
-    }
+    // if (!backendApps.includes(appName) && userIdFromContext !== userId) {
+    //   throw new UserMismatchError();
+    // }
 
     // throw error if document already exists
     const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId, topicId));
