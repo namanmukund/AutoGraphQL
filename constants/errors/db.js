@@ -75,3 +75,7 @@ export const PaidComponentLockedError = createError('PaidComponentLockedError', 
 export const SendOtpFirstError = createError('SendOtpFirstError', {
   message: 'Send otp via login first',
 });
+
+export const SimilarDocumentAlreadyExistError = createError('SimilarDocumentAlreadyExistError', {
+  message: 'Similar document has already been added from before',
+});

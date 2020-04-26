@@ -1,13 +1,16 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { log } from '../../../../../utils';
-import { RelationValuesExistError, UserMismatchError } from '../../../../../constants/errors';
+import {
+  UserMismatchError,
+} from '../../../../../constants/errors';
 import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import { ADMIN } from '../../../../../constants/roles';
 import validateMentorSessionInput from './utils/validateMentorSessionInput';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
+import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
+import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 
 
 // query to get mentor Sessions
@@ -38,7 +41,11 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
 
   // log in case user id or availabilityDate is not present
   if (!userId || !availabilityDate) {
-    log('Either one of userId or availabilityDate is missing in params of addMentorSessionValidation');
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'Either userConnectId or availabilityDate or both missing in input',
+      },
+    });
   }
 
   if (userId && availabilityDate) {
@@ -71,7 +78,7 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
     // if once session created for a day then just update the session
     if (mentorSessions && mentorSessions.length) {
-      throw new RelationValuesExistError();
+      throw new SimilarDocumentAlreadyExistError();
     }
   }
 

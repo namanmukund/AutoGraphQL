@@ -3,6 +3,12 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import getSelectedSlots from './utils/getSelectedSlots';
 import validateMentorMenteePermission from './utils/validateMentorMenteePermission';
+import {
+  InvalidSessionDateTimeError,
+  SessionTopicAndTopicConnectIdMismatchError,
+} from '../../../../../constants/errors/input';
+import { ConnectIdRequiredError, DatabaseRecordNotFoundError } from '../../../../../constants/errors';
+import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 
 // query to get mentor Sessions
 const mentorMenteeSessionsQuery = (menteeSessionConnectId, mentorSessionConnectId) => `
@@ -30,8 +36,11 @@ query{
   }
 }`;
 
-const validateMenteeStartSessionData = (menteeSession) => {
-  const { bookingDate, ...slots } = menteeSession;
+const validateMenteeStartSessionData = (menteeSession, topicConnectId) => {
+  const { bookingDate, topic: { id: topicId }, ...slots } = menteeSession;
+  if (topicConnectId !== topicId) {
+    throw new SessionTopicAndTopicConnectIdMismatchError();
+  }
 
   const slotTimeArray = getSelectedSlots(slots);
   const date = new Date(bookingDate);
@@ -40,9 +49,9 @@ const validateMenteeStartSessionData = (menteeSession) => {
   const currentDate = new Date();
 
   if (!(currentDate >= sessionStartDate && currentDate < sessionEndDate)) {
-    throw new Error('The time is not right');
+    throw new InvalidSessionDateTimeError();
   }
-  throw new Error('sto here');
+  return true;
 };
 // prehook logic to check if added MentorSession(user id and availabilityDate) already exists
 const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
@@ -52,9 +61,9 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   validateMentorMenteePermission(
     context,
   );
-  const { menteeSessionConnectId, mentorSessionConnectId } = params;
-  if (!menteeSessionConnectId || !mentorSessionConnectId) {
-    throw new Error('connectid required');
+  const { menteeSessionConnectId, mentorSessionConnectId, topicConnectId } = params;
+  if (!menteeSessionConnectId || !mentorSessionConnectId || !topicConnectId) {
+    throw new ConnectIdRequiredError();
   }
 
   // check if mentor mentee sessions already exist
@@ -67,7 +76,7 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
 
   const mentorMenteeSessions = get(mentorMenteeSessionsData, 'data.mentorMenteeSessions');
   if (mentorMenteeSessions && mentorMenteeSessions.length) {
-    throw new Error('Sessions already created');
+    throw new SimilarDocumentAlreadyExistError();
   }
   // validate date and time of starting the session
   const menteeSessionData = await callLocalGraphqlApi(
@@ -75,9 +84,13 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   );
   const menteeSession = get(menteeSessionData, 'data.menteeSession');
   if (!mentorMenteeSessions || !menteeSession.id) {
-    throw new Error('Mentee session does not exist');
+    throw new DatabaseRecordNotFoundError({
+      date: {
+        message: 'mentee session does not exist',
+      },
+    });
   }
-  validateMenteeStartSessionData(menteeSession);
+  validateMenteeStartSessionData(menteeSession, topicConnectId);
   return true;
 };
 

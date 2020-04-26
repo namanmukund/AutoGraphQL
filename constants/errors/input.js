@@ -115,3 +115,15 @@ export const InvalidFacebookTokenError = createError('InvalidFacebookTokenError'
 export const AssignmentQuestionsNotPresentError = createError('AssignmentQuestionsNotPresentError', {
   message: 'AssignmentQuestions are missing in input',
 });
+
+export const SessionTopicAndTopicConnectIdMismatchError = createError('SessionTopicAndTopicConnectIdMismatchError', {
+  message: 'Invalid topicConnectId sent in input',
+});
+
+export const InvalidSessionDateTimeError = createError('InvalidSessionDateTimeError', {
+  message: 'Invalid session date or time',
+});
+
+export const MissingMandatoryInputInRequestError = createError('MissingMandatoryInputInRequestError', {
+  message: 'One or more than one input is missing in request',
+});

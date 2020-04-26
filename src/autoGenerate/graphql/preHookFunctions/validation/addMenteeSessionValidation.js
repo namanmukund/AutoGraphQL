@@ -1,10 +1,11 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { log } from '../../../../../utils';
-import { RelationValuesExistError, UserMismatchError } from '../../../../../constants/errors';
+import { UserMismatchError } from '../../../../../constants/errors';
 import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateMenteeSessionInput from './utils/validateMenteeSessionInput';
+import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
+import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 
 // query to get mentee Sessions
 const getMenteeSessions = (userId, topicId) => `
@@ -36,7 +37,11 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
 
   // log in case user or topic id is not present
   if (!userId || !topicId) {
-    log('Either one of userId or topicId is missing in params of addMenteeSessionValidation');
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'Either userConnectId or topicConnectId or both missing in input',
+      },
+    });
   }
 
   if (userId && topicId) {
@@ -50,15 +55,16 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
       userIdFromContext,
       appName,
     } = userAndAppInfo;
-    // if (!backendApps.includes(appName) && userIdFromContext !== userId) {
-    //   throw new UserMismatchError();
-    // }
+
+    if (!backendApps.includes(appName) && userIdFromContext !== userId) {
+      throw new UserMismatchError();
+    }
 
     // throw error if document already exists
     const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId, topicId));
     const menteeSessions = get(getMenteeSessionsRes, 'data.menteeSessions');
     if (menteeSessions && menteeSessions.length) {
-      throw new RelationValuesExistError();
+      throw new SimilarDocumentAlreadyExistError();
     }
   }
 
