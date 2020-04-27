@@ -77,6 +77,10 @@ import addMentorSessionValidation
 import updateMentorSessionValidation from './preHookFunctions/validation/updateMentorSessionValidation';
 import updateMenteeSessionValidation from './preHookFunctions/validation/updateMenteeSessionValidation';
 import addMentorMenteeSessionValidation from './preHookFunctions/validation/addMentorMenteeSessionValidation';
+import addMentorSessionPostHookMethod from './postHookFunctions/addMentorSessionPostHookMethod';
+import updateMentorSessionPostHookMethod from './postHookFunctions/updateMentorSessionPostHookMethod';
+import deleteMentorSessionValidation from './preHookFunctions/validation/deleteMentorSessionValidation';
+import deleteMentorSessionPostHookMethod from './postHookFunctions/deleteMentorSessionPostHookMethod';
 
 const { hookFunctions } = functions || {};
 
@@ -441,6 +445,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await updateMentorSessionValidation(newParams, mutationOrQueryName, context);
       return hook(newInput, mutationOrQueryName, 'PreHook');
     }
+    case 'deleteMentorSession': {
+      await deleteMentorSessionValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
     case 'addMentorMenteeSession': {
       const newInput = {
         ...input,
@@ -568,6 +576,18 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'addUserActivityAssignmentDump': {
       await addUserActivityAssignmentDumpPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'addMentorSession': {
+      await addMentorSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'updateMentorSession': {
+      await updateMentorSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'deleteMentorSession': {
+      await deleteMentorSessionPostHookMethod(input, mutationName, context);
       break;
     }
     default:

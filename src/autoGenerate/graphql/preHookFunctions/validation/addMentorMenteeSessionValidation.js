@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
-import getSelectedSlots from './utils/getSelectedSlots';
+import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import validateMentorMenteePermission from './utils/validateMentorMenteePermission';
 import {
   InvalidSessionDateTimeError,
@@ -42,7 +42,7 @@ const validateMenteeStartSessionData = (menteeSession, topicConnectId) => {
     throw new SessionTopicAndTopicConnectIdMismatchError();
   }
 
-  const slotTimeArray = getSelectedSlots(slots);
+  const slotTimeArray = getSelectedSlotsTime(slots);
   const date = new Date(bookingDate);
   const sessionStartDate = date.setHours(date.getHours() + slotTimeArray[0]);
   const sessionEndDate = date.setHours(date.getHours() + 1);

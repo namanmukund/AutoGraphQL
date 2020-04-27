@@ -1,4 +1,4 @@
-const getSelectedSlots = (slots) => {
+const getSelectedSlotsTime = (slots) => {
   const slotTimeArray = [];
   Object.keys(slots).forEach((slot) => {
     if (slot.includes('slot')) {
@@ -7,7 +7,7 @@ const getSelectedSlots = (slots) => {
       }
     }
   });
-  return slotTimeArray;
+  return slotTimeArray.sort((a, b) => b - a);
 };
 
-export default getSelectedSlots;
+export default getSelectedSlotsTime;
