@@ -13,6 +13,9 @@ import {
 import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
 import getMasteryLevel from '../resolvers/utils/getMasteryLevel';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import validateTokenAndExtractInformation
+  from '../preHookFunctions/validation/utils/validateTokenAndExtractInformation';
+import { MENTEE } from '../../../../constants/roles';
 
 // query to fetch user quiz info
 const userQuizQuery = (
@@ -170,6 +173,45 @@ const updateUserProfile = (
       }
     ){
      id 
+    }
+  }
+  `;
+
+// getting mentee session id on basis of topic id and user id
+const menteeSessionQuery = (userId, topicId) => `
+query{
+  menteeSessions(filter:{
+    and:[
+      {topic_some:{id: "${topicId}"}}
+      {user_some:{id: "${userId}"}}
+    ]
+  }){
+    id
+  }
+}
+  `;
+
+// getting mentorMenteeSession id on basis of topic id and menteeSession id
+const mentorMenteeSessionQuery = (menteeSessionId, topicId) => `
+query{
+  mentorMenteeSessions(filter:{
+    and:[
+      {topic_some:{id: "${topicId}"}}
+      {menteeSession_some:{id: "${menteeSessionId}"}}
+    ]
+  }){
+    id
+  }
+}
+  `;
+
+// mutation to update UserQuiz, pushing updated quiz questions
+const updateMentorMenteeSessionMutation = (mentorMenteeSessionId) => `
+  mutation{
+    updateMentorMenteeSession(id:"${mentorMenteeSessionId}",  input:{
+      isQuizSubmitted: true
+    }){
+      id
     }
   }
   `;
@@ -774,6 +816,37 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     learningObjectiveConnectId,
     nextTopicId,
   );
+
+  // getting user role from context. We will allow updating mentorMenteeSession isQuizSubmitted if logged in user is mentee
+  const userInfo = validateTokenAndExtractInformation(context, false);
+  const {
+    currentUser,
+  } = userInfo;
+  const userRoleFromContext = currentUser && currentUser.role;
+
+  // getting menteeSessionId to update mentorMenteeSession in case of a mentee
+  if (userRoleFromContext === MENTEE) {
+    const menteeSessionRes = await callLocalGraphqlApi(menteeSessionQuery(userId, topicId));
+    const menteeSessionInfo = get(menteeSessionRes, 'data.menteeSessions[0]');
+    const menteeSessionId = get(menteeSessionInfo, 'id');
+    if (!menteeSessionId) {
+      log('Not able to get menteeSessionId in addUserActivityQuizDumpPostHookMethod');
+    }
+    // Ideally menteeSessionId should be there if user has reached to this point
+    if (menteeSessionId) {
+      const mentorMenteeSessionRes = await callLocalGraphqlApi(mentorMenteeSessionQuery(menteeSessionId, topicId));
+      const mentorMenteeSessionInfo = get(mentorMenteeSessionRes, 'data.mentorMenteeSessions[0]');
+      const mentorMenteeSessionId = get(mentorMenteeSessionInfo, 'id');
+      if (!mentorMenteeSessionId) {
+        log('Not able to get mentorMenteeSessionId in addUserActivityQuizDumpPostHookMethod');
+      }
+      if (mentorMenteeSessionId) {
+        // updating isQuizSubmitted for the topic for which quiz dump is called
+        await callLocalGraphqlApi(updateMentorMenteeSessionMutation(mentorMenteeSessionId));
+      }
+    }
+  }
+
   // throwing error if client has not send any question in input
   if (!quizQuestions || !quizQuestions.length) {
     log('QuizQuestions are not present in input in addUserActivityQuizDumpPostHookMethod');
