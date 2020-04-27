@@ -1,7 +1,7 @@
 // validate mentor session input variables
 import validateBookingDate from './validateBookingDate';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
-import { NoSlotSelectedError } from '../../../../../../constants/errors/input';
+import { MissingMandatoryInputInRequestError, NoSlotSelectedError } from '../../../../../../constants/errors/input';
 
 const PRE_BOOKING_HOUR_LIMIT = 0;
 const validateMentorSessionInput = (params) => {
@@ -9,7 +9,11 @@ const validateMentorSessionInput = (params) => {
   const { availabilityDate, ...slots } = input;
 
   if (!availabilityDate) {
-    throw new Error('no date is selected');
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'availabilityDate is mandatory',
+      },
+    });
   }
   const slotTimeArray = getSelectedSlotsTime(slots);
 
