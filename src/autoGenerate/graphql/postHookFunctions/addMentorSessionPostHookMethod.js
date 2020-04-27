@@ -1,34 +1,9 @@
 import { get } from 'lodash';
-import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
-
-const availableSlotsQuery = (date) => `
-query{
-  availableSlots(filter:{
-    date:"${date}"
-  }){
-    id
-    date
-    ${getSlotTimesInString()}
-  }
-}
-`;
-const addAvailableSlotQuery = () => `
-mutation($input:AvailableSlotInput!){
-  addAvailableSlot(input:$input){
-    id
-    date
-  }
-}`;
-
-const updateAvailableSlotQuery = (availableSlotId) => `
-mutation($input:AvailableSlotUpdate!){
-  updateAvailableSlot(id:"${availableSlotId}", input: $input){
-    id
-  }
-}
-`;
+import availableSlotsQuery from '../graphqlQueries/availableSlotsQuery';
+import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery';
+import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
 
 const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
   const { availabilityDate, ...slots } = input;
@@ -41,14 +16,14 @@ const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
 
   if (availableSlots && availableSlots.length) {
     slotTimeStringArray.forEach((slot) => {
-      console.log(333333, slot);
-      docToBeUpdated[slot] = availableSlots[0][slot] + 1;
+      docToBeUpdated[slot] = (availableSlots[0][slot] >= 0 ? availableSlots[0][slot] : 0) + 1;
     });
+
     const { id: availableSlotId } = availableSlots[0];
-    console.log(33333, docToBeUpdated);
     const variables = {
       input: docToBeUpdated,
     };
+
     await callLocalGraphqlApi(updateAvailableSlotQuery(availableSlotId), context, variables);
     // update
   } else {

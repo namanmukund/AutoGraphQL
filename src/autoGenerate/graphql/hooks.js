@@ -78,6 +78,7 @@ import updateMentorSessionValidation from './preHookFunctions/validation/updateM
 import updateMenteeSessionValidation from './preHookFunctions/validation/updateMenteeSessionValidation';
 import addMentorMenteeSessionValidation from './preHookFunctions/validation/addMentorMenteeSessionValidation';
 import addMentorSessionPostHookMethod from './postHookFunctions/addMentorSessionPostHookMethod';
+import updateMentorSessionPostHookMethod from './postHookFunctions/updateMentorSessionPostHookMethod';
 
 const { hookFunctions } = functions || {};
 
@@ -572,8 +573,11 @@ const posthook = async (input, mutationName, context, params) => {
       break;
     }
     case 'addMentorSession': {
-      console.log(111111, input);
       await addMentorSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'updateMentorSession': {
+      await updateMentorSessionPostHookMethod(input, mutationName, context);
       break;
     }
     default:
