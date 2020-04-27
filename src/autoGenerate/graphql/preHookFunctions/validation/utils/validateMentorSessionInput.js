@@ -8,20 +8,20 @@ const validateMentorSessionInput = (params) => {
   const { input } = params;
   const { availabilityDate, ...slots } = input;
 
+  if (!availabilityDate) {
+    throw new Error('no date is selected');
+  }
   const slotTimeArray = getSelectedSlotsTime(slots);
 
   if (!slotTimeArray.length) {
     throw new NoSlotSelectedError();
   }
 
-  // availabilityDate can be empty in case of update operation
-  if (availabilityDate) {
-    validateBookingDate(
-      availabilityDate,
-      slotTimeArray,
-      PRE_BOOKING_HOUR_LIMIT,
-    );
-  }
+  validateBookingDate(
+    availabilityDate,
+    slotTimeArray,
+    PRE_BOOKING_HOUR_LIMIT,
+  );
   return true;
 };
 

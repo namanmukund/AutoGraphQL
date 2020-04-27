@@ -30,7 +30,7 @@ const getMenteeSessions = (userId, topicId) => `
 // prehook logic to check if added MenteeSession(user and topic id) is already present
 const addMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   // validate input
-  validateMenteeSessionInput(params);
+  await validateMenteeSessionInput(params, context);
   // check if the document for called user and topic is already present
   const userId = get(params, 'userConnectId');
   const topicId = get(params, 'topicConnectId');
