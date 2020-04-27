@@ -2,7 +2,11 @@
 import { get } from 'lodash';
 import validateBookingDate from './validateBookingDate';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
-import { NoSlotSelectedError, OnlyOneSlotAllowedError } from '../../../../../../constants/errors/input';
+import {
+  MissingMandatoryInputInRequestError,
+  NoSlotSelectedError,
+  OnlyOneSlotAllowedError,
+} from '../../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import availableSlotsQuery from '../../../graphqlQueries/availableSlotsQuery';
 import getSelectedSlotsStringArray from '../../../postHookFunctions/utils/getSelectedSlotsStringArray';
@@ -13,7 +17,11 @@ const validateMenteeSessionInput = async (params, context) => {
   const { input } = params;
   const { bookingDate, ...slots } = input;
   if (!bookingDate) {
-    throw new Error('bookingDate is required');
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'bookingDate is mandatory',
+      },
+    });
   }
   const slotTimeArray = getSelectedSlotsTime(slots);
 
