@@ -83,3 +83,7 @@ export const SimilarDocumentAlreadyExistError = createError('SimilarDocumentAlre
 export const PastDateOrSlotError = createError('PastDateOrSlotError', {
   message: 'Can not delete as either date or slot is of past',
 });
+
+export const NoSlotsAvailableForBooking = createError('NoSlotsAvailableForBooking', {
+  message: 'No slot is available for booking',
+});

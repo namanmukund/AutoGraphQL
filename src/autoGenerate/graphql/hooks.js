@@ -81,6 +81,10 @@ import addMentorSessionPostHookMethod from './postHookFunctions/addMentorSession
 import updateMentorSessionPostHookMethod from './postHookFunctions/updateMentorSessionPostHookMethod';
 import deleteMentorSessionValidation from './preHookFunctions/validation/deleteMentorSessionValidation';
 import deleteMentorSessionPostHookMethod from './postHookFunctions/deleteMentorSessionPostHookMethod';
+import addMenteeSessionPostHookMethod from './postHookFunctions/addMenteeSessionPostHookMethod';
+import updateMenteeSessionPostHookMethod from './postHookFunctions/updateMenteeSessionPostHookMethod';
+import deleteMenteeSessionValidation from './preHookFunctions/validation/deleteMenteeSessionValidation';
+import deleteMenteeSessionPostHookMethod from './preHookFunctions/deleteMenteeSessionPostHookMethod';
 
 const { hookFunctions } = functions || {};
 
@@ -477,6 +481,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
 
       return hook(newInput, mutationOrQueryName, 'PreHook');
     }
+    case 'deleteMenteeSession': {
+      await deleteMenteeSessionValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
     default: {
       /* If context is not present then it means user is not authenticated and the
       user won't be able to make any db query
@@ -588,6 +596,18 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'deleteMentorSession': {
       await deleteMentorSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'addMenteeSession': {
+      await addMenteeSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'updateMenteeSession': {
+      await updateMenteeSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'deleteMenteeSession': {
+      await deleteMenteeSessionPostHookMethod(input, mutationName, context);
       break;
     }
     default:
