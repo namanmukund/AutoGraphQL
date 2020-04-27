@@ -79,3 +79,7 @@ export const SendOtpFirstError = createError('SendOtpFirstError', {
 export const SimilarDocumentAlreadyExistError = createError('SimilarDocumentAlreadyExistError', {
   message: 'Similar document has already been added from before',
 });
+
+export const PastDateOrSlotError = createError('PastDateOrSlotError', {
+  message: 'Can not delete as either date or slot is of past',
+});

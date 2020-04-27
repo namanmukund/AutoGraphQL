@@ -3,7 +3,7 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import mentorSessionQuery from '../../graphqlQueries/mentorSessionQuery';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
-import { InvalidSessionDateTimeError } from '../../../../../constants/errors/input';
+import { PastDateOrSlotError } from '../../../../../constants/errors/db';
 
 const deleteMentorSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: mentorSessionId } = params;
@@ -22,7 +22,7 @@ const deleteMentorSessionValidation = async (params, mutationOrQueryName, contex
     );
     const currentDate = new Date();
     if (dateTime <= currentDate) {
-      throw new InvalidSessionDateTimeError();
+      throw new PastDateOrSlotError();
     }
   }
 
