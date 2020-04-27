@@ -20,9 +20,8 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
    */
   const currentAvailableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(availabilityDate));
   const currentAvailableSlots = get(currentAvailableSlotsRes, 'data.availableSlots');
-  console.log(77777, availabilityDate, prevAvailabilityDate);
+
   if (availabilityDate.getTime() !== prevAvailabilityDate.getTime()) {
-    console.log(11111, 'here');
     // --remove the availability slot from the prevAvailabilityDate
     const prevAvailableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(prevAvailabilityDate));
     const prevAvailableSlots = get(prevAvailableSlotsRes, 'data.availableSlots');
@@ -76,8 +75,6 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
     const docForUpdate = {};
     const slotsToBeDecreasedInUpdate = difference(prevSlotTimeStringArray, slotTimeStringArray);
     const slotsToBeIncreasedInUpdate = difference(slotTimeStringArray, prevSlotTimeStringArray);
-    console.log(4444444, slotsToBeDecreasedInUpdate);
-    console.log(555555, slotsToBeIncreasedInUpdate);
 
     if (slotsToBeDecreasedInUpdate && slotsToBeDecreasedInUpdate.length) {
       slotsToBeDecreasedInUpdate.forEach((slot) => {

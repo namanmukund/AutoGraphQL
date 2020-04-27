@@ -7,7 +7,7 @@ const getSelectedSlotsTime = (slots) => {
       }
     }
   });
-  return slotTimeArray;
+  return slotTimeArray.sort((a, b) => b - a);
 };
 
 export default getSelectedSlotsTime;
