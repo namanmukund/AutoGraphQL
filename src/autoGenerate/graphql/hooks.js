@@ -77,6 +77,7 @@ import addMentorSessionValidation
 import updateMentorSessionValidation from './preHookFunctions/validation/updateMentorSessionValidation';
 import updateMenteeSessionValidation from './preHookFunctions/validation/updateMenteeSessionValidation';
 import addMentorMenteeSessionValidation from './preHookFunctions/validation/addMentorMenteeSessionValidation';
+import addMentorSessionPostHookMethod from './postHookFunctions/addMentorSessionPostHookMethod';
 
 const { hookFunctions } = functions || {};
 
@@ -568,6 +569,11 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'addUserActivityAssignmentDump': {
       await addUserActivityAssignmentDumpPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'addMentorSession': {
+      console.log(111111, input);
+      await addMentorSessionPostHookMethod(input, mutationName, context);
       break;
     }
     default:

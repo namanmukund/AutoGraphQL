@@ -1,6 +1,6 @@
 // validate mentor session input variables
 import validateBookingDate from './validateBookingDate';
-import getSelectedSlots from './getSelectedSlots';
+import getSelectedSlotsTime from './getSelectedSlotsTime';
 import { NoSlotSelectedError, OnlyOneSlotAllowedError } from '../../../../../../constants/errors/input';
 
 const PRE_BOOKING_HOUR_LIMIT = 0;
@@ -8,7 +8,7 @@ const validateMenteeSessionInput = (params) => {
   const { input } = params;
   const { bookingDate, ...slots } = input;
 
-  const slotTimeArray = getSelectedSlots(slots);
+  const slotTimeArray = getSelectedSlotsTime(slots);
 
   if (!slotTimeArray.length) {
     throw new NoSlotSelectedError();

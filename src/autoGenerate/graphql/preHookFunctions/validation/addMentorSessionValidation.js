@@ -31,6 +31,7 @@ const getMentorSessions = (userId, availabilityDate) => `
   `;
 // prehook logic to check if added MentorSession(user id and availabilityDate) already exists
 const addMentorSessionValidation = async (params, mutationOrQueryName, context) => {
+  console.log(111111, context);
   // validate input before proceeding
   validateMentorSessionInput(params);
   // check if the document for called user and availabilityDate is already present
