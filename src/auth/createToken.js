@@ -4,7 +4,7 @@ import authParams from '../../config/authParams';
 import getExpiryDateForUserToken from './getExpiryDateForUserToken';
 
 export default function createToken(user, authentication, toPhone, isForgotPasswordToken = false) {
-  const expiresIn = getExpiryDateForUserToken(authParams, authentication, isForgotPasswordToken);
+  const expiresIn = getExpiryDateForUserToken(authParams, authentication, isForgotPasswordToken, user);
   let userInfo = pick(user, ['id', 'username']);
   // Assign information whether token is created by phone login or email login
   if (toPhone === true) {
@@ -18,6 +18,7 @@ export default function createToken(user, authentication, toPhone, isForgotPassw
       byEmail: true,
     };
   }
+
   let secret = authParams.SECRET;
   if (isForgotPasswordToken) secret = authParams.FORGOT_PASSWORD_SECRET;
 
