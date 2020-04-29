@@ -3,8 +3,8 @@ import { pick } from 'lodash';
 import authParams from '../../config/authParams';
 import getExpiryDateForUserToken from './getExpiryDateForUserToken';
 
-export default function createToken(user, authentication, toPhone, isForgotPasswordToken = false) {
-  const expiresIn = getExpiryDateForUserToken(authParams, authentication, isForgotPasswordToken, user);
+export default function createToken(user, authentication, toPhone, isForgotPasswordToken = false, isSignUp) {
+  const expiresIn = getExpiryDateForUserToken(authParams, authentication, isForgotPasswordToken, user, isSignUp);
   let userInfo = pick(user, ['id', 'username']);
   // Assign information whether token is created by phone login or email login
   if (toPhone === true) {
