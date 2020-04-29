@@ -1,12 +1,11 @@
 import bcrypt from 'bcryptjs';
 import { get } from 'lodash';
 import {
-  InvalidEmailError,
   InvalidPasswordLengthError, UserAlreadyExistsError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
 import authParams from '../../../../../../config/authParams';
-import { MutationController } from '../../../controllers';
+import { MutationController, QueryController } from '../../../controllers';
 import { generateCuid, log } from '../../../../../../utils';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
@@ -16,18 +15,48 @@ import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAn
 import addUserCurrentTopicComponentStatus
   from '../../../../utils/addUserCurrentTopicComponentStatus';
 import { ADD } from '../../../../../../constants/graphqlOperations';
-import isValidEmail from '../../../validation/isValidEmail';
-import getUserData from './utils/getUserData';
+import { commonUserValidation } from '../../../preHookFunctions/validation/utils';
+import {
+  NameFieldRequiredError,
+  PasswordFieldRequiredError,
+  PhoneFieldRequiredError,
+} from '../../../../../../constants/errors/input';
+import { TWA } from '../../../../../../constants';
+import getUserFromDBQuery from './utils/getUserFromDBQuery';
+import { SELF_LEARNER } from '../../../../../../constants/roles';
 
-const validateSignUpInput = (input) => {
-  const { email, password } = input;
-  if (!isValidEmail(email)) {
-    throw new InvalidEmailError();
+const validateSignUpInput = (input, authentication) => {
+  const {
+    name, email, phone, password,
+  } = input;
+
+  const { app: { name: appName } } = authentication;
+
+  switch (appName) {
+    case TWA: {
+      if (!name) {
+        throw new NameFieldRequiredError();
+      }
+      if (!phone || !phone.countryCode || !phone.number) {
+        throw new PhoneFieldRequiredError();
+      }
+      // eslint-disable-next-line no-param-reassign
+      input.role = SELF_LEARNER;
+      break;
+    }
+    default: {
+      if (!password) {
+        throw new PasswordFieldRequiredError();
+      }
+    }
   }
-  if (password.length < 6) {
+
+  commonUserValidation({ name, email, phone });
+
+  if (password && password.length < 6) {
     throw new InvalidPasswordLengthError();
   }
-  return true;
+  return input;
 };
 
 const signupMutationResolver = async (
@@ -58,10 +87,13 @@ const signupMutationResolver = async (
     throw new UserTokenNotRequiredError();
   }
 
-  validateSignUpInput(input);
+  validateSignUpInput(input, authentication);
 
-  const { email } = input;
-  const userData = await getUserData(email, { bypass: true });
+  Object.assign(authentication, {
+    user: true,
+  });
+  const modelQueries = new QueryController('User', authentication);
+  const userData = await getUserFromDBQuery(input, modelQueries);
   /* if password is already present or if password
     is not present and also user is not socially logged in
     */
@@ -74,13 +106,13 @@ const signupMutationResolver = async (
   /* Setting user to true if not preset, as signup
   does not require user authentication.
   */
-  Object.assign(authentication, {
-    user: true,
-  });
   const userObj = {};
-  const hashedPwd = bcrypt.hashSync(input.password, authParams.SALT);
-  userObj.password = hashedPwd;
-  userObj.isSetPassword = true;
+
+  if (input.password) {
+    const hashedPwd = bcrypt.hashSync(input.password, authParams.SALT);
+    userObj.password = hashedPwd;
+    userObj.isSetPassword = true;
+  }
 
   let result = '';
   const modelMutations = new MutationController(typeName, authentication);
@@ -121,7 +153,7 @@ const signupMutationResolver = async (
     log('Failed to get first published topic or first published learning objective corresponding to it');
   }
   // return user with token
-  return createUserTokenTypeData(result);
+  return createUserTokenTypeData(result, authentication, '', true);
 };
 
 export default signupMutationResolver;
