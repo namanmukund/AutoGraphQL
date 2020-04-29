@@ -1,62 +1,14 @@
-import { pick } from 'lodash';
 import {
   UserTokenNotRequiredError,
   BlockedOperationError,
   DatabaseRecordNotFoundError,
 } from '../../../../../../constants/errors';
-import { QueryController, RemoteController } from '../../../controllers';
-import { toObject } from '../../../../../../utils';
-import {
-  mergeMutationsPromisesResults,
-} from '../utils/mergeMutationsPromisesResults';
+import { QueryController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { checkPasswordAndReturnUserWithToken } from '../utils/checkPasswordAndReturnUserWithToken';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import getUserFromDBQuery from './utils/getUserFromDBQuery';
-
-
-// Returns remote delete mutaiton promises.
-const remoteLoginMutationPromises = (
-  input,
-  typeName,
-  mutationName,
-  controllerFunctionName,
-  fieldsFetched,
-  remoteFieldsApplicationWise,
-  authentication,
-) => {
-  const promiseArray = Object.keys(remoteFieldsApplicationWise).map((appApplicationName) => {
-    const appModelRemote = new RemoteController(appApplicationName, authentication);
-    const appInput = { ...pick(input, Object.keys(remoteFieldsApplicationWise[appApplicationName])) };
-    const appFieldsToMutation = {
-
-      // get only those fields that are requested.
-      ...pick(fieldsFetched, Object.keys(remoteFieldsApplicationWise[appApplicationName])),
-      id: true,
-      password: true,
-    };
-    // Mutate remote applications.
-    const loginSpecificTypeName = 'Login';
-    return appModelRemote[controllerFunctionName](
-      loginSpecificTypeName,
-      mutationName,
-      appInput,
-      appFieldsToMutation,
-    )
-      .then((appResultRemote) => {
-        const appData = appResultRemote.data;
-        const appErrors = appResultRemote.errors;
-        if (appErrors) {
-          throw new Error(JSON.stringify(appErrors));
-        }
-
-        return appData[mutationName];
-      });
-  });
-
-  return promiseArray;
-};
 
 export default function loginMutationResolver(
   root,
@@ -68,7 +20,6 @@ export default function loginMutationResolver(
   authentication,
 ) {
   const { input } = params;
-  const { localFields, remoteFields, remoteFieldsApplicationWise } = ast[typeName];
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
@@ -92,56 +43,24 @@ export default function loginMutationResolver(
   // Create a new object id if there is no id.
   const modelQueries = new QueryController('User', authentication);
 
-  // @TODO incorporate relation logic with multi apps logic
-  // If there are no remote fields, return the result.
-  if (!Object.keys(remoteFields).length) {
-    return getUserFromDBQuery(
-      input,
-      modelQueries,
-    ).then((fetchedUser) => {
-      if (!fetchedUser) {
-        throw new DatabaseRecordNotFoundError();
-      }
-      const data = checkPasswordAndReturnUserWithToken(fetchedUser, input, authentication);
-      const { status } = fetchedUser;
-      switch (status) {
-        case 'blocked':
-          throw new BlockedOperationError();
-        case 'inactive':
-          if (!input.username === fetchedUser.username) { throw new BlockedOperationError(); }
-          break;
-        case 'active':
-        default:
-      }
-      return data;
-    })
-      .catch((err) => err);
-  }
-
-  // If there are remote fields.
-  const controllerFunctionName = 'loginMutation';
-  const promiseArray = remoteLoginMutationPromises(
+  return getUserFromDBQuery(
     input,
-    typeName,
-    mutationName,
-    controllerFunctionName,
-    fieldsFetched,
-    remoteFieldsApplicationWise,
-    authentication,
-  );
-  // Wait for the promise to resolve.
-  return Promise.all(promiseArray).then((values) => {
-    // Expecting only one value.
-
-    const value = values[0];
-    const { id } = value;
-    const cuidInput = { ...input, id };
-    // Input to local database.
-    const localInput = pick(cuidInput, Object.keys({ ...localFields, id: true }));
-    return getUserFromDBQuery(
-      localInput,
-      modelQueries,
-    ).then((val) => mergeMutationsPromisesResults([value, toObject(val)]))
-      .then((savedUser) => checkPasswordAndReturnUserWithToken(savedUser, input, authentication));
-  }).catch((error) => error);
+    modelQueries,
+  ).then((fetchedUser) => {
+    if (!fetchedUser) {
+      throw new DatabaseRecordNotFoundError();
+    }
+    const data = checkPasswordAndReturnUserWithToken(fetchedUser, input, authentication);
+    const { status } = fetchedUser;
+    switch (status) {
+      case 'blocked':
+        throw new BlockedOperationError();
+      case 'inactive':
+        if (!input.username === fetchedUser.username) { throw new BlockedOperationError(); }
+        break;
+      case 'active':
+      default:
+    }
+    return data;
+  });
 }
