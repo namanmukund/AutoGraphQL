@@ -143,3 +143,15 @@ export const NoSlotSelectedError = createError('NoSlotSelectedError', {
 export const OnlyOneSlotAllowedError = createError('OnlyOneSlotAllowedError', {
   message: 'Only one slot can be selected in a day',
 });
+
+export const NameFieldRequiredError = createError('NameFieldRequiredError', {
+  message: 'Name field is mandatory in input',
+});
+
+export const PhoneFieldRequiredError = createError('PhoneFieldRequiredError', {
+  message: 'Phone field is mandatory in input',
+});
+
+export const PasswordFieldRequiredError = createError('PasswordFieldRequiredError', {
+  message: 'Password field is mandatory in input',
+});
