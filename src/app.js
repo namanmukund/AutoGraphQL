@@ -1,10 +1,11 @@
+import { get } from 'lodash';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import { ApolloServer, PubSub } from 'apollo-server-express';
 import schema from './graphql';
 import { log } from '../utils';
-import { graphqlUpload, authMiddleware } from './middlewares';
+import { authMiddleware, graphqlUpload } from './middlewares';
 import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
 import Raven from './Raven';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
@@ -64,6 +65,7 @@ const server = new ApolloServer({
       'editor.theme': 'light',
     },
   },
+  debug: false,
   uploads: false,
   formatError: (error) => {
     if (error.name !== 'GraphQLError') {
@@ -71,7 +73,11 @@ const server = new ApolloServer({
     } else {
       Raven.captureMessage(`Message: ${error.message}`);
     }
-    return error;
+
+    return {
+      ...error,
+      code: get(error, 'extensions.exception.name') || '',
+    };
   },
   context: ({ req, connection }) => {
     if (connection) {

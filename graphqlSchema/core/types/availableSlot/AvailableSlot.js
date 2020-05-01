@@ -3,7 +3,9 @@ import getSlotTimeFields from '../../functions/getSlotTimeFields';
 const slotTimeFields = getSlotTimeFields('Int', 0);
 
 const AvailableSlot = `
-  type AvailableSlot @model {
+  type AvailableSlot @model 
+  @appPermissions( permissions: "*", rule: deny)
+  {
     date: Date
     ${slotTimeFields}
 }`;
