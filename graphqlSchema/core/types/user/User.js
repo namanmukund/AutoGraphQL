@@ -43,6 +43,7 @@ const User = `
     facebookId: String @writeOnly
     studentProfile: StudentProfile @relation(name:"StudentProfileUser", isSubset: true)
     parentProfile: ParentProfile @relation(name:"ParentProfileUser")
+    profilePic: File @relation(name: "UserProfilePic", direction: "OneWay")
   }
 `;
 
