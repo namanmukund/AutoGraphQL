@@ -14,7 +14,7 @@ const TLA = 'tekieLearningApp';
 const TWA = 'tekieWebApp';
 const backendApps = ['core'];
 
-const frontEndApps = [TLA, TMS, TWA, 'testApp'];
+const frontEndApps = [TLA, TMS, TWA];
 const permissionIntegratedApps = [];
 const firebaseExcludedApps = [];
 
