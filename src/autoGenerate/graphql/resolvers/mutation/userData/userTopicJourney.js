@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import { get, cloneDeep } from 'lodash';
 import {
   topicTypes,
   GLOBAL_COURSE_TITLE,
@@ -116,6 +116,46 @@ const getQuizReportQuery = (userId, topicId) => `
   }
   `;
 
+// query to get UserLeaaarningObjective of a user and LO
+const getUserLearningObjectiveQuery = (userId, learningObjectiveId) => `
+  query{
+    userLearningObjectives(filter:{
+      and:[
+        {user_some:{
+            id: "${userId}"
+          }},
+        {learningObjective_some:{
+            id: "${learningObjectiveId}"
+          }}
+      ]
+    }){
+      id
+      practiceQuestionStatus
+      chatStatus
+    }
+  }
+  `;
+
+const getUpdatedLearningObjectivesData = async (userId, learningObjectivesData, context) => {
+  const clonedLearningObjectivesData = cloneDeep(learningObjectivesData);
+  /* eslint no-restricted-syntax:0 */
+  for (const loInArray of clonedLearningObjectivesData) {
+    loInArray.isUnlocked = true;
+    /* eslint no-await-in-loop:0 */
+    const userLearningObjectiveRes = await callLocalGraphqlApi(
+      getUserLearningObjectiveQuery(userId, loInArray.id),
+      context,
+      '',
+    );
+    const userLearningObjectiveInfo = get(userLearningObjectiveRes, 'data.userLearningObjectives[0]');
+    if (userLearningObjectiveInfo) {
+      loInArray.practiceQuestionStatus = userLearningObjectiveInfo.practiceQuestionStatus;
+      loInArray.chatStatus = userLearningObjectiveInfo.chatStatus;
+    }
+  }
+  return clonedLearningObjectivesData;
+};
+
 /*
 This is called when user tries to load journey page
 It will return all the components of a topics(video, LO, quiz)
@@ -186,6 +226,7 @@ const userTopicJourneyMutationResolver = async (
   } = currentTopicComponentInfo;
   // this object will be returned in output
   const userTopicData = {};
+  const { incomplete, complete } = userTopicTypeStatus;
   // constructing data for video component
   const videoData = {
     title: topicInfo.videoTitle,
@@ -193,7 +234,7 @@ const userTopicJourneyMutationResolver = async (
     thumbnail: topicInfo.videoThumbnail,
   };
   // constructing data for LO component
-  const learningObjectivesData = [];
+  let learningObjectivesData = [];
   topicInfo.learningObjectives.forEach((loInArray) => {
     const {
       id,
@@ -208,6 +249,8 @@ const userTopicJourneyMutationResolver = async (
       order,
       description,
       thumbnail,
+      practiceQuestionStatus: incomplete,
+      chatStatus: incomplete,
     });
   });
   // constructing data for quiz component
@@ -215,6 +258,7 @@ const userTopicJourneyMutationResolver = async (
     title: topicInfo.title,
     description: topicInfo.description,
     thumbnail: topicInfo.thumbnail,
+    status: incomplete,
   };
   const { pro } = enrollmentTypes;
   /*
@@ -225,7 +269,6 @@ const userTopicJourneyMutationResolver = async (
    currentRunningTopic - this is topic in UserCurrentTopicComponentStatus
   */
   const { defaultMastery } = masteryLevels;
-  const { incomplete, complete } = userTopicTypeStatus;
   let topicStatus = incomplete;
   if (topicInfo.order < currentRunningTopic.order) {
     if (topicInfo.isTrial || enrollmentType === pro) {
@@ -234,9 +277,8 @@ const userTopicJourneyMutationResolver = async (
       videoData.isUnlocked = false;
     }
 
-    learningObjectivesData.forEach((loInArray, index) => {
-      learningObjectivesData[index].isUnlocked = true;
-    });
+    learningObjectivesData = getUpdatedLearningObjectivesData(userId, learningObjectivesData, context);
+
     quizData.isUnlocked = true;
     // getting user quiz report to get the mastery level of user in quiz
     const quizRes = await callLocalGraphqlApi(
@@ -258,6 +300,7 @@ const userTopicJourneyMutationResolver = async (
     const masteryLevel = getMasteryLevel(correctQuestionCount, totalQuestionCount);
     quizData.masteryLevel = masteryLevel;
     topicStatus = complete;
+    quizData.status = complete;
     /*
     if called topic order is greater than that of current topic order,
      that means all components are locked for that topic
@@ -296,9 +339,7 @@ const userTopicJourneyMutationResolver = async (
       // since quiz is last component, if that is current topic component
       // that means all components are unlocked
       case quiz: {
-        learningObjectivesData.forEach((loInArray, index) => {
-          learningObjectivesData[index].isUnlocked = true;
-        });
+        learningObjectivesData = getUpdatedLearningObjectivesData(userId, learningObjectivesData, context);
         quizData.isUnlocked = true;
         break;
       }
@@ -312,6 +353,24 @@ const userTopicJourneyMutationResolver = async (
             learningObjectivesData[index].isUnlocked = false;
           }
         });
+        for (const loInArray of learningObjectivesData) {
+          if (loInArray.order <= currentRunningLearningObjective.order) {
+            loInArray.isUnlocked = true;
+            /* eslint no-await-in-loop:0 */
+            const userLearningObjectiveRes = await callLocalGraphqlApi(
+              getUserLearningObjectiveQuery(userId, loInArray.id),
+              context,
+              '',
+            );
+            const userLearningObjectiveInfo = get(userLearningObjectiveRes, 'data.userLearningObjectives[0]');
+            if (userLearningObjectiveInfo) {
+              loInArray.practiceQuestionStatus = userLearningObjectiveInfo.practiceQuestionStatus;
+              loInArray.chatStatus = userLearningObjectiveInfo.chatStatus;
+            }
+          } else {
+            loInArray.isUnlocked = false;
+          }
+        }
         quizData.isUnlocked = false;
         break;
       }

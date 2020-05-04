@@ -6,6 +6,8 @@ const userJourneyLearningObjectiveType = `
    description: String
    thumbnail: File
    isUnlocked: Boolean @defaultValue(value: "false")
+   chatStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
+   practiceQuestionStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
  }`;
 
 const userQuizType = `
@@ -15,6 +17,7 @@ const userQuizType = `
    description: String
    thumbnail: File
    isUnlocked: Boolean @defaultValue(value: "false")
+   status: UserTopicTypeStatus @defaultValue(value: "incomplete")
  }`;
 
 const userVideoType = `
