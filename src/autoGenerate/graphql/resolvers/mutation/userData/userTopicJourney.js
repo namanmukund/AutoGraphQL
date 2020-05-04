@@ -346,7 +346,31 @@ const userTopicJourneyMutationResolver = async (
       default: {
         // case when messgae or practiceQuestion is current component
         // in that case we are checking order of LOs
-        learningObjectivesData = getUpdatedLearningObjectivesData(userId, learningObjectivesData, context);
+        learningObjectivesData.forEach((loInArray, index) => {
+          if (loInArray.order <= currentRunningLearningObjective.order) {
+            learningObjectivesData[index].isUnlocked = true;
+          } else {
+            learningObjectivesData[index].isUnlocked = false;
+          }
+        });
+        for (const loInArray of learningObjectivesData) {
+          if (loInArray.order <= currentRunningLearningObjective.order) {
+            loInArray.isUnlocked = true;
+            /* eslint no-await-in-loop:0 */
+            const userLearningObjectiveRes = await callLocalGraphqlApi(
+              getUserLearningObjectiveQuery(userId, loInArray.id),
+              context,
+              '',
+            );
+            const userLearningObjectiveInfo = get(userLearningObjectiveRes, 'data.userLearningObjectives[0]');
+            if (userLearningObjectiveInfo) {
+              loInArray.practiceQuestionStatus = userLearningObjectiveInfo.practiceQuestionStatus;
+              loInArray.chatStatus = userLearningObjectiveInfo.chatStatus;
+            }
+          } else {
+            loInArray.isUnlocked = false;
+          }
+        }
         quizData.isUnlocked = false;
         break;
       }
