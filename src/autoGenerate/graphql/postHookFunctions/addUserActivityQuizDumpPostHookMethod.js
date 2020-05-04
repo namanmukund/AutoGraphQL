@@ -16,6 +16,7 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import validateTokenAndExtractInformation
   from '../preHookFunctions/validation/utils/validateTokenAndExtractInformation';
 import { MENTEE } from '../../../../constants/roles';
+import getNextComponent from './utils/getNextComponent';
 
 // query to fetch user quiz info
 const userQuizQuery = (
@@ -112,6 +113,7 @@ const addUserQuizReport = (
   quizReportQuery,
   learningObjectiveReportQuery,
   pushManyQuery,
+  nextComponentQuery,
 ) => `
   mutation{
     addUserQuizReport(
@@ -121,6 +123,7 @@ const addUserQuizReport = (
       ${quizReportQuery}
       ${learningObjectiveReportQuery}
       ${pushManyQuery}
+      ${nextComponentQuery}
     }){
       id
     }
@@ -883,6 +886,11 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     }
     // updating UserQuiz to change status to complete
     await callLocalGraphqlApi(updateUserQuizMutation(userQuizId));
+    const nextComponentQuery = getNextComponent(
+      '',
+      nextTopicId,
+      'quiz',
+    );
     // generating quiz report of user
     const addUserQuizReportRes = await callLocalGraphqlApi(addUserQuizReport(
       userId,
@@ -890,6 +898,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       quizReportQuery,
       learningObjectiveReportQuery,
       pushManyQuery,
+      nextComponentQuery,
     ));
     const addUserQuizReportId = get(addUserQuizReportRes, 'data.addUserQuizReport.id');
     Object.assign(input, {

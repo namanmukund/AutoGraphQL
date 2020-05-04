@@ -33,6 +33,12 @@ const quizAnswersType = `
    learningObjective: LearningObjective @relation(name: "LearningObjectiveUserQuiz", direction: "OneWay")
  }`;
 
+const userQuizReportNextComponentType = `
+  type UserQuizReportNextComponentType {
+   topic: Topic @relation(name: "UserQuizReportNextComponentTypeTopic", direction: "OneWay")
+   nextComponentType: CurrentTopicComponentType!
+ }`;
+
 const UserQuizReport = `
   type UserQuizReport @model {
     user: User! @relation(name: "UserQuizReport", direction: "OneWay")
@@ -40,7 +46,8 @@ const UserQuizReport = `
     quizReport: QuizReportType
     learningObjectiveReport: [QuizReportLearningObjective]
     topic: Topic @relation(name: "TopicUserQuizReport", direction: "OneWay")
+    nextComponent: UserQuizReportNextComponentType
   }
 `;
 
-export default [UserQuizReport, quizReportType, quizReportLearningObjective, quizAnswersType];
+export default [UserQuizReport, quizReportType, quizReportLearningObjective, quizAnswersType, userQuizReportNextComponentType];
