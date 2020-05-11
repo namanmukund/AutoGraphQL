@@ -59,7 +59,7 @@ app.use(path, bodyParser.json(), graphqlUpload({ uploadDir: '/tmp/uploads' }));
 const server = new ApolloServer({
   schema,
   playground: {
-    endpoint: `http://localhost:${port}${path}`,
+    endpoint: `http://0.0.0.0:${port}${path}`,
     settings: {
       'editor.theme': 'light',
     },
@@ -142,8 +142,8 @@ const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
 httpServer.listen(port, () => {
-  log(`Server ready at http://localhost:${port}${server.graphqlPath}`);
-  log(`Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`);
+  log(`Server ready at http://0.0.0.0:${port}${server.graphqlPath}`);
+  log(`Subscriptions ready at ws://0.0.0.0:${port}${server.subscriptionsPath}`);
 });
 
 export default app;
