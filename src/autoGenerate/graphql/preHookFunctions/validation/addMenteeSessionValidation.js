@@ -65,7 +65,6 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
   if (menteeSessions && menteeSessions.length) {
     throw new SimilarDocumentAlreadyExistError();
   }
-  throw new Error('Exiting....');
   return true;
 };
 
