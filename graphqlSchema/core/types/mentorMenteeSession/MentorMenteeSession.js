@@ -7,8 +7,10 @@ const MentorMenteeSession = `
     sessionEndDate: Date
     sessionStatus: SessionStatus! @defaultValue(value: "started")
     isQuizSubmitted: Boolean @defaultValue(value: "false")
+    quizSubmitDate: Date
     isAssignmentSubmitted: Boolean @defaultValue(value: "false")
-    isHomeworkChecked: Boolean @defaultValue(value: "false")
+    assignmentSubmitDate: Date
+    isHomeworkCheckedByMentor: Boolean @defaultValue(value: "false")
 }`;
 
 export default [MentorMenteeSession];
