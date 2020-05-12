@@ -3,6 +3,7 @@ const sessionDetailType = `
    topicId: ID
    topicTitle: String
    topicThumbnail: File
+   topicThumbnailSmall: File
    topicDescription: String
    topicOrder: Int
    bookingDate: Date
@@ -12,13 +13,28 @@ const sessionDetailType = `
    mentorProfilePic: String
  }`;
 
+const completedSessionDetailType = `
+  type CompletedSessionDetailType {
+   topicId: ID
+   topicTitle: String
+   topicThumbnail: File
+   topicThumbnailSmall: File
+   topicDescription: String
+   topicOrder: Int
+   endingDate: Date
+   mentorId: ID
+   mentorName: String
+   mentorProfilePic: String
+ }`;
+
 const MenteeCourseSyllabus = `
   type MenteeCourseSyllabus {
     upComingSession: [SessionDetailType]
     bookedSession: [SessionDetailType]
+    completedSession: [CompletedSessionDetailType]
     totalChapters: Int
     totalTopics: Int
   }
 `;
 
-export default [MenteeCourseSyllabus, sessionDetailType];
+export default [MenteeCourseSyllabus, sessionDetailType, completedSessionDetailType];
