@@ -48,8 +48,11 @@ const validateMenteeStartSessionData = (menteeSession, topicConnectId) => {
   const sessionEndDate = date.setHours(date.getHours() + 1);
   const currentDate = new Date();
 
-  if (!(currentDate >= sessionStartDate && currentDate < sessionEndDate)) {
-    throw new InvalidSessionDateTimeError();
+  // added to allow testing on staging
+  if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
+    if (!(currentDate >= sessionStartDate && currentDate < sessionEndDate)) {
+      throw new InvalidSessionDateTimeError();
+    }
   }
   return true;
 };
