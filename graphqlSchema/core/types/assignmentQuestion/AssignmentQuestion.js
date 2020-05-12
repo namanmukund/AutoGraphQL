@@ -23,6 +23,7 @@ const AssignmentQuestion = `
     statement: String! @trim
     hint: String @trim
     difficulty: Int
+    isHomework: Boolean @defaultValue(value: "false")
     questionCodeSnippet: String @trim
     answerCodeSnippet: String @trim
     explanation: String @trim
