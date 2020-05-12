@@ -64,6 +64,11 @@ const getUserCurrentTopicComponentStatus = (userId) => `
               uri
               name
             }
+            thumbnailSmall{
+              id
+              uri
+              name
+            }
           }
         }
       }
@@ -77,6 +82,11 @@ const getUserCurrentTopicComponentStatus = (userId) => `
           id
           name
           uri
+        }
+        thumbnailSmall{
+          id
+          uri
+          name
         }
         description
         videoDescription
@@ -136,6 +146,11 @@ const getCourseQuery = () => `
               uri
               name
             }
+            thumbnailSmall{
+              id
+              uri
+              name
+            }
           }
         }
       }
@@ -160,6 +175,11 @@ const getMenteeSessions = (userId) => `
           uri
           name
         }
+        thumbnailSmall{
+          id
+          uri
+          name
+        }
         description
       }
       mentor{
@@ -170,6 +190,53 @@ const getMenteeSessions = (userId) => `
       }
       bookingDate
       ${getSlotTimeFields()}
+    }
+  }
+  `;
+
+// query to get mentorMentee Sessions
+const getMentorMenteeSessions = (userId) => `
+  query{
+    mentorMenteeSessions(filter:{
+      and:[
+        {
+          menteeSession_some:{
+            user_some:{
+              id:"${userId}"
+            }
+          }
+        },
+        {
+          sessionStatus: completed
+        }
+      ]
+    }){
+      id
+      topic{
+        id
+        title
+        order
+        thumbnail{
+          id
+          uri
+          name
+        }
+        thumbnailSmall{
+          id
+          uri
+          name
+        }
+        description
+      }
+      mentorSession{
+        user{
+          id
+          name
+          socialProfilePic
+        }
+      }
+      sessionEndDate
+      sessionStatus
     }
   }
   `;
@@ -200,9 +267,12 @@ const menteeCourseSyllabusMutationResolver = async (
   } = userAndAppInfo;
   let currentTopicComponentInfo;
   let menteeSessions;
+  let mentorMenteeSessions;
   const upComingSession = [];
   const bookedSession = [];
+  const completedSession = [];
   let lastTopicBookedOrder = 0;
+  let lastCompletedTopicOrder = 0;
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
     const res = await callLocalGraphqlApi(
@@ -215,6 +285,9 @@ const menteeCourseSyllabusMutationResolver = async (
     validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
     const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId));
     menteeSessions = get(getMenteeSessionsRes, 'data.menteeSessions');
+
+    const getMentorMenteeSessionsRes = await callLocalGraphqlApi(getMentorMenteeSessions(userId));
+    mentorMenteeSessions = get(getMentorMenteeSessionsRes, 'data.mentorMenteeSessions');
   /*
   If user is not logged in and asking for course syllabus then we will not add
   any document in Db and will return default data with first topic as unlocked
@@ -255,7 +328,6 @@ const menteeCourseSyllabusMutationResolver = async (
 
   const {
     currentCourse,
-    currentTopic,
   } = currentTopicComponentInfo;
 
   // this object will be returned in output
@@ -263,12 +335,53 @@ const menteeCourseSyllabusMutationResolver = async (
   let totalChapters = 0;
   let totalTopics = 0;
   const { chapters } = currentCourse;
-  const { order: currentTopicOrder } = currentTopic;
   if (!chapters || !chapters.length) {
     throw new DatabaseRecordNotFoundError({
       data: {
         error: 'CurrentCourse.chapters: is not present',
       },
+    });
+  }
+
+  // iterating over each of mentorMenteeSessions to send sessions that are already completed by mentee
+  if (mentorMenteeSessions && mentorMenteeSessions.length) {
+    mentorMenteeSessions.forEach((mentorMenteeSession) => {
+      const {
+        sessionEndDate: endingDate,
+      } = mentorMenteeSession;
+      const {
+        order: topicOrder,
+        id: topicId,
+        title: topicTitle,
+        description: topicDescription,
+        thumbnail: topicThumbnail,
+        thumbnailSmall: topicThumbnailSmall,
+      } = mentorMenteeSession.topic;
+
+      const {
+        id: mentorId,
+        name: mentorName,
+        socialProfilePic: mentorProfilePic,
+      } = mentorMenteeSession.mentorSession && mentorMenteeSession.mentorSession.user;
+
+      // setting last topic completed order, will use this to find booked sessions that are not completed
+      if (topicOrder > lastCompletedTopicOrder) {
+        lastCompletedTopicOrder = topicOrder;
+      }
+
+      const completedMenteeSession = {
+        topicId,
+        topicOrder,
+        topicTitle,
+        topicThumbnail,
+        topicThumbnailSmall,
+        topicDescription,
+        endingDate,
+        mentorId,
+        mentorName,
+        mentorProfilePic,
+      };
+      completedSession.push(completedMenteeSession);
     });
   }
 
@@ -285,6 +398,7 @@ const menteeCourseSyllabusMutationResolver = async (
         title: topicTitle,
         description: topicDescription,
         thumbnail: topicThumbnail,
+        thumbnailSmall: topicThumbnailSmall,
       } = menteeSession.topic;
 
       // setting last topic booked order, will use this to find upcoming sessions
@@ -304,13 +418,14 @@ const menteeCourseSyllabusMutationResolver = async (
       });
       // checking logic if topic is already consumed or yet to be watched
       if (
-        topicOrder >= currentTopicOrder
+        topicOrder > lastCompletedTopicOrder
       ) {
         const bookedMenteeSession = {
           topicId,
           topicOrder,
           topicTitle,
           topicThumbnail,
+          topicThumbnailSmall,
           topicDescription,
           bookingDate,
           slotTime,
@@ -343,6 +458,7 @@ const menteeCourseSyllabusMutationResolver = async (
         title: topicTitle,
         description: topicDescription,
         thumbnail: topicThumbnail,
+        thumbnailSmall: topicThumbnailSmall,
       } = topic;
       // checking logic for topics which are yet not booked by mentee
       if (
@@ -353,6 +469,7 @@ const menteeCourseSyllabusMutationResolver = async (
           topicOrder,
           topicTitle,
           topicThumbnail,
+          topicThumbnailSmall,
           topicDescription,
         };
         upComingSession.push(upComingMenteeSession);
@@ -362,6 +479,7 @@ const menteeCourseSyllabusMutationResolver = async (
   Object.assign(currentUserSyllabus, {
     upComingSession,
     bookedSession,
+    completedSession,
     totalChapters,
     totalTopics,
   });
