@@ -14,7 +14,7 @@ const http = require('http');
 
 const pubsub = new PubSub();
 
-const port = process.env.PORT ||  80;
+const port = process.env.PORT || 80;
 const env = process.env.NODE_ENV || 'development';
 const application = process.env.APPLICATION || 'core';
 
