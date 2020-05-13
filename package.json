@@ -9,6 +9,7 @@
     "start:core": "better-npm-run start:core",
     "start:core:debug": "better-npm-run start:core:debug",
     "start:cloudBuild": "better-npm-run start:cloudBuild",
+    "heroku-postbuild": "better-npm-run start:cloudBuild",
     "start": "better-npm-run start:core",
     "start-debug": "better-npm-run start-debug",
     "test": "better-npm-run test:core",
