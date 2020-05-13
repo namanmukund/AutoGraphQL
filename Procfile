@@ -1,1 +1,1 @@
-web: npm run start:cloudBuild
+worker: npm run start:cloudBuild
