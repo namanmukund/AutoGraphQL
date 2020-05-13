@@ -1,1 +1,1 @@
-'web: npm run start:cloudBuild'
+web: npm run start:cloudBuild
