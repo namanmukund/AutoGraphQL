@@ -9,6 +9,7 @@
     "start:core": "better-npm-run start:core",
     "start:core:debug": "better-npm-run start:core:debug",
     "start:cloudBuild": "better-npm-run start:cloudBuild",
+    "heroku-postbuild": "npm run build:cloudProd",
     "start": "better-npm-run start:core",
     "start-debug": "better-npm-run start-debug",
     "test": "better-npm-run test:core",
@@ -22,9 +23,7 @@
     "start:cloudBuild": {
       "command": "node ./build/mainCloud.js",
       "env": {
-        "APPLICATION": "core",
-        "NODE_ENV": "development",
-        "PORT": 3000
+        "APPLICATION": "core"
       }
     },
     "test:core": {
