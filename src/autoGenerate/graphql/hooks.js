@@ -347,6 +347,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await userCourseSyllabusMethod(context);
       break;
     }
+    case 'menteeCourseSyllabus': {
+      await userCourseSyllabusMethod(context);
+      break;
+    }
     case 'userAssignment': {
       await userAssignmentValidation(params, context);
       return hook(input, mutationOrQueryName, 'PreHook');
