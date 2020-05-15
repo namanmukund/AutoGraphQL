@@ -1,4 +1,4 @@
 defaults.url=https://sentry.io/
 defaults.org=tekie-mn
 defaults.project=tekie-backend
-auth.token=3ee551d4968811eabee44201c0a8d030
+auth.token=18ddeb90968811eab8424201c0a8d02b
