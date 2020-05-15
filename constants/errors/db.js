@@ -75,3 +75,15 @@ export const PaidComponentLockedError = createError('PaidComponentLockedError', 
 export const SendOtpFirstError = createError('SendOtpFirstError', {
   message: 'Send otp via login first',
 });
+
+export const SimilarDocumentAlreadyExistError = createError('SimilarDocumentAlreadyExistError', {
+  message: 'Similar document has already been added from before',
+});
+
+export const PastDateOrSlotError = createError('PastDateOrSlotError', {
+  message: 'Can not delete as either date or slot is of past',
+});
+
+export const NoSlotsAvailableForBooking = createError('NoSlotsAvailableForBooking', {
+  message: 'No slot is available for booking',
+});

@@ -25,6 +25,7 @@ import StickerEmojiType from './StickerEmojiType';
 import Grade from './Grade';
 import Subject from './Subject';
 import UserRole from './UserRole';
+import SessionStatus from './SessionStatus';
 
 export default [
   Status,
@@ -54,4 +55,5 @@ export default [
   Grade,
   Subject,
   UserRole,
+  SessionStatus,
 ];

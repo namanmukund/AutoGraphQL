@@ -1,10 +1,11 @@
+import { get } from 'lodash';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import { ApolloServer, PubSub } from 'apollo-server-express';
 import schema from './graphql';
 import { log } from '../utils';
-import { graphqlUpload, authMiddleware } from './middlewares';
+import { authMiddleware, graphqlUpload } from './middlewares';
 import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
 import Raven from './Raven';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
@@ -13,7 +14,7 @@ const http = require('http');
 
 const pubsub = new PubSub();
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 80;
 const env = process.env.NODE_ENV || 'development';
 const application = process.env.APPLICATION || 'core';
 
@@ -59,11 +60,12 @@ app.use(path, bodyParser.json(), graphqlUpload({ uploadDir: '/tmp/uploads' }));
 const server = new ApolloServer({
   schema,
   playground: {
-    endpoint: `http://localhost:${port}${path}`,
+    endpoint: `http://0.0.0.0:${port}${path}`,
     settings: {
       'editor.theme': 'light',
     },
   },
+  debug: false,
   uploads: false,
   formatError: (error) => {
     if (error.name !== 'GraphQLError') {
@@ -71,7 +73,11 @@ const server = new ApolloServer({
     } else {
       Raven.captureMessage(`Message: ${error.message}`);
     }
-    return error;
+
+    return {
+      ...error,
+      code: get(error, 'extensions.exception.name') || '',
+    };
   },
   context: ({ req, connection }) => {
     if (connection) {
@@ -141,9 +147,9 @@ server.applyMiddleware({ app });
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
-httpServer.listen(port, () => {
-  log(`Server ready at http://localhost:${port}${server.graphqlPath}`);
-  log(`Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`);
+httpServer.listen(port, '0.0.0.0', () => {
+  log(`Server ready at http://0.0.0.0:${port}${server.graphqlPath}`);
+  log(`Subscriptions ready at ws://0.0.0.0:${port}${server.subscriptionsPath}`);
 });
 
 export default app;

@@ -275,11 +275,11 @@ const parentChildSignUpMutationResolver = async (
   const queryController = new QueryController(USER_TYPE, authentication);
   const parentUserData = await queryController.fetchOne({ id: parentId });
   // generate parent token
-  const userTokenData = createUserTokenTypeData(parentUserData);
+  const userTokenData = createUserTokenTypeData(parentUserData, authentication, '', true);
   // generate kids token
   userTokenData.children = [
     ...parentInfo.childrenToken,
-    createUserTokenTypeData(childUserData),
+    createUserTokenTypeData(childUserData, authentication, '', true),
   ];
   return userTokenData;
 };

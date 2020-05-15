@@ -1,5 +1,5 @@
 import { READ } from '../../../../constants/graphqlOperations';
-import { TLA, TMS } from '../../../../constants';
+import { TLA, TMS, TWA } from '../../../../constants';
 import { CMS_HEAD, NOT_CMS_HEAD } from '../../../../constants/roles';
 import { CREATED } from '../../../../constants/subscriptionEvents';
 
@@ -8,7 +8,9 @@ const Topic = `
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
-      { appName: "${TLA}" operations: ${READ} }], 
+      { appName: "${TLA}" operations: ${READ} },
+      { appName: "${TWA}" operations: ${READ} }
+      ], 
     rule: allow
   ) 
   @userPermissions(
@@ -42,6 +44,7 @@ const Topic = `
     questions: [QuestionBank] @relation(name: "TopicQuestionBank")
     badges: [Badge] @relation(name: "TopicBadge", isSubset: true)
     thumbnail: File @relation(name: "TopicThumbnail", direction: "OneWay")
+    thumbnailSmall: File @relation(name: "TopicThumbnailSmall", direction: "OneWay")
     isTrial: Boolean @defaultValue(value: "false")
     assignmentQuestions: [AssignmentQuestion] @relation(name: "TopicAssignmentQuestion")
   }

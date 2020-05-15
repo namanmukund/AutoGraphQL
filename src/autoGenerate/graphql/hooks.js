@@ -74,6 +74,17 @@ import addMenteeSessionValidation
   from './preHookFunctions/validation/addMenteeSessionValidation';
 import addMentorSessionValidation
   from './preHookFunctions/validation/addMentorSessionValidation';
+import updateMentorSessionValidation from './preHookFunctions/validation/updateMentorSessionValidation';
+import updateMenteeSessionValidation from './preHookFunctions/validation/updateMenteeSessionValidation';
+import addMentorMenteeSessionValidation from './preHookFunctions/validation/addMentorMenteeSessionValidation';
+import addMentorSessionPostHookMethod from './postHookFunctions/addMentorSessionPostHookMethod';
+import updateMentorSessionPostHookMethod from './postHookFunctions/updateMentorSessionPostHookMethod';
+import deleteMentorSessionValidation from './preHookFunctions/validation/deleteMentorSessionValidation';
+import deleteMentorSessionPostHookMethod from './postHookFunctions/deleteMentorSessionPostHookMethod';
+import addMenteeSessionPostHookMethod from './postHookFunctions/addMenteeSessionPostHookMethod';
+import updateMenteeSessionPostHookMethod from './postHookFunctions/updateMenteeSessionPostHookMethod';
+import deleteMenteeSessionValidation from './preHookFunctions/validation/deleteMenteeSessionValidation';
+import deleteMenteeSessionPostHookMethod from './preHookFunctions/deleteMenteeSessionPostHookMethod';
 
 const { hookFunctions } = functions || {};
 
@@ -336,6 +347,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await userCourseSyllabusMethod(context);
       break;
     }
+    case 'menteeCourseSyllabus': {
+      await userCourseSyllabusMethod(context);
+      break;
+    }
     case 'userAssignment': {
       await userAssignmentValidation(params, context);
       return hook(input, mutationOrQueryName, 'PreHook');
@@ -345,11 +360,133 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addMenteeSession': {
-      await addMenteeSessionValidation(params, mutationOrQueryName, context);
-      return hook(input, mutationOrQueryName, 'PreHook');
+      const { bookingDate } = input;
+      const updatedDate = new Date(bookingDate);
+      updatedDate.setHours(0, 0, 0, 0);
+
+      const newInput = {
+        ...input,
+        bookingDate: updatedDate.toISOString(),
+      };
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await addMenteeSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
+    case 'updateMenteeSession': {
+      const { bookingDate } = input;
+      let newInput = {};
+      let newParams = {};
+      if (bookingDate) {
+        const updatedDate = new Date(bookingDate);
+        updatedDate.setHours(0, 0, 0, 0);
+
+        newInput = {
+          ...input,
+          bookingDate: updatedDate.toISOString(),
+        };
+        newParams = {
+          ...params,
+          input: {
+            ...newInput,
+          },
+        };
+      } else {
+        newInput = {
+          ...input,
+        };
+        newParams = {
+          ...params,
+        };
+      }
+      await updateMenteeSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
     }
     case 'addMentorSession': {
-      await addMentorSessionValidation(params, mutationOrQueryName, context);
+      const { availabilityDate } = input;
+      const updatedDate = new Date(availabilityDate);
+      updatedDate.setHours(0, 0, 0, 0);
+
+      const newInput = {
+        ...input,
+        availabilityDate: updatedDate.toISOString(),
+      };
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await addMentorSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
+    case 'updateMentorSession': {
+      const { availabilityDate } = input;
+      let newParams = {};
+      let newInput = {};
+      if (availabilityDate) {
+        const updatedDate = new Date(availabilityDate);
+        updatedDate.setHours(0, 0, 0, 0);
+
+        newInput = {
+          ...input,
+          availabilityDate: updatedDate.toISOString(),
+        };
+        newParams = {
+          ...params,
+          input: {
+            ...newInput,
+          },
+        };
+      } else {
+        newInput = {
+          ...input,
+        };
+        newParams = {
+          ...params,
+        };
+      }
+      await updateMentorSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
+    case 'deleteMentorSession': {
+      await deleteMentorSessionValidation(params, mutationOrQueryName, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addMentorMenteeSession': {
+      const newInput = {
+        ...input,
+        sessionStartDate: new Date().toISOString(),
+      };
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await addMentorMenteeSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
+    case 'updateMentorMenteeSession': {
+      const { sessionStatus } = input;
+      let newInput;
+      if (sessionStatus === 'completed') {
+        newInput = {
+          ...input,
+          sessionEndDate: new Date().toISOString(),
+        };
+      } else {
+        newInput = { ...input };
+      }
+
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
+    case 'deleteMenteeSession': {
+      await deleteMenteeSessionValidation(params, mutationOrQueryName, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     default: {
@@ -451,6 +588,30 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'addUserActivityAssignmentDump': {
       await addUserActivityAssignmentDumpPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'addMentorSession': {
+      await addMentorSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'updateMentorSession': {
+      await updateMentorSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'deleteMentorSession': {
+      await deleteMentorSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'addMenteeSession': {
+      await addMenteeSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'updateMenteeSession': {
+      await updateMenteeSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'deleteMenteeSession': {
+      await deleteMenteeSessionPostHookMethod(input, mutationName, context);
       break;
     }
     default:

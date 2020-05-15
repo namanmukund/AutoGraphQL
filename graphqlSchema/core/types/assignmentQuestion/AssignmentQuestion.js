@@ -1,5 +1,5 @@
 import { READ } from '../../../../constants/graphqlOperations';
-import { TLA, TMS } from '../../../../constants';
+import { TLA, TMS, TWA } from '../../../../constants';
 import { CMS_HEAD, NOT_CMS_HEAD } from '../../../../constants/roles';
 
 const AssignmentQuestion = `
@@ -7,7 +7,9 @@ const AssignmentQuestion = `
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
-      { appName: "${TLA}" operations: ${READ} }], 
+      { appName: "${TLA}" operations: ${READ} },
+      { appName: "${TWA}" operations: ${READ} }
+      ], 
     rule: allow
   ) 
   @userPermissions(
@@ -21,6 +23,7 @@ const AssignmentQuestion = `
     statement: String! @trim
     hint: String @trim
     difficulty: Int
+    isHomework: Boolean @defaultValue(value: "false")
     questionCodeSnippet: String @trim
     answerCodeSnippet: String @trim
     explanation: String @trim
