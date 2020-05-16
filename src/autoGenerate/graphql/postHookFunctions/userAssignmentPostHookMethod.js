@@ -118,12 +118,14 @@ const userAssignmentPostHookMethod = async (input, params) => {
   }
   assignmentQuery += ']';
 
+  log('assignmentQuery: ', assignmentQuery);
   const result = await callLocalGraphqlApi(addUserAssignmentMutation(
     userId,
     topicId,
     assignmentQuery,
   ));
 
+  log('addUserAssignmentMutation result: ', result);
   if (result) {
     /*
       parsing data 'addUserAssignment' so that the logic implemented ahead can read data is
