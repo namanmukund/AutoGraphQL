@@ -5,6 +5,7 @@ import {
 import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import { log } from '../../../../utils';
 
 // query to get assignment questions associated with topic
 const topicQuery = (topicId) => `
@@ -99,7 +100,11 @@ const userAssignmentPostHookMethod = async (input, params) => {
   let assignmentQuery = 'assignment:[';
   if (topicInfo) {
     const assignmentQuestionsinTopic = get(topicInfo, 'assignmentQuestions');
-    assignmentQuestionsinTopic.forEach((assignmentQuestion) => {
+    if (!assignmentQuestionsinTopic || (assignmentQuestionsinTopic && !assignmentQuestionsinTopic.length)) {
+      log('assignmentQuestionsinTopic info missing in topicInfo');
+    }
+    // eslint-disable-next-line no-restricted-syntax
+    for (const assignmentQuestion of assignmentQuestionsinTopic) {
       const {
         id: assignmentQuestionId,
         order: assignmentQuestionOrder,
@@ -107,16 +112,20 @@ const userAssignmentPostHookMethod = async (input, params) => {
       assignmentQuery += `{ assignmentQuestionConnectId: "${assignmentQuestionId}"
                             assignmentQuestionDisplayOrder: ${assignmentQuestionOrder}
                           }, `;
-    });
+    }
+  } else {
+    log('topicInfo is missing');
   }
   assignmentQuery += ']';
 
+  log('assignmentQuery: ', assignmentQuery);
   const result = await callLocalGraphqlApi(addUserAssignmentMutation(
     userId,
     topicId,
     assignmentQuery,
   ));
 
+  log('addUserAssignmentMutation result: ', result);
   if (result) {
     /*
       parsing data 'addUserAssignment' so that the logic implemented ahead can read data is

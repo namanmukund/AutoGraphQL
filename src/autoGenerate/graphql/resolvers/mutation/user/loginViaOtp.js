@@ -71,14 +71,10 @@ const loginViaOtpMutationResolver = async (
   };
   // update phoneOtp in db
   await updateExistingUserOTP({ id: userData.id }, updateObj, modelMutations);
-  // send otp to the client
-  const myPhone = {
-    countryCode: '+91',
-    number: '9654347463',
-  };
 
-  const { name } = userData;
-  getNumberAndSendSms(myPhone, phoneOtp, name);
+  // send otp to the client
+  const { name, phone } = userData;
+  getNumberAndSendSms(phone, phoneOtp, name);
   return {
     result: true,
   };

@@ -90,7 +90,7 @@ const arrayUpdateRemoveTypes = [
 const sortBy = ['ASC', 'DESC'];
 const smsOTPMessage = {
   bodyBeforeName: 'Dear ',
-  bodyAfterName: ', your login OTP is ',
+  bodyAfterName: ', your login OTP for Tekie App is ',
 };
 
 const fromEmail = 'namanmukund@gmail.com';
