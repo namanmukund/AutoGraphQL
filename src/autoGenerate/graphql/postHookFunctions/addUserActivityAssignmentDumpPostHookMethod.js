@@ -49,7 +49,7 @@ const updateUserAssignmentMutation = (userAssignmentId, input) => `
   }
   `;
 
-// const escapeString = (value) => value.replace(/\\([\s\S])|(")/g, '\\$1$2');
+const escapeString = (value) => value.replace(/\\([\s\S])|(")/g, '\\$1$2');
 
 // method to update UserAssignment submitted by user
 const updateUserAssignment = async (
@@ -73,8 +73,8 @@ const updateUserAssignment = async (
   assignmentQuestionsInUserAssignment.forEach((assignmentQuestionElem) => {
     const assignmentQuestionId = get(assignmentQuestionElem, 'assignmentQuestion.id');
     const assignmentQuestionDisplayOrder = get(assignmentQuestionElem, 'assignmentQuestionDisplayOrder');
-    let isAttempted = false;
-    let userAnswerCodeSnippet = '';
+    let isAttempted = get(assignmentQuestionElem, 'isAttempted', false);
+    let userAnswerCodeSnippet = get(assignmentQuestionElem, 'userAnswerCodeSnippet', '');
     /*
     Iterate on each one of assignmentQuestions in user Assignment and get answer provided by
     user/mentee for respective assignment question
@@ -89,7 +89,7 @@ const updateUserAssignment = async (
         const { isAttempted: isQuestionAttempted } = assignmentQuestion;
         if (isQuestionAttempted) {
           isAttempted = true;
-          userAnswerCodeSnippet = get(assignmentQuestion, 'userAnswerCodeSnippet');
+          userAnswerCodeSnippet = escapeString(get(assignmentQuestion, 'userAnswerCodeSnippet'));
         }
       }
     });
