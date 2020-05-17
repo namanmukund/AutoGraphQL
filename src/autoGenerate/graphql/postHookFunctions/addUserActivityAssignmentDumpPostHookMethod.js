@@ -32,6 +32,8 @@ const userAssignmentQuery = (
             id
           }
           assignmentQuestionDisplayOrder
+          userAnswerCodeSnippet
+          isAttempted
         }
         assignmentStatus
       }
