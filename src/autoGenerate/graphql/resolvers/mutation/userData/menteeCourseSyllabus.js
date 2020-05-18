@@ -182,12 +182,6 @@ const getMenteeSessions = (userId) => `
         }
         description
       }
-      mentor{
-        id
-        email
-        name
-        socialProfilePic
-      }
       bookingDate
       ${getSlotTimeFields()}
     }
@@ -227,13 +221,6 @@ const getMentorMenteeSessions = (userId) => `
           name
         }
         description
-      }
-      mentorSession{
-        user{
-          id
-          name
-          socialProfilePic
-        }
       }
       sessionEndDate
       sessionStatus
@@ -358,12 +345,6 @@ const menteeCourseSyllabusMutationResolver = async (
         thumbnailSmall: topicThumbnailSmall,
       } = mentorMenteeSession.topic;
 
-      const {
-        id: mentorId,
-        name: mentorName,
-        socialProfilePic: mentorProfilePic,
-      } = mentorMenteeSession.mentorSession && mentorMenteeSession.mentorSession.user;
-
       // setting last topic completed order, will use this to find booked sessions that are not completed
       if (topicOrder > lastCompletedTopicOrder) {
         lastCompletedTopicOrder = topicOrder;
@@ -377,9 +358,6 @@ const menteeCourseSyllabusMutationResolver = async (
         topicThumbnailSmall,
         topicDescription,
         endingDate,
-        mentorId,
-        mentorName,
-        mentorProfilePic,
       };
       completedSession.push(completedMenteeSession);
     });
@@ -405,11 +383,6 @@ const menteeCourseSyllabusMutationResolver = async (
       if (topicOrder > lastTopicBookedOrder) {
         lastTopicBookedOrder = topicOrder;
       }
-      const {
-        id: mentorId,
-        name: mentorName,
-        socialProfilePic: mentorProfilePic,
-      } = menteeSession.mentor;
 
       slotTimes.forEach((time, index) => {
         if (menteeSession[time]) {
@@ -429,15 +402,11 @@ const menteeCourseSyllabusMutationResolver = async (
           topicDescription,
           bookingDate,
           slotTime,
-          mentorId,
-          mentorName,
-          mentorProfilePic,
         };
         bookedSession.push(bookedMenteeSession);
       }
     });
   }
-
 
   totalChapters += chapters.length;
   // iterating over chapters to construct data for homepage
@@ -476,6 +445,7 @@ const menteeCourseSyllabusMutationResolver = async (
       }
     });
   });
+
   Object.assign(currentUserSyllabus, {
     upComingSession,
     bookedSession,
