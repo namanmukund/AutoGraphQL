@@ -1,0 +1,46 @@
+<table style="width:100%">
+    <tr>
+        <th>Session Information</th>
+    </tr>
+    <tr>
+        <td>Session Title: <%= topicTitle %></td>
+    </tr>
+    <tr>
+        <td>Session Date: <%= date %></td>
+    </tr>
+    <tr>
+        <td>Session Time: <%= time %></td>
+    </tr>
+    <tr>
+        <th>Kid's Information</th>
+    </tr>
+    <tr>
+        <td>Name: <%= name %></td>
+    </tr>
+    <tr>
+        <td>Grade: <%= grade %></td>
+    </tr>
+    <tr>
+        <th>Parent Information</th>
+    </tr>
+    <tr>
+        <td>Parent Name: <%= parentName %></td>
+    </tr>
+    <tr>
+        <td>Parent Email: <%= parentEmail %></td>
+    </tr>
+    <tr>
+        <td>Parent Number: <%= countryCode %> <%= parentNumber %></td>
+    </tr>
+    <% if (prevBookingDate) { %>
+        <tr>
+            <th>Previous Session Information</th>
+        </tr>
+        <tr>
+            <td>Previous Session Booking Date: <%= prevBookingDate %></td>
+        </tr>
+        <tr>
+            <td>Previous Session Start Time: <%= previousStartTime %></td>
+        </tr>
+    <% } %>
+</table>

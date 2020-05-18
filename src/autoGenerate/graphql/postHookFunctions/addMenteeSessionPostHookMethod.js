@@ -1,5 +1,6 @@
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import reduceParticularAvailableSlotOfADate from './utils/reduceParticularAvailableSlotOfADate';
+import extractMenteeSessionInfoAndSendEmail from './utils/extractMenteeSessionInfoAndSendEmail';
 
 const addMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   /*
@@ -10,5 +11,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const { availableSlots } = context;
 
   await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context, availableSlots);
+  // send email to mentor admin regarding the session
+  extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray);
 };
 export default addMenteeSessionPostHookMethod;
