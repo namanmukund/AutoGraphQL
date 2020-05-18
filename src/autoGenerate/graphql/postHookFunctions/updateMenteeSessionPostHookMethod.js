@@ -5,6 +5,7 @@ import increaseParticularAvailableSlotOfADate from './utils/increaseParticularAv
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import availableSlotsQuery from '../graphqlQueries/availableSlotsQuery';
 import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery';
+import extractMenteeSessionInfoAndSendEmail from './utils/extractMenteeSessionInfoAndSendEmail';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const { previousDocument } = context;
@@ -52,6 +53,15 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
       await callLocalGraphqlApi(updateAvailableSlotQuery(availableSlotId), context, variables);
     }
   }
+  // send email to mentor admin regarding the session
+  extractMenteeSessionInfoAndSendEmail(
+    'update',
+    input,
+    bookingDate,
+    slotTimeStringArray,
+    prevBookingDate,
+    prevSlotTimeStringArray,
+  );
 };
 
 export default updateMenteeSessionPostHookMethod;
