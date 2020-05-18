@@ -8,9 +8,6 @@ const sessionDetailType = `
    topicOrder: Int
    bookingDate: Date
    slotTime: Int
-   mentorId: ID
-   mentorName: String
-   mentorProfilePic: String
  }`;
 
 const completedSessionDetailType = `
@@ -22,9 +19,6 @@ const completedSessionDetailType = `
    topicDescription: String
    topicOrder: Int
    endingDate: Date
-   mentorId: ID
-   mentorName: String
-   mentorProfilePic: String
  }`;
 
 const MenteeCourseSyllabus = `
