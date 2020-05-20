@@ -126,12 +126,16 @@ const extractMenteeSessionInfoAndSendEmail = async (
   const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, menteeObj);
   templateString.then((html) => {
     // emailto should be in array. Can send the mail to mutiple people
-
-    const emailTo = [
-      'shantanu.najhawan@tekie.in',
-      'anand.verma@tekie.in',
-      'naman.mukund@tekie.in',
-    ];
+    let emailTo;
+    if (process.env.NODE_ENV === 'production') {
+      emailTo = [
+        'shantanu.najhawan@tekie.in',
+        'anand.verma@tekie.in',
+        'naman.mukund@tekie.in',
+      ];
+    } else {
+      emailTo = ['namanmukund@gmail.com'];
+    }
     // ccemail should be in array. Can send the mail to mutiple people
     const ccEmail = [''];
     // bccemail should be in array. Can send the mail to mutiple people

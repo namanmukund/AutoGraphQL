@@ -1,4 +1,5 @@
 import { InvalidDateError, InvalidTimeError } from '../../../../../../constants/errors/input';
+import isToday from '../../../../../../utils/isToday';
 
 const validateBookingDate = (
   bookingDate,
@@ -8,14 +9,11 @@ const validateBookingDate = (
   const date = new Date(bookingDate);
   const currentDate = new Date();
   // if date is same check for hours
-  if (slotTime && slotTime.length) {
+  if (slotTime && slotTime.length
+      && isToday(date)) {
     // eslint-disable-next-line no-restricted-syntax
     for (const st of slotTime) {
-      if (date.getDate() === currentDate.getDate()
-        && date.getMonth() === currentDate.getMonth()
-        && date.getFullYear() === currentDate.getFullYear()
-        && st <= (Math.floor(currentDate.getHours()) + PRE_BOOKING_HOUR_LIMIT)
-      ) {
+      if (st <= (Math.floor(currentDate.getHours()) + PRE_BOOKING_HOUR_LIMIT)) {
         throw new InvalidTimeError();
       }
     }
