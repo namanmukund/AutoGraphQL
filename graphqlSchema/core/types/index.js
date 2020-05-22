@@ -41,6 +41,10 @@ import MenteeSession from './menteeSession';
 import AvailableSlot from './availableSlot';
 import MentorMenteeSession from './mentorMenteeSession';
 import MenteeCourseSyllabus from './menteeCourseSyllabus';
+import Discount from './discount';
+import UserPayment from './userPayment';
+import Product from './product';
+import PaymentRequest from './paymentRequest'
 
 export default [
   ...User,
@@ -86,4 +90,8 @@ export default [
   ...AvailableSlot,
   ...MentorMenteeSession,
   ...MenteeCourseSyllabus,
+  ...Discount,
+  ...UserPayment,
+  ...Product,
+  ...PaymentRequest,
 ];

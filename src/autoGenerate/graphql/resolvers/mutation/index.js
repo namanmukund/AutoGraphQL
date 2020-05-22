@@ -30,6 +30,7 @@ import getUnlockedUserBadgeMutationResolver from './userData/getUnlockedUserBadg
 import getQuizReportMutationResolver from './userData/getQuizReport';
 import parentChildSignUpMutationResolver from './user/parentChildSignUp';
 import loginViaPasswordMutationResolver from './user/loginViaPassword';
+import getPaymentRequestMutationResolver from './payment/getPaymentRequest'
 
 
 export {
@@ -65,4 +66,5 @@ export {
   getQuizReportMutationResolver,
   parentChildSignUpMutationResolver,
   loginViaPasswordMutationResolver,
+  getPaymentRequestMutationResolver
 };

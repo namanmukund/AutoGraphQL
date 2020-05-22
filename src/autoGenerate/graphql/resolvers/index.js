@@ -27,6 +27,7 @@ import {
   userBadgeMutationResolver,
   getQuizReportMutationResolver,
   parentChildSignUpMutationResolver,
+  getPaymentRequestMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import {
@@ -1120,6 +1121,24 @@ resolvers.Mutation.validateUserOTP = (async (root, params, context, info) => {
     authentication,
   ).then((result) => toObject(result));
 });
+
+// Resolver for a custom get user quiz report, when user submits quiz
+resolvers.Mutation.getPaymentRequest = async (root, params, context, info) => {
+  const typeName = 'PaymentRequest';
+  const mutationName = 'getPaymentRequest';
+  const { input } = params;
+  const hookInput = await prehook(input, mutationName, context, params);
+
+  return getPaymentRequestMutationResolver(
+    root,
+    hookInput,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+  ).then((result) => toObject(result));
+};
 
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
