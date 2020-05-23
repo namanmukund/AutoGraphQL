@@ -28,6 +28,7 @@ import {
   getQuizReportMutationResolver,
   parentChildSignUpMutationResolver,
   getPaymentRequestMutationResolver,
+  getPaymentResponseMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import {
@@ -1122,16 +1123,30 @@ resolvers.Mutation.validateUserOTP = (async (root, params, context, info) => {
   ).then((result) => toObject(result));
 });
 
-// Resolver for a custom get user quiz report, when user submits quiz
+// Resolver for a custom get user payment information, when user buys a product
 resolvers.Mutation.getPaymentRequest = async (root, params, context, info) => {
   const typeName = 'PaymentRequest';
   const mutationName = 'getPaymentRequest';
-  const { input } = params;
-  const hookInput = await prehook(input, mutationName, context, params);
 
   return getPaymentRequestMutationResolver(
     root,
-    hookInput,
+    params,
+    typeName,
+    info,
+    mutationName,
+    parsedASTMap,
+    context,
+  ).then((result) => toObject(result));
+};
+
+// Resolver to check whether hash returned by payU is correct and there is no man in middle attack
+resolvers.Mutation.getPaymentResponse = async (root, params, context, info) => {
+  const typeName = 'PaymentResponse';
+  const mutationName = 'getPaymentResponse';
+
+  return getPaymentResponseMutationResolver(
+    root,
+    params,
     typeName,
     info,
     mutationName,

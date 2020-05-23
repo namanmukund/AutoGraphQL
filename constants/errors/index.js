@@ -82,6 +82,9 @@ import {
   InvalidFacebookTokenError,
   InvalidPasswordLengthError,
   AssignmentQuestionsNotPresentError,
+  ProductIdNotPresentError,
+  TransactionIdNotPresentError,
+  HashOrStatusNotPresentError,
 } from './input';
 
 
@@ -189,4 +192,7 @@ export {
   ChildAlreadyRegisteredError,
   SomethingWentWrongError,
   SendOtpFirstError,
+  ProductIdNotPresentError,
+  TransactionIdNotPresentError,
+  HashOrStatusNotPresentError,
 };

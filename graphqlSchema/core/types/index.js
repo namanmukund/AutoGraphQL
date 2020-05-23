@@ -44,7 +44,7 @@ import MenteeCourseSyllabus from './menteeCourseSyllabus';
 import Discount from './discount';
 import UserPayment from './userPayment';
 import Product from './product';
-import PaymentRequest from './paymentRequest'
+import PaymentRequest from './paymentRequest';
 
 export default [
   ...User,

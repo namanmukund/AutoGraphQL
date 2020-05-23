@@ -27,7 +27,8 @@ const customMutationString = `
    loginViaPassword ( input: EmailLoginInput ): ParentChildToken,
    loginViaOtp ( input: ExistingUserInput ): BooleanResult,
    validateUserOTP ( input: ValidateUserInput  ): ParentChildToken,
-   getPaymentRequest ( productId: ID!): PaymentRequest,
+   getPaymentRequest ( productId: ID!, discountCode: String): PaymentRequest,
+   getPaymentResponse ( id: ID!, hash: String!, status: String!, txnId: String!): BooleanResult,
    `;
 
 export default customMutationString;

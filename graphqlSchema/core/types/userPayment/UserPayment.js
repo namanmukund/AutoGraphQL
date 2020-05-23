@@ -7,17 +7,17 @@ const UserPayment = `
     permissions:[
       { appName: "${TMS}" operations: "*" },
       { appName: "${TLA}" operations: ${READ} },
-      { appName: "${TWA}" operations: ${READ} }
+      { appName: "${TWA}" operations: "*" }
       ], 
     rule: allow
   )
   {
     user: User! @relation(name: "UserPayment", direction: "OneWay")
     product: Product! @relation(name: "ProductUserPayment", direction: "OneWay")
-    txnId: String!
     amount: Int!
     isDiscountUsed: Boolean @defaultValue(value: "false")
     discount: Discount @relation(name: "Discount", direction: "OneWay")
+    status: String!
   }
 `;
 

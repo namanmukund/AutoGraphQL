@@ -5,7 +5,7 @@ const PaymentRequest = `
     amount: Int,
     firstName: String!,
     email: String!,
-    phone: String!,
+    phone: Phone!,
     productInfo: String!,
   }
 `;

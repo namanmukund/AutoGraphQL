@@ -1,238 +1,101 @@
 import { get } from 'lodash';
-import {
-  GLOBAL_COURSE_TITLE,
-  PUBLISHED,
-  slotTimes,
-} from '../../../../../../constants';
+import jsSHA from 'jssha';
 import {
   DatabaseRecordNotFoundError,
+  ProductIdNotPresentError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
-import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
-import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import { MENTEE } from '../../../../../../constants/roles';
+import payUConfig from '../../../../../../config/payment/payUConfig';
 
-const getSlotTimeFields = () => {
-  let slotTimeFields = '';
-  slotTimes.forEach((slotTime) => {
-    slotTimeFields += `${slotTime} `;
-  });
-  return slotTimeFields;
-};
-
-// query to get current component status of user
-const getUserCurrentTopicComponentStatus = (userId) => `
+// query to get user info of current user
+const getUserInfo = (userId) => `
   query{
-    userCurrentTopicComponentStatuses(filter:{
-      and:[
-        {user_some:{
-        id:"${userId}"
-        }},
-      {currentCourse_some:{
-        and:[
-          {status: ${PUBLISHED}},
-          {title: ${GLOBAL_COURSE_TITLE}}
-        ]
-      }}
-      ]
-    }){
+    user(id: "${userId}"){
       id
-      currentCourse{
+      role
+      name
+      email
+      phone{
+        countryCode
+        number
+      }
+      studentProfile{
         id
-        title
-        chapters(
-            filter: {
-              status: ${PUBLISHED}
-            }
-          ){
+        parents{
           id
-          title
-          order
-          topics(
-            filter: {
-              status: ${PUBLISHED}
-            }
-          ){
+          user{
             id
-            title
-            order
-            isTrial
-            description
-            thumbnail{
-              id
-              uri
-              name
+            name
+            phone{
+              number
+              countryCode
             }
-            thumbnailSmall{
-              id
-              uri
-              name
-            }
+            email
           }
         }
       }
-      currentTopic{
-        id
-        title
-        description
-        videoTitle
-        order
-        thumbnail{
-          id
-          name
-          uri
-        }
-        thumbnailSmall{
-          id
-          uri
-          name
-        }
-        description
-        videoDescription
-        videoThumbnail{
-          id
-          name
-          uri
-        }
-      }
-      currentLearningObjective{
-        id
-        title
-        description
-        thumbnail{
-          id
-          uri
-          name
-        }
-      }
-      currentTopicComponentType
-      enrollmentType
     }
   }
   `;
 
-// query to get chapters and topics belonging to a course
-const getCourseQuery = () => `
-    query{
-      courses(filter:{
-        and:[
-          {title: ${GLOBAL_COURSE_TITLE}},
-          {status: ${PUBLISHED}}
-        ]
-      }){
-        id
-        title
-        chapters(
-            filter: {
-              status: ${PUBLISHED}
-            }
-          ){
-          id
-          title
-          order
-          topics(
-            filter: {
-              status: ${PUBLISHED}
-            }
-          ){
-            id
-            title
-            order
-            isTrial
-            description
-            thumbnail{
-              id
-              uri
-              name
-            }
-            thumbnailSmall{
-              id
-              uri
-              name
-            }
-          }
-        }
-      }
-    }
-  `;
-
-// query to get mentee Sessions
-const getMenteeSessions = (userId) => `
+// query to get product info
+const getProductInfo = (productId) => `
   query{
-    menteeSessions(filter:{
-      user_some:{
-        id:"${userId}"
-        }
-    }){
+    product(id:"${productId}"){
       id
-      topic{
-        id
-        title
-        order
-        thumbnail{
-          id
-          uri
-          name
-        }
-        thumbnailSmall{
-          id
-          uri
-          name
-        }
-        description
+      title
+      price{
+        amount
+        currency
       }
-      bookingDate
-      ${getSlotTimeFields()}
     }
   }
   `;
 
-// query to get mentorMentee Sessions
-const getMentorMenteeSessions = (userId) => `
+// query to get discount info
+const getDiscountInfo = (code) => `
   query{
-    mentorMenteeSessions(filter:{
-      and:[
-        {
-          menteeSession_some:{
-            user_some:{
-              id:"${userId}"
-            }
-          }
-        },
-        {
-          sessionStatus: completed
-        }
-      ]
+    discounts(filter:{
+      code: "${code}"
     }){
       id
-      topic{
-        id
-        title
-        order
-        thumbnail{
-          id
-          uri
-          name
-        }
-        thumbnailSmall{
-          id
-          uri
-          name
-        }
-        description
-      }
-      sessionEndDate
-      sessionStatus
+      percentage
+      expiryDate
+    }
+  }
+  `;
+
+// mutation to add UserPayment
+const addUserPayment = (
+  userId,
+  productId,
+  amount,
+  discountConnectIdQuery,
+  isDiscountUsedQuery,
+) => `
+  mutation{
+    addUserPayment(
+    userConnectId: "${userId}"
+    productConnectId: "${productId}"
+    ${discountConnectIdQuery}
+    input:{
+      amount: ${amount}
+      status: "Pending"
+      ${isDiscountUsedQuery}
+    }){
+      id
     }
   }
   `;
 
 /*
-This is called when mentee tries to load homepage
-It will return all the booked and upcoming sessions based on User current topic component status
-and sessions booked so far by a mentee which is in MenteeSession
-It also returns the total no. of topics and chapters
+  This is called when user tries to buys a product
+  It will return the hash for payU along with the other information which is
+  needed in the request payload for payU. Here we are also calculating the amount after
+  discount depending on discount coupon code
 */
 const getPaymentRequestMutationResolver = async (
   root,
@@ -252,210 +115,112 @@ const getPaymentRequestMutationResolver = async (
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;
-  let currentTopicComponentInfo;
-  let menteeSessions;
-  let mentorMenteeSessions;
-  const upComingSession = [];
-  const bookedSession = [];
-  const completedSession = [];
-  let lastTopicBookedOrder = 0;
-  let lastCompletedTopicOrder = 0;
-  // if we get userId through token, then we will return syllabus for that user
-  if (userId) {
-    const res = await callLocalGraphqlApi(
-      getUserCurrentTopicComponentStatus(userId),
-      context,
-      '',
-    );
-    currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
-    // calling method to validate user current topic component status
-    validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
-    const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId));
-    menteeSessions = get(getMenteeSessionsRes, 'data.menteeSessions');
 
-    const getMentorMenteeSessionsRes = await callLocalGraphqlApi(getMentorMenteeSessions(userId));
-    mentorMenteeSessions = get(getMentorMenteeSessionsRes, 'data.mentorMenteeSessions');
-  /*
-  If user is not logged in and asking for course syllabus then we will not add
-  any document in Db and will return default data with first topic as unlocked
-  */
-  } else {
-    const topic = await getFirstTopicAndLearningObjective('userCourseSyllabus');
-    const firstTopic = get(topic, 'data.topics[0]');
-    const firstLearningObjective = get(topic, 'data.topics[0].learningObjectives[0]');
-    if (!firstTopic) {
-      throw new DatabaseRecordNotFoundError({
-        data: {
-          error: 'FirstTopic is not present',
-        },
-      });
-    }
-    if (!firstLearningObjective) {
-      throw new DatabaseRecordNotFoundError({
-        data: {
-          error: 'FirstTopicId.firstLearningObjective: is not present',
-        },
-      });
-    }
-    const courseResult = await callLocalGraphqlApi(getCourseQuery());
-    const course = get(courseResult, 'data.courses');
-    if (course.length <= 0) {
-      throw new DatabaseRecordNotFoundError({
-        data: {
-          error: 'Published course is not present with title as python',
-        },
-      });
-    }
-    // constructing data when a not logged in user fetches userCourseSyllabus
-    currentTopicComponentInfo = {
-      currentCourse: course[0],
-      currentTopic: firstTopic,
-    };
+  // check if user has passed product id
+  const { productId, discountCode } = params;
+
+  // throwing error if we do not get product id
+  if (!productId) {
+    throw new ProductIdNotPresentError();
   }
 
-  const {
-    currentCourse,
-  } = currentTopicComponentInfo;
+  // throwing error if we do not get user info
+  if (!userId) {
+    throw new UnauthenticatedUserError();
+  }
 
-  // this object will be returned in output
-  const currentUserSyllabus = {};
-  let totalChapters = 0;
-  let totalTopics = 0;
-  const { chapters } = currentCourse;
-  if (!chapters || !chapters.length) {
+  // we will return payload in response
+  const payload = {};
+
+  const userRes = await callLocalGraphqlApi(
+    getUserInfo(userId),
+    context,
+    '',
+  );
+
+  const userInfo = get(userRes, 'data.user');
+
+  if (!userInfo) {
     throw new DatabaseRecordNotFoundError({
       data: {
-        error: 'CurrentCourse.chapters: is not present',
+        error: 'User is not present',
       },
     });
   }
 
-  // iterating over each of mentorMenteeSessions to send sessions that are already completed by mentee
-  if (mentorMenteeSessions && mentorMenteeSessions.length) {
-    mentorMenteeSessions.forEach((mentorMenteeSession) => {
-      const {
-        sessionEndDate: endingDate,
-      } = mentorMenteeSession;
-      const {
-        order: topicOrder,
-        id: topicId,
-        title: topicTitle,
-        description: topicDescription,
-        thumbnail: topicThumbnail,
-        thumbnailSmall: topicThumbnailSmall,
-      } = mentorMenteeSession.topic;
+  const productRes = await callLocalGraphqlApi(
+    getProductInfo(productId),
+    context,
+    '',
+  );
 
-      // setting last topic completed order, will use this to find booked sessions that are not completed
-      if (topicOrder > lastCompletedTopicOrder) {
-        lastCompletedTopicOrder = topicOrder;
-      }
+  const productInfo = get(productRes, 'data.product');
 
-      const completedMenteeSession = {
-        topicId,
-        topicOrder,
-        topicTitle,
-        topicThumbnail,
-        topicThumbnailSmall,
-        topicDescription,
-        endingDate,
-      };
-      completedSession.push(completedMenteeSession);
+  if (!productInfo) {
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'Product is not present',
+      },
     });
   }
 
-  // iterating over each of MenteeSessions to send sessions that are already booked and not yet completed by mentee
-  if (menteeSessions && menteeSessions.length) {
-    menteeSessions.forEach((menteeSession) => {
-      let slotTime = null;
-      const {
-        bookingDate,
-      } = menteeSession;
-      const {
-        order: topicOrder,
-        id: topicId,
-        title: topicTitle,
-        description: topicDescription,
-        thumbnail: topicThumbnail,
-        thumbnailSmall: topicThumbnailSmall,
-      } = menteeSession.topic;
-
-      // setting last topic booked order, will use this to find upcoming sessions
-      if (topicOrder > lastTopicBookedOrder) {
-        lastTopicBookedOrder = topicOrder;
-      }
-
-      slotTimes.forEach((time, index) => {
-        if (menteeSession[time]) {
-          slotTime = index;
-        }
-      });
-      // checking logic if topic is already consumed or yet to be watched
-      if (
-        topicOrder > lastCompletedTopicOrder
-      ) {
-        const bookedMenteeSession = {
-          topicId,
-          topicOrder,
-          topicTitle,
-          topicThumbnail,
-          topicThumbnailSmall,
-          topicDescription,
-          bookingDate,
-          slotTime,
-        };
-        bookedSession.push(bookedMenteeSession);
-      }
-    });
+  // get firstName, email, phone from user object based on it's role
+  payload.firstName = get(userInfo, 'name', '');
+  if (userInfo.role === MENTEE) {
+    payload.email = get(userInfo, 'studentProfile.parents[0].user.email', '');
+    payload.phone = get(userInfo, 'studentProfile.parents[0].user.phone', '');
+  } else {
+    payload.email = get(userInfo, 'email', '');
+    payload.phone = get(userInfo, 'phone', '');
   }
 
-  totalChapters += chapters.length;
-  // iterating over chapters to construct data for homepage
-  chapters.forEach((chapter) => {
-    if (!chapter || !chapter.topics || !chapter.topics.length) {
-      throw new DatabaseRecordNotFoundError({
-        data: {
-          error: 'CurrentCourse.chapter.topics: is not present',
-        },
-      });
+  // getting productInfo and phone from product
+  payload.productInfo = get(productInfo, 'title', '');
+  payload.amount = get(productInfo, 'price.amount', 0);
+
+  // calculate discounted amount if user has passed discount coupon
+  let discountConnectIdQuery = '';
+  let isDiscountUsedQuery = '';
+
+  if (discountCode) {
+    const discountRes = await callLocalGraphqlApi(
+      getDiscountInfo(discountCode),
+      context,
+      '',
+    );
+
+    const discountInfo = get(discountRes, 'data.discounts[0]');
+    if (discountInfo && discountInfo.percentage && discountInfo.expiryDate > new Date()) {
+      const discountedAmount = (payload.amount - (payload.amount * discountInfo.percentage * 0.01));
+      if (discountedAmount > 0) {
+        payload.amount = Math.round((discountedAmount + Number.EPSILON) * 100) / 100;
+        isDiscountUsedQuery = 'isDiscountUsed: true';
+        discountConnectIdQuery = `discountConnectId : "${discountInfo.id}"`;
+      }
     }
-    totalTopics += chapter.topics.length;
-    // iterating over topics of each chapter  and setting isUnlocked field
-    chapter.topics.forEach((topic) => {
-      const {
-        order: topicOrder,
-        id: topicId,
-        title: topicTitle,
-        description: topicDescription,
-        thumbnail: topicThumbnail,
-        thumbnailSmall: topicThumbnailSmall,
-      } = topic;
-      // checking logic for topics which are yet not booked by mentee
-      if (
-        topicOrder > lastTopicBookedOrder
-      ) {
-        const upComingMenteeSession = {
-          topicId,
-          topicOrder,
-          topicTitle,
-          topicThumbnail,
-          topicThumbnailSmall,
-          topicDescription,
-        };
-        upComingSession.push(upComingMenteeSession);
-      }
-    });
-  });
+  }
 
-  Object.assign(currentUserSyllabus, {
-    txnId: '543532325654',
-    hash: '',
-    amount: 30094,
-    firstName: 'Kritesh Patel',
-    email: 'kritesh.patel@tekie.in',
-    phone: '7838420765',
-    productInfo: 'Bag',  });
+  //  generate userPayment document and gets it's id, we will use it as txnId
+  const addUserPaymentRes = await callLocalGraphqlApi(addUserPayment(
+    userId,
+    productId,
+    payload.amount,
+    discountConnectIdQuery,
+    isDiscountUsedQuery,
+  ));
+  const txnId = get(addUserPaymentRes, 'data.addUserPayment.id');
+  payload.txnId = txnId;
 
-  return currentUserSyllabus;
+  const hashString = `${payUConfig.payUKey}|${payload.txnId}|${payload.amount}|Bag123|${payload.firstName}|${payload.email}|`
+      + `||||||||||${payUConfig.payUSalt}`;
+
+  /* eslint new-cap:0 */
+  const sha = new jsSHA('SHA-512', 'TEXT');
+  sha.update(hashString);
+  const hash = sha.getHash('HEX');
+  payload.hash = hash;
+
+  return payload;
 };
 
 export default getPaymentRequestMutationResolver;

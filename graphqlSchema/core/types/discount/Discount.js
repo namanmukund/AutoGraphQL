@@ -7,7 +7,7 @@ const Discount = `
     permissions:[
       { appName: "${TMS}" operations: "*" },
       { appName: "${TLA}" operations: ${READ} },
-      { appName: "${TWA}" operations: ${READ} }
+      { appName: "${TWA}" operations: "*" }
       ], 
     rule: allow
   )
@@ -16,6 +16,7 @@ const Discount = `
     percentage: Int!
     code: String!
     expiryDate: Date!
+    description: String
   }
 `;
 
