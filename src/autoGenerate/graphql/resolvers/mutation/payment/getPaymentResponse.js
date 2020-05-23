@@ -90,13 +90,30 @@ const updateUserCurrentTopicComponentStatus = (
   id,
 ) => `
   mutation{
-    updateUserCurrentTopicComponentStatus(id:"${id}",input:{
-      enrollmentType: "${enrollmentTypes.pro}"
-    }){
+    updateUserCurrentTopicComponentStatus(
+    id: "${id}",
+    input:{
+      enrollmentType: ${enrollmentTypes.pro}
+    }
+    ){
       id
     }
   }
   `;
+
+const addZeroes = (num) => {
+// Convert input string to a number and store as a variable.
+  let value = Number(num);
+  // Split the input string into two arrays containing integers/decimals
+  const res = num.toString() && num.toString().split('.');
+  // If there is no decimal point or only one decimal place found.
+  if (res.length === 1 || res[1].length < 3) {
+    // Set the number to two decimal places
+    value = value.toFixed(2);
+  }
+  // Return updated or original number.
+  return value;
+};
 
 /*
   This is called when user gets hash in response of payU
@@ -187,9 +204,13 @@ const getPaymentResponseMutationResolver = async (
 
   // getting productInfo
   payload.productInfo = get(userPaymentInfo, 'product.title', '');
-  payload.amount = get(userPaymentInfo, 'amount', 0);
-  payload.txnId = txnId;
 
+  let amount = get(userPaymentInfo, 'amount', 0);
+  amount = Math.round((amount + Number.EPSILON) * 100) / 100;
+  amount = addZeroes(amount);
+  payload.amount = amount;
+
+  payload.txnId = txnId;
 
   // update status of userPayment document
   await callLocalGraphqlApi(updateUserPayment(
@@ -197,7 +218,7 @@ const getPaymentResponseMutationResolver = async (
     status,
   ));
 
-  const hashString = `${payUConfig.payUSalt}|${status}|||||||||||${payload.email}|${payload.firstName}|Bag123|${payload.amount}|${payload.txnId}|`
+  const hashString = `${payUConfig.payUSalt}|${status}|||||||||||${payload.email}|${payload.firstName}|${payload.productInfo}|${payload.amount}|${payload.txnId}|`
       + `${payUConfig.payUKey}`; // Your salt value
 
   /* eslint new-cap:0 */
@@ -206,6 +227,7 @@ const getPaymentResponseMutationResolver = async (
   const hashToBeMatched = sha.getHash('HEX');
 
   let response = false;
+
   if (hashToBeMatched === hash) {
     response = true;
     // update UserCurrentTopicComponentStatus, change user to pro

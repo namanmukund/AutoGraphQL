@@ -3,7 +3,7 @@ import { TLA, TMS, TWA } from '../../../../constants';
 
 const priceInputType = `
   type PriceInputType {
-    amount: Int!
+    amount: Float!
     currency: String! @defaultValue(value: "RS")
  }`;
 
