@@ -2,7 +2,7 @@ const PaymentRequest = `
   type PaymentRequest {
     txnId: String!,
     hash: String!,
-    amount: Int,
+    amount: Float,
     firstName: String!,
     email: String!,
     phone: Phone!,

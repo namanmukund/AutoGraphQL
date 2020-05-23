@@ -83,13 +83,27 @@ const addUserPayment = (
     ${discountConnectIdQuery}
     input:{
       amount: ${amount}
-      status: "Pending"
+      status: "Initiated"
       ${isDiscountUsedQuery}
     }){
       id
     }
   }
   `;
+
+const addZeroes = (num) => {
+// Convert input string to a number and store as a variable.
+  let value = Number(num);
+  // Split the input string into two arrays containing integers/decimals
+  const res = num.toString() && num.toString().split('.');
+  // If there is no decimal point or only one decimal place found.
+  if (res.length === 1 || res[1].length < 3) {
+    // Set the number to two decimal places
+    value = value.toFixed(2);
+  }
+  // Return updated or original number.
+  return value;
+};
 
 /*
   This is called when user tries to buys a product
@@ -176,7 +190,10 @@ const getPaymentRequestMutationResolver = async (
 
   // getting productInfo and phone from product
   payload.productInfo = get(productInfo, 'title', '');
-  payload.amount = get(productInfo, 'price.amount', 0);
+  let amount = get(productInfo, 'price.amount', 0);
+  amount = Math.round((amount + Number.EPSILON) * 100) / 100;
+  amount = addZeroes(amount);
+  payload.amount = amount;
 
   // calculate discounted amount if user has passed discount coupon
   let discountConnectIdQuery = '';
@@ -191,9 +208,11 @@ const getPaymentRequestMutationResolver = async (
 
     const discountInfo = get(discountRes, 'data.discounts[0]');
     if (discountInfo && discountInfo.percentage && discountInfo.expiryDate > new Date()) {
-      const discountedAmount = (payload.amount - (payload.amount * discountInfo.percentage * 0.01));
+      let discountedAmount = (payload.amount - (payload.amount * discountInfo.percentage * 0.01));
+      discountedAmount = Math.round((discountedAmount + Number.EPSILON) * 100) / 100;
+      discountedAmount = addZeroes(discountedAmount);
       if (discountedAmount > 0) {
-        payload.amount = Math.round((discountedAmount + Number.EPSILON) * 100) / 100;
+        payload.amount = discountedAmount;
         isDiscountUsedQuery = 'isDiscountUsed: true';
         discountConnectIdQuery = `discountConnectId : "${discountInfo.id}"`;
       }
@@ -211,7 +230,7 @@ const getPaymentRequestMutationResolver = async (
   const txnId = get(addUserPaymentRes, 'data.addUserPayment.id');
   payload.txnId = txnId;
 
-  const hashString = `${payUConfig.payUKey}|${payload.txnId}|${payload.amount}|Bag123|${payload.firstName}|${payload.email}|`
+  const hashString = `${payUConfig.payUKey}|${payload.txnId}|${payload.amount}|${payload.productInfo}|${payload.firstName}|${payload.email}|`
       + `||||||||||${payUConfig.payUSalt}`;
 
   /* eslint new-cap:0 */
