@@ -7,7 +7,7 @@ const UserPayment = `
     permissions:[
       { appName: "${TMS}" operations: "*" },
       { appName: "${TLA}" operations: ${READ} },
-      { appName: "${TWA}" operations: "*" }
+      { appName: "${TWA}" operations: ${READ} }
       ], 
     rule: allow
   )
