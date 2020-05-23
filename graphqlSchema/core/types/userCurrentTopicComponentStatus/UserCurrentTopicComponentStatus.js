@@ -7,7 +7,7 @@ const UserCurrentTopicComponentStatus = `
     permissions:[
       { appName: "${TMS}" operations: "*" },
       { appName: "${TLA}" operations: ${READ} },
-      { appName: "${TWA}" operations: "${READ}" }
+      { appName: "${TWA}" operations: ${READ} }
       ], 
     rule: allow
   )
