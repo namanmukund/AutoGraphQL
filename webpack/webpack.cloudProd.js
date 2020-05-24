@@ -14,7 +14,7 @@ const environment = process.env.NODE_ENV || 'development';
 
 module.exports = merge(common, {
   devtool: 'source-map',
-  mode: environment,
+  mode: (environment === 'production') ? environment : 'development',
   target: 'node',
   plugins: [
     new UglifyJSPlugin({
