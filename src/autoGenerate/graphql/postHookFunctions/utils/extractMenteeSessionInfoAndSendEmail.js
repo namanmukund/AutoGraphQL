@@ -127,6 +127,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
   templateString.then((html) => {
     // emailto should be in array. Can send the mail to mutiple people
     let emailTo;
+    // send email in case a session is booked/updated/deleted
     if (process.env.NODE_ENV === 'production') {
       emailTo = [
         'shantanu.najhawan@tekie.in',
@@ -136,6 +137,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
     } else {
       emailTo = ['namanmukund@gmail.com'];
     }
+
     // ccemail should be in array. Can send the mail to mutiple people
     const ccEmail = [''];
     // bccemail should be in array. Can send the mail to mutiple people
