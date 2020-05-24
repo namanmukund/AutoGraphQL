@@ -128,6 +128,8 @@ const extractMenteeSessionInfoAndSendEmail = async (
     // emailto should be in array. Can send the mail to mutiple people
     let emailTo;
     // send email in case a session is booked/updated/deleted
+    // eslint-disable-next-line no-console
+    console.log('Capturing NODE_ENV in  prod', process.env.NODE_ENV);
     if (process.env.NODE_ENV === 'production') {
       emailTo = [
         'shantanu.najhawan@tekie.in',
