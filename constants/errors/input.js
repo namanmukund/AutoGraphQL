@@ -155,3 +155,15 @@ export const PhoneFieldRequiredError = createError('PhoneFieldRequiredError', {
 export const PasswordFieldRequiredError = createError('PasswordFieldRequiredError', {
   message: 'Password field is mandatory in input',
 });
+
+export const ProductIdNotPresentError = createError('ProductIdNotPresentError', {
+  message: 'Product Id is missing in input',
+});
+
+export const TransactionIdNotPresentError = createError('TransactionIdNotPresentError', {
+  message: 'Transaction Id is missing in input',
+});
+
+export const HashOrStatusNotPresentError = createError('HashOrStatusNotPresentError', {
+  message: 'Hash is missing in input',
+});

@@ -11,6 +11,7 @@ const MentorMenteeSession = `
     isAssignmentSubmitted: Boolean @defaultValue(value: "false")
     assignmentSubmitDate: Date
     isHomeworkCheckedByMentor: Boolean @defaultValue(value: "false")
+    isSubmittedForReview: Boolean @defaultValue(value: "false")
 }`;
 
 export default [MentorMenteeSession];
