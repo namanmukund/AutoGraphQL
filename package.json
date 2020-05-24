@@ -21,10 +21,7 @@
   },
   "betterScripts": {
     "start:cloudBuild": {
-      "command": "node ./build/mainCloud.js",
-      "env": {
-        "APPLICATION": "core"
-      }
+      "command": "node ./build/mainCloud.js"
     },
     "test:core": {
       "command": "nyc --clean=false --reporter=text --reporter=json --reporter=text-summary --report-dir=./coverage-core mocha  ./test --timeout 4000 --recursive --compilers js:babel-core/register --require @babel/polyfill",
