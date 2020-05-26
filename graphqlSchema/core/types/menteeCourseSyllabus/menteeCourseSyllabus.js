@@ -8,6 +8,7 @@ const sessionDetailType = `
    topicOrder: Int
    bookingDate: Date
    slotTime: Int
+   isAccessible: Boolean
  }`;
 
 const completedSessionDetailType = `
