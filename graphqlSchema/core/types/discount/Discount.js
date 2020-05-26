@@ -13,7 +13,7 @@ const Discount = `
   )
   {
     product: Product! @relation(name: "ProductDiscount", direction: "OneWay")
-    percentage: Int!
+    percentage: Float!
     code: String!
     expiryDate: Date!
     description: String
