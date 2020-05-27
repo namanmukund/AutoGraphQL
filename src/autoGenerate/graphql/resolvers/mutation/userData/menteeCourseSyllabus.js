@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import {
+  enrollmentTypes,
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   slotTimes,
@@ -19,6 +20,17 @@ const getSlotTimeFields = () => {
     slotTimeFields += `${slotTime} `;
   });
   return slotTimeFields;
+};
+
+// calculate if user can consume a topic or not
+const isTopicAccessible = (enrollmentType, isTopicFree) => {
+  if (enrollmentType === enrollmentTypes.pro) {
+    return true;
+  }
+  if (isTopicFree) {
+    return true;
+  }
+  return false;
 };
 
 // query to get current component status of user
@@ -141,6 +153,7 @@ const getCourseQuery = () => `
             order
             isTrial
             description
+            isTrial
             thumbnail{
               id
               uri
@@ -170,6 +183,7 @@ const getMenteeSessions = (userId) => `
         id
         title
         order
+        isTrial
         thumbnail{
           id
           uri
@@ -310,11 +324,13 @@ const menteeCourseSyllabusMutationResolver = async (
     currentTopicComponentInfo = {
       currentCourse: course[0],
       currentTopic: firstTopic,
+      enrollmentType: enrollmentTypes.free,
     };
   }
 
   const {
     currentCourse,
+    enrollmentType,
   } = currentTopicComponentInfo;
 
   // this object will be returned in output
@@ -377,7 +393,10 @@ const menteeCourseSyllabusMutationResolver = async (
         description: topicDescription,
         thumbnail: topicThumbnail,
         thumbnailSmall: topicThumbnailSmall,
+        isTrial,
       } = menteeSession.topic;
+
+      const isAccessible = isTopicAccessible(enrollmentType, isTrial);
 
       // setting last topic booked order, will use this to find upcoming sessions
       if (topicOrder > lastTopicBookedOrder) {
@@ -402,6 +421,7 @@ const menteeCourseSyllabusMutationResolver = async (
           topicDescription,
           bookingDate,
           slotTime,
+          isAccessible,
         };
         bookedSession.push(bookedMenteeSession);
       }
@@ -428,7 +448,10 @@ const menteeCourseSyllabusMutationResolver = async (
         description: topicDescription,
         thumbnail: topicThumbnail,
         thumbnailSmall: topicThumbnailSmall,
+        isTrial,
       } = topic;
+
+      const isAccessible = isTopicAccessible(enrollmentType, isTrial);
       // checking logic for topics which are yet not booked by mentee
       if (
         topicOrder > lastTopicBookedOrder
@@ -440,6 +463,7 @@ const menteeCourseSyllabusMutationResolver = async (
           topicThumbnail,
           topicThumbnailSmall,
           topicDescription,
+          isAccessible,
         };
         upComingSession.push(upComingMenteeSession);
       }

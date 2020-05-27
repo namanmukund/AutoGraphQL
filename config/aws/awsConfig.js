@@ -39,7 +39,7 @@ const awsConfig = {
       region: 'us-east-1',
     },
     s3: {
-      bucket: 'tekie-tms-test',
+      bucket: 'tekie-backend',
     },
     ACL: {
       publicReadWrite: 'public-read-write',
