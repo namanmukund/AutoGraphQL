@@ -41,19 +41,19 @@ const validateMenteeStartSessionData = (menteeSession, topicConnectId) => {
   if (topicConnectId !== topicId) {
     throw new SessionTopicAndTopicConnectIdMismatchError();
   }
-
-  const slotTimeArray = getSelectedSlotsTime(slots);
-  const date = new Date(bookingDate);
-  const sessionStartDate = date.setHours(date.getHours() + slotTimeArray[0]);
-  const sessionEndDate = date.setHours(date.getHours() + 1);
-  const currentDate = new Date();
+  // uncomment later on
+  // const slotTimeArray = getSelectedSlotsTime(slots);
+  // const date = new Date(bookingDate);
+  // const sessionStartDate = date.setHours(date.getHours() + slotTimeArray[0]);
+  // const sessionEndDate = date.setHours(date.getHours() + 1);
+  // const currentDate = new Date();
 
   // added to allow testing on staging
-  if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
-    if (!(currentDate >= sessionStartDate && currentDate < sessionEndDate)) {
-      throw new InvalidSessionDateTimeError();
-    }
-  }
+  // if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
+  //   //   if (!(currentDate >= sessionStartDate && currentDate < sessionEndDate)) {
+  //   //     throw new InvalidSessionDateTimeError();
+  //   //   }
+  //   // }
   return true;
 };
 // prehook logic to check if added MentorSession(user id and availabilityDate) already exists
