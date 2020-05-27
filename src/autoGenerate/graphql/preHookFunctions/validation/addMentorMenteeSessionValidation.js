@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
@@ -37,16 +38,17 @@ query{
 }`;
 
 const validateMenteeStartSessionData = (menteeSession, topicConnectId) => {
+  // eslint-disable-next-line no-unused-vars
   const { bookingDate, topic: { id: topicId }, ...slots } = menteeSession;
   if (topicConnectId !== topicId) {
     throw new SessionTopicAndTopicConnectIdMismatchError();
   }
   // uncomment later on
-  // const slotTimeArray = getSelectedSlotsTime(slots);
-  // const date = new Date(bookingDate);
-  // const sessionStartDate = date.setHours(date.getHours() + slotTimeArray[0]);
-  // const sessionEndDate = date.setHours(date.getHours() + 1);
-  // const currentDate = new Date();
+  const slotTimeArray = getSelectedSlotsTime(slots);
+  const date = new Date(bookingDate);
+  const sessionStartDate = date.setHours(date.getHours() + slotTimeArray[0]);
+  const sessionEndDate = date.setHours(date.getHours() + 1);
+  const currentDate = new Date();
 
   // added to allow testing on staging
   // if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
