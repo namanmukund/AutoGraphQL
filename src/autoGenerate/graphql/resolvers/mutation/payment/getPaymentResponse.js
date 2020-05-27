@@ -10,6 +10,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { MENTEE } from '../../../../../../constants/roles';
 import payUConfig from '../../../../../../config/payment/payUConfig';
 import { GLOBAL_COURSE_TITLE, PUBLISHED, enrollmentTypes } from '../../../../../../constants';
+import { log } from '../../../../../../utils';
 
 // query to get user paayment info for id
 const getUserPayment = (id) => `
@@ -105,11 +106,11 @@ const addZeroes = (num) => {
 // Convert input string to a number and store as a variable.
   let value = Number(num);
   // Split the input string into two arrays containing integers/decimals
-  const res = num.toString() && num.toString().split('.');
+  const res = num && num.toString() && num.toString().split('.');
   // If there is no decimal point or only one decimal place found.
-  if (res.length === 1 || res[1].length < 3) {
+  if (res && (res.length === 1 || res[1].length < 3)) {
     // Set the number to two decimal places
-    value = value.toFixed(2);
+    value = value && value.toFixed(2);
   }
   // Return updated or original number.
   return value;
@@ -170,7 +171,7 @@ const getPaymentResponseMutationResolver = async (
   if (!currentTopicComponentInfoId) {
     throw new DatabaseRecordNotFoundError({
       data: {
-        error: 'UserCurrentTopicComponentStatus: is not present',
+        error: `UserCurrentTopicComponentStatus: is not present for userId: ${userId}`,
       },
     });
   }
@@ -186,7 +187,7 @@ const getPaymentResponseMutationResolver = async (
   if (!userPaymentInfo) {
     throw new DatabaseRecordNotFoundError({
       data: {
-        error: 'User Payment is not present for the txnId',
+        error: `User Payment is not present for the txnId: ${id}`,
       },
     });
   }
@@ -218,6 +219,8 @@ const getPaymentResponseMutationResolver = async (
     status,
   ));
 
+  log(`Status for txnId: ${txnId} is: ${status}`);
+
   const hashString = `${payUConfig.payUSalt}|${status}|||||||||||${payload.email}|${payload.firstName}|${payload.productInfo}|${payload.amount}|${payload.txnId}|`
       + `${payUConfig.payUKey}`; // Your salt value
 
@@ -228,7 +231,8 @@ const getPaymentResponseMutationResolver = async (
 
   let response = false;
 
-  if (hashToBeMatched === hash) {
+  if (hashToBeMatched === hash && status === 'success') {
+    log(`Hash matched for userId: ${userId}`);
     response = true;
     // update UserCurrentTopicComponentStatus, change user to pro
     await callLocalGraphqlApi(updateUserCurrentTopicComponentStatus(
