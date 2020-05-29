@@ -75,6 +75,7 @@ const addUserPayment = (
   amount,
   discountConnectIdQuery,
   isDiscountUsedQuery,
+  discountAmountQuery,
 ) => `
   mutation{
     addUserPayment(
@@ -85,6 +86,7 @@ const addUserPayment = (
       amount: ${amount}
       status: "Initiated"
       ${isDiscountUsedQuery}
+      ${discountAmountQuery}
     }){
       id
     }
@@ -198,6 +200,7 @@ const getPaymentRequestMutationResolver = async (
   // calculate discounted amount if user has passed discount coupon
   let discountConnectIdQuery = '';
   let isDiscountUsedQuery = '';
+  let discountAmountQuery = '';
 
   if (discountCode) {
     const discountRes = await callLocalGraphqlApi(
@@ -208,11 +211,14 @@ const getPaymentRequestMutationResolver = async (
 
     const discountInfo = get(discountRes, 'data.discounts[0]');
     if (discountInfo && discountInfo.percentage && discountInfo.expiryDate > new Date()) {
-      let discountedAmount = (payload.amount - (payload.amount * discountInfo.percentage * 0.01));
+      let discount = payload.amount * discountInfo.percentage * 0.01;
+      let discountedAmount = payload.amount - discount;
       discountedAmount = Math.round((discountedAmount + Number.EPSILON) * 100) / 100;
       discountedAmount = addZeroes(discountedAmount);
+      discount = addZeroes(discount);
       if (discountedAmount > 0) {
         payload.amount = discountedAmount;
+        discountAmountQuery = `discountAmount: ${discount}`;
         isDiscountUsedQuery = 'isDiscountUsed: true';
         discountConnectIdQuery = `discountConnectId : "${discountInfo.id}"`;
       }
@@ -226,7 +232,9 @@ const getPaymentRequestMutationResolver = async (
     payload.amount,
     discountConnectIdQuery,
     isDiscountUsedQuery,
+    discountAmountQuery,
   ));
+
   const txnId = get(addUserPaymentRes, 'data.addUserPayment.id');
   payload.txnId = txnId;
 
