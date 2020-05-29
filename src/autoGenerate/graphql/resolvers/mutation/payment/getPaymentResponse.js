@@ -139,7 +139,7 @@ const sendEmailInvoiceToUser = (payload) => {
     } else {
       emailTo = [
         'kriteshpk@gmail.com',
-        'naman.mukund@tekie.in',
+        'namanmukund@gmail.com',
       ];
     }
 
