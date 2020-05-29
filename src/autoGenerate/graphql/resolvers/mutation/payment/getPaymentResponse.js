@@ -271,7 +271,7 @@ const getPaymentResponseMutationResolver = async (
   }
   const coursePrice = Number(amount) + Number(discount);
 
-  payload.coursePrice = addZeroes(coursePrice)
+  payload.coursePrice = addZeroes(coursePrice);
 
   payload.txnId = id;
 
