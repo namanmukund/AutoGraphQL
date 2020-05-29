@@ -15,9 +15,11 @@ const UserPayment = `
     user: User! @relation(name: "UserPayment", direction: "OneWay")
     product: Product! @relation(name: "ProductUserPayment", direction: "OneWay")
     amount: Float!
+    discountAmount: Float!
     isDiscountUsed: Boolean @defaultValue(value: "false")
     discount: Discount @relation(name: "Discount", direction: "OneWay")
     status: String!
+    invoiceId: String
   }
 `;
 
