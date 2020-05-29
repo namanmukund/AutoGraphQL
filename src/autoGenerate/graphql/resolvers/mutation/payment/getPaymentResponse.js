@@ -137,7 +137,10 @@ const sendEmailInvoiceToUser = (payload) => {
         payload.email,
       ];
     } else {
-      emailTo = ['kriteshpk@gmail.com'];
+      emailTo = [
+        'kriteshpk@gmail.com',
+        'naman.mukund@tekie.in',
+      ];
     }
 
     // ccemail should be in array. Can send the mail to mutiple people
