@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import jsSHA from 'jssha';
+import moment from 'moment';
 import {
   DatabaseRecordNotFoundError, HashOrStatusNotPresentError,
   TransactionIdNotPresentError, UnauthenticatedUserError,
@@ -11,6 +12,10 @@ import { MENTEE } from '../../../../../../constants/roles';
 import payUConfig from '../../../../../../config/payment/payUConfig';
 import { GLOBAL_COURSE_TITLE, PUBLISHED, enrollmentTypes } from '../../../../../../constants';
 import { log } from '../../../../../../utils';
+import parsedHtmlFromTemplateFileAndObject
+  from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
+import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
+import sendEmail from '../../../../../../services/email/utils/sendEmail';
 
 // query to get user paayment info for id
 const getUserPayment = (id) => `
@@ -18,6 +23,7 @@ const getUserPayment = (id) => `
     userPayment(id:"${id}"){
       id
       amount
+      discountAmount
       user{
         id
         role
@@ -76,10 +82,12 @@ const getUserCurrentTopicComponentStatus = (userId) => `
 const updateUserPayment = (
   id,
   status,
+  payuMoneyId,
 ) => `
   mutation{
     updateUserPayment(id:"${id}",input:{
       status: "${status}"
+      invoiceId: "${payuMoneyId}"
     }){
       id
     }
@@ -116,6 +124,47 @@ const addZeroes = (num) => {
   return value;
 };
 
+const sendEmailInvoiceToUser = (payload) => {
+  const subject = 'Payment Receipt from Tekie';
+  const templateFileName = 'paymentInvoiceEmailTemplate';
+  const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, payload);
+  templateString.then((html) => {
+    // email to should be in array. Can send the mail to mutiple people
+    let emailTo;
+    // send email in case a session is booked/updated/deleted
+    if (process.env.NODE_ENV === 'production') {
+      emailTo = [
+        payload.email,
+      ];
+    } else {
+      emailTo = [
+        'kriteshpk@gmail.com',
+        'namanmukund@gmail.com',
+      ];
+    }
+
+    // ccemail should be in array. Can send the mail to mutiple people
+    const ccEmail = [''];
+    // bccemail should be in array. Can send the mail to mutiple people
+    const bccEmail = [''];
+
+    const text = 'Payment Receipt';
+    /* if html is empty then in the body text will be appear. Html is having higher
+     precedence over text */
+
+    const emailMsgObject = getEmailObject(
+      emailTo,
+      ccEmail,
+      bccEmail,
+      subject,
+      text,
+      html,
+      'hello@tekie.in',
+    );
+    sendEmail(emailMsgObject);
+  });
+};
+
 /*
   This is called when user gets hash in response of payU
   It will return true/false depending upon whether hash from payU matches to hash we sent in request
@@ -142,11 +191,11 @@ const getPaymentResponseMutationResolver = async (
 
   // check if user has passed transaction id and hash value
   const {
-    id, hash, status, txnId,
+    id, hash, status, payuMoneyId,
   } = params;
 
   // throwing error if we do not get transaction id
-  if (!id || !txnId) {
+  if (!id || !payuMoneyId) {
     throw new TransactionIdNotPresentError();
   }
 
@@ -198,6 +247,9 @@ const getPaymentResponseMutationResolver = async (
   if (userPaymentInfo.user && userPaymentInfo.user.role === MENTEE) {
     payload.email = get(userPaymentInfo, 'user.studentProfile.parents[0].user.email', '');
     payload.phone = get(userPaymentInfo, 'user.studentProfile.parents[0].user.phone', '');
+    payload.countryCode = get(userPaymentInfo, 'user.studentProfile.parents[0].user.phone.countryCode', '');
+    payload.phoneNumber = get(userPaymentInfo, 'user.studentProfile.parents[0].user.phone.number', '');
+    payload.parentName = get(userPaymentInfo, 'user.studentProfile.parents[0].user.name', '');
   } else {
     payload.email = get(userPaymentInfo, 'user.email', '');
     payload.phone = get(userPaymentInfo, 'user.phone', '');
@@ -211,15 +263,29 @@ const getPaymentResponseMutationResolver = async (
   amount = addZeroes(amount);
   payload.amount = amount;
 
-  payload.txnId = txnId;
+  let discount = get(userPaymentInfo, 'discountAmount', 0);
+  if (discount) {
+    discount = Math.round((discount + Number.EPSILON) * 100) / 100;
+    discount = addZeroes(discount);
+    payload.discount = discount;
+  }
+  payload.coursePrice = Number(amount) + Number(discount);
+
+  payload.txnId = id;
+
+  payload.payuMoneyId = payuMoneyId;
+
+  payload.paymentDate = moment(new Date()).format('ll');
 
   // update status of userPayment document
   await callLocalGraphqlApi(updateUserPayment(
     id,
     status,
+    payuMoneyId,
   ));
 
-  log(`Status for txnId: ${txnId} is: ${status}`);
+  log(`Status for txnId: ${id} is: ${status}`);
+  log(`PayUMoney Id for txnId: ${id} is: ${payuMoneyId}`);
 
   const hashString = `${payUConfig.payUSalt}|${status}|||||||||||${payload.email}|${payload.firstName}|${payload.productInfo}|${payload.amount}|${payload.txnId}|`
       + `${payUConfig.payUKey}`; // Your salt value
@@ -238,6 +304,9 @@ const getPaymentResponseMutationResolver = async (
     await callLocalGraphqlApi(updateUserCurrentTopicComponentStatus(
       currentTopicComponentInfoId,
     ));
+
+    // Send invoice to customer on mail
+    sendEmailInvoiceToUser(payload);
   }
 
   return {
