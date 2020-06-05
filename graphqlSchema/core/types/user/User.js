@@ -22,7 +22,8 @@ const User = `
     savedPassword: String @filterOff 
                  @userPermissions(
                   permissions:[
-                    { userRole: ${UMS_HEAD} appName: "*" operations: "*" }
+                    { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
+                    { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${READ} }
                     ], 
                   rule: allow
                 )
