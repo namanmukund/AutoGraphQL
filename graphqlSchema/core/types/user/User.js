@@ -1,4 +1,4 @@
-import { ADMIN, NOT_ADMIN, UMS_HEAD } from '../../../../constants/roles';
+import { NOT_ADMIN, UMS_HEAD } from '../../../../constants/roles';
 import { READ } from '../../../../constants/graphqlOperations';
 
 const User = `
