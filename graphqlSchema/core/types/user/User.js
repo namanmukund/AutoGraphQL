@@ -1,4 +1,4 @@
-import { NOT_ADMIN, UMS_HEAD } from '../../../../constants/roles';
+import { NOT_UMS_HEAD, UMS_HEAD } from '../../../../constants/roles';
 import { READ } from '../../../../constants/graphqlOperations';
 
 const User = `
@@ -12,7 +12,7 @@ const User = `
           @userPermissions(
             permissions:[
               { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
-              { userRole: ${NOT_ADMIN} appName: "*" operations: ${READ} }
+              { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${READ} }
               ], 
             rule: allow
           ) 
