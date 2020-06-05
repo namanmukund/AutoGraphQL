@@ -1,4 +1,4 @@
-import { ADMIN, NOT_ADMIN } from '../../../../constants/roles';
+import { NOT_UMS_HEAD, UMS_HEAD } from '../../../../constants/roles';
 import { READ } from '../../../../constants/graphqlOperations';
 
 const User = `
@@ -11,8 +11,8 @@ const User = `
     role: UserRole! @defaultValue(value: "selfLearner") 
           @userPermissions(
             permissions:[
-              { userRole: ${ADMIN} appName: "*" operations: "*" },
-              { userRole: ${NOT_ADMIN} appName: "*" operations: ${READ} }
+              { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
+              { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${READ} }
               ], 
             rule: allow
           ) 
@@ -22,7 +22,8 @@ const User = `
     savedPassword: String @filterOff 
                  @userPermissions(
                   permissions:[
-                    { userRole: ${ADMIN} appName: "*" operations: "*" }
+                    { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
+                    { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${READ} }
                     ], 
                   rule: allow
                 )

@@ -1,36 +1,106 @@
-const CONTENT_MANAGER = 'contentManager';
 const ADMIN = 'admin';
 const SELF_LEARNER = 'selfLearner';
 const SCHOOL_STUDENT = 'schoolStudent';
-const USER_MANAGER = 'userManager';
 const MENTOR = 'mentor';
 const MENTEE = 'mentee';
 const PARENT = 'parent';
+const UMS_ADMIN = 'umsAdmin';
+const UMS_VIEWER = 'umsViewer';
+const CMS_ADMIN = 'cmsAdmin';
+const CMS_VIEWER = 'cmsViewer';
+const CMS_UMS_VIEWER = 'cmsUmsViewer';
 
-const CMS_HEAD = `["${ADMIN}", "${CONTENT_MANAGER}"]`;
-const NOT_CMS_HEAD = `["${SELF_LEARNER}", "${SCHOOL_STUDENT}", "${USER_MANAGER}", "${MENTOR}", "${MENTEE}"]`;
-const UMS_HEAD = `["${ADMIN}", "${USER_MANAGER}"]`;
-const NOT_UMS_HEAD = `["${CONTENT_MANAGER}", "${SELF_LEARNER}", "${SCHOOL_STUDENT}", "${MENTOR}", "${MENTEE}"]`;
-const ALL_ROLES = `["${ADMIN}", "${CONTENT_MANAGER}", "${SELF_LEARNER}", "${SCHOOL_STUDENT}", "${USER_MANAGER}", "${MENTOR}", "${MENTEE}"]`;
-const NOT_ADMIN = `["${CONTENT_MANAGER}", "${SELF_LEARNER}", "${SCHOOL_STUDENT}", "${USER_MANAGER}", "${MENTOR}", "${MENTEE}"]`;
+const CMS_HEAD = `[
+"${ADMIN}", 
+"${CMS_ADMIN}"
+]`;
+
+const NOT_CMS_HEAD = `[
+"${SELF_LEARNER}", 
+"${SCHOOL_STUDENT}", 
+"${UMS_ADMIN}", 
+"${MENTOR}", 
+"${MENTEE}", 
+"${UMS_VIEWER}", 
+"${CMS_ADMIN}",
+"${CMS_UMS_VIEWER}"
+]`;
+
+const UMS_HEAD = `[
+"${ADMIN}", 
+"${UMS_ADMIN}"
+]`;
+
+const NOT_UMS_HEAD = `[
+"${CMS_ADMIN}", 
+"${SELF_LEARNER}", 
+"${SCHOOL_STUDENT}", 
+"${MENTOR}", 
+"${MENTEE}", 
+"${UMS_VIEWER}", 
+"${CMS_UMS_VIEWER}"
+]`;
+
+const UMS_HEAD_AND_MENTOR = `[
+"${ADMIN}", 
+"${UMS_ADMIN}",
+"${MENTOR}"
+]`;
+
+const NOT_UMS_HEAD_AND_MENTOR = `[
+"${CMS_ADMIN}", 
+"${SELF_LEARNER}", 
+"${SCHOOL_STUDENT}", 
+"${MENTEE}", 
+"${UMS_VIEWER}", 
+"${CMS_UMS_VIEWER}"
+]`;
+
+const ALL_ROLES = `[
+"${ADMIN}", 
+"${CMS_ADMIN}", 
+"${SELF_LEARNER}", 
+"${SCHOOL_STUDENT}", 
+"${UMS_ADMIN}", 
+"${MENTOR}", 
+"${MENTEE}", 
+"${UMS_VIEWER}", 
+"${CMS_VIEWER}", 
+"${CMS_UMS_VIEWER}"
+]`;
+
+const NOT_ADMIN = `[
+"${CMS_ADMIN}", 
+"${SELF_LEARNER}", 
+"${SCHOOL_STUDENT}", 
+"${UMS_ADMIN}", 
+"${MENTOR}", 
+"${MENTEE}",
+"${UMS_VIEWER}", 
+"${CMS_VIEWER}", 
+"${CMS_UMS_VIEWER}"
+]`;
 
 const ALL_ROLES_ARRAY = [
-  CONTENT_MANAGER,
+  CMS_ADMIN,
   ADMIN,
   SELF_LEARNER,
   SCHOOL_STUDENT,
-  USER_MANAGER,
+  UMS_ADMIN,
   MENTOR,
   MENTEE,
   PARENT,
+  UMS_VIEWER,
+  CMS_VIEWER,
+  CMS_UMS_VIEWER,
 ];
 
 export {
-  CONTENT_MANAGER,
+  CMS_ADMIN,
   ADMIN,
   SELF_LEARNER,
   SCHOOL_STUDENT,
-  USER_MANAGER,
+  UMS_ADMIN,
   CMS_HEAD,
   NOT_CMS_HEAD,
   UMS_HEAD,
@@ -41,4 +111,9 @@ export {
   MENTEE,
   ALL_ROLES_ARRAY,
   PARENT,
+  UMS_VIEWER,
+  CMS_VIEWER,
+  CMS_UMS_VIEWER,
+  UMS_HEAD_AND_MENTOR,
+  NOT_UMS_HEAD_AND_MENTOR,
 };
