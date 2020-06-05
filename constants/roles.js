@@ -21,7 +21,8 @@ const NOT_CMS_HEAD = `[
 "${UMS_ADMIN}", 
 "${MENTOR}", 
 "${MENTEE}", 
-"${CMS_VIEWER}", 
+"${UMS_VIEWER}", 
+"${CMS_ADMIN}",
 "${CMS_UMS_VIEWER}"
 ]`;
 
