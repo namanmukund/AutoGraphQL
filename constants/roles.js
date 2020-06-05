@@ -40,6 +40,21 @@ const NOT_UMS_HEAD = `[
 "${CMS_UMS_VIEWER}"
 ]`;
 
+const UMS_HEAD_AND_MENTOR = `[
+"${ADMIN}", 
+"${UMS_ADMIN}",
+"${MENTOR}"
+]`;
+
+const NOT_UMS_HEAD_AND_MENTOR = `[
+"${CMS_ADMIN}", 
+"${SELF_LEARNER}", 
+"${SCHOOL_STUDENT}", 
+"${MENTEE}", 
+"${UMS_VIEWER}", 
+"${CMS_UMS_VIEWER}"
+]`;
+
 const ALL_ROLES = `[
 "${ADMIN}", 
 "${CMS_ADMIN}", 
@@ -98,4 +113,6 @@ export {
   UMS_VIEWER,
   CMS_VIEWER,
   CMS_UMS_VIEWER,
+  UMS_HEAD_AND_MENTOR,
+  NOT_UMS_HEAD_AND_MENTOR,
 };
