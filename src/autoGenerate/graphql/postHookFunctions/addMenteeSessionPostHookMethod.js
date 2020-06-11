@@ -12,6 +12,6 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context) => {
 
   await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context, availableSlots);
   // send email to mentor admin regarding the session
-  extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray);
+  await extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray);
 };
 export default addMenteeSessionPostHookMethod;

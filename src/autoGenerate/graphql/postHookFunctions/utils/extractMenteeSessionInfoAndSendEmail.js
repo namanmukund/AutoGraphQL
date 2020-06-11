@@ -1,9 +1,10 @@
-import { get } from 'lodash';
+import { get, startCase, toLower } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import parsedHtmlFromTemplateFileAndObject
   from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
+import getFormatedDate from '../../../../../utils/getFormatedDate';
 
 const menteeInfoQuery = (userId) => `
   query{
@@ -34,116 +35,62 @@ const topicInfoQuery = (topicId) => `
     topic(id:"${topicId}"){
       id
       title
+      thumbnailSmall {
+        uri
+      }
     }
   }
 `;
 
-const getSlotLabel = (slotNumber) => {
+const getSlotLabel = (slotNumberString, isCapital = true) => {
+  const slotNumber = Number(slotNumberString);
+  let AM = 'AM';
+  let PM = 'PM';
+  if (!isCapital) {
+    AM = 'am';
+    PM = 'pm';
+  }
   let startTime = '';
   let endTime = '';
   if (slotNumber < 12) {
     if (slotNumber === 0) {
-      startTime = '12 am';
+      startTime = `12:00 ${AM}`;
     } else {
-      startTime = `${slotNumber} am`;
+      startTime = `${slotNumber}:00 ${AM}`;
     }
     if (slotNumber === 11) {
-      endTime = '12 pm';
+      endTime = `12:00 ${PM}`;
     } else {
-      endTime = `${slotNumber + 1} am`;
+      endTime = `${slotNumber + 1}:00 ${AM}`;
     }
-  } else if (slotNumber === 12) {
-    startTime = '12 pm';
-    endTime = '1 pm';
   } else if (slotNumber > 12) {
-    startTime = `${slotNumber - 12} pm`;
+    startTime = `${slotNumber - 12}:00 ${PM}`;
     if (slotNumber === 23) {
-      endTime = '12 am';
+      endTime = `12:00 ${AM}`;
     } else {
-      endTime = `${slotNumber - 11} pm`;
+      endTime = `${slotNumber - 11}:00 PM`;
     }
+  } else {
+    startTime = `12:00 ${PM}`;
+    endTime = `1:00 ${PM}`;
   }
   return {
     startTime,
     endTime,
   };
 };
-
-const extractMenteeSessionInfoAndSendEmail = async (
-  action,
-  input,
-  bookingDate,
-  slotTimeStringArray,
-  prevBookingDate,
-  prevSlotTimeStringArray,
-) => {
-  const slotNumber = slotTimeStringArray[0].split('slot')[1];
-  const { startTime } = getSlotLabel(slotNumber);
-
-  const { user: { typeId: userId }, topic: { typeId: topicId } } = input;
-  const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId));
-  const menteeInfo = get(userInfo, 'data.user');
-  const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
-
-  const menteeObj = {
-    date: bookingDate,
-    time: startTime,
-    name: get(menteeInfo, 'name') || '',
-    grade: get(menteeInfo, 'studentProfile.grade') || '',
-    parentName: get(parentInfo, 'name') || '',
-    parentEmail: get(parentInfo, 'email') || '',
-    parentNumber: get(parentInfo, 'phone.number') || '',
-    countryCode: get(parentInfo, 'phone.countryCode') || '',
-  };
-  const topicInfo = await callLocalGraphqlApi(topicInfoQuery(topicId));
-  menteeObj.topicTitle = get(topicInfo, 'data.topic.title');
-
-  let subject = '';
-  menteeObj.prevBookingDate = '';
-  menteeObj.previousStartTime = '';
-
-  switch (action) {
-    case 'add': {
-      subject = `Session Booked by ${menteeObj.name}`;
-      break;
-    }
-    case 'update': {
-      menteeObj.prevBookingDate = prevBookingDate;
-      const previousSlotNumber = prevSlotTimeStringArray[0].split('slot')[1];
-      const { startTime: previousStartTime } = getSlotLabel(previousSlotNumber);
-      menteeObj.previousStartTime = previousStartTime;
-      subject = `Session Updated by ${menteeObj.name}`;
-      break;
-    }
-    case 'delete': {
-      subject = `Session Deleted by ${menteeObj.name}`;
-      break;
-    }
-    default:
-  }
-
+const sendBookedSessionEmailToTekie = (subject, menteeObj) => {
   const templateFileName = 'menteeSessionBookingEmailTemplate';
   const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, menteeObj);
   templateString.then((html) => {
-    // emailto should be in array. Can send the mail to mutiple people
-    let emailTo;
-    // send email in case a session is booked/updated/deleted
-    if (process.env.NODE_ENV === 'production') {
-      emailTo = [
-        'shantanu.najhawan@tekie.in',
-        'anand.verma@tekie.in',
-        'naman.mukund@tekie.in',
-      ];
-    } else {
-      emailTo = ['namanmukund@gmail.com'];
-    }
-
-    // ccemail should be in array. Can send the mail to mutiple people
+    const emailTo = [
+      'shantanu.najhawan@tekie.in',
+      'anand.verma@tekie.in',
+      'naman.mukund@tekie.in',
+    ];
     const ccEmail = [''];
-    // bccemail should be in array. Can send the mail to mutiple people
     const bccEmail = [''];
-
-    const text = 'Test Text';
+    const text = '';
     /* if html is empty then in the body text will be appear. Html is having higher
      precedence over text */
     const emailMsgObject = getEmailObject(
@@ -157,6 +104,101 @@ const extractMenteeSessionInfoAndSendEmail = async (
     );
     sendEmail(emailMsgObject);
   });
+};
+
+const sendBookedSessionEmailToParent = (subject, menteeObj, action) => {
+  let templateFileName = 'bookedSessionEmailTemplate';
+  if (action === 'delete') {
+    templateFileName = 'canceledSessionEmailTemplate';
+  }
+  // eslint-disable-next-line no-param-reassign
+  menteeObj.action = action;
+  const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, menteeObj);
+  templateString.then((html) => {
+    const emailTo = [
+      menteeObj.parentEmail,
+    ];
+    const ccEmail = [''];
+    const bccEmail = [''];
+    const text = '';
+    /* if html is empty then in the body text will be appear. Html is having higher
+     precedence over text */
+    const emailMsgObject = getEmailObject(
+      emailTo,
+      ccEmail,
+      bccEmail,
+      subject,
+      text,
+      html,
+      'hello@tekie.in',
+    );
+    sendEmail(emailMsgObject);
+  });
+};
+
+const extractMenteeSessionInfoAndSendEmail = async (
+  action,
+  input,
+  bookingDate,
+  slotTimeStringArray,
+  prevBookingDate,
+  prevSlotTimeStringArray,
+) => {
+  const slotNumber = slotTimeStringArray[0].split('slot')[1];
+  const { startTime, endTime } = getSlotLabel(slotNumber);
+
+  const { user: { typeId: userId }, topic: { typeId: topicId } } = input;
+  const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId));
+  const menteeInfo = get(userInfo, 'data.user');
+  const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
+
+  const menteeObj = {
+    date: getFormatedDate(bookingDate),
+    startTime,
+    endTime,
+    name: startCase(toLower(get(menteeInfo, 'name') || '')),
+    grade: get(menteeInfo, 'studentProfile.grade') || '',
+    parentName: startCase(toLower(get(parentInfo, 'name') || '')),
+    parentEmail: get(parentInfo, 'email') || '',
+    parentNumber: get(parentInfo, 'phone.number') || '',
+    countryCode: get(parentInfo, 'phone.countryCode') || '',
+  };
+  const topicInfo = await callLocalGraphqlApi(topicInfoQuery(topicId));
+  menteeObj.topicTitle = get(topicInfo, 'data.topic.title');
+  const topicThumbnail = get(topicInfo, 'data.topic.thumbnailSmall.uri');
+  if (topicThumbnail) {
+    menteeObj.topicThumbnail = `${process.env.FILE_BASE_URL}/${topicThumbnail}`;
+  }
+
+  let subject = '';
+  menteeObj.prevBookingDate = '';
+  menteeObj.previousStartTime = '';
+
+  switch (action) {
+    case 'add': {
+      subject = `Session Booked by ${menteeObj.name}`;
+      break;
+    }
+    case 'update': {
+      menteeObj.prevBookingDate = getFormatedDate(prevBookingDate);
+      const previousSlotNumber = prevSlotTimeStringArray[0].split('slot')[1];
+      const { startTime: previousStartTime, endTime: previousEndTime } = getSlotLabel(previousSlotNumber);
+      menteeObj.previousStartTime = previousStartTime;
+      menteeObj.previousEndTime = previousEndTime;
+      subject = `Session Updated by ${menteeObj.name}`;
+      break;
+    }
+    case 'delete': {
+      subject = `Session Deleted by ${menteeObj.name}`;
+      break;
+    }
+    default:
+  }
+  // send email
+  if (process.env.NODE_ENV === 'production') {
+    sendBookedSessionEmailToTekie(subject, menteeObj, action);
+    sendBookedSessionEmailToParent(subject, menteeObj, action);
+  }
 };
 
 export default extractMenteeSessionInfoAndSendEmail;

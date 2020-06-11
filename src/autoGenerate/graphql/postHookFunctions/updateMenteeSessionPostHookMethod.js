@@ -54,7 +54,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     }
   }
   // send email to mentor admin regarding the session
-  extractMenteeSessionInfoAndSendEmail(
+  await extractMenteeSessionInfoAndSendEmail(
     'update',
     input,
     bookingDate,

@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import { get, startCase, toLower } from 'lodash';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { isValidPhoneNumber, validate, validateName } from '../../../validation';
 import { ADD } from '../../../../../../constants/graphqlOperations';
@@ -16,6 +16,10 @@ import { generateCuid } from '../../../../../../utils';
 import localSignUpMutationPromise from '../utils/localSignUpMutationPromise';
 import { MutationController, QueryController } from '../../../controllers';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
+import parsedHtmlFromTemplateFileAndObject
+  from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
+import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
+import sendEmail from '../../../../../../services/email/utils/sendEmail';
 
 const USER_TYPE = 'User';
 const validateParentChildSignUpInput = (input) => {
@@ -281,6 +285,35 @@ const parentChildSignUpMutationResolver = async (
     ...parentInfo.childrenToken,
     createUserTokenTypeData(childUserData, authentication, '', true),
   ];
+
+  // send email
+  if (process.env.NODE_ENV === 'production') {
+    const templateFileName = 'parentChildSignupEmailTemplate';
+    const parentChildEmailObj = {
+      parentName: startCase(toLower(parentName)),
+      childName: startCase(toLower(childName)),
+    };
+    const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, parentChildEmailObj);
+    templateString.then((html) => {
+      const emailTo = [
+        parentEmail,
+      ];
+      const ccEmail = [''];
+      const bccEmail = [''];
+      const text = '';
+      const subject = 'Schedule Live 1:1 Free Trial Coding Session';
+      const emailMsgObject = getEmailObject(
+        emailTo,
+        ccEmail,
+        bccEmail,
+        subject,
+        text,
+        html,
+        'hello@tekie.in',
+      );
+      sendEmail(emailMsgObject);
+    });
+  }
   return userTokenData;
 };
 
