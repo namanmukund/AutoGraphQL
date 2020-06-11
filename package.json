@@ -70,7 +70,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.8.7",
     "@babel/runtime-corejs2": "^7.9.2",
-    "@sendgrid/mail": "^7.0.0",
+    "@sendgrid/mail": "^7.2.0",
     "apollo-errors": "^1.9.0",
     "apollo-fetch": "^0.7.0",
     "apollo-server-express": "^2.11.0",

@@ -11,7 +11,7 @@ const sendEmail = (emailMsgObject) => {
     sgMail
       .send(emailMsgObject, (error) => {
         if (error) {
-          log('Error while sending emial.');
+          log('Error while sending email.');
           log(error);
         }
       });
