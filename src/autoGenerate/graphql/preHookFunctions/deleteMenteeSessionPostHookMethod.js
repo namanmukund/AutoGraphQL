@@ -11,7 +11,7 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
   await increaseParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
-  extractMenteeSessionInfoAndSendEmail('delete', input, bookingDate, slotTimeStringArray);
+  await extractMenteeSessionInfoAndSendEmail('delete', input, bookingDate, slotTimeStringArray);
 };
 
 export default deleteMenteeSessionPostHookMethod;

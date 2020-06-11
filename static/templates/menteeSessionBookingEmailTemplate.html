@@ -9,7 +9,7 @@
         <td>Session Date: <%= date %></td>
     </tr>
     <tr>
-        <td>Session Time: <%= time %></td>
+        <td>Session Time: <%= startTime %> - <%= endTime %></td>
     </tr>
     <tr>
         <th>Kid's Information</th>
@@ -40,7 +40,7 @@
             <td>Previous Session Booking Date: <%= prevBookingDate %></td>
         </tr>
         <tr>
-            <td>Previous Session Start Time: <%= previousStartTime %></td>
+            <td>Previous Session Start Time: <%= previousStartTime %> - <%= previousEndTime %></td>
         </tr>
     <% } %>
 </table>
