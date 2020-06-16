@@ -45,6 +45,8 @@ import Discount from './discount';
 import UserPayment from './userPayment';
 import Product from './product';
 import PaymentRequest from './paymentRequest';
+import UserCredit from './userCredit';
+import InviteUser from './inviteUser';
 
 export default [
   ...User,
@@ -94,4 +96,6 @@ export default [
   ...UserPayment,
   ...Product,
   ...PaymentRequest,
+  ...UserCredit,
+  ...InviteUser,
 ];

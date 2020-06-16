@@ -12,7 +12,7 @@ import {
 import isValidEmail from '../../../validation/isValidEmail';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { MENTEE, PARENT } from '../../../../../../constants/roles';
-import { generateCuid } from '../../../../../../utils';
+import { generateCuid, log } from '../../../../../../utils';
 import localSignUpMutationPromise from '../utils/localSignUpMutationPromise';
 import { MutationController, QueryController } from '../../../controllers';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
@@ -20,6 +20,8 @@ import parsedHtmlFromTemplateFileAndObject
   from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../../services/email/utils/sendEmail';
+import generateInviteCode from '../../../../../../utils/generateInviteCode';
+import { MAX_ALLOWED_REFERRALS } from '../../../../../../constants';
 
 const USER_TYPE = 'User';
 const validateParentChildSignUpInput = (input) => {
@@ -150,6 +152,76 @@ const getParentInfo = async (context, email, phone) => {
   result.childrenToken = childrenToken;
   return result;
 };
+
+const getReferredByUserId = async (invitedByCode) => {
+  const query = `
+    query{
+      user(inviteCode:"${invitedByCode}"){
+        id
+        inviteCode
+      }
+    }
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.user.id');
+};
+
+const getNumberOfReferralsOfAUser = async (userId) => {
+  const query = `
+      query{
+        inviteUsersMeta(filter:{
+          invitedBy_some:{
+            id:"${userId}"
+          }
+        }){
+          count
+        }
+      }
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.inviteUsersMeta.count');
+};
+
+const addToInviteUserList = async (invitedByConnectId, acceptedByConnectId) => {
+  const query = `
+    mutation{
+      addInviteUser(input:{
+        registrationVerified:false
+        trialTaken: false
+        coursePurchased: false
+      }
+        invitedByConnectId:"${invitedByConnectId}"
+        acceptedByConnectId:"${acceptedByConnectId}"
+      ){
+        id
+      }
+    }
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.addInviteUser.id');
+};
+
+/*
+- get referral user id
+- check if the referral user has not reached its max limit
+- add inviteUser collection
+- update user referral status
+ */
+
+const checkForValidReferralCode = async (invitedByCode) => {
+  if (!invitedByCode) {
+    return false;
+  }
+  const referredByUserId = await getReferredByUserId(invitedByCode);
+  if (referredByUserId) {
+    const numberOfReferralsOfAUser = await getNumberOfReferralsOfAUser(referredByUserId);
+    if (numberOfReferralsOfAUser <= MAX_ALLOWED_REFERRALS) {
+      return referredByUserId;
+    }
+    log(`Max referral limit exceeded by userId ${referredByUserId}`);
+  }
+  return false;
+};
 /*
 - both the parent and a kid is registered
 - email & phone both are required
@@ -187,7 +259,13 @@ const parentChildSignUpMutationResolver = async (
   validateParentChildSignUpInput(input);
 
   const {
-    parentName, childName, parentEmail, parentPhone, grade, hasLaptopOrDesktop,
+    parentName,
+    childName,
+    parentEmail,
+    parentPhone,
+    grade,
+    hasLaptopOrDesktop,
+    invitedByCode,
   } = input;
 
   // check if parent exist in db
@@ -197,6 +275,7 @@ const parentChildSignUpMutationResolver = async (
   Object.assign(authentication, {
     bypass: true,
   });
+
   // if parent exist don't add parent and check if the child exists too
   if (parentInfo && parentInfo.parentId) {
     parentId = parentInfo.parentId;
@@ -238,18 +317,27 @@ const parentChildSignUpMutationResolver = async (
       variables,
     );
   }
+
   const childData = {
     name: childName,
     role: MENTEE,
+    inviteCode: generateInviteCode(),
   };
+
+  // check if the child has been referred by a valid user
+  const referredByUserId = await checkForValidReferralCode(invitedByCode);
+  if (referredByUserId) {
+    childData.fromReferral = true;
+    childData.giftVoucherApplied = false;
+  }
   const childDataWithId = generateCuid(childData);
 
   const childUserData = await addUserData(authentication, childDataWithId);
-  const { id: childId } = childUserData;
-  if (!childId) {
+  const { id: childUserId } = childUserData;
+  if (!childUserId) {
     throw new SomethingWentWrongError({
       data: {
-        message: 'childId not found',
+        message: 'childUserId not found',
       },
     });
   }
@@ -260,7 +348,7 @@ const parentChildSignUpMutationResolver = async (
   const studentProfileInput = {
     input: studentProfileInputData,
   };
-  const studentProfileId = await addStudentProfile(context, studentProfileInput, childId, parentProfileId);
+  const studentProfileId = await addStudentProfile(context, studentProfileInput, childUserId, parentProfileId);
   if (!studentProfileId) {
     throw new SomethingWentWrongError({
       data: {
@@ -285,6 +373,15 @@ const parentChildSignUpMutationResolver = async (
     ...parentInfo.childrenToken,
     createUserTokenTypeData(childUserData, authentication, '', true),
   ];
+
+  // if referredByUserId then add to the list of invite user
+  if (referredByUserId) {
+    try {
+      await addToInviteUserList(referredByUserId, childUserId);
+    } catch (e) {
+      log('Error in adding to invite user', e);
+    }
+  }
 
   // send email
   if (process.env.NODE_ENV === 'production') {

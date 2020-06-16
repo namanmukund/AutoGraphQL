@@ -8,6 +8,9 @@ const User = `
     emailOtp: Int @writeOnly
     emailOtpCreationDate: Date @writeOnly
     name: String @trim
+    inviteCode: String @uniqueOrEmpty @readOnly
+    fromReferral: Boolean @defaultValue(value: "false") @readOnly
+    giftVoucherApplied: Boolean @defaultValue(value: "false") @readOnly 
     role: UserRole! @defaultValue(value: "selfLearner") 
           @userPermissions(
             permissions:[
