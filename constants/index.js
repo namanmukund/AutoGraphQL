@@ -29,6 +29,8 @@ const rangeOTP = {
   min: 1000,
   max: 9999,
 };
+
+const MAX_ALLOWED_REFERRALS = 10;
 const randomNumberRangeForUsername = {
   min: 1,
   max: 99,
@@ -260,4 +262,5 @@ export {
   forgotPassWebURL,
   stickerEmojiType,
   slotTimes,
+  MAX_ALLOWED_REFERRALS,
 };
