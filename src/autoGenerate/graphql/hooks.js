@@ -85,6 +85,7 @@ import addMenteeSessionPostHookMethod from './postHookFunctions/addMenteeSession
 import updateMenteeSessionPostHookMethod from './postHookFunctions/updateMenteeSessionPostHookMethod';
 import deleteMenteeSessionValidation from './preHookFunctions/validation/deleteMenteeSessionValidation';
 import deleteMenteeSessionPostHookMethod from './preHookFunctions/deleteMenteeSessionPostHookMethod';
+import updateUserPostHookMethod from './postHookFunctions/updateUserPostHookMethod';
 
 const { hookFunctions } = functions || {};
 
@@ -224,7 +225,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateUser': {
       // validate username, phone, email and name and returns email or phone verified accordingly
-      const verifiedData = await updateUserValidation(input, context);
+      const verifiedData = await updateUserValidation(params, context);
       Object.assign(input, verifiedData);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
@@ -612,6 +613,9 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'deleteMenteeSession': {
       await deleteMenteeSessionPostHookMethod(input, mutationName, context);
+      break;
+    } case 'updateUser': {
+      await updateUserPostHookMethod(input, mutationName, context);
       break;
     }
     default:

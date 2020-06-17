@@ -22,6 +22,8 @@ import getEmailObject from '../../../../../../services/email/utils/getEmailObjec
 import sendEmail from '../../../../../../services/email/utils/sendEmail';
 import generateInviteCode from '../../../../../../utils/generateInviteCode';
 import { MAX_ALLOWED_REFERRALS } from '../../../../../../constants';
+import getNumberOfReferralsOfAUser from './utils/getNumberOfReferralsOfAUser';
+import getReferredByUserIdByReferralCode from './utils/getReferredByUserIdByReferralCode';
 
 const USER_TYPE = 'User';
 const validateParentChildSignUpInput = (input) => {
@@ -153,35 +155,6 @@ const getParentInfo = async (context, email, phone) => {
   return result;
 };
 
-const getReferredByUserId = async (invitedByCode) => {
-  const query = `
-    query{
-      user(inviteCode:"${invitedByCode}"){
-        id
-        inviteCode
-      }
-    }
-  `;
-  const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.user.id');
-};
-
-const getNumberOfReferralsOfAUser = async (userId) => {
-  const query = `
-      query{
-        userInvitesMeta(filter:{
-          invitedBy_some:{
-            id:"${userId}"
-          }
-        }){
-          count
-        }
-      }
-  `;
-  const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.userInvitesMeta.count');
-};
-
 const addToUserInviteList = async (invitedByConnectId, acceptedByConnectId) => {
   const query = `
     mutation{
@@ -208,11 +181,11 @@ const addToUserInviteList = async (invitedByConnectId, acceptedByConnectId) => {
 - update user referral status
  */
 
-const checkForValidReferralCode = async (invitedByCode) => {
-  if (!invitedByCode) {
+const checkForValidReferralCode = async (referralCode) => {
+  if (!referralCode) {
     return false;
   }
-  const referredByUserId = await getReferredByUserId(invitedByCode);
+  const referredByUserId = await getReferredByUserIdByReferralCode(referralCode);
   if (referredByUserId) {
     const numberOfReferralsOfAUser = await getNumberOfReferralsOfAUser(referredByUserId);
     if (numberOfReferralsOfAUser <= MAX_ALLOWED_REFERRALS) {
@@ -265,7 +238,7 @@ const parentChildSignUpMutationResolver = async (
     parentPhone,
     grade,
     hasLaptopOrDesktop,
-    invitedByCode,
+    referralCode,
   } = input;
 
   // check if parent exist in db
@@ -325,7 +298,7 @@ const parentChildSignUpMutationResolver = async (
   };
 
   // check if the child has been referred by a valid user
-  const referredByUserId = await checkForValidReferralCode(invitedByCode);
+  const referredByUserId = await checkForValidReferralCode(referralCode);
   if (referredByUserId) {
     childData.fromReferral = true;
     childData.giftVoucherApplied = false;

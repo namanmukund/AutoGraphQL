@@ -6,7 +6,7 @@ const ParentChildSignUpInput = `
     parentPhone: PhoneInput!  
     grade: Grade
     hasLaptopOrDesktop: Boolean
-    invitedByCode: String
+    referralCode: String
   }
 `;
 
