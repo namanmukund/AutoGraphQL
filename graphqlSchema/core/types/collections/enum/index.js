@@ -27,6 +27,8 @@ import Subject from './Subject';
 import UserRole from './UserRole';
 import SessionStatus from './SessionStatus';
 import SalesTeamStatus from './SalesTeamStatus';
+import UserBehaviourStatus from './UserBehaviourStatus';
+
 
 export default [
   Status,
@@ -58,4 +60,5 @@ export default [
   UserRole,
   SessionStatus,
   SalesTeamStatus,
+  UserBehaviourStatus,
 ];

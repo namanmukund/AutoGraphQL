@@ -2,7 +2,8 @@ const SalesTeamStatus = `
   enum SalesTeamStatus {
     pending
     verified
-    irrelevant
+    unverified
+    incorrect
     internal
   }`;
 
