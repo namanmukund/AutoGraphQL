@@ -10,7 +10,13 @@ const updateUserValidation = async (params, context) => {
   const { input, id } = params;
   const userObj = {};
   const {
-    name, username, email, phone, password, salesTeamStatus,
+    name,
+    username,
+    email,
+    phone,
+    password,
+    salesTeamStatus,
+    salesTeamUserStateUpdate,
   } = input;
   commonUserValidation({ name, email, phone });
   if (username) {
@@ -42,6 +48,14 @@ const updateUserValidation = async (params, context) => {
   const { salesTeamStatus: prevSalesTeamStatus } = userData;
   if (prevSalesTeamStatus === 'verified' && (salesTeamStatus && salesTeamStatus !== 'verified')) {
     throw new CanNotChangeVerifiedUserStatusError();
+  }
+
+  if (salesTeamStatus) {
+    userObj.salesTeamStatusUpdateDate = new Date();
+  }
+
+  if (salesTeamUserStateUpdate) {
+    userObj.salesTeamUserStateUpdateDate = new Date();
   }
   return userObj;
 };

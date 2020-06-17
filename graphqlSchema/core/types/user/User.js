@@ -20,8 +20,10 @@ const User = `
     fromReferral: Boolean @defaultValue(value: "false") @readOnly
     giftVoucherApplied: Boolean @defaultValue(value: "false") @readOnly
     salesTeamStatus: SalesTeamStatus @defaultValue(value: "pending")
-    salesTeamFeedback: String
-    userBehaviour: UserBehaviourStatus @defaultValue(value: "pending")
+    salesTeamStatusUpdateDate: Date
+    salesTeamOverallFeedback: String
+    salesTeamUserStateUpdate: UserBehaviourStatus @defaultValue(value: "pending")
+    salesTeamUserStateUpdateDate: Date
     role: UserRole! @defaultValue(value: "selfLearner") 
           @userPermissions(
             permissions:[
