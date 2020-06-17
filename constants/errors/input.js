@@ -167,3 +167,7 @@ export const TransactionIdNotPresentError = createError('TransactionIdNotPresent
 export const HashOrStatusNotPresentError = createError('HashOrStatusNotPresentError', {
   message: 'Hash is missing in input',
 });
+
+export const CanNotChangeVerifiedUserStatusError = createError('CanNotChangeVerifiedUserStatusError', {
+  message: 'Can not change the status of a verified user',
+});
