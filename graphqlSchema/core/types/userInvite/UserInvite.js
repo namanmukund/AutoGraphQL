@@ -2,11 +2,11 @@
 // import { TLA, TMS, TWA } from '../../../../constants';
 // import { CMS_HEAD, NOT_CMS_HEAD } from '../../../../constants/roles';
 
-const InviteUser = `
-  type InviteUser @model 
+const UserInvite = `
+  type UserInvite @model 
    {  
-    invitedBy: User @relation(name: "InviteUserInvitedBy", direction: "OneWay")
-    acceptedBy: User @relation(name: "InviteUserAcceptedBy", direction: "OneWay")
+    invitedBy: User @relation(name: "UserInviteInvitedBy", direction: "OneWay")
+    acceptedBy: User @relation(name: "UserInviteAcceptedBy", direction: "OneWay")
     registrationVerified: Boolean @defaultValue(value: "false")
     registrationVerifiedDate: Date
     trialTaken: Boolean @defaultValue(value: "false")
@@ -16,4 +16,4 @@ const InviteUser = `
   }
 `;
 
-export default InviteUser;
+export default UserInvite;

@@ -26,6 +26,7 @@ import Grade from './Grade';
 import Subject from './Subject';
 import UserRole from './UserRole';
 import SessionStatus from './SessionStatus';
+import SalesTeamStatus from './SalesTeamStatus';
 
 export default [
   Status,
@@ -56,4 +57,5 @@ export default [
   Subject,
   UserRole,
   SessionStatus,
+  SalesTeamStatus,
 ];

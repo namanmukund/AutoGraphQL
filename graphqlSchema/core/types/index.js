@@ -46,7 +46,7 @@ import UserPayment from './userPayment';
 import Product from './product';
 import PaymentRequest from './paymentRequest';
 import UserCredit from './userCredit';
-import InviteUser from './inviteUser';
+import InviteUser from './userInvite';
 
 export default [
   ...User,
