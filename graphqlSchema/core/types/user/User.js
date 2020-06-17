@@ -21,6 +21,7 @@ const User = `
     giftVoucherApplied: Boolean @defaultValue(value: "false") @readOnly
     salesTeamStatus: SalesTeamStatus @defaultValue(value: "pending")
     salesTeamFeedback: String
+    userBehaviour: UserBehaviourStatus @defaultValue(value: "pending")
     role: UserRole! @defaultValue(value: "selfLearner") 
           @userPermissions(
             permissions:[
