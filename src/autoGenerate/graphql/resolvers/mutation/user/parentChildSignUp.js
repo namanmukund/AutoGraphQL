@@ -169,7 +169,7 @@ const getReferredByUserId = async (invitedByCode) => {
 const getNumberOfReferralsOfAUser = async (userId) => {
   const query = `
       query{
-        inviteUsersMeta(filter:{
+        userInvitesMeta(filter:{
           invitedBy_some:{
             id:"${userId}"
           }
@@ -179,13 +179,13 @@ const getNumberOfReferralsOfAUser = async (userId) => {
       }
   `;
   const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.inviteUsersMeta.count');
+  return get(res, 'data.userInvitesMeta.count');
 };
 
-const addToInviteUserList = async (invitedByConnectId, acceptedByConnectId) => {
+const addToUserInviteList = async (invitedByConnectId, acceptedByConnectId) => {
   const query = `
     mutation{
-      addInviteUser(input:{
+      addUserInvite(input:{
         registrationVerified:false
         trialTaken: false
         coursePurchased: false
@@ -198,13 +198,13 @@ const addToInviteUserList = async (invitedByConnectId, acceptedByConnectId) => {
     }
   `;
   const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.addInviteUser.id');
+  return get(res, 'data.addUserInvite.id');
 };
 
 /*
 - get referral user id
 - check if the referral user has not reached its max limit
-- add inviteUser collection
+- add userInvite collection
 - update user referral status
  */
 
@@ -377,9 +377,9 @@ const parentChildSignUpMutationResolver = async (
   // if referredByUserId then add to the list of invite user
   if (referredByUserId) {
     try {
-      await addToInviteUserList(referredByUserId, childUserId);
+      await addToUserInviteList(referredByUserId, childUserId);
     } catch (e) {
-      log('Error in adding to invite user', e);
+      log('Error in adding to user invite', e);
     }
   }
 
