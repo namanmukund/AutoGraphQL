@@ -86,6 +86,7 @@ import updateMenteeSessionPostHookMethod from './postHookFunctions/updateMenteeS
 import deleteMenteeSessionValidation from './preHookFunctions/validation/deleteMenteeSessionValidation';
 import deleteMenteeSessionPostHookMethod from './preHookFunctions/deleteMenteeSessionPostHookMethod';
 import updateUserPostHookMethod from './postHookFunctions/updateUserPostHookMethod';
+import updateMentorMenteeSessionPostHookMethod from './postHookFunctions/updateMentorMenteeSessionPostHookMethod';
 
 const { hookFunctions } = functions || {};
 
@@ -609,6 +610,10 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateMenteeSession': {
       await updateMenteeSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'updateMentorMenteeSession': {
+      await updateMentorMenteeSessionPostHookMethod(input, mutationName, context);
       break;
     }
     case 'deleteMenteeSession': {

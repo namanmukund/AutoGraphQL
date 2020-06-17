@@ -51,11 +51,11 @@ const updateUserValidation = async (params, context) => {
   }
 
   if (salesTeamStatus) {
-    userObj.salesTeamStatusUpdateDate = new Date();
+    userObj.salesTeamStatusUpdateDate = new Date().toISOString();
   }
 
   if (salesTeamUserStateUpdate) {
-    userObj.salesTeamUserStateUpdateDate = new Date();
+    userObj.salesTeamUserStateUpdateDate = new Date().toISOString();
   }
   return userObj;
 };
