@@ -19,6 +19,7 @@ import parsedHtmlFromTemplateFileAndObject
 import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../../services/email/utils/sendEmail';
 import updateReferrerCreditsPostSessionOrUserPayment from '../../../postHookFunctions/utils/updateReferrerCreditsPostSessionOrUserPayment';
+import referralCredits from '../../../../../../constants/referralCredits';
 
 // query to get user paayment info for id
 const getUserPayment = (id) => `
@@ -318,7 +319,9 @@ const getPaymentResponseMutationResolver = async (
           coursePurchasedDate: new Date().toISOString(),
         },
       };
-      await updateReferrerCreditsPostSessionOrUserPayment(userId, context, variables);
+      const { coursePurchased } = referralCredits;
+
+      await updateReferrerCreditsPostSessionOrUserPayment(userId, coursePurchased, context, variables);
     } catch (e) {
       log('Error in updateReferrerCreditsPostUserPayment', e);
     }
