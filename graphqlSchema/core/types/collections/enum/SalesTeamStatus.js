@@ -5,6 +5,7 @@ const SalesTeamStatus = `
     unverified
     incorrect
     internal
+    forReferralCredits
   }`;
 
 export default SalesTeamStatus;
