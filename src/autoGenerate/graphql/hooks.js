@@ -86,6 +86,8 @@ import updateMenteeSessionPostHookMethod from './postHookFunctions/updateMenteeS
 import deleteMenteeSessionValidation from './preHookFunctions/validation/deleteMenteeSessionValidation';
 import deleteMenteeSessionPostHookMethod from './preHookFunctions/deleteMenteeSessionPostHookMethod';
 import updateUserPostHookMethod from './postHookFunctions/updateUserPostHookMethod';
+import updateMentorMenteeSessionPostHookMethod from './postHookFunctions/updateMentorMenteeSessionPostHookMethod';
+import updateMentorMenteeSessionValidation from './preHookFunctions/validation/updateMentorMenteeSessionValidation';
 
 const { hookFunctions } = functions || {};
 
@@ -483,7 +485,13 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       } else {
         newInput = { ...input };
       }
-
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await updateMentorMenteeSessionValidation(newParams, mutationOrQueryName, context);
       return hook(newInput, mutationOrQueryName, 'PreHook');
     }
     case 'deleteMenteeSession': {
@@ -609,6 +617,10 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateMenteeSession': {
       await updateMenteeSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'updateMentorMenteeSession': {
+      await updateMentorMenteeSessionPostHookMethod(input, mutationName, context);
       break;
     }
     case 'deleteMenteeSession': {
