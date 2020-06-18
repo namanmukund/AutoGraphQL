@@ -18,7 +18,7 @@ import parsedHtmlFromTemplateFileAndObject
   from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../../services/email/utils/sendEmail';
-import updateReferrerCreditsPostUserPayment from './utils/updateReferrerCreditsPostUserPayment';
+import updateReferrerCreditsPostSessionOrUserPayment from '../../../postHookFunctions/utils/updateReferrerCreditsPostSessionOrUserPayment';
 
 // query to get user paayment info for id
 const getUserPayment = (id) => `
@@ -312,7 +312,13 @@ const getPaymentResponseMutationResolver = async (
 
     // update referrer credits as per referral program
     try {
-      await updateReferrerCreditsPostUserPayment(userId, context);
+      const variables = {
+        input: {
+          coursePurchased: true,
+          coursePurchasedDate: new Date().toISOString(),
+        },
+      };
+      await updateReferrerCreditsPostSessionOrUserPayment(userId, context, variables);
     } catch (e) {
       log('Error in updateReferrerCreditsPostUserPayment', e);
     }
