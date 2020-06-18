@@ -1,118 +1,61 @@
-import { isArray, get } from 'lodash';
-import { functions, ifAuthorized } from '../../../utils';
-
-
+import { get } from 'lodash';
+import isUniqueOrderField from './validation/isUniqueOrderField';
 import {
-  validateLogin, validateExistingUserInput,
-  preUserDataValidation,
-  validateAppTokenInput,
-  isFileDeleteAllowed,
-  validateForgotPassword,
+  AlreadyActiveUser,
+  BlockedOperationError,
+  ConnectIdRequiredError,
+  DatabaseRecordNotFoundError,
+  FileUsageCountNotZeroError,
+  UnauthorizedOperationError,
+  UserAlreadyExistsError,
+  UserPasswordAlreadySetError,
+  UserPasswordNotSetError,
+} from '../../../constants/errors';
+import hook from './hook';
+import {
   addUserValidation,
   deleteChapterValidation,
+  isFileDeleteAllowed,
+  preUserDataValidation,
+  validateAppTokenInput,
+  validateExistingUserInput,
+  validateForgotPassword,
+  validateLogin,
 } from './validation';
-import {
-  UserAlreadyExistsError,
-  UnauthorizedOperationError,
-  BlockedOperationError,
-  UserPasswordNotSetError,
-  DatabaseRecordNotFoundError,
-  UserPasswordAlreadySetError,
-  AlreadyActiveUser,
-  FileUsageCountNotZeroError, ConnectIdRequiredError,
-}
-  from '../../../constants/errors';
-
-import { addLearningObjectiveValidation } from './preHookFunctions/validation';
+import updateUserValidation from './preHookFunctions/validation/updateUserValidation';
 import { BYPASS } from '../../../constants';
-
+import { ifAuthorized } from '../../../utils';
 import { createStaticAppToken } from '../../auth';
-import deleteFromS3 from '../../middlewares/utils/deleteFromS3';
-import generateSignedUrl from '../../middlewares/utils/getSigned';
 import deleteTopicValidation from './preHookFunctions/validation/deleteTopicValidation';
 import deleteLearningObjectiveValidation from './preHookFunctions/validation/deleteLearningObjectiveValidation';
 import deleteQuestionBankValidation from './preHookFunctions/validation/deleteQuestionBankValidation';
-import userCourseSyllabusMethod from './preHookFunctions/userCourseSyllabusMethod';
-import userVideoPostHookMethod from './postHookFunctions/userVideoPostHookMethod';
-import userLearningObjectivePostHookMethod from './postHookFunctions/userLearningObjectivePostHookMethod';
-import userQuizPostHookMethod from './postHookFunctions/userQuizPostHookMethod';
-import addUserActivityVideoDumpPostHookMethod
-  from './postHookFunctions/addUserActivityVideoDumpPostHookMethod';
-import addUserActivityChatDumpPostHookMethod
-  from './postHookFunctions/addUserActivityChatDumpPostHookMethod';
-import addUserActivityPQDumpPostHookMethod
-  from './postHookFunctions/addUserActivityPQDumpPostHookMethod';
-import addUserActivityQuizDumpPostHookMethod
-  from './postHookFunctions/addUserActivityQuizDumpPostHookMethod';
-import userProfilePostHookMethod from './postHookFunctions/userProfilePostHookMethod';
-import addUserActivityChatDumpValidation
-  from './preHookFunctions/validation/addUserActivityChatDumpValidation';
 import addUserCurrentTopicComponentStatusValidation
   from './preHookFunctions/validation/addUserCurrentTopicComponentStatusValidation';
 import updateUserCurrentTopicComponentStatusValidation
   from './preHookFunctions/validation/updateUserCurrentTopicComponentStatusValidation';
-import addUserActivityVideoDumpValidation
-  from './preHookFunctions/validation/addUserActivityVideoDumpValidation';
-import addUserActivityPQDumpValidation
-  from './preHookFunctions/validation/addUserActivityPQDumpValidation';
-import addUserActivityQuizDumpValidation
-  from './preHookFunctions/validation/addUserActivityQuizDumpValidation';
+import userCourseSyllabusMethod from './preHookFunctions/userCourseSyllabusMethod';
+import addUserActivityVideoDumpValidation from './preHookFunctions/validation/addUserActivityVideoDumpValidation';
+import addUserActivityChatDumpValidation from './preHookFunctions/validation/addUserActivityChatDumpValidation';
+import addUserActivityPQDumpValidation from './preHookFunctions/validation/addUserActivityPQDumpValidation';
+import addUserActivityQuizDumpValidation from './preHookFunctions/validation/addUserActivityQuizDumpValidation';
 import userVideoValidation from './preHookFunctions/validation/userVideoValidation';
-import userLearningObjectiveValidation
-  from './preHookFunctions/validation/userLearningObjectiveValidation';
+import userLearningObjectiveValidation from './preHookFunctions/validation/userLearningObjectiveValidation';
 import userQuizValidation from './preHookFunctions/validation/userQuizValidation';
-import userPracticeQuestionReportPostHookMethod from './postHookFunctions/userPracticeQuestionReportPostHookMethod';
-import isUniqueOrderField from './validation/isUniqueOrderField';
+import { addLearningObjectiveValidation } from './preHookFunctions/validation';
 import userAssignmentValidation from './preHookFunctions/validation/userAssignmentValidation';
-import userAssignmentPostHookMethod from './postHookFunctions/userAssignmentPostHookMethod';
 import addUserActivityAssignmentDumpValidation
   from './preHookFunctions/validation/addUserActivityAssignmentDumpValidation';
-import addUserActivityAssignmentDumpPostHookMethod
-  from './postHookFunctions/addUserActivityAssignmentDumpPostHookMethod';
-import updateUserValidation from './preHookFunctions/validation/updateUserValidation';
-import addMenteeSessionValidation
-  from './preHookFunctions/validation/addMenteeSessionValidation';
-import addMentorSessionValidation
-  from './preHookFunctions/validation/addMentorSessionValidation';
-import updateMentorSessionValidation from './preHookFunctions/validation/updateMentorSessionValidation';
+import addMenteeSessionValidation from './preHookFunctions/validation/addMenteeSessionValidation';
 import updateMenteeSessionValidation from './preHookFunctions/validation/updateMenteeSessionValidation';
-import addMentorMenteeSessionValidation from './preHookFunctions/validation/addMentorMenteeSessionValidation';
-import addMentorSessionPostHookMethod from './postHookFunctions/addMentorSessionPostHookMethod';
-import updateMentorSessionPostHookMethod from './postHookFunctions/updateMentorSessionPostHookMethod';
+import addMentorSessionValidation from './preHookFunctions/validation/addMentorSessionValidation';
+import updateMentorSessionValidation from './preHookFunctions/validation/updateMentorSessionValidation';
 import deleteMentorSessionValidation from './preHookFunctions/validation/deleteMentorSessionValidation';
-import deleteMentorSessionPostHookMethod from './postHookFunctions/deleteMentorSessionPostHookMethod';
-import addMenteeSessionPostHookMethod from './postHookFunctions/addMenteeSessionPostHookMethod';
-import updateMenteeSessionPostHookMethod from './postHookFunctions/updateMenteeSessionPostHookMethod';
-import deleteMenteeSessionValidation from './preHookFunctions/validation/deleteMenteeSessionValidation';
-import deleteMenteeSessionPostHookMethod from './preHookFunctions/deleteMenteeSessionPostHookMethod';
-import updateUserPostHookMethod from './postHookFunctions/updateUserPostHookMethod';
-import updateMentorMenteeSessionPostHookMethod from './postHookFunctions/updateMentorMenteeSessionPostHookMethod';
+import addMentorMenteeSessionValidation from './preHookFunctions/validation/addMentorMenteeSessionValidation';
 import updateMentorMenteeSessionValidation from './preHookFunctions/validation/updateMentorMenteeSessionValidation';
+import deleteMenteeSessionValidation from './preHookFunctions/validation/deleteMenteeSessionValidation';
+import updateSalesOperationValidation from './preHookFunctions/validation/updateSalesOperationValidation';
+import addSalesOperationValidation from './preHookFunctions/validation/addSalesOperationOperationValidation';
 
-const { hookFunctions } = functions || {};
-
-const hook = (data, mutationName, hookName) => {
-  if (!data) {
-    return data;
-  }
-  let newData = data;
-  const arrayName = `${mutationName}${hookName}`;
-  if (hookFunctions && isArray(hookFunctions[arrayName])) {
-    const loopArray = hookFunctions[arrayName];
-    loopArray.map((fn) => {
-      newData = fn(newData);
-
-      return null;
-    });
-  }
-  return newData;
-};
-
-// use context to pass data b/w functions
-// validationObject, record, hookValidationsCalled, fetchedData
-
-// This hook is used to transform input argument for a mutation.
-// params contain all the arguments whatever you are passing in mutation query
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
     case 'updateTopic': {
@@ -144,72 +87,76 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       // validate username, phone, email and name and returns email or phone verified accordingly
       const verifiedData = await addUserValidation(input, context);
       Object.assign(input, verifiedData);
-      return preUserDataValidation(input, mutationOrQueryName).then((userData) => {
-        if (userData) {
-          throw new UserAlreadyExistsError();
-        }
-        return hook(input, mutationOrQueryName, 'PreHook');
-      });
+      return preUserDataValidation(input, mutationOrQueryName)
+        .then((userData) => {
+          if (userData) {
+            throw new UserAlreadyExistsError();
+          }
+          return hook(input, mutationOrQueryName, 'PreHook');
+        });
     }
     case 'setUserPassword': {
-      return preUserDataValidation(input, mutationOrQueryName).then((userData) => {
-        if (!userData) {
-          throw new DatabaseRecordNotFoundError();
-        }
+      return preUserDataValidation(input, mutationOrQueryName)
+        .then((userData) => {
+          if (!userData) {
+            throw new DatabaseRecordNotFoundError();
+          }
 
-        // Only user with active and inactive status are allowed to set their password
-        const { status, isSetPassword } = userData;
-        switch (status) {
-          case 'blocked':
-            throw new BlockedOperationError();
-          default:
-        }
+          // Only user with active and inactive status are allowed to set their password
+          const { status, isSetPassword } = userData;
+          switch (status) {
+            case 'blocked':
+              throw new BlockedOperationError();
+            default:
+          }
 
-        if (isSetPassword) {
-          throw new UserPasswordAlreadySetError();
-        }
-        return hook(input, mutationOrQueryName, 'PreHook');
-      });
+          if (isSetPassword) {
+            throw new UserPasswordAlreadySetError();
+          }
+          return hook(input, mutationOrQueryName, 'PreHook');
+        });
     }
     case 'resetUserPassword': {
-      return preUserDataValidation(input, mutationOrQueryName).then((userData) => {
-        if (!userData) {
-          throw new DatabaseRecordNotFoundError();
-        }
-        const { status, isSetPassword } = userData;
+      return preUserDataValidation(input, mutationOrQueryName)
+        .then((userData) => {
+          if (!userData) {
+            throw new DatabaseRecordNotFoundError();
+          }
+          const { status, isSetPassword } = userData;
 
-        // Only user with active and inactive status are allowed to reset their password
-        switch (status) {
-          case 'blocked':
-            throw new BlockedOperationError();
-          default:
-        }
+          // Only user with active and inactive status are allowed to reset their password
+          switch (status) {
+            case 'blocked':
+              throw new BlockedOperationError();
+            default:
+          }
 
-        if (!isSetPassword) {
-          throw new UserPasswordNotSetError();
-        }
-        Object.assign(input, {
-          password: userData.password,
+          if (!isSetPassword) {
+            throw new UserPasswordNotSetError();
+          }
+          Object.assign(input, {
+            password: userData.password,
+          });
+          return hook(input, mutationOrQueryName, 'PreHook');
         });
-        return hook(input, mutationOrQueryName, 'PreHook');
-      });
     }
     case 'tcirtSdrowssaPtes': {
-      return preUserDataValidation(input, mutationOrQueryName).then((userData) => {
-        if (!userData) {
-          throw new DatabaseRecordNotFoundError();
-        }
-        const { status } = userData;
+      return preUserDataValidation(input, mutationOrQueryName)
+        .then((userData) => {
+          if (!userData) {
+            throw new DatabaseRecordNotFoundError();
+          }
+          const { status } = userData;
 
-        // Only user with active and inactive status are allowed to set/reset their password
-        switch (status) {
-          case 'blocked':
-            throw new BlockedOperationError();
-          default:
-        }
+          // Only user with active and inactive status are allowed to set/reset their password
+          switch (status) {
+            case 'blocked':
+              throw new BlockedOperationError();
+            default:
+          }
 
-        return hook(input, mutationOrQueryName, 'PreHook');
-      });
+          return hook(input, mutationOrQueryName, 'PreHook');
+        });
     }
     case 'signupExistingUser': {
       return new Promise((resolve) => {
@@ -271,20 +218,22 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         }
       }
 
-      return validateAppTokenInput(input, authentication).then(() => {
-        Object.assign(input, {
-          token: createStaticAppToken(name, type),
+      return validateAppTokenInput(input, authentication)
+        .then(() => {
+          Object.assign(input, {
+            token: createStaticAppToken(name, type),
+          });
+          return hook(input, mutationOrQueryName, 'PreHook');
         });
-        return hook(input, mutationOrQueryName, 'PreHook');
-      });
     }
     case 'deleteFile': {
-      return isFileDeleteAllowed(params).then((res) => {
-        if (!res) {
-          throw new FileUsageCountNotZeroError();
-        }
-        return hook(input, mutationOrQueryName, 'PreHook');
-      });
+      return isFileDeleteAllowed(params)
+        .then((res) => {
+          if (!res) {
+            throw new FileUsageCountNotZeroError();
+          }
+          return hook(input, mutationOrQueryName, 'PreHook');
+        });
     }
     case 'deleteChapter': {
       await deleteChapterValidation(params);
@@ -498,6 +447,14 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await deleteMenteeSessionValidation(params, mutationOrQueryName, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
+    case 'addSalesOperation': {
+      await addSalesOperationValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateSalesOperation': {
+      await updateSalesOperationValidation(params, mutationOrQueryName, context);
+      break;
+    }
     default: {
       /* If context is not present then it means user is not authenticated and the
       user won't be able to make any db query
@@ -518,122 +475,4 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
   }
   return hook(input, mutationOrQueryName, 'PreHook');
 };
-
-// This hook is used to transform output data for a mutation.
-/*
-Params: input,mutationName,context,params
- */
-const posthook = async (input, mutationName, context, params) => {
-  switch (mutationName) {
-    case 'deleteFile': {
-      const { uri } = input;
-      await deleteFromS3(uri);
-      break;
-    }
-    case 'file': {
-      if (input.length > 1) {
-        for (const data of input) {
-          // eslint-disable-next-line no-await-in-loop
-          data.signedUri = await generateSignedUrl(get(data, 'uri'));
-        }
-      } else {
-        // eslint-disable-next-line no-param-reassign
-        input.signedUri = await generateSignedUrl(get(input, 'uri'));
-      }
-
-      break;
-    }
-
-    case 'deleteFiles': {
-      const urisToDelete = input.map((record) => record.uri);
-      /* eslint no-restricted-syntax: ["error", "FunctionExpression", "WithStatement",
-      "BinaryExpression[operator='in']"] */
-      for (const uri of urisToDelete) {
-        /* eslint-disable no-await-in-loop */
-        await deleteFromS3(uri);
-        /* eslint-enable no-await-in-loop */
-      }
-      break;
-    }
-    case 'userVideo': {
-      const resultArray = await userVideoPostHookMethod(input, params);
-      return hook(resultArray, mutationName, 'PostHook');
-    }
-    case 'userLearningObjective': {
-      const resultArray = await userLearningObjectivePostHookMethod(input, params);
-      return hook(resultArray, mutationName, 'PostHook');
-    }
-    case 'userQuiz': {
-      const resultArray = await userQuizPostHookMethod(input, params);
-      return hook(resultArray, mutationName, 'PostHook');
-    }
-    case 'userProfile': {
-      const resultArray = await userProfilePostHookMethod(input, params);
-      return hook(resultArray, mutationName, 'PostHook');
-    }
-    case 'addUserActivityVideoDump': {
-      await addUserActivityVideoDumpPostHookMethod(input, mutationName, context);
-      break;
-    }
-    case 'addUserActivityChatDump': {
-      await addUserActivityChatDumpPostHookMethod(input, mutationName, context);
-      break;
-    }
-    case 'addUserActivityPQDump': {
-      await addUserActivityPQDumpPostHookMethod(input, mutationName, context);
-      break;
-    }
-    case 'addUserActivityQuizDump': {
-      await addUserActivityQuizDumpPostHookMethod(input, mutationName, context);
-      break;
-    }
-    case 'userPracticeQuestionReport': {
-      const resultArray = await userPracticeQuestionReportPostHookMethod(input, params);
-      return hook(resultArray, mutationName, 'PostHook');
-    }
-    case 'userAssignment': {
-      const resultArray = await userAssignmentPostHookMethod(input, params);
-      return hook(resultArray, mutationName, 'PostHook');
-    }
-    case 'addUserActivityAssignmentDump': {
-      await addUserActivityAssignmentDumpPostHookMethod(input, mutationName, context);
-      break;
-    }
-    case 'addMentorSession': {
-      await addMentorSessionPostHookMethod(input, mutationName, context);
-      break;
-    }
-    case 'updateMentorSession': {
-      await updateMentorSessionPostHookMethod(input, mutationName, context);
-      break;
-    }
-    case 'deleteMentorSession': {
-      await deleteMentorSessionPostHookMethod(input, mutationName, context);
-      break;
-    }
-    case 'addMenteeSession': {
-      await addMenteeSessionPostHookMethod(input, mutationName, context);
-      break;
-    }
-    case 'updateMenteeSession': {
-      await updateMenteeSessionPostHookMethod(input, mutationName, context);
-      break;
-    }
-    case 'updateMentorMenteeSession': {
-      await updateMentorMenteeSessionPostHookMethod(input, mutationName, context);
-      break;
-    }
-    case 'deleteMenteeSession': {
-      await deleteMenteeSessionPostHookMethod(input, mutationName, context);
-      break;
-    } case 'updateUser': {
-      await updateUserPostHookMethod(input, mutationName, context);
-      break;
-    }
-    default:
-      break;
-  }
-  return hook(input, mutationName, 'PostHook');
-};
-
-export { prehook, posthook };
+export { prehook };

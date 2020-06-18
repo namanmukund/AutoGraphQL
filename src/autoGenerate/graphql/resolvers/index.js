@@ -34,7 +34,6 @@ import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQ
 import {
   types, authenticateUser, ifAuthorized, toObject, isErrorThrown, getRandomNumber,
 } from '../../../../utils';
-import { prehook, posthook } from '../hooks';
 import {
   BYPASS,
   rangeOTP,
@@ -67,6 +66,8 @@ import convertObjectFieldsToStrings from './utils/convertObjectFieldsToStrings';
 import subscribeToEvents from './utils/subscribeToEvents';
 import loginViaPasswordMutationResolver from './mutation/user/loginViaPassword';
 import loginViaOtpMutationResolver from './mutation/user/loginViaOtp';
+import { prehook } from '../preHook';
+import { posthook } from '../postHook';
 
 const parsedASTMap = getParsedASTMap(types);
 
