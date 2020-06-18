@@ -1,6 +1,6 @@
 import { MENTEE } from '../../../../constants/roles';
-import getReferredByUserIdByAcceptedUserId from '../resolvers/mutation/user/utils/getReferredByUserIdByAcceptedUserId';
 import updateReferrerCreditsPostSessionOrUserPayment from './utils/updateReferrerCreditsPostSessionOrUserPayment';
+import referralCredits from '../../../../constants/referralCredits';
 
 /*
   - check if the user if from referral
@@ -16,16 +16,14 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     && allowedRoles.includes(role)
     && topic.order === 1
   ) {
-    const referredByUserId = await getReferredByUserIdByAcceptedUserId(id);
-    if (referredByUserId) {
-      const variables = {
-        input: {
-          trialTaken: true,
-          trialTakenDate: new Date().toISOString(),
-        },
-      };
-      await updateReferrerCreditsPostSessionOrUserPayment(referredByUserId, context, variables);
-    }
+    const variables = {
+      input: {
+        trialTaken: true,
+        trialTakenDate: new Date().toISOString(),
+      },
+    };
+    const { trialTaken } = referralCredits;
+    await updateReferrerCreditsPostSessionOrUserPayment(id, trialTaken, context, variables);
   }
 };
 export default updateMentorMenteeSessionPostHookMethod;

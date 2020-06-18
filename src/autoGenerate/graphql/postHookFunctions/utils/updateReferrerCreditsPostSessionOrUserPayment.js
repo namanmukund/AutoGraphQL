@@ -2,18 +2,17 @@ import getReferredByUserIdByAcceptedUserId from '../../resolvers/mutation/user/u
 import getNumberOfReferralsOfAUser from '../../resolvers/mutation/user/utils/getNumberOfReferralsOfAUser';
 import { MAX_ALLOWED_REFERRALS } from '../../../../../constants';
 import updateUserCreditsCount from '../../resolvers/mutation/user/utils/updateUserCreditsCount';
-import referralCredits from '../../../../../constants/referralCredits';
 import getAParticularUserInvite from '../../resolvers/mutation/user/utils/getAParticularUserInvite';
 import updateAUserInvite from '../../resolvers/mutation/user/utils/updateAUserInvite';
 import { log } from '../../../../../utils';
 
-const updateReferrerCreditsPostSessionOrUserPayment = async (inviteAcceptedByUserId, context, variables) => {
+const updateReferrerCreditsPostSessionOrUserPayment = async (inviteAcceptedByUserId, referralCreditsType, context, variables) => {
   const referredByUserId = await getReferredByUserIdByAcceptedUserId(inviteAcceptedByUserId);
   if (referredByUserId) {
     const numberOfReferralsOfAUser = await getNumberOfReferralsOfAUser(referredByUserId);
     if (numberOfReferralsOfAUser <= MAX_ALLOWED_REFERRALS) {
       // add credits
-      const userCreditDoc = await updateUserCreditsCount(referralCredits.coursePurchased, referredByUserId, 'inc');
+      const userCreditDoc = await updateUserCreditsCount(referralCreditsType, referredByUserId, 'inc');
       if (userCreditDoc && userCreditDoc.nModified === 1) {
         // update user invite trialTaken status & date
         const userInviteId = await getAParticularUserInvite(referredByUserId, inviteAcceptedByUserId);
@@ -25,6 +24,7 @@ const updateReferrerCreditsPostSessionOrUserPayment = async (inviteAcceptedByUse
       log(`Max referral limit exceeded by userId ${referredByUserId}`);
     }
   }
+  return null;
 };
 
 export default updateReferrerCreditsPostSessionOrUserPayment;
