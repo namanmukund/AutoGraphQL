@@ -10,7 +10,6 @@ const updateAUserInvite = async (id, context, variables) => {
     }
   `;
   const res = await callLocalGraphqlApi(query, context, variables);
-  console.log(44444, res);
   return get(res, 'data.updateUserInvite.id');
 };
 

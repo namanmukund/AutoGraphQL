@@ -171,3 +171,7 @@ export const HashOrStatusNotPresentError = createError('HashOrStatusNotPresentEr
 export const CanNotChangeVerifiedUserStatusError = createError('CanNotChangeVerifiedUserStatusError', {
   message: 'Can not change the status of a verified user',
 });
+
+export const CanNotChangeSessionStatusError = createError('CanNotChangeSessionStatusError', {
+  message: 'Can not change the status of a completed session',
+});
