@@ -6,8 +6,8 @@ import getUniqueFieldFromInput from '../../../../utils/getUniqueFieldFromInput';
 import { isRelationDataValid } from './isRelationDataValid';
 import { getAdditionalRelationFieldsFromRelationInput } from './getAdditionalRelationFieldsFromRelationInput';
 import { generateCuid } from '../../../../../../utils';
-import { prehook } from '../../../hooks';
 import { getRelationObjectMap } from './getRelationObjectMap';
+import { prehook } from '../../../preHook';
 
 /*
 { fieldName: 'learningObjective',

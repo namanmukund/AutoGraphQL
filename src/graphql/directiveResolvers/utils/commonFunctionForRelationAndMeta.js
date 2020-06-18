@@ -12,7 +12,8 @@ import { handleUserToken } from '../../../middlewares/authMiddleware';
 import fetchListAggregationQueryResolver
   from '../../../autoGenerate/graphql/resolvers/query/fetchListAggregationQueryResolver';
 import addAdditionalRelationFieldsToResponse from './addAdditionalRelationFieldsToResponse';
-import { posthook, prehook } from '../../../autoGenerate/graphql/hooks';
+import { prehook } from '../../../autoGenerate/graphql/preHook';
+import { posthook } from '../../../autoGenerate/graphql/postHook';
 
 const parsedASTMap = getParsedASTMap(types);
 

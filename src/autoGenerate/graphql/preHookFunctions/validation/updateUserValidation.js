@@ -2,12 +2,9 @@ import bcrypt from 'bcryptjs';
 import { validateUsername } from '../../validation';
 import { commonUserValidation } from './utils';
 import authParams from '../../../../../config/authParams';
-import { QueryController } from '../../controllers';
-import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
-import { CanNotChangeVerifiedUserStatusError } from '../../../../../constants/errors/input';
 
-const updateUserValidation = async (params, context) => {
-  const { input, id } = params;
+const updateUserValidation = async (params) => {
+  const { input } = params;
   const userObj = {};
   const {
     name,
@@ -15,8 +12,6 @@ const updateUserValidation = async (params, context) => {
     email,
     phone,
     password,
-    salesTeamStatus,
-    salesTeamUserStateUpdate,
   } = input;
   commonUserValidation({ name, email, phone });
   if (username) {
@@ -30,32 +25,6 @@ const updateUserValidation = async (params, context) => {
     userObj.password = hashedPwd;
     userObj.savedPassword = password;
     userObj.isSetPassword = true;
-  }
-
-  const typeName = 'User';
-  const newAuthentication = {
-    bypass: true,
-  };
-  const modelQueries = new QueryController(typeName, newAuthentication);
-  const userData = await modelQueries.fetchOne({ id });
-  if (!userData || (userData && !userData.id)) {
-    throw new DatabaseRecordNotFoundError();
-  }
-  // eslint-disable-next-line no-param-reassign
-  context.previousDocument = userData;
-
-  // can not change the status of a verified user
-  const { salesTeamStatus: prevSalesTeamStatus } = userData;
-  if (prevSalesTeamStatus === 'verified' && (salesTeamStatus && salesTeamStatus !== 'verified')) {
-    throw new CanNotChangeVerifiedUserStatusError();
-  }
-
-  if (salesTeamStatus) {
-    userObj.salesTeamStatusUpdateDate = new Date().toISOString();
-  }
-
-  if (salesTeamUserStateUpdate) {
-    userObj.salesTeamUserStateUpdateDate = new Date().toISOString();
   }
   return userObj;
 };
