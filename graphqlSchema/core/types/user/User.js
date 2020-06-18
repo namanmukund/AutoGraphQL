@@ -19,11 +19,6 @@ const User = `
     inviteCode: String @uniqueOrEmpty @readOnly
     fromReferral: Boolean @defaultValue(value: "false") @readOnly
     giftVoucherApplied: Boolean @defaultValue(value: "false") @readOnly
-    salesTeamStatus: SalesTeamStatus @defaultValue(value: "pending")
-    salesTeamStatusUpdateDate: Date
-    salesTeamOverallFeedback: String
-    salesTeamUserStateUpdate: UserBehaviourStatus @defaultValue(value: "pending")
-    salesTeamUserStateUpdateDate: Date
     role: UserRole! @defaultValue(value: "selfLearner") 
           @userPermissions(
             permissions:[
@@ -59,8 +54,9 @@ const User = `
     isFacebookLogin: Boolean @defaultValue(value: "false")
     facebookId: String @writeOnly
     studentProfile: StudentProfile @relation(name:"StudentProfileUser", isSubset: true)
-    parentProfile: ParentProfile @relation(name:"ParentProfileUser")
-    profilePic: File @relation(name: "UserProfilePic", direction: "OneWay")
+    parentProfile: ParentProfile @relation(name:"ParentProfileUser", isSubset: true)
+    profilePic: File @relation(name: "UserProfilePic", direction: "OneWay", isSubset: true)
+    
   }
 `;
 

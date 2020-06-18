@@ -47,6 +47,7 @@ import Product from './product';
 import PaymentRequest from './paymentRequest';
 import UserCredit from './userCredit';
 import InviteUser from './userInvite';
+import SalesOperation from './salesOperation';
 
 export default [
   ...User,
@@ -98,4 +99,5 @@ export default [
   ...PaymentRequest,
   ...UserCredit,
   ...InviteUser,
+  ...SalesOperation,
 ];
