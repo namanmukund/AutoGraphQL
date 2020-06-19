@@ -10,12 +10,16 @@ import getUserIdandAppNameAfterValidation
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { MENTEE } from '../../../../../../constants/roles';
 import payUConfig from '../../../../../../config/payment/payUConfig';
-import { GLOBAL_COURSE_TITLE, PUBLISHED, enrollmentTypes } from '../../../../../../constants';
+import {
+  GLOBAL_COURSE_TITLE, PUBLISHED, enrollmentTypes,
+} from '../../../../../../constants';
 import { log } from '../../../../../../utils';
 import parsedHtmlFromTemplateFileAndObject
   from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../../services/email/utils/sendEmail';
+import updateReferrerCreditsPostSessionOrUserPayment from '../../../postHookFunctions/utils/updateReferrerCreditsPostSessionOrUserPayment';
+import referralCredits from '../../../../../../constants/referralCredits';
 
 // query to get user paayment info for id
 const getUserPayment = (id) => `
@@ -307,6 +311,20 @@ const getPaymentResponseMutationResolver = async (
       currentTopicComponentInfoId,
     ));
 
+    // update referrer credits as per referral program
+    try {
+      const variables = {
+        input: {
+          coursePurchased: true,
+          coursePurchasedDate: new Date().toISOString(),
+        },
+      };
+      const { coursePurchased } = referralCredits;
+
+      await updateReferrerCreditsPostSessionOrUserPayment(userId, coursePurchased, context, variables);
+    } catch (e) {
+      log('Error in updateReferrerCreditsPostUserPayment', e);
+    }
     // Send invoice to customer on mail
     sendEmailInvoiceToUser(payload);
   }

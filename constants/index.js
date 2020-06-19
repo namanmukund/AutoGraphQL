@@ -29,6 +29,8 @@ const rangeOTP = {
   min: 1000,
   max: 9999,
 };
+
+const MAX_ALLOWED_REFERRALS = 10;
 const randomNumberRangeForUsername = {
   min: 1,
   max: 99,
@@ -216,6 +218,9 @@ const slotTimes = [
   'slot21', 'slot22', 'slot23',
 ];
 
+const CREDITED = 'credited';
+const DEBITED = 'debited';
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -260,4 +265,7 @@ export {
   forgotPassWebURL,
   stickerEmojiType,
   slotTimes,
+  MAX_ALLOWED_REFERRALS,
+  CREDITED,
+  DEBITED,
 };

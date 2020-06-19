@@ -1,13 +1,24 @@
 import { NOT_UMS_HEAD, UMS_HEAD } from '../../../../constants/roles';
-import { READ } from '../../../../constants/graphqlOperations';
+import { EXCEPT_DELETE, READ } from '../../../../constants/graphqlOperations';
 
 const User = `
-  type User @model {
+  type User @model 
+      @userPermissions(
+      permissions:[
+        { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
+        { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${EXCEPT_DELETE} }
+        ], 
+      rule: allow
+    ) 
+  {
     phoneOtp: Int @writeOnly
     phoneOtpCreationDate: Date @writeOnly
     emailOtp: Int @writeOnly
     emailOtpCreationDate: Date @writeOnly
     name: String @trim
+    inviteCode: String @uniqueOrEmpty @readOnly
+    fromReferral: Boolean @defaultValue(value: "false") @readOnly
+    giftVoucherApplied: Boolean @defaultValue(value: "false") @readOnly
     role: UserRole! @defaultValue(value: "selfLearner") 
           @userPermissions(
             permissions:[
@@ -43,8 +54,9 @@ const User = `
     isFacebookLogin: Boolean @defaultValue(value: "false")
     facebookId: String @writeOnly
     studentProfile: StudentProfile @relation(name:"StudentProfileUser", isSubset: true)
-    parentProfile: ParentProfile @relation(name:"ParentProfileUser")
-    profilePic: File @relation(name: "UserProfilePic", direction: "OneWay")
+    parentProfile: ParentProfile @relation(name:"ParentProfileUser", isSubset: true)
+    profilePic: File @relation(name: "UserProfilePic", direction: "OneWay", isSubset: true)
+    
   }
 `;
 

@@ -3,10 +3,15 @@ import { validateUsername } from '../../validation';
 import { commonUserValidation } from './utils';
 import authParams from '../../../../../config/authParams';
 
-const updateUserValidation = async (input) => {
+const updateUserValidation = async (params) => {
+  const { input } = params;
   const userObj = {};
   const {
-    name, username, email, phone, password,
+    name,
+    username,
+    email,
+    phone,
+    password,
   } = input;
   commonUserValidation({ name, email, phone });
   if (username) {
@@ -21,7 +26,6 @@ const updateUserValidation = async (input) => {
     userObj.savedPassword = password;
     userObj.isSetPassword = true;
   }
-
   return userObj;
 };
 
