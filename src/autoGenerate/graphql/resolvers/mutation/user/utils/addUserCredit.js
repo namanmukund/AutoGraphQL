@@ -1,5 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
+import addUserCreditLog from './addUserCreditLog';
+import { CREDITED } from '../../../../../../../constants';
 
 const addUserCredit = async (credits, userConnectId) => {
   const query = `
@@ -13,6 +15,8 @@ const addUserCredit = async (credits, userConnectId) => {
     }
   `;
   const res = await callLocalGraphqlApi(query);
+  // add user credit log
+  await addUserCreditLog(credits, CREDITED, userConnectId);
   return get(res, 'data.addUserCredit.id');
 };
 

@@ -1,9 +1,16 @@
-// import { READ } from '../../../../constants/graphqlOperations';
-// import { TLA, TMS, TWA } from '../../../../constants';
-// import { CMS_HEAD, NOT_CMS_HEAD } from '../../../../constants/roles';
+import { READ } from '../../../../constants/graphqlOperations';
+import { TLA, TMS, TWA } from '../../../../constants';
 
 const UserInvite = `
   type UserInvite @model 
+    @appPermissions(
+      permissions:[
+        { appName: "${TMS}" operations: ${READ} },
+        { appName: "${TLA}" operations: ${READ} },
+        { appName: "${TWA}" operations: ${READ} }
+        ], 
+      rule: allow
+  )
    {  
     invitedBy: User @relation(name: "UserInviteInvitedBy", direction: "OneWay")
     acceptedBy: User @relation(name: "UserInviteAcceptedBy", direction: "OneWay")

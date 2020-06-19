@@ -28,7 +28,7 @@ import UserRole from './UserRole';
 import SessionStatus from './SessionStatus';
 import SalesTeamStatus from './SalesTeamStatus';
 import UserBehaviourStatus from './UserBehaviourStatus';
-
+import CreditType from './CreditType';
 
 export default [
   Status,
@@ -61,4 +61,5 @@ export default [
   SessionStatus,
   SalesTeamStatus,
   UserBehaviourStatus,
+  CreditType,
 ];

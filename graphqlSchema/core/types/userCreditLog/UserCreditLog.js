@@ -1,8 +1,8 @@
 import { TLA, TMS, TWA } from '../../../../constants';
 import { READ } from '../../../../constants/graphqlOperations';
 
-const UserCredit = `
-  type UserCredit @model
+const UserCreditLog = `
+  type UserCreditLog @model
    @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: ${READ} },
@@ -12,9 +12,10 @@ const UserCredit = `
     rule: allow
   )  
    {  
-    user: User! @relation(name: "UserCreditUser", direction: "OneWay")
-    credits: Int! @readOnly
+    user: User! @relation(name: "UserCreditLogUser", direction: "OneWay")
+    amount: Int!
+    type: CreditType!
   }
 `;
 
-export default UserCredit;
+export default UserCreditLog;

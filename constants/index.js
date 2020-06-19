@@ -218,6 +218,9 @@ const slotTimes = [
   'slot21', 'slot22', 'slot23',
 ];
 
+const CREDITED = 'credited';
+const DEBITED = 'debited';
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -263,4 +266,6 @@ export {
   stickerEmojiType,
   slotTimes,
   MAX_ALLOWED_REFERRALS,
+  CREDITED,
+  DEBITED,
 };
