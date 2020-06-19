@@ -34,6 +34,7 @@ const updateUserCreditsCount = (credits, referredByUserId, type) => {
     if (res) {
       await addUserCreditLog(credits, creditType, referredByUserId);
     }
+    return res;
   });
 };
 
