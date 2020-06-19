@@ -15,7 +15,7 @@ const getAParticularUserInvite = async (invitedById, acceptedById) => {
       }
   `;
   const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.userInvites.[0].id');
+  return get(res, 'data.userInvites[0].id');
 };
 
 export default getAParticularUserInvite;
