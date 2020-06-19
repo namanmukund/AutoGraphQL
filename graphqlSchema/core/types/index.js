@@ -48,6 +48,8 @@ import PaymentRequest from './paymentRequest';
 import UserCredit from './userCredit';
 import InviteUser from './userInvite';
 import SalesOperation from './salesOperation';
+import UserCreditLog from './userCreditLog';
+
 
 export default [
   ...User,
@@ -100,4 +102,5 @@ export default [
   ...UserCredit,
   ...InviteUser,
   ...SalesOperation,
+  ...UserCreditLog,
 ];

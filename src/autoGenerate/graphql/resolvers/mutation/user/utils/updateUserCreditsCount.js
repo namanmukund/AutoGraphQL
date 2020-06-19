@@ -1,10 +1,13 @@
 import { MutationController } from '../../../../controllers';
+import addUserCreditLog from './addUserCreditLog';
+import { CREDITED, DEBITED } from '../../../../../../../constants';
 
 const updateUserCreditsCount = (credits, referredByUserId, type) => {
   const newAuthentication = {
     bypass: true,
   };
   const updateObj = {};
+  let creditType = '';
   const query = {
     'user.typeId': referredByUserId,
   };
@@ -13,11 +16,13 @@ const updateUserCreditsCount = (credits, referredByUserId, type) => {
       updateObj.$inc = {
         credits,
       };
+      creditType = CREDITED;
       break;
     } case 'dec': {
       updateObj.$inc = {
         credits: -credits,
       };
+      creditType = DEBITED;
       break;
     }
     default: {
@@ -25,7 +30,11 @@ const updateUserCreditsCount = (credits, referredByUserId, type) => {
     }
   }
   const modelMutation = new MutationController('UserCredit', newAuthentication);
-  return modelMutation.update(query, updateObj);
+  return modelMutation.update(query, updateObj).then(async (res) => {
+    if (res) {
+      await addUserCreditLog(credits, creditType, referredByUserId);
+    }
+  });
 };
 
 export default updateUserCreditsCount;
