@@ -23,6 +23,7 @@ const SalesOperation = `
     userResponseStatusUpdateDate: Date 
     client: User @relation(name:"SalesOperationClient", direction: "OneWay")
     monitoredBy: User @relation(name:"SalesOperationMonitoredBy", direction: "OneWay")
+    salesOperationLog: [SalesOperationLog] @relation(name:"SalesOperationLogSalesOperation")
   }
 `;
 
