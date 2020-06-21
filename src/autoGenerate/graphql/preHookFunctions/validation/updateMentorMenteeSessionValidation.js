@@ -30,7 +30,7 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   }
   const { sessionStatus: prevSessionStatus } = mentorMenteeSessionDoc;
   // if session is complete and user is trying to change the status then throw error
-  if (prevSessionStatus === 'completed' && sessionStatus !== 'completed') {
+  if (prevSessionStatus === 'completed' && sessionStatus && sessionStatus !== 'completed') {
     throw new CanNotChangeSessionStatusError();
   }
   // eslint-disable-next-line no-param-reassign
