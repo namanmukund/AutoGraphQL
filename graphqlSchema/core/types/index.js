@@ -49,6 +49,7 @@ import UserCredit from './userCredit';
 import InviteUser from './userInvite';
 import SalesOperation from './salesOperation';
 import UserCreditLog from './userCreditLog';
+import SalesOperationLog from './salesOperationLog';
 
 
 export default [
@@ -103,4 +104,5 @@ export default [
   ...InviteUser,
   ...SalesOperation,
   ...UserCreditLog,
+  ...SalesOperationLog,
 ];

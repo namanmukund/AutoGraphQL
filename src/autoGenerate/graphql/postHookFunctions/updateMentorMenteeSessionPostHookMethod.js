@@ -10,20 +10,22 @@ import referralCredits from '../../../../constants/referralCredits';
  */
 const allowedRoles = [MENTEE];
 const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, context) => {
-  const { currentUser: { id, role }, previousDocument: { sessionStatus: prevSessionStatus, topic } } = context;
-  if (
-    (prevSessionStatus !== 'completed' && (input && input.sessionStatus === 'completed'))
-    && allowedRoles.includes(role)
-    && topic.order === 1
-  ) {
-    const variables = {
-      input: {
-        trialTaken: true,
-        trialTakenDate: new Date().toISOString(),
-      },
-    };
-    const { trialTaken } = referralCredits;
-    await updateReferrerCreditsPostSessionOrUserPayment(id, trialTaken, context, variables);
+  const { currentUser, previousDocument: { sessionStatus: prevSessionStatus, topic } } = context;
+  if (currentUser && currentUser.id) {
+    if (
+      (prevSessionStatus !== 'completed' && (input && input.sessionStatus && input.sessionStatus === 'completed'))
+      && allowedRoles.includes(currentUser.role)
+      && topic.order === 1
+    ) {
+      const variables = {
+        input: {
+          trialTaken: true,
+          trialTakenDate: new Date().toISOString(),
+        },
+      };
+      const { trialTaken } = referralCredits;
+      await updateReferrerCreditsPostSessionOrUserPayment(currentUser.id, trialTaken, context, variables);
+    }
   }
 };
 export default updateMentorMenteeSessionPostHookMethod;
