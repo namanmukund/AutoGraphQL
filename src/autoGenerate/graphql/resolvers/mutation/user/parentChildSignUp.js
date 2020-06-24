@@ -24,6 +24,7 @@ import generateInviteCode from '../../../../../../utils/generateInviteCode';
 import { MAX_ALLOWED_REFERRALS } from '../../../../../../constants';
 import getNumberOfReferralsOfAUser from './utils/getNumberOfReferralsOfAUser';
 import getReferredByUserIdByReferralCode from './utils/getReferredByUserIdByReferralCode';
+import { sendTextSms } from '../../../../../sms';
 
 const USER_TYPE = 'User';
 const validateParentChildSignUpInput = (input) => {
@@ -383,6 +384,12 @@ const parentChildSignUpMutationResolver = async (
       );
       sendEmail(emailMsgObject);
     });
+    // temp code to send sms to sales team
+    const phoneNumberShravasti = '+917083759072';
+    const phoneNumberJahnavi = '+919892222579';
+    const smsText = `Tekie: Newly registered user's parentName: ${parentName}, childName: ${childName}, number: ${parentPhone.number}`;
+    sendTextSms(phoneNumberShravasti, smsText);
+    sendTextSms(phoneNumberJahnavi, smsText);
   }
   return userTokenData;
 };
