@@ -3,7 +3,7 @@ import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
 import addUserCreditLog from './addUserCreditLog';
 import { CREDITED } from '../../../../../../../constants';
 
-const addUserCredit = async (credits, userConnectId) => {
+const addUserCredit = async (credits, userConnectId, userCreditReason) => {
   const query = `
     mutation{
       addUserCredit(input:{
@@ -16,7 +16,7 @@ const addUserCredit = async (credits, userConnectId) => {
   `;
   const res = await callLocalGraphqlApi(query);
   // add user credit log
-  await addUserCreditLog(credits, CREDITED, userConnectId);
+  await addUserCreditLog(credits, CREDITED, userConnectId, userCreditReason);
   return get(res, 'data.addUserCredit.id');
 };
 
