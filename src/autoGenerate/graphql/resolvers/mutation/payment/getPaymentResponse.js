@@ -319,7 +319,7 @@ const getPaymentResponseMutationResolver = async (
           coursePurchasedDate: new Date().toISOString(),
         },
       };
-      const { coursePurchased } = referralCredits;
+      const { coursePurchased } = referralCredits[1];
 
       await updateReferrerCreditsPostSessionOrUserPayment(userId, coursePurchased, context, variables);
     } catch (e) {

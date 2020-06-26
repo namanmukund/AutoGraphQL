@@ -220,6 +220,7 @@ const slotTimes = [
 
 const CREDITED = 'credited';
 const DEBITED = 'debited';
+const REGISTRATION_BASE_CREDIT = 1000;
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
@@ -268,4 +269,5 @@ export {
   MAX_ALLOWED_REFERRALS,
   CREDITED,
   DEBITED,
+  REGISTRATION_BASE_CREDIT,
 };

@@ -15,9 +15,9 @@ const registrationVerificationAddUpdateUserCredit = async (referredByUserId, cli
     const userCreditId = await getUserCreditId(referredByUserId);
     // update credit if userCreditId exist else add it
     if (userCreditId) {
-      await updateUserCreditsCount(referralCredits.registrationVerified, referredByUserId, 'inc');
+      await updateUserCreditsCount(referralCredits[1].registrationVerified, referredByUserId, 'inc');
     } else {
-      await addUserCredit(referralCredits.registrationVerified, referredByUserId);
+      await addUserCredit(referralCredits[1].registrationVerified, referredByUserId);
     }
     // update user credit
     const userInviteId = await getAParticularUserInvite(referredByUserId, clientConnectId);

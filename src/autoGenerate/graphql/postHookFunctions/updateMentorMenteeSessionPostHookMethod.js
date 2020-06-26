@@ -23,7 +23,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
           trialTakenDate: new Date().toISOString(),
         },
       };
-      const { trialTaken } = referralCredits;
+      const { trialTaken } = referralCredits[1];
       await updateReferrerCreditsPostSessionOrUserPayment(currentUser.id, trialTaken, context, variables);
     }
   }
