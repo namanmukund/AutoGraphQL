@@ -21,10 +21,11 @@ import parsedHtmlFromTemplateFileAndObject
 import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../../services/email/utils/sendEmail';
 import generateInviteCode from '../../../../../../utils/generateInviteCode';
-import { MAX_ALLOWED_REFERRALS } from '../../../../../../constants';
+import { MAX_ALLOWED_REFERRALS, REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
 import getNumberOfReferralsOfAUser from './utils/getNumberOfReferralsOfAUser';
 import getReferredByUserIdByReferralCode from './utils/getReferredByUserIdByReferralCode';
 import { sendTextSms } from '../../../../../sms';
+import addUserCredit from './utils/addUserCredit';
 
 const USER_TYPE = 'User';
 const validateParentChildSignUpInput = (input) => {
@@ -391,6 +392,8 @@ const parentChildSignUpMutationResolver = async (
     sendTextSms(phoneNumberShravasti, smsText);
     sendTextSms(phoneNumberJahnavi, smsText);
   }
+  // add base credit to user
+  await addUserCredit(REGISTRATION_BASE_CREDIT, childUserId);
   return userTokenData;
 };
 
