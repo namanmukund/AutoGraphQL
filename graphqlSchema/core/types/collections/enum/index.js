@@ -29,6 +29,8 @@ import SessionStatus from './SessionStatus';
 import SalesTeamStatus from './SalesTeamStatus';
 import UserBehaviourStatus from './UserBehaviourStatus';
 import CreditType from './CreditType';
+import UserCreditReason from './UserCreditReason';
+
 
 export default [
   Status,
@@ -62,4 +64,5 @@ export default [
   SalesTeamStatus,
   UserBehaviourStatus,
   CreditType,
+  UserCreditReason,
 ];

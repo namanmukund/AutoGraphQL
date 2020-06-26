@@ -26,6 +26,7 @@ import getNumberOfReferralsOfAUser from './utils/getNumberOfReferralsOfAUser';
 import getReferredByUserIdByReferralCode from './utils/getReferredByUserIdByReferralCode';
 import { sendTextSms } from '../../../../../sms';
 import addUserCredit from './utils/addUserCredit';
+import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 
 const USER_TYPE = 'User';
 const validateParentChildSignUpInput = (input) => {
@@ -356,11 +357,7 @@ const parentChildSignUpMutationResolver = async (
     } catch (e) {
       log('Error in adding to user invite', e);
     }
-  } else {
-    // add base credit to user
-    await addUserCredit(REGISTRATION_BASE_CREDIT, childUserId);
   }
-
   // send email
   if (process.env.NODE_ENV === 'production') {
     const templateFileName = 'parentChildSignupEmailTemplate';
@@ -395,7 +392,8 @@ const parentChildSignUpMutationResolver = async (
     sendTextSms(phoneNumberShravasti, smsText);
     sendTextSms(phoneNumberJahnavi, smsText);
   }
-
+  // add base credit to user
+  await addUserCredit(REGISTRATION_BASE_CREDIT, childUserId, SIGN_UP_BONUS);
   return userTokenData;
 };
 
