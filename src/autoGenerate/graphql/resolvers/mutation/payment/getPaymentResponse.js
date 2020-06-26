@@ -20,6 +20,7 @@ import getEmailObject from '../../../../../../services/email/utils/getEmailObjec
 import sendEmail from '../../../../../../services/email/utils/sendEmail';
 import updateReferrerCreditsPostSessionOrUserPayment from '../../../postHookFunctions/utils/updateReferrerCreditsPostSessionOrUserPayment';
 import referralCredits from '../../../../../../constants/referralCredits';
+import { COURSE_PURCHASED } from '../../../../../../constants/userCreditReason';
 
 // query to get user paayment info for id
 const getUserPayment = (id) => `
@@ -321,7 +322,7 @@ const getPaymentResponseMutationResolver = async (
       };
       const { coursePurchased } = referralCredits[1];
 
-      await updateReferrerCreditsPostSessionOrUserPayment(userId, coursePurchased, context, variables);
+      await updateReferrerCreditsPostSessionOrUserPayment(userId, coursePurchased, context, variables, COURSE_PURCHASED);
     } catch (e) {
       log('Error in updateReferrerCreditsPostUserPayment', e);
     }
