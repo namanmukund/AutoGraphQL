@@ -356,6 +356,9 @@ const parentChildSignUpMutationResolver = async (
     } catch (e) {
       log('Error in adding to user invite', e);
     }
+  } else {
+    // add base credit to user
+    await addUserCredit(REGISTRATION_BASE_CREDIT, childUserId);
   }
 
   // send email
@@ -392,8 +395,7 @@ const parentChildSignUpMutationResolver = async (
     sendTextSms(phoneNumberShravasti, smsText);
     sendTextSms(phoneNumberJahnavi, smsText);
   }
-  // add base credit to user
-  await addUserCredit(REGISTRATION_BASE_CREDIT, childUserId);
+
   return userTokenData;
 };
 
