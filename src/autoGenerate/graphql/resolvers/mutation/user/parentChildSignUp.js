@@ -298,6 +298,7 @@ const parentChildSignUpMutationResolver = async (
     name: childName,
     role: MENTEE,
     inviteCode: generateInviteCode(),
+    signUpBonusCredited: true,
   };
 
   // check if the child has been referred by a valid user
