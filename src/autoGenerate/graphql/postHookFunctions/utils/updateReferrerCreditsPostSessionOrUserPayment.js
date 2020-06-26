@@ -5,26 +5,19 @@ import updateUserCreditsCount from '../../resolvers/mutation/user/utils/updateUs
 import getAParticularUserInvite from '../../resolvers/mutation/user/utils/getAParticularUserInvite';
 import updateAUserInvite from '../../resolvers/mutation/user/utils/updateAUserInvite';
 import { log } from '../../../../../utils';
-import { COURSE_PURCHASED, TRIAL_TAKEN } from '../../../../../constants/userCreditReason';
 
-const updateReferrerCreditsPostSessionOrUserPayment = async (inviteAcceptedByUserId, referralCreditsType, context, variables) => {
+const updateReferrerCreditsPostSessionOrUserPayment = async (
+  inviteAcceptedByUserId,
+  referralCreditsType,
+  context,
+  variables,
+  userCreditReason,
+) => {
   const referredByUserId = await getReferredByUserIdByAcceptedUserId(inviteAcceptedByUserId);
   if (referredByUserId) {
     const numberOfReferralsOfAUser = await getNumberOfReferralsOfAUser(referredByUserId);
     if (numberOfReferralsOfAUser <= MAX_ALLOWED_REFERRALS) {
       // add credits
-      let userCreditReason = '';
-      switch (referralCreditsType) {
-        case TRIAL_TAKEN: {
-          userCreditReason = TRIAL_TAKEN;
-          break;
-        }
-        case COURSE_PURCHASED: {
-          userCreditReason = COURSE_PURCHASED;
-          break;
-        }
-        default:
-      }
       const userCreditDoc = await updateUserCreditsCount(referralCreditsType, referredByUserId, 'inc', userCreditReason);
       if (userCreditDoc && userCreditDoc.nModified === 1) {
         // update user invite trialTaken status & date
