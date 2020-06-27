@@ -11,16 +11,14 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { MENTEE } from '../../../../../../constants/roles';
 import payUConfig from '../../../../../../config/payment/payUConfig';
 import {
-  GLOBAL_COURSE_TITLE, PUBLISHED, enrollmentTypes,
+  GLOBAL_COURSE_TITLE, PUBLISHED, enrollmentTypes, GIFT_VOUCHER_AMOUNT,
 } from '../../../../../../constants';
 import { log } from '../../../../../../utils';
-import parsedHtmlFromTemplateFileAndObject
-  from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
-import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
-import sendEmail from '../../../../../../services/email/utils/sendEmail';
 import updateReferrerCreditsPostSessionOrUserPayment from '../../../postHookFunctions/utils/updateReferrerCreditsPostSessionOrUserPayment';
 import referralCredits from '../../../../../../constants/referralCredits';
 import { COURSE_PURCHASED } from '../../../../../../constants/userCreditReason';
+import { sendEmailInvoiceToUser } from '../utils/sendEmailInvoiceToUser';
+import updateUserCreditsCount from '../user/utils/updateUserCreditsCount';
 
 // query to get user paayment info for id
 const getUserPayment = (id) => `
@@ -29,11 +27,14 @@ const getUserPayment = (id) => `
       id
       amount
       discountAmount
+      creditsUsed
       user{
         id
         role
         name
         email
+        fromReferral
+        giftVoucherApplied
         phone{
           countryCode
           number
@@ -115,6 +116,19 @@ const updateUserCurrentTopicComponentStatus = (
   }
   `;
 
+// mutation to update user giftVoucherApplied
+const updateUserGiftVoucher = (
+  userId,
+) => `
+  mutation{
+    updateUser(id:"${userId}",input:{
+      giftVoucherApplied: true
+    }){
+      id
+    }
+  }
+  `;
+
 const addZeroes = (num) => {
 // Convert input string to a number and store as a variable.
   let value = Number(num);
@@ -127,47 +141,6 @@ const addZeroes = (num) => {
   }
   // Return updated or original number.
   return value;
-};
-
-const sendEmailInvoiceToUser = (payload) => {
-  const subject = 'Payment Receipt from Tekie';
-  const templateFileName = 'paymentInvoiceEmailTemplate';
-  const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, payload);
-  templateString.then((html) => {
-    // email to should be in array. Can send the mail to mutiple people
-    let emailTo;
-    // send email in case a session is booked/updated/deleted
-    if (process.env.NODE_ENV === 'production') {
-      emailTo = [
-        payload.email,
-      ];
-    } else {
-      emailTo = [
-        'kriteshpk@gmail.com',
-        'namanmukund@gmail.com',
-      ];
-    }
-
-    // ccemail should be in array. Can send the mail to mutiple people
-    const ccEmail = [''];
-    // bccemail should be in array. Can send the mail to mutiple people
-    const bccEmail = [''];
-
-    const text = 'Payment Receipt';
-    /* if html is empty then in the body text will be appear. Html is having higher
-     precedence over text */
-
-    const emailMsgObject = getEmailObject(
-      emailTo,
-      ccEmail,
-      bccEmail,
-      subject,
-      text,
-      html,
-      'hello@tekie.in',
-    );
-    sendEmail(emailMsgObject);
-  });
 };
 
 /*
@@ -274,9 +247,26 @@ const getPaymentResponseMutationResolver = async (
     discount = addZeroes(discount);
     payload.discount = discount;
   }
-  const coursePrice = Number(amount) + Number(discount);
+
+  const fromReferral = get(userPaymentInfo, 'user.fromReferral', false);
+  const giftVoucherApplied = get(userPaymentInfo, 'user.giftVoucherApplied', false);
+
+  if (fromReferral && !giftVoucherApplied) {
+    payload.discount = Number(payload.discount) + Number(GIFT_VOUCHER_AMOUNT);
+  }
+
+  const userCreditToAvail = get(userPaymentInfo, 'creditsUsed', 0);
+  if (userCreditToAvail > 0) {
+    payload.discount = Number(payload.discount) + Number(userCreditToAvail);
+  }
+
+  let coursePrice = Number(amount) + Number(discount) + Number(userCreditToAvail);
+  if (fromReferral && !giftVoucherApplied) {
+    coursePrice += GIFT_VOUCHER_AMOUNT;
+  }
 
   payload.coursePrice = addZeroes(coursePrice);
+  payload.discount = addZeroes(payload.discount);
 
   payload.txnId = id;
 
@@ -323,6 +313,15 @@ const getPaymentResponseMutationResolver = async (
       const { coursePurchased } = referralCredits[1];
 
       await updateReferrerCreditsPostSessionOrUserPayment(userId, coursePurchased, context, variables, COURSE_PURCHASED);
+
+      if (userCreditToAvail > 0) {
+        await updateUserCreditsCount(userCreditToAvail, userId, 'dec', COURSE_PURCHASED);
+      }
+
+      // update user document for isGiftVoucherUsed, change user to pro
+      await callLocalGraphqlApi(updateUserGiftVoucher(
+        userId,
+      ));
     } catch (e) {
       log('Error in updateReferrerCreditsPostUserPayment', e);
     }
