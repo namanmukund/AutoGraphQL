@@ -1,7 +1,7 @@
 import { MENTEE } from '../../../../constants/roles';
 import updateReferrerCreditsPostSessionOrUserPayment from './utils/updateReferrerCreditsPostSessionOrUserPayment';
 import referralCredits from '../../../../constants/referralCredits';
-import { TRIAL_TAKEN } from '../../../../constants/userCreditReason';
+import { TRIAL_TAKEN_FROM_REFERRAL } from '../../../../constants/userCreditReason';
 
 /*
   - check if the user if from referral
@@ -25,7 +25,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
         },
       };
       const { trialTaken } = referralCredits[1];
-      await updateReferrerCreditsPostSessionOrUserPayment(currentUser.id, trialTaken, context, variables, TRIAL_TAKEN);
+      await updateReferrerCreditsPostSessionOrUserPayment(currentUser.id, trialTaken, context, variables, TRIAL_TAKEN_FROM_REFERRAL);
     }
   }
 };

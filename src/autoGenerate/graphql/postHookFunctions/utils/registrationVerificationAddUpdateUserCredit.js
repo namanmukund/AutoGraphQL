@@ -7,7 +7,7 @@ import addUserCredit from '../../resolvers/mutation/user/utils/addUserCredit';
 import getAParticularUserInvite from '../../resolvers/mutation/user/utils/getAParticularUserInvite';
 import updateAUserInvite from '../../resolvers/mutation/user/utils/updateAUserInvite';
 import { log } from '../../../../../utils';
-import { REGISTRATION_VERIFIED } from '../../../../../constants/userCreditReason';
+import { REGISTRATION_VERIFIED_FROM_REFERRAL } from '../../../../../constants/userCreditReason';
 
 const registrationVerificationAddUpdateUserCredit = async (referredByUserId, clientConnectId, context) => {
   const numberOfReferralsOfAUser = await getNumberOfReferralsOfAUser(referredByUserId);
@@ -16,9 +16,9 @@ const registrationVerificationAddUpdateUserCredit = async (referredByUserId, cli
     const userCreditId = await getUserCreditId(referredByUserId);
     // update credit if userCreditId exist else add it
     if (userCreditId) {
-      await updateUserCreditsCount(referralCredits[1].registrationVerified, referredByUserId, 'inc', REGISTRATION_VERIFIED);
+      await updateUserCreditsCount(referralCredits[1].registrationVerified, referredByUserId, 'inc', REGISTRATION_VERIFIED_FROM_REFERRAL);
     } else {
-      await addUserCredit(referralCredits[1].registrationVerified, referredByUserId, REGISTRATION_VERIFIED);
+      await addUserCredit(referralCredits[1].registrationVerified, referredByUserId, REGISTRATION_VERIFIED_FROM_REFERRAL);
     }
     // update user credit
     const userInviteId = await getAParticularUserInvite(referredByUserId, clientConnectId);
