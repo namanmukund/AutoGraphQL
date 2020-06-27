@@ -21,10 +21,12 @@ import parsedHtmlFromTemplateFileAndObject
 import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../../services/email/utils/sendEmail';
 import generateInviteCode from '../../../../../../utils/generateInviteCode';
-import { MAX_ALLOWED_REFERRALS } from '../../../../../../constants';
+import { MAX_ALLOWED_REFERRALS, REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
 import getNumberOfReferralsOfAUser from './utils/getNumberOfReferralsOfAUser';
 import getReferredByUserIdByReferralCode from './utils/getReferredByUserIdByReferralCode';
 import { sendTextSms } from '../../../../../sms';
+import addUserCredit from './utils/addUserCredit';
+import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 
 const USER_TYPE = 'User';
 const validateParentChildSignUpInput = (input) => {
@@ -296,6 +298,7 @@ const parentChildSignUpMutationResolver = async (
     name: childName,
     role: MENTEE,
     inviteCode: generateInviteCode(),
+    signUpBonusCredited: true,
   };
 
   // check if the child has been referred by a valid user
@@ -356,7 +359,6 @@ const parentChildSignUpMutationResolver = async (
       log('Error in adding to user invite', e);
     }
   }
-
   // send email
   if (process.env.NODE_ENV === 'production') {
     const templateFileName = 'parentChildSignupEmailTemplate';
@@ -391,6 +393,8 @@ const parentChildSignUpMutationResolver = async (
     sendTextSms(phoneNumberShravasti, smsText);
     sendTextSms(phoneNumberJahnavi, smsText);
   }
+  // add base credit to user
+  await addUserCredit(REGISTRATION_BASE_CREDIT, childUserId, SIGN_UP_BONUS);
   return userTokenData;
 };
 

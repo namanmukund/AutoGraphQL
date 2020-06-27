@@ -19,6 +19,8 @@ const User = `
     inviteCode: String @uniqueOrEmpty @readOnly
     fromReferral: Boolean @defaultValue(value: "false") @readOnly
     giftVoucherApplied: Boolean @defaultValue(value: "false") @readOnly
+    signUpBonusCredited: Boolean @defaultValue(value: "false") @readOnly
+    signUpBonusNotified: Boolean @defaultValue(value: "false")
     role: UserRole! @defaultValue(value: "selfLearner") 
           @userPermissions(
             permissions:[

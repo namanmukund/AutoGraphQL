@@ -2,7 +2,7 @@ import { MutationController } from '../../../../controllers';
 import addUserCreditLog from './addUserCreditLog';
 import { CREDITED, DEBITED } from '../../../../../../../constants';
 
-const updateUserCreditsCount = (credits, referredByUserId, type) => {
+const updateUserCreditsCount = (credits, referredByUserId, type, userCreditReason) => {
   const newAuthentication = {
     bypass: true,
   };
@@ -32,7 +32,7 @@ const updateUserCreditsCount = (credits, referredByUserId, type) => {
   const modelMutation = new MutationController('UserCredit', newAuthentication);
   return modelMutation.update(query, updateObj).then(async (res) => {
     if (res) {
-      await addUserCreditLog(credits, creditType, referredByUserId);
+      await addUserCreditLog(credits, creditType, referredByUserId, userCreditReason);
     }
     return res;
   });

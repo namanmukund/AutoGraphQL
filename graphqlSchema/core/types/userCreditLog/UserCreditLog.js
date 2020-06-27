@@ -15,6 +15,7 @@ const UserCreditLog = `
     user: User! @relation(name: "UserCreditLogUser", direction: "OneWay")
     amount: Int!
     type: CreditType!
+    reason: UserCreditReason!
   }
 `;
 
