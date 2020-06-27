@@ -20,6 +20,7 @@ import { COURSE_PURCHASED } from '../../../../../../constants/userCreditReason';
 import { log } from '../../../../../../utils';
 import { sendEmailInvoiceToUser } from '../utils/sendEmailInvoiceToUser';
 import updateUserCreditsCount from '../user/utils/updateUserCreditsCount';
+import { addZeroes } from '../utils/addZeroesToANumber';
 
 // query to get user info of current user
 const getUserInfo = (userId) => `
@@ -186,20 +187,6 @@ const updateUserGiftVoucher = (
     }
   }
   `;
-
-const addZeroes = (num) => {
-// Convert input string to a number and store as a variable.
-  let value = Number(num);
-  // Split the input string into two arrays containing integers/decimals
-  const res = num.toString() && num.toString().split('.');
-  // If there is no decimal point or only one decimal place found.
-  if (res.length === 1 || res[1].length < 3) {
-    // Set the number to two decimal places
-    value = value.toFixed(2);
-  }
-  // Return updated or original number.
-  return value;
-};
 
 /*
   This is called when user tries to buys a product
