@@ -20,6 +20,7 @@ const UserPayment = `
     discount: Discount @relation(name: "Discount", direction: "OneWay")
     status: String!
     invoiceId: String
+    creditsUsed: Float
   }
 `;
 

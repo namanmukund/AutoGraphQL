@@ -221,6 +221,7 @@ const slotTimes = [
 const CREDITED = 'credited';
 const DEBITED = 'debited';
 const REGISTRATION_BASE_CREDIT = 1000;
+export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,

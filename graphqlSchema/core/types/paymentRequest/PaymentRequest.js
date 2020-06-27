@@ -6,7 +6,11 @@ const PaymentRequest = `
     firstName: String!,
     email: String!,
     phone: Phone!,
+    countryCode: String,
+    phoneNumber: String,
+    parentName: String,
     productInfo: String!,
+    discount: Float,
   }
 `;
 
