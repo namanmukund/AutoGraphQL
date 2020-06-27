@@ -16,7 +16,7 @@ import {
 import { log } from '../../../../../../utils';
 import updateReferrerCreditsPostSessionOrUserPayment from '../../../postHookFunctions/utils/updateReferrerCreditsPostSessionOrUserPayment';
 import referralCredits from '../../../../../../constants/referralCredits';
-import { COURSE_PURCHASED } from '../../../../../../constants/userCreditReason';
+import { COURSE_PURCHASED_FROM_REFERRAL, COURSE_PURCHASED } from '../../../../../../constants/userCreditReason';
 import { sendEmailInvoiceToUser } from '../utils/sendEmailInvoiceToUser';
 import updateUserCreditsCount from '../user/utils/updateUserCreditsCount';
 
@@ -312,7 +312,7 @@ const getPaymentResponseMutationResolver = async (
       };
       const { coursePurchased } = referralCredits[1];
 
-      await updateReferrerCreditsPostSessionOrUserPayment(userId, coursePurchased, context, variables, COURSE_PURCHASED);
+      await updateReferrerCreditsPostSessionOrUserPayment(userId, coursePurchased, context, variables, COURSE_PURCHASED_FROM_REFERRAL);
 
       if (userCreditToAvail > 0) {
         await updateUserCreditsCount(userCreditToAvail, userId, 'dec', COURSE_PURCHASED);
