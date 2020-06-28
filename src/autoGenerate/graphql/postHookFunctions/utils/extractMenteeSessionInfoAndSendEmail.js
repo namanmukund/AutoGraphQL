@@ -90,6 +90,7 @@ const sendBookedSessionEmailToTekie = (subject, menteeObj) => {
       'shravastivaidya@gmail.com',
       '19j.agarwal99@gmail.com',
       'jayasivakami2001@gmail.com',
+      'dubeyishan17@gmail.com',
     ];
     const ccEmail = [''];
     const bccEmail = [''];

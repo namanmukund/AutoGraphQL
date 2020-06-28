@@ -3,7 +3,7 @@ import { EXCEPT_DELETE, READ } from '../../../../constants/graphqlOperations';
 
 const User = `
   type User @model 
-      @userPermissions(
+    @userPermissions(
       permissions:[
         { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
         { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${EXCEPT_DELETE} }
@@ -57,8 +57,7 @@ const User = `
     facebookId: String @writeOnly
     studentProfile: StudentProfile @relation(name:"StudentProfileUser", isSubset: true)
     parentProfile: ParentProfile @relation(name:"ParentProfileUser", isSubset: true)
-    profilePic: File @relation(name: "UserProfilePic", direction: "OneWay", isSubset: true)
-    
+    profilePic: File @relation(name: "UserProfilePic", direction: "OneWay", isSubset: true)   
   }
 `;
 
