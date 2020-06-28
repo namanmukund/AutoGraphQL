@@ -50,6 +50,7 @@ import InviteUser from './userInvite';
 import SalesOperation from './salesOperation';
 import UserCreditLog from './userCreditLog';
 import SalesOperationLog from './salesOperationLog';
+import NetPromoterScore from './netPromoterScore';
 
 
 export default [
@@ -105,4 +106,5 @@ export default [
   ...SalesOperation,
   ...UserCreditLog,
   ...SalesOperationLog,
+  ...NetPromoterScore,
 ];
