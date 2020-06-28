@@ -55,6 +55,7 @@ import updateMentorMenteeSessionValidation from './preHookFunctions/validation/u
 import deleteMenteeSessionValidation from './preHookFunctions/validation/deleteMenteeSessionValidation';
 import updateSalesOperationValidation from './preHookFunctions/validation/updateSalesOperationValidation';
 import addSalesOperationValidation from './preHookFunctions/validation/addSalesOperationOperationValidation';
+import addNetPromoterScoreValidation from './preHookFunctions/validation/addNetPromoterScoreValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -453,6 +454,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateSalesOperation': {
       await updateSalesOperationValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addNetPromoterScore': {
+      await addNetPromoterScoreValidation(params, mutationOrQueryName, context);
       break;
     }
     default: {
