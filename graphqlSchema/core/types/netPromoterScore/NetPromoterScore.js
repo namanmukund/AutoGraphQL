@@ -12,7 +12,7 @@ const NetPromoterScore = `
     rule: allow
   ) 
   {
-    score: Int!
+    score: Int! @length(min: 0, max: 10)
     user: User! @relation(name: "NetPromoterScoreUser", direction: "OneWay")
   }
 `;
