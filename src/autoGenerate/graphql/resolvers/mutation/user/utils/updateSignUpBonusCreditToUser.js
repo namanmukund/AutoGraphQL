@@ -14,7 +14,6 @@ const updateSignUpBonusCreditToUser = async () => {
   if (users && users.length) {
     console.log('**********Total Users***********: ', users.length);
     for (const user of users) {
-      console.log("....11111", user)
       const { id: userId, name } = user;
       if (name) {
         console.log('Processing for user: ', name);
