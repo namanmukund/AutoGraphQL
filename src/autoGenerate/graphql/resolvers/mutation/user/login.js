@@ -1,7 +1,8 @@
+import { get } from 'lodash';
 import {
   UserTokenNotRequiredError,
   BlockedOperationError,
-  DatabaseRecordNotFoundError,
+  DatabaseRecordNotFoundError, InsufficientPermissionError,
 } from '../../../../../../constants/errors';
 import { QueryController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
@@ -9,6 +10,10 @@ import { validate } from '../../../validation';
 import { checkPasswordAndReturnUserWithToken } from '../utils/checkPasswordAndReturnUserWithToken';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import getUserFromDBQuery from './utils/getUserFromDBQuery';
+import { TWA } from '../../../../../../constants';
+import { MENTOR } from '../../../../../../constants/roles';
+import checkIfMentorIsAvailable from './utils/checkIfMentorIsAvailable';
+import { MentorAvailabilitySlotNotBookedError } from '../../../../../../constants/errors/permissions';
 
 export default function loginMutationResolver(
   root,
@@ -46,9 +51,20 @@ export default function loginMutationResolver(
   return getUserFromDBQuery(
     input,
     modelQueries,
-  ).then((fetchedUser) => {
+  ).then(async (fetchedUser) => {
     if (!fetchedUser) {
       throw new DatabaseRecordNotFoundError();
+    }
+    const { id: userId, role } = fetchedUser;
+    if (get(authentication, 'app.name') === TWA) {
+      if (role !== MENTOR) {
+        throw new InsufficientPermissionError();
+      }
+      // check if availability slots exist
+      const isMentorAvailable = await checkIfMentorIsAvailable(userId);
+      if (!isMentorAvailable) {
+        throw new MentorAvailabilitySlotNotBookedError();
+      }
     }
     const data = checkPasswordAndReturnUserWithToken(fetchedUser, input, authentication);
     const { status } = fetchedUser;
