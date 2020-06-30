@@ -20,6 +20,7 @@ const SalesOperationLog = `
     loggedBy: User @relation(name:"SalesOperationLogLoggedBy", direction: "OneWay")
     salesOperation: SalesOperation @relation(name:"SalesOperationLogSalesOperation")
     log: String
+    type: SalesOperationLogType
   }
 `;
 

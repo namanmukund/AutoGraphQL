@@ -1,4 +1,4 @@
-import { ADD, READ } from '../../../../constants/graphqlOperations';
+import { ADD, PLURAL, READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
 
 const NetPromoterScore = `
@@ -6,8 +6,8 @@ const NetPromoterScore = `
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: ${READ} },
-      { appName: "${TLA}" operations: [${ADD}] },
-      { appName: "${TWA}" operations: [${ADD}] }
+      { appName: "${TLA}" operations: [${ADD}, ${PLURAL}] },
+      { appName: "${TWA}" operations: [${ADD}, ${PLURAL}] }
       ], 
     rule: allow
   ) 

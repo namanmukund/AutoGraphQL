@@ -27,3 +27,7 @@ export const PermissionDeniedError = createError('PermissionDeniedError', {
 export const UserRolesNotFoundError = createError('UserRolesNotFoundError', {
   message: 'User roles not found.',
 });
+
+export const MentorAvailabilitySlotNotBookedError = createError('MentorAvailabilitySlotNotBookedError', {
+  message: 'Mentor has not booked the session for the current time',
+});
