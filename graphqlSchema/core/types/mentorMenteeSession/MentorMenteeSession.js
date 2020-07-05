@@ -12,6 +12,24 @@ const MentorMenteeSession = `
     assignmentSubmitDate: Date
     isHomeworkCheckedByMentor: Boolean @defaultValue(value: "false")
     isSubmittedForReview: Boolean @defaultValue(value: "false")
+    friendly: Boolean
+    motivating: Boolean
+    engaging: Boolean
+    helping: Boolean
+    enthusiastic: Boolean
+    patient: Boolean
+    conceptsPerfectlyExplained: Boolean
+    distracted: Boolean
+    rude: Boolean
+    slowPaced: Boolean
+    fastPaced: Boolean
+    notPunctual: Boolean
+    average: Boolean
+    boring: Boolean
+    poorExplanation: Boolean
+    averageExplanation: Boolean
+    comment: String
+    rating: Int @length(min: 1, max: 5)
 }`;
 
 export default [MentorMenteeSession];
