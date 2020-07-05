@@ -29,6 +29,7 @@ const MentorMenteeSession = `
     poorExplanation: Boolean
     averageExplanation: Boolean
     comment: String
+    rating: Int
 }`;
 
 export default [MentorMenteeSession];
