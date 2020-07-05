@@ -21,6 +21,7 @@ const SalesOperationLog = `
     salesOperation: SalesOperation @relation(name:"SalesOperationLogSalesOperation")
     log: String
     type: SalesOperationLogType
+    topic: Topic @relation(name: "SalesOperationLogTopic", direction: "OneWay")
   }
 `;
 
