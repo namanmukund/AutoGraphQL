@@ -61,9 +61,11 @@ export default function loginMutationResolver(
         throw new InsufficientPermissionError();
       }
       // check if availability slots exist
-      const isMentorAvailable = await checkIfMentorIsAvailable(userId);
-      if (!isMentorAvailable) {
-        throw new MentorAvailabilitySlotNotBookedError();
+      if (process.env.NODE_ENV === 'production') {
+        const isMentorAvailable = await checkIfMentorIsAvailable(userId);
+        if (!isMentorAvailable) {
+          throw new MentorAvailabilitySlotNotBookedError();
+        }
       }
     }
     const data = checkPasswordAndReturnUserWithToken(fetchedUser, input, authentication);
