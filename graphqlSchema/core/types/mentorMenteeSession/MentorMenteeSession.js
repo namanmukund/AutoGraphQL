@@ -30,6 +30,7 @@ const MentorMenteeSession = `
     averageExplanation: Boolean
     comment: String
     rating: Int @length(min: 1, max: 5)
+    sessionRecordingLink: String 
 }`;
 
 export default [MentorMenteeSession];
