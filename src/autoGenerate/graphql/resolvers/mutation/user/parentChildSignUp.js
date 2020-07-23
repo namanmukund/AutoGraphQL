@@ -374,7 +374,7 @@ const parentChildSignUpMutationResolver = async (
       const ccEmail = [''];
       const bccEmail = [''];
       const text = '';
-      const subject = 'Schedule Live 1:1 Free Trial Coding Session';
+      const subject = 'Schedule Live Free Trial Coding Session';
       const emailMsgObject = getEmailObject(
         emailTo,
         ccEmail,
