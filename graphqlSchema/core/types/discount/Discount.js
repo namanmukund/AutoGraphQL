@@ -12,11 +12,12 @@ const Discount = `
     rule: allow
   )
   {
-    product: Product! @relation(name: "ProductDiscount", direction: "OneWay")
+    product: Product! @relation(name: "ProductDiscount")
     percentage: Float!
     code: String!
     expiryDate: Date!
     description: String
+    isDefault: Boolean @defaultValue(value: "false")
   }
 `;
 
