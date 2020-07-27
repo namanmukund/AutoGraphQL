@@ -25,6 +25,22 @@ const SalesOperation = `
     client: User @relation(name:"SalesOperationClient", direction: "OneWay")
     monitoredBy: User @relation(name:"SalesOperationMonitoredBy", direction: "OneWay")
     salesOperationLog: [SalesOperationLog] @relation(name:"SalesOperationLogSalesOperation")
+    potentialLead: Boolean
+    mayConvert: Boolean
+    pricingIssue: Boolean
+    disInterested: Boolean
+    differentStream: Boolean
+    dump: Boolean
+    unfit: Boolean
+    knowCoding: Boolean
+    hasRescheduled: Boolean
+    internetIssue: Boolean
+    zoomIssue: Boolean
+    laptopIssue: Boolean
+    didNotRespond: Boolean
+    powerCut: Boolean
+    turnedUpWithoutConfirming: Boolean
+    highlyInterested: Boolean 
   }
 `;
 

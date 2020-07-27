@@ -23,7 +23,9 @@ const Product = `
     description: String
     price: PriceInputType!
     status: ContentStatus! @defaultValue(value: "unpublished")
+    type: ProductType! @defaultValue(value: "oneToOne")
     userRole: UserRole! @defaultValue(value: "selfLearner")
+    discounts: [Discount] @relation(name: "ProductDiscount")
   }
 `;
 

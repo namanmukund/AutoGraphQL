@@ -1,6 +1,9 @@
 const ProductType = `
   enum ProductType {
-    appOne
+    oneToOne,
+    oneToTwo,
+    oneToThree,
+    selfLearner
   }`;
 
 export default ProductType;

@@ -70,10 +70,15 @@ const getProductInfo = (productId) => `
   `;
 
 // query to get discount info
-const getDiscountInfo = (code) => `
+const getDiscountInfo = (code, productId) => `
   query{
     discounts(filter:{
-      code: "${code}"
+      and:[
+        {code: "${code}"},
+        {product_some:{
+          id:"${productId}"
+        }}
+      ]
     }){
       id
       percentage
@@ -288,14 +293,14 @@ const getPaymentRequestMutationResolver = async (
   let discount = 0;
   if (discountCode) {
     const discountRes = await callLocalGraphqlApi(
-      getDiscountInfo(discountCode),
+      getDiscountInfo(discountCode, productId),
       context,
       '',
     );
 
     const discountInfo = get(discountRes, 'data.discounts[0]');
     if (discountInfo && discountInfo.percentage && discountInfo.expiryDate > new Date()) {
-      discount = payload.amount * discountInfo.percentage * 0.01;
+      discount = Math.round(payload.amount * discountInfo.percentage * 0.01);
       let discountedAmount = payload.amount - discount;
       discountedAmount = Math.round((discountedAmount + Number.EPSILON) * 100) / 100;
       discountedAmount = addZeroes(discountedAmount);
