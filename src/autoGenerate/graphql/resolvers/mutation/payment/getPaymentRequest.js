@@ -300,7 +300,7 @@ const getPaymentRequestMutationResolver = async (
 
     const discountInfo = get(discountRes, 'data.discounts[0]');
     if (discountInfo && discountInfo.percentage && discountInfo.expiryDate > new Date()) {
-      discount = payload.amount * discountInfo.percentage * 0.01;
+      discount = Math.round(payload.amount * discountInfo.percentage * 0.01);
       let discountedAmount = payload.amount - discount;
       discountedAmount = Math.round((discountedAmount + Number.EPSILON) * 100) / 100;
       discountedAmount = addZeroes(discountedAmount);
