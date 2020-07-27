@@ -70,10 +70,15 @@ const getProductInfo = (productId) => `
   `;
 
 // query to get discount info
-const getDiscountInfo = (code) => `
+const getDiscountInfo = (code, productId) => `
   query{
     discounts(filter:{
-      code: "${code}"
+      and:[
+        {code: "${code}"},
+        {product_some:{
+          id:"${productId}"
+        }}
+      ]
     }){
       id
       percentage
@@ -288,7 +293,7 @@ const getPaymentRequestMutationResolver = async (
   let discount = 0;
   if (discountCode) {
     const discountRes = await callLocalGraphqlApi(
-      getDiscountInfo(discountCode),
+      getDiscountInfo(discountCode, productId),
       context,
       '',
     );
