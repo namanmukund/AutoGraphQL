@@ -3,7 +3,9 @@ import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
 
 const checkIfMentorIsAvailable = async (userId) => {
   const currentDate = new Date();
-  const slotTime = currentDate.getHours();
+  const durationInMinutes = 20;
+  const modifiedDate = currentDate.setMinutes(currentDate.getMinutes() + durationInMinutes);
+  const slotTime = new Date(modifiedDate).getHours();
   const availabilityDate = currentDate.setHours(0, 0, 0, 0);
   const query = `
       {
