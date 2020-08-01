@@ -40,7 +40,8 @@ const SalesOperation = `
     didNotRespond: Boolean
     powerCut: Boolean
     turnedUpWithoutConfirming: Boolean
-    highlyInterested: Boolean 
+    highlyInterested: Boolean
+    nextCallOn: Date
   }
 `;
 
