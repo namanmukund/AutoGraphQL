@@ -10,13 +10,11 @@ import QuestionBankAnswer from './QuestionBankAnswer';
 import Class from './Class';
 import ParentChildSignUpInput from './ParentChildSignUpInput';
 import ChildrenToken from './ChildrenToken';
-import PythonByteCode from './PythonByteCode';
 
 export default [
   ...Enum,
   ...Phone,
   BooleanResult,
-  PythonByteCode,
   ...MobileDeviceInformation,
   AggregationResult,
   TokenType,
