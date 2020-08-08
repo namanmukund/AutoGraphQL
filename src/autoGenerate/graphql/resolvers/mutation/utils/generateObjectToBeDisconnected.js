@@ -52,5 +52,4 @@ const generateObjectToBeDisconnected = (
   return null;
 };
 
-
 export default generateObjectToBeDisconnected;

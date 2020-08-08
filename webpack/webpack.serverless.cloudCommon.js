@@ -19,7 +19,6 @@ config.optimization = {
   minimize: false,
 };
 
-
 config.externals = [nodeExternals()];
 
 // We are outputting a real node app!

@@ -5,7 +5,6 @@ import { InsufficientPermissionError } from '../../../../constants/errors';
 import { META } from '../../../../constants';
 import { SINGULAR } from '../../../../constants/graphqlOperations';
 
-
 const validateAllowDenyRuleOnApp = (
   appPermissions,
   appName,

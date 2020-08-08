@@ -36,7 +36,6 @@ const getFilterKeyAndValueFromParam = (filterObject) => {
   return returnObject;
 };
 
-
 // get all foreign keys from relation filter querying in related collection
 const getRelatedTypeIdsFromRelationFilter = (relatedType, fieldName, filterValue) => {
   const relatedModel = models[relatedType];

@@ -20,5 +20,4 @@ const updateSchemaWithUserToken = (schemaTypes) => {
   return schemaTypes;
 };
 
-
 export default updateSchemaWithUserToken;

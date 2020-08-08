@@ -3,7 +3,6 @@ import callGraphqlApi from '../../../api/callGraphqlApi';
 
 import { OrderAlreadyExistsError } from '../../../../constants/errors';
 
-
 const topicQuery = (parentId, parent, collections) => `{
 ${collections}(filter:{
     ${parent}_some:{
@@ -17,7 +16,6 @@ ${collections}(filter:{
 
 `;
 
-
 const chapterQuery = (topicId, collection, parent) => `{
   ${parent}(filter:{
       id_in: ${topicId}
@@ -30,7 +28,6 @@ const chapterQuery = (topicId, collection, parent) => `{
   }
 }
 `;
-
 
 const chapterTopicQuery = (topicId, collection, parent) => `{
 ${parent}(filter:{
@@ -47,7 +44,6 @@ ${parent}(filter:{
 }
 
 `;
-
 
 const convertToMap = (src) => Object.assign({}, ...src.map((s) => ({ [s.id]: s.order })));
 const isUniqueOrderField = async (params, mutationOrQueryName) => {

@@ -1,4 +1,3 @@
-
 const getUpdateUserMutation = (userId) => {
   const query = `mutation($input: UserUpdate!) {
         updateUser(id: "${userId}"  input: $input) {

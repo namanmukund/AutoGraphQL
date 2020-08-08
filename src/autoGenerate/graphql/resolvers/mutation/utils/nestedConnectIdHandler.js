@@ -2,7 +2,6 @@ import updateInputInCaseOfNestedConnect from './updateInputInCaseOfNestedConnect
 import { arrayUpdateAddTypes, arrayUpdateRemoveTypes } from '../../../../../../constants';
 import generateObjectToBeDisconnected from './generateObjectToBeDisconnected';
 
-
 const nestedConnectIdHandler = (
   ast,
   typeName,
@@ -52,7 +51,6 @@ const nestedConnectIdHandler = (
         nestedDisconnectObjInfo,
       );
     }
-
 
     if (
       Array.isArray(finalInput[inputFieldName])
@@ -114,7 +112,6 @@ const nestedConnectIdHandler = (
       }
     }
   });
-
 
   return {
     finalInput,

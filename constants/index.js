@@ -8,7 +8,6 @@ import forceDeleteTypeNames from './forceDeleteTypeNames';
 import regexValidation from './regexValidation';
 import loginType from './loginType';
 
-
 const TMS = 'tekieTms';
 const TLA = 'tekieLearningApp';
 const TWA = 'tekieWebApp';
@@ -43,7 +42,6 @@ const usernameRules = {
   min: 3,
   max: 30,
 };
-
 
 const connectMutationsArgumentsSuffix = {
   singular: 'ConnectId',
@@ -199,7 +197,6 @@ const badgeTypes = {
   character: 'character',
   equipment: 'equipment',
 };
-
 
 const stickerEmojiType = {
   sticker: 'sticker',

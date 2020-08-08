@@ -4,7 +4,6 @@ import { getRandomNumber } from '../../../../utils';
 import getUserIdandAppNameAfterValidation
   from '../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 
-
 const generateUsername = (input, context) => {
   // calling method to get app name, we will use app name to determine how username will generate
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
@@ -40,6 +39,5 @@ const generateUsername = (input, context) => {
       return username;
     });
 };
-
 
 export default generateUsername;

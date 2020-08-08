@@ -6,7 +6,6 @@ import SocialLoginInput from './SocialLoginInput';
 import EmailLoginInput from './EmailLoginInput';
 import ValidateUserInput from './ValidateUserInput';
 
-
 export default [
   ...User, ...SignUpInput,
   ...LoginInput, ExistingUserInput,

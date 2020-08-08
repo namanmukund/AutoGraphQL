@@ -82,7 +82,6 @@ const validateDefaultInput = (input) => {
   return true;
 };
 
-
 const validate = (
   typeName,
   parsedASTMap,

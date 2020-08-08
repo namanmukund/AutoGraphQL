@@ -8,5 +8,4 @@ const getNumberAndSendSms = (phone, phoneOtp, name) => {
   }
 };
 
-
 export default getNumberAndSendSms;

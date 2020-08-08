@@ -173,7 +173,6 @@ const getUpdatedRecordObject = (
   return recordDoc;
 };
 
-
 // returns if input class with grade and sec already exists
 const validateClassItemsUniqueness = (record, input) => {
   if (!input.grade || !input.section) {

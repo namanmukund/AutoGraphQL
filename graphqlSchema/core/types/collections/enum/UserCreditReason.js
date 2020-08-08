@@ -11,5 +11,4 @@ export const getUserCreditReasonEnum = () => {
 
 const UserCreditReason = getUserCreditReasonEnum();
 
-
 export default UserCreditReason;

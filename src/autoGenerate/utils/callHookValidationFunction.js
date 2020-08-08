@@ -50,5 +50,4 @@ const callConnectHookValidationFunction = (mutationOrQueryName, connectRecord1,
   return null;
 };
 
-
 export { callAddUpdateHookValidationFunction, callConnectHookValidationFunction };

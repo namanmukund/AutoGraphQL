@@ -32,7 +32,6 @@ import CreditType from './CreditType';
 import UserCreditReason from './UserCreditReason';
 import SalesOperationLogType from './SalesOperationLogType';
 
-
 export default [
   Status,
   Gender,

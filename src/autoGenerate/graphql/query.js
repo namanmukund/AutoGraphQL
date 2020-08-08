@@ -197,7 +197,6 @@ const getFieldFilters = (fieldName, typeASTFields) => {
   return fieldFilter;
 };
 
-
 const getAllFieldsToBeFiltered = (collection, completeFields, parentName) => {
   const typeAST = parsedASTMap[collection];
 
@@ -381,7 +380,6 @@ parsedASTTypes.forEach((type) => {
     // Get unique fields filters
     let singleFetchParamsString = fetchParamsString[type];
     singleFetchParamsString = trimEnd(singleFetchParamsString, ',');
-
 
     if (
       (allowedOperations && allowedOperations === '*')

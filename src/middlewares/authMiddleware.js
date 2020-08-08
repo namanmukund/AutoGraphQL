@@ -170,5 +170,4 @@ const authMiddleware = async (req, res, next) => {
   next();
 };
 
-
 export { authMiddleware, verifyIfStaticTokenIsValidOrNot, handleUserToken };
