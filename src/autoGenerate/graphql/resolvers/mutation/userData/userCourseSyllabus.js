@@ -133,7 +133,6 @@ const getCourseQuery = () => `
     }
   `;
 
-
 /*
 This is called when user tries to load homepage
 It will return all the chapters and topics

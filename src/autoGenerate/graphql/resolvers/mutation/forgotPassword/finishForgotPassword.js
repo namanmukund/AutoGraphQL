@@ -14,7 +14,6 @@ const finishForgotPasswordQueryPromise = (input, modelQueries) => modelQueries.f
 
 const finishForgotPasswordMutationPromise = (searchObj, updateObj, modelMutations) => modelMutations.updateOne(searchObj, updateObj);
 
-
 export default function finishForgotPasswordMutationResolver(
   root,
   params,

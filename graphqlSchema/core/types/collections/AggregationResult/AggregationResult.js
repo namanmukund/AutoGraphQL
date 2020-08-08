@@ -1,4 +1,3 @@
-
 const AggregationResult = `
   type AggregationResult {
    count: Int,

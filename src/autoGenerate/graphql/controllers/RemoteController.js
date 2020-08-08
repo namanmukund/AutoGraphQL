@@ -192,5 +192,4 @@ class RemoteController extends MasterController {
   }
 }
 
-
 export default RemoteController;

@@ -81,7 +81,6 @@ const addUserVideoDump = (userConnectId,
   }
   `;
 
-
 /*
 This is called when user tries to skip video on journey page
 It will just update the userCurrentTopicComponentStatus to message

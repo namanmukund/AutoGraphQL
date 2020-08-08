@@ -23,5 +23,4 @@ const sampleEmail = () => {
   });
 };
 
-
 export default sampleEmail;

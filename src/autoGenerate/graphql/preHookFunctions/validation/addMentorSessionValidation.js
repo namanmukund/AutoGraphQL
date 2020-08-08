@@ -11,7 +11,6 @@ import validateMentorSessionInput from './utils/validateMentorSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 
-
 // query to get mentor Sessions
 const getMentorSessions = (userId, availabilityDate) => `
   query{

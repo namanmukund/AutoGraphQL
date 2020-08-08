@@ -72,7 +72,6 @@ const rollBack = () => {
   // @TODO implement rollback for updateMutation.
 };
 
-
 const localUpdateMutationPromise = async (
   id,
   input,
@@ -228,7 +227,6 @@ const localUpdateMutationPromise = async (
   );
 };
 
-
 const updateGenericMutation = (root,
   params,
   typeName,
@@ -357,6 +355,5 @@ const updateMutationResolver = (
     context,
     isMultiple);
 };
-
 
 export default updateMutationResolver;

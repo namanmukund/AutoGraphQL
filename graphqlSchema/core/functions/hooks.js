@@ -6,7 +6,6 @@ const addUserPostHook = [
   (result) => result,
 ];
 
-
 export {
   addUserPreHook,
   addUserPostHook,

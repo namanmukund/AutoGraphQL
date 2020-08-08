@@ -31,5 +31,4 @@ const deleteTopicValidation = async (params) => {
   return true;
 };
 
-
 export default deleteTopicValidation;

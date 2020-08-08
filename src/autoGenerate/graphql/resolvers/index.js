@@ -68,6 +68,7 @@ import loginViaPasswordMutationResolver from './mutation/user/loginViaPassword';
 import loginViaOtpMutationResolver from './mutation/user/loginViaOtp';
 import { prehook } from '../preHook';
 import { posthook } from '../postHook';
+import getByteCode from './utils/getByteCode';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -83,7 +84,6 @@ const defaultMutationsResolvers = {
   updateMutationResolver,
   deleteMultipleMutationResolver,
 };
-
 
 // FIX: instead of id and input just take in params object as args
 const defaultMutationsResolverWrapper = async (
@@ -821,6 +821,26 @@ resolvers.Query.me = ((root, params, context, info) => {
   );
 });
 
+resolvers.Query.getPythonByteCode = (async (root, params, context) => {
+  const authentication = ifAuthorized(context);
+
+  if (!authentication || !authentication.app || !authentication.user) {
+    throw new UnauthorizedOperationError();
+  }
+
+  const { pythonCode } = params;
+
+  const response = await getByteCode(pythonCode);
+  const { byteCode, error } = response;
+  if (error) {
+    return {
+      error,
+    };
+  }
+  return {
+    byteCode,
+  };
+});
 // Resolver for a custom homepage data for user
 resolvers.Mutation.userCourseSyllabus = async (root, params, context, info) => {
   const typeName = 'UserCurrentTopicComponentStatus';

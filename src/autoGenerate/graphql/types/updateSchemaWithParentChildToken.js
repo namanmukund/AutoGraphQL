@@ -20,5 +20,4 @@ const updateSchemaWithParentChildToken = (schemaTypes) => {
   return schemaTypes;
 };
 
-
 export default updateSchemaWithParentChildToken;

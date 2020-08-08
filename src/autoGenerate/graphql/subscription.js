@@ -15,7 +15,6 @@ const makeSubscriptionTypePayload = (
      data: ${type}!
   }`;
 
-
 Object.keys(parsedASTMap).forEach((type) => {
   const definition = parsedASTMap[type];
   const {
@@ -26,7 +25,6 @@ Object.keys(parsedASTMap).forEach((type) => {
     subscriptionPayloadTypes.push(makeSubscriptionTypePayload(type));
   }
 });
-
 
 subscriptionString = trimEnd(subscriptionString, ',');
 subscriptionString += '}';

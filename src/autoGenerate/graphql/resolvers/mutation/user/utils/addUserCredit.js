@@ -20,5 +20,4 @@ const addUserCredit = async (credits, userConnectId, userCreditReason) => {
   return get(res, 'data.addUserCredit.id');
 };
 
-
 export default addUserCredit;

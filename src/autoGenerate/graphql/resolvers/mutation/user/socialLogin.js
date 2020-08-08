@@ -19,7 +19,6 @@ const { OAuth2Client } = require('google-auth-library');
 
 const client = new OAuth2Client(CLIENT_ID);
 
-
 const verifyGmailAuthAndReturnUser = async (idToken) => {
   try {
     const ticket = await client.verifyIdToken({

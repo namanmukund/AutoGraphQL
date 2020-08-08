@@ -3,7 +3,6 @@ import { ConnectIdRequiredError } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 
-
 const getNetPromoterScoreByAUser = async (userId) => {
   const query = `
         query{
@@ -17,7 +16,6 @@ const getNetPromoterScoreByAUser = async (userId) => {
   const res = await callLocalGraphqlApi(query);
   return get(res, 'data.netPromoterScores');
 };
-
 
 const addNetPromoterScoreValidation = async (params) => {
   const { userConnectId } = params;

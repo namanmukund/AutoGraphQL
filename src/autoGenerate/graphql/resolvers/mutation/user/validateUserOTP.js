@@ -125,5 +125,4 @@ const validateUserOTPMutationResolver = async (
   return userTokenData;
 };
 
-
 export default validateUserOTPMutationResolver;

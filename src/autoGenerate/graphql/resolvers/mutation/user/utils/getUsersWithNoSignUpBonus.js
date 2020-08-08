@@ -1,7 +1,6 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
 
-
 const getUsersWithNoSignUpBonus = async () => {
   const query = `
       query{

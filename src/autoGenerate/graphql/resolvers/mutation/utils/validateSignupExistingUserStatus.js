@@ -34,5 +34,4 @@ const validateSignupExistingUserStatus = (searchObj, typeName, authentication, i
   });
 };
 
-
 export default validateSignupExistingUserStatus;

@@ -25,5 +25,4 @@ const updateSchemaWithDefaultFields = (graphqlTypes) => {
   return schemaTypes;
 };
 
-
 export default updateSchemaWithDefaultFields;

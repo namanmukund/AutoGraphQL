@@ -15,5 +15,4 @@ const getUserCreditId = async (userId) => {
   return get(res, 'data.userCredits[0].id');
 };
 
-
 export default getUserCreditId;
