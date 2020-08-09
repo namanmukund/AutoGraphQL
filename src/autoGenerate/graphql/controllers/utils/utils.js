@@ -115,7 +115,11 @@ const getUpdatedRecordObject = (
         }
       } else {
         // update field type object
-        recordDoc[field] = customMerge(recordDoc[field], input[field], arrayFieldsArray);
+        // recordDoc[field] = customMerge(recordDoc[field], input[field], arrayFieldsArray);
+        /*
+        Above line commented as this is mongoose model and it may require set function to assign a value
+         */
+        recordDoc.set([field], customMerge(recordDoc[field], input[field], arrayFieldsArray));
       }
     } else if (arrayFieldsArray.includes(field)) {
       // If array type field
