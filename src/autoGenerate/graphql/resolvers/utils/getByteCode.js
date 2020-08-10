@@ -9,8 +9,11 @@ const getByteCode = async (input) => {
   const code = decode(input);
   // const mainFilePath = path.join(__dirname, '../../../../../main.py');
   await writeFile('/tmp/main.py', code, 'utf8');
-
+  // eslint-disable-next-line no-console
+  console.log(11111);
   const pythonProcess = spawnSync('python3', ['-m', 'py_compile', '/tmp/main.py']);
+  // eslint-disable-next-line no-console
+  console.log(22222, pythonProcess);
   if (pythonProcess.error) {
     return {
       error: 'Internal Error',
