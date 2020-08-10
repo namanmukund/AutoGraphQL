@@ -23,7 +23,7 @@ const getByteCode = async (input) => {
     };
   }
   try {
-    const pyVersion = await pythonVersion('python -c "import platform; print(platform.python_version())"');
+    const pyVersion = await pythonVersion('python3 -c "import platform; print(platform.python_version())"');
     const { stdout } = pyVersion;
     const pyVersionArray = stdout.toString()
       .split('.');
