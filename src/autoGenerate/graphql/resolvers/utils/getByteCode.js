@@ -8,9 +8,10 @@ const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
 const getByteCode = async (input) => {
   const code = decode(input);
-  await writeFile('main.py', code, 'utf8');
+  const mainFilePath = path.join(__dirname, '../../../../../main.py');
+  await writeFile(mainFilePath, code, 'utf8');
 
-  const pythonProcess = spawnSync('python3', ['-m', 'py_compile', path.join(__dirname, '../../../../../main.py')]);
+  const pythonProcess = spawnSync('python3', ['-m', 'py_compile', mainFilePath]);
   if (pythonProcess.error) {
     return {
       error: 'Internal Error',
