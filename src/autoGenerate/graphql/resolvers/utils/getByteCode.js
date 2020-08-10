@@ -1,7 +1,6 @@
 import { spawnSync } from 'child_process';
 import * as fs from 'fs';
 import * as util from 'util';
-import * as path from 'path';
 import { decode } from 'base-64';
 
 const readFile = util.promisify(fs.readFile);
