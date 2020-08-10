@@ -1,19 +1,16 @@
-import { spawnSync } from 'child_process';
+import { spawnSync, exec } from 'child_process';
 import * as fs from 'fs';
 import * as util from 'util';
 import { decode } from 'base-64';
 
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
+const pythonVersion = util.promisify(exec);
 const getByteCode = async (input) => {
   const code = decode(input);
-  // const mainFilePath = path.join(__dirname, '../../../../../main.py');
   await writeFile('/tmp/main.py', code, 'utf8');
-  // eslint-disable-next-line no-console
-  console.log(11111);
   const pythonProcess = spawnSync('python3', ['-m', 'py_compile', '/tmp/main.py']);
-  // eslint-disable-next-line no-console
-  console.log(22222, pythonProcess, pythonProcess.stderr.toString(), pythonProcess.stdout.toString());
+
   if (pythonProcess.error) {
     return {
       error: 'Internal Error',
@@ -25,12 +22,21 @@ const getByteCode = async (input) => {
       error: pythonProcess.stderr.toString(),
     };
   }
-  // 37 is not a magic number, it is version of python - 3.7
-  // This code needs to updated to get correct python version according to the system.
-  const res = await readFile('/tmp/__pycache__/main.cpython-36.pyc');
-  return {
-    byteCode: res.toString('base64'),
-  };
+  try {
+    const pyVersion = await pythonVersion('python -c "import platform; print(platform.python_version())"');
+    const { stdout } = pyVersion;
+    const pyVersionArray = stdout.toString()
+      .split('.');
+    const pyVersionNumber = pyVersionArray[0] + pyVersionArray[1];
+    const res = await readFile(`/tmp/__pycache__/main.cpython-${pyVersionNumber}.pyc`);
+    return {
+      byteCode: res.toString('base64'),
+    };
+  } catch (e) {
+    return {
+      error: e,
+    };
+  }
 };
 
 export default getByteCode;
