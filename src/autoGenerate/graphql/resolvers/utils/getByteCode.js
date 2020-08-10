@@ -13,7 +13,7 @@ const getByteCode = async (input) => {
   console.log(11111);
   const pythonProcess = spawnSync('python3', ['-m', 'py_compile', '/tmp/main.py']);
   // eslint-disable-next-line no-console
-  console.log(22222, pythonProcess);
+  console.log(22222, pythonProcess, pythonProcess.stderr.toString(), pythonProcess.stdout.toString());
   if (pythonProcess.error) {
     return {
       error: 'Internal Error',
@@ -27,7 +27,7 @@ const getByteCode = async (input) => {
   }
   // 37 is not a magic number, it is version of python - 3.7
   // This code needs to updated to get correct python version according to the system.
-  const res = await readFile('/tmp/__pycache__/main.cpython-37.pyc');
+  const res = await readFile('/tmp/__pycache__/main.cpython-36.pyc');
   return {
     byteCode: res.toString('base64'),
   };
