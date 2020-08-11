@@ -31,6 +31,8 @@ import UserBehaviourStatus from './UserBehaviourStatus';
 import CreditType from './CreditType';
 import UserCreditReason from './UserCreditReason';
 import SalesOperationLogType from './SalesOperationLogType';
+import YesNoAverage from './YesNoAverage';
+import EnglishSpeakingSkill from './EnglishSpeakingSkill';
 
 export default [
   Status,
@@ -66,4 +68,6 @@ export default [
   CreditType,
   UserCreditReason,
   SalesOperationLogType,
+  YesNoAverage,
+  EnglishSpeakingSkill,
 ];

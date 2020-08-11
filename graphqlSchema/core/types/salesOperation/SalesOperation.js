@@ -1,6 +1,45 @@
 import { TMS } from '../../../../constants';
 import { MENTOR, UMS_HEAD, UMS_VIEWER } from '../../../../constants/roles';
 
+const unQualifiedLeadReasons = `
+    knowCoding: Boolean
+    lookingForAdvanceCourse: Boolean
+    ageNotAppropriate: Boolean
+    notRelevantDifferentStream: Boolean 
+    noPayingPower: Boolean
+    notInterestedInCoding: Boolean
+    learningAptitudeIssue: Boolean
+    notAQualifiedLeadComment: String
+`;
+
+const sessionRescheduledReasons = `
+    hasRescheduled: Boolean
+    internetIssue: Boolean
+    zoomIssue: Boolean
+    laptopIssue: Boolean
+    chromeIssue: Boolean
+    powerCut: Boolean
+    notResponseAndDidNotTurnUp: Boolean
+    turnedUpButLeftAbruptly: Boolean
+    leadNotVerifiedProperly: Boolean
+    otherReasonForReschedule: Boolean
+`;
+
+const mentorPitch = `
+    pricingPitched: Boolean
+    parentCounsellingDone: Boolean
+    courseInterestedIn: ProductType
+    potentialLead: Boolean
+`;
+
+const studentPersonna = `
+    prodigyChild: Boolean
+    extrovertStudent: YesNoAverage
+    fastLearner: YesNoAverage
+    studentEnglishSpeakingSkill: EnglishSpeakingSkill
+    parentEnglishSpeakingSkill: EnglishSpeakingSkill
+`;
+
 const SalesOperation = `
   type SalesOperation @model
   @appPermissions(
@@ -25,23 +64,11 @@ const SalesOperation = `
     client: User @relation(name:"SalesOperationClient", direction: "OneWay")
     monitoredBy: User @relation(name:"SalesOperationMonitoredBy", direction: "OneWay")
     salesOperationLog: [SalesOperationLog] @relation(name:"SalesOperationLogSalesOperation")
-    potentialLead: Boolean
-    mayConvert: Boolean
-    pricingIssue: Boolean
-    disInterested: Boolean
-    differentStream: Boolean
-    dump: Boolean
-    unfit: Boolean
-    knowCoding: Boolean
-    hasRescheduled: Boolean
-    internetIssue: Boolean
-    zoomIssue: Boolean
-    laptopIssue: Boolean
-    didNotRespond: Boolean
-    powerCut: Boolean
-    turnedUpWithoutConfirming: Boolean
-    highlyInterested: Boolean
     nextCallOn: Date
+    ${unQualifiedLeadReasons}
+    ${sessionRescheduledReasons}
+    ${mentorPitch}
+    ${studentPersonna}
   }
 `;
 
