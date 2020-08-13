@@ -1,5 +1,5 @@
 import {
-  get, startCase, toLower, find,
+  get, startCase, toLower,
 } from 'lodash';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { isValidPhoneNumber, validate, validateName } from '../../../validation';
