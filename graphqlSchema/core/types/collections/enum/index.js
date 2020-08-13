@@ -33,6 +33,7 @@ import UserCreditReason from './UserCreditReason';
 import SalesOperationLogType from './SalesOperationLogType';
 import YesNoAverage from './YesNoAverage';
 import EnglishSpeakingSkill from './EnglishSpeakingSkill';
+import LeadStatus from './LeadStatus';
 
 export default [
   Status,
@@ -70,4 +71,5 @@ export default [
   SalesOperationLogType,
   YesNoAverage,
   EnglishSpeakingSkill,
+  LeadStatus,
 ];
