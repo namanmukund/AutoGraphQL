@@ -1,4 +1,6 @@
-import { get, startCase, toLower } from 'lodash';
+import {
+  get, startCase, toLower, find,
+} from 'lodash';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { isValidPhoneNumber, validate, validateName } from '../../../validation';
 import { ADD } from '../../../../../../constants/graphqlOperations';
@@ -242,6 +244,7 @@ const parentChildSignUpMutationResolver = async (
     grade,
     hasLaptopOrDesktop,
     referralCode,
+    isBuyNow,
   } = input;
 
   // check if parent exist in db
@@ -258,12 +261,25 @@ const parentChildSignUpMutationResolver = async (
     parentProfileId = parentInfo.parentProfileId;
     const { childrenName } = parentInfo;
     if (childrenName && childrenName.length && childrenName.includes(childName)) {
-      throw new ChildAlreadyRegisteredError();
+      if (!isBuyNow) {
+        throw new ChildAlreadyRegisteredError();
+      }
+      // // if the page is buy now then login the user and provide the relevant information
+      // // in such case return user data with token
+      const queryController = new QueryController(USER_TYPE, authentication);
+      const parentUserData = await queryController.fetchOne({ id: parentId });
+      // generate parent token
+      const userTokenData = createUserTokenTypeData(parentUserData, authentication, '', true);
+      // generate kids token
+      userTokenData.children = [
+        ...parentInfo.childrenToken,
+      ];
+      return userTokenData;
     }
   } else {
     const parentData = {
-      name: parentName,
-      email: parentEmail,
+      name: parentName.trim(),
+      email: parentEmail.trim(),
       phone: parentPhone,
       role: PARENT,
     };
@@ -295,7 +311,7 @@ const parentChildSignUpMutationResolver = async (
   }
 
   const childData = {
-    name: childName,
+    name: childName.trim(),
     role: MENTEE,
     inviteCode: generateInviteCode(),
     signUpBonusCredited: true,
