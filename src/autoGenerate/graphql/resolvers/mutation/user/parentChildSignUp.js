@@ -311,7 +311,7 @@ const parentChildSignUpMutationResolver = async (
   }
 
   const childData = {
-    name: childName,
+    name: childName.trim(),
     role: MENTEE,
     inviteCode: generateInviteCode(),
     signUpBonusCredited: true,
