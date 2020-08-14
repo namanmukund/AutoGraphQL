@@ -34,6 +34,7 @@ import SalesOperationLogType from './SalesOperationLogType';
 import YesNoAverage from './YesNoAverage';
 import EnglishSpeakingSkill from './EnglishSpeakingSkill';
 import LeadStatus from './LeadStatus';
+import NextStep from './NextStep';
 
 export default [
   Status,
@@ -72,4 +73,5 @@ export default [
   YesNoAverage,
   EnglishSpeakingSkill,
   LeadStatus,
+  NextStep,
 ];
