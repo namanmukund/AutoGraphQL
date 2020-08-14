@@ -14,6 +14,8 @@ const unQualifiedLeadReasons = `
 
 const sessionRescheduledReasons = `
     hasRescheduled: Boolean
+    rescheduledDate: Date
+    rescheduledDateProvided: Boolean
     internetIssue: Boolean
     zoomIssue: Boolean
     laptopIssue: Boolean
@@ -30,6 +32,9 @@ const mentorPitch = `
     parentCounsellingDone: Boolean
     courseInterestedIn: ProductType
     leadStatus: LeadStatus
+    nextSteps: NextStep
+    otherReasonForNextStep: String
+    nextCallOn: Date
 `;
 
 const studentPersonna = `
@@ -64,7 +69,6 @@ const SalesOperation = `
     client: User @relation(name:"SalesOperationClient", direction: "OneWay")
     monitoredBy: User @relation(name:"SalesOperationMonitoredBy", direction: "OneWay")
     salesOperationLog: [SalesOperationLog] @relation(name:"SalesOperationLogSalesOperation")
-    nextCallOn: Date
     ${unQualifiedLeadReasons}
     ${sessionRescheduledReasons}
     ${mentorPitch}
