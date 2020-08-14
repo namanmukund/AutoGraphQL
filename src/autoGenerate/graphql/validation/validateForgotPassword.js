@@ -11,7 +11,6 @@ import {
 } from '../../../../constants/errors';
 import isValidEmail from './isValidEmail';
 
-
 const validateForgotPassword = (params) => {
   let isPhone = false;
   let newParams;
@@ -41,6 +40,5 @@ const validateForgotPassword = (params) => {
   }
   return newParams;
 };
-
 
 export default validateForgotPassword;

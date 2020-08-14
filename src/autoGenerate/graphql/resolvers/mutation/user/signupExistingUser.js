@@ -13,7 +13,6 @@ import { sendEmailOtpToUser } from '../../../../../email/messages';
 import validateSignupExistingUserStatus from '../utils/validateSignupExistingUserStatus';
 import { ADD } from '../../../../../../constants/graphqlOperations';
 
-
 const updateExistingUserOTP = (
   searchObj,
   updateObj,

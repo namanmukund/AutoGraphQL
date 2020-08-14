@@ -11,7 +11,6 @@ process.env.SOCKET_PORT = 2030;
 process.env.IO_SOCKET_PORT = 2040;
 require('../../../src/serverCloud');
 
-
 const removeEmptyFieldFromACollection = async (targetedCollection, targetedField) => {
   const docs = await getTargetedDocuments(targetedCollection, targetedField);
   if (!docs || !docs.length) {

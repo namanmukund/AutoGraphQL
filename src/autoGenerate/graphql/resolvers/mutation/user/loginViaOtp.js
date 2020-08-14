@@ -14,7 +14,6 @@ import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
 
 const USER_TYPE = 'User';
 
-
 const updateExistingUserOTP = (
   searchObj,
   updateObj,

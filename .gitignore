@@ -10,3 +10,6 @@ uploads/
 .serverless
 mongoMigration/oldVersioningMigrationFiles/*
 .env
+__pycache__/
+main.py
+

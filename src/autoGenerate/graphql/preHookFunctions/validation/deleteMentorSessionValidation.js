@@ -30,5 +30,4 @@ const deleteMentorSessionValidation = async (params, mutationOrQueryName, contex
   context.previousDocument = mentorSession;
 };
 
-
 export default deleteMentorSessionValidation;

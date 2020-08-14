@@ -41,5 +41,4 @@ const updateSchemaWithRelationalMetaFields = (parsedASTMap, schemaTypes) => {
   return schemaTypes;
 };
 
-
 export default updateSchemaWithRelationalMetaFields;

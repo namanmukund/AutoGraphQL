@@ -16,5 +16,4 @@ const addSalesOperationPostHookMethod = async (input, params, mutationName, cont
   }
 };
 
-
 export default addSalesOperationPostHookMethod;

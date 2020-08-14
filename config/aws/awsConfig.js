@@ -30,7 +30,6 @@ const cloudFrontPrivateKeyString = '-----BEGIN RSA PRIVATE KEY-----\n'
   + 'hL4nMmX3PSuDBRv0YHlIrm/A/mGCOx3Lt3ps9lFUahbVj6wIQp0CIw==\n'
   + '-----END RSA PRIVATE KEY-----';
 
-
 const awsConfig = {
   production: {
     aws: {

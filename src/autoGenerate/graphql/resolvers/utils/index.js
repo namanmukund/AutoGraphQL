@@ -5,7 +5,6 @@ import validateCurrentTopicComponent from './validateCurrentTopicComponent';
 import convertObjectFieldsToStrings from './convertObjectFieldsToStrings';
 import subscribeToEvents from './subscribeToEvents';
 
-
 export {
   checkDateValidity,
   checkMiddlewareErrors,

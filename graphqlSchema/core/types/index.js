@@ -52,7 +52,6 @@ import UserCreditLog from './userCreditLog';
 import SalesOperationLog from './salesOperationLog';
 import NetPromoterScore from './netPromoterScore';
 
-
 export default [
   ...User,
   ...File,

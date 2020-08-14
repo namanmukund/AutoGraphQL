@@ -16,7 +16,6 @@ import { rollBackDocumentSaves } from '../utils/rollBackDocumentSaves';
 import nestedConnectIdHandler from '../utils/nestedConnectIdHandler';
 import { ADD } from '../../../../../../constants/graphqlOperations';
 
-
 // Returns remote delete mutation promises.
 const remoteAddMutationPromises = (
   id,

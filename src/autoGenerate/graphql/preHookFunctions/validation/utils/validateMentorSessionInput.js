@@ -44,7 +44,6 @@ const validateMentorSessionInput = (params, prevMentorSession) => {
     prevMentorSession,
   );
 
-
   return true;
 };
 

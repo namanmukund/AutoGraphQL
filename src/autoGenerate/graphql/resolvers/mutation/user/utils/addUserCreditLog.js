@@ -17,5 +17,4 @@ const addUserCreditLog = async (amount, type, userConnectId, userCreditReason) =
   return get(res, 'data.addUserCreditLog.id');
 };
 
-
 export default addUserCreditLog;

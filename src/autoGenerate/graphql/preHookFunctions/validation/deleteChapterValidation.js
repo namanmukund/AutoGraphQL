@@ -51,5 +51,4 @@ const deleteChapterValidation = async (params) => {
   return true;
 };
 
-
 export default deleteChapterValidation;

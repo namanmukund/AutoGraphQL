@@ -10,5 +10,4 @@ const generateSignedUrl = async (url) => {
   return cf.getSignedUrl(tempUrl, options);
 };
 
-
 export default generateSignedUrl;
