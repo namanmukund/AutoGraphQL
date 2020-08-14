@@ -31,7 +31,7 @@ const mentorPitch = `
     pricingPitched: Boolean
     parentCounsellingDone: Boolean
     courseInterestedIn: ProductType
-    potentialLead: Boolean
+    leadStatus: LeadStatus
 `;
 
 const studentPersonna = `
