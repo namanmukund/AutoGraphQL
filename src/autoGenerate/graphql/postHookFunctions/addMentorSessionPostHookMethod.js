@@ -4,20 +4,19 @@ import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import availableSlotsQuery from '../graphqlQueries/availableSlotsQuery';
 import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery';
 import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
-import getSlotCountByProductType from './utils/getSlotCountByProductType';
 
 const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
-  const { availabilityDate, slotType, ...slots } = input;
+  const { availabilityDate, ...slots } = input;
   const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(availabilityDate));
   const availableSlots = get(availableSlotsRes, 'data.availableSlots');
 
   // update if available slots for a particular date exist from before
   const docToBeUpdated = {};
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-  const slotCount = getSlotCountByProductType(slotType);
+
   if (availableSlots && availableSlots.length) {
     slotTimeStringArray.forEach((slot) => {
-      docToBeUpdated[slot] = (availableSlots[0][slot] >= 0 ? availableSlots[0][slot] : 0) + slotCount;
+      docToBeUpdated[slot] = (availableSlots[0][slot] >= 0 ? availableSlots[0][slot] : 0) + 1;
     });
 
     const { id: availableSlotId } = availableSlots[0];
@@ -29,14 +28,13 @@ const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
     // update
   } else {
     slotTimeStringArray.forEach((slot) => {
-      docToBeUpdated[slot] = slotCount;
+      docToBeUpdated[slot] = 1;
       docToBeUpdated.date = availabilityDate.toISOString();
     });
     // add
     const variables = {
       input: docToBeUpdated,
     };
-
     await callLocalGraphqlApi(addAvailableSlotQuery(docToBeUpdated), context, variables);
   }
 };

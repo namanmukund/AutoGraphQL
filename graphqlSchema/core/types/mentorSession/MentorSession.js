@@ -26,7 +26,6 @@ const MentorSession = `
     user: User! @relation(name: "MentorSessionUser", direction: "OneWay")
     course: Course! @relation(name: "MentorSessionCourse", direction: "OneWay")
     availabilityDate: Date!
-    slotType: ProductType @defaultValue(value: "oneToOne")
     ${slotTimeFields}
 }`;
 
