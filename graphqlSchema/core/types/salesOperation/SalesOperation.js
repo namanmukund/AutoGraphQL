@@ -31,6 +31,9 @@ const mentorPitch = `
     pricingPitched: Boolean
     parentCounsellingDone: Boolean
     courseInterestedIn: ProductType
+    oneToOne: Boolean
+    oneToTwo: Boolean
+    oneToThree: Boolean
     leadStatus: LeadStatus
     nextSteps: NextStep
     otherReasonForNextStep: String
