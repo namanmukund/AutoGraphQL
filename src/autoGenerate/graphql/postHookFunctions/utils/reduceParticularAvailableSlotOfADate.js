@@ -4,7 +4,13 @@ import availableSlotsQuery from '../../graphqlQueries/availableSlotsQuery';
 import updateAvailableSlotQuery from '../../graphqlQueries/updateAvailableSlotQuery';
 
 // update if doc exist else leave
-const reduceParticularAvailableSlotOfADate = async (slotTimeStringArray, date, context, availableSlots) => {
+const reduceParticularAvailableSlotOfADate = async (
+  slotTimeStringArray,
+  date,
+  context,
+  availableSlots,
+  slotCount = 1,
+) => {
   if (!availableSlots || !availableSlots.length) {
     const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(date));
     // eslint-disable-next-line no-param-reassign
@@ -16,7 +22,7 @@ const reduceParticularAvailableSlotOfADate = async (slotTimeStringArray, date, c
 
     slotTimeStringArray.forEach((slot) => {
       if (availableSlots[0][slot] > 0) {
-        docToBeUpdated[slot] = availableSlots[0][slot] - 1;
+        docToBeUpdated[slot] = availableSlots[0][slot] - slotCount;
       }
     });
 
