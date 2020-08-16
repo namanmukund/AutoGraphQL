@@ -7,6 +7,8 @@ const loginViaPassword = async (root, params, context, info) => {
   const authentication = ifAuthorized(context);
   const typeName = 'User';
   const mutationName = 'loginViaPassword';
+  const { parsedASTMap } = context;
+
   const { input } = params;
   const hookInput = await prehook(input, mutationName, context, params);
 

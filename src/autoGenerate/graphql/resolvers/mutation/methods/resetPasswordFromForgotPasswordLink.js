@@ -5,6 +5,7 @@ const resetPasswordFromForgotPasswordLink = async (root, params, context, info) 
   const authentication = ifAuthorized(context);
   const typeName = 'User';
   const mutationName = 'resetPasswordFromForgotPasswordLink';
+  const { parsedASTMap } = context;
 
   return resetPasswordFromForgotPasswordLinkMutationResolver(
     root,

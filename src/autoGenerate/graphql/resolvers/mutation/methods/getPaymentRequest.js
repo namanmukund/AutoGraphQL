@@ -4,6 +4,7 @@ import { toObject } from '../../../../../../utils';
 const getPaymentRequest = async (root, params, context, info) => {
   const typeName = 'PaymentRequest';
   const mutationName = 'getPaymentRequest';
+  const { parsedASTMap } = context;
 
   return getPaymentRequestMutationResolver(
     root,

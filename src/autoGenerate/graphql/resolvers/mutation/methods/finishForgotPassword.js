@@ -6,6 +6,7 @@ const finishForgotPassword = async (root, params, context, info) => {
   const authentication = ifAuthorized(context);
   const typeName = 'User';
   const mutationName = 'finishForgotPassword';
+  const { parsedASTMap } = context;
 
   const hookInput = await prehook(params, mutationName, context, params);
 

@@ -7,6 +7,8 @@ const loginViaOtp = async (root, params, context, info) => {
   const authentication = ifAuthorized(context);
   const typeName = 'User';
   const mutationName = 'loginViaOtp';
+  const { parsedASTMap } = context;
+
   const { input } = params;
   const hookInput = await prehook(input, mutationName, context, params);
 
