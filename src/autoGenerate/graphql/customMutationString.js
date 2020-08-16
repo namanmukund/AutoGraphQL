@@ -24,6 +24,7 @@ const customMutationString = `
    tcirtSdrowssaPtes ( id: ID!, password: String! ): User,
    uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,
    parentChildSignUp ( input: ParentChildSignUpInput ): ParentChildToken,
+   signUpAffiliate ( input: SignUpInput ): UserToken,
    loginViaPassword ( input: EmailLoginInput ): ParentChildToken,
    loginViaOtp ( input: ExistingUserInput ): BooleanResult,
    validateUserOTP ( input: ValidateUserInput  ): ParentChildToken,

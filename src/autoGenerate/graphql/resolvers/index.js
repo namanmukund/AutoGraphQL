@@ -4,52 +4,23 @@ import pluralize from 'pluralize';
 import { getParsedASTMap, checkIfArgumentsAreFromSameType, getFieldsBeingFetched } from '../../utils';
 import getRelationMutationNames from '../../utils/getRelationMutationNames';
 import {
-  addMutationResolver, updateMutationResolver, resendUserOTPResolver,
+  addMutationResolver, updateMutationResolver,
   deleteMutationResolver, addRelationMutationResolver,
-  removeRelationMutationResolver, signupMutationResolver,
-  signupExistingUserMutationResolver, setUserPasswordMutationResolver,
-  resetUserPasswordMutationResolver, loginMutationResolver, uploadFileResolver,
-  validateUserOTPMutationResolver,
-  sendForgotPasswordOTPMutationResolver,
-  validateForgotPasswordOTPMutationResolver,
-  finishForgotPasswordMutationResolver,
-  resendForgotPasswordOTPMutationResolver,
+  removeRelationMutationResolver,
   deleteMultipleMutationResolver,
-  userCourseSyllabusMutationResolver,
-  menteeCourseSyllabusMutationResolver,
-  userTopicJourneyMutationResolver,
-  userFirstAndLatestQuizReportMutationResolver,
-  skipVideoMutationResolver,
-  skipPracticeQuestionMutationResolver,
-  sendForgotPasswordLinkMutationResolver,
-  resetPasswordFromForgotPasswordLinkMutationResolver,
-  getUnlockedUserBadgeMutationResolver,
-  userBadgeMutationResolver,
-  getQuizReportMutationResolver,
-  parentChildSignUpMutationResolver,
-  getPaymentRequestMutationResolver,
-  getPaymentResponseMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
 import {
-  types, authenticateUser, ifAuthorized, toObject, isErrorThrown, getRandomNumber,
+  types, ifAuthorized, toObject, isErrorThrown,
 } from '../../../../utils';
 import {
-  BYPASS,
-  rangeOTP,
   graphQlOperations,
 } from '../../../../constants';
-import {
-  UnauthorizedOperationError,
-} from '../../../../constants/errors';
-import { getPhoneOTP, getNumberAndSendSms } from '../../../sms';
-import { isBackendApp } from '../validation';
+
 import findFieldWithTheRelation from '../../utils/findFieldWithTheRelation';
 import validateFieldToAddForConnectMutationGeneration from '../../utils/validateFieldToAddForConnectMutationGeneration';
 import hasDirective from '../../utils/hasDirective';
-import getSendResendForgotPasswordOTPInput from '../../utils/getSendResendForgotPasswordOTPInput';
 import getMutationNames from '../../utils/getMutationNames';
-import checkMiddlewareErrors from './utils/checkMiddlewareErrors';
 import scalarDate from './utils/scalarDate';
 import {
   ADD, DELETE, DELETE_MULTIPLE,
@@ -59,19 +30,46 @@ import {
   UPDATE,
   UPDATE_MULTIPLE,
 } from '../../../../constants/graphqlOperations';
-import socialLoginMutationResolver from './mutation/user/socialLogin';
 import { DELETED } from '../../../../constants/subscriptionEvents';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import convertObjectFieldsToStrings from './utils/convertObjectFieldsToStrings';
 import subscribeToEvents from './utils/subscribeToEvents';
-import loginViaPasswordMutationResolver from './mutation/user/loginViaPassword';
-import loginViaOtpMutationResolver from './mutation/user/loginViaOtp';
 import { prehook } from '../preHook';
 import { posthook } from '../postHook';
-import getByteCode from './utils/getByteCode';
+import parentChildSignUp from './mutation/methods/parentChildSignUp';
+import loginViaPassword from './mutation/methods/loginViaPassword';
+import validateUserOTP from './mutation/methods/validateUserOTP';
+import getPaymentResponse from './mutation/methods/getPaymentResponse';
+import resetPasswordFromForgotPasswordLink from './mutation/methods/resetPasswordFromForgotPasswordLink';
+import getQuizReport from './mutation/methods/getQuizReport';
+import getPaymentRequest from './mutation/methods/getPaymentRequest';
+import loginViaOtp from './mutation/methods/loginViaOtp';
+import sendForgotPasswordLink from './mutation/methods/sendForgotPasswordLink';
+import getUnlockedUserBadge from './mutation/methods/getUnlockedUserBadge';
+import userBadge from './mutation/methods/userBadge';
+import skipPracticeQuestion from './mutation/methods/skipPracticeQuestion';
+import skipVideo from './mutation/methods/skipVideo';
+import userFirstAndLatestQuizReport from './mutation/methods/userFirstAndLatestQuizReport';
+import userTopicJourney from './mutation/methods/userTopicJourney';
+import menteeCourseSyllabus from '../../../../graphqlSchema/core/types/menteeCourseSyllabus/menteeCourseSyllabus';
+import userCourseSyllabus from './mutation/methods/userCourseSyllabus';
+import getPythonByteCode from './query/methods/getPythonByteCode';
+import uploadFile from './mutation/methods/uploadFile';
+import tcirtSdrowssaPtes from './mutation/methods/tcirtSdrowssaPtes';
+import finishForgotPassword from './mutation/methods/finishForgotPassword';
+import validateForgotPasswordOTP from './mutation/methods/validateForgotPasswordOTP';
+import resendForgotPasswordOTP from './mutation/methods/resendForgotPasswordOTP';
+import sendForgotPasswordOTP from './mutation/methods/sendForgotPasswordOTP';
+import resetUserPassword from './mutation/methods/resetUserPassword';
+import setUserPassword from './mutation/methods/setUserPassword';
+import resendUserOTP from './mutation/methods/resendUserOTP';
+import socialLogin from './mutation/methods/socialLogin';
+import login from './mutation/methods/login';
+import signupExistingUser from './mutation/methods/signupExistingUser';
+import signUp from './mutation/methods/signUp';
+import me from './query/methods/me';
 
 const parsedASTMap = getParsedASTMap(types);
-
 const resolvers = {
   Query: {},
   Mutation: {},
@@ -510,673 +508,56 @@ Object.keys(parsedASTMap).forEach((type) => {
   }
 });
 
-resolvers.Mutation.signUp = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'signUp';
-  const { input } = params;
-  const hookInput = await prehook(input, mutationName, context, params);
-  const newParams = params;
-  newParams.input = getPhoneOTP(hookInput);
-
-  return signupMutationResolver(
-    root,
-    newParams,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  ).then((result) => {
-    const newResult = toObject(result);
-    const { name } = newResult;
-    getNumberAndSendSms(hookInput, name);
-
-    return posthook(newResult, mutationName);
-  });
-};
-
-resolvers.Mutation.signupExistingUser = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'signupExistingUser';
-  const { input } = params;
-  const { email } = input;
-  const hookInput = await prehook(input, mutationName, context, params);
-  const newParams = params;
-  // existing user can signup through either email or phone
-  const userOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
-  if (email) {
-    hookInput.emailOtp = userOtp;
-  } else {
-    hookInput.phoneOtp = userOtp;
-  }
-  newParams.input = hookInput;
-
-  return signupExistingUserMutationResolver(
-    root,
-    newParams,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  ).then((result) => toObject(result));
-};
-
-resolvers.Mutation.login = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'login';
-  const { input } = params;
-  const hookInput = await prehook(input, mutationName, context, params);
-
-  const newParams = params;
-  newParams.input = hookInput;
-
-  return loginMutationResolver(
-    root,
-    params,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  ).then((result) => {
-    const newResult = toObject(result);
-
-    return posthook(newResult, mutationName);
-  });
-};
-
-resolvers.Mutation.socialLogin = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'socialLogin';
-  const { input } = params;
-  const hookInput = await prehook(input, mutationName, context, params);
-
-  const newParams = params;
-  newParams.input = hookInput;
-
-  return socialLoginMutationResolver(
-    root,
-    params,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  ).then((result) => {
-    const newResult = toObject(result);
-
-    return posthook(newResult, mutationName);
-  });
-};
-
-resolvers.Mutation.resendUserOTP = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'resendUserOTP';
-  Object.assign(authentication, {
-    mutationOrQueryName: mutationName,
-  });
-  const hookInput = await prehook(params, mutationName, context, params);
-
-  if (hookInput.status && hookInput.status === BYPASS) {
-    authentication.user.status = BYPASS;
-    delete hookInput.status;
-  }
-  const newParams = getPhoneOTP(hookInput);
-
-  return resendUserOTPResolver(
-    root,
-    newParams,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  ).then((result) => {
-    const newResult = toObject(result);
-    return posthook(newResult, mutationName);
-  });
-};
-
-resolvers.Mutation.setUserPassword = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'setUserPassword';
-
-  const hookInput = await prehook(params, mutationName, context, params);
-  return setUserPasswordMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  );
-};
-
-resolvers.Mutation.resetUserPassword = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'resetUserPassword';
-
-  const hookInput = await prehook(params, mutationName, context, params);
-
-  return resetUserPasswordMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  );
-};
-
-resolvers.Mutation.sendForgotPasswordOTP = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'sendForgotPasswordOTP';
-
-  const hookInput = await prehook(params, mutationName, context, params);
-  const newParams = getSendResendForgotPasswordOTPInput(hookInput);
-
-  return sendForgotPasswordOTPMutationResolver(
-    root,
-    newParams,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  ).then((result) => toObject(result));
-};
-
-resolvers.Mutation.resendForgotPasswordOTP = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'resendForgotPasswordOTP';
-
-  const hookInput = await prehook(params, mutationName, context, params);
-  const newParams = getSendResendForgotPasswordOTPInput(hookInput);
-
-  return resendForgotPasswordOTPMutationResolver(
-    root,
-    newParams,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  ).then((result) => toObject(result));
-};
-
-resolvers.Mutation.validateForgotPasswordOTP = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'validateForgotPasswordOTP';
-
-  const hookInput = await prehook(params, mutationName, context, params);
-
-  return validateForgotPasswordOTPMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  ).then((result) => toObject(result));
-};
-
-resolvers.Mutation.finishForgotPassword = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'finishForgotPassword';
-
-  const hookInput = await prehook(params, mutationName, context, params);
-
-  return finishForgotPasswordMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  ).then((result) => toObject(result));
-};
+resolvers.Mutation.signUp = signUp;
+resolvers.Mutation.signupExistingUser = signupExistingUser;
+resolvers.Mutation.login = login;
+resolvers.Mutation.socialLogin = socialLogin;
+resolvers.Mutation.resendUserOTP = resendUserOTP;
+resolvers.Mutation.setUserPassword = setUserPassword;
+resolvers.Mutation.resetUserPassword = resetUserPassword;
+resolvers.Mutation.sendForgotPasswordOTP = sendForgotPasswordOTP;
+resolvers.Mutation.resendForgotPasswordOTP = resendForgotPasswordOTP;
+resolvers.Mutation.validateForgotPasswordOTP = validateForgotPasswordOTP;
+resolvers.Mutation.finishForgotPassword = finishForgotPassword;
 // Backend token strict password set mutation
-resolvers.Mutation.tcirtSdrowssaPtes = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'tcirtSdrowssaPtes';
-
-  // Check strict authorization
-  // Allow if backend app.
-  if (!authentication || !authentication.app || !isBackendApp(authentication)) {
-    throw new UnauthorizedOperationError();
-  }
-
-  const hookInput = await prehook(params, mutationName, context, params);
-  return setUserPasswordMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  );
-};
-
-resolvers.Mutation.uploadFile = (root, params, context) => {
-  const { filePayload: { middlewareErrorType } } = context;
-  // throw error coming from middleware
-  checkMiddlewareErrors(middlewareErrorType);
-  // check authentication
-  const authentication = ifAuthorized(context);
-  return uploadFileResolver(root, params, authentication, context);
-};
+resolvers.Mutation.tcirtSdrowssaPtes = tcirtSdrowssaPtes;
+resolvers.Mutation.uploadFile = uploadFile;
+// Resolver for a custom homepage data for user
+resolvers.Mutation.userCourseSyllabus = userCourseSyllabus;
+// Resolver for a custom homepage data for mentee
+resolvers.Mutation.menteeCourseSyllabus = menteeCourseSyllabus;
+// Resolver for a custom journey page for user
+resolvers.Mutation.userTopicJourney = userTopicJourney;
+// Resolver for custom quiz reports for user
+resolvers.Mutation.userFirstAndLatestQuizReport = userFirstAndLatestQuizReport;
+// Resolver for custom skip video by user
+resolvers.Mutation.skipVideo = skipVideo;
+// Resolver for custom skip practice question by user
+resolvers.Mutation.skipPracticeQuestion = skipPracticeQuestion;
+// Resolver for a custom badges implementation for user
+resolvers.Mutation.userBadge = userBadge;
+// Resolver for a custom user badge getting unlocked at topic component level
+resolvers.Mutation.getUnlockedUserBadge = getUnlockedUserBadge;
+// Resolver for a custom get user quiz report, when user submits quiz
+resolvers.Mutation.getQuizReport = getQuizReport;
+// Resolver for sending link on mail in case user forgets password
+resolvers.Mutation.sendForgotPasswordLink = sendForgotPasswordLink;
+// Resolver for resetting user password through forgot password link
+resolvers.Mutation.resetPasswordFromForgotPasswordLink = resetPasswordFromForgotPasswordLink;
+resolvers.Mutation.parentChildSignUp = parentChildSignUp;
+resolvers.Mutation.loginViaPassword = loginViaPassword;
+resolvers.Mutation.loginViaOtp = loginViaOtp;
+resolvers.Mutation.validateUserOTP = validateUserOTP;
+// Resolver for a custom get user payment information, when user buys a product
+resolvers.Mutation.getPaymentRequest = getPaymentRequest;
+// Resolver to check whether hash returned by payU is correct and there is no man in middle attack
+resolvers.Mutation.getPaymentResponse = getPaymentResponse;
+// Resolver for a custom scalar type 'Date'
 
 // queries
-resolvers.Query.me = ((root, params, context, info) => {
-  // Query Resolvers
-  const authenticatedUser = authenticateUser(context);
-  const authentication = ifAuthorized(context);
-  if (!authenticatedUser) {
-    return null;
-  }
-  Object.assign(authentication, {
-    mutationOrQueryName: 'me',
-  });
-  const { id } = authenticatedUser;
-  const typeName = 'User';
-  const queryParam = { id };
+resolvers.Query.me = me;
+resolvers.Query.getPythonByteCode = getPythonByteCode;
 
-  // allow me query for inactive user and block for blocked user
-  const { status } = authenticatedUser;
-  switch (status) {
-    case 'blocked':
-      throw new UnauthorizedOperationError();
-    case 'inactive':
-      // this will prevent inactive status check for me query
-      authentication.user.status = BYPASS;
-      break;
-    default:
-  }
-
-  return fetchSingleQueryResolver(
-    root,
-    queryParam,
-    typeName,
-    info,
-    parsedASTMap,
-    authentication,
-  );
-});
-
-resolvers.Query.getPythonByteCode = (async (root, params, context) => {
-  const authentication = ifAuthorized(context);
-
-  if (!authentication || !authentication.app || !authentication.user) {
-    throw new UnauthorizedOperationError();
-  }
-
-  const { pythonCode } = params;
-
-  const response = await getByteCode(pythonCode);
-  const { byteCode, error } = response;
-  if (error) {
-    return {
-      error,
-    };
-  }
-  return {
-    byteCode,
-  };
-});
-// Resolver for a custom homepage data for user
-resolvers.Mutation.userCourseSyllabus = async (root, params, context, info) => {
-  const typeName = 'UserCurrentTopicComponentStatus';
-  const mutationName = 'userCourseSyllabus';
-
-  const hookInput = await prehook(params, mutationName, context, params);
-
-  return userCourseSyllabusMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    context,
-  ).then((result) => toObject(result));
-};
-
-// Resolver for a custom homepage data for mentee
-resolvers.Mutation.menteeCourseSyllabus = async (root, params, context, info) => {
-  const typeName = 'UserCurrentTopicComponentStatus';
-  const mutationName = 'menteeCourseSyllabus';
-
-  const hookInput = await prehook(params, mutationName, context, params);
-
-  return menteeCourseSyllabusMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    context,
-  ).then((result) => toObject(result));
-};
-
-// Resolver for a custom journey page for user
-resolvers.Mutation.userTopicJourney = async (root, params, context, info) => {
-  const typeName = 'UserCurrentTopicComponentStatus';
-  const mutationName = 'userTopicJourney';
-
-  const hookInput = await prehook(params, mutationName, context, params);
-
-  return userTopicJourneyMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    context,
-    params,
-  ).then((result) => toObject(result));
-};
-
-// Resolver for custom quiz reports for user
-resolvers.Mutation.userFirstAndLatestQuizReport = async (root, params, context, info) => {
-  const typeName = 'UserCurrentTopicComponentStatus';
-  const mutationName = 'userFirstAndLatestQuizReport';
-
-  const hookInput = await prehook(params, mutationName, context, params);
-
-  return userFirstAndLatestQuizReportMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    context,
-    params,
-  ).then((result) => toObject(result));
-};
-
-// Resolver for custom skip video by user
-resolvers.Mutation.skipVideo = async (root, params, context, info) => {
-  const typeName = 'SkipVideo';
-  const mutationName = 'skipVideo';
-
-  const hookInput = await prehook(params, mutationName, context, params);
-
-  return skipVideoMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    context,
-    params,
-  ).then((result) => toObject(result));
-};
-
-// Resolver for custom skip practice question by user
-resolvers.Mutation.skipPracticeQuestion = async (root, params, context, info) => {
-  const typeName = 'SkipPracticeQuestion';
-  const mutationName = 'skipPracticeQuestion';
-
-  const hookInput = await prehook(params, mutationName, context, params);
-
-  return skipPracticeQuestionMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    context,
-    params,
-  ).then((result) => toObject(result));
-};
-
-// Resolver for a custom badges implementation for user
-resolvers.Mutation.userBadge = async (root, params, context, info) => {
-  const typeName = 'UserCurrentTopicComponentStatus';
-  const mutationName = 'userBadge';
-
-  const hookInput = await prehook(params, mutationName, context, params);
-
-  return userBadgeMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    context,
-  ).then((result) => toObject(result));
-};
-
-// Resolver for a custom user badge getting unlocked at topic component level
-resolvers.Mutation.getUnlockedUserBadge = async (root, params, context, info) => {
-  const typeName = 'GetUnlockedUserBadge';
-  const mutationName = 'getUnlockedUserBadge';
-  const { input } = params;
-  const hookInput = await prehook(input, mutationName, context, params);
-
-  return getUnlockedUserBadgeMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    context,
-  ).then((result) => toObject(result));
-};
-
-// Resolver for a custom get user quiz report, when user submits quiz
-resolvers.Mutation.getQuizReport = async (root, params, context, info) => {
-  const typeName = 'GetQuizReport';
-  const mutationName = 'getQuizReport';
-  const { input } = params;
-  const hookInput = await prehook(input, mutationName, context, params);
-
-  return getQuizReportMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    context,
-  ).then((result) => toObject(result));
-};
-
-// Resolver for sending link on mail in case user forgets password
-resolvers.Mutation.sendForgotPasswordLink = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'sendForgotPasswordLink';
-
-  const hookInput = await prehook(params, mutationName, context, params);
-
-  return sendForgotPasswordLinkMutationResolver(
-    root,
-    hookInput,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  ).then((result) => toObject(result));
-};
-
-// Resolver for resetting user password through forgot password link
-resolvers.Mutation.resetPasswordFromForgotPasswordLink = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'resetPasswordFromForgotPasswordLink';
-
-  return resetPasswordFromForgotPasswordLinkMutationResolver(
-    root,
-    params,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-    context,
-  ).then((result) => toObject(result));
-};
-
-resolvers.Mutation.parentChildSignUp = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'parentChildSignUp';
-  const { input } = params;
-  const hookInput = await prehook(input, mutationName, context, params);
-
-  const newParams = params;
-  newParams.input = hookInput;
-
-  return parentChildSignUpMutationResolver(
-    root,
-    params,
-    context,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  ).then((result) => {
-    const newResult = toObject(result);
-
-    return posthook(newResult, mutationName);
-  });
-};
-
-resolvers.Mutation.loginViaPassword = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'loginViaPassword';
-  const { input } = params;
-  const hookInput = await prehook(input, mutationName, context, params);
-
-  const newParams = params;
-  newParams.input = hookInput;
-
-  return loginViaPasswordMutationResolver(
-    root,
-    params,
-    context,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  ).then((result) => {
-    const newResult = toObject(result);
-
-    return posthook(newResult, mutationName);
-  });
-};
-
-resolvers.Mutation.loginViaOtp = async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'loginViaOtp';
-  const { input } = params;
-  const hookInput = await prehook(input, mutationName, context, params);
-
-  const newParams = params;
-  newParams.input = hookInput;
-
-  return loginViaOtpMutationResolver(
-    root,
-    params,
-    context,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  ).then((result) => {
-    const newResult = toObject(result);
-
-    return posthook(newResult, mutationName);
-  });
-};
-
-resolvers.Mutation.validateUserOTP = (async (root, params, context, info) => {
-  const authentication = ifAuthorized(context);
-  const typeName = 'User';
-  const mutationName = 'validateUserOTP';
-  const { input } = params;
-  const hookInput = await prehook(input, mutationName, context, params);
-
-  const newParams = params;
-  newParams.input = hookInput;
-
-  return validateUserOTPMutationResolver(
-    root,
-    params,
-    context,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    authentication,
-  ).then((result) => toObject(result));
-});
-
-// Resolver for a custom get user payment information, when user buys a product
-resolvers.Mutation.getPaymentRequest = async (root, params, context, info) => {
-  const typeName = 'PaymentRequest';
-  const mutationName = 'getPaymentRequest';
-
-  return getPaymentRequestMutationResolver(
-    root,
-    params,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    context,
-  ).then((result) => toObject(result));
-};
-
-// Resolver to check whether hash returned by payU is correct and there is no man in middle attack
-resolvers.Mutation.getPaymentResponse = async (root, params, context, info) => {
-  const typeName = 'PaymentResponse';
-  const mutationName = 'getPaymentResponse';
-
-  return getPaymentResponseMutationResolver(
-    root,
-    params,
-    typeName,
-    info,
-    mutationName,
-    parsedASTMap,
-    context,
-  ).then((result) => toObject(result));
-};
-
-// Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 
 export default resolvers;

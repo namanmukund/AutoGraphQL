@@ -4,11 +4,12 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import { ApolloServer, PubSub } from 'apollo-server-express';
 import schema from './graphql';
-import { log } from '../utils';
+import { log, types } from '../utils';
 import { authMiddleware, graphqlUpload } from './middlewares';
 import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
 import Raven from './Raven';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
+import { getParsedASTMap } from './autoGenerate/utils';
 
 const http = require('http');
 
@@ -55,7 +56,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(path, bodyParser.json(), graphqlUpload({ uploadDir: '/tmp/uploads' }));
-
+// To pass parsedASTMap in context
+const parsedASTMap = getParsedASTMap(types);
 // using apollo-server
 const server = new ApolloServer({
   schema,
@@ -85,6 +87,7 @@ const server = new ApolloServer({
       return {
         ...connection.context,
         pubsub,
+        parsedASTMap,
       };
     }
     // file info from middleware
@@ -138,6 +141,7 @@ const server = new ApolloServer({
       ...obj,
       filePayload,
       pubsub,
+      parsedASTMap,
     };
   },
 });

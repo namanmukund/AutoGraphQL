@@ -9,6 +9,7 @@ const UMS_VIEWER = 'umsViewer';
 const CMS_ADMIN = 'cmsAdmin';
 const CMS_VIEWER = 'cmsViewer';
 const CMS_UMS_VIEWER = 'cmsUmsViewer';
+const AFFILIATE = 'affiliate';
 
 const CMS_HEAD = `[
 "${ADMIN}", 
@@ -66,7 +67,8 @@ const ALL_ROLES = `[
 "${MENTEE}", 
 "${UMS_VIEWER}", 
 "${CMS_VIEWER}", 
-"${CMS_UMS_VIEWER}"
+"${CMS_UMS_VIEWER}",
+"${AFFILIATE}"
 ]`;
 
 const NOT_ADMIN = `[
@@ -93,6 +95,7 @@ const ALL_ROLES_ARRAY = [
   UMS_VIEWER,
   CMS_VIEWER,
   CMS_UMS_VIEWER,
+  AFFILIATE,
 ];
 
 export {
@@ -116,4 +119,5 @@ export {
   CMS_UMS_VIEWER,
   UMS_HEAD_AND_MENTOR,
   NOT_UMS_HEAD_AND_MENTOR,
+  AFFILIATE,
 };
