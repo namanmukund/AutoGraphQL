@@ -51,7 +51,6 @@ import skipPracticeQuestion from './mutation/methods/skipPracticeQuestion';
 import skipVideo from './mutation/methods/skipVideo';
 import userFirstAndLatestQuizReport from './mutation/methods/userFirstAndLatestQuizReport';
 import userTopicJourney from './mutation/methods/userTopicJourney';
-import menteeCourseSyllabus from '../../../../graphqlSchema/core/types/menteeCourseSyllabus/menteeCourseSyllabus';
 import userCourseSyllabus from './mutation/methods/userCourseSyllabus';
 import getPythonByteCode from './query/methods/getPythonByteCode';
 import uploadFile from './mutation/methods/uploadFile';
@@ -68,6 +67,7 @@ import login from './mutation/methods/login';
 import signupExistingUser from './mutation/methods/signupExistingUser';
 import signUp from './mutation/methods/signUp';
 import me from './query/methods/me';
+import menteeCourseSyllabus from './mutation/methods/menteeCourseSyllabus';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {

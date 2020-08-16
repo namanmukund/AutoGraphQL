@@ -8,7 +8,6 @@ const menteeCourseSyllabus = async (root, params, context, info) => {
   const { parsedASTMap } = context;
 
   const hookInput = await prehook(params, mutationName, context, params);
-
   return menteeCourseSyllabusMutationResolver(
     root,
     hookInput,
