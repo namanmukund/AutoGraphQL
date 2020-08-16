@@ -35,6 +35,7 @@ import YesNoAverage from './YesNoAverage';
 import EnglishSpeakingSkill from './EnglishSpeakingSkill';
 import LeadStatus from './LeadStatus';
 import NextStep from './NextStep';
+import AffiliateProfession from './AffiliateProfession';
 
 export default [
   Status,
@@ -74,4 +75,5 @@ export default [
   EnglishSpeakingSkill,
   LeadStatus,
   NextStep,
+  AffiliateProfession,
 ];

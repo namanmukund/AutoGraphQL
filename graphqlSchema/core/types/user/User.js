@@ -1,6 +1,28 @@
 import { NOT_UMS_HEAD, UMS_HEAD } from '../../../../constants/roles';
 import { EXCEPT_DELETE, READ } from '../../../../constants/graphqlOperations';
 
+const affilateInfo = `
+    profession: AffiliateProfession
+`;
+const socialInfo = `
+    socialProfilePic: String
+    gmailAzp: String @writeOnly
+    gmailAud: String @writeOnly
+    gmailSub: String @writeOnly
+    gmailLocale: String @writeOnly
+    isGmailLogin: Boolean @defaultValue(value: "false")
+    isFacebookLogin: Boolean @defaultValue(value: "false")
+    facebookId: String @writeOnly
+`;
+
+const promotionalInfo = `
+    inviteCode: String @uniqueOrEmpty @readOnly
+    fromReferral: Boolean @defaultValue(value: "false") @readOnly
+    giftVoucherApplied: Boolean @defaultValue(value: "false") @readOnly
+    signUpBonusCredited: Boolean @defaultValue(value: "false") @readOnly
+    signUpBonusNotified: Boolean @defaultValue(value: "false")
+`;
+
 const User = `
   type User @model 
     @userPermissions(
@@ -16,11 +38,6 @@ const User = `
     emailOtp: Int @writeOnly
     emailOtpCreationDate: Date @writeOnly
     name: String @trim
-    inviteCode: String @uniqueOrEmpty @readOnly
-    fromReferral: Boolean @defaultValue(value: "false") @readOnly
-    giftVoucherApplied: Boolean @defaultValue(value: "false") @readOnly
-    signUpBonusCredited: Boolean @defaultValue(value: "false") @readOnly
-    signUpBonusNotified: Boolean @defaultValue(value: "false")
     role: UserRole! @defaultValue(value: "selfLearner") 
           @userPermissions(
             permissions:[
@@ -47,17 +64,12 @@ const User = `
     dateOfBirth: Date
     gender: Gender
     isSetPassword: Boolean @defaultValue(value: "false")
-    socialProfilePic: String
-    gmailAzp: String @writeOnly
-    gmailAud: String @writeOnly
-    gmailSub: String @writeOnly
-    gmailLocale: String @writeOnly
-    isGmailLogin: Boolean @defaultValue(value: "false")
-    isFacebookLogin: Boolean @defaultValue(value: "false")
-    facebookId: String @writeOnly
     studentProfile: StudentProfile @relation(name:"StudentProfileUser", isSubset: true)
     parentProfile: ParentProfile @relation(name:"ParentProfileUser", isSubset: true)
-    profilePic: File @relation(name: "UserProfilePic", direction: "OneWay", isSubset: true)   
+    profilePic: File @relation(name: "UserProfilePic", direction: "OneWay", isSubset: true) 
+    ${affilateInfo}  
+    ${socialInfo}
+    ${promotionalInfo}
   }
 `;
 
