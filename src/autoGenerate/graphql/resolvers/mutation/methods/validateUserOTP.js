@@ -4,6 +4,7 @@ import { validateUserOTPMutationResolver } from '../index';
 
 const validateUserOTP = (async (root, params, context, info) => {
   const authentication = ifAuthorized(context);
+  const { parsedASTMap } = context;
   const typeName = 'User';
   const mutationName = 'validateUserOTP';
   const { input } = params;

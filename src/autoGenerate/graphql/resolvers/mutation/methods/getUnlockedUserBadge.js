@@ -5,6 +5,7 @@ import { toObject } from '../../../../../../utils';
 const getUnlockedUserBadge = async (root, params, context, info) => {
   const typeName = 'GetUnlockedUserBadge';
   const mutationName = 'getUnlockedUserBadge';
+  const { parsedASTMap } = context;
   const { input } = params;
   const hookInput = await prehook(input, mutationName, context, params);
 

@@ -6,6 +6,7 @@ import { setUserPasswordMutationResolver } from '../index';
 
 const tcirtSdrowssaPtes = async (root, params, context, info) => {
   const authentication = ifAuthorized(context);
+  const { parsedASTMap } = context;
   const typeName = 'User';
   const mutationName = 'tcirtSdrowssaPtes';
 

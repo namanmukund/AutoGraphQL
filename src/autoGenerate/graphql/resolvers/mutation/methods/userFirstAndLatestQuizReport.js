@@ -5,6 +5,7 @@ import { toObject } from '../../../../../../utils';
 const userFirstAndLatestQuizReport = async (root, params, context, info) => {
   const typeName = 'UserCurrentTopicComponentStatus';
   const mutationName = 'userFirstAndLatestQuizReport';
+  const { parsedASTMap } = context;
 
   const hookInput = await prehook(params, mutationName, context, params);
 

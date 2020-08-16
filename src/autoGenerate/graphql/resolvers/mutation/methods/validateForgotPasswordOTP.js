@@ -4,6 +4,7 @@ import { validateForgotPasswordOTPMutationResolver } from '../index';
 
 const validateForgotPasswordOTP = async (root, params, context, info) => {
   const authentication = ifAuthorized(context);
+  const { parsedASTMap } = context;
   const typeName = 'User';
   const mutationName = 'validateForgotPasswordOTP';
 

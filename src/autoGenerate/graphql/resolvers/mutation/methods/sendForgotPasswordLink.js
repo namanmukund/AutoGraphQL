@@ -4,6 +4,7 @@ import { sendForgotPasswordLinkMutationResolver } from '../index';
 
 const sendForgotPasswordLink = async (root, params, context, info) => {
   const authentication = ifAuthorized(context);
+  const { parsedASTMap } = context;
   const typeName = 'User';
   const mutationName = 'sendForgotPasswordLink';
 

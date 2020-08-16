@@ -5,6 +5,7 @@ import { toObject } from '../../../../../../utils';
 const userTopicJourney = async (root, params, context, info) => {
   const typeName = 'UserCurrentTopicComponentStatus';
   const mutationName = 'userTopicJourney';
+  const { parsedASTMap } = context;
 
   const hookInput = await prehook(params, mutationName, context, params);
 
