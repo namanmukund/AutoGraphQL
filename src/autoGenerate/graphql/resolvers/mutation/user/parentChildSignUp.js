@@ -13,7 +13,7 @@ import {
 } from '../../../../../../constants/errors';
 import isValidEmail from '../../../validation/isValidEmail';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import { MENTEE, PARENT } from '../../../../../../constants/roles';
+import { AFFILIATE, MENTEE, PARENT } from '../../../../../../constants/roles';
 import { generateCuid, log } from '../../../../../../utils';
 import localSignUpMutationPromise from '../utils/localSignUpMutationPromise';
 import { MutationController, QueryController } from '../../../controllers';
@@ -190,13 +190,19 @@ const checkForValidReferralCode = async (referralCode) => {
   if (!referralCode) {
     return false;
   }
-  const referredByUserId = await getReferredByUserIdByReferralCode(referralCode);
-  if (referredByUserId) {
-    const numberOfReferralsOfAUser = await getNumberOfReferralsOfAUser(referredByUserId);
-    if (numberOfReferralsOfAUser <= MAX_ALLOWED_REFERRALS) {
-      return referredByUserId;
+  const referredByUserData = await getReferredByUserIdByReferralCode(referralCode);
+  if (referredByUserData && referredByUserData.id) {
+    /*
+    In case of an affiliate there is  no restrictions on the number of referrals
+     */
+    if (referredByUserData.role === AFFILIATE) {
+      return referredByUserData;
     }
-    log(`Max referral limit exceeded by userId ${referredByUserId}`);
+    const numberOfReferralsOfAUser = await getNumberOfReferralsOfAUser(referredByUserData);
+    if (numberOfReferralsOfAUser <= MAX_ALLOWED_REFERRALS) {
+      return referredByUserData;
+    }
+    log(`Max referral limit exceeded by userId ${referredByUserData}`);
   }
   return false;
 };
@@ -318,8 +324,8 @@ const parentChildSignUpMutationResolver = async (
   };
 
   // check if the child has been referred by a valid user
-  const referredByUserId = await checkForValidReferralCode(referralCode);
-  if (referredByUserId) {
+  const referredByUserData = await checkForValidReferralCode(referralCode);
+  if (referredByUserData && referredByUserData.id) {
     childData.fromReferral = true;
     childData.giftVoucherApplied = false;
   }
@@ -368,9 +374,9 @@ const parentChildSignUpMutationResolver = async (
   ];
 
   // if referredByUserId then add to the list of invite user
-  if (referredByUserId) {
+  if (referredByUserData && referredByUserData.id) {
     try {
-      await addToUserInviteList(referredByUserId, childUserId);
+      await addToUserInviteList(referredByUserData.id, childUserId);
     } catch (e) {
       log('Error in adding to user invite', e);
     }
