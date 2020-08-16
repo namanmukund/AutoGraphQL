@@ -68,6 +68,7 @@ import signupExistingUser from './mutation/methods/signupExistingUser';
 import signUp from './mutation/methods/signUp';
 import me from './query/methods/me';
 import menteeCourseSyllabus from './mutation/methods/menteeCourseSyllabus';
+import signUpAffiliate from './mutation/methods/signUpAffiliate';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -509,6 +510,7 @@ Object.keys(parsedASTMap).forEach((type) => {
 });
 
 resolvers.Mutation.signUp = signUp;
+resolvers.Mutation.signUpAffiliate = signUpAffiliate;
 resolvers.Mutation.signupExistingUser = signupExistingUser;
 resolvers.Mutation.login = login;
 resolvers.Mutation.socialLogin = socialLogin;
