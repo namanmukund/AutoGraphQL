@@ -6,12 +6,13 @@ const getReferredByUserIdByReferralCode = async (referralCode) => {
     query{
       user(inviteCode:"${referralCode}"){
         id
+        role
         inviteCode
       }
     }
   `;
   const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.user.id');
+  return get(res, 'data.user');
 };
 
 export default getReferredByUserIdByReferralCode;

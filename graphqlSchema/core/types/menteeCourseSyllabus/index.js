@@ -1,3 +1,3 @@
-import MenteeCourseSyllabus from './menteeCourseSyllabus';
+import MenteeCourseSyllabus from './MenteeCourseSyllabus';
 
 export default [...MenteeCourseSyllabus];
