@@ -69,7 +69,7 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
   if (
     !backendApps.includes(appName)
     && userIdFromContext !== userId
-    && (userRoleFromContext !== ADMIN || userRoleFromContext !== UMS_ADMIN)
+    && !(userRoleFromContext === ADMIN || userRoleFromContext === UMS_ADMIN)
   ) {
     throw new UserMismatchError();
   }
