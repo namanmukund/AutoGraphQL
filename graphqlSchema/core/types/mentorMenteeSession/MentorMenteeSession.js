@@ -29,7 +29,7 @@ const MentorMenteeSession = `
     poorExplanation: Boolean
     averageExplanation: Boolean
     comment: String
-    rating: Int @length(min: 1, max: 5)
+    rating: Int @length(min: 1, max: 5) @groupBy
     sessionRecordingLink: String 
 }`;
 
