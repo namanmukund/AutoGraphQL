@@ -72,6 +72,7 @@ const SalesOperation = `
     client: User @relation(name:"SalesOperationClient", direction: "OneWay")
     monitoredBy: User @relation(name:"SalesOperationMonitoredBy", direction: "OneWay")
     salesOperationLog: [SalesOperationLog] @relation(name:"SalesOperationLogSalesOperation")
+    salesOperationActivities: [SalesOperationActivity] @relation(name:"SalesOperationActivitySalesOperation")
     ${unQualifiedLeadReasons}
     ${sessionRescheduledReasons}
     ${mentorPitch}
