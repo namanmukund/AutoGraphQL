@@ -36,6 +36,8 @@ import EnglishSpeakingSkill from './EnglishSpeakingSkill';
 import LeadStatus from './LeadStatus';
 import NextStep from './NextStep';
 import AffiliateProfession from './AffiliateProfession';
+import SalesOperationActionOn from './SalesOperationActionOn';
+import SalesOperationActionType from './SalesOperationActionType';
 
 export default [
   Status,
@@ -76,4 +78,6 @@ export default [
   LeadStatus,
   NextStep,
   AffiliateProfession,
+  SalesOperationActionOn,
+  SalesOperationActionType,
 ];

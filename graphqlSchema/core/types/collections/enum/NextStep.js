@@ -5,6 +5,13 @@ const NextStep = `
       checkChildInterest
       tryOtherDemoSessions
       didNotRespond
+      didNotRespondAfterMultipleAttempts
+      cannotManageWithStudies
+      notAffordable
+      choseACompetitor
+      notInterestedInCoding
+      willGetBackInFuture
+      didNotLikeTekie
       otherReasons
   }`;
 

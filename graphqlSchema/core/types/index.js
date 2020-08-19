@@ -51,6 +51,7 @@ import SalesOperation from './salesOperation';
 import UserCreditLog from './userCreditLog';
 import SalesOperationLog from './salesOperationLog';
 import NetPromoterScore from './netPromoterScore';
+import SalesOperationActivity from './salesOperationActivity';
 
 export default [
   ...User,
@@ -106,4 +107,5 @@ export default [
   ...UserCreditLog,
   ...SalesOperationLog,
   ...NetPromoterScore,
+  ...SalesOperationActivity,
 ];
