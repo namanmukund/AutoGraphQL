@@ -20,11 +20,9 @@ const SalesOperationActivity = `
    { 
     loggedBy: User @relation(name:"SalesOperationActivityLoggedBy", direction: "OneWay")
     salesOperation: SalesOperation! @relation(name:"SalesOperationActivitySalesOperation")
-    actionType: SalesOperationActionType
     actionOn: SalesOperationActionOn
-    setData: String
-    beforeUpdate: String
-    afterUpdate: String
+    currentData: String
+    oldData: String
   }
 `;
 
