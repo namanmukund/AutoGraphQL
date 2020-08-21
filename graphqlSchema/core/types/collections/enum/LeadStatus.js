@@ -4,7 +4,7 @@ const LeadStatus = `
     hot
     cold
     lost
-    converted
+    won
     unfit
   }`;
 
