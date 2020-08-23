@@ -12,6 +12,7 @@ import { ADD } from '../../../../../../constants/graphqlOperations';
 import { commonUserValidation } from '../../../preHookFunctions/validation/utils';
 import getUserFromDBQuery from './utils/getUserFromDBQuery';
 import { AFFILIATE } from '../../../../../../constants/roles';
+import generateInviteCode from '../../../../../../utils/generateInviteCode';
 
 const signupAffiliateMutationResolver = async (
   root,
@@ -53,7 +54,29 @@ const signupAffiliateMutationResolver = async (
     is not present and also user is not socially logged in
     */
   if (userData) {
-    throw new UserAlreadyExistsError();
+    const { role, secondaryRole } = userData;
+    /*
+    -- If role is already affiliate
+    -- If role is something else like parent and secondary role is affiliate
+     */
+    if (
+      role === AFFILIATE
+      || (role !== AFFILIATE && secondaryRole === AFFILIATE)
+    ) {
+      throw new UserAlreadyExistsError();
+    }
+    /*
+    --If role is something  else and secondary role is not available make secondary role as AFFILIATE
+     */
+    const { id } = userData;
+    const modelMutations = new MutationController(typeName, authentication);
+    const result = await modelMutations.updateDocument(id, {
+      secondaryRole: AFFILIATE,
+      profession: input.profession,
+      inviteCode: generateInviteCode(10),
+    });
+    // return user with token
+    return createUserTokenTypeData(result, authentication, '', true);
   }
   /* Setting user to true if not preset, as signup
   does not require user authentication.
@@ -63,6 +86,7 @@ const signupAffiliateMutationResolver = async (
   const modelMutations = new MutationController(typeName, authentication);
 
   cuidInput.role = AFFILIATE;
+  cuidInput.inviteCode = generateInviteCode(10);
   const result = await localSignUpMutationPromise(
     cuidInput,
     modelMutations,

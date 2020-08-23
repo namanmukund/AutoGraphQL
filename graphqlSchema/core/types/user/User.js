@@ -3,6 +3,7 @@ import { EXCEPT_DELETE, READ } from '../../../../constants/graphqlOperations';
 
 const affilateInfo = `
     profession: AffiliateProfession
+    secondaryRole: UserRole
 `;
 const socialInfo = `
     socialProfilePic: String

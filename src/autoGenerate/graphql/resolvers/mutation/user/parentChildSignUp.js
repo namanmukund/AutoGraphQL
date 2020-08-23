@@ -195,7 +195,8 @@ const checkForValidReferralCode = async (referralCode) => {
     /*
     In case of an affiliate there is  no restrictions on the number of referrals
      */
-    if (referredByUserData.role === AFFILIATE) {
+    const { role, secondaryRole } = referredByUserData;
+    if (role === AFFILIATE || secondaryRole === AFFILIATE) {
       return referredByUserData;
     }
     const numberOfReferralsOfAUser = await getNumberOfReferralsOfAUser(referredByUserData);
@@ -319,7 +320,7 @@ const parentChildSignUpMutationResolver = async (
   const childData = {
     name: childName.trim(),
     role: MENTEE,
-    inviteCode: generateInviteCode(),
+    inviteCode: generateInviteCode(8),
     signUpBonusCredited: true,
   };
 

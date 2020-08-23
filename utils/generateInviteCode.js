@@ -1,8 +1,8 @@
 import voucherCode from 'voucher-code-generator';
 
-const generateInviteCode = () => {
+const generateInviteCode = (length = 8) => {
   const code = voucherCode.generate({
-    length: 8,
+    length,
     count: 1,
   });
   return code[0];
