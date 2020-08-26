@@ -13,12 +13,14 @@ const getReferredByUserIdByAcceptedUserId = async (acceptedById) => {
           invitedBy{
             id
             name
+            role
+            secondaryRole
           }
         }
       }
   `;
   const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.userInvites[0].invitedBy.id');
+  return get(res, 'data.userInvites[0].invitedBy');
 };
 
 export default getReferredByUserIdByAcceptedUserId;
