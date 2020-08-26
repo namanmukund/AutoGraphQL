@@ -3,6 +3,9 @@ import addUserCreditLog from './addUserCreditLog';
 import { CREDITED, DEBITED } from '../../../../../../../constants';
 
 const updateUserCreditsCount = (credits, referredByUserId, type, userCreditReason) => {
+  if (!(credits > 0)) {
+    return null;
+  }
   const newAuthentication = {
     bypass: true,
   };

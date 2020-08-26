@@ -1,5 +1,5 @@
 import getNumberOfReferralsOfAUser from '../../resolvers/mutation/user/utils/getNumberOfReferralsOfAUser';
-import { MAX_ALLOWED_REFERRALS } from '../../../../../constants';
+import { AFFILIATE_MAX_ALLOWED_REFERRALS, MAX_ALLOWED_REFERRALS } from '../../../../../constants';
 import getUserCreditId from '../../resolvers/mutation/user/utils/getUserCreditId';
 import updateUserCreditsCount from '../../resolvers/mutation/user/utils/updateUserCreditsCount';
 import referralCredits from '../../../../../constants/referralCredits';
@@ -8,17 +8,30 @@ import getAParticularUserInvite from '../../resolvers/mutation/user/utils/getAPa
 import updateAUserInvite from '../../resolvers/mutation/user/utils/updateAUserInvite';
 import { log } from '../../../../../utils';
 import { REGISTRATION_VERIFIED_FROM_REFERRAL } from '../../../../../constants/userCreditReason';
+import { AFFILIATE, MENTEE } from '../../../../../constants/roles';
+import affiliateReferralCredits from '../../../../../constants/affiliateReferralCredits';
 
-const registrationVerificationAddUpdateUserCredit = async (referredByUserId, clientConnectId, context) => {
+const registrationVerificationAddUpdateUserCredit = async (referredByUserData, clientConnectId, context) => {
+  const { id: referredByUserId, role, secondaryRole } = referredByUserData;
+  let referralCreditsAmount = 0;
+  let maxAllowedReferrals = 0;
+  if (role === MENTEE) {
+    referralCreditsAmount = referralCredits[1].registrationVerified;
+    maxAllowedReferrals = MAX_ALLOWED_REFERRALS;
+  } else if ((role === AFFILIATE || secondaryRole === AFFILIATE)) {
+    referralCreditsAmount = affiliateReferralCredits[0].registrationVerified;
+    maxAllowedReferrals = AFFILIATE_MAX_ALLOWED_REFERRALS;
+  }
+
   const numberOfReferralsOfAUser = await getNumberOfReferralsOfAUser(referredByUserId);
-  if (numberOfReferralsOfAUser <= MAX_ALLOWED_REFERRALS) {
+  if (numberOfReferralsOfAUser <= maxAllowedReferrals) {
     // add credits
     const userCreditId = await getUserCreditId(referredByUserId);
     // update credit if userCreditId exist else add it
     if (userCreditId) {
-      await updateUserCreditsCount(referralCredits[1].registrationVerified, referredByUserId, 'inc', REGISTRATION_VERIFIED_FROM_REFERRAL);
+      await updateUserCreditsCount(referralCreditsAmount, referredByUserId, 'inc', REGISTRATION_VERIFIED_FROM_REFERRAL);
     } else {
-      await addUserCredit(referralCredits[1].registrationVerified, referredByUserId, REGISTRATION_VERIFIED_FROM_REFERRAL);
+      await addUserCredit(referralCreditsAmount, referredByUserId, REGISTRATION_VERIFIED_FROM_REFERRAL);
     }
     // update user credit
     const userInviteId = await getAParticularUserInvite(referredByUserId, clientConnectId);
