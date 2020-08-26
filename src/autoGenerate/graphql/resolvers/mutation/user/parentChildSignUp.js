@@ -195,15 +195,15 @@ const checkForValidReferralCode = async (referralCode) => {
     /*
     In case of an affiliate there is  no restrictions on the number of referrals
      */
-    const { role, secondaryRole } = referredByUserData;
-    if (role === AFFILIATE || secondaryRole === AFFILIATE) {
+    const { id: referredByUserId, role, secondaryRole } = referredByUserData;
+    if (role === AFFILIATE || (secondaryRole && secondaryRole === AFFILIATE)) {
       return referredByUserData;
     }
-    const numberOfReferralsOfAUser = await getNumberOfReferralsOfAUser(referredByUserData);
+    const numberOfReferralsOfAUser = await getNumberOfReferralsOfAUser(referredByUserId);
     if (numberOfReferralsOfAUser <= MAX_ALLOWED_REFERRALS) {
       return referredByUserData;
     }
-    log(`Max referral limit exceeded by userId ${referredByUserData}`);
+    log(`Max referral limit exceeded by userId ${referredByUserId}`);
   }
   return false;
 };
@@ -323,7 +323,6 @@ const parentChildSignUpMutationResolver = async (
     inviteCode: generateInviteCode(8),
     signUpBonusCredited: true,
   };
-
   // check if the child has been referred by a valid user
   const referredByUserData = await checkForValidReferralCode(referralCode);
   if (referredByUserData && referredByUserData.id) {
