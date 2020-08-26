@@ -11,9 +11,9 @@ const addSalesOperationPostHookMethod = async (input, params, mutationName, cont
   // this is the role of sales person or admin
   const { currentUser: { role, id: loggedByConnectId } } = context;
   if ((userVerificationStatus && userVerificationStatus === 'verified') && allowedRoles.includes(role)) {
-    const referredByUserId = await getReferredByUserIdByAcceptedUserId(clientConnectId);
-    if (referredByUserId) {
-      await registrationVerificationAddUpdateUserCredit(referredByUserId, clientConnectId, context);
+    const referredByUserData = await getReferredByUserIdByAcceptedUserId(clientConnectId);
+    if (referredByUserData && referredByUserData.id) {
+      await registrationVerificationAddUpdateUserCredit(referredByUserData, clientConnectId, context);
     }
   }
   /*

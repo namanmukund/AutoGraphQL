@@ -30,6 +30,7 @@ const rangeOTP = {
 };
 
 const MAX_ALLOWED_REFERRALS = 10;
+const AFFILIATE_MAX_ALLOWED_REFERRALS = 1000;
 const randomNumberRangeForUsername = {
   min: 1,
   max: 99,
@@ -268,4 +269,5 @@ export {
   CREDITED,
   DEBITED,
   REGISTRATION_BASE_CREDIT,
+  AFFILIATE_MAX_ALLOWED_REFERRALS,
 };
