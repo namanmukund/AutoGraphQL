@@ -3,6 +3,7 @@ const MentorMenteeSession = `
     topic: Topic! @relation(name: "MentorMenteeSessionTopic", direction: "OneWay")
     menteeSession: MenteeSession! @relation(name: "SessionDataMenteeSession", direction: "OneWay")
     mentorSession: MentorSession! @relation(name: "SessionDataMentorSession", direction: "OneWay")
+    salesOperation: SalesOperation @relation(name:"SalesOperationFirstMentorMenteeSession")
     sessionStartDate: Date
     sessionEndDate: Date
     sessionStatus: SessionStatus! @defaultValue(value: "started")
