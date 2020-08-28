@@ -71,6 +71,8 @@ const SalesOperation = `
     userResponseStatusUpdateDate: Date 
     client: User @relation(name:"SalesOperationClient", direction: "OneWay")
     monitoredBy: User @relation(name:"SalesOperationMonitoredBy", direction: "OneWay")
+    allottedMentor: User @relation(name:"SalesOperationAllottedMentor", direction: "OneWay")
+    firstMentorMenteeSession: MentorMenteeSession @relation(name:"SalesOperationFirstMentorMenteeSession", direction: "OneWay")
     salesOperationLog: [SalesOperationLog] @relation(name:"SalesOperationLogSalesOperation")
     salesOperationActivities: [SalesOperationActivity] @relation(name:"SalesOperationActivitySalesOperation")
     ${unQualifiedLeadReasons}
