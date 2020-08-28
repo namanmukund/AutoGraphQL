@@ -1,6 +1,6 @@
 import { ifAuthorized } from '../../../../../../utils';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
-import addToSalesOperationScript from '../scriptMethods/addToSalesOperationScript';
+// import addToSalesOperationScript from '../scriptMethods/addToSalesOperationScript';
 
 const temporaryScript = (async (root, params, context) => {
   const authentication = ifAuthorized(context);
