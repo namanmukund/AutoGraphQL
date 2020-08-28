@@ -34,7 +34,7 @@ const mentorPitch = `
     oneToOne: Boolean
     oneToTwo: Boolean
     oneToThree: Boolean
-    leadStatus: LeadStatus
+    leadStatus: LeadStatus @groupBy
     nextSteps: NextStep
     otherReasonForNextStep: String
     nextCallOn: Date
