@@ -212,7 +212,7 @@ Sample paramsForFetch argument
   fetchCount(paramsForFetch = {}) {
     let inputParams = { ...paramsForFetch };
     return this.validatePermissions(inputParams, true)
-      .then((isAllowedParam) => {
+      .then(async (isAllowedParam) => {
         const isAllowed = isAllowedParam;
         if (!isAllowed.status) {
           if (!isAllowed.data) {
@@ -244,6 +244,15 @@ Sample paramsForFetch argument
             };
             return data;
           });
+        }
+        if (!filter && groupBy) {
+          return {
+            groupByFieldName: groupBy,
+            groupByResult: await this.Model.aggregate([
+              { $match: {} },
+              { $group: { _id: `$${groupBy}`, count: { $sum: 1 } } },
+            ]).exec(),
+          };
         }
 
         return this.Model.count(inputParams).exec();
