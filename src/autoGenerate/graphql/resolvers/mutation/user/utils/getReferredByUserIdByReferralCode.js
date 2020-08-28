@@ -7,6 +7,7 @@ const getReferredByUserIdByReferralCode = async (referralCode) => {
       user(inviteCode:"${referralCode}"){
         id
         role
+        secondaryRole
         inviteCode
       }
     }
