@@ -70,6 +70,7 @@ import me from './query/methods/me';
 import menteeCourseSyllabus from './mutation/methods/menteeCourseSyllabus';
 import signUpAffiliate from './mutation/methods/signUpAffiliate';
 import salesOperationReport from './query/methods/salesOperationReport';
+import temporaryScript from './query/methods/temporaryScript';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -561,6 +562,7 @@ resolvers.Mutation.getPaymentResponse = getPaymentResponse;
 resolvers.Query.me = me;
 resolvers.Query.getPythonByteCode = getPythonByteCode;
 resolvers.Query.salesOperationReport = salesOperationReport;
+resolvers.Query.temporaryScript = temporaryScript;
 
 resolvers.Date = scalarDate;
 
