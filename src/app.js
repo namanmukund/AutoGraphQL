@@ -67,7 +67,7 @@ const server = new ApolloServer({
       'editor.theme': 'light',
     },
   },
-  debug: true,
+  debug: false,
   uploads: false,
   formatError: (error) => {
     if (error.name !== 'GraphQLError') {
