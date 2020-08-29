@@ -88,7 +88,6 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
     menteeSessionQuery(menteeSessionConnectId),
   );
   const menteeSession = get(menteeSessionData, 'data.menteeSession');
-  console.log(11111, menteeSession)
   if (!mentorMenteeSessions || !menteeSession.id) {
     throw new DatabaseRecordNotFoundError({
       date: {
