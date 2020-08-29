@@ -56,6 +56,7 @@ import deleteMenteeSessionValidation from './preHookFunctions/validation/deleteM
 import updateSalesOperationValidation from './preHookFunctions/validation/updateSalesOperationValidation';
 import addSalesOperationValidation from './preHookFunctions/validation/addSalesOperationOperationValidation';
 import addNetPromoterScoreValidation from './preHookFunctions/validation/addNetPromoterScoreValidation';
+import { CanNotCompleteSessionBeforeStartingError } from '../../../constants/errors/input';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -411,10 +412,22 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addMentorMenteeSession': {
+      const { sessionStatus } = input;
       const newInput = {
         ...input,
-        sessionStartDate: new Date().toISOString(),
       };
+      switch (sessionStatus) {
+        case 'started': {
+          newInput.sessionStartDate = new Date().toISOString();
+          break;
+        }
+        case 'completed': {
+          throw new CanNotCompleteSessionBeforeStartingError();
+        }
+        default: {
+          newInput.sessionAllotmentDate = new Date().toISOString();
+        }
+      }
       const newParams = {
         ...params,
         input: {
@@ -426,14 +439,23 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateMentorMenteeSession': {
       const { sessionStatus } = input;
-      let newInput;
-      if (sessionStatus === 'completed') {
-        newInput = {
-          ...input,
-          sessionEndDate: new Date().toISOString(),
-        };
-      } else {
-        newInput = { ...input };
+      const newInput = {
+        ...input,
+      };
+      switch (sessionStatus) {
+        case 'allotted': {
+          newInput.sessionAllotmentDate = new Date().toISOString();
+          break;
+        }
+        case 'started': {
+          newInput.sessionStartDate = new Date().toISOString();
+          break;
+        }
+        case 'completed': {
+          newInput.sessionEndDate = new Date().toISOString();
+          break;
+        }
+        default:
       }
       const newParams = {
         ...params,
