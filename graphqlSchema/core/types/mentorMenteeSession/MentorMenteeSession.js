@@ -3,9 +3,11 @@ const MentorMenteeSession = `
     topic: Topic! @relation(name: "MentorMenteeSessionTopic", direction: "OneWay")
     menteeSession: MenteeSession! @relation(name: "SessionDataMenteeSession", direction: "OneWay")
     mentorSession: MentorSession! @relation(name: "SessionDataMentorSession", direction: "OneWay")
+    salesOperation: SalesOperation @relation(name:"SalesOperationFirstMentorMenteeSession")
+    sessionAllotmentDate: Date
     sessionStartDate: Date
     sessionEndDate: Date
-    sessionStatus: SessionStatus! @defaultValue(value: "started")
+    sessionStatus: SessionStatus! @defaultValue(value: "allotted")
     isQuizSubmitted: Boolean @defaultValue(value: "false")
     quizSubmitDate: Date
     isAssignmentSubmitted: Boolean @defaultValue(value: "false")

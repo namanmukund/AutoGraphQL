@@ -175,3 +175,7 @@ export const CanNotChangeVerifiedUserStatusError = createError('CanNotChangeVeri
 export const CanNotChangeSessionStatusError = createError('CanNotChangeSessionStatusError', {
   message: 'Can not change the status of a completed session',
 });
+
+export const CanNotCompleteSessionBeforeStartingError = createError('CanNotCompleteSessionBeforeStartingError', {
+  message: 'Can not complete the session before starting it',
+});

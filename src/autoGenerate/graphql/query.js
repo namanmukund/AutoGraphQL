@@ -80,9 +80,9 @@ const generateFieldFilterForScalarTypes = (fieldName, fieldType, isFieldListType
       fieldFilter += `${fieldName}_${allFilters.in}: [${fieldType}],`;
       fieldFilter += `${fieldName}_${allFilters.notIn}: [${fieldType}],`;
       fieldFilter += `${fieldName}_${allFilters.lt}: ${fieldType},`;
-      // fieldFilter += `${fieldName}_${allFilters.lte}: ${fieldType},`;
+      fieldFilter += `${fieldName}_${allFilters.lte}: ${fieldType},`;
       fieldFilter += `${fieldName}_${allFilters.gt}: ${fieldType},`;
-      // fieldFilter += `${fieldName}_${allFilters.gte}: ${fieldType},`;
+      fieldFilter += `${fieldName}_${allFilters.gte}: ${fieldType},`;
       fieldFilter += (fieldName !== 'this') ? `${fieldName}_${allFilters.exists}: Boolean,` : '';
       if (isFieldListType) {
         fieldFilter += `${fieldName}_${allFilters.array}: [${fieldType}]`;
@@ -122,7 +122,9 @@ const generateFieldFilterForScalarTypes = (fieldName, fieldType, isFieldListType
       fieldFilter += `${fieldName}_${allFilters.in}: [${fieldType}],`;
       fieldFilter += `${fieldName}_${allFilters.notIn}: [${fieldType}],`;
       fieldFilter += `${fieldName}_${allFilters.gt}: ${fieldType},`;
+      fieldFilter += `${fieldName}_${allFilters.gte}: ${fieldType},`;
       fieldFilter += `${fieldName}_${allFilters.lt}: ${fieldType},`;
+      fieldFilter += `${fieldName}_${allFilters.lte}: ${fieldType},`;
       fieldFilter += (fieldName !== 'this') ? `${fieldName}_${allFilters.exists}: Boolean,` : '';
       break;
     }

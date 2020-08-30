@@ -1,4 +1,4 @@
-import { get, groupBy } from 'lodash';
+import { get, groupBy, orderBy } from 'lodash';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { QueryController } from '../../../controllers';
 import { ifAuthorized } from '../../../../../../utils';
@@ -8,9 +8,10 @@ import { MENTEE } from '../../../../../../constants/roles';
 const topicsQuery = () => `
       query{
         topics(filter:{
-          order:1
-        }){
+          order_in:[1, 2]
+        } orderBy: order_ASC){
           id
+          title
         }
       }
 `;
@@ -50,6 +51,7 @@ const salesOperationReport = (async (root, params, context) => {
   }
   const topicsData = await callLocalGraphqlApi(topicsQuery());
   const firstTopicId = get(topicsData, 'data.topics[0].id');
+  const secondTopicId = get(topicsData, 'data.topics[1].id');
 
   // -----------------------------------------------------------------------------
   const userMatchQuery = {
@@ -115,6 +117,21 @@ const salesOperationReport = (async (root, params, context) => {
     firstSessionCompletedCountMatchQuery,
     'firstSessionCompletedCount',
   );
+
+  // -----------------------------------------------------------------------------
+
+  const secondSessionCompletedCountMatchQuery = {
+    sessionStartDate: { $gte: new Date(fromDate), $lte: new Date(toDate) },
+    sessionStatus: 'completed',
+    'topic.typeId': secondTopicId,
+  };
+
+  const secondSessionCompleted = await aggregateGroupByQuery(
+    'MentorMenteeSession',
+    'sessionStartDate',
+    secondSessionCompletedCountMatchQuery,
+    'secondSessionCompletedCount',
+  );
   // -----------------------------------------------------------------------------
   const sessionStartedCountMatchQuery = {
     sessionStartDate: { $gte: new Date(fromDate), $lte: new Date(toDate) },
@@ -144,7 +161,7 @@ const salesOperationReport = (async (root, params, context) => {
   const finalArray = [];
 
   const mergedArray = [
-    ...users, ...menteeSessions, ...menteeFirstSessions, ...firstSessionStarted, ...firstSessionCompleted, ...sessionStarted, ...sessionCompleted,
+    ...users, ...menteeSessions, ...menteeFirstSessions, ...firstSessionStarted, ...firstSessionCompleted, ...secondSessionCompleted, ...sessionStarted, ...sessionCompleted,
   ];
   if (mergedArray && mergedArray.length) {
     const groupedArray = groupBy(mergedArray, (doc) => doc._id);
@@ -155,10 +172,12 @@ const salesOperationReport = (async (root, params, context) => {
         groupedArray[key].forEach((obj) => {
           temp = { ...temp, ...obj };
         });
+        const dateParts = temp._id.split('-');
+        temp.date = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
         finalArray.push(temp);
       });
   }
-  return finalArray;
+  return finalArray.length ? orderBy(finalArray, ['date'], ['desc']) : [];
 });
 
 export default salesOperationReport;

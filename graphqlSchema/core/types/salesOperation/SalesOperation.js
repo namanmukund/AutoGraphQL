@@ -34,7 +34,7 @@ const mentorPitch = `
     oneToOne: Boolean
     oneToTwo: Boolean
     oneToThree: Boolean
-    leadStatus: LeadStatus
+    leadStatus: LeadStatus @groupBy
     nextSteps: NextStep
     otherReasonForNextStep: String
     nextCallOn: Date
@@ -71,6 +71,8 @@ const SalesOperation = `
     userResponseStatusUpdateDate: Date 
     client: User @relation(name:"SalesOperationClient", direction: "OneWay")
     monitoredBy: User @relation(name:"SalesOperationMonitoredBy", direction: "OneWay")
+    allottedMentor: User @relation(name:"SalesOperationAllottedMentor", direction: "OneWay")
+    firstMentorMenteeSession: MentorMenteeSession @relation(name:"SalesOperationFirstMentorMenteeSession")
     salesOperationLog: [SalesOperationLog] @relation(name:"SalesOperationLogSalesOperation")
     salesOperationActivities: [SalesOperationActivity] @relation(name:"SalesOperationActivitySalesOperation")
     ${unQualifiedLeadReasons}
