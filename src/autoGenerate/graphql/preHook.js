@@ -426,6 +426,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         }
         default: {
           newInput.sessionAllotmentDate = new Date().toISOString();
+          // temporary hack for backword compatibility
+          newInput.sessionStartDate = new Date().toISOString();
         }
       }
       const newParams = {
@@ -446,6 +448,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       switch (sessionStatus) {
         case 'allotted': {
           newInput.sessionAllotmentDate = new Date().toISOString();
+          // temporary hack for backword compatibility
+          newInput.sessionStartDate = new Date().toISOString();
           break;
         }
         case 'started': {
