@@ -37,7 +37,7 @@ query{
   }
 }`;
 
-const validateMenteeStartSessionData = (menteeSession, topicConnectId) => {
+const validateMenteeStartSessionData = (menteeSession, topicConnectId, params) => {
   // eslint-disable-next-line no-unused-vars
   const { bookingDate, topic: { id: topicId }, ...slots } = menteeSession;
   if (topicConnectId !== topicId) {
@@ -47,6 +47,7 @@ const validateMenteeStartSessionData = (menteeSession, topicConnectId) => {
   const slotTimeArray = getSelectedSlotsTime(slots);
   const date = new Date(bookingDate);
   const sessionStartDate = date.setHours(date.getHours() + slotTimeArray[0]);
+  params.input = {...params.input,  sessionStartDate: new Date(sessionStartDate).toISOString()}
   const sessionEndDate = date.setHours(date.getHours() + 1);
   const currentDate = new Date();
 
@@ -95,7 +96,7 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
       },
     });
   }
-  validateMenteeStartSessionData(menteeSession, topicConnectId);
+  validateMenteeStartSessionData(menteeSession, topicConnectId, params);
   return true;
 };
 
