@@ -435,7 +435,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         },
       };
       await addMentorMenteeSessionValidation(newParams, mutationOrQueryName, context);
-      return hook(newInput, mutationOrQueryName, 'PreHook');
+
+      return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'updateMentorMenteeSession': {
       const { sessionStatus } = input;
