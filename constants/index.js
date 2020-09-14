@@ -11,9 +11,10 @@ import loginType from './loginType';
 const TMS = 'tekieTms';
 const TLA = 'tekieLearningApp';
 const TWA = 'tekieWebApp';
+const TAA = 'tekieAffiliateApp';
 const backendApps = ['core'];
 
-const frontEndApps = [TLA, TMS, TWA];
+const frontEndApps = [TLA, TMS, TWA, TAA];
 const permissionIntegratedApps = [];
 const firebaseExcludedApps = [];
 
