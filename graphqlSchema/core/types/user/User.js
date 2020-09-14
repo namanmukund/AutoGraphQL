@@ -1,4 +1,4 @@
-import { NOT_UMS_HEAD, UMS_HEAD } from '../../../../constants/roles';
+import { AFFILIATE, NOT_UMS_HEAD, UMS_HEAD } from '../../../../constants/roles';
 import { EXCEPT_DELETE, READ } from '../../../../constants/graphqlOperations';
 
 const affilateInfo = `
@@ -29,6 +29,7 @@ const User = `
     @userPermissions(
       permissions:[
         { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
+        { userRole: ${AFFILIATE} appName: "*" operations: ${READ} },
         { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${EXCEPT_DELETE} }
         ], 
       rule: allow

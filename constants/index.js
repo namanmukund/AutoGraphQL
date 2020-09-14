@@ -258,6 +258,7 @@ export {
   TMS,
   TLA,
   TWA,
+  TAA,
   loginType,
   masteryLevels,
   learningObjectiveQuizReportThreshHolds,

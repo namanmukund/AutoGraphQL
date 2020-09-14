@@ -1,5 +1,7 @@
 import { READ } from '../../../../constants/graphqlOperations';
-import { TLA, TMS, TWA } from '../../../../constants';
+import {
+  TAA, TLA, TMS, TWA,
+} from '../../../../constants';
 
 const UserInvite = `
   type UserInvite @model 
@@ -7,7 +9,8 @@ const UserInvite = `
       permissions:[
         { appName: "${TMS}" operations: ${READ} },
         { appName: "${TLA}" operations: ${READ} },
-        { appName: "${TWA}" operations: ${READ} }
+        { appName: "${TWA}" operations: ${READ} },
+        { appName: "${TAA}" operations: ${READ} }
         ], 
       rule: allow
   )
