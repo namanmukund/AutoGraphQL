@@ -20,6 +20,7 @@ const UserPaymentInstallment = `
    { 
   user: User! @relation(name: "UserPaymentInstallment", direction: "OneWay")
   userPaymentPlan: UserPaymentPlan! @relation(name: "UserPaymentPlanUserPaymentInstallment")
+  userPaymentLink: UserPaymentLink @relation(name: "UserPaymentInstallmentUserPaymentLink", direction: "OneWay")
   amount: Float!
   dueDate: Date
   paidDate: Date
