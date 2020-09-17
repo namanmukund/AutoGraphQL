@@ -54,6 +54,7 @@ import NetPromoterScore from './netPromoterScore';
 import SalesOperationActivity from './salesOperationActivity';
 import UserPaymentPlan from './userPaymentPlan';
 import UserPaymentInstallment from './userPaymentInstallment';
+import UserPaymentLink from './userPaymentLink';
 
 export default [
   ...User,
@@ -112,4 +113,5 @@ export default [
   ...SalesOperationActivity,
   ...UserPaymentPlan,
   ...UserPaymentInstallment,
+  ...UserPaymentLink,
 ];
