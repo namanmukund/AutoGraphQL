@@ -52,6 +52,8 @@ import UserCreditLog from './userCreditLog';
 import SalesOperationLog from './salesOperationLog';
 import NetPromoterScore from './netPromoterScore';
 import SalesOperationActivity from './salesOperationActivity';
+import UserPaymentPlan from './userPaymentPlan';
+import UserPaymentInstallment from './userPaymentInstallment';
 
 export default [
   ...User,
@@ -108,4 +110,6 @@ export default [
   ...SalesOperationLog,
   ...NetPromoterScore,
   ...SalesOperationActivity,
+  ...UserPaymentPlan,
+  ...UserPaymentInstallment,
 ];
