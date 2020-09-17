@@ -48,6 +48,10 @@ const studentPersonna = `
     parentEnglishSpeakingSkill: EnglishSpeakingSkill
 `;
 
+const userPaymentPlan = `
+  userPaymentPlan: UserPaymentPlan @relation(name: "SalesOperationUserPaymentPlan")
+`;
+
 const SalesOperation = `
   type SalesOperation @model
   @appPermissions(
@@ -79,6 +83,7 @@ const SalesOperation = `
     ${sessionRescheduledReasons}
     ${mentorPitch}
     ${studentPersonna}
+    ${userPaymentPlan}
   }
 `;
 

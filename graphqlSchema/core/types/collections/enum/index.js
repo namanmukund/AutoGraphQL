@@ -38,6 +38,8 @@ import NextStep from './NextStep';
 import AffiliateProfession from './AffiliateProfession';
 import SalesOperationActionOn from './SalesOperationActionOn';
 import SalesOperationActionType from './SalesOperationActionType';
+import InstallmentType from './InstallmentType';
+import UserPaymentInstallmentStatus from './UserPaymentInstallmentStatus';
 
 export default [
   Status,
@@ -80,4 +82,6 @@ export default [
   AffiliateProfession,
   SalesOperationActionOn,
   SalesOperationActionType,
+  InstallmentType,
+  UserPaymentInstallmentStatus,
 ];
