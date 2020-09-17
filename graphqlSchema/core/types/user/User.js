@@ -65,6 +65,7 @@ const User = `
     phoneVerified: Boolean @defaultValue(value: "false")
     dateOfBirth: Date
     gender: Gender
+    city: String
     isSetPassword: Boolean @defaultValue(value: "false")
     studentProfile: StudentProfile @relation(name:"StudentProfileUser", isSubset: true)
     parentProfile: ParentProfile @relation(name:"ParentProfileUser", isSubset: true)

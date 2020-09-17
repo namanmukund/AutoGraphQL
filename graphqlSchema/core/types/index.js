@@ -55,6 +55,8 @@ import SalesOperationActivity from './salesOperationActivity';
 import UserPaymentPlan from './userPaymentPlan';
 import UserPaymentInstallment from './userPaymentInstallment';
 import UserPaymentLink from './userPaymentLink';
+import UserBankDetail from './userBankDetail';
+import MarketingResource from './marketingResource';
 
 export default [
   ...User,
@@ -114,4 +116,6 @@ export default [
   ...UserPaymentPlan,
   ...UserPaymentInstallment,
   ...UserPaymentLink,
+  ...UserBankDetail,
+  ...MarketingResource,
 ];
