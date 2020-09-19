@@ -20,11 +20,13 @@ const UserPaymentPlan = `
   { 
     user: User! @relation(name: "UserPaymentPlan", direction: "OneWay")
     product: Product! @relation(name: "UserPaymentPlanProduct", direction: "OneWay")
+    discount: Discount @relation(name: "UserPaymentPlanDiscount", direction: "OneWay")
     salesOperation: SalesOperation! @relation(name: "SalesOperationUserPaymentPlan")
     userPaymentInstallments: [UserPaymentInstallment] @relation(name: "UserPaymentPlanUserPaymentInstallment")
     sessionsPerMonth: Int!
     installmentType : InstallmentType @defaultValue(value: "auto")
     installmentNumber: Int!
+    productPrice: Float!
     finalSellingPrice: Float!
     comment: String
   }
