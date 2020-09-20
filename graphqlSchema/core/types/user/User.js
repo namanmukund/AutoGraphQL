@@ -1,4 +1,4 @@
-import { AFFILIATE, NOT_UMS_HEAD, UMS_HEAD } from '../../../../constants/roles';
+import { NOT_UMS_HEAD, UMS_HEAD } from '../../../../constants/roles';
 import { EXCEPT_DELETE, READ } from '../../../../constants/graphqlOperations';
 
 const affilateInfo = `
