@@ -1,5 +1,5 @@
 const MarketingResource = `
-  type marketingResource @model {
+  type MarketingResource @model {
     type: MarketingResourceType
     content: String
     url: File @relation(name: "MarketingResourceUrl", direction: "OneWay")
