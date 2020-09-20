@@ -2,7 +2,8 @@ const MarketingResource = `
   type MarketingResource @model {
     type: MarketingResourceType
     content: String
-    url: File @relation(name: "MarketingResourceUrl", direction: "OneWay")
+    videoLink: String
+    fileInfo: File @relation(name: "MarketingResourceUrl", direction: "OneWay")
     status: ContentStatus! @defaultValue(value: "unpublished")
   }
 `;
