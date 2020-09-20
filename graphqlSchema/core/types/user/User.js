@@ -29,7 +29,6 @@ const User = `
     @userPermissions(
       permissions:[
         { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
-        { userRole: ${AFFILIATE} appName: "*" operations: ${READ} },
         { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${EXCEPT_DELETE} }
         ], 
       rule: allow

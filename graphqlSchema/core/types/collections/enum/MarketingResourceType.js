@@ -1,8 +1,11 @@
 const MarketingResourceType = `
   enum MarketingResourceType {
-      text
-      image
+      message
+      email
       video
+      image
+      brochure
+      ppt
   }`;
 
 export default MarketingResourceType;

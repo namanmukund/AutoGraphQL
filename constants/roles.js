@@ -39,7 +39,8 @@ const NOT_UMS_HEAD = `[
 "${MENTOR}", 
 "${MENTEE}", 
 "${UMS_VIEWER}", 
-"${CMS_UMS_VIEWER}"
+"${CMS_UMS_VIEWER}",
+"${AFFILIATE}"
 ]`;
 
 const UMS_HEAD_AND_MENTOR = `[
