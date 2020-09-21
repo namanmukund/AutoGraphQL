@@ -24,6 +24,8 @@ const UserPaymentInstallment = `
   amount: Float!
   dueDate: Date
   paidDate: Date
+  lastPaymentRequestedDate: Date
+  paymentRequestedCount: Int
   status: UserPaymentInstallmentStatus @defaultValue(value: "pending")
   comment: String
   }`;

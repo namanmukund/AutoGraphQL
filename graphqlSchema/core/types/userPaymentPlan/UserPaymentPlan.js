@@ -28,6 +28,7 @@ const UserPaymentPlan = `
     installmentNumber: Int!
     productPrice: Float!
     finalSellingPrice: Float!
+    dateOfEnrollment: Date!
     comment: String
   }
 `;
