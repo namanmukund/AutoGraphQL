@@ -77,34 +77,35 @@ const validateUserOTPMutationResolver = async (
 
   let updateObj;
   let result;
-
-  if (phoneOtp) {
+  if (!(process.env.NODE_ENV && process.env.NODE_ENV === 'staging')) {
+    if (phoneOtp) {
     // temporary code
-    if (phoneOtp !== 1857) {
-      if (userData.phoneOtp !== phoneOtp) {
+      if (phoneOtp !== 7009) {
+        if (userData.phoneOtp !== phoneOtp) {
+          throw new OTPMismatchError();
+        }
+        if (
+          getTimeDifferenceWithCurrentDateInSeconds(phoneOtpCreationDate)
+        > authParams.OTP_EXPIRATION_TIME_IN_SEC) {
+          throw new Error('Otp expired');
+        }
+      }
+
+      updateObj = {
+        phoneVerified: true,
+        status: 'active',
+      };
+    } else if (emailOtp) {
+      if (userData.emailOtp !== emailOtp) {
         throw new OTPMismatchError();
       }
-      if (
-        getTimeDifferenceWithCurrentDateInSeconds(phoneOtpCreationDate)
-        > authParams.OTP_EXPIRATION_TIME_IN_SEC) {
-        throw new Error('Otp expired');
-      }
+      updateObj = {
+        emailVerified: true,
+        status: 'active',
+      };
+    } else {
+      throw new SendOtpFirstError();
     }
-
-    updateObj = {
-      phoneVerified: true,
-      status: 'active',
-    };
-  } else if (emailOtp) {
-    if (userData.emailOtp !== emailOtp) {
-      throw new OTPMismatchError();
-    }
-    updateObj = {
-      emailVerified: true,
-      status: 'active',
-    };
-  } else {
-    throw new SendOtpFirstError();
   }
   // if user is already verified
   if (
