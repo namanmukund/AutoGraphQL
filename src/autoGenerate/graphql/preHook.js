@@ -472,13 +472,18 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(newInput, mutationOrQueryName, 'PreHook');
     }
     case 'addUserPaymentInstallment': {
-      // eslint-disable-next-line no-param-reassign
-      input.lastPaymentRequestedDate = new Date().toISOString();
+      const { status } = input;
+      if (status !== 'paid') {
+        // eslint-disable-next-line no-param-reassign
+        input.lastPaymentRequestedDate = new Date().toISOString();
+      }
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'updateUserPaymentInstallment': {
-      // eslint-disable-next-line no-param-reassign
-      input.lastPaymentRequestedDate = new Date().toISOString();
+      if (status !== 'paid') {
+        // eslint-disable-next-line no-param-reassign
+        input.lastPaymentRequestedDate = new Date().toISOString();
+      }
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'deleteMenteeSession': {
