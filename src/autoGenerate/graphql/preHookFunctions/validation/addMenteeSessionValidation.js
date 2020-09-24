@@ -6,6 +6,7 @@ import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfter
 import validateMenteeSessionInput from './utils/validateMenteeSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
+import isTrialSession from '../../resolvers/utils/isTrialSession';
 
 // query to get mentee Sessions
 const getMenteeSessions = (userId, topicId) => `
@@ -23,6 +24,10 @@ const getMenteeSessions = (userId, topicId) => `
       ]
     }){
       id
+      topic{
+        id
+        order
+      }
     }
   }
   `;
@@ -65,6 +70,7 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
   if (menteeSessions && menteeSessions.length) {
     throw new SimilarDocumentAlreadyExistError();
   }
+  context.isTrialSession = await isTrialSession(topicId);
   return true;
 };
 
