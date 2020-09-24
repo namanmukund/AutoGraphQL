@@ -1,5 +1,7 @@
 import { TMS, TWA } from '../../../../constants';
-import { MENTEE, MENTOR, UMS_HEAD, UMS_VIEWER } from '../../../../constants/roles';
+import {
+  MENTEE, MENTOR, UMS_HEAD, UMS_VIEWER,
+} from '../../../../constants/roles';
 import { READ } from '../../../../constants/graphqlOperations';
 
 const unQualifiedLeadReasons = `
