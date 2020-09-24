@@ -472,15 +472,16 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(newInput, mutationOrQueryName, 'PreHook');
     }
     case 'addUserPaymentInstallment': {
-      const { status } = input;
-      if (status !== 'paid') {
+      const { isPaymentRequested } = input;
+      if (typeof isPaymentRequested === 'boolean' && isPaymentRequested) {
         // eslint-disable-next-line no-param-reassign
         input.lastPaymentRequestedDate = new Date().toISOString();
       }
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'updateUserPaymentInstallment': {
-      if (status !== 'paid') {
+      const { isPaymentRequested } = input;
+      if (typeof isPaymentRequested === 'boolean' && isPaymentRequested) {
         // eslint-disable-next-line no-param-reassign
         input.lastPaymentRequestedDate = new Date().toISOString();
       }

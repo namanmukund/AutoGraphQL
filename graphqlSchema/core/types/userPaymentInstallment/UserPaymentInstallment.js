@@ -27,6 +27,7 @@ const UserPaymentInstallment = `
   lastPaymentRequestedDate: Date
   paymentRequestedCount: Int
   status: UserPaymentInstallmentStatus @defaultValue(value: "pending")
+  isPaymentRequested: Boolean
   comment: String
   }`;
 
