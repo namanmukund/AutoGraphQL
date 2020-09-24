@@ -5,6 +5,11 @@ import updateAvailableSlotQuery from '../../graphqlQueries/updateAvailableSlotQu
 
 // update if doc exist else leave
 const reduceParticularAvailableSlotOfADate = async (slotTimeStringArray, date, context, availableSlots) => {
+  const { isTrialSession } = context;
+  if (typeof isTrialSession === 'boolean' && !isTrialSession) {
+    return true;
+  }
+
   if (!availableSlots || !availableSlots.length) {
     const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(date));
     // eslint-disable-next-line no-param-reassign

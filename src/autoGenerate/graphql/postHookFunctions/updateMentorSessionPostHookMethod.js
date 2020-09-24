@@ -6,11 +6,15 @@ import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery
 import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
 
 const updateMentorSessionPostHookMethod = async (input, mutationName, context) => {
+  const { sessionType, availabilityDate, ...slots } = input;
+  if (sessionType && sessionType === 'paid') {
+    return true;
+  }
+
   const { previousDocument } = context;
   const { availabilityDate: prevAvailabilityDate, ...prevSlots } = previousDocument;
   const prevSlotTimeStringArray = getSelectedSlotsStringArray(prevSlots);
 
-  const { availabilityDate, ...slots } = input;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
   /* if a mentor has changed the date to future
     --remove the availability slot from the prevAvailabilityDate
@@ -97,6 +101,7 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
       await callLocalGraphqlApi(updateAvailableSlotQuery(currentSlotAvailableSlotId), context, variables);
     }
   }
+  return true;
 };
 
 export default updateMentorSessionPostHookMethod;

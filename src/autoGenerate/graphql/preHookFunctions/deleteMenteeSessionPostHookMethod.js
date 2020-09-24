@@ -1,6 +1,7 @@
 import getSelectedSlotsStringArray from '../postHookFunctions/utils/getSelectedSlotsStringArray';
 import increaseParticularAvailableSlotOfADate from '../postHookFunctions/utils/increaseParticularAvailableSlotOfADate';
 import extractMenteeSessionInfoAndSendEmail from '../postHookFunctions/utils/extractMenteeSessionInfoAndSendEmail';
+import isTrialSession from '../resolvers/utils/isTrialSession';
 
 const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   /*
@@ -9,8 +10,11 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const { previousDocument } = context;
   const { bookingDate, ...slots } = previousDocument;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
+  const isTrial = await isTrialSession(input.topic.typeId);
 
-  await increaseParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
+  if (typeof isTrial === 'boolean' && isTrial) {
+    await increaseParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
+  }
   await extractMenteeSessionInfoAndSendEmail('delete', input, bookingDate, slotTimeStringArray);
 };
 

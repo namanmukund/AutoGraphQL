@@ -6,7 +6,10 @@ import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery
 import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
 
 const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
-  const { availabilityDate, ...slots } = input;
+  const { sessionType, availabilityDate, ...slots } = input;
+  if (sessionType && sessionType === 'paid') {
+    return true;
+  }
   const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(availabilityDate));
   const availableSlots = get(availableSlotsRes, 'data.availableSlots');
 
@@ -37,6 +40,7 @@ const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
     };
     await callLocalGraphqlApi(addAvailableSlotQuery(docToBeUpdated), context, variables);
   }
+  return true;
 };
 
 export default addMentorSessionPostHookMethod;
