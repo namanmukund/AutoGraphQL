@@ -4,7 +4,7 @@ import isToday from '../../../../../../utils/isToday';
 const validateBookingDate = (
   bookingDate,
   slotTime,
-  PRE_BOOKING_HOUR_LIMIT = 0,
+  PRE_BOOKING_HOUR_LIMIT = 1,
 ) => {
   const date = new Date(bookingDate);
   const currentDate = new Date();
