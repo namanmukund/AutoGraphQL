@@ -5,6 +5,7 @@ query{
   menteeSession(id:"${menteeSessionId}"){
     id
     bookingDate
+    topic{id order}
     ${getSlotTimesInString()}
   }
 }
