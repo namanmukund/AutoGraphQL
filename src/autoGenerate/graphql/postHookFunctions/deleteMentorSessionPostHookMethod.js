@@ -9,7 +9,12 @@ const deleteMentorSessionPostHookMethod = async (input, mutationName, context) =
   const { availabilityDate, ...slots } = previousDocument;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
+  const { sessionType } = input;
+  if (sessionType && sessionType === 'paid') {
+    return true;
+  }
   await reduceParticularAvailableSlotOfADate(slotTimeStringArray, availabilityDate, context);
+  return true;
 };
 
 export default deleteMentorSessionPostHookMethod;

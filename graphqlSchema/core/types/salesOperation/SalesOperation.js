@@ -1,5 +1,8 @@
-import { TMS } from '../../../../constants';
-import { MENTOR, UMS_HEAD, UMS_VIEWER } from '../../../../constants/roles';
+import { TMS, TWA } from '../../../../constants';
+import {
+  MENTEE, MENTOR, UMS_HEAD, UMS_VIEWER,
+} from '../../../../constants/roles';
+import { READ } from '../../../../constants/graphqlOperations';
 
 const unQualifiedLeadReasons = `
     knowCoding: Boolean
@@ -57,6 +60,7 @@ const SalesOperation = `
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
+      { appName: "${TWA}" operations: "*" },
       ], 
     rule: allow
   )  
@@ -64,7 +68,8 @@ const SalesOperation = `
     permissions:[
       { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
       { userRole: ${UMS_VIEWER} appName: "*" operations: "*" },
-      { userRole: ${MENTOR} appName: "*" operations: "*" }
+      { userRole: ${MENTOR} appName: "*" operations: "*" },
+      { userRole: ${MENTEE} appName: "*" operations: ${READ} }
       ], 
     rule: allow
   ) 

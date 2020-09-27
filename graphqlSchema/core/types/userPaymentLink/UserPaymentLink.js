@@ -18,7 +18,8 @@ const UserPaymentLink = `
     rule: allow
   ) 
   { 
-    amount: Float!
+    type: UserPaymentLinkType
+    amount: Float
     link: String!
   }
 `;

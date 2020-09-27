@@ -42,6 +42,8 @@ import InstallmentType from './InstallmentType';
 import UserPaymentInstallmentStatus from './UserPaymentInstallmentStatus';
 import BankAccountType from './BankAccountType';
 import MarketingResourceType from './MarketingResourceType';
+import SessionType from './SessionType';
+import UserPaymentLinkType from './UserPaymentLinkType';
 
 export default [
   Status,
@@ -88,4 +90,6 @@ export default [
   UserPaymentInstallmentStatus,
   BankAccountType,
   MarketingResourceType,
+  SessionType,
+  UserPaymentLinkType,
 ];

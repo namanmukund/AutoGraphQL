@@ -6,6 +6,7 @@ import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfter
 import validateMenteeSessionInput from './utils/validateMenteeSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
+import isTrialSession from '../../resolvers/utils/isTrialSession';
 
 // query to get mentee Sessions
 const getMenteeSessions = (userId, topicId) => `
@@ -23,17 +24,20 @@ const getMenteeSessions = (userId, topicId) => `
       ]
     }){
       id
+      topic{
+        id
+        order
+      }
     }
   }
   `;
 
 // prehook logic to check if added MenteeSession(user and topic id) is already present
 const addMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
-  // validate input
-  await validateMenteeSessionInput(params, context);
   // check if the document for called user and topic is already present
   const userId = get(params, 'userConnectId');
   const topicId = get(params, 'topicConnectId');
+  context.isTrialSession = await isTrialSession(topicId);
 
   // log in case user or topic id is not present
   if (!userId || !topicId) {
@@ -44,6 +48,8 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
     });
   }
 
+  // validate input
+  await validateMenteeSessionInput(params, context);
   /*
     Calling method to validate token and return userId and appName
     we will compare this userId against userId passed in input

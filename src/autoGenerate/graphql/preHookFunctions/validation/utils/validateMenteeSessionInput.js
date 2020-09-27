@@ -37,6 +37,10 @@ const validateMenteeSessionInput = async (params, context) => {
     PRE_BOOKING_HOUR_LIMIT,
   );
 
+  const { isTrialSession } = context;
+  if (typeof isTrialSession === 'boolean' && !isTrialSession) {
+    return true;
+  }
   // check if the slot mentee trying to book is available in availableSlot
   const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(bookingDate));
   const availableSlots = get(availableSlotsRes, 'data.availableSlots');
