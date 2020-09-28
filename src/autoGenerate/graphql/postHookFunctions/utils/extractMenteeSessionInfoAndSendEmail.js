@@ -5,6 +5,7 @@ import parsedHtmlFromTemplateFileAndObject
 import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
 import getFormatedDate from '../../../../../utils/getFormatedDate';
+import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 
 const menteeInfoQuery = (userId) => `
   query{
@@ -202,6 +203,36 @@ const extractMenteeSessionInfoAndSendEmail = async (
   if (process.env.NODE_ENV === 'production') {
     sendBookedSessionEmailToTekie(subject, menteeObj, action);
     sendBookedSessionEmailToParent(subject, menteeObj, action);
+    if (action === 'add') {
+      // send whatsapp template message
+      const {
+        parentName, parentNumber, countryCode, name, date, startTime,
+      } = menteeObj;
+      const parameters = [{
+        name: 'parent_name',
+        value: parentName,
+      },
+      {
+        name: 'student_name',
+        value: name,
+      },
+      {
+        name: 'session_date',
+        value: date,
+      },
+      {
+        name: 'session_time',
+        value: startTime,
+      },
+      ];
+      const phone = countryCode.split('+')[1] + parentNumber;
+      sendWhatsAppTemplateMessage(
+        phone,
+        'booking_confirmation',
+        'Tekie',
+        parameters,
+      );
+    }
   }
 };
 
