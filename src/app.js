@@ -10,7 +10,6 @@ import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
 import Raven from './Raven';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
 import { getParsedASTMap } from './autoGenerate/utils';
-import sendWhatsAppTemplateMessage from './autoGenerate/utils/sendWhatsAppTemplateMessage';
 
 const http = require('http');
 

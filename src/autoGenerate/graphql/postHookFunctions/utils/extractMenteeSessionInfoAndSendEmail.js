@@ -206,7 +206,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
     if (action === 'add') {
       // send whatsapp template message
       const {
-        parentName, parentNumber, countryCode, name, date, startTime,
+        parentName, parentNumber, countryCode, name, date,
       } = menteeObj;
       const parameters = [{
         name: 'parent_name',
