@@ -35,6 +35,7 @@ const topicInfoQuery = (topicId) => `
   query{
     topic(id:"${topicId}"){
       id
+      order
       title
       thumbnailSmall {
         uri
@@ -203,7 +204,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
   if (process.env.NODE_ENV === 'production') {
     sendBookedSessionEmailToTekie(subject, menteeObj, action);
     sendBookedSessionEmailToParent(subject, menteeObj, action);
-    if (action === 'add') {
+    if (action === 'add' && get(topicInfo, 'data.topic.order') === 1) {
       // send whatsapp template message
       const {
         parentName, parentNumber, countryCode, name, date,
