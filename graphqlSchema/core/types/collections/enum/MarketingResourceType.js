@@ -1,5 +1,6 @@
 const MarketingResourceType = `
   enum MarketingResourceType {
+      general
       message
       email
       video
