@@ -7,6 +7,7 @@ const MenteeSession = `
     user: User! @relation(name: "MenteeSessionUser", direction: "OneWay")
     topic: Topic! @relation(name: "MenteeSessionTopic", direction: "OneWay")
     bookingDate: Date!
+    scheduleRunStatus: ScheduleRunStatus
     ${slotTimeFields}
 }`;
 

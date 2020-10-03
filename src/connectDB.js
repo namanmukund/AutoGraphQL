@@ -1,5 +1,7 @@
+import * as schedule from 'node-schedule';
 import { log, dbConfig } from '../utils';
 import db from './db';
+import scheduleTrialSessionReminder from '../utils/scheduleJobs/scheduleTrialSessionReminder';
 
 let dbReconnectCount = 1;
 db.on('error', (err) => {
@@ -16,4 +18,13 @@ db.on('error', (err) => {
   log('MongoDB reconnected!');
 }).on('disconnected', () => {
   log('MongoDB disconnected!');
-}).once('open', () => log('Connected to DB.'));
+}).once('open', async () => {
+  log('Connected to DB.');
+  if (process.env.NODE_ENV === 'production') {
+    // eslint-disable-next-line no-unused-vars
+    const j = schedule.scheduleJob('*/40 * * * *', async () => {
+      log('scheduleTrialSessionReminder called at: ', new Date());
+      await scheduleTrialSessionReminder();
+    });
+  }
+});
