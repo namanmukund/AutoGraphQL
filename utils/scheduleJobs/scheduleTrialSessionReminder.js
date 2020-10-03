@@ -24,6 +24,7 @@ query{
       and:[
         {scheduleRunStatus_not_in:[completed]}
         {bookingDate: "${parsedDate}"}
+        {topic_some:{order:1}}
         {or:[
           {slot${hourValue + 1}:true}
           {slot${hourValue + 2}:true}
