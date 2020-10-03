@@ -1,4 +1,5 @@
 import { get, startCase, toLower } from 'lodash';
+import * as schedule from 'node-schedule';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import parsedHtmlFromTemplateFileAndObject
   from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
@@ -6,6 +7,7 @@ import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
 import getFormatedDate from '../../../../../utils/getFormatedDate';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
+import addHoursToDate from '../../../../../utils/addHoursToDate';
 
 const menteeInfoQuery = (userId) => `
   query{
@@ -227,12 +229,24 @@ const extractMenteeSessionInfoAndSendEmail = async (
       },
       ];
       const phone = countryCode.split('+')[1] + parentNumber;
+      // const phone = 919654347463;
       sendWhatsAppTemplateMessage(
         phone,
         'booking_confirmation',
         'Tekie',
         parameters,
       );
+      // send reminder job schedule
+      const dt = addHoursToDate(bookingDate, Number(slotNumber) - 2);
+      // eslint-disable-next-line no-unused-vars
+      const j = schedule.scheduleJob(dt, () => {
+        sendWhatsAppTemplateMessage(
+          phone,
+          'reminder_new',
+          'Tekie',
+          parameters,
+        );
+      });
     }
   }
 };
