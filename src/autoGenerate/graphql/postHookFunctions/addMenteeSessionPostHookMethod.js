@@ -6,7 +6,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   /*
   Since addition of session by mentee will consume a slot
    */
-  const { bookingDate, ...slots } = input;
+  const { id: menteeSessionId, bookingDate, ...slots } = input;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
   const { availableSlots } = context;
 
