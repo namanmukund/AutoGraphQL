@@ -44,6 +44,7 @@ import BankAccountType from './BankAccountType';
 import MarketingResourceType from './MarketingResourceType';
 import SessionType from './SessionType';
 import UserPaymentLinkType from './UserPaymentLinkType';
+import ScheduleRunStatus from './ScheduleRunStatus';
 
 export default [
   Status,
@@ -92,4 +93,5 @@ export default [
   MarketingResourceType,
   SessionType,
   UserPaymentLinkType,
+  ScheduleRunStatus,
 ];
