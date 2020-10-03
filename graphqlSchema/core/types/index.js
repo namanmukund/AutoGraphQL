@@ -57,6 +57,7 @@ import UserPaymentInstallment from './userPaymentInstallment';
 import UserPaymentLink from './userPaymentLink';
 import UserBankDetail from './userBankDetail';
 import MarketingResource from './marketingResource';
+import ScheduleJob from './scheduleJob';
 
 export default [
   ...User,
@@ -118,4 +119,5 @@ export default [
   ...UserPaymentLink,
   ...UserBankDetail,
   ...MarketingResource,
+  ...ScheduleJob,
 ];

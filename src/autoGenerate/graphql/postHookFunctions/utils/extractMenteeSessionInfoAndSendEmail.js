@@ -1,13 +1,11 @@
 import { get, startCase, toLower } from 'lodash';
-import * as schedule from 'node-schedule';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import parsedHtmlFromTemplateFileAndObject
   from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
 import getFormatedDate from '../../../../../utils/getFormatedDate';
-import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
-import addHoursToDate from '../../../../../utils/addHoursToDate';
+import getSlotLabel from '../../../../../utils/getSlotLabel';
 
 const menteeInfoQuery = (userId) => `
   query{
@@ -46,43 +44,6 @@ const topicInfoQuery = (topicId) => `
   }
 `;
 
-const getSlotLabel = (slotNumberString, isCapital = true) => {
-  const slotNumber = Number(slotNumberString);
-  let AM = 'AM';
-  let PM = 'PM';
-  if (!isCapital) {
-    AM = 'am';
-    PM = 'pm';
-  }
-  let startTime = '';
-  let endTime = '';
-  if (slotNumber < 12) {
-    if (slotNumber === 0) {
-      startTime = `12:00 ${AM}`;
-    } else {
-      startTime = `${slotNumber}:00 ${AM}`;
-    }
-    if (slotNumber === 11) {
-      endTime = `12:00 ${PM}`;
-    } else {
-      endTime = `${slotNumber + 1}:00 ${AM}`;
-    }
-  } else if (slotNumber > 12) {
-    startTime = `${slotNumber - 12}:00 ${PM}`;
-    if (slotNumber === 23) {
-      endTime = `12:00 ${AM}`;
-    } else {
-      endTime = `${slotNumber - 11}:00 PM`;
-    }
-  } else {
-    startTime = `12:00 ${PM}`;
-    endTime = `1:00 ${PM}`;
-  }
-  return {
-    startTime,
-    endTime,
-  };
-};
 const sendBookedSessionEmailToTekie = (subject, menteeObj) => {
   const templateFileName = 'menteeSessionBookingEmailTemplate';
   const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, menteeObj);
@@ -206,48 +167,6 @@ const extractMenteeSessionInfoAndSendEmail = async (
   if (process.env.NODE_ENV === 'production') {
     sendBookedSessionEmailToTekie(subject, menteeObj, action);
     sendBookedSessionEmailToParent(subject, menteeObj, action);
-    if (action === 'add' && get(topicInfo, 'data.topic.order') === 1) {
-      // send whatsapp template message
-      const {
-        parentName, parentNumber, countryCode, name, date,
-      } = menteeObj;
-      const parameters = [{
-        name: 'parent_name',
-        value: parentName,
-      },
-      {
-        name: 'student_name',
-        value: name,
-      },
-      {
-        name: 'session_date',
-        value: date,
-      },
-      {
-        name: 'session_time',
-        value: startTime,
-      },
-      ];
-      const phone = countryCode.split('+')[1] + parentNumber;
-      // const phone = 919654347463;
-      sendWhatsAppTemplateMessage(
-        phone,
-        'booking_confirmation',
-        'Tekie',
-        parameters,
-      );
-      // send reminder job schedule
-      const dt = addHoursToDate(bookingDate, Number(slotNumber) - 2);
-      // eslint-disable-next-line no-unused-vars
-      const j = schedule.scheduleJob(dt, () => {
-        sendWhatsAppTemplateMessage(
-          phone,
-          'reminder_new',
-          'Tekie',
-          parameters,
-        );
-      });
-    }
   }
 };
 
