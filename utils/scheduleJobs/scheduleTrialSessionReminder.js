@@ -69,54 +69,56 @@ query{
         } = menteeSession;
 
         const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-        const slotNumber = slotTimeStringArray[0].split('slot')[1];
-        const { startTime, endTime } = getSlotLabel(slotNumber);
+        if (slotTimeStringArray && slotTimeStringArray.length) {
+          const slotNumber = slotTimeStringArray[0].split('slot')[1];
+          const { startTime, endTime } = getSlotLabel(slotNumber);
 
-        const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
-        const menteeObj = {
-          date: getFormatedDate(bookingDate),
-          startTime,
-          endTime,
-          name: startCase(toLower(get(menteeInfo, 'name') || '')),
-          grade: get(menteeInfo, 'studentProfile.grade') || '',
-          parentName: startCase(toLower(get(parentInfo, 'name') || '')),
-          parentEmail: get(parentInfo, 'email') || '',
-          parentNumber: get(parentInfo, 'phone.number') || '',
-          countryCode: get(parentInfo, 'phone.countryCode') || '',
-        };
+          const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
+          const menteeObj = {
+            date: getFormatedDate(bookingDate),
+            startTime,
+            endTime,
+            name: startCase(toLower(get(menteeInfo, 'name') || '')),
+            grade: get(menteeInfo, 'studentProfile.grade') || '',
+            parentName: startCase(toLower(get(parentInfo, 'name') || '')),
+            parentEmail: get(parentInfo, 'email') || '',
+            parentNumber: get(parentInfo, 'phone.number') || '',
+            countryCode: get(parentInfo, 'phone.countryCode') || '',
+          };
 
-        const {
-          parentName, parentNumber, countryCode, name, date,
-        } = menteeObj;
-        const parameters = [{
-          name: 'parent_name',
-          value: parentName,
-        },
-        {
-          name: 'student_name',
-          value: name,
-        },
-        {
-          name: 'session_date',
-          value: date,
-        },
-        {
-          name: 'session_time',
-          value: startTime,
-        },
-        ];
+          const {
+            parentName, parentNumber, countryCode, name, date,
+          } = menteeObj;
+          const parameters = [{
+            name: 'parent_name',
+            value: parentName,
+          },
+          {
+            name: 'student_name',
+            value: name,
+          },
+          {
+            name: 'session_date',
+            value: date,
+          },
+          {
+            name: 'session_time',
+            value: startTime,
+          },
+          ];
 
-        // const phone = 919654347463;
-        const phone = countryCode.split('+')[1] + parentNumber;
-        sendWhatsAppTemplateMessage(
-          phone,
-          'reminder_new',
-          'Tekie',
-          parameters,
-        );
-        // update  status
-        // eslint-disable-next-line no-await-in-loop
-        await updateScheduleStatusOfMenteeSession(menteeSessionId);
+          // const phone = 919654347463;
+          const phone = countryCode.split('+')[1] + parentNumber;
+          sendWhatsAppTemplateMessage(
+            phone,
+            'reminder_new',
+            'Tekie',
+            parameters,
+          );
+          // update  status
+          // eslint-disable-next-line no-await-in-loop
+          await updateScheduleStatusOfMenteeSession(menteeSessionId);
+        }
       }
     }
   }

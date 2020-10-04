@@ -1,3 +1,3 @@
-const isSentryAppAndEnv = () => true;
+const isSentryAppAndEnv = () => false;
 
 export default isSentryAppAndEnv;
