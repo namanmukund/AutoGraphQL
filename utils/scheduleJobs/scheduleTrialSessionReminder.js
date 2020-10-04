@@ -13,8 +13,8 @@ const updateScheduleStatusOfMenteeSession = (id) => {
 };
 
 const scheduleTrialSessionReminder = async () => {
-  const date = new Date().setHours(0, 0, 0, 0);
-  const parsedDate = new Date(date).toISOString();
+  const dt = new Date().setHours(0, 0, 0, 0);
+  const parsedDate = new Date(dt).toISOString();
   const hourValue = new Date().getHours();
   if (hourValue > 7 && hourValue < 22) {
     const query = `
@@ -86,7 +86,7 @@ query{
         };
 
         const {
-          parentName, parentNumber, countryCode, name,
+          parentName, parentNumber, countryCode, name, date,
         } = menteeObj;
         const parameters = [{
           name: 'parent_name',
