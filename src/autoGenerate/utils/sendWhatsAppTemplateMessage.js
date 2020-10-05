@@ -9,7 +9,7 @@ const sendWhatsAppTemplateMessage = async (
 ) => {
   const bodyJson = {
     template_name,
-    broadcast_name: 'Tekie',
+    broadcast_name: broadcast_name || 'Tekie',
     parameters: JSON.stringify(parameters),
   };
   const headers = {

@@ -6,6 +6,7 @@ import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
 import getFormatedDate from '../../../../../utils/getFormatedDate';
 import getSlotLabel from '../../../../../utils/getSlotLabel';
+import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 
 const menteeInfoQuery = (userId) => `
   query{
@@ -194,7 +195,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
       sendWhatsAppTemplateMessage(
         phone,
         'booking_confirmation',
-        'Tekie',
+        'Confirmation',
         parameters,
       );
     }
