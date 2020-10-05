@@ -112,7 +112,7 @@ query{
           sendWhatsAppTemplateMessage(
             phone,
             'reminder_new',
-            'Tekie',
+            'Reminder',
             parameters,
           );
           // update  status
