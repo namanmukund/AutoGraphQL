@@ -167,6 +167,37 @@ const extractMenteeSessionInfoAndSendEmail = async (
   if (process.env.NODE_ENV === 'production') {
     sendBookedSessionEmailToTekie(subject, menteeObj, action);
     sendBookedSessionEmailToParent(subject, menteeObj, action);
+    if (action === 'add' && get(topicInfo, 'data.topic.order') === 1) {
+      // send whatsapp template message
+      const {
+        parentName, parentNumber, countryCode, name, date,
+      } = menteeObj;
+      const parameters = [{
+        name: 'parent_name',
+        value: parentName,
+      },
+      {
+        name: 'student_name',
+        value: name,
+      },
+      {
+        name: 'session_date',
+        value: date,
+      },
+      {
+        name: 'session_time',
+        value: startTime,
+      },
+      ];
+      const phone = countryCode.split('+')[1] + parentNumber;
+      // const phone = 919654347463;
+      sendWhatsAppTemplateMessage(
+        phone,
+        'booking_confirmation',
+        'Tekie',
+        parameters,
+      );
+    }
   }
 };
 
