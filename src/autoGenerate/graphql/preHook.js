@@ -306,7 +306,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'userAssignment': {
-      await userAssignmentValidation(params, context);
+      await userAssignmentValidation(params, context, mutationOrQueryName);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUserActivityAssignmentDump': {

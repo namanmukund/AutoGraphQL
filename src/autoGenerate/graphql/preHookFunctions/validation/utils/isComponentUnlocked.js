@@ -29,6 +29,7 @@ const isComponentUnlocked = async (
   inputUserId = '',
   inputLearningObjectiveId = '',
   checkForPaidLogic = false,
+  queryNameToPassData = '',
 ) => {
   const {
     video, message, practiceQuestion, quiz,
@@ -344,6 +345,20 @@ const isComponentUnlocked = async (
     }
     Object.assign(context, userCurrentTopicComponentStatusData);
   }
+
+  // this condition is added if we need to pass data in other than dump APIs
+  // Currently it is needed for UserAssignment only. Modify it in future as per need
+  if (queryNameToPassData && page === 'quiz') {
+    // initialising object to be passed in context to save query
+    const userCurrentTopicComponentStatusData = {};
+    // passing data in context which can be used further in post hook methods
+    // this will prevent a further query
+    userCurrentTopicComponentStatusData[queryNameToPassData] = {
+      userCurrentTopicComponentStatuses: currentTopicComponentInfo,
+    };
+    Object.assign(context, userCurrentTopicComponentStatusData);
+  }
+
   return true;
 };
 

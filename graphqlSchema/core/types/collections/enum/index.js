@@ -45,6 +45,7 @@ import MarketingResourceType from './MarketingResourceType';
 import SessionType from './SessionType';
 import UserPaymentLinkType from './UserPaymentLinkType';
 import ScheduleRunStatus from './ScheduleRunStatus';
+import SkillsLevel from './SkillsLevel';
 
 export default [
   Status,
@@ -94,4 +95,5 @@ export default [
   SessionType,
   UserPaymentLinkType,
   ScheduleRunStatus,
+  SkillsLevel,
 ];
