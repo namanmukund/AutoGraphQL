@@ -22,8 +22,9 @@ db.on('error', (err) => {
   log('Connected to DB.');
   if (process.env.NODE_ENV === 'production') {
     // eslint-disable-next-line no-unused-vars
-    const j = schedule.scheduleJob('*/40 * * * *', async () => {
-      log('scheduleTrialSessionReminder called at: ', new Date());
+    const j = schedule.scheduleJob('*/30 * * * *', async () => {
+      // eslint-disable-next-line no-console
+      console.log('scheduleTrialSessionReminder called at: ', new Date());
       await scheduleTrialSessionReminder();
     });
   }

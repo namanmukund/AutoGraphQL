@@ -6,6 +6,7 @@ import getSlotLabel from '../getSlotLabel';
 import getFormatedDate from '../getFormatedDate';
 import sendWhatsAppTemplateMessage from '../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
 import { MutationController } from '../../src/autoGenerate/graphql/controllers';
+import getLongDate from '../getLongDate';
 
 const updateScheduleStatusOfMenteeSession = (id) => {
   const modelMutations = new MutationController('MenteeSession', { bypass: true });
@@ -37,6 +38,7 @@ query{
     bookingDate
     slot${hourValue + 1}
     slot${hourValue + 2}
+    slot${hourValue + 3}
     user{
       id
       name
@@ -87,7 +89,7 @@ query{
           };
 
           const {
-            parentName, parentNumber, countryCode, name, date,
+            parentName, parentNumber, countryCode, name,
           } = menteeObj;
           const parameters = [{
             name: 'parent_name',
@@ -99,11 +101,15 @@ query{
           },
           {
             name: 'session_date',
-            value: date,
+            value: getLongDate(bookingDate),
           },
           {
             name: 'session_time',
             value: startTime,
+          },
+          {
+            name: 'phone',
+            value: `${countryCode}-${parentNumber}`,
           },
           ];
 
@@ -111,8 +117,8 @@ query{
           const phone = countryCode.split('+')[1] + parentNumber;
           sendWhatsAppTemplateMessage(
             phone,
-            'reminder_new',
-            'Reminder',
+            'Oct5_class_reminder',
+            parentName,
             parameters,
           );
           // update  status

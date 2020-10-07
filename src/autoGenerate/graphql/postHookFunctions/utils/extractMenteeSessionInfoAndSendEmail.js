@@ -7,6 +7,7 @@ import sendEmail from '../../../../../services/email/utils/sendEmail';
 import getFormatedDate from '../../../../../utils/getFormatedDate';
 import getSlotLabel from '../../../../../utils/getSlotLabel';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
+import getLongDate from '../../../../../utils/getLongDate';
 
 const menteeInfoQuery = (userId) => `
   query{
@@ -171,7 +172,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
     if (action === 'add' && get(topicInfo, 'data.topic.order') === 1) {
       // send whatsapp template message
       const {
-        parentName, parentNumber, countryCode, name, date,
+        parentName, parentNumber, countryCode, name,
       } = menteeObj;
       const parameters = [{
         name: 'parent_name',
@@ -183,19 +184,23 @@ const extractMenteeSessionInfoAndSendEmail = async (
       },
       {
         name: 'session_date',
-        value: date,
+        value: getLongDate(bookingDate),
       },
       {
         name: 'session_time',
         value: startTime,
+      },
+      {
+        name: 'phone',
+        value: `${countryCode}-${parentNumber}`,
       },
       ];
       const phone = countryCode.split('+')[1] + parentNumber;
       // const phone = 919654347463;
       sendWhatsAppTemplateMessage(
         phone,
-        'booking_confirmation',
-        'Confirmation',
+        'oct5_trial_booked_confirmation',
+        parentName,
         parameters,
       );
     }
