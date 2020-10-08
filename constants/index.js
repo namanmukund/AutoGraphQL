@@ -220,6 +220,13 @@ const slotTimes = [
 const CREDITED = 'credited';
 const DEBITED = 'debited';
 const REGISTRATION_BASE_CREDIT = 1000;
+
+const skillsLevel = {
+  easy: 'easy',
+  medium: 'medium',
+  hard: 'hard',
+};
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export {
@@ -272,4 +279,5 @@ export {
   DEBITED,
   REGISTRATION_BASE_CREDIT,
   AFFILIATE_MAX_ALLOWED_REFERRALS,
+  skillsLevel,
 };
