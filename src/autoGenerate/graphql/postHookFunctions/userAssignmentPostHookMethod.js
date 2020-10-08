@@ -1,6 +1,7 @@
 import { get } from 'lodash';
 import {
-  PUBLISHED, skillsLevel,
+  PUBLISHED,
+  skillsLevel,
 } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
@@ -64,7 +65,7 @@ If userAssignment document does not exist for provided combination of user id an
 It will be created and returned to tekie app with all the assignment questions.
 Document contains all the necessary information needed on page
 */
-const userAssignmentPostHookMethod = async (input, params, mutationName) => {
+const userAssignmentPostHookMethod = async (input, params, mutationName, context) => {
   /*
   checking if document is already present in collection for user and topic id,
   returning input in that case
@@ -73,6 +74,13 @@ const userAssignmentPostHookMethod = async (input, params, mutationName) => {
   if (input && input.length) {
     return input;
   }
+  const {
+    easy,
+    medium,
+    hard,
+  } = skillsLevel;
+
+  let userSkillLevel = easy;
   const resultArray = [];
   const {
     userId,
@@ -92,24 +100,17 @@ const userAssignmentPostHookMethod = async (input, params, mutationName) => {
     return resultArray;
   }
 
-  const {
-    easy, medium, hard
-  } = skillsLevel;
-  let userSkillLevel = easy;
-  console.log('-------------------------------mutationName', mutationName);
   /*
   Getting data for user current topic component status from context based on mutationName
   This will be used to get the assignment questions based on skill level of the user
   */
   const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
-  console.log('-------------------------------currentTopicComponentInfo', currentTopicComponentInfo);
   const {
-    skillsLevel
+    skillsLevel: userSkillsLevelFromDb,
   } = currentTopicComponentInfo;
 
-  console.log('-------------------------------skillsLevel', skillsLevel);
-  if(skillsLevel) {
-    userSkillLevel = skillsLevel
+  if (skillsLevel) {
+    userSkillLevel = userSkillsLevelFromDb;
   }
   /*
     we are getting below fields in topicQuery:
@@ -122,187 +123,185 @@ const userAssignmentPostHookMethod = async (input, params, mutationName) => {
   let assignmentQuery = 'assignment:[';
   if (topicInfo) {
     const assignmentQuestionsinTopic = get(topicInfo, 'assignmentQuestions');
-    const sortedAssignmentQuestionsinTopic = [];
-    const easyAssignmentQuestions =[];
-    const mediumAssignmentQuestions =[];
-    const difficultAssignmentQuestions =[];
+    let sortedAssignmentQuestionsinTopic = [];
+    const easyAssignmentQuestions = [];
+    const mediumAssignmentQuestions = [];
+    const difficultAssignmentQuestions = [];
 
     if (!assignmentQuestionsinTopic || (assignmentQuestionsinTopic && !assignmentQuestionsinTopic.length)) {
       log('assignmentQuestionsinTopic info missing in topicInfo');
     }
-    if(assignmentQuestionsinTopic && assignmentQuestionsinTopic.length > 0) {
+    if (assignmentQuestionsinTopic && assignmentQuestionsinTopic.length > 0) {
       sortedAssignmentQuestionsinTopic = assignmentQuestionsinTopic.sort((a, b) => a.order - b.order);
     }
 
     // dividing questions in the three buckets easy, medium and hard
     // Easy(0, 1) medium(2, 3) difficult(4, 5)
-    console.log('-------------------------------sortedAssignmentQuestionsinTopic', sortedAssignmentQuestionsinTopic);
-
     sortedAssignmentQuestionsinTopic.forEach((sortedAssignmentQuestion) => {
-      if(!sortedAssignmentQuestion.difficulty || sortedAssignmentQuestion.difficulty < 2) {
-        easyAssignmentQuestions.push(sortedAssignmentQuestion)
-      } else if(sortedAssignmentQuestion.difficulty >1 && sortedAssignmentQuestion.difficulty < 4) {
-        mediumAssignmentQuestions.push(sortedAssignmentQuestion)
+      if (!sortedAssignmentQuestion.difficulty || sortedAssignmentQuestion.difficulty < 2) {
+        easyAssignmentQuestions.push(sortedAssignmentQuestion);
+      } else if (sortedAssignmentQuestion.difficulty > 1 && sortedAssignmentQuestion.difficulty < 4) {
+        mediumAssignmentQuestions.push(sortedAssignmentQuestion);
       } else {
-        difficultAssignmentQuestions.push(sortedAssignmentQuestion)
+        difficultAssignmentQuestions.push(sortedAssignmentQuestion);
       }
     });
 
-    console.log('-------------------------------easyAssignmentQuestions', easyAssignmentQuestions);
-    console.log('-------------------------------mediumAssignmentQuestions', mediumAssignmentQuestions);
-    console.log('-------------------------------difficultAssignmentQuestions', difficultAssignmentQuestions);
-
-
-    const finalAssignmentQuestionsForQuery = []
+    const finalAssignmentQuestionsForQuery = [];
     // assignment question will populate on basis of user skill type and available questions
-    // LOgic is as below. 
-    // Student' appetite: 
+    // LOgic is as below.
+    // Student' appetite:
     // Easy(1) medium(2, 3) difficult(4, 5)
-
     // Easy-4(E1, E2,   E3, E4)
-    // Medium-2 (E1, M1) (E3, M2) 
+    // Medium-2 (E1, M1) (E3, M2)
     // Difficult -2  (M1 D1) (M2, D2)
     let assignmentQuestionCount = 0;
     let homeworkQuestionCount = 0;
     switch (userSkillLevel) {
       case easy:
         // push 2 questions each for homewok and assignment from medium
-        easyAssignmentQuestions.length > 0 && easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
-          if(easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-            finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion)
-            homeworkQuestionCount = homeworkQuestionCount + 1;
-          }
-
-          if(easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-            finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion)
-            assignmentQuestionCount = assignmentQuestionCount + 1;
-          }
-        });
-
-        // if 2 easy questions are not there for each homework and assignment, got to medium
-        if(homeworkQuestionCount < 2 || assignmentQuestionCount < 2){
-          mediumAssignmentQuestions.length > 0 && mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
-            if(mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion)
-              homeworkQuestionCount = homeworkQuestionCount + 1;
+        if (easyAssignmentQuestions.length > 0) {
+          easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
+            if (easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
+              finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
+              homeworkQuestionCount += 1;
             }
 
-            if(mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion)
-              assignmentQuestionCount = assignmentQuestionCount + 1;
+            if (easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
+              finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
+              assignmentQuestionCount += 1;
+            }
+          });
+        }
+
+        // if 2 easy questions are not there for each homework and assignment, got to medium
+        if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && mediumAssignmentQuestions.length > 0) {
+          mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
+            if (mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
+              finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
+              homeworkQuestionCount += 1;
+            }
+
+            if (mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
+              finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
+              assignmentQuestionCount += 1;
             }
           });
         }
 
         // if 2 questions are not still there go to difficult
-        if(homeworkQuestionCount < 2 || assignmentQuestionCount < 2){
-          difficultAssignmentQuestions.length > 0 && difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
-            if(difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion)
-              homeworkQuestionCount = homeworkQuestionCount + 1;
+        if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && difficultAssignmentQuestions.length > 0) {
+          difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
+            if (difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
+              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
+              homeworkQuestionCount += 1;
             }
 
-            if(difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion)
-              assignmentQuestionCount = assignmentQuestionCount + 1;
+            if (difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
+              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
+              assignmentQuestionCount += 1;
             }
           });
         }
-        
         break;
       case medium:
         // push 1 question each for homewok and assignment from medium
-        mediumAssignmentQuestions.length > 0 && mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
-          if(mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 1) {
-            finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion)
-            homeworkQuestionCount = homeworkQuestionCount + 1;
-          }
+        if (mediumAssignmentQuestions.length > 0) {
+          mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
+            if (mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 1) {
+              finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
+              homeworkQuestionCount += 1;
+            }
 
-          if(mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 1) {
-            finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion)
-            assignmentQuestionCount = assignmentQuestionCount + 1;
-          }
-        });
+            if (mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 1) {
+              finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
+              assignmentQuestionCount += 1;
+            }
+          });
+        }
 
         // push 1 question each for homewok and assignment from easy
         // if there were no medium questions, this will get populated
-        easyAssignmentQuestions.length > 0 && easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
-          if(easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-            finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion)
-            homeworkQuestionCount = homeworkQuestionCount + 1;
-          }
-
-          if(easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-            finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion)
-            assignmentQuestionCount = assignmentQuestionCount + 1;
-          }
-        });
-
-        // if 2 questions are not still there go to difficult
-        if(homeworkQuestionCount < 2 || assignmentQuestionCount < 2){
-          difficultAssignmentQuestions.length > 0 && difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
-            if(difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion)
-              homeworkQuestionCount = homeworkQuestionCount + 1;
+        if (easyAssignmentQuestions.length > 0) {
+          easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
+            if (easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
+              finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
+              homeworkQuestionCount += 1;
             }
 
-            if(difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion)
-              assignmentQuestionCount = assignmentQuestionCount + 1;
+            if (easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
+              finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
+              assignmentQuestionCount += 1;
             }
           });
         }
-        
+
+        // if 2 questions are not still there go to difficult
+        if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && difficultAssignmentQuestions.length > 0) {
+          difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
+            if (difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
+              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
+              homeworkQuestionCount += 1;
+            }
+
+            if (difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
+              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
+              assignmentQuestionCount += 1;
+            }
+          });
+        }
+
         break;
       case hard:
         // push 1 question each for homewok and assignment from difficult
-        difficultAssignmentQuestions.length > 0 && difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
-          if(difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 1) {
-            finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion)
-            homeworkQuestionCount = homeworkQuestionCount + 1;
-          }
-
-          if(difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 1) {
-            finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion)
-            assignmentQuestionCount = assignmentQuestionCount + 1;
-          }
-        });
-
-        // push remaining 1 question each for homewok and assignment from medium
-        // // if there were no difficult questions, this will get populated
-        mediumAssignmentQuestions.length > 0 && mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
-          if(mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-            finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion)
-            homeworkQuestionCount = homeworkQuestionCount + 1;
-          }
-
-          if(mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-            finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion)
-            assignmentQuestionCount = assignmentQuestionCount + 1;
-          }
-        });
-
-        // if 2 questions are not still there go to easy
-        if(homeworkQuestionCount < 2 || assignmentQuestionCount < 2){
-          easyAssignmentQuestions.length > 0 && easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
-            if(easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion)
-              homeworkQuestionCount = homeworkQuestionCount + 1;
+        if (difficultAssignmentQuestions.length > 0) {
+          difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
+            if (difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 1) {
+              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
+              homeworkQuestionCount += 1;
             }
 
-            if(easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion)
-              assignmentQuestionCount = assignmentQuestionCount + 1;
+            if (difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 1) {
+              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
+              assignmentQuestionCount += 1;
             }
           });
         }
-        
+
+        // push remaining 1 question each for homewok and assignment from medium
+        // // if there were no difficult questions, this will get populated
+        if (mediumAssignmentQuestions.length > 0) {
+          mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
+            if (mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
+              finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
+              homeworkQuestionCount += 1;
+            }
+
+            if (mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
+              finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
+              assignmentQuestionCount += 1;
+            }
+          });
+        }
+
+        // if 2 questions are not still there go to easy
+        if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && easyAssignmentQuestions.length > 0) {
+          easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
+            if (easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
+              finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
+              homeworkQuestionCount += 1;
+            }
+
+            if (easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
+              finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
+              assignmentQuestionCount += 1;
+            }
+          });
+        }
         break;
       default:
     }
 
-
-    console.log('----------------finalAssignmentQuestionsForQuery', finalAssignmentQuestionsForQuery);
     // eslint-disable-next-line no-restricted-syntax
     for (const assignmentQuestion of finalAssignmentQuestionsForQuery) {
       const {

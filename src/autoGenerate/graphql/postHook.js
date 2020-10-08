@@ -93,7 +93,7 @@ const posthook = async (input, mutationName, context, params) => {
       return hook(resultArray, mutationName, 'PostHook');
     }
     case 'userAssignment': {
-      const resultArray = await userAssignmentPostHookMethod(input, params, mutationName);
+      const resultArray = await userAssignmentPostHookMethod(input, params, mutationName, context);
       return hook(resultArray, mutationName, 'PostHook');
     }
     case 'addUserActivityAssignmentDump': {
