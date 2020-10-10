@@ -6,7 +6,7 @@ const UserCurrentTopicComponentStatus = `
   type UserCurrentTopicComponentStatus @model 
   @appPermissions(
     permissions:[
-      { appName: "${TMS}" operations: ${READ} },
+      { appName: "${TMS}" operations: "*" },
       { appName: "${TLA}" operations: ${READ} },
       { appName: "${TWA}" operations: ${READ} }
       ], 
