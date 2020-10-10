@@ -12,6 +12,7 @@ import ParentChildSignUpInput from './ParentChildSignUpInput';
 import ChildrenToken from './ChildrenToken';
 import PythonByteCode from './PythonByteCode';
 import SalesOperationReport from './SalesOperationReport';
+import TransactionalMessageInput from './TransactionalMessageInput';
 
 export default [
   ...Enum,
@@ -28,4 +29,5 @@ export default [
   ParentChildSignUpInput,
   ChildrenToken,
   SalesOperationReport,
+  TransactionalMessageInput,
 ];

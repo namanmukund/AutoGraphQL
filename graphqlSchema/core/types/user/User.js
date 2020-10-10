@@ -68,6 +68,7 @@ const User = `
     isSetPassword: Boolean @defaultValue(value: "false")
     studentProfile: StudentProfile @relation(name:"StudentProfileUser", isSubset: true)
     parentProfile: ParentProfile @relation(name:"ParentProfileUser", isSubset: true)
+    mentorProfile: MentorProfile @relation(name:"MentorProfileUser", isSubset: true)
     profilePic: File @relation(name: "UserProfilePic", direction: "OneWay", isSubset: true) 
     ${affilateInfo}  
     ${socialInfo}
