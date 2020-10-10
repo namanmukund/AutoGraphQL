@@ -45,6 +45,8 @@ import MarketingResourceType from './MarketingResourceType';
 import SessionType from './SessionType';
 import UserPaymentLinkType from './UserPaymentLinkType';
 import ScheduleRunStatus from './ScheduleRunStatus';
+import TransactionalMessageMedium from './TransactionalMessageMedium';
+import TransactionalMessageType from './TransactionalMessageType';
 
 export default [
   Status,
@@ -94,4 +96,6 @@ export default [
   SessionType,
   UserPaymentLinkType,
   ScheduleRunStatus,
+  TransactionalMessageMedium,
+  TransactionalMessageType,
 ];
