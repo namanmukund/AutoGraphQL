@@ -58,6 +58,7 @@ import UserPaymentLink from './userPaymentLink';
 import UserBankDetail from './userBankDetail';
 import MarketingResource from './marketingResource';
 import ScheduleJob from './scheduleJob';
+import MentorProfile from './mentorProfile';
 
 export default [
   ...User,
@@ -120,4 +121,5 @@ export default [
   ...UserBankDetail,
   ...MarketingResource,
   ...ScheduleJob,
+  ...MentorProfile,
 ];
