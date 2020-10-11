@@ -1,9 +1,70 @@
-import { get } from 'lodash';
+import { get, startCase } from 'lodash';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import getLongDate from '../../../../../../utils/getLongDate';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import getSlotTimesInString from '../../../../../../utils/getSlotTimesInString';
+import getSelectedSlotsStringArray from '../../../postHookFunctions/utils/getSelectedSlotsStringArray';
+import getSlotLabel from '../../../../../../utils/getSlotLabel';
 
-const getMentorMenteeSessions = async (userId) => {
+const calculateMentorRating = (mentorInfo) => {
+  let ratingNum = 0;
+  let ratingDen = 0;
+  Object.keys(mentorInfo).forEach((key) => {
+    if (key.includes('pythonCourseRating') && mentorInfo[key] > 0) {
+      const ratingValue = key.split('pythonCourseRating')[1];
+      ratingNum += ratingValue * mentorInfo[key];
+      ratingDen += mentorInfo[key];
+    }
+  });
+  if (ratingNum > 0 && ratingDen > 0) {
+    return (ratingNum / ratingDen).toFixed(2);
+  }
+  return '';
+};
+
+const getMentorCodingLanguages = (codingLanguages) => {
+  let codingLanguageStr = '';
+  if (codingLanguages && codingLanguages.length) {
+    codingLanguages.forEach((language, index) => {
+      if (index < codingLanguages.length - 1) {
+        codingLanguageStr += `${startCase(language)}, `;
+      } else {
+        codingLanguageStr += `${startCase(language)}`;
+      }
+    });
+  }
+  return codingLanguageStr;
+};
+
+const getSessionRescheduledReasons = (reasons) => {
+  const reasonsArray = Object.keys(reasons);
+  // eslint-disable-next-line no-restricted-syntax
+  for (const reason of reasonsArray) {
+    if (reasons[reason]) {
+      switch (reason) {
+        case 'internetIssue':
+          return 'Internet connectivity issue';
+        case 'zoomIssue':
+          return 'Zoom related issue';
+        case 'laptopIssue':
+          return 'Laptop related issue';
+        case 'chromeIssue':
+          return 'Chrome related issue';
+        case 'powerCut':
+          return 'Power cut';
+        case 'notResponseAndDidNotTurnUp':
+          return 'Kid did not turn up in session';
+        case 'turnedUpButLeftAbruptly':
+          return 'Turned up but abruptly left the session';
+        default:
+          return 'NA';
+      }
+    }
+  }
+  return '';
+};
+
+const getMentorMenteeSessions = async (userId, messageType) => {
   const query = `
 query{
   mentorMenteeSessions(filter:{
@@ -17,6 +78,10 @@ query{
     ]
   }, orderBy:createdAt_ASC){
     id
+    sendSessionLink
+    didNotPickTheCall
+    sessionNotConducted
+    didNotTurnUpInSession
     topic{
       id
       title
@@ -31,6 +96,10 @@ query{
         phone{
           countryCode
           number
+        }
+        profilePic{
+          id
+          uri
         }
         mentorProfile{
           id
@@ -47,6 +116,7 @@ query{
     menteeSession{
       id
       bookingDate
+      ${getSlotTimesInString()}
       user{
         id
         name
@@ -67,43 +137,119 @@ query{
         }
       }
     }
+    salesOperation{
+      internetIssue
+      zoomIssue
+      laptopIssue
+      chromeIssue
+      powerCut
+      notResponseAndDidNotTurnUp
+      turnedUpButLeftAbruptly
+    }
   }
 }
 `;
   const res = await callLocalGraphqlApi(query);
   const data = get(res, 'data.mentorMenteeSessions', []);
-  console.log(11111, data);
+  const parentInfo = get(data[0], 'menteeSession.user.studentProfile.parents[0].user');
+  const mentorInfo = get(data[0], 'mentorSession.user.mentorProfile');
+  const menteeSession = get(data[0], 'menteeSession');
+
+  // validate before sending the message
   if (!data || (data && data.length > 1)) {
     throw new Error('Invalid');
   }
-  const parentInfo = get(data[0], 'menteeSession.user.studentProfile.parents[0].user');
-  const mentorInfo = get(data[0], 'mentorSession.user.mentorProfile');
-  const doc = {
-    parentName: get(parentInfo, 'name'),
-    parentEmail: get(parentInfo, 'email'),
-    parentNumber: get(parentInfo, 'phone.number'),
-    countryCode: get(parentInfo, 'phone.countryCode'),
-    name: get(data[0], 'menteeSession.user.name'),
-    // bookingDate:
-    // startTime:
-    codingLanguages: get(mentorInfo, 'codingLanguages'),
-    experienceYear: get(mentorInfo, 'experienceYear'),
-    mentorPhoneNumber: get(data[0], 'mentorSession.user.phone.number'),
-    mentorCountryCode: get(data[0], 'mentorSession.user.phone.countryCode'),
-  };
-  console.log(1111, doc);
-  return doc;
-};
+  // if message is already  send then avoid sending that  again
+  const {
+    sendSessionLink,
+    didNotPickTheCall,
+    sessionNotConducted,
+    didNotTurnUpInSession,
+  } = data[0];
 
-const getWhatsAppMessageParametersByType = async (messageType, dataObj) => {
-  let parameters;
-  console.log(11223);
   switch (messageType) {
     case 'sendSessionLink': {
-      const data = await getMentorMenteeSessions('cka85xf0c00020vvyecpaf9mk');
-      console.log(3333, data);
+      if (sendSessionLink) {
+        throw new Error('Already sent');
+      }
+      break;
+    }
+    case 'didNotPickTheCall': {
+      if (didNotPickTheCall) {
+        throw new Error('Already sent');
+      }
+      break;
+    }
+    case 'sessionNotConducted': {
+      if (sessionNotConducted) {
+        throw new Error('Already sent');
+      }
+      break;
+    }
+    case 'didNotTurnUpInSession': {
+      if (didNotTurnUpInSession) {
+        throw new Error('Already sent');
+      }
+      break;
+    }
+
+    default:
+  }
+
+  if (menteeSession && menteeSession.id && parentInfo.id) {
+    const { bookingDate, ...slots } = menteeSession;
+    const slotTimeStringArray = getSelectedSlotsStringArray(slots);
+    const slotNumber = slotTimeStringArray[0].split('slot')[1];
+    const { startTime } = getSlotLabel(slotNumber);
+
+    return {
+      mentorMenteeSessionId: get(data[0], 'id'),
+      parentName: get(parentInfo, 'name'),
+      parentEmail: get(parentInfo, 'email'),
+      parentNumber: get(parentInfo, 'phone.number'),
+      countryCode: get(parentInfo, 'phone.countryCode'),
+      name: get(menteeSession, 'user.name'),
+      bookingDate,
+      startTime,
+      codingLanguages: getMentorCodingLanguages(get(mentorInfo, 'codingLanguages')) || 'Python',
+      experienceYear: get(mentorInfo, 'experienceYear') || 3,
+      mentorPhoneNumber: get(data[0], 'mentorSession.user.phone.number'),
+      mentorCountryCode: get(data[0], 'mentorSession.user.phone.countryCode'),
+      mentorRating: calculateMentorRating(mentorInfo) || 5,
+      rescheduleReason: getSessionRescheduledReasons(get(data[0], 'salesOperation')) || 'NA',
+    };
+  }
+  return '';
+};
+
+const updateMentorMenteeSessionWithMessageType = async (id, messageType) => {
+  const query = `
+  mutation($input: MentorMenteeSessionUpdate){
+    updateMentorMenteeSession(id:"${id}", input:$input){
+      id
+    }
+  }
+`;
+  const variables = {
+    input: {
+      [messageType]: true,
+    },
+  };
+  const res = await callLocalGraphqlApi(query, '', variables);
+  return get(res, 'data.updateMentorMenteeSession.id');
+};
+
+const sendTransactionalMessage = async (root, params, context) => {
+  validateAuthentication(context);
+  const { userId, input } = params;
+  const { messageType, medium, sessionLink } = input;
+  const dataObj = await getMentorMenteeSessions(userId, messageType);
+
+  let parameters;
+  switch (messageType) {
+    case 'sendSessionLink': {
       const {
-        parentName, name, sessionLink, bookingDate, startTime,
+        parentName, name, bookingDate, startTime,
         experienceYear, codingLanguages, mentorRating,
       } = dataObj;
       parameters = [{
@@ -151,7 +297,7 @@ const getWhatsAppMessageParametersByType = async (messageType, dataObj) => {
       }];
       break;
     }
-    case 'didNotTurnUpInSession': {
+    case 'sessionNotConducted': {
       const {
         parentName, name, rescheduleReason,
         countryCode, parentNumber,
@@ -175,7 +321,7 @@ const getWhatsAppMessageParametersByType = async (messageType, dataObj) => {
       ];
       break;
     }
-    case 'sessionNotConducted': {
+    case 'didNotTurnUpInSession': {
       const {
         parentName, name, bookingDate, startTime,
         countryCode, parentNumber,
@@ -205,25 +351,27 @@ const getWhatsAppMessageParametersByType = async (messageType, dataObj) => {
     }
     default:
   }
-  return parameters;
-};
-const sendTransactionalMessage = async (root, params, context) => {
-  validateAuthentication(context);
 
-  const { userId, input } = params;
-  const { messageType, medium, sessionLink } = input;
-  console.log(params);
+  console.log(dataObj, parameters);
 
-  // if (medium === 'whatsApp' || medium === 'both') {
-  // send whatsapp message
-  const parameters = await getWhatsAppMessageParametersByType(
-    messageType,
-  );
-  // }
+  switch (medium) {
+    case 'all': {
+      // send whatsApp
+      // send email
+      break;
+    }
+    case 'whatsApp': {
+      // send whatsApp
+      break;
+    }
+    case 'email': {
+      // send email
+      break;
+    }
 
-  if (medium === 'email' || medium === 'both') {
-    // send email message
+    default:
   }
+  await updateMentorMenteeSessionWithMessageType(dataObj.mentorMenteeSessionId, messageType);
   return {
     result: true,
   };
