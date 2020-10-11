@@ -27,6 +27,7 @@ const userCurrentTopicComponentStatusQuery = (
       ${currentLearningObjective}
       ${enrollmentType}
       currentTopicComponentType
+      skillsLevel
     }
   }
   `;

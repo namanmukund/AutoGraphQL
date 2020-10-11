@@ -47,6 +47,7 @@ import UserPaymentLinkType from './UserPaymentLinkType';
 import ScheduleRunStatus from './ScheduleRunStatus';
 import TransactionalMessageMedium from './TransactionalMessageMedium';
 import TransactionalMessageType from './TransactionalMessageType';
+import SkillsLevel from './SkillsLevel';
 
 export default [
   Status,
@@ -98,4 +99,5 @@ export default [
   ScheduleRunStatus,
   TransactionalMessageMedium,
   TransactionalMessageType,
+  SkillsLevel,
 ];
