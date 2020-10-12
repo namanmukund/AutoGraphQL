@@ -1,10 +1,34 @@
 import { get, startCase } from 'lodash';
+import moment from 'moment';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import getLongDate from '../../../../../../utils/getLongDate';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../../utils/getSlotTimesInString';
 import getSelectedSlotsStringArray from '../../../postHookFunctions/utils/getSelectedSlotsStringArray';
 import getSlotLabel from '../../../../../../utils/getSlotLabel';
+import parsedHtmlFromTemplateFileAndObject from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
+import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
+import sendEmail from '../../../../../../services/email/utils/sendEmail';
+
+const sendTransactionalEmail = async (templateObject, emailBody) => {
+  const templateFileName = get(emailBody, 'template');
+  // console.log(templateObject)
+  const html = await parsedHtmlFromTemplateFileAndObject(templateFileName, templateObject);
+  // console.log(html)
+  // emailto should be in array. Can send the mail to mutiple people
+  const emailTo = ['sanatankc@gmail.com', 'namanmukund@gmail.com'];
+  // ccemail should be in array. Can send the mail to mutiple people
+  const ccEmail = [''];
+  // bccemail should be in array. Can send the mail to mutiple people
+  const bccEmail = [''];
+  const subject = get(emailBody, 'subject')
+  /* if html is empty then in the body text will be appear. Html is having higher
+    precedence over text */
+  const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
+  sendEmail(emailMsgObject);
+};
+
+
 
 const calculateMentorRating = (mentorInfo) => {
   let ratingNum = 0;
@@ -154,6 +178,7 @@ query{
   const parentInfo = get(data[0], 'menteeSession.user.studentProfile.parents[0].user');
   const mentorInfo = get(data[0], 'mentorSession.user.mentorProfile');
   const menteeSession = get(data[0], 'menteeSession');
+  const topicTitle = get(data[0], 'topic.title', '')
 
   // validate before sending the message
   if (!data || (data && data.length > 1)) {
@@ -167,41 +192,42 @@ query{
     didNotTurnUpInSession,
   } = data[0];
 
-  switch (messageType) {
-    case 'sendSessionLink': {
-      if (sendSessionLink) {
-        throw new Error('Already sent');
-      }
-      break;
-    }
-    case 'didNotPickTheCall': {
-      if (didNotPickTheCall) {
-        throw new Error('Already sent');
-      }
-      break;
-    }
-    case 'sessionNotConducted': {
-      if (sessionNotConducted) {
-        throw new Error('Already sent');
-      }
-      break;
-    }
-    case 'didNotTurnUpInSession': {
-      if (didNotTurnUpInSession) {
-        throw new Error('Already sent');
-      }
-      break;
-    }
+  // switch (messageType) {
+  //   case 'sendSessionLink': {
+  //     if (sendSessionLink) {
+  //       throw new Error('Already sent');
+  //     }
+  //     break;
+  //   }
+  //   case 'didNotPickTheCall': {
+  //     if (didNotPickTheCall) {
+  //       throw new Error('Already sent');
+  //     }
+  //     break;
+  //   }
+  //   case 'sessionNotConducted': {
+  //     if (sessionNotConducted) {
+  //       throw new Error('Already sent');
+  //     }
+  //     break;
+  //   }
+  //   case 'didNotTurnUpInSession': {
+  //     if (didNotTurnUpInSession) {
+  //       throw new Error('Already sent');
+  //     }
+  //     break;
+  //   }
 
-    default:
-  }
+  //   default:
+  // }
 
   if (menteeSession && menteeSession.id && parentInfo.id) {
     const { bookingDate, ...slots } = menteeSession;
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
     const slotNumber = slotTimeStringArray[0].split('slot')[1];
-    const { startTime } = getSlotLabel(slotNumber);
+    const { startTime, endTime } = getSlotLabel(slotNumber);
 
+    
     return {
       mentorMenteeSessionId: get(data[0], 'id'),
       parentName: get(parentInfo, 'name'),
@@ -209,11 +235,14 @@ query{
       parentNumber: get(parentInfo, 'phone.number'),
       countryCode: get(parentInfo, 'phone.countryCode'),
       name: get(menteeSession, 'user.name'),
-      bookingDate,
+      bookingDate: bookingDate,
       startTime,
+      endTime,
+      topicTitle,
       codingLanguages: getMentorCodingLanguages(get(mentorInfo, 'codingLanguages')) || 'Python',
       experienceYear: get(mentorInfo, 'experienceYear') || 3,
       mentorPhoneNumber: get(data[0], 'mentorSession.user.phone.number'),
+      mentorName: get(data[0], 'mentorSession.user.name'),
       mentorCountryCode: get(data[0], 'mentorSession.user.phone.countryCode'),
       mentorRating: calculateMentorRating(mentorInfo) || 5,
       rescheduleReason: getSessionRescheduledReasons(get(data[0], 'salesOperation')) || 'NA',
@@ -352,12 +381,23 @@ const sendTransactionalMessage = async (root, params, context) => {
     default:
   }
 
-  console.log(dataObj, parameters);
+  
+  dataObj.bookingDateLong = getLongDate(dataObj.bookingDate)
+  dataObj.bookingDate = moment(dataObj.bookingDate).format('DD-MM-YYYY')
+  dataObj.sessionLink = sessionLink
+
+  const mailBody = {
+    sendSessionLink: {
+      template: 'sessionLink',
+      subject: 'Tekie - session link for free trial class'
+    },
+  }
 
   switch (medium) {
     case 'all': {
       // send whatsApp
       // send email
+      sendTransactionalEmail(dataObj, mailBody[messageType])
       break;
     }
     case 'whatsApp': {

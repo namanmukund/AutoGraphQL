@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+  <head>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html charset=UTF-8" />
+    
+  </head>
+  <body style="margin: 0; padding: 0; background: #f9fefe;"></body>
+    <table border="0" cellpadding="0" cellspacing="0" align="center" style="padding: 30px; max-width: 920px; width: 100%; background-size: cover; background-repeat: no-repeat; background-image: url('https://tekie-backend.s3.amazonaws.com/python/email/invoiceBackground.png')">
+      <tr style="width: 100%; height: 100%;" align="center">
+        <td style="width: 100%; height: 100%;" align="center">
+          <table style="width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); padding: 30px;">
+            <tr align="center">
+              <td align="center">
+                <img width="84" height="29.3" src="https://tekie-backend.s3.amazonaws.com/python/email/tekieLogo.png" />
+              </td>
+            </tr>
+            <tr align="left">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 18px; color: #504F4F; border-top: 33px solid transparent;">
+                Hello <span style="color: #00ADE6;"><%= parentName %></span>,
+              </td>
+            </tr>
+
+            <tr align="left">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 18px; color: #504F4F; border-top: 5px solid transparent;">
+                  Congratulations! <span style="color: #00ADE6;"><%= name %></span> free coding class has been scheduled:
+              </td>
+            </tr>
+
+            <tr style="width: 100%;">
+              <td style="width: 100%; border-top: 30px solid transparent;" align="center">
+                <img src="https://tekie-backend.s3.amazonaws.com/python/topic/thumbnailSmall_cjx2czgja00001h2xt7fjlh04_1589290510205.png" width="136" height="161"></img>
+              </td>
+            </tr>
+
+            <tr style="width: 100%;">
+              <td align="center" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: bold; font-size: 20px; color: #504F4F;">
+                <%= topicTitle %>
+              </td>
+            </tr>
+            <tr style="width: 100%;">
+              <td style="width: 100%; border-top: 15px solid transparent;" align="center">
+                <table style="width: 158px;">
+                  <tr>
+                      <td align="right" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: bold; font-size: 20px; color: #504F4F;">
+                        <img src="https://tekie-backend.s3.amazonaws.com/python/email/iconCalendar.png" style="margin-right: 5px;" width="28.3" height="28.3"></img>
+                      </td>
+                      <td align="left" style=" margin-right: 10px;font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: bold; font-size: 20px; color: #504F4F;">
+                        <span><%= bookingDate %></span>
+                      </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr style="width: 100%;">
+              <td style="width: 100%; border-top: 12px solid transparent;" align="center">
+                <table style="width: 220px;">
+                  <tr>
+                      <td align="right" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: bold; font-size: 20px; color: #504f4f;">
+                        <img src="https://tekie-backend.s3.amazonaws.com/python/email/clock.png" width="28.3" height="28.3" style="margin-right: 5px;"></img>
+                      </td>
+                      <td align="left" style=" margin-right: 10px;font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: bold; font-size: 20px; color: #504F4F;">
+                        <span><%= startTime %> - <%= endTime %></span>
+                      </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr style="width: 100%;">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; border-top: 30px solid transparent; font-size: 18px; color: #504f4f;">
+                Kindly join the class with the link you'll receive 30 minutes before the class.<br/><br/>
+                We request you to be ready 10 minutes before the class starts. It is compulsory to join 
+                from laptop/pc with google chrome, a stable internet connection(at least 8MBPS), and zoom installed. 
+                <br/><br/>
+                Need to reschedule this class? Do it with your app (www.tekie.in/login) by logging with OTP using 
+                your registered phone number <span style="color: #00ADE6"><%= mentorPhoneNumber %></span>. 
+                <br/><br/>
+
+                For any assistance or to set up your laptop/pc, feel free to reach out to <span style="color: #00ADE6">Setup Helpline</span> at <span style="color: #00ADE6">+91 88277 06789</span>.
+              </td>
+            </tr>
+            
+            <tr style="width: 100%;">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; border-top: 30px solid transparent; font-size: 18px; color: #504f4f;">
+                See you there,
+              </td>
+            </tr>
+            <tr style="width: 100%;">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-size: 18px; color: #504f4f;">
+                The Tekie Team.
+              </td>
+            </tr>
+            
+            <tr style="width: 100%;">
+              <td style="border-top: 15px solid transparent; width: 100%;"></td>
+            </tr>
+            <tr style="width: 100%;">
+              <td style="border-bottom: 1px solid rgba(0,0,0,0.22); width: 100%;"></td>
+            </tr>
+            <tr style="width: 100%;">
+              <td style="border-bottom: 15px solid transparent; width: 100%;"></td>
+            </tr>
+
+            <tr align="center">
+              <td>
+                <img width="102" height="35" src="https://tekie-backend.s3.amazonaws.com/python/email/tekieLogo.png" />
+              </td>
+            </tr>
+            <tr style="width: 100%;">
+              <td style="border-top: 16px solid transparent; width: 100%;"></td>
+            </tr>
+
+            <tr align="center">
+              <td>
+                <img style="max-width: 515px; width: 100%" src="https://tekie-backend.s3.amazonaws.com/python/email/footerflex.png" />
+              </td>
+            </tr>
+
+            <tr style="width: 100%;">
+              <td style="border-top: 24px solid transparent; width: 100%;"></td>
+            </tr>
+
+            <tr align="center">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 300; font-size: 18px; color: #504F4F;">
+                <a href="https://www.tekie.in" style="color: #504F4F; text-decoration: none;">www.tekie.in</a>
+              </td>
+            </tr>
+
+
+            <td align="center" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 300; font-size: 18px; color: #504F4F;">
+              <table>
+                <tr align="center">
+                  <td style="border-right: 1px solid #504F4F; width: 62px; padding-right: 10px;">
+                    <a href="https://www.tekie.in/privacy" style="color: #504F4F;">Privacy</a>
+                  </td>
+                  <td align="right" style="border-right: 1px solid #504F4F; width: 43px; padding-left: 10px; padding-right: 10px;">
+                    <a href="https://www.tekie.in/terms" style="color: #504F4F;">Terms</a>
+                  </td>
+                  <td align="right" style=" padding-left: 5px;">
+                    <a href="https://www.tekie.in/refund" style="color: #504F4F;">Refunds</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+
+            <tr align="center">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; border-top: 15px solid transparent; font-size: 16px; color: #504f4f; font-style: italic; font-weight: 300; text-align: center;">
+                <table style="width: 100%;">
+                  <tr align="center">
+                    <td align="center">
+                      <p style="width: 100%; max-width: 260px;">
+                        Connect with us to stay updated
+                        with news around coding and more:
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            
+            <tr align="center">
+              <td>
+                <table style="width: 258px;">
+                  <tr>
+                    <td style="width: 28px; height: 28px;">
+                      <a href="https://www.facebook.com/TekieApp/">
+                        <img src="https://tekie-backend.s3.amazonaws.com/python/email/facebook.png" style="width: 28px; height: 28px">
+                      </a>
+                    </td>
+                    <td style="width: 28px; height: 28px;">
+                      <a href="https://www.instagram.com/tekieapp/">
+                        <img src="https://tekie-backend.s3.amazonaws.com/python/email/instagram.png" style="width: 28px; height: 28px">
+                      </a>
+                    </td>
+                    <td style="width: 28px; height: 28px;">
+                      <a href="https://www.youtube.com/channel/UCCr7GPlTdZRXFEfveeuKcbg">
+                        <img src="https://tekie-backend.s3.amazonaws.com/python/email/youtube.png" style="width: 28px; height: 19px">
+                      </a>
+                    </td>
+                    <td style="width: 28px; height: 28px;">
+                      <a href="https://www.linkedin.com/company/tekie/">
+                        <img src="https://tekie-backend.s3.amazonaws.com/python/email/linkedin.png" style="width: 28px; height: 28px">
+                      </a>
+                    </td>
+                    <td style="width: 28px; height: 28px;">
+                      <a href="https://www.tekie.in">
+                        <img src="https://tekie-backend.s3.amazonaws.com/python/email/tekie.png" style="width: 24px; height: 28px">
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr align="center">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; border-top: 15px solid transparent; font-size: 16px; color: #504f4f; font-weight: 300; text-align: center;">
+                <table style="width: 100%;">
+                  <tr align="center">
+                    <td align="center">
+                      <p style="width: 100%;">
+                        This email was addressed to <a href="mailto:parent1@gmail.com" style="color: #00ADE6; text-decoration: none;"><% mentorPhoneNumber %> </a><br/>
+                        Don't want any updates delivered to your inbox? <a href="https://tekie.in/Unsubscribe" style="color: #00ADE6;">Unsubscribe here</a>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+  
