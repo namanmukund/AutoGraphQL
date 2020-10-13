@@ -1,3 +1,4 @@
+/*eslint-disable*/
 import { get, startCase } from 'lodash';
 import moment from 'moment';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
