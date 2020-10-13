@@ -1,3 +1,4 @@
+/*eslint-disable*/
 import { ifAuthorized } from '../../../../../../utils';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import addToSalesOperationScript from '../scriptMethods/addToSalesOperationScript';
