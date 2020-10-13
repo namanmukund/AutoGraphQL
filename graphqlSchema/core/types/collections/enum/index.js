@@ -48,6 +48,7 @@ import ScheduleRunStatus from './ScheduleRunStatus';
 import TransactionalMessageMedium from './TransactionalMessageMedium';
 import TransactionalMessageType from './TransactionalMessageType';
 import SkillsLevel from './SkillsLevel';
+import CodingLanguageType from './CodingLanguageType';
 
 export default [
   Status,
@@ -100,4 +101,5 @@ export default [
   TransactionalMessageMedium,
   TransactionalMessageType,
   SkillsLevel,
+  CodingLanguageType,
 ];

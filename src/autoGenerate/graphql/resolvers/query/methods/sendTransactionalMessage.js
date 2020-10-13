@@ -14,21 +14,19 @@ import getFullPath from '../../../../../../utils/getFullPath';
 const sendTransactionalEmail = async (templateObject, emailBody) => {
   const templateFileName = get(emailBody, 'template');
   const footer = await parsedHtmlFromTemplateFileAndObject('footer', templateObject);
-  const html = await parsedHtmlFromTemplateFileAndObject(templateFileName, { ... templateObject, footer});
+  const html = await parsedHtmlFromTemplateFileAndObject(templateFileName, { ...templateObject, footer });
   // emailto should be in array. Can send the mail to mutiple people
   const emailTo = ['sanatankc@gmail.com'];
   // ccemail should be in array. Can send the mail to mutiple people
   const ccEmail = [''];
   // bccemail should be in array. Can send the mail to mutiple people
   const bccEmail = [''];
-  const subject = get(emailBody, 'subject')
+  const subject = get(emailBody, 'subject');
   /* if html is empty then in the body text will be appear. Html is having higher
     precedence over text */
   const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
   sendEmail(emailMsgObject);
 };
-
-
 
 const calculateMentorRating = (mentorInfo) => {
   let ratingNum = 0;
@@ -51,9 +49,9 @@ const getMentorCodingLanguages = (codingLanguages) => {
   if (codingLanguages && codingLanguages.length) {
     codingLanguages.forEach((language, index) => {
       if (index < codingLanguages.length - 1) {
-        codingLanguageStr += `${startCase(language)}, `;
+        codingLanguageStr += `${startCase(language.value)}, `;
       } else {
-        codingLanguageStr += `${startCase(language)}`;
+        codingLanguageStr += `${startCase(language.value)}`;
       }
     });
   }
@@ -61,7 +59,7 @@ const getMentorCodingLanguages = (codingLanguages) => {
 };
 
 const getSessionRescheduledReasons = (reasons) => {
-  if (!reasons) return ''
+  if (!reasons) return '';
   const reasonsArray = Object.keys(reasons);
   // eslint-disable-next-line no-restricted-syntax
   for (const reason of reasonsArray) {
@@ -78,9 +76,9 @@ const getSessionRescheduledReasons = (reasons) => {
         case 'powerCut':
           return 'Power cut';
         case 'notResponseAndDidNotTurnUp':
-          return 'Kid did not turn up in session';
+          return 'Kid could not turn up in session';
         case 'turnedUpButLeftAbruptly':
-          return 'Turned up but abruptly left the session';
+          return 'Kid turned up but could not complete the session';
         default:
           return 'NA';
       }
@@ -89,7 +87,7 @@ const getSessionRescheduledReasons = (reasons) => {
   return '';
 };
 
-const getMentorMenteeSessions = async (userId, messageType) => {
+const getMentorMenteeSessions = async (userId, messageType, sessionLink) => {
   const query = `
 query{
   mentorMenteeSessions(filter:{
@@ -130,6 +128,7 @@ query{
           id
           codingLanguages
           experienceYear
+          sessionLink
           pythonCourseRating1
           pythonCourseRating2
           pythonCourseRating3
@@ -180,9 +179,9 @@ query{
   const mentorInfo = get(data[0], 'mentorSession.user.mentorProfile');
   const menteeSession = get(data[0], 'menteeSession');
   const mentorProfileFile = get(data[0], 'mentorSession.user.profilePic.uri', '');
-  const topicTitle = get(data[0], 'topic.title', '')
+  const topicTitle = get(data[0], 'topic.title', '');
 
-  const mentorProfilePic = mentorProfileFile ?  getFullPath(mentorProfileFile) : 'https://tekie-backend.s3.amazonaws.com/python/email/mentor1.png'
+  const mentorProfilePic = mentorProfileFile ? getFullPath(mentorProfileFile) : 'https://tekie-backend.s3.amazonaws.com/python/email/mentor1.png';
 
   // validate before sending the message
   if (!data || (data && data.length > 1)) {
@@ -231,7 +230,6 @@ query{
     const slotNumber = slotTimeStringArray[0].split('slot')[1];
     const { startTime, endTime } = getSlotLabel(slotNumber);
 
-    
     return {
       mentorMenteeSessionId: get(data[0], 'id'),
       parentName: get(parentInfo, 'name'),
@@ -239,12 +237,13 @@ query{
       parentNumber: get(parentInfo, 'phone.number'),
       countryCode: get(parentInfo, 'phone.countryCode'),
       name: get(menteeSession, 'user.name'),
-      bookingDate: bookingDate,
+      bookingDate,
       startTime,
       endTime,
       topicTitle,
       codingLanguages: getMentorCodingLanguages(get(mentorInfo, 'codingLanguages')) || 'Python',
       experienceYear: get(mentorInfo, 'experienceYear') || 3,
+      sessionLink: get(mentorInfo, 'sessionLink') || sessionLink,
       mentorPhoneNumber: get(data[0], 'mentorSession.user.phone.number'),
       mentorName: get(data[0], 'mentorSession.user.name'),
       mentorCountryCode: get(data[0], 'mentorSession.user.phone.countryCode'),
@@ -277,7 +276,7 @@ const sendTransactionalMessage = async (root, params, context) => {
   validateAuthentication(context);
   const { userId, input } = params;
   const { messageType, medium, sessionLink } = input;
-  const dataObj = await getMentorMenteeSessions(userId, messageType);
+  const dataObj = await getMentorMenteeSessions(userId, messageType, sessionLink);
 
   let parameters;
   switch (messageType) {
@@ -292,7 +291,7 @@ const sendTransactionalMessage = async (root, params, context) => {
       },
       {
         name: 'session_link',
-        value: sessionLink,
+        value: dataObj.sessionLink || sessionLink,
       },
       {
         name: 'student_name',
@@ -386,36 +385,37 @@ const sendTransactionalMessage = async (root, params, context) => {
     default:
   }
 
-  
-  dataObj.bookingDateLong = getLongDate(dataObj.bookingDate)
-  dataObj.bookingDate = moment(dataObj.bookingDate).format('DD-MM-YYYY')
-  dataObj.sessionLink = sessionLink
-  console.log(dataObj)
+  dataObj.bookingDateLong = getLongDate(dataObj.bookingDate);
+  dataObj.bookingDate = moment(dataObj.bookingDate).format('DD-MM-YYYY');
+  if (!dataObj.sessionLink) {
+    dataObj.sessionLink = sessionLink;
+  }
+  console.log(dataObj);
 
   const mailBody = {
     sendSessionLink: {
       template: 'sendSessionLink',
-      subject: 'Tekie - Session link for free coding session'
+      subject: 'Tekie - Session link for free coding session',
     },
     didNotPickTheCall: {
       template: 'didNotPickTheCall',
-      subject: 'Tekie - We tried calling you'
+      subject: 'Tekie - We tried calling you',
     },
     didNotTurnUpInSession: {
       template: 'sessionNotConducted',
-      subject: 'Tekie - Missed the free coding session'
+      subject: 'Tekie - Missed the free coding session',
     },
     sessionNotConducted: {
       template: 'sessionNotConducted',
-      subject: 'Tekie - Session was not conducted'
+      subject: 'Tekie - Session was not conducted',
     },
-  }
+  };
 
   switch (medium) {
     case 'all': {
       // send whatsApp
       // send email
-      sendTransactionalEmail(dataObj, mailBody[messageType])
+      sendTransactionalEmail(dataObj, mailBody[messageType]);
       break;
     }
     case 'whatsApp': {
@@ -424,7 +424,7 @@ const sendTransactionalMessage = async (root, params, context) => {
     }
     case 'email': {
       // send email
-      sendTransactionalEmail(dataObj, mailBody[messageType])
+      sendTransactionalEmail(dataObj, mailBody[messageType]);
       break;
     }
 

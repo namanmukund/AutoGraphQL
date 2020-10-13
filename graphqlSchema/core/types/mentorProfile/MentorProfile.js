@@ -1,8 +1,9 @@
 const MentorProfile = `
   type MentorProfile @model {
     user: User! @relation(name: "MentorProfileUser")
-    codingLanguages: [String]
+    codingLanguages: [CodingLanguage]
     experienceYear: Int
+    sessionLink: String
     pythonCourseRating5: Int
     pythonCourseRating4: Int
     pythonCourseRating3: Int
