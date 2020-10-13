@@ -9,14 +9,14 @@ import getSlotLabel from '../../../../../../utils/getSlotLabel';
 import parsedHtmlFromTemplateFileAndObject from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../../services/email/utils/sendEmail';
+import getFullPath from '../../../../../../utils/getFullPath';
 
 const sendTransactionalEmail = async (templateObject, emailBody) => {
   const templateFileName = get(emailBody, 'template');
-  // console.log(templateObject)
-  const html = await parsedHtmlFromTemplateFileAndObject(templateFileName, templateObject);
-  // console.log(html)
+  const footer = await parsedHtmlFromTemplateFileAndObject('footer', templateObject);
+  const html = await parsedHtmlFromTemplateFileAndObject(templateFileName, { ... templateObject, footer});
   // emailto should be in array. Can send the mail to mutiple people
-  const emailTo = ['sanatankc@gmail.com', 'namanmukund@gmail.com'];
+  const emailTo = ['sanatankc@gmail.com'];
   // ccemail should be in array. Can send the mail to mutiple people
   const ccEmail = [''];
   // bccemail should be in array. Can send the mail to mutiple people
@@ -61,6 +61,7 @@ const getMentorCodingLanguages = (codingLanguages) => {
 };
 
 const getSessionRescheduledReasons = (reasons) => {
+  if (!reasons) return ''
   const reasonsArray = Object.keys(reasons);
   // eslint-disable-next-line no-restricted-syntax
   for (const reason of reasonsArray) {
@@ -178,7 +179,10 @@ query{
   const parentInfo = get(data[0], 'menteeSession.user.studentProfile.parents[0].user');
   const mentorInfo = get(data[0], 'mentorSession.user.mentorProfile');
   const menteeSession = get(data[0], 'menteeSession');
+  const mentorProfileFile = get(data[0], 'mentorSession.user.profilePic.uri', '');
   const topicTitle = get(data[0], 'topic.title', '')
+
+  const mentorProfilePic = mentorProfileFile ?  getFullPath(mentorProfileFile) : 'https://tekie-backend.s3.amazonaws.com/python/email/mentor1.png'
 
   // validate before sending the message
   if (!data || (data && data.length > 1)) {
@@ -244,6 +248,7 @@ query{
       mentorPhoneNumber: get(data[0], 'mentorSession.user.phone.number'),
       mentorName: get(data[0], 'mentorSession.user.name'),
       mentorCountryCode: get(data[0], 'mentorSession.user.phone.countryCode'),
+      mentorProfilePic,
       mentorRating: calculateMentorRating(mentorInfo) || 5,
       rescheduleReason: getSessionRescheduledReasons(get(data[0], 'salesOperation')) || 'NA',
     };
@@ -385,11 +390,24 @@ const sendTransactionalMessage = async (root, params, context) => {
   dataObj.bookingDateLong = getLongDate(dataObj.bookingDate)
   dataObj.bookingDate = moment(dataObj.bookingDate).format('DD-MM-YYYY')
   dataObj.sessionLink = sessionLink
+  console.log(dataObj)
 
   const mailBody = {
     sendSessionLink: {
-      template: 'sessionLink',
-      subject: 'Tekie - session link for free trial class'
+      template: 'sendSessionLink',
+      subject: 'Tekie - Session link for free coding session'
+    },
+    didNotPickTheCall: {
+      template: 'didNotPickTheCall',
+      subject: 'Tekie - We tried calling you'
+    },
+    didNotTurnUpInSession: {
+      template: 'sessionNotConducted',
+      subject: 'Tekie - Missed the free coding session'
+    },
+    sessionNotConducted: {
+      template: 'sessionNotConducted',
+      subject: 'Tekie - Session was not conducted'
     },
   }
 
@@ -406,6 +424,7 @@ const sendTransactionalMessage = async (root, params, context) => {
     }
     case 'email': {
       // send email
+      sendTransactionalEmail(dataObj, mailBody[messageType])
       break;
     }
 
