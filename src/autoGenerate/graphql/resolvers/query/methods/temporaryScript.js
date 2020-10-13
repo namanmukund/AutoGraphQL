@@ -1,17 +1,16 @@
 import { ifAuthorized } from '../../../../../../utils';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
-// import addToSalesOperationScript from '../scriptMethods/addToSalesOperationScript';
+import addToSalesOperationScript from '../scriptMethods/addToSalesOperationScript';
+import validateAuthentication from '../../../../../../utils/validateAuthentication';
+import updateMentorRating from '../scriptMethods/updateMentorRating';
 
 const temporaryScript = (async (root, params, context) => {
-  const authentication = ifAuthorized(context);
-
-  if (!authentication || !authentication.app || !authentication.user) {
-    throw new UnauthorizedOperationError();
-  }
+  // validateAuthentication(context);
   /*
   Add script functions
    */
   // await addToSalesOperationScript('firstMentorMenteeSession');
+  await updateMentorRating();
   return {
     result: true,
   };
