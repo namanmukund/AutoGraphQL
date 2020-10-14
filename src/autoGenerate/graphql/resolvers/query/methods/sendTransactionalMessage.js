@@ -222,7 +222,8 @@ query{
       if (didNotPickTheCall) {
         throw new MessageAlreadySendError();
       }
-      break;
+      // temporary
+      throw new InvalidRequestError();
     }
     case 'sessionNotConducted': {
       if (sessionNotConducted) {
@@ -234,7 +235,8 @@ query{
       if (didNotTurnUpInSession) {
         throw new MessageAlreadySendError();
       }
-      break;
+      // temporary
+      throw new InvalidRequestError();
     }
 
     default:
