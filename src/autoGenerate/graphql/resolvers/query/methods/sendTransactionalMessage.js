@@ -1,4 +1,4 @@
-import { get, startCase } from 'lodash';
+import { get } from 'lodash';
 import moment from 'moment';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import getLongDate from '../../../../../../utils/getLongDate';
@@ -50,7 +50,7 @@ const calculateMentorRating = (mentorInfo) => {
   }
   return '';
 };
-const getCorrectCodingLaguageTitle = (codingLanguage) => {
+const getCorrectCodingLanguageTitle = (codingLanguage) => {
   switch (codingLanguage) {
     case 'Cplusplus':
       return 'C++';
@@ -66,9 +66,9 @@ const getMentorCodingLanguages = (codingLanguages) => {
   if (codingLanguages && codingLanguages.length) {
     codingLanguages.forEach((language, index) => {
       if (index < codingLanguages.length - 1) {
-        codingLanguageStr += `${startCase(getCorrectCodingLaguageTitle(language.value))}, `;
+        codingLanguageStr += `${getCorrectCodingLanguageTitle(language.value)}, `;
       } else {
-        codingLanguageStr += `${startCase(getCorrectCodingLaguageTitle(language.value))}`;
+        codingLanguageStr += `${getCorrectCodingLanguageTitle(language.value)}`;
       }
     });
   }
