@@ -23,11 +23,12 @@ const sendTransactionalEmail = async (templateObject, emailBody) => {
   const footer = await parsedHtmlFromTemplateFileAndObject('footer', templateObject);
   const html = await parsedHtmlFromTemplateFileAndObject(templateFileName, { ...templateObject, footer });
 
-  const emailTo = [transactionalMessageBody.testEmail];
-  // const emailTo = [templateObject.dataObj];
-  const ccEmail = [''];
+  // const emailTo = [transactionalMessageBody.testEmail];
+  const emailTo = [templateObject.parentEmail];
 
-  const bccEmail = [''];
+  const ccEmail = [transactionalMessageBody.testEmail, templateObject.mentorEmail];
+
+  const bccEmail = [];
   const subject = get(emailBody, 'subject');
   /* if html is empty then in the body text will be appear. Html is having higher
     precedence over text */
@@ -133,6 +134,7 @@ query{
         id
         name
         username
+        email
         phone{
           countryCode
           number
@@ -264,6 +266,7 @@ query{
       sessionLink: get(mentorInfo, 'sessionLink') || sessionLink,
       mentorPhoneNumber: `${get(data[0], 'mentorSession.user.phone.countryCode')}-${get(data[0], 'mentorSession.user.phone.number')}`,
       mentorName: get(data[0], 'mentorSession.user.name'),
+      mentorEmail: get(data[0], 'mentorSession.user.email'),
       mentorCountryCode: get(data[0], 'mentorSession.user.phone.countryCode'),
       mentorProfilePic,
       mentorRating: calculateMentorRating(mentorInfo) || 5,
@@ -295,6 +298,13 @@ const sendTransactionalMessage = async (root, params, context) => {
   const { userId, input } = params;
   const { messageType, medium, sessionLink } = input;
   const dataObj = await getMentorMenteeSessions(userId, messageType, sessionLink);
+  // if staging just don't send the message and behave similarly
+  if (process.env.NODE_ENV !== 'production') {
+    await updateMentorMenteeSessionWithMessageType(dataObj.mentorMenteeSessionId, messageType);
+    return {
+      result: true,
+    };
+  }
 
   let parameters;
   switch (messageType) {
@@ -419,8 +429,8 @@ const sendTransactionalMessage = async (root, params, context) => {
   if (!dataObj.sessionLink) {
     dataObj.sessionLink = sessionLink;
   }
-  // const whatsAppPhoneNumber = dataObj.countryCode.split('+')[1] + dataObj.parentNumber;
-  const whatsAppPhoneNumber = transactionalMessageBody.testWhatsAppNumber;
+  const whatsAppPhoneNumber = dataObj.countryCode.split('+')[1] + dataObj.parentNumber;
+  // const whatsAppPhoneNumber = transactionalMessageBody.testWhatsAppNumber;
 
   const { whatsAppTemplate } = transactionalMessageBody[messageType];
 
