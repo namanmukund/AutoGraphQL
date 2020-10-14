@@ -1,6 +1,6 @@
-const BASE_URL = 'https://tekie-tms-test.s3.amazonaws.com';
+const BASE_URL = process.env.FILE_BASE_URL;
 
-const getFullPath = (file) => {
+const getFullFilePath = (file) => {
   if (file.includes(BASE_URL)) {
     return file;
   }
@@ -8,4 +8,4 @@ const getFullPath = (file) => {
   return `${BASE_URL}/${file}`;
 };
 
-export default getFullPath;
+export default getFullFilePath;

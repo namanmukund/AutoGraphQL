@@ -7,10 +7,11 @@ import availableSlotsQuery from '../graphqlQueries/availableSlotsQuery';
 import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery';
 import extractMenteeSessionInfoAndSendEmail from './utils/extractMenteeSessionInfoAndSendEmail';
 import isTrialSession from '../resolvers/utils/isTrialSession';
+import updateScheduleStatusOfMenteeSession from '../../../../utils/scheduleJobs/updateScheduleStatusOfMenteeSession';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const { previousDocument } = context;
-  const { bookingDate: prevBookingDate, ...prevSlots } = previousDocument;
+  const { id: menteeSessionId, bookingDate: prevBookingDate, ...prevSlots } = previousDocument;
   const prevSlotTimeStringArray = getSelectedSlotsStringArray(prevSlots);
 
   const { bookingDate, ...slots } = input;
@@ -58,6 +59,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
         };
         await callLocalGraphqlApi(updateAvailableSlotQuery(availableSlotId), context, variables);
       }
+      await updateScheduleStatusOfMenteeSession(menteeSessionId, 'todo');
     }
   }
   // send email to mentor admin regarding the session

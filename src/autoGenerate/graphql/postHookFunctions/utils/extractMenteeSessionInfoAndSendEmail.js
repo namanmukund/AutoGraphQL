@@ -8,6 +8,7 @@ import getFormatedDate from '../../../../../utils/getFormatedDate';
 import getSlotLabel from '../../../../../utils/getSlotLabel';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 import getLongDate from '../../../../../utils/getLongDate';
+import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
 
 const menteeInfoQuery = (userId) => `
   query{
@@ -170,7 +171,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
     sendBookedSessionEmailToTekie(subject, menteeObj, action);
     sendBookedSessionEmailToParent(subject, menteeObj, action);
     if (action === 'add' && get(topicInfo, 'data.topic.order') === 1) {
-      // send whatsapp template message
+      // send whatsapp emailTemplate message
       const {
         parentName, parentNumber, countryCode, name,
       } = menteeObj;
@@ -197,9 +198,9 @@ const extractMenteeSessionInfoAndSendEmail = async (
       ];
       const phone = countryCode.split('+')[1] + parentNumber;
       // const phone = 919654347463;
-      sendWhatsAppTemplateMessage(
+      await sendWhatsAppTemplateMessage(
         phone,
-        'oct5_trial_booked_confirmation',
+        transactionalMessageBody.bookingConfirmation,
         parentName,
         parameters,
       );

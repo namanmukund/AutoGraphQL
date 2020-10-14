@@ -179,3 +179,15 @@ export const CanNotChangeSessionStatusError = createError('CanNotChangeSessionSt
 export const CanNotCompleteSessionBeforeStartingError = createError('CanNotCompleteSessionBeforeStartingError', {
   message: 'Can not complete the session before starting it',
 });
+
+export const MessageAlreadySendError = createError('MessageAlreadySendError', {
+  message: 'Message is already send',
+});
+
+export const InvalidRequestError = createError('InvalidRequestError', {
+  message: 'Request validation failed',
+});
+
+export const MandatorySessionLinkError = createError('MandatorySessionLinkError', {
+  message: 'Session link is mandatory',
+});

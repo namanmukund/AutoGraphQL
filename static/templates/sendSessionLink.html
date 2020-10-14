@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
   <head>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html charset=UTF-8" />
   </head>
@@ -15,7 +15,7 @@
                 <img width="84" height="29.3" src="https://tekie-backend.s3.amazonaws.com/python/email/tekieLogo.png" />
               </td>
             </tr>
-            <tr align="left">  
+            <tr align="left">
               <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 18px; color: #707070; border-top: 33px solid transparent;">
                 Hello <span style="color: #00ADE6;"><%= parentName %> </span>,
               </td>
@@ -34,13 +34,13 @@
                 </a>
               </td>
             </tr>
-            
+
             <tr>
               <td>
                 <table style="margin-top: -25px">
                   <tr align="left">
                     <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 18px; color: #707070; border-top: 5px solid transparent;">
-                      <span style="color: #00ADE6"><%= name %> </span>'s mentor for the class would be <span style="color: #00ADE6"><%= mentorName %> </span>, reachable at <span style="color: #00ADE6"><%= mentorCountryCode %>  <%= mentorPhoneNumber %> </span>
+                      <span style="color: #00ADE6"><%= name %> </span>'s mentor for the class would be <span style="color: #00ADE6"><%= mentorName %></span>, reachable at <span style="color: #00ADE6"><%= mentorPhoneNumber %></span>
                     </td>
                   </tr>
                 </table>
@@ -62,7 +62,7 @@
 
                       <div style="width: 106px; height: 106px; border-radius: 50%; border: 2px solid #00ADE6; margin-top: -7px; margin-right: 8px; box-shadow: 0 1px 6px rgba(32,33,36,.28); box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.25); background-image: url('<%= mentorProfilePic %>'); background-size: 95%; background-repeat: no-repeat; background-position: 130% center;"></div>
                       <div style="color: #00ADE6; font-family: Nunito; font-size: 18px; margin-top: 9px"><%= mentorName %> </div>
-                      <div style="font-family: Nunito; font-size: 14px; margin-top: 9px; color: #474747">Rating <span style="color: #00ADE6;"><%= mentorRating %> </span></div>
+                      <div style="font-family: Nunito; font-size: 14px; margin-top: 9px; color: #474747">Rating <span style="color: #00ADE6;"><%= mentorRating %>/5 </span></div>
                       <div style="font-family: Nunito; font-size: 14px; margin-top: 9px; color: #474747">Languages familiar with: </div>
                       <div style="font-family: Nunito; font-size: 14px; margin-top: 0px; color: #474747"><%= codingLanguages %> </div>
                       <div style="font-family: Nunito; font-size: 14px; margin-top: 9px; color: #474747; font-style: italic"><%= experienceYear %>+ years experience in coding</div>
@@ -76,14 +76,14 @@
                 <span style="font-weight: 700;">Session:</span> <span style="color: #00ADE6"><%= topicTitle %> </span><br/><br/>
               </td>
             </tr>
-            
+
 
             <tr style="width: 100%;">
               <td style="font-family: Nunito, Arial, Helvetica, sans-serif; border-top: 0px solid transparent; font-size: 18px; color: #707070;">
                 For any assistance or to set up your laptop/pc, feel free to reach out to <span style="color: #00ADE6">Setup Helpline</span> at <span style="color: #00ADE6">+91 88277 06789</span>.
               </td>
             </tr>
-            
+
             <tr style="width: 100%;">
               <td style="font-family: Nunito, Arial, Helvetica, sans-serif; border-top: 30px solid transparent; font-size: 18px; color: #707070;">
                 See you there,
@@ -94,12 +94,11 @@
                 The Tekie Team.
               </td>
             </tr>
-            
-            <%= footer %> 
-            
+
+            <%= footer %>
+
           </table>
         </td>
       </tr>
     </table>
   </body>
-  
