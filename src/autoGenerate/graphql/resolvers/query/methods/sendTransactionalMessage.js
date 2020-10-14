@@ -1,4 +1,3 @@
-/*eslint-disable*/
 import { get, startCase } from 'lodash';
 import moment from 'moment';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
@@ -10,17 +9,24 @@ import getSlotLabel from '../../../../../../utils/getSlotLabel';
 import parsedHtmlFromTemplateFileAndObject from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../../services/email/utils/sendEmail';
-import getFullPath from '../../../../../../utils/getFullPath';
+import getFullFilePath from '../../../../../../utils/getFullFilePath';
+import {
+  InvalidRequestError,
+  MandatorySessionLinkError,
+  MessageAlreadySendError,
+} from '../../../../../../constants/errors/input';
+import sendWhatsAppTemplateMessage from '../../../../utils/sendWhatsAppTemplateMessage';
+import transactionalMessageBody from '../../../../../../constants/transactionalMessageBody';
 
 const sendTransactionalEmail = async (templateObject, emailBody) => {
-  const templateFileName = get(emailBody, 'template');
+  const templateFileName = get(emailBody, 'emailTemplate');
   const footer = await parsedHtmlFromTemplateFileAndObject('footer', templateObject);
   const html = await parsedHtmlFromTemplateFileAndObject(templateFileName, { ...templateObject, footer });
-  // emailto should be in array. Can send the mail to mutiple people
-  const emailTo = ['sanatankc@gmail.com'];
-  // ccemail should be in array. Can send the mail to mutiple people
+
+  const emailTo = [transactionalMessageBody.testEmail];
+  // const emailTo = [templateObject.dataObj];
   const ccEmail = [''];
-  // bccemail should be in array. Can send the mail to mutiple people
+
   const bccEmail = [''];
   const subject = get(emailBody, 'subject');
   /* if html is empty then in the body text will be appear. Html is having higher
@@ -40,9 +46,19 @@ const calculateMentorRating = (mentorInfo) => {
     }
   });
   if (ratingNum > 0 && ratingDen > 0) {
-    return (ratingNum / ratingDen).toFixed(2);
+    return Number((ratingNum / ratingDen).toFixed(2));
   }
   return '';
+};
+const getCorrectCodingLaguageTitle = (codingLanguage) => {
+  switch (codingLanguage) {
+    case 'Cplusplus':
+      return 'C++';
+    case 'Csharp':
+      return 'C#';
+    default:
+      return codingLanguage || '';
+  }
 };
 
 const getMentorCodingLanguages = (codingLanguages) => {
@@ -50,9 +66,9 @@ const getMentorCodingLanguages = (codingLanguages) => {
   if (codingLanguages && codingLanguages.length) {
     codingLanguages.forEach((language, index) => {
       if (index < codingLanguages.length - 1) {
-        codingLanguageStr += `${startCase(language.value)}, `;
+        codingLanguageStr += `${startCase(getCorrectCodingLaguageTitle(language.value))}, `;
       } else {
-        codingLanguageStr += `${startCase(language.value)}`;
+        codingLanguageStr += `${startCase(getCorrectCodingLaguageTitle(language.value))}`;
       }
     });
   }
@@ -77,9 +93,9 @@ const getSessionRescheduledReasons = (reasons) => {
         case 'powerCut':
           return 'Power cut';
         case 'notResponseAndDidNotTurnUp':
-          return 'Kid could not turn up in session';
+          return 'Your child could not attend the session';
         case 'turnedUpButLeftAbruptly':
-          return 'Kid turned up but could not complete the session';
+          return 'Your child attended the session but could not complete it';
         default:
           return 'NA';
       }
@@ -127,7 +143,7 @@ query{
         }
         mentorProfile{
           id
-          codingLanguages
+          codingLanguages{value}
           experienceYear
           sessionLink
           pythonCourseRating1
@@ -181,14 +197,13 @@ query{
   const menteeSession = get(data[0], 'menteeSession');
   const mentorProfileFile = get(data[0], 'mentorSession.user.profilePic.uri', '');
   const topicTitle = get(data[0], 'topic.title', '');
-
-  const mentorProfilePic = mentorProfileFile ? getFullPath(mentorProfileFile) : 'https://tekie-backend.s3.amazonaws.com/python/email/mentor1.png';
+  const mentorProfilePic = mentorProfileFile ? getFullFilePath(mentorProfileFile) : getFullFilePath('python/email/mentor1.png');
 
   // validate before sending the message
   if (!data || (data && data.length > 1)) {
-    throw new Error('Invalid');
+    throw new InvalidRequestError();
   }
-  // if message is already  send then avoid sending that  again
+  // if message is already  send then avoid sending that again
   const {
     sendSessionLink,
     didNotPickTheCall,
@@ -196,34 +211,34 @@ query{
     didNotTurnUpInSession,
   } = data[0];
 
-  // switch (messageType) {
-  //   case 'sendSessionLink': {
-  //     if (sendSessionLink) {
-  //       throw new Error('Already sent');
-  //     }
-  //     break;
-  //   }
-  //   case 'didNotPickTheCall': {
-  //     if (didNotPickTheCall) {
-  //       throw new Error('Already sent');
-  //     }
-  //     break;
-  //   }
-  //   case 'sessionNotConducted': {
-  //     if (sessionNotConducted) {
-  //       throw new Error('Already sent');
-  //     }
-  //     break;
-  //   }
-  //   case 'didNotTurnUpInSession': {
-  //     if (didNotTurnUpInSession) {
-  //       throw new Error('Already sent');
-  //     }
-  //     break;
-  //   }
+  switch (messageType) {
+    case 'sendSessionLink': {
+      if (sendSessionLink) {
+        throw new MessageAlreadySendError();
+      }
+      break;
+    }
+    case 'didNotPickTheCall': {
+      if (didNotPickTheCall) {
+        throw new MessageAlreadySendError();
+      }
+      break;
+    }
+    case 'sessionNotConducted': {
+      if (sessionNotConducted) {
+        throw new MessageAlreadySendError();
+      }
+      break;
+    }
+    case 'didNotTurnUpInSession': {
+      if (didNotTurnUpInSession) {
+        throw new MessageAlreadySendError();
+      }
+      break;
+    }
 
-  //   default:
-  // }
+    default:
+  }
 
   if (menteeSession && menteeSession.id && parentInfo.id) {
     const { bookingDate, ...slots } = menteeSession;
@@ -245,7 +260,7 @@ query{
       codingLanguages: getMentorCodingLanguages(get(mentorInfo, 'codingLanguages')) || 'Python',
       experienceYear: get(mentorInfo, 'experienceYear') || 3,
       sessionLink: get(mentorInfo, 'sessionLink') || sessionLink,
-      mentorPhoneNumber: get(data[0], 'mentorSession.user.phone.number'),
+      mentorPhoneNumber: `${get(data[0], 'mentorSession.user.phone.countryCode')}-${get(data[0], 'mentorSession.user.phone.number')}`,
       mentorName: get(data[0], 'mentorSession.user.name'),
       mentorCountryCode: get(data[0], 'mentorSession.user.phone.countryCode'),
       mentorProfilePic,
@@ -282,9 +297,12 @@ const sendTransactionalMessage = async (root, params, context) => {
   let parameters;
   switch (messageType) {
     case 'sendSessionLink': {
+      if (!dataObj.sessionLink || !sessionLink) {
+        throw new MandatorySessionLinkError();
+      }
       const {
-        parentName, name, bookingDate, startTime,
-        experienceYear, codingLanguages, mentorRating,
+        parentName, name, bookingDate, startTime, mentorPhoneNumber,
+        experienceYear, codingLanguages, mentorRating, mentorName,
       } = dataObj;
       parameters = [{
         name: 'parent_name',
@@ -315,8 +333,16 @@ const sendTransactionalMessage = async (root, params, context) => {
         value: codingLanguages,
       },
       {
+        name: 'mentor_name',
+        value: mentorName,
+      },
+      {
         name: 'mentor_rating',
         value: mentorRating,
+      },
+      {
+        name: 'mentor_number',
+        value: mentorPhoneNumber,
       },
       ];
       break;
@@ -391,41 +417,40 @@ const sendTransactionalMessage = async (root, params, context) => {
   if (!dataObj.sessionLink) {
     dataObj.sessionLink = sessionLink;
   }
-  console.log(dataObj);
+  // const whatsAppPhoneNumber = dataObj.countryCode.split('+')[1] + dataObj.parentNumber;
+  const whatsAppPhoneNumber = transactionalMessageBody.testWhatsAppNumber;
 
-  const mailBody = {
-    sendSessionLink: {
-      template: 'sendSessionLink',
-      subject: 'Tekie - Session link for free coding session',
-    },
-    didNotPickTheCall: {
-      template: 'didNotPickTheCall',
-      subject: 'Tekie - We tried calling you',
-    },
-    didNotTurnUpInSession: {
-      template: 'sessionNotConducted',
-      subject: 'Tekie - Missed the free coding session',
-    },
-    sessionNotConducted: {
-      template: 'sessionNotConducted',
-      subject: 'Tekie - Session was not conducted',
-    },
-  };
+  const { whatsAppTemplate } = transactionalMessageBody[messageType];
 
   switch (medium) {
     case 'all': {
-      // send whatsApp
       // send email
-      sendTransactionalEmail(dataObj, mailBody[messageType]);
+      await sendTransactionalEmail(
+        dataObj,
+        transactionalMessageBody[messageType],
+      );
+      // send whatsApp
+      await sendWhatsAppTemplateMessage(
+        whatsAppPhoneNumber,
+        whatsAppTemplate,
+        dataObj.parentName,
+        parameters,
+      );
       break;
     }
     case 'whatsApp': {
       // send whatsApp
+      await sendWhatsAppTemplateMessage(
+        whatsAppPhoneNumber,
+        whatsAppTemplate,
+        dataObj.parentName,
+        parameters,
+      );
       break;
     }
     case 'email': {
       // send email
-      sendTransactionalEmail(dataObj, mailBody[messageType]);
+      await sendTransactionalEmail(dataObj, transactionalMessageBody[messageType]);
       break;
     }
 

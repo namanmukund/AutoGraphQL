@@ -5,19 +5,15 @@ import getSelectedSlotsStringArray
 import getSlotLabel from '../getSlotLabel';
 import getFormatedDate from '../getFormatedDate';
 import sendWhatsAppTemplateMessage from '../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
-import { MutationController } from '../../src/autoGenerate/graphql/controllers';
 import getLongDate from '../getLongDate';
-
-const updateScheduleStatusOfMenteeSession = (id) => {
-  const modelMutations = new MutationController('MenteeSession', { bypass: true });
-  return modelMutations.updateOne({ id }, { scheduleRunStatus: 'completed' });
-};
+import transactionalMessageBody from '../../constants/transactionalMessageBody';
+import updateScheduleStatusOfMenteeSession from './updateScheduleStatusOfMenteeSession';
 
 const scheduleTrialSessionReminder = async () => {
   const dt = new Date().setHours(0, 0, 0, 0);
   const parsedDate = new Date(dt).toISOString();
   const hourValue = new Date().getHours();
-  if (hourValue > 7 && hourValue < 22) {
+  if (hourValue > 6 && hourValue < 22) {
     const query = `
 query{
   menteeSessions(
@@ -117,13 +113,13 @@ query{
           const phone = countryCode.split('+')[1] + parentNumber;
           sendWhatsAppTemplateMessage(
             phone,
-            'Oct5_class_reminder',
+            transactionalMessageBody.sessionReminder,
             parentName,
             parameters,
           );
           // update  status
           // eslint-disable-next-line no-await-in-loop
-          await updateScheduleStatusOfMenteeSession(menteeSessionId);
+          await updateScheduleStatusOfMenteeSession(menteeSessionId, 'completed');
         }
       }
     }
