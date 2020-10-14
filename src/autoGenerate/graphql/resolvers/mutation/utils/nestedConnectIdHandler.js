@@ -11,9 +11,9 @@ const nestedConnectIdHandler = (
   const allRelationObjectsArray1to1Data = [];
   const allRelationObjectsArray1toMData = [];
   const nestedDisconnectObjInfo = {};
-  let isArrayUpdate = false;
 
   Object.keys(finalInput).forEach((inputFieldName) => {
+    let isArrayUpdate = false;
     // special case for update
     const fieldKeys = Object.keys(finalInput[inputFieldName]);
     // for operations like push, pushMany and all
