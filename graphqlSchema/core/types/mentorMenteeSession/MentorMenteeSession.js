@@ -1,3 +1,9 @@
+const sendTransactionalMessageFields = `
+    sendSessionLink: Boolean
+    didNotPickTheCall: Boolean
+    sessionNotConducted: Boolean
+    didNotTurnUpInSession: Boolean
+`;
 const MentorMenteeSession = `
   type MentorMenteeSession @model {
     topic: Topic! @relation(name: "MentorMenteeSessionTopic", direction: "OneWay")
@@ -32,7 +38,8 @@ const MentorMenteeSession = `
     averageExplanation: Boolean
     comment: String
     rating: Int @length(min: 1, max: 5) @groupBy
-    sessionRecordingLink: String 
+    sessionRecordingLink: String
+    ${sendTransactionalMessageFields} 
 }`;
 
 export default [MentorMenteeSession];

@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+  <head>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html charset=UTF-8" />
+    
+  </head>
+  <body style="margin: 0; padding: 0; background: #f9fefe;">
+    <table border="0" cellpadding="0" cellspacing="0" align="center" style="padding: 30px; max-width: 920px; width: 100%; background-size: cover; background-repeat: no-repeat; background-image: url('https://tekie-backend.s3.amazonaws.com/python/email/invoiceBackground.png')">
+      <tr style="width: 100%; height: 100%;">
+        <td style="width: 100%; height: 100%;">
+          <table style="width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); padding: 30px;">
+            <tr align="center">
+              <td>
+                <img width="84" height="29.3" src="https://tekie-backend.s3.amazonaws.com/python/email/tekieLogo.png" />
+              </td>
+            </tr>
+            <tr align="left">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 18px; color: #504F4F; border-top: 33px solid transparent;">
+                Hello <span style="color: #00ADE6;"><%= parentName %> </span>,
+              </td>
+            </tr>
+
+            <tr align="left">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 18px; color: #504F4F; border-top: 5px solid transparent;">
+                  <span style="color: #00ADE6;"><%= name %></span> free coding class wasn't conducted today.
+              </td>
+            </tr>
+
+            <tr style="width: 100%;">
+              <td style="width: 100%; border-top: 30px solid transparent;" align="center">
+                <img src="https://tekie-backend.s3.amazonaws.com/python/topic/thumbnailSmall_cjx2czgja00001h2xt7fjlh04_1589290510205.png" width="136" height="161"></img>
+              </td>
+            </tr>
+
+            <tr style="width: 100%;">
+              <td align="center" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: bold; font-size: 20px; color: #504F4F;">
+                <%= topicTitle %> 
+              </td>
+            </tr>
+            <tr style="width: 100%;">
+              <td style="width: 100%; border-top: 15px solid transparent;" align="center">
+                <table style="width: 158px;">
+                  <tr>
+                      <td align="right" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: bold; font-size: 20px; color: #504F4F;">
+                        <img src="https://tekie-backend.s3.amazonaws.com/python/email/iconCalendar.png" style="margin-right: 5px;" width="28.3" height="28.3"></img>
+                      </td>
+                      <td align="left" style=" margin-right: 10px;font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: bold; font-size: 20px; color: #504F4F;">
+                        <span><%= bookingDate %> </span>
+                      </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr style="width: 100%;">
+              <td style="width: 100%; border-top: 12px solid transparent;" align="center">
+                <table style="width: 220px;">
+                  <tr>
+                      <td align="right" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: bold; font-size: 20px; color: #504f4f;">
+                        <img src="https://tekie-backend.s3.amazonaws.com/python/email/clock.png" width="28.3" height="28.3" style="margin-right: 5px;"></img>
+                      </td>
+                      <td align="left" style=" margin-right: 10px;font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: bold; font-size: 20px; color: #504F4F;">
+                        <span><%= startTime %>  - <%= endTime %></span>
+                      </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr style="width: 100%;">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; border-top: 30px solid transparent; font-size: 18px; color: #504f4f;">
+                Reason: <%= rescheduleReason %>  <br/><br />
+                Kindly fix the issue & reschedule the class by logging (www.tekie.in/login) with OTP using your registered
+                phone number <span style="color: #00ADE6"> <%= parentNumber %>  </span> before your free trial expires (48 hrs from now).
+              </td>
+            </tr>
+
+            <tr align="center">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 18px; color: #504F4F; border-top: 30px solid transparent; position: relative;">
+                <a href="https://www.tekie.in/sessions?reschedule=true" style="text-decoration: none;">
+                  <img src="https://tekie-backend.s3.amazonaws.com/python/email/rescheduleButton.png" style="width: 201px;">
+                </a>
+              </td>
+            </tr>
+
+            <tr style="width: 100%;">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; border-top: 30px solid transparent; font-size: 18px; color: #504f4f;">
+                For any assistance or to set up your laptop/pc, feel free to reach out to <span style="color: #00ADE6">Setup Helpline</span> at <span style="color: #00ADE6">+91 88277 06789</span>.
+              </td>
+            </tr>
+            
+            <tr style="width: 100%;">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; border-top: 30px solid transparent; font-size: 18px; color: #504f4f;">
+                See you there,
+              </td>
+            </tr>
+            <tr style="width: 100%;">
+              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-size: 18px; color: #504f4f;">
+                The Tekie Team.
+              </td>
+            </tr>
+            <%= footer %> 
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+  

@@ -105,7 +105,6 @@ const addToSalesOperationScript = async (type) => {
           console.log(res);
         } catch (e) {
           // eslint-disable-next-line no-console
-          console.log(e);
         }
       } else if (type === 'allottedMentor') {
         try {

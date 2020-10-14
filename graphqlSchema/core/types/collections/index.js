@@ -13,6 +13,7 @@ import ChildrenToken from './ChildrenToken';
 import PythonByteCode from './PythonByteCode';
 import SalesOperationReport from './SalesOperationReport';
 import TransactionalMessageInput from './TransactionalMessageInput';
+import CodingLanguage from './CodingLanguage';
 
 export default [
   ...Enum,
@@ -30,4 +31,5 @@ export default [
   ChildrenToken,
   SalesOperationReport,
   TransactionalMessageInput,
+  CodingLanguage,
 ];
