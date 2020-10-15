@@ -1,8 +1,10 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { UserMismatchError } from '../../../../../constants/errors';
+import { ADMIN, UMS_ADMIN, MENTOR } from '../../../../../constants/roles';
 import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
+import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import validateMenteeSessionInput from './utils/validateMenteeSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
@@ -50,6 +52,14 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
 
   // validate input
   await validateMenteeSessionInput(params, context);
+
+  // getting user role from context. We will allow adding mentorSession if logged in user is admin
+  const userInfo = validateTokenAndExtractInformation(context, false);
+  const {
+    currentUser,
+  } = userInfo;
+  const userRoleFromContext = currentUser && currentUser.role;
+
   /*
     Calling method to validate token and return userId and appName
     we will compare this userId against userId passed in input
@@ -61,7 +71,12 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
     appName,
   } = userAndAppInfo;
 
-  if (!backendApps.includes(appName) && userIdFromContext !== userId) {
+  if (
+    !backendApps.includes(appName)
+    && userIdFromContext !== userId
+    && !(userRoleFromContext === ADMIN || userRoleFromContext === UMS_ADMIN
+     || userRoleFromContext === MENTOR)
+  ) {
     throw new UserMismatchError();
   }
 
