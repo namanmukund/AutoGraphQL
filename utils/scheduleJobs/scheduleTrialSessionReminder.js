@@ -9,6 +9,30 @@ import getLongDate from '../getLongDate';
 import transactionalMessageBody from '../../constants/transactionalMessageBody';
 import updateScheduleStatusOfMenteeSession from './updateScheduleStatusOfMenteeSession';
 
+const getMentorMenteeSession = async(menteeSessionId) => {
+  const query = `
+ query{
+  mentorMenteeSessions(filter:{
+      menteeSession_some:{id:"${menteeSessionId}"}
+  }){
+    id
+    mentorSession{
+      id
+      user{
+        id
+        name
+        mentorProfile{
+          id
+          sessionLink
+        }
+      }
+    }
+  }
+}
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.mentorMenteeSessions[0]');
+};
 const scheduleTrialSessionReminder = async () => {
   const dt = new Date().setHours(0, 0, 0, 0);
   const parsedDate = new Date(dt).toISOString();
@@ -58,7 +82,6 @@ query{
 `;
     const menteeSessionsData = await callLocalGraphqlApi(query);
     const menteeSessions = get(menteeSessionsData, 'data.menteeSessions');
-
     if (menteeSessions && menteeSessions.length) {
       // eslint-disable-next-line no-restricted-syntax
       for (const menteeSession of menteeSessions) {
@@ -87,6 +110,9 @@ query{
           const {
             parentName, parentNumber, countryCode, name,
           } = menteeObj;
+          // eslint-disable-next-line no-await-in-loop
+          const mentorMenteeSession = await getMentorMenteeSession(menteeSessionId);
+          const sessionLink = get(mentorMenteeSession, 'mentorSession.user.mentorProfile.sessionLink');
           const parameters = [{
             name: 'parent_name',
             value: parentName,
@@ -107,11 +133,16 @@ query{
             name: 'phone',
             value: `${countryCode}-${parentNumber}`,
           },
+          {
+            name: 'session_link',
+            value: sessionLink,
+          },
           ];
 
           // const phone = 919654347463;
           const phone = countryCode.split('+')[1] + parentNumber;
-          sendWhatsAppTemplateMessage(
+          // eslint-disable-next-line no-await-in-loop
+          await sendWhatsAppTemplateMessage(
             phone,
             transactionalMessageBody.sessionReminder,
             parentName,
