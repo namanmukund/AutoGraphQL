@@ -9,7 +9,7 @@ import getLongDate from '../getLongDate';
 import transactionalMessageBody from '../../constants/transactionalMessageBody';
 import updateScheduleStatusOfMenteeSession from './updateScheduleStatusOfMenteeSession';
 
-const getMentorMenteeSession = async(menteeSessionId) => {
+const getMentorMenteeSession = async (menteeSessionId) => {
   const query = `
  query{
   mentorMenteeSessions(filter:{
