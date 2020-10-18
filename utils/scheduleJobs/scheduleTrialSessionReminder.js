@@ -8,6 +8,9 @@ import sendWhatsAppTemplateMessage from '../../src/autoGenerate/utils/sendWhatsA
 import getLongDate from '../getLongDate';
 import transactionalMessageBody from '../../constants/transactionalMessageBody';
 import updateScheduleStatusOfMenteeSession from './updateScheduleStatusOfMenteeSession';
+import getFullFilePath from '../getFullFilePath';
+import calculateMentorRating from '../../src/autoGenerate/graphql/resolvers/utils/calculateMentorRating';
+import sendTransactionalEmail from '../../src/autoGenerate/graphql/resolvers/utils/sendTransactionalEmail';
 
 const getMentorMenteeSession = async (menteeSessionId) => {
   const query = `
@@ -21,9 +24,26 @@ const getMentorMenteeSession = async (menteeSessionId) => {
       user{
         id
         name
+        username
+        email
+        phone{
+          countryCode
+          number
+        }
+        profilePic{
+          id
+          uri
+        }
         mentorProfile{
           id
+          codingLanguages{value}
+          experienceYear
           sessionLink
+          pythonCourseRating1
+          pythonCourseRating2
+          pythonCourseRating3
+          pythonCourseRating4
+          pythonCourseRating5
         }
       }
     }
@@ -95,8 +115,16 @@ query{
           const { startTime, endTime } = getSlotLabel(slotNumber);
 
           const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
+          // eslint-disable-next-line no-await-in-loop
+          const mentorMenteeSession = await getMentorMenteeSession(menteeSessionId);
+          const sessionLink = get(mentorMenteeSession, 'mentorSession.user.mentorProfile.sessionLink');
+          const mentorProfileFile = get(mentorMenteeSession, 'mentorSession.user.profilePic.uri', '');
+          const mentorInfo = get(mentorMenteeSession, 'mentorSession.user.mentorProfile');
+          const mentorProfilePic = mentorProfileFile ? getFullFilePath(mentorProfileFile) : getFullFilePath('python/email/mentor1.png');
+
           const menteeObj = {
             date: getFormatedDate(bookingDate),
+            bookingDateLong: getLongDate(bookingDate),
             startTime,
             endTime,
             name: startCase(toLower(get(menteeInfo, 'name') || '')),
@@ -105,14 +133,18 @@ query{
             parentEmail: get(parentInfo, 'email') || '',
             parentNumber: get(parentInfo, 'phone.number') || '',
             countryCode: get(parentInfo, 'phone.countryCode') || '',
+            mentorPhoneNumber: `${get(mentorMenteeSession, 'mentorSession.user.phone.countryCode')}-${get(mentorMenteeSession, 'mentorSession.user.phone.number')}`,
+            mentorName: get(mentorMenteeSession, 'mentorSession.user.name'),
+            mentorEmail: get(mentorMenteeSession, 'mentorSession.user.email'),
+            mentorCountryCode: get(mentorMenteeSession, 'mentorSession.user.phone.countryCode'),
+            mentorProfilePic,
+            mentorRating: calculateMentorRating(mentorInfo) || 5,
           };
-
+          menteeObj.sessionLink = sessionLink;
           const {
             parentName, parentNumber, countryCode, name,
           } = menteeObj;
-          // eslint-disable-next-line no-await-in-loop
-          const mentorMenteeSession = await getMentorMenteeSession(menteeSessionId);
-          const sessionLink = get(mentorMenteeSession, 'mentorSession.user.mentorProfile.sessionLink');
+
           const parameters = [{
             name: 'parent_name',
             value: parentName,
@@ -138,7 +170,6 @@ query{
             value: sessionLink,
           },
           ];
-
           // const phone = 919654347463;
           const phone = countryCode.split('+')[1] + parentNumber;
           // eslint-disable-next-line no-await-in-loop
@@ -148,6 +179,9 @@ query{
             parentName,
             parameters,
           );
+          // send email
+          // eslint-disable-next-line no-await-in-loop
+          await sendTransactionalEmail(menteeObj, transactionalMessageBody.sendSessionLink);
           // update  status
           // eslint-disable-next-line no-await-in-loop
           await updateScheduleStatusOfMenteeSession(menteeSessionId, 'completed');
