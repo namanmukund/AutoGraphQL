@@ -95,6 +95,7 @@ query{
           user{
             id
             name
+            email
             phone{
               countryCode
               number
