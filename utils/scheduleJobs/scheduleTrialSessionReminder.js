@@ -11,6 +11,7 @@ import updateScheduleStatusOfMenteeSession from './updateScheduleStatusOfMenteeS
 import getFullFilePath from '../getFullFilePath';
 import calculateMentorRating from '../../src/autoGenerate/graphql/resolvers/utils/calculateMentorRating';
 import sendTransactionalEmail from '../../src/autoGenerate/graphql/resolvers/utils/sendTransactionalEmail';
+import getMentorCodingLanguages from '../../src/autoGenerate/graphql/resolvers/utils/getMentorCodingLanguages';
 
 const getMentorMenteeSession = async (menteeSessionId) => {
   const query = `
@@ -76,6 +77,11 @@ query{
   ){
     id
     bookingDate
+    topic{
+      id
+      title
+      order
+    }
     slot${hourValue + 1}
     slot${hourValue + 2}
     slot${hourValue + 3}
@@ -121,7 +127,7 @@ query{
           const mentorProfileFile = get(mentorMenteeSession, 'mentorSession.user.profilePic.uri', '');
           const mentorInfo = get(mentorMenteeSession, 'mentorSession.user.mentorProfile');
           const mentorProfilePic = mentorProfileFile ? getFullFilePath(mentorProfileFile) : getFullFilePath('python/email/mentor1.png');
-
+          const topicTitle = get(menteeSession, 'topic.title', '');
           const menteeObj = {
             date: getFormatedDate(bookingDate),
             bookingDateLong: getLongDate(bookingDate),
@@ -139,6 +145,9 @@ query{
             mentorCountryCode: get(mentorMenteeSession, 'mentorSession.user.phone.countryCode'),
             mentorProfilePic,
             mentorRating: calculateMentorRating(mentorInfo) || 5,
+            codingLanguages: getMentorCodingLanguages(get(mentorInfo, 'codingLanguages')) || 'Python',
+            experienceYear: get(mentorInfo, 'experienceYear') || 3,
+            topicTitle,
           };
           menteeObj.sessionLink = sessionLink;
           const {
