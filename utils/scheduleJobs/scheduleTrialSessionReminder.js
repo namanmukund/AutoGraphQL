@@ -71,9 +71,6 @@ query{
           {slot${hourValue + 1}:true}
           {slot${hourValue + 2}:true}
           {slot${hourValue + 3}:true}
-          {slot${hourValue + 4}:true}
-          {slot${hourValue + 5}:true}
-          {slot${hourValue + 6}:true}
         ]}
       ]
     }
@@ -88,9 +85,6 @@ query{
     slot${hourValue + 1}
     slot${hourValue + 2}
     slot${hourValue + 3}
-    slot${hourValue + 4}
-    slot${hourValue + 5}
-    slot${hourValue + 6}
     user{
       id
       name
