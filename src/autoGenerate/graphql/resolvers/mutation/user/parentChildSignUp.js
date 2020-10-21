@@ -1,5 +1,5 @@
 import {
-  get, startCase, toLower,
+  get,
 } from 'lodash';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { isValidPhoneNumber, validate, validateName } from '../../../validation';
@@ -18,15 +18,10 @@ import { generateCuid, log } from '../../../../../../utils';
 import localSignUpMutationPromise from '../utils/localSignUpMutationPromise';
 import { MutationController, QueryController } from '../../../controllers';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
-import parsedHtmlFromTemplateFileAndObject
-  from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
-import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
-import sendEmail from '../../../../../../services/email/utils/sendEmail';
 import generateInviteCode from '../../../../../../utils/generateInviteCode';
 import { MAX_ALLOWED_REFERRALS, REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
 import getNumberOfReferralsOfAUser from './utils/getNumberOfReferralsOfAUser';
 import getReferredByUserIdByReferralCode from './utils/getReferredByUserIdByReferralCode';
-import { sendTextSms } from '../../../../../sms';
 import addUserCredit from './utils/addUserCredit';
 import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 
@@ -382,43 +377,43 @@ const parentChildSignUpMutationResolver = async (
     }
   }
   // send email
-  if (process.env.NODE_ENV === 'production') {
-    const templateFileName = 'parentChildSignupEmailTemplate';
-    const parentChildEmailObj = {
-      parentName: startCase(toLower(parentName)),
-      childName: startCase(toLower(childName)),
-    };
-    const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, parentChildEmailObj);
-    templateString.then((html) => {
-      const emailTo = [
-        parentEmail,
-      ];
-      const ccEmail = [''];
-      const bccEmail = [''];
-      const text = '';
-      const subject = 'Schedule Live Free Trial Coding Session';
-      const emailMsgObject = getEmailObject(
-        emailTo,
-        ccEmail,
-        bccEmail,
-        subject,
-        text,
-        html,
-        'hello@tekie.in',
-      );
-      sendEmail(emailMsgObject);
-    });
-    // temp code to send sms to sales team
-    const phoneNumberShravasti = '+917083759072';
-    const phoneNumberJahnavi = '+919892222579';
-    const phoneNumberIshan = '+917000287331';
-    const phoneNumberShantanu = '+918383963592';
-    const smsText = `Tekie: Newly registered user's parentName: ${parentName}, childName: ${childName}, number: ${parentPhone.number}`;
-    sendTextSms(phoneNumberShravasti, smsText);
-    sendTextSms(phoneNumberJahnavi, smsText);
-    sendTextSms(phoneNumberIshan, smsText);
-    sendTextSms(phoneNumberShantanu, smsText);
-  }
+  // if (process.env.NODE_ENV === 'production') {
+  //   const templateFileName = 'parentChildSignupEmailTemplate';
+  //   const parentChildEmailObj = {
+  //     parentName: startCase(toLower(parentName)),
+  //     childName: startCase(toLower(childName)),
+  //   };
+  //   const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, parentChildEmailObj);
+  //   templateString.then((html) => {
+  //     const emailTo = [
+  //       parentEmail,
+  //     ];
+  //     const ccEmail = [''];
+  //     const bccEmail = [''];
+  //     const text = '';
+  //     const subject = 'Schedule Live Free Trial Coding Session';
+  //     const emailMsgObject = getEmailObject(
+  //       emailTo,
+  //       ccEmail,
+  //       bccEmail,
+  //       subject,
+  //       text,
+  //       html,
+  //       'hello@tekie.in',
+  //     );
+  //     sendEmail(emailMsgObject);
+  //   });
+  //   // temp code to send sms to sales team
+  //   const phoneNumberShravasti = '+917083759072';
+  //   const phoneNumberJahnavi = '+919892222579';
+  //   const phoneNumberIshan = '+917000287331';
+  //   const phoneNumberShantanu = '+918383963592';
+  //   const smsText = `Tekie: Newly registered user's parentName: ${parentName}, childName: ${childName}, number: ${parentPhone.number}`;
+  //   sendTextSms(phoneNumberShravasti, smsText);
+  //   sendTextSms(phoneNumberJahnavi, smsText);
+  //   sendTextSms(phoneNumberIshan, smsText);
+  //   sendTextSms(phoneNumberShantanu, smsText);
+  // }
   // add base credit to user
   await addUserCredit(REGISTRATION_BASE_CREDIT, childUserId, SIGN_UP_BONUS);
   return userTokenData;
