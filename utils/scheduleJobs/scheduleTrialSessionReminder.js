@@ -40,6 +40,8 @@ const getMentorMenteeSession = async (menteeSessionId) => {
           codingLanguages{value}
           experienceYear
           sessionLink
+          meetingId
+          meetingPassword
           pythonCourseRating1
           pythonCourseRating2
           pythonCourseRating3
@@ -149,10 +151,12 @@ query{
             codingLanguages: getMentorCodingLanguages(get(mentorInfo, 'codingLanguages')) || 'Python',
             experienceYear: get(mentorInfo, 'experienceYear') || 3,
             topicTitle,
+            meetingId: get(mentorInfo, 'meetingId'),
+            meetingPassword: get(mentorInfo, 'meetingPassword'),
           };
           menteeObj.sessionLink = sessionLink;
           const {
-            parentName, parentNumber, countryCode, name,
+            parentName, parentNumber, countryCode, name, meetingId, meetingPassword,
           } = menteeObj;
 
           const parameters = [{
@@ -178,6 +182,14 @@ query{
           {
             name: 'session_link',
             value: sessionLink,
+          },
+          {
+            name: 'meeting_id',
+            value: meetingId,
+          },
+          {
+            name: 'meeting_password',
+            value: meetingPassword,
           },
           ];
           // const phone = 919654347463;
