@@ -382,43 +382,43 @@ const parentChildSignUpMutationResolver = async (
     }
   }
   // send email
-  if (process.env.NODE_ENV === 'production') {
-    const templateFileName = 'parentChildSignupEmailTemplate';
-    const parentChildEmailObj = {
-      parentName: startCase(toLower(parentName)),
-      childName: startCase(toLower(childName)),
-    };
-    const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, parentChildEmailObj);
-    templateString.then((html) => {
-      const emailTo = [
-        parentEmail,
-      ];
-      const ccEmail = [''];
-      const bccEmail = [''];
-      const text = '';
-      const subject = 'Schedule Live Free Trial Coding Session';
-      const emailMsgObject = getEmailObject(
-        emailTo,
-        ccEmail,
-        bccEmail,
-        subject,
-        text,
-        html,
-        'hello@tekie.in',
-      );
-      sendEmail(emailMsgObject);
-    });
-    // temp code to send sms to sales team
-    const phoneNumberShravasti = '+917083759072';
-    const phoneNumberJahnavi = '+919892222579';
-    const phoneNumberIshan = '+917000287331';
-    const phoneNumberShantanu = '+918383963592';
-    const smsText = `Tekie: Newly registered user's parentName: ${parentName}, childName: ${childName}, number: ${parentPhone.number}`;
-    sendTextSms(phoneNumberShravasti, smsText);
-    sendTextSms(phoneNumberJahnavi, smsText);
-    sendTextSms(phoneNumberIshan, smsText);
-    sendTextSms(phoneNumberShantanu, smsText);
-  }
+  // if (process.env.NODE_ENV === 'production') {
+  //   const templateFileName = 'parentChildSignupEmailTemplate';
+  //   const parentChildEmailObj = {
+  //     parentName: startCase(toLower(parentName)),
+  //     childName: startCase(toLower(childName)),
+  //   };
+  //   const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, parentChildEmailObj);
+  //   templateString.then((html) => {
+  //     const emailTo = [
+  //       parentEmail,
+  //     ];
+  //     const ccEmail = [''];
+  //     const bccEmail = [''];
+  //     const text = '';
+  //     const subject = 'Schedule Live Free Trial Coding Session';
+  //     const emailMsgObject = getEmailObject(
+  //       emailTo,
+  //       ccEmail,
+  //       bccEmail,
+  //       subject,
+  //       text,
+  //       html,
+  //       'hello@tekie.in',
+  //     );
+  //     sendEmail(emailMsgObject);
+  //   });
+  //   // temp code to send sms to sales team
+  //   const phoneNumberShravasti = '+917083759072';
+  //   const phoneNumberJahnavi = '+919892222579';
+  //   const phoneNumberIshan = '+917000287331';
+  //   const phoneNumberShantanu = '+918383963592';
+  //   const smsText = `Tekie: Newly registered user's parentName: ${parentName}, childName: ${childName}, number: ${parentPhone.number}`;
+  //   sendTextSms(phoneNumberShravasti, smsText);
+  //   sendTextSms(phoneNumberJahnavi, smsText);
+  //   sendTextSms(phoneNumberIshan, smsText);
+  //   sendTextSms(phoneNumberShantanu, smsText);
+  // }
   // add base credit to user
   await addUserCredit(REGISTRATION_BASE_CREDIT, childUserId, SIGN_UP_BONUS);
   return userTokenData;
