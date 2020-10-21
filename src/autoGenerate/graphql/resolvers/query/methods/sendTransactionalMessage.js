@@ -90,6 +90,8 @@ query{
           codingLanguages{value}
           experienceYear
           sessionLink
+          meetingId
+          meetingPassword
           pythonCourseRating1
           pythonCourseRating2
           pythonCourseRating3
@@ -213,6 +215,8 @@ query{
       mentorProfilePic,
       mentorRating: calculateMentorRating(mentorInfo) || 5,
       rescheduleReason: getSessionRescheduledReasons(get(data[0], 'salesOperation')) || 'NA',
+      meetingId: get(mentorInfo, 'meetingId'),
+      meetingPassword: get(mentorInfo, 'meetingPassword'),
     };
   }
   return '';

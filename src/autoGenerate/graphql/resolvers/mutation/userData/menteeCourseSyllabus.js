@@ -274,6 +274,7 @@ const menteeCourseSyllabusMutationResolver = async (
   const completedSession = [];
   let lastTopicBookedOrder = 0;
   let lastCompletedTopicOrder = 0;
+  let isPaid = false;
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
     const res = await callLocalGraphqlApi(
@@ -470,12 +471,17 @@ const menteeCourseSyllabusMutationResolver = async (
     });
   });
 
+  if (enrollmentType === enrollmentTypes.pro) {
+    isPaid = true;
+  }
+
   Object.assign(currentUserSyllabus, {
     upComingSession,
     bookedSession,
     completedSession,
     totalChapters,
     totalTopics,
+    isPaid,
   });
 
   return currentUserSyllabus;
