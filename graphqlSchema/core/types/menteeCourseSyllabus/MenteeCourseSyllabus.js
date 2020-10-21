@@ -29,6 +29,7 @@ const MenteeCourseSyllabus = `
     completedSession: [CompletedSessionDetailType]
     totalChapters: Int
     totalTopics: Int
+    isPaid: Boolean @defaultValue(value: "false")
   }
 `;
 
