@@ -6,9 +6,6 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../../utils/getSlotTimesInString';
 import getSelectedSlotsStringArray from '../../../postHookFunctions/utils/getSelectedSlotsStringArray';
 import getSlotLabel from '../../../../../../utils/getSlotLabel';
-import parsedHtmlFromTemplateFileAndObject from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
-import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
-import sendEmail from '../../../../../../services/email/utils/sendEmail';
 import getFullFilePath from '../../../../../../utils/getFullFilePath';
 import {
   InvalidRequestError,
@@ -17,64 +14,9 @@ import {
 } from '../../../../../../constants/errors/input';
 import sendWhatsAppTemplateMessage from '../../../../utils/sendWhatsAppTemplateMessage';
 import transactionalMessageBody from '../../../../../../constants/transactionalMessageBody';
-
-const sendTransactionalEmail = async (templateObject, emailBody) => {
-  const templateFileName = get(emailBody, 'emailTemplate');
-  const footer = await parsedHtmlFromTemplateFileAndObject('footer', templateObject);
-  const html = await parsedHtmlFromTemplateFileAndObject(templateFileName, { ...templateObject, footer });
-
-  // const emailTo = [transactionalMessageBody.testEmail];
-  const emailTo = [templateObject.parentEmail];
-
-  const ccEmail = [transactionalMessageBody.testEmail, templateObject.mentorEmail];
-
-  const bccEmail = [];
-  const subject = get(emailBody, 'subject');
-  /* if html is empty then in the body text will be appear. Html is having higher
-    precedence over text */
-  const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
-  sendEmail(emailMsgObject);
-};
-
-const calculateMentorRating = (mentorInfo) => {
-  let ratingNum = 0;
-  let ratingDen = 0;
-  Object.keys(mentorInfo).forEach((key) => {
-    if (key.includes('pythonCourseRating') && mentorInfo[key] > 0) {
-      const ratingValue = key.split('pythonCourseRating')[1];
-      ratingNum += ratingValue * mentorInfo[key];
-      ratingDen += mentorInfo[key];
-    }
-  });
-  if (ratingNum > 0 && ratingDen > 0) {
-    return Number((ratingNum / ratingDen).toFixed(2));
-  }
-  return '';
-};
-const getCorrectCodingLanguageTitle = (codingLanguage) => {
-  switch (codingLanguage) {
-    case 'Cplusplus':
-      return 'C++';
-    case 'Csharp':
-      return 'C#';
-    default:
-      return codingLanguage || '';
-  }
-};
-
-const getMentorCodingLanguages = (codingLanguages) => {
-  let codingLanguageStr = '';
-  if (codingLanguages && codingLanguages.length) {
-    codingLanguages.forEach((language, index) => {
-      if (index < codingLanguages.length - 1) {
-        codingLanguageStr += `${getCorrectCodingLanguageTitle(language.value)}, `;
-      } else {
-        codingLanguageStr += `${getCorrectCodingLanguageTitle(language.value)}`;
-      }
-    });
-  }
-  return codingLanguageStr;
-};
+import sendTransactionalEmail from '../../utils/sendTransactionalEmail';
+import calculateMentorRating from '../../utils/calculateMentorRating';
+import getMentorCodingLanguages from '../../utils/getMentorCodingLanguages';
 
 const getSessionRescheduledReasons = (reasons) => {
   if (!reasons) return '';
@@ -148,6 +90,8 @@ query{
           codingLanguages{value}
           experienceYear
           sessionLink
+          meetingId
+          meetingPassword
           pythonCourseRating1
           pythonCourseRating2
           pythonCourseRating3
@@ -271,6 +215,8 @@ query{
       mentorProfilePic,
       mentorRating: calculateMentorRating(mentorInfo) || 5,
       rescheduleReason: getSessionRescheduledReasons(get(data[0], 'salesOperation')) || 'NA',
+      meetingId: get(mentorInfo, 'meetingId'),
+      meetingPassword: get(mentorInfo, 'meetingPassword'),
     };
   }
   return '';
@@ -437,10 +383,12 @@ const sendTransactionalMessage = async (root, params, context) => {
   switch (medium) {
     case 'all': {
       // send email
-      await sendTransactionalEmail(
-        dataObj,
-        transactionalMessageBody[messageType],
-      );
+      if (messageType !== 'sendSessionLink') {
+        await sendTransactionalEmail(
+          dataObj,
+          transactionalMessageBody[messageType],
+        );
+      }
       // send whatsApp
       await sendWhatsAppTemplateMessage(
         whatsAppPhoneNumber,
@@ -462,7 +410,9 @@ const sendTransactionalMessage = async (root, params, context) => {
     }
     case 'email': {
       // send email
-      await sendTransactionalEmail(dataObj, transactionalMessageBody[messageType]);
+      if (messageType !== 'sendSessionLink') {
+        await sendTransactionalEmail(dataObj, transactionalMessageBody[messageType]);
+      }
       break;
     }
 
