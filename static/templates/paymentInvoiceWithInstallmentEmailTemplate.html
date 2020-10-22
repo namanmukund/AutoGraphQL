@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html charset=UTF-8" />
+</head>
+<body style="margin: 0; padding: 0; background: #f9fefe;"></body>
+<table border="0" cellpadding="0" cellspacing="0" align="center" style="padding: 30px; max-width: 920px; width: 100%; background-size: cover; background-repeat: no-repeat; background-image: url('https://tekie-backend.s3.amazonaws.com/python/email/invoiceBackground.png')">
+    <tr style="width: 100%; height: 100%;">
+        <td style="width: 100%; height: 100%;">
+            <table style="width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); padding: 30px;">
+                <tr align="center">
+                    <td>
+                        <img style="width: 136px; height: 47.28px; margin-top: 10px;" src="https://tekie-backend.s3.amazonaws.com/python/email/tekieLogo.png" />
+                    </td>
+                </tr>
+                <tr align="left">
+                    <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 22px; color: #504F4F; border-top: 15px solid transparent;">
+                        Hello <span style="color: #00ADE6;"><%= parentName %></span>,
+                    </td>
+                </tr>
+                <tr align="left">
+                    <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 22px; color: #504F4F; border-top: 18px solid transparent;">
+                        Thank you for joining us.
+                    </td>
+                </tr>
+                <tr style="width: 100%;">
+                    <td style="width: 100%; border-top: 15px solid transparent;">
+                        <table style="width: 100%; border-radius: 15px; padding: 30px; border: 0.5px solid #31E1E9;">
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 26px; color: #00ADE6; ">
+                                    Summary
+                                </td>
+                            </tr>
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 22px; border-top: 18px solid transparent; color: #504F4F; width: 33%">
+                                    Amount Paid:
+                                </td>
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 22px; border-top: 18px solid transparent; color: #AAACAE;">
+                                    &#8377; <%= amountToPay %>
+                                </td>
+                            </tr>
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 22px; border-top: 15px solid transparent; color: #504F4F; width: 33%">
+                                    Date Paid:
+                                </td>
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 22px; border-top: 15px solid transparent; color: #AAACAE;">
+                                    <%= paidDate %>
+                                </td>
+                            </tr>
+                            <!-- <tr align="left">
+                              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 22px; border-top: 15px solid transparent; color: #504F4F; width: 33%">
+                                Payment Method:
+                              </td>
+                              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 22px; border-top: 15px solid transparent; color: #AAACAE;">
+                                - 2345
+                              </td>
+                            </tr> -->
+                        </table>
+                    </td>
+                </tr>
+
+                <tr style="width: 100%;">
+                    <td style="width: 100%; border-top: 15px solid transparent;">
+                        <table style="width:100%; border: 0.5px solid #31E1E9; padding: 30px; border-radius: 15px;">
+                            <tr style="width: 100%">
+                                <td style="width: 100%;">
+                                    <table style="width: 100%; border-radius: 15px;">
+                                        <tr align="left">
+                                            <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 26px; color: #00ADE6; ">
+                                                Billing Details
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <table style="width: 100%;">
+                                        <tr align="left">
+                                            <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 22px; border-top: 18px solid transparent; color: #504F4F; width: 33%">
+                                                Kid Name:
+                                            </td>
+                                            <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 22px; border-top: 18px solid transparent; color: #AAACAE;">
+                                                <%= firstName %>
+                                            </td>
+                                        </tr>
+                                        <tr align="left">
+                                            <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 22px; border-top: 15px solid transparent; color: #504F4F; width: 33%">
+                                                Contact No:
+                                            </td>
+                                            <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 22px; border-top: 15px solid transparent; color: #AAACAE;">
+                                                <%= countryCode %> <%= phoneNumber %>
+                                            </td>
+                                        </tr>
+                                        <tr align="left">
+                                            <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 22px; border-top: 15px solid transparent; color: #504F4F; width: 33%">
+                                                Email ID:
+                                            </td>
+                                            <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 22px; border-top: 15px solid transparent; color: #AAACAE;">
+                                                <%= email %>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr style="width: 100%;">
+                    <td style="width: 100%; border-top: 15px solid transparent;">
+                        <table style="width: 100%; border-radius: 15px; padding: 30px; border: 0.5px solid #31E1E9; border-spaing: 0px;">
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 26px; color: #00ADE6; ">
+                                    Pricing Details:
+                                </td>
+                            </tr>
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 22px; border-top: 18px solid transparent; color: #504F4F;">
+                                    <%= productInfo %>
+                                </td>
+                                <td align="right" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 22px; border-top: 18px solid transparent; color: #AAACAE; min-width: 132px;">
+                                    &#8377; <%= productPrice %>
+                                </td>
+                            </tr>
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 20px; border-top: 18px solid transparent; color: #00ADE6;">
+                                    Special Discount
+                                </td>
+                                <td align="right" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 300; font-size: 20px; border-top: 18px solid transparent; color: #00ADE6; min-width: 132px;">
+                                    - &#8377; <%= totalDiscount %>
+                                </td>
+                            </tr>
+
+                            <tr style="width: 100%;">
+                                <td style="border-top: 10px solid transparent; width: 100%;"></td>
+                            </tr>
+                            <tr style="width: 100%;">
+                                <td style="border-bottom: 1px solid #B7F6F8; width: 100%;"></td>
+                                <td style="border-bottom: 1px solid #B7F6F8; width: 100%;"></td>
+                            </tr>
+                            <tr style="width: 100%;">
+                                <td style="border-bottom: 15px solid transparent; width: 100%;"></td>
+                            </tr>
+
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 22px; color: #504F4F;">
+                                    Total Amount
+                                </td>
+                                <td align="right" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 22px;color: #AAACAE; min-width: 132px;">
+                                    &#8377; <%= finalSellingPrice %>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                
+                <tr style="width: 100%;">
+                    <td style="width: 100%; border-top: 15px solid transparent;">
+                        <table style="width: 100%; border-radius: 15px; padding: 30px; border: 0.5px solid #31E1E9; border-spaing: 0px;">
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 26px; color: #00ADE6; ">
+                                    Installment Details:
+                                </td>
+                            </tr>
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 22px; border-top: 18px solid transparent; color: #504F4F;">
+                                    Total Amount
+                                </td>
+                                <td align="right" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 22px; border-top: 18px solid transparent; color: #AAACAE; min-width: 132px;">
+                                    &#8377; <%= finalSellingPrice %>
+                                </td>
+                            </tr>
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 20px; border-top: 18px solid transparent; color: #00ADE6;">
+                                    Number of installments
+                                </td>
+                                <td align="right" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 300; font-size: 20px; border-top: 18px solid transparent; color: #00ADE6; min-width: 132px;">
+                                    <%= totalNumberOfInstallments %>
+                                </td>
+                            </tr>
+
+                            <tr style="width: 100%;">
+                                <td style="border-bottom: 15px solid transparent; width: 100%;"></td>
+                            </tr>
+
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 22px; color: #504F4F;">
+                                    Amount Paid (Installment <%= installmentNumber %>)
+                                </td>
+                                <td align="right" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 22px;color: #AAACAE; min-width: 132px;">
+                                    &#8377; <%= amountToPay %>
+                                </td>
+                            </tr>
+
+                            <tr style="width: 100%;">
+                                <td style="border-bottom: 15px solid transparent; width: 100%;"></td>
+                            </tr>
+
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 500; font-size: 22px; color: #504F4F;">
+                                    Amount Due
+                                </td>
+                                <td align="right" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 22px;color: #AAACAE; min-width: 132px;">
+                                    &#8377; <%= totalDueAmount %>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr align="left">
+                    <td style="font-family: Nunito, Arial, Helvetica, sans-serif; border-top: 15px solid transparent; font-weight: 300; font-size: 22px; color: #504F4F;">
+                        If you have any queries, contact us at <a href="mailto:hello@tekie.in" style="color:#00ADE6">hello@tekie.in</a>
+                    </td>
+                </tr>
+
+                <tr style="width: 100%;">
+                    <td style="border-top: 15px solid transparent; width: 100%;"></td>
+                </tr>
+                <tr style="width: 100%;">
+                    <td style="border-bottom: 1px solid #000000; width: 100%;"></td>
+                </tr>
+                <tr style="width: 100%;">
+                    <td style="border-bottom: 15px solid transparent; width: 100%;"></td>
+                </tr>
+
+                <tr style="width: 100%;">
+                    <td style="width: 100%;">
+                        <table style="width: 100%;">
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 300; font-size: 18px; color: #504F4F;">
+                                    Kiwhode Learning Private Limited
+                                </td>
+                                <td align="right" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 300; font-size: 18px; color: #504F4F;">
+                                    <a href="https://www.tekie.in" style="color: #504F4F; text-decoration: none;">www.tekie.in</a>
+                                </td>
+                            </tr>
+
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 300; font-size: 18px; color: #504F4F;">
+                                    <span style="font-weight: 500;">Corporate Head Office</span> - Gurgaon
+                                </td>
+                                <td align="right" style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 300; font-size: 18px; color: #504F4F;">
+                                    <table style='margin-left: 18px;'>
+                                        <tr align="right">
+                                            <td style="border-right: 1px solid #504F4F; width: 62px; padding-right: 10px;">
+                                                <a href="https://www.tekie.in/privacy" style="color: #504F4F;">Privacy</a>
+                                            </td>
+                                            <td align="right" style="border-right: 1px solid #504F4F; width: 43px; padding-left: 10px; padding-right: 10px;">
+                                                <a href="https://www.tekie.in/terms" style="color: #504F4F;">Terms</a>
+                                            </td>
+                                            <td align="right" style=" padding-left: 5px;">
+                                                <a href="https://www.tekie.in/refund" style="color: #504F4F;">Refunds</a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 300; font-size: 18px; color: #504F4F;">
+                                    1st floor, M 2/37 B, DLF Phase 2
+                                </td>
+                            </tr>
+
+                            <tr align="left">
+                                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 300; font-size: 18px; color: #504F4F;">
+                                    Opp. Timeless Garden park, Gurgaon.
+                                </td>
+                            </tr>
+
+                        </table>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+    <!-- <tr>
+    <td>Content of column 1 </td>
+    <td>Content of column 2 </td>
+    </tr> -->
+</table>
+</body>
+</html>
