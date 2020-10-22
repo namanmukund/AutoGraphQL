@@ -14,75 +14,75 @@ import { sendEmailInvoiceToUser } from './utils/sendEmailInvoiceToUser';
 
 /* query to get userPaymentInstallment */
 const userPaymentInstallmentQuery = (userId, userPaymentPlanId) => `
-  	query {
-		userPaymentInstallments(filter:{
-		and: [
-		  {
-		    user_some:{
-		      id:"${userId}"
-		    }
-		  }
-		  {
-		    userPaymentPlan_some:{
-		      id: "${userPaymentPlanId}"
-		    }
-		  }
-		]
-		}){
-			user{
-			    id
-			    role
-			    name
-			    email
-			    fromReferral
-			    giftVoucherApplied
-			    phone{
-					countryCode
-					number
-			    }
-			    studentProfile{
-			      id
-			      parents{
-			        id
-			        user{
-						id
-						name
-						phone{
-							number
-							countryCode
-						}
-						email
-			        }
-			      }
-			    }
-		  	}
-		  userPaymentPlan{
-		    product{
-		      id
-		      title
-		    }
-		    userPaymentInstallments{
-		      id
-		      amount
-		      dueDate
-		      status
-		    }
-		    installmentNumber
-		    productPrice
-		    finalSellingPrice
-		  }
-		  userPaymentLink{
-		    amount
-		    link
-		  }
-			amount
-			dueDate
-			paidDate
-			paymentRequestedCount
-			status
-			createdAt
-		}
-	}
+query {
+  userPaymentInstallments(filter:{
+  and: [
+    {
+      user_some:{
+        id:"${userId}"
+      }
+    }
+    {
+      userPaymentPlan_some:{
+        id: "${userPaymentPlanId}"
+      }
+    }
+  ]
+  }){
+    user{
+        id
+        role
+        name
+        email
+        fromReferral
+        giftVoucherApplied
+        phone{
+        countryCode
+        number
+        }
+        studentProfile{
+          id
+          parents{
+            id
+            user{
+          id
+          name
+          phone{
+            number
+            countryCode
+          }
+          email
+            }
+          }
+        }
+      }
+    userPaymentPlan{
+      product{
+        id
+        title
+      }
+      userPaymentInstallments{
+        id
+        amount
+        dueDate
+        status
+      }
+      installmentNumber
+      productPrice
+      finalSellingPrice
+    }
+    userPaymentLink{
+      amount
+      link
+    }
+    amount
+    dueDate
+    paidDate
+    paymentRequestedCount
+    status
+    createdAt
+  }
+}
 `;
 
 const getSuffix = (i) => {
@@ -102,33 +102,33 @@ const getSuffix = (i) => {
   This method sends invoice on mail to users depending upon the intallments and
   whether that is paid or pending
   */
-const addUserPaymentInstallmentPostHookMethod = async (input, params, mutationName, context) => {
-  	const userId = get(params, 'userConnectId');
+const addUserPaymentInstallmentPostHookMethod = async (input, params) => {
+  const userId = get(params, 'userConnectId');
   const paymentPlanId = get(params, 'userPaymentPlanConnectId');
 
   if (!userId || !paymentPlanId) {
-    	log('Either one of userId or paymentPlanId is missing in input of addUserPaymentInstallmentPostHookMethod');
-  	}
+    log('Either one of userId or paymentPlanId is missing in input of addUserPaymentInstallmentPostHookMethod');
+  }
 
-  	const {
-	    pending,
-	    paid,
-  	} = installmentStatus;
-  	const userPaymentInstallmentQueryRes = await callLocalGraphqlApi(userPaymentInstallmentQuery(userId, paymentPlanId));
-  	let userPaymentInstallmentsInfo = get(userPaymentInstallmentQueryRes, 'data.userPaymentInstallments');
+  const {
+    pending,
+    paid,
+  } = installmentStatus;
+  const userPaymentInstallmentQueryRes = await callLocalGraphqlApi(userPaymentInstallmentQuery(userId, paymentPlanId));
+  let userPaymentInstallmentsInfo = get(userPaymentInstallmentQueryRes, 'data.userPaymentInstallments');
 
-  	if (!userPaymentInstallmentsInfo || (userPaymentInstallmentsInfo && !userPaymentInstallmentsInfo.length)) {
-	    throw new DatabaseRecordNotFoundError({
-	      data: {
-	        error: `UserPaymentInstallmentInfo is not present for the userId: ${userId}`,
-	      },
-	    });
-  	}
-  	userPaymentInstallmentsInfo = userPaymentInstallmentsInfo.sort((a, b) => a.createdAt - b.createdAt);
-  	const userPaymentInstallmentInfo = userPaymentInstallmentsInfo[userPaymentInstallmentsInfo.length - 1];
+  if (!userPaymentInstallmentsInfo || (userPaymentInstallmentsInfo && !userPaymentInstallmentsInfo.length)) {
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: `UserPaymentInstallmentInfo is not present for the userId: ${userId}`,
+      },
+    });
+  }
+  userPaymentInstallmentsInfo = userPaymentInstallmentsInfo.sort((a, b) => a.createdAt - b.createdAt);
+  const userPaymentInstallmentInfo = userPaymentInstallmentsInfo[userPaymentInstallmentsInfo.length - 1];
 
   // payload object where we will store the info to be sent in email
-  	const payload = {};
+  const payload = {};
   // get firstName, email, phone from user object based on it's role
   payload.firstName = get(userPaymentInstallmentInfo, 'user.name', '');
   if (userPaymentInstallmentInfo.user && userPaymentInstallmentInfo.user.role === MENTEE) {
@@ -157,10 +157,10 @@ const addUserPaymentInstallmentPostHookMethod = async (input, params, mutationNa
   let totalPaidAmount = 0;
   if (userPaymentInstallments && userPaymentInstallments.length > 0) {
     userPaymentInstallments.forEach((userPaymentInstallmentDoc) => {
-	      if (userPaymentInstallmentDoc.status === paid) {
-	        totalPaidAmount += userPaymentInstallmentDoc.amount;
-	      }
-	    });
+      if (userPaymentInstallmentDoc.status === paid) {
+        totalPaidAmount += userPaymentInstallmentDoc.amount;
+      }
+    });
   }
 
   let totalDueAmount = finalSellingPrice - totalPaidAmount;

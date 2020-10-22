@@ -8,7 +8,6 @@ import { log } from '../../../../utils';
 import {
   DatabaseRecordNotFoundError,
 } from '../../../../constants/errors';
-import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { addZeroes } from './utils/addZeroesToANumber';
 import { sendEmailInvoiceToUser } from './utils/sendEmailInvoiceToUser';
@@ -93,7 +92,7 @@ const getSuffix = (i) => {
   This method sends invoice on mail to users depending upon the intallments and
   whether that is paid or pending
   */
-const updateUserPaymentInstallmentPostHookMethod = async (input, params, mutationName, context) => {
+const updateUserPaymentInstallmentPostHookMethod = async (input, params) => {
   const userPaymentInstallmentId = get(params, 'id');
   const { status: inputPaymentStatus, paymentRequestedCount } = input;
 
