@@ -145,7 +145,7 @@ const addUserPaymentInstallmentPostHookMethod = async (input, params) => {
     payload.countryCode = get(userPaymentInstallmentInfo, 'user.phone.countryCode', '');
   }
 
-  // getting productInfo
+  // getting productInfo, final selling price, discount etc
   payload.productInfo = get(userPaymentInstallmentInfo, 'userPaymentPlan.product.title', '');
   const userPaymentInstallments = get(userPaymentInstallmentInfo, 'userPaymentPlan.userPaymentInstallments', []);
   payload.paymentLink = get(userPaymentInstallmentInfo, 'userPaymentLink.link', '');
@@ -181,8 +181,9 @@ const addUserPaymentInstallmentPostHookMethod = async (input, params) => {
   payload.amountToPay = addZeroes(amountToPay);
 
   const status = get(userPaymentInstallmentInfo, 'status', pending);
-  // paymentRequestedCount
 
+  // Sending mails on basis of if there are more than 1 totalNumberOfInstallments
+  // and if the status is paid, we will send the invoice otherwise a reminder mail
   let subject = 'Payment Receipt from Tekie';
   if (status === paid) {
     if (totalNumberOfInstallments > 1) {

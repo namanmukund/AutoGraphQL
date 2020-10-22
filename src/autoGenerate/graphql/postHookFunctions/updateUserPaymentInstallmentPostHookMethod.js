@@ -105,6 +105,8 @@ const updateUserPaymentInstallmentPostHookMethod = async (input, params) => {
     paid,
   } = installmentStatus;
 
+  // mail will only be sent if there are fields inputPaymentStatus or
+  // paymentRequestedCount in the input fields
   if (inputPaymentStatus === paid || paymentRequestedCount) {
     const userPaymentInstallmentQueryRes = await callLocalGraphqlApi(userPaymentInstallmentQuery(userPaymentInstallmentId));
     const userPaymentInstallmentInfo = get(userPaymentInstallmentQueryRes, 'data.userPaymentInstallment');
@@ -143,6 +145,7 @@ const updateUserPaymentInstallmentPostHookMethod = async (input, params) => {
 
     let installmentNumber = 1;
     let totalPaidAmount = 0;
+
     // sorting and iterating over userPaymentInstallments to get amount paid
     // and to get current installment number
     userPaymentInstallments = userPaymentInstallments.sort((a, b) => a.createdAt - b.createdAt);
@@ -176,6 +179,9 @@ const updateUserPaymentInstallmentPostHookMethod = async (input, params) => {
     payload.amountToPay = addZeroes(amountToPay);
 
     const status = get(userPaymentInstallmentInfo, 'status', pending);
+
+    // Sending mails on basis of if there are more than 1 totalNumberOfInstallments
+  // and if the status is paid, we will send the invoice otherwise a reminder mail
     let subject = 'Payment Receipt from Tekie';
     if (status === paid) {
       if (totalNumberOfInstallments > 1) {
