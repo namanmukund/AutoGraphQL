@@ -8,20 +8,27 @@ export const sendEmailInvoiceToUser = (payload, templateFileName, subject) => {
   templateString.then((html) => {
     // email to should be in array. Can send the mail to mutiple people
     let emailTo;
+    // ccemail should be in array. Can send the mail to mutiple people
+    let ccEmail;
     // send email in case a session is booked/updated/deleted
     if (process.env.NODE_ENV === 'production') {
       emailTo = [
         payload.email,
       ];
+      ccEmail = [
+        'naman.mukund@tekie.in',
+        'hamza.hassan@tekie.in',
+      ];
     } else {
       emailTo = [
+        'kritesh.patel@tekie.in',
+      ];
+      ccEmail = [
         'kriteshpk@gmail.com',
-        'namanmukund@gmail.com',
+        'naman.mukund@tekie.in',
       ];
     }
 
-    // ccemail should be in array. Can send the mail to mutiple people
-    const ccEmail = [''];
     // bccemail should be in array. Can send the mail to mutiple people
     const bccEmail = [''];
 
