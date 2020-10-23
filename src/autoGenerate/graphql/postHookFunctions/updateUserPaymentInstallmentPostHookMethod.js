@@ -181,7 +181,7 @@ const updateUserPaymentInstallmentPostHookMethod = async (input, params) => {
     const status = get(userPaymentInstallmentInfo, 'status', pending);
 
     // Sending mails on basis of if there are more than 1 totalNumberOfInstallments
-  // and if the status is paid, we will send the invoice otherwise a reminder mail
+    // and if the status is paid, we will send the invoice otherwise a reminder mail
     let subject = 'Payment Receipt from Tekie';
     if (status === paid) {
       if (totalNumberOfInstallments > 1) {
