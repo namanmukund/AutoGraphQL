@@ -23,6 +23,8 @@ import deleteMenteeSessionPostHookMethod from './preHookFunctions/deleteMenteeSe
 import hook from './hook';
 import addSalesOperationPostHookMethod from './postHookFunctions/addSalesOperationPostHookMethod';
 import updateSalesOperationPostHookMethod from './postHookFunctions/updateSalesOperationPostHookMethod';
+import addUserPaymentInstallmentPostHookMethod from './postHookFunctions/addUserPaymentInstallmentPostHookMethod';
+import updateUserPaymentInstallmentPostHookMethod from './postHookFunctions/updateUserPaymentInstallmentPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -134,6 +136,14 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateSalesOperation': {
       await updateSalesOperationPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'addUserPaymentInstallment': {
+      await addUserPaymentInstallmentPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'updateUserPaymentInstallment': {
+      await updateUserPaymentInstallmentPostHookMethod(input, params, mutationName, context);
       break;
     }
     default:
