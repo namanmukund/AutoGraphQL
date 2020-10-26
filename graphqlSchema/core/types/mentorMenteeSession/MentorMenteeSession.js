@@ -4,6 +4,22 @@ const sendTransactionalMessageFields = `
     sessionNotConducted: Boolean
     didNotTurnUpInSession: Boolean
 `;
+
+const sessionRescheduledReasons = `
+    hasRescheduled: Boolean
+    rescheduledDate: Date
+    rescheduledDateProvided: Boolean
+    internetIssue: Boolean
+    zoomIssue: Boolean
+    laptopIssue: Boolean
+    chromeIssue: Boolean
+    powerCut: Boolean
+    notResponseAndDidNotTurnUp: Boolean
+    turnedUpButLeftAbruptly: Boolean
+    leadNotVerifiedProperly: Boolean
+    otherReasonForReschedule: Boolean
+`;
+
 const MentorMenteeSession = `
   type MentorMenteeSession @model {
     topic: Topic! @relation(name: "MentorMenteeSessionTopic", direction: "OneWay")
@@ -40,6 +56,8 @@ const MentorMenteeSession = `
     rating: Int @length(min: 1, max: 5) @groupBy
     sessionRecordingLink: String
     ${sendTransactionalMessageFields} 
+    ${sessionRescheduledReasons}
+    sessionCommentByMentor: String
 }`;
 
 export default [MentorMenteeSession];
