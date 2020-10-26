@@ -227,6 +227,11 @@ const skillsLevel = {
   hard: 'hard',
 };
 
+const installmentStatus = {
+  pending: 'pending',
+  paid: 'paid',
+};
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export {
@@ -280,4 +285,5 @@ export {
   REGISTRATION_BASE_CREDIT,
   AFFILIATE_MAX_ALLOWED_REFERRALS,
   skillsLevel,
+  installmentStatus,
 };
