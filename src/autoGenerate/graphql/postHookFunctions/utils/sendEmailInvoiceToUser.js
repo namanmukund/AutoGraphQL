@@ -1,11 +1,9 @@
 import parsedHtmlFromTemplateFileAndObject
-  from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
-import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
-import sendEmail from '../../../../../../services/email/utils/sendEmail';
+  from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
+import getEmailObject from '../../../../../services/email/utils/getEmailObject';
+import sendEmail from '../../../../../services/email/utils/sendEmail';
 
-export const sendEmailInvoiceToUser = (payload) => {
-  const subject = 'Payment Receipt from Tekie';
-  const templateFileName = 'paymentInvoiceEmailTemplate';
+export const sendEmailInvoiceToUser = (payload, templateFileName, subject) => {
   const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, payload);
   templateString.then((html) => {
     // email to should be in array. Can send the mail to mutiple people
