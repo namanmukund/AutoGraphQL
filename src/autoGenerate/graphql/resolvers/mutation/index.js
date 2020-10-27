@@ -32,7 +32,6 @@ import parentChildSignUpMutationResolver from './user/parentChildSignUp';
 import loginViaPasswordMutationResolver from './user/loginViaPassword';
 import getPaymentRequestMutationResolver from './payment/getPaymentRequest';
 import getPaymentResponseMutationResolver from './payment/getPaymentResponse';
-import getTotalAmountCollectedMutationResolver from './payment/getTotalAmountCollected';
 
 export {
   addMutationResolver,
@@ -69,5 +68,4 @@ export {
   loginViaPasswordMutationResolver,
   getPaymentRequestMutationResolver,
   getPaymentResponseMutationResolver,
-  getTotalAmountCollectedMutationResolver,
 };
