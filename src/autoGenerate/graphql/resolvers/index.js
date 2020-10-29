@@ -72,7 +72,7 @@ import signUpAffiliate from './mutation/methods/signUpAffiliate';
 import salesOperationReport from './query/methods/salesOperationReport';
 import temporaryScript from './query/methods/temporaryScript';
 import sendTransactionalMessage from './query/methods/sendTransactionalMessage';
-import getTotalAmountCollected from './mutation/methods/getTotalAmountCollected';
+import getTotalAmountCollected from './query/methods/getTotalAmountCollected';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -558,8 +558,6 @@ resolvers.Mutation.validateUserOTP = validateUserOTP;
 resolvers.Mutation.getPaymentRequest = getPaymentRequest;
 // Resolver to check whether hash returned by payU is correct and there is no man in middle attack
 resolvers.Mutation.getPaymentResponse = getPaymentResponse;
-// Resolver to get total sell amount and amount colected
-resolvers.Mutation.getTotalAmountCollected = getTotalAmountCollected;
 // Resolver for a custom scalar type 'Date'
 
 // queries
@@ -568,6 +566,8 @@ resolvers.Query.getPythonByteCode = getPythonByteCode;
 resolvers.Query.salesOperationReport = salesOperationReport;
 resolvers.Query.temporaryScript = temporaryScript;
 resolvers.Query.sendTransactionalMessage = sendTransactionalMessage;
+// Resolver to get total sell amount and amount colected
+resolvers.Query.getTotalAmountCollected = getTotalAmountCollected;
 
 resolvers.Date = scalarDate;
 
