@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get sales operation to calculate payment amount
@@ -22,15 +23,8 @@ const getSalesOperationWonUsers = (filter) => `
 /*
   This API will return total amount and total amount collected on the basis of filters in the query
 */
-const getTotalAmountCollected = async (
-  root,
-  params,
-  typeName,
-  info,
-  mutationName,
-  ast,
-  context,
-) => {
+const getTotalAmountCollected = (async (root, params, context) => {
+  validateAuthentication(context);
   // initializing mandatory filter to get the sales operation data
   let filter = '{and: [{leadStatus: won}, {firstMentorMenteeSession_some: {and: [{topic_some: {order: 1}}, {sessionStatus: completed}, ';
   let totalAmountCollected = 0;
@@ -121,6 +115,6 @@ const getTotalAmountCollected = async (
     totalAmountCollected,
     totalAmount,
   };
-};
+});
 
 export default getTotalAmountCollected;
