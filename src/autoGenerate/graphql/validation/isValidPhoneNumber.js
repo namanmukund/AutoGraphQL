@@ -1,8 +1,8 @@
-import phone from 'phone';
+import libphonenumber from 'google-libphonenumber';
 /*
 Validates country code, like +91 is correct and +919191 is not
 and also checks if the starting number is valid or not like for +91,
-number should start with 8 or 9. Other checks like phone length is
+Other checks like phone length is
 also verified.
 */
 const isValidPhoneNumber = (phoneDoc) => {
@@ -11,8 +11,11 @@ const isValidPhoneNumber = (phoneDoc) => {
     return false;
   }
   const phoneNumber = countryCode + number;
-  const parsedPhoneNumber = phone(phoneNumber);
-  if (!parsedPhoneNumber || !parsedPhoneNumber.length) {
+  const phoneUtil = libphonenumber.PhoneNumberUtil && libphonenumber.PhoneNumberUtil.getInstance();
+  // Parse number in input.
+  const parsedPhoneNumber = phoneUtil && phoneUtil.parseAndKeepRawInput(phoneNumber);
+  // check if phone number is valid
+  if (phoneUtil && !phoneUtil.isValidNumber(parsedPhoneNumber)) {
     return false;
   }
   return true;
