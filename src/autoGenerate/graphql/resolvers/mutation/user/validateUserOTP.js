@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import {
   DatabaseRecordNotFoundError,
   OTPMismatchError, SendOtpFirstError,
@@ -73,6 +74,7 @@ const validateUserOTPMutationResolver = async (
   const {
     phoneOtp,
     emailOtp,
+    phone,
   } = input;
 
   let updateObj;
@@ -80,7 +82,12 @@ const validateUserOTPMutationResolver = async (
   if (!(process.env.NODE_ENV && process.env.NODE_ENV === 'staging')) {
     if (phoneOtp) {
     // temporary code
-      if (phoneOtp !== 7009) {
+      const countryCode = get(phone, 'countryCode', '');
+      const number = get(phone, 'number', '');
+      const phoneNumber = countryCode + number;
+      const businessPartnerDemoNumber = '+918827706789';
+
+      if (!(phoneOtp === 7009 || (phoneOtp === 7777 && phoneNumber === businessPartnerDemoNumber))) {
         if (userData.phoneOtp !== phoneOtp) {
           throw new OTPMismatchError();
         }
