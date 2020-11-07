@@ -5,8 +5,14 @@ import updateAvailableSlotQuery from '../../graphqlQueries/updateAvailableSlotQu
 
 // update if doc exist else leave
 const reduceParticularAvailableSlotOfADate = async (slotTimeStringArray, date, context, availableSlots) => {
-  const { isTrialSession } = context;
+  const { isTrialSession, userCountryCode } = context;
   if (typeof isTrialSession === 'boolean' && !isTrialSession) {
+    return true;
+  }
+
+  // temporary code to allow users to book multiple slots at a time for outside India
+  // we would have to eventually change it on role=school etc.
+  if (userCountryCode && userCountryCode !== '+91') {
     return true;
   }
 
