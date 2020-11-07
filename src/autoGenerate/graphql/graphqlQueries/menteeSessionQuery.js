@@ -8,20 +8,20 @@ query{
     topic{id order}
     ${getSlotTimesInString()}
     user{
-	    id
-	    studentProfile{
-	        parents{
-	          id
-	          user{
-	            id
-	            phone{
-	              countryCode
-	              number
-	            }
-	          }
-	        }
-	      }
-  	}
+      id
+      studentProfile{
+        parents{
+          id
+          user{
+            id
+            phone{
+              countryCode
+              number
+            }
+          }
+        }
+      }
+    }
   }
 }
 `;
