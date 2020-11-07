@@ -37,10 +37,17 @@ const validateMenteeSessionInput = async (params, context) => {
     PRE_BOOKING_HOUR_LIMIT,
   );
 
-  const { isTrialSession } = context;
+  const { isTrialSession, userCountryCode } = context;
   if (typeof isTrialSession === 'boolean' && !isTrialSession) {
     return true;
   }
+
+  // temporary code to allow users to book multiple slots at a time for outside India
+  // we would have to eventually change it on role=school etc.
+  if (userCountryCode && userCountryCode !== '+91') {
+    return true;
+  }
+
   // check if the slot mentee trying to book is available in availableSlot
   const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(bookingDate));
   const availableSlots = get(availableSlotsRes, 'data.availableSlots');

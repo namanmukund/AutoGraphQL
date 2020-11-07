@@ -12,6 +12,11 @@ const updateMenteeSessionValidation = async (params, mutationOrQueryName, contex
     throw new DatabaseRecordNotFoundError();
   }
   context.isTrialSession = get(menteeSession, 'topic.order') === 1;
+
+  // get user country code
+  const userCountryCode = get(menteeSessionData, 'data.menteeSession.user.studentProfile.parents[0].user.phone.countryCode');
+  context.userCountryCode = userCountryCode;
+
   // validate input
   await validateMenteeSessionInput(params, context);
   // eslint-disable-next-line no-param-reassign
