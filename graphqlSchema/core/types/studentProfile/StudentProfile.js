@@ -2,6 +2,8 @@ const StudentProfile = `
   type StudentProfile @model {
     grade: Grade @groupBy
     section: String @groupBy
+    branch: String
+    batch: String
     rollNo: Int
     year: Int
     schoolName: String
