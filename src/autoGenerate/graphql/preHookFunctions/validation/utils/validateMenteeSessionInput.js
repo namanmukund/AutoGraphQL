@@ -11,6 +11,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import availableSlotsQuery from '../../../graphqlQueries/availableSlotsQuery';
 import getSelectedSlotsStringArray from '../../../postHookFunctions/utils/getSelectedSlotsStringArray';
 import { NoSlotsAvailableForBooking } from '../../../../../../constants/errors/db';
+import { byPassMenteeValidationApps } from '../../../../../../constants';
 
 const PRE_BOOKING_HOUR_LIMIT = 0;
 const validateMenteeSessionInput = async (params, context) => {
@@ -37,8 +38,13 @@ const validateMenteeSessionInput = async (params, context) => {
     PRE_BOOKING_HOUR_LIMIT,
   );
 
-  const { isTrialSession, userCountryCode } = context;
+  const { isTrialSession, userCountryCode, appName } = context;
   if (typeof isTrialSession === 'boolean' && !isTrialSession) {
+    return true;
+  }
+
+  // by pass validation if call is from backend
+  if (byPassMenteeValidationApps.includes(appName)) {
     return true;
   }
 
