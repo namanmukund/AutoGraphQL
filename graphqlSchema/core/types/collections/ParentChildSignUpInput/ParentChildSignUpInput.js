@@ -7,6 +7,7 @@ const ParentChildSignUpInput = `
     grade: Grade
     hasLaptopOrDesktop: Boolean
     referralCode: String
+    schoolName: String
     isBuyNow: Boolean
   }
 `;
