@@ -202,6 +202,48 @@ const checkForValidReferralCode = async (referralCode) => {
   }
   return false;
 };
+const getSchoolInformation = async (schoolName) => {
+  const query = `
+query{
+  schools(filter:{
+    name:"${schoolName}"
+  }){
+    id
+  }
+}
+`;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.schools[0].id');
+};
+
+const updateSchoolDataOfAStudent = async (input, studentProfileId) => {
+  const {
+    schoolName, section, rollNo, batch,
+  } = input;
+  const schoolId = await getSchoolInformation(schoolName);
+  if (!schoolId) {
+    return false;
+  }
+  const query = `
+  mutation($input: StudentProfileUpdate) {
+    updateStudentProfile(id:"${studentProfileId}"
+    input: $input
+    schoolConnectId: "${schoolId}"
+    ){
+      id
+    }
+  }
+  `;
+  const variables = {
+    input: {
+      section,
+      rollNo,
+      batch,
+    },
+  };
+  const res = await callLocalGraphqlApi(query, '', variables);
+  return get(res, 'data.updateStudentProfile.id');
+};
 /*
 - both the parent and a kid is registered
 - email & phone both are required
@@ -416,6 +458,10 @@ const parentChildSignUpMutationResolver = async (
   // }
   // add base credit to user
   await addUserCredit(REGISTRATION_BASE_CREDIT, childUserId, SIGN_UP_BONUS);
+  //  if  school information exist add school data
+  if (input && input.schoolName) {
+    await updateSchoolDataOfAStudent(input, studentProfileId);
+  }
   return userTokenData;
 };
 
