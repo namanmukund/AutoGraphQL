@@ -78,9 +78,6 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
   const userCountryCode = get(getUserRes, 'data.user.studentProfile.parents[0].user.phone.countryCode');
   context.userCountryCode = userCountryCode;
 
-  // validate input
-  await validateMenteeSessionInput(params, context);
-
   // getting user role from context. We will allow adding mentorSession if logged in user is admin
   const userInfo = validateTokenAndExtractInformation(context, false);
   const {
@@ -98,6 +95,11 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
     userIdFromContext,
     appName,
   } = userAndAppInfo;
+
+  context.appName = appName;
+
+  // validate input
+  await validateMenteeSessionInput(params, context);
 
   if (
     !backendApps.includes(appName)
