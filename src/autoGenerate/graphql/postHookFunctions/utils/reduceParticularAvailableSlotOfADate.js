@@ -2,10 +2,11 @@ import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import availableSlotsQuery from '../../graphqlQueries/availableSlotsQuery';
 import updateAvailableSlotQuery from '../../graphqlQueries/updateAvailableSlotQuery';
+import { byPassMenteeValidationApps } from '../../../../../constants';
 
 // update if doc exist else leave
 const reduceParticularAvailableSlotOfADate = async (slotTimeStringArray, date, context, availableSlots) => {
-  const { isTrialSession, userCountryCode } = context;
+  const { isTrialSession, userCountryCode, appName } = context;
   if (typeof isTrialSession === 'boolean' && !isTrialSession) {
     return true;
   }
@@ -13,6 +14,11 @@ const reduceParticularAvailableSlotOfADate = async (slotTimeStringArray, date, c
   // temporary code to allow users to book multiple slots at a time for outside India
   // we would have to eventually change it on role=school etc.
   if (userCountryCode && userCountryCode !== '+91') {
+    return true;
+  }
+
+  // by pass validation if call is from backend
+  if (byPassMenteeValidationApps.includes(appName)) {
     return true;
   }
 

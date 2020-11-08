@@ -13,6 +13,7 @@ const TLA = 'tekieLearningApp';
 const TWA = 'tekieWebApp';
 const TAA = 'tekieAffiliateApp';
 const backendApps = ['core'];
+const byPassMenteeValidationApps = ['core'];
 
 const frontEndApps = [TLA, TMS, TWA, TAA];
 const permissionIntegratedApps = [];
@@ -286,4 +287,5 @@ export {
   AFFILIATE_MAX_ALLOWED_REFERRALS,
   skillsLevel,
   installmentStatus,
+  byPassMenteeValidationApps,
 };
