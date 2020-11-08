@@ -14,6 +14,8 @@ import PythonByteCode from './PythonByteCode';
 import SalesOperationReport from './SalesOperationReport';
 import TransactionalMessageInput from './TransactionalMessageInput';
 import CodingLanguage from './CodingLanguage';
+import AddUpdateBulkSchoolUserDataOutput from './AddUpdateBulkSchoolUserDataOutput';
+import ErrorLog from './ErrorLog';
 
 export default [
   ...Enum,
@@ -32,4 +34,6 @@ export default [
   SalesOperationReport,
   TransactionalMessageInput,
   CodingLanguage,
+  AddUpdateBulkSchoolUserDataOutput,
+  ErrorLog,
 ];

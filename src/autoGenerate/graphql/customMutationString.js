@@ -30,7 +30,7 @@ const customMutationString = `
    validateUserOTP ( input: ValidateUserInput  ): ParentChildToken,
    getPaymentRequest ( productId: ID!, discountCode: String, isCreditUsed: Boolean): PaymentRequest,
    getPaymentResponse ( id: ID!, hash: String!, status: String!, payuMoneyId: String!): BooleanResult,
-   addUpdateBulkSchoolUserData (sheetId: String!, schoolName: String!): [User],
+   addUpdateBulkSchoolUserData (sheetId: String!, schoolName: String!): AddUpdateBulkSchoolUserDataOutput,
    `;
 
 export default customMutationString;

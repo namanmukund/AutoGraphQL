@@ -18,9 +18,6 @@ const callParentChildSignup = async (row, schoolName, country) => {
     section,
     branch,
     batch,
-    mentor,
-    bookingDate,
-    slot,
   } = row;
   const query = `
 mutation($input: ParentChildSignUpInput){
@@ -83,6 +80,27 @@ mutation ($input: MenteeSessionInput!) {
   return get(res, 'data.addMenteeSession.id');
 };
 
+const getMentorSessionId = async (
+  mentorUserId,
+  availabilityDate,
+) => {
+  const query = `
+query {
+  mentorSessions(filter:{
+    and:[
+      {user_some:{id:"${mentorUserId}"}}
+      {availabilityDate: "${availabilityDate}"}
+      {sessionType: trial}
+    ]
+  }){
+    id
+  }
+}
+`;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.mentorSessions[0].id');
+};
+
 const callAddMentorSession = async (
   userConnectId,
   courseConnectId,
@@ -112,17 +130,34 @@ const callAddMentorMenteeSession = async (
 mutation($input: MentorMenteeSessionInput!){
   addMentorMenteeSession(
     input:$input
-    topicConnectId:""
-    menteeSessionConnectId:""
-    mentorSessionConnectId:""
+    topicConnectId:"${topicConnectId}"
+    menteeSessionConnectId:"${menteeSessionConnectId}"
+    mentorSessionConnectId:"${mentorSessionConnectId}"
   ){
     id
   }
 }
-
 `;
   const res = await callLocalGraphqlApi(query, '', variables);
   return get(res, 'data.addMentorMenteeSession.id');
+};
+
+const callUpdateMentorSession = async (
+  mentorSessionId,
+  variables,
+) => {
+  const query = `
+mutation($input: MentorSessionUpdate){
+  updateMentorSession(
+    id:"${mentorSessionId}",
+    input:$input
+  ){
+    id
+  }
+}
+`;
+  const res = await callLocalGraphqlApi(query, '', variables);
+  return get(res, 'data.updateMentorSession.id');
 };
 
 const getMentorUserId = async (
@@ -177,59 +212,90 @@ const addUpdateBulkSchoolUserData = async (root, params, context, info) => {
   const firstTopic = await getFirstTopicAndLearningObjective();
   const firstTopicId = get(firstTopic, 'data.topics[0].id');
   const courseConnectId = await getCourseId();
-  console.log('firstTopicId....', firstTopicId);
-  console.log('courseConnectId....', courseConnectId);
+  const errorLogs = [];
   // eslint-disable-next-line no-restricted-syntax
-  for (const row of sheetDataRows) {
-    const result = await callParentChildSignup(row, schoolName, country);
+  for (const [index, row] of sheetDataRows.entries()) {
+    try {
+      const result = await callParentChildSignup(row, schoolName, country);
 
-    if (result && result.id) {
-      const { bookingDate, slot, mentor } = row;
-      let menteeSessionId;
-      let mentorSessionId;
-      // add mentee session
-      if (bookingDate && slot) {
-        const variables = {
-          input: {
-            bookingDate: convertDateFormat(bookingDate),
-            [slot]: true,
-          },
-        };
-        const userId = get(result, 'parentProfile.children.user.id');
-        menteeSessionId = await callAddMenteeSession(userId, firstTopicId, variables);
-        console.log('menteeSessionId.....', menteeSessionId);
+      if (result && result.id) {
+        const { bookingDate, slot, mentor } = row;
+        let menteeSessionId;
+        let mentorSessionId;
+        // add mentee session
+        if (bookingDate && slot) {
+          const variables = {
+            input: {
+              bookingDate: convertDateFormat(bookingDate),
+              [slot]: true,
+            },
+          };
+          const userId = get(result, 'parentProfile.children[0].user.id');
+          menteeSessionId = await callAddMenteeSession(userId, firstTopicId, variables);
+        }
+        // add mentor  session
+        if (mentor) {
+          const mentorUserId = await getMentorUserId(mentor);
+          if (mentorUserId) {
+            mentorSessionId = await getMentorSessionId(
+              mentorUserId,
+              convertDateFormat(bookingDate),
+              slot,
+            );
+            if (!mentorSessionId) {
+              const variables = {
+                input: {
+                  availabilityDate: convertDateFormat(bookingDate),
+                  [slot]: true,
+                  sessionType: 'trial',
+                },
+              };
+              mentorSessionId = await callAddMentorSession(mentorUserId, courseConnectId, variables);
+            } else {
+              // update
+              const variables = {
+                input: {
+                  availabilityDate: convertDateFormat(bookingDate),
+                  [slot]: true,
+                },
+              };
+              await callUpdateMentorSession(
+                mentorSessionId,
+                variables,
+              );
+            }
+          }
+        }
+        // add mentor mentee session
+        if (menteeSessionId && mentorSessionId) {
+          const variables = {
+            input: {
+              sessionStatus: 'allotted',
+            },
+          };
+          await callAddMentorMenteeSession(
+            firstTopicId,
+            menteeSessionId,
+            mentorSessionId,
+            variables,
+          );
+        }
       }
-      // add mentor  session
-      if (mentor) {
-        const mentorUserId = await getMentorUserId(mentor);
-        const variables = {
-          input: {
-            availabilityDate: convertDateFormat(bookingDate),
-            [slot]: true,
-            sessionType: 'trial',
-          },
-        };
-        mentorSessionId = await callAddMentorSession(mentorUserId, courseConnectId, variables);
-        console.log('mentorSessionId.....', mentorSessionId);
-      }
-      // add mentor mentee session
-      if (menteeSessionId && mentorSessionId) {
-        const variables = {
-          input: {
-            sessionStatus: 'allotted',
-          },
-        };
-        const mentorMenteeSessionId = await callAddMentorMenteeSession(
-          firstTopicId,
-          menteeSessionId,
-          mentorSessionId,
-          variables,
-        );
-        console.log('mentorMenteeSessionId.....', mentorMenteeSessionId);
-      }
+    } catch (e) {
+      errorLogs.push({
+        sheetRow: index + 2,
+        parentEmail: row.parentEmail,
+        childName: row.childName,
+        parentName: row.parentName,
+        phoneNumber: row.phoneNumber,
+        error: e,
+      });
     }
   }
-  return [{ id: '123' }];
+  return {
+    status: 'completed',
+    errorLogs,
+  };
 };
 
 export default addUpdateBulkSchoolUserData;
