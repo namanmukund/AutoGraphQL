@@ -2,7 +2,9 @@ const StudentProfile = `
   type StudentProfile @model {
     grade: Grade @groupBy
     section: String @groupBy
-    rollNo: Int
+    branch: String
+    batch: String
+    rollNo: String
     year: Int
     schoolName: String
     user: User! @relation(name: "StudentProfileUser")

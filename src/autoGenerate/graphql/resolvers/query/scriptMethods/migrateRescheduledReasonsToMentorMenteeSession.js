@@ -4,9 +4,7 @@ import { MutationController } from '../../../controllers';
 
 const updateMentorMenteeSession = async (id, modifiedData) => {
   const modelMutations = new MutationController('MentorMenteeSession', { bypass: true });
-  console.log('......data to update', modifiedData);
   const data = await modelMutations.updateOne({ id }, modifiedData);
-  console.log('updated...', data);
   return data;
 };
 

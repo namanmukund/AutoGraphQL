@@ -12,7 +12,9 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
   const isTrial = await isTrialSession(input.topic.typeId);
 
-  if (typeof isTrial === 'boolean' && isTrial) {
+  const { userCountryCode } = context;
+
+  if (typeof isTrial === 'boolean' && isTrial && userCountryCode === '+91') {
     await increaseParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
   }
   await extractMenteeSessionInfoAndSendEmail('delete', input, bookingDate, slotTimeStringArray);

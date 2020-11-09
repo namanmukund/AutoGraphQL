@@ -13,6 +13,11 @@ const deleteMenteeSessionValidation = async (params, mutationOrQueryName, contex
   if (!menteeSession || !menteeSession.id) {
     throw new DatabaseRecordNotFoundError();
   }
+
+  // get user country code
+  const userCountryCode = get(menteeSessionData, 'data.menteeSession.user.studentProfile.parents[0].user.phone.countryCode');
+  context.userCountryCode = userCountryCode;
+
   const { bookingDate, ...slots } = menteeSession;
   const slotTimeArray = getSelectedSlotsTime(slots);
   // of any slots is taken or the date is of past then the doc can not be deleted

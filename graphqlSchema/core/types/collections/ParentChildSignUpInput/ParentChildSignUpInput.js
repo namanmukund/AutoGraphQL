@@ -5,8 +5,13 @@ const ParentChildSignUpInput = `
     parentEmail: String!
     parentPhone: PhoneInput!  
     grade: Grade
+    section:  String
+    rollNo: String
+    batch: String
+    branch: String
     hasLaptopOrDesktop: Boolean
     referralCode: String
+    schoolName: String
     isBuyNow: Boolean
   }
 `;

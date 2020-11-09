@@ -17,7 +17,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const { bookingDate, ...slots } = input;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
-  // Only for trial session
+  // Only for trial session and only for india
   /* if a mentee has changed the date to future
   --increase the availability slot from the prevBookingDate
   -- decrease the availability slot of current availabilityDate
@@ -26,8 +26,9 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
  */
 
   const isTrial = await isTrialSession(input.topic.typeId);
+  const { userCountryCode } = context;
 
-  if (typeof isTrial === 'boolean' && isTrial) {
+  if (typeof isTrial === 'boolean' && isTrial && userCountryCode === '+91') {
     if (bookingDate && bookingDate.getTime() !== prevBookingDate.getTime()) {
       // -- decrease the availability slot of current availabilityDate
       await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);

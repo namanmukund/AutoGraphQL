@@ -1,7 +1,9 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { UserMismatchError } from '../../../../../constants/errors';
-import { ADMIN, UMS_ADMIN, MENTOR } from '../../../../../constants/roles';
+import {
+  ADMIN, UMS_ADMIN, MENTOR, SALES,
+} from '../../../../../constants/roles';
 import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
@@ -34,6 +36,27 @@ const getMenteeSessions = (userId, topicId) => `
   }
   `;
 
+// query to get user country code
+const getUserCountryCode = (userId) => `
+  query {
+    user(id: "${userId}") {
+      id
+      studentProfile{
+        parents{
+          id
+          user{
+            id
+            phone{
+              countryCode
+              number
+            }
+          }
+        }
+      }
+    }
+  }
+  `;
+
 // prehook logic to check if added MenteeSession(user and topic id) is already present
 const addMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   // check if the document for called user and topic is already present
@@ -50,8 +73,10 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
     });
   }
 
-  // validate input
-  await validateMenteeSessionInput(params, context);
+  // get user country code
+  const getUserRes = await callLocalGraphqlApi(getUserCountryCode(userId));
+  const userCountryCode = get(getUserRes, 'data.user.studentProfile.parents[0].user.phone.countryCode');
+  context.userCountryCode = userCountryCode;
 
   // getting user role from context. We will allow adding mentorSession if logged in user is admin
   const userInfo = validateTokenAndExtractInformation(context, false);
@@ -71,11 +96,16 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
     appName,
   } = userAndAppInfo;
 
+  context.appName = appName;
+
+  // validate input
+  await validateMenteeSessionInput(params, context);
+
   if (
     !backendApps.includes(appName)
     && userIdFromContext !== userId
     && !(userRoleFromContext === ADMIN || userRoleFromContext === UMS_ADMIN
-     || userRoleFromContext === MENTOR)
+     || userRoleFromContext === MENTOR || userRoleFromContext === SALES)
   ) {
     throw new UserMismatchError();
   }
