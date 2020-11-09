@@ -218,7 +218,7 @@ query{
 
 const updateSchoolDataOfAStudent = async (input, studentProfileId) => {
   const {
-    schoolName, section, rollNo, batch,
+    schoolName, section, rollNo, batch, branch,
   } = input;
   const schoolId = await getSchoolInformation(schoolName);
   if (!schoolId) {
@@ -239,6 +239,7 @@ const updateSchoolDataOfAStudent = async (input, studentProfileId) => {
       section,
       rollNo,
       batch,
+      branch,
     },
   };
   const res = await callLocalGraphqlApi(query, '', variables);

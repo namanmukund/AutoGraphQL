@@ -4,7 +4,7 @@ const StudentProfile = `
     section: String @groupBy
     branch: String
     batch: String
-    rollNo: Int
+    rollNo: String
     year: Int
     schoolName: String
     user: User! @relation(name: "StudentProfileUser")
