@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop */
+/* eslint-disable no-await-in-loop, no-console */
 import { get } from 'lodash';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
@@ -202,7 +202,7 @@ const convertDateFormat = (date) => {
   return newdate;
 };
 
-const addUpdateBulkSchoolUserData = async (root, params, context, info) => {
+const addUpdateBulkSchoolUserData = async (root, params, context) => {
   validateAuthentication(context);
   const { sheetId, country = 'india', schoolName } = params;
   if (!sheetId || !schoolName) {
@@ -216,9 +216,11 @@ const addUpdateBulkSchoolUserData = async (root, params, context, info) => {
   // eslint-disable-next-line no-restricted-syntax
   for (const [index, row] of sheetDataRows.entries()) {
     try {
+      console.log('Processing row number........', index + 2);
       const result = await callParentChildSignup(row, schoolName, country);
 
       if (result && result.id) {
+        console.log('Parent  Id....', result.id);
         const { bookingDate, slot, mentor } = row;
         let menteeSessionId;
         let mentorSessionId;
@@ -232,10 +234,12 @@ const addUpdateBulkSchoolUserData = async (root, params, context, info) => {
           };
           const userId = get(result, 'parentProfile.children[0].user.id');
           menteeSessionId = await callAddMenteeSession(userId, firstTopicId, variables);
+          console.log('menteeSessionId....', menteeSessionId);
         }
         // add mentor  session
         if (mentor) {
           const mentorUserId = await getMentorUserId(mentor);
+          console.log('mentorUserId....', mentorUserId);
           if (mentorUserId) {
             mentorSessionId = await getMentorSessionId(
               mentorUserId,
@@ -266,6 +270,7 @@ const addUpdateBulkSchoolUserData = async (root, params, context, info) => {
             }
           }
         }
+        console.log('mentorSessionId....', mentorSessionId);
         // add mentor mentee session
         if (menteeSessionId && mentorSessionId) {
           const variables = {
@@ -279,9 +284,11 @@ const addUpdateBulkSchoolUserData = async (root, params, context, info) => {
             mentorSessionId,
             variables,
           );
+          console.log('Processed........', index + 2, result.id);
         }
       }
     } catch (e) {
+      console.log('Error........', e);
       errorLogs.push({
         sheetRow: index + 2,
         parentEmail: row.parentEmail,
