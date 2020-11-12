@@ -25,7 +25,7 @@ import addSalesOperationPostHookMethod from './postHookFunctions/addSalesOperati
 import updateSalesOperationPostHookMethod from './postHookFunctions/updateSalesOperationPostHookMethod';
 import addUserPaymentInstallmentPostHookMethod from './postHookFunctions/addUserPaymentInstallmentPostHookMethod';
 import updateUserPaymentInstallmentPostHookMethod from './postHookFunctions/updateUserPaymentInstallmentPostHookMethod';
-import updateLeadsquared from '../../../services/leadsquared/updateLeadSquared'
+import createNewUserMethod from './postHookFunctions/leadsquared/createNewUserMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -148,27 +148,7 @@ const posthook = async (input, mutationName, context, params) => {
       break;
     }
     case 'parentChildSignUp': {
-      const leadSquaredInput = {
-        'Phone': get(params, 'input.parentPhone.number'),
-        mx_Student_Name: get(params, 'input.childName'),
-        mx_Student_Grade: get(params, 'input.grade').replace('Grade', ''),
-        FirstName: get(params, 'input.parentName'),
-        Source: 'WEBSITE',
-        EmailAddress: get(params, 'input.parentEmail'),
-      }
-      if (get(params, 'input.utmSource')) {
-        leadSquaredInput.mx_utm_source = get(params, 'input.utmSource')
-      }
-      if (get(params, 'input.utmCampaign')) {
-        leadSquaredInput.mx_utm_Campaign = get(params, 'input.utmCampaign')
-      }
-      if (get(params, 'input.utmTerm')) {
-        leadSquaredInput.mx_utm_term = get(params, 'input.utmTerm')
-      }
-      if (get(params, 'input.utmContent')) {
-        leadSquaredInput.utm_content = get(params, 'input.utmContent')
-      }
-      updateLeadsquared(leadSquaredInput)
+      createNewUserMethod(params);
       break;
     }
     default:
