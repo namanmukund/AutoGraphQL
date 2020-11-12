@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
 
 const createNewUserMethod = (params) => {
