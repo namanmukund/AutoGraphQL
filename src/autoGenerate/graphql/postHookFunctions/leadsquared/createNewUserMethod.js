@@ -20,7 +20,7 @@ const createNewUserMethod = (params) => {
     leadSquaredInput.mx_utm_term = get(params, 'input.utmTerm');
   }
   if (get(params, 'input.utmContent')) {
-    leadSquaredInput.utm_content = get(params, 'input.utmContent');
+    leadSquaredInput.mx_utm_content = get(params, 'input.utmContent');
   }
   updateLeadsquared(leadSquaredInput);
 };

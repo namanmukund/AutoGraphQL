@@ -19,7 +19,7 @@ import localSignUpMutationPromise from '../utils/localSignUpMutationPromise';
 import { MutationController, QueryController } from '../../../controllers';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import generateInviteCode from '../../../../../../utils/generateInviteCode';
-import { MAX_ALLOWED_REFERRALS, REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
+import { MAX_ALLOWED_REFERRALS, REGISTRATION_BASE_CREDIT, userSourceOrigin } from '../../../../../../constants';
 import getNumberOfReferralsOfAUser from './utils/getNumberOfReferralsOfAUser';
 import getReferredByUserIdByReferralCode from './utils/getReferredByUserIdByReferralCode';
 import addUserCredit from './utils/addUserCredit';
@@ -245,6 +245,27 @@ const updateSchoolDataOfAStudent = async (input, studentProfileId) => {
   const res = await callLocalGraphqlApi(query, '', variables);
   return get(res, 'data.updateStudentProfile.id');
 };
+
+const getUserOriginSource = (utmSource, schoolName) => {
+  const {
+    website, facebook, google, instagram, school,
+  } = userSourceOrigin;
+  let source = website;
+
+  if (utmSource && utmSource.toLowerCase().includes('facebook')) {
+    source = facebook;
+  }
+  if (utmSource && utmSource.toLowerCase().includes('instagram')) {
+    source = instagram;
+  }
+  if (utmSource && utmSource.toLowerCase().includes('google')) {
+    source = google;
+  }
+  if (schoolName) {
+    source = school;
+  }
+  return source;
+};
 /*
 - both the parent and a kid is registered
 - email & phone both are required
@@ -290,8 +311,12 @@ const parentChildSignUpMutationResolver = async (
     hasLaptopOrDesktop,
     referralCode,
     isBuyNow,
+    utmSource,
+    utmCampaign,
+    utmTerm,
+    utmContent,
+    schoolName,
   } = input;
-
   // check if parent exist in db
   const parentInfo = await getParentInfo(context, parentEmail, parentPhone);
   let parentId;
@@ -299,6 +324,7 @@ const parentChildSignUpMutationResolver = async (
   Object.assign(authentication, {
     bypass: true,
   });
+  const source = getUserOriginSource(utmSource, schoolName);
 
   // if parent exist don't add parent and check if the child exists too
   if (parentInfo && parentInfo.parentId) {
@@ -327,7 +353,13 @@ const parentChildSignUpMutationResolver = async (
       email: parentEmail.trim(),
       phone: parentPhone,
       role: PARENT,
+      utmSource,
+      utmCampaign,
+      utmTerm,
+      utmContent,
+      source,
     };
+
     const parentDataWithId = generateCuid(parentData);
     const parentUserData = await addUserData(authentication, parentDataWithId);
 
@@ -360,7 +392,13 @@ const parentChildSignUpMutationResolver = async (
     role: MENTEE,
     inviteCode: generateInviteCode(8),
     signUpBonusCredited: true,
+    source,
+    utmSource,
+    utmCampaign,
+    utmTerm,
+    utmContent,
   };
+
   // check if the child has been referred by a valid user
   const referredByUserData = await checkForValidReferralCode(referralCode);
   if (referredByUserData && referredByUserData.id) {

@@ -70,6 +70,11 @@ const User = `
     parentProfile: ParentProfile @relation(name:"ParentProfileUser", isSubset: true)
     mentorProfile: MentorProfile @relation(name:"MentorProfileUser", isSubset: true)
     profilePic: File @relation(name: "UserProfilePic", direction: "OneWay", isSubset: true) 
+    utmSource: String
+    utmCampaign: String
+    utmTerm: String
+    utmContent: String
+    source: UserOriginSource @defaultValue(value: "website")
     ${affilateInfo}  
     ${socialInfo}
     ${promotionalInfo}

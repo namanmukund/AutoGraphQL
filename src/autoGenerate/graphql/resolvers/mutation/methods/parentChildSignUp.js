@@ -25,7 +25,7 @@ const parentChildSignUp = async (root, params, context, info) => {
     authentication,
   ).then((result) => {
     const newResult = toObject(result);
-    posthook(newResult, mutationName, context, params)
+    posthook(newResult, mutationName, context, params);
     return newResult;
   });
 };
