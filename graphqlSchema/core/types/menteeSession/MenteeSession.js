@@ -9,6 +9,7 @@ const MenteeSession = `
     bookingDate: Date!
     scheduleRunStatus: ScheduleRunStatus
     ${slotTimeFields}
+    source: UserOriginSource @defaultValue(value: "website")
 }`;
 
 export default [MenteeSession];
