@@ -25,6 +25,7 @@ import addSalesOperationPostHookMethod from './postHookFunctions/addSalesOperati
 import updateSalesOperationPostHookMethod from './postHookFunctions/updateSalesOperationPostHookMethod';
 import addUserPaymentInstallmentPostHookMethod from './postHookFunctions/addUserPaymentInstallmentPostHookMethod';
 import updateUserPaymentInstallmentPostHookMethod from './postHookFunctions/updateUserPaymentInstallmentPostHookMethod';
+import createNewUserMethod from './postHookFunctions/leadsquared/createNewUserMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -144,6 +145,10 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateUserPaymentInstallment': {
       await updateUserPaymentInstallmentPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'parentChildSignUp': {
+      createNewUserMethod(params);
       break;
     }
     default:
