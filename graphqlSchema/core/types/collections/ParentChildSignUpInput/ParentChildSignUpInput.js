@@ -13,6 +13,10 @@ const ParentChildSignUpInput = `
     referralCode: String
     schoolName: String
     isBuyNow: Boolean
+    utmSource: String
+    utmCampaign: String
+    utmTerm: String
+    utmContent: String
   }
 `;
 

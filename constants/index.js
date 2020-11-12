@@ -195,6 +195,14 @@ const masteryLevels = {
   defaultMastery: 'none',
 };
 
+const userSourceOrigin = {
+  school: 'school',
+  facebook: 'facebook',
+  instagram: 'instagram',
+  google: 'google',
+  website: 'website',
+};
+
 const freeTopicCount = 5;
 const badgeTypes = {
   character: 'character',
@@ -288,4 +296,5 @@ export {
   skillsLevel,
   installmentStatus,
   byPassMenteeValidationApps,
+  userSourceOrigin,
 };

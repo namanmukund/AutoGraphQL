@@ -49,12 +49,14 @@ import TransactionalMessageMedium from './TransactionalMessageMedium';
 import TransactionalMessageType from './TransactionalMessageType';
 import SkillsLevel from './SkillsLevel';
 import CodingLanguageType from './CodingLanguageType';
+import UserOriginSource from './UserOriginSource';
 
 export default [
   Status,
   Gender,
   ProductType,
-  FileType, FileUsageKind,
+  FileType,
+  FileUsageKind,
   AppName,
   ApplicationType,
   FileBucket,
@@ -102,4 +104,5 @@ export default [
   TransactionalMessageType,
   SkillsLevel,
   CodingLanguageType,
+  UserOriginSource,
 ];
