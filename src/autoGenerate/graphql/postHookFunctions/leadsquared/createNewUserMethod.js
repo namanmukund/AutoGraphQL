@@ -22,7 +22,7 @@ const createNewUserMethod = (params) => {
   if (get(params, 'input.utmContent')) {
     leadSquaredInput.mx_utm_content = get(params, 'input.utmContent');
   }
-  updateLeadsquared(leadSquaredInput);
+  updateLeadsquared(leadSquaredInput, true);
 };
 
 export default createNewUserMethod;
