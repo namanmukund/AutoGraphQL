@@ -58,6 +58,7 @@ const MentorMenteeSession = `
     ${sendTransactionalMessageFields} 
     ${sessionRescheduledReasons}
     sessionCommentByMentor: String
+    source: UserOriginSource @defaultValue(value: "website")
 }`;
 
 export default [MentorMenteeSession];
