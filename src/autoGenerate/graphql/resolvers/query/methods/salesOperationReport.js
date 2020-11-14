@@ -1,4 +1,6 @@
-import { get, groupBy, orderBy } from 'lodash';
+import {
+  get, groupBy, orderBy, findIndex,
+} from 'lodash';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { QueryController } from '../../../controllers';
 import { ifAuthorized } from '../../../../../../utils';
@@ -15,6 +17,89 @@ const topicsQuery = () => `
         }
       }
 `;
+
+const mentorMenteeSessions = async (fromDate, toDate) => {
+  const query = `query{
+  mentorMenteeSessions(filter:{
+    and:[
+      {topic_some:{order:1}}
+      {sessionStartDate_gte:"${fromDate}"}
+      {sessionStartDate_lte:"${toDate}"}
+      {hasRescheduled:true}
+      {source_not:school}
+    ]
+  }orderBy:sessionStartDate_DESC){
+    id
+    sessionStartDate
+    zoomIssue
+    internetIssue
+    laptopIssue
+    chromeIssue
+    powerCut
+    notResponseAndDidNotTurnUp
+    turnedUpButLeftAbruptly
+    leadNotVerifiedProperly
+    otherReasonForReschedule
+  }
+}`;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.mentorMenteeSessions');
+};
+
+const isoToMMDDYYYY = (dt) => {
+  const date = new Date(dt);
+  const year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  let modifiedDate = date.getDate();
+
+  if (modifiedDate < 10) {
+    modifiedDate = `0${modifiedDate}`;
+  }
+  if (month < 10) {
+    month = `0${month}`;
+  }
+
+  return `${modifiedDate}-${month}-${year}`;
+};
+
+const getTrueRescheduledField = (obj) => {
+  const keys = Object.keys((obj));
+  // eslint-disable-next-line no-restricted-syntax
+  for (const key of keys) {
+    if (obj[key]) {
+      return key;
+    }
+  }
+  return '';
+};
+const getRescheduledReasonData = async (fromDate, toDate) => {
+  const mentorMenteeSessionsData = await mentorMenteeSessions(fromDate, toDate);
+  const docsArray = [];
+  mentorMenteeSessionsData.forEach((obj) => {
+    const { id, sessionStartDate, ...rest } = obj;
+    const modifiedDate = isoToMMDDYYYY(sessionStartDate);
+    const fieldName = getTrueRescheduledField(rest);
+    const index = findIndex(docsArray, ['_id', modifiedDate]);
+    if (fieldName) {
+      if (index !== -1) {
+        // update
+        if (docsArray[index][fieldName]) {
+          // eslint-disable-next-line operator-assignment
+          docsArray[index][fieldName] = docsArray[index][fieldName] + 1;
+        } else {
+          docsArray[index][fieldName] = 1;
+        }
+      } else {
+        // add
+        docsArray.push({
+          _id: modifiedDate,
+          [fieldName]: 1,
+        });
+      }
+    }
+  });
+  return docsArray;
+};
 
 const aggregateGroupByQuery = (
   typeName,
@@ -57,6 +142,7 @@ const salesOperationReport = (async (root, params, context) => {
   const userMatchQuery = {
     createdAt: { $gte: new Date(fromDate), $lte: new Date(toDate) },
     role: MENTEE,
+    source: { $ne: 'school' },
   };
   const users = await aggregateGroupByQuery(
     'User',
@@ -67,7 +153,13 @@ const salesOperationReport = (async (root, params, context) => {
 
   // -----------------------------------------------------------------------------
 
-  const menteeSessionMatchQuery = { bookingDate: { $gte: new Date(fromDate), $lte: new Date(toDate) } };
+  const menteeSessionMatchQuery = {
+    bookingDate: {
+      $gte: new Date(fromDate),
+      $lte: new Date(toDate),
+    },
+    source: { $ne: 'school' },
+  };
   const menteeSessions = await aggregateGroupByQuery(
     'MenteeSession',
     'bookingDate',
@@ -80,6 +172,7 @@ const salesOperationReport = (async (root, params, context) => {
   const menteeFirstSessionMatchQuery = {
     bookingDate: { $gte: new Date(fromDate), $lte: new Date(toDate) },
     'topic.typeId': firstTopicId,
+    source: { $ne: 'school' },
   };
   const menteeFirstSessions = await aggregateGroupByQuery(
     'MenteeSession',
@@ -90,10 +183,27 @@ const salesOperationReport = (async (root, params, context) => {
 
   // -----------------------------------------------------------------------------
 
+  const firstSessionAllottedCountMatchQuery = {
+    sessionStartDate: { $gte: new Date(fromDate), $lte: new Date(toDate) },
+    sessionStatus: 'allotted',
+    'topic.typeId': firstTopicId,
+    source: { $ne: 'school' },
+  };
+
+  const firstSessionAllotted = await aggregateGroupByQuery(
+    'MentorMenteeSession',
+    'sessionStartDate',
+    firstSessionAllottedCountMatchQuery,
+    'firstSessionAllottedCount',
+  );
+
+  // -----------------------------------------------------------------------------
+
   const firstSessionStartedCountMatchQuery = {
     sessionStartDate: { $gte: new Date(fromDate), $lte: new Date(toDate) },
     sessionStatus: 'started',
     'topic.typeId': firstTopicId,
+    source: { $ne: 'school' },
   };
 
   const firstSessionStarted = await aggregateGroupByQuery(
@@ -109,6 +219,7 @@ const salesOperationReport = (async (root, params, context) => {
     sessionStartDate: { $gte: new Date(fromDate), $lte: new Date(toDate) },
     sessionStatus: 'completed',
     'topic.typeId': firstTopicId,
+    source: { $ne: 'school' },
   };
 
   const firstSessionCompleted = await aggregateGroupByQuery(
@@ -124,6 +235,7 @@ const salesOperationReport = (async (root, params, context) => {
     sessionStartDate: { $gte: new Date(fromDate), $lte: new Date(toDate) },
     sessionStatus: 'completed',
     'topic.typeId': secondTopicId,
+    source: { $ne: 'school' },
   };
 
   const secondSessionCompleted = await aggregateGroupByQuery(
@@ -136,6 +248,7 @@ const salesOperationReport = (async (root, params, context) => {
   const sessionStartedCountMatchQuery = {
     sessionStartDate: { $gte: new Date(fromDate), $lte: new Date(toDate) },
     sessionStatus: 'started',
+    source: { $ne: 'school' },
   };
 
   const sessionStarted = await aggregateGroupByQuery(
@@ -148,6 +261,7 @@ const salesOperationReport = (async (root, params, context) => {
   const sessionCompletedCountMatchQuery = {
     sessionStartDate: { $gte: new Date(fromDate), $lte: new Date(toDate) },
     sessionStatus: 'completed',
+    source: { $ne: 'school' },
   };
 
   const sessionCompleted = await aggregateGroupByQuery(
@@ -159,9 +273,11 @@ const salesOperationReport = (async (root, params, context) => {
 
   // -----------------------------------------------------------------------------
   const finalArray = [];
-
+  const mentorMenteeSessionData = await getRescheduledReasonData(fromDate, toDate);
   const mergedArray = [
-    ...users, ...menteeSessions, ...menteeFirstSessions, ...firstSessionStarted, ...firstSessionCompleted, ...secondSessionCompleted, ...sessionStarted, ...sessionCompleted,
+    ...users, ...menteeSessions, ...menteeFirstSessions,
+    ...firstSessionAllotted, ...firstSessionStarted, ...firstSessionCompleted,
+    ...secondSessionCompleted, ...sessionStarted, ...sessionCompleted, ...mentorMenteeSessionData,
   ];
   if (mergedArray && mergedArray.length) {
     const groupedArray = groupBy(mergedArray, (doc) => doc._id);
@@ -174,6 +290,18 @@ const salesOperationReport = (async (root, params, context) => {
         });
         const dateParts = temp._id.split('-');
         temp.date = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
+        const {
+          firstSessionAllottedCount = 0,
+          firstSessionStartedCount = 0,
+          firstSessionCompletedCount = 0,
+          menteeFirstSessionBookedCount = 0,
+        } = temp;
+        temp.firstMentorMenteeSessionsCount = firstSessionAllottedCount + firstSessionStartedCount + firstSessionCompletedCount;
+        temp.firstUnAssignedSessions = menteeFirstSessionBookedCount - temp.firstMentorMenteeSessionsCount;
+        if (temp.firstMentorMenteeSessionsCount) {
+          temp.firstCompletedSessionsPercentage = (
+            (firstSessionCompletedCount / temp.firstMentorMenteeSessionsCount) * 100).toFixed(2);
+        }
         finalArray.push(temp);
       });
   }
