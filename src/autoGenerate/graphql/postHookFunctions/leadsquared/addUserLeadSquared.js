@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
 
-const createNewUserMethod = (params) => {
+const addUserLeadSquared = (params) => {
   const leadSquaredInput = {
     Phone: get(params, 'input.parentPhone.number'),
     mx_Student_Name: get(params, 'input.childName'),
@@ -25,4 +25,4 @@ const createNewUserMethod = (params) => {
   updateLeadsquared(leadSquaredInput, true);
 };
 
-export default createNewUserMethod;
+export default addUserLeadSquared;
