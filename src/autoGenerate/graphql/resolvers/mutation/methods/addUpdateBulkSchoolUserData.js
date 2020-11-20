@@ -230,6 +230,7 @@ const addUpdateBulkSchoolUserData = async (root, params, context) => {
             input: {
               bookingDate: convertDateFormat(bookingDate),
               [slot]: true,
+              source: 'school',
             },
           };
           const userId = get(result, 'parentProfile.children[0].user.id');
@@ -276,6 +277,7 @@ const addUpdateBulkSchoolUserData = async (root, params, context) => {
           const variables = {
             input: {
               sessionStatus: 'allotted',
+              source: 'school',
             },
           };
           await callAddMentorMenteeSession(
