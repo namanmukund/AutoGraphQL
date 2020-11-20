@@ -116,7 +116,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
   prevBookingDate,
   prevSlotTimeStringArray,
   user,
-  topic
+  topic,
 ) => {
   const slotNumber = slotTimeStringArray[0].split('slot')[1];
   const { startTime, endTime } = getSlotLabel(slotNumber);

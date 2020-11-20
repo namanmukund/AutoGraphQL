@@ -10,7 +10,6 @@ const setSessionCompletedLeadsquared = async (userInfo) => {
     ProspectStage: 'Session Taken',
     mx_Session_Taken_Date_Time: moment().utc().format('YYYY-MM-DD HH:mm:ss'),
   };
-  console.log(leadSquaredInput)
   updateLeadsquared(leadSquaredInput);
 };
 
