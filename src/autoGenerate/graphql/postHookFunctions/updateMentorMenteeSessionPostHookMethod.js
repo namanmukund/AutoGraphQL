@@ -47,11 +47,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       setSessionCompletedLeadsquared(userInfo);
     }
 
-    console.log('check 1');
     if (input && Object.keys(input).includes('hasRescheduled') && topic.order === 1) {
-      console.log('check 2');
-      // console.log(input,params)
-      console.log(get(userInfo, 'data.user.studentProfile.parents[0].user.phone.number'));
       updateMentorRescheduleLeadsquared(userInfo, input, params);
     }
   }

@@ -1,8 +1,11 @@
+import { get } from 'lodash';
 import { ADMIN, UMS_ADMIN, UMS_VIEWER } from '../../../../constants/roles';
 import getReferredByUserIdByAcceptedUserId from '../resolvers/mutation/user/utils/getReferredByUserIdByAcceptedUserId';
 import registrationVerificationAddUpdateUserCredit from './utils/registrationVerificationAddUpdateUserCredit';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import addSalesOperationActivityQuery from './utils/addSalesOperationActivityQuery';
+import { updateSalesOperationLeadsquared } from './leadsquared';
+import getMenteeInfo from './utils/getMenteeInfo';
 
 const allowedRoles = [ADMIN, UMS_ADMIN, UMS_VIEWER];
 const addSalesOperationPostHookMethod = async (input, params, mutationName, context) => {
@@ -42,6 +45,8 @@ const addSalesOperationPostHookMethod = async (input, params, mutationName, cont
       ),
     );
   }
+  const userInfo = await getMenteeInfo(get(input, 'client.typeId'));
+  updateSalesOperationLeadsquared(input.id, userInfo);
 };
 
 export default addSalesOperationPostHookMethod;

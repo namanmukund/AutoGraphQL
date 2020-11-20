@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import moment from 'moment';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
 
 const setSessionStartedLeadsquared = async (userInfo, topicInfo) => {

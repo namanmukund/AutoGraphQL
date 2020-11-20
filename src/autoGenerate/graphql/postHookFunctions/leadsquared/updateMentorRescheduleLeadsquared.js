@@ -18,7 +18,6 @@ const mentorMenteeSessionQuery = (userId) => `{
     hasRescheduled
     sessionCommentByMentor
     rescheduledDate
-    hasRescheduled
   }
 }`;
 

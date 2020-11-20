@@ -5,6 +5,7 @@ import rescheduleMenteeBookingLeadsquared from './rescheduleMenteeBookingLeadsqu
 import setSessionStartedLeadsquared from './setSessionStartedLeadsquared';
 import setSessionCompletedLeadsquared from './setSessionCompletedLeadsquared';
 import updateMentorRescheduleLeadsquared from './updateMentorRescheduleLeadsquared';
+import updateSalesOperationLeadsquared from './updateSalesOperationLeadsquared';
 
 export {
   addUserLeadSquared,
@@ -13,5 +14,6 @@ export {
   rescheduleMenteeBookingLeadsquared,
   setSessionStartedLeadsquared,
   setSessionCompletedLeadsquared,
-  updateMentorRescheduleLeadsquared
+  updateMentorRescheduleLeadsquared,
+  updateSalesOperationLeadsquared,
 };
