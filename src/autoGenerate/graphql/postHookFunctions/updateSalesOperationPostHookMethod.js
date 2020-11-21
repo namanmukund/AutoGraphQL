@@ -1,9 +1,12 @@
+import { get } from 'lodash';
 import { ADMIN, UMS_ADMIN, UMS_VIEWER } from '../../../../constants/roles';
 import getReferredByUserIdByAcceptedUserId from '../resolvers/mutation/user/utils/getReferredByUserIdByAcceptedUserId';
 import registrationVerificationAddUpdateUserCredit from './utils/registrationVerificationAddUpdateUserCredit';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import addSalesOperationActivityQuery from './utils/addSalesOperationActivityQuery';
 import isEqualDates from '../../../../utils/isEqualDates';
+import { updateSalesOperationLeadsquared } from './leadsquared';
+import getMenteeInfo from './utils/getMenteeInfo';
 
 const allowedRoles = [ADMIN, UMS_ADMIN, UMS_VIEWER];
 const updateSalesOperationPostHookMethod = async (input, params, mutationName, context) => {
@@ -77,6 +80,8 @@ const updateSalesOperationPostHookMethod = async (input, params, mutationName, c
       ),
     );
   }
+  const userInfo = await getMenteeInfo(get(input, 'client.typeId'));
+  updateSalesOperationLeadsquared(get(input, 'id'), userInfo);
 };
 
 export default updateSalesOperationPostHookMethod;

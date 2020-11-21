@@ -115,12 +115,14 @@ const extractMenteeSessionInfoAndSendEmail = async (
   slotTimeStringArray,
   prevBookingDate,
   prevSlotTimeStringArray,
+  user,
+  topic,
 ) => {
   const slotNumber = slotTimeStringArray[0].split('slot')[1];
   const { startTime, endTime } = getSlotLabel(slotNumber);
 
   const { user: { typeId: userId }, topic: { typeId: topicId } } = input;
-  const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId));
+  const userInfo = user || await callLocalGraphqlApi(menteeInfoQuery(userId));
   const menteeInfo = get(userInfo, 'data.user');
   const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
 
@@ -135,7 +137,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
     parentNumber: get(parentInfo, 'phone.number') || '',
     countryCode: get(parentInfo, 'phone.countryCode') || '',
   };
-  const topicInfo = await callLocalGraphqlApi(topicInfoQuery(topicId));
+  const topicInfo = topic || await callLocalGraphqlApi(topicInfoQuery(topicId));
   menteeObj.topicTitle = get(topicInfo, 'data.topic.title');
   const topicThumbnail = get(topicInfo, 'data.topic.thumbnailSmall.uri');
   if (topicThumbnail) {

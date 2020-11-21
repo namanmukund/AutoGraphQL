@@ -8,6 +8,9 @@ import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery
 import extractMenteeSessionInfoAndSendEmail from './utils/extractMenteeSessionInfoAndSendEmail';
 import isTrialSession from '../resolvers/utils/isTrialSession';
 import updateScheduleStatusOfMenteeSession from '../../../../utils/scheduleJobs/updateScheduleStatusOfMenteeSession';
+import getMenteeInfo from './utils/getMenteeInfo';
+import getTopicInfo from './utils/getTopicInfo';
+import rescheduleMenteeBookingLeadsquared from './leadsquared/rescheduleMenteeBookingLeadsquared';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const { previousDocument } = context;
@@ -27,7 +30,8 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
 
   const isTrial = await isTrialSession(input.topic.typeId);
   const { userCountryCode } = context;
-
+  const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
+  const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
   if (typeof isTrial === 'boolean' && isTrial && userCountryCode === '+91') {
     if (bookingDate && bookingDate.getTime() !== prevBookingDate.getTime()) {
       // -- decrease the availability slot of current availabilityDate
@@ -63,6 +67,8 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
       await updateScheduleStatusOfMenteeSession(menteeSessionId, 'todo');
     }
   }
+  // update booking time on leadsquared
+  rescheduleMenteeBookingLeadsquared(input, slotTimeStringArray, userInfo, topicInfo);
   // send email to mentor admin regarding the session
   await extractMenteeSessionInfoAndSendEmail(
     'update',
@@ -71,6 +77,8 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     slotTimeStringArray,
     prevBookingDate,
     prevSlotTimeStringArray,
+    userInfo,
+    topicInfo,
   );
 };
 
