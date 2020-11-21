@@ -6,6 +6,7 @@ import isTrialSession from '../resolvers/utils/isTrialSession';
 import deleteMenteeBookingLeadSquared from '../postHookFunctions/leadsquared/deleteMenteeBookingLeadSquared';
 import getMenteeInfo from '../postHookFunctions/utils/getMenteeInfo';
 import getTopicInfo from '../postHookFunctions/utils/getTopicInfo';
+import { byPassMenteeValidationApps } from '../../../../constants';
 
 const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   /*
@@ -17,9 +18,10 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const isTrial = await isTrialSession(input.topic.typeId);
   const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
-  const { userCountryCode } = context;
+  const { appName } = context;
 
-  if (typeof isTrial === 'boolean' && isTrial && userCountryCode === '+91') {
+  // if call is from backend we will not update the availability slots, same for paid sessions
+  if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
     await increaseParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
   }
   deleteMenteeBookingLeadSquared(userInfo, topicInfo);

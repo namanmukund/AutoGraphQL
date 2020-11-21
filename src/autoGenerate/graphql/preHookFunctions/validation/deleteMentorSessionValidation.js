@@ -4,6 +4,7 @@ import mentorSessionQuery from '../../graphqlQueries/mentorSessionQuery';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import { PastDateOrSlotError } from '../../../../../constants/errors/db';
+import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 
 const deleteMentorSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: mentorSessionId } = params;
@@ -25,6 +26,12 @@ const deleteMentorSessionValidation = async (params, mutationOrQueryName, contex
       throw new PastDateOrSlotError();
     }
   }
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+
+  const {
+    appName,
+  } = userAndAppInfo;
+  context.appName = appName;
 
   // eslint-disable-next-line no-param-reassign
   context.previousDocument = mentorSession;
