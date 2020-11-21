@@ -62,6 +62,7 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
     userIdFromContext,
     appName,
   } = userAndAppInfo;
+  context.appName = appName;
 
   if (
     !backendApps.includes(appName)
