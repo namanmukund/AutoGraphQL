@@ -25,7 +25,8 @@ import addSalesOperationPostHookMethod from './postHookFunctions/addSalesOperati
 import updateSalesOperationPostHookMethod from './postHookFunctions/updateSalesOperationPostHookMethod';
 import addUserPaymentInstallmentPostHookMethod from './postHookFunctions/addUserPaymentInstallmentPostHookMethod';
 import updateUserPaymentInstallmentPostHookMethod from './postHookFunctions/updateUserPaymentInstallmentPostHookMethod';
-import createNewUserMethod from './postHookFunctions/leadsquared/createNewUserMethod';
+import parentChildSignupPostHookMethod from './postHookFunctions/parentChildSignupPostHookMethod';
+import addMentorMenteeSessionPostHookMethod from './postHookFunctions/addMentorMenteeSessionPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -116,7 +117,7 @@ const posthook = async (input, mutationName, context, params) => {
       break;
     }
     case 'addMenteeSession': {
-      await addMenteeSessionPostHookMethod(input, mutationName, context);
+      await addMenteeSessionPostHookMethod(input, mutationName, context, params);
       break;
     }
     case 'updateMenteeSession': {
@@ -124,7 +125,7 @@ const posthook = async (input, mutationName, context, params) => {
       break;
     }
     case 'updateMentorMenteeSession': {
-      await updateMentorMenteeSessionPostHookMethod(input, mutationName, context);
+      await updateMentorMenteeSessionPostHookMethod(input, mutationName, context, params);
       break;
     }
     case 'deleteMenteeSession': {
@@ -148,7 +149,11 @@ const posthook = async (input, mutationName, context, params) => {
       break;
     }
     case 'parentChildSignUp': {
-      createNewUserMethod(params);
+      parentChildSignupPostHookMethod(input, params);
+      break;
+    }
+    case 'addMentorMenteeSession': {
+      addMentorMenteeSessionPostHookMethod(input, params, context);
       break;
     }
     default:
