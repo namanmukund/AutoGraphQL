@@ -20,6 +20,12 @@ const sessionRescheduledReasons = `
     otherReasonForReschedule: Boolean
 `;
 
+const internetSpeed = `
+  type InternetSpeed {
+   speed: Float
+   unit: InternetSpeedUnit
+ }`;
+
 const MentorMenteeSession = `
   type MentorMenteeSession @model {
     topic: Topic! @relation(name: "MentorMenteeSessionTopic", direction: "OneWay")
@@ -59,6 +65,7 @@ const MentorMenteeSession = `
     ${sessionRescheduledReasons}
     sessionCommentByMentor: String
     source: UserOriginSource @defaultValue(value: "website")
+    internetSpeed: InternetSpeed
 }`;
 
-export default [MentorMenteeSession];
+export default [MentorMenteeSession, internetSpeed];

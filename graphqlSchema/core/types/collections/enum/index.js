@@ -50,6 +50,7 @@ import TransactionalMessageType from './TransactionalMessageType';
 import SkillsLevel from './SkillsLevel';
 import CodingLanguageType from './CodingLanguageType';
 import UserOriginSource from './UserOriginSource';
+import InternetSpeedUnit from './InternetSpeedUnit';
 
 export default [
   Status,
@@ -105,4 +106,5 @@ export default [
   SkillsLevel,
   CodingLanguageType,
   UserOriginSource,
+  InternetSpeedUnit,
 ];
