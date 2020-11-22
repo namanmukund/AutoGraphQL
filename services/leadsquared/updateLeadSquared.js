@@ -4,6 +4,7 @@ import fetch from 'node-fetch';
 
 const LEAD_CREATE_ENDPOINT = '/LeadManagement.svc/Lead.Capture?';
 const LEAD_UPDATE_ENDPOINT = '/ProspectActivity.svc/CreateCustom?';
+const LEAD_GET_ENDPOINT = '/LeadManagement.svc/RetrieveLeadByPhoneNumber?';
 
 const LEAD_UPDATE_CODE = 99;
 
@@ -43,6 +44,17 @@ const logSheet = (Status, Data, Phone, error = '-') => {
 const updateSheet = async (leadSquaredParams = {}, create = false) => {
   const LEAD_ENDPOINT = create ? LEAD_CREATE_ENDPOINT : LEAD_UPDATE_ENDPOINT;
   if (process.env.NODE_ENV === 'production') {
+    if (!create) {
+      const res = await fetch(
+        process.env.LEAD_SQUARED_URL + LEAD_GET_ENDPOINT + queryString.stringify({
+          accessKey: process.env.LEAD_SQUARED_ACCESS_KEY,
+          secretKey: process.env.LEAD_SQUARED_SECRET_KEY,
+          phone: leadSquaredParams.Phone,
+        }),
+      );
+      const data = await res.json();
+      if (data.length === 0) return;
+    }
     fetch(
       process.env.LEAD_SQUARED_URL + LEAD_ENDPOINT + queryString.stringify({
         accessKey: process.env.LEAD_SQUARED_ACCESS_KEY,
