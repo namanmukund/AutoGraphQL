@@ -1,3 +1,3 @@
 import MentorMenteeSession from './MentorMenteeSession';
 
-export default MentorMenteeSession;
+export default [...MentorMenteeSession];
