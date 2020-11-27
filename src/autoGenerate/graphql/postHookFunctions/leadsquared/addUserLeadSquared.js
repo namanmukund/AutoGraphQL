@@ -22,6 +22,9 @@ const addUserLeadSquared = (params) => {
   if (get(params, 'input.utmContent')) {
     leadSquaredInput.mx_utm_content = get(params, 'input.utmContent');
   }
+  if (get(params, 'input.utmMedium')) {
+    leadSquaredInput.mx_utm_medium = get(params, 'input.utmMedium');
+  }
   updateLeadsquared(leadSquaredInput, true);
 };
 
