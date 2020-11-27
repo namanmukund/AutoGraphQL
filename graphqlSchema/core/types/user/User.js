@@ -74,6 +74,7 @@ const User = `
     utmCampaign: String
     utmTerm: String
     utmContent: String
+    utmMedium: String
     source: UserOriginSource @defaultValue(value: "website")
     ${affilateInfo}  
     ${socialInfo}

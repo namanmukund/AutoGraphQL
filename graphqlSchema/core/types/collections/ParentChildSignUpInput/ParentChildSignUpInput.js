@@ -17,6 +17,7 @@ const ParentChildSignUpInput = `
     utmCampaign: String
     utmTerm: String
     utmContent: String
+    utmMedium: String
   }
 `;
 

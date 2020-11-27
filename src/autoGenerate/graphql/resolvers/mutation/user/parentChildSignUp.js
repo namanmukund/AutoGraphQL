@@ -315,6 +315,7 @@ const parentChildSignUpMutationResolver = async (
     utmCampaign,
     utmTerm,
     utmContent,
+    utmMedium,
     schoolName,
   } = input;
   // check if parent exist in db
@@ -357,6 +358,7 @@ const parentChildSignUpMutationResolver = async (
       utmCampaign,
       utmTerm,
       utmContent,
+      utmMedium,
       source,
     };
 
@@ -397,6 +399,7 @@ const parentChildSignUpMutationResolver = async (
     utmCampaign,
     utmTerm,
     utmContent,
+    utmMedium,
   };
 
   // check if the child has been referred by a valid user
