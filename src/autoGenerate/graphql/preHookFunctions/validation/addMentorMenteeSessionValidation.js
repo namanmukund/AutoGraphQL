@@ -10,6 +10,7 @@ import {
 } from '../../../../../constants/errors/input';
 import { ConnectIdRequiredError, DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
+import getUserSource from './utils/getUserSource';
 
 // query to get mentor Sessions
 const mentorMenteeSessionsQuery = (menteeSessionConnectId, mentorSessionConnectId) => `
@@ -30,6 +31,10 @@ query{
   menteeSession(id:"${menteeSessionId}"){
     id
     bookingDate
+    user{
+      id
+      source
+    }
     topic{
       id
     }
@@ -97,6 +102,16 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
     });
   }
   validateMenteeStartSessionData(menteeSession, topicConnectId, params);
+  //update source in mentorMenteeSession
+  const source = get(menteeSession, 'user.source')
+  if (source) {
+    if (!get(params, 'input')) {
+      // eslint-disable-next-line no-param-reassign
+      params.input = {};
+    }
+    // eslint-disable-next-line no-param-reassign
+    params.input.source = source;
+  }
   return true;
 };
 

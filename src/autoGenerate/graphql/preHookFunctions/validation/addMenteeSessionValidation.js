@@ -11,6 +11,7 @@ import validateMenteeSessionInput from './utils/validateMenteeSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import isTrialSession from '../../resolvers/utils/isTrialSession';
+import getUserSource from './utils/getUserSource';
 
 // query to get mentee Sessions
 const getMenteeSessions = (userId, topicId) => `
@@ -115,6 +116,17 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
   const menteeSessions = get(getMenteeSessionsRes, 'data.menteeSessions');
   if (menteeSessions && menteeSessions.length) {
     throw new SimilarDocumentAlreadyExistError();
+  }
+
+  // update source in menteeSession
+  const source = await getUserSource(userId);
+  if (source) {
+    if (!get(params, 'input')) {
+      // eslint-disable-next-line no-param-reassign
+      params.input = {};
+    }
+    // eslint-disable-next-line no-param-reassign
+    params.input.source = source;
   }
   return true;
 };
