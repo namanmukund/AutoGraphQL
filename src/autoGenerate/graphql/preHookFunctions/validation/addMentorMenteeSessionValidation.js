@@ -5,7 +5,6 @@ import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import validateMentorMenteePermission from './utils/validateMentorMenteePermission';
 import {
-  InvalidSessionDateTimeError,
   SessionTopicAndTopicConnectIdMismatchError,
 } from '../../../../../constants/errors/input';
 import { ConnectIdRequiredError, DatabaseRecordNotFoundError } from '../../../../../constants/errors';
@@ -30,6 +29,10 @@ query{
   menteeSession(id:"${menteeSessionId}"){
     id
     bookingDate
+    user{
+      id
+      source
+    }
     topic{
       id
     }
@@ -97,6 +100,16 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
     });
   }
   validateMenteeStartSessionData(menteeSession, topicConnectId, params);
+  //update source in mentorMenteeSession
+  const source = get(menteeSession, 'user.source')
+  if (source) {
+    if (!get(params, 'input')) {
+      // eslint-disable-next-line no-param-reassign
+      params.input = {};
+    }
+    // eslint-disable-next-line no-param-reassign
+    params.input.source = source;
+  }
   return true;
 };
 
