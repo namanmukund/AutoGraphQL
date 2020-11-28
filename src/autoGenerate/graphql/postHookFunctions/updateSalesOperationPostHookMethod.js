@@ -7,6 +7,7 @@ import addSalesOperationActivityQuery from './utils/addSalesOperationActivityQue
 import isEqualDates from '../../../../utils/isEqualDates';
 import { updateSalesOperationLeadsquared } from './leadsquared';
 import getMenteeInfo from './utils/getMenteeInfo';
+import updateMentorMenteeSession from '../resolvers/query/scriptMethods/utils/updateMentorMenteeSession';
 
 const allowedRoles = [ADMIN, UMS_ADMIN, UMS_VIEWER];
 const updateSalesOperationPostHookMethod = async (input, params, mutationName, context) => {
@@ -37,6 +38,11 @@ const updateSalesOperationPostHookMethod = async (input, params, mutationName, c
         loggedByConnectId, input.id, 'leadStatus', leadStatus,
       ),
     );
+    // update leadStatus in MentorMenteeSession
+    const firstMentorMenteeSessionId = get(input, 'firstMentorMenteeSession.typeId');
+    if (firstMentorMenteeSessionId) {
+      await updateMentorMenteeSession(firstMentorMenteeSessionId, { leadStatus });
+    }
   }
   // case of update  leadStatus
   if (prevLeadStatus && leadStatus && (prevLeadStatus !== leadStatus)) {
@@ -45,6 +51,11 @@ const updateSalesOperationPostHookMethod = async (input, params, mutationName, c
         loggedByConnectId, input.id, 'leadStatus', leadStatus, prevLeadStatus,
       ),
     );
+    // update leadStatus in MentorMenteeSession
+    const firstMentorMenteeSessionId = get(input, 'firstMentorMenteeSession.typeId');
+    if (firstMentorMenteeSessionId) {
+      await updateMentorMenteeSession(firstMentorMenteeSessionId, { leadStatus });
+    }
   }
 
   // case of set nextSteps ---------------------------------------------------------------------------
