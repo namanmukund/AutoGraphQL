@@ -85,6 +85,7 @@ const SalesOperation = `
     firstMentorMenteeSession: MentorMenteeSession @relation(name:"SalesOperationFirstMentorMenteeSession")
     salesOperationLog: [SalesOperationLog] @relation(name:"SalesOperationLogSalesOperation")
     salesOperationActivities: [SalesOperationActivity] @relation(name:"SalesOperationActivitySalesOperation")
+    source: UserOriginSource
     ${unQualifiedLeadReasons}
     ${sessionRescheduledReasons}
     ${mentorPitch}

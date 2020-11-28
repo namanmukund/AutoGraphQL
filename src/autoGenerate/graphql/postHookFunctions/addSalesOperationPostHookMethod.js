@@ -6,6 +6,7 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import addSalesOperationActivityQuery from './utils/addSalesOperationActivityQuery';
 import { updateSalesOperationLeadsquared } from './leadsquared';
 import getMenteeInfo from './utils/getMenteeInfo';
+import updateMentorMenteeSession from '../resolvers/query/scriptMethods/utils/updateMentorMenteeSession';
 
 const allowedRoles = [ADMIN, UMS_ADMIN, UMS_VIEWER];
 const addSalesOperationPostHookMethod = async (input, params, mutationName, context) => {
@@ -30,6 +31,11 @@ const addSalesOperationPostHookMethod = async (input, params, mutationName, cont
         loggedByConnectId, input.id, 'leadStatus', leadStatus,
       ),
     );
+    // update leadStatus in MentorMenteeSession
+    const firstMentorMenteeSessionId = get(input, 'firstMentorMenteeSession.typeId');
+    if (firstMentorMenteeSessionId) {
+      await updateMentorMenteeSession(firstMentorMenteeSessionId, { leadStatus });
+    }
   }
   if (nextSteps) {
     await callLocalGraphqlApi(

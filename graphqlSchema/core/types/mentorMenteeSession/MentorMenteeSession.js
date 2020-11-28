@@ -66,6 +66,7 @@ const MentorMenteeSession = `
     sessionCommentByMentor: String
     source: UserOriginSource @defaultValue(value: "website")
     internetSpeed: InternetSpeed
+    leadStatus: LeadStatus @groupBy
 }`;
 
 export default [MentorMenteeSession, internetSpeed];
