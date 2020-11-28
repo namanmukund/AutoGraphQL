@@ -5,12 +5,10 @@ import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import validateMentorMenteePermission from './utils/validateMentorMenteePermission';
 import {
-  InvalidSessionDateTimeError,
   SessionTopicAndTopicConnectIdMismatchError,
 } from '../../../../../constants/errors/input';
 import { ConnectIdRequiredError, DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
-import getUserSource from './utils/getUserSource';
 
 // query to get mentor Sessions
 const mentorMenteeSessionsQuery = (menteeSessionConnectId, mentorSessionConnectId) => `
