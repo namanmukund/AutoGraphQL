@@ -43,6 +43,34 @@ query{
   }
 `;
 
+/* query to get userPaymentPlans */
+const userPaymentPlanQuery = (userPaymentPlanId) => `
+query {
+  userPaymentPlan(id:"${userPaymentPlanId}") {
+    id
+    userPaymentInstallments {
+      id
+      userPaymentPlan {
+        id
+      }
+      userPaymentLink {
+        id
+      }
+      amount
+      dueDate
+      paidDate
+      lastPaymentRequestedDate
+      paymentRequestedCount
+      status
+      isPaymentRequested
+      comment
+      createdAt
+      updatedAt
+    }
+  }
+}
+`;
+
 // query to add UserPaymentInstallment
 const addUserPaymentInstallment = (
   userId,
@@ -98,9 +126,11 @@ const addUserPaymentPlanPostHookMethod = async (input, params) => {
 
   const installmentsDueDate = getDueDates(dateOfEnrollment, sessionsPerMonth, installmentNumber);
   const amountPerInstallment = Math.ceil(finalSellingPrice / installmentNumber);
+
   // eslint-disable-next-line no-restricted-syntax
   for (const dueDate of installmentsDueDate) {
-    callLocalGraphqlApi(addUserPaymentInstallment(
+    // eslint-disable-next-line no-await-in-loop
+    await callLocalGraphqlApi(addUserPaymentInstallment(
       userId,
       userPaymentPlanId,
       linkConnectId,
@@ -108,6 +138,17 @@ const addUserPaymentPlanPostHookMethod = async (input, params) => {
       new Date(dueDate),
     ));
   }
+
+  // returning updated userPaymentInstallments
+  if (input && userPaymentPlanId) {
+    // getting updated Payment installments
+    const userPaymentPlansQueryRes = await callLocalGraphqlApi(userPaymentPlanQuery(userPaymentPlanId));
+    const userPaymentInstallments = get(userPaymentPlansQueryRes, 'data.userPaymentPlan.userPaymentInstallments', []);
+    // parsing userPaymentInstallments data to be returned in userPaymentPlan
+    /* eslint-disable no-param-reassign */
+    input.userPaymentInstallments = userPaymentInstallments;
+  }
+  return input;
 };
 
 export default addUserPaymentPlanPostHookMethod;
