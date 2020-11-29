@@ -27,6 +27,7 @@ import addUserPaymentInstallmentPostHookMethod from './postHookFunctions/addUser
 import updateUserPaymentInstallmentPostHookMethod from './postHookFunctions/updateUserPaymentInstallmentPostHookMethod';
 import parentChildSignupPostHookMethod from './postHookFunctions/parentChildSignupPostHookMethod';
 import addMentorMenteeSessionPostHookMethod from './postHookFunctions/addMentorMenteeSessionPostHookMethod';
+import addUserPaymentPlanPostHookMethod from './postHookFunctions/addUserPaymentPlanPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -154,6 +155,10 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'addMentorMenteeSession': {
       addMentorMenteeSessionPostHookMethod(input, params, context);
+      break;
+    }
+    case 'addUserPaymentPlan': {
+      await addUserPaymentPlanPostHookMethod(input, params, mutationName, context);
       break;
     }
     default:

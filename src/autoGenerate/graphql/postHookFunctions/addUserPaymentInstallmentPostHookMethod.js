@@ -10,7 +10,8 @@ import {
 } from '../../../../constants/errors';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { addZeroes } from './utils/addZeroesToANumber';
-import { sendEmailInvoiceToUser } from './utils/sendEmailInvoiceToUser';
+// import { sendEmailInvoiceToUser } from './utils/sendEmailInvoiceToUser';
+import updateUserEnrollmentTypeToPro from './utils/updateUserEnrollmentTypeToPro';
 
 /* query to get userPaymentInstallment */
 const userPaymentInstallmentQuery = (userId, userPaymentPlanId) => `
@@ -85,18 +86,20 @@ query {
 }
 `;
 
-const getSuffix = (i) => {
-  switch (i) {
-    case 1:
-      return 'st';
-    case 2:
-      return 'nd';
-    case 3:
-      return 'rd';
-    default:
-      return 'th';
-  }
-};
+/*
+  const getSuffix = (i) => {
+    switch (i) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  };
+*/
 
 /*
   This method sends invoice on mail to users depending upon the intallments and
@@ -182,27 +185,36 @@ const addUserPaymentInstallmentPostHookMethod = async (input, params) => {
 
   const status = get(userPaymentInstallmentInfo, 'status', pending);
 
+  // update userTopicCurrentComponentStatus to pro if user status is paid
+  if (status === paid && userId && payload) {
+    updateUserEnrollmentTypeToPro(userId);
+  }
+
+  // commented below code and keeping it for refernce. Will be deleted eventually
+
   // Sending mails on basis of if there are more than 1 totalNumberOfInstallments
   // and if the status is paid, we will send the invoice otherwise a reminder mail
-  let subject = 'Payment Receipt from Tekie';
-  if (status === paid) {
-    if (totalNumberOfInstallments > 1) {
-      subject = `${payload.installmentNumber}${getSuffix(payload.installmentNumber)} Installment Payment Receipt from Tekie`;
-      sendEmailInvoiceToUser(payload, 'paymentInvoiceWithInstallmentEmailTemplate', subject);
+  /*
+    let subject = 'Payment Receipt from Tekie';
+    if (status === paid) {
+      if (totalNumberOfInstallments > 1) {
+        subject = `${payload.installmentNumber}${getSuffix(payload.installmentNumber)} Installment Payment Receipt from Tekie`;
+        sendEmailInvoiceToUser(payload, 'paymentInvoiceWithInstallmentEmailTemplate', subject);
+      } else {
+        sendEmailInvoiceToUser(payload, 'paymentInvoiceWithoutInstallmentEmailTemplate', subject);
+      }
+    } else if (totalNumberOfInstallments > 1) {
+      if (payload.installmentNumber) {
+        subject = `${payload.installmentNumber}${getSuffix(payload.installmentNumber)} Installment Reminder from Tekie`;
+      } else {
+        subject = 'Installment Reminder from Tekie';
+      }
+      sendEmailInvoiceToUser(payload, 'paymentReminderWithInstallmentEmailTemplate', subject);
     } else {
-      sendEmailInvoiceToUser(payload, 'paymentInvoiceWithoutInstallmentEmailTemplate', subject);
+      subject = 'Payment Reminder from Tekie';
+      sendEmailInvoiceToUser(payload, 'paymentReminderWithoutInstallmentEmailTemplate', subject);
     }
-  } else if (totalNumberOfInstallments > 1) {
-    if (payload.installmentNumber) {
-      subject = `${payload.installmentNumber}${getSuffix(payload.installmentNumber)} Installment Reminder from Tekie`;
-    } else {
-      subject = 'Installment Reminder from Tekie';
-    }
-    sendEmailInvoiceToUser(payload, 'paymentReminderWithInstallmentEmailTemplate', subject);
-  } else {
-    subject = 'Payment Reminder from Tekie';
-    sendEmailInvoiceToUser(payload, 'paymentReminderWithoutInstallmentEmailTemplate', subject);
-  }
+  */
 };
 
 export default addUserPaymentInstallmentPostHookMethod;
