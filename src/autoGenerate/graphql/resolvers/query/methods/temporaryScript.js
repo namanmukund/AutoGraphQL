@@ -1,5 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import updateSourceInSalesOperation from '../scriptMethods/updateSourceInSalesOperation';
+import addPaymentIntallmentsOfPastUsers from '../scriptMethods/addPaymentIntallmentsOfPastUsers';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -10,7 +10,8 @@ const temporaryScript = (async (root, params, context) => {
   // await updateUserInPaymentPlanAndPaymentInstallment();
   // await migrateRescheduledReasonsToMentorMenteeSession();
   // await updateLeadStatusInMMSFromSalesOperation();
-  await updateSourceInSalesOperation();
+  // await updateSourceInSalesOperation();
+  await addPaymentIntallmentsOfPastUsers();
   return {
     result: true,
   };

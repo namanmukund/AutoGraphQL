@@ -11,6 +11,7 @@ import {
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { addZeroes } from './utils/addZeroesToANumber';
 import { sendEmailInvoiceToUser } from './utils/sendEmailInvoiceToUser';
+import updateUserEnrollmentTypeToPro from './utils/updateUserEnrollmentTypeToPro';
 
 /* query to get userPaymentInstallment */
 const userPaymentInstallmentQuery = (userPaymentInstallmentId) => `
@@ -117,6 +118,7 @@ const updateUserPaymentInstallmentPostHookMethod = async (input, params) => {
         },
       });
     }
+    const userId = get(userPaymentInstallmentInfo, 'user.id', '');
     const payload = {};
     // get firstName, email, phone from user object based on it's role
     payload.firstName = get(userPaymentInstallmentInfo, 'user.name', '');
@@ -179,6 +181,11 @@ const updateUserPaymentInstallmentPostHookMethod = async (input, params) => {
     payload.amountToPay = addZeroes(amountToPay);
 
     const status = get(userPaymentInstallmentInfo, 'status', pending);
+
+    // update userTopicCurrentComponentStatus to pro if user status is paid
+    if (status === paid && userId) {
+      updateUserEnrollmentTypeToPro(userId);
+    }
 
     // Sending mails on basis of if there are more than 1 totalNumberOfInstallments
     // and if the status is paid, we will send the invoice otherwise a reminder mail
