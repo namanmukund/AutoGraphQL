@@ -108,9 +108,6 @@ const addUserPaymentInstallment = (
     `;
 
 const addPaymentIntallmentsOfPastUsers = async () => {
-  let totalPaidUsers = 0;
-  let totalPaidUsersWithPaymentPlan = 0;
-  let totalPiadUsersWithoutAllInstallments = 0;
   const userPaymentLinksQueryRes = await callLocalGraphqlApi(userPaymentLinksQuery());
   const paymentLinks = get(userPaymentLinksQueryRes, 'data.userPaymentLinks');
   let linkConnectId = '';
@@ -124,9 +121,7 @@ const addPaymentIntallmentsOfPastUsers = async () => {
   const salesOperationsArray = get(paymentPlans, 'data.salesOperations', []);
 
   salesOperationsArray.forEach(async (saleOperation) => {
-    totalPaidUsers += 1;
     if (saleOperation.userPaymentPlan) {
-      totalPaidUsersWithPaymentPlan += 1;
       const userPaymentPlan = saleOperation.userPaymentPlan;
       const {
         id: userPaymentPlanId,
@@ -152,14 +147,8 @@ const addPaymentIntallmentsOfPastUsers = async () => {
 
         // ideally this should be 0 but to avoid corner cases taking it as 1
         if (totalRemainingAmount > 1) {
-          totalPiadUsersWithoutAllInstallments += 1;
           const installmentsDueDate = getDueDates(dateOfEnrollment, sessionsPerMonth, installmentNumber, totalNumberOFInstallmentDocsAlreadyPresent);
           const amountPerInstallment = Math.ceil(totalRemainingAmount / totalPaymentInstallmentDocToBeCreated);
-          console.log('------------------------------------userId', userId);
-          console.log('------------------------------------userPaymentPlanId', userPaymentPlanId);
-          console.log('------------------------------------amountPerInstallment', amountPerInstallment);
-          console.log('------------------------------------numberOfDocsAdded', installmentsDueDate.length);
-
           // eslint-disable-next-line no-restricted-syntax
           for (const dueDate of installmentsDueDate) {
             // eslint-disable-next-line no-await-in-loop
@@ -175,9 +164,6 @@ const addPaymentIntallmentsOfPastUsers = async () => {
       }
     }
   });
-  console.log('------------------------------------totalPaidUsers', totalPaidUsers);
-  console.log('------------------------------------totalPaidUsersWithPaymentPlan', totalPaidUsersWithPaymentPlan);
-  console.log('------------------------------------totalPiadUsersWithoutAllInstallments', totalPiadUsersWithoutAllInstallments);
 };
 
 export default addPaymentIntallmentsOfPastUsers;
