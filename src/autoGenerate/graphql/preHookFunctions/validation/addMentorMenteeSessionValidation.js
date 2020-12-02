@@ -110,6 +110,9 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
     // eslint-disable-next-line no-param-reassign
     params.input.source = source;
   }
+
+  context.menteeSession = menteeSession;
+  context.mentorSessionConnectId = mentorSessionConnectId;
   return true;
 };
 
