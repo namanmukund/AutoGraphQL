@@ -47,6 +47,12 @@ const getTotalAmountCollected = (async (root, params, context) => {
     // closing parenthesis for firstMentorMenteeSession_some
     filter += ']}}';
 
+    if (input.isSchool) {
+      filter += '{source: school}, ';
+    } else {
+      filter += '{source_not: school}, ';
+    }
+
     if (input.mentorName) {
       filter += `{allottedMentor_some: {name_contains: "${input.mentorName}"}}, `;
     }

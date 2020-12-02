@@ -9,6 +9,7 @@ const TotalAmountCollectedInput = `
     oneToThree: Boolean
     installmentType: InstallmentType
     installmentNumber: Int
+    isSchool: Boolean @defaultValue(value: "false")
   }`;
 
 export default [TotalAmountCollectedInput];
