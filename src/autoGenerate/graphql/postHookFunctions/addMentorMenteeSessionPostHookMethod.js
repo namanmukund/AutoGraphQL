@@ -7,8 +7,14 @@ import extractMentorMenteeSessionAndSendMessage from './utils/extractMentorMente
 
 const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
   // add user on leadsquared
-  const { currentUser, menteeSession, mentorSessionConnectId } = context;
-  const userInfo = await getMenteeInfo(get(currentUser, 'id'));
+  const { menteeSession, mentorSessionConnectId } = context;
+  const {
+    id: menteeSessionId,
+    user,
+    bookingDate,
+    ...slots
+  } = menteeSession;
+  const userInfo = await getMenteeInfo(get(user, 'id'));
   const topicInfo = await getTopicInfo(get(params, 'topicConnectId'));
 
   if (get(input, 'sessionStatus') === 'started') {
@@ -17,15 +23,8 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
 
   // send message to mentor regarding the session
   if (get(topicInfo, 'data.topic.order') === 1) {
-    const {
-      id: menteeSessionId,
-      user,
-      bookingDate,
-      ...slots
-    } = menteeSession;
-    const menteeInfo = await getMenteeInfo(get(user, 'id'));
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-    await extractMentorMenteeSessionAndSendMessage(bookingDate, slotTimeStringArray, mentorSessionConnectId, menteeInfo, topicInfo);
+    await extractMentorMenteeSessionAndSendMessage(bookingDate, slotTimeStringArray, mentorSessionConnectId, userInfo, topicInfo);
   }
 };
 
