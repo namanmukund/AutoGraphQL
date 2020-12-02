@@ -1,6 +1,7 @@
 const transactionalMessageBody = {
   bookingConfirmation: 'oct5_trial_booked_confirmation',
   sessionReminder: 'oct19_class_reminder',
+  mentorSessionNotification: 'mentor_notification',
   sendSessionLink: {
     emailTemplate: 'sendSessionLink',
     subject: 'Tekie - Meeting link for free coding session',
