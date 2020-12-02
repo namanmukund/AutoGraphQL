@@ -26,6 +26,7 @@ const Product = `
     type: ProductType! @defaultValue(value: "oneToOne")
     userRole: UserRole! @defaultValue(value: "selfLearner")
     discounts: [Discount] @relation(name: "ProductDiscount")
+    isDemoPack: Boolean @defaultValue(value: "false")
   }
 `;
 
