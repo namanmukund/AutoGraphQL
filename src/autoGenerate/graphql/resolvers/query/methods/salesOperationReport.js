@@ -31,6 +31,7 @@ const mentorMenteeSessions = async (fromDate, toDate) => {
   }orderBy:sessionStartDate_DESC){
     id
     sessionStartDate
+    hasRescheduled
     zoomIssue
     internetIssue
     laptopIssue
@@ -75,11 +76,31 @@ const getTrueRescheduledField = (obj) => {
 const getRescheduledReasonData = async (fromDate, toDate) => {
   const mentorMenteeSessionsData = await mentorMenteeSessions(fromDate, toDate);
   const docsArray = [];
+  const hasReScheduledArray = [];
   mentorMenteeSessionsData.forEach((obj) => {
-    const { id, sessionStartDate, ...rest } = obj;
+    const {
+      id, sessionStartDate, hasRescheduled, ...rest
+    } = obj;
     const modifiedDate = isoToMMDDYYYY(sessionStartDate);
     const fieldName = getTrueRescheduledField(rest);
     const index = findIndex(docsArray, ['_id', modifiedDate]);
+    if (hasRescheduled) {
+      if (index !== -1) {
+        // update
+        if (hasReScheduledArray[index].hasRescheduled) {
+          // eslint-disable-next-line operator-assignment
+          hasReScheduledArray[index].hasRescheduled = hasReScheduledArray[index].hasRescheduled + 1;
+        } else {
+          hasReScheduledArray[index].hasRescheduled = 1;
+        }
+      } else {
+        // add
+        hasReScheduledArray.push({
+          _id: modifiedDate,
+          hasRescheduled: 1,
+        });
+      }
+    }
     if (fieldName) {
       if (index !== -1) {
         // update
@@ -98,7 +119,19 @@ const getRescheduledReasonData = async (fromDate, toDate) => {
       }
     }
   });
-  return docsArray;
+  const finalArray = [];
+  hasReScheduledArray.forEach((doc) => {
+    const i = findIndex(docsArray, { _id: doc._id });
+    if (i !== -1) {
+      finalArray.push({
+        ...doc,
+        ...docsArray[i],
+      });
+    } else {
+      finalArray.push(doc);
+    }
+  });
+  return finalArray;
 };
 
 const aggregateGroupByQuery = (
@@ -160,6 +193,7 @@ const salesOperationReport = (async (root, params, context) => {
     },
     source: { $ne: 'school' },
   };
+
   const menteeSessions = await aggregateGroupByQuery(
     'MenteeSession',
     'bookingDate',
