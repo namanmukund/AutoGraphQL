@@ -14,6 +14,7 @@ const SalesOperationReport = `
     secondSessionCompletedCount: Int
     allSessionsStartedCount: Int
     allSessionsCompletedCount: Int
+    hasRescheduled: Int
     zoomIssue: Int
     internetIssue: Int
     laptopIssue: Int
