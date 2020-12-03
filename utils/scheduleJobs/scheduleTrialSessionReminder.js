@@ -57,6 +57,8 @@ const getMentorMenteeSession = async (menteeSessionId) => {
   return get(res, 'data.mentorMenteeSessions[0]');
 };
 const scheduleTrialSessionReminder = async () => {
+  // eslint-disable-next-line no-console
+  console.log('scheduleTrialSessionReminder called at: ', new Date());
   const dt = new Date().setHours(0, 0, 0, 0);
   const parsedDate = new Date(dt).toISOString();
   const hourValue = new Date().getHours();
