@@ -24,6 +24,8 @@ db.on('error', (err) => {
   if (process.env.NODE_ENV === 'production') {
     // eslint-disable-next-line no-unused-vars
     const rand = getRandomNumber(20, 60);
+    // eslint-disable-next-line no-console
+    console.log('Scheduler timed at ', rand, ' interval');
     const scheduleConfig = `*/${rand} * * * *`;
     // eslint-disable-next-line no-unused-vars
     const j = schedule.scheduleJob(scheduleConfig, async () => {
