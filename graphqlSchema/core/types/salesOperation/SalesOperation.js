@@ -37,7 +37,7 @@ const mentorPitch = `
     oneToOne: Boolean
     oneToTwo: Boolean
     oneToThree: Boolean
-    leadStatus: LeadStatus @groupBy
+    leadStatus: LeadStatus @groupBy @defaultValue(value: "unassigned")
     nextSteps: NextStep
     otherReasonForNextStep: String
     nextCallOn: Date
@@ -86,6 +86,7 @@ const SalesOperation = `
     salesOperationLog: [SalesOperationLog] @relation(name:"SalesOperationLogSalesOperation")
     salesOperationActivities: [SalesOperationActivity] @relation(name:"SalesOperationActivitySalesOperation")
     source: UserOriginSource
+    enrollmentType: EnrollmentType @defaultValue(value: "free")
     ${unQualifiedLeadReasons}
     ${sessionRescheduledReasons}
     ${mentorPitch}

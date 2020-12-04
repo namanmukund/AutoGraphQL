@@ -6,6 +6,7 @@ const LeadStatus = `
     lost
     won
     unfit
+    unassigned
   }`;
 
 export default LeadStatus;
