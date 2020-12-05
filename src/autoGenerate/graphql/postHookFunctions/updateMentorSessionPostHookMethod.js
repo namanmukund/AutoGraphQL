@@ -4,6 +4,7 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import availableSlotsQuery from '../graphqlQueries/availableSlotsQuery';
 import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery';
 import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
+import { byPassMenteeValidationApps } from '../../../../constants';
 
 const updateMentorSessionPostHookMethod = async (input, mutationName, context) => {
   const { sessionType, availabilityDate, ...slots } = input;
@@ -11,7 +12,13 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
     return true;
   }
 
-  const { previousDocument } = context;
+  const { previousDocument, appName } = context;
+
+  // don't increase the availability slot if it is done through backend
+  if (byPassMenteeValidationApps.includes(appName)) {
+    return true;
+  }
+
   const { availabilityDate: prevAvailabilityDate, ...prevSlots } = previousDocument;
   const prevSlotTimeStringArray = getSelectedSlotsStringArray(prevSlots);
 

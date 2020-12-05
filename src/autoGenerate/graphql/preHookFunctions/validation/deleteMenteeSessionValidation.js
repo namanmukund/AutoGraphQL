@@ -4,6 +4,7 @@ import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import { PastDateOrSlotError } from '../../../../../constants/errors/db';
 import menteeSessionQuery from '../../graphqlQueries/menteeSessionQuery';
+import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 
 const deleteMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: menteeSessionId } = params;
@@ -14,9 +15,15 @@ const deleteMenteeSessionValidation = async (params, mutationOrQueryName, contex
     throw new DatabaseRecordNotFoundError();
   }
 
-  // get user country code
-  const userCountryCode = get(menteeSessionData, 'data.menteeSession.user.studentProfile.parents[0].user.phone.countryCode');
-  context.userCountryCode = userCountryCode;
+  /*
+  Calling method to get app name, we will skip validation if it is called from backend
+  */
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+  const {
+    appName,
+  } = userAndAppInfo;
+
+  context.appName = appName;
 
   const { bookingDate, ...slots } = menteeSession;
   const slotTimeArray = getSelectedSlotsTime(slots);

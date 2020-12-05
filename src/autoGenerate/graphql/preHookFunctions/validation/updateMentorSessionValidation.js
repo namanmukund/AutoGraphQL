@@ -3,6 +3,7 @@ import validateMentorSessionInput from './utils/validateMentorSessionInput';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import mentorSessionQuery from '../../graphqlQueries/mentorSessionQuery';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
+import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 
 const updateMentorSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: mentorSessionId } = params;
@@ -12,6 +13,13 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
     throw new DatabaseRecordNotFoundError();
   }
   validateMentorSessionInput(params, mentorSession);
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+
+  const {
+    appName,
+  } = userAndAppInfo;
+  context.appName = appName;
+
   // eslint-disable-next-line no-param-reassign
   context.previousDocument = mentorSession;
   return true;

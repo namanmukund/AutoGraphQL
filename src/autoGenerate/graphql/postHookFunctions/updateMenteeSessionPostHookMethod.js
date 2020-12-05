@@ -11,6 +11,7 @@ import updateScheduleStatusOfMenteeSession from '../../../../utils/scheduleJobs/
 import getMenteeInfo from './utils/getMenteeInfo';
 import getTopicInfo from './utils/getTopicInfo';
 import rescheduleMenteeBookingLeadsquared from './leadsquared/rescheduleMenteeBookingLeadsquared';
+import { byPassMenteeValidationApps } from '../../../../constants';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const { previousDocument } = context;
@@ -29,10 +30,11 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
  */
 
   const isTrial = await isTrialSession(input.topic.typeId);
-  const { userCountryCode } = context;
+  const { appName } = context;
   const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
-  if (typeof isTrial === 'boolean' && isTrial && userCountryCode === '+91') {
+  // if call is from backend we will not update the availability slots, same for paid sessions
+  if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
     if (bookingDate && bookingDate.getTime() !== prevBookingDate.getTime()) {
       // -- decrease the availability slot of current availabilityDate
       await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
