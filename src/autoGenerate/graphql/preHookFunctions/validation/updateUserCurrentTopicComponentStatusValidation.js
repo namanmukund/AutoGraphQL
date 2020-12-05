@@ -20,6 +20,9 @@ const userCurrentTopicComponentStatusQuery = (userCurrentTopicComponentStatusId)
   query{
     userCurrentTopicComponentStatus(id:"${userCurrentTopicComponentStatusId}"){
       id
+      user{
+        id
+      }
       currentTopic{
         id
         title
@@ -31,7 +34,7 @@ const userCurrentTopicComponentStatusQuery = (userCurrentTopicComponentStatusId)
 
 // pre hook contains logic to check if passed topic's order is not less than already present in
 // user current topic component status
-const updateUserCurrentTopicComponentStatusValidation = async (params) => {
+const updateUserCurrentTopicComponentStatusValidation = async (params, context) => {
   const { id: userCurrentTopicComponentStatusId } = params;
   const { currentTopicConnectId: topicId } = params;
   if (!userCurrentTopicComponentStatusId) {
@@ -42,13 +45,13 @@ const updateUserCurrentTopicComponentStatusValidation = async (params) => {
   This condtion is placed to check if user is trying to update componentType and not topic
   In that case this validation will not get fired
   */
+  const userCurrentTopicComponentStatusData = await callLocalGraphqlApi(
+    userCurrentTopicComponentStatusQuery(userCurrentTopicComponentStatusId),
+  );
   if (topicId) {
     const topicData = await callLocalGraphqlApi(topicQuery(topicId));
     const topicOrder = get(topicData, 'data.topic.order');
     // Fetching userCurrentTopicComponentStatus to get order of current topic
-    const userCurrentTopicComponentStatusData = await callLocalGraphqlApi(
-      userCurrentTopicComponentStatusQuery(userCurrentTopicComponentStatusId),
-    );
     const userCurrentTopicComponentTopicOrder = get(
       userCurrentTopicComponentStatusData,
       'data.userCurrentTopicComponentStatus.currentTopic.order',
@@ -60,6 +63,12 @@ const updateUserCurrentTopicComponentStatusValidation = async (params) => {
       throw new InvalidTopicPassedInCurrentTopicComponent();
     }
   }
+  const userId = get(
+    userCurrentTopicComponentStatusData,
+    'data.userCurrentTopicComponentStatus.user.id',
+  );
+  context.userId = userId;
+
   return true;
 };
 
