@@ -4,13 +4,9 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 const salesOperationQuery = () => `
 query{
   salesOperations(
-    filter:{
-      and:[
-        {
-          createdAt_lte:"2020-11-30"
-        }
-      ]
-    }
+    first: 1000,
+    skip: 0,
+     orderBy: createdAt_DESC
   ){
     id
   }
@@ -38,12 +34,15 @@ const addDefaultEnrollmentTypeInSalesOperation = async () => {
   let count = 0;
   salesOperationsArray.forEach(async (saleOperation) => {
     if (saleOperation.id) {
+      // eslint-disable-next-line no-console
+      console.log('------------------------------saleOperation.id', saleOperation.id);
       count += 1;
       await callLocalGraphqlApi(updateUserSalesOperation(
         saleOperation.id,
       ));
     }
   });
+  // eslint-disable-next-line no-console
   console.log('------------------------------count', count);
 };
 

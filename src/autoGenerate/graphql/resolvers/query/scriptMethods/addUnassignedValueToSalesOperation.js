@@ -44,6 +44,7 @@ const addUnassignedValueToSalesOperation = async () => {
       ));
     }
   });
+  // eslint-disable-next-line no-console
   console.log('------------------------------count', count);
 };
 
