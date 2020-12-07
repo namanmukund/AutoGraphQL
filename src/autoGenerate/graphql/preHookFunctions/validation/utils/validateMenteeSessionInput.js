@@ -38,19 +38,13 @@ const validateMenteeSessionInput = async (params, context) => {
     PRE_BOOKING_HOUR_LIMIT,
   );
 
-  const { isTrialSession, userCountryCode, appName } = context;
+  const { isTrialSession, appName } = context;
   if (typeof isTrialSession === 'boolean' && !isTrialSession) {
     return true;
   }
 
   // by pass validation if call is from backend
   if (byPassMenteeValidationApps.includes(appName)) {
-    return true;
-  }
-
-  // temporary code to allow users to book multiple slots at a time for outside India
-  // we would have to eventually change it on role=school etc.
-  if (userCountryCode && userCountryCode !== '+91') {
     return true;
   }
 

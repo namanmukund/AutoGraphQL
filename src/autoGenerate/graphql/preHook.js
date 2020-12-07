@@ -258,7 +258,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'updateUserCurrentTopicComponentStatus': {
-      await updateUserCurrentTopicComponentStatusValidation(params);
+      await updateUserCurrentTopicComponentStatusValidation(params, context);
       break;
     }
     case 'userCourseSyllabus': {

@@ -4,12 +4,20 @@ import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import availableSlotsQuery from '../graphqlQueries/availableSlotsQuery';
 import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery';
 import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
+import { byPassMenteeValidationApps } from '../../../../constants';
 
 const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
   const { sessionType, availabilityDate, ...slots } = input;
   if (sessionType && sessionType === 'paid') {
     return true;
   }
+
+  // don't increase the availability slot if it is done through backend
+  const { appName } = context;
+  if (byPassMenteeValidationApps.includes(appName)) {
+    return true;
+  }
+
   const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(availabilityDate));
   const availableSlots = get(availableSlotsRes, 'data.availableSlots');
 

@@ -3,6 +3,7 @@ import validateMenteeSessionInput from './utils/validateMenteeSessionInput';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import menteeSessionQuery from '../../graphqlQueries/menteeSessionQuery';
+import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 
 const updateMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: menteeSessionId } = params;
@@ -13,9 +14,15 @@ const updateMenteeSessionValidation = async (params, mutationOrQueryName, contex
   }
   context.isTrialSession = get(menteeSession, 'topic.order') === 1;
 
-  // get user country code
-  const userCountryCode = get(menteeSessionData, 'data.menteeSession.user.studentProfile.parents[0].user.phone.countryCode');
-  context.userCountryCode = userCountryCode;
+  /*
+  Calling method to get app name, we will skip validation if it is called from backend
+  */
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+  const {
+    appName,
+  } = userAndAppInfo;
+
+  context.appName = appName;
 
   // validate input
   await validateMenteeSessionInput(params, context);

@@ -44,6 +44,12 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       const { trialTaken } = referralCredits[1];
       await updateReferrerCreditsPostSessionOrUserPayment(currentUser.id, trialTaken, context, variables, TRIAL_TAKEN_FROM_REFERRAL);
       // set session completed on leadsquared
+    }
+
+    if (
+      (prevSessionStatus !== 'completed' && (input && input.sessionStatus && input.sessionStatus === 'completed'))
+      && topic.order === 1
+    ) {
       setSessionCompletedLeadsquared(userInfo);
     }
 
