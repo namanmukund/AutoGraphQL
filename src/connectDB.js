@@ -24,9 +24,12 @@ db.on('error', (err) => {
   if (process.env.NODE_ENV === 'production') {
     // eslint-disable-next-line no-unused-vars
     const rand = getRandomNumber(20, 60);
-    const scheduleConfig = `*/${rand} * * * *`;
+    const rule = new schedule.RecurrenceRule();
+    rule.minute = rand;
+    // eslint-disable-next-line no-console
+    console.log('Scheduler timed at ', rand, ' interval');
     // eslint-disable-next-line no-unused-vars
-    const j = schedule.scheduleJob(scheduleConfig, async () => {
+    const j = schedule.scheduleJob(rule, async () => {
       // eslint-disable-next-line no-console
       await scheduleTrialSessionReminder();
     });
