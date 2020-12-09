@@ -24,6 +24,9 @@ import getNumberOfReferralsOfAUser from './utils/getNumberOfReferralsOfAUser';
 import getReferredByUserIdByReferralCode from './utils/getReferredByUserIdByReferralCode';
 import addUserCredit from './utils/addUserCredit';
 import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
+import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
+import addUserCurrentTopicComponentStatus
+  from '../../../../utils/addUserCurrentTopicComponentStatus';
 
 const USER_TYPE = 'User';
 const validateParentChildSignUpInput = (input) => {
@@ -504,6 +507,25 @@ const parentChildSignUpMutationResolver = async (
   if (input && input.schoolName) {
     await updateSchoolDataOfAStudent(input, studentProfileId);
   }
+
+  /*
+    logic to add current user topic component status
+    the first published topic and first published learning objective corresponding to that topic
+    will get populated in the document
+    */
+  const topic = await getFirstTopicAndLearningObjective();
+  const firstTopicId = get(topic, 'data.topics[0].id');
+  const firstLearningObjectiveId = get(topic, 'data.topics[0].learningObjectives[0].id');
+  // we are not throwing any error here because it will seem that sign up failed if
+  // firstTopicId and firstLearningObjectiveId is not present. Just adding log
+  if (firstTopicId && firstLearningObjectiveId) {
+    await addUserCurrentTopicComponentStatus(
+      childUserId, firstTopicId, firstLearningObjectiveId,
+    );
+  } else {
+    log('Failed to get first published topic or first published learning objective corresponding to it in parentChildSignUp');
+  }
+
   return userTokenData;
 };
 
