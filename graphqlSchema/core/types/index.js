@@ -60,6 +60,7 @@ import MarketingResource from './marketingResource';
 import ScheduleJob from './scheduleJob';
 import MentorProfile from './mentorProfile';
 import TotalAmountCollected from './totalAmountCollected';
+import UserSavedCode from './userSavedCode';
 
 export default [
   ...User,
@@ -124,4 +125,5 @@ export default [
   ...ScheduleJob,
   ...MentorProfile,
   ...TotalAmountCollected,
+  ...UserSavedCode,
 ];
