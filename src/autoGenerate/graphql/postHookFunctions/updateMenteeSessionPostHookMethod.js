@@ -66,8 +66,8 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
         };
         await callLocalGraphqlApi(updateAvailableSlotQuery(availableSlotId), context, variables);
       }
-      await updateScheduleStatusOfMenteeSession(menteeSessionId, 'todo');
     }
+    await updateScheduleStatusOfMenteeSession(menteeSessionId, 'todo');
   }
   // update booking time on leadsquared
   rescheduleMenteeBookingLeadsquared(input, slotTimeStringArray, userInfo, topicInfo);
