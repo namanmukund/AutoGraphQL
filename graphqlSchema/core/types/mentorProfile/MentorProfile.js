@@ -11,6 +11,7 @@ const MentorProfile = `
     pythonCourseRating3: Int
     pythonCourseRating2: Int
     pythonCourseRating1: Int
+    salesExecutive: SalesExecutiveProfile @relation(name: "SalesExecutiveProfileMentorProfile")
 }`;
 
 export default [MentorProfile];
