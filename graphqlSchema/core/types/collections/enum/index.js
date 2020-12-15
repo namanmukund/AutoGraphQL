@@ -51,6 +51,7 @@ import SkillsLevel from './SkillsLevel';
 import CodingLanguageType from './CodingLanguageType';
 import UserOriginSource from './UserOriginSource';
 import InternetSpeedUnit from './InternetSpeedUnit';
+import MentorStatus from './MentorStatus';
 
 export default [
   Status,
@@ -107,4 +108,5 @@ export default [
   CodingLanguageType,
   UserOriginSource,
   InternetSpeedUnit,
+  MentorStatus,
 ];
