@@ -11,6 +11,9 @@ const MentorProfile = `
     pythonCourseRating3: Int
     pythonCourseRating2: Int
     pythonCourseRating1: Int
+    salesExecutive: SalesExecutiveProfile @relation(name: "SalesExecutiveProfileMentorProfile")
+    status: MentorStatus @defaultValue(value: "onboarded")
+    isMentorActive: Boolean @defaultValue(value: "true")
 }`;
 
 export default [MentorProfile];
