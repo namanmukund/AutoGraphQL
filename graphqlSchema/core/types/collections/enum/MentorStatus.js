@@ -1,8 +1,8 @@
 const MentorStatus = `
   enum MentorStatus {
-    paidSessions
-    partiallyFull
-    training
+    paidOnly
+    paidAndTrial
+    onTraining
     onboarded
   }`;
 

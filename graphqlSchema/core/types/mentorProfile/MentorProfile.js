@@ -12,7 +12,7 @@ const MentorProfile = `
     pythonCourseRating2: Int
     pythonCourseRating1: Int
     salesExecutive: SalesExecutiveProfile @relation(name: "SalesExecutiveProfileMentorProfile")
-    status: MentorStatus
+    status: MentorStatus @defaultValue(value: "onboarded")
     isMentorActive: Boolean @defaultValue(value: "true")
 }`;
 
