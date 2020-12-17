@@ -68,7 +68,7 @@ const MentorMenteeSession = `
     internetSpeed: InternetSpeed
     leadStatus: LeadStatus @groupBy
     mentorPaymentStatus: MentorPaymentStatus @defaultValue(value: "declined")
-    mentorPaymentJustificationComment: String
+    mentorPaymentJustification: String
 }`;
 
 export default [MentorMenteeSession, internetSpeed];
