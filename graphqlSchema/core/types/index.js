@@ -63,6 +63,7 @@ import TotalAmountCollected from './totalAmountCollected';
 import UserSavedCode from './userSavedCode';
 import SalesExecutiveProfile from './salesExecutiveProfile';
 import MentorPricing from './mentorPricing';
+import MentorReport from './mentorReport';
 
 export default [
   ...User,
@@ -130,4 +131,5 @@ export default [
   ...UserSavedCode,
   ...SalesExecutiveProfile,
   ...MentorPricing,
+  ...MentorReport,
 ];
