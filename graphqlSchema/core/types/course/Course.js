@@ -27,6 +27,7 @@ const Course = `
     status: ContentStatus! @defaultValue(value: "unpublished")
     chapters: [Chapter] @relation(name: "CourseChapter")
     products: [Product] @relation(name: "CourseProduct")
+    mentorPricings: [MentorPricing] @relation(name: "CourseMentorPricing")
     thumbnail: File @relation(name: "CourseThumbnail", direction: "OneWay")
   }
 `;
