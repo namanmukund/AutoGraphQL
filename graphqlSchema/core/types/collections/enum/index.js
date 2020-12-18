@@ -52,6 +52,7 @@ import CodingLanguageType from './CodingLanguageType';
 import UserOriginSource from './UserOriginSource';
 import InternetSpeedUnit from './InternetSpeedUnit';
 import MentorStatus from './MentorStatus';
+import MentorPaymentStatus from './MentorPaymentStatus';
 
 export default [
   Status,
@@ -109,4 +110,5 @@ export default [
   UserOriginSource,
   InternetSpeedUnit,
   MentorStatus,
+  MentorPaymentStatus,
 ];
