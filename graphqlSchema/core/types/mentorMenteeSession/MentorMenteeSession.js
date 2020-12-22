@@ -69,6 +69,7 @@ const MentorMenteeSession = `
     leadStatus: LeadStatus @groupBy
     mentorPaymentStatus: MentorPaymentStatus @defaultValue(value: "declined")
     mentorPaymentJustification: String
+    paymentApprovedBy: User @relation(name: "MentorMenteeSessionPaymentApprovedUser", direction: "OneWay")
 }`;
 
 export default [MentorMenteeSession, internetSpeed];
