@@ -152,6 +152,7 @@ const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
 httpServer.listen(port, '0.0.0.0', () => {
+  log(`End time:${new Date()}`);
   log(`Server ready at http://0.0.0.0:${port}${server.graphqlPath}`);
   log(`Subscriptions ready at ws://0.0.0.0:${port}${server.subscriptionsPath}`);
 });
