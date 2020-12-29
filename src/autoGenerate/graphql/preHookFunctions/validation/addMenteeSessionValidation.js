@@ -2,7 +2,7 @@ import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { UserMismatchError } from '../../../../../constants/errors';
 import {
-  ADMIN, UMS_ADMIN, MENTOR, SALES,
+  ADMIN, UMS_ADMIN, MENTOR, UMS_VIEWER,
 } from '../../../../../constants/roles';
 import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
@@ -80,7 +80,7 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
     !backendApps.includes(appName)
     && userIdFromContext !== userId
     && !(userRoleFromContext === ADMIN || userRoleFromContext === UMS_ADMIN
-     || userRoleFromContext === MENTOR || userRoleFromContext === SALES)
+     || userRoleFromContext === MENTOR || userRoleFromContext === UMS_VIEWER)
   ) {
     throw new UserMismatchError();
   }
