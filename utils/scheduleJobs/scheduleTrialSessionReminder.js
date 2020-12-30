@@ -128,87 +128,89 @@ query{
           const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
           // eslint-disable-next-line no-await-in-loop
           const mentorMenteeSession = await getMentorMenteeSession(menteeSessionId);
-          const sessionLink = get(mentorMenteeSession, 'mentorSession.user.mentorProfile.sessionLink');
-          const mentorProfileFile = get(mentorMenteeSession, 'mentorSession.user.profilePic.uri', '');
-          const mentorInfo = get(mentorMenteeSession, 'mentorSession.user.mentorProfile');
-          const mentorProfilePic = mentorProfileFile ? getFullFilePath(mentorProfileFile) : getFullFilePath('python/email/mentor1.png');
-          const topicTitle = get(menteeSession, 'topic.title', '');
-          const menteeObj = {
-            date: getFormatedDate(bookingDate),
-            bookingDateLong: getLongDate(bookingDate),
-            startTime,
-            endTime,
-            name: startCase(toLower(get(menteeInfo, 'name') || '')),
-            grade: get(menteeInfo, 'studentProfile.grade') || '',
-            parentName: startCase(toLower(get(parentInfo, 'name') || '')),
-            parentEmail: get(parentInfo, 'email') || '',
-            parentNumber: get(parentInfo, 'phone.number') || '',
-            countryCode: get(parentInfo, 'phone.countryCode') || '',
-            mentorPhoneNumber: `${get(mentorMenteeSession, 'mentorSession.user.phone.countryCode')}-${get(mentorMenteeSession, 'mentorSession.user.phone.number')}`,
-            mentorName: get(mentorMenteeSession, 'mentorSession.user.name'),
-            mentorEmail: get(mentorMenteeSession, 'mentorSession.user.email'),
-            mentorCountryCode: get(mentorMenteeSession, 'mentorSession.user.phone.countryCode'),
-            mentorProfilePic,
-            mentorRating: calculateMentorRating(mentorInfo) || 5,
-            codingLanguages: getMentorCodingLanguages(get(mentorInfo, 'codingLanguages')) || 'Python',
-            experienceYear: get(mentorInfo, 'experienceYear') || 3,
-            topicTitle,
-            meetingId: get(mentorInfo, 'meetingId'),
-            meetingPassword: get(mentorInfo, 'meetingPassword'),
-          };
-          menteeObj.sessionLink = sessionLink;
-          const {
-            parentName, parentNumber, countryCode, name, meetingId, meetingPassword,
-          } = menteeObj;
+          if (mentorMenteeSession && mentorMenteeSession.id) {
+            const sessionLink = get(mentorMenteeSession, 'mentorSession.user.mentorProfile.sessionLink');
+            const mentorProfileFile = get(mentorMenteeSession, 'mentorSession.user.profilePic.uri', '');
+            const mentorInfo = get(mentorMenteeSession, 'mentorSession.user.mentorProfile');
+            const mentorProfilePic = mentorProfileFile ? getFullFilePath(mentorProfileFile) : getFullFilePath('python/email/mentor1.png');
+            const topicTitle = get(menteeSession, 'topic.title', '');
+            const menteeObj = {
+              date: getFormatedDate(bookingDate),
+              bookingDateLong: getLongDate(bookingDate),
+              startTime,
+              endTime,
+              name: startCase(toLower(get(menteeInfo, 'name') || '')),
+              grade: get(menteeInfo, 'studentProfile.grade') || '',
+              parentName: startCase(toLower(get(parentInfo, 'name') || '')),
+              parentEmail: get(parentInfo, 'email') || '',
+              parentNumber: get(parentInfo, 'phone.number') || '',
+              countryCode: get(parentInfo, 'phone.countryCode') || '',
+              mentorPhoneNumber: `${get(mentorMenteeSession, 'mentorSession.user.phone.countryCode')}-${get(mentorMenteeSession, 'mentorSession.user.phone.number')}`,
+              mentorName: get(mentorMenteeSession, 'mentorSession.user.name'),
+              mentorEmail: get(mentorMenteeSession, 'mentorSession.user.email'),
+              mentorCountryCode: get(mentorMenteeSession, 'mentorSession.user.phone.countryCode'),
+              mentorProfilePic,
+              mentorRating: calculateMentorRating(mentorInfo) || 5,
+              codingLanguages: getMentorCodingLanguages(get(mentorInfo, 'codingLanguages')) || 'Python',
+              experienceYear: get(mentorInfo, 'experienceYear') || 3,
+              topicTitle,
+              meetingId: get(mentorInfo, 'meetingId'),
+              meetingPassword: get(mentorInfo, 'meetingPassword'),
+            };
+            menteeObj.sessionLink = sessionLink;
+            const {
+              parentName, parentNumber, countryCode, name, meetingId, meetingPassword,
+            } = menteeObj;
 
-          const parameters = [{
-            name: 'parent_name',
-            value: parentName,
-          },
-          {
-            name: 'student_name',
-            value: name,
-          },
-          {
-            name: 'session_date',
-            value: getLongDate(bookingDate),
-          },
-          {
-            name: 'session_time',
-            value: startTime,
-          },
-          {
-            name: 'phone',
-            value: `${countryCode}-${parentNumber}`,
-          },
-          {
-            name: 'session_link',
-            value: sessionLink,
-          },
-          {
-            name: 'meeting_id',
-            value: meetingId,
-          },
-          {
-            name: 'meeting_password',
-            value: meetingPassword,
-          },
-          ];
-          // const phone = 919654347463;
-          const phone = countryCode.split('+')[1] + parentNumber;
-          // eslint-disable-next-line no-await-in-loop
-          await sendWhatsAppTemplateMessage(
-            phone,
-            transactionalMessageBody.sessionReminder,
-            parentName,
-            parameters,
-          );
-          // send email
-          // eslint-disable-next-line no-await-in-loop
-          await sendTransactionalEmail(menteeObj, transactionalMessageBody.sendSessionLink);
-          // update  status
-          // eslint-disable-next-line no-await-in-loop
-          await updateScheduleStatusOfMenteeSession(menteeSessionId, 'completed');
+            const parameters = [{
+              name: 'parent_name',
+              value: parentName,
+            },
+            {
+              name: 'student_name',
+              value: name,
+            },
+            {
+              name: 'session_date',
+              value: getLongDate(bookingDate),
+            },
+            {
+              name: 'session_time',
+              value: startTime,
+            },
+            {
+              name: 'phone',
+              value: `${countryCode}-${parentNumber}`,
+            },
+            {
+              name: 'session_link',
+              value: sessionLink,
+            },
+            {
+              name: 'meeting_id',
+              value: meetingId,
+            },
+            {
+              name: 'meeting_password',
+              value: meetingPassword,
+            },
+            ];
+            // const phone = 919654347463;
+            const phone = countryCode.split('+')[1] + parentNumber;
+            // eslint-disable-next-line no-await-in-loop
+            await sendWhatsAppTemplateMessage(
+              phone,
+              transactionalMessageBody.sessionReminder,
+              parentName,
+              parameters,
+            );
+            // send email
+            // eslint-disable-next-line no-await-in-loop
+            await sendTransactionalEmail(menteeObj, transactionalMessageBody.sendSessionLink);
+            // update  status
+            // eslint-disable-next-line no-await-in-loop
+            await updateScheduleStatusOfMenteeSession(menteeSessionId, 'completed');
+          }
         }
       }
     }
