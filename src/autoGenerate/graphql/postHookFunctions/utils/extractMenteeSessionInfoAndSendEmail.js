@@ -174,7 +174,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
   if (process.env.NODE_ENV === 'production') {
     sendBookedSessionEmailToTekie(subject, menteeObj, action);
     sendBookedSessionEmailToParent(subject, menteeObj, action);
-    if (action === 'add' && get(topicInfo, 'data.topic.order') === 1) {
+    if (['add', 'update'].includes(action) && get(topicInfo, 'data.topic.order') === 1) {
       // send whatsapp emailTemplate message
       const {
         parentName, parentNumber, countryCode, name,
