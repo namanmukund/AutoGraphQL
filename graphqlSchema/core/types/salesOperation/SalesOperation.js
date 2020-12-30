@@ -28,6 +28,7 @@ const sessionRescheduledReasons = `
     turnedUpButLeftAbruptly: Boolean
     leadNotVerifiedProperly: Boolean
     otherReasonForReschedule: Boolean
+    otherReasonsComment: String
 `;
 
 const mentorPitch = `
