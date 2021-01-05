@@ -4,6 +4,8 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   slotTimes,
+  userTopicTypeStatus,
+  batchType,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError,
@@ -242,6 +244,31 @@ const getMentorMenteeSessions = (userId) => `
   }
   `;
 
+// query to get batch Sessions
+const getBatchStatus = (userId) => `
+  query{
+    user(id: "${userId}"){
+      studentProfile{
+        batch{
+          id
+          type
+          currentComponent{
+            currentCourse{
+              id
+              order
+            }
+            currentTopic{
+              id
+              order
+            }
+            sessionStatus
+          }
+        }
+      }
+    }
+  }
+  `;
+
 /*
 This is called when mentee tries to load homepage
 It will return all the booked and upcoming sessions based on User current topic component status
@@ -266,6 +293,7 @@ const menteeCourseSyllabusMutationResolver = async (
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;
+  let batchCurrentComponentInfo;
   let currentTopicComponentInfo;
   let menteeSessions;
   let mentorMenteeSessions;
@@ -275,8 +303,19 @@ const menteeCourseSyllabusMutationResolver = async (
   let lastTopicBookedOrder = 0;
   let lastCompletedTopicOrder = 0;
   let isPaid = false;
+  let batchCurrentComponentBatchType;
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
+    // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
+    const batchRes = await callLocalGraphqlApi(
+      getBatchStatus(userId),
+      context,
+      '',
+    );
+
+    batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+    batchCurrentComponentBatchType = get(batchRes, 'data.user.studentProfile.batch.type');
+
     const res = await callLocalGraphqlApi(
       getUserCurrentTopicComponentStatus(userId),
       context,
@@ -285,11 +324,15 @@ const menteeCourseSyllabusMutationResolver = async (
     currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
     // calling method to validate user current topic component status
     validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
-    const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId));
-    menteeSessions = get(getMenteeSessionsRes, 'data.menteeSessions');
 
-    const getMentorMenteeSessionsRes = await callLocalGraphqlApi(getMentorMenteeSessions(userId));
-    mentorMenteeSessions = get(getMentorMenteeSessionsRes, 'data.mentorMenteeSessions');
+    // menteeSessions and mentorMenteeSessions will be called if user is not from batch
+    if (!batchCurrentComponentInfo) {
+      const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId));
+      menteeSessions = get(getMenteeSessionsRes, 'data.menteeSessions');
+
+      const getMentorMenteeSessionsRes = await callLocalGraphqlApi(getMentorMenteeSessions(userId));
+      mentorMenteeSessions = get(getMentorMenteeSessionsRes, 'data.mentorMenteeSessions');
+    }
   /*
   If user is not logged in and asking for course syllabus then we will not add
   any document in Db and will return default data with first topic as unlocked
@@ -346,130 +389,217 @@ const menteeCourseSyllabusMutationResolver = async (
       },
     });
   }
+  // if user belongs to a batch, the syllbaus will be calculated on basis of batchCurrentComponentStatus
+  if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+    const {
+      currentTopic,
+      sessionStatus,
+    } = batchCurrentComponentInfo;
 
-  // iterating over each of mentorMenteeSessions to send sessions that are already completed by mentee
-  if (mentorMenteeSessions && mentorMenteeSessions.length) {
-    mentorMenteeSessions.forEach((mentorMenteeSession) => {
-      const {
-        sessionEndDate: endingDate,
-      } = mentorMenteeSession;
-      const {
-        order: topicOrder,
-        id: topicId,
-        title: topicTitle,
-        description: topicDescription,
-        thumbnail: topicThumbnail,
-        thumbnailSmall: topicThumbnailSmall,
-      } = mentorMenteeSession.topic;
+    lastTopicBookedOrder = currentTopic && currentTopic.order;
+    const lastTopicSessionStatus = sessionStatus;
 
-      // setting last topic completed order, will use this to find booked sessions that are not completed
-      if (topicOrder > lastCompletedTopicOrder) {
-        lastCompletedTopicOrder = topicOrder;
+    totalChapters += chapters.length;
+    // iterating over chapters to construct data for homepage
+    chapters.forEach((chapter) => {
+      if (!chapter || !chapter.topics || !chapter.topics.length) {
+        throw new DatabaseRecordNotFoundError({
+          data: {
+            error: 'CurrentCourse.chapter.topics: is not present',
+          },
+        });
       }
+      totalTopics += chapter.topics.length;
+      // iterating over topics of each chapter  and setting isUnlocked field
+      chapter.topics.forEach((topic) => {
+        const {
+          order: topicOrder,
+          id: topicId,
+          title: topicTitle,
+          description: topicDescription,
+          thumbnail: topicThumbnail,
+          thumbnailSmall: topicThumbnailSmall,
+          isTrial,
+        } = topic;
 
-      const completedMenteeSession = {
-        topicId,
-        topicOrder,
-        topicTitle,
-        topicThumbnail,
-        topicThumbnailSmall,
-        topicDescription,
-        endingDate,
-      };
-      completedSession.push(completedMenteeSession);
-    });
-  }
-
-  // iterating over each of MenteeSessions to send sessions that are already booked and not yet completed by mentee
-  if (menteeSessions && menteeSessions.length) {
-    menteeSessions.forEach((menteeSession) => {
-      let slotTime = null;
-      const {
-        bookingDate,
-      } = menteeSession;
-      const {
-        order: topicOrder,
-        id: topicId,
-        title: topicTitle,
-        description: topicDescription,
-        thumbnail: topicThumbnail,
-        thumbnailSmall: topicThumbnailSmall,
-        isTrial,
-      } = menteeSession.topic;
-
-      const isAccessible = isTopicAccessible(enrollmentType, isTrial);
-
-      // setting last topic booked order, will use this to find upcoming sessions
-      if (topicOrder > lastTopicBookedOrder) {
-        lastTopicBookedOrder = topicOrder;
-      }
-
-      slotTimes.forEach((time, index) => {
-        if (menteeSession[time]) {
-          slotTime = index;
+        const isAccessible = isTopicAccessible(enrollmentType, isTrial);
+        // checking logic for topics which are yet not booked by mentee
+        if (
+          topicOrder > lastTopicBookedOrder
+        ) {
+          const upComingMenteeSession = {
+            topicId,
+            topicOrder,
+            topicTitle,
+            topicThumbnail,
+            topicThumbnailSmall,
+            topicDescription,
+            isAccessible,
+          };
+          upComingSession.push(upComingMenteeSession);
+        } else if (topicOrder === lastTopicBookedOrder) {
+          if (lastTopicSessionStatus === userTopicTypeStatus.complete) {
+            const completedMenteeSession = {
+              topicId,
+              topicOrder,
+              topicTitle,
+              topicThumbnail,
+              topicThumbnailSmall,
+              topicDescription,
+              isAccessible,
+            };
+            completedSession.push(completedMenteeSession);
+          } else {
+            const upComingMenteeSession = {
+              topicId,
+              topicOrder,
+              topicTitle,
+              topicThumbnail,
+              topicThumbnailSmall,
+              topicDescription,
+              isAccessible,
+            };
+            upComingSession.push(upComingMenteeSession);
+          }
+        } else {
+          const completedMenteeSession = {
+            topicId,
+            topicOrder,
+            topicTitle,
+            topicThumbnail,
+            topicThumbnailSmall,
+            topicDescription,
+            isAccessible,
+          };
+          completedSession.push(completedMenteeSession);
         }
       });
-      // checking logic if topic is already consumed or yet to be watched
-      if (
-        topicOrder > lastCompletedTopicOrder
-      ) {
-        const bookedMenteeSession = {
+    });
+  } else {
+    // iterating over each of mentorMenteeSessions to send sessions that are already completed by mentee
+    if (mentorMenteeSessions && mentorMenteeSessions.length) {
+      mentorMenteeSessions.forEach((mentorMenteeSession) => {
+        const {
+          sessionEndDate: endingDate,
+        } = mentorMenteeSession;
+        const {
+          order: topicOrder,
+          id: topicId,
+          title: topicTitle,
+          description: topicDescription,
+          thumbnail: topicThumbnail,
+          thumbnailSmall: topicThumbnailSmall,
+        } = mentorMenteeSession.topic;
+
+        // setting last topic completed order, will use this to find booked sessions that are not completed
+        if (topicOrder > lastCompletedTopicOrder) {
+          lastCompletedTopicOrder = topicOrder;
+        }
+
+        const completedMenteeSession = {
           topicId,
           topicOrder,
           topicTitle,
           topicThumbnail,
           topicThumbnailSmall,
           topicDescription,
-          bookingDate,
-          slotTime,
-          isAccessible,
+          endingDate,
         };
-        bookedSession.push(bookedMenteeSession);
-      }
-    });
-  }
-
-  totalChapters += chapters.length;
-  // iterating over chapters to construct data for homepage
-  chapters.forEach((chapter) => {
-    if (!chapter || !chapter.topics || !chapter.topics.length) {
-      throw new DatabaseRecordNotFoundError({
-        data: {
-          error: 'CurrentCourse.chapter.topics: is not present',
-        },
+        completedSession.push(completedMenteeSession);
       });
     }
-    totalTopics += chapter.topics.length;
-    // iterating over topics of each chapter  and setting isUnlocked field
-    chapter.topics.forEach((topic) => {
-      const {
-        order: topicOrder,
-        id: topicId,
-        title: topicTitle,
-        description: topicDescription,
-        thumbnail: topicThumbnail,
-        thumbnailSmall: topicThumbnailSmall,
-        isTrial,
-      } = topic;
 
-      const isAccessible = isTopicAccessible(enrollmentType, isTrial);
-      // checking logic for topics which are yet not booked by mentee
-      if (
-        topicOrder > lastTopicBookedOrder
-      ) {
-        const upComingMenteeSession = {
-          topicId,
-          topicOrder,
-          topicTitle,
-          topicThumbnail,
-          topicThumbnailSmall,
-          topicDescription,
-          isAccessible,
-        };
-        upComingSession.push(upComingMenteeSession);
+    // iterating over each of MenteeSessions to send sessions that are already booked and not yet completed by mentee
+    if (menteeSessions && menteeSessions.length) {
+      menteeSessions.forEach((menteeSession) => {
+        let slotTime = null;
+        const {
+          bookingDate,
+        } = menteeSession;
+        const {
+          order: topicOrder,
+          id: topicId,
+          title: topicTitle,
+          description: topicDescription,
+          thumbnail: topicThumbnail,
+          thumbnailSmall: topicThumbnailSmall,
+          isTrial,
+        } = menteeSession.topic;
+
+        const isAccessible = isTopicAccessible(enrollmentType, isTrial);
+
+        // setting last topic booked order, will use this to find upcoming sessions
+        if (topicOrder > lastTopicBookedOrder) {
+          lastTopicBookedOrder = topicOrder;
+        }
+
+        slotTimes.forEach((time, index) => {
+          if (menteeSession[time]) {
+            slotTime = index;
+          }
+        });
+        // checking logic if topic is already consumed or yet to be watched
+        if (
+          topicOrder > lastCompletedTopicOrder
+        ) {
+          const bookedMenteeSession = {
+            topicId,
+            topicOrder,
+            topicTitle,
+            topicThumbnail,
+            topicThumbnailSmall,
+            topicDescription,
+            bookingDate,
+            slotTime,
+            isAccessible,
+          };
+          bookedSession.push(bookedMenteeSession);
+        }
+      });
+    }
+
+    totalChapters += chapters.length;
+    // iterating over chapters to construct data for homepage
+    chapters.forEach((chapter) => {
+      if (!chapter || !chapter.topics || !chapter.topics.length) {
+        throw new DatabaseRecordNotFoundError({
+          data: {
+            error: 'CurrentCourse.chapter.topics: is not present',
+          },
+        });
       }
+      totalTopics += chapter.topics.length;
+      // iterating over topics of each chapter  and setting isUnlocked field
+      chapter.topics.forEach((topic) => {
+        const {
+          order: topicOrder,
+          id: topicId,
+          title: topicTitle,
+          description: topicDescription,
+          thumbnail: topicThumbnail,
+          thumbnailSmall: topicThumbnailSmall,
+          isTrial,
+        } = topic;
+
+        const isAccessible = isTopicAccessible(enrollmentType, isTrial);
+        // checking logic for topics which are yet not booked by mentee
+        if (
+          topicOrder > lastTopicBookedOrder
+        ) {
+          const upComingMenteeSession = {
+            topicId,
+            topicOrder,
+            topicTitle,
+            topicThumbnail,
+            topicThumbnailSmall,
+            topicDescription,
+            isAccessible,
+          };
+          upComingSession.push(upComingMenteeSession);
+        }
+      });
     });
-  });
+  }
 
   if (enrollmentType === enrollmentTypes.pro) {
     isPaid = true;

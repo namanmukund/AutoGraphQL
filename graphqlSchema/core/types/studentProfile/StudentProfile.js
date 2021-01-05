@@ -10,6 +10,7 @@ const StudentProfile = `
     user: User! @relation(name: "StudentProfileUser")
     school: School @relation(name: "StudentProfileSchool")
     parents: [ParentProfile] @relation(name: "StudentProfileParentProfile")
+    batch: Batch @relation(name: "BatchStudentProfile")
 }`;
 
 export default [StudentProfile];
