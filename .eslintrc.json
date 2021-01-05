@@ -8,6 +8,7 @@
     "mocha" : true
   },
   "rules": {
+    "linebreak-style": 0,
     "semi": 2,
     "no-unused-vars": 2,
     "import/prefer-default-export": 0,
