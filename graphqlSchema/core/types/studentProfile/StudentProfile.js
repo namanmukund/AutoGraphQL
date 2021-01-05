@@ -3,7 +3,6 @@ const StudentProfile = `
     grade: Grade @groupBy
     section: String @groupBy
     branch: String
-    batch: String
     rollNo: String
     year: Int
     schoolName: String
