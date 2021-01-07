@@ -1,5 +1,7 @@
 import { TMS } from '../../../../constants';
-import { MENTOR, TRANSFORMATION_TEAM, UMS_HEAD, UMS_VIEWER } from '../../../../constants/roles';
+import {
+  MENTOR, TRANSFORMATION_TEAM, UMS_HEAD, UMS_VIEWER,
+} from '../../../../constants/roles';
 
 const SalesOperationActivity = `
   type SalesOperationActivity @model
