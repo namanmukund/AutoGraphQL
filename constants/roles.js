@@ -30,6 +30,7 @@ const NOT_CMS_HEAD = `[
 "${CMS_UMS_VIEWER}",
 "${SALES}",
 "${SALES_EXECUTIVE}"
+"${TRANSFORMATION_TEAM}"
 ]`;
 
 const UMS_HEAD = `[
@@ -47,7 +48,7 @@ const NOT_UMS_HEAD = `[
 "${CMS_UMS_VIEWER}",
 "${AFFILIATE}",
 "${SALES}",
-"${SALES_EXECUTIVE}"
+"${SALES_EXECUTIVE}",
 "${TRANSFORMATION_TEAM}"
 ]`;
 
@@ -64,7 +65,8 @@ const NOT_UMS_HEAD_AND_MENTOR = `[
 "${MENTEE}", 
 "${UMS_VIEWER}", 
 "${CMS_UMS_VIEWER}",
-"${SALES_EXECUTIVE}"
+"${SALES_EXECUTIVE}",
+"${TRANSFORMATION_TEAM}"
 ]`;
 
 const UMS_HEAD_AND_SALES_EXECUTIVE = `[
@@ -80,7 +82,7 @@ const NOT_UMS_HEAD_AND_SALES_EXECUTIVE = `[
 "${MENTEE}", 
 "${UMS_VIEWER}", 
 "${CMS_UMS_VIEWER}",
-"${MENTOR}"
+"${MENTOR}",
 ]`;
 
 const ALL_ROLES = `[
@@ -96,7 +98,8 @@ const ALL_ROLES = `[
 "${CMS_UMS_VIEWER}",
 "${AFFILIATE}",
 "${SALES}",
-"${SALES_EXECUTIVE}"
+"${SALES_EXECUTIVE}",
+"${TRANSFORMATION_TEAM}"
 ]`;
 
 const NOT_ADMIN = `[
@@ -110,7 +113,8 @@ const NOT_ADMIN = `[
 "${CMS_VIEWER}", 
 "${CMS_UMS_VIEWER}",
 "${SALES}",
-"${SALES_EXECUTIVE}"
+"${SALES_EXECUTIVE}",
+"${TRANSFORMATION_TEAM}"
 ]`;
 
 const BATCH_HEAD = `[
