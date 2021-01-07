@@ -13,7 +13,7 @@ const Batch = `
   )
   {
     course: Course! @relation(name: "BatchCurrentComponentStatusCourse", direction: "OneWay")
-    code: String!
+    code: String! @uniqueOrEmpty @trim
     title: String
     students: [StudentProfile] @relation(name: "BatchStudentProfile")
     currentComponent: BatchCurrentComponentStatus @relation(name: "BatchCurrentComponentStatusBatch")

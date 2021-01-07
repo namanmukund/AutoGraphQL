@@ -8,7 +8,7 @@ import { byPassMenteeValidationApps } from '../../../../constants';
 
 const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
   const { sessionType, availabilityDate, ...slots } = input;
-  if (sessionType && sessionType === 'paid') {
+  if (sessionType && (sessionType === 'paid' || sessionType === 'batch')) {
     return true;
   }
 

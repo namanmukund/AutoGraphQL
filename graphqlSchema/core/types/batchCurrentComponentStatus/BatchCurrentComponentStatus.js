@@ -26,7 +26,7 @@ const BatchCurrentComponentStatus = `
     currentLearningObjective: LearningObjective @relation(name: "BatchCurrentComponentStatusLearningObjective", direction: "OneWay")
     currentPracticeQuestion: QuestionBank @relation(name: "BatchCurrentComponentStatusQuestionBank", direction: "OneWay")
     currentTopicComponentType: CurrentTopicComponentType
-    sessionStatus: SessionStatus! @defaultValue(value: "allotted")
+    latestSessionStatus: SessionStatus! @defaultValue(value: "allotted")
   }
 `;
 
