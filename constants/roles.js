@@ -12,6 +12,7 @@ const CMS_UMS_VIEWER = 'cmsUmsViewer';
 const AFFILIATE = 'affiliate';
 const SALES = 'sales';
 const SALES_EXECUTIVE = 'salesExecutive';
+const TRANSFORMATION_TEAM = 'transformationTeam';
 
 const CMS_HEAD = `[
 "${ADMIN}", 
@@ -47,6 +48,7 @@ const NOT_UMS_HEAD = `[
 "${AFFILIATE}",
 "${SALES}",
 "${SALES_EXECUTIVE}"
+"${TRANSFORMATION_TEAM}"
 ]`;
 
 const UMS_HEAD_AND_MENTOR = `[
@@ -143,6 +145,7 @@ const ALL_ROLES_ARRAY = [
   AFFILIATE,
   SALES,
   SALES_EXECUTIVE,
+  TRANSFORMATION_TEAM,
 ];
 
 export {
@@ -173,4 +176,5 @@ export {
   NOT_UMS_HEAD_AND_SALES_EXECUTIVE,
   NOT_BATCH_HEAD,
   BATCH_HEAD,
+  TRANSFORMATION_TEAM,
 };

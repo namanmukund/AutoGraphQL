@@ -201,6 +201,7 @@ const userSourceOrigin = {
   instagram: 'instagram',
   google: 'google',
   website: 'website',
+  transformation: 'transformation',
 };
 
 const freeTopicCount = 5;
