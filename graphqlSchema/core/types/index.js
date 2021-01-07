@@ -66,6 +66,8 @@ import MentorPricing from './mentorPricing';
 import MentorReport from './mentorReport';
 import Batch from './batch';
 import BatchCurrentComponentStatus from './batchCurrentComponentStatus';
+import BatchSession from './batchSession';
+import MentorBatchSession from './mentorBatchSession';
 
 export default [
   ...User,
@@ -136,4 +138,6 @@ export default [
   ...MentorReport,
   ...Batch,
   ...BatchCurrentComponentStatus,
+  ...BatchSession,
+  ...MentorBatchSession,
 ];
