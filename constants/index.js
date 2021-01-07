@@ -247,6 +247,12 @@ const batchType = {
   b2b2c: 'b2b2c',
 };
 
+const sessionStatus = {
+  started: 'started',
+  completed: 'completed',
+  allotted: 'allotted',
+};
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export {
@@ -304,4 +310,5 @@ export {
   byPassMenteeValidationApps,
   userSourceOrigin,
   batchType,
+  sessionStatus,
 };

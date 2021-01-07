@@ -11,7 +11,7 @@ const deleteMentorSessionPostHookMethod = async (input, mutationName, context) =
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
   const { sessionType } = input;
-  if (sessionType && sessionType === 'paid') {
+  if (sessionType && (sessionType === 'paid' || sessionType === 'batch')) {
     return true;
   }
 

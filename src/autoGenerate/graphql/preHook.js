@@ -56,6 +56,11 @@ import deleteMenteeSessionValidation from './preHookFunctions/validation/deleteM
 import updateSalesOperationValidation from './preHookFunctions/validation/updateSalesOperationValidation';
 import addSalesOperationValidation from './preHookFunctions/validation/addSalesOperationOperationValidation';
 import addNetPromoterScoreValidation from './preHookFunctions/validation/addNetPromoterScoreValidation';
+import addBatchSessionValidation from './preHookFunctions/validation/addBatchSessionValidation';
+import updateBatchSessionValidation from './preHookFunctions/validation/updateBatchSessionValidation';
+import deleteBatchSessionValidation from './preHookFunctions/validation/deleteBatchSessionValidation';
+import addMentorBatchSessionValidation from './preHookFunctions/validation/addMentorBatchSessionValidation';
+import updateMentorBatchSessionValidation from './preHookFunctions/validation/updateMentorBatchSessionValidation';
 import { CanNotCompleteSessionBeforeStartingError } from '../../../constants/errors/input';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -501,6 +506,26 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'addNetPromoterScore': {
       await addNetPromoterScoreValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addBatchSession': {
+      await addBatchSessionValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateBatchSession': {
+      await updateBatchSessionValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'deleteBatchSession': {
+      await deleteBatchSessionValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addMentorBatchSession': {
+      await addMentorBatchSessionValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateMentorBatchSession': {
+      await updateMentorBatchSessionValidation(params, mutationOrQueryName, context);
       break;
     }
     default: {

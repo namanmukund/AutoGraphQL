@@ -4,8 +4,8 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   slotTimes,
-  userTopicTypeStatus,
   batchType,
+  sessionStatus,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError,
@@ -261,7 +261,7 @@ const getBatchStatus = (userId) => `
               id
               order
             }
-            sessionStatus
+            latestSessionStatus
           }
         }
       }
@@ -393,11 +393,11 @@ const menteeCourseSyllabusMutationResolver = async (
   if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
     const {
       currentTopic,
-      sessionStatus,
+      latestSessionStatus,
     } = batchCurrentComponentInfo;
 
     lastTopicBookedOrder = currentTopic && currentTopic.order;
-    const lastTopicSessionStatus = sessionStatus;
+    const lastTopicSessionStatus = latestSessionStatus;
 
     totalChapters += chapters.length;
     // iterating over chapters to construct data for homepage
@@ -438,7 +438,7 @@ const menteeCourseSyllabusMutationResolver = async (
           };
           upComingSession.push(upComingMenteeSession);
         } else if (topicOrder === lastTopicBookedOrder) {
-          if (lastTopicSessionStatus === userTopicTypeStatus.complete) {
+          if (lastTopicSessionStatus === sessionStatus.completed) {
             const completedMenteeSession = {
               topicId,
               topicOrder,
