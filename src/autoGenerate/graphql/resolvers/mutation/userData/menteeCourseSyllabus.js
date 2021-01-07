@@ -269,6 +269,38 @@ const getBatchStatus = (userId) => `
   }
   `;
 
+// query to get batch Sessions
+const getBatchSessions = (batchId) => `
+  query{
+    batchSessions(filter:{
+      batch_some:{
+        id:"${batchId}"
+        }
+    }){
+      id
+      topic{
+        id
+        title
+        order
+        isTrial
+        thumbnail{
+          id
+          uri
+          name
+        }
+        thumbnailSmall{
+          id
+          uri
+          name
+        }
+        description
+      }
+      bookingDate
+      ${getSlotTimeFields()}
+    }
+  }
+  `;
+
 /*
 This is called when mentee tries to load homepage
 It will return all the booked and upcoming sessions based on User current topic component status
@@ -297,6 +329,7 @@ const menteeCourseSyllabusMutationResolver = async (
   let currentTopicComponentInfo;
   let menteeSessions;
   let mentorMenteeSessions;
+  let batchSessions;
   const upComingSession = [];
   const bookedSession = [];
   const completedSession = [];
@@ -326,7 +359,11 @@ const menteeCourseSyllabusMutationResolver = async (
     validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
 
     // menteeSessions and mentorMenteeSessions will be called if user is not from batch
-    if (!batchCurrentComponentInfo) {
+    if (batchCurrentComponentInfo) {
+      const batchId = get(batchRes, 'data.user.studentProfile.batch.id');
+      const getBatchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId));
+      batchSessions = get(getBatchSessionsRes, 'data.batchSessions');
+    } else {
       const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId));
       menteeSessions = get(getMenteeSessionsRes, 'data.menteeSessions');
 
@@ -450,16 +487,62 @@ const menteeCourseSyllabusMutationResolver = async (
             };
             completedSession.push(completedMenteeSession);
           } else {
-            const upComingMenteeSession = {
-              topicId,
-              topicOrder,
-              topicTitle,
-              topicThumbnail,
-              topicThumbnailSmall,
-              topicDescription,
-              isAccessible,
-            };
-            upComingSession.push(upComingMenteeSession);
+            // iterating over each of batchSessions to send sessions that are already booked and not yet completed by mentee
+            if (batchSessions && batchSessions.length) {
+              batchSessions.forEach((batchSession) => {
+                let slotTime = null;
+                const {
+                  bookingDate,
+                } = batchSession;
+                const {
+                  order: batchSessionTopicOrder,
+                  id: batchSessionTopicId,
+                  title: batchSessionTopicTitle,
+                  description: batchSessionTopicDescription,
+                  thumbnail: batchSessionTopicThumbnail,
+                  thumbnailSmall: batchSessionTopicThumbnailSmall,
+                  isTrial: batchSessionIsTrial,
+                } = batchSession.topic;
+
+                const isBatchTopicAccessible = isTopicAccessible(enrollmentType, batchSessionIsTrial);
+
+                slotTimes.forEach((time, index) => {
+                  if (batchSession[time]) {
+                    slotTime = index;
+                  }
+                });
+                // checking logic if topic is already consumed or yet to be watched
+                if (
+                  batchSessionTopicOrder === lastTopicBookedOrder
+                ) {
+                  const bookedMenteeSession = {
+                    topicId: batchSessionTopicId,
+                    topicOrder: batchSessionTopicOrder,
+                    topicTitle: batchSessionTopicTitle,
+                    topicThumbnail: batchSessionTopicThumbnail,
+                    topicThumbnailSmall: batchSessionTopicThumbnailSmall,
+                    topicDescription: batchSessionTopicDescription,
+                    bookingDate,
+                    slotTime,
+                    isAccessible: isBatchTopicAccessible,
+                  };
+                  bookedSession.push(bookedMenteeSession);
+                }
+              });
+            }
+
+            if (bookedSession && !bookedSession.length) {
+              const upComingMenteeSession = {
+                topicId,
+                topicOrder,
+                topicTitle,
+                topicThumbnail,
+                topicThumbnailSmall,
+                topicDescription,
+                isAccessible,
+              };
+              upComingSession.push(upComingMenteeSession);
+            }
           }
         } else {
           const completedMenteeSession = {
