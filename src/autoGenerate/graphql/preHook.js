@@ -59,8 +59,6 @@ import addNetPromoterScoreValidation from './preHookFunctions/validation/addNetP
 import addBatchSessionValidation from './preHookFunctions/validation/addBatchSessionValidation';
 import updateBatchSessionValidation from './preHookFunctions/validation/updateBatchSessionValidation';
 import deleteBatchSessionValidation from './preHookFunctions/validation/deleteBatchSessionValidation';
-import addMentorBatchSessionValidation from './preHookFunctions/validation/addMentorBatchSessionValidation';
-import updateMentorBatchSessionValidation from './preHookFunctions/validation/updateMentorBatchSessionValidation';
 import { CanNotCompleteSessionBeforeStartingError } from '../../../constants/errors/input';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -518,14 +516,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'deleteBatchSession': {
       await deleteBatchSessionValidation(params, mutationOrQueryName, context);
-      break;
-    }
-    case 'addMentorBatchSession': {
-      await addMentorBatchSessionValidation(params, mutationOrQueryName, context);
-      break;
-    }
-    case 'updateMentorBatchSession': {
-      await updateMentorBatchSessionValidation(params, mutationOrQueryName, context);
       break;
     }
     default: {
