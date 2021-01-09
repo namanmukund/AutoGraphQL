@@ -13,9 +13,8 @@ const Batch = `
   )
   {
     course: Course! @relation(name: "BatchCurrentComponentStatusCourse", direction: "OneWay")
-    allottedMentor: User! @relation(name:"BatchMentor", direction: "OneWay")
     code: String! @uniqueOrEmpty @trim
-    description: String
+    title: String
     students: [StudentProfile] @relation(name: "BatchStudentProfile")
     currentComponent: BatchCurrentComponentStatus @relation(name: "BatchCurrentComponentStatusBatch")
     type: BatchType @defaultValue(value: "normal")
