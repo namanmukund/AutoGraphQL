@@ -37,28 +37,17 @@ const getBatchSessions = (batchId, topicId) => `
   }
   `;
 
-const validateBatchStartSessionData = (params) => {
-  // eslint-disable-next-line no-unused-vars
-  const { bookingDate, ...slots } = params.input;
-  const slotTimeArray = getSelectedSlotsTime(slots);
-  const date = new Date(bookingDate);
-  const sessionStartDate = date.setHours(date.getHours() + slotTimeArray[0]);
-  params.input = {...params.input,  sessionStartDate: new Date(sessionStartDate).toISOString()}
-  return true;
-};
-
 // prehook logic to check if added BatchSession(batch and topic id) is already present
 const addBatchSessionValidation = async (params, mutationOrQueryName, context) => {
   // check if the document for called batch and topic is already present
   const batchId = get(params, 'batchConnectId');
   const topicId = get(params, 'topicConnectId');
-  const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
 
   // log in case batch or topic id is not present
-  if (!batchId || !topicId || !mentorSessionConnectId) {
+  if (!batchId || !topicId) {
     throw new MissingMandatoryInputInRequestError({
       data: {
-        message: 'Either batchConnectId or topicConnectId or mentorSessionConnectId or all missing in input',
+        message: 'Either batchConnectId or topicConnectId or all missing in input',
       },
     });
   }
