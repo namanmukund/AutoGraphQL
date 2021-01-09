@@ -10,6 +10,7 @@ query{
     batch{
       id
     }
+    sessionStatus
   }
 }
 `;
