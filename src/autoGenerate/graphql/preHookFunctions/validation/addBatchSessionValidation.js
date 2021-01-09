@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { PermissionDeniedError } from '../../../../../constants/errors';
@@ -11,7 +10,6 @@ import validateTokenAndExtractInformation from './utils/validateTokenAndExtractI
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
-import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 
 // query to get batch Sessions
 const getBatchSessions = (batchId, topicId) => `
@@ -95,8 +93,6 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   if (batchSessions && batchSessions.length) {
     throw new SimilarDocumentAlreadyExistError();
   }
-
-  validateBatchSessionInput(params);
 
   return true;
 };
