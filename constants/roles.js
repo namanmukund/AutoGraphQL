@@ -12,6 +12,7 @@ const CMS_UMS_VIEWER = 'cmsUmsViewer';
 const AFFILIATE = 'affiliate';
 const SALES = 'sales';
 const SALES_EXECUTIVE = 'salesExecutive';
+const TRANSFORMATION_TEAM = 'transformationTeam';
 
 const CMS_HEAD = `[
 "${ADMIN}", 
@@ -29,6 +30,7 @@ const NOT_CMS_HEAD = `[
 "${CMS_UMS_VIEWER}",
 "${SALES}",
 "${SALES_EXECUTIVE}"
+"${TRANSFORMATION_TEAM}"
 ]`;
 
 const UMS_HEAD = `[
@@ -46,7 +48,8 @@ const NOT_UMS_HEAD = `[
 "${CMS_UMS_VIEWER}",
 "${AFFILIATE}",
 "${SALES}",
-"${SALES_EXECUTIVE}"
+"${SALES_EXECUTIVE}",
+"${TRANSFORMATION_TEAM}"
 ]`;
 
 const UMS_HEAD_AND_MENTOR = `[
@@ -62,7 +65,8 @@ const NOT_UMS_HEAD_AND_MENTOR = `[
 "${MENTEE}", 
 "${UMS_VIEWER}", 
 "${CMS_UMS_VIEWER}",
-"${SALES_EXECUTIVE}"
+"${SALES_EXECUTIVE}",
+"${TRANSFORMATION_TEAM}"
 ]`;
 
 const UMS_HEAD_AND_SALES_EXECUTIVE = `[
@@ -94,7 +98,8 @@ const ALL_ROLES = `[
 "${CMS_UMS_VIEWER}",
 "${AFFILIATE}",
 "${SALES}",
-"${SALES_EXECUTIVE}"
+"${SALES_EXECUTIVE}",
+"${TRANSFORMATION_TEAM}"
 ]`;
 
 const NOT_ADMIN = `[
@@ -108,7 +113,8 @@ const NOT_ADMIN = `[
 "${CMS_VIEWER}", 
 "${CMS_UMS_VIEWER}",
 "${SALES}",
-"${SALES_EXECUTIVE}"
+"${SALES_EXECUTIVE}",
+"${TRANSFORMATION_TEAM}"
 ]`;
 
 const ALL_ROLES_ARRAY = [
@@ -126,6 +132,7 @@ const ALL_ROLES_ARRAY = [
   AFFILIATE,
   SALES,
   SALES_EXECUTIVE,
+  TRANSFORMATION_TEAM,
 ];
 
 export {
@@ -154,4 +161,5 @@ export {
   SALES_EXECUTIVE,
   UMS_HEAD_AND_SALES_EXECUTIVE,
   NOT_UMS_HEAD_AND_SALES_EXECUTIVE,
+  TRANSFORMATION_TEAM,
 };

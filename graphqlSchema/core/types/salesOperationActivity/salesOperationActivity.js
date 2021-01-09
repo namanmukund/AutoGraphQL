@@ -1,5 +1,7 @@
 import { TMS } from '../../../../constants';
-import { MENTOR, UMS_HEAD, UMS_VIEWER } from '../../../../constants/roles';
+import {
+  MENTOR, TRANSFORMATION_TEAM, UMS_HEAD, UMS_VIEWER,
+} from '../../../../constants/roles';
 
 const SalesOperationActivity = `
   type SalesOperationActivity @model
@@ -13,7 +15,8 @@ const SalesOperationActivity = `
     permissions:[
       { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
       { userRole: ${UMS_VIEWER} appName: "*" operations: "*" },
-      { userRole: ${MENTOR} appName: "*" operations: "*" }
+      { userRole: ${MENTOR} appName: "*" operations: "*" },
+      { userRole: ${TRANSFORMATION_TEAM} appName: "*" operations: "*" },
       ], 
     rule: allow
   ) 

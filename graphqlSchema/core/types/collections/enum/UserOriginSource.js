@@ -7,6 +7,7 @@ const UserOriginSource = `
     ${userSourceOrigin.instagram}
     ${userSourceOrigin.school}
     ${userSourceOrigin.website}
+    ${userSourceOrigin.transformation}
   }`;
 
 export default UserOriginSource;
