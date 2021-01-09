@@ -251,10 +251,12 @@ const updateSchoolDataOfAStudent = async (input, studentProfileId) => {
 
 const getUserOriginSource = (utmSource, schoolName) => {
   const {
-    website, facebook, google, instagram, school,
+    website, facebook, google, instagram, school, transformation,
   } = userSourceOrigin;
   let source = website;
-
+  if (utmSource && utmSource.toLowerCase().includes('transformation')) {
+    source = transformation;
+  }
   if (utmSource && utmSource.toLowerCase().includes('facebook')) {
     source = facebook;
   }
