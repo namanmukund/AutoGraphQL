@@ -181,20 +181,41 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
   // eslint-disable-next-line no-restricted-syntax
   try {
     let menteeSessionId;
-    let mentorSessionId;
+    let mentorSessionId = mentorSessionIdFromInput;
     if (menteeUserId) {
       menteeSessionId = await getMenteeSessionId(
         menteeUserId,
-        bookingDate,
-        slot,
+        topicId,
       );
-
       if (menteeSessionId) {
         // update
         const variables = {
           input: {
             bookingDate,
-            [slot]: true,
+            slot0: `slot${slot}` === 'slot0',
+            slot1: `slot${slot}` === 'slot1',
+            slot2: `slot${slot}` === 'slot2',
+            slot3: `slot${slot}` === 'slot3',
+            slot4: `slot${slot}` === 'slot4',
+            slot5: `slot${slot}` === 'slot5',
+            slot6: `slot${slot}` === 'slot6',
+            slot7: `slot${slot}` === 'slot7',
+            slot8: `slot${slot}` === 'slot8',
+            slot9: `slot${slot}` === 'slot9',
+            slot10: `slot${slot}` === 'slot10',
+            slot11: `slot${slot}` === 'slot11',
+            slot12: `slot${slot}` === 'slot12',
+            slot13: `slot${slot}` === 'slot13',
+            slot14: `slot${slot}` === 'slot14',
+            slot15: `slot${slot}` === 'slot15',
+            slot16: `slot${slot}` === 'slot16',
+            slot17: `slot${slot}` === 'slot17',
+            slot18: `slot${slot}` === 'slot18',
+            slot19: `slot${slot}` === 'slot19',
+            slot20: `slot${slot}` === 'slot20',
+            slot21: `slot${slot}` === 'slot21',
+            slot22: `slot${slot}` === 'slot22',
+            slot23: `slot${slot}` === 'slot23',
           },
         };
         await callUpdateMenteeSession(
@@ -203,16 +224,16 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
         );
       } else {
         // add mentee session
+        /* eslint no-lonely-if:0 */
         if (bookingDate && slot) {
           const variables = {
             input: {
               bookingDate,
-              [slot]: true,
+              [`slot${slot}`]: true,
               source: 'school',
             },
           };
           menteeSessionId = await callAddMenteeSession(menteeUserId, topicId, variables);
-          console.log('menteeSessionId....', menteeSessionId);
         }
       }
     }
@@ -221,13 +242,13 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
       mentorSessionId = await getMentorSessionId(
         mentorUserId,
         bookingDate,
-        slot,
+        `slot${slot}`,
       );
       if (!mentorSessionId) {
         const variables = {
           input: {
             availabilityDate: bookingDate,
-            [slot]: true,
+            [`slot${slot}`]: true,
           },
         };
         mentorSessionId = await callAddMentorSession(mentorUserId, courseId, variables);
@@ -236,7 +257,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
         const variables = {
           input: {
             availabilityDate: bookingDate,
-            [slot]: true,
+            [`slot${slot}`]: true,
           },
         };
         await callUpdateMentorSession(
@@ -244,12 +265,21 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           variables,
         );
       }
+    } else {
+      const variables = {
+        input: {
+          availabilityDate: bookingDate,
+          [`slot${slot}`]: true,
+        },
+      };
+      await callUpdateMentorSession(
+        mentorSessionId,
+        variables,
+      );
     }
-    console.log('mentorSessionId....', mentorSessionId);
     // add mentor mentee session
     if (menteeSessionId && mentorSessionId) {
-      const mentorMenteeId = await callMentorMenteeSessions(userId, topicId);
-      console.log('*************mentorMenteeId', mentorMenteeId);
+      const mentorMenteeId = await callMentorMenteeSessions(menteeUserId, topicId);
       if (mentorMenteeId) {
         await callUpdateMentorMenteeSession(mentorMenteeId, { input: { sessionStatus } });
       } else {

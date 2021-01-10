@@ -1,12 +1,3 @@
-import { get } from 'lodash';
-import {
-  GLOBAL_COURSE_TITLE,
-  PUBLISHED,
-  enrollmentTypes,
-} from '../../../../../constants';
-import {
-  DatabaseRecordNotFoundError,
-} from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 // mutation to update BatchCurrentComponentStatus
@@ -20,7 +11,7 @@ const updateBatchCurrentComponentStatusMutation = (
       id:"${id}",
       ${currentTopicConnectQuery}
       input: {
-        latestSessionStatus: "${sessionStatus}"
+        latestSessionStatus: ${sessionStatus}
       }
     ){
       id

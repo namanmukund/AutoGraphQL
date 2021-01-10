@@ -6,6 +6,7 @@ import {
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
+import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -64,11 +65,9 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   const batchId = get(params, 'batchConnectId');
   const topicId = get(params, 'topicConnectId');
   const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
-  const { bookingDate, sessionStatus: sessionStatusFromInput } = input;
+  const { bookingDate, sessionStatus: sessionStatusFromInput } = params && params.input;
   const { slotTimeArray } = context;
-  console.log('------------------------bookingDate', bookingDate);
-  console.log('-----------slotTimeArray', slotTimeArray);
-  
+
   /*
     get Course Id
   */
@@ -87,8 +86,8 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     get batch info
   */
   const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
-  const batchInfo= get(batchResult, 'data.batch');
-  const { students, currentComponent } = batchInfo
+  const batchInfo = get(batchResult, 'data.batch');
+  const { students, currentComponent } = batchInfo;
   const batchCurrentComponentId = currentComponent && currentComponent.id;
   const currentComponentTopicId = get(currentComponent, 'currentTopic.id');
 
@@ -115,13 +114,13 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
       await updateBatchCurrentComponentStatus(
         batchCurrentComponentId,
         sessionStatusFromInput,
-        nextTopicId
-      )
+        nextTopicId,
+      );
     } else {
       await updateBatchCurrentComponentStatus(
         batchCurrentComponentId,
-        sessionStatusFromInput
-      )
+        sessionStatusFromInput,
+      );
     }
   }
 
@@ -138,11 +137,10 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
         mentorSessionConnectId,
         courseId,
         sessionStatusFromInput || sessionStatus.allotted,
-        student.user.source
-      )
+        student.user.source,
+      );
     }
   }
-
 };
 
 export default addBatchSessionPostHookMethod;

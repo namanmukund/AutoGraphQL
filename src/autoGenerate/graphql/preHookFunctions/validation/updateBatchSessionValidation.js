@@ -17,7 +17,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   // sessionStatus and all. So, the fields booking date and slots are not mandatory
   // await validateBatchSessionInput(params);
 
-  const { 
+  const {
     sessionStatus: prevSessionStatus,
     batch,
     topic,
@@ -26,8 +26,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     ...slots
   } = batchSession;
   const slotTimeArray = getSelectedSlotsTime(slots);
-
-  context.topicId = topicId && topic.id;
+  context.topicId = topic && topic.id;
   context.batchId = batch && batch.id;
   context.bookingDate = bookingDate;
   context.mentorSessionConnectId = mentorSession && mentorSession.id;

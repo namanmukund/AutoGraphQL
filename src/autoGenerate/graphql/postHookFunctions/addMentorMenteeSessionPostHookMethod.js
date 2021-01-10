@@ -9,28 +9,27 @@ import { backendApps } from '../../../../constants';
 const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
   // don't do anything if it is done through backend
   const { appName } = context;
-  if (backendApps.includes(appName)) {
-    return true;
-  }
-  // add user on leadsquared
-  const { menteeSession, mentorSessionConnectId } = context;
-  const {
-    id: menteeSessionId,
-    user,
-    bookingDate,
-    ...slots
-  } = menteeSession;
-  const userInfo = await getMenteeInfo(get(user, 'id'));
-  const topicInfo = await getTopicInfo(get(params, 'topicConnectId'));
+  if (!backendApps.includes(appName)) {
+    // add user on leadsquared
+    const { menteeSession, mentorSessionConnectId } = context;
+    const {
+      id: menteeSessionId,
+      user,
+      bookingDate,
+      ...slots
+    } = menteeSession;
+    const userInfo = await getMenteeInfo(get(user, 'id'));
+    const topicInfo = await getTopicInfo(get(params, 'topicConnectId'));
 
-  if (get(input, 'sessionStatus') === 'started') {
-    setSessionStartedLeadsquared(userInfo, topicInfo);
-  }
+    if (get(input, 'sessionStatus') === 'started') {
+      setSessionStartedLeadsquared(userInfo, topicInfo);
+    }
 
-  // send message to mentor regarding the session
-  if (get(topicInfo, 'data.topic.order') === 1) {
-    const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-    await extractMentorMenteeSessionAndSendMessage(bookingDate, slotTimeStringArray, mentorSessionConnectId, userInfo, topicInfo);
+    // send message to mentor regarding the session
+    if (get(topicInfo, 'data.topic.order') === 1) {
+      const slotTimeStringArray = getSelectedSlotsStringArray(slots);
+      await extractMentorMenteeSessionAndSendMessage(bookingDate, slotTimeStringArray, mentorSessionConnectId, userInfo, topicInfo);
+    }
   }
 };
 

@@ -26,7 +26,7 @@ const validateBatchSessionInput = async (params, context) => {
     throw new OnlyOneSlotAllowedError();
   }
   context.slotTimeArray = slotTimeArray;
-  
+
   validateBookingDate(
     bookingDate,
     slotTimeArray,

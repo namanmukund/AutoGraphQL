@@ -6,6 +6,7 @@ import {
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
+import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -62,9 +63,13 @@ const nextTopicQuery = () => `
 */
 const updateBatchSessionPostHookMethod = async (input, params, mutationName, context) => {
   const { sessionStatus: sessionStatusFromInput } = input;
-  const { slotTimeArray, topicId, batchId, bookingDate, mentorSessionConnectId } = context;
-  console.log('------------------------bookingDate', bookingDate);
-  console.log('-----------slotTimeArray', slotTimeArray);
+  const {
+    slotTimeArray,
+    topicId,
+    batchId,
+    bookingDate,
+    mentorSessionConnectId,
+  } = context;
   /*
     get Course Id
   */
@@ -83,8 +88,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     get batch info
   */
   const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
-  const batchInfo= get(batchResult, 'data.batch');
-  const { students, currentComponent } = batchInfo
+  const batchInfo = get(batchResult, 'data.batch');
+  const { students, currentComponent } = batchInfo;
   const batchCurrentComponentId = currentComponent && currentComponent.id;
   const currentComponentTopicId = get(currentComponent, 'currentTopic.id');
 
@@ -110,14 +115,14 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       }
       await updateBatchCurrentComponentStatus(
         batchCurrentComponentId,
-        sessionStatusFromInput,
-        nextTopicId
-      )
+        sessionStatus.allotted,
+        nextTopicId,
+      );
     } else {
       await updateBatchCurrentComponentStatus(
         batchCurrentComponentId,
-        sessionStatusFromInput
-      )
+        sessionStatusFromInput,
+      );
     }
   }
 
@@ -134,11 +139,10 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         mentorSessionConnectId,
         courseId,
         sessionStatusFromInput || sessionStatus.allotted,
-        student.user.source
-      )
+        student.user.source,
+      );
     }
   }
-
 };
 
 export default updateBatchSessionPostHookMethod;
