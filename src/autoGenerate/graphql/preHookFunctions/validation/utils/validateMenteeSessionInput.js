@@ -11,7 +11,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import availableSlotsQuery from '../../../graphqlQueries/availableSlotsQuery';
 import getSelectedSlotsStringArray from '../../../postHookFunctions/utils/getSelectedSlotsStringArray';
 import { NoSlotsAvailableForBooking } from '../../../../../../constants/errors/db';
-import { byPassMenteeValidationApps } from '../../../../../../constants';
+import { byPassMenteeValidationApps, backendApps } from '../../../../../../constants';
 
 const PRE_BOOKING_HOUR_LIMIT = 0;
 const validateMenteeSessionInput = async (params, context) => {
@@ -32,13 +32,18 @@ const validateMenteeSessionInput = async (params, context) => {
     throw new OnlyOneSlotAllowedError();
   }
 
+  // if call is made from backend, excluding this check for batch
+  const { isTrialSession, appName } = context;
+  if (backendApps.includes(appName)) {
+    return true;
+  }
+
   validateBookingDate(
     bookingDate,
     slotTimeArray,
     PRE_BOOKING_HOUR_LIMIT,
   );
 
-  const { isTrialSession, appName } = context;
   if (typeof isTrialSession === 'boolean' && !isTrialSession) {
     return true;
   }

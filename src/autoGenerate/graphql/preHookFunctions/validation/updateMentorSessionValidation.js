@@ -12,7 +12,7 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
   if (mentorSession && !mentorSession) {
     throw new DatabaseRecordNotFoundError();
   }
-  validateMentorSessionInput(params, mentorSession);
+  validateMentorSessionInput(params, mentorSession, context);
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
 
   const {

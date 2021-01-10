@@ -42,7 +42,7 @@ const addBatchCurrentComponentStatus = (
   `;
 
 /*
-  This method adds enrollmentType as pro in salesOperation
+  Post hook of add batch
 */
 const addBatchPostHookMethod = async (input) => {
   const { id: batchId } = input;

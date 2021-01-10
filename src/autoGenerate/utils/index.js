@@ -33,6 +33,7 @@ import getFirstTopicAndLearningObjective from './getFirstTopicAndLearningObjecti
 import addUserCurrentTopicComponentStatus from './addUserCurrentTopicComponentStatus';
 import getUserCurrentTopicComponentStatus from './getUserCurrentTopicComponentStatus';
 import getBatchCurrentComponentStatus from './getBatchCurrentComponentStatus';
+import addMentorMenteeSessionForBatch from './addMentorMenteeSessionForBatch';
 
 export {
   getParsedASTMap,
@@ -70,4 +71,5 @@ export {
   addUserCurrentTopicComponentStatus,
   getUserCurrentTopicComponentStatus,
   getBatchCurrentComponentStatus,
+  addMentorMenteeSessionForBatch,
 };
