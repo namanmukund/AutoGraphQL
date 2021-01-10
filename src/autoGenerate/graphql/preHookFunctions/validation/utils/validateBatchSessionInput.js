@@ -8,7 +8,7 @@ import {
 } from '../../../../../../constants/errors/input';
 
 const PRE_BOOKING_HOUR_LIMIT = 0;
-const validateBatchSessionInput = async (params) => {
+const validateBatchSessionInput = async (params, context) => {
   const { input } = params;
   const { bookingDate, ...slots } = input;
   if (!bookingDate) {
@@ -25,7 +25,8 @@ const validateBatchSessionInput = async (params) => {
   } else if (slotTimeArray.length > 1) {
     throw new OnlyOneSlotAllowedError();
   }
-
+  context.slotTimeArray = slotTimeArray;
+  
   validateBookingDate(
     bookingDate,
     slotTimeArray,

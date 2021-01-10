@@ -79,7 +79,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   } = userAndAppInfo;
 
   // validate input
-  await validateBatchSessionInput(params);
+  await validateBatchSessionInput(params, context);
 
   if (
     !backendApps.includes(appName)

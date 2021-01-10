@@ -4,8 +4,14 @@ import getMenteeInfo from './utils/getMenteeInfo';
 import getTopicInfo from './utils/getTopicInfo';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import extractMentorMenteeSessionAndSendMessage from './utils/extractMentorMenteeSessionAndSendMessage';
+import { backendApps } from '../../../../constants';
 
 const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
+  // don't do anything if it is done through backend
+  const { appName } = context;
+  if (backendApps.includes(appName)) {
+    return true;
+  }
   // add user on leadsquared
   const { menteeSession, mentorSessionConnectId } = context;
   const {

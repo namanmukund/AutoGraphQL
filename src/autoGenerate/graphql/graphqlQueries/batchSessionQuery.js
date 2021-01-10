@@ -11,6 +11,9 @@ query{
       id
     }
     sessionStatus
+    mentorSession{
+      id
+    }
   }
 }
 `;

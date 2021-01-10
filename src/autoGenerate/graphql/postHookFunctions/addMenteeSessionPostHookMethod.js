@@ -5,8 +5,14 @@ import extractMenteeSessionInfoAndSendEmail from './utils/extractMenteeSessionIn
 import { addMenteeBookingLeadsquared } from './leadsquared';
 import getMenteeInfo from './utils/getMenteeInfo';
 import getTopicInfo from './utils/getTopicInfo';
+import { byPassMenteeValidationApps } from '../../../../constants';
 
 const addMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
+  // don't decrease the availability slot if it is done through backend
+  const { appName } = context;
+  if (byPassMenteeValidationApps.includes(appName)) {
+    return true;
+  }
   /*
   Since addition of session by mentee will consume a slot
    */
