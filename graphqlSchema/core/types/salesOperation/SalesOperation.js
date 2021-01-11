@@ -1,6 +1,6 @@
 import { TMS, TWA } from '../../../../constants';
 import {
-  MENTEE, MENTOR, UMS_HEAD, UMS_VIEWER, SALES, TRANSFORMATION_TEAM,
+  MENTEE, MENTOR, UMS_HEAD, UMS_VIEWER, SALES, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN,
 } from '../../../../constants/roles';
 import { READ } from '../../../../constants/graphqlOperations';
 
@@ -8,7 +8,7 @@ const unQualifiedLeadReasons = `
     knowCoding: Boolean
     lookingForAdvanceCourse: Boolean
     ageNotAppropriate: Boolean
-    notRelevantDifferentStream: Boolean 
+    notRelevantDifferentStream: Boolean
     noPayingPower: Boolean
     notInterestedInCoding: Boolean
     learningAptitudeIssue: Boolean
@@ -62,9 +62,9 @@ const SalesOperation = `
     permissions:[
       { appName: "${TMS}" operations: "*" },
       { appName: "${TWA}" operations: "*" },
-      ], 
+      ],
     rule: allow
-  )  
+  )
   @userPermissions(
     permissions:[
       { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
@@ -72,15 +72,16 @@ const SalesOperation = `
       { userRole: ${MENTOR} appName: "*" operations: "*" },
       { userRole: ${SALES} appName: "*" operations: "*" },
       { userRole: ${TRANSFORMATION_TEAM} appName: "*" operations: "*" },
+      { userRole: ${TRANSFORMATION_ADMIN} appName: "*" operations: "*" },
       { userRole: ${MENTEE} appName: "*" operations: ${READ} }
-      ],  
+        ],
     rule: allow
-  ) 
-   { 
+  )
+   {
     userVerificationStatus: SalesTeamStatus @defaultValue(value: "pending")
     userResponseStatus: UserBehaviourStatus @defaultValue(value: "pending")
     overallFeedback: String
-    userResponseStatusUpdateDate: Date 
+    userResponseStatusUpdateDate: Date
     client: User @relation(name:"SalesOperationClient", direction: "OneWay")
     monitoredBy: User @relation(name:"SalesOperationMonitoredBy", direction: "OneWay")
     allottedMentor: User @relation(name:"SalesOperationAllottedMentor", direction: "OneWay")

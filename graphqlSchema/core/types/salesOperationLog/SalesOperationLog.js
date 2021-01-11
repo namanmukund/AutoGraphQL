@@ -1,6 +1,6 @@
 import { TMS } from '../../../../constants';
 import {
-  MENTOR, TRANSFORMATION_TEAM, UMS_HEAD, UMS_VIEWER,
+  MENTOR, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM, UMS_HEAD, UMS_VIEWER,
 } from '../../../../constants/roles';
 
 const SalesOperationLog = `
@@ -8,24 +8,25 @@ const SalesOperationLog = `
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
-      ], 
+      ],
     rule: allow
-  )  
+  )
   @userPermissions(
     permissions:[
       { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
       { userRole: ${UMS_VIEWER} appName: "*" operations: "*" },
       { userRole: ${MENTOR} appName: "*" operations: "*" },
       { userRole: ${TRANSFORMATION_TEAM} appName: "*" operations: "*" },
-      ], 
+      { userRole: ${TRANSFORMATION_ADMIN} appName: "*" operations: "*" },
+      ],
     rule: allow
-  ) 
-   { 
+  )
+   {
     loggedBy: User @relation(name:"SalesOperationLogLoggedBy", direction: "OneWay")
     salesOperation: SalesOperation @relation(name:"SalesOperationLogSalesOperation")
     log: String
     type: SalesOperationLogType
-    topic: Topic @relation(name: "SalesOperationLogTopic", direction: "OneWay") 
+    topic: Topic @relation(name: "SalesOperationLogTopic", direction: "OneWay")
   }
 `;
 
