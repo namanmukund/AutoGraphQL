@@ -244,7 +244,7 @@ const getMentorMenteeSessions = (userId) => `
   }
   `;
 
-// query to get batch Sessions
+// query to get batch status
 const getBatchStatus = (userId) => `
   query{
     user(id: "${userId}"){
