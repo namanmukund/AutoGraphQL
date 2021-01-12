@@ -80,6 +80,7 @@ const User = `
     ${affilateInfo}  
     ${socialInfo}
     ${promotionalInfo}
+    verificationStatus: VerificationStatus @defaultValue(value: "empty")
   }
 `;
 
