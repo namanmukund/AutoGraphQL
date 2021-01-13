@@ -20,7 +20,10 @@ db.on('error', (err) => {
   log('MongoDB disconnected!');
 }).once('open', async () => {
   log('Connected to DB.');
-  if (process.env.NODE_ENV === 'production' && process.env.IS_SCHEDULER_INSTANCE) {
+  if (
+    process.env.NODE_ENV === 'production'
+    && process.env.IS_SCHEDULER_INSTANCE
+    && process.env.IS_SCHEDULER_INSTANCE !== 'false') {
     // eslint-disable-next-line no-unused-vars
     const interval = 30;
     const rule = new schedule.RecurrenceRule();
