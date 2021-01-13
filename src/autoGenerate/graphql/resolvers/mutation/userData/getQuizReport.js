@@ -4,13 +4,17 @@ import {
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
   PUBLISHED,
-  masteryLevels, topicTypes, userActionType,
+  masteryLevels,
+  topicTypes,
+  userActionType,
+  batchType,
 } from '../../../../../../constants';
 import {
   ComponentLockedError,
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getUserIdandAppNameAfterValidation
   from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
@@ -148,6 +152,31 @@ const addUserQuizDump = (
   }
   `;
 
+// query to get batch status
+const getBatchStatus = (userId) => `
+  query{
+    user(id: "${userId}"){
+      studentProfile{
+        batch{
+          id
+          type
+          currentComponent{
+            currentCourse{
+              id
+              order
+            }
+            currentTopic{
+              id
+              order
+            }
+            latestSessionStatus
+          }
+        }
+      }
+    }
+  }
+  `;
+
 /*
   parsing data of user quiz report so that the logic implemented ahead can read data in
   desired format and return the same.
@@ -260,6 +289,16 @@ const getQuizReportMutationResolver = async (
   // calling method to validate user current topic component status
   validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
 
+  // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
+  const batchRes = await callLocalGraphqlApi(
+    getBatchStatus(userId),
+    context,
+    '',
+  );
+
+  const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+  const batchCurrentComponentBatchType = get(batchRes, 'data.user.studentProfile.batch.type');
+
   // calling API to get data of fetched topic
   const topicRes = await callGraphqlApi(
     getTopicQuery(topicId),
@@ -277,9 +316,15 @@ const getQuizReportMutationResolver = async (
       },
     });
   }
-  const {
-    currentTopic: currentRunningTopic,
-  } = currentTopicComponentInfo;
+  let currentRunningTopic;
+
+  // if user belongs to a batch, quiz report will be calculated on basis of batchCurrentComponentStatus
+  if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+    currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
+  } else {
+    currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
+  }
+
   if (topicInfo.order > currentRunningTopic.order) {
     throw new ComponentLockedError();
   }
