@@ -2,7 +2,6 @@ import * as schedule from 'node-schedule';
 import { log, dbConfig } from '../utils';
 import db from './db';
 import scheduleTrialSessionReminder from '../utils/scheduleJobs/scheduleTrialSessionReminder';
-import getRandomNumber from '../utils/getRandomNumber';
 
 let dbReconnectCount = 1;
 db.on('error', (err) => {
