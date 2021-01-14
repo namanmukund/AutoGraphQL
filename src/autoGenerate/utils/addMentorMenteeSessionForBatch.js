@@ -1,6 +1,8 @@
 /* eslint-disable no-await-in-loop, no-console */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
+import getSlotTimesInString from '../../../utils/getSlotTimesInString';
+import getSelectedSlotsTime from '../graphql/preHookFunctions/validation/utils/getSelectedSlotsTime';
 
 const callMentorMenteeSessions = async (
   userId,
@@ -60,7 +62,7 @@ mutation ($input: MenteeSessionInput!) {
   return get(res, 'data.addMenteeSession.id');
 };
 
-const getMenteeSessionId = async (
+const getMenteeSession = async (
   menteeUserId,
   topicId,
 ) => {
@@ -73,11 +75,13 @@ query {
     ]
   }){
     id
+    bookingDate
+    ${getSlotTimesInString()}
   }
 }
 `;
   const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.menteeSessions[0].id');
+  return get(res, 'data.menteeSessions[0]');
 };
 
 const callUpdateMenteeSession = async (
@@ -177,59 +181,71 @@ mutation($input: MentorSessionUpdate){
   return get(res, 'data.updateMentorSession.id');
 };
 
-const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicId, bookingDate, slot, mentorSessionIdFromInput, courseId, sessionStatus, source) => {
+const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicId, bookingDate, slot, mentorSessionIdFromInput, courseId, sessionStatus, source, methodCallOriginComponent) => {
   // eslint-disable-next-line no-restricted-syntax
   try {
+    let menteBookingDate = bookingDate;
+    let menteeBookingSlot = slot;
     let menteeSessionId;
     let mentorSessionId = mentorSessionIdFromInput;
     if (menteeUserId) {
-      menteeSessionId = await getMenteeSessionId(
+      const menteeSession = await getMenteeSession(
         menteeUserId,
         topicId,
       );
-      if (menteeSessionId) {
+      if (menteeSession) {
+        const { id: menteeSessionIdFromMenteeQuery, bookingDate: bookingDateFromMenteeQuery, ...slots } = menteeSession;
+        menteeSessionId = menteeSessionIdFromMenteeQuery;
+        if (methodCallOriginComponent === 'updateBatchCurrentComponentStatus') {
+          menteBookingDate = bookingDateFromMenteeQuery;
+          const slotTimeArray = getSelectedSlotsTime(slots);
+          menteeBookingSlot = slotTimeArray && slotTimeArray.length && slotTimeArray[0];
+        }
+      }
+
+      if (menteeSessionId && methodCallOriginComponent === 'updateBatchSession') {
         // update
         const variables = {
           input: {
-            bookingDate,
-            slot0: `slot${slot}` === 'slot0',
-            slot1: `slot${slot}` === 'slot1',
-            slot2: `slot${slot}` === 'slot2',
-            slot3: `slot${slot}` === 'slot3',
-            slot4: `slot${slot}` === 'slot4',
-            slot5: `slot${slot}` === 'slot5',
-            slot6: `slot${slot}` === 'slot6',
-            slot7: `slot${slot}` === 'slot7',
-            slot8: `slot${slot}` === 'slot8',
-            slot9: `slot${slot}` === 'slot9',
-            slot10: `slot${slot}` === 'slot10',
-            slot11: `slot${slot}` === 'slot11',
-            slot12: `slot${slot}` === 'slot12',
-            slot13: `slot${slot}` === 'slot13',
-            slot14: `slot${slot}` === 'slot14',
-            slot15: `slot${slot}` === 'slot15',
-            slot16: `slot${slot}` === 'slot16',
-            slot17: `slot${slot}` === 'slot17',
-            slot18: `slot${slot}` === 'slot18',
-            slot19: `slot${slot}` === 'slot19',
-            slot20: `slot${slot}` === 'slot20',
-            slot21: `slot${slot}` === 'slot21',
-            slot22: `slot${slot}` === 'slot22',
-            slot23: `slot${slot}` === 'slot23',
+            bookingDate: menteBookingDate,
+            slot0: `slot${menteeBookingSlot}` === 'slot0',
+            slot1: `slot${menteeBookingSlot}` === 'slot1',
+            slot2: `slot${menteeBookingSlot}` === 'slot2',
+            slot3: `slot${menteeBookingSlot}` === 'slot3',
+            slot4: `slot${menteeBookingSlot}` === 'slot4',
+            slot5: `slot${menteeBookingSlot}` === 'slot5',
+            slot6: `slot${menteeBookingSlot}` === 'slot6',
+            slot7: `slot${menteeBookingSlot}` === 'slot7',
+            slot8: `slot${menteeBookingSlot}` === 'slot8',
+            slot9: `slot${menteeBookingSlot}` === 'slot9',
+            slot10: `slot${menteeBookingSlot}` === 'slot10',
+            slot11: `slot${menteeBookingSlot}` === 'slot11',
+            slot12: `slot${menteeBookingSlot}` === 'slot12',
+            slot13: `slot${menteeBookingSlot}` === 'slot13',
+            slot14: `slot${menteeBookingSlot}` === 'slot14',
+            slot15: `slot${menteeBookingSlot}` === 'slot15',
+            slot16: `slot${menteeBookingSlot}` === 'slot16',
+            slot17: `slot${menteeBookingSlot}` === 'slot17',
+            slot18: `slot${menteeBookingSlot}` === 'slot18',
+            slot19: `slot${menteeBookingSlot}` === 'slot19',
+            slot20: `slot${menteeBookingSlot}` === 'slot20',
+            slot21: `slot${menteeBookingSlot}` === 'slot21',
+            slot22: `slot${menteeBookingSlot}` === 'slot22',
+            slot23: `slot${menteeBookingSlot}` === 'slot23',
           },
         };
         await callUpdateMenteeSession(
           menteeSessionId,
           variables,
         );
-      } else {
+      } else if (!menteeSessionId) {
         // add mentee session
         /* eslint no-lonely-if:0 */
-        if (bookingDate && slot) {
+        if (menteBookingDate && menteeBookingSlot) {
           const variables = {
             input: {
-              bookingDate,
-              [`slot${slot}`]: true,
+              bookingDate: menteBookingDate,
+              [`slot${menteeBookingSlot}`]: true,
               source: 'school',
             },
           };
@@ -241,14 +257,14 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
     if (!mentorSessionId && mentorUserId) {
       mentorSessionId = await getMentorSessionId(
         mentorUserId,
-        bookingDate,
-        `slot${slot}`,
+        menteBookingDate,
+        `slot${menteeBookingSlot}`,
       );
       if (!mentorSessionId) {
         const variables = {
           input: {
-            availabilityDate: bookingDate,
-            [`slot${slot}`]: true,
+            availabilityDate: menteeBookingSlot,
+            [`slot${menteeBookingSlot}`]: true,
           },
         };
         mentorSessionId = await callAddMentorSession(mentorUserId, courseId, variables);
@@ -256,8 +272,8 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
         // update
         const variables = {
           input: {
-            availabilityDate: bookingDate,
-            [`slot${slot}`]: true,
+            availabilityDate: menteBookingDate,
+            [`slot${menteeBookingSlot}`]: true,
           },
         };
         await callUpdateMentorSession(
@@ -268,8 +284,8 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
     } else {
       const variables = {
         input: {
-          availabilityDate: bookingDate,
-          [`slot${slot}`]: true,
+          availabilityDate: menteBookingDate,
+          [`slot${menteeBookingSlot}`]: true,
         },
       };
       await callUpdateMentorSession(

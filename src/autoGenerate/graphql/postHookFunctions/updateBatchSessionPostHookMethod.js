@@ -140,6 +140,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         courseId,
         sessionStatusFromInput || sessionStatus.allotted,
         student.user.source,
+        'updateBatchSession',
       );
     }
   }
