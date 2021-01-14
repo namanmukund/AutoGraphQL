@@ -38,6 +38,8 @@ import addBatchSessionPostHookMethod
   from './postHookFunctions/addBatchSessionPostHookMethod';
 import updateBatchSessionPostHookMethod
   from './postHookFunctions/updateBatchSessionPostHookMethod';
+import updateBatchCurrentComponentStatusPostHookMethod
+  from './postHookFunctions/updateBatchCurrentComponentStatusPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -189,6 +191,10 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateBatchSession': {
       await updateBatchSessionPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'updateBatchCurrentComponentStatus': {
+      await updateBatchCurrentComponentStatusPostHookMethod(input, params, mutationName, context);
       break;
     }
     default:
