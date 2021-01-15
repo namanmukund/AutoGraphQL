@@ -17,6 +17,11 @@ const MentorReport = `
     oneToOneConversion: Int
     oneToTwoConversion: Int
     oneToThreeConversion: Int
+    pythonCourseRating5: Int
+    pythonCourseRating4: Int
+    pythonCourseRating3: Int
+    pythonCourseRating2: Int
+    pythonCourseRating1: Int
 }`;
 
 export default [MentorReport];

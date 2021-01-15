@@ -2,7 +2,6 @@ import * as schedule from 'node-schedule';
 import { log, dbConfig } from '../utils';
 import db from './db';
 import scheduleTrialSessionReminder from '../utils/scheduleJobs/scheduleTrialSessionReminder';
-import getRandomNumber from '../utils/getRandomNumber';
 
 let dbReconnectCount = 1;
 db.on('error', (err) => {
@@ -21,13 +20,16 @@ db.on('error', (err) => {
   log('MongoDB disconnected!');
 }).once('open', async () => {
   log('Connected to DB.');
-  if (process.env.NODE_ENV === 'production') {
+  if (
+    process.env.NODE_ENV === 'production'
+    && process.env.IS_SCHEDULER_INSTANCE
+    && process.env.IS_SCHEDULER_INSTANCE !== 'false') {
     // eslint-disable-next-line no-unused-vars
-    const rand = getRandomNumber(20, 60);
+    const interval = 30;
     const rule = new schedule.RecurrenceRule();
-    rule.minute = rand;
+    rule.minute = interval;
     // eslint-disable-next-line no-console
-    console.log('Scheduler timed at ', rand, ' interval');
+    console.log('Scheduler timed at ', interval, ' interval');
     // eslint-disable-next-line no-unused-vars
     const j = schedule.scheduleJob(rule, async () => {
       // eslint-disable-next-line no-console
