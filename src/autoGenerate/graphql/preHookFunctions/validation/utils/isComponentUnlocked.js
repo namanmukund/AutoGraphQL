@@ -12,10 +12,17 @@ import {
 import getUserCurrentTopicComponentStatus
   from '../../../../utils/getUserCurrentTopicComponentStatus';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
-import { backendApps, enrollmentTypes, topicTypes } from '../../../../../../constants';
+import {
+  backendApps,
+  enrollmentTypes,
+  topicTypes,
+  batchType,
+} from '../../../../../../constants';
 import getTopicForValidation from './getTopicForValidation';
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
 import { validateMentorMenteePermissionForComponent } from './index';
+import getBatchCurrentComponentStatus
+  from '../../../../utils/getBatchCurrentComponentStatus';
 
 /*
 This is a common method to check whether the called topic component is locked or not
@@ -188,6 +195,11 @@ const isComponentUnlocked = async (
   // condition to check if topic is free, if not then user should be pro
   // type to access that topic
   const { order: currentTopicOrder } = currentTopic;
+  const batchCurrentComponentStatusRes = await getBatchCurrentComponentStatus(
+    userId,
+  );
+  const batchCurrentComponentInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.currentComponent');
+  const batchCurrentComponentBatchType = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.type');
   /*
   condition to check if chat can be accessed:
   if called topic order is less than current topic order or
@@ -201,6 +213,8 @@ const isComponentUnlocked = async (
     isTrial,
     page,
     checkForPaidLogic,
+    batchCurrentComponentInfo,
+    batchCurrentComponentBatchType,
   )) {
     // placing logic to send correct message if a paid video is locked coz free user is trying to access it
     const { free } = enrollmentTypes;
@@ -217,114 +231,117 @@ const isComponentUnlocked = async (
   // check if mentee should be able to watch a video
   // check if user has permission to hit API according to his role, if user is mentee and there is
   // no mentor token, he should not be able to hit API
-  validateMentorMenteePermissionForComponent(
-    context,
-    topicOrder,
-    learningObjectiveOrder,
-    page,
-    currentTopicComponentInfo,
-  );
+  // this will be checked for normal flow and not for batch
+  if (!batchCurrentComponentInfo || (batchCurrentComponentInfo && batchCurrentComponentBatchType === batchType.normal)) {
+    validateMentorMenteePermissionForComponent(
+      context,
+      topicOrder,
+      learningObjectiveOrder,
+      page,
+      currentTopicComponentInfo,
+    );
 
-  switch (page) {
-    case message: {
-      const {
-        currentLearningObjective,
-      } = currentTopicComponentInfo;
-      if (!currentLearningObjective) {
-        throw new DatabaseRecordNotFoundError({
-          data: {
-            error: 'CurrentTopicComponentInfo.CurrentLearningObjective: is not present',
-          },
-        });
-      }
-      // will remove commented code after review and testing
-      // if (topicOrder < currentTopic.order ||
-      //   (currentTopicComponentType === topicTypes.quiz) ||
-      //   (currentTopicComponentType !== topicTypes.video &&
-      //     learningObjectiveOrder <= currentLearningObjective.order)) {
-      //   isUnlocked = true;
-      // }
-      /*
-      code will only reach here in case if passed topic order
-       is less than or equal to current topic order
-      Here we are checking the case when passed topic order and current topic order are equal
-      and passed LO order is greater than current LO order or
-      both LO order are equal and current component type is video
-      For all above cases we will throw locked error
-      */
-      const { order: currentLearningObjectiveOrder } = currentLearningObjective;
-      if (topicOrder === currentTopicOrder
-        && (learningObjectiveOrder > currentLearningObjectiveOrder
-          || (learningObjectiveOrder === currentLearningObjectiveOrder
-            && currentTopicComponentType === topicTypes.video
+    switch (page) {
+      case message: {
+        const {
+          currentLearningObjective,
+        } = currentTopicComponentInfo;
+        if (!currentLearningObjective) {
+          throw new DatabaseRecordNotFoundError({
+            data: {
+              error: 'CurrentTopicComponentInfo.CurrentLearningObjective: is not present',
+            },
+          });
+        }
+        // will remove commented code after review and testing
+        // if (topicOrder < currentTopic.order ||
+        //   (currentTopicComponentType === topicTypes.quiz) ||
+        //   (currentTopicComponentType !== topicTypes.video &&
+        //     learningObjectiveOrder <= currentLearningObjective.order)) {
+        //   isUnlocked = true;
+        // }
+        /*
+        code will only reach here in case if passed topic order
+         is less than or equal to current topic order
+        Here we are checking the case when passed topic order and current topic order are equal
+        and passed LO order is greater than current LO order or
+        both LO order are equal and current component type is video
+        For all above cases we will throw locked error
+        */
+        const { order: currentLearningObjectiveOrder } = currentLearningObjective;
+        if (topicOrder === currentTopicOrder
+          && (learningObjectiveOrder > currentLearningObjectiveOrder
+            || (learningObjectiveOrder === currentLearningObjectiveOrder
+              && currentTopicComponentType === topicTypes.video
+            )
           )
-        )
-      ) {
-        throw new ComponentLockedError();
+        ) {
+          throw new ComponentLockedError();
+        }
+        break;
       }
-      break;
-    }
-    case practiceQuestion: {
-      const {
-        currentLearningObjective,
-      } = currentTopicComponentInfo;
-      if (!currentLearningObjective) {
-        throw new DatabaseRecordNotFoundError({
-          data: {
-            error: 'CurrentTopicComponentInfo.CurrentLearningObjective: is not present',
-          },
-        });
-      }
-      // will remove commented code after review and testing
-      // if (topicOrder < currentTopic.order ||
-      //     (currentTopicComponentType === topicTypes.quiz) ||
-      //     (currentTopicComponentType !== topicTypes.video &&
-      //       learningObjectiveOrder < currentLearningObjective.order) ||
-      //     (currentTopicComponentType === topicTypes.practiceQuestion &&
-      //       learningObjectiveOrder === currentLearningObjective.order)) {
-      //   isUnlocked = true;
-      // }
-      /*
-          code will only reach here in case if passed topic order
-           is less than or equal to current topic order.
-          Here we are checking the case when passed topic order and current topic order are equal
-          and passed LO order is greater than current LO order or
-          both LO order are equal and current component type is video or chat
-          For all above cases we will throw locked error
-          */
-      const { order: currentLearningObjectiveOrder } = currentLearningObjective;
-      if (topicOrder === currentTopicOrder
-        && (learningObjectiveOrder > currentLearningObjectiveOrder
-          || (learningObjectiveOrder === currentLearningObjectiveOrder
-            && currentTopicComponentType === topicTypes.video
+      case practiceQuestion: {
+        const {
+          currentLearningObjective,
+        } = currentTopicComponentInfo;
+        if (!currentLearningObjective) {
+          throw new DatabaseRecordNotFoundError({
+            data: {
+              error: 'CurrentTopicComponentInfo.CurrentLearningObjective: is not present',
+            },
+          });
+        }
+        // will remove commented code after review and testing
+        // if (topicOrder < currentTopic.order ||
+        //     (currentTopicComponentType === topicTypes.quiz) ||
+        //     (currentTopicComponentType !== topicTypes.video &&
+        //       learningObjectiveOrder < currentLearningObjective.order) ||
+        //     (currentTopicComponentType === topicTypes.practiceQuestion &&
+        //       learningObjectiveOrder === currentLearningObjective.order)) {
+        //   isUnlocked = true;
+        // }
+        /*
+            code will only reach here in case if passed topic order
+             is less than or equal to current topic order.
+            Here we are checking the case when passed topic order and current topic order are equal
+            and passed LO order is greater than current LO order or
+            both LO order are equal and current component type is video or chat
+            For all above cases we will throw locked error
+            */
+        const { order: currentLearningObjectiveOrder } = currentLearningObjective;
+        if (topicOrder === currentTopicOrder
+          && (learningObjectiveOrder > currentLearningObjectiveOrder
+            || (learningObjectiveOrder === currentLearningObjectiveOrder
+              && currentTopicComponentType === topicTypes.video
+            )
           )
-        )
-      ) {
-        throw new ComponentLockedError();
+        ) {
+          throw new ComponentLockedError();
+        }
+        break;
       }
-      break;
-    }
-    case quiz: {
-      // will remove commented code after review and testing
-      // if (topicOrder < currentTopic.order ||
-      //   (currentTopicComponentType === topicTypes.quiz)) {
-      //   isUnlocked = true;
-      // }
-      /*
-          code will only reach here in case if passed topic order
-           is less than or equal to current topic order.
-          Here we are checking the case when passed topic order and current topic order are equal
-          and current component type is not quiz
-          For all above cases we will throw locked error
-          */
-      if (topicOrder === currentTopicOrder
-        && currentTopicComponentType !== topicTypes.quiz
-      ) {
-        throw new ComponentLockedError();
+      case quiz: {
+        // will remove commented code after review and testing
+        // if (topicOrder < currentTopic.order ||
+        //   (currentTopicComponentType === topicTypes.quiz)) {
+        //   isUnlocked = true;
+        // }
+        /*
+            code will only reach here in case if passed topic order
+             is less than or equal to current topic order.
+            Here we are checking the case when passed topic order and current topic order are equal
+            and current component type is not quiz
+            For all above cases we will throw locked error
+            */
+        if (topicOrder === currentTopicOrder
+          && currentTopicComponentType !== topicTypes.quiz
+        ) {
+          throw new ComponentLockedError();
+        }
+        break;
       }
-      break;
+      default:
     }
-    default:
   }
   // for video we don't need to check on LO level as video is first component
   // this condition checks whether isTopicLocked is called from addDump APIs or not

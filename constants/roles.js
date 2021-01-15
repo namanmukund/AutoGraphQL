@@ -16,17 +16,17 @@ const TRANSFORMATION_TEAM = 'transformationTeam';
 const TRANSFORMATION_ADMIN = 'transformationAdmin';
 
 const CMS_HEAD = `[
-"${ADMIN}", 
+"${ADMIN}",
 "${CMS_ADMIN}"
 ]`;
 
 const NOT_CMS_HEAD = `[
-"${SELF_LEARNER}", 
-"${SCHOOL_STUDENT}", 
-"${UMS_ADMIN}", 
-"${MENTOR}", 
-"${MENTEE}", 
-"${UMS_VIEWER}", 
+"${SELF_LEARNER}",
+"${SCHOOL_STUDENT}",
+"${UMS_ADMIN}",
+"${MENTOR}",
+"${MENTEE}",
+"${UMS_VIEWER}",
 "${CMS_ADMIN}",
 "${CMS_UMS_VIEWER}",
 "${SALES}",
@@ -36,17 +36,17 @@ const NOT_CMS_HEAD = `[
 ]`;
 
 const UMS_HEAD = `[
-"${ADMIN}", 
+"${ADMIN}",
 "${UMS_ADMIN}"
 ]`;
 
 const NOT_UMS_HEAD = `[
-"${CMS_ADMIN}", 
-"${SELF_LEARNER}", 
-"${SCHOOL_STUDENT}", 
-"${MENTOR}", 
-"${MENTEE}", 
-"${UMS_VIEWER}", 
+"${CMS_ADMIN}",
+"${SELF_LEARNER}",
+"${SCHOOL_STUDENT}",
+"${MENTOR}",
+"${MENTEE}",
+"${UMS_VIEWER}",
 "${CMS_UMS_VIEWER}",
 "${AFFILIATE}",
 "${SALES}",
@@ -56,17 +56,17 @@ const NOT_UMS_HEAD = `[
 ]`;
 
 const UMS_HEAD_AND_MENTOR = `[
-"${ADMIN}", 
+"${ADMIN}",
 "${UMS_ADMIN}",
 "${MENTOR}"
 ]`;
 
 const NOT_UMS_HEAD_AND_MENTOR = `[
-"${CMS_ADMIN}", 
-"${SELF_LEARNER}", 
-"${SCHOOL_STUDENT}", 
-"${MENTEE}", 
-"${UMS_VIEWER}", 
+"${CMS_ADMIN}",
+"${SELF_LEARNER}",
+"${SCHOOL_STUDENT}",
+"${MENTEE}",
+"${UMS_VIEWER}",
 "${CMS_UMS_VIEWER}",
 "${SALES_EXECUTIVE}",
 "${TRANSFORMATION_TEAM}",
@@ -74,31 +74,31 @@ const NOT_UMS_HEAD_AND_MENTOR = `[
 ]`;
 
 const UMS_HEAD_AND_SALES_EXECUTIVE = `[
-"${ADMIN}", 
+"${ADMIN}",
 "${UMS_ADMIN}",
 "${SALES_EXECUTIVE}"
 ]`;
 
 const NOT_UMS_HEAD_AND_SALES_EXECUTIVE = `[
-"${CMS_ADMIN}", 
-"${SELF_LEARNER}", 
-"${SCHOOL_STUDENT}", 
-"${MENTEE}", 
-"${UMS_VIEWER}", 
+"${CMS_ADMIN}",
+"${SELF_LEARNER}",
+"${SCHOOL_STUDENT}",
+"${MENTEE}",
+"${UMS_VIEWER}",
 "${CMS_UMS_VIEWER}",
-"${MENTOR}"
+"${MENTOR}",
 ]`;
 
 const ALL_ROLES = `[
-"${ADMIN}", 
-"${CMS_ADMIN}", 
-"${SELF_LEARNER}", 
-"${SCHOOL_STUDENT}", 
-"${UMS_ADMIN}", 
-"${MENTOR}", 
-"${MENTEE}", 
-"${UMS_VIEWER}", 
-"${CMS_VIEWER}", 
+"${ADMIN}",
+"${CMS_ADMIN}",
+"${SELF_LEARNER}",
+"${SCHOOL_STUDENT}",
+"${UMS_ADMIN}",
+"${MENTOR}",
+"${MENTEE}",
+"${UMS_VIEWER}",
+"${CMS_VIEWER}",
 "${CMS_UMS_VIEWER}",
 "${AFFILIATE}",
 "${SALES}",
@@ -108,19 +108,36 @@ const ALL_ROLES = `[
 ]`;
 
 const NOT_ADMIN = `[
-"${CMS_ADMIN}", 
-"${SELF_LEARNER}", 
-"${SCHOOL_STUDENT}", 
-"${UMS_ADMIN}", 
-"${MENTOR}", 
+"${CMS_ADMIN}",
+"${SELF_LEARNER}",
+"${SCHOOL_STUDENT}",
+"${UMS_ADMIN}",
+"${MENTOR}",
 "${MENTEE}",
-"${UMS_VIEWER}", 
-"${CMS_VIEWER}", 
+"${UMS_VIEWER}",
+"${CMS_VIEWER}",
 "${CMS_UMS_VIEWER}",
 "${SALES}",
 "${SALES_EXECUTIVE}",
 "${TRANSFORMATION_TEAM}",
 "${TRANSFORMATION_ADMIN}"
+]`;
+
+const BATCH_HEAD = `[
+"${ADMIN}",
+"${UMS_ADMIN}",
+"${MENTOR}",
+"${SALES_EXECUTIVE}"
+]`;
+
+const NOT_BATCH_HEAD = `[
+"${CMS_ADMIN}",
+"${SELF_LEARNER}",
+"${SCHOOL_STUDENT}",
+"${MENTEE}",
+"${UMS_VIEWER}",
+"${CMS_UMS_VIEWER}",
+"${AFFILIATE}",
 ]`;
 
 const ALL_ROLES_ARRAY = [
@@ -168,6 +185,8 @@ export {
   SALES_EXECUTIVE,
   UMS_HEAD_AND_SALES_EXECUTIVE,
   NOT_UMS_HEAD_AND_SALES_EXECUTIVE,
+  NOT_BATCH_HEAD,
+  BATCH_HEAD,
   TRANSFORMATION_TEAM,
   TRANSFORMATION_ADMIN,
 };

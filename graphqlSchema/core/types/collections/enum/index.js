@@ -53,6 +53,8 @@ import UserOriginSource from './UserOriginSource';
 import InternetSpeedUnit from './InternetSpeedUnit';
 import MentorStatus from './MentorStatus';
 import MentorPaymentStatus from './MentorPaymentStatus';
+import BatchType from './BatchType';
+import VerificationStatus from './VerificationStatus';
 
 export default [
   Status,
@@ -111,4 +113,6 @@ export default [
   InternetSpeedUnit,
   MentorStatus,
   MentorPaymentStatus,
+  BatchType,
+  VerificationStatus,
 ];

@@ -64,6 +64,9 @@ import UserSavedCode from './userSavedCode';
 import SalesExecutiveProfile from './salesExecutiveProfile';
 import MentorPricing from './mentorPricing';
 import MentorReport from './mentorReport';
+import Batch from './batch';
+import BatchCurrentComponentStatus from './batchCurrentComponentStatus';
+import BatchSession from './batchSession';
 
 export default [
   ...User,
@@ -132,4 +135,7 @@ export default [
   ...SalesExecutiveProfile,
   ...MentorPricing,
   ...MentorReport,
+  ...Batch,
+  ...BatchCurrentComponentStatus,
+  ...BatchSession,
 ];

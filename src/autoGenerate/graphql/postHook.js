@@ -32,6 +32,14 @@ import addUserCurrentTopicComponentStatusPostHookMethod
   from './postHookFunctions/addUserCurrentTopicComponentStatusPostHookMethod';
 import updateUserCurrentTopicComponentStatusPostHookMethod
   from './postHookFunctions/updateUserCurrentTopicComponentStatusPostHookMethod';
+import addBatchPostHookMethod
+  from './postHookFunctions/addBatchPostHookMethod';
+import addBatchSessionPostHookMethod
+  from './postHookFunctions/addBatchSessionPostHookMethod';
+import updateBatchSessionPostHookMethod
+  from './postHookFunctions/updateBatchSessionPostHookMethod';
+import updateBatchCurrentComponentStatusPostHookMethod
+  from './postHookFunctions/updateBatchCurrentComponentStatusPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -171,6 +179,22 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateUserCurrentTopicComponentStatus': {
       await updateUserCurrentTopicComponentStatusPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'addBatch': {
+      await addBatchPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'addBatchSession': {
+      await addBatchSessionPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'updateBatchSession': {
+      await updateBatchSessionPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'updateBatchCurrentComponentStatus': {
+      await updateBatchCurrentComponentStatusPostHookMethod(input, params, mutationName, context);
       break;
     }
     default:

@@ -4,17 +4,17 @@ import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import availableSlotsQuery from '../graphqlQueries/availableSlotsQuery';
 import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery';
 import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
-import { byPassMenteeValidationApps } from '../../../../constants';
+import { backendApps } from '../../../../constants';
 
 const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
   const { sessionType, availabilityDate, ...slots } = input;
-  if (sessionType && sessionType === 'paid') {
+  if (sessionType && (sessionType === 'paid' || sessionType === 'batch')) {
     return true;
   }
 
   // don't increase the availability slot if it is done through backend
   const { appName } = context;
-  if (byPassMenteeValidationApps.includes(appName)) {
+  if (backendApps.includes(appName)) {
     return true;
   }
 

@@ -3,7 +3,7 @@ import {
   topicTypes,
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
-  enrollmentTypes, masteryLevels, userTopicTypeStatus,
+  enrollmentTypes, masteryLevels, userTopicTypeStatus, sessionStatus, batchType,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
@@ -136,6 +136,31 @@ const getUserLearningObjectiveQuery = (userId, learningObjectiveId) => `
   }
   `;
 
+// query to get batch Sessions
+const getBatchStatus = (userId) => `
+  query{
+    user(id: "${userId}"){
+      studentProfile{
+        batch{
+          id
+          type
+          currentComponent{
+            currentCourse{
+              id
+              order
+            }
+            currentTopic{
+              id
+              order
+            }
+            latestSessionStatus
+          }
+        }
+      }
+    }
+  }
+  `;
+
 const getUpdatedLearningObjectivesData = async (userId, learningObjectivesData, context) => {
   const clonedLearningObjectivesData = cloneDeep(learningObjectivesData);
   /* eslint no-restricted-syntax:0 */
@@ -202,6 +227,16 @@ const userTopicJourneyMutationResolver = async (
 
   // calling method to validate user current topic component status
   validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
+
+  // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
+  const batchRes = await callLocalGraphqlApi(
+    getBatchStatus(userId),
+    context,
+    '',
+  );
+
+  const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+  const batchCurrentComponentBatchType = get(batchRes, 'data.user.studentProfile.batch.type');
 
   // calling API to get data of fetched topic
   const topicRes = await callLocalGraphqlApi(
@@ -270,13 +305,23 @@ const userTopicJourneyMutationResolver = async (
   */
   const { defaultMastery } = masteryLevels;
   let topicStatus = incomplete;
-  if (topicInfo.order < currentRunningTopic.order) {
+  let currentRunningTopicOrder;
+  // for batches we will use batchCurrentComponentStatus to check current topic
+  if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+    const {
+      currentTopic: currentBatchRunningTopic,
+    } = batchCurrentComponentInfo;
+    currentRunningTopicOrder = currentBatchRunningTopic && currentBatchRunningTopic.order;
+  } else {
+    currentRunningTopicOrder = currentRunningTopic.order;
+  }
+
+  if (topicInfo.order < currentRunningTopicOrder) {
     if (topicInfo.isTrial || enrollmentType === pro) {
       videoData.isUnlocked = true;
     } else {
       videoData.isUnlocked = false;
     }
-
     learningObjectivesData = getUpdatedLearningObjectivesData(userId, learningObjectivesData, context);
 
     quizData.isUnlocked = true;
@@ -305,7 +350,7 @@ const userTopicJourneyMutationResolver = async (
     if called topic order is greater than that of current topic order,
      that means all components are locked for that topic
     */
-  } else if (topicInfo.order > currentRunningTopic.order) {
+  } else if (topicInfo.order > currentRunningTopicOrder) {
     videoData.isUnlocked = false;
     learningObjectivesData.forEach((loInArray, index) => {
       learningObjectivesData[index].isUnlocked = false;
@@ -318,61 +363,101 @@ const userTopicJourneyMutationResolver = async (
      status on basis of that
     */
   } else {
-    const { video, quiz } = topicTypes;
-    quizData.masteryLevel = defaultMastery;
-    // video is unlocked only if topic is free or user is pro
-    if (topicInfo.isTrial || enrollmentType === pro) {
-      videoData.isUnlocked = true;
-    } else {
-      videoData.isUnlocked = false;
-    }
-    switch (currentTopicComponent) {
-      // since video is first component, if that is current topic component
-      // that means all components are locked
-      case video: {
-        learningObjectivesData.forEach((loInArray, index) => {
-          learningObjectivesData[index].isUnlocked = false;
-        });
-        quizData.isUnlocked = false;
-        break;
-      }
-      // since quiz is last component, if that is current topic component
-      // that means all components are unlocked
-      case quiz: {
-        learningObjectivesData = getUpdatedLearningObjectivesData(userId, learningObjectivesData, context);
-        quizData.isUnlocked = true;
-        break;
-      }
-      default: {
-        // case when messgae or practiceQuestion is current component
-        // in that case we are checking order of LOs
-        learningObjectivesData.forEach((loInArray, index) => {
-          if (loInArray.order <= currentRunningLearningObjective.order) {
-            learningObjectivesData[index].isUnlocked = true;
-          } else {
-            learningObjectivesData[index].isUnlocked = false;
-          }
-        });
-        for (const loInArray of learningObjectivesData) {
-          if (loInArray.order <= currentRunningLearningObjective.order) {
-            loInArray.isUnlocked = true;
-            /* eslint no-await-in-loop:0 */
-            const userLearningObjectiveRes = await callLocalGraphqlApi(
-              getUserLearningObjectiveQuery(userId, loInArray.id),
-              context,
-              '',
-            );
-            const userLearningObjectiveInfo = get(userLearningObjectiveRes, 'data.userLearningObjectives[0]');
-            if (userLearningObjectiveInfo) {
-              loInArray.practiceQuestionStatus = userLearningObjectiveInfo.practiceQuestionStatus;
-              loInArray.chatStatus = userLearningObjectiveInfo.chatStatus;
-            }
-          } else {
-            loInArray.isUnlocked = false;
-          }
+    // batch user calculation when topic order === current topi order in batch
+    /* eslint no-lonely-if:0 */
+    if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+      const {
+        latestSessionStatus,
+      } = batchCurrentComponentInfo;
+      if (latestSessionStatus === sessionStatus.started || latestSessionStatus === sessionStatus.completed) {
+        if (topicInfo.isTrial || enrollmentType === pro) {
+          videoData.isUnlocked = true;
+        } else {
+          videoData.isUnlocked = false;
         }
-        quizData.isUnlocked = false;
-        break;
+
+        learningObjectivesData = getUpdatedLearningObjectivesData(userId, learningObjectivesData, context);
+
+        quizData.isUnlocked = true;
+        // getting user quiz report to get the mastery level of user in quiz
+        const quizRes = await callLocalGraphqlApi(
+          getQuizReportQuery(userId, topicId),
+          context,
+          '',
+        );
+        const quizInfo = get(quizRes, 'data.userQuizReports[0]');
+        if (!quizInfo) {
+          log('Topic quiz report is not present');
+        }
+        let correctQuestionCount = 0;
+        let totalQuestionCount = 0;
+        if (quizInfo && quizInfo.quizReport) {
+          correctQuestionCount = quizInfo.quizReport.correctQuestionCount;
+          totalQuestionCount = quizInfo.quizReport.totalQuestionCount;
+        }
+        // logic to calculate mastery level on basis of percentage
+        const masteryLevel = getMasteryLevel(correctQuestionCount, totalQuestionCount);
+        quizData.masteryLevel = masteryLevel;
+        topicStatus = complete;
+        quizData.status = complete;
+      }
+    } else {
+      const { video, quiz } = topicTypes;
+      quizData.masteryLevel = defaultMastery;
+      // video is unlocked only if topic is free or user is pro
+      if (topicInfo.isTrial || enrollmentType === pro) {
+        videoData.isUnlocked = true;
+      } else {
+        videoData.isUnlocked = false;
+      }
+      switch (currentTopicComponent) {
+        // since video is first component, if that is current topic component
+        // that means all components are locked
+        case video: {
+          learningObjectivesData.forEach((loInArray, index) => {
+            learningObjectivesData[index].isUnlocked = false;
+          });
+          quizData.isUnlocked = false;
+          break;
+        }
+        // since quiz is last component, if that is current topic component
+        // that means all components are unlocked
+        case quiz: {
+          learningObjectivesData = getUpdatedLearningObjectivesData(userId, learningObjectivesData, context);
+          quizData.isUnlocked = true;
+          break;
+        }
+        default: {
+          // case when messgae or practiceQuestion is current component
+          // in that case we are checking order of LOs
+          learningObjectivesData.forEach((loInArray, index) => {
+            if (loInArray.order <= currentRunningLearningObjective.order) {
+              learningObjectivesData[index].isUnlocked = true;
+            } else {
+              learningObjectivesData[index].isUnlocked = false;
+            }
+          });
+          for (const loInArray of learningObjectivesData) {
+            if (loInArray.order <= currentRunningLearningObjective.order) {
+              loInArray.isUnlocked = true;
+              /* eslint no-await-in-loop:0 */
+              const userLearningObjectiveRes = await callLocalGraphqlApi(
+                getUserLearningObjectiveQuery(userId, loInArray.id),
+                context,
+                '',
+              );
+              const userLearningObjectiveInfo = get(userLearningObjectiveRes, 'data.userLearningObjectives[0]');
+              if (userLearningObjectiveInfo) {
+                loInArray.practiceQuestionStatus = userLearningObjectiveInfo.practiceQuestionStatus;
+                loInArray.chatStatus = userLearningObjectiveInfo.chatStatus;
+              }
+            } else {
+              loInArray.isUnlocked = false;
+            }
+          }
+          quizData.isUnlocked = false;
+          break;
+        }
       }
     }
   }
@@ -383,7 +468,6 @@ const userTopicJourneyMutationResolver = async (
     quiz: quizData,
     topicStatus,
   });
-
   return userTopicData;
 };
 

@@ -8,9 +8,9 @@ const SalesOperationActivity = `
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
-      ], 
+      ],
     rule: allow
-  )  
+  )
   @userPermissions(
     permissions:[
       { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
@@ -18,10 +18,10 @@ const SalesOperationActivity = `
       { userRole: ${MENTOR} appName: "*" operations: "*" },
       { userRole: ${TRANSFORMATION_TEAM} appName: "*" operations: "*" },
       { userRole: ${TRANSFORMATION_ADMIN} appName: "*" operations: "*" },
-      ], 
+      ],
     rule: allow
-  ) 
-   { 
+  )
+   {
     loggedBy: User @relation(name:"SalesOperationActivityLoggedBy", direction: "OneWay")
     salesOperation: SalesOperation! @relation(name:"SalesOperationActivitySalesOperation")
     actionOn: SalesOperationActionOn

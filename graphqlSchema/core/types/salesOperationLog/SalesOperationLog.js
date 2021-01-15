@@ -8,9 +8,9 @@ const SalesOperationLog = `
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
-      ], 
+      ],
     rule: allow
-  )  
+  )
   @userPermissions(
     permissions:[
       { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
@@ -18,15 +18,15 @@ const SalesOperationLog = `
       { userRole: ${MENTOR} appName: "*" operations: "*" },
       { userRole: ${TRANSFORMATION_TEAM} appName: "*" operations: "*" },
       { userRole: ${TRANSFORMATION_ADMIN} appName: "*" operations: "*" },
-      ], 
+      ],
     rule: allow
-  ) 
-   { 
+  )
+   {
     loggedBy: User @relation(name:"SalesOperationLogLoggedBy", direction: "OneWay")
     salesOperation: SalesOperation @relation(name:"SalesOperationLogSalesOperation")
     log: String
     type: SalesOperationLogType
-    topic: Topic @relation(name: "SalesOperationLogTopic", direction: "OneWay") 
+    topic: Topic @relation(name: "SalesOperationLogTopic", direction: "OneWay")
   }
 `;
 

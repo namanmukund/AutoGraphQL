@@ -27,27 +27,11 @@ const getMentorSessions = (userId, availabilityDate, sessionType) => `
   `;
 // prehook logic to check if added MentorSession(user id and availabilityDate) already exists
 const addMentorSessionValidation = async (params, mutationOrQueryName, context) => {
-  // validate input before proceeding
-  validateMentorSessionInput(params);
-  // check if the document for called user and availabilityDate is already present
-  const userId = get(params, 'userConnectId');
-  const courseId = get(params, 'courseConnectId');
-  const availabilityDate = get(params, 'input.availabilityDate');
-
-  // log in case user id or availabilityDate is not present
-  if (!userId || !availabilityDate || !courseId) {
-    throw new MissingMandatoryInputInRequestError({
-      data: {
-        message: 'Either userConnectId or courseConnectId or availabilityDate or all missing in input',
-      },
-    });
-  }
-
   /*
-    Calling method to validate token and return userId and appName
-    we will compare this userId against userId passed in input
-    both should be equal to perform further action
-    */
+  Calling method to validate token and return userId and appName
+  we will compare this userId against userId passed in input
+  both should be equal to perform further action
+  */
 
   // getting user role from context. We will allow adding mentorSession if logged in user is admin
   const userInfo = validateTokenAndExtractInformation(context, false);
@@ -63,6 +47,22 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
     appName,
   } = userAndAppInfo;
   context.appName = appName;
+
+  // validate input before proceeding
+  validateMentorSessionInput(params, '', context);
+  // check if the document for called user and availabilityDate is already present
+  const userId = get(params, 'userConnectId');
+  const courseId = get(params, 'courseConnectId');
+  const availabilityDate = get(params, 'input.availabilityDate');
+
+  // log in case user id or availabilityDate is not present
+  if (!userId || !availabilityDate || !courseId) {
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'Either userConnectId or courseConnectId or availabilityDate or all missing in input',
+      },
+    });
+  }
 
   if (
     !backendApps.includes(appName)

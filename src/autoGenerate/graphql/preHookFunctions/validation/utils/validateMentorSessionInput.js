@@ -4,9 +4,10 @@ import validateBookingDate from './validateBookingDate';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
 import { MissingMandatoryInputInRequestError, NoSlotSelectedError } from '../../../../../../constants/errors/input';
 import isToday from '../../../../../../utils/isToday';
+import { backendApps } from '../../../../../../constants';
 
 const PRE_BOOKING_HOUR_LIMIT = 0;
-const validateMentorSessionInput = (params, prevMentorSession) => {
+const validateMentorSessionInput = (params, prevMentorSession, context) => {
   const { input } = params;
   const { availabilityDate, ...slots } = input;
 
@@ -23,6 +24,13 @@ const validateMentorSessionInput = (params, prevMentorSession) => {
   if (!(prevMentorSession && prevMentorSession.id) && !slotTimeArray.length) {
     throw new NoSlotSelectedError();
   }
+
+  // if call is made from backend, excluding this check for batch
+  const { appName } = context;
+  if (backendApps.includes(appName)) {
+    return true;
+  }
+
   let modifiedSlotTimeArray = slotTimeArray;
   if (prevMentorSession && prevMentorSession.id) {
     const date = new Date(availabilityDate);

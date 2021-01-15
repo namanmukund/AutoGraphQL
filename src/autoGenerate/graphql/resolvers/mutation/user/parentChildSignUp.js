@@ -302,7 +302,7 @@ const parentChildSignUpMutationResolver = async (
 
   const currentUser = authentication && authentication.user;
 
-  if (currentUser) {
+  if (currentUser && currentUser) {
     throw new UserTokenNotRequiredError();
   }
   validateParentChildSignUpInput(input);

@@ -56,7 +56,11 @@ import deleteMenteeSessionValidation from './preHookFunctions/validation/deleteM
 import updateSalesOperationValidation from './preHookFunctions/validation/updateSalesOperationValidation';
 import addSalesOperationValidation from './preHookFunctions/validation/addSalesOperationOperationValidation';
 import addNetPromoterScoreValidation from './preHookFunctions/validation/addNetPromoterScoreValidation';
-import { CanNotCompleteSessionBeforeStartingError } from '../../../constants/errors/input';
+import addBatchSessionValidation from './preHookFunctions/validation/addBatchSessionValidation';
+import updateBatchSessionValidation from './preHookFunctions/validation/updateBatchSessionValidation';
+import deleteBatchSessionValidation from './preHookFunctions/validation/deleteBatchSessionValidation';
+import updateBatchCurrentComponentStatusValidation from './preHookFunctions/validation/updateBatchCurrentComponentStatusValidation';
+// import { CanNotCompleteSessionBeforeStartingError } from '../../../constants/errors/input';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -421,9 +425,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
           newInput.sessionStartDate = new Date().toISOString();
           break;
         }
-        case 'completed': {
-          throw new CanNotCompleteSessionBeforeStartingError();
-        }
+        // commenting it for batch, as we can complete session if we shift a batch to a topic
+        // case 'completed': {
+        //   throw new CanNotCompleteSessionBeforeStartingError();
+        // }
         default: {
           newInput.sessionAllotmentDate = new Date().toISOString();
           // temporary hack for backword compatibility
@@ -501,6 +506,22 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'addNetPromoterScore': {
       await addNetPromoterScoreValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addBatchSession': {
+      await addBatchSessionValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateBatchSession': {
+      await updateBatchSessionValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'deleteBatchSession': {
+      await deleteBatchSessionValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateBatchCurrentComponentStatus': {
+      await updateBatchCurrentComponentStatusValidation(params, mutationOrQueryName, context);
       break;
     }
     default: {
