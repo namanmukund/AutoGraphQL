@@ -263,7 +263,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
       if (!mentorSessionId) {
         const variables = {
           input: {
-            availabilityDate: menteeBookingSlot,
+            availabilityDate: menteBookingDate,
             [`slot${menteeBookingSlot}`]: true,
           },
         };
