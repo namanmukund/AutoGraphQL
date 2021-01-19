@@ -31,6 +31,9 @@ const getBatchQuery = (batchId) => `
           user{
             id
             source
+            studentProfile{
+              id
+            }
           }
         }
         currentComponent{
@@ -58,6 +61,19 @@ const nextTopicQuery = () => `
 }
   `;
 
+// mutation to update batch sessions
+const updateBatchSessionQuery = (
+  batchSessionId, pushManyQuery,
+) => `
+  mutation{
+    updateBatchSession(id:"${batchSessionId}",  input:{
+      ${pushManyQuery}
+    }){
+      id
+    }
+  }
+  `;
+
 /*
   Post hook of addBatchSession
 */
@@ -65,6 +81,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   const batchId = get(params, 'batchConnectId');
   const topicId = get(params, 'topicConnectId');
   const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
+  const { id: batchSessionId } = input;
   const { bookingDate, sessionStatus: sessionStatusFromInput } = params && params.input;
   const { slotTimeArray } = context;
 
@@ -122,6 +139,24 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
         sessionStatusFromInput,
       );
     }
+  }
+
+  // add students to the batch session and mark them absent as default
+  if (students && students.length) {
+    let pushManyQuery = 'attendance:{ pushMany: [';
+    students.forEach((studentElem) => {
+      if (studentElem.user && studentElem.user.studentProfile && studentElem.user.studentProfile.id) {
+        pushManyQuery += `{studentConnectId: "${studentElem.user.studentProfile.id}", 
+                                               isPresent: false, 
+                                               }, `;
+      }
+    });
+    pushManyQuery += ']}';
+    // pushing new array of students in batch session
+    await callLocalGraphqlApi(updateBatchSessionQuery(
+      batchSessionId,
+      pushManyQuery,
+    ));
   }
 
   // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
