@@ -1,9 +1,6 @@
 /* eslint-disable no-await-in-loop, no-console */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
-import getSlotTimesInString from '../../../utils/getSlotTimesInString';
-import getSelectedSlotsTime from '../graphql/preHookFunctions/validation/utils/getSelectedSlotsTime';
-
 const callMentorMenteeSessions = async (
   userId,
   topicId,
@@ -76,7 +73,6 @@ query {
   }){
     id
     bookingDate
-    ${getSlotTimesInString()}
   }
 }
 `;
@@ -184,26 +180,91 @@ mutation($input: MentorSessionUpdate){
 const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicId, bookingDate, slot, mentorSessionIdFromInput, courseId, sessionStatus, source, methodCallOriginComponent) => {
   // eslint-disable-next-line no-restricted-syntax
   try {
+    console.log('------------------------menteeUserId', menteeUserId);
+    console.log('------------------------mentorUserId', mentorUserId);
+    console.log('------------------------topicId', topicId);
+    console.log('------------------------bookingDate', bookingDate);
+    console.log('------------------------slot', slot);
+    console.log('------------------------mentorSessionIdFromInput', mentorSessionIdFromInput);
+    console.log('------------------------courseId', courseId);
+    console.log('------------------------sessionStatus', sessionStatus);
+    console.log('------------------------source', source);
+    console.log('------------------------methodCallOriginComponent', methodCallOriginComponent);
+    if (menteeUserId && topicId) {
+      const mentorMenteeId = await callMentorMenteeSessions(menteeUserId, topicId);
+      if (mentorMenteeId) {
+        await callUpdateMentorMenteeSession(mentorMenteeId, { input: { sessionStatus } });
+        console.log('------------------------updated mentorMenteeId', mentorMenteeId);
+        return true;
+      }
+    }
+
     let menteBookingDate = bookingDate;
     let menteeBookingSlot = slot;
     let menteeSessionId;
     let mentorSessionId = mentorSessionIdFromInput;
+
+    // add mentor  session
+    if (!mentorSessionId && mentorUserId) {
+      mentorSessionId = await getMentorSessionId(
+        mentorUserId,
+        menteBookingDate,
+        `slot${menteeBookingSlot}`,
+      );
+      console.log('------------------------111 mentorSessionId', mentorSessionId);
+      if (!mentorSessionId) {
+        console.log('------------------------adding mentorSessionId');
+        const variables = {
+          input: {
+            availabilityDate: menteBookingDate,
+            [`slot${menteeBookingSlot}`]: true,
+            sessionType: 'batch',
+          },
+        };
+        mentorSessionId = await callAddMentorSession(mentorUserId, courseId, variables);
+        console.log('------------------------added mentorSessionId', mentorSessionId);
+      } else {
+        // update
+        const variables = {
+          input: {
+            availabilityDate: menteBookingDate,
+            [`slot${menteeBookingSlot}`]: true,
+            sessionType: 'batch',
+          },
+        };
+        await callUpdateMentorSession(
+          mentorSessionId,
+          variables,
+        );
+        console.log('------------------------updated mentorSessionId', mentorSessionId);
+      }
+    } else {
+      console.log('------------------------updated existing mentorSessionId', mentorSessionId);
+      const variables = {
+        input: {
+          availabilityDate: menteBookingDate,
+          [`slot${menteeBookingSlot}`]: true,
+          sessionType: 'batch',
+        },
+      };
+      await callUpdateMentorSession(
+        mentorSessionId,
+        variables,
+      );
+    }
+
     if (menteeUserId) {
       const menteeSession = await getMenteeSession(
         menteeUserId,
         topicId,
       );
       if (menteeSession) {
-        const { id: menteeSessionIdFromMenteeQuery, bookingDate: bookingDateFromMenteeQuery, ...slots } = menteeSession;
+        const { id: menteeSessionIdFromMenteeQuery } = menteeSession;
         menteeSessionId = menteeSessionIdFromMenteeQuery;
-        if (methodCallOriginComponent === 'updateBatchCurrentComponentStatus') {
-          menteBookingDate = bookingDateFromMenteeQuery;
-          const slotTimeArray = getSelectedSlotsTime(slots);
-          menteeBookingSlot = slotTimeArray && slotTimeArray.length && slotTimeArray[0];
-        }
       }
-
-      if (menteeSessionId && methodCallOriginComponent === 'updateBatchSession') {
+      console.log('------------------------menteeSessionId', menteeSessionId);
+      if (menteeSessionId) {
+        console.log('------------------------updating menteeSessionId', menteeSessionId);
         // update
         const variables = {
           input: {
@@ -238,6 +299,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           menteeSessionId,
           variables,
         );
+        console.log('------------------------updated menteeSessionId', menteeSessionId);
       } else if (!menteeSessionId) {
         // add mentee session
         /* eslint no-lonely-if:0 */
@@ -250,68 +312,26 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
             },
           };
           menteeSessionId = await callAddMenteeSession(menteeUserId, topicId, variables);
+          console.log('------------------------added menteeSessionId', menteeSessionId);
         }
       }
     }
-    // add mentor  session
-    if (!mentorSessionId && mentorUserId) {
-      mentorSessionId = await getMentorSessionId(
-        mentorUserId,
-        menteBookingDate,
-        `slot${menteeBookingSlot}`,
-      );
-      if (!mentorSessionId) {
-        const variables = {
-          input: {
-            availabilityDate: menteBookingDate,
-            [`slot${menteeBookingSlot}`]: true,
-          },
-        };
-        mentorSessionId = await callAddMentorSession(mentorUserId, courseId, variables);
-      } else {
-        // update
-        const variables = {
-          input: {
-            availabilityDate: menteBookingDate,
-            [`slot${menteeBookingSlot}`]: true,
-          },
-        };
-        await callUpdateMentorSession(
-          mentorSessionId,
-          variables,
-        );
-      }
-    } else {
+    
+    // add mentor mentee session
+    if (menteeSessionId && mentorSessionId) {
       const variables = {
         input: {
-          availabilityDate: menteBookingDate,
-          [`slot${menteeBookingSlot}`]: true,
+          sessionStatus,
+          source,
         },
       };
-      await callUpdateMentorSession(
+      await callAddMentorMenteeSession(
+        topicId,
+        menteeSessionId,
         mentorSessionId,
         variables,
       );
-    }
-    // add mentor mentee session
-    if (menteeSessionId && mentorSessionId) {
-      const mentorMenteeId = await callMentorMenteeSessions(menteeUserId, topicId);
-      if (mentorMenteeId) {
-        await callUpdateMentorMenteeSession(mentorMenteeId, { input: { sessionStatus } });
-      } else {
-        const variables = {
-          input: {
-            sessionStatus,
-            source,
-          },
-        };
-        await callAddMentorMenteeSession(
-          topicId,
-          menteeSessionId,
-          mentorSessionId,
-          variables,
-        );
-      }
+      console.log('------------------------added mentorMenteeId');
     }
   } catch (e) {
     console.log('Error........', e);
