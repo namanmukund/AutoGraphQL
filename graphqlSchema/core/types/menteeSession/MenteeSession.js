@@ -10,6 +10,7 @@ const MenteeSession = `
     scheduleRunStatus: ScheduleRunStatus
     ${slotTimeFields}
     source: UserOriginSource @defaultValue(value: "website")
+    country: Country @defaultValue(value: "india")
 }`;
 
 export default [MenteeSession];

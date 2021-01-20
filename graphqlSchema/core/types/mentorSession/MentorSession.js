@@ -27,6 +27,7 @@ const MentorSession = `
     course: Course! @relation(name: "MentorSessionCourse", direction: "OneWay")
     availabilityDate: Date!
     sessionType: SessionType @defaultValue(value: "trial")
+    country: Country @defaultValue(value: "india")
     ${slotTimeFields}
 }`;
 

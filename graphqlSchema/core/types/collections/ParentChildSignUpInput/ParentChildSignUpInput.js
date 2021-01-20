@@ -5,6 +5,7 @@ const ParentChildSignUpInput = `
     parentEmail: String!
     parentPhone: PhoneInput!  
     grade: Grade
+    country: Country
     section:  String
     rollNo: String
     batch: String

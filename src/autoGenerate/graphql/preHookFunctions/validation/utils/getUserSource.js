@@ -7,11 +7,12 @@ query{
   user(id:"${userId}"){
     id
     source
+    country
   }
 }
 `;
   const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.user.source');
+  return get(res, 'data.user');
 };
 
 export default getUserSource;
