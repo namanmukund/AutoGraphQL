@@ -65,6 +65,7 @@ const User = `
     dateOfBirth: Date
     gender: Gender
     city: String
+    country: Country @defaultValue(value: "india")
     isSetPassword: Boolean @defaultValue(value: "false")
     studentProfile: StudentProfile @relation(name:"StudentProfileUser", isSubset: true)
     parentProfile: ParentProfile @relation(name:"ParentProfileUser", isSubset: true)

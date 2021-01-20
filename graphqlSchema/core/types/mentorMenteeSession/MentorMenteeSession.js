@@ -65,6 +65,7 @@ const MentorMenteeSession = `
     ${sessionRescheduledReasons}
     sessionCommentByMentor: String
     source: UserOriginSource @defaultValue(value: "website")
+    country: Country @defaultValue(value: "india")
     internetSpeed: InternetSpeed
     leadStatus: LeadStatus @groupBy
     mentorPaymentStatus: MentorPaymentStatus @defaultValue(value: "declined")

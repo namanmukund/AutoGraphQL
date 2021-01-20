@@ -27,6 +27,7 @@ const Product = `
     userRole: UserRole! @defaultValue(value: "selfLearner")
     discounts: [Discount] @relation(name: "ProductDiscount")
     isDemoPack: Boolean @defaultValue(value: "false")
+    country: Country @defaultValue(value: "india")
   }
 `;
 
