@@ -14,7 +14,6 @@ const NetPromoterScore = `
   {
     score: Int! @length(min: 0, max: 10) @groupBy
     user: User! @relation(name: "NetPromoterScoreUser", direction: "OneWay")
-    country: Country @defaultValue(value: "india")
   }
 `;
 
