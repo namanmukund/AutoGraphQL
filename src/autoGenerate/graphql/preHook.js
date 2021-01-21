@@ -333,7 +333,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         },
       };
       await addMenteeSessionValidation(newParams, mutationOrQueryName, context);
-      return hook(newInput, mutationOrQueryName, 'PreHook');
+      return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'updateMenteeSession': {
       const { bookingDate } = input;
@@ -362,7 +362,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         };
       }
       await updateMenteeSessionValidation(newParams, mutationOrQueryName, context);
-      return hook(newInput, mutationOrQueryName, 'PreHook');
+      return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'addMentorSession': {
       const { availabilityDate } = input;
@@ -380,7 +380,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         },
       };
       await addMentorSessionValidation(newParams, mutationOrQueryName, context);
-      return hook(newInput, mutationOrQueryName, 'PreHook');
+      return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'updateMentorSession': {
       const { availabilityDate } = input;
@@ -409,7 +409,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         };
       }
       await updateMentorSessionValidation(newParams, mutationOrQueryName, context);
-      return hook(newInput, mutationOrQueryName, 'PreHook');
+      return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'deleteMentorSession': {
       await deleteMentorSessionValidation(params, mutationOrQueryName, context);
@@ -474,7 +474,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         },
       };
       await updateMentorMenteeSessionValidation(newParams, mutationOrQueryName, context);
-      return hook(newInput, mutationOrQueryName, 'PreHook');
+      return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'addUserPaymentInstallment': {
       const { isPaymentRequested } = input;
