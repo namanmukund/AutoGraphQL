@@ -8,6 +8,7 @@ const collectionNames = [
   'MentorMenteeSession',
   'SalesOperation',
   'Product',
+  'AvailableSlot',
 ];
 
 const updateCountryInCollections = async () => {

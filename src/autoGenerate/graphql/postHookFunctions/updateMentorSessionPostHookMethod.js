@@ -7,7 +7,9 @@ import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
 import { byPassMenteeValidationApps } from '../../../../constants';
 
 const updateMentorSessionPostHookMethod = async (input, mutationName, context) => {
-  const { sessionType, availabilityDate, ...slots } = input;
+  const {
+    sessionType, country, availabilityDate, ...slots
+  } = input;
   if (sessionType && (sessionType === 'paid' || sessionType === 'batch')) {
     return true;
   }
@@ -29,7 +31,9 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
     if a mentor has changed the slots of the current date
     ---add for new slots and remove for old slots
    */
-  const currentAvailableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(availabilityDate));
+  const currentAvailableSlotsRes = await callLocalGraphqlApi(
+    availableSlotsQuery(availabilityDate, country),
+  );
   const currentAvailableSlots = get(currentAvailableSlotsRes, 'data.availableSlots');
 
   if (availabilityDate && availabilityDate.getTime() !== prevAvailabilityDate.getTime()) {
@@ -71,6 +75,7 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
       slotTimeStringArray.forEach((slot) => {
         docToBeAdded[slot] = 1;
         docToBeAdded.date = availabilityDate.toISOString();
+        docToBeAdded.country = country;
       });
       // add
       const variables = {
