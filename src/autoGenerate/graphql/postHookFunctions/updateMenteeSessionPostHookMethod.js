@@ -18,7 +18,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const { id: menteeSessionId, bookingDate: prevBookingDate, ...prevSlots } = previousDocument;
   const prevSlotTimeStringArray = getSelectedSlotsStringArray(prevSlots);
 
-  const { bookingDate, ...slots } = input;
+  const { bookingDate, country, ...slots } = input;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
   // Only for trial session and only for india
@@ -37,12 +37,27 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
     if (bookingDate && bookingDate.getTime() !== prevBookingDate.getTime()) {
       // -- decrease the availability slot of current availabilityDate
-      await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
+      await reduceParticularAvailableSlotOfADate(
+        slotTimeStringArray,
+        bookingDate,
+        context,
+        country,
+      );
       // --increase the availability slot from the prevBookingDate
-      await increaseParticularAvailableSlotOfADate(prevSlotTimeStringArray, prevBookingDate, context);
+      await increaseParticularAvailableSlotOfADate(
+        prevSlotTimeStringArray,
+        prevBookingDate,
+        context,
+        country,
+      );
     } else {
       // ---decrease for new slots and increase for old slots
-      const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(bookingDate));
+      const availableSlotsRes = await callLocalGraphqlApi(
+        availableSlotsQuery(
+          bookingDate,
+          country,
+        ),
+      );
       const availableSlots = get(availableSlotsRes, 'data.availableSlots');
       // update if doc exist else leave
       if (availableSlots && availableSlots.length) {
