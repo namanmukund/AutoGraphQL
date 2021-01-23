@@ -67,6 +67,7 @@ import MentorReport from './mentorReport';
 import Batch from './batch';
 import BatchCurrentComponentStatus from './batchCurrentComponentStatus';
 import BatchSession from './batchSession';
+import UserLocationLog from './userLocationLog';
 
 export default [
   ...User,
@@ -138,4 +139,5 @@ export default [
   ...Batch,
   ...BatchCurrentComponentStatus,
   ...BatchSession,
+  ...UserLocationLog,
 ];
