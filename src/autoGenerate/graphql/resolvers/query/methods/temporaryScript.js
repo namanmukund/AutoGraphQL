@@ -15,6 +15,8 @@ const temporaryScript = (async (root, params, context) => {
   // await addDefaultEnrollmentTypeInSalesOperation();
   // await addUnassignedValueToSalesOperation();
   await generateMentorReport();
+  // await addProEnrollmentTypeInSalesOperation();
+  // await updateCountryInCollections();
   return {
     result: true,
   };

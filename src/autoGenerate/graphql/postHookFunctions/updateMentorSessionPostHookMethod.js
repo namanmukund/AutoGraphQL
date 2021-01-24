@@ -7,7 +7,9 @@ import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
 import { byPassMenteeValidationApps } from '../../../../constants';
 
 const updateMentorSessionPostHookMethod = async (input, mutationName, context) => {
-  const { sessionType, availabilityDate, ...slots } = input;
+  const {
+    sessionType, country, availabilityDate, ...slots
+  } = input;
   if (sessionType && (sessionType === 'paid' || sessionType === 'batch')) {
     return true;
   }
@@ -19,7 +21,7 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
     return true;
   }
 
-  const { availabilityDate: prevAvailabilityDate, ...prevSlots } = previousDocument;
+  const { availabilityDate: prevAvailabilityDate, country: prevCountry, ...prevSlots } = previousDocument;
   const prevSlotTimeStringArray = getSelectedSlotsStringArray(prevSlots);
 
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
@@ -29,12 +31,19 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
     if a mentor has changed the slots of the current date
     ---add for new slots and remove for old slots
    */
-  const currentAvailableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(availabilityDate));
+  const currentAvailableSlotsRes = await callLocalGraphqlApi(
+    availableSlotsQuery(availabilityDate, country),
+  );
   const currentAvailableSlots = get(currentAvailableSlotsRes, 'data.availableSlots');
 
   if (availabilityDate && availabilityDate.getTime() !== prevAvailabilityDate.getTime()) {
     // --remove the availability slot from the prevAvailabilityDate
-    const prevAvailableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(prevAvailabilityDate));
+    const prevAvailableSlotsRes = await callLocalGraphqlApi(
+      availableSlotsQuery(
+        prevAvailabilityDate,
+        prevCountry,
+      ),
+    );
     const prevAvailableSlots = get(prevAvailableSlotsRes, 'data.availableSlots');
     // if prevAvailableSlots document exist then update else do nothing
     if (prevAvailableSlots && prevAvailableSlots.length) {
@@ -71,6 +80,7 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
       slotTimeStringArray.forEach((slot) => {
         docToBeAdded[slot] = 1;
         docToBeAdded.date = availabilityDate.toISOString();
+        docToBeAdded.country = country;
       });
       // add
       const variables = {

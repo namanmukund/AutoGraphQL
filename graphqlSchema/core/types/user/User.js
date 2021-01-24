@@ -71,7 +71,8 @@ const User = `
     parentProfile: ParentProfile @relation(name:"ParentProfileUser", isSubset: true)
     mentorProfile: MentorProfile @relation(name:"MentorProfileUser", isSubset: true)
     salesExecutiveProfile: SalesExecutiveProfile @relation(name:"SalesExecutiveProfileUser", isSubset: true)
-    profilePic: File @relation(name: "UserProfilePic", direction: "OneWay", isSubset: true) 
+    profilePic: File @relation(name: "UserProfilePic", direction: "OneWay", isSubset: true)
+    userLocationLog: UserLocationLog @relation(name:"UserLocationLogUser", isSubset: true) 
     utmSource: String
     utmCampaign: String
     utmTerm: String

@@ -2,6 +2,8 @@ import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import {
   MENTOR_REPORT_DAYS,
+  MENTOR_REPORT_COUNTRY,
+  MENTOR_REPORT_SESSION_TYPE,
   leadStatus,
 } from '../../../../../../constants';
 
@@ -10,7 +12,7 @@ const mentorMenteeSessionsQuery = (
   endDate,
 ) => `
   query{
-    mentorMenteeSessions(filter: {and: [{topic_some: {order: 1}}, {source_not: school}, {sessionStartDate_gt: "${startDate}"}, {sessionStartDate_lte: "${endDate}"}]}, orderBy: sessionStartDate_DESC) {
+    mentorMenteeSessions(filter: {and: [{country: ${MENTOR_REPORT_COUNTRY}}, ${MENTOR_REPORT_SESSION_TYPE === 'trial' ? '{topic_some: {order: 1}},' : ''} {source_not: school}, {sessionStartDate_gt: "${startDate}"}, {sessionStartDate_lte: "${endDate}"}]}, orderBy: sessionStartDate_DESC) {
       id
       leadStatus
       sessionStatus
@@ -85,7 +87,7 @@ const mentorSessionsQuery = (
   endDate,
 ) => `
   query{
-    mentorSessions(filter: {and: [{sessionType: trial}, {availabilityDate_gt: "${startDate}"}, {availabilityDate_lte: "${endDate}"}]}, orderBy: availabilityDate_DESC) {
+    mentorSessions(filter: {and: [{country: ${MENTOR_REPORT_COUNTRY}}, {sessionType: ${MENTOR_REPORT_SESSION_TYPE}}, {availabilityDate_gt: "${startDate}"}, {availabilityDate_lte: "${endDate}"}]}, orderBy: availabilityDate_DESC) {
       id
       course {
         id
@@ -150,6 +152,12 @@ const mentorReportQuery = (
           mentor_some:{
             id:"${mentorId}"
           }
+        },
+        {
+          country: ${MENTOR_REPORT_COUNTRY}
+        },
+        {
+          sessionType: ${MENTOR_REPORT_SESSION_TYPE}
         }
       ]
     }){
@@ -207,6 +215,8 @@ mutation{
       pythonCourseRating3: ${pythonCourseRating3},
       pythonCourseRating4: ${pythonCourseRating4},
       pythonCourseRating5: ${pythonCourseRating5},
+      country: ${MENTOR_REPORT_COUNTRY},
+      sessionType: ${MENTOR_REPORT_SESSION_TYPE},
     }
   ){
     id
@@ -261,6 +271,8 @@ mutation{
       pythonCourseRating3: ${pythonCourseRating3},
       pythonCourseRating4: ${pythonCourseRating4},
       pythonCourseRating5: ${pythonCourseRating5},
+      country: ${MENTOR_REPORT_COUNTRY},
+      sessionType: ${MENTOR_REPORT_SESSION_TYPE},
     }
   ){
     id
