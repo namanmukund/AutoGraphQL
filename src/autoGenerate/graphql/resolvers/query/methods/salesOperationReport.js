@@ -18,7 +18,7 @@ const topicsQuery = () => `
       }
 `;
 
-const mentorMenteeSessions = async (fromDate, toDate) => {
+const mentorMenteeSessions = async (fromDate, toDate, country) => {
   const query = `query{
   mentorMenteeSessions(filter:{
     and:[
@@ -27,6 +27,7 @@ const mentorMenteeSessions = async (fromDate, toDate) => {
       {sessionStartDate_lte:"${toDate}"}
       {hasRescheduled:true}
       {source_not:school}
+      {country: ${country}}
     ]
   }orderBy:sessionStartDate_DESC){
     id
@@ -73,8 +74,8 @@ const getTrueRescheduledField = (obj) => {
   }
   return '';
 };
-const getRescheduledReasonData = async (fromDate, toDate) => {
-  const mentorMenteeSessionsData = await mentorMenteeSessions(fromDate, toDate);
+const getRescheduledReasonData = async (fromDate, toDate, country) => {
+  const mentorMenteeSessionsData = await mentorMenteeSessions(fromDate, toDate, country);
   const docsArray = [];
   const hasReScheduledArray = [];
   mentorMenteeSessionsData.forEach((obj) => {
@@ -160,7 +161,8 @@ const salesOperationReport = (async (root, params, context) => {
     throw new UnauthorizedOperationError();
   }
 
-  let { fromDate, toDate } = params;
+  // eslint-disable-next-line prefer-const
+  let { fromDate, toDate, country = 'india' } = params;
   if (!fromDate) {
     fromDate = new Date(2018, 0, 0, 0, 0, 0);
   }
@@ -176,6 +178,7 @@ const salesOperationReport = (async (root, params, context) => {
     createdAt: { $gte: new Date(fromDate), $lte: new Date(toDate) },
     role: MENTEE,
     source: { $ne: 'school' },
+    country,
   };
   const users = await aggregateGroupByQuery(
     'User',
@@ -192,6 +195,7 @@ const salesOperationReport = (async (root, params, context) => {
       $lte: new Date(toDate),
     },
     source: { $ne: 'school' },
+    country,
   };
 
   const menteeSessions = await aggregateGroupByQuery(
@@ -207,6 +211,7 @@ const salesOperationReport = (async (root, params, context) => {
     bookingDate: { $gte: new Date(fromDate), $lte: new Date(toDate) },
     'topic.typeId': firstTopicId,
     source: { $ne: 'school' },
+    country,
   };
   const menteeFirstSessions = await aggregateGroupByQuery(
     'MenteeSession',
@@ -222,6 +227,7 @@ const salesOperationReport = (async (root, params, context) => {
     sessionStatus: 'allotted',
     'topic.typeId': firstTopicId,
     source: { $ne: 'school' },
+    country,
   };
 
   const firstSessionAllotted = await aggregateGroupByQuery(
@@ -238,6 +244,7 @@ const salesOperationReport = (async (root, params, context) => {
     sessionStatus: 'started',
     'topic.typeId': firstTopicId,
     source: { $ne: 'school' },
+    country,
   };
 
   const firstSessionStarted = await aggregateGroupByQuery(
@@ -254,6 +261,7 @@ const salesOperationReport = (async (root, params, context) => {
     sessionStatus: 'completed',
     'topic.typeId': firstTopicId,
     source: { $ne: 'school' },
+    country,
   };
 
   const firstSessionCompleted = await aggregateGroupByQuery(
@@ -270,6 +278,7 @@ const salesOperationReport = (async (root, params, context) => {
     sessionStatus: 'completed',
     'topic.typeId': secondTopicId,
     source: { $ne: 'school' },
+    country,
   };
 
   const secondSessionCompleted = await aggregateGroupByQuery(
@@ -283,6 +292,7 @@ const salesOperationReport = (async (root, params, context) => {
     sessionStartDate: { $gte: new Date(fromDate), $lte: new Date(toDate) },
     sessionStatus: 'started',
     source: { $ne: 'school' },
+    country,
   };
 
   const sessionStarted = await aggregateGroupByQuery(
@@ -296,6 +306,7 @@ const salesOperationReport = (async (root, params, context) => {
     sessionStartDate: { $gte: new Date(fromDate), $lte: new Date(toDate) },
     sessionStatus: 'completed',
     source: { $ne: 'school' },
+    country,
   };
 
   const sessionCompleted = await aggregateGroupByQuery(
@@ -307,7 +318,7 @@ const salesOperationReport = (async (root, params, context) => {
 
   // -----------------------------------------------------------------------------
   const finalArray = [];
-  const mentorMenteeSessionData = await getRescheduledReasonData(fromDate, toDate);
+  const mentorMenteeSessionData = await getRescheduledReasonData(fromDate, toDate, country);
   const mergedArray = [
     ...users, ...menteeSessions, ...menteeFirstSessions,
     ...firstSessionAllotted, ...firstSessionStarted, ...firstSessionCompleted,
