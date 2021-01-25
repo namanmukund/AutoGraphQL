@@ -1,12 +1,9 @@
 import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
 
-const availableSlotsQuery = (date, country) => `
+const availableSlotsQuery = (date) => `
 query{
   availableSlots(filter:{
-    and:[
-      {date:"${date}"}
-      {country:${country}}
-    ]
+    date:"${date}"
   }){
     id
     date

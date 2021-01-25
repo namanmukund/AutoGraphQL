@@ -7,9 +7,7 @@ import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
 import { backendApps } from '../../../../constants';
 
 const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
-  const {
-    sessionType, country, availabilityDate, ...slots
-  } = input;
+  const { sessionType, availabilityDate, ...slots } = input;
   if (sessionType && (sessionType === 'paid' || sessionType === 'batch')) {
     return true;
   }
@@ -20,12 +18,7 @@ const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
     return true;
   }
 
-  const availableSlotsRes = await callLocalGraphqlApi(
-    availableSlotsQuery(
-      availabilityDate,
-      country,
-    ),
-  );
+  const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(availabilityDate));
   const availableSlots = get(availableSlotsRes, 'data.availableSlots');
 
   // update if available slots for a particular date exist from before
@@ -48,7 +41,6 @@ const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
     slotTimeStringArray.forEach((slot) => {
       docToBeUpdated[slot] = 1;
       docToBeUpdated.date = availabilityDate.toISOString();
-      docToBeUpdated.country = country;
     });
     // add
     const variables = {

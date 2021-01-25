@@ -15,7 +15,6 @@ const AvailableSlot = `
   ) 
   {
     date: Date
-    country: Country @defaultValue(value: "india")
     ${slotTimeFields}
 }`;
 
