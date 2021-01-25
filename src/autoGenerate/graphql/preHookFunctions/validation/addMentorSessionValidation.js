@@ -12,13 +12,12 @@ import { MissingMandatoryInputInRequestError } from '../../../../../constants/er
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 
 // query to get mentor Sessions
-const getMentorSessions = (userId, availabilityDate, sessionType, country) => `query{
+const getMentorSessions = (userId, availabilityDate, sessionType) => `query{
     mentorSessions(filter:{
       and:[
           {user_some: {id: "${userId}"}},
           {availabilityDate: "${availabilityDate}"}
           {sessionType: ${sessionType}}
-          {country: ${country}}
       ]
     }){
       id
@@ -54,7 +53,6 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
   const userId = get(params, 'userConnectId');
   const courseId = get(params, 'courseConnectId');
   const availabilityDate = get(params, 'input.availabilityDate');
-  const country = get(params, 'input.country') || 'india  ';
 
   // log in case user id or availabilityDate is not present
   if (!userId || !availabilityDate || !courseId) {
@@ -80,7 +78,6 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
       userId,
       availabilityDate,
       sessionType,
-      country,
     ),
   );
   const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
