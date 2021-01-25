@@ -323,6 +323,7 @@ const parentChildSignUpMutationResolver = async (
     utmMedium,
     schoolName,
     country,
+    timezone,
   } = input;
   // check if parent exist in db
   const parentInfo = await getParentInfo(context, parentEmail, parentPhone);
@@ -367,6 +368,7 @@ const parentChildSignUpMutationResolver = async (
       utmMedium,
       source,
       country: country || 'india',
+      timezone,
     };
 
     const parentDataWithId = generateCuid(parentData);
@@ -408,6 +410,7 @@ const parentChildSignUpMutationResolver = async (
     utmContent,
     utmMedium,
     country: country || 'india',
+    timezone,
   };
 
   // check if the child has been referred by a valid user

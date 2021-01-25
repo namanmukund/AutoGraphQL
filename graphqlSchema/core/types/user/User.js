@@ -66,6 +66,7 @@ const User = `
     gender: Gender
     city: String
     country: Country @defaultValue(value: "india")
+    timezone: String
     isSetPassword: Boolean @defaultValue(value: "false")
     studentProfile: StudentProfile @relation(name:"StudentProfileUser", isSubset: true)
     parentProfile: ParentProfile @relation(name:"ParentProfileUser", isSubset: true)
