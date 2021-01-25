@@ -12,8 +12,7 @@ import { MissingMandatoryInputInRequestError } from '../../../../../constants/er
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 
 // query to get mentor Sessions
-const getMentorSessions = (userId, availabilityDate, sessionType) => `
-  query{
+const getMentorSessions = (userId, availabilityDate, sessionType) => `query{
     mentorSessions(filter:{
       and:[
           {user_some: {id: "${userId}"}},
@@ -74,7 +73,13 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
 
   const sessionType = get(params, 'input.sessionType') || 'trial';
   // throw error if document already exists
-  const getMentorSessionsRes = await callLocalGraphqlApi(getMentorSessions(userId, availabilityDate, sessionType));
+  const getMentorSessionsRes = await callLocalGraphqlApi(
+    getMentorSessions(
+      userId,
+      availabilityDate,
+      sessionType,
+    ),
+  );
   const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
   // if once session created for a day then just update the session
   if (mentorSessions && mentorSessions.length) {

@@ -22,6 +22,8 @@ const MentorReport = `
     pythonCourseRating3: Int
     pythonCourseRating2: Int
     pythonCourseRating1: Int
+    sessionType: SessionType @defaultValue(value: "trial")
+    country: Country @defaultValue(value: "india")
 }`;
 
 export default [MentorReport];

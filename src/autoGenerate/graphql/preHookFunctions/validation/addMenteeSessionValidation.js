@@ -12,6 +12,7 @@ import { MissingMandatoryInputInRequestError } from '../../../../../constants/er
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import isTrialSession from '../../resolvers/utils/isTrialSession';
 import getUserSource from './utils/getUserSource';
+import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetailsInParams';
 
 // query to get mentee Sessions
 const getMenteeSessions = (userId, topicId) => `
@@ -92,16 +93,10 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
     throw new SimilarDocumentAlreadyExistError();
   }
 
-  // update source in menteeSession
-  const source = await getUserSource(userId);
-  if (source) {
-    if (!get(params, 'input')) {
-      // eslint-disable-next-line no-param-reassign
-      params.input = {};
-    }
-    // eslint-disable-next-line no-param-reassign
-    params.input.source = source;
-  }
+  // update source & country in menteeSession
+  const userData = await getUserSource(userId);
+  updateUserSpecificDetailsInParams(userData, params);
+
   return true;
 };
 

@@ -9,6 +9,7 @@ import {
 } from '../../../../../constants/errors/input';
 import { ConnectIdRequiredError, DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
+import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetailsInParams';
 
 // query to get mentor Sessions
 const mentorMenteeSessionsQuery = (menteeSessionConnectId, mentorSessionConnectId) => `
@@ -32,6 +33,7 @@ query{
     user{
       id
       source
+      country
     }
     topic{
       id
@@ -100,16 +102,9 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
     });
   }
   validateMenteeStartSessionData(menteeSession, topicConnectId, params);
-  //update source in mentorMenteeSession
-  const source = get(menteeSession, 'user.source')
-  if (source) {
-    if (!get(params, 'input')) {
-      // eslint-disable-next-line no-param-reassign
-      params.input = {};
-    }
-    // eslint-disable-next-line no-param-reassign
-    params.input.source = source;
-  }
+  //update source & country in mentorMenteeSession
+  const userData = get(menteeSession, 'user');
+  updateUserSpecificDetailsInParams(userData, params);
 
   context.menteeSession = menteeSession;
   context.mentorSessionConnectId = mentorSessionConnectId;

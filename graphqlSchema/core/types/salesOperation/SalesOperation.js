@@ -89,6 +89,7 @@ const SalesOperation = `
     salesOperationLog: [SalesOperationLog] @relation(name:"SalesOperationLogSalesOperation")
     salesOperationActivities: [SalesOperationActivity] @relation(name:"SalesOperationActivitySalesOperation")
     source: UserOriginSource
+    country: Country @defaultValue(value: "india")
     enrollmentType: EnrollmentType @defaultValue(value: "free")
     ${unQualifiedLeadReasons}
     ${sessionRescheduledReasons}

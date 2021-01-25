@@ -17,7 +17,7 @@ const Batch = `
     code: String! @uniqueOrEmpty @trim
     description: String
     students: [StudentProfile] @relation(name: "BatchStudentProfile")
-    currentComponent: BatchCurrentComponentStatus @relation(name: "BatchCurrentComponentStatusBatch")
+    currentComponent: BatchCurrentComponentStatus @relation(name: "BatchCurrentComponentStatusBatch", isSubset: true)
     type: BatchType @defaultValue(value: "normal")
   }
 `;
