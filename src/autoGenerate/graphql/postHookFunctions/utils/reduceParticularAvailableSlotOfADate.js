@@ -5,13 +5,7 @@ import updateAvailableSlotQuery from '../../graphqlQueries/updateAvailableSlotQu
 import { byPassMenteeValidationApps } from '../../../../../constants';
 
 // update if doc exist else leave
-const reduceParticularAvailableSlotOfADate = async (
-  slotTimeStringArray,
-  date,
-  context,
-  availableSlots,
-  country,
-) => {
+const reduceParticularAvailableSlotOfADate = async (slotTimeStringArray, date, context, availableSlots) => {
   const { isTrialSession, appName } = context;
   if (typeof isTrialSession === 'boolean' && !isTrialSession) {
     return true;
@@ -23,12 +17,7 @@ const reduceParticularAvailableSlotOfADate = async (
   }
 
   if (!availableSlots || !availableSlots.length) {
-    const availableSlotsRes = await callLocalGraphqlApi(
-      availableSlotsQuery(
-        date,
-        country,
-      ),
-    );
+    const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(date));
     // eslint-disable-next-line no-param-reassign
     availableSlots = get(availableSlotsRes, 'data.availableSlots');
   }

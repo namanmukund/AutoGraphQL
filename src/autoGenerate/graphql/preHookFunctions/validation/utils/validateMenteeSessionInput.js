@@ -16,7 +16,7 @@ import { byPassMenteeValidationApps, backendApps } from '../../../../../../const
 const PRE_BOOKING_HOUR_LIMIT = 0;
 const validateMenteeSessionInput = async (params, context) => {
   const { input } = params;
-  const { bookingDate, country = 'india', ...slots } = input;
+  const { bookingDate, ...slots } = input;
   if (!bookingDate) {
     throw new MissingMandatoryInputInRequestError({
       data: {
@@ -54,12 +54,7 @@ const validateMenteeSessionInput = async (params, context) => {
   }
 
   // check if the slot mentee trying to book is available in availableSlot
-  const availableSlotsRes = await callLocalGraphqlApi(
-    availableSlotsQuery(
-      bookingDate,
-      country,
-    ),
-  );
+  const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(bookingDate));
   const availableSlots = get(availableSlotsRes, 'data.availableSlots');
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
