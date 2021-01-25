@@ -13,7 +13,7 @@ const mentorMenteeSessionsQuery = (
   endDate,
 ) => `
   query{
-    mentorMenteeSessions(filter: {and: [{country: ${MENTOR_REPORT_COUNTRY}}, ${MENTOR_REPORT_SESSION_TYPE === 'trial' ? '{topic_some: {order: 1}},' : ''} {source_not: school}, {menteeSession_some:{user_some:{studentProfile_some:{batch_exists:false}}}}, {sessionStartDate_gt: "${startDate}"}, {sessionStartDate_lte: "${endDate}"}]}, orderBy: sessionStartDate_DESC) {
+    mentorMenteeSessions(filter: {and: [${MENTOR_REPORT_SESSION_TYPE === 'trial' ? '{topic_some: {order: 1}},' : ''} {source_not: school}, {menteeSession_some:{user_some:{studentProfile_some:{batch_exists:false}}}}, {sessionStartDate_gt: "${startDate}"}, {sessionStartDate_lte: "${endDate}"}]}, orderBy: sessionStartDate_DESC) {
       id
       leadStatus
       sessionStatus
@@ -87,7 +87,7 @@ const mentorSessionsQuery = (
   endDate,
 ) => `
   query{
-    mentorSessions(filter: {and: [{country: ${MENTOR_REPORT_COUNTRY}}, {sessionType: ${MENTOR_REPORT_SESSION_TYPE}}, {availabilityDate_gt: "${startDate}"}, {availabilityDate_lte: "${endDate}"}]}, orderBy: availabilityDate_DESC) {
+    mentorSessions(filter: {and: [{sessionType: ${MENTOR_REPORT_SESSION_TYPE}}, {availabilityDate_gt: "${startDate}"}, {availabilityDate_lte: "${endDate}"}]}, orderBy: availabilityDate_DESC) {
       id
       course {
         id
