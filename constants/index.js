@@ -262,7 +262,7 @@ const leadStatus = {
   won: 'won',
   unfit: 'unfit',
   unassigned: 'unassigned',
-};  
+};
 
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
@@ -270,7 +270,7 @@ export const MENTOR_REPORT_COUNTRY = 'india';
 
 export const MENTOR_REPORT_SESSION_TYPE = 'trial';
 
-export const MENTOR_REPORT_DAYS = 1;
+export const MENTOR_REPORT_DAYS = 270;
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
