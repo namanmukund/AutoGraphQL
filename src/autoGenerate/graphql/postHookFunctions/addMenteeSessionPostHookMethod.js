@@ -14,20 +14,12 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     /*
     Since addition of session by mentee will consume a slot
      */
-    const {
-      id: menteeSessionId, bookingDate, country, ...slots
-    } = input;
+    const { id: menteeSessionId, bookingDate, ...slots } = input;
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
     const { availableSlots } = context;
     const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
     const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
-    await reduceParticularAvailableSlotOfADate(
-      slotTimeStringArray,
-      bookingDate,
-      context,
-      availableSlots,
-      country,
-    );
+    await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context, availableSlots);
     // send email to mentor admin regarding the session
     await extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
     // update user booking on leadsquared

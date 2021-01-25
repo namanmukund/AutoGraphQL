@@ -10,7 +10,7 @@ const deleteMentorSessionPostHookMethod = async (input, mutationName, context) =
   const { availabilityDate, ...slots } = previousDocument;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
-  const { sessionType, country } = input;
+  const { sessionType } = input;
   if (sessionType && (sessionType === 'paid' || sessionType === 'batch')) {
     return true;
   }
@@ -20,12 +20,7 @@ const deleteMentorSessionPostHookMethod = async (input, mutationName, context) =
     return true;
   }
 
-  await reduceParticularAvailableSlotOfADate(
-    slotTimeStringArray,
-    availabilityDate,
-    context,
-    country,
-  );
+  await reduceParticularAvailableSlotOfADate(slotTimeStringArray, availabilityDate, context);
   return true;
 };
 

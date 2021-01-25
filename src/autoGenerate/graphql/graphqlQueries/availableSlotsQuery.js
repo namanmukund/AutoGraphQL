@@ -5,7 +5,7 @@ query{
   availableSlots(filter:{
     and:[
       {date:"${date}"}
-      {country:${country}}
+      {country:"${country}"}
     ]
   }){
     id

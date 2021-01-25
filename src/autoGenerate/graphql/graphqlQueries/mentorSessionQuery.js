@@ -5,7 +5,6 @@ query{
   mentorSession(id:"${mentorSessionId}"){
     id
     availabilityDate
-    country
     ${getSlotTimesInString()}
   }
 }`;
