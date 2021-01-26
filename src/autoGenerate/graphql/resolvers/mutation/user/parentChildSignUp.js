@@ -513,7 +513,11 @@ const parentChildSignUpMutationResolver = async (
   await addUserCredit(REGISTRATION_BASE_CREDIT, childUserId, SIGN_UP_BONUS);
   //  if  school information exist add school data
   if (input && input.schoolName) {
-    await updateSchoolDataOfAStudent(input, studentProfileId);
+    const updatedStudentProfileId = await updateSchoolDataOfAStudent(input, studentProfileId);
+    if (updatedStudentProfileId) {
+      // eslint-disable-next-line no-param-reassign
+      params.input.isSchoolStudent = true;
+    }
   }
 
   /*
