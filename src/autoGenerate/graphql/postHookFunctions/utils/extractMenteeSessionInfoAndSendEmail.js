@@ -93,7 +93,7 @@ const sendBookedSessionEmailToParent = (subject, menteeObj, action) => {
   const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, menteeObj);
   templateString.then((html) => {
     const emailTo = [
-      menteeObj.parentEmail
+      menteeObj.parentEmail,
     ];
     const ccEmail = [''];
     const bccEmail = [''];
@@ -209,7 +209,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
       // const phone = 919654347463;
       await sendWhatsAppTemplateMessage(
         phone,
-        transactionalMessageBody.bookingConfirmation,
+        menteeObj.country === 'india' ? transactionalMessageBody.bookingConfirmation : transactionalMessageBody.bookingConfirmationInternational,
         parentName,
         parameters,
       );

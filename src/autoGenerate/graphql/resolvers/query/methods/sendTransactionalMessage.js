@@ -5,7 +5,6 @@ import getLongDate from '../../../../../../utils/getLongDate';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../../utils/getSlotTimesInString';
 import getSelectedSlotsStringArray from '../../../postHookFunctions/utils/getSelectedSlotsStringArray';
-import getSlotLabel from '../../../../../../utils/getSlotLabel';
 import getFullFilePath from '../../../../../../utils/getFullFilePath';
 import {
   InvalidRequestError,
@@ -17,6 +16,7 @@ import transactionalMessageBody from '../../../../../../constants/transactionalM
 import sendTransactionalEmail from '../../utils/sendTransactionalEmail';
 import calculateMentorRating from '../../utils/calculateMentorRating';
 import getMentorCodingLanguages from '../../utils/getMentorCodingLanguages';
+import getIntlDateTime from '../../../../../../utils/timeZoneDiff';
 
 const getSessionRescheduledReasons = (reasons) => {
   if (!reasons) return '';
@@ -49,95 +49,95 @@ const getSessionRescheduledReasons = (reasons) => {
 
 const getMentorMenteeSessions = async (userId, messageType, sessionLink) => {
   const query = `
-query{
-  mentorMenteeSessions(filter:{
-    and:[
-      { menteeSession_some:{user_some:{id:"${userId}"}}}
-      {or:[
-        {topic_some:{order:1}}
-        {topic_some:{order:2}}
-      ]
-    }  
-    ]
-  }, orderBy:createdAt_ASC){
-    id
-    sendSessionLink
-    didNotPickTheCall
-    sessionNotConducted
-    didNotTurnUpInSession
-    topic{
-      id
-      title
-      order
-    }
-    mentorSession{
-      id
-      user{
+    query{
+      mentorMenteeSessions(filter:{
+        and:[
+          { menteeSession_some:{user_some:{id:"${userId}"}}}
+          {or:[
+            {topic_some:{order:1}}
+            {topic_some:{order:2}}
+          ]
+        }  
+        ]
+      }, orderBy:createdAt_ASC){
         id
-        name
-        username
-        email
-        phone{
-          countryCode
-          number
-        }
-        profilePic{
+        sendSessionLink
+        didNotPickTheCall
+        sessionNotConducted
+        didNotTurnUpInSession
+        topic{
           id
-          uri
+          title
+          order
         }
-        mentorProfile{
+        mentorSession{
           id
-          codingLanguages{value}
-          experienceYear
-          sessionLink
-          meetingId
-          meetingPassword
-          pythonCourseRating1
-          pythonCourseRating2
-          pythonCourseRating3
-          pythonCourseRating4
-          pythonCourseRating5
-        }
-      }
-    }
-    menteeSession{
-      id
-      bookingDate
-      ${getSlotTimesInString()}
-      user{
-        id
-        timezone
-        country
-        name
-        studentProfile{
-          id
-          parents{
+          user{
             id
-            user{
+            name
+            username
+            email
+            phone{
+              countryCode
+              number
+            }
+            profilePic{
               id
-              name
-              email
-              phone{
-                countryCode
-                number
+              uri
+            }
+            mentorProfile{
+              id
+              codingLanguages{value}
+              experienceYear
+              sessionLink
+              meetingId
+              meetingPassword
+              pythonCourseRating1
+              pythonCourseRating2
+              pythonCourseRating3
+              pythonCourseRating4
+              pythonCourseRating5
+            }
+          }
+        }
+        menteeSession{
+          id
+          bookingDate
+          ${getSlotTimesInString()}
+          user{
+            id
+            timezone
+            country
+            name
+            studentProfile{
+              id
+              parents{
+                id
+                user{
+                  id
+                  name
+                  email
+                  phone{
+                    countryCode
+                    number
+                  }
+                }
               }
             }
           }
         }
+        salesOperation{
+          internetIssue
+          zoomIssue
+          laptopIssue
+          chromeIssue
+          powerCut
+          notResponseAndDidNotTurnUp
+          turnedUpButLeftAbruptly
+        }
       }
     }
-    salesOperation{
-      internetIssue
-      zoomIssue
-      laptopIssue
-      chromeIssue
-      powerCut
-      notResponseAndDidNotTurnUp
-      turnedUpButLeftAbruptly
-    }
-  }
-}
-`;
+  `;
   const res = await callLocalGraphqlApi(query);
   const data = get(res, 'data.mentorMenteeSessions', []);
   const parentInfo = get(data[0], 'menteeSession.user.studentProfile.parents[0].user');
@@ -146,7 +146,6 @@ query{
   const mentorProfileFile = get(data[0], 'mentorSession.user.profilePic.uri', '');
   const topicTitle = get(data[0], 'topic.title', '');
   const mentorProfilePic = mentorProfileFile ? getFullFilePath(mentorProfileFile) : getFullFilePath('python/email/mentor1.png');
-
   // validate before sending the message
   if (!data || (data && data.length > 1)) {
     throw new InvalidRequestError();
@@ -194,7 +193,7 @@ query{
     const { bookingDate, ...slots } = menteeSession;
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
     const slotNumber = slotTimeStringArray[0].split('slot')[1];
-    const { startTime, endTime } = getSlotLabel(slotNumber);
+    const { startTime, endTime, date } = getIntlDateTime(bookingDate, slotNumber, get(menteeSession, 'user.timezone') || 'Asia/Kolkata');
 
     return {
       mentorMenteeSessionId: get(data[0], 'id'),
@@ -203,7 +202,9 @@ query{
       parentNumber: get(parentInfo, 'phone.number'),
       countryCode: get(parentInfo, 'phone.countryCode'),
       name: get(menteeSession, 'user.name'),
-      bookingDate,
+      timezone: get(menteeSession, 'user.timezone') || 'Asia/Kolkata',
+      country: get(menteeSession, 'user.country'),
+      bookingDate: date,
       startTime,
       endTime,
       topicTitle,
@@ -247,6 +248,7 @@ const sendTransactionalMessage = async (root, params, context) => {
   const { messageType, medium, sessionLink } = input;
   const dataObj = await getMentorMenteeSessions(userId, messageType, sessionLink);
   // if staging just don't send the message and behave similarly
+
   if (process.env.NODE_ENV !== 'production') {
     await updateMentorMenteeSessionWithMessageType(dataObj.mentorMenteeSessionId, messageType);
     return {
@@ -379,18 +381,27 @@ const sendTransactionalMessage = async (root, params, context) => {
   }
   const whatsAppPhoneNumber = dataObj.countryCode.split('+')[1] + dataObj.parentNumber;
   // const whatsAppPhoneNumber = transactionalMessageBody.testWhatsAppNumber;
-
-  const { whatsAppTemplate } = transactionalMessageBody[messageType];
+  let whatsAppTemplate = '';
+  if (dataObj.country) {
+    if (dataObj.country === 'india') {
+      whatsAppTemplate = transactionalMessageBody[messageType].whatsAppTemplate;
+    } else if (transactionalMessageBody[messageType].whatsAppTemplateInternational) {
+      whatsAppTemplate = transactionalMessageBody[messageType].whatsAppTemplateInternational;
+    } else {
+      whatsAppTemplate = transactionalMessageBody[messageType].whatsAppTemplate;
+    }
+  } else {
+    whatsAppTemplate = transactionalMessageBody[messageType].whatsAppTemplate;
+  }
 
   switch (medium) {
     case 'all': {
       // send email
-      if (messageType !== 'sendSessionLink') {
-        await sendTransactionalEmail(
-          dataObj,
-          transactionalMessageBody[messageType],
-        );
-      }
+      await sendTransactionalEmail(
+        dataObj,
+        transactionalMessageBody[messageType],
+        dataObj.country,
+      );
       // send whatsApp
       await sendWhatsAppTemplateMessage(
         whatsAppPhoneNumber,
@@ -412,9 +423,11 @@ const sendTransactionalMessage = async (root, params, context) => {
     }
     case 'email': {
       // send email
-      if (messageType !== 'sendSessionLink') {
-        await sendTransactionalEmail(dataObj, transactionalMessageBody[messageType]);
-      }
+      await sendTransactionalEmail(
+        dataObj,
+        transactionalMessageBody[messageType],
+        dataObj.country,
+      );
       break;
     }
 

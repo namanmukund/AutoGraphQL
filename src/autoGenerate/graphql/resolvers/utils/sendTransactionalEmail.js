@@ -10,8 +10,10 @@ const sendTransactionalEmail = async (templateObject, emailBody, country = 'indi
   if (country) {
     if (country === 'india') {
       templateFileName = get(emailBody, 'emailTemplate');
-    } else {
+    } else if (get(emailBody, 'emailTemplateInternational')) {
       templateFileName = get(emailBody, 'emailTemplateInternational');
+    } else {
+      templateFileName = get(emailBody, 'emailTemplate');
     }
   } else {
     templateFileName = get(emailBody, 'emailTemplate');
