@@ -141,8 +141,8 @@ const extractMenteeSessionInfoAndSendEmail = async (
     parentEmail: get(parentInfo, 'email') || '',
     parentNumber: get(parentInfo, 'phone.number') || '',
     countryCode: get(parentInfo, 'phone.countryCode') || '',
-    country: get(menteeInfo, 'country') || '',
-    timezone: get(menteeInfo, 'timezone') || '',
+    country: get(menteeInfo, 'country') || 'india',
+    timezone: get(menteeInfo, 'timezone') || 'Asia/Kolkata',
   };
   const topicInfo = topic || await callLocalGraphqlApi(topicInfoQuery(topicId));
   menteeObj.topicTitle = get(topicInfo, 'data.topic.title');
