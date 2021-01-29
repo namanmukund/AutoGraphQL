@@ -4,6 +4,7 @@ const transactionalMessageBody = {
   mentorSessionNotification: 'mentor_notification',
   sendSessionLink: {
     emailTemplate: 'sendSessionLink',
+    emailTemplateInternational: 'sendSessionLinkInternational',
     subject: 'Tekie - Meeting link for free coding session',
     whatsAppTemplate: 'oct14_know_your_mentor',
   },

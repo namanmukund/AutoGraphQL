@@ -27,6 +27,8 @@ const getMentorMenteeSession = async (menteeSessionId) => {
         name
         username
         email
+        country
+        timezone
         phone{
           countryCode
           number
@@ -64,53 +66,53 @@ const scheduleTrialSessionReminder = async () => {
   const hourValue = new Date().getHours();
   if (hourValue > 6 && hourValue < 22) {
     const query = `
-query{
-  menteeSessions(
-    filter:{
-      and:[
-        {scheduleRunStatus_not_in:[completed]}
-        {bookingDate: "${parsedDate}"}
-        {topic_some:{order:1}}
-        {or:[
-          {slot${hourValue + 1}:true}
-          {slot${hourValue + 2}:true}
-          {slot${hourValue + 3}:true}
-        ]}
-      ]
-    }
-  ){
-    id
-    bookingDate
-    topic{
-      id
-      title
-      order
-    }
-    slot${hourValue + 1}
-    slot${hourValue + 2}
-    slot${hourValue + 3}
-    user{
-      id
-      name
-      studentProfile{
-        id
-        parents{
+      query{
+        menteeSessions(
+          filter:{
+            and:[
+              {scheduleRunStatus_not_in:[completed]}
+              {bookingDate: "${parsedDate}"}
+              {topic_some:{order:1}}
+              {or:[
+                {slot${hourValue + 1}:true}
+                {slot${hourValue + 2}:true}
+                {slot${hourValue + 3}:true}
+              ]}
+            ]
+          }
+        ){
           id
+          bookingDate
+          topic{
+            id
+            title
+            order
+          }
+          slot${hourValue + 1}
+          slot${hourValue + 2}
+          slot${hourValue + 3}
           user{
             id
             name
-            email
-            phone{
-              countryCode
-              number
+            studentProfile{
+              id
+              parents{
+                id
+                user{
+                  id
+                  name
+                  email
+                  phone{
+                    countryCode
+                    number
+                  }
+                }
+              }
             }
           }
         }
       }
-    }
-  }
-}
-`;
+      `;
     const menteeSessionsData = await callLocalGraphqlApi(query);
     const menteeSessions = get(menteeSessionsData, 'data.menteeSessions');
     if (menteeSessions && menteeSessions.length) {
@@ -140,6 +142,8 @@ query{
               startTime,
               endTime,
               name: startCase(toLower(get(menteeInfo, 'name') || '')),
+              country: startCase(toLower(get(menteeInfo, 'country') || '')),
+              timezone: startCase(toLower(get(menteeInfo, 'timezone') || '')),
               grade: get(menteeInfo, 'studentProfile.grade') || '',
               parentName: startCase(toLower(get(parentInfo, 'name') || '')),
               parentEmail: get(parentInfo, 'email') || '',
@@ -206,7 +210,7 @@ query{
             );
             // send email
             // eslint-disable-next-line no-await-in-loop
-            await sendTransactionalEmail(menteeObj, transactionalMessageBody.sendSessionLink);
+            await sendTransactionalEmail(menteeObj, transactionalMessageBody.sendSessionLink, menteeObj.country);
             // update  status
             // eslint-disable-next-line no-await-in-loop
             await updateScheduleStatusOfMenteeSession(menteeSessionId, 'completed');

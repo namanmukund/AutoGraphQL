@@ -9,12 +9,15 @@ import getSlotLabel from '../../../../../utils/getSlotLabel';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 import getLongDate from '../../../../../utils/getLongDate';
 import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
+import getIntlDateTime from '../../../../../utils/timeZoneDiff';
 
 const menteeInfoQuery = (userId) => `
   query{
     user(id:"${userId}"){
       id
       name
+      country
+      timezone
         studentProfile{
         id
         grade
@@ -60,7 +63,7 @@ const sendBookedSessionEmailToTekie = (subject, menteeObj) => {
       'dubeyishan17@gmail.com',
       'veera.karan@gmail.com',
       'nilanjan.official1@gmail.com',
-      'shivank.goel@tekie.in',
+      'shivank.goel@tekie.in'
     ];
     const ccEmail = [''];
     const bccEmail = [''];
@@ -81,7 +84,7 @@ const sendBookedSessionEmailToTekie = (subject, menteeObj) => {
 };
 
 const sendBookedSessionEmailToParent = (subject, menteeObj, action) => {
-  let templateFileName = 'bookedSessionEmailTemplate';
+  let templateFileName = menteeObj.country === 'india' ? 'bookedSessionEmailTemplate' : 'bookedSessionEmailTemplateInternational';
   if (action === 'delete') {
     templateFileName = 'canceledSessionEmailTemplate';
   }
@@ -90,7 +93,7 @@ const sendBookedSessionEmailToParent = (subject, menteeObj, action) => {
   const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, menteeObj);
   templateString.then((html) => {
     const emailTo = [
-      menteeObj.parentEmail,
+      menteeObj.parentEmail
     ];
     const ccEmail = [''];
     const bccEmail = [''];
@@ -121,15 +124,15 @@ const extractMenteeSessionInfoAndSendEmail = async (
   topic,
 ) => {
   const slotNumber = slotTimeStringArray[0].split('slot')[1];
-  const { startTime, endTime } = getSlotLabel(slotNumber);
 
   const { user: { typeId: userId }, topic: { typeId: topicId } } = input;
-  const userInfo = user || await callLocalGraphqlApi(menteeInfoQuery(userId));
+  const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId));
   const menteeInfo = get(userInfo, 'data.user');
   const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
 
+  const { startTime, endTime, date } = getIntlDateTime(bookingDate, slotNumber, get(menteeInfo, 'timezone') || 'Asia/Kolkata');
   const menteeObj = {
-    date: getFormatedDate(bookingDate),
+    date,
     startTime,
     endTime,
     name: startCase(toLower(get(menteeInfo, 'name') || '')),
@@ -138,6 +141,8 @@ const extractMenteeSessionInfoAndSendEmail = async (
     parentEmail: get(parentInfo, 'email') || '',
     parentNumber: get(parentInfo, 'phone.number') || '',
     countryCode: get(parentInfo, 'phone.countryCode') || '',
+    country: get(menteeInfo, 'country') || '',
+    timezone: get(menteeInfo, 'timezone') || '',
   };
   const topicInfo = topic || await callLocalGraphqlApi(topicInfoQuery(topicId));
   menteeObj.topicTitle = get(topicInfo, 'data.topic.title');

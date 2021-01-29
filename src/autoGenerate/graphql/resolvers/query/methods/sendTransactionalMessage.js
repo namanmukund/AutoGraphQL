@@ -106,6 +106,8 @@ query{
       ${getSlotTimesInString()}
       user{
         id
+        timezone
+        country
         name
         studentProfile{
           id
