@@ -203,7 +203,7 @@ const getMentorMenteeSessions = async (userId, messageType, sessionLink) => {
       countryCode: get(parentInfo, 'phone.countryCode'),
       name: get(menteeSession, 'user.name'),
       timezone: get(menteeSession, 'user.timezone') || 'Asia/Kolkata',
-      country: get(menteeSession, 'user.country'),
+      country: get(menteeSession, 'user.country') || 'india',
       bookingDate: date,
       startTime,
       endTime,
