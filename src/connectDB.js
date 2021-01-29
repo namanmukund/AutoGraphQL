@@ -29,9 +29,9 @@ db.on('error', (err) => {
     const rule = new schedule.RecurrenceRule();
     rule.minute = interval;
     // eslint-disable-next-line no-console
-    console.log('Scheduler timed at ', interval, ' interval');
     // eslint-disable-next-line no-unused-vars
-    const j = schedule.scheduleJob(rule, async () => {
+    await scheduleTrialSessionReminder();
+    schedule.scheduleJob(rule, async () => {
       // eslint-disable-next-line no-console
       await scheduleTrialSessionReminder();
     });
