@@ -1,7 +1,6 @@
 import { get } from 'lodash';
 import parsedHtmlFromTemplateFileAndObject
   from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
-import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
 import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
 
