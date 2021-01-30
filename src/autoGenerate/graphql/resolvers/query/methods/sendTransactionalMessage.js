@@ -411,7 +411,7 @@ const sendTransactionalMessage = async (root, params, context) => {
         transactionalMessageBody[messageType],
         dataObj.country,
       );
-      if ((!country || country === 'india') && messageType === 'sendSessionLink') {
+      if ((!dataObj.country || dataObj.country === 'india') && messageType === 'sendSessionLink') {
         // send whatsApp
         await sendWhatsAppTemplateMessage(
           whatsAppPhoneNumber,
@@ -424,7 +424,7 @@ const sendTransactionalMessage = async (root, params, context) => {
     }
     case 'whatsApp': {
       // send whatsApp
-      if ((!country || country === 'india') && messageType === 'sendSessionLink') {
+      if ((!dataObj.country || dataObj.country === 'india') && messageType === 'sendSessionLink') {
         await sendWhatsAppTemplateMessage(
           whatsAppPhoneNumber,
           whatsAppTemplate,
