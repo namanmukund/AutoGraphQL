@@ -239,9 +239,9 @@ body{
                 <td style="text-align:center;">
                   <div style='width: 100%; padding-top: 20px; box-sizing: border-box; text-align: center;'>
                     <div style='width: 80px; height: 30px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/tekieLogo.png"); margin-left: 20px; background-size: contain; background-repeat: no-repeat;'></div>
-                    <div style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 28px; color: #00ADE6; margin-top: 10px; margin-bottom: 0px">Here’s your moment!</div>
+                    <div style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 28px; color: #00ADE6; margin-top: 10px; margin-bottom: 0px">Here's your moment!</div>
                     <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 10px; margin-bottom: 0px; width: 80%; opacity: 0.8; color: #504F4F; display: inline-block; font-size: 16px;">
-                      “<span style="font-weight: bold;">Ahoy!</span> <span style='font-weight: bold; color: #00ADE6'><%= name %></span> The ship will be leaving shore in 30 minutes <div style='transform: translateY(3px); width: 18px; height: 18px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/shipEmoji.png"); background-size: contain; display: inline-block;'></div> <br />The ticket to your zoom session is below. Click and join! <br /><span style="font-weight: bold;">Bon Voyage</span>”
+                      “<span style="font-weight: bold;">Ahoy!</span> <span style='font-weight: bold; color: #00ADE6'><%= name %></span> The ship will be leaving shore at <span style="font-weight: bold;"><%= startTime %> <%= bookingDate %></span> <div style='transform: translateY(3px); width: 18px; height: 18px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/shipEmoji.png"); background-size: contain; display: inline-block;'></div> <br />The ticket to your zoom session is below. Click and join! <br /><span style="font-weight: bold;">Bon Voyage</span>”
                     </div>
                     <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 15px; margin-bottom: 0px; margin-right: 6%; opacity: 0.8; color: #504F4F; text-align: right; font-size: 16px;">
                       -Words from your captain
@@ -259,29 +259,31 @@ body{
                 </td>
               </tr>
 
-		          <tr>
-                <td style="text-align:center; padding-top: 0px">
-                  <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 100%;color: #00ADE6; opacity: 0.8; font-size: 18px; font-weight: bold;">
-                    Just in case you need it:
-                  </div>
-                </td>
-              </tr>
-
-		          <tr>
-                <td style="text-align:center; padding-top: 13px">
-                  <div style="display: inline-block; text-align: left; width: 33%; font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; color: #504F4F; opacity: 0.8; font-size: 16px; font-weight: regular;">
-                      <span style="font-weight: bold;">Meeting ID: </span> <%= meetingId %>
-                  </div>
-                </td>
-              </tr>
-
-		          <tr>
-                <td style="text-align:center; padding-top: 9px">
-                  <div style="display: inline-block; text-align: left; width: 33%; font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; color: #504F4F; opacity: 0.8; font-size: 16px; font-weight: regular;">
-                      <span style="font-weight: bold;">Password: </span> <%= meetingPassword %>
-                  </div>
-                </td>
-              </tr>
+              <% if (meetingId !== null) { %>
+                <tr>
+                  <td style="text-align:center; padding-top: 0px">
+                    <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 100%;color: #00ADE6; opacity: 0.8; font-size: 18px; font-weight: bold;">
+                      Just in case you need it:
+                    </div>
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td style="text-align:center; padding-top: 13px">
+                    <div style="display: inline-block; text-align: left; width: 33%; font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; color: #504F4F; opacity: 0.8; font-size: 16px; font-weight: regular;">
+                        <span style="font-weight: bold;">Meeting ID: </span> <%= meetingId %>
+                    </div>
+                  </td>
+                </tr>
+  
+                <tr>
+                  <td style="text-align:center; padding-top: 9px">
+                    <div style="display: inline-block; text-align: left; width: 33%; font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; color: #504F4F; opacity: 0.8; font-size: 16px; font-weight: regular;">
+                        <span style="font-weight: bold;">Password: </span> <%= meetingPassword %>
+                    </div>
+                  </td>
+                </tr>
+              <% } %>
 
               <tr>
                 <td style="text-align:center; padding-top: 24px; padding-bottom: 17px; opacity: 0.8">
@@ -356,16 +358,16 @@ body{
               
               <tr>
                 <td style="text-align:center;">
-                  <h3 style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 22px; color: #00ADE6; margin-top: 0px; margin-bottom: 0px">We’re just a text away!</h3>
+                  <h3 style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 22px; color: #00ADE6; margin-top: 0px; margin-bottom: 0px">We're just a text away!</h3>
                 </td>
 		          </tr>
 		          <tr>
                 <td style="text-align:center; padding-top: 10px">
                   <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 85%; margin-left: 7.5%; opacity: 0.8; color: #504F4F; font-size: 16px">
-                    Tekie understands that when it is about your kid’s future, you will always have genuine questions, and we respect it. We will assign you a <span style="font-style: italic">captain</span> to make your journey smooth <div style='transform: translateY(3px); width: 18px; height: 18px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/sailBoatEmoji.png"); background-size: contain; display: inline-block;'></div>
+                    Tekie understands that when it is about your kid's future, you will always have genuine questions, and we respect it. We will assign you a <span style="font-style: italic">captain</span> to make your journey smooth <div style='transform: translateY(3px); width: 18px; height: 18px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/sailBoatEmoji.png"); background-size: contain; display: inline-block;'></div>
                   </div>
                   <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 85%; margin-left: 7.5%; margin-top: 10px; opacity: 0.8; color: #504F4F; font-size: 16px">
-                    Your captain is just a ‘Hi <div style='transform: translateY(3px); width: 18px; height: 18px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/handWaveEmoji.png"); background-size: contain; display: inline-block;'></div>’ away. You can also request a call by asking them over chat.
+                    Your captain is just a ‘Hi <div style='transform: translateY(3px); width: 18px; height: 18px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/handWaveEmoji.png"); background-size: contain; display: inline-block;'></div>' away. You can also request a call by asking them over chat.
                   </div>
                 </td>
 		          </tr>

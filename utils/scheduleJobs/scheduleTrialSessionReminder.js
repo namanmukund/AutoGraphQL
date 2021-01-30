@@ -72,9 +72,9 @@ const scheduleTrialSessionReminder = async () => {
             {bookingDate: "${parsedDate}"}
             {topic_some:{order:1}}
             {or:[
-              {slot${hourValue + 1}:true}
-              {slot${hourValue + 2}:true}
-              {slot${hourValue + 3}:true}
+              {slot${(hourValue + 1) % 24}:true}
+              {slot${(hourValue + 2) % 24}:true}
+              {slot${(hourValue + 3) % 24}:true}
             ]}
           ]
         }
@@ -86,9 +86,9 @@ const scheduleTrialSessionReminder = async () => {
           title
           order
         }
-        slot${hourValue + 1}
-        slot${hourValue + 2}
-        slot${hourValue + 3}
+        slot${(hourValue + 1) % 24}
+        slot${(hourValue + 2) % 24}
+        slot${(hourValue + 3) % 24}
         user{
           id
           name
@@ -205,16 +205,28 @@ const scheduleTrialSessionReminder = async () => {
           ];
           // const phone = 919654347463;
           const phone = countryCode.split('+')[1] + parentNumber;
-          // eslint-disable-next-line no-await-in-loop
-          await sendWhatsAppTemplateMessage(
-            phone,
-            transactionalMessageBody.sessionReminder,
-            parentName,
-            parameters,
-          );
+          if (!country || country === 'india') {
+            // eslint-disable-next-line no-await-in-loop
+            await sendWhatsAppTemplateMessage(
+              phone,
+              transactionalMessageBody.sessionReminder,
+              parentName,
+              parameters,
+            );
+          } else {
+            // eslint-disable-next-line no-await-in-loop
+            await sendWhatsAppTemplateMessage(
+              phone,
+              transactionalMessageBody.sendSessionLink.whatsAppTemplateInternational,
+              parentName,
+              parameters,
+            );
+          }
           // send email
-          // eslint-disable-next-line no-await-in-loop
-          await sendTransactionalEmail(menteeObj, transactionalMessageBody.sendSessionLink, menteeObj.country);
+          if (!country || country === 'india') {
+            // eslint-disable-next-line no-await-in-loop
+            await sendTransactionalEmail(menteeObj, transactionalMessageBody.sendSessionLink, menteeObj.country);
+          }
           // update  status
           // eslint-disable-next-line no-await-in-loop
           await updateScheduleStatusOfMenteeSession(menteeSessionId, 'completed');

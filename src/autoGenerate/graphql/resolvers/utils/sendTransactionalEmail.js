@@ -21,11 +21,10 @@ const sendTransactionalEmail = async (templateObject, emailBody, country = 'indi
 
   const footer = await parsedHtmlFromTemplateFileAndObject('footer', templateObject);
   const html = await parsedHtmlFromTemplateFileAndObject(templateFileName, { ...templateObject, footer });
-
   // const emailTo = [transactionalMessageBody.testEmail];
   const emailTo = [templateObject.parentEmail];
 
-  const ccEmail = [transactionalMessageBody.testEmail, templateObject.mentorEmail, 'shravasti.vaidya@tekie.in'];
+  const ccEmail = [templateObject.mentorEmail, 'shravasti.vaidya@tekie.in'];
 
   const bccEmail = [];
   const subject = get(emailBody, 'subject');

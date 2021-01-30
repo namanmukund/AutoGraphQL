@@ -1,4 +1,5 @@
 import { getTimezone } from 'countries-and-timezones';
+import moment from 'moment'
 import { get } from 'lodash';
 
 const getSlotLabel = (slotNumber) => {
@@ -63,8 +64,9 @@ const getIntlDateTime = (date, istTime, targetTimezone) => {
 
   return {
     date: intlDate,
-    startTime: intlStartTime,
-    endTime: intlEndTime,
+    dateObject: moment().month(intlDate.split('-')[1]).year(intlDate.split('-')[2] - 1).date(intlDate.split('-')[0]).toDate(),
+    startTime: intlStartTime.padStart(2, '0'),
+    endTime: intlEndTime.padStart(2, '0'),
   };
 };
 
