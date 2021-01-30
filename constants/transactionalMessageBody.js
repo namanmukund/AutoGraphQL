@@ -1,6 +1,6 @@
 const transactionalMessageBody = {
   bookingConfirmation: 'oct5_trial_booked_confirmation',
-  bookingConfirmationInternational: 'booked_confirmation_usa',
+  bookingConfirmationInternational: 'booking_confirmation_usa',
   sessionReminder: 'oct19_class_reminder',
   sessionReminderInternational: 'reminder_link_usa',
   mentorSessionNotification: 'mentor_notification',

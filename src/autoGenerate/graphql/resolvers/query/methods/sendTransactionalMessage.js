@@ -1,7 +1,5 @@
 import { get } from 'lodash';
-import moment from 'moment';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import getLongDate from '../../../../../../utils/getLongDate';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../../utils/getSlotTimesInString';
 import getSelectedSlotsStringArray from '../../../postHookFunctions/utils/getSelectedSlotsStringArray';
@@ -145,8 +143,12 @@ const getMentorMenteeSessions = async (userId, messageType, sessionLink) => {
   const menteeSession = get(data[0], 'menteeSession');
   const mentorProfileFile = get(data[0], 'mentorSession.user.profilePic.uri', '');
   const topicTitle = get(data[0], 'topic.title', '');
-  const mentorProfilePic = mentorProfileFile ? getFullFilePath(mentorProfileFile) : getFullFilePath('python/email/mentor1.png');
+  const mentorProfilePic = mentorProfileFile ? getFullFilePath(mentorProfileFile) : 'https://tekie-backend.s3.amazonaws.com/python/email/mentorDrop.png';
   // validate before sending the message
+
+  if (!mentorInfo) {
+    throw new MessageAlreadySendError();
+  }
   if (!data || (data && data.length > 1)) {
     throw new InvalidRequestError();
   }
@@ -194,7 +196,6 @@ const getMentorMenteeSessions = async (userId, messageType, sessionLink) => {
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
     const slotNumber = slotTimeStringArray[0].split('slot')[1];
     const { startTime, endTime, date } = getIntlDateTime(bookingDate, slotNumber, get(menteeSession, 'user.timezone') || 'Asia/Kolkata');
-
     return {
       mentorMenteeSessionId: get(data[0], 'id'),
       parentName: get(parentInfo, 'name'),
@@ -265,6 +266,7 @@ const sendTransactionalMessage = async (root, params, context) => {
       const {
         parentName, name, bookingDate, startTime, mentorPhoneNumber,
         experienceYear, codingLanguages, mentorRating, mentorName,
+        meetingId, meetingPassword,
       } = dataObj;
       parameters = [{
         name: 'parent_name',
@@ -279,8 +281,16 @@ const sendTransactionalMessage = async (root, params, context) => {
         value: name,
       },
       {
+        name: 'meeting_id',
+        value: meetingId || '-',
+      },
+      {
+        name: 'meeting_password',
+        value: meetingPassword || '-',
+      },
+      {
         name: 'session_date',
-        value: getLongDate(bookingDate),
+        value: bookingDate,
       },
       {
         name: 'session_time',
@@ -358,7 +368,7 @@ const sendTransactionalMessage = async (root, params, context) => {
       },
       {
         name: 'session_date',
-        value: getLongDate(bookingDate),
+        value: bookingDate,
       },
       {
         name: 'session_time',
@@ -374,8 +384,7 @@ const sendTransactionalMessage = async (root, params, context) => {
     default:
   }
 
-  dataObj.bookingDateLong = getLongDate(dataObj.bookingDate);
-  dataObj.bookingDate = moment(dataObj.bookingDate).format('DD-MM-YYYY');
+  dataObj.bookingDateLong = dataObj.bookingDate;
   if (!dataObj.sessionLink) {
     dataObj.sessionLink = sessionLink;
   }
@@ -402,23 +411,27 @@ const sendTransactionalMessage = async (root, params, context) => {
         transactionalMessageBody[messageType],
         dataObj.country,
       );
-      // send whatsApp
-      await sendWhatsAppTemplateMessage(
-        whatsAppPhoneNumber,
-        whatsAppTemplate,
-        dataObj.parentName,
-        parameters,
-      );
+      if ((!country || country === 'india') && messageType === 'sendSessionLink') {
+        // send whatsApp
+        await sendWhatsAppTemplateMessage(
+          whatsAppPhoneNumber,
+          whatsAppTemplate,
+          dataObj.parentName,
+          parameters,
+        );
+      }
       break;
     }
     case 'whatsApp': {
       // send whatsApp
-      await sendWhatsAppTemplateMessage(
-        whatsAppPhoneNumber,
-        whatsAppTemplate,
-        dataObj.parentName,
-        parameters,
-      );
+      if ((!country || country === 'india') && messageType === 'sendSessionLink') {
+        await sendWhatsAppTemplateMessage(
+          whatsAppPhoneNumber,
+          whatsAppTemplate,
+          dataObj.parentName,
+          parameters,
+        );
+      }
       break;
     }
     case 'email': {

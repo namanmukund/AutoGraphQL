@@ -130,7 +130,9 @@ const extractMenteeSessionInfoAndSendEmail = async (
   const menteeInfo = get(userInfo, 'data.user');
   const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
 
-  const { startTime, endTime, date } = getIntlDateTime(bookingDate, slotNumber, get(menteeInfo, 'timezone') || 'Asia/Kolkata');
+  const {
+    startTime, endTime, date,
+  } = getIntlDateTime(bookingDate, slotNumber, get(menteeInfo, 'timezone') || 'Asia/Kolkata');
   const menteeObj = {
     date,
     startTime,
@@ -194,7 +196,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
       },
       {
         name: 'session_date',
-        value: getLongDate(bookingDate),
+        value: date,
       },
       {
         name: 'session_time',
