@@ -7,7 +7,6 @@ import sendEmail from '../../../../../services/email/utils/sendEmail';
 import getFormatedDate from '../../../../../utils/getFormatedDate';
 import getSlotLabel from '../../../../../utils/getSlotLabel';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
-import getLongDate from '../../../../../utils/getLongDate';
 import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
 import getIntlDateTime from '../../../../../utils/timeZoneDiff';
 
