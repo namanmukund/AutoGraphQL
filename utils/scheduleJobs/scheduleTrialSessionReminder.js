@@ -205,7 +205,7 @@ const scheduleTrialSessionReminder = async () => {
           ];
           // const phone = 919654347463;
           const phone = countryCode.split('+')[1] + parentNumber;
-          if (!country || country === 'india') {
+          if (!menteeObj.country || menteeObj.country === 'india') {
             // eslint-disable-next-line no-await-in-loop
             await sendWhatsAppTemplateMessage(
               phone,
@@ -223,10 +223,8 @@ const scheduleTrialSessionReminder = async () => {
             );
           }
           // send email
-          if (!country || country === 'india') {
-            // eslint-disable-next-line no-await-in-loop
-            await sendTransactionalEmail(menteeObj, transactionalMessageBody.sendSessionLink, menteeObj.country);
-          }
+          // eslint-disable-next-line no-await-in-loop
+          await sendTransactionalEmail(menteeObj, transactionalMessageBody.sendSessionLink, menteeObj.country);
           // update  status
           // eslint-disable-next-line no-await-in-loop
           await updateScheduleStatusOfMenteeSession(menteeSessionId, 'completed');
