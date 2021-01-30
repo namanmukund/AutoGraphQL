@@ -1,5 +1,4 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import generateMentorReport from '../scriptMethods/generateMentorReport';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -14,7 +13,7 @@ const temporaryScript = (async (root, params, context) => {
   // await addPaymentIntallmentsOfPastUsers();
   // await addDefaultEnrollmentTypeInSalesOperation();
   // await addUnassignedValueToSalesOperation();
-  await generateMentorReport();
+  // await generateMentorReport();
   // await addProEnrollmentTypeInSalesOperation();
   // await updateCountryInCollections();
   return {
