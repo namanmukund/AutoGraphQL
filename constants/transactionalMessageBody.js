@@ -1,11 +1,15 @@
 const transactionalMessageBody = {
   bookingConfirmation: 'oct5_trial_booked_confirmation',
+  bookingConfirmationInternational: 'booking_confirmation_usa',
   sessionReminder: 'oct19_class_reminder',
+  sessionReminderInternational: 'reminder_link_usa',
   mentorSessionNotification: 'mentor_notification',
   sendSessionLink: {
     emailTemplate: 'sendSessionLink',
+    emailTemplateInternational: 'sendSessionLinkInternational',
     subject: 'Tekie - Meeting link for free coding session',
     whatsAppTemplate: 'oct14_know_your_mentor',
+    whatsAppTemplateInternational: 'reminder_link_usa',
   },
   didNotPickTheCall: {
     emailTemplate: 'didNotPickTheCall',

@@ -34,18 +34,21 @@
                 </a>
               </td>
             </tr>
+            
+            <% if (meetingId !== null) { %>
+              <tr align="center">
+                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 18px; color: #707070; border-top: 15px solid transparent;">
+                  Meeting ID: <%= meetingId %>
+                </td>
+              </tr>
+  
+              <tr align="center">
+                <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 18px; color: #707070; border-top: 5px solid transparent;">
+                  Meeting Password: <%= meetingPassword %>
+                </td>
+              </tr>
+          <% } %>
 
-            <tr align="center">
-              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 18px; color: #707070; border-top: 15px solid transparent;">
-                Meeting ID: <%= meetingId %>
-              </td>
-            </tr>
-
-            <tr align="center">
-              <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 18px; color: #707070; border-top: 5px solid transparent;">
-                Meeting Password: <%= meetingPassword %>
-              </td>
-            </tr>
             <tr align="center">
               <td style="font-family: Nunito, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 18px; color: #707070; border-top: 25px solid transparent;">
               </td>
