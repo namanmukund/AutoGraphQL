@@ -68,6 +68,8 @@ import Batch from './batch';
 import BatchCurrentComponentStatus from './batchCurrentComponentStatus';
 import BatchSession from './batchSession';
 import UserLocationLog from './userLocationLog';
+import MentorMenteeSessionAudit from './mentorMenteeSessionAudit';
+import MentorMenteeSessionTimestamp from './mentorMenteeSessionTimestamp';
 
 export default [
   ...User,
@@ -140,4 +142,6 @@ export default [
   ...BatchCurrentComponentStatus,
   ...BatchSession,
   ...UserLocationLog,
+  ...MentorMenteeSessionAudit,
+  ...MentorMenteeSessionTimestamp,
 ];
