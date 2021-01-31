@@ -4,6 +4,7 @@ const transactionalMessageBody = {
   sessionReminder: 'oct19_class_reminder',
   sessionReminderInternational: 'reminder_link_usa',
   mentorSessionNotification: 'mentor_notification',
+  usNotBookedWelcomeMessage: 'welcome_usa_v2',
   sendSessionLink: {
     emailTemplate: 'sendSessionLink',
     emailTemplateInternational: 'sendSessionLinkInternational',
