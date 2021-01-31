@@ -7,7 +7,6 @@ import sendEmail from '../../../../../services/email/utils/sendEmail';
 import getFormatedDate from '../../../../../utils/getFormatedDate';
 import getSlotLabel from '../../../../../utils/getSlotLabel';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
-import getLongDate from '../../../../../utils/getLongDate';
 import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
 import getIntlDateTime from '../../../../../utils/timeZoneDiff';
 
@@ -211,7 +210,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
       // const phone = 919654347463;
       await sendWhatsAppTemplateMessage(
         phone,
-        menteeObj.country === 'india' ? transactionalMessageBody.bookingConfirmation : transactionalMessageBody.bookingConfirmationInternational,
+        menteeObj.country === 'india' || !menteeObj.country ? transactionalMessageBody.bookingConfirmation : transactionalMessageBody.bookingConfirmationInternational,
         parentName,
         parameters,
       );
