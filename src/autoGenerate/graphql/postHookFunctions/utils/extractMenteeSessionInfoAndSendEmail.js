@@ -210,7 +210,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
       // const phone = 919654347463;
       await sendWhatsAppTemplateMessage(
         phone,
-        menteeObj.country === 'india' ? transactionalMessageBody.bookingConfirmation : transactionalMessageBody.bookingConfirmationInternational,
+        menteeObj.country === 'india' || !menteeObj.country ? transactionalMessageBody.bookingConfirmation : transactionalMessageBody.bookingConfirmationInternational,
         parentName,
         parameters,
       );
