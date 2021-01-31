@@ -21,7 +21,7 @@ const menteeSessionQuery = (userId) => `
 const sendBookingReminder = async (input, params) => {
   const studentName = get(params, 'input.childName');
   const children = get(input, 'children', []);
-  const child = children.find((child) => get(child, 'child.name') === studentName);
+  const child = children.find((student) => get(student, 'child.name') === studentName);
   const studentId = get(
     child,
     'id',
