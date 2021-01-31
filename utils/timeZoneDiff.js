@@ -1,5 +1,4 @@
 import { getTimezone } from 'countries-and-timezones';
-import moment from 'moment';
 import { get } from 'lodash';
 
 const getSlotLabel = (slotNumber) => {
@@ -61,11 +60,9 @@ const getIntlDateTime = (date, istTime, targetTimezone) => {
     : dateAfterSlotOffset.getMinutes();
   const meridianEnd = getSlotLabel(dateAfterSlotOffset.getHours()).startTime.split(' ')[1];
   const intlEndTime = `${hourAfterOffsetEnd}:${minAfterOffsetEnd} ${meridianEnd}`;
-
   return {
     date: intlDate,
-    dateObject: moment().month(intlDate.split('-')[1]).year(intlDate.split('-')[2] - 1).date(intlDate.split('-')[0])
-      .toDate(),
+    dateObject: new Date(new Date().setFullYear(intlDate.split('-')[2], intlDate.split('-')[1] - 1, intlDate.split('-')[0])),
     startTime: intlStartTime.padStart(2, '0'),
     endTime: intlEndTime.padStart(2, '0'),
   };

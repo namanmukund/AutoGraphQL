@@ -30,7 +30,6 @@ db.on('error', (err) => {
     rule.minute = interval;
     // eslint-disable-next-line no-console
     // eslint-disable-next-line no-unused-vars
-    await scheduleTrialSessionReminder();
     schedule.scheduleJob(rule, async () => {
       // eslint-disable-next-line no-console
       await scheduleTrialSessionReminder();
