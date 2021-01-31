@@ -131,7 +131,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
 
   const {
     startTime, endTime, date,
-  } = getIntlDateTime(bookingDate, slotNumber, get(menteeInfo, 'timezone') || 'Asia/Kolkata');
+  } = getIntlDateTime(bookingDate, slotNumber, get(menteeInfo, 'timezone') ? get(menteeInfo, 'timezone') : 'Asia/Kolkata');
   const menteeObj = {
     date,
     startTime,
