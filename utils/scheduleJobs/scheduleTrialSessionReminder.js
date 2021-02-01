@@ -125,7 +125,7 @@ const scheduleTrialSessionReminder = async () => {
       const slotTimeStringArray = getSelectedSlotsStringArray(slots);
       if (slotTimeStringArray && slotTimeStringArray.length) {
         const slotNumber = slotTimeStringArray[0].split('slot')[1];
-        const { startTime, endTime, date } = getIntlDateTime(
+        const { startTime, endTime, dateObject } = getIntlDateTime(
           bookingDate,
           slotNumber,
           get(menteeInfo, 'timezone') || 'Asia/Kolkata',
@@ -141,8 +141,8 @@ const scheduleTrialSessionReminder = async () => {
           const mentorProfilePic = mentorProfileFile ? getFullFilePath(mentorProfileFile) : getFullFilePath('python/email/mentor1.png');
           const topicTitle = get(menteeSession, 'topic.title', '');
           const menteeObj = {
-            date: getFormatedDate(date),
-            bookingDateLong: getLongDate(date),
+            date: getFormatedDate(dateObject),
+            bookingDateLong: getLongDate(dateObject),
             startTime,
             endTime,
             name: startCase(toLower(get(menteeInfo, 'name') || '')),
@@ -180,7 +180,7 @@ const scheduleTrialSessionReminder = async () => {
           },
           {
             name: 'session_date',
-            value: getLongDate(bookingDate),
+            value: getLongDate(dateObject),
           },
           {
             name: 'session_time',
