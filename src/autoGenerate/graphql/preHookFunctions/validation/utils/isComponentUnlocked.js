@@ -20,7 +20,7 @@ import {
 } from '../../../../../../constants';
 import getTopicForValidation from './getTopicForValidation';
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
-import { validateMentorMenteePermissionForComponent } from './index';
+import { validateMentorMenteePermissionForComponent, getMentorMenteeSessionForValidation } from './index';
 import getBatchCurrentComponentStatus
   from '../../../../utils/getBatchCurrentComponentStatus';
 
@@ -166,6 +166,8 @@ const isComponentUnlocked = async (
     order: topicOrder,
     isTrial,
   } = topicInfo;
+
+  topicId = topicInfo && topicInfo.id;
   const {
     currentTopic,
     currentTopicComponentType,
@@ -233,12 +235,16 @@ const isComponentUnlocked = async (
   // no mentor token, he should not be able to hit API
   // this will be checked for normal flow and not for batch
   if (!batchCurrentComponentInfo || (batchCurrentComponentInfo && batchCurrentComponentBatchType === batchType.normal)) {
+    const mentorMenteeSessionQueryRes = await getMentorMenteeSessionForValidation(userId, topicId);
+    const mentorMenteeSessionStatus = get(mentorMenteeSessionQueryRes, 'data.mentorMenteeSessions[0].sessionStatus', '');
+
     validateMentorMenteePermissionForComponent(
       context,
       topicOrder,
       learningObjectiveOrder,
       page,
       currentTopicComponentInfo,
+      mentorMenteeSessionStatus,
     );
 
     switch (page) {
