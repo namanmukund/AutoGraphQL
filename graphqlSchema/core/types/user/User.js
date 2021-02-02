@@ -65,6 +65,7 @@ const User = `
     dateOfBirth: Date
     gender: Gender
     city: String
+    isBookSessionReminderSent: Boolean @defaultValue(value: "false")
     country: Country @defaultValue(value: "india")
     timezone: String
     isSetPassword: Boolean @defaultValue(value: "false")

@@ -36,6 +36,7 @@ const MentorMenteeSession = `
     sessionStartDate: Date
     sessionEndDate: Date
     sessionStatus: SessionStatus! @defaultValue(value: "allotted")
+    classMissedMessageStatus: ClassMissedMessageStatus @defaultValue(value: "pending")
     isQuizSubmitted: Boolean @defaultValue(value: "false")
     quizSubmitDate: Date
     isAssignmentSubmitted: Boolean @defaultValue(value: "false")

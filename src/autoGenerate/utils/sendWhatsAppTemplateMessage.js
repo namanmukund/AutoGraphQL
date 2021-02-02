@@ -7,6 +7,7 @@ const sendWhatsAppTemplateMessage = async (
   broadcast_name,
   parameters,
 ) => {
+  if (process.env.NODE_ENV !== 'production') return null;
   const bodyJson = {
     template_name,
     broadcast_name: broadcast_name || 'Tekie',
