@@ -17,7 +17,7 @@ const sendTransactionalEmail = async (templateObject, emailBody, country = 'indi
   // const emailTo = [transactionalMessageBody.testEmail];
   const emailTo = [templateObject.parentEmail];
 
-  const ccEmail = ['shravasti.vaidya@tekie.in'];
+  const ccEmail = [];
 
   if (templateObject.mentorEmail) {
     ccEmail.push(templateObject.mentorEmail);
