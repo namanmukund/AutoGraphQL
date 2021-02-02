@@ -1,4 +1,5 @@
 import { get, startCase, toLower } from 'lodash';
+import moment from 'moment';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import parsedHtmlFromTemplateFileAndObject
   from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
@@ -9,6 +10,7 @@ import getSlotLabel from '../../../../../utils/getSlotLabel';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
 import getIntlDateTime from '../../../../../utils/timeZoneDiff';
+import updateBookSessionReminderStatus from './updateBookSessionReminderStatus';
 
 const menteeInfoQuery = (userId) => `
   query{
@@ -16,8 +18,9 @@ const menteeInfoQuery = (userId) => `
       id
       name
       country
+      isBookSessionReminderSent
       timezone
-        studentProfile{
+      studentProfile{
         id
         grade
         parents{
@@ -87,6 +90,14 @@ const sendBookedSessionEmailToParent = (subject, menteeObj, action) => {
   if (action === 'delete') {
     templateFileName = 'canceledSessionEmailTemplate';
   }
+
+  // eslint-disable-next-line no-param-reassign
+  menteeObj.timingsText = 'soon!';
+
+  if (menteeObj.isSessionBefore3Hours) {
+    // eslint-disable-next-line no-param-reassign
+    menteeObj.timingsText = '3 hours before your session!';
+  }
   // eslint-disable-next-line no-param-reassign
   menteeObj.action = action;
   const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, menteeObj);
@@ -108,6 +119,7 @@ const sendBookedSessionEmailToParent = (subject, menteeObj, action) => {
       html,
       'hello@tekie.in',
     );
+    if (action === 'delete' && menteeObj.country !== 'india') return;
     sendEmail(emailMsgObject);
   });
 };
@@ -128,22 +140,25 @@ const extractMenteeSessionInfoAndSendEmail = async (
   const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId));
   const menteeInfo = get(userInfo, 'data.user');
   const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
-
+  const timezone = get(menteeInfo, 'timezone') ? get(menteeInfo, 'timezone') : 'Asia/Kolkata';
   const {
-    startTime, endTime, date,
-  } = getIntlDateTime(bookingDate, slotNumber, get(menteeInfo, 'timezone') ? get(menteeInfo, 'timezone') : 'Asia/Kolkata');
+    startTime, endTime, date, dateObject,
+  } = getIntlDateTime(bookingDate, slotNumber, timezone);
   const menteeObj = {
     date,
     startTime,
     endTime,
+    id: get(menteeInfo, 'data.user'),
     name: startCase(toLower(get(menteeInfo, 'name') || '')),
     grade: get(menteeInfo, 'studentProfile.grade') || '',
     parentName: startCase(toLower(get(parentInfo, 'name') || '')),
     parentEmail: get(parentInfo, 'email') || '',
     parentNumber: get(parentInfo, 'phone.number') || '',
     countryCode: get(parentInfo, 'phone.countryCode') || '',
-    country: get(menteeInfo, 'country') || 'india',
+    country: get(menteeInfo, 'country') ? get(menteeInfo, 'country') : 'india',
     timezone: get(menteeInfo, 'timezone') || 'Asia/Kolkata',
+    isSessionBefore3Hours: moment(dateObject).diff(getIntlDateTime(new Date(), new Date().getHours(), timezone), 'hours', false) >= 4,
+    isBookSessionReminderSent: get(menteeInfo, 'isBookSessionReminderSent'),
   };
   const topicInfo = topic || await callLocalGraphqlApi(topicInfoQuery(topicId));
   menteeObj.topicTitle = get(topicInfo, 'data.topic.title');
@@ -158,7 +173,11 @@ const extractMenteeSessionInfoAndSendEmail = async (
 
   switch (action) {
     case 'add': {
-      subject = `Session Booked by ${menteeObj.name}`;
+      if (menteeObj.country === 'india') {
+        subject = `Session Booked by ${menteeObj.name}`;
+      } else {
+        subject = 'Success! Tekie Demo Session on its way!';
+      }
       break;
     }
     case 'update': {
@@ -167,7 +186,11 @@ const extractMenteeSessionInfoAndSendEmail = async (
       const { startTime: previousStartTime, endTime: previousEndTime } = getSlotLabel(previousSlotNumber);
       menteeObj.previousStartTime = previousStartTime;
       menteeObj.previousEndTime = previousEndTime;
-      subject = `Session Updated by ${menteeObj.name}`;
+      if (menteeObj.country === 'india') {
+        subject = `Session Updated by ${menteeObj.name}`;
+      } else {
+        subject = 'Success! Tekie Demo Session on its way!';
+      }
       break;
     }
     case 'delete': {
@@ -208,9 +231,27 @@ const extractMenteeSessionInfoAndSendEmail = async (
       ];
       const phone = countryCode.split('+')[1] + parentNumber;
       // const phone = 919654347463;
+      let whatsAppTemplate = '';
+      if (menteeObj.country === 'india') {
+        whatsAppTemplate = transactionalMessageBody.bookingConfirmation;
+      } else if (menteeObj.isBookSessionReminderSent) {
+        if (menteeObj.isSessionBefore3Hours) {
+          whatsAppTemplate = transactionalMessageBody.bookingConfirmationInternational;
+        } else {
+          whatsAppTemplate = transactionalMessageBody.bookingConfirmationSoonInternational;
+        }
+      } else {
+        // eslint-disable-next-line no-lonely-if
+        if (menteeObj.isSessionBefore3Hours) {
+          whatsAppTemplate = transactionalMessageBody.bookingWithWelcomeConfirmationInternational;
+        } else {
+          whatsAppTemplate = transactionalMessageBody.bookingWithWelcomeSoonConfirmationInternational;
+        }
+      }
+      updateBookSessionReminderStatus(menteeObj.id, true);
       await sendWhatsAppTemplateMessage(
         phone,
-        menteeObj.country === 'india' || !menteeObj.country ? transactionalMessageBody.bookingConfirmation : transactionalMessageBody.bookingConfirmationInternational,
+        whatsAppTemplate,
         parentName,
         parameters,
       );

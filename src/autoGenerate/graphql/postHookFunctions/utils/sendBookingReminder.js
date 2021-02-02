@@ -2,6 +2,8 @@ import { get } from 'lodash';
 import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
+import sendTransactionalEmail from '../../resolvers/utils/sendTransactionalEmail';
+import updateBookSessionReminderStatus from './updateBookSessionReminderStatus';
 
 const menteeSessionQuery = (userId) => `
   query {
@@ -14,6 +16,10 @@ const menteeSessionQuery = (userId) => `
       topic {
         id
       }
+      user {
+        id
+        isBookSessionReminderSent
+      }
     }
   }
 `;
@@ -21,7 +27,7 @@ const menteeSessionQuery = (userId) => `
 const sendBookingReminder = async (input, params) => {
   const studentName = get(params, 'input.childName');
   const children = get(input, 'children', []);
-  const child = children.find((student) => get(student, 'child.name') === studentName);
+  const child = children.find((student) => get(student, 'name') === studentName);
   const studentId = get(
     child,
     'id',
@@ -33,6 +39,7 @@ const sendBookingReminder = async (input, params) => {
   const phone = get(input, 'phone.countryCode', '').replace('+', '') + get(input, 'phone.number');
   const country = get(input, 'country') ? get(input, 'country', 'india') : 'india';
   const parentName = get(input, 'name', '');
+  const parentEmail = get(input, 'email', '');
   const parameters = [
     {
       name: 'parent_name',
@@ -46,10 +53,16 @@ const sendBookingReminder = async (input, params) => {
   if (menteeSessions.length === 0 && country !== 'india') {
     sendWhatsAppTemplateMessage(
       phone,
-      transactionalMessageBody.usNotBookedWelcomeMessage,
+      transactionalMessageBody.demoNotBooked.whatsAppTemplate,
       parentName,
       parameters,
     );
+    sendTransactionalEmail({
+      parentEmail,
+      studentName,
+      parentName,
+    }, transactionalMessageBody.demoNotBooked);
+    updateBookSessionReminderStatus(studentId, true);
   }
 };
 

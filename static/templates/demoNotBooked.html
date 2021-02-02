@@ -18,6 +18,14 @@
     <!-- CSS Reset : BEGIN -->
 <style>
 
+@media (max-width: 432px) {
+  .knowYourMentorContainer {
+    border-right: none !important;
+    margin-left: 10px;
+    padding-bottom: 20px !important;
+  }
+}
+
 html,
 body {
     margin: 0 auto !important;
@@ -229,94 +237,54 @@ body{
 		        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
 		          <tr>
                 <td style="text-align:center;">
-                  <div style='width: 100%; height: 208px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/usMailConfettiBG.png"); background-size: cover; background-position: center center; padding-top: 20px; box-sizing: border-box;'>
+                  <div style='width: 100%; padding-top: 20px; box-sizing: border-box; text-align: center;'>
                     <div style='width: 80px; height: 30px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/tekieLogo.png"); margin-left: 20px; background-size: contain; background-repeat: no-repeat;'></div>
-                    <div style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 28px; color: #00ADE6; margin-top: 10px; margin-bottom: 0px">Woo-Hoo!</div>
-                    <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 10px; margin-bottom: 0px; width: 100%; opacity: 0.8; color: #504F4F; font-size: 16px;">
-                      “<span style="font-weight: bold;">Level up,</span> <span style='font-weight: bold; color: #00ADE6'><%= name %></span> <div style='transform: translateY(3px); width: 18px; height: 18px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/coolGlassesEmoji.png"); background-size: contain; display: inline-block;'></div>. The game is on!”
+                    <div style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 28px; color: #00ADE6; margin-top: 10px; margin-bottom: 0px">You're almost there...</div>
+                    <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 10px; margin-bottom: 0px; width: 80%; opacity: 0.8; color: #504F4F; display: inline-block; font-size: 16px;">
+                      “<span style='font-weight: bold; color: #00ADE6'> <%= studentName %> </span> is just one click away from awesomeness"</span>
                     </div>
                     <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 5px; margin-bottom: 0px; margin-right: 6%; opacity: 0.8; color: #504F4F; text-align: right; font-size: 16px;">
                       -Words from your captain
                     </div>
-                  </div>
-                </td>
-		          </tr>
-		          <tr>
-                <td style="text-align:center; padding-top: 0px">
-                  <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 100%; opacity: 0.8; color: #504F4F; font-size: 16px">
-                    You will experience your first Python session with Tekie on
-                  </div>
-                </td>
-		          </tr>
-		          <tr>
-		          <tr>
-                <td style="text-align:center; padding-top: 0px">
-                  <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 100%; color: #504F4F; display: inline-block;">
-                    <img src='https://tekie-backend.s3.amazonaws.com/python/topic/thumbnailSmall_cjx2czgja00001h2xt7fjlh04_1589290510205.png' style='width: 142px; display: inline-block;' />
-                    <div style='display: inline-block; height: 142px; text-align: left;'>
-                      <div>
-                        <table>
-                          <tr>
-                            <td style='border-top: 25px solid transparent'>
-                              <div style='width: 25px; height: 25px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/iconCalendar.png"); background-size: contain; display: inline-block; vertical-align:middle; margin-right: 12px; margin-left: 21px;'></div>
-                              <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; color: #504F4F; display: inline-block; vertical-align:middle; font-size: 16px;"><%= date %></div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td style='border-top: 15px solid transparent'>
-                              <div style='width: 25px; height: 25px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/clock.png"); background-size: contain; display: inline-block; vertical-align:middle; margin-right: 12px; margin-left: 21px;'></div>
-                              <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; color: #504F4F; display: inline-block; vertical-align:middle; font-size: 16px;"><%= startTime %> - <%= endTime %></div>
-                            </td>
-                          </tr>
-                        </table>
-                        <!-- <span style='margin-left: 12px; font-family: "Nunito", "Open Sans", Helvetica, Roboto, sans-serif;'>02-02-2020</span> -->
-                      </div>
-                      <!-- <div>dsd</div> -->
-                      <!-- <div style='width: 25px; height: 25px; background-color: red; margin-left: 12px; display: inline-block;'></div>
-                      <div style='margin-left: 12px; font-family: "Nunito", "Open Sans", Helvetica, Roboto, sans-serif; display: inline-block;'>02-02-2020</div> -->
+                    <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 15px; margin-bottom: 0px; width: 80%; opacity: 0.8; color: #504F4F; display: inline-block; font-size: 16px;">
+                      <%= parentName %> just click below and book your first demo Tekie session. 
                     </div>
                   </div>
-                </td>
-		          </tr>
-		          <tr>
-                <td style="text-align:center; padding-top: 0px; padding-bottom: 17px; opacity: 0.8">
-                  <div style='width: 78%; margin-left: 11%; height: 1px; background-color: #D8D8D8'></div>
                 </td>
               </tr>
               
               <tr>
-                <td style="text-align:center;">
-                  <h3 style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 22px; color: #00ADE6; margin-top: 0px; margin-bottom: 0px">Look Out!</h3>
+                <td style="text-align:center; padding-top: 17px; opacity: 0.8;">
+                  <a href='https://www.tekie.us/sessions/book' style='background-color: #fff;filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.22)); display: inline-block; min-width: 200px; border-radius: 7px; text-decoration: none; color: white; font-family: Lato, "Open Sans", Helvetica, Roboto, sans-serif; text-transform: uppercase; font-weight: 700; box-sizing: border-box; margin-bottom: 17px; padding: 10px 24px; background: linear-gradient(180deg, #34E4EA 0%, #00ADE6 100%);'>
+                    <div style='display: inline-block; width: 28px; height: 28px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/calendorIconUS.png"); background-size: cover; margin-right: 8px; vertical-align:middle; background-size: contain; background-repeat: no-repeat;'></div>
+                    <div style='vertical-align:middle; display: inline-block; color: #fff; text-transform: uppercase;'>book a demo session</div>
+                  </a>
                 </td>
               </tr>
+
 
               <tr>
-                <td style="text-align:center;">
-                  <h5 style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 500; font-size: 19px; color: #00ADE6; margin-top: 0px; margin-bottom: 0px; opacity: 0.75">Before entering Tekie's majestic world</h5>
+                <td style="text-align:center; padding-top: 8px; padding-bottom: 17px; opacity: 0.8">
+                  <div style='width: 78%; margin-left: 11%; height: 1px; background-color: #D8D8D8'></div>
                 </td>
               </tr>
 
 		          <tr>
-                <td style="text-align: left; padding-top: 7px; padding-bottom: 2px;">
-                  <div style='width: 14px; height: 10px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/checkBoxBlueUS.png"); background-size: contain; background-repeat: no-repeat; display: inline-block; margin-right: 8px; margin-left: 4%; vertical-align:top; margin-top: 10px'></div>
-                  <div style='display: inline-block; font-family: "Nunito", "Open Sans", Helvetica, Roboto, sans-serif; font-size: 16px; color: #504F4F; opacity: 0.8; width: 85%; vertical-align:top;'>Zoom and Google chrome should be updated on the laptop!</div>
-                </td>
-              </tr>
-		          <tr>
-                <td style="text-align: left; padding-top: 7px; padding-bottom: 2px;">
-                  <div style='width: 14px; height: 10px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/checkBoxBlueUS.png"); background-size: contain; background-repeat: no-repeat; display: inline-block; margin-right: 8px; margin-left: 4%; vertical-align:top; margin-top: 10px'></div>
-                  <div style='display: inline-block; font-family: "Nunito", "Open Sans", Helvetica, Roboto, sans-serif; font-size: 16px; color: #504F4F; opacity: 0.8; width: 85%; vertical-align:top;'>You will get the zoom link and your mentor's details <%= timingsText %></div>
-                </td>
-              </tr>
-		          <tr>
-                <td style="text-align: left; padding-top: 7px; padding-bottom: 2px;">
-                  <div style='width: 14px; height: 10px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/checkBoxBlueUS.png"); background-size: contain; background-repeat: no-repeat; display: inline-block; margin-right: 8px; margin-left: 4%; vertical-align:top; margin-top: 10px'></div>
-                  <div style='display: inline-block; font-family: "Nunito", "Open Sans", Helvetica, Roboto, sans-serif; font-size: 16px; color: #504F4F; opacity: 0.8; width: 85%; vertical-align:top;'>Heads up - Your mentor will require remote access to enter credentials and for a better learning experience.</div>
+                <td style="text-align:center; padding-top: 0px">
+                  <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 100%; color: #504F4F; display: inline-block; vertical-align: top">
+                    <h3 style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 22px; color: #00ADE6; margin-top: 0px; margin-bottom: 0px">Student Tales</h3>
+                    <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 10px; margin-bottom: 0px; width: 80%; opacity: 0.8; color: #504F4F; display: inline-block; font-size: 16px;">
+                      Meet a happy student of Tekie!
+                    </div>
+                    <a href='https://www.youtube.com/watch?v=ToJ7gTZZjT4'>
+                      <img src='https://tekie-backend.s3.amazonaws.com/python/email/namanSonparUS.png' style='max-width: 260px; width: 80%; margin-top: 40px;'></img>
+                    </a>
+                  </div>
                 </td>
               </tr>
 
-              <tr>
-                <td style="text-align:center; padding-top: 17px; padding-bottom: 17px; opacity: 0.8">
+		          <tr>
+                <td style="text-align:center; padding-top: 15px; padding-bottom: 24px; opacity: 0.8">
                   <div style='width: 78%; margin-left: 11%; height: 1px; background-color: #D8D8D8'></div>
                 </td>
               </tr>
@@ -332,7 +300,7 @@ body{
                     Tekie understands that when it is about your kid's future, you will always have genuine questions, and we respect it. We will assign you a <span style="font-style: italic">captain</span> to make your journey smooth <div style='transform: translateY(3px); width: 18px; height: 18px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/sailBoatEmoji.png"); background-size: contain; display: inline-block;'></div>
                   </div>
                   <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 85%; margin-left: 7.5%; margin-top: 10px; opacity: 0.8; color: #504F4F; font-size: 16px">
-                    Your captain is just a ‘Hi <div style='transform: translateY(3px); width: 18px; height: 18px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/handWaveEmoji.png"); background-size: contain; display: inline-block;'></div>’ away. You can also request a call by asking them over chat.
+                    Your captain is just a ‘Hi <div style='transform: translateY(3px); width: 18px; height: 18px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/handWaveEmoji.png"); background-size: contain; display: inline-block;'></div>' away. You can also request a call by asking them over chat.
                   </div>
                 </td>
 		          </tr>
@@ -344,7 +312,7 @@ body{
                     <div style='vertical-align:middle; width: 16px; height: 16px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/handWaveEmoji.png"); background-size: contain; display: inline-block;'></div>
                   </a>
                 </td>
-		          </tr>	          
+		          </tr>        
 		        </table>
 		      </td>
 		    </tr><!-- end:tr -->

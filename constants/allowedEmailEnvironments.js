@@ -1,6 +1,4 @@
 const allowedEmailEnvironments = [
-  'development',
-  'staging',
   'production',
 ];
 
