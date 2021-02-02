@@ -1,4 +1,5 @@
 import { get, startCase, toLower } from 'lodash';
+import moment from 'moment';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import parsedHtmlFromTemplateFileAndObject
   from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
@@ -234,15 +235,18 @@ const extractMenteeSessionInfoAndSendEmail = async (
       if (menteeObj.country === 'india') {
         whatsAppTemplate = transactionalMessageBody.bookingConfirmation;
       } else if (menteeObj.isBookSessionReminderSent) {
-        if (isSessionBefore3Hours) {
+        if (menteeObj.isSessionBefore3Hours) {
           whatsAppTemplate = transactionalMessageBody.bookingConfirmationInternational;
         } else {
           whatsAppTemplate = transactionalMessageBody.bookingConfirmationSoonInternational;
         }
-      } else if (isSessionBefore3Hours) {
-        whatsAppTemplate = transactionalMessageBody.bookingWithWelcomeConfirmationInternational;
       } else {
-        whatsAppTemplate = transactionalMessageBody.bookingWithWelcomeSoonConfirmationInternational;
+        // eslint-disable-next-line no-lonely-if
+        if (menteeObj.isSessionBefore3Hours) {
+          whatsAppTemplate = transactionalMessageBody.bookingWithWelcomeConfirmationInternational;
+        } else {
+          whatsAppTemplate = transactionalMessageBody.bookingWithWelcomeSoonConfirmationInternational;
+        }
       }
       updateBookSessionReminderStatus(menteeObj.id, true);
       await sendWhatsAppTemplateMessage(

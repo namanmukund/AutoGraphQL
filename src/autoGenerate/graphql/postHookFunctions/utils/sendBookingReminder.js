@@ -59,7 +59,7 @@ const sendBookingReminder = async (input, params) => {
     );
     sendTransactionalEmail({
       parentEmail,
-      name: studentName,
+      studentName,
       parentName,
     }, transactionalMessageBody.demoNotBooked);
     updateBookSessionReminderStatus(studentId, true);
