@@ -4,7 +4,7 @@ import {
   DatabaseRecordNotFoundError,
   InsufficientPermissionError,
 } from '../../../../../../constants/errors';
-import { topicTypes } from '../../../../../../constants';
+import { topicTypes, sessionStatus } from '../../../../../../constants';
 
 /*
 this method validates whether user should be able to hit API on basis of user role
@@ -15,12 +15,12 @@ const validateMentorMenteePermissionForComponent = (
   learningObjectiveOrder,
   page,
   currentTopicComponentInfo,
+  mentorMenteeSessionStatus,
 ) => {
   const {
     video, message, practiceQuestion,
   } = topicTypes;
   const currentUserRole = get(context, 'currentUser.role');
-  const currentMentorId = get(context, 'currentMentor.id');
 
   const {
     currentTopic,
@@ -33,7 +33,7 @@ const validateMentorMenteePermissionForComponent = (
     case video: {
       // condition if mentee is trying to access a video which is yet to be taught
       if (currentUserRole === MENTEE
-            && !currentMentorId
+            && (!mentorMenteeSessionStatus || mentorMenteeSessionStatus === sessionStatus.allotted)
             && topicOrder === currentTopicOrder
             && currentTopicComponentType === video) {
         throw new InsufficientPermissionError();
@@ -54,7 +54,7 @@ const validateMentorMenteePermissionForComponent = (
       // condition if mentee is trying to access a chat which is yet to be taught
       const { order: currentLearningObjectiveOrder } = currentLearningObjective;
       if (currentUserRole === MENTEE
-          && !currentMentorId
+          && (!mentorMenteeSessionStatus || mentorMenteeSessionStatus === sessionStatus.allotted)
           && topicOrder === currentTopicOrder
           && learningObjectiveOrder === currentLearningObjectiveOrder
           && currentTopicComponentType === message) {
@@ -76,7 +76,7 @@ const validateMentorMenteePermissionForComponent = (
       // condition if mentee is trying to access a PQ which is yet to be taught
       const { order: currentLearningObjectiveOrder } = currentLearningObjective;
       if (currentUserRole === MENTEE
-          && !currentMentorId
+          && (!mentorMenteeSessionStatus || mentorMenteeSessionStatus === sessionStatus.allotted)
           && topicOrder === currentTopicOrder
           && learningObjectiveOrder === currentLearningObjectiveOrder
           && currentTopicComponentType === practiceQuestion) {
