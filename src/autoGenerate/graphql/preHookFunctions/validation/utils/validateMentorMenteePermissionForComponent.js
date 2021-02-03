@@ -29,13 +29,6 @@ const validateMentorMenteePermissionForComponent = (
 
   const { order: currentTopicOrder } = currentTopic;
 
-  console.log('---------------------mentorMenteeSessionStatus', mentorMenteeSessionStatus);
-  console.log('---------------------currentUserRole', currentUserRole);
-  console.log('---------------------page', page);
-  console.log('---------------------topicOrder', topicOrder);
-  console.log('---------------------currentTopicOrder', currentTopicOrder);
-  console.log('---------------------currentTopicComponentType', currentTopicComponentType);
-
   switch (page) {
     case video: {
       // condition if mentee is trying to access a video which is yet to be taught
@@ -43,7 +36,6 @@ const validateMentorMenteePermissionForComponent = (
             && (!mentorMenteeSessionStatus || mentorMenteeSessionStatus === sessionStatus.allotted)
             && topicOrder === currentTopicOrder
             && currentTopicComponentType === video) {
-        console.log('---------------------oops');
         throw new InsufficientPermissionError();
       }
       break;
