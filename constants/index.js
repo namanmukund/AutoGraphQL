@@ -270,7 +270,7 @@ export const MENTOR_REPORT_COUNTRY = 'india';
 
 export const MENTOR_REPORT_SESSION_TYPE = 'trial';
 
-export const MENTOR_REPORT_DAYS = 270;
+export const MENTOR_REPORT_DAYS = 15;
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
