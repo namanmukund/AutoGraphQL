@@ -1,6 +1,6 @@
 import { TMS, TWA } from '../../../../constants';
 import {
-  MENTEE, MENTOR, UMS_HEAD, UMS_VIEWER, SALES, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN,
+  MENTEE, MENTOR, UMS_HEAD, UMS_VIEWER, SALES, SALES_EXECUTIVE,
 } from '../../../../constants/roles';
 import { READ } from '../../../../constants/graphqlOperations';
 
@@ -71,8 +71,7 @@ const SalesOperation = `
       { userRole: ${UMS_VIEWER} appName: "*" operations: "*" },
       { userRole: ${MENTOR} appName: "*" operations: "*" },
       { userRole: ${SALES} appName: "*" operations: "*" },
-      { userRole: ${TRANSFORMATION_TEAM} appName: "*" operations: "*" },
-      { userRole: ${TRANSFORMATION_ADMIN} appName: "*" operations: "*" },
+      { userRole: ${SALES_EXECUTIVE} appName: "*" operations: "*" },
       { userRole: ${MENTEE} appName: "*" operations: ${READ} }
         ],
     rule: allow

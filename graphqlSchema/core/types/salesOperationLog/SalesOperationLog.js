@@ -1,6 +1,6 @@
 import { TMS } from '../../../../constants';
 import {
-  MENTOR, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM, UMS_HEAD, UMS_VIEWER,
+  MENTOR, SALES_EXECUTIVE, UMS_HEAD, UMS_VIEWER,
 } from '../../../../constants/roles';
 
 const SalesOperationLog = `
@@ -16,8 +16,7 @@ const SalesOperationLog = `
       { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
       { userRole: ${UMS_VIEWER} appName: "*" operations: "*" },
       { userRole: ${MENTOR} appName: "*" operations: "*" },
-      { userRole: ${TRANSFORMATION_TEAM} appName: "*" operations: "*" },
-      { userRole: ${TRANSFORMATION_ADMIN} appName: "*" operations: "*" },
+      { userRole: ${SALES_EXECUTIVE} appName: "*" operations: "*" },
       ],
     rule: allow
   )
