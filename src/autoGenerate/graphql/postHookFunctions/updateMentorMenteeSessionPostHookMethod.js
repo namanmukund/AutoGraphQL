@@ -1,10 +1,12 @@
 import { get } from 'lodash';
+import { MENTOR_RATING_AUDIT_THRESHOLD } from '../../../../constants';
 import { MENTEE } from '../../../../constants/roles';
 import updateReferrerCreditsPostSessionOrUserPayment from './utils/updateReferrerCreditsPostSessionOrUserPayment';
 import referralCredits from '../../../../constants/referralCredits';
 import { TRIAL_TAKEN_FROM_REFERRAL } from '../../../../constants/userCreditReason';
 import getMenteeInfo from './utils/getMenteeInfo';
 import updateClassMissedMessageStatus from './utils/updateClassMissedMessageStatus';
+import addMentorMenteeSessionAudit from './utils/addMentorMenteeSessionAudit';
 import { setSessionCompletedLeadsquared, updateMentorRescheduleLeadsquared } from './leadsquared';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import sendWhatsAppTemplateMessage from '../../utils/sendWhatsAppTemplateMessage';
@@ -90,6 +92,26 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       const { trialTaken } = referralCredits[1];
       await updateReferrerCreditsPostSessionOrUserPayment(currentUser.id, trialTaken, context, variables, TRIAL_TAKEN_FROM_REFERRAL);
       // set session completed on leadsquared
+    }
+    const inputMentorRating = get(input, 'rating');
+    const inputDistracted = get(input, 'distracted', false);
+    const inputRude = get(input, 'rude', false);
+    const inputSlowPaced = get(input, 'slowPaced', false);
+    const inputFastPaced = get(input, 'fastPaced', false);
+    const inputNotPunctual = get(input, 'notPunctual', false);
+    const inputAverage = get(input, 'average', false);
+    const inputBoring = get(input, 'boring', false);
+    const inputPoorExplanation = get(input, 'poorExplanation', false);
+    const inputAverageExplanation = get(input, 'averageExplanation', false);
+    const inputIsAudit = get(input, 'isAudit', false);
+    const prevIsAudit = get(context, 'previousDocument.isAudit', false);
+    const mentorMenteeSessionId = get(context, 'previousDocument.id', '');
+
+    if ((inputIsAudit && prevIsAudit !== inputIsAudit)
+      || (inputMentorRating && inputMentorRating < MENTOR_RATING_AUDIT_THRESHOLD)
+      || inputDistracted || inputRude || inputSlowPaced || inputFastPaced || inputNotPunctual
+      || inputAverage || inputBoring || inputPoorExplanation || inputAverageExplanation) {
+      addMentorMenteeSessionAudit(mentorMenteeSessionId);
     }
 
     if (
