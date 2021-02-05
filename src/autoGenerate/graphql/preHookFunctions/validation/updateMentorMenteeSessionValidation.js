@@ -8,6 +8,7 @@ const getMentorMenteeSessionData = async (id) => {
     query{
       mentorMenteeSession(id:"${id}"){
         id
+        isAudit
         sessionStatus
         topic{
           id

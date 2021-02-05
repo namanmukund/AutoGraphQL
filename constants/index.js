@@ -272,6 +272,8 @@ export const MENTOR_REPORT_SESSION_TYPE = 'trial';
 
 export const MENTOR_REPORT_DAYS = 270;
 
+export const MENTOR_RATING_AUDIT_THRESHOLD = 4;
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
