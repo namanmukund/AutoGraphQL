@@ -1,5 +1,4 @@
-import { NOT_UMS_HEAD, UMS_HEAD } from '../../../../constants/roles';
-import { EXCEPT_DELETE, READ } from '../../../../constants/graphqlOperations';
+import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
 
 const affilateInfo = `
     profession: AffiliateProfession
@@ -26,38 +25,18 @@ const promotionalInfo = `
 
 const User = `
   type User @model 
-    @userPermissions(
-      permissions:[
-        { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
-        { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${EXCEPT_DELETE} }
-        ], 
-      rule: allow
-    ) 
+  ${getPermissionSchemaString('User')}
   {
     phoneOtp: Int @writeOnly
     phoneOtpCreationDate: Date @writeOnly
     emailOtp: Int @writeOnly
     emailOtpCreationDate: Date @writeOnly
     name: String @trim
-    role: UserRole! @defaultValue(value: "selfLearner") 
-          @userPermissions(
-            permissions:[
-              { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
-              { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${READ} }
-              ], 
-            rule: allow
-          ) 
+    role: UserRole! @defaultValue(value: "selfLearner") ${getPermissionSchemaString('role')}
     status: Status! @defaultValue(value: "active") @readOnly
     username: String @uniqueOrEmpty @trim
     password: String @filterOff @writeOnly
-    savedPassword: String @filterOff 
-                 @userPermissions(
-                  permissions:[
-                    { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
-                    { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${READ} }
-                    ], 
-                  rule: allow
-                )
+    savedPassword: String @filterOff ${getPermissionSchemaString('savedPassword')}
     email: String @uniqueOrEmpty @trim
     emailVerified: Boolean @defaultValue(value: "false") @readOnly
     phone: Phone @uniqueOrEmpty
