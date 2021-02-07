@@ -32,11 +32,11 @@ const User = `
     emailOtp: Int @writeOnly
     emailOtpCreationDate: Date @writeOnly
     name: String @trim
-    role: UserRole! @defaultValue(value: "selfLearner") ${getPermissionSchemaString('role')}
+    role: UserRole! @defaultValue(value: "selfLearner") ${getPermissionSchemaString('User', 'role')}
     status: Status! @defaultValue(value: "active") @readOnly
     username: String @uniqueOrEmpty @trim
     password: String @filterOff @writeOnly
-    savedPassword: String @filterOff ${getPermissionSchemaString('savedPassword')}
+    savedPassword: String @filterOff ${getPermissionSchemaString('User', 'savedPassword')}
     email: String @uniqueOrEmpty @trim
     emailVerified: Boolean @defaultValue(value: "false") @readOnly
     phone: Phone @uniqueOrEmpty
