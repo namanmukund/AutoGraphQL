@@ -1,7 +1,5 @@
 import { TMS } from '../../../../constants';
-import {
-  MENTOR, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM, UMS_HEAD, UMS_VIEWER,
-} from '../../../../constants/roles';
+import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
 
 const SalesOperationActivity = `
   type SalesOperationActivity @model
@@ -11,16 +9,7 @@ const SalesOperationActivity = `
       ],
     rule: allow
   )
-  @userPermissions(
-    permissions:[
-      { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
-      { userRole: ${UMS_VIEWER} appName: "*" operations: "*" },
-      { userRole: ${MENTOR} appName: "*" operations: "*" },
-      { userRole: ${TRANSFORMATION_TEAM} appName: "*" operations: "*" },
-      { userRole: ${TRANSFORMATION_ADMIN} appName: "*" operations: "*" },
-      ],
-    rule: allow
-  )
+  ${getPermissionSchemaString('SalesOperationActivity')}
    {
     loggedBy: User @relation(name:"SalesOperationActivityLoggedBy", direction: "OneWay")
     salesOperation: SalesOperation! @relation(name:"SalesOperationActivitySalesOperation")

@@ -1,8 +1,5 @@
 import { TMS, TWA } from '../../../../constants';
-import {
-  MENTEE, MENTOR, UMS_HEAD, UMS_VIEWER, SALES, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN,
-} from '../../../../constants/roles';
-import { READ } from '../../../../constants/graphqlOperations';
+import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
 
 const unQualifiedLeadReasons = `
     knowCoding: Boolean
@@ -64,19 +61,9 @@ const SalesOperation = `
       { appName: "${TWA}" operations: "*" },
       ],
     rule: allow
-  )
-  @userPermissions(
-    permissions:[
-      { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
-      { userRole: ${UMS_VIEWER} appName: "*" operations: "*" },
-      { userRole: ${MENTOR} appName: "*" operations: "*" },
-      { userRole: ${SALES} appName: "*" operations: "*" },
-      { userRole: ${TRANSFORMATION_TEAM} appName: "*" operations: "*" },
-      { userRole: ${TRANSFORMATION_ADMIN} appName: "*" operations: "*" },
-      { userRole: ${MENTEE} appName: "*" operations: ${READ} }
-        ],
-    rule: allow
-  )
+  ) 
+
+${getPermissionSchemaString('SalesOperation')}
    {
     userVerificationStatus: SalesTeamStatus @defaultValue(value: "pending")
     userResponseStatus: UserBehaviourStatus @defaultValue(value: "pending")
