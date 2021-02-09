@@ -10,6 +10,7 @@ import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
 import Raven from './Raven';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
 import { getParsedASTMap } from './autoGenerate/utils';
+import { createAppToken } from './auth';
 
 const http = require('http');
 
@@ -157,4 +158,5 @@ httpServer.listen(port, '0.0.0.0', () => {
   log(`Subscriptions ready at ws://0.0.0.0:${port}${server.subscriptionsPath}`);
 });
 
+console.log(11111, createAppToken('core'));
 export default app;
