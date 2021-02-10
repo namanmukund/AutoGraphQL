@@ -509,12 +509,61 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'addBatchSession': {
-      await addBatchSessionValidation(params, mutationOrQueryName, context);
-      break;
+      const { sessionStatus } = input;
+      const newInput = {
+        ...input,
+      };
+      switch (sessionStatus) {
+        case 'started': {
+          newInput.sessionStartDate = new Date().toISOString();
+          break;
+        }
+        default: {
+          newInput.sessionAllotmentDate = new Date().toISOString();
+          // temporary hack for backword compatibility
+          newInput.sessionStartDate = new Date().toISOString();
+        }
+      }
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await addBatchSessionValidation(newParams, mutationOrQueryName, context);
+
+      return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'updateBatchSession': {
-      await updateBatchSessionValidation(params, mutationOrQueryName, context);
-      break;
+      const { sessionStatus } = input;
+      const newInput = {
+        ...input,
+      };
+      switch (sessionStatus) {
+        case 'allotted': {
+          newInput.sessionAllotmentDate = new Date().toISOString();
+          // temporary hack for backword compatibility
+          newInput.sessionStartDate = new Date().toISOString();
+          break;
+        }
+        case 'started': {
+          newInput.sessionStartDate = new Date().toISOString();
+          break;
+        }
+        case 'completed': {
+          newInput.sessionEndDate = new Date().toISOString();
+          break;
+        }
+        default:
+      }
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await updateBatchSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
     }
     case 'deleteBatchSession': {
       await deleteBatchSessionValidation(params, mutationOrQueryName, context);

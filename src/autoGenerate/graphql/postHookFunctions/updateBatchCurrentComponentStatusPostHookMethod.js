@@ -70,7 +70,7 @@ const updateBatchCurrentComponentStatusPostHookMethod = async (input, params, mu
         });
       }
       const { id: courseId } = course[0];
-      let date = new Date();
+      const date = new Date();
       date.setDate(date.getDate() + 1);
       date.setHours(0, 0, 0, 0);
       // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student for each topics
@@ -79,6 +79,7 @@ const updateBatchCurrentComponentStatusPostHookMethod = async (input, params, mu
         // eslint-disable-next-line no-restricted-syntax
         for (const topic of topicsList) {
           if (student.user && student.user.id && topic && topic.id) {
+            // eslint-disable-next-line no-await-in-loop
             await addMentorMenteeSessionForBatch(
               student.user.id,
               mentorId,

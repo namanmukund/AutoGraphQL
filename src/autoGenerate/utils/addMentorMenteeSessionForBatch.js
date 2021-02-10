@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop, no-console */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
+
 const callMentorMenteeSessions = async (
   userId,
   topicId,
@@ -199,8 +200,8 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
       }
     }
 
-    let menteBookingDate = bookingDate;
-    let menteeBookingSlot = slot;
+    const menteBookingDate = bookingDate;
+    const menteeBookingSlot = slot;
     let menteeSessionId;
     let mentorSessionId = mentorSessionIdFromInput;
 
@@ -316,7 +317,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
         }
       }
     }
-    
+
     // add mentor mentee session
     if (menteeSessionId && mentorSessionId) {
       const variables = {
