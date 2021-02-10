@@ -524,6 +524,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await updateBatchCurrentComponentStatusValidation(params, mutationOrQueryName, context);
       break;
     }
+    case 'updateUserSavedCode': {
+      await updateBatchCurrentComponentStatusValidation(params, mutationOrQueryName, context);
+      break;
+    }
     default: {
       /* If context is not present then it means user is not authenticated and the
       user won't be able to make any db query
