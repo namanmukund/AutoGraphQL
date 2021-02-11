@@ -57,6 +57,7 @@ import MentorPaymentStatus from './MentorPaymentStatus';
 import BatchType from './BatchType';
 import VerificationStatus from './VerificationStatus';
 import Country from './Country';
+import SchoolCoordinatorRole from './SchoolCoordinatorRole';
 
 export default [
   Status,
@@ -119,4 +120,5 @@ export default [
   BatchType,
   VerificationStatus,
   Country,
+  SchoolCoordinatorRole,
 ];
