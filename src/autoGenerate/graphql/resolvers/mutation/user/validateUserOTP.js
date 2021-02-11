@@ -87,7 +87,7 @@ const validateUserOTPMutationResolver = async (
       const phoneNumber = countryCode + number;
       const businessPartnerDemoNumber = '+918827706789';
 
-      if (!(phoneOtp === 2319 || (phoneOtp === 7777 && phoneNumber === businessPartnerDemoNumber))) {
+      if (!(phoneOtp === 1151 || (phoneOtp === 7777 && phoneNumber === businessPartnerDemoNumber))) {
         if (userData.phoneOtp !== phoneOtp) {
           throw new OTPMismatchError();
         }
