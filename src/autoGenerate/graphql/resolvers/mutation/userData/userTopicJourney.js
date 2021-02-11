@@ -307,7 +307,7 @@ const userTopicJourneyMutationResolver = async (
   let topicStatus = incomplete;
   let currentRunningTopicOrder;
   // for batches we will use batchCurrentComponentStatus to check current topic
-  if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+  if (batchCurrentComponentInfo) {
     const {
       currentTopic: currentBatchRunningTopic,
     } = batchCurrentComponentInfo;
@@ -365,7 +365,7 @@ const userTopicJourneyMutationResolver = async (
   } else {
     // batch user calculation when topic order === current topi order in batch
     /* eslint no-lonely-if:0 */
-    if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+    if (batchCurrentComponentInfo) {
       const {
         latestSessionStatus,
       } = batchCurrentComponentInfo;

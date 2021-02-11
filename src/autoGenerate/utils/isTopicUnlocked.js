@@ -26,7 +26,7 @@ const isTopicUnlocked = (
   if (!checkForPaidLogic) checkIfTopicIsFree = true;
   // check if user belongs to a batch, we will calculate this on basis of batch
   // else we will do calculation as before
-  if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+  if (batchCurrentComponentInfo) {
     const {
       currentTopic,
     } = batchCurrentComponentInfo;

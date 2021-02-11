@@ -319,7 +319,7 @@ const getQuizReportMutationResolver = async (
   let currentRunningTopic;
 
   // if user belongs to a batch, quiz report will be calculated on basis of batchCurrentComponentStatus
-  if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+  if (batchCurrentComponentInfo) {
     currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
   } else {
     currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;

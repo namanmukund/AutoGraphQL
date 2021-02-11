@@ -267,7 +267,7 @@ const userBadgeMutationResolver = async (
     const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
     const batchCurrentComponentBatchType = get(batchRes, 'data.user.studentProfile.batch.type');
 
-    if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+    if (batchCurrentComponentInfo) {
       currentTopicOrder = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic && batchCurrentComponentInfo.currentTopic.order;
       currentTopicComponentType = quiz;
     }

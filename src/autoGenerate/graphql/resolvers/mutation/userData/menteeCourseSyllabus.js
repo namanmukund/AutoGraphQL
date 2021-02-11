@@ -427,7 +427,7 @@ const menteeCourseSyllabusMutationResolver = async (
     });
   }
   // if user belongs to a batch, the syllbaus will be calculated on basis of batchCurrentComponentStatus
-  if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+  if (batchCurrentComponentInfo) {
     const {
       currentTopic,
       latestSessionStatus,
