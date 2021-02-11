@@ -16,7 +16,6 @@ import {
   backendApps,
   enrollmentTypes,
   topicTypes,
-  batchType,
 } from '../../../../../../constants';
 import getTopicForValidation from './getTopicForValidation';
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';

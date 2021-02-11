@@ -3,7 +3,7 @@ import {
   topicTypes,
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
-  enrollmentTypes, masteryLevels, userTopicTypeStatus, sessionStatus, batchType,
+  enrollmentTypes, masteryLevels, userTopicTypeStatus, sessionStatus,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
@@ -236,7 +236,6 @@ const userTopicJourneyMutationResolver = async (
   );
 
   const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
-  const batchCurrentComponentBatchType = get(batchRes, 'data.user.studentProfile.batch.type');
 
   // calling API to get data of fetched topic
   const topicRes = await callLocalGraphqlApi(

@@ -4,7 +4,6 @@ import {
   PUBLISHED,
   badgeTypes,
   topicTypes,
-  batchType,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError,
@@ -265,7 +264,6 @@ const userBadgeMutationResolver = async (
     );
 
     const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
-    const batchCurrentComponentBatchType = get(batchRes, 'data.user.studentProfile.batch.type');
 
     if (batchCurrentComponentInfo) {
       currentTopicOrder = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic && batchCurrentComponentInfo.currentTopic.order;

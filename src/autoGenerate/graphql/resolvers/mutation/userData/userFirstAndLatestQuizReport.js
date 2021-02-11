@@ -6,7 +6,6 @@ import {
   PUBLISHED,
   masteryLevels,
   topicTypes,
-  batchType,
 } from '../../../../../../constants';
 import {
   ComponentLockedError,
@@ -257,7 +256,6 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   );
 
   const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
-  const batchCurrentComponentBatchType = get(batchRes, 'data.user.studentProfile.batch.type');
 
   const res = await callLocalGraphqlApi(
     getUserCurrentTopicComponentStatus(userId),

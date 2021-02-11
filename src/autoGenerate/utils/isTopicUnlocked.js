@@ -1,4 +1,4 @@
-import { enrollmentTypes, topicTypes, batchType } from '../../../constants';
+import { enrollmentTypes, topicTypes } from '../../../constants';
 
 /*
 checking if the topic fetched by user is unlocked or not, logic for isUnlocked=true is:
@@ -13,7 +13,6 @@ const isTopicUnlocked = (
   page,
   checkForPaidLogic,
   batchCurrentComponentInfo,
-  batchCurrentComponentBatchType,
 ) => {
   const { free, pro } = enrollmentTypes;
   const { video } = topicTypes;

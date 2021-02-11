@@ -4,7 +4,6 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   slotTimes,
-  batchType,
   sessionStatus,
 } from '../../../../../../constants';
 import {
@@ -336,7 +335,6 @@ const menteeCourseSyllabusMutationResolver = async (
   let lastTopicBookedOrder = 0;
   let lastCompletedTopicOrder = 0;
   let isPaid = false;
-  let batchCurrentComponentBatchType;
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
     // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
@@ -347,7 +345,6 @@ const menteeCourseSyllabusMutationResolver = async (
     );
 
     batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
-    batchCurrentComponentBatchType = get(batchRes, 'data.user.studentProfile.batch.type');
 
     const res = await callLocalGraphqlApi(
       getUserCurrentTopicComponentStatus(userId),

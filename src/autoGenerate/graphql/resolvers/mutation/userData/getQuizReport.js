@@ -7,7 +7,6 @@ import {
   masteryLevels,
   topicTypes,
   userActionType,
-  batchType,
 } from '../../../../../../constants';
 import {
   ComponentLockedError,
@@ -297,7 +296,6 @@ const getQuizReportMutationResolver = async (
   );
 
   const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
-  const batchCurrentComponentBatchType = get(batchRes, 'data.user.studentProfile.batch.type');
 
   // calling API to get data of fetched topic
   const topicRes = await callGraphqlApi(

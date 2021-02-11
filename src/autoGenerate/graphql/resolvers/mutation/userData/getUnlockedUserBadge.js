@@ -2,7 +2,6 @@ import { get } from 'lodash';
 import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
-  batchType,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError,
@@ -148,7 +147,6 @@ const getUnlockedUserBadgeMutationResolver = async (
   );
 
   const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
-  const batchCurrentComponentBatchType = get(batchRes, 'data.user.studentProfile.batch.type');
 
   let currentTopicId = get(currentTopicComponentInfo, 'currentTopic.id');
   const currentTopicComponent = get(currentTopicComponentInfo, 'currentTopicComponentType');
