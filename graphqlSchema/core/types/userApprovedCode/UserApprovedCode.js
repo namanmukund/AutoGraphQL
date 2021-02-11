@@ -37,7 +37,8 @@ const UserApprovedCode = `
     celebrateReactionCount: Int @defaultValue(value: 0)
     hotReactionCount: Int @defaultValue(value: 0)
     totalReactionCount: Int @defaultValue(value: 0)
-    userApprovedCodeTagMappings:[UserApprovedCodeTagMapping] @relation(name: "UserApprovedCodeTagMappingCode")      
+    userApprovedCodeTagMappings:[UserApprovedCodeTagMapping] @relation(name: "UserApprovedCodeTagMappingCode")
+    status: ContentStatus! @defaultValue(value: "unpublished")      
   }
 `;
 
