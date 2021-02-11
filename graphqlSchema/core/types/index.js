@@ -70,6 +70,10 @@ import BatchSession from './batchSession';
 import UserLocationLog from './userLocationLog';
 import MentorMenteeSessionAudit from './mentorMenteeSessionAudit';
 import MentorMenteeSessionTimestamp from './mentorMenteeSessionTimestamp';
+import UserApprovedCode from './userApprovedCode';
+import UserApprovedCodeReactionLog from './userApprovedCodeReactionLog';
+import UserApprovedCodeTag from './userApprovedCodeTag';
+import UserApprovedCodeTagMapping from './userApprovedCodeTagMapping';
 
 export default [
   ...User,
@@ -144,4 +148,8 @@ export default [
   ...UserLocationLog,
   ...MentorMenteeSessionAudit,
   ...MentorMenteeSessionTimestamp,
+  ...UserApprovedCode,
+  ...UserApprovedCodeReactionLog,
+  ...UserApprovedCodeTag,
+  ...UserApprovedCodeTagMapping,
 ];
