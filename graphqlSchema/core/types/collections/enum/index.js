@@ -58,6 +58,7 @@ import BatchType from './BatchType';
 import VerificationStatus from './VerificationStatus';
 import Country from './Country';
 import ReactionType from './ReactionType';
+import SchoolCoordinatorRole from './SchoolCoordinatorRole';
 
 export default [
   Status,
@@ -121,4 +122,5 @@ export default [
   VerificationStatus,
   Country,
   ReactionType,
+  SchoolCoordinatorRole,
 ];
