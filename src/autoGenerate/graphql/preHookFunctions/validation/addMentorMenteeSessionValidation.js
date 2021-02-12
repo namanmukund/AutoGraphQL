@@ -69,9 +69,10 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   /* check if user has permission to hit API according to his role, if user is mentee and there is
   no mentor token, he should not be able to hit API
    */
-  validateMentorMenteePermission(
-    context,
-  );
+  // commenting this as now we are removing the login flow of mentor
+  // validateMentorMenteePermission(
+  //   context,
+  // );
   const { menteeSessionConnectId, mentorSessionConnectId, topicConnectId } = params;
   if (!menteeSessionConnectId || !mentorSessionConnectId || !topicConnectId) {
     throw new ConnectIdRequiredError();
