@@ -1,7 +1,7 @@
 const UserApprovedCodeTag = `
   type UserApprovedCodeTag @model 
   {
-    title: String! @trim
+    title: String! @unique @trim
     codeCount: Int @defaultValue(value: 0)    
   }
 `;
