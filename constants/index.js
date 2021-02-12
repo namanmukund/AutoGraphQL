@@ -12,8 +12,9 @@ const TMS = 'tekieTms';
 const TLA = 'tekieLearningApp';
 const TWA = 'tekieWebApp';
 const TAA = 'tekieAffiliateApp';
-const backendApps = ['core'];
-const byPassMenteeValidationApps = ['core'];
+const TBA = 'core';
+const backendApps = [TBA];
+const byPassMenteeValidationApps = [TBA];
 
 const frontEndApps = [TLA, TMS, TWA, TAA];
 const permissionIntegratedApps = [];
@@ -311,6 +312,7 @@ export {
   TLA,
   TWA,
   TAA,
+  TBA,
   loginType,
   masteryLevels,
   learningObjectiveQuizReportThreshHolds,
