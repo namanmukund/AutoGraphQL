@@ -70,7 +70,7 @@ const UserApprovedCode = `
       )
     approvedCode: String! @trim
     approvedFileName: String! @trim
-    approvedDescription: String! @trim
+    approvedDescription: String @trim
     userApprovedCodeTagMappings:[UserApprovedCodeTagMapping] @relation(name: "UserApprovedCodeTagMappingCode")
     status: ContentStatus! @defaultValue(value: "unpublished")      
   }

@@ -12,9 +12,9 @@ const UserApprovedCodeReactionLog = `
     user: User! @relation(name: "UserApprovedCodeReactionLogUser", direction: "OneWay")
     userApprovedCode: UserApprovedCode! @relation(name: "UserApprovedCodeReactionLogUserUserApprovedCode", direction: "OneWay")
     reactedBy: User! @relation(name: "UserApprovedCodeReactionLogReactedBy", direction: "OneWay")
-    hot: @defaultValue(value: "false") 
-    heart: @defaultValue(value: "false")
-    celebrate: @defaultValue(value: "false")     
+    hot: Boolean @defaultValue(value: "false") 
+    heart: Boolean @defaultValue(value: "false")
+    celebrate: Boolean @defaultValue(value: "false")     
   }
 `;
 
