@@ -20,7 +20,7 @@ const UserApprovedCode = `
           ], 
         rule: deny
       ) 
-    userSavedCode: UserSavedCode! @relation(name: "UserApprovedCodeUserSavedCode", direction: "OneWay")
+    userSavedCode: UserSavedCode! @relation(name: "UserApprovedCodeUserSavedCode")
        @appPermissions(
         permissions:[
           { appName: "${TMS}" operations: ${READ} },
