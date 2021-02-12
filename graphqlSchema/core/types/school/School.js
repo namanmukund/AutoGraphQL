@@ -3,7 +3,7 @@ const School = `
     name: String @unique
     classes: [Class]
     students: [StudentProfile] @relation(name: "StudentProfileSchool")
-    coordinator: SchoolCoordinator @relation(name: "SchoolCoordinatorSchool")
+    coordinator: SchoolCoordinator
     city: String
     country: Country @defaultValue(value: "india")
   }
