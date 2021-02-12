@@ -6,7 +6,7 @@ const UserApprovedCode = `
   @appPermissions(
     permissions:[
       { appName: "${TBA}" operations: "*" },
-      { appName: "${TMS}" operations: ${READ} },
+      { appName: "${TMS}" operations: "*" },
       { appName: "${TWA}" operations: ${READ} }
       ], 
     rule: allow
@@ -15,28 +15,62 @@ const UserApprovedCode = `
     user: User! @relation(name: "UserApprovedCodeUser", direction: "OneWay")
       @appPermissions(
         permissions:[
-          { appName: "${TMS}" operations: ${READ} },
-          { appName: "${TWA}" operations: ${READ} }
+          { appName: "${TBA}" operations: "*" },
           ], 
-        rule: deny
+        rule: allow
       ) 
-    userSavedCode: UserSavedCode! @relation(name: "UserApprovedCodeUserSavedCode", direction: "OneWay")
+    userSavedCode: UserSavedCode! @relation(name: "UserApprovedCodeUserSavedCode")
        @appPermissions(
         permissions:[
-          { appName: "${TMS}" operations: ${READ} },
-          { appName: "${TWA}" operations: ${READ} }
+          { appName: "${TBA}" operations: "*" },
           ], 
-        rule: deny
+        rule: allow
       ) 
     studentName: String! @trim
+      @appPermissions(
+        permissions:[
+          { appName: "${TBA}" operations: "*" },
+          ], 
+        rule: allow
+      ) 
     studentGrade: Grade! @trim
+      @appPermissions(
+        permissions:[
+          { appName: "${TBA}" operations: "*" },
+          ], 
+        rule: allow
+      ) 
+    heartReactionCount: Int @defaultValue(value: 0)
+      @appPermissions(
+        permissions:[
+          { appName: "${TBA}" operations: "*" },
+          ], 
+        rule: allow
+      ) 
+    celebrateReactionCount: Int @defaultValue(value: 0)
+      @appPermissions(
+        permissions:[
+          { appName: "${TBA}" operations: "*" },
+          ], 
+        rule: allow
+      ) 
+    hotReactionCount: Int @defaultValue(value: 0)
+      @appPermissions(
+        permissions:[
+          { appName: "${TBA}" operations: "*" },
+          ], 
+        rule: allow
+      )
+    totalReactionCount: Int @defaultValue(value: 0)
+      @appPermissions(
+        permissions:[
+          { appName: "${TBA}" operations: "*" },
+          ], 
+        rule: allow
+      )
     approvedCode: String! @trim
     approvedFileName: String! @trim
-    approvedDescription: String! @trim
-    heartReactionCount: Int @defaultValue(value: 0)
-    celebrateReactionCount: Int @defaultValue(value: 0)
-    hotReactionCount: Int @defaultValue(value: 0)
-    totalReactionCount: Int @defaultValue(value: 0)
+    approvedDescription: String @trim
     userApprovedCodeTagMappings:[UserApprovedCodeTagMapping] @relation(name: "UserApprovedCodeTagMappingCode")
     status: ContentStatus! @defaultValue(value: "unpublished")      
   }

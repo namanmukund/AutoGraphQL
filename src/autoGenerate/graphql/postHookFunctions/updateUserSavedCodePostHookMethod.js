@@ -16,7 +16,7 @@ const addUserApprovedCodeQuery = async (input, userConnectId, userSavedCodeConne
     input,
   };
   const res = await callLocalGraphqlApi(query, '', variables);
-  return get(res, 'data.userSavedCode');
+  return get(res, 'data.addUserApprovedCode');
 };
 
 const userQuery = async (userId) => {
@@ -54,7 +54,15 @@ const updateUserSavedCodePostHookMethod = async (input, params, mutationName, co
       approvedDescription: description || '',
 
     };
-    await addUserApprovedCodeQuery(doc, userConnectId, userSavedCodeConnectId);
+    const userApprovedData = await addUserApprovedCodeQuery(doc, userConnectId, userSavedCodeConnectId);
+    if (userApprovedData && userApprovedData.id) {
+      Object.assign(input, {
+        userApprovedCode: {
+          type: 'UserApprovedCode',
+          typeId: userApprovedData.id,
+        },
+      });
+    }
   }
 };
 

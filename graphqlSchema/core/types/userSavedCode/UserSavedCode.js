@@ -6,6 +6,7 @@ const UserSavedCode = `
     fileName: String! @trim
     description: String @trim
     isApprovedForDisplay: Boolean @defaultValue(value: "false")
+    userApprovedCode: UserApprovedCode @relation(name: "UserApprovedCodeUserSavedCode")
   }
 `;
 
