@@ -411,29 +411,24 @@ const sendTransactionalMessage = async (root, params, context) => {
         transactionalMessageBody[messageType],
         dataObj.country,
       );
-      if ((!dataObj.country || dataObj.country === 'india') && messageType === 'sendSessionLink') {
-        // send whatsApp
-        await sendWhatsAppTemplateMessage(
-          whatsAppPhoneNumber,
-          whatsAppTemplate,
-          dataObj.parentName,
-          parameters,
-        );
-      }
-      break;
-    }
-    case 'whatsApp': {
       // send whatsApp
-      if ((!dataObj.country || dataObj.country === 'india') && messageType === 'sendSessionLink') {
-        await sendWhatsAppTemplateMessage(
-          whatsAppPhoneNumber,
-          whatsAppTemplate,
-          dataObj.parentName,
-          parameters,
-        );
-      }
+      await sendWhatsAppTemplateMessage(
+        whatsAppPhoneNumber,
+        whatsAppTemplate,
+        dataObj.parentName,
+        parameters,
+      );
       break;
     }
+    case 'whatsApp':
+    // send whatsApp
+      await sendWhatsAppTemplateMessage(
+        whatsAppPhoneNumber,
+        whatsAppTemplate,
+        dataObj.parentName,
+        parameters,
+      );
+      break;
     case 'email': {
       // send email
       await sendTransactionalEmail(
