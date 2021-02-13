@@ -1,4 +1,4 @@
-import { enrollmentTypes, topicTypes, batchType } from '../../../constants';
+import { enrollmentTypes, topicTypes } from '../../../constants';
 
 /*
 checking if the topic fetched by user is unlocked or not, logic for isUnlocked=true is:
@@ -13,7 +13,6 @@ const isTopicUnlocked = (
   page,
   checkForPaidLogic,
   batchCurrentComponentInfo,
-  batchCurrentComponentBatchType,
 ) => {
   const { free, pro } = enrollmentTypes;
   const { video } = topicTypes;
@@ -26,7 +25,7 @@ const isTopicUnlocked = (
   if (!checkForPaidLogic) checkIfTopicIsFree = true;
   // check if user belongs to a batch, we will calculate this on basis of batch
   // else we will do calculation as before
-  if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+  if (batchCurrentComponentInfo) {
     const {
       currentTopic,
     } = batchCurrentComponentInfo;

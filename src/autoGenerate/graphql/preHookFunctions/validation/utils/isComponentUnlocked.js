@@ -16,7 +16,6 @@ import {
   backendApps,
   enrollmentTypes,
   topicTypes,
-  batchType,
 } from '../../../../../../constants';
 import getTopicForValidation from './getTopicForValidation';
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
@@ -234,7 +233,7 @@ const isComponentUnlocked = async (
   // check if user has permission to hit API according to his role, if user is mentee and there is
   // no mentor token, he should not be able to hit API
   // this will be checked for normal flow and not for batch
-  if (!batchCurrentComponentInfo || (batchCurrentComponentInfo && batchCurrentComponentBatchType === batchType.normal)) {
+  if (!batchCurrentComponentInfo) {
     const mentorMenteeSessionQueryRes = await getMentorMenteeSessionForValidation(userId, topicId);
     const mentorMenteeSessionStatus = get(mentorMenteeSessionQueryRes, 'data.mentorMenteeSessions[0].sessionStatus', '');
 

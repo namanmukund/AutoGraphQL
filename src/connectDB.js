@@ -1,7 +1,6 @@
-import * as schedule from 'node-schedule';
 import { log, dbConfig } from '../utils';
 import db from './db';
-import scheduleTrialSessionReminder from '../utils/scheduleJobs/scheduleTrialSessionReminder';
+import createScheduler from '../utils/createScheduler';
 
 let dbReconnectCount = 1;
 db.on('error', (err) => {
@@ -24,15 +23,7 @@ db.on('error', (err) => {
     process.env.NODE_ENV === 'production'
     && process.env.IS_SCHEDULER_INSTANCE
     && process.env.IS_SCHEDULER_INSTANCE !== 'false') {
-    // eslint-disable-next-line no-unused-vars
-    const interval = 30;
-    const rule = new schedule.RecurrenceRule();
-    rule.minute = interval;
-    // eslint-disable-next-line no-console
-    // eslint-disable-next-line no-unused-vars
-    schedule.scheduleJob(rule, async () => {
-      // eslint-disable-next-line no-console
-      await scheduleTrialSessionReminder();
-    });
+    createScheduler('sessionReminder');
+    createScheduler('mentorReport');
   }
 });
