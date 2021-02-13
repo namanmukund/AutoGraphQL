@@ -281,7 +281,7 @@ mutation{
 `;
 
 const getIsFormFilled = (salesOperationData) => {
-  console.log('-------------------------------salesOperationData', salesOperationData);
+  // console.log('-------------------------------salesOperationData', salesOperationData);
   const logs = get(salesOperationData, 'salesOperationLog');
   const cmntStatusCheckKeys = [
     'parentCounsellingDone',
@@ -357,15 +357,15 @@ const generateMentorReport = async () => {
     const mentorReportsObj = {};
     totalLoopDays -= 1;
     startDate.setDate(endDate.getDate() - 1);
-    console.log('----------------------startDate', startDate);
-    console.log('----------------------endDate', endDate);
+    // console.log('----------------------startDate', startDate);
+    // console.log('----------------------endDate', endDate);
     // eslint-disable-next-line no-await-in-loop
     const mentorMenteeSessionsRes = await callLocalGraphqlApi(mentorMenteeSessionsQuery(startDate, endDate));
     const mentorMenteeSessions = get(mentorMenteeSessionsRes, 'data.mentorMenteeSessions', []);
     // console.log('-----------------------------mentorMenteeSessions', mentorMenteeSessions);
     // eslint-disable-next-line no-restricted-syntax
     for (const mentorMenteeSession of mentorMenteeSessions) {
-      console.log('-----------------------------mentorMenteeSession', mentorMenteeSession);
+      // console.log('-----------------------------mentorMenteeSession', mentorMenteeSession);
       const mentorIdInMentorMenteeSession = get(mentorMenteeSession, 'mentorSession.user.id', '');
       if (mentorIdInMentorMenteeSession) {
         const bookingsAssigned = 1;
@@ -383,7 +383,7 @@ const generateMentorReport = async () => {
         const trialsCompleted = sessionStatus === 'completed' ? 1 : 0;
 
         const userLeadStatus = get(mentorMenteeSession, 'leadStatus', '');
-        console.log('------------------------------userLeadStatus', userLeadStatus);
+        // console.log('------------------------------userLeadStatus', userLeadStatus);
         const unfit = userLeadStatus === leadStatus.unfit ? 1 : 0;
         const lost = userLeadStatus === leadStatus.lost ? 1 : 0;
         const cold = userLeadStatus === leadStatus.cold ? 1 : 0;
@@ -453,11 +453,11 @@ const generateMentorReport = async () => {
     // eslint-disable-next-line no-await-in-loop
     const mentorSessionsRes = await callLocalGraphqlApi(mentorSessionsQuery(startDate, endDate));
     const mentorSessions = get(mentorSessionsRes, 'data.mentorSessions', []);
-    console.log('-----------------------------mentorSessions', mentorSessions);
+    // console.log('-----------------------------mentorSessions', mentorSessions);
 
     // eslint-disable-next-line no-restricted-syntax
     for (const mentorSession of mentorSessions) {
-      console.log('-----------------------------mentorSession', mentorSession);
+      // console.log('-----------------------------mentorSession', mentorSession);
       const mentorIdInMentorSession = get(mentorSession, 'user.id', '');
       if (mentorIdInMentorSession) {
         let slotsOpened = 0;
@@ -563,13 +563,13 @@ const generateMentorReport = async () => {
       }
     }
 
-    console.log('--------------------------------mentorReportsObj', mentorReportsObj);
+    // console.log('--------------------------------mentorReportsObj', mentorReportsObj);
     // eslint-disable-next-line
     for (const mentorId in mentorReportsObj) {
       // eslint-disable-next-line no-await-in-loop
       const mentorReportRes = await callLocalGraphqlApi(mentorReportQuery(mentorId, startDate, endDate));
       const mentorReportId = get(mentorReportRes, 'data.mentorReports[0].id', '');
-      console.log('-------------------------mentorReportId', mentorReportId);
+      // console.log('-------------------------mentorReportId', mentorReportId);
       if (mentorReportId) {
         // eslint-disable-next-line no-await-in-loop
         await callLocalGraphqlApi(updateMentorReportQuery(
