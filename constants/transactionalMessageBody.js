@@ -27,7 +27,7 @@ const transactionalMessageBody = {
     subject: 'Tekie - Meeting link for free coding session',
     subjectInternational: 'Don’t miss it! Tekie Session Entry Ticket Inside ',
     whatsAppTemplate: 'oct14_know_your_mentor',
-    whatsAppTemplateInternational: 'reminder_link_usa',
+    whatsAppTemplateInternational: 'reminder_link_usa_v2_confirm',
   },
   didNotPickTheCall: {
     emailTemplate: 'didNotPickTheCall',
