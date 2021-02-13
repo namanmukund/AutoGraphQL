@@ -7,7 +7,6 @@ import {
   masteryLevels,
   topicTypes,
   userActionType,
-  batchType,
 } from '../../../../../../constants';
 import {
   ComponentLockedError,
@@ -297,7 +296,6 @@ const getQuizReportMutationResolver = async (
   );
 
   const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
-  const batchCurrentComponentBatchType = get(batchRes, 'data.user.studentProfile.batch.type');
 
   // calling API to get data of fetched topic
   const topicRes = await callGraphqlApi(
@@ -319,7 +317,7 @@ const getQuizReportMutationResolver = async (
   let currentRunningTopic;
 
   // if user belongs to a batch, quiz report will be calculated on basis of batchCurrentComponentStatus
-  if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+  if (batchCurrentComponentInfo) {
     currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
   } else {
     currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
