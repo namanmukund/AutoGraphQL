@@ -2,7 +2,6 @@ import { get } from 'lodash';
 import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
-  batchType,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError,
@@ -148,17 +147,16 @@ const getUnlockedUserBadgeMutationResolver = async (
   );
 
   const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
-  const batchCurrentComponentBatchType = get(batchRes, 'data.user.studentProfile.batch.type');
 
   let currentTopicId = get(currentTopicComponentInfo, 'currentTopic.id');
   const currentTopicComponent = get(currentTopicComponentInfo, 'currentTopicComponentType');
 
-  if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+  if (batchCurrentComponentInfo) {
     currentTopicId = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic && batchCurrentComponentInfo.currentTopic.id;
   }
   // badge will only be returned in case user is on that particular topic and component
   // in alll other cases displayBadge will remain false
-  if (inputTopicId === currentTopicId && ((inputComponent === currentTopicComponent) || (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal))) {
+  if (inputTopicId === currentTopicId && ((inputComponent === currentTopicComponent))) {
     // calling method to get all published badges
     const badgeRes = await callLocalGraphqlApi(
       getBadgeQuery(inputTopicId, inputComponent),

@@ -3,7 +3,7 @@ import {
   topicTypes,
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
-  enrollmentTypes, masteryLevels, userTopicTypeStatus, sessionStatus, batchType,
+  enrollmentTypes, masteryLevels, userTopicTypeStatus, sessionStatus,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
@@ -236,7 +236,6 @@ const userTopicJourneyMutationResolver = async (
   );
 
   const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
-  const batchCurrentComponentBatchType = get(batchRes, 'data.user.studentProfile.batch.type');
 
   // calling API to get data of fetched topic
   const topicRes = await callLocalGraphqlApi(
@@ -307,7 +306,7 @@ const userTopicJourneyMutationResolver = async (
   let topicStatus = incomplete;
   let currentRunningTopicOrder;
   // for batches we will use batchCurrentComponentStatus to check current topic
-  if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+  if (batchCurrentComponentInfo) {
     const {
       currentTopic: currentBatchRunningTopic,
     } = batchCurrentComponentInfo;
@@ -365,7 +364,7 @@ const userTopicJourneyMutationResolver = async (
   } else {
     // batch user calculation when topic order === current topi order in batch
     /* eslint no-lonely-if:0 */
-    if (batchCurrentComponentInfo && batchCurrentComponentBatchType !== batchType.normal) {
+    if (batchCurrentComponentInfo) {
       const {
         latestSessionStatus,
       } = batchCurrentComponentInfo;
