@@ -1,4 +1,6 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import updateCountryInCollections from '../scriptMethods/updateCountryInCollections';
+// import updateUserPaymentPlan from '../scriptMethods/updateUserPaymentPlan';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -16,6 +18,7 @@ const temporaryScript = (async (root, params, context) => {
   // await generateMentorReport();
   // await addProEnrollmentTypeInSalesOperation();
   // await updateCountryInCollections();
+  // await updateUserPaymentPlan();
   return {
     result: true,
   };
