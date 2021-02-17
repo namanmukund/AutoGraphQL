@@ -23,6 +23,7 @@ ${getPermissionSchemaString('UserPaymentPlan')}
     finalSellingPrice: Float!
     dateOfEnrollment: Date!
     comment: String
+    userStatus: Status! @defaultValue(value: "active")
   }
 `;
 

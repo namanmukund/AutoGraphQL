@@ -2,6 +2,7 @@ const Status = `
   enum Status {
     inactive
     active
+    dropped
     blocked
   }`;
 
