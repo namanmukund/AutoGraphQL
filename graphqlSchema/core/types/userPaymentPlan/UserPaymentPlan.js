@@ -23,7 +23,7 @@ ${getPermissionSchemaString('UserPaymentPlan')}
     finalSellingPrice: Float!
     dateOfEnrollment: Date!
     comment: String
-    enrollmentStatus: Status! @defaultValue(value: "active")
+    enrollmentStatus: EnrollmentStatus! @defaultValue(value: "active")
     lastSessionOn: Date
     lastSessionTopic: Topic @relation(name: "UserPaymentPlanTopic", direction: "OneWay")
     nextPaymentDate: Date 
