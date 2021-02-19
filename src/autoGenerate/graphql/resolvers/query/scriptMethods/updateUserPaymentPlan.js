@@ -1,12 +1,14 @@
 import { get } from 'lodash';
+import moment from 'moment';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 const userPaymentPlanQuery = async () => {
   const query = `
 query{
-  userPaymentPlans{
+  userPaymentPlans {
     id
     finalSellingPrice
+    sessionsPerMonth
     user{
       id
     }
@@ -24,7 +26,13 @@ query{
   return data;
 };
 
-const mentorMenteeSessionsQuery = async (userId) => {
+const mentorMenteeSessionsQuery = async (userId, orderBy = 'latest') => {
+  let orderByString = '';
+  if (orderBy === 'latest') {
+    orderByString = 'orderBy:sessionStartDate_DESC';
+  } else {
+    orderByString = 'orderBy:sessionStartDate_ASC';
+  }
   const query = `
 query{
   mentorMenteeSessions(filter:{
@@ -32,7 +40,7 @@ query{
       {menteeSession_some:{user_some:{id:"${userId}"}}}
       {sessionStatus:completed}
     ]
-  }, orderBy:sessionStartDate_DESC, first:1){
+  }, ${orderByString}, first:1){
     id
     sessionStartDate
     topic{
@@ -47,7 +55,11 @@ query{
   return data;
 };
 
-const updateUserPaymentPlanMutation = async (id, topicId, input) => {
+const updateUserPaymentPlanMutation = async (
+  id,
+  input,
+  topicId,
+) => {
   const query = `
 mutation($input:UserPaymentPlanUpdate){
   updateUserPaymentPlan(
@@ -65,19 +77,43 @@ mutation($input:UserPaymentPlanUpdate){
   console.log('Updated updateUserPaymentPlan', data.id);
   return data;
 };
+
+const getSessionVelocityStatus = (sessionsPerMonth, avgDaysPerSession) => {
+  let sessionVelocityStatus = 'onTime';
+  const expectedAvgDaysPerSession = Math.round(30 / sessionsPerMonth);
+  if (avgDaysPerSession && (expectedAvgDaysPerSession > Math.round(avgDaysPerSession))) {
+    sessionVelocityStatus = 'ahead';
+  } else if (avgDaysPerSession && (expectedAvgDaysPerSession < Math.round(avgDaysPerSession))) {
+    sessionVelocityStatus = 'delayed';
+  }
+  return sessionVelocityStatus;
+};
+
 const updateUserPaymentPlan = async () => {
   const userPaymentPlansData = await userPaymentPlanQuery();
   if (userPaymentPlansData && userPaymentPlansData.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const userPaymentPlan of userPaymentPlansData) {
-      const { id: userPaymentPlanId, user, userPaymentInstallments } = userPaymentPlan;
+      const {
+        id: userPaymentPlanId, user, userPaymentInstallments, sessionsPerMonth,
+      } = userPaymentPlan;
       const userId = get(user, 'id');
       if (userId) {
         // eslint-disable-next-line no-await-in-loop
-        const mmsData = await mentorMenteeSessionsQuery(userId);
+        const mmsLastData = await mentorMenteeSessionsQuery(userId);
         const updateObj = {};
-        if (mmsData && mmsData.sessionStartDate) {
-          updateObj.lastSessionOn = new Date(mmsData.sessionStartDate).toISOString();
+        if (mmsLastData && mmsLastData.sessionStartDate) {
+          updateObj.lastSessionOn = new Date(mmsLastData.sessionStartDate).toISOString();
+          const lastTopicOrder = get(mmsLastData, 'topic.order');
+          if (lastTopicOrder > 1) {
+            // eslint-disable-next-line no-await-in-loop
+            const mmsFirstData = await mentorMenteeSessionsQuery(userId, 'first');
+            const diffInDays = moment(mmsLastData.sessionStartDate).diff(mmsFirstData.sessionStartDate, 'days');
+            if (diffInDays) {
+              updateObj.avgDaysPerSession = Math.round(diffInDays / lastTopicOrder);
+              updateObj.sessionVelocityStatus = getSessionVelocityStatus(sessionsPerMonth, updateObj.avgDaysPerSession);
+            }
+          }
         }
         let collectedAmount = 0;
         let isPaid = true;
@@ -106,7 +142,11 @@ const updateUserPaymentPlan = async () => {
         }
         updateObj.isPaid = isPaid;
         // eslint-disable-next-line no-await-in-loop
-        await updateUserPaymentPlanMutation(userPaymentPlanId, get(mmsData, 'topic.id'), updateObj);
+        await updateUserPaymentPlanMutation(
+          userPaymentPlanId,
+          updateObj,
+          get(mmsLastData, 'topic.id'),
+        );
       }
     }
   }

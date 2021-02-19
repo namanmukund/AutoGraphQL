@@ -29,6 +29,8 @@ ${getPermissionSchemaString('UserPaymentPlan')}
     nextPaymentDate: Date 
     isPaid: Boolean @defaultValue(value: "false")
     collectedAmount: Float @defaultValue(value: 0)
+    avgDaysPerSession: Float @defaultValue(value: 0)
+    sessionVelocityStatus: SessionVelocityStatus @defaultValue(value: "onTime")
   }     
 `;
 

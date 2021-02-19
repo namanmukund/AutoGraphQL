@@ -1,6 +1,4 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-// import updateCountryInCollections from '../scriptMethods/updateCountryInCollections';
-// import updateUserPaymentPlan from '../scriptMethods/updateUserPaymentPlan';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
