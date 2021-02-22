@@ -40,28 +40,30 @@ const updateUserSavedCodePostHookMethod = async (input, params, mutationName, co
     get(params, 'input.isApprovedForDisplay')
     && get(context, 'previousDocument.isApprovedForDisplay') !== true
   ) {
-    const {
-      id: userSavedCodeConnectId,
-      user: { typeId: userConnectId }, code, fileName, description,
-    } = input;
+    if (!get(context, 'previousDocument.userApprovedCode')) {
+      const {
+        id: userSavedCodeConnectId,
+        user: { typeId: userConnectId }, code, fileName, description,
+      } = input;
 
-    const userData = await userQuery(userConnectId);
-    const doc = {
-      studentName: get(userData, 'name') || '',
-      studentGrade: get(userData, 'studentProfile.grade'),
-      approvedCode: code || '',
-      approvedFileName: fileName || '',
-      approvedDescription: description || '',
+      const userData = await userQuery(userConnectId);
+      const doc = {
+        studentName: get(userData, 'name') || '',
+        studentGrade: get(userData, 'studentProfile.grade'),
+        approvedCode: code || '',
+        approvedFileName: fileName || '',
+        approvedDescription: description || '',
 
-    };
-    const userApprovedData = await addUserApprovedCodeQuery(doc, userConnectId, userSavedCodeConnectId);
-    if (userApprovedData && userApprovedData.id) {
-      Object.assign(input, {
-        userApprovedCode: {
-          type: 'UserApprovedCode',
-          typeId: userApprovedData.id,
-        },
-      });
+      };
+      const userApprovedData = await addUserApprovedCodeQuery(doc, userConnectId, userSavedCodeConnectId);
+      if (userApprovedData && userApprovedData.id) {
+        Object.assign(input, {
+          userApprovedCode: {
+            type: 'UserApprovedCode',
+            typeId: userApprovedData.id,
+          },
+        });
+      }
     }
   }
 };
