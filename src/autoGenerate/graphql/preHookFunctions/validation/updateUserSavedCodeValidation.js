@@ -8,6 +8,9 @@ query{
   userSavedCode(id:"${id}"){
     id
     isApprovedForDisplay
+    userApprovedCode {
+      id
+    }
   }
 }`;
   const res = await callLocalGraphqlApi(query);
