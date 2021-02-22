@@ -12,7 +12,7 @@ const deleteUserApprovedCodeTagValidation = async (params) => {
         }
     `;
   const approvedCodeTag = await callLocalGraphqlApi(query);
-  const isAddedToCode = (get(approvedCodeTag, 'data.userApprovedCodeTag.codeCount') > 0);
+  const isAddedToCode = (get(approvedCodeTag, 'data.userApprovedCodeTag.codeCount', 0) > 0);
   if (isAddedToCode) {
     throw new ApprovedCodeTagIsAddedToCodeError();
   }
