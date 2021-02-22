@@ -1,33 +1,5 @@
-import { get } from 'lodash';
-import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-
-const fetchUserApprovedCodeTag = async (userApprovedCodeTagId) => {
-  const query = `
-        query{
-          userApprovedCodeTag(id:"${userApprovedCodeTagId}") {
-                id
-                codeCount
-            }
-        }
-      `;
-  const response = await callLocalGraphqlApi(query);
-  return get(response, 'data.userApprovedCodeTag');
-};
-
-const updateUserApprovedCodeTag = async (userApprovedCodeTagId, input) => {
-  const query = `
-        mutation($input: UserApprovedCodeTagUpdate!) {
-            updateUserApprovedCodeTag(id:"${userApprovedCodeTagId}",input: $input) {
-                id
-            }
-        }
-    `;
-  const variables = {
-    input,
-  };
-  const response = await callLocalGraphqlApi(query, '', variables);
-  return get(response, 'data.updateUserApprovedCodeTag');
-};
+import fetchUserApprovedCodeTag from './utils/fetchUserApprovedCodeTag';
+import updateUserApprovedCodeTag from './utils/updateUserApprovedCodeTag';
 
 const deleteUserApprovedCodeTagMappingPostHookMethod = async (input) => {
   const { userApprovedCodeTag } = input;

@@ -40,7 +40,7 @@ const updateUserSavedCodePostHookMethod = async (input, params, mutationName, co
     get(params, 'input.isApprovedForDisplay')
     && get(context, 'previousDocument.isApprovedForDisplay') !== true
   ) {
-    if (!get(context, 'previousDocument.userApprovedCode')) {
+    if (!get(context, 'previousDocument.userApprovedCode.id')) {
       const {
         id: userSavedCodeConnectId,
         user: { typeId: userConnectId }, code, fileName, description,
