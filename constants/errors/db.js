@@ -48,6 +48,10 @@ export const QuestionIsPublishedError = createError('QuestionIsPublishedError', 
   message: 'Can not perform the current operation as question is published',
 });
 
+export const ApprovedCodeTagIsAddedToCodeError = createError('ApprovedCodeTagIsAddedToCodeError', {
+  message: 'Cannot delete as Tag is added to some Approved Code',
+});
+
 export const MessageIsPublishedError = createError('MessageIsPublishedError', {
   message: 'Can not perform the current operation as message is published',
 });
