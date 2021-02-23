@@ -5,7 +5,6 @@ import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors/
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import reactions from '../../../../../../constants/reactions';
-import userApprovedCodeReactionLog from '../../../../../../graphqlSchema/core/types/userApprovedCodeReactionLog';
 
 const fetchUserApprovedCodeReactionLogs = async (
   reactedByID,
@@ -152,7 +151,6 @@ const updateVisitorReactionOnUserApprovedCode = async (root, params, context) =>
 
     const reactionVariables = { input: {} };
     reactions.forEach((reaction) => {
-      // eslint-disable-next-line valid-typeof
       if (typeof params[reaction] === 'boolean') {
         reactionVariables.input[reaction] = params[reaction];
       }
