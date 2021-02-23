@@ -28,6 +28,7 @@ const Product = `
     discounts: [Discount] @relation(name: "ProductDiscount")
     isDemoPack: Boolean @defaultValue(value: "false")
     country: Country @defaultValue(value: "india")
+    school: School @relation(name: "SchoolProduct")
   }
 `;
 
