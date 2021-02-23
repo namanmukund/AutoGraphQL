@@ -6,6 +6,7 @@ const School = `
     coordinator: SchoolCoordinator
     city: String
     country: Country @defaultValue(value: "india")
+    products: [Product] @relation(name: "SchoolProduct")
   }
 `;
 export default [School];
