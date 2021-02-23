@@ -1,11 +1,10 @@
-import { TBA, TMS } from '../../../../constants';
+import { TBA } from '../../../../constants';
 
 const UserApprovedCodeReactionLog = `
   type UserApprovedCodeReactionLog @model 
   @appPermissions(
     permissions:[
       { appName: "${TBA}" operations: "*" },
-      { appName: "${TMS}" operations: "*" },
       ], 
     rule: allow
   ) 

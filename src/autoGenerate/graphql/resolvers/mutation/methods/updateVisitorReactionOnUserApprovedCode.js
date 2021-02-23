@@ -1,7 +1,11 @@
 /* eslint-disable no-await-in-loop, no-console */
 import { get } from 'lodash';
+import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
+import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors/db';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import reactions from '../../../../../../constants/reactions';
+import userApprovedCodeReactionLog from '../../../../../../graphqlSchema/core/types/userApprovedCodeReactionLog';
 
 const fetchUserApprovedCodeReactionLogs = async (
   reactedByID,
@@ -29,23 +33,17 @@ const fetchUserApprovedCodeReactionLogs = async (
 
 const updateUserApprovedCodeReactionLog = async (
   userApprovedCodeReactionLogId,
-  heart,
-  celebrate,
-  hot,
+  variables,
 ) => {
   const query = `
-  mutation {
+  mutation($input:UserApprovedCodeReactionLogUpdate!) {
       updateUserApprovedCodeReactionLog(
           id:"${userApprovedCodeReactionLogId}",
-          input:{
-              heart: ${heart},
-              celebrate: ${celebrate},
-              hot: ${hot},
-            }) {
+          input:$input) {
         id
       }
     }`;
-  const response = await callLocalGraphqlApi(query);
+  const response = await callLocalGraphqlApi(query, '', variables);
   return get(response, 'data.updateUserApprovedCodeReactionLog.id');
 };
 
@@ -99,39 +97,44 @@ const updateUserApprovedCode = async (userApprovedCodeID, inputData) => {
 
 const mapReactionLogsWithUserApprovedCodeReactionCount = (prevReactionLogData, input, userApprovedCode) => {
   const userApprovedCodeReactionCountInput = {
-    heartReactionCount: get(userApprovedCode, 'heartReactionCount', 0),
-    celebrateReactionCount: get(userApprovedCode, 'celebrateReactionCount', 0),
-    hotReactionCount: get(userApprovedCode, 'hotReactionCount', 0),
     totalReactionCount: get(userApprovedCode, 'totalReactionCount', 0),
   };
-  if (input.heart && !prevReactionLogData.heart) {
-    userApprovedCodeReactionCountInput.heartReactionCount += 1;
+  reactions.forEach((reaction) => {
+    userApprovedCodeReactionCountInput[`${reaction}ReactionCount`] = get(userApprovedCode, `${reaction}ReactionCount`, 0);
+  });
+  /** If previous ReactionLog record exists update count accordingly */
+  if (prevReactionLogData && get(prevReactionLogData, 'id')) {
+    reactions.forEach((reaction) => {
+      if (input[reaction] && !prevReactionLogData[reaction]) {
+        userApprovedCodeReactionCountInput[`${reaction}ReactionCount`] += 1;
+      }
+      if (!input[reaction] && prevReactionLogData[reaction]) {
+        userApprovedCodeReactionCountInput[`${reaction}ReactionCount`] -= 1;
+      }
+    });
+  } else {
+    reactions.forEach((reaction) => {
+      if (typeof input[reaction] === 'boolean') {
+        userApprovedCodeReactionCountInput[`${reaction}ReactionCount`] = input[reaction]
+          ? userApprovedCodeReactionCountInput[`${reaction}ReactionCount`] + 1
+          : userApprovedCodeReactionCountInput[`${reaction}ReactionCount`];
+      }
+    });
   }
-  if (input.celebrate && !prevReactionLogData.celebrate) {
-    userApprovedCodeReactionCountInput.celebrateReactionCount += 1;
-  }
-  if (input.hot && !prevReactionLogData.hot) {
-    userApprovedCodeReactionCountInput.hotReactionCount += 1;
-  }
-  if (!input.heart && prevReactionLogData.heart) {
-    userApprovedCodeReactionCountInput.heartReactionCount -= 1;
-  }
-  if (!input.celebrate && prevReactionLogData.celebrate) {
-    userApprovedCodeReactionCountInput.celebrateReactionCount -= 1;
-  }
-  if (!input.hot && prevReactionLogData.hot) {
-    userApprovedCodeReactionCountInput.hotReactionCount -= 1;
-  }
-  userApprovedCodeReactionCountInput.totalReactionCount = userApprovedCodeReactionCountInput.heartReactionCount
-          + userApprovedCodeReactionCountInput.celebrateReactionCount
-          + userApprovedCodeReactionCountInput.hotReactionCount;
+  let totalCount = 0;
+  reactions.forEach((reaction) => {
+    if (userApprovedCodeReactionCountInput[`${reaction}ReactionCount`]) {
+      totalCount += userApprovedCodeReactionCountInput[`${reaction}ReactionCount`];
+    }
+  });
+  userApprovedCodeReactionCountInput.totalReactionCount = totalCount;
   return userApprovedCodeReactionCountInput;
 };
 
 const updateVisitorReactionOnUserApprovedCode = async (root, params, context) => {
   await validateAuthentication(context);
   const {
-    reactedByID, userApprovedCodeID, heart, celebrate, hot,
+    reactedByID, userApprovedCodeID,
   } = params;
   if (!reactedByID || !userApprovedCodeID) {
     throw new MissingMandatoryInputInRequestError();
@@ -139,63 +142,54 @@ const updateVisitorReactionOnUserApprovedCode = async (root, params, context) =>
 
   try {
     const userApprovedCodeData = await fetchUserApprovedCode(userApprovedCodeID);
+    if (!(userApprovedCodeData && get(userApprovedCodeData, 'id'))) {
+      throw new DatabaseRecordNotFoundError();
+    }
     const reactionLog = await fetchUserApprovedCodeReactionLogs(
       reactedByID,
       userApprovedCodeID,
     );
-    if (reactionLog) {
-      const updateReactionLogResponse = await updateUserApprovedCodeReactionLog(
+
+    const reactionVariables = { input: {} };
+    reactions.forEach((reaction) => {
+      // eslint-disable-next-line valid-typeof
+      if (typeof params[reaction] === 'boolean') {
+        reactionVariables.input[reaction] = params[reaction];
+      }
+    });
+    /** Check If ReactionLog Record Already Exists  */
+    if (reactionLog && get(reactionLog, 'id')) {
+      const updateReactionLogResponseId = await updateUserApprovedCodeReactionLog(
         get(reactionLog, 'id'),
-        heart,
-        celebrate,
-        hot,
+        reactionVariables,
       );
-      if (updateReactionLogResponse) {
+      /** To ReactionLog update successfull then update UserApprovedCode reaction counts */
+      if (updateReactionLogResponseId) {
+        /** Mapping Boolean Reaction Input to Actual Counts */
         const userApprovedCodeInputData = await mapReactionLogsWithUserApprovedCodeReactionCount(
           reactionLog,
-          {
-            hot,
-            heart,
-            celebrate,
-          },
+          reactionVariables.input,
           userApprovedCodeData,
         );
 
         await updateUserApprovedCode(userApprovedCodeID, userApprovedCodeInputData);
-        return {
-          result: true,
-        };
       }
     } else {
-      const variables = {
-        input: {
-          hot,
-          heart,
-          celebrate,
-        },
-      };
-      await addUserApprovedCodeReactionLog(reactedByID, userApprovedCodeID, variables);
-      const userApprovedCodeInputData = {
-        heartReactionCount: heart
-          ? userApprovedCodeData.heartReactionCount + 1
-          : userApprovedCodeData.heartReactionCount,
-        celebrateReactionCount: celebrate
-          ? userApprovedCodeData.celebrateReactionCount + 1
-          : userApprovedCodeData.celebrateReactionCount,
-        hotReactionCount: hot
-          ? userApprovedCodeData.hotReactionCount + 1
-          : userApprovedCodeData.hotReactionCount,
-        totalReactionCount: 0,
-      };
-      userApprovedCodeInputData.totalReactionCount = userApprovedCodeInputData.heartReactionCount
-              + userApprovedCodeInputData.celebrateReactionCount
-              + userApprovedCodeInputData.hotReactionCount;
-
+      /**
+        * if ReactionLog Record not exists Create a new Record
+        */
+      await addUserApprovedCodeReactionLog(reactedByID, userApprovedCodeID, reactionVariables);
+      /** Mapping Boolean Reaction Input to Actual Counts */
+      const userApprovedCodeInputData = await mapReactionLogsWithUserApprovedCodeReactionCount(
+        null,
+        reactionVariables.input,
+        userApprovedCodeData,
+      );
       await updateUserApprovedCode(userApprovedCodeID, userApprovedCodeInputData);
-      return {
-        result: true,
-      };
     }
+    return {
+      result: true,
+    };
   } catch (e) {
     return {
       error: e,
