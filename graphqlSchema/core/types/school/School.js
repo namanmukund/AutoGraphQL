@@ -3,7 +3,7 @@ const School = `
     name: String @unique
     classes: [Class]
     students: [StudentProfile] @relation(name: "StudentProfileSchool")
-   	coordinatorEmail: String @uniqueOrEmpty @trim
+    coordinatorEmail: String @uniqueOrEmpty @trim
     coordinatorPhone: Phone @uniqueOrEmpty
     coordinatorRole: SchoolCoordinatorRole
     coordinatorName: String
