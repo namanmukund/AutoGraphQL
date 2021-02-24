@@ -74,6 +74,7 @@ import temporaryScript from './query/methods/temporaryScript';
 import sendTransactionalMessage from './query/methods/sendTransactionalMessage';
 import getTotalAmountCollected from './query/methods/getTotalAmountCollected';
 import addUpdateBulkSchoolUserData from './mutation/methods/addUpdateBulkSchoolUserData';
+import updateVisitorReactionOnUserApprovedCode from './mutation/methods/updateVisitorReactionOnUserApprovedCode';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -560,6 +561,7 @@ resolvers.Mutation.getPaymentRequest = getPaymentRequest;
 // Resolver to check whether hash returned by payU is correct and there is no man in middle attack
 resolvers.Mutation.getPaymentResponse = getPaymentResponse;
 resolvers.Mutation.addUpdateBulkSchoolUserData = addUpdateBulkSchoolUserData;
+resolvers.Mutation.updateVisitorReactionOnUserApprovedCode = updateVisitorReactionOnUserApprovedCode;
 
 // queries
 resolvers.Query.me = me;

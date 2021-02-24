@@ -31,6 +31,7 @@ const customMutationString = `
    getPaymentRequest ( productId: ID!, discountCode: String, isCreditUsed: Boolean): PaymentRequest,
    getPaymentResponse ( id: ID!, hash: String!, status: String!, payuMoneyId: String!): BooleanResult,
    addUpdateBulkSchoolUserData (sheetId: String!, schoolName: String!): AddUpdateBulkSchoolUserDataOutput,
+   updateVisitorReactionOnUserApprovedCode(reactedByID: ID!, userApprovedCodeID: ID!, heart: Boolean, celebrate: Boolean, hot: Boolean): BooleanResult,
    `;
 
 export default customMutationString;
