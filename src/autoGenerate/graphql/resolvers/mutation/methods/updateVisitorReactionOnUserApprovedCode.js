@@ -113,7 +113,6 @@ const mapReactionLogsWithUserApprovedCodeReactionCount = (prevReactionLogData, i
         }
       }
     });
-    console.log(userApprovedCodeReactionCountInput);
   } else {
     reactions.forEach((reaction) => {
       if (typeof input[reaction] === 'boolean') {
