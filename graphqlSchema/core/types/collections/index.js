@@ -16,7 +16,6 @@ import TransactionalMessageInput from './TransactionalMessageInput';
 import CodingLanguage from './CodingLanguage';
 import AddUpdateBulkSchoolUserDataOutput from './AddUpdateBulkSchoolUserDataOutput';
 import ErrorLog from './ErrorLog';
-import SchoolCoordinator from './SchoolCoordinator';
 
 export default [
   ...Enum,
@@ -37,5 +36,4 @@ export default [
   CodingLanguage,
   AddUpdateBulkSchoolUserDataOutput,
   ErrorLog,
-  ...SchoolCoordinator,
 ];
