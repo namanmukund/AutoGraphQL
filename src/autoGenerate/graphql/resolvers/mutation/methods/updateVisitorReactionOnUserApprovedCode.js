@@ -104,11 +104,13 @@ const mapReactionLogsWithUserApprovedCodeReactionCount = (prevReactionLogData, i
   /** If previous ReactionLog record exists update count accordingly */
   if (prevReactionLogData && get(prevReactionLogData, 'id')) {
     reactions.forEach((reaction) => {
-      if (input[reaction] && !prevReactionLogData[reaction]) {
-        userApprovedCodeReactionCountInput[`${reaction}ReactionCount`] += 1;
-      }
-      if (!input[reaction] && prevReactionLogData[reaction]) {
-        userApprovedCodeReactionCountInput[`${reaction}ReactionCount`] -= 1;
+      if (typeof input[reaction] === 'boolean') {
+        if (input[reaction] && !prevReactionLogData[reaction]) {
+          userApprovedCodeReactionCountInput[`${reaction}ReactionCount`] += 1;
+        }
+        if (!input[reaction] && prevReactionLogData[reaction]) {
+          userApprovedCodeReactionCountInput[`${reaction}ReactionCount`] -= 1;
+        }
       }
     });
   } else {
