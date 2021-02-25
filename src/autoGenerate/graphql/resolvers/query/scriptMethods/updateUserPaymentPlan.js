@@ -60,11 +60,15 @@ const updateUserPaymentPlanMutation = async (
   input,
   topicId,
 ) => {
+  let connectStr = '';
+  if (topicId) {
+    connectStr = `lastSessionTopicConnectId:"${topicId}",`;
+  }
   const query = `
 mutation($input:UserPaymentPlanUpdate){
   updateUserPaymentPlan(
     id:"${id}", 
-    lastSessionTopicConnectId:"${topicId}",
+    ${connectStr}
     input:$input
   ){
     id
