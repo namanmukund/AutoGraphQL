@@ -1,6 +1,10 @@
+import { get } from 'lodash';
 import { MENTOR } from '../constants/roles';
 
-export const authenticateUser = (context) => {
+export const authenticateUser = (context, userToken) => {
+  if (get(userToken, 'isRequired') === 'false' || get(userToken, 'isRequired') === false) {
+    return true;
+  }
   if (context && context.currentUser && (
     (context.currentUser.id && context.currentUser.status) || context.currentUser === true)) {
     return context.currentUser;
@@ -30,9 +34,9 @@ export const authenticateMentor = (context) => {
   return false;
 };
 
-export const ifAuthorized = (context) => {
+export const ifAuthorized = (context, userToken) => {
   const app = authenticateApp(context);
-  const user = authenticateUser(context);
+  const user = authenticateUser(context, userToken);
   const mentor = authenticateMentor(context);
   const obj = {};
   // no need to show mentor tag inn context if it has no value
