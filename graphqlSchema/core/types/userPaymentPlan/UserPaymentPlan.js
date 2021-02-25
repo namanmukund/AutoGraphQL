@@ -23,7 +23,15 @@ ${getPermissionSchemaString('UserPaymentPlan')}
     finalSellingPrice: Float!
     dateOfEnrollment: Date!
     comment: String
-  }
+    enrollmentStatus: EnrollmentStatus! @defaultValue(value: "active")
+    lastSessionOn: Date
+    lastSessionTopic: Topic @relation(name: "UserPaymentPlanTopic", direction: "OneWay")
+    nextPaymentDate: Date 
+    isPaid: Boolean @defaultValue(value: "false")
+    collectedAmount: Float @defaultValue(value: 0)
+    avgDaysPerSession: Float @defaultValue(value: 0)
+    sessionVelocityStatus: SessionVelocityStatus @defaultValue(value: "onTime")
+  }     
 `;
 
 export default UserPaymentPlan;

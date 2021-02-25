@@ -59,6 +59,8 @@ import VerificationStatus from './VerificationStatus';
 import Country from './Country';
 import ReactionType from './ReactionType';
 import SchoolCoordinatorRole from './SchoolCoordinatorRole';
+import SessionVelocityStatus from './SessionVelocityStatus';
+import EnrollmentStatus from './EnrollmentStatus';
 
 export default [
   Status,
@@ -123,4 +125,6 @@ export default [
   Country,
   ReactionType,
   SchoolCoordinatorRole,
+  SessionVelocityStatus,
+  EnrollmentStatus,
 ];

@@ -41,6 +41,8 @@ import updateBatchSessionPostHookMethod
 import updateBatchCurrentComponentStatusPostHookMethod
   from './postHookFunctions/updateBatchCurrentComponentStatusPostHookMethod';
 import updateUserSavedCodePostHookMethod from './postHookFunctions/updateUserSavedCodePostHookMethod';
+import addUserApprovedCodeTagMappingPostHookMethod from './postHookFunctions/addUserApprovedCodeTagMappingPostHookMethod';
+import deleteUserApprovedCodeTagMappingPostHookMethod from './postHookFunctions/deleteUserApprovedCodeTagMappingPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -120,6 +122,14 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'addMentorSession': {
       await addMentorSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'addUserApprovedCodeTagMapping': {
+      await addUserApprovedCodeTagMappingPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'deleteUserApprovedCodeTagMapping': {
+      await deleteUserApprovedCodeTagMappingPostHookMethod(input, mutationName, context);
       break;
     }
     case 'updateMentorSession': {

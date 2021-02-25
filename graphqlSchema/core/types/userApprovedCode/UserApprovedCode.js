@@ -23,13 +23,15 @@ const UserApprovedCode = `
        @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
-          ], 
+          { appName: "${TMS}" operations: ${READ} }          ], 
         rule: allow
       ) 
     studentName: String! @trim
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
+          { appName: "${TMS}" operations: ${READ} },
+          { appName: "${TWA}" operations: ${READ} }
           ], 
         rule: allow
       ) 
@@ -37,6 +39,8 @@ const UserApprovedCode = `
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
+                    { appName: "${TMS}" operations: ${READ} },
+          { appName: "${TWA}" operations: ${READ} }
           ], 
         rule: allow
       ) 
@@ -44,6 +48,8 @@ const UserApprovedCode = `
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
+          { appName: "${TMS}" operations: ${READ} },
+          { appName: "${TWA}" operations: ${READ} }
           ], 
         rule: allow
       ) 
@@ -51,6 +57,8 @@ const UserApprovedCode = `
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
+          { appName: "${TMS}" operations: ${READ} },
+          { appName: "${TWA}" operations: ${READ} }
           ], 
         rule: allow
       ) 
@@ -58,6 +66,8 @@ const UserApprovedCode = `
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
+          { appName: "${TMS}" operations: ${READ} },
+          { appName: "${TWA}" operations: ${READ} }
           ], 
         rule: allow
       )
@@ -65,6 +75,8 @@ const UserApprovedCode = `
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
+          { appName: "${TMS}" operations: ${READ} },
+          { appName: "${TWA}" operations: ${READ} }
           ], 
         rule: allow
       )

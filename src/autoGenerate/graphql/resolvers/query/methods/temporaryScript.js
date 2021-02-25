@@ -17,6 +17,7 @@ const temporaryScript = (async (root, params, context) => {
   await generateMentorReport();
   // await addProEnrollmentTypeInSalesOperation();
   // await updateCountryInCollections();
+  // await updateUserPaymentPlan();
   return {
     result: true,
   };

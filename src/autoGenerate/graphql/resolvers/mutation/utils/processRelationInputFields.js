@@ -3,7 +3,7 @@ import { findIndex, get } from 'lodash';
 import { isErrorThrown } from '../../../../../../utils';
 import { checkConnectRecordsExistenceInDb } from './checkConnectRecordsExistenceInDb';
 import {
-  ConnectIdsAlreadyRelatedError,
+  // ConnectIdsAlreadyRelatedError,
   ConnectRecordsNotFoundInDBError,
   OneToOneRelationSentInInputAndAsConnectError,
 } from '../../../../../../constants/errors';
@@ -70,10 +70,14 @@ const validateNestedAlreadyConnectedIds = (
             connectIdsAlreadyRelated.push(typeId);
           }
         }
+        /*
+        Commenting the ConnectIdsAlreadyRelatedError code to let the same
+        connect happen multiple times
+         */
         // throw error if connect ids already related
-        if (connectIdsAlreadyRelated.length) {
-          throw new ConnectIdsAlreadyRelatedError({ data: { connectIdsAlreadyRelated } });
-        }
+        // if (connectIdsAlreadyRelated.length) {
+        //   throw new ConnectIdsAlreadyRelatedError({ data: { connectIdsAlreadyRelated } });
+        // }
       }
     });
   }
@@ -299,10 +303,14 @@ const processRelationInputFields = (
                 }
               });
             }
+            /*
+            Commenting the ConnectIdsAlreadyRelatedError code to let the same
+            connect happen multiple times
+             */
             // throw error if connect ids already related
-            if (connectIdsAlreadyRelated.length) {
-              throw new ConnectIdsAlreadyRelatedError({ data: { connectIdsAlreadyRelated } });
-            }
+            // if (connectIdsAlreadyRelated.length) {
+            //   throw new ConnectIdsAlreadyRelatedError({ data: { connectIdsAlreadyRelated } });
+            // }
             // replace input field value
             finalInput[fieldName] = relationValueToInput;
             allRelationObjectsArray1to1.push(relationObjectMap);

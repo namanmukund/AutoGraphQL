@@ -3,9 +3,13 @@ const School = `
     name: String @unique
     classes: [Class]
     students: [StudentProfile] @relation(name: "StudentProfileSchool")
-    coordinator: SchoolCoordinator
+    coordinatorEmail: String @uniqueOrEmpty @trim
+    coordinatorPhone: Phone @uniqueOrEmpty
+    coordinatorRole: SchoolCoordinatorRole
+    coordinatorName: String
     city: String
     country: Country @defaultValue(value: "india")
+    products: [Product] @relation(name: "SchoolProduct")
   }
 `;
 export default [School];

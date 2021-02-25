@@ -61,6 +61,7 @@ import updateBatchSessionValidation from './preHookFunctions/validation/updateBa
 import deleteBatchSessionValidation from './preHookFunctions/validation/deleteBatchSessionValidation';
 import updateBatchCurrentComponentStatusValidation from './preHookFunctions/validation/updateBatchCurrentComponentStatusValidation';
 import updateUserSavedCodeValidation from './preHookFunctions/validation/updateUserSavedCodeValidation';
+import deleteUserApprovedCodeTagValidation from './preHookFunctions/validation/deleteUserApprovedCodeTagValidation';
 // import { CanNotCompleteSessionBeforeStartingError } from '../../../constants/errors/input';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -572,6 +573,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateBatchCurrentComponentStatus': {
       await updateBatchCurrentComponentStatusValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'deleteUserApprovedCodeTag': {
+      await deleteUserApprovedCodeTagValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'updateUserSavedCode': {
