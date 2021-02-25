@@ -79,6 +79,25 @@ const getSubscriptionEventsOnType = (
   return subscribedEvents;
 };
 
+const getUserTokenOnType = (
+  definition,
+  allowedDirectiveName,
+) => {
+  const userTokenDoc = {};
+  const { directives } = definition;
+  if (directives && directives.length) {
+    directives.forEach((directive) => {
+      if (get(directive, 'name.value') === allowedDirectiveName) {
+        if (get(directive, 'arguments[0].name.value') === 'isRequired') {
+          userTokenDoc.isRequired = get(directive, 'arguments[0].value.value');
+        }
+      }
+    });
+  }
+
+  return userTokenDoc;
+};
+
 const getAppAndUserPermissionsFromDirective = (
   definition,
   permissionsRelatedDirectiveName,
@@ -230,6 +249,12 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
       definition,
       'subscribe',
     );
+
+    const userToken = getUserTokenOnType(
+      definition,
+      'userToken',
+    );
+
     // To store fields Object for each field.
     const fieldsObject = {};
     // To Store all relation fields.
@@ -483,6 +508,7 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
       userPermissions,
       allowedOperations,
       subscribe,
+      userToken,
     };
 
     return null;

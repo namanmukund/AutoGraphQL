@@ -150,7 +150,7 @@ const defaultMutationsResolverWrapper = async (
 Object.keys(parsedASTMap).forEach((type) => {
   const definition = parsedASTMap[type];
   const {
-    name, field, directives, allowedOperations,
+    name, field, directives, allowedOperations, userToken,
   } = definition;
   const typeName = name.value;
   const modelSingular = camelCase(typeName);
@@ -229,7 +229,7 @@ Object.keys(parsedASTMap).forEach((type) => {
     ) {
       resolvers.Query[modelSingular] = (async (root, params, context, info) => {
         // Query Resolvers
-        const authentication = ifAuthorized(context);
+        const authentication = ifAuthorized(context, userToken);
         Object.assign(authentication, {
           mutationOrQueryName: modelSingular,
         });
@@ -256,7 +256,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         && allowedOperations.length && allowedOperations.includes(PLURAL))
     ) {
       resolvers.Query[modelPlural] = (async (root, params, context, info) => {
-        const authentication = ifAuthorized(context);
+        const authentication = ifAuthorized(context, userToken);
         Object.assign(authentication, {
           mutationOrQueryName: modelPlural,
         });
