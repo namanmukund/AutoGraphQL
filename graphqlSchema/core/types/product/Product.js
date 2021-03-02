@@ -29,6 +29,7 @@ const Product = `
     isDemoPack: Boolean @defaultValue(value: "false")
     country: Country @defaultValue(value: "india")
     school: School @relation(name: "SchoolProduct")
+    targetUserType: ProductTargetUserType @defaultValue(value: "b2c")
   }
 `;
 
