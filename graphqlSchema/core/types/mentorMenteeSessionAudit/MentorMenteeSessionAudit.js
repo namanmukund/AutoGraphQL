@@ -52,6 +52,7 @@ const MentorMenteeSessionAudit = `
     auditor: User @relation(name: "UserMentorMenteeSessionAudit", direction: "OneWay")
     mentorMenteeSession: MentorMenteeSession! @relation(name: "SessionDataMenteeSessionAudit", direction: "OneWay")
     isAuditComplete: Boolean @defaultValue(value: "false")
+    status: MentorMenteeSessionAuditStatus @defaultValue(value: "allotted")
     ${classQuality}
     ${interpersonalSkills}
     ${processMonitoring}
