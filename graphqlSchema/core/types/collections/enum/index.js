@@ -63,6 +63,7 @@ import SessionVelocityStatus from './SessionVelocityStatus';
 import EnrollmentStatus from './EnrollmentStatus';
 import ProductTargetUserType from './ProductTargetUserType';
 import MentorMenteeSessionAuditStatus from './MentorMenteeSessionAuditStatus';
+import BannerType from './BannerType';
 
 export default [
   Status,
@@ -131,4 +132,5 @@ export default [
   EnrollmentStatus,
   ProductTargetUserType,
   MentorMenteeSessionAuditStatus,
+  BannerType,
 ];
