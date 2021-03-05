@@ -62,6 +62,7 @@ import SchoolCoordinatorRole from './SchoolCoordinatorRole';
 import SessionVelocityStatus from './SessionVelocityStatus';
 import EnrollmentStatus from './EnrollmentStatus';
 import ProductTargetUserType from './ProductTargetUserType';
+import MentorMenteeSessionAuditStatus from './MentorMenteeSessionAuditStatus';
 
 export default [
   Status,
@@ -129,4 +130,5 @@ export default [
   SessionVelocityStatus,
   EnrollmentStatus,
   ProductTargetUserType,
+  MentorMenteeSessionAuditStatus,
 ];
