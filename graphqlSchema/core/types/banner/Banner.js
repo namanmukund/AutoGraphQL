@@ -24,12 +24,15 @@ const Banner = `
     description: String
     status: ContentStatus! @defaultValue(value: "unpublished")
     backgroundImage: File! @relation(name: "BackgroundImageBanner", direction: "OneWay")
-    discountImage: File! @relation(name: "DiscountImageBanner", direction: "OneWay")
+    discount: Int
+    discountFontSize: Int
+    discountColor: String
+    discountBackground: String
     textBeforeDiscount: String! @trim
-    textBeforeDiscountFont: Int
+    textBeforeDiscountFontSize: Int
     textBeforeDiscountColor: String
     textAfterDiscount: String! @trim
-    textAfterDiscountFont: Int
+    textAfterDiscountFontSize: Int
     textAfterDiscountColor: String
     width: Int
     height: Int
