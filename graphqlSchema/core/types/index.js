@@ -74,6 +74,7 @@ import UserApprovedCode from './userApprovedCode';
 import UserApprovedCodeReactionLog from './userApprovedCodeReactionLog';
 import UserApprovedCodeTag from './userApprovedCodeTag';
 import UserApprovedCodeTagMapping from './userApprovedCodeTagMapping';
+import Banner from './banner';
 
 export default [
   ...User,
@@ -152,4 +153,5 @@ export default [
   ...UserApprovedCodeReactionLog,
   ...UserApprovedCodeTag,
   ...UserApprovedCodeTagMapping,
+  ...Banner,
 ];
