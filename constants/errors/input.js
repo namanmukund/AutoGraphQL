@@ -136,6 +136,10 @@ export const InvalidDateError = createError('InvalidDateError', {
   message: 'Date can not be less than current date',
 });
 
+export const InvalidBannerDateRangeError = createError('InvalidBannerDateRangeError', {
+  message: 'ExpiryDate can not be less than InceptionDate',
+});
+
 export const NoSlotSelectedError = createError('NoSlotSelectedError', {
   message: 'No slot is selected in input',
 });

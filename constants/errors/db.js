@@ -56,8 +56,12 @@ export const MessageIsPublishedError = createError('MessageIsPublishedError', {
   message: 'Can not perform the current operation as message is published',
 });
 
-export const BannerIsPublishedError = createError('MessageIsPublishedError', {
+export const BannerIsPublishedError = createError('BannerIsPublishedError', {
   message: 'Can not perform the current operation as banner is published',
+});
+
+export const BannerExistsError = createError('BannerExistsError', {
+  message: 'Cannot perform the current operation as banner with similar type already exists within the given range',
 });
 
 export const ComponentLockedError = createError('ComponentLockedError', {

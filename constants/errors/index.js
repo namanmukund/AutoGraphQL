@@ -25,6 +25,7 @@ import {
   ApprovedCodeTagIsAddedToCodeError,
   MessageIsPublishedError,
   BannerIsPublishedError,
+  BannerExistsError,
   ComponentLockedError,
   OrderAlreadyExistsError,
   TopicIdRequiredError,
@@ -87,6 +88,7 @@ import {
   ProductIdNotPresentError,
   TransactionIdNotPresentError,
   HashOrStatusNotPresentError,
+  InvalidBannerDateRangeError,
 } from './input';
 
 // assessment validation sqs  profile apolloErrorPackageTest maxSync transcoder
@@ -164,6 +166,7 @@ export {
   ApprovedCodeTagIsAddedToCodeError,
   MessageIsPublishedError,
   BannerIsPublishedError,
+  BannerExistsError,
   FileIdIsMandatoryError,
   UnsupportedListFieldInsideSubDocumentObjectError,
   DuplicateConnectIdsError,
@@ -198,4 +201,5 @@ export {
   ProductIdNotPresentError,
   TransactionIdNotPresentError,
   HashOrStatusNotPresentError,
+  InvalidBannerDateRangeError,
 };
