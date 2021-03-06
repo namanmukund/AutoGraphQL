@@ -39,6 +39,7 @@ const Banner = `
     lottieFile: File @relation(name: "LottieFileBanner", direction: "OneWay")
     country: Country @defaultValue(value: "india")
     expiryDate: Date!
+    inceptionDate: Date!
     disclaimerText: String
     type: BannerType @defaultValue(value: "marketing")
   }
