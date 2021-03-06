@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import checkIfBannerPublishedForTheDuration from './utils/checkIfBannerPublishedForTheDuration';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { InvalidBannerDateRangeError } from '../../../../../constants/errors';
+import { InvalidBannerDateRangeError, DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 
 const fetchBanner = async (bannerId) => {
   const query = `
@@ -22,6 +22,10 @@ const fetchBanner = async (bannerId) => {
 const updateBannerValidation = async (params) => {
   const { id: bannerId, input } = params;
   const existingBannerData = await fetchBanner(bannerId);
+  if (!get(existingBannerData, 'id', null)) {
+    throw new DatabaseRecordNotFoundError();
+  }
+  /** throws error if ExpiryDate < InceptionDate */
   if (
     (new Date(get(input, 'expiryDate', existingBannerData.expiryDate)))
     < (new Date(get(input, 'inceptionDate', existingBannerData.inceptionDate)))

@@ -3,7 +3,11 @@ import { PUBLISHED, UNPUBLISHED } from '../../../../../../constants';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { BannerExistsError } from '../../../../../../constants/errors';
 
-const fetchOverlappingBanner = async (inceptionDate, expiryDate, bannerType, bannerId) => {
+const fetchOverlappingBanners = async (inceptionDate, expiryDate, bannerType, bannerId) => {
+  /**
+     * Fetch Overlapping Banners having similar 'type' &
+     * ranges between inceptionDate and expiryDate
+     */
   const query = `
         {
             banners(filter:{
@@ -52,8 +56,9 @@ const fetchOverlappingBanner = async (inceptionDate, expiryDate, bannerType, ban
   return get(overLappingBanners, 'data.banners');
 };
 const checkIfBannerPublishedForTheDuration = async (input) => {
+  /** If Status Published check if another banner already published within specific date range  */
   if (get(input, 'status', UNPUBLISHED) === PUBLISHED) {
-    const overlappingBanners = await fetchOverlappingBanner(
+    const overlappingBanners = await fetchOverlappingBanners(
       get(input, 'inceptionDate', null),
       get(input, 'expiryDate', null),
       get(input, 'type', 'marketing'),
