@@ -24,7 +24,7 @@ const Banner = `
     description: String
     status: ContentStatus! @defaultValue(value: "unpublished")
     backgroundImage: File! @relation(name: "BackgroundImageBanner", direction: "OneWay")
-    discount: Int
+    discount: Int!
     discountFontSize: Int
     discountColor: String
     discountBackground: String
@@ -34,11 +34,12 @@ const Banner = `
     textAfterDiscount: String! @trim
     textAfterDiscountFontSize: Int
     textAfterDiscountColor: String
-    width: Int
-    height: Int
+    width: Int!
+    height: Int!
     lottieFile: File @relation(name: "LottieFileBanner", direction: "OneWay")
     country: Country @defaultValue(value: "india")
     expiryDate: Date!
+    inceptionDate: Date!
     disclaimerText: String
     type: BannerType @defaultValue(value: "marketing")
   }
