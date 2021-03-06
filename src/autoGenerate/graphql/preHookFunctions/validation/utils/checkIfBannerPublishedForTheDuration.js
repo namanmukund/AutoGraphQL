@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import { PUBLISHED, UNPUBLISHED } from '../../../../../../constants';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { BannerExistsError } from '../../../../../../constants/errors';
 
