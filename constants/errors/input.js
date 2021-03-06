@@ -156,6 +156,10 @@ export const PhoneFieldRequiredError = createError('PhoneFieldRequiredError', {
   message: 'Phone field is mandatory in input',
 });
 
+export const BannerFieldRequiredError = createError('BannerFieldRequiredError', {
+  message: 'Required Field!',
+});
+
 export const PasswordFieldRequiredError = createError('PasswordFieldRequiredError', {
   message: 'Password field is mandatory in input',
 });

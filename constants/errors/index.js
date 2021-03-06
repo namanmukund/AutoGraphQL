@@ -89,6 +89,7 @@ import {
   TransactionIdNotPresentError,
   HashOrStatusNotPresentError,
   InvalidBannerDateRangeError,
+  BannerFieldRequiredError,
 } from './input';
 
 // assessment validation sqs  profile apolloErrorPackageTest maxSync transcoder
@@ -202,4 +203,5 @@ export {
   TransactionIdNotPresentError,
   HashOrStatusNotPresentError,
   InvalidBannerDateRangeError,
+  BannerFieldRequiredError,
 };

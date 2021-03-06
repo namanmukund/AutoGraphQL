@@ -1,6 +1,23 @@
 import { get } from 'lodash';
 import checkIfBannerPublishedForTheDuration from './utils/checkIfBannerPublishedForTheDuration';
-import { InvalidBannerDateRangeError } from '../../../../../constants/errors';
+import { InvalidBannerDateRangeError, BannerFieldRequiredError } from '../../../../../constants/errors';
+import { PUBLISHED, UNPUBLISHED } from '../../../../../constants';
+
+const checkIfRequiredFieldsExists = (input) => {
+  /**
+   * Required Fields : Discount, width, height
+   */
+  const requiredFields = ['discount', 'width', 'height'];
+  requiredFields.forEach((key) => {
+    if (!(get(input, key, false))) {
+      throw new BannerFieldRequiredError({
+        data: {
+          error: `${key} input is required!`,
+        },
+      });
+    }
+  });
+};
 
 const addBannerValidation = async (params) => {
   const { input } = params;
@@ -10,12 +27,15 @@ const addBannerValidation = async (params) => {
   ) {
     throw new InvalidBannerDateRangeError();
   }
-  await checkIfBannerPublishedForTheDuration({
-    inceptionDate: get(input, 'inceptionDate', null),
-    expiryDate: get(input, 'expiryDate', null),
-    status: get(input, 'status', null),
-    type: get(input, 'type', 'marketing'),
-  });
+  if (get(input, 'status', UNPUBLISHED) === PUBLISHED) {
+    checkIfRequiredFieldsExists(input);
+    await checkIfBannerPublishedForTheDuration({
+      inceptionDate: get(input, 'inceptionDate', null),
+      expiryDate: get(input, 'expiryDate', null),
+      status: get(input, 'status', null),
+      type: get(input, 'type', 'marketing'),
+    });
+  }
   return true;
 };
 

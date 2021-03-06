@@ -1,7 +1,8 @@
 import { get } from 'lodash';
 import checkIfBannerPublishedForTheDuration from './utils/checkIfBannerPublishedForTheDuration';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { InvalidBannerDateRangeError, DatabaseRecordNotFoundError } from '../../../../../constants/errors';
+import { InvalidBannerDateRangeError, DatabaseRecordNotFoundError, BannerFieldRequiredError } from '../../../../../constants/errors';
+import { PUBLISHED, UNPUBLISHED } from '../../../../../constants';
 
 const fetchBanner = async (bannerId) => {
   const query = `
@@ -19,6 +20,22 @@ const fetchBanner = async (bannerId) => {
   return get(banner, 'data.banner');
 };
 
+const checkIfRequiredFieldsExists = (input, existingBannerData) => {
+  /**
+   * Required Fields : Discount, width, height
+   */
+  const requiredFields = ['discount', 'width', 'height'];
+  requiredFields.forEach((key) => {
+    if (!(get(input, key, get(existingBannerData, key, false)))) {
+      throw new BannerFieldRequiredError({
+        data: {
+          error: `${key} input is required!`,
+        },
+      });
+    }
+  });
+};
+
 const updateBannerValidation = async (params) => {
   const { id: bannerId, input } = params;
   const existingBannerData = await fetchBanner(bannerId);
@@ -32,13 +49,15 @@ const updateBannerValidation = async (params) => {
   ) {
     throw new InvalidBannerDateRangeError();
   }
-  await checkIfBannerPublishedForTheDuration({
-    bannerId,
-    inceptionDate: get(input, 'inceptionDate', existingBannerData.inceptionDate),
-    expiryDate: get(input, 'expiryDate', existingBannerData.expiryDate),
-    status: get(input, 'status', existingBannerData.status),
-    type: get(input, 'type', existingBannerData.type),
-  });
+  if (get(input, 'status', get(existingBannerData, 'status', UNPUBLISHED)) === PUBLISHED) {
+    checkIfRequiredFieldsExists(input, existingBannerData);
+    await checkIfBannerPublishedForTheDuration({
+      bannerId,
+      inceptionDate: get(input, 'inceptionDate', existingBannerData.inceptionDate),
+      expiryDate: get(input, 'expiryDate', existingBannerData.expiryDate),
+      type: get(input, 'type', existingBannerData.type),
+    });
+  }
   return true;
 };
 

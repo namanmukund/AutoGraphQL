@@ -57,16 +57,14 @@ const fetchOverlappingBanners = async (inceptionDate, expiryDate, bannerType, ba
 };
 const checkIfBannerPublishedForTheDuration = async (input) => {
   /** If Status Published check if another banner already published within specific date range  */
-  if (get(input, 'status', UNPUBLISHED) === PUBLISHED) {
-    const overlappingBanners = await fetchOverlappingBanners(
-      get(input, 'inceptionDate', null),
-      get(input, 'expiryDate', null),
-      get(input, 'type', 'marketing'),
-      get(input, 'bannerId', null),
-    );
-    if (overlappingBanners && overlappingBanners.length > 0) {
-      throw new BannerExistsError();
-    }
+  const overlappingBanners = await fetchOverlappingBanners(
+    get(input, 'inceptionDate', null),
+    get(input, 'expiryDate', null),
+    get(input, 'type', 'marketing'),
+    get(input, 'bannerId', null),
+  );
+  if (overlappingBanners && overlappingBanners.length > 0) {
+    throw new BannerExistsError();
   }
   return true;
 };
