@@ -827,6 +827,22 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   } = userInfo;
   const userRoleFromContext = currentUser && currentUser.role;
 
+  // throwing error if client has not send any question in input
+  if (!quizQuestions || !quizQuestions.length) {
+    log('QuizQuestions are not present in input in addUserActivityQuizDumpPostHookMethod');
+    throw new QuizQuestionsNotPresentError();
+  }
+  // throwing error if there are no published questions in database
+  if (!quizQuestionsInUserQuiz
+    || !quizQuestionsInUserQuiz.length) {
+    log('Quiz Questions are not present in UserQuiz in addUserActivityQuizDumpPostHookMethod');
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'Topic.QuizQuestions: is not present',
+      },
+    });
+  }
+
   // getting menteeSessionId to update mentorMenteeSession in case of a mentee
   if (userRoleFromContext === MENTEE) {
     const menteeSessionRes = await callLocalGraphqlApi(menteeSessionQuery(userId, topicId));
@@ -850,21 +866,6 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     }
   }
 
-  // throwing error if client has not send any question in input
-  if (!quizQuestions || !quizQuestions.length) {
-    log('QuizQuestions are not present in input in addUserActivityQuizDumpPostHookMethod');
-    throw new QuizQuestionsNotPresentError();
-  }
-  // throwing error if there are no published questions in database
-  if (!quizQuestionsInUserQuiz
-    || !quizQuestionsInUserQuiz.length) {
-    log('Quiz Questions are not present in UserQuiz in addUserActivityQuizDumpPostHookMethod');
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'Topic.QuizQuestions: is not present',
-      },
-    });
-  }
   /*
   Quiz report will only get created when user hits next after completing quiz
   In case user closes app in between quiz, he will have to give whole quiz again
