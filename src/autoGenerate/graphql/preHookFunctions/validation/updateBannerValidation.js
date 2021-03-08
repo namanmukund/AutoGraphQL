@@ -8,11 +8,22 @@ const fetchBanner = async (bannerId) => {
   const query = `
           {
               banner(id:"${bannerId}") {
-                id  
-                status
-                type
-                expiryDate
-                inceptionDate
+                 id
+                 status
+                  title 
+                  backgroundImage {
+                    name
+                    uri
+                    id
+                  } 
+                  discount
+                  textBeforeDiscount
+                  textAfterDiscount 
+                  width
+                  height 
+                  expiryDate 
+                  inceptionDate 
+                  type
               }
           }
           `;
@@ -21,10 +32,19 @@ const fetchBanner = async (bannerId) => {
 };
 
 const checkIfRequiredFieldsExists = (input, existingBannerData) => {
-  /**
-   * Required Fields : Discount, width, height
-   */
-  const requiredFields = ['discount', 'width', 'height'];
+  const requiredFields = [
+    'title',
+    'backgroundImage',
+    'discount',
+    'textBeforeDiscount',
+    'textAfterDiscount',
+    'width',
+    'height',
+    'expiryDate',
+    'inceptionDate',
+    'type',
+  ];
+  /** First check if fields exists in input or fallback to check in existing database */
   requiredFields.forEach((key) => {
     if (!(get(input, key, get(existingBannerData, key, false)))) {
       throw new BannerFieldRequiredError({

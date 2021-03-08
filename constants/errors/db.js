@@ -61,7 +61,7 @@ export const BannerIsPublishedError = createError('BannerIsPublishedError', {
 });
 
 export const BannerExistsError = createError('BannerExistsError', {
-  message: 'Cannot perform the current operation as banner with similar type already exists within the given range',
+  message: 'Cannot perform the current operation as banner with similar type already published',
 });
 
 export const ComponentLockedError = createError('ComponentLockedError', {

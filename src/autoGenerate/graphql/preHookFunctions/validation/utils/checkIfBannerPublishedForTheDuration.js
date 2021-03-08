@@ -1,6 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { BannerExistsError } from '../../../../../../constants/errors';
+import { PUBLISHED } from '../../../../../../constants';
 
 const fetchOverlappingBanners = async (inceptionDate, expiryDate, bannerType, bannerId) => {
   /**
@@ -13,37 +14,12 @@ const fetchOverlappingBanners = async (inceptionDate, expiryDate, bannerType, ba
                 and: [
                     {
                         id_not:"${bannerId}"
-                    }
+                    },
                     {
                         type: ${bannerType}
                     },
                     {
-                        or:[
-                            {
-                                and: [
-                                    {inceptionDate_gte:"${inceptionDate}"},
-                                    {inceptionDate_lte:"${expiryDate}"}
-                                ]
-                            },
-                            {
-                                and: [
-                                    {inceptionDate_lte:"${inceptionDate}"},
-                                    {expiryDate_gte: "${expiryDate}"}
-                                ]
-                            },
-                            {
-                                and: [
-                                    {expiryDate_gte:"${inceptionDate}"},
-                                    {expiryDate_lte:"${expiryDate}"}
-                                ]
-                            },
-                            {
-                                and: [
-                                    {inceptionDate_gte:"${inceptionDate}"},
-                                    {expiryDate_lte:"${expiryDate}"}
-                                ]
-                            }
-                        ]
+                        status: ${PUBLISHED}
                     }
                 ]
             }){
