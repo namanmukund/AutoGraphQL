@@ -14,6 +14,9 @@ const getFileTypeName = (type) => {
   } else if (includes(type, 'octet-stream')) {
     // if invalid fileType then graphql will give the required error
     fileType = 'subtitle';
+  } else if (includes(type, 'json')) {
+    // if invalid fileType then graphql will give the required error
+    fileType = 'lottie';
   } else {
     log('File Type is not defined');
     fileType = '';
