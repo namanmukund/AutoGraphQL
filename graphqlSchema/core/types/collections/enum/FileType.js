@@ -4,6 +4,7 @@ const FileType = `
     video
     image
     subtitle
+    lottie
   }`;
 
 export default FileType;

@@ -4,6 +4,7 @@ const fileExtensions = {
   videoExtensions: ['mp4'],
   excelExtensions: ['xlsx'],
   subtitleExtensions: ['octet-stream'],
+  lottieExtensions: ['json'],
 };
 
 export default fileExtensions;
