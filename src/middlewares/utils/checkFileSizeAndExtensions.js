@@ -8,6 +8,7 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
     video: videoSizeLimit,
     excel: excelSizeLimit,
     subtitle: subtitleSizeLimit,
+    lottie: lottieSizeLimit,
   } = fileSizeLimitInMB;
 
   const {
@@ -16,6 +17,7 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
     videoExtensions,
     excelExtensions,
     subtitleExtensions,
+    lottieExtensions,
   } = fileExtensions;
 
   const doc = {};
@@ -64,6 +66,15 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
         doc.isValidSize = true;
       }
       if (includes(subtitleExtensions, caseInsensitiveExt)) {
+        doc.isValidExtension = true;
+      }
+      break;
+    }
+    case 'lottie': {
+      if (size <= (lottieSizeLimit * 1024 * 1024)) {
+        doc.isValidSize = true;
+      }
+      if (includes(lottieExtensions, caseInsensitiveExt)) {
         doc.isValidExtension = true;
       }
       break;

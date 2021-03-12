@@ -4,6 +4,7 @@ const fileSizeLimitInMB = {
   video: 200,
   excel: 30,
   subtitle: 10,
+  lottie: 1,
 };
 
 export default fileSizeLimitInMB;
