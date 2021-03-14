@@ -2,7 +2,8 @@ import { TBA, TMS, TWA } from '../../../../constants';
 import { READ } from '../../../../constants/graphqlOperations';
 
 const UserApprovedCode = `
-  type UserApprovedCode @model 
+  type UserApprovedCode @model
+  @userToken(isRequired:"false")  
   @appPermissions(
     permissions:[
       { appName: "${TBA}" operations: "*" },

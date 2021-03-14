@@ -62,6 +62,9 @@ import deleteBatchSessionValidation from './preHookFunctions/validation/deleteBa
 import updateBatchCurrentComponentStatusValidation from './preHookFunctions/validation/updateBatchCurrentComponentStatusValidation';
 import updateUserSavedCodeValidation from './preHookFunctions/validation/updateUserSavedCodeValidation';
 import deleteUserApprovedCodeTagValidation from './preHookFunctions/validation/deleteUserApprovedCodeTagValidation';
+import addBannerValidation from './preHookFunctions/validation/addBannerValidation';
+import updateBannerValidation from './preHookFunctions/validation/updateBannerValidation';
+import deleteBannerValidation from './preHookFunctions/validation/deleteBannerValidation';
 // import { CanNotCompleteSessionBeforeStartingError } from '../../../constants/errors/input';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -577,6 +580,18 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'deleteUserApprovedCodeTag': {
       await deleteUserApprovedCodeTagValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addBanner': {
+      await addBannerValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateBanner': {
+      await updateBannerValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'deleteBanner': {
+      await deleteBannerValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'updateUserSavedCode': {

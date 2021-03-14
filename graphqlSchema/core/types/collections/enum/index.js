@@ -61,6 +61,9 @@ import ReactionType from './ReactionType';
 import SchoolCoordinatorRole from './SchoolCoordinatorRole';
 import SessionVelocityStatus from './SessionVelocityStatus';
 import EnrollmentStatus from './EnrollmentStatus';
+import ProductTargetUserType from './ProductTargetUserType';
+import MentorMenteeSessionAuditStatus from './MentorMenteeSessionAuditStatus';
+import BannerType from './BannerType';
 
 export default [
   Status,
@@ -127,4 +130,7 @@ export default [
   SchoolCoordinatorRole,
   SessionVelocityStatus,
   EnrollmentStatus,
+  ProductTargetUserType,
+  MentorMenteeSessionAuditStatus,
+  BannerType,
 ];
