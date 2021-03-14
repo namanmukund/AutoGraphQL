@@ -12,6 +12,7 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { addZeroes } from './utils/addZeroesToANumber';
 import { sendEmailInvoiceToUser } from './utils/sendEmailInvoiceToUser';
 import updateUserEnrollmentTypeToPro from './utils/updateUserEnrollmentTypeToPro';
+import updateUserPaymentPlanMutation from './utils/updateUserPaymentPlanMutation';
 
 /* query to get userPaymentInstallment */
 const userPaymentInstallmentQuery = (userPaymentInstallmentId) => `
@@ -45,6 +46,7 @@ const userPaymentInstallmentQuery = (userPaymentInstallmentId) => `
           }
         }
         userPaymentPlan{
+          id
           product{
             id
             title
@@ -86,6 +88,44 @@ const getSuffix = (i) => {
       return 'rd';
     default:
       return 'th';
+  }
+};
+
+const updateUserPaymentPlanWorkFlow = async (userPaymentPlanData) => {
+  if (userPaymentPlanData) {
+    const updateObj = {};
+    const { userPaymentInstallments } = userPaymentPlanData;
+    let collectedAmount = 0;
+    let isPaid = true;
+    let nextPaymentDate;
+    if (userPaymentInstallments && userPaymentInstallments.length) {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const userPaymentInstallment of userPaymentInstallments) {
+        const {
+          amount,
+          dueDate,
+          status,
+        } = userPaymentInstallment;
+        if (status === 'paid') {
+          collectedAmount += amount;
+        } else {
+          isPaid = false;
+          if (!nextPaymentDate) {
+            nextPaymentDate = dueDate;
+            updateObj.nextPaymentDate = new Date(nextPaymentDate).toISOString();
+          }
+        }
+      }
+      updateObj.collectedAmount = collectedAmount;
+    } else {
+      isPaid = false;
+    }
+    updateObj.isPaid = isPaid;
+    // eslint-disable-next-line no-await-in-loop
+    await updateUserPaymentPlanMutation(
+      get(userPaymentPlanData, 'id'),
+      updateObj,
+    );
   }
 };
 
@@ -212,6 +252,11 @@ const updateUserPaymentInstallmentPostHookMethod = async (input, params) => {
       subject = 'Payment Reminder from Tekie';
       sendEmailInvoiceToUser(payload, 'paymentReminderWithoutInstallmentEmailTemplate', subject);
     }
+
+    /**
+     * Update UserPaymentPlan Flow
+     */
+    await updateUserPaymentPlanWorkFlow(get(userPaymentInstallmentInfo, 'userPaymentPlan', null));
   }
 };
 

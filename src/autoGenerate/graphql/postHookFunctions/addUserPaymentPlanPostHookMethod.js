@@ -2,6 +2,7 @@ import { get } from 'lodash';
 import moment from 'moment';
 import { log } from '../../../../utils';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import updateUserPaymentPlanMutation from './utils/updateUserPaymentPlanMutation';
 
 const getDueDates = (dateOfEnrollment, sessionsPerMonth, installmentNumber = 1) => {
   const enrollmentDate = new Date(dateOfEnrollment);
@@ -138,6 +139,16 @@ const addUserPaymentPlanPostHookMethod = async (input, params) => {
       new Date(dueDate),
     ));
   }
+
+  /** Initialize UserPaymentPlan with default values and nextPaymentDate  */
+  await updateUserPaymentPlanMutation(
+    userPaymentPlanId,
+    {
+      isPaid: false,
+      collectedAmount: 0,
+      nextPaymentDate: new Date(installmentsDueDate[0]).toISOString(),
+    },
+  );
 
   // returning updated userPaymentInstallments
   if (input && userPaymentPlanId) {
