@@ -12,6 +12,7 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { addZeroes } from './utils/addZeroesToANumber';
 import { sendEmailInvoiceToUser } from './utils/sendEmailInvoiceToUser';
 import updateUserEnrollmentTypeToPro from './utils/updateUserEnrollmentTypeToPro';
+import updateUserPaymentPlanMutation from './utils/updateUserPaymentPlanMutation';
 
 /* query to get userPaymentInstallment */
 const userPaymentInstallmentQuery = (userPaymentInstallmentId) => `
@@ -88,25 +89,6 @@ const getSuffix = (i) => {
     default:
       return 'th';
   }
-};
-
-const updateUserPaymentPlanMutation = async (
-  id,
-  input,
-) => {
-  const query = `
-mutation($input:UserPaymentPlanUpdate){
-  updateUserPaymentPlan(
-    id:"${id}", 
-    input:$input
-  ){
-    id
-  }
-}
-`;
-  const res = await callLocalGraphqlApi(query, '', { input });
-  const data = get(res, 'data.updateUserPaymentPlan');
-  return data;
 };
 
 const updateUserPaymentPlanWorkFlow = async (userPaymentPlanData) => {
