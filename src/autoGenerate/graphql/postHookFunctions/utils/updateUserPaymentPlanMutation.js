@@ -4,11 +4,17 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 const updateUserPaymentPlanMutation = async (
   id,
   input,
+  topicId = null,
 ) => {
+  let connectStr = '';
+  if (topicId) {
+    connectStr = `lastSessionTopicConnectId:"${topicId}",`;
+  }
   const query = `
 mutation($input:UserPaymentPlanUpdate){
   updateUserPaymentPlan(
-    id:"${id}", 
+    id:"${id}",
+    ${connectStr}
     input:$input
   ){
     id

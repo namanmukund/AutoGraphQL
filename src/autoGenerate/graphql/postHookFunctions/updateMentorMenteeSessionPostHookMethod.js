@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import moment from 'moment';
 import { MENTOR_RATING_AUDIT_THRESHOLD } from '../../../../constants';
 import { MENTEE } from '../../../../constants/roles';
 import updateReferrerCreditsPostSessionOrUserPayment from './utils/updateReferrerCreditsPostSessionOrUserPayment';
@@ -12,7 +13,8 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import sendWhatsAppTemplateMessage from '../../utils/sendWhatsAppTemplateMessage';
 import transactionalMessageBody from '../../../../constants/transactionalMessageBody';
 import sendTransactionalEmail from '../resolvers/utils/sendTransactionalEmail';
-
+import updateUserPaymentPlanMutation from './utils/updateUserPaymentPlanMutation';
+import getSessionVelocityStatus from './utils/getSessionVelocityStatus';
 /*
   - check if the user if from referral
   - check if the session is the first session
@@ -44,10 +46,55 @@ const userIdQuery = (menteeSessionId) => `{
   }
 }`;
 
+const mentorMenteeSessionsQuery = async (userId, orderBy = 'latest') => {
+  let orderByString = '';
+  if (orderBy === 'latest') {
+    orderByString = 'orderBy:sessionStartDate_DESC';
+  } else {
+    orderByString = 'orderBy:sessionStartDate_ASC';
+  }
+  const query = `
+query{
+  mentorMenteeSessions(filter:{
+    and:[
+      {menteeSession_some:{user_some:{id:"${userId}"}}}
+      {sessionStatus:completed}
+    ]
+  }, ${orderByString}, first:1){
+    id
+    sessionStartDate
+    topic{
+      id
+      order
+    }
+  }
+}
+`;
+  const res = await callLocalGraphqlApi(query);
+  const data = get(res, 'data.mentorMenteeSessions[0]');
+  return data;
+};
+
+const userPaymentPlanQuery = async (filterQuery) => {
+  const query = `
+    query{
+      userPaymentPlans(filter:{and:[
+        ${filterQuery}
+    ]}) {
+        id
+        sessionsPerMonth
+      }
+    }
+`;
+  const res = await callLocalGraphqlApi(query);
+  const data = get(res, 'data.userPaymentPlans[0]');
+  return data;
+};
+
 const allowedRoles = [MENTEE];
 const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
   const { currentUser, previousDocument: { sessionStatus: prevSessionStatus, topic } } = context;
-
+  const { sessionStartDate } = input;
   const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));
   const userId = get(menteeSession, 'data.menteeSession.user.id');
   const userInfo = await getMenteeInfo(userId);
@@ -123,6 +170,27 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
 
     if (input && Object.keys(input).includes('hasRescheduled') && topic.order === 1) {
       updateMentorRescheduleLeadsquared(userInfo, input, params);
+    }
+  }
+  /** Update MenteeMentorSession If Session Completed  */
+  if (prevSessionStatus === 'completed' || get(input, 'sessionStatus') === 'completed') {
+    const menteeId = get(menteeSession, 'data.menteeSession.user.id');
+    const userPaymentPlanData = await userPaymentPlanQuery(`{user_some:{id:"${menteeId}"}}`);
+    if (userPaymentPlanData && userPaymentPlanData.id) {
+      const updateObject = {};
+      if (sessionStartDate) {
+        updateObject.lastSessionOn = new Date(sessionStartDate).toISOString();
+        const lastTopicOrder = get(topic, 'order');
+        if (lastTopicOrder > 1) {
+          const mmsFirstData = await mentorMenteeSessionsQuery(menteeId, 'first');
+          const diffInDays = moment(sessionStartDate).diff(mmsFirstData.sessionStartDate, 'days');
+          if (diffInDays) {
+            updateObject.avgDaysPerSession = Math.round(diffInDays / lastTopicOrder);
+            updateObject.sessionVelocityStatus = getSessionVelocityStatus(userPaymentPlanData.sessionsPerMonth, updateObject.avgDaysPerSession);
+          }
+        }
+      }
+      await updateUserPaymentPlanMutation(get(userPaymentPlanData, 'id'), updateObject, get(topic, 'id'));
     }
   }
 };
