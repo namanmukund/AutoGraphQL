@@ -24,7 +24,7 @@ const Banner = `
     description: String
     status: ContentStatus! @defaultValue(value: "unpublished")
     backgroundImage: File @relation(name: "BackgroundImageBanner", direction: "OneWay")
-    discount: Int
+    discount: String
     discountFontSize: Int
     discountColor: String
     discountBackground: String
@@ -41,6 +41,8 @@ const Banner = `
     expiryDate: Date
     inceptionDate: Date
     disclaimerText: String
+    disclaimerTextFontSize: Int
+    disclaimerTextColor: String
     type: BannerType @defaultValue(value: "marketing")
   }
 `;
