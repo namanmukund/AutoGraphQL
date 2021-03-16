@@ -5,15 +5,15 @@ import { PUBLISHED, UNPUBLISHED } from '../../../../../constants';
 
 const checkIfRequiredFieldsExists = (input) => {
   const requiredFields = [
-    'title',
-    'backgroundImage',
-    'discount',
-    'textBeforeDiscount',
-    'textAfterDiscount',
-    'width',
-    'height',
-    'expiryDate',
-    'inceptionDate',
+    // 'title',
+    // 'backgroundImage',
+    // 'discount',
+    // 'textBeforeDiscount',
+    // 'textAfterDiscount',
+    // 'width',
+    // 'height',
+    // 'expiryDate',
+    // 'inceptionDate',
     'type',
   ];
   /** First check if fields exists in input or fallback to check in existing database */
