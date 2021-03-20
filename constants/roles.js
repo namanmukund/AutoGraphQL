@@ -14,6 +14,7 @@ const SALES = 'sales';
 const SALES_EXECUTIVE = 'salesExecutive';
 const TRANSFORMATION_TEAM = 'transformationTeam';
 const TRANSFORMATION_ADMIN = 'transformationAdmin';
+const SCHOOL_ADMIN = 'schoolAdmin';
 
 const CMS_HEAD = `[
 "${ADMIN}",
@@ -164,6 +165,7 @@ const ALL_ROLES_ARRAY = [
   SALES_EXECUTIVE,
   TRANSFORMATION_TEAM,
   TRANSFORMATION_ADMIN,
+  SCHOOL_ADMIN,
 ];
 
 export {
@@ -198,4 +200,5 @@ export {
   TRANSFORMATION_ADMIN,
   UMS_HEAD_ARR,
   NOT_UMS_HEAD_ARR,
+  SCHOOL_ADMIN,
 };
