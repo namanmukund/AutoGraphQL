@@ -103,20 +103,22 @@ Object.keys(parsedASTMap).forEach((type) => {
         }
         // if field type is array
         if (parsedASTMap[type].field[fieldName].type.isList) {
-          throw new UnsupportedListFieldInsideSubDocumentObjectError(
-            {
-              data: {
-                type,
-                fieldName,
+          if (!['UserToken', 'ParentChildToken'].includes(type)) {
+            throw new UnsupportedListFieldInsideSubDocumentObjectError(
+              {
+                data: {
+                  type,
+                  fieldName,
+                },
               },
-            },
-          );
-        } else {
-          key = `${relationalField}${connectMutationsArgumentsSuffix.singular}`;
-          // pushing connect ID field in graphql Input TypeObject
-          graphqlInputTypeObject[typeName][key] = 'ID';
-          // pushing connect ID field in graphql Update TypeObject
-          graphqlUpdateTypeObject[typeName][key] = 'ID';
+            );
+          } else {
+            key = `${relationalField}${connectMutationsArgumentsSuffix.singular}`;
+            // pushing connect ID field in graphql Input TypeObject
+            graphqlInputTypeObject[typeName][key] = 'ID';
+            // pushing connect ID field in graphql Update TypeObject
+            graphqlUpdateTypeObject[typeName][key] = 'ID';
+          }
         }
       });
     } else {
