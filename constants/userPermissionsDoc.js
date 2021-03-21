@@ -1,5 +1,14 @@
 import {
-  MENTEE, MENTOR, NOT_UMS_HEAD_ARR, SALES, SALES_EXECUTIVE, UMS_HEAD_ARR, UMS_VIEWER,
+  BATCH_HEAD_ARR,
+  MENTEE,
+  MENTOR,
+  NOT_BATCH_HEAD_ARR,
+  NOT_UMS_HEAD_ARR,
+  SALES,
+  SALES_EXECUTIVE,
+  SCHOOL_ADMIN,
+  UMS_HEAD_ARR,
+  UMS_VIEWER,
 } from './roles';
 
 const userPermissionsDoc = {
@@ -7,7 +16,7 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR],
-      exceptDelete: [...NOT_UMS_HEAD_ARR],
+      exceptDelete: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN],
     },
     fields: {
       role: {
@@ -57,6 +66,20 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+    },
+  },
+  UserCurrentTopicComponentStatus: {
+    collection: {
+      rule: 'allow',
+      crud: [...UMS_HEAD_ARR],
+      read: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN],
+    },
+  },
+  BatchCurrentComponentStatus: {
+    collection: {
+      rule: 'allow',
+      crud: [...BATCH_HEAD_ARR],
+      read: [...NOT_BATCH_HEAD_ARR, SCHOOL_ADMIN],
     },
   },
 };
