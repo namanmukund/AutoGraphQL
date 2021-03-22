@@ -75,6 +75,9 @@ import UserApprovedCodeReactionLog from './userApprovedCodeReactionLog';
 import UserApprovedCodeTag from './userApprovedCodeTag';
 import UserApprovedCodeTagMapping from './userApprovedCodeTagMapping';
 import Banner from './banner';
+import CheatSheet from './cheatSheet';
+import CheatSheetContent from './cheatSheetContent';
+import ContentTag from './contentTag';
 
 export default [
   ...User,
@@ -154,4 +157,7 @@ export default [
   ...UserApprovedCodeTag,
   ...UserApprovedCodeTagMapping,
   ...Banner,
+  ...CheatSheet,
+  ...CheatSheetContent,
+  ...ContentTag,
 ];
