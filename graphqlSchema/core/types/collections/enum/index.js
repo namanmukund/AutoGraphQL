@@ -64,6 +64,7 @@ import EnrollmentStatus from './EnrollmentStatus';
 import ProductTargetUserType from './ProductTargetUserType';
 import MentorMenteeSessionAuditStatus from './MentorMenteeSessionAuditStatus';
 import BannerType from './BannerType';
+import CheatSheetType from './CheatSheetType';
 
 export default [
   Status,
@@ -133,4 +134,5 @@ export default [
   ProductTargetUserType,
   MentorMenteeSessionAuditStatus,
   BannerType,
+  CheatSheetType,
 ];
