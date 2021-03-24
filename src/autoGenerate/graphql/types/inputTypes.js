@@ -112,13 +112,13 @@ Object.keys(parsedASTMap).forEach((type) => {
                 },
               },
             );
-          } else {
-            key = `${relationalField}${connectMutationsArgumentsSuffix.singular}`;
-            // pushing connect ID field in graphql Input TypeObject
-            graphqlInputTypeObject[typeName][key] = 'ID';
-            // pushing connect ID field in graphql Update TypeObject
-            graphqlUpdateTypeObject[typeName][key] = 'ID';
           }
+        } else {
+          key = `${relationalField}${connectMutationsArgumentsSuffix.singular}`;
+          // pushing connect ID field in graphql Input TypeObject
+          graphqlInputTypeObject[typeName][key] = 'ID';
+          // pushing connect ID field in graphql Update TypeObject
+          graphqlUpdateTypeObject[typeName][key] = 'ID';
         }
       });
     } else {
