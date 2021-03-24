@@ -1,10 +1,10 @@
 /* eslint-disable no-await-in-loop, no-console */
 import { get } from 'lodash';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
-import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors/db';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import reactions from '../../../../../../constants/reactions';
+import updateUserApprovedCodeReactionsCount from './updateUserApprovedCodeReactionsCount';
 
 const fetchUserApprovedCodeReactionLogs = async (
   reactedByID,
@@ -66,72 +66,6 @@ const addUserApprovedCodeReactionLog = async (
   return get(response, 'data.addUserApprovedCodeReactionLog');
 };
 
-const fetchUserApprovedCode = async (userApprovedCodeID) => {
-  const query = `{
-      userApprovedCode(id:"${userApprovedCodeID}") {
-        id
-        heartReactionCount
-        celebrateReactionCount
-        hotReactionCount
-        totalReactionCount
-      }
-    }`;
-  const response = await callLocalGraphqlApi(query);
-  return get(response, 'data.userApprovedCode');
-};
-
-const updateUserApprovedCode = async (userApprovedCodeID, inputData) => {
-  const query = `
-  mutation($input: UserApprovedCodeUpdate!){
-      updateUserApprovedCode(
-          id:"${userApprovedCodeID}"
-          input:$input,
-          ) {
-        id
-      }
-    }`;
-  const response = await callLocalGraphqlApi(query, '', { input: inputData });
-  return get(response, 'data.addUserApprovedCodeReactionLog');
-};
-
-const mapReactionLogsWithUserApprovedCodeReactionCount = (prevReactionLogData, input, userApprovedCode) => {
-  const userApprovedCodeReactionCountInput = {
-    totalReactionCount: get(userApprovedCode, 'totalReactionCount', 0),
-  };
-  reactions.forEach((reaction) => {
-    userApprovedCodeReactionCountInput[`${reaction}ReactionCount`] = get(userApprovedCode, `${reaction}ReactionCount`, 0);
-  });
-  /** If previous ReactionLog record exists update count accordingly */
-  if (prevReactionLogData && get(prevReactionLogData, 'id')) {
-    reactions.forEach((reaction) => {
-      if (typeof input[reaction] === 'boolean') {
-        if (input[reaction] && !prevReactionLogData[reaction]) {
-          userApprovedCodeReactionCountInput[`${reaction}ReactionCount`] += 1;
-        }
-        if (!input[reaction] && prevReactionLogData[reaction]) {
-          userApprovedCodeReactionCountInput[`${reaction}ReactionCount`] -= 1;
-        }
-      }
-    });
-  } else {
-    reactions.forEach((reaction) => {
-      if (typeof input[reaction] === 'boolean') {
-        userApprovedCodeReactionCountInput[`${reaction}ReactionCount`] = input[reaction]
-          ? userApprovedCodeReactionCountInput[`${reaction}ReactionCount`] + 1
-          : userApprovedCodeReactionCountInput[`${reaction}ReactionCount`];
-      }
-    });
-  }
-  let totalCount = 0;
-  reactions.forEach((reaction) => {
-    if (userApprovedCodeReactionCountInput[`${reaction}ReactionCount`]) {
-      totalCount += userApprovedCodeReactionCountInput[`${reaction}ReactionCount`];
-    }
-  });
-  userApprovedCodeReactionCountInput.totalReactionCount = totalCount;
-  return userApprovedCodeReactionCountInput;
-};
-
 const updateVisitorReactionOnUserApprovedCode = async (root, params, context) => {
   await validateAuthentication(context);
   const {
@@ -142,10 +76,6 @@ const updateVisitorReactionOnUserApprovedCode = async (root, params, context) =>
   }
 
   try {
-    const userApprovedCodeData = await fetchUserApprovedCode(userApprovedCodeID);
-    if (!(userApprovedCodeData && get(userApprovedCodeData, 'id'))) {
-      throw new DatabaseRecordNotFoundError();
-    }
     const reactionLog = await fetchUserApprovedCodeReactionLogs(
       reactedByID,
       userApprovedCodeID,
@@ -166,13 +96,11 @@ const updateVisitorReactionOnUserApprovedCode = async (root, params, context) =>
       /** To ReactionLog update successfull then update UserApprovedCode reaction counts */
       if (updateReactionLogResponseId) {
         /** Mapping Boolean Reaction Input to Actual Counts */
-        const userApprovedCodeInputData = await mapReactionLogsWithUserApprovedCodeReactionCount(
+        await updateUserApprovedCodeReactionsCount(
           reactionLog,
           reactionVariables.input,
-          userApprovedCodeData,
+          userApprovedCodeID,
         );
-
-        await updateUserApprovedCode(userApprovedCodeID, userApprovedCodeInputData);
       }
     } else {
       /**
@@ -180,12 +108,11 @@ const updateVisitorReactionOnUserApprovedCode = async (root, params, context) =>
         */
       await addUserApprovedCodeReactionLog(reactedByID, userApprovedCodeID, reactionVariables);
       /** Mapping Boolean Reaction Input to Actual Counts */
-      const userApprovedCodeInputData = await mapReactionLogsWithUserApprovedCodeReactionCount(
+      await updateUserApprovedCodeReactionsCount(
         null,
         reactionVariables.input,
-        userApprovedCodeData,
+        userApprovedCodeID,
       );
-      await updateUserApprovedCode(userApprovedCodeID, userApprovedCodeInputData);
     }
     return {
       result: true,
