@@ -24,6 +24,7 @@ const CheatSheetContent = `
     type: CheatSheetType!
     statement: String @trim
     image: File @relation(name: "CheatSheetImage", direction: "OneWay")
+    emoji: [StickerEmoji] @relation(name: "CheatSheetContentEmoji", direction: "OneWay")
     cheatSheet: CheatSheet @relation(name: "CheatSheetContent")
     terminalInput: String @trim
     terminalOutput: String @trim
