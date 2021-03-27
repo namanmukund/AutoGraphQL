@@ -48,6 +48,7 @@ const Topic = `
     thumbnailSmall: File @relation(name: "TopicThumbnailSmall", direction: "OneWay")
     isTrial: Boolean @defaultValue(value: "false")
     assignmentQuestions: [AssignmentQuestion] @relation(name: "TopicAssignmentQuestion")
+    bulletPoints: [String]
   }
 `;
 
