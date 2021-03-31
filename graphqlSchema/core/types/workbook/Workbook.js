@@ -1,6 +1,6 @@
-import { READ } from "../../../../constants/graphqlOperations";
-import { TLA, TMS, TWA } from "../../../../constants";
-import getPermissionSchemaString from "../../../../src/autoGenerate/utils/getPermissionSchemaString";
+import { READ } from '../../../../constants/graphqlOperations';
+import { TLA, TMS, TWA } from '../../../../constants';
+import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
 
 const Workbook = `
   type Workbook @model
@@ -12,7 +12,7 @@ const Workbook = `
       ],
     rule: allow
   )
-${getPermissionSchemaString("Workbook")}
+${getPermissionSchemaString('Workbook')}
   {
     order: Int
     title: String! @trim

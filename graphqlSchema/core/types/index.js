@@ -161,5 +161,5 @@ export default [
   ...CheatSheet,
   ...CheatSheetContent,
   ...ContentTag,
-  ...Workbook
+  ...Workbook,
 ];

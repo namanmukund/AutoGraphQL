@@ -1,3 +1,3 @@
-import WorkbookExample from "./WorkbookExample";
+import WorkbookExample from './WorkbookExample';
 
 export default [WorkbookExample];

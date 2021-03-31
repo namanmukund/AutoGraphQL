@@ -34,7 +34,7 @@ import {
   EmailOrPhoneMismatchError,
   ChildAlreadyRegisteredError,
   SendOtpFirstError,
-  WorkbookIsPublished
+  WorkbookIsPublished,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -205,5 +205,5 @@ export {
   HashOrStatusNotPresentError,
   InvalidBannerDateRangeError,
   BannerFieldRequiredError,
-  WorkbookIsPublished
+  WorkbookIsPublished,
 };

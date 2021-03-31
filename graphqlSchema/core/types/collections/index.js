@@ -17,7 +17,7 @@ import CodingLanguage from './CodingLanguage';
 import AddUpdateBulkSchoolUserDataOutput from './AddUpdateBulkSchoolUserDataOutput';
 import ErrorLog from './ErrorLog';
 import BulletPoint from './BulletPoint';
-import WorkbookExample from "./WorkbookExample";
+import WorkbookExample from './WorkbookExample';
 
 export default [
   ...Enum,

@@ -88,9 +88,9 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...WORKBOOK_CMS_HEAD],
-      read: [...WORKBOOK_NOT_CMS_HEAD]
-    }
-  }
+      read: [...WORKBOOK_NOT_CMS_HEAD],
+    },
+  },
 };
 
 // CMS_HEAD
