@@ -65,6 +65,7 @@ import deleteUserApprovedCodeTagValidation from './preHookFunctions/validation/d
 import addBannerValidation from './preHookFunctions/validation/addBannerValidation';
 import updateBannerValidation from './preHookFunctions/validation/updateBannerValidation';
 import deleteBannerValidation from './preHookFunctions/validation/deleteBannerValidation';
+import deleteWorkbookValidation from './preHookFunctions/validation/deleteWorkbookValidation';
 // import { CanNotCompleteSessionBeforeStartingError } from '../../../constants/errors/input';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -592,6 +593,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'deleteBanner': {
       await deleteBannerValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'deleteWorkbook': {
+      await deleteWorkbookValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'updateUserSavedCode': {

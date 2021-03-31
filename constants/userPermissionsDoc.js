@@ -9,6 +9,8 @@ import {
   SCHOOL_ADMIN,
   UMS_HEAD_ARR,
   UMS_VIEWER,
+  WORKBOOK_CMS_HEAD,
+  WORKBOOK_NOT_CMS_HEAD,
 } from './roles';
 
 const userPermissionsDoc = {
@@ -82,6 +84,17 @@ const userPermissionsDoc = {
       read: [...NOT_BATCH_HEAD_ARR, SCHOOL_ADMIN],
     },
   },
+  Workbook: {
+    collection: {
+      rule: 'allow',
+      crud: [...WORKBOOK_CMS_HEAD],
+      read: [...WORKBOOK_NOT_CMS_HEAD]
+    }
+  }
 };
+
+// CMS_HEAD
+
+// NOT_CMS_HEAD
 
 export default userPermissionsDoc;
