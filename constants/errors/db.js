@@ -99,3 +99,7 @@ export const PastDateOrSlotError = createError('PastDateOrSlotError', {
 export const NoSlotsAvailableForBooking = createError('NoSlotsAvailableForBooking', {
   message: 'No slot is available for booking',
 });
+
+export const WorkbookIsPublished = createError('WorkbookIsPublished', {
+  message: 'Can not perform the current operation as workbook is published',
+});
