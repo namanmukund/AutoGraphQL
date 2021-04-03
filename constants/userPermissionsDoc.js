@@ -91,6 +91,20 @@ const userPermissionsDoc = {
       read: [...WORKBOOK_NOT_CMS_HEAD],
     },
   },
+  Project: {
+    collection: {
+      rule: 'allow',
+      crud: [...WORKBOOK_CMS_HEAD],
+      read: [...WORKBOOK_NOT_CMS_HEAD],
+    },
+  },
+  ProjectContent: {
+    collection: {
+      rule: 'allow',
+      crud: [...WORKBOOK_CMS_HEAD],
+      read: [...WORKBOOK_NOT_CMS_HEAD],
+    },
+  },
 };
 
 // CMS_HEAD

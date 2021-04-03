@@ -103,3 +103,11 @@ export const NoSlotsAvailableForBooking = createError('NoSlotsAvailableForBookin
 export const WorkbookIsPublished = createError('WorkbookIsPublished', {
   message: 'Can not perform the current operation as workbook is published',
 });
+
+export const ProjectIsPublishedError = createError('ProjectIsPublishedError', {
+  message: 'Can not perform the current operation as project is published',
+});
+
+export const CheatSheetIsPublishedError = createError('CheatSheetIsPublishedError', {
+  message: 'Can not perform the current operation as cheatSheet is published',
+});
