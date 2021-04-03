@@ -35,6 +35,8 @@ import {
   ChildAlreadyRegisteredError,
   SendOtpFirstError,
   WorkbookIsPublished,
+  ProjectIsPublishedError,
+  CheatSheetIsPublishedError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -206,4 +208,6 @@ export {
   InvalidBannerDateRangeError,
   BannerFieldRequiredError,
   WorkbookIsPublished,
+  ProjectIsPublishedError,
+  CheatSheetIsPublishedError,
 };
