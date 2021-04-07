@@ -37,6 +37,7 @@ import {
   WorkbookIsPublished,
   ProjectIsPublishedError,
   CheatSheetIsPublishedError,
+  OtherDiscountAlreadySetToDefault,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -210,4 +211,5 @@ export {
   WorkbookIsPublished,
   ProjectIsPublishedError,
   CheatSheetIsPublishedError,
+  OtherDiscountAlreadySetToDefault,
 };
