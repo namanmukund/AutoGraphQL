@@ -44,6 +44,7 @@ import updateUserSavedCodePostHookMethod from './postHookFunctions/updateUserSav
 import addUserApprovedCodeTagMappingPostHookMethod from './postHookFunctions/addUserApprovedCodeTagMappingPostHookMethod';
 import deleteUserApprovedCodeTagMappingPostHookMethod from './postHookFunctions/deleteUserApprovedCodeTagMappingPostHookMethod';
 import updateMentorMenteeSessionAuditPostHookMethod from './postHookFunctions/updateMentorMenteeSessionAuditPostHookMethod';
+import updateUserApprovedCodePostHookMethod from './postHookFunctions/updateUserApprovedCodePostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -215,6 +216,10 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateUserSavedCode': {
       await updateUserSavedCodePostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'updateUserApprovedCode': {
+      await updateUserApprovedCodePostHookMethod(input, params, mutationName, context);
       break;
     }
     default:
