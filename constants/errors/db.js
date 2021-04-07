@@ -115,3 +115,7 @@ export const CheatSheetIsPublishedError = createError('CheatSheetIsPublishedErro
 export const OtherDiscountAlreadySetToDefault = createError('OtherDiscountAlreadySetToDefault', {
   message: 'Cannot set discount as default as another discount is already set to default',
 });
+
+export const ProductTypeAlreadyAdded = createError('ProductTypeAlreadyAdded', {
+  message: 'Product with similar type already exists',
+});

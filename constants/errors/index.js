@@ -38,6 +38,7 @@ import {
   ProjectIsPublishedError,
   CheatSheetIsPublishedError,
   OtherDiscountAlreadySetToDefault,
+  ProductTypeAlreadyAdded,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -212,4 +213,5 @@ export {
   ProjectIsPublishedError,
   CheatSheetIsPublishedError,
   OtherDiscountAlreadySetToDefault,
+  ProductTypeAlreadyAdded,
 };
