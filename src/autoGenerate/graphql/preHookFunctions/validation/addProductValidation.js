@@ -9,7 +9,7 @@ const fetchProduct = async (schoolId, targetUserType, type, isDemoPack) => {
             products(
               filter: {
                 and: [
-                  { school_some: { id: "${schoolId}" } }
+                  ${schoolId ? `{ school_some: { id: "${schoolId}" } }` : ''}
                   { targetUserType: ${targetUserType} }
                   { type: ${type} }
                   { isDemoPack: ${isDemoPack} }
@@ -25,15 +25,20 @@ const fetchProduct = async (schoolId, targetUserType, type, isDemoPack) => {
   return get(products, 'data.products');
 };
 
-const addProductToSchoolValidation = async (params) => {
+const addProductValidation = async (params) => {
   const { schoolConnectId: schoolId, input: { targetUserType, type, isDemoPack = false } } = params;
-  if (schoolId && targetUserType && targetUserType === batchType.b2b2c && type) {
+  if (schoolId && targetUserType && (targetUserType === batchType.b2b2c || targetUserType === batchType.b2c) && type) {
     const products = await fetchProduct(schoolId, targetUserType, type, isDemoPack);
     if (products && products.length > 0) {
+      throw new ProductTypeAlreadyAdded();
+    }
+  } else if (targetUserType === batchType.b2c) {
+    const b2cProduct = await fetchProduct(null, targetUserType, type, isDemoPack);
+    if (b2cProduct && b2cProduct.length > 0) {
       throw new ProductTypeAlreadyAdded();
     }
   }
   return true;
 };
 
-export default addProductToSchoolValidation;
+export default addProductValidation;

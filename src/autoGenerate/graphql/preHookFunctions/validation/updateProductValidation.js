@@ -29,7 +29,7 @@ const fetchSchoolProducts = async (schoolId, targetUserType, type, isDemoPack) =
         products(
             filter: {
             and: [
-                { school_some: { id: "${schoolId}" } }
+              ${schoolId ? `{ school_some: { id: "${schoolId}" } }` : ''}
                 { targetUserType: ${targetUserType} }
                 { type: ${type} }
                 { isDemoPack: ${isDemoPack} }
@@ -45,17 +45,23 @@ const fetchSchoolProducts = async (schoolId, targetUserType, type, isDemoPack) =
   return get(schoolProducts, 'data.products');
 };
 
-const updateSchoolProductValidation = async (params) => {
+const updateProductValidation = async (params) => {
   const { id: productId, input: { type } } = params;
-  if (productId) {
+  if (type) {
     const products = await fetchProducts(productId);
     if (products && products.length > 0) {
       if (get(products[0], 'type') !== type) {
         const info = products[0];
-        const { school: { id }, targetUserType, isDemoPack } = info;
-        if (id && targetUserType && targetUserType === batchType.b2b2c && type) {
+        const { targetUserType, isDemoPack } = info;
+        const id = get(info, 'school.id', '');
+        if (id && targetUserType && (targetUserType === batchType.b2b2c || targetUserType === batchType.b2c) && type) {
           const schoolProducts = await fetchSchoolProducts(id, targetUserType, type, isDemoPack);
           if (schoolProducts && schoolProducts.length > 0) {
+            throw new ProductTypeAlreadyAdded();
+          }
+        } else if (targetUserType === batchType.b2c) {
+          const b2cProduct = await fetchSchoolProducts(null, targetUserType, type, isDemoPack);
+          if (b2cProduct && b2cProduct.length > 0) {
             throw new ProductTypeAlreadyAdded();
           }
         }
@@ -66,4 +72,4 @@ const updateSchoolProductValidation = async (params) => {
   return true;
 };
 
-export default updateSchoolProductValidation;
+export default updateProductValidation;
