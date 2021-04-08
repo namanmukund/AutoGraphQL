@@ -70,6 +70,7 @@ import deleteProjectValidation from './preHookFunctions/validation/deleteProject
 import deleteCheatSheetValidation from './preHookFunctions/validation/deleteCheatSheetValidation';
 import updateSchoolDiscountValidation from './preHookFunctions/validation/updateSchoolDiscountValidation';
 import addProductToSchoolValidation from './preHookFunctions/validation/addProductToSchoolValidation';
+import updateSchoolProductValidation from './preHookFunctions/validation/updateSchoolProductValidation';
 // import { CanNotCompleteSessionBeforeStartingError } from '../../../constants/errors/input';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -621,6 +622,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'addProduct': {
       await addProductToSchoolValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateProduct': {
+      await updateSchoolProductValidation(params, mutationOrQueryName, context);
       break;
     }
     default: {
