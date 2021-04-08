@@ -5,37 +5,61 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 const fetchProducts = async (productId) => {
   const query = `
           {
-            product(id: "${productId}") {
+            products(
+                filter: { and: [{ id: "${productId}" }] }
+            ) {
+                school {
+                  id
+                }
                 id
                 type
-                school {
-                id
-                name
-                products(filter: { id_not: "${productId}" }) {
-                    id
-                    type
-                }
-                }
+                targetUserType
+                isDemoPack
             }
           }
           `;
   const product = await callLocalGraphqlApi(query);
-  return get(product, 'data.product');
+  return get(product, 'data.products');
+};
+
+const fetchSchoolProducts = async (schoolId, targetUserType, type, isDemoPack) => {
+  const query = `
+    {
+        products(
+            filter: {
+            and: [
+                { school_some: { id: "${schoolId}" } }
+                { targetUserType: ${targetUserType} }
+                { type: ${type} }
+                { isDemoPack: ${isDemoPack} }
+            ]
+            }
+        ) {
+            id
+            type
+        }
+        }
+  `;
+  const schoolProducts = await callLocalGraphqlApi(query);
+  return get(schoolProducts, 'data.products');
 };
 
 const updateSchoolProductValidation = async (params) => {
-  const { id: productId, input } = params;
-  const product = await fetchProducts(productId);
-  if (get(product, 'type') !== get(input, 'type')) {
-    let types = [];
-    const products = get(product, 'school.products', []);
+  const { id: productId, input: { type } } = params;
+  if (productId) {
+    const products = await fetchProducts(productId);
     if (products && products.length > 0) {
-      types = products.map(({ type }) => type);
-      if (types.includes(get(input, 'type'))) {
-        throw new ProductTypeAlreadyAdded();
+      if (get(products[0], 'type') !== type) {
+        const info = products[0];
+        const { school: { id }, targetUserType, isDemoPack } = info;
+        const schoolProducts = await fetchSchoolProducts(id, targetUserType, type, isDemoPack);
+        if (schoolProducts && schoolProducts.length > 0) {
+          throw new ProductTypeAlreadyAdded();
+        }
+      } else {
+        return true;
       }
     }
-    return true;
   }
   return true;
 };
