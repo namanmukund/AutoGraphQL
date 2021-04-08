@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import { batchType } from '../../../../../constants';
 import { ProductTypeAlreadyAdded } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
@@ -52,13 +53,14 @@ const updateSchoolProductValidation = async (params) => {
       if (get(products[0], 'type') !== type) {
         const info = products[0];
         const { school: { id }, targetUserType, isDemoPack } = info;
-        const schoolProducts = await fetchSchoolProducts(id, targetUserType, type, isDemoPack);
-        if (schoolProducts && schoolProducts.length > 0) {
-          throw new ProductTypeAlreadyAdded();
+        if (id && targetUserType && targetUserType === batchType.b2b2c && type) {
+          const schoolProducts = await fetchSchoolProducts(id, targetUserType, type, isDemoPack);
+          if (schoolProducts && schoolProducts.length > 0) {
+            throw new ProductTypeAlreadyAdded();
+          }
         }
-      } else {
-        return true;
       }
+      return true;
     }
   }
   return true;
