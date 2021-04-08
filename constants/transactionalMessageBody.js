@@ -46,7 +46,7 @@ const transactionalMessageBody = {
   },
   userSavedCodePublished: {
     emailTemplate: 'userSavedCodePublishedEmailTemplate',
-    subject: 'Tekie - Your Code Has been Published!',
+    subject: 'Tekie - Your Code Has Been Published!',
     whatsAppTemplate: '',
   },
   testEmail: 'namanmukund@gmail.com',
