@@ -111,3 +111,15 @@ export const ProjectIsPublishedError = createError('ProjectIsPublishedError', {
 export const CheatSheetIsPublishedError = createError('CheatSheetIsPublishedError', {
   message: 'Can not perform the current operation as cheatSheet is published',
 });
+
+export const OtherDiscountAlreadySetToDefault = createError('OtherDiscountAlreadySetToDefault', {
+  message: 'Cannot set discount as default as another discount is already set to default',
+});
+
+export const ProductTypeAlreadyAdded = createError('ProductTypeAlreadyAdded', {
+  message: 'Product with similar type already exists',
+});
+
+export const ProductIsPublishedError = createError('ProductIsPublishedError', {
+  message: 'Cannot perform the current operation as product is published',
+});
