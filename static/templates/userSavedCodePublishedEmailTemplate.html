@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
 
     <!-- Nunito Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Nunito:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Nunito:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
 
     <!-- CSS Reset : BEGIN -->
 <style>
@@ -187,7 +187,7 @@ body{
 }
 .heading-section-white h2{
 	font-size: 28px;
-	font-family: 
+	font-family: 'Nunito';
 	line-height: 1;
 	padding-bottom: 0;
 }
@@ -232,22 +232,22 @@ body{
                     <div style='width: 80px; height: 30px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/tekieLogo.png"); margin-left: 20px; background-size: contain; background-repeat: no-repeat;'></div>
                     <div style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 28px; color: #00ADE6; margin-top: 10px; margin-bottom: 0px">Woo-Hoo!</div>
                     <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 10px; margin-bottom: 0px; width: 100%; opacity: 0.8; color: #504F4F; font-size: 16px;">
-                      “<span style="font-weight: bold;">Way to go,</span> <span style='font-weight: bold; color: #00ADE6'><%= studentName %>!</span> 
-                      <!-- <div style='transform: translateY(3px); width: 18px; height: 18px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/coolGlassesEmoji.png"); background-size: contain; display: inline-block;'></div>.  -->
-                      Still clapping👏🏼”
+                      “<span style="font-weight: bold;">Way to go,</span> <span style='font-weight: bold'><%= studentName %>!</span> 
+                      <span style="font-style:italic">Still clapping</span> 
+                      <div style='transform: translateY(3px); width: 18px; height: 18px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/clapsEmoji2.png"); background-size: contain; display: inline-block;'></div>”
                     </div>
                   </div>
                 </td>
 		          </tr>
-
 		          <tr>
                 <td style="text-align:center; padding-top: 0px">
                   <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif;margin:0px auto; width: 70%; opacity: 0.8; color: #504F4F; font-size: 16px;">
-                    Your code has been selected 💪 for display on Tekie's student community page! 
+                    Your code has been selected
+                    <div style='transform: translateY(3px); width: 18px; height: 18px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/bicepsEmoji.png"); background-size: contain;background-repeat: no-repeat;display: inline-block;'></div>
+                    for display on Tekie's student community page! 
                   </div>
                 </td>
 		          </tr>
-
 		          <tr>
                 <td style="text-align:center; padding-top: 0px">
                   <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 100%; color: #504F4F; display: inline-block;">
@@ -255,40 +255,34 @@ body{
                   </div>
                 </td>
               </tr>
-
               <tr>
                 <td style="text-align:center;">
                   <h5 style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 19px; color: #00ADE6; margin-top: 0px; margin-bottom: 0px; opacity: 0.75"><%= fileName %></h5>
                 </td>
               </tr>
-
 		          <tr>
                 <td style="text-align: center; padding-top: 7px; padding-bottom: 2px;">
                   <div style='display: inline-block; font-family: "Nunito", "Open Sans", Helvetica, Roboto, sans-serif; font-size: 16px; color: #504F4F; opacity: 0.8; width: 85%; vertical-align:top;'><%= description %></div>
                 </td>
               </tr>
-
               <tr>
                 <td style="text-align:center; padding-top: 10px">
-                    <a href="https://tekie-web-staging.herokuapp.com/code-showcase/<%= approvedCodeID %>" style='background-color: #fff;filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.22)); display: inline-block; min-width: 180px; border-radius: 7px; text-decoration: none; color: white; font-family: Lato, "Open Sans", Helvetica, Roboto, sans-serif; text-transform: uppercase; font-weight: 700; box-sizing: border-box; margin: 17px 0px; padding: 12px 24px; background: linear-gradient(180deg, #34E4EA 0%, #00ADE6 100%);line-height: 1'>
-                        <div style='display: inline-block; width: 25px; height: 25px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/calendorIconUS.png"); background-size: cover; margin-right: 8px; vertical-align:middle; background-size: contain; background-repeat: no-repeat;'></div>
-                        <div style='vertical-align:middle; display: inline-block; color: #fff; text-transform: uppercase;'>VIEW CODE</div>
+                    <a href="https://tekie-web-staging.herokuapp.com/code-showcase/<%= approvedCodeID %>" style='background-color: #fff;filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.22)); display: inline-block; min-width: 180px; border-radius: 7px; text-decoration: none; color: white; font-family: Lato, "Open Sans", Helvetica, Roboto, sans-serif; text-transform: uppercase; font-weight: 600; box-sizing: border-box; margin: 17px 0px; padding: 10px 24px 12px; background: linear-gradient(180deg, #34E4EA 0%, #00ADE6 100%);line-height: 2;font-size: 14px;letter-spacing: 1px;'>
+                        <div style='display: inline-block; width: 25px; height: 25px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/videoCameraIcon.png"); margin-right: 8px; vertical-align:middle; background-size: contain; background-repeat: no-repeat;background-position: center'></div>
+                        <div style='vertical-align:middle; display: inline-block; color: #fff; text-transform: uppercase;line-height: 2;'>VIEW CODE</div>
                     </a>
                 </td>
               </tr>
-
               <tr>
                 <td style="text-align:center; padding-top: 17px; padding-bottom: 17px; opacity: 0.8">
                   <div style='width: 78%; margin-left: 11%; height: 1px; background-color: #D8D8D8'></div>
                 </td>
               </tr>
-              
               <tr>
                 <td style="text-align:center;">
-                  <h3 style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 22px; color: #00ADE6; margin-top: 0px; margin-bottom: 0px">Code of the Week!</h3>
+                  <h3 style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 22px; color: #00ADE6; margin-top: 0px; margin-bottom: 0px">Code of the Week!</h3>
                 </td>
               </tr>
-
               <tr>
                   <td style="text-align:center; padding-top: 10px">
                     <h3 style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif;font-weight: 400; margin-top: 0px; margin-bottom: 0px; width: 85%; margin-left: 7.5%; opacity: 0.8; color: #504F4F; font-size: 16px">
@@ -296,16 +290,14 @@ body{
                     </h3>
                   </td>
               </tr>
-
 		          <tr>
                 <td style="text-align:center; padding-top: 17px; opacity: 0.8;">
-                  <a href="https://tekie-web-staging.herokuapp.com/code-showcase/<%= approvedCodeID %>?share" style='background-color: #fff; border: 2px solid #00ADE6; filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.22)); display: inline-block; min-width: 150px; border-radius: 7px; text-decoration: none; color: white; font-family: Lato, "Open Sans", Helvetica, Roboto, sans-serif; text-transform: uppercase; font-weight: 700; box-sizing: border-box; margin-bottom: 34px; padding: 8px 14px'>
-                    <div style='display: inline-block; width: 22px; height: 22px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/whatsappIcon.png"); background-size: cover; margin-right: 8px; vertical-align:middle;'></div>
-                    <div style='display: inline-block; vertical-align:middle;  color: #00ADE6;'>SHARE</div>
+                  <a href="https://tekie-web-staging.herokuapp.com/code-showcase/<%= approvedCodeID %>?share" style='background-color: #fff; border: 2px solid #00ADE6; filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.22)); display: inline-block; min-width: 150px; border-radius: 7px; text-decoration: none; color: white; font-family: Lato, "Open Sans", Helvetica, Roboto, sans-serif; text-transform: uppercase; font-weight: 700; box-sizing: border-box; margin-bottom: 34px; padding: 8px 14px 10px;line-height: 2;font-size: 16px;'>
+                    <div style='display: inline-block; width: 24px; height: 24px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/shareIcon.png"); background-size: cover; margin-right: 8px; vertical-align:middle;'></div>
+                    <div style='display: inline-block; vertical-align:middle;  color: #00ADE6;line-height: 2;'>SHARE</div>
                   </a>
                 </td>
 		          </tr>	 
-
 		        </table>
 		      </td>
 		    </tr><!-- end:tr -->
@@ -357,9 +349,7 @@ body{
             </table>
         	</td>
         </tr>
-
       </table>
-
     </div>
   </center>
 </body>
