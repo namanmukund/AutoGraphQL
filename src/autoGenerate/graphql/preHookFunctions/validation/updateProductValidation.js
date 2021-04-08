@@ -16,6 +16,7 @@ const fetchProducts = async (productId) => {
                 type
                 targetUserType
                 isDemoPack
+                country
             }
           }
           `;
@@ -23,7 +24,7 @@ const fetchProducts = async (productId) => {
   return get(product, 'data.products');
 };
 
-const fetchSchoolProducts = async (schoolId, targetUserType, type, isDemoPack) => {
+const fetchSchoolProducts = async (schoolId, targetUserType, type, isDemoPack, country = 'india') => {
   const query = `
     {
         products(
@@ -33,6 +34,7 @@ const fetchSchoolProducts = async (schoolId, targetUserType, type, isDemoPack) =
                 { targetUserType: ${targetUserType} }
                 { type: ${type} }
                 { isDemoPack: ${isDemoPack} }
+                { country: ${country} }
             ]
             }
         ) {
@@ -52,15 +54,15 @@ const updateProductValidation = async (params) => {
     if (products && products.length > 0) {
       if (get(products[0], 'type') !== type) {
         const info = products[0];
-        const { targetUserType, isDemoPack } = info;
+        const { targetUserType, isDemoPack, country } = info;
         const id = get(info, 'school.id', '');
-        if (id && targetUserType && (targetUserType === batchType.b2b2c || targetUserType === batchType.b2c) && type) {
-          const schoolProducts = await fetchSchoolProducts(id, targetUserType, type, isDemoPack);
+        if (id && targetUserType && (targetUserType === batchType.b2b2c || targetUserType === batchType.b2b) && type) {
+          const schoolProducts = await fetchSchoolProducts(id, targetUserType, type, isDemoPack, country);
           if (schoolProducts && schoolProducts.length > 0) {
             throw new ProductTypeAlreadyAdded();
           }
         } else if (targetUserType === batchType.b2c) {
-          const b2cProduct = await fetchSchoolProducts(null, targetUserType, type, isDemoPack);
+          const b2cProduct = await fetchSchoolProducts(null, targetUserType, type, isDemoPack, country);
           if (b2cProduct && b2cProduct.length > 0) {
             throw new ProductTypeAlreadyAdded();
           }
