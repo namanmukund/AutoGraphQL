@@ -9,8 +9,8 @@ import {
   SCHOOL_ADMIN,
   UMS_HEAD_ARR,
   UMS_VIEWER,
-  WORKBOOK_CMS_HEAD,
-  WORKBOOK_NOT_CMS_HEAD,
+  NOT_CMS_HEAD_ARRAY,
+  CMS_HEAD_ARRAY,
 } from './roles';
 
 const userPermissionsDoc = {
@@ -87,22 +87,29 @@ const userPermissionsDoc = {
   Workbook: {
     collection: {
       rule: 'allow',
-      crud: [...WORKBOOK_CMS_HEAD],
-      read: [...WORKBOOK_NOT_CMS_HEAD],
+      crud: [...CMS_HEAD_ARRAY],
+      read: [...NOT_CMS_HEAD_ARRAY],
     },
   },
   Project: {
     collection: {
       rule: 'allow',
-      crud: [...WORKBOOK_CMS_HEAD],
-      read: [...WORKBOOK_NOT_CMS_HEAD],
+      crud: [...CMS_HEAD_ARRAY],
+      read: [...NOT_CMS_HEAD_ARRAY],
     },
   },
   ProjectContent: {
     collection: {
       rule: 'allow',
-      crud: [...WORKBOOK_CMS_HEAD],
-      read: [...WORKBOOK_NOT_CMS_HEAD],
+      crud: [...CMS_HEAD_ARRAY],
+      read: [...NOT_CMS_HEAD_ARRAY],
+    },
+  },
+  Product: {
+    collection: {
+      rule: 'allow',
+      crud: [...CMS_HEAD_ARRAY],
+      read: [...NOT_CMS_HEAD_ARRAY],
     },
   },
 };
