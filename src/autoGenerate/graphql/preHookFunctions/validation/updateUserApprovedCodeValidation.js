@@ -10,6 +10,7 @@ const userApprovedCodeQuery = async (id) => {
         studentName
         approvedFileName
         approvedDescription
+        approvedCode
         status
         user {
           email

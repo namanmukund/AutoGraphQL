@@ -9,11 +9,11 @@ const updateUserApprovedCodePostHookMethod = async (input, _params, _mutationNam
   if (approvedCodeStatus === PUBLISHED && get(previousDocument, 'status') === UNPUBLISHED) {
     const templateObject = {
       approvedCodeID: get(previousDocument, 'id'),
-      parentEmail: get(previousDocument, 'user.email'),
-      studentName: get(previousDocument, 'studentName'),
-      fileName: get(previousDocument, 'approvedFileName'),
-      description: get(previousDocument, 'approvedDescription'),
-      codeImageLink: 'https://sourcecodeshots.com/image/EgLdZ26qazSz8UxCY8de.png',
+      parentEmail: get(previousDocument, 'user.email', ''),
+      studentName: get(previousDocument, 'studentName', ''),
+      fileName: get(previousDocument, 'approvedFileName', ''),
+      description: get(previousDocument, 'approvedDescription', ''),
+      approvedCode: encodeURIComponent(get(previousDocument, 'approvedCode', '')),
     };
     await sendTransactionalEmail(templateObject, transactionalMessageBody.userSavedCodePublished, 'india');
   }
