@@ -7,10 +7,11 @@ const addUserLeadSquared = (params) => {
     const leadSquaredInput = {
       Phone: get(params, 'input.parentPhone.countryCode') + get(params, 'input.parentPhone.number'),
       mx_Student_Name: get(params, 'input.childName'),
-      mx_Student_Grade: get(params, 'input.grade').replace('Grade', ''),
+      mx_Mentee_Grade: get(params, 'input.grade').replace('Grade', ''),
       FirstName: get(params, 'input.parentName'),
       Source: 'WEBSITE',
       EmailAddress: get(params, 'input.parentEmail'),
+      mx_Lead_Status: 'New Lead',
     };
     if (get(params, 'input.country')) {
       leadSquaredInput.mx_Country_Name = get(params, 'input.country');

@@ -8,10 +8,17 @@ const deleteMenteeBookingLeadSquared = async (userInfo, topicInfo) => {
     const leadSquaredInput = {
       Phone: phoneNumber,
       mx_Lead_Status: 'Pipeline',
-      ProspectStage: 'Pipeline',
-      mx_Booking_Date_Time: '',
     };
-    updateLeadsquared(leadSquaredInput);
+    const activityInput = {
+      ActivityEvent: 103,
+      Fields: [
+        {
+          SchemaName: 'Status',
+          Value: 'Pipeline',
+        },
+      ],
+    };
+    updateLeadsquared(leadSquaredInput, false, activityInput);
   }
 };
 

@@ -11,6 +11,7 @@ const MenteeSession = `
     ${slotTimeFields}
     source: UserOriginSource @defaultValue(value: "website")
     country: Country @defaultValue(value: "india")
+    bookedBy: BookedBy @defaultValue(value: "customer")
 }`;
 
 export default [MenteeSession];
