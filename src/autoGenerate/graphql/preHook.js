@@ -69,6 +69,10 @@ import deleteBannerValidation from './preHookFunctions/validation/deleteBannerVa
 import deleteWorkbookValidation from './preHookFunctions/validation/deleteWorkbookValidation';
 import deleteProjectValidation from './preHookFunctions/validation/deleteProjectValidation';
 import deleteCheatSheetValidation from './preHookFunctions/validation/deleteCheatSheetValidation';
+import updateSchoolDiscountValidation from './preHookFunctions/validation/updateSchoolDiscountValidation';
+import addProductValidation from './preHookFunctions/validation/addProductValidation';
+import updateProductValidation from './preHookFunctions/validation/updateProductValidation';
+import deleteProductValidation from './preHookFunctions/validation/deleteProductValidation';
 // import { CanNotCompleteSessionBeforeStartingError } from '../../../constants/errors/input';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -616,6 +620,22 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateUserApprovedCode': {
       await updateUserApprovedCodeValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateDiscount': {
+      await updateSchoolDiscountValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addProduct': {
+      await addProductValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateProduct': {
+      await updateProductValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'deleteProduct': {
+      await deleteProductValidation(params, mutationOrQueryName, context);
       break;
     }
     default: {
