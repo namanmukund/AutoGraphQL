@@ -119,7 +119,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
         value: parentName,
       },
     ];
-    sendWhatsAppTemplateMessage(phoneNumber, transactionalMessageBody.sessionMissed.whatsAppTemplate, parentName, parameters);
+    // sendWhatsAppTemplateMessage(phoneNumber, transactionalMessageBody.sessionMissed.whatsAppTemplate, parentName, parameters);
     sendTransactionalEmail({ parentName, name: studentName, parentEmail }, transactionalMessageBody.sessionMissed, country);
     updateClassMissedMessageStatus(input.id, 'sent');
   }
