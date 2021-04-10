@@ -27,6 +27,7 @@ import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
 import addUserCurrentTopicComponentStatus
   from '../../../../utils/addUserCurrentTopicComponentStatus';
+import studentProfileAvatarCodes from '../../../../../../constants/studentProfileAvatarCodes';
 
 const USER_TYPE = 'User';
 const validateParentChildSignUpInput = (input) => {
@@ -434,6 +435,8 @@ const parentChildSignUpMutationResolver = async (
   if (grade) {
     studentProfileInputData.grade = grade;
   }
+
+  studentProfileInputData.profileAvatarCode = studentProfileAvatarCodes[Math.floor((Math.random() * studentProfileAvatarCodes.length))] || 'theo';
   const studentProfileInput = {
     input: studentProfileInputData,
   };
