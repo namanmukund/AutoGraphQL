@@ -1,5 +1,6 @@
 import { READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
+import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
 
 const priceInputType = `
   type PriceInputType {
@@ -17,6 +18,7 @@ const Product = `
       ], 
     rule: allow
   )
+  ${getPermissionSchemaString('Product')}
   {
     course: Course! @relation(name: "CourseProduct")
     title: String!

@@ -34,6 +34,12 @@ import {
   EmailOrPhoneMismatchError,
   ChildAlreadyRegisteredError,
   SendOtpFirstError,
+  WorkbookIsPublished,
+  ProjectIsPublishedError,
+  CheatSheetIsPublishedError,
+  OtherDiscountAlreadySetToDefault,
+  ProductTypeAlreadyAdded,
+  ProductIsPublishedError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -204,4 +210,10 @@ export {
   HashOrStatusNotPresentError,
   InvalidBannerDateRangeError,
   BannerFieldRequiredError,
+  WorkbookIsPublished,
+  ProjectIsPublishedError,
+  CheatSheetIsPublishedError,
+  OtherDiscountAlreadySetToDefault,
+  ProductTypeAlreadyAdded,
+  ProductIsPublishedError,
 };

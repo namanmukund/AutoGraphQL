@@ -99,3 +99,27 @@ export const PastDateOrSlotError = createError('PastDateOrSlotError', {
 export const NoSlotsAvailableForBooking = createError('NoSlotsAvailableForBooking', {
   message: 'No slot is available for booking',
 });
+
+export const WorkbookIsPublished = createError('WorkbookIsPublished', {
+  message: 'Can not perform the current operation as workbook is published',
+});
+
+export const ProjectIsPublishedError = createError('ProjectIsPublishedError', {
+  message: 'Can not perform the current operation as project is published',
+});
+
+export const CheatSheetIsPublishedError = createError('CheatSheetIsPublishedError', {
+  message: 'Can not perform the current operation as cheatSheet is published',
+});
+
+export const OtherDiscountAlreadySetToDefault = createError('OtherDiscountAlreadySetToDefault', {
+  message: 'Cannot set discount as default as another discount is already set to default',
+});
+
+export const ProductTypeAlreadyAdded = createError('ProductTypeAlreadyAdded', {
+  message: 'Product with similar type already exists',
+});
+
+export const ProductIsPublishedError = createError('ProductIsPublishedError', {
+  message: 'Cannot perform the current operation as product is published',
+});
