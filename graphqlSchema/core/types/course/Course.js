@@ -16,7 +16,7 @@ const Course = `
     permissions:[
       { userRole: ${CMS_HEAD} appName: "*" operations: "*" },
       { userRole: ${NOT_CMS_HEAD} appName: "*" operations: ${READ} }
-      { userRole: ${SCHOOL_ADMIN} appName: "*" operations: "*" }
+      { userRole: ${SCHOOL_ADMIN} appName: "*" operations: ${READ} }
       ], 
     rule: allow
   ) 
