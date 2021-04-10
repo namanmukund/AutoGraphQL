@@ -395,7 +395,7 @@ const sendTransactionalMessage = async (root, params, context) => {
     if (dataObj.country === 'india') {
       whatsAppTemplate = transactionalMessageBody[messageType].whatsAppTemplate;
     } else if (transactionalMessageBody[messageType].whatsAppTemplateInternational) {
-      whatsAppTemplate = transactionalMessageBody[messageType].whatsAppTemplateInternational;
+      // whatsAppTemplate = transactionalMessageBody[messageType].whatsAppTemplateInternational;
     } else {
       whatsAppTemplate = transactionalMessageBody[messageType].whatsAppTemplate;
     }

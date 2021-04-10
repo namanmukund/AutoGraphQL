@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
+// import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 import sendTransactionalEmail from '../../resolvers/utils/sendTransactionalEmail';
 import updateBookSessionReminderStatus from './updateBookSessionReminderStatus';
 
@@ -36,27 +36,27 @@ const sendBookingReminder = async (input, params) => {
     menteeSessionQuery(studentId),
   );
   const menteeSessions = get(res, 'data.menteeSessions', []);
-  const phone = get(input, 'phone.countryCode', '').replace('+', '') + get(input, 'phone.number');
+  // const phone = get(input, 'phone.countryCode', '').replace('+', '') + get(input, 'phone.number');
   const country = get(input, 'country') ? get(input, 'country', 'india') : 'india';
   const parentName = get(input, 'name', '');
   const parentEmail = get(input, 'email', '');
-  const parameters = [
-    {
-      name: 'parent_name',
-      value: parentName,
-    },
-    {
-      name: 'student_name',
-      value: studentName,
-    },
-  ];
+  // const parameters = [
+  //   {
+  //     name: 'parent_name',
+  //     value: parentName,
+  //   },
+  //   {
+  //     name: 'student_name',
+  //     value: studentName,
+  //   },
+  // ];
   if (menteeSessions.length === 0 && country !== 'india') {
-    sendWhatsAppTemplateMessage(
-      phone,
-      transactionalMessageBody.demoNotBooked.whatsAppTemplate,
-      parentName,
-      parameters,
-    );
+    // sendWhatsAppTemplateMessage(
+    //   phone,
+    //   transactionalMessageBody.demoNotBooked.whatsAppTemplate,
+    //   parentName,
+    //   parameters,
+    // );
     sendTransactionalEmail({
       parentEmail,
       studentName,
