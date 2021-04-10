@@ -10,7 +10,7 @@ import updateClassMissedMessageStatus from './utils/updateClassMissedMessageStat
 import addMentorMenteeSessionAudit from './utils/addMentorMenteeSessionAudit';
 import { setSessionCompletedLeadsquared, updateMentorRescheduleLeadsquared } from './leadsquared';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import sendWhatsAppTemplateMessage from '../../utils/sendWhatsAppTemplateMessage';
+// import sendWhatsAppTemplateMessage from '../../utils/sendWhatsAppTemplateMessage';
 import transactionalMessageBody from '../../../../constants/transactionalMessageBody';
 import sendTransactionalEmail from '../resolvers/utils/sendTransactionalEmail';
 import updateUserPaymentPlanMutation from './utils/updateUserPaymentPlanMutation';
@@ -106,19 +106,19 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   const studentName = get(menteeSession, 'data.menteeSession.user.name');
   const parentName = get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.name');
   const parentEmail = get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.email', '');
-  const phoneNumber = get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.phone.countryCode', '').replace('+', '')
-    + get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.phone.number');
+  // const phoneNumber = get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.phone.countryCode', '').replace('+', '')
+  //   + get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.phone.number');
   if (hasRescheduled && notResponseAndDidNotTurnUp && classMissedMessageStatus === 'pending' && country !== 'india') {
-    const parameters = [
-      {
-        name: 'student_name',
-        value: studentName,
-      },
-      {
-        name: 'parent_name',
-        value: parentName,
-      },
-    ];
+    // const parameters = [
+    //   {
+    //     name: 'student_name',
+    //     value: studentName,
+    //   },
+    //   {
+    //     name: 'parent_name',
+    //     value: parentName,
+    //   },
+    // ];
     // sendWhatsAppTemplateMessage(phoneNumber, transactionalMessageBody.sessionMissed.whatsAppTemplate, parentName, parameters);
     sendTransactionalEmail({ parentName, name: studentName, parentEmail }, transactionalMessageBody.sessionMissed, country);
     updateClassMissedMessageStatus(input.id, 'sent');
