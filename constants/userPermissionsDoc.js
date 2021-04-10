@@ -109,7 +109,7 @@ const userPermissionsDoc = {
   Product: {
     collection: {
       rule: 'allow',
-      crud: [...CMS_HEAD_ARRAY, UMS_ADMIN],
+      crud: [...CMS_HEAD_ARRAY, UMS_ADMIN, SCHOOL_ADMIN],
       read: [...NOT_CMS_HEAD_ARRAY],
     },
   },
