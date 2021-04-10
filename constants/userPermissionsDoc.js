@@ -110,7 +110,7 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...CMS_HEAD_ARRAY, UMS_ADMIN],
-      read: [...NOT_CMS_HEAD_ARRAY],
+      read: [...NOT_CMS_HEAD_ARRAY, SCHOOL_ADMIN],
     },
   },
 };
