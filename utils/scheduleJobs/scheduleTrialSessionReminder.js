@@ -215,12 +215,12 @@ const scheduleTrialSessionReminder = async () => {
             );
           } else {
             // eslint-disable-next-line no-await-in-loop
-            await sendWhatsAppTemplateMessage(
-              phone,
-              transactionalMessageBody.sendSessionLink.whatsAppTemplateInternational,
-              parentName,
-              parameters,
-            );
+            // await sendWhatsAppTemplateMessage(
+            //   phone,
+            //   transactionalMessageBody.sendSessionLink.whatsAppTemplateInternational,
+            //   parentName,
+            //   parameters,
+            // );
           }
           // send email
           // eslint-disable-next-line no-await-in-loop

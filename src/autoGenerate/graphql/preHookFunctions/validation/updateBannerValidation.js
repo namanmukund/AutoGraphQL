@@ -33,15 +33,15 @@ const fetchBanner = async (bannerId) => {
 
 const checkIfRequiredFieldsExists = (input, existingBannerData) => {
   const requiredFields = [
-    'title',
-    'backgroundImage',
-    'discount',
-    'textBeforeDiscount',
-    'textAfterDiscount',
-    'width',
-    'height',
-    'expiryDate',
-    'inceptionDate',
+    // 'title',
+    // 'backgroundImage',
+    // 'discount',
+    // 'textBeforeDiscount',
+    // 'textAfterDiscount',
+    // 'width',
+    // 'height',
+    // 'expiryDate',
+    // 'inceptionDate',
     'type',
   ];
   /** First check if fields exists in input or fallback to check in existing database */

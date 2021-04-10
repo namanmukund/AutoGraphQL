@@ -1,5 +1,6 @@
 const UserApprovedCodeTag = `
-  type UserApprovedCodeTag @model 
+  type UserApprovedCodeTag @model
+  @userToken(isRequired:"false") 
   {
     title: String! @unique @trim
     codeCount: Int @defaultValue(value: 0)

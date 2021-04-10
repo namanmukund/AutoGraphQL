@@ -283,7 +283,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         && allowedOperations.length && allowedOperations.includes(META_QUERY))
     ) {
       resolvers.Query[modelMeta] = ((root, params, context, info) => {
-        const authentication = ifAuthorized(context);
+        const authentication = ifAuthorized(context, userToken);
         Object.assign(authentication, {
           mutationOrQueryName: modelMeta,
         });

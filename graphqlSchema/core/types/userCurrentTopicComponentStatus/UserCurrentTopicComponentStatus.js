@@ -1,6 +1,6 @@
 import { TLA, TMS, TWA } from '../../../../constants';
-import { NOT_UMS_HEAD, UMS_HEAD } from '../../../../constants/roles';
 import { READ } from '../../../../constants/graphqlOperations';
+import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
 
 const UserCurrentTopicComponentStatus = `
   type UserCurrentTopicComponentStatus @model 
@@ -12,13 +12,7 @@ const UserCurrentTopicComponentStatus = `
       ], 
     rule: allow
   )
-  @userPermissions(
-    permissions:[
-      { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
-      { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${READ} }
-      ], 
-    rule: allow
-  )
+  ${getPermissionSchemaString('UserCurrentTopicComponentStatus')}
   {
     user: User! @relation(name: "UserCurrentTopicComponentStatus", direction: "OneWay")
     currentCourse: Course! @relation(name: "UserCurrentTopicComponentStatusCourse", direction: "OneWay")
