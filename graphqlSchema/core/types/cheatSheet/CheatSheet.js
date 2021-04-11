@@ -21,6 +21,7 @@ const CheatSheet = `
   ) 
   {
     title: String! @unique @trim
+    order: Int
     topic: Topic @relation(name: "TopicCheatSheet", direction: "OneWay")
     content: [CheatSheetContent] @relation(name: "CheatSheetContent", isSubset: true)
     status: ContentStatus! @defaultValue(value: "unpublished")
