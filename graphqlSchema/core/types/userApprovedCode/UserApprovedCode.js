@@ -40,7 +40,16 @@ const UserApprovedCode = `
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
-                    { appName: "${TMS}" operations: ${READ} },
+          { appName: "${TMS}" operations: ${READ} },
+          { appName: "${TWA}" operations: ${READ} }
+          ], 
+        rule: allow
+      ) 
+    studentProfileAvatar: StudentProfileAvatarCode @trim
+      @appPermissions(
+        permissions:[
+          { appName: "${TBA}" operations: "*" },
+          { appName: "${TMS}" operations: ${READ} },
           { appName: "${TWA}" operations: ${READ} }
           ], 
         rule: allow
