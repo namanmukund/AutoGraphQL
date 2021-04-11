@@ -40,6 +40,7 @@ import {
   OtherDiscountAlreadySetToDefault,
   ProductTypeAlreadyAdded,
   ProductIsPublishedError,
+  ProductWithSimilarTypeAlreadyPublished,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -216,4 +217,5 @@ export {
   OtherDiscountAlreadySetToDefault,
   ProductTypeAlreadyAdded,
   ProductIsPublishedError,
+  ProductWithSimilarTypeAlreadyPublished,
 };
