@@ -34,7 +34,8 @@ const updateStudentProfile = async (id, input) => {
 
 const updateStudentProfileWithRandomAvatar = async () => {
   const studentProfiles = await getStudentProfiles();
-  studentProfiles.forEach(async (studentProfile) => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const studentProfile of studentProfiles) {
     const studentProfileId = get(studentProfile, 'id');
     if (studentProfileId && !get(studentProfile, 'profileAvatarCode')) {
       const updateObj = {
@@ -44,7 +45,7 @@ const updateStudentProfileWithRandomAvatar = async () => {
       // eslint-disable-next-line no-await-in-loop
       await updateStudentProfile(studentProfileId, updateObj);
     }
-  });
+  }
 };
 
 export default updateStudentProfileWithRandomAvatar;
