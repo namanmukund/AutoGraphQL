@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+import updateStudentProfileWithRandomAvatar from '../scriptMethods/updateStudentProfileWithRandomAvatar';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -17,6 +18,7 @@ const temporaryScript = (async (root, params, context) => {
   // await addProEnrollmentTypeInSalesOperation();
   // await updateCountryInCollections();
   // await updateUserPaymentPlan();
+  await updateStudentProfileWithRandomAvatar();
   return {
     result: true,
   };
