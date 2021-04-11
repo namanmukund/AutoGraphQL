@@ -117,9 +117,13 @@ export const OtherDiscountAlreadySetToDefault = createError('OtherDiscountAlread
 });
 
 export const ProductTypeAlreadyAdded = createError('ProductTypeAlreadyAdded', {
-  message: 'Product with similar type already exists',
+  message: 'Cannot perform the current operation as product with similar type already published',
 });
 
 export const ProductIsPublishedError = createError('ProductIsPublishedError', {
   message: 'Cannot perform the current operation as product is published',
+});
+
+export const ProductWithSimilarTypeAlreadyPublished = createError('ProductWithSimilarTypeAlreadyPublished', {
+  message: 'Product with similar type already published',
 });
