@@ -50,6 +50,7 @@ const updateUserSavedCodePostHookMethod = async (input, params, mutationName, co
       const doc = {
         studentName: get(userData, 'name') || '',
         studentGrade: get(userData, 'studentProfile.grade'),
+        studentAvatar: get(userData, 'studentProfile.profileAvatarCode', 'theo'),
         approvedCode: code || '',
         approvedFileName: fileName || '',
         approvedDescription: description || '',
