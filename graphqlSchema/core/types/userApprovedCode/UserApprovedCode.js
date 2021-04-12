@@ -17,7 +17,6 @@ const UserApprovedCode = `
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
-          { appName: "${TWA}" operations: ${READ} }
           ], 
         rule: allow
       ) 
