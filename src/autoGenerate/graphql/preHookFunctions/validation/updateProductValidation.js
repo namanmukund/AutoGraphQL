@@ -37,12 +37,12 @@ const updateProductValidation = async (params) => {
       } = info;
       const id = get(info, 'school.id', '');
       if (id && targetUserType && (targetUserType === batchType.b2b2c || targetUserType === batchType.b2b) && type) {
-        const schoolProducts = await fetchSimilarProducts(id, targetUserType, type, isDemoPack, country);
+        const schoolProducts = await fetchSimilarProducts(id, targetUserType, type, isDemoPack, country, productId);
         if (schoolProducts && schoolProducts.length > 0) {
           throw new ProductTypeAlreadyAdded();
         }
       } else if (targetUserType === batchType.b2c) {
-        const b2cProduct = await fetchSimilarProducts(null, targetUserType, type, isDemoPack, country);
+        const b2cProduct = await fetchSimilarProducts(null, targetUserType, type, isDemoPack, country, productId);
         if (b2cProduct && b2cProduct.length > 0) {
           throw new ProductTypeAlreadyAdded();
         }

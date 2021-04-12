@@ -2,7 +2,7 @@ import { get } from 'lodash';
 import { PUBLISHED } from '../../../../../../constants';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
-const fetchSimilarProducts = async (schoolId, targetUserType, type, isDemoPack, country = 'india') => {
+const fetchSimilarProducts = async (schoolId, targetUserType, type, isDemoPack, country = 'india', productId) => {
   const query = `
           {
             products(
@@ -14,6 +14,7 @@ const fetchSimilarProducts = async (schoolId, targetUserType, type, isDemoPack, 
                   { country: ${country} }
                   { type: ${type} }
                   { status: ${PUBLISHED}}
+                  ${productId ? `{ id_not:"${productId}" }` : ''}
                 ]
               }
             ) {
