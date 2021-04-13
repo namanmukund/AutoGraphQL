@@ -11,6 +11,7 @@ import {
   UMS_VIEWER,
   NOT_CMS_HEAD_ARRAY,
   CMS_HEAD_ARRAY,
+  UMS_ADMIN,
 } from './roles';
 
 const userPermissionsDoc = {
@@ -108,14 +109,10 @@ const userPermissionsDoc = {
   Product: {
     collection: {
       rule: 'allow',
-      crud: [...CMS_HEAD_ARRAY],
-      read: [...NOT_CMS_HEAD_ARRAY],
+      crud: [...CMS_HEAD_ARRAY, UMS_ADMIN],
+      read: [...NOT_CMS_HEAD_ARRAY, SCHOOL_ADMIN],
     },
   },
 };
-
-// CMS_HEAD
-
-// NOT_CMS_HEAD
 
 export default userPermissionsDoc;

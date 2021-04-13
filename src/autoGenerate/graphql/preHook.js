@@ -73,6 +73,7 @@ import updateSchoolDiscountValidation from './preHookFunctions/validation/update
 import addProductValidation from './preHookFunctions/validation/addProductValidation';
 import updateProductValidation from './preHookFunctions/validation/updateProductValidation';
 import deleteProductValidation from './preHookFunctions/validation/deleteProductValidation';
+import updateStudentProfileValidation from './preHookFunctions/validation/updateStudentProfileValidation';
 // import { CanNotCompleteSessionBeforeStartingError } from '../../../constants/errors/input';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -515,6 +516,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateSalesOperation': {
       await updateSalesOperationValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateStudentProfile': {
+      await updateStudentProfileValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'addNetPromoterScore': {
