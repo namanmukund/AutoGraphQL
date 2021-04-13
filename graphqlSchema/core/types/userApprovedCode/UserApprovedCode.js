@@ -45,6 +45,15 @@ const UserApprovedCode = `
           ], 
         rule: allow
       ) 
+    studentAvatar: StudentProfileAvatarCode @trim
+      @appPermissions(
+        permissions:[
+          { appName: "${TBA}" operations: "*" },
+          { appName: "${TMS}" operations: ${READ} },
+          { appName: "${TWA}" operations: ${READ} }
+          ], 
+        rule: allow
+      ) 
     heartReactionCount: Int @defaultValue(value: 0)
       @appPermissions(
         permissions:[

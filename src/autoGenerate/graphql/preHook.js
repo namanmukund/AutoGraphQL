@@ -61,6 +61,7 @@ import updateBatchSessionValidation from './preHookFunctions/validation/updateBa
 import deleteBatchSessionValidation from './preHookFunctions/validation/deleteBatchSessionValidation';
 import updateBatchCurrentComponentStatusValidation from './preHookFunctions/validation/updateBatchCurrentComponentStatusValidation';
 import updateUserSavedCodeValidation from './preHookFunctions/validation/updateUserSavedCodeValidation';
+import updateUserApprovedCodeValidation from './preHookFunctions/validation/updateUserApprovedCodeValidation';
 import deleteUserApprovedCodeTagValidation from './preHookFunctions/validation/deleteUserApprovedCodeTagValidation';
 import addBannerValidation from './preHookFunctions/validation/addBannerValidation';
 import updateBannerValidation from './preHookFunctions/validation/updateBannerValidation';
@@ -72,6 +73,7 @@ import updateSchoolDiscountValidation from './preHookFunctions/validation/update
 import addProductValidation from './preHookFunctions/validation/addProductValidation';
 import updateProductValidation from './preHookFunctions/validation/updateProductValidation';
 import deleteProductValidation from './preHookFunctions/validation/deleteProductValidation';
+import updateStudentProfileValidation from './preHookFunctions/validation/updateStudentProfileValidation';
 // import { CanNotCompleteSessionBeforeStartingError } from '../../../constants/errors/input';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -516,6 +518,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await updateSalesOperationValidation(params, mutationOrQueryName, context);
       break;
     }
+    case 'updateStudentProfile': {
+      await updateStudentProfileValidation(params, mutationOrQueryName, context);
+      break;
+    }
     case 'addNetPromoterScore': {
       await addNetPromoterScoreValidation(params, mutationOrQueryName, context);
       break;
@@ -615,6 +621,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateUserSavedCode': {
       await updateUserSavedCodeValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateUserApprovedCode': {
+      await updateUserApprovedCodeValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'updateDiscount': {
