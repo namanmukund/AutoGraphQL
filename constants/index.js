@@ -272,7 +272,7 @@ export const MENTOR_REPORT_COUNTRY = 'india';
 
 export const MENTOR_REPORT_SESSION_TYPE = 'trial';
 
-export const MENTOR_REPORT_DAYS = 15;
+export const MENTOR_REPORT_DAYS = 3;
 
 export const MENTOR_RATING_AUDIT_THRESHOLD = 4;
 
