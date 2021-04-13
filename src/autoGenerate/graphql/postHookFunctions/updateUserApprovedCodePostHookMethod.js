@@ -15,12 +15,11 @@ const updateUserApprovedCodePostHookMethod = async (input, _params, _mutationNam
       description: get(previousDocument, 'approvedDescription', ''),
       approvedCode: encodeURIComponent(get(previousDocument, 'approvedCode', '')),
     };
-    await sendTransactionalEmail(templateObject,
-      {
-        emailTemplate: 'userSavedCodePublishedEmailTemplate',
-        subject: `Congrats ${studentName}, your code has been published!`,
-        whatsAppTemplate: '',
-      }, 'india');
+    await sendTransactionalEmail(templateObject, {
+      emailTemplate: 'userSavedCodePublishedEmailTemplate',
+      subject: `Congrats ${studentName}, your code has been published!`,
+      whatsAppTemplate: '',
+    }, 'india');
   }
 };
 
