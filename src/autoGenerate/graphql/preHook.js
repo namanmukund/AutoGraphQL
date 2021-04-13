@@ -61,6 +61,7 @@ import updateBatchSessionValidation from './preHookFunctions/validation/updateBa
 import deleteBatchSessionValidation from './preHookFunctions/validation/deleteBatchSessionValidation';
 import updateBatchCurrentComponentStatusValidation from './preHookFunctions/validation/updateBatchCurrentComponentStatusValidation';
 import updateUserSavedCodeValidation from './preHookFunctions/validation/updateUserSavedCodeValidation';
+import updateUserApprovedCodeValidation from './preHookFunctions/validation/updateUserApprovedCodeValidation';
 import deleteUserApprovedCodeTagValidation from './preHookFunctions/validation/deleteUserApprovedCodeTagValidation';
 import addBannerValidation from './preHookFunctions/validation/addBannerValidation';
 import updateBannerValidation from './preHookFunctions/validation/updateBannerValidation';
@@ -620,6 +621,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateUserSavedCode': {
       await updateUserSavedCodeValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateUserApprovedCode': {
+      await updateUserApprovedCodeValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'updateDiscount': {
