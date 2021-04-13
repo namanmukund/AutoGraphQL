@@ -13,11 +13,11 @@ const temporaryScript = (async (root, params, context) => {
   // await addPaymentIntallmentsOfPastUsers();
   // await addDefaultEnrollmentTypeInSalesOperation();
   // await addUnassignedValueToSalesOperation();
-  //await generateMentorReport();
+  // await generateMentorReport();
   // await addProEnrollmentTypeInSalesOperation();
   // await updateCountryInCollections();
   // await updateUserPaymentPlan();
-  //await updateStudentProfileWithRandomAvatar();
+  // await updateStudentProfileWithRandomAvatar();
   return {
     result: true,
   };
