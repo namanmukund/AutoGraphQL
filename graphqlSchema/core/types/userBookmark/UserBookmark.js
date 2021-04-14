@@ -22,6 +22,7 @@ const UserBookmark = `
     videos: [BookmarkVideoType]
     chat: [BookmarkChatType]
     practiceQuestion: [PracticeQuestionType]
+    cheatsheet: [CheatSheet] @relation(name: "CheatSheetBookmark", direction: "OneWay")
   }
 `;
 
