@@ -44,11 +44,6 @@ const transactionalMessageBody = {
     subject: 'Tekie - Session was not conducted',
     whatsAppTemplate: 'oct14_session_not_conducted',
   },
-  userSavedCodePublished: {
-    emailTemplate: 'userSavedCodePublishedEmailTemplate',
-    subject: 'Tekie - Your Code Has Been Published!',
-    whatsAppTemplate: '',
-  },
   testEmail: 'namanmukund@gmail.com',
   testWhatsAppNumber: '919654347463',
 };
