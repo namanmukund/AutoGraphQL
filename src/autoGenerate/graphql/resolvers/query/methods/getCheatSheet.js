@@ -1,50 +1,28 @@
 import { get } from 'lodash';
 import { GLOBAL_COURSE_TITLE, PUBLISHED } from '../../../../../../constants';
-import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
-const getTopicsAndCheatSheet = (filter) => `
+const getTopics = () => `
+{
+  topics(
+    filter: {
+      and: [
+        { chapter_some: { courses_some: { title: ${GLOBAL_COURSE_TITLE} } } }
+        { status: ${PUBLISHED} }
+      ]
+    }
+  ) {
+    id
+    title
+    thumbnail {
+      id
+      uri
+    }
+  }
+}
+`;
+const getCheatSheets = (filter) => `
   {
-    courses(filter:{
-        and:[
-          {title: ${GLOBAL_COURSE_TITLE}},
-          {status: ${PUBLISHED}}
-        ]
-      }){
-        id
-        title
-        chapters(
-            filter: {
-              status: ${PUBLISHED}
-            }
-          ){
-          id
-          title
-          order
-          topics(
-            filter: {
-              status: ${PUBLISHED}
-            }
-          ){
-            id
-            title
-            order
-            isTrial
-            description
-            isTrial
-            thumbnail{
-              id
-              uri
-              name
-            }
-            thumbnailSmall{
-              id
-              uri
-              name
-            }
-          }
-        }
-      }
     cheatSheets(
     filter: {
       and: [${filter}]
@@ -55,34 +33,33 @@ const getTopicsAndCheatSheet = (filter) => `
         order
         status
         topic {
-            id
-            title
+          id
+          title
         }
         content {
-            order
-            type
-            statement
+          order
+          type
+          statement
+          image {
+            id
+            uri
+          }
+          emoji {
+            id
+            code
             image {
-                id
-                uri
+              id
+              uri
             }
-            emoji {
-                id
-                code
-                image {
-                    id
-                    uri
-                }
-            }
-            terminalInput
-            terminalOutput
+          }
+          terminalInput
+          terminalOutput
         }
+      }
     }
-  }
   `;
 
 const getCheatSheet = (async (root, params, context) => {
-  validateAuthentication(context);
   let filter = '';
   const { input } = params;
   if (input) {
@@ -98,25 +75,32 @@ const getCheatSheet = (async (root, params, context) => {
     if (input.isFavourite) {
       filter = '';
     }
+    const data = await callLocalGraphqlApi(
+      getCheatSheets(filter),
+      context,
+      '',
+    );
+    const cheatSheets = get(data, 'data.cheatSheets', []);
+    const cheatSheetArray = [];
+    cheatSheets.forEach((concept, i) => {
+      cheatSheetArray.push({ cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` }, isSelected: i === 0 });
+    });
+    return {
+      cheatSheetConcepts: [...cheatSheetArray],
+    };
   }
-  const data = await callLocalGraphqlApi(
-    getTopicsAndCheatSheet(filter),
+  const topicsData = await callLocalGraphqlApi(
+    getTopics(),
     context,
     '',
   );
-  const topics = get(data, 'data.courses[0].chapters[0].topics', []);
-  const cheatSheets = get(data, 'data.cheatSheets');
+  const topics = get(topicsData, 'data.topics', []);
   const topicsArray = [];
-  const cheatSheetArray = [];
-  topics.forEach((t, i) => {
-    topicsArray.push({ topic: { type: 'Topic', typeId: `${t.id}` }, isSelected: i === 0 });
-  });
-  cheatSheets.forEach((concept, i) => {
-    cheatSheetArray.push({ cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` }, isSelected: i === 0 });
+  topics.forEach((topic, i) => {
+    topicsArray.push({ topic: { type: 'Topic', typeId: `${topic.id}` }, isSelected: i === 0 });
   });
   return {
     cheatSheetTopics: [...topicsArray],
-    cheatSheetConcepts: [...cheatSheetArray],
   };
 });
 
