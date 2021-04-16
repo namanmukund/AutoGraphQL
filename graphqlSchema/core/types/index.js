@@ -82,6 +82,7 @@ import Workbook from './workbook';
 import Project from './project';
 import ProjectContent from './projectContent';
 import CheatSheetData from './CheatSheetData';
+import UserCheatSheet from './userCheatSheet';
 
 export default [
   ...User,
@@ -168,4 +169,5 @@ export default [
   ...Project,
   ...ProjectContent,
   ...CheatSheetData,
+  ...UserCheatSheet,
 ];
