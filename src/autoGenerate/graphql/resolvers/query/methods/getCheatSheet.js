@@ -72,7 +72,7 @@ const getBookmarked = (id) => `
   }
 }
 `;
-const getCheatSheetContents = async ({ input, context, bookmarkedCheat }) => {
+const getCheatSheetContents = async ({ input, bookmarkedCheat }) => {
   let data;
   const cheatSheetArray = [];
   const topicsArray = [];
@@ -123,7 +123,7 @@ const getCheatSheetContents = async ({ input, context, bookmarkedCheat }) => {
     cheatSheetConcepts: [...cheatSheetArray],
   };
 };
-const getCheatSheetContentWithoutInput = async (context, bookmarkedCheat) => {
+const getCheatSheetContentWithoutInput = async (bookmarkedCheat) => {
   // if not input is provided then this function will be called
   const topicsData = await callLocalGraphqlApi(getTopics());
   const topics = get(topicsData, 'data.topics', []);
@@ -166,11 +166,11 @@ const getCheatSheet = (async (root, params, context) => {
   // if the user is not loggedIn
   if (!userId) {
     if (input) {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ input, context });
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ input });
       cheatTopics = cheatSheetTopics;
       cheatConcepts = cheatSheetConcepts;
     } else {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput(context);
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput();
       cheatTopics = cheatSheetTopics;
       cheatConcepts = cheatSheetConcepts;
     }
@@ -180,16 +180,15 @@ const getCheatSheet = (async (root, params, context) => {
     const isBookmarked = await callLocalGraphqlApi(getBookmarked(userId));
     const bookmarkedCheat = get(isBookmarked, 'data.userCheatSheets[0].cheatsheet.id');
     if (input) {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ input, context, bookmarkedCheat });
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ input, bookmarkedCheat });
       cheatTopics = cheatSheetTopics;
       cheatConcepts = cheatSheetConcepts;
     } else {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput(context, bookmarkedCheat);
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput(bookmarkedCheat);
       cheatTopics = cheatSheetTopics;
       cheatConcepts = cheatSheetConcepts;
     }
   }
-
   return {
     cheatSheetTopics: [...cheatTopics],
     cheatSheetConcepts: [...cheatConcepts],
