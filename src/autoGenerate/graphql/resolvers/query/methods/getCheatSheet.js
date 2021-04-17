@@ -73,7 +73,7 @@ const getBookmarked = (id) => `
   }
 }
 `;
-const getCheatSheetContents = async ({ input, bookmarkedCheat, bookmarkId }) => {
+const getCheatSheetContents = async ({ input, bookmarkedCheatId, bookmarkId }) => {
   let data;
   const cheatSheetArray = [];
   const topicsArray = [];
@@ -91,9 +91,9 @@ const getCheatSheetContents = async ({ input, bookmarkedCheat, bookmarkId }) => 
     cheatSheets.forEach((concept, i) => {
       cheatSheetArray.push({
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
-        isBookmarked: (bookmarkedCheat && bookmarkedCheat === get(concept, 'id')) || false,
+        isBookmarked: (bookmarkedCheatId && bookmarkedCheatId === get(concept, 'id')) || false,
         isSelected: i === 0,
-        bookmarkId: bookmarkId || '',
+        bookmarkId: (bookmarkedCheatId && bookmarkedCheatId === get(concept, 'id')) ? bookmarkId : '',
       });
     });
     /* eslint-disable no-else-return */
@@ -114,9 +114,9 @@ const getCheatSheetContents = async ({ input, bookmarkedCheat, bookmarkId }) => 
     cheatSheets.forEach((concept, i) => {
       cheatSheetArray.push({
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
-        isBookmarked: (bookmarkedCheat && bookmarkedCheat === get(concept, 'id')) || false,
+        isBookmarked: (bookmarkedCheatId && bookmarkedCheatId === get(concept, 'id')) || false,
         isSelected: i === 0,
-        bookmarkId: bookmarkId || '',
+        bookmarkId: (bookmarkedCheatId && bookmarkedCheatId === get(concept, 'id')) ? bookmarkId : '',
       });
     });
     // constructing the data as defined in schema for cheatSheetConcepts and cheatSheetTopics and returning value
@@ -126,7 +126,7 @@ const getCheatSheetContents = async ({ input, bookmarkedCheat, bookmarkId }) => 
     cheatSheetConcepts: [...cheatSheetArray],
   };
 };
-const getCheatSheetContentWithoutInput = async (bookmarkedCheat, bookmarkId) => {
+const getCheatSheetContentWithoutInput = async (bookmarkedCheatId, bookmarkId) => {
   // if not input is provided then this function will be called
   const topicsData = await callLocalGraphqlApi(getTopics());
   const topics = get(topicsData, 'data.topics', []);
@@ -143,9 +143,9 @@ const getCheatSheetContentWithoutInput = async (bookmarkedCheat, bookmarkId) => 
     cheatsheets.forEach((concept, i) => {
       cheatSheetArray.push({
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
-        isBookmarked: (bookmarkedCheat && bookmarkedCheat === get(concept, 'id')) || false,
+        isBookmarked: (bookmarkedCheatId && bookmarkedCheatId === get(concept, 'id')) || false,
         isSelected: i === 0,
-        bookmarkId: bookmarkId || '',
+        bookmarkId: (bookmarkedCheatId && bookmarkedCheatId === get(concept, 'id')) ? bookmarkId : '',
       });
     });
   }
@@ -182,15 +182,18 @@ const getCheatSheet = (async (root, params, context) => {
   } else {
     // if user is loggedIn will also fetch its bookmarked cheatSheets and enable the flag isBookmark to true
     const isBookmarked = await callLocalGraphqlApi(getBookmarked(userId));
-    const bookmarkedCheat = get(isBookmarked, 'data.userCheatSheets[0].cheatsheet.id');
+    const bookmarkedCheat = get(isBookmarked, 'data.userCheatSheets', []);
+    // from all the bookmarked cheatsheets of user getting the cheatsheet whose bookmarked value is true and sending them to frontend
+    const bookmarkedData = bookmarkedCheat.find((bData) => get(bData, 'isBookmarked', false) === true);
+    const bookmarkedCheatId = get(bookmarkedData, 'cheatsheet.id', '');
+    const bookmarkId = get(bookmarkedData, 'id', '');
     // getting the bookmark id which can be user to update/delete userCheatSheet (bookmarked cheatsheet)
-    const bookmarkId = get(isBookmarked, 'data.userCheatSheets[0].id', '');
     if (input) {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ input, bookmarkedCheat, bookmarkId });
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ input, bookmarkedCheatId, bookmarkId });
       cheatTopics = cheatSheetTopics;
       cheatConcepts = cheatSheetConcepts;
     } else {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput(bookmarkedCheat, bookmarkId);
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput(bookmarkedCheatId, bookmarkId);
       cheatTopics = cheatSheetTopics;
       cheatConcepts = cheatSheetConcepts;
     }
