@@ -60,7 +60,7 @@ const getCheatSheets = (filter) => `
     }
   `;
 
-const getCheatSheetContents = async ({ input }) => {
+const getCheatSheetContents = async ({ input, context }) => {
   let data;
   const cheatSheetArray = [];
   const topicsArray = [];
@@ -72,23 +72,23 @@ const getCheatSheetContents = async ({ input }) => {
     if (input.searchText) {
       filter = `{title_contains:"${input.searchText}"}`;
     }
-    data = await callLocalGraphqlApi(getCheatSheets(filter));
+    data = await callLocalGraphqlApi(getCheatSheets(filter), context);
     const cheatSheets = get(data, 'data.cheatSheets', []);
     cheatSheets.forEach((concept, i) => {
       cheatSheetArray.push({ cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` }, isSelected: i === 0 });
     });
     /* eslint-disable no-else-return */
   } else if (input.cheatSheetId !== '') {
-    const topicsData = await callLocalGraphqlApi(getTopics());
+    const topicsData = await callLocalGraphqlApi(getTopics(), context);
     const topics = get(topicsData, 'data.topics', []);
     filter = `{ id:"${input.cheatSheetId}" }, `;
-    const cheatsheet = await callLocalGraphqlApi(getCheatSheets(filter));
+    const cheatsheet = await callLocalGraphqlApi(getCheatSheets(filter), context);
     const cheatTopic = get(cheatsheet, 'data.cheatSheets[0].topic.id', '');
     // by default selecting the topic which contains the cheatsheet for which the cheatsheetId is passed in input
     topics.forEach((topic) => {
       topicsArray.push({ topic: { type: 'Topic', typeId: `${topic.id}` }, isSelected: get(topic, 'id') === cheatTopic });
     });
-    data = await callLocalGraphqlApi(getCheatSheets(`{topic_some:{id:"${cheatTopic}"}}`));
+    data = await callLocalGraphqlApi(getCheatSheets(`{topic_some:{id:"${cheatTopic}"}}`), context);
     const cheatSheets = get(data, 'data.cheatSheets', []);
     cheatSheets.forEach((concept, i) => {
       cheatSheetArray.push({ cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` }, isSelected: i === 0 });
@@ -99,8 +99,8 @@ const getCheatSheetContents = async ({ input }) => {
     cheatSheetConcepts: [...cheatSheetArray],
   };
 };
-const getCheatSheetContentWithoutInput = async () => {
-  const topicsData = await callLocalGraphqlApi(getTopics());
+const getCheatSheetContentWithoutInput = async (context) => {
+  const topicsData = await callLocalGraphqlApi(getTopics(), context);
   const topics = get(topicsData, 'data.topics', []);
   const topicsArray = [];
   topics.forEach((topic, i) => {
@@ -108,7 +108,7 @@ const getCheatSheetContentWithoutInput = async () => {
   });
   const cheatSheetArray = [];
   if (topics.length > 0) {
-    const data = await callLocalGraphqlApi(getCheatSheets(`{topic_some:{id:"${get(topics[0], 'id')}"}}`));
+    const data = await callLocalGraphqlApi(getCheatSheets(`{topic_some:{id:"${get(topics[0], 'id')}"}}`), context);
     const cheatsheets = get(data, 'data.cheatSheets', []);
     cheatsheets.forEach((concept, i) => {
       cheatSheetArray.push({ cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` }, isSelected: i === 0 });
@@ -125,34 +125,34 @@ const getCheatSheet = (async (root, params, context) => {
     userIdFromContext: userId,
   } = userAndAppInfo;
   const { input } = params;
-  let cheatTopic = [];
-  let cheatConcept = [];
-  if (userId) {
+  let cheatTopics = []
+  let cheatConcepts = []
+  if (!userId) {
     if (input) {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ ...input });
-      cheatTopic = [...cheatSheetTopics];
-      cheatConcept = [...cheatSheetConcepts];
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ input, context })
+      cheatTopics = cheatSheetTopics
+      cheatConcepts = cheatSheetConcepts
     } else {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput();
-      cheatTopic = [...cheatSheetTopics];
-      cheatConcept = [...cheatSheetConcepts];
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput(context)
+      cheatTopics = cheatSheetTopics
+      cheatConcepts = cheatSheetConcepts
     }
     /* eslint-disable no-lonely-if */
   } else {
     if (input) {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ ...input });
-      cheatTopic = [...cheatSheetTopics];
-      cheatConcept = [...cheatSheetConcepts];
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ input, context })
+      cheatTopics = cheatSheetTopics
+      cheatConcepts = cheatSheetConcepts
     } else {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput();
-      cheatTopic = [...cheatSheetTopics];
-      cheatConcept = [...cheatSheetConcepts];
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput(context)
+      cheatTopics = cheatSheetTopics
+      cheatConcepts = cheatSheetConcepts
     }
   }
   return {
-    cheatSheetTopics: [...cheatTopic],
-    cheatSheetConcepts: [...cheatConcept],
-  };
+    cheatSheetTopics: [...cheatTopics],
+    cheatSheetConcepts: [...cheatConcepts],
+  }
 });
 
 export default getCheatSheet;

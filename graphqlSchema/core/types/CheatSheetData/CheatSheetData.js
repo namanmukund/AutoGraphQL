@@ -14,8 +14,7 @@ const CheatSheetConceptType = `
  }`;
 
 const CheatSheetData = `
-  type CheatSheetData
-  @userToken(isRequired:"false") 
+  type CheatSheetData 
   @appPermissions(
     permissions:[
       { appName: "${TBA}" operations: "*" },
@@ -27,7 +26,7 @@ const CheatSheetData = `
   {
     cheatSheetTopics: [CheatSheetTopicType]
     cheatSheetConcepts: [CheatSheetConceptType]
-  }
+  } 
 `;
 
 export default [CheatSheetData, CheatSheetTopicType, CheatSheetConceptType];
