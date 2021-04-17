@@ -64,6 +64,7 @@ const getCheatSheets = (filter) => `
 const getBookmarked = (id) => `
 {
   userCheatSheets(filter: { user_some: { id: "${id}" } }) {
+    id
     isBookmarked
     cheatsheet {
       id
@@ -72,7 +73,7 @@ const getBookmarked = (id) => `
   }
 }
 `;
-const getCheatSheetContents = async ({ input, bookmarkedCheat }) => {
+const getCheatSheetContents = async ({ input, bookmarkedCheat, bookmarkId }) => {
   let data;
   const cheatSheetArray = [];
   const topicsArray = [];
@@ -92,6 +93,7 @@ const getCheatSheetContents = async ({ input, bookmarkedCheat }) => {
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
         isBookmarked: (bookmarkedCheat && bookmarkedCheat === get(concept, 'id')) || false,
         isSelected: i === 0,
+        bookmarkId: bookmarkId || '',
       });
     });
     /* eslint-disable no-else-return */
@@ -114,6 +116,7 @@ const getCheatSheetContents = async ({ input, bookmarkedCheat }) => {
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
         isBookmarked: (bookmarkedCheat && bookmarkedCheat === get(concept, 'id')) || false,
         isSelected: i === 0,
+        bookmarkId: bookmarkId || '',
       });
     });
     // constructing the data as defined in schema for cheatSheetConcepts and cheatSheetTopics and returning value
@@ -123,7 +126,7 @@ const getCheatSheetContents = async ({ input, bookmarkedCheat }) => {
     cheatSheetConcepts: [...cheatSheetArray],
   };
 };
-const getCheatSheetContentWithoutInput = async (bookmarkedCheat) => {
+const getCheatSheetContentWithoutInput = async (bookmarkedCheat, bookmarkId) => {
   // if not input is provided then this function will be called
   const topicsData = await callLocalGraphqlApi(getTopics());
   const topics = get(topicsData, 'data.topics', []);
@@ -142,6 +145,7 @@ const getCheatSheetContentWithoutInput = async (bookmarkedCheat) => {
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
         isBookmarked: (bookmarkedCheat && bookmarkedCheat === get(concept, 'id')) || false,
         isSelected: i === 0,
+        bookmarkId: bookmarkId || '',
       });
     });
   }
@@ -179,12 +183,14 @@ const getCheatSheet = (async (root, params, context) => {
     // if user is loggedIn will also fetch its bookmarked cheatSheets and enable the flag isBookmark to true
     const isBookmarked = await callLocalGraphqlApi(getBookmarked(userId));
     const bookmarkedCheat = get(isBookmarked, 'data.userCheatSheets[0].cheatsheet.id');
+    // getting the bookmark id which can be user to update/delete userCheatSheet (bookmarked cheatsheet)
+    const bookmarkId = get(isBookmarked, 'data.userCheatSheets[0].id', '');
     if (input) {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ input, bookmarkedCheat });
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ input, bookmarkedCheat, bookmarkId });
       cheatTopics = cheatSheetTopics;
       cheatConcepts = cheatSheetConcepts;
     } else {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput(bookmarkedCheat);
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput(bookmarkedCheat, bookmarkId);
       cheatTopics = cheatSheetTopics;
       cheatConcepts = cheatSheetConcepts;
     }

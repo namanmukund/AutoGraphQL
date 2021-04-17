@@ -11,6 +11,7 @@ const CheatSheetConceptType = `
    cheatsheet: CheatSheet @relation(name: "CheatSheetDataConcept", direction: "OneWay")
    isBookmarked: Boolean @defaultValue(value: "false")
    isSelected: Boolean
+   bookmarkId: String
  }`;
 
 const CheatSheetData = `
