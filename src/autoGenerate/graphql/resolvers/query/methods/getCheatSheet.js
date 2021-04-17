@@ -125,34 +125,34 @@ const getCheatSheet = (async (root, params, context) => {
     userIdFromContext: userId,
   } = userAndAppInfo;
   const { input } = params;
-  let cheatTopics = []
-  let cheatConcepts = []
+  let cheatTopics = [];
+  let cheatConcepts = [];
   if (!userId) {
     if (input) {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ input, context })
-      cheatTopics = cheatSheetTopics
-      cheatConcepts = cheatSheetConcepts
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ input, context });
+      cheatTopics = cheatSheetTopics;
+      cheatConcepts = cheatSheetConcepts;
     } else {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput(context)
-      cheatTopics = cheatSheetTopics
-      cheatConcepts = cheatSheetConcepts
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput(context);
+      cheatTopics = cheatSheetTopics;
+      cheatConcepts = cheatSheetConcepts;
     }
     /* eslint-disable no-lonely-if */
   } else {
     if (input) {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ input, context })
-      cheatTopics = cheatSheetTopics
-      cheatConcepts = cheatSheetConcepts
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContents({ input, context });
+      cheatTopics = cheatSheetTopics;
+      cheatConcepts = cheatSheetConcepts;
     } else {
-      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput(context)
-      cheatTopics = cheatSheetTopics
-      cheatConcepts = cheatSheetConcepts
+      const { cheatSheetTopics, cheatSheetConcepts } = await getCheatSheetContentWithoutInput(context);
+      cheatTopics = cheatSheetTopics;
+      cheatConcepts = cheatSheetConcepts;
     }
   }
   return {
     cheatSheetTopics: [...cheatTopics],
     cheatSheetConcepts: [...cheatConcepts],
-  }
+  };
 });
 
 export default getCheatSheet;
