@@ -88,7 +88,7 @@ const getCheatSheetContents = async ({ input, context, bookmarkedCheat }) => {
     cheatSheets.forEach((concept, i) => {
       cheatSheetArray.push({
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
-        isBookmarked: (bookmarkedCheat && bookmarkedCheat === get(concept, 'id')),
+        isBookmarked: (bookmarkedCheat && bookmarkedCheat === get(concept, 'id')) || false,
         isSelected: i === 0,
       });
     });
@@ -110,7 +110,7 @@ const getCheatSheetContents = async ({ input, context, bookmarkedCheat }) => {
     cheatSheets.forEach((concept, i) => {
       cheatSheetArray.push({
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
-        isBookmarked: (bookmarkedCheat && bookmarkedCheat === get(concept, 'id')),
+        isBookmarked: (bookmarkedCheat && bookmarkedCheat === get(concept, 'id')) || false,
         isSelected: i === 0,
       });
     });
@@ -138,7 +138,7 @@ const getCheatSheetContentWithoutInput = async (context, bookmarkedCheat) => {
     cheatsheets.forEach((concept, i) => {
       cheatSheetArray.push({
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
-        isBookmarked: (bookmarkedCheat && bookmarkedCheat === get(concept, 'id')),
+        isBookmarked: (bookmarkedCheat && bookmarkedCheat === get(concept, 'id')) || false,
         isSelected: i === 0,
       });
     });
