@@ -1,5 +1,4 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import updateUserSavedCodeIsApprovedForDisplay from '../scriptMethods/updateUserSavedCodeIsApprovedForDisplay';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -19,7 +18,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateCountryInCollections();
   // await updateUserPaymentPlan();
   // await updateStudentProfileWithRandomAvatar();
-  await updateUserSavedCodeIsApprovedForDisplay();
+  // await updateUserSavedCodeIsApprovedForDisplay();
   return {
     result: true,
   };
