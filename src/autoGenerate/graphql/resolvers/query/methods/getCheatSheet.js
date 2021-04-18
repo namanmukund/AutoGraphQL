@@ -218,7 +218,8 @@ const getCheatSheet = (async (root, params, context) => {
     }
     /* eslint-disable no-lonely-if */
   } else {
-    // if user is loggedIn will also fetch its bookmarked cheatSheets and enable the flag isBookmark to true
+    // if user is loggedIn will also fetch its bookmarked cheatSheets to pass it's isBookmarked status (true/false) and
+    // also its corresponding bookmarkId to perform (update/delete) operation
     const isBookmarked = await callLocalGraphqlApi(getBookmarked(userId));
     const bookmarkedCheat = get(isBookmarked, 'data.userCheatSheets', []);
     if (input) {
