@@ -9,6 +9,7 @@ query{
   userSavedCode(id:"${id}"){
     id
     isApprovedForDisplay
+    hasRequestedByMentee
     userApprovedCode {
       id
     }
