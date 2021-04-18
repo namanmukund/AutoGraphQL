@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import { userSavedCodeStatus } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 const addUserApprovedCodeQuery = async (input, userConnectId, userSavedCodeConnectId) => {
@@ -37,8 +38,8 @@ const userQuery = async (userId) => {
 
 const updateUserSavedCodePostHookMethod = async (input, params, mutationName, context) => {
   if (
-    get(params, 'input.isApprovedForDisplay')
-    && get(context, 'previousDocument.isApprovedForDisplay') !== true
+    get(params, 'input.isApprovedForDisplay') === userSavedCodeStatus.accepted
+    && get(context, 'previousDocument.isApprovedForDisplay') === userSavedCodeStatus.pending
   ) {
     if (!get(context, 'previousDocument.userApprovedCode.id')) {
       const {
