@@ -3,6 +3,7 @@ import fetchBookmarks from './utils/checkExistingCheatSheetBookmark';
 
 const addUserCheatSheetValidation = async (params) => {
   const { userConnectId: userId, input: { isBookmarked } } = params;
+  // checking if the user has bookmarked cheatsheet with isBookmark == true
   if (isBookmarked === true) {
     const bookmarkedCheat = await fetchBookmarks(userId);
     if (bookmarkedCheat && bookmarkedCheat.length > 0) {

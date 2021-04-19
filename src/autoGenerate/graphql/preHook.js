@@ -76,7 +76,6 @@ import deleteProductValidation from './preHookFunctions/validation/deleteProduct
 import updateStudentProfileValidation from './preHookFunctions/validation/updateStudentProfileValidation';
 import addUserCheatSheetValidation from './preHookFunctions/validation/addUserCheatSheetValidation';
 import updateUserCheatSheetValidation from './preHookFunctions/validation/updateUserCheatSheetValidation';
-// import { CanNotCompleteSessionBeforeStartingError } from '../../../constants/errors/input';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {

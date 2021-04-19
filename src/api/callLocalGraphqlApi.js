@@ -1,4 +1,3 @@
-import { get } from 'lodash';
 import { graphql } from 'graphql';
 import schema from '../graphql/index';
 import { createAndThrowApolloError } from '../../utils';
@@ -10,13 +9,11 @@ const callLocalGraphqlApi = (query, context, variables) => {
   const contextValue = context || {};
   let variableValues = variables || {};
 
-  if (!get(context, 'currentApp')) {
-    contextValue.currentApp = {
-      name: 'core',
-    };
-    // Remove decoded user
-    delete contextValue.currentUser;
-  }
+  contextValue.currentApp = {
+    name: 'core',
+  };
+  // Remove decoded user
+  delete contextValue.currentUser;
 
   // To avoid apollo-server-core error
   if (!variableValues || variableValues === '') {
