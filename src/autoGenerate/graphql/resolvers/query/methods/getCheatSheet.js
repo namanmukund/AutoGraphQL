@@ -104,6 +104,7 @@ const getCheatSheetContents = async ({ input, bookmarkedCheatSheetData }) => {
     // and then will fetch all the cheatSheets for that topicId
     data = await callLocalGraphqlApi(getCheatSheets(`{topic_some:{id:"${cheatTopic}"}}`));
     const cheatSheets = get(data, 'data.cheatSheets', []);
+    // constructing the data as defined in schema for cheatSheetConcepts and cheatSheetTopics and returning value
     cheatSheets.forEach((concept, i) => {
       const bookmarkData = bookmarkedCheatSheetData && bookmarkedCheatSheetData.find((bData) => get(bData, 'cheatsheet.id') === get(concept, 'id'));
       const bookmarkId = get(bookmarkData, 'id', '');
@@ -116,7 +117,6 @@ const getCheatSheetContents = async ({ input, bookmarkedCheatSheetData }) => {
       });
     });
   }
-  // constructing the data as defined in schema for cheatSheetConcepts and cheatSheetTopics and returning value
   return {
     cheatSheetTopics: [...topicsArray],
     cheatSheetConcepts: [...cheatSheetArray],
