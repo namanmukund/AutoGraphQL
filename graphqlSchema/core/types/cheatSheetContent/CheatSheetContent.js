@@ -28,6 +28,7 @@ const CheatSheetContent = `
     cheatSheet: CheatSheet @relation(name: "CheatSheetContent")
     terminalInput: String @trim
     terminalOutput: String @trim
+    syntax: String @trim
   }
 `;
 

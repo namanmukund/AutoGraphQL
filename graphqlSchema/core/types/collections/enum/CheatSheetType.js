@@ -3,6 +3,7 @@ const CheatSheetType = `
     text
     image
     terminal
+    syntax
   }`;
 
 export default CheatSheetType;
