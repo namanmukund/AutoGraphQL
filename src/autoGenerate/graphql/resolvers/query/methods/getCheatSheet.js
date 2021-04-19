@@ -182,7 +182,7 @@ const getCheatSheet = (async (root, params, context) => {
     // if user is loggedIn will also fetch its bookmarked cheatSheets to pass it's isBookmarked status (true/false) and
     // also its corresponding bookmarkId to perform (update/delete) operation
     let bookmarkedCheatSheet;
-    if (input.isFavourite === true) {
+    if (input && input.isFavourite === true) {
       bookmarkedCheatSheet = await callLocalGraphqlApi(getBookmarkedCheats(userId, true));
     } else {
       bookmarkedCheatSheet = await callLocalGraphqlApi(getBookmarkedCheats(userId));
