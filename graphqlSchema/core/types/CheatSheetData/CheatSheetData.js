@@ -1,4 +1,4 @@
-import { TBA, TLA, TMS } from '../../../../constants';
+import { TBA, TLA, TWA } from '../../../../constants';
 
 const CheatSheetTopicType = `
   type CheatSheetTopicType {
@@ -20,7 +20,7 @@ const CheatSheetData = `
     permissions:[
       { appName: "${TBA}" operations: "*" },
       { appName: "${TLA}" operations: "*" },
-      { appName: "${TMS}" operations: "*" },
+      { appName: "${TWA}" operations: "*" },
       ], 
     rule: allow
   )

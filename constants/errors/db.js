@@ -131,3 +131,7 @@ export const ProductWithSimilarTypeAlreadyPublished = createError('ProductWithSi
 export const AlreadyBookmarkedOtherCheatSheet = createError('AlreadyBookmarkedOtherCheatSheet', {
   message: 'Already bookmarked other cheatsheet.',
 });
+
+export const AlreadyBookmarkedCheatSheet = createError('AlreadyBookmarkedCheatSheet', {
+  message: 'Already bookmarked this cheatsheet',
+});

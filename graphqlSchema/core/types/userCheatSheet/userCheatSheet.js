@@ -1,6 +1,4 @@
-import {
-  TBA, TLA, TMS, TWA,
-} from '../../../../constants';
+import { TBA, TLA, TWA } from '../../../../constants';
 
 const UserCheatSheet = `
   type UserCheatSheet @model
@@ -8,7 +6,6 @@ const UserCheatSheet = `
     permissions:[
       { appName: "${TLA}" operations: "*" },
       { appName: "${TBA}" operations: "*" },
-      { appName: "${TMS}" operations: "*" },
       { appName: "${TWA}" operations: "*" },
       ], 
     rule: allow
