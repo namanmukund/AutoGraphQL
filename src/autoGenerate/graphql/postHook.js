@@ -46,6 +46,7 @@ import deleteUserApprovedCodeTagMappingPostHookMethod from './postHookFunctions/
 import updateMentorMenteeSessionAuditPostHookMethod from './postHookFunctions/updateMentorMenteeSessionAuditPostHookMethod';
 import updateUserApprovedCodePostHookMethod from './postHookFunctions/updateUserApprovedCodePostHookMethod';
 import updateStudentProfilePostHookMethod from './postHookFunctions/updateStudentProfilePostHookMethod';
+import addUserSavedCodePostHookMethod from './postHookFunctions/addUserSavedCodePostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -209,6 +210,10 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'addBatchSession': {
       await addBatchSessionPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'addUserSavedCode': {
+      await addUserSavedCodePostHookMethod(input, params, mutationName, context);
       break;
     }
     case 'updateBatchSession': {
