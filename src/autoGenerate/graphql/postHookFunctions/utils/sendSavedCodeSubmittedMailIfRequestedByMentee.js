@@ -13,7 +13,7 @@ const sendSavedCodeSubmittedMailIfRequestedByMentee = async (previousDocument) =
     };
     await sendTransactionalEmail(templateObject, {
       emailTemplate: 'savedCodeSubmittedForReviewEmailTemplate',
-      subject: `Kudos ${studentName}, your code has been submitted and is in review`,
+      subject: `${studentName}, your code has been submitted for review`,
       whatsAppTemplate: '',
     }, 'india');
     return true;
