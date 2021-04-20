@@ -163,6 +163,12 @@ const userTopicTypeStatus = {
   skip: 'skip',
 };
 
+const userSavedCodeStatus = {
+  accepted: 'accepted',
+  pending: 'pending',
+  rejected: 'rejected',
+};
+
 const questionTypes = {
   mcq: 'mcq',
   fibInput: 'fibInput',
@@ -334,4 +340,5 @@ export {
   batchType,
   sessionStatus,
   leadStatus,
+  userSavedCodeStatus,
 };

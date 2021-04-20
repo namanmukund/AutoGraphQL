@@ -18,6 +18,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateCountryInCollections();
   // await updateUserPaymentPlan();
   // await updateStudentProfileWithRandomAvatar();
+  // await updateUserSavedCodeIsApprovedForDisplay();
   return {
     result: true,
   };

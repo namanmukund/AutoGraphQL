@@ -66,6 +66,7 @@ import MentorMenteeSessionAuditStatus from './MentorMenteeSessionAuditStatus';
 import BannerType from './BannerType';
 import CheatSheetType from './CheatSheetType';
 import StudentProfileAvatarCode from './StudentProfileAvatarCode';
+import UserSavedCodeStatus from './UserSavedCodeStatus';
 
 export default [
   Status,
@@ -137,4 +138,5 @@ export default [
   BannerType,
   CheatSheetType,
   StudentProfileAvatarCode,
+  UserSavedCodeStatus,
 ];

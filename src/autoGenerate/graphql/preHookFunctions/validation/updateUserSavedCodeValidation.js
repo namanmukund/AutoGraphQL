@@ -1,6 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
+import { userSavedCodeStatus } from '../../../../../constants';
 
 const userSavedCodeQuery = async (id) => {
   const query = `
@@ -8,6 +9,7 @@ query{
   userSavedCode(id:"${id}"){
     id
     isApprovedForDisplay
+    hasRequestedByMentee
     userApprovedCode {
       id
     }
@@ -18,7 +20,7 @@ query{
 };
 
 const updateUserSavedCodeValidation = async (params, mutationOrQueryName, context) => {
-  if (get(params, 'input.isApprovedForDisplay')) {
+  if (get(params, 'input.isApprovedForDisplay') === userSavedCodeStatus.accepted) {
     const { id } = params;
     const userSavedCodeData = await userSavedCodeQuery(id);
     if (!get(userSavedCodeData, 'id')) {
