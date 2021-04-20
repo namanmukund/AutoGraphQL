@@ -8,8 +8,22 @@ const userSavedCodeQuery = async (id) => {
 query{
   userSavedCode(id:"${id}"){
     id
+    code
+    fileName
     isApprovedForDisplay
     hasRequestedByMentee
+    user {
+      id
+      email
+      name
+      studentProfile {
+        parents {
+          user {
+            email
+          }
+        }
+      }
+    }
     userApprovedCode {
       id
     }
@@ -20,7 +34,10 @@ query{
 };
 
 const updateUserSavedCodeValidation = async (params, mutationOrQueryName, context) => {
-  if (get(params, 'input.isApprovedForDisplay') === userSavedCodeStatus.accepted) {
+  if (
+    get(params, 'input.isApprovedForDisplay') === userSavedCodeStatus.accepted
+    || get(params, 'input.hasRequestedByMentee')
+  ) {
     const { id } = params;
     const userSavedCodeData = await userSavedCodeQuery(id);
     if (!get(userSavedCodeData, 'id')) {

@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import { userSavedCodeStatus } from '../../../../constants';
+import sendSavedCodeSubmittedMailIfRequestedByMentee from './utils/sendSavedCodeSubmittedMailIfRequestedByMentee';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 const addUserApprovedCodeQuery = async (input, userConnectId, userSavedCodeConnectId) => {
@@ -37,6 +38,11 @@ const userQuery = async (userId) => {
 };
 
 const updateUserSavedCodePostHookMethod = async (input, params, mutationName, context) => {
+  if (
+    get(params, 'input.hasRequestedByMentee')
+    && !get(context, 'previousDocument.hasRequestedByMentee')) {
+    await sendSavedCodeSubmittedMailIfRequestedByMentee(get(context, 'previousDocument', null));
+  }
   if (
     get(params, 'input.isApprovedForDisplay') === userSavedCodeStatus.accepted
     && get(context, 'previousDocument.isApprovedForDisplay') === userSavedCodeStatus.pending
