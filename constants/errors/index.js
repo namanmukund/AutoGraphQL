@@ -41,7 +41,7 @@ import {
   ProductTypeAlreadyAdded,
   ProductIsPublishedError,
   ProductWithSimilarTypeAlreadyPublished,
-  AlreadyBookmarkedOtherCheatSheet,
+  UserCheatSheetAlreadyExists,
   AlreadyBookmarkedCheatSheet,
 } from './db';
 import {
@@ -220,6 +220,6 @@ export {
   ProductTypeAlreadyAdded,
   ProductIsPublishedError,
   ProductWithSimilarTypeAlreadyPublished,
-  AlreadyBookmarkedOtherCheatSheet,
+  UserCheatSheetAlreadyExists,
   AlreadyBookmarkedCheatSheet,
 };

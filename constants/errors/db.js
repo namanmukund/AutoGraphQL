@@ -128,8 +128,8 @@ export const ProductWithSimilarTypeAlreadyPublished = createError('ProductWithSi
   message: 'Product with similar type already published',
 });
 
-export const AlreadyBookmarkedOtherCheatSheet = createError('AlreadyBookmarkedOtherCheatSheet', {
-  message: 'Already bookmarked other cheatsheet.',
+export const UserCheatSheetAlreadyExists = createError('UserCheatSheetAlreadyExists', {
+  message: 'User cheatsheet already exists.',
 });
 
 export const AlreadyBookmarkedCheatSheet = createError('AlreadyBookmarkedCheatSheet', {

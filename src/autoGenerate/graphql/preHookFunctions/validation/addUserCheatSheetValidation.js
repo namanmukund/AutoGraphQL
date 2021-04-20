@@ -1,4 +1,4 @@
-import { AlreadyBookmarkedOtherCheatSheet } from '../../../../../constants/errors';
+import { UserCheatSheetAlreadyExists } from '../../../../../constants/errors';
 import fetchBookmarks from './utils/checkExistingCheatSheetBookmark';
 
 const addUserCheatSheetValidation = async (params) => {
@@ -6,7 +6,7 @@ const addUserCheatSheetValidation = async (params) => {
   // checking if the userCheatSheet collection contains doc with userId and cheatSheetId
   const bookmarkedCheat = await fetchBookmarks(userId, cheatsheetId);
   if (bookmarkedCheat && bookmarkedCheat.length > 0) {
-    throw new AlreadyBookmarkedOtherCheatSheet();
+    throw new UserCheatSheetAlreadyExists();
   }
   return true;
 };
