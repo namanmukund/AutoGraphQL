@@ -5,6 +5,7 @@ salesOperationReport (fromDate: Date, toDate: Date, country: Country):  [SalesOp
 temporaryScript :  BooleanResult
 sendTransactionalMessage(userId: ID, input: TransactionalMessageInput) : BooleanResult 
 getTotalAmountCollected ( input: TotalAmountCollectedInput): TotalAmountCollected
+getCheatSheet (input: CheatSheetInput): CheatSheetData
 `;
 
 export default customQueryString;

@@ -127,3 +127,11 @@ export const ProductIsPublishedError = createError('ProductIsPublishedError', {
 export const ProductWithSimilarTypeAlreadyPublished = createError('ProductWithSimilarTypeAlreadyPublished', {
   message: 'Product with similar type already published',
 });
+
+export const UserCheatSheetAlreadyExists = createError('UserCheatSheetAlreadyExists', {
+  message: 'User cheatsheet already exists.',
+});
+
+export const AlreadyBookmarkedCheatSheet = createError('AlreadyBookmarkedCheatSheet', {
+  message: 'Already bookmarked this cheatsheet',
+});
