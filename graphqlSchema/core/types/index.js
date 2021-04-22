@@ -81,6 +81,8 @@ import ContentTag from './contentTag';
 import Workbook from './workbook';
 import Project from './project';
 import ProjectContent from './projectContent';
+import CheatSheetData from './cheatSheetData';
+import UserCheatSheet from './userCheatSheet';
 
 export default [
   ...User,
@@ -166,4 +168,6 @@ export default [
   ...Workbook,
   ...Project,
   ...ProjectContent,
+  ...CheatSheetData,
+  ...UserCheatSheet,
 ];

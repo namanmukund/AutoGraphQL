@@ -75,6 +75,7 @@ import sendTransactionalMessage from './query/methods/sendTransactionalMessage';
 import getTotalAmountCollected from './query/methods/getTotalAmountCollected';
 import addUpdateBulkSchoolUserData from './mutation/methods/addUpdateBulkSchoolUserData';
 import updateVisitorReactionOnUserApprovedCode from './mutation/methods/updateVisitorReactionOnUserApprovedCode';
+import getCheatSheet from './query/methods/getCheatSheet';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -571,6 +572,8 @@ resolvers.Query.temporaryScript = temporaryScript;
 resolvers.Query.sendTransactionalMessage = sendTransactionalMessage;
 // Resolver to get total sell amount and amount colected
 resolvers.Query.getTotalAmountCollected = getTotalAmountCollected;
+// Resolver to get the cheatsheets
+resolvers.Query.getCheatSheet = getCheatSheet;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 
