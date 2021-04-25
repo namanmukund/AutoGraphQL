@@ -1,9 +1,9 @@
-const CheatSheetInput = `
-  input CheatSheetInput {
+const getCheatSheetInput = `
+  input getCheatSheetInput {
     topicId: String
     cheatSheetId: String
     searchText: String
     isFavourite: Boolean
   }`;
 
-export default [CheatSheetInput];
+export default [getCheatSheetInput];

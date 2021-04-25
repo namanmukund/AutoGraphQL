@@ -1,4 +1,4 @@
 import CheatSheetData from './CheatSheetData';
-import CheatSheetInput from './CheatSheetInput';
+import getCheatSheetInput from './getCheatSheetInput';
 
-export default [...CheatSheetData, ...CheatSheetInput];
+export default [...CheatSheetData, ...getCheatSheetInput];
