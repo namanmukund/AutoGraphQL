@@ -204,7 +204,9 @@ const convertDateFormat = (date) => {
 
 const addUpdateBulkSchoolUserData = async (root, params, context) => {
   validateAuthentication(context);
-  const { sheetId, country = 'india', schoolName } = params;
+  const {
+    sheetId, country = 'india', schoolName, booking = false,
+  } = params;
   if (!sheetId || !schoolName) {
     throw new MissingMandatoryInputInRequestError();
   }
@@ -219,7 +221,7 @@ const addUpdateBulkSchoolUserData = async (root, params, context) => {
       console.log('Processing row number........', index + 2);
       const result = await callParentChildSignup(row, schoolName, country);
 
-      if (result && result.id) {
+      if (booking && result && result.id) {
         console.log('Parent  Id....', result.id);
         const { bookingDate, slot, mentor } = row;
         let menteeSessionId;

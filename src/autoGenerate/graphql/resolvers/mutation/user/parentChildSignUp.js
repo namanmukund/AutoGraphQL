@@ -127,7 +127,7 @@ const getParentInfo = async (context, email, phone) => {
     if (res.length > 1) {
       throw new UserAlreadyExistsError();
     }
-    // if res has length 1 then check if phone and email belogs to the same user
+    // if res has length 1 then check if phone and email belongs to the same user
     const {
       id, parentProfile, email: parentEmail, phone: parentPhone,
     } = res[0];
