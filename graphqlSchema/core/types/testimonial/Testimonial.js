@@ -9,6 +9,7 @@ const Testimonial = `
     testimonial: String!
     displayPic: File @relation(name: "TestimonialDisplayPic", direction: "OneWay", isSubset: true)
     videoUrl: File @relation(name: "TestimonialVideoUrl", direction: "OneWay", isSubset: true)
+    status: ContentStatus! @defaultValue(value: "unpublished")
 }`;
 
 export default [Testimonial];
