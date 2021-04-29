@@ -81,6 +81,7 @@ import ContentTag from './contentTag';
 import Workbook from './workbook';
 import Project from './project';
 import ProjectContent from './projectContent';
+import Testimonial from './testimonial';
 
 export default [
   ...User,
@@ -166,4 +167,5 @@ export default [
   ...Workbook,
   ...Project,
   ...ProjectContent,
+  ...Testimonial,
 ];

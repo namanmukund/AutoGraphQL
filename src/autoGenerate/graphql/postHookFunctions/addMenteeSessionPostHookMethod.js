@@ -19,8 +19,10 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     const { availableSlots } = context;
     const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
     const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
+    console.log(JSON.stringify(userInfo, null, 2));
     await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context, availableSlots);
     // send email to mentor admin regarding the session
+    console.log(bookingDate, slotTimeStringArray)
     await extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
     // update user booking on leadsquared
     addMenteeBookingLeadsquared(input, params, slotTimeStringArray, userInfo, topicInfo);

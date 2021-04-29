@@ -35,7 +35,8 @@ const getSlotLabel = (slotNumber) => {
 };
 
 const getIntlDateTime = (date, istTime, targetTimezone) => {
-  const timezone = getTimezone(targetTimezone);
+  const timezone = getTimezone(targetTimezone || 'Asia/Kolkata');
+  console.log(date, istTime, targetTimezone, targetTimezone || 'Asia/Kolkata', timezone);
   const indianOffset = get(getTimezone('Asia/Kolkata'), 'utcOffset');
   const intlOffset = get(timezone, 'utcOffset');
   const timeDiffInMs = (indianOffset - intlOffset) * 60 * 1000;
@@ -60,6 +61,12 @@ const getIntlDateTime = (date, istTime, targetTimezone) => {
     : dateAfterSlotOffset.getMinutes();
   const meridianEnd = getSlotLabel(dateAfterSlotOffset.getHours()).startTime.split(' ')[1];
   const intlEndTime = `${hourAfterOffsetEnd}:${minAfterOffsetEnd} ${meridianEnd}`;
+  console.log({
+    date: intlDate,
+    dateObject: new Date(new Date(new Date(new Date().setFullYear(intlDate.split('-')[2], intlDate.split('-')[1] - 1, intlDate.split('-')[0])).setHours(hourAfterOffset)).setMinutes(minAfterOffsetEnd)),
+    startTime: intlStartTime.padStart(2, '0'),
+    endTime: intlEndTime.padStart(2, '0'),
+  });
   return {
     date: intlDate,
     dateObject: new Date(new Date(new Date(new Date().setFullYear(intlDate.split('-')[2], intlDate.split('-')[1] - 1, intlDate.split('-')[0])).setHours(hourAfterOffset)).setMinutes(minAfterOffsetEnd)),
