@@ -30,6 +30,7 @@ const userQuery = async (userId) => {
           studentProfile{
             id
             grade
+            profileAvatarCode
           }
         }
       }`;
