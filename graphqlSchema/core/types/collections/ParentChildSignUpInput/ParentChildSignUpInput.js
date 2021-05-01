@@ -7,7 +7,7 @@ const ParentChildSignUpInput = `
     grade: Grade
     country: Country
     timezone: String
-    section:  String
+    section: Section @groupBy
     rollNo: String
     batch: String
     branch: String
