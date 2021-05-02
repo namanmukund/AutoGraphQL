@@ -6,7 +6,7 @@ import { CanNotChangeSessionStatusError } from '../../../../../constants/errors/
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 
 const updateBatchSessionValidation = async (params, mutationOrQueryName, context) => {
-  const { id: batchSessionId, input: { sessionStatus } } = params;
+  const { id: batchSessionId, input: { sessionStatus, bookingDate: bookingDateFromInput } } = params;
   const batchSessionData = await callLocalGraphqlApi(batchSessionQuery(batchSessionId));
   const batchSession = get(batchSessionData, 'data.batchSession');
   if (!batchSession || !batchSession.id) {
@@ -31,6 +31,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   context.bookingDate = bookingDate;
   context.mentorSessionConnectId = mentorSession && mentorSession.id;
   context.slotTimeArray = slotTimeArray;
+  context.bookingDateFromInput = bookingDateFromInput;
 
   // if session is complete and user is trying to change the status then throw error
   if (prevSessionStatus === 'completed' && sessionStatus && sessionStatus !== 'completed') {
