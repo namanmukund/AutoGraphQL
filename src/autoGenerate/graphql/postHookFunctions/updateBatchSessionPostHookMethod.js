@@ -69,6 +69,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     batchId,
     bookingDate,
     mentorSessionConnectId,
+    bookingDateFromInput,
   } = context;
   /*
     get Course Id
@@ -127,21 +128,24 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   }
 
   // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
-  // eslint-disable-next-line no-restricted-syntax
-  for (const student of students) {
-    if (student.user && student.user.id) {
-      addMentorMenteeSessionForBatch(
-        student.user.id,
-        '',
-        topicId,
-        bookingDate,
-        slotTimeArray[0],
-        mentorSessionConnectId,
-        courseId,
-        sessionStatusFromInput || sessionStatus.allotted,
-        student.user.source,
-        'updateBatchSession',
-      );
+  // this should only happen if we are changing sessionStatus or bookingDateFromInput
+  if ((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput) {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const student of students) {
+      if (student.user && student.user.id) {
+        addMentorMenteeSessionForBatch(
+          student.user.id,
+          '',
+          topicId,
+          bookingDate,
+          slotTimeArray[0],
+          mentorSessionConnectId,
+          courseId,
+          sessionStatusFromInput || sessionStatus.allotted,
+          student.user.source,
+          'updateBatchSession',
+        );
+      }
     }
   }
 };
