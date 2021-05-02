@@ -67,6 +67,9 @@ import BannerType from './BannerType';
 import CheatSheetType from './CheatSheetType';
 import StudentProfileAvatarCode from './StudentProfileAvatarCode';
 import UserSavedCodeStatus from './UserSavedCodeStatus';
+import AuthorType from './AuthorType';
+import TestimonialType from './TestimonialType';
+import Section from './Section';
 
 export default [
   Status,
@@ -139,4 +142,7 @@ export default [
   CheatSheetType,
   StudentProfileAvatarCode,
   UserSavedCodeStatus,
+  AuthorType,
+  TestimonialType,
+  Section,
 ];

@@ -35,7 +35,7 @@ const getSlotLabel = (slotNumber) => {
 };
 
 const getIntlDateTime = (date, istTime, targetTimezone) => {
-  const timezone = getTimezone(targetTimezone);
+  const timezone = getTimezone(targetTimezone || 'Asia/Kolkata');
   const indianOffset = get(getTimezone('Asia/Kolkata'), 'utcOffset');
   const intlOffset = get(timezone, 'utcOffset');
   const timeDiffInMs = (indianOffset - intlOffset) * 60 * 1000;
