@@ -59,6 +59,11 @@ const getCheatSheetContents = async ({ input, bookmarkedCheatSheetData }) => {
   let filter = '';
   if (input.topicId || input.searchText) {
     if (input.topicId) {
+      const topicsData = await callLocalGraphqlApi(getTopics());
+      const topics = get(topicsData, 'data.topics', []);
+      topics.forEach((topic) => {
+        topicsArray.push({ topic: { type: 'Topic', typeId: `${topic.id}` }, isSelected: get(topic, 'id') === input.topicId });
+      });
       filter = `{topic_some:{id:"${input.topicId}"}}, `;
     }
     if (input.searchText) {
@@ -66,6 +71,7 @@ const getCheatSheetContents = async ({ input, bookmarkedCheatSheetData }) => {
     }
     data = await callLocalGraphqlApi(getCheatSheets(filter));
     const cheatSheets = get(data, 'data.cheatSheets', []);
+
     // constructing the data as defined in schema for cheatSheetConcepts
     cheatSheets.forEach((concept, i) => {
       // iterating through each cheatsheet and finding that particular cheatsheet in bookmarkedData
@@ -82,6 +88,11 @@ const getCheatSheetContents = async ({ input, bookmarkedCheatSheetData }) => {
       });
     });
   } else if (input.isFavourite) {
+    const topicsData = await callLocalGraphqlApi(getTopics());
+    const topics = get(topicsData, 'data.topics', []);
+    topics.forEach((topic) => {
+      topicsArray.push({ topic: { type: 'Topic', typeId: `${topic.id}` }, isSelected: false });
+    });
     bookmarkedCheatSheetData.forEach(({ isBookmarked, id, ...concept }, i) => {
       cheatSheetArray.push({
         cheatsheet: { type: 'CheatSheet', typeId: `${get(concept, 'cheatsheet.id')}` },
