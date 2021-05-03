@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
-const fetchBookmarks = async (userId, cheatSheetId, bookmarkId) => {
+const fetchBookmarks = async (userId, cheatSheetId) => {
   const query = `
           {
             userCheatSheets(
@@ -9,12 +9,10 @@ const fetchBookmarks = async (userId, cheatSheetId, bookmarkId) => {
                 and: [
                     { user_some: { id: "${userId}" } }
                     { cheatsheet_some: { id: "${cheatSheetId}" } }
-                    ${bookmarkId ? `{ id: "${bookmarkId}" }` : ''}
                 ]
                 }
             ) {
                 id
-                isBookmarked
             }
           }
           `;

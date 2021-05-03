@@ -75,7 +75,6 @@ import updateProductValidation from './preHookFunctions/validation/updateProduct
 import deleteProductValidation from './preHookFunctions/validation/deleteProductValidation';
 import updateStudentProfileValidation from './preHookFunctions/validation/updateStudentProfileValidation';
 import addUserCheatSheetValidation from './preHookFunctions/validation/addUserCheatSheetValidation';
-import updateUserCheatSheetValidation from './preHookFunctions/validation/updateUserCheatSheetValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -646,10 +645,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'addUserCheatSheet': {
       await addUserCheatSheetValidation(params, mutationOrQueryName, context);
-      break;
-    }
-    case 'updateUserCheatSheet': {
-      await updateUserCheatSheetValidation(params, mutationOrQueryName, context);
       break;
     }
     default: {

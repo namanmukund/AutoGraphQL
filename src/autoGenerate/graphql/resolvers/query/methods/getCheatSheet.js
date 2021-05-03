@@ -72,13 +72,13 @@ const getCheatSheetContents = async ({ input, bookmarkedCheatSheetData }) => {
       // to get the corresponding bookmarked data i.e (bookmarkId and its status),
       // same is done for below cases if(if cheatsheetId is passed or if no input is passed)
       const bookmarkData = bookmarkedCheatSheetData && bookmarkedCheatSheetData.find((bData) => get(bData, 'cheatsheet.id') === get(concept, 'id'));
-      const bookmarkId = get(bookmarkData, 'id', '');
+      const userCheatSheetId = get(bookmarkData, 'id', '');
       const isBookmark = get(bookmarkData, 'isBookmarked', false);
       cheatSheetArray.push({
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
         isBookmarked: isBookmark,
         isSelected: i === 0,
-        bookmarkId,
+        userCheatSheetId,
       });
     });
   } else if (input.isFavourite) {
@@ -87,7 +87,7 @@ const getCheatSheetContents = async ({ input, bookmarkedCheatSheetData }) => {
         cheatsheet: { type: 'CheatSheet', typeId: `${get(concept, 'cheatsheet.id')}` },
         isBookmarked,
         isSelected: i === 0,
-        bookmarkId: id,
+        userCheatSheetId: id,
       });
     });
   } else if (input.cheatSheetId !== '') {
@@ -107,13 +107,13 @@ const getCheatSheetContents = async ({ input, bookmarkedCheatSheetData }) => {
     // constructing the data as defined in schema for cheatSheetConcepts and cheatSheetTopics and returning value
     cheatSheets.forEach((concept, i) => {
       const bookmarkData = bookmarkedCheatSheetData && bookmarkedCheatSheetData.find((bData) => get(bData, 'cheatsheet.id') === get(concept, 'id'));
-      const bookmarkId = get(bookmarkData, 'id', '');
+      const userCheatSheetId = get(bookmarkData, 'id', '');
       const isBookmark = get(bookmarkData, 'isBookmarked', false);
       cheatSheetArray.push({
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
         isBookmarked: isBookmark,
         isSelected: i === 0,
-        bookmarkId,
+        userCheatSheetId,
       });
     });
   }
@@ -138,13 +138,13 @@ const getCheatSheetContentWithoutInput = async (bookmarkedCheatSheetData) => {
     const cheatsheets = get(data, 'data.cheatSheets', []);
     cheatsheets.forEach((concept, i) => {
       const bookmarkData = bookmarkedCheatSheetData && bookmarkedCheatSheetData.find((bData) => get(bData, 'cheatsheet.id') === get(concept, 'id'));
-      const bookmarkId = get(bookmarkData, 'id', '');
+      const userCheatSheetId = get(bookmarkData, 'id', '');
       const isBookmark = get(bookmarkData, 'isBookmarked', false);
       cheatSheetArray.push({
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
         isBookmarked: isBookmark,
         isSelected: i === 0,
-        bookmarkId,
+        userCheatSheetId,
       });
     });
   }
@@ -180,7 +180,7 @@ const getCheatSheet = (async (root, params, context) => {
     /* eslint-disable no-lonely-if */
   } else {
     // if user is loggedIn will also fetch its bookmarked cheatSheets to pass it's isBookmarked status (true/false) and
-    // also its corresponding bookmarkId to perform (update/delete) operation
+    // also its corresponding userCheatSheetId to perform (update/delete) operation
     let bookmarkedCheatSheet;
     if (input && input.isFavourite === true) {
       bookmarkedCheatSheet = await callLocalGraphqlApi(getBookmarkedCheats(userId, true));
