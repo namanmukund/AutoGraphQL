@@ -1,7 +1,7 @@
 const Class = `
 type Class {
   grade: Grade
-  section: String
+  section: Section
   subjects: [Subject]
 }
 `;

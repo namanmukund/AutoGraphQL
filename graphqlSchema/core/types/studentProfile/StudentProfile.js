@@ -1,7 +1,7 @@
 const StudentProfile = `
   type StudentProfile @model {
     grade: Grade @groupBy
-    section: String @groupBy
+    section: Section @groupBy
     branch: String
     rollNo: String
     profileAvatarCode: StudentProfileAvatarCode
