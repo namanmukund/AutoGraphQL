@@ -20,13 +20,13 @@ const NewsFeed = `
   rule: allow
   )
   {
-    order: Int
     title: String! @trim
     description: String @trim
     publishedBy: String @trim
     publishedOn: Date
     newsFeedLink: String @trim
     thumbnail: File @relation(name: "NewsFeedThumbnail", direction: "OneWay")
+    thumbnailSmall: File @relation(name: "NewsFeedThumbnailSmall", direction: "OneWay")
     status: ContentStatus! @defaultValue(value: "unpublished")
   }
 `;
