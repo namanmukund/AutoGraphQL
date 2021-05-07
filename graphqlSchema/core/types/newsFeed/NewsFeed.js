@@ -1,0 +1,34 @@
+import { READ } from '../../../../constants/graphqlOperations';
+import { TMS, TLA, TWA } from '../../../../constants';
+import { UMS_HEAD, NOT_UMS_HEAD } from '../../../../constants/roles';
+
+const NewsFeed = `
+  type NewsFeed @model
+  @appPermissions(
+    permissions:[
+      { appName: "${TMS}" operations: "*" },
+      { appName: "${TLA}" operations: ${READ} },
+      { appName: "${TWA}" operations: ${READ} }
+      ],
+    rule: allow
+  )
+  @userPermissions(
+  permissions:[
+    { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
+    { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${READ} }
+    ],
+  rule: allow
+  )
+  {
+    order: Int
+    title: String! @trim
+    description: String @trim
+    publishedBy: String @trim
+    publishedOn: Date
+    newsFeedLink: String @trim
+    thumbnail: File @relation(name: "NewsFeedThumbnail", direction: "OneWay")
+    status: ContentStatus! @defaultValue(value: "unpublished")
+  }
+`;
+
+export default NewsFeed;
