@@ -1,6 +1,6 @@
 import { READ } from '../../../../constants/graphqlOperations';
 import { TMS, TLA, TWA } from '../../../../constants';
-import { UMS_HEAD, NOT_UMS_HEAD } from '../../../../constants/roles';
+import { CMS_HEAD, NOT_CMS_HEAD } from '../../../../constants/roles';
 
 const NewsFeed = `
   type NewsFeed @model
@@ -14,8 +14,8 @@ const NewsFeed = `
   )
   @userPermissions(
   permissions:[
-    { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
-    { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${READ} }
+    { userRole: ${CMS_HEAD} appName: "*" operations: "*" },
+    { userRole: ${NOT_CMS_HEAD} appName: "*" operations: ${READ} }
     ],
   rule: allow
   )
