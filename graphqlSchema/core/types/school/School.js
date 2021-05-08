@@ -1,8 +1,8 @@
 const School = `
   type School @model {
-    name: String @unique
+    name: String! @unique
     admins: [User] @relation(name:"UserSchool")
-    classes: [Class]
+    classes: [SchoolClass] @relation(name: "SchoolClassSchool")
     students: [StudentProfile] @relation(name: "StudentProfileSchool")
     coordinatorEmail: String @uniqueOrEmpty @trim
     coordinatorPhone: Phone @uniqueOrEmpty

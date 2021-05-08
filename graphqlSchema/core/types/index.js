@@ -85,6 +85,7 @@ import Testimonial from './testimonial';
 import CheatSheetData from './cheatSheetData';
 import UserCheatSheet from './userCheatSheet';
 import NewsFeed from './newsFeed';
+import SchoolClass from './schoolClass';
 
 export default [
   ...User,
@@ -174,4 +175,5 @@ export default [
   ...CheatSheetData,
   ...UserCheatSheet,
   ...NewsFeed,
+  ...SchoolClass,
 ];
