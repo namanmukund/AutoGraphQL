@@ -22,7 +22,7 @@ const NewsFeed = `
   {
     title: String! @trim
     description: String @trim
-    publishedBy: String @trim
+    publishedBy: Publisher
     publishedOn: Date
     newsFeedLink: String @trim
     thumbnail: File @relation(name: "NewsFeedThumbnail", direction: "OneWay")

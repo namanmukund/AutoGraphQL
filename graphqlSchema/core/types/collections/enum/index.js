@@ -70,6 +70,7 @@ import UserSavedCodeStatus from './UserSavedCodeStatus';
 import AuthorType from './AuthorType';
 import TestimonialType from './TestimonialType';
 import Section from './Section';
+import Publisher from './Publisher'
 
 export default [
   Status,
@@ -145,4 +146,5 @@ export default [
   AuthorType,
   TestimonialType,
   Section,
+  Publisher
 ];
