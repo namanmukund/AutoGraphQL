@@ -75,6 +75,8 @@ import updateProductValidation from './preHookFunctions/validation/updateProduct
 import deleteProductValidation from './preHookFunctions/validation/deleteProductValidation';
 import updateStudentProfileValidation from './preHookFunctions/validation/updateStudentProfileValidation';
 import addUserCheatSheetValidation from './preHookFunctions/validation/addUserCheatSheetValidation';
+import addSchoolClassGradeSectionValidation from './preHookFunctions/validation/addSchoolClassGradeSectionValidation';
+import updateSchoolClassGradeSectionValidation from './preHookFunctions/validation/updateSchoolClassGradeSectionValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -645,6 +647,13 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'addUserCheatSheet': {
       await addUserCheatSheetValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addSchoolClass': {
+      await addSchoolClassGradeSectionValidation(params, mutationOrQueryName, context)
+    }
+    case 'updateSchoolClass': {
+      await updateSchoolClassGradeSectionValidation(params, mutationOrQueryName, context)
       break;
     }
     default: {

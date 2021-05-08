@@ -1,28 +1,26 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
-const fetchSchools = async (schoolId, grade, section) => {
+const fetchSchoolClasses = async (schoolId, grade, section) => {
   const query = `
           {
-            schools(filter: {
-              and:[
-                {id: "${schoolId}"},
-                {classes_grade_subDoc: "${grade}"},
-                {classes_section_subDoc: "${section}"},
-              ]
-            }){
-              id
-              name
-              classes{
-                grade
-                section
-                subjects
+            schoolClasses(filter:
+              {
+                and:[
+                  {school_some: {id: "${schoolId}"}},
+                  {grade: ${grade}},
+                  {section: ${section}}
+                ]
               }
+            ){
+              id
+              grade
+              section
             }
           }
           `;
-  const school = await callLocalGraphqlApi(query);
-  return get(school, 'data.schools', []);
+  const schoolClass = await callLocalGraphqlApi(query);
+  return get(schoolClass, 'data.schoolClasses', []);
 };
 
-export default fetchSchools;
+export default fetchSchoolClasses;
