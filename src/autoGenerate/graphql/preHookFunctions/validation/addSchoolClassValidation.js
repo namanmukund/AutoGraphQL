@@ -1,7 +1,7 @@
 import { GradeSectionCombinationAlreadyExists } from '../../../../../constants/errors';
 import fetchSchools from './utils/checkIfGradeSectionExists';
 
-const addSchoolClassGradeSectionValidation = async (params) => {
+const addSchoolClassValidation = async (params) => {
   const { schoolConnectId: schoolId, input: { grade, section } } = params;
   const schoolClasses = await fetchSchools(schoolId, grade, section);
   if (schoolClasses && schoolClasses.length > 0) {
@@ -10,4 +10,4 @@ const addSchoolClassGradeSectionValidation = async (params) => {
   return true;
 };
 
-export default addSchoolClassGradeSectionValidation;
+export default addSchoolClassValidation;
