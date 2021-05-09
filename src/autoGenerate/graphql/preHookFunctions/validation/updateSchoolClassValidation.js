@@ -95,18 +95,21 @@ const updateSchoolClassValidation = async (params) => {
           throw new GradeSectionCombinationAlreadyExists();
         }
       } else if (grade && !section) {
-        const schoolClasses = await fetchSchoolClass(null, grade, sectionFetched, schoolId);
-        if (schoolClasses && schoolClasses.length > 0) {
-          throw new GradeSectionCombinationAlreadyExists();
+        if (sectionFetched) {
+          const schoolClasses = await fetchSchoolClass(null, grade, sectionFetched, schoolId);
+          if (schoolClasses && schoolClasses.length > 0) {
+            throw new GradeSectionCombinationAlreadyExists();
+          }
         }
       } else if (!grade && section) {
-        const schoolClasses = await fetchSchoolClass(null, gradeFetched, section, schoolId);
-        if (schoolClasses && schoolClasses.length > 0) {
-          throw new GradeSectionCombinationAlreadyExists();
+        // grade mandatory but added for uniformity
+        if (gradeFetched) {
+          const schoolClasses = await fetchSchoolClass(null, gradeFetched, section, schoolId);
+          if (schoolClasses && schoolClasses.length > 0) {
+            throw new GradeSectionCombinationAlreadyExists();
+          }
         }
       }
-
-
     }
   }
   return true;
