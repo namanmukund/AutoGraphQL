@@ -84,12 +84,29 @@ const updateSchoolClassValidation = async (params) => {
     const schoolClassOfGivenId = await fetchSchoolClass(schoolClassId);
     if (schoolClassOfGivenId && schoolClassOfGivenId.length > 0) {
       const schoolId = schoolClassOfGivenId[0].school.id;
+      const gradeFetched = schoolClassOfGivenId[0].grade;
+      const sectionFetched = schoolClassOfGivenId[0].section;
 
       // then we check if for the given input of grade and class if there exists some document in the same school, by passing the school id
-      const schoolClasses = await fetchSchoolClass(null, grade, section, schoolId);
-      if (schoolClasses && schoolClasses.length > 0) {
-        throw new GradeSectionCombinationAlreadyExists();
+
+      if (grade && section) {
+        const schoolClasses = await fetchSchoolClass(null, grade, section, schoolId);
+        if (schoolClasses && schoolClasses.length > 0) {
+          throw new GradeSectionCombinationAlreadyExists();
+        }
+      } else if (grade && !section) {
+        const schoolClasses = await fetchSchoolClass(null, grade, sectionFetched, schoolId);
+        if (schoolClasses && schoolClasses.length > 0) {
+          throw new GradeSectionCombinationAlreadyExists();
+        }
+      } else if (!grade && section) {
+        const schoolClasses = await fetchSchoolClass(null, gradeFetched, section, schoolId);
+        if (schoolClasses && schoolClasses.length > 0) {
+          throw new GradeSectionCombinationAlreadyExists();
+        }
       }
+
+
     }
   }
   return true;
