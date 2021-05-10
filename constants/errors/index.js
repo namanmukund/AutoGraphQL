@@ -43,6 +43,7 @@ import {
   ProductWithSimilarTypeAlreadyPublished,
   UserCheatSheetAlreadyExists,
   AlreadyBookmarkedCheatSheet,
+  GradeSectionCombinationAlreadyExists,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -222,4 +223,5 @@ export {
   ProductWithSimilarTypeAlreadyPublished,
   UserCheatSheetAlreadyExists,
   AlreadyBookmarkedCheatSheet,
+  GradeSectionCombinationAlreadyExists,
 };

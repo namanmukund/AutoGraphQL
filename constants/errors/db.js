@@ -135,3 +135,7 @@ export const UserCheatSheetAlreadyExists = createError('UserCheatSheetAlreadyExi
 export const AlreadyBookmarkedCheatSheet = createError('AlreadyBookmarkedCheatSheet', {
   message: 'Already bookmarked this cheatsheet',
 });
+
+export const GradeSectionCombinationAlreadyExists = createError('GradeSectionCombinationAlreadyExists', {
+  message: 'Provided grade and section combination already exists',
+});

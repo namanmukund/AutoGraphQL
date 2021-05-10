@@ -84,6 +84,7 @@ import ProjectContent from './projectContent';
 import Testimonial from './testimonial';
 import CheatSheetData from './cheatSheetData';
 import UserCheatSheet from './userCheatSheet';
+import NewsFeed from './newsFeed';
 import SchoolClass from './schoolClass';
 
 export default [
@@ -173,5 +174,6 @@ export default [
   ...Testimonial,
   ...CheatSheetData,
   ...UserCheatSheet,
+  ...NewsFeed,
   ...SchoolClass,
 ];
