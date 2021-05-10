@@ -1,34 +1,34 @@
-import { GradeSectionCombinationAlreadyExists } from '../../../../../constants/errors';
 import { get } from 'lodash';
+import { GradeSectionCombinationAlreadyExists } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 const getGradeFilter = (grade) => {
   if (grade) {
-    return `{grade : ${grade}}`
+    return `{grade : ${grade}}`;
   }
-  return ''
-}
+  return '';
+};
 
 const getSectionFilter = (section) => {
   if (section) {
-    return `{section : ${section}}`
+    return `{section : ${section}}`;
   }
-  return ''
-}
+  return '';
+};
 
 const getSchoolFilter = (schoolConnectId) => {
   if (schoolConnectId) {
-    return `{school_some: {id : "${schoolConnectId}"}}`
+    return `{school_some: {id : "${schoolConnectId}"}}`;
   }
-  return ''
-}
+  return '';
+};
 
 const getSchoolClassIdFilter = (schoolClassId) => {
   if (schoolClassId) {
-    return `{ id: "${schoolClassId}" }`
+    return `{ id: "${schoolClassId}" }`;
   }
-  return ''
-}
+  return '';
+};
 
 const fetchSchoolClass = async (schoolClassId, grade, section, schoolConnectId) => {
   const query = `
@@ -63,7 +63,6 @@ const updateSchoolClassValidation = async (params) => {
   if (schoolConnectId) {
     const schoolClassesOfGivenSchoolId = await fetchSchoolClass(null, null, null, schoolConnectId);
     if (schoolClassesOfGivenSchoolId && schoolClassesOfGivenSchoolId.length > 0) {
-
       // then we fetch the already stored grade and section from the given schoolClassId
       const schoolClassOfGivenId = await fetchSchoolClass(schoolClassId);
       if (schoolClassOfGivenId && schoolClassOfGivenId.length > 0) {
@@ -71,15 +70,15 @@ const updateSchoolClassValidation = async (params) => {
         const sectionOfClass = schoolClassOfGivenId[0].section;
 
         // then we iterate through the results of existing school classes in the first result and if any of the grade and section from that list matches the grade and section of the current schoolClass, we will throw error
-        schoolClassesOfGivenSchoolId.map(item => {
+        // eslint-disable-next-line array-callback-return
+        schoolClassesOfGivenSchoolId.map((item) => {
           if (item.grade === gradeOfClass && item.section === sectionOfClass) {
             throw new GradeSectionCombinationAlreadyExists();
           }
-        })
+        });
       }
     }
   } else {
-
     // else if the update query is to change the grade or section of school class without changin the school it is connected to, we first query the school id corresponding to the schoolClassId
     const schoolClassOfGivenId = await fetchSchoolClass(schoolClassId);
     if (schoolClassOfGivenId && schoolClassOfGivenId.length > 0) {
