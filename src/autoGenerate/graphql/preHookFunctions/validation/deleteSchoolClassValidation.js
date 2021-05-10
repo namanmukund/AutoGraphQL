@@ -5,15 +5,11 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 const fetchSchoolClasses = async (schoolClassId) => {
   const query = `
           {
-            schoolClasses(filter:
-              {
-                and:[
-                  {id: "${schoolClassId}"},
-                  {students_exists:true}
-                ]
-              }
-            ){
+            schoolClasses(filter: {id: "${schoolClassId}"}){
               id
+              studentsMeta{
+                count
+              }
             }
           }
           `;
@@ -27,7 +23,10 @@ const deleteSchoolClassValidation = async (params) => {
   // checking if students are linked to the schoolClass corresponding to the id
   const schoolClasses = await fetchSchoolClasses(schoolClassId);
   if (schoolClasses && schoolClasses.length > 0) {
-    throw new StudentsLinked();
+    const studentsMeta = schoolClasses[0].studentsMeta;
+    if (studentsMeta && studentsMeta.count !== 0) {
+      throw new StudentsLinked();
+    }
   }
   return true;
 };
