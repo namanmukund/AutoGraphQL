@@ -44,6 +44,7 @@ import {
   UserCheatSheetAlreadyExists,
   AlreadyBookmarkedCheatSheet,
   GradeSectionCombinationAlreadyExists,
+  StudentsLinked,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -224,4 +225,5 @@ export {
   UserCheatSheetAlreadyExists,
   AlreadyBookmarkedCheatSheet,
   GradeSectionCombinationAlreadyExists,
+  StudentsLinked,
 };

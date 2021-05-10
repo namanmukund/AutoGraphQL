@@ -139,3 +139,7 @@ export const AlreadyBookmarkedCheatSheet = createError('AlreadyBookmarkedCheatSh
 export const GradeSectionCombinationAlreadyExists = createError('GradeSectionCombinationAlreadyExists', {
   message: 'Provided grade and section combination already exists',
 });
+
+export const StudentsLinked = createError('StudentsLinked', {
+  message: 'Cannot perform the current operation as students are linked to the entity',
+});
