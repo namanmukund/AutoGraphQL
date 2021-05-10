@@ -111,3 +111,91 @@ export const InvalidGmailTokenError = createError('InvalidGmailTokenError', {
 export const InvalidFacebookTokenError = createError('InvalidFacebookTokenError', {
   message: 'Invalid facebook token error',
 });
+
+export const AssignmentQuestionsNotPresentError = createError('AssignmentQuestionsNotPresentError', {
+  message: 'AssignmentQuestions are missing in input',
+});
+
+export const SessionTopicAndTopicConnectIdMismatchError = createError('SessionTopicAndTopicConnectIdMismatchError', {
+  message: 'Invalid topicConnectId sent in input',
+});
+
+export const InvalidSessionDateTimeError = createError('InvalidSessionDateTimeError', {
+  message: 'Invalid session date or time',
+});
+
+export const MissingMandatoryInputInRequestError = createError('MissingMandatoryInputInRequestError', {
+  message: 'One or more than one input is missing in request',
+});
+
+export const InvalidTimeError = createError('InvalidTimeError', {
+  message: 'Time has to be more than current time',
+});
+
+export const InvalidDateError = createError('InvalidDateError', {
+  message: 'Date can not be less than current date',
+});
+
+export const InvalidBannerDateRangeError = createError('InvalidBannerDateRangeError', {
+  message: 'ExpiryDate can not be less than InceptionDate',
+});
+
+export const NoSlotSelectedError = createError('NoSlotSelectedError', {
+  message: 'No slot is selected in input',
+});
+
+export const OnlyOneSlotAllowedError = createError('OnlyOneSlotAllowedError', {
+  message: 'Only one slot can be selected in a day',
+});
+
+export const NameFieldRequiredError = createError('NameFieldRequiredError', {
+  message: 'Name field is mandatory in input',
+});
+
+export const PhoneFieldRequiredError = createError('PhoneFieldRequiredError', {
+  message: 'Phone field is mandatory in input',
+});
+
+export const BannerFieldRequiredError = createError('BannerFieldRequiredError', {
+  message: 'Required Field!',
+});
+
+export const PasswordFieldRequiredError = createError('PasswordFieldRequiredError', {
+  message: 'Password field is mandatory in input',
+});
+
+export const ProductIdNotPresentError = createError('ProductIdNotPresentError', {
+  message: 'Product Id is missing in input',
+});
+
+export const TransactionIdNotPresentError = createError('TransactionIdNotPresentError', {
+  message: 'Transaction Id is missing in input',
+});
+
+export const HashOrStatusNotPresentError = createError('HashOrStatusNotPresentError', {
+  message: 'Hash is missing in input',
+});
+
+export const CanNotChangeVerifiedUserStatusError = createError('CanNotChangeVerifiedUserStatusError', {
+  message: 'Can not change the status of a verified user',
+});
+
+export const CanNotChangeSessionStatusError = createError('CanNotChangeSessionStatusError', {
+  message: 'Can not change the status of a completed session',
+});
+
+export const CanNotCompleteSessionBeforeStartingError = createError('CanNotCompleteSessionBeforeStartingError', {
+  message: 'Can not complete the session before starting it',
+});
+
+export const MessageAlreadySendError = createError('MessageAlreadySendError', {
+  message: 'Message is already send',
+});
+
+export const InvalidRequestError = createError('InvalidRequestError', {
+  message: 'Request validation failed',
+});
+
+export const MandatorySessionLinkError = createError('MandatorySessionLinkError', {
+  message: 'Session link is mandatory',
+});

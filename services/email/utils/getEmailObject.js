@@ -26,5 +26,4 @@ const getEmailObject = (
   return emailObject;
 };
 
-
 export default getEmailObject;

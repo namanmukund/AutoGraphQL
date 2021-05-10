@@ -17,6 +17,7 @@ import getNestedConnectMutationString from '../utils/getNestedConnectMutationStr
 import {
   ADD, DELETE, DELETE_MULTIPLE, UPDATE, UPDATE_MULTIPLE,
 } from '../../../constants/graphqlOperations';
+import customMutationString from './customMutationString';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -327,35 +328,12 @@ Object.keys(parsedASTMap).forEach((type) => {
     });
   }
 });
-
-mutationString += 'signUp ( input: SignUpInput ): UserToken,';
-mutationString += 'setUserPassword ( id: ID!, password: String! ): User,';
-mutationString += 'resetUserPassword ( id: ID!, oldPassword: String!, newPassword: String!  ): User,';
-mutationString += 'login ( input: LoginInput ): UserToken,';
-mutationString += 'socialLogin ( input: SocialLoginInput ): UserToken,';
-mutationString += 'signupExistingUser ( input: ExistingUserInput, stopOtpTrigger:Boolean ): UserToken,';
-mutationString += 'validateUserOTP ( id: ID!, phoneOtp: Int, emailOtp: Int ): User,';
-mutationString += 'resendUserOTP ( id: ID!): User,';
-mutationString += 'sendForgotPasswordOTP (input: PhoneInput, email: String): BooleanResult,';
-mutationString += 'resendForgotPasswordOTP (input: PhoneInput, email: String): BooleanResult,';
-mutationString += 'validateForgotPasswordOTP (input: PhoneInput, phoneOtp: Int, email: String, emailOtp: Int): BooleanResult,';
-mutationString += 'finishForgotPassword (input: PhoneInput, phoneOtp: Int, email: String, emailOtp: Int, newPassword: String!): BooleanResult,';
-mutationString += 'sendForgotPasswordLink (email: String!): BooleanResult,';
-mutationString += 'resetPasswordFromForgotPasswordLink (newPassword: String!): BooleanResult,';
-mutationString += 'userCourseSyllabus : UserCourseSyllabus,';
-mutationString += 'userTopicJourney ( topicId: ID!): UserTopicJourney,';
-mutationString += 'userFirstAndLatestQuizReport ( topicId: ID!): UserFirstAndLatestQuizReport,';
-mutationString += 'skipVideo ( topicId: ID!): SkipVideo,';
-mutationString += 'skipPracticeQuestion ( learningObjectiveId: ID!): BooleanResult,';
-mutationString += 'userBadge : UserBadge,';
-mutationString += 'getUnlockedUserBadge ( input: GetUnlockedUserBadgeInput ): GetUnlockedUserBadgeResult,';
-mutationString += 'getQuizReport ( input: GetQuizReportInput): GetQuizReportResult,';
-// Backend Token only password update mutation
-mutationString += 'tcirtSdrowssaPtes ( id: ID!, password: String! ): User,';
-mutationString += 'uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,';
+/*
+Add custom mutation string along with the generic mutation
+ */
+mutationString += customMutationString;
 
 mutationString = trimEnd(mutationString, ',');
 mutationString += '}';
 const mutation = mutationString;
-
 export { mutation, relationTypes };

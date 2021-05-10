@@ -4,6 +4,7 @@ import { QueryController } from '../autoGenerate/graphql/controllers';
 import { toObject, log } from '../../utils';
 import { STATIC } from '../../constants';
 import { DatabaseRecordNotFoundError } from '../../constants/errors';
+import appSpecificAuthTokens from '../../constants/appSpecificAuthTokens';
 
 const application = process.env.APPLICATION || 'core';
 
@@ -64,6 +65,7 @@ const handleUserToken = async (id, currentApp, currentUser) => {
   const user = await fetchUser(id);
   // Get status
   let { status } = user;
+  const { role } = user;
   // Check if user token have phone login or email login information and update status accordingly
   if (typeof currentUser === 'object' && status === 'active') {
     // commenting emailVerified true logic as unverified email user can be active too
@@ -77,7 +79,32 @@ const handleUserToken = async (id, currentApp, currentUser) => {
   }
   // Put status info in userInfo object
   userInfo.status = status;
+  if (role || role.length) {
+    userInfo.role = role;
+  }
+
   return userInfo;
+};
+
+const extractAndUpdateUserTokenInfoInRequest = async (req, token, currentData) => {
+  try {
+    const decoded = verifyToken(token);
+    if (decoded) {
+      req[currentData] = decoded.userInfo;
+      const { id } = decoded.userInfo;
+      if (id) {
+        const userObj = await handleUserToken(id, req.currentApp, req[currentData]);
+        req[currentData] = {
+          ...req[currentData],
+          ...userObj,
+        };
+      }
+    }
+  } catch (err) {
+    log(`Error processing ${currentData} token in middleware. Wrong user token is being used.`);
+    log(err);
+  }
+  return null;
 };
 
 // Authorization middleware
@@ -116,13 +143,20 @@ const authMiddleware = async (req, res, next) => {
       const decoded = verifyAppToken(appToken, application);
       if (decoded) {
         // if token is static type validate if token is present in the database or not
-        const { type } = decoded.appInfo;
+        const { name, type } = decoded.appInfo;
         let isValidStaticToken = false;
         if (type && type === STATIC) {
           isValidStaticToken = await verifyIfStaticTokenIsValidOrNot(appToken);
           decoded.appInfo.isValidStaticToken = isValidStaticToken;
         }
         req.currentApp = decoded.appInfo;
+        if (appSpecificAuthTokens[name] && authorizationArray && authorizationArray[2]) {
+          await extractAndUpdateUserTokenInfoInRequest(
+            req,
+            authorizationArray[2],
+            appSpecificAuthTokens[name],
+          );
+        }
       }
     } catch (err) {
       log('Error processing app token in middleware. Wrong app token is being used.');
@@ -131,24 +165,9 @@ const authMiddleware = async (req, res, next) => {
   }
   // Verify User
   if (userToken && isValidToken) {
-    try {
-      const decoded = verifyToken(userToken);
-      if (decoded) {
-        req.currentUser = decoded.userInfo;
-        const { id } = decoded.userInfo;
-        if (id) {
-          const userObj = await handleUserToken(id, req.currentApp, req.currentUser);
-          req.currentUser = {
-            ...req.currentUser,
-            ...userObj,
-          };
-        }
-      }
-    } catch (err) {
-      log('Error processing user token in middleware. Wrong user token is being used.');
-      log(err);
-    }
+    await extractAndUpdateUserTokenInfoInRequest(req, userToken, 'currentUser');
   }
   next();
 };
+
 export { authMiddleware, verifyIfStaticTokenIsValidOrNot, handleUserToken };

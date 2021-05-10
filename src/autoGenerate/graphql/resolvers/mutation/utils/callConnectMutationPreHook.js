@@ -1,6 +1,6 @@
 import { camelCase } from 'lodash';
-import { prehook } from '../../../hooks';
 import { isErrorThrown } from '../../../../../../utils';
+import { prehook } from '../../../preHook';
 
 const callConnectMutationPreHook = async (
   updateRecordId,

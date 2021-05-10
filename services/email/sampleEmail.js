@@ -1,4 +1,4 @@
-// template file is the template file name and object is what you want to replace in the html
+// emailTemplate file is the emailTemplate file name and object is what you want to replace in the html
 import parsedHtmlFromTemplateFileAndObject from './utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from './utils/getEmailObject';
 import sendEmail from './utils/sendEmail';
@@ -22,6 +22,5 @@ const sampleEmail = () => {
     sendEmail(emailMsgObject);
   });
 };
-
 
 export default sampleEmail;

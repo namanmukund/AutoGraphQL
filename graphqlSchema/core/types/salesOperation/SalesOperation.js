@@ -1,0 +1,89 @@
+import { TMS, TWA } from '../../../../constants';
+import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
+
+const unQualifiedLeadReasons = `
+    knowCoding: Boolean
+    lookingForAdvanceCourse: Boolean
+    ageNotAppropriate: Boolean
+    notRelevantDifferentStream: Boolean
+    noPayingPower: Boolean
+    notInterestedInCoding: Boolean
+    learningAptitudeIssue: Boolean
+    notAQualifiedLeadComment: String
+`;
+
+const sessionRescheduledReasons = `
+    hasRescheduled: Boolean
+    rescheduledDate: Date
+    rescheduledDateProvided: Boolean
+    internetIssue: Boolean
+    zoomIssue: Boolean
+    laptopIssue: Boolean
+    chromeIssue: Boolean
+    powerCut: Boolean
+    notResponseAndDidNotTurnUp: Boolean
+    turnedUpButLeftAbruptly: Boolean
+    leadNotVerifiedProperly: Boolean
+    otherReasonForReschedule: Boolean
+    otherReasonsComment: String
+`;
+
+const mentorPitch = `
+    pricingPitched: Boolean
+    parentCounsellingDone: Boolean
+    courseInterestedIn: ProductType
+    oneToOne: Boolean
+    oneToTwo: Boolean
+    oneToThree: Boolean
+    leadStatus: LeadStatus @groupBy @defaultValue(value: "unassigned")
+    nextSteps: NextStep
+    otherReasonForNextStep: String
+    nextCallOn: Date
+`;
+
+const studentPersonna = `
+    prodigyChild: Boolean
+    extrovertStudent: YesNoAverage
+    fastLearner: YesNoAverage
+    studentEnglishSpeakingSkill: EnglishSpeakingSkill
+    parentEnglishSpeakingSkill: EnglishSpeakingSkill
+`;
+
+const userPaymentPlan = `
+  userPaymentPlan: UserPaymentPlan @relation(name: "SalesOperationUserPaymentPlan")
+`;
+
+const SalesOperation = `
+  type SalesOperation @model
+  @appPermissions(
+    permissions:[
+      { appName: "${TMS}" operations: "*" },
+      { appName: "${TWA}" operations: "*" },
+      ],
+    rule: allow
+  ) 
+
+${getPermissionSchemaString('SalesOperation')}
+   {
+    userVerificationStatus: SalesTeamStatus @defaultValue(value: "pending")
+    userResponseStatus: UserBehaviourStatus @defaultValue(value: "pending")
+    overallFeedback: String
+    userResponseStatusUpdateDate: Date
+    client: User @relation(name:"SalesOperationClient", direction: "OneWay")
+    monitoredBy: User @relation(name:"SalesOperationMonitoredBy", direction: "OneWay")
+    allottedMentor: User @relation(name:"SalesOperationAllottedMentor", direction: "OneWay")
+    firstMentorMenteeSession: MentorMenteeSession @relation(name:"SalesOperationFirstMentorMenteeSession")
+    salesOperationLog: [SalesOperationLog] @relation(name:"SalesOperationLogSalesOperation")
+    salesOperationActivities: [SalesOperationActivity] @relation(name:"SalesOperationActivitySalesOperation")
+    source: UserOriginSource
+    country: Country @defaultValue(value: "india")
+    enrollmentType: EnrollmentType @defaultValue(value: "free")
+    ${unQualifiedLeadReasons}
+    ${sessionRescheduledReasons}
+    ${mentorPitch}
+    ${studentPersonna}
+    ${userPaymentPlan}
+  }
+`;
+
+export default SalesOperation;

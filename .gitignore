@@ -9,3 +9,8 @@ coverage*
 uploads/
 .serverless
 mongoMigration/oldVersioningMigrationFiles/*
+main.py
+.env
+__pycache__/
+
+

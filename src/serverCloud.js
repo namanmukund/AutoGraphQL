@@ -1,5 +1,7 @@
+import { log } from '../utils';
+
 /* eslint-disable no-unused-vars */
+log(`Start time:${new Date()}`);
 require('./server');
-require('./firebase/connectDb');
 // Intantiate App.
 require('./cloudApp');

@@ -68,6 +68,31 @@ const getBadgeQuery = (
   }
   `;
 
+// query to get batch status
+const getBatchStatus = (userId) => `
+  query{
+    user(id: "${userId}"){
+      studentProfile{
+        batch{
+          id
+          type
+          currentComponent{
+            currentCourse{
+              id
+              order
+            }
+            currentTopic{
+              id
+              order
+            }
+            latestSessionStatus
+          }
+        }
+      }
+    }
+  }
+  `;
+
 /*
 This is called when user clicks next on video/quiz
 It will return  badge if user is on that component otherwise will return no badge
@@ -113,11 +138,25 @@ const getUnlockedUserBadgeMutationResolver = async (
   const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
   // calling method to validate user current topic component status
   validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
-  const currentTopicId = get(currentTopicComponentInfo, 'currentTopic.id');
+
+  // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
+  const batchRes = await callLocalGraphqlApi(
+    getBatchStatus(userId),
+    context,
+    '',
+  );
+
+  const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+
+  let currentTopicId = get(currentTopicComponentInfo, 'currentTopic.id');
   const currentTopicComponent = get(currentTopicComponentInfo, 'currentTopicComponentType');
+
+  if (batchCurrentComponentInfo) {
+    currentTopicId = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic && batchCurrentComponentInfo.currentTopic.id;
+  }
   // badge will only be returned in case user is on that particular topic and component
   // in alll other cases displayBadge will remain false
-  if (inputTopicId === currentTopicId && inputComponent === currentTopicComponent) {
+  if (inputTopicId === currentTopicId && ((inputComponent === currentTopicComponent))) {
     // calling method to get all published badges
     const badgeRes = await callLocalGraphqlApi(
       getBadgeQuery(inputTopicId, inputComponent),

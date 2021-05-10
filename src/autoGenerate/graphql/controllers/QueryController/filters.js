@@ -36,7 +36,6 @@ const getFilterKeyAndValueFromParam = (filterObject) => {
   return returnObject;
 };
 
-
 // get all foreign keys from relation filter querying in related collection
 const getRelatedTypeIdsFromRelationFilter = (relatedType, fieldName, filterValue) => {
   const relatedModel = models[relatedType];
@@ -246,19 +245,19 @@ const generateQueryParamsForFilter = (
       break;
     }
     case allFilters.lt: {
-      queryParams[filterKey] = { $lt: filterValue };
+      queryParams[filterKey] = { $lt: filterValue ? new Date(filterValue) : '' };
       break;
     }
     case allFilters.lte: {
-      queryParams[filterKey] = { $lte: filterValue };
+      queryParams[filterKey] = { $lte: filterValue ? new Date(filterValue) : '' };
       break;
     }
     case allFilters.gt: {
-      queryParams[filterKey] = { $gt: filterValue };
+      queryParams[filterKey] = { $gt: filterValue ? new Date(filterValue) : '' };
       break;
     }
     case allFilters.gte: {
-      queryParams[filterKey] = { $gte: filterValue };
+      queryParams[filterKey] = { $gte: filterValue ? new Date(filterValue) : '' };
       break;
     }
     case allFilters.contains: {

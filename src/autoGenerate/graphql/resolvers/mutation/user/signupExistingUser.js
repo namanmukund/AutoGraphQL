@@ -13,7 +13,6 @@ import { sendEmailOtpToUser } from '../../../../../email/messages';
 import validateSignupExistingUserStatus from '../utils/validateSignupExistingUserStatus';
 import { ADD } from '../../../../../../constants/graphqlOperations';
 
-
 const updateExistingUserOTP = (
   searchObj,
   updateObj,
@@ -68,8 +67,8 @@ export default function signupExistingUserMutationResolver(
     {},
   );
 
-  const decodedUser = authentication && authentication.user;
-  if (decodedUser) {
+  const currentUser = authentication && authentication.user;
+  if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
 

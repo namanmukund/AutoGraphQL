@@ -18,6 +18,7 @@ import validateForgotPasswordOTPMutationResolver from './forgotPassword/validate
 import finishForgotPasswordMutationResolver from './forgotPassword/finishForgotPassword';
 import resendForgotPasswordOTPMutationResolver from './forgotPassword/resendForgotPasswordOTP';
 import userCourseSyllabusMutationResolver from './userData/userCourseSyllabus';
+import menteeCourseSyllabusMutationResolver from './userData/menteeCourseSyllabus';
 import userTopicJourneyMutationResolver from './userData/userTopicJourney';
 import userFirstAndLatestQuizReportMutationResolver from './userData/userFirstAndLatestQuizReport';
 import skipVideoMutationResolver from './userData/skipVideo';
@@ -27,6 +28,10 @@ import sendForgotPasswordLinkMutationResolver from './forgotPassword/sendForgotP
 import resetPasswordFromForgotPasswordLinkMutationResolver from './forgotPassword/resetPasswordFromForgotPasswordLink';
 import getUnlockedUserBadgeMutationResolver from './userData/getUnlockedUserBadge';
 import getQuizReportMutationResolver from './userData/getQuizReport';
+import parentChildSignUpMutationResolver from './user/parentChildSignUp';
+import loginViaPasswordMutationResolver from './user/loginViaPassword';
+import getPaymentRequestMutationResolver from './payment/getPaymentRequest';
+import getPaymentResponseMutationResolver from './payment/getPaymentResponse';
 
 export {
   addMutationResolver,
@@ -49,6 +54,7 @@ export {
   setPasswordStrictMutationPromise,
   deleteMultipleMutationResolver,
   userCourseSyllabusMutationResolver,
+  menteeCourseSyllabusMutationResolver,
   userTopicJourneyMutationResolver,
   userFirstAndLatestQuizReportMutationResolver,
   skipVideoMutationResolver,
@@ -58,4 +64,8 @@ export {
   resetPasswordFromForgotPasswordLinkMutationResolver,
   getUnlockedUserBadgeMutationResolver,
   getQuizReportMutationResolver,
+  parentChildSignUpMutationResolver,
+  loginViaPasswordMutationResolver,
+  getPaymentRequestMutationResolver,
+  getPaymentResponseMutationResolver,
 };

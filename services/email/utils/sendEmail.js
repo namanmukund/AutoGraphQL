@@ -1,5 +1,5 @@
 import sgMail from '@sendgrid/mail';
-import { sendGridApi } from '../../../config/authParams';
+import sendGridApi from '../../../config/sendGrid';
 import { log } from '../../../utils/log';
 import allowedEmailEnvironments from '../../../constants/allowedEmailEnvironments';
 
@@ -11,7 +11,7 @@ const sendEmail = (emailMsgObject) => {
     sgMail
       .send(emailMsgObject, (error) => {
         if (error) {
-          log('Error while sending emial.');
+          log('Error while sending email.');
           log(error);
         }
       });

@@ -1,0 +1,36 @@
+import * as schedule from 'node-schedule';
+import scheduleTrialSessionReminder from './scheduleJobs/scheduleTrialSessionReminder';
+import scheduleMentorReport from './scheduleJobs/scheduleMentorReport';
+
+// create scheduler for different functionalities
+const createScheduler = (schedulerName) => {
+  // eslint-disable-next-line no-unused-vars
+  const rule = new schedule.RecurrenceRule();
+  switch (schedulerName) {
+    case 'sessionReminder':
+      rule.minute = 30;
+      // eslint-disable-next-line no-unused-vars
+      schedule.scheduleJob(rule, async () => {
+        // eslint-disable-next-line no-console
+        console.log('scheduler started for: ', schedulerName);
+        await scheduleTrialSessionReminder();
+      });
+      break;
+    case 'mentorReport':
+      rule.hour = 10;
+      rule.minute = 32;
+      rule.second = 0;
+      rule.dayOfWeek = new schedule.Range(0, 6);
+      // eslint-disable-next-line no-unused-vars
+      schedule.scheduleJob(rule, async () => {
+        // eslint-disable-next-line no-console
+        console.log('scheduler started for: ', schedulerName);
+        await scheduleMentorReport();
+      });
+      break;
+    default:
+  }
+  return true;
+};
+
+export default createScheduler;

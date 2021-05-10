@@ -1,14 +1,21 @@
+import { get } from 'lodash';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer, PubSub } from 'apollo-server-express';
 import schema from './graphql';
-import { log } from '../utils';
-import { graphqlUpload, authMiddleware } from './middlewares';
+import { log, types } from '../utils';
+import { authMiddleware, graphqlUpload } from './middlewares';
 import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
 import Raven from './Raven';
+import dataExtractedFromReq from '../constants/dataExtractedFromReq';
+import { getParsedASTMap } from './autoGenerate/utils';
 
-const port = process.env.PORT || 3000;
+const http = require('http');
+
+const pubsub = new PubSub();
+
+const port = process.env.PORT || 80;
 const env = process.env.NODE_ENV || 'development';
 const application = process.env.APPLICATION || 'core';
 
@@ -49,16 +56,18 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(path, bodyParser.json(), graphqlUpload({ uploadDir: '/tmp/uploads' }));
-
+// To pass parsedASTMap in context
+const parsedASTMap = getParsedASTMap(types);
 // using apollo-server
 const server = new ApolloServer({
   schema,
   playground: {
-    endpoint: `http://localhost:${port}${path}`,
+    endpoint: `http://0.0.0.0:${port}${path}`,
     settings: {
       'editor.theme': 'light',
     },
   },
+  debug: true,
   uploads: false,
   formatError: (error) => {
     if (error.name !== 'GraphQLError') {
@@ -66,9 +75,21 @@ const server = new ApolloServer({
     } else {
       Raven.captureMessage(`Message: ${error.message}`);
     }
-    return error;
+
+    return {
+      ...error,
+      code: get(error, 'extensions.exception.name') || '',
+    };
   },
-  context: ({ req }) => {
+  context: ({ req, connection }) => {
+    if (connection) {
+      // context comes in connection in case WS
+      return {
+        ...connection.context,
+        pubsub,
+        parsedASTMap,
+      };
+    }
     // file info from middleware
     let filePayload = '';
     if (req.body && req.body.variables) {
@@ -112,21 +133,28 @@ const server = new ApolloServer({
       Raven.setContext(contextObj);
     }
     // return context data
+    const obj = {};
+    dataExtractedFromReq.forEach((data) => {
+      obj[data] = req[data];
+    });
     return {
-      decodedUser: req.currentUser,
-      decodedApp: req.currentApp,
+      ...obj,
       filePayload,
-      mutationCallRoute: req.mutationCallRoute,
-      authorization: req.authorization,
-      xForwardedBy: req.xForwardedBy,
+      pubsub,
+      parsedASTMap,
     };
   },
 });
 
-server.applyMiddleware({ app, path });
+server.applyMiddleware({ app });
 
-app.listen(port, () => {
-  log(`Server ready at http://localhost:${port}${server.graphqlPath}`);
+const httpServer = http.createServer(app);
+server.installSubscriptionHandlers(httpServer);
+
+httpServer.listen(port, '0.0.0.0', () => {
+  log(`End time:${new Date()}`);
+  log(`Server ready at http://0.0.0.0:${port}${server.graphqlPath}`);
+  log(`Subscriptions ready at ws://0.0.0.0:${port}${server.subscriptionsPath}`);
 });
 
 export default app;

@@ -21,5 +21,4 @@ const deleteQuestionBankValidation = async (params) => {
   return true;
 };
 
-
 export default deleteQuestionBankValidation;

@@ -8,12 +8,15 @@ import forceDeleteTypeNames from './forceDeleteTypeNames';
 import regexValidation from './regexValidation';
 import loginType from './loginType';
 
+const TMS = 'tekieTms';
+const TLA = 'tekieLearningApp';
+const TWA = 'tekieWebApp';
+const TAA = 'tekieAffiliateApp';
+const TBA = 'core';
+const backendApps = [TBA];
+const byPassMenteeValidationApps = [TBA];
 
-const FRONTEND_APP_ONE = 'tekieTms';
-const FRONTEND_APP_TWO = 'tekieLearningApp';
-const backendApps = ['core'];
-
-const frontEndApps = [FRONTEND_APP_TWO, FRONTEND_APP_ONE];
+const frontEndApps = [TLA, TMS, TWA, TAA];
 const permissionIntegratedApps = [];
 const firebaseExcludedApps = [];
 
@@ -28,6 +31,9 @@ const rangeOTP = {
   min: 1000,
   max: 9999,
 };
+
+const MAX_ALLOWED_REFERRALS = 10;
+const AFFILIATE_MAX_ALLOWED_REFERRALS = 1000;
 const randomNumberRangeForUsername = {
   min: 1,
   max: 99,
@@ -40,7 +46,6 @@ const usernameRules = {
   min: 3,
   max: 30,
 };
-
 
 const connectMutationsArgumentsSuffix = {
   singular: 'ConnectId',
@@ -89,7 +94,7 @@ const arrayUpdateRemoveTypes = [
 const sortBy = ['ASC', 'DESC'];
 const smsOTPMessage = {
   bodyBeforeName: 'Dear ',
-  bodyAfterName: ', your xyz OTP is ',
+  bodyAfterName: ', your login OTP for Tekie App is ',
 };
 
 const fromEmail = 'namanmukund@gmail.com';
@@ -158,6 +163,12 @@ const userTopicTypeStatus = {
   skip: 'skip',
 };
 
+const userSavedCodeStatus = {
+  accepted: 'accepted',
+  pending: 'pending',
+  rejected: 'rejected',
+};
+
 const questionTypes = {
   mcq: 'mcq',
   fibInput: 'fibInput',
@@ -191,24 +202,85 @@ const masteryLevels = {
   defaultMastery: 'none',
 };
 
+const userSourceOrigin = {
+  school: 'school',
+  facebook: 'facebook',
+  instagram: 'instagram',
+  google: 'google',
+  website: 'website',
+  transformation: 'transformation',
+};
+
 const freeTopicCount = 5;
 const badgeTypes = {
   character: 'character',
   equipment: 'equipment',
 };
 
-
 const stickerEmojiType = {
   sticker: 'sticker',
   emoji: 'emoji',
 };
-
 
 const forgotPassWebURL = {
   development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword/',
   staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
   production: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
 };
+
+const slotTimes = [
+  'slot0', 'slot1', 'slot2', 'slot3', 'slot4', 'slot5', 'slot6', 'slot7', 'slot8', 'slot9', 'slot10',
+  'slot11', 'slot12', 'slot13', 'slot14', 'slot15', 'slot16', 'slot17', 'slot18', 'slot19', 'slot20',
+  'slot21', 'slot22', 'slot23',
+];
+
+const CREDITED = 'credited';
+const DEBITED = 'debited';
+const REGISTRATION_BASE_CREDIT = 1000;
+
+const skillsLevel = {
+  easy: 'easy',
+  medium: 'medium',
+  hard: 'hard',
+};
+
+const installmentStatus = {
+  pending: 'pending',
+  paid: 'paid',
+};
+
+const batchType = {
+  normal: 'normal',
+  b2b: 'b2b',
+  b2b2c: 'b2b2c',
+  b2c: 'b2c',
+};
+
+const sessionStatus = {
+  started: 'started',
+  completed: 'completed',
+  allotted: 'allotted',
+};
+
+const leadStatus = {
+  pipeline: 'pipeline',
+  hot: 'hot',
+  cold: 'cold',
+  lost: 'lost',
+  won: 'won',
+  unfit: 'unfit',
+  unassigned: 'unassigned',
+};
+
+export const GIFT_VOUCHER_AMOUNT = 2500;
+
+export const MENTOR_REPORT_COUNTRY = 'india';
+
+export const MENTOR_REPORT_SESSION_TYPE = 'trial';
+
+export const MENTOR_REPORT_DAYS = 3;
+
+export const MENTOR_RATING_AUDIT_THRESHOLD = 4;
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
@@ -243,8 +315,11 @@ export {
   questionTypes,
   scholarshipThreshHolds,
   freeTopicCount,
-  FRONTEND_APP_ONE,
-  FRONTEND_APP_TWO,
+  TMS,
+  TLA,
+  TWA,
+  TAA,
+  TBA,
   loginType,
   masteryLevels,
   learningObjectiveQuizReportThreshHolds,
@@ -252,4 +327,18 @@ export {
   badgeTypes,
   forgotPassWebURL,
   stickerEmojiType,
+  slotTimes,
+  MAX_ALLOWED_REFERRALS,
+  CREDITED,
+  DEBITED,
+  REGISTRATION_BASE_CREDIT,
+  AFFILIATE_MAX_ALLOWED_REFERRALS,
+  skillsLevel,
+  installmentStatus,
+  byPassMenteeValidationApps,
+  userSourceOrigin,
+  batchType,
+  sessionStatus,
+  leadStatus,
+  userSavedCodeStatus,
 };

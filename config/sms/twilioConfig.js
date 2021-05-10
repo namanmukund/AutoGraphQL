@@ -1,7 +1,7 @@
 const twilioConfig = {
-  accountSid: 'AC74ef0587e19e62e869366757cfc34667',
-  authToken: '6f26a4d53b33d529b5cd998e23a96dbc',
-  senderId: '+14843460134',
+  accountSid: process.env.TWILIO_ACCOUNT_SID,
+  authToken: process.env.TWILIO_AUTH_TOKEN,
+  senderId: process.env.TWILIO_SENDER_ID,
 };
 
 export default twilioConfig;

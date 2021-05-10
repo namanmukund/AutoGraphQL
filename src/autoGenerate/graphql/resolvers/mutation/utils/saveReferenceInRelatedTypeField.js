@@ -59,7 +59,6 @@ export const saveReferenceInRelatedTypeField = async (relationObject, ast, authe
   const searchObject = { id: relationObject.typeId };
   let updateObject;
 
-
   let isReferencePresent = false;
   const referencedRecord = await relatedModelQueries.fetchById(relationObject.typeId);
   if (isFieldListType) {

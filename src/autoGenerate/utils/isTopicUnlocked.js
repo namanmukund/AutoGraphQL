@@ -12,6 +12,7 @@ const isTopicUnlocked = (
   isTrial,
   page,
   checkForPaidLogic,
+  batchCurrentComponentInfo,
 ) => {
   const { free, pro } = enrollmentTypes;
   const { video } = topicTypes;
@@ -22,16 +23,38 @@ const isTopicUnlocked = (
   // the video with status as skipped
   let checkIfTopicIsFree = isTrial;
   if (!checkForPaidLogic) checkIfTopicIsFree = true;
-  if ((enrollmentType === pro
+  // check if user belongs to a batch, we will calculate this on basis of batch
+  // else we will do calculation as before
+  if (batchCurrentComponentInfo) {
+    const {
+      currentTopic,
+    } = batchCurrentComponentInfo;
+
+    const batchCurrentTopicOrder = currentTopic && currentTopic.order;
+    if ((enrollmentType === pro
+        && topicOrder <= batchCurrentTopicOrder
+    ) || (enrollmentType === free
+      && topicOrder <= batchCurrentTopicOrder
+      && checkIfTopicIsFree === true && page === video)
+      || (enrollmentType === free
+        && topicOrder <= batchCurrentTopicOrder
+        && page !== video)
+    ) {
+      return true;
+    }
+  } else {
+    /* eslint no-lonely-if:0 */
+    if ((enrollmentType === pro
+        && topicOrder <= currentTopicOrder
+    ) || (enrollmentType === free
       && topicOrder <= currentTopicOrder
-  ) || (enrollmentType === free
-    && topicOrder <= currentTopicOrder
-    && checkIfTopicIsFree === true && page === video)
-    || (enrollmentType === free
-      && topicOrder <= currentTopicOrder
-      && page !== video)
-  ) {
-    return true;
+      && checkIfTopicIsFree === true && page === video)
+      || (enrollmentType === free
+        && topicOrder <= currentTopicOrder
+        && page !== video)
+    ) {
+      return true;
+    }
   }
   return false;
 };

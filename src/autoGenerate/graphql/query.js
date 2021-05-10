@@ -13,6 +13,7 @@ import { InvalidFieldType } from '../../../constants/errors';
 import hasDirective from '../utils/hasDirective';
 import visitField from '../utils/visitField';
 import { PLURAL, SINGULAR, META_QUERY } from '../../../constants/graphqlOperations';
+import customQueryString from './customQueryString';
 
 const parsedASTMap = getParsedASTMap(types);
 const parsedASTTypes = Object.keys(parsedASTMap);
@@ -79,9 +80,9 @@ const generateFieldFilterForScalarTypes = (fieldName, fieldType, isFieldListType
       fieldFilter += `${fieldName}_${allFilters.in}: [${fieldType}],`;
       fieldFilter += `${fieldName}_${allFilters.notIn}: [${fieldType}],`;
       fieldFilter += `${fieldName}_${allFilters.lt}: ${fieldType},`;
-      // fieldFilter += `${fieldName}_${allFilters.lte}: ${fieldType},`;
+      fieldFilter += `${fieldName}_${allFilters.lte}: ${fieldType},`;
       fieldFilter += `${fieldName}_${allFilters.gt}: ${fieldType},`;
-      // fieldFilter += `${fieldName}_${allFilters.gte}: ${fieldType},`;
+      fieldFilter += `${fieldName}_${allFilters.gte}: ${fieldType},`;
       fieldFilter += (fieldName !== 'this') ? `${fieldName}_${allFilters.exists}: Boolean,` : '';
       if (isFieldListType) {
         fieldFilter += `${fieldName}_${allFilters.array}: [${fieldType}]`;
@@ -121,7 +122,9 @@ const generateFieldFilterForScalarTypes = (fieldName, fieldType, isFieldListType
       fieldFilter += `${fieldName}_${allFilters.in}: [${fieldType}],`;
       fieldFilter += `${fieldName}_${allFilters.notIn}: [${fieldType}],`;
       fieldFilter += `${fieldName}_${allFilters.gt}: ${fieldType},`;
+      fieldFilter += `${fieldName}_${allFilters.gte}: ${fieldType},`;
       fieldFilter += `${fieldName}_${allFilters.lt}: ${fieldType},`;
+      fieldFilter += `${fieldName}_${allFilters.lte}: ${fieldType},`;
       fieldFilter += (fieldName !== 'this') ? `${fieldName}_${allFilters.exists}: Boolean,` : '';
       break;
     }
@@ -195,7 +198,6 @@ const getFieldFilters = (fieldName, typeASTFields) => {
 
   return fieldFilter;
 };
-
 
 const getAllFieldsToBeFiltered = (collection, completeFields, parentName) => {
   const typeAST = parsedASTMap[collection];
@@ -381,7 +383,6 @@ parsedASTTypes.forEach((type) => {
     let singleFetchParamsString = fetchParamsString[type];
     singleFetchParamsString = trimEnd(singleFetchParamsString, ',');
 
-
     if (
       (allowedOperations && allowedOperations === '*')
     || (allowedOperations && allowedOperations !== '*'
@@ -447,8 +448,10 @@ parsedASTTypes.forEach((type) => {
     }
   }
 });
-
-queryString += 'me: User,';
+/*
+Add custom query string along with the generic query
+ */
+queryString += customQueryString;
 
 queryString = trimEnd(queryString, ',');
 queryString += '}';

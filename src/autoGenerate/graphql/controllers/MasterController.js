@@ -7,6 +7,7 @@ import {
 import { STATIC, shortAppName, graphQlOperations } from '../../../../constants';
 import { isBackendApp, isFrontEndApp, isPermissionIntegratedApp } from '../validation';
 import { QueryController } from './index';
+import userTokenNotRequiredModels from '../../../../constants/userTokenNotRequiredModels';
 
 class MasterController {
   constructor(model, authentication) {
@@ -44,7 +45,7 @@ class MasterController {
       throw new UnauthenticatedAppError();
     }
     // validate user.
-    if (!this.user) {
+    if (!userTokenNotRequiredModels.includes(this.modelName) && !this.user) {
       throw new UnauthenticatedUserError();
     }
     return true;

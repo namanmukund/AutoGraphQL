@@ -10,7 +10,6 @@ import {
   EitherEmailOrPhoneNotBothRequiredError,
 } from '../../../../constants/errors';
 
-
 const validateExistingUserInput = (input) => {
   const { email, phone } = input;
   // either email or phone is mandatory for registration
@@ -37,6 +36,5 @@ const validateExistingUserInput = (input) => {
 
   return {};
 };
-
 
 export default validateExistingUserInput;

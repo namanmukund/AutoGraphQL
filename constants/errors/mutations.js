@@ -16,7 +16,6 @@ export const RelationMutationSimilarTypeArgumentError = createError('RelationMut
   message: 'Argument passed in the relation mutation cannot be of the same type',
 });
 
-
 export const MultipleArrayOperationDeniedError = createError('MultipleArrayOperationDeniedError', {
   message: 'Only single operation can be done in an array field on a mutation',
 });

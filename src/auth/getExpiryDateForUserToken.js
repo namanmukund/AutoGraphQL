@@ -1,6 +1,9 @@
-import { FRONTEND_APP_TWO, FRONTEND_APP_ONE } from '../../constants';
+import { TLA, TMS, TWA } from '../../constants';
+import {
+  MENTEE, MENTOR, PARENT, SELF_LEARNER,
+} from '../../constants/roles';
 
-const getExpiryDateForUserToken = (authParams, authentication, isForgotPasswordToken = false) => {
+const getExpiryDateForUserToken = (authParams, authentication, isForgotPasswordToken = false, user, isSignUp) => {
   let expiresIn = authParams.TOKEN_EXPIRY_DATE;
   if (!authentication || !authentication.app) {
     return expiresIn;
@@ -11,14 +14,24 @@ const getExpiryDateForUserToken = (authParams, authentication, isForgotPasswordT
     return expiresIn;
   }
   const { app } = authentication;
+  const { role } = user;
   const { name } = app;
+
   switch (name) {
-    case FRONTEND_APP_TWO:
+    case TLA:
       expiresIn = authParams.TOKEN_EXPIRY_DATE;
       break;
-    case FRONTEND_APP_ONE:
+    case TMS:
       expiresIn = authParams.TOKEN_EXPIRY_DATE;
       break;
+    case TWA: {
+      if (role === MENTOR) {
+        expiresIn = authParams.MENTOR_TOKEN_TEKIE_WEB_APP_EXPIRY_DATE;
+      } else if ([PARENT, MENTEE, SELF_LEARNER].includes(role) && isSignUp) {
+        expiresIn = authParams.TEKIE_WEB_APP_USER_SIGN_UP_EXPIRY_DATE;
+      }
+      break;
+    }
     default:
   }
   return expiresIn;

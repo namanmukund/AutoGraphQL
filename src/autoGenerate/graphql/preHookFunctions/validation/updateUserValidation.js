@@ -1,29 +1,32 @@
-import { validateUsername, validateUpdateUserOperation, preUserDataValidation } from '../../validation';
+import bcrypt from 'bcryptjs';
+import { validateUsername } from '../../validation';
 import { commonUserValidation } from './utils';
-import { UserAlreadyExistsError } from '../../../../../constants/errors';
+import authParams from '../../../../../config/authParams';
 
 const updateUserValidation = async (params) => {
-  const { input = {}, id } = params;
+  const { input } = params;
+  const userObj = {};
   const {
-    name, username, email, phone,
+    name,
+    username,
+    email,
+    phone,
+    password,
   } = input;
   commonUserValidation({ name, email, phone });
   if (username) {
     validateUsername(username);
   }
-  // validate email
-  if (email) {
-    const userData = await preUserDataValidation(input, 'updateUser');
-    if (userData && userData.id !== id) {
-      throw new UserAlreadyExistsError();
-    }
-  }
   /*
 @TODO change this code implementation: NM
  */
-  const user = {};
-  // validate is user
-  validateUpdateUserOperation(input, user);
+  if (password) {
+    const hashedPwd = bcrypt.hashSync(password, authParams.SALT);
+    userObj.password = hashedPwd;
+    userObj.savedPassword = password;
+    userObj.isSetPassword = true;
+  }
+  return userObj;
 };
 
 export default updateUserValidation;

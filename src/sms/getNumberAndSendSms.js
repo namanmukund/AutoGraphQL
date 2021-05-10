@@ -1,17 +1,11 @@
 import sendOTPSms from './sendOTPSms';
 
-const getNumberAndSendSms = (input, name) => {
-  // console.log()
-  const { phone, phoneOtp } = input;
+const getNumberAndSendSms = (phone, phoneOtp, name) => {
   if (phone && phoneOtp) {
     const { countryCode, number } = phone;
     const phoneNumber = countryCode + number;
-    getNumberAndSendSms.sendSms(phoneNumber, phoneOtp, name);
+    sendOTPSms(phoneNumber, phoneOtp, name);
   }
-};
-
-getNumberAndSendSms.sendSms = (...args) => {
-  sendOTPSms(...args);
 };
 
 export default getNumberAndSendSms;

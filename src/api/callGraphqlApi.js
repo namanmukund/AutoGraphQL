@@ -2,7 +2,6 @@ import { createApolloFetchRetry, createAndThrowApolloError } from '../../utils';
 import allServerConfig from '../../config/server/index';
 import getTokenForApi from './getTokenForApi';
 
-
 const application = process.env.APPLICATION || 'core';
 const env = process.env.NODE_ENV || 'development';
 const { uri } = allServerConfig[application][env].backend;

@@ -1,8 +1,8 @@
 import { log, logMapOfArrays, logArray } from './log';
 import { authenticateUser, authenticateApp, ifAuthorized } from './ifAuthorized';
 import generateCuid from './generateCuid';
-import schema from '../config/graphqlSchema';
-import allDbConfig from '../config/mongoDb';
+import schema from '../graphqlSchema';
+import dbConfig from '../config/mongoDb';
 import toObject from './toObject';
 import isErrorThrown from './isErrorThrown';
 import encodeToken from './encodeToken';
@@ -32,10 +32,10 @@ import compareObjects from './compareObjects';
 import isObject from './isObject';
 import isSentryAppAndEnv from './isSentryAppAndEnv';
 import throwAsyncError from './throwAsyncError';
+import getTimeDifferenceWithCurrentDateInSeconds from './getTimeDifferenceWithCurrentDateInSeconds';
 
 const env = process.env.NODE_ENV || 'development';
 const application = process.env.APPLICATION || 'core';
-const dbConfig = allDbConfig[application][env];
 const { functions } = schema[application];
 const awsConfig = allAwsConfig[env];
 
@@ -78,4 +78,5 @@ export {
   isObject,
   isSentryAppAndEnv,
   throwAsyncError,
+  getTimeDifferenceWithCurrentDateInSeconds,
 };

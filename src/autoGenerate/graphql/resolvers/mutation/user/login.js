@@ -1,81 +1,19 @@
-import { pick } from 'lodash';
+import { get } from 'lodash';
 import {
   UserTokenNotRequiredError,
   BlockedOperationError,
-  DatabaseRecordNotFoundError,
+  DatabaseRecordNotFoundError, InsufficientPermissionError,
 } from '../../../../../../constants/errors';
-import { QueryController, RemoteController } from '../../../controllers';
-import { toObject } from '../../../../../../utils';
-import {
-  mergeMutationsPromisesResults,
-} from '../utils/mergeMutationsPromisesResults';
+import { QueryController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { checkPasswordAndReturnUserWithToken } from '../utils/checkPasswordAndReturnUserWithToken';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
-
-const localLoginMutationPromise = (
-  typeName,
-  input,
-  ast,
-  modelMutations,
-) => {
-  const { username, email, phone } = input;
-
-  let query = {};
-  if (username) query.username = username;
-  if (email) query.email = email;
-  if (phone) {
-    const { countryCode, number } = phone;
-    query = {
-      'phone.countryCode': countryCode,
-      'phone.number': number,
-    };
-  }
-  return modelMutations.fetchOne(query);
-};
-
-// Returns remote delete mutaiton promises.
-const remoteLoginMutationPromises = (
-  input,
-  typeName,
-  mutationName,
-  controllerFunctionName,
-  fieldsFetched,
-  remoteFieldsApplicationWise,
-  authentication,
-) => {
-  const promiseArray = Object.keys(remoteFieldsApplicationWise).map((appApplicationName) => {
-    const appModelRemote = new RemoteController(appApplicationName, authentication);
-    const appInput = { ...pick(input, Object.keys(remoteFieldsApplicationWise[appApplicationName])) };
-    const appFieldsToMutation = {
-
-      // get only those fields that are requested.
-      ...pick(fieldsFetched, Object.keys(remoteFieldsApplicationWise[appApplicationName])),
-      id: true,
-      password: true,
-    };
-    // Mutate remote applications.
-    const loginSpecificTypeName = 'Login';
-    return appModelRemote[controllerFunctionName](
-      loginSpecificTypeName,
-      mutationName,
-      appInput,
-      appFieldsToMutation,
-    )
-      .then((appResultRemote) => {
-        const appData = appResultRemote.data;
-        const appErrors = appResultRemote.errors;
-        if (appErrors) {
-          throw new Error(JSON.stringify(appErrors));
-        }
-
-        return appData[mutationName];
-      });
-  });
-
-  return promiseArray;
-};
+import getUserFromDBQuery from './utils/getUserFromDBQuery';
+import { TWA } from '../../../../../../constants';
+import { MENTOR } from '../../../../../../constants/roles';
+import checkIfMentorIsAvailable from './utils/checkIfMentorIsAvailable';
+import { MentorAvailabilitySlotNotBookedError } from '../../../../../../constants/errors/permissions';
 
 export default function loginMutationResolver(
   root,
@@ -87,7 +25,6 @@ export default function loginMutationResolver(
   authentication,
 ) {
   const { input } = params;
-  const { localFields, remoteFields, remoteFieldsApplicationWise } = ast[typeName];
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
@@ -99,9 +36,9 @@ export default function loginMutationResolver(
     authentication,
     input,
   );
-  const decodedUser = authentication && authentication.user;
+  const currentUser = authentication && authentication.user;
   // FIX: Should this not be a null check
-  if (decodedUser) {
+  if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
   // Setting user to true if not preset, as login does not require user authentication.
@@ -109,62 +46,39 @@ export default function loginMutationResolver(
     user: true,
   });
   // Create a new object id if there is no id.
-  const modelMutations = new QueryController('User', authentication);
+  const modelQueries = new QueryController('User', authentication);
 
-  // @TODO incorporate relation logic with multi apps logic
-  // If there are no remote fields, return the result.
-  if (!Object.keys(remoteFields).length) {
-    return localLoginMutationPromise(
-      typeName,
-      input,
-      ast,
-      modelMutations,
-    ).then((fetchedUser) => {
-      if (!fetchedUser) {
-        throw new DatabaseRecordNotFoundError();
-      }
-      const data = checkPasswordAndReturnUserWithToken(fetchedUser, input, authentication);
-      const { status } = fetchedUser;
-      switch (status) {
-        case 'blocked':
-          throw new BlockedOperationError();
-        case 'inactive':
-          if (!input.username === fetchedUser.username) { throw new BlockedOperationError(); }
-          break;
-        case 'active':
-        default:
-      }
-      return data;
-    })
-      .catch((err) => err);
-  }
-
-  // If there are remote fields.
-  const controllerFunctionName = 'loginMutation';
-  const promiseArray = remoteLoginMutationPromises(
+  return getUserFromDBQuery(
     input,
-    typeName,
-    mutationName,
-    controllerFunctionName,
-    fieldsFetched,
-    remoteFieldsApplicationWise,
-    authentication,
-  );
-  // Wait for the promise to resolve.
-  return Promise.all(promiseArray).then((values) => {
-    // Expecting only one value.
-
-    const value = values[0];
-    const { id } = value;
-    const cuidInput = { ...input, id };
-    // Input to local database.
-    const localInput = pick(cuidInput, Object.keys({ ...localFields, id: true }));
-    return localLoginMutationPromise(
-      typeName,
-      localInput,
-      ast,
-      modelMutations,
-    ).then((val) => mergeMutationsPromisesResults([value, toObject(val)]))
-      .then((savedUser) => checkPasswordAndReturnUserWithToken(savedUser, input, authentication));
-  }).catch((error) => error);
+    modelQueries,
+  ).then(async (fetchedUser) => {
+    if (!fetchedUser) {
+      throw new DatabaseRecordNotFoundError();
+    }
+    const { id: userId, role, email } = fetchedUser;
+    if (get(authentication, 'app.name') === TWA) {
+      if (role !== MENTOR) {
+        throw new InsufficientPermissionError();
+      }
+      // check if availability slots exist
+      if (process.env.NODE_ENV === 'production') {
+        const isMentorAvailable = await checkIfMentorIsAvailable(userId);
+        if (email !== 'namanmentor@tekie.in' && !isMentorAvailable) {
+          throw new MentorAvailabilitySlotNotBookedError();
+        }
+      }
+    }
+    const data = checkPasswordAndReturnUserWithToken(fetchedUser, input, authentication);
+    const { status } = fetchedUser;
+    switch (status) {
+      case 'blocked':
+        throw new BlockedOperationError();
+      case 'inactive':
+        if (!input.username === fetchedUser.username) { throw new BlockedOperationError(); }
+        break;
+      case 'active':
+      default:
+    }
+    return data;
+  });
 }

@@ -4,15 +4,27 @@ service: tekie-backend
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs12.x
+  timeout: 30
   stage: staging
   region: us-east-1
   iamRoleStatements:
     - Effect: Allow
       Action:
         - '*'
-      Resource: "arn:aws:s3:::${self:custom.bucket}/*"
-
+      Resource: "arn:aws:s3:::tekie-tms-test/*"
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "arn:aws:s3:::tekie-tms-test/*"
+    - Effect: "Allow"
+      Action:
+        - "s3:getSignedUrl"
+      Resource: "arn:aws:s3:::tekie-tms-test/*"
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+      Resource: "arn:aws:s3:::tekie-tms-test/*"
 functions:
   app:
     handler: src/serverlessApp.handler # reference the file and exported method
@@ -33,4 +45,3 @@ custom:
     webpackConfig: /webpack/webpack.serverless.cloudProd.js
   webpackIncludeModules:
     packagePath: './package.json'
-  bucket: 'tekie-tms-staging'

@@ -4,7 +4,8 @@ import {
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
   PUBLISHED,
-  masteryLevels, topicTypes,
+  masteryLevels,
+  topicTypes,
 } from '../../../../../../constants';
 import {
   ComponentLockedError,
@@ -123,6 +124,31 @@ const getQuizReportQuery = (userId, topicId) => `
   }
   `;
 
+// query to get batch status
+const getBatchStatus = (userId) => `
+  query{
+    user(id: "${userId}"){
+      studentProfile{
+        batch{
+          id
+          type
+          currentComponent{
+            currentCourse{
+              id
+              order
+            }
+            currentTopic{
+              id
+              order
+            }
+            latestSessionStatus
+          }
+        }
+      }
+    }
+  }
+  `;
+
 /*
   parsing data of user quiz report so that the logic implemented ahead can read data in
   desired format and return the same.
@@ -222,6 +248,15 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     throw new UnauthenticatedUserError();
   }
 
+  // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
+  const batchRes = await callLocalGraphqlApi(
+    getBatchStatus(userId),
+    context,
+    '',
+  );
+
+  const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+
   const res = await callLocalGraphqlApi(
     getUserCurrentTopicComponentStatus(userId),
     context,
@@ -248,9 +283,14 @@ const userFirstAndLatestQuizReportMutationResolver = async (
       },
     });
   }
-  const {
-    currentTopic: currentRunningTopic,
-  } = currentTopicComponentInfo;
+  let currentRunningTopic;
+
+  // if user belongs to a batch, quiz report will be calculated on basis of batchCurrentComponentStatus
+  if (batchCurrentComponentInfo) {
+    currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
+  } else {
+    currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
+  }
   if (topicInfo.order >= currentRunningTopic.order) {
     throw new ComponentLockedError();
   }

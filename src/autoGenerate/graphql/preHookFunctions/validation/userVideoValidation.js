@@ -7,7 +7,7 @@ const userVideoValidation = async (params, context) => {
   // userVideo collection is used to store and get video page info
   // checking if called topic and user combination in accessible
   const { video } = topicTypes;
-  const decodedApp = get(context, 'decodedApp.name');
+  const currentApp = get(context, 'currentApp.name');
   // checkForPaidLogic is added in isComponentUnlocked to check
   // if we need to validate component for payment, if call for addUserActivityVideoDump is made from
   // backend application, we will not check for paid component logic since we will be skipping
@@ -19,7 +19,7 @@ const userVideoValidation = async (params, context) => {
     video,
     '',
     '',
-    decodedApp !== backendApps[0],
+    currentApp !== backendApps[0],
   );
   return true;
 };

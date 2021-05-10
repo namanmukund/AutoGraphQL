@@ -3,7 +3,7 @@
 import { findIndex } from 'lodash';
 import { InsufficientPermissionError } from '../../../../constants/errors';
 import { META } from '../../../../constants';
-
+import { SINGULAR } from '../../../../constants/graphqlOperations';
 
 const validateAllowDenyRuleOnApp = (
   appPermissions,
@@ -11,7 +11,6 @@ const validateAllowDenyRuleOnApp = (
   operation,
 ) => {
   const { permissions, rule } = appPermissions;
-
   /*
   If rule is allow then check for all the permitted apps and their operations
    */
@@ -26,7 +25,7 @@ const validateAllowDenyRuleOnApp = (
       throw new InsufficientPermissionError();
     }
     const { operations } = permissions[index];
-    if (!operations.includes(operation)) {
+    if (operations !== '*' && !operations.includes(operation)) {
       throw new InsufficientPermissionError();
     }
   }
@@ -45,7 +44,7 @@ const validateAllowDenyRuleOnApp = (
       const index = findIndex(permissions, { appName });
       if (index !== -1) {
         const { operations } = permissions[index];
-        if (operations.includes(operation)) {
+        if (operations === '*' || operations.includes(operation)) {
           throw new InsufficientPermissionError();
         }
       }
@@ -55,16 +54,59 @@ const validateAllowDenyRuleOnApp = (
   return true;
 };
 
-const validateAppPermission = (
+const validateAllowDenyRuleOnUser = (
+  userPermissions,
+  appName,
+  operation,
+  dbRole,
+) => {
+  const { permissions, rule } = userPermissions;
+  let flag = false;
+  if (permissions && rule && dbRole) {
+    // @TODO
+    //  if permissions exist but db role is not available except for the default case
+    if (
+      permissions !== '*'
+      && permissions.length
+    ) {
+      // if only all the conditions are met this permission will be valid
+      for (let i = 0; i < permissions.length; i += 1) {
+        const { userRole, appName: allowedApps, operations } = permissions[i];
+        // in case user has multiple roles defined in db
+        const userRoleArray = Array.isArray(userRole) ? userRole : [userRole];
+        for (let j = 0; j < userRoleArray.length; j += 1) {
+          if (userRoleArray[j].includes(dbRole)) {
+            if (allowedApps === '*' || allowedApps.includes(appName)) {
+              if (operations === '*' || operations.includes(operation)) {
+                flag = true;
+                break;
+              }
+            }
+          }
+        }
+      }
+    } else if (permissions === '*') {
+      flag = true;
+    }
+
+    if ((rule === 'allow' && flag === false) || (rule === 'deny' && flag === true)) {
+      throw new InsufficientPermissionError();
+    }
+  }
+
+  return true;
+};
+
+const validateAppAndUserPermission = (
   typeName,
   parsedASTMap,
   queryFields,
   authentication,
   operation,
 ) => {
-  const { appPermissions, field } = parsedASTMap[typeName];
-  const { app: { name: appName } } = authentication;
-  // permission check on the typename level
+  const { appPermissions, userPermissions, field } = parsedASTMap[typeName];
+  const { app: { name: appName }, user: { role: dbRole } } = authentication;
+  // app permission check on the typename level
   if (appPermissions && Object.keys(appPermissions)) {
     validateAllowDenyRuleOnApp(
       appPermissions,
@@ -72,11 +114,21 @@ const validateAppPermission = (
       operation,
     );
   }
+  // user permission check on the typename level
+  if (userPermissions && Object.keys(userPermissions)) {
+    validateAllowDenyRuleOnUser(
+      userPermissions,
+      appName,
+      operation,
+      dbRole,
+    );
+  }
   // permission check on the fields
   const queryFieldKeys = Object.keys(queryFields);
   for (const key of queryFieldKeys) {
     // including 'result' and 'error' fields as exceptions to be sent in response like count & meta
     if (key
+      && field[key]
       && !(key.includes(META)
         || key.includes('count')
         || key.includes('result')
@@ -90,6 +142,15 @@ const validateAppPermission = (
           operation,
         );
       }
+      const { userPermissions: userPermissionsOnField } = field[key];
+      if (userPermissionsOnField && Object.keys(userPermissionsOnField)) {
+        validateAllowDenyRuleOnUser(
+          userPermissionsOnField,
+          appName,
+          operation,
+          dbRole,
+        );
+      }
     }
 
     /* if field key is relation field then recursive strategy will be used
@@ -98,18 +159,17 @@ const validateAppPermission = (
     if (Object.keys(parsedASTMap[typeName].relationFields)
       .includes(key)) {
       const subTypeName = parsedASTMap[typeName].field[key].type.dataType;
-      validateAppPermission(
+      validateAppAndUserPermission(
         subTypeName,
         parsedASTMap,
         queryFields[key],
         authentication,
-        operation,
+        SINGULAR,
       );
     }
   }
   return true;
 };
-
 
 const validateAppAndUserPermissionOnFields = (
   typeName,
@@ -118,8 +178,8 @@ const validateAppAndUserPermissionOnFields = (
   authentication,
   operation,
 ) => {
-  // checking for app permissions on type and fields and relational fields
-  validateAppPermission(
+  // checking for app & user permissions on type and fields and relational fields
+  validateAppAndUserPermission(
     typeName,
     parsedASTMap,
     queryFields,

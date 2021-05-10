@@ -95,7 +95,32 @@ const getCourseQuery = () => `
     }
   `;
 
-const { video } = topicTypes;
+// query to get batch status
+const getBatchStatus = (userId) => `
+  query{
+    user(id: "${userId}"){
+      studentProfile{
+        batch{
+          id
+          type
+          currentComponent{
+            currentCourse{
+              id
+              order
+            }
+            currentTopic{
+              id
+              order
+            }
+            latestSessionStatus
+          }
+        }
+      }
+    }
+  }
+  `;
+
+const { video, quiz } = topicTypes;
 
 // method to sort badge array according to topic order and order inside of a topic
 // it will take a array which is already sorted topic order wise
@@ -230,6 +255,20 @@ const userBadgeMutationResolver = async (
     currentCourse = get(currentTopicComponentInfo, 'currentCourse');
     currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
     currentTopicComponentType = get(currentTopicComponentInfo, 'currentTopicComponentType');
+
+    // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
+    const batchRes = await callLocalGraphqlApi(
+      getBatchStatus(userId),
+      context,
+      '',
+    );
+
+    const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+
+    if (batchCurrentComponentInfo) {
+      currentTopicOrder = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic && batchCurrentComponentInfo.currentTopic.order;
+      currentTopicComponentType = quiz;
+    }
   } else {
     const courseResult = await callLocalGraphqlApi(getCourseQuery());
     const course = get(courseResult, 'data.courses');
@@ -246,7 +285,7 @@ const userBadgeMutationResolver = async (
     currentTopicOrder = -1;
     currentTopicComponentType = video;
     // Setting app name to that of backend as we are fetching images ahead
-    Object.assign(context.decodedApp, {
+    Object.assign(context.currentApp, {
       name: 'core',
     });
   }

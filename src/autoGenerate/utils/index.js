@@ -32,6 +32,8 @@ import isTopicUnlocked from './isTopicUnlocked';
 import getFirstTopicAndLearningObjective from './getFirstTopicAndLearningObjective';
 import addUserCurrentTopicComponentStatus from './addUserCurrentTopicComponentStatus';
 import getUserCurrentTopicComponentStatus from './getUserCurrentTopicComponentStatus';
+import getBatchCurrentComponentStatus from './getBatchCurrentComponentStatus';
+import addMentorMenteeSessionForBatch from './addMentorMenteeSessionForBatch';
 
 export {
   getParsedASTMap,
@@ -68,4 +70,6 @@ export {
   getFirstTopicAndLearningObjective,
   addUserCurrentTopicComponentStatus,
   getUserCurrentTopicComponentStatus,
+  getBatchCurrentComponentStatus,
+  addMentorMenteeSessionForBatch,
 };

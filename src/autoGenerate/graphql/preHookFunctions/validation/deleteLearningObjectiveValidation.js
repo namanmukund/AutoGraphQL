@@ -26,5 +26,4 @@ const deleteLearningObjectiveValidation = async (params) => {
   return true;
 };
 
-
 export default deleteLearningObjectiveValidation;

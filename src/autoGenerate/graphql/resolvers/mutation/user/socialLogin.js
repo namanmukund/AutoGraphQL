@@ -19,7 +19,6 @@ const { OAuth2Client } = require('google-auth-library');
 
 const client = new OAuth2Client(CLIENT_ID);
 
-
 const verifyGmailAuthAndReturnUser = async (idToken) => {
   try {
     const ticket = await client.verifyIdToken({
@@ -113,13 +112,13 @@ const socialLoginMutationResolver = async (
     input,
   );
 
-  const decodedUser = authentication && authentication.user;
-  const decodedApp = authentication && authentication.app;
+  const currentUser = authentication && authentication.user;
+  const currentApp = authentication && authentication.app;
 
-  if (!decodedApp) {
+  if (!currentApp) {
     throw new UnauthenticatedAppError();
   }
-  if (decodedUser) {
+  if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
   Object.assign(authentication, {

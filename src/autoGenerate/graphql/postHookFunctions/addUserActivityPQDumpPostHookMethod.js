@@ -301,6 +301,13 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   const popAllQuery = `practiceQuestions:{
                      popAll: true
                    }`;
+
+  // check if all PQ questions are sent in input in case pq action is "next"
+  if (pqAction && pqAction === next && completedQuestionCount !== totalQuestions) {
+    log('PracticeQuestions are not present in input in addUserActivityPQDumpPostHookMethod');
+    throw new PracticeQuestionsNotPresentError();
+  }
+
   // practiceQuestionStatus will change to complete if user hits next
   if (pqAction && pqAction === next && completedQuestionCount === totalQuestions) {
     practiceQuestionStatus = complete;

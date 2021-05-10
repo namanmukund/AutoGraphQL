@@ -2,7 +2,6 @@ import updateInputInCaseOfNestedConnect from './updateInputInCaseOfNestedConnect
 import { arrayUpdateAddTypes, arrayUpdateRemoveTypes } from '../../../../../../constants';
 import generateObjectToBeDisconnected from './generateObjectToBeDisconnected';
 
-
 const nestedConnectIdHandler = (
   ast,
   typeName,
@@ -12,9 +11,9 @@ const nestedConnectIdHandler = (
   const allRelationObjectsArray1to1Data = [];
   const allRelationObjectsArray1toMData = [];
   const nestedDisconnectObjInfo = {};
-  let isArrayUpdate = false;
 
   Object.keys(finalInput).forEach((inputFieldName) => {
+    let isArrayUpdate = false;
     // special case for update
     const fieldKeys = Object.keys(finalInput[inputFieldName]);
     // for operations like push, pushMany and all
@@ -52,7 +51,6 @@ const nestedConnectIdHandler = (
         nestedDisconnectObjInfo,
       );
     }
-
 
     if (
       Array.isArray(finalInput[inputFieldName])
@@ -114,7 +112,6 @@ const nestedConnectIdHandler = (
       }
     }
   });
-
 
   return {
     finalInput,

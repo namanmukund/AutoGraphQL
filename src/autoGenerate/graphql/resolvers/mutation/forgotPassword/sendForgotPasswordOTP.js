@@ -34,9 +34,8 @@ export default function sendForgotPasswordOTPMutationResolver(
     {},
   );
 
-
-  const decodedUser = authentication && authentication.user;
-  if (decodedUser) {
+  const currentUser = authentication && authentication.user;
+  if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
 
@@ -69,7 +68,6 @@ export default function sendForgotPasswordOTPMutationResolver(
       emailOtp,
     };
   }
-
 
   return sendForgotPasswordOTPMutationPromise(
     searchObj,
