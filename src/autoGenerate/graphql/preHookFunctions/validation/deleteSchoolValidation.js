@@ -23,6 +23,8 @@ const fetchSchools = async (schoolId) => {
 
 const deleteSchoolValidation = async (params) => {
   const { id: schoolId } = params;
+
+  // checking if students are linked to the school corresponding to the id
   const schools = await fetchSchools(schoolId);
   if (schools && schools.length > 0) {
     throw new StudentsLinked();
