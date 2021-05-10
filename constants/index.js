@@ -234,6 +234,10 @@ const slotTimes = [
   'slot21', 'slot22', 'slot23',
 ];
 
+const weekDays = [
+  'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday',
+];
+
 const CREDITED = 'credited';
 const DEBITED = 'debited';
 const REGISTRATION_BASE_CREDIT = 1000;
@@ -270,6 +274,23 @@ const leadStatus = {
   won: 'won',
   unfit: 'unfit',
   unassigned: 'unassigned',
+};
+
+const campaignTypes = {
+  b2b: 'b2b',
+  b2b2cPaid: 'b2b2cPaid',
+  b2b2cEvent: 'b2b2cEvent',
+};
+
+const batchCreationBasis = {
+  grade: 'grade',
+  section: 'section',
+};
+
+const batchCreationStatus = {
+  todo: 'todo',
+  inProgress: 'inProgress',
+  complete: 'complete',
 };
 
 export const GIFT_VOUCHER_AMOUNT = 2500;
@@ -341,4 +362,8 @@ export {
   sessionStatus,
   leadStatus,
   userSavedCodeStatus,
+  campaignTypes,
+  batchCreationBasis,
+  batchCreationStatus,
+  weekDays,
 };
