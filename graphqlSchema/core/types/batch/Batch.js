@@ -35,7 +35,7 @@ const Batch = `
     campaign: Campaign @relation(name: "CampaignBatch")
     classes: [SchoolClass] @relation(name: "BatchSchoolClass", direction: "OneWay")
     school: School @relation(name: "BatchSchool", direction: "OneWay")
-    timeTableRules: [BatchTimeTableRules]
+    timeTableRules: BatchTimeTableRules
   }
 `;
 
