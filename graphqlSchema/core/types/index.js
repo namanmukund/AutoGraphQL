@@ -86,6 +86,7 @@ import CheatSheetData from './cheatSheetData';
 import UserCheatSheet from './userCheatSheet';
 import NewsFeed from './newsFeed';
 import SchoolClass from './schoolClass';
+import Campaign from './campaign';
 
 export default [
   ...User,
@@ -176,4 +177,5 @@ export default [
   ...UserCheatSheet,
   ...NewsFeed,
   ...SchoolClass,
+  ...Campaign,
 ];

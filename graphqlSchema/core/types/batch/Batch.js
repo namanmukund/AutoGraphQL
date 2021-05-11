@@ -1,5 +1,18 @@
 import { READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
+import getSlotTimeFields from '../../functions/getSlotTimeFields';
+import getWeekDaysFields from '../../functions/getWeekDaysFields';
+
+const slotTimeFields = getSlotTimeFields('Boolean', false);
+const weekDaysFields = getWeekDaysFields('Boolean', false);
+
+const BatchTimeTableRules = `
+  type BatchTimeTableRules {
+   startDate: Date
+   endDate: Date
+   ${slotTimeFields}
+   ${weekDaysFields}
+ }`;
 
 const Batch = `
   type Batch @model
@@ -19,7 +32,11 @@ const Batch = `
     students: [StudentProfile] @relation(name: "BatchStudentProfile")
     currentComponent: BatchCurrentComponentStatus @relation(name: "BatchCurrentComponentStatusBatch", isSubset: true)
     type: BatchType @defaultValue(value: "normal")
+    campaign: Campaign @relation(name: "CampaignBatch")
+    classes: [SchoolClass] @relation(name: "BatchSchoolClass", direction: "OneWay")
+    school: School @relation(name: "BatchSchool", direction: "OneWay")
+    timeTableRules: BatchTimeTableRules
   }
 `;
 
-export default [Batch];
+export default [Batch, BatchTimeTableRules];

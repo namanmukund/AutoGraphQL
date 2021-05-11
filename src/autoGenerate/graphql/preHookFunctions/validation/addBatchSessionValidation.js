@@ -52,13 +52,20 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   // check if the document for called batch and topic is already present
   const batchId = get(params, 'batchConnectId');
   const topicId = get(params, 'topicConnectId');
-  const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
+  // const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
 
   // log in case batch or topic id is not present
-  if (!batchId || !topicId || !mentorSessionConnectId) {
+  // if (!batchId || !topicId || !mentorSessionConnectId) {
+  //   throw new MissingMandatoryInputInRequestError({
+  //     data: {
+  //       message: 'Either batchConnectId or topicConnectId or mentorSessionConnectId or all missing in input',
+  //     },
+  //   });
+  // }
+  if (!batchId) {
     throw new MissingMandatoryInputInRequestError({
       data: {
-        message: 'Either batchConnectId or topicConnectId or mentorSessionConnectId or all missing in input',
+        message: 'batchConnectId is missing in input',
       },
     });
   }
@@ -90,13 +97,15 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   }
 
   // throw error if document already exists
-  const getBatchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, topicId));
-  const batchSessions = get(getBatchSessionsRes, 'data.batchSessions');
-  if (batchSessions && batchSessions.length) {
-    throw new SimilarDocumentAlreadyExistError();
+  if (topicId) {
+    const getBatchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, topicId));
+    const batchSessions = get(getBatchSessionsRes, 'data.batchSessions');
+    if (batchSessions && batchSessions.length) {
+      throw new SimilarDocumentAlreadyExistError();
+    }
   }
 
-  validateBatchSessionInput(params);
+  // validateBatchSessionInput(params);
 
   return true;
 };
