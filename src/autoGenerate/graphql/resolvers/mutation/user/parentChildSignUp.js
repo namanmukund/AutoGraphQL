@@ -134,12 +134,14 @@ const getParentInfo = async (context, email, phone) => {
     result.parentId = id;
     result.parentEmail = parentEmail;
     // only continue if parent phone and email are same to add a sibling
+    // commenting for schools only
     if (
       parentPhone.countryCode !== countryCode
       || parentPhone.number !== number
       || parentEmail !== email
     ) {
-      throw new EmailOrPhoneMismatchError();
+      console.log('Case of sibling, ', parentPhone.number, parentEmail);
+      // throw new EmailOrPhoneMismatchError();
     }
 
     if (parentProfile && parentProfile.id) {
