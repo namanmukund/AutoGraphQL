@@ -4,7 +4,7 @@ const extractSlotsFromInput = (slots) => {
   Object.keys(slots).forEach((slot) => {
     if (slot.includes('slot')) {
       filteredSlots[slot] = slots[slot];
-      filteredSlotsString += `${filteredSlots[slot]}: ${slots[slot]}`;
+      filteredSlotsString += ` ${slot}: ${slots[slot]} `;
     }
   });
   return { filteredSlots, filteredSlotsString };
