@@ -31,7 +31,7 @@ const updateMentorSession = (mentorSessionId, mentorMenteeSessionId, batchSessio
   mutation{
     updateMentorSession(id: "${mentorSessionId}",
       ${mentorMenteeSessionId ? `mentorMenteeSessionsConnectIds: ["${mentorMenteeSessionId}"]` : ''}
-      ${batchSessionId ? `batchSessionConnectIds: ["${batchSessionId}"]` : ''}
+      ${batchSessionId ? `batchSessionsConnectIds: ["${batchSessionId}"]` : ''}
       input:{}){
       id
     }
