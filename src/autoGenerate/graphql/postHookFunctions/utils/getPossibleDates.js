@@ -5,7 +5,7 @@ const getPossibleDates = (startDate, endDate, days) => {
   var dates = [],
     currentDate = startDate,
     addDays = function (days) {
-      var date = new Date(this.valueOf());
+      var date = new Date(this.valueOf() - 1);
       date.setDate(date.getDate() + days);
       return date;
     };

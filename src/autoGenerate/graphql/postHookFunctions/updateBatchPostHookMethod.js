@@ -96,6 +96,24 @@ const createBatchSession = async (batchId, date, slots) => {
   return true;
 }
 
+const updateBatchSession = async (sessionId, slots, date) => {
+  const query = `
+          mutation{
+            updateBatchSession(batchConnectId: "${sessionId}",
+            input:{
+              bookingDate:"${date}",
+              ${slots}
+            }
+            ){
+              id
+            }
+          }
+          `;
+  await callLocalGraphqlApi(query);
+  console.log(`updated batch session! for ${date}`);
+  return true;
+}
+
 const createBatchSessions = async (batchId, possibleDates, filteredSlots, possibleSessionCount) => {
   if (possibleDates.length <= possibleSessionCount) {
     possibleDates.forEach(date => createBatchSession(batchId, date, filteredSlots));
@@ -108,23 +126,13 @@ const createBatchSessions = async (batchId, possibleDates, filteredSlots, possib
   return true;
 }
 
-// method to return the terms that do not match from present query and stored db
-// const getDiff = (timeTableRules, fetchedTimeTableRules) => {
-//   let result = {}
-//   if (timeTableRules.startDate && timeTableRules.startDate !== fetchedTimeTableRules.startDate) {
-//     result.startDate = timeTableRules.startDate;
-//   } else {
-//     result.startDate = fetchedTimeTableRules.startDate;
-//   }
-//   if (timeTableRules.endDate && timeTableRules.endDate !== fetchedTimeTableRules.endDate) {
-//     result.endDate = timeTableRules.endDate;
-//   } else {
-//     result.endDate = fetchedTimeTableRules.endDate;
-//   }
-//   // result.slot = getSlotDiff(timeTableRules, fetchedTimeTableRules);
-//   // result.day = getDayDiff(timeTableRules, fetchedTimetableRules);
-//   return result;
-// }
+const updateAllottedBatchSessions = async (sessions_a, possibleDates, filteredSlotsString, allottedSessionsCount) => {
+  let i = 0;
+  for (const sessionId in sessions_a) {
+    updateBatchSession(sessionId, filteredSlotsString, possibleDates[i]);
+    i += 1;
+  }
+}
 
 // method to sort batchSessions
 const sortBatchSessions = (batchSessions) => {
@@ -177,10 +185,8 @@ const updateBatchPostHookMethod = async (input, params, _mutationName, _context)
 
   // slots passed in input
   const { ...slots } = timeTableRules;
-  const { filteredSlots, filteredSlotsString } = extractSlotsFromInput(slots);
+  const { filteredSlotsString } = extractSlotsFromInput(slots);
   console.log(filteredSlotsString);
-
-
 
   if (batchSessions) {
 
@@ -192,20 +198,18 @@ const updateBatchPostHookMethod = async (input, params, _mutationName, _context)
       // if there exists some started or completed sessions, create sessions for the remaining
       possibleSessionCount -= sessions_sc.length;
     }
-    const possibleDates = getPossibleDates(startDate, endDate, days);
+    let possibleDates = getPossibleDates(startDate, endDate, days);
     console.log(possibleDates);
 
     // for the sessions which are still in the allotted state, update them
     const allottedSessionsCount = sessions_a.length;
     if (allottedSessionsCount > 0) {
       possibleSessionCount -= allottedSessionsCount;
-      for (let i = 0; i < allottedSessionsCount; i += 1) {
-        await updateAllottedBatchSessions(sessions_a, possibleDates, filteredSlotsString);
-      }
+      await updateAllottedBatchSessions(sessions_a, possibleDates, filteredSlotsString, allottedSessionsCount);
     }
     if (possibleSessionCount > 0) {
-
       // all the remaining sessions have to be created
+      possibleDates = possibleDates.slice(0, allottedSessionsCount - 1);
       await createBatchSessions(batchId, possibleDates, filteredSlotsString, possibleSessionCount);
     }
   } else {
