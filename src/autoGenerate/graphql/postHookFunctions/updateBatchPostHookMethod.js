@@ -1,11 +1,8 @@
 import { get } from 'lodash';
-import {
-  GLOBAL_COURSE_TITLE,
-  PUBLISHED,
-} from '../../../../constants';
-import { log } from '../../../../utils';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import getFirstTopicAndLearningObjective from '../../utils/getFirstTopicAndLearningObjective';
+import extractSlotsFromInput from './utils/extractSlotsFromInput'
+import getSelectedDays from './utils/getSelectedDays';
+import getPossibleDates from './utils/getPossibleDates';
 
 // query to get published topics count 
 const getTopicMeta = async () => {
@@ -80,6 +77,34 @@ const getBatch = async (batchId) => {
   return get(currBatch, 'data.batch');
 };
 
+
+const getSlotsString = (slots) => {
+
+}
+
+const createBatchSession = async (batchId, date, slots) => {
+  const query = `
+          mutation{
+            addBatchSession(batchConnectId: "${batchId}",
+            input:{
+              bookingDate:"${date}",
+              ${slots}
+            }
+            ){
+              id
+            }
+          }
+          `;
+  await callLocalGraphqlApi(query);
+  console.log(`created batch session! for ${date}`);
+  return true;
+}
+
+const createBatchSessions = async (batchId, possibleDates, filteredSlots) => {
+  possibleDates.forEach(date => createBatchSession(batchId, date, filteredSlots));
+  return true;
+}
+
 // method to return the terms that do not match from present query and stored db
 const getDiff = (timeTableRules, fetchedTimeTableRules) => {
   let result = {}
@@ -91,7 +116,7 @@ const getDiff = (timeTableRules, fetchedTimeTableRules) => {
   if (timeTableRules.endDate && timeTableRules.endDate !== fetchedTimeTableRules.endDate) {
     result.endDate = timeTableRules.endDate;
   } else {
-    result.endDate = fetchTimeTableRules.endDate;
+    result.endDate = fetchedTimeTableRules.endDate;
   }
   // result.slot = getSlotDiff(timeTableRules, fetchedTimeTableRules);
   // result.day = getDayDiff(timeTableRules, fetchedTimetableRules);
@@ -115,24 +140,11 @@ const sortBatchSessions = (batchSessions) => {
 
 }
 
-// method that returns the array of dates
-const getPossibleDates = (startDate, endDate, days) => {
-
-  const weekDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const start = new Date();
-
-
-
-}
-
-
 /*
   Post hook of update batch
 */
 const updateBatchPostHookMethod = async (input, params, _mutationName, _context) => {
   const { id: batchId, input: { timeTableRules } } = params;
-  console.log(input);
-  console.log(params);
   /*
     TODO : 
     -> Fetch total number of published topics (x) of the course, this will be the max possible number of batchSessions
@@ -145,39 +157,45 @@ const updateBatchPostHookMethod = async (input, params, _mutationName, _context)
 
   const topicsMeta = await getTopicMeta();
   const topicCount = topicsMeta.count;
+  // get the current state of the batch to decide what to do next
+  const batch = await getBatch(batchId)
 
   // the batch sessions 
   const batchSessions = await getBatchSessions(batchId);
+
   if (batchSessions) {
-
-    // sort batch sessions into started/completed (sc) and alloted (a)
+    // TODO : for condition where previous batch sessions are present, write code..
     const { sessions_sc, sessions_a } = sortBatchSessions(batchSessions);
-
     if (sessions_sc.length > 0) {
       const possibleSessionCount = topicCount - sessions_sc.length;
-
     }
-
-
   } else {
 
     // if there are no exisiting batchSessions for the given batch id, we create all of them
+    // make the comparison here
+    const diffTerms = getDiff(timeTableRules, fetchedTimeTableRules);
 
-    // we need to get an array of Dates when we want the batch Session to be created,
-    // it has to be between from and to passed in the query
-    // it has to be greater than currentDate
 
   }
 
-  // get the current state of the batch to decide what to do next
-  const batch = await getBatch(batchId)
-  console.log(timeTableRules)
+  const days = getSelectedDays(timeTableRules);
+  const startDate = new Date(timeTableRules.startDate);
+  startDate.setHours(0, 0, 0, 0);
+  const endDate = new Date(timeTableRules.endDate);
+  endDate.setHours(0, 0, 0, 0);
+
+  const possibleDates = getPossibleDates(startDate, endDate, days);
+  // console.log(possibleDates);
+
+  const { ...slots } = timeTableRules;
+  const { filteredSlots, filteredSlotsString } = extractSlotsFromInput(slots);
+  await createBatchSessions(batchId, possibleDates, filteredSlotsString);
+
+
   const fetchedTimeTableRules = batch.timeTableRules
-  console.log('hi')
   if (timeTableRules && fetchedTimeTableRules) {
-    // make the comparison here
-    const diffTerms = getDiff(timeTableRules, fetchedTimeTableRules);
-    console.log(diffTerms);
+
+
   }
 
 
