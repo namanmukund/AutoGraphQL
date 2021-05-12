@@ -161,7 +161,7 @@ const updateBatchPostHookMethod = async (_input, params, _mutationName, _context
     -> Fetch total number of published topics (x), this will be the max possible number of batchSessions
     -> Fetch batchSessions that are either in the started or completed state (y)
     -> compare fields (fromDate, toDate, slot and weekdays) which are alredy stored in the database and which are passed as input
-    -> make an array of Date, on which batchSessions are to be created (start > currentDate)(max = x-y), if beyond max throw interval too big error
+    -> make an array of Date, on which batchSessions are to be created (start > currentDate)(max = x-y)
     -> if there are no batchSessions in the Db, create batchSessions for all the dates in the date array
     -> if there are some batchSessions, update the remaining batchSessions with the new passed values and create batchSessions if necessary.
   */
@@ -179,8 +179,10 @@ const updateBatchPostHookMethod = async (_input, params, _mutationName, _context
   // start, end dates
   const days = getSelectedDays(timeTableRules);
   const startDate = new Date(timeTableRules.startDate);
+  startDate.setDate(startDate.getDate())
   startDate.setHours(0, 0, 0, 0);
   const endDate = new Date(timeTableRules.endDate);
+  endDate.setDate(endDate.getDate())
   endDate.setHours(0, 0, 0, 0);
 
   // slots passed in input
