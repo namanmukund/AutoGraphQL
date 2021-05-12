@@ -29,7 +29,7 @@ const MentorSession = `
     sessionType: SessionType @defaultValue(value: "trial")
     ${slotTimeFields}
     mentorMenteeSessions: [MentorMenteeSession] @relation(name: "SessionDataMentorSession")
-    batchSession: BatchSession @relation(name: "BatchSessionMentorSession")
+    batchSessions: [BatchSession] @relation(name: "BatchSessionMentorSession")
 }`;
 
 export default [MentorSession];
