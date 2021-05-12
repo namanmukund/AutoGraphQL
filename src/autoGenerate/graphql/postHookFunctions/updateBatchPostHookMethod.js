@@ -154,11 +154,11 @@ const sortBatchSessions = (batchSessions) => {
 /*
   Post hook of update batch
 */
-const updateBatchPostHookMethod = async (input, params, _mutationName, _context) => {
+const updateBatchPostHookMethod = async (_input, params, _mutationName, _context) => {
   const { id: batchId, input: { timeTableRules } } = params;
   /*
     TODO : 
-    -> Fetch total number of published topics (x) of the course, this will be the max possible number of batchSessions
+    -> Fetch total number of published topics (x), this will be the max possible number of batchSessions
     -> Fetch batchSessions that are either in the started or completed state (y)
     -> compare fields (fromDate, toDate, slot and weekdays) which are alredy stored in the database and which are passed as input
     -> make an array of Date, on which batchSessions are to be created (start > currentDate)(max = x-y), if beyond max throw interval too big error

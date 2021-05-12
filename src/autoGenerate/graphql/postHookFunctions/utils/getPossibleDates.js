@@ -10,7 +10,7 @@ const getPossibleDates = (startDate, endDate, days) => {
       return date;
     };
   while (currentDate <= endDate) {
-    if (days.has(currentDate.getDay())) {
+    if (days.has(currentDate.getDay()) && currentDate > new Date()) {
       dates.push(currentDate);
     }
     currentDate = addDays.call(currentDate, 1);
