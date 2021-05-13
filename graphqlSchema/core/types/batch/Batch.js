@@ -26,7 +26,7 @@ const Batch = `
   )
   {
     course: Course! @relation(name: "BatchCurrentComponentStatusCourse", direction: "OneWay")
-    allottedMentor: User! @relation(name:"BatchMentor", direction: "OneWay")
+    allottedMentor: User @relation(name:"BatchMentor", direction: "OneWay")
     code: String! @uniqueOrEmpty @trim
     description: String
     students: [StudentProfile] @relation(name: "BatchStudentProfile")
