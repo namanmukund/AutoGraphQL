@@ -1,10 +1,10 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import extractSlotsFromInput from './utils/extractSlotsFromInput'
+import extractSlotsFromInput from './utils/extractSlotsFromInput';
 import getSelectedDays from './utils/getSelectedDays';
 import getPossibleDates from './utils/getPossibleDates';
 
-// query to get published topics count 
+// query to get published topics count
 const getTopicMeta = async () => {
   const query = `
           {
@@ -92,9 +92,8 @@ const createBatchSession = async (batchId, date, slots) => {
           }
           `;
   await callLocalGraphqlApi(query);
-  console.log(`created batch session! for ${date}`);
   return true;
-}
+};
 
 const updateBatchSession = async (sessionId, slots, date) => {
   const query = `
@@ -110,54 +109,55 @@ const updateBatchSession = async (sessionId, slots, date) => {
           }
           `;
   await callLocalGraphqlApi(query);
-  console.log(`updated batch session! for ${date}`);
   return true;
-}
+};
 
 const createBatchSessions = async (batchId, possibleDates, filteredSlots, possibleSessionCount) => {
   if (possibleDates.length <= possibleSessionCount) {
-    possibleDates.forEach(date => createBatchSession(batchId, date, filteredSlots));
+    possibleDates.forEach((date) => createBatchSession(batchId, date, filteredSlots));
   } else {
     for (let i = 0; i < possibleSessionCount; i += 1) {
-      createBatchSession(batchId, possibleDates[i], filteredSlots);
+      createBatchSession(batchId, possibleDates[i].toISOString(), filteredSlots);
     }
   }
 
   return true;
-}
+};
 
-const updateAllottedBatchSessions = async (sessions_a, possibleDates, filteredSlotsString, allottedSessionsCount) => {
+const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filteredSlotsString) => {
   let i = 0;
-  for (const sessionId in sessions_a) {
-    updateBatchSession(sessionId, filteredSlotsString, possibleDates[i]);
+  /* eslint-disable array-callback-return */
+  sessionsAllotted.map((sessionId) => {
+    /* eslint-disable array-callback-return */
+    const date = possibleDates[i].toISOString();
+    updateBatchSession(sessionId, filteredSlotsString, date);
     i += 1;
-  }
-}
+  });
+};
 
 // method to sort batchSessions
 const sortBatchSessions = (batchSessions) => {
-  const sessions_sc = [];
-  const sessions_a = [];
+  const sessionsStartedOrCompleted = [];
+  const sessionsAllotted = [];
 
-  batchSessions.map(item => {
+  batchSessions.map((item) => {
+    /* eslint-disable array-callback-return */
     if (item.sessionsStatus === 'allotted') {
-      sessions_a.push(item);
+      sessionsAllotted.push(item);
     } else {
-      sessions_sc.push(item);
+      sessionsStartedOrCompleted.push(item);
     }
-  })
+  });
 
-  return { sessions_sc, sessions_a };
-
-}
+  return { sessionsStartedOrCompleted, sessionsAllotted };
+};
 
 /*
   Post hook of update batch
 */
-const updateBatchPostHookMethod = async (_input, params, _mutationName, _context) => {
+const updateBatchPostHookMethod = async (params) => {
   const { id: batchId, input: { timeTableRule } } = params;
   /*
-    TODO : 
     -> Fetch total number of published topics (x), this will be the max possible number of batchSessions
     -> Fetch batchSessions that are either in the started or completed state (y)
     -> compare fields (fromDate, toDate, slot and weekdays) which are alredy stored in the database and which are passed as input
@@ -165,15 +165,15 @@ const updateBatchPostHookMethod = async (_input, params, _mutationName, _context
     -> if there are no batchSessions in the Db, create batchSessions for all the dates in the date array
     -> if there are some batchSessions, update the remaining batchSessions with the new passed values and create batchSessions if necessary.
   */
-
   // topic count
   const topicsMeta = await getTopicMeta();
   const topicCount = topicsMeta.count;
 
   // current batch
-  const batch = await getBatch(batchId)
+  /* eslint-disable no-unused-vars */
+  const batch = await getBatch(batchId);
 
-  // batch sessions 
+  // batch sessions
   const batchSessions = await getBatchSessions(batchId);
 
   // start, end dates
@@ -186,38 +186,32 @@ const updateBatchPostHookMethod = async (_input, params, _mutationName, _context
   // slots passed in input
   const { ...slots } = timeTableRule;
   const { filteredSlotsString } = extractSlotsFromInput(slots);
-  console.log(filteredSlotsString);
 
   if (batchSessions) {
-
     // sorting the existing batch sessions into started/completed and allotted
-    const { sessions_sc, sessions_a } = sortBatchSessions(batchSessions);
+    const { sessionsStartedOrCompleted, sessionsAllotted } = sortBatchSessions(batchSessions);
     let possibleSessionCount = topicCount;
-    if (sessions_sc.length > 0) {
-
-      // if there exists some started or completed sessions, create sessions for the remaining
-      possibleSessionCount -= sessions_sc.length;
+    if (sessionsStartedOrCompleted.length > 0) {
+      // if there exists some started or completed sessions, don't count them, create/update sessions for the remaining
+      possibleSessionCount -= sessionsStartedOrCompleted.length;
     }
     let possibleDates = getPossibleDates(startDate, endDate, days);
-    console.log(possibleDates);
-
     // for the sessions which are still in the allotted state, update them
-    const allottedSessionsCount = sessions_a.length;
+    const allottedSessionsCount = sessionsAllotted.length;
     if (allottedSessionsCount > 0) {
       possibleSessionCount -= allottedSessionsCount;
-      await updateAllottedBatchSessions(sessions_a, possibleDates, filteredSlotsString, allottedSessionsCount);
+      await updateAllottedBatchSessions(sessionsAllotted, possibleDates, filteredSlotsString);
     }
     if (possibleSessionCount > 0) {
       // all the remaining sessions have to be created
-      possibleDates = possibleDates.slice(0, allottedSessionsCount - 1);
+      const startFromIndex = allottedSessionsCount;
+      possibleDates = possibleDates.splice(startFromIndex);
       await createBatchSessions(batchId, possibleDates, filteredSlotsString, possibleSessionCount);
     }
   } else {
-
     // if there are no exisiting batchSessions for the given batch id, create all of them
     const possibleSessionCount = topicCount;
     const possibleDates = getPossibleDates(startDate, endDate, days);
-    console.log(possibleDates);
     await createBatchSessions(batchId, possibleDates, filteredSlotsString, possibleSessionCount);
   }
 };

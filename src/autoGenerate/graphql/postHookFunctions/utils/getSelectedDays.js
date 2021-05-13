@@ -23,6 +23,6 @@ const getSelectedDays = (timeTableRule) => {
     days.add(6);
   }
   return days;
-}
+};
 
 export default getSelectedDays;

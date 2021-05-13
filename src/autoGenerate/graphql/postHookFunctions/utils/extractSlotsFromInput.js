@@ -8,6 +8,6 @@ const extractSlotsFromInput = (slots) => {
     }
   });
   return { filteredSlots, filteredSlotsString };
-}
+};
 
 export default extractSlotsFromInput;
