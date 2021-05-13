@@ -37,7 +37,7 @@ const getBatch = async (batchId) => {
           {
             batch(id:"${batchId}"){
               id
-              timeTableRules{
+              timeTableRule{
                 startDate
                 endDate
                 slot0
@@ -155,13 +155,13 @@ const sortBatchSessions = (batchSessions) => {
   Post hook of update batch
 */
 const updateBatchPostHookMethod = async (_input, params, _mutationName, _context) => {
-  const { id: batchId, input: { timeTableRules } } = params;
+  const { id: batchId, input: { timeTableRule } } = params;
   /*
     TODO : 
     -> Fetch total number of published topics (x), this will be the max possible number of batchSessions
     -> Fetch batchSessions that are either in the started or completed state (y)
     -> compare fields (fromDate, toDate, slot and weekdays) which are alredy stored in the database and which are passed as input
-    -> make an array of Date, on which batchSessions are to be created (start > currentDate)(max = x-y)
+    -> make an array of Date, on which batchSessions are to be created (start > currentDate)(max = x-y), if beyond max throw interval too big error
     -> if there are no batchSessions in the Db, create batchSessions for all the dates in the date array
     -> if there are some batchSessions, update the remaining batchSessions with the new passed values and create batchSessions if necessary.
   */
@@ -177,16 +177,14 @@ const updateBatchPostHookMethod = async (_input, params, _mutationName, _context
   const batchSessions = await getBatchSessions(batchId);
 
   // start, end dates
-  const days = getSelectedDays(timeTableRules);
-  const startDate = new Date(timeTableRules.startDate);
-  startDate.setDate(startDate.getDate())
+  const days = getSelectedDays(timeTableRule);
+  const startDate = new Date(timeTableRule.startDate);
   startDate.setHours(0, 0, 0, 0);
-  const endDate = new Date(timeTableRules.endDate);
-  endDate.setDate(endDate.getDate())
+  const endDate = new Date(timeTableRule.endDate);
   endDate.setHours(0, 0, 0, 0);
 
   // slots passed in input
-  const { ...slots } = timeTableRules;
+  const { ...slots } = timeTableRule;
   const { filteredSlotsString } = extractSlotsFromInput(slots);
   console.log(filteredSlotsString);
 

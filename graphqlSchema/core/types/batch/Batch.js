@@ -6,8 +6,8 @@ import getWeekDaysFields from '../../functions/getWeekDaysFields';
 const slotTimeFields = getSlotTimeFields('Boolean', false);
 const weekDaysFields = getWeekDaysFields('Boolean', false);
 
-const BatchTimeTableRules = `
-  type BatchTimeTableRules {
+const BatchTimeTableRule = `
+  type BatchTimeTableRule {
    startDate: Date
    endDate: Date
    ${slotTimeFields}
@@ -35,8 +35,8 @@ const Batch = `
     campaign: Campaign @relation(name: "CampaignBatch")
     classes: [SchoolClass] @relation(name: "BatchSchoolClass", direction: "OneWay")
     school: School @relation(name: "BatchSchool", direction: "OneWay")
-    timeTableRules: BatchTimeTableRules
+    timeTableRule: BatchTimeTableRule
   }
 `;
 
-export default [Batch, BatchTimeTableRules];
+export default [Batch, BatchTimeTableRule];
