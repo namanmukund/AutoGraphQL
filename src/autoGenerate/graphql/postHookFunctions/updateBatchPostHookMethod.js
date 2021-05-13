@@ -1,116 +1,10 @@
-import { get } from 'lodash';
-import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+// import { get } from 'lodash';
+// import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import extractSlotsFromInput from './utils/extractSlotsFromInput';
 import getSelectedDays from './utils/getSelectedDays';
 import getPossibleDates from './utils/getPossibleDates';
-
-// query to get published topics count
-const getTopicMeta = async () => {
-  const query = `
-          {
-            topicsMeta(filter: {status: published}){
-              count
-            }
-          }
-          `;
-  const topicMeta = await callLocalGraphqlApi(query);
-  return get(topicMeta, 'data.topicsMeta');
-};
-
-// query to get batch sessions (started, completed)
-const getBatchSessions = async (batchId) => {
-  const query = `
-          {
-            batchSessions(filter: {batch_some: {id: "${batchId}"}}){
-              id
-              bookingDate
-            }
-          }
-          `;
-  const batches = await callLocalGraphqlApi(query);
-  return get(batches, 'data.batchSessions');
-};
-
-// query to get batch sessions (started, completed)
-const getBatch = async (batchId) => {
-  const query = `
-          {
-            batch(id:"${batchId}"){
-              id
-              timeTableRule{
-                startDate
-                endDate
-                slot0
-                slot1
-                slot2
-                slot3
-                slot4
-                slot5
-                slot6
-                slot7
-                slot8
-                slot9
-                slot11
-                slot12
-                slot13
-                slot14
-                slot15
-                slot16
-                slot17
-                slot18
-                slot19
-                slot20
-                slot21
-                slot22
-                slot23
-                sunday
-                monday
-                tuesday
-                wednesday
-                thursday
-                friday
-                saturday
-              }
-            }
-          }
-          `;
-  const currBatch = await callLocalGraphqlApi(query);
-  return get(currBatch, 'data.batch');
-};
-
-const createBatchSession = async (batchId, date, slots) => {
-  const query = `
-          mutation{
-            addBatchSession(batchConnectId: "${batchId}",
-            input:{
-              bookingDate:"${date}",
-              ${slots}
-            }
-            ){
-              id
-            }
-          }
-          `;
-  await callLocalGraphqlApi(query);
-  return true;
-};
-
-const updateBatchSession = async (sessionId, slots, date) => {
-  const query = `
-          mutation{
-            updateBatchSession(batchConnectId: "${sessionId}",
-            input:{
-              bookingDate:"${date}",
-              ${slots}
-            }
-            ){
-              id
-            }
-          }
-          `;
-  await callLocalGraphqlApi(query);
-  return true;
-};
+/* eslint-disable object-curly-newline */
+import { getTopicMeta, getBatchSessions, getBatch, createBatchSession, updateBatchSession } from './utils/updateBatchPostHookQueries';
 
 const createBatchSessions = async (batchId, possibleDates, filteredSlots, possibleSessionCount) => {
   if (possibleDates.length <= possibleSessionCount) {
@@ -155,7 +49,8 @@ const sortBatchSessions = (batchSessions) => {
 /*
   Post hook of update batch
 */
-const updateBatchPostHookMethod = async (params) => {
+/* eslint-disable no-unused-vars */
+const updateBatchPostHookMethod = async (input, params, mutationName, context) => {
   const { id: batchId, input: { timeTableRule } } = params;
   /*
     -> Fetch total number of published topics (x), this will be the max possible number of batchSessions
