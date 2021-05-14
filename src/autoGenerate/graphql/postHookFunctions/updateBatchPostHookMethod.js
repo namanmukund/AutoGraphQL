@@ -9,7 +9,7 @@ import {
   getBatchSessions,
   getBatch,
   createBatchSession,
-  updateBatchSession
+  updateBatchSession,
 } from './utils/updateBatchPostHookQueries';
 
 const createBatchSessions = async (batchId, possibleDates, filteredSlots, possibleSessionCount) => {
@@ -51,7 +51,7 @@ const sortBatchSessions = (batchSessions) => {
 
   return {
     sessionsStartedOrCompleted,
-    sessionsAllotted
+    sessionsAllotted,
   };
 };
 
@@ -63,8 +63,8 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
   const {
     id: batchId,
     input: {
-      timeTableRule
-    }
+      timeTableRule,
+    },
   } = params;
   /*
     -> Fetch total number of published topics (x), this will be the max possible number of batchSessions
@@ -97,14 +97,14 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
     ...slots
   } = timeTableRule;
   const {
-    filteredSlotsString
+    filteredSlotsString,
   } = extractSlotsFromInput(slots);
 
   if (batchSessions && batchSessions.length) {
     // sorting the existing batch sessions into started/completed and allotted
     const {
       sessionsStartedOrCompleted,
-      sessionsAllotted
+      sessionsAllotted,
     } = sortBatchSessions(batchSessions);
     let possibleSessionCount = topicCount;
     if (sessionsStartedOrCompleted.length > 0) {

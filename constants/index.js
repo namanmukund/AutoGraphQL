@@ -303,6 +303,8 @@ export const MENTOR_REPORT_DAYS = 3;
 
 export const MENTOR_RATING_AUDIT_THRESHOLD = 4;
 
+export const MAX_ALLOWED_BATCH_SESSIONS_DAYS_RANGE = 365;
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
