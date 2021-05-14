@@ -16,7 +16,6 @@ const BulkMentorSessionInput = `
   input BulkMentorSessionInput {
     timeTableRule: MentorTimeTableRuleInput!
     userId: String!
-    courseId: String!
   }
 `;
 
