@@ -1,8 +1,8 @@
 // import { get } from 'lodash';
 // import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import extractSlotsFromInput from './utils/extractSlotsFromInput';
+import extractSlotsFromInput from '../../../../utils/extractSlotsFromInput';
 import getSelectedDays from './utils/getSelectedDays';
-import getPossibleDates from './utils/getPossibleDates';
+import getPossibleDates from '../../../../utils/getPossibleDates';
 /* eslint-disable object-curly-newline */
 import { getTopicMeta, getBatchSessions, getBatch, createBatchSession, updateBatchSession } from './utils/updateBatchPostHookQueries';
 
@@ -82,7 +82,7 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
   const { ...slots } = timeTableRule;
   const { filteredSlotsString } = extractSlotsFromInput(slots);
 
-  if (batchSessions) {
+  if (batchSessions && batchSessions.length) {
     // sorting the existing batch sessions into started/completed and allotted
     const { sessionsStartedOrCompleted, sessionsAllotted } = sortBatchSessions(batchSessions);
     let possibleSessionCount = topicCount;
