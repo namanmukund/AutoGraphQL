@@ -87,6 +87,7 @@ import UserCheatSheet from './userCheatSheet';
 import NewsFeed from './newsFeed';
 import SchoolClass from './schoolClass';
 import Campaign from './campaign';
+import BulkMentorSessionInput from './bulkMentorSessionInput';
 
 export default [
   ...User,
@@ -178,4 +179,5 @@ export default [
   ...NewsFeed,
   ...SchoolClass,
   ...Campaign,
+  ...BulkMentorSessionInput,
 ];
