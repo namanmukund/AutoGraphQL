@@ -2,9 +2,9 @@ import { get } from 'lodash';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import getSelectedDays from '../../../postHookFunctions/utils/getSelectedDays';
 import extractSlotsFromInput from '../../../../../../utils/extractSlotsFromInput';
-import getPossibleDates from '../../../postHookFunctions/utils/getPossibleDates';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { QueryController } from '../../../controllers';
+import getPossibleDates from '../../../../../../utils/getPossibleDates';
 
 // query to fetch mentorSession
 const fetchMentorSessions = (userId, date) => `
@@ -21,13 +21,13 @@ const fetchMentorSessions = (userId, date) => `
   `;
 
 // mutation to add mentorSession
-const createMentorSessions = (userId, courseId, date, slots) => `
+const createMentorSessions = (userId, date, slots) => `
   mutation {
     addMentorSession(input: {
       availabilityDate: "${date}",
       ${slots}
       sessionType: trial
-    }, userConnectId: "${userId}", courseConnectId: "${courseId}") {
+    }, userConnectId: "${userId}") {
       id
     }
   }
@@ -46,7 +46,7 @@ const updateMentorSessions = (id, date, slots) => `
   `;
 
 // method to add/update mentorSession on all the provided dates and slots
-const constructMentorSessions = async (userId, courseId, possibleDates, filteredSlots) => {
+const constructMentorSessions = async (userId, possibleDates, filteredSlots) => {
   // mentorSessionIds array to track alll the mentorSession ids added + updated
   const mentorSessionsIdArray = [];
   if (possibleDates.length) {
@@ -71,7 +71,6 @@ const constructMentorSessions = async (userId, courseId, possibleDates, filtered
           // eslint-disable-next-line no-await-in-loop
           const addMentorSessionsMutationRes = await callLocalGraphqlApi(createMentorSessions(
             userId,
-            courseId,
             date.toISOString(),
             filteredSlots,
           ));
@@ -89,7 +88,7 @@ const constructMentorSessions = async (userId, courseId, possibleDates, filtered
 
 /*
 This is called when mentor tries to crate his sessions in bulk, here from frontend we will pass:
-userId, courseId, timeTableRule(startDate, endDate, ...slots, ...weekdays)
+userId, timeTableRule(startDate, endDate, ...slots, ...weekdays)
 in return we will send mentorSessions updated/added
 */
 const addBulkMentorSessionMutationResolver = async (
@@ -102,7 +101,7 @@ const addBulkMentorSessionMutationResolver = async (
   context,
 ) => {
   validateAuthentication(context);
-  const { input: { userId, courseId, timeTableRule } } = params;
+  const { input: { userId, timeTableRule } } = params;
   const { startDate: startDateInInput, endDate: endDateInInput, ...slots } = timeTableRule;
 
   // start, end dates
@@ -119,7 +118,7 @@ const addBulkMentorSessionMutationResolver = async (
   const possibleDates = getPossibleDates(startDate, endDate, days);
 
   // add/update mentorSession on the dates created and slots passed
-  const mentorSessionArray = await constructMentorSessions(userId, courseId, possibleDates, filteredSlotsString);
+  const mentorSessionArray = await constructMentorSessions(userId, possibleDates, filteredSlotsString);
 
   // constructing data in format to be returned
   const modelQuery = new QueryController('MentorSession', { bypass: true });
