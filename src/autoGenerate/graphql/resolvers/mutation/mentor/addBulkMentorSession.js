@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import getSelectedDays from '../../../postHookFunctions/utils/getSelectedDays';
-import extractSlotsFromInput from '../../../postHookFunctions/utils/extractSlotsFromInput';
+import extractSlotsFromInput from '../../../../../../utils/extractSlotsFromInput';
 import getPossibleDates from '../../../postHookFunctions/utils/getPossibleDates';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { QueryController } from '../../../controllers';
