@@ -6,8 +6,8 @@ const weekDaysFields = getWeekDaysFields('Boolean', false);
 
 const MentorTimeTableRuleInput = `
   input MentorTimeTableRuleInput {
-   startDate: Date
-   endDate: Date
+   startDate: Date!
+   endDate: Date!
    ${slotTimeFields}
    ${weekDaysFields}
  }`;
