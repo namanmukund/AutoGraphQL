@@ -34,7 +34,7 @@ const fetchPublishedCourse = async () => {
             `;
   const course = await callLocalGraphqlApi(query);
   return get(course, 'data.courses', []);
-}
+};
 
 const fetchLastBatchSession = async () => {
   const query = `
@@ -50,12 +50,13 @@ const fetchLastBatchSession = async () => {
 
 const fetchAllConnectedSchoolClasses = async (classesConnectIds) => {
   const classes = [];
+  /* eslint-disable no-await-in-loop */
   for (let i = 0; i < classesConnectIds.length; i += 1) {
     const data = await fetchSchoolClass(classesConnectIds[i]);
     classes.push(data);
   }
   return classes;
-}
+};
 
 const createBatch = async (batchCode, schoolId, classIds, campaignId, studentIds, courseId) => {
   const classIdsString = JSON.stringify(classIds);
@@ -90,13 +91,12 @@ const createBatch = async (batchCode, schoolId, classIds, campaignId, studentIds
               }
                 `;
   const addBatchResponse = await callLocalGraphqlApi(mutation);
-  console.log(addBatchResponse);
   return get(addBatchResponse, 'data.addBatch', {});
-}
+};
 
 const getClassesGroupByGrade = (classes) => {
-  let classesMap = new Map();
-  classes.forEach(schoolClass => {
+  const classesMap = new Map();
+  classes.forEach((schoolClass) => {
     if (classesMap.has(schoolClass.grade)) {
       const arr = classesMap.get(schoolClass.grade);
       arr.push(schoolClass);
@@ -106,11 +106,9 @@ const getClassesGroupByGrade = (classes) => {
       arr.push(schoolClass);
       classesMap.set(schoolClass.grade, arr);
     }
-  })
+  });
   return classesMap;
-}
-
-
+};
 
 const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId) => {
   // classIds and studentIds to pass in input
@@ -121,14 +119,15 @@ const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId) 
   const lastBatchSessionCode = lastBatchSession[0].code;
   let numeric = Number(lastBatchSessionCode.substring(6));
 
-  // fetch the course code 
+  // fetch the course code
   const course = await fetchPublishedCourse();
   const courseId = course[0].id;
-
+  /* eslint-disable no-restricted-syntax */
   for (const grade of classesGroupByGrade.keys()) {
     const classesInGrade = classesGroupByGrade.get(grade);
     const schoolId = classesInGrade[0].school.id;
     const batchCode = `TK-BBS${numeric += 1}`;
+    /* eslint-disable no-loop-func */
     classesInGrade.forEach((schoolClass) => {
       classIds.push(schoolClass.id);
       if (schoolClass.students && schoolClass.students.length > 0) {
@@ -137,6 +136,7 @@ const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId) 
         });
       }
     });
+    /* eslint-disable no-await-in-loop */
     await createBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId);
     log(`Batch ${batchCode} added`);
     classIds = [];
@@ -152,7 +152,7 @@ const createBatchSessionsGroupBySection = async (classes, campaignId) => {
   const lastBatchSessionCode = lastBatchSession[0].code;
   let numeric = Number(lastBatchSessionCode.substring(6));
 
-  // fetch the course code 
+  // fetch the course code
   const course = await fetchPublishedCourse();
   const courseId = course[0].id;
 
@@ -165,28 +165,32 @@ const createBatchSessionsGroupBySection = async (classes, campaignId) => {
         studentIds[indexedDB].push(student.id);
       });
     }
+    /* eslint-disable no-await-in-loop */
     await createBatch(batchCode, schoolId, schoolClass[i].id, campaignId, studentIds, courseId);
     log(`Batch ${batchCode} added`);
     studentIds = [];
-  };
+  }
+  return true;
 };
 
 const getSectionExists = (classes) => {
   let noSectionInAnyClass = true;
+  /* eslint-disable no-loop-func */
   classes.forEach((schoolClass) => {
+    /* eslint-disable consistent-return */
     if (schoolClass.section && schoolClass.section != null) {
       noSectionInAnyClass = false;
       return noSectionInAnyClass;
     }
-  })
+    return true;
+  });
   return noSectionInAnyClass;
-}
-
+};
 
 export {
   createBatchSessionsGroupBySection,
   createBatchSessionsGroupByGrade,
   getClassesGroupByGrade,
   fetchAllConnectedSchoolClasses,
-  getSectionExists
+  getSectionExists,
 };
