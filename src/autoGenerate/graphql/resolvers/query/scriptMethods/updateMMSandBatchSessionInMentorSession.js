@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get all mentorMenteeSessions
@@ -48,6 +47,7 @@ const updateMMSandBatchSessionInMentorSession = async () => {
   do {
     // eslint-disable-next-line no-console
     console.log('------------------------------skipMentorMenteeSession', skipMentorMenteeSession);
+    // eslint-disable-next-line no-await-in-loop
     const mentorMenteeSessionsQueryRes = await callLocalGraphqlApi(getMentorMenteeSessions(skipMentorMenteeSession));
     mentorMenteeSessionsArray = get(mentorMenteeSessionsQueryRes, 'data.mentorMenteeSessions', []);
     // eslint-disable-next-line no-restricted-syntax

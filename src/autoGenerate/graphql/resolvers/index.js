@@ -76,6 +76,7 @@ import getTotalAmountCollected from './query/methods/getTotalAmountCollected';
 import addUpdateBulkSchoolUserData from './mutation/methods/addUpdateBulkSchoolUserData';
 import updateVisitorReactionOnUserApprovedCode from './mutation/methods/updateVisitorReactionOnUserApprovedCode';
 import getCheatSheet from './query/methods/getCheatSheet';
+import addBulkMentorSession from './mutation/methods/addBulkMentorSession';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -563,6 +564,7 @@ resolvers.Mutation.getPaymentRequest = getPaymentRequest;
 resolvers.Mutation.getPaymentResponse = getPaymentResponse;
 resolvers.Mutation.addUpdateBulkSchoolUserData = addUpdateBulkSchoolUserData;
 resolvers.Mutation.updateVisitorReactionOnUserApprovedCode = updateVisitorReactionOnUserApprovedCode;
+resolvers.Mutation.addBulkMentorSession = addBulkMentorSession;
 
 // queries
 resolvers.Query.me = me;

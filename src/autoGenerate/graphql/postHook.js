@@ -47,6 +47,7 @@ import updateMentorMenteeSessionAuditPostHookMethod from './postHookFunctions/up
 import updateUserApprovedCodePostHookMethod from './postHookFunctions/updateUserApprovedCodePostHookMethod';
 import updateStudentProfilePostHookMethod from './postHookFunctions/updateStudentProfilePostHookMethod';
 import addUserSavedCodePostHookMethod from './postHookFunctions/addUserSavedCodePostHookMethod';
+import updateBatchPostHookMethod from './postHookFunctions/updateBatchPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -206,6 +207,10 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'addBatch': {
       await addBatchPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'updateBatch': {
+      await updateBatchPostHookMethod(input, params, mutationName, context);
       break;
     }
     case 'addBatchSession': {

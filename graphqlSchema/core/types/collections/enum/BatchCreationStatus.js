@@ -1,10 +1,11 @@
 import { batchCreationStatus } from '../../../../../constants';
 
-const { grade, section } = batchCreationStatus;
+const { todo, inProgress, complete } = batchCreationStatus;
 const BatchCreationStatus = `
   enum BatchCreationStatus {
-    ${grade}
-    ${section}
+    ${todo}
+    ${inProgress}
+    ${complete}
   }`;
 
 export default BatchCreationStatus;
