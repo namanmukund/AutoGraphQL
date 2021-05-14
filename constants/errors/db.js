@@ -143,3 +143,7 @@ export const GradeSectionCombinationAlreadyExists = createError('GradeSectionCom
 export const StudentsLinked = createError('StudentsLinked', {
   message: 'Cannot perform the current operation as students are linked to the entity',
 });
+
+export const NoSectionExists = createError('No Section Exists', {
+  message: 'Cannot perform batch creation on basis of \'section\'. No section exists in any of the selected schoolClasses',
+});
