@@ -2,9 +2,9 @@ import { get } from 'lodash';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import getSelectedDays from '../../../postHookFunctions/utils/getSelectedDays';
 import extractSlotsFromInput from '../../../../../../utils/extractSlotsFromInput';
-import getPossibleDates from '../../../postHookFunctions/utils/getPossibleDates';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { QueryController } from '../../../controllers';
+import getPossibleDates from '../../../../../../utils/getPossibleDates';
 
 // query to fetch mentorSession
 const fetchMentorSessions = (userId, date) => `
