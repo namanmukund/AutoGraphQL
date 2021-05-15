@@ -51,14 +51,15 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
   validateMentorSessionInput(params, '', context);
   // check if the document for called user and availabilityDate is already present
   const userId = get(params, 'userConnectId');
-  const courseId = get(params, 'courseConnectId');
+  // courseId not mandatory for mentorSession
+  // const courseId = get(params, 'courseConnectId');
   const availabilityDate = get(params, 'input.availabilityDate');
 
   // log in case user id or availabilityDate is not present
-  if (!userId || !availabilityDate || !courseId) {
+  if (!userId || !availabilityDate) {
     throw new MissingMandatoryInputInRequestError({
       data: {
-        message: 'Either userConnectId or courseConnectId or availabilityDate or all missing in input',
+        message: 'Either userConnectId or availabilityDate or all missing in input',
       },
     });
   }
