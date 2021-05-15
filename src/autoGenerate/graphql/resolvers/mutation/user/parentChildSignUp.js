@@ -282,14 +282,18 @@ const updateSchoolDataOfAStudent = async (input, studentProfileId) => {
       return false;
     }
   }
-  const schoolClassId = await getSchoolClassId(input, studentSchoolId);
+  let schoolClassConnectData = '';
 
+  if (section) {
+    const schoolClassId = await getSchoolClassId(input, studentSchoolId);
+    schoolClassConnectData = `schoolClassConnectId: "${schoolClassId}"`;
+  }
   const query = `
   mutation($input: StudentProfileUpdate) {
     updateStudentProfile(id:"${studentProfileId}"
     input: $input
     schoolConnectId: "${studentSchoolId}"
-    schoolClassConnectId: "${schoolClassId}"
+    ${schoolClassConnectData}
     ){
       id
     }
