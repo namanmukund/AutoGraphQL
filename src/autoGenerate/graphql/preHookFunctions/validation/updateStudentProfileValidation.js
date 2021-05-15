@@ -5,14 +5,20 @@ import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 const studentProfileQuery = async (id) => {
   const query = `
     query{
-    studentProfile(id:"${id}"){
-      id
-      grade
-      profileAvatarCode
-      user {
+      studentProfile(id:"${id}"){
         id
+        grade
+        section
+        profileAvatarCode
+        user {
+          id
+        }
+        schoolClass {
+        id
+        grade
+        section
+        }
       }
-    }
     }`;
   const res = await callLocalGraphqlApi(query);
   return get(res, 'data.studentProfile');

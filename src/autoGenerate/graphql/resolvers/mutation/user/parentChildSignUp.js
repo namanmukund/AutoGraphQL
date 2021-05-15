@@ -219,58 +219,6 @@ query{
   return get(res, 'data.schools[0].id');
 };
 
-const getSchoolClass = async (input, studentSchoolId) => {
-  const {
-    grade,
-    section,
-  } = input;
-  const query = `
-  query{
-  schoolClasses(filter:{
-    and:[
-      {school_some:{id:"${studentSchoolId}"}}
-      {grade:${grade}}
-      {section: ${section}}
-    ]
-  }){
-    id
-  }
-}
-  `;
-  const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.schoolClasses.0.id');
-};
-
-const addSchoolClass = async (input, studentSchoolId) => {
-  const query = `
-    mutation($input: SchoolClassInput!){
-      addSchoolClass(
-      input:$input, 
-      schoolConnectId:"${studentSchoolId}"){
-        id
-      }
-    }
-  `;
-  const { grade, section } = input;
-  const variables = {
-    input: {
-      grade,
-      section,
-    },
-  };
-  const res = await callLocalGraphqlApi(query, '', variables);
-  return get(res, 'data.addSchoolClass.id');
-};
-
-const getSchoolClassId = async (input, studentSchoolId) => {
-  const schoolClassId = await getSchoolClass(input, studentSchoolId);
-  // map student profile with school class if exist else create first and then map
-  if (schoolClassId) {
-    return schoolClassId;
-  }
-  return addSchoolClass(input, studentSchoolId);
-};
-
 const updateSchoolDataOfAStudent = async (input, studentProfileId) => {
   const {
     schoolName, schoolId, section, rollNo, batch, branch,
@@ -282,18 +230,12 @@ const updateSchoolDataOfAStudent = async (input, studentProfileId) => {
       return false;
     }
   }
-  let schoolClassConnectData = '';
 
-  if (section) {
-    const schoolClassId = await getSchoolClassId(input, studentSchoolId);
-    schoolClassConnectData = `schoolClassConnectId: "${schoolClassId}"`;
-  }
   const query = `
   mutation($input: StudentProfileUpdate) {
     updateStudentProfile(id:"${studentProfileId}"
     input: $input
     schoolConnectId: "${studentSchoolId}"
-    ${schoolClassConnectData}
     ){
       id
     }
