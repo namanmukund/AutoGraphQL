@@ -1,6 +1,4 @@
-import {
-  get,
-} from 'lodash';
+import { get } from 'lodash';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { isValidPhoneNumber, validate, validateName } from '../../../validation';
 import { ADD } from '../../../../../../constants/graphqlOperations';
@@ -8,7 +6,9 @@ import {
   ChildAlreadyRegisteredError,
   EmailOrPhoneMismatchError,
   InvalidEmailError,
-  InvalidPhoneError, SomethingWentWrongError, UserAlreadyExistsError,
+  InvalidPhoneError,
+  SomethingWentWrongError,
+  UserAlreadyExistsError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
 import isValidEmail from '../../../validation/isValidEmail';
@@ -25,8 +25,7 @@ import getReferredByUserIdByReferralCode from './utils/getReferredByUserIdByRefe
 import addUserCredit from './utils/addUserCredit';
 import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
-import addUserCurrentTopicComponentStatus
-  from '../../../../utils/addUserCurrentTopicComponentStatus';
+import addUserCurrentTopicComponentStatus from '../../../../utils/addUserCurrentTopicComponentStatus';
 import studentProfileAvatarCodes from '../../../../../../constants/studentProfileAvatarCodes';
 
 const USER_TYPE = 'User';
@@ -220,19 +219,77 @@ query{
   return get(res, 'data.schools[0].id');
 };
 
+const getSchoolClass = async (input, studentSchoolId) => {
+  const {
+    grade,
+    section,
+  } = input;
+  const query = `
+  query{
+  schoolClasses(filter:{
+    and:[
+      {school_some:{id:"${studentSchoolId}"}}
+      {grade:${grade}}
+      {section: ${section}}
+    ]
+  }){
+    id
+  }
+}
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.schoolClasses.0.id');
+};
+
+const addSchoolClass = async (input, studentSchoolId) => {
+  const query = `
+    mutation($input: SchoolClassInput!){
+      addSchoolClass(
+      input:$input, 
+      schoolConnectId:"${studentSchoolId}"){
+        id
+      }
+    }
+  `;
+  const { grade, section } = input;
+  const variables = {
+    input: {
+      grade,
+      section,
+    },
+  };
+  const res = await callLocalGraphqlApi(query, '', variables);
+  return get(res, 'data.addSchoolClass.id');
+};
+
+const getSchoolClassId = async (input, studentSchoolId) => {
+  const schoolClassId = await getSchoolClass(input, studentSchoolId);
+  // map student profile with school class if exist else create first and then map
+  if (schoolClassId) {
+    return schoolClassId;
+  }
+  return addSchoolClass(input, studentSchoolId);
+};
+
 const updateSchoolDataOfAStudent = async (input, studentProfileId) => {
   const {
-    schoolName, section, rollNo, batch, branch,
+    schoolName, schoolId, section, rollNo, batch, branch,
   } = input;
-  const schoolId = await getSchoolInformation(schoolName);
+  let studentSchoolId = schoolId;
   if (!schoolId) {
-    return false;
+    studentSchoolId = await getSchoolInformation(schoolName);
+    if (!studentSchoolId) {
+      return false;
+    }
   }
+  const schoolClassId = await getSchoolClassId(input, studentSchoolId);
+
   const query = `
   mutation($input: StudentProfileUpdate) {
     updateStudentProfile(id:"${studentProfileId}"
     input: $input
-    schoolConnectId: "${schoolId}"
+    schoolConnectId: "${studentSchoolId}"
+    schoolClassConnectId: "${schoolClassId}"
     ){
       id
     }
@@ -250,7 +307,7 @@ const updateSchoolDataOfAStudent = async (input, studentProfileId) => {
   return get(res, 'data.updateStudentProfile.id');
 };
 
-const getUserOriginSource = (utmSource, schoolName) => {
+const getUserOriginSource = (utmSource, schoolName = '', schoolId = '') => {
   const {
     website, facebook, google, instagram, school, transformation,
   } = userSourceOrigin;
@@ -267,7 +324,7 @@ const getUserOriginSource = (utmSource, schoolName) => {
   if (utmSource && utmSource.toLowerCase().includes('google')) {
     source = google;
   }
-  if (schoolName) {
+  if (schoolName || schoolId) {
     source = school;
   }
   return source;
@@ -323,8 +380,9 @@ const parentChildSignUpMutationResolver = async (
     utmContent,
     utmMedium,
     schoolName,
+    schoolId,
     country,
-    timezone,
+    timezone = 'Asia/Kolkata',
   } = input;
   // check if parent exist in db
   const parentInfo = await getParentInfo(context, parentEmail, parentPhone);
@@ -333,7 +391,7 @@ const parentChildSignUpMutationResolver = async (
   Object.assign(authentication, {
     bypass: true,
   });
-  const source = getUserOriginSource(utmSource, schoolName);
+  const source = getUserOriginSource(utmSource, schoolName, schoolId);
 
   // if parent exist don't add parent and check if the child exists too
   if (parentInfo && parentInfo.parentId) {
@@ -515,7 +573,7 @@ const parentChildSignUpMutationResolver = async (
   // add base credit to user
   await addUserCredit(REGISTRATION_BASE_CREDIT, childUserId, SIGN_UP_BONUS);
   //  if  school information exist add school data
-  if (input && input.schoolName) {
+  if (get(input, 'schoolName') || get(input, 'schoolId')) {
     const updatedStudentProfileId = await updateSchoolDataOfAStudent(input, studentProfileId);
     if (updatedStudentProfileId) {
       // eslint-disable-next-line no-param-reassign
