@@ -14,6 +14,7 @@ const ParentChildSignUpInput = `
     hasLaptopOrDesktop: Boolean
     referralCode: String
     schoolName: String
+    schoolId: ID
     isBuyNow: Boolean
     utmSource: String
     utmCampaign: String

@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-// import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get all mentorMenteeSessions

@@ -6,8 +6,8 @@ const weekDaysFields = getWeekDaysFields('Boolean', false);
 
 const MentorTimeTableRuleInput = `
   input MentorTimeTableRuleInput {
-   startDate: Date
-   endDate: Date
+   startDate: Date!
+   endDate: Date!
    ${slotTimeFields}
    ${weekDaysFields}
  }`;
@@ -16,7 +16,6 @@ const BulkMentorSessionInput = `
   input BulkMentorSessionInput {
     timeTableRule: MentorTimeTableRuleInput!
     userId: String!
-    courseId: String!
   }
 `;
 

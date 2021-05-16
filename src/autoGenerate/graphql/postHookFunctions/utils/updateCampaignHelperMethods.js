@@ -152,6 +152,7 @@ const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId, 
         });
       }
     });
+
     /* eslint-disable no-await-in-loop */
     // tries batchCodes on fail for max. 5 times before moving on
     for (let i = 0; i < ADD_BATCH_TRY_LIMIT; i += 1) {
