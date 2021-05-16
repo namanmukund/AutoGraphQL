@@ -1,12 +1,13 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callGraphqlApi';
-import { batchType, batchCreationStatus } from '../../../../../constants';
+import { batchType, batchCreationStatus, ADD_BATCH_TRY_LIMIT } from '../../../../../constants';
 import { log } from '../../../../../utils';
 
-const fetchSchoolClass = async (schoolClassId) => {
+const fetchSchoolClasses = async (schoolClassIds) => {
+  const schoolClassIdsString = JSON.stringify(schoolClassIds);
   const query = `
           {
-            schoolClass(id: "${schoolClassId}"){
+            schoolClasses(filter: {id_in: ${schoolClassIdsString}}){
               id
               grade
               section
@@ -19,8 +20,8 @@ const fetchSchoolClass = async (schoolClassId) => {
             }
           }
           `;
-  const schoolClass = await callLocalGraphqlApi(query);
-  return get(schoolClass, 'data.schoolClass', {});
+  const schoolClasses = await callLocalGraphqlApi(query);
+  return get(schoolClasses, 'data.schoolClasses', []);
 };
 
 const fetchCampaign = async (campaignId) => {
@@ -52,13 +53,8 @@ const fetchLastBatchSession = async () => {
 };
 
 const fetchAllConnectedSchoolClasses = async (classesConnectIds) => {
-  const classes = [];
-  /* eslint-disable no-await-in-loop */
-  for (let i = 0; i < classesConnectIds.length; i += 1) {
-    const data = await fetchSchoolClass(classesConnectIds[i]);
-    classes.push(data);
-  }
-  return classes;
+  const data = await fetchSchoolClasses(classesConnectIds);
+  return data;
 };
 
 const updateBatchCreationStatus = async (campaignId, status) => {
@@ -157,7 +153,8 @@ const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId, 
       }
     });
     /* eslint-disable no-await-in-loop */
-    for (let i = 0; i < 5; i += 1) {
+    // tries batchCodes on fail for max. 5 times before moving on
+    for (let i = 0; i < ADD_BATCH_TRY_LIMIT; i += 1) {
       try {
         await createBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId);
         log(`Batch ${batchCode} added`);
@@ -195,7 +192,8 @@ const createBatchSessionsGroupBySection = async (classes, campaignId, courseId) 
       });
     }
     /* eslint-disable no-await-in-loop */
-    for (let j = 0; j < 5; j += 1) {
+    // tries batchCodes on fail for max. 5 times before moving on
+    for (let j = 0; j < ADD_BATCH_TRY_LIMIT; j += 1) {
       try {
         await createBatch(batchCode, schoolId, schoolClass[i].id, campaignId, studentIds, courseId);
         log(`Batch ${batchCode} added`);
