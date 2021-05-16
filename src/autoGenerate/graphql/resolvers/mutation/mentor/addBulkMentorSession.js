@@ -14,10 +14,11 @@ const addBulkMentorSessionMutationResolver = async (
 ) => {
   validateAuthentication(context);
   // work in progress
+  /* eslint-disable no-unused-vars */
   const { userId, courseId, timeTableRule } = params;
-  console.log('--------------------------------userId', userId);
-  console.log('--------------------------------courseId', courseId);
-  console.log('--------------------------------timeTableRule', timeTableRule);
+  // console.log('--------------------------------userId', userId);
+  // console.log('--------------------------------courseId', courseId);
+  // console.log('--------------------------------timeTableRule', timeTableRule);
   return [];
 };
 

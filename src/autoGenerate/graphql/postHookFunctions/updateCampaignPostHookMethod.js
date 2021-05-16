@@ -1,5 +1,5 @@
 import { NoSectionExists } from '../../../../constants/errors/db';
-import { campaignTypes } from '../../../../constants';
+import { campaignTypes, batchCreationStatus } from '../../../../constants';
 import {
   createBatchSessionsGroupBySection,
   createBatchSessionsGroupByGrade,
@@ -16,14 +16,14 @@ const updateCampaignPostHookMethod = async (input, params, mutationName, context
 
   const campaign = await fetchCampaign(campaignId);
   const courseId = campaign.course.id;
-  if (campaign.type === campaignTypes.b2b) {
+  if (campaign.type === campaignTypes.b2b && campaign.batchCreationStatus === batchCreationStatus.todo) {
     if (batchRules && batchRules.batchCreationBasis && classesConnectIds && classesConnectIds.length > 0) {
       const classes = await fetchAllConnectedSchoolClasses(classesConnectIds);
       // here sort the classes based on the batchCreationBasis rules
       if (batchRules.batchCreationBasis === 'grade') {
         // Map, with key = grade, value = array of classes corresponding to that grade
         const classesGroupByGrade = getClassesGroupByGrade(classes);
-        await createBatchSessionsGroupByGrade(classesGroupByGrade, campaignId, courseId);
+        createBatchSessionsGroupByGrade(classesGroupByGrade, campaignId, courseId);
       } else {
         // check if section exists in atleast one of the school classes
         const noSectionExists = getSectionExists(classes);
@@ -31,7 +31,7 @@ const updateCampaignPostHookMethod = async (input, params, mutationName, context
           throw new NoSectionExists();
         } else {
           // create separate batches for all the schoolClasses
-          await createBatchSessionsGroupBySection(classes, campaignId, courseId);
+          createBatchSessionsGroupBySection(classes, campaignId, courseId);
         }
       }
     }

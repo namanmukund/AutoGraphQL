@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callGraphqlApi';
-import { batchType } from '../../../../../constants';
+import { batchType, batchCreationStatus } from '../../../../../constants';
 import { log } from '../../../../../utils';
 
 const fetchSchoolClass = async (schoolClassId) => {
@@ -31,6 +31,7 @@ const fetchCampaign = async (campaignId) => {
                 course{
                   title
                 }
+                batchCreationStatus
               }
             }
             `;
@@ -58,6 +59,23 @@ const fetchAllConnectedSchoolClasses = async (classesConnectIds) => {
     classes.push(data);
   }
   return classes;
+};
+
+const updateBatchCreationStatus = async (campaignId, status) => {
+  const mutation = `
+            mutation{
+                  updateCampaign(id: "${campaignId}",
+                  input:{
+                    batchCreationStatus: ${status}
+                  }
+                  ){
+                    id
+                    batchCreationStatus
+                  }
+                }
+                `;
+  const updateCampaignResponse = await callLocalGraphqlApi(mutation);
+  return get(updateCampaignResponse, 'data.updateCampaign', {});
 };
 
 const createBatch = async (batchCode, schoolId, classIds, campaignId, studentIds, courseId) => {
@@ -121,11 +139,14 @@ const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId, 
   const lastBatchSessionCode = lastBatchSession[0].code;
   let numeric = Number(lastBatchSessionCode.substring(6));
 
+  // update batchCreation status to in-progress
+  await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
+
   /* eslint-disable no-restricted-syntax */
   for (const grade of classesGroupByGrade.keys()) {
     const classesInGrade = classesGroupByGrade.get(grade);
     const schoolId = classesInGrade[0].school.id;
-    const batchCode = `TK-BBS${numeric += 1}`;
+    let batchCode = `TK-BBS${numeric += 1}`;
     /* eslint-disable no-loop-func */
     classesInGrade.forEach((schoolClass) => {
       classIds.push(schoolClass.id);
@@ -136,25 +157,21 @@ const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId, 
       }
     });
     /* eslint-disable no-await-in-loop */
-    try {
-      await createBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId);
-      log(`Batch ${batchCode} added`);
-    } catch (err) {
-      log(`Batch ${batchCode} not added. Trying next batch code.`);
-      for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i += 1) {
+      try {
+        await createBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId);
+        log(`Batch ${batchCode} added`);
+        break;
+      } catch (err) {
+        log(`Batch ${batchCode} not added. Trying next batch code.`);
         batchCode = `TK-BBS${numeric += 1}`;
-        try {
-          await createBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId);
-          log(`Batch ${batchCode} added`);
-          break;
-        } catch (err) {
-          log(`Batch ${batchCode} not added. Trying next batch code.`);
-        }
       }
     }
     classIds = [];
     studentIds = [];
   }
+  // update batchCreation status to complete
+  await updateBatchCreationStatus(campaignId, batchCreationStatus.complete);
 };
 
 const createBatchSessionsGroupBySection = async (classes, campaignId, courseId) => {
@@ -167,32 +184,31 @@ const createBatchSessionsGroupBySection = async (classes, campaignId, courseId) 
 
   const schoolId = classes[0].school.id;
 
+  // update batchCreation status to in-progress
+  await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
+
   for (let i = 0; i < schoolClass.length; i += 1) {
-    const batchCode = `TK-BBS${numeric += 1}`;
+    let batchCode = `TK-BBS${numeric += 1}`;
     if (schoolClass[i].students && schoolClass[i].students.length > 0) {
       schoolClass[i].students.forEach((student) => {
         studentIds[indexedDB].push(student.id);
       });
     }
     /* eslint-disable no-await-in-loop */
-    try {
-      await createBatch(batchCode, schoolId, schoolClass[i].id, campaignId, studentIds, courseId);
-      log(`Batch ${batchCode} added`);
-    } catch (err) {
-      log(`Batch ${batchCode} not added. Trying next batch code.`);
-      for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 5; j += 1) {
+      try {
+        await createBatch(batchCode, schoolId, schoolClass[i].id, campaignId, studentIds, courseId);
+        log(`Batch ${batchCode} added`);
+        break;
+      } catch (err) {
+        log(`Batch ${batchCode} not added. Trying next batch code.`);
         batchCode = `TK-BBS${numeric += 1}`;
-        try {
-          await createBatch(batchCode, schoolId, schoolClass[i].id, campaignId, studentIds, courseId);
-          log(`Batch ${batchCode} added`);
-          break;
-        } catch (err) {
-          log(`Batch ${batchCode} not added. Trying next batch code.`);
-        }
       }
     }
     studentIds = [];
   }
+  // update batchCreation status to complete
+  await updateBatchCreationStatus(campaignId, batchCreationStatus.complete);
   return true;
 };
 
