@@ -23,17 +23,19 @@ const fetchSchoolClass = async (schoolClassId) => {
   return get(schoolClass, 'data.schoolClass', {});
 };
 
-const fetchPublishedCourse = async () => {
+const fetchCampaign = async (campaignId) => {
   const query = `
             {
-              courses(filter:{status: published}){
-                id
-                title
+              campaign(id: "${campaignId}"){
+                type
+                course{
+                  title
+                }
               }
             }
             `;
-  const course = await callLocalGraphqlApi(query);
-  return get(course, 'data.courses', []);
+  const campaign = await callLocalGraphqlApi(query);
+  return get(campaign, 'data.campaign', {});
 };
 
 const fetchLastBatchSession = async () => {
@@ -110,7 +112,7 @@ const getClassesGroupByGrade = (classes) => {
   return classesMap;
 };
 
-const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId) => {
+const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId, courseId) => {
   // classIds and studentIds to pass in input
   let classIds = [];
   let studentIds = [];
@@ -119,9 +121,6 @@ const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId) 
   const lastBatchSessionCode = lastBatchSession[0].code;
   let numeric = Number(lastBatchSessionCode.substring(6));
 
-  // fetch the course code
-  const course = await fetchPublishedCourse();
-  const courseId = course[0].id;
   /* eslint-disable no-restricted-syntax */
   for (const grade of classesGroupByGrade.keys()) {
     const classesInGrade = classesGroupByGrade.get(grade);
@@ -137,24 +136,34 @@ const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId) 
       }
     });
     /* eslint-disable no-await-in-loop */
-    await createBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId);
-    log(`Batch ${batchCode} added`);
+    try {
+      await createBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId);
+      log(`Batch ${batchCode} added`);
+    } catch (err) {
+      log(`Batch ${batchCode} not added. Trying next batch code.`);
+      for (let i = 0; i < 4; i++) {
+        batchCode = `TK-BBS${numeric += 1}`;
+        try {
+          await createBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId);
+          log(`Batch ${batchCode} added`);
+          break;
+        } catch (err) {
+          log(`Batch ${batchCode} not added. Trying next batch code.`);
+        }
+      }
+    }
     classIds = [];
     studentIds = [];
   }
 };
 
-const createBatchSessionsGroupBySection = async (classes, campaignId) => {
+const createBatchSessionsGroupBySection = async (classes, campaignId, courseId) => {
   // classIds and studentIds to pass in input
   let studentIds = [];
   // handle the batch code increments
   const lastBatchSession = await fetchLastBatchSession();
   const lastBatchSessionCode = lastBatchSession[0].code;
   let numeric = Number(lastBatchSessionCode.substring(6));
-
-  // fetch the course code
-  const course = await fetchPublishedCourse();
-  const courseId = course[0].id;
 
   const schoolId = classes[0].school.id;
 
@@ -166,8 +175,22 @@ const createBatchSessionsGroupBySection = async (classes, campaignId) => {
       });
     }
     /* eslint-disable no-await-in-loop */
-    await createBatch(batchCode, schoolId, schoolClass[i].id, campaignId, studentIds, courseId);
-    log(`Batch ${batchCode} added`);
+    try {
+      await createBatch(batchCode, schoolId, schoolClass[i].id, campaignId, studentIds, courseId);
+      log(`Batch ${batchCode} added`);
+    } catch (err) {
+      log(`Batch ${batchCode} not added. Trying next batch code.`);
+      for (let i = 0; i < 4; i++) {
+        batchCode = `TK-BBS${numeric += 1}`;
+        try {
+          await createBatch(batchCode, schoolId, schoolClass[i].id, campaignId, studentIds, courseId);
+          log(`Batch ${batchCode} added`);
+          break;
+        } catch (err) {
+          log(`Batch ${batchCode} not added. Trying next batch code.`);
+        }
+      }
+    }
     studentIds = [];
   }
   return true;
@@ -193,4 +216,5 @@ export {
   getClassesGroupByGrade,
   fetchAllConnectedSchoolClasses,
   getSectionExists,
+  fetchCampaign,
 };
