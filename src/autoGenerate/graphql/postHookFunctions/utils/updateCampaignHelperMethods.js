@@ -24,23 +24,7 @@ const fetchSchoolClasses = async (schoolClassIds) => {
   return get(schoolClasses, 'data.schoolClasses', []);
 };
 
-const fetchCampaign = async (campaignId) => {
-  const query = `
-            {
-              campaign(id: "${campaignId}"){
-                type
-                course{
-                  title
-                }
-                batchCreationStatus
-              }
-            }
-            `;
-  const campaign = await callLocalGraphqlApi(query);
-  return get(campaign, 'data.campaign', {});
-};
-
-const fetchLastBatchSession = async () => {
+const fetchLastBatchCode = async () => {
   const query = `
           {
             batches(filter:{type:${batchType.b2b}},first:1, orderBy:createdAt_DESC){
@@ -74,7 +58,7 @@ const updateBatchCreationStatus = async (campaignId, status) => {
   return get(updateCampaignResponse, 'data.updateCampaign', {});
 };
 
-const createBatch = async (batchCode, schoolId, classIds, campaignId, studentIds, courseId) => {
+const createB2BBatch = async (batchCode, schoolId, classIds, campaignId, studentIds, courseId) => {
   const classIdsString = JSON.stringify(classIds);
   const studentIdsString = JSON.stringify(studentIds);
   const mutation = `
@@ -131,7 +115,7 @@ const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId, 
   let classIds = [];
   let studentIds = [];
   // handle the batch code increments
-  const lastBatchSession = await fetchLastBatchSession();
+  const lastBatchSession = await fetchLastBatchCode();
   const lastBatchSessionCode = lastBatchSession[0].code;
   let numeric = Number(lastBatchSessionCode.substring(6));
 
@@ -154,10 +138,11 @@ const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId, 
     });
 
     /* eslint-disable no-await-in-loop */
+    // TODO : check for previously present batch and update it
     // tries batchCodes on fail for max. 5 times before moving on
     for (let i = 0; i < ADD_BATCH_TRY_LIMIT; i += 1) {
       try {
-        await createBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId);
+        await createB2BBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId);
         log(`Batch ${batchCode} added`);
         break;
       } catch (err) {
@@ -176,7 +161,7 @@ const createBatchSessionsGroupBySection = async (classes, campaignId, courseId) 
   // classIds and studentIds to pass in input
   let studentIds = [];
   // handle the batch code increments
-  const lastBatchSession = await fetchLastBatchSession();
+  const lastBatchSession = await fetchLastBatchCode();
   const lastBatchSessionCode = lastBatchSession[0].code;
   let numeric = Number(lastBatchSessionCode.substring(6));
 
@@ -185,18 +170,19 @@ const createBatchSessionsGroupBySection = async (classes, campaignId, courseId) 
   // update batchCreation status to in-progress
   await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
 
-  for (let i = 0; i < schoolClass.length; i += 1) {
+  for (let i = 0; i < classes.length; i += 1) {
     let batchCode = `TK-BBS${numeric += 1}`;
-    if (schoolClass[i].students && schoolClass[i].students.length > 0) {
-      schoolClass[i].students.forEach((student) => {
+    if (classes[i].students && classes[i].students.length > 0) {
+      classes[i].students.forEach((student) => {
         studentIds[indexedDB].push(student.id);
       });
     }
     /* eslint-disable no-await-in-loop */
+    // TODO : check for previously present batch and update it
     // tries batchCodes on fail for max. 5 times before moving on
     for (let j = 0; j < ADD_BATCH_TRY_LIMIT; j += 1) {
       try {
-        await createBatch(batchCode, schoolId, schoolClass[i].id, campaignId, studentIds, courseId);
+        await createB2BBatch(batchCode, schoolId, classes[i].id, campaignId, studentIds, courseId);
         log(`Batch ${batchCode} added`);
         break;
       } catch (err) {
@@ -231,5 +217,4 @@ export {
   getClassesGroupByGrade,
   fetchAllConnectedSchoolClasses,
   getSectionExists,
-  fetchCampaign,
 };
