@@ -115,9 +115,9 @@ const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId, 
   let classIds = [];
   let studentIds = [];
   // handle the batch code increments
-  const lastBatchSession = await fetchLastBatchCode();
-  const lastBatchSessionCode = lastBatchSession[0].code;
-  let numeric = Number(lastBatchSessionCode.substring(6));
+  const lastBatchCodeRes = await fetchLastBatchCode();
+  const lastBatchCode = lastBatchCodeRes && lastBatchCodeRes.length && lastBatchCodeRes[0].code;
+  let numeric = Number(lastBatchCode.substring(6));
 
   // update batchCreation status to in-progress
   await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
@@ -161,9 +161,9 @@ const createBatchSessionsGroupBySection = async (classes, campaignId, courseId) 
   // classIds and studentIds to pass in input
   let studentIds = [];
   // handle the batch code increments
-  const lastBatchSession = await fetchLastBatchCode();
-  const lastBatchSessionCode = lastBatchSession[0].code;
-  let numeric = Number(lastBatchSessionCode.substring(6));
+  const lastBatchCodeRes = await fetchLastBatchCode();
+  const lastBatchCode = lastBatchCodeRes && lastBatchCodeRes.length && lastBatchCodeRes[0].code;
+  let numeric = Number(lastBatchCode.substring(6));
 
   const schoolId = classes[0].school.id;
 
