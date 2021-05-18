@@ -1,4 +1,4 @@
-import { slotTimes } from "../constants";
+import { slotTimes } from '../constants';
 
 const extractSlotsFromInput = (slots) => {
   const filteredSlots = {};
