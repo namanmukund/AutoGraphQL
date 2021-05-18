@@ -29,6 +29,7 @@ const Campaign = `
   {
     course: Course! @relation(name: "CampaignCourse", direction: "OneWay")
     title: String! @trim
+    code: String @trim
     description: String
     type: CampaignType
     batchRules: BatchRules
