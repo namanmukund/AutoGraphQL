@@ -48,6 +48,7 @@ import updateUserApprovedCodePostHookMethod from './postHookFunctions/updateUser
 import updateStudentProfilePostHookMethod from './postHookFunctions/updateStudentProfilePostHookMethod';
 import addUserSavedCodePostHookMethod from './postHookFunctions/addUserSavedCodePostHookMethod';
 import updateBatchPostHookMethod from './postHookFunctions/updateBatchPostHookMethod';
+import updateCampaignPostHookMethod from './postHookFunctions/updateCampaignPostHookMethod';
 import addStudentProfilePostHookMethod from './postHookFunctions/addStudentProfilePostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
@@ -232,6 +233,10 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateBatchCurrentComponentStatus': {
       await updateBatchCurrentComponentStatusPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'updateCampaign': {
+      await updateCampaignPostHookMethod(input, params, mutationName, context);
       break;
     }
     case 'updateUserSavedCode': {
