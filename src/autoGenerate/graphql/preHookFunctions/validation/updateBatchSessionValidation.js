@@ -8,18 +8,18 @@ import {
 } from '../../../../../constants/errors/input';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import { sessionStatus } from '../../../../../constants';
+import validateBatchSessionInput from './utils/validateBatchSessionInput';
 
 const updateBatchSessionValidation = async (params, mutationOrQueryName, context) => {
-  const { id: batchSessionId, topicConnectId, input: { sessionStatus: sessionStatusInInput, bookingDate: bookingDateFromInput } } = params;
+  const { id: batchSessionId, topicConnectId, input: { sessionStatus: sessionStatusInInput, bookingDate: bookingDateFromInput, ...inputSlot } } = params;
   const batchSessionData = await callLocalGraphqlApi(batchSessionQuery(batchSessionId));
   const batchSession = get(batchSessionData, 'data.batchSession');
   if (!batchSession || !batchSession.id) {
     throw new DatabaseRecordNotFoundError();
   }
 
-  // validate input, this is commented sice we are using batchSessions only to track
-  // sessionStatus and all. So, the fields booking date and slots are not mandatory
-  // await validateBatchSessionInput(params);
+  // validate input
+  await validateBatchSessionInput(params, context);
 
   const {
     sessionStatus: prevSessionStatus,
@@ -29,13 +29,16 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     mentorSession,
     ...slots
   } = batchSession;
+  const inputSlotTimeArray = getSelectedSlotsTime(inputSlot);
   const slotTimeArray = getSelectedSlotsTime(slots);
+  context.batchSessionId = batchSessionId;
   context.topicId = topic && topic.id;
   context.batchId = batch && batch.id;
   context.bookingDate = bookingDate;
   context.mentorSessionConnectId = mentorSession && mentorSession.id;
   context.slotTimeArray = slotTimeArray;
   context.bookingDateFromInput = bookingDateFromInput;
+  context.inputSlotTimeArray = inputSlotTimeArray;
 
   // we are doing this to handle cases where we make timetable for school without the topic being attached
   // so whenever these sessions get started we need topicId in this mutation as mandatory field
@@ -57,6 +60,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   if (prevSessionStatus === sessionStatus.completed && sessionStatusInInput && sessionStatusInInput !== sessionStatus.completed) {
     throw new CanNotChangeSessionStatusError();
   }
+
   return true;
 };
 

@@ -7,6 +7,7 @@ import {
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
 import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
+import addRescheduledSlot from './utils/addRescheduledSlot';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -64,6 +65,8 @@ const nextTopicQuery = () => `
 const updateBatchSessionPostHookMethod = async (input, params, mutationName, context) => {
   const { sessionStatus: sessionStatusFromInput } = input;
   const {
+    batchSessionId,
+    inputSlotTimeArray,
     slotTimeArray,
     topicId,
     batchId,
@@ -71,6 +74,20 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     mentorSessionConnectId,
     bookingDateFromInput,
   } = context;
+
+  // adding Rescheduled Slot async if we get slots in the input
+  // constructing fromDate and fromSLot from values in previous document
+  // constructing toDate and toSLot from values in input
+  if (inputSlotTimeArray && inputSlotTimeArray.length && slotTimeArray && slotTimeArray.length) {
+    const fromDate = new Date(bookingDate).toISOString();
+    const toDate = bookingDateFromInput ? new Date(bookingDateFromInput).toISOString() : new Date(bookingDate).toISOString();
+    const fromSlot = `slot${slotTimeArray[0]}`;
+    const toSlot = `slot${inputSlotTimeArray[0]}`;
+    // adding only in case the slots or date passed in input is different from that is already there in db
+    if ((fromDate !== toDate) || (fromSlot !== toSlot)) {
+      addRescheduledSlot(fromDate, fromSlot, toDate, toSlot, batchSessionId);
+    }
+  }
 
   if (topicId) {
     /*

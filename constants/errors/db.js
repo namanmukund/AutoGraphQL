@@ -143,3 +143,7 @@ export const GradeSectionCombinationAlreadyExists = createError('GradeSectionCom
 export const StudentsLinked = createError('StudentsLinked', {
   message: 'Cannot perform the current operation as students are linked to the entity',
 });
+
+export const SlotsOccupiedError = createError('SlotsOccupiedError', {
+  message: 'Session exists on one of the provided slots',
+});
