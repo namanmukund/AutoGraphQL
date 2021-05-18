@@ -14,7 +14,9 @@ const deleteMentorSessionValidation = async (params, mutationOrQueryName, contex
   if (!mentorSession || !mentorSession.id) {
     throw new DatabaseRecordNotFoundError();
   }
-  const { availabilityDate, ...slots } = mentorSession;
+  const {
+    availabilityDate, batchSessions, mentorMenteeSessions, ...slots
+  } = mentorSession;
   const slotTimeArray = getSelectedSlotsTime(slots);
   // of any slots is taken or the date is of past then the doc can not be deleted
   if (slotTimeArray && slotTimeArray.length) {
