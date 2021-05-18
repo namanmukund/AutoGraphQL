@@ -46,6 +46,9 @@ import {
   GradeSectionCombinationAlreadyExists,
   StudentsLinked,
   SlotsOccupiedError,
+  NoSectionExists,
+  StartEndDateError,
+  MaxMentorSessionDaysError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -228,4 +231,7 @@ export {
   GradeSectionCombinationAlreadyExists,
   StudentsLinked,
   SlotsOccupiedError,
+  NoSectionExists,
+  StartEndDateError,
+  MaxMentorSessionDaysError,
 };

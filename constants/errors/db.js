@@ -1,4 +1,5 @@
 import { createError } from 'apollo-errors';
+import { BULK_MENTOR_SESSION_DAYS_LIMIT } from '../index';
 
 export const DatabaseRecordNotFoundError = createError('DatabaseRecordNotFoundError', {
   message: 'Database record not found',
@@ -146,4 +147,16 @@ export const StudentsLinked = createError('StudentsLinked', {
 
 export const SlotsOccupiedError = createError('SlotsOccupiedError', {
   message: 'Session exists on one of the provided slots',
+});
+
+export const NoSectionExists = createError('No Section Exists', {
+  message: 'Cannot perform batch creation on basis of \'section\'. No section exists in any of the selected schoolClasses',
+});
+
+export const StartEndDateError = createError('StartEndDateError', {
+  message: 'End date should be greater than start date',
+});
+
+export const MaxMentorSessionDaysError = createError('MaxMentorSessionDaysError', {
+  message: `End date should not exceed start date by ${BULK_MENTOR_SESSION_DAYS_LIMIT} days`,
 });
