@@ -1,0 +1,22 @@
+import getSlotTimeFields from '../../functions/getSlotTimeFields';
+
+const slotTimeFields = getSlotTimeFields('Boolean', false);
+
+const CampaignSlots = `
+  type CampaignSlots {
+   bookingDate: Date
+   ${slotTimeFields}
+   allottedMentorId: ID
+   mentorSessionId: ID
+ }`;
+
+const GetCampaignSlotsResult = `
+  type GetCampaignSlotsResult {
+    slots: [CampaignSlots]
+    schoolName: String
+    schoolLogo: File @relation(name: "GetCampaignSlotsResultFile", direction: "OneWay")
+    campaignType: String
+  }
+`;
+
+export default [GetCampaignSlotsResult, CampaignSlots];
