@@ -4,7 +4,13 @@ import extractSlotsFromInput from '../../../../utils/extractSlotsFromInput';
 import getSelectedDays from './utils/getSelectedDays';
 import getPossibleDates from '../../../../utils/getPossibleDates';
 /* eslint-disable object-curly-newline */
-import { getTopicMeta, getBatchSessions, getBatch, createBatchSession, updateBatchSession } from './utils/updateBatchPostHookQueries';
+import {
+  getTopicMeta,
+  getBatchSessions,
+  getBatch,
+  createBatchSession,
+  updateBatchSession,
+} from './utils/updateBatchPostHookQueries';
 
 const createBatchSessions = async (batchId, possibleDates, filteredSlots, possibleSessionCount) => {
   if (possibleDates.length <= possibleSessionCount) {
@@ -43,7 +49,10 @@ const sortBatchSessions = (batchSessions) => {
     }
   });
 
-  return { sessionsStartedOrCompleted, sessionsAllotted };
+  return {
+    sessionsStartedOrCompleted,
+    sessionsAllotted,
+  };
 };
 
 /*
@@ -51,7 +60,12 @@ const sortBatchSessions = (batchSessions) => {
 */
 /* eslint-disable no-unused-vars */
 const updateBatchPostHookMethod = async (input, params, mutationName, context) => {
-  const { id: batchId, input: { timeTableRule } } = params;
+  const {
+    id: batchId,
+    input: {
+      timeTableRule,
+    },
+  } = params;
   /*
     -> Fetch total number of published topics (x), this will be the max possible number of batchSessions
     -> Fetch batchSessions that are either in the started or completed state (y)
@@ -79,12 +93,19 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
   endDate.setHours(0, 0, 0, 0);
 
   // slots passed in input
-  const { ...slots } = timeTableRule;
-  const { filteredSlotsString } = extractSlotsFromInput(slots);
+  const {
+    ...slots
+  } = timeTableRule;
+  const {
+    filteredSlotsString,
+  } = extractSlotsFromInput(slots);
 
   if (batchSessions && batchSessions.length) {
     // sorting the existing batch sessions into started/completed and allotted
-    const { sessionsStartedOrCompleted, sessionsAllotted } = sortBatchSessions(batchSessions);
+    const {
+      sessionsStartedOrCompleted,
+      sessionsAllotted,
+    } = sortBatchSessions(batchSessions);
     let possibleSessionCount = topicCount;
     if (sessionsStartedOrCompleted.length > 0) {
       // if there exists some started or completed sessions, don't count them, create/update sessions for the remaining

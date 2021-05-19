@@ -306,6 +306,7 @@ export const MENTOR_RATING_AUDIT_THRESHOLD = 4;
 export const ADD_BATCH_TRY_LIMIT = 5;
 
 export const BULK_MENTOR_SESSION_DAYS_LIMIT = 365;
+export const MAX_ALLOWED_BATCH_SESSIONS_DAYS_RANGE = 365;
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
