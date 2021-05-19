@@ -15,6 +15,7 @@ const CampaignTimeTableRules = `
    bookingDate: Date
    ${slotTimeFields}
    allottedMentor: User @relation(name: "CampaignUser", direction: "OneWay")
+   mentorSession: MentorSession @relation(name: "CampaignMentorSession", direction: "OneWay")
  }`;
 
 const Campaign = `
