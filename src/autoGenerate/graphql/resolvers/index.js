@@ -78,6 +78,7 @@ import updateVisitorReactionOnUserApprovedCode from './mutation/methods/updateVi
 import getCheatSheet from './query/methods/getCheatSheet';
 import addBulkMentorSession from './mutation/methods/addBulkMentorSession';
 import updateParentChildDetail from './mutation/methods/updateParentChildDetail';
+import getCampaignSlots from './query/methods/getCampaignSlots';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -578,6 +579,8 @@ resolvers.Query.sendTransactionalMessage = sendTransactionalMessage;
 resolvers.Query.getTotalAmountCollected = getTotalAmountCollected;
 // Resolver to get the cheatsheets
 resolvers.Query.getCheatSheet = getCheatSheet;
+// Resolver to get the campaign slots
+resolvers.Query.getCampaignSlots = getCampaignSlots;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 

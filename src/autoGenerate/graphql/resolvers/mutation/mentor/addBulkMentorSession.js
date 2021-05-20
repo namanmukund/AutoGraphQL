@@ -1,10 +1,11 @@
 import { get } from 'lodash';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import getSelectedDays from '../../../postHookFunctions/utils/getSelectedDays';
-import extractSlotsFromInput from '../../../../../../utils/extractSlotsFromInput';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { QueryController } from '../../../controllers';
 import getPossibleDates from '../../../../../../utils/getPossibleDates';
+import { MaxMentorSessionDaysError, StartEndDateError } from '../../../../../../constants/errors';
+import { BULK_MENTOR_SESSION_DAYS_LIMIT } from '../../../../../../constants';
 
 // query to fetch mentorSession
 const fetchMentorSessions = (userId, date) => `
@@ -44,6 +45,19 @@ const updateMentorSessions = (id, date, slots) => `
     }
   }
   `;
+
+//
+const extractSlotsFromInput = (slots) => {
+  const filteredSlots = {};
+  let filteredSlotsString = '';
+  Object.keys(slots).forEach((slot) => {
+    if (slot.includes('slot')) {
+      filteredSlots[slot] = slots[slot];
+      filteredSlotsString += ` ${slot}: ${slots[slot]} `;
+    }
+  });
+  return { filteredSlots, filteredSlotsString };
+};
 
 // method to add/update mentorSession on all the provided dates and slots
 const constructMentorSessions = async (userId, possibleDates, filteredSlots) => {
@@ -110,6 +124,19 @@ const addBulkMentorSessionMutationResolver = async (
   startDate.setHours(0, 0, 0, 0);
   const endDate = new Date(endDateInInput);
   endDate.setHours(0, 0, 0, 0);
+
+  // throw error in this case
+  if (startDate > endDate) {
+    throw new StartEndDateError();
+  }
+
+  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  const diffDays = Math.round(Math.abs((endDate - endDate) / oneDay));
+
+  // throw error if duration for mentor sessions is more than 1 year
+  if (diffDays > BULK_MENTOR_SESSION_DAYS_LIMIT) {
+    throw new MaxMentorSessionDaysError();
+  }
 
   // slots passed in input
   const { filteredSlotsString } = extractSlotsFromInput(slots);

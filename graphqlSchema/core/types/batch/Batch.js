@@ -14,6 +14,13 @@ const BatchTimeTableRule = `
    ${weekDaysFields}
  }`;
 
+const B2b2cTimeTable = `
+  type B2b2cTimeTable {
+   bookingDate: Date
+   ${slotTimeFields}
+   mentorSession: MentorSession @relation(name: "BatchMentorSession")
+ }`;
+
 const Batch = `
   type Batch @model
   @appPermissions(
@@ -36,7 +43,8 @@ const Batch = `
     classes: [SchoolClass] @relation(name: "BatchSchoolClass", direction: "OneWay")
     school: School @relation(name: "BatchSchool", direction: "OneWay")
     timeTableRule: BatchTimeTableRule
+    b2b2ctimeTable: B2b2cTimeTable
   }
 `;
 
-export default [Batch, BatchTimeTableRule];
+export default [Batch, BatchTimeTableRule, B2b2cTimeTable];

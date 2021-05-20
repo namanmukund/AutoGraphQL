@@ -88,6 +88,7 @@ import NewsFeed from './newsFeed';
 import SchoolClass from './schoolClass';
 import Campaign from './campaign';
 import BulkMentorSessionInput from './bulkMentorSessionInput';
+import GetCampaignSlots from './getCampaignSlots';
 
 export default [
   ...User,
@@ -180,4 +181,5 @@ export default [
   ...SchoolClass,
   ...Campaign,
   ...BulkMentorSessionInput,
+  ...GetCampaignSlots,
 ];

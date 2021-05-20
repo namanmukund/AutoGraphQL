@@ -20,6 +20,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateStudentProfileWithRandomAvatar();
   // await updateUserSavedCodeIsApprovedForDisplay();
   // await updateMMSandBatchSessionInMentorSession();
+  // await updateCodeInCampaign();
   return {
     result: true,
   };
