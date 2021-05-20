@@ -106,13 +106,13 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
 
   const oldSlotTimeArray = getSelectedSlotsTime(prevMenteeSession);
   const newSlotTimeArray = getSelectedSlotsTime(get(menteeSession, 'data.menteeSession', []));
-  const oldBookingDate = getSelectedSlotsTime(get(prevMenteeSession, 'bookingDate'));
-  const newBookingDate = getSelectedSlotsTime(get(menteeSession, 'data.menteeSession.bookingDate'));
+  const oldBookingDate = get(prevMenteeSession, 'bookingDate', '');
+  const newBookingDate = get(menteeSession, 'data.menteeSession.bookingDate', '');
 
   // adding Rescheduled Slot async if we get changed mentee session
   // constructing fromDate and fromSLot from values in previous document
   // constructing toDate and toSLot from values in updated document
-  if (newSlotTimeArray && newSlotTimeArray.length && oldSlotTimeArray && oldSlotTimeArray.length) {
+  if (newSlotTimeArray && newSlotTimeArray.length && oldSlotTimeArray && oldSlotTimeArray.length && oldBookingDate && newBookingDate) {
     const fromDate = new Date(oldBookingDate).toISOString();
     const toDate = new Date(newBookingDate).toISOString();
     const fromSlot = `slot${oldSlotTimeArray[0]}`;
