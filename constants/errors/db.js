@@ -1,4 +1,5 @@
 import { createError } from 'apollo-errors';
+import { BULK_MENTOR_SESSION_DAYS_LIMIT } from '../index';
 
 export const DatabaseRecordNotFoundError = createError('DatabaseRecordNotFoundError', {
   message: 'Database record not found',
@@ -134,4 +135,24 @@ export const UserCheatSheetAlreadyExists = createError('UserCheatSheetAlreadyExi
 
 export const AlreadyBookmarkedCheatSheet = createError('AlreadyBookmarkedCheatSheet', {
   message: 'Already bookmarked this cheatsheet',
+});
+
+export const GradeSectionCombinationAlreadyExists = createError('GradeSectionCombinationAlreadyExists', {
+  message: 'Provided grade and section combination already exists',
+});
+
+export const StudentsLinked = createError('StudentsLinked', {
+  message: 'Cannot perform the current operation as students are linked to the entity',
+});
+
+export const NoSectionExists = createError('No Section Exists', {
+  message: 'Cannot perform batch creation on basis of \'section\'. No section exists in any of the selected schoolClasses',
+});
+
+export const StartEndDateError = createError('StartEndDateError', {
+  message: 'End date should be greater than start date',
+});
+
+export const MaxMentorSessionDaysError = createError('MaxMentorSessionDaysError', {
+  message: `End date should not exceed start date by ${BULK_MENTOR_SESSION_DAYS_LIMIT} days`,
 });
