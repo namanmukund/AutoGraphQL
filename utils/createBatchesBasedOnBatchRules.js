@@ -7,7 +7,7 @@ import {
   fetchAllConnectedSchoolClasses,
 } from '../src/autoGenerate/graphql/postHookFunctions/utils/updateCampaignHelperMethods';
 
-const createBatchesBasedOnBatchRules = async (campaignId, courseId, batchRules, classesConnectIds) => {
+const createB2BBatchesBasedOnBatchRules = async (campaignId, courseId, batchRules, classesConnectIds) => {
   if (batchRules && batchRules.batchCreationBasis && classesConnectIds && classesConnectIds.length > 0) {
     const classes = await fetchAllConnectedSchoolClasses(classesConnectIds);
     // here sort the classes based on the batchCreationBasis rules
@@ -28,4 +28,28 @@ const createBatchesBasedOnBatchRules = async (campaignId, courseId, batchRules, 
   }
 };
 
-export default createBatchesBasedOnBatchRules;
+const createB2B2CEventBatchesBasedOnBatchRules = async (campaignId, courseId, batchRules, timeTableRules, classesConnectIds) => {
+  if (batchRules && batchRules.batchCreationBasis && classesConnectIds && classesConnectIds.length > 0) {
+    const classes = await fetchAllConnectedSchoolClasses(classesConnectIds);
+    // here sort the classes based on the batchCreationBasis rules
+    if (batchRules.batchCreationBasis === 'grade') {
+      // Map, with key = grade, value = array of classes corresponding to that grade
+      const classesGroupByGrade = getClassesGroupByGrade(classes);
+      createBatchSessionsGroupByGrade(classesGroupByGrade, campaignId, courseId, 'b2b2cEvent');
+    } else {
+      // check if section exists in atleast one of the school classes
+      const noSectionExists = getSectionExists(classes);
+      if (noSectionExists) {
+        throw new NoSectionExists();
+      } else {
+        // create separate batches for all the schoolClasses
+        createBatchSessionsGroupBySection(classes, campaignId, courseId, 'b2b2cEvent');
+      }
+    }
+  }
+};
+
+export {
+  createB2BBatchesBasedOnBatchRules,
+  createB2B2CEventBatchesBasedOnBatchRules
+};

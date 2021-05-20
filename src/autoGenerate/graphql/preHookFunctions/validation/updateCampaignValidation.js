@@ -6,9 +6,12 @@ const updateCampaignValidation = async (params, mutationName, context) => {
   const {
     input: {
       timeTableRules,
+      batchCreationStatus,
     },
   } = params;
   const timeTableRulesArray = get(timeTableRules, 'replace', []);
+
+  context.batchCreationStatus = batchCreationStatus;
 
   for (let i = 0; i < timeTableRulesArray.length; i += 1) {
     await validateTimeTableRule(timeTableRulesArray[i]);

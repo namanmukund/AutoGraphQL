@@ -187,115 +187,127 @@ const getClassesGroupByGrade = (classes) => {
   return classesMap;
 };
 
-const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId, courseId) => {
-  // classIds and studentIds to pass in input
-  let classIds = [];
-  let studentIds = [];
-  // handle the batch code increments
-  const lastBatchCodeRes = await fetchLastBatchCode();
-  const lastBatchCode = lastBatchCodeRes && lastBatchCodeRes.length && lastBatchCodeRes[0].code;
-  let numeric = Number(lastBatchCode.substring(6));
+const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId, courseId, type = 'b2b') => {
 
-  // update batchCreation status to in-progress
-  await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
+  if (type === 'b2b') {
+    // classIds and studentIds to pass in input
+    let classIds = [];
+    let studentIds = [];
+    // handle the batch code increments
+    const lastBatchCodeRes = await fetchLastBatchCode();
+    const lastBatchCode = lastBatchCodeRes && lastBatchCodeRes.length && lastBatchCodeRes[0].code;
+    let numeric = Number(lastBatchCode.substring(6));
 
-  /* eslint-disable no-restricted-syntax */
-  for (const grade of classesGroupByGrade.keys()) {
-    const classesInGrade = classesGroupByGrade.get(grade);
-    const schoolId = classesInGrade[0].school.id;
+    // update batchCreation status to in-progress
+    await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
 
-    /* eslint-disable no-loop-func */
-    classesInGrade.forEach((schoolClass) => {
-      classIds.push(schoolClass.id);
-      if (schoolClass.students && schoolClass.students.length > 0) {
-        schoolClass.students.forEach((student) => {
-          studentIds.push(student.id);
-        });
-      }
-    });
+    /* eslint-disable no-restricted-syntax */
+    for (const grade of classesGroupByGrade.keys()) {
+      const classesInGrade = classesGroupByGrade.get(grade);
+      const schoolId = classesInGrade[0].school.id;
 
-    // if previosly present batch exists
-    /* eslint-disable no-await-in-loop */
-    const exisitingBatches = await fetchExisitingBatchForGivenData(grade, null, schoolId);
-    if (exisitingBatches && exisitingBatches.length > 0) {
-      // update exisiting batch
-      const existingBatchId = get(exisitingBatches[0], 'id', '');
-      /* eslint-disable no-await-in-loop */
-      await updateB2BBatch(existingBatchId, classIds, campaignId, studentIds, courseId);
-    } else {
-      // tries batchCodes on fail for max. 5 times before moving on
-      /* eslint-disable no-await-in-loop */
-      let batchCode = `TK-BBS${numeric += 1}`;
-      for (let i = 0; i < ADD_BATCH_TRY_LIMIT; i += 1) {
-        try {
-          await createB2BBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId);
-          log(`Batch ${batchCode} added`);
-          break;
-        } catch (err) {
-          log(`Batch ${batchCode} not added. Trying next batch code.`);
-          batchCode = `TK-BBS${numeric += 1}`;
+      /* eslint-disable no-loop-func */
+      classesInGrade.forEach((schoolClass) => {
+        classIds.push(schoolClass.id);
+        if (schoolClass.students && schoolClass.students.length > 0) {
+          schoolClass.students.forEach((student) => {
+            studentIds.push(student.id);
+          });
         }
-      }
-    }
-    classIds = [];
-    studentIds = [];
-  }
-  // update batchCreation status to complete
-  await updateBatchCreationStatus(campaignId, batchCreationStatus.complete);
-};
-
-const createBatchSessionsGroupBySection = async (classes, campaignId, courseId) => {
-  // classIds and studentIds to pass in input
-  let studentIds = [];
-  // handle the batch code increments
-  const lastBatchCodeRes = await fetchLastBatchCode();
-  const lastBatchCode = lastBatchCodeRes && lastBatchCodeRes.length && lastBatchCodeRes[0].code;
-  let numeric = Number(lastBatchCode.substring(6));
-
-  const schoolId = classes[0].school.id;
-
-  // update batchCreation status to in-progress
-  await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
-
-  for (let i = 0; i < classes.length; i += 1) {
-    if (classes[i].students && classes[i].students.length > 0) {
-      classes[i].students.forEach((student) => {
-        studentIds.push(student.id);
       });
-    }
 
-    const gradeToCheck = get(classes[i], 'grade', '');
-    const sectionToCheck = get(classes[i], 'section', '');
-
-    if (gradeToCheck.length > 0 && sectionToCheck.length > 0) {
-      // if previously present batch exists
+      // if previosly present batch exists
       /* eslint-disable no-await-in-loop */
-      const exisitingBatches = await fetchExisitingBatchForGivenData(classes[i].grade, classes[i].section, schoolId);
+      const exisitingBatches = await fetchExisitingBatchForGivenData(grade, null, schoolId);
       if (exisitingBatches && exisitingBatches.length > 0) {
         // update exisiting batch
         const existingBatchId = get(exisitingBatches[0], 'id', '');
         /* eslint-disable no-await-in-loop */
-        await updateB2BBatch(existingBatchId, classes[i].id, campaignId, studentIds, courseId);
-      }
-    } else {
-      let batchCode = `TK-BBS${numeric += 1}`;
-      /* eslint-disable no-await-in-loop */
-      // tries batchCodes on fail for max. 5 times before moving on
-      for (let j = 0; j < ADD_BATCH_TRY_LIMIT; j += 1) {
-        try {
-          await createB2BBatch(batchCode, schoolId, classes[i].id, campaignId, studentIds, courseId);
-          log(`Batch ${batchCode} added`);
-          break;
-        } catch (err) {
-          log(`Batch ${batchCode} not added. Trying next batch code.`);
-          batchCode = `TK-BBS${numeric += 1}`;
+        await updateB2BBatch(existingBatchId, classIds, campaignId, studentIds, courseId);
+      } else {
+        // tries batchCodes on fail for max. 5 times before moving on
+        /* eslint-disable no-await-in-loop */
+        let batchCode = `TK-BBS${numeric += 1}`;
+        for (let i = 0; i < ADD_BATCH_TRY_LIMIT; i += 1) {
+          try {
+            await createB2BBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId);
+            log(`Batch ${batchCode} added`);
+            break;
+          } catch (err) {
+            log(`Batch ${batchCode} not added. Trying next batch code.`);
+            batchCode = `TK-BBS${numeric += 1}`;
+          }
         }
       }
+      classIds = [];
+      studentIds = [];
     }
-    studentIds = [];
+    // update batchCreation status to complete
+    await updateBatchCreationStatus(campaignId, batchCreationStatus.complete);
+  } else if (type === 'b2b2cEvent') {
+    console.log("Hi I am here");
   }
-  // update batchCreation status to complete
-  await updateBatchCreationStatus(campaignId, batchCreationStatus.complete);
+
+};
+
+const createBatchSessionsGroupBySection = async (classes, campaignId, courseId, type = 'b2b') => {
+
+  if (type === 'b2b') {
+    // classIds and studentIds to pass in input
+    let studentIds = [];
+    // handle the batch code increments
+    const lastBatchCodeRes = await fetchLastBatchCode();
+    const lastBatchCode = lastBatchCodeRes && lastBatchCodeRes.length && lastBatchCodeRes[0].code;
+    let numeric = Number(lastBatchCode.substring(6));
+
+    const schoolId = classes[0].school.id;
+
+    // update batchCreation status to in-progress
+    await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
+
+    for (let i = 0; i < classes.length; i += 1) {
+      if (classes[i].students && classes[i].students.length > 0) {
+        classes[i].students.forEach((student) => {
+          studentIds.push(student.id);
+        });
+      }
+
+      const gradeToCheck = get(classes[i], 'grade', '');
+      const sectionToCheck = get(classes[i], 'section', '');
+
+      if (gradeToCheck.length > 0 && sectionToCheck.length > 0) {
+        // if previously present batch exists
+        /* eslint-disable no-await-in-loop */
+        const exisitingBatches = await fetchExisitingBatchForGivenData(classes[i].grade, classes[i].section, schoolId);
+        if (exisitingBatches && exisitingBatches.length > 0) {
+          // update exisiting batch
+          const existingBatchId = get(exisitingBatches[0], 'id', '');
+          /* eslint-disable no-await-in-loop */
+          await updateB2BBatch(existingBatchId, classes[i].id, campaignId, studentIds, courseId);
+        }
+      } else {
+        let batchCode = `TK-BBS${numeric += 1}`;
+        /* eslint-disable no-await-in-loop */
+        // tries batchCodes on fail for max. 5 times before moving on
+        for (let j = 0; j < ADD_BATCH_TRY_LIMIT; j += 1) {
+          try {
+            await createB2BBatch(batchCode, schoolId, classes[i].id, campaignId, studentIds, courseId);
+            log(`Batch ${batchCode} added`);
+            break;
+          } catch (err) {
+            log(`Batch ${batchCode} not added. Trying next batch code.`);
+            batchCode = `TK-BBS${numeric += 1}`;
+          }
+        }
+      }
+      studentIds = [];
+    }
+    // update batchCreation status to complete
+    await updateBatchCreationStatus(campaignId, batchCreationStatus.complete);
+  } else if (type === 'b2b2cEvent') {
+    console.log("Hi I am here");
+  }
+
   return true;
 };
 

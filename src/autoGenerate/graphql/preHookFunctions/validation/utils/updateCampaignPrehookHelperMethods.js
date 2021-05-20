@@ -8,7 +8,6 @@ import {
 import getSelectedSlotsTime from './getSelectedSlotsTime';
 
 const validateTimeTableRule = async (timeTableRule) => {
-  console.log(timeTableRule);
 
   const { bookingDate, allottedMentorConnectId, mentorSessionConnectId, ...slots } = timeTableRule;
 
@@ -17,7 +16,6 @@ const validateTimeTableRule = async (timeTableRule) => {
   const isValidMentorSessionConnectId = (mentorSessionConnectId && mentorSessionConnectId.length > 0);
 
   const selectedSlots = getSelectedSlotsTime(slots);
-  console.log(selectedSlots);
   const isValidSlots = (selectedSlots.length == 1);
 
   if (!isValidBookingDate) {
