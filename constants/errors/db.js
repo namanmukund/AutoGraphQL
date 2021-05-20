@@ -156,3 +156,19 @@ export const StartEndDateError = createError('StartEndDateError', {
 export const MaxMentorSessionDaysError = createError('MaxMentorSessionDaysError', {
   message: `End date should not exceed start date by ${BULK_MENTOR_SESSION_DAYS_LIMIT} days`,
 });
+
+export const BookingDateInvalidError = createError('BookingDateInvalidError', {
+  message: 'Booking date provided in input is not valid.',
+});
+
+export const SlotsInvalidError = createError('SlotsInvalidError', {
+  message: 'Exactly one slot provided in input must be true.',
+});
+
+export const AllottedMentorIdInvalidError = createError('AllottedMentorIdInvalidError', {
+  message: 'Allotted Mentor Connect ID is mandatory.',
+});
+
+export const MentorSessionIdInvalidError = createError('MentorSessionIdInvalidError', {
+  message: 'Mentor Session Connect ID is invalid.',
+});

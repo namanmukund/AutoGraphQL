@@ -48,6 +48,10 @@ import {
   NoSectionExists,
   StartEndDateError,
   MaxMentorSessionDaysError,
+  BookingDateInvalidError,
+  SlotsInvalidError,
+  AllottedMentorIdInvalidError,
+  MentorSessionIdInvalidError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -233,4 +237,8 @@ export {
   StartEndDateError,
   MaxMentorSessionDaysError,
   MaxAllowedDayRangeExceededError,
+  BookingDateInvalidError,
+  SlotsInvalidError,
+  AllottedMentorIdInvalidError,
+  MentorSessionIdInvalidError,
 };
