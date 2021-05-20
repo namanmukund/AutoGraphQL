@@ -30,6 +30,7 @@ const MentorSession = `
     ${slotTimeFields}
     mentorMenteeSessions: [MentorMenteeSession] @relation(name: "SessionDataMentorSession")
     batchSessions: [BatchSession] @relation(name: "BatchSessionMentorSession")
+    b2b2cBatch: [Batch] @relation(name: "BatchMentorSession")
 }`;
 
 export default [MentorSession];

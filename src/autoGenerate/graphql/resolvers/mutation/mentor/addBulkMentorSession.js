@@ -1,7 +1,6 @@
 import { get } from 'lodash';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import getSelectedDays from '../../../postHookFunctions/utils/getSelectedDays';
-import extractSlotsFromInput from '../../../../../../utils/extractSlotsFromInput';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { QueryController } from '../../../controllers';
 import getPossibleDates from '../../../../../../utils/getPossibleDates';
@@ -46,6 +45,19 @@ const updateMentorSessions = (id, date, slots) => `
     }
   }
   `;
+
+//
+const extractSlotsFromInput = (slots) => {
+  const filteredSlots = {};
+  let filteredSlotsString = '';
+  Object.keys(slots).forEach((slot) => {
+    if (slot.includes('slot')) {
+      filteredSlots[slot] = slots[slot];
+      filteredSlotsString += ` ${slot}: ${slots[slot]} `;
+    }
+  });
+  return { filteredSlots, filteredSlotsString };
+};
 
 // method to add/update mentorSession on all the provided dates and slots
 const constructMentorSessions = async (userId, possibleDates, filteredSlots) => {
