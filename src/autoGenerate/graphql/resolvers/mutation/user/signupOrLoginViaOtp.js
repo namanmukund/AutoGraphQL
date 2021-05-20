@@ -60,16 +60,20 @@ const signupOrLoginViaOtp = async (
   let userData = await getUserFromDBQuery(input, modelQueries);
 
   if (!userData || !userData.id) {
-    const modelMutations = new MutationController(typeName, { bypass: true });
-    const newUser = {
-      phone: {
-        number: input.phone.number,
-        countryCode: input.phone.countryCode,
-      },
-      // campaign:
-    };
-    userData = generateCuid(newUser);
-    await modelMutations.addDocument(userData);
+    // create user if it doesn't exist and phone is passed in input else throw error
+    if (input.phone) {
+      const modelMutations = new MutationController(typeName, { bypass: true });
+      const newUser = {
+        phone: {
+          number: input.phone.number,
+          countryCode: input.phone.countryCode,
+        },
+      };
+      userData = generateCuid(newUser);
+      await modelMutations.addDocument(userData);
+    } else {
+      throw new DatabaseRecordNotFoundError();
+    }
   }
   const phoneOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
   const modelMutations = new MutationController(typeName, authentication);
