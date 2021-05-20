@@ -12,8 +12,10 @@ const sendOTPSms = (receiverNumber, phoneOtp, name) => {
     return null;
   }
 
-  const { bodyBeforeName, bodyAfterName } = smsOTPMessage;
-  const body = bodyBeforeName + name + bodyAfterName + phoneOtp;
+  const { bodyBeforeName, bodyAfterName, bodyBeforeIfNoName } = smsOTPMessage;
+  const body = name
+    ? bodyBeforeName + name + bodyAfterName + phoneOtp
+    : bodyBeforeIfNoName + bodyAfterName + phoneOtp;
 
   return client.messages
     .create({
