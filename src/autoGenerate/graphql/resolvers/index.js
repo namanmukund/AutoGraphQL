@@ -78,6 +78,7 @@ import updateVisitorReactionOnUserApprovedCode from './mutation/methods/updateVi
 import getCheatSheet from './query/methods/getCheatSheet';
 import addBulkMentorSession from './mutation/methods/addBulkMentorSession';
 import getCampaignSlots from './query/methods/getCampaignSlots';
+import bookB2B2CSlots from './mutation/methods/bookB2B2CSlots';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -566,6 +567,7 @@ resolvers.Mutation.getPaymentResponse = getPaymentResponse;
 resolvers.Mutation.addUpdateBulkSchoolUserData = addUpdateBulkSchoolUserData;
 resolvers.Mutation.updateVisitorReactionOnUserApprovedCode = updateVisitorReactionOnUserApprovedCode;
 resolvers.Mutation.addBulkMentorSession = addBulkMentorSession;
+resolvers.Mutation.bookB2B2CSlots = bookB2B2CSlots;
 
 // queries
 resolvers.Query.me = me;
