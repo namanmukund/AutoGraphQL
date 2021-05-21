@@ -1,6 +1,3 @@
-import UpdateParentChildDetailInput
-  from '../../../graphqlSchema/core/types/collections/UpdateParentChildDetailInput.js';
-
 const customMutationString = `
    signUp ( input: SignUpInput ): UserToken,
    setUserPassword ( id: ID!, password: String! ): User,
