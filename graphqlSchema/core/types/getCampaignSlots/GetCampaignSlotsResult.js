@@ -15,6 +15,7 @@ const GetCampaignSlotsResult = `
     id: String
     slots: [CampaignSlots]
     schoolName: String
+    classes: [SchoolClass]
     schoolLogo: File @relation(name: "GetCampaignSlotsResultFile", direction: "OneWay")
     campaignType: String
     poster: File @relation(name: "GetCampaignPosterFile", direction: "OneWay")

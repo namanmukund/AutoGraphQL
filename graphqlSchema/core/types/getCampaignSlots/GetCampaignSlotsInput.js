@@ -1,6 +1,6 @@
 const GetCampaignSlotsInput = `
   input GetCampaignSlotsInput {
-    code: ID!
+    code: String!
   }`;
 
 export default [

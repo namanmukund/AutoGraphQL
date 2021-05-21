@@ -21,6 +21,10 @@ const getCampaign = (code) => `
     poster {
       id
     }
+    classes {
+      section
+      grade
+    }
     school{
       id
       name
@@ -47,6 +51,7 @@ const getCampaignSlots = (async (root, params, context) => {
   const schoolName = get(getCampaignRes, 'data.campaigns[0].school.name', '');
   const schoolLogoId = get(getCampaignRes, 'data.campaigns[0].school.logo.id', '');
   const posterId = get(getCampaignRes, 'data.campaigns[0].school.logo.id', '');
+  const classes = get(getCampaignRes, 'data.campaigns[0].classes', []);
   const { timeTableRules, type } = campaign;
 
   if (timeTableRules && timeTableRules.length) {
@@ -63,6 +68,7 @@ const getCampaignSlots = (async (root, params, context) => {
   result.id = campaignId;
   result.slots = slotsArray;
   result.schoolName = schoolName;
+  result.classes = classes;
   result.schoolLogo = { type: 'File', typeId: `${schoolLogoId}` };
   result.poster = { type: 'File', typeId: `${posterId}` };
   result.campaignType = type;
