@@ -30,10 +30,10 @@ const createB2BBatchesBasedOnBatchRules = async (campaignId, courseId, batchRule
   }
 };
 
-const createB2B2CEventBatchesBasedOnBatchRules = async (campaignId, courseId, batchRules, timeTableRules, schoolId) => {
+const createB2B2CEventBatchesBasedOnBatchRules = async (campaignId, courseId, batchRules, timeTableRules, schoolId, classesConnectIds) => {
   if (batchRules && timeTableRules && schoolId) {
     const timeTableRulesArray = get(timeTableRules, 'replace', []);
-    createBatchForB2B2C(timeTableRulesArray, campaignId, courseId, schoolId);
+    createBatchForB2B2C(timeTableRulesArray, campaignId, courseId, schoolId, classesConnectIds);
   }
 };
 

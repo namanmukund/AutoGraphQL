@@ -109,7 +109,8 @@ const updateBatchCreationStatus = async (campaignId, status) => {
   return get(updateCampaignResponse, 'data.updateCampaign', {});
 };
 
-const createB2B2CBatch = async (batchCode, schoolId, campaignId, courseId, bookingDate, selectedSlot, allottedMentorConnectId, mentorSessionConnectId) => {
+const createB2B2CBatch = async (batchCode, schoolId, campaignId, courseId, bookingDate, selectedSlot, allottedMentorConnectId, mentorSessionConnectId, classesConnectIds) => {
+  const classIdsString = JSON.stringify(classesConnectIds);
   const mutation = `
             mutation{
                 addBatch(input: {
@@ -123,6 +124,7 @@ const createB2B2CBatch = async (batchCode, schoolId, campaignId, courseId, booki
                 }, schoolConnectId:"${schoolId}",
                   campaignConnectId:"${campaignId}",
                   allottedMentorConnectId:"${allottedMentorConnectId}",
+                  ${classIdsString ? `classesConnectIds: ${classIdsString}` : ''}
                   courseConnectId: "${courseId}") {
                   id
                   course {
@@ -390,7 +392,7 @@ const getSectionExists = (classes) => {
   return noSectionInAnyClass;
 };
 
-const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolId) => {
+const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolId, classesConnectIds) => {
   // update batchCreation status to in-progress
   await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
   // handle the batch code increments
@@ -422,7 +424,7 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
     let batchCode = `${schoolCode}-BCS${numeric}`;
     for (let i = 0; i < ADD_BATCH_TRY_LIMIT; i += 1) {
       try {
-        const addBatchRes = await createB2B2CBatch(batchCode, schoolId, campaignId, courseId, formattedBookingDate.toISOString(), selectedSlot, allottedMentorConnectId, mentorSessionConnectId);
+        const addBatchRes = await createB2B2CBatch(batchCode, schoolId, campaignId, courseId, formattedBookingDate.toISOString(), selectedSlot, allottedMentorConnectId, mentorSessionConnectId, classesConnectIds);
         numeric += 1;
         const batchId = addBatchRes && addBatchRes.id;
         await addB2B2CBatchSession(batchId, mentorSessionConnectId, firstTopicId, formattedBookingDate.toISOString(), selectedSlot);
