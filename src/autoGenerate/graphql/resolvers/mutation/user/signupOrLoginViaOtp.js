@@ -80,11 +80,9 @@ const signupOrLoginViaOtp = async (
         role: PARENT,
       };
       if (input.campaignId) {
-        const campaign = await callLocalGraphqlApi(getCampaign(input.code));
-        const campaignId = get(campaign, 'data.campaigns[0].id');
         newUser.campaign = {
           type: 'Campaign',
-          typeId: campaignId,
+          typeId: input.campaignId,
         };
       }
       if (input.utmSource) {

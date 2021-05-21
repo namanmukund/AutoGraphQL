@@ -2,7 +2,7 @@ const SignupOrLoginUserInput = `
   input SignupOrLoginUserInput {
     email: String
     phone: PhoneInput
-    campaignCode: String
+    campaignId: String
     utmSource: String
     utmCampaign: String
     utmTerm: String
