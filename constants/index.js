@@ -293,6 +293,12 @@ const batchCreationStatus = {
   complete: 'complete',
 };
 
+const sessionType = {
+  trial: 'trial',
+  paid: 'paid',
+  batch: 'batch',
+};
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export const MENTOR_REPORT_COUNTRY = 'india';
@@ -371,4 +377,5 @@ export {
   batchCreationBasis,
   batchCreationStatus,
   weekDays,
+  sessionType,
 };
