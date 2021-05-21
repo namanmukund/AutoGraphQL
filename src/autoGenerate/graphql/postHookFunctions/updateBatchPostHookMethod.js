@@ -1,10 +1,9 @@
-// import { get } from 'lodash';
-// import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import extractSlotsFromInput from '../../../../utils/extractSlotsFromInput';
 import getSelectedDays from './utils/getSelectedDays';
 import getPossibleDates from '../../../../utils/getPossibleDates';
-/* eslint-disable object-curly-newline */
-import { getTopicMeta, getBatchSessions, createBatchSession, updateBatchSession } from './utils/updateBatchPostHookQueries';
+import {
+  getTopicMeta, getBatchSessions, createBatchSession, updateBatchSession,
+} from './utils/updateBatchPostHookQueries';
 
 const createBatchSessions = async (batchId, possibleDates, filteredSlots, possibleSessionCount) => {
   if (possibleDates.length <= possibleSessionCount) {

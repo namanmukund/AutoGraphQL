@@ -15,6 +15,7 @@ const CampaignTimeTableRules = `
    bookingDate: Date
    ${slotTimeFields}
    allottedMentor: User @relation(name: "CampaignUser", direction: "OneWay")
+   mentorSession: MentorSession @relation(name: "CampaignMentorSession", direction: "OneWay")
  }`;
 
 const Campaign = `
@@ -38,8 +39,8 @@ const Campaign = `
     batches: [Batch] @relation(name: "CampaignBatch")
     classes: [SchoolClass] @relation(name: "CampaignSchoolClass", direction: "OneWay")
     batchCreationStatus: BatchCreationStatus @defaultValue(value: "todo")
-    poster: File @relation(name: "posterCampaign", direction: "OneWay")
-    school: School @relation(name: "CampaignSchool", direction: "OneWay")
+    poster: File @relation(name: "CampaignPoster", direction: "OneWay")
+    school: School! @relation(name: "CampaignSchool", direction: "OneWay")
   }
 `;
 

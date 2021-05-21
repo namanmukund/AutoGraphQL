@@ -80,6 +80,8 @@ import updateSchoolClassValidation from './preHookFunctions/validation/updateSch
 import deleteSchoolValidation from './preHookFunctions/validation/deleteSchoolValidation';
 import deleteSchoolClassValidation from './preHookFunctions/validation/deleteSchoolClassValidation';
 import deleteCourseValidation from './preHookFunctions/validation/deleteCourseValidation';
+import updateBatchValidation from './preHookFunctions/validation/updateBatchValidation';
+import updateCampaignValidation from './preHookFunctions/validation/updateCampaignValidation';
 import generateInviteCode from '../../../utils/generateInviteCode';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -673,8 +675,16 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await deleteCourseValidation(params, mutationOrQueryName, context);
       break;
     }
+    case 'updateBatch': {
+      await updateBatchValidation(params, mutationOrQueryName, context);
+      break;
+    }
     case 'addCampaign': {
       return hook({ ...input, code: generateInviteCode(8) }, mutationOrQueryName, 'PreHook');
+    }
+    case 'updateCampaign': {
+      await updateCampaignValidation(params, mutationOrQueryName, context);
+      break;
     }
     default: {
       /* If context is not present then it means user is not authenticated and the

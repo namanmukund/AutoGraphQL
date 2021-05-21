@@ -33,6 +33,7 @@ import loginViaPasswordMutationResolver from './user/loginViaPassword';
 import getPaymentRequestMutationResolver from './payment/getPaymentRequest';
 import getPaymentResponseMutationResolver from './payment/getPaymentResponse';
 import addBulkMentorSessionMutationResolver from './mentor/addBulkMentorSession';
+import bookB2B2CSlotsMutationResolver from './user/bookB2B2CSlots';
 
 export {
   addMutationResolver,
@@ -70,4 +71,5 @@ export {
   getPaymentRequestMutationResolver,
   getPaymentResponseMutationResolver,
   addBulkMentorSessionMutationResolver,
+  bookB2B2CSlotsMutationResolver,
 };
