@@ -1,3 +1,6 @@
+import UpdateParentChildDetailInput
+  from '../../../graphqlSchema/core/types/collections/UpdateParentChildDetailInput.js';
+
 const customMutationString = `
    signUp ( input: SignUpInput ): UserToken,
    setUserPassword ( id: ID!, password: String! ): User,
@@ -23,7 +26,8 @@ const customMutationString = `
    menteeCourseSyllabus : MenteeCourseSyllabus,
    tcirtSdrowssaPtes ( id: ID!, password: String! ): User,
    uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,
-   parentChildSignUp ( input: ParentChildSignUpInput ): ParentChildToken,
+   parentChildSignUp ( schoolId: ID, input: ParentChildSignUpInput ): ParentChildToken,
+   updateParentChildDetail ( userId:ID!, schoolId: ID, input: UpdateParentChildDetailInput ): ParentChildToken,
    signUpAffiliate ( input: SignUpAffiliateInput ): UserToken,
    loginViaPassword ( input: EmailLoginInput ): ParentChildToken,
    loginViaOtp ( input: ExistingUserInput ): BooleanResult,
