@@ -88,7 +88,9 @@ import NewsFeed from './newsFeed';
 import SchoolClass from './schoolClass';
 import Campaign from './campaign';
 import BulkMentorSessionInput from './bulkMentorSessionInput';
+import RescheduledSlot from './rescheduledSlot';
 import GetCampaignSlots from './getCampaignSlots';
+import BookB2B2CSlotsInput from './bookB2B2CSlotsInput';
 
 export default [
   ...User,
@@ -181,5 +183,7 @@ export default [
   ...SchoolClass,
   ...Campaign,
   ...BulkMentorSessionInput,
+  ...RescheduledSlot,
   ...GetCampaignSlots,
+  ...BookB2B2CSlotsInput,
 ];
