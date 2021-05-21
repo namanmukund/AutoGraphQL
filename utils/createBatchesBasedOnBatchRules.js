@@ -2,11 +2,11 @@ import { get } from 'lodash';
 import { NoSectionExists } from '../constants/errors';
 import {
   getSectionExists,
-  createBatchSessionsGroupBySection,
-  createBatchSessionsGroupByGrade,
   getClassesGroupByGrade,
   fetchAllConnectedSchoolClasses,
   createBatchForB2B2C,
+  createBatchGroupByGrade,
+  createBatchGroupBySection,
 } from '../src/autoGenerate/graphql/postHookFunctions/utils/updateCampaignHelperMethods';
 
 const createB2BBatchesBasedOnBatchRules = async (campaignId, courseId, batchRules, classesConnectIds) => {
@@ -16,7 +16,7 @@ const createB2BBatchesBasedOnBatchRules = async (campaignId, courseId, batchRule
     if (batchRules.batchCreationBasis === 'grade') {
       // Map, with key = grade, value = array of classes corresponding to that grade
       const classesGroupByGrade = getClassesGroupByGrade(classes);
-      createBatchSessionsGroupByGrade(classesGroupByGrade, campaignId, courseId);
+      createBatchGroupByGrade(classesGroupByGrade, campaignId, courseId);
     } else {
       // check if section exists in atleast one of the school classes
       const noSectionExists = getSectionExists(classes);
@@ -24,7 +24,7 @@ const createB2BBatchesBasedOnBatchRules = async (campaignId, courseId, batchRule
         throw new NoSectionExists();
       } else {
         // create separate batches for all the schoolClasses
-        createBatchSessionsGroupBySection(classes, campaignId, courseId);
+        createBatchGroupBySection(classes, campaignId, courseId);
       }
     }
   }

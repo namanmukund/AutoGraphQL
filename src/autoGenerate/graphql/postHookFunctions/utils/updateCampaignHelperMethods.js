@@ -3,6 +3,7 @@ import callLocalGraphqlApi from '../../../../api/callGraphqlApi';
 import { batchType, batchCreationStatus, ADD_BATCH_TRY_LIMIT } from '../../../../../constants';
 import { log } from '../../../../../utils';
 import getSelectedSlotsTime from '../../preHookFunctions/validation/utils/getSelectedSlotsTime';
+import getFirstTopicAndLearningObjective from '../../../utils/getFirstTopicAndLearningObjective';
 
 const fetchSchoolClasses = async (schoolClassIds) => {
   const schoolClassIdsString = JSON.stringify(schoolClassIds);
@@ -25,10 +26,13 @@ const fetchSchoolClasses = async (schoolClassIds) => {
   return get(schoolClasses, 'data.schoolClasses', []);
 };
 
-const fetchLastBatchCode = async () => {
+const fetchLastBatchCode = async (type, schoolId) => {
   const query = `
           {
-            batches(filter:{type:${batchType.b2b}},first:1, orderBy:createdAt_DESC){
+            batches(filter:{and:[
+            {type:${type}},
+            ${schoolId ? `{school_some:{id: "${schoolId}"}}` : ''}
+            ]},first:1, orderBy:createdAt_DESC){
               code
             }
           }
@@ -224,6 +228,24 @@ const updateB2BBatch = async (existingBatchId, classIds, campaignId, studentIds,
   return get(updateBatchResponse, 'data.updateBatch', {});
 };
 
+const addB2B2CBatchSession = async (batchId, mentorSessionConnectId, firstTopicId, bookingDate, selectedSlot) => {
+  const mutation = `
+    mutation{
+      addBatchSession(input: {
+        bookingDate: "${bookingDate}",
+        ${selectedSlot}: true
+      },
+        batchConnectId: "${batchId}",
+        topicConnectId: "${firstTopicId}",
+        mentorSessionConnectId:"${mentorSessionConnectId}",) {
+        id
+      }
+    }
+  `;
+  const updateCampaignResponse = await callLocalGraphqlApi(mutation);
+  return get(updateCampaignResponse, 'data.updateCampaign', {});
+};
+
 const getClassesGroupByGrade = (classes) => {
   const classesMap = new Map();
   classes.forEach((schoolClass) => {
@@ -240,12 +262,12 @@ const getClassesGroupByGrade = (classes) => {
   return classesMap;
 };
 
-const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId, courseId) => {
+const createBatchGroupByGrade = async (classesGroupByGrade, campaignId, courseId) => {
   // classIds and studentIds to pass in input
   let classIds = [];
   let studentIds = [];
   // handle the batch code increments
-  const lastBatchCodeRes = await fetchLastBatchCode();
+  const lastBatchCodeRes = await fetchLastBatchCode(batchType.b2b);
   const lastBatchCode = lastBatchCodeRes && lastBatchCodeRes.length && lastBatchCodeRes[0].code;
   let numeric = Number(lastBatchCode.substring(6));
 
@@ -299,11 +321,11 @@ const createBatchSessionsGroupByGrade = async (classesGroupByGrade, campaignId, 
   await updateBatchCreationStatus(campaignId, batchCreationStatus.complete);
 };
 
-const createBatchSessionsGroupBySection = async (classes, campaignId, courseId) => {
+const createBatchGroupBySection = async (classes, campaignId, courseId) => {
   // classIds and studentIds to pass in input
   let studentIds = [];
   // handle the batch code increments
-  const lastBatchCodeRes = await fetchLastBatchCode();
+  const lastBatchCodeRes = await fetchLastBatchCode(batchType.b2b);
   const lastBatchCode = lastBatchCodeRes && lastBatchCodeRes.length && lastBatchCodeRes[0].code;
   let numeric = Number(lastBatchCode.substring(6));
 
@@ -374,8 +396,18 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
   // handle the batch code increments
   const schoolCodeRes = await callLocalGraphqlApi(fetchSchoolCode(schoolId));
   const schoolCode = get(schoolCodeRes, 'data.school.code', '');
+  // get b2b2c batch attached t school to get last batch code
+  const lastBatchCodeRes = await fetchLastBatchCode(batchType.b2b2c, schoolId);
+  const lastBatchCode = lastBatchCodeRes && lastBatchCodeRes.length && lastBatchCodeRes[0].code;
+  let numeric = lastBatchCode ? lastBatchCode.split('-BCS')[1] : 0;
+  numeric += 1;
+  /*
+    logic to add batch Session
+    the first published topic will get populated in the document
+    */
+  const topic = await getFirstTopicAndLearningObjective();
+  const firstTopicId = get(topic, 'data.topics[0].id');
 
-  let numeric = 1;
   /* eslint-disable no-restricted-syntax */
   for (const timeTableRule of timeTableRules) {
     const {
@@ -390,8 +422,10 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
     let batchCode = `${schoolCode}-BCS${numeric}`;
     for (let i = 0; i < ADD_BATCH_TRY_LIMIT; i += 1) {
       try {
-        await createB2B2CBatch(batchCode, schoolId, campaignId, courseId, formattedBookingDate.toISOString(), selectedSlot, allottedMentorConnectId, mentorSessionConnectId);
+        const addBatchRes = await createB2B2CBatch(batchCode, schoolId, campaignId, courseId, formattedBookingDate.toISOString(), selectedSlot, allottedMentorConnectId, mentorSessionConnectId);
         numeric += 1;
+        const batchId = addBatchRes && addBatchRes.id;
+        await addB2B2CBatchSession(batchId, mentorSessionConnectId, firstTopicId, formattedBookingDate.toISOString(), selectedSlot);
         log(`Batch ${batchCode} added`);
         break;
       } catch (err) {
@@ -406,8 +440,8 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
 };
 
 export {
-  createBatchSessionsGroupBySection,
-  createBatchSessionsGroupByGrade,
+  createBatchGroupBySection,
+  createBatchGroupByGrade,
   getClassesGroupByGrade,
   fetchAllConnectedSchoolClasses,
   getSectionExists,
