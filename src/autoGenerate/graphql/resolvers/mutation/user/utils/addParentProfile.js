@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
 
-const addParentProfile = async (context, parentId, variables) => {
+const addParentProfile = async (parentId, variables) => {
   const query = `
 mutation($input: ParentProfileInput!){
   addParentProfile(userConnectId:"${parentId}", input:$input ){
@@ -9,7 +9,7 @@ mutation($input: ParentProfileInput!){
   }
 }
   `;
-  const res = await callLocalGraphqlApi(query, context, variables);
+  const res = await callLocalGraphqlApi(query, '', variables);
   return get(res, 'data.addParentProfile.id');
 };
 

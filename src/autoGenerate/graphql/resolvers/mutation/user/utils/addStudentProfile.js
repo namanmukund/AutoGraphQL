@@ -2,7 +2,6 @@ import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
 
 const addStudentProfile = async (
-  context,
   variables,
   userConnectId,
   parentProfileId,
@@ -25,7 +24,7 @@ mutation($input: StudentProfileInput!){
 }
 `;
 
-  const res = await callLocalGraphqlApi(query, context, variables);
+  const res = await callLocalGraphqlApi(query, '', variables);
   return get(res, 'data.addStudentProfile.id');
 };
 

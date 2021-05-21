@@ -1,7 +1,5 @@
+/* eslint-disable no-unused-vars */
 import { get } from 'lodash';
-import { getFieldsBeingFetched } from '../../../../utils';
-import { validate } from '../../../validation';
-import { ADD } from '../../../../../../constants/graphqlOperations';
 import {
   ChildAlreadyRegisteredError,
   DatabaseRecordNotFoundError,
@@ -62,17 +60,6 @@ const updateParentChildDetailMutationResolver = async (
 ) => {
   validateAuthentication(context);
   const { input } = params;
-  const { fieldNodes } = info;
-  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
-
-  validate(
-    'User',
-    ast,
-    ADD,
-    fieldsFetched,
-    authentication,
-    {},
-  );
 
   validateUpdateParentChildDetailInput(input);
 
@@ -137,7 +124,6 @@ const updateParentChildDetailMutationResolver = async (
       input: parentProfileInputData,
     };
     parentProfileId = await addParentProfile(
-      context,
       existingUserId,
       variables,
     );
@@ -176,7 +162,7 @@ Create student and their user profile
   }
   const childDataWithId = generateCuid(childData);
 
-  const childUserData = await addUserData(authentication, childDataWithId);
+  const childUserData = await addUserData({ bypass: true }, childDataWithId);
   const { id: childUserId } = childUserData;
   if (!childUserId) {
     throw new SomethingWentWrongError({
@@ -208,7 +194,6 @@ Create student and their user profile
     input: studentProfileInputData,
   };
   const studentProfileId = await addStudentProfile(
-    context,
     studentProfileInput,
     childUserId,
     parentProfileId,

@@ -150,7 +150,6 @@ const parentChildSignUpMutationResolver = async (
       input: parentProfileInputData,
     };
     parentProfileId = await addParentProfile(
-      context,
       parentId,
       variables,
     );
@@ -197,7 +196,7 @@ const parentChildSignUpMutationResolver = async (
   const studentProfileInput = {
     input: studentProfileInputData,
   };
-  const studentProfileId = await addStudentProfile(context, studentProfileInput, childUserId, parentProfileId);
+  const studentProfileId = await addStudentProfile(studentProfileInput, childUserId, parentProfileId);
   if (!studentProfileId) {
     throw new SomethingWentWrongError({
       data: {

@@ -40,7 +40,7 @@ const Campaign = `
     classes: [SchoolClass] @relation(name: "CampaignSchoolClass", direction: "OneWay")
     batchCreationStatus: BatchCreationStatus @defaultValue(value: "todo")
     poster: File @relation(name: "CampaignPoster", direction: "OneWay")
-    school: School @relation(name: "CampaignSchool", direction: "OneWay")
+    school: School! @relation(name: "CampaignSchool", direction: "OneWay")
   }
 `;
 

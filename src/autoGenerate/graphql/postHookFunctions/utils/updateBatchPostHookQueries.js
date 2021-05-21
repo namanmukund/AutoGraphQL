@@ -1,11 +1,18 @@
 import { get } from 'lodash';
+import { GLOBAL_COURSE_TITLE } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 // query to get published topics count
 const getTopicMeta = async () => {
   const query = `
           {
-            topicsMeta(filter: {status: published}){
+            topicsMeta(filter: 
+              {
+                and: [
+                  {status: published},
+                  {chapter_some: {courses_some: {title: ${GLOBAL_COURSE_TITLE}}}}
+                ]
+              }){
               count
             }
           }
