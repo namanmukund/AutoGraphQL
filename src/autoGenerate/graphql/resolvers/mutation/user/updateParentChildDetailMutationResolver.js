@@ -24,6 +24,7 @@ import addUserCredit from './utils/addUserCredit';
 import { REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
 import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 import { QueryController } from '../../../controllers';
+import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 
 const getParentChildExistingDetails = async (userId) => {
   const query = `
@@ -46,6 +47,26 @@ const getParentChildExistingDetails = async (userId) => {
   `;
   const res = await callLocalGraphqlApi(query);
   return get(res, 'data.user');
+};
+
+const getChildrenDataOfAParent = async (parentProfileId) => {
+  const query = `
+      query{
+        parentProfile(id: "${parentProfileId}") {
+          id
+          children {
+            id
+            user {
+              id
+              name
+              role
+            }
+          }
+        }
+      }
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.parentProfile');
 };
 
 const updateParentChildDetailMutationResolver = async (
@@ -218,10 +239,24 @@ Create student and their user profile
   }
   // add base credit to user
   await addUserCredit(REGISTRATION_BASE_CREDIT, childUserId, SIGN_UP_BONUS);
-
+  const parentProfile = await getChildrenDataOfAParent(parentProfileId);
+  const { children } = parentProfile;
+  const childrenToken = [];
+  if (children && children.length) {
+    children.forEach((child) => {
+      const { user } = child;
+      childrenToken.push(createUserTokenTypeData(child.user));
+    });
+  }
   // return primary user
   const queryController = new QueryController('User', { bypass: true });
-  return queryController.fetchOne({ id: existingUserId });
+  const parentUserData = await queryController.fetchOne({ id: existingUserId });
+
+  // generate parent token
+  const userTokenData = createUserTokenTypeData(parentUserData, authentication, '', false);
+  // generate kids token
+  userTokenData.children = childrenToken;
+  return userTokenData;
 };
 
 export default updateParentChildDetailMutationResolver;
