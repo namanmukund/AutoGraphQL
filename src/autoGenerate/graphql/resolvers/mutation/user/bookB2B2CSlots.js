@@ -1,57 +1,74 @@
 import { get } from 'lodash';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import getSelectedDays from '../../../postHookFunctions/utils/getSelectedDays';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import { QueryController } from '../../../controllers';
-import getPossibleDates from '../../../../../../utils/getPossibleDates';
-import { MaxMentorSessionDaysError, StartEndDateError } from '../../../../../../constants/errors';
-import { BULK_MENTOR_SESSION_DAYS_LIMIT } from '../../../../../../constants';
 import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import { NoSlotSelectedError, OnlyOneSlotAllowedError } from '../../../../../../constants/errors/input';
 
-// query to fetch mentorSession
-const fetchMentorSessions = (userId, date) => `
+// query to fetch batch
+const fetchBatch = (campaignId, bookingDate, slotInput) => `
   query{
-    mentorSessions(
-      filter: {and: [
-        {sessionType: trial},
-        {user_some: {id: "${userId}"}},
-        {availabilityDate: "${date}"}
-      ]}) {
+    batches(filter:{
+      and: [
+        {
+          campaign_some: {
+            id: "${campaignId}"
+          }
+        },
+        {
+          ${slotInput}: true
+        },
+        {
+          b2b2ctimeTable_bookingDate_subDoc: "${bookingDate}"
+        }
+      ]
+    }){
       id
     }
   }
   `;
 
-// mutation to add mentorSession
-const createMentorSessions = (userId, date, slots) => `
-  mutation {
-    addMentorSession(input: {
-      availabilityDate: "${date}",
-      ${slots}
-      sessionType: trial
-    }, userConnectId: "${userId}") {
+// query to fetch batch n basis of studentProfileId
+const fetchBatchForStudent = (studentProfileId) => `
+  query{
+    batches(filter:{
+      and: [
+        {
+          students_some:{
+            id: "${studentProfileId}"
+          }
+        },
+        {
+          type: b2b2c
+        }
+      ]
+    }){
       id
     }
   }
   `;
 
-// mutation to update mentorSession
-const updateMentorSessions = (id, date, slots) => `
+// mutation to update batch
+const updateBatch = (batchId, studentId) => `
   mutation{
-    updateMentorSession(id: "${id}", input: {
-      availabilityDate: "${date}",
-      ${slots}
-    }) {
+    updateBatch(id:"${batchId}", studentsConnectIds: ["${studentId}"]){
       id
+    }
+  }
+  `;
+
+// mutation to remove student from a batch
+const removeStudentFromBatch = (batchId, studentId) => `
+  mutation{
+    removeFromBatchStudentProfile(studentProfileId:"${studentId}", batchId:"${batchId}"){
+      studentProfile{
+        id
+      }
     }
   }
   `;
 
 /*
-This is called when mentor tries to crate his sessions in bulk, here from frontend we will pass:
-userId, timeTableRule(startDate, endDate, ...slots, ...weekdays)
-in return we will send mentorSessions updated/added
+This mutation is called when b2b2c user tries to book a slot
 */
 const bookB2B2CSlotsMutationResolver = async (
   root,
@@ -68,8 +85,7 @@ const bookB2B2CSlotsMutationResolver = async (
       campaignId,
       studentProfileId,
       bookingDate,
-      mentorSessionId,
-      ...slots,
+      ...slots
     },
   } = params;
 
@@ -81,38 +97,25 @@ const bookB2B2CSlotsMutationResolver = async (
     throw new OnlyOneSlotAllowedError();
   }
 
-  // start, end dates
-  const days = getSelectedDays(timeTableRule);
-  const startDate = new Date(startDateInInput);
-  startDate.setHours(0, 0, 0, 0);
-  const endDate = new Date(endDateInInput);
-  endDate.setHours(0, 0, 0, 0);
+  // fetch batch on the basis of campaign and slots
+  const slotInput = `b2b2ctimeTable_slot${slotTimeArray[0]}_subDoc`;
+  const formattedBookingDate = new Date(bookingDate);
+  formattedBookingDate.setHours(0, 0, 0, 0);
+  const fetchBatchRes = await callLocalGraphqlApi(fetchBatch(campaignId, formattedBookingDate.toISOString(), slotInput));
+  const batchId = get(fetchBatchRes, 'data.batches[0].id', '');
 
-  // throw error in this case
-  if (startDate > endDate) {
-    throw new StartEndDateError();
+  if (batchId) {
+    const fetchBatchForStudentRes = await callLocalGraphqlApi(fetchBatchForStudent(studentProfileId));
+    const batchIdForStudent = get(fetchBatchForStudentRes, 'data.batches[0].id', '');
+
+    // if student is already attached to a batch, disconnect it
+    if (batchIdForStudent) {
+      await callLocalGraphqlApi(removeStudentFromBatch(batchIdForStudent, studentProfileId));
+    }
+
+    // add student to the new batch
+    await callLocalGraphqlApi(updateBatch(batchIdForStudent, studentProfileId));
   }
-
-  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
-  const diffDays = Math.round(Math.abs((endDate - endDate) / oneDay));
-
-  // throw error if duration for mentor sessions is more than 1 year
-  if (diffDays > BULK_MENTOR_SESSION_DAYS_LIMIT) {
-    throw new MaxMentorSessionDaysError();
-  }
-
-  // slots passed in input
-  const { filteredSlotsString } = extractSlotsFromInput(slots);
-
-  // getting dates on basis of startDate, endDate and days selected
-  const possibleDates = getPossibleDates(startDate, endDate, days);
-
-  // add/update mentorSession on the dates created and slots passed
-  const mentorSessionArray = await constructMentorSessions(userId, possibleDates, filteredSlotsString);
-
-  // constructing data in format to be returned
-  const modelQuery = new QueryController('MentorSession', { bypass: true });
-  const modelQueryRes = await modelQuery.fetchMultiple({ id: { $in: mentorSessionArray } });
 
   return {
     result: true,
