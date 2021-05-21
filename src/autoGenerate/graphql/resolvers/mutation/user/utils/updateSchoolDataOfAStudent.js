@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
+import getSchoolInformation from './getSchoolInformation';
 
 const updateSchoolDataOfAStudent = async (input, studentProfileId) => {
   const {
