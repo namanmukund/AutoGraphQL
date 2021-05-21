@@ -248,7 +248,6 @@ Create student and their user profile
       childrenToken.push(createUserTokenTypeData(child.user));
     });
   }
-  console.log(111111, childrenToken);
   // return primary user
   const queryController = new QueryController('User', { bypass: true });
   const parentUserData = await queryController.fetchOne({ id: existingUserId });
