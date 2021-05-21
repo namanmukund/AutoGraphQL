@@ -1,5 +1,5 @@
-const SignuporLoginUserInput = `
-  input SignuporLoginUserInput {
+const SignupOrLoginUserInput = `
+  input SignupOrLoginUserInput {
     email: String
     phone: PhoneInput
     campaignCode: String
@@ -12,4 +12,4 @@ const SignuporLoginUserInput = `
     timezone: String
   }`;
 
-export default SignuporLoginUserInput;
+export default SignupOrLoginUserInput;

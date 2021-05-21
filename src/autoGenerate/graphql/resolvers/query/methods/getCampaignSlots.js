@@ -41,6 +41,7 @@ const getCampaignSlots = (async (root, params, context) => {
   const slotsArray = [];
 
   const getCampaignRes = await callLocalGraphqlApi(getCampaign(code));
+  console.log(code, JSON.stringify(get(getCampaignRes, 'data'), null, 2));
   const campaign = get(getCampaignRes, 'data.campaigns[0]', {});
   const schoolName = get(getCampaignRes, 'data.campaigns[0].school.name', '');
   const schoolLogoId = get(getCampaignRes, 'data.campaigns[0].school.logo.id', '');

@@ -28,7 +28,7 @@ const customMutationString = `
    signUpAffiliate ( input: SignUpAffiliateInput ): UserToken,
    loginViaPassword ( input: EmailLoginInput ): ParentChildToken,
    loginViaOtp ( input: ExistingUserInput ): BooleanResult,
-   signupOrLoginViaOtp ( input: ExistingUserInput ): BooleanResult,
+   signupOrLoginViaOtp ( input: SignupOrLoginUserInput ): BooleanResult,
    validateUserOTP ( input: ValidateUserInput  ): ParentChildToken,
    getPaymentRequest ( productId: ID!, discountCode: String, isCreditUsed: Boolean): PaymentRequest,
    getPaymentResponse ( id: ID!, hash: String!, status: String!, payuMoneyId: String!): BooleanResult,
