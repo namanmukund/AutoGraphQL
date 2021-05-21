@@ -16,6 +16,8 @@ const GetCampaignSlotsResult = `
     schoolName: String
     schoolLogo: File @relation(name: "GetCampaignSlotsResultFile", direction: "OneWay")
     campaignType: String
+    poster: File @relation(name: "GetCampaignPosterFile", direction: "OneWay")
+    type: String
   }
 `;
 

@@ -253,7 +253,7 @@ const updateSchoolDataOfAStudent = async (input, studentProfileId) => {
   return get(res, 'data.updateStudentProfile.id');
 };
 
-const getUserOriginSource = (utmSource, schoolName = '', schoolId = '') => {
+export const getUserOriginSource = (utmSource, schoolName = '', schoolId = '') => {
   const {
     website, facebook, google, instagram, school, transformation,
   } = userSourceOrigin;

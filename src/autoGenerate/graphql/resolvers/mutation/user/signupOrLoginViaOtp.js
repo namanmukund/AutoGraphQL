@@ -11,6 +11,15 @@ import { generateCuid, getRandomNumber } from '../../../../../../utils';
 import { rangeOTP } from '../../../../../../constants';
 import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import { PARENT } from '../../../../../../constants/roles';
+
+const getCampaign = (code) => `{
+  campaigns(filter: {code: "${code}"}) {
+    id
+  }
+}
+`;
 
 const USER_TYPE = 'User';
 
@@ -68,7 +77,33 @@ const signupOrLoginViaOtp = async (
           number: input.phone.number,
           countryCode: input.phone.countryCode,
         },
+        role: PARENT,
       };
+      if (input.campaignId) {
+        const campaign = await callLocalGraphqlApi(getCampaign(input.code));
+        const campaignId = get(campaign, 'data.campaigns[0].id');
+        newUser.campaign = {
+          type: 'Campaign',
+          typeId: campaignId,
+        };
+      }
+      if (input.utmSource) {
+        newUser.utmSource = input.utmSource;
+      }
+      if (input.utmCampaign) {
+        newUser.utmCampaign = input.utmCampaign;
+      }
+      if (input.utmTerm) {
+        newUser.utmTerm = input.utmTerm;
+      }
+      if (input.utmContent) {
+        newUser.utmContent = input.utmContent;
+      }
+      if (input.utmMedium) {
+        newUser.utmMedium = input.utmMedium;
+      }
+      newUser.country = input.country || 'india';
+      newUser.timezone = input.timezone || 'Asia/Kolkata';
       userData = generateCuid(newUser);
       await modelMutations.addDocument(userData);
     } else {

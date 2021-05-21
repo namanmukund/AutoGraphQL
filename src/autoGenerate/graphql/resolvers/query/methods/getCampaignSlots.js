@@ -3,9 +3,9 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import getSlotTimesInString from '../../../../../../utils/getSlotTimesInString';
 
-const getCampaign = (id) => `
+const getCampaign = (code) => `
 {
-  campaign(id: "${id}"){
+  campaigns(filter: {code: "${code}"}){
     timeTableRules{
       bookingDate
        ${getSlotTimesInString()}
@@ -17,6 +17,9 @@ const getCampaign = (id) => `
       }
     }
     type
+    poster {
+      id
+    }
     school{
       id
       name
@@ -32,15 +35,16 @@ const getCampaignSlots = (async (root, params, context) => {
   validateAuthentication(context, 'app');
   context.currentUser = true;
   // getting input from params
-  const { input: { campaignId } } = params;
+  const { input: { code } } = params;
   // this will be sent in output
   const result = {};
   const slotsArray = [];
 
-  const getCampaignRes = await callLocalGraphqlApi(getCampaign(campaignId));
-  const campaign = get(getCampaignRes, 'data.campaign', {});
-  const schoolName = get(getCampaignRes, 'data.campaign.school.name', '');
-  const schoolLogoId = get(getCampaignRes, 'data.campaign.school.logo.id', '');
+  const getCampaignRes = await callLocalGraphqlApi(getCampaign(code));
+  const campaign = get(getCampaignRes, 'data.campaigns[0]', {});
+  const schoolName = get(getCampaignRes, 'data.campaigns[0].school.name', '');
+  const schoolLogoId = get(getCampaignRes, 'data.campaigns[0].school.logo.id', '');
+  const posterId = get(getCampaignRes, 'data.campaigns[0].school.logo.id', '');
   const { timeTableRules, type } = campaign;
 
   if (timeTableRules && timeTableRules.length) {
@@ -57,6 +61,7 @@ const getCampaignSlots = (async (root, params, context) => {
   result.slots = slotsArray;
   result.schoolName = schoolName;
   result.schoolLogo = { type: 'File', typeId: `${schoolLogoId}` };
+  result.poster = { type: 'File', typeId: `${posterId}` };
   result.campaignType = type;
 
   return result;
