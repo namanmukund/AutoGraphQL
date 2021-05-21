@@ -1,6 +1,6 @@
 /* eslint no-restricted-syntax: ["error", "FunctionExpression", "WithStatement",
 "BinaryExpression[operator='in']"] */
-import { findIndex } from 'lodash';
+import { findIndex, get } from 'lodash';
 import { InsufficientPermissionError } from '../../../../constants/errors';
 import { META } from '../../../../constants';
 import { SINGULAR } from '../../../../constants/graphqlOperations';
