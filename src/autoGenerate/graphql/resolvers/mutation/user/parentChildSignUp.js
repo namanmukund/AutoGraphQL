@@ -47,7 +47,7 @@ const parentChildSignUpMutationResolver = async (
   ast,
   authentication,
 ) => {
-  const { input } = params;
+  const { input, schoolId } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
   validate(
@@ -65,7 +65,6 @@ const parentChildSignUpMutationResolver = async (
     throw new UserTokenNotRequiredError();
   }
   validateParentChildSignUpInput(input);
-  const { schoolId } = params;
   const {
     parentName,
     childName,
@@ -236,7 +235,7 @@ const parentChildSignUpMutationResolver = async (
   // add base credit to user
   await addUserCredit(REGISTRATION_BASE_CREDIT, childUserId, SIGN_UP_BONUS);
   //  if  school information exist add school data
-  if (get(input, 'schoolName') || get(input, 'schoolId')) {
+  if (get(input, 'schoolName') || schoolId) {
     const updatedStudentProfileId = await updateSchoolDataOfAStudent(input, studentProfileId);
     if (updatedStudentProfileId) {
       // eslint-disable-next-line no-param-reassign
