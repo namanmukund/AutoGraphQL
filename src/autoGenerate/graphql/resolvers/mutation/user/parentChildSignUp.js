@@ -1,280 +1,35 @@
 import { get } from 'lodash';
 import { getFieldsBeingFetched } from '../../../../utils';
-import { isValidPhoneNumber, validate, validateName } from '../../../validation';
+import { validate } from '../../../validation';
 import { ADD } from '../../../../../../constants/graphqlOperations';
 import {
   ChildAlreadyRegisteredError,
-  EmailOrPhoneMismatchError,
-  InvalidEmailError,
-  InvalidPhoneError,
   SomethingWentWrongError,
-  UserAlreadyExistsError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
-import isValidEmail from '../../../validation/isValidEmail';
-import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import { AFFILIATE, MENTEE, PARENT } from '../../../../../../constants/roles';
+import { MENTEE, PARENT } from '../../../../../../constants/roles';
 import { generateCuid, log } from '../../../../../../utils';
-import localSignUpMutationPromise from '../utils/localSignUpMutationPromise';
-import { MutationController, QueryController } from '../../../controllers';
+import { QueryController } from '../../../controllers';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import generateInviteCode from '../../../../../../utils/generateInviteCode';
-import { MAX_ALLOWED_REFERRALS, REGISTRATION_BASE_CREDIT, userSourceOrigin } from '../../../../../../constants';
-import getNumberOfReferralsOfAUser from './utils/getNumberOfReferralsOfAUser';
-import getReferredByUserIdByReferralCode from './utils/getReferredByUserIdByReferralCode';
+import { REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
 import addUserCredit from './utils/addUserCredit';
 import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
 import addUserCurrentTopicComponentStatus from '../../../../utils/addUserCurrentTopicComponentStatus';
 import studentProfileAvatarCodes from '../../../../../../constants/studentProfileAvatarCodes';
+import addParentProfile from './utils/addParentProfile';
+import checkForValidReferralCode from './utils/checkForValidReferralCode';
+import addUserData from './utils/addUserData';
+import addToUserInviteList from './utils/addToUserInviteList';
+import addStudentProfile from './utils/addStudentProfile';
+import validateParentChildSignUpInput from './utils/validateParentChildSignUpInput';
+import getParentInfo from './utils/getParentInfo';
+import getUserOriginSource from './utils/getUserOriginSource';
+import updateSchoolDataOfAStudent from './utils/updateSchoolDataOfAStudent';
 
 const USER_TYPE = 'User';
-const validateParentChildSignUpInput = (input) => {
-  const {
-    parentName, childName, parentEmail, parentPhone,
-  } = input;
-  // check email
-  if (!isValidEmail(parentEmail)) {
-    throw new InvalidEmailError();
-  }
-  // check phone number
-  if (!isValidPhoneNumber(parentPhone)) {
-    throw new InvalidPhoneError();
-  }
-  // check childName
-  validateName(childName);
-  // check parentName
-  validateName(parentName);
 
-  return true;
-};
-
-const addUserData = async (authentication, dataWithId) => {
-  const modelMutations = new MutationController(USER_TYPE, authentication);
-  const result = await localSignUpMutationPromise(
-    dataWithId,
-    modelMutations,
-  );
-  return result;
-};
-
-const addStudentProfile = async (context, variables, userConnectId, parentProfileId) => {
-  const query = `
-mutation($input: StudentProfileInput!){
-  addStudentProfile(input:$input, userConnectId: "${userConnectId}", parentsConnectIds:["${parentProfileId}"]){
-    id
-  }
-}
-`;
-
-  const res = await callLocalGraphqlApi(query, context, variables);
-  return get(res, 'data.addStudentProfile.id');
-};
-
-const addParentProfile = async (context, parentId, variables) => {
-  const query = `
-mutation($input: ParentProfileInput!){
-  addParentProfile(userConnectId:"${parentId}", input:$input ){
-    id
-  }
-}
-  `;
-  const res = await callLocalGraphqlApi(query, context, variables);
-  return get(res, 'data.addParentProfile.id');
-};
-
-const getParentInfo = async (context, email, phone) => {
-  const result = {};
-  const { countryCode, number } = phone;
-  const childrenName = [];
-  const childrenToken = [];
-  const query = `
-  query {
-    users(filter:{
-      or:[
-      {email:"${email}"}
-      {and:[
-        {phone_countryCode_subDoc:"${countryCode}"}
-        {phone_number_subDoc: "${number}"}
-      ]}
-      ]
-    }){
-      id
-      name
-      email
-      phone {
-      countryCode
-      number
-      }
-      parentProfile {
-        id
-        children {
-        id 
-        user{
-          id
-          name
-          role
-        }
-      }
-    }
-  }
-}
-  `;
-  const res = get(await callLocalGraphqlApi(query, context), 'data.users', []);
-  // when same users are added with email and number separately
-  if (res && res.length) {
-    if (res.length > 1) {
-      throw new UserAlreadyExistsError();
-    }
-    // if res has length 1 then check if phone and email belogs to the same user
-    const {
-      id, parentProfile, email: parentEmail, phone: parentPhone,
-    } = res[0];
-    result.parentId = id;
-    result.parentEmail = parentEmail;
-    // only continue if parent phone and email are same to add a sibling
-    if (
-      parentPhone.countryCode !== countryCode
-      || parentPhone.number !== number
-      || parentEmail !== email
-    ) {
-      throw new EmailOrPhoneMismatchError();
-    }
-
-    if (parentProfile && parentProfile.id) {
-      result.parentProfileId = parentProfile.id;
-      const { children } = parentProfile;
-      if (children && children.length) {
-        children.forEach((child) => {
-          const { user: { name } } = child;
-          childrenName.push(name);
-          childrenToken.push(createUserTokenTypeData(child.user));
-        });
-      }
-    }
-  }
-  result.childrenName = childrenName;
-  result.childrenToken = childrenToken;
-  return result;
-};
-
-const addToUserInviteList = async (invitedByConnectId, acceptedByConnectId) => {
-  const query = `
-    mutation{
-      addUserInvite(input:{
-        registrationVerified:false
-        trialTaken: false
-        coursePurchased: false
-      }
-        invitedByConnectId:"${invitedByConnectId}"
-        acceptedByConnectId:"${acceptedByConnectId}"
-      ){
-        id
-      }
-    }
-  `;
-  const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.addUserInvite.id');
-};
-
-/*
-- get referral user id
-- check if the referral user has not reached its max limit
-- add userInvite collection
-- update user referral status
- */
-
-const checkForValidReferralCode = async (referralCode) => {
-  if (!referralCode) {
-    return false;
-  }
-  const referredByUserData = await getReferredByUserIdByReferralCode(referralCode);
-  if (referredByUserData && referredByUserData.id) {
-    /*
-    In case of an affiliate there is  no restrictions on the number of referrals
-     */
-    const { id: referredByUserId, role, secondaryRole } = referredByUserData;
-    if (role === AFFILIATE || (secondaryRole && secondaryRole === AFFILIATE)) {
-      return referredByUserData;
-    }
-    const numberOfReferralsOfAUser = await getNumberOfReferralsOfAUser(referredByUserId);
-    if (numberOfReferralsOfAUser <= MAX_ALLOWED_REFERRALS) {
-      return referredByUserData;
-    }
-    log(`Max referral limit exceeded by userId ${referredByUserId}`);
-  }
-  return false;
-};
-const getSchoolInformation = async (schoolName) => {
-  const query = `
-query{
-  schools(filter:{
-    name:"${schoolName}"
-  }){
-    id
-  }
-}
-`;
-  const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.schools[0].id');
-};
-
-const updateSchoolDataOfAStudent = async (input, studentProfileId) => {
-  const {
-    schoolName, schoolId, section, rollNo, batch, branch,
-  } = input;
-  let studentSchoolId = schoolId;
-  if (!schoolId) {
-    studentSchoolId = await getSchoolInformation(schoolName);
-    if (!studentSchoolId) {
-      return false;
-    }
-  }
-
-  const query = `
-  mutation($input: StudentProfileUpdate) {
-    updateStudentProfile(id:"${studentProfileId}"
-    input: $input
-    schoolConnectId: "${studentSchoolId}"
-    ){
-      id
-    }
-  }
-  `;
-  const variables = {
-    input: {
-      section,
-      rollNo,
-      batch,
-      branch,
-    },
-  };
-  const res = await callLocalGraphqlApi(query, '', variables);
-  return get(res, 'data.updateStudentProfile.id');
-};
-
-export const getUserOriginSource = (utmSource, schoolName = '', schoolId = '') => {
-  const {
-    website, facebook, google, instagram, school, transformation,
-  } = userSourceOrigin;
-  let source = website;
-  if (utmSource && utmSource.toLowerCase().includes('transformation')) {
-    source = transformation;
-  }
-  if (utmSource && utmSource.toLowerCase().includes('facebook')) {
-    source = facebook;
-  }
-  if (utmSource && utmSource.toLowerCase().includes('instagram')) {
-    source = instagram;
-  }
-  if (utmSource && utmSource.toLowerCase().includes('google')) {
-    source = google;
-  }
-  if (schoolName || schoolId) {
-    source = school;
-  }
-  return source;
-};
 /*
 - both the parent and a kid is registered
 - email & phone both are required
@@ -292,7 +47,7 @@ const parentChildSignUpMutationResolver = async (
   ast,
   authentication,
 ) => {
-  const { input } = params;
+  const { input, schoolId } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
   validate(
@@ -310,7 +65,6 @@ const parentChildSignUpMutationResolver = async (
     throw new UserTokenNotRequiredError();
   }
   validateParentChildSignUpInput(input);
-
   const {
     parentName,
     childName,
@@ -326,8 +80,7 @@ const parentChildSignUpMutationResolver = async (
     utmContent,
     utmMedium,
     schoolName,
-    schoolId,
-    country,
+    country = 'india',
     timezone = 'Asia/Kolkata',
   } = input;
   // check if parent exist in db
@@ -372,7 +125,7 @@ const parentChildSignUpMutationResolver = async (
       utmContent,
       utmMedium,
       source,
-      country: country || 'india',
+      country,
       timezone,
     };
 
@@ -414,7 +167,7 @@ const parentChildSignUpMutationResolver = async (
     utmTerm,
     utmContent,
     utmMedium,
-    country: country || 'india',
+    country,
     timezone,
   };
 
@@ -478,48 +231,11 @@ const parentChildSignUpMutationResolver = async (
       log('Error in adding to user invite', e);
     }
   }
-  // send email
-  // if (process.env.NODE_ENV === 'production') {
-  //   const templateFileName = 'parentChildSignupEmailTemplate';
-  //   const parentChildEmailObj = {
-  //     parentName: startCase(toLower(parentName)),
-  //     childName: startCase(toLower(childName)),
-  //   };
-  //   const templateString = parsedHtmlFromTemplateFileAndObject(templateFileName, parentChildEmailObj);
-  //   templateString.then((html) => {
-  //     const emailTo = [
-  //       parentEmail,
-  //     ];
-  //     const ccEmail = [''];
-  //     const bccEmail = [''];
-  //     const text = '';
-  //     const subject = 'Schedule Live Free Trial Coding Session';
-  //     const emailMsgObject = getEmailObject(
-  //       emailTo,
-  //       ccEmail,
-  //       bccEmail,
-  //       subject,
-  //       text,
-  //       html,
-  //       'hello@tekie.in',
-  //     );
-  //     sendEmail(emailMsgObject);
-  //   });
-  //   // temp code to send sms to sales team
-  //   const phoneNumberShravasti = '+917083759072';
-  //   const phoneNumberJahnavi = '+919892222579';
-  //   const phoneNumberIshan = '+917000287331';
-  //   const phoneNumberShantanu = '+918383963592';
-  //   const smsText = `Tekie: Newly registered user's parentName: ${parentName}, childName: ${childName}, number: ${parentPhone.number}`;
-  //   sendTextSms(phoneNumberShravasti, smsText);
-  //   sendTextSms(phoneNumberJahnavi, smsText);
-  //   sendTextSms(phoneNumberIshan, smsText);
-  //   sendTextSms(phoneNumberShantanu, smsText);
-  // }
+
   // add base credit to user
   await addUserCredit(REGISTRATION_BASE_CREDIT, childUserId, SIGN_UP_BONUS);
   //  if  school information exist add school data
-  if (get(input, 'schoolName') || get(input, 'schoolId')) {
+  if (get(input, 'schoolName') || schoolId) {
     const updatedStudentProfileId = await updateSchoolDataOfAStudent(input, studentProfileId);
     if (updatedStudentProfileId) {
       // eslint-disable-next-line no-param-reassign
