@@ -53,6 +53,7 @@ import {
   SlotsInvalidError,
   AllottedMentorIdInvalidError,
   MentorSessionIdInvalidError,
+  BatchFullError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -243,4 +244,5 @@ export {
   SlotsInvalidError,
   AllottedMentorIdInvalidError,
   MentorSessionIdInvalidError,
+  BatchFullError,
 };

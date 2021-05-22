@@ -176,3 +176,7 @@ export const AllottedMentorIdInvalidError = createError('AllottedMentorIdInvalid
 export const MentorSessionIdInvalidError = createError('MentorSessionIdInvalidError', {
   message: 'Mentor Session Connect ID is invalid.',
 });
+
+export const BatchFullError = createError('BatchFullError', {
+  message: 'Batch is full.',
+});
