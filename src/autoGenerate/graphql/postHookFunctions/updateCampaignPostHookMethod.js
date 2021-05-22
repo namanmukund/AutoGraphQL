@@ -17,7 +17,7 @@ const updateCampaignPostHookMethod = async (input, params, mutationName, context
   if (type === campaignTypes.b2b && prevBatchCreationStatus === batchCreationStatus.todo) {
     createB2BBatchesBasedOnBatchRules(campaignId, courseId, batchRules, classesConnectIds);
   } else if (type === campaignTypes.b2b2cEvent && prevBatchCreationStatus === batchCreationStatus.todo) {
-    createB2B2CEventBatchesBasedOnBatchRules(campaignId, courseId, batchRules, timeTableRules, schoolId, classesConnectIds);
+    createB2B2CEventBatchesBasedOnBatchRules(campaignId, courseId, batchRules, timeTableRules, schoolId, classesConnectIds, context);
   }
 };
 

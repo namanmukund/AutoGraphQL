@@ -4,6 +4,8 @@ import { batchType, batchCreationStatus, ADD_BATCH_TRY_LIMIT } from '../../../..
 import { log } from '../../../../../utils';
 import getSelectedSlotsTime from '../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import getFirstTopicAndLearningObjective from '../../../utils/getFirstTopicAndLearningObjective';
+import getSelectedSlotsStringArray from './getSelectedSlotsStringArray';
+import reduceParticularAvailableSlotOfADate from './reduceParticularAvailableSlotOfADate';
 
 const fetchSchoolClasses = async (schoolClassIds) => {
   const schoolClassIdsString = JSON.stringify(schoolClassIds);
@@ -392,7 +394,7 @@ const getSectionExists = (classes) => {
   return noSectionInAnyClass;
 };
 
-const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolId, classesConnectIds) => {
+const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolId, classesConnectIds, context) => {
   // update batchCreation status to in-progress
   await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
   // handle the batch code increments
@@ -428,6 +430,8 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
         numeric += 1;
         const batchId = addBatchRes && addBatchRes.id;
         await addB2B2CBatchSession(batchId, mentorSessionConnectId, firstTopicId, formattedBookingDate.toISOString(), selectedSlot);
+        const slotTimeStringArray = getSelectedSlotsStringArray(slots);
+        await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
         log(`Batch ${batchCode} added`);
         break;
       } catch (err) {
