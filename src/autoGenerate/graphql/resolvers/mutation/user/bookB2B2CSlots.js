@@ -129,10 +129,43 @@ const bookB2B2CSlotsMutationResolver = async (
   const formattedBookingDate = new Date(bookingDate);
   formattedBookingDate.setHours(0, 0, 0, 0);
   const fetchBatchRes = await callLocalGraphqlApi(fetchBatch(campaignId, formattedBookingDate.toISOString(), slotInput));
-  const batchId = get(fetchBatchRes, 'data.batches[0].id', '');
-  const maxBatchSize = get(fetchBatchRes, 'data.batches[0].campaign.batchRules.batchSize', 1);
-  const studentsMeta = get(fetchBatchRes, 'data.batches[0].studentsMeta.count', 0);
-  if (studentsMeta >= maxBatchSize) {
+  const batches = get(fetchBatchRes, 'data.batches', '');
+  let batchId = '';
+  if (batches && batches.length) {
+    // iterating over each batch for that particular booking date and slot
+    // if there are multiple batches and there n students in any of the batches
+    // we will randomly choose one otherwise choose which is partially full
+    // and if one is full, and other have 0 students, again choose randomly
+
+    // iterating over each batch here to find partially filled batch
+    batches.forEach((batch) => {
+      if (batch && batch.id) {
+        const batchSize = get(batch, 'campaign.batchRules.batchSize', 1);
+        const studentsMeta = get(batch, 'studentsMeta.count', 0);
+        if (!batchId && studentsMeta < batchSize && studentsMeta > 0) {
+          batchId = batch.id;
+        }
+      }
+    });
+
+    // if we do not get a batch id uptil here, that means either the batch has 0 students
+    // or students equal to batchSize
+    // so here we will randomly choose a batch with 0 students
+    if (!batchId) {
+      batches.forEach((batch) => {
+        if (batch && batch.id) {
+          const batchSize = get(batch, 'campaign.batchRules.batchSize', 1);
+          const studentsMeta = get(batch, 'studentsMeta.count', 0);
+          if (!batchId && studentsMeta < batchSize && studentsMeta === 0) {
+            batchId = batch.id;
+          }
+        }
+      });
+    }
+  }
+
+  // if we don't get a batchId until now, that means all batches are full
+  if (!batchId) {
     throw new BatchFullError();
   }
 

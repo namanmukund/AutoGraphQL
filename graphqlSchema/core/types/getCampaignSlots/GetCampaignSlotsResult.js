@@ -6,8 +6,7 @@ const CampaignSlots = `
   type CampaignSlots {
    bookingDate: Date
    ${slotTimeFields}
-   allottedMentorId: ID
-   mentorSessionId: ID
+   showSlot: Boolean
  }`;
 
 const GetCampaignSlotsResult = `
@@ -20,7 +19,6 @@ const GetCampaignSlotsResult = `
     schoolLogo: File @relation(name: "GetCampaignSlotsResultFile", direction: "OneWay")
     campaignType: String
     poster: File @relation(name: "GetCampaignPosterFile", direction: "OneWay")
-    type: String
   }
 `;
 
