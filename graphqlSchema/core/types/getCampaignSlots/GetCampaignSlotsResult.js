@@ -14,6 +14,7 @@ const GetCampaignSlotsResult = `
   type GetCampaignSlotsResult {
     id: String
     slots: [CampaignSlots]
+    schoolId: String
     schoolName: String
     classes: [SchoolClass]
     schoolLogo: File @relation(name: "GetCampaignSlotsResultFile", direction: "OneWay")

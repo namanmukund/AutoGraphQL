@@ -48,6 +48,7 @@ const getCampaignSlots = (async (root, params, context) => {
   const getCampaignRes = await callLocalGraphqlApi(getCampaign(code));
   const campaign = get(getCampaignRes, 'data.campaigns[0]', {});
   const campaignId = get(getCampaignRes, 'data.campaigns[0].id', {});
+  const schoolId = get(getCampaignRes, 'data.campaigns[0].school.id', '');
   const schoolName = get(getCampaignRes, 'data.campaigns[0].school.name', '');
   const schoolLogoId = get(getCampaignRes, 'data.campaigns[0].school.logo.id', '');
   const posterId = get(getCampaignRes, 'data.campaigns[0].school.logo.id', '');
@@ -69,6 +70,7 @@ const getCampaignSlots = (async (root, params, context) => {
   result.slots = slotsArray;
   result.schoolName = schoolName;
   result.classes = classes;
+  result.schoolId = schoolId;
   result.schoolLogo = { type: 'File', typeId: `${schoolLogoId}` };
   result.poster = { type: 'File', typeId: `${posterId}` };
   result.campaignType = type;
