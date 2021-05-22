@@ -6,6 +6,8 @@ const CampaignSlots = `
   type CampaignSlots {
    bookingDate: Date
    ${slotTimeFields}
+   allottedMentorId: ID
+   mentorSessionId: ID
    showSlot: Boolean
  }`;
 
