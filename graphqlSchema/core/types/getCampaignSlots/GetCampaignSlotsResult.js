@@ -12,10 +12,15 @@ const CampaignSlots = `
 
 const GetCampaignSlotsResult = `
   type GetCampaignSlotsResult {
+    id: String
     slots: [CampaignSlots]
+    schoolId: String
     schoolName: String
+    classes: [SchoolClass]
     schoolLogo: File @relation(name: "GetCampaignSlotsResultFile", direction: "OneWay")
     campaignType: String
+    poster: File @relation(name: "GetCampaignPosterFile", direction: "OneWay")
+    type: String
   }
 `;
 

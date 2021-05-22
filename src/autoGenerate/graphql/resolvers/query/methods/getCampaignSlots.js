@@ -3,9 +3,10 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import getSlotTimesInString from '../../../../../../utils/getSlotTimesInString';
 
-const getCampaign = (id) => `
+const getCampaign = (code) => `
 {
-  campaign(id: "${id}"){
+  campaigns(filter: {code: "${code}"}){
+    id
     timeTableRules{
       bookingDate
        ${getSlotTimesInString()}
@@ -17,6 +18,13 @@ const getCampaign = (id) => `
       }
     }
     type
+    poster {
+      id
+    }
+    classes {
+      section
+      grade
+    }
     school{
       id
       name
@@ -32,15 +40,19 @@ const getCampaignSlots = (async (root, params, context) => {
   validateAuthentication(context, 'app');
   context.currentUser = true;
   // getting input from params
-  const { input: { campaignId } } = params;
+  const { input: { code } } = params;
   // this will be sent in output
   const result = {};
   const slotsArray = [];
 
-  const getCampaignRes = await callLocalGraphqlApi(getCampaign(campaignId));
-  const campaign = get(getCampaignRes, 'data.campaign', {});
-  const schoolName = get(getCampaignRes, 'data.campaign.school.name', '');
-  const schoolLogoId = get(getCampaignRes, 'data.campaign.school.logo.id', '');
+  const getCampaignRes = await callLocalGraphqlApi(getCampaign(code));
+  const campaign = get(getCampaignRes, 'data.campaigns[0]', {});
+  const campaignId = get(getCampaignRes, 'data.campaigns[0].id', {});
+  const schoolId = get(getCampaignRes, 'data.campaigns[0].school.id', '');
+  const schoolName = get(getCampaignRes, 'data.campaigns[0].school.name', '');
+  const schoolLogoId = get(getCampaignRes, 'data.campaigns[0].school.logo.id', '');
+  const posterId = get(getCampaignRes, 'data.campaigns[0].school.logo.id', '');
+  const classes = get(getCampaignRes, 'data.campaigns[0].classes', []);
   const { timeTableRules, type } = campaign;
 
   if (timeTableRules && timeTableRules.length) {
@@ -54,9 +66,17 @@ const getCampaignSlots = (async (root, params, context) => {
       });
     });
   }
+  result.id = campaignId;
   result.slots = slotsArray;
   result.schoolName = schoolName;
-  result.schoolLogo = { type: 'File', typeId: `${schoolLogoId}` };
+  result.classes = classes;
+  result.schoolId = schoolId;
+  if (schoolLogoId) {
+    result.schoolLogo = { type: 'File', typeId: `${schoolLogoId}` };
+  }
+  if (posterId) {
+    result.poster = { type: 'File', typeId: `${posterId}` };
+  }
   result.campaignType = type;
 
   return result;

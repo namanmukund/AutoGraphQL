@@ -94,6 +94,7 @@ const arrayUpdateRemoveTypes = [
 const sortBy = ['ASC', 'DESC'];
 const smsOTPMessage = {
   bodyBeforeName: 'Dear ',
+  bodyBeforeIfNoName: 'Hi',
   bodyAfterName: ', your login OTP for Tekie App is ',
 };
 
