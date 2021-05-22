@@ -51,7 +51,7 @@ const getCampaignSlots = (async (root, params, context) => {
   const schoolId = get(getCampaignRes, 'data.campaigns[0].school.id', '');
   const schoolName = get(getCampaignRes, 'data.campaigns[0].school.name', '');
   const schoolLogoId = get(getCampaignRes, 'data.campaigns[0].school.logo.id', '');
-  const posterId = get(getCampaignRes, 'data.campaigns[0].school.logo.id', '');
+  const posterId = get(getCampaignRes, 'data.campaigns[0].poster.id', '');
   const classes = get(getCampaignRes, 'data.campaigns[0].classes', []);
   const { timeTableRules, type } = campaign;
 
