@@ -71,8 +71,12 @@ const getCampaignSlots = (async (root, params, context) => {
   result.schoolName = schoolName;
   result.classes = classes;
   result.schoolId = schoolId;
-  result.schoolLogo = { type: 'File', typeId: `${schoolLogoId}` };
-  result.poster = { type: 'File', typeId: `${posterId}` };
+  if (schoolLogoId) {
+    result.schoolLogo = { type: 'File', typeId: `${schoolLogoId}` };
+  }
+  if (posterId) {
+    result.poster = { type: 'File', typeId: `${posterId}` };
+  }
   result.campaignType = type;
 
   return result;
