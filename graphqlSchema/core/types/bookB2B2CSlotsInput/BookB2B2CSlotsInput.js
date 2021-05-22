@@ -8,9 +8,6 @@ const BookB2B2CSlotsInput = `
     userId: ID!
     ${slotTimeFields}
     bookingDate: Date!
-    mentorSessionId: ID
-    allottedMentorId: ID
-    schoolId: ID
   }`;
 
 export default [

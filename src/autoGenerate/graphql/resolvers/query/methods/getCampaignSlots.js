@@ -10,10 +10,6 @@ const getCampaign = (code) => `
 {
   campaigns(filter: {code: "${code}"}){
     id
-    timeTableRules{
-      bookingDate
-       ${getSlotTimesInString()}
-    }
     type
     poster {
       id
@@ -47,75 +43,44 @@ const getCampaign = (code) => `
 `;
 
 // method to construct timeslots array and which slots are filled and which are not
-const getTimeSlotsForB2B2C = async (timeTableRules, batches, maxBatchSize) => {
+const getTimeSlotsForB2B2C = async (batches, maxBatchSize) => {
   const slotsArray = [];
-  if (timeTableRules && timeTableRules.length) {
-    // iterating over each timetable object in timeTableRulesin the campaign
-    // if there are multiple object for same date and time we will add maximumAllowableStudentsInaBatch
-    timeTableRules.forEach((timeTableRule) => {
-      let maximumAllowableStudentsInaBatch = maxBatchSize;
-      const {
-        bookingDate, ...slots
-      } = timeTableRule;
-      const slotTimeArray = getSelectedSlotsTime(slots);
-      if (slotTimeArray.length === 1) {
-        let found = false;
-        // iterating over slotsArray to check if the boking date and slot combination already exists
-        // it it is found we only increase maximumAllowableStudentsInaBatch and will not push it in array again
-        // eslint-disable-next-line no-plusplus
-        for (let i = 0; i < slotsArray.length; i++) {
-          if (slotsArray[i].bookingDate === bookingDate && slotsArray[i][`slot${slotTimeArray[0]}`] === true) {
-            found = true;
-            maximumAllowableStudentsInaBatch += maxBatchSize;
-            break;
-          }
-        }
-        if (!found) {
-          slotsArray.push({
-            bookingDate,
-            [`slot${slotTimeArray[0]}`]: true,
-            maxBatchSize: maximumAllowableStudentsInaBatch,
-            studentsCount: 0,
-          });
-        }
-      }
-    });
-  }
-
-  // iterating over all the b2b2c batches to check how many students have booked the slots
   if (batches && batches.length) {
+    // iterating over each b2b2c batches in the campaign with timetable rule
+    // if there are multiple object for same date and time we will just check if slots are free for any of them
     batches.forEach((batch) => {
-      if (batch && batch.type === batchType.b2b2c && batch.b2b2ctimeTable && batch.studentsMeta && batch.studentsMeta.count) {
+      if (batch && batch.type === batchType.b2b2c && batch.b2b2ctimeTable && batch.b2b2ctimeTable.bookingDate) {
+        const studentsMeta = get(batch, 'studentsMeta.count', 0);
         const {
-          bookingDate, ...slots
+          bookingDate,
+          ...slots
         } = batch.b2b2ctimeTable;
         const slotTimeArray = getSelectedSlotsTime(slots);
-        if (slotTimeArray.length === 1 && bookingDate) {
-          // here we are appending the stuent count for a particular booking date and slot
+        if (slotTimeArray.length === 1) {
+          let found = false;
+          // iterating over slotsArray to check if the booking date and slot combination already exists
+          // if it is found we only check if students slot are available in this and will not push it in array again
           // eslint-disable-next-line no-plusplus
           for (let i = 0; i < slotsArray.length; i++) {
-            const bookingDateInCampaign = new Date(slotsArray[i].bookingDate);
-            bookingDateInCampaign.setHours(0, 0, 0, 0);
-            const bookingDateInBatch = new Date(bookingDate);
-            bookingDateInBatch.setHours(0, 0, 0, 0);
-            if (bookingDateInCampaign.toISOString() === bookingDateInBatch.toISOString() && slotsArray[i][`slot${slotTimeArray[0]}`] === true) {
-              slotsArray[i].studentsCount += batch.studentsMeta.count;
+            if (slotsArray[i].bookingDate.toISOString() === bookingDate.toISOString() && slotsArray[i][`slot${slotTimeArray[0]}`] === true) {
+              found = true;
+              // checking if slot was not free for earlier batch then we check if it is available for this batch
+              if (!slotsArray[i].showSlot && studentsMeta < maxBatchSize) {
+                slotsArray[i].showSlot = true;
+              }
               break;
             }
           }
+          if (!found) {
+            slotsArray.push({
+              bookingDate,
+              [`slot${slotTimeArray[0]}`]: true,
+              showSlot: studentsMeta < maxBatchSize,
+            });
+          }
         }
       }
     });
-  }
-
-  // here just iterating again to populate showSlot
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < slotsArray.length; i++) {
-    if (slotsArray[i].studentsCount < slotsArray[i].maxBatchSize) {
-      slotsArray[i].showSlot = true;
-    } else {
-      slotsArray[i].showSlot = false;
-    }
   }
   return slotsArray;
 };
@@ -144,9 +109,9 @@ const getCampaignSlots = (async (root, params, context) => {
     throw new DatabaseRecordNotFoundError();
   }
 
-  const { timeTableRules, type } = campaign;
+  const { type } = campaign;
   // get slots for b2b2c campaign and populate logic which is full and which is not
-  const slotsArray = getTimeSlotsForB2B2C(timeTableRules, batches, maxBatchSize);
+  const slotsArray = getTimeSlotsForB2B2C(batches, maxBatchSize);
 
   result.id = campaignId;
   result.slots = slotsArray;
