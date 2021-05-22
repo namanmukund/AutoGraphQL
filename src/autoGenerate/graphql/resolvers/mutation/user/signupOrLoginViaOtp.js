@@ -11,15 +11,7 @@ import { generateCuid, getRandomNumber } from '../../../../../../utils';
 import { rangeOTP } from '../../../../../../constants';
 import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
-import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { PARENT } from '../../../../../../constants/roles';
-
-const getCampaign = (code) => `{
-  campaigns(filter: {code: "${code}"}) {
-    id
-  }
-}
-`;
 
 const USER_TYPE = 'User';
 

@@ -1,6 +1,5 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
-import { DatabaseRecordNotFoundError } from '../../../../../../../constants/errors';
 import { createUserTokenTypeData } from '../../utils/createUserTokenTypeData';
 
 const getChildrenToken = async (context, userId) => {
