@@ -3,6 +3,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import { NoSlotSelectedError, OnlyOneSlotAllowedError } from '../../../../../../constants/errors/input';
+import { BatchFullError } from '../../../../../../constants/errors';
 
 // query to fetch batch
 const fetchBatch = (campaignId, bookingDate, slotInput) => `
@@ -23,6 +24,14 @@ const fetchBatch = (campaignId, bookingDate, slotInput) => `
       ]
     }){
       id
+      campaign{
+        batchRules{
+          batchSize
+        }
+      }
+      studentsMeta{
+        count
+      }
     }
   }
   `;
@@ -103,6 +112,12 @@ const bookB2B2CSlotsMutationResolver = async (
   formattedBookingDate.setHours(0, 0, 0, 0);
   const fetchBatchRes = await callLocalGraphqlApi(fetchBatch(campaignId, formattedBookingDate.toISOString(), slotInput));
   const batchId = get(fetchBatchRes, 'data.batches[0].id', '');
+  const maxBatchSize = get(fetchBatchRes, 'data.batches[0].campaign.batchRules.batchSize', 1);
+  const studentsMeta = get(fetchBatchRes, 'data.batches[0].studentsMeta.count', 0);
+
+  if (studentsMeta >= maxBatchSize) {
+    throw new BatchFullError();
+  }
 
   if (batchId) {
     const fetchBatchForStudentRes = await callLocalGraphqlApi(fetchBatchForStudent(studentProfileId));
