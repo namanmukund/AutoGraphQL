@@ -401,7 +401,7 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
   // get b2b2c batch attached t school to get last batch code
   const lastBatchCodeRes = await fetchLastBatchCode(batchType.b2b2c, schoolId);
   const lastBatchCode = lastBatchCodeRes && lastBatchCodeRes.length && lastBatchCodeRes[0].code;
-  let numeric = lastBatchCode ? lastBatchCode.split('-BCS')[1] : 0;
+  let numeric = lastBatchCode ? Number(lastBatchCode.split('-BCS')[1]) : 0;
   numeric += 1;
   /*
     logic to add batch Session
