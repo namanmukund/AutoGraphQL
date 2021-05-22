@@ -7,6 +7,7 @@ import {
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
 import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
+import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
