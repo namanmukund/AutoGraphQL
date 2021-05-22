@@ -3,7 +3,19 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import { NoSlotSelectedError, OnlyOneSlotAllowedError } from '../../../../../../constants/errors/input';
-import { BatchFullError } from '../../../../../../constants/errors';
+import { BatchFullError, DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
+
+// query to fetch student profile id on basis of user id
+const fetchUser = (userId) => `
+  query{
+    user(id: "${userId}"){
+      id
+      studentProfile {
+        id
+      }
+    }
+  }
+  `;
 
 // query to fetch batch
 const fetchBatch = (campaignId, bookingDate, slotInput) => `
@@ -59,7 +71,7 @@ const fetchBatchForStudent = (studentProfileId) => `
 // mutation to update batch
 const updateBatch = (batchId, studentId) => `
   mutation{
-    updateBatch(id:"${batchId}", studentsConnectIds: ["${studentId}"]){
+    updateBatch(id:"${batchId}", studentsConnectIds: ["${studentId}"], input:{}){
       id
     }
   }
@@ -92,7 +104,7 @@ const bookB2B2CSlotsMutationResolver = async (
   const {
     input: {
       campaignId,
-      studentProfileId,
+      userId,
       bookingDate,
       ...slots
     },
@@ -106,6 +118,12 @@ const bookB2B2CSlotsMutationResolver = async (
     throw new OnlyOneSlotAllowedError();
   }
 
+  const fetchUserRes = await callLocalGraphqlApi(fetchUser(userId));
+  const studentProfileId = get(fetchUserRes, 'data.user.studentProfile.id', '');
+  if (!studentProfileId) {
+    throw new DatabaseRecordNotFoundError();
+  }
+
   // fetch batch on the basis of campaign and slots
   const slotInput = `b2b2ctimeTable_slot${slotTimeArray[0]}_subDoc`;
   const formattedBookingDate = new Date(bookingDate);
@@ -114,7 +132,6 @@ const bookB2B2CSlotsMutationResolver = async (
   const batchId = get(fetchBatchRes, 'data.batches[0].id', '');
   const maxBatchSize = get(fetchBatchRes, 'data.batches[0].campaign.batchRules.batchSize', 1);
   const studentsMeta = get(fetchBatchRes, 'data.batches[0].studentsMeta.count', 0);
-
   if (studentsMeta >= maxBatchSize) {
     throw new BatchFullError();
   }
@@ -122,14 +139,13 @@ const bookB2B2CSlotsMutationResolver = async (
   if (batchId) {
     const fetchBatchForStudentRes = await callLocalGraphqlApi(fetchBatchForStudent(studentProfileId));
     const batchIdForStudent = get(fetchBatchForStudentRes, 'data.batches[0].id', '');
-
     // if student is already attached to a batch, disconnect it
     if (batchIdForStudent) {
       await callLocalGraphqlApi(removeStudentFromBatch(batchIdForStudent, studentProfileId));
     }
 
     // add student to the new batch
-    await callLocalGraphqlApi(updateBatch(batchIdForStudent, studentProfileId));
+    await callLocalGraphqlApi(updateBatch(batchId, studentProfileId));
   }
 
   return {
