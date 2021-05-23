@@ -115,6 +115,7 @@ const validateUserOTPMutationResolver = async (
     }
   }
   // if user is already verified
+  console.log(phoneOtp, phoneVerified, status, emailOtp, emailVerified)
   if (
     (phoneOtp && phoneVerified && status === 'active')
     || (emailOtp && emailVerified && status === 'active')

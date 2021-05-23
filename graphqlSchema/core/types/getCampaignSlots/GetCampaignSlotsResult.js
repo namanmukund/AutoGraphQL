@@ -12,6 +12,7 @@ const CampaignSlots = `
 const GetCampaignSlotsResult = `
   type GetCampaignSlotsResult {
     id: String
+    title: String
     slots: [CampaignSlots]
     schoolId: String
     schoolName: String
