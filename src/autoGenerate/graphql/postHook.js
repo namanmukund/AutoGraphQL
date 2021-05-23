@@ -50,6 +50,7 @@ import addUserSavedCodePostHookMethod from './postHookFunctions/addUserSavedCode
 import updateBatchPostHookMethod from './postHookFunctions/updateBatchPostHookMethod';
 import updateCampaignPostHookMethod from './postHookFunctions/updateCampaignPostHookMethod';
 import addStudentProfilePostHookMethod from './postHookFunctions/addStudentProfilePostHookMethod';
+import removeFromBatchStudentProfilePosthookMethod from './postHookFunctions/removeFromBatchStudentProfile';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -245,6 +246,10 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateUserApprovedCode': {
       await updateUserApprovedCodePostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'removeFromBatchStudentProfile': {
+      await removeFromBatchStudentProfilePosthookMethod(input, params, mutationName, context);
       break;
     }
     default:
