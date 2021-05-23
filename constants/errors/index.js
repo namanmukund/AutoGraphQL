@@ -54,6 +54,7 @@ import {
   AllottedMentorIdInvalidError,
   MentorSessionIdInvalidError,
   BatchFullError,
+  MentorMandatoryError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -245,4 +246,5 @@ export {
   AllottedMentorIdInvalidError,
   MentorSessionIdInvalidError,
   BatchFullError,
+  MentorMandatoryError,
 };

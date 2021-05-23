@@ -15,7 +15,7 @@ const updateCampaignPostHookMethod = async (input, params, mutationName, context
 
   // update campaign only when campaign type is b2b and batch creation status is todo
   if (type === campaignTypes.b2b && prevBatchCreationStatus === batchCreationStatus.todo) {
-    createB2BBatchesBasedOnBatchRules(campaignId, courseId, batchRules, classesConnectIds);
+    createB2BBatchesBasedOnBatchRules(campaignId, courseId, batchRules, classesConnectIds, schoolId);
   } else if (type === campaignTypes.b2b2cEvent && prevBatchCreationStatus === batchCreationStatus.todo) {
     createB2B2CEventBatchesBasedOnBatchRules(campaignId, courseId, batchRules, timeTableRules, schoolId, classesConnectIds, context);
   }

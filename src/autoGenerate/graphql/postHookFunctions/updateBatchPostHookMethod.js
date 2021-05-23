@@ -3,9 +3,10 @@ import extractSlotsFromInput from '../../../../utils/extractSlotsFromInput';
 import getSelectedDays from './utils/getSelectedDays';
 import getPossibleDates from '../../../../utils/getPossibleDates';
 import {
-  getTopicMeta, getBatchSessions, createBatchSession, updateBatchSession,
+  getTopics, getBatchSessions, createBatchSession, updateBatchSession,
 } from './utils/updateBatchPostHookQueries';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
 
 // query to get all not completed batchSessions of a batch to update student
 const getBatchSessionsQuery = (batchId) => `
@@ -40,27 +41,126 @@ const updateBatchSessionQuery = (
   }
   `;
 
-const createBatchSessions = async (batchId, possibleDates, filteredSlots, possibleSessionCount) => {
+// fetch mentor Sessions
+const fetchMentorSessions = (bookingDate, mentorId) => `
+  {
+    mentorSessions(filter: {and: [{availabilityDate: "${bookingDate}"}, {user_some: {id: "${mentorId}"}}, {sessionType: batch}]}) {
+      id
+      availabilityDate
+      slot0
+      slot1
+      slot2
+      slot3
+      slot4
+      slot5
+      slot6
+      slot7
+      slot8
+      slot9
+      slot10
+      slot11
+      slot12
+      slot13
+      slot14
+      slot15
+      slot16
+      slot17
+      slot18
+      slot19
+      slot20
+      slot21
+      slot22
+      slot23
+    }
+  }
+  `;
+
+// update mentor Session
+const updateMentorSession = (mentorSessionId, sessionsBookingDateInDB, slot) => `
+  mutation{
+    updateMentorSession(id: "${mentorSessionId}", input: {
+      availabilityDate:"${sessionsBookingDateInDB}",
+      ${slot}: true,
+      sessionType:batch
+    }) {
+      id
+    }
+  }
+  `;
+
+// add mentor Session
+const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot) => `
+  mutation {
+    addMentorSession(
+      userConnectId: "${mentorUserId}",
+      courseConnectId: "${courseId}",
+    input:{
+      availabilityDate:"${sessionsBookingDateInDB}",
+      ${slot}: true,
+      sessionType:batch
+    }
+    ) {
+      id
+    }
+  }
+  `;
+
+const getMentorSessionId = async (allottedMentorId, date, slotsInInput, courseId) => {
+  let finalMentorSessionId = '';
+  if (allottedMentorId) {
+    const sentSlotsArray = getSelectedSlotsTime(slotsInInput);
+    // eslint-disable-next-line no-await-in-loop
+    const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(date, allottedMentorId));
+    const mentorSession = get(mentorSessionsRes, 'data.mentorSessions[0]');
+    if (mentorSession && mentorSession.id) {
+      const { id: mentorSessionId, ...slotsInMentorSession } = mentorSession;
+      finalMentorSessionId = mentorSessionId;
+      const slotsInMentorSessionArray = getSelectedSlotsTime(slotsInMentorSession);
+      if (sentSlotsArray && sentSlotsArray.length && slotsInMentorSessionArray && slotsInMentorSessionArray.length && sentSlotsArray[0] !== slotsInMentorSessionArray[0]) {
+        // eslint-disable-next-line no-await-in-loop
+        await callLocalGraphqlApi(updateMentorSession(mentorSessionId, date, `slot${sentSlotsArray[0]}`));
+      }
+    } else {
+      // eslint-disable-next-line no-await-in-loop
+      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, date, `slot${sentSlotsArray[0]}`));
+      finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
+    }
+  }
+  return finalMentorSessionId;
+};
+
+const createBatchSessions = async (batchId, possibleDates, filteredSlots, slotsInInput, possibleSessionCount, topics, allottedMentorId, courseId) => {
   if (possibleDates.length <= possibleSessionCount) {
-    possibleDates.forEach((date) => createBatchSession(batchId, date, filteredSlots));
+    // eslint-disable-next-line no-restricted-syntax
+    for (const date of possibleDates) {
+      // eslint-disable-next-line no-await-in-loop
+      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, date, slotsInInput, courseId);
+      const index = possibleDates.indexOf(date);
+      createBatchSession(batchId, date, filteredSlots, topics[index].id, finalMentorSessionId);
+    }
   } else {
     for (let i = 0; i < possibleSessionCount; i += 1) {
-      createBatchSession(batchId, possibleDates[i].toISOString(), filteredSlots);
+      // eslint-disable-next-line no-await-in-loop
+      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId);
+      createBatchSession(batchId, possibleDates[i].toISOString(), filteredSlots, topics[i].id, finalMentorSessionId);
     }
   }
 
   return true;
 };
 
-const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filteredSlotsString) => {
+const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filteredSlotsString, slotsInInput, allottedMentorId, courseId) => {
   let i = 0;
   /* eslint-disable array-callback-return */
-  sessionsAllotted.map((sessionId) => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const session of sessionsAllotted) {
+    // eslint-disable-next-line no-await-in-loop
+    const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId);
     /* eslint-disable array-callback-return */
     const date = possibleDates[i].toISOString();
-    updateBatchSession(sessionId, filteredSlotsString, date);
+    updateBatchSession(session.id, filteredSlotsString, date, finalMentorSessionId);
     i += 1;
-  });
+  }
 };
 
 // method to sort batchSessions
@@ -70,7 +170,7 @@ const sortBatchSessions = (batchSessions) => {
 
   batchSessions.map((item) => {
     /* eslint-disable array-callback-return */
-    if (item.sessionsStatus === 'allotted') {
+    if (item.sessionStatus === 'allotted') {
       sessionsAllotted.push(item);
     } else {
       sessionsStartedOrCompleted.push(item);
@@ -86,6 +186,8 @@ const sortBatchSessions = (batchSessions) => {
 /* eslint-disable no-unused-vars */
 const updateBatchPostHookMethod = async (input, params, mutationName, context) => {
   const { id: batchId, studentsConnectIds } = params;
+  const mentorUserId = get(input, 'allottedMentor.typeId', '');
+  const courseId = get(input, 'course.typeId', '');
   const timeTableRule = get(params, 'input.timeTableRule', null);
   /*
     -> Fetch total number of published topics (x), this will be the max possible number of batchSessions
@@ -97,9 +199,8 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
   */
   if (timeTableRule) {
     // topic count
-    const topicsMeta = await getTopicMeta();
-    const topicCount = topicsMeta.count;
-
+    let topics = await getTopics();
+    const topicCount = topics && topics.length;
     // batch sessions
     const batchSessions = await getBatchSessions(batchId);
 
@@ -130,19 +231,21 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
       const allottedSessionsCount = sessionsAllotted.length;
       if (allottedSessionsCount > 0) {
         possibleSessionCount -= allottedSessionsCount;
-        await updateAllottedBatchSessions(sessionsAllotted, possibleDates, filteredSlotsString);
+        updateAllottedBatchSessions(sessionsAllotted, possibleDates, filteredSlotsString, slots, mentorUserId, courseId);
       }
       if (possibleSessionCount > 0) {
         // all the remaining sessions have to be created
         const startFromIndex = allottedSessionsCount;
-        possibleDates = possibleDates.splice(startFromIndex);
-        await createBatchSessions(batchId, possibleDates, filteredSlotsString, possibleSessionCount);
+        possibleDates = possibleDates.slice(startFromIndex);
+        const topicStartIndex = topicCount - possibleSessionCount;
+        topics = topics.splice(topicStartIndex);
+        createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId);
       }
     } else {
       // if there are no exisiting batchSessions for the given batch id, create all of them
       const possibleSessionCount = topicCount;
       const possibleDates = getPossibleDates(startDate, endDate, days);
-      await createBatchSessions(batchId, possibleDates, filteredSlotsString, possibleSessionCount);
+      createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId);
     }
   }
 

@@ -200,7 +200,7 @@ const updateB2BBatch = async (existingBatchId, classIds, campaignId, studentIds,
                   id: ${existingBatchId},
                   classesConnectIds:${classIdsString},
                   campaignConnectId:"${campaignId}",
-                  studentsConnectIds:${studentIdsString},
+                  ${studentIdsString ? `studentsConnectIds:${studentIdsString}` : ''},
                   courseConnectId: "${courseId}",
                   input: {
                     type: ${batchType.b2b},
@@ -266,14 +266,18 @@ const getClassesGroupByGrade = (classes) => {
   return classesMap;
 };
 
-const createBatchGroupByGrade = async (classesGroupByGrade, campaignId, courseId) => {
+const createBatchGroupByGrade = async (classesGroupByGrade, campaignId, courseId, campaignSchoolId) => {
   // classIds and studentIds to pass in input
   let classIds = [];
   let studentIds = [];
   // handle the batch code increments
-  const lastBatchCodeRes = await fetchLastBatchCode(batchType.b2b);
+  const schoolCodeRes = await callLocalGraphqlApi(fetchSchoolCode(campaignSchoolId));
+  const schoolCode = get(schoolCodeRes, 'data.school.code', '');
+  // get b2b2c batch attached t school to get last batch code
+  const lastBatchCodeRes = await fetchLastBatchCode(batchType.b2b, campaignSchoolId);
   const lastBatchCode = lastBatchCodeRes && lastBatchCodeRes.length && lastBatchCodeRes[0].code;
-  let numeric = Number(lastBatchCode.substring(6));
+  let numeric = lastBatchCode ? Number(lastBatchCode.split('-BBS')[1]) : 0;
+  numeric += 1;
 
   // update batchCreation status to in-progress
   await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
@@ -304,15 +308,16 @@ const createBatchGroupByGrade = async (classesGroupByGrade, campaignId, courseId
     } else {
       // tries batchCodes on fail for max. 5 times before moving on
       /* eslint-disable no-await-in-loop */
-      let batchCode = `TK-BBS${numeric += 1}`;
+      let batchCode = `${schoolCode}-BBS${numeric}`;
       for (let i = 0; i < ADD_BATCH_TRY_LIMIT; i += 1) {
         try {
           await createB2BBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId);
+          numeric += 1;
           log(`Batch ${batchCode} added`);
           break;
         } catch (err) {
           log(`Batch ${batchCode} not added. Trying next batch code.`);
-          batchCode = `TK-BBS${numeric += 1}`;
+          batchCode = `${schoolCode}-BBS${numeric += 1}`;
         }
       }
     }
@@ -328,12 +333,16 @@ const createBatchGroupByGrade = async (classesGroupByGrade, campaignId, courseId
 const createBatchGroupBySection = async (classes, campaignId, courseId) => {
   // classIds and studentIds to pass in input
   let studentIds = [];
-  // handle the batch code increments
-  const lastBatchCodeRes = await fetchLastBatchCode(batchType.b2b);
-  const lastBatchCode = lastBatchCodeRes && lastBatchCodeRes.length && lastBatchCodeRes[0].code;
-  let numeric = Number(lastBatchCode.substring(6));
-
   const schoolId = classes[0].school.id;
+  // handle the batch code increments
+  // handle the batch code increments
+  const schoolCodeRes = await callLocalGraphqlApi(fetchSchoolCode(schoolId));
+  const schoolCode = get(schoolCodeRes, 'data.school.code', '');
+  // get b2b2c batch attached t school to get last batch code
+  const lastBatchCodeRes = await fetchLastBatchCode(batchType.b2b, schoolId);
+  const lastBatchCode = lastBatchCodeRes && lastBatchCodeRes.length && lastBatchCodeRes[0].code;
+  let numeric = lastBatchCode ? Number(lastBatchCode.split('-BBS')[1]) : 0;
+  numeric += 1;
 
   // update batchCreation status to in-progress
   await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
@@ -347,7 +356,6 @@ const createBatchGroupBySection = async (classes, campaignId, courseId) => {
 
     const gradeToCheck = get(classes[i], 'grade', '');
     const sectionToCheck = get(classes[i], 'section', '');
-
     if (gradeToCheck.length > 0 && sectionToCheck.length > 0) {
       // if previously present batch exists
       /* eslint-disable no-await-in-loop */
@@ -357,19 +365,20 @@ const createBatchGroupBySection = async (classes, campaignId, courseId) => {
         const existingBatchId = get(exisitingBatches[0], 'id', '');
         /* eslint-disable no-await-in-loop */
         await updateB2BBatch(existingBatchId, classes[i].id, campaignId, studentIds, courseId);
-      }
-    } else {
-      let batchCode = `TK-BBS${numeric += 1}`;
-      /* eslint-disable no-await-in-loop */
-      // tries batchCodes on fail for max. 5 times before moving on
-      for (let j = 0; j < ADD_BATCH_TRY_LIMIT; j += 1) {
-        try {
-          await createB2BBatch(batchCode, schoolId, classes[i].id, campaignId, studentIds, courseId);
-          log(`Batch ${batchCode} added`);
-          break;
-        } catch (err) {
-          log(`Batch ${batchCode} not added. Trying next batch code.`);
-          batchCode = `TK-BBS${numeric += 1}`;
+      } else {
+        let batchCode = `${schoolCode}-BBS${numeric}`;
+        /* eslint-disable no-await-in-loop */
+        // tries batchCodes on fail for max. 5 times before moving on
+        for (let j = 0; j < ADD_BATCH_TRY_LIMIT; j += 1) {
+          try {
+            await createB2BBatch(batchCode, schoolId, classes[i].id, campaignId, studentIds, courseId);
+            numeric += 1;
+            log(`Batch ${batchCode} added`);
+            break;
+          } catch (err) {
+            log(`Batch ${batchCode} not added. Trying next batch code.`);
+            batchCode = `${schoolCode}-BBS${numeric += 1}`;
+          }
         }
       }
     }

@@ -180,3 +180,7 @@ export const MentorSessionIdInvalidError = createError('MentorSessionIdInvalidEr
 export const BatchFullError = createError('BatchFullError', {
   message: 'Batch is full.',
 });
+
+export const MentorMandatoryError = createError('MentorMandatoryError', {
+  message: 'Allotted mentor is mandatory in batch while starting a session',
+});
