@@ -421,31 +421,78 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
   const topic = await getFirstTopicAndLearningObjective();
   const firstTopicId = get(topic, 'data.topics[0].id');
 
-  /* eslint-disable no-restricted-syntax */
-  for (const timeTableRule of timeTableRules) {
-    const {
-      bookingDate, mentorSession, allottedMentor, ...slots
-    } = timeTableRule;
-    const selectedSlots = getSelectedSlotsTime(slots);
-    const formattedBookingDate = new Date(bookingDate);
-    formattedBookingDate.setHours(0, 0, 0, 0);
-    const selectedSlot = `slot${selectedSlots[0]}`;
-    const allottedMentorConnectId = get(allottedMentor, 'typeId', '');
-    const mentorSessionConnectId = get(mentorSession, 'typeId', '');
-    let batchCode = `${schoolCode}-BCS${numeric}`;
-    for (let i = 0; i < ADD_BATCH_TRY_LIMIT; i += 1) {
-      try {
-        const addBatchRes = await createB2B2CBatch(batchCode, schoolId, campaignId, courseId, formattedBookingDate.toISOString(), selectedSlot, allottedMentorConnectId, mentorSessionConnectId, classesConnectIds);
-        numeric += 1;
-        const batchId = addBatchRes && addBatchRes.id;
-        await addB2B2CBatchSession(batchId, mentorSessionConnectId, firstTopicId, formattedBookingDate.toISOString(), selectedSlot);
-        const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-        await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
-        log(`Batch ${batchCode} added`);
-        break;
-      } catch (err) {
-        log(`Batch ${batchCode} not added. Trying next batch code.`);
-        batchCode = `${schoolCode}-BCS${numeric += 1}`;
+  if (timeTableRules && timeTableRules.length) {
+    // keeping this code as commented for now, as this will be handled from frontend
+    /* const formttedTimeTableRules = [];
+    // iterating over each timetable rules in the campaign
+    // if there are multiple object for same date, time, mentrSession and allottedmentor, then combine them
+    timeTableRules.forEach((timeTableRule) => {
+      const {
+        bookingDate, mentorSession, allottedMentor, ...slots
+      } = timeTableRule;
+      const allottedMentorConnectId = get(allottedMentor, 'typeId', '');
+      const mentorSessionConnectId = get(mentorSession, 'typeId', '');
+      const slotTimeArray = getSelectedSlotsTime(slots);
+      if (slotTimeArray.length === 1) {
+        let found = false;
+        // iterating over slotsArray to check if the booking date, slot and mentor combination already exists
+        // if it is found we will not push it in array again
+        // eslint-disable-next-line no-plusplus
+        for (let i = 0; i < formttedTimeTableRules.length; i++) {
+          if (formttedTimeTableRules[i].bookingDate.toISOString() === bookingDate.toISOString()
+              && formttedTimeTableRules[i][`slot${slotTimeArray[0]}`] === true
+              && formttedTimeTableRules[i].allottedMentorConnectId === allottedMentorConnectId
+              && formttedTimeTableRules[i].mentorSessionConnectId === mentorSessionConnectId
+          ) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          formttedTimeTableRules.push({
+            bookingDate,
+            allottedMentorConnectId,
+            mentorSessionConnectId,
+            [`slot${slotTimeArray[0]}`]: true,
+          });
+        }
+      }
+    }); */
+
+    /* eslint-disable no-restricted-syntax */
+    for (const timeTableRule of timeTableRules) {
+      const {
+        bookingDate, mentorSession, allottedMentor, ...slots
+      } = timeTableRule;
+      const selectedSlots = getSelectedSlotsTime(slots);
+      const formattedBookingDate = new Date(bookingDate);
+      formattedBookingDate.setHours(0, 0, 0, 0);
+      const selectedSlot = `slot${selectedSlots[0]}`;
+      const allottedMentorConnectId = get(allottedMentor, 'typeId', '');
+      const mentorSessionConnectId = get(mentorSession, 'typeId', '');
+      let batchCode = `${schoolCode}-BCS${numeric}`;
+      let batchId = '';
+      for (let i = 0; i < ADD_BATCH_TRY_LIMIT; i += 1) {
+        try {
+          const addBatchRes = await createB2B2CBatch(batchCode, schoolId, campaignId, courseId, formattedBookingDate.toISOString(), selectedSlot, allottedMentorConnectId, mentorSessionConnectId, classesConnectIds);
+          numeric += 1;
+          batchId = addBatchRes && addBatchRes.id;
+          log(`Batch ${batchCode} added`);
+          break;
+        } catch (err) {
+          log(`Batch ${batchCode} not added. Trying next batch code.`);
+          batchCode = `${schoolCode}-BCS${numeric += 1}`;
+        }
+      }
+      // moving this to different block to avoid case of multiple batches being created
+      if (batchId) {
+        try {
+          await addB2B2CBatchSession(batchId, mentorSessionConnectId, firstTopicId, formattedBookingDate.toISOString(), selectedSlot);
+          const slotTimeStringArray = getSelectedSlotsStringArray(slots);
+          await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
+        } catch (err) {
+          log(`Batch session was not added for batch: ${batchCode}.`);
+        }
       }
     }
   }
