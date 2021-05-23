@@ -39,6 +39,8 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   context.slotTimeArray = slotTimeArray;
   context.bookingDateFromInput = bookingDateFromInput;
   context.inputSlotTimeArray = inputSlotTimeArray;
+  const allottedMentorId = batch && batch.allottedMentor && batch.allottedMentor.id;
+  context.allottedMentorId = allottedMentorId;
 
   // we are doing this to handle cases where we make timetable for school without the topic being attached
   // so whenever these sessions get started we need topicId in this mutation as mandatory field
@@ -54,6 +56,15 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
         },
       });
     }
+  }
+
+  // while starting/completing a batchSession, mentor should be there in batch
+  if (!allottedMentorId && (sessionStatusInInput === sessionStatus.started || sessionStatusInInput === sessionStatus.completed)) {
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'allotted mentor is mandatory in batch while starting a session',
+      },
+    });
   }
 
   // if session is complete and user is trying to change the status then throw error
