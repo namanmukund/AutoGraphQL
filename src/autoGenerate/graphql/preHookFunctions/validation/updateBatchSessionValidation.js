@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
+import { DatabaseRecordNotFoundError, MentorMandatoryError } from '../../../../../constants/errors';
 import batchSessionQuery from '../../graphqlQueries/batchSessionQuery';
 import {
   CanNotChangeSessionStatusError,
@@ -60,11 +60,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
 
   // while starting/completing a batchSession, mentor should be there in batch
   if (!allottedMentorId && (sessionStatusInInput === sessionStatus.started || sessionStatusInInput === sessionStatus.completed)) {
-    throw new MissingMandatoryInputInRequestError({
-      data: {
-        message: 'allotted mentor is mandatory in batch while starting a session',
-      },
-    });
+    throw new MentorMandatoryError();
   }
 
   // if session is complete and user is trying to change the status then throw error
