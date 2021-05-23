@@ -7,7 +7,7 @@ const client = require('twilio')(twilioConfig.accountSid, twilioConfig.authToken
 
 const env = process.env.NODE_ENV || 'development';
 const sendOTPSms = (receiverNumber, phoneOtp, name) => {
-  if (env === 'test' || env === 'testBackend') {
+  if (env === 'test' || env === 'testBackend' || env === 'staging') {
     log(`sendOTPSms method called in ${env} environment`);
     return null;
   }
