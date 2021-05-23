@@ -85,7 +85,8 @@ const sortBatchSessions = (batchSessions) => {
 */
 /* eslint-disable no-unused-vars */
 const updateBatchPostHookMethod = async (input, params, mutationName, context) => {
-  const { id: batchId, studentsConnectIds, input: { timeTableRule } } = params;
+  const { id: batchId, studentsConnectIds } = params;
+  const timeTableRule = get(params, 'input.timeTableRule', null);
   /*
     -> Fetch total number of published topics (x), this will be the max possible number of batchSessions
     -> Fetch batchSessions that are either in the started or completed state (y)

@@ -1,13 +1,10 @@
+import { get } from 'lodash';
 import { MAX_ALLOWED_BATCH_SESSIONS_DAYS_RANGE } from '../../../../../constants';
 import { MaxAllowedDayRangeExceededError } from '../../../../../constants/errors';
 
 /* eslint-disable no-unused-vars */
 const updateBatchValidation = async (params, mutationName, context) => {
-  const {
-    input: {
-      timeTableRule,
-    },
-  } = params;
+  const timeTableRule = get(params, 'input.timeTableRule', null);
   if (timeTableRule) {
     const startDate = new Date(timeTableRule.startDate);
     startDate.setHours(0, 0, 0, 0);
