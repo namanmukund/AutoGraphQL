@@ -18,7 +18,7 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions) => {
       const batchSessions = get(mentorSession, 'batchSessions', []);
 
       // for a batch mentorSession we will check batchSessions and see which slots are occupied
-      if (mentorSession.sessionType === sessionType.batch && batchSessions.length) {
+      if ((mentorSession.sessionType === sessionType.trial || mentorSession.sessionType === sessionType.batch) && batchSessions.length) {
         // eslint-disable-next-line no-restricted-syntax
         for (const batchSession of batchSessions) {
           const occupiedSlotTimeArrayForBatch = getSelectedSlotsTime(batchSession);
@@ -36,7 +36,6 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions) => {
     }
     // storing only unique slots
     const uniqueOccupiedSlotsArray = occupiedSlotsArray.filter((v, i, a) => a.indexOf(v) === i);
-
     // if any slot passed in input is in occupied slot( derived from batchSession and MMS) throw error
     const intersectionSlots = slotTimeArray.filter((x) => uniqueOccupiedSlotsArray.includes(x));
     if (intersectionSlots && intersectionSlots.length) {

@@ -16,7 +16,7 @@ const checkIfSlotCanBeDeletedValidation = (params, mentorSession) => {
     const batchSessions = get(mentorSession, 'batchSessions', []);
 
     // for a batch mentorSession we will check batchSessions and see which slots are occupied
-    if (mentorSession.sessionType === sessionType.batch && batchSessions.length) {
+    if ((mentorSession.sessionType === sessionType.trial || mentorSession.sessionType === sessionType.batch) && batchSessions.length) {
       // eslint-disable-next-line no-restricted-syntax
       for (const batchSession of batchSessions) {
         const occupiedSlotTimeArrayForBatch = getSelectedSlotsTime(batchSession);
