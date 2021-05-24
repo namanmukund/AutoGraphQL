@@ -62,8 +62,7 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
     );
 
     // there can be a max of 3 mentorSessions for an availability date of type(batch/trial/paid)
-    // first we will check that only one sessionType exits for one availability day
-    // second we will check that slot which is being sent true in not already booked for other type
+    // we will check that slot which is being sent true in not already booked for other type
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
     checkIfSlotCanBeOpenedValidation(params, mentorSessions);
   }
