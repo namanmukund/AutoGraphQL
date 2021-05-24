@@ -1,7 +1,7 @@
 const School = `
   type School @model {
     name: String! @unique
-    code: String! @unique @trim
+    code: String @unique @trim
     admins: [User] @relation(name:"UserSchool")
     classes: [SchoolClass] @relation(name: "SchoolClassSchool")
     students: [StudentProfile] @relation(name: "StudentProfileSchool")
@@ -13,6 +13,7 @@ const School = `
     country: Country @defaultValue(value: "india")
     products: [Product] @relation(name: "SchoolProduct")
     logo: File @relation(name: "SchoolLogo", direction: "OneWay")
+    hubspotId: String
   }
 `;
 export default [School];

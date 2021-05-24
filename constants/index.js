@@ -94,6 +94,7 @@ const arrayUpdateRemoveTypes = [
 const sortBy = ['ASC', 'DESC'];
 const smsOTPMessage = {
   bodyBeforeName: 'Dear ',
+  bodyBeforeIfNoName: 'Hi',
   bodyAfterName: ', your login OTP for Tekie App is ',
 };
 
@@ -293,6 +294,12 @@ const batchCreationStatus = {
   complete: 'complete',
 };
 
+const sessionType = {
+  trial: 'trial',
+  paid: 'paid',
+  batch: 'batch',
+};
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export const MENTOR_REPORT_COUNTRY = 'india';
@@ -303,7 +310,7 @@ export const MENTOR_REPORT_DAYS = 3;
 
 export const MENTOR_RATING_AUDIT_THRESHOLD = 4;
 
-export const ADD_BATCH_TRY_LIMIT = 5;
+export const ADD_BATCH_TRY_LIMIT = 20;
 
 export const BULK_MENTOR_SESSION_DAYS_LIMIT = 365;
 export const MAX_ALLOWED_BATCH_SESSIONS_DAYS_RANGE = 365;
@@ -371,4 +378,5 @@ export {
   batchCreationBasis,
   batchCreationStatus,
   weekDays,
+  sessionType,
 };

@@ -45,6 +45,7 @@ import {
   AlreadyBookmarkedCheatSheet,
   GradeSectionCombinationAlreadyExists,
   StudentsLinked,
+  SlotsOccupiedError,
   NoSectionExists,
   StartEndDateError,
   MaxMentorSessionDaysError,
@@ -52,6 +53,8 @@ import {
   SlotsInvalidError,
   AllottedMentorIdInvalidError,
   MentorSessionIdInvalidError,
+  BatchFullError,
+  MentorMandatoryError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -233,6 +236,7 @@ export {
   AlreadyBookmarkedCheatSheet,
   GradeSectionCombinationAlreadyExists,
   StudentsLinked,
+  SlotsOccupiedError,
   NoSectionExists,
   StartEndDateError,
   MaxMentorSessionDaysError,
@@ -241,4 +245,6 @@ export {
   SlotsInvalidError,
   AllottedMentorIdInvalidError,
   MentorSessionIdInvalidError,
+  BatchFullError,
+  MentorMandatoryError,
 };

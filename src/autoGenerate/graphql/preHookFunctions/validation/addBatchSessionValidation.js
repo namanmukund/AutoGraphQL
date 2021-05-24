@@ -86,7 +86,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   } = userAndAppInfo;
 
   // validate input
-  await validateBatchSessionInput(params, context);
+  await validateBatchSessionInput(params, context, 'addBatch');
 
   if (
     !backendApps.includes(appName)
@@ -104,8 +104,6 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
       throw new SimilarDocumentAlreadyExistError();
     }
   }
-
-  // validateBatchSessionInput(params);
 
   return true;
 };

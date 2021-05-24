@@ -1,38 +1,166 @@
-// import { get } from 'lodash';
-// import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import { get } from 'lodash';
 import extractSlotsFromInput from '../../../../utils/extractSlotsFromInput';
 import getSelectedDays from './utils/getSelectedDays';
 import getPossibleDates from '../../../../utils/getPossibleDates';
-/* eslint-disable object-curly-newline */
 import {
-  getTopicMeta,
-  getBatchSessions,
-  getBatch,
-  createBatchSession,
-  updateBatchSession,
+  getTopics, getBatchSessions, createBatchSession, updateBatchSession,
 } from './utils/updateBatchPostHookQueries';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
 
-const createBatchSessions = async (batchId, possibleDates, filteredSlots, possibleSessionCount) => {
+// query to get all not completed batchSessions of a batch to update student
+const getBatchSessionsQuery = (batchId) => `
+    query{
+    batchSessions(filter:{
+      and:[
+        {
+          batch_some:{
+            id: "${batchId}"
+          }
+        },
+        {
+          sessionStatus_in: [started, allotted]
+        }
+      ]
+    }){
+      id
+    }
+  }
+  `;
+
+// mutation to update batch sessions
+const updateBatchSessionQuery = (
+  batchSessionId, pushManyQuery,
+) => `
+  mutation{
+    updateBatchSession(id:"${batchSessionId}",  input:{
+      ${pushManyQuery}
+    }){
+      id
+    }
+  }
+  `;
+
+// fetch mentor Sessions
+const fetchMentorSessions = (bookingDate, mentorId) => `
+  {
+    mentorSessions(filter: {and: [{availabilityDate: "${bookingDate}"}, {user_some: {id: "${mentorId}"}}, {sessionType: batch}]}) {
+      id
+      availabilityDate
+      slot0
+      slot1
+      slot2
+      slot3
+      slot4
+      slot5
+      slot6
+      slot7
+      slot8
+      slot9
+      slot10
+      slot11
+      slot12
+      slot13
+      slot14
+      slot15
+      slot16
+      slot17
+      slot18
+      slot19
+      slot20
+      slot21
+      slot22
+      slot23
+    }
+  }
+  `;
+
+// update mentor Session
+const updateMentorSession = (mentorSessionId, sessionsBookingDateInDB, slot) => `
+  mutation{
+    updateMentorSession(id: "${mentorSessionId}", input: {
+      availabilityDate:"${sessionsBookingDateInDB}",
+      ${slot}: true,
+      sessionType:batch
+    }) {
+      id
+    }
+  }
+  `;
+
+// add mentor Session
+const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot) => `
+  mutation {
+    addMentorSession(
+      userConnectId: "${mentorUserId}",
+      courseConnectId: "${courseId}",
+    input:{
+      availabilityDate:"${sessionsBookingDateInDB}",
+      ${slot}: true,
+      sessionType:batch
+    }
+    ) {
+      id
+    }
+  }
+  `;
+
+const getMentorSessionId = async (allottedMentorId, date, slotsInInput, courseId) => {
+  let finalMentorSessionId = '';
+  if (allottedMentorId) {
+    const sentSlotsArray = getSelectedSlotsTime(slotsInInput);
+    // eslint-disable-next-line no-await-in-loop
+    const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(date, allottedMentorId));
+    const mentorSession = get(mentorSessionsRes, 'data.mentorSessions[0]');
+    if (mentorSession && mentorSession.id) {
+      const { id: mentorSessionId, ...slotsInMentorSession } = mentorSession;
+      finalMentorSessionId = mentorSessionId;
+      const slotsInMentorSessionArray = getSelectedSlotsTime(slotsInMentorSession);
+      if (sentSlotsArray && sentSlotsArray.length && slotsInMentorSessionArray && slotsInMentorSessionArray.length && sentSlotsArray[0] !== slotsInMentorSessionArray[0]) {
+        // eslint-disable-next-line no-await-in-loop
+        await callLocalGraphqlApi(updateMentorSession(mentorSessionId, date, `slot${sentSlotsArray[0]}`));
+      }
+    } else {
+      // eslint-disable-next-line no-await-in-loop
+      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, date, `slot${sentSlotsArray[0]}`));
+      finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
+    }
+  }
+  return finalMentorSessionId;
+};
+
+const createBatchSessions = async (batchId, possibleDates, filteredSlots, slotsInInput, possibleSessionCount, topics, allottedMentorId, courseId) => {
   if (possibleDates.length <= possibleSessionCount) {
-    possibleDates.forEach((date) => createBatchSession(batchId, date, filteredSlots));
+    // eslint-disable-next-line no-restricted-syntax
+    for (const date of possibleDates) {
+      // eslint-disable-next-line no-await-in-loop
+      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, date, slotsInInput, courseId);
+      const index = possibleDates.indexOf(date);
+      createBatchSession(batchId, date, filteredSlots, topics[index].id, finalMentorSessionId);
+    }
   } else {
     for (let i = 0; i < possibleSessionCount; i += 1) {
-      createBatchSession(batchId, possibleDates[i].toISOString(), filteredSlots);
+      // eslint-disable-next-line no-await-in-loop
+      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId);
+      createBatchSession(batchId, possibleDates[i].toISOString(), filteredSlots, topics[i].id, finalMentorSessionId);
     }
   }
 
   return true;
 };
 
-const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filteredSlotsString) => {
+const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filteredSlotsString, slotsInInput, allottedMentorId, courseId) => {
   let i = 0;
   /* eslint-disable array-callback-return */
-  sessionsAllotted.map((sessionId) => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const session of sessionsAllotted) {
+    // eslint-disable-next-line no-await-in-loop
+    const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId);
     /* eslint-disable array-callback-return */
     const date = possibleDates[i].toISOString();
-    updateBatchSession(sessionId, filteredSlotsString, date);
+    updateBatchSession(session.id, filteredSlotsString, date, finalMentorSessionId);
     i += 1;
-  });
+  }
 };
 
 // method to sort batchSessions
@@ -42,17 +170,14 @@ const sortBatchSessions = (batchSessions) => {
 
   batchSessions.map((item) => {
     /* eslint-disable array-callback-return */
-    if (item.sessionsStatus === 'allotted') {
+    if (item.sessionStatus === 'allotted') {
       sessionsAllotted.push(item);
     } else {
       sessionsStartedOrCompleted.push(item);
     }
   });
 
-  return {
-    sessionsStartedOrCompleted,
-    sessionsAllotted,
-  };
+  return { sessionsStartedOrCompleted, sessionsAllotted };
 };
 
 /*
@@ -60,12 +185,10 @@ const sortBatchSessions = (batchSessions) => {
 */
 /* eslint-disable no-unused-vars */
 const updateBatchPostHookMethod = async (input, params, mutationName, context) => {
-  const {
-    id: batchId,
-    input: {
-      timeTableRule,
-    },
-  } = params;
+  const { id: batchId, studentsConnectIds } = params;
+  const mentorUserId = get(input, 'allottedMentor.typeId', '');
+  const courseId = get(input, 'course.typeId', '');
+  const timeTableRule = get(params, 'input.timeTableRule', null);
   /*
     -> Fetch total number of published topics (x), this will be the max possible number of batchSessions
     -> Fetch batchSessions that are either in the started or completed state (y)
@@ -74,61 +197,76 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
     -> if there are no batchSessions in the Db, create batchSessions for all the dates in the date array
     -> if there are some batchSessions, update the remaining batchSessions with the new passed values and create batchSessions if necessary.
   */
-  // topic count
-  const topicsMeta = await getTopicMeta();
-  const topicCount = topicsMeta.count;
+  if (timeTableRule) {
+    // topic count
+    let topics = await getTopics();
+    const topicCount = topics && topics.length;
+    // batch sessions
+    const batchSessions = await getBatchSessions(batchId);
 
-  // current batch
-  /* eslint-disable no-unused-vars */
-  const batch = await getBatch(batchId);
+    // start, end dates
+    const days = getSelectedDays(timeTableRule);
+    const startDate = new Date(timeTableRule.startDate);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(timeTableRule.endDate);
+    endDate.setHours(0, 0, 0, 0);
 
-  // batch sessions
-  const batchSessions = await getBatchSessions(batchId);
+    // slots passed in input
+    const { ...slots } = timeTableRule;
+    const { filteredSlotsString } = extractSlotsFromInput(slots);
 
-  // start, end dates
-  const days = getSelectedDays(timeTableRule);
-  const startDate = new Date(timeTableRule.startDate);
-  startDate.setHours(0, 0, 0, 0);
-  const endDate = new Date(timeTableRule.endDate);
-  endDate.setHours(0, 0, 0, 0);
-
-  // slots passed in input
-  const {
-    ...slots
-  } = timeTableRule;
-  const {
-    filteredSlotsString,
-  } = extractSlotsFromInput(slots);
-
-  if (batchSessions && batchSessions.length) {
-    // sorting the existing batch sessions into started/completed and allotted
-    const {
-      sessionsStartedOrCompleted,
-      sessionsAllotted,
-    } = sortBatchSessions(batchSessions);
-    let possibleSessionCount = topicCount;
-    if (sessionsStartedOrCompleted.length > 0) {
-      // if there exists some started or completed sessions, don't count them, create/update sessions for the remaining
-      possibleSessionCount -= sessionsStartedOrCompleted.length;
+    if (batchSessions && batchSessions.length) {
+      // sorting the existing batch sessions into started/completed and allotted
+      const {
+        sessionsStartedOrCompleted,
+        sessionsAllotted,
+      } = sortBatchSessions(batchSessions);
+      let possibleSessionCount = topicCount;
+      if (sessionsStartedOrCompleted.length > 0) {
+        // if there exists some started or completed sessions, don't count them, create/update sessions for the remaining
+        possibleSessionCount -= sessionsStartedOrCompleted.length;
+      }
+      let possibleDates = getPossibleDates(startDate, endDate, days);
+      // for the sessions which are still in the allotted state, update them
+      const allottedSessionsCount = sessionsAllotted.length;
+      if (allottedSessionsCount > 0) {
+        possibleSessionCount -= allottedSessionsCount;
+        updateAllottedBatchSessions(sessionsAllotted, possibleDates, filteredSlotsString, slots, mentorUserId, courseId);
+      }
+      if (possibleSessionCount > 0) {
+        // all the remaining sessions have to be created
+        const startFromIndex = allottedSessionsCount;
+        possibleDates = possibleDates.slice(startFromIndex);
+        const topicStartIndex = topicCount - possibleSessionCount;
+        topics = topics.splice(topicStartIndex);
+        createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId);
+      }
+    } else {
+      // if there are no exisiting batchSessions for the given batch id, create all of them
+      const possibleSessionCount = topicCount;
+      const possibleDates = getPossibleDates(startDate, endDate, days);
+      createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId);
     }
-    let possibleDates = getPossibleDates(startDate, endDate, days);
-    // for the sessions which are still in the allotted state, update them
-    const allottedSessionsCount = sessionsAllotted.length;
-    if (allottedSessionsCount > 0) {
-      possibleSessionCount -= allottedSessionsCount;
-      await updateAllottedBatchSessions(sessionsAllotted, possibleDates, filteredSlotsString);
-    }
-    if (possibleSessionCount > 0) {
-      // all the remaining sessions have to be created
-      const startFromIndex = allottedSessionsCount;
-      possibleDates = possibleDates.splice(startFromIndex);
-      await createBatchSessions(batchId, possibleDates, filteredSlotsString, possibleSessionCount);
-    }
-  } else {
-    // if there are no exisiting batchSessions for the given batch id, create all of them
-    const possibleSessionCount = topicCount;
-    const possibleDates = getPossibleDates(startDate, endDate, days);
-    await createBatchSessions(batchId, possibleDates, filteredSlotsString, possibleSessionCount);
+  }
+
+  // while we are adding new students to a batch, adding those students to not completed batch Sessions
+  if (studentsConnectIds && studentsConnectIds.length && batchId) {
+    const notCompletedBatchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId));
+    const notCompletedBatchSessions = get(notCompletedBatchSessionsResult, 'data.batchSessions');
+    notCompletedBatchSessions.forEach((batchSession) => {
+      let pushManyQuery = 'attendance:{ pushMany: [';
+      studentsConnectIds.forEach((studentsConnectId) => {
+        pushManyQuery += `{studentConnectId: "${studentsConnectId}", 
+                                               isPresent: false, 
+                                               }, `;
+      });
+      pushManyQuery += ']}';
+      // pushing new array of students in batch session
+      callLocalGraphqlApi(updateBatchSessionQuery(
+        batchSession.id,
+        pushManyQuery,
+      ));
+    });
   }
 };
 

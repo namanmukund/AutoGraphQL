@@ -145,6 +145,10 @@ export const StudentsLinked = createError('StudentsLinked', {
   message: 'Cannot perform the current operation as students are linked to the entity',
 });
 
+export const SlotsOccupiedError = createError('SlotsOccupiedError', {
+  message: 'Session exists on one of the provided slots',
+});
+
 export const NoSectionExists = createError('No Section Exists', {
   message: 'Cannot perform batch creation on basis of \'section\'. No section exists in any of the selected schoolClasses',
 });
@@ -171,4 +175,12 @@ export const AllottedMentorIdInvalidError = createError('AllottedMentorIdInvalid
 
 export const MentorSessionIdInvalidError = createError('MentorSessionIdInvalidError', {
   message: 'Mentor Session Connect ID is invalid.',
+});
+
+export const BatchFullError = createError('BatchFullError', {
+  message: 'Batch is full.',
+});
+
+export const MentorMandatoryError = createError('MentorMandatoryError', {
+  message: 'Allotted mentor is mandatory in batch while starting a session',
 });

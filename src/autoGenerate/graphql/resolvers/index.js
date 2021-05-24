@@ -44,6 +44,7 @@ import resetPasswordFromForgotPasswordLink from './mutation/methods/resetPasswor
 import getQuizReport from './mutation/methods/getQuizReport';
 import getPaymentRequest from './mutation/methods/getPaymentRequest';
 import loginViaOtp from './mutation/methods/loginViaOtp';
+import signupOrLoginViaOtp from './mutation/methods/signupOrLoginViaOtp';
 import sendForgotPasswordLink from './mutation/methods/sendForgotPasswordLink';
 import getUnlockedUserBadge from './mutation/methods/getUnlockedUserBadge';
 import userBadge from './mutation/methods/userBadge';
@@ -77,7 +78,9 @@ import addUpdateBulkSchoolUserData from './mutation/methods/addUpdateBulkSchoolU
 import updateVisitorReactionOnUserApprovedCode from './mutation/methods/updateVisitorReactionOnUserApprovedCode';
 import getCheatSheet from './query/methods/getCheatSheet';
 import addBulkMentorSession from './mutation/methods/addBulkMentorSession';
+import updateParentChildDetail from './mutation/methods/updateParentChildDetail';
 import getCampaignSlots from './query/methods/getCampaignSlots';
+import bookB2B2CSlots from './mutation/methods/bookB2B2CSlots';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -556,8 +559,10 @@ resolvers.Mutation.sendForgotPasswordLink = sendForgotPasswordLink;
 // Resolver for resetting user password through forgot password link
 resolvers.Mutation.resetPasswordFromForgotPasswordLink = resetPasswordFromForgotPasswordLink;
 resolvers.Mutation.parentChildSignUp = parentChildSignUp;
+resolvers.Mutation.updateParentChildDetail = updateParentChildDetail;
 resolvers.Mutation.loginViaPassword = loginViaPassword;
 resolvers.Mutation.loginViaOtp = loginViaOtp;
+resolvers.Mutation.signupOrLoginViaOtp = signupOrLoginViaOtp;
 resolvers.Mutation.validateUserOTP = validateUserOTP;
 // Resolver for a custom get user payment information, when user buys a product
 resolvers.Mutation.getPaymentRequest = getPaymentRequest;
@@ -566,6 +571,7 @@ resolvers.Mutation.getPaymentResponse = getPaymentResponse;
 resolvers.Mutation.addUpdateBulkSchoolUserData = addUpdateBulkSchoolUserData;
 resolvers.Mutation.updateVisitorReactionOnUserApprovedCode = updateVisitorReactionOnUserApprovedCode;
 resolvers.Mutation.addBulkMentorSession = addBulkMentorSession;
+resolvers.Mutation.bookB2B2CSlots = bookB2B2CSlots;
 
 // queries
 resolvers.Query.me = me;

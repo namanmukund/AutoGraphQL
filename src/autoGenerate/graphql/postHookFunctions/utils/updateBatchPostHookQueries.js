@@ -3,31 +3,33 @@ import { GLOBAL_COURSE_TITLE } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 // query to get published topics count
-const getTopicMeta = async () => {
+const getTopics = async () => {
   const query = `
           {
-            topicsMeta(filter: 
+            topics(filter: 
               {
                 and: [
                   {status: published},
                   {chapter_some: {courses_some: {title: ${GLOBAL_COURSE_TITLE}}}}
                 ]
-              }){
-              count
+              }, orderBy: order_ASC){
+              id
+              order
             }
           }
           `;
   const topicMeta = await callLocalGraphqlApi(query);
-  return get(topicMeta, 'data.topicsMeta');
+  return get(topicMeta, 'data.topics');
 };
 
 // query to get batch sessions (started, completed)
 const getBatchSessions = async (batchId) => {
   const query = `
           {
-            batchSessions(filter: {batch_some: {id: "${batchId}"}}){
+            batchSessions(filter: {batch_some: {id: "${batchId}"}}, orderBy:bookingDate_ASC){
               id
               bookingDate
+              sessionStatus
             }
           }
           `;
@@ -82,10 +84,12 @@ const getBatch = async (batchId) => {
   return get(currBatch, 'data.batch');
 };
 
-const createBatchSession = async (batchId, date, slots) => {
+const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId) => {
   const query = `
           mutation{
             addBatchSession(batchConnectId: "${batchId}",
+            ${topicId ? `topicConnectId: "${topicId}"` : ''}
+            ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             input:{
               bookingDate:"${date}",
               ${slots}
@@ -99,10 +103,12 @@ const createBatchSession = async (batchId, date, slots) => {
   return true;
 };
 
-const updateBatchSession = async (sessionId, slots, date) => {
+const updateBatchSession = async (sessionId, slots, date, mentorSessionId) => {
   const query = `
           mutation{
-            updateBatchSession(batchConnectId: "${sessionId}",
+            updateBatchSession(
+            id: "${sessionId}",
+            ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             input:{
               bookingDate:"${date}",
               ${slots}
@@ -117,4 +123,4 @@ const updateBatchSession = async (sessionId, slots, date) => {
 };
 
 /* eslint-disable object-curly-newline */
-export { getTopicMeta, getBatchSessions, getBatch, createBatchSession, updateBatchSession };
+export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession };

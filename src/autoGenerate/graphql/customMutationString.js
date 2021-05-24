@@ -23,16 +23,19 @@ const customMutationString = `
    menteeCourseSyllabus : MenteeCourseSyllabus,
    tcirtSdrowssaPtes ( id: ID!, password: String! ): User,
    uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,
-   parentChildSignUp ( input: ParentChildSignUpInput ): ParentChildToken,
+   parentChildSignUp ( schoolId: ID, input: ParentChildSignUpInput ): ParentChildToken,
+   updateParentChildDetail ( userId:ID!, schoolId: ID, input: UpdateParentChildDetailInput ): ParentChildToken,
    signUpAffiliate ( input: SignUpAffiliateInput ): UserToken,
    loginViaPassword ( input: EmailLoginInput ): ParentChildToken,
    loginViaOtp ( input: ExistingUserInput ): BooleanResult,
+   signupOrLoginViaOtp ( input: SignupOrLoginUserInput ): BooleanResult,
    validateUserOTP ( input: ValidateUserInput  ): ParentChildToken,
    getPaymentRequest ( productId: ID!, discountCode: String, isCreditUsed: Boolean): PaymentRequest,
    getPaymentResponse ( id: ID!, hash: String!, status: String!, payuMoneyId: String!): BooleanResult,
    addUpdateBulkSchoolUserData (sheetId: String!, schoolName: String!): AddUpdateBulkSchoolUserDataOutput,
    updateVisitorReactionOnUserApprovedCode(reactedByID: ID!, userApprovedCodeID: ID!, heart: Boolean, celebrate: Boolean, hot: Boolean): BooleanResult,
    addBulkMentorSession ( input: BulkMentorSessionInput ): [MentorSession],
+   bookB2B2CSlots ( input: BookB2B2CSlotsInput ): BooleanResult,  
    `;
 
 export default customMutationString;
