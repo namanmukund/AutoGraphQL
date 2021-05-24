@@ -58,9 +58,10 @@ const removeStudentFromBatchSessionAttendance = async (batchSession, studentProf
   const attendanceArray = get(batchSession, 'attendance', []);
   const batchId = get(batchSession, 'id', '');
   if (attendanceArray.length > 0) {
-    const filteredArray = attendanceArray.filter(item => item.student.id !== studentProfileId);
+    const filteredArray = attendanceArray.filter((item) => item.student.id !== studentProfileId);
 
     let newArrString = '[';
+    /*  eslint-disable no-restricted-syntax */
     for (const item of filteredArray) {
       const objString = `{
         studentConnectId: "${item.student.id}",
@@ -70,12 +71,11 @@ const removeStudentFromBatchSessionAttendance = async (batchSession, studentProf
       `;
       newArrString += objString;
     }
-    newArrString += ']'
+    newArrString += ']';
     // console.log('********** string passed in replace *******');
     // console.log(newArrString);
-    const result = await updateAttendanceArray(batchId, newArrString);
+    await updateAttendanceArray(batchId, newArrString);
     // console.log('********** result *******');
-    // console.log(result);
   }
 };
 
