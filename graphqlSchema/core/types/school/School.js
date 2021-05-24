@@ -13,6 +13,7 @@ const School = `
     country: Country @defaultValue(value: "india")
     products: [Product] @relation(name: "SchoolProduct")
     logo: File @relation(name: "SchoolLogo", direction: "OneWay")
+    hubspotId: String
   }
 `;
 export default [School];
