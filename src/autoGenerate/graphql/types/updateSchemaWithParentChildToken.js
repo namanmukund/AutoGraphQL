@@ -1,7 +1,7 @@
 import insertSubString from '../../../../utils/insertSubString';
 
 const updateSchemaWithParentChildToken = (schemaTypes) => {
-  const tokenString = ',token: String!, children:[ChildrenToken]';
+  const tokenString = ',token: String, children:[ChildrenToken]';
   const totalSchemaTypes = schemaTypes.length;
   schemaTypes.some((type) => {
     if (type.includes('User @model')) {

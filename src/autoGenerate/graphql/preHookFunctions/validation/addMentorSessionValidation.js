@@ -10,17 +10,29 @@ import { ADMIN, UMS_ADMIN } from '../../../../../constants/roles';
 import validateMentorSessionInput from './utils/validateMentorSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
+import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
+import checkIfSlotCanBeOpenedValidation from './utils/checkIfSlotCanBeOpenedValidation';
 
 // query to get mentor Sessions
-const getMentorSessions = (userId, availabilityDate, sessionType) => `query{
+const getMentorSessions = (userId, availabilityDate) => `query{
     mentorSessions(filter:{
       and:[
           {user_some: {id: "${userId}"}},
           {availabilityDate: "${availabilityDate}"}
-          {sessionType: ${sessionType}}
       ]
     }){
       id
+      sessionType
+       mentorMenteeSessions{
+          id
+          menteeSession{
+            ${getSlotTimesInString()}
+          }
+        }
+        batchSessions{
+          id
+          ${getSlotTimesInString()}
+        }
     }
   }
   `;
@@ -51,14 +63,15 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
   validateMentorSessionInput(params, '', context);
   // check if the document for called user and availabilityDate is already present
   const userId = get(params, 'userConnectId');
-  const courseId = get(params, 'courseConnectId');
+  // courseId not mandatory for mentorSession
+  // const courseId = get(params, 'courseConnectId');
   const availabilityDate = get(params, 'input.availabilityDate');
 
   // log in case user id or availabilityDate is not present
-  if (!userId || !availabilityDate || !courseId) {
+  if (!userId || !availabilityDate) {
     throw new MissingMandatoryInputInRequestError({
       data: {
-        message: 'Either userConnectId or courseConnectId or availabilityDate or all missing in input',
+        message: 'Either userConnectId or availabilityDate or all missing in input',
       },
     });
   }
@@ -77,15 +90,24 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
     getMentorSessions(
       userId,
       availabilityDate,
-      sessionType,
     ),
   );
+
+  // there can be a max of 3 mentorSessions for an availability date of type(batch/trial/paid)
+  // first we will check that only one sessionType exits for one availability day
+  // second we will check that slot which is being sent true in not already booked for other type
   const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
   // if once session created for a day then just update the session
   if (mentorSessions && mentorSessions.length) {
-    throw new SimilarDocumentAlreadyExistError();
+    // eslint-disable-next-line no-restricted-syntax
+    for (const mentorSession of mentorSessions) {
+      if (mentorSession.sessionType === sessionType) {
+        throw new SimilarDocumentAlreadyExistError();
+      }
+    }
   }
 
+  checkIfSlotCanBeOpenedValidation(params, mentorSessions);
   return true;
 };
 

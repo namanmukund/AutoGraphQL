@@ -47,6 +47,10 @@ import updateMentorMenteeSessionAuditPostHookMethod from './postHookFunctions/up
 import updateUserApprovedCodePostHookMethod from './postHookFunctions/updateUserApprovedCodePostHookMethod';
 import updateStudentProfilePostHookMethod from './postHookFunctions/updateStudentProfilePostHookMethod';
 import addUserSavedCodePostHookMethod from './postHookFunctions/addUserSavedCodePostHookMethod';
+import updateBatchPostHookMethod from './postHookFunctions/updateBatchPostHookMethod';
+import updateCampaignPostHookMethod from './postHookFunctions/updateCampaignPostHookMethod';
+import addStudentProfilePostHookMethod from './postHookFunctions/addStudentProfilePostHookMethod';
+import removeFromBatchStudentProfilePosthookMethod from './postHookFunctions/removeFromBatchStudentProfile';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -140,6 +144,10 @@ const posthook = async (input, mutationName, context, params) => {
       await updateMentorSessionPostHookMethod(input, mutationName, context);
       break;
     }
+    case 'addStudentProfile': {
+      await addStudentProfilePostHookMethod(input, params, mutationName, context);
+      break;
+    }
     case 'updateStudentProfile': {
       await updateStudentProfilePostHookMethod(input, params, mutationName, context);
       break;
@@ -208,6 +216,10 @@ const posthook = async (input, mutationName, context, params) => {
       await addBatchPostHookMethod(input, params, mutationName, context);
       break;
     }
+    case 'updateBatch': {
+      await updateBatchPostHookMethod(input, params, mutationName, context);
+      break;
+    }
     case 'addBatchSession': {
       await addBatchSessionPostHookMethod(input, params, mutationName, context);
       break;
@@ -224,12 +236,20 @@ const posthook = async (input, mutationName, context, params) => {
       await updateBatchCurrentComponentStatusPostHookMethod(input, params, mutationName, context);
       break;
     }
+    case 'updateCampaign': {
+      await updateCampaignPostHookMethod(input, params, mutationName, context);
+      break;
+    }
     case 'updateUserSavedCode': {
       await updateUserSavedCodePostHookMethod(input, params, mutationName, context);
       break;
     }
     case 'updateUserApprovedCode': {
       await updateUserApprovedCodePostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'removeFromBatchStudentProfile': {
+      await removeFromBatchStudentProfilePosthookMethod(input, params, mutationName, context);
       break;
     }
     default:

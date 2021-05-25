@@ -15,6 +15,9 @@ import transactionalMessageBody from '../../../../constants/transactionalMessage
 import sendTransactionalEmail from '../resolvers/utils/sendTransactionalEmail';
 import updateUserPaymentPlanMutation from './utils/updateUserPaymentPlanMutation';
 import getSessionVelocityStatus from './utils/getSessionVelocityStatus';
+import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
+import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
+import addRescheduledSlot from './utils/addRescheduledSlot';
 /*
   - check if the user if from referral
   - check if the session is the first session
@@ -25,6 +28,8 @@ import getSessionVelocityStatus from './utils/getSessionVelocityStatus';
 const userIdQuery = (menteeSessionId) => `{
   menteeSession(id: "${menteeSessionId}") {
     id
+    bookingDate
+    ${getSlotTimesInString()}
     user {
       id
       name
@@ -93,11 +98,30 @@ const userPaymentPlanQuery = async (filterQuery) => {
 
 const allowedRoles = [MENTEE];
 const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
-  const { currentUser, previousDocument: { sessionStatus: prevSessionStatus, topic } } = context;
+  const { currentUser, previousDocument: { sessionStatus: prevSessionStatus, topic, menteeSession: prevMenteeSession } } = context;
   const { sessionStartDate } = input;
   const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));
   const userId = get(menteeSession, 'data.menteeSession.user.id');
   const userInfo = await getMenteeInfo(userId);
+
+  const oldSlotTimeArray = getSelectedSlotsTime(prevMenteeSession);
+  const newSlotTimeArray = getSelectedSlotsTime(get(menteeSession, 'data.menteeSession', []));
+  const oldBookingDate = get(prevMenteeSession, 'bookingDate', '');
+  const newBookingDate = get(menteeSession, 'data.menteeSession.bookingDate', '');
+
+  // adding Rescheduled Slot async if we get changed mentee session
+  // constructing fromDate and fromSLot from values in previous document
+  // constructing toDate and toSLot from values in updated document
+  if (newSlotTimeArray && newSlotTimeArray.length && oldSlotTimeArray && oldSlotTimeArray.length && oldBookingDate && newBookingDate) {
+    const fromDate = new Date(oldBookingDate).toISOString();
+    const toDate = new Date(newBookingDate).toISOString();
+    const fromSlot = `slot${oldSlotTimeArray[0]}`;
+    const toSlot = `slot${newSlotTimeArray[0]}`;
+    // adding only in case the slots or date passed in input is different from that is already there in db
+    if ((fromDate !== toDate) || (fromSlot !== toSlot)) {
+      addRescheduledSlot(fromDate, fromSlot, toDate, toSlot, '', input.id);
+    }
+  }
 
   const hasRescheduled = get(input, 'hasRescheduled');
   const notResponseAndDidNotTurnUp = get(input, 'notResponseAndDidNotTurnUp');

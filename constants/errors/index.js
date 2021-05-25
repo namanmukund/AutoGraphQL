@@ -43,6 +43,18 @@ import {
   ProductWithSimilarTypeAlreadyPublished,
   UserCheatSheetAlreadyExists,
   AlreadyBookmarkedCheatSheet,
+  GradeSectionCombinationAlreadyExists,
+  StudentsLinked,
+  SlotsOccupiedError,
+  NoSectionExists,
+  StartEndDateError,
+  MaxMentorSessionDaysError,
+  BookingDateInvalidError,
+  SlotsInvalidError,
+  AllottedMentorIdInvalidError,
+  MentorSessionIdInvalidError,
+  BatchFullError,
+  MentorMandatoryError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -69,7 +81,7 @@ import {
 import {
   InvalidSortFieldError, InvalidFilterArgumentsError, NotFilterRequiredError,
   InvalidParamsError, ConnectionAlreadyExistError, ConnectionNotExistError,
-  FetchError, InvalidFieldType,
+  FetchError, InvalidFieldType, MaxAllowedDayRangeExceededError,
 } from './queries';
 import {
   NestingLevelExceedingError, BiDirectionalRelationsRequiredError, NoUniqueFieldError,
@@ -222,4 +234,17 @@ export {
   ProductWithSimilarTypeAlreadyPublished,
   UserCheatSheetAlreadyExists,
   AlreadyBookmarkedCheatSheet,
+  GradeSectionCombinationAlreadyExists,
+  StudentsLinked,
+  SlotsOccupiedError,
+  NoSectionExists,
+  StartEndDateError,
+  MaxMentorSessionDaysError,
+  MaxAllowedDayRangeExceededError,
+  BookingDateInvalidError,
+  SlotsInvalidError,
+  AllottedMentorIdInvalidError,
+  MentorSessionIdInvalidError,
+  BatchFullError,
+  MentorMandatoryError,
 };

@@ -9,6 +9,9 @@ query{
     ${getSlotTimesInString()}
     batch{
       id
+      allottedMentor{
+        id
+      }
     }
     sessionStatus
     mentorSession{
