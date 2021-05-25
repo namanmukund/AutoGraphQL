@@ -25,12 +25,28 @@ import { REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
 import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 import { QueryController } from '../../../controllers';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
+import getBatchIdByBatchCreationBasis from './utils/getBatchIdByBatchCreationBasis';
 
 const getParentChildExistingDetails = async (userId) => {
   const query = `
       query{
         user(id:"${userId}"){
           id
+          campaign{
+            id
+            type
+            batchRules{
+              batchCreationBasis
+            }
+            batches{
+              id
+              type
+              classes{
+                grade
+                section
+              }
+            }
+          }
           source
           parentProfile{
             id
@@ -214,11 +230,31 @@ Create student and their user profile
   const studentProfileInput = {
     input: studentProfileInputData,
   };
+  /*
+  If coming from campaign and the type os b2b allocate the user to the right batch
+   */
+  const campaign = get(existingUserDetails, 'campaign');
+  const campaignType = get(campaign, 'type');
+  let batchId = '';
+  if (campaignType && campaignType === 'b2b') {
+    const batchCreationBasis = get(campaign, 'batchRules.batchCreationBasis');
+    const batches = get(campaign, 'batches', []);
+    if (batches && batches.length) {
+      batchId = getBatchIdByBatchCreationBasis(
+        batchCreationBasis,
+        batches,
+        grade,
+        section,
+      );
+    }
+  }
+
   const studentProfileId = await addStudentProfile(
     studentProfileInput,
     childUserId,
     parentProfileId,
     studentSchoolId,
+    batchId,
   );
 
   if (!studentProfileId) {

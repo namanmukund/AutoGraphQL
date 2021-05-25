@@ -27,6 +27,9 @@ import validateParentChildSignUpInput from './utils/validateParentChildSignUpInp
 import getParentInfo from './utils/getParentInfo';
 import getUserOriginSource from './utils/getUserOriginSource';
 import updateSchoolDataOfAStudent from './utils/updateSchoolDataOfAStudent';
+import getBatchDetailsFromACampaign from './utils/getBatchDetailsFromACampaign';
+import getBatchIdByBatchCreationBasis from './utils/getBatchIdByBatchCreationBasis';
+import getSchoolInformation from './utils/getSchoolInformation';
 
 const USER_TYPE = 'User';
 
@@ -47,7 +50,7 @@ const parentChildSignUpMutationResolver = async (
   ast,
   authentication,
 ) => {
-  const { input, schoolId } = params;
+  const { input, schoolId, campaignId } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
   validate(
@@ -71,6 +74,9 @@ const parentChildSignUpMutationResolver = async (
     parentEmail,
     parentPhone,
     grade,
+    section,
+    rollNo,
+    branch,
     hasLaptopOrDesktop,
     referralCode,
     isBuyNow,
@@ -128,6 +134,13 @@ const parentChildSignUpMutationResolver = async (
       country,
       timezone,
     };
+
+    if (campaignId) {
+      parentData.campaign = {
+        type: 'Campaign',
+        typeId: campaignId,
+      };
+    }
 
     const parentDataWithId = generateCuid(parentData);
     const parentUserData = await addUserData(authentication, parentDataWithId);
@@ -191,12 +204,59 @@ const parentChildSignUpMutationResolver = async (
   if (grade) {
     studentProfileInputData.grade = grade;
   }
+  if (section) {
+    studentProfileInputData.section = section;
+  }
+  if (rollNo) {
+    studentProfileInputData.rollNo = rollNo;
+  }
+  if (section) {
+    studentProfileInputData.branch = branch;
+  }
 
   studentProfileInputData.profileAvatarCode = studentProfileAvatarCodes[Math.floor((Math.random() * studentProfileAvatarCodes.length))] || 'theo';
   const studentProfileInput = {
     input: studentProfileInputData,
   };
-  const studentProfileId = await addStudentProfile(studentProfileInput, childUserId, parentProfileId);
+  /*
+Update school info too
+ */
+  let studentSchoolId = schoolId;
+  if (!schoolId && schoolName) {
+    studentSchoolId = await getSchoolInformation(schoolName);
+  }
+
+  /*
+If coming from campaign and the type os b2b allocate the user to the right batch
+*/
+  const campaign = await getBatchDetailsFromACampaign(campaignId);
+  let batchId = '';
+  if (campaign && campaign.id) {
+    const campaignType = get(campaign, 'type');
+    if (campaignType && campaignType === 'b2b') {
+      const batchCreationBasis = get(campaign, 'batchRules.batchCreationBasis');
+      const batches = get(campaign, 'batches', []);
+      if (batches && batches.length) {
+        batchId = getBatchIdByBatchCreationBasis(
+          batchCreationBasis,
+          batches,
+          grade,
+          section,
+        );
+      }
+    }
+  }
+  if (get(campaign, 'school.id')) {
+    studentSchoolId = get(campaign, 'school.id');
+  }
+  const studentProfileId = await addStudentProfile(
+    studentProfileInput,
+    childUserId,
+    parentProfileId,
+    studentSchoolId,
+    batchId,
+  );
+
   if (!studentProfileId) {
     throw new SomethingWentWrongError({
       data: {
