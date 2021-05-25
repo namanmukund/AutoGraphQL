@@ -8,6 +8,7 @@ const SignupOrLoginUserInput = `
     utmTerm: String
     utmContent: String
     utmMedium: String
+    source: UserOriginSource
     country: String
     timezone: String
   }`;

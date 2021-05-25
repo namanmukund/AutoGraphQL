@@ -77,6 +77,9 @@ const signupOrLoginViaOtp = async (
           typeId: input.campaignId,
         };
       }
+      if (input.source) {
+        newUser.source = input.source;
+      }
       if (input.utmSource) {
         newUser.utmSource = input.utmSource;
       }
