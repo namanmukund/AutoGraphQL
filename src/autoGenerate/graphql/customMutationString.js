@@ -23,7 +23,7 @@ const customMutationString = `
    menteeCourseSyllabus : MenteeCourseSyllabus,
    tcirtSdrowssaPtes ( id: ID!, password: String! ): User,
    uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,
-   parentChildSignUp ( schoolId: ID, input: ParentChildSignUpInput ): ParentChildToken,
+   parentChildSignUp ( schoolId: ID, campaignId: ID, input: ParentChildSignUpInput ): ParentChildToken,
    updateParentChildDetail ( userId:ID!, schoolId: ID, input: UpdateParentChildDetailInput ): ParentChildToken,
    signUpAffiliate ( input: SignUpAffiliateInput ): UserToken,
    loginViaPassword ( input: EmailLoginInput ): ParentChildToken,
