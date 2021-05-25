@@ -9,7 +9,6 @@ const getBatchIdByBatchCreationBasis = (
   if (batchCreationBasis === 'grade') {
     // eslint-disable-next-line no-restricted-syntax
     for (const batch of batches) {
-      console.log(4444555, batch);
       const { classes } = batch;
       // eslint-disable-next-line no-restricted-syntax
       for (const schoolClass of classes) {
@@ -21,7 +20,6 @@ const getBatchIdByBatchCreationBasis = (
   } else {
     // eslint-disable-next-line no-restricted-syntax
     for (const batch of batches) {
-      console.log(4444, batch);
       const { classes } = batch;
       // eslint-disable-next-line no-restricted-syntax
       for (const schoolClass of classes) {
