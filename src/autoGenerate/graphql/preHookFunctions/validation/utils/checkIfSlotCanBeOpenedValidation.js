@@ -3,11 +3,15 @@ import getSelectedSlotsTime from './getSelectedSlotsTime';
 import { sessionType } from '../../../../../../constants';
 import { SlotsOccupiedError } from '../../../../../../constants/errors/db';
 
-const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions) => {
+const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsInPrevDoc) => {
   const { input } = params;
   const { ...slots } = input;
 
-  const slotTimeArray = getSelectedSlotsTime(slots);
+  let slotTimeArray = getSelectedSlotsTime(slots);
+  // if a slot is true from before we do not need to validate that, so will remove those slots from slotTimeArray
+  if (timeSlotsInPrevDoc && timeSlotsInPrevDoc.length) {
+    slotTimeArray = slotTimeArray.filter((el) => !timeSlotsInPrevDoc.includes(el));
+  }
 
   // array to store all the occupied slots of mentor on that availability date
   const occupiedSlotsArray = [];
