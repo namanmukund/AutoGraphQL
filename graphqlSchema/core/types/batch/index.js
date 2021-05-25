@@ -1,3 +1,3 @@
 import Batch from './Batch';
 
-export default Batch;
+export default [...Batch];

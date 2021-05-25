@@ -1,14 +1,19 @@
-import { isValidPhoneNumber } from '../../../../validation';
-import { InvalidPhoneError } from '../../../../../../../constants/errors';
+import { isValidPhoneNumber, isValidEmail } from '../../../../validation';
+import { InvalidPhoneError, InvalidEmailError } from '../../../../../../../constants/errors';
 
 const loginViaOtpInputValidation = (input) => {
   const { phone, email } = input;
-  if (!isValidPhoneNumber(phone)) {
+  if (phone) {
+    if (isValidPhoneNumber(phone)) {
+      return true;
+    }
     throw new InvalidPhoneError();
   }
-  // temporary error for future reference to extend the functionality further
   if (email) {
-    throw new Error('Service is currently unavailable');
+    if (isValidEmail(email)) {
+      return true;
+    }
+    throw new InvalidEmailError();
   }
   return true;
 };
