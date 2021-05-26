@@ -12,6 +12,7 @@ import { rangeOTP } from '../../../../../../constants';
 import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
 import { PARENT } from '../../../../../../constants/roles';
+import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
 
 const USER_TYPE = 'User';
 
@@ -98,6 +99,10 @@ const signupOrLoginViaOtp = async (
       newUser.country = input.country || 'india';
       newUser.timezone = input.timezone || 'Asia/Kolkata';
       userData = generateCuid(newUser);
+
+      // create on leadsquared
+      parentChildSignupPostHookMethod(input, params);
+
       await modelMutations.addDocument(userData);
     } else {
       throw new DatabaseRecordNotFoundError();

@@ -26,13 +26,21 @@ import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 import { QueryController } from '../../../controllers';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import getBatchIdByBatchCreationBasis from './utils/getBatchIdByBatchCreationBasis';
+import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
 
 const getParentChildExistingDetails = async (userId) => {
   const query = `
       query{
         user(id:"${userId}"){
           id
+          phone {
+            number
+            countryCode
+          }
           campaign{
+            school {
+              name
+            }
             id
             type
             batchRules{
@@ -292,6 +300,26 @@ Create student and their user profile
   const userTokenData = createUserTokenTypeData(parentUserData, authentication, '', false);
   // generate kids token
   userTokenData.children = childrenToken;
+
+  // leadsquared
+  // update leadsquared
+  const leadSquaredParams = {
+    ...params,
+    input: {
+      ...params.input,
+      phone: {
+        number: get(existingUserDetails, 'phone.number'),
+        countryCode: get(existingUserDetails, 'phone.countryCode'),
+      },
+    },
+  };
+  if (get(existingUserDetails, 'campaign.school.name', '')) {
+    leadSquaredParams.input.schoolName = get(existingUserDetails, 'campaign.school.name', '');
+  }
+  if (campaignType) {
+    leadSquaredParams.input.Vertical = campaignType.replace('Event', '');
+  }
+  parentChildSignupPostHookMethod(input, leadSquaredParams, false);
   return userTokenData;
 };
 

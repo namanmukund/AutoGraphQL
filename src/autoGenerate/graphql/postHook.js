@@ -25,7 +25,6 @@ import addSalesOperationPostHookMethod from './postHookFunctions/addSalesOperati
 import updateSalesOperationPostHookMethod from './postHookFunctions/updateSalesOperationPostHookMethod';
 import addUserPaymentInstallmentPostHookMethod from './postHookFunctions/addUserPaymentInstallmentPostHookMethod';
 import updateUserPaymentInstallmentPostHookMethod from './postHookFunctions/updateUserPaymentInstallmentPostHookMethod';
-import parentChildSignupPostHookMethod from './postHookFunctions/parentChildSignupPostHookMethod';
 import addMentorMenteeSessionPostHookMethod from './postHookFunctions/addMentorMenteeSessionPostHookMethod';
 import addUserPaymentPlanPostHookMethod from './postHookFunctions/addUserPaymentPlanPostHookMethod';
 import addUserCurrentTopicComponentStatusPostHookMethod
@@ -190,10 +189,6 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateUserPaymentInstallment': {
       await updateUserPaymentInstallmentPostHookMethod(input, params, mutationName, context);
-      break;
-    }
-    case 'parentChildSignUp': {
-      parentChildSignupPostHookMethod(input, params);
       break;
     }
     case 'addMentorMenteeSession': {
