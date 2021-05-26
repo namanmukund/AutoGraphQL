@@ -24,6 +24,9 @@ const getBatchSessionsQuery = (batchId) => `
       ]
     }){
       id
+      mentorSession{
+        id
+      }
     }
   }
   `;
@@ -71,6 +74,15 @@ const fetchMentorSessions = (bookingDate, mentorId) => `
       slot21
       slot22
       slot23
+    }
+  }
+  `;
+
+// update mentors in mentor session
+const updateNewMentorInMentorSession = (mentorSessionId, mentorId) => `
+  mutation{
+    updateMentorSession(id: "${mentorSessionId}", userConnectId: "${mentorId}") {
+      id
     }
   }
   `;
@@ -185,7 +197,7 @@ const sortBatchSessions = (batchSessions) => {
 */
 /* eslint-disable no-unused-vars */
 const updateBatchPostHookMethod = async (input, params, mutationName, context) => {
-  const { id: batchId, studentsConnectIds } = params;
+  const { id: batchId, studentsConnectIds, allottedMentorConnectId } = params;
   const mentorUserId = get(input, 'allottedMentor.typeId', '');
   const courseId = get(input, 'course.typeId', '');
   const timeTableRule = get(params, 'input.timeTableRule', null);
@@ -248,6 +260,28 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
       createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId);
     }
   }
+
+  // if mentorId is passed in mutation, update batchSessions for all !completed batches
+  if (allottedMentorConnectId) {
+    // fetch all the batch Sessions corresponding to given batch which are !completed state
+    const notCompletedBatchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId));
+    const notCompletedBatchSessions = get(notCompletedBatchSessionsResult, 'data.batchSessions');
+    console.log(notCompletedBatchSessions);
+    // get all their mentorSessions if not null
+    const notCompletedBatchSessionsFiltered = notCompletedBatchSessions.filter((item) => item.mentorSession !== null);
+
+    notCompletedBatchSessionsFiltered.forEach((batchSession) => {
+      // here update the corresponding mentor session for all batch sessions with the new mentor id
+      const mentorSessionId = batchSession.mentorSession && batchSession.mentorSession.id
+      console.log(mentorSessionId);
+      // callLocalGraphqlApi(updateNewMentorInMentorSession(
+      //   mentorSessionId,
+      //   allottedMentorConnectId,
+      // ));
+    });
+
+  }
+
 
   // while we are adding new students to a batch, adding those students to not completed batch Sessions
   if (studentsConnectIds && studentsConnectIds.length && batchId) {
