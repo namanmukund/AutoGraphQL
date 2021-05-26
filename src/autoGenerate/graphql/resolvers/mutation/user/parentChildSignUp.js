@@ -30,8 +30,18 @@ import updateSchoolDataOfAStudent from './utils/updateSchoolDataOfAStudent';
 import getBatchDetailsFromACampaign from './utils/getBatchDetailsFromACampaign';
 import getBatchIdByBatchCreationBasis from './utils/getBatchIdByBatchCreationBasis';
 import getSchoolInformation from './utils/getSchoolInformation';
+import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 const USER_TYPE = 'User';
+
+const FETCH_CAMPAIGN = (campaignId) => `{
+  campaign(id: "${campaignId}") {
+    school {
+      name
+    }
+  }
+}`;
 
 /*
 - both the parent and a kid is registered
@@ -319,6 +329,17 @@ If coming from campaign and the type os b2b allocate the user to the right batch
   } else {
     log('Failed to get first published topic or first published learning objective corresponding to it in parentChildSignUp');
   }
+
+  const leadSquaredParams = params;
+
+  if (campaignId) {
+    const res = await callLocalGraphqlApi(FETCH_CAMPAIGN(campaignId));
+    leadSquaredParams.input.schoolName = get(res, 'data.campaign.school.name', '');
+  }
+  if (campaignType) {
+    leadSquaredParams.input.Vertical = campaignType.replace('Event', '');
+  }
+  parentChildSignupPostHookMethod(input, leadSquaredParams, false);
 
   return userTokenData;
 };
