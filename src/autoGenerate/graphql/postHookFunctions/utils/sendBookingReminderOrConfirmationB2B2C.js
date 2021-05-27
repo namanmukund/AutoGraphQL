@@ -91,7 +91,7 @@ const sendBookingReminderOrConfigmationB2B = async (userId) => {
         { name: 'booking_link', value: bookingLink },
       ]);
     }
-  }, 500 * 60);
+  }, 5000 * 60);
 };
 
 export default sendBookingReminderOrConfigmationB2B;
