@@ -79,12 +79,17 @@ const fetchMentorSessions = (bookingDate, mentorId) => `
   `;
 
 // update mentors in mentor session
-const updateNewMentorInMentorSession = (mentorSessionId, mentorId) => `
+const updateNewMentorInBatchSession = (mentorSessionId, mentorId) => `
   mutation{
-    updateMentorSession(id: "${mentorSessionId}", userConnectId: "${mentorId}") {
+  updateBatchSession(id: "ckldv1lit001j0vyy51braxih",
+  mentorSessionConnectId: "ckjmnfx9t0002tgui0ykp5asu"
+  ){
+    id
+    mentorSession{
       id
     }
   }
+}
   `;
 
 // update mentor Session
@@ -271,11 +276,11 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
 
     notCompletedBatchSessionsFiltered.forEach((batchSession) => {
       // here update the corresponding mentor session for all batch sessions with the new mentor id
-      const mentorSessionId = batchSession.mentorSession && batchSession.mentorSession.id
-      callLocalGraphqlApi(updateNewMentorInMentorSession(
-        mentorSessionId,
-        allottedMentorConnectId,
-      ));
+      const batchSessionId = batchSession && batchSession.id
+      // callLocalGraphqlApi(updateNewMentorInBatchSession(
+      //   mentorSessionId,
+      //   allottedMentorConnectId,
+      // ));
     });
 
   }

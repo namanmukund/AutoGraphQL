@@ -39,9 +39,13 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
     throw new DatabaseRecordNotFoundError();
   }
   const mentorUserId = get(mentorSession, 'user.id', '');
-  const { input: { availabilityDate } } = params;
+  const availabilityDate = get(params, 'input.availabilityDate', '');
+  const { input } = params;
+  // only if input is passed, proceed to validate
+  if (input) {
+    validateMentorSessionInput(params, mentorSession, context);
+  }
 
-  validateMentorSessionInput(params, mentorSession, context);
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
 
   const {

@@ -1,5 +1,5 @@
 // validate mentor session input variables
-import { difference } from 'lodash';
+import { difference, get } from 'lodash';
 import validateBookingDate from './validateBookingDate';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
 import { MissingMandatoryInputInRequestError, NoSlotSelectedError } from '../../../../../../constants/errors/input';
@@ -9,7 +9,7 @@ import { backendApps } from '../../../../../../constants';
 const PRE_BOOKING_HOUR_LIMIT = 0;
 const validateMentorSessionInput = (params, prevMentorSession, context) => {
   const { input } = params;
-  const { availabilityDate, ...slots } = input;
+  const { availabilityDate = '', ...slots } = input;
 
   if (!availabilityDate) {
     throw new MissingMandatoryInputInRequestError({

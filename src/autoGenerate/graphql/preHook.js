@@ -405,7 +405,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'updateMentorSession': {
-      const { availabilityDate } = input;
+      const availabilityDate = get(input, 'availabilityDate', '');
       let newParams = {};
       let newInput = {};
       if (availabilityDate) {
@@ -561,26 +561,28 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'updateBatchSession': {
-      const { sessionStatus } = input;
+      const sessionStatus = get(input, 'sessionStatus', '')
       const newInput = {
         ...input,
       };
-      switch (sessionStatus) {
-        case 'allotted': {
-          newInput.sessionAllotmentDate = new Date().toISOString();
-          // temporary hack for backword compatibility
-          newInput.sessionStartDate = new Date().toISOString();
-          break;
+      if (sessionStatus) {
+        switch (sessionStatus) {
+          case 'allotted': {
+            newInput.sessionAllotmentDate = new Date().toISOString();
+            // temporary hack for backword compatibility
+            newInput.sessionStartDate = new Date().toISOString();
+            break;
+          }
+          case 'started': {
+            newInput.sessionStartDate = new Date().toISOString();
+            break;
+          }
+          case 'completed': {
+            newInput.sessionEndDate = new Date().toISOString();
+            break;
+          }
+          default:
         }
-        case 'started': {
-          newInput.sessionStartDate = new Date().toISOString();
-          break;
-        }
-        case 'completed': {
-          newInput.sessionEndDate = new Date().toISOString();
-          break;
-        }
-        default:
       }
       const newParams = {
         ...params,
