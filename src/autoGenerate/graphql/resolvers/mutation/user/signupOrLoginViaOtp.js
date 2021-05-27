@@ -13,6 +13,7 @@ import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
 import { PARENT } from '../../../../../../constants/roles';
 import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
+import sendBookingReminderOrConfigmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 
 const USER_TYPE = 'User';
 
@@ -100,10 +101,10 @@ const signupOrLoginViaOtp = async (
       newUser.timezone = input.timezone || 'Asia/Kolkata';
       userData = generateCuid(newUser);
 
+      await modelMutations.addDocument(userData);
+      sendBookingReminderOrConfigmationB2BC(userData.id);
       // create on leadsquared
       parentChildSignupPostHookMethod(input, params);
-
-      await modelMutations.addDocument(userData);
     } else {
       throw new DatabaseRecordNotFoundError();
     }
