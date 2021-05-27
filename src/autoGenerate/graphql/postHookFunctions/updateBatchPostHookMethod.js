@@ -79,10 +79,10 @@ const fetchMentorSessions = (bookingDate, mentorId) => `
   `;
 
 // update mentors in mentor session
-const updateNewMentorInBatchSession = (mentorSessionId, mentorId) => `
+const updateNewMentorSessionInBatchSession = (batchSessionId, mentorSessionId) => `
   mutation{
-  updateBatchSession(id: "ckldv1lit001j0vyy51braxih",
-  mentorSessionConnectId: "ckjmnfx9t0002tgui0ykp5asu"
+  updateBatchSession(id: "${batchSessionId}",
+  mentorSessionConnectId: "${mentorSessionId}"
   ){
     id
     mentorSession{
@@ -121,6 +121,17 @@ const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot)
     }
   }
   `;
+
+const getMentorSessionsQuery = (mentodId) => `
+  {
+    mentorSessions(filter: {user_some:{id:"${mentodId}"}}){
+      id
+      user{
+        id
+      }
+    }
+  }
+`;
 
 const getMentorSessionId = async (allottedMentorId, date, slotsInInput, courseId) => {
   let finalMentorSessionId = '';
@@ -276,16 +287,15 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
 
     notCompletedBatchSessionsFiltered.forEach((batchSession) => {
       // here update the corresponding mentor session for all batch sessions with the new mentor id
-      const batchSessionId = batchSession && batchSession.id
-      // callLocalGraphqlApi(updateNewMentorInBatchSession(
-      //   mentorSessionId,
-      //   allottedMentorConnectId,
-      // ));
+      const batchSessionId = batchSession && batchSession.id;
+      const mentorSessions = callLocalGraphqlApi(getMentorSessionsQuery(allottedMentorConnectId));
+      const mentorSessionId = mentorSessions && mentorSessions[0] && mentorSessions[0].id;
+      callLocalGraphqlApi(updateNewMentorSessionInBatchSession(
+        batchSessionId,
+        mentorSessionId,
+      ));
     });
-
   }
-
-
   // while we are adding new students to a batch, adding those students to not completed batch Sessions
   if (studentsConnectIds && studentsConnectIds.length && batchId) {
     const notCompletedBatchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId));

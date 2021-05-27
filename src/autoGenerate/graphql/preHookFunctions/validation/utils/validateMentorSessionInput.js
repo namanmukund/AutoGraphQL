@@ -1,5 +1,5 @@
 // validate mentor session input variables
-import { difference, get } from 'lodash';
+import { difference } from 'lodash';
 import validateBookingDate from './validateBookingDate';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
 import { MissingMandatoryInputInRequestError, NoSlotSelectedError } from '../../../../../../constants/errors/input';

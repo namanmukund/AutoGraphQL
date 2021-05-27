@@ -561,7 +561,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'updateBatchSession': {
-      const sessionStatus = get(input, 'sessionStatus', '')
+      const sessionStatus = get(input, 'sessionStatus', '');
       const newInput = {
         ...input,
       };
