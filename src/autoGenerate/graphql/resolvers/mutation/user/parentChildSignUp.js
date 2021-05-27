@@ -336,6 +336,7 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     const res = await callLocalGraphqlApi(FETCH_CAMPAIGN(campaignId));
     leadSquaredParams.input.schoolName = get(res, 'data.campaign.school.name', '');
   }
+  const campaignType = get(campaign, 'type', '');
   if (campaignType) {
     leadSquaredParams.input.Vertical = campaignType.replace('Event', '');
   }
