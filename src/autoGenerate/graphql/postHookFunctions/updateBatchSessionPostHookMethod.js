@@ -205,7 +205,8 @@ get Course Id
     */
     const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
     const batchInfo = get(batchResult, 'data.batch');
-    const { students, currentComponent } = batchInfo;
+    const students = batchInfo && batchInfo.students;
+    const currentComponent = batchInfo && batchInfo.currentComponent;
     const batchCurrentComponentId = currentComponent && currentComponent.id;
     const currentComponentTopicId = get(currentComponent, 'currentTopic.id');
 

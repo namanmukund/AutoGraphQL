@@ -1,11 +1,21 @@
 import { get } from 'lodash';
 import { MAX_ALLOWED_BATCH_SESSIONS_DAYS_RANGE, slotTimes, weekDays } from '../../../../../constants';
-import { MaxAllowedDayRangeExceededError, StartEndDateError } from '../../../../../constants/errors';
+import { DatabaseRecordNotFoundError, MaxAllowedDayRangeExceededError, StartEndDateError } from '../../../../../constants/errors';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import { NoSlotSelectedError, OnlyOneSlotAllowedError } from '../../../../../constants/errors/input';
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import batchQuery from '../../graphqlQueries/batchQuery';
 
 /* eslint-disable no-unused-vars */
 const updateBatchValidation = async (params, mutationName, context) => {
+  const { id: batchId } = params;
+  const batchData = await callLocalGraphqlApi(batchQuery(batchId));
+  const batchFetched = get(batchData, 'data.batch');
+  if (batchFetched && !batchFetched) {
+    throw new DatabaseRecordNotFoundError();
+  }
+  context.previousDocument = batchFetched;
+
   const timeTableRule = get(params, 'input.timeTableRule', null);
   if (timeTableRule) {
     const startDate = new Date(timeTableRule.startDate);
