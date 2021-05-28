@@ -282,10 +282,8 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
     // fetch all the batch Sessions corresponding to given batch which are !completed state
     const notCompletedBatchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId));
     const notCompletedBatchSessions = get(notCompletedBatchSessionsResult, 'data.batchSessions');
-    // get all their mentorSessions if not null
-    const notCompletedBatchSessionsFiltered = notCompletedBatchSessions.filter((item) => item.mentorSession !== null);
 
-    notCompletedBatchSessionsFiltered.forEach((batchSession) => {
+    notCompletedBatchSessions.forEach((batchSession) => {
       // here update the corresponding mentor session for all batch sessions with the new mentor id
       const batchSessionId = batchSession && batchSession.id;
       const mentorSessions = callLocalGraphqlApi(getMentorSessionsQuery(allottedMentorConnectId));
