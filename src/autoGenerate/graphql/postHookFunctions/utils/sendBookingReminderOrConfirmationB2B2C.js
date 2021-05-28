@@ -9,6 +9,8 @@ import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMess
 import sendTransactionalEmail from '../../resolvers/utils/sendTransactionalEmail';
 import updateBookSessionReminderStatus from './updateBookSessionReminderStatus';
 
+const TIMEOUT = 5000 * 60;
+
 const USER_QUERY = (userId) => `
   query {
     user(id: "${userId}") {
@@ -46,7 +48,7 @@ const USER_QUERY = (userId) => `
 `;
 
 const sendBookingReminderOrConfirmationB2B = async (userId, isBookSlot = false) => {
-  const timeout = isBookSlot ? 0 : 5000 * 60;
+  const timeout = isBookSlot ? 0 : TIMEOUT;
   // const slotTime = Object.keys(slots).find((slot) => slots[slot]);
   // console.log(
   //   'BOOKED - sent mail and wati',
@@ -95,8 +97,8 @@ const sendBookingReminderOrConfirmationB2B = async (userId, isBookSlot = false) 
           subject: `Here's ${studentName}'s Pass for Tekie Code Carnival`,
           emailTemplate: 'CarnivalEmailBookingFinal',
         });
-        const bookTemplate = moment().diff(moment(get(user, 'createdAt'))) < 5000 * 60 ? 'workshop_registration_confirmation1' : 'workshop_booking_confirmation';
-        const parameters = moment().diff(moment(get(user, 'createdAt'))) < 5000 * 60
+        const bookTemplate = moment().diff(moment(get(user, 'createdAt'))) < TIMEOUT ? 'workshop_registration_confirmation1' : 'workshop_booking_confirmation';
+        const parameters = moment().diff(moment(get(user, 'createdAt'))) < TIMEOUT
           ? [
             { name: 'parent_name', value: parentName },
             { name: 'student_name', value: studentName },
@@ -108,7 +110,7 @@ const sendBookingReminderOrConfirmationB2B = async (userId, isBookSlot = false) 
             { name: 'student_name', value: studentName },
             { name: 'w_date', value: moment(bookingDate).format('dddd, Do MMM') },
             { name: 'w_time', value: getSlotLabel(slotTime.replace('slot', '')).startTime },
-          ]
+          ];
         sendWhatsAppTemplateMessage(phone, bookTemplate, phone, parameters);
       } else {
         sendTransactionalEmail({
