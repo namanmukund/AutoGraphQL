@@ -92,7 +92,7 @@ const sendBookingReminderOrConfirmationB2B = async (userId, isBookSlot = false) 
           parentName,
           schoolName,
           startTime: getSlotLabel(slotTime.replace('slot', '')).startTime,
-          endTime: getSlotLabel(slotTime.replace('slot', '')).endTime,
+          endTime: getSlotLabel(slotTime.replace('slot', '')).endTime.replace('00', '30'), // change this so that it can handle ::30
         }, {
           subject: `Here's ${studentName}'s Pass for Tekie Code Carnival`,
           emailTemplate: 'CarnivalEmailBookingFinal',
