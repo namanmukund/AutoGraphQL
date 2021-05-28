@@ -95,15 +95,21 @@ const sendBookingReminderOrConfirmationB2B = async (userId, isBookSlot = false) 
           subject: `Here's ${studentName}'s Pass for Tekie Code Carnival`,
           emailTemplate: 'CarnivalEmailBookingFinal',
         });
-        console.log(moment().diff(moment(get(user, 'createdAt'))))
-        const bookTemplate = moment().diff(moment(get(user, 'createdAt'))) < 5000 * 60 ? 'workshop_registration_confirmation1' : 'workshop_registration_confirmation';
-        sendWhatsAppTemplateMessage(phone, bookTemplate, schoolName, [
-          { name: 'parent_name', value: parentName },
-          { name: 'student_name', value: studentName },
-          { name: 'w_date', value: moment(bookingDate).format('dddd, Do MMM') },
-          { name: 'w_time', value: getSlotLabel(slotTime.replace('slot', '')).startTime },
-          { name: 'school_name', value: schoolName },
-        ]);
+        const bookTemplate = moment().diff(moment(get(user, 'createdAt'))) < 5000 * 60 ? 'workshop_registration_confirmation1' : 'workshop_booking_confirmation';
+        const parameters = moment().diff(moment(get(user, 'createdAt'))) < 5000 * 60;
+          ? [
+            { name: 'parent_name', value: parentName },
+            { name: 'student_name', value: studentName },
+            { name: 'w_date', value: moment(bookingDate).format('dddd, Do MMM') },
+            { name: 'w_time', value: getSlotLabel(slotTime.replace('slot', '')).startTime },
+            { name: 'school_name', value: schoolName },
+          ] : [
+            { name: 'parent_name', value: parentName },
+            { name: 'student_name', value: studentName },
+            { name: 'w_date', value: moment(bookingDate).format('dddd, Do MMM') },
+            { name: 'w_time', value: getSlotLabel(slotTime.replace('slot', '')).startTime },
+          ]
+        sendWhatsAppTemplateMessage(phone, bookTemplate, phone, parameters);
       } else {
         sendTransactionalEmail({
           parentEmail: user.email,
@@ -112,7 +118,7 @@ const sendBookingReminderOrConfirmationB2B = async (userId, isBookSlot = false) 
           subject: 'Book your Spot at Tekie Code Carnival!',
           emailTemplate: 'CarivalEmailRegistrationConfirmed',
         });
-        sendWhatsAppTemplateMessage(phone, 'workshop_registration_confirmation3', schoolName, [
+        sendWhatsAppTemplateMessage(phone, 'workshop_registration_confirmation3', phone, [
           { name: 'parent_name', value: parentName },
           { name: 'student_name', value: studentName },
           { name: 'code', value: code },
