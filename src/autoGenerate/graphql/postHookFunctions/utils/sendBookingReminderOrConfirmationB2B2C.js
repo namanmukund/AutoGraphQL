@@ -96,7 +96,7 @@ const sendBookingReminderOrConfirmationB2B = async (userId, isBookSlot = false) 
           emailTemplate: 'CarnivalEmailBookingFinal',
         });
         const bookTemplate = moment().diff(moment(get(user, 'createdAt'))) < 5000 * 60 ? 'workshop_registration_confirmation1' : 'workshop_booking_confirmation';
-        const parameters = moment().diff(moment(get(user, 'createdAt'))) < 5000 * 60;
+        const parameters = moment().diff(moment(get(user, 'createdAt'))) < 5000 * 60
           ? [
             { name: 'parent_name', value: parentName },
             { name: 'student_name', value: studentName },
