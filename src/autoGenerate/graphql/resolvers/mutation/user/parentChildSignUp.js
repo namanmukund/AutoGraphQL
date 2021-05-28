@@ -32,6 +32,7 @@ import getBatchIdByBatchCreationBasis from './utils/getBatchIdByBatchCreationBas
 import getSchoolInformation from './utils/getSchoolInformation';
 import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 
 const USER_TYPE = 'User';
 
@@ -340,7 +341,11 @@ If coming from campaign and the type os b2b allocate the user to the right batch
   if (campaignType) {
     leadSquaredParams.input.Vertical = campaignType.replace('Event', '');
   }
+
   parentChildSignupPostHookMethod(input, leadSquaredParams, false);
+
+  // send b2b2c reg+booking
+  sendBookingReminderOrConfirmationB2B(parentId);
 
   return userTokenData;
 };

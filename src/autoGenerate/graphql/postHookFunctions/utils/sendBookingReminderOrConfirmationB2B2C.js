@@ -1,17 +1,21 @@
 import { get } from 'lodash';
+import moment from 'moment';
+import getSlotLabel from '../../../../../utils/getSlotLabel';
 // import moment from 'moment';
 // import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
 // import getSlotLabel from '../../../../../utils/getSlotLabel';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 import sendTransactionalEmail from '../../resolvers/utils/sendTransactionalEmail';
-// import updateBookSessionReminderStatus from './updateBookSessionReminderStatus';
+import updateBookSessionReminderStatus from './updateBookSessionReminderStatus';
 
 const USER_QUERY = (userId) => `
   query {
     user(id: "${userId}") {
       email
       name
+      isBookSessionReminderSent
+      createdAt
       phone {
         number
         countryCode
@@ -41,15 +45,15 @@ const USER_QUERY = (userId) => `
   }
 `;
 
-const sendBookingReminderOrConfigmationB2B = async (userId) => {
-  // const { bookingDate, ...slots } = timeTable;
+const sendBookingReminderOrConfirmationB2B = async (userId, isBookSlot = false) => {
+  const timeout = isBookSlot ? 0 : 5000 * 60;
   // const slotTime = Object.keys(slots).find((slot) => slots[slot]);
   // console.log(
   //   'BOOKED - sent mail and wati',
   //   parentName,
   //   schoolName,
   //   studentName,
-  //   moment(bookingDate).format('dddd, Do MMM'),
+  // moment(bookingDate).format('dddd, Do MMM'),
   //   getSlotLabel(slotTime.replace('slot', '')),
   // );
   setTimeout(async () => {
@@ -74,24 +78,50 @@ const sendBookingReminderOrConfigmationB2B = async (userId) => {
       const studentName = get(user, 'parentProfile.children[0].user.name');
       const timeTable = get(user, 'parentProfile.children[0].batch.b2b2ctimeTable', {});
       if (timeTable.bookingDate) {
-        return;
+        if (!isBookSlot) return;
+        if (get(user, 'isBookSessionReminderSent')) return;
+        const { bookingDate, ...slots } = timeTable;
+        const slotTime = Object.keys(slots).find((slot) => slots[slot]);
+        await updateBookSessionReminderStatus(get(user, 'id'), true);
+        sendTransactionalEmail({
+          parentEmail: user.email,
+          workshopDate: moment(bookingDate).format('dddd, Do MMM'),
+          studentName,
+          parentName,
+          schoolName,
+          startTime: getSlotLabel(slotTime.replace('slot', '')).startTime,
+          endTime: getSlotLabel(slotTime.replace('slot', '')).endTime,
+        }, {
+          subject: `Here's ${studentName}'s Pass for Tekie Code Carnival`,
+          emailTemplate: 'CarnivalEmailBookingFinal',
+        });
+        console.log(moment().diff(moment(get(user, 'createdAt'))))
+        const bookTemplate = moment().diff(moment(get(user, 'createdAt'))) < 5000 * 60 ? 'workshop_registration_confirmation1' : 'workshop_registration_confirmation';
+        sendWhatsAppTemplateMessage(phone, bookTemplate, schoolName, [
+          { name: 'parent_name', value: parentName },
+          { name: 'student_name', value: studentName },
+          { name: 'w_date', value: moment(bookingDate).format('dddd, Do MMM') },
+          { name: 'w_time', value: getSlotLabel(slotTime.replace('slot', '')).startTime },
+          { name: 'school_name', value: schoolName },
+        ]);
+      } else {
+        sendTransactionalEmail({
+          parentEmail: user.email,
+          bookingLink,
+        }, {
+          subject: 'Book your Spot at Tekie Code Carnival!',
+          emailTemplate: 'CarivalEmailRegistrationConfirmed',
+        });
+        sendWhatsAppTemplateMessage(phone, 'workshop_registration_confirmation3', schoolName, [
+          { name: 'parent_name', value: parentName },
+          { name: 'student_name', value: studentName },
+          { name: 'code', value: code },
+          { name: 'school_name', value: schoolName },
+          { name: 'booking_link', value: bookingLink },
+        ]);
       }
-      sendTransactionalEmail({
-        parentEmail: user.email,
-        bookingLink,
-      }, {
-        subject: 'Book your Spot at Tekie Code Carnival!',
-        emailTemplate: 'CarivalEmailRegistrationConfirmed',
-      });
-      sendWhatsAppTemplateMessage(phone, 'workshop_registration_confirmation3', schoolName, [
-        { name: 'parent_name', value: parentName },
-        { name: 'student_name', value: studentName },
-        { name: 'code', value: code },
-        { name: 'school_name', value: schoolName },
-        { name: 'booking_link', value: bookingLink },
-      ]);
     }
-  }, 5000 * 60);
+  }, timeout);
 };
 
-export default sendBookingReminderOrConfigmationB2B;
+export default sendBookingReminderOrConfirmationB2B;
