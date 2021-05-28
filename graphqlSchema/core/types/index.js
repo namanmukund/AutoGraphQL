@@ -91,7 +91,7 @@ import BulkMentorSessionInput from './bulkMentorSessionInput';
 import RescheduledSlot from './rescheduledSlot';
 import GetCampaignSlots from './getCampaignSlots';
 import BookB2B2CSlotsInput from './bookB2B2CSlotsInput';
-import StudentCurrentStatus from './studentCurrentStatus'
+import StudentCurrentStatus from './studentCurrentStatus';
 
 export default [
   ...User,

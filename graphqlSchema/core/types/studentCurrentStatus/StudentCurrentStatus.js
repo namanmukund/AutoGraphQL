@@ -1,4 +1,3 @@
-
 const StudentCurrentStatus = `
   type StudentCurrentStatus 
   {
