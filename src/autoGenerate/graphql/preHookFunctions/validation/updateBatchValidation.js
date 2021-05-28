@@ -4,6 +4,7 @@ import { DatabaseRecordNotFoundError, MaxAllowedDayRangeExceededError, StartEndD
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import { NoSlotSelectedError, OnlyOneSlotAllowedError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import batchQuery from '../../graphqlQueries/batchQuery';
 
 /* eslint-disable no-unused-vars */
 const updateBatchValidation = async (params, mutationName, context) => {
