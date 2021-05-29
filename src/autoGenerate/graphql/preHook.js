@@ -83,6 +83,7 @@ import deleteCourseValidation from './preHookFunctions/validation/deleteCourseVa
 import updateBatchValidation from './preHookFunctions/validation/updateBatchValidation';
 import updateCampaignValidation from './preHookFunctions/validation/updateCampaignValidation';
 import generateInviteCode from '../../../utils/generateInviteCode';
+import deleteBatchValidation from './preHookFunctions/validation/deleteBatchValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -686,6 +687,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateCampaign': {
       await updateCampaignValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'deleteBatch': {
+      await deleteBatchValidation(params, mutationOrQueryName, context);
       break;
     }
     default: {

@@ -27,6 +27,9 @@ query{
     }
     code
     type
+    studentsMeta{
+      count
+    }
   }
 }
 `;
