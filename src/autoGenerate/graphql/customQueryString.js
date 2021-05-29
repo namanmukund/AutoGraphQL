@@ -7,6 +7,7 @@ sendTransactionalMessage(userId: ID, input: TransactionalMessageInput) : Boolean
 getTotalAmountCollected ( input: TotalAmountCollectedInput): TotalAmountCollected
 getCheatSheet (input: getCheatSheetInput): CheatSheetData
 getCampaignSlots (input: GetCampaignSlotsInput): GetCampaignSlotsResult
+getStudentCurrentStatus (input: getStudentCurrentStatusInput): StudentCurrentStatus
 `;
 
 export default customQueryString;
