@@ -1,5 +1,8 @@
 import { get } from 'lodash';
-import { GLOBAL_COURSE_TITLE, PUBLISHED } from '../../../../../../constants';
+import {
+  GLOBAL_COURSE_TITLE, installmentStatus, PUBLISHED,
+  sessionStatus, studentCurrentStatus,
+} from '../../../../../../constants';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get current component status of user
@@ -83,7 +86,11 @@ const getMentorMenteeSession = (menteeSessionId) => `
 }
 `;
 const getStatus = async (topicOrder, enrollmentType, userId) => {
-  let status = 'registered';
+  const {
+    registered, onBoarding, postDemo,
+    preDemo, paidUser,
+  } = studentCurrentStatus;
+  let status = registered;
   if (topicOrder >= 1 && topicOrder <= 3) {
     const menteeSessions = await callLocalGraphqlApi(getMenteeSession(userId));
     const menteeSessionData = get(menteeSessions, 'data.menteeSessions', []);
@@ -94,33 +101,38 @@ const getStatus = async (topicOrder, enrollmentType, userId) => {
       const mentorMenteeSessionData = get(mentorMenteeSessions, 'data.mentorMenteeSessions', []);
 
       if (mentorMenteeSessionData && mentorMenteeSessionData.length > 0
-        && get(mentorMenteeSessionData, '[0].sessionStatus') === 'completed') {
-        if (enrollmentType && enrollmentType === 'paid') {
-          status = 'onBoarding';
+        && get(mentorMenteeSessionData, '[0].sessionStatus') === sessionStatus.completed) {
+        if (enrollmentType && enrollmentType === installmentStatus.paid) {
+          status = onBoarding;
         } else {
-          status = 'postDemo';
+          status = postDemo;
         }
       } else {
-        status = 'preDemo';
+        status = preDemo;
       }
     } else {
-      status = 'preDemo';
+      status = preDemo;
     }
   } else if (topicOrder > 3) {
-    status = 'paidUser';
+    if (enrollmentType && enrollmentType === installmentStatus.paid) {
+      status = paidUser;
+    } else {
+      status = onBoarding;
+    }
   }
   return status;
 };
 
 const getStudentCurrentStatus = (async (root, params) => {
   const { input } = params;
+  const { registered, unRegistered, churned } = studentCurrentStatus;
   if (input && get(input, 'userId')) {
-    let studentStatus = 'registered';
+    let studentStatus = registered;
     const enrollmentTypeFromPayment = await callLocalGraphqlApi(getEnrollmentStatusFromPayment(get(input, 'userId')));
     // If we get the enrollment status as downgraded then the student status is churned
     if (enrollmentTypeFromPayment && enrollmentTypeFromPayment.length > 0
       && get(enrollmentTypeFromPayment, '[0].enrollmentStatus') === 'downgraded') {
-      studentStatus = 'churned';
+      studentStatus = churned;
     } else {
       const getBatchTopic = await callLocalGraphqlApi(getBatchCurrentTopic(get(input, 'userId')));
       const getUserTopic = await callLocalGraphqlApi(getUserCurrentTopicComponentStatus(get(input, 'userId')));
@@ -143,7 +155,7 @@ const getStudentCurrentStatus = (async (root, params) => {
     };
   }
   return {
-    status: 'unRegistered',
+    status: unRegistered,
   };
 });
 
