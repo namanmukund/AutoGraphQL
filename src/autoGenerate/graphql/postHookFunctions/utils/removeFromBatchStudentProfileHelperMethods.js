@@ -34,7 +34,7 @@ const fetchStudentProfile = async (studentProfileId, batchId) => {
   `;
   const studentProfiles = await callLocalGraphqlApi(query);
   return get(studentProfiles, 'data.batchSessions', []);
-}
+};
 
 const fetchUserCurrentTopicComponentStatuses = async (userId) => {
   const query = `
@@ -57,14 +57,14 @@ const fetchUserCurrentTopicComponentStatuses = async (userId) => {
   `;
   const currentTopicComponent = await callLocalGraphqlApi(query);
   return get(currentTopicComponent, 'data.userCurrentTopicComponentStatuses', []);
-}
+};
 
 const fetchNextTopicId = async (topicOrder) => {
   const query = `
     {
       topics(filter: {
         and:[
-          {order: 4}
+          {order: ${topicOrder}}
         ]
       }){
         id
@@ -74,7 +74,7 @@ const fetchNextTopicId = async (topicOrder) => {
   `;
   const topics = await callLocalGraphqlApi(query);
   return get(topics, 'data.topics', []);
-}
+};
 
 const updateUserCurrentTopicComponentStatus = async (userCurrentComponentId, topicId) => {
   const mutation = `
@@ -91,7 +91,7 @@ const updateUserCurrentTopicComponentStatus = async (userCurrentComponentId, top
   `;
   const updateResult = await callLocalGraphqlApi(mutation);
   return get(updateResult, 'data.updateUserCurrentTopicComponentStatus', {});
-}
+};
 
 const fetchAllottedBatchSessions = async (batchId) => {
   const query = `

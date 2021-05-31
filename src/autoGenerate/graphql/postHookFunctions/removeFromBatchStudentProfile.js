@@ -50,7 +50,6 @@ const removeFromBatchStudentProfilePosthookMethod = async (input, params, mutati
       await updateUserCurrentTopicComponentStatus(userCurrentComponentId, nextTopicId);
     }
   }
-
 };
 
 export default removeFromBatchStudentProfilePosthookMethod;
