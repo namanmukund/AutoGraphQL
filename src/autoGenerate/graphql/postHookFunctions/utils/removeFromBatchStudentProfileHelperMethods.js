@@ -47,9 +47,11 @@ const fetchUserCurrentTopicComponentStatuses = async (userId) => {
         id
       }
       currentTopic{
+        id
         order
       }
       currentLearningObjective{
+        id
         order
       }
     }
@@ -69,6 +71,9 @@ const fetchNextTopicId = async (topicOrder) => {
       }){
         id
         order
+        learningObjectives(filter: {order:1}){
+          id
+        }
       }
     }
   `;
@@ -76,11 +81,15 @@ const fetchNextTopicId = async (topicOrder) => {
   return get(topics, 'data.topics', []);
 };
 
-const updateUserCurrentTopicComponentStatus = async (userCurrentComponentId, topicId) => {
+const updateUserCurrentTopicComponentStatus = async (userCurrentComponentId, topicId, topicComponentType, loId) => {
   const mutation = `
     mutation{
-    updateUserCurrentTopicComponentStatus(id: "${userCurrentComponentId}"
+    updateUserCurrentTopicComponentStatus(id: "${userCurrentComponentId}",
       currentTopicConnectId: "${topicId}",
+      currentLearningObjectiveConnectId: "${loId}",
+      input:{
+        currentTopicComponentType:${topicComponentType}
+      }
     ){
       id
       currentLearningObjective{

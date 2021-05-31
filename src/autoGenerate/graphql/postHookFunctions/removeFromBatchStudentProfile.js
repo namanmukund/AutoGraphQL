@@ -35,19 +35,21 @@ const removeFromBatchStudentProfilePosthookMethod = async (input, params, mutati
 
   // proceed to update only if the current topic in batch is greater than current topic in user
   const batchCurrentTopicOrder = get(studentProfile, 'batch.currentComponent.currentTopic.order', '');
+  const batchCurrentTopicComponentType = get(studentProfile, 'batch.currentComponent.currentTopicComponentType', '');
   const userCurrentTopicOrder = get(userCurrentComponent, 'currentTopic.order', '');
   const userCurrentComponentId = get(userCurrentComponent, 'id', '');
-
   if (batchCurrentTopicOrder > userCurrentTopicOrder) {
     // check latest session status and update accordingly
     const latestSessionStatus = get(studentProfile, 'batch.currentComponent.latestSessionStatus', '');
     if (latestSessionStatus !== sessionStatus.completed) {
       const batchCurrentTopicId = get(studentProfile, 'batch.currentComponent.currentTopic.id', '');
-      await updateUserCurrentTopicComponentStatus(userCurrentComponentId, batchCurrentTopicId);
+      const batchCurrentLOId = get(studentProfile, 'batch.currentComponent.currentLearningObjective.id', '');
+      await updateUserCurrentTopicComponentStatus(userCurrentComponentId, batchCurrentTopicId, batchCurrentTopicComponentType, batchCurrentLOId);
     } else {
       const topics = await fetchNextTopicId(batchCurrentTopicOrder + 1);
       const nextTopicId = get(topics[0], 'id');
-      await updateUserCurrentTopicComponentStatus(userCurrentComponentId, nextTopicId);
+      const firstLearningObjectiveId = get(topics[0], 'learningObjectives[0].id', '')
+      await updateUserCurrentTopicComponentStatus(userCurrentComponentId, nextTopicId, 'allotted', firstLearningObjectiveId);
     }
   }
 };
