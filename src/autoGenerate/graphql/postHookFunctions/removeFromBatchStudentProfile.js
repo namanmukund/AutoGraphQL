@@ -49,7 +49,7 @@ const removeFromBatchStudentProfilePosthookMethod = async (input, params, mutati
       const topics = await fetchNextTopicId(batchCurrentTopicOrder + 1);
       const nextTopicId = get(topics[0], 'id');
       const firstLearningObjectiveId = get(topics[0], 'learningObjectives[0].id', '')
-      await updateUserCurrentTopicComponentStatus(userCurrentComponentId, nextTopicId, 'allotted', firstLearningObjectiveId);
+      await updateUserCurrentTopicComponentStatus(userCurrentComponentId, nextTopicId, 'video', firstLearningObjectiveId);
     }
   }
 };
