@@ -7,7 +7,6 @@ import {
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
 import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
-import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -110,7 +109,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   const currentComponentTopicId = get(currentComponent, 'currentTopic.id');
 
   // logic to change current component status if topic is completed
-  if (batchCurrentComponentId && sessionStatusFromInput && topicId && topicId === currentComponentTopicId) {
+  if (batchCurrentComponentId && sessionStatusFromInput && topicId === currentComponentTopicId) {
     if (sessionStatusFromInput === sessionStatus.completed) {
       /*
       We are getting published topics list through this query.
@@ -143,7 +142,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   }
 
   // add students to the batch session and mark them absent as default
-  if (students && students.length && topicId) {
+  if (students && students.length) {
     let pushManyQuery = 'attendance:{ pushMany: [';
     students.forEach((studentElem) => {
       if (studentElem.user && studentElem.user.studentProfile && studentElem.user.studentProfile.id) {
@@ -161,22 +160,20 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   }
 
   // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
-  if (topicId && mentorSessionConnectId) {
-    // eslint-disable-next-line no-restricted-syntax
-    for (const student of students) {
-      if (student.user && student.user.id) {
-        addMentorMenteeSessionForBatch(
-          student.user.id,
-          '',
-          topicId,
-          bookingDate,
-          slotTimeArray[0],
-          mentorSessionConnectId,
-          courseId,
-          sessionStatusFromInput || sessionStatus.allotted,
-          student.user.source,
-        );
-      }
+  // eslint-disable-next-line no-restricted-syntax
+  for (const student of students) {
+    if (student.user && student.user.id) {
+      addMentorMenteeSessionForBatch(
+        student.user.id,
+        '',
+        topicId,
+        bookingDate,
+        slotTimeArray[0],
+        mentorSessionConnectId,
+        courseId,
+        sessionStatusFromInput || sessionStatus.allotted,
+        student.user.source,
+      );
     }
   }
 };

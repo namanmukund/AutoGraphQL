@@ -8,10 +8,10 @@ import {
 } from '../../../../../../constants/errors/input';
 
 const PRE_BOOKING_HOUR_LIMIT = 0;
-const validateBatchSessionInput = async (params, context, originMethod) => {
+const validateBatchSessionInput = async (params, context) => {
   const { input } = params;
   const { bookingDate, ...slots } = input;
-  if (!bookingDate && originMethod === 'addBatch') {
+  if (!bookingDate) {
     throw new MissingMandatoryInputInRequestError({
       data: {
         message: 'bookingDate is mandatory',
@@ -20,15 +20,14 @@ const validateBatchSessionInput = async (params, context, originMethod) => {
   }
   const slotTimeArray = getSelectedSlotsTime(slots);
 
-  if (!slotTimeArray.length && originMethod === 'addBatch') {
+  if (!slotTimeArray.length) {
     throw new NoSlotSelectedError();
   } else if (slotTimeArray.length > 1) {
     throw new OnlyOneSlotAllowedError();
   }
   context.slotTimeArray = slotTimeArray;
 
-  // eslint-disable-next-line no-unused-expressions
-  bookingDate && slotTimeArray && slotTimeArray.length && validateBookingDate(
+  validateBookingDate(
     bookingDate,
     slotTimeArray,
     PRE_BOOKING_HOUR_LIMIT,

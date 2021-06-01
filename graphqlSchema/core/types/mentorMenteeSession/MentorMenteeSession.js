@@ -30,7 +30,7 @@ const MentorMenteeSession = `
   type MentorMenteeSession @model {
     topic: Topic! @relation(name: "MentorMenteeSessionTopic", direction: "OneWay")
     menteeSession: MenteeSession! @relation(name: "SessionDataMenteeSession", direction: "OneWay")
-    mentorSession: MentorSession! @relation(name: "SessionDataMentorSession")
+    mentorSession: MentorSession! @relation(name: "SessionDataMentorSession", direction: "OneWay")
     salesOperation: SalesOperation @relation(name:"SalesOperationFirstMentorMenteeSession")
     sessionAllotmentDate: Date
     sessionStartDate: Date

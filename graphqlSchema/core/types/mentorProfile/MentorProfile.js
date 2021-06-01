@@ -4,7 +4,6 @@ const MentorProfile = `
     codingLanguages: [CodingLanguage]
     experienceYear: Int
     sessionLink: String
-    googleMeetLink: String
     meetingId: String
     meetingPassword: String
     pythonCourseRating5: Int

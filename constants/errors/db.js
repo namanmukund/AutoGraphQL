@@ -1,5 +1,4 @@
 import { createError } from 'apollo-errors';
-import { BULK_MENTOR_SESSION_DAYS_LIMIT } from '../index';
 
 export const DatabaseRecordNotFoundError = createError('DatabaseRecordNotFoundError', {
   message: 'Database record not found',
@@ -135,52 +134,4 @@ export const UserCheatSheetAlreadyExists = createError('UserCheatSheetAlreadyExi
 
 export const AlreadyBookmarkedCheatSheet = createError('AlreadyBookmarkedCheatSheet', {
   message: 'Already bookmarked this cheatsheet',
-});
-
-export const GradeSectionCombinationAlreadyExists = createError('GradeSectionCombinationAlreadyExists', {
-  message: 'Provided grade and section combination already exists',
-});
-
-export const StudentsLinked = createError('StudentsLinked', {
-  message: 'Cannot perform the current operation as students are linked to the entity',
-});
-
-export const SlotsOccupiedError = createError('SlotsOccupiedError', {
-  message: 'Session exists on one of the provided slots',
-});
-
-export const NoSectionExists = createError('No Section Exists', {
-  message: 'Cannot perform batch creation on basis of \'section\'. No section exists in any of the selected schoolClasses',
-});
-
-export const StartEndDateError = createError('StartEndDateError', {
-  message: 'End date should be greater than start date',
-});
-
-export const MaxMentorSessionDaysError = createError('MaxMentorSessionDaysError', {
-  message: `End date should not exceed start date by ${BULK_MENTOR_SESSION_DAYS_LIMIT} days`,
-});
-
-export const BookingDateInvalidError = createError('BookingDateInvalidError', {
-  message: 'Booking date provided in input is not valid.',
-});
-
-export const SlotsInvalidError = createError('SlotsInvalidError', {
-  message: 'Exactly one slot provided in input must be true.',
-});
-
-export const AllottedMentorIdInvalidError = createError('AllottedMentorIdInvalidError', {
-  message: 'Allotted Mentor Connect ID is mandatory.',
-});
-
-export const MentorSessionIdInvalidError = createError('MentorSessionIdInvalidError', {
-  message: 'Mentor Session Connect ID is invalid.',
-});
-
-export const BatchFullError = createError('BatchFullError', {
-  message: 'Batch is full.',
-});
-
-export const MentorMandatoryError = createError('MentorMandatoryError', {
-  message: 'Allotted mentor is mandatory in batch while starting a session',
 });

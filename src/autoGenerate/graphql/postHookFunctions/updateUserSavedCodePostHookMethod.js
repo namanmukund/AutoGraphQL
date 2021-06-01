@@ -30,7 +30,6 @@ const userQuery = async (userId) => {
           studentProfile{
             id
             grade
-            profileAvatarCode
           }
         }
       }`;
@@ -58,7 +57,7 @@ const updateUserSavedCodePostHookMethod = async (input, params, mutationName, co
       const doc = {
         studentName: get(userData, 'name') || '',
         studentGrade: get(userData, 'studentProfile.grade'),
-        studentAvatar: get(userData, 'studentProfile.profileAvatarCode', 'theo') || 'theo', // since get is setting null as null
+        studentAvatar: get(userData, 'studentProfile.profileAvatarCode', 'theo'),
         approvedCode: code || '',
         approvedFileName: fileName || '',
         approvedDescription: description || '',

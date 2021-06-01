@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
+import { DatabaseRecordNotFoundError } from '../../../../../../../constants/errors';
 import { createUserTokenTypeData } from '../../utils/createUserTokenTypeData';
 
 const getChildrenToken = async (context, userId) => {
@@ -27,7 +28,7 @@ const getChildrenToken = async (context, userId) => {
   const res = get(await callLocalGraphqlApi(query, context), 'data.users', []);
   // if user not found
   if (!res.length) {
-    return null;
+    throw new DatabaseRecordNotFoundError();
   }
 
   const {
@@ -35,7 +36,7 @@ const getChildrenToken = async (context, userId) => {
   } = res[0];
   // children mapping will  not exist if parent profile does not exist
   if (!parentProfile || !parentProfile.id) {
-    return null;
+    throw new DatabaseRecordNotFoundError();
   }
 
   const { children } = parentProfile;

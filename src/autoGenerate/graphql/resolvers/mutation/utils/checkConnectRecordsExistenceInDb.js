@@ -44,11 +44,10 @@ const getRelatedTypeWithConnectIds = (
     const { connectIds } = getRelatedConnectObj[relatedTypeName];
     // check for unique connectIds in input
     if (connectIds.length !== uniq(connectIds).length) {
-      // commenting so that 2 different sub document can have same connectId on a nested type
-      // throw new DuplicateConnectIdsError();
+      throw new DuplicateConnectIdsError();
     }
     // update the count
-    connectIdsCount += uniq(connectIds).length;
+    connectIdsCount += connectIds.length;
     // update connectPromiseArray
     getConnectCountInfo(
       authentication,

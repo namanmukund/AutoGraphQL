@@ -6,7 +6,6 @@ temporaryScript :  BooleanResult
 sendTransactionalMessage(userId: ID, input: TransactionalMessageInput) : BooleanResult 
 getTotalAmountCollected ( input: TotalAmountCollectedInput): TotalAmountCollected
 getCheatSheet (input: getCheatSheetInput): CheatSheetData
-getCampaignSlots (input: GetCampaignSlotsInput): GetCampaignSlotsResult
 `;
 
 export default customQueryString;

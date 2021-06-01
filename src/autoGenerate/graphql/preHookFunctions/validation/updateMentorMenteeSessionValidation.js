@@ -2,7 +2,6 @@ import { get } from 'lodash';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import { CanNotChangeSessionStatusError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 
 const getMentorMenteeSessionData = async (id) => {
   const query = `
@@ -15,11 +14,6 @@ const getMentorMenteeSessionData = async (id) => {
           id
           order
         }
-        menteeSession{
-          id
-          bookingDate
-          ${getSlotTimesInString()}
-        }
       }
     }
   `;
@@ -28,7 +22,7 @@ const getMentorMenteeSessionData = async (id) => {
 };
 
 const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryName, context) => {
-  const { id, menteeSessionConnectId, input: { sessionStatus } } = newParams;
+  const { id, input: { sessionStatus } } = newParams;
 
   const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id);
 
@@ -42,7 +36,6 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   }
   // eslint-disable-next-line no-param-reassign
   context.previousDocument = mentorMenteeSessionDoc;
-  context.menteeSessionConnectId = menteeSessionConnectId;
 };
 
 export default updateMentorMenteeSessionValidation;

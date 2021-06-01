@@ -29,7 +29,3 @@ export const ConnectionNotExistError = createError('ConnectionNotExistError', {
 export const InvalidFieldType = createError('InvalidFieldType', {
   message: 'Field schema is invalid',
 });
-
-export const MaxAllowedDayRangeExceededError = createError('MaxAllowedDayRangeExceededError', {
-  message: 'Date range provided exceeds maximum allowed limit.',
-});

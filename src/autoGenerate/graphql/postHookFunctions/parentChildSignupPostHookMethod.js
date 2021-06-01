@@ -1,9 +1,9 @@
 import { addUserLeadSquared } from './leadsquared';
 import sendBookingReminder from './utils/sendBookingReminder';
 
-const parentChildSignupPostHookMethod = async (input, params, create = true) => {
+const parentChildSignupPostHookMethod = async (input, params) => {
   // add user on leadsquared
-  addUserLeadSquared(params, create);
+  addUserLeadSquared(params);
 
   // call book reminder if not booked
   setTimeout(() => {

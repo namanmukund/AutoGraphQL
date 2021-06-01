@@ -9,7 +9,6 @@ const StudentProfile = `
     schoolName: String
     user: User! @relation(name: "StudentProfileUser")
     school: School @relation(name: "StudentProfileSchool")
-    schoolClass: SchoolClass @relation(name: "SchoolClassStudentProfile")
     parents: [ParentProfile] @relation(name: "StudentProfileParentProfile")
     batch: Batch @relation(name: "BatchStudentProfile")
 }`;

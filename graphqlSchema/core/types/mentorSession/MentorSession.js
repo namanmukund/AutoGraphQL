@@ -24,13 +24,10 @@ const MentorSession = `
   ) 
   {
     user: User! @relation(name: "MentorSessionUser", direction: "OneWay")
-    course: Course @relation(name: "MentorSessionCourse", direction: "OneWay")
+    course: Course! @relation(name: "MentorSessionCourse", direction: "OneWay")
     availabilityDate: Date!
     sessionType: SessionType @defaultValue(value: "trial")
     ${slotTimeFields}
-    mentorMenteeSessions: [MentorMenteeSession] @relation(name: "SessionDataMentorSession")
-    batchSessions: [BatchSession] @relation(name: "BatchSessionMentorSession")
-    b2b2cBatch: [Batch] @relation(name: "BatchMentorSession")
 }`;
 
 export default [MentorSession];

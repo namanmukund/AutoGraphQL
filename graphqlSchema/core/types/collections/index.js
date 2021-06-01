@@ -18,7 +18,6 @@ import AddUpdateBulkSchoolUserDataOutput from './AddUpdateBulkSchoolUserDataOutp
 import ErrorLog from './ErrorLog';
 import BulletPoint from './BulletPoint';
 import WorkbookExample from './WorkbookExample';
-import UpdateParentChildDetailInput from './UpdateParentChildDetailInput.js';
 
 export default [
   ...Enum,
@@ -33,7 +32,6 @@ export default [
   ...QuestionBankAnswer,
   Class,
   ParentChildSignUpInput,
-  UpdateParentChildDetailInput,
   ChildrenToken,
   SalesOperationReport,
   TransactionalMessageInput,

@@ -75,14 +75,7 @@ import updateProductValidation from './preHookFunctions/validation/updateProduct
 import deleteProductValidation from './preHookFunctions/validation/deleteProductValidation';
 import updateStudentProfileValidation from './preHookFunctions/validation/updateStudentProfileValidation';
 import addUserCheatSheetValidation from './preHookFunctions/validation/addUserCheatSheetValidation';
-import addSchoolClassValidation from './preHookFunctions/validation/addSchoolClassValidation';
-import updateSchoolClassValidation from './preHookFunctions/validation/updateSchoolClassValidation';
-import deleteSchoolValidation from './preHookFunctions/validation/deleteSchoolValidation';
-import deleteSchoolClassValidation from './preHookFunctions/validation/deleteSchoolClassValidation';
-import deleteCourseValidation from './preHookFunctions/validation/deleteCourseValidation';
-import updateBatchValidation from './preHookFunctions/validation/updateBatchValidation';
-import updateCampaignValidation from './preHookFunctions/validation/updateCampaignValidation';
-import generateInviteCode from '../../../utils/generateInviteCode';
+import updateUserCheatSheetValidation from './preHookFunctions/validation/updateUserCheatSheetValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -655,35 +648,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await addUserCheatSheetValidation(params, mutationOrQueryName, context);
       break;
     }
-    case 'addSchoolClass': {
-      await addSchoolClassValidation(params, mutationOrQueryName, context);
-      break;
-    }
-    case 'updateSchoolClass': {
-      await updateSchoolClassValidation(params, mutationOrQueryName, context);
-      break;
-    }
-    case 'deleteSchoolClass': {
-      await deleteSchoolClassValidation(params, mutationOrQueryName, context);
-      break;
-    }
-    case 'deleteSchool': {
-      await deleteSchoolValidation(params, mutationOrQueryName, context);
-      break;
-    }
-    case 'deleteCourse': {
-      await deleteCourseValidation(params, mutationOrQueryName, context);
-      break;
-    }
-    case 'updateBatch': {
-      await updateBatchValidation(params, mutationOrQueryName, context);
-      break;
-    }
-    case 'addCampaign': {
-      return hook({ ...input, code: generateInviteCode(8) }, mutationOrQueryName, 'PreHook');
-    }
-    case 'updateCampaign': {
-      await updateCampaignValidation(params, mutationOrQueryName, context);
+    case 'updateUserCheatSheet': {
+      await updateUserCheatSheetValidation(params, mutationOrQueryName, context);
       break;
     }
     default: {

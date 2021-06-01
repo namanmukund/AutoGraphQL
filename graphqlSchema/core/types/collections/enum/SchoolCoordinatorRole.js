@@ -7,7 +7,6 @@ const SchoolCoordinatorRole = `
       teacher
       owner
       trustee
-      director
   }`;
 
 export default SchoolCoordinatorRole;

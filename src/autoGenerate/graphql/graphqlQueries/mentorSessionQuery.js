@@ -4,22 +4,8 @@ const mentorSessionQuery = (mentorSessionId) => `
 query{
   mentorSession(id:"${mentorSessionId}"){
     id
-    user{
-      id
-    }
     availabilityDate
     ${getSlotTimesInString()}
-    sessionType
-    mentorMenteeSessions{
-      id
-      menteeSession{
-        ${getSlotTimesInString()}
-      }
-    }
-    batchSessions{
-      id
-      ${getSlotTimesInString()}
-    }
   }
 }`;
 

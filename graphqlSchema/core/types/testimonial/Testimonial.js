@@ -1,12 +1,14 @@
 const Testimonial = `
   type Testimonial @model {
+    author: AuthorType!
     type: TestimonialType!
-    authorType: AuthorType!
-    authorName: String
+    parentName: String
+    studentName: String
+    principalName: String
     schoolName: String
     testimonial: String!
-    displayPicture: File @relation(name: "TestimonialDisplayPicture", direction: "OneWay")
-    video: File @relation(name: "TestimonialVideo", direction: "OneWay")
+    displayPic: File @relation(name: "TestimonialDisplayPic", direction: "OneWay", isSubset: true)
+    videoUrl: File @relation(name: "TestimonialVideoUrl", direction: "OneWay", isSubset: true)
     status: ContentStatus! @defaultValue(value: "unpublished")
 }`;
 

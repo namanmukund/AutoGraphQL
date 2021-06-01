@@ -1,7 +1,6 @@
 /* eslint-disable no-await-in-loop, no-console */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
-import { log } from '../../../utils';
 
 const callMentorMenteeSessions = async (
   userId,
@@ -234,15 +233,10 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
             sessionType: 'batch',
           },
         };
-
-        try {
-          await callUpdateMentorSession(
-            mentorSessionId,
-            variables,
-          );
-        } catch (err) {
-          log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
-        }
+        await callUpdateMentorSession(
+          mentorSessionId,
+          variables,
+        );
         console.log('------------------------updated mentorSessionId', mentorSessionId);
       }
     } else {
@@ -254,14 +248,10 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           sessionType: 'batch',
         },
       };
-      try {
-        await callUpdateMentorSession(
-          mentorSessionId,
-          variables,
-        );
-      } catch (err) {
-        log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
-      }
+      await callUpdateMentorSession(
+        mentorSessionId,
+        variables,
+      );
     }
 
     if (menteeUserId) {

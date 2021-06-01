@@ -52,20 +52,13 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   // check if the document for called batch and topic is already present
   const batchId = get(params, 'batchConnectId');
   const topicId = get(params, 'topicConnectId');
-  // const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
+  const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
 
   // log in case batch or topic id is not present
-  // if (!batchId || !topicId || !mentorSessionConnectId) {
-  //   throw new MissingMandatoryInputInRequestError({
-  //     data: {
-  //       message: 'Either batchConnectId or topicConnectId or mentorSessionConnectId or all missing in input',
-  //     },
-  //   });
-  // }
-  if (!batchId) {
+  if (!batchId || !topicId || !mentorSessionConnectId) {
     throw new MissingMandatoryInputInRequestError({
       data: {
-        message: 'batchConnectId is missing in input',
+        message: 'Either batchConnectId or topicConnectId or mentorSessionConnectId or all missing in input',
       },
     });
   }
@@ -86,7 +79,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   } = userAndAppInfo;
 
   // validate input
-  await validateBatchSessionInput(params, context, 'addBatch');
+  await validateBatchSessionInput(params, context);
 
   if (
     !backendApps.includes(appName)
@@ -97,13 +90,13 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   }
 
   // throw error if document already exists
-  if (topicId) {
-    const getBatchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, topicId));
-    const batchSessions = get(getBatchSessionsRes, 'data.batchSessions');
-    if (batchSessions && batchSessions.length) {
-      throw new SimilarDocumentAlreadyExistError();
-    }
+  const getBatchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, topicId));
+  const batchSessions = get(getBatchSessionsRes, 'data.batchSessions');
+  if (batchSessions && batchSessions.length) {
+    throw new SimilarDocumentAlreadyExistError();
   }
+
+  validateBatchSessionInput(params);
 
   return true;
 };
