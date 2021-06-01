@@ -77,16 +77,6 @@ const updateSalesOperationLeadSquared = async (salesOperationId, userInfo) => {
     }
     leadSquaredInput.mx_Lead_Conversion_Status = capitalize(get(data, 'leadStatus'));
   }
-
-  if (get(data, 'oneToOne')) {
-    leadSquaredInput.mx_Lead_Conversion_Model = '1:1';
-  }
-  if (get(data, 'oneToTwo')) {
-    leadSquaredInput.mx_Lead_Conversion_Model = '1:2';
-  }
-  if (get(data, 'oneToThree')) {
-    leadSquaredInput.mx_Lead_Conversion_Model = '1:3';
-  }
   if (get(data, 'nextSteps')) {
     leadSquaredInput.mx_Lead_Conversion_Reason = get(
       leadStatusNextStepOptions
@@ -95,7 +85,31 @@ const updateSalesOperationLeadSquared = async (salesOperationId, userInfo) => {
       '',
     );
   }
-  updateLeadsquared(leadSquaredInput);
+  const activityInput = {
+    ActivityEvent: 106,
+  };
+  const fields = [];
+  if (get(data, 'leadStatus')) {
+    fields.push({
+      SchemaName: 'mx_Custom_3',
+      Value: capitalize(get(data, 'leadStatus')),
+    });
+  }
+  if (get(data, 'nextSteps')) {
+    fields.push({
+      SchemaName: 'mx_Custom_2',
+      Value: get(
+        leadStatusNextStepOptions
+          .find((option) => option.value === get(data, 'nextSteps')),
+        'label',
+        '',
+      ),
+    });
+  }
+  updateLeadsquared(leadSquaredInput, false, {
+    ...activityInput,
+    Fields: fields,
+  });
 };
 
 export default updateSalesOperationLeadSquared;

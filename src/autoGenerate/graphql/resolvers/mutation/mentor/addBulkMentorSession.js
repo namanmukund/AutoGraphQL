@@ -1,0 +1,157 @@
+import { get } from 'lodash';
+import validateAuthentication from '../../../../../../utils/validateAuthentication';
+import getSelectedDays from '../../../postHookFunctions/utils/getSelectedDays';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import { QueryController } from '../../../controllers';
+import getPossibleDates from '../../../../../../utils/getPossibleDates';
+import { MaxMentorSessionDaysError, StartEndDateError } from '../../../../../../constants/errors';
+import { BULK_MENTOR_SESSION_DAYS_LIMIT } from '../../../../../../constants';
+
+// query to fetch mentorSession
+const fetchMentorSessions = (userId, date) => `
+  query{
+    mentorSessions(
+      filter: {and: [
+        {sessionType: trial},
+        {user_some: {id: "${userId}"}},
+        {availabilityDate: "${date}"}
+      ]}) {
+      id
+    }
+  }
+  `;
+
+// mutation to add mentorSession
+const createMentorSessions = (userId, date, slots) => `
+  mutation {
+    addMentorSession(input: {
+      availabilityDate: "${date}",
+      ${slots}
+      sessionType: trial
+    }, userConnectId: "${userId}") {
+      id
+    }
+  }
+  `;
+
+// mutation to update mentorSession
+const updateMentorSessions = (id, date, slots) => `
+  mutation{
+    updateMentorSession(id: "${id}", input: {
+      availabilityDate: "${date}",
+      ${slots}
+    }) {
+      id
+    }
+  }
+  `;
+
+//
+const extractSlotsFromInput = (slots) => {
+  const filteredSlots = {};
+  let filteredSlotsString = '';
+  Object.keys(slots).forEach((slot) => {
+    if (slot.includes('slot')) {
+      filteredSlots[slot] = slots[slot];
+      filteredSlotsString += ` ${slot}: ${slots[slot]} `;
+    }
+  });
+  return { filteredSlots, filteredSlotsString };
+};
+
+// method to add/update mentorSession on all the provided dates and slots
+const constructMentorSessions = async (userId, possibleDates, filteredSlots) => {
+  // mentorSessionIds array to track alll the mentorSession ids added + updated
+  const mentorSessionsIdArray = [];
+  if (possibleDates.length) {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const date of possibleDates) {
+      try {
+        // fetching mentorSession on the given date and if it exists we will update otherwise create
+        // eslint-disable-next-line no-await-in-loop
+        const mentorSessionsQueryRes = await callLocalGraphqlApi(fetchMentorSessions(userId, date.toISOString()));
+        const mentorSessionId = get(mentorSessionsQueryRes, 'data.mentorSessions[0].id', '');
+
+        if (mentorSessionId) {
+          // eslint-disable-next-line no-await-in-loop
+          const updateMentorSessionsMutationRes = await callLocalGraphqlApi(updateMentorSessions(
+            mentorSessionId,
+            date.toISOString(),
+            filteredSlots,
+          ));
+          const updatedMentorSessionId = get(updateMentorSessionsMutationRes, 'data.updateMentorSession.id', '');
+          mentorSessionsIdArray.push(updatedMentorSessionId);
+        } else {
+          // eslint-disable-next-line no-await-in-loop
+          const addMentorSessionsMutationRes = await callLocalGraphqlApi(createMentorSessions(
+            userId,
+            date.toISOString(),
+            filteredSlots,
+          ));
+          const addMentorSessionId = get(addMentorSessionsMutationRes, 'data.addMentorSession.id', '');
+          mentorSessionsIdArray.push(addMentorSessionId);
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log('----------------------addBulkMentorSession error', e);
+      }
+    }
+  }
+  return mentorSessionsIdArray;
+};
+
+/*
+This is called when mentor tries to crate his sessions in bulk, here from frontend we will pass:
+userId, timeTableRule(startDate, endDate, ...slots, ...weekdays)
+in return we will send mentorSessions updated/added
+*/
+const addBulkMentorSessionMutationResolver = async (
+  root,
+  params,
+  typeName,
+  info,
+  mutationName,
+  ast,
+  context,
+) => {
+  validateAuthentication(context);
+  const { input: { userId, timeTableRule } } = params;
+  const { startDate: startDateInInput, endDate: endDateInInput, ...slots } = timeTableRule;
+
+  // start, end dates
+  const days = getSelectedDays(timeTableRule);
+  const startDate = new Date(startDateInInput);
+  startDate.setHours(0, 0, 0, 0);
+  const endDate = new Date(endDateInInput);
+  endDate.setHours(0, 0, 0, 0);
+
+  // throw error in this case
+  if (startDate > endDate) {
+    throw new StartEndDateError();
+  }
+
+  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  const diffDays = Math.round(Math.abs((endDate - endDate) / oneDay));
+
+  // throw error if duration for mentor sessions is more than 1 year
+  if (diffDays > BULK_MENTOR_SESSION_DAYS_LIMIT) {
+    throw new MaxMentorSessionDaysError();
+  }
+
+  // slots passed in input
+  const { filteredSlotsString } = extractSlotsFromInput(slots);
+
+  // getting dates on basis of startDate, endDate and days selected
+  const possibleDates = getPossibleDates(startDate, endDate, days);
+
+  // add/update mentorSession on the dates created and slots passed
+  const mentorSessionArray = await constructMentorSessions(userId, possibleDates, filteredSlotsString);
+
+  // constructing data in format to be returned
+  const modelQuery = new QueryController('MentorSession', { bypass: true });
+  const modelQueryRes = await modelQuery.fetchMultiple({ id: { $in: mentorSessionArray } });
+
+  return modelQueryRes;
+};
+
+export default addBulkMentorSessionMutationResolver;
