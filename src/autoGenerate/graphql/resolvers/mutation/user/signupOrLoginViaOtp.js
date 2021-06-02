@@ -120,7 +120,6 @@ const signupOrLoginViaOtp = async (
         const campaignType = get(campaignRes, 'data.campaign.type', '');
         input.schoolName = get(campaignRes, 'data.campaign.school.name', '');
         input.Vertical = campaignType.replace('Event', '');
-        console.log(input);
         parentChildSignupPostHookMethod(input, params);
       } else {
         parentChildSignupPostHookMethod(input, params);
