@@ -49,6 +49,7 @@ const Topic = `
     isTrial: Boolean @defaultValue(value: "false")
     assignmentQuestions: [AssignmentQuestion] @relation(name: "TopicAssignmentQuestion")
     bulletPoints: [BulletPoint]
+    courses: [Course] @relation(name: "CourseTopic")
   }
 `;
 

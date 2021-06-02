@@ -6,6 +6,17 @@ import {
   SCHOOL_ADMIN,
 } from '../../../../constants/roles';
 
+// video, lo, chat, pq, coding assignment, home assignment, quiz
+const TopicComponentsRule = `
+  type TopicComponentsRule {
+   componentName: String
+   parentComponentName: String
+   order: Int
+   max: Int
+   min: Int
+   collectionName: String
+ }`;
+
 const Course = `
   type Course @model 
   @appPermissions(
@@ -34,7 +45,9 @@ const Course = `
     products: [Product] @relation(name: "CourseProduct")
     mentorPricings: [MentorPricing] @relation(name: "CourseMentorPricing")
     thumbnail: File @relation(name: "CourseThumbnail", direction: "OneWay")
+    topics: [Topic] @relation(name: "CourseTopic")
+    componentRule: [TopicComponentsRule]
   }
 `;
 
-export default Course;
+export default [Course, TopicComponentsRule];
