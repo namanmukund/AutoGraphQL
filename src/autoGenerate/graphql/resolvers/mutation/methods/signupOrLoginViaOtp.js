@@ -26,8 +26,7 @@ const signupOrLoginViaOtp = async (root, params, context, info) => {
     authentication,
   ).then((result) => {
     const newResult = toObject(result);
-
-    return posthook(newResult, mutationName);
+    return posthook(newResult, mutationName, context, params);
   });
 };
 

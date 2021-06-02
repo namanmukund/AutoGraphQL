@@ -656,7 +656,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'addSchoolClass': {
-      await addSchoolClassValidation(params, mutationOrQueryName, context);
+      await addSchoolClassValidation(params, mutationOrQueryName, );
       break;
     }
     case 'updateSchoolClass': {

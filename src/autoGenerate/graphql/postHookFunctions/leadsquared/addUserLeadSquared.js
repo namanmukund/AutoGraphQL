@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
 
-const addUserLeadSquared = (params) => {
+const addUserLeadSquared = (params, create = true) => {
   const leadSquaredInput = {
     Phone: get(params, 'input.parentPhone.countryCode') + get(params, 'input.parentPhone.number'),
   };
@@ -45,7 +45,7 @@ const addUserLeadSquared = (params) => {
   if (get(params, 'input.utmMedium')) {
     leadSquaredInput.mx_utm_medium = get(params, 'input.utmMedium');
   }
-  updateLeadsquared(leadSquaredInput, createjfdjs);
+  updateLeadsquared(leadSquaredInput, create);
 };
 
 export default addUserLeadSquared;
