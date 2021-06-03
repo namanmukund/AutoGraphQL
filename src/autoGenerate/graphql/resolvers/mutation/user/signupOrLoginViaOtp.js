@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
@@ -14,8 +15,18 @@ import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
 import { PARENT } from '../../../../../../constants/roles';
 import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
 import sendBookingReminderOrConfigmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 const USER_TYPE = 'User';
+
+const FETCH_CAMPAIGN = (campaignId) => `{
+  campaign(id: "${campaignId}") {
+    type
+    school {
+      name
+    }
+  }
+}`;
 
 const updateExistingUserOTP = (
   searchObj,
@@ -104,7 +115,15 @@ const signupOrLoginViaOtp = async (
       await modelMutations.addDocument(userData);
       sendBookingReminderOrConfigmationB2BC(userData.id);
       // create on leadsquared
-      parentChildSignupPostHookMethod(input, params);
+      if (input.campaignId) {
+        const campaignRes = await callLocalGraphqlApi(FETCH_CAMPAIGN(input.campaignId));
+        const campaignType = get(campaignRes, 'data.campaign.type', '');
+        input.schoolName = get(campaignRes, 'data.campaign.school.name', '');
+        input.Vertical = campaignType.replace('Event', '');
+        parentChildSignupPostHookMethod(input, params);
+      } else {
+        parentChildSignupPostHookMethod(input, params);
+      }
     } else {
       throw new DatabaseRecordNotFoundError();
     }

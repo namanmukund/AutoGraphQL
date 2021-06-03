@@ -38,6 +38,7 @@ const USER_TYPE = 'User';
 
 const FETCH_CAMPAIGN = (campaignId) => `{
   campaign(id: "${campaignId}") {
+    type
     school {
       name
     }
