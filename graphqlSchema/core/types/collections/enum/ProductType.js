@@ -12,6 +12,7 @@ const ProductType = `
     oneToTen,
     oneToEleven,
     oneToTwelve,
+    oneToThirty,
     selfLearner
   }`;
 
