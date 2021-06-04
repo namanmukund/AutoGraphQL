@@ -9,12 +9,11 @@ import {
 // video, lo, chat, pq, coding assignment, home assignment, quiz
 const TopicComponentsRule = `
   type TopicComponentsRule {
-   componentName: String
-   parentComponentName: String
+   componentName: TopicComponents
+   childComponentName: ChildTopicComponents
    order: Int
    max: Int
    min: Int
-   collectionName: String
  }`;
 
 const Course = `
@@ -45,6 +44,7 @@ const Course = `
     products: [Product] @relation(name: "CourseProduct")
     mentorPricings: [MentorPricing] @relation(name: "CourseMentorPricing")
     thumbnail: File @relation(name: "CourseThumbnail", direction: "OneWay")
+    bannerThumbnail: File @relation(name: "CourseBannerThumbnail", direction: "OneWay")
     topics: [Topic] @relation(name: "CourseTopic")
     componentRule: [TopicComponentsRule]
   }
