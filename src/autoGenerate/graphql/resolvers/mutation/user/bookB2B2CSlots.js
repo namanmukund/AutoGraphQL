@@ -5,6 +5,7 @@ import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/get
 import { NoSlotSelectedError, OnlyOneSlotAllowedError } from '../../../../../../constants/errors/input';
 import { BatchFullError, DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
 import { addMenteeBookingLeadsquared } from '../../../postHookFunctions/leadsquared';
+import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 
 // query to fetch student profile id on basis of user id
 const fetchUser = (userId) => `
@@ -15,6 +16,7 @@ const fetchUser = (userId) => `
         id
         parents {
           user {
+            id
             phone {
               number
               countryCode
@@ -191,12 +193,18 @@ const bookB2B2CSlotsMutationResolver = async (
   }
 
   const phone = get(fetchUserRes, 'data.user.studentProfile.parents[0].user.phone.number', '');
+  const parentId = get(fetchUserRes, 'data.user.studentProfile.parents[0].user.id', '');
+
+  // add mentee booking
   addMenteeBookingLeadsquared({
     phone,
     bookingDate,
     type: 'b2b2c',
     slot: slotTimeArray[0],
   });
+
+  // send booking Confimation Mail
+  sendBookingReminderOrConfirmationB2B(parentId, true);
 
   return {
     result: true,
