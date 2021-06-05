@@ -1,10 +1,12 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+import updateBatchInMentorProfileScript from '../scriptMethods/updateBatchInMentorProfile';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
   /*
   Add script functions
    */
+  await updateBatchInMentorProfileScript();
   // await addToSalesOperationScript('firstMentorMenteeSession');
   // await updateUserInPaymentPlanAndPaymentInstallment();
   // await migrateRescheduledReasonsToMentorMenteeSession();
