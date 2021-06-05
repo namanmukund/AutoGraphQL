@@ -6,8 +6,6 @@ const LEAD_CREATE_ENDPOINT = '/LeadManagement.svc/Lead.Capture?';
 const LEAD_UPDATE_ENDPOINT = '/ProspectActivity.svc/CreateCustom?';
 const LEAD_GET_ENDPOINT = '/LeadManagement.svc/RetrieveLeadByPhoneNumber?';
 
-const LEAD_UPDATE_CODE = 99;
-
 const getLeadSquaredParams = (params = {}, create = false, leadActivity) => {
   const leadSquaredParams = [];
   // eslint-disable-next-line no-restricted-syntax
@@ -43,6 +41,7 @@ const logSheet = (Status, Data, Phone, error = '-') => {
 
 const updateSheet = async (leadSquaredParams = {}, create = false, leadActivity) => {
   let LEAD_ENDPOINT = '';
+  return;
   if (create || !leadActivity) {
     LEAD_ENDPOINT = LEAD_CREATE_ENDPOINT;
   } else {

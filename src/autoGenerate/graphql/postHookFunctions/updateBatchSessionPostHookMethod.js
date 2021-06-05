@@ -9,6 +9,7 @@ import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentCompone
 import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
 import addRescheduledSlot from './utils/addRescheduledSlot';
 import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
+import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -148,7 +149,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     bookingDateFromInput,
     allottedMentorId,
   } = context;
-
+  // console.log(JSON.stringify(input, null, 2));
   /*
 get Course Id
 */
@@ -264,6 +265,8 @@ get Course Id
       }
     }
   }
+  const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
+  extractBatchSessionAndSendB2B(batchSessionId, students);
 };
 
 export default updateBatchSessionPostHookMethod;

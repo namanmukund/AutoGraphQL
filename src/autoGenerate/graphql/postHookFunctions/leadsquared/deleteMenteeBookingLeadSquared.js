@@ -11,6 +11,7 @@ const deleteMenteeBookingLeadSquared = async (userInfo, topicInfo) => {
     };
     const activityInput = {
       ActivityEvent: 103,
+      ActivityNote: 'User deleted a session',
       Fields: [
         {
           SchemaName: 'Status',

@@ -4,19 +4,36 @@ import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSqu
 
 const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, userInfo, topicInfo) => {
   const { bookingDate, bookedBy } = input;
-  const phoneNumber = get(userInfo, 'data.user.studentProfile.parents[0].user.phone.number');
-  const topicOrder = get(topicInfo, 'data.topic.order');
-  if (topicOrder === 1) {
-    const slotNumber = slotTimeStringArray[0].split('slot')[1];
-    const bookingDateTime = moment(bookingDate).minutes(0).hours(slotNumber).subtract(5, 'hours')
+  let phoneNumber = '';
+  let bookingDateTime = '';
+  let shouldUpdate = true;
+  if (get(input, 'type') === 'b2b2c') {
+    const { slot, phone } = input;
+    phoneNumber = phone;
+    bookingDateTime = moment(bookingDate).minutes(0).hours(slot).subtract(5, 'hours')
       .subtract(30, 'minutes')
       .format('YYYY-MM-DD HH:mm:ss');
+  } else {
+    phoneNumber = get(userInfo, 'data.user.studentProfile.parents[0].user.phone.number');
+    const topicOrder = get(topicInfo, 'data.topic.order');
+    if (topicOrder === 1) {
+      const slotNumber = slotTimeStringArray[0].split('slot')[1];
+      bookingDateTime = moment(bookingDate).minutes(0).hours(slotNumber).subtract(5, 'hours')
+        .subtract(30, 'minutes')
+        .format('YYYY-MM-DD HH:mm:ss');
+    } else {
+      shouldUpdate = false;
+    }
+  }
+
+  if (shouldUpdate) {
     const leadSquaredInput = {
       Phone: phoneNumber,
       mx_Booking_Date_Time: bookingDateTime,
     };
     const activityInput = {
       ActivityEvent: 103,
+      ActivityNote: 'User booked a session',
       Fields: [
         {
           SchemaName: 'Status',
@@ -34,13 +51,6 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
     };
     updateLeadsquared(leadSquaredInput, false, activityInput);
   }
-  const leadSquaredInput = {
-    Phone: phoneNumber,
-    mx_Lead_Status: 'Booked',
-    ProspectStage: 'Booked',
-    mx_Booking_Date_Time: bookingDateTime,
-  };
-  updateLeadsquared(leadSquaredInput);
 };
 
 export default addMenteeBookingLeadsquared;

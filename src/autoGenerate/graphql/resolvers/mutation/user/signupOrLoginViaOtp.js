@@ -14,7 +14,7 @@ import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
 import { PARENT } from '../../../../../../constants/roles';
 import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
-import sendBookingReminderOrConfigmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
+import sendBookingReminderOrConfirmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 const USER_TYPE = 'User';
@@ -113,7 +113,7 @@ const signupOrLoginViaOtp = async (
       userData = generateCuid(newUser);
 
       await modelMutations.addDocument(userData);
-      sendBookingReminderOrConfigmationB2BC(userData.id);
+      sendBookingReminderOrConfirmationB2BC(userData.id);
       // create on leadsquared
       if (input.campaignId) {
         const campaignRes = await callLocalGraphqlApi(FETCH_CAMPAIGN(input.campaignId));

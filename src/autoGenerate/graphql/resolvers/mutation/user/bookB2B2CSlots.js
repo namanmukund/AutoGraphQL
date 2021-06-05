@@ -191,21 +191,6 @@ const bookB2B2CSlotsMutationResolver = async (
     // add student to the new batch
     await callLocalGraphqlApi(updateBatch(batchId, studentProfileId));
   }
-
-  const phone = get(fetchUserRes, 'data.user.studentProfile.parents[0].user.phone.number', '');
-  const parentId = get(fetchUserRes, 'data.user.studentProfile.parents[0].user.id', '');
-
-  // add mentee booking
-  addMenteeBookingLeadsquared({
-    phone,
-    bookingDate,
-    type: 'b2b2c',
-    slot: slotTimeArray[0],
-  });
-
-  // send booking Confimation Mail
-  sendBookingReminderOrConfirmationB2B(parentId, true);
-
   return {
     result: true,
   };

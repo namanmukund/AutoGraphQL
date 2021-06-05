@@ -15,35 +15,21 @@ const rescheduleMenteeBookingLeadsquared = async (input, slotTimeStringArray, us
       Phone: phoneNumber,
       mx_Booking_Date_Time: bookingDateTime,
     };
-    const activityInput = bookedBy === 'tekieTeam'
-      ? {
-        ActivityEvent: 103,
-        Fields: [
-          {
-            SchemaName: 'Status',
-            Value: 'Booked (Verified)',
-          },
-          {
-            SchemaName: 'mx_Custom_8',
-            Value: bookingDateTime,
-          },
-        ],
-      }
-      : {
-        ActivityEvent: 107,
-        Fields: [
-          {
-            SchemaName: 'mx_Custom_1',
-            Value: 'App Reschedule',
-          },
-          {
-            SchemaName: 'mx_Custom_3',
-            Value: bookingDateTime,
-          },
-        ],
-      };
+    const activityInput = {
+      ActivityEvent: 103,
+      ActivityNote: bookedBy === 'tekieTeam' ? 'Agent updated session details' : 'User rescheduled a session',
+      Fields: [
+        {
+          SchemaName: 'Status',
+          Value: bookedBy === 'tekieTeam' ? 'Booked (Verified)' : 'Booked (Non Verified)',
+        },
+        {
+          SchemaName: 'mx_Custom_8',
+          Value: bookingDateTime,
+        },
+      ],
+    };
     updateLeadsquared(leadSquaredInput, false, activityInput);
-
   }
 };
 
