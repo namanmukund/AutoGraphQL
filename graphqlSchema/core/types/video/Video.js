@@ -1,7 +1,6 @@
 import { READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
 import { CMS_HEAD, NOT_CMS_HEAD, SCHOOL_ADMIN } from '../../../../constants/roles';
-import { CREATED } from '../../../../constants/subscriptionEvents';
 
 const Video = `
   type Video @model
@@ -20,8 +19,7 @@ const Video = `
       { userRole: ${SCHOOL_ADMIN} appName: "*" operations: ${READ} }
       ], 
     rule: allow
-  ) 
-  @subscribe(events: [${CREATED}])
+  )
   {
     status: ContentStatus! @defaultValue(value: "unpublished")
     videoFile: File @relation(name: "VideoFile", direction: "OneWay")

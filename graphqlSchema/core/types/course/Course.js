@@ -12,8 +12,8 @@ const CourseComponentsRule = `
    componentName: TopicComponents
    childComponentName: ChildTopicComponents
    order: Int
-   max: Int
-   min: Int
+   max: Int @defaultValue(value: 1)
+   min: Int @defaultValue(value: 1)
  }`;
 
 const Course = `
