@@ -1,12 +1,16 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import updateBatchInMentorProfileScript from '../scriptMethods/updateBatchInMentorProfile';
+// import moveVideoToACollection from '../scriptMethods/moveVideoToACollection';
+// import updateBatchInUserScript from '../scriptMethods/updateBatchInUserScript';
+// import updateCourseInTopics from '../scriptMethods/updateCourseInTopics';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
   /*
   Add script functions
    */
-  await updateBatchInMentorProfileScript();
+  // await updateBatchInUserScript();
+  // await moveVideoToACollection();
+  // await updateCourseInTopics();
   // await addToSalesOperationScript('firstMentorMenteeSession');
   // await updateUserInPaymentPlanAndPaymentInstallment();
   // await migrateRescheduledReasonsToMentorMenteeSession();
