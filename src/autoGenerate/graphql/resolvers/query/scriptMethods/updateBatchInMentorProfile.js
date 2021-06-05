@@ -1,4 +1,4 @@
-import { get, update } from 'lodash';
+import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 const fetchBatchesWithMentorProfiles = async () => {
@@ -12,12 +12,8 @@ const fetchBatchesWithMentorProfiles = async () => {
               id
               code
               allottedMentor{
-                mentorProfile{
-                  id
-                  user{
-                    username
-                  }
-                }
+                id
+                username
               }
             }
           }
@@ -26,13 +22,13 @@ const fetchBatchesWithMentorProfiles = async () => {
   return get(batches, 'data.batches', []);
 };
 
-const updateBatchInMentorProfile = async (mentorProfileId, batchId) => {
+const updateBatchInMentorProfile = async (userId, batchId) => {
   const mutation = `
       mutation{
-        updateMentorProfile(id:"${mentorProfileId}", batchesConnectIds:["${batchId}"]){
-          id
+          updateUser(id:"${userId}", mentorBatchesConnectIds:["${batchId}"], input:{}){
+            id
+          }
         }
-      }
       `;
   const result = await callLocalGraphqlApi(mutation);
   return get(result, 'data.updateMentorProfile', {});
@@ -44,19 +40,22 @@ const updateBatchInMentorProfileScript = async () => {
   let batchesLength = 0;
   let batches = [];
   do {
+    // eslint-disable-next-line no-await-in-loop
     batches = await fetchBatchesWithMentorProfiles();
     batchesLength = batches.length;
+    // eslint-disable-next-line no-restricted-syntax
     for (const batch of batches) {
       const batchId = batch.id;
-      const mentorProfileId = get(batch, 'allottedMentor.mentorProfile.id', '');
-      const username = get(batch, 'allottedMentor.mentorProfile.user.username');
+      const userId = get(batch, 'allottedMentor.id', '');
+      const username = get(batch, 'allottedMentor.username');
       const batchCode = get(batch, 'code');
-      if (batchId.length > 0 && mentorProfileId.length > 0) {
-        await updateBatchInMentorProfile(mentorProfileId, batchId);
+      if (batchId.length > 0 && userId.length > 0) {
+        // eslint-disable-next-line no-await-in-loop
+        await updateBatchInMentorProfile(userId, batchId);
+        // eslint-disable-next-line no-console
         console.log(`>>>>> Updated MentorProfile : ${username}, with batch : ${batchCode}`);
       }
     }
   } while (batchesLength === 1000);
-
 };
 export default updateBatchInMentorProfileScript;
