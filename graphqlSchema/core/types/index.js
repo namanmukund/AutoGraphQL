@@ -94,6 +94,7 @@ import BookB2B2CSlotsInput from './bookB2B2CSlotsInput';
 import StudentCurrentStatus from './studentCurrentStatus';
 import Video from './video';
 import ComicStrip from './comicStrip';
+import BlockTypeProject from './blockTypeProject';
 
 export default [
   ...User,
@@ -192,4 +193,5 @@ export default [
   ...StudentCurrentStatus,
   ...Video,
   ...ComicStrip,
+  ...BlockTypeProject,
 ];

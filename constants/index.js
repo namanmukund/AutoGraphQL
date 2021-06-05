@@ -315,13 +315,13 @@ const topicComponents = {
   learningObjective: 'learningObjective',
   assignment: 'assignment',
   quiz: 'quiz',
-  comicStrip: 'comicStrip',
-  project: 'project',
+  blockTypeProject: 'blockTypeProject',
 };
 
 const childTopicComponents = {
   message: 'message',
   practiceQuestion: 'practiceQuestion',
+  comicStrip: 'comicStrip',
 };
 
 export const GIFT_VOUCHER_AMOUNT = 2500;

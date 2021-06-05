@@ -57,7 +57,7 @@ const Topic = `
     assignmentQuestions: [AssignmentQuestion] @relation(name: "TopicAssignmentQuestion")
     bulletPoints: [BulletPoint]
     courses: [Course] @relation(name: "CourseTopic")
-    projects: [Project] @relation(name: "TopicProject")
+    blockTypeProjects: [BlockTypeProject] @relation(name: "TopicBlockTypeProject")
     videoContent: [Video] @relation(name: "TopicVideo")
     componentRule: [TopicComponentsRule]
   }
