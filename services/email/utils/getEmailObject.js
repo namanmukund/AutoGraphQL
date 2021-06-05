@@ -19,7 +19,10 @@ const getEmailObject = (
     to: emailTo || [''],
     cc: ccEmail || [''],
     bcc: bccEmail || [''],
-    from: emailFromParam || fromEmail,
+    from: {
+      email: emailFromParam || fromEmail,
+      name: 'Tekie',
+    },
     subject: mailSubject,
     html,
   };

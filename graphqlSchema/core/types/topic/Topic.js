@@ -3,6 +3,13 @@ import { TLA, TMS, TWA } from '../../../../constants';
 import { CMS_HEAD, NOT_CMS_HEAD, SCHOOL_ADMIN } from '../../../../constants/roles';
 import { CREATED } from '../../../../constants/subscriptionEvents';
 
+const TopicComponentsRule = `
+  type TopicComponentsRule {
+   componentName: TopicComponents
+   childComponentName: ChildTopicComponents
+   order: Int
+ }`;
+
 const Topic = `
   type Topic @model
   @appPermissions(
@@ -49,7 +56,11 @@ const Topic = `
     isTrial: Boolean @defaultValue(value: "false")
     assignmentQuestions: [AssignmentQuestion] @relation(name: "TopicAssignmentQuestion")
     bulletPoints: [BulletPoint]
+    courses: [Course] @relation(name: "CourseTopic")
+    blockTypeProjects: [BlockTypeProject] @relation(name: "TopicBlockTypeProject")
+    videoContent: [Video] @relation(name: "TopicVideo")
+    componentRule: [TopicComponentsRule]
   }
 `;
 
-export default Topic;
+export default [Topic, TopicComponentsRule];
