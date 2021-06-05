@@ -7,8 +7,8 @@ import {
 } from '../../../../constants/roles';
 
 // video, lo, chat, pq, coding assignment, home assignment, quiz
-const TopicComponentsRule = `
-  type TopicComponentsRule {
+const CourseComponentsRule = `
+  type CourseComponentsRule {
    componentName: TopicComponents
    childComponentName: ChildTopicComponents
    order: Int
@@ -46,8 +46,10 @@ const Course = `
     thumbnail: File @relation(name: "CourseThumbnail", direction: "OneWay")
     bannerThumbnail: File @relation(name: "CourseBannerThumbnail", direction: "OneWay")
     topics: [Topic] @relation(name: "CourseTopic")
-    componentRule: [TopicComponentsRule]
+    componentRule: [CourseComponentsRule]
+    badges: [Badge] @relation(name: "CourseBadge")
+    badgeDescription: String @uniqueOrEmpty @length(min: 6, max: 120) @trim
   }
 `;
 
-export default [Course, TopicComponentsRule];
+export default [Course, CourseComponentsRule];

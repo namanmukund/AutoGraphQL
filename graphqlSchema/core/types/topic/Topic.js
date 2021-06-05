@@ -3,6 +3,13 @@ import { TLA, TMS, TWA } from '../../../../constants';
 import { CMS_HEAD, NOT_CMS_HEAD, SCHOOL_ADMIN } from '../../../../constants/roles';
 import { CREATED } from '../../../../constants/subscriptionEvents';
 
+const TopicComponentsRule = `
+  type TopicComponentsRule {
+   componentName: TopicComponents
+   childComponentName: ChildTopicComponents
+   order: Int
+ }`;
+
 const Topic = `
   type Topic @model
   @appPermissions(
@@ -29,17 +36,6 @@ const Topic = `
         @trim
     description: String @uniqueOrEmpty @trim
     status: ContentStatus! @defaultValue(value: "unpublished")
-    video: File @relation(name: "TopicVideo", direction: "OneWay")
-    videoTitle: String @uniqueOrEmpty @trim
-    videoDescription: String @uniqueOrEmpty @trim
-    videoSubtitle: File @relation(name: "VideoSubtitle", direction: "OneWay")
-    videoThumbnail: File @relation(name: "VideoThumbnail", direction: "OneWay")
-    videoStatus: ContentStatus! @defaultValue(value: "unpublished")
-    videoStartTime: Int
-    videoEndTime: Int
-    storyStartTime: Int
-    storyEndTime: Int
-    storyThumbnail: File @relation(name: "StoryThumbnail", direction: "OneWay")
     chapter: Chapter @relation(name: "ChapterTopic")
     learningObjectives: [LearningObjective] @relation(name: "TopicLearningObjective", isSubset: true)
     questions: [QuestionBank] @relation(name: "TopicQuestionBank")
@@ -50,7 +46,11 @@ const Topic = `
     assignmentQuestions: [AssignmentQuestion] @relation(name: "TopicAssignmentQuestion")
     bulletPoints: [BulletPoint]
     courses: [Course] @relation(name: "CourseTopic")
+    projects: [Project] @relation(name: "TopicProject")
+    videoContent: [Video] @relation(name: "TopicVideo")
+    comicStrips: [ComicStrip] @relation(name: "TopicComicStrip")
+    componentRule: [TopicComponentsRule]
   }
 `;
 
-export default Topic;
+export default [Topic, TopicComponentsRule];
