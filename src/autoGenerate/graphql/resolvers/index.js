@@ -524,6 +524,7 @@ Object.keys(parsedASTMap).forEach((type) => {
 
 resolvers.Mutation.signUp = signUp;
 resolvers.Mutation.signUpAffiliate = signUpAffiliate;
+resolvers.Mutation.signUpSchool = signUpSchool;
 resolvers.Mutation.signupExistingUser = signupExistingUser;
 resolvers.Mutation.login = login;
 resolvers.Mutation.socialLogin = socialLogin;
