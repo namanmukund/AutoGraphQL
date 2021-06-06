@@ -1,6 +1,7 @@
 import { log, dbConfig } from '../utils';
 import db from './db';
 import createScheduler from '../utils/createScheduler';
+import reRunJobsFromDB from '../utils/scheduleJobs/reRunJobsFromDB';
 
 let dbReconnectCount = 1;
 db.on('error', (err) => {
@@ -19,6 +20,7 @@ db.on('error', (err) => {
   log('MongoDB disconnected!');
 }).once('open', async () => {
   log('Connected to DB.');
+  reRunJobsFromDB();
   if (
     process.env.NODE_ENV === 'production'
     && process.env.IS_SCHEDULER_INSTANCE

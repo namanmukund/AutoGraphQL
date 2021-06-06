@@ -33,6 +33,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   const slotTimeArray = getSelectedSlotsTime(slots);
   context.batchSessionId = batchSessionId;
   context.topicId = topic && topic.id;
+  context.inputSlot = inputSlot;
   context.batchId = batch && batch.id;
   context.bookingDate = bookingDate;
   context.mentorSessionConnectId = mentorSession && mentorSession.id;

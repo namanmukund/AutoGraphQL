@@ -14,7 +14,7 @@ import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
 import { PARENT } from '../../../../../../constants/roles';
 import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
-import sendBookingReminderOrConfigmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
+import sendBookingReminderOrConfirmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 const USER_TYPE = 'User';
@@ -22,6 +22,9 @@ const USER_TYPE = 'User';
 const FETCH_CAMPAIGN = (campaignId) => `{
   campaign(id: "${campaignId}") {
     type
+    batchRules {
+      batchSize 
+    }
     school {
       name
     }
@@ -111,15 +114,18 @@ const signupOrLoginViaOtp = async (
       newUser.country = input.country || 'india';
       newUser.timezone = input.timezone || 'Asia/Kolkata';
       userData = generateCuid(newUser);
+      input.leadStatus = 'New Lead';
+      input.country = input.country ? input.country : 'india';
 
       await modelMutations.addDocument(userData);
-      sendBookingReminderOrConfigmationB2BC(userData.id);
+      sendBookingReminderOrConfirmationB2BC(userData.id);
       // create on leadsquared
       if (input.campaignId) {
         const campaignRes = await callLocalGraphqlApi(FETCH_CAMPAIGN(input.campaignId));
         const campaignType = get(campaignRes, 'data.campaign.type', '');
         input.schoolName = get(campaignRes, 'data.campaign.school.name', '');
         input.Vertical = campaignType.replace('Event', '');
+        input.mx_Demo_Model = `1:${get(campaignRes, 'data.campaign.batchRules.batchSize', '')}`;
         parentChildSignupPostHookMethod(input, params);
       } else {
         parentChildSignupPostHookMethod(input, params);
