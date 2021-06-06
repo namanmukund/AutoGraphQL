@@ -10,7 +10,7 @@ const getTopics = async () => {
               {
                 and: [
                   {status: published},
-                  {chapter_some: {courses_some: {title: ${GLOBAL_COURSE_TITLE}}}}
+                  {chapter_some: {courses_some: {title: "${GLOBAL_COURSE_TITLE}"}}}
                 ]
               }, orderBy: order_ASC){
               id

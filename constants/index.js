@@ -315,7 +315,7 @@ const topicComponents = {
   learningObjective: 'learningObjective',
   assignment: 'assignment',
   quiz: 'quiz',
-  blockTypeProject: 'blockTypeProject',
+  blockBasedProject: 'blockBasedProject',
 };
 
 const childTopicComponents = {
