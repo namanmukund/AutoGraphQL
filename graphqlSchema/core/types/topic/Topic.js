@@ -59,7 +59,7 @@ const Topic = `
     courses: [Course] @relation(name: "CourseTopic")
     blockTypeProjects: [BlockTypeProject] @relation(name: "TopicBlockTypeProject")
     videoContent: [Video] @relation(name: "TopicVideo")
-    componentRule: [TopicComponentsRule]
+    topicComponentRule: [TopicComponentsRule]
   }
 `;
 

@@ -46,7 +46,7 @@ const Course = `
     thumbnail: File @relation(name: "CourseThumbnail", direction: "OneWay")
     bannerThumbnail: File @relation(name: "CourseBannerThumbnail", direction: "OneWay")
     topics: [Topic] @relation(name: "CourseTopic")
-    componentRule: [CourseComponentsRule]
+    courseComponentRule: [CourseComponentsRule]
     badges: [Badge] @relation(name: "CourseBadge")
     badgeDescription: String @uniqueOrEmpty @length(min: 6, max: 120) @trim
   }
