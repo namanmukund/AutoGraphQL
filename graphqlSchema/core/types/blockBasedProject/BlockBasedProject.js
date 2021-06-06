@@ -2,8 +2,8 @@ import { READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
 import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
 
-const BlockTypeProject = `
-  type BlockTypeProject @model
+const BlockBasedProject = `
+  type BlockBasedProject @model
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
@@ -12,19 +12,19 @@ const BlockTypeProject = `
       ], 
     rule: allow
   ) 
-  ${getPermissionSchemaString('Project')}
+  ${getPermissionSchemaString('BlockBasedProject')}
   {
     title: String! @trim
     order: Int
     statement: String @trim
     difficulty: Int
     projectDescription: String @trim
-    projectThumbnail: File @relation(name: "BlockTypeProjectThumbnail", direction: "OneWay")
+    projectThumbnail: File @relation(name: "BlockBasedProjectThumbnail", direction: "OneWay")
     answerDescription: String @trim
-    answerThumbnail: File @relation(name: "BlockTypeProjectAnswerThumbnail", direction: "OneWay")
-    topics: [Topic] @relation(name: "TopicBlockTypeProject")
+    answerThumbnail: File @relation(name: "BlockBasedProjectAnswerThumbnail", direction: "OneWay")
+    topics: [Topic] @relation(name: "TopicBlockBasedProject")
     status: ContentStatus! @defaultValue(value: "unpublished")
   }
 `;
 
-export default BlockTypeProject;
+export default BlockBasedProject;
