@@ -2,7 +2,6 @@ import { get } from 'lodash';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
 
 const addUserLeadSquared = (params, create = true) => {
-  console.log(params.input)
   const leadSquaredInput = {
     Phone: get(params, 'input.phone.countryCode') + get(params, 'input.phone.number'),
   };
@@ -18,14 +17,19 @@ const addUserLeadSquared = (params, create = true) => {
   if (get(params, 'input.childName')) {
     leadSquaredInput.mx_Student_Name = get(params, 'input.childName');
   }
+  if (get(params, 'input.mx_Demo_Model')) {
+    leadSquaredInput.mx_Demo_Model = get(params, 'input.mx_Demo_Model');
+  }
 
   if (get(params, 'input.schoolName')) {
     leadSquaredInput.mx_School_name = get(params, 'input.schoolName');
   }
-
+  if (get(params, 'input.status')) {
+    leadSquaredInput.mx_Lead_Status = get(params, 'input.status');
+  }
   if (get(params, 'input.Vertical')) {
     leadSquaredInput.mx_Vertical = get(params, 'input.Vertical');
-  } else {
+  } else if (!get(params, 'input.schoolName')) {
     leadSquaredInput.mx_Vertical = 'b2c';
   }
 

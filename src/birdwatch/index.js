@@ -5,7 +5,7 @@ const reduceUniqueFields = (tasks) => {
   tasks.forEach((task) => {
     Object.keys(task.fields).forEach((fieldType) => {
       if (fields[fieldType]) {
-        fields[fieldType] = { ...fields[fieldType], ...Object.keys(task.fields[fieldType])};
+        fields[fieldType] = { ...fields[fieldType], ...Object.keys(task.fields[fieldType]) };
       } else {
         fields[fieldType] = Object.keys(task.fields[fieldType]);
       }
@@ -14,14 +14,8 @@ const reduceUniqueFields = (tasks) => {
   return fields;
 };
 
-const getParameterValues = async () => {
-  // console.log(input);
-  return {};
-};
-
-const getActionArgument = () => {
-  return {};
-};
+const getParameterValues = async () => {};
+const getActionArgument = () => ({});
 
 const birdwatch = async (input, mutationName, context, params) => {
   // console.log(input);

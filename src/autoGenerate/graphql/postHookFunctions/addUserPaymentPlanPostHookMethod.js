@@ -173,7 +173,6 @@ const addUserPaymentPlanPostHookMethod = async (input, params) => {
   );
 
   let phoneNumber = '';
-  console.log(userPaymentPlanId);
   // returning updated userPaymentInstallments
   if (input && userPaymentPlanId) {
     // getting updated Payment installments
@@ -186,7 +185,6 @@ const addUserPaymentPlanPostHookMethod = async (input, params) => {
   }
 
   // update Leadsquared
-  console.log('productConnectId', productConnectId);
   if (productConnectId) {
     const product = await callLocalGraphqlApi(fetchProduct(productConnectId));
     const productType = get(product, 'data.product.type');

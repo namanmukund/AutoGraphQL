@@ -50,14 +50,8 @@ import updateBatchPostHookMethod from './postHookFunctions/updateBatchPostHookMe
 import updateCampaignPostHookMethod from './postHookFunctions/updateCampaignPostHookMethod';
 import addStudentProfilePostHookMethod from './postHookFunctions/addStudentProfilePostHookMethod';
 import removeFromBatchStudentProfilePosthookMethod from './postHookFunctions/removeFromBatchStudentProfile';
-import updateUserPostHookMethod from './postHookFunctions/updateUserPostHookMethod';
-// import birdwatch from '../../birdwatch';
 
 const posthook = async (input, mutationName, context, params) => {
-
-  // manages user in leadsquared and sends emails/whatsapp
-  // birdwatch(input, mutationName, context, params);
-
   switch (mutationName) {
     case 'deleteFile': {
       const { uri } = input;

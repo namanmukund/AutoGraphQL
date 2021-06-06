@@ -57,7 +57,6 @@ const USER_QUERY = (userId) => `
 
 const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false) => {
   const timeout = isBookSlot ? 0 : TIMEOUT;
-  console.log('triggered... send b2b2c');
   setTimeout(async () => {
     const res = await callLocalGraphqlApi(USER_QUERY(userId));
     const user = get(res, 'data.user', {}) || {};
@@ -84,16 +83,14 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
       if (timeTable.bookingDate) {
         if (!isBookSlot) return;
         const batchId = get(user, 'parentProfile.children[0].batch.id');
-        console.log('sending booking maill....');
         if (get(user, 'isBookSessionReminderSent')) return;
         const { bookingDate, ...slots } = timeTable;
         const slotTime = Object.keys(slots).find((slot) => slots[slot]);
         await updateBookSessionReminderStatus(get(user, 'id'), true);
-        console.log('sending booking maill....');
 
         sendTransactionalEmail({
           parentEmail: user.email,
-          workshopDate: moment(bookingDate).format('dddd, Do MMM'),
+          workshopDate: moment(bookingDate).format('dddd, Do MMMM'),
           studentName,
           parentName,
           schoolName,
@@ -109,18 +106,16 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
           ? [
             { name: 'parent_name', value: parentName },
             { name: 'student_name', value: studentName },
-            { name: 'w_date', value: moment(bookingDate).format('dddd, Do MMM') },
+            { name: 'w_date', value: moment(bookingDate).format('dddd, Do MMMM') },
             { name: 'w_time', value: getSlotLabel(slotTime.replace('slot', '')).startTime },
             { name: 'school_name', value: schoolName },
           ] : [
             { name: 'parent_name', value: parentName },
             { name: 'student_name', value: studentName },
-            { name: 'w_date', value: moment(bookingDate).format('dddd, Do MMM') },
+            { name: 'w_date', value: moment(bookingDate).format('dddd, Do MMMM') },
             { name: 'w_time', value: getSlotLabel(slotTime.replace('slot', '')).startTime },
           ];
         sendWhatsAppTemplateMessage(phone, bookTemplate, phone, parameters);
-        const today = new Date();
-        console.log('difff=>>', getDays(bookingDate));
         if (
           getDays(bookingDate) > 3
           || (getDays(bookingDate) === 3 && slotNumber <= 17)) {
@@ -129,15 +124,9 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
           const thirdMailScheduleTime = slotNumber === 8 || slotNumber === 9
             ? new Date(moment(bookingDate).subtract(1, 'day').toDate().setHours(19, 49, 0, 0))
             : new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0));
-          addToSchedule('engagementMail', new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes() + 1, 0), { userId, code, batchId });
-          addToSchedule('engagementMailWithMentor', new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes() + 2, 0), { userId, code, batchId });
-          addToSchedule('bookingFinalReminder', new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes() + 3, 0), { userId, code, batchId });
-          console.log(
-            'first flow...',
-            firstMailScheduleTime,
-            secondMailScheduleTime,
-            thirdMailScheduleTime,
-          );
+          addToSchedule('engagementMail', firstMailScheduleTime, { userId, code, batchId });
+          addToSchedule('engagementMailWithMentor', secondMailScheduleTime, { userId, code, batchId });
+          addToSchedule('bookingFinalReminder', thirdMailScheduleTime, { userId, code, batchId });
         } else if (getDays(bookingDate) === 0 || (getDays(bookingDate) === 1 && slotNumber <= 18)) {
           let scheduleTime = '';
           if (slotNumber === 8 || slotNumber === 9) {
@@ -146,27 +135,17 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
           } else {
             scheduleTime = new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0));
           }
-          console.log(
-            'same day flow...',
-            scheduleTime,
-          );
-          addToSchedule('bookingSameDayFinalReminder', new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes() + 1, 0), { userId, code, batchId });
+          addToSchedule('bookingSameDayFinalReminder', scheduleTime, { userId, code, batchId });
         } else {
           const firstMailScheduleTime = new Date(moment(bookingDate).subtract(2, 'days').toDate().setHours(18, 11, 0, 0));
           const secondMailScheduleTime = slotNumber === 8 || slotNumber === 9
             ? new Date(moment(bookingDate).subtract(1, 'day').toDate().setHours(19, 49, 0, 0))
-            : new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0));
-          addToSchedule('engagementMailWithMentor', new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes() + 2, 0), { userId, code, batchId });
-          addToSchedule('bookingFinalReminder', new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes() + 3, 0), { userId, code, batchId });
-          console.log(
-            'second day flow...',
-            firstMailScheduleTime,
-            secondMailScheduleTime,
-            );
-          }
+            : new Date(moment(bookingDate).toDate().setHours(slotNumber - 2, 0, 0, 0));
+          addToSchedule('engagementMailWithMentor', firstMailScheduleTime, { userId, code, batchId });
+          addToSchedule('bookingFinalReminder', secondMailScheduleTime, { userId, code, batchId });
+        }
         const watiScheduleTime = new Date(moment(bookingDate).toDate().setHours(slotNumber - 1, 30, 0, 0));
-        console.log('watiTime...', watiScheduleTime);
-        addToSchedule('sessionReminderWati', new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes() + 1, 0), { userId, code, batchId });
+        addToSchedule('sessionReminderWati', watiScheduleTime, { userId, code, batchId });
       } else {
         sendTransactionalEmail({
           parentEmail: user.email,

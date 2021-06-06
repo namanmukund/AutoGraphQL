@@ -4,6 +4,7 @@ const ScheduleJob = `
     parent: User @relation(name: "ScheduleJobParent", direction: "OneWay")
     scheduledDate: Date
     jobType: String
+    batchSessionId: String
     code: String
 }`;
 

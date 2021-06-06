@@ -11,6 +11,9 @@ const menteeInfoQuery = (userId) => `
         parents{
           id
           user{
+            campaign {
+              type
+            }
             id
             name
             email

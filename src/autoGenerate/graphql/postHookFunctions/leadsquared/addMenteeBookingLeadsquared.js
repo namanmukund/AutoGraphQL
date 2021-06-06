@@ -6,7 +6,6 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
   const { bookingDate, bookedBy } = input;
   let phoneNumber = '';
   let bookingDateTime = '';
-  let shouldUpdate = true;
   if (get(input, 'type') === 'b2b2c') {
     const { slot, phone } = input;
     phoneNumber = phone;
@@ -26,31 +25,29 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
     }
   }
 
-  if (shouldUpdate) {
-    const leadSquaredInput = {
-      Phone: phoneNumber,
-      mx_Booking_Date_Time: bookingDateTime,
-    };
-    const activityInput = {
-      ActivityEvent: 103,
-      ActivityNote: 'User booked a session',
-      Fields: [
-        {
-          SchemaName: 'Status',
-          Value: bookedBy === 'tekieTeam' ? 'Booked (Verified)' : 'Booked (Non Verified)',
-        },
-        {
-          SchemaName: 'mx_Custom_3',
-          Value: bookedBy === 'tekieTeam' ? 'Tekie Team' : 'Customer',
-        },
-        {
-          SchemaName: 'mx_Custom_8',
-          Value: bookingDateTime,
-        },
-      ],
-    };
-    updateLeadsquared(leadSquaredInput, false, activityInput);
-  }
+  const leadSquaredInput = {
+    Phone: phoneNumber,
+    mx_Booking_Date_Time: bookingDateTime,
+  };
+  const activityInput = {
+    ActivityEvent: 103,
+    ActivityNote: 'User booked a session',
+    Fields: [
+      {
+        SchemaName: 'Status',
+        Value: bookedBy === 'tekieTeam' ? 'Booked (Verified)' : 'Booked (Non Verified)',
+      },
+      {
+        SchemaName: 'mx_Custom_3',
+        Value: bookedBy === 'tekieTeam' ? 'Tekie Team' : 'Customer',
+      },
+      {
+        SchemaName: 'mx_Custom_8',
+        Value: bookingDateTime,
+      },
+    ],
+  };
+  updateLeadsquared(leadSquaredInput, false, activityInput);
 };
 
 export default addMenteeBookingLeadsquared;

@@ -4,8 +4,6 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import { NoSlotSelectedError, OnlyOneSlotAllowedError } from '../../../../../../constants/errors/input';
 import { BatchFullError, DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
-import { addMenteeBookingLeadsquared } from '../../../postHookFunctions/leadsquared';
-import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 
 // query to fetch student profile id on basis of user id
 const fetchUser = (userId) => `

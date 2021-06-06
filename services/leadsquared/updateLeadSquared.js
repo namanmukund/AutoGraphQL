@@ -39,54 +39,46 @@ const logSheet = (Status, Data, Phone, error = '-') => {
   })}`);
 };
 
-const updateSheet = async (leadSquaredParams = {}, create = false, leadActivity) => {
+const updateLeadSquared = async (leadSquaredParams = {}, create = false, leadActivity) => {
   let LEAD_ENDPOINT = '';
-  return;
   if (create || !leadActivity) {
     LEAD_ENDPOINT = LEAD_CREATE_ENDPOINT;
   } else {
     LEAD_ENDPOINT = LEAD_UPDATE_ENDPOINT;
   }
-  console.log(leadActivity, LEAD_ENDPOINT);
-  // if (process.env.NODE_ENV === 'production') {
-  console.log('Phone number find...', leadSquaredParams.Phone);
-  if (!create) {
-    try {
-      const res = await fetch(
-        process.env.LEAD_SQUARED_URL + LEAD_GET_ENDPOINT + queryString.stringify({
-          accessKey: process.env.LEAD_SQUARED_ACCESS_KEY,
-          secretKey: process.env.LEAD_SQUARED_SECRET_KEY,
-          phone: leadSquaredParams.Phone,
-        }),
-      );
-      const data = await res.json();
-      if (data.length === 0) return;
-    } catch (e) {
-      console.log('Failed', e, JSON.stringify(e, null, 2));
-      return;
+  if (process.env.NODE_ENV === 'production') {
+    if (!create) {
+      try {
+        const res = await fetch(
+          process.env.LEAD_SQUARED_URL + LEAD_GET_ENDPOINT + queryString.stringify({
+            accessKey: process.env.LEAD_SQUARED_ACCESS_KEY,
+            secretKey: process.env.LEAD_SQUARED_SECRET_KEY,
+            phone: leadSquaredParams.Phone,
+          }),
+        );
+        const data = await res.json();
+        if (data.length === 0) return;
+      } catch (e) {
+        return;
+      }
     }
-  }
-  console.log('leadsquared update....');
-  fetch(
-    process.env.LEAD_SQUARED_URL + LEAD_ENDPOINT + queryString.stringify({
-      accessKey: process.env.LEAD_SQUARED_ACCESS_KEY,
-      secretKey: process.env.LEAD_SQUARED_SECRET_KEY,
-    }), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    fetch(
+      process.env.LEAD_SQUARED_URL + LEAD_ENDPOINT + queryString.stringify({
+        accessKey: process.env.LEAD_SQUARED_ACCESS_KEY,
+        secretKey: process.env.LEAD_SQUARED_SECRET_KEY,
+      }), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(getLeadSquaredParams(leadSquaredParams, create, leadActivity)),
       },
-      body: JSON.stringify(getLeadSquaredParams(leadSquaredParams, create, leadActivity)),
-    },
-  ).then((res) => {
-    console.log(JSON.stringify(getLeadSquaredParams(leadSquaredParams, create, leadActivity)));
-    console.log(res.status);
-    logSheet(res.status, JSON.stringify(getLeadSquaredParams(leadSquaredParams, create)), leadSquaredParams.Phone);
-  }).catch((e) => {
-    console.log('Failed', JSON.stringify(getLeadSquaredParams(leadSquaredParams, create, leadActivity)));
-    logSheet('Failed', JSON.stringify(getLeadSquaredParams(leadSquaredParams, create)), leadSquaredParams.Phone, e);
-  });
-  // }
+    ).then((res) => {
+      logSheet(res.status, JSON.stringify(getLeadSquaredParams(leadSquaredParams, create)), leadSquaredParams.Phone);
+    }).catch((e) => {
+      logSheet('Failed', JSON.stringify(getLeadSquaredParams(leadSquaredParams, create)), leadSquaredParams.Phone, e);
+    });
+  }
 };
 
-export default updateSheet;
+export default updateLeadSquared;

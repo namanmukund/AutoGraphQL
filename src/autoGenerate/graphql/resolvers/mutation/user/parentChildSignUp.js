@@ -33,6 +33,7 @@ import getSchoolInformation from './utils/getSchoolInformation';
 import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
+import sendTransactionalEmail from '../../utils/sendTransactionalEmail';
 
 const USER_TYPE = 'User';
 
@@ -341,6 +342,16 @@ If coming from campaign and the type os b2b allocate the user to the right batch
   const campaignType = get(campaign, 'type', '');
   if (campaignType) {
     leadSquaredParams.input.Vertical = campaignType.replace('Event', '');
+  }
+
+  if (!campaignType && !schoolName) {
+    sendTransactionalEmail({
+      parentEmail,
+      parentName,
+    }, {
+      emailTemplate: 'WelcomeEmail',
+      subject: 'Welcome to Tekie, your next steps!',
+    });
   }
 
   parentChildSignupPostHookMethod(input, leadSquaredParams);

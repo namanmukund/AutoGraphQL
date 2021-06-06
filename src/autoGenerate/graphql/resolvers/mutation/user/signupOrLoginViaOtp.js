@@ -22,6 +22,9 @@ const USER_TYPE = 'User';
 const FETCH_CAMPAIGN = (campaignId) => `{
   campaign(id: "${campaignId}") {
     type
+    batchRules {
+      batchSize 
+    }
     school {
       name
     }
@@ -111,6 +114,8 @@ const signupOrLoginViaOtp = async (
       newUser.country = input.country || 'india';
       newUser.timezone = input.timezone || 'Asia/Kolkata';
       userData = generateCuid(newUser);
+      input.leadStatus = 'New Lead';
+      input.country = input.country ? input.country : 'india';
 
       await modelMutations.addDocument(userData);
       sendBookingReminderOrConfirmationB2BC(userData.id);
@@ -120,6 +125,7 @@ const signupOrLoginViaOtp = async (
         const campaignType = get(campaignRes, 'data.campaign.type', '');
         input.schoolName = get(campaignRes, 'data.campaign.school.name', '');
         input.Vertical = campaignType.replace('Event', '');
+        input.mx_Demo_Model = `1:${get(campaignRes, 'data.campaign.batchRules.batchSize', '')}`;
         parentChildSignupPostHookMethod(input, params);
       } else {
         parentChildSignupPostHookMethod(input, params);
