@@ -81,7 +81,7 @@ const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob,
         }]);
       }
       leadSquaredInput = {
-        Phone: cparentPhone,
+        Phone: parentPhone,
         mx_Demo_Attendance: 'Present',
         mx_Success_Manager_Name: salesExec,
         mx_Mentor_Name: mentorName,
