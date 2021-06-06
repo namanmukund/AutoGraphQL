@@ -6,9 +6,7 @@ const LEAD_CREATE_ENDPOINT = '/LeadManagement.svc/Lead.Capture?';
 const LEAD_UPDATE_ENDPOINT = '/ProspectActivity.svc/CreateCustom?';
 const LEAD_GET_ENDPOINT = '/LeadManagement.svc/RetrieveLeadByPhoneNumber?';
 
-const LEAD_UPDATE_CODE = 99;
-
-const getLeadSquaredParams = (params = {}, create = false) => {
+const getLeadSquaredParams = (params = {}, create = false, leadActivity) => {
   const leadSquaredParams = [];
   // eslint-disable-next-line no-restricted-syntax
   for (const key of Object.keys(params)) {
@@ -22,11 +20,11 @@ const getLeadSquaredParams = (params = {}, create = false) => {
     Value: 'Phone',
   });
   if (create) return leadSquaredParams;
+  if (!leadActivity) return leadSquaredParams;
   return {
     LeadDetails: leadSquaredParams,
     Activity: {
-      ActivityEvent: LEAD_UPDATE_CODE,
-      ActivityNote: 'Lead API Update',
+      ...leadActivity,
       ActivityDateTime: moment().utc().format('YYYY-MM-DD HH:mm:ss'),
     },
   };
@@ -41,19 +39,28 @@ const logSheet = (Status, Data, Phone, error = '-') => {
   })}`);
 };
 
-const updateSheet = async (leadSquaredParams = {}, create = false) => {
-  const LEAD_ENDPOINT = create ? LEAD_CREATE_ENDPOINT : LEAD_UPDATE_ENDPOINT;
+const updateLeadSquared = async (leadSquaredParams = {}, create = false, leadActivity) => {
+  let LEAD_ENDPOINT = '';
+  if (create || !leadActivity) {
+    LEAD_ENDPOINT = LEAD_CREATE_ENDPOINT;
+  } else {
+    LEAD_ENDPOINT = LEAD_UPDATE_ENDPOINT;
+  }
   if (process.env.NODE_ENV === 'production') {
     if (!create) {
-      const res = await fetch(
-        process.env.LEAD_SQUARED_URL + LEAD_GET_ENDPOINT + queryString.stringify({
-          accessKey: process.env.LEAD_SQUARED_ACCESS_KEY,
-          secretKey: process.env.LEAD_SQUARED_SECRET_KEY,
-          phone: leadSquaredParams.Phone,
-        }),
-      );
-      const data = await res.json();
-      if (data.length === 0) return;
+      try {
+        const res = await fetch(
+          process.env.LEAD_SQUARED_URL + LEAD_GET_ENDPOINT + queryString.stringify({
+            accessKey: process.env.LEAD_SQUARED_ACCESS_KEY,
+            secretKey: process.env.LEAD_SQUARED_SECRET_KEY,
+            phone: leadSquaredParams.Phone,
+          }),
+        );
+        const data = await res.json();
+        if (data.length === 0) return;
+      } catch (e) {
+        return;
+      }
     }
     fetch(
       process.env.LEAD_SQUARED_URL + LEAD_ENDPOINT + queryString.stringify({
@@ -64,7 +71,7 @@ const updateSheet = async (leadSquaredParams = {}, create = false) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(getLeadSquaredParams(leadSquaredParams, create)),
+        body: JSON.stringify(getLeadSquaredParams(leadSquaredParams, create, leadActivity)),
       },
     ).then((res) => {
       logSheet(res.status, JSON.stringify(getLeadSquaredParams(leadSquaredParams, create)), leadSquaredParams.Phone);
@@ -74,4 +81,4 @@ const updateSheet = async (leadSquaredParams = {}, create = false) => {
   }
 };
 
-export default updateSheet;
+export default updateLeadSquared;

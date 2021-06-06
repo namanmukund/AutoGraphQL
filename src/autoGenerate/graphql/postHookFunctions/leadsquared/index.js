@@ -6,6 +6,8 @@ import setSessionStartedLeadsquared from './setSessionStartedLeadsquared';
 import setSessionCompletedLeadsquared from './setSessionCompletedLeadsquared';
 import updateMentorRescheduleLeadsquared from './updateMentorRescheduleLeadsquared';
 import updateSalesOperationLeadsquared from './updateSalesOperationLeadsquared';
+import updateUserLeadSquared from './updateUserLeadSquared';
+import updateProductTypeLeadSquared from './updateProductTypeLeadSquared';
 
 export {
   addUserLeadSquared,
@@ -16,4 +18,6 @@ export {
   setSessionCompletedLeadsquared,
   updateMentorRescheduleLeadsquared,
   updateSalesOperationLeadsquared,
+  updateUserLeadSquared,
+  updateProductTypeLeadSquared,
 };
