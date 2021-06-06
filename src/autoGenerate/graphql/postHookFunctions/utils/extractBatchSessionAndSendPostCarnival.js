@@ -1,6 +1,7 @@
 import { get } from 'lodash';
 import updateLeadSquared from '../../../../../services/leadsquared/updateLeadSquared';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 import sendTransactionalEmail from '../../resolvers/utils/sendTransactionalEmail';
 
 const BATCH_SESSION = (batchSessionId) => `{
@@ -30,8 +31,10 @@ const BATCH_SESSION = (batchSessionId) => `{
         }
         parents{
           user {
+            name
             email
             phone {
+              countryCode
               number
             }
             campaign {
@@ -57,8 +60,10 @@ const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob,
     const isPresent = get(attendance, 'isPresent', false);
     const student = get(attendance, 'student', {});
     const studentName = get(student, 'user.name');
+    const parentName = get(student, 'parents[0].user.name');
     const parentEmail = get(student, 'parents[0].user.email');
     const parentPhone = get(student, 'parents[0].user.phone.number');
+    const countryCode = get(student, 'parents[0].user.phone.countryCode', '').replace('+', '');
     let leadSquaredInput = {};
     let activityInput = {};
     if (isPresent) {
@@ -67,9 +72,16 @@ const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob,
           studentName,
           parentEmail,
         }, 'PostCarnivalFeedback');
+        sendWhatsAppTemplateMessage(countryCode + parentPhone, 'workshop_post_demo', parentName, [{
+          name: 'parent_name',
+          value: parentName,
+        }, {
+          name: 'student_nam',
+          value: studentName,
+        }]);
       }
       leadSquaredInput = {
-        Phone: parentPhone,
+        Phone: cparentPhone,
         mx_Demo_Attendance: 'Present',
         mx_Success_Manager_Name: salesExec,
         mx_Mentor_Name: mentorName,
