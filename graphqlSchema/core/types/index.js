@@ -81,8 +81,16 @@ import ContentTag from './contentTag';
 import Workbook from './workbook';
 import Project from './project';
 import ProjectContent from './projectContent';
+import Testimonial from './testimonial';
 import CheatSheetData from './cheatSheetData';
 import UserCheatSheet from './userCheatSheet';
+import NewsFeed from './newsFeed';
+import SchoolClass from './schoolClass';
+import Campaign from './campaign';
+import BulkMentorSessionInput from './bulkMentorSessionInput';
+import RescheduledSlot from './rescheduledSlot';
+import GetCampaignSlots from './getCampaignSlots';
+import BookB2B2CSlotsInput from './bookB2B2CSlotsInput';
 
 export default [
   ...User,
@@ -168,6 +176,14 @@ export default [
   ...Workbook,
   ...Project,
   ...ProjectContent,
+  ...Testimonial,
   ...CheatSheetData,
   ...UserCheatSheet,
+  ...NewsFeed,
+  ...SchoolClass,
+  ...Campaign,
+  ...BulkMentorSessionInput,
+  ...RescheduledSlot,
+  ...GetCampaignSlots,
+  ...BookB2B2CSlotsInput,
 ];

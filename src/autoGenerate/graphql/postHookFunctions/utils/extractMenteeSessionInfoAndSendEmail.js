@@ -26,6 +26,9 @@ const menteeInfoQuery = (userId) => `
         parents{
           id
           user{
+            campaign {
+              type
+            }
             id
             name
             email
@@ -135,12 +138,13 @@ const extractMenteeSessionInfoAndSendEmail = async (
   topic,
 ) => {
   const slotNumber = slotTimeStringArray[0].split('slot')[1];
+  if (get(user, 'data.user.studentProfile.parents[0].user.campaign.type')) return;
 
   const { user: { typeId: userId }, topic: { typeId: topicId } } = input;
   const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId));
   const menteeInfo = get(userInfo, 'data.user');
   const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
-  const timezone = get(menteeInfo, 'timezone') ? get(menteeInfo, 'timezone') : 'Asia/Kolkata';
+  const timezone = (get(menteeInfo, 'timezone') && get(menteeInfo, 'timezone') !== 'undefined') ? get(menteeInfo, 'timezone') : 'Asia/Kolkata';
   const {
     startTime, endTime, date, dateObject,
   } = getIntlDateTime(bookingDate, slotNumber, timezone);
@@ -163,6 +167,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
   const topicInfo = topic || await callLocalGraphqlApi(topicInfoQuery(topicId));
   menteeObj.topicTitle = get(topicInfo, 'data.topic.title');
   const topicThumbnail = get(topicInfo, 'data.topic.thumbnailSmall.uri');
+  menteeObj.topicThumbnail = '';
   if (topicThumbnail) {
     menteeObj.topicThumbnail = `${process.env.FILE_BASE_URL}/${topicThumbnail}`;
   }

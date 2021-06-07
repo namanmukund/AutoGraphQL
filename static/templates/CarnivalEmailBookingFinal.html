@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+    <meta charset="utf-8"> <!-- utf-8 works for most cases -->
+    <meta name="viewport" content="width=device-width"> <!-- Forcing initial-scale shouldn't be necessary -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- Use the latest (edge) version of IE rendering engine -->
+    <meta name="x-apple-disable-message-reformatting">  <!-- Disable auto-scale in iOS 10 Mail entirely -->
+    <title></title> <!-- The title tag shows in email notifications, like Android 4.4. -->
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+
+    <!-- Lato Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+
+    <!-- Nunito Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Nunito:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+    <!-- CSS Reset : BEGIN -->
+<style>
+
+html,
+body {
+    margin: 0 auto !important;
+    padding: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
+    background: #f1f1f1;
+}
+
+/* What it does: Stops email clients resizing small text. */
+* {
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* What it does: Centers email on Android 4.4 */
+div[style*="margin: 16px 0"] {
+    margin: 0 !important;
+}
+
+/* What it does: Stops Outlook from adding extra spacing to tables. */
+table,
+td {
+    mso-table-lspace: 0pt !important;
+    mso-table-rspace: 0pt !important;
+}
+
+/* What it does: Fixes webkit padding issue. */
+table {
+    border-spacing: 0 !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    margin: 0 auto !important;
+}
+
+/* What it does: Uses a better rendering method when resizing images in IE. */
+img {
+    -ms-interpolation-mode:bicubic;
+}
+
+/* What it does: Prevents Windows 10 Mail from underlining links despite inline CSS. Styles for underlined links should be inline. */
+a {
+    text-decoration: none;
+}
+
+/* What it does: A work-around for email clients meddling in triggered links. */
+*[x-apple-data-detectors],  /* iOS */
+.unstyle-auto-detected-links *,
+.aBn {
+    border-bottom: 0 !important;
+    cursor: default !important;
+    color: inherit !important;
+    text-decoration: none !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+}
+
+/* What it does: Prevents Gmail from displaying a download button on large, non-linked images. */
+.a6S {
+    display: none !important;
+    opacity: 0.01 !important;
+}
+
+/* What it does: Prevents Gmail from changing the text color in conversation threads. */
+.im {
+    color: inherit !important;
+}
+
+/* If the above doesn't work, add a .g-img class to any image in question. */
+img.g-img + div {
+    display: none !important;
+}
+
+/* What it does: Removes right gutter in Gmail iOS app: https://github.com/TedGoas/Cerberus/issues/89  */
+/* Create one of these media queries for each additional viewport size you'd like to fix */
+
+/* iPhone 4, 4S, 5, 5S, 5C, and 5SE */
+@media only screen and (min-device-width: 320px) and (max-device-width: 374px) {
+    u ~ div .email-container {
+        min-width: 320px !important;
+    }
+}
+/* iPhone 6, 6S, 7, 8, and X */
+@media only screen and (min-device-width: 375px) and (max-device-width: 413px) {
+    u ~ div .email-container {
+        min-width: 375px !important;
+    }
+}
+/* iPhone 6+, 7+, and 8+ */
+@media only screen and (min-device-width: 414px) {
+    u ~ div .email-container {
+        min-width: 414px !important;
+    }
+}
+
+</style>
+
+    <!-- CSS Reset : END -->
+
+    <!-- Progressive Enhancements : BEGIN -->
+<style>
+
+.bg_white{
+	background: #ffffff;
+}
+.bg_light{
+	background: #fafafa;
+}
+.bg_black{
+	background: #191B1C;
+}
+.bg_dark{
+	background: rgba(0,0,0,.8);
+}
+.email-section{
+	padding: 30px;
+}
+
+.top-section p {
+  width: 500px;
+}
+
+h1,h2,h3,h4,h5,h6{
+	color: #000000;
+	margin-top: 0;
+  margin-bottom: 0;
+}
+
+h3 {
+  font-weight: 700;
+  font-size: 22px;
+  color: #00ADE6;
+}
+
+p {
+	font-family: 'Nunito', serif;
+  font-size: 15px;
+  color: #504F4F;
+  opacity: 0.8;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+body{
+	font-family: 'Montserrat', 'Open Sans', Helvetica, Roboto, sans-serif;
+	font-weight: 400;
+	font-size: 15px;
+	line-height: 1.8;
+	color: rgba(0,0,0,.4);
+}
+
+/*HEADING SECTION*/
+.heading-section{
+}
+.heading-section h2{
+	color: #000000;
+	font-size: 28px;
+	margin-top: 0;
+	line-height: 1.4;
+}
+
+.heading-section-white{
+	color: rgba(255,255,255,.8);
+}
+.heading-section-white h2{
+	font-size: 28px;
+	font-family: 'Nunito';
+	line-height: 1;
+	padding-bottom: 0;
+}
+.heading-section-white h2{
+	color: #ffffff;
+}
+
+
+ .workshopTiming {
+  font-size: 14px;
+  letter-spacing: .7px;
+ }
+
+ .flex-container {
+  flex-direction: row;
+  align-items: flex-end;
+ }
+@media screen and (max-width: 500px) {
+	.icon{
+		text-align: left;
+	}
+
+	.text-services{
+		padding-left: 0;
+		padding-right: 20px;
+		text-align: left;
+	}
+  
+  h2 {
+    font-weight: 500;
+  }
+}
+
+
+@media screen and (max-width: 380px) {
+  .workshopTiming {
+    font-size: 9.5px;
+  }
+}
+
+</style>
+
+
+</head>
+
+<body width="100%" style="margin: 0; padding: 0 !important; mso-line-height-rule: exactly; background-color: #222222;">
+	<center style="width: 100%; background-color: #f1f1f1;">
+    <div style="max-width: 600px; margin: 0 auto; background: #fff;" class="email-container">
+      <!-- BEGIN BODY -->
+      <!-- <img src='https://tekie-backend.s3.amazonaws.com/python/email/tekieMailBanner.png' style='width: 100%;'></img> -->
+      <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;overflow: hidden;">
+	      <tr>
+		      <td class="bg_white">
+		        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+		          <tr>
+                <td style="box-shadow:0px 0px 50px 10px inset rgba(0,0,0,0.4);text-align:center;background-image: url('https://tekie-backend.s3.amazonaws.com/python/email/usMailConfettiBG.png'); background-size: cover; background-position: center center; box-sizing: border-box;background-color: #1B4A86;">
+                  <div style="height: 230px;width: 100%;background: url(https://tekie-backend.s3.amazonaws.com/python/email/CarnivalHeader2.png); background-size: contain; background-position: center center; padding: 15px; box-sizing: border-box;background-repeat: no-repeat;">
+                    <div style='width: 100%; height: 100%; box-sizing: border-box;border: 3px solid #FFC24C;padding: 10px;'>
+                      <div style="height: 22px;width: 100%; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/tekieLogo.png); background-size: contain; background-repeat: no-repeat;background-position: right;"></div>
+                    </div>
+                  </div>
+                </td>
+		          </tr>
+		          <tr>
+		          <tr>
+                <td style="text-align:center; padding-top: 0px; padding-bottom: 17px; opacity: 0.8">
+                  <div style='width: 78%; margin-left: 11%; height: 1px; background-color: #D8D8D8'></div>
+                </td>
+              </tr>
+              <tr>
+                <td style="text-align:center;">
+                  <h3 style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 20px; color: #00ADE6; margin-top: 0px; margin-bottom: 0px;text-align: center;">Hello <%= parentName %>,</h3>
+                </td>
+              </tr>
+              <tr>
+                <td style="text-align:center; padding-top: 10px">
+                  <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 75%; margin: auto; opacity: 0.8; color: #504F4F; font-size: 16px;text-align: center;">
+                    We're delighted to confirm <%= studentName %>'s session at Tekie Code Carnival. It's going to be a day of fun and learning!
+                  </div>
+                </td>
+		          </tr>
+              <tr>
+                <td style="text-align:center; padding-top: 10px">
+                  <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 75%; margin: auto; opacity: 0.8; color: #504F4F; font-size: 16px;font-weight: 700;text-align: center;">
+                    Here's <%= studentName %>'s entry pass for Code Carnival organized by Tekie and <%= schoolName %>.
+                  </div>
+                </td>
+		          </tr>
+              <tr>
+                <td style="text-align:center; padding-top: 18px;">
+                  <div style="width: 75%;position: relative;font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; height: 150px;margin: auto; color: #504F4F;font-weight: 700;text-align: center;background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/ticketBg2.png);background-repeat: no-repeat;background-size: contain;background-position: center;">
+                  </div>
+                </td>
+		          </tr>
+              <tr>
+                <td style="text-align:center; padding-top: 10px">
+                  <div style="line-height: 16px;font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 75%; margin: auto; opacity: 0.8; color: #504F4F; font-size: 16px;font-weight: 700;text-align: center;">
+                    Date: <%= workshopDate %>
+                  </div>
+                </td>
+		          </tr>
+              <tr>
+                <td style="text-align:center; padding-top: 10px">
+                  <div style="line-height: 16px;font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 65%; margin: auto; opacity: 0.8; color: #504F4F; font-size: 16px;font-weight: 700;text-align: center;">
+                    Time: <%= startTime %> - <%= endTime %>
+                  </div>
+                </td>
+		          </tr>
+              <tr>
+                <td style="text-align:center; padding-top: 17px; padding-bottom: 17px; opacity: 0.8">
+                  <div style='width: 100%; height: 1px; border-bottom: .6px dotted #D8D8D8;transform: scale(3.5)'></div>
+                </td>
+              </tr>
+              <tr>
+                <td style="text-align:center;">
+                  <h3 style="font-family: monospace, 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 600; font-size: 22px; color: #00ADE6; margin-top: 0px; margin-bottom: 0px;display: inline-block;text-align:center;">Carnival Itinerary
+                    <div style='width: 32px; height: 22px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/partyPopperIcon.png); background-size: contain; display: inline-block;background-repeat: no-repeat;background-position: bottom'></div>
+                  </h3>
+                </td>
+		          </tr>
+              <tr>
+                <td style="padding-top: 20px;">
+                  <div style="background: url(https://tekie-backend.s3.amazonaws.com/python/email/CarnivalItinerary.png);width: 90%;height: 180px; background-position: center; background-repeat: no-repeat;background-size: contain;margin: auto;">
+
+                  </div>
+                </td>
+		          </tr>
+              <tr>
+                <td style="text-align:center; padding-top: 17px; padding-bottom: 17px; opacity: 0.8">
+                  <div style='width: 100%; height: 1px; border-bottom: .6px dotted #D8D8D8;transform: scale(3.5)'></div>
+                </td>
+              </tr>
+		          <tr>
+                <td style="padding-top: 10px">
+                 <div style="display:flex;flex-direction:row; align-items: center;justify-content:flex-start;font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 80%; margin: auto; opacity: 0.8; color: #504F4F; font-size: 16px;background:#EEEEEE;padding: 12px 8px;line-height: 24px;">
+                  <div style='width: 70px; height: 30px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/thumbsUpIcon.png); background-size: contain; display: inline-block;background-repeat: no-repeat;background-position: center;margin-right: 12px;'></div>
+                    <span>Don't worry, we'll remind you again and share the joining link before the session.</span>
+                  </div>
+                </td>
+		          </tr>
+		          <tr>
+                <td style="text-align:center; padding-top: 10px">
+                  <div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 85%; margin-left: 7.5%; margin-top: 10px; opacity: 0.8; color: #504F4F; font-size: 16px">
+                    If you have any questions, we're just a text away. <br />
+                    Simply send a Hi, and we will get in touch with you.
+                  </div>
+                </td>
+		          </tr>
+		          <tr>
+                <td style="text-align:center; padding-top: 17px; opacity: 0.8;">
+                  <a href="http://tekie.app.link/sgnArKNfwdb" style="border: 2px solid #4CAF50;width: fit-content;background-color: #fff;filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.22));display: block;min-width: 200px;border-radius: 7px;text-decoration: none;color: white;font-family: Lato,'Open Sans',Helvetica, Roboto, sans-serif;text-transform: uppercase;font-weight: 700;box-sizing: border-box;margin:auto;margin-bottom: 34px;padding: 15px 46px">
+                    <div style='display: inline-block; width: 22px; height: 22px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/whatsappIcon.png); background-size: cover; margin-right: 8px; vertical-align:middle;'></div>
+                    <div style='display: inline-block; vertical-align:middle;  color: #4CAF50;'>SEND A ‘Hi</div>
+                    <div style='vertical-align:middle; width: 16px; height: 16px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/handWaveEmoji.png); background-size: contain; display: inline-block;'></div>
+                  </a>
+                </td>
+		          </tr>	          
+		        </table>
+		      </td>
+		    </tr><!-- end:tr -->
+      <!-- 1 Column Text + Button : END -->
+      </table>
+      <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
+        <tr>
+        	<td valign="middle" class="bg_black footer email-section" style="background: #191B1C; padding: 30px;">
+        		<table>
+            	<tr>
+                <td valign="top" width="33.333%">
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                      <td style="text-align: center; opacity: 0.6;color: #c6c6c6;">
+                        <a href="https://www.tekie.in/terms" style="font-family: Lato, 'Open Sans', Helvetica, Roboto, sans-serif; color: #c6c6c6; font-size: 14px; font-weight: regular; border-bottom: 1px solid #C6C6C6; padding-bottom: 2px; text-transform: uppercase; text-decoration: none;">VIEW T&C</a>
+                        <span> &nbsp;&nbsp;|&nbsp;&nbsp; </span>
+                      	<a href="https://www.tekie.in" style="font-family: Lato,'Open Sans', Helvetica, Roboto, sans-serif; color: #c6c6c6; font-size: 14px; font-weight: regular; border-bottom: 1px solid #C6C6C6; padding-bottom: 2px; text-transform: uppercase; text-decoration: none">Visit tekie.in</a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            	<tr>
+                <td valign="top" width="33.333%">
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                      <td style="text-align: center;">
+                        <div style='display: inline-block; margin-top: 25px;'>
+                          <a href='https://www.facebook.com/TekieApp/' target='_blank' style='text-decoration: none;'>
+                            <div style='display: inline-block; width: 38px; height: 38px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/facebookGreyIcon.png); background-size: cover; margin-right: 30px;'></div>
+                          </a>
+                          <a href='https://www.instagram.com/tekieapp/' target='_blank' style='text-decoration: none;'>
+                            <div style='display: inline-block; width: 38px; height: 38px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/instagramGreyIcon.png); background-size: cover; margin-right: 30px;'></div>
+                          </a>
+                          <a href='https://www.linkedin.com/company/tekie' target='_blank' style='text-decoration: none;'>
+                            <div style='display: inline-block; width: 38px; height: 38px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/linkedinGreyIcon.png); background-size: cover; margin-right: 30px;'></div>
+                          </a>
+                          <a href='https://www.youtube.com/channel/UCCr7GPlTdZRXFEfveeuKcbg' target='_blank' style='text-decoration: none;'>
+                            <div style='display: inline-block; width: 38px; height: 38px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/youtubeGreyIcon.png); background-size: cover;'></div>
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+        	</td>
+        </tr>
+
+      </table>
+
+    </div>
+  </center>
+</body>
+</html>

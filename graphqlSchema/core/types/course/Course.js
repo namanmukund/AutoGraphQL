@@ -1,6 +1,10 @@
 import { READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
-import { CMS_HEAD, NOT_CMS_HEAD, SCHOOL_ADMIN } from '../../../../constants/roles';
+import {
+  CMS_HEAD,
+  NOT_CMS_HEAD,
+  SCHOOL_ADMIN,
+} from '../../../../constants/roles';
 
 const Course = `
   type Course @model 

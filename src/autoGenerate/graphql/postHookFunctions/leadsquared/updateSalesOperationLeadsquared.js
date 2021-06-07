@@ -5,6 +5,14 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 const salesOperationQuery = (salesOperationId) => `{
   salesOperation(id: "${salesOperationId}") {
     id
+    extrovertStudent
+    fastLearner
+    studentEnglishSpeakingSkill
+    parentEnglishSpeakingSkill
+    pricingPitched
+    parentCounsellingDone
+    courseInterestedIn
+    otherReasonsComment
     leadStatus
     nextSteps
     oneToOne
@@ -64,10 +72,24 @@ const updateSalesOperationLeadSquared = async (salesOperationId, userInfo) => {
       text: 'Severe Aptitude Issues(Struggling To Learn, Unfit)',
     },
   ];
+  const englishSpeakingSkill = {
+    fluent: 'Fluent',
+    veryFluent: 'Very Fluent',
+    notFluent: 'Not Fluent',
+  };
   const leadSquaredInput = {
     Phone: phoneNumber,
     mx_Unqualified_Lead_Reasons: reasons.filter((reason) => reason.tag).map((reason) => reason.text).join(' , '),
     mx_Unqualfied_Lead_Comment: get(data, 'notAQualifiedLeadComment'),
+    mx_Student_Extrovert: capitalize(get(data, 'extrovertStudent')),
+    mx_Student_fast_learner: capitalize(get(data, 'fastLearner')),
+    mx_Student_English_Skills: englishSpeakingSkill[get(data, 'studentEnglishSpeakingSkill')],
+    mx_Parent_English_Skills: englishSpeakingSkill[get(data, 'parentEnglishSpeakingSkill')],
+    mx_Pricing_Pitched: get(data, 'pricingPitched') ? 'Yes' : 'No',
+    mx_Parent_Counselling_Done: get(data, 'parentCounsellingDone') ? 'Yes' : 'No',
+    mx_Interested_Course_Model: get(data, 'courseInterestedIn'),
+    mx_mentor_session_comment: get(data, 'otherReasonsComment'),
+    mx_Potential_Interested_Lead: get(data, 'leadStatus') === 'hot' ? 'Yes' : 'No',
   };
   if (get(data, 'leadStatus')) {
     if (get(data, 'leadStatus') === 'unfit') {
@@ -75,17 +97,7 @@ const updateSalesOperationLeadSquared = async (salesOperationId, userInfo) => {
     } else {
       leadSquaredInput.mx_Unqualified_Lead = 'No';
     }
-    leadSquaredInput.mx_Lead_Conversion_Status = capitalize(get(data, 'leadStatus'));
-  }
-
-  if (get(data, 'oneToOne')) {
-    leadSquaredInput.mx_Lead_Conversion_Model = '1:1';
-  }
-  if (get(data, 'oneToTwo')) {
-    leadSquaredInput.mx_Lead_Conversion_Model = '1:2';
-  }
-  if (get(data, 'oneToThree')) {
-    leadSquaredInput.mx_Lead_Conversion_Model = '1:3';
+    // leadSquaredInput.mx_Lead_Conversion_Status = capitalize(get(data, 'leadStatus'));
   }
   if (get(data, 'nextSteps')) {
     leadSquaredInput.mx_Lead_Conversion_Reason = get(
@@ -95,7 +107,31 @@ const updateSalesOperationLeadSquared = async (salesOperationId, userInfo) => {
       '',
     );
   }
-  updateLeadsquared(leadSquaredInput);
+  const activityInput = {
+    ActivityEvent: 106,
+  };
+  const fields = [];
+  if (get(data, 'leadStatus')) {
+    fields.push({
+      SchemaName: 'mx_Custom_3',
+      Value: capitalize(get(data, 'leadStatus')),
+    });
+  }
+  if (get(data, 'nextSteps')) {
+    fields.push({
+      SchemaName: 'mx_Custom_2',
+      Value: get(
+        leadStatusNextStepOptions
+          .find((option) => option.value === get(data, 'nextSteps')),
+        'label',
+        '',
+      ),
+    });
+  }
+  updateLeadsquared(leadSquaredInput, false, {
+    ...activityInput,
+    Fields: fields,
+  });
 };
 
 export default updateSalesOperationLeadSquared;

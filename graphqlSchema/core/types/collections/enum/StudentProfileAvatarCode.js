@@ -4,6 +4,9 @@ const StudentProfileAvatarCode = `
     zog
     tyra
     erby
+    zo
+    ozzy
+    auli
   }`;
 
 export default StudentProfileAvatarCode;

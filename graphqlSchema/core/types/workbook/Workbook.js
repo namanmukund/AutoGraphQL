@@ -23,6 +23,8 @@ ${getPermissionSchemaString('Workbook')}
     status: ContentStatus! @defaultValue(value: "unpublished")
     tags: [ContentTag] @relation(name: "WorkbookContentTag")
     workbookExamples: [WorkbookExample]
+    codeHint: String
+    answer: String
   }
 `;
 

@@ -76,7 +76,19 @@ const updateMentorRescheduleLeadsquared = async (userInfo, input, params) => {
   if (get(params, 'input.rescheduledDate')) {
     leadSquaredInput.mx_Mentor_Rescheduled_Date_Time = moment(get(data, 'rescheduledDate')).utc().format('YYYY-MM-DD HH:mm:ss');
   }
-  updateLeadsquared(leadSquaredInput);
+  if (get(params, 'input.hasRescheduled')) {
+    updateLeadsquared(leadSquaredInput, false, {
+      ActivityEvent: 103,
+      Fields: [
+        {
+          SchemaName: 'Status',
+          Value: 'Reschedule',
+        },
+      ],
+    });
+  } else {
+    updateLeadsquared(leadSquaredInput);
+  }
 };
 
 export default updateMentorRescheduleLeadsquared;

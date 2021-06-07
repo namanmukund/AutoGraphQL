@@ -3,7 +3,7 @@ import moment from 'moment';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
 
 const rescheduleMenteeBookingLeadsquared = async (input, slotTimeStringArray, userInfo, topicInfo) => {
-  const { bookingDate } = input;
+  const { bookingDate, bookedBy } = input;
   const phoneNumber = get(userInfo, 'data.user.studentProfile.parents[0].user.phone.number');
   const topicOrder = get(topicInfo, 'data.topic.order');
   if (topicOrder === 1) {
@@ -13,11 +13,23 @@ const rescheduleMenteeBookingLeadsquared = async (input, slotTimeStringArray, us
       .format('YYYY-MM-DD HH:mm:ss');
     const leadSquaredInput = {
       Phone: phoneNumber,
-      mx_Lead_Status: 'Booked',
-      ProspectStage: 'Booked',
       mx_Booking_Date_Time: bookingDateTime,
     };
-    updateLeadsquared(leadSquaredInput);
+    const activityInput = {
+      ActivityEvent: 103,
+      ActivityNote: bookedBy === 'tekieTeam' ? 'Agent updated session details' : 'User rescheduled a session',
+      Fields: [
+        {
+          SchemaName: 'Status',
+          Value: bookedBy === 'tekieTeam' ? 'Booked (Verified)' : 'Booked (Non Verified)',
+        },
+        {
+          SchemaName: 'mx_Custom_8',
+          Value: bookingDateTime,
+        },
+      ],
+    };
+    updateLeadsquared(leadSquaredInput, false, activityInput);
   }
 };
 

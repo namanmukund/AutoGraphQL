@@ -12,8 +12,8 @@ const batchAttendanceType = `
 const BatchSession = `
   type BatchSession @model {
     batch: Batch! @relation(name: "BatchSessionBatch", direction: "OneWay")
-    topic: Topic! @relation(name: "BatchSessionTopic", direction: "OneWay")
-    mentorSession: MentorSession! @relation(name: "SessionDataMentorSession", direction: "OneWay")
+    topic: Topic @relation(name: "BatchSessionTopic", direction: "OneWay")
+    mentorSession: MentorSession @relation(name: "BatchSessionMentorSession")
     bookingDate: Date!
     scheduleRunStatus: ScheduleRunStatus
     ${slotTimeFields}
