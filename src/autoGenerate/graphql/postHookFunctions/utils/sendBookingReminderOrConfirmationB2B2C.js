@@ -10,7 +10,7 @@ import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMess
 import sendTransactionalEmail from '../../resolvers/utils/sendTransactionalEmail';
 import updateBookSessionReminderStatus from './updateBookSessionReminderStatus';
 
-const TIMEOUT = 2000 * 60;
+const TIMEOUT = 5000 * 60;
 
 const getDays = (date) => {
   const then = new Date(new Date(date).setHours(0, 0, 0, 0)).toISOString();
