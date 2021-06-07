@@ -26,6 +26,7 @@ const customMutationString = `
    parentChildSignUp ( schoolId: ID, campaignId: ID, input: ParentChildSignUpInput ): ParentChildToken,
    updateParentChildDetail ( userId:ID!, schoolId: ID, input: UpdateParentChildDetailInput ): ParentChildToken,
    signUpAffiliate ( input: SignUpAffiliateInput ): UserToken,
+   signUpSchool ( schoolId: ID!, input: SignUpAffiliateInput ): UserToken,
    loginViaPassword ( input: EmailLoginInput ): ParentChildToken,
    loginViaOtp ( input: ExistingUserInput ): BooleanResult,
    signupOrLoginViaOtp ( input: SignupOrLoginUserInput ): BooleanResult,

@@ -82,6 +82,7 @@ import updateParentChildDetail from './mutation/methods/updateParentChildDetail'
 import getCampaignSlots from './query/methods/getCampaignSlots';
 import bookB2B2CSlots from './mutation/methods/bookB2B2CSlots';
 import getStudentCurrentStatus from './query/methods/getStudentCurrentStatus';
+import signUpSchool from './mutation/methods/signUpSchool';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -524,6 +525,7 @@ Object.keys(parsedASTMap).forEach((type) => {
 
 resolvers.Mutation.signUp = signUp;
 resolvers.Mutation.signUpAffiliate = signUpAffiliate;
+resolvers.Mutation.signUpSchool = signUpSchool;
 resolvers.Mutation.signupExistingUser = signupExistingUser;
 resolvers.Mutation.login = login;
 resolvers.Mutation.socialLogin = socialLogin;
