@@ -8,7 +8,7 @@ const signUpSchool = async (root, params, context, info) => {
   const { parsedASTMap } = context;
   const authentication = ifAuthorized(context);
   const typeName = 'User';
-  const mutationName = 'signUpAffiliate ';
+  const mutationName = 'signUpSchool';
   const { input } = params;
   const hookInput = await prehook(input, mutationName, context, params);
   const newParams = params;
