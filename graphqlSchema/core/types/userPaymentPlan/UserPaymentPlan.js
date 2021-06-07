@@ -1,4 +1,4 @@
-import { TMS } from '../../../../constants';
+import { TBA, TMS } from '../../../../constants';
 import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
 
 const UserPaymentPlan = `
@@ -6,6 +6,7 @@ const UserPaymentPlan = `
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
+      { appName: "${TBA}" operations: "*" }
       ], 
     rule: allow
   )  

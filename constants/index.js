@@ -300,6 +300,16 @@ const sessionType = {
   batch: 'batch',
 };
 
+const studentCurrentStatus = {
+  unRegistered: 'unRegistered',
+  registered: 'registered',
+  preDemo: 'preDemo',
+  postDemo: 'postDemo',
+  onBoarding: 'onBoarding',
+  paidUser: 'paidUser',
+  churned: 'churned',
+};
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export const MENTOR_REPORT_COUNTRY = 'india';
@@ -379,4 +389,5 @@ export {
   batchCreationStatus,
   weekDays,
   sessionType,
+  studentCurrentStatus,
 };
