@@ -88,7 +88,7 @@ import deleteBatchValidation from './preHookFunctions/validation/deleteBatchVali
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
     case 'updateTopic': {
-      await isUniqueOrderField(params, mutationOrQueryName);
+      // await isUniqueOrderField(params, mutationOrQueryName);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
@@ -98,10 +98,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
 
     case 'addTopic': {
-      if (!get(params, 'chapterConnectId')) {
-        throw new ConnectIdRequiredError({ data: { message: 'Chapter Id is required' } });
-      }
-      await isUniqueOrderField(params, mutationOrQueryName);
+      // if (!get(params, 'chapterConnectId')) {
+      //   throw new ConnectIdRequiredError({ data: { message: 'Chapter Id is required' } });
+      // }
+      // await isUniqueOrderField(params, mutationOrQueryName);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
