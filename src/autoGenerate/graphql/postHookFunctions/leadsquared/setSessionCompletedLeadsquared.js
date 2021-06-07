@@ -6,11 +6,18 @@ const setSessionCompletedLeadsquared = async (userInfo) => {
   const phoneNumber = get(userInfo, 'data.user.studentProfile.parents[0].user.phone.number');
   const leadSquaredInput = {
     Phone: phoneNumber,
-    mx_Lead_Status: 'Session Taken',
-    ProspectStage: 'Session Taken',
     mx_Session_Taken_Date_Time: moment().utc().format('YYYY-MM-DD HH:mm:ss'),
   };
-  updateLeadsquared(leadSquaredInput);
+  const activityInput = {
+    ActivityEvent: 105,
+    Fields: [
+      {
+        SchemaName: 'Status',
+        Value: 'Demo Completed',
+      },
+    ],
+  };
+  updateLeadsquared(leadSquaredInput, false, activityInput);
 };
 
 export default setSessionCompletedLeadsquared;

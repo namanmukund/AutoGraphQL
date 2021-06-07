@@ -3,6 +3,7 @@ import moment from 'moment';
 import { log } from '../../../../utils';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateUserPaymentPlanMutation from './utils/updateUserPaymentPlanMutation';
+import { updateProductTypeLeadSquared } from './leadsquared';
 
 const getDueDates = (dateOfEnrollment, sessionsPerMonth, installmentNumber = 1) => {
   const enrollmentDate = new Date(dateOfEnrollment);
@@ -49,6 +50,20 @@ const userPaymentPlanQuery = (userPaymentPlanId) => `
 query {
   userPaymentPlan(id:"${userPaymentPlanId}") {
     id
+    user {
+      id
+      studentProfile {
+        parents {
+          user {
+            id
+            phone {
+              number
+              countryCode
+            }
+          }
+        }
+      }
+    }
     userPaymentInstallments {
       id
       userPaymentPlan {
@@ -71,6 +86,13 @@ query {
   }
 }
 `;
+
+const fetchProduct = (id) => `{
+  product(id: "${id}") {
+    id
+    type
+  }
+}`;
 
 // query to add UserPaymentInstallment
 const addUserPaymentInstallment = (
@@ -103,7 +125,6 @@ const addUserPaymentInstallment = (
 */
 const addUserPaymentPlanPostHookMethod = async (input, params) => {
   const userId = get(params, 'userConnectId');
-
   if (!userId) {
     log('UserId is missing in input of addUserPaymentPlanPostHookMethod');
   }
@@ -115,6 +136,7 @@ const addUserPaymentPlanPostHookMethod = async (input, params) => {
     installmentNumber,
     sessionsPerMonth,
   } = input;
+  const { productConnectId } = params;
 
   const userPaymentLinksQueryRes = await callLocalGraphqlApi(userPaymentLinksQuery());
   const paymentLinks = get(userPaymentLinksQueryRes, 'data.userPaymentLinks');
@@ -150,14 +172,23 @@ const addUserPaymentPlanPostHookMethod = async (input, params) => {
     },
   );
 
+  let phoneNumber = '';
   // returning updated userPaymentInstallments
   if (input && userPaymentPlanId) {
     // getting updated Payment installments
     const userPaymentPlansQueryRes = await callLocalGraphqlApi(userPaymentPlanQuery(userPaymentPlanId));
     const userPaymentInstallments = get(userPaymentPlansQueryRes, 'data.userPaymentPlan.userPaymentInstallments', []);
+    phoneNumber = get(userPaymentPlansQueryRes, 'data.userPaymentPlan.user.studentProfile.parents[0].user.phone.number', '');
     // parsing userPaymentInstallments data to be returned in userPaymentPlan
     /* eslint-disable no-param-reassign */
     input.userPaymentInstallments = userPaymentInstallments;
+  }
+
+  // update Leadsquared
+  if (productConnectId) {
+    const product = await callLocalGraphqlApi(fetchProduct(productConnectId));
+    const productType = get(product, 'data.product.type');
+    updateProductTypeLeadSquared(phoneNumber, productType);
   }
   return input;
 };

@@ -32,11 +32,14 @@ import getBatchIdByBatchCreationBasis from './utils/getBatchIdByBatchCreationBas
 import getSchoolInformation from './utils/getSchoolInformation';
 import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
+import sendTransactionalEmail from '../../utils/sendTransactionalEmail';
 
 const USER_TYPE = 'User';
 
 const FETCH_CAMPAIGN = (campaignId) => `{
   campaign(id: "${campaignId}") {
+    type
     school {
       name
     }
@@ -340,7 +343,21 @@ If coming from campaign and the type os b2b allocate the user to the right batch
   if (campaignType) {
     leadSquaredParams.input.Vertical = campaignType.replace('Event', '');
   }
-  parentChildSignupPostHookMethod(input, leadSquaredParams, false);
+
+  if (!campaignType && !schoolName) {
+    sendTransactionalEmail({
+      parentEmail,
+      parentName,
+    }, {
+      emailTemplate: 'WelcomeEmail',
+      subject: 'Welcome to Tekie, your next steps!',
+    });
+  }
+
+  parentChildSignupPostHookMethod(input, leadSquaredParams);
+
+  // send b2b2c reg+booking
+  sendBookingReminderOrConfirmationB2B(parentId);
 
   return userTokenData;
 };

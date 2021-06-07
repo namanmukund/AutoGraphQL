@@ -4,7 +4,6 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import { NoSlotSelectedError, OnlyOneSlotAllowedError } from '../../../../../../constants/errors/input';
 import { BatchFullError, DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
-import { addMenteeBookingLeadsquared } from '../../../postHookFunctions/leadsquared';
 
 // query to fetch student profile id on basis of user id
 const fetchUser = (userId) => `
@@ -15,6 +14,7 @@ const fetchUser = (userId) => `
         id
         parents {
           user {
+            id
             phone {
               number
               countryCode
@@ -189,15 +189,6 @@ const bookB2B2CSlotsMutationResolver = async (
     // add student to the new batch
     await callLocalGraphqlApi(updateBatch(batchId, studentProfileId));
   }
-
-  const phone = get(fetchUserRes, 'data.user.studentProfile.parents[0].user.phone.number', '');
-  addMenteeBookingLeadsquared({
-    phone,
-    bookingDate,
-    type: 'b2b2c',
-    slot: slotTimeArray[0],
-  });
-
   return {
     result: true,
   };

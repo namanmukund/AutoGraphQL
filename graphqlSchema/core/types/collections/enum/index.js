@@ -75,6 +75,7 @@ import BatchCreationStatus from './BatchCreationStatus';
 import CampaignType from './CampaignType';
 import Publisher from './Publisher';
 import StudentCurrentStatusType from './StudentCurrentStatusType';
+import BookedBy from './BookedBy';
 
 export default [
   Status,
@@ -155,4 +156,5 @@ export default [
   CampaignType,
   Publisher,
   StudentCurrentStatusType,
+  BookedBy,
 ];
