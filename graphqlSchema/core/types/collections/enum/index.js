@@ -74,6 +74,7 @@ import BatchCreationBasis from './BatchCreationBasis';
 import BatchCreationStatus from './BatchCreationStatus';
 import CampaignType from './CampaignType';
 import Publisher from './Publisher';
+import StudentCurrentStatusType from './StudentCurrentStatusType';
 import BookedBy from './BookedBy';
 
 export default [
@@ -154,5 +155,6 @@ export default [
   BatchCreationStatus,
   CampaignType,
   Publisher,
+  StudentCurrentStatusType,
   BookedBy,
 ];
