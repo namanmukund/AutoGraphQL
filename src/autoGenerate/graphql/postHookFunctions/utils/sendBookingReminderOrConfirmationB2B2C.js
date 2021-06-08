@@ -161,8 +161,9 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
           { name: 'school_name', value: schoolName },
           { name: 'booking_link', value: bookingLink },
         ]);
-        const today = new Date();
-        addToSchedule('sendNextDayBookReminder', new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes() + 5, 0), { userId, code });
+        const oneDayAfter = moment().add(1, 'day').toDate();
+        scheduleTime = new Date(oneDayBeforeBookingTime.setHours(17, 17, 0, 0));
+        addToSchedule('sendNextDayBookReminder', oneDayAfter, { userId, code });
       }
     }
   }, timeout);
