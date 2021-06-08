@@ -15,6 +15,7 @@ const UserActivityComicStripDump = `
     comicStripAction: UserActionType
     learningObjective: LearningObjective! @relation(name: "LearningObjectiveUserActivityComicStripDump", direction: "OneWay")
     topic: Topic @relation(name: "TopicUserActivityComicStripDump", direction: "OneWay")
+    course: Course @relation(name: "UserActivityComicStripDumpCourse", direction: "OneWay")
   }
 `;
 

@@ -26,6 +26,7 @@ const UserLearningObjective = `
     comicStripStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
     isComicStripBookmarked: Boolean @defaultValue(value: "false")
     nextComponent: UserLearningObjectiveNextComponentType
+    course: Course @relation(name: "UserLearningObjectiveCourse", direction: "OneWay")
   }
 `;
 

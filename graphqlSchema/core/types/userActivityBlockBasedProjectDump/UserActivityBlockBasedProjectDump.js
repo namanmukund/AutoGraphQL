@@ -5,6 +5,7 @@ const UserActivityBlockBasedProjectDump = `
     blockBasedProjectAction: UserActionType
     answerLink: String
     topic: Topic @relation(name: "TopicUserActivityBlockBasedProjectDump", direction: "OneWay")
+    course: Course @relation(name: "UserActivityBlockBasedProjectDumpCourse", direction: "OneWay")
   }
 `;
 

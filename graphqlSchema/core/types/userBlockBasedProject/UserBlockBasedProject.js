@@ -5,6 +5,7 @@ const UserBlockBasedProject = `
     blockBasedProject: BlockBasedProject! @relation(name: "ProjectUserBlockBasedProject", direction: "OneWay")
     answerLink: String
     topic: Topic! @relation(name: "TopicUserBlockBasedProject", direction: "OneWay")
+    course: Course @relation(name: "UserBlockBasedProjectCourse", direction: "OneWay")
   }
 `;
 

@@ -31,6 +31,7 @@ const UserActivityPQDump = `
     pqAction: UserActionType
     learningObjective: LearningObjective! @relation(name: "LearningObjectiveUserActivityPQDump", direction: "OneWay")
     topic: Topic @relation(name: "TopicUserActivityPQDump", direction: "OneWay")
+    course: Course @relation(name: "UserActivityPQDumpCourse", direction: "OneWay")
   }
 `;
 
