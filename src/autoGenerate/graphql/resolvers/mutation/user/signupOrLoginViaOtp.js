@@ -145,9 +145,8 @@ const signupOrLoginViaOtp = async (
 
   // send otp to the client
   const { name, phone } = userData;
-  if (!input.email) {
-    getNumberAndSendSms(phone, phoneOtp, name);
-  }
+  getNumberAndSendSms(phone, phoneOtp, name);
+
   return {
     result: true,
   };
