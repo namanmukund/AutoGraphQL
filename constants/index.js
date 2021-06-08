@@ -139,6 +139,8 @@ const UNPUBLISHED = 'unpublished';
 
 const GLOBAL_COURSE_TITLE = 'python';
 
+const NEW_COURSES_ID = ['id'];
+
 const enrollmentTypes = {
   free: 'free',
   pro: 'pro',
@@ -147,8 +149,11 @@ const enrollmentTypes = {
 const topicTypes = {
   video: 'video',
   message: 'message',
+  comicStrip: 'comicStrip',
   practiceQuestion: 'practiceQuestion',
   quiz: 'quiz',
+  blockBasedProject: 'blockBasedProject',
+  blockBasedPractice: 'blockBasedPractice',
 };
 
 const userActionType = {
@@ -316,12 +321,18 @@ const topicComponents = {
   assignment: 'assignment',
   quiz: 'quiz',
   blockBasedProject: 'blockBasedProject',
+  blockBasedPractice: 'blockBasedPractice',
 };
 
 const childTopicComponents = {
   message: 'message',
   practiceQuestion: 'practiceQuestion',
   comicStrip: 'comicStrip',
+};
+
+const blockBasedProjectType = {
+  project: 'project',
+  practice: 'practice',
 };
 
 export const GIFT_VOUCHER_AMOUNT = 2500;
@@ -406,4 +417,6 @@ export {
   studentCurrentStatus,
   topicComponents,
   childTopicComponents,
+  NEW_COURSES_ID,
+  blockBasedProjectType,
 };

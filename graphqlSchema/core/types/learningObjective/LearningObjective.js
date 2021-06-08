@@ -35,6 +35,7 @@ const LearningObjective = `
     thumbnail: File @relation(name: "LearningObjectiveThumbnail", direction: "OneWay")
     messageStatus: ContentStatus! @defaultValue(value: "unpublished")
     comicStrips: [ComicStrip] @relation(name: "LearningObjectiveComicStrip")
+    courses: [Course] @relation(name: "CourseLearningObjective", direction: "OneWay")
   }
 `;
 

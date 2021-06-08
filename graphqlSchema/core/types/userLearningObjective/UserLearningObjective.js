@@ -23,6 +23,8 @@ const UserLearningObjective = `
     practiceQuestions: [PracticeQuestionsUserLearningObjectiveType]
     practiceQuestionStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
     isPracticeQuestionBookmarked: Boolean @defaultValue(value: "false")
+    comicStripStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
+    isComicStripBookmarked: Boolean @defaultValue(value: "false")
     nextComponent: UserLearningObjectiveNextComponentType
   }
 `;
