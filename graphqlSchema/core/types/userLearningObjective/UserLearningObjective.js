@@ -12,6 +12,7 @@ const userLearningObjectivenextComponentType = `
    learningObjective: LearningObjective @relation(name: "UserLearningObjectiveNextComponentTypeLO", direction: "OneWay")
    nextComponentType: CurrentTopicComponentType
    topic: Topic @relation(name: "UserLearningObjectiveNextComponentTypeTopic", direction: "OneWay")
+   blockBasedProject: BlockBasedProject @relation(name: "UserLearningObjectiveNextComponentTypeProject", direction: "OneWay")
  }`;
 
 const UserLearningObjective = `
