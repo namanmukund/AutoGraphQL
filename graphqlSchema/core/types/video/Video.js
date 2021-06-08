@@ -32,8 +32,7 @@ const Video = `
     storyStartTime: Int
     storyEndTime: Int
     storyThumbnail: File @relation(name: "StoryThumbnail", direction: "OneWay")
-    topics: [Topic] @relation(name: "TopicVideo")
-    courses: [Course] @relation(name: "CourseVideo", direction: "OneWay")
+    topics: [Topic] @relation(name: "TopicVideoContent")
   }
 `;
 
