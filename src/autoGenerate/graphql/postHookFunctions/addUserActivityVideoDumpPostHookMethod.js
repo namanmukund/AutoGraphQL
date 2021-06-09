@@ -1,11 +1,13 @@
 import { get } from 'lodash';
 import {
+  OLD_COURSE_ID,
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
 import { log } from '../../../../utils';
 import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 
 /*
 query to get User video for given user and topic id
@@ -25,6 +27,26 @@ const userVideoQuery = (userId, topicId) => `
     }){
       id
       status
+      topic{
+        id
+        order
+        topicComponentRule{
+          componentName
+          order
+          childComponentName
+          learningObjective{
+            id
+            order
+          }
+          blockBasedProject{
+            id
+            order
+          }
+          video{
+            id
+          }
+        }
+      }
     }
   }
   `;
@@ -61,6 +83,8 @@ UserVideo(bookmark, status etc) is updated based on-
 const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, context) => {
   const userId = get(input, 'user.typeId');
   const topicId = get(input, 'topic.typeId');
+  const courseId = get(input, 'course.typeId');
+  const videoId = get(input, 'video.typeId');
   // query to get topic info
   if (!userId || !topicId) {
     log('Either one of userId or topicId is missing in input of addUserActivityVideoDumpPostHookMethod');
@@ -102,13 +126,31 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
   /*
   Calling method to update current user Topic Component status
   */
-  await updateCurrentComponentStatus(
-    currentTopicComponentInfo,
-    videoAction,
-    topicId,
-    '',
-    'video',
-  );
+  if (!courseId || (courseId !== OLD_COURSE_ID)) {
+    await updateCurrentComponentStatus(
+      currentTopicComponentInfo,
+      videoAction,
+      topicId,
+      '',
+      'video',
+    );
+  } else {
+    const topicComponentRule = get(userVideoInfo, 'topic.topicComponentRule', []);
+    const topicOrder = get(userVideoInfo, 'topic.order');
+
+    await updateCurrentComponentStatusOfNewCourse(
+      courseId,
+      currentTopicComponentInfo,
+      videoAction,
+      topicId,
+      '',
+      '',
+      videoId,
+      'video',
+      topicComponentRule,
+      topicOrder,
+    );
+  }
   // if existing status for video is complete, it will remain complete
   if (userVideoInfo && userVideoInfoStatus === complete) {
     status = complete;

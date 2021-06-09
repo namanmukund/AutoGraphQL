@@ -15,11 +15,6 @@ const topicQuery = (topicId) => `
     topic(id:"${topicId}"){
       id
       order
-      topicComponentRule{
-        componentName
-        childComponentName
-        order
-      }
       learningObjectives(filter:{
         status: ${PUBLISHED}
         }

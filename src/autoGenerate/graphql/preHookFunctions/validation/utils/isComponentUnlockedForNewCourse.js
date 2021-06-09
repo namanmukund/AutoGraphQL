@@ -9,8 +9,8 @@ import {
   UserOrTopicNotPresentError,
   PaidComponentLockedError,
 } from '../../../../../../constants/errors';
-import getUserCurrentTopicComponentStatus
-  from '../../../../utils/getUserCurrentTopicComponentStatus';
+import getUserCurrentTopicComponentStatusForNewCourse
+  from '../../../../utils/getUserCurrentTopicComponentStatusForNewCourse';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
 import {
   backendApps,
@@ -36,7 +36,7 @@ const isComponentUnlockedForNewCourse = async (
   inputUserId = '',
   inputLearningObjectiveId = '',
   checkForPaidLogic = false,
-  queryNameToPassData = '',
+  courseId,
 ) => {
   const {
     video, message, practiceQuestion, comicStrip, quiz, blockBasedProject, blockBasedPractice,
@@ -145,7 +145,8 @@ const isComponentUnlockedForNewCourse = async (
       },
     });
   }
-  const userCurrentTopicComponentStatusRes = await getUserCurrentTopicComponentStatus(
+  const userCurrentTopicComponentStatusRes = await getUserCurrentTopicComponentStatusForNewCourse(
+    courseId,
     userId,
     currentTopicQuery,
     currentLearningObjectiveQuery,

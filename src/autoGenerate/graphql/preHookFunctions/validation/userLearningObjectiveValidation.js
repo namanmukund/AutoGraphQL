@@ -24,6 +24,10 @@ const userLearningObjectiveValidation = async (params, context) => {
       '',
       context,
       message,
+      '',
+      '',
+      '',
+      courseId,
     );
   }
 
