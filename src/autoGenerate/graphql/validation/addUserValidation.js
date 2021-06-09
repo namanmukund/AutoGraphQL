@@ -1,11 +1,9 @@
-import bcrypt from 'bcryptjs';
 import {
   generateUsername,
   validateUsername,
 } from './index';
 import { commonUserValidation } from '../preHookFunctions/validation/utils';
 import { EitherEmailOrPhoneRequiredError } from '../../../../constants/errors';
-import authParams from '../../../../config/authParams';
 import getUserPasswordObject from '../resolvers/mutation/user/utils/getUserPasswordObject';
 
 const addUserValidation = async (input, context) => {
