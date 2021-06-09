@@ -21,7 +21,7 @@ const validateParentChildSignUpInput = (input, isBackendApp) => {
     throw new PhoneFieldRequiredError();
   }
   // check phone number
-  if (get(parentPhone, 'countryCode') && !get(parentPhone, 'number') && !isValidPhoneNumber(parentPhone)) {
+  if (get(parentPhone, 'countryCode') && get(parentPhone, 'number') && !isValidPhoneNumber(parentPhone)) {
     throw new InvalidPhoneError();
   }
   // check childName

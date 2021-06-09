@@ -18,6 +18,7 @@ const callParentChildSignup = async (row, schoolName, country) => {
     section,
     branch,
     batch,
+    parentPassword,
   } = row;
   const query = `
 mutation($input: ParentChildSignUpInput){
@@ -45,7 +46,7 @@ mutation($input: ParentChildSignUpInput){
       childName,
       parentEmail,
       parentPhone: {
-        countryCode: countryAndCode[country],
+        countryCode: phoneNumber && countryAndCode[country],
         number: phoneNumber,
       },
       grade,
@@ -54,8 +55,10 @@ mutation($input: ParentChildSignUpInput){
       batch,
       branch,
       schoolName,
+      parentPassword,
     },
   };
+
   const res = await callLocalGraphqlApi(query, '', variables);
   return get(res, 'data.parentChildSignUp');
 };
