@@ -205,7 +205,7 @@ const convertDateFormat = (date) => {
 const addUpdateBulkSchoolUserData = async (root, params, context) => {
   validateAuthentication(context);
   const {
-    sheetId, country = 'india', schoolName, booking = false,
+    sheetId, country = 'india', schoolName, booking = false, setPassword = false,
   } = params;
   if (!sheetId || !schoolName) {
     throw new MissingMandatoryInputInRequestError();
@@ -219,6 +219,9 @@ const addUpdateBulkSchoolUserData = async (root, params, context) => {
   for (const [index, row] of sheetDataRows.entries()) {
     try {
       console.log('Processing row number........', index + 2);
+      if (setPassword) {
+        row.parentPassword = row.parentEmail && row.parentEmail.trim().toLowerCase().split('@')[0];
+      }
       const result = await callParentChildSignup(row, schoolName, country);
 
       if (booking && result && result.id) {
