@@ -77,6 +77,7 @@ import Publisher from './Publisher';
 import StudentCurrentStatusType from './StudentCurrentStatusType';
 import ChildTopicComponents from './ChildTopicComponents';
 import TopicComponents from './TopicComponents';
+import BookedBy from './BookedBy';
 
 export default [
   Status,
@@ -159,4 +160,5 @@ export default [
   StudentCurrentStatusType,
   TopicComponents,
   ChildTopicComponents,
+  BookedBy,
 ];

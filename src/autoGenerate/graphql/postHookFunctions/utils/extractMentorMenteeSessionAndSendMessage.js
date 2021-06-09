@@ -28,6 +28,7 @@ const extractMentorMenteeSessionAndSendMessage = async (
   user,
   topic,
 ) => {
+  if (get(user, 'data.user.studentProfile.parents[0].user.campaign.type')) return;
   const slotNumber = slotTimeStringArray[0].split('slot')[1];
   const { startTime, endTime } = getSlotLabel(slotNumber);
   const menteeInfo = get(user, 'data.user');
