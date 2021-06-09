@@ -66,6 +66,7 @@ const User = `
     ${socialInfo}
     ${promotionalInfo}
     verificationStatus: VerificationStatus @defaultValue(value: "empty")
+    mentorBatches: [Batch] @relation(name:"BatchMentor")
   }
 `;
 

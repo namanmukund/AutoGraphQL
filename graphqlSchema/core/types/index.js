@@ -92,6 +92,9 @@ import RescheduledSlot from './rescheduledSlot';
 import GetCampaignSlots from './getCampaignSlots';
 import BookB2B2CSlotsInput from './bookB2B2CSlotsInput';
 import StudentCurrentStatus from './studentCurrentStatus';
+import Video from './video';
+import ComicStrip from './comicStrip';
+import BlockBasedProject from './blockBasedProject';
 
 export default [
   ...User,
@@ -188,4 +191,7 @@ export default [
   ...GetCampaignSlots,
   ...BookB2B2CSlotsInput,
   ...StudentCurrentStatus,
+  ...Video,
+  ...ComicStrip,
+  ...BlockBasedProject,
 ];

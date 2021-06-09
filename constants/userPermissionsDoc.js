@@ -113,6 +113,13 @@ const userPermissionsDoc = {
       read: [...NOT_CMS_HEAD_ARRAY, SCHOOL_ADMIN],
     },
   },
+  BlockBasedProject: {
+    collection: {
+      rule: 'allow',
+      crud: [...CMS_HEAD_ARRAY],
+      read: [...NOT_CMS_HEAD_ARRAY],
+    },
+  },
 };
 
 export default userPermissionsDoc;

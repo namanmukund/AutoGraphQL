@@ -310,6 +310,20 @@ const studentCurrentStatus = {
   churned: 'churned',
 };
 
+const topicComponents = {
+  video: 'video',
+  learningObjective: 'learningObjective',
+  assignment: 'assignment',
+  quiz: 'quiz',
+  blockBasedProject: 'blockBasedProject',
+};
+
+const childTopicComponents = {
+  message: 'message',
+  practiceQuestion: 'practiceQuestion',
+  comicStrip: 'comicStrip',
+};
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export const MENTOR_REPORT_COUNTRY = 'india';
@@ -390,4 +404,6 @@ export {
   weekDays,
   sessionType,
   studentCurrentStatus,
+  topicComponents,
+  childTopicComponents,
 };

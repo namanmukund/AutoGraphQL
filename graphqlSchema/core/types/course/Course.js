@@ -6,6 +6,16 @@ import {
   SCHOOL_ADMIN,
 } from '../../../../constants/roles';
 
+// video, lo, chat, pq, coding assignment, home assignment, quiz
+const CourseComponentsRule = `
+  type CourseComponentsRule {
+   componentName: TopicComponents
+   childComponentName: ChildTopicComponents
+   order: Int
+   max: Int @defaultValue(value: 1)
+   min: Int @defaultValue(value: 1)
+ }`;
+
 const Course = `
   type Course @model 
   @appPermissions(
@@ -26,7 +36,7 @@ const Course = `
   ) 
   {
     order: Int
-    title: CourseTitle! @unique
+    title: String! @unique
     category: CourseCategory!
     description: String @uniqueOrEmpty @length(min: 6, max: 120) @trim
     status: ContentStatus! @defaultValue(value: "unpublished")
@@ -34,7 +44,12 @@ const Course = `
     products: [Product] @relation(name: "CourseProduct")
     mentorPricings: [MentorPricing] @relation(name: "CourseMentorPricing")
     thumbnail: File @relation(name: "CourseThumbnail", direction: "OneWay")
+    bannerThumbnail: File @relation(name: "CourseBannerThumbnail", direction: "OneWay")
+    topics: [Topic] @relation(name: "CourseTopic")
+    courseComponentRule: [CourseComponentsRule]
+    badges: [Badge] @relation(name: "CourseBadge")
+    badgeDescription: String @uniqueOrEmpty @length(min: 6, max: 120) @trim
   }
 `;
 
-export default Course;
+export default [Course, CourseComponentsRule];

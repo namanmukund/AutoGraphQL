@@ -16,7 +16,7 @@ const Project = `
   {
     title: String! @unique @trim
     order: Int
-    topic: Topic @relation(name: "TopicCheatSheet", direction: "OneWay")
+    topics: [Topic] @relation(name: "TopicProject")
     content: [ProjectContent] @relation(name: "ProjectContent", isSubset: true)
     status: ContentStatus! @defaultValue(value: "unpublished")
   }
