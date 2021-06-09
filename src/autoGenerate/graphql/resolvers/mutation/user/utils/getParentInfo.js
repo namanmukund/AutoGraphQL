@@ -10,13 +10,13 @@ const getParentInfo = async (context, email, phone) => {
   let filter = '';
   if (!get(phone, 'countryCode') || !get(phone, 'number')) {
     filter = `
-      {email:"${email}"}
+      {email:"${email.trim().toLowerCase()}"}
     `;
   } else {
     const { countryCode, number } = phone;
     filter = `{
       or:[
-      {email:"${email}"}
+      {email:"${email.trim().toLowerCase()}"}
       {and:[
         {phone_countryCode_subDoc:"${countryCode}"}
         {phone_number_subDoc: "${number}"}
