@@ -1,16 +1,20 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
-import { EmailOrPhoneMismatchError, UserAlreadyExistsError } from '../../../../../../../constants/errors';
+import { UserAlreadyExistsError } from '../../../../../../../constants/errors';
 import { createUserTokenTypeData } from '../../utils/createUserTokenTypeData';
 
 const getParentInfo = async (context, email, phone) => {
   const result = {};
-  const { countryCode, number } = phone;
   const childrenName = [];
   const childrenToken = [];
-  const query = `
-  query {
-    users(filter:{
+  let filter = '';
+  if (!get(phone, 'countryCode') || !get(phone, 'number')) {
+    filter = `
+      {email:"${email}"}
+    `;
+  } else {
+    const { countryCode, number } = phone;
+    filter = `{
       or:[
       {email:"${email}"}
       {and:[
@@ -18,7 +22,11 @@ const getParentInfo = async (context, email, phone) => {
         {phone_number_subDoc: "${number}"}
       ]}
       ]
-    }){
+    }`;
+  }
+  const query = `
+  query {
+    users(filter: ${filter}){
       id
       name
       email
@@ -46,20 +54,21 @@ const getParentInfo = async (context, email, phone) => {
     if (res.length > 1) {
       throw new UserAlreadyExistsError();
     }
-    // if res has length 1 then check if phone and email belogs to the same user
+    // if res has length 1 then check if phone and email belongs to the same user
     const {
-      id, parentProfile, email: parentEmail, phone: parentPhone,
+      id, parentProfile, email: parentEmail,
     } = res[0];
     result.parentId = id;
     result.parentEmail = parentEmail;
+    // changed to: either if phone or email exists and kid name is different then map the kid with the parent
     // only continue if parent phone and email are same to add a sibling
-    if (
-      parentPhone.countryCode !== countryCode
-            || parentPhone.number !== number
-            || parentEmail !== email
-    ) {
-      throw new EmailOrPhoneMismatchError();
-    }
+    // if (
+    //   parentPhone.countryCode !== countryCode
+    //         || parentPhone.number !== number
+    //         || parentEmail !== email
+    // ) {
+    //   throw new EmailOrPhoneMismatchError();
+    // }
 
     if (parentProfile && parentProfile.id) {
       result.parentProfileId = parentProfile.id;
