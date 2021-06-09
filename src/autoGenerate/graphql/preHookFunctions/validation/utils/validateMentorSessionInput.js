@@ -9,7 +9,7 @@ import { backendApps } from '../../../../../../constants';
 const PRE_BOOKING_HOUR_LIMIT = 0;
 const validateMentorSessionInput = (params, prevMentorSession, context) => {
   const { input } = params;
-  const { availabilityDate, ...slots } = input;
+  const { availabilityDate = '', ...slots } = input;
 
   if (!availabilityDate) {
     throw new MissingMandatoryInputInRequestError({

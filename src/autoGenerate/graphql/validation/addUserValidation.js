@@ -6,6 +6,7 @@ import {
 import { commonUserValidation } from '../preHookFunctions/validation/utils';
 import { EitherEmailOrPhoneRequiredError } from '../../../../constants/errors';
 import authParams from '../../../../config/authParams';
+import getUserPasswordObject from '../resolvers/mutation/user/utils/getUserPasswordObject';
 
 const addUserValidation = async (input, context) => {
   const {
@@ -33,10 +34,8 @@ const addUserValidation = async (input, context) => {
   }
 
   if (password) {
-    const hashedPwd = bcrypt.hashSync(password, authParams.SALT);
-    doc.password = hashedPwd;
-    doc.savedPassword = password;
-    doc.isSetPassword = true;
+    const passwordObj = getUserPasswordObject(password, true);
+    Object.assign(doc, passwordObj);
   }
 
   return doc;

@@ -74,7 +74,9 @@ import BatchCreationBasis from './BatchCreationBasis';
 import BatchCreationStatus from './BatchCreationStatus';
 import CampaignType from './CampaignType';
 import Publisher from './Publisher';
-import BookedBy from './BookedBy';
+import StudentCurrentStatusType from './StudentCurrentStatusType';
+import ChildTopicComponents from './ChildTopicComponents';
+import TopicComponents from './TopicComponents';
 
 export default [
   Status,
@@ -154,5 +156,7 @@ export default [
   BatchCreationStatus,
   CampaignType,
   Publisher,
-  BookedBy,
+  StudentCurrentStatusType,
+  TopicComponents,
+  ChildTopicComponents,
 ];

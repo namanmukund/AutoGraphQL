@@ -7,6 +7,7 @@ import {
 } from './utils/updateBatchPostHookQueries';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
+import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
 
 // query to get all not completed batchSessions of a batch to update student
 const getBatchSessionsQuery = (batchId) => `
@@ -24,6 +25,8 @@ const getBatchSessionsQuery = (batchId) => `
       ]
     }){
       id
+      bookingDate
+      ${getSlotTimesInString()}
     }
   }
   `;
@@ -73,6 +76,20 @@ const fetchMentorSessions = (bookingDate, mentorId) => `
       slot23
     }
   }
+  `;
+
+// update mentors in mentor session
+const updateNewMentorSessionInBatchSession = (batchSessionId, mentorSessionId) => `
+  mutation{
+  updateBatchSession(id: "${batchSessionId}",
+  mentorSessionConnectId: "${mentorSessionId}"
+  ){
+    id
+    mentorSession{
+      id
+    }
+  }
+}
   `;
 
 // update mentor Session
@@ -185,7 +202,7 @@ const sortBatchSessions = (batchSessions) => {
 */
 /* eslint-disable no-unused-vars */
 const updateBatchPostHookMethod = async (input, params, mutationName, context) => {
-  const { id: batchId, studentsConnectIds } = params;
+  const { id: batchId, studentsConnectIds, allottedMentorConnectId } = params;
   const mentorUserId = get(input, 'allottedMentor.typeId', '');
   const courseId = get(input, 'course.typeId', '');
   const timeTableRule = get(params, 'input.timeTableRule', null);
@@ -247,8 +264,21 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
       const possibleDates = getPossibleDates(startDate, endDate, days);
       createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId);
     }
+  } else if (allottedMentorConnectId) {
+    const previouslyAllottedMentorId = get(context, 'previousDocument.allottedMentor.id', '');
+    if (previouslyAllottedMentorId !== allottedMentorConnectId) {
+      // fetch all the batch Sessions corresponding to given batch which are !completed state
+      const notCompletedBatchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId));
+      const notCompletedBatchSessions = get(notCompletedBatchSessionsResult, 'data.batchSessions');
+      notCompletedBatchSessions.forEach(async (batchSession) => {
+        // we add or update mentor sessions of the new mentor based on the batch session dates
+        const { id: batchSessionId, bookingDate, ...slots } = batchSession;
+        const finalMentorSessionId = await getMentorSessionId(allottedMentorConnectId, bookingDate, slots, courseId);
+        // update the new mentorSessionId in the batch Session
+        callLocalGraphqlApi(updateNewMentorSessionInBatchSession(batchSessionId, finalMentorSessionId));
+      });
+    }
   }
-
   // while we are adding new students to a batch, adding those students to not completed batch Sessions
   if (studentsConnectIds && studentsConnectIds.length && batchId) {
     const notCompletedBatchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId));

@@ -17,7 +17,7 @@ const userCurrentTopicComponentStatusQuery = (
       {currentCourse_some:{
         and:[
           {status: ${PUBLISHED}},
-          {title: ${GLOBAL_COURSE_TITLE}}
+          {title: "${GLOBAL_COURSE_TITLE}""}
         ]
       }}
       ]

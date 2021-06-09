@@ -12,7 +12,7 @@ import { generateCuid, log } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import generateInviteCode from '../../../../../../utils/generateInviteCode';
-import { REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
+import { backendApps, REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
 import addUserCredit from './utils/addUserCredit';
 import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
@@ -33,13 +33,12 @@ import getSchoolInformation from './utils/getSchoolInformation';
 import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
-import sendTransactionalEmail from '../../utils/sendTransactionalEmail';
+import getUserPasswordObject from './utils/getUserPasswordObject';
 
 const USER_TYPE = 'User';
 
 const FETCH_CAMPAIGN = (campaignId) => `{
   campaign(id: "${campaignId}") {
-    type
     school {
       name
     }
@@ -63,9 +62,12 @@ const parentChildSignUpMutationResolver = async (
   ast,
   authentication,
 ) => {
-  const { input, schoolId, campaignId } = params;
+  const {
+    input, schoolId, campaignId = false,
+  } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
+
   validate(
     'UserToken',
     ast,
@@ -76,16 +78,20 @@ const parentChildSignUpMutationResolver = async (
   );
 
   const currentUser = authentication && authentication.user;
+  const isBackendApp = backendApps.includes(get(authentication, 'app.name'));
 
-  if (currentUser && currentUser) {
+  if (!isBackendApp && currentUser && currentUser) {
     throw new UserTokenNotRequiredError();
   }
-  validateParentChildSignUpInput(input);
+  validateParentChildSignUpInput(input, isBackendApp);
   const {
     parentName,
     childName,
     parentEmail,
     parentPhone,
+    parentPassword,
+    childPassword,
+    childEmail,
     grade,
     section,
     rollNo,
@@ -103,7 +109,7 @@ const parentChildSignUpMutationResolver = async (
     timezone = 'Asia/Kolkata',
   } = input;
   // check if parent exist in db
-  const parentInfo = await getParentInfo(context, parentEmail, parentPhone);
+  const parentInfo = await getParentInfo(context, parentEmail, parentPhone, isBackendApp);
   let parentId;
   let parentProfileId;
   Object.assign(authentication, {
@@ -135,8 +141,7 @@ const parentChildSignUpMutationResolver = async (
   } else {
     const parentData = {
       name: parentName.trim(),
-      email: parentEmail.trim(),
-      phone: parentPhone,
+      email: parentEmail.trim().toLowerCase(),
       role: PARENT,
       utmSource,
       utmCampaign,
@@ -147,6 +152,16 @@ const parentChildSignUpMutationResolver = async (
       country,
       timezone,
     };
+
+    if (get(parentPhone, 'countryCode') && get(parentPhone, 'number')) {
+      parentData.phone = parentPhone;
+    }
+
+    // set parent password
+    if (isBackendApp && parentPassword) {
+      const passwordObj = getUserPasswordObject(parentPassword, true);
+      Object.assign(parentData, passwordObj);
+    }
 
     if (campaignId) {
       parentData.campaign = {
@@ -195,6 +210,16 @@ const parentChildSignUpMutationResolver = async (
     country,
     timezone,
   };
+
+  if (isBackendApp && childEmail) {
+    childData.email = childEmail.trim().toLowerCase();
+  }
+  // set child password
+  if (isBackendApp && childEmail && childPassword) {
+    // set email half as password
+    const passwordObj = getUserPasswordObject(childPassword, true);
+    Object.assign(childData, passwordObj);
+  }
 
   // check if the child has been referred by a valid user
   const referredByUserData = await checkForValidReferralCode(referralCode);
@@ -342,16 +367,6 @@ If coming from campaign and the type os b2b allocate the user to the right batch
   const campaignType = get(campaign, 'type', '');
   if (campaignType) {
     leadSquaredParams.input.Vertical = campaignType.replace('Event', '');
-  }
-
-  if (!campaignType && !schoolName) {
-    sendTransactionalEmail({
-      parentEmail,
-      parentName,
-    }, {
-      emailTemplate: 'WelcomeEmail',
-      subject: 'Welcome to Tekie, your next steps!',
-    });
   }
 
   parentChildSignupPostHookMethod(input, leadSquaredParams);
