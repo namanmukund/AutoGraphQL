@@ -8,6 +8,9 @@ const TopicComponentsRule = `
    componentName: TopicComponents
    childComponentName: ChildTopicComponents
    order: Int
+   learningObjective: LearningObjective @relation(name: "TopicComponentLearningObjective", direction: "OneWay")
+   video: Video @relation(name: "TopicComponentVideo", direction: "OneWay")
+   blockBasedProject: BlockBasedProject @relation(name: "TopicComponentBlockBasedProject", direction: "OneWay")
  }`;
 
 const Topic = `

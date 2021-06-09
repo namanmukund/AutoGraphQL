@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import {
+  OLD_COURSE_ID,
   PUBLISHED,
   userTopicTypeStatus,
 } from '../../../../constants';
@@ -14,12 +15,18 @@ const topicQuery = (topicId) => `
     topic(id:"${topicId}"){
       id
       order
+      topicComponentRule{
+        componentName
+        childComponentName
+        order
+      }
       learningObjectives(filter:{
         status: ${PUBLISHED}
         }
         orderBy: order_ASC
       ){
         id
+        order
       }
     }
   }
@@ -30,11 +37,15 @@ const addUserVideoMutation = (
   userId,
   topicId,
   restQuery,
+  courseId,
+  videoId,
 ) => `
   mutation{
     addUserVideo(
     userConnectId:"${userId}"
     topicConnectId:"${topicId}"
+    ${courseId ? `courseConnectId:"${courseId}"` : ''}
+    ${videoId ? `videoConnectId:"${videoId}"` : ''}
     input:{
         status: ${userTopicTypeStatus.incomplete}
         ${restQuery}
@@ -73,6 +84,7 @@ const userVideoPostHookMethod = async (input, params) => {
   returning input in that case
   if it is not already present, we will add a new document with default data
   */
+  let restQuery = '';
   if (input && input.length) {
     return input;
   }
@@ -80,6 +92,8 @@ const userVideoPostHookMethod = async (input, params) => {
   const {
     userId,
     topicId,
+    courseId,
+    videoId,
   } = getInfoFromParams(params, 'video');
   // In case there is no topic id, empty data will be sent
   if (!topicId) {
@@ -94,11 +108,13 @@ const userVideoPostHookMethod = async (input, params) => {
   const learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
 
   // next component will be chat of first published LO
-  const restQuery = getNextComponent(
-    learningObjectiveConnectId,
-    '',
-    'video',
-  );
+  if (!courseId || (courseId !== OLD_COURSE_ID)) {
+    restQuery = getNextComponent(
+      learningObjectiveConnectId,
+      '',
+      'video',
+    );
+  }
   /*
     adding addUserVideo document on the basis of
     restQuery(next component data), rest data will take default values from schema
@@ -107,6 +123,8 @@ const userVideoPostHookMethod = async (input, params) => {
     userId,
     topicId,
     restQuery,
+    courseId,
+    videoId,
   ));
   if (result) {
     /*

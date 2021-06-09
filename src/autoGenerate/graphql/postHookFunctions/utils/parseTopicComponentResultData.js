@@ -1,6 +1,7 @@
 const parseTopicComponentResultData = (result, page) => {
   const parsedData = result;
   let topic;
+  let video;
   let learningObjective;
   const practiceQuestions = [];
   let practiceQuestionsRes;
@@ -54,6 +55,10 @@ const parseTopicComponentResultData = (result, page) => {
     case 'video':
       topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
       parsedData.topic = topic;
+      if (parsedData.video && parsedData.video.id) {
+        video = { type: 'Video', typeId: `${parsedData.video.id}` };
+        parsedData.video = video;
+      }
       break;
     case 'assignment':
       topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };

@@ -139,7 +139,7 @@ const UNPUBLISHED = 'unpublished';
 
 const GLOBAL_COURSE_TITLE = 'python';
 
-const NEW_COURSES_ID = ['id'];
+const OLD_COURSE_ID = 'id';
 
 const enrollmentTypes = {
   free: 'free',
@@ -417,6 +417,6 @@ export {
   studentCurrentStatus,
   topicComponents,
   childTopicComponents,
-  NEW_COURSES_ID,
+  OLD_COURSE_ID,
   blockBasedProjectType,
 };
