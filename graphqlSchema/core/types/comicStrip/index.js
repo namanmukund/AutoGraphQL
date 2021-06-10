@@ -1,3 +1,3 @@
 import ComicStrip from './ComicStrip';
 
-export default [...ComicStrip];
+export default [ComicStrip];

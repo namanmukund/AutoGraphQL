@@ -2,6 +2,8 @@ const userVideoNextComponentType = `
   type UserVideoNextComponentType {
    learningObjective: LearningObjective @relation(name: "UserVideoLearningObjective", direction: "OneWay")
    nextComponentType: CurrentTopicComponentType
+   topic: Topic @relation(name: "UserVideoNextComponentTypeTopic", direction: "OneWay")
+   video: Video @relation(name: "UserVideoNextComponentTypeVideo", direction: "OneWay")
  }`;
 
 const UserVideo = `
