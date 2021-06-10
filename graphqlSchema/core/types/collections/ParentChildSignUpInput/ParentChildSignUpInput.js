@@ -3,7 +3,10 @@ const ParentChildSignUpInput = `
     parentName: String!
     childName: String!
     parentEmail: String!
-    parentPhone: PhoneInput!  
+    parentPhone: PhoneInput
+    parentPassword: String
+    childPassword: String
+    childEmail: String 
     grade: Grade
     country: Country
     timezone: String

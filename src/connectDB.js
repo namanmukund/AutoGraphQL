@@ -20,12 +20,12 @@ db.on('error', (err) => {
   log('MongoDB disconnected!');
 }).once('open', async () => {
   log('Connected to DB.');
-  reRunJobsFromDB();
   if (
     process.env.NODE_ENV === 'production'
     && process.env.IS_SCHEDULER_INSTANCE
     && process.env.IS_SCHEDULER_INSTANCE !== 'false') {
     createScheduler('sessionReminder');
     createScheduler('mentorReport');
+    reRunJobsFromDB();
   }
 });

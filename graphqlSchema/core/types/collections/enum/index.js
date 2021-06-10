@@ -77,7 +77,10 @@ import Publisher from './Publisher';
 import StudentCurrentStatusType from './StudentCurrentStatusType';
 import ChildTopicComponents from './ChildTopicComponents';
 import TopicComponents from './TopicComponents';
+<<<<<<< HEAD
 import BlockBasedProjectType from './BlockBasedProjectType';
+=======
+>>>>>>> c7ca75125d51156788032475ff33d78a0ebffb1a
 import BookedBy from './BookedBy';
 
 export default [
@@ -161,6 +164,9 @@ export default [
   StudentCurrentStatusType,
   TopicComponents,
   ChildTopicComponents,
+<<<<<<< HEAD
   BlockBasedProjectType,
+=======
+>>>>>>> c7ca75125d51156788032475ff33d78a0ebffb1a
   BookedBy,
 ];

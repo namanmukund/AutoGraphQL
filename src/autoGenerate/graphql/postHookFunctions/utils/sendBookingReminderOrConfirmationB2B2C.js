@@ -10,7 +10,7 @@ import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMess
 import sendTransactionalEmail from '../../resolvers/utils/sendTransactionalEmail';
 import updateBookSessionReminderStatus from './updateBookSessionReminderStatus';
 
-const TIMEOUT = 2000 * 60;
+const TIMEOUT = 5000 * 60;
 
 const getDays = (date) => {
   const then = new Date(new Date(date).setHours(0, 0, 0, 0)).toISOString();
@@ -161,8 +161,9 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
           { name: 'school_name', value: schoolName },
           { name: 'booking_link', value: bookingLink },
         ]);
-        const today = new Date();
-        addToSchedule('sendNextDayBookReminder', new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes() + 5, 0), { userId, code });
+        const oneDayAfter = moment().add(1, 'day').toDate();
+        scheduleTime = new Date(oneDayBeforeBookingTime.setHours(17, 17, 0, 0));
+        addToSchedule('sendNextDayBookReminder', oneDayAfter, { userId, code });
       }
     }
   }, timeout);
