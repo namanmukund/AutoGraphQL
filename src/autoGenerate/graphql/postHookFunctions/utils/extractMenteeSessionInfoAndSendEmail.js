@@ -26,6 +26,9 @@ const menteeInfoQuery = (userId) => `
         parents{
           id
           user{
+            campaign {
+              type
+            }
             id
             name
             email
@@ -135,6 +138,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
   topic,
 ) => {
   const slotNumber = slotTimeStringArray[0].split('slot')[1];
+  if (get(user, 'data.user.studentProfile.parents[0].user.campaign.type')) return;
 
   const { user: { typeId: userId }, topic: { typeId: topicId } } = input;
   const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId));
@@ -163,6 +167,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
   const topicInfo = topic || await callLocalGraphqlApi(topicInfoQuery(topicId));
   menteeObj.topicTitle = get(topicInfo, 'data.topic.title');
   const topicThumbnail = get(topicInfo, 'data.topic.thumbnailSmall.uri');
+  menteeObj.topicThumbnail = '';
   if (topicThumbnail) {
     menteeObj.topicThumbnail = `${process.env.FILE_BASE_URL}/${topicThumbnail}`;
   }

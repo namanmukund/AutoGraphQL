@@ -1,6 +1,7 @@
 import { log, dbConfig } from '../utils';
 import db from './db';
 import createScheduler from '../utils/createScheduler';
+import reRunJobsFromDB from '../utils/scheduleJobs/reRunJobsFromDB';
 
 let dbReconnectCount = 1;
 db.on('error', (err) => {
@@ -25,5 +26,6 @@ db.on('error', (err) => {
     && process.env.IS_SCHEDULER_INSTANCE !== 'false') {
     createScheduler('sessionReminder');
     createScheduler('mentorReport');
+    reRunJobsFromDB();
   }
 });

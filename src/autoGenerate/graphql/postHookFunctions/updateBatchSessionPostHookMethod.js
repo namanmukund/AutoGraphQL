@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import moment from 'moment';
 import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
@@ -9,6 +10,8 @@ import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentCompone
 import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
 import addRescheduledSlot from './utils/addRescheduledSlot';
 import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
+import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
+import addToSchedule from '../../../../utils/scheduleJobs/addToSchedule';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -33,6 +36,12 @@ const getBatchQuery = (batchId) => `
           user{
             id
             source
+            name
+          }
+          parents {
+            user {
+              email
+            }
           }
         }
         currentComponent{
@@ -148,7 +157,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     bookingDateFromInput,
     allottedMentorId,
   } = context;
-
+  // console.log(JSON.stringify(input, null, 2));
   /*
 get Course Id
 */
@@ -235,6 +244,8 @@ get Course Id
           sessionStatus.allotted,
           nextTopicId,
         );
+        const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
+        addToSchedule('postCarnivalMail', postCarnivalFeedbackDate, { batchSessionId });
       } else {
         await updateBatchCurrentComponentStatus(
           batchCurrentComponentId,
@@ -265,6 +276,8 @@ get Course Id
       }
     }
   }
+  const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
+  extractBatchSessionAndSendB2B(batchSessionId, students);
 };
 
 export default updateBatchSessionPostHookMethod;

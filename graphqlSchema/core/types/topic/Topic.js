@@ -61,7 +61,7 @@ const Topic = `
     bulletPoints: [BulletPoint]
     courses: [Course] @relation(name: "CourseTopic")
     blockBasedProjects: [BlockBasedProject] @relation(name: "TopicBlockBasedProject")
-    videoContent: [Video] @relation(name: "TopicVideo")
+    videoContent: [Video] @relation(name: "TopicVideoContent")
     topicComponentRule: [TopicComponentsRule]
   }
 `;

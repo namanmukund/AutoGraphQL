@@ -18,6 +18,7 @@ const callParentChildSignup = async (row, schoolName, country) => {
     section,
     branch,
     batch,
+    parentPassword,
   } = row;
   const query = `
 mutation($input: ParentChildSignUpInput){
@@ -45,7 +46,7 @@ mutation($input: ParentChildSignUpInput){
       childName,
       parentEmail,
       parentPhone: {
-        countryCode: countryAndCode[country],
+        countryCode: phoneNumber && countryAndCode[country],
         number: phoneNumber,
       },
       grade,
@@ -54,8 +55,10 @@ mutation($input: ParentChildSignUpInput){
       batch,
       branch,
       schoolName,
+      parentPassword,
     },
   };
+
   const res = await callLocalGraphqlApi(query, '', variables);
   return get(res, 'data.parentChildSignUp');
 };
@@ -204,7 +207,9 @@ const convertDateFormat = (date) => {
 
 const addUpdateBulkSchoolUserData = async (root, params, context) => {
   validateAuthentication(context);
-  const { sheetId, country = 'india', schoolName } = params;
+  const {
+    sheetId, country = 'india', schoolName, booking = false, setPassword = false,
+  } = params;
   if (!sheetId || !schoolName) {
     throw new MissingMandatoryInputInRequestError();
   }
@@ -217,9 +222,12 @@ const addUpdateBulkSchoolUserData = async (root, params, context) => {
   for (const [index, row] of sheetDataRows.entries()) {
     try {
       console.log('Processing row number........', index + 2);
+      if (setPassword) {
+        row.parentPassword = row.parentEmail && row.parentEmail.trim().toLowerCase().split('@')[0];
+      }
       const result = await callParentChildSignup(row, schoolName, country);
 
-      if (result && result.id) {
+      if (booking && result && result.id) {
         console.log('Parent  Id....', result.id);
         const { bookingDate, slot, mentor } = row;
         let menteeSessionId;

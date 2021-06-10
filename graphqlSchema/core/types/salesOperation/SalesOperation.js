@@ -83,6 +83,7 @@ ${getPermissionSchemaString('SalesOperation')}
     ${mentorPitch}
     ${studentPersonna}
     ${userPaymentPlan}
+    sessionCommentByMentor: String
   }
 `;
 
