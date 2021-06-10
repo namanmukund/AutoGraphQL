@@ -2,8 +2,8 @@ import { READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
 import { CMS_HEAD, NOT_CMS_HEAD, SCHOOL_ADMIN } from '../../../../constants/roles';
 
-const ComicStrip = `
-  type ComicStrip @model
+const ComicImage = `
+  type ComicImage @model
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
@@ -21,13 +21,10 @@ const ComicStrip = `
     rule: allow
   ) 
   {
-    title: String @uniqueOrEmpty @trim
-    description: String @uniqueOrEmpty @trim
-    comicImages: [ComicImage] @relation(name: "ComicStripeComicImage", isSubset: true)
-    learningObjectives: [LearningObjective]! @relation(name: "LearningObjectiveComicStrip")
-    status: ContentStatus! @defaultValue(value: "unpublished")
-    courses: [Course] @relation(name: "CourseComicStrip", direction: "OneWay")
+   image: File @relation(name: "ComicImageFile", direction: "OneWay")
+   order: Int
+   comicStrip: ComicStrip @relation(name: "ComicStripeComicImage")
   }
 `;
 
-export default ComicStrip;
+export default ComicImage;

@@ -100,6 +100,7 @@ import UserActivityComicStripDump from './userActivityComicStripDump';
 import UserBlockBasedPractice from './userBlockBasedPractice';
 import UserBlockBasedProject from './userBlockBasedProject';
 import UserActivityBlockBasedProjectDump from './userActivityBlockBasedProjectDump';
+import ComicImage from './comicImage';
 
 export default [
   ...User,
@@ -204,4 +205,5 @@ export default [
   ...UserBlockBasedPractice,
   ...UserActivityBlockBasedProjectDump,
   ...UserBlockBasedProject,
+  ...ComicImage,
 ];
