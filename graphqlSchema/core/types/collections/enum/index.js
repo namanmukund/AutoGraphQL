@@ -78,6 +78,7 @@ import StudentCurrentStatusType from './StudentCurrentStatusType';
 import ChildTopicComponents from './ChildTopicComponents';
 import TopicComponents from './TopicComponents';
 import BlockBasedProjectType from './BlockBasedProjectType';
+import BookedBy from './BookedBy';
 
 export default [
   Status,
@@ -161,4 +162,5 @@ export default [
   TopicComponents,
   ChildTopicComponents,
   BlockBasedProjectType,
+  BookedBy,
 ];
