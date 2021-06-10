@@ -295,7 +295,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'userCourseSyllabus': {
-      await userCourseSyllabusMethod(context);
+      await userCourseSyllabusMethod(context, params);
       break;
     }
     case 'addUserActivityVideoDump': {
@@ -331,11 +331,11 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'userTopicJourney': {
-      await userCourseSyllabusMethod(context);
+      await userCourseSyllabusMethod(context, params);
       break;
     }
     case 'menteeCourseSyllabus': {
-      await userCourseSyllabusMethod(context);
+      await userCourseSyllabusMethod(context, params);
       break;
     }
     case 'userAssignment': {

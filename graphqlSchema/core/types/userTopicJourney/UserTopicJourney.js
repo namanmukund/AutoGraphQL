@@ -8,6 +8,8 @@ const userJourneyLearningObjectiveType = `
    isUnlocked: Boolean @defaultValue(value: "false")
    chatStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
    practiceQuestionStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
+   comicStripStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
+   order: Int
  }`;
 
 const userQuizType = `
@@ -18,6 +20,7 @@ const userQuizType = `
    thumbnail: File
    isUnlocked: Boolean @defaultValue(value: "false")
    status: UserTopicTypeStatus @defaultValue(value: "incomplete")
+   order: Int
  }`;
 
 const userVideoType = `
@@ -26,6 +29,16 @@ const userVideoType = `
    description: String
    thumbnail: File
    isUnlocked: Boolean @defaultValue(value: "false")
+   order: Int
+ }`;
+
+const userBlockBasedProjectType = `
+  type UserBlockBasedProjectType {
+   title: String
+   description: String
+   thumbnail: File
+   isUnlocked: Boolean @defaultValue(value: "false")
+   order: Int
  }`;
 
 const UserTopicJourney = `
@@ -33,8 +46,11 @@ const UserTopicJourney = `
     video: UserVideoType
     learningObjectives: [UserJourneyLearningObjectiveType]
     quiz: UserQuizType
+    blockBasedPractices: [UserBlockBasedProjectType]
+    blockBasedProjects: [UserBlockBasedProjectType]
     topicStatus: UserTopicTypeStatus
+    videos: [UserVideoType]
   }
 `;
 
-export default [UserTopicJourney, userJourneyLearningObjectiveType, userQuizType, userVideoType];
+export default [UserTopicJourney, userJourneyLearningObjectiveType, userQuizType, userVideoType, userBlockBasedProjectType];
