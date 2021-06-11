@@ -43,7 +43,7 @@ const Topic = `
     videoTitle: String @uniqueOrEmpty @trim
     videoDescription: String @uniqueOrEmpty @trim
     videoSubtitle: File @relation(name: "VideoSubtitle", direction: "OneWay")
-    videoThumbnail: File @relation(name: "VideoThumbnail", direction: "OneWay")
+    videoThumbnail: File @relation(name: "TopicVideoThumbnail", direction: "OneWay")
     videoStatus: ContentStatus! @defaultValue(value: "unpublished")
     videoStartTime: Int
     videoEndTime: Int
