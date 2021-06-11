@@ -60,7 +60,7 @@ const menteeCourseSyllabusProject = `
   type MenteeCourseSyllabusProject {
    title: String
    projectThumbnail: File
-   tags: [String]
+   tags: [ContentTag]
  }`;
 
 const MenteeCourseSyllabus = `
