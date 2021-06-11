@@ -4,7 +4,7 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   slotTimes,
-  sessionStatus, badgeTypes,
+  sessionStatus, badgeTypes, blockBasedProjectType,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError,
@@ -53,6 +53,8 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
       currentCourse{
         id
         title
+        description
+        badgeDescription
         chapters(
             filter: {
               status: ${PUBLISHED}
@@ -80,6 +82,22 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
               id
               uri
               name
+            }
+            projectCount: blockBasedProjectsMeta(filter:{and:[{type: ${blockBasedProjectType.project}}{status: ${PUBLISHED} }]}){
+              count
+            }
+            practiceCount: blockBasedProjectsMeta(filter:{and:[{type: ${blockBasedProjectType.practice}}{status: ${PUBLISHED}}]}){
+              count
+            }
+            projects: blockBasedProjects(filter:{and:[{type: ${blockBasedProjectType.project}} {status: ${PUBLISHED}}]}){
+              id
+              title
+              projectThumbnail{
+                id
+              }
+              tags{
+                title
+              }
             }
           }
         }
@@ -132,6 +150,8 @@ const getCourseQuery = (courseId) => `
       }){
         id
         title
+        description
+        badgeDescription
         chapters(
             filter: {
               status: ${PUBLISHED}
@@ -160,6 +180,22 @@ const getCourseQuery = (courseId) => `
               id
               uri
               name
+            }
+            projectCount: blockBasedProjectsMeta(filter:{and:[{type: ${blockBasedProjectType.project}}{status: ${PUBLISHED} }]}){
+              count
+            }
+            practiceCount: blockBasedProjectsMeta(filter:{and:[{type: ${blockBasedProjectType.practice}}{status: ${PUBLISHED}}]}){
+              count
+            }
+            projects: blockBasedProjects(filter:{and:[{type: ${blockBasedProjectType.project}} {status: ${PUBLISHED}}]}){
+              id
+              title
+              projectThumbnail{
+                id
+              }
+              tags{
+                title
+              }
             }
           }
         }
@@ -308,8 +344,8 @@ const getBatchSessions = (batchId, courseId) => `
   `;
 
 // query to get all badges in a course along with the topic
-const getBadgeQuery = () => `
-    query{
+const getBadgeQuery = (courseId) => `
+query{
   badges(
     filter:{
       and:[
@@ -318,12 +354,7 @@ const getBadgeQuery = () => `
         }
         {
           courses_some:{
-            id: ""
-          }
-        }
-        {
-          courses_some:{
-            name: ""
+            ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
           }
         }
         {
@@ -393,6 +424,9 @@ const menteeCourseSyllabusMutationResolver = async (
   let lastCompletedTopicOrder = 0;
   let isPaid = false;
   let currentTopicOrder;
+  let projectCount = 0;
+  let practiceCount = 0;
+  const projects = [];
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
     // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
@@ -509,6 +543,14 @@ const menteeCourseSyllabusMutationResolver = async (
       totalTopics += chapter.topics.length;
       // iterating over topics of each chapter  and setting isUnlocked field
       chapter.topics.forEach((topic) => {
+        if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
+        if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
+        if (topic.projects && topic.projects.length) {
+          topic.projects.forEach((project) => {
+            projects.push(project);
+          });
+        }
+
         const {
           order: topicOrder,
           id: topicId,
@@ -714,6 +756,13 @@ const menteeCourseSyllabusMutationResolver = async (
       totalTopics += chapter.topics.length;
       // iterating over topics of each chapter  and setting isUnlocked field
       chapter.topics.forEach((topic) => {
+        if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
+        if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
+        if (topic.projects && topic.projects.length) {
+          topic.projects.forEach((project) => {
+            projects.push(project);
+          });
+        }
         const {
           order: topicOrder,
           id: topicId,
@@ -776,6 +825,17 @@ const menteeCourseSyllabusMutationResolver = async (
     currentTopicOrder,
   );
 
+  const courseData = {
+    title: currentCourse.title,
+    description: currentCourse.description,
+    badgeDescription: currentCourse.badgeDescription,
+    chapterCount: totalChapters,
+    topicCount: totalTopics,
+    projectCount,
+    practiceCount,
+    courseCompletionPercentage: totalTopics ? Math.round((completedSession / totalTopics) * 100) / 100 : 0,
+  };
+
   Object.assign(currentUserSyllabus, {
     upComingSession,
     bookedSession,
@@ -784,6 +844,8 @@ const menteeCourseSyllabusMutationResolver = async (
     totalTopics,
     isPaid,
     skills,
+    course: courseData,
+    projects,
   });
 
   return currentUserSyllabus;
