@@ -33,6 +33,7 @@ const updateSchoolClassInSchoolStudents = async () => {
       );
       // eslint-disable-next-line no-console
       console.log('------------------------------added student id', id);
+      // eslint-disable-next-line no-console
       console.log('------------------------------added schoolClassId', schoolClassId);
     }
   }

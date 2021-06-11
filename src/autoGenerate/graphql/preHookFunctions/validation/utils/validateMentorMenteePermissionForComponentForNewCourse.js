@@ -1,10 +1,9 @@
 import { get } from 'lodash';
 import { MENTEE } from '../../../../../../constants/roles';
 import {
-  DatabaseRecordNotFoundError,
   InsufficientPermissionError,
 } from '../../../../../../constants/errors';
-import { topicTypes, sessionStatus } from '../../../../../../constants';
+import { sessionStatus } from '../../../../../../constants';
 
 /*
 this method validates whether user should be able to hit API on basis of user role

@@ -15,6 +15,9 @@ const MentorProfile = `
     salesExecutive: SalesExecutiveProfile @relation(name: "SalesExecutiveProfileMentorProfile")
     status: MentorStatus @defaultValue(value: "onboarded")
     isMentorActive: Boolean @defaultValue(value: "true")
+    gitHubLink: String
+    linkedInLink: String
+    portfolioLink: String
 }`;
 
 export default [MentorProfile];
