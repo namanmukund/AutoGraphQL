@@ -115,7 +115,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       if (!get(params, 'coursesConnectIds', []).length) {
         throw new ConnectIdRequiredError({ data: { message: 'Course Id is required' } });
       }
-      await isUniqueOrderField(params, mutationOrQueryName);
+      // await isUniqueOrderField(params, mutationOrQueryName);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUser': {

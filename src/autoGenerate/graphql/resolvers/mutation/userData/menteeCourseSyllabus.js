@@ -285,7 +285,7 @@ const getMentorMenteeSessions = (userId, courseId) => `
   `;
 
 // query to get batch status
-const getBatchStatus = (userId, courseId) => `
+const getBatchStatus = (userId) => `
   query{
     user(id: "${userId}"){
       studentProfile{
@@ -440,7 +440,11 @@ const menteeCourseSyllabusMutationResolver = async (
       '',
     );
 
-    batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+    const batchCurrentComponentCourseId = get(batchRes, 'data.user.studentProfile.batch.currentComponent.currentCourse.id');
+
+    if (batchCurrentComponentCourseId === courseId) {
+      batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+    }
 
     const res = await callLocalGraphqlApi(
       getUserCurrentTopicComponentStatus(userId, courseId),
