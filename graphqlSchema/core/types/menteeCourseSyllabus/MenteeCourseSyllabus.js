@@ -34,7 +34,6 @@ const menteeCourseSyllabusSkills = `
 
 const menteeCourseSyllabusCourse = `
   type MenteeCourseSyllabusCourse {
-   id: ID
    title: String
    description: String
    badgeDescription: String
@@ -72,7 +71,7 @@ const MenteeCourseSyllabus = `
     totalChapters: Int
     totalTopics: Int
     isPaid: Boolean @defaultValue(value: "false")
-    currentCourse: MenteeCourseSyllabusCourse
+    course: MenteeCourseSyllabusCourse
     skills: [MenteeCourseSyllabusSkills]
     mentor: MenteeCourseSyllabusMentor
     projects: [MenteeCourseSyllabusProject]
