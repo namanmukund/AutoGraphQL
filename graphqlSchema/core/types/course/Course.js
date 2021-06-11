@@ -48,7 +48,7 @@ const Course = `
     topics: [Topic] @relation(name: "CourseTopic")
     courseComponentRule: [CourseComponentsRule]
     badges: [Badge] @relation(name: "CourseBadge")
-    badgeDescription: String @uniqueOrEmpty @length(min: 6, max: 120) @trim
+    badgeDescription: String @uniqueOrEmpty @trim
   }
 `;
 

@@ -221,6 +221,7 @@ const freeTopicCount = 5;
 const badgeTypes = {
   character: 'character',
   equipment: 'equipment',
+  skill: 'skill',
 };
 
 const stickerEmojiType = {

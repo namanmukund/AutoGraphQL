@@ -19,6 +19,7 @@ const Project = `
     topics: [Topic] @relation(name: "TopicProject")
     content: [ProjectContent] @relation(name: "ProjectContent", isSubset: true)
     status: ContentStatus! @defaultValue(value: "unpublished")
+    courses: [Course] @relation(name: "CourseProject", direction: "OneWay")
   }
 `;
 

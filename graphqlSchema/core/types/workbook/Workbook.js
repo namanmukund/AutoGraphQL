@@ -25,6 +25,7 @@ ${getPermissionSchemaString('Workbook')}
     workbookExamples: [WorkbookExample]
     codeHint: String
     answer: String
+    course: Course @relation(name: "WorkbookCourse", direction: "OneWay")
   }
 `;
 

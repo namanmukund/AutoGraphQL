@@ -29,6 +29,7 @@ const BlockBasedProject = `
     isSubmitAnswer: Boolean
     type: BlockBasedProjectType!
     courses: [Course] @relation(name: "CourseBlockBasedProject", direction: "OneWay")
+    tags: [ContentTag] @relation(name: "BlockBasedProjectTag")
   }
 `;
 
