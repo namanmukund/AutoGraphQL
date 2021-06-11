@@ -192,8 +192,11 @@ const getCourseQuery = (courseId) => `
               title
               projectThumbnail{
                 id
+                name
+                uri
               }
               tags{
+                id
                 title
               }
             }
@@ -282,7 +285,7 @@ const getMentorMenteeSessions = (userId, courseId) => `
   `;
 
 // query to get batch status
-const getBatchStatus = (userId) => `
+const getBatchStatus = (userId, courseId) => `
   query{
     user(id: "${userId}"){
       studentProfile{
@@ -306,6 +309,7 @@ const getBatchStatus = (userId) => `
   }
   `;
 
+// query to get batch Sessions
 // query to get batch Sessions
 const getBatchSessions = (batchId, courseId) => `
   query{
@@ -833,7 +837,7 @@ const menteeCourseSyllabusMutationResolver = async (
     topicCount: totalTopics,
     projectCount,
     practiceCount,
-    courseCompletionPercentage: totalTopics ? Math.round((completedSession / totalTopics) * 100) / 100 : 0,
+    courseCompletionPercentage: totalTopics ? Math.round(((completedSession.length * 100) / totalTopics) * 100) / 100 : 0,
   };
 
   Object.assign(currentUserSyllabus, {
