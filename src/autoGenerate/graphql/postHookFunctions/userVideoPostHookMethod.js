@@ -103,7 +103,7 @@ const userVideoPostHookMethod = async (input, params) => {
   const learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
 
   // next component will be chat of first published LO
-  if (!courseId || (courseId !== OLD_COURSE_ID)) {
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
     restQuery = getNextComponent(
       learningObjectiveConnectId,
       '',

@@ -13,7 +13,7 @@ const addUserActivityVideoDumpValidation = async (params, mutationOrQueryName, c
   // if we need to validate component for payment, if call for addUserActivityVideoDump is made from
   // backend application, we will not check for paid component logic since we will be skipping
   // the video with status as skipped
-  if (!courseId || (courseId !== OLD_COURSE_ID)) {
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
     await isComponentUnlocked(
       params,
       mutationOrQueryName,

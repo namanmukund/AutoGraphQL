@@ -11,7 +11,7 @@ const userLearningObjectiveValidation = async (params, context) => {
   // userLearningObjective collection is used to store and get chat and pq page info
   // checking if called lo and user combination is accessible
   const { message } = topicTypes;
-  if (!courseId || (courseId !== OLD_COURSE_ID)) {
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
     await isComponentUnlocked(
       params,
       '',

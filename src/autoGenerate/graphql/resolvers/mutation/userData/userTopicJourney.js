@@ -282,7 +282,7 @@ const userTopicJourneyMutationResolver = async (
   );
   const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
   // calling method to validate user current topic component status
-  if (!courseId || (courseId !== OLD_COURSE_ID)) {
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
     validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
   } else {
     validateCurrentTopicComponentForNewCourse(currentTopicComponentInfo, mutationName);
@@ -295,10 +295,14 @@ const userTopicJourneyMutationResolver = async (
     '',
   );
 
-  const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+  const batchCurrentComponentCourseId = get(batchRes, 'data.user.studentProfile.batch.currentComponent.currentCourse.id');
+  let batchCurrentComponentInfo;
+  if (batchCurrentComponentCourseId === courseId) {
+    batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+  }
 
   const userTopicData = {};
-  if (!courseId || (courseId !== OLD_COURSE_ID)) {
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
     // calling API to get data of fetched topic
     const topicRes = await callLocalGraphqlApi(
       getTopicQuery(topicId),
@@ -565,7 +569,6 @@ const userTopicJourneyMutationResolver = async (
 
     const topicComponentRule = topicInfo.topicComponentRule;
     const sortedTopicComponentRule = topicComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
-
     sortedTopicComponentRule.forEach((topicComponent) => {
       if (topicComponent.componentName === video) {
         videoData.push({
@@ -575,7 +578,7 @@ const userTopicJourneyMutationResolver = async (
           thumbnail: topicComponent.video && topicComponent.video.thumbnail,
           order: topicComponent.order,
         });
-      } else if (topicComponent.componentName === comicStrip) {
+      } else if (topicComponent.componentName === 'learningObjective') {
         learningObjectivesData.push({
           id: topicComponent.learningObjective && topicComponent.learningObjective.id,
           title: topicComponent.learningObjective && topicComponent.learningObjective.title,
@@ -622,7 +625,6 @@ const userTopicJourneyMutationResolver = async (
     } else {
       currentRunningTopicOrder = currentRunningTopic.order;
     }
-
     if (topicInfo.order < currentRunningTopicOrder) {
       if (topicInfo.isTrial || enrollmentType === pro) {
         for (const videoElem of videoData) {

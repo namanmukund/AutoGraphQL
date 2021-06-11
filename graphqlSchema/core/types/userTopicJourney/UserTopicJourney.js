@@ -25,6 +25,7 @@ const userQuizType = `
 
 const userVideoType = `
   type UserVideoType {
+   id: ID
    title: String
    description: String
    thumbnail: File
@@ -34,6 +35,7 @@ const userVideoType = `
 
 const userBlockBasedProjectType = `
   type UserBlockBasedProjectType {
+   id: ID
    title: String
    description: String
    thumbnail: File

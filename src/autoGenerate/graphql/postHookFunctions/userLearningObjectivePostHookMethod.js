@@ -154,7 +154,7 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
   // obtaining next LO
   // next component will be chat of first published LO
   let restQuery = '';
-  if (!courseId || (courseId !== OLD_COURSE_ID)) {
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
     const learningObjectivesInTopic = get(topicInfo, 'learningObjectives');
     let currentLearningObjectiveIndex;
     learningObjectivesInTopic.forEach((learningObjective, index) => {

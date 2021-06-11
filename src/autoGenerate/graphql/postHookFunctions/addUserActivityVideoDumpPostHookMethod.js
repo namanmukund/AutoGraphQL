@@ -126,7 +126,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
   /*
   Calling method to update current user Topic Component status
   */
-  if (!courseId || (courseId !== OLD_COURSE_ID)) {
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
     await updateCurrentComponentStatus(
       currentTopicComponentInfo,
       videoAction,

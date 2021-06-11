@@ -139,7 +139,7 @@ const UNPUBLISHED = 'unpublished';
 
 const GLOBAL_COURSE_TITLE = 'python';
 
-const OLD_COURSE_ID = 'id';
+const OLD_COURSE_ID = 'cjs8skrd200041huzz78kncz5';
 
 const enrollmentTypes = {
   free: 'free',

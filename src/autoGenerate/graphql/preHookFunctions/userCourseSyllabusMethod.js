@@ -54,6 +54,7 @@ const userCourseSyllabusMethod = async (context, params) => {
   */
   if (userId) {
     const userCurrentTopicComponentStatusesRes = await callLocalGraphqlApi(userCurrentTopicComponentStatusesQuery(userId, courseId));
+
     /*
     Ideally each user will have 1 document in the collection. Fetching the same document
     Also we have logic in addUserCurrentTopicComponentStatusValidation to check that
@@ -62,7 +63,7 @@ const userCourseSyllabusMethod = async (context, params) => {
     const currentTopicComponentInfo = get(userCurrentTopicComponentStatusesRes,
       'data.userCurrentTopicComponentStatuses[0]');
     if (!currentTopicComponentInfo) {
-      if (!courseId || (courseId !== OLD_COURSE_ID)) {
+      if (!courseId || (courseId === OLD_COURSE_ID)) {
         const topic = await getFirstTopicAndLearningObjective();
         const firstTopicId = get(topic, 'data.topics[0].id');
         const firstLearningObjectiveId = get(topic, 'data.topics[0].learningObjectives[0].id');
@@ -88,7 +89,7 @@ const userCourseSyllabusMethod = async (context, params) => {
         );
       } else {
         const {
-          video, comicStrip, blockBasedPractice, blockBasedProject,
+          video, blockBasedPractice, blockBasedProject,
         } = topicTypes;
         const topic = await getFirstTopicComponents(courseId);
         const firstTopicId = get(topic, 'data.topics[0].id');
@@ -123,7 +124,7 @@ const userCourseSyllabusMethod = async (context, params) => {
           if (topicComponent.componentName === video && !firstVideoId) {
             isVideoPresent = true;
             firstVideoId = topicComponent.video && topicComponent.video.id;
-          } else if (topicComponent.componentName === comicStrip && !firstLearningObjectiveId) {
+          } else if (topicComponent.componentName === 'learningObjective' && !firstLearningObjectiveId) {
             isLearningObjectivePresent = true;
             firstLearningObjectiveId = topicComponent.learningObjective && topicComponent.learningObjective.id;
           } else if (topicComponent.componentName === blockBasedPractice && !firstBlockedBasedProjectId) {
@@ -163,6 +164,7 @@ const userCourseSyllabusMethod = async (context, params) => {
         }
         // mutation to create current component status of user with current topic as first topic and courseId
         // and current LO as first LO of topic and video as current component type
+
         await addUserCurrentTopicComponentStatusForNewCourse(
           userId, courseId, firstTopicId, firstLearningObjectiveId, firstVideoId, firstBlockedBasedProjectId, firstComponentName,
         );
