@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import {
+  OLD_COURSE_ID,
   PUBLISHED,
   topicTypes,
 } from '../../../../constants';
@@ -48,11 +49,13 @@ const addUserLearningObjectiveMutation = (
   learningObjectiveId,
   restQuery,
   practiceQuestionsQuery,
+  courseId,
 ) => `
   mutation{
     addUserLearningObjective(
     userConnectId:"${userId}"
     learningObjectiveConnectId:"${learningObjectiveId}"
+    ${courseId ? `courseConnectId:"${courseId}"` : ''}
     input:{
         ${restQuery}
         ${practiceQuestionsQuery}
@@ -115,6 +118,7 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
   const {
     userId,
     learningObjectiveId,
+    courseId,
   } = getInfoFromParams(params, 'learningObjective');
   // In case there is no learning objective id, empty data will be sent
   if (!learningObjectiveId) {
@@ -137,32 +141,38 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
   }
   const { id: topicId } = topicInfo;
   // adding PQs to the userLearningObjective document
-  let practiceQuestionsQuery = 'practiceQuestions:[';
-  if (learningObjectiveInfo && practiceQuestionsInLO) {
+  let practiceQuestionsQuery = '';
+  if (learningObjectiveInfo && practiceQuestionsInLO && practiceQuestionsInLO.length) {
+    practiceQuestionsQuery = 'practiceQuestions:[';
     practiceQuestionsInLO.forEach((practiceQuestion) => {
       const { id: practiceQuestionId } = practiceQuestion;
       practiceQuestionsQuery += `{ questionConnectId: "${practiceQuestionId}" }, `;
     });
-  }
-  practiceQuestionsQuery += ']';
-  // obtaining next LO
-  const learningObjectivesInTopic = get(topicInfo, 'learningObjectives');
-  let currentLearningObjectiveIndex;
-  learningObjectivesInTopic.forEach((learningObjective, index) => {
-    if (learningObjective.id === learningObjectiveId) {
-      currentLearningObjectiveIndex = index;
-    }
-  });
-  let nextLearningObjectiveId = '';
-  if (currentLearningObjectiveIndex + 1 < learningObjectivesInTopic.length) {
-    nextLearningObjectiveId = learningObjectivesInTopic[currentLearningObjectiveIndex + 1].id;
+    practiceQuestionsQuery += ']';
   }
 
-  const restQuery = getNextComponent(
-    nextLearningObjectiveId,
-    topicId,
-    'learningObjective',
-  );
+  // obtaining next LO
+  // next component will be chat of first published LO
+  let restQuery = '';
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
+    const learningObjectivesInTopic = get(topicInfo, 'learningObjectives');
+    let currentLearningObjectiveIndex;
+    learningObjectivesInTopic.forEach((learningObjective, index) => {
+      if (learningObjective.id === learningObjectiveId) {
+        currentLearningObjectiveIndex = index;
+      }
+    });
+    let nextLearningObjectiveId = '';
+    if (currentLearningObjectiveIndex + 1 < learningObjectivesInTopic.length) {
+      nextLearningObjectiveId = learningObjectivesInTopic[currentLearningObjectiveIndex + 1].id;
+    }
+
+    restQuery = getNextComponent(
+      nextLearningObjectiveId,
+      topicId,
+      'learningObjective',
+    );
+  }
   /*
     adding addUserLearningObjective document on the basis of
     restQuery(next component data), practiceQuestionsQuery(published practice questions of LO)
@@ -173,6 +183,7 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
       learningObjectiveId,
       restQuery,
       practiceQuestionsQuery,
+      courseId,
     ),
   );
   if (result) {

@@ -139,6 +139,8 @@ const UNPUBLISHED = 'unpublished';
 
 const GLOBAL_COURSE_TITLE = 'python';
 
+const OLD_COURSE_ID = 'cjs8skrd200041huzz78kncz5';
+
 const enrollmentTypes = {
   free: 'free',
   pro: 'pro',
@@ -147,8 +149,11 @@ const enrollmentTypes = {
 const topicTypes = {
   video: 'video',
   message: 'message',
+  comicStrip: 'comicStrip',
   practiceQuestion: 'practiceQuestion',
   quiz: 'quiz',
+  blockBasedProject: 'blockBasedProject',
+  blockBasedPractice: 'blockBasedPractice',
 };
 
 const userActionType = {
@@ -216,6 +221,7 @@ const freeTopicCount = 5;
 const badgeTypes = {
   character: 'character',
   equipment: 'equipment',
+  skill: 'skill',
 };
 
 const stickerEmojiType = {
@@ -316,12 +322,18 @@ const topicComponents = {
   assignment: 'assignment',
   quiz: 'quiz',
   blockBasedProject: 'blockBasedProject',
+  blockBasedPractice: 'blockBasedPractice',
 };
 
 const childTopicComponents = {
   message: 'message',
   practiceQuestion: 'practiceQuestion',
   comicStrip: 'comicStrip',
+};
+
+const blockBasedProjectType = {
+  project: 'project',
+  practice: 'practice',
 };
 
 export const GIFT_VOUCHER_AMOUNT = 2500;
@@ -406,4 +418,6 @@ export {
   studentCurrentStatus,
   topicComponents,
   childTopicComponents,
+  OLD_COURSE_ID,
+  blockBasedProjectType,
 };

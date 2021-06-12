@@ -4,7 +4,7 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   slotTimes,
-  sessionStatus,
+  sessionStatus, badgeTypes, blockBasedProjectType,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError,
@@ -14,6 +14,8 @@ import getUserIdandAppNameAfterValidation
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import { parseBadges } from '../utils/parseBadges';
+import { sortBadges } from '../utils/sortBadges';
 
 const getSlotTimeFields = () => {
   let slotTimeFields = '';
@@ -35,25 +37,24 @@ const isTopicAccessible = (enrollmentType, isTopicFree) => {
 };
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = (userId) => `
+const getUserCurrentTopicComponentStatus = (userId, courseId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
         {user_some:{
         id:"${userId}"
         }},
-      {currentCourse_some:{
-        and:[
-          {status: ${PUBLISHED}},
-          {title: "${GLOBAL_COURSE_TITLE}"}
-        ]
-      }}
+        {currentCourse_some:{
+          ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
+        }}
       ]
     }){
       id
       currentCourse{
         id
         title
+        description
+        badgeDescription
         chapters(
             filter: {
               status: ${PUBLISHED}
@@ -81,6 +82,22 @@ const getUserCurrentTopicComponentStatus = (userId) => `
               id
               uri
               name
+            }
+            projectCount: blockBasedProjectsMeta(filter:{and:[{type: ${blockBasedProjectType.project}}{status: ${PUBLISHED} }]}){
+              count
+            }
+            practiceCount: blockBasedProjectsMeta(filter:{and:[{type: ${blockBasedProjectType.practice}}{status: ${PUBLISHED}}]}){
+              count
+            }
+            projects: blockBasedProjects(filter:{and:[{type: ${blockBasedProjectType.project}} {status: ${PUBLISHED}}]}){
+              id
+              title
+              projectThumbnail{
+                id
+              }
+              tags{
+                title
+              }
             }
           }
         }
@@ -126,16 +143,15 @@ const getUserCurrentTopicComponentStatus = (userId) => `
   `;
 
 // query to get chapters and topics belonging to a course
-const getCourseQuery = () => `
+const getCourseQuery = (courseId) => `
     query{
       courses(filter:{
-        and:[
-          {title: "${GLOBAL_COURSE_TITLE}"},
-          {status: ${PUBLISHED}}
-        ]
+        ${courseId ? `id: "${courseId}"` : `and:[{title: "${GLOBAL_COURSE_TITLE}"}, {status: ${PUBLISHED}}]`}
       }){
         id
         title
+        description
+        badgeDescription
         chapters(
             filter: {
               status: ${PUBLISHED}
@@ -165,6 +181,25 @@ const getCourseQuery = () => `
               uri
               name
             }
+            projectCount: blockBasedProjectsMeta(filter:{and:[{type: ${blockBasedProjectType.project}}{status: ${PUBLISHED} }]}){
+              count
+            }
+            practiceCount: blockBasedProjectsMeta(filter:{and:[{type: ${blockBasedProjectType.practice}}{status: ${PUBLISHED}}]}){
+              count
+            }
+            projects: blockBasedProjects(filter:{and:[{type: ${blockBasedProjectType.project}} {status: ${PUBLISHED}}]}){
+              id
+              title
+              projectThumbnail{
+                id
+                name
+                uri
+              }
+              tags{
+                id
+                title
+              }
+            }
           }
         }
       }
@@ -172,12 +207,17 @@ const getCourseQuery = () => `
   `;
 
 // query to get mentee Sessions
-const getMenteeSessions = (userId) => `
-  query{
-    menteeSessions(filter:{
+const getMenteeSessions = (userId, courseId) => `
+query{
+  menteeSessions(filter:{
+    and:[
+      {
       user_some:{
         id:"${userId}"
         }
+      }
+      ${courseId ? `{course_some:{id: "${courseId}"}}` : ''}
+    ]
     }){
       id
       topic{
@@ -204,7 +244,7 @@ const getMenteeSessions = (userId) => `
   `;
 
 // query to get mentorMentee Sessions
-const getMentorMenteeSessions = (userId) => `
+const getMentorMenteeSessions = (userId, courseId) => `
   query{
     mentorMenteeSessions(filter:{
       and:[
@@ -214,10 +254,11 @@ const getMentorMenteeSessions = (userId) => `
               id:"${userId}"
             }
           }
-        },
+        }
         {
           sessionStatus: completed
         }
+        ${courseId ? `{course_some:{id: "${courseId}"}}` : ''}
       ]
     }){
       id
@@ -269,12 +310,18 @@ const getBatchStatus = (userId) => `
   `;
 
 // query to get batch Sessions
-const getBatchSessions = (batchId) => `
+// query to get batch Sessions
+const getBatchSessions = (batchId, courseId) => `
   query{
     batchSessions(filter:{
-      batch_some:{
-        id:"${batchId}"
+    and: [
+      {
+        batch_some:{
+          id:"${batchId}"
         }
+      }
+      ${courseId ? `{course_some:{id: "${courseId}"}}` : ''}
+    ]
     }){
       id
       topic{
@@ -300,6 +347,50 @@ const getBatchSessions = (batchId) => `
   }
   `;
 
+// query to get all badges in a course along with the topic
+const getBadgeQuery = (courseId) => `
+query{
+  badges(
+    filter:{
+      and:[
+        {
+          status:${PUBLISHED}
+        }
+        {
+          courses_some:{
+            ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
+          }
+        }
+        {
+          type: ${badgeTypes.skill}
+        }
+      ]
+    }
+  ){
+    id
+    name
+    description
+    order
+    type
+    unlockPoint
+    activeImage{
+      id
+      uri
+      name
+    }
+    inactiveImage{
+      id
+      uri
+      name
+    }
+    topic{
+      id
+      order
+    }
+  }
+}
+  `;
+
 /*
 This is called when mentee tries to load homepage
 It will return all the booked and upcoming sessions based on User current topic component status
@@ -321,6 +412,7 @@ const menteeCourseSyllabusMutationResolver = async (
   both should be equal to perform further action
   */
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
+  const { courseId } = params;
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;
@@ -335,6 +427,10 @@ const menteeCourseSyllabusMutationResolver = async (
   let lastTopicBookedOrder = 0;
   let lastCompletedTopicOrder = 0;
   let isPaid = false;
+  let currentTopicOrder;
+  let projectCount = 0;
+  let practiceCount = 0;
+  const projects = [];
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
     // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
@@ -344,10 +440,14 @@ const menteeCourseSyllabusMutationResolver = async (
       '',
     );
 
-    batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+    const batchCurrentComponentCourseId = get(batchRes, 'data.user.studentProfile.batch.currentComponent.currentCourse.id');
+
+    if (batchCurrentComponentCourseId === courseId) {
+      batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+    }
 
     const res = await callLocalGraphqlApi(
-      getUserCurrentTopicComponentStatus(userId),
+      getUserCurrentTopicComponentStatus(userId, courseId),
       context,
       '',
     );
@@ -358,21 +458,23 @@ const menteeCourseSyllabusMutationResolver = async (
     // menteeSessions and mentorMenteeSessions will be called if user is not from batch
     if (batchCurrentComponentInfo) {
       const batchId = get(batchRes, 'data.user.studentProfile.batch.id');
-      const getBatchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId));
+      const getBatchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, courseId));
       batchSessions = get(getBatchSessionsRes, 'data.batchSessions');
+      currentTopicOrder = get(batchCurrentComponentInfo, 'currentTopic.order');
     } else {
-      const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId));
+      const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId, courseId));
       menteeSessions = get(getMenteeSessionsRes, 'data.menteeSessions');
 
-      const getMentorMenteeSessionsRes = await callLocalGraphqlApi(getMentorMenteeSessions(userId));
+      const getMentorMenteeSessionsRes = await callLocalGraphqlApi(getMentorMenteeSessions(userId, courseId));
       mentorMenteeSessions = get(getMentorMenteeSessionsRes, 'data.mentorMenteeSessions');
+      currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
     }
   /*
   If user is not logged in and asking for course syllabus then we will not add
   any document in Db and will return default data with first topic as unlocked
   */
   } else {
-    const topic = await getFirstTopicAndLearningObjective('userCourseSyllabus');
+    const topic = await getFirstTopicAndLearningObjective('userCourseSyllabus', courseId);
     const firstTopic = get(topic, 'data.topics[0]');
     const firstLearningObjective = get(topic, 'data.topics[0].learningObjectives[0]');
     if (!firstTopic) {
@@ -389,7 +491,7 @@ const menteeCourseSyllabusMutationResolver = async (
         },
       });
     }
-    const courseResult = await callLocalGraphqlApi(getCourseQuery());
+    const courseResult = await callLocalGraphqlApi(getCourseQuery(courseId));
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
       throw new DatabaseRecordNotFoundError({
@@ -404,6 +506,9 @@ const menteeCourseSyllabusMutationResolver = async (
       currentTopic: firstTopic,
       enrollmentType: enrollmentTypes.free,
     };
+    // Setting topic order as -1 and currentTopicComponentType as video for guest user,
+    // this way all inactive images will be returned
+    currentTopicOrder = -1;
   }
 
   const {
@@ -446,6 +551,14 @@ const menteeCourseSyllabusMutationResolver = async (
       totalTopics += chapter.topics.length;
       // iterating over topics of each chapter  and setting isUnlocked field
       chapter.topics.forEach((topic) => {
+        if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
+        if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
+        if (topic.projects && topic.projects.length) {
+          topic.projects.forEach((project) => {
+            projects.push(project);
+          });
+        }
+
         const {
           order: topicOrder,
           id: topicId,
@@ -651,6 +764,13 @@ const menteeCourseSyllabusMutationResolver = async (
       totalTopics += chapter.topics.length;
       // iterating over topics of each chapter  and setting isUnlocked field
       chapter.topics.forEach((topic) => {
+        if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
+        if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
+        if (topic.projects && topic.projects.length) {
+          topic.projects.forEach((project) => {
+            projects.push(project);
+          });
+        }
         const {
           order: topicOrder,
           id: topicId,
@@ -685,6 +805,45 @@ const menteeCourseSyllabusMutationResolver = async (
     isPaid = true;
   }
 
+  // calling method to get all published badges
+  const badgeRes = await callLocalGraphqlApi(getBadgeQuery(courseId));
+  const skillsFromBadgeInfo = get(badgeRes, 'data.badges');
+  skillsFromBadgeInfo.forEach((badge) => {
+    if (
+      !badge
+      || !badge.type
+      || !badge.topic
+      || !badge.name
+      || !badge.order
+      || !badge.unlockPoint
+      || !badge.topic.order) {
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'Badge: Wrong/Incomplete information stored in badge',
+        },
+      });
+    }
+  });
+  // sorting each badge array according to topic order
+  skillsFromBadgeInfo.sort((a, b) => a.topic.order - b.topic.order);
+
+  // getting parsed characters and equipments to be sent in result
+  const skills = parseBadges(
+    sortBadges(skillsFromBadgeInfo),
+    currentTopicOrder,
+  );
+
+  const courseData = {
+    title: currentCourse.title,
+    description: currentCourse.description,
+    badgeDescription: currentCourse.badgeDescription,
+    chapterCount: totalChapters,
+    topicCount: totalTopics,
+    projectCount,
+    practiceCount,
+    courseCompletionPercentage: totalTopics ? Math.round(((completedSession.length * 100) / totalTopics) * 100) / 100 : 0,
+  };
+
   Object.assign(currentUserSyllabus, {
     upComingSession,
     bookedSession,
@@ -692,6 +851,9 @@ const menteeCourseSyllabusMutationResolver = async (
     totalChapters,
     totalTopics,
     isPaid,
+    skills,
+    course: courseData,
+    projects,
   });
 
   return currentUserSyllabus;

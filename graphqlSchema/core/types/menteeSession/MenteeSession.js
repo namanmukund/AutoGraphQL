@@ -4,6 +4,7 @@ const slotTimeFields = getSlotTimeFields('Boolean', false);
 
 const MenteeSession = `
   type MenteeSession @model {
+    course: Course @relation(name: "MenteeSessionCourse", direction: "OneWay")
     user: User! @relation(name: "MenteeSessionUser", direction: "OneWay")
     topic: Topic! @relation(name: "MenteeSessionTopic", direction: "OneWay")
     bookingDate: Date!

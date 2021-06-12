@@ -4,7 +4,7 @@ import {
   UserCourseCombinationExistError, UserMismatchError, UserOrCourseNotPresentError,
 } from '../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
-import { backendApps } from '../../../../../constants';
+import { backendApps, OLD_COURSE_ID } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 // query to get userCurrentTopicComponentStatus for given user and course id
@@ -67,9 +67,10 @@ const addUserCurrentTopicComponentStatusValidation = async (params, context) => 
     throw new UserMismatchError();
   }
   // logic to check if lo and topic passed are related to each other
-  if (!topicId || !learningObjectiveId) {
+  if (!topicId) {
     throw new TopicOrLONotPresentError();
   }
+
   const userCurrentTopicComponentStatusData = await callLocalGraphqlApi(
     userCurrentTopicComponentStatusQuery(userId, courseId),
   );
@@ -78,28 +79,34 @@ const addUserCurrentTopicComponentStatusValidation = async (params, context) => 
     userCurrentTopicComponentStatusData,
     'data.userCurrentTopicComponentStatuses',
   );
-    // checking if course and user document already exists
+  // checking if course and user document already exists
   if (userCurrentTopicComponentStatusesResult && userCurrentTopicComponentStatusesResult.length) {
     throw new UserCourseCombinationExistError();
   }
-  /*
-  this query returns the count of the learning objective id inside topic id
-  So, basically it returns 1 if LO and topic are related otherwise 0
-  */
-  const learningObjectiveData = await callLocalGraphqlApi(
-    learningObjectiveQuery(topicId, learningObjectiveId),
-  );
-  const learningObjectiveCount = get(
-    learningObjectiveData,
-    'data.topic.learningObjectivesMeta.count',
-  );
-  /*
-  if learning objective count is not present or the count is less than 1
-  that means LO and topic are not related to each other
-  */
-  if (!learningObjectiveCount || learningObjectiveCount < 1) {
-    throw new InvalidTopicLOConnectionError();
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
+    if (!topicId || !learningObjectiveId) {
+      throw new TopicOrLONotPresentError();
+    }
+    /*
+    this query returns the count of the learning objective id inside topic id
+    So, basically it returns 1 if LO and topic are related otherwise 0
+    */
+    const learningObjectiveData = await callLocalGraphqlApi(
+      learningObjectiveQuery(topicId, learningObjectiveId),
+    );
+    const learningObjectiveCount = get(
+      learningObjectiveData,
+      'data.topic.learningObjectivesMeta.count',
+    );
+    /*
+    if learning objective count is not present or the count is less than 1
+    that means LO and topic are not related to each other
+    */
+    if (!learningObjectiveCount || learningObjectiveCount < 1) {
+      throw new InvalidTopicLOConnectionError();
+    }
   }
+
   return true;
 };
 

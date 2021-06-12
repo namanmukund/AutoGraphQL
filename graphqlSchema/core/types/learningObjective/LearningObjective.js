@@ -29,12 +29,14 @@ const LearningObjective = `
     videoEndTime: Int
     videoThumbnail: File @relation(name: "LearningObjectiveVideoThumbnail", direction: "OneWay")
     topic: Topic @relation(name: "TopicLearningObjective")
+    video: Video @relation(name: "VideoLearningObjective")
     messages: [Message] @relation(name: "LearningObjectiveMessage", isSubset: true)
     questionBank: [QuestionBank] @relation(name: "LearningObjectiveQuestionBank", isSubset: true)
     status: ContentStatus! @defaultValue(value: "unpublished")
     thumbnail: File @relation(name: "LearningObjectiveThumbnail", direction: "OneWay")
     messageStatus: ContentStatus! @defaultValue(value: "unpublished")
     comicStrips: [ComicStrip] @relation(name: "LearningObjectiveComicStrip")
+    courses: [Course] @relation(name: "CourseLearningObjective", direction: "OneWay")
   }
 `;
 

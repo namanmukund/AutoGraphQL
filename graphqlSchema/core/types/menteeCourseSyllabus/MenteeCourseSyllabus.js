@@ -22,6 +22,47 @@ const completedSessionDetailType = `
    endingDate: Date
  }`;
 
+const menteeCourseSyllabusSkills = `
+  type MenteeCourseSyllabusSkills {
+   name: String
+   order: Int
+   description: String
+   image: File @relation(name: "UserBadgeImage", direction: "OneWay")
+   isUnlocked: Boolean @defaultValue(value: "false")
+   unlockPoint: CurrentTopicComponentType!
+ }`;
+
+const menteeCourseSyllabusCourse = `
+  type MenteeCourseSyllabusCourse {
+   title: String
+   description: String
+   badgeDescription: String
+   chapterCount: Int
+   topicCount: Int
+   projectCount: Int
+   practiceCount: Int
+   courseCompletionPercentage: Float
+ }`;
+
+const menteeCourseSyllabusMentor = `
+  type MenteeCourseSyllabusMentor {
+   name: String
+   description: String
+   averageRating: Float
+   experienceYear: Int
+   gitHubLink: String
+   linkedInLink: String
+   portfolioLink: String
+   profilePic: File
+ }`;
+
+const menteeCourseSyllabusProject = `
+  type MenteeCourseSyllabusProject {
+   title: String
+   projectThumbnail: File
+   tags: [ContentTag]
+ }`;
+
 const MenteeCourseSyllabus = `
   type MenteeCourseSyllabus {
     upComingSession: [SessionDetailType]
@@ -30,7 +71,11 @@ const MenteeCourseSyllabus = `
     totalChapters: Int
     totalTopics: Int
     isPaid: Boolean @defaultValue(value: "false")
+    course: MenteeCourseSyllabusCourse
+    skills: [MenteeCourseSyllabusSkills]
+    mentor: MenteeCourseSyllabusMentor
+    projects: [MenteeCourseSyllabusProject]
   }
 `;
 
-export default [MenteeCourseSyllabus, sessionDetailType, completedSessionDetailType];
+export default [MenteeCourseSyllabus, sessionDetailType, completedSessionDetailType, menteeCourseSyllabusCourse, menteeCourseSyllabusSkills, menteeCourseSyllabusMentor, menteeCourseSyllabusProject];

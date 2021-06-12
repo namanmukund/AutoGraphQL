@@ -12,6 +12,7 @@ const userLearningObjectivenextComponentType = `
    learningObjective: LearningObjective @relation(name: "UserLearningObjectiveNextComponentTypeLO", direction: "OneWay")
    nextComponentType: CurrentTopicComponentType
    topic: Topic @relation(name: "UserLearningObjectiveNextComponentTypeTopic", direction: "OneWay")
+   blockBasedProject: BlockBasedProject @relation(name: "UserLearningObjectiveNextComponentTypeProject", direction: "OneWay")
  }`;
 
 const UserLearningObjective = `
@@ -23,7 +24,10 @@ const UserLearningObjective = `
     practiceQuestions: [PracticeQuestionsUserLearningObjectiveType]
     practiceQuestionStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
     isPracticeQuestionBookmarked: Boolean @defaultValue(value: "false")
+    comicStripStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
+    isComicStripBookmarked: Boolean @defaultValue(value: "false")
     nextComponent: UserLearningObjectiveNextComponentType
+    course: Course @relation(name: "UserLearningObjectiveCourse", direction: "OneWay")
   }
 `;
 

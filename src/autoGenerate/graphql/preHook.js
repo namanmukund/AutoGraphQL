@@ -84,6 +84,12 @@ import updateBatchValidation from './preHookFunctions/validation/updateBatchVali
 import updateCampaignValidation from './preHookFunctions/validation/updateCampaignValidation';
 import generateInviteCode from '../../../utils/generateInviteCode';
 import deleteBatchValidation from './preHookFunctions/validation/deleteBatchValidation';
+import addUserActivityComicStripDumpValidation from './preHookFunctions/validation/addUserActivityComicStripDumpValidation';
+import userBlockBasedPracticeValidation from './preHookFunctions/validation/userBlockBasedPracticeValidation';
+import userBlockBasedProjectValidation from './preHookFunctions/validation/userBlockBasedProjectValidation';
+import addUserActivityBlockBasedProjectDumpValidation from './preHookFunctions/validation/addUserActivityBlockBasedProjectDumpValidation';
+import addUserActivityBlockBasedPracticeDumpValidation
+  from './preHookFunctions/validation/addUserActivityBlockBasedPracticeDumpValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -109,7 +115,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       if (!get(params, 'coursesConnectIds', []).length) {
         throw new ConnectIdRequiredError({ data: { message: 'Course Id is required' } });
       }
-      await isUniqueOrderField(params, mutationOrQueryName);
+      // await isUniqueOrderField(params, mutationOrQueryName);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUser': {
@@ -289,7 +295,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'userCourseSyllabus': {
-      await userCourseSyllabusMethod(context);
+      await userCourseSyllabusMethod(context, params);
       break;
     }
     case 'addUserActivityVideoDump': {
@@ -325,11 +331,11 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'userTopicJourney': {
-      await userCourseSyllabusMethod(context);
+      await userCourseSyllabusMethod(context, params);
       break;
     }
     case 'menteeCourseSyllabus': {
-      await userCourseSyllabusMethod(context);
+      await userCourseSyllabusMethod(context, params);
       break;
     }
     case 'userAssignment': {
@@ -691,6 +697,26 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'deleteBatch': {
       await deleteBatchValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addUserActivityComicStrip': {
+      await addUserActivityComicStripDumpValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'userBlockBasedPractice': {
+      await userBlockBasedPracticeValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'userBlockBasedProject': {
+      await userBlockBasedProjectValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addUserActivityBlockBasedProjectDump': {
+      await addUserActivityBlockBasedProjectDumpValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addUserActivityBlockBasedPractice': {
+      await addUserActivityBlockBasedPracticeDumpValidation(params, mutationOrQueryName, context);
       break;
     }
     default: {

@@ -1,6 +1,9 @@
 const parseTopicComponentResultData = (result, page) => {
   const parsedData = result;
   let topic;
+  let video;
+  let blockBasedProject;
+  let blockBasedPractice;
   let learningObjective;
   const practiceQuestions = [];
   let practiceQuestionsRes;
@@ -54,6 +57,10 @@ const parseTopicComponentResultData = (result, page) => {
     case 'video':
       topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
       parsedData.topic = topic;
+      if (parsedData.video && parsedData.video.id) {
+        video = { type: 'Video', typeId: `${parsedData.video.id}` };
+        parsedData.video = video;
+      }
       break;
     case 'assignment':
       topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
@@ -74,6 +81,22 @@ const parseTopicComponentResultData = (result, page) => {
         });
       }
       parsedData.assignment = assignment;
+      break;
+    case 'blockBasedProject':
+      topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
+      parsedData.topic = topic;
+      if (parsedData.blockBasedProject && parsedData.blockBasedProject.id) {
+        blockBasedProject = { type: 'BlockBasedProject', typeId: `${parsedData.blockBasedProject.id}` };
+        parsedData.blockBasedProject = blockBasedProject;
+      }
+      break;
+    case 'blockBasedPractice':
+      topic = { type: 'Topic', typeId: `${parsedData.topic.id}` };
+      parsedData.topic = topic;
+      if (parsedData.blockBasedPractice && parsedData.blockBasedPractice.id) {
+        blockBasedPractice = { type: 'BlockBasedProject', typeId: `${parsedData.blockBasedPractice.id}` };
+        parsedData.blockBasedPractice = blockBasedPractice;
+      }
       break;
     default:
   }

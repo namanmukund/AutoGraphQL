@@ -17,6 +17,7 @@ const UserQuiz = `
     quiz: [QuizType]
     topic: Topic! @relation(name: "TopicUserQuiz", direction: "OneWay")
     nextComponent: UserQuizNextComponentType
+    course: Course @relation(name: "UserQuizCourse", direction: "OneWay")
   }
 `;
 

@@ -35,6 +35,8 @@ const UserActivityVideoDump = `
     topic: Topic! @relation(name: "TopicUserActivityVideoDump", direction: "OneWay")
     learningObjectiveInVideo: [LearningObjectiveInVideoType]
     storyHitCount: Int
+    video: Video @relation(name: "VideoUserActivityVideoDump", direction: "OneWay")
+    course: Course @relation(name: "UserActivityVideoDumpCourse", direction: "OneWay")
   }
 `;
 
