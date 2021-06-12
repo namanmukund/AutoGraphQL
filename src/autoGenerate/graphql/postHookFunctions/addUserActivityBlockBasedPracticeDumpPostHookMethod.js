@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import {
+  PUBLISHED,
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
@@ -35,6 +36,15 @@ const userBlockBasedPracticeQuery = (userId, topicId, blockBasedPracticeId) => `
           learningObjective{
             id
             order
+            messagesMeta{
+              count
+            }
+            questionBankMeta(filter:{and:[{assessmentType:practiceQuestion}{status:${PUBLISHED}}]}){
+              count
+            }
+            comicStripsMeta(filter:{status:${PUBLISHED}}){
+              count
+            }
           }
           blockBasedProject{
             id
@@ -71,6 +81,7 @@ UserActivityBlockBasedPractice(answerLink) is updated based on-
   -user BlockBasedPractice for provided userId, blockBasedPractice id and topic id
 */
 const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutationName, context) => {
+  console.log('--------------------------------ololo');
   const userId = get(input, 'user.typeId');
   const blockBasedPracticeId = get(input, 'blockBasedPractice.typeId');
   const courseId = get(input, 'course.typeId');
@@ -88,7 +99,7 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
   */
   const userBlockBasedPracticeQueryRes = await callLocalGraphqlApi(userBlockBasedPracticeQuery(userId, topicId, blockBasedPracticeId));
   const userBlockBasedPracticeInfo = get(userBlockBasedPracticeQueryRes, 'data.userBlockBasedPractices[0]');
-
+  console.log('--------------------------userBlockBasedPracticeInfo', userBlockBasedPracticeInfo);
   const {
     id: userBlockBasedPracticeId,
     status: existingBlockBasedPracticeStatus,

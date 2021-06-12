@@ -5,6 +5,7 @@ import isComponentUnlockedForNewCourse from './utils/isComponentUnlockedForNewCo
 // prehook logic to check if requested comic strip(user and LO id) is unlocked
 const addUserActivityComicStripDumpValidation = async (params, mutationOrQueryName, context) => {
   const courseId = get(params, 'courseConnectId');
+  const learningObjectiveId = get(params, 'learningObjectiveConnectId');
   const { comicStrip } = topicTypes;
   await isComponentUnlockedForNewCourse(
     params,
@@ -12,7 +13,7 @@ const addUserActivityComicStripDumpValidation = async (params, mutationOrQueryNa
     context,
     comicStrip,
     '',
-    '',
+    learningObjectiveId,
     '',
     courseId,
   );

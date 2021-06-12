@@ -699,7 +699,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await deleteBatchValidation(params, mutationOrQueryName, context);
       break;
     }
-    case 'addUserActivityComicStrip': {
+    case 'addUserActivityComicStripDump': {
       await addUserActivityComicStripDumpValidation(params, mutationOrQueryName, context);
       break;
     }
@@ -715,7 +715,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await addUserActivityBlockBasedProjectDumpValidation(params, mutationOrQueryName, context);
       break;
     }
-    case 'addUserActivityBlockBasedPractice': {
+    case 'addUserActivityBlockBasedPracticeDump': {
       await addUserActivityBlockBasedPracticeDumpValidation(params, mutationOrQueryName, context);
       break;
     }
