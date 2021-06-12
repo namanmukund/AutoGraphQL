@@ -82,7 +82,6 @@ UserLearningObjective(bookmark, comicStripStatus) is updated based on-
   -learning objective and topic
 */
 const addUserActivityComicStripDumpPostHookMethod = async (input, mutationName, context) => {
-  console.log('---------------------------------here');
   const userId = get(input, 'user.typeId');
   const learningObjectiveId = get(input, 'learningObjective.typeId');
   const courseId = get(input, 'course.typeId');
@@ -130,7 +129,6 @@ const addUserActivityComicStripDumpPostHookMethod = async (input, mutationName, 
   /*
   Calling method to update current user Topic Component status
   */
-  console.log('----------------------------currentTopicComponentInfo', currentTopicComponentInfo);
   await updateCurrentComponentStatusOfNewCourse(
     courseId,
     currentTopicComponentInfo,

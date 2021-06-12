@@ -86,7 +86,6 @@ const isComponentUnlockedForNewCourse = async (
     }
     const learningObjectiveQueryRes = await getLearningObjectiveAndTopicForValidation(learningObjectiveId);
     learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
-    console.log('--------------------------------------0000 learningObjectiveInfo', learningObjectiveInfo);
     if (!learningObjectiveInfo) {
       throw new DatabaseRecordNotFoundError({
         data: {
@@ -253,7 +252,6 @@ const isComponentUnlockedForNewCourse = async (
     if (page === message || page === practiceQuestion || page === comicStrip) {
       // passing data in context which can be used further in post hook methods
       // this will prevent a further query
-      console.log('--------------------------------------11111 learningObjectiveInfo', learningObjectiveInfo);
       userCurrentTopicComponentStatusData[mutationOrQueryName] = {
         userCurrentTopicComponentStatuses: currentTopicComponentInfo,
         learningObjective: learningObjectiveInfo,

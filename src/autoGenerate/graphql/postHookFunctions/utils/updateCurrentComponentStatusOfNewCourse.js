@@ -11,7 +11,7 @@ const getNextTopic = (courseId,
       and:[
         {courses_some:{id: "${courseId}"}}
         {order_gt: ${order}}
-        {status: ${PUBLISHED}
+        {status: ${PUBLISHED}}
       ]
     }, orderBy: order_ASC, first: 1){
       id
@@ -86,7 +86,6 @@ const updateCurrentComponentStatusOfNewCourse = async (
   } = topicTypes;
   const sortedTopicComponentRule = topicComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
   const { next, skip } = userActionType;
-  console.log('--------------------------------------------currentTopicComponentInfo', currentTopicComponentInfo);
   const {
     id: currentTopicComponentId,
     currentTopicComponentType: currentTopicComponent,
@@ -114,7 +113,6 @@ const updateCurrentComponentStatusOfNewCourse = async (
   let updateUserCurrentTopicComponentStatus = false;
   let currentComponentIndex;
   let nextComponentIndex;
-  console.log('-----------------------------------swich start');
   // page wise conditions to check whether UserCurrentTopicComponentStatus should be updated
   switch (page) {
     case video:
@@ -133,10 +131,6 @@ const updateCurrentComponentStatusOfNewCourse = async (
       called component is equal to  current component and user has just consumed(next action) it
       and current component status will not get changed when it is already consumed in past
       */
-      console.log('-----------------------userAction', userAction);
-      console.log('-----------------------currentTopicComponent', currentTopicComponent);
-      console.log('-----------------------currentTopicId', currentTopicId);
-      console.log('-----------------------currentVideoId', currentVideoId);
       if ((userAction === next || userAction === skip)
         && currentTopicComponent === video
         && currentTopicId === topicId
@@ -251,8 +245,6 @@ const updateCurrentComponentStatusOfNewCourse = async (
         && currentTopicComponent === quiz
         && currentTopicId === topicId
       ) {
-        if (nextComponentLearningObjectiveId) { loQuery = `currentLearningObjectiveConnectId:"${nextComponentLearningObjectiveId}"`; }
-        if (nextComponentTopicId) { topicQuery = `currentTopicConnectId:"${nextComponentTopicId}"`; }
         // updating current component in case quiz is completed by user
         updateUserCurrentTopicComponentStatus = true;
       }
@@ -323,7 +315,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       topicQuery = `currentTopicConnectId:"${nextTopicId}"`;
     }
   }
-  console.log('-----------------------------------nextCurrentTopicComponent', nextCurrentTopicComponent);
+
   if (nextCurrentTopicComponent.componentName) {
     if (nextCurrentTopicComponent.componentName === 'learningObjective') {
       const messageCount = get(nextCurrentTopicComponent, 'learningObjective.messagesMeta.count', 0);
@@ -352,13 +344,6 @@ const updateCurrentComponentStatusOfNewCourse = async (
   if (nextCurrentTopicComponent.blockBasedProject && nextCurrentTopicComponent.blockBasedProject.id) {
     blockBasedProjectQuery = `currentBlockBasedProjectConnectId:"${nextCurrentTopicComponent.blockBasedProject.id}"`;
   }
-  console.log('-----------------------------------currentTopicComponentId', currentTopicComponentId);
-  console.log('-----------------------------------loQuery', loQuery);
-  console.log('-----------------------------------topicQuery', topicQuery);
-  console.log('-----------------------------------videoQuery', videoQuery);
-  console.log('-----------------------------------blockBasedProjectQuery', blockBasedProjectQuery);
-  console.log('-----------------------------------nextCurrentTopicComponentType', nextCurrentTopicComponentType);
-  console.log('-----------------------------------updateUserCurrentTopicComponentStatus', updateUserCurrentTopicComponentStatus);
 
   /*
   updating UserCurrentTopicComponentStatus based on flag updateUserCurrentTopicComponentStatus
