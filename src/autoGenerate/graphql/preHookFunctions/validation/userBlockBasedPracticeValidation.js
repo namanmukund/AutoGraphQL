@@ -6,7 +6,7 @@ import getInfoFromParams from '../../postHookFunctions/utils/getInfoFromParams';
 const userBlockBasedPracticeValidation = async (params, context) => {
   const {
     courseId,
-  } = getInfoFromParams(params, 'blockBasedProject');
+  } = getInfoFromParams(params, 'blockBasedPractice');
   // check if the called user and topic is unlocked
   const { blockBasedPractice } = topicTypes;
   await isComponentUnlockedForNewCourse(

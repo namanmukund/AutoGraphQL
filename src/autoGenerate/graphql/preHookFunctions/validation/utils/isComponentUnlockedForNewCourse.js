@@ -23,6 +23,7 @@ import getBatchCurrentComponentStatus
   from '../../../../utils/getBatchCurrentComponentStatus';
 import validateMentorMenteePermissionForComponentForNewCourse
   from './validateMentorMenteePermissionForComponentForNewCourse';
+import { getMentorMenteeSessionForValidation } from './index';
 
 /*
 This is a common method to check whether the called topic component is locked or not

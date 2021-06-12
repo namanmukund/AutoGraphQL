@@ -33,6 +33,7 @@ const addUserBlockBasedProjectMutation = (
       blockBasedProject{
         id
       }
+      answerLink
     }
     }
     `;
