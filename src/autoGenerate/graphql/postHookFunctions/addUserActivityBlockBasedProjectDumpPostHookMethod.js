@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import {
+  PUBLISHED,
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
@@ -35,6 +36,15 @@ const userBlockBasedProjectQuery = (userId, topicId, blockBasedProjectId) => `
           learningObjective{
             id
             order
+            messagesMeta{
+              count
+            }
+            questionBankMeta(filter:{and:[{assessmentType:practiceQuestion}{status:${PUBLISHED}}]}){
+              count
+            }
+            comicStripsMeta(filter:{status:${PUBLISHED}}){
+              count
+            }
           }
           blockBasedProject{
             id

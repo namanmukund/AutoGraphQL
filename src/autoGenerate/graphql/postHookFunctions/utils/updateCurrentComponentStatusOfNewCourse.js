@@ -11,7 +11,7 @@ const getNextTopic = (courseId,
       and:[
         {courses_some:{id: "${courseId}"}}
         {order_gt: ${order}}
-        {status: ${PUBLISHED}
+        {status: ${PUBLISHED}}
       ]
     }, orderBy: order_ASC, first: 1){
       id
@@ -21,6 +21,15 @@ const getNextTopic = (courseId,
         order
         learningObjective{
           id
+          messagesMeta{
+            count
+          }
+          questionBankMeta(filter:{and:[{assessmentType:practiceQuestion}{status:${PUBLISHED}}]}){
+            count
+          }
+          comicStripsMeta(filter:{status:${PUBLISHED}}){
+            count
+          }
         }
         blockBasedProject{
           id
@@ -83,6 +92,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
     currentLearningObjective,
     currentTopic,
     currentBlockBasedProject,
+    currentVideo,
   } = currentTopicComponentInfo;
   if (!currentTopic) {
     log('Not able to fetch CurrentTopicComponentInfo.CurrentTopic in updateUserCurrentComponent method');
@@ -99,6 +109,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
   let nextCurrentTopicComponentType = '';
   let currentLearningObjectiveId;
   let currentBlockBasedProjectId;
+  let currentVideoId;
   let updateUserCurrentTopicComponentStatus = false;
   let currentComponentIndex;
   let nextComponentIndex;
@@ -107,6 +118,10 @@ const updateCurrentComponentStatusOfNewCourse = async (
     case video:
       currentComponentIndex = sortedTopicComponentRule.findIndex((comp) => comp.video && comp.video.id === videoId);
       nextComponentIndex = currentComponentIndex + 1;
+      if (!currentVideo) {
+        log('Not able to fetch CurrentTopicComponentInfo.currentVideo in updateUserCurrentComponent method');
+      }
+      currentVideoId = get(currentVideo, 'id');
       /*
       We are checking whether user current topic status should be updated, below are the conditions:
       -user is hitting next and
@@ -119,6 +134,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       if ((userAction === next || userAction === skip)
         && currentTopicComponent === video
         && currentTopicId === topicId
+        && currentVideoId === videoId
       ) {
         updateUserCurrentTopicComponentStatus = true;
       }
@@ -141,7 +157,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       and current component status will not get changed when it is already consumed in past
       */
       if ((userAction === next || userAction === skip)
-        && currentTopicComponent === message
+        && currentTopicComponent === comicStrip
         && currentTopicId === topicId
         && currentLearningObjectiveId === learningObjectiveId
       ) {
@@ -229,8 +245,6 @@ const updateCurrentComponentStatusOfNewCourse = async (
         && currentTopicComponent === quiz
         && currentTopicId === topicId
       ) {
-        if (nextComponentLearningObjectiveId) { loQuery = `currentLearningObjectiveConnectId:"${nextComponentLearningObjectiveId}"`; }
-        if (nextComponentTopicId) { topicQuery = `currentTopicConnectId:"${nextComponentTopicId}"`; }
         // updating current component in case quiz is completed by user
         updateUserCurrentTopicComponentStatus = true;
       }
@@ -303,7 +317,20 @@ const updateCurrentComponentStatusOfNewCourse = async (
   }
 
   if (nextCurrentTopicComponent.componentName) {
-    nextCurrentTopicComponentType = nextCurrentTopicComponent.componentName;
+    if (nextCurrentTopicComponent.componentName === 'learningObjective') {
+      const messageCount = get(nextCurrentTopicComponent, 'learningObjective.messagesMeta.count', 0);
+      const pqCount = get(nextCurrentTopicComponent, 'learningObjective.questionBankMeta.count', 0);
+      const comicStripCount = get(nextCurrentTopicComponent, 'learningObjective.comicStripsMeta.count', 0);
+      if (messageCount) {
+        nextCurrentTopicComponentType = message;
+      } else if (pqCount) {
+        nextCurrentTopicComponentType = practiceQuestion;
+      } else if (comicStripCount) {
+        nextCurrentTopicComponentType = comicStrip;
+      }
+    } else {
+      nextCurrentTopicComponentType = nextCurrentTopicComponent.componentName;
+    }
   }
 
   if (nextCurrentTopicComponent.learningObjective && nextCurrentTopicComponent.learningObjective.id) {
@@ -315,8 +342,9 @@ const updateCurrentComponentStatusOfNewCourse = async (
   }
 
   if (nextCurrentTopicComponent.blockBasedProject && nextCurrentTopicComponent.blockBasedProject.id) {
-    blockBasedProjectQuery = `currentVideoConnectId:"${nextCurrentTopicComponent.video.id}"`;
+    blockBasedProjectQuery = `currentBlockBasedProjectConnectId:"${nextCurrentTopicComponent.blockBasedProject.id}"`;
   }
+
   /*
   updating UserCurrentTopicComponentStatus based on flag updateUserCurrentTopicComponentStatus
   which becomes only true according to page and conditions above

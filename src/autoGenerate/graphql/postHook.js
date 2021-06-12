@@ -254,8 +254,8 @@ const posthook = async (input, mutationName, context, params) => {
       await removeFromBatchStudentProfilePosthookMethod(input, params, mutationName, context);
       break;
     }
-    case 'addUserActivityComicStrip': {
-      await addUserActivityComicStripDumpPostHookMethod(input, params, mutationName, context);
+    case 'addUserActivityComicStripDump': {
+      await addUserActivityComicStripDumpPostHookMethod(input, mutationName, context);
       break;
     }
     case 'userBlockBasedProject': {
@@ -267,11 +267,11 @@ const posthook = async (input, mutationName, context, params) => {
       return hook(resultArray, mutationName, 'PostHook');
     }
     case 'addUserActivityBlockBasedPracticeDump': {
-      await addUserActivityBlockBasedPracticeDumpPostHookMethod(input, params, mutationName, context);
+      await addUserActivityBlockBasedPracticeDumpPostHookMethod(input, mutationName, context);
       break;
     }
     case 'addUserActivityBlockBasedProjectDump': {
-      await addUserActivityBlockBasedProjectDumpPostHookMethod(input, params, mutationName, context);
+      await addUserActivityBlockBasedProjectDumpPostHookMethod(input, mutationName, context);
       break;
     }
     default:

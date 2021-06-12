@@ -30,6 +30,9 @@ const userCurrentTopicComponentStatusQuery = (
         id
         order
       }
+      currentVideo{
+        id
+      }
     }
   }
   `;
