@@ -259,12 +259,12 @@ const posthook = async (input, mutationName, context, params) => {
       break;
     }
     case 'userBlockBasedProject': {
-      await userBlockBasedProjectPostHookMethod(input, params, mutationName, context);
-      break;
+      const resultArray = await userBlockBasedProjectPostHookMethod(input, params);
+      return hook(resultArray, mutationName, 'PostHook');
     }
     case 'userBlockBasedPractice': {
-      await userBlockBasedPracticePostHookMethod(input, params, mutationName, context);
-      break;
+      const resultArray = await userBlockBasedPracticePostHookMethod(input, params);
+      return hook(resultArray, mutationName, 'PostHook');
     }
     case 'addUserActivityBlockBasedPracticeDump': {
       await addUserActivityBlockBasedPracticeDumpPostHookMethod(input, params, mutationName, context);

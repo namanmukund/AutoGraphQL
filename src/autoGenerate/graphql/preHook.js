@@ -704,12 +704,12 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'userBlockBasedPractice': {
-      await userBlockBasedPracticeValidation(params, mutationOrQueryName, context);
-      break;
+      await userBlockBasedPracticeValidation(params, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'userBlockBasedProject': {
-      await userBlockBasedProjectValidation(params, mutationOrQueryName, context);
-      break;
+      await userBlockBasedProjectValidation(params, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUserActivityBlockBasedProjectDump': {
       await addUserActivityBlockBasedProjectDumpValidation(params, mutationOrQueryName, context);

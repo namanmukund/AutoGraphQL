@@ -32,8 +32,10 @@ const getInfoFromParams = (params, page) => {
       log('LearningObjectiveId is missing in input of postHook');
     } else if ((page === 'video' || page === 'quiz' || page === 'blockBasedProject') && !topicId) {
       log('TopicId is missing in input of postHook');
-    } else if (page === 'blockBasedProject') {
+    } else if (page === 'blockBasedProject' && !blockBasedProjectId) {
       log('BlockBasedProjectId is missing in input of postHook');
+    } else if (page === 'blockBasedPractice' && !blockBasedPracticeId) {
+      log('blockBasedPracticeId is missing in input of postHook');
     }
   }
   return {

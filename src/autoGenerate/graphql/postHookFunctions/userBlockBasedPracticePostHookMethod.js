@@ -33,6 +33,7 @@ const addUserBlockBasedPracticeMutation = (
       blockBasedPractice{
         id
       }
+      answerLink
     }
     }
     `;
@@ -58,7 +59,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params) => {
     topicId,
     courseId,
     blockBasedPracticeId,
-  } = getInfoFromParams(params, 'blockBasedProject');
+  } = getInfoFromParams(params, 'blockBasedPractice');
   // In case there is no topic id, empty data will be sent
   if (!topicId) {
     return resultArray;
