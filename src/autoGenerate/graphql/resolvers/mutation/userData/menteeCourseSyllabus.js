@@ -470,11 +470,9 @@ const getAllottedMentorQuery = (userId, courseId) => `
             id:"${userId}"
           }
         }
-        {
-          course_some:{
-            id: "${courseId}"
-          }
-        }
+        ${courseId ? `{course_some:{
+          ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
+        }}` : ''}
       ]
     }){
       allottedMentor{
@@ -513,11 +511,9 @@ const allottedMentorFromMMSQuery = (userId, courseId) => `
             }
           }
         }
-        {
-          course_some:{
-            id: "${courseId}"
-          }
-        }
+        ${courseId ? `{course_some:{
+          ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
+        }}` : ''}
       ]
     }){
       mentorSession{

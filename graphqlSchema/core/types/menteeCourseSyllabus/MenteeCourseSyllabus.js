@@ -1,5 +1,8 @@
 const sessionDetailType = `
   type SessionDetailType {
+   chapterId: ID
+   chapterOrder: Int
+   chapterTitle: String
    topicId: ID
    topicTitle: String
    topicThumbnail: File
@@ -13,6 +16,9 @@ const sessionDetailType = `
 
 const completedSessionDetailType = `
   type CompletedSessionDetailType {
+   chapterId: ID
+   chapterOrder: Int
+   chapterTitle: String
    topicId: ID
    topicTitle: String
    topicThumbnail: File
