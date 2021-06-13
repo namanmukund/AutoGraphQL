@@ -13,7 +13,7 @@ import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentCompon
 query to get User video for given user and topic id
 we use status and next component to update thses based on value fetched
 */
-const userVideoQuery = (userId, topicId) => `
+const userVideoQuery = (userId, topicId, courseId) => `
   query{
     userVideos(filter:{
       and:[
@@ -23,6 +23,7 @@ const userVideoQuery = (userId, topicId) => `
       {topic_some:{
         id:"${topicId}"
       }}
+      ${courseId ? `{course_some:{id:"${courseId}"}}` : ''}
       ]
     }){
       id
@@ -112,7 +113,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
   in that case if he is hitting back after video consumption, status will not get updated
   if it is already completed
   */
-  const userVideoQueryRes = await callLocalGraphqlApi(userVideoQuery(userId, topicId));
+  const userVideoQueryRes = await callLocalGraphqlApi(userVideoQuery(userId, topicId, courseId));
   const userVideoInfo = get(userVideoQueryRes, 'data.userVideos[0]');
   const {
     id: userVideoId,

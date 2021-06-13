@@ -78,9 +78,9 @@ const fetchBatchForStudent = (studentProfileId) => `
   `;
 
 // mutation to update batch
-const updateBatch = (batchId, studentId) => `
+const updateBatch = (batchId, studentId, courseId) => `
   mutation{
-    updateBatch(id:"${batchId}", studentsConnectIds: ["${studentId}"], input:{}){
+    updateBatch(id:"${batchId}", ${courseId ? `courseConnectId: "${courseId}"` : ''} studentsConnectIds: ["${studentId}"], input:{}){
       id
     }
   }
@@ -112,6 +112,7 @@ const bookB2B2CSlotsMutationResolver = async (
   validateAuthentication(context);
   const {
     input: {
+      courseId,
       campaignId,
       userId,
       bookingDate,
@@ -187,7 +188,7 @@ const bookB2B2CSlotsMutationResolver = async (
     }
 
     // add student to the new batch
-    await callLocalGraphqlApi(updateBatch(batchId, studentProfileId));
+    await callLocalGraphqlApi(updateBatch(batchId, studentProfileId, courseId));
   }
   return {
     result: true,
