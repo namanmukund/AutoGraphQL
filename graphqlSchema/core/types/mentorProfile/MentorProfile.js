@@ -1,6 +1,7 @@
 const MentorProfile = `
   type MentorProfile @model {
     user: User! @relation(name: "MentorProfileUser")
+    description: String
     codingLanguages: [CodingLanguage]
     experienceYear: Int
     sessionLink: String

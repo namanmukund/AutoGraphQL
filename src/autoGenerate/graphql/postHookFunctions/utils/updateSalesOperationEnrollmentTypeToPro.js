@@ -3,6 +3,7 @@ import {
   enrollmentTypes,
 } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import { log } from '../../../../../utils';
 
 // query to get user sales operation
 const getUserSalesOperation = (userId) => `

@@ -36,6 +36,55 @@ const isTopicAccessible = (enrollmentType, isTopicFree) => {
   return false;
 };
 
+// return mentor object in the defined format
+const getMentorData = (allottedMentor) => {
+  const { name, profilePic, mentorProfile } = allottedMentor;
+  const mentor = { name, profilePic };
+  if (mentorProfile) {
+    const {
+      description,
+      linkedInLink,
+      portfolioLink,
+      gitHubLink,
+      experienceYear,
+      pythonCourseRating5,
+      pythonCourseRating4,
+      pythonCourseRating3,
+      pythonCourseRating2,
+      pythonCourseRating1,
+    } = mentorProfile;
+    mentor.experienceYear = experienceYear;
+    mentor.description = description;
+    mentor.linkedInLink = linkedInLink;
+    mentor.portfolioLink = portfolioLink;
+    mentor.gitHubLink = gitHubLink;
+    let totalRatingUsers = 0;
+    let cumulativeRating = 0;
+    if (pythonCourseRating5) {
+      totalRatingUsers += pythonCourseRating5;
+      cumulativeRating += pythonCourseRating5 * 5;
+    }
+    if (pythonCourseRating4) {
+      totalRatingUsers += pythonCourseRating4;
+      cumulativeRating += pythonCourseRating4 * 4;
+    }
+    if (pythonCourseRating3) {
+      totalRatingUsers += pythonCourseRating3;
+      cumulativeRating += pythonCourseRating3 * 3;
+    }
+    if (pythonCourseRating2) {
+      totalRatingUsers += pythonCourseRating2;
+      cumulativeRating += pythonCourseRating2 * 2;
+    }
+    if (pythonCourseRating1) {
+      totalRatingUsers += pythonCourseRating1;
+      cumulativeRating += pythonCourseRating1;
+    }
+    mentor.averageRating = totalRatingUsers ? Math.round(((cumulativeRating.length * 100) / totalRatingUsers) * 100) / 100 : 0;
+  }
+  return mentor;
+};
+
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = (userId, courseId) => `
   query{
@@ -292,6 +341,26 @@ const getBatchStatus = (userId) => `
         batch{
           id
           type
+          allottedMentor{
+            name
+            profilePic{
+              id
+              uri
+              name
+            }
+            mentorProfile{
+              description
+              pythonCourseRating5
+              pythonCourseRating4
+              pythonCourseRating3
+              pythonCourseRating2
+              pythonCourseRating1
+              gitHubLink
+              linkedInLink
+              portfolioLink
+              experienceYear
+            }
+          }
           currentComponent{
             currentCourse{
               id
@@ -391,6 +460,92 @@ query{
 }
   `;
 
+// query to get mentor from salesOperation
+const getAllottedMentorQuery = (userId, courseId) => `
+  query{
+    salesOperations(filter:{
+          and:[
+        {
+          client_some:{
+            id:"${userId}"
+          }
+        }
+        {
+          course_some:{
+            id: "${courseId}"
+          }
+        }
+      ]
+    }){
+      allottedMentor{
+        name
+        profilePic{
+          id
+          uri
+          name
+        }
+        mentorProfile{
+          description
+          pythonCourseRating5
+          pythonCourseRating4
+          pythonCourseRating3
+          pythonCourseRating2
+          pythonCourseRating1
+          gitHubLink
+          linkedInLink
+          portfolioLink
+          experienceYear
+        }
+      }
+    }
+  }
+  `;
+
+// query to get mentor from MMS
+const allottedMentorFromMMSQuery = (userId, courseId) => `
+  query{
+    mentorMenteeSessions(filter:{
+      and:[
+        {
+          menteeSession_some:{
+            user_some:{
+              id: "${userId}"
+            }
+          }
+        }
+        {
+          course_some:{
+            id: "${courseId}"
+          }
+        }
+      ]
+    }){
+      mentorSession{
+        user{
+          name
+          profilePic{
+            id
+            uri
+            name
+          }
+          mentorProfile{
+            description
+            pythonCourseRating5
+            pythonCourseRating4
+            pythonCourseRating3
+            pythonCourseRating2
+            pythonCourseRating1
+            gitHubLink
+            linkedInLink
+            portfolioLink
+            experienceYear
+          }
+        }
+      }
+    }
+  }
+  `;
+
 /*
 This is called when mentee tries to load homepage
 It will return all the booked and upcoming sessions based on User current topic component status
@@ -431,6 +586,7 @@ const menteeCourseSyllabusMutationResolver = async (
   let projectCount = 0;
   let practiceCount = 0;
   const projects = [];
+  let mentorData = {};
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
     // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
@@ -444,6 +600,10 @@ const menteeCourseSyllabusMutationResolver = async (
 
     if (batchCurrentComponentCourseId === courseId) {
       batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+      const allottedMentor = get(batchRes, 'data.user.studentProfile.batch.currentComponent.allottedMentor');
+      if (allottedMentor && allottedMentor.name) {
+        mentorData = getMentorData(allottedMentor);
+      }
     }
 
     const res = await callLocalGraphqlApi(
@@ -468,6 +628,22 @@ const menteeCourseSyllabusMutationResolver = async (
       const getMentorMenteeSessionsRes = await callLocalGraphqlApi(getMentorMenteeSessions(userId, courseId));
       mentorMenteeSessions = get(getMentorMenteeSessionsRes, 'data.mentorMenteeSessions');
       currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
+
+      if (mentorMenteeSessions && mentorMenteeSessions.length) {
+        const allottedMentorQueryRes = await callLocalGraphqlApi(getAllottedMentorQuery(userId, courseId));
+        const allottedMentor = get(allottedMentorQueryRes, 'data.salesOperations[0].allottedMentor', '');
+        if (allottedMentor && allottedMentor.name) {
+          mentorData = getMentorData(allottedMentor);
+        }
+      }
+
+      if (!mentorData.name) {
+        const allottedMentorFromMMSQueryRes = await callLocalGraphqlApi(allottedMentorFromMMSQuery(userId, courseId));
+        const allottedMentor = get(allottedMentorFromMMSQueryRes, 'data.mentorMenteeSessions[0].mentorSession.user');
+        if (allottedMentor && allottedMentor.name) {
+          mentorData = getMentorData(allottedMentor);
+        }
+      }
     }
   /*
   If user is not logged in and asking for course syllabus then we will not add
@@ -854,6 +1030,7 @@ const menteeCourseSyllabusMutationResolver = async (
     skills,
     course: courseData,
     projects,
+    mentor: mentorData,
   });
 
   return currentUserSyllabus;
