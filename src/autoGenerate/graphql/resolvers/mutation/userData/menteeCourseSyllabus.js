@@ -274,6 +274,11 @@ query{
         title
         order
         isTrial
+        chapter{
+          id
+          title
+          order
+        }
         thumbnail{
           id
           uri
@@ -315,6 +320,11 @@ const getMentorMenteeSessions = (userId, courseId) => `
         id
         title
         order
+        chapter{
+          id
+          title
+          order
+        }
         thumbnail{
           id
           uri
@@ -723,6 +733,7 @@ const menteeCourseSyllabusMutationResolver = async (
       totalTopics += chapter.topics.length;
       // iterating over topics of each chapter  and setting isUnlocked field
       chapter.topics.forEach((topic) => {
+        const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
         if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
         if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
         if (topic.projects && topic.projects.length) {
@@ -754,6 +765,9 @@ const menteeCourseSyllabusMutationResolver = async (
             topicThumbnailSmall,
             topicDescription,
             isAccessible,
+            chapterId,
+            chapterTitle,
+            chapterOrder,
           };
           upComingSession.push(upComingMenteeSession);
         } else if (topicOrder === lastTopicBookedOrder) {
@@ -766,6 +780,9 @@ const menteeCourseSyllabusMutationResolver = async (
               topicThumbnailSmall,
               topicDescription,
               isAccessible,
+              chapterId,
+              chapterTitle,
+              chapterOrder,
             };
             completedSession.push(completedMenteeSession);
           } else {
@@ -807,6 +824,9 @@ const menteeCourseSyllabusMutationResolver = async (
                     bookingDate,
                     slotTime,
                     isAccessible: isBatchTopicAccessible,
+                    chapterId,
+                    chapterTitle,
+                    chapterOrder,
                   };
                   bookedSession.push(bookedMenteeSession);
                 }
@@ -822,6 +842,9 @@ const menteeCourseSyllabusMutationResolver = async (
                 topicThumbnailSmall,
                 topicDescription,
                 isAccessible,
+                chapterId,
+                chapterTitle,
+                chapterOrder,
               };
               upComingSession.push(upComingMenteeSession);
             }
@@ -835,6 +858,9 @@ const menteeCourseSyllabusMutationResolver = async (
             topicThumbnailSmall,
             topicDescription,
             isAccessible,
+            chapterId,
+            chapterTitle,
+            chapterOrder,
           };
           completedSession.push(completedMenteeSession);
         }
@@ -854,6 +880,7 @@ const menteeCourseSyllabusMutationResolver = async (
           description: topicDescription,
           thumbnail: topicThumbnail,
           thumbnailSmall: topicThumbnailSmall,
+          chapter,
         } = mentorMenteeSession.topic;
 
         // setting last topic completed order, will use this to find booked sessions that are not completed
@@ -869,6 +896,9 @@ const menteeCourseSyllabusMutationResolver = async (
           topicThumbnailSmall,
           topicDescription,
           endingDate,
+          chapterId: chapter && chapter.id,
+          chapterTitle: chapter && chapter.title,
+          chapterOrder: chapter && chapter.order,
         };
         completedSession.push(completedMenteeSession);
       });
@@ -889,6 +919,7 @@ const menteeCourseSyllabusMutationResolver = async (
           thumbnail: topicThumbnail,
           thumbnailSmall: topicThumbnailSmall,
           isTrial,
+          chapter,
         } = menteeSession.topic;
 
         const isAccessible = isTopicAccessible(enrollmentType, isTrial);
@@ -917,6 +948,9 @@ const menteeCourseSyllabusMutationResolver = async (
             bookingDate,
             slotTime,
             isAccessible,
+            chapterId: chapter && chapter.id,
+            chapterTitle: chapter && chapter.title,
+            chapterOrder: chapter && chapter.order,
           };
           bookedSession.push(bookedMenteeSession);
         }
@@ -936,6 +970,7 @@ const menteeCourseSyllabusMutationResolver = async (
       totalTopics += chapter.topics.length;
       // iterating over topics of each chapter  and setting isUnlocked field
       chapter.topics.forEach((topic) => {
+        const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
         if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
         if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
         if (topic.projects && topic.projects.length) {
@@ -966,6 +1001,9 @@ const menteeCourseSyllabusMutationResolver = async (
             topicThumbnailSmall,
             topicDescription,
             isAccessible,
+            chapterId,
+            chapterTitle,
+            chapterOrder,
           };
           upComingSession.push(upComingMenteeSession);
         }
