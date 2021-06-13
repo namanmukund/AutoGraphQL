@@ -13,7 +13,7 @@ import validateCurrentTopicComponent from '../../utils/validateCurrentTopicCompo
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = (userId) => `
+const getUserCurrentTopicComponentStatus = (userId, courseId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -21,10 +21,7 @@ const getUserCurrentTopicComponentStatus = (userId) => `
         id:"${userId}"
         }},
       {currentCourse_some:{
-        and:[
-          {status: ${PUBLISHED}},
-          {title: "${GLOBAL_COURSE_TITLE}"}
-        ]
+        ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
       }}
       ]
     }){
@@ -113,6 +110,7 @@ const getUnlockedUserBadgeMutationResolver = async (
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;
+  const { courseId } = params;
   if (!userId) {
     throw new UnauthenticatedUserError();
   }
@@ -134,19 +132,22 @@ const getUnlockedUserBadgeMutationResolver = async (
   let displayBadge = false;
   let badgeId = '';
   // getting token to be sent in callLocalGraphqlApi method
-  const res = await callLocalGraphqlApi(getUserCurrentTopicComponentStatus(userId), context, '');
+  const res = await callLocalGraphqlApi(getUserCurrentTopicComponentStatus(userId, courseId), context, '');
   const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
   // calling method to validate user current topic component status
   validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
 
   // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
   const batchRes = await callLocalGraphqlApi(
-    getBatchStatus(userId),
+    getBatchStatus(userId, courseId),
     context,
     '',
   );
-
-  const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+  let batchCurrentComponentInfo;
+  const batchCurrentComponentCourseId = get(batchRes, 'data.user.studentProfile.batch.currentComponent.currentCourse.id');
+  if (batchCurrentComponentCourseId === courseId) {
+    batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+  }
 
   let currentTopicId = get(currentTopicComponentInfo, 'currentTopic.id');
   const currentTopicComponent = get(currentTopicComponentInfo, 'currentTopicComponentType');

@@ -36,6 +36,55 @@ const isTopicAccessible = (enrollmentType, isTopicFree) => {
   return false;
 };
 
+// return mentor object in the defined format
+const getMentorData = (allottedMentor) => {
+  const { name, profilePic, mentorProfile } = allottedMentor;
+  const mentor = { name, profilePic };
+  if (mentorProfile) {
+    const {
+      description,
+      linkedInLink,
+      portfolioLink,
+      gitHubLink,
+      experienceYear,
+      pythonCourseRating5,
+      pythonCourseRating4,
+      pythonCourseRating3,
+      pythonCourseRating2,
+      pythonCourseRating1,
+    } = mentorProfile;
+    mentor.experienceYear = experienceYear;
+    mentor.description = description;
+    mentor.linkedInLink = linkedInLink;
+    mentor.portfolioLink = portfolioLink;
+    mentor.gitHubLink = gitHubLink;
+    let totalRatingUsers = 0;
+    let cumulativeRating = 0;
+    if (pythonCourseRating5) {
+      totalRatingUsers += pythonCourseRating5;
+      cumulativeRating += pythonCourseRating5 * 5;
+    }
+    if (pythonCourseRating4) {
+      totalRatingUsers += pythonCourseRating4;
+      cumulativeRating += pythonCourseRating4 * 4;
+    }
+    if (pythonCourseRating3) {
+      totalRatingUsers += pythonCourseRating3;
+      cumulativeRating += pythonCourseRating3 * 3;
+    }
+    if (pythonCourseRating2) {
+      totalRatingUsers += pythonCourseRating2;
+      cumulativeRating += pythonCourseRating2 * 2;
+    }
+    if (pythonCourseRating1) {
+      totalRatingUsers += pythonCourseRating1;
+      cumulativeRating += pythonCourseRating1;
+    }
+    mentor.averageRating = totalRatingUsers ? Math.round(((cumulativeRating.length * 100) / totalRatingUsers) * 100) / 100 : 0;
+  }
+  return mentor;
+};
+
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = (userId, courseId) => `
   query{
@@ -225,6 +274,11 @@ query{
         title
         order
         isTrial
+        chapter{
+          id
+          title
+          order
+        }
         thumbnail{
           id
           uri
@@ -266,6 +320,11 @@ const getMentorMenteeSessions = (userId, courseId) => `
         id
         title
         order
+        chapter{
+          id
+          title
+          order
+        }
         thumbnail{
           id
           uri
@@ -292,6 +351,26 @@ const getBatchStatus = (userId) => `
         batch{
           id
           type
+          allottedMentor{
+            name
+            profilePic{
+              id
+              uri
+              name
+            }
+            mentorProfile{
+              description
+              pythonCourseRating5
+              pythonCourseRating4
+              pythonCourseRating3
+              pythonCourseRating2
+              pythonCourseRating1
+              gitHubLink
+              linkedInLink
+              portfolioLink
+              experienceYear
+            }
+          }
           currentComponent{
             currentCourse{
               id
@@ -391,6 +470,88 @@ query{
 }
   `;
 
+// query to get mentor from salesOperation
+const getAllottedMentorQuery = (userId, courseId) => `
+  query{
+    salesOperations(filter:{
+          and:[
+        {
+          client_some:{
+            id:"${userId}"
+          }
+        }
+        ${courseId ? `{course_some:{
+          ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
+        }}` : ''}
+      ]
+    }){
+      allottedMentor{
+        name
+        profilePic{
+          id
+          uri
+          name
+        }
+        mentorProfile{
+          description
+          pythonCourseRating5
+          pythonCourseRating4
+          pythonCourseRating3
+          pythonCourseRating2
+          pythonCourseRating1
+          gitHubLink
+          linkedInLink
+          portfolioLink
+          experienceYear
+        }
+      }
+    }
+  }
+  `;
+
+// query to get mentor from MMS
+const allottedMentorFromMMSQuery = (userId, courseId) => `
+  query{
+    mentorMenteeSessions(filter:{
+      and:[
+        {
+          menteeSession_some:{
+            user_some:{
+              id: "${userId}"
+            }
+          }
+        }
+        ${courseId ? `{course_some:{
+          ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
+        }}` : ''}
+      ]
+    }){
+      mentorSession{
+        user{
+          name
+          profilePic{
+            id
+            uri
+            name
+          }
+          mentorProfile{
+            description
+            pythonCourseRating5
+            pythonCourseRating4
+            pythonCourseRating3
+            pythonCourseRating2
+            pythonCourseRating1
+            gitHubLink
+            linkedInLink
+            portfolioLink
+            experienceYear
+          }
+        }
+      }
+    }
+  }
+  `;
+
 /*
 This is called when mentee tries to load homepage
 It will return all the booked and upcoming sessions based on User current topic component status
@@ -431,6 +592,7 @@ const menteeCourseSyllabusMutationResolver = async (
   let projectCount = 0;
   let practiceCount = 0;
   const projects = [];
+  let mentorData = {};
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
     // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
@@ -444,6 +606,10 @@ const menteeCourseSyllabusMutationResolver = async (
 
     if (batchCurrentComponentCourseId === courseId) {
       batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+      const allottedMentor = get(batchRes, 'data.user.studentProfile.batch.currentComponent.allottedMentor');
+      if (allottedMentor && allottedMentor.name) {
+        mentorData = getMentorData(allottedMentor);
+      }
     }
 
     const res = await callLocalGraphqlApi(
@@ -468,6 +634,22 @@ const menteeCourseSyllabusMutationResolver = async (
       const getMentorMenteeSessionsRes = await callLocalGraphqlApi(getMentorMenteeSessions(userId, courseId));
       mentorMenteeSessions = get(getMentorMenteeSessionsRes, 'data.mentorMenteeSessions');
       currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
+
+      if (mentorMenteeSessions && mentorMenteeSessions.length) {
+        const allottedMentorQueryRes = await callLocalGraphqlApi(getAllottedMentorQuery(userId, courseId));
+        const allottedMentor = get(allottedMentorQueryRes, 'data.salesOperations[0].allottedMentor', '');
+        if (allottedMentor && allottedMentor.name) {
+          mentorData = getMentorData(allottedMentor);
+        }
+      }
+
+      if (!mentorData.name) {
+        const allottedMentorFromMMSQueryRes = await callLocalGraphqlApi(allottedMentorFromMMSQuery(userId, courseId));
+        const allottedMentor = get(allottedMentorFromMMSQueryRes, 'data.mentorMenteeSessions[0].mentorSession.user');
+        if (allottedMentor && allottedMentor.name) {
+          mentorData = getMentorData(allottedMentor);
+        }
+      }
     }
   /*
   If user is not logged in and asking for course syllabus then we will not add
@@ -551,6 +733,7 @@ const menteeCourseSyllabusMutationResolver = async (
       totalTopics += chapter.topics.length;
       // iterating over topics of each chapter  and setting isUnlocked field
       chapter.topics.forEach((topic) => {
+        const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
         if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
         if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
         if (topic.projects && topic.projects.length) {
@@ -582,6 +765,9 @@ const menteeCourseSyllabusMutationResolver = async (
             topicThumbnailSmall,
             topicDescription,
             isAccessible,
+            chapterId,
+            chapterTitle,
+            chapterOrder,
           };
           upComingSession.push(upComingMenteeSession);
         } else if (topicOrder === lastTopicBookedOrder) {
@@ -594,6 +780,9 @@ const menteeCourseSyllabusMutationResolver = async (
               topicThumbnailSmall,
               topicDescription,
               isAccessible,
+              chapterId,
+              chapterTitle,
+              chapterOrder,
             };
             completedSession.push(completedMenteeSession);
           } else {
@@ -635,6 +824,9 @@ const menteeCourseSyllabusMutationResolver = async (
                     bookingDate,
                     slotTime,
                     isAccessible: isBatchTopicAccessible,
+                    chapterId,
+                    chapterTitle,
+                    chapterOrder,
                   };
                   bookedSession.push(bookedMenteeSession);
                 }
@@ -650,6 +842,9 @@ const menteeCourseSyllabusMutationResolver = async (
                 topicThumbnailSmall,
                 topicDescription,
                 isAccessible,
+                chapterId,
+                chapterTitle,
+                chapterOrder,
               };
               upComingSession.push(upComingMenteeSession);
             }
@@ -663,6 +858,9 @@ const menteeCourseSyllabusMutationResolver = async (
             topicThumbnailSmall,
             topicDescription,
             isAccessible,
+            chapterId,
+            chapterTitle,
+            chapterOrder,
           };
           completedSession.push(completedMenteeSession);
         }
@@ -682,6 +880,7 @@ const menteeCourseSyllabusMutationResolver = async (
           description: topicDescription,
           thumbnail: topicThumbnail,
           thumbnailSmall: topicThumbnailSmall,
+          chapter,
         } = mentorMenteeSession.topic;
 
         // setting last topic completed order, will use this to find booked sessions that are not completed
@@ -697,6 +896,9 @@ const menteeCourseSyllabusMutationResolver = async (
           topicThumbnailSmall,
           topicDescription,
           endingDate,
+          chapterId: chapter && chapter.id,
+          chapterTitle: chapter && chapter.title,
+          chapterOrder: chapter && chapter.order,
         };
         completedSession.push(completedMenteeSession);
       });
@@ -717,6 +919,7 @@ const menteeCourseSyllabusMutationResolver = async (
           thumbnail: topicThumbnail,
           thumbnailSmall: topicThumbnailSmall,
           isTrial,
+          chapter,
         } = menteeSession.topic;
 
         const isAccessible = isTopicAccessible(enrollmentType, isTrial);
@@ -745,6 +948,9 @@ const menteeCourseSyllabusMutationResolver = async (
             bookingDate,
             slotTime,
             isAccessible,
+            chapterId: chapter && chapter.id,
+            chapterTitle: chapter && chapter.title,
+            chapterOrder: chapter && chapter.order,
           };
           bookedSession.push(bookedMenteeSession);
         }
@@ -764,6 +970,7 @@ const menteeCourseSyllabusMutationResolver = async (
       totalTopics += chapter.topics.length;
       // iterating over topics of each chapter  and setting isUnlocked field
       chapter.topics.forEach((topic) => {
+        const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
         if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
         if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
         if (topic.projects && topic.projects.length) {
@@ -794,6 +1001,9 @@ const menteeCourseSyllabusMutationResolver = async (
             topicThumbnailSmall,
             topicDescription,
             isAccessible,
+            chapterId,
+            chapterTitle,
+            chapterOrder,
           };
           upComingSession.push(upComingMenteeSession);
         }
@@ -854,6 +1064,7 @@ const menteeCourseSyllabusMutationResolver = async (
     skills,
     course: courseData,
     projects,
+    mentor: mentorData,
   });
 
   return currentUserSyllabus;
