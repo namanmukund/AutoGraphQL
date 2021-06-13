@@ -9,7 +9,7 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 
 // query to get userLO to check if document exists for userId and learningObjectiveId
-const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
+const userLearningObjectiveQuery = (userId, learningObjectiveId, courseId) => `
   query{
     userLearningObjectives(filter:{
       and:[
@@ -19,6 +19,7 @@ const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
       {learningObjective_some:{
         id:"${learningObjectiveId}"
       }}
+      ${courseId ? `{course_some:{id:"${courseId}"}}` : ''}
       ]
     }){
       id
@@ -102,7 +103,7 @@ const addUserActivityComicStripDumpPostHookMethod = async (input, mutationName, 
     in that case if he is hitting back after chat consumption, status will not get updated
     if it is already completed
   */
-  const userLearningObjectiveQueryRes = await callLocalGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId));
+  const userLearningObjectiveQueryRes = await callLocalGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId, courseId));
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
     id: userLearningObjectiveId,
