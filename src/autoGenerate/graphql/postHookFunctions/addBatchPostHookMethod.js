@@ -64,7 +64,7 @@ const addBatchPostHookMethod = async (input) => {
         },
       });
     }
-    courseId = get(topic, 'course[0].id');
+    courseId = course[0].id;
   }
   // we are not throwing any error here because it will seem that create batch failed if
   // firstTopicId and courseId and batchId is not present. Just adding log
