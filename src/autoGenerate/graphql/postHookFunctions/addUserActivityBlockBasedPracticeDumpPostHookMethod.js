@@ -9,7 +9,7 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 
 // query to get userLO to check if document exists for userId, blockBasedPracticeId and topicId
-const userBlockBasedPracticeQuery = (userId, topicId, blockBasedPracticeId) => `
+const userBlockBasedPracticeQuery = (userId, topicId, blockBasedPracticeId, courseId) => `
   query{
     userBlockBasedPractices(filter:{
       and:[
@@ -22,6 +22,7 @@ const userBlockBasedPracticeQuery = (userId, topicId, blockBasedPracticeId) => `
         {topic_some:{
           id:"${topicId}"
         }}
+        ${courseId ? `{course_some:{id:"${courseId}"}}` : ''}
       ]
     }){
       id
@@ -96,7 +97,7 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
     in that case if he is hitting back after blockBasedPractice consumption, status will not get updated
     if it is already completed
   */
-  const userBlockBasedPracticeQueryRes = await callLocalGraphqlApi(userBlockBasedPracticeQuery(userId, topicId, blockBasedPracticeId));
+  const userBlockBasedPracticeQueryRes = await callLocalGraphqlApi(userBlockBasedPracticeQuery(userId, topicId, blockBasedPracticeId, courseId));
   const userBlockBasedPracticeInfo = get(userBlockBasedPracticeQueryRes, 'data.userBlockBasedPractices[0]');
   const {
     id: userBlockBasedPracticeId,
