@@ -143,6 +143,8 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
               title
               projectThumbnail{
                 id
+                uri
+                name
               }
               tags{
                 title
@@ -593,6 +595,7 @@ const menteeCourseSyllabusMutationResolver = async (
   let practiceCount = 0;
   const projects = [];
   let mentorData = {};
+
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
     // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
@@ -601,12 +604,11 @@ const menteeCourseSyllabusMutationResolver = async (
       context,
       '',
     );
-
     const batchCurrentComponentCourseId = get(batchRes, 'data.user.studentProfile.batch.currentComponent.currentCourse.id');
 
     if (batchCurrentComponentCourseId === courseId) {
       batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
-      const allottedMentor = get(batchRes, 'data.user.studentProfile.batch.currentComponent.allottedMentor');
+      const allottedMentor = get(batchRes, 'data.user.studentProfile.batch.allottedMentor');
       if (allottedMentor && allottedMentor.name) {
         mentorData = getMentorData(allottedMentor);
       }
@@ -617,6 +619,7 @@ const menteeCourseSyllabusMutationResolver = async (
       context,
       '',
     );
+
     currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
     // calling method to validate user current topic component status
     validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
@@ -719,7 +722,6 @@ const menteeCourseSyllabusMutationResolver = async (
 
     lastTopicBookedOrder = currentTopic && currentTopic.order;
     const lastTopicSessionStatus = latestSessionStatus;
-
     totalChapters += chapters.length;
     // iterating over chapters to construct data for homepage
     chapters.forEach((chapter) => {
@@ -1010,7 +1012,6 @@ const menteeCourseSyllabusMutationResolver = async (
       });
     });
   }
-
   if (enrollmentType === enrollmentTypes.pro) {
     isPaid = true;
   }
@@ -1053,7 +1054,6 @@ const menteeCourseSyllabusMutationResolver = async (
     practiceCount,
     courseCompletionPercentage: totalTopics ? Math.round(((completedSession.length * 100) / totalTopics) * 100) / 100 : 0,
   };
-
   Object.assign(currentUserSyllabus, {
     upComingSession,
     bookedSession,
