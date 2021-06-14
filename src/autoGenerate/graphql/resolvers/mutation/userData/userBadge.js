@@ -49,11 +49,20 @@ const getUserCurrentTopicComponentStatus = (userId) => `
   `;
 
 // query to get all badges in a course along with the topic
-const getBadgeQuery = () => `
+const getBadgeQuery = (courseId) => `
     query{
       badges(
         filter:{
-          status:${PUBLISHED}
+        and:[
+            {
+              status:${PUBLISHED}
+            }
+            ${courseId ? `{
+              courses_some:{
+                id: "${courseId}"
+              }
+            }` : ''}
+          ]
         }
       ){
         id
@@ -81,13 +90,13 @@ const getBadgeQuery = () => `
   `;
 
 // query to get a course
-const getCourseQuery = () => `
+const getCourseQuery = (courseId) => `
     query{
       courses(filter:{
-        and:[
+        ${courseId ? `and:[
           {title: "${GLOBAL_COURSE_TITLE}"},
           {status: ${PUBLISHED}}
-        ]
+        ]` : `id: "${courseId}"`}
       }){
         id
         title
@@ -203,16 +212,18 @@ const userBadgeMutationResolver = async (
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;
+  const { courseId } = params;
 
   // calling method to get all published badges
-  const badgeRes = await callLocalGraphqlApi(getBadgeQuery());
+  const badgeRes = await callLocalGraphqlApi(getBadgeQuery(courseId));
   const badgeInfo = get(badgeRes, 'data.badges');
   // this object will be returned in output
   const userBadgeDocument = {};
   // storing characters and equipments in separate arrays, initialising both arrays
   const charactersFromBadgeInfo = [];
   const equipmentsFromBadgeInfo = [];
-  const { character, equipment } = badgeTypes;
+  const skillsFromBadgeInfo = [];
+  const { character, equipment, skill } = badgeTypes;
   badgeInfo.forEach((badge) => {
     if (
       !badge
@@ -232,11 +243,14 @@ const userBadgeMutationResolver = async (
       charactersFromBadgeInfo.push(badge);
     } else if (badge.type === equipment) {
       equipmentsFromBadgeInfo.push(badge);
+    } else if (badge.type === skill) {
+      skillsFromBadgeInfo.push(badge);
     }
   });
   // sorting each badge array according to topic order
   charactersFromBadgeInfo.sort((a, b) => a.topic.order - b.topic.order);
   equipmentsFromBadgeInfo.sort((a, b) => a.topic.order - b.topic.order);
+  skillsFromBadgeInfo.sort((a, b) => a.topic.order - b.topic.order);
   let currentCourse;
   let currentTopicOrder;
   let currentTopicComponentType;
@@ -263,14 +277,18 @@ const userBadgeMutationResolver = async (
       '',
     );
 
-    const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+    const batchCurrentComponentCourseId = get(batchRes, 'data.user.studentProfile.batch.currentComponent.currentCourse.id');
+    let batchCurrentComponentInfo;
+    if (batchCurrentComponentCourseId === courseId) {
+      batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+    }
 
     if (batchCurrentComponentInfo) {
       currentTopicOrder = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic && batchCurrentComponentInfo.currentTopic.order;
       currentTopicComponentType = quiz;
     }
   } else {
-    const courseResult = await callLocalGraphqlApi(getCourseQuery());
+    const courseResult = await callLocalGraphqlApi(getCourseQuery(courseId));
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
       throw new DatabaseRecordNotFoundError({
@@ -300,8 +318,16 @@ const userBadgeMutationResolver = async (
     currentTopicOrder,
     currentTopicComponentType,
   );
+
+  const skills = parseBadges(
+    sortBadges(skillsFromBadgeInfo),
+    currentTopicOrder,
+    currentTopicComponentType,
+  );
+
   userBadgeDocument.characters = characters;
   userBadgeDocument.equipments = equipments;
+  userBadgeDocument.skills = skills;
   Object.assign(userBadgeDocument, {
     currentCourse,
   });

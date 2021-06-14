@@ -17,7 +17,7 @@ const customMutationString = `
    userFirstAndLatestQuizReport ( topicId: ID!): UserFirstAndLatestQuizReport,
    skipVideo ( topicId: ID!): SkipVideo,
    skipPracticeQuestion ( learningObjectiveId: ID!): BooleanResult,
-   userBadge : UserBadge,
+   userBadge (courseId: ID): UserBadge,
    getUnlockedUserBadge ( input: GetUnlockedUserBadgeInput ): GetUnlockedUserBadgeResult,
    getQuizReport ( input: GetQuizReportInput): GetQuizReportResult,
    menteeCourseSyllabus (courseId: ID): MenteeCourseSyllabus,
