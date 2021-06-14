@@ -34,8 +34,7 @@ const Topic = `
   @subscribe(events: [${CREATED}])
   {
     order: Int! 
-    title: String! 
-        @unique 
+    title: String!
         @trim
     description: String @uniqueOrEmpty @trim
     status: ContentStatus! @defaultValue(value: "unpublished")
