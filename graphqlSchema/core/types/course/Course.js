@@ -36,7 +36,7 @@ const Course = `
   ) 
   {
     order: Int
-    title: String! @unique
+    title: String!
     category: CourseCategory!
     description: String @uniqueOrEmpty @length(min: 6, max: 800) @trim
     status: ContentStatus! @defaultValue(value: "unpublished")
