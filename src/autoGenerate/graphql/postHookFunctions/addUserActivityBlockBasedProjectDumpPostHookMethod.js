@@ -9,7 +9,7 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 
 // query to get userLO to check if document exists for userId, blockBasedProjectId and topicId
-const userBlockBasedProjectQuery = (userId, topicId, blockBasedProjectId) => `
+const userBlockBasedProjectQuery = (userId, topicId, blockBasedProjectId, courseId) => `
   query{
     userBlockBasedProjects(filter:{
       and:[
@@ -22,6 +22,7 @@ const userBlockBasedProjectQuery = (userId, topicId, blockBasedProjectId) => `
         {topic_some:{
           id:"${topicId}"
         }}
+         ${courseId ? `{course_some:{id:"${courseId}"}}` : ''}
       ]
     }){
       id
@@ -96,7 +97,7 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
     in that case if he is hitting back after blockBasedProject consumption, status will not get updated
     if it is already completed
   */
-  const userBlockBasedProjectQueryRes = await callLocalGraphqlApi(userBlockBasedProjectQuery(userId, topicId, blockBasedProjectId));
+  const userBlockBasedProjectQueryRes = await callLocalGraphqlApi(userBlockBasedProjectQuery(userId, topicId, blockBasedProjectId, courseId));
   const userBlockBasedProjectInfo = get(userBlockBasedProjectQueryRes, 'data.userBlockBasedProjects[0]');
 
   const {
