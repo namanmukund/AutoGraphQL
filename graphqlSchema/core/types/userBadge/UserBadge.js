@@ -19,6 +19,7 @@ const UserBadge = `
     currentCourse: CourseUserBadge
     characters: [UserBadgeArray]
     equipments: [UserBadgeArray]
+    skills: [UserBadgeArray]
   }
 `;
 
