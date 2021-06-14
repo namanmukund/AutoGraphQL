@@ -4,7 +4,7 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   slotTimes,
-  sessionStatus, badgeTypes, blockBasedProjectType,
+  sessionStatus, blockBasedProjectType, OLD_COURSE_ID,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError,
@@ -14,8 +14,8 @@ import getUserIdandAppNameAfterValidation
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import { parseBadges } from '../utils/parseBadges';
-import { sortBadges } from '../utils/sortBadges';
+// import { parseBadges } from '../utils/parseBadges';
+// import { sortBadges } from '../utils/sortBadges';
 
 const getSlotTimeFields = () => {
   let slotTimeFields = '';
@@ -37,7 +37,7 @@ const isTopicAccessible = (enrollmentType, isTopicFree) => {
 };
 
 // return mentor object in the defined format
-const getMentorData = (allottedMentor) => {
+/* const getMentorData = (allottedMentor) => {
   const { name, profilePic, mentorProfile } = allottedMentor;
   const mentor = { name, profilePic };
   if (mentorProfile) {
@@ -83,7 +83,7 @@ const getMentorData = (allottedMentor) => {
     mentor.averageRating = totalRatingUsers ? Math.round(((cumulativeRating.length * 100) / totalRatingUsers) * 100) / 100 : 0;
   }
   return mentor;
-};
+}; */
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = (userId, courseId) => `
@@ -137,18 +137,6 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
             }
             practiceCount: blockBasedProjectsMeta(filter:{and:[{type: ${blockBasedProjectType.practice}}{status: ${PUBLISHED}}]}){
               count
-            }
-            projects: blockBasedProjects(filter:{and:[{type: ${blockBasedProjectType.project}} {status: ${PUBLISHED}}]}){
-              id
-              title
-              projectThumbnail{
-                id
-                uri
-                name
-              }
-              tags{
-                title
-              }
             }
           }
         }
@@ -238,19 +226,6 @@ const getCourseQuery = (courseId) => `
             practiceCount: blockBasedProjectsMeta(filter:{and:[{type: ${blockBasedProjectType.practice}}{status: ${PUBLISHED}}]}){
               count
             }
-            projects: blockBasedProjects(filter:{and:[{type: ${blockBasedProjectType.project}} {status: ${PUBLISHED}}]}){
-              id
-              title
-              projectThumbnail{
-                id
-                name
-                uri
-              }
-              tags{
-                id
-                title
-              }
-            }
           }
         }
       }
@@ -267,7 +242,7 @@ query{
         id:"${userId}"
         }
       }
-      ${courseId ? `{course_some:{id: "${courseId}"}}` : ''}
+      ${courseId && courseId !== OLD_COURSE_ID ? `{course_some:{id: "${courseId}"}}` : ''}
     ]
     }){
       id
@@ -314,7 +289,7 @@ const getMentorMenteeSessions = (userId, courseId) => `
         {
           sessionStatus: completed
         }
-        ${courseId ? `{course_some:{id: "${courseId}"}}` : ''}
+        ${courseId && courseId !== OLD_COURSE_ID ? `{course_some:{id: "${courseId}"}}` : ''}
       ]
     }){
       id
@@ -353,26 +328,6 @@ const getBatchStatus = (userId) => `
         batch{
           id
           type
-          allottedMentor{
-            name
-            profilePic{
-              id
-              uri
-              name
-            }
-            mentorProfile{
-              description
-              pythonCourseRating5
-              pythonCourseRating4
-              pythonCourseRating3
-              pythonCourseRating2
-              pythonCourseRating1
-              gitHubLink
-              linkedInLink
-              portfolioLink
-              experienceYear
-            }
-          }
           currentComponent{
             currentCourse{
               id
@@ -429,130 +384,130 @@ const getBatchSessions = (batchId, courseId) => `
   `;
 
 // query to get all badges in a course along with the topic
-const getBadgeQuery = (courseId) => `
-query{
-  badges(
-    filter:{
-      and:[
-        {
-          status:${PUBLISHED}
-        }
-        {
-          courses_some:{
-            ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
-          }
-        }
-        {
-          type: ${badgeTypes.skill}
-        }
-      ]
-    }
-  ){
-    id
-    name
-    description
-    order
-    type
-    unlockPoint
-    activeImage{
-      id
-      uri
-      name
-    }
-    inactiveImage{
-      id
-      uri
-      name
-    }
-    topic{
-      id
-      order
-    }
-  }
-}
-  `;
+// const getBadgeQuery = (courseId) => `
+// query{
+//   badges(
+//     filter:{
+//       and:[
+//         {
+//           status:${PUBLISHED}
+//         }
+//         {
+//           courses_some:{
+//             ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
+//           }
+//         }
+//         {
+//           type: ${badgeTypes.skill}
+//         }
+//       ]
+//     }
+//   ){
+//     id
+//     name
+//     description
+//     order
+//     type
+//     unlockPoint
+//     activeImage{
+//       id
+//       uri
+//       name
+//     }
+//     inactiveImage{
+//       id
+//       uri
+//       name
+//     }
+//     topic{
+//       id
+//       order
+//     }
+//   }
+// }
+//   `;
 
 // query to get mentor from salesOperation
-const getAllottedMentorQuery = (userId, courseId) => `
-  query{
-    salesOperations(filter:{
-          and:[
-        {
-          client_some:{
-            id:"${userId}"
-          }
-        }
-        ${courseId ? `{course_some:{
-          ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
-        }}` : ''}
-      ]
-    }){
-      allottedMentor{
-        name
-        profilePic{
-          id
-          uri
-          name
-        }
-        mentorProfile{
-          description
-          pythonCourseRating5
-          pythonCourseRating4
-          pythonCourseRating3
-          pythonCourseRating2
-          pythonCourseRating1
-          gitHubLink
-          linkedInLink
-          portfolioLink
-          experienceYear
-        }
-      }
-    }
-  }
-  `;
+// const getAllottedMentorQuery = (userId, courseId) => `
+//   query{
+//     salesOperations(filter:{
+//           and:[
+//         {
+//           client_some:{
+//             id:"${userId}"
+//           }
+//         }
+//         ${courseId ? `{course_some:{
+//           ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
+//         }}` : ''}
+//       ]
+//     }){
+//       allottedMentor{
+//         name
+//         profilePic{
+//           id
+//           uri
+//           name
+//         }
+//         mentorProfile{
+//           description
+//           pythonCourseRating5
+//           pythonCourseRating4
+//           pythonCourseRating3
+//           pythonCourseRating2
+//           pythonCourseRating1
+//           gitHubLink
+//           linkedInLink
+//           portfolioLink
+//           experienceYear
+//         }
+//       }
+//     }
+//   }
+//   `;
 
 // query to get mentor from MMS
-const allottedMentorFromMMSQuery = (userId, courseId) => `
-  query{
-    mentorMenteeSessions(filter:{
-      and:[
-        {
-          menteeSession_some:{
-            user_some:{
-              id: "${userId}"
-            }
-          }
-        }
-        ${courseId ? `{course_some:{
-          ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
-        }}` : ''}
-      ]
-    }){
-      mentorSession{
-        user{
-          name
-          profilePic{
-            id
-            uri
-            name
-          }
-          mentorProfile{
-            description
-            pythonCourseRating5
-            pythonCourseRating4
-            pythonCourseRating3
-            pythonCourseRating2
-            pythonCourseRating1
-            gitHubLink
-            linkedInLink
-            portfolioLink
-            experienceYear
-          }
-        }
-      }
-    }
-  }
-  `;
+// const allottedMentorFromMMSQuery = (userId, courseId) => `
+//   query{
+//     mentorMenteeSessions(filter:{
+//       and:[
+//         {
+//           menteeSession_some:{
+//             user_some:{
+//               id: "${userId}"
+//             }
+//           }
+//         }
+//         ${courseId ? `{course_some:{
+//           ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
+//         }}` : ''}
+//       ]
+//     }){
+//       mentorSession{
+//         user{
+//           name
+//           profilePic{
+//             id
+//             uri
+//             name
+//           }
+//           mentorProfile{
+//             description
+//             pythonCourseRating5
+//             pythonCourseRating4
+//             pythonCourseRating3
+//             pythonCourseRating2
+//             pythonCourseRating1
+//             gitHubLink
+//             linkedInLink
+//             portfolioLink
+//             experienceYear
+//           }
+//         }
+//       }
+//     }
+//   }
+//   `;
 
 /*
 This is called when mentee tries to load homepage
@@ -590,11 +545,11 @@ const menteeCourseSyllabusMutationResolver = async (
   let lastTopicBookedOrder = 0;
   let lastCompletedTopicOrder = 0;
   let isPaid = false;
-  let currentTopicOrder;
+  // let currentTopicOrder;
   let projectCount = 0;
   let practiceCount = 0;
-  const projects = [];
-  let mentorData = {};
+  // const projects = [];
+  // const mentorData = {};
 
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
@@ -608,10 +563,10 @@ const menteeCourseSyllabusMutationResolver = async (
 
     if (batchCurrentComponentCourseId === courseId) {
       batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
-      const allottedMentor = get(batchRes, 'data.user.studentProfile.batch.allottedMentor');
-      if (allottedMentor && allottedMentor.name) {
-        mentorData = getMentorData(allottedMentor);
-      }
+      // const allottedMentor = get(batchRes, 'data.user.studentProfile.batch.allottedMentor');
+      // if (allottedMentor && allottedMentor.name) {
+      //   mentorData = getMentorData(allottedMentor);
+      // }
     }
 
     const res = await callLocalGraphqlApi(
@@ -629,30 +584,30 @@ const menteeCourseSyllabusMutationResolver = async (
       const batchId = get(batchRes, 'data.user.studentProfile.batch.id');
       const getBatchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, courseId));
       batchSessions = get(getBatchSessionsRes, 'data.batchSessions');
-      currentTopicOrder = get(batchCurrentComponentInfo, 'currentTopic.order');
+      // currentTopicOrder = get(batchCurrentComponentInfo, 'currentTopic.order');
     } else {
       const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId, courseId));
       menteeSessions = get(getMenteeSessionsRes, 'data.menteeSessions');
 
       const getMentorMenteeSessionsRes = await callLocalGraphqlApi(getMentorMenteeSessions(userId, courseId));
       mentorMenteeSessions = get(getMentorMenteeSessionsRes, 'data.mentorMenteeSessions');
-      currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
+      // currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
 
-      if (mentorMenteeSessions && mentorMenteeSessions.length) {
-        const allottedMentorQueryRes = await callLocalGraphqlApi(getAllottedMentorQuery(userId, courseId));
-        const allottedMentor = get(allottedMentorQueryRes, 'data.salesOperations[0].allottedMentor', '');
-        if (allottedMentor && allottedMentor.name) {
-          mentorData = getMentorData(allottedMentor);
-        }
-      }
+      // if (mentorMenteeSessions && mentorMenteeSessions.length) {
+      //   const allottedMentorQueryRes = await callLocalGraphqlApi(getAllottedMentorQuery(userId, courseId));
+      //   const allottedMentor = get(allottedMentorQueryRes, 'data.salesOperations[0].allottedMentor', '');
+      //   if (allottedMentor && allottedMentor.name) {
+      //     mentorData = getMentorData(allottedMentor);
+      //   }
+      // }
 
-      if (!mentorData.name) {
-        const allottedMentorFromMMSQueryRes = await callLocalGraphqlApi(allottedMentorFromMMSQuery(userId, courseId));
-        const allottedMentor = get(allottedMentorFromMMSQueryRes, 'data.mentorMenteeSessions[0].mentorSession.user');
-        if (allottedMentor && allottedMentor.name) {
-          mentorData = getMentorData(allottedMentor);
-        }
-      }
+      // if (!mentorData.name) {
+      //   const allottedMentorFromMMSQueryRes = await callLocalGraphqlApi(allottedMentorFromMMSQuery(userId, courseId));
+      //   const allottedMentor = get(allottedMentorFromMMSQueryRes, 'data.mentorMenteeSessions[0].mentorSession.user');
+      //   if (allottedMentor && allottedMentor.name) {
+      //     mentorData = getMentorData(allottedMentor);
+      //   }
+      // }
     }
   /*
   If user is not logged in and asking for course syllabus then we will not add
@@ -693,7 +648,7 @@ const menteeCourseSyllabusMutationResolver = async (
     };
     // Setting topic order as -1 and currentTopicComponentType as video for guest user,
     // this way all inactive images will be returned
-    currentTopicOrder = -1;
+    // currentTopicOrder = -1;
   }
 
   const {
@@ -738,11 +693,11 @@ const menteeCourseSyllabusMutationResolver = async (
         const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
         if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
         if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
-        if (topic.projects && topic.projects.length) {
-          topic.projects.forEach((project) => {
-            projects.push(project);
-          });
-        }
+        // if (topic.projects && topic.projects.length) {
+        //   topic.projects.forEach((project) => {
+        //     projects.push(project);
+        //   });
+        // }
 
         const {
           order: topicOrder,
@@ -975,11 +930,11 @@ const menteeCourseSyllabusMutationResolver = async (
         const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
         if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
         if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
-        if (topic.projects && topic.projects.length) {
-          topic.projects.forEach((project) => {
-            projects.push(project);
-          });
-        }
+        // if (topic.projects && topic.projects.length) {
+        //   topic.projects.forEach((project) => {
+        //     projects.push(project);
+        //   });
+        // }
         const {
           order: topicOrder,
           id: topicId,
@@ -1016,7 +971,7 @@ const menteeCourseSyllabusMutationResolver = async (
     isPaid = true;
   }
 
-  // calling method to get all published badges
+  /* // calling method to get all published badges
   const badgeRes = await callLocalGraphqlApi(getBadgeQuery(courseId));
   const skillsFromBadgeInfo = get(badgeRes, 'data.badges');
   skillsFromBadgeInfo.forEach((badge) => {
@@ -1042,7 +997,7 @@ const menteeCourseSyllabusMutationResolver = async (
   const skills = parseBadges(
     sortBadges(skillsFromBadgeInfo),
     currentTopicOrder,
-  );
+  ); */
 
   const courseData = {
     title: currentCourse.title,
@@ -1061,10 +1016,10 @@ const menteeCourseSyllabusMutationResolver = async (
     totalChapters,
     totalTopics,
     isPaid,
-    skills,
+    // skills,
     course: courseData,
-    projects,
-    mentor: mentorData,
+    // projects,
+    // mentor: mentorData,
   });
 
   return currentUserSyllabus;
