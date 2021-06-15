@@ -561,7 +561,7 @@ const menteeCourseSyllabusMutationResolver = async (
     // );
     const batchCurrentComponentCourseId = get(res, 'data.userCurrentTopicComponentStatuses[0].user.studentProfile.batch.currentComponent.currentCourse.id');
 
-    if (batchCurrentComponentCourseId === courseId) {
+    if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId) {
       batchCurrentComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0].user.studentProfile.batch.currentComponent');
       // const allottedMentor = get(res, 'data.user.studentProfile.batch.allottedMentor');
       // if (allottedMentor && allottedMentor.name) {
