@@ -143,36 +143,27 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
       }
       currentTopic{
         id
-        title
-        description
-        videoTitle
-        order
-        thumbnail{
-          id
-          name
-          uri
-        }
-        thumbnailSmall{
-          id
-          uri
-          name
-        }
-        description
-        videoDescription
-        videoThumbnail{
-          id
-          name
-          uri
-        }
       }
       currentLearningObjective{
         id
-        title
-        description
-        thumbnail{
-          id
-          uri
-          name
+      }
+      user{
+        studentProfile{
+          batch{
+            id
+            type
+            currentComponent{
+              currentCourse{
+                id
+                order
+              }
+              currentTopic{
+                id
+                order
+              }
+              latestSessionStatus
+            }
+          }
         }
       }
       currentTopicComponentType
@@ -321,29 +312,29 @@ const getMentorMenteeSessions = (userId, courseId) => `
   `;
 
 // query to get batch status
-const getBatchStatus = (userId) => `
-  query{
-    user(id: "${userId}"){
-      studentProfile{
-        batch{
-          id
-          type
-          currentComponent{
-            currentCourse{
-              id
-              order
-            }
-            currentTopic{
-              id
-              order
-            }
-            latestSessionStatus
-          }
-        }
-      }
-    }
-  }
-  `;
+// const getBatchStatus = (userId) => `
+//   query{
+//     user(id: "${userId}"){
+//       studentProfile{
+//         batch{
+//           id
+//           type
+//           currentComponent{
+//             currentCourse{
+//               id
+//               order
+//             }
+//             currentTopic{
+//               id
+//               order
+//             }
+//             latestSessionStatus
+//           }
+//         }
+//       }
+//     }
+//   }
+//   `;
 
 // query to get batch Sessions
 // query to get batch Sessions
@@ -553,22 +544,6 @@ const menteeCourseSyllabusMutationResolver = async (
 
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
-    // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
-    const batchRes = await callLocalGraphqlApi(
-      getBatchStatus(userId),
-      context,
-      '',
-    );
-    const batchCurrentComponentCourseId = get(batchRes, 'data.user.studentProfile.batch.currentComponent.currentCourse.id');
-
-    if (batchCurrentComponentCourseId === courseId) {
-      batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
-      // const allottedMentor = get(batchRes, 'data.user.studentProfile.batch.allottedMentor');
-      // if (allottedMentor && allottedMentor.name) {
-      //   mentorData = getMentorData(allottedMentor);
-      // }
-    }
-
     const res = await callLocalGraphqlApi(
       getUserCurrentTopicComponentStatus(userId, courseId),
       context,
@@ -578,10 +553,25 @@ const menteeCourseSyllabusMutationResolver = async (
     currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
     // calling method to validate user current topic component status
     validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
+    // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
+    // const batchRes = await callLocalGraphqlApi(
+    //   getBatchStatus(userId),
+    //   context,
+    //   '',
+    // );
+    const batchCurrentComponentCourseId = get(res, 'data.userCurrentTopicComponentStatuses[0].user.studentProfile.batch.currentComponent.currentCourse.id');
+
+    if (batchCurrentComponentCourseId === courseId) {
+      batchCurrentComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0].user.studentProfile.batch.currentComponent');
+      // const allottedMentor = get(res, 'data.user.studentProfile.batch.allottedMentor');
+      // if (allottedMentor && allottedMentor.name) {
+      //   mentorData = getMentorData(allottedMentor);
+      // }
+    }
 
     // menteeSessions and mentorMenteeSessions will be called if user is not from batch
     if (batchCurrentComponentInfo) {
-      const batchId = get(batchRes, 'data.user.studentProfile.batch.id');
+      const batchId = get(res, 'data.userCurrentTopicComponentStatuses[0].user.studentProfile.batch.id');
       const getBatchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, courseId));
       batchSessions = get(getBatchSessionsRes, 'data.batchSessions');
       // currentTopicOrder = get(batchCurrentComponentInfo, 'currentTopic.order');
@@ -624,13 +614,13 @@ const menteeCourseSyllabusMutationResolver = async (
         },
       });
     }
-    if (!firstLearningObjective) {
-      throw new DatabaseRecordNotFoundError({
-        data: {
-          error: 'FirstTopicId.firstLearningObjective: is not present',
-        },
-      });
-    }
+    // if (!firstLearningObjective) {
+    //   throw new DatabaseRecordNotFoundError({
+    //     data: {
+    //       error: 'FirstTopicId.firstLearningObjective: is not present',
+    //     },
+    //   });
+    // }
     const courseResult = await callLocalGraphqlApi(getCourseQuery(courseId));
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
