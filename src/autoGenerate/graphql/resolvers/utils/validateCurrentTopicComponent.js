@@ -18,7 +18,7 @@ const validateCurrentTopicComponent = (currentTopicComponentInfo, mutationName) 
     currentCourse,
     currentTopicComponentType: currentTopicComponent,
     currentTopic,
-    currentLearningObjective,
+    // currentLearningObjective,
     enrollmentType,
   } = currentTopicComponentInfo;
   // throwing errors if some data is missing in User current topic component status
@@ -44,13 +44,13 @@ const validateCurrentTopicComponent = (currentTopicComponentInfo, mutationName) 
       },
     });
   }
-  if (!currentLearningObjective) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'CurrentLearningObjective: is not present',
-      },
-    });
-  }
+  // if (!currentLearningObjective) {
+  //   throw new DatabaseRecordNotFoundError({
+  //     data: {
+  //       error: 'CurrentLearningObjective: is not present',
+  //     },
+  //   });
+  // }
   if (!enrollmentType) {
     throw new DatabaseRecordNotFoundError({
       data: {
