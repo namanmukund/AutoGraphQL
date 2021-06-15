@@ -207,6 +207,7 @@ const isComponentUnlocked = async (
   other case is when called topic order is equal to current topic order
   in that case we are checking current component type and lo order
   */
+
   if (!isTopicUnlocked(
     enrollmentType,
     currentTopicOrder,
@@ -245,7 +246,6 @@ const isComponentUnlocked = async (
       currentTopicComponentInfo,
       mentorMenteeSessionStatus,
     );
-
     switch (page) {
       case message: {
         const {

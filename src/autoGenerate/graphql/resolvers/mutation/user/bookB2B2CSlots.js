@@ -82,6 +82,9 @@ const updateBatch = (batchId, studentId, courseId) => `
   mutation{
     updateBatch(id:"${batchId}", ${courseId ? `courseConnectId: "${courseId}"` : ''} studentsConnectIds: ["${studentId}"], input:{}){
       id
+      course{
+        id
+      }
     }
   }
   `;
@@ -119,7 +122,6 @@ const bookB2B2CSlotsMutationResolver = async (
       ...slots
     },
   } = params;
-
   const slotTimeArray = getSelectedSlotsTime(slots);
 
   if (!slotTimeArray.length) {
@@ -178,7 +180,6 @@ const bookB2B2CSlotsMutationResolver = async (
   if (!batchId) {
     throw new BatchFullError();
   }
-
   if (batchId) {
     const fetchBatchForStudentRes = await callLocalGraphqlApi(fetchBatchForStudent(studentProfileId));
     const batchIdForStudent = get(fetchBatchForStudentRes, 'data.batches[0].id', '');

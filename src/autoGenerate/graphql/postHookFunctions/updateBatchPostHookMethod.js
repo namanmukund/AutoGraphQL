@@ -153,13 +153,13 @@ const createBatchSessions = async (batchId, possibleDates, filteredSlots, slotsI
       // eslint-disable-next-line no-await-in-loop
       const finalMentorSessionId = await getMentorSessionId(allottedMentorId, date, slotsInInput, courseId);
       const index = possibleDates.indexOf(date);
-      createBatchSession(batchId, date, filteredSlots, topics[index].id, finalMentorSessionId);
+      createBatchSession(batchId, date, filteredSlots, topics[index].id, finalMentorSessionId, courseId);
     }
   } else {
     for (let i = 0; i < possibleSessionCount; i += 1) {
       // eslint-disable-next-line no-await-in-loop
       const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId);
-      createBatchSession(batchId, possibleDates[i].toISOString(), filteredSlots, topics[i].id, finalMentorSessionId);
+      createBatchSession(batchId, possibleDates[i].toISOString(), filteredSlots, topics[i].id, finalMentorSessionId, courseId);
     }
   }
 
@@ -175,7 +175,7 @@ const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filt
     const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId);
     /* eslint-disable array-callback-return */
     const date = possibleDates[i].toISOString();
-    updateBatchSession(session.id, filteredSlotsString, date, finalMentorSessionId);
+    updateBatchSession(session.id, filteredSlotsString, date, finalMentorSessionId, courseId);
     i += 1;
   }
 };
@@ -216,7 +216,7 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
   */
   if (timeTableRule) {
     // topic count
-    let topics = await getTopics();
+    let topics = await getTopics(courseId);
     const topicCount = topics && topics.length;
     // batch sessions
     const batchSessions = await getBatchSessions(batchId);

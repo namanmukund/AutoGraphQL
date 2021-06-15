@@ -46,7 +46,7 @@ const addBatchCurrentComponentStatus = (
 */
 const addBatchPostHookMethod = async (input) => {
   const { id: batchId } = input;
-  let courseId = get(input, 'input.course.typeId');
+  let courseId = get(input, 'course.typeId');
   /*
     logic to add current batch component status
     the first published topic will get populated in the document
