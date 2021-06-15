@@ -242,7 +242,7 @@ const addB2B2CBatchSession = async (batchId, mentorSessionConnectId, firstTopicI
         batchConnectId: "${batchId}",
         topicConnectId: "${firstTopicId}",
         mentorSessionConnectId:"${mentorSessionConnectId}",
-        courseConnectId:"${courseId}",) {
+        ${courseId ? `courseConnectId: "${courseId}"` : ''}) {
         id
       }
     }
@@ -419,7 +419,7 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
     logic to add batch Session
     the first published topic will get populated in the document
     */
-  const topic = await getFirstTopicAndLearningObjective();
+  const topic = await getFirstTopicAndLearningObjective('', courseId);
   const firstTopicId = get(topic, 'data.topics[0].id');
 
   if (timeTableRules && timeTableRules.length) {

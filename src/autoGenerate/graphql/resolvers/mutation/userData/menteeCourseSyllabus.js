@@ -37,7 +37,7 @@ const isTopicAccessible = (enrollmentType, isTopicFree) => {
 };
 
 // return mentor object in the defined format
-/* const getMentorData = (allottedMentor) => {
+const getMentorData = (allottedMentor) => {
   const { name, profilePic, mentorProfile } = allottedMentor;
   const mentor = { name, profilePic };
   if (mentorProfile) {
@@ -83,7 +83,7 @@ const isTopicAccessible = (enrollmentType, isTopicFree) => {
     mentor.averageRating = totalRatingUsers ? Math.round(((cumulativeRating.length * 100) / totalRatingUsers) * 100) / 100 : 0;
   }
   return mentor;
-}; */
+};
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = (userId, courseId) => `
@@ -152,6 +152,29 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
           batch{
             id
             type
+            course{
+              id
+            }
+            allottedMentor{
+              name
+              profilePic{
+                id
+                uri
+                name
+              }
+              mentorProfile{
+                description
+                pythonCourseRating5
+                pythonCourseRating4
+                pythonCourseRating3
+                pythonCourseRating2
+                pythonCourseRating1
+                gitHubLink
+                linkedInLink
+                portfolioLink
+                experienceYear
+              }
+            }
             currentComponent{
               currentCourse{
                 id
@@ -419,86 +442,86 @@ const getBatchSessions = (batchId, courseId) => `
 //   `;
 
 // query to get mentor from salesOperation
-// const getAllottedMentorQuery = (userId, courseId) => `
-//   query{
-//     salesOperations(filter:{
-//           and:[
-//         {
-//           client_some:{
-//             id:"${userId}"
-//           }
-//         }
-//         ${courseId ? `{course_some:{
-//           ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
-//         }}` : ''}
-//       ]
-//     }){
-//       allottedMentor{
-//         name
-//         profilePic{
-//           id
-//           uri
-//           name
-//         }
-//         mentorProfile{
-//           description
-//           pythonCourseRating5
-//           pythonCourseRating4
-//           pythonCourseRating3
-//           pythonCourseRating2
-//           pythonCourseRating1
-//           gitHubLink
-//           linkedInLink
-//           portfolioLink
-//           experienceYear
-//         }
-//       }
-//     }
-//   }
-//   `;
+const getAllottedMentorQuery = (userId, courseId) => `
+  query{
+    salesOperations(filter:{
+          and:[
+        {
+          client_some:{
+            id:"${userId}"
+          }
+        }
+        ${courseId ? `{course_some:{
+          ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
+        }}` : ''}
+      ]
+    }){
+      allottedMentor{
+        name
+        profilePic{
+          id
+          uri
+          name
+        }
+        mentorProfile{
+          description
+          pythonCourseRating5
+          pythonCourseRating4
+          pythonCourseRating3
+          pythonCourseRating2
+          pythonCourseRating1
+          gitHubLink
+          linkedInLink
+          portfolioLink
+          experienceYear
+        }
+      }
+    }
+  }
+  `;
 
 // query to get mentor from MMS
-// const allottedMentorFromMMSQuery = (userId, courseId) => `
-//   query{
-//     mentorMenteeSessions(filter:{
-//       and:[
-//         {
-//           menteeSession_some:{
-//             user_some:{
-//               id: "${userId}"
-//             }
-//           }
-//         }
-//         ${courseId ? `{course_some:{
-//           ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
-//         }}` : ''}
-//       ]
-//     }){
-//       mentorSession{
-//         user{
-//           name
-//           profilePic{
-//             id
-//             uri
-//             name
-//           }
-//           mentorProfile{
-//             description
-//             pythonCourseRating5
-//             pythonCourseRating4
-//             pythonCourseRating3
-//             pythonCourseRating2
-//             pythonCourseRating1
-//             gitHubLink
-//             linkedInLink
-//             portfolioLink
-//             experienceYear
-//           }
-//         }
-//       }
-//     }
-//   }
-//   `;
+const allottedMentorFromMMSQuery = (userId, courseId) => `
+  query{
+    mentorMenteeSessions(filter:{
+      and:[
+        {
+          menteeSession_some:{
+            user_some:{
+              id: "${userId}"
+            }
+          }
+        }
+        ${courseId ? `{course_some:{
+          ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
+        }}` : ''}
+      ]
+    }){
+      mentorSession{
+        user{
+          name
+          profilePic{
+            id
+            uri
+            name
+          }
+          mentorProfile{
+            description
+            pythonCourseRating5
+            pythonCourseRating4
+            pythonCourseRating3
+            pythonCourseRating2
+            pythonCourseRating1
+            gitHubLink
+            linkedInLink
+            portfolioLink
+            experienceYear
+          }
+        }
+      }
+    }
+  }
+  `;
 
 /*
 This is called when mentee tries to load homepage
@@ -540,7 +563,7 @@ const menteeCourseSyllabusMutationResolver = async (
   let projectCount = 0;
   let practiceCount = 0;
   // const projects = [];
-  // const mentorData = {};
+  let mentorData = {};
 
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
@@ -563,10 +586,10 @@ const menteeCourseSyllabusMutationResolver = async (
 
     if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId) {
       batchCurrentComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0].user.studentProfile.batch.currentComponent');
-      // const allottedMentor = get(res, 'data.user.studentProfile.batch.allottedMentor');
-      // if (allottedMentor && allottedMentor.name) {
-      //   mentorData = getMentorData(allottedMentor);
-      // }
+      const allottedMentor = get(res, 'data.userCurrentTopicComponentStatuses[0].user.studentProfile.batch.allottedMentor');
+      if (allottedMentor && allottedMentor.name) {
+        mentorData = getMentorData(allottedMentor);
+      }
     }
 
     // menteeSessions and mentorMenteeSessions will be called if user is not from batch
@@ -583,21 +606,21 @@ const menteeCourseSyllabusMutationResolver = async (
       mentorMenteeSessions = get(getMentorMenteeSessionsRes, 'data.mentorMenteeSessions');
       // currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
 
-      // if (mentorMenteeSessions && mentorMenteeSessions.length) {
-      //   const allottedMentorQueryRes = await callLocalGraphqlApi(getAllottedMentorQuery(userId, courseId));
-      //   const allottedMentor = get(allottedMentorQueryRes, 'data.salesOperations[0].allottedMentor', '');
-      //   if (allottedMentor && allottedMentor.name) {
-      //     mentorData = getMentorData(allottedMentor);
-      //   }
-      // }
+      if (mentorMenteeSessions && mentorMenteeSessions.length) {
+        const allottedMentorQueryRes = await callLocalGraphqlApi(getAllottedMentorQuery(userId, courseId));
+        const allottedMentor = get(allottedMentorQueryRes, 'data.salesOperations[0].allottedMentor', '');
+        if (allottedMentor && allottedMentor.name) {
+          mentorData = getMentorData(allottedMentor);
+        }
+      }
 
-      // if (!mentorData.name) {
-      //   const allottedMentorFromMMSQueryRes = await callLocalGraphqlApi(allottedMentorFromMMSQuery(userId, courseId));
-      //   const allottedMentor = get(allottedMentorFromMMSQueryRes, 'data.mentorMenteeSessions[0].mentorSession.user');
-      //   if (allottedMentor && allottedMentor.name) {
-      //     mentorData = getMentorData(allottedMentor);
-      //   }
-      // }
+      if (!mentorData.name) {
+        const allottedMentorFromMMSQueryRes = await callLocalGraphqlApi(allottedMentorFromMMSQuery(userId, courseId));
+        const allottedMentor = get(allottedMentorFromMMSQueryRes, 'data.mentorMenteeSessions[0].mentorSession.user');
+        if (allottedMentor && allottedMentor.name) {
+          mentorData = getMentorData(allottedMentor);
+        }
+      }
     }
   /*
   If user is not logged in and asking for course syllabus then we will not add
@@ -702,65 +725,52 @@ const menteeCourseSyllabusMutationResolver = async (
         const isAccessible = isTopicAccessible(enrollmentType, isTrial);
         // checking logic for topics which are yet not booked by mentee
         if (
-          topicOrder > lastTopicBookedOrder
+          topicOrder >= lastTopicBookedOrder
         ) {
-          const upComingMenteeSession = {
-            topicId,
-            topicOrder,
-            topicTitle,
-            topicThumbnail,
-            topicThumbnailSmall,
-            topicDescription,
-            isAccessible,
-            chapterId,
-            chapterTitle,
-            chapterOrder,
-          };
-          upComingSession.push(upComingMenteeSession);
-        } else if (topicOrder === lastTopicBookedOrder) {
-          if (lastTopicSessionStatus === sessionStatus.completed) {
-            const completedMenteeSession = {
-              topicId,
-              topicOrder,
-              topicTitle,
-              topicThumbnail,
-              topicThumbnailSmall,
-              topicDescription,
-              isAccessible,
-              chapterId,
-              chapterTitle,
-              chapterOrder,
-            };
-            completedSession.push(completedMenteeSession);
-          } else {
-            // iterating over each of batchSessions to send sessions that are already booked and not yet completed by mentee
-            if (batchSessions && batchSessions.length) {
-              batchSessions.forEach((batchSession) => {
-                let slotTime = null;
-                const {
-                  bookingDate,
-                } = batchSession;
-                const {
-                  order: batchSessionTopicOrder,
-                  id: batchSessionTopicId,
-                  title: batchSessionTopicTitle,
-                  description: batchSessionTopicDescription,
-                  thumbnail: batchSessionTopicThumbnail,
-                  thumbnailSmall: batchSessionTopicThumbnailSmall,
-                  isTrial: batchSessionIsTrial,
-                } = batchSession.topic;
+          let isUpcomingSession = true;
+          if (batchSessions && batchSessions.length) {
+            batchSessions.forEach((batchSession) => {
+              let slotTime = null;
+              const {
+                bookingDate,
+              } = batchSession;
+              const {
+                order: batchSessionTopicOrder,
+                id: batchSessionTopicId,
+                title: batchSessionTopicTitle,
+                description: batchSessionTopicDescription,
+                thumbnail: batchSessionTopicThumbnail,
+                thumbnailSmall: batchSessionTopicThumbnailSmall,
+                isTrial: batchSessionIsTrial,
+              } = batchSession.topic;
 
-                const isBatchTopicAccessible = isTopicAccessible(enrollmentType, batchSessionIsTrial);
+              const isBatchTopicAccessible = isTopicAccessible(enrollmentType, batchSessionIsTrial);
 
-                slotTimes.forEach((time, index) => {
-                  if (batchSession[time]) {
-                    slotTime = index;
-                  }
-                });
-                // checking logic if topic is already consumed or yet to be watched
-                if (
-                  batchSessionTopicOrder === lastTopicBookedOrder
-                ) {
+              slotTimes.forEach((time, index) => {
+                if (batchSession[time]) {
+                  slotTime = index;
+                }
+              });
+              // checking logic if topic is already consumed or yet to be watched
+              if (
+                topicId === batchSessionTopicId
+              ) {
+                if (topicOrder === lastTopicBookedOrder && lastTopicSessionStatus === sessionStatus.completed) {
+                  const completedMenteeSession = {
+                    topicId,
+                    topicOrder,
+                    topicTitle,
+                    topicThumbnail,
+                    topicThumbnailSmall,
+                    topicDescription,
+                    isAccessible,
+                    chapterId,
+                    chapterTitle,
+                    chapterOrder,
+                  };
+                  completedSession.push(completedMenteeSession);
+                  isUpcomingSession = false;
+                } else {
                   const bookedMenteeSession = {
                     topicId: batchSessionTopicId,
                     topicOrder: batchSessionTopicOrder,
@@ -776,26 +786,41 @@ const menteeCourseSyllabusMutationResolver = async (
                     chapterOrder,
                   };
                   bookedSession.push(bookedMenteeSession);
+                  isUpcomingSession = false;
                 }
-              });
-            }
-
-            if (bookedSession && !bookedSession.length) {
-              const upComingMenteeSession = {
-                topicId,
-                topicOrder,
-                topicTitle,
-                topicThumbnail,
-                topicThumbnailSmall,
-                topicDescription,
-                isAccessible,
-                chapterId,
-                chapterTitle,
-                chapterOrder,
-              };
-              upComingSession.push(upComingMenteeSession);
-            }
+              }
+            });
           }
+
+          if (isUpcomingSession) {
+            const upComingMenteeSession = {
+              topicId,
+              topicOrder,
+              topicTitle,
+              topicThumbnail,
+              topicThumbnailSmall,
+              topicDescription,
+              isAccessible,
+              chapterId,
+              chapterTitle,
+              chapterOrder,
+            };
+            upComingSession.push(upComingMenteeSession);
+          }
+
+          // const upComingMenteeSession = {
+          //   topicId,
+          //   topicOrder,
+          //   topicTitle,
+          //   topicThumbnail,
+          //   topicThumbnailSmall,
+          //   topicDescription,
+          //   isAccessible,
+          //   chapterId,
+          //   chapterTitle,
+          //   chapterOrder,
+          // };
+          // upComingSession.push(upComingMenteeSession);
         } else {
           const completedMenteeSession = {
             topicId,
@@ -1009,7 +1034,7 @@ const menteeCourseSyllabusMutationResolver = async (
     // skills,
     course: courseData,
     // projects,
-    // mentor: mentorData,
+    mentor: mentorData,
   });
 
   return currentUserSyllabus;
