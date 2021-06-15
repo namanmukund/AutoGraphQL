@@ -297,7 +297,7 @@ const userTopicJourneyMutationResolver = async (
 
   const batchCurrentComponentCourseId = get(batchRes, 'data.user.studentProfile.batch.currentComponent.currentCourse.id');
   let batchCurrentComponentInfo;
-  if (batchCurrentComponentCourseId === courseId) {
+  if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId) {
     batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
   }
 
