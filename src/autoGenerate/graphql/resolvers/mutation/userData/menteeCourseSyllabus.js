@@ -606,7 +606,7 @@ const menteeCourseSyllabusMutationResolver = async (
   } else {
     const topic = await getFirstTopicAndLearningObjective('userCourseSyllabus', courseId);
     const firstTopic = get(topic, 'data.topics[0]');
-    const firstLearningObjective = get(topic, 'data.topics[0].learningObjectives[0]');
+    // const firstLearningObjective = get(topic, 'data.topics[0].learningObjectives[0]');
     if (!firstTopic) {
       throw new DatabaseRecordNotFoundError({
         data: {
