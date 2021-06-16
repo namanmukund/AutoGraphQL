@@ -66,7 +66,7 @@ const updateUserBlockBasedPracticeMutation = (userBlockBasedPracticeId,
   answerLink) => `
   mutation{
     updateUserBlockBasedPractice(id:"${userBlockBasedPracticeId}",  input:{
-      ${answerLink ? `answerLink: ${answerLink}` : ''}
+      ${answerLink ? `answerLink: "${answerLink}"` : ''}
       status: ${blockBasedPracticeStatus}
     }){
       id
@@ -102,8 +102,10 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
   const {
     id: userBlockBasedPracticeId,
     status: existingBlockBasedPracticeStatus,
-    answerLink,
   } = userBlockBasedPracticeInfo;
+  const {
+    answerLink,
+  } = input;
   const topicComponentRule = get(userBlockBasedPracticeInfo, 'topic.topicComponentRule', []);
   const topicOrder = get(userBlockBasedPracticeInfo, 'topic.order');
   const { complete, incomplete, skip: skipStatus } = userTopicTypeStatus;
