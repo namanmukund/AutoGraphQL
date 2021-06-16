@@ -29,6 +29,7 @@ const Badge = `
     topic: Topic! @relation(name: "TopicBadge")
     unlockPoint: CurrentTopicComponentType!
     status: ContentStatus! @defaultValue(value: "unpublished")
+    courses: [Course] @relation(name: "CourseBadge")
   }
 `;
 

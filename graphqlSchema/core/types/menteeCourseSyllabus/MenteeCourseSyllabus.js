@@ -1,5 +1,8 @@
 const sessionDetailType = `
   type SessionDetailType {
+   chapterId: ID
+   chapterOrder: Int
+   chapterTitle: String
    topicId: ID
    topicTitle: String
    topicThumbnail: File
@@ -13,6 +16,9 @@ const sessionDetailType = `
 
 const completedSessionDetailType = `
   type CompletedSessionDetailType {
+   chapterId: ID
+   chapterOrder: Int
+   chapterTitle: String
    topicId: ID
    topicTitle: String
    topicThumbnail: File
@@ -20,6 +26,48 @@ const completedSessionDetailType = `
    topicDescription: String
    topicOrder: Int
    endingDate: Date
+ }`;
+
+const menteeCourseSyllabusSkills = `
+  type MenteeCourseSyllabusSkills {
+   name: String
+   order: Int
+   description: String
+   image: File @relation(name: "UserBadgeImage", direction: "OneWay")
+   isUnlocked: Boolean @defaultValue(value: "false")
+   unlockPoint: CurrentTopicComponentType!
+ }`;
+
+const menteeCourseSyllabusCourse = `
+  type MenteeCourseSyllabusCourse {
+   title: String
+   description: String
+   badgeDescription: String
+   chapterCount: Int
+   topicCount: Int
+   projectCount: Int
+   practiceCount: Int
+   courseCompletionPercentage: Float
+ }`;
+
+const menteeCourseSyllabusMentor = `
+  type MenteeCourseSyllabusMentor {
+   id: ID
+   name: String
+   description: String
+   averageRating: Float
+   experienceYear: Int
+   gitHubLink: String
+   linkedInLink: String
+   portfolioLink: String
+   profilePic: File
+ }`;
+
+const menteeCourseSyllabusProject = `
+  type MenteeCourseSyllabusProject {
+   title: String
+   projectThumbnail: File
+   tags: [ContentTag]
  }`;
 
 const MenteeCourseSyllabus = `
@@ -30,7 +78,11 @@ const MenteeCourseSyllabus = `
     totalChapters: Int
     totalTopics: Int
     isPaid: Boolean @defaultValue(value: "false")
+    course: MenteeCourseSyllabusCourse
+    skills: [MenteeCourseSyllabusSkills]
+    mentor: MenteeCourseSyllabusMentor
+    projects: [MenteeCourseSyllabusProject]
   }
 `;
 
-export default [MenteeCourseSyllabus, sessionDetailType, completedSessionDetailType];
+export default [MenteeCourseSyllabus, sessionDetailType, completedSessionDetailType, menteeCourseSyllabusCourse, menteeCourseSyllabusSkills, menteeCourseSyllabusMentor, menteeCourseSyllabusProject];

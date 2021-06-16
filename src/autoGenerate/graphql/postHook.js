@@ -50,6 +50,13 @@ import updateBatchPostHookMethod from './postHookFunctions/updateBatchPostHookMe
 import updateCampaignPostHookMethod from './postHookFunctions/updateCampaignPostHookMethod';
 import addStudentProfilePostHookMethod from './postHookFunctions/addStudentProfilePostHookMethod';
 import removeFromBatchStudentProfilePosthookMethod from './postHookFunctions/removeFromBatchStudentProfile';
+import addUserActivityComicStripDumpPostHookMethod from './postHookFunctions/addUserActivityComicStripDumpPostHookMethod';
+import userBlockBasedProjectPostHookMethod from './postHookFunctions/userBlockBasedProjectPostHookMethod';
+import userBlockBasedPracticePostHookMethod from './postHookFunctions/userBlockBasedPracticePostHookMethod';
+import addUserActivityBlockBasedPracticeDumpPostHookMethod
+  from './postHookFunctions/addUserActivityBlockBasedPracticeDumpPostHookMethod';
+import addUserActivityBlockBasedProjectDumpPostHookMethod
+  from './postHookFunctions/addUserActivityBlockBasedProjectDumpPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -245,6 +252,26 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'removeFromBatchStudentProfile': {
       await removeFromBatchStudentProfilePosthookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'addUserActivityComicStripDump': {
+      await addUserActivityComicStripDumpPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'userBlockBasedProject': {
+      const resultArray = await userBlockBasedProjectPostHookMethod(input, params);
+      return hook(resultArray, mutationName, 'PostHook');
+    }
+    case 'userBlockBasedPractice': {
+      const resultArray = await userBlockBasedPracticePostHookMethod(input, params);
+      return hook(resultArray, mutationName, 'PostHook');
+    }
+    case 'addUserActivityBlockBasedPracticeDump': {
+      await addUserActivityBlockBasedPracticeDumpPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'addUserActivityBlockBasedProjectDump': {
+      await addUserActivityBlockBasedProjectDumpPostHookMethod(input, mutationName, context);
       break;
     }
     default:

@@ -12,6 +12,7 @@ const UserActivityAssignmentDump = `
     assignmentQuestions: [AssignmentQuestionsType]
     assignmentAction: UserActionType
     topic: Topic @relation(name: "TopicUserActivityAssignmentDump", direction: "OneWay")
+    course: Course @relation(name: "UserActivityAssignmentDumpCourse", direction: "OneWay")
   }
 `;
 

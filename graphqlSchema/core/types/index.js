@@ -92,6 +92,15 @@ import RescheduledSlot from './rescheduledSlot';
 import GetCampaignSlots from './getCampaignSlots';
 import BookB2B2CSlotsInput from './bookB2B2CSlotsInput';
 import StudentCurrentStatus from './studentCurrentStatus';
+import Video from './video';
+import ComicStrip from './comicStrip';
+import BlockBasedProject from './blockBasedProject';
+import UserActivityBlockBasedPracticeDump from './userActivityBlockBasedPracticeDump';
+import UserActivityComicStripDump from './userActivityComicStripDump';
+import UserBlockBasedPractice from './userBlockBasedPractice';
+import UserBlockBasedProject from './userBlockBasedProject';
+import UserActivityBlockBasedProjectDump from './userActivityBlockBasedProjectDump';
+import ComicImage from './comicImage';
 
 export default [
   ...User,
@@ -188,4 +197,13 @@ export default [
   ...GetCampaignSlots,
   ...BookB2B2CSlotsInput,
   ...StudentCurrentStatus,
+  ...Video,
+  ...ComicStrip,
+  ...BlockBasedProject,
+  ...UserActivityComicStripDump,
+  ...UserActivityBlockBasedPracticeDump,
+  ...UserBlockBasedPractice,
+  ...UserActivityBlockBasedProjectDump,
+  ...UserBlockBasedProject,
+  ...ComicImage,
 ];

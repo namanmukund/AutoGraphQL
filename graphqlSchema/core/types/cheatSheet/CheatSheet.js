@@ -27,6 +27,7 @@ const CheatSheet = `
     content: [CheatSheetContent] @relation(name: "CheatSheetContent", isSubset: true)
     status: ContentStatus! @defaultValue(value: "unpublished")
     tags: [ContentTag] @relation(name: "CheatSheetContentTag")
+    course: Course @relation(name: "CheatSheetCourse", direction: "OneWay")
   }
 `;
 

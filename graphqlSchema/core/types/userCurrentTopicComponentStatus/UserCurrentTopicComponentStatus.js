@@ -21,6 +21,8 @@ const UserCurrentTopicComponentStatus = `
     currentLearningObjective: LearningObjective @relation(name: "UserCurrentTopicComponentStatusLearningObjective", direction: "OneWay")
     currentPracticeQuestion: QuestionBank @relation(name: "UserCurrentTopicComponentStatusQuestionBank", direction: "OneWay")
     currentTopicComponentType: CurrentTopicComponentType!
+    currentVideo: Video @relation(name: "UserCurrentTopicComponentStatusVideo", direction: "OneWay")
+    currentBlockBasedProject: BlockBasedProject @relation(name: "UserCurrentTopicComponentStatusBlockBasedProject", direction: "OneWay")
     skillsLevel: SkillsLevel @defaultValue(value: "easy")
   }
 `;

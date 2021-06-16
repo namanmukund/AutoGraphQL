@@ -1,7 +1,6 @@
-import bcrypt from 'bcryptjs';
 import { validateUsername } from '../../validation';
 import { commonUserValidation } from './utils';
-import authParams from '../../../../../config/authParams';
+import getUserPasswordObject from '../../resolvers/mutation/user/utils/getUserPasswordObject';
 
 const updateUserValidation = async (params) => {
   const { input } = params;
@@ -17,15 +16,12 @@ const updateUserValidation = async (params) => {
   if (username) {
     validateUsername(username);
   }
-  /*
-@TODO change this code implementation: NM
- */
+
   if (password) {
-    const hashedPwd = bcrypt.hashSync(password, authParams.SALT);
-    userObj.password = hashedPwd;
-    userObj.savedPassword = password;
-    userObj.isSetPassword = true;
+    const passwordObj = getUserPasswordObject(password, false);
+    Object.assign(userObj, passwordObj);
   }
+
   return userObj;
 };
 

@@ -65,6 +65,7 @@ const SalesOperation = `
 
 ${getPermissionSchemaString('SalesOperation')}
    {
+    course: Course @relation(name: "SalesOperationCourse", direction: "OneWay")
     userVerificationStatus: SalesTeamStatus @defaultValue(value: "pending")
     userResponseStatus: UserBehaviourStatus @defaultValue(value: "pending")
     overallFeedback: String
@@ -83,6 +84,7 @@ ${getPermissionSchemaString('SalesOperation')}
     ${mentorPitch}
     ${studentPersonna}
     ${userPaymentPlan}
+    sessionCommentByMentor: String
   }
 `;
 

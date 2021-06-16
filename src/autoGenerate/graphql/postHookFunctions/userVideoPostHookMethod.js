@@ -1,6 +1,7 @@
 import { get } from 'lodash';
 import {
-  PUBLISHED,
+  OLD_COURSE_ID,
+  PUBLISHED, topicTypes,
   userTopicTypeStatus,
 } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
@@ -14,12 +15,20 @@ const topicQuery = (topicId) => `
     topic(id:"${topicId}"){
       id
       order
+      topicComponentRule{
+        componentName
+        order
+        video{
+          id
+        }
+      }
       learningObjectives(filter:{
         status: ${PUBLISHED}
         }
         orderBy: order_ASC
       ){
         id
+        order
       }
     }
   }
@@ -30,11 +39,15 @@ const addUserVideoMutation = (
   userId,
   topicId,
   restQuery,
+  courseId,
+  videoId,
 ) => `
   mutation{
     addUserVideo(
     userConnectId:"${userId}"
     topicConnectId:"${topicId}"
+    ${courseId ? `courseConnectId:"${courseId}"` : ''}
+    ${videoId ? `videoConnectId:"${videoId}"` : ''}
     input:{
         status: ${userTopicTypeStatus.incomplete}
         ${restQuery}
@@ -73,6 +86,7 @@ const userVideoPostHookMethod = async (input, params) => {
   returning input in that case
   if it is not already present, we will add a new document with default data
   */
+  let restQuery = '';
   if (input && input.length) {
     return input;
   }
@@ -80,7 +94,11 @@ const userVideoPostHookMethod = async (input, params) => {
   const {
     userId,
     topicId,
+    courseId,
+    videoId,
   } = getInfoFromParams(params, 'video');
+  let finalVideoId = videoId;
+
   // In case there is no topic id, empty data will be sent
   if (!topicId) {
     return resultArray;
@@ -92,13 +110,27 @@ const userVideoPostHookMethod = async (input, params) => {
   const topicQueryRes = await callLocalGraphqlApi(topicQuery(topicId));
   const topicInfo = get(topicQueryRes, 'data.topic');
   const learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
+  const topicComponentRule = get(topicInfo, 'topicComponentRule');
+  if (!finalVideoId && topicComponentRule && topicComponentRule.length > 0) {
+    const {
+      video,
+    } = topicTypes;
+    const sortedTopicComponentRule = topicComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
+    sortedTopicComponentRule.forEach((topicComponent) => {
+      if (topicComponent.componentName === video && !finalVideoId) {
+        finalVideoId = topicComponent.video && topicComponent.video.id;
+      }
+    });
+  }
 
   // next component will be chat of first published LO
-  const restQuery = getNextComponent(
-    learningObjectiveConnectId,
-    '',
-    'video',
-  );
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
+    restQuery = getNextComponent(
+      learningObjectiveConnectId,
+      '',
+      'video',
+    );
+  }
   /*
     adding addUserVideo document on the basis of
     restQuery(next component data), rest data will take default values from schema
@@ -107,6 +139,8 @@ const userVideoPostHookMethod = async (input, params) => {
     userId,
     topicId,
     restQuery,
+    courseId,
+    finalVideoId,
   ));
   if (result) {
     /*

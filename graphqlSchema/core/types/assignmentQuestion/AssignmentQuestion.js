@@ -29,6 +29,7 @@ const AssignmentQuestion = `
     explanation: String @trim
     topic: Topic! @relation(name: "TopicAssignmentQuestion")
     status: ContentStatus! @defaultValue(value: "unpublished")
+    courses: [Course] @relation(name: "CourseAssignmentQuestion", direction: "OneWay")
   }
 `;
 export default AssignmentQuestion;

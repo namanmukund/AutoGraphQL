@@ -25,7 +25,7 @@ const getUserCurrentTopicComponentStatus = (userId) => `
       {currentCourse_some:{
         and:[
           {status: ${PUBLISHED}},
-          {title: ${GLOBAL_COURSE_TITLE}}
+          {title: "${GLOBAL_COURSE_TITLE}"}
         ]
       }}
       ]
@@ -99,7 +99,7 @@ const getCourseQuery = () => `
     query{
       courses(filter:{
         and:[
-          {title: ${GLOBAL_COURSE_TITLE}},
+          {title: "${GLOBAL_COURSE_TITLE}"},
           {status: ${PUBLISHED}}
         ]
       }){

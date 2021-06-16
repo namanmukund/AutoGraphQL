@@ -15,7 +15,7 @@ const getCourseQuery = () => `
     query{
       courses(filter:{
         and:[
-          {title: ${GLOBAL_COURSE_TITLE}},
+          {title: "${GLOBAL_COURSE_TITLE}"},
           {status: ${PUBLISHED}}
         ]
       }){

@@ -22,7 +22,7 @@ const Chapter = `
     @subscribe(events: "*")
    {  
     order: Int!
-    title: String! @unique @trim
+    title: String! @trim
     description: String @uniqueOrEmpty @trim
     status: ContentStatus! @defaultValue(value: "unpublished")
     topics: [Topic] @relation(name: "ChapterTopic", isSubset: true)
