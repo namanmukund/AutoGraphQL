@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import {
   OLD_COURSE_ID,
-  PUBLISHED,
+  PUBLISHED, topicTypes,
   userTopicTypeStatus,
 } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
@@ -15,6 +15,13 @@ const topicQuery = (topicId) => `
     topic(id:"${topicId}"){
       id
       order
+      topicComponentRule{
+        componentName
+        order
+        video{
+          id
+        }
+      }
       learningObjectives(filter:{
         status: ${PUBLISHED}
         }
@@ -90,6 +97,8 @@ const userVideoPostHookMethod = async (input, params) => {
     courseId,
     videoId,
   } = getInfoFromParams(params, 'video');
+  let finalVideoId = videoId;
+
   // In case there is no topic id, empty data will be sent
   if (!topicId) {
     return resultArray;
@@ -101,6 +110,18 @@ const userVideoPostHookMethod = async (input, params) => {
   const topicQueryRes = await callLocalGraphqlApi(topicQuery(topicId));
   const topicInfo = get(topicQueryRes, 'data.topic');
   const learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
+  const topicComponentRule = get(topicInfo, 'topicComponentRule');
+  if (!finalVideoId && topicComponentRule && topicComponentRule.length > 0) {
+    const {
+      video,
+    } = topicTypes;
+    const sortedTopicComponentRule = topicComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
+    sortedTopicComponentRule.forEach((topicComponent) => {
+      if (topicComponent.componentName === video && !finalVideoId) {
+        finalVideoId = topicComponent.video && topicComponent.video.id;
+      }
+    });
+  }
 
   // next component will be chat of first published LO
   if (!courseId || (courseId === OLD_COURSE_ID)) {
@@ -119,7 +140,7 @@ const userVideoPostHookMethod = async (input, params) => {
     topicId,
     restQuery,
     courseId,
-    videoId,
+    finalVideoId,
   ));
   if (result) {
     /*
