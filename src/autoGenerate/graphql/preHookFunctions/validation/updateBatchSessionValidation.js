@@ -26,6 +26,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     batch,
     topic,
     bookingDate,
+    course,
     mentorSession,
     ...slots
   } = batchSession;
@@ -42,6 +43,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   context.inputSlotTimeArray = inputSlotTimeArray;
   const allottedMentorId = batch && batch.allottedMentor && batch.allottedMentor.id;
   context.allottedMentorId = allottedMentorId;
+  context.courseId = course && course.id;
 
   // we are doing this to handle cases where we make timetable for school without the topic being attached
   // so whenever these sessions get started we need topicId in this mutation as mandatory field

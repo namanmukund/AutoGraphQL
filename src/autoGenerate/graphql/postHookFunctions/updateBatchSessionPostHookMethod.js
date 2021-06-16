@@ -56,11 +56,20 @@ const getBatchQuery = (batchId) => `
   `;
 
 // query to get published topic list
-const nextTopicQuery = () => `
+const nextTopicQuery = (courseId) => `
   query{
   topics(
     filter:{
-      status: ${PUBLISHED}
+      and:[
+        {
+          status: ${PUBLISHED}
+        }
+        {
+          courses_some:{
+            ${courseId ? `id: "${courseId}"` : `title: "${GLOBAL_COURSE_TITLE}"`}
+          }
+        }
+      ]
     }
     orderBy:order_ASC,
   ){
@@ -157,20 +166,22 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     bookingDateFromInput,
     allottedMentorId,
   } = context;
-  // console.log(JSON.stringify(input, null, 2));
+  let courseId = get(context, 'courseId');
   /*
 get Course Id
 */
-  const courseResult = await callLocalGraphqlApi(getCourseQuery());
-  const course = get(courseResult, 'data.courses');
-  if (course.length <= 0) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'Published course is not present with title as python from component addBatchPostHookMethod',
-      },
-    });
+  if (!courseId) {
+    const courseResult = await callLocalGraphqlApi(getCourseQuery());
+    const course = get(courseResult, 'data.courses');
+    if (course.length <= 0) {
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'Published course is not present with title as python from component addBatchPostHookMethod',
+        },
+      });
+    }
+    courseId = course[0].id;
   }
-  const { id: courseId } = course[0];
 
   // if mentorSessionConnectId is not present in batch session, then we need t create mentor session on basis of
   // allotted mentor in batch
@@ -218,7 +229,6 @@ get Course Id
     const currentComponent = batchInfo && batchInfo.currentComponent;
     const batchCurrentComponentId = currentComponent && currentComponent.id;
     const currentComponentTopicId = get(currentComponent, 'currentTopic.id');
-
     // logic to change current component status if topic is completed
     if (batchCurrentComponentId && sessionStatusFromInput && topicId === currentComponentTopicId) {
       if (sessionStatusFromInput === sessionStatus.completed) {
@@ -226,7 +236,8 @@ get Course Id
         We are getting published topics list through this query.
         Then we will get next published topic
         */
-        const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery());
+
+        const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
         const topicsList = get(nextTopicQueryRes, 'data.topics');
 
         let currentTopicIndex;
