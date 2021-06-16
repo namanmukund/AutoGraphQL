@@ -54,12 +54,16 @@ const getMentorData = (allottedMentor) => {
       pythonCourseRating3,
       pythonCourseRating2,
       pythonCourseRating1,
+      sessionLink,
+      googleMeetLink,
     } = mentorProfile;
     mentor.experienceYear = experienceYear;
     mentor.description = description;
     mentor.linkedInLink = linkedInLink;
     mentor.portfolioLink = portfolioLink;
     mentor.gitHubLink = gitHubLink;
+    mentor.sessionLink = sessionLink;
+    mentor.googleMeetLink = googleMeetLink;
     let totalRatingUsers = 0;
     let cumulativeRating = 0;
     if (pythonCourseRating5) {
@@ -167,6 +171,8 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
               }
               mentorProfile{
                 description
+                sessionLink
+                googleMeetLink
                 pythonCourseRating5
                 pythonCourseRating4
                 pythonCourseRating3
@@ -469,6 +475,8 @@ const getAllottedMentorQuery = (userId, courseId) => `
         }
         mentorProfile{
           description
+          sessionLink
+          googleMeetLink
           pythonCourseRating5
           pythonCourseRating4
           pythonCourseRating3
@@ -512,6 +520,8 @@ const allottedMentorFromMMSQuery = (userId, courseId) => `
           }
           mentorProfile{
             description
+            sessionLink
+            googleMeetLink
             pythonCourseRating5
             pythonCourseRating4
             pythonCourseRating3

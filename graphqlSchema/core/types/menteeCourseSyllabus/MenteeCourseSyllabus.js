@@ -61,6 +61,8 @@ const menteeCourseSyllabusMentor = `
    linkedInLink: String
    portfolioLink: String
    profilePic: File
+   sessionLink: String
+   googleMeetLink: String
  }`;
 
 const menteeCourseSyllabusProject = `
