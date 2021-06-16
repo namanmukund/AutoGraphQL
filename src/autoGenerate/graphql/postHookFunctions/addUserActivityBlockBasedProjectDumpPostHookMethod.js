@@ -66,7 +66,7 @@ const updateUserBlockBasedProjectMutation = (userBlockBasedProjectId,
   answerLink) => `
   mutation{
     updateUserBlockBasedProject(id:"${userBlockBasedProjectId}",  input:{
-      ${answerLink ? `answerLink: ${answerLink}` : ''}
+      ${answerLink ? `answerLink: "${answerLink}"` : ''}
       status: ${blockBasedProjectStatus}
     }){
       id
@@ -103,8 +103,11 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
   const {
     id: userBlockBasedProjectId,
     status: existingBlockBasedProjectStatus,
-    answerLink,
   } = userBlockBasedProjectInfo;
+  const {
+    answerLink,
+  } = input;
+
   const topicComponentRule = get(userBlockBasedProjectInfo, 'topic.topicComponentRule', []);
   const topicOrder = get(userBlockBasedProjectInfo, 'topic.order');
   const { complete, incomplete, skip: skipStatus } = userTopicTypeStatus;
