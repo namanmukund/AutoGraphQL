@@ -38,8 +38,10 @@ const isTopicAccessible = (enrollmentType, isTopicFree) => {
 
 // return mentor object in the defined format
 const getMentorData = (allottedMentor) => {
-  const { name, profilePic, mentorProfile } = allottedMentor;
-  const mentor = { name, profilePic };
+  const {
+    id, name, profilePic, mentorProfile,
+  } = allottedMentor;
+  const mentor = { id, name, profilePic };
   if (mentorProfile) {
     const {
       description,
@@ -156,6 +158,7 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
               id
             }
             allottedMentor{
+              id
               name
               profilePic{
                 id
@@ -457,6 +460,7 @@ const getAllottedMentorQuery = (userId, courseId) => `
       ]
     }){
       allottedMentor{
+        id
         name
         profilePic{
           id
@@ -499,6 +503,7 @@ const allottedMentorFromMMSQuery = (userId, courseId) => `
     }){
       mentorSession{
         user{
+          id
           name
           profilePic{
             id
