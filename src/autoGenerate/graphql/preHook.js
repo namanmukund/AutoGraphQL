@@ -83,11 +83,18 @@ import deleteCourseValidation from './preHookFunctions/validation/deleteCourseVa
 import updateBatchValidation from './preHookFunctions/validation/updateBatchValidation';
 import updateCampaignValidation from './preHookFunctions/validation/updateCampaignValidation';
 import generateInviteCode from '../../../utils/generateInviteCode';
+import deleteBatchValidation from './preHookFunctions/validation/deleteBatchValidation';
+import addUserActivityComicStripDumpValidation from './preHookFunctions/validation/addUserActivityComicStripDumpValidation';
+import userBlockBasedPracticeValidation from './preHookFunctions/validation/userBlockBasedPracticeValidation';
+import userBlockBasedProjectValidation from './preHookFunctions/validation/userBlockBasedProjectValidation';
+import addUserActivityBlockBasedProjectDumpValidation from './preHookFunctions/validation/addUserActivityBlockBasedProjectDumpValidation';
+import addUserActivityBlockBasedPracticeDumpValidation
+  from './preHookFunctions/validation/addUserActivityBlockBasedPracticeDumpValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
     case 'updateTopic': {
-      await isUniqueOrderField(params, mutationOrQueryName);
+      // await isUniqueOrderField(params, mutationOrQueryName);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
@@ -97,10 +104,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
 
     case 'addTopic': {
-      if (!get(params, 'chapterConnectId')) {
-        throw new ConnectIdRequiredError({ data: { message: 'Chapter Id is required' } });
-      }
-      await isUniqueOrderField(params, mutationOrQueryName);
+      // if (!get(params, 'chapterConnectId')) {
+      //   throw new ConnectIdRequiredError({ data: { message: 'Chapter Id is required' } });
+      // }
+      // await isUniqueOrderField(params, mutationOrQueryName);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
@@ -108,7 +115,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       if (!get(params, 'coursesConnectIds', []).length) {
         throw new ConnectIdRequiredError({ data: { message: 'Course Id is required' } });
       }
-      await isUniqueOrderField(params, mutationOrQueryName);
+      // await isUniqueOrderField(params, mutationOrQueryName);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addUser': {
@@ -288,7 +295,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'userCourseSyllabus': {
-      await userCourseSyllabusMethod(context);
+      await userCourseSyllabusMethod(context, params);
       break;
     }
     case 'addUserActivityVideoDump': {
@@ -324,11 +331,11 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'userTopicJourney': {
-      await userCourseSyllabusMethod(context);
+      await userCourseSyllabusMethod(context, params);
       break;
     }
     case 'menteeCourseSyllabus': {
-      await userCourseSyllabusMethod(context);
+      await userCourseSyllabusMethod(context, params);
       break;
     }
     case 'userAssignment': {
@@ -405,7 +412,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'updateMentorSession': {
-      const { availabilityDate } = input;
+      const availabilityDate = get(input, 'availabilityDate', '');
       let newParams = {};
       let newInput = {};
       if (availabilityDate) {
@@ -561,26 +568,28 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'updateBatchSession': {
-      const { sessionStatus } = input;
+      const sessionStatus = get(input, 'sessionStatus', '');
       const newInput = {
         ...input,
       };
-      switch (sessionStatus) {
-        case 'allotted': {
-          newInput.sessionAllotmentDate = new Date().toISOString();
-          // temporary hack for backword compatibility
-          newInput.sessionStartDate = new Date().toISOString();
-          break;
+      if (sessionStatus) {
+        switch (sessionStatus) {
+          case 'allotted': {
+            newInput.sessionAllotmentDate = new Date().toISOString();
+            // temporary hack for backword compatibility
+            newInput.sessionStartDate = new Date().toISOString();
+            break;
+          }
+          case 'started': {
+            newInput.sessionStartDate = new Date().toISOString();
+            break;
+          }
+          case 'completed': {
+            newInput.sessionEndDate = new Date().toISOString();
+            break;
+          }
+          default:
         }
-        case 'started': {
-          newInput.sessionStartDate = new Date().toISOString();
-          break;
-        }
-        case 'completed': {
-          newInput.sessionEndDate = new Date().toISOString();
-          break;
-        }
-        default:
       }
       const newParams = {
         ...params,
@@ -684,6 +693,30 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateCampaign': {
       await updateCampaignValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'deleteBatch': {
+      await deleteBatchValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addUserActivityComicStripDump': {
+      await addUserActivityComicStripDumpValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'userBlockBasedPractice': {
+      await userBlockBasedPracticeValidation(params, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'userBlockBasedProject': {
+      await userBlockBasedProjectValidation(params, context);
+      return hook(input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addUserActivityBlockBasedProjectDump': {
+      await addUserActivityBlockBasedProjectDumpValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addUserActivityBlockBasedPracticeDump': {
+      await addUserActivityBlockBasedPracticeDumpValidation(params, mutationOrQueryName, context);
       break;
     }
     default: {

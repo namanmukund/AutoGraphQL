@@ -232,7 +232,7 @@ const updateB2BBatch = async (existingBatchId, classIds, campaignId, studentIds,
   return get(updateBatchResponse, 'data.updateBatch', {});
 };
 
-const addB2B2CBatchSession = async (batchId, mentorSessionConnectId, firstTopicId, bookingDate, selectedSlot) => {
+const addB2B2CBatchSession = async (batchId, mentorSessionConnectId, firstTopicId, bookingDate, selectedSlot, courseId) => {
   const mutation = `
     mutation{
       addBatchSession(input: {
@@ -241,7 +241,8 @@ const addB2B2CBatchSession = async (batchId, mentorSessionConnectId, firstTopicI
       },
         batchConnectId: "${batchId}",
         topicConnectId: "${firstTopicId}",
-        mentorSessionConnectId:"${mentorSessionConnectId}",) {
+        mentorSessionConnectId:"${mentorSessionConnectId}",
+        ${courseId ? `courseConnectId: "${courseId}"` : ''}) {
         id
       }
     }
@@ -418,7 +419,7 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
     logic to add batch Session
     the first published topic will get populated in the document
     */
-  const topic = await getFirstTopicAndLearningObjective();
+  const topic = await getFirstTopicAndLearningObjective('', courseId);
   const firstTopicId = get(topic, 'data.topics[0].id');
 
   if (timeTableRules && timeTableRules.length) {
@@ -487,7 +488,7 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
       // moving this to different block to avoid case of multiple batches being created
       if (batchId) {
         try {
-          await addB2B2CBatchSession(batchId, mentorSessionConnectId, firstTopicId, formattedBookingDate.toISOString(), selectedSlot);
+          await addB2B2CBatchSession(batchId, mentorSessionConnectId, firstTopicId, formattedBookingDate.toISOString(), selectedSlot, courseId);
           const slotTimeStringArray = getSelectedSlotsStringArray(slots);
           await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
         } catch (err) {

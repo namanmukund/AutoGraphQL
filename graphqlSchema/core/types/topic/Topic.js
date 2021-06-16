@@ -3,6 +3,16 @@ import { TLA, TMS, TWA } from '../../../../constants';
 import { CMS_HEAD, NOT_CMS_HEAD, SCHOOL_ADMIN } from '../../../../constants/roles';
 import { CREATED } from '../../../../constants/subscriptionEvents';
 
+const TopicComponentsRule = `
+  type TopicComponentsRule {
+   componentName: TopicComponents
+   childComponentName: ChildTopicComponents
+   order: Int
+   learningObjective: LearningObjective @relation(name: "TopicComponentLearningObjective", direction: "OneWay")
+   video: Video @relation(name: "TopicComponentVideo", direction: "OneWay")
+   blockBasedProject: BlockBasedProject @relation(name: "TopicComponentBlockBasedProject", direction: "OneWay")
+ }`;
+
 const Topic = `
   type Topic @model
   @appPermissions(
@@ -24,16 +34,15 @@ const Topic = `
   @subscribe(events: [${CREATED}])
   {
     order: Int! 
-    title: String! 
-        @unique 
+    title: String!
         @trim
     description: String @uniqueOrEmpty @trim
     status: ContentStatus! @defaultValue(value: "unpublished")
     video: File @relation(name: "TopicVideo", direction: "OneWay")
     videoTitle: String @uniqueOrEmpty @trim
     videoDescription: String @uniqueOrEmpty @trim
-    videoSubtitle: File @relation(name: "VideoSubtitle", direction: "OneWay")
-    videoThumbnail: File @relation(name: "VideoThumbnail", direction: "OneWay")
+    videoSubtitle: File @relation(name: "TopicVideoSubtitle", direction: "OneWay")
+    videoThumbnail: File @relation(name: "TopicVideoThumbnail", direction: "OneWay")
     videoStatus: ContentStatus! @defaultValue(value: "unpublished")
     videoStartTime: Int
     videoEndTime: Int
@@ -41,7 +50,7 @@ const Topic = `
     storyEndTime: Int
     storyThumbnail: File @relation(name: "StoryThumbnail", direction: "OneWay")
     chapter: Chapter @relation(name: "ChapterTopic")
-    learningObjectives: [LearningObjective] @relation(name: "TopicLearningObjective", isSubset: true)
+    learningObjectives: [LearningObjective] @relation(name: "TopicLearningObjective")
     questions: [QuestionBank] @relation(name: "TopicQuestionBank")
     badges: [Badge] @relation(name: "TopicBadge", isSubset: true)
     thumbnail: File @relation(name: "TopicThumbnail", direction: "OneWay")
@@ -49,7 +58,11 @@ const Topic = `
     isTrial: Boolean @defaultValue(value: "false")
     assignmentQuestions: [AssignmentQuestion] @relation(name: "TopicAssignmentQuestion")
     bulletPoints: [BulletPoint]
+    courses: [Course] @relation(name: "CourseTopic")
+    blockBasedProjects: [BlockBasedProject] @relation(name: "TopicBlockBasedProject")
+    videoContent: [Video] @relation(name: "TopicVideoContent")
+    topicComponentRule: [TopicComponentsRule]
   }
 `;
 
-export default Topic;
+export default [Topic, TopicComponentsRule];

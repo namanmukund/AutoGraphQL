@@ -17,6 +17,9 @@ query{
     mentorSession{
       id
     }
+    course{
+        id
+    }
   }
 }
 `;

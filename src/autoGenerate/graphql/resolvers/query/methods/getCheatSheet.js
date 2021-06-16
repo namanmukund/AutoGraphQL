@@ -10,7 +10,7 @@ const getTopics = () => `
   topics(
     filter: {
       and: [
-        { chapter_some: { courses_some: { title: ${GLOBAL_COURSE_TITLE} } } }
+        { chapter_some: { courses_some: { title: "${GLOBAL_COURSE_TITLE}" } } }
         { status: ${PUBLISHED} }
       ]
     }

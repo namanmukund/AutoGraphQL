@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import libphonenumber from 'google-libphonenumber';
 /*
 Validates country code, like +91 is correct and +919191 is not
@@ -6,10 +7,11 @@ Other checks like phone length is
 also verified.
 */
 const isValidPhoneNumber = (phoneDoc) => {
-  const { countryCode, number } = phoneDoc;
-  if (!countryCode || !number) {
+  if (!get(phoneDoc, 'countryCode') || !get(phoneDoc, 'number')) {
     return false;
   }
+
+  const { countryCode, number } = phoneDoc;
   const phoneNumber = countryCode + number;
   const phoneUtil = libphonenumber.PhoneNumberUtil && libphonenumber.PhoneNumberUtil.getInstance();
   // Parse number in input.

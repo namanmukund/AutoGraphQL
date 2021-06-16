@@ -15,6 +15,7 @@ import validateMentorMenteePermissionForComponent from './validateMentorMenteePe
 import validateMentorSessionInput from './validateMentorSessionInput';
 import getMentorMenteeSessionForValidation from './getMentorMenteeSessionForValidation';
 import checkIfSlotCanBeOpenedValidation from './checkIfSlotCanBeOpenedValidation';
+import validateMentorMenteePermissionForComponentForNewCourse from './validateMentorMenteePermissionForComponentForNewCourse';
 
 export {
   getFinalConnectedRecordsForARelationFromInput,
@@ -34,4 +35,5 @@ export {
   validateMentorSessionInput,
   getMentorMenteeSessionForValidation,
   checkIfSlotCanBeOpenedValidation,
+  validateMentorMenteePermissionForComponentForNewCourse,
 };

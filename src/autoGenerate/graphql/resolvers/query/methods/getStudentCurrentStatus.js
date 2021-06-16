@@ -14,7 +14,7 @@ const getUserCurrentTopicComponentStatus = (userId) => `
         { user_some: { id: "${userId}" } }
         {
           currentCourse_some: {
-            and: [{ status: ${PUBLISHED} }, { title: ${GLOBAL_COURSE_TITLE} }]
+            and: [{ status: ${PUBLISHED} }, { title: "${GLOBAL_COURSE_TITLE}" }]
           }
         }
       ]

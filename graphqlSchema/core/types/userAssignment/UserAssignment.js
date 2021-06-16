@@ -12,6 +12,7 @@ const UserAssignment = `
     assignmentStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
     assignment: [AssignmentType]
     topic: Topic! @relation(name: "TopicUserAssignment", direction: "OneWay")
+    course: Course @relation(name: "UserAssignmentCourse", direction: "OneWay")
   }
 `;
 

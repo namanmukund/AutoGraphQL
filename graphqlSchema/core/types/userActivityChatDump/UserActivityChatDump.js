@@ -22,6 +22,7 @@ const UserActivityChatDump = `
     chatAction: UserActionType
     learningObjective: LearningObjective! @relation(name: "LearningObjectiveUserActivityChatDump", direction: "OneWay")
     topic: Topic @relation(name: "TopicUserActivityChatDump", direction: "OneWay")
+    course: Course @relation(name: "UserActivityChatDumpCourse", direction: "OneWay")
   }
 `;
 

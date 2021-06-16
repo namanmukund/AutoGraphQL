@@ -3,14 +3,14 @@ import { GLOBAL_COURSE_TITLE } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 // query to get published topics count
-const getTopics = async () => {
+const getTopics = async (courseId) => {
   const query = `
           {
             topics(filter: 
               {
                 and: [
                   {status: published},
-                  {chapter_some: {courses_some: {title: ${GLOBAL_COURSE_TITLE}}}}
+                  {chapter_some: {courses_some: {${courseId ? `id: "${courseId}"` : `title: "${GLOBAL_COURSE_TITLE}"`}}}}
                 ]
               }, orderBy: order_ASC){
               id
@@ -84,12 +84,13 @@ const getBatch = async (batchId) => {
   return get(currBatch, 'data.batch');
 };
 
-const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId) => {
+const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId, courseId) => {
   const query = `
           mutation{
             addBatchSession(batchConnectId: "${batchId}",
             ${topicId ? `topicConnectId: "${topicId}"` : ''}
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
+            ${courseId ? `courseConnectId: "${courseId}"` : ''}
             input:{
               bookingDate:"${date}",
               ${slots}
@@ -103,12 +104,13 @@ const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId
   return true;
 };
 
-const updateBatchSession = async (sessionId, slots, date, mentorSessionId) => {
+const updateBatchSession = async (sessionId, slots, date, mentorSessionId, courseId) => {
   const query = `
           mutation{
             updateBatchSession(
             id: "${sessionId}",
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
+            ${courseId ? `courseConnectId: "${courseId}"` : ''}
             input:{
               bookingDate:"${date}",
               ${slots}

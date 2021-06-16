@@ -28,6 +28,7 @@ const internetSpeed = `
 
 const MentorMenteeSession = `
   type MentorMenteeSession @model {
+    course: Course @relation(name: "MentorMenteeSessionCourse", direction: "OneWay")
     topic: Topic! @relation(name: "MentorMenteeSessionTopic", direction: "OneWay")
     menteeSession: MenteeSession! @relation(name: "SessionDataMenteeSession", direction: "OneWay")
     mentorSession: MentorSession! @relation(name: "SessionDataMentorSession")

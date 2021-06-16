@@ -75,6 +75,9 @@ import BatchCreationStatus from './BatchCreationStatus';
 import CampaignType from './CampaignType';
 import Publisher from './Publisher';
 import StudentCurrentStatusType from './StudentCurrentStatusType';
+import ChildTopicComponents from './ChildTopicComponents';
+import TopicComponents from './TopicComponents';
+import BlockBasedProjectType from './BlockBasedProjectType';
 import BookedBy from './BookedBy';
 
 export default [
@@ -156,5 +159,8 @@ export default [
   CampaignType,
   Publisher,
   StudentCurrentStatusType,
+  TopicComponents,
+  ChildTopicComponents,
+  BlockBasedProjectType,
   BookedBy,
 ];

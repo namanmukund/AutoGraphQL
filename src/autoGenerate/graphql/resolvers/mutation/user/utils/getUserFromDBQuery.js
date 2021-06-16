@@ -6,7 +6,7 @@ const getUserFromDBQuery = (
 
   let query = {};
   if (username) query.username = username;
-  if (email) query.email = email;
+  if (email) query.email = email.trim().toLowerCase();
   if (phone) {
     const { countryCode, number } = phone;
     query = {
