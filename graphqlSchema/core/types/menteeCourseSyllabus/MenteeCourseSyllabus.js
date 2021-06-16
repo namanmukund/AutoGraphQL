@@ -52,6 +52,7 @@ const menteeCourseSyllabusCourse = `
 
 const menteeCourseSyllabusMentor = `
   type MenteeCourseSyllabusMentor {
+   id: ID
    name: String
    description: String
    averageRating: Float
