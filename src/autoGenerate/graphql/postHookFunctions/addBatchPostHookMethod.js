@@ -51,7 +51,7 @@ const addBatchPostHookMethod = async (input) => {
     logic to add current batch component status
     the first published topic will get populated in the document
     */
-  const topic = await getFirstTopicAndLearningObjective(courseId);
+  const topic = await getFirstTopicAndLearningObjective('', courseId);
   const firstTopicId = get(topic, 'data.topics[0].id');
 
   if (!courseId) {
