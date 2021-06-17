@@ -34,6 +34,7 @@ const removeFromBatchStudentProfilePosthookMethod = async (input, params, mutati
   const userCurrentComponent = await fetchUserCurrentTopicComponentStatuses(userId);
 
   // proceed to update only if the current topic in batch is greater than current topic in user
+  const courseId = get(studentProfile, 'batch.course.id', '');
   const batchCurrentTopicOrder = get(studentProfile, 'batch.currentComponent.currentTopic.order', '');
   const batchCurrentTopicComponentType = get(studentProfile, 'batch.currentComponent.currentTopicComponentType', '');
   const userCurrentTopicOrder = get(userCurrentComponent, 'currentTopic.order', '');
@@ -46,7 +47,7 @@ const removeFromBatchStudentProfilePosthookMethod = async (input, params, mutati
       const batchCurrentLOId = get(studentProfile, 'batch.currentComponent.currentLearningObjective.id', '');
       await updateUserCurrentTopicComponentStatus(userCurrentComponentId, batchCurrentTopicId, batchCurrentTopicComponentType, batchCurrentLOId);
     } else {
-      const topics = await fetchNextTopicId(batchCurrentTopicOrder + 1);
+      const topics = await fetchNextTopicId(batchCurrentTopicOrder, courseId);
       const nextTopicId = get(topics[0], 'id');
       const firstLearningObjectiveId = get(topics[0], 'learningObjectives[0].id', '');
       await updateUserCurrentTopicComponentStatus(userCurrentComponentId, nextTopicId, 'video', firstLearningObjectiveId);
