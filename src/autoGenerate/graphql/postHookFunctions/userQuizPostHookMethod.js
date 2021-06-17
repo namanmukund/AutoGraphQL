@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import {
-  topicTypes, PUBLISHED,
+  topicTypes, PUBLISHED, OLD_COURSE_ID,
 } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
 import getNextComponent from './utils/getNextComponent';
@@ -32,10 +32,19 @@ const topicQuery = (topicId) => `
 
 // query to get published topic list
 const nextTopicQuery = () => `
-  query{
+query{
   topics(
     filter:{
-      status: ${PUBLISHED}
+      and:[
+        {
+          status: published
+        },
+        {
+          courses_some:{
+            id: "${OLD_COURSE_ID}"
+          }
+        }
+      ]
     }
     orderBy:order_ASC,
   ){

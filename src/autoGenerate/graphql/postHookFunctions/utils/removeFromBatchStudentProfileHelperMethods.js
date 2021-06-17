@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import { GLOBAL_COURSE_TITLE } from '../../../../../constants';
 
 const fetchStudentProfile = async (studentProfileId, batchId) => {
   const query = `
@@ -15,6 +16,9 @@ const fetchStudentProfile = async (studentProfileId, batchId) => {
         id
         batch{
           id
+          course{
+            id
+          }
           currentComponent{
             id
             currentCourse{
@@ -61,21 +65,29 @@ const fetchUserCurrentTopicComponentStatuses = async (userId) => {
   return get(currentTopicComponent, 'data.userCurrentTopicComponentStatuses', []);
 };
 
-const fetchNextTopicId = async (topicOrder) => {
+const fetchNextTopicId = async (topicOrder, courseId) => {
   const query = `
     {
       topics(filter: {
         and:[
-          {order: ${topicOrder}}
+          {order_gt: ${topicOrder}}
+          {
+            status: published
+          }
+          {
+            courses_some:{
+              ${courseId ? `id: "${courseId}"` : `title: "${GLOBAL_COURSE_TITLE}"`}
+            }
+          }
         ]
-      }){
+      }, orderBy: order_ASC, first: 1){
         id
         order
-        learningObjectives(filter: {order:1}){
+        learningObjectives(filter: {status: published}, orderBy: order_ASC){
           id
         }
       }
-    }
+}
   `;
   const topics = await callLocalGraphqlApi(query);
   return get(topics, 'data.topics', []);
