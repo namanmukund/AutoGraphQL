@@ -559,7 +559,12 @@ const menteeCourseSyllabusMutationResolver = async (
   both should be equal to perform further action
   */
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
-  const { courseId } = params;
+  let { courseId } = params;
+  // doing this for backward compatibility
+  if (courseId === OLD_COURSE_ID) {
+    courseId = '';
+  }
+
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;
