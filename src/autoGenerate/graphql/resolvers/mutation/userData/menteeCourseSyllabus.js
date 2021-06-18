@@ -86,7 +86,7 @@ const getMentorData = (allottedMentor) => {
       totalRatingUsers += pythonCourseRating1;
       cumulativeRating += pythonCourseRating1;
     }
-    mentor.averageRating = totalRatingUsers ? Math.round(((cumulativeRating.length * 100) / totalRatingUsers) * 100) / 100 : 0;
+    mentor.averageRating = totalRatingUsers ? Math.round(((cumulativeRating) / totalRatingUsers) * 100) / 100 : 0;
   }
   return mentor;
 };
