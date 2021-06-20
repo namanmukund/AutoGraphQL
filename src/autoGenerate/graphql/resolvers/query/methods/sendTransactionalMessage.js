@@ -414,6 +414,7 @@ const sendTransactionalMessage = async (root, params, context) => {
       // send whatsApp
       await sendWhatsAppTemplateMessage(
         whatsAppPhoneNumber,
+        dataObj.countryCode.split('+')[1],
         whatsAppTemplate,
         dataObj.parentName,
         parameters,
@@ -424,6 +425,7 @@ const sendTransactionalMessage = async (root, params, context) => {
     // send whatsApp
       await sendWhatsAppTemplateMessage(
         whatsAppPhoneNumber,
+        dataObj.countryCode.split('+')[1],
         whatsAppTemplate,
         dataObj.parentName,
         parameters,

@@ -107,7 +107,7 @@ const sendB2BBookingReminder = async ({ userId, jobType }, deleteJob) => {
       subject: `${studentName}, Your link to join Tekie Coding Carnival.`,
     });
   } else if (jobType === 'sessionReminderWati') {
-    sendWhatsAppTemplateMessage(phone, 'workshop_reminder_3', parentName, [
+    sendWhatsAppTemplateMessage(phone, get(res, 'data.user.phone.countryCode', '').replace('+', ''), 'workshop_reminder_3', parentName, [
       { name: 'parent_name', value: parentName },
       { name: 'student_name', value: studentName },
       { name: 'w_time', value: startTime },

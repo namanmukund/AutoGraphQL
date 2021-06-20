@@ -98,6 +98,7 @@ const extractMentorMenteeSessionAndSendMessage = async (
 
       await sendWhatsAppTemplateMessage(
         phone,
+        mentorCountryCode.split('+')[1],
         transactionalMessageBody.mentorSessionNotification,
         mentorName,
         parameters,

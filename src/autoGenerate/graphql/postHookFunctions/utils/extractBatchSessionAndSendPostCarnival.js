@@ -72,7 +72,7 @@ const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob,
           studentName,
           parentEmail,
         }, 'PostCarnivalFeedback');
-        sendWhatsAppTemplateMessage(countryCode + parentPhone, 'workshop_post_demo', parentName, [{
+        sendWhatsAppTemplateMessage(countryCode + parentPhone, countryCode, 'workshop_post_demo', parentName, [{
           name: 'parent_name',
           value: parentName,
         }, {
