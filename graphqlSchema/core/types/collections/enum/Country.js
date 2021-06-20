@@ -13,6 +13,8 @@ const Country = `
     oman
     kuwait
     egypt
+    afghanistan
+    russia
   }`;
 
 export default Country;
