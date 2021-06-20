@@ -256,7 +256,6 @@ const extractMenteeSessionInfoAndSendEmail = async (
       updateBookSessionReminderStatus(menteeObj.id, true);
       await sendWhatsAppTemplateMessage(
         phone,
-        mentorCountryCode.split('+')[1],
         whatsAppTemplate,
         parentName,
         parameters,

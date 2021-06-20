@@ -209,7 +209,6 @@ const scheduleTrialSessionReminder = async () => {
             // eslint-disable-next-line no-await-in-loop
             await sendWhatsAppTemplateMessage(
               phone,
-              countryCode.split('+')[1],
               transactionalMessageBody.sessionReminder,
               parentName,
               parameters,

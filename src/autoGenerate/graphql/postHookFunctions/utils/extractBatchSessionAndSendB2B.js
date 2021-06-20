@@ -80,7 +80,6 @@ const extractBatchSessionAndSendB2B = async (batchSessionId, studentsId) => {
       const mentorPhoneCountryCode = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.phone.countryCode', '');
       sendWhatsAppTemplateMessage(
         mentorPhoneCountryCode.replace('+', '') + mentorPhoneNumber,
-        mentorPhoneCountryCode.replace('+', ''),
         'mentor_workshop_confirmation',
         get(student, 'parents[0].user.name'),
         [
