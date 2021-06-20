@@ -6,9 +6,10 @@ import {
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
+import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 
 // query to topics between 2 orders
-const getTopicSList = (topicStartOrder, topicEndOrder) => `
+const getTopicSList = (topicStartOrder, topicEndOrder, courseId) => `
     query{
       topics(filter:{
         and: [
@@ -17,6 +18,11 @@ const getTopicSList = (topicStartOrder, topicEndOrder) => `
           },
           {
             order_lt: ${topicEndOrder}
+          },
+          {
+            courses_some:{
+              ${courseId ? `id: "${courseId}"` : `title: "${GLOBAL_COURSE_TITLE}"`}
+            }
           }
         ]
       }){
@@ -52,24 +58,28 @@ const updateBatchCurrentComponentStatusPostHookMethod = async (input, params, mu
   const mentorId = get(batchCurrentComponentStatusDoc, 'batch.allottedMentor.id');
   const topicStartOrder = get(batchCurrentComponentStatusDoc, 'currentTopic.order');
   const topicEndOrder = get(topicDoc, 'order');
+  let courseId = get(input, 'currentCourse.typeId', '');
 
   if (studentsList && studentsList.length && topicStartOrder && topicEndOrder && topicEndOrder > topicStartOrder) {
-    const topicsListResult = await callLocalGraphqlApi(getTopicSList(topicStartOrder, topicEndOrder));
+    const topicsListResult = await callLocalGraphqlApi(getTopicSList(topicStartOrder, topicEndOrder, courseId));
     const topicsList = get(topicsListResult, 'data.topics');
     if (topicsList && topicsList.length) {
       /*
         get Course Id
       */
-      const courseResult = await callLocalGraphqlApi(getCourseQuery());
-      const course = get(courseResult, 'data.courses');
-      if (course.length <= 0) {
-        throw new DatabaseRecordNotFoundError({
-          data: {
-            error: 'Published course is not present with title as python from component addBatchPostHookMethod',
-          },
-        });
+      if (!courseId) {
+        const courseResult = await callLocalGraphqlApi(getCourseQuery());
+        const course = get(courseResult, 'data.courses');
+        if (course.length <= 0) {
+          throw new DatabaseRecordNotFoundError({
+            data: {
+              error: 'Published course is not present with title as python from component addBatchPostHookMethod',
+            },
+          });
+        }
+        courseId = course[0];
       }
-      const { id: courseId } = course[0];
+
       const date = new Date();
       date.setDate(date.getDate() + 1);
       date.setHours(0, 0, 0, 0);
