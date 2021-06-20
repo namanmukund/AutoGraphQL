@@ -68,7 +68,7 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
 
     if (campaign.type === 'b2b2cEvent') {
       if (!user.email) {
-        sendWhatsAppTemplateMessage(phone, get(user, 'phone.countryCode', '').replace('+', ''), get(user, 'phone.countryCode', '').replace('+', ''), get(user, 'phone.countryCode', '').replace('+', ''), 'workshop_registration_4', schoolName, [
+        sendWhatsAppTemplateMessage(phone, get(user, 'phone.countryCode', '').replace('+', ''), 'workshop_registration_4', schoolName, [
           { name: 'school_name', value: schoolName },
           { name: 'code', value: code },
           { name: 'booking_link', value: bookingLink },
