@@ -113,10 +113,9 @@ const signupOrLoginViaOtp = async (
       }
       newUser.country = input.country || 'india';
       newUser.timezone = input.timezone || 'Asia/Kolkata';
-      userData = generateCuid(newUser);
       input.leadStatus = 'New Lead';
       input.country = input.country ? input.country : 'india';
-
+      userData = generateCuid(newUser);
       await modelMutations.addDocument(userData);
       sendBookingReminderOrConfirmationB2BC(userData.id);
       // create on leadsquared

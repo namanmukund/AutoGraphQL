@@ -36,8 +36,8 @@ const getSlotLabel = (slotNumber) => {
 
 const getIntlDateTime = (date, istTime, targetTimezone) => {
   const timezone = getTimezone(targetTimezone || 'Asia/Kolkata');
-  const indianOffset = get(getTimezone('Asia/Kolkata'), 'utcOffset');
-  const intlOffset = get(timezone, 'utcOffset');
+  const indianOffset = get(getTimezone('Asia/Kolkata'), 'dstOffset');
+  const intlOffset = get(timezone, 'dstOffset');
   const timeDiffInMs = (indianOffset - intlOffset) * 60 * 1000;
   const offsetedSelectedDateInMs = new Date(date).setHours(0, 0, 0, 0) - timeDiffInMs;
   const dateAfterSlotOffset = new Date(
