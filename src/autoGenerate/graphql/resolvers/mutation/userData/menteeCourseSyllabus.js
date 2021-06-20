@@ -86,7 +86,7 @@ const getMentorData = (allottedMentor) => {
       totalRatingUsers += pythonCourseRating1;
       cumulativeRating += pythonCourseRating1;
     }
-    mentor.averageRating = totalRatingUsers ? Math.round(((cumulativeRating.length * 100) / totalRatingUsers) * 100) / 100 : 0;
+    mentor.averageRating = totalRatingUsers ? Math.round(((cumulativeRating) / totalRatingUsers) * 100) / 100 : 0;
   }
   return mentor;
 };
@@ -559,7 +559,12 @@ const menteeCourseSyllabusMutationResolver = async (
   both should be equal to perform further action
   */
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
-  const { courseId } = params;
+  let { courseId } = params;
+  // doing this for backward compatibility
+  if (courseId === OLD_COURSE_ID) {
+    courseId = '';
+  }
+
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;

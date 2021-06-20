@@ -51,11 +51,20 @@ const getBatchQuery = (batchId) => `
   `;
 
 // query to get published topic list
-const nextTopicQuery = () => `
+const nextTopicQuery = (courseId) => `
   query{
   topics(
     filter:{
-      status: ${PUBLISHED}
+      and:[
+        {
+          status: ${PUBLISHED}
+        }
+        {
+          courses_some:{
+            ${courseId ? `id: "${courseId}"` : `title: "${GLOBAL_COURSE_TITLE}"`}
+          }
+        }
+      ]
     }
     orderBy:order_ASC,
   ){
@@ -83,6 +92,7 @@ const updateBatchSessionQuery = (
 const addBatchSessionPostHookMethod = async (input, params, mutationName, context) => {
   const batchId = get(params, 'batchConnectId');
   const topicId = get(params, 'topicConnectId');
+  let courseId = get(params, 'courseConnectId');
   const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
   const { id: batchSessionId } = input;
   const { bookingDate, sessionStatus: sessionStatusFromInput } = params && params.input;
@@ -91,16 +101,18 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   /*
     get Course Id
   */
-  const courseResult = await callLocalGraphqlApi(getCourseQuery());
-  const course = get(courseResult, 'data.courses');
-  if (course.length <= 0) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'Published course is not present with title as python from component addBatchPostHookMethod',
-      },
-    });
+  if (!courseId) {
+    const courseResult = await callLocalGraphqlApi(getCourseQuery());
+    const course = get(courseResult, 'data.courses');
+    if (course.length <= 0) {
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'Published course is not present with title as python from component addBatchPostHookMethod',
+        },
+      });
+    }
+    courseId = course[0].id;
   }
-  const { id: courseId } = course[0];
 
   /*
     get batch info
@@ -118,7 +130,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
       We are getting published topics list through this query.
       Then we will get next published topic
       */
-      const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery());
+      const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
       const topicsList = get(nextTopicQueryRes, 'data.topics');
 
       let currentTopicIndex;
