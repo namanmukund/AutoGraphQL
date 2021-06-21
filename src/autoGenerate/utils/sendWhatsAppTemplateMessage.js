@@ -8,6 +8,7 @@ const sendWhatsAppTemplateMessage = async (
   parameters,
 ) => {
   if (process.env.NODE_ENV !== 'production') return null;
+  if (!phoneNumber.startsWith('91')) return null;
   const bodyJson = {
     template_name,
     broadcast_name: broadcast_name || 'Tekie',
