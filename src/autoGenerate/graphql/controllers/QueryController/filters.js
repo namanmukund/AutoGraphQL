@@ -3,7 +3,7 @@
 import {
   includes, split, without, get,
 } from 'lodash';
-import { allFilters, historyFieldName } from '../../../../../constants';
+import { allFilters, historyFieldName, scalarTypes } from '../../../../../constants';
 import { InvalidFilterArgumentsError, NotFilterRequiredError } from '../../../../../constants/errors';
 import { types } from '../../../../../utils';
 import { getParsedASTMap } from '../../../utils';
@@ -233,6 +233,7 @@ const generateQueryParamsForFilter = (
   filterTypeName,
   filterKey,
   filterValue,
+  modelName,
 ) => {
   const queryParams = {};
   switch (filterTypeName) {
@@ -273,7 +274,42 @@ const generateQueryParamsForFilter = (
       break;
     }
     case allFilters.exists: {
-      queryParams[filterKey] = { $exists: filterValue };
+      /*
+      fieldName: "" , null,[], {}, not exist
+      exists-->false will be
+        1) fieldName --> not exist or
+        2) fieldName exists but fieldName: "" , null,[], {}
+      exists-->true will be
+        1) fieldName --> exist and
+        2) not fieldName: "" , null,[], {}
+       */
+
+      const relatedType = get(parsedASTMap[modelName], `field[${filterKey}].type.dataType`);
+      const isList = get(parsedASTMap[modelName], `field[${filterKey}].type.isList`);
+      if (filterValue) {
+        queryParams[filterKey] = { $exists: filterValue, $nin: ['', null, {}] };
+        if (!scalarTypes.includes(relatedType) && isList) {
+          // check for "" , null
+          queryParams[filterKey] = { $exists: filterValue, $ne: [] };
+        } else {
+          queryParams[filterKey] = { $exists: filterValue, $nin: ['', null, {}] };
+        }
+      } else if (!scalarTypes.includes(relatedType) && isList) {
+        Object.assign(queryParams, {
+          $or: [
+            { [filterKey]: { $exists: true, $eq: [] } },
+            { [filterKey]: { $exists: false } },
+          ],
+        });
+      } else {
+        Object.assign(queryParams,
+          {
+            $or: [
+              { [filterKey]: { $exists: true, $in: ['', null, {}] } },
+              { [filterKey]: { $exists: false } },
+            ],
+          });
+      }
       break;
     }
     default:
@@ -379,6 +415,7 @@ const getQueryFromFilter = async (filterKey, filterValue, modelName) => {
             splitArray[1],
             fieldName,
             filterValue,
+            modelName,
           );
           Object.assign(queryParams, filterQueryParams);
         }
