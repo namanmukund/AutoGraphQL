@@ -135,7 +135,7 @@ const updateUserPaymentPlanWorkFlow = async (userPaymentPlanData) => {
   */
 const updateUserPaymentInstallmentPostHookMethod = async (input, params) => {
   const userPaymentInstallmentId = get(params, 'id');
-  const { status: inputPaymentStatus, paymentRequestedCount } = input;
+  const { status: inputPaymentStatus, paymentRequestedCount, isPaymentRequested } = input;
 
   if (!userPaymentInstallmentId) {
     log('userPaymentInstallmentId is missing in input of updateUserPaymentInstallmentPostHookMethod');
@@ -148,7 +148,7 @@ const updateUserPaymentInstallmentPostHookMethod = async (input, params) => {
 
   // mail will only be sent if there are fields inputPaymentStatus or
   // paymentRequestedCount in the input fields
-  if (inputPaymentStatus === paid || paymentRequestedCount) {
+  if (isPaymentRequested && (inputPaymentStatus === paid || paymentRequestedCount)) {
     const userPaymentInstallmentQueryRes = await callLocalGraphqlApi(userPaymentInstallmentQuery(userPaymentInstallmentId));
     const userPaymentInstallmentInfo = get(userPaymentInstallmentQueryRes, 'data.userPaymentInstallment');
     if (!userPaymentInstallmentInfo) {
