@@ -287,12 +287,13 @@ const generateQueryParamsForFilter = (
       const relatedType = get(parsedASTMap[modelName], `field[${filterKey}].type.dataType`);
       const isList = get(parsedASTMap[modelName], `field[${filterKey}].type.isList`);
       if (filterValue) {
-        queryParams[filterKey] = { $exists: filterValue, $nin: ['', null, {}] };
         if (!scalarTypes.includes(relatedType) && isList) {
           // check for "" , null
           queryParams[filterKey] = { $exists: filterValue, $ne: [] };
-        } else {
+        } else if (!scalarTypes.includes(relatedType) && !isList) {
           queryParams[filterKey] = { $exists: filterValue, $nin: ['', null, {}] };
+        } else {
+          queryParams[filterKey] = { $exists: filterValue };
         }
       } else if (!scalarTypes.includes(relatedType) && isList) {
         Object.assign(queryParams, {
@@ -301,7 +302,7 @@ const generateQueryParamsForFilter = (
             { [filterKey]: { $exists: false } },
           ],
         });
-      } else {
+      } else if (!scalarTypes.includes(relatedType) && !isList) {
         Object.assign(queryParams,
           {
             $or: [
@@ -309,6 +310,9 @@ const generateQueryParamsForFilter = (
               { [filterKey]: { $exists: false } },
             ],
           });
+      } else {
+        // case of scaler types
+        queryParams[filterKey] = { $exists: filterValue };
       }
       break;
     }
