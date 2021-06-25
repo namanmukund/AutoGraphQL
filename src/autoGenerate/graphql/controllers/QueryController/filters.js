@@ -286,6 +286,9 @@ const generateQueryParamsForFilter = (
 
       const relatedType = get(parsedASTMap[modelName], `field[${filterKey}].type.dataType`);
       const isList = get(parsedASTMap[modelName], `field[${filterKey}].type.isList`);
+      /*
+      If it's enum it nonScalarKind wil be "" else it will be ObjectTypeDefinition
+       */
       const nonScalarKind = get(parsedASTMap, `[${relatedType}].kind`);
 
       if (filterValue) {
