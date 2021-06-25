@@ -47,7 +47,7 @@
       }
     },
     "start-debug": {
-      "command": "babel-node --inspect --debug-brk src/serverCloud.js",
+      "command": "babel-node --inspect --inspect-brk src/serverCloud.js",
       "env": {
         "APPLICATION": "core",
         "NODE_ENV": "development",
