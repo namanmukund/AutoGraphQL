@@ -23,12 +23,12 @@ const menteeInfoQuery = (userId) => `
       studentProfile{
         id
         grade
+        batch {
+          id
+        }
         parents{
           id
           user{
-            campaign {
-              type
-            }
             id
             name
             email
@@ -62,7 +62,7 @@ const sendBookedSessionEmailToTekie = (subject, menteeObj) => {
     const emailTo = [
       'shantanu.najhawan@tekie.in',
       'anand.verma@tekie.in',
-      'shravastivaidya@gmail.com',
+      // 'shravastivaidya@gmail.com',
       '19j.agarwal99@gmail.com',
       'jayasivakami2001@gmail.com',
       'dubeyishan17@gmail.com',
@@ -122,6 +122,7 @@ const sendBookedSessionEmailToParent = (subject, menteeObj, action) => {
       html,
       'hello@tekie.in',
     );
+    if (menteeObj.country !== 'india') return; // temp check to disable us mentee
     if (action === 'delete' && menteeObj.country !== 'india') return;
     sendEmail(emailMsgObject);
   });
@@ -137,8 +138,8 @@ const extractMenteeSessionInfoAndSendEmail = async (
   user,
   topic,
 ) => {
+  if (get(user, 'data.user.studentProfile.batch.id')) return;
   const slotNumber = slotTimeStringArray[0].split('slot')[1];
-  if (get(user, 'data.user.studentProfile.parents[0].user.campaign.type')) return;
 
   const { user: { typeId: userId }, topic: { typeId: topicId } } = input;
   const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId));

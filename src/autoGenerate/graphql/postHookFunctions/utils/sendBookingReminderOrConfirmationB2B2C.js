@@ -2,9 +2,7 @@ import { get } from 'lodash';
 import moment from 'moment';
 import getSlotLabel from '../../../../../utils/getSlotLabel';
 import addToSchedule from '../../../../../utils/scheduleJobs/addToSchedule';
-// import moment from 'moment';
-// import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
-// import getSlotLabel from '../../../../../utils/getSlotLabel';
+import sendB2B2CBookingReminder from '../../../../../utils/scheduleJobs/jobs/sendB2B2CBookingReminder';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 import sendTransactionalEmail from '../../resolvers/utils/sendTransactionalEmail';
@@ -36,6 +34,14 @@ const USER_QUERY = (userId) => `
           }
           batch {
             id
+            campaign {
+              type
+              code
+              title
+              school {
+                name
+              }
+            }
             b2b2ctimeTable {
               ${new Array(24).fill('').map((_, i) => `slot${i}`).join('\n')}
               bookingDate
@@ -55,16 +61,63 @@ const USER_QUERY = (userId) => `
   }
 `;
 
+const schedule = {
+  nextDaySessionReminder: () => {
+    const oneDayAfter = moment().add(1, 'day').toDate();
+    return new Date(oneDayAfter.setHours(17, 17, 0, 0));
+  },
+  firstFlow: {
+    firstMail: (bookingDate) => new Date(moment(bookingDate).subtract(3, 'days').toDate().setHours(18, 3, 0, 0)),
+    secondMail: (bookingDate) => new Date(moment(bookingDate).subtract(2, 'days').toDate().setHours(18, 11, 0, 0)),
+    thirdMail: (slotNumber, bookingDate) => slotNumber === 8 || slotNumber === 9
+      ? new Date(moment(bookingDate).subtract(1, 'day').toDate().setHours(19, 49, 0, 0))
+      : new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0));
+  },
+  secondFlow: (slotNumber, bookingDate) => {
+    if (slotNumber === 8 || slotNumber === 9) {
+      const oneDayBeforeBookingTime = moment(bookingDate).subtract(1, 'day').toDate();
+      return new Date(oneDayBeforeBookingTime.setHours(19, 49, 0, 0));
+    }
+    return new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0));
+  },
+  thirdFlow: {
+    firstMail: (bookingDate) => new Date(moment(bookingDate).subtract(2, 'days').toDate().setHours(18, 11, 0, 0)),
+    secondMail: (slotNumber, bookingDate) => slotNumber === 8 || slotNumber === 9
+      ? new Date(moment(bookingDate).subtract(1, 'day').toDate().setHours(19, 49, 0, 0))
+      : new Date(moment(bookingDate).toDate().setHours(slotNumber - 2, 0, 0, 0))
+  },
+  reminderWati: (slotNumber, bookingDate) => new Date(moment(bookingDate).toDate().setHours(slotNumber - 1, 30, 0, 0))
+};
+
+// TODO: HANDLE CASE FOR SIBLINGS
+// TODO: HANDLE FOR MULTIPLE BATCHES
 const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false) => {
+  // If booking mail execute immediately or wait for TIMEOUT
   const timeout = isBookSlot ? 0 : TIMEOUT;
   setTimeout(async () => {
     const res = await callLocalGraphqlApi(USER_QUERY(userId));
     const user = get(res, 'data.user', {}) || {};
-    const campaign = get(user, 'campaign', {}) || {};
+    const campaign = get(user, 'campaign.id')
+      ? get(user, 'campaign')
+      : get(user, 'parentProfile.children[0].batch.campaign');
     const schoolName = get(campaign, 'school.name');
     const code = get(user, 'campaign.code', '');
     const bookingLink = `https://www.tekie.in/login?code=${code}`;
     const phone = get(user, 'phone.countryCode', '').replace('+', '') + get(user, 'phone.number', '');
+    if (!campaign.type && !schoolName && !user.email) {
+      // case for b2c users who didn't fill their details
+      sendWhatsAppTemplateMessage(phone, 'demo_registration_confirmation1', phone, []);
+    }
+
+    if (!campaign.type && !schoolName && user.email) {
+      sendTransactionalEmail({
+        parentName: user.name,
+        parentEmail: user.email,
+      }, {
+        emailTemplate: 'WelcomeEmail',
+        subject: 'Welcome to Tekie, your next steps!',
+      });
+    }
 
     if (campaign.type === 'b2b2cEvent') {
       if (!user.email) {
@@ -73,8 +126,14 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
           { name: 'code', value: code },
           { name: 'booking_link', value: bookingLink },
         ]);
-        const today = new Date();
-        addToSchedule('sendNextDayBookReminder', new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes() + 1, 0), { userId });
+        sendTransactionalEmail({
+          parentEmail: user.email,
+          bookingLink,
+        }, {
+          subject: 'Book your Spot at Tekie Code Carnival!',
+          emailTemplate: 'CarivalEmailRegistrationConfirmed',
+        });
+        addToSchedule('sendNextDayBookReminder', schedule.nextDaySessionReminder(), { userId, code });
         return;
       }
       const parentName = get(user, 'name');
@@ -118,34 +177,23 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
         sendWhatsAppTemplateMessage(phone, bookTemplate, phone, parameters);
         if (
           getDays(bookingDate) > 3
-          || (getDays(bookingDate) === 3 && slotNumber <= 17)) {
-          const firstMailScheduleTime = new Date(moment(bookingDate).subtract(3, 'days').toDate().setHours(18, 3, 0, 0));
-          const secondMailScheduleTime = new Date(moment(bookingDate).subtract(2, 'days').toDate().setHours(18, 11, 0, 0));
-          const thirdMailScheduleTime = slotNumber === 8 || slotNumber === 9
-            ? new Date(moment(bookingDate).subtract(1, 'day').toDate().setHours(19, 49, 0, 0))
-            : new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0));
-          addToSchedule('engagementMail', firstMailScheduleTime, { userId, code, batchId });
-          addToSchedule('engagementMailWithMentor', secondMailScheduleTime, { userId, code, batchId });
-          addToSchedule('bookingFinalReminder', thirdMailScheduleTime, { userId, code, batchId });
+          || (getDays(bookingDate) === 3 && slotNumber <= 17)
+        ) {
+          addToSchedule('engagementMail', schedule.firstFlow.firstMail(bookingDate), { userId, code, batchId });
+          addToSchedule('engagementMailWithMentor', schedule.firstFlow.secondMail(bookingDate), { userId, code, batchId });
+          addToSchedule('bookingFinalReminder', schedule.firstFlow.thirdMail(slotNumber, bookingDate), { userId, code, batchId });
         } else if (getDays(bookingDate) === 0 || (getDays(bookingDate) === 1 && slotNumber <= 18)) {
-          let scheduleTime = '';
-          if (slotNumber === 8 || slotNumber === 9) {
-            const oneDayBeforeBookingTime = moment(bookingDate).subtract(1, 'day').toDate();
-            scheduleTime = new Date(oneDayBeforeBookingTime.setHours(19, 49, 0, 0));
+          // if slot is book b/w less than 3 hours.
+          if (getDays(bookingDate) === 0 && moment().hours() + 3 >= slotNumber) {
+            sendB2B2CBookingReminder({ userId, jobType: 'bookingSameDayFinalReminder' }, () => {});
           } else {
-            scheduleTime = new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0));
+            addToSchedule('bookingSameDayFinalReminder', schedule.secondFlow(slotNumber, bookingDate), { userId, code, batchId });
           }
-          addToSchedule('bookingSameDayFinalReminder', scheduleTime, { userId, code, batchId });
         } else {
-          const firstMailScheduleTime = new Date(moment(bookingDate).subtract(2, 'days').toDate().setHours(18, 11, 0, 0));
-          const secondMailScheduleTime = slotNumber === 8 || slotNumber === 9
-            ? new Date(moment(bookingDate).subtract(1, 'day').toDate().setHours(19, 49, 0, 0))
-            : new Date(moment(bookingDate).toDate().setHours(slotNumber - 2, 0, 0, 0));
-          addToSchedule('engagementMailWithMentor', firstMailScheduleTime, { userId, code, batchId });
-          addToSchedule('bookingFinalReminder', secondMailScheduleTime, { userId, code, batchId });
+          addToSchedule('engagementMailWithMentor', schedule.thirdFlow.firstMail(bookingDate), { userId, code, batchId });
+          addToSchedule('bookingFinalReminder', schedule.thirdFlow.secondMail(slotNumber, bookingDate), { userId, code, batchId });
         }
-        const watiScheduleTime = new Date(moment(bookingDate).toDate().setHours(slotNumber - 1, 30, 0, 0));
-        addToSchedule('sessionReminderWati', watiScheduleTime, { userId, code, batchId });
+        addToSchedule('sessionReminderWati', schedule.reminderWati(slotNumber, bookingDate), { userId, code, batchId });
       } else {
         sendTransactionalEmail({
           parentEmail: user.email,
@@ -161,9 +209,7 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
           { name: 'school_name', value: schoolName },
           { name: 'booking_link', value: bookingLink },
         ]);
-        const oneDayAfter = moment().add(1, 'day').toDate();
-        scheduleTime = new Date(oneDayBeforeBookingTime.setHours(17, 17, 0, 0));
-        addToSchedule('sendNextDayBookReminder', oneDayAfter, { userId, code });
+        addToSchedule('sendNextDayBookReminder', schedule.nextDaySessionReminder(), { userId, code });
       }
     }
   }, timeout);

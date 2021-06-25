@@ -8,7 +8,7 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
 import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
 import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
-import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
+import extractBatchSessionAndSendB2BC from './utils/extractBatchSessionAndSendB2BC';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -174,7 +174,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     ));
   }
   const studentsId = (students && students.length) ? students.map((student) => get(student, 'id')) : [];
-  extractBatchSessionAndSendB2B(batchSessionId, studentsId);
+  extractBatchSessionAndSendB2BC(batchSessionId, studentsId);
 
   // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
   if (topicId && mentorSessionConnectId) {
