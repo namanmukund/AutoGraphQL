@@ -34,7 +34,6 @@ import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentCh
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import getUserPasswordObject from './utils/getUserPasswordObject';
-import sendTransactionalEmail from '../../utils/sendTransactionalEmail';
 
 const USER_TYPE = 'User';
 

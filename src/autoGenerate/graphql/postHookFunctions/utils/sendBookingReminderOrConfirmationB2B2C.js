@@ -69,9 +69,9 @@ const schedule = {
   firstFlow: {
     firstMail: (bookingDate) => new Date(moment(bookingDate).subtract(3, 'days').toDate().setHours(18, 3, 0, 0)),
     secondMail: (bookingDate) => new Date(moment(bookingDate).subtract(2, 'days').toDate().setHours(18, 11, 0, 0)),
-    thirdMail: (slotNumber, bookingDate) => slotNumber === 8 || slotNumber === 9
+    thirdMail: (slotNumber, bookingDate) => (slotNumber === 8 || slotNumber === 9
       ? new Date(moment(bookingDate).subtract(1, 'day').toDate().setHours(19, 49, 0, 0))
-      : new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0));
+      : new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0))),
   },
   secondFlow: (slotNumber, bookingDate) => {
     if (slotNumber === 8 || slotNumber === 9) {
@@ -82,11 +82,11 @@ const schedule = {
   },
   thirdFlow: {
     firstMail: (bookingDate) => new Date(moment(bookingDate).subtract(2, 'days').toDate().setHours(18, 11, 0, 0)),
-    secondMail: (slotNumber, bookingDate) => slotNumber === 8 || slotNumber === 9
+    secondMail: (slotNumber, bookingDate) => (slotNumber === 8 || slotNumber === 9
       ? new Date(moment(bookingDate).subtract(1, 'day').toDate().setHours(19, 49, 0, 0))
-      : new Date(moment(bookingDate).toDate().setHours(slotNumber - 2, 0, 0, 0))
+      : new Date(moment(bookingDate).toDate().setHours(slotNumber - 2, 0, 0, 0))),
   },
-  reminderWati: (slotNumber, bookingDate) => new Date(moment(bookingDate).toDate().setHours(slotNumber - 1, 30, 0, 0))
+  reminderWati: (slotNumber, bookingDate) => new Date(moment(bookingDate).toDate().setHours(slotNumber - 1, 30, 0, 0)),
 };
 
 // TODO: HANDLE CASE FOR SIBLINGS
