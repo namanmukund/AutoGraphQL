@@ -15,6 +15,10 @@ const BATCH_SESSION = (batchSessionId) => `{
     }
     batch {
       code
+      campaign {
+        id
+        type
+      }
       school {
         name
       }
@@ -40,9 +44,6 @@ const BATCH_SESSION = (batchSessionId) => `{
         parents{
           user {
             name
-            campaign {
-              type
-            }
             id
             phone {
               number
@@ -55,7 +56,7 @@ const BATCH_SESSION = (batchSessionId) => `{
   }
 }`;
 
-const extractBatchSessionAndSendB2B = async (batchSessionId, studentsId) => {
+const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId) => {
   const batchSessionRes = await callLocalGraphqlApi(BATCH_SESSION(batchSessionId));
   // Don't proceed if it is not the first topic
   if (get(batchSessionRes, 'data.batchSession.topic.order') !== 1) return;
@@ -63,7 +64,7 @@ const extractBatchSessionAndSendB2B = async (batchSessionId, studentsId) => {
     const studentsInBatchSession = get(batchSessionRes, 'data.batchSession.attendance', []).map((attendance) => get(attendance, 'student'));
     const student = studentsInBatchSession.find((studentInBatchSession) => get(studentInBatchSession, 'id') === studentId);
     const phone = get(student, 'parents[0].user.phone.number');
-    const campaignType = get(student, 'parents[0].user.campaign.type');
+    const campaignType = get(batchSessionRes, 'data.batchSession.batch.campaign.type');
     const slot = get(getSelectedSlotsTime(get(batchSessionRes, 'data.batchSession')), '[0]');
     if (student && campaignType === campaignTypes.b2b2cEvent) {
       addMenteeBookingLeadsquared({
@@ -113,4 +114,4 @@ const extractBatchSessionAndSendB2B = async (batchSessionId, studentsId) => {
   });
 };
 
-export default extractBatchSessionAndSendB2B;
+export default extractBatchSessionAndSendB2BC;

@@ -72,6 +72,18 @@ query{
       id
       order
     }
+    mentorSession {
+      user {
+        name
+        mentorProfile {
+          salesExecutive {
+            user {
+              name
+            }
+          }
+        }
+      }
+    }
   }
 }
 `;
@@ -148,6 +160,8 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     updateClassMissedMessageStatus(input.id, 'sent');
   }
 
+  const mmsFirstData = await mentorMenteeSessionsQuery(menteeId, 'first');
+
   if (currentUser && currentUser.id) {
     if (
       (prevSessionStatus !== 'completed' && (input && input.sessionStatus && input.sessionStatus === 'completed'))
@@ -189,7 +203,11 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       (prevSessionStatus !== 'completed' && (input && input.sessionStatus && input.sessionStatus === 'completed'))
       && topic.order === 1
     ) {
-      setSessionCompletedLeadsquared(userInfo);
+      setSessionCompletedLeadsquared(
+        userInfo,
+        get(mmsFirstData, 'mentorSession.user.name'),
+        get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.name'),
+      );
     }
 
     if (input && Object.keys(input).includes('hasRescheduled') && topic.order === 1) {
@@ -206,7 +224,6 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
         updateObject.lastSessionOn = new Date(sessionStartDate).toISOString();
         const lastTopicOrder = get(topic, 'order');
         if (lastTopicOrder > 1) {
-          const mmsFirstData = await mentorMenteeSessionsQuery(menteeId, 'first');
           const diffInDays = moment(sessionStartDate).diff(mmsFirstData.sessionStartDate, 'days');
           if (diffInDays) {
             updateObject.avgDaysPerSession = Math.round(diffInDays / lastTopicOrder);

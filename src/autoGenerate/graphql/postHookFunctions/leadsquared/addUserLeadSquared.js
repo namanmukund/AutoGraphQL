@@ -2,9 +2,17 @@ import { get } from 'lodash';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
 
 const addUserLeadSquared = (params, create = true) => {
+  if (get(params, 'input.Vertical') === 'b2b') {
+    return;
+  }
+  if (get(params, 'input.schoolName') && !get(params, 'input.Vertical')) {
+    return;
+  }
+
   const leadSquaredInput = {
     Phone: get(params, 'input.phone.countryCode') + get(params, 'input.phone.number'),
   };
+
   if (get(params, 'input.grade')) {
     leadSquaredInput.mx_Student_Grade = get(params, 'input.grade').replace('Grade', '');
   }
@@ -61,6 +69,7 @@ const addUserLeadSquared = (params, create = true) => {
   if (get(params, 'input.utmMedium')) {
     leadSquaredInput.mx_utm_medium = get(params, 'input.utmMedium');
   }
+
   const activityInput = {
     ActivityEvent: 103,
     Fields: [

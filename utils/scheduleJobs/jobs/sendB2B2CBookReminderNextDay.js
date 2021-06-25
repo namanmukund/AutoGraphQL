@@ -23,7 +23,7 @@ const USER = (id) => `{
   }
 }`;
 
-const sendB2BBookReminderNextDay = async ({ userId, code }, deleteJob) => {
+const sendB2B2CBookReminderNextDay = async ({ userId, code }, deleteJob) => {
   const res = await callLocalGraphqlApi(USER(userId));
   const parentEmail = get(res, 'data.user.email');
   const parentName = get(res, 'data.user.name');
@@ -43,4 +43,4 @@ const sendB2BBookReminderNextDay = async ({ userId, code }, deleteJob) => {
   deleteJob();
 };
 
-export default sendB2BBookReminderNextDay;
+export default sendB2B2CBookReminderNextDay;

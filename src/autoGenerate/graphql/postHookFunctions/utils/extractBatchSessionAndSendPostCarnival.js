@@ -47,6 +47,7 @@ const BATCH_SESSION = (batchSessionId) => `{
   }
 }`;
 
+// TODO : HANDLE FOR NORMAL BATCH TRIAL
 const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob, ls = false) => {
   const batchSessionRes = await callLocalGraphqlApi(BATCH_SESSION(batchSessionId));
   // Don't proceed if it is not the first topic
@@ -71,12 +72,15 @@ const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob,
         sendTransactionalEmail({
           studentName,
           parentEmail,
-        }, 'PostCarnivalFeedback');
+        }, {
+          emailTemplate: 'PostCarnivalFeedback',
+          subject: `${studentName}, did you enjoy the Code Carnival?`,
+        });
         sendWhatsAppTemplateMessage(countryCode + parentPhone, 'workshop_post_demo', parentName, [{
           name: 'parent_name',
           value: parentName,
         }, {
-          name: 'student_nam',
+          name: 'student_name',
           value: studentName,
         }]);
       }
