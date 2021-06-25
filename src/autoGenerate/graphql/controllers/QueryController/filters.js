@@ -286,23 +286,28 @@ const generateQueryParamsForFilter = (
 
       const relatedType = get(parsedASTMap[modelName], `field[${filterKey}].type.dataType`);
       const isList = get(parsedASTMap[modelName], `field[${filterKey}].type.isList`);
+      /*
+      If it's enum it nonScalarKind wil be "" else it will be ObjectTypeDefinition
+       */
+      const nonScalarKind = get(parsedASTMap, `[${relatedType}].kind`);
+
       if (filterValue) {
-        if (!scalarTypes.includes(relatedType) && isList) {
+        if (!scalarTypes.includes(relatedType) && nonScalarKind && isList) {
           // check for "" , null
           queryParams[filterKey] = { $exists: filterValue, $ne: [] };
-        } else if (!scalarTypes.includes(relatedType) && !isList) {
+        } else if (!scalarTypes.includes(relatedType) && nonScalarKind && !isList) {
           queryParams[filterKey] = { $exists: filterValue, $nin: ['', null, {}] };
         } else {
           queryParams[filterKey] = { $exists: filterValue };
         }
-      } else if (!scalarTypes.includes(relatedType) && isList) {
+      } else if (!scalarTypes.includes(relatedType) && nonScalarKind && isList) {
         Object.assign(queryParams, {
           $or: [
             { [filterKey]: { $exists: true, $eq: [] } },
             { [filterKey]: { $exists: false } },
           ],
         });
-      } else if (!scalarTypes.includes(relatedType) && !isList) {
+      } else if (!scalarTypes.includes(relatedType) && nonScalarKind && !isList) {
         Object.assign(queryParams,
           {
             $or: [
