@@ -160,6 +160,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     updateClassMissedMessageStatus(input.id, 'sent');
   }
 
+  const menteeId = get(menteeSession, 'data.menteeSession.user.id');
   const mmsFirstData = await mentorMenteeSessionsQuery(menteeId, 'first');
 
   if (currentUser && currentUser.id) {
