@@ -2,12 +2,14 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import moveVideoToACollection from '../scriptMethods/moveVideoToACollection';
 // import updateBatchInUserScript from '../scriptMethods/updateBatchInUserScript';
 // import updateCourseInTopics from '../scriptMethods/updateCourseInTopics';
+import updateCourse from '../scriptMethods/updateCourse';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
   /*
   Add script functions
    */
+  await updateCourse();
   // await updateBatchInUserScript();
   // await moveVideoToACollection();
   // await updateCourseInTopics();
