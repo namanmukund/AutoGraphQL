@@ -10,7 +10,7 @@ import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentCompone
 import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
 import addRescheduledSlot from './utils/addRescheduledSlot';
 import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
-import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
+import extractBatchSessionAndSendB2BC from './utils/extractBatchSessionAndSendB2BC';
 import addToSchedule from '../../../../utils/scheduleJobs/addToSchedule';
 
 // query to get chapters and topics belomngin to a course
@@ -288,7 +288,7 @@ get Course Id
     }
   }
   const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
-  extractBatchSessionAndSendB2B(batchSessionId, students);
+  extractBatchSessionAndSendB2BC(batchSessionId, students);
 };
 
 export default updateBatchSessionPostHookMethod;

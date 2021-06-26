@@ -320,15 +320,15 @@ Create student and their user profile
   if (campaignType) {
     leadSquaredParams.input.Vertical = campaignType.replace('Event', '');
   }
-  if (!campaignType && !schoolName) {
-    sendTransactionalEmail({
-      parentEmail,
-      parentName,
-    }, {
-      emailTemplate: 'WelcomeEmail',
-      subject: 'Welcome to Tekie, your next steps!',
-    });
-  }
+  // if (!campaignType && !schoolName) {
+  //   sendTransactionalEmail({
+  //     parentEmail,
+  //     parentName,
+  //   }, {
+  //     emailTemplate: 'WelcomeEmail',
+  //     subject: 'Welcome to Tekie, your next steps!',
+  //   });
+  // }
 
   parentChildSignupPostHookMethod(input, leadSquaredParams, false);
   return userTokenData;

@@ -54,7 +54,7 @@ const USER = (id) => `{
   }
 }`;
 
-const sendB2BBookingReminder = async ({ userId, jobType }, deleteJob) => {
+const sendB2B2CBookingReminder = async ({ userId, jobType }, deleteJob = () => {}) => {
   const res = await callLocalGraphqlApi(USER(userId));
   const parentEmail = get(res, 'data.user.email');
   const parentName = get(res, 'data.user.name');
@@ -135,4 +135,4 @@ const sendB2BBookingReminder = async ({ userId, jobType }, deleteJob) => {
   deleteJob();
 };
 
-export default sendB2BBookingReminder;
+export default sendB2B2CBookingReminder;

@@ -8,12 +8,12 @@ const menteeInfoQuery = (userId) => `
       studentProfile{
         id
         grade
+        batch {
+          id
+        }
         parents{
           id
           user{
-            campaign {
-              type
-            }
             id
             name
             email
