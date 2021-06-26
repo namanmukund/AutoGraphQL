@@ -29,28 +29,26 @@ const fetchMentorMenteeSessions = async () => {
 };
 
 // eslint-disable-next-line no-unused-vars
-const fetchMentorSessions = async () => {
+const fetchMenteeSessions = async () => {
   const query = `
             {
-              mentorSessions(first:1000){
+              menteeSessions(first:1000){
                 id
                 course{
                   id
                 }
-                mentorMenteeSessions{
-                  topic{
+                topic{
+                  id
+                  courses{
                     id
-                    courses{
-                      id
-                      title
-                    }
+                    title
                   }
                 }
               }
             }
           `;
   const sessions = await callLocalGraphqlApi(query);
-  return get(sessions, 'data.mentorSessions', []);
+  return get(sessions, 'data.menteeSessions', []);
 };
 
 // eslint-disable-next-line no-unused-vars
@@ -95,11 +93,11 @@ const updateMentorMenteeSession = async (sessionId, courseConnectId, sessionStat
 };
 
 // eslint-disable-next-line no-unused-vars
-const updateMentorSession = async (sessionId, courseConnectId) => {
+const updateMenteeSession = async (sessionId, courseId) => {
   const mutation = `
       mutation{
           updateMentorSession(id: "${sessionId}",
-          courseConnectId: "${courseConnectId}"
+          courseConnectId: "${courseId}"
           ){
             id
           }
@@ -126,74 +124,71 @@ const updateBatchSession = async (sessionId, courseConnectId) => {
 
 const updateCourse = async () => {
   /*
-    Uncomment below to update course in mentorMenteeSessions
+    update course in mentorMenteeSessions
   */
-  // let mm_sessions_length = 0;
-  // do {
-  //   // eslint-disable-next-line no-await-in-loop
-  //   const mm_sessions = await fetchMentorMenteeSessions();
-  //   mm_sessions_length = mm_sessions.length;
-  //   // eslint-disable-next-line no-restricted-syntax
-  //   for (const session of mm_sessions) {
-  //     const sessionId = get(session, 'id');
-  //     const courseId = get(session, 'topic.courses[0].id');
-  //     const sessionStatus = get(session, 'sessionStatus');
-  //     const course = get(session, 'course');
-  //     console.log(`>>>>> Checking : ${sessionId}, with courseId : ${courseId}, sessionStatus: ${sessionStatus}`);
-  //     if (sessionId && courseId && !course) {
-  //       // eslint-disable-next-line no-await-in-loop
-  //       await updateMentorMenteeSession(sessionId, courseId, sessionStatus);
-  //       console.log(`>>>>> Updated session id : ${sessionId}, with course : ${session.topic.courses[0].title}`);
-  //     }
-  //   }
-  // } while (mm_sessions_length === 1000);
-  // console.log('>>>>> Finished updating courses in mentorMenteeSessions!!!');
+  let mm_sessions_length = 0;
+  do {
+    // eslint-disable-next-line no-await-in-loop
+    const mm_sessions = await fetchMentorMenteeSessions();
+    mm_sessions_length = mm_sessions.length;
+    // eslint-disable-next-line no-restricted-syntax
+    for (const session of mm_sessions) {
+      const sessionId = get(session, 'id');
+      const courseId = get(session, 'topic.courses[0].id');
+      const sessionStatus = get(session, 'sessionStatus');
+      const course = get(session, 'course');
+      console.log(`>>>>> Checking : ${sessionId}, with courseId : ${courseId}, sessionStatus: ${sessionStatus}`);
+      if (sessionId && courseId && !course) {
+        // eslint-disable-next-line no-await-in-loop
+        await updateMentorMenteeSession(sessionId, courseId, sessionStatus);
+        console.log(`>>>>> Updated session id : ${sessionId}, with course : ${session.topic.courses[0].title}`);
+      }
+    }
+  } while (mm_sessions_length === 1000);
+  console.log('>>>>> Finished updating courses in mentorMenteeSessions!!!');
   /*
-      Uncomment below to update course in mentorSessions
+      update course in mentorSessions
     */
-  // let m_sessions_length = 0;
-  // do {
-  //   // eslint-disable-next-line no-await-in-loop
-  //   const m_sessions = await fetchMentorSessions();
-  //   m_sessions_length = m_sessions.length;
-  //   // eslint-disable-next-line no-restricted-syntax
-  //   for (const session of m_sessions) {
-  //     const sessionId = get(session, 'id');
-  //     const courseId = get(session, 'mentorMenteeSessions[0].topic.courses[0].id');
-  //     // const sessionStatus = get(session, 'sessionStatus');
-  //     const course = get(session, 'course');
-  //     console.log(`>>>>> Checking : ${sessionId}, with courseId : ${courseId}`);
-  //     if (sessionId && courseId && !course) {
-  //       // eslint-disable-next-line no-await-in-loop
-  //       await updateMentorSession(sessionId, courseId);
-  //       console.log(`>>>>> Updated session id : ${sessionId}, with course : ${session.mentorMenteeSessions[0].topic.courses[0].title}`);
-  //     }
-  //   }
-  // } while (m_sessions_length === 1000);
-  // console.log('>>>>> Finished updating courses in mentorSessions!!!');
-
+  let m_sessions_length = 0;
+  do {
+    // eslint-disable-next-line no-await-in-loop
+    const m_sessions = await fetchMenteeSessions();
+    m_sessions_length = m_sessions.length;
+    // eslint-disable-next-line no-restricted-syntax
+    for (const session of m_sessions) {
+      const sessionId = get(session, 'id');
+      const courseId = get(session, 'topic.courses[0].id');
+      const course = get(session, 'course');
+      console.log(`>>>>> Checking : ${sessionId}, with courseId : ${courseId}`);
+      if (sessionId && courseId && !course) {
+        // eslint-disable-next-line no-await-in-loop
+        await updateMenteeSession(sessionId, courseId);
+        console.log(`>>>>> Updated session id : ${sessionId}, with course : ${session.topic.courses[0].title}`);
+      }
+    }
+  } while (m_sessions_length === 1000);
+  console.log('>>>>> Finished updating courses in mentorSessions!!!');
   /*
-     Uncomment below to update course in batchSessions
+     update course in batchSessions
    */
-
-  // let b_sessions_length = 0;
-  // do {
-  //   // eslint-disable-next-line no-await-in-loop
-  //   const b_sessions = await fetchBatchSessions();
-  //   b_sessions_length = b_sessions.length;
-  //   // eslint-disable-next-line no-restricted-syntax
-  //   for (const session of b_sessions) {
-  //     const sessionId = get(session, 'id');
-  //     const courseId = get(session, 'topic.courses[0].id');
-  //     const course = get(session, 'course');
-  //     console.log(`>>>>> Checking : ${sessionId}, with courseId : ${courseId}`);
-  //     if (sessionId && courseId && !course) {
-  //       // eslint-disable-next-line no-await-in-loop
-  //       await updateBatchSession(sessionId, courseId);
-  //       console.log(`>>>>> Updated session id : ${sessionId}, with course : ${session.topic.courses[0].title}`);
-  //     }
-  //   }
-  // } while (b_sessions_length === 1000);
-  // console.log('>>>>> Finished updating courses in batchSessions!!!');
+  let b_sessions_length = 0;
+  do {
+    // eslint-disable-next-line no-await-in-loop
+    const b_sessions = await fetchBatchSessions();
+    b_sessions_length = b_sessions.length;
+    // eslint-disable-next-line no-restricted-syntax
+    for (const session of b_sessions) {
+      const sessionId = get(session, 'id');
+      const courseId = get(session, 'topic.courses[0].id');
+      const course = get(session, 'course');
+      console.log(`>>>>> Checking : ${sessionId}, with courseId : ${courseId}`);
+      if (sessionId && courseId && !course) {
+        // eslint-disable-next-line no-await-in-loop
+        await updateBatchSession(sessionId, courseId);
+        console.log(`>>>>> Updated session id : ${sessionId}, with course : ${session.topic.courses[0].title}`);
+      }
+    }
+  } while (b_sessions_length === 1000);
+  console.log('>>>>> Finished updating courses in batchSessions!!!');
 };
 export default updateCourse;
