@@ -217,7 +217,6 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   }
   /** Update MenteeMentorSession If Session Completed  */
   if (prevSessionStatus === 'completed' || get(input, 'sessionStatus') === 'completed') {
-    const menteeId = get(menteeSession, 'data.menteeSession.user.id');
     const userPaymentPlanData = await userPaymentPlanQuery(`{user_some:{id:"${menteeId}"}}`);
     if (userPaymentPlanData && userPaymentPlanData.id) {
       const updateObject = {};
