@@ -7,6 +7,7 @@ import forceUpdateTypeNames from './forceUpdateTypeNames';
 import forceDeleteTypeNames from './forceDeleteTypeNames';
 import regexValidation from './regexValidation';
 import loginType from './loginType';
+import { meWatiSMS, usWatiSMS } from './messagingText';
 
 const TMS = 'tekieTms';
 const TLA = 'tekieLearningApp';
@@ -336,6 +337,21 @@ const blockBasedProjectType = {
   practice: 'practice',
 };
 
+const emailText = {
+  instagramLink: {
+    india: 'https://instagram.com/tekie.in',
+    default: 'https://www.instagram.com/tekie.us/',
+  },
+  tekieLink: {
+    india: 'https://www.tekie.in',
+    default: 'https://www.tekie.us',
+  },
+  tekieText: {
+    india: 'VISIT TEKIE.IN',
+    default: 'VISIT TEKIE.US',
+  },
+};
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export const MENTOR_REPORT_COUNTRY = 'india';
@@ -420,4 +436,7 @@ export {
   childTopicComponents,
   OLD_COURSE_ID,
   blockBasedProjectType,
+  emailText,
+  meWatiSMS,
+  usWatiSMS,
 };
