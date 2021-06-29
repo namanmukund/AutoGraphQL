@@ -4,7 +4,6 @@ import callLocalGraphqlApi from '../../../src/api/callLocalGraphqlApi';
 import getMentorCodingLanguages from '../../../src/autoGenerate/graphql/resolvers/utils/getMentorCodingLanguages';
 import sendTransactionalEmail from '../../../src/autoGenerate/graphql/resolvers/utils/sendTransactionalEmail';
 import getFullFilePath from '../../getFullFilePath';
-import getSlotLabel from '../../getSlotLabel';
 import sendWhatsAppTemplateMessage from '../../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
 import getMenteeSessions from '../../../src/autoGenerate/graphql/postHookFunctions/utils/getMenteeSessions';
 import getSelectedSlotsTime from '../../../src/autoGenerate/graphql/preHookFunctions/validation/utils/getSelectedSlotsTime';
@@ -98,7 +97,7 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
   if (!get(mentorMenteeSession, 'id')) {
     deleteJob();
     return;
-  };
+  }
   const parent = get(res, 'data.user.studentProfile.parents[0].user', {});
   const parentEmail = get(parent, 'email', {});
   const country = get(parent, 'country', {});

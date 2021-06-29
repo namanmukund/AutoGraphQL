@@ -187,7 +187,7 @@ const sendB2CUserWithBookingDate = async (user, userId, code, timeTable, parentN
       parentName,
       schoolName,
       startTime,
-      phoneNumber: get(user, 'phone.countryCode') + get(user, 'phone.number');
+      phoneNumber: get(user, 'phone.countryCode') + get(user, 'phone.number'),
     }, {
       subject: `Here's ${studentName}'s Pass for Tekie`,
       emailTemplate: 'textWelcomeMailAfterBooking',
@@ -245,7 +245,7 @@ const sendB2CUserWithBookingDate = async (user, userId, code, timeTable, parentN
   addToSchedule('B2CSessionReminderWati', schedule.reminderWati(slotNumber, bookingDate), { userId, menteeId });
 };
 
-const sendB2B2CWithBookingDate = async (user, userId, code, timeTable, parentName, studentName, schoolName, phone, country) => {
+const sendB2B2CWithBookingDate = async (user, userId, code, timeTable, parentName, studentName, schoolName, phone) => {
   const batchId = get(user, 'parentProfile.children[0].batch.id');
   if (get(user, 'isBookSessionReminderSent')) return;
   const { bookingDate, ...slots } = timeTable;

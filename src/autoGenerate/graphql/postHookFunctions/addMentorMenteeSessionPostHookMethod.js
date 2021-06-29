@@ -5,7 +5,6 @@ import getTopicInfo from './utils/getTopicInfo';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import extractMentorMenteeSessionAndSendMessage from './utils/extractMentorMenteeSessionAndSendMessage';
 import { backendApps } from '../../../../constants';
-import sendBookingReminderOrConfirmationB2BC from './utils/sendBookingReminderOrConfirmationB2B2C';
 
 const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
   // don't do anything if it is done through backend
