@@ -80,11 +80,10 @@ const signupOrLoginViaOtp = async (
     // create user if it doesn't exist and phone is passed in input else throw error
     if (input.phone) {
       const modelMutations = new MutationController(typeName, { bypass: true });
-      let userRole = PARENT
+      let userRole = PARENT;
       if (input.role === 'schoolAdmin') {
-        userRole = 'schoolAdmin'
+        userRole = 'schoolAdmin';
       }
-      console.log('asfasf', userRole)
       const newUser = {
         phone: {
           number: input.phone.number,
