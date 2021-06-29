@@ -85,7 +85,7 @@ const signupOrLoginViaOtp = async (
           number: input.phone.number,
           countryCode: input.phone.countryCode,
         },
-        role: PARENT,
+        role: get(input, 'role', PARENT),
       };
       if (input.campaignId) {
         newUser.campaign = {
