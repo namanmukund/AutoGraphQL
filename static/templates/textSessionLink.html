@@ -1,11 +1,13 @@
 Dear <%= parentName %>,
 
-The sessions starts in 1 hour <%= sessionDateTime %>
+The sessions starts in 3 hour <%= sessionDateTime %>
 
 Kindly join the with this link - <%= sessionLink %>
 
-Meeting ID - <%= meetingId %>
-Password - <%= meetingPassword %>
+<% if (meetingId) { %>
+  Meeting ID - <%= meetingId %>
+  Password - <%= meetingPassword %>
+<% } %>
 
 <span style='font-weight: bold'>Session 1</span>: Intro to Programming (Ep 1):
 Code your first program in Python

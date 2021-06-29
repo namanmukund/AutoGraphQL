@@ -7,6 +7,7 @@ import forceUpdateTypeNames from './forceUpdateTypeNames';
 import forceDeleteTypeNames from './forceDeleteTypeNames';
 import regexValidation from './regexValidation';
 import loginType from './loginType';
+import { meWatiSMS, usWatiSMS } from './messagingText';
 
 const TMS = 'tekieTms';
 const TLA = 'tekieLearningApp';
@@ -338,8 +339,8 @@ const blockBasedProjectType = {
 
 const emailText = {
   instagramLink: {
-    india: 'instaindia',
-    default: 'instadefault',
+    india: 'https://instagram.com/tekie.in',
+    default: 'https://www.instagram.com/tekie.us/',
   },
   tekieLink: {
     india: 'https://www.tekie.in',
@@ -436,4 +437,6 @@ export {
   OLD_COURSE_ID,
   blockBasedProjectType,
   emailText,
+  meWatiSMS,
+  usWatiSMS,
 };

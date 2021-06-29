@@ -10,6 +10,8 @@ import sendTransactionalEmail from '../../resolvers/utils/sendTransactionalEmail
 import updateBookSessionReminderStatus from './updateBookSessionReminderStatus';
 import getSelectedSlotsTime from '../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import getIntlDateTime from '../../../../../utils/timeZoneDiff';
+import { sendTextSms } from '../../../../sms';
+import { meWatiSMS, usWatiSMS } from '../../../../../constants';
 
 const TIMEOUT = 1000 * 60;
 
@@ -97,8 +99,14 @@ const schedule = {
   reminderWati: (slotNumber, bookingDate) => new Date(moment(bookingDate).toDate().setHours(slotNumber - 1, 30, 0, 0)),
 };
 
-const sendB2CNoEmail = (phone) => {
-  sendWhatsAppTemplateMessage(phone, 'demo_registration_confirmation1', phone, []);
+const sendB2CNoEmail = (phone, country) => {
+  if (country === 'india') {
+    sendWhatsAppTemplateMessage(phone, 'demo_registration_confirmation1', phone, []);
+  } else if (country === 'usa') {
+    sendTextSms(`+${phone}`, usWatiSMS.trialRegistrationConfirmation);
+  } else {
+    sendTextSms(`+${phone}`, meWatiSMS.trialRegistrationConfirmation);
+  }
 };
 
 const sendB2B2CNoEmail = (phone, schoolName, code, bookingLink, user, userId) => {
@@ -111,18 +119,38 @@ const sendB2B2CNoEmail = (phone, schoolName, code, bookingLink, user, userId) =>
 };
 
 const sendB2CWithEmail = (user, studentName, phone) => {
-  sendWhatsAppTemplateMessage(phone, 'demo_registration_confirmation', phone, [
-    { name: 'parent_name', value: user.name },
-    { name: 'student_name', value: studentName },
-  ]);
-  sendTransactionalEmail({
-    parentName: user.name,
-    studentName,
-    parentEmail: user.email,
-  }, {
-    emailTemplate: 'B2CRegistrationWithoutBooking',
-    subject: 'Welcome to Tekie, your next steps!',
-  }, get(user, 'country'));
+  const country = get(user, 'country');
+
+  if (country === 'india') {
+    sendWhatsAppTemplateMessage(phone, 'demo_registration_confirmation', phone, [
+      { name: 'parent_name', value: user.name },
+      { name: 'student_name', value: studentName },
+    ]);
+  } else if (country === 'usa') {
+    sendTextSms(`+${phone}`, usWatiSMS.trialRegistrationConfirmation);
+  } else {
+    sendTextSms(`+${phone}`, meWatiSMS.trialRegistrationConfirmation);
+  }
+
+  if (country === 'usa') {
+    sendTransactionalEmail({
+      parentName: user.name,
+      studentName,
+      parentEmail: user.email,
+    }, {
+      emailTemplate: 'textWelcomeEmail',
+      subject: 'Welcome to Tekie, your next steps!',
+    }, country);
+  } else {
+    sendTransactionalEmail({
+      parentName: user.name,
+      studentName,
+      parentEmail: user.email,
+    }, {
+      emailTemplate: 'B2CRegistrationWithoutBooking',
+      subject: 'Welcome to Tekie, your next steps!',
+    }, country);
+  }
   addToSchedule('sendNextDayBookReminder', schedule.nextDaySessionReminder(), { userId, code });
 };
 
@@ -150,27 +178,49 @@ const sendB2CUserWithBookingDate = async (user, userId, code, timeTable, parentN
   const { dateObject, startTime } = getIntlDateTime(slotNumber);
   const sessionDate = moment(dateObject).format('dddd, Do MMMM');
   await updateBookSessionReminderStatus(get(user, 'id'), true);
-  sendTransactionalEmail({
-    parentEmail: user.email,
-    sessionDate,
-    studentName,
-    parentName,
-    schoolName,
-    startTime,
-  }, {
-    subject: `Here's ${studentName}'s Pass for Tekie`,
-    emailTemplate: 'B2CRegistrationWithBooking',
-  }, get(user, 'country'));
+  const country = get(user, 'country');
+  if (country === 'usa') {
+    sendTransactionalEmail({
+      parentEmail: user.email,
+      sessionDate,
+      studentName,
+      parentName,
+      schoolName,
+      startTime,
+      phoneNumber: get(user, 'phone.countryCode') + get(user, 'phone.number');
+    }, {
+      subject: `Here's ${studentName}'s Pass for Tekie`,
+      emailTemplate: 'textWelcomeMailAfterBooking',
+    }, get(user, 'country'));
+  } else {
+    sendTransactionalEmail({
+      parentEmail: user.email,
+      sessionDate,
+      studentName,
+      parentName,
+      schoolName,
+      startTime,
+    }, {
+      subject: `Here's ${studentName}'s Pass for Tekie`,
+      emailTemplate: 'B2CRegistrationWithBooking',
+    }, get(user, 'country'));
+  }
 
-  const bookTemplate = 'demo_booking_confirmation';
-  const parameters = [
-    { name: 'parent_name', value: parentName },
-    { name: 'student_name', value: studentName },
-    { name: 'session_date', value: moment(bookingDate).format('dddd, Do MMMM') },
-    { name: 'session_time', value: startTime },
-    { name: 'school_name', value: schoolName },
-  ];
-  sendWhatsAppTemplateMessage(phone, bookTemplate, phone, parameters);
+  if (country === 'india') {
+    const bookTemplate = 'demo_booking_confirmation';
+    const parameters = [
+      { name: 'parent_name', value: parentName },
+      { name: 'student_name', value: studentName },
+      { name: 'session_date', value: moment(bookingDate).format('dddd, Do MMMM') },
+      { name: 'session_time', value: startTime },
+      { name: 'school_name', value: schoolName },
+    ];
+    sendWhatsAppTemplateMessage(phone, bookTemplate, phone, parameters);
+  } else if (country === 'usa') {
+    sendTextSms(`+${phone}`, usWatiSMS.bookingConfirmation(studentName, `${moment(bookingDate).format('dddd, Do MMMM')}, ${startTime}`));
+  } else {
+    sendTextSms(`+${phone}`, meWatiSMS.bookingConfirmation(studentName, `${moment(bookingDate).format('dddd, Do MMMM')}, ${startTime}`));
+  }
 
   // todo
 
@@ -279,7 +329,7 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
 
     if (!user.email) {
       if (isB2CUser) {
-        sendB2CNoEmail(phone);
+        sendB2CNoEmail(phone, user.country);
       } else if (isB2B2CUser) {
         sendB2B2CNoEmail(phone, schoolName, code, bookingLink, user, userId);
       }

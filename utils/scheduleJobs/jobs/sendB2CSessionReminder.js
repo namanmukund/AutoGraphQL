@@ -9,6 +9,8 @@ import sendWhatsAppTemplateMessage from '../../../src/autoGenerate/utils/sendWha
 import getMenteeSessions from '../../../src/autoGenerate/graphql/postHookFunctions/utils/getMenteeSessions';
 import getSelectedSlotsTime from '../../../src/autoGenerate/graphql/preHookFunctions/validation/utils/getSelectedSlotsTime';
 import getIntlDateTime from '../../timeZoneDiff';
+import { sendTextSms } from '../../../src/sms';
+import { meWatiSMS, usWatiSMS } from '../../../constants';
 
 const USER = (id) => `{
   user(id: "${id}") {
@@ -93,7 +95,10 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
   const res = await callLocalGraphqlApi(USER(userId));
 
   const mentorMenteeSession = await getMentorMenteeSession(menteeSession.get('id'));
-  if (!get(mentorMenteeSession, 'id')) return;
+  if (!get(mentorMenteeSession, 'id')) {
+    deleteJob();
+    return;
+  };
   const parent = get(res, 'data.user.studentProfile.parents[0].user', {});
   const parentEmail = get(parent, 'email', {});
   const country = get(parent, 'country', {});
@@ -116,6 +121,7 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
   const meetingId = get(mentorInfo, 'meetingId') || 3;
   const meetingPassword = get(mentorInfo, 'meetingPassword') || 3;
   const sessionLink = get(mentorInfo, 'googleMeetLink') ? get(mentorInfo, 'googleMeetLink') : get(mentorInfo, 'sessionLink');
+  const mentorPhoneNumber = get(mentorInfo, 'phone.countryCode') + get(mentorInfo, 'phone.number');
   const mentorProfilePic = getFullFilePath(get(mentor, 'profilePic.uri', ''));
   const schoolName = getFullFilePath(get(mentor, 'school.name', ''));
   const codingLanguages = getMentorCodingLanguages(get(mentorInfo, 'codingLanguages'), []) || 'Python';
@@ -140,8 +146,13 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
         endTime,
         mentorProfilePic,
         mentorName,
+        sessionDateTime,
+        sessionLink,
         experienceYear,
+        meetingId,
+        meetingPassword,
         codingLanguages,
+        mentorPhoneNumber,
       }, {
         emailTemplate: 'textMentorDetails',
         subject: 'Meet your mentor for the Session!',
@@ -156,8 +167,13 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
         endTime,
         mentorProfilePic,
         mentorName,
+        sessionLink,
         experienceYear,
+        sessionDateTime,
+        meetingId,
+        meetingPassword,
         codingLanguages,
+        mentorPhoneNumber,
       }, {
         emailTemplate: 'textMentorDetails',
         subject: 'Meet your mentor for the Session!',
@@ -186,48 +202,80 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
         subject: `${studentName}, Your link to join Tekie.`,
       }, country);
     }
-    sendWhatsAppTemplateMessage(phone, 'demo_reminder_1', parentName, [
-      { name: 'student_name', value: studentName },
-      { name: 'session_date', value: date },
-      { name: 'session_time', value: startTime },
-      { name: 'session_link', value: sessionLink },
-      { name: 'meeting_id', value: meetingId },
-      { name: 'meeting_password', value: meetingPassword },
-    ]);
+    if (country === 'india') {
+      sendWhatsAppTemplateMessage(phone, 'demo_reminder_1', parentName, [
+        { name: 'student_name', value: studentName },
+        { name: 'session_date', value: date },
+        { name: 'session_time', value: startTime },
+        { name: 'session_link', value: sessionLink },
+        { name: 'meeting_id', value: meetingId },
+        { name: 'meeting_password', value: meetingPassword },
+      ]);
+    }
   } else if (jobType === 'B2CSessionReminderWati') {
-    sendWhatsAppTemplateMessage(phone, 'demo_reminder_2', parentName, [
-      { name: 'student_name', value: studentName },
-      { name: 'school_name', value: schoolName },
-      { name: 'session_link', value: sessionLink },
-      { name: 'meeting_id', value: meetingId },
-      { name: 'meeting_password', value: meetingPassword },
-    ]);
+    if (country === 'india') {
+      sendWhatsAppTemplateMessage(phone, 'demo_reminder_2', parentName, [
+        { name: 'student_name', value: studentName },
+        { name: 'school_name', value: schoolName },
+        { name: 'session_link', value: sessionLink },
+        { name: 'meeting_id', value: meetingId },
+        { name: 'meeting_password', value: meetingPassword },
+      ]);
+    } else if (country === 'usa') {
+      sendTextSms(`+${phone}`, usWatiSMS.sessionReminder(studentName, startTime));
+    } else {
+      sendTextSms(`+${phone}`, meWatiSMS.sessionReminder(studentName, startTime));
+    }
   } else {
-    sendTransactionalEmail({
-      parentEmail,
-      parentName,
-      studentName,
-      bookingDate: date,
-      startTime,
-      endTime,
-      mentorProfilePic,
-      mentorName,
-      experienceYear,
-      codingLanguages,
-      sessionLink,
-    }, {
-      emailTemplate: 'B2CSessionLinkWithMentor',
-      subject: `${studentName}, Your link to join Tekie Coding Carnival.`,
-    }, country);
-
-    sendWhatsAppTemplateMessage(phone, 'demo_reminder_1', parentName, [
-      { name: 'student_name', value: studentName },
-      { name: 'session_date', value: date },
-      { name: 'session_time', value: startTime },
-      { name: 'session_link', value: sessionLink },
-      { name: 'meeting_id', value: meetingId },
-      { name: 'meeting_password', value: meetingPassword },
-    ]);
+    if (country === 'usa') {
+      sendTransactionalEmail({
+        parentEmail,
+        parentName,
+        studentName,
+        bookingDate: date,
+        startTime,
+        endTime,
+        mentorProfilePic,
+        mentorName,
+        sessionLink,
+        experienceYear,
+        sessionDateTime,
+        meetingId,
+        meetingPassword,
+        codingLanguages,
+        mentorPhoneNumber,
+      }, {
+        emailTemplate: 'textMentorDetails',
+        subject: `${studentName}, Your link to join Tekie.`,
+      }, country);
+    } else {
+      sendTransactionalEmail({
+        parentEmail,
+        parentName,
+        studentName,
+        bookingDate: date,
+        startTime,
+        endTime,
+        mentorProfilePic,
+        mentorName,
+        experienceYear,
+        codingLanguages,
+        sessionLink,
+      }, {
+        emailTemplate: 'B2CSessionLinkWithMentor',
+        subject: `${studentName}, Your link to join Tekie Coding Carnival.`,
+      }, country);
+    }
+    if (country === 'india') {
+      sendWhatsAppTemplateMessage(phone, 'demo_reminder_1', parentName, [
+        { name: 'student_name', value: studentName },
+        { name: 'session_date', value: date },
+        { name: 'session_time', value: startTime },
+        { name: 'session_link', value: sessionLink },
+        { name: 'meeting_id', value: meetingId },
+        { name: 'meeting_password', value: meetingPassword },
+      ]);
+    }
   }
   deleteJob();
 };
