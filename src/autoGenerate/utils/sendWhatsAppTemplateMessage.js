@@ -7,8 +7,10 @@ const sendWhatsAppTemplateMessage = async (
   broadcast_name,
   parameters,
 ) => {
-  if (process.env.NODE_ENV !== 'production') return null;
   if (!phoneNumber.startsWith('91')) return null;
+  /* eslint-disable no-param-reassign */
+  phoneNumber = process.env.NODE_ENV === 'production' ? phoneNumber : '918368246974';
+  broadcast_name = process.env.NODE_ENV === 'production' ? broadcast_name : 'Test User';
   const bodyJson = {
     template_name,
     broadcast_name: broadcast_name || 'Tekie',

@@ -336,6 +336,21 @@ const blockBasedProjectType = {
   practice: 'practice',
 };
 
+const emailText = {
+  instagramLink: {
+    india: 'instaindia',
+    default: 'instadefault',
+  },
+  tekieLink: {
+    india: 'https://www.tekie.in',
+    default: 'https://www.tekie.us',
+  },
+  tekieText: {
+    india: 'VISIT TEKIE.IN',
+    default: 'VISIT TEKIE.US',
+  },
+};
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export const MENTOR_REPORT_COUNTRY = 'india';
@@ -420,4 +435,5 @@ export {
   childTopicComponents,
   OLD_COURSE_ID,
   blockBasedProjectType,
+  emailText,
 };

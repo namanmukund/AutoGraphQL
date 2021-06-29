@@ -11,6 +11,7 @@ import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMess
 import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
 import getIntlDateTime from '../../../../../utils/timeZoneDiff';
 import updateBookSessionReminderStatus from './updateBookSessionReminderStatus';
+import sendBookingReminderOrConfirmationB2BC from './sendBookingReminderOrConfirmationB2B2C';
 
 const menteeInfoQuery = (userId) => `
   query{
@@ -145,6 +146,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
   const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId));
   const menteeInfo = get(userInfo, 'data.user');
   const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
+  const parentId = get(parentInfo, 'id');
   const timezone = (get(menteeInfo, 'timezone') && get(menteeInfo, 'timezone') !== 'undefined') ? get(menteeInfo, 'timezone') : 'Asia/Kolkata';
   const {
     startTime, endTime, date, dateObject,
@@ -172,96 +174,19 @@ const extractMenteeSessionInfoAndSendEmail = async (
   if (topicThumbnail) {
     menteeObj.topicThumbnail = `${process.env.FILE_BASE_URL}/${topicThumbnail}`;
   }
-
-  let subject = '';
   menteeObj.prevBookingDate = '';
   menteeObj.previousStartTime = '';
 
   switch (action) {
     case 'add': {
-      if (menteeObj.country === 'india') {
-        subject = `Session Booked by ${menteeObj.name}`;
-      } else {
-        subject = 'Success! Tekie Demo Session on its way!';
-      }
+      sendBookingReminderOrConfirmationB2BC(parentId, true);
       break;
     }
     case 'update': {
-      menteeObj.prevBookingDate = getFormatedDate(prevBookingDate);
-      const previousSlotNumber = prevSlotTimeStringArray[0].split('slot')[1];
-      const { startTime: previousStartTime, endTime: previousEndTime } = getSlotLabel(previousSlotNumber);
-      menteeObj.previousStartTime = previousStartTime;
-      menteeObj.previousEndTime = previousEndTime;
-      if (menteeObj.country === 'india') {
-        subject = `Session Updated by ${menteeObj.name}`;
-      } else {
-        subject = 'Success! Tekie Demo Session on its way!';
-      }
-      break;
-    }
-    case 'delete': {
-      subject = `Session Deleted by ${menteeObj.name}`;
+      sendBookingReminderOrConfirmationB2BC(parentId, true);
       break;
     }
     default:
-  }
-  // send email
-  if (process.env.NODE_ENV === 'production') {
-    sendBookedSessionEmailToTekie(subject, menteeObj, action);
-    sendBookedSessionEmailToParent(subject, menteeObj, action);
-    if (['add', 'update'].includes(action) && get(topicInfo, 'data.topic.order') === 1) {
-      // send whatsapp emailTemplate message
-      const {
-        parentName, parentNumber, countryCode, name,
-      } = menteeObj;
-      const parameters = [{
-        name: 'parent_name',
-        value: parentName,
-      },
-      {
-        name: 'student_name',
-        value: name,
-      },
-      {
-        name: 'session_date',
-        value: date,
-      },
-      {
-        name: 'session_time',
-        value: startTime,
-      },
-      {
-        name: 'phone',
-        value: `${countryCode}-${parentNumber}`,
-      },
-      ];
-      const phone = countryCode.split('+')[1] + parentNumber;
-      // const phone = 919654347463;
-      let whatsAppTemplate = '';
-      if (menteeObj.country === 'india') {
-        whatsAppTemplate = transactionalMessageBody.bookingConfirmation;
-      } else if (menteeObj.isBookSessionReminderSent) {
-        if (menteeObj.isSessionBefore3Hours) {
-          whatsAppTemplate = transactionalMessageBody.bookingConfirmationInternational;
-        } else {
-          whatsAppTemplate = transactionalMessageBody.bookingConfirmationSoonInternational;
-        }
-      } else {
-        // eslint-disable-next-line no-lonely-if
-        if (menteeObj.isSessionBefore3Hours) {
-          whatsAppTemplate = transactionalMessageBody.bookingWithWelcomeConfirmationInternational;
-        } else {
-          whatsAppTemplate = transactionalMessageBody.bookingWithWelcomeSoonConfirmationInternational;
-        }
-      }
-      updateBookSessionReminderStatus(menteeObj.id, true);
-      await sendWhatsAppTemplateMessage(
-        phone,
-        whatsAppTemplate,
-        parentName,
-        parameters,
-      );
-    }
   }
 };
 
