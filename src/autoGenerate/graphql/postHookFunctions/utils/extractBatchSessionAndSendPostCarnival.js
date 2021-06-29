@@ -88,6 +88,7 @@ const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob,
         Phone: parentPhone,
         mx_Demo_Attendance: 'Present',
         mx_Success_Manager_Name: salesExec,
+        OwnerId: salesExec,
         mx_Mentor_Name: mentorName,
       };
       activityInput = {
