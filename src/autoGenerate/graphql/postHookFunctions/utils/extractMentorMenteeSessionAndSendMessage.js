@@ -7,9 +7,9 @@ import getLongDate from '../../../../../utils/getLongDate';
 import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
 
 const mentorInfoQuery = (mentorSessionId) => `
-  query{
-    mentorSession(id: "${mentorSessionId}"){
-      user{
+  query {
+    mentorSession(id: "${mentorSessionId}") {
+      user {
         id
         name
         phone{
