@@ -7,10 +7,13 @@ const setSessionCompletedLeadsquared = async (userInfo, mentorName, salesExec) =
   const leadSquaredInput = {
     Phone: phoneNumber,
     mx_Session_Taken_Date_Time: moment().utc().format('YYYY-MM-DD HH:mm:ss'),
-    mx_Success_Manager_Name: salesExec,
     mx_Mentor_Name: mentorName,
-    OwnerId: salesExec,
   };
+
+  if (salesExec) {
+    leadSquaredInput.mx_Success_Manager_Name = salesExec;
+    // leadSquaredInput.OwnerId = salesExec;
+  }
   const activityInput = {
     ActivityEvent: 105,
     Fields: [

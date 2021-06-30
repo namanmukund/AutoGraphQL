@@ -1,5 +1,3 @@
-import { testMailingList } from '../../../constants';
-
 /* eslint-disable camelcase */
 const fetch = require('node-fetch');
 
@@ -21,14 +19,7 @@ const sendWhatsAppTemplateMessage = async (
   };
   const url = process.env.WATI_API_URL + phoneNumber;
 
-  fetch(url, { method: 'POST', headers, body: JSON.stringify(bodyJson) });
-
-  // test wati for log
-  if (testMailingList[process.env.NODE_ENV] && testMailingList[process.env.NODE_ENV].phone && testMailingList[process.env.NODE_ENV].phone.length) {
-    testMailingList[process.env.NODE_ENV].email.phone((phone) => {
-      fetch(process.env.WATI_API_URL + phone, { method: 'POST', headers, body: JSON.stringify({ ...bodyJson, broadcast_name: 'Test' }) });
-    });
-  }
+  return fetch(url, { method: 'POST', headers, body: JSON.stringify(bodyJson) });
 };
 
 export default sendWhatsAppTemplateMessage;

@@ -111,7 +111,7 @@ const updateSalesOperationLeadSquared = async (salesOperationId, userInfo) => {
     ActivityEvent: 106,
   };
   const fields = [];
-  if (get(data, 'leadStatus')) {
+  if (get(data, 'leadStatus') && get(data, 'leadStatus') !== 'Pipeline') {
     fields.push({
       SchemaName: 'mx_Custom_3',
       Value: capitalize(get(data, 'leadStatus')),
