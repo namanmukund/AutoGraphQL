@@ -11,6 +11,7 @@ const SignupOrLoginUserInput = `
     source: UserOriginSource
     country: String
     timezone: String
+    role: UserRole @defaultValue(value: "parent")
   }`;
 
 export default SignupOrLoginUserInput;

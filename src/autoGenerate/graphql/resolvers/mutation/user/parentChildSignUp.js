@@ -34,7 +34,6 @@ import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentCh
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import getUserPasswordObject from './utils/getUserPasswordObject';
-import sendTransactionalEmail from '../../utils/sendTransactionalEmail';
 
 const USER_TYPE = 'User';
 
@@ -366,20 +365,15 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     const res = await callLocalGraphqlApi(FETCH_CAMPAIGN(campaignId));
     leadSquaredParams.input.schoolName = get(res, 'data.campaign.school.name', '');
   }
+  if (schoolName) {
+    leadSquaredParams.input.schoolName = schoolName;
+  }
   const campaignType = get(campaign, 'type', '');
   if (campaignType) {
     leadSquaredParams.input.Vertical = campaignType.replace('Event', '');
   }
 
-  if (!campaignType && !schoolName) {
-    sendTransactionalEmail({
-      parentEmail,
-      parentName,
-    }, {
-      emailTemplate: 'WelcomeEmail',
-      subject: 'Welcome to Tekie, your next steps!',
-    });
-  }
+  leadSquaredParams.input.phone = get(input, 'parentPhone');
 
   parentChildSignupPostHookMethod(input, leadSquaredParams);
 

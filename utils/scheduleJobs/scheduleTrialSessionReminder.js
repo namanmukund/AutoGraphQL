@@ -96,6 +96,9 @@ const scheduleTrialSessionReminder = async () => {
           timezone
           studentProfile{
             id
+            batch {
+              id
+            }
             parents{
               id
               user{
@@ -132,6 +135,8 @@ const scheduleTrialSessionReminder = async () => {
         );
 
         const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
+        const isBatch = get(menteeInfo, 'studentProfile.batch.id');
+        if (isBatch) return;
         // eslint-disable-next-line no-await-in-loop
         const mentorMenteeSession = await getMentorMenteeSession(menteeSessionId);
         if (mentorMenteeSession && mentorMenteeSession.id) {
