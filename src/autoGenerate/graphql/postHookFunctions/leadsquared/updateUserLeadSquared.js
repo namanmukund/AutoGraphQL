@@ -40,9 +40,6 @@ const updateUserLeadSquared = async (input) => {
     const phone = await getPhoneNumber(input.id);
     leadSquaredInput.Phone = get(phone, 'countryCode') + get(phone, 'number');
   }
-  if (input.timezone) {
-    leadSquaredInput.mx_Timezone = input.timezone;
-  }
   if (input.email) {
     leadSquaredInput.EmailAddress = input.email;
   }

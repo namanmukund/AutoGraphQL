@@ -40,6 +40,7 @@ const USER_QUERY = (userId) => `
             name
           }
           user {
+            id
             name
           }
           batch {
@@ -71,51 +72,32 @@ const USER_QUERY = (userId) => `
   }
 `;
 
-// const schedule = {
-//   nextDaySessionReminder: () => {
-//     const oneDayAfter = moment().add(1, 'day').toDate();
-//     return new Date(oneDayAfter.setHours(17, 17, 0, 0));
-//   },
-//   firstFlow: {
-//     firstMail: (bookingDate) => new Date(moment(bookingDate).subtract(3, 'days').toDate().setHours(18, 3, 0, 0)),
-//     secondMail: (bookingDate) => new Date(moment(bookingDate).subtract(2, 'days').toDate().setHours(18, 11, 0, 0)),
-//     thirdMail: (slotNumber, bookingDate) => (slotNumber === 8 || slotNumber === 9
-//       ? new Date(moment(bookingDate).subtract(1, 'day').toDate().setHours(19, 49, 0, 0))
-//       : new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0))),
-//   },
-//   secondFlow: (slotNumber, bookingDate) => {
-//     if (slotNumber === 8 || slotNumber === 9) {
-//       const oneDayBeforeBookingTime = moment(bookingDate).subtract(1, 'day').toDate();
-//       return new Date(oneDayBeforeBookingTime.setHours(19, 49, 0, 0));
-//     }
-//     return new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0));
-//   },
-//   thirdFlow: {
-//     firstMail: (bookingDate) => new Date(moment(bookingDate).subtract(2, 'days').toDate().setHours(18, 11, 0, 0)),
-//     secondMail: (slotNumber, bookingDate) => (slotNumber === 8 || slotNumber === 9
-//       ? new Date(moment(bookingDate).subtract(1, 'day').toDate().setHours(19, 49, 0, 0))
-//       : new Date(moment(bookingDate).toDate().setHours(slotNumber - 2, 0, 0, 0))),
-//   },
-//   reminderWati: (slotNumber, bookingDate) => new Date(moment(bookingDate).toDate().setHours(slotNumber - 1, 30, 0, 0)),
-// };
 const schedule = {
   nextDaySessionReminder: () => {
     const oneDayAfter = moment().add(1, 'day').toDate();
-    return moment().add(30, 'minute');
+    return new Date(oneDayAfter.setHours(17, 17, 0, 0));
   },
   firstFlow: {
-    firstMail: (bookingDate) => moment().add(1, 'minute'),
-    secondMail: (bookingDate) => moment().add(90, 'seconds'),
-    thirdMail: (slotNumber, bookingDate) => moment().add(120, 'seconds'),
+    firstMail: (bookingDate) => new Date(moment(bookingDate).subtract(3, 'days').toDate().setHours(18, 3, 0, 0)),
+    secondMail: (bookingDate) => new Date(moment(bookingDate).subtract(2, 'days').toDate().setHours(18, 11, 0, 0)),
+    thirdMail: (slotNumber, bookingDate) => (slotNumber === 8 || slotNumber === 9
+      ? new Date(moment(bookingDate).subtract(1, 'day').toDate().setHours(19, 49, 0, 0))
+      : new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0))),
   },
   secondFlow: (slotNumber, bookingDate) => {
-    return moment().add(1, 'minute');
+    if (slotNumber === 8 || slotNumber === 9) {
+      const oneDayBeforeBookingTime = moment(bookingDate).subtract(1, 'day').toDate();
+      return new Date(oneDayBeforeBookingTime.setHours(19, 49, 0, 0));
+    }
+    return new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0));
   },
   thirdFlow: {
-    firstMail: (bookingDate) => moment().add(1, 'minute'),
-    secondMail: (slotNumber, bookingDate) => moment().add(90, 'seconds'),
+    firstMail: (bookingDate) => new Date(moment(bookingDate).subtract(2, 'days').toDate().setHours(18, 11, 0, 0)),
+    secondMail: (slotNumber, bookingDate) => (slotNumber === 8 || slotNumber === 9
+      ? new Date(moment(bookingDate).subtract(1, 'day').toDate().setHours(19, 49, 0, 0))
+      : new Date(moment(bookingDate).toDate().setHours(slotNumber - 2, 0, 0, 0))),
   },
-  reminderWati: (slotNumber, bookingDate) => moment().add(120, 'seconds'),
+  reminderWati: (slotNumber, bookingDate) => new Date(moment(bookingDate).toDate().setHours(slotNumber - 1, 30, 0, 0)),
 };
 
 const sendB2CNoEmail = (phone, country) => {
@@ -158,7 +140,7 @@ const sendB2CWithEmail = (user, studentName, phone) => {
       parentEmail: user.email,
     }, {
       emailTemplate: 'textWelcomeEmail',
-      subject: 'Welcome to Tekie, your next steps!',
+      subject: `${studentName} is one step away from starting their coding journey!`,
     }, country);
   } else {
     sendTransactionalEmail({
@@ -167,7 +149,7 @@ const sendB2CWithEmail = (user, studentName, phone) => {
       parentEmail: user.email,
     }, {
       emailTemplate: 'B2CRegistrationWithoutBooking',
-      subject: 'Welcome to Tekie, your next steps!',
+      subject: `${studentName} is one step away from starting their coding journey!`,
     }, country);
   }
   addToSchedule('sendNextDayBookReminder', schedule.nextDaySessionReminder(), { userId, code });
@@ -193,8 +175,8 @@ const sendB2B2CWithEmail = (user, phone, parentName, studentName, code, schoolNa
 
 const sendB2CUserWithBookingDate = async (user, userId, code, timeTable, parentName, studentName, schoolName, phone, menteeId) => {
   const { bookingDate, ...slots } = timeTable;
-  const slotNumber = getSelectedSlotsTime(bookingDate, slots, get(user, 'timezone'));
-  const { dateObject, startTime } = getIntlDateTime(slotNumber);
+  const slotNumber = get(getSelectedSlotsTime(slots), '[0]');
+  const { dateObject, startTime } = getIntlDateTime(bookingDate, slotNumber, get(user, 'timezone'));
   const sessionDate = moment(dateObject).format('dddd, Do MMMM');
   await updateBookSessionReminderStatus(get(user, 'id'), true);
   const country = get(user, 'country');
@@ -208,7 +190,7 @@ const sendB2CUserWithBookingDate = async (user, userId, code, timeTable, parentN
       startTime,
       phoneNumber: get(user, 'phone.countryCode') + get(user, 'phone.number'),
     }, {
-      subject: `Here's ${studentName}'s Pass for Tekie`,
+      subject: `${studentName}'s free coding class is confirmed for ${sessionDate} ${startTime}`,
       emailTemplate: 'textWelcomeMailAfterBooking',
     }, get(user, 'country'));
   } else {
@@ -220,7 +202,7 @@ const sendB2CUserWithBookingDate = async (user, userId, code, timeTable, parentN
       schoolName,
       startTime,
     }, {
-      subject: `Here's ${studentName}'s Pass for Tekie`,
+      subject: `${studentName}'s free coding class is confirmed for ${sessionDate} ${startTime}`,
       emailTemplate: 'B2CRegistrationWithBooking',
     }, get(user, 'country'));
   }
@@ -242,7 +224,6 @@ const sendB2CUserWithBookingDate = async (user, userId, code, timeTable, parentN
   }
 
   // todo
-
   if (
     getDays(bookingDate) > 3
     || (getDays(bookingDate) === 3 && slotNumber <= 17)
@@ -281,7 +262,7 @@ const sendB2B2CWithBookingDate = async (user, userId, code, timeTable, parentNam
     endTime: getSlotLabel(slotTime.replace('slot', '')).endTime.replace('00', '30'), // change this so that it can handle ::30
   }, {
     subject: `Here's ${studentName}'s Pass for Tekie Code Carnival`,
-    emailTemplate: 'B2CRegistrationWithBooking',
+    emailTemplate: 'CarnivalEmailBookingFinal',
   });
   const bookTemplate = moment().diff(moment(get(user, 'createdAt'))) < TIMEOUT ? 'workshop_registration_confirmation1' : 'workshop_booking_confirmation';
   const slotNumber = Number(slotTime.replace('slot', ''));
@@ -345,7 +326,9 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
       isB2CUser = false;
     }
     const isB2B2CUser = campaign.type === 'b2b2cEvent';
+    const studentId = get(user, 'parentProfile.children[0].user.id');
 
+    const menteeSessions = await getMenteSessions(studentId);
     if (!user.email) {
       if (isB2CUser) {
         sendB2CNoEmail(phone, user.country);
@@ -355,10 +338,8 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
       return;
     }
     const parentName = get(user, 'name');
-    const studentId = get(user, 'parentProfile.children[0].user.id');
     const studentName = get(user, 'parentProfile.children[0].user.name');
     const timeTable = get(user, 'parentProfile.children[0].batch.b2b2ctimeTable', {});
-    const menteeSessions = await getMenteSessions(studentId);
     const hasBookedSession = isB2B2CUser ? !!get(timeTable, 'bookingDate') : menteeSessions.length > 0;
     if (hasBookedSession) {
       if (!isBookSlot) return;
