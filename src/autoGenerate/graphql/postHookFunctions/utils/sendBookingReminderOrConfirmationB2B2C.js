@@ -13,7 +13,7 @@ import getIntlDateTime from '../../../../../utils/timeZoneDiff';
 import { sendTextSms } from '../../../../sms';
 import { meWatiSMS, usWatiSMS } from '../../../../../constants';
 
-const TIMEOUT = 5000 * 60;
+const TIMEOUT = 1000 * 60;
 
 const getDays = (date) => {
   const then = new Date(new Date(date).setHours(0, 0, 0, 0)).toISOString();
