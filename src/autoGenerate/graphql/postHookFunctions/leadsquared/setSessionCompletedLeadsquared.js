@@ -9,6 +9,7 @@ const setSessionCompletedLeadsquared = async (userInfo, mentorName, salesExec) =
     mx_Session_Taken_Date_Time: moment().utc().format('YYYY-MM-DD HH:mm:ss'),
     mx_Success_Manager_Name: salesExec,
     mx_Mentor_Name: mentorName,
+    OwnerId: salesExec,
   };
   const activityInput = {
     ActivityEvent: 105,
