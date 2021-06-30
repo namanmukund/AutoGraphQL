@@ -51,7 +51,11 @@ const addUserLeadSquared = (params, create = true) => {
   if (get(params, 'input.country')) {
     leadSquaredInput.mx_Country_Name = get(params, 'input.country');
   }
-  leadSquaredInput.mx_OTP_Verified = 'No';
+
+  if (get(params, 'input.unVerifiedLead')) {
+    leadSquaredInput.mx_OTP_Verified = 'No';
+  }
+
   if (get(params, 'input.utmSource')) {
     leadSquaredInput.mx_utm_source = get(params, 'input.utmSource');
   }

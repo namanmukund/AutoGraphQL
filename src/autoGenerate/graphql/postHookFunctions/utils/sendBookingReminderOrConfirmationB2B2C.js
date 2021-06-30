@@ -186,6 +186,7 @@ const sendB2CUserWithBookingDate = async (user, userId, code, timeTable, parentN
       sessionDate,
       studentName,
       parentName,
+      sessionDateTime: `${sessionDate} ${startTime}`,
       schoolName,
       startTime,
       phoneNumber: get(user, 'phone.countryCode') + get(user, 'phone.number'),
