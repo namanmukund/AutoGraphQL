@@ -11,7 +11,7 @@ import {
   UMS_VIEWER,
   NOT_CMS_HEAD_ARRAY,
   CMS_HEAD_ARRAY,
-  UMS_ADMIN,
+  UMS_ADMIN, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM,
 } from './roles';
 
 const userPermissionsDoc = {
@@ -38,37 +38,42 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
-      read: [MENTEE],
+      read: [MENTEE, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
   SalesOperationLog: {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+      read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
   SalesOperationActivity: {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+      read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
   UserPaymentPlan: {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+      read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
   UserPaymentInstallment: {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+      read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
   UserPaymentLink: {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+      read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
   UserCurrentTopicComponentStatus: {
