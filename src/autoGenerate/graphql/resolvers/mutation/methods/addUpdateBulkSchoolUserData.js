@@ -198,6 +198,20 @@ const getCourseId = async () => {
   const res = await callLocalGraphqlApi(query);
   return get(res, 'data.courses[0].id');
 };
+/*
+const updateUserPassword = async (userId, variables) => {
+  const query = `
+    mutation($input: UserUpdate){
+      updateUser(id:"${userId}", input:$input){
+        id
+        isSetPassword
+      }
+    }
+`;
+  const res = await callLocalGraphqlApi(query, '', variables);
+  return get(res, 'data.updateUser');
+};
+ */
 
 const convertDateFormat = (date) => {
   const datearray = date.split('-');
@@ -222,6 +236,21 @@ const addUpdateBulkSchoolUserData = async (root, params, context) => {
   for (const [index, row] of sheetDataRows.entries()) {
     try {
       console.log('Processing row number........', index + 2);
+      /*
+temp code
+      // if (row.userId) {
+      //   console.log('For userID........', row.userId);
+      //   const res = await updateUserPassword(row.userId, {
+      //     input: {
+      //       email: row.studentEmail && row.studentEmail.trim().toLowerCase(),
+      //       password: row.studentEmail && row.studentEmail.trim().toLowerCase().split('@')[0],
+      //     },
+      //   });
+      //   console.log('....', res);
+      // }
+
+       */
+
       if (setPassword) {
         row.parentPassword = row.parentEmail && row.parentEmail.trim().toLowerCase().split('@')[0];
       }
