@@ -4,7 +4,7 @@ import parsedHtmlFromTemplateFileAndObject
 import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { emailText, testMailingList } from '../../../../../constants';
+import { emailText } from '../../../../../constants';
 
 const USER_QUERY = (email) => `{
   users(filter: { email: "${email}" }) {
