@@ -9,7 +9,7 @@ import { byPassMenteeValidationApps } from '../../../../constants';
 
 const addMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
   // don't decrease the availability slot if it is done through backend
-  const { appName } = context;
+  const { appName, isBookedByMentee } = context;
   if (!byPassMenteeValidationApps.includes(appName)) {
     /*
     Since addition of session by mentee will consume a slot
@@ -23,7 +23,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     // send email to mentor admin regarding the session
     await extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
     // update user booking on leadsquared
-    addMenteeBookingLeadsquared(input, params, slotTimeStringArray, userInfo, topicInfo);
+    addMenteeBookingLeadsquared(input, params, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee);
   }
 };
 

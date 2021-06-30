@@ -51,9 +51,7 @@ const addUserLeadSquared = (params, create = true) => {
   if (get(params, 'input.country')) {
     leadSquaredInput.mx_Country_Name = get(params, 'input.country');
   }
-  if (get(params, 'input.timezone')) {
-    leadSquaredInput.mx_Timezone = get(params, 'input.timezone');
-  }
+  leadSquaredInput.mx_OTP_Verified = 'No';
   if (get(params, 'input.utmSource')) {
     leadSquaredInput.mx_utm_source = get(params, 'input.utmSource');
   }
@@ -70,16 +68,7 @@ const addUserLeadSquared = (params, create = true) => {
     leadSquaredInput.mx_utm_medium = get(params, 'input.utmMedium');
   }
 
-  const activityInput = {
-    ActivityEvent: 103,
-    Fields: [
-      {
-        SchemaName: 'Status',
-        Value: 'New Lead',
-      },
-    ],
-  };
-  updateLeadsquared(leadSquaredInput, create, activityInput);
+  updateLeadsquared(leadSquaredInput, create);
 };
 
 export default addUserLeadSquared;

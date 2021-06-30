@@ -7,6 +7,7 @@ import forceUpdateTypeNames from './forceUpdateTypeNames';
 import forceDeleteTypeNames from './forceDeleteTypeNames';
 import regexValidation from './regexValidation';
 import loginType from './loginType';
+import { meWatiSMS, usWatiSMS } from './messagingText';
 
 const TMS = 'tekieTms';
 const TLA = 'tekieLearningApp';
@@ -336,6 +337,21 @@ const blockBasedProjectType = {
   practice: 'practice',
 };
 
+const emailText = {
+  instagramLink: {
+    india: 'https://instagram.com/tekie.in',
+    default: 'https://www.instagram.com/tekie.us/',
+  },
+  tekieLink: {
+    india: 'https://www.tekie.in',
+    default: 'https://www.tekie.us',
+  },
+  tekieText: {
+    india: 'VISIT TEKIE.IN',
+    default: 'VISIT TEKIE.US',
+  },
+};
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export const MENTOR_REPORT_COUNTRY = 'india';
@@ -350,6 +366,17 @@ export const ADD_BATCH_TRY_LIMIT = 20;
 
 export const BULK_MENTOR_SESSION_DAYS_LIMIT = 365;
 export const MAX_ALLOWED_BATCH_SESSIONS_DAYS_RANGE = 365;
+
+export const testMailingList = {
+  production: {
+    email: ['sanatankc@gmail.com', 'naman.mukund@tekie.in'],
+    phone: ['918368246974', '919654347463'],
+  },
+  staging: {
+    email: ['sanatankc@gmail.com'],
+    phone: ['918368246974'],
+  },
+};
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
@@ -420,4 +447,7 @@ export {
   childTopicComponents,
   OLD_COURSE_ID,
   blockBasedProjectType,
+  emailText,
+  meWatiSMS,
+  usWatiSMS,
 };

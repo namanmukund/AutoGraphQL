@@ -2,8 +2,8 @@ import { get } from 'lodash';
 import moment from 'moment';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
 
-const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, userInfo, topicInfo) => {
-  const { bookingDate, bookedBy } = input;
+const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee) => {
+  const { bookingDate } = input;
   let phoneNumber = '';
   let bookingDateTime = '';
   if (get(input, 'type') === 'b2b2c') {
@@ -35,11 +35,11 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
     Fields: [
       {
         SchemaName: 'Status',
-        Value: bookedBy === 'tekieTeam' ? 'Booked (Verified)' : 'Booked (Non Verified)',
+        Value: !isBookedByMentee ? 'Booked (Verified)' : 'Booked (Non Verified)',
       },
       {
         SchemaName: 'mx_Custom_3',
-        Value: bookedBy === 'tekieTeam' ? 'Tekie Team' : 'Customer',
+        Value: !isBookedByMentee ? 'Tekie Team' : 'Customer',
       },
       {
         SchemaName: 'mx_Custom_8',
