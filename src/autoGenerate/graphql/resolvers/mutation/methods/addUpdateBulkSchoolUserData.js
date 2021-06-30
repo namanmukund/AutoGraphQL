@@ -198,7 +198,7 @@ const getCourseId = async () => {
   const res = await callLocalGraphqlApi(query);
   return get(res, 'data.courses[0].id');
 };
-
+/*
 const updateUserPassword = async (userId, variables) => {
   const query = `
     mutation($input: UserUpdate){
@@ -211,6 +211,7 @@ const updateUserPassword = async (userId, variables) => {
   const res = await callLocalGraphqlApi(query, '', variables);
   return get(res, 'data.updateUser');
 };
+ */
 
 const convertDateFormat = (date) => {
   const datearray = date.split('-');
