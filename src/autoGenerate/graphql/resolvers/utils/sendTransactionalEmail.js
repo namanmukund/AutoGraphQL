@@ -66,11 +66,11 @@ const sendTransactionalEmail = async (templateObject, emailBody, country = 'indi
   const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
 
   sendEmail(emailMsgObject);
-  if (testMailingList[process.env.NODE_ENV] && testMailingList[process.env.NODE_ENV].email && testMailingList[process.env.NODE_ENV].email.length) {
-    testMailingList[process.env.NODE_ENV].email.forEach((email) => {
-      sendEmail({ ...emailMsgObject, to: email, cc: '' });
-    });
-  }
+  // if (testMailingList[process.env.NODE_ENV] && testMailingList[process.env.NODE_ENV].email && testMailingList[process.env.NODE_ENV].email.length) {
+  //   testMailingList[process.env.NODE_ENV].email.forEach((email) => {
+  //     sendEmail({ ...emailMsgObject, to: email, cc: '' });
+  //   });
+  // }
 };
 
 export default sendTransactionalEmail;
