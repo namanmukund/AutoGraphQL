@@ -367,6 +367,17 @@ export const ADD_BATCH_TRY_LIMIT = 20;
 export const BULK_MENTOR_SESSION_DAYS_LIMIT = 365;
 export const MAX_ALLOWED_BATCH_SESSIONS_DAYS_RANGE = 365;
 
+export const testMailingList = {
+  production: {
+    email: ['sanatankc@gmail.com', 'naman.mukund@tekie.in'],
+    phone: ['918368246974', '919654347463'],
+  },
+  staging: {
+    email: ['sanatankc@gmail.com'],
+    phone: ['918368246974'],
+  },
+};
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,

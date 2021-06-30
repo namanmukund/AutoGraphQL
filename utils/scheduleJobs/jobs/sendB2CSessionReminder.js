@@ -86,15 +86,15 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
     deleteJob();
     return;
   }
-  const menteeSession = menteeSessions.get('[0]', {});
-  if (menteeSession.get('id') !== menteeSessionId) {
+  const menteeSession = get(menteeSessions, '[0]', {});
+  if (menteeSession.id !== menteeSessionId) {
     deleteJob();
     return;
   }
   const res = await callLocalGraphqlApi(USER(userId));
 
-  const mentorMenteeSession = await getMentorMenteeSession(menteeSession.get('id'));
-  if (!get(mentorMenteeSession, 'id')) {
+  const mentorMenteeSession = await getMentorMenteeSession(get(menteeSession, 'id', ''));
+  if (!get(mentorMenteeSession, 'id') && jobType !== 'B2CEngagementMail') {
     deleteJob();
     return;
   }
@@ -106,10 +106,9 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
   const phone = get(parent, 'phone.countryCode', '').replace('+', '') + get(res, 'phone.number');
   const studentName = get(res, 'data.user.name');
 
-  const { bookingDate, ...slots } = menteeSessions;
-  const slotNumber = get(getSelectedSlotsTime(slots), '[0]');
-
-  const { dateObject, startTime, endTime } = getIntlDateTime(get(menteeSessions, 'bookingDate'), slotNumber, timezone);
+  const { bookingDate, ...slots } = menteeSession;
+  const slotNumber = getSelectedSlotsTime(slots)[0];
+  const { dateObject, startTime, endTime } = getIntlDateTime(get(menteeSession, 'bookingDate'), slotNumber, timezone);
   const date = moment(dateObject).format('dddd, Do MMMM');
   const sessionDateTime = `${date} ${startTime}`;
 
@@ -122,7 +121,6 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
   const sessionLink = get(mentorInfo, 'googleMeetLink') ? get(mentorInfo, 'googleMeetLink') : get(mentorInfo, 'sessionLink');
   const mentorPhoneNumber = get(mentorInfo, 'phone.countryCode') + get(mentorInfo, 'phone.number');
   const mentorProfilePic = getFullFilePath(get(mentor, 'profilePic.uri', ''));
-  const schoolName = getFullFilePath(get(mentor, 'school.name', ''));
   const codingLanguages = getMentorCodingLanguages(get(mentorInfo, 'codingLanguages'), []) || 'Python';
 
   if (jobType === 'B2CEngagementMail') {
@@ -132,7 +130,7 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
       studentName,
     }, {
       emailTemplate: 'B2CEngagementMail',
-      subject: `${parentName}, Here are few Coding Terms you should know!`,
+      subject: 'Become a Super Parent - Here\'s how!',
     }, country);
   } else if (jobType === 'B2CEngagementMailWithMentor') {
     if (country === 'usa') {
@@ -154,7 +152,7 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
         mentorPhoneNumber,
       }, {
         emailTemplate: 'textMentorDetails',
-        subject: 'Meet your mentor for the Session!',
+        subject: 'Your Mentor is ready to meet You!',
       }, country);
     } else {
       sendTransactionalEmail({
@@ -174,8 +172,8 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
         codingLanguages,
         mentorPhoneNumber,
       }, {
-        emailTemplate: 'textMentorDetails',
-        subject: 'Meet your mentor for the Session!',
+        emailTemplate: 'B2CEngagementMailWithMentor',
+        subject: 'Your Mentor is ready to meet You!',
       }, country);
     }
   } else if (jobType === 'B2CSessionLink') {
@@ -190,7 +188,7 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
         startTime,
       }, {
         emailTemplate: 'textSessionLink',
-        subject: `${studentName}, Your link to join Tekie.`,
+        subject: `${studentName}'s coding journey begins today. Are you excited?`,
       }, country);
     } else {
       sendTransactionalEmail({
@@ -198,7 +196,7 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
         parentEmail,
       }, {
         emailTemplate: 'B2CSessionLink',
-        subject: `${studentName}, Your link to join Tekie.`,
+        subject: `${studentName}'s coding journey begins today. Are you excited?`,
       }, country);
     }
     if (country === 'india') {
@@ -215,7 +213,6 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
     if (country === 'india') {
       sendWhatsAppTemplateMessage(phone, 'demo_reminder_2', parentName, [
         { name: 'student_name', value: studentName },
-        { name: 'school_name', value: schoolName },
         { name: 'session_link', value: sessionLink },
         { name: 'meeting_id', value: meetingId },
         { name: 'meeting_password', value: meetingPassword },
@@ -245,7 +242,7 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
         mentorPhoneNumber,
       }, {
         emailTemplate: 'textMentorDetails',
-        subject: `${studentName}, Your link to join Tekie.`,
+        subject: `${studentName}'s coding journey begins today. Are you excited?`,
       }, country);
     } else {
       sendTransactionalEmail({
@@ -262,7 +259,7 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
         sessionLink,
       }, {
         emailTemplate: 'B2CSessionLinkWithMentor',
-        subject: `${studentName}, Your link to join Tekie Coding Carnival.`,
+        subject: `${studentName}'s coding journey begins today. Are you excited?`,
       }, country);
     }
     if (country === 'india') {

@@ -39,7 +39,7 @@ const sendB2CBookReminderNextDay = async ({ userId }, deleteJob) => {
         phoneNumber: phone.countryCode + phone.number,
       }, {
         emailTemplate: 'textNextDayBookingReminder',
-        subject: 'Hurry! Just a few free spots left at Tekie',
+        subject: `${studentName}'s seat is waiting. Hurry!`,
       }, country);
     } else {
       sendTransactionalEmail({
@@ -48,7 +48,7 @@ const sendB2CBookReminderNextDay = async ({ userId }, deleteJob) => {
         studentName,
       }, {
         emailTemplate: 'B2CBookingReminderNextDay',
-        subject: 'Hurry! Just a few free spots left at Tekie',
+        subject: `${studentName}'s seat is waiting. Hurry!`,
       }, country);
     }
   }

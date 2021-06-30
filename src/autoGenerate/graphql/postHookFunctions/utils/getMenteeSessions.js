@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 const getMenteeSessions = async (userId) => {
