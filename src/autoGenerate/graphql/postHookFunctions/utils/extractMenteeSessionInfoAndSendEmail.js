@@ -92,7 +92,9 @@ const extractMenteeSessionInfoAndSendEmail = async (
   }
   menteeObj.prevBookingDate = '';
   menteeObj.previousStartTime = '';
-
+  if (get(topicInfo, 'data.topic.order') !== 1) {
+    return;
+  }
   switch (action) {
     case 'add': {
       sendBookingReminderOrConfirmationB2BC(parentId, true);
