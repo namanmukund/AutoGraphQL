@@ -13,6 +13,7 @@ const getMenteeSessions = async (userId) => {
         orderBy: bookingDate_ASC
       ) {
         id
+        updatedAt
         topic {
           id
         }

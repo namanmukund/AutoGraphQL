@@ -369,11 +369,11 @@ export const MAX_ALLOWED_BATCH_SESSIONS_DAYS_RANGE = 365;
 
 export const testMailingList = {
   production: {
-    email: ['sanatankc@gmail.com', 'naman.mukund@tekie.in'],
+    email: ['sanatankc@gmail.com', 'naman.mukund@tekie.in', 'kritesh.patel@tekie.in', 'amit.ranjan@tekie.in'],
     phone: ['918368246974', '919654347463'],
   },
   staging: {
-    email: ['sanatankc@gmail.com'],
+    email: ['kriteshpk@gmail.com', 'sanatxn@gmail.com'],
     phone: ['918368246974'],
   },
 };
