@@ -227,7 +227,7 @@ const sendB2CSessionReminder = async ({
       if (!sessionLink) return;
       sendWhatsAppTemplateMessage(phone, 'demo_reminder_2', parentName, [
         { name: 'student_name', value: studentName },
-        { name: 'session_link', value: 'fsdffsdfj' },
+        { name: 'session_link', value: sessionLink },
         { name: 'meeting_id', value: meetingId },
         { name: 'meeting_password', value: meetingPassword },
       ]);
