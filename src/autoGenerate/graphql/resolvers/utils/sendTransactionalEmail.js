@@ -64,11 +64,10 @@ const sendTransactionalEmail = async (templateObject, emailBody, country = 'indi
   /* if html is empty then in the body text will be appear. Html is having higher
     precedence over text */
   const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
-
   sendEmail(emailMsgObject);
   if (testMailingList[process.env.NODE_ENV] && testMailingList[process.env.NODE_ENV].email && testMailingList[process.env.NODE_ENV].email.length) {
     testMailingList[process.env.NODE_ENV].email.forEach((email) => {
-      sendEmail({ ...emailMsgObject, to: email, cc: '' });
+      sendEmail({ ...emailMsgObject, to: email, cc: [''] });
     });
   }
 };

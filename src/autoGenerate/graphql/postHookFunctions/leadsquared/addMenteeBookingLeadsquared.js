@@ -20,8 +20,6 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
       bookingDateTime = moment(bookingDate).minutes(0).hours(slotNumber).subtract(5, 'hours')
         .subtract(30, 'minutes')
         .format('YYYY-MM-DD HH:mm:ss');
-    } else {
-      shouldUpdate = false;
     }
   }
 

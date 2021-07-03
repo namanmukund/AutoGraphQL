@@ -80,7 +80,9 @@ const getMentorMenteeSession = async (menteeSessionId) => {
   return mentorMenteeSession;
 };
 
-const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, deleteJob = () => {}) => {
+const sendB2CSessionReminder = async ({
+  userId, menteeSessionId, menteeSessionUpdatedAt, jobType,
+}, deleteJob = () => {}) => {
   const menteeSessions = await getMenteeSessions(userId);
   if (menteeSessions.length === 0) {
     deleteJob();
@@ -91,12 +93,17 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
     deleteJob();
     return;
   }
-  const res = await callLocalGraphqlApi(USER(userId));
-
-  const mentorMenteeSession = await getMentorMenteeSession(get(menteeSession, 'id', ''));
-  if (!get(mentorMenteeSession, 'id') && jobType !== 'B2CEngagementMail') {
+  if (!!menteeSessionUpdatedAt && menteeSession.updatedAt.toString() !== menteeSessionUpdatedAt.toString()) {
     deleteJob();
     return;
+  }
+  const res = await callLocalGraphqlApi(USER(userId));
+  const mentorMenteeSession = await getMentorMenteeSession(get(menteeSession, 'id', ''));
+  if (jobType !== 'B2CEngagementMail') {
+    if (!get(mentorMenteeSession, 'id')) {
+      deleteJob();
+      return;
+    }
   }
   const parent = get(res, 'data.user.studentProfile.parents[0].user', {});
   const parentEmail = get(parent, 'email', {});
@@ -134,6 +141,7 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
     }, country);
   } else if (jobType === 'B2CEngagementMailWithMentor') {
     if (country === 'usa') {
+      if (!sessionLink) return;
       sendTransactionalEmail({
         parentEmail,
         parentName,
@@ -155,6 +163,7 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
         subject: 'Your Mentor is ready to meet You!',
       }, country);
     } else {
+      if (!sessionLink) return;
       sendTransactionalEmail({
         parentEmail,
         parentName,
@@ -178,6 +187,7 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
     }
   } else if (jobType === 'B2CSessionLink') {
     if (country === 'usa') {
+      if (!sessionLink) return;
       sendTransactionalEmail({
         sessionLink,
         parentEmail,
@@ -191,6 +201,7 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
         subject: `${studentName}'s coding journey begins today. Are you excited?`,
       }, country);
     } else {
+      if (!sessionLink) return;
       sendTransactionalEmail({
         sessionLink,
         parentEmail,
@@ -200,7 +211,9 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
       }, country);
     }
     if (country === 'india') {
+      if (!sessionLink) return;
       sendWhatsAppTemplateMessage(phone, 'demo_reminder_1', parentName, [
+        { name: 'parent_name', value: parentName },
         { name: 'student_name', value: studentName },
         { name: 'session_date', value: date },
         { name: 'session_time', value: startTime },
@@ -211,9 +224,10 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
     }
   } else if (jobType === 'B2CSessionReminderWati') {
     if (country === 'india') {
+      if (!sessionLink) return;
       sendWhatsAppTemplateMessage(phone, 'demo_reminder_2', parentName, [
         { name: 'student_name', value: studentName },
-        { name: 'session_link', value: sessionLink },
+        { name: 'session_link', value: 'fsdffsdfj' },
         { name: 'meeting_id', value: meetingId },
         { name: 'meeting_password', value: meetingPassword },
       ]);
@@ -224,6 +238,7 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
     }
   } else {
     if (country === 'usa') {
+      if (!sessionLink) return;
       sendTransactionalEmail({
         parentEmail,
         parentName,
@@ -245,6 +260,7 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
         subject: `${studentName}'s coding journey begins today. Are you excited?`,
       }, country);
     } else {
+      if (!sessionLink) return;
       sendTransactionalEmail({
         parentEmail,
         parentName,
@@ -263,7 +279,9 @@ const sendB2CSessionReminder = async ({ userId, menteeSessionId, jobType }, dele
       }, country);
     }
     if (country === 'india') {
+      if (!sessionLink) return;
       sendWhatsAppTemplateMessage(phone, 'demo_reminder_1', parentName, [
+        { name: 'parent_name', value: parentName },
         { name: 'student_name', value: studentName },
         { name: 'session_date', value: date },
         { name: 'session_time', value: startTime },
