@@ -4,7 +4,7 @@ import parsedHtmlFromTemplateFileAndObject
 import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { emailText } from '../../../../../constants';
+import { emailText, testMailingList } from '../../../../../constants';
 
 const USER_QUERY = (email) => `{
   users(filter: { email: "${email}" }) {
@@ -64,13 +64,12 @@ const sendTransactionalEmail = async (templateObject, emailBody, country = 'indi
   /* if html is empty then in the body text will be appear. Html is having higher
     precedence over text */
   const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
-
   sendEmail(emailMsgObject);
-  // if (testMailingList[process.env.NODE_ENV] && testMailingList[process.env.NODE_ENV].email && testMailingList[process.env.NODE_ENV].email.length) {
-  //   testMailingList[process.env.NODE_ENV].email.forEach((email) => {
-  //     sendEmail({ ...emailMsgObject, to: email, cc: '' });
-  //   });
-  // }
+  if (testMailingList[process.env.NODE_ENV] && testMailingList[process.env.NODE_ENV].email && testMailingList[process.env.NODE_ENV].email.length) {
+    testMailingList[process.env.NODE_ENV].email.forEach((email) => {
+      sendEmail({ ...emailMsgObject, to: email, cc: [''] });
+    });
+  }
 };
 
 export default sendTransactionalEmail;
