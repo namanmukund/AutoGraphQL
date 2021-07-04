@@ -36,7 +36,7 @@ const Topic = `
     order: Int! 
     title: String!
         @trim
-    description: String @uniqueOrEmpty @trim
+    description: String @trim
     status: ContentStatus! @defaultValue(value: "unpublished")
     video: File @relation(name: "TopicVideo", direction: "OneWay")
     videoTitle: String @uniqueOrEmpty @trim
