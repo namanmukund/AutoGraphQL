@@ -55,6 +55,7 @@ import {
   MentorSessionIdInvalidError,
   BatchFullError,
   MentorMandatoryError,
+  MentorProfileAlreadyExist,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -247,4 +248,5 @@ export {
   MentorSessionIdInvalidError,
   BatchFullError,
   MentorMandatoryError,
+  MentorProfileAlreadyExist,
 };
