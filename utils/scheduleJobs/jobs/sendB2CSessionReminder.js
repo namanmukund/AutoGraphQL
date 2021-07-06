@@ -125,11 +125,10 @@ const sendB2CSessionReminder = async ({
   const experienceYear = get(mentorInfo, 'experienceYear') || 3;
   const meetingId = get(mentorInfo, 'meetingId') || 3;
   const meetingPassword = get(mentorInfo, 'meetingPassword') || 3;
-  const sessionLink = get(mentorInfo, 'googleMeetLink') ? get(mentorInfo, 'googleMeetLink') : get(mentorInfo, 'sessionLink');
+  const sessionLink = get(mentorInfo, 'sessionLink');
   const mentorPhoneNumber = get(mentorInfo, 'phone.countryCode') + get(mentorInfo, 'phone.number');
   const mentorProfilePic = getFullFilePath(get(mentor, 'profilePic.uri', ''));
   const codingLanguages = getMentorCodingLanguages(get(mentorInfo, 'codingLanguages'), []) || 'Python';
-
   if (jobType === 'B2CEngagementMail') {
     sendTransactionalEmail({
       parentEmail,
@@ -185,7 +184,7 @@ const sendB2CSessionReminder = async ({
         subject: 'Your Mentor is ready to meet You!',
       }, country);
     }
-  } else if (jobType === 'B2CSessionLink') {
+  } else if (jobType === 'B2CBookingFinalReminder') {
     if (country === 'usa') {
       if (!sessionLink) return;
       sendTransactionalEmail({
@@ -227,7 +226,7 @@ const sendB2CSessionReminder = async ({
       if (!sessionLink) return;
       sendWhatsAppTemplateMessage(phone, 'demo_reminder_2', parentName, [
         { name: 'student_name', value: studentName },
-        { name: 'session_link', value: 'fsdffsdfj' },
+        { name: 'session_link', value: sessionLink },
         { name: 'meeting_id', value: meetingId },
         { name: 'meeting_password', value: meetingPassword },
       ]);

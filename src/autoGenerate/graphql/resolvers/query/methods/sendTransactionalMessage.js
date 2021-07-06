@@ -123,7 +123,7 @@ const getMentorMenteeSessions = async (userId, messageType, sessionLink) => {
               }
             }
           }
-        }
+        } 
         salesOperation{
           internetIssue
           zoomIssue
@@ -264,8 +264,7 @@ const sendTransactionalMessage = async (root, params, context) => {
         throw new MandatorySessionLinkError();
       }
       const {
-        parentName, name, bookingDate, startTime, mentorPhoneNumber,
-        experienceYear, codingLanguages, mentorRating, mentorName,
+        parentName, name, bookingDate, startTime,
         meetingId, meetingPassword,
       } = dataObj;
       parameters = [{
@@ -295,26 +294,6 @@ const sendTransactionalMessage = async (root, params, context) => {
       {
         name: 'session_time',
         value: startTime,
-      },
-      {
-        name: 'mentor_experience',
-        value: experienceYear,
-      },
-      {
-        name: 'coding_language',
-        value: codingLanguages,
-      },
-      {
-        name: 'mentor_name',
-        value: mentorName,
-      },
-      {
-        name: 'mentor_rating',
-        value: mentorRating,
-      },
-      {
-        name: 'mentor_number',
-        value: mentorPhoneNumber,
       },
       ];
       break;
@@ -403,12 +382,17 @@ const sendTransactionalMessage = async (root, params, context) => {
     whatsAppTemplate = transactionalMessageBody[messageType].whatsAppTemplate;
   }
 
+  const emailBody = messageType === 'sendSessionLink' ? {
+    emailTemplate: transactionalMessageBody.sendSessionLink.emailTemplate,
+    subject: transactionalMessageBody.sendSessionLink.subject(dataObj.name),
+  } : transactionalMessageBody[messageType];
+
   switch (medium) {
     case 'all': {
       // send email
       await sendTransactionalEmail(
         dataObj,
-        transactionalMessageBody[messageType],
+        emailBody,
         dataObj.country,
       );
       // send whatsApp
@@ -433,7 +417,7 @@ const sendTransactionalMessage = async (root, params, context) => {
       // send email
       await sendTransactionalEmail(
         dataObj,
-        transactionalMessageBody[messageType],
+        emailBody,
         dataObj.country,
       );
       break;

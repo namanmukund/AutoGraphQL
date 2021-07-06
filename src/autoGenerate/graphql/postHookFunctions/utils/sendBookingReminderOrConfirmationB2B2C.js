@@ -72,7 +72,7 @@ const USER_QUERY = (userId) => `
   }
 `;
 
-const schedule = {
+const productionSchedule = {
   nextDaySessionReminder: () => {
     const oneDayAfter = moment().add(1, 'day').toDate();
     return new Date(oneDayAfter.setHours(17, 17, 0, 0));
@@ -92,36 +92,29 @@ const schedule = {
     return new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0));
   },
   thirdFlow: {
-    firstMail: (bookingDate) => new Date(moment(bookingDate).subtract(2, 'days').toDate().setHours(18, 11, 0, 0)),
+    firstMail: (bookingDate) => new Date(moment(bookingDate).subtract(1, 'days').toDate().setHours(18, 11, 0, 0)),
     secondMail: (slotNumber, bookingDate) => (slotNumber === 8 || slotNumber === 9
       ? new Date(moment(bookingDate).subtract(1, 'day').toDate().setHours(19, 49, 0, 0))
       : new Date(moment(bookingDate).toDate().setHours(slotNumber - 2, 0, 0, 0))),
   },
   reminderWati: (slotNumber, bookingDate) => new Date(moment(bookingDate).toDate().setHours(slotNumber - 1, 30, 0, 0)),
 };
-// const schedule = {
-//   nextDaySessionReminder: () => {
-//     const oneDayAfter = moment().add(1, 'day').toDate();
-//     return moment().add(30, 'seconds').toDate();
-//   },
-//   firstFlow: {
-//     firstMail: (bookingDate) => moment().add(60, 'seconds').toDate(),
-//     secondMail: (bookingDate) => moment().add(90, 'seconds').toDate(),
-//     thirdMail: (slotNumber, bookingDate) => moment().add(100, 'seconds').toDate(),
-//   },
-//   secondFlow: (slotNumber, bookingDate) => {
-//     if (slotNumber === 8 || slotNumber === 9) {
-//       const oneDayBeforeBookingTime = moment(bookingDate).subtract(1, 'day').toDate();
-//       return new Date(oneDayBeforeBookingTime.setHours(19, 49, 0, 0));
-//     }
-//     return new Date(moment(bookingDate).toDate().setHours(slotNumber - 3, 0, 0, 0));
-//   },
-//   thirdFlow: {
-//     firstMail: (bookingDate) => moment().add(60, 'seconds').toDate(),
-//     secondMail: (bookingDate) => moment().add(100, 'seconds').toDate(),
-//   },
-//   reminderWati: (slotNumber, bookingDate) => moment().add(120, 'seconds').toDate(),
-// };
+const testSchedule = {
+  nextDaySessionReminder: () => moment().add(30, 'seconds').toDate(),
+  firstFlow: {
+    firstMail: () => moment().add(60, 'seconds').toDate(),
+    secondMail: () => moment().add(90, 'seconds').toDate(),
+    thirdMail: () => moment().add(100, 'seconds').toDate(),
+  },
+  secondFlow: () => moment().add(60, 'seconds').toDate(),
+  thirdFlow: {
+    firstMail: () => moment().add(60, 'seconds').toDate(),
+    secondMail: () => moment().add(100, 'seconds').toDate(),
+  },
+  reminderWati: () => moment().add(120, 'seconds').toDate(),
+};
+
+const schedule = process.env.NODE_ENV === 'production' ? productionSchedule : testSchedule;
 
 const sendB2CNoEmail = (phone, country) => {
   if (country === 'india') {
