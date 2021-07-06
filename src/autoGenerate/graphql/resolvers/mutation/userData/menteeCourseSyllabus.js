@@ -339,6 +339,17 @@ const getMentorMenteeSessions = (userId, courseId) => `
       }
       sessionEndDate
       sessionStatus
+      mentorSession{
+        user{
+          id
+          name
+          profilePic{
+            id
+            uri
+            name
+          }
+        }
+      }
     }
   }
   `;
@@ -401,6 +412,18 @@ const getBatchSessions = (batchId, courseId) => `
         description
       }
       bookingDate
+      sessionEndDate
+      mentorSession{
+        user{
+          id
+          name
+          profilePic{
+            id
+            uri
+            name
+          }
+        }
+      }
       ${getSlotTimeFields()}
     }
   }
@@ -753,6 +776,8 @@ const menteeCourseSyllabusMutationResolver = async (
               let slotTime = null;
               const {
                 bookingDate,
+                mentorSession,
+                sessionEndDate,
               } = batchSession;
               const {
                 order: batchSessionTopicOrder,
@@ -787,6 +812,9 @@ const menteeCourseSyllabusMutationResolver = async (
                     chapterId,
                     chapterTitle,
                     chapterOrder,
+                    endingDate: sessionEndDate,
+                    mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
+                    mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
                   };
                   completedSession.push(completedMenteeSession);
                   isUpcomingSession = false;
@@ -842,6 +870,15 @@ const menteeCourseSyllabusMutationResolver = async (
           // };
           // upComingSession.push(upComingMenteeSession);
         } else {
+          let mentorSession;
+          let sessionEndDate;
+          batchSessions.forEach((batchSession) => {
+            if (batchSession.topic && batchSession.topic.id === topicId) {
+              mentorSession = batchSession.mentorSession;
+              sessionEndDate = batchSession.sessionEndDate;
+            }
+          });
+
           const completedMenteeSession = {
             topicId,
             topicOrder,
@@ -853,6 +890,9 @@ const menteeCourseSyllabusMutationResolver = async (
             chapterId,
             chapterTitle,
             chapterOrder,
+            endingDate: sessionEndDate,
+            mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
+            mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
           };
           completedSession.push(completedMenteeSession);
         }
@@ -864,6 +904,7 @@ const menteeCourseSyllabusMutationResolver = async (
       mentorMenteeSessions.forEach((mentorMenteeSession) => {
         const {
           sessionEndDate: endingDate,
+          mentorSession,
         } = mentorMenteeSession;
         const {
           order: topicOrder,
@@ -891,6 +932,8 @@ const menteeCourseSyllabusMutationResolver = async (
           chapterId: chapter && chapter.id,
           chapterTitle: chapter && chapter.title,
           chapterOrder: chapter && chapter.order,
+          mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
+          mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
         };
         completedSession.push(completedMenteeSession);
       });
