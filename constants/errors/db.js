@@ -184,3 +184,7 @@ export const BatchFullError = createError('BatchFullError', {
 export const MentorMandatoryError = createError('MentorMandatoryError', {
   message: 'Allotted mentor is mandatory in batch while starting a session',
 });
+
+export const MentorProfileAlreadyExist = createError('MentorProfileAlreadyExist', {
+  message: 'Mentor Profile already exist for the user',
+});
