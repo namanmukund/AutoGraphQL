@@ -32,9 +32,11 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
       } else if (mentorMenteeSessions.length) {
         // eslint-disable-next-line no-restricted-syntax
         for (const mentorMenteeSession of mentorMenteeSessions) {
-          const menteeSession = get(mentorMenteeSession, 'menteeSession');
-          const occupiedSlotTimeArrayForMMS = getSelectedSlotsTime(menteeSession);
-          occupiedSlotsArray.push(...occupiedSlotTimeArrayForMMS);
+          const menteeSession = get(mentorMenteeSession, 'menteeSession', '');
+          if (menteeSession) {
+            const occupiedSlotTimeArrayForMMS = getSelectedSlotsTime(menteeSession);
+            occupiedSlotsArray.push(...occupiedSlotTimeArrayForMMS);
+          }
         }
       }
     }
