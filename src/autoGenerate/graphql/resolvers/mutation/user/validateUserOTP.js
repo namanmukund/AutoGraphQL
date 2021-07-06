@@ -16,6 +16,7 @@ import getChildrenToken from './utils/getChildrenToken';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import getTimeDifferenceWithCurrentDateInSeconds
   from '../../../../../../utils/getTimeDifferenceWithCurrentDateInSeconds';
+import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
 
 const USER_TYPE = 'User';
 const validateUserOTPMutationPromise = (
@@ -102,6 +103,12 @@ const validateUserOTPMutationResolver = async (
         phoneVerified: true,
         status: 'active',
       };
+      if (!phoneVerified) {
+        updateLeadSquared({
+          Phone: countryCode + number,
+          mx_OTP_Verified: 'Yes',
+        }, false);
+      }
     } else if (emailOtp) {
       if (userData.emailOtp !== emailOtp) {
         throw new OTPMismatchError();
