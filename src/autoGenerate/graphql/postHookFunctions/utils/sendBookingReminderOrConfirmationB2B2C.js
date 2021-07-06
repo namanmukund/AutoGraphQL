@@ -100,17 +100,13 @@ const productionSchedule = {
   reminderWati: (slotNumber, bookingDate) => new Date(moment(bookingDate).toDate().setHours(slotNumber - 1, 30, 0, 0)),
 };
 const testSchedule = {
-  nextDaySessionReminder: () => {
-    return moment().add(30, 'seconds').toDate();
-  },
+  nextDaySessionReminder: () => moment().add(30, 'seconds').toDate(),
   firstFlow: {
     firstMail: () => moment().add(60, 'seconds').toDate(),
     secondMail: () => moment().add(90, 'seconds').toDate(),
     thirdMail: () => moment().add(100, 'seconds').toDate(),
   },
-  secondFlow: () => {
-    return moment().add(60, 'seconds').toDate();
-  },
+  secondFlow: () => moment().add(60, 'seconds').toDate(),
   thirdFlow: {
     firstMail: () => moment().add(60, 'seconds').toDate(),
     secondMail: () => moment().add(100, 'seconds').toDate(),

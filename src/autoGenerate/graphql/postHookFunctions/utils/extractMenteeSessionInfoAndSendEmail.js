@@ -53,7 +53,6 @@ const extractMenteeSessionInfoAndSendEmail = async (
   bookingDate,
   slotTimeStringArray,
   user,
-  topic,
 ) => {
   if (get(user, 'data.user.studentProfile.batch.id')) return;
   const slotNumber = slotTimeStringArray[0].split('slot')[1];

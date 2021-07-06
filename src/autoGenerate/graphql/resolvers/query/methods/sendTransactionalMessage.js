@@ -264,8 +264,7 @@ const sendTransactionalMessage = async (root, params, context) => {
         throw new MandatorySessionLinkError();
       }
       const {
-        parentName, name, bookingDate, startTime, mentorPhoneNumber,
-        experienceYear, codingLanguages, mentorRating, mentorName,
+        parentName, name, bookingDate, startTime,
         meetingId, meetingPassword,
       } = dataObj;
       parameters = [{
