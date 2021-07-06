@@ -83,7 +83,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
     isSessionBefore3Hours: moment(dateObject).diff(getIntlDateTime(new Date(), new Date().getHours(), timezone), 'hours', false) >= 4,
     isBookSessionReminderSent: get(menteeInfo, 'isBookSessionReminderSent'),
   };
-  const topicInfo = topic || await callLocalGraphqlApi(topicInfoQuery(topicId));
+  const topicInfo = await callLocalGraphqlApi(topicInfoQuery(topicId));
   menteeObj.topicTitle = get(topicInfo, 'data.topic.title');
   const topicThumbnail = get(topicInfo, 'data.topic.thumbnailSmall.uri');
   menteeObj.topicThumbnail = '';

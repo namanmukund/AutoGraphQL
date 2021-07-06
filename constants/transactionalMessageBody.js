@@ -22,12 +22,12 @@ const transactionalMessageBody = {
     whatsAppTemplate: 'welcome_usa_v2',
   },
   sendSessionLink: {
-    emailTemplate: 'sendSessionLink',
-    emailTemplateInternational: 'sendSessionLinkInternational',
-    subject: 'Tekie - Meeting link for free coding session',
-    subjectInternational: 'Don’t miss it! Tekie Session Entry Ticket Inside ',
-    whatsAppTemplate: 'oct14_know_your_mentor',
-    whatsAppTemplateInternational: 'reminder_link_usa_v2_confirm',
+    emailTemplate: 'B2CSessionLink',
+    emailTemplateInternational: 'B2CSessionLink',
+    subject: (studentName) => `${studentName}'s coding journey begins today. Are you excited?`,
+    subjectInternational: (studentName) => `${studentName}'s coding journey begins today. Are you excited?`,
+    whatsAppTemplate: 'demo_reminder_1',
+    whatsAppTemplateInternational: 'demo_reminder_1',
   },
   didNotPickTheCall: {
     emailTemplate: 'didNotPickTheCall',
