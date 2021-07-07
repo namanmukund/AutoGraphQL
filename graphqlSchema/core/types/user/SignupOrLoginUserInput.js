@@ -10,6 +10,7 @@ const SignupOrLoginUserInput = `
     utmMedium: String
     source: UserOriginSource
     country: String
+    city: String
     timezone: String
     role: UserRole @defaultValue(value: "parent")
   }`;
