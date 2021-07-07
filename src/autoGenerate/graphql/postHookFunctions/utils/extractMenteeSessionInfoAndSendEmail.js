@@ -53,7 +53,6 @@ const extractMenteeSessionInfoAndSendEmail = async (
   bookingDate,
   slotTimeStringArray,
   user,
-  topic,
 ) => {
   if (get(user, 'data.user.studentProfile.batch.id')) return;
   const slotNumber = slotTimeStringArray[0].split('slot')[1];
@@ -83,7 +82,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
     isSessionBefore3Hours: moment(dateObject).diff(getIntlDateTime(new Date(), new Date().getHours(), timezone), 'hours', false) >= 4,
     isBookSessionReminderSent: get(menteeInfo, 'isBookSessionReminderSent'),
   };
-  const topicInfo = topic || await callLocalGraphqlApi(topicInfoQuery(topicId));
+  const topicInfo = await callLocalGraphqlApi(topicInfoQuery(topicId));
   menteeObj.topicTitle = get(topicInfo, 'data.topic.title');
   const topicThumbnail = get(topicInfo, 'data.topic.thumbnailSmall.uri');
   menteeObj.topicThumbnail = '';
@@ -92,7 +91,9 @@ const extractMenteeSessionInfoAndSendEmail = async (
   }
   menteeObj.prevBookingDate = '';
   menteeObj.previousStartTime = '';
-
+  if (get(topicInfo, 'data.topic.order') !== 1) {
+    return;
+  }
   switch (action) {
     case 'add': {
       sendBookingReminderOrConfirmationB2BC(parentId, true);
