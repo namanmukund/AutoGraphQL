@@ -8,7 +8,7 @@ import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/p
 import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
 
 const addScheduleJob = ({
-  jobType, userId, scheduledDate, code, batchSessionId, menteeSessionId, menteeSessionUpdatedAt,
+  jobType, userId, scheduledDate, code, batchSessionId, menteeSessionId, menteeSessionUpdatedAt, menteeId,
 }) => `
   mutation {
     addScheduleJob(
@@ -17,6 +17,7 @@ const addScheduleJob = ({
         ${code ? `code: "${code}"` : ''}
         ${batchSessionId ? `batchSessionId: "${batchSessionId}"` : ''}
         ${menteeSessionId ? `menteeSessionId: "${menteeSessionId}"` : ''}
+        ${menteeId ? `menteeId: "${menteeId}"` : ''}
         ${menteeSessionUpdatedAt ? `menteeSessionUpdatedAt: "${menteeSessionUpdatedAt}"` : ''}
         scheduledDate: "${scheduledDate.toISOString()}"
       }
@@ -126,7 +127,7 @@ const addToSchedule = async (jobType, scheduledDate, {
     }
     case 'B2CEngagementMail': {
       const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate,
+        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
       }));
       const jobId = get(res, 'data.addScheduleJob.id');
       schedule.scheduleJob(scheduledDate, () => {
@@ -138,7 +139,7 @@ const addToSchedule = async (jobType, scheduledDate, {
     }
     case 'B2CEngagementMailWithMentor': {
       const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate,
+        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
       }));
       const jobId = get(res, 'data.addScheduleJob.id');
       schedule.scheduleJob(scheduledDate, () => {
@@ -150,7 +151,7 @@ const addToSchedule = async (jobType, scheduledDate, {
     }
     case 'B2CBookingFinalReminder': {
       const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate,
+        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
       }));
       const jobId = get(res, 'data.addScheduleJob.id');
       schedule.scheduleJob(scheduledDate, () => {
@@ -162,7 +163,7 @@ const addToSchedule = async (jobType, scheduledDate, {
     }
     case 'B2CBookingSameDayFinalReminder': {
       const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate,
+        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
       }));
       const jobId = get(res, 'data.addScheduleJob.id');
       schedule.scheduleJob(scheduledDate, () => {
@@ -174,7 +175,7 @@ const addToSchedule = async (jobType, scheduledDate, {
     }
     case 'B2CSessionReminderWati': {
       const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate,
+        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
       }));
       const jobId = get(res, 'data.addScheduleJob.id');
       schedule.scheduleJob(scheduledDate, () => {
