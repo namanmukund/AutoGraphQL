@@ -74,6 +74,12 @@ const menteeCourseSyllabusProject = `
    tags: [ContentTag]
  }`;
 
+const firstComponent = `
+  type FirstComponent {
+   componentName: String,
+   componentId: ID,
+ }`;
+
 const MenteeCourseSyllabus = `
   type MenteeCourseSyllabus {
     upComingSession: [SessionDetailType]
@@ -86,7 +92,8 @@ const MenteeCourseSyllabus = `
     skills: [MenteeCourseSyllabusSkills]
     mentor: MenteeCourseSyllabusMentor
     projects: [MenteeCourseSyllabusProject]
+    firstComponent: FirstComponent
   }
 `;
 
-export default [MenteeCourseSyllabus, sessionDetailType, completedSessionDetailType, menteeCourseSyllabusCourse, menteeCourseSyllabusSkills, menteeCourseSyllabusMentor, menteeCourseSyllabusProject];
+export default [MenteeCourseSyllabus, sessionDetailType, completedSessionDetailType, menteeCourseSyllabusCourse, menteeCourseSyllabusSkills, menteeCourseSyllabusMentor, menteeCourseSyllabusProject, firstComponent];
