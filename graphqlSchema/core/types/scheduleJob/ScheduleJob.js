@@ -2,7 +2,8 @@ const ScheduleJob = `
   type ScheduleJob @model {
     menteeSession: MenteeSession @relation(name: "ScheduleJobMenteeSession", direction: "OneWay")
     menteeSessionId: String
-    menteeSessionUpdatedAt: String
+    menteeId: String
+    menteeSessionUpdatedAt: Date
     parent: User @relation(name: "ScheduleJobParent", direction: "OneWay")
     scheduledDate: Date
     jobType: String
