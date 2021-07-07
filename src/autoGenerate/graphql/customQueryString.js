@@ -8,6 +8,7 @@ getTotalAmountCollected ( input: TotalAmountCollectedInput): TotalAmountCollecte
 getCheatSheet (input: getCheatSheetInput): CheatSheetData
 getCampaignSlots (input: GetCampaignSlotsInput): GetCampaignSlotsResult
 getStudentCurrentStatus (input: getStudentCurrentStatusInput): StudentCurrentStatus
+getCourseCertificate (input: GetCourseCertificateInput ): CourseCertificateResult
 `;
 
 export default customQueryString;
