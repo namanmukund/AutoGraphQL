@@ -6,6 +6,7 @@ const UpdateParentChildDetailInput = `
     parentPhone: PhoneInput 
     grade: Grade
     country: Country
+    city: String
     timezone: String
     section: Section
     hasLaptopOrDesktop: Boolean
