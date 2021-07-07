@@ -9,6 +9,7 @@ const ParentChildSignUpInput = `
     childEmail: String 
     grade: Grade
     country: Country
+    city: String
     timezone: String
     section: Section @groupBy
     rollNo: String
