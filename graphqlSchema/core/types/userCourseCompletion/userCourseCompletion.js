@@ -1,7 +1,7 @@
 import { TBA, TLA, TWA } from '../../../../constants';
 
-const UserCourseRating = `
-  type UserCourseRating @model
+const UserCourseCompletion = `
+  type UserCourseCompletion @model
   @appPermissions(
     permissions:[
       { appName: "${TLA}" operations: "*" },
@@ -11,23 +11,24 @@ const UserCourseRating = `
     rule: allow
   )
   {
-    course: Course! @relation(name: "UserCourseRatingCourse", direction: "OneWay")
+    course: Course! @relation(name: "UserCourseCompletion", direction: "OneWay")
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
           ], 
         rule: allow
       )
-    user: User! @relation(name: "UserCourseRatingUser", direction: "OneWay")
+    user: User! @relation(name: "UserCourseCompletion", direction: "OneWay")
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
           ], 
         rule: allow
       )
-    rating: Int!
+    rating: Int
     comment: String
+    certificate: File @relation(name: "Certificate", direction: "OneWay")
   }
 `;
 
-export default UserCourseRating;
+export default UserCourseCompletion;

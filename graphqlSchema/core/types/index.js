@@ -101,7 +101,7 @@ import UserBlockBasedPractice from './userBlockBasedPractice';
 import UserBlockBasedProject from './userBlockBasedProject';
 import UserActivityBlockBasedProjectDump from './userActivityBlockBasedProjectDump';
 import ComicImage from './comicImage';
-import UserCourseRating from './userCourseRating';
+import userCourseCompletion from './userCourseCompletion';
 
 export default [
   ...User,
@@ -207,5 +207,5 @@ export default [
   ...UserActivityBlockBasedProjectDump,
   ...UserBlockBasedProject,
   ...ComicImage,
-  ...UserCourseRating,
+  ...userCourseCompletion,
 ];
