@@ -19,6 +19,7 @@ const FETCH_JOBS = `{
     code
     batchSessionId
     menteeSessionId
+    menteeId
     menteeSessionUpdatedAt
   }
 }`;
@@ -36,7 +37,7 @@ const reRunJobsFromDB = async () => {
   const scheduledJobs = get(res, 'data.scheduleJobs', []);
   scheduledJobs.forEach(async (scheduledJob) => {
     const {
-      jobType, scheduledDate, parent, id, code, batchSessionId, menteeSessionId, menteeSessionUpdatedAt,
+      jobType, scheduledDate, parent, id, code, batchSessionId, menteeSessionId, menteeSessionUpdatedAt, menteeId,
     } = scheduledJob;
     const isPast = moment().isAfter(scheduledDate);
     const userId = get(parent, 'id');
@@ -100,7 +101,7 @@ const reRunJobsFromDB = async () => {
       case 'B2CEngagementMail': {
         schedule.scheduleJob(new Date(scheduledDate), () => {
           sendB2CSessionReminder({
-            userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+            userId: menteeId, jobType, menteeSessionId, menteeSessionUpdatedAt,
           }, () => callLocalGraphqlApi(deleteJob(id)));
         });
         break;
@@ -108,7 +109,7 @@ const reRunJobsFromDB = async () => {
       case 'B2CEngagementMailWithMentor': {
         schedule.scheduleJob(new Date(scheduledDate), () => {
           sendB2CSessionReminder({
-            userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+            userId: menteeId, jobType, menteeSessionId, menteeSessionUpdatedAt,
           }, () => callLocalGraphqlApi(deleteJob(id)));
         });
         break;
@@ -116,7 +117,7 @@ const reRunJobsFromDB = async () => {
       case 'B2CBookingFinalReminder': {
         schedule.scheduleJob(new Date(scheduledDate), () => {
           sendB2CSessionReminder({
-            userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+            userId: menteeId, jobType, menteeSessionId, menteeSessionUpdatedAt,
           }, () => callLocalGraphqlApi(deleteJob(id)));
         });
         break;
@@ -124,7 +125,7 @@ const reRunJobsFromDB = async () => {
       case 'B2CBookingSameDayFinalReminder': {
         schedule.scheduleJob(new Date(scheduledDate), () => {
           sendB2CSessionReminder({
-            userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+            userId: menteeId, jobType, menteeSessionId, menteeSessionUpdatedAt,
           }, () => callLocalGraphqlApi(deleteJob(id)));
         });
         break;
@@ -132,7 +133,7 @@ const reRunJobsFromDB = async () => {
       case 'B2CSessionReminderWati': {
         schedule.scheduleJob(new Date(scheduledDate), () => {
           sendB2CSessionReminder({
-            userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+            userId: menteeId, jobType, menteeSessionId, menteeSessionUpdatedAt,
           }, () => callLocalGraphqlApi(deleteJob(id)));
         });
         break;

@@ -51,6 +51,9 @@ const addUserLeadSquared = (params, create = true) => {
   if (get(params, 'input.country')) {
     leadSquaredInput.mx_Country_Name = get(params, 'input.country');
   }
+  if (get(params, 'input.city')) {
+    leadSquaredInput.mx_City = get(params, 'input.city');
+  }
 
   if (get(params, 'input.unVerifiedLead')) {
     leadSquaredInput.mx_OTP_Verified = 'No';

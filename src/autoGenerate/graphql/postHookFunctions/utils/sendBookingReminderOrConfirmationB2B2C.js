@@ -99,19 +99,21 @@ const productionSchedule = {
   },
   reminderWati: (slotNumber, bookingDate) => new Date(moment(bookingDate).toDate().setHours(slotNumber - 1, 30, 0, 0)),
 };
+
+const TEST_WAIT_FACTOR = 180;
 const testSchedule = {
   nextDaySessionReminder: () => moment().add(30, 'seconds').toDate(),
   firstFlow: {
-    firstMail: () => moment().add(60, 'seconds').toDate(),
-    secondMail: () => moment().add(90, 'seconds').toDate(),
-    thirdMail: () => moment().add(100, 'seconds').toDate(),
+    firstMail: () => moment().add(60 + TEST_WAIT_FACTOR, 'seconds').toDate(),
+    secondMail: () => moment().add(90 + TEST_WAIT_FACTOR, 'seconds').toDate(),
+    thirdMail: () => moment().add(100 + TEST_WAIT_FACTOR, 'seconds').toDate(),
   },
-  secondFlow: () => moment().add(60, 'seconds').toDate(),
+  secondFlow: () => moment().add(60 + TEST_WAIT_FACTOR, 'seconds').toDate(),
   thirdFlow: {
-    firstMail: () => moment().add(60, 'seconds').toDate(),
-    secondMail: () => moment().add(100, 'seconds').toDate(),
+    firstMail: () => moment().add(60 + TEST_WAIT_FACTOR, 'seconds').toDate(),
+    secondMail: () => moment().add(100 + TEST_WAIT_FACTOR, 'seconds').toDate(),
   },
-  reminderWati: () => moment().add(120, 'seconds').toDate(),
+  reminderWati: () => moment().add(120 + TEST_WAIT_FACTOR, 'seconds').toDate(),
 };
 
 const schedule = process.env.NODE_ENV === 'production' ? productionSchedule : testSchedule;
@@ -244,11 +246,13 @@ const sendB2CUserWithBookingDate = async (user, userId, timeTable, parentName, s
     getDays(bookingDate) > 3
     || (getDays(bookingDate) === 3 && slotNumber <= 17)
   ) {
+    // console.log(1, productionSchedule.firstFlow.firstMail(bookingDate), productionSchedule.firstFlow.secondMail(bookingDate), productionSchedule.firstFlow.thirdMail(slotNumber, bookingDate));
     addToSchedule('B2CEngagementMail', schedule.firstFlow.firstMail(bookingDate), { userId, menteeId, menteeSessionUpdatedAt });
     addToSchedule('B2CEngagementMailWithMentor', schedule.firstFlow.secondMail(bookingDate), { userId, menteeId, menteeSessionUpdatedAt });
     addToSchedule('B2CBookingFinalReminder', schedule.firstFlow.thirdMail(slotNumber, bookingDate), { userId, menteeId, menteeSessionUpdatedAt });
   } else if (getDays(bookingDate) === 0 || (getDays(bookingDate) === 1 && slotNumber <= 18)) {
     // if slot is book b/w less than 3 hours.
+    // console.log(2, productionSchedule.secondFlow(slotNumber, bookingDate));
     if (getDays(bookingDate) === 0 && moment().hours() + 3 >= slotNumber) {
       sendB2B2CBookingReminder({
         userId, menteeId, menteeSessionUpdatedAt, jobType: 'B2CBookingSameDayFinalReminder',
@@ -257,6 +261,7 @@ const sendB2CUserWithBookingDate = async (user, userId, timeTable, parentName, s
       addToSchedule('B2CBookingSameDayFinalReminder', schedule.secondFlow(slotNumber, bookingDate), { userId, menteeId, menteeSessionUpdatedAt });
     }
   } else {
+    // console.log(3, productionSchedule.thirdFlow.firstMail(bookingDate), productionSchedule.thirdFlow.secondMail(slotNumber, bookingDate));
     addToSchedule('B2CEngagementMailWithMentor', schedule.thirdFlow.firstMail(bookingDate), { userId, menteeId, menteeSessionUpdatedAt });
     addToSchedule('B2CBookingFinalReminder', schedule.thirdFlow.secondMail(slotNumber, bookingDate), { userId, menteeId, menteeSessionUpdatedAt });
   }
