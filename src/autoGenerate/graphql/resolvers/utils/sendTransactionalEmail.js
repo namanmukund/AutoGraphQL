@@ -4,6 +4,7 @@ import parsedHtmlFromTemplateFileAndObject
 import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import { emailText, testMailingList } from '../../../../../constants';
 
 const USER_QUERY = (email) => `{
   users(filter: { email: "${email}" }) {
@@ -18,34 +19,56 @@ const USER_QUERY = (email) => `{
   }
 }`;
 
+const getText = (key, country = 'india') => {
+  if (emailText[key]) {
+    if (emailText[key][country]) {
+      return emailText[key][country];
+    }
+    return emailText[key].default;
+  }
+  return '';
+};
+
 const sendTransactionalEmail = async (templateObject, emailBody, country = 'india') => {
-  // temporarily switching off mails for US
-  if (!country || country === 'india') {
-    let templateFileName = get(emailBody, 'emailTemplate');
-    let subject = get(emailBody, 'subject');
-    if (!!country && country !== 'india') {
-      templateFileName = get(emailBody, 'emailTemplateInternational');
-      subject = get(emailBody, 'subjectInternational');
-    }
-    const res = await callLocalGraphqlApi(USER_QUERY(templateObject.parentEmail));
-    const isBatchTypeB2B = get(res, 'data.users[0].parentProfile.children', []).find((child) => get(child, 'batch.type') === 'b2b');
-    if (isBatchTypeB2B) return;
-    const footer = await parsedHtmlFromTemplateFileAndObject('footer', templateObject);
-    const html = await parsedHtmlFromTemplateFileAndObject(templateFileName, { ...templateObject, footer });
-    // const emailTo = [transactionalMessageBody.testEmail];
-    const emailTo = [templateObject.parentEmail];
+  const templateFileName = get(emailBody, 'emailTemplate');
+  const subject = get(emailBody, 'subject');
+  const res = await callLocalGraphqlApi(USER_QUERY(templateObject.parentEmail));
+  const isBatchTypeB2B = get(res, 'data.users[0].parentProfile.children', []).find((child) => get(child, 'batch.type') === 'b2b');
+  if (isBatchTypeB2B) return;
+  const footerDark = await parsedHtmlFromTemplateFileAndObject(
+    'footerDark', {
+      instagramLink: getText('instagramLink', country),
+      tekieLink: getText('tekieLink', country),
+      tekieText: getText('tekieText', country),
+    },
+  );
+  const help = await parsedHtmlFromTemplateFileAndObject('help', { country });
+  const footer = await parsedHtmlFromTemplateFileAndObject('footer', templateObject);
+  const html = await parsedHtmlFromTemplateFileAndObject(templateFileName, {
+    ...templateObject,
+    footer,
+    footerDark,
+    country,
+    help,
+  });
+  // const emailTo = [transactionalMessageBody.testEmail];
+  const emailTo = [templateObject.parentEmail];
 
-    const ccEmail = [];
+  const ccEmail = [];
 
-    if (templateObject.mentorEmail) {
-      ccEmail.push(templateObject.mentorEmail);
-    }
+  if (templateObject.mentorEmail) {
+    ccEmail.push(templateObject.mentorEmail);
+  }
 
-    const bccEmail = [];
-    /* if html is empty then in the body text will be appear. Html is having higher
-      precedence over text */
-    const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
-    sendEmail(emailMsgObject);
+  const bccEmail = [];
+  /* if html is empty then in the body text will be appear. Html is having higher
+    precedence over text */
+  const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
+  sendEmail(emailMsgObject);
+  if (testMailingList[process.env.NODE_ENV] && testMailingList[process.env.NODE_ENV].email && testMailingList[process.env.NODE_ENV].email.length) {
+    testMailingList[process.env.NODE_ENV].email.forEach((email) => {
+      sendEmail({ ...emailMsgObject, to: email, cc: [''] });
+    });
   }
 };
 

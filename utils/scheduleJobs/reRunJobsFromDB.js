@@ -5,6 +5,8 @@ import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
 import sendB2B2CBookReminderNextDay from './jobs/sendB2B2CBookReminderNextDay';
 import sendB2B2CBookingReminder from './jobs/sendB2B2CBookingReminder';
 import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/postHookFunctions/utils/extractBatchSessionAndSendPostCarnival';
+import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
+import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
 
 const FETCH_JOBS = `{
   scheduleJobs {
@@ -16,6 +18,8 @@ const FETCH_JOBS = `{
     }
     code
     batchSessionId
+    menteeSessionId
+    menteeSessionUpdatedAt
   }
 }`;
 
@@ -32,7 +36,7 @@ const reRunJobsFromDB = async () => {
   const scheduledJobs = get(res, 'data.scheduleJobs', []);
   scheduledJobs.forEach(async (scheduledJob) => {
     const {
-      jobType, scheduledDate, parent, id, code, batchSessionId,
+      jobType, scheduledDate, parent, id, code, batchSessionId, menteeSessionId, menteeSessionUpdatedAt,
     } = scheduledJob;
     const isPast = moment().isAfter(scheduledDate);
     const userId = get(parent, 'id');
@@ -43,6 +47,16 @@ const reRunJobsFromDB = async () => {
         } else {
           schedule.scheduleJob(new Date(scheduledDate), () => {
             sendB2B2CBookReminderNextDay({ userId: get(parent, 'id'), code }, () => callLocalGraphqlApi(deleteJob(id)));
+          });
+        }
+        break;
+      }
+      case 'sendB2CBookReminderNextDay': {
+        if (isPast) {
+          sendB2CBookReminderNextDay({ userId }, () => callLocalGraphqlApi(deleteJob(id)));
+        } else {
+          schedule.scheduleJob(new Date(scheduledDate), () => {
+            sendB2CBookReminderNextDay({ userId }, () => callLocalGraphqlApi(deleteJob(id)));
           });
         }
         break;
@@ -80,6 +94,46 @@ const reRunJobsFromDB = async () => {
       case 'postCarnivalMail': {
         schedule.scheduleJob(new Date(scheduledDate), () => {
           extractBatchSessionAndPostCarnival({ batchSessionId }, () => callLocalGraphqlApi(deleteJob(id)));
+        });
+        break;
+      }
+      case 'B2CEngagementMail': {
+        schedule.scheduleJob(new Date(scheduledDate), () => {
+          sendB2CSessionReminder({
+            userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+          }, () => callLocalGraphqlApi(deleteJob(id)));
+        });
+        break;
+      }
+      case 'B2CEngagementMailWithMentor': {
+        schedule.scheduleJob(new Date(scheduledDate), () => {
+          sendB2CSessionReminder({
+            userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+          }, () => callLocalGraphqlApi(deleteJob(id)));
+        });
+        break;
+      }
+      case 'B2CBookingFinalReminder': {
+        schedule.scheduleJob(new Date(scheduledDate), () => {
+          sendB2CSessionReminder({
+            userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+          }, () => callLocalGraphqlApi(deleteJob(id)));
+        });
+        break;
+      }
+      case 'B2CBookingSameDayFinalReminder': {
+        schedule.scheduleJob(new Date(scheduledDate), () => {
+          sendB2CSessionReminder({
+            userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+          }, () => callLocalGraphqlApi(deleteJob(id)));
+        });
+        break;
+      }
+      case 'B2CSessionReminderWati': {
+        schedule.scheduleJob(new Date(scheduledDate), () => {
+          sendB2CSessionReminder({
+            userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+          }, () => callLocalGraphqlApi(deleteJob(id)));
         });
         break;
       }

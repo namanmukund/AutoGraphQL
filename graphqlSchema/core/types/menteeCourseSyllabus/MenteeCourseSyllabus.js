@@ -26,6 +26,8 @@ const completedSessionDetailType = `
    topicDescription: String
    topicOrder: Int
    endingDate: Date
+   mentorName: String
+   mentorProfilePic: File
  }`;
 
 const menteeCourseSyllabusSkills = `
