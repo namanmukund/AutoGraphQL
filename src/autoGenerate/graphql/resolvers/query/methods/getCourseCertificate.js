@@ -8,6 +8,7 @@ const getUserCourseCompletion = (code) => `
   userCourseCompletion(id:"${code}"){
     id
     user {
+      id
       name
     }
     course {
@@ -31,13 +32,16 @@ const getCourseCertificate = (async (root, params, context) => {
 
   const getUserCourseCompletionRes = await callLocalGraphqlApi(getUserCourseCompletion(code));
   const completionId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.id', {});
-  const certificateId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.certificate.id', {});
-  result.name = get(getUserCourseCompletionRes, 'data.userCourseCompletion.user.name', null);
-  result.courseName = get(getUserCourseCompletionRes, 'data.userCourseCompletion.course.title', null);
-
+  
   if (!completionId) {
     throw new DatabaseRecordNotFoundError();
   }
+
+  const certificateId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.certificate.id', {});
+  result.name = get(getUserCourseCompletionRes, 'data.userCourseCompletion.user.name', null);
+  result.userId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.user.id', null);
+  result.courseName = get(getUserCourseCompletionRes, 'data.userCourseCompletion.course.title', null);
+
 
   if (certificateId) {
     result.certificate = { type: 'File', typeId: `${certificateId}` };
