@@ -27,6 +27,10 @@ const UserCourseCompletion = `
       )
     rating: Int
     comment: String
+    courseDuration: String
+    courseEndingDate: String
+    mentors: [String]
+    profiency: String
     certificate: File @relation(name: "Certificate", direction: "OneWay")
   }
 `;
