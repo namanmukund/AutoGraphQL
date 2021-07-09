@@ -486,6 +486,9 @@ const getAllottedMentorQuery = (userId, courseId) => `
         ${courseId ? `{course_some:{
           ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
         }}` : ''}
+        {
+          leadStatus_not: unassigned
+        }
       ]
     }){
       allottedMentor{
@@ -1165,7 +1168,6 @@ const menteeCourseSyllabusMutationResolver = async (
       }
     }
   }
-
   Object.assign(currentUserSyllabus, {
     upComingSession,
     bookedSession,
