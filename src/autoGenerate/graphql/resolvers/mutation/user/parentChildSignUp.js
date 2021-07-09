@@ -34,6 +34,7 @@ import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentCh
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import getUserPasswordObject from './utils/getUserPasswordObject';
+import updateUser from './utils/updateUser';
 
 const USER_TYPE = 'User';
 
@@ -119,7 +120,7 @@ const parentChildSignUpMutationResolver = async (
   const source = getUserOriginSource(utmSource, schoolName, schoolId);
 
   // if parent exist don't add parent and check if the child exists too
-  if (parentInfo && parentInfo.parentId) {
+  if (parentInfo && parentInfo.parentId && parentInfo.parentEmail) {
     parentId = parentInfo.parentId;
     parentProfileId = parentInfo.parentProfileId;
     const { childrenName } = parentInfo;
@@ -172,7 +173,20 @@ const parentChildSignUpMutationResolver = async (
     }
 
     const parentDataWithId = generateCuid(parentData);
-    const parentUserData = await addUserData(authentication, parentDataWithId);
+    let parentUserData;
+    /*
+    handling case where parent phone exists but email does not exist
+     */
+    if (!get(parentInfo, 'parentId')) {
+      // add if parent is not added
+      parentUserData = await addUserData(authentication, parentDataWithId);
+    } else {
+      // case of phone and not email of a parent user data
+      // eslint-disable-next-line no-unused-vars
+      const { id, ...updateObj } = parentDataWithId;
+      updateObj.id = get(parentInfo, 'parentId');
+      parentUserData = await addUserData(authentication, updateObj, 'update');
+    }
 
     if (!parentUserData || !parentUserData.id) {
       throw new SomethingWentWrongError({
@@ -183,6 +197,7 @@ const parentChildSignUpMutationResolver = async (
     }
     parentId = parentUserData.id;
   }
+
   if (!parentProfileId) {
     const parentProfileInputData = {};
     if (hasLaptopOrDesktop) {
