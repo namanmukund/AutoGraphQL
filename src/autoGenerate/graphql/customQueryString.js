@@ -7,6 +7,7 @@ sendTransactionalMessage(userId: ID, input: TransactionalMessageInput) : Boolean
 getTotalAmountCollected ( input: TotalAmountCollectedInput): TotalAmountCollected
 getCheatSheet (input: getCheatSheetInput): CheatSheetData
 getCampaignSlots (input: GetCampaignSlotsInput): GetCampaignSlotsResult
+getSchoolDetails (input: GetSchoolDetailsInput): GetSchoolDetailsResult
 getStudentCurrentStatus (input: getStudentCurrentStatusInput): StudentCurrentStatus
 getCourseCertificate (input: GetCourseCertificateInput ): CourseCertificateResult
 `;

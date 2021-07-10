@@ -4,7 +4,7 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   slotTimes,
-  sessionStatus, blockBasedProjectType, OLD_COURSE_ID,
+  sessionStatus, blockBasedProjectType, OLD_COURSE_ID, topicTypes,
 } from '../../../../../../constants';
 import {
   DatabaseRecordNotFoundError,
@@ -486,6 +486,9 @@ const getAllottedMentorQuery = (userId, courseId) => `
         ${courseId ? `{course_some:{
           ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
         }}` : ''}
+        {
+          leadStatus_not: unassigned
+        }
       ]
     }){
       allottedMentor{
@@ -561,6 +564,28 @@ const allottedMentorFromMMSQuery = (userId, courseId) => `
   }
   `;
 
+// query to get chapters and topics belomngin to a course
+const getTopicQueryNewCourse = (topicId) => `
+query{
+  topic(id:"${topicId}"){
+    id
+    topicComponentRule{
+      order
+      componentName
+      learningObjective{
+        id
+      }
+      video{
+        id
+      }
+      blockBasedProject{
+        id
+      }
+    }
+  }
+}
+`;
+
 /*
 This is called when mentee tries to load homepage
 It will return all the booked and upcoming sessions based on User current topic component status
@@ -607,6 +632,7 @@ const menteeCourseSyllabusMutationResolver = async (
   let practiceCount = 0;
   // const projects = [];
   let mentorData = {};
+  let firstComponent = {};
 
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
@@ -1087,6 +1113,61 @@ const menteeCourseSyllabusMutationResolver = async (
     practiceCount,
     courseCompletionPercentage: totalTopics ? Math.round(((completedSession.length * 100) / totalTopics) * 100) / 100 : 0,
   };
+
+  if (bookedSession && bookedSession.length) {
+    const bookedTopicId = bookedSession[0].topicId || '';
+    if (bookedTopicId) {
+      const {
+        video, blockBasedPractice, blockBasedProject,
+      } = topicTypes;
+      if (!courseId || (courseId === OLD_COURSE_ID)) {
+        firstComponent = {
+          componentName: video,
+          componentId: bookedTopicId,
+        };
+      } else {
+        const topicRes = await callLocalGraphqlApi(
+          getTopicQueryNewCourse(bookedTopicId),
+          context,
+          '',
+        );
+        // getting info of called topic
+        const topicInfo = get(topicRes, 'data.topic');
+        if (!topicInfo) {
+          throw new DatabaseRecordNotFoundError({
+            data: {
+              error: 'Topic is not present',
+            },
+          });
+        }
+
+        const topicComponentRule = topicInfo.topicComponentRule;
+        if (topicComponentRule && topicComponentRule.length) {
+          const sortedTopicComponentRule = topicComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
+          let componentId = '';
+          if (sortedTopicComponentRule[0].componentName === video) {
+            componentId = sortedTopicComponentRule[0].video && sortedTopicComponentRule[0].video.id;
+          } else if (sortedTopicComponentRule[0].componentName === 'learningObjective') {
+            componentId = sortedTopicComponentRule[0].learningObjective && sortedTopicComponentRule[0].learningObjective.id;
+          } else if (sortedTopicComponentRule[0].componentName === blockBasedPractice) {
+            componentId = sortedTopicComponentRule[0].blockBasedProject && sortedTopicComponentRule[0].blockBasedProject.id;
+          } else if (sortedTopicComponentRule[0].componentName === blockBasedProject) {
+            componentId = sortedTopicComponentRule[0].blockBasedProject && sortedTopicComponentRule[0].blockBasedProject.id;
+          }
+          firstComponent = {
+            componentName: sortedTopicComponentRule[0].componentName,
+            componentId,
+          };
+        } else {
+          // in case topicComponentRule is not present, handling the case and sending video
+          firstComponent = {
+            componentName: video,
+            componentId: bookedTopicId,
+          };
+        }
+      }
+    }
+  }
   Object.assign(currentUserSyllabus, {
     upComingSession,
     bookedSession,
@@ -1098,6 +1179,7 @@ const menteeCourseSyllabusMutationResolver = async (
     course: courseData,
     // projects,
     mentor: mentorData,
+    firstComponent,
   });
 
   return currentUserSyllabus;

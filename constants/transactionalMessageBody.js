@@ -11,7 +11,7 @@ const transactionalMessageBody = {
     emailTemplate: 'sessionMissed',
     emailTemplateInternational: 'sessionMissed',
     subject: 'Tekie - Meeting link for free coding session',
-    subjectInternational: 'You missed the session! But don’t worry.',
+    subjectInternational: 'You missed the session! But don\'t worry.',
     whatsAppTemplate: 'session_missed_usa',
   },
   demoNotBooked: {

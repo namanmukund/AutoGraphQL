@@ -6,7 +6,7 @@ import {
 import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
-import { ADMIN, UMS_ADMIN } from '../../../../../constants/roles';
+import { ADMIN, SALES_EXECUTIVE, UMS_ADMIN } from '../../../../../constants/roles';
 import validateMentorSessionInput from './utils/validateMentorSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
@@ -79,7 +79,7 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
   if (
     !backendApps.includes(appName)
     && userIdFromContext !== userId
-    && !(userRoleFromContext === ADMIN || userRoleFromContext === UMS_ADMIN)
+    && !(userRoleFromContext === ADMIN || userRoleFromContext === UMS_ADMIN || userRoleFromContext === SALES_EXECUTIVE)
   ) {
     throw new UserMismatchError();
   }

@@ -80,6 +80,7 @@ import getCheatSheet from './query/methods/getCheatSheet';
 import addBulkMentorSession from './mutation/methods/addBulkMentorSession';
 import updateParentChildDetail from './mutation/methods/updateParentChildDetail';
 import getCampaignSlots from './query/methods/getCampaignSlots';
+import getSchoolDetails from './query/methods/getSchoolDetails';
 import bookB2B2CSlots from './mutation/methods/bookB2B2CSlots';
 import getStudentCurrentStatus from './query/methods/getStudentCurrentStatus';
 import getCourseCertificate from './query/methods/getCourseCertificate';
@@ -593,6 +594,8 @@ resolvers.Query.getCourseCertificate = getCourseCertificate;
 resolvers.Query.getStudentCurrentStatus = getStudentCurrentStatus;
 // Resolver to get the campaign slots
 resolvers.Query.getCampaignSlots = getCampaignSlots;
+// Resolver to get school Details
+resolvers.Query.getSchoolDetails = getSchoolDetails;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 
