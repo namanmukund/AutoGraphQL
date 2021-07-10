@@ -90,6 +90,7 @@ import Campaign from './campaign';
 import BulkMentorSessionInput from './bulkMentorSessionInput';
 import RescheduledSlot from './rescheduledSlot';
 import GetCampaignSlots from './getCampaignSlots';
+import GetSchoolDetails from './getSchoolDetails';
 import BookB2B2CSlotsInput from './bookB2B2CSlotsInput';
 import StudentCurrentStatus from './studentCurrentStatus';
 import Video from './video';
@@ -207,5 +208,6 @@ export default [
   ...UserActivityBlockBasedProjectDump,
   ...UserBlockBasedProject,
   ...ComicImage,
+  ...GetSchoolDetails,
   ...UserCourseRating,
 ];
