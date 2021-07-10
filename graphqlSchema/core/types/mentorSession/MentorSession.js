@@ -1,5 +1,5 @@
 import getSlotTimeFields from '../../functions/getSlotTimeFields';
-import { NOT_UMS_HEAD_AND_MENTOR, UMS_HEAD_AND_MENTOR } from '../../../../constants/roles';
+import { NOT_UMS_HEAD_AND_MENTOR, SALES_EXECUTIVE, UMS_HEAD_AND_MENTOR } from '../../../../constants/roles';
 import { READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
 
@@ -18,6 +18,7 @@ const MentorSession = `
   @userPermissions(
   permissions:[
     { userRole: ${UMS_HEAD_AND_MENTOR} appName: "*" operations: "*" },
+    { userRole: ${SALES_EXECUTIVE} appName: "*" operations: "*" },
     { userRole: ${NOT_UMS_HEAD_AND_MENTOR} appName: "*" operations: ${READ} }
     ], 
   rule: allow
