@@ -30,7 +30,7 @@ const UserCourseCompletion = `
     courseDuration: String
     courseEndingDate: String
     mentors: [String]
-    profiency: String
+    proficiency: String
     certificate: File @relation(name: "Certificate", direction: "OneWay")
   }
 `;
