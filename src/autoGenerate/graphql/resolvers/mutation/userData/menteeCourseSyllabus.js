@@ -839,6 +839,7 @@ const menteeCourseSyllabusMutationResolver = async (
                     chapterTitle,
                     chapterOrder,
                     endingDate: sessionEndDate,
+                    mentorId: mentorSession && mentorSession.user && mentorSession.user.id,
                     mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
                     mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
                   };
@@ -917,6 +918,7 @@ const menteeCourseSyllabusMutationResolver = async (
             chapterTitle,
             chapterOrder,
             endingDate: sessionEndDate,
+            mentorId: mentorSession && mentorSession.user && mentorSession.user.id,
             mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
             mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
           };
@@ -958,6 +960,7 @@ const menteeCourseSyllabusMutationResolver = async (
           chapterId: chapter && chapter.id,
           chapterTitle: chapter && chapter.title,
           chapterOrder: chapter && chapter.order,
+          mentorId: mentorSession && mentorSession.user && mentorSession.user.id,
           mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
           mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
         };

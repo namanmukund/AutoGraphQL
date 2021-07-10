@@ -49,6 +49,7 @@ const Course = `
     courseComponentRule: [CourseComponentsRule]
     badges: [Badge] @relation(name: "CourseBadge")
     badgeDescription: String @uniqueOrEmpty @trim
+    projectsCount: Int
   }
 `;
 

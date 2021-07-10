@@ -8,7 +8,8 @@ const CourseCertificateResult = `
     courseDuration: String
     courseEndingDate: String
     mentors: [String]
-    profiency: String
+    proficiency: String
+    projectsCount: Int
     certificate: File @relation(name: "CourseCertificate", direction: "OneWay")
   }
 `;

@@ -9,8 +9,10 @@ const getUserCourseCompletion = (code) => `
     id
     courseDuration
     courseEndingDate
-    mentors
-    profiency
+    mentors {
+      name
+    }
+    proficiency
     user {
       id
       name
@@ -18,6 +20,7 @@ const getUserCourseCompletion = (code) => `
     course {
       id
       title
+      projectsCount
       thumbnail {
         id
       }
@@ -53,8 +56,9 @@ const getCourseCertificate = (async (root, params, context) => {
   result.courseName = get(getUserCourseCompletionRes, 'data.userCourseCompletion.course.title', null);
   result.courseDuration = get(getUserCourseCompletionRes, 'data.userCourseCompletion.courseDuration', null);
   result.courseEndingDate = get(getUserCourseCompletionRes, 'data.userCourseCompletion.courseEndingDate', null);
-  result.mentors = get(getUserCourseCompletionRes, 'data.userCourseCompletion.mentors', []);
-  result.profiency = get(getUserCourseCompletionRes, 'data.userCourseCompletion.profiency', null);
+  result.mentors = get(getUserCourseCompletionRes, 'data.userCourseCompletion.mentors', []).map((user) => get(user, 'name'));
+  result.projectsCount = get(getUserCourseCompletionRes, 'data.userCourseCompletion.course.projectsCount', null);
+  result.proficiency = get(getUserCourseCompletionRes, 'data.userCourseCompletion.proficiency', null);
 
   if (courseThumbnailId) {
     result.courseThumbnail = { type: 'File', typeId: `${courseThumbnailId}` };
