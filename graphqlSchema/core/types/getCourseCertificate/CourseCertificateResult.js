@@ -4,6 +4,7 @@ const CourseCertificateResult = `
     userId: String
     courseId: String
     courseName: String
+    courseThumbnail: File @relation(name: "CourseThumbnail", direction: "OneWay")
     courseDuration: String
     courseEndingDate: String
     mentors: [String]

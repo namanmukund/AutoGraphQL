@@ -18,6 +18,9 @@ const getUserCourseCompletion = (code) => `
     course {
       id
       title
+      thumbnail {
+        id
+      }
     }
     certificate {
       id
@@ -43,15 +46,19 @@ const getCourseCertificate = (async (root, params, context) => {
   }
 
   const certificateId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.certificate.id', {});
+  const courseThumbnailId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.course.thumbnail.id', null);
   result.name = get(getUserCourseCompletionRes, 'data.userCourseCompletion.user.name', null);
   result.userId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.user.id', null);
-  result.courseName = get(getUserCourseCompletionRes, 'data.userCourseCompletion.course.title', null);
   result.courseId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.course.id', null);
+  result.courseName = get(getUserCourseCompletionRes, 'data.userCourseCompletion.course.title', null);
   result.courseDuration = get(getUserCourseCompletionRes, 'data.userCourseCompletion.courseDuration', null);
   result.courseEndingDate = get(getUserCourseCompletionRes, 'data.userCourseCompletion.courseEndingDate', null);
   result.mentors = get(getUserCourseCompletionRes, 'data.userCourseCompletion.mentors', []);
   result.profiency = get(getUserCourseCompletionRes, 'data.userCourseCompletion.profiency', null);
 
+  if (courseThumbnailId) {
+    result.courseThumbnail = { type: 'File', typeId: `${courseThumbnailId}` };
+  }
   if (certificateId) {
     result.certificate = { type: 'File', typeId: `${certificateId}` };
   }
