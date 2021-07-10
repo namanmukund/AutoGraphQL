@@ -212,5 +212,4 @@ export default [
   ...UserCourseCompletion,
   ...GetCourseCertificate,
   ...GetSchoolDetails,
-  ...UserCourseRating,
 ];
