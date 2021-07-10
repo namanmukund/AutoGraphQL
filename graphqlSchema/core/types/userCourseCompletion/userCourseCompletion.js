@@ -25,11 +25,11 @@ const UserCourseCompletion = `
           ], 
         rule: allow
       )
+    mentors: [User] @relation(name: "UserCourseCompletionMentors", direction: "OneWay")
     rating: Int
     comment: String
     courseDuration: String
     courseEndingDate: String
-    mentors: [String]
     proficiency: String
     certificate: File @relation(name: "Certificate", direction: "OneWay")
   }
