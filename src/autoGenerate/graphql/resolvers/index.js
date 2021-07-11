@@ -83,6 +83,7 @@ import getCampaignSlots from './query/methods/getCampaignSlots';
 import getSchoolDetails from './query/methods/getSchoolDetails';
 import bookB2B2CSlots from './mutation/methods/bookB2B2CSlots';
 import getStudentCurrentStatus from './query/methods/getStudentCurrentStatus';
+import getCourseCertificate from './query/methods/getCourseCertificate';
 import signUpSchool from './mutation/methods/signUpSchool';
 
 const parsedASTMap = getParsedASTMap(types);
@@ -587,6 +588,8 @@ resolvers.Query.sendTransactionalMessage = sendTransactionalMessage;
 resolvers.Query.getTotalAmountCollected = getTotalAmountCollected;
 // Resolver to get the cheatsheets
 resolvers.Query.getCheatSheet = getCheatSheet;
+// Resolver to get User's Course Completion Certificate
+resolvers.Query.getCourseCertificate = getCourseCertificate;
 // Resolver to get students Status
 resolvers.Query.getStudentCurrentStatus = getStudentCurrentStatus;
 // Resolver to get the campaign slots

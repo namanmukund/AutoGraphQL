@@ -9,6 +9,7 @@ getCheatSheet (input: getCheatSheetInput): CheatSheetData
 getCampaignSlots (input: GetCampaignSlotsInput): GetCampaignSlotsResult
 getSchoolDetails (input: GetSchoolDetailsInput): GetSchoolDetailsResult
 getStudentCurrentStatus (input: getStudentCurrentStatusInput): StudentCurrentStatus
+getCourseCertificate (input: GetCourseCertificateInput ): CourseCertificateResult
 `;
 
 export default customQueryString;
