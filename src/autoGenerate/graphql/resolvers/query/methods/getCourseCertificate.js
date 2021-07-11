@@ -42,7 +42,7 @@ const getCourseCertificate = (async (root, params, context) => {
   const result = {};
 
   const getUserCourseCompletionRes = await callLocalGraphqlApi(getUserCourseCompletion(code));
-  const completionId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.id', {});
+  const completionId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.id', null);
 
   if (!completionId) {
     throw new DatabaseRecordNotFoundError();
