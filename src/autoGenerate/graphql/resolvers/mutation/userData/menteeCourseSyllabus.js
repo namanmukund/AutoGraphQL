@@ -901,10 +901,7 @@ const menteeCourseSyllabusMutationResolver = async (
           mentorMenteeSessions.forEach((mentorMenteeSession) => {
             if (mentorMenteeSession.topic && mentorMenteeSession.topic.id === topicId) {
               mentorSession = mentorMenteeSession.mentorSession;
-              sessionDate = mentorMenteeSession.sessionEndDate;
-              if (!sessionDate) {
-                sessionDate = mentorMenteeSession.sessionStartDate;
-              }
+              sessionDate = mentorMenteeSession.sessionEndDate || mentorMenteeSession.sessionStartDate;
             }
           });
 
