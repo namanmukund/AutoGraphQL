@@ -26,6 +26,7 @@ const completedSessionDetailType = `
    topicDescription: String
    topicOrder: Int
    endingDate: Date
+   mentorId: String
    mentorName: String
    mentorProfilePic: File
  }`;
