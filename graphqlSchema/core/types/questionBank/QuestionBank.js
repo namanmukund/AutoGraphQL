@@ -34,8 +34,8 @@ const QuestionBank = `
     fibBlocksOptions: [FibBlocksOption]
     fibInputOptions: [FibInputOption]
     arrangeOptions: [ArrangeOption]
-    learningObjective: LearningObjective! @relation(name: "LearningObjectiveQuestionBank")
-    topic: Topic @relation(name: "TopicQuestionBank")
+    learningObjectives: [LearningObjective] @relation(name: "LearningObjectiveQuestionBank")
+    topics: [Topic] @relation(name: "TopicQuestionBank")
     status: ContentStatus! @defaultValue(value: "unpublished")
     courses: [Course] @relation(name: "CourseQuestionBank", direction: "OneWay")
   }
