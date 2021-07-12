@@ -10,6 +10,7 @@ const GetSchoolDetailsResult = `
     city: String
     country: Country
     logo: File @relation(name: "GetSchoolDetailsResultFile", direction: "OneWay")
+    bgImage: File @relation(name: "GetSchoolDetailsResultPictureFile", direction: "OneWay")
   }
 `;
 

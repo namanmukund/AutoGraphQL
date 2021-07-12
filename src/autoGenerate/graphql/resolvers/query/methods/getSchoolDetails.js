@@ -18,6 +18,9 @@ const getSchoolData = (code) => `
     coordinatorName
     city
     country
+    schoolPicture {
+      id
+    }
     logo{
       id
     }
@@ -37,6 +40,7 @@ const getSchoolDetails = (async (root, params, context) => {
   const getSchoolRes = await callLocalGraphqlApi(getSchoolData(code));
   const schoolId = get(getSchoolRes, 'data.school.id', '');
   const schoolLogoId = get(getSchoolRes, 'data.school.logo.id', '');
+  const schoolPictureId = get(getSchoolRes, 'data.school.schoolPicture.id', '');
   // by default taking value as 1 in worst case
   if (!schoolId) {
     throw new DatabaseRecordNotFoundError();
@@ -53,6 +57,9 @@ const getSchoolDetails = (async (root, params, context) => {
   result.country = get(getSchoolRes, 'data.school.country', '');
   if (schoolLogoId) {
     result.logo = { type: 'File', typeId: `${schoolLogoId}` };
+  }
+  if (schoolPictureId) {
+    result.bgImage = { type: 'File', typeId: `${schoolPictureId}` };
   }
 
   return result;
