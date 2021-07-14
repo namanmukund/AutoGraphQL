@@ -8,6 +8,9 @@ const fetchLearningObjectives = async () => {
               id
               topic{
                 id
+                courses{
+                  id
+                }
               }
             }
           }
@@ -16,10 +19,13 @@ const fetchLearningObjectives = async () => {
   return get(learningObjectives, 'data.learningObjectives', []);
 };
 
-const updateTopicInLearningObjective = async (learningObjectiveId, topicId) => {
+const updateTopicInLearningObjective = async (learningObjectiveId, topicId, courseId) => {
   const mutation = `
       mutation{
-        updateLearningObjective(id: "${learningObjectiveId}", topicsConnectIds: "${topicId}"){
+        updateLearningObjective(id: "${learningObjectiveId}",
+         topicsConnectIds: "${topicId}"
+         ${courseId ? `coursesConnectIds: "${courseId}"` : ''}
+         ){
           id
         }
       }
@@ -35,9 +41,10 @@ const updateTopicsInLearningObjective = async () => {
   for (const learningObjective of learningObjectives) {
     const learningObjectiveId = learningObjective.id;
     const topicId = learningObjective && learningObjective.topic && learningObjective.topic.id;
+    const courseId = get(learningObjective, 'topic.courses[0].id', '');
     if (learningObjectiveId && topicId) {
       // eslint-disable-next-line no-await-in-loop
-      await updateTopicInLearningObjective(learningObjectiveId, topicId);
+      await updateTopicInLearningObjective(learningObjectiveId, topicId, courseId);
       // eslint-disable-next-line no-console
       console.log(`>>>>> Updated learningObjective id : ${learningObjectiveId}`);
     }

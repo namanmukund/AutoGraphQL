@@ -7,19 +7,25 @@ const fetchAssignments = async () => {
             assignmentQuestions{
               id
               topic{
+                id
+                courses{
                   id
                 }
               }
             }
+          }
           `;
   const assignments = await callLocalGraphqlApi(query);
   return get(assignments, 'data.assignmentQuestions', []);
 };
 
-const updateTopicInAssignment = async (assignmentId, topicId) => {
+const updateTopicInAssignment = async (assignmentId, topicId, courseId) => {
   const mutation = `
       mutation{
-        updateAssignmentQuestion(id: "${assignmentId}", topicsConnectIds: "${topicId}"){
+        updateAssignmentQuestion(id: "${assignmentId}",
+         topicsConnectIds: "${topicId}"
+         ${courseId ? `coursesConnectIds: "${courseId}"` : ''}
+         ){
           id
         }
       }
@@ -35,9 +41,10 @@ const updateTopicsInAssignment = async () => {
   for (const assignment of assignments) {
     const assignmentId = assignment.id;
     const topicId = assignment && assignment.topic && assignment.topic.id;
+    const courseId = get(assignment, 'topic.courses[0].id', '');
     if (assignmentId && topicId) {
       // eslint-disable-next-line no-await-in-loop
-      await updateTopicInAssignment(assignmentId, topicId);
+      await updateTopicInAssignment(assignmentId, topicId, courseId);
       // eslint-disable-next-line no-console
       console.log(`>>>>> Updated assignmentId id : ${assignmentId}`);
     }
