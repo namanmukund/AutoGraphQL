@@ -109,6 +109,8 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
         id
         title
         description
+        bannerTitle
+        bannerDescription
         badgeDescription
         chapters(
             filter: {
@@ -1110,6 +1112,8 @@ const menteeCourseSyllabusMutationResolver = async (
   const courseData = {
     title: currentCourse.title,
     description: currentCourse.description,
+    bannerTitle: currentCourse.bannerTitle,
+    bannerDescription: currentCourse.bannerDescription,
     badgeDescription: currentCourse.badgeDescription,
     chapterCount: totalChapters,
     topicCount: totalTopics,

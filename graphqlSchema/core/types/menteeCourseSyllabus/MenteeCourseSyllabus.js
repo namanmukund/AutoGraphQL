@@ -45,6 +45,8 @@ const menteeCourseSyllabusCourse = `
   type MenteeCourseSyllabusCourse {
    title: String
    description: String
+   bannerTitle: String
+   bannerDescription: String
    badgeDescription: String
    chapterCount: Int
    topicCount: Int
