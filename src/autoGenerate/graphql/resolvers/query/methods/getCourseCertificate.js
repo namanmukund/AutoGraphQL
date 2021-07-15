@@ -12,7 +12,9 @@ const getUserCourseCompletion = (code) => `
     mentors {
       name
     }
-    proficiency
+    topicsCompleted
+    proficientTopicCount
+    masteredTopicCount
     user {
       id
       name
@@ -31,6 +33,19 @@ const getUserCourseCompletion = (code) => `
   }
 }
 `;
+
+const getUserProficiency = (userCourseCompletion) => {
+  const { topicsCompleted, proficientTopicCount, masteredTopicCount } = userCourseCompletion;
+  const proficientTopicsPer = (proficientTopicCount / topicsCompleted) * 100;
+  const masterTopicsPer = ((proficientTopicCount + (masteredTopicCount - proficientTopicCount)) / topicsCompleted) * 100;
+  if (proficientTopicsPer >= 20) {
+    return 'PROFICIENT';
+  }
+  if (masterTopicsPer >= 10) {
+    return 'MASTER';
+  }
+  return 'FAMILIAR';
+};
 
 // this API will return user's course completion certificate if exists
 const getCourseCertificate = (async (root, params, context) => {
@@ -58,7 +73,7 @@ const getCourseCertificate = (async (root, params, context) => {
   result.courseEndingDate = get(getUserCourseCompletionRes, 'data.userCourseCompletion.courseEndingDate', null);
   result.mentors = get(getUserCourseCompletionRes, 'data.userCourseCompletion.mentors', []).map((user) => get(user, 'name'));
   result.projectsCount = get(getUserCourseCompletionRes, 'data.userCourseCompletion.course.projectsCount', null);
-  result.proficiency = get(getUserCourseCompletionRes, 'data.userCourseCompletion.proficiency', null);
+  result.proficiency = getUserProficiency(get(getUserCourseCompletionRes, 'data.userCourseCompletion'));
 
   if (courseThumbnailId) {
     result.courseThumbnail = { type: 'File', typeId: `${courseThumbnailId}` };
