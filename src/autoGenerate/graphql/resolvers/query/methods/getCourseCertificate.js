@@ -37,7 +37,7 @@ const getUserCourseCompletion = (code) => `
 const getUserProficiency = (userCourseCompletion) => {
   const { topicsCompleted, proficientTopicCount, masteredTopicCount } = userCourseCompletion;
   const proficientTopicsPer = (proficientTopicCount / topicsCompleted) * 100;
-  const masterTopicsPer = ((proficientTopicCount + (masteredTopicCount - proficientTopicCount)) / topicsCompleted) * 100;
+  const masterTopicsPer = (masteredTopicCount / topicsCompleted) * 100;
   if (proficientTopicsPer >= 20) {
     return 'PROFICIENT';
   }
