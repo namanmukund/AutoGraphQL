@@ -24,6 +24,7 @@ const getDays = (date) => {
 const USER_QUERY = (userId) => `
   query {
     user(id: "${userId}") {
+      id
       email
       name
       isBookSessionReminderSent
