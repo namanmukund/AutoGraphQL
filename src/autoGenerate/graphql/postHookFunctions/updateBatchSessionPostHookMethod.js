@@ -295,7 +295,7 @@ get Course Id
       }
     }
     // adding logs also when mentorSession is changed or status is changed
-    if (prevSessionStatus !== sessionStatusFromInput || mentorSessionId !== mentorSessionConnectId) {
+    if (prevSessionStatus !== sessionStatusFromInput || (mentorSessionConnectId && (mentorSessionId !== mentorSessionConnectId))) {
       addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
     }
   }

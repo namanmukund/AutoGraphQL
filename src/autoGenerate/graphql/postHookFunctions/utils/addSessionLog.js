@@ -32,6 +32,7 @@ const getMentorSession = (mentorSessionId) => `query{
       id
     }
   }
+}
   `;
 
 const addSessionLog = async (
