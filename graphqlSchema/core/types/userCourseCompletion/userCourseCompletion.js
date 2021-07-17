@@ -30,7 +30,10 @@ const UserCourseCompletion = `
     comment: String
     courseDuration: String
     courseEndingDate: String
-    proficiency: String
+    topicsCompleted: Int
+    proficientTopicCount: Int
+    masteredTopicCount: Int
+    familiarTopicCount: Int
     certificate: File @relation(name: "Certificate", direction: "OneWay")
   }
 `;
