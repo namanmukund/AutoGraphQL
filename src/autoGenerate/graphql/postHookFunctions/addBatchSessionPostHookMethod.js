@@ -9,6 +9,8 @@ import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentCompone
 import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
 import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 import extractBatchSessionAndSendB2BC from './utils/extractBatchSessionAndSendB2BC';
+import addSessionLog from './utils/addSessionLog';
+import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -29,6 +31,7 @@ const getBatchQuery = (batchId) => `
     query{
       batch(id:"${batchId}"){
         id
+        code
         students{
           id
           user{
@@ -95,8 +98,9 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   let courseId = get(params, 'courseConnectId');
   const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
   const { id: batchSessionId } = input;
-  const { bookingDate, sessionStatus: sessionStatusFromInput } = params && params.input;
-  const { slotTimeArray } = context;
+  const { bookingDate, sessionStatus: sessionStatusFromInput, ...slots } = params && params.input;
+  const { slotTimeArray, currentUser } = context;
+  const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
   /*
     get Course Id
@@ -119,7 +123,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   */
   const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
   const batchInfo = get(batchResult, 'data.batch');
-  const { students, currentComponent } = batchInfo;
+  const { students, currentComponent, code } = batchInfo;
   const batchCurrentComponentId = currentComponent && currentComponent.id;
   const currentComponentTopicId = get(currentComponent, 'currentTopic.id');
 
@@ -194,6 +198,11 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
         );
       }
     }
+  }
+
+  if (topicId) {
+    // update session log entry
+    addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'addBatchSession', code, mentorSessionConnectId, sessionStatusFromInput || sessionStatus.allotted);
   }
 };
 

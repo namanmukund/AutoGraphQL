@@ -12,9 +12,10 @@ import getMenteeInfo from './utils/getMenteeInfo';
 import getTopicInfo from './utils/getTopicInfo';
 import rescheduleMenteeBookingLeadsquared from './leadsquared/rescheduleMenteeBookingLeadsquared';
 import { byPassMenteeValidationApps } from '../../../../constants';
+import addSessionLog from './utils/addSessionLog';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
-  const { previousDocument } = context;
+  const { previousDocument, currentUser } = context;
   const { id: menteeSessionId, bookingDate: prevBookingDate, ...prevSlots } = previousDocument;
   const prevSlotTimeStringArray = getSelectedSlotsStringArray(prevSlots);
 
@@ -82,6 +83,15 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     userInfo,
     topicInfo,
   );
+  if (!byPassMenteeValidationApps.includes(appName)) {
+    // update session log entry
+    const courseId = get(input, 'course.typeId', '');
+    const clientId = get(userInfo, 'data.user.id', '');
+    const topicId = get(topicInfo, 'data.topic.id', '');
+    console.log('----------------------------courseId', courseId);
+    const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMenteeSession', batchCode, '', '');
+  }
 };
 
 export default updateMenteeSessionPostHookMethod;

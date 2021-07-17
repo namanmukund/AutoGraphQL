@@ -9,6 +9,7 @@ import {
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import { sessionStatus } from '../../../../../constants';
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
+import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 
 const updateBatchSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: batchSessionId, topicConnectId, input: { sessionStatus: sessionStatusInInput, bookingDate: bookingDateFromInput, ...inputSlot } } = params;
@@ -44,6 +45,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   const allottedMentorId = batch && batch.allottedMentor && batch.allottedMentor.id;
   context.allottedMentorId = allottedMentorId;
   context.courseId = course && course.id;
+  context.prevSessionStatus = prevSessionStatus;
 
   // we are doing this to handle cases where we make timetable for school without the topic being attached
   // so whenever these sessions get started we need topicId in this mutation as mandatory field
@@ -70,6 +72,13 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   if (prevSessionStatus === sessionStatus.completed && sessionStatusInInput && sessionStatusInInput !== sessionStatus.completed) {
     throw new CanNotChangeSessionStatusError();
   }
+
+  // getting current user from context to send in logs
+  const userInfo = validateTokenAndExtractInformation(context, false);
+  const {
+    currentUser,
+  } = userInfo;
+  context.currentUser = currentUser;
 
   return true;
 };

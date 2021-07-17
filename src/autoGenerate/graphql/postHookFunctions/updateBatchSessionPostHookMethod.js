@@ -12,6 +12,8 @@ import addRescheduledSlot from './utils/addRescheduledSlot';
 import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import extractBatchSessionAndSendB2BC from './utils/extractBatchSessionAndSendB2BC';
 import addToSchedule from '../../../../utils/scheduleJobs/addToSchedule';
+import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
+import addSessionLog from './utils/addSessionLog';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -32,6 +34,7 @@ const getBatchQuery = (batchId) => `
     query{
       batch(id:"${batchId}"){
         id
+        code
         students{
           user{
             id
@@ -154,7 +157,11 @@ const updateBatchSession = (batchSessionId, mentorSessionId) => `
   Post hook of addBatchSession
 */
 const updateBatchSessionPostHookMethod = async (input, params, mutationName, context) => {
-  const { sessionStatus: sessionStatusFromInput } = input;
+  const { sessionStatus: sessionStatusFromInput, ...slots } = input;
+  const slotTimeStringArray = getSelectedSlotsStringArray(slots);
+
+  const mentorSessionId = get(input, 'mentorSession.typeId');
+  console.log('-----------------------------------------mentorSessionId', mentorSessionId);
   const {
     batchSessionId,
     inputSlotTimeArray,
@@ -165,6 +172,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     mentorSessionConnectId,
     bookingDateFromInput,
     allottedMentorId,
+    currentUser,
+    prevSessionStatus,
   } = context;
   let courseId = get(context, 'courseId');
   /*
@@ -185,38 +194,24 @@ get Course Id
 
   // if mentorSessionConnectId is not present in batch session, then we need t create mentor session on basis of
   // allotted mentor in batch
-  if (!mentorSessionConnectId && allottedMentorId) {
+  if (!mentorSessionId && allottedMentorId) {
     let finalMentorSessionId = '';
     const { bookingDate: sessionsBookingDateInDB, ...slotsInDB } = input;
     const slotTimeInDBArray = getSelectedSlotsTime(slotsInDB);
     const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(sessionsBookingDateInDB, allottedMentorId));
     const mentorSession = get(mentorSessionsRes, 'data.mentorSessions[0]');
     if (mentorSession && mentorSession.id) {
-      const { id: mentorSessionId, ...slotsInMentorSession } = mentorSession;
-      finalMentorSessionId = mentorSessionId;
+      const { id: mentorSessionIdOfAllottedMentor, ...slotsInMentorSession } = mentorSession;
+      finalMentorSessionId = mentorSessionIdOfAllottedMentor;
       const slotsInMentorSessionArray = getSelectedSlotsTime(slotsInMentorSession);
       if (slotTimeInDBArray && slotTimeInDBArray.length && slotsInMentorSessionArray && slotsInMentorSessionArray.length && slotTimeInDBArray[0] !== slotsInMentorSessionArray[0]) {
-        await callLocalGraphqlApi(updateMentorSession(mentorSessionId, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`));
+        await callLocalGraphqlApi(updateMentorSession(mentorSessionIdOfAllottedMentor, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`));
       }
     } else {
       const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`));
       finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
     }
     await callLocalGraphqlApi(updateBatchSession(batchSessionId, finalMentorSessionId));
-  }
-
-  // adding Rescheduled Slot async if we get slots in the input
-  // constructing fromDate and fromSLot from values in previous document
-  // constructing toDate and toSLot from values in input
-  if (inputSlotTimeArray && inputSlotTimeArray.length && slotTimeArray && slotTimeArray.length) {
-    const fromDate = new Date(bookingDate).toISOString();
-    const toDate = bookingDateFromInput ? new Date(bookingDateFromInput).toISOString() : new Date(bookingDate).toISOString();
-    const fromSlot = `slot${slotTimeArray[0]}`;
-    const toSlot = `slot${inputSlotTimeArray[0]}`;
-    // adding only in case the slots or date passed in input is different from that is already there in db
-    if ((fromDate !== toDate) || (fromSlot !== toSlot)) {
-      addRescheduledSlot(fromDate, fromSlot, toDate, toSlot, batchSessionId);
-    }
   }
 
   if (topicId) {
@@ -227,6 +222,7 @@ get Course Id
     const batchInfo = get(batchResult, 'data.batch');
     const students = batchInfo && batchInfo.students;
     const currentComponent = batchInfo && batchInfo.currentComponent;
+    const code = batchInfo && batchInfo.code;
     const batchCurrentComponentId = currentComponent && currentComponent.id;
     const currentComponentTopicId = get(currentComponent, 'currentTopic.id');
     // logic to change current component status if topic is completed
@@ -277,7 +273,7 @@ get Course Id
             topicId,
             bookingDate,
             slotTimeArray[0],
-            mentorSessionConnectId,
+            mentorSessionId,
             courseId,
             sessionStatusFromInput || sessionStatus.allotted,
             student.user.source,
@@ -285,6 +281,22 @@ get Course Id
           );
         }
       }
+    }
+
+    // adding session logs when booking date or time is changed
+    if (inputSlotTimeArray && inputSlotTimeArray.length && slotTimeArray && slotTimeArray.length) {
+      const fromDate = new Date(bookingDate).toISOString();
+      const toDate = bookingDateFromInput ? new Date(bookingDateFromInput).toISOString() : new Date(bookingDate).toISOString();
+      const fromSlot = `slot${slotTimeArray[0]}`;
+      const toSlot = `slot${inputSlotTimeArray[0]}`;
+      // adding only in case the slots or date passed in input is different from that is already there in db
+      if ((fromDate !== toDate) || (fromSlot !== toSlot)) {
+        addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
+      }
+    }
+    // adding logs also when mentorSession is changed or status is changed
+    if (prevSessionStatus !== sessionStatusFromInput || mentorSessionId !== mentorSessionConnectId) {
+      addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
     }
   }
   const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));

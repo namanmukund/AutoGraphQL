@@ -73,6 +73,7 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
   } = userAndAppInfo;
 
   context.appName = appName;
+  context.currentUser = currentUser;
 
   // validate input
   await validateMenteeSessionInput(params, context);

@@ -5,6 +5,7 @@ import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import { PastDateOrSlotError } from '../../../../../constants/errors/db';
 import menteeSessionQuery from '../../graphqlQueries/menteeSessionQuery';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
+import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 
 const deleteMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: menteeSessionId } = params;
@@ -22,6 +23,13 @@ const deleteMenteeSessionValidation = async (params, mutationOrQueryName, contex
   const {
     appName,
   } = userAndAppInfo;
+
+  // getting current user from context to send in logs
+  const userInfo = validateTokenAndExtractInformation(context, false);
+  const {
+    currentUser,
+  } = userInfo;
+  context.currentUser = currentUser;
 
   context.appName = appName;
 
