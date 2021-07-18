@@ -105,7 +105,7 @@ const validateUserOTPMutationResolver = async (
       };
       if (!phoneVerified) {
         updateLeadSquared({
-          Phone: countryCode + number,
+          Phone: number,
           mx_OTP_Verified: 'Yes',
         }, false);
       }

@@ -12,7 +12,9 @@ const getUserCourseCompletion = (code) => `
     mentors {
       name
     }
-    proficiency
+    topicsCompleted
+    proficientTopicCount
+    masteredTopicCount
     user {
       id
       name
@@ -32,6 +34,19 @@ const getUserCourseCompletion = (code) => `
 }
 `;
 
+const getUserProficiency = (userCourseCompletion) => {
+  const { topicsCompleted, proficientTopicCount, masteredTopicCount } = userCourseCompletion;
+  const proficientTopicsPer = (proficientTopicCount / topicsCompleted) * 100;
+  const masterTopicsPer = (masteredTopicCount / topicsCompleted) * 100;
+  if (proficientTopicsPer >= 20) {
+    return 'PROFICIENT';
+  }
+  if (masterTopicsPer >= 10) {
+    return 'MASTER';
+  }
+  return 'FAMILIAR';
+};
+
 // this API will return user's course completion certificate if exists
 const getCourseCertificate = (async (root, params, context) => {
   validateAuthentication(context, 'app');
@@ -48,7 +63,7 @@ const getCourseCertificate = (async (root, params, context) => {
     throw new DatabaseRecordNotFoundError();
   }
 
-  const certificateId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.certificate.id', {});
+  const certificateId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.certificate.id', null);
   const courseThumbnailId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.course.thumbnail.id', null);
   result.name = get(getUserCourseCompletionRes, 'data.userCourseCompletion.user.name', null);
   result.userId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.user.id', null);
@@ -58,7 +73,7 @@ const getCourseCertificate = (async (root, params, context) => {
   result.courseEndingDate = get(getUserCourseCompletionRes, 'data.userCourseCompletion.courseEndingDate', null);
   result.mentors = get(getUserCourseCompletionRes, 'data.userCourseCompletion.mentors', []).map((user) => get(user, 'name'));
   result.projectsCount = get(getUserCourseCompletionRes, 'data.userCourseCompletion.course.projectsCount', null);
-  result.proficiency = get(getUserCourseCompletionRes, 'data.userCourseCompletion.proficiency', null);
+  result.proficiency = getUserProficiency(get(getUserCourseCompletionRes, 'data.userCourseCompletion'));
 
   if (courseThumbnailId) {
     result.courseThumbnail = { type: 'File', typeId: `${courseThumbnailId}` };
