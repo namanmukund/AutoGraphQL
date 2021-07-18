@@ -110,7 +110,7 @@ const sendB2CSessionReminder = async ({
   const country = get(parent, 'country', {});
   const timezone = get(parent, 'timezone', {});
   const parentName = get(parent, 'name');
-  const phone = get(parent, 'phone.countryCode', '').replace('+', '') + get(res, 'phone.number');
+  const phone = get(parent, 'phone.countryCode', '').replace('+', '') + get(parent, 'phone.number');
   const studentName = get(res, 'data.user.name');
 
   const { bookingDate, ...slots } = menteeSession;
