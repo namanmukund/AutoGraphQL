@@ -13,6 +13,7 @@ const MenteeSession = `
     source: UserOriginSource @defaultValue(value: "website")
     country: Country @defaultValue(value: "india")
     bookedBy: BookedBy @defaultValue(value: "customer")
+    bookingAgent: User @relation(name: "BookingAgent", direction: "OneWay")
 }`;
 
 export default [MenteeSession];

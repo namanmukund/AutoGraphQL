@@ -1,13 +1,16 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const updateUserBookingAgent = async (userId, bookingAgentId) => {
+const updateUserBookingAgent = async (menteeSessionId, bookingAgentId, bookingDate, slot) => {
   const query = `
     mutation {
-      updateUser(
-        id: "${userId}",
+      updateMenteeSession(
+        id: "${menteeSessionId}",
         bookingAgentConnectId: "${bookingAgentId}"
-        input: {}
+        input: {
+          bookingDate: "${bookingDate}"
+          ${slot}:true
+        }
       ) {
         id
       }

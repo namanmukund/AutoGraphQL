@@ -72,8 +72,6 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     }
     await updateScheduleStatusOfMenteeSession(menteeSessionId, 'todo');
   }
-
-  updateUserBookingAgent(get(input, 'user.typeId'), get(context, 'userIdFromContext'));
   // update booking time on leadsquared
   rescheduleMenteeBookingLeadsquared(input, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, get(context, 'userIdFromContext'));
   // send email to mentor admin regarding the session
@@ -88,6 +86,9 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     topicInfo,
   );
   if (!byPassMenteeValidationApps.includes(appName)) {
+    if (get(context, 'userIdFromContext')) {
+      updateUserBookingAgent(menteeSessionId, get(context, 'userIdFromContext'), bookingDate, get(slotTimeStringArray, '0'));
+    }
     // update session log entry
     const courseId = get(input, 'course.typeId', '');
     const clientId = get(userInfo, 'data.user.id', '');
