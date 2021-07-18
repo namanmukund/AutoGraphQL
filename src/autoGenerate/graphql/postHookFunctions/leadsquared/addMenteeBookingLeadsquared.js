@@ -1,8 +1,9 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
+import { fetchAgentName } from '../utils/updateUserBookingAgent';
 
-const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee) => {
+const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, agentId) => {
   const { bookingDate } = input;
   let phoneNumber = '';
   let bookingDateTime = '';
@@ -23,13 +24,18 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
     }
   }
 
+  const agentName = await fetchAgentName(agentId);
+
   const leadSquaredInput = {
     Phone: phoneNumber,
     mx_Booking_Date_Time: bookingDateTime,
   };
+  if (!isBookedByMentee && agentName) {
+    leadSquaredInput.mx_Booking_Agent = agentName;
+  }
   const activityInput = {
     ActivityEvent: 103,
-    ActivityNote: 'User booked a session',
+    ActivityNote: !isBookedByMentee ? 'Agent booked a session' : 'User booked a session',
     Fields: [
       {
         SchemaName: 'Status',

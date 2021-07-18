@@ -59,6 +59,7 @@ import addUserActivityBlockBasedProjectDumpPostHookMethod
   from './postHookFunctions/addUserActivityBlockBasedProjectDumpPostHookMethod';
 import deleteMentorMenteeSessionPostHookMethod from './postHookFunctions/deleteMentorMenteeSessionPostHookMethod';
 import deleteBatchSessionPostHookMethod from './postHookFunctions/deleteBatchSessionPostHookMethod';
+import updateUserPostHookMethod from './postHookFunctions/updateUserPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -282,6 +283,10 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'deleteBatchSession': {
       await deleteBatchSessionPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'updateUser': {
+      await updateUserPostHookMethod(input, mutationName, context);
       break;
     }
     default:

@@ -29,7 +29,10 @@ const updateMenteeSessionValidation = async (params, mutationOrQueryName, contex
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
   const {
     appName,
+    userIdFromContext,
   } = userAndAppInfo;
+
+  context.userIdFromContext = userIdFromContext;
 
   context.appName = appName;
 

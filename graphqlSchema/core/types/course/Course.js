@@ -37,8 +37,10 @@ const Course = `
   {
     order: Int
     title: String!
+    bannerTitle: String
+    bannerDescription: String
     category: CourseCategory!
-    description: String @length(min: 6, max: 800) @trim
+    description: String @length(min: 6, max: 1000) @trim
     status: ContentStatus! @defaultValue(value: "unpublished")
     chapters: [Chapter] @relation(name: "CourseChapter")
     products: [Product] @relation(name: "CourseProduct")
