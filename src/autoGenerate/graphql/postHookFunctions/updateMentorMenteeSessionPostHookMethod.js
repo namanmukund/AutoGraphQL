@@ -113,7 +113,7 @@ const userPaymentPlanQuery = async (filterQuery) => {
 const allowedRoles = [MENTEE];
 const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
   const {
-    currentUser, mentorSessionConnectId, menteeSessionConnectId, previousDocument: { sessionStatus: prevSessionStatus, topic, menteeSession: prevMenteeSession },
+    currentUser, previousDocument: { sessionStatus: prevSessionStatus, topic, menteeSession: prevMenteeSession },
   } = context;
   const { sessionStartDate } = input;
   const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));
@@ -228,13 +228,10 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const { bookingDate, ...slots } = menteeSessionDoc;
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
-    const menteeSessionId = get(input, 'menteeSession.typeId');
     const mentorSessionId = get(input, 'mentorSession.typeId');
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     // adding logs when menteeSession is changed or mentorSession is changed or status is changed
-    if ((menteeSessionConnectId && (menteeSessionId !== menteeSessionConnectId)) || (mentorSessionConnectId && (mentorSessionId !== mentorSessionConnectId)) || prevSessionStatus !== sessionStatus) {
-      addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMentorMenteeSession', batchCode, mentorSessionId, sessionStatus);
-    }
+    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMentorMenteeSession', batchCode, mentorSessionId, sessionStatus, input);
   }
   /** Update MenteeMentorSession If Session Completed  */
   if (prevSessionStatus === 'completed' || get(input, 'sessionStatus') === 'completed') {
