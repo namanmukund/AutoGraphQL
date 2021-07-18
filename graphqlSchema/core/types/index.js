@@ -104,6 +104,7 @@ import UserActivityBlockBasedProjectDump from './userActivityBlockBasedProjectDu
 import ComicImage from './comicImage';
 import UserCourseCompletion from './userCourseCompletion';
 import GetCourseCertificate from './getCourseCertificate';
+import SessionLog from './sessionLog';
 
 export default [
   ...User,
@@ -212,4 +213,5 @@ export default [
   ...UserCourseCompletion,
   ...GetCourseCertificate,
   ...GetSchoolDetails,
+  ...SessionLog,
 ];

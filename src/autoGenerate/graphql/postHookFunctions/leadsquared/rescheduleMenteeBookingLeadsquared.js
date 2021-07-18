@@ -1,9 +1,10 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
+import { fetchAgentName } from '../utils/updateUserBookingAgent';
 
-const rescheduleMenteeBookingLeadsquared = async (input, slotTimeStringArray, userInfo, topicInfo) => {
-  const { bookingDate, bookedBy } = input;
+const rescheduleMenteeBookingLeadsquared = async (input, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, agentId) => {
+  const { bookingDate } = input;
   const phoneNumber = get(userInfo, 'data.user.studentProfile.parents[0].user.phone.number');
   const topicOrder = get(topicInfo, 'data.topic.order');
   if (topicOrder === 1) {
@@ -15,13 +16,21 @@ const rescheduleMenteeBookingLeadsquared = async (input, slotTimeStringArray, us
       Phone: phoneNumber,
       mx_Booking_Date_Time: bookingDateTime,
     };
+    const agentName = await fetchAgentName(agentId);
+    if (!isBookedByMentee && agentName) {
+      leadSquaredInput.mx_Booking_Agent = agentName;
+    }
     const activityInput = {
       ActivityEvent: 103,
-      ActivityNote: bookedBy === 'tekieTeam' ? 'Agent updated session details' : 'User rescheduled a session',
+      ActivityNote: !isBookedByMentee ? 'Agent updated session details' : 'User rescheduled a session',
       Fields: [
         {
           SchemaName: 'Status',
-          Value: bookedBy === 'tekieTeam' ? 'Booked (Verified)' : 'Booked (Non Verified)',
+          Value: !isBookedByMentee ? 'Booked (Verified)' : 'Booked (Non Verified)',
+        },
+        {
+          SchemaName: 'mx_Custom_3',
+          Value: !isBookedByMentee ? 'Tekie Team' : 'Customer',
         },
         {
           SchemaName: 'mx_Custom_8',

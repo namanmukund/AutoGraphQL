@@ -10,6 +10,7 @@ const menteeInfoQuery = (userId) => `
         grade
         batch {
           id
+          code
         }
         parents{
           id

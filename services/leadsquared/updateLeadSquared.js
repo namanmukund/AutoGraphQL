@@ -30,16 +30,16 @@ const getLeadSquaredParams = (params = {}, create = false, leadActivity) => {
   };
 };
 
-const logSheet = (Status, Data, Phone, error = '-') => {
-  fetch(`https://script.google.com/macros/s/AKfycbxmnOewZrOJNpbu_xALna5VJMKnM6wp66Df2F3j7tkzrmoJXpY/exec?${queryString.stringify({
-    Status,
-    Data,
-    Phone,
-    Error: error,
-  })}`);
-};
+// const logSheet = (Status, Data, Phone, error = '-') => {
+//   fetch(`https://script.google.com/macros/s/AKfycbxmnOewZrOJNpbu_xALna5VJMKnM6wp66Df2F3j7tkzrmoJXpY/exec?${queryString.stringify({
+//     Status,
+//     Data,
+//     Phone,
+//     Error: error,
+//   })}`);
+// };
 
-const updateLeadSquared = async (leadSquaredParams = {}, create = false, leadActivity) => {
+const updateLeadSquared = async (leadSquaredParams = {}, create = false, leadActivity = {}, pseudoCreate = false) => {
   let LEAD_ENDPOINT = '';
   if (create || !leadActivity) {
     LEAD_ENDPOINT = LEAD_CREATE_ENDPOINT;
@@ -47,7 +47,7 @@ const updateLeadSquared = async (leadSquaredParams = {}, create = false, leadAct
     LEAD_ENDPOINT = LEAD_UPDATE_ENDPOINT;
   }
   if (process.env.NODE_ENV === 'production') {
-    if (!create) {
+    if (!create || pseudoCreate) {
       try {
         const res = await fetch(
           process.env.LEAD_SQUARED_URL + LEAD_GET_ENDPOINT + queryString.stringify({
@@ -73,11 +73,7 @@ const updateLeadSquared = async (leadSquaredParams = {}, create = false, leadAct
         },
         body: JSON.stringify(getLeadSquaredParams(leadSquaredParams, create, leadActivity)),
       },
-    ).then((res) => {
-      logSheet(res.status, JSON.stringify(getLeadSquaredParams(leadSquaredParams, create)), leadSquaredParams.Phone);
-    }).catch((e) => {
-      logSheet('Failed', JSON.stringify(getLeadSquaredParams(leadSquaredParams, create)), leadSquaredParams.Phone, e);
-    });
+    );
   }
 };
 

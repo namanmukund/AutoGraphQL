@@ -12,9 +12,11 @@ import getMenteeInfo from './utils/getMenteeInfo';
 import getTopicInfo from './utils/getTopicInfo';
 import rescheduleMenteeBookingLeadsquared from './leadsquared/rescheduleMenteeBookingLeadsquared';
 import { byPassMenteeValidationApps } from '../../../../constants';
+import addSessionLog from './utils/addSessionLog';
+import updateUserBookingAgent from './utils/updateUserBookingAgent';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
-  const { previousDocument } = context;
+  const { previousDocument, currentUser } = context;
   const { id: menteeSessionId, bookingDate: prevBookingDate, ...prevSlots } = previousDocument;
   const prevSlotTimeStringArray = getSelectedSlotsStringArray(prevSlots);
 
@@ -32,6 +34,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const isTrial = await isTrialSession(input.topic.typeId);
   const { appName } = context;
   const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
+  const isBookedByMentee = get(context, 'userIdFromContext') === get(input, 'user.typeId');
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
   // if call is from backend we will not update the availability slots, same for paid sessions
   if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
@@ -70,7 +73,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     await updateScheduleStatusOfMenteeSession(menteeSessionId, 'todo');
   }
   // update booking time on leadsquared
-  rescheduleMenteeBookingLeadsquared(input, slotTimeStringArray, userInfo, topicInfo);
+  rescheduleMenteeBookingLeadsquared(input, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, get(context, 'userIdFromContext'));
   // send email to mentor admin regarding the session
   await extractMenteeSessionInfoAndSendEmail(
     'update',
@@ -82,6 +85,17 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     userInfo,
     topicInfo,
   );
+  if (!byPassMenteeValidationApps.includes(appName)) {
+    if (get(context, 'userIdFromContext')) {
+      updateUserBookingAgent(menteeSessionId, get(context, 'userIdFromContext'), bookingDate, get(slotTimeStringArray, '0'));
+    }
+    // update session log entry
+    const courseId = get(input, 'course.typeId', '');
+    const clientId = get(userInfo, 'data.user.id', '');
+    const topicId = get(topicInfo, 'data.topic.id', '');
+    const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMenteeSession', batchCode, '', '');
+  }
 };
 
 export default updateMenteeSessionPostHookMethod;

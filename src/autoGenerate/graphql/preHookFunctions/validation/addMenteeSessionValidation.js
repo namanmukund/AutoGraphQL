@@ -73,12 +73,22 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
   } = userAndAppInfo;
 
   context.appName = appName;
+  context.currentUser = currentUser;
 
   // validate input
   await validateMenteeSessionInput(params, context);
   const allowedRoles = [ADMIN, UMS_ADMIN, UMS_VIEWER, MENTOR, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN];
 
+  context.userIdFromContext = userIdFromContext;
   context.isBookedByMentee = userIdFromContext === userId;
+
+  if (userIdFromContext === userId) {
+    // eslint-disable-next-line no-param-reassign
+    params.input.bookedBy = 'customer';
+  } else {
+    // eslint-disable-next-line no-param-reassign
+    params.input.bookedBy = 'tekieTeam';
+  }
 
   if (
     !backendApps.includes(appName)

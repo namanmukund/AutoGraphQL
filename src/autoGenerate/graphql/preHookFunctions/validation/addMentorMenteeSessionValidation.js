@@ -10,6 +10,7 @@ import {
 import { ConnectIdRequiredError, DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetailsInParams';
+import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 
 // query to get mentor Sessions
 const mentorMenteeSessionsQuery = (menteeSessionConnectId, mentorSessionConnectId) => `
@@ -107,8 +108,15 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   const userData = get(menteeSession, 'user');
   updateUserSpecificDetailsInParams(userData, params);
 
+  // getting current user from context to send in logs
+  const userInfo = validateTokenAndExtractInformation(context, false);
+  const {
+    currentUser,
+  } = userInfo;
+
   context.menteeSession = menteeSession;
   context.mentorSessionConnectId = mentorSessionConnectId;
+  context.currentUser = currentUser;
   return true;
 };
 
