@@ -19,7 +19,7 @@ import deleteMentorSessionPostHookMethod from './postHookFunctions/deleteMentorS
 import addMenteeSessionPostHookMethod from './postHookFunctions/addMenteeSessionPostHookMethod';
 import updateMenteeSessionPostHookMethod from './postHookFunctions/updateMenteeSessionPostHookMethod';
 import updateMentorMenteeSessionPostHookMethod from './postHookFunctions/updateMentorMenteeSessionPostHookMethod';
-import deleteMenteeSessionPostHookMethod from './preHookFunctions/deleteMenteeSessionPostHookMethod';
+import deleteMenteeSessionPostHookMethod from './postHookFunctions/deleteMenteeSessionPostHookMethod';
 import hook from './hook';
 import addSalesOperationPostHookMethod from './postHookFunctions/addSalesOperationPostHookMethod';
 import updateSalesOperationPostHookMethod from './postHookFunctions/updateSalesOperationPostHookMethod';
@@ -57,6 +57,8 @@ import addUserActivityBlockBasedPracticeDumpPostHookMethod
   from './postHookFunctions/addUserActivityBlockBasedPracticeDumpPostHookMethod';
 import addUserActivityBlockBasedProjectDumpPostHookMethod
   from './postHookFunctions/addUserActivityBlockBasedProjectDumpPostHookMethod';
+import deleteMentorMenteeSessionPostHookMethod from './postHookFunctions/deleteMentorMenteeSessionPostHookMethod';
+import deleteBatchSessionPostHookMethod from './postHookFunctions/deleteBatchSessionPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -272,6 +274,14 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'addUserActivityBlockBasedProjectDump': {
       await addUserActivityBlockBasedProjectDumpPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'deleteMentorMenteeSession': {
+      await deleteMentorMenteeSessionPostHookMethod(input, mutationName, context, params);
+      break;
+    }
+    case 'deleteBatchSession': {
+      await deleteBatchSessionPostHookMethod(input, params, mutationName, context);
       break;
     }
     default:

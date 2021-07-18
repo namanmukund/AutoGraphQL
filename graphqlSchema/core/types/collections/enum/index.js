@@ -79,6 +79,7 @@ import ChildTopicComponents from './ChildTopicComponents';
 import TopicComponents from './TopicComponents';
 import BlockBasedProjectType from './BlockBasedProjectType';
 import BookedBy from './BookedBy';
+import SessionLogAction from './SessionLogAction';
 
 export default [
   Status,
@@ -163,4 +164,5 @@ export default [
   ChildTopicComponents,
   BlockBasedProjectType,
   BookedBy,
+  SessionLogAction,
 ];
