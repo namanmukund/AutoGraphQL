@@ -35,6 +35,15 @@ const getMentorSession = (mentorSessionId) => `query{
 }
   `;
 
+// query to get topic
+const getTopic = (topicId) => `query{
+  topic(id: "${topicId}"){
+    id
+    order
+  }
+}
+  `;
+
 const addSessionLog = async (
   bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, action, batchCode, mentorSessionId, sessionStatus,
 ) => {
@@ -42,6 +51,7 @@ const addSessionLog = async (
   const actionByUserId = currentUser && currentUser.id;
   let mentorId = '';
   let mentorAvailabilityDate = '';
+  let topicOrder = 0;
   if (mentorSessionId) {
     const getMentorSessionRes = await callLocalGraphqlApi(
       getMentorSession(
@@ -51,21 +61,20 @@ const addSessionLog = async (
     mentorId = get(getMentorSessionRes, 'data.mentorSession.user.id', '');
     mentorAvailabilityDate = get(getMentorSessionRes, 'data.mentorSession.availabilityDate', '');
   }
-  console.log('-----------------------------------------bookingDate', bookingDate);
-  console.log('-----------------------------------------slot', slot);
-  console.log('-----------------------------------------clientId', clientId);
-  console.log('-----------------------------------------topicId', topicId);
-  console.log('-----------------------------------------actionByUserId', actionByUserId);
-  console.log('-----------------------------------------courseId', courseId);
-  console.log('-----------------------------------------action', action);
-  console.log('-----------------------------------------batchCode', batchCode);
-  console.log('-----------------------------------------mentorId', mentorId);
-  console.log('-----------------------------------------sessionStatus', sessionStatus);
-  console.log('-----------------------------------------mentorAvailabilityDate', mentorAvailabilityDate);
 
-  callLocalGraphqlApi(addSessionLogQuery(
-    bookingDate, slot, clientId, topicId, actionByUserId, courseId, action, batchCode, mentorId, sessionStatus, mentorAvailabilityDate,
-  ));
+  if (topicId) {
+    const getTopicRes = await callLocalGraphqlApi(
+      getTopic(
+        topicId,
+      ),
+    );
+    topicOrder = get(getTopicRes, 'data.topic.order', 0);
+  }
+  if (topicOrder === 1 && actionByUserId) {
+    callLocalGraphqlApi(addSessionLogQuery(
+      bookingDate, slot, clientId, topicId, actionByUserId, courseId, action, batchCode, mentorId, sessionStatus, mentorAvailabilityDate,
+    ));
+  }
 };
 
 export default addSessionLog;

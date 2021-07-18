@@ -12,8 +12,6 @@ const deleteBatchSessionPostHookMethod = async (input, params, mutationName, con
     slotTimeStringArray,
   } = context;
   const courseId = get(context, 'courseId');
-
-  console.log('----------------------------courseId', courseId);
   if (topicId) {
     addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'deleteBatchSession', batchCode, mentorSessionConnectId, sessionStatus);
   }

@@ -29,7 +29,6 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     const courseId = get(input, 'course.typeId', '');
     const clientId = get(userInfo, 'data.user.id', '');
     const topicId = get(topicInfo, 'data.topic.id', '');
-    console.log('----------------------------courseId', courseId);
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMenteeSession', batchCode, '', '');
   }

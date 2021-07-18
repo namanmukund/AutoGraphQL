@@ -8,7 +8,6 @@ import {
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
 import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
-import addRescheduledSlot from './utils/addRescheduledSlot';
 import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import extractBatchSessionAndSendB2BC from './utils/extractBatchSessionAndSendB2BC';
 import addToSchedule from '../../../../utils/scheduleJobs/addToSchedule';
@@ -161,7 +160,6 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
   const mentorSessionId = get(input, 'mentorSession.typeId');
-  console.log('-----------------------------------------mentorSessionId', mentorSessionId);
   const {
     batchSessionId,
     inputSlotTimeArray,
@@ -271,7 +269,7 @@ get Course Id
             student.user.id,
             '',
             topicId,
-            bookingDate,
+            bookingDateFromInput || bookingDate,
             slotTimeArray[0],
             mentorSessionId,
             courseId,
@@ -291,7 +289,7 @@ get Course Id
       const toSlot = `slot${inputSlotTimeArray[0]}`;
       // adding only in case the slots or date passed in input is different from that is already there in db
       if ((fromDate !== toDate) || (fromSlot !== toSlot)) {
-        addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
+        addSessionLog(bookingDateFromInput || bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
       }
     }
     // adding logs also when mentorSession is changed or status is changed

@@ -54,7 +54,6 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const menteeSessionDoc = get(menteeSession, 'data.menteeSession', {});
     const { bookingDate, ...slots } = menteeSessionDoc;
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-    console.log('----------------------------courseId', courseId);
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMentorMenteeSession', batchCode, mentorSessionId, sessionStatus);
   }

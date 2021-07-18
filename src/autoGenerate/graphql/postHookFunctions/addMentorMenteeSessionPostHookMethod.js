@@ -37,8 +37,6 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
     const clientId = get(userInfo, 'data.user.id', '');
     const topicId = get(topicInfo, 'data.topic.id', '');
     const sessionStatus = get(input, 'sessionStatus');
-    console.log('----------------------------courseId', courseId);
-    console.log('----------------------------mentorSessionConnectId', mentorSessionConnectId);
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMentorMenteeSession', batchCode, mentorSessionConnectId, sessionStatus);
   }

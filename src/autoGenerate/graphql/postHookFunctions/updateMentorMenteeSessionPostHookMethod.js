@@ -230,16 +230,8 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
 
     const menteeSessionId = get(input, 'menteeSession.typeId');
     const mentorSessionId = get(input, 'mentorSession.typeId');
-    console.log('----------------------------courseId', courseId);
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     // adding logs when menteeSession is changed or mentorSession is changed or status is changed
-    console.log('----------------------------menteeSessionId', menteeSessionId);
-    console.log('----------------------------menteeSessionConnectId', menteeSessionConnectId);
-    console.log('----------------------------mentorSessionId', mentorSessionId);
-    console.log('----------------------------mentorSessionConnectId', mentorSessionConnectId);
-    console.log('----------------------------prevSessionStatus', prevSessionStatus);
-    console.log('----------------------------sessionStatus', sessionStatus);
-
     if ((menteeSessionConnectId && (menteeSessionId !== menteeSessionConnectId)) || (mentorSessionConnectId && (mentorSessionId !== mentorSessionConnectId)) || prevSessionStatus !== sessionStatus) {
       addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMentorMenteeSession', batchCode, mentorSessionId, sessionStatus);
     }
