@@ -24,7 +24,6 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context, availableSlots);
     // send email to mentor admin regarding the session
     await extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
-    // update Booking Agent if not booked by mentee
     updateUserBookingAgent(get(input, 'user.typeId'), get(context, 'userIdFromContext'));
     // update user booking on leadsquared
     addMenteeBookingLeadsquared(input, params, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, get(context, 'userIdFromContext'));

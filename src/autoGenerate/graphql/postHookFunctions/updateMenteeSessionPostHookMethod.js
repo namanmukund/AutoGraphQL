@@ -73,7 +73,6 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     await updateScheduleStatusOfMenteeSession(menteeSessionId, 'todo');
   }
 
-  // update Booking Agent if not booked by mentee
   updateUserBookingAgent(get(input, 'user.typeId'), get(context, 'userIdFromContext'));
   // update booking time on leadsquared
   rescheduleMenteeBookingLeadsquared(input, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, get(context, 'userIdFromContext'));
