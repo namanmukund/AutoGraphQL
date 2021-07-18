@@ -79,6 +79,7 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
   await validateMenteeSessionInput(params, context);
   const allowedRoles = [ADMIN, UMS_ADMIN, UMS_VIEWER, MENTOR, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN];
 
+  context.userIdFromContext = userIdFromContext;
   context.isBookedByMentee = userIdFromContext === userId;
 
   if (userIdFromContext === userId) {

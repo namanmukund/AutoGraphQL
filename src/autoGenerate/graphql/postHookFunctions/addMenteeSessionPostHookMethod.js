@@ -4,6 +4,7 @@ import reduceParticularAvailableSlotOfADate from './utils/reduceParticularAvaila
 import extractMenteeSessionInfoAndSendEmail from './utils/extractMenteeSessionInfoAndSendEmail';
 import { addMenteeBookingLeadsquared } from './leadsquared';
 import getMenteeInfo from './utils/getMenteeInfo';
+import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import getTopicInfo from './utils/getTopicInfo';
 import { byPassMenteeValidationApps } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
@@ -23,8 +24,10 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context, availableSlots);
     // send email to mentor admin regarding the session
     await extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
+    // update Booking Agent if not booked by mentee
+    updateUserBookingAgent(get(input, 'user.typeId'), get(context, 'userIdFromContext'));
     // update user booking on leadsquared
-    addMenteeBookingLeadsquared(input, params, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee);
+    addMenteeBookingLeadsquared(input, params, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, get(context, 'userIdFromContext'));
     // update session log entry
     const courseId = get(input, 'course.typeId', '');
     const clientId = get(userInfo, 'data.user.id', '');
