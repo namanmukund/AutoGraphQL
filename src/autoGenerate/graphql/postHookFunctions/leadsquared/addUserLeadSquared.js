@@ -10,7 +10,9 @@ const addUserLeadSquared = (params, create = true) => {
   }
 
   const leadSquaredInput = {
-    Phone: get(params, 'input.phone.countryCode') + get(params, 'input.phone.number'),
+    Phone: create
+      ? `${get(params, 'input.phone.countryCode')}-${get(params, 'input.phone.number')}`
+      : get(params, 'input.phone.number'),
   };
 
   if (get(params, 'input.grade')) {
