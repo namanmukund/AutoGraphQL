@@ -81,6 +81,14 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
 
   context.isBookedByMentee = userIdFromContext === userId;
 
+  if (userIdFromContext === userId) {
+    // eslint-disable-next-line no-param-reassign
+    params.input.bookedBy = 'customer';
+  } else {
+    // eslint-disable-next-line no-param-reassign
+    params.input.bookedBy = 'tekieTeam';
+  }
+
   if (
     !backendApps.includes(appName)
     && userIdFromContext !== userId
