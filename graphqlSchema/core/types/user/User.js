@@ -67,7 +67,7 @@ const User = `
     ${affilateInfo}  
     ${socialInfo}
     ${promotionalInfo}
-    verificationStatus: VerificationStatus @defaultValue(value: "empty")
+    verificationStatus: VerificationStatus @defaultValue(value: "notQualified")
     verifiedBy: User @relation(name: "UserVerifiedBy", direction: "OneWay")
     mentorBatches: [Batch] @relation(name:"BatchMentor")
   }
