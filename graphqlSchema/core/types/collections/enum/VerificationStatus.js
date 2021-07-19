@@ -3,6 +3,7 @@ const VerificationStatus = `
     verified
     unverified
     empty
+    notQualified
   }`;
 
 export default VerificationStatus;
