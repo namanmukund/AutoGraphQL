@@ -19,6 +19,7 @@ import ErrorLog from './ErrorLog';
 import BulletPoint from './BulletPoint';
 import WorkbookExample from './WorkbookExample';
 import UpdateParentChildDetailInput from './UpdateParentChildDetailInput.js';
+import ProductFeature from './ProductFeature';
 
 export default [
   ...Enum,
@@ -42,4 +43,5 @@ export default [
   ErrorLog,
   ...BulletPoint,
   ...WorkbookExample,
+  ...ProductFeature,
 ];
