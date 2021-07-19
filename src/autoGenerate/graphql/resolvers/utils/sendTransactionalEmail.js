@@ -70,6 +70,13 @@ const sendTransactionalEmail = async (templateObject, emailBody, country = 'indi
       sendEmail({ ...emailMsgObject, to: email, cc: [''] });
     });
   }
+  if (process.env.NODE_ENV === 'production') {
+    if (country === 'usa') {
+      testMailingList.usMailingList.forEach((email) => {
+        sendEmail({ ...emailMsgObject, to: email, cc: [''] });
+      });
+    }
+  }
 };
 
 export default sendTransactionalEmail;

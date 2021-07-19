@@ -376,6 +376,7 @@ export const testMailingList = {
     email: ['kriteshpk@gmail.com', 'sanatxn@gmail.com'],
     phone: ['918368246974'],
   },
+  usMailingList: ['rishabprachi26@gmail.com'],
 };
 
 export {
