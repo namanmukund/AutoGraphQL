@@ -22,6 +22,7 @@ const deleteMenteeSessionValidation = async (params, mutationOrQueryName, contex
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
   const {
     appName,
+    userIdFromContext,
   } = userAndAppInfo;
 
   // getting current user from context to send in logs
@@ -30,6 +31,8 @@ const deleteMenteeSessionValidation = async (params, mutationOrQueryName, contex
     currentUser,
   } = userInfo;
   context.currentUser = currentUser;
+
+  context.userIdFromContext = userIdFromContext;
 
   context.appName = appName;
 

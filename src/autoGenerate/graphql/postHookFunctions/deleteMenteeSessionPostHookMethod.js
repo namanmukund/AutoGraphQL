@@ -25,7 +25,6 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
     await increaseParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
   }
-  deleteMenteeBookingLeadSquared(userInfo, topicInfo);
   await extractMenteeSessionInfoAndSendEmail('delete', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
 
   // update session log entry
@@ -34,6 +33,8 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const topicId = get(topicInfo, 'data.topic.id', '');
   const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
   addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMenteeSession', batchCode, '', '');
+
+  deleteMenteeBookingLeadSquared(userInfo, topicInfo, context.userIdFromContext === clientId);
 };
 
 export default deleteMenteeSessionPostHookMethod;
