@@ -2,7 +2,6 @@ import moment from 'moment';
 import { get } from 'lodash';
 import getSlotLabel from '../../../../../utils/getSlotLabel';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import getSelectedSlotsTime from '../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 
 const mentorSessionQuery = (id) => `{
