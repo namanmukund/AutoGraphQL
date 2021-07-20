@@ -3,6 +3,7 @@ import getMenteeInfo from './utils/getMenteeInfo';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
 import addSessionLog from './utils/addSessionLog';
+import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 /*
   - check if the user if from referral
@@ -16,6 +17,10 @@ const userIdQuery = (menteeSessionId) => `{
     id
     bookingDate
     ${getSlotTimesInString()}
+    topic {
+      id
+      order
+    }
     user {
       id
       name
@@ -56,6 +61,12 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMentorMenteeSession', batchCode, mentorSessionId, sessionStatus);
+
+    const studentName = get(menteeSession, 'data.menteeSession.user.name');
+    const parentName = get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.name');
+    if (get(menteeSession, 'data.menteeSession.topic.order') === 1) {
+      sendSessionCancellationMessage(mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName);
+    }
   }
 };
 export default deleteMentorMenteeSessionPostHookMethod;
