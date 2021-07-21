@@ -9,6 +9,7 @@ import getTopicInfo from './utils/getTopicInfo';
 import { byPassMenteeValidationApps } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
+import deleteMentorMenteeSessionQuery from './utils/deleteMentorMenteeSessionQuery';
 
 const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   /*
@@ -20,27 +21,31 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const isTrial = await isTrialSession(input.topic.typeId);
   const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
+
+  const studentName = get(userInfo, 'data.user.name', '');
+  const parentName = get(userInfo, 'data.user.studentProfile.parents[0].user.name', '');
   const { appName } = context;
 
   // if call is from backend we will not update the availability slots, same for paid sessions
   if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
     await increaseParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
+    if (context.mentorSessionId) {
+      sendSessionCancellationMessage(context.mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName);
+    }
   }
   await extractMenteeSessionInfoAndSendEmail('delete', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
 
   // update session log entry
   const courseId = get(input, 'course.typeId', '');
   const clientId = get(userInfo, 'data.user.id', '');
-  const studentName = get(userInfo, 'data.user.name', '');
-  const parentName = get(userInfo, 'data.user.studentProfile.parents[0].user.name', '');
   const topicId = get(topicInfo, 'data.topic.id', '');
   const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
   addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMenteeSession', batchCode, '', '');
 
   deleteMenteeBookingLeadSquared(userInfo, topicInfo, context.userIdFromContext === clientId);
 
-  if (context.mentorSessionId) {
-    sendSessionCancellationMessage(context.mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName);
+  if (context.mmsId) {
+    deleteMentorMenteeSessionQuery();
   }
 };
 
