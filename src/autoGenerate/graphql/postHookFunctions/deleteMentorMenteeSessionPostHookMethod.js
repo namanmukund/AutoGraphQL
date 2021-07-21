@@ -1,7 +1,5 @@
 import { get } from 'lodash';
 import getMenteeInfo from './utils/getMenteeInfo';
-import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
 import addSessionLog from './utils/addSessionLog';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
@@ -12,36 +10,6 @@ import { TBA } from '../../../../constants';
   - check if the referrer has not reached its limit
   - check if the session status is completed for the first time
  */
-
-const userIdQuery = (menteeSessionId) => `{
-  menteeSession(id: "${menteeSessionId}") {
-    id
-    bookingDate
-    ${getSlotTimesInString()}
-    topic {
-      id
-      order
-    }
-    user {
-      id
-      name
-      country
-      studentProfile {
-        parents {
-          user {
-            id
-            name
-            email
-            phone {
-              number
-              countryCode
-            }
-          }
-        }
-      }
-    }
-  }
-}`;
 
 const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const {
