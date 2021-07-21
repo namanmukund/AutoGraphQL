@@ -82,6 +82,7 @@ query{
           salesExecutive {
             user {
               name
+              email
             }
           }
         }
@@ -213,6 +214,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
         userInfo,
         get(mmsFirstData, 'mentorSession.user.name'),
         get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.name'),
+        get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.email'),
       );
     }
 
