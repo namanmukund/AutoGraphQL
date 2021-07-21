@@ -13,10 +13,10 @@ const deleteMenteeSessionValidation = async (params, mutationOrQueryName, contex
   const menteeSessionData = await callLocalGraphqlApi(menteeSessionQuery(menteeSessionId));
 
   const menteeSession = get(menteeSessionData, 'data.menteeSession');
-  const { mentorSessionId, id } = await getMentorMenteeSession(menteeSessionId);
+  const { mentorSessionId, id: mmsId } = await getMentorMenteeSession(menteeSessionId);
 
   context.mentorSessionId = mentorSessionId;
-  context.mmsId = id;
+  context.mmsId = mmsId;
 
   if (!menteeSession || !menteeSession.id) {
     throw new DatabaseRecordNotFoundError();

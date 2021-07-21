@@ -3,6 +3,7 @@ import validateTokenAndExtractInformation from './utils/validateTokenAndExtractI
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import { CanNotDeleteCompletedSessionError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 
 const getMentorMenteeSessionData = async (id) => {
   const query = `
@@ -65,7 +66,6 @@ const deleteMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   if (prevSessionStatus === 'completed') {
     throw new CanNotDeleteCompletedSessionError();
   }
-  await menteeSessionQuery(get(input, 'menteeSession.typeId'));
   // getting current user from context to send in logs
   const userInfo = validateTokenAndExtractInformation(context, false);
   const {

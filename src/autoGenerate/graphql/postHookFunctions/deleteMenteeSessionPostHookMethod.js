@@ -32,6 +32,10 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
     if (context.mentorSessionId) {
       sendSessionCancellationMessage(context.mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName);
     }
+
+    if (context.mmsId) {
+      deleteMentorMenteeSessionQuery(context.mmsId);
+    }
   }
   await extractMenteeSessionInfoAndSendEmail('delete', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
 
@@ -43,10 +47,6 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMenteeSession', batchCode, '', '');
 
   deleteMenteeBookingLeadSquared(userInfo, topicInfo, context.userIdFromContext === clientId);
-
-  if (context.mmsId) {
-    deleteMentorMenteeSessionQuery(context.mmsId);
-  }
 };
 
 export default deleteMenteeSessionPostHookMethod;

@@ -84,20 +84,21 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
       if (context.mentorSessionId) {
         sendSessionCancellationMessage(context.mentorSessionId, prevBookingDate, prevSlotTimeStringArray, studentName, parentName);
       }
+
+      // send email to mentor admin regarding the session
+      await extractMenteeSessionInfoAndSendEmail(
+        'update',
+        input,
+        bookingDate,
+        slotTimeStringArray,
+        prevBookingDate,
+        prevSlotTimeStringArray,
+        userInfo,
+        topicInfo,
+      );
     }
   }
 
-  // send email to mentor admin regarding the session
-  await extractMenteeSessionInfoAndSendEmail(
-    'update',
-    input,
-    bookingDate,
-    slotTimeStringArray,
-    prevBookingDate,
-    prevSlotTimeStringArray,
-    userInfo,
-    topicInfo,
-  );
   if (!byPassMenteeValidationApps.includes(appName)) {
     if (get(context, 'userIdFromContext')) {
       updateUserBookingAgent(menteeSessionId, get(context, 'userIdFromContext'), bookingDate, get(slotTimeStringArray, '0'));
@@ -110,10 +111,10 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     const topicId = get(topicInfo, 'data.topic.id', '');
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMenteeSession', batchCode, '', '');
-  }
 
-  if (context.mmsId) {
-    deleteMentorMenteeSessionQuery(context.mmsId);
+    if (context.mmsId) {
+      deleteMentorMenteeSessionQuery(context.mmsId);
+    }
   }
 };
 
