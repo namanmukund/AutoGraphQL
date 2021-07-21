@@ -14,6 +14,7 @@ import rescheduleMenteeBookingLeadsquared from './leadsquared/rescheduleMenteeBo
 import { byPassMenteeValidationApps } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
+import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const { previousDocument, currentUser } = context;
@@ -71,6 +72,18 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
       }
     }
     await updateScheduleStatusOfMenteeSession(menteeSessionId, 'todo');
+  }
+
+  const studentName = get(userInfo, 'data.user.name', '');
+  const parentName = get(userInfo, 'data.user.studentProfile.parents[0].user.name', '');
+
+  if (
+    (new Date(prevBookingDate).getTime() !== new Date(bookingDate).getTime())
+    || (get(prevSlotTimeStringArray, '0') !== get(slotTimeStringArray, '0'))
+  ) {
+    if (context.mentorSessionId) {
+      sendSessionCancellationMessage(context.mentorSessionId, prevBookingDate, prevSlotTimeStringArray, studentName, parentName);
+    }
   }
   // send email to mentor admin regarding the session
   await extractMenteeSessionInfoAndSendEmail(

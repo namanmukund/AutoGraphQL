@@ -5,6 +5,7 @@ import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
 import addSessionLog from './utils/addSessionLog';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
+import { TBA } from '../../../../constants';
 /*
   - check if the user if from referral
   - check if the session is the first session
@@ -46,7 +47,7 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   const {
     currentUser,
   } = context;
-  const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));
+  const menteeSession = context.menteeSession;
   const userId = get(menteeSession, 'data.menteeSession.user.id');
   const userInfo = await getMenteeInfo(userId);
   const topicId = get(input, 'topic.typeId', '');
@@ -65,7 +66,9 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const studentName = get(menteeSession, 'data.menteeSession.user.name');
     const parentName = get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.name');
     if (get(menteeSession, 'data.menteeSession.topic.order') === 1) {
-      sendSessionCancellationMessage(mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName);
+      if (context.currentApp !== TBA) {
+        sendSessionCancellationMessage(mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName);
+      }
     }
   }
 };

@@ -8,6 +8,7 @@ import getMenteeInfo from './utils/getMenteeInfo';
 import getTopicInfo from './utils/getTopicInfo';
 import { byPassMenteeValidationApps } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
+import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 
 const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   /*
@@ -30,11 +31,17 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   // update session log entry
   const courseId = get(input, 'course.typeId', '');
   const clientId = get(userInfo, 'data.user.id', '');
+  const studentName = get(userInfo, 'data.user.name', '');
+  const parentName = get(userInfo, 'data.user.studentProfile.parents[0].user.name', '');
   const topicId = get(topicInfo, 'data.topic.id', '');
   const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
   addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMenteeSession', batchCode, '', '');
 
   deleteMenteeBookingLeadSquared(userInfo, topicInfo, context.userIdFromContext === clientId);
+
+  if (context.mentorSessionId) {
+    sendSessionCancellationMessage(context.mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName);
+  }
 };
 
 export default deleteMenteeSessionPostHookMethod;

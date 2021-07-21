@@ -5,11 +5,14 @@ import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import menteeSessionQuery from '../../graphqlQueries/menteeSessionQuery';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
+import getMentorSessionIdFromMenteeId from '../../postHookFunctions/utils/getMentorSessionIdFromMenteeId';
 
 const updateMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: menteeSessionId } = params;
   const menteeSessionData = await callLocalGraphqlApi(menteeSessionQuery(menteeSessionId));
   const menteeSession = get(menteeSessionData, 'data.menteeSession');
+  const mentorSessionId = await getMentorSessionIdFromMenteeId(menteeSessionId);
+  context.mentorSessionId = mentorSessionId;
   if (!menteeSession || !menteeSession.id) {
     throw new DatabaseRecordNotFoundError();
   }
