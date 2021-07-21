@@ -113,7 +113,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   }
 
   if (context.mmsId) {
-    deleteMentorMenteeSessionQuery();
+    deleteMentorMenteeSessionQuery(context.mmsId);
   }
 };
 

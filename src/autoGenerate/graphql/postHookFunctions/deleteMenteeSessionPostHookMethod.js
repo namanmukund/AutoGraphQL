@@ -45,7 +45,7 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   deleteMenteeBookingLeadSquared(userInfo, topicInfo, context.userIdFromContext === clientId);
 
   if (context.mmsId) {
-    deleteMentorMenteeSessionQuery();
+    deleteMentorMenteeSessionQuery(context.mmsId);
   }
 };
 
