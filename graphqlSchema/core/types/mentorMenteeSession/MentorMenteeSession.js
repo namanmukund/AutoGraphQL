@@ -71,6 +71,7 @@ const MentorMenteeSession = `
     sessionRecordingLink: String
     ${sendTransactionalMessageFields} 
     ${sessionRescheduledReasons}
+    isFeedbackSubmitted: Boolean @defaultValue(value: "false")
     sessionCommentByMentor: String
     source: UserOriginSource @defaultValue(value: "website")
     country: Country @defaultValue(value: "india")
