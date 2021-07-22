@@ -18,7 +18,8 @@ const sessionRescheduledReasons = `
     turnedUpButLeftAbruptly: Boolean
     classDurationExceeded: Boolean
     leadNotVerifiedProperly: Boolean
-    otherReasonForReschedule: String
+    otherReasonForReschedule: Boolean
+    otherReasonForChallenges: String
     webSiteLoadingIssue: Boolean
     videoNotLoading: Boolean
     codePlaygroundIssue: Boolean

@@ -21,7 +21,7 @@ const addSessionLogQuery = (bookingDate, slot, clientId, topicId, actionByUserId
           ${updateMentorMenteeSessionInput.rescheduledDate ? `rescheduledDate: "${updateMentorMenteeSessionInput.rescheduledDate}"` : ''}
           ${updateMentorMenteeSessionInput.classMissedMessageStatus ? `classMissedMessageStatus: ${updateMentorMenteeSessionInput.classMissedMessageStatus}` : ''}
           ${updateMentorMenteeSessionInput.comment ? `comment: "${updateMentorMenteeSessionInput.comment}"` : ''}
-          ${updateMentorMenteeSessionInput.otherReasonForReschedule ? `otherReasonForReschedule: "${updateMentorMenteeSessionInput.otherReasonForReschedule}"` : ''}
+          ${updateMentorMenteeSessionInput.otherReasonForChallenges ? `otherReasonForChallenges: "${updateMentorMenteeSessionInput.otherReasonForChallenges}"` : ''}
           ${updateMentorMenteeSessionInput.rating ? `rating: ${updateMentorMenteeSessionInput.rating}` : ''}
           ${updateMentorMenteeSessionInput.sessionRecordingLink ? `sessionRecordingLink: "${updateMentorMenteeSessionInput.sessionRecordingLink}"` : ''}
           ${updateMentorMenteeSessionInput.sessionCommentByMentor ? `sessionCommentByMentor: "${updateMentorMenteeSessionInput.sessionCommentByMentor}"` : ''}
@@ -60,10 +60,10 @@ const addSessionLogQuery = (bookingDate, slot, clientId, topicId, actionByUserId
           ${updateMentorMenteeSessionInput.codePlaygroundIssue || updateMentorMenteeSessionInput.codePlaygroundIssue === false ? `codePlaygroundIssue: ${updateMentorMenteeSessionInput.codePlaygroundIssue}` : ''}
           ${updateMentorMenteeSessionInput.logInOTPError || updateMentorMenteeSessionInput.logInOTPError === false ? `logInOTPError: ${updateMentorMenteeSessionInput.logInOTPError}` : ''}
           ${updateMentorMenteeSessionInput.notResponseAndDidNotTurnUp || updateMentorMenteeSessionInput.notResponseAndDidNotTurnUp === false ? `notResponseAndDidNotTurnUp: ${updateMentorMenteeSessionInput.notResponseAndDidNotTurnUp}` : ''}
-          ${updateMentorMenteeSessionInput.notResponseAndDidNotTurnUp || updateMentorMenteeSessionInput.notResponseAndDidNotTurnUp === false ? `notResponseAndDidNotTurnUp: ${updateMentorMenteeSessionInput.notResponseAndDidNotTurnUp}` : ''}
           ${updateMentorMenteeSessionInput.turnedUpButLeftAbruptly || updateMentorMenteeSessionInput.turnedUpButLeftAbruptly === false ? `turnedUpButLeftAbruptly: ${updateMentorMenteeSessionInput.turnedUpButLeftAbruptly}` : ''}
           ${updateMentorMenteeSessionInput.leadNotVerifiedProperly || updateMentorMenteeSessionInput.leadNotVerifiedProperly === false ? `leadNotVerifiedProperly: ${updateMentorMenteeSessionInput.leadNotVerifiedProperly}` : ''}
           ${updateMentorMenteeSessionInput.otherReasonForReschedule || updateMentorMenteeSessionInput.otherReasonForReschedule === false ? `otherReasonForReschedule: ${updateMentorMenteeSessionInput.otherReasonForReschedule}` : ''}
+          ${updateMentorMenteeSessionInput.isFeedbackSubmitted || updateMentorMenteeSessionInput.isFeedbackSubmitted === false ? `isFeedbackSubmitted: ${updateMentorMenteeSessionInput.isFeedbackSubmitted}` : ''}
         }
     ){
       id

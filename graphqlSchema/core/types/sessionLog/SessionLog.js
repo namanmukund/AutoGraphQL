@@ -21,9 +21,15 @@ const sessionRescheduledReasons = `
     chromeIssue: Boolean
     powerCut: Boolean
     notResponseAndDidNotTurnUp: Boolean
+    classDurationExceeded: Boolean
     turnedUpButLeftAbruptly: Boolean
     leadNotVerifiedProperly: Boolean
     otherReasonForReschedule: Boolean
+    otherReasonForChallenges: String
+    webSiteLoadingIssue: Boolean
+    videoNotLoading: Boolean
+    codePlaygroundIssue: Boolean
+    logInOTPError: Boolean
 `;
 
 const SessionLog = `
@@ -71,6 +77,7 @@ const SessionLog = `
     sessionRecordingLink: String
     ${sendTransactionalMessageFields} 
     ${sessionRescheduledReasons}
+    isFeedbackSubmitted: Boolean @defaultValue(value: "false")
     sessionCommentByMentor: String
     source: UserOriginSource @defaultValue(value: "website")
     country: Country @defaultValue(value: "india")
