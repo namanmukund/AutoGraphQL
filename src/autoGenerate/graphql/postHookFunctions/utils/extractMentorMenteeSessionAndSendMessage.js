@@ -5,12 +5,17 @@ import getSlotLabel from '../../../../../utils/getSlotLabel';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 import getLongDate from '../../../../../utils/getLongDate';
 import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
+import updateLeadSquared from '../../../../../services/leadsquared/updateLeadSquared';
 
 const mentorInfoQuery = (mentorSessionId) => `
   query {
     mentorSession(id: "${mentorSessionId}") {
       user {
         id
+        mentorProfile {
+          sessionLink
+          googleMeetLink
+        }
         name
         phone{
           number
@@ -54,13 +59,20 @@ const extractMentorMenteeSessionAndSendMessage = async (
     countryCode: get(mentorInfo, 'data.mentorSession.user.phone.countryCode') || '',
   };
 
+  const {
+    parentName, parentNumber, countryCode, name, grade, parentEmail,
+  } = menteeObj;
+
+  // add session Link to LS
+  updateLeadSquared({
+    Phone: parentNumber,
+    mx_Session_Link: get(mentorInfo, 'data.mentorSession.user.mentorProfile.sessionLink'),
+  }, true, {}, true);
+
   // send email
   if (process.env.NODE_ENV === 'production') {
     if (get(topic, 'data.topic.order') === 1) {
       // send whatsapp emailTemplate message
-      const {
-        parentName, parentNumber, countryCode, name, grade, parentEmail,
-      } = menteeObj;
       const {
         name: mentorName, phoneNumber: mentorPhoneNumber, countryCode: mentorCountryCode,
       } = mentorObj;
