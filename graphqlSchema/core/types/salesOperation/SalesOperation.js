@@ -7,6 +7,7 @@ const unQualifiedLeadReasons = `
     ageNotAppropriate: Boolean
     notRelevantDifferentStream: Boolean
     noPayingPower: Boolean
+    payingPower: YesNoAverage
     notInterestedInCoding: Boolean
     learningAptitudeIssue: Boolean
     notAQualifiedLeadComment: String
@@ -14,6 +15,7 @@ const unQualifiedLeadReasons = `
 
 const sessionRescheduledReasons = `
     hasRescheduled: Boolean
+    isMentorReadyToTakeClass: Boolean
     rescheduledDate: Date
     rescheduledDateProvided: Boolean
     internetIssue: Boolean
@@ -44,7 +46,9 @@ const mentorPitch = `
 const studentPersonna = `
     prodigyChild: Boolean
     extrovertStudent: YesNoAverage
+    personality: UserPersonality
     fastLearner: YesNoAverage
+    learningSpeed: WeakSlowAverageFast
     studentEnglishSpeakingSkill: EnglishSpeakingSkill
     parentEnglishSpeakingSkill: EnglishSpeakingSkill
 `;

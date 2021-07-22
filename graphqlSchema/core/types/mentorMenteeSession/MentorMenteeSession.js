@@ -16,8 +16,15 @@ const sessionRescheduledReasons = `
     powerCut: Boolean
     notResponseAndDidNotTurnUp: Boolean
     turnedUpButLeftAbruptly: Boolean
+    classDurationExceeded: Boolean
     leadNotVerifiedProperly: Boolean
     otherReasonForReschedule: Boolean
+    otherReasonForChallenges: String
+    webSiteLoadingIssue: Boolean
+    videoNotLoading: Boolean
+    codePlaygroundIssue: Boolean
+    logInOTPError: Boolean
+    otherTechnicalReason: String
 `;
 
 const internetSpeed = `
@@ -65,6 +72,7 @@ const MentorMenteeSession = `
     sessionRecordingLink: String
     ${sendTransactionalMessageFields} 
     ${sessionRescheduledReasons}
+    isFeedbackSubmitted: Boolean @defaultValue(value: "false")
     sessionCommentByMentor: String
     source: UserOriginSource @defaultValue(value: "website")
     country: Country @defaultValue(value: "india")

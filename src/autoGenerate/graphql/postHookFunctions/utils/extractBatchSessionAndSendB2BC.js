@@ -67,16 +67,17 @@ const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId) => {
     const campaignType = get(batchSessionRes, 'data.batchSession.batch.campaign.type');
     const slot = get(getSelectedSlotsTime(get(batchSessionRes, 'data.batchSession')), '[0]');
     if (student && campaignType === campaignTypes.b2b2cEvent) {
+      const defaultSessionLink = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.sessionLink');
+      const googleMeetLink = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.googleMeetLink');
+      const sessionLink = googleMeetLink || defaultSessionLink;
       addMenteeBookingLeadsquared({
         phone,
         bookingDate: get(batchSessionRes, 'data.batchSession.bookingDate'),
         slot,
+        sessionLink,
         type: 'b2b2c',
       });
       sendBookingReminderOrConfirmationB2BC(get(student, 'parents[0].user.id'), true);
-      const defaultSessionLink = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.sessionLink');
-      const googleMeetLink = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.googleMeetLink');
-      const sessionLink = googleMeetLink || defaultSessionLink;
       const mentorPhoneNumber = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.phone.number', '');
       const mentorPhoneCountryCode = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.phone.countryCode', '');
       sendWhatsAppTemplateMessage(
