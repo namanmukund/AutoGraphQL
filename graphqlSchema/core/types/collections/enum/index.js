@@ -81,7 +81,7 @@ import BlockBasedProjectType from './BlockBasedProjectType';
 import BookedBy from './BookedBy';
 import SessionLogAction from './SessionLogAction';
 import UserPersonality from './UserPersonality';
-import WeekSlowAverageFast from './WeekSlowAverageFast';
+import WeakSlowAverageFast from './WeakSlowAverageFast';
 
 export default [
   Status,
@@ -168,5 +168,5 @@ export default [
   BookedBy,
   SessionLogAction,
   UserPersonality,
-  WeekSlowAverageFast,
+  WeakSlowAverageFast,
 ];

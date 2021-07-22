@@ -15,6 +15,7 @@ const unQualifiedLeadReasons = `
 
 const sessionRescheduledReasons = `
     hasRescheduled: Boolean
+    isMentorReadyToTakeClass: Boolean
     rescheduledDate: Date
     rescheduledDateProvided: Boolean
     internetIssue: Boolean
@@ -47,7 +48,7 @@ const studentPersonna = `
     extrovertStudent: YesNoAverage
     personality: UserPersonality
     fastLearner: YesNoAverage
-    learningSpeed: WeekSlowAverageFast
+    learningSpeed: WeakSlowAverageFast
     studentEnglishSpeakingSkill: EnglishSpeakingSkill
     parentEnglishSpeakingSkill: EnglishSpeakingSkill
 `;
