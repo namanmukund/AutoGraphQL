@@ -80,6 +80,8 @@ import TopicComponents from './TopicComponents';
 import BlockBasedProjectType from './BlockBasedProjectType';
 import BookedBy from './BookedBy';
 import SessionLogAction from './SessionLogAction';
+import UserPersonality from './UserPersonality';
+import WeakSlowAverageFast from './WeakSlowAverageFast';
 
 export default [
   Status,
@@ -165,4 +167,6 @@ export default [
   BlockBasedProjectType,
   BookedBy,
   SessionLogAction,
+  UserPersonality,
+  WeakSlowAverageFast,
 ];
