@@ -7,6 +7,7 @@ const unQualifiedLeadReasons = `
     ageNotAppropriate: Boolean
     notRelevantDifferentStream: Boolean
     noPayingPower: Boolean
+    payingPower: YesNoAverage
     notInterestedInCoding: Boolean
     learningAptitudeIssue: Boolean
     notAQualifiedLeadComment: String
@@ -44,7 +45,9 @@ const mentorPitch = `
 const studentPersonna = `
     prodigyChild: Boolean
     extrovertStudent: YesNoAverage
+    personality: UserPersonality
     fastLearner: YesNoAverage
+    learningSpeed: WeekSlowAverageFast
     studentEnglishSpeakingSkill: EnglishSpeakingSkill
     parentEnglishSpeakingSkill: EnglishSpeakingSkill
 `;

@@ -16,8 +16,14 @@ const sessionRescheduledReasons = `
     powerCut: Boolean
     notResponseAndDidNotTurnUp: Boolean
     turnedUpButLeftAbruptly: Boolean
+    classDurationExceeded: Boolean
     leadNotVerifiedProperly: Boolean
     otherReasonForReschedule: Boolean
+    webSiteLoadingIssue: Boolean
+    videoNotLoading: Boolean
+    codePlaygroundIssue: Boolean
+    logInOTPError: Boolean
+    otherTechnicalReason: String
 `;
 
 const internetSpeed = `
