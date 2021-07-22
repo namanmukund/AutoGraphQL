@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import moment from 'moment';
+import { DEFAULT_LS_OM_USER_ID } from '../../../../../constants';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
 
 const setSessionCompletedLeadsquared = async (userInfo, mentorName, salesExec, salesExecEmail) => {
@@ -17,6 +18,9 @@ const setSessionCompletedLeadsquared = async (userInfo, mentorName, salesExec, s
   }
   if (get(data, '0.UserId')) {
     leadSquaredInput.OwnerId = get(data, '0.UserId');
+  } else {
+    // Default to Om Dubey User Id, if Sales Manager not found on LS
+    leadSquaredInput.OwnerId = DEFAULT_LS_OM_USER_ID;
   }
   const activityInput = {
     ActivityEvent: 105,
