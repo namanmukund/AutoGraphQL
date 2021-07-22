@@ -30,7 +30,7 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
     ---add for new slots and remove for old slots
    */
   const currentAvailableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(availabilityDate));
-  const currentAvailableSlots = get(currentAvailableSlotsRes, 'data.availableSlots');
+  const currentAvailableSlots = get(currentAvailableSlotsRes, 'data.availableSlots', []);
 
   if (availabilityDate && availabilityDate.getTime() !== prevAvailabilityDate.getTime()) {
     // --remove the availability slot from the prevAvailabilityDate
@@ -87,25 +87,29 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
     const slotsToBeDecreasedInUpdate = difference(prevSlotTimeStringArray, slotTimeStringArray);
     const slotsToBeIncreasedInUpdate = difference(slotTimeStringArray, prevSlotTimeStringArray);
 
-    if (slotsToBeDecreasedInUpdate && slotsToBeDecreasedInUpdate.length) {
+    if (slotsToBeDecreasedInUpdate && slotsToBeDecreasedInUpdate.length
+      && currentAvailableSlots && currentAvailableSlots.length) {
       slotsToBeDecreasedInUpdate.forEach((slot) => {
         if (currentAvailableSlots[0][slot] > 0) {
           docForUpdate[slot] = currentAvailableSlots[0][slot] - 1;
         }
       });
     }
-    if (slotsToBeIncreasedInUpdate && slotsToBeIncreasedInUpdate.length) {
+    if (slotsToBeIncreasedInUpdate && slotsToBeIncreasedInUpdate.length
+      && currentAvailableSlots && currentAvailableSlots.length) {
       slotsToBeIncreasedInUpdate.forEach((slot) => {
         docForUpdate[slot] = (currentAvailableSlots[0][slot] >= 0 ? currentAvailableSlots[0][slot] : 0) + 1;
       });
     }
 
-    const { id: currentSlotAvailableSlotId } = currentAvailableSlots[0];
-    const variables = {
-      input: docForUpdate,
-    };
-    if (Object.keys(docForUpdate).length) {
-      await callLocalGraphqlApi(updateAvailableSlotQuery(currentSlotAvailableSlotId), context, variables);
+    if (currentAvailableSlots && currentAvailableSlots.length) {
+      const { id: currentSlotAvailableSlotId } = currentAvailableSlots[0];
+      const variables = {
+        input: docForUpdate,
+      };
+      if (Object.keys(docForUpdate).length) {
+        await callLocalGraphqlApi(updateAvailableSlotQuery(currentSlotAvailableSlotId), context, variables);
+      }
     }
   }
   return true;

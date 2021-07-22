@@ -21,6 +21,7 @@ const addSessionLogQuery = (bookingDate, slot, clientId, topicId, actionByUserId
           ${updateMentorMenteeSessionInput.rescheduledDate ? `rescheduledDate: "${updateMentorMenteeSessionInput.rescheduledDate}"` : ''}
           ${updateMentorMenteeSessionInput.classMissedMessageStatus ? `classMissedMessageStatus: ${updateMentorMenteeSessionInput.classMissedMessageStatus}` : ''}
           ${updateMentorMenteeSessionInput.comment ? `comment: "${updateMentorMenteeSessionInput.comment}"` : ''}
+          ${updateMentorMenteeSessionInput.otherReasonForReschedule ? `otherReasonForReschedule: "${updateMentorMenteeSessionInput.otherReasonForReschedule}"` : ''}
           ${updateMentorMenteeSessionInput.rating ? `rating: ${updateMentorMenteeSessionInput.rating}` : ''}
           ${updateMentorMenteeSessionInput.sessionRecordingLink ? `sessionRecordingLink: "${updateMentorMenteeSessionInput.sessionRecordingLink}"` : ''}
           ${updateMentorMenteeSessionInput.sessionCommentByMentor ? `sessionCommentByMentor: "${updateMentorMenteeSessionInput.sessionCommentByMentor}"` : ''}
@@ -53,7 +54,12 @@ const addSessionLogQuery = (bookingDate, slot, clientId, topicId, actionByUserId
           ${updateMentorMenteeSessionInput.zoomIssue || updateMentorMenteeSessionInput.zoomIssue === false ? `zoomIssue: ${updateMentorMenteeSessionInput.zoomIssue}` : ''}
           ${updateMentorMenteeSessionInput.laptopIssue || updateMentorMenteeSessionInput.laptopIssue === false ? `laptopIssue: ${updateMentorMenteeSessionInput.laptopIssue}` : ''}
           ${updateMentorMenteeSessionInput.chromeIssue || updateMentorMenteeSessionInput.chromeIssue === false ? `chromeIssue: ${updateMentorMenteeSessionInput.chromeIssue}` : ''}
-          ${updateMentorMenteeSessionInput.powerCut || updateMentorMenteeSessionInput.powerCut === false ? `powerCut: ${updateMentorMenteeSessionInput.powerCut}` : ''}
+          ${updateMentorMenteeSessionInput.classDurationExceeded || updateMentorMenteeSessionInput.classDurationExceeded === false ? `classDurationExceeded: ${updateMentorMenteeSessionInput.classDurationExceeded}` : ''}
+          ${updateMentorMenteeSessionInput.webSiteLoadingIssue || updateMentorMenteeSessionInput.webSiteLoadingIssue === false ? `webSiteLoadingIssue: ${updateMentorMenteeSessionInput.webSiteLoadingIssue}` : ''}
+          ${updateMentorMenteeSessionInput.videoNotLoading || updateMentorMenteeSessionInput.videoNotLoading === false ? `videoNotLoading: ${updateMentorMenteeSessionInput.videoNotLoading}` : ''}
+          ${updateMentorMenteeSessionInput.codePlaygroundIssue || updateMentorMenteeSessionInput.codePlaygroundIssue === false ? `codePlaygroundIssue: ${updateMentorMenteeSessionInput.codePlaygroundIssue}` : ''}
+          ${updateMentorMenteeSessionInput.logInOTPError || updateMentorMenteeSessionInput.logInOTPError === false ? `logInOTPError: ${updateMentorMenteeSessionInput.logInOTPError}` : ''}
+          ${updateMentorMenteeSessionInput.notResponseAndDidNotTurnUp || updateMentorMenteeSessionInput.notResponseAndDidNotTurnUp === false ? `notResponseAndDidNotTurnUp: ${updateMentorMenteeSessionInput.notResponseAndDidNotTurnUp}` : ''}
           ${updateMentorMenteeSessionInput.notResponseAndDidNotTurnUp || updateMentorMenteeSessionInput.notResponseAndDidNotTurnUp === false ? `notResponseAndDidNotTurnUp: ${updateMentorMenteeSessionInput.notResponseAndDidNotTurnUp}` : ''}
           ${updateMentorMenteeSessionInput.turnedUpButLeftAbruptly || updateMentorMenteeSessionInput.turnedUpButLeftAbruptly === false ? `turnedUpButLeftAbruptly: ${updateMentorMenteeSessionInput.turnedUpButLeftAbruptly}` : ''}
           ${updateMentorMenteeSessionInput.leadNotVerifiedProperly || updateMentorMenteeSessionInput.leadNotVerifiedProperly === false ? `leadNotVerifiedProperly: ${updateMentorMenteeSessionInput.leadNotVerifiedProperly}` : ''}
