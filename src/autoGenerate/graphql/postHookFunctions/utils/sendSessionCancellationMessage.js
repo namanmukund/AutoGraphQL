@@ -42,7 +42,7 @@ const sendSessionCancellationMessage = async (mentorSessionId, bookingDate, slot
     ).setHours(slotNumber, 0, 0, 0),
   );
   if (moment().isBefore(moment(sessionDateTime).add(20, 'minutes'))) {
-    sendWhatsAppTemplateMessage(mentorPhoneNumber, 'mentor_cancellation_1', mentorName, [
+    sendWhatsAppTemplateMessage(mentorPhoneNumber, 'mentor_cancellation3', mentorName, [
       {
         name: 'session_date',
         value: sessionDate,

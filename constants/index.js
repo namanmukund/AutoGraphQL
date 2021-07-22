@@ -379,6 +379,8 @@ export const testMailingList = {
   usMailingList: ['rishabprachi26@gmail.com'],
 };
 
+export const DEFAULT_LS_OM_USER_ID = 'b29041e3-5645-11eb-9166-0a68392cb7c4';
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
