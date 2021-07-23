@@ -37,7 +37,7 @@ const sendB2B2CBookReminderNextDay = async ({ userId, code }, deleteJob) => {
       bookingLink: `https://www.tekie.in/login?code=${code}`,
     }, {
       emailTemplate: 'CarnivalEmailRegistrationConfirmedBookingReminder',
-      subject: 'Hurry! Just a few free spots left at Tekie Code Carnival',
+      subject: 'Hurry! Just a few free spots left at Tekie Code Jam',
     });
   }
   deleteJob();
