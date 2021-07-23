@@ -311,9 +311,14 @@ body{
 		          </tr>
               <tr>
                 <td style="padding-top: 20px;">
-                  <div style="background: url(https://tekie-backend.s3.amazonaws.com/python/email/codeJamLineup.png);width: 90%;height: 180px; background-position: center; background-repeat: no-repeat;background-size: contain;margin: auto;">
-
-                  </div>
+                  <% if (isUnderGrade5) { %>
+                    <div style="background: url(https://tekie-backend.s3.amazonaws.com/python/email/codeJamLineUpUnderGrade5.png);width: 90%;height: 180px; background-position: center; background-repeat: no-repeat;background-size: contain;margin: auto;">
+                    </div>
+                  <% } %>
+                  <% if (isOverGrade5) { %>
+                      <div style="background: url(https://tekie-backend.s3.amazonaws.com/python/email/codeJamLineup.png);width: 90%;height: 180px; background-position: center; background-repeat: no-repeat;background-size: contain;margin: auto;">
+                      </div>
+                  <% } %>
                 </td>
 		          </tr>
               <tr>

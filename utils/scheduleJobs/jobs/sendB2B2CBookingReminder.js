@@ -96,7 +96,7 @@ const sendB2B2CBookingReminder = async ({ userId, jobType }, deleteJob = () => {
       codingLanguages,
     }, {
       emailTemplate: 'CarnivalEmailReminderMentorDetails',
-      subject: 'Meet your mentor for the Code Carnival Session!',
+      subject: 'Meet your mentor for the Code Jam Session!',
     });
   } else if (jobType === 'bookingFinalReminder') {
     sendTransactionalEmail({
@@ -104,14 +104,20 @@ const sendB2B2CBookingReminder = async ({ userId, jobType }, deleteJob = () => {
       parentEmail,
     }, {
       emailTemplate: 'CarnivalEmailReminderSessionLink',
-      subject: `${studentName}, Your link to join Tekie Coding Carnival.`,
+      subject: `${studentName}, Your link to join Tekie Code Jam, which starts soon!`,
     });
-  } else if (jobType === 'sessionReminderWati') {
-    sendWhatsAppTemplateMessage(phone, 'workshop_reminder_3', parentName, [
+    sendWhatsAppTemplateMessage(phone, 'code_jam_reminder_1', parentName, [
       { name: 'parent_name', value: parentName },
       { name: 'student_name', value: studentName },
+      { name: 'w_date', value: date },
       { name: 'w_time', value: startTime },
       { name: 'school_name', value: schoolName },
+      { name: 'session_link', value: sessionLink },
+    ]);
+  } else if (jobType === 'sessionReminderWati') {
+    sendWhatsAppTemplateMessage(phone, 'code_jam_reminder_2', parentName, [
+      { name: 'parent_name', value: parentName },
+      { name: 'student_name', value: studentName },
       { name: 'session_link', value: sessionLink },
     ]);
   } else {
@@ -129,7 +135,7 @@ const sendB2B2CBookingReminder = async ({ userId, jobType }, deleteJob = () => {
       sessionLink,
     }, {
       emailTemplate: 'CarnivalEmailReminderSameDay',
-      subject: `${studentName}, Your link to join Tekie Coding Carnival.`,
+      subject: `Your Code Jam starts in 3 hours! Here's your link for the session.`,
     });
   }
   deleteJob();
