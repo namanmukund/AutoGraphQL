@@ -102,6 +102,9 @@ const sendB2B2CBookingReminder = async ({ userId, jobType }, deleteJob = () => {
     sendTransactionalEmail({
       sessionLink,
       parentEmail,
+      bookingDate: date,
+      startTime,
+      endTime,
     }, {
       emailTemplate: 'CarnivalEmailReminderSessionLink',
       subject: `${studentName}, Your link to join Tekie Code Jam, which starts soon!`,
@@ -135,7 +138,7 @@ const sendB2B2CBookingReminder = async ({ userId, jobType }, deleteJob = () => {
       sessionLink,
     }, {
       emailTemplate: 'CarnivalEmailReminderSameDay',
-      subject: `Your Code Jam starts in 3 hours! Here's your link for the session.`,
+      subject: 'Your Code Jam starts in 3 hours! Here\'s your link for the session.',
     });
   }
   deleteJob();
