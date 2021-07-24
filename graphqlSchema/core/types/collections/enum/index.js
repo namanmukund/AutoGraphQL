@@ -82,6 +82,7 @@ import BookedBy from './BookedBy';
 import SessionLogAction from './SessionLogAction';
 import UserPersonality from './UserPersonality';
 import WeakSlowAverageFast from './WeakSlowAverageFast';
+import Languages from './Languages';
 
 export default [
   Status,
@@ -169,4 +170,5 @@ export default [
   SessionLogAction,
   UserPersonality,
   WeakSlowAverageFast,
+  Languages,
 ];
