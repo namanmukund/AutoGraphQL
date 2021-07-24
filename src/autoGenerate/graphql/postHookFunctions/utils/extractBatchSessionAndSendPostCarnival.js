@@ -58,6 +58,7 @@ const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob,
   const attendances = get(batchSessionRes, 'data.batchSession.attendance', []);
   const mentorName = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.name', '');
   const salesExec = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.salesExecutive.user.name', '');
+  const salesExecEmail = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.salesExecutive.user.email', '');
   attendances.forEach(async (attendance) => {
     const isPresent = get(attendance, 'isPresent', false);
     const student = get(attendance, 'student', {});
