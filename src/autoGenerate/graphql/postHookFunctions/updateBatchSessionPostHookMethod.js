@@ -4,6 +4,7 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   sessionStatus,
+  TBA,
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
@@ -298,7 +299,7 @@ get Course Id
     }
   }
   const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
-  extractBatchSessionAndSendB2BC(batchSessionId, students);
+  extractBatchSessionAndSendB2BC(batchSessionId, students, context.currentApp === TBA);
 };
 
 export default updateBatchSessionPostHookMethod;

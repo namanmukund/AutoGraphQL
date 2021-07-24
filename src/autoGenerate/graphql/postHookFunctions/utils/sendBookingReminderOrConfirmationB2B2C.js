@@ -40,6 +40,7 @@ const USER_QUERY = (userId) => `
           school {
             name
           }
+          grade
           user {
             id
             name
@@ -130,7 +131,7 @@ const sendB2CNoEmail = (phone, country) => {
 };
 
 const sendB2B2CNoEmail = (phone, schoolName, code, bookingLink, user, userId) => {
-  sendWhatsAppTemplateMessage(phone, 'workshop_registration_4', schoolName, [
+  sendWhatsAppTemplateMessage(phone, 'codejam_registration_confirmation_wo_name_6_12', schoolName, [
     { name: 'school_name', value: schoolName },
     { name: 'code', value: code },
     { name: 'booking_link', value: bookingLink },
@@ -179,10 +180,11 @@ const sendB2B2CWithEmail = (user, phone, parentName, studentName, code, schoolNa
     parentEmail: user.email,
     bookingLink,
   }, {
-    subject: 'Book your Spot at Tekie Code Carnival!',
+    subject: 'Book your Spot at Tekie Code Jam!',
     emailTemplate: 'CarivalEmailRegistrationConfirmed',
   });
-  sendWhatsAppTemplateMessage(phone, 'workshop_registration_confirmation3', phone, [
+  const isUnderGrade5 = Number(grade.replace('Grade', '')) <= 5;
+  sendWhatsAppTemplateMessage(phone, isUnderGrade5 ? 'codejam_registration_confirmation_1_5' : 'codejam_registration_confirmation_6_12', phone, [
     { name: 'parent_name', value: parentName },
     { name: 'student_name', value: studentName },
     { name: 'code', value: code },
@@ -269,40 +271,51 @@ const sendB2CUserWithBookingDate = async (user, userId, timeTable, parentName, s
   addToSchedule('B2CSessionReminderWati', schedule.reminderWati(slotNumber, bookingDate), { userId, menteeId, menteeSessionUpdatedAt });
 };
 
-const sendB2B2CWithBookingDate = async (user, userId, code, timeTable, parentName, studentName, schoolName, phone) => {
+const sendB2B2CWithBookingDate = async (user, userId, code, timeTable, parentName, studentName, schoolName, phone, grade) => {
   const batchId = get(user, 'parentProfile.children[0].batch.id');
   if (get(user, 'isBookSessionReminderSent')) return;
   const { bookingDate, ...slots } = timeTable;
   const slotTime = Object.keys(slots).find((slot) => slots[slot]);
   await updateBookSessionReminderStatus(get(user, 'id'), true);
-
+  const isUnderGrade5 = Number(grade.replace('Grade', '')) <= 5;
   sendTransactionalEmail({
     parentEmail: user.email,
     workshopDate: moment(bookingDate).format('dddd, Do MMMM'),
     studentName,
     parentName,
     schoolName,
+    isUnderGrade5,
+    isOverGrade5: !isUnderGrade5,
     startTime: getSlotLabel(slotTime.replace('slot', '')).startTime,
     endTime: getSlotLabel(slotTime.replace('slot', '')).endTime.replace('00', '30'), // change this so that it can handle ::30
   }, {
-    subject: `Here's ${studentName}'s Pass for Tekie Code Carnival`,
+    subject: `Here's ${studentName}'s Pass for Tekie Code Jam`,
     emailTemplate: 'CarnivalEmailBookingFinal',
   });
-  const bookTemplate = moment().diff(moment(get(user, 'createdAt'))) < TIMEOUT ? 'workshop_registration_confirmation1' : 'workshop_booking_confirmation';
+  // const registrationTemplate = 'codejam_registration_confirmation_1_5';
+  // const bookTemplate = moment().diff(moment(get(user, 'createdAt'))) < TIMEOUT ? registrationTemplate : 'codejam_booking_confirmation';
+  const bookTemplate = 'codejam_booking_confirmation';
   const slotNumber = Number(slotTime.replace('slot', ''));
-  const parameters = moment().diff(moment(get(user, 'createdAt'))) < TIMEOUT
-    ? [
-      { name: 'parent_name', value: parentName },
-      { name: 'student_name', value: studentName },
-      { name: 'w_date', value: moment(bookingDate).format('dddd, Do MMMM') },
-      { name: 'w_time', value: getSlotLabel(slotTime.replace('slot', '')).startTime },
-      { name: 'school_name', value: schoolName },
-    ] : [
-      { name: 'parent_name', value: parentName },
-      { name: 'student_name', value: studentName },
-      { name: 'w_date', value: moment(bookingDate).format('dddd, Do MMMM') },
-      { name: 'w_time', value: getSlotLabel(slotTime.replace('slot', '')).startTime },
-    ];
+  // const parameters = moment().diff(moment(get(user, 'createdAt'))) < TIMEOUT
+  //   ? [
+  //     { name: 'parent_name', value: parentName },
+  //     { name: 'student_name', value: studentName },
+  //     { name: 'w_date', value: moment(bookingDate).format('dddd, Do MMMM') },
+  //     { name: 'w_time', value: getSlotLabel(slotTime.replace('slot', '')).startTime },
+  //     { name: 'school_name', value: schoolName },
+  //   ] : [
+  //     { name: 'parent_name', value: parentName },
+  //     { name: 'student_name', value: studentName },
+  //     { name: 'w_date', value: moment(bookingDate).format('dddd, Do MMMM') },
+  //     { name: 'w_time', value: getSlotLabel(slotTime.replace('slot', '')).startTime },
+  //   ];
+  const parameters = [
+    { name: 'parent_name', value: parentName },
+    { name: 'student_name', value: studentName },
+    { name: 'w_date', value: moment(bookingDate).format('dddd, Do MMMM') },
+    { name: 'w_time', value: getSlotLabel(slotTime.replace('slot', '')).startTime },
+    { name: 'school_name', value: schoolName },
+  ];
   sendWhatsAppTemplateMessage(phone, bookTemplate, phone, parameters);
   if (
     getDays(bookingDate) > 3
@@ -361,8 +374,9 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
       }
       return;
     }
-    const parentName = get(user, 'name');
-    const studentName = get(user, 'parentProfile.children[0].user.name');
+    const parentName = get(user, 'name', '');
+    const studentName = get(user, 'parentProfile.children[0].user.name', '');
+    const grade = get(user, 'parentProfile.children[0].grade', '');
     const timeTable = get(user, 'parentProfile.children[0].batch.b2b2ctimeTable', {});
     const hasBookedSession = isB2B2CUser ? !!get(timeTable, 'bookingDate') : menteeSessions.length > 0;
     if (hasBookedSession) {
@@ -370,7 +384,7 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
       if (isB2CUser) {
         sendB2CUserWithBookingDate(user, studentId, get(menteeSessions, '[0]', {}), parentName, studentName, schoolName, phone, get(menteeSessions, '[0].id'), get(menteeSessions, '[0].updatedAt'));
       } else {
-        sendB2B2CWithBookingDate(user, userId, code, timeTable, parentName, studentName, schoolName, phone);
+        sendB2B2CWithBookingDate(user, userId, code, timeTable, parentName, studentName, schoolName, phone, grade);
       }
     } else {
       /* eslint-disable no-lonely-if */
