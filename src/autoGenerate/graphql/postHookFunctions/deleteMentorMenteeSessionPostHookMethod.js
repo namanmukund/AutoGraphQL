@@ -15,7 +15,7 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   const {
     currentUser,
   } = context;
-  console.log('-------------currentUser', currentUser);
+  // console.log('-------------currentUser', currentUser);
   const menteeSession = context.menteeSession;
   const userId = get(menteeSession, 'data.menteeSession.user.id');
   const userInfo = await getMenteeInfo(userId);
