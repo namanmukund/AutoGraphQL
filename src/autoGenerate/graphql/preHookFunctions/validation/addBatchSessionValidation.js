@@ -72,20 +72,21 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
 
   // getting user role from context. We will allow adding batchSession if logged in user is admin
   const userInfo = validateTokenAndExtractInformation(context, false);
+
   const {
-    currentUser,
-    currentApp
+    currentUser
   } = userInfo;
   const userRoleFromContext = currentUser && currentUser.role;
   context.currentUser = currentUser;
-  context.currentApp = get(currentApp, 'name');
   /*
     Calling method to validate token and return appName to check if action should be allowed
-    */
+  */
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
   const {
     appName,
   } = userAndAppInfo;
+
+  context.appName = appName
 
   // validate input
   await validateBatchSessionInput(params, context, 'addBatch');
