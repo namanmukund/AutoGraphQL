@@ -99,10 +99,11 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     }
   }
 
+  if (context.mmsId) {
+    await deleteMentorMenteeSessionQuery(context.mmsId, context);
+  }
+
   if (!byPassMenteeValidationApps.includes(appName)) {
-    if (context.mmsId) {
-      await deleteMentorMenteeSessionQuery(context.mmsId);
-    }
     if (get(context, 'userIdFromContext')) {
       updateUserBookingAgent(menteeSessionId, get(context, 'userIdFromContext'), bookingDate, get(slotTimeStringArray, '0'));
     }
