@@ -1,4 +1,8 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import updateTopicsInAssignment from '../scriptMethods/updateTopicsInAssignment';
+// import updateTopicsInLearningObjective from '../scriptMethods/updateTopicsInLearningObjective';
+// import updateTopicsAndLearningObjectivesInQuestionBank
+//   from '../scriptMethods/updateTopicsAndLearningObjectivesInQuestionBank';
 // import moveVideoToACollection from '../scriptMethods/moveVideoToACollection';
 // import updateBatchInUserScript from '../scriptMethods/updateBatchInUserScript';
 // import updateCourseInTopics from '../scriptMethods/updateCourseInTopics';
@@ -9,6 +13,9 @@ const temporaryScript = (async (root, params, context) => {
   /*
   Add script functions
    */
+  // await updateTopicsInAssignment();
+  // await updateTopicsInLearningObjective();
+  // await updateTopicsAndLearningObjectivesInQuestionBank();
   // await updateCourse();
   // await updateBatchInUserScript();
   // await moveVideoToACollection();
