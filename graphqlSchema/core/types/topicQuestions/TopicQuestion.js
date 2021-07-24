@@ -1,8 +1,8 @@
 const TopicQuestion = `
-  type TopicQuestion @model
+  type TopicQuestion
   {
    order: Int
-   quiz: QuestionBank @relation(name: "QuizTopicQuestion")
+   question: QuestionBank @relation(name: "QuestionTopicQuestion")
   }
 `;
 

@@ -1,8 +1,8 @@
 const TopicAssignmentQuestion = `
-  type TopicAssignmentQuestion @model
+  type TopicAssignmentQuestion
   {
    order: Int
-   assignmentQuestion: AssignmentQuestion @relation(name: "TopicAssignmentQuestion")
+   assignmentQuestion: AssignmentQuestion @relation(name: "AssignmentTopicAssignmentQuestion")
   }
 `;
 

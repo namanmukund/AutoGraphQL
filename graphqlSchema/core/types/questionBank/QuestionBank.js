@@ -37,7 +37,7 @@ const QuestionBank = `
     learningObjective: LearningObjective @relation(name: "kp4",  direction: "OneWay")
     topic: Topic @relation(name: "kp3",  direction: "OneWay")
     learningObjectives: [LearningObjective] @relation(name: "LearningObjectiveQuestionBank")
-    topics: [Topic] @relation(name: "TopicQuestionBank")
+    topics: [Topic] @relation(name: "QuestionTopicQuestion")
     status: ContentStatus! @defaultValue(value: "unpublished")
     courses: [Course] @relation(name: "CourseQuestionBank", direction: "OneWay")
   }
