@@ -81,8 +81,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     currentApp,
   } = userInfo;
   context.currentUser = currentUser;
-  context.currentApp = get(currentApp, 'name');
-
+  context.appName = get(currentApp, 'name');
   return true;
 };
 
