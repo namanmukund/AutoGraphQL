@@ -25,6 +25,7 @@ const sessionRescheduledReasons = `
     codePlaygroundIssue: Boolean
     logInOTPError: Boolean
     otherTechnicalReason: String
+    languageBarrier: Languages
 `;
 
 const internetSpeed = `
