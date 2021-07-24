@@ -1,7 +1,6 @@
 import { get } from 'lodash';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import increaseParticularAvailableSlotOfADate from './utils/increaseParticularAvailableSlotOfADate';
-import extractMenteeSessionInfoAndSendEmail from './utils/extractMenteeSessionInfoAndSendEmail';
 import isTrialSession from '../resolvers/utils/isTrialSession';
 import deleteMenteeBookingLeadSquared from './leadsquared/deleteMenteeBookingLeadSquared';
 import getMenteeInfo from './utils/getMenteeInfo';
@@ -34,10 +33,10 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
     }
 
     if (context.mmsId) {
-      deleteMentorMenteeSessionQuery(context.mmsId);
+      await deleteMentorMenteeSessionQuery(context.mmsId);
     }
   }
-  await extractMenteeSessionInfoAndSendEmail('delete', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
+  // await extractMenteeSessionInfoAndSendEmail('delete', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
 
   // update session log entry
   const courseId = get(input, 'course.typeId', '');

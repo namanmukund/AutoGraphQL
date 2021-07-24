@@ -74,9 +74,11 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   const userInfo = validateTokenAndExtractInformation(context, false);
   const {
     currentUser,
+    currentApp
   } = userInfo;
   const userRoleFromContext = currentUser && currentUser.role;
   context.currentUser = currentUser;
+  context.currentApp = get(currentApp, 'name');
   /*
     Calling method to validate token and return appName to check if action should be allowed
     */
