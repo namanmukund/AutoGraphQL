@@ -8,7 +8,6 @@ const Languages = `
     gujarati
     bengali
     marathi
-    otherLanguage
   }`;
 
 export default Languages;
