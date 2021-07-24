@@ -52,6 +52,7 @@ const Topic = `
     chapter: Chapter @relation(name: "ChapterTopic")
     learningObjectives: [LearningObjective] @relation(name: "TopicLearningObjective")
     questions: [QuestionBank] @relation(name: "TopicQuestionBank")
+    topicQuestions: [TopicQuestion] @relation(name: "TopicQuestion")
     badges: [Badge] @relation(name: "TopicBadge", isSubset: true)
     thumbnail: File @relation(name: "TopicThumbnail", direction: "OneWay")
     thumbnailSmall: File @relation(name: "TopicThumbnailSmall", direction: "OneWay")
