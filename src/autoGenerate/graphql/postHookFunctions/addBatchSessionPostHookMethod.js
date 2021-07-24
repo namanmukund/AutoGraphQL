@@ -179,7 +179,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     ));
   }
   const studentsId = (students && students.length) ? students.map((student) => get(student, 'id')) : [];
-  extractBatchSessionAndSendB2BC(batchSessionId, studentsId, context.currentApp === TBA);
+  extractBatchSessionAndSendB2BC(batchSessionId, studentsId, context.appName === TBA);
 
   // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
   if (topicId && mentorSessionConnectId) {
