@@ -31,10 +31,10 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
     if (context.mentorSessionId) {
       sendSessionCancellationMessage(context.mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName);
     }
+  }
 
-    if (context.mmsId) {
-      await deleteMentorMenteeSessionQuery(context.mmsId);
-    }
+  if (context.mmsId) {
+    await deleteMentorMenteeSessionQuery(context.mmsId, context);
   }
   // await extractMenteeSessionInfoAndSendEmail('delete', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
 

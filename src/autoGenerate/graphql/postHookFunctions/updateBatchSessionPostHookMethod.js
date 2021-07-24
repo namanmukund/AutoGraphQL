@@ -299,7 +299,7 @@ get Course Id
     }
   }
   const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
-  extractBatchSessionAndSendB2BC(batchSessionId, students, context.currentApp === TBA);
+  extractBatchSessionAndSendB2BC(batchSessionId, students, context.appName === TBA);
 };
 
 export default updateBatchSessionPostHookMethod;
