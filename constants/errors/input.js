@@ -199,3 +199,7 @@ export const InvalidRequestError = createError('InvalidRequestError', {
 export const MandatorySessionLinkError = createError('MandatorySessionLinkError', {
   message: 'Session link is mandatory',
 });
+
+export const CanNotDeleteCompletedSessionError = createError('CanNotDeleteCompletedSessionError', {
+  message: 'Can not delete a completed session',
+});

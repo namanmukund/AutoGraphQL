@@ -9,6 +9,7 @@ query{
     ${getSlotTimesInString()}
     batch{
       id
+      code
       allottedMentor{
         id
       }

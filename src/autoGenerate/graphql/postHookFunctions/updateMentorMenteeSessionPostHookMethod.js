@@ -18,6 +18,8 @@ import getSessionVelocityStatus from './utils/getSessionVelocityStatus';
 import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
 import addRescheduledSlot from './utils/addRescheduledSlot';
+import addSessionLog from './utils/addSessionLog';
+import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 /*
   - check if the user if from referral
   - check if the session is the first session
@@ -110,7 +112,9 @@ const userPaymentPlanQuery = async (filterQuery) => {
 
 const allowedRoles = [MENTEE];
 const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
-  const { currentUser, previousDocument: { sessionStatus: prevSessionStatus, topic, menteeSession: prevMenteeSession } } = context;
+  const {
+    currentUser, previousDocument: { sessionStatus: prevSessionStatus, topic, menteeSession: prevMenteeSession },
+  } = context;
   const { sessionStartDate } = input;
   const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));
   const userId = get(menteeSession, 'data.menteeSession.user.id');
@@ -214,6 +218,20 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     if (input && Object.keys(input).includes('hasRescheduled') && topic.order === 1) {
       updateMentorRescheduleLeadsquared(userInfo, input, params);
     }
+
+    // update session log entry
+    const courseId = get(input, 'course.typeId', '');
+    const clientId = get(userInfo, 'data.user.id', '');
+    const topicId = topic && topic.id;
+    const sessionStatus = get(input, 'sessionStatus');
+    const menteeSessionDoc = get(menteeSession, 'data.menteeSession', {});
+    const { bookingDate, ...slots } = menteeSessionDoc;
+    const slotTimeStringArray = getSelectedSlotsStringArray(slots);
+
+    const mentorSessionId = get(input, 'mentorSession.typeId');
+    const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    // adding logs when menteeSession is changed or mentorSession is changed or status is changed
+    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMentorMenteeSession', batchCode, mentorSessionId, sessionStatus, input);
   }
   /** Update MenteeMentorSession If Session Completed  */
   if (prevSessionStatus === 'completed' || get(input, 'sessionStatus') === 'completed') {

@@ -1,18 +1,19 @@
 import { get } from 'lodash';
-import getSelectedSlotsStringArray from '../postHookFunctions/utils/getSelectedSlotsStringArray';
-import increaseParticularAvailableSlotOfADate from '../postHookFunctions/utils/increaseParticularAvailableSlotOfADate';
-import extractMenteeSessionInfoAndSendEmail from '../postHookFunctions/utils/extractMenteeSessionInfoAndSendEmail';
+import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
+import increaseParticularAvailableSlotOfADate from './utils/increaseParticularAvailableSlotOfADate';
+import extractMenteeSessionInfoAndSendEmail from './utils/extractMenteeSessionInfoAndSendEmail';
 import isTrialSession from '../resolvers/utils/isTrialSession';
-import deleteMenteeBookingLeadSquared from '../postHookFunctions/leadsquared/deleteMenteeBookingLeadSquared';
-import getMenteeInfo from '../postHookFunctions/utils/getMenteeInfo';
-import getTopicInfo from '../postHookFunctions/utils/getTopicInfo';
+import deleteMenteeBookingLeadSquared from './leadsquared/deleteMenteeBookingLeadSquared';
+import getMenteeInfo from './utils/getMenteeInfo';
+import getTopicInfo from './utils/getTopicInfo';
 import { byPassMenteeValidationApps } from '../../../../constants';
+import addSessionLog from './utils/addSessionLog';
 
 const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   /*
   Since doc is deleted increase corresponding availability slots
    */
-  const { previousDocument } = context;
+  const { previousDocument, currentUser } = context;
   const { bookingDate, ...slots } = previousDocument;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
   const isTrial = await isTrialSession(input.topic.typeId);
@@ -26,6 +27,13 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   }
   deleteMenteeBookingLeadSquared(userInfo, topicInfo);
   await extractMenteeSessionInfoAndSendEmail('delete', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
+
+  // update session log entry
+  const courseId = get(input, 'course.typeId', '');
+  const clientId = get(userInfo, 'data.user.id', '');
+  const topicId = get(topicInfo, 'data.topic.id', '');
+  const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+  addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMenteeSession', batchCode, '', '');
 };
 
 export default deleteMenteeSessionPostHookMethod;

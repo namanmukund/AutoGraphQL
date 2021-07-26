@@ -104,6 +104,9 @@ import UserActivityBlockBasedProjectDump from './userActivityBlockBasedProjectDu
 import ComicImage from './comicImage';
 import UserCourseCompletion from './userCourseCompletion';
 import GetCourseCertificate from './getCourseCertificate';
+import SessionLog from './sessionLog';
+import TopicQuestions from './topicQuestions';
+import TopicAssignmentQuestion from './topicAssignmentQuestion';
 
 export default [
   ...User,
@@ -212,4 +215,7 @@ export default [
   ...UserCourseCompletion,
   ...GetCourseCertificate,
   ...GetSchoolDetails,
+  ...SessionLog,
+  ...TopicQuestions,
+  ...TopicAssignmentQuestion,
 ];

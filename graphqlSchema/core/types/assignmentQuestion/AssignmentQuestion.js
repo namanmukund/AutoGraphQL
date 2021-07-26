@@ -28,7 +28,7 @@ const AssignmentQuestion = `
     answerCodeSnippet: String @trim
     explanation: String @trim
     topic: Topic @relation(name: "kp2",  direction: "OneWay")
-    topics: [Topic] @relation(name: "TopicAssignmentQuestion")
+    topics: [Topic] @relation(name: "AssignmentTopicAssignmentQuestion")
     status: ContentStatus! @defaultValue(value: "unpublished")
     courses: [Course] @relation(name: "CourseAssignmentQuestion", direction: "OneWay")
   }

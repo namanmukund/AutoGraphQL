@@ -112,6 +112,7 @@ import {
   HashOrStatusNotPresentError,
   InvalidBannerDateRangeError,
   BannerFieldRequiredError,
+  CanNotDeleteCompletedSessionError,
 } from './input';
 
 // assessment validation sqs  profile apolloErrorPackageTest maxSync transcoder
@@ -249,4 +250,5 @@ export {
   BatchFullError,
   MentorMandatoryError,
   MentorProfileAlreadyExist,
+  CanNotDeleteCompletedSessionError,
 };

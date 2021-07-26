@@ -91,6 +91,7 @@ import addUserActivityBlockBasedProjectDumpValidation from './preHookFunctions/v
 import addUserActivityBlockBasedPracticeDumpValidation
   from './preHookFunctions/validation/addUserActivityBlockBasedPracticeDumpValidation';
 import addMentorProfileValidation from './preHookFunctions/validation/addMentorProfileValidation';
+import deleteMentorMenteeSessionValidation from './preHookFunctions/validation/deleteMentorMenteeSessionValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -722,6 +723,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'addMentorProfile': {
       await addMentorProfileValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'deleteMentorMenteeSession': {
+      await deleteMentorMenteeSessionValidation(params, mutationOrQueryName, context);
       break;
     }
     default: {

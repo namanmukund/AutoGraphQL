@@ -63,7 +63,7 @@ const getCourseCertificate = (async (root, params, context) => {
     throw new DatabaseRecordNotFoundError();
   }
 
-  const certificateId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.certificate.id', {});
+  const certificateId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.certificate.id', null);
   const courseThumbnailId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.course.thumbnail.id', null);
   result.name = get(getUserCourseCompletionRes, 'data.userCourseCompletion.user.name', null);
   result.userId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.user.id', null);
