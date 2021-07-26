@@ -465,6 +465,7 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
       const {
         bookingDate, mentorSession, allottedMentor, ...slots
       } = timeTableRule;
+      console.log(bookingDate);
       const selectedSlots = getSelectedSlotsTime(slots);
       const formattedBookingDate = new Date(bookingDate);
       formattedBookingDate.setHours(0, 0, 0, 0);

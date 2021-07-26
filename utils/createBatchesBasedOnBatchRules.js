@@ -1,5 +1,6 @@
 import { get, isEqual } from 'lodash';
 import { NoSectionExists } from '../constants/errors';
+import getSelectedSlotsStringArray from '../src/autoGenerate/graphql/postHookFunctions/utils/getSelectedSlotsStringArray';
 import {
   getSectionExists,
   getClassesGroupByGrade,
@@ -32,10 +33,7 @@ const createB2BBatchesBasedOnBatchRules = async (campaignId, courseId, batchRule
 };
 
 const createB2B2CEventBatchesBasedOnBatchRules = async (campaignId, courseId, batchRules, timeTableRules, schoolId, classesConnectIds, context) => {
-  if (batchRules && timeTableRules && schoolId) {
-    const timeTableRulesArray = get(timeTableRules, 'replace', []);
-    createBatchForB2B2C(timeTableRulesArray, campaignId, courseId, schoolId, classesConnectIds, context);
-  } else if (context.prevTimeTableRules && timeTableRules) {
+  if (context.prevTimeTableRules.length > 0 && timeTableRules) {
     const prevTimeTableRulesArray = get(context, 'prevTimeTableRules');
     const timeTableRulesArray = get(timeTableRules, 'replace', []);
 
@@ -43,18 +41,22 @@ const createB2B2CEventBatchesBasedOnBatchRules = async (campaignId, courseId, ba
     /* eslint-disable arrow-body-style */
     const diff = timeTableRulesArray.filter((obj) => {
       return !prevTimeTableRulesArray.some((obj2) => {
-        const { filteredSlots: f1 } = extractSlotsFromInput(obj);
-        const { filteredSlots: f2 } = extractSlotsFromInput(obj2);
+        const slotTimeStringArray1 = getSelectedSlotsStringArray(obj);
+        const slotTimeStringArray2 = getSelectedSlotsStringArray(obj2);
         return (obj.bookingDate === obj2.bookingDate
-          && isEqual(f1, f2)
-          && obj.allottedMentorConnectId === obj2.allottedMentorConnectId);
+          && isEqual(slotTimeStringArray1, slotTimeStringArray2)
+          && get(obj, 'allottedMentor.typeId', '') === get(obj2, 'allottedMentor.id', ''));
+        // check if it allotted mentor id in both the objects
       });
     });
 
     // if there exists any batches to be made
     if (diff.length > 0) {
-      createBatchForB2B2C(diff, campaignId, courseId, context.schoolId, classesConnectIds, context);
+      createBatchForB2B2C(diff, campaignId, courseId, schoolId, classesConnectIds, context);
     }
+  } else if (batchRules && timeTableRules && schoolId) {
+    const timeTableRulesArray = get(timeTableRules, 'replace', []);
+    createBatchForB2B2C(timeTableRulesArray, campaignId, courseId, schoolId, classesConnectIds, context);
   }
 };
 

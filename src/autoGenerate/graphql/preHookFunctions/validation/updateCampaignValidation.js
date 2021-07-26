@@ -77,7 +77,6 @@ const updateCampaignValidation = async (params, mutationName, context) => {
   const preParsedTimetableRules = campaignDoc && campaignDoc.timeTableRules;
   // parse the object to remove the prototype and hence compare with new timeTableRules input
   context.prevTimeTableRules = JSON.parse(JSON.stringify(preParsedTimetableRules));
-  context.schoolId = campaignDoc && campaignDoc.school && campaignDoc.school.id;
 };
 
 export default updateCampaignValidation;
