@@ -11,6 +11,9 @@ const getMentorMenteeSessionData = async (id) => {
       mentorMenteeSession(id:"${id}"){
         id
         sessionStatus
+        hasRescheduled
+        rescheduledDate
+        rescheduledDateProvided
         menteeSession {
           id
         }
@@ -57,7 +60,7 @@ const deleteMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id);
   const menteeSessionDoc = await callLocalGraphqlApi(menteeSessionQuery(get(mentorMenteeSessionDoc, 'menteeSession.id')));
   context.menteeSession = menteeSessionDoc;
-
+  context.prevMenteeSessionDoc = context.previousDocument;
   if (!(mentorMenteeSessionDoc && mentorMenteeSessionDoc.id)) {
     throw new DatabaseRecordNotFoundError();
   }
@@ -76,6 +79,7 @@ const deleteMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   context.currentUser = currentUser;
   context.currentApp = currentApp;
   context.mentorSessionConnectId = mentorSessionConnectId;
+  context.prevMentorMenteeSessionDoc = mentorMenteeSessionDoc;
 };
 
 export default deleteMentorMenteeSessionValidation;
