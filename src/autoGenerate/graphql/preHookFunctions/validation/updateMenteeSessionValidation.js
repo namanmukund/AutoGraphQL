@@ -12,10 +12,12 @@ const updateMenteeSessionValidation = async (params, mutationOrQueryName, contex
   const { id: menteeSessionId } = params;
   const menteeSessionData = await callLocalGraphqlApi(menteeSessionQuery(menteeSessionId));
   const menteeSession = get(menteeSessionData, 'data.menteeSession');
-  const { mentorSessionId, id: mmsId } = await getMentorMenteeSession(menteeSessionId);
+  const mentorMenteeSession = await getMentorMenteeSession(menteeSessionId);
+  const { mentorSessionId, id: mmsId } = mentorMenteeSession;
 
   context.mentorSessionId = mentorSessionId;
   context.mmsId = mmsId;
+  context.mentorMenteeSessionDoc = mentorMenteeSession;
   if (!menteeSession || !menteeSession.id) {
     throw new DatabaseRecordNotFoundError();
   }

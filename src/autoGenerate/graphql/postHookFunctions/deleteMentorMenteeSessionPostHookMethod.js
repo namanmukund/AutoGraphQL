@@ -14,8 +14,9 @@ import { TBA } from '../../../../constants';
 const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const {
     currentUser,
+    prevMentorMenteeSessionDoc,
+    prevMenteeSessionDoc,
   } = context;
-  // console.log('-------------currentUser', currentUser);
   const menteeSession = context.menteeSession;
   const userId = get(menteeSession, 'data.menteeSession.user.id');
   const userInfo = await getMenteeInfo(userId);
@@ -29,8 +30,16 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const menteeSessionDoc = get(menteeSession, 'data.menteeSession', {});
     const { bookingDate, ...slots } = menteeSessionDoc;
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
+    const { bookingDate: prevBookingDate, ...prevSlots } = prevMenteeSessionDoc;
+    const prevSlotTimeStringArray = getSelectedSlotsStringArray(prevSlots);
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
-    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMentorMenteeSession', batchCode, mentorSessionId, sessionStatus);
+    const updateMentorMenteeSessionInput = {};
+    if (prevMentorMenteeSessionDoc) {
+      updateMentorMenteeSessionInput.hasRescheduled = get(prevMentorMenteeSessionDoc, 'hasRescheduled', false);
+      updateMentorMenteeSessionInput.rescheduledDate = get(prevMentorMenteeSessionDoc, 'rescheduledDate', false);
+      updateMentorMenteeSessionInput.rescheduledDateProvided = get(prevMentorMenteeSessionDoc, 'rescheduledDateProvided', null);
+    }
+    addSessionLog(prevBookingDate, prevSlotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMentorMenteeSession', batchCode, mentorSessionId, sessionStatus, updateMentorMenteeSessionInput);
 
     const studentName = get(menteeSession, 'data.menteeSession.user.name');
     const parentName = get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.name');
