@@ -29,7 +29,9 @@ const getMentorMenteeSessionData = async (id) => {
         classDurationExceeded
         webSiteLoadingIssue
         videoNotLoading
+        codePlaygroundIssue
         logInOTPError
+        otherReasonForChallenges
         otherTechnicalReason
         languageBarrier
         otherLanguageBarrier
@@ -97,7 +99,7 @@ const deleteMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   } = userInfo;
   // eslint-disable-next-line no-param-reassign
   context.currentUser = currentUser;
-  context.currentApp = currentApp;
+  context.currentApp = get(currentApp, 'name');
   context.mentorSessionConnectId = mentorSessionConnectId;
   context.prevMentorMenteeSessionDoc = mentorMenteeSessionDoc;
 };
