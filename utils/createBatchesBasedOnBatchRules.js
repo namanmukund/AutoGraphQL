@@ -9,7 +9,6 @@ import {
   createBatchGroupByGrade,
   createBatchGroupBySection,
 } from '../src/autoGenerate/graphql/postHookFunctions/utils/updateCampaignHelperMethods';
-import extractSlotsFromInput from './extractSlotsFromInput';
 
 const createB2BBatchesBasedOnBatchRules = async (campaignId, courseId, batchRules, classesConnectIds, campaignSchoolId) => {
   if (batchRules && batchRules.batchCreationBasis && classesConnectIds && classesConnectIds.length > 0) {

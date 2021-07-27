@@ -21,7 +21,8 @@ const updateCampaignPostHookMethod = async (input, params, mutationName, context
 
   if (!classesConnectIds) {
     const classes = get(input, 'classes');
-    classesConnectIds = []
+    classesConnectIds = [];
+    /* eslint-disable no-restricted-syntax */
     for (const singleClass of classes) {
       classesConnectIds.push(get(singleClass, 'typeId'));
     }
