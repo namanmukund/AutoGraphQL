@@ -14,6 +14,28 @@ const getMentorMenteeSessionData = async (id) => {
         hasRescheduled
         rescheduledDate
         rescheduledDateProvided
+        isFeedbackSubmitted
+        sessionNotConducted
+        sessionCommentByMentor
+        didNotTurnUpInSession
+        didNotPickTheCall
+        internetIssue
+        zoomIssue
+        laptopIssue
+        chromeIssue
+        powerCut
+        notResponseAndDidNotTurnUp
+        turnedUpButLeftAbruptly
+        classDurationExceeded
+        webSiteLoadingIssue
+        videoNotLoading
+        codePlaygroundIssue
+        logInOTPError
+        otherReasonForChallenges
+        otherTechnicalReason
+        languageBarrier
+        otherLanguageBarrier
+        sessionStartDate
         menteeSession {
           id
         }
@@ -77,7 +99,7 @@ const deleteMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   } = userInfo;
   // eslint-disable-next-line no-param-reassign
   context.currentUser = currentUser;
-  context.currentApp = currentApp;
+  context.currentApp = get(currentApp, 'name');
   context.mentorSessionConnectId = mentorSessionConnectId;
   context.prevMentorMenteeSessionDoc = mentorMenteeSessionDoc;
 };

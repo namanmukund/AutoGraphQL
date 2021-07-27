@@ -3,7 +3,7 @@ import getMenteeInfo from './utils/getMenteeInfo';
 import addSessionLog from './utils/addSessionLog';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
-import { TBA } from '../../../../constants';
+import { TBA, TMS } from '../../../../constants';
 /*
   - check if the user if from referral
   - check if the session is the first session
@@ -28,18 +28,37 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const clientId = get(userInfo, 'data.user.id', '');
     const sessionStatus = get(input, 'sessionStatus');
     const menteeSessionDoc = get(menteeSession, 'data.menteeSession', {});
-    const { bookingDate, ...slots } = menteeSessionDoc;
-    const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-    const { bookingDate: prevBookingDate, ...prevSlots } = prevMenteeSessionDoc;
-    const prevSlotTimeStringArray = getSelectedSlotsStringArray(prevSlots);
+    let bookingDate = '';
+    let slotTimeStringArray = [];
+    if (prevMenteeSessionDoc) {
+      bookingDate = get(prevMenteeSessionDoc, 'bookingDate');
+      slotTimeStringArray = getSelectedSlotsStringArray(prevMenteeSessionDoc);
+    } else {
+      bookingDate = get(menteeSessionDoc, 'bookingDate');
+      slotTimeStringArray = getSelectedSlotsStringArray(menteeSessionDoc);
+    }
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
-    const updateMentorMenteeSessionInput = {};
-    if (prevMentorMenteeSessionDoc) {
+    if (context.currentApp === TMS
+      || (context.currentApp === TBA && prevMentorMenteeSessionDoc)) {
+      const updateMentorMenteeSessionInput = {};
       updateMentorMenteeSessionInput.hasRescheduled = get(prevMentorMenteeSessionDoc, 'hasRescheduled', false);
       updateMentorMenteeSessionInput.rescheduledDate = get(prevMentorMenteeSessionDoc, 'rescheduledDate', false);
       updateMentorMenteeSessionInput.rescheduledDateProvided = get(prevMentorMenteeSessionDoc, 'rescheduledDateProvided', null);
+      updateMentorMenteeSessionInput.isFeedbackSubmitted = get(prevMentorMenteeSessionDoc, 'isFeedbackSubmitted', false);
+      updateMentorMenteeSessionInput.sessionCommentByMentor = get(prevMentorMenteeSessionDoc, 'sessionCommentByMentor', '');
+      updateMentorMenteeSessionInput.otherTechnicalReason = get(prevMentorMenteeSessionDoc, 'otherTechnicalReason', '');
+      updateMentorMenteeSessionInput.otherReasonForChallenges = get(prevMentorMenteeSessionDoc, 'otherReasonForChallenges', '');
+      updateMentorMenteeSessionInput.languageBarrier = get(prevMentorMenteeSessionDoc, 'languageBarrier');
+      updateMentorMenteeSessionInput.otherLanguageBarrier = get(prevMentorMenteeSessionDoc, 'otherLanguageBarrier', '');
+      updateMentorMenteeSessionInput.sessionStartDate = get(prevMentorMenteeSessionDoc, 'sessionStartDate');
+      const booleanReasons = ['sessionNotConducted', 'didNotTurnUpInSession', 'didNotPickTheCall', 'internetIssue', 'zoomIssue', 'laptopIssue', 'chromeIssue', 'powerCut', 'notResponseAndDidNotTurnUp', 'turnedUpButLeftAbruptly', 'classDurationExceeded', 'webSiteLoadingIssue', 'videoNotLoading', 'logInOTPError', 'codePlaygroundIssue'];
+      booleanReasons.forEach((reason) => {
+        if (typeof prevMentorMenteeSessionDoc[reason] === 'boolean') {
+          updateMentorMenteeSessionInput[reason] = prevMentorMenteeSessionDoc[reason];
+        }
+      });
+      addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMentorMenteeSession', batchCode, mentorSessionId, sessionStatus, updateMentorMenteeSessionInput);
     }
-    addSessionLog(prevBookingDate, prevSlotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMentorMenteeSession', batchCode, mentorSessionId, sessionStatus, updateMentorMenteeSessionInput);
 
     const studentName = get(menteeSession, 'data.menteeSession.user.name');
     const parentName = get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.name');
