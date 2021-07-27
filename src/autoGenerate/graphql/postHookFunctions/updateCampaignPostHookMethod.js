@@ -4,8 +4,10 @@ import { createB2BBatchesBasedOnBatchRules, createB2B2CEventBatchesBasedOnBatchR
 
 /* eslint-disable no-unused-vars */
 const updateCampaignPostHookMethod = async (input, params, mutationName, context) => {
-  const { id: campaignId, input: campaignInput, classesConnectIds } = params;
-  const { batchRules, timeTableRules } = campaignInput;
+  const { id: campaignId, input: campaignInput } = params;
+  let { classesConnectIds } = params;
+  const { timeTableRules } = campaignInput;
+  let { batchRules } = campaignInput;
 
   const courseId = get(input, 'course.typeId');
   const schoolId = get(input, 'school.typeId');
@@ -13,10 +15,23 @@ const updateCampaignPostHookMethod = async (input, params, mutationName, context
   const prevBatchCreationStatus = get(context, 'prevBatchCreationStatus');
   const type = get(input, 'type');
 
+  if (!batchRules) {
+    batchRules = get(input, 'batchRules');
+  }
+
+  if (!classesConnectIds) {
+    const classes = get(input, 'classes');
+    classesConnectIds = [];
+    /* eslint-disable no-restricted-syntax */
+    for (const singleClass of classes) {
+      classesConnectIds.push(get(singleClass, 'typeId'));
+    }
+  }
+
   // update campaign only when campaign type is b2b and batch creation status is todo
   if (type === campaignTypes.b2b && prevBatchCreationStatus === batchCreationStatus.todo) {
     createB2BBatchesBasedOnBatchRules(campaignId, courseId, batchRules, classesConnectIds, schoolId);
-  } else if (type === campaignTypes.b2b2cEvent && prevBatchCreationStatus === batchCreationStatus.todo) {
+  } else if (type === campaignTypes.b2b2cEvent) {
     createB2B2CEventBatchesBasedOnBatchRules(campaignId, courseId, batchRules, timeTableRules, schoolId, classesConnectIds, context);
   }
 };
