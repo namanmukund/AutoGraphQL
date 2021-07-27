@@ -15,12 +15,12 @@ const updateCampaignPostHookMethod = async (input, params, mutationName, context
   const prevBatchCreationStatus = get(context, 'prevBatchCreationStatus');
   const type = get(input, 'type');
 
-  if (!batchRules) {
+  if (!batchRules || (batchRules && !batchRules.batchSize)) {
     batchRules = get(input, 'batchRules');
   }
 
-  if (!classesConnectIds) {
-    const classes = get(input, 'classes');
+  if (!classesConnectIds || (classesConnectIds && !classesConnectIds.length)) {
+    const classes = get(input, 'classes', []);
     classesConnectIds = [];
     /* eslint-disable no-restricted-syntax */
     for (const singleClass of classes) {
