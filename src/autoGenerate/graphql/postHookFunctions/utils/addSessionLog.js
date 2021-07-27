@@ -25,6 +25,9 @@ const addSessionLogQuery = (bookingDate, slot, clientId, topicId, actionByUserId
           ${updateMentorMenteeSessionInput.rating ? `rating: ${updateMentorMenteeSessionInput.rating}` : ''}
           ${updateMentorMenteeSessionInput.sessionRecordingLink ? `sessionRecordingLink: "${updateMentorMenteeSessionInput.sessionRecordingLink}"` : ''}
           ${updateMentorMenteeSessionInput.sessionCommentByMentor ? `sessionCommentByMentor: "${updateMentorMenteeSessionInput.sessionCommentByMentor}"` : ''}
+          ${updateMentorMenteeSessionInput.otherLanguageBarrier ? `otherLanguageBarrier: "${updateMentorMenteeSessionInput.otherLanguageBarrier}"` : ''}
+          ${updateMentorMenteeSessionInput.otherTechnicalReason ? `otherTechnicalReason: "${updateMentorMenteeSessionInput.otherTechnicalReason}"` : ''}
+          ${updateMentorMenteeSessionInput.languageBarrier ? `languageBarrier: "${updateMentorMenteeSessionInput.languageBarrier}"` : ''}
           ${updateMentorMenteeSessionInput.source ? `source: ${updateMentorMenteeSessionInput.source}` : ''}
           ${updateMentorMenteeSessionInput.country ? `country: ${updateMentorMenteeSessionInput.country}` : ''}
           ${updateMentorMenteeSessionInput.leadStatus ? `leadStatus: ${updateMentorMenteeSessionInput.leadStatus}` : ''}
@@ -54,6 +57,7 @@ const addSessionLogQuery = (bookingDate, slot, clientId, topicId, actionByUserId
           ${updateMentorMenteeSessionInput.zoomIssue || updateMentorMenteeSessionInput.zoomIssue === false ? `zoomIssue: ${updateMentorMenteeSessionInput.zoomIssue}` : ''}
           ${updateMentorMenteeSessionInput.laptopIssue || updateMentorMenteeSessionInput.laptopIssue === false ? `laptopIssue: ${updateMentorMenteeSessionInput.laptopIssue}` : ''}
           ${updateMentorMenteeSessionInput.chromeIssue || updateMentorMenteeSessionInput.chromeIssue === false ? `chromeIssue: ${updateMentorMenteeSessionInput.chromeIssue}` : ''}
+          ${updateMentorMenteeSessionInput.powerCut || updateMentorMenteeSessionInput.powerCut === false ? `powerCut: ${updateMentorMenteeSessionInput.powerCut}` : ''}
           ${updateMentorMenteeSessionInput.classDurationExceeded || updateMentorMenteeSessionInput.classDurationExceeded === false ? `classDurationExceeded: ${updateMentorMenteeSessionInput.classDurationExceeded}` : ''}
           ${updateMentorMenteeSessionInput.webSiteLoadingIssue || updateMentorMenteeSessionInput.webSiteLoadingIssue === false ? `webSiteLoadingIssue: ${updateMentorMenteeSessionInput.webSiteLoadingIssue}` : ''}
           ${updateMentorMenteeSessionInput.videoNotLoading || updateMentorMenteeSessionInput.videoNotLoading === false ? `videoNotLoading: ${updateMentorMenteeSessionInput.videoNotLoading}` : ''}

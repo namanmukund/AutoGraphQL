@@ -30,6 +30,9 @@ const sessionRescheduledReasons = `
     videoNotLoading: Boolean
     codePlaygroundIssue: Boolean
     logInOTPError: Boolean
+    otherTechnicalReason: String
+    languageBarrier: Languages
+    otherLanguageBarrier: String
 `;
 
 const SessionLog = `

@@ -13,7 +13,7 @@ const callLocalGraphqlApi = (query, context, variables) => {
     name: 'core',
   };
   // Remove decoded user
-  delete contextValue.currentUser;
+  // delete contextValue.currentUser;
 
   // To avoid apollo-server-core error
   if (!variableValues || variableValues === '') {

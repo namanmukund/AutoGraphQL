@@ -11,6 +11,31 @@ const getMentorMenteeSessionData = async (id) => {
       mentorMenteeSession(id:"${id}"){
         id
         sessionStatus
+        hasRescheduled
+        rescheduledDate
+        rescheduledDateProvided
+        isFeedbackSubmitted
+        sessionNotConducted
+        sessionCommentByMentor
+        didNotTurnUpInSession
+        didNotPickTheCall
+        internetIssue
+        zoomIssue
+        laptopIssue
+        chromeIssue
+        powerCut
+        notResponseAndDidNotTurnUp
+        turnedUpButLeftAbruptly
+        classDurationExceeded
+        webSiteLoadingIssue
+        videoNotLoading
+        codePlaygroundIssue
+        logInOTPError
+        otherReasonForChallenges
+        otherTechnicalReason
+        languageBarrier
+        otherLanguageBarrier
+        sessionStartDate
         menteeSession {
           id
         }
@@ -57,7 +82,7 @@ const deleteMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id);
   const menteeSessionDoc = await callLocalGraphqlApi(menteeSessionQuery(get(mentorMenteeSessionDoc, 'menteeSession.id')));
   context.menteeSession = menteeSessionDoc;
-
+  context.prevMenteeSessionDoc = context.previousDocument;
   if (!(mentorMenteeSessionDoc && mentorMenteeSessionDoc.id)) {
     throw new DatabaseRecordNotFoundError();
   }
@@ -74,8 +99,9 @@ const deleteMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   } = userInfo;
   // eslint-disable-next-line no-param-reassign
   context.currentUser = currentUser;
-  context.currentApp = currentApp;
+  context.currentApp = get(currentApp, 'name');
   context.mentorSessionConnectId = mentorSessionConnectId;
+  context.prevMentorMenteeSessionDoc = mentorMenteeSessionDoc;
 };
 
 export default deleteMentorMenteeSessionValidation;
