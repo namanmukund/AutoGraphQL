@@ -14,6 +14,26 @@ const getMentorMenteeSessionData = async (id) => {
         hasRescheduled
         rescheduledDate
         rescheduledDateProvided
+        isFeedbackSubmitted
+        sessionNotConducted
+        sessionCommentByMentor
+        didNotTurnUpInSession
+        didNotPickTheCall
+        internetIssue
+        zoomIssue
+        laptopIssue
+        chromeIssue
+        powerCut
+        notResponseAndDidNotTurnUp
+        turnedUpButLeftAbruptly
+        classDurationExceeded
+        webSiteLoadingIssue
+        videoNotLoading
+        logInOTPError
+        otherTechnicalReason
+        languageBarrier
+        otherLanguageBarrier
+        sessionStartDate
         menteeSession {
           id
         }
