@@ -222,8 +222,8 @@ const isComponentUnlocked = async (
     const { free } = enrollmentTypes;
 
     if (enrollmentType === free
-        && topicOrder <= currentTopicOrder
-        && isTrial !== true && page === video) {
+      && topicOrder <= currentTopicOrder
+      && isTrial !== true && page === video) {
       throw new PaidComponentLockedError();
     } else {
       throw new ComponentLockedError();

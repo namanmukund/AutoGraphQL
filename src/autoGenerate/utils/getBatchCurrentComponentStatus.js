@@ -20,6 +20,7 @@ const batchCurrentComponentStatusQuery = (
               order
             }
             latestSessionStatus
+            enrollmentType
           }
         }
       }
