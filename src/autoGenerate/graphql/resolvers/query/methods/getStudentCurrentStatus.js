@@ -40,6 +40,7 @@ const getBatchCurrentTopic = (userId) => `
       batch {
         id
         currentComponent {
+          enrollmentType
           currentTopic {
             id
             order
@@ -140,11 +141,14 @@ const getStudentCurrentStatus = (async (root, params) => {
       const batchTopicOrder = get(getBatchTopic, 'data.user.studentProfile.batch.currentComponent.currentTopic.order');
       const userTopicOrder = get(getUserTopic, 'data.userCurrentTopicComponentStatuses[0].currentTopic.order');
       const userEnrollmentType = get(getUserTopic, 'data.userCurrentTopicComponentStatuses[0].enrollmentType');
+      const batchEnrollmentType = get(getBatchTopic, 'data.user.studentProfile.batch.currentComponent.enrollmentType');
+
+      const combinedEnrollmentType = (userEnrollmentType === 'free' && batchEnrollmentType === 'free') ? 'free' : 'paid';
 
       // if the batch for the user exists then will check for the topic order from batch current component
 
       if (batchTopicOrder) {
-        studentStatus = getStatus(batchTopicOrder, userEnrollmentType, get(input, 'userId'));
+        studentStatus = getStatus(batchTopicOrder, combinedEnrollmentType, get(input, 'userId'));
       } else {
         // else will check for the topic order from student's current topic
         studentStatus = getStatus(userTopicOrder, userEnrollmentType, get(input, 'userId'));

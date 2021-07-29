@@ -220,14 +220,28 @@ const isComponentUnlocked = async (
   )) {
     // placing logic to send correct message if a paid video is locked coz free user is trying to access it
     const { free } = enrollmentTypes;
-
-    if (enrollmentType === free
-      && topicOrder <= currentTopicOrder
-      && isTrial !== true && page === video) {
-      throw new PaidComponentLockedError();
+    if (batchCurrentComponentInfo) {
+      const {
+        enrollmentType: batchEnrollmentType,
+      } = batchCurrentComponentInfo;
+      const combinedEnrollmentType = (enrollmentType === free && batchEnrollmentType === free) ? free : pro;
+      if (combinedEnrollmentType === free
+        && topicOrder <= currentTopicOrder
+        && isTrial !== true && page === video) {
+        throw new PaidComponentLockedError();
+      } else {
+        throw new ComponentLockedError();
+      }
     } else {
-      throw new ComponentLockedError();
+      if (enrollmentType === free
+        && topicOrder <= currentTopicOrder
+        && isTrial !== true && page === video) {
+        throw new PaidComponentLockedError();
+      } else {
+        throw new ComponentLockedError();
+      }
     }
+
   }
 
   // check if mentee should be able to watch a video
