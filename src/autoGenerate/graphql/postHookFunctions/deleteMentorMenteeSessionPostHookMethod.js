@@ -3,7 +3,7 @@ import getMenteeInfo from './utils/getMenteeInfo';
 import addSessionLog from './utils/addSessionLog';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
-import { TBA, TMS } from '../../../../constants';
+import { TBA } from '../../../../constants';
 /*
   - check if the user if from referral
   - check if the session is the first session
@@ -38,8 +38,8 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       slotTimeStringArray = getSelectedSlotsStringArray(menteeSessionDoc);
     }
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
-    if (context.currentApp === TMS
-      || (context.currentApp === TBA && prevMentorMenteeSessionDoc)) {
+    if (context.currentApp !== TBA
+      || (context.currentApp === TBA && prevMenteeSessionDoc)) {
       const updateMentorMenteeSessionInput = {};
       updateMentorMenteeSessionInput.hasRescheduled = get(prevMentorMenteeSessionDoc, 'hasRescheduled', false);
       updateMentorMenteeSessionInput.rescheduledDate = get(prevMentorMenteeSessionDoc, 'rescheduledDate', false);
