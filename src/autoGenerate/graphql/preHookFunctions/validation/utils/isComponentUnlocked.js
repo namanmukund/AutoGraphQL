@@ -201,6 +201,7 @@ const isComponentUnlocked = async (
   );
   const batchCurrentComponentInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.currentComponent');
   const batchCurrentComponentBatchType = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.type');
+  const schoolInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.school');
   /*
   condition to check if chat can be accessed:
   if called topic order is less than current topic order or
@@ -216,7 +217,7 @@ const isComponentUnlocked = async (
     page,
     checkForPaidLogic,
     batchCurrentComponentInfo,
-    batchCurrentComponentBatchType,
+    schoolInfo,
   )) {
     // placing logic to send correct message if a paid video is locked coz free user is trying to access it
     const { free, pro } = enrollmentTypes;
@@ -224,7 +225,11 @@ const isComponentUnlocked = async (
       const {
         enrollmentType: batchEnrollmentType,
       } = batchCurrentComponentInfo;
-      const combinedEnrollmentType = (enrollmentType === free && batchEnrollmentType === free) ? free : pro;
+      let combinedEnrollmentType = (enrollmentType === free && batchEnrollmentType === free) ? free : pro;
+      if (schoolInfo) {
+        const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
+        combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
+      }
       if (combinedEnrollmentType === free
         && topicOrder <= currentTopicOrder
         && isTrial !== true && page === video) {
@@ -233,8 +238,14 @@ const isComponentUnlocked = async (
         throw new ComponentLockedError();
       }
     } else {
+      // for user without batch but with school
+      let combinedEnrollmentType = enrollmentType;
+      if (schoolInfo) {
+        const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
+        combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
+      }
       /* eslint-disable no-lonely-if */
-      if (enrollmentType === free
+      if (combinedEnrollmentType === free
         && topicOrder <= currentTopicOrder
         && isTrial !== true && page === video) {
         throw new PaidComponentLockedError();

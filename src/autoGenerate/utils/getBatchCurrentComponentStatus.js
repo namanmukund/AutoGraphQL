@@ -7,6 +7,9 @@ const batchCurrentComponentStatusQuery = (
   query{
     user(id: "${userId}"){
       studentProfile{
+        school{
+          enrollmentType
+        }
         batch{
           id
           type
