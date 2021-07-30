@@ -199,6 +199,9 @@ const getBatchStatus = (userId) => `
   query{
     user(id: "${userId}"){
       studentProfile{
+        school{
+          enrollmentType
+        }
         batch{
           id
           type
@@ -302,6 +305,8 @@ const userTopicJourneyMutationResolver = async (
     batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
   }
 
+  const schoolInfo = get(batchRes, 'data.user.studentProfile.school');
+
   const userTopicData = {};
   if (!courseId || (courseId === OLD_COURSE_ID)) {
     // calling API to get data of fetched topic
@@ -384,6 +389,11 @@ const userTopicJourneyMutationResolver = async (
       currentRunningTopicOrder = currentRunningTopic.order;
     }
 
+    if (schoolInfo) {
+      const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
+      combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
+    }
+
     if (topicInfo.order < currentRunningTopicOrder) {
       if (topicInfo.isTrial || combinedEnrollmentType === pro) {
         videoData.isUnlocked = true;
@@ -440,7 +450,13 @@ const userTopicJourneyMutationResolver = async (
         } = batchCurrentComponentInfo;
         if (latestSessionStatus === sessionStatus.started || latestSessionStatus === sessionStatus.completed) {
           /* eslint-disable no-shadow */
-          const combinedEnrollmentType = (enrollmentType === free && batchEnrollmentType === free) ? free : pro;
+          let combinedEnrollmentType = (enrollmentType === free && batchEnrollmentType === free) ? free : pro;
+
+          if (schoolInfo) {
+            const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
+            combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
+          }
+
           if (topicInfo.isTrial || combinedEnrollmentType === pro) {
             videoData.isUnlocked = true;
           } else {
@@ -476,7 +492,13 @@ const userTopicJourneyMutationResolver = async (
         const { video, quiz } = topicTypes;
         quizData.masteryLevel = defaultMastery;
         // video is unlocked only if topic is free or user is pro
-        if (topicInfo.isTrial || enrollmentType === pro) {
+        let combinedEnrollmentType = enrollmentType;
+        if (schoolInfo) {
+          const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
+          combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
+        }
+
+        if (topicInfo.isTrial || combinedEnrollmentType === pro) {
           videoData.isUnlocked = true;
         } else {
           videoData.isUnlocked = false;
@@ -721,7 +743,7 @@ const userTopicJourneyMutationResolver = async (
         }
       } else {
         // video is unlocked only if topic is free or user is pro
-        if (topicInfo.isTrial || enrollmentType === pro) {
+        if (topicInfo.isTrial || combinedEnrollmentType === pro) {
           for (const videoElem of videoData) {
             videoElem.isUnlocked = true;
           }
