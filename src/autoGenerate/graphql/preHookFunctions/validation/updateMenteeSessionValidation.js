@@ -4,10 +4,10 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import menteeSessionQuery from '../../graphqlQueries/menteeSessionQuery';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
-import { log } from '../../../../utils';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorMenteeSession from '../../postHookFunctions/utils/getMentorMenteeSession';
 import { TMS } from '../../../../../constants';
+import { log } from '../../../../../utils';
 
 const updateMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: menteeSessionId } = params;

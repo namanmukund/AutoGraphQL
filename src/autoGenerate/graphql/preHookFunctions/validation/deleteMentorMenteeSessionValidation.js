@@ -3,8 +3,8 @@ import validateTokenAndExtractInformation from './utils/validateTokenAndExtractI
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import { CanNotDeleteCompletedSessionError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { log } from '../../../../utils';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
+import { log } from '../../../../../utils';
 
 const getMentorMenteeSessionData = async (id) => {
   const query = `
