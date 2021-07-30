@@ -372,7 +372,7 @@ const userTopicJourneyMutationResolver = async (
     let topicStatus = incomplete;
     let currentRunningTopicOrder;
     // for batches we will use batchCurrentComponentStatus to check current topic
-    const combinedEnrollmentType = enrollmentType;
+    let combinedEnrollmentType = enrollmentType;
     if (batchCurrentComponentInfo) {
       const {
         enrollmentType: batchEnrollmentType,
@@ -436,9 +436,10 @@ const userTopicJourneyMutationResolver = async (
       if (batchCurrentComponentInfo) {
         const {
           latestSessionStatus,
-          enrollmentType: batchEnrollmentType
+          enrollmentType: batchEnrollmentType,
         } = batchCurrentComponentInfo;
         if (latestSessionStatus === sessionStatus.started || latestSessionStatus === sessionStatus.completed) {
+          /* eslint-disable no-shadow */
           const combinedEnrollmentType = (enrollmentType === free && batchEnrollmentType === free) ? free : pro;
           if (topicInfo.isTrial || combinedEnrollmentType === pro) {
             videoData.isUnlocked = true;
@@ -623,11 +624,11 @@ const userTopicJourneyMutationResolver = async (
     const topicStatus = incomplete;
     let currentRunningTopicOrder;
     // for batches we will use batchCurrentComponentStatus to check current topic
-    const combinedEnrollmentType = enrollmentType;
+    let combinedEnrollmentType = enrollmentType;
     if (batchCurrentComponentInfo) {
       const {
         enrollmentType: batchEnrollmentType,
-        currentTopic: currentBatchRunningTopic
+        currentTopic: currentBatchRunningTopic,
       } = batchCurrentComponentInfo;
       combinedEnrollmentType = (enrollmentType === free && batchEnrollmentType === free) ? free : pro;
       currentRunningTopicOrder = currentBatchRunningTopic && currentBatchRunningTopic.order;
@@ -686,7 +687,8 @@ const userTopicJourneyMutationResolver = async (
     } else {
       // batch user calculation when topic order === current topi order in batch
       /* eslint no-lonely-if:0 */
-      const combinedEnrollmentType = enrollmentType;
+      /* eslint-disable no-shadow */
+      let combinedEnrollmentType = enrollmentType;
       if (batchCurrentComponentInfo) {
         const {
           enrollmentType: batchEnrollmentType,

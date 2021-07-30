@@ -219,7 +219,7 @@ const isComponentUnlocked = async (
     batchCurrentComponentBatchType,
   )) {
     // placing logic to send correct message if a paid video is locked coz free user is trying to access it
-    const { free } = enrollmentTypes;
+    const { free, pro } = enrollmentTypes;
     if (batchCurrentComponentInfo) {
       const {
         enrollmentType: batchEnrollmentType,
@@ -233,6 +233,7 @@ const isComponentUnlocked = async (
         throw new ComponentLockedError();
       }
     } else {
+      /* eslint-disable no-lonely-if */
       if (enrollmentType === free
         && topicOrder <= currentTopicOrder
         && isTrial !== true && page === video) {
@@ -241,7 +242,6 @@ const isComponentUnlocked = async (
         throw new ComponentLockedError();
       }
     }
-
   }
 
   // check if mentee should be able to watch a video

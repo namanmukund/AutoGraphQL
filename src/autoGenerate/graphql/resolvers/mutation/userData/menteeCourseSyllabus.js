@@ -758,7 +758,7 @@ const menteeCourseSyllabusMutationResolver = async (
     const {
       currentTopic,
       latestSessionStatus,
-      enrollmentType: batchEnrollmentType
+      enrollmentType: batchEnrollmentType,
     } = batchCurrentComponentInfo;
     const combinedEnrollmentType = (enrollmentType === enrollmentTypes.free && batchEnrollmentType === enrollmentTypes.free) ? enrollmentTypes.free : enrollmentTypes.pro;
     lastTopicBookedOrder = currentTopic && currentTopic.order;
