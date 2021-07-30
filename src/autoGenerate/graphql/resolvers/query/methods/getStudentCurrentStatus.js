@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import {
+  enrollmentTypes,
   GLOBAL_COURSE_TITLE, installmentStatus, PUBLISHED,
   sessionStatus, studentCurrentStatus,
 } from '../../../../../../constants';
@@ -143,7 +144,7 @@ const getStudentCurrentStatus = (async (root, params) => {
       const userEnrollmentType = get(getUserTopic, 'data.userCurrentTopicComponentStatuses[0].enrollmentType');
       const batchEnrollmentType = get(getBatchTopic, 'data.user.studentProfile.batch.currentComponent.enrollmentType');
 
-      const combinedEnrollmentType = (userEnrollmentType === 'free' && batchEnrollmentType === 'free') ? 'free' : 'paid';
+      const combinedEnrollmentType = (userEnrollmentType === enrollmentTypes.free && batchEnrollmentType === enrollmentTypes.free) ? enrollmentTypes.free : enrollmentTypes.pro;
 
       // if the batch for the user exists then will check for the topic order from batch current component
 
