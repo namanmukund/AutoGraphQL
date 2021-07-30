@@ -187,6 +187,7 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
               }
             }
             currentComponent{
+              enrollmentType
               currentCourse{
                 id
                 order
@@ -693,10 +694,10 @@ const menteeCourseSyllabusMutationResolver = async (
         }
       }
     }
-  /*
-  If user is not logged in and asking for course syllabus then we will not add
-  any document in Db and will return default data with first topic as unlocked
-  */
+    /*
+    If user is not logged in and asking for course syllabus then we will not add
+    any document in Db and will return default data with first topic as unlocked
+    */
   } else {
     const topic = await getFirstTopicAndLearningObjective('userCourseSyllabus', courseId);
     const firstTopic = get(topic, 'data.topics[0]');
@@ -757,8 +758,9 @@ const menteeCourseSyllabusMutationResolver = async (
     const {
       currentTopic,
       latestSessionStatus,
+      enrollmentType: batchEnrollmentType
     } = batchCurrentComponentInfo;
-
+    const combinedEnrollmentType = (enrollmentType === enrollmentTypes.free && batchEnrollmentType === enrollmentTypes.free) ? enrollmentTypes.free : enrollmentTypes.pro;
     lastTopicBookedOrder = currentTopic && currentTopic.order;
     const lastTopicSessionStatus = latestSessionStatus;
     totalChapters += chapters.length;
@@ -793,7 +795,7 @@ const menteeCourseSyllabusMutationResolver = async (
           isTrial,
         } = topic;
 
-        const isAccessible = isTopicAccessible(enrollmentType, isTrial);
+        const isAccessible = isTopicAccessible(combinedEnrollmentType, isTrial);
         // checking logic for topics which are yet not booked by mentee
         if (
           topicOrder >= lastTopicBookedOrder
@@ -817,7 +819,7 @@ const menteeCourseSyllabusMutationResolver = async (
                 isTrial: batchSessionIsTrial,
               } = batchSession.topic;
 
-              const isBatchTopicAccessible = isTopicAccessible(enrollmentType, batchSessionIsTrial);
+              const isBatchTopicAccessible = isTopicAccessible(combinedEnrollmentType, batchSessionIsTrial);
 
               slotTimes.forEach((time, index) => {
                 if (batchSession[time]) {
