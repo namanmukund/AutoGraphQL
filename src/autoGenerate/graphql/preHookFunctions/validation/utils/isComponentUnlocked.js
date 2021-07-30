@@ -200,7 +200,6 @@ const isComponentUnlocked = async (
     userId,
   );
   const batchCurrentComponentInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.currentComponent');
-  const batchCurrentComponentBatchType = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.type');
   const schoolInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.school');
   /*
   condition to check if chat can be accessed:

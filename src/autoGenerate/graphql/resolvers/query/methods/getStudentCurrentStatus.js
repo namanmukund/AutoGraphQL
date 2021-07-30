@@ -144,7 +144,7 @@ const getStudentCurrentStatus = (async (root, params) => {
 
       const batchTopicOrder = get(getBatchTopic, 'data.user.studentProfile.batch.currentComponent.currentTopic.order');
       const userTopicOrder = get(getUserTopic, 'data.userCurrentTopicComponentStatuses[0].currentTopic.order');
-      let userEnrollmentType = get(getUserTopic, 'data.userCurrentTopicComponentStatuses[0].enrollmentType');
+      const userEnrollmentType = get(getUserTopic, 'data.userCurrentTopicComponentStatuses[0].enrollmentType');
       const batchEnrollmentType = get(getBatchTopic, 'data.user.studentProfile.batch.currentComponent.enrollmentType', enrollmentTypes.free);
       const schoolEnrollmentType = get(getBatchTopic, 'data.user.studentProfile.school.enrollmentType', enrollmentTypes.free);
 
