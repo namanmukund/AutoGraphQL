@@ -4,7 +4,6 @@ import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import { CanNotDeleteCompletedSessionError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
-import { log } from '../../../../../utils';
 
 const getMentorMenteeSessionData = async (id) => {
   const query = `
@@ -98,12 +97,10 @@ const deleteMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
     currentUser,
     currentApp,
   } = userInfo;
-  log(`PRE CURRENT APP--------> ${currentApp}`);
 
   // eslint-disable-next-line no-param-reassign
   context.currentUser = currentUser;
   context.currentAppName = get(currentApp, 'name');
-  log(`PRE CURRENT APPNAME--------> ${context.currentAppName}`);
   context.mentorSessionConnectId = mentorSessionConnectId;
   context.prevMentorMenteeSessionDoc = mentorMenteeSessionDoc;
 };

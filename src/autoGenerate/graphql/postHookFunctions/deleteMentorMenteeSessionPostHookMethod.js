@@ -4,7 +4,6 @@ import addSessionLog from './utils/addSessionLog';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import { TBA } from '../../../../constants';
-import { log } from '../../../../utils';
 /*
   - check if the user if from referral
   - check if the session is the first session
@@ -39,8 +38,6 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       slotTimeStringArray = getSelectedSlotsStringArray(menteeSessionDoc);
     }
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
-    log(`POSTHOOK CURRENT APP--------> ${context.currentAppName}`);
-    log(`PREMENTEE--------> ${prevMenteeSessionDoc}`);
     if (context.currentAppName !== TBA
       || (context.currentAppName === TBA && prevMenteeSessionDoc)) {
       const updateMentorMenteeSessionInput = {};

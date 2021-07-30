@@ -7,7 +7,6 @@ import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfter
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorMenteeSession from '../../postHookFunctions/utils/getMentorMenteeSession';
 import { TMS } from '../../../../../constants';
-import { log } from '../../../../../utils';
 
 const updateMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: menteeSessionId } = params;
@@ -42,7 +41,6 @@ const updateMenteeSessionValidation = async (params, mutationOrQueryName, contex
   } = userAndAppInfo;
 
   context.userIdFromContext = userIdFromContext;
-  log(`PREMENTEE APPNAME---> ${appName}`);
   context.appName = appName;
 
   // validate input if call is not from TMS, allowing user to reschedule as per his choice
