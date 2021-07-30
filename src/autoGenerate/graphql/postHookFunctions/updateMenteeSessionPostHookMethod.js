@@ -101,8 +101,8 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   }
 
   const updateMentorMenteeSessionInput = {};
-  log('POST UPDATEMENTEE--->', context.mmsId);
-  log('POST APPNAME--->', appName);
+  log(`POST UPDATEMENTEE---> ${context.mmsId}`);
+  log(`POST APPNAME---> ${appName}`);
   if (context.mmsId && (
     (prevBookingDate.getTime() !== bookingDate.getTime())
     || (get(prevSlotTimeStringArray, '0') !== get(slotTimeStringArray, '0'))

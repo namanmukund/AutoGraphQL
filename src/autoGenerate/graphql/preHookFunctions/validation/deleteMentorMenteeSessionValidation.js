@@ -98,12 +98,12 @@ const deleteMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
     currentUser,
     currentApp,
   } = userInfo;
-  log('PRE CURRENT APP-------->', currentApp);
+  log(`PRE CURRENT APP--------> ${currentApp}`);
 
   // eslint-disable-next-line no-param-reassign
   context.currentUser = currentUser;
   context.currentAppName = get(currentApp, 'name');
-  log('PRE CURRENT APPNAME-------->', context.currentAppName);
+  log(`PRE CURRENT APPNAME--------> ${context.currentAppName}`);
   context.mentorSessionConnectId = mentorSessionConnectId;
   context.prevMentorMenteeSessionDoc = mentorMenteeSessionDoc;
 };

@@ -42,7 +42,7 @@ const updateMenteeSessionValidation = async (params, mutationOrQueryName, contex
   } = userAndAppInfo;
 
   context.userIdFromContext = userIdFromContext;
-  log('PREMENTEE APPNAME--->', appName);
+  log(`PREMENTEE APPNAME---> ${appName}`);
   context.appName = appName;
 
   // validate input if call is not from TMS, allowing user to reschedule as per his choice
