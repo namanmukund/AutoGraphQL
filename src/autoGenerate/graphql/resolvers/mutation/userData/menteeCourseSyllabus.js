@@ -157,6 +157,9 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
       }
       user{
         studentProfile{
+          school{
+            enrollmentType
+          }
           batch{
             id
             type
@@ -621,6 +624,7 @@ const menteeCourseSyllabusMutationResolver = async (
     userIdFromContext: userId,
   } = userAndAppInfo;
   let batchCurrentComponentInfo;
+  let schoolInfo;
   let currentTopicComponentInfo;
   let menteeSessions;
   let mentorMenteeSessions;
@@ -659,6 +663,7 @@ const menteeCourseSyllabusMutationResolver = async (
 
     if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId) {
       batchCurrentComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0].user.studentProfile.batch.currentComponent');
+      schoolInfo = get(res, 'data.userCurrentTopicComponentStatuses[0].user.studentProfile.school');
       const allottedMentor = get(res, 'data.userCurrentTopicComponentStatuses[0].user.studentProfile.batch.allottedMentor');
       if (allottedMentor && allottedMentor.name) {
         mentorData = getMentorData(allottedMentor);
@@ -760,7 +765,11 @@ const menteeCourseSyllabusMutationResolver = async (
       latestSessionStatus,
       enrollmentType: batchEnrollmentType,
     } = batchCurrentComponentInfo;
-    const combinedEnrollmentType = (enrollmentType === enrollmentTypes.free && batchEnrollmentType === enrollmentTypes.free) ? enrollmentTypes.free : enrollmentTypes.pro;
+    let combinedEnrollmentType = (enrollmentType === enrollmentTypes.free && batchEnrollmentType === enrollmentTypes.free) ? enrollmentTypes.free : enrollmentTypes.pro;
+    if (schoolInfo) {
+      const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
+      combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
+    }
     lastTopicBookedOrder = currentTopic && currentTopic.order;
     const lastTopicSessionStatus = latestSessionStatus;
     totalChapters += chapters.length;
@@ -991,7 +1000,14 @@ const menteeCourseSyllabusMutationResolver = async (
           chapter,
         } = menteeSession.topic;
 
-        const isAccessible = isTopicAccessible(enrollmentType, isTrial);
+        // checking on user level and school level (if user is linked to school but not batch)
+        let combinedEnrollmentType = enrollmentType;
+        if (schoolInfo) {
+          const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
+          combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
+        }
+
+        const isAccessible = isTopicAccessible(combinedEnrollmentType, isTrial);
 
         // setting last topic booked order, will use this to find upcoming sessions
         if (topicOrder > lastTopicBookedOrder) {
@@ -1057,7 +1073,7 @@ const menteeCourseSyllabusMutationResolver = async (
           isTrial,
         } = topic;
 
-        const isAccessible = isTopicAccessible(enrollmentType, isTrial);
+        const isAccessible = isTopicAccessible(combinedEnrollmentType, isTrial);
         // checking logic for topics which are yet not booked by mentee
         if (
           topicOrder > lastTopicBookedOrder
@@ -1079,7 +1095,7 @@ const menteeCourseSyllabusMutationResolver = async (
       });
     });
   }
-  if (enrollmentType === enrollmentTypes.pro) {
+  if (combinedEnrollmentType === enrollmentTypes.pro) {
     isPaid = true;
   }
 

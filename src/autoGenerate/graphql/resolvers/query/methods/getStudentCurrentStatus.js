@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import {
   enrollmentTypes,
-  GLOBAL_COURSE_TITLE, installmentStatus, PUBLISHED,
+  GLOBAL_COURSE_TITLE, PUBLISHED,
   sessionStatus, studentCurrentStatus,
 } from '../../../../../../constants';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
@@ -104,7 +104,7 @@ const getStatus = async (topicOrder, enrollmentType, userId) => {
 
       if (mentorMenteeSessionData && mentorMenteeSessionData.length > 0
         && get(mentorMenteeSessionData, '[0].sessionStatus') === sessionStatus.completed) {
-        if (enrollmentType && enrollmentType === installmentStatus.paid) {
+        if (enrollmentType && enrollmentType === enrollmentTypes.pro) {
           status = onBoarding;
         } else {
           status = postDemo;
@@ -116,7 +116,7 @@ const getStatus = async (topicOrder, enrollmentType, userId) => {
       status = preDemo;
     }
   } else if (topicOrder > 3) {
-    if (enrollmentType && enrollmentType === installmentStatus.paid) {
+    if (enrollmentType && enrollmentType === enrollmentTypes.pro) {
       status = paidUser;
     } else {
       status = onBoarding;
