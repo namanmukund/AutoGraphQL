@@ -4,6 +4,7 @@ import addSessionLog from './utils/addSessionLog';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import { TBA } from '../../../../constants';
+import { log } from '../../../../utils';
 /*
   - check if the user if from referral
   - check if the session is the first session
@@ -38,8 +39,10 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       slotTimeStringArray = getSelectedSlotsStringArray(menteeSessionDoc);
     }
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
-    if (context.currentApp !== TBA
-      || (context.currentApp === TBA && prevMenteeSessionDoc)) {
+    log('POSTHOOK CURRENT APP-------->', context.currentAppName);
+    log('PREMENTEE-------->', prevMenteeSessionDoc);
+    if (context.currentAppName !== TBA
+      || (context.currentAppName === TBA && prevMenteeSessionDoc)) {
       const updateMentorMenteeSessionInput = {};
       updateMentorMenteeSessionInput.hasRescheduled = get(prevMentorMenteeSessionDoc, 'hasRescheduled', false);
       updateMentorMenteeSessionInput.rescheduledDate = get(prevMentorMenteeSessionDoc, 'rescheduledDate', false);
@@ -63,7 +66,7 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const studentName = get(menteeSession, 'data.menteeSession.user.name');
     const parentName = get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.name');
     if (get(menteeSession, 'data.menteeSession.topic.order') === 1) {
-      if (context.currentApp !== TBA) {
+      if (context.currentAppName !== TBA) {
         sendSessionCancellationMessage(mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName);
       }
     }
