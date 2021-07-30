@@ -7,7 +7,6 @@ import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfter
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorMenteeSession from '../../postHookFunctions/utils/getMentorMenteeSession';
 import { TMS } from '../../../../../constants';
-import { log } from '../../../../../utils';
 
 const updateMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: menteeSessionId } = params;

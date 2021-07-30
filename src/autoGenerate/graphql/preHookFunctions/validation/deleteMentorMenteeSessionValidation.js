@@ -4,7 +4,6 @@ import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import { CanNotDeleteCompletedSessionError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
-import { log } from '../../../../../utils';
 
 const getMentorMenteeSessionData = async (id) => {
   const query = `

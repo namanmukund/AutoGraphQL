@@ -4,7 +4,6 @@ import addSessionLog from './utils/addSessionLog';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import { TBA } from '../../../../constants';
-import { log } from '../../../../utils';
 /*
   - check if the user if from referral
   - check if the session is the first session
