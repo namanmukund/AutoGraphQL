@@ -39,8 +39,6 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       slotTimeStringArray = getSelectedSlotsStringArray(menteeSessionDoc);
     }
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
-    log(`POSTHOOK CURRENT APP--------> ${context.currentAppName}`);
-    log(`PREMENTEE--------> ${prevMenteeSessionDoc}`);
     if (context.currentAppName !== TBA
       || (context.currentAppName === TBA && prevMenteeSessionDoc)) {
       const updateMentorMenteeSessionInput = {};
