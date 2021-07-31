@@ -57,8 +57,8 @@ const Course = `
     bannerThumbnail: File @relation(name: "CourseBannerThumbnail", direction: "OneWay")
     topics: [Topic] @relation(name: "CourseTopic")
     secondaryCategory: String
-    theme: [ThemeType]
-    targetGroup: [ProductTargetUserType]
+    theme: ThemeType
+    targetGroup: ProductTargetUserType
     courseComponentRule: [CourseComponentsRule]
     badges: [Badge] @relation(name: "CourseBadge")
     badgeDescription: String @uniqueOrEmpty @trim
