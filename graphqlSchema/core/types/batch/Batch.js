@@ -34,7 +34,7 @@ const Batch = `
   {
     course: Course! @relation(name: "BatchCurrentComponentStatusCourse", direction: "OneWay")
     allottedMentor: User @relation(name:"BatchMentor")
-    code: String! @uniqueOrEmpty @trim
+    code: String! @uniqueOrEmpty @trim @uppercase
     description: String
     students: [StudentProfile] @relation(name: "BatchStudentProfile")
     currentComponent: BatchCurrentComponentStatus @relation(name: "BatchCurrentComponentStatusBatch", isSubset: true)

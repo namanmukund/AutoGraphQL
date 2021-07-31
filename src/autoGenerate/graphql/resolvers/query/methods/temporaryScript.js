@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+import updateCodeInSchool from '../scriptMethods/updateCodeInSchool';
 // import moveVideoToACollection from '../scriptMethods/moveVideoToACollection';
 // import updateBatchInUserScript from '../scriptMethods/updateBatchInUserScript';
 // import updateCourseInTopics from '../scriptMethods/updateCourseInTopics';
@@ -29,6 +30,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateUserSavedCodeIsApprovedForDisplay();
   // await updateMMSandBatchSessionInMentorSession();
   // await updateCodeInCampaign();
+  await updateCodeInSchool();
   return {
     result: true,
   };
