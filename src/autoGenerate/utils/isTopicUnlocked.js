@@ -13,6 +13,7 @@ const isTopicUnlocked = (
   page,
   checkForPaidLogic,
   batchCurrentComponentInfo,
+  schoolInfo,
 ) => {
   const { free, pro } = enrollmentTypes;
   const { video } = topicTypes;
@@ -28,15 +29,21 @@ const isTopicUnlocked = (
   if (batchCurrentComponentInfo) {
     const {
       currentTopic,
+      enrollmentType: batchEnrollmentType,
     } = batchCurrentComponentInfo;
 
     const batchCurrentTopicOrder = currentTopic && currentTopic.order;
-    if ((enrollmentType === pro
-        && topicOrder <= batchCurrentTopicOrder
-    ) || (enrollmentType === free
+    let combinedEnrollmentType = (enrollmentType === free && batchEnrollmentType === free) ? free : pro;
+    if (schoolInfo) {
+      const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
+      combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
+    }
+    if ((combinedEnrollmentType === pro
+      && topicOrder <= batchCurrentTopicOrder
+    ) || (combinedEnrollmentType === free
       && topicOrder <= batchCurrentTopicOrder
       && checkIfTopicIsFree === true && page === video)
-      || (enrollmentType === free
+      || (combinedEnrollmentType === free
         && topicOrder <= batchCurrentTopicOrder
         && page !== video)
     ) {
@@ -44,12 +51,18 @@ const isTopicUnlocked = (
     }
   } else {
     /* eslint no-lonely-if:0 */
-    if ((enrollmentType === pro
-        && topicOrder <= currentTopicOrder
-    ) || (enrollmentType === free
+    let combinedEnrollmentType = enrollmentType;
+    if (schoolInfo) {
+      const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
+      combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
+    }
+
+    if ((combinedEnrollmentType === pro
+      && topicOrder <= currentTopicOrder
+    ) || (combinedEnrollmentType === free
       && topicOrder <= currentTopicOrder
       && checkIfTopicIsFree === true && page === video)
-      || (enrollmentType === free
+      || (combinedEnrollmentType === free
         && topicOrder <= currentTopicOrder
         && page !== video)
     ) {
