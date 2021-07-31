@@ -20,6 +20,7 @@ const updateCodeInSchool = async () => {
       const modelMutation = new MutationController('School', { bypass: true });
       // eslint-disable-next-line no-await-in-loop
       const updatedDoc = await modelMutation.updateDocument(id, { code: code.toLowerCase() });
+      // eslint-disable-next-line no-console
       console.log(id, '....updatedDoc', updatedDoc.code);
     }
   }
