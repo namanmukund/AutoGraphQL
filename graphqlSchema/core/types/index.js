@@ -105,7 +105,7 @@ import ComicImage from './comicImage';
 import UserCourseCompletion from './userCourseCompletion';
 import GetCourseCertificate from './getCourseCertificate';
 import SessionLog from './sessionLog';
-import UserBookingReport from './userBookingReport.js';
+import SessionReport from './sessionReport';
 
 export default [
   ...User,
@@ -215,5 +215,5 @@ export default [
   ...GetCourseCertificate,
   ...GetSchoolDetails,
   ...SessionLog,
-  ...UserBookingReport,
+  ...SessionReport,
 ];
