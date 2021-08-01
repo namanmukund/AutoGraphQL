@@ -1072,7 +1072,7 @@ const menteeCourseSyllabusMutationResolver = async (
           thumbnailSmall: topicThumbnailSmall,
           isTrial,
         } = topic;
-
+        /* eslint-disable no-use-before-define */
         const isAccessible = isTopicAccessible(combinedEnrollmentType, isTrial);
         // checking logic for topics which are yet not booked by mentee
         if (
