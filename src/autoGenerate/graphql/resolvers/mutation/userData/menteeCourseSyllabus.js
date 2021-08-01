@@ -1095,6 +1095,11 @@ const menteeCourseSyllabusMutationResolver = async (
       });
     });
   }
+  let combinedEnrollmentType = enrollmentType;
+  if (schoolInfo) {
+    const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
+    combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
+  }
   if (combinedEnrollmentType === enrollmentTypes.pro) {
     isPaid = true;
   }
