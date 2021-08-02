@@ -47,6 +47,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   context.allottedMentorId = allottedMentorId;
   context.courseId = course && course.id;
   context.prevSessionStatus = prevSessionStatus;
+  context.isAttendanceMigration = get(context, 'attendanceMigration', false);
 
   // we are doing this to handle cases where we make timetable for school without the topic being attached
   // so whenever these sessions get started we need topicId in this mutation as mandatory field
