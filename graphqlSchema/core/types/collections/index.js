@@ -19,6 +19,7 @@ import ErrorLog from './ErrorLog';
 import BulletPoint from './BulletPoint';
 import WorkbookExample from './WorkbookExample';
 import UpdateParentChildDetailInput from './UpdateParentChildDetailInput.js';
+import TimestampTag from './TimestampTag';
 
 export default [
   ...Enum,
@@ -42,4 +43,5 @@ export default [
   ErrorLog,
   ...BulletPoint,
   ...WorkbookExample,
+  ...TimestampTag,
 ];

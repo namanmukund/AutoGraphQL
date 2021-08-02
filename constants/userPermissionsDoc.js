@@ -127,6 +127,12 @@ const userPermissionsDoc = {
       read: [...NOT_CMS_HEAD_ARRAY],
     },
   },
+  AuditQuestion: {
+    collection: {
+      rule: 'allow',
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR],
+    },
+  },
 };
 
 export default userPermissionsDoc;

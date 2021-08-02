@@ -107,6 +107,7 @@ import GetCourseCertificate from './getCourseCertificate';
 import SessionLog from './sessionLog';
 import TopicQuestions from './topicQuestions';
 import TopicAssignmentQuestion from './topicAssignmentQuestion';
+import AuditQuestion from './auditQuestion';
 
 export default [
   ...User,
@@ -218,4 +219,5 @@ export default [
   ...SessionLog,
   ...TopicQuestions,
   ...TopicAssignmentQuestion,
+  ...AuditQuestion,
 ];
