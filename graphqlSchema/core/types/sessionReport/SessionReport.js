@@ -1,8 +1,12 @@
+import { TBA, TMS } from "../../../../constants";
+import { READ } from "../../../../constants/graphqlOperations";
+import getPermissionSchemaString from "../../../../src/autoGenerate/utils/getPermissionSchemaString";
+
 const SessionBookedToday = `
   type SessionBookedToday {
     registered: Int
     bookedToday: Int
-    demoCompleted: Int
+    demoCompletedToday: Int
     converted: Int
     phoneVerfied: Int
     bookedbySelf: Int
@@ -11,7 +15,16 @@ const SessionBookedToday = `
 `;
 
 const SessionReport = `
-  type SessionReport @model {
+  type SessionReport @model 
+  ${getPermissionSchemaString('SessionReport')}
+  @appPermissions(
+    permissions: [
+    { appName: "${TBA}" operations: "*" },
+    { appName: "${TMS}" operations: "*" }
+  ],
+    rule: allow
+  )
+  {
     registeredToday: SessionBookedToday
     registeredOneDayBefore: SessionBookedToday
     registeredTwoDaysBefore: SessionBookedToday
@@ -19,7 +32,7 @@ const SessionReport = `
     totalBookedToday: Int
     totalDemoCompleteToday: Int
     totalConvertedUsersToday: Int
-    coutry: Country @defaultValue(value: "india")
+    country: Country @defaultValue(value: "india")
     date: Date
   }
 `;
