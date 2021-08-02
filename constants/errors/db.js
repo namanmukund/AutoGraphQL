@@ -188,3 +188,15 @@ export const MentorMandatoryError = createError('MentorMandatoryError', {
 export const MentorProfileAlreadyExist = createError('MentorProfileAlreadyExist', {
   message: 'Mentor Profile already exist for the user',
 });
+
+export const OrderAndAuditTypeExists = createError('OrderAndAuditTypeExists', {
+  message: 'Question with given order and audit type already exists.',
+});
+
+export const MCQOptionNotProvided = createError('MCQOptionNotProvided', {
+  message: 'Atleast one mcq option is mandatory.',
+});
+
+export const MaxRatingAndDisplayTypeNotFound = createError('MaxRatingAndDisplayTypeNotFound', {
+  message: 'maxRating and ratingDisplayType should be passed.',
+});
