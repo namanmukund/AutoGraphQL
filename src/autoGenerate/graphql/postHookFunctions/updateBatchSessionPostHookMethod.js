@@ -190,7 +190,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       }
       courseId = course[0].id;
     }
-  
+
     // if mentorSessionConnectId is not present in batch session, then we need t create mentor session on basis of
     // allotted mentor in batch
     if (!mentorSessionId && allottedMentorId) {
@@ -212,7 +212,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       }
       await callLocalGraphqlApi(updateBatchSession(batchSessionId, finalMentorSessionId));
     }
-  
+
     if (topicId) {
       /*
         get batch info
@@ -231,10 +231,10 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
           We are getting published topics list through this query.
           Then we will get next published topic
           */
-  
+
           const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
           const topicsList = get(nextTopicQueryRes, 'data.topics');
-  
+
           let currentTopicIndex;
           topicsList.forEach((topic, index) => {
             if (topic.id === topicId) {
@@ -259,7 +259,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
           );
         }
       }
-  
+
       // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
       // this should only happen if we are changing sessionStatus or bookingDateFromInput
       if ((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput) {
@@ -281,7 +281,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
           }
         }
       }
-  
+
       // adding session logs when booking date or time is changed
       if (inputSlotTimeArray && inputSlotTimeArray.length && slotTimeArray && slotTimeArray.length) {
         const fromDate = new Date(bookingDate).toISOString();

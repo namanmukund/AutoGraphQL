@@ -45,12 +45,13 @@ const migrateBatchAttendanceToEnum = async () => {
   if (batchSessions && batchSessions.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const session of batchSessions) {
-        const sessionId = get(session, 'id');
-        if (sessionId) {
-            // eslint-disable-next-line no-await-in-loop
-            await updateBatchSession(sessionId, true, 'present');
-            await updateBatchSession(sessionId, false, 'absent');
-        }
+      const sessionId = get(session, 'id');
+      if (sessionId) {
+        // eslint-disable-next-line no-await-in-loop
+        await updateBatchSession(sessionId, true, 'present');
+        // eslint-disable-next-line no-await-in-loop
+        await updateBatchSession(sessionId, false, 'absent');
+      }
     }
   }
 };
