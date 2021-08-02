@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { get, identity } from 'lodash';
+import { get } from 'lodash';
 import { SESSION_REPORT_DAYS } from '../../constants';
 import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
 
@@ -255,6 +255,9 @@ const generateSessionReport = async (numDaysToRunQuery) => {
 
     let forwardCount = 0;
     const sessionReportsObj = {};
+    /*
+      Here we loop to populate single report for single day
+    */
     while (totalLoopDays > 0) {
 
       let otherDayStartDate = new Date();
@@ -263,11 +266,10 @@ const generateSessionReport = async (numDaysToRunQuery) => {
       otherDayEndDate.setDate(todayEndDate.getDate() - forwardCount);
       otherDayStartDate.setHours(0, 0, 0, 0);
       otherDayEndDate.setHours(23, 59, 59, 999);
-      console.log(otherDayStartDate);
-      console.log(otherDayEndDate);
+      // console.log(otherDayStartDate);
+      // console.log(otherDayEndDate);
       const queryRes = await callLocalGraphqlApi(masterQuery(todayStartDate, todayEndDate, otherDayStartDate, otherDayEndDate, country));
       const data = get(queryRes, 'data', {});
-      // console.log(data);
 
       if (forwardCount == 0) {
         // we are in today bucket
@@ -306,23 +308,23 @@ const generateSessionReport = async (numDaysToRunQuery) => {
       totalLoopDays -= 1;
     }
 
-    console.log(sessionReportsObj);
+    // console.log(sessionReportsObj);
     const sessionReportQueryRes = await callLocalGraphqlApi(sessionReportQuery(todayStartDate, country));
     const sessionReportId = get(sessionReportQueryRes, 'data.sessionReports[0].id', '');
     if (sessionReportId) {
       // update exisiting session report
-      console.log('have to update');
+      // console.log('have to update');
       const updateSessionReportRes = await callLocalGraphqlApi(updateSessionReport(sessionReportsObj, sessionReportId));
-      console.log(updateSessionReportRes);
-      const sessionReportUpdated = get(updateSessionReportRes, 'data.updateSessionReport', {});
-      console.log(sessionReportUpdated);
+      const sessionReportUpdatedId = get(updateSessionReportRes, 'data.updateSessionReport.id', '');
+      if (sessionReportUpdatedId) {
+        console.log(`******* SessionReport updated for date : ${todayStartDate}`);
+      }
     } else {
       const addSessionReportRes = await callLocalGraphqlApi(addSessionReport(sessionReportsObj));
-      console.log(addSessionReportRes);
-      const sessionReportAdded = get(addSessionReportRes, 'data.addSessionReport', {});
-      console.log(sessionReportAdded);
-      // }
-
+      const sessionReportAddedId = get(addSessionReportRes, 'data.addSessionReport.id', '');
+      if (sessionReportAddedId) {
+        console.log(`******* SessionReport added for date : ${todayStartDate}`);
+      }
     }
     dayCount += 1;
     numDaysToRunQuery -= 1;

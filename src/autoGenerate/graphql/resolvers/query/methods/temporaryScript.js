@@ -11,7 +11,7 @@ const temporaryScript = (async (root, params, context) => {
   /*
   Add script functions
    */
-  await generateSessionReport(2);
+  await generateSessionReport(3);
   // await updateCourse();
   // await updateBatchInUserScript();
   // await moveVideoToACollection();
