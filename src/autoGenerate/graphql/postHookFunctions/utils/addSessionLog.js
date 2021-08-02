@@ -21,13 +21,13 @@ const addSessionLogQuery = (bookingDate, slot, clientId, topicId, actionByUserId
           ${updateMentorMenteeSessionInput.rescheduledDate ? `rescheduledDate: "${updateMentorMenteeSessionInput.rescheduledDate}"` : ''}
           ${updateMentorMenteeSessionInput.classMissedMessageStatus ? `classMissedMessageStatus: ${updateMentorMenteeSessionInput.classMissedMessageStatus}` : ''}
           ${updateMentorMenteeSessionInput.comment ? `comment: "${updateMentorMenteeSessionInput.comment}"` : ''}
-          ${updateMentorMenteeSessionInput.otherReasonForChallenges ? `otherReasonForChallenges: "${updateMentorMenteeSessionInput.otherReasonForChallenges}"` : ''}
+          ${updateMentorMenteeSessionInput.otherReasonForChallenges ? `otherReasonForChallenges: """${updateMentorMenteeSessionInput.otherReasonForChallenges}"""` : ''}
           ${updateMentorMenteeSessionInput.rating ? `rating: ${updateMentorMenteeSessionInput.rating}` : ''}
           ${updateMentorMenteeSessionInput.sessionRecordingLink ? `sessionRecordingLink: "${updateMentorMenteeSessionInput.sessionRecordingLink}"` : ''}
-          ${updateMentorMenteeSessionInput.sessionCommentByMentor ? `sessionCommentByMentor: "${updateMentorMenteeSessionInput.sessionCommentByMentor}"` : ''}
+          ${updateMentorMenteeSessionInput.sessionCommentByMentor ? `sessionCommentByMentor: """${updateMentorMenteeSessionInput.sessionCommentByMentor}"""` : ''}
           ${updateMentorMenteeSessionInput.otherLanguageBarrier ? `otherLanguageBarrier: "${updateMentorMenteeSessionInput.otherLanguageBarrier}"` : ''}
-          ${updateMentorMenteeSessionInput.otherTechnicalReason ? `otherTechnicalReason: "${updateMentorMenteeSessionInput.otherTechnicalReason}"` : ''}
-          ${updateMentorMenteeSessionInput.languageBarrier ? `languageBarrier: "${updateMentorMenteeSessionInput.languageBarrier}"` : ''}
+          ${updateMentorMenteeSessionInput.otherTechnicalReason ? `otherTechnicalReason: """${updateMentorMenteeSessionInput.otherTechnicalReason}"""` : ''}
+          ${updateMentorMenteeSessionInput.languageBarrier ? `languageBarrier: ${updateMentorMenteeSessionInput.languageBarrier}` : ''}
           ${updateMentorMenteeSessionInput.source ? `source: ${updateMentorMenteeSessionInput.source}` : ''}
           ${updateMentorMenteeSessionInput.country ? `country: ${updateMentorMenteeSessionInput.country}` : ''}
           ${updateMentorMenteeSessionInput.leadStatus ? `leadStatus: ${updateMentorMenteeSessionInput.leadStatus}` : ''}
