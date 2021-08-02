@@ -1,14 +1,11 @@
-import { READ } from '../../../../constants/graphqlOperations';
-import { TLA, TMS, TWA } from '../../../../constants';
+import { TMS } from '../../../../constants';
 import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
 
 const AuditQuestion = `
   type AuditQuestion @model 
   @appPermissions(
     permissions:[
-      { appName: "${TMS}" operations: "*" },
-      { appName: "${TLA}" operations: ${READ} },
-      { appName: "${TWA}" operations: ${READ} }
+      { appName: "${TMS}" operations: "*" }
       ], 
     rule: allow
   )
@@ -16,9 +13,11 @@ const AuditQuestion = `
   {
     order: Int!
     statement: String! @trim
-    questionType: AuditQuestionType! @defaultValue(value: "mcq")
+    score: Int!
+    maxRating: Int
+    questionType: AuditQuestionType!
     isMandatory: Boolean @defaultValue(value: "false")
-    auditType: AuditType!
+    auditType: [AuditType]!
     mcqOptions: [McqOption]
     ratingDisplayType: RatingDisplayType
     timestampTags: [TimestampTag]

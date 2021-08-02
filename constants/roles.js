@@ -15,6 +15,9 @@ const SALES_EXECUTIVE = 'salesExecutive';
 const TRANSFORMATION_TEAM = 'transformationTeam';
 const TRANSFORMATION_ADMIN = 'transformationAdmin';
 const SCHOOL_ADMIN = 'schoolAdmin';
+const AUDIT_ADMIN = 'auditAdmin';
+const PRE_SALES = 'preSales';
+const POST_SALES = 'postSales';
 
 const CMS_HEAD = `[
 "${ADMIN}",
@@ -237,4 +240,7 @@ export {
   NOT_BATCH_HEAD_ARR,
   CMS_HEAD_ARRAY,
   NOT_CMS_HEAD_ARRAY,
+  AUDIT_ADMIN,
+  PRE_SALES,
+  POST_SALES,
 };

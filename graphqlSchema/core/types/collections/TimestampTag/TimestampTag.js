@@ -1,6 +1,6 @@
 const TimestampTag = `
 type TimestampTag {
-  statement: String
+  title: String
   order: Int
 }
 `;

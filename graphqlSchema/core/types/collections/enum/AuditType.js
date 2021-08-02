@@ -1,8 +1,8 @@
 const AuditType = `
   enum AuditType {
     mentor
-    preSale
-    postSale
+    preSales
+    postSales
   }`;
 
 export default AuditType;

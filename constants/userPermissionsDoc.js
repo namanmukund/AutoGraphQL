@@ -11,7 +11,7 @@ import {
   UMS_VIEWER,
   NOT_CMS_HEAD_ARRAY,
   CMS_HEAD_ARRAY,
-  UMS_ADMIN, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM,
+  UMS_ADMIN, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM, AUDIT_ADMIN, PRE_SALES, POST_SALES,
 } from './roles';
 
 const userPermissionsDoc = {
@@ -130,7 +130,8 @@ const userPermissionsDoc = {
   AuditQuestion: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR],
+      crud: [...UMS_HEAD_ARR, AUDIT_ADMIN],
+      read: [UMS_VIEWER, MENTOR, PRE_SALES, POST_SALES],
     },
   },
 };
