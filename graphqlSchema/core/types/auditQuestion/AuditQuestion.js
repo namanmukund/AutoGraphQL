@@ -17,7 +17,7 @@ const AuditQuestion = `
     maxRating: Int
     questionType: AuditQuestionType!
     isMandatory: Boolean @defaultValue(value: "false")
-    auditType: [AuditType]!
+    auditType: AuditType!
     mcqOptions: [McqOption]
     ratingDisplayType: RatingDisplayType
     timestampTags: [TimestampTag]
