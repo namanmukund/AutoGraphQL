@@ -40,7 +40,7 @@ const SessionLog = `
   @appPermissions(
     permissions:[
       { appName: "${TBA}" operations: "*" },
-      { appName: "${TMS}" operations: ${READ} }
+      { appName: "${TMS}" operations: "*" }
       ],
     rule: allow
   )
