@@ -1,14 +1,15 @@
 /* eslint-disable no-console */
+/* eslint-disable no-await-in-loop */
 import { get } from 'lodash';
-import { SESSION_REPORT_DAYS } from '../../constants';
+import { SESSION_REPORT_DAYS, COUNTRIES } from '../../constants';
 import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
+import { log } from '../log';
 
 const masterQuery = (todayStartDate,
   todayEndDate,
   otherDayStartDate,
   otherDayEndDate,
-  country,
-) => `
+  country) => `
     query{
   registeredUsers: usersMeta(filter:{
     and:[
@@ -33,20 +34,6 @@ const masterQuery = (todayStartDate,
   }){
     count
   }
-    verifiedUsersWithDetails: usersMeta(filter:{
-    and:[
-      {role: parent}
-      {phoneVerified:true}
-      {createdAt_gte:"${otherDayStartDate}"}
-      {createdAt_lt:"${otherDayEndDate}"}
-      {source_not:school}
-      {country:${country}}
-      {name_exists: true}
-      {email_exists: true}
-    ]
-  }){
-    count
-  }
   bookedSessions: menteeSessionsMeta(filter:{
     and:[
       {bookingDate_gte:"${todayStartDate}"}
@@ -57,14 +44,14 @@ const masterQuery = (todayStartDate,
       {
         user_some:{
           and:[
-						{createdAt_gte:"${otherDayStartDate}"}
+            {createdAt_gte:"${otherDayStartDate}"}
             {createdAt_lt:"${otherDayEndDate}"}
           ]
-      	}
+        }
       }
     ]
   }){
-		count
+    count
   }
   completedSessions: mentorMenteeSessionsMeta(filter:{
     and:[
@@ -82,7 +69,7 @@ const masterQuery = (todayStartDate,
               {createdAt_lt:"${otherDayEndDate}"}
             ]
           }
-      	}
+        }
       }
     ]
   }){
@@ -98,10 +85,30 @@ const masterQuery = (todayStartDate,
       {
         client_some:{
           and:[
-						{createdAt_gte:"${otherDayStartDate}"}
+            {createdAt_gte:"${otherDayStartDate}"}
             {createdAt_lt:"${otherDayEndDate}"}
           ]
-      	}
+        }
+      }
+    ]
+  }){
+    count
+  }
+  bookedSessionsByAgent: menteeSessionsMeta(filter:{
+    and:[
+      {bookingDate_gte:"${todayStartDate}"}
+      {bookingDate_lte:"${todayEndDate}"}
+      {source_not:school}
+      {country:${country}}
+      {topic_some:{order:1}}
+      {bookedBy: tekieTeam}
+      {
+        user_some:{
+          and:[
+            {createdAt_gte:"${otherDayStartDate}"}
+            {createdAt_lt:"${otherDayEndDate}"}
+          ]
+        }
       }
     ]
   }){
@@ -116,7 +123,7 @@ const masterQuery = (todayStartDate,
       {topic_some:{order:1}}
     ]
   }){
-		count
+    count
   }
   totalCompletedSessionsToday: mentorMenteeSessionsMeta(filter:{
     and:[
@@ -164,27 +171,39 @@ const addSessionReport = (input) => `
     country: ${input.country},
     registeredToday: {
       registered: ${input.registeredToday.registered},
-    	bookedToday: ${input.registeredToday.bookedToday},
-    	demoCompletedToday: ${input.registeredToday.demoCompletedToday},
-    	converted: ${input.registeredToday.converted}
+      bookedToday: ${input.registeredToday.bookedToday},
+      demoCompletedToday: ${input.registeredToday.demoCompletedToday},
+      converted: ${input.registeredToday.converted},
+      phoneVerified: ${input.registeredToday.phoneVerified},
+      bookedBySelf: ${input.registeredToday.bookedBySelf},
+      bookedByAgent: ${input.registeredToday.bookedByAgent}
     }
     registeredOneDayBefore: {
       registered: ${input.registeredOneDayBefore.registered},
-    	bookedToday: ${input.registeredOneDayBefore.bookedToday},
-    	demoCompletedToday: ${input.registeredOneDayBefore.demoCompletedToday},
-    	converted: ${input.registeredOneDayBefore.converted}
+      bookedToday: ${input.registeredOneDayBefore.bookedToday},
+      demoCompletedToday: ${input.registeredOneDayBefore.demoCompletedToday},
+      converted: ${input.registeredOneDayBefore.converted},
+      phoneVerified: ${input.registeredOneDayBefore.phoneVerified},
+      bookedBySelf: ${input.registeredOneDayBefore.bookedBySelf},
+      bookedByAgent: ${input.registeredOneDayBefore.bookedByAgent}
     }
     registeredTwoDaysBefore: {
       registered: ${input.registeredTwoDaysBefore.registered},
-    	bookedToday: ${input.registeredTwoDaysBefore.bookedToday},
-    	demoCompletedToday: ${input.registeredTwoDaysBefore.demoCompletedToday},
-    	converted: ${input.registeredTwoDaysBefore.converted}
+      bookedToday: ${input.registeredTwoDaysBefore.bookedToday},
+      demoCompletedToday: ${input.registeredTwoDaysBefore.demoCompletedToday},
+      converted: ${input.registeredTwoDaysBefore.converted},
+      phoneVerified: ${input.registeredTwoDaysBefore.phoneVerified},
+      bookedBySelf: ${input.registeredTwoDaysBefore.bookedBySelf},
+      bookedByAgent: ${input.registeredTwoDaysBefore.bookedByAgent}
     }
     registeredThreeDaysBefore: {
       registered: ${input.registeredThreeDaysBefore.registered},
-    	bookedToday: ${input.registeredThreeDaysBefore.bookedToday},
-    	demoCompletedToday: ${input.registeredThreeDaysBefore.demoCompletedToday},
-    	converted: ${input.registeredThreeDaysBefore.converted}
+      bookedToday: ${input.registeredThreeDaysBefore.bookedToday},
+      demoCompletedToday: ${input.registeredThreeDaysBefore.demoCompletedToday},
+      converted: ${input.registeredThreeDaysBefore.converted},
+      phoneVerified: ${input.registeredThreeDaysBefore.phoneVerified},
+      bookedBySelf: ${input.registeredThreeDaysBefore.bookedBySelf},
+      bookedByAgent: ${input.registeredThreeDaysBefore.bookedByAgent}
     }
     totalBookedToday: ${input.totalBookedToday},
     totalDemoCompleteToday: ${input.totalDemoCompleteToday},
@@ -196,33 +215,43 @@ const addSessionReport = (input) => `
 `;
 
 const updateSessionReport = (input, id) => `
-  mutation{
+mutation{
   updateSessionReport(id: "${id}", input: {
-    date: "${input.date}",
-    country: ${input.country},
     registeredToday: {
       registered: ${input.registeredToday.registered},
-    	bookedToday: ${input.registeredToday.bookedToday},
-    	demoCompletedToday: ${input.registeredToday.demoCompletedToday},
-    	converted: ${input.registeredToday.converted}
+      bookedToday: ${input.registeredToday.bookedToday},
+      demoCompletedToday: ${input.registeredToday.demoCompletedToday},
+      converted: ${input.registeredToday.converted},
+      phoneVerified: ${input.registeredToday.phoneVerified},
+      bookedBySelf: ${input.registeredToday.bookedBySelf},
+      bookedByAgent: ${input.registeredToday.bookedByAgent}
     }
     registeredOneDayBefore: {
       registered: ${input.registeredOneDayBefore.registered},
-    	bookedToday: ${input.registeredOneDayBefore.bookedToday},
-    	demoCompletedToday: ${input.registeredOneDayBefore.demoCompletedToday},
-    	converted: ${input.registeredOneDayBefore.converted}
+      bookedToday: ${input.registeredOneDayBefore.bookedToday},
+      demoCompletedToday: ${input.registeredOneDayBefore.demoCompletedToday},
+      converted: ${input.registeredOneDayBefore.converted},
+      phoneVerified: ${input.registeredOneDayBefore.phoneVerified},
+      bookedBySelf: ${input.registeredOneDayBefore.bookedBySelf},
+      bookedByAgent: ${input.registeredOneDayBefore.bookedByAgent}
     }
     registeredTwoDaysBefore: {
       registered: ${input.registeredTwoDaysBefore.registered},
-    	bookedToday: ${input.registeredTwoDaysBefore.bookedToday},
-    	demoCompletedToday: ${input.registeredTwoDaysBefore.demoCompletedToday},
-    	converted: ${input.registeredTwoDaysBefore.converted}
+      bookedToday: ${input.registeredTwoDaysBefore.bookedToday},
+      demoCompletedToday: ${input.registeredTwoDaysBefore.demoCompletedToday},
+      converted: ${input.registeredTwoDaysBefore.converted},
+      phoneVerified: ${input.registeredTwoDaysBefore.phoneVerified},
+      bookedBySelf: ${input.registeredTwoDaysBefore.bookedBySelf},
+      bookedByAgent: ${input.registeredTwoDaysBefore.bookedByAgent}
     }
     registeredThreeDaysBefore: {
       registered: ${input.registeredThreeDaysBefore.registered},
-    	bookedToday: ${input.registeredThreeDaysBefore.bookedToday},
-    	demoCompletedToday: ${input.registeredThreeDaysBefore.demoCompletedToday},
-    	converted: ${input.registeredThreeDaysBefore.converted}
+      bookedToday: ${input.registeredThreeDaysBefore.bookedToday},
+      demoCompletedToday: ${input.registeredThreeDaysBefore.demoCompletedToday},
+      converted: ${input.registeredThreeDaysBefore.converted},
+      phoneVerified: ${input.registeredThreeDaysBefore.phoneVerified},
+      bookedBySelf: ${input.registeredThreeDaysBefore.bookedBySelf},
+      bookedByAgent: ${input.registeredThreeDaysBefore.bookedByAgent}
     }
     totalBookedToday: ${input.totalBookedToday},
     totalDemoCompleteToday: ${input.totalDemoCompleteToday},
@@ -236,8 +265,8 @@ const updateSessionReport = (input, id) => `
 const generateSessionReport = async (numDaysToRunQuery) => {
   // setting current date (start and end times)
   let dayCount = 0;
-  let currentStartDate = new Date();
-  let currentEndDate = new Date();
+  const currentStartDate = new Date();
+  const currentEndDate = new Date();
   currentStartDate.setHours(0, 0, 0, 0);
   currentEndDate.setHours(23, 59, 59, 999);
 
@@ -245,91 +274,106 @@ const generateSessionReport = async (numDaysToRunQuery) => {
     // according to parameter 'numDaysToRunQuery', we add session report for that many days
     // SESSION_REPORT_DAYS gives till how many days back we have to include in our report (currently 4)
     let totalLoopDays = SESSION_REPORT_DAYS;
-    let todayStartDate = new Date();
-    let todayEndDate = new Date();
+    const todayStartDate = new Date();
+    const todayEndDate = new Date();
     todayStartDate.setDate(currentStartDate.getDate() - dayCount);
     todayEndDate.setDate(currentEndDate.getDate() - dayCount);
-    const country = 'india';
     todayStartDate.setHours(0, 0, 0, 0);
     todayEndDate.setHours(23, 59, 59, 999);
 
-    let forwardCount = 0;
-    const sessionReportsObj = {};
-    /*
-      Here we loop to populate single report for single day
-    */
-    while (totalLoopDays > 0) {
+    // for every country in array
+    /* eslint-disable no-restricted-syntax */
+    for (const country of COUNTRIES) {
+      let forwardCount = 0;
+      const sessionReportsObj = {};
+      /*
+        Here we loop to populate single report for single day
+      */
+      while (totalLoopDays > 0) {
+        const otherDayStartDate = new Date();
+        const otherDayEndDate = new Date();
+        otherDayStartDate.setDate(todayStartDate.getDate() - forwardCount);
+        otherDayEndDate.setDate(todayEndDate.getDate() - forwardCount);
+        otherDayStartDate.setHours(0, 0, 0, 0);
+        otherDayEndDate.setHours(23, 59, 59, 999);
+        // console.log(otherDayStartDate);
+        // console.log(otherDayEndDate);
+        const queryRes = await callLocalGraphqlApi(masterQuery(todayStartDate, todayEndDate, otherDayStartDate, otherDayEndDate, country));
+        const data = get(queryRes, 'data', {});
+        // console.log(data);
+        if (forwardCount === 0) {
+          // we are in today bucket
+          sessionReportsObj.registeredToday = {};
+          sessionReportsObj.registeredToday.registered = data.registeredUsers.count;
+          sessionReportsObj.registeredToday.bookedToday = data.bookedSessions.count;
+          sessionReportsObj.registeredToday.demoCompletedToday = data.completedSessions.count;
+          sessionReportsObj.registeredToday.converted = data.convertedUsersToday.count;
+          sessionReportsObj.registeredToday.phoneVerified = data.verifiedUsers.count;
+          sessionReportsObj.registeredToday.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
+          sessionReportsObj.registeredToday.bookedByAgent = data.bookedSessionsByAgent.count;
+        } else if (forwardCount === 1) {
+          sessionReportsObj.registeredOneDayBefore = {};
+          sessionReportsObj.registeredOneDayBefore.registered = data.registeredUsers.count;
+          sessionReportsObj.registeredOneDayBefore.bookedToday = data.bookedSessions.count;
+          sessionReportsObj.registeredOneDayBefore.demoCompletedToday = data.completedSessions.count;
+          sessionReportsObj.registeredOneDayBefore.converted = data.convertedUsersToday.count;
+          sessionReportsObj.registeredOneDayBefore.phoneVerified = data.verifiedUsers.count;
+          sessionReportsObj.registeredOneDayBefore.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
+          sessionReportsObj.registeredOneDayBefore.bookedByAgent = data.bookedSessionsByAgent.count;
+        } else if (forwardCount === 2) {
+          sessionReportsObj.registeredTwoDaysBefore = {};
+          sessionReportsObj.registeredTwoDaysBefore.registered = data.registeredUsers.count;
+          sessionReportsObj.registeredTwoDaysBefore.bookedToday = data.bookedSessions.count;
+          sessionReportsObj.registeredTwoDaysBefore.demoCompletedToday = data.completedSessions.count;
+          sessionReportsObj.registeredTwoDaysBefore.converted = data.convertedUsersToday.count;
+          sessionReportsObj.registeredTwoDaysBefore.phoneVerified = data.verifiedUsers.count;
+          sessionReportsObj.registeredTwoDaysBefore.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
+          sessionReportsObj.registeredTwoDaysBefore.bookedByAgent = data.bookedSessionsByAgent.count;
+        } else if (forwardCount === 3) {
+          sessionReportsObj.registeredThreeDaysBefore = {};
+          sessionReportsObj.registeredThreeDaysBefore.registered = data.registeredUsers.count;
+          sessionReportsObj.registeredThreeDaysBefore.bookedToday = data.bookedSessions.count;
+          sessionReportsObj.registeredThreeDaysBefore.demoCompletedToday = data.completedSessions.count;
+          sessionReportsObj.registeredThreeDaysBefore.converted = data.convertedUsersToday.count;
+          sessionReportsObj.registeredThreeDaysBefore.phoneVerified = data.verifiedUsers.count;
+          sessionReportsObj.registeredThreeDaysBefore.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
+          sessionReportsObj.registeredThreeDaysBefore.bookedByAgent = data.bookedSessionsByAgent.count;
+        }
 
-      let otherDayStartDate = new Date();
-      let otherDayEndDate = new Date();
-      otherDayStartDate.setDate(todayStartDate.getDate() - forwardCount);
-      otherDayEndDate.setDate(todayEndDate.getDate() - forwardCount);
-      otherDayStartDate.setHours(0, 0, 0, 0);
-      otherDayEndDate.setHours(23, 59, 59, 999);
-      // console.log(otherDayStartDate);
-      // console.log(otherDayEndDate);
-      const queryRes = await callLocalGraphqlApi(masterQuery(todayStartDate, todayEndDate, otherDayStartDate, otherDayEndDate, country));
-      const data = get(queryRes, 'data', {});
+        sessionReportsObj.totalBookedToday = data.totalBookedSessionsToday.count;
+        sessionReportsObj.totalDemoCompleteToday = data.totalCompletedSessionsToday.count;
+        sessionReportsObj.totalConvertedUsersToday = data.totalConvertedUsersToday.count;
+        sessionReportsObj.country = country;
+        sessionReportsObj.date = todayStartDate;
 
-      if (forwardCount == 0) {
-        // we are in today bucket
-        sessionReportsObj.registeredToday = {};
-        sessionReportsObj.registeredToday.registered = data.registeredUsers.count;
-        sessionReportsObj.registeredToday.bookedToday = data.bookedSessions.count;
-        sessionReportsObj.registeredToday.demoCompletedToday = data.completedSessions.count;
-        sessionReportsObj.registeredToday.converted = data.convertedUsersToday.count;
-      } else if (forwardCount == 1) {
-        sessionReportsObj.registeredOneDayBefore = {};
-        sessionReportsObj.registeredOneDayBefore.registered = data.registeredUsers.count;
-        sessionReportsObj.registeredOneDayBefore.bookedToday = data.bookedSessions.count;
-        sessionReportsObj.registeredOneDayBefore.demoCompletedToday = data.completedSessions.count;
-        sessionReportsObj.registeredOneDayBefore.converted = data.convertedUsersToday.count;
-      } else if (forwardCount == 2) {
-        sessionReportsObj.registeredTwoDaysBefore = {};
-        sessionReportsObj.registeredTwoDaysBefore.registered = data.registeredUsers.count;
-        sessionReportsObj.registeredTwoDaysBefore.bookedToday = data.bookedSessions.count;
-        sessionReportsObj.registeredTwoDaysBefore.demoCompletedToday = data.completedSessions.count;
-        sessionReportsObj.registeredTwoDaysBefore.converted = data.convertedUsersToday.count;
-      } else if (forwardCount == 3) {
-        sessionReportsObj.registeredThreeDaysBefore = {};
-        sessionReportsObj.registeredThreeDaysBefore.registered = data.registeredUsers.count;
-        sessionReportsObj.registeredThreeDaysBefore.bookedToday = data.bookedSessions.count;
-        sessionReportsObj.registeredThreeDaysBefore.demoCompletedToday = data.completedSessions.count;
-        sessionReportsObj.registeredThreeDaysBefore.converted = data.convertedUsersToday.count;
+        forwardCount += 1;
+        totalLoopDays -= 1;
       }
 
-      sessionReportsObj.totalBookedToday = data.totalBookedSessionsToday.count;
-      sessionReportsObj.totalDemoCompleteToday = data.totalCompletedSessionsToday.count;
-      sessionReportsObj.totalConvertedUsersToday = data.totalConvertedUsersToday.count;
-      sessionReportsObj.country = country;
-      sessionReportsObj.date = todayStartDate;
-
-      forwardCount += 1;
-      totalLoopDays -= 1;
-    }
-
-    // console.log(sessionReportsObj);
-    const sessionReportQueryRes = await callLocalGraphqlApi(sessionReportQuery(todayStartDate, country));
-    const sessionReportId = get(sessionReportQueryRes, 'data.sessionReports[0].id', '');
-    if (sessionReportId) {
-      // update exisiting session report
-      // console.log('have to update');
-      const updateSessionReportRes = await callLocalGraphqlApi(updateSessionReport(sessionReportsObj, sessionReportId));
-      const sessionReportUpdatedId = get(updateSessionReportRes, 'data.updateSessionReport.id', '');
-      if (sessionReportUpdatedId) {
-        console.log(`******* SessionReport updated for date : ${todayStartDate}`);
+      // console.log(sessionReportsObj);
+      const sessionReportQueryRes = await callLocalGraphqlApi(sessionReportQuery(todayStartDate, country));
+      const sessionReportId = get(sessionReportQueryRes, 'data.sessionReports[0].id', '');
+      if (sessionReportId) {
+        // update exisiting session report
+        const updateSessionReportRes = await callLocalGraphqlApi(updateSessionReport(sessionReportsObj, sessionReportId));
+        const sessionReportUpdatedId = get(updateSessionReportRes, 'data.updateSessionReport.id', '');
+        if (sessionReportUpdatedId) {
+          log(`******* SessionReport updated for date : ${todayStartDate} and country : ${country}`);
+        }
+      } else {
+        const addSessionReportRes = await callLocalGraphqlApi(addSessionReport(sessionReportsObj));
+        const sessionReportAddedId = get(addSessionReportRes, 'data.addSessionReport.id', '');
+        if (sessionReportAddedId) {
+          log(`******* SessionReport added for date : ${todayStartDate} and country : ${country}`);
+        }
       }
-    } else {
-      const addSessionReportRes = await callLocalGraphqlApi(addSessionReport(sessionReportsObj));
-      const sessionReportAddedId = get(addSessionReportRes, 'data.addSessionReport.id', '');
-      if (sessionReportAddedId) {
-        console.log(`******* SessionReport added for date : ${todayStartDate}`);
-      }
+      // resetting looping variable for next country report
+      totalLoopDays = SESSION_REPORT_DAYS;
     }
     dayCount += 1;
+    /* eslint-disable no-param-reassign */
     numDaysToRunQuery -= 1;
   }
-
-}
+};
 
 export default generateSessionReport;

@@ -3,15 +3,14 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateBatchInUserScript from '../scriptMethods/updateBatchInUserScript';
 // import updateCourseInTopics from '../scriptMethods/updateCourseInTopics';
 // import updateCourse from '../scriptMethods/updateCourse';
-
-import generateSessionReport from '../../../../../../utils/scheduleJobs/scheduleSessionReport';
+// import generateSessionReport from '../../../../../../utils/scheduleJobs/scheduleSessionReport';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
   /*
   Add script functions
    */
-  await generateSessionReport(3);
+  // await generateSessionReport(60);
   // await updateCourse();
   // await updateBatchInUserScript();
   // await moveVideoToACollection();

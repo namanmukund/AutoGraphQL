@@ -15,7 +15,7 @@ import {
   TRANSFORMATION_ADMIN,
   TRANSFORMATION_TEAM,
   ADMIN,
-  NOT_ADMIN
+  NOT_ADMIN,
 } from './roles';
 
 const userPermissionsDoc = {
@@ -135,8 +135,8 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [ADMIN],
-      read: [NOT_ADMIN]
-    }
+      read: [NOT_ADMIN],
+    },
   },
 };
 

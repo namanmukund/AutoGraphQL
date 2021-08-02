@@ -30,6 +30,7 @@ const createScheduler = (schedulerName) => {
       });
       break;
     case 'sessionReport':
+      rule.tz = 'Asia/Kolkata';
       rule.hour = 1;
       rule.minute = 0;
       rule.second = 0;
