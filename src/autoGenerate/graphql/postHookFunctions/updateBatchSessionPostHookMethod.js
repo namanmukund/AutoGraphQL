@@ -159,148 +159,146 @@ const updateBatchSession = (batchSessionId, mentorSessionId) => `
 const updateBatchSessionPostHookMethod = async (input, params, mutationName, context) => {
   const { sessionStatus: sessionStatusFromInput, ...slots } = input;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-  if (!get(context, 'isAttendanceMigration', false)) {
-    const mentorSessionId = get(input, 'mentorSession.typeId');
-    const {
-      batchSessionId,
-      inputSlotTimeArray,
-      slotTimeArray,
-      topicId,
-      batchId,
-      bookingDate,
-      mentorSessionConnectId,
-      bookingDateFromInput,
-      allottedMentorId,
-      currentUser,
-      prevSessionStatus,
-    } = context;
-    let courseId = get(context, 'courseId');
-    /*
+  const mentorSessionId = get(input, 'mentorSession.typeId');
+  const {
+    batchSessionId,
+    inputSlotTimeArray,
+    slotTimeArray,
+    topicId,
+    batchId,
+    bookingDate,
+    mentorSessionConnectId,
+    bookingDateFromInput,
+    allottedMentorId,
+    currentUser,
+    prevSessionStatus,
+  } = context;
+  let courseId = get(context, 'courseId');
+  /*
   get Course Id
   */
-    if (!courseId) {
-      const courseResult = await callLocalGraphqlApi(getCourseQuery());
-      const course = get(courseResult, 'data.courses');
-      if (course.length <= 0) {
-        throw new DatabaseRecordNotFoundError({
-          data: {
-            error: 'Published course is not present with title as python from component addBatchPostHookMethod',
-          },
-        });
-      }
-      courseId = course[0].id;
+  if (!courseId) {
+    const courseResult = await callLocalGraphqlApi(getCourseQuery());
+    const course = get(courseResult, 'data.courses');
+    if (course.length <= 0) {
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'Published course is not present with title as python from component addBatchPostHookMethod',
+        },
+      });
     }
-
-    // if mentorSessionConnectId is not present in batch session, then we need t create mentor session on basis of
-    // allotted mentor in batch
-    if (!mentorSessionId && allottedMentorId) {
-      let finalMentorSessionId = '';
-      const { bookingDate: sessionsBookingDateInDB, ...slotsInDB } = input;
-      const slotTimeInDBArray = getSelectedSlotsTime(slotsInDB);
-      const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(sessionsBookingDateInDB, allottedMentorId));
-      const mentorSession = get(mentorSessionsRes, 'data.mentorSessions[0]');
-      if (mentorSession && mentorSession.id) {
-        const { id: mentorSessionIdOfAllottedMentor, ...slotsInMentorSession } = mentorSession;
-        finalMentorSessionId = mentorSessionIdOfAllottedMentor;
-        const slotsInMentorSessionArray = getSelectedSlotsTime(slotsInMentorSession);
-        if (slotTimeInDBArray && slotTimeInDBArray.length && slotsInMentorSessionArray && slotsInMentorSessionArray.length && slotTimeInDBArray[0] !== slotsInMentorSessionArray[0]) {
-          await callLocalGraphqlApi(updateMentorSession(mentorSessionIdOfAllottedMentor, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`));
-        }
-      } else {
-        const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`));
-        finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
-      }
-      await callLocalGraphqlApi(updateBatchSession(batchSessionId, finalMentorSessionId));
-    }
-
-    if (topicId) {
-      /*
-        get batch info
-      */
-      const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
-      const batchInfo = get(batchResult, 'data.batch');
-      const students = batchInfo && batchInfo.students;
-      const currentComponent = batchInfo && batchInfo.currentComponent;
-      const code = batchInfo && batchInfo.code;
-      const batchCurrentComponentId = currentComponent && currentComponent.id;
-      const currentComponentTopicId = get(currentComponent, 'currentTopic.id');
-      // logic to change current component status if topic is completed
-      if (batchCurrentComponentId && sessionStatusFromInput && topicId === currentComponentTopicId) {
-        if (sessionStatusFromInput === sessionStatus.completed) {
-          /*
-          We are getting published topics list through this query.
-          Then we will get next published topic
-          */
-
-          const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
-          const topicsList = get(nextTopicQueryRes, 'data.topics');
-
-          let currentTopicIndex;
-          topicsList.forEach((topic, index) => {
-            if (topic.id === topicId) {
-              currentTopicIndex = index;
-            }
-          });
-          let nextTopicId = '';
-          if (currentTopicIndex + 1 < topicsList.length) {
-            nextTopicId = topicsList[currentTopicIndex + 1].id;
-          }
-          await updateBatchCurrentComponentStatus(
-            batchCurrentComponentId,
-            sessionStatus.allotted,
-            nextTopicId,
-          );
-          const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
-          addToSchedule('postCarnivalMail', postCarnivalFeedbackDate, { batchSessionId });
-        } else {
-          await updateBatchCurrentComponentStatus(
-            batchCurrentComponentId,
-            sessionStatusFromInput,
-          );
-        }
-      }
-
-      // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
-      // this should only happen if we are changing sessionStatus or bookingDateFromInput
-      if ((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput) {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const student of students) {
-          if (student.user && student.user.id) {
-            addMentorMenteeSessionForBatch(
-              student.user.id,
-              '',
-              topicId,
-              bookingDateFromInput || bookingDate,
-              slotTimeArray[0],
-              mentorSessionId,
-              courseId,
-              sessionStatusFromInput || sessionStatus.allotted,
-              student.user.source,
-              'updateBatchSession',
-            );
-          }
-        }
-      }
-
-      // adding session logs when booking date or time is changed
-      if (inputSlotTimeArray && inputSlotTimeArray.length && slotTimeArray && slotTimeArray.length) {
-        const fromDate = new Date(bookingDate).toISOString();
-        const toDate = bookingDateFromInput ? new Date(bookingDateFromInput).toISOString() : new Date(bookingDate).toISOString();
-        const fromSlot = `slot${slotTimeArray[0]}`;
-        const toSlot = `slot${inputSlotTimeArray[0]}`;
-        // adding only in case the slots or date passed in input is different from that is already there in db
-        if ((fromDate !== toDate) || (fromSlot !== toSlot)) {
-          addSessionLog(bookingDateFromInput || bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
-        }
-      }
-      // adding logs also when mentorSession is changed or status is changed
-      if (prevSessionStatus !== sessionStatusFromInput || (mentorSessionConnectId && (mentorSessionId !== mentorSessionConnectId))) {
-        addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
-      }
-    }
-    const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
-    extractBatchSessionAndSendB2BC(batchSessionId, students, context.appName === TBA);
+    courseId = course[0].id;
   }
+
+  // if mentorSessionConnectId is not present in batch session, then we need t create mentor session on basis of
+  // allotted mentor in batch
+  if (!mentorSessionId && allottedMentorId) {
+    let finalMentorSessionId = '';
+    const { bookingDate: sessionsBookingDateInDB, ...slotsInDB } = input;
+    const slotTimeInDBArray = getSelectedSlotsTime(slotsInDB);
+    const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(sessionsBookingDateInDB, allottedMentorId));
+    const mentorSession = get(mentorSessionsRes, 'data.mentorSessions[0]');
+    if (mentorSession && mentorSession.id) {
+      const { id: mentorSessionIdOfAllottedMentor, ...slotsInMentorSession } = mentorSession;
+      finalMentorSessionId = mentorSessionIdOfAllottedMentor;
+      const slotsInMentorSessionArray = getSelectedSlotsTime(slotsInMentorSession);
+      if (slotTimeInDBArray && slotTimeInDBArray.length && slotsInMentorSessionArray && slotsInMentorSessionArray.length && slotTimeInDBArray[0] !== slotsInMentorSessionArray[0]) {
+        await callLocalGraphqlApi(updateMentorSession(mentorSessionIdOfAllottedMentor, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`));
+      }
+    } else {
+      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`));
+      finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
+    }
+    await callLocalGraphqlApi(updateBatchSession(batchSessionId, finalMentorSessionId));
+  }
+
+  if (topicId) {
+    /*
+      get batch info
+    */
+    const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
+    const batchInfo = get(batchResult, 'data.batch');
+    const students = batchInfo && batchInfo.students;
+    const currentComponent = batchInfo && batchInfo.currentComponent;
+    const code = batchInfo && batchInfo.code;
+    const batchCurrentComponentId = currentComponent && currentComponent.id;
+    const currentComponentTopicId = get(currentComponent, 'currentTopic.id');
+    // logic to change current component status if topic is completed
+    if (batchCurrentComponentId && sessionStatusFromInput && topicId === currentComponentTopicId) {
+      if (sessionStatusFromInput === sessionStatus.completed) {
+        /*
+        We are getting published topics list through this query.
+        Then we will get next published topic
+        */
+
+        const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
+        const topicsList = get(nextTopicQueryRes, 'data.topics');
+
+        let currentTopicIndex;
+        topicsList.forEach((topic, index) => {
+          if (topic.id === topicId) {
+            currentTopicIndex = index;
+          }
+        });
+        let nextTopicId = '';
+        if (currentTopicIndex + 1 < topicsList.length) {
+          nextTopicId = topicsList[currentTopicIndex + 1].id;
+        }
+        await updateBatchCurrentComponentStatus(
+          batchCurrentComponentId,
+          sessionStatus.allotted,
+          nextTopicId,
+        );
+        const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
+        addToSchedule('postCarnivalMail', postCarnivalFeedbackDate, { batchSessionId });
+      } else {
+        await updateBatchCurrentComponentStatus(
+          batchCurrentComponentId,
+          sessionStatusFromInput,
+        );
+      }
+    }
+
+    // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
+    // this should only happen if we are changing sessionStatus or bookingDateFromInput
+    if ((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput) {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const student of students) {
+        if (student.user && student.user.id) {
+          addMentorMenteeSessionForBatch(
+            student.user.id,
+            '',
+            topicId,
+            bookingDateFromInput || bookingDate,
+            slotTimeArray[0],
+            mentorSessionId,
+            courseId,
+            sessionStatusFromInput || sessionStatus.allotted,
+            student.user.source,
+            'updateBatchSession',
+          );
+        }
+      }
+    }
+
+    // adding session logs when booking date or time is changed
+    if (inputSlotTimeArray && inputSlotTimeArray.length && slotTimeArray && slotTimeArray.length) {
+      const fromDate = new Date(bookingDate).toISOString();
+      const toDate = bookingDateFromInput ? new Date(bookingDateFromInput).toISOString() : new Date(bookingDate).toISOString();
+      const fromSlot = `slot${slotTimeArray[0]}`;
+      const toSlot = `slot${inputSlotTimeArray[0]}`;
+      // adding only in case the slots or date passed in input is different from that is already there in db
+      if ((fromDate !== toDate) || (fromSlot !== toSlot)) {
+        addSessionLog(bookingDateFromInput || bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
+      }
+    }
+    // adding logs also when mentorSession is changed or status is changed
+    if (prevSessionStatus !== sessionStatusFromInput || (mentorSessionConnectId && (mentorSessionId !== mentorSessionConnectId))) {
+      addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
+    }
+  }
+  const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
+  extractBatchSessionAndSendB2BC(batchSessionId, students, context.appName === TBA);
 };
 
 export default updateBatchSessionPostHookMethod;

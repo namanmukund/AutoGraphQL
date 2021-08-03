@@ -36,7 +36,7 @@ const updateBatchSession = async (id, isPresent, status) => {
         }
     }
   `;
-  const res = await callLocalGraphqlApi(query, { attendanceMigration: true });
+  const res = await callLocalGraphqlApi(query);
   return get(res, 'data.updateBatchSession.id');
 };
 
