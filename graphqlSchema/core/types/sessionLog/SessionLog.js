@@ -1,6 +1,5 @@
 import { TBA, TMS } from '../../../../constants';
 import getSlotTimeFields from '../../functions/getSlotTimeFields';
-import { READ } from '../../../../constants/graphqlOperations';
 
 const slotTimeFields = getSlotTimeFields('Boolean', false);
 
