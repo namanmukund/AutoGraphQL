@@ -159,7 +159,6 @@ const updateBatchSession = (batchSessionId, mentorSessionId) => `
 const updateBatchSessionPostHookMethod = async (input, params, mutationName, context) => {
   const { sessionStatus: sessionStatusFromInput, ...slots } = input;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-
   const mentorSessionId = get(input, 'mentorSession.typeId');
   const {
     batchSessionId,
@@ -176,8 +175,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   } = context;
   let courseId = get(context, 'courseId');
   /*
-get Course Id
-*/
+  get Course Id
+  */
   if (!courseId) {
     const courseResult = await callLocalGraphqlApi(getCourseQuery());
     const course = get(courseResult, 'data.courses');

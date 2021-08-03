@@ -1,6 +1,5 @@
 import { TBA, TMS } from '../../../../constants';
 import getSlotTimeFields from '../../functions/getSlotTimeFields';
-import { READ } from '../../../../constants/graphqlOperations';
 
 const slotTimeFields = getSlotTimeFields('Boolean', false);
 
@@ -40,7 +39,7 @@ const SessionLog = `
   @appPermissions(
     permissions:[
       { appName: "${TBA}" operations: "*" },
-      { appName: "${TMS}" operations: ${READ} }
+      { appName: "${TMS}" operations: "*" }
       ],
     rule: allow
   )

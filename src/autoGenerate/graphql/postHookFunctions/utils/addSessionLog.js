@@ -27,7 +27,7 @@ const addSessionLogQuery = (bookingDate, slot, clientId, topicId, actionByUserId
           ${updateMentorMenteeSessionInput.sessionCommentByMentor ? `sessionCommentByMentor: """${updateMentorMenteeSessionInput.sessionCommentByMentor}"""` : ''}
           ${updateMentorMenteeSessionInput.otherLanguageBarrier ? `otherLanguageBarrier: "${updateMentorMenteeSessionInput.otherLanguageBarrier}"` : ''}
           ${updateMentorMenteeSessionInput.otherTechnicalReason ? `otherTechnicalReason: """${updateMentorMenteeSessionInput.otherTechnicalReason}"""` : ''}
-          ${updateMentorMenteeSessionInput.languageBarrier ? `languageBarrier: "${updateMentorMenteeSessionInput.languageBarrier}"` : ''}
+          ${updateMentorMenteeSessionInput.languageBarrier ? `languageBarrier: ${updateMentorMenteeSessionInput.languageBarrier}` : ''}
           ${updateMentorMenteeSessionInput.source ? `source: ${updateMentorMenteeSessionInput.source}` : ''}
           ${updateMentorMenteeSessionInput.country ? `country: ${updateMentorMenteeSessionInput.country}` : ''}
           ${updateMentorMenteeSessionInput.leadStatus ? `leadStatus: ${updateMentorMenteeSessionInput.leadStatus}` : ''}

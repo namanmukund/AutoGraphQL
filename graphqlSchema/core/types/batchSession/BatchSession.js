@@ -6,6 +6,7 @@ const batchAttendanceType = `
   type BatchAttendanceType {
    student: StudentProfile! @relation(name:"BatchSessionStudentProfile", direction: "OneWay")
    isPresent: Boolean
+   status: AttendanceStatus @defaultValue(value: "notAssigned")
    absentReason: String
  }`;
 
