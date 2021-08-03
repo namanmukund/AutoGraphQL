@@ -83,6 +83,7 @@ import SessionLogAction from './SessionLogAction';
 import UserPersonality from './UserPersonality';
 import WeakSlowAverageFast from './WeakSlowAverageFast';
 import Languages from './Languages';
+import AttendanceStatus from './AttendanceStatus';
 
 export default [
   Status,
@@ -171,4 +172,5 @@ export default [
   UserPersonality,
   WeakSlowAverageFast,
   Languages,
+  AttendanceStatus,
 ];

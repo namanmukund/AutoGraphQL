@@ -1072,7 +1072,7 @@ const menteeCourseSyllabusMutationResolver = async (
           thumbnailSmall: topicThumbnailSmall,
           isTrial,
         } = topic;
-
+        /* eslint-disable no-use-before-define */
         const isAccessible = isTopicAccessible(combinedEnrollmentType, isTrial);
         // checking logic for topics which are yet not booked by mentee
         if (
@@ -1094,6 +1094,11 @@ const menteeCourseSyllabusMutationResolver = async (
         }
       });
     });
+  }
+  let combinedEnrollmentType = enrollmentType;
+  if (schoolInfo) {
+    const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
+    combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
   }
   if (combinedEnrollmentType === enrollmentTypes.pro) {
     isPaid = true;
