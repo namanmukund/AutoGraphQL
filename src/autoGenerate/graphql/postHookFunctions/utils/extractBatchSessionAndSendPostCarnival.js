@@ -25,6 +25,7 @@ const BATCH_SESSION = (batchSessionId) => `{
     }
     attendance {
       isPresent
+      status
       student {
         id
         user {
@@ -60,7 +61,7 @@ const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob,
   const salesExec = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.salesExecutive.user.name', '');
   const salesExecEmail = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.salesExecutive.user.email', '');
   attendances.forEach(async (attendance) => {
-    const isPresent = get(attendance, 'isPresent', false);
+    const attendanceStatus = get(attendance, 'status', 'notAssigned');
     const student = get(attendance, 'student', {});
     const studentName = get(student, 'user.name');
     const parentName = get(student, 'parents[0].user.name');
@@ -69,7 +70,7 @@ const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob,
     const countryCode = get(student, 'parents[0].user.phone.countryCode', '').replace('+', '');
     let leadSquaredInput = {};
     let activityInput = {};
-    if (isPresent) {
+    if (attendanceStatus === 'present') {
       if (!ls) {
         sendTransactionalEmail({
           studentName,

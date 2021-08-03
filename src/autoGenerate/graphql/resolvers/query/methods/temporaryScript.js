@@ -3,6 +3,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateBatchInUserScript from '../scriptMethods/updateBatchInUserScript';
 // import updateCourseInTopics from '../scriptMethods/updateCourseInTopics';
 // import updateCourse from '../scriptMethods/updateCourse';
+// import migrateBatchAttendanceToEnum from '../scriptMethods/migrateBatchAttendanceToEnum';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -30,6 +31,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateMMSandBatchSessionInMentorSession();
   // await updateCodeInCampaign();
   // await updateCodeInSchool();
+  // await migrateBatchAttendanceToEnum();
   return {
     result: true,
   };

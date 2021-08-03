@@ -131,6 +131,7 @@ const fetchAllottedBatchSessions = async (batchId) => {
                   }
                 }
                 isPresent
+                status
                 absentReason
               }
             }
@@ -158,6 +159,7 @@ const updateAttendanceArray = async (batchSession, newArrString) => {
                         }
                       }
                       isPresent
+                      status
                       absentReason
                     }
                   }
@@ -179,6 +181,7 @@ const removeStudentFromBatchSessionAttendance = async (batchSession, studentProf
       const objString = `{
         studentConnectId: "${item.student.id}",
         isPresent: ${item.isPresent},
+        status: ${item.status},
         absentReason: ${item.absentReason},
       },
       `;
