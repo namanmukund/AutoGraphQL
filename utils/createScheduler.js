@@ -1,6 +1,7 @@
 import * as schedule from 'node-schedule';
 import scheduleTrialSessionReminder from './scheduleJobs/scheduleTrialSessionReminder';
 import scheduleMentorReport from './scheduleJobs/scheduleMentorReport';
+import scheduleSessionReport from './scheduleJobs/scheduleSessionReport';
 
 // create scheduler for different functionalities
 const createScheduler = (schedulerName) => {
@@ -26,6 +27,19 @@ const createScheduler = (schedulerName) => {
         // eslint-disable-next-line no-console
         console.log('scheduler started for: ', schedulerName);
         await scheduleMentorReport();
+      });
+      break;
+    case 'sessionReport':
+      rule.tz = 'Asia/Kolkata';
+      rule.hour = 1;
+      rule.minute = 0;
+      rule.second = 0;
+      rule.dayOfWeek = new schedule.Range(0, 6);
+      // eslint-disable-next-line no-unused-vars
+      schedule.scheduleJob(rule, async () => {
+        // eslint-disable-next-line no-console
+        console.log('scheduler started for: ', schedulerName);
+        await scheduleSessionReport(1);
       });
       break;
     default:

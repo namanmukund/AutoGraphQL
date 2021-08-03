@@ -381,6 +381,26 @@ export const testMailingList = {
 
 export const DEFAULT_LS_OM_USER_ID = 'b29041e3-5645-11eb-9166-0a68392cb7c4';
 
+export const SESSION_REPORT_DAYS = 4;
+
+export const COUNTRIES = [
+  'india',
+  'usa',
+  'uk',
+  'canada',
+  'jamaica',
+  'australia',
+  'singapore',
+  'bangladesh',
+  'qatar',
+  'uae',
+  'oman',
+  'kuwait',
+  'egypt',
+  'afghanistan',
+  'russia',
+];
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
