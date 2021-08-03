@@ -24,8 +24,8 @@ const transactionalMessageBody = {
   sendSessionLink: {
     emailTemplate: 'B2CSessionLink',
     emailTemplateInternational: 'B2CSessionLink',
-    subject: (studentName) => `${studentName}'s coding journey begins today. Are you excited?`,
-    subjectInternational: (studentName) => `${studentName}'s coding journey begins today. Are you excited?`,
+    subject: (studentName) => `${studentName}'s coding journey begins soon. Are you excited?`,
+    subjectInternational: (studentName) => `${studentName}'s coding journey begins soon. Are you excited?`,
     whatsAppTemplate: 'demo_reminder_1',
     whatsAppTemplateInternational: 'demo_reminder_1',
   },
