@@ -137,7 +137,7 @@ const masterQuery = (todayStartDate,
   }){
     count
   }
-  totalConvertedUsersToday: salesOperationsMeta(filter:{
+  totalConvertedUsers: salesOperationsMeta(filter:{
     and:[
       {leadStatus:won}
       {source_not:school}
@@ -169,19 +169,19 @@ const addSessionReport = (input) => `
   addSessionReport(input: {
     date: "${input.date}",
     country: ${input.country},
-    registeredToday: {
-      registered: ${input.registeredToday.registered},
-      bookedToday: ${input.registeredToday.bookedToday},
-      demoCompletedToday: ${input.registeredToday.demoCompletedToday},
-      converted: ${input.registeredToday.converted},
-      phoneVerified: ${input.registeredToday.phoneVerified},
-      bookedBySelf: ${input.registeredToday.bookedBySelf},
-      bookedByAgent: ${input.registeredToday.bookedByAgent}
+    registeredSameDay: {
+      registered: ${input.registeredSameDay.registered},
+      booked: ${input.registeredSameDay.booked},
+      demoCompleted: ${input.registeredSameDay.demoCompleted},
+      converted: ${input.registeredSameDay.converted},
+      phoneVerified: ${input.registeredSameDay.phoneVerified},
+      bookedBySelf: ${input.registeredSameDay.bookedBySelf},
+      bookedByAgent: ${input.registeredSameDay.bookedByAgent}
     }
     registeredOneDayBefore: {
       registered: ${input.registeredOneDayBefore.registered},
-      bookedToday: ${input.registeredOneDayBefore.bookedToday},
-      demoCompletedToday: ${input.registeredOneDayBefore.demoCompletedToday},
+      booked: ${input.registeredOneDayBefore.booked},
+      demoCompleted: ${input.registeredOneDayBefore.demoCompleted},
       converted: ${input.registeredOneDayBefore.converted},
       phoneVerified: ${input.registeredOneDayBefore.phoneVerified},
       bookedBySelf: ${input.registeredOneDayBefore.bookedBySelf},
@@ -189,8 +189,8 @@ const addSessionReport = (input) => `
     }
     registeredTwoDaysBefore: {
       registered: ${input.registeredTwoDaysBefore.registered},
-      bookedToday: ${input.registeredTwoDaysBefore.bookedToday},
-      demoCompletedToday: ${input.registeredTwoDaysBefore.demoCompletedToday},
+      booked: ${input.registeredTwoDaysBefore.booked},
+      demoCompleted: ${input.registeredTwoDaysBefore.demoCompleted},
       converted: ${input.registeredTwoDaysBefore.converted},
       phoneVerified: ${input.registeredTwoDaysBefore.phoneVerified},
       bookedBySelf: ${input.registeredTwoDaysBefore.bookedBySelf},
@@ -198,16 +198,16 @@ const addSessionReport = (input) => `
     }
     registeredThreeDaysBefore: {
       registered: ${input.registeredThreeDaysBefore.registered},
-      bookedToday: ${input.registeredThreeDaysBefore.bookedToday},
-      demoCompletedToday: ${input.registeredThreeDaysBefore.demoCompletedToday},
+      booked: ${input.registeredThreeDaysBefore.booked},
+      demoCompleted: ${input.registeredThreeDaysBefore.demoCompleted},
       converted: ${input.registeredThreeDaysBefore.converted},
       phoneVerified: ${input.registeredThreeDaysBefore.phoneVerified},
       bookedBySelf: ${input.registeredThreeDaysBefore.bookedBySelf},
       bookedByAgent: ${input.registeredThreeDaysBefore.bookedByAgent}
     }
-    totalBookedToday: ${input.totalBookedToday},
-    totalDemoCompleteToday: ${input.totalDemoCompleteToday},
-    totalConvertedUsersToday: ${input.totalConvertedUsersToday}
+    totalBooked: ${input.totalBooked},
+    totalDemoCompleted: ${input.totalDemoCompleted},
+    totalConvertedUsers: ${input.totalConvertedUsers}
   }){
     id
   }
@@ -217,19 +217,19 @@ const addSessionReport = (input) => `
 const updateSessionReport = (input, id) => `
 mutation{
   updateSessionReport(id: "${id}", input: {
-    registeredToday: {
-      registered: ${input.registeredToday.registered},
-      bookedToday: ${input.registeredToday.bookedToday},
-      demoCompletedToday: ${input.registeredToday.demoCompletedToday},
-      converted: ${input.registeredToday.converted},
-      phoneVerified: ${input.registeredToday.phoneVerified},
-      bookedBySelf: ${input.registeredToday.bookedBySelf},
-      bookedByAgent: ${input.registeredToday.bookedByAgent}
+    registeredSameDay: {
+      registered: ${input.registeredSameDay.registered},
+      booked: ${input.registeredSameDay.booked},
+      demoCompleted: ${input.registeredSameDay.demoCompleted},
+      converted: ${input.registeredSameDay.converted},
+      phoneVerified: ${input.registeredSameDay.phoneVerified},
+      bookedBySelf: ${input.registeredSameDay.bookedBySelf},
+      bookedByAgent: ${input.registeredSameDay.bookedByAgent}
     }
     registeredOneDayBefore: {
       registered: ${input.registeredOneDayBefore.registered},
-      bookedToday: ${input.registeredOneDayBefore.bookedToday},
-      demoCompletedToday: ${input.registeredOneDayBefore.demoCompletedToday},
+      booked: ${input.registeredOneDayBefore.booked},
+      demoCompleted: ${input.registeredOneDayBefore.demoCompleted},
       converted: ${input.registeredOneDayBefore.converted},
       phoneVerified: ${input.registeredOneDayBefore.phoneVerified},
       bookedBySelf: ${input.registeredOneDayBefore.bookedBySelf},
@@ -237,8 +237,8 @@ mutation{
     }
     registeredTwoDaysBefore: {
       registered: ${input.registeredTwoDaysBefore.registered},
-      bookedToday: ${input.registeredTwoDaysBefore.bookedToday},
-      demoCompletedToday: ${input.registeredTwoDaysBefore.demoCompletedToday},
+      booked: ${input.registeredTwoDaysBefore.booked},
+      demoCompleted: ${input.registeredTwoDaysBefore.demoCompleted},
       converted: ${input.registeredTwoDaysBefore.converted},
       phoneVerified: ${input.registeredTwoDaysBefore.phoneVerified},
       bookedBySelf: ${input.registeredTwoDaysBefore.bookedBySelf},
@@ -246,16 +246,16 @@ mutation{
     }
     registeredThreeDaysBefore: {
       registered: ${input.registeredThreeDaysBefore.registered},
-      bookedToday: ${input.registeredThreeDaysBefore.bookedToday},
-      demoCompletedToday: ${input.registeredThreeDaysBefore.demoCompletedToday},
+      booked: ${input.registeredThreeDaysBefore.booked},
+      demoCompleted: ${input.registeredThreeDaysBefore.demoCompleted},
       converted: ${input.registeredThreeDaysBefore.converted},
       phoneVerified: ${input.registeredThreeDaysBefore.phoneVerified},
       bookedBySelf: ${input.registeredThreeDaysBefore.bookedBySelf},
       bookedByAgent: ${input.registeredThreeDaysBefore.bookedByAgent}
     }
-    totalBookedToday: ${input.totalBookedToday},
-    totalDemoCompleteToday: ${input.totalDemoCompleteToday},
-    totalConvertedUsersToday: ${input.totalConvertedUsersToday}
+    totalBooked: ${input.totalBooked},
+    totalDemoCompleted: ${input.totalDemoCompleted},
+    totalConvertedUsers: ${input.totalConvertedUsers}
   }){
     id
   }
@@ -303,19 +303,19 @@ const generateSessionReport = async (numDaysToRunQuery) => {
         // console.log(data);
         if (forwardCount === 0) {
           // we are in today bucket
-          sessionReportsObj.registeredToday = {};
-          sessionReportsObj.registeredToday.registered = data.registeredUsers.count;
-          sessionReportsObj.registeredToday.bookedToday = data.bookedSessions.count;
-          sessionReportsObj.registeredToday.demoCompletedToday = data.completedSessions.count;
-          sessionReportsObj.registeredToday.converted = data.convertedUsersToday.count;
-          sessionReportsObj.registeredToday.phoneVerified = data.verifiedUsers.count;
-          sessionReportsObj.registeredToday.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
-          sessionReportsObj.registeredToday.bookedByAgent = data.bookedSessionsByAgent.count;
+          sessionReportsObj.registeredSameDay = {};
+          sessionReportsObj.registeredSameDay.registered = data.registeredUsers.count;
+          sessionReportsObj.registeredSameDay.booked = data.bookedSessions.count;
+          sessionReportsObj.registeredSameDay.demoCompleted = data.completedSessions.count;
+          sessionReportsObj.registeredSameDay.converted = data.convertedUsersToday.count;
+          sessionReportsObj.registeredSameDay.phoneVerified = data.verifiedUsers.count;
+          sessionReportsObj.registeredSameDay.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
+          sessionReportsObj.registeredSameDay.bookedByAgent = data.bookedSessionsByAgent.count;
         } else if (forwardCount === 1) {
           sessionReportsObj.registeredOneDayBefore = {};
           sessionReportsObj.registeredOneDayBefore.registered = data.registeredUsers.count;
-          sessionReportsObj.registeredOneDayBefore.bookedToday = data.bookedSessions.count;
-          sessionReportsObj.registeredOneDayBefore.demoCompletedToday = data.completedSessions.count;
+          sessionReportsObj.registeredOneDayBefore.booked = data.bookedSessions.count;
+          sessionReportsObj.registeredOneDayBefore.demoCompleted = data.completedSessions.count;
           sessionReportsObj.registeredOneDayBefore.converted = data.convertedUsersToday.count;
           sessionReportsObj.registeredOneDayBefore.phoneVerified = data.verifiedUsers.count;
           sessionReportsObj.registeredOneDayBefore.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
@@ -323,8 +323,8 @@ const generateSessionReport = async (numDaysToRunQuery) => {
         } else if (forwardCount === 2) {
           sessionReportsObj.registeredTwoDaysBefore = {};
           sessionReportsObj.registeredTwoDaysBefore.registered = data.registeredUsers.count;
-          sessionReportsObj.registeredTwoDaysBefore.bookedToday = data.bookedSessions.count;
-          sessionReportsObj.registeredTwoDaysBefore.demoCompletedToday = data.completedSessions.count;
+          sessionReportsObj.registeredTwoDaysBefore.booked = data.bookedSessions.count;
+          sessionReportsObj.registeredTwoDaysBefore.demoCompleted = data.completedSessions.count;
           sessionReportsObj.registeredTwoDaysBefore.converted = data.convertedUsersToday.count;
           sessionReportsObj.registeredTwoDaysBefore.phoneVerified = data.verifiedUsers.count;
           sessionReportsObj.registeredTwoDaysBefore.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
@@ -332,17 +332,17 @@ const generateSessionReport = async (numDaysToRunQuery) => {
         } else if (forwardCount === 3) {
           sessionReportsObj.registeredThreeDaysBefore = {};
           sessionReportsObj.registeredThreeDaysBefore.registered = data.registeredUsers.count;
-          sessionReportsObj.registeredThreeDaysBefore.bookedToday = data.bookedSessions.count;
-          sessionReportsObj.registeredThreeDaysBefore.demoCompletedToday = data.completedSessions.count;
+          sessionReportsObj.registeredThreeDaysBefore.booked = data.bookedSessions.count;
+          sessionReportsObj.registeredThreeDaysBefore.demoCompleted = data.completedSessions.count;
           sessionReportsObj.registeredThreeDaysBefore.converted = data.convertedUsersToday.count;
           sessionReportsObj.registeredThreeDaysBefore.phoneVerified = data.verifiedUsers.count;
           sessionReportsObj.registeredThreeDaysBefore.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
           sessionReportsObj.registeredThreeDaysBefore.bookedByAgent = data.bookedSessionsByAgent.count;
         }
 
-        sessionReportsObj.totalBookedToday = data.totalBookedSessionsToday.count;
-        sessionReportsObj.totalDemoCompleteToday = data.totalCompletedSessionsToday.count;
-        sessionReportsObj.totalConvertedUsersToday = data.totalConvertedUsersToday.count;
+        sessionReportsObj.totalBooked = data.totalBookedSessionsToday.count;
+        sessionReportsObj.totalDemoCompleted = data.totalCompletedSessionsToday.count;
+        sessionReportsObj.totalConvertedUsers = data.totalConvertedUsers.count;
         sessionReportsObj.country = country;
         sessionReportsObj.date = todayStartDate;
 

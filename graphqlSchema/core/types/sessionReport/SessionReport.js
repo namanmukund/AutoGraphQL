@@ -5,8 +5,8 @@ import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPer
 const SessionBookedToday = `
   type SessionBookedToday {
     registered: Int
-    bookedToday: Int
-    demoCompletedToday: Int
+    booked: Int
+    demoCompleted: Int
     converted: Int
     phoneVerified: Int
     bookedBySelf: Int
@@ -25,13 +25,13 @@ const SessionReport = `
     rule: allow
   )
   {
-    registeredToday: SessionBookedToday
+    registeredSameDay: SessionBookedToday
     registeredOneDayBefore: SessionBookedToday
     registeredTwoDaysBefore: SessionBookedToday
     registeredThreeDaysBefore: SessionBookedToday
-    totalBookedToday: Int
-    totalDemoCompleteToday: Int
-    totalConvertedUsersToday: Int
+    totalBooked: Int
+    totalDemoCompleted: Int
+    totalConvertedUsers: Int
     country: Country @defaultValue(value: "india")
     date: Date
   }
