@@ -3,6 +3,23 @@ import getSlotTimeFields from '../../functions/getSlotTimeFields';
 
 const slotTimeFields = getSlotTimeFields('Boolean', false);
 
+const SessionLogSalesOperation = `
+  type SessionLogSalesOperation {
+    personality: UserPersonality
+    prodigyChild: Boolean
+    learningSpeed: WeakSlowAverageFast
+    studentEnglishSpeakingSkill: EnglishSpeakingSkill
+    parentEnglishSpeakingSkill: EnglishSpeakingSkill
+    parentCounsellingDone: Boolean
+    leadStatus: LeadStatus @groupBy @defaultValue(value: "unassigned")
+    isMentorReadyToTakeClass: Boolean
+    knowCoding: Boolean
+    lookingForAdvanceCourse: Boolean
+    ageNotAppropriate: Boolean
+    notInterestedInCoding: Boolean
+    payingPower: YesNoAverage
+  }`;
+
 const sendTransactionalMessageFields = `
     sendSessionLink: Boolean
     didNotPickTheCall: Boolean
@@ -84,7 +101,8 @@ const SessionLog = `
     source: UserOriginSource @defaultValue(value: "website")
     country: Country @defaultValue(value: "india")
     leadStatus: LeadStatus @groupBy
+    salesOperation: SessionLogSalesOperation
   }
 `;
 
-export default [SessionLog];
+export default [SessionLog, SessionLogSalesOperation];
