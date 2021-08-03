@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { auditQuestionType } from '../../../../../constants';
+import { auditQuestionType, questionTypes } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import {
   OrderAndAuditTypeExists,
@@ -46,7 +46,7 @@ const addAuditQuestionValidation = async (params, mutationOrQueryName, context) 
     }
   }
   // check if maxRating and ratingDisplay is passed if rating is passed
-  if (score && (!maxRating || !ratingDisplayType)) {
+  if (questionTypes === auditQuestionType.rating && (!maxRating || !ratingDisplayType)) {
     throw new MaxRatingAndDisplayTypeNotFound();
   }
 };
