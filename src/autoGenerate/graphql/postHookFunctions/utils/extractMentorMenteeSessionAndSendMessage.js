@@ -1,4 +1,5 @@
 import { get, startCase, toLower } from 'lodash';
+import moment from 'moment';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getFormatedDate from '../../../../../utils/getFormatedDate';
 import getSlotLabel from '../../../../../utils/getSlotLabel';
@@ -6,6 +7,7 @@ import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMess
 import getLongDate from '../../../../../utils/getLongDate';
 import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
 import updateLeadSquared from '../../../../../services/leadsquared/updateLeadSquared';
+import addToSchedule from '../../../../../utils/scheduleJobs/addToSchedule';
 
 const mentorInfoQuery = (mentorSessionId) => `
   query {
@@ -32,6 +34,7 @@ const extractMentorMenteeSessionAndSendMessage = async (
   mentorSessionId,
   user,
   topic,
+  mentorMenteeSessionId,
 ) => {
   if (get(user, 'data.user.studentProfile.batch.id')) return;
   const slotNumber = slotTimeStringArray[0].split('slot')[1];
@@ -72,7 +75,7 @@ const extractMentorMenteeSessionAndSendMessage = async (
   // send email
   if (process.env.NODE_ENV === 'production') {
     if (get(topic, 'data.topic.order') === 1) {
-      // send whatsapp emailTemplate message
+    // send whatsapp emailTemplate message
       const {
         name: mentorName, phoneNumber: mentorPhoneNumber, countryCode: mentorCountryCode,
       } = mentorObj;
@@ -114,6 +117,16 @@ const extractMentorMenteeSessionAndSendMessage = async (
         mentorName,
         parameters,
       );
+      // mentor_confirmation_b2c
+      const bookingDateTime = new Date(moment(bookingDate).toDate().setHours(slotNumber, 0, 0, 0)).toISOString();
+      const hoursLeftForSession = Math.abs(moment(bookingDateTime).diff(moment(), 'hours'));
+      let mentorSessionReminderDateTime = moment(bookingDateTime).subtract(30, 'minutes').toDate();
+      if (hoursLeftForSession >= 18) {
+        mentorSessionReminderDateTime = moment(bookingDateTime).subtract(3, 'hours').toDate();
+      }
+      addToSchedule('mentorSessionNotificationB2C', mentorSessionReminderDateTime, {
+        mentorMenteeSessionId,
+      });
     }
   }
 };
