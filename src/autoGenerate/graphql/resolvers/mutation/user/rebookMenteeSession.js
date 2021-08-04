@@ -1,6 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
+import { MutationController } from '../../../controllers';
 
 const updateMenteeSession = async (id, bookingDate, slot) => `
   mutation {
@@ -27,17 +26,14 @@ const rebookMenteeSessionMutationResolver = async (
   context,
 ) => {
   validateAuthentication(context);
-  const { id, input: { bookingDate, ...slots } } = params;
-  const selectedSlot = getSelectedSlotsTime(slots);
-  console.log(selectedSlot);
+  const { input } = params;
 
   context.parentComponent = 'rebookMenteeSession';
 
-  const updateMenteeSessionRes = await callLocalGraphqlApi(updateMenteeSession(id, bookingDate, selectedSlot[0]), context);
-  console.log(updateMenteeSessionRes);
-  return {
-    result: true,
-  };
+  const modelQuery = new MutationController('MenteeSession', { bypass: true });
+  const modelQueryRes = await modelQuery.updateDocument(input.menteeSessionId, { ...input });
+
+  return modelQueryRes;
 };
 
 export default rebookMenteeSessionMutationResolver;
