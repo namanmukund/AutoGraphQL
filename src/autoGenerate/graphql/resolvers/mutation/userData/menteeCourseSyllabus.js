@@ -743,9 +743,18 @@ const menteeCourseSyllabusMutationResolver = async (
 
   const {
     currentCourse,
-    enrollmentType,
   } = currentTopicComponentInfo;
 
+  let combinedEnrollmentType = get(currentTopicComponentInfo, 'enrollmentType', enrollmentTypes.free);
+
+  if (batchCurrentComponentInfo) {
+    const batchEnrollmentType = get(batchCurrentComponentInfo, 'enrollmentType', enrollmentTypes.free);
+    combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && batchEnrollmentType === enrollmentTypes.free) ? enrollmentTypes.free : enrollmentTypes.pro;
+  }
+  if (schoolInfo) {
+    const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
+    combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
+  }
   // this object will be returned in output
   const currentUserSyllabus = {};
   let totalChapters = 0;
@@ -763,13 +772,7 @@ const menteeCourseSyllabusMutationResolver = async (
     const {
       currentTopic,
       latestSessionStatus,
-      enrollmentType: batchEnrollmentType,
     } = batchCurrentComponentInfo;
-    let combinedEnrollmentType = (enrollmentType === enrollmentTypes.free && batchEnrollmentType === enrollmentTypes.free) ? enrollmentTypes.free : enrollmentTypes.pro;
-    if (schoolInfo) {
-      const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
-      combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
-    }
     lastTopicBookedOrder = currentTopic && currentTopic.order;
     const lastTopicSessionStatus = latestSessionStatus;
     totalChapters += chapters.length;
@@ -1000,13 +1003,6 @@ const menteeCourseSyllabusMutationResolver = async (
           chapter,
         } = menteeSession.topic;
 
-        // checking on user level and school level (if user is linked to school but not batch)
-        let combinedEnrollmentType = enrollmentType;
-        if (schoolInfo) {
-          const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
-          combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
-        }
-
         const isAccessible = isTopicAccessible(combinedEnrollmentType, isTrial);
 
         // setting last topic booked order, will use this to find upcoming sessions
@@ -1094,11 +1090,6 @@ const menteeCourseSyllabusMutationResolver = async (
         }
       });
     });
-  }
-  let combinedEnrollmentType = enrollmentType;
-  if (schoolInfo) {
-    const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
-    combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
   }
   if (combinedEnrollmentType === enrollmentTypes.pro) {
     isPaid = true;

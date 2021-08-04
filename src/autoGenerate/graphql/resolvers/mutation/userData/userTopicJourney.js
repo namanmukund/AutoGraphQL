@@ -305,7 +305,18 @@ const userTopicJourneyMutationResolver = async (
     batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
   }
 
+  const { free, pro } = enrollmentTypes;
   const schoolInfo = get(batchRes, 'data.user.studentProfile.school');
+  let combinedEnrollmentType = get(currentTopicComponentInfo, 'enrollmentType', free);
+  if (batchCurrentComponentInfo) {
+    const batchEnrollmentType = get(batchCurrentComponentInfo, 'enrollmentType', free);
+    combinedEnrollmentType = (combinedEnrollmentType === free && batchEnrollmentType === free) ? free : pro;
+  }
+
+  if (schoolInfo) {
+    const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', free);
+    combinedEnrollmentType = (combinedEnrollmentType === free && schoolEnrollmentType === free ? free : pro);
+  }
 
   const userTopicData = {};
   if (!courseId || (courseId === OLD_COURSE_ID)) {
@@ -328,7 +339,6 @@ const userTopicJourneyMutationResolver = async (
       currentTopicComponentType: currentTopicComponent,
       currentTopic: currentRunningTopic,
       currentLearningObjective: currentRunningLearningObjective,
-      enrollmentType,
     } = currentTopicComponentInfo;
     // this object will be returned in output
     const { incomplete, complete } = userTopicTypeStatus;
@@ -365,7 +375,6 @@ const userTopicJourneyMutationResolver = async (
       thumbnail: topicInfo.thumbnail,
       status: incomplete,
     };
-    const { free, pro } = enrollmentTypes;
     /*
     Logic for getting locked status of different components for a topic
     if called topic order is less than that of current topic order,
@@ -377,21 +386,13 @@ const userTopicJourneyMutationResolver = async (
     let topicStatus = incomplete;
     let currentRunningTopicOrder;
     // for batches we will use batchCurrentComponentStatus to check current topic
-    let combinedEnrollmentType = enrollmentType;
     if (batchCurrentComponentInfo) {
       const {
-        enrollmentType: batchEnrollmentType,
         currentTopic: currentBatchRunningTopic,
       } = batchCurrentComponentInfo;
-      combinedEnrollmentType = (enrollmentType === free && batchEnrollmentType === free) ? free : pro;
       currentRunningTopicOrder = currentBatchRunningTopic && currentBatchRunningTopic.order;
     } else {
       currentRunningTopicOrder = currentRunningTopic.order;
-    }
-
-    if (schoolInfo) {
-      const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
-      combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
     }
 
     if (topicInfo.order < currentRunningTopicOrder) {
@@ -446,17 +447,8 @@ const userTopicJourneyMutationResolver = async (
       if (batchCurrentComponentInfo) {
         const {
           latestSessionStatus,
-          enrollmentType: batchEnrollmentType,
         } = batchCurrentComponentInfo;
         if (latestSessionStatus === sessionStatus.started || latestSessionStatus === sessionStatus.completed) {
-          /* eslint-disable no-shadow */
-          let combinedEnrollmentType = (enrollmentType === free && batchEnrollmentType === free) ? free : pro;
-
-          if (schoolInfo) {
-            const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
-            combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
-          }
-
           if (topicInfo.isTrial || combinedEnrollmentType === pro) {
             videoData.isUnlocked = true;
           } else {
@@ -492,12 +484,6 @@ const userTopicJourneyMutationResolver = async (
         const { video, quiz } = topicTypes;
         quizData.masteryLevel = defaultMastery;
         // video is unlocked only if topic is free or user is pro
-        let combinedEnrollmentType = enrollmentType;
-        if (schoolInfo) {
-          const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', enrollmentTypes.free);
-          combinedEnrollmentType = (combinedEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free ? enrollmentTypes.free : enrollmentTypes.pro);
-        }
-
         if (topicInfo.isTrial || combinedEnrollmentType === pro) {
           videoData.isUnlocked = true;
         } else {
@@ -586,7 +572,6 @@ const userTopicJourneyMutationResolver = async (
       currentLearningObjective: currentRunningLearningObjective,
       currentVideo: currentRunningVideo,
       currentBlockBasedProject: currentRunningBlockBasedProject,
-      enrollmentType,
     } = currentTopicComponentInfo;
     // this object will be returned in output
     const { incomplete, complete } = userTopicTypeStatus;
@@ -634,8 +619,6 @@ const userTopicJourneyMutationResolver = async (
         });
       }
     });
-
-    const { pro, free } = enrollmentTypes;
     /*
     Logic for getting locked status of different components for a topic
     if called topic order is less than that of current topic order,
@@ -646,13 +629,10 @@ const userTopicJourneyMutationResolver = async (
     const topicStatus = incomplete;
     let currentRunningTopicOrder;
     // for batches we will use batchCurrentComponentStatus to check current topic
-    let combinedEnrollmentType = enrollmentType;
     if (batchCurrentComponentInfo) {
       const {
-        enrollmentType: batchEnrollmentType,
         currentTopic: currentBatchRunningTopic,
       } = batchCurrentComponentInfo;
-      combinedEnrollmentType = (enrollmentType === free && batchEnrollmentType === free) ? free : pro;
       currentRunningTopicOrder = currentBatchRunningTopic && currentBatchRunningTopic.order;
     } else {
       currentRunningTopicOrder = currentRunningTopic.order;
@@ -710,14 +690,11 @@ const userTopicJourneyMutationResolver = async (
       // batch user calculation when topic order === current topi order in batch
       /* eslint no-lonely-if:0 */
       /* eslint-disable no-shadow */
-      let combinedEnrollmentType = enrollmentType;
       if (batchCurrentComponentInfo) {
         const {
-          enrollmentType: batchEnrollmentType,
           latestSessionStatus,
         } = batchCurrentComponentInfo;
         if (latestSessionStatus === sessionStatus.started || latestSessionStatus === sessionStatus.completed) {
-          combinedEnrollmentType = (enrollmentType === free && batchEnrollmentType === free) ? free : pro;
           if (topicInfo.isTrial || combinedEnrollmentType === pro) {
             for (const videoElem of videoData) {
               videoElem.isUnlocked = true;
