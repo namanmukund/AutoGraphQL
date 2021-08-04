@@ -119,10 +119,13 @@ const extractMentorMenteeSessionAndSendMessage = async (
       );
       // mentor_confirmation_b2c
       const bookingDateTime = new Date(moment(bookingDate).toDate().setHours(slotNumber, 0, 0, 0)).toISOString();
+
       const hoursLeftForSession = Math.abs(moment(bookingDateTime).diff(moment(), 'hours'));
+      if (hoursLeftForSession < 3) return;
+
       let mentorSessionReminderDateTime = moment(bookingDateTime).subtract(30, 'minutes').toDate();
       if (hoursLeftForSession >= 18) {
-        mentorSessionReminderDateTime = moment(bookingDateTime).subtract(3, 'hours').toDate();
+        mentorSessionReminderDateTime = moment(bookingDateTime).subtract(2, 'hours').toDate();
       }
       addToSchedule('mentorSessionNotificationB2C', mentorSessionReminderDateTime, {
         mentorMenteeSessionId,
