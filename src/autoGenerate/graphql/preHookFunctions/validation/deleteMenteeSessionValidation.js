@@ -42,10 +42,12 @@ const deleteMenteeSessionValidation = async (params, mutationOrQueryName, contex
 
   context.appName = appName;
 
+  const parentComponent = get(context, 'parentComponent', '');
+
   const { bookingDate, ...slots } = menteeSession;
   const slotTimeArray = getSelectedSlotsTime(slots);
   // of any slots is taken or the date is of past then the doc can not be deleted
-  if (slotTimeArray && slotTimeArray.length) {
+  if (slotTimeArray && slotTimeArray.length && parentComponent !== 'rebookMenteeSession') {
     const date = new Date(bookingDate);
     const dateTime = date.setHours(
       date.getHours() + slotTimeArray[0],
