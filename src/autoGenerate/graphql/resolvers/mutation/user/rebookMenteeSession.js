@@ -1,5 +1,23 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import { MutationController } from '../../../controllers';
+import { QueryController } from '../../../controllers';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
+import { log } from '../../../../../../utils';
+
+const updateMenteeSession = (id, bookingDate, slot) => `
+  mutation {
+    updateMenteeSession(id:"${id}"
+    input: {
+      bookingDate: "${bookingDate}",
+      slot${slot}: true,
+    }){
+      id
+      course{
+        id
+      }
+    }
+  }
+`;
 
 const rebookMenteeSessionMutationResolver = async (
   root,
@@ -11,12 +29,18 @@ const rebookMenteeSessionMutationResolver = async (
   context,
 ) => {
   validateAuthentication(context);
-  const { input } = params;
+  const { input: { menteeSessionId, bookingDate, ...slots } } = params;
 
   context.parentComponent = 'rebookMenteeSession';
+  const selectedSlot = getSelectedSlotsTime(slots);
+  try {
+    await callLocalGraphqlApi(updateMenteeSession(menteeSessionId, bookingDate, selectedSlot[0]), context);
+  } catch (err) {
+    log(err);
+  }
 
-  const modelQuery = new MutationController('MenteeSession', { bypass: true });
-  const modelQueryRes = await modelQuery.updateDocument(input.menteeSessionId, { ...input });
+  const modelQuery = new QueryController('MenteeSession', { bypass: true });
+  const modelQueryRes = await modelQuery.fetchById(menteeSessionId);
 
   return modelQueryRes;
 };
