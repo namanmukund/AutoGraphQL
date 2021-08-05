@@ -108,6 +108,8 @@ import SessionLog from './sessionLog';
 import TopicQuestions from './topicQuestions';
 import TopicAssignmentQuestion from './topicAssignmentQuestion';
 import AuditQuestion from './auditQuestion';
+import PreSalesAudit from './preSalesAudit';
+import PostSalesAudit from './postSalesAudit';
 
 export default [
   ...User,
@@ -220,4 +222,6 @@ export default [
   ...TopicQuestions,
   ...TopicAssignmentQuestion,
   ...AuditQuestion,
+  ...PreSalesAudit,
+  ...PostSalesAudit,
 ];
