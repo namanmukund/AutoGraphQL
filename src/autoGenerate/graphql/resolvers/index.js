@@ -85,6 +85,7 @@ import bookB2B2CSlots from './mutation/methods/bookB2B2CSlots';
 import getStudentCurrentStatus from './query/methods/getStudentCurrentStatus';
 import getCourseCertificate from './query/methods/getCourseCertificate';
 import signUpSchool from './mutation/methods/signUpSchool';
+import rebookMenteeSession from './mutation/methods/rebookMenteeSession';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -577,6 +578,7 @@ resolvers.Mutation.addUpdateBulkSchoolUserData = addUpdateBulkSchoolUserData;
 resolvers.Mutation.updateVisitorReactionOnUserApprovedCode = updateVisitorReactionOnUserApprovedCode;
 resolvers.Mutation.addBulkMentorSession = addBulkMentorSession;
 resolvers.Mutation.bookB2B2CSlots = bookB2B2CSlots;
+resolvers.Mutation.rebookMenteeSession = rebookMenteeSession;
 
 // queries
 resolvers.Query.me = me;

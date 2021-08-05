@@ -88,7 +88,7 @@ const deleteMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   }
   const { sessionStatus: prevSessionStatus } = mentorMenteeSessionDoc;
   // if session is complete and user is trying to delete, then throw error
-  if (prevSessionStatus === 'completed') {
+  if (prevSessionStatus === 'completed' && !context.parentComponent) {
     throw new CanNotDeleteCompletedSessionError();
   }
   // getting current user from context to send in logs
