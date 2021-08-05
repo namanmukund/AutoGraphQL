@@ -1,21 +1,6 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import { MutationController } from '../../../controllers';
 
-const updateMenteeSession = async (id, bookingDate, slot) => `
-  mutation {
-    updateMenteeSession(id:"${id}"
-    input: {
-      bookingDate: "${bookingDate}",
-      slot${slot}: true,
-    }){
-      id
-      course{
-        id
-      }
-    }
-  }
-`;
-
 const rebookMenteeSessionMutationResolver = async (
   root,
   params,

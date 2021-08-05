@@ -106,7 +106,7 @@ import UserCourseCompletion from './userCourseCompletion';
 import GetCourseCertificate from './getCourseCertificate';
 import SessionLog from './sessionLog';
 import SessionReport from './sessionReport';
-import RebookMenteeSessionInput from './RebookMenteeSessionInput';
+import RebookMenteeSessionInput from './rebookMenteeSessionInput';
 
 export default [
   ...User,
