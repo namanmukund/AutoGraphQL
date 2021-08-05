@@ -36,7 +36,8 @@ const customMutationString = `
    addUpdateBulkSchoolUserData (sheetId: String!, schoolName: String!, setPassword: Boolean, booking: Boolean): AddUpdateBulkSchoolUserDataOutput,
    updateVisitorReactionOnUserApprovedCode(reactedByID: ID!, userApprovedCodeID: ID!, heart: Boolean, celebrate: Boolean, hot: Boolean): BooleanResult,
    addBulkMentorSession ( input: BulkMentorSessionInput ): [MentorSession],
-   bookB2B2CSlots ( input: BookB2B2CSlotsInput ): BooleanResult,  
+   bookB2B2CSlots ( input: BookB2B2CSlotsInput ): BooleanResult, 
+   rebookMenteeSession ( input: RebookMenteeSessionInput ): MenteeSession,
    `;
 
 export default customMutationString;

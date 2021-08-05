@@ -79,7 +79,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
 
     if (
       (prevBookingDate.getTime() !== bookingDate.getTime())
-    || (get(prevSlotTimeStringArray, '0') !== get(slotTimeStringArray, '0'))
+      || (get(prevSlotTimeStringArray, '0') !== get(slotTimeStringArray, '0'))
     ) {
       if (context.mentorSessionId) {
         sendSessionCancellationMessage(context.mentorSessionId, prevBookingDate, prevSlotTimeStringArray, studentName, parentName);

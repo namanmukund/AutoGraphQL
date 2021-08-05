@@ -34,6 +34,7 @@ import getPaymentRequestMutationResolver from './payment/getPaymentRequest';
 import getPaymentResponseMutationResolver from './payment/getPaymentResponse';
 import addBulkMentorSessionMutationResolver from './mentor/addBulkMentorSession';
 import bookB2B2CSlotsMutationResolver from './user/bookB2B2CSlots';
+import rebookMenteeSessionMutationResolver from './user/rebookMenteeSession';
 
 export {
   addMutationResolver,
@@ -72,4 +73,5 @@ export {
   getPaymentResponseMutationResolver,
   addBulkMentorSessionMutationResolver,
   bookB2B2CSlotsMutationResolver,
+  rebookMenteeSessionMutationResolver,
 };
