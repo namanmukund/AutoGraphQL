@@ -112,6 +112,16 @@ const userPaymentPlanQuery = async (filterQuery) => {
   return data;
 };
 
+const intersection = (arr1, arr2) => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const v of arr1) {
+    if (arr2.includes(v)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const allowedRoles = [MENTEE];
 const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
   const {
@@ -217,8 +227,9 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
         get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.email'),
       );
     }
-
-    if (input && Object.keys(input).includes('hasRescheduled') && topic.order === 1) {
+    console.log(input, intersection(['hasRescheduled', 'sessionStatus', 'didNotPickTheCall', 'didNotTurnUpInSession', 'sessionNotConducted'], Object.keys(input)), topic.order);
+    if (input && intersection(['hasRescheduled', 'sessionStatus', 'didNotPickTheCall', 'didNotTurnUpInSession', 'sessionNotConducted'], Object.keys(input)) && topic.order === 1) {
+      console.log('hit...');
       updateMentorRescheduleLeadsquared(userInfo, input, params);
     }
 
