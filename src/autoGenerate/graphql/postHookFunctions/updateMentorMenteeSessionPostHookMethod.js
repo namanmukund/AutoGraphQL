@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import moment from 'moment';
-import { MENTOR_RATING_AUDIT_THRESHOLD } from '../../../../constants';
+import { auditType, MENTOR_RATING_AUDIT_THRESHOLD } from '../../../../constants';
 import { MENTEE } from '../../../../constants/roles';
 import updateReferrerCreditsPostSessionOrUserPayment from './utils/updateReferrerCreditsPostSessionOrUserPayment';
 import referralCredits from '../../../../constants/referralCredits';
@@ -20,6 +20,9 @@ import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
 import addRescheduledSlot from './utils/addRescheduledSlot';
 import addSessionLog from './utils/addSessionLog';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
+import addSalesAudit from './utils/addSalesAudit';
+
+const { postSales } = auditType;
 /*
   - check if the user if from referral
   - check if the session is the first session
@@ -196,12 +199,18 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const inputIsAudit = get(input, 'isAudit', false);
     const prevIsAudit = get(context, 'previousDocument.isAudit', false);
     const mentorMenteeSessionId = get(context, 'previousDocument.id', '');
+    const prevIsPostSalesAudit = get(context, 'previousDocument.isPostSalesAudit', false);
+    const isPostSalesAuditFromInput = get(context, 'isPostSalesAuditFromInput', false);
 
     if ((inputIsAudit && prevIsAudit !== inputIsAudit)
       || (inputMentorRating && inputMentorRating < MENTOR_RATING_AUDIT_THRESHOLD)
       || inputDistracted || inputRude || inputSlowPaced || inputFastPaced || inputNotPunctual
       || inputAverage || inputBoring || inputPoorExplanation || inputAverageExplanation) {
       addMentorMenteeSessionAudit(mentorMenteeSessionId);
+    }
+
+    if (isPostSalesAuditFromInput && prevIsPostSalesAudit === false) {
+      addSalesAudit({ mentorMenteeSessionId, auditType: postSales });
     }
 
     if (

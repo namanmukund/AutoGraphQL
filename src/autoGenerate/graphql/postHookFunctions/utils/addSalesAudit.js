@@ -1,5 +1,8 @@
 import { get } from 'lodash';
+import { auditType as auditTypesFilter } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+
+const { preSales, postSales } = auditTypesFilter;
 
 const fetchAllAuditQuestion = async (auditType) => {
   const query = `
@@ -23,11 +26,24 @@ const addPreSalesAuditQuery = (auditQuestionsIds, clientId) => `
             ]
             }
         ) {
-            id
+          id
         }
     }`;
 
-const addPreSalesAudit = async (clientId, auditType) => {
+const addPostSalesAuditQuery = (auditQuestionsIds, mentorMenteeSessionId) => `mutation {
+  addPostSalesAudit(
+    mentorMenteeSessionConnectId: "${mentorMenteeSessionId}"
+    input: {
+      auditQuestions: [
+        ${auditQuestionsIds}
+      ]
+    }
+  ) {
+    id
+  }
+}`;
+
+const addSalesAudit = async ({ mentorMenteeSessionId, clientId, auditType }) => {
   const auditQuestions = await fetchAllAuditQuestion(auditType);
   let auditQuestionsIds = '';
   if (auditQuestions && auditQuestions.length > 0) {
@@ -36,8 +52,12 @@ const addPreSalesAudit = async (clientId, auditType) => {
     });
   }
   if (auditQuestionsIds) {
-    callLocalGraphqlApi(addPreSalesAuditQuery(auditQuestionsIds, clientId));
+    if (auditType === preSales) {
+      callLocalGraphqlApi(addPreSalesAuditQuery(auditQuestionsIds, clientId));
+    } else if (auditType === postSales) {
+      callLocalGraphqlApi(addPostSalesAuditQuery(auditQuestionsIds, mentorMenteeSessionId));
+    }
   }
 };
 
-export default addPreSalesAudit;
+export default addSalesAudit;
