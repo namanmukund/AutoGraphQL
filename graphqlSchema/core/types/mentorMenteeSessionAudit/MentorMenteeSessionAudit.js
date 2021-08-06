@@ -40,6 +40,15 @@ const processMonitoring = `
     offeredCounselling: Boolean
 `;
 
+const mentorAuditQuestion = `
+type MentorAuditQuestion {
+   auditQuestion: AuditQuestion @relation(name: "MentorAuditQuestion", direction: "OneWay")
+   mcqAnswers: [McqAnswer]
+   boolAnswers: Boolean
+   inputAnswer: String
+   ratingAnswer: Int
+ }`;
+
 const codingExercise = `
     isStudentProperlyHelped: Boolean
     isProactive: Boolean
@@ -60,9 +69,10 @@ const MentorMenteeSessionAudit = `
     isStudentCameraOff: Boolean
     switchedToComfortableLanguage: Boolean
     isMentorInternetDecent: Boolean
+    auditQuestions: [MentorAuditQuestion]
     timestampComment: [MentorMenteeSessionTimestamp] @relation(name: "MentorMenteeSessionAuditTimestamp")
     overallClassComment: String
     score: Float
 }`;
 
-export default [MentorMenteeSessionAudit];
+export default [MentorMenteeSessionAudit, mentorAuditQuestion];

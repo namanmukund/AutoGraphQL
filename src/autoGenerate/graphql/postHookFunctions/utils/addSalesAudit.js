@@ -4,7 +4,7 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 const { preSales, postSales } = auditTypesFilter;
 
-const fetchAllAuditQuestion = async (auditType) => {
+export const fetchAllAuditQuestion = async (auditType) => {
   const query = `
     {
       auditQuestions(filter:{ and: [ { auditType: ${auditType} } { status: published } ] }){
