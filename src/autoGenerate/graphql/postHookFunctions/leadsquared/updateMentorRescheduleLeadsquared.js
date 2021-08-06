@@ -1,29 +1,29 @@
 import { get } from 'lodash';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
-import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+// import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const mentorMenteeSessionQuery = (userId) => `{
-  mentorMenteeSession(id: "${userId}") {
-    id
-    internetIssue
-    zoomIssue
-    laptopIssue
-    chromeIssue
-    powerCut
-    notResponseAndDidNotTurnUp
-    turnedUpButLeftAbruptly
-    leadNotVerifiedProperly
-    otherReasonForReschedule
-    hasRescheduled
-    sessionCommentByMentor
-    rescheduledDate
-  }
-}`;
+// const mentorMenteeSessionQuery = (userId) => `{
+//   mentorMenteeSession(id: "${userId}") {
+//     id
+//     internetIssue
+//     zoomIssue
+//     laptopIssue
+//     chromeIssue
+//     powerCut
+//     notResponseAndDidNotTurnUp
+//     turnedUpButLeftAbruptly
+//     leadNotVerifiedProperly
+//     otherReasonForReschedule
+//     hasRescheduled
+//     sessionCommentByMentor
+//     rescheduledDate
+//   }
+// }`;
 
 const updateMentorRescheduleLeadsquared = async (userInfo, input, params) => {
   const phoneNumber = get(userInfo, 'data.user.studentProfile.parents[0].user.phone.number');
-  const mentorMenteeSession = await callLocalGraphqlApi(mentorMenteeSessionQuery(get(params, 'id')));
-  const data = get(mentorMenteeSession, 'data.mentorMenteeSession');
+  // const mentorMenteeSession = await callLocalGraphqlApi(mentorMenteeSessionQuery(get(params, 'id')));
+  // const data = get(mentorMenteeSession, 'data.mentorMenteeSession');
 
   const leadSquaredInput = {
     Phone: phoneNumber,
