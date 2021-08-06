@@ -5,7 +5,15 @@ query{
   batchSession(id:"${batchSessionId}"){
     id
     bookingDate
-    topic{id order}
+    topic{
+      id 
+      order
+    }
+    attendance {
+      student {
+        id
+      }
+    }
     ${getSlotTimesInString()}
     batch{
       id
@@ -17,6 +25,13 @@ query{
     sessionStatus
     mentorSession{
       id
+      user{
+        id
+        phone {
+          countryCode
+          number
+        }
+      }
     }
     course{
         id

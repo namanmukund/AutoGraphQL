@@ -10,6 +10,15 @@ const ScheduleJob = `
     jobType: String
     batchSessionId: String
     code: String
+    batchSessionId: String
+    courseName: String
+    batchCode: String
+    schoolName: String
+    sessionDate: String
+    sessionTime: String
+    sessionLink: String
+    mentorUserId: String
+    mentorPhoneNumber: String
 }`;
 
 export default [ScheduleJob];
