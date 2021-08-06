@@ -227,9 +227,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
         get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.email'),
       );
     }
-    console.log(input, intersection(['hasRescheduled', 'sessionStatus', 'didNotPickTheCall', 'didNotTurnUpInSession', 'sessionNotConducted'], Object.keys(input)), topic.order);
     if (input && intersection(['hasRescheduled', 'sessionStatus', 'didNotPickTheCall', 'didNotTurnUpInSession', 'sessionNotConducted'], Object.keys(input)) && topic.order === 1) {
-      console.log('hit...');
       updateMentorRescheduleLeadsquared(userInfo, input, params);
     }
 
