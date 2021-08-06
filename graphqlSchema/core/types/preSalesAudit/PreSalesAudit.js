@@ -4,12 +4,9 @@ const preSalesAuditQuestion = `
 type PreSalesAuditQuestion {
    auditQuestion: AuditQuestion @relation(name: "PreSalesAuditQuestion", direction: "OneWay")
    mcqAnswers: [McqAnswer]
-   mcqOptions: [McqOption]
    boolAnswers: Boolean
    inputAnswer: String
    ratingAnswer: Int
-   maxRating: Int
-   timestampTags: [TimestampTag]
  }`;
 
 const PreSalesAudit = `
@@ -20,7 +17,7 @@ const PreSalesAudit = `
       ]
     rule: allow
   ){
-    preSalesUser: User! @relation(name: "UserPreSalesUser", direction: "OneWay")
+    preSalesUser: User @relation(name: "UserPreSalesUser", direction: "OneWay")
     auditor: User @relation(name: "UserPreSalesAudit", direction: "OneWay")
     client: User! @relation(name: "UserPreSalesClient", direction: "OneWay")
     status: SessionStatus @defaultValue(value: "allotted")

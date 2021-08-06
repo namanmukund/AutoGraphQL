@@ -41,7 +41,6 @@ const MentorMenteeSessionTimestamp = `
     auditQuestion: AuditQuestion @relation(name: "MentorMenteeSessionTimestampAuditQuestion", direction: "OneWay")
     ${timestampComment}
     ${tags}
-    timestampTags: [TimestampTag]
     answerTimestampTags: [TimestampTag]
 }`;
 

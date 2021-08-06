@@ -191,6 +191,12 @@ const auditQuestionType = {
   input: 'input',
 };
 
+const auditType = {
+  mentor: 'mentor',
+  preSales: 'preSales',
+  postSales: 'postSales',
+};
+
 const scholarshipThreshHolds = {
   proficient: 100,
   master: 80,
@@ -460,4 +466,5 @@ export {
   meWatiSMS,
   usWatiSMS,
   auditQuestionType,
+  auditType,
 };
