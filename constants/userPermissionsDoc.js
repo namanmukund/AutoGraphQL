@@ -11,7 +11,11 @@ import {
   UMS_VIEWER,
   NOT_CMS_HEAD_ARRAY,
   CMS_HEAD_ARRAY,
-  UMS_ADMIN, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM,
+  UMS_ADMIN,
+  TRANSFORMATION_ADMIN,
+  TRANSFORMATION_TEAM,
+  ADMIN,
+  NOT_ADMIN,
 } from './roles';
 
 const userPermissionsDoc = {
@@ -125,6 +129,13 @@ const userPermissionsDoc = {
       rule: 'allow',
       crud: [...CMS_HEAD_ARRAY],
       read: [...NOT_CMS_HEAD_ARRAY],
+    },
+  },
+  SessionReport: {
+    collection: {
+      rule: 'allow',
+      crud: [ADMIN],
+      read: [NOT_ADMIN],
     },
   },
 };

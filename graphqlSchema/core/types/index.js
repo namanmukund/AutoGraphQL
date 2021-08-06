@@ -105,6 +105,8 @@ import ComicImage from './comicImage';
 import UserCourseCompletion from './userCourseCompletion';
 import GetCourseCertificate from './getCourseCertificate';
 import SessionLog from './sessionLog';
+import SessionReport from './sessionReport';
+import RebookMenteeSessionInput from './rebookMenteeSessionInput';
 import TopicQuestions from './topicQuestions';
 import TopicAssignmentQuestion from './topicAssignmentQuestion';
 
@@ -216,6 +218,8 @@ export default [
   ...GetCourseCertificate,
   ...GetSchoolDetails,
   ...SessionLog,
+  ...SessionReport,
+  ...RebookMenteeSessionInput,
   ...TopicQuestions,
   ...TopicAssignmentQuestion,
 ];

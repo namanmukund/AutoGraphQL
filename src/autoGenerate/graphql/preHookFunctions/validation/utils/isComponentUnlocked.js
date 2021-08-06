@@ -200,7 +200,19 @@ const isComponentUnlocked = async (
     userId,
   );
   const batchCurrentComponentInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.currentComponent');
-  const batchCurrentComponentBatchType = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.type');
+  const schoolInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.school');
+
+  const { free, pro } = enrollmentTypes;
+
+  let combinedEnrollmentType = get(currentTopicComponentInfo, 'enrollmentType', free);
+  if (batchCurrentComponentInfo) {
+    const batchEnrollmentType = get(batchCurrentComponentInfo, 'enrollmentType', free);
+    combinedEnrollmentType = (enrollmentType === free && batchEnrollmentType === free) ? free : pro;
+  }
+  if (schoolInfo) {
+    const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', free);
+    combinedEnrollmentType = (combinedEnrollmentType === free && schoolEnrollmentType === free ? free : pro);
+  }
   /*
   condition to check if chat can be accessed:
   if called topic order is less than current topic order or
@@ -209,24 +221,33 @@ const isComponentUnlocked = async (
   */
 
   if (!isTopicUnlocked(
-    enrollmentType,
+    combinedEnrollmentType,
     currentTopicOrder,
     topicOrder,
     isTrial,
     page,
     checkForPaidLogic,
     batchCurrentComponentInfo,
-    batchCurrentComponentBatchType,
   )) {
     // placing logic to send correct message if a paid video is locked coz free user is trying to access it
-    const { free } = enrollmentTypes;
-
-    if (enrollmentType === free
+    if (batchCurrentComponentInfo) {
+      if (combinedEnrollmentType === free
         && topicOrder <= currentTopicOrder
         && isTrial !== true && page === video) {
-      throw new PaidComponentLockedError();
+        throw new PaidComponentLockedError();
+      } else {
+        throw new ComponentLockedError();
+      }
     } else {
-      throw new ComponentLockedError();
+      // for user without batch but with school
+      /* eslint-disable no-lonely-if */
+      if (combinedEnrollmentType === free
+        && topicOrder <= currentTopicOrder
+        && isTrial !== true && page === video) {
+        throw new PaidComponentLockedError();
+      } else {
+        throw new ComponentLockedError();
+      }
     }
   }
 

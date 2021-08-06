@@ -29,10 +29,9 @@ const isTopicUnlocked = (
     const {
       currentTopic,
     } = batchCurrentComponentInfo;
-
     const batchCurrentTopicOrder = currentTopic && currentTopic.order;
     if ((enrollmentType === pro
-        && topicOrder <= batchCurrentTopicOrder
+      && topicOrder <= batchCurrentTopicOrder
     ) || (enrollmentType === free
       && topicOrder <= batchCurrentTopicOrder
       && checkIfTopicIsFree === true && page === video)
@@ -45,7 +44,7 @@ const isTopicUnlocked = (
   } else {
     /* eslint no-lonely-if:0 */
     if ((enrollmentType === pro
-        && topicOrder <= currentTopicOrder
+      && topicOrder <= currentTopicOrder
     ) || (enrollmentType === free
       && topicOrder <= currentTopicOrder
       && checkIfTopicIsFree === true && page === video)

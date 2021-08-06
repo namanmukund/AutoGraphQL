@@ -25,6 +25,7 @@ db.on('error', (err) => {
     && process.env.IS_SCHEDULER_INSTANCE
     && process.env.IS_SCHEDULER_INSTANCE !== 'false') {
     createScheduler('mentorReport');
+    createScheduler('sessionReport');
     reRunJobsFromDB();
   }
 });

@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import { DEFAULT_LS_OM_USER_ID } from '../../../../../constants';
 import updateLeadSquared from '../../../../../services/leadsquared/updateLeadSquared';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
@@ -24,6 +25,7 @@ const BATCH_SESSION = (batchSessionId) => `{
     }
     attendance {
       isPresent
+      status
       student {
         id
         user {
@@ -57,8 +59,9 @@ const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob,
   const attendances = get(batchSessionRes, 'data.batchSession.attendance', []);
   const mentorName = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.name', '');
   const salesExec = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.salesExecutive.user.name', '');
-  attendances.forEach((attendance) => {
-    const isPresent = get(attendance, 'isPresent', false);
+  const salesExecEmail = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.salesExecutive.user.email', '');
+  attendances.forEach(async (attendance) => {
+    const attendanceStatus = get(attendance, 'status', 'notAssigned');
     const student = get(attendance, 'student', {});
     const studentName = get(student, 'user.name');
     const parentName = get(student, 'parents[0].user.name');
@@ -67,14 +70,14 @@ const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob,
     const countryCode = get(student, 'parents[0].user.phone.countryCode', '').replace('+', '');
     let leadSquaredInput = {};
     let activityInput = {};
-    if (isPresent) {
+    if (attendanceStatus === 'present') {
       if (!ls) {
         sendTransactionalEmail({
           studentName,
           parentEmail,
         }, {
           emailTemplate: 'PostCarnivalFeedback',
-          subject: `${studentName}, did you enjoy the Code Carnival?`,
+          subject: `${studentName}, did you enjoy the Code Jam?`,
         });
         sendWhatsAppTemplateMessage(countryCode + parentPhone, 'workshop_post_demo', parentName, [{
           name: 'parent_name',
@@ -87,10 +90,21 @@ const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob,
       leadSquaredInput = {
         Phone: parentPhone,
         mx_Demo_Attendance: 'Present',
-        mx_Success_Manager_Name: salesExec,
-        OwnerId: salesExec,
         mx_Mentor_Name: mentorName,
       };
+      if (salesExec) {
+        leadSquaredInput.mx_Success_Manager_Name = salesExec;
+      }
+
+      const res = await fetch(`https://api-in21.leadsquared.com/v2/UserManagement.svc/User/Retrieve/ByEmailAddress?accessKey=${process.env.LEAD_SQUARED_ACCESS_KEY}&secretKey=${process.env.LEAD_SQUARED_SECRET_KEY}&emailAddress=${salesExecEmail}`);
+      const data = await res.json();
+      if (get(data, '0.UserId')) {
+        leadSquaredInput.OwnerId = get(data, '0.UserId');
+      } else {
+        // Default to Om Dubey User Id, if Sales Manager not found on LS
+        leadSquaredInput.OwnerId = DEFAULT_LS_OM_USER_ID;
+      }
+
       activityInput = {
         ActivityEvent: 105,
         ActivityNote: 'Student attended the demo',

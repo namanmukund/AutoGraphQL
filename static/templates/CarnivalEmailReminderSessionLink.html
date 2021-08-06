@@ -233,14 +233,14 @@
 					<td class="bg_white">
 						<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
 							<tr>
-								<td style="box-shadow:0px 0px 50px 10px inset rgba(0,0,0,0.4);text-align:center;background-image: url('https://tekie-backend.s3.amazonaws.com/python/email/usMailConfettiBG.png'); background-size: cover; background-position: center center; box-sizing: border-box;background-color: #1B4A86;">
-									<div style="height: 230px;width: 100%;background: url(https://tekie-backend.s3.amazonaws.com/python/email/CarnivalHeader2.png); background-size: contain; background-position: center center; padding: 15px; box-sizing: border-box;background-repeat: no-repeat;">
-										<div style='width: 100%; height: 100%; box-sizing: border-box;border: 3px solid #FFC24C;padding: 10px;'>
-											<div style="height: 22px;width: 100%; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/tekieLogo.png); background-size: contain; background-repeat: no-repeat;background-position: right;"></div>
+								<td style="box-shadow:0px 0px 50px 10px inset rgba(0,0,0,0.4);text-align:center;background-size: cover; background-position: center center; box-sizing: border-box;">
+										<div style="height: 253px;width: 100%;background: url(https://tekie-backend.s3.amazonaws.com/python/email/codeJamBanner.png); background-size: cover; background-position: center center; padding: 15px; box-sizing: border-box;background-repeat: no-repeat;">
+												<!-- <div style='width: 100%; height: 100%; box-sizing: border-box;border: 3px solid #FFC24C;padding: 10px;'>
+														<div style="height: 22px;width: 100%; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/tekieLogo.png); background-size: contain; background-repeat: no-repeat;background-position: right;"></div>
+												</div> -->
 										</div>
-									</div>
 								</td>
-							</tr>
+						</tr>
 							<tr>
 								<td></td>
 							</tr>
@@ -252,6 +252,22 @@
 							<tr>
 								<td style="text-align:center;padding-top: 10px;">
 									<h3 style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 20px; color: #00ADE6; margin-top: 0px; margin-bottom: 0px;text-align: center;">Are you Ready? The countdown has begun!</h3>
+								</td>
+							</tr>
+
+							<tr>
+								<td style="padding-top: 20px">
+									<div style="display:flex;align-items: center;flex-direction:row; align-items: center;justify-content:flex-start;font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: fit-content; margin: auto; opacity: 0.8; color: #504F4F; font-size: 14px;background:#EEEEEE;padding: 10px 18px 10px 0px;line-height: 24px;">
+										<div style="width: 70px; height: 30px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/carnivalCalendarIcon.png); background-size: contain; display: inline-block;background-repeat: no-repeat;background-position: center"></div>
+										<div>
+											<div>
+												<%= bookingDate %>
+											</div>
+											<div>
+												<%= startTime %>- <%= endTime %>
+											</div>
+										</div>
+									</div>
 								</td>
 							</tr>
 							
@@ -267,7 +283,7 @@
 							</tr>
 							<tr>
 								<td style="text-align:center; padding-top: 0px">
-									<a href="<%= sessionLink %>" style="background-color: #fff;filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.22)); display: inline-block; min-width: 150px; border-radius: 7px; text-decoration: none; color: white; font-family: Lato, 'Open Sans', Helvetica, Roboto, sans-serif; text-transform: uppercase; font-weight: 600; box-sizing: border-box; margin: 0px 0px; padding: 6px 20px; background: linear-gradient(180deg, #34E4EA 0%, #00ADE6 100%);line-height: 2;font-size: 14px;letter-spacing: 1px;">
+									<a href="<%= sessionLink %>" style="background-color: #fff; display: inline-block; min-width: 150px; border-radius: 30px; text-decoration: none; color: white; font-family: Lato, 'Open Sans', Helvetica, Roboto, sans-serif; text-transform: uppercase; font-weight: 600; box-sizing: border-box; margin: 17px 0px; padding: 8px 20px; background: #00ADE6;line-height: 2;font-size: 14px;letter-spacing: 1px;">
 									<div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; vertical-align:middle; display: inline-block; color: #fff; text-transform: uppercase;line-height: 2; font-weight: bold; font-size: 16px;">
 										JOIN SESSION
 									</div></a>
@@ -276,7 +292,7 @@
 							<tr>
 								<td style="text-align:center; padding-top: 10px">
 									<div style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 70%; margin: auto; margin-top: 10px; opacity: 0.8; color: #504F4F; font-size: 16px;text-align: center;">
-										We will conclude the carnival with a <span style="font-weight: 700;">Recap and a Q&A session,</span> where we hope to answer your questions and <span style="font-weight: 700;">debunk some myths about coding.</span>
+										We will conclude the session with a <span style="font-weight: 700;">Recap and a Q&A session,</span> where we hope to answer your questions and <span style="font-weight: 700;">debunk some myths about coding.</span>
 									</div>
 								</td>
 							</tr>

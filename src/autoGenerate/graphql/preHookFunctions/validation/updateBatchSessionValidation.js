@@ -78,9 +78,10 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   const userInfo = validateTokenAndExtractInformation(context, false);
   const {
     currentUser,
+    currentApp,
   } = userInfo;
   context.currentUser = currentUser;
-
+  context.appName = get(currentApp, 'name');
   return true;
 };
 

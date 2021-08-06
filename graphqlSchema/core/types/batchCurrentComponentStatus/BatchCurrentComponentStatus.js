@@ -16,6 +16,7 @@ ${getPermissionSchemaString('BatchCurrentComponentStatus')}
   {
     batch: Batch! @relation(name: "BatchCurrentComponentStatusBatch")
     currentCourse: Course! @relation(name: "BatchCurrentComponentStatusCourse", direction: "OneWay")
+    enrollmentType: EnrollmentType! @defaultValue(value: "free")
     currentTopic: Topic! @relation(name: "BatchCurrentComponentStatusTopic", direction: "OneWay")
     currentLearningObjective: LearningObjective @relation(name: "BatchCurrentComponentStatusLearningObjective", direction: "OneWay")
     currentPracticeQuestion: QuestionBank @relation(name: "BatchCurrentComponentStatusQuestionBank", direction: "OneWay")

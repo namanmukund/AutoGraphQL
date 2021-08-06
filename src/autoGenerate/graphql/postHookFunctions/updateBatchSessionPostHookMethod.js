@@ -4,6 +4,7 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   sessionStatus,
+  TBA,
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
@@ -158,7 +159,6 @@ const updateBatchSession = (batchSessionId, mentorSessionId) => `
 const updateBatchSessionPostHookMethod = async (input, params, mutationName, context) => {
   const { sessionStatus: sessionStatusFromInput, ...slots } = input;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-
   const mentorSessionId = get(input, 'mentorSession.typeId');
   const {
     batchSessionId,
@@ -175,8 +175,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   } = context;
   let courseId = get(context, 'courseId');
   /*
-get Course Id
-*/
+  get Course Id
+  */
   if (!courseId) {
     const courseResult = await callLocalGraphqlApi(getCourseQuery());
     const course = get(courseResult, 'data.courses');
@@ -298,7 +298,7 @@ get Course Id
     }
   }
   const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
-  extractBatchSessionAndSendB2BC(batchSessionId, students);
+  extractBatchSessionAndSendB2BC(batchSessionId, students, context.appName === TBA);
 };
 
 export default updateBatchSessionPostHookMethod;

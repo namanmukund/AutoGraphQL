@@ -6,9 +6,10 @@ import sendB2B2CBookingReminder from './jobs/sendB2B2CBookingReminder';
 import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
 import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/postHookFunctions/utils/extractBatchSessionAndSendPostCarnival';
 import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
+import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 
 const addScheduleJob = ({
-  jobType, userId, scheduledDate, code, batchSessionId, menteeSessionId, menteeSessionUpdatedAt, menteeId,
+  jobType, userId, scheduledDate, code, batchSessionId, menteeSessionId, menteeSessionUpdatedAt, menteeId, mentorMenteeSessionId,
 }) => `
   mutation {
     addScheduleJob(
@@ -19,6 +20,7 @@ const addScheduleJob = ({
         ${menteeSessionId ? `menteeSessionId: "${menteeSessionId}"` : ''}
         ${menteeId ? `menteeId: "${menteeId}"` : ''}
         ${menteeSessionUpdatedAt ? `menteeSessionUpdatedAt: "${menteeSessionUpdatedAt}"` : ''}
+        ${mentorMenteeSessionId ? `mentorMenteeSessionId: "${mentorMenteeSessionId}"` : ''}
         scheduledDate: "${scheduledDate.toISOString()}"
       }
       ${userId ? `parentConnectId: "${userId}"` : ''}
@@ -42,6 +44,7 @@ const addToSchedule = async (jobType, scheduledDate, {
   batchSessionId,
   menteeId: menteeSessionId,
   menteeSessionUpdatedAt,
+  mentorMenteeSessionId,
 }) => {
   switch (jobType) {
     case 'sendNextDayBookReminder': {
@@ -181,6 +184,18 @@ const addToSchedule = async (jobType, scheduledDate, {
       schedule.scheduleJob(scheduledDate, () => {
         sendB2CSessionReminder({
           userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+        }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      });
+      break;
+    }
+    case 'mentorSessionNotificationB2C': {
+      const res = await callLocalGraphqlApi(addScheduleJob({
+        jobType, mentorMenteeSessionId, scheduledDate,
+      }));
+      const jobId = get(res, 'data.addScheduleJob.id');
+      schedule.scheduleJob(scheduledDate, () => {
+        sendMentorSessionReminder({
+          mentorMenteeSessionId, jobType,
         }, () => callLocalGraphqlApi(deleteJob(jobId)));
       });
       break;
