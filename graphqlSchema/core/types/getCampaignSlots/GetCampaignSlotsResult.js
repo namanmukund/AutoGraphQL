@@ -13,6 +13,7 @@ const GetCampaignSlotsResult = `
   type GetCampaignSlotsResult {
     id: String
     title: String
+    whiteLabel: Boolean @defaultValue(value: "false")
     slots: [CampaignSlots]
     schoolId: String
     schoolName: String

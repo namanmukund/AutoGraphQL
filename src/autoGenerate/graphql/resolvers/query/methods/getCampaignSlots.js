@@ -12,6 +12,7 @@ const getCampaign = (code) => `
     id
     type
     title
+    whiteLabel
     poster {
       id
     }
@@ -103,6 +104,7 @@ const getCampaignSlots = (async (root, params, context) => {
   const schoolLogoId = get(getCampaignRes, 'data.campaigns[0].school.logo.id', '');
   const posterId = get(getCampaignRes, 'data.campaigns[0].poster.id', '');
   const title = get(getCampaignRes, 'data.campaigns[0].title', '');
+  const whiteLabel = get(getCampaignRes, 'data.campaigns[0].whiteLabel', '');
   const classes = get(getCampaignRes, 'data.campaigns[0].classes', []);
   const batches = get(getCampaignRes, 'data.campaigns[0].batches', []);
   // by default taking value as 1 in worst case
@@ -118,6 +120,7 @@ const getCampaignSlots = (async (root, params, context) => {
   result.id = campaignId;
   result.slots = slotsArray;
   result.schoolName = schoolName;
+  result.whiteLabel = whiteLabel;
   result.classes = classes;
   result.schoolId = schoolId;
   result.title = title;
