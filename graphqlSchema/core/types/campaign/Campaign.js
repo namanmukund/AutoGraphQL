@@ -33,7 +33,6 @@ const Campaign = `
     title: String! @trim
     code: String @unique @trim
     description: String
-    whiteLabel: Boolean @defaultValue(value: "false")
     type: CampaignType!
     batchRules: BatchRules
     timeTableRules: [CampaignTimeTableRules]
