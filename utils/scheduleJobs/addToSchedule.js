@@ -248,7 +248,6 @@ const addToSchedule = async (jobType, scheduledDate, {
         mentorUserId,
       }));
       const jobId = get(res, 'data.addScheduleJob.id');
-      console.log('job adddedd.... ');
       schedule.scheduleJob(scheduledDate, () => {
         sendMentorSessionReminderB2B2C({
           jobType,
