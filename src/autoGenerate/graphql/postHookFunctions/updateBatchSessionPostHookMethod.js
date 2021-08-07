@@ -424,7 +424,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         mentorSessionReminderDateTime = moment(bookingDateTime).subtract(2, 'hours').toDate();
       }
 
-      addToSchedule('mentorSessionNotificationB2B2C', moment().add(30, 'seconds').toDate(), {
+      addToSchedule('mentorSessionNotificationB2B2C', mentorSessionReminderDateTime, {
         batchSessionId,
         courseName: get(batchSessionRes, 'data.batchSession.course.title'),
         batchCode: get(batchSessionRes, 'data.batchSession.batch.code'),
