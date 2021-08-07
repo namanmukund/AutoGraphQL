@@ -7,9 +7,26 @@ import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
 import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/postHookFunctions/utils/extractBatchSessionAndSendPostCarnival';
 import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
 import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
+import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
 
 const addScheduleJob = ({
-  jobType, userId, scheduledDate, code, batchSessionId, menteeSessionId, menteeSessionUpdatedAt, menteeId, mentorMenteeSessionId,
+  jobType,
+  userId,
+  scheduledDate,
+  code,
+  menteeSessionId,
+  menteeSessionUpdatedAt,
+  menteeId,
+  mentorMenteeSessionId,
+  batchSessionId,
+  courseName,
+  batchCode,
+  schoolName,
+  sessionDate,
+  sessionTime,
+  sessionLink,
+  mentorUserId,
+  mentorPhoneNumber,
 }) => `
   mutation {
     addScheduleJob(
@@ -21,6 +38,14 @@ const addScheduleJob = ({
         ${menteeId ? `menteeId: "${menteeId}"` : ''}
         ${menteeSessionUpdatedAt ? `menteeSessionUpdatedAt: "${menteeSessionUpdatedAt}"` : ''}
         ${mentorMenteeSessionId ? `mentorMenteeSessionId: "${mentorMenteeSessionId}"` : ''}
+        ${courseName ? `courseName: "${courseName}"` : ''}
+        ${batchCode ? `batchCode: "${batchCode}"` : ''}
+        ${schoolName ? `schoolName: "${schoolName}"` : ''}
+        ${sessionDate ? `sessionDate: "${sessionDate}"` : ''}
+        ${sessionTime ? `sessionTime: "${sessionTime}"` : ''}
+        ${sessionLink ? `sessionLink: "${sessionLink}"` : ''}
+        ${mentorUserId ? `mentorUserId: "${mentorUserId}"` : ''}
+        ${mentorPhoneNumber ? `mentorPhoneNumber: "${mentorPhoneNumber}"` : ''}        
         scheduledDate: "${scheduledDate.toISOString()}"
       }
       ${userId ? `parentConnectId: "${userId}"` : ''}
@@ -45,6 +70,14 @@ const addToSchedule = async (jobType, scheduledDate, {
   menteeId: menteeSessionId,
   menteeSessionUpdatedAt,
   mentorMenteeSessionId,
+  courseName,
+  batchCode,
+  schoolName,
+  sessionDate,
+  sessionTime,
+  sessionLink,
+  mentorUserId,
+  mentorPhoneNumber,
 }) => {
   switch (jobType) {
     case 'sendNextDayBookReminder': {
@@ -196,6 +229,37 @@ const addToSchedule = async (jobType, scheduledDate, {
       schedule.scheduleJob(scheduledDate, () => {
         sendMentorSessionReminder({
           mentorMenteeSessionId, jobType,
+        }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      });
+      break;
+    }
+    case 'mentorSessionNotificationB2B2C': {
+      const res = await callLocalGraphqlApi(addScheduleJob({
+        jobType,
+        scheduledDate,
+        batchSessionId,
+        courseName,
+        batchCode,
+        schoolName,
+        sessionDate,
+        sessionTime,
+        sessionLink,
+        mentorPhoneNumber,
+        mentorUserId,
+      }));
+      const jobId = get(res, 'data.addScheduleJob.id');
+      schedule.scheduleJob(scheduledDate, () => {
+        sendMentorSessionReminderB2B2C({
+          jobType,
+          batchSessionId,
+          courseName,
+          batchCode,
+          schoolName,
+          sessionDate,
+          sessionTime,
+          sessionLink,
+          mentorUserId,
+          mentorPhoneNumber,
         }, () => callLocalGraphqlApi(deleteJob(jobId)));
       });
       break;

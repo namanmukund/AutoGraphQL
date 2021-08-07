@@ -8,6 +8,7 @@ import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/p
 import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
 import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
 import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
+import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
 
 const FETCH_JOBS = `{
   scheduleJobs {
@@ -23,6 +24,14 @@ const FETCH_JOBS = `{
     mentorMenteeSessionId
     menteeId
     menteeSessionUpdatedAt
+    courseName
+    batchCode
+    schoolName
+    sessionDate
+    sessionTime
+    sessionLink
+    mentorUserId
+    mentorPhoneNumber
   }
 }`;
 
@@ -50,6 +59,14 @@ const reRunJobsFromDB = async () => {
       menteeSessionUpdatedAt,
       menteeId,
       mentorMenteeSessionId,
+      courseName,
+      batchCode,
+      schoolName,
+      sessionDate,
+      sessionTime,
+      sessionLink,
+      mentorUserId,
+      mentorPhoneNumber,
     } = scheduledJob;
     const deleteJob = () => callLocalGraphqlApi(deleteJobQuery(id));
     const isPast = moment().isAfter(scheduledDate);
@@ -155,6 +172,23 @@ const reRunJobsFromDB = async () => {
         schedule.scheduleJob(new Date(scheduledDate), () => {
           sendMentorSessionReminder({
             mentorMenteeSessionId, jobType,
+          }, deleteJob);
+        });
+        break;
+      }
+      case 'mentorSessionNotificationB2B2C': {
+        schedule.scheduleJob(new Date(scheduledDate), () => {
+          sendMentorSessionReminderB2B2C({
+            jobType,
+            batchSessionId,
+            courseName,
+            batchCode,
+            schoolName,
+            sessionDate,
+            sessionTime,
+            sessionLink,
+            mentorUserId,
+            mentorPhoneNumber,
           }, deleteJob);
         });
         break;
