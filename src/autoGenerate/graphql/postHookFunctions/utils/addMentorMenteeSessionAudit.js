@@ -21,6 +21,7 @@ const mentorMenteeSessionAuditQuery = (mentorMenteeSessionId) => `
 const addMentorMenteeSessionAuditQuery = (
   mentorMenteeSessionId,
   auditQuestionsIds,
+  questionSectionsQuery,
 ) => `
   mutation{
   addMentorMenteeSessionAudit(mentorMenteeSessionConnectId: "${mentorMenteeSessionId}",
@@ -28,6 +29,7 @@ const addMentorMenteeSessionAuditQuery = (
       auditQuestions: [
         ${auditQuestionsIds}
       ]
+      customSectionScore: [${questionSectionsQuery}]
     }){
     id
   }
@@ -43,14 +45,22 @@ const addMentorMenteeSessionAudit = async (
   if (!mentorMenteeSessionAuditId) {
     const auditQuestions = await fetchAllAuditQuestion(mentor);
     let auditQuestionsIds = '';
+    let sectionsArray = [];
     if (auditQuestions && auditQuestions.length > 0) {
       auditQuestions.forEach((auditQuestion) => {
         auditQuestionsIds += `{ auditQuestionConnectId: "${get(auditQuestion, 'id')}" }`;
+        sectionsArray.push(get(auditQuestion, 'section'));
       });
     }
+    sectionsArray = [...new Set(sectionsArray)];
+    let questionSectionsQuery = '';
+    sectionsArray.forEach((section) => {
+      questionSectionsQuery += `{questionSection: ${section}}`;
+    });
     callLocalGraphqlApi(addMentorMenteeSessionAuditQuery(
       mentorMenteeSessionId,
       auditQuestionsIds,
+      questionSectionsQuery,
     ));
   }
 };

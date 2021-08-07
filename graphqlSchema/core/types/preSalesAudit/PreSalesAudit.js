@@ -7,6 +7,7 @@ type PreSalesAuditQuestion {
    boolAnswers: Boolean
    inputAnswer: String
    ratingAnswer: Int
+   customScore: Int
  }`;
 
 const PreSalesAudit = `
@@ -25,6 +26,7 @@ const PreSalesAudit = `
     timestampAnswer: [MentorMenteeSessionTimestamp] @relation(name: "PreSalesAuditTimestamp")
     finalComment: String
     score: Float
+    customSectionScore: [CustomSectionScore]
 }`;
 
 export default [PreSalesAudit, preSalesAuditQuestion];

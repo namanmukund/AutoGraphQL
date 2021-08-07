@@ -18,14 +18,15 @@ const userPermissionsDoc = {
   User: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, PRE_SALES],
-      exceptDelete: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN, TRANSFORMATION_ADMIN],
+      crud: [...UMS_HEAD_ARR],
+      read: [PRE_SALES, POST_SALES],
+      exceptDelete: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN, TRANSFORMATION_ADMIN, AUDIT_ADMIN],
     },
     fields: {
       role: {
         rule: 'allow',
         crud: [...UMS_HEAD_ARR],
-        read: [...NOT_UMS_HEAD_ARR, PRE_SALES],
+        read: [...NOT_UMS_HEAD_ARR, PRE_SALES, POST_SALES, AUDIT_ADMIN],
         exceptDelete: [TRANSFORMATION_ADMIN],
       },
       savedPassword: {

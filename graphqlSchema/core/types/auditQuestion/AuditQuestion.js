@@ -15,6 +15,7 @@ const AuditQuestion = `
     statement: String! @trim
     score: Int!
     maxRating: Int
+    section: AuditQuestionsSection
     questionType: AuditQuestionType!
     isMandatory: Boolean @defaultValue(value: "false")
     auditType: AuditType!

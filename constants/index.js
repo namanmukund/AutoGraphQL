@@ -191,6 +191,16 @@ const auditQuestionType = {
   input: 'input',
 };
 
+const auditQuestionsSection = {
+  classQuality: 'classQuality',
+  interpersonalSkills: 'interpersonalSkills',
+  addTimestampSpecificComments: 'addTimestampSpecificComments',
+  negativeTimestampSigns: 'negativeTimestampSigns',
+  processMonitoring: 'processMonitoring',
+  codingExercises: 'codingExercises',
+  other: 'other',
+};
+
 const auditType = {
   mentor: 'mentor',
   preSales: 'preSales',
@@ -467,4 +477,5 @@ export {
   usWatiSMS,
   auditQuestionType,
   auditType,
+  auditQuestionsSection,
 };

@@ -47,6 +47,13 @@ type MentorAuditQuestion {
    boolAnswers: Boolean
    inputAnswer: String
    ratingAnswer: Int
+   customScore: Int
+ }`;
+
+const customSectionScore = `
+type CustomSectionScore {
+   questionSection: AuditQuestionsSection
+   customScore: Int
  }`;
 
 const codingExercise = `
@@ -73,6 +80,7 @@ const MentorMenteeSessionAudit = `
     timestampComment: [MentorMenteeSessionTimestamp] @relation(name: "MentorMenteeSessionAuditTimestamp")
     overallClassComment: String
     score: Float
+    customSectionScore: [CustomSectionScore]
 }`;
 
-export default [MentorMenteeSessionAudit, mentorAuditQuestion];
+export default [MentorMenteeSessionAudit, mentorAuditQuestion, customSectionScore];

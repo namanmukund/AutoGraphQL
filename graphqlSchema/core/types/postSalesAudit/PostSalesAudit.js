@@ -7,6 +7,7 @@ type PostSalesAuditQuestion {
    boolAnswers: Boolean
    inputAnswer: String
    ratingAnswer: Int
+   customScore: Int
  }`;
 
 const PostSalesAudit = `
@@ -25,6 +26,7 @@ const PostSalesAudit = `
     timestampAnswer: [MentorMenteeSessionTimestamp] @relation(name: "PreSalesAuditTimestamp")
     finalComment: String
     score: Float
+    customSectionScore: [CustomSectionScore]
 }`;
 
 export default [PostSalesAudit, postSalesAuditQuestion];
