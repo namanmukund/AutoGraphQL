@@ -24,7 +24,7 @@ const PostSalesAudit = `
     status: SessionStatus @defaultValue(value: "allotted")
     auditQuestions: [PostSalesAuditQuestion]
     timestampAnswer: [MentorMenteeSessionTimestamp] @relation(name: "PreSalesAuditTimestamp")
-    finalComment: String
+    overallClassComment: String
     score: Float
     customSectionScore: [CustomSectionScore]
 }`;

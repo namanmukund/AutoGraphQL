@@ -17,12 +17,12 @@ const updatePostSalesAudit = async (postSalesAuditId, input) => {
 };
 
 const updatePostSalesAuditPostHookMethod = async (input, _mutationName, _context, params) => {
-  const { auditorConnectId } = params;
+  const { auditorConnectId, postSalesUserConnectId } = params;
   /**
    * Check if prev status is not started and auditorConnectId not provided then update status to started
    * i.e To avoid changing status to started when the query for assigning the Auditor is fired.
    * */
-  if (get(input, 'status', false) !== 'started' && !auditorConnectId) {
+  if (get(input, 'status', false) !== 'started' && !auditorConnectId && !postSalesUserConnectId) {
     const updatePostSalesAuditPostHookMethodData = await updatePostSalesAudit(get(input, 'id'), { status: 'started' });
     if (updatePostSalesAuditPostHookMethodData && updatePostSalesAuditPostHookMethodData.id) {
       Object.assign(input, {

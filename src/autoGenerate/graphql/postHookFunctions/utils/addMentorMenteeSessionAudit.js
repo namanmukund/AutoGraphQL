@@ -49,7 +49,9 @@ const addMentorMenteeSessionAudit = async (
     if (auditQuestions && auditQuestions.length > 0) {
       auditQuestions.forEach((auditQuestion) => {
         auditQuestionsIds += `{ auditQuestionConnectId: "${get(auditQuestion, 'id')}" }`;
-        sectionsArray.push(get(auditQuestion, 'section'));
+        if (get(auditQuestion, 'section')) {
+          sectionsArray.push(get(auditQuestion, 'section'));
+        }
       });
     }
     sectionsArray = [...new Set(sectionsArray)];

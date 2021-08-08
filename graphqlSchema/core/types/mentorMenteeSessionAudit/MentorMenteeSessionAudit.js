@@ -77,7 +77,7 @@ const MentorMenteeSessionAudit = `
     switchedToComfortableLanguage: Boolean
     isMentorInternetDecent: Boolean
     auditQuestions: [MentorAuditQuestion]
-    timestampComment: [MentorMenteeSessionTimestamp] @relation(name: "MentorMenteeSessionAuditTimestamp")
+    timestampAnswer: [MentorMenteeSessionTimestamp] @relation(name: "MentorMenteeSessionAuditTimestamp")
     overallClassComment: String
     score: Float
     customSectionScore: [CustomSectionScore]
