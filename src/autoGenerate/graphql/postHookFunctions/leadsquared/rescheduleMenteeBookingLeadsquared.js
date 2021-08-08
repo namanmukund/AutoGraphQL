@@ -26,7 +26,7 @@ const rescheduleMenteeBookingLeadsquared = async (input, slotTimeStringArray, us
       Fields: [
         {
           SchemaName: 'Status',
-          Value: 'Lead Reschedule',
+          Value: !isBookedByMentee ? 'Booked (Verified)' : 'Lead Reschedule',
         },
         {
           SchemaName: 'mx_Custom_3',
