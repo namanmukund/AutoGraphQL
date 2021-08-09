@@ -20,7 +20,8 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
     for (const mentorSession of prevMentorSessions) {
       const mentorMenteeSessions = get(mentorSession, 'mentorMenteeSessions', []);
       const batchSessions = get(mentorSession, 'batchSessions', []);
-
+      let customError = '';
+      
       // for a batch mentorSession we will check batchSessions and see which slots are occupied
       if ((mentorSession.sessionType === sessionType.trial || mentorSession.sessionType === sessionType.batch) && batchSessions.length) {
         // eslint-disable-next-line no-restricted-syntax
@@ -28,6 +29,7 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
           const occupiedSlotTimeArrayForBatch = getSelectedSlotsTime(batchSession);
           occupiedSlotsArray.push(...occupiedSlotTimeArrayForBatch);
         }
+        customError = `Batch Code : ${get(batchSessions, '[0].batch.code', '')}`
       // for trial/paid mentorSession we will check mentorMenteeSessions and see which slots are occupied
       } else if (mentorMenteeSessions.length) {
         // eslint-disable-next-line no-restricted-syntax
@@ -51,6 +53,7 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
         errorMessage += ` slot${intersectionSlot}`;
       }
       errorMessage += ' are already present and booked';
+      errorMessage += customError;
       throw new SlotsOccupiedError({
         data: {
           message: errorMessage,
