@@ -31,10 +31,35 @@ const getMentorMenteeSessionData = async (id) => {
   return get(res, 'data.mentorMenteeSession');
 };
 
+// query to get mentor from mentorSessionConnectId
+const fetchMentor = (id) => `
+query{
+  mentorSession(id: "${id}"){
+    id
+    user{
+      id
+    }
+  }
+}`;
+
 const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryName, context) => {
   const {
-    id, menteeSessionConnectId, mentorSessionConnectId, input: { sessionStatus },
+    id, menteeSessionConnectId, mentorSessionConnectId, input: { sessionStatus, bookingDate },
   } = newParams;
+
+  // check if mentor already has another session in same slot
+  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
+  if (mentorUserId && bookingDate) {
+    const getMentorSessionsRes = await callLocalGraphqlApi(
+      getMentorSessions(
+        mentorUserId,
+        bookingDate,
+      ),
+    );
+    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+    checkIfSlotCanBeOpenedValidation(params, mentorSessions);
+  }
 
   const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id);
 

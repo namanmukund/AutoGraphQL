@@ -55,26 +55,13 @@ query{
   }
 }`;
 
-const validateMenteeStartSessionData = (menteeSession, topicConnectId, params, mentorSessionConnectId) => {
+const validateMenteeStartSessionData = (menteeSession, topicConnectId, params) => {
   // eslint-disable-next-line no-unused-vars
   const { bookingDate, topic: { id: topicId }, ...slots } = menteeSession;
   if (topicConnectId !== topicId) {
     throw new SessionTopicAndTopicConnectIdMismatchError();
   }
 
-  // check if mentor already has another session in same slot
-  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
-  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
-  if (mentorUserId) {
-    const getMentorSessionsRes = await callLocalGraphqlApi(
-      getMentorSessions(
-        mentorUserId,
-        bookingDate,
-      ),
-    );
-    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-    checkIfSlotCanBeOpenedValidation(params, mentorSessions);
-  }
 
   // uncomment later on
   const slotTimeArray = getSelectedSlotsTime(slots);
@@ -130,7 +117,23 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
       },
     });
   }
-  validateMenteeStartSessionData(menteeSession, topicConnectId, params, mentorSessionConnectId);
+  validateMenteeStartSessionData(menteeSession, topicConnectId, params);
+
+  // check if mentor already has another session in same slot
+  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
+  const { bookingDate } = menteeSession;
+  if (mentorUserId && bookingDate) {
+    const getMentorSessionsRes = await callLocalGraphqlApi(
+      getMentorSessions(
+        mentorUserId,
+        bookingDate,
+      ),
+    );
+    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+    checkIfSlotCanBeOpenedValidation(params, mentorSessions);
+  }
+
   //update source & country in mentorMenteeSession
   const userData = get(menteeSession, 'user');
   updateUserSpecificDetailsInParams(userData, params);
