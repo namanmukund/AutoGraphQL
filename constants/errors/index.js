@@ -56,6 +56,9 @@ import {
   BatchFullError,
   MentorMandatoryError,
   MentorProfileAlreadyExist,
+  OrderAndAuditTypeExists,
+  MCQOptionNotProvided,
+  MaxRatingAndDisplayTypeNotFound,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -251,4 +254,7 @@ export {
   MentorMandatoryError,
   MentorProfileAlreadyExist,
   CanNotDeleteCompletedSessionError,
+  OrderAndAuditTypeExists,
+  MCQOptionNotProvided,
+  MaxRatingAndDisplayTypeNotFound,
 };

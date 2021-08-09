@@ -60,6 +60,8 @@ import addUserActivityBlockBasedProjectDumpPostHookMethod
 import deleteMentorMenteeSessionPostHookMethod from './postHookFunctions/deleteMentorMenteeSessionPostHookMethod';
 import deleteBatchSessionPostHookMethod from './postHookFunctions/deleteBatchSessionPostHookMethod';
 import updateUserPostHookMethod from './postHookFunctions/updateUserPostHookMethod';
+import updatePreSalesAuditPostHookMethod from './postHookFunctions/updatePreSalesAuditPostHookMethod';
+import updatePostSalesAuditPostHookMethod from './postHookFunctions/updatePostSalesAuditPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -287,6 +289,14 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateUser': {
       await updateUserPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'updatePreSalesAudit': {
+      await updatePreSalesAuditPostHookMethod(input, mutationName, context, params);
+      break;
+    }
+    case 'updatePostSalesAudit': {
+      await updatePostSalesAuditPostHookMethod(input, mutationName, context, params);
       break;
     }
     default:
