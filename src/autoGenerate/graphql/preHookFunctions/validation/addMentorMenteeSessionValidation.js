@@ -11,6 +11,7 @@ import { ConnectIdRequiredError, DatabaseRecordNotFoundError } from '../../../..
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetailsInParams';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
+import getMentorSessions from '../../../utils/getMentorSessions';
 
 // query to get mentor Sessions
 const mentorMenteeSessionsQuery = (menteeSessionConnectId, mentorSessionConnectId) => `
@@ -40,6 +41,17 @@ query{
       id
     }
     ${getSlotTimesInString()}
+  }
+}`;
+
+// query to get mentor from mentorSessionConnectId
+const fetchMentor = (id) => `
+query{
+  mentorSession(id: "${id}"){
+    id
+    user{
+      id
+    }
   }
 }`;
 
@@ -77,6 +89,21 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   const { menteeSessionConnectId, mentorSessionConnectId, topicConnectId } = params;
   if (!menteeSessionConnectId || !mentorSessionConnectId || !topicConnectId) {
     throw new ConnectIdRequiredError();
+  }
+
+  // check if mentor already has another session in same slot
+  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+  const mentorUserId = get(fetchMentorRes, 'data.mentorSessions[0].user.id', '');
+  const bookingDate = get(params, 'bookingDate', '');
+  if(mentorUserId){
+    const getMentorSessionsRes = await callLocalGraphqlApi(
+      getMentorSessions(
+        mentorUserId,
+        bookingDate,
+      ),
+    );
+    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+    checkIfSlotCanBeOpenedValidation(params, mentorSessions);
   }
 
   // check if mentor mentee sessions already exist
