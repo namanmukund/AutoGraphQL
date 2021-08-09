@@ -9,14 +9,16 @@ import extractMenteeSessionInfoAndSendEmail from './utils/extractMenteeSessionIn
 import isTrialSession from '../resolvers/utils/isTrialSession';
 import updateScheduleStatusOfMenteeSession from '../../../../utils/scheduleJobs/updateScheduleStatusOfMenteeSession';
 import getMenteeInfo from './utils/getMenteeInfo';
+import deleteMentorMenteeSessionQuery from './utils/deleteMentorMenteeSessionQuery';
 import getTopicInfo from './utils/getTopicInfo';
 import rescheduleMenteeBookingLeadsquared from './leadsquared/rescheduleMenteeBookingLeadsquared';
 import { byPassMenteeValidationApps } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
+import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
-  const { previousDocument, currentUser } = context;
+  const { previousDocument, currentUser, mentorMenteeSessionDoc } = context;
   const { id: menteeSessionId, bookingDate: prevBookingDate, ...prevSlots } = previousDocument;
   const prevSlotTimeStringArray = getSelectedSlotsStringArray(prevSlots);
 
@@ -71,30 +73,55 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
       }
     }
     await updateScheduleStatusOfMenteeSession(menteeSessionId, 'todo');
+
+    const studentName = get(userInfo, 'data.user.name', '');
+    const parentName = get(userInfo, 'data.user.studentProfile.parents[0].user.name', '');
+
+    if (
+      (prevBookingDate.getTime() !== bookingDate.getTime())
+      || (get(prevSlotTimeStringArray, '0') !== get(slotTimeStringArray, '0'))
+    ) {
+      if (context.mentorSessionId) {
+        sendSessionCancellationMessage(context.mentorSessionId, prevBookingDate, prevSlotTimeStringArray, studentName, parentName);
+      }
+
+      // send email to mentor admin regarding the session
+      extractMenteeSessionInfoAndSendEmail(
+        'update',
+        input,
+        bookingDate,
+        slotTimeStringArray,
+        prevBookingDate,
+        prevSlotTimeStringArray,
+        userInfo,
+        topicInfo,
+      );
+    }
   }
-  // update booking time on leadsquared
-  rescheduleMenteeBookingLeadsquared(input, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, get(context, 'userIdFromContext'));
-  // send email to mentor admin regarding the session
-  await extractMenteeSessionInfoAndSendEmail(
-    'update',
-    input,
-    bookingDate,
-    slotTimeStringArray,
-    prevBookingDate,
-    prevSlotTimeStringArray,
-    userInfo,
-    topicInfo,
-  );
+
+  const updateMentorMenteeSessionInput = {};
+  if (context.mmsId && (
+    (prevBookingDate.getTime() !== bookingDate.getTime())
+    || (get(prevSlotTimeStringArray, '0') !== get(slotTimeStringArray, '0'))
+  )) {
+    updateMentorMenteeSessionInput.hasRescheduled = get(mentorMenteeSessionDoc, 'hasRescheduled', false);
+    updateMentorMenteeSessionInput.rescheduledDate = get(mentorMenteeSessionDoc, 'rescheduledDate', false);
+    updateMentorMenteeSessionInput.rescheduledDateProvided = get(mentorMenteeSessionDoc, 'rescheduledDateProvided', null);
+    await deleteMentorMenteeSessionQuery(context.mmsId, context);
+  }
+
   if (!byPassMenteeValidationApps.includes(appName)) {
     if (get(context, 'userIdFromContext')) {
       updateUserBookingAgent(menteeSessionId, get(context, 'userIdFromContext'), bookingDate, get(slotTimeStringArray, '0'));
     }
+    // update booking time on leadsquared
+    rescheduleMenteeBookingLeadsquared(input, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, get(context, 'userIdFromContext'));
     // update session log entry
     const courseId = get(input, 'course.typeId', '');
     const clientId = get(userInfo, 'data.user.id', '');
     const topicId = get(topicInfo, 'data.topic.id', '');
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
-    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMenteeSession', batchCode, '', '');
+    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMenteeSession', batchCode, '', '', updateMentorMenteeSessionInput);
   }
 };
 

@@ -39,7 +39,7 @@ const getLeadSquaredParams = (params = {}, create = false, leadActivity) => {
 //   })}`);
 // };
 
-const updateLeadSquared = async (leadSquaredParams = {}, create = false, leadActivity = {}, pseudoCreate = false) => {
+const updateLeadSquared = async (leadSquaredParams = {}, create = false, leadActivity, pseudoCreate = false) => {
   let LEAD_ENDPOINT = '';
   if (create || !leadActivity) {
     LEAD_ENDPOINT = LEAD_CREATE_ENDPOINT;

@@ -23,6 +23,7 @@ import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import addSalesAudit from './utils/addSalesAudit';
 
 const { postSales } = auditType;
+// import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 /*
   - check if the user if from referral
   - check if the session is the first session
@@ -84,6 +85,7 @@ query{
           salesExecutive {
             user {
               name
+              email
             }
           }
         }
@@ -111,6 +113,16 @@ const userPaymentPlanQuery = async (filterQuery) => {
   const res = await callLocalGraphqlApi(query);
   const data = get(res, 'data.userPaymentPlans[0]');
   return data;
+};
+
+const intersection = (arr1, arr2) => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const v of arr1) {
+    if (arr2.includes(v)) {
+      return true;
+    }
+  }
+  return false;
 };
 
 const allowedRoles = [MENTEE];
@@ -221,10 +233,10 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
         userInfo,
         get(mmsFirstData, 'mentorSession.user.name'),
         get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.name'),
+        get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.email'),
       );
     }
-
-    if (input && Object.keys(input).includes('hasRescheduled') && topic.order === 1) {
+    if (input && intersection(['hasRescheduled', 'sessionStatus', 'didNotPickTheCall', 'didNotTurnUpInSession', 'sessionNotConducted'], Object.keys(input)) && topic.order === 1) {
       updateMentorRescheduleLeadsquared(userInfo, input, params);
     }
 
@@ -241,6 +253,10 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     // adding logs when menteeSession is changed or mentorSession is changed or status is changed
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMentorMenteeSession', batchCode, mentorSessionId, sessionStatus, input);
+  }
+
+  if (context.hasMenteeSessionChanged || context.hasMentorSessionChanged) {
+    // sendSessionCancellationMessage(get(context, 'mentorSessionConnectId'), oldBookingDate, [`slot${get(oldSlotTimeArray, '0')}`], studentName, parentName);
   }
   /** Update MenteeMentorSession If Session Completed  */
   if (prevSessionStatus === 'completed' || get(input, 'sessionStatus') === 'completed') {

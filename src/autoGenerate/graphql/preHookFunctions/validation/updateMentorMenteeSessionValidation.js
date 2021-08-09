@@ -22,6 +22,9 @@ const getMentorMenteeSessionData = async (id) => {
           bookingDate
           ${getSlotTimesInString()}
         }
+        mentorSession {
+          id
+        }
       }
     }
   `;
@@ -56,6 +59,12 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   context.currentUser = currentUser;
   context.mentorSessionConnectId = mentorSessionConnectId;
   context.isPostSalesAuditFromInput = isPostSalesAuditFromInput;
+  if (menteeSessionConnectId && menteeSessionConnectId !== get(mentorMenteeSessionDoc, 'menteeSession.id')) {
+    context.hasMenteeSessionChanged = true;
+  }
+  if (mentorSessionConnectId && mentorSessionConnectId !== get(mentorMenteeSessionDoc, 'mentorSession.id')) {
+    context.hasMentorSessionChanged = true;
+  }
 };
 
 export default updateMentorMenteeSessionValidation;

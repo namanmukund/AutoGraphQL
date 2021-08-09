@@ -197,7 +197,7 @@ const sendB2CSessionReminder = async ({
         startTime,
       }, {
         emailTemplate: 'textSessionLink',
-        subject: `${studentName}'s coding journey begins today. Are you excited?`,
+        subject: `${studentName}'s coding journey begins soon. Are you excited?`,
       }, country);
     } else {
       if (!sessionLink) return;
@@ -206,7 +206,7 @@ const sendB2CSessionReminder = async ({
         parentEmail,
       }, {
         emailTemplate: 'B2CSessionLink',
-        subject: `${studentName}'s coding journey begins today. Are you excited?`,
+        subject: `${studentName}'s coding journey begins soon. Are you excited?`,
       }, country);
     }
     if (country === 'india') {
@@ -256,7 +256,7 @@ const sendB2CSessionReminder = async ({
         mentorPhoneNumber,
       }, {
         emailTemplate: 'textMentorDetails',
-        subject: `${studentName}'s coding journey begins today. Are you excited?`,
+        subject: `${studentName}'s coding journey begins soon. Are you excited?`,
       }, country);
     } else {
       if (!sessionLink) return;
@@ -274,7 +274,7 @@ const sendB2CSessionReminder = async ({
         sessionLink,
       }, {
         emailTemplate: 'B2CSessionLinkWithMentor',
-        subject: `${studentName}'s coding journey begins today. Are you excited?`,
+        subject: `${studentName}'s coding journey begins soon. Are you excited?`,
       }, country);
     }
     if (country === 'india') {

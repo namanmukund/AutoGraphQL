@@ -1,8 +1,10 @@
 const School = `
   type School @model {
     name: String! @unique
-    code: String @unique @trim
+    code: String @unique @trim @lowercase
+    whiteLabel: Boolean @defaultValue(value: "false")
     admins: [User] @relation(name:"UserSchool")
+    enrollmentType: EnrollmentType! @defaultValue(value: "free")
     classes: [SchoolClass] @relation(name: "SchoolClassSchool")
     students: [StudentProfile] @relation(name: "StudentProfileSchool")
     coordinatorEmail: String @uniqueOrEmpty @trim

@@ -40,6 +40,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   context.batchId = batch && batch.id;
   context.bookingDate = bookingDate;
   context.mentorSessionConnectId = mentorSessionConnectId;
+  context.prevMentor = get(batch, 'allottedMentor.user', {});
   context.slotTimeArray = slotTimeArray;
   context.bookingDateFromInput = bookingDateFromInput;
   context.inputSlotTimeArray = inputSlotTimeArray;
@@ -47,6 +48,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   context.allottedMentorId = allottedMentorId;
   context.courseId = course && course.id;
   context.prevSessionStatus = prevSessionStatus;
+  context.prevStudentsAttendanceCount = get(batchSession, 'attendance', []).length;
 
   // we are doing this to handle cases where we make timetable for school without the topic being attached
   // so whenever these sessions get started we need topicId in this mutation as mandatory field
@@ -78,9 +80,10 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   const userInfo = validateTokenAndExtractInformation(context, false);
   const {
     currentUser,
+    currentApp,
   } = userInfo;
   context.currentUser = currentUser;
-
+  context.appName = get(currentApp, 'name');
   return true;
 };
 

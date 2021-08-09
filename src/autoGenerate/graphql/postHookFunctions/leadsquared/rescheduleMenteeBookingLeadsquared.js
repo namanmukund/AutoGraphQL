@@ -22,11 +22,11 @@ const rescheduleMenteeBookingLeadsquared = async (input, slotTimeStringArray, us
     }
     const activityInput = {
       ActivityEvent: 103,
-      ActivityNote: !isBookedByMentee ? 'Agent updated session details' : 'User rescheduled a session',
+      ActivityNote: !isBookedByMentee ? 'Mentor rescheduled the session' : 'User rescheduled a session',
       Fields: [
         {
           SchemaName: 'Status',
-          Value: !isBookedByMentee ? 'Booked (Verified)' : 'Booked (Non Verified)',
+          Value: 'Lead Reschedule',
         },
         {
           SchemaName: 'mx_Custom_3',

@@ -20,6 +20,7 @@ import BulletPoint from './BulletPoint';
 import WorkbookExample from './WorkbookExample';
 import UpdateParentChildDetailInput from './UpdateParentChildDetailInput.js';
 import TimestampTag from './TimestampTag';
+import ProductFeature from './ProductFeature';
 
 export default [
   ...Enum,
@@ -44,4 +45,5 @@ export default [
   ...BulletPoint,
   ...WorkbookExample,
   ...TimestampTag,
+  ...ProductFeature,
 ];

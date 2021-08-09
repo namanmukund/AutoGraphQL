@@ -84,6 +84,10 @@ import AuditQuestionType from './AuditQuestionType';
 import AuditType from './AuditType';
 import RatingDisplayType from './RatingDisplayType';
 import AuditQuestionsSection from './AuditQuestionsSection';
+import UserPersonality from './UserPersonality';
+import WeakSlowAverageFast from './WeakSlowAverageFast';
+import Languages from './Languages';
+import AttendanceStatus from './AttendanceStatus';
 
 export default [
   Status,
@@ -173,4 +177,8 @@ export default [
   AuditType,
   RatingDisplayType,
   AuditQuestionsSection,
+  UserPersonality,
+  WeakSlowAverageFast,
+  Languages,
+  AttendanceStatus,
 ];
