@@ -55,12 +55,27 @@ query{
   }
 }`;
 
-const validateMenteeStartSessionData = (menteeSession, topicConnectId, params) => {
+const validateMenteeStartSessionData = (menteeSession, topicConnectId, params, mentorSessionConnectId) => {
   // eslint-disable-next-line no-unused-vars
   const { bookingDate, topic: { id: topicId }, ...slots } = menteeSession;
   if (topicConnectId !== topicId) {
     throw new SessionTopicAndTopicConnectIdMismatchError();
   }
+
+  // check if mentor already has another session in same slot
+  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
+  if (mentorUserId) {
+    const getMentorSessionsRes = await callLocalGraphqlApi(
+      getMentorSessions(
+        mentorUserId,
+        bookingDate,
+      ),
+    );
+    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+    checkIfSlotCanBeOpenedValidation(params, mentorSessions);
+  }
+
   // uncomment later on
   const slotTimeArray = getSelectedSlotsTime(slots);
   const date = new Date(bookingDate);
@@ -91,21 +106,6 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
     throw new ConnectIdRequiredError();
   }
 
-  // check if mentor already has another session in same slot
-  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
-  const mentorUserId = get(fetchMentorRes, 'data.mentorSessions[0].user.id', '');
-  const bookingDate = get(params, 'bookingDate', '');
-  if(mentorUserId){
-    const getMentorSessionsRes = await callLocalGraphqlApi(
-      getMentorSessions(
-        mentorUserId,
-        bookingDate,
-      ),
-    );
-    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-    checkIfSlotCanBeOpenedValidation(params, mentorSessions);
-  }
-
   // check if mentor mentee sessions already exist
   const mentorMenteeSessionsData = await callLocalGraphqlApi(
     mentorMenteeSessionsQuery(
@@ -130,7 +130,7 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
       },
     });
   }
-  validateMenteeStartSessionData(menteeSession, topicConnectId, params);
+  validateMenteeStartSessionData(menteeSession, topicConnectId, params, mentorSessionConnectId);
   //update source & country in mentorMenteeSession
   const userData = get(menteeSession, 'user');
   updateUserSpecificDetailsInParams(userData, params);

@@ -37,6 +37,17 @@ const getBatchSessions = (batchId, topicId) => `
   }
   `;
 
+// query to get mentor from mentorSessionConnectId
+const fetchMentor = (id) => `
+query{
+  mentorSession(id: "${id}"){
+    id
+    user{
+      id
+    }
+  }
+}`;
+
 const validateBatchStartSessionData = (params) => {
   // eslint-disable-next-line no-unused-vars
   const { bookingDate, ...slots } = params.input;
@@ -52,7 +63,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   // check if the document for called batch and topic is already present
   const batchId = get(params, 'batchConnectId');
   const topicId = get(params, 'topicConnectId');
-  // const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
+  const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
 
   // log in case batch or topic id is not present
   // if (!batchId || !topicId || !mentorSessionConnectId) {
@@ -68,6 +79,21 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
         message: 'batchConnectId is missing in input',
       },
     });
+  }
+
+  // check if mentor already has another session in same slot
+  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
+  const bookingDate = get(params, 'input.bookingDate', '');
+  if (mentorUserId && bookingDate) {
+    const getMentorSessionsRes = await callLocalGraphqlApi(
+      getMentorSessions(
+        mentorUserId,
+        bookingDate,
+      ),
+    );
+    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+    checkIfSlotCanBeOpenedValidation(params, mentorSessions);
   }
 
   // getting user role from context. We will allow adding batchSession if logged in user is admin
