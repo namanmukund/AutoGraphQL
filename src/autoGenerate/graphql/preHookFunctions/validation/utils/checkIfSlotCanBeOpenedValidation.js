@@ -24,20 +24,29 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
       
       // for a batch mentorSession we will check batchSessions and see which slots are occupied
       if ((mentorSession.sessionType === sessionType.trial || mentorSession.sessionType === sessionType.batch) && batchSessions.length) {
+        customError += 'Batch(es) -> ';
         // eslint-disable-next-line no-restricted-syntax
         for (const batchSession of batchSessions) {
           const occupiedSlotTimeArrayForBatch = getSelectedSlotsTime(batchSession);
           occupiedSlotsArray.push(...occupiedSlotTimeArrayForBatch);
+          const intersection = slotTimeArray.filter((x) => occupiedSlotsArray.includes(x));
+          if (intersection && intersection.length){
+            customError += `${get(batchSession, 'batch.code', '')} `;
+          }
         }
-        customError = `Batch Code : ${get(batchSessions, '[0].batch.code', '')}`
       // for trial/paid mentorSession we will check mentorMenteeSessions and see which slots are occupied
       } else if (mentorMenteeSessions.length) {
+        customError += 'Mentee(s) -> ';
         // eslint-disable-next-line no-restricted-syntax
         for (const mentorMenteeSession of mentorMenteeSessions) {
           const menteeSession = get(mentorMenteeSession, 'menteeSession', '');
           if (menteeSession) {
             const occupiedSlotTimeArrayForMMS = getSelectedSlotsTime(menteeSession);
             occupiedSlotsArray.push(...occupiedSlotTimeArrayForMMS);
+            const intersection = slotTimeArray.filter((x) => occupiedSlotsArray.includes(x));
+            if (intersection && intersection.length) {
+              customError += `${get(menteeSession, 'user.name', '')} `;
+            }
           }
         }
       }
@@ -52,7 +61,7 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
       for (const intersectionSlot of intersectionSlots) {
         errorMessage += ` slot${intersectionSlot}`;
       }
-      errorMessage += ' are already present and booked';
+      errorMessage += ' are already present and booked for ';
       errorMessage += customError;
       throw new SlotsOccupiedError({
         data: {

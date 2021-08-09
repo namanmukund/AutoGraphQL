@@ -13,11 +13,17 @@ const getMentorSessions = (userId, availabilityDate) => `query{
        mentorMenteeSessions{
           id
           menteeSession{
+            user {
+              name
+            }
             ${getSlotTimesInString()}
           }
         }
         batchSessions{
           id
+          batch {
+            code
+          }
           ${getSlotTimesInString()}
         }
     }
