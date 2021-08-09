@@ -9,7 +9,6 @@ import checkIfSlotCanBeOpenedValidation from './utils/checkIfSlotCanBeOpenedVali
 import checkIfSlotCanBeDeletedValidation from './utils/checkIfSlotCanBeDeletedValidation';
 import getMentorSessions from '../../../utils/getMentorSessions';
 
-
 const updateMentorSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: mentorSessionId } = params;
   const mentorSessionData = await callLocalGraphqlApi(mentorSessionQuery(mentorSessionId));

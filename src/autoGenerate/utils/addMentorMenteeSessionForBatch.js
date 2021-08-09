@@ -2,8 +2,6 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
 import { log } from '../../../utils';
-import { checkIfSlotCanBeOpenedValidation } from '../graphql/preHookFunctions/validation/utils';
-import getMentorSessions from './getMentorSessions';
 
 const callMentorMenteeSessions = async (
   userId,
