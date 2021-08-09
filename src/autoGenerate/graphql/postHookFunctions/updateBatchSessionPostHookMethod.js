@@ -305,9 +305,17 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       }
     }
 
+    console.log('')
+
+    console.log('bookingDateFromInput', bookingDateFromInput);
+    console.log('sessionStatusFromInput', sessionStatusFromInput);
+
+    const newStudentsArray = get(context, 'inputSlot.attendance.pushMany', [])
+    console.log('newStudentsArrayLength', JSON.stringify(newStudentsArray))
     // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
     // this should only happen if we are changing sessionStatus or bookingDateFromInput
-    if ((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput) {
+    if ((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || newStudentsArray.length > 0) {
+      console.log('students', JSON.stringify(students));
       // eslint-disable-next-line no-restricted-syntax
       for (const student of students) {
         if (student.user && student.user.id) {

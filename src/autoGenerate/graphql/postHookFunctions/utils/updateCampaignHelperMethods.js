@@ -492,6 +492,7 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
           const slotTimeStringArray = getSelectedSlotsStringArray(slots);
           await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
         } catch (err) {
+          log(err)
           log(`Batch session was not added for batch: ${batchCode}.`);
         }
       }

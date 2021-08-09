@@ -12,6 +12,8 @@ import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
+import getMentorSessions from '../../../utils/getMentorSessions';
+import { checkIfSlotCanBeOpenedValidation } from './utils';
 
 // query to get batch Sessions
 const getBatchSessions = (batchId, topicId) => `
@@ -81,20 +83,6 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
     });
   }
 
-  // check if mentor already has another session in same slot
-  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
-  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
-  const bookingDate = get(params, 'input.bookingDate', '');
-  if (mentorUserId && bookingDate) {
-    const getMentorSessionsRes = await callLocalGraphqlApi(
-      getMentorSessions(
-        mentorUserId,
-        bookingDate,
-      ),
-    );
-    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-    checkIfSlotCanBeOpenedValidation(params, mentorSessions);
-  }
 
   // getting user role from context. We will allow adding batchSession if logged in user is admin
   const userInfo = validateTokenAndExtractInformation(context, false);
@@ -116,6 +104,21 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
 
   // validate input
   await validateBatchSessionInput(params, context, 'addBatch');
+
+  // check if mentor already has another session in same slot
+  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
+  const bookingDate = get(params, 'input.bookingDate', '');
+  if (mentorUserId && bookingDate) {
+    const getMentorSessionsRes = await callLocalGraphqlApi(
+      getMentorSessions(
+        mentorUserId,
+        bookingDate,
+      ),
+    );
+    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+    checkIfSlotCanBeOpenedValidation(params, mentorSessions);
+  }
 
   if (
     !backendApps.includes(appName)

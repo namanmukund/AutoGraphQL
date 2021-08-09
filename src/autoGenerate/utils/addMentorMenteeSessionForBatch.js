@@ -266,16 +266,19 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
       }
     }
 
+
+    console.log('menteeUserId', menteeUserId)
     if (menteeUserId) {
       const menteeSession = await getMenteeSession(
         menteeUserId,
         topicId,
       );
+      console.log('menteeSession', menteeSession)
       if (menteeSession) {
         const { id: menteeSessionIdFromMenteeQuery } = menteeSession;
         menteeSessionId = menteeSessionIdFromMenteeQuery;
       }
-      log('------------------------menteeSessionId', menteeSessionId);
+      console.log('------------------------menteeSessionId', menteeSessionId);
       if (menteeSessionId) {
         log('------------------------updating menteeSessionId', menteeSessionId);
         // update
@@ -316,7 +319,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
       } else if (!menteeSessionId) {
         // add mentee session
         /* eslint no-lonely-if:0 */
-        if (menteBookingDate && menteeBookingSlot) {
+        if (menteBookingDate && menteeBookingSlot !== null && menteeBookingSlot !== undefined) {
           const variables = {
             input: {
               bookingDate: menteBookingDate,

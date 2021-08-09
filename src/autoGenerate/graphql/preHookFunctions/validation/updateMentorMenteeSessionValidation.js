@@ -4,6 +4,8 @@ import { CanNotChangeSessionStatusError } from '../../../../../constants/errors/
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
+import getMentorSessions from '../../../utils/getMentorSessions';
+import { checkIfSlotCanBeOpenedValidation } from './utils';
 
 const getMentorMenteeSessionData = async (id) => {
   const query = `
@@ -18,6 +20,13 @@ const getMentorMenteeSessionData = async (id) => {
         }
         menteeSession{
           id
+          user {
+            studentProfile {
+              batch {
+                code
+              }
+            }
+          }
           bookingDate
           ${getSlotTimesInString()}
         }
@@ -47,6 +56,8 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
     id, menteeSessionConnectId, mentorSessionConnectId, input: { sessionStatus, bookingDate },
   } = newParams;
 
+  const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id);
+
   // check if mentor already has another session in same slot
   const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
@@ -58,10 +69,9 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
       ),
     );
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-    checkIfSlotCanBeOpenedValidation(params, mentorSessions);
+    const menteeSessionSlots = { input: { ...get(mentorMenteeSessionDoc, 'menteeSession', {}) } };
+    checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions, null, get(mentorMenteeSessionDoc, 'menteeSession.user.studentProfile.batch.code'));
   }
-
-  const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id);
 
   if (!(mentorMenteeSessionDoc && mentorMenteeSessionDoc.id)) {
     throw new DatabaseRecordNotFoundError();

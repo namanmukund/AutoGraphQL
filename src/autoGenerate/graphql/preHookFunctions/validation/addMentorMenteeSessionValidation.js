@@ -12,6 +12,7 @@ import { SimilarDocumentAlreadyExistError } from '../../../../../constants/error
 import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetailsInParams';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorSessions from '../../../utils/getMentorSessions';
+import { checkIfSlotCanBeOpenedValidation } from './utils';
 
 // query to get mentor Sessions
 const mentorMenteeSessionsQuery = (menteeSessionConnectId, mentorSessionConnectId) => `
@@ -33,6 +34,11 @@ query{
     id
     bookingDate
     user{
+      studentProfile {
+        batch {
+          code
+        }
+      }
       id
       source
       country
@@ -120,6 +126,8 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   validateMenteeStartSessionData(menteeSession, topicConnectId, params);
 
   // check if mentor already has another session in same slot
+  console.log('we are at add mms ')
+
   const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
   const { bookingDate } = menteeSession;
@@ -131,7 +139,9 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
       ),
     );
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-    checkIfSlotCanBeOpenedValidation(params, mentorSessions);
+    // constucting data in appropriate format
+    const menteeSessionSlots = { input: { ...menteeSession } };
+    checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions, null, get(menteeSession, 'user.studentProfile.batch.code'));
   }
 
   //update source & country in mentorMenteeSession

@@ -11,6 +11,7 @@ import { sessionStatus } from '../../../../../constants';
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorSessions from '../../../utils/getMentorSessions';
+import { checkIfSlotCanBeOpenedValidation } from './utils';
 
 // query to get mentor from mentorSessionConnectId
 const fetchMentor = (id) => `
@@ -36,30 +37,48 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   // validate input
   await validateBatchSessionInput(params, context);
 
-  // check if mentor already has another session in same slot
-  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
-  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
-  if (mentorUserId && bookingDateFromInput) {
-    const getMentorSessionsRes = await callLocalGraphqlApi(
-      getMentorSessions(
-        mentorUserId,
-        bookingDateFromInput,
-      ),
-    );
-    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-    checkIfSlotCanBeOpenedValidation(params, mentorSessions);
-  }
-
   const {
     sessionStatus: prevSessionStatus,
     batch,
     topic,
     bookingDate,
     course,
+    mentorSession,
     ...slots
   } = batchSession;
+
+
   const inputSlotTimeArray = getSelectedSlotsTime(inputSlot);
   const slotTimeArray = getSelectedSlotsTime(slots);
+  console.log('inputSlotTimeArray', inputSlotTimeArray);
+  console.log('slotTimeArray', slotTimeArray);
+
+  // check if mentor already has another session in same slot
+  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId || get(mentorSession, 'id', )));
+  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
+  console.log('mentorUserId', mentorUserId);
+  console.log('bookingDateFromInput', bookingDateFromInput);
+  if (mentorUserId && bookingDateFromInput) {
+    const getMentorSessionsRes = await callLocalGraphqlApi(
+      getMentorSessions(
+        mentorUserId,
+        bookingDateFromInput || bookingDate,
+      ),
+    );
+    let tempObj = { ...inputSlot }
+    if (inputSlotTimeArray.length === 0){
+      tempObj = { ...slots }
+    }
+    console.log('tempObj', tempObj)
+    const menteeSessionSlots = { input: tempObj};
+    console.log('menteeSessionSlots', menteeSessionSlots)
+    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+    checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions);
+  }
+
+  
+  console.log('slotTImeArray', JSON.stringify(slotTimeArray));
+  console.log('batchSession', batchSession);
   context.batchSessionId = batchSessionId;
   context.topicId = topic && topic.id;
   context.inputSlot = inputSlot;
