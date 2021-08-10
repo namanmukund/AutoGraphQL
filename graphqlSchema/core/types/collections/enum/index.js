@@ -83,7 +83,6 @@ import SessionLogAction from './SessionLogAction';
 import AuditQuestionType from './AuditQuestionType';
 import AuditType from './AuditType';
 import RatingDisplayType from './RatingDisplayType';
-import AuditQuestionsSection from './AuditQuestionsSection';
 import UserPersonality from './UserPersonality';
 import WeakSlowAverageFast from './WeakSlowAverageFast';
 import Languages from './Languages';
@@ -176,7 +175,6 @@ export default [
   AuditQuestionType,
   AuditType,
   RatingDisplayType,
-  AuditQuestionsSection,
   UserPersonality,
   WeakSlowAverageFast,
   Languages,

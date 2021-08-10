@@ -112,6 +112,8 @@ import TopicAssignmentQuestion from './topicAssignmentQuestion';
 import AuditQuestion from './auditQuestion';
 import PreSalesAudit from './preSalesAudit';
 import PostSalesAudit from './postSalesAudit';
+import AuditQuestionSection from './auditQuestionSection';
+import AuditQuestionSubSection from './auditQuestionSubSection';
 
 export default [
   ...User,
@@ -228,4 +230,6 @@ export default [
   ...AuditQuestion,
   ...PreSalesAudit,
   ...PostSalesAudit,
+  ...AuditQuestionSection,
+  ...AuditQuestionSubSection,
 ];
