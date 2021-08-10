@@ -18,6 +18,7 @@ const SCHOOL_ADMIN = 'schoolAdmin';
 const AUDIT_ADMIN = 'auditAdmin';
 const PRE_SALES = 'preSales';
 const POST_SALES = 'postSales';
+const AUDIT = 'audit';
 
 const CMS_HEAD = `[
 "${ADMIN}",
@@ -65,6 +66,7 @@ const AUDIT_ROLES = `[
   "${AUDIT_ADMIN}",
   "${PRE_SALES}",
   "${POST_SALES}"
+  "${AUDIT}"
 ]`;
 
 const NOT_UMS_HEAD_ARR = [
@@ -190,6 +192,7 @@ const ALL_ROLES_ARRAY = [
   AUDIT_ADMIN,
   PRE_SALES,
   POST_SALES,
+  AUDIT,
 ];
 
 const CMS_HEAD_ARRAY = [
@@ -253,4 +256,5 @@ export {
   PRE_SALES,
   POST_SALES,
   AUDIT_ROLES,
+  AUDIT,
 };
