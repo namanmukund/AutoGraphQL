@@ -126,7 +126,6 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   validateMenteeStartSessionData(menteeSession, topicConnectId, params);
 
   // check if mentor already has another session in same slot
-  console.log('we are at add mms ')
 
   const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');

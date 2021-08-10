@@ -47,17 +47,12 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     ...slots
   } = batchSession;
 
-
   const inputSlotTimeArray = getSelectedSlotsTime(inputSlot);
   const slotTimeArray = getSelectedSlotsTime(slots);
-  console.log('inputSlotTimeArray', inputSlotTimeArray);
-  console.log('slotTimeArray', slotTimeArray);
 
   // check if mentor already has another session in same slot
-  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId || get(mentorSession, 'id', )));
+  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId || get(mentorSession, 'id', '')));
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
-  console.log('mentorUserId', mentorUserId);
-  console.log('bookingDateFromInput', bookingDateFromInput);
   if (mentorUserId && bookingDateFromInput) {
     const getMentorSessionsRes = await callLocalGraphqlApi(
       getMentorSessions(
@@ -65,20 +60,15 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
         bookingDateFromInput || bookingDate,
       ),
     );
-    let tempObj = { ...inputSlot }
-    if (inputSlotTimeArray.length === 0){
-      tempObj = { ...slots }
+    let tempObj = { ...inputSlot };
+    if (inputSlotTimeArray.length === 0) {
+      tempObj = { ...slots };
     }
-    console.log('tempObj', tempObj)
-    const menteeSessionSlots = { input: tempObj};
-    console.log('menteeSessionSlots', menteeSessionSlots)
+    const menteeSessionSlots = { input: tempObj };
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
     checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions);
   }
 
-  
-  console.log('slotTImeArray', JSON.stringify(slotTimeArray));
-  console.log('batchSession', batchSession);
   context.batchSessionId = batchSessionId;
   context.topicId = topic && topic.id;
   context.inputSlot = inputSlot;

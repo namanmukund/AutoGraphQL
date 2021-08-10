@@ -280,7 +280,6 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
     }
   }
   // while we are adding new students to a batch, adding those students to not completed batch Sessions
-  console.log('studentConnectId', studentsConnectIds);
   if (studentsConnectIds && studentsConnectIds.length && batchId) {
     const notCompletedBatchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId));
     const notCompletedBatchSessions = get(notCompletedBatchSessionsResult, 'data.batchSessions');
