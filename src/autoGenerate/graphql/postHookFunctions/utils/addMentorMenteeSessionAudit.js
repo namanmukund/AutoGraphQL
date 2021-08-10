@@ -45,19 +45,19 @@ const addMentorMenteeSessionAudit = async (
   if (!mentorMenteeSessionAuditId) {
     const auditQuestions = await fetchAllAuditQuestion(mentor);
     let auditQuestionsIds = '';
-    let sectionsArray = [];
+    let sectionIdsArray = [];
     if (auditQuestions && auditQuestions.length > 0) {
       auditQuestions.forEach((auditQuestion) => {
         auditQuestionsIds += `{ auditQuestionConnectId: "${get(auditQuestion, 'id')}" }`;
-        if (get(auditQuestion, 'section')) {
-          sectionsArray.push(get(auditQuestion, 'section'));
+        if (get(auditQuestion, 'section.id')) {
+          sectionIdsArray.push(get(auditQuestion, 'section.id'));
         }
       });
     }
-    sectionsArray = [...new Set(sectionsArray)];
+    sectionIdsArray = [...new Set(sectionIdsArray)];
     let questionSectionsQuery = '';
-    sectionsArray.forEach((section) => {
-      questionSectionsQuery += `{questionSection: ${section}}`;
+    sectionIdsArray.forEach((sectionId) => {
+      questionSectionsQuery += `{questionSectionConnectId: "${sectionId}"}`;
     });
     callLocalGraphqlApi(addMentorMenteeSessionAuditQuery(
       mentorMenteeSessionId,

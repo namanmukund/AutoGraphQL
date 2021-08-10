@@ -52,7 +52,7 @@ type MentorAuditQuestion {
 
 const customSectionScore = `
 type CustomSectionScore {
-   questionSection: AuditQuestionsSection
+   questionSection: AuditQuestionSection @relation(name: "AuditQuestionSectionCustomScore", direction: "OneWay")
    customScore: Int
  }`;
 

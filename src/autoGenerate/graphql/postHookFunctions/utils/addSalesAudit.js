@@ -9,7 +9,9 @@ export const fetchAllAuditQuestion = async (auditType) => {
     {
       auditQuestions(filter:{ and: [ { auditType: ${auditType} } { status: published } ] }){
         id
-        section
+        section{
+          id
+        }
       }
     }
   `;
@@ -54,19 +56,19 @@ mutation {
 const addSalesAudit = async ({ mentorMenteeSessionId, clientId, auditType }) => {
   const auditQuestions = await fetchAllAuditQuestion(auditType);
   let auditQuestionsIds = '';
-  let sectionsArray = [];
+  let sectionIdsArray = [];
   if (auditQuestions && auditQuestions.length > 0) {
     auditQuestions.forEach((auditQuestion) => {
       auditQuestionsIds += `{ auditQuestionConnectId: "${get(auditQuestion, 'id')}" }`;
-      if (get(auditQuestion, 'section')) {
-        sectionsArray.push(get(auditQuestion, 'section'));
+      if (get(auditQuestion, 'section.id')) {
+        sectionIdsArray.push(get(auditQuestion, 'section.id'));
       }
     });
   }
-  sectionsArray = [...new Set(sectionsArray)];
+  sectionIdsArray = [...new Set(sectionIdsArray)];
   let questionSectionsQuery = '';
-  sectionsArray.forEach((section) => {
-    questionSectionsQuery += `{questionSection: ${section}}`;
+  sectionIdsArray.forEach((sectionId) => {
+    questionSectionsQuery += `{questionSectionConnectId: "${sectionId}"}`;
   });
   if (auditQuestionsIds) {
     if (auditType === preSales) {

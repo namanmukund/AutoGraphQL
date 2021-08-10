@@ -15,7 +15,8 @@ const AuditQuestion = `
     statement: String! @trim
     score: Int!
     maxRating: Int
-    section: AuditQuestionsSection
+    section: AuditQuestionSection @relation(name: "AuditQuestionSection", direction: "OneWay")
+    subSection: AuditQuestionSubSection @relation(name: "AuditQuestionSubSection", direction: "OneWay")
     questionType: AuditQuestionType!
     isMandatory: Boolean @defaultValue(value: "false")
     auditType: AuditType!
