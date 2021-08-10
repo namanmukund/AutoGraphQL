@@ -4,12 +4,13 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import { log } from '../../../../../../utils';
 
-const updateMenteeSession = (id, bookingDate, slot) => `
+const updateMenteeSession = (id, bookingDate, slot, unSelectedSlot) => `
   mutation {
     updateMenteeSession(id:"${id}"
     input: {
       bookingDate: "${bookingDate}",
       slot${slot}: true,
+      slot${unSelectedSlot}: false,
     }){
       id
       course{
@@ -33,8 +34,9 @@ const rebookMenteeSessionMutationResolver = async (
 
   context.parentComponent = 'rebookMenteeSession';
   const selectedSlot = getSelectedSlotsTime(slots);
+  const unSelectedSlot = getSelectedSlotsTime(slots, 'falseOnly');
   try {
-    await callLocalGraphqlApi(updateMenteeSession(menteeSessionId, bookingDate, selectedSlot[0]), context);
+    await callLocalGraphqlApi(updateMenteeSession(menteeSessionId, bookingDate, selectedSlot[0], unSelectedSlot[0]), context);
   } catch (err) {
     log(err);
   }
