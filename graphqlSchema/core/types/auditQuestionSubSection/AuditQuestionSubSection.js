@@ -8,7 +8,7 @@ const AuditQuestionSubSection = `
       ]
     rule: allow
   ){
-    title: String!
+    title: String! @unique @trim
     order: Int
 }`;
 
