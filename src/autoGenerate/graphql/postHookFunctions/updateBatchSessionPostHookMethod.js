@@ -305,14 +305,25 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       }
     }
 
+
+    // console.log('bookingDate before if', bookingDate);
+    // console.log('bookingDateFromInput before if', bookingDateFromInput);
+    const bookingDateFromInputParsed = new Date(bookingDateFromInput);
+    // console.log('bookingDateFromInputParsed', bookingDateFromInputParsed);
+
     const newStudentsArray = get(context, 'inputSlot.attendance.pushMany', []);
     // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
     // this should only happen if we are changing sessionStatus or bookingDateFromInput
     if ((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || mentorSessionId !== mentorSessionConnectId) {
 
+      // console.log('bookingDate', bookingDate);
+      // console.log('bookingDateFromInput', bookingDateFromInput);
+      // console.log('slotTimeArray', slotTimeArray);
+      // console.log('inputSlotTimeArray', inputSlotTimeArray);
+
       let toUpdateMenteeSession = false;
       if (
-        (bookingDate.getTime() !== bookingDateFromInput.getTime())
+        (bookingDate && bookingDateFromInput && bookingDate.getTime() !== bookingDateFromInputParsed.getTime())
         || (get(slotTimeArray, '0') !== get(inputSlotTimeArray, '0'))
       ) {
         toUpdateMenteeSession = true;
@@ -355,8 +366,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
       }
     }
-    const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
-    extractBatchSessionAndSendB2BC(batchSessionId, students, context.appName === TBA, context.prevStudentsAttendanceCount === 0);
+    const studentsFromAttendance = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
+    extractBatchSessionAndSendB2BC(batchSessionId, studentsFromAttendance, context.appName === TBA, context.prevStudentsAttendanceCount === 0);
     if (mentorSessionConnectId) {
       const mentorUser = await getMentor(mentorSessionConnectId);
       const { id: mentorUserId, phone } = mentorUser;
@@ -449,6 +460,6 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         });
       }
     }
-  };
-
-  export default updateBatchSessionPostHookMethod;
+  }
+};
+export default updateBatchSessionPostHookMethod;

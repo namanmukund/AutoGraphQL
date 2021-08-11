@@ -50,6 +50,9 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   const inputSlotTimeArray = getSelectedSlotsTime(inputSlot);
   const slotTimeArray = getSelectedSlotsTime(slots);
 
+  // console.log('bookingDate in prehoook', bookingDate);
+  // console.log('bookingDateFromInput in prehook', bookingDateFromInput);
+
   // check if mentor already has another session in same slot
   const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId || get(mentorSession, 'id', '')));
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
