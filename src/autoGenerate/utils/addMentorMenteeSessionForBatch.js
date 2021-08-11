@@ -25,12 +25,14 @@ query{
 
 const callUpdateMentorMenteeSession = async (
   mentorMenteeId,
+  mentorSessionId,
   variables,
 ) => {
   const query = `
 mutation($input: MentorMenteeSessionUpdate){
   updateMentorMenteeSession(
     id:"${mentorMenteeId}"
+    ${!mentorSessionId ? '' : `mentorSessionConnectId: ${mentorSessionId}`}
     input:$input
   ){
     id
@@ -195,7 +197,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
     if (menteeUserId && topicId) {
       const mentorMenteeId = await callMentorMenteeSessions(menteeUserId, topicId);
       if (mentorMenteeId) {
-        await callUpdateMentorMenteeSession(mentorMenteeId, { input: { sessionStatus } });
+        await callUpdateMentorMenteeSession(mentorMenteeId, mentorSessionIdFromInput, { input: { sessionStatus } });
         console.log('------------------------updated mentorMenteeId', mentorMenteeId);
         return true;
       }

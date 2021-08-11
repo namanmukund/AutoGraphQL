@@ -316,7 +316,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
             '',
             topicId,
             bookingDateFromInput || bookingDate,
-            slotTimeArray[0],
+            slotTimeArray[0] || inputSlotTimeArray[0],
             mentorSessionId,
             courseId,
             sessionStatusFromInput || sessionStatus.allotted,
