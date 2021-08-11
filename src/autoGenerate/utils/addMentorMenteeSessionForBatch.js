@@ -181,7 +181,9 @@ mutation($input: MentorSessionUpdate){
   return get(res, 'data.updateMentorSession.id');
 };
 
-const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicId, bookingDate, slot, mentorSessionIdFromInput, courseId, sessionStatus, source, methodCallOriginComponent) => {
+const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicId, bookingDate, slot, mentorSessionIdFromInput, courseId, sessionStatus, source, methodCallOriginComponent, toUpdateMenteeSession) => {
+  const menteBookingDate = bookingDate;
+  const menteeBookingSlot = slot;
   // eslint-disable-next-line no-restricted-syntax
   try {
     console.log('------------------------menteeUserId', menteeUserId);
@@ -199,12 +201,44 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
       if (mentorMenteeId) {
         await callUpdateMentorMenteeSession(mentorMenteeId, mentorSessionIdFromInput, { input: { sessionStatus } });
         console.log('------------------------updated mentorMenteeId', mentorMenteeId);
+        if (toUpdateMenteeSession){
+          const variables = {
+            input: {
+              bookingDate: menteBookingDate,
+              slot0: `slot${menteeBookingSlot}` === 'slot0',
+              slot1: `slot${menteeBookingSlot}` === 'slot1',
+              slot2: `slot${menteeBookingSlot}` === 'slot2',
+              slot3: `slot${menteeBookingSlot}` === 'slot3',
+              slot4: `slot${menteeBookingSlot}` === 'slot4',
+              slot5: `slot${menteeBookingSlot}` === 'slot5',
+              slot6: `slot${menteeBookingSlot}` === 'slot6',
+              slot7: `slot${menteeBookingSlot}` === 'slot7',
+              slot8: `slot${menteeBookingSlot}` === 'slot8',
+              slot9: `slot${menteeBookingSlot}` === 'slot9',
+              slot10: `slot${menteeBookingSlot}` === 'slot10',
+              slot11: `slot${menteeBookingSlot}` === 'slot11',
+              slot12: `slot${menteeBookingSlot}` === 'slot12',
+              slot13: `slot${menteeBookingSlot}` === 'slot13',
+              slot14: `slot${menteeBookingSlot}` === 'slot14',
+              slot15: `slot${menteeBookingSlot}` === 'slot15',
+              slot16: `slot${menteeBookingSlot}` === 'slot16',
+              slot17: `slot${menteeBookingSlot}` === 'slot17',
+              slot18: `slot${menteeBookingSlot}` === 'slot18',
+              slot19: `slot${menteeBookingSlot}` === 'slot19',
+              slot20: `slot${menteeBookingSlot}` === 'slot20',
+              slot21: `slot${menteeBookingSlot}` === 'slot21',
+              slot22: `slot${menteeBookingSlot}` === 'slot22',
+              slot23: `slot${menteeBookingSlot}` === 'slot23',
+            },
+          };
+          await callUpdateMenteeSession(menteeUserId, variables);
+          console.log('------------------------updated menteeUserId', menteeUserId);
+        }
         return true;
       }
     }
 
-    const menteBookingDate = bookingDate;
-    const menteeBookingSlot = slot;
+    
     let menteeSessionId;
     let mentorSessionId = mentorSessionIdFromInput;
 
