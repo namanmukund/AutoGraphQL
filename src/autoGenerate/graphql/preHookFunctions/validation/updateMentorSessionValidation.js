@@ -4,34 +4,10 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import mentorSessionQuery from '../../graphqlQueries/mentorSessionQuery';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
-import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import checkIfSlotCanBeOpenedValidation from './utils/checkIfSlotCanBeOpenedValidation';
 import checkIfSlotCanBeDeletedValidation from './utils/checkIfSlotCanBeDeletedValidation';
-
-// query to get mentor Sessions
-const getMentorSessions = (userId, availabilityDate) => `query{
-    mentorSessions(filter:{
-      and:[
-          {user_some: {id: "${userId}"}},
-          {availabilityDate: "${availabilityDate}"}
-      ]
-    }){
-      id
-      sessionType
-       mentorMenteeSessions{
-          id
-          menteeSession{
-            ${getSlotTimesInString()}
-          }
-        }
-        batchSessions{
-          id
-          ${getSlotTimesInString()}
-        }
-    }
-  }
-  `;
+import getMentorSessions from '../../../utils/getMentorSessions';
 
 const updateMentorSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: mentorSessionId } = params;

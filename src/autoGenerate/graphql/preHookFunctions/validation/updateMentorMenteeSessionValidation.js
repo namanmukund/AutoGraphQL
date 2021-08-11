@@ -4,6 +4,8 @@ import { CanNotChangeSessionStatusError } from '../../../../../constants/errors/
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
+import getMentorSessions from '../../../utils/getMentorSessions';
+import { checkIfSlotCanBeOpenedValidation } from './utils';
 
 const getMentorMenteeSessionData = async (id) => {
   const query = `
@@ -18,6 +20,13 @@ const getMentorMenteeSessionData = async (id) => {
         }
         menteeSession{
           id
+          user {
+            studentProfile {
+              batch {
+                code
+              }
+            }
+          }
           bookingDate
           ${getSlotTimesInString()}
         }
@@ -31,12 +40,38 @@ const getMentorMenteeSessionData = async (id) => {
   return get(res, 'data.mentorMenteeSession');
 };
 
+// query to get mentor from mentorSessionConnectId
+const fetchMentor = (id) => `
+query{
+  mentorSession(id: "${id}"){
+    id
+    user{
+      id
+    }
+  }
+}`;
+
 const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryName, context) => {
   const {
-    id, menteeSessionConnectId, mentorSessionConnectId, input: { sessionStatus },
+    id, menteeSessionConnectId, mentorSessionConnectId, input: { sessionStatus, bookingDate },
   } = newParams;
 
   const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id);
+
+  // check if mentor already has another session in same slot
+  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
+  if (mentorUserId && bookingDate) {
+    const getMentorSessionsRes = await callLocalGraphqlApi(
+      getMentorSessions(
+        mentorUserId,
+        bookingDate,
+      ),
+    );
+    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+    const menteeSessionSlots = { input: { ...get(mentorMenteeSessionDoc, 'menteeSession', {}) } };
+    checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions, null, get(mentorMenteeSessionDoc, 'menteeSession.user.studentProfile.batch.code'));
+  }
 
   if (!(mentorMenteeSessionDoc && mentorMenteeSessionDoc.id)) {
     throw new DatabaseRecordNotFoundError();

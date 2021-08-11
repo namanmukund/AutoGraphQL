@@ -1,7 +1,6 @@
 /* eslint-disable no-await-in-loop, no-console */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
-import { log } from '../../../utils';
 
 const callMentorMenteeSessions = async (
   userId,
@@ -196,6 +195,8 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
     console.log('------------------------sessionStatus', sessionStatus);
     console.log('------------------------source', source);
     console.log('------------------------methodCallOriginComponent', methodCallOriginComponent);
+
+    // simply update existing mms if that's all it is to be done
     if (menteeUserId && topicId) {
       const mentorMenteeId = await callMentorMenteeSessions(menteeUserId, topicId);
       if (mentorMenteeId) {
@@ -242,7 +243,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
     let menteeSessionId;
     let mentorSessionId = mentorSessionIdFromInput;
 
-    // add mentor  session
+    // add mentor session if mentorSessionId is not present in input
     if (!mentorSessionId && mentorUserId) {
       mentorSessionId = await getMentorSessionId(
         mentorUserId,
@@ -277,7 +278,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
             variables,
           );
         } catch (err) {
-          log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
+          console.log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
         }
         console.log('------------------------updated mentorSessionId', mentorSessionId);
       }
@@ -296,7 +297,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           variables,
         );
       } catch (err) {
-        log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
+        console.log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
       }
     }
 
@@ -350,7 +351,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
       } else if (!menteeSessionId) {
         // add mentee session
         /* eslint no-lonely-if:0 */
-        if (menteBookingDate && menteeBookingSlot) {
+        if (menteBookingDate && menteeBookingSlot !== null && menteeBookingSlot !== undefined) {
           const variables = {
             input: {
               bookingDate: menteBookingDate,

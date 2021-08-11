@@ -10,32 +10,9 @@ import { ADMIN, SALES_EXECUTIVE, UMS_ADMIN } from '../../../../../constants/role
 import validateMentorSessionInput from './utils/validateMentorSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
-import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import checkIfSlotCanBeOpenedValidation from './utils/checkIfSlotCanBeOpenedValidation';
+import getMentorSessions from '../../../utils/getMentorSessions';
 
-// query to get mentor Sessions
-const getMentorSessions = (userId, availabilityDate) => `query{
-    mentorSessions(filter:{
-      and:[
-          {user_some: {id: "${userId}"}},
-          {availabilityDate: "${availabilityDate}"}
-      ]
-    }){
-      id
-      sessionType
-       mentorMenteeSessions{
-          id
-          menteeSession{
-            ${getSlotTimesInString()}
-          }
-        }
-        batchSessions{
-          id
-          ${getSlotTimesInString()}
-        }
-    }
-  }
-  `;
 // prehook logic to check if added MentorSession(user id and availabilityDate) already exists
 const addMentorSessionValidation = async (params, mutationOrQueryName, context) => {
   /*
@@ -106,7 +83,6 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
       }
     }
   }
-
   checkIfSlotCanBeOpenedValidation(params, mentorSessions);
   return true;
 };
