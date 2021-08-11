@@ -313,7 +313,6 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
       }
     }
 
-
     if (menteeSessionId) {
       console.log('------------------------updating menteeSessionId', menteeSessionId);
       // update

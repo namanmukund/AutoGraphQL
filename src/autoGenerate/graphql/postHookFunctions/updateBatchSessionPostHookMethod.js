@@ -304,8 +304,6 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         );
       }
     }
-
-
     // console.log('bookingDate before if', bookingDate);
     // console.log('bookingDateFromInput before if', bookingDateFromInput);
     const bookingDateFromInputParsed = new Date(bookingDateFromInput);
@@ -315,12 +313,10 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
     // this should only happen if we are changing sessionStatus or bookingDateFromInput
     if ((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || mentorSessionId !== mentorSessionConnectId) {
-
       // console.log('bookingDate', bookingDate);
       // console.log('bookingDateFromInput', bookingDateFromInput);
       // console.log('slotTimeArray', slotTimeArray);
       // console.log('inputSlotTimeArray', inputSlotTimeArray);
-
       let toUpdateMenteeSession = false;
       if (
         (bookingDate && bookingDateFromInput && bookingDate.getTime() !== bookingDateFromInputParsed.getTime())
