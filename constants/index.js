@@ -183,6 +183,20 @@ const questionTypes = {
   arrange: 'arrange',
 };
 
+const auditQuestionType = {
+  mcq: questionTypes.mcq,
+  bool: 'bool',
+  rating: 'rating',
+  timestamp: 'timestamp',
+  input: 'input',
+};
+
+const auditType = {
+  mentor: 'mentor',
+  preSales: 'preSales',
+  postSales: 'postSales',
+};
+
 const scholarshipThreshHolds = {
   proficient: 100,
   master: 80,
@@ -473,4 +487,6 @@ export {
   emailText,
   meWatiSMS,
   usWatiSMS,
+  auditQuestionType,
+  auditType,
 };

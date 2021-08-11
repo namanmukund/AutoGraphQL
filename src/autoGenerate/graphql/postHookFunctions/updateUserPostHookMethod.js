@@ -1,6 +1,10 @@
 import { get } from 'lodash';
+import { auditType } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { updateUserLeadSquared } from './leadsquared';
+import addSalesAudit from './utils/addSalesAudit';
+
+const { preSales } = auditType;
 
 const fetchUser = async (id) => {
   const query = `
@@ -59,6 +63,11 @@ const updateUserPostHookMethod = async (input, mutationName, context) => {
       get(user, 'studentProfile.parents[0].user.phone.number'),
       agentName,
     );
+  }
+  const isPreSalesAuditFromInput = get(context, 'isPreSalesAuditFromInput');
+  const prevIsPreSalesAudit = get(context, 'prevIsPreSalesAudit');
+  if (isPreSalesAuditFromInput && prevIsPreSalesAudit === false) {
+    addSalesAudit({ clientId: userId, auditType: preSales });
   }
 };
 

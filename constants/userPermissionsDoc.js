@@ -14,8 +14,12 @@ import {
   UMS_ADMIN,
   TRANSFORMATION_ADMIN,
   TRANSFORMATION_TEAM,
+  AUDIT_ADMIN,
+  PRE_SALES,
+  POST_SALES,
   ADMIN,
   NOT_ADMIN,
+  AUDIT,
 } from './roles';
 
 const userPermissionsDoc = {
@@ -23,13 +27,14 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR],
-      exceptDelete: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN, TRANSFORMATION_ADMIN],
+      read: [PRE_SALES, POST_SALES, AUDIT],
+      exceptDelete: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN, TRANSFORMATION_ADMIN, AUDIT_ADMIN],
     },
     fields: {
       role: {
         rule: 'allow',
         crud: [...UMS_HEAD_ARR],
-        read: [...NOT_UMS_HEAD_ARR],
+        read: [...NOT_UMS_HEAD_ARR, PRE_SALES, POST_SALES, AUDIT_ADMIN, AUDIT],
         exceptDelete: [TRANSFORMATION_ADMIN],
       },
       savedPassword: {
@@ -129,6 +134,13 @@ const userPermissionsDoc = {
       rule: 'allow',
       crud: [...CMS_HEAD_ARRAY],
       read: [...NOT_CMS_HEAD_ARRAY],
+    },
+  },
+  AuditQuestion: {
+    collection: {
+      rule: 'allow',
+      crud: [...UMS_HEAD_ARR, AUDIT_ADMIN, AUDIT],
+      read: [UMS_VIEWER, MENTOR, PRE_SALES, POST_SALES],
     },
   },
   SessionReport: {

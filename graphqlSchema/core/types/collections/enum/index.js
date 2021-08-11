@@ -80,6 +80,9 @@ import TopicComponents from './TopicComponents';
 import BlockBasedProjectType from './BlockBasedProjectType';
 import BookedBy from './BookedBy';
 import SessionLogAction from './SessionLogAction';
+import AuditQuestionType from './AuditQuestionType';
+import AuditType from './AuditType';
+import RatingDisplayType from './RatingDisplayType';
 import UserPersonality from './UserPersonality';
 import WeakSlowAverageFast from './WeakSlowAverageFast';
 import Languages from './Languages';
@@ -169,6 +172,9 @@ export default [
   BlockBasedProjectType,
   BookedBy,
   SessionLogAction,
+  AuditQuestionType,
+  AuditType,
+  RatingDisplayType,
   UserPersonality,
   WeakSlowAverageFast,
   Languages,

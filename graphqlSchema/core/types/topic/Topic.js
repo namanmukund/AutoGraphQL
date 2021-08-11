@@ -1,6 +1,8 @@
 import { READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
-import { CMS_HEAD, NOT_CMS_HEAD, SCHOOL_ADMIN } from '../../../../constants/roles';
+import {
+  AUDIT_ROLES, CMS_HEAD, NOT_CMS_HEAD, SCHOOL_ADMIN,
+} from '../../../../constants/roles';
 import { CREATED } from '../../../../constants/subscriptionEvents';
 
 const TopicComponentsRule = `
@@ -27,7 +29,8 @@ const Topic = `
     permissions:[
       { userRole: ${CMS_HEAD} appName: "*" operations: "*" },
       { userRole: ${NOT_CMS_HEAD} appName: "*" operations: ${READ} },
-      { userRole: ${SCHOOL_ADMIN} appName: "*" operations: ${READ} }
+      { userRole: ${SCHOOL_ADMIN} appName: "*" operations: ${READ} },
+      { userRole: ${AUDIT_ROLES} appName: "*" operations: ${READ} },
       ], 
     rule: allow
   ) 

@@ -107,6 +107,13 @@ import GetCourseCertificate from './getCourseCertificate';
 import SessionLog from './sessionLog';
 import SessionReport from './sessionReport';
 import RebookMenteeSessionInput from './rebookMenteeSessionInput';
+import TopicQuestions from './topicQuestions';
+import TopicAssignmentQuestion from './topicAssignmentQuestion';
+import AuditQuestion from './auditQuestion';
+import PreSalesAudit from './preSalesAudit';
+import PostSalesAudit from './postSalesAudit';
+import AuditQuestionSection from './auditQuestionSection';
+import AuditQuestionSubSection from './auditQuestionSubSection';
 
 export default [
   ...User,
@@ -218,4 +225,11 @@ export default [
   ...SessionLog,
   ...SessionReport,
   ...RebookMenteeSessionInput,
+  ...TopicQuestions,
+  ...TopicAssignmentQuestion,
+  ...AuditQuestion,
+  ...PreSalesAudit,
+  ...PostSalesAudit,
+  ...AuditQuestionSection,
+  ...AuditQuestionSubSection,
 ];
