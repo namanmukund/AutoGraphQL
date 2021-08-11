@@ -54,14 +54,12 @@ const Topic = `
     storyThumbnail: File @relation(name: "StoryThumbnail", direction: "OneWay")
     chapter: Chapter @relation(name: "ChapterTopic")
     learningObjectives: [LearningObjective] @relation(name: "TopicLearningObjective")
-    questions: [QuestionBank] @relation(name: "TopicQuestionBank1", direction: "OneWay")
-    topicQuestions: [TopicQuestion]
-    topicAssignmentQuestions: [TopicAssignmentQuestion]
+    questions: [QuestionBank] @relation(name: "TopicQuestionBank")
     badges: [Badge] @relation(name: "TopicBadge", isSubset: true)
     thumbnail: File @relation(name: "TopicThumbnail", direction: "OneWay")
     thumbnailSmall: File @relation(name: "TopicThumbnailSmall", direction: "OneWay")
     isTrial: Boolean @defaultValue(value: "false")
-    assignmentQuestions: [AssignmentQuestion] @relation(name: "TopicAssignmentQuestion1", direction: "OneWay")
+    assignmentQuestions: [AssignmentQuestion] @relation(name: "TopicAssignmentQuestion")
     bulletPoints: [BulletPoint]
     courses: [Course] @relation(name: "CourseTopic")
     blockBasedProjects: [BlockBasedProject] @relation(name: "TopicBlockBasedProject")
