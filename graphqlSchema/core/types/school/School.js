@@ -17,6 +17,7 @@ const School = `
     logo: File @relation(name: "SchoolLogo", direction: "OneWay")
     schoolPicture: File @relation(name: "SchoolPicture", direction: "OneWay")
     hubspotId: String
+    schoolCampaignCode: String @unique @trim
   }
 `;
 export default [School];
