@@ -10,6 +10,19 @@ import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import { sessionStatus } from '../../../../../constants';
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
+import getMentorSessions from '../../../utils/getMentorSessions';
+import { checkIfSlotCanBeOpenedValidation } from './utils';
+
+// query to get mentor from mentorSessionConnectId
+const fetchMentor = (id) => `
+query{
+  mentorSession(id: "${id}"){
+    id
+    user{
+      id
+    }
+  }
+}`;
 
 const updateBatchSessionValidation = async (params, mutationOrQueryName, context) => {
   const {
@@ -30,10 +43,35 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     topic,
     bookingDate,
     course,
+    mentorSession,
     ...slots
   } = batchSession;
+
   const inputSlotTimeArray = getSelectedSlotsTime(inputSlot);
   const slotTimeArray = getSelectedSlotsTime(slots);
+
+  // console.log('bookingDate in prehoook', bookingDate);
+  // console.log('bookingDateFromInput in prehook', bookingDateFromInput);
+
+  // check if mentor already has another session in same slot
+  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId || get(mentorSession, 'id', '')));
+  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
+  if (mentorUserId && bookingDateFromInput) {
+    const getMentorSessionsRes = await callLocalGraphqlApi(
+      getMentorSessions(
+        mentorUserId,
+        bookingDateFromInput || bookingDate,
+      ),
+    );
+    let tempObj = { ...inputSlot };
+    if (inputSlotTimeArray.length === 0) {
+      tempObj = { ...slots };
+    }
+    const menteeSessionSlots = { input: tempObj };
+    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+    checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions);
+  }
+
   context.batchSessionId = batchSessionId;
   context.topicId = topic && topic.id;
   context.inputSlot = inputSlot;
