@@ -143,7 +143,7 @@ const getSchoolCampaignSlots = (async (root, params, context) => {
     schoolResult.push(result);
   });
 
-  return result;
+  return schoolResult;
 });
 
 export default getSchoolCampaignSlots;
