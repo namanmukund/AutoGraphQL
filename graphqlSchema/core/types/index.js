@@ -114,6 +114,7 @@ import PreSalesAudit from './preSalesAudit';
 import PostSalesAudit from './postSalesAudit';
 import AuditQuestionSection from './auditQuestionSection';
 import AuditQuestionSubSection from './auditQuestionSubSection';
+import GetSchoolCampaignSlots from './getSchoolCampaignSlots';
 
 export default [
   ...User,
@@ -232,4 +233,5 @@ export default [
   ...PostSalesAudit,
   ...AuditQuestionSection,
   ...AuditQuestionSubSection,
+  ...GetSchoolCampaignSlots,
 ];
