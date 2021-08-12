@@ -92,6 +92,7 @@ import addUserActivityBlockBasedPracticeDumpValidation
   from './preHookFunctions/validation/addUserActivityBlockBasedPracticeDumpValidation';
 import addMentorProfileValidation from './preHookFunctions/validation/addMentorProfileValidation';
 import deleteMentorMenteeSessionValidation from './preHookFunctions/validation/deleteMentorMenteeSessionValidation';
+import addAuditQuestionValidation from './preHookFunctions/validation/addAuditQuestionValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -727,6 +728,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'deleteMentorMenteeSession': {
       await deleteMentorMenteeSessionValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addAuditQuestion': {
+      await addAuditQuestionValidation(params, mutationOrQueryName, context);
       break;
     }
     default: {

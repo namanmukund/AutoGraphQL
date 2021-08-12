@@ -2,7 +2,6 @@ const TopicQuestion = `
   type TopicQuestion
   {
    order: Int
-   question: QuestionBank @relation(name: "QuestionTopicQuestion")
   }
 `;
 

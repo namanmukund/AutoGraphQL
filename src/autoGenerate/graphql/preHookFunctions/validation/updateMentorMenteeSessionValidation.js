@@ -14,6 +14,7 @@ const getMentorMenteeSessionData = async (id) => {
         id
         isAudit
         sessionStatus
+        isPostSalesAudit
         topic{
           id
           order
@@ -53,7 +54,7 @@ query{
 
 const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryName, context) => {
   const {
-    id, menteeSessionConnectId, mentorSessionConnectId, input: { sessionStatus, bookingDate },
+    id, menteeSessionConnectId, mentorSessionConnectId, input: { sessionStatus, bookingDate, isPostSalesAudit: isPostSalesAuditFromInput },
   } = newParams;
 
   const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id);
@@ -92,6 +93,7 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   context.menteeSessionConnectId = menteeSessionConnectId;
   context.currentUser = currentUser;
   context.mentorSessionConnectId = mentorSessionConnectId;
+  context.isPostSalesAuditFromInput = isPostSalesAuditFromInput;
   if (menteeSessionConnectId && menteeSessionConnectId !== get(mentorMenteeSessionDoc, 'menteeSession.id')) {
     context.hasMenteeSessionChanged = true;
   }

@@ -1,9 +1,24 @@
+import { get } from 'lodash';
 import { validateUsername } from '../../validation';
 import { commonUserValidation, validateTokenAndExtractInformation } from './utils';
 import getUserPasswordObject from '../../resolvers/mutation/user/utils/getUserPasswordObject';
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+
+const fetchUser = async (id) => {
+  const query = `
+    {
+      user(id: "${id}") {
+        id
+        isPreSalesAudit
+      }
+    }
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.user');
+};
 
 const updateUserValidation = async (params, context) => {
-  const { input } = params;
+  const { input, id: userId } = params;
   const userObj = {};
   const {
     name,
@@ -12,6 +27,7 @@ const updateUserValidation = async (params, context) => {
     phone,
     verificationStatus,
     password,
+    isPreSalesAudit: isPreSalesAuditFromInput,
   } = input;
   commonUserValidation({ name, email, phone });
   if (username) {
@@ -22,9 +38,11 @@ const updateUserValidation = async (params, context) => {
   const {
     currentUser,
   } = userInfo;
-
+  const user = await fetchUser(userId);
   context.currentUser = currentUser;
   context.verificationStatusFromInput = verificationStatus;
+  context.prevIsPreSalesAudit = get(user, 'isPreSalesAudit');
+  context.isPreSalesAuditFromInput = isPreSalesAuditFromInput;
 
   if (password) {
     const passwordObj = getUserPasswordObject(password, false);

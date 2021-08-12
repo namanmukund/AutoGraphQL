@@ -71,12 +71,25 @@ const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId, isBack
   const mentorPhoneCountryCode = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.phone.countryCode', '');
   const studentBatchType = get(batchSessionRes, 'data.batchSession.batch.type');
   if (studentBatchType !== batchType.b2b2c) return;
-
   const defaultSessionLink = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.sessionLink', '-');
   const googleMeetLink = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.googleMeetLink', '-');
   const sessionLink = googleMeetLink || defaultSessionLink || '-';
   const slot = get(getSelectedSlotsTime(get(batchSessionRes, 'data.batchSession')), '[0]');
-
+  if (studentsId && studentsId.length && studentsId.length > 0) {
+    studentsId.forEach((studentId) => {
+      const studentsInBatchSession = get(batchSessionRes, 'data.batchSession.attendance', []).map((attendance) => get(attendance, 'student'));
+      const student = studentsInBatchSession.find((studentInBatchSession) => get(studentInBatchSession, 'id') === studentId);
+      const phone = get(student, 'parents[0].user.phone.number');
+      addMenteeBookingLeadsquared({
+        phone,
+        bookingDate: get(batchSessionRes, 'data.batchSession.bookingDate'),
+        slot,
+        sessionLink,
+        type: 'b2b2c',
+      });
+      sendBookingReminderOrConfirmationB2BC(get(student, 'parents[0].user.id'), true);
+    });
+  }
   if (shouldSendMentorComms && studentsId && studentsId.length && studentsId.length > 0) {
     sendWhatsAppTemplateMessage(
       mentorPhoneCountryCode.replace('+', '') + mentorPhoneNumber,
@@ -132,21 +145,6 @@ const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId, isBack
       mentorPhoneNumber,
     });
   }
-  studentsId.forEach((studentId) => {
-    const studentsInBatchSession = get(batchSessionRes, 'data.batchSession.attendance', []).map((attendance) => get(attendance, 'student'));
-    const student = studentsInBatchSession.find((studentInBatchSession) => get(studentInBatchSession, 'id') === studentId);
-    const phone = get(student, 'parents[0].user.phone.number');
-    if (!isBackendApp) {
-      addMenteeBookingLeadsquared({
-        phone,
-        bookingDate: get(batchSessionRes, 'data.batchSession.bookingDate'),
-        slot,
-        sessionLink,
-        type: 'b2b2c',
-      });
-      sendBookingReminderOrConfirmationB2BC(get(student, 'parents[0].user.id'), true);
-    }
-  });
 };
 
 export default extractBatchSessionAndSendB2BC;

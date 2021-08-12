@@ -290,11 +290,18 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         if (currentTopicIndex + 1 < topicsList.length) {
           nextTopicId = topicsList[currentTopicIndex + 1].id;
         }
-        await updateBatchCurrentComponentStatus(
-          batchCurrentComponentId,
-          sessionStatus.allotted,
-          nextTopicId,
-        );
+        if (nextTopicId) {
+          await updateBatchCurrentComponentStatus(
+            batchCurrentComponentId,
+            sessionStatus.allotted,
+            nextTopicId,
+          );
+        } else {
+          await updateBatchCurrentComponentStatus(
+            batchCurrentComponentId,
+            sessionStatusFromInput,
+          );
+        }
         const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
         addToSchedule('postCarnivalMail', postCarnivalFeedbackDate, { batchSessionId });
       } else {
