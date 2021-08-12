@@ -11,6 +11,7 @@ getCampaignSlots (input: GetCampaignSlotsInput): GetCampaignSlotsResult
 getSchoolDetails (input: GetSchoolDetailsInput): GetSchoolDetailsResult
 getStudentCurrentStatus (input: getStudentCurrentStatusInput): StudentCurrentStatus
 getCourseCertificate (input: GetCourseCertificateInput ): CourseCertificateResult
+getSchoolCampaignSlots (input: GetSchoolCampaignSlotsInput): [GetSchoolCampaignSlotsResult]
 `;
 
 export default customQueryString;

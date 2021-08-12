@@ -87,6 +87,7 @@ import getStudentCurrentStatus from './query/methods/getStudentCurrentStatus';
 import getCourseCertificate from './query/methods/getCourseCertificate';
 import signUpSchool from './mutation/methods/signUpSchool';
 import rebookMenteeSession from './mutation/methods/rebookMenteeSession';
+import getSchoolCampaignSlots from './query/methods/getSchoolCampaignSlots';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -600,6 +601,8 @@ resolvers.Query.getStudentCurrentStatus = getStudentCurrentStatus;
 resolvers.Query.getCampaignSlots = getCampaignSlots;
 // Resolver to get school Details
 resolvers.Query.getSchoolDetails = getSchoolDetails;
+// Resolver to get school campaign slots
+resolvers.Query.getSchoolCampaignSlots = getSchoolCampaignSlots;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 

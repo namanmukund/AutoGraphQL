@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import updateSchoolCampaignCodeInSchool from '../scriptMethods/updateSchoolCampaignCodeInSchool';
 // import updateTopicsInAssignment from '../scriptMethods/updateTopicsInAssignment';
 // import updateTopicsInLearningObjective from '../scriptMethods/updateTopicsInLearningObjective';
 // import updateTopicsAndLearningObjectivesInQuestionBank
@@ -15,6 +16,7 @@ const temporaryScript = (async (root, params, context) => {
   /*
   Add script functions
    */
+  // await updateSchoolCampaignCodeInSchool();
   // await generateSessionReport(60);
   // await updateTopicsInAssignment();
   // await updateTopicsInLearningObjective();

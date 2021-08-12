@@ -734,6 +734,9 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await addAuditQuestionValidation(params, mutationOrQueryName, context);
       break;
     }
+    case 'addSchool': {
+      return hook({ ...input, schoolCampaignCode: generateInviteCode(8) }, mutationOrQueryName, 'PreHook');
+    }
     default: {
       /* If context is not present then it means user is not authenticated and the
       user won't be able to make any db query
