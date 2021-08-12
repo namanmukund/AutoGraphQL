@@ -10,7 +10,7 @@ const getSchoolCampaigns = (schoolCode) => `
 {
   campaigns(filter:{
     school_some:{
-      code:"${schoolCode}"
+      schoolCampaignCode:"${schoolCode}"
     }
   }){
     id
