@@ -26,6 +26,7 @@ const PreSalesAudit = `
     timestampAnswer: [MentorMenteeSessionTimestamp] @relation(name: "PreSalesAuditTimestamp")
     overallClassComment: String
     score: Float
+    auditAudioFile: File @relation(name: "PreSalesAuditAudioFile", direction: "OneWay")
     customSectionScore: [CustomSectionScore]
 }`;
 
