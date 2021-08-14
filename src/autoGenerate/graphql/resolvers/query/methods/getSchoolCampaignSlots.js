@@ -103,6 +103,7 @@ const getSchoolCampaignSlots = (async (root, params, context) => {
 
   const getCampaignRes = await callLocalGraphqlApi(getSchoolCampaigns(schoolCode));
   const schoolCampaigns = get(getCampaignRes, 'data.campaigns', []);
+  console.log(schoolCampaigns);
   schoolCampaigns.forEach((campaign) => {
     const result = {};
     const campaignId = get(campaign, 'id', '');

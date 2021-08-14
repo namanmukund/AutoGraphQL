@@ -62,7 +62,7 @@ const BATCH_SESSION = (batchSessionId) => `{
   }
 }`;
 
-const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId, isBackendApp, shouldSendMentorComms = true) => {
+const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId, isBookedByMentee, shouldSendMentorComms = true) => {
   const batchSessionRes = await callLocalGraphqlApi(BATCH_SESSION(batchSessionId));
   // Don't proceed if it is not the first topic
   if (get(batchSessionRes, 'data.batchSession.topic.order') !== 1) return;
@@ -86,7 +86,7 @@ const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId, isBack
         slot,
         sessionLink,
         type: 'b2b2c',
-      });
+      }, {}, [], {}, {}, isBookedByMentee);
       sendBookingReminderOrConfirmationB2BC(get(student, 'parents[0].user.id'), true);
     });
   }

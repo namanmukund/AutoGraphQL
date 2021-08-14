@@ -77,4 +77,27 @@ const updateLeadSquared = async (leadSquaredParams = {}, create = false, leadAct
   }
 };
 
-export default updateLeadSquared;
+const callInQueue = (functionToCall, timeout) => (...args) => {
+  const queue = [];
+  if (queue.length === 0) {
+    // if queue is empty
+    // pushes to queue and starts a 500ms timer
+    queue.push(args);
+    const timer = setInterval(() => {
+      // If queue is empty clear interval
+      if (queue.length === 0) {
+        clearInterval(timer);
+        return;
+      }
+      // call first function call
+      functionToCall(...queue[0]);
+      // delete first function call
+      queue.shift();
+    }, timeout);
+  } else {
+    // If queue is more than 0, keep pushing function calls to queue
+    queue.push(args);
+  }
+};
+
+export default callInQueue(updateLeadSquared, 500);
