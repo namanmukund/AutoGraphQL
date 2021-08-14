@@ -15,27 +15,21 @@ const SessionBookedToday = `
 `;
 
 const sessionRescheduledReasons = `
-    hasRescheduled: Boolean
-    rescheduledDate: Date
-    rescheduledDateProvided: Boolean
-    internetIssue: Boolean
-    zoomIssue: Boolean
-    laptopIssue: Boolean
-    chromeIssue: Boolean
-    powerCut: Boolean
-    notResponseAndDidNotTurnUp: Boolean
-    classDurationExceeded: Boolean
-    turnedUpButLeftAbruptly: Boolean
-    leadNotVerifiedProperly: Boolean
-    otherReasonForReschedule: Boolean
-    otherReasonForChallenges: String
-    webSiteLoadingIssue: Boolean
-    videoNotLoading: Boolean
-    codePlaygroundIssue: Boolean
-    logInOTPError: Boolean
-    otherTechnicalReason: String
-    languageBarrier: Languages
-    otherLanguageBarrier: String
+    hasRescheduled: Int
+    internetIssue: Int
+    zoomIssue: Int
+    laptopIssue: Int
+    chromeIssue: Int
+    powerCut: Int
+    notResponseAndDidNotTurnUp: Int
+    classDurationExceeded: Int
+    turnedUpButLeftAbruptly: Int
+    leadNotVerifiedProperly: Int
+    otherReasonForReschedule: Int
+    webSiteLoadingIssue: Int
+    videoNotLoading: Int
+    codePlaygroundIssue: Int
+    logInOTPError: Int
 `;
 
 const SessionReport = `

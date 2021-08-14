@@ -151,6 +151,82 @@ const masterQuery = (todayStartDate,
 }
   `;
 
+const mentorMenteeSessions = async (fromDate, toDate, country) => {
+  const query = `query{
+  mentorMenteeSessions(filter:{
+    and:[
+      {sessionStartDate_gte:"${fromDate}"}
+      {sessionStartDate_lte:"${toDate}"}
+      {country: ${country}}
+    ]
+  }orderBy:sessionStartDate_DESC){
+    id
+    sessionStartDate
+    hasRescheduled
+    rescheduledDate
+    rescheduledDateProvided
+    zoomIssue
+    internetIssue
+    laptopIssue
+    chromeIssue
+    powerCut
+    notResponseAndDidNotTurnUp
+    classDurationExceeded
+    turnedUpButLeftAbruptly
+    leadNotVerifiedProperly
+    otherReasonForReschedule
+    otherReasonForChallenges
+    webSiteLoadingIssue
+    videoNotLoading
+    codePlaygroundIssue
+    logInOTPError
+    otherTechnicalReason
+    languageBarrier
+    otherLanguageBarrier
+  }
+}`;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.mentorMenteeSessions');
+};
+
+const sessionLogs = async (fromDate, toDate, country) => {
+  const query = `query{
+  sessionLogs(filter:{
+    and:[
+      {sessionStartDate_gte:"${fromDate}"}
+      {sessionStartDate_lte:"${toDate}"}
+      {country: ${country}}
+    ]
+  }orderBy:sessionStartDate_DESC){
+    id
+    sessionStartDate
+    hasRescheduled
+    rescheduledDate
+    rescheduledDateProvided
+    zoomIssue
+    internetIssue
+    laptopIssue
+    chromeIssue
+    powerCut
+    notResponseAndDidNotTurnUp
+    classDurationExceeded
+    turnedUpButLeftAbruptly
+    leadNotVerifiedProperly
+    otherReasonForReschedule
+    otherReasonForChallenges
+    webSiteLoadingIssue
+    videoNotLoading
+    codePlaygroundIssue
+    logInOTPError
+    otherTechnicalReason
+    languageBarrier
+    otherLanguageBarrier
+  }
+}`;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.sessionLogs');
+};
+
 const sessionReportQuery = (date, country) => `
   {
     sessionReports(filter: {
