@@ -154,6 +154,7 @@ const bookB2B2CSlotsMutationResolver = async (
       ...slots
     },
   } = params;
+  context.isBookedByMentee = true;
   const slotTimeArray = getSelectedSlotsTime(slots);
   if (!slotTimeArray.length) {
     throw new NoSlotSelectedError();
@@ -221,7 +222,7 @@ const bookB2B2CSlotsMutationResolver = async (
     }
 
     // add student to the new batch
-    await callLocalGraphqlApi(updateBatch(batchId, studentProfileId, courseId));
+    await callLocalGraphqlApi(updateBatch(batchId, studentProfileId, courseId), context);
     addMenteeToLS(phone, bookingDate, slots, batchId);
   }
   return {
