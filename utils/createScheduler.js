@@ -39,7 +39,7 @@ const createScheduler = (schedulerName) => {
       schedule.scheduleJob(rule, async () => {
         // eslint-disable-next-line no-console
         console.log('scheduler started for: ', schedulerName);
-        await scheduleSessionReport(1);
+        await scheduleSessionReport(5);
       });
       break;
     default:
