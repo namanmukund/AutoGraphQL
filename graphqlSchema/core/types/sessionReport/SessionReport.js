@@ -15,6 +15,9 @@ const SessionBookedToday = `
 `;
 
 const sessionRescheduledReasons = `
+    hasRescheduled: Boolean
+    rescheduledDate: Date
+    rescheduledDateProvided: Boolean
     internetIssue: Boolean
     zoomIssue: Boolean
     laptopIssue: Boolean
