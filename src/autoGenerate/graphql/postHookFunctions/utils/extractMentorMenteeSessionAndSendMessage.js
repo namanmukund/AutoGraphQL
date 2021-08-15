@@ -8,6 +8,9 @@ import getLongDate from '../../../../../utils/getLongDate';
 import transactionalMessageBody from '../../../../../constants/transactionalMessageBody';
 import updateLeadSquared from '../../../../../services/leadsquared/updateLeadSquared';
 import addToSchedule from '../../../../../utils/scheduleJobs/addToSchedule';
+import getMentorCodingLanguages from '../../resolvers/utils/getMentorCodingLanguages';
+
+const minCap = (num, cap) => (num > cap ? num : cap);
 
 const mentorInfoQuery = (mentorSessionId) => `
   query {
@@ -17,6 +20,19 @@ const mentorInfoQuery = (mentorSessionId) => `
         mentorProfile {
           sessionLink
           googleMeetLink
+          experienceYear
+          codingLanguages {
+            value
+          }
+          pythonCourseRating5
+          pythonCourseRating4
+          pythonCourseRating3
+          pythonCourseRating2
+          pythonCourseRating1
+        }
+        profilePic{
+          id
+          uri
         }
         name
         phone{
@@ -56,11 +72,40 @@ const extractMentorMenteeSessionAndSendMessage = async (
   menteeObj.topicTitle = get(topic, 'data.topic.title');
 
   const mentorInfo = await callLocalGraphqlApi(mentorInfoQuery(mentorSessionId));
+  const mentorSession = get(mentorInfo, 'mentorSession', {});
+  const mentorProfile = get(mentorSession, 'mentorProfile', {});
   const mentorObj = {
     name: startCase(toLower(get(mentorInfo, 'data.mentorSession.user.name') || '')),
     phoneNumber: get(mentorInfo, 'data.mentorSession.user.phone.number') || '',
     countryCode: get(mentorInfo, 'data.mentorSession.user.phone.countryCode') || '',
   };
+  const {
+    pythonCourseRating1, pythonCourseRating2, pythonCourseRating3, pythonCourseRating4, pythonCourseRating5,
+  } = mentorProfile;
+
+  let totalRatingUsers = 0;
+  let cumulativeRating = 0;
+  if (pythonCourseRating5) {
+    totalRatingUsers += pythonCourseRating5;
+    cumulativeRating += pythonCourseRating5 * 5;
+  }
+  if (pythonCourseRating4) {
+    totalRatingUsers += pythonCourseRating4;
+    cumulativeRating += pythonCourseRating4 * 4;
+  }
+  if (pythonCourseRating3) {
+    totalRatingUsers += pythonCourseRating3;
+    cumulativeRating += pythonCourseRating3 * 3;
+  }
+  if (pythonCourseRating2) {
+    totalRatingUsers += pythonCourseRating2;
+    cumulativeRating += pythonCourseRating2 * 2;
+  }
+  if (pythonCourseRating1) {
+    totalRatingUsers += pythonCourseRating1;
+    cumulativeRating += pythonCourseRating1;
+  }
+  mentorObj.rating = minCap(totalRatingUsers ? Math.round(((cumulativeRating) / totalRatingUsers) * 100) / 100 : 5);
 
   const {
     parentName, parentNumber, countryCode, name, grade, parentEmail,
@@ -69,7 +114,12 @@ const extractMentorMenteeSessionAndSendMessage = async (
   // add session Link to LS
   updateLeadSquared({
     Phone: parentNumber,
+    mx_mentor_Name: mentorObj.name,
     mx_Session_Link: get(mentorInfo, 'data.mentorSession.user.mentorProfile.sessionLink'),
+    mx_Mentor_Star_Rating: mentorObj.rating,
+    mx_Mentor_Photo: get(mentorSession, 'profilePic.uri', ''),
+    mx_Mentor_Exp_in_years: get(mentorProfile, 'experienceYear') || 3,
+    mx_Mentor_Languages_Known: getMentorCodingLanguages(get(mentorProfile, 'experienceYear')) || 'Python',
   }, true, {}, true);
 
   // send email
