@@ -1,23 +1,44 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
+import getIntlDateTime from '../../../../../utils/timeZoneDiff';
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { fetchAgentName } from '../utils/updateUserBookingAgent';
 
-const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, agentId) => {
+const getUser = async (phoneNumber) => {
+  const user = await callLocalGraphqlApi(`{
+    users(filter: { phone_number_subDoc: "${phoneNumber}" }) {
+      timezone
+    }
+  }`);
+  return get(user, 'data.users[0]', {});
+};
+
+const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, agentId, fields = {}) => {
   const { bookingDate } = input;
-  let phoneNumber = '';
+  let phoneNumber = input.phone;
   let bookingDateTime = '';
+  let date = '';
+  let time = '';
+  const { timezone } = await getUser(phoneNumber);
   if (get(input, 'type') === 'b2b2c') {
     const { slot, phone } = input;
     phoneNumber = phone;
+    const { dateObject, startTime } = getIntlDateTime(bookingDate, slot, timezone);
+    date = moment(dateObject).format('dddd, Do MMMM');
+    time = startTime;
     bookingDateTime = moment(bookingDate).minutes(0).hours(slot).subtract(5, 'hours')
       .subtract(30, 'minutes')
       .format('YYYY-MM-DD HH:mm:ss');
   } else {
     phoneNumber = get(userInfo, 'data.user.studentProfile.parents[0].user.phone.number');
     const topicOrder = get(topicInfo, 'data.topic.order');
+
     if (topicOrder === 1) {
       const slotNumber = slotTimeStringArray[0].split('slot')[1];
+      const { dateObject, startTime } = getIntlDateTime(bookingDate, slotNumber, timezone);
+      date = moment(dateObject).format('dddd, Do MMMM');
+      time = startTime;
       bookingDateTime = moment(bookingDate).minutes(0).hours(slotNumber).subtract(5, 'hours')
         .subtract(30, 'minutes')
         .format('YYYY-MM-DD HH:mm:ss');
@@ -29,6 +50,9 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
   const leadSquaredInput = {
     Phone: phoneNumber,
     mx_Booking_Date_Time: bookingDateTime,
+    mx_Booking_Date: date,
+    mx_Booking_Time: time,
+    ...fields,
   };
   if (!isBookedByMentee && agentName) {
     leadSquaredInput.mx_Booking_Agent = agentName;

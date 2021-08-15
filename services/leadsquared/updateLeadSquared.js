@@ -77,8 +77,8 @@ const updateLeadSquared = async (leadSquaredParams = {}, create = false, leadAct
   }
 };
 
+const queue = [];
 const callInQueue = (functionToCall, timeout) => (...args) => {
-  const queue = [];
   if (queue.length === 0) {
     // if queue is empty
     // pushes to queue and starts a 500ms timer
