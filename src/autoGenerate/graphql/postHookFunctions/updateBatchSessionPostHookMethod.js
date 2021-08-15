@@ -369,99 +369,103 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
       }
     }
-    const studentsFromAttendance = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
-    extractBatchSessionAndSendB2BC(batchSessionId, studentsFromAttendance, context.appName === TBA, context.prevStudentsAttendanceCount === 0);
-    if (mentorSessionConnectId) {
-      const mentorUser = await getMentor(mentorSessionConnectId);
-      const { id: mentorUserId, phone } = mentorUser;
-      const prevMentorUserId = get(prevMentor, 'id');
-      const prevMentorPhoneNumber = get(prevMentor, 'phone.countryCode', '').replace('+', '') + get(prevMentor, 'phone.number', '');
+    // adding logs also when mentorSession is changed or status is changed
+    if (prevSessionStatus !== sessionStatusFromInput || (mentorSessionConnectId && (mentorSessionId !== mentorSessionConnectId))) {
+      addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
+    }
+  }
+  const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
+  extractBatchSessionAndSendB2BC(batchSessionId, students, context.isBookedByMentee, context.prevStudentsAttendanceCount === 0);
+  if (mentorSessionConnectId) {
+    const mentorUser = await getMentor(mentorSessionConnectId);
+    const { id: mentorUserId, phone } = mentorUser;
+    const prevMentorUserId = get(prevMentor, 'id');
+    const prevMentorPhoneNumber = get(prevMentor, 'phone.countryCode', '').replace('+', '') + get(prevMentor, 'phone.number', '');
 
-      // If mentor is changed
-      if (mentorUserId !== prevMentorUserId) {
-        // send prev mentor cancellation message
-        const batchSessionRes = await callLocalGraphqlApi(batchSessionQuery(batchSessionId));
-        if (get(batchSessionRes, 'data.batchSession.batch.type') !== batchType.b2b2c) return;
-        const sessionDate = moment(bookingDate).format('dddd, Do MMMM');
-        const sessionTime = getSlotLabel(slotTimeArray[0]).startTime;
-        sendWhatsAppTemplateMessage(
-          prevMentorPhoneNumber,
-          'mentor_cancellation_b2b2c',
-          prevMentorPhoneNumber,
-          [
-            {
-              name: 'session_date',
-              value: sessionDate,
-            },
-            {
-              name: 'session_time',
-              value: sessionTime,
-            },
-            {
-              name: 'batch_code',
-              value: get(batchSessionRes, 'data.batchSession.batch.code'),
-            },
-          ],
-        );
+    // If mentor is changed
+    if (mentorUserId !== prevMentorUserId) {
+      // send prev mentor cancellation message
+      const batchSessionRes = await callLocalGraphqlApi(batchSessionQuery(batchSessionId));
+      if (get(batchSessionRes, 'data.batchSession.batch.type') !== batchType.b2b2c) return;
+      const sessionDate = moment(bookingDate).format('dddd, Do MMMM');
+      const sessionTime = getSlotLabel(slotTimeArray[0]).startTime;
+      sendWhatsAppTemplateMessage(
+        prevMentorPhoneNumber,
+        'mentor_cancellation_b2b2c',
+        prevMentorPhoneNumber,
+        [
+          {
+            name: 'session_date',
+            value: sessionDate,
+          },
+          {
+            name: 'session_time',
+            value: sessionTime,
+          },
+          {
+            name: 'batch_code',
+            value: get(batchSessionRes, 'data.batchSession.batch.code'),
+          },
+        ],
+      );
 
-        // send new mentor confirmation message
-        const newMentorPhoneNumber = get(phone, 'countryCode', '').replace('+', '') + get(phone, 'number', '');
-        const sessionLink = get(mentorUser, 'mentorProfile.googleMeetLink')
-          ? get(mentorUser, 'mentorProfile.googleMeetLink')
-          : get(mentorUser, 'mentorProfile.sessionMeetLink', '-') || '';
-        sendWhatsAppTemplateMessage(
-          newMentorPhoneNumber,
-          'mentor_confirmation_b2b2c',
-          newMentorPhoneNumber,
-          [
-            {
-              name: 'course',
-              value: get(batchSessionRes, 'data.batchSession.course.title'),
-            },
-            {
-              name: 'batch_code',
-              value: get(batchSessionRes, 'data.batchSession.batch.code'),
-            },
-            {
-              name: 'school_name',
-              value: get(batchSessionRes, 'data.batchSession.batch.school.name'),
-            },
-            {
-              name: 'w_date',
-              value: sessionDate,
-            },
-            {
-              name: 'w_time',
-              value: sessionTime,
-            },
-            {
-              name: 'session_link',
-              value: sessionLink,
-            },
-          ],
-        );
-        // schedule new mentor reminder
-        const bookingDateTime = new Date(moment(bookingDate).toDate().setHours(slotTimeArray[0], 0, 0, 0)).toISOString();
-        const hoursLeftForSession = Math.abs(moment(bookingDateTime).diff(moment(), 'hours'));
-        if (hoursLeftForSession < 3) return;
+      // send new mentor confirmation message
+      const newMentorPhoneNumber = get(phone, 'countryCode', '').replace('+', '') + get(phone, 'number', '');
+      const sessionLink = get(mentorUser, 'mentorProfile.googleMeetLink')
+        ? get(mentorUser, 'mentorProfile.googleMeetLink')
+        : get(mentorUser, 'mentorProfile.sessionMeetLink', '-') || '';
+      sendWhatsAppTemplateMessage(
+        newMentorPhoneNumber,
+        'mentor_confirmation_b2b2c',
+        newMentorPhoneNumber,
+        [
+          {
+            name: 'course',
+            value: get(batchSessionRes, 'data.batchSession.course.title'),
+          },
+          {
+            name: 'batch_code',
+            value: get(batchSessionRes, 'data.batchSession.batch.code'),
+          },
+          {
+            name: 'school_name',
+            value: get(batchSessionRes, 'data.batchSession.batch.school.name'),
+          },
+          {
+            name: 'w_date',
+            value: sessionDate,
+          },
+          {
+            name: 'w_time',
+            value: sessionTime,
+          },
+          {
+            name: 'session_link',
+            value: sessionLink,
+          },
+        ],
+      );
+      // schedule new mentor reminder
+      const bookingDateTime = new Date(moment(bookingDate).toDate().setHours(slotTimeArray[0], 0, 0, 0)).toISOString();
+      const hoursLeftForSession = Math.abs(moment(bookingDateTime).diff(moment(), 'hours'));
+      if (hoursLeftForSession < 3) return;
 
-        let mentorSessionReminderDateTime = moment(bookingDateTime).subtract(30, 'minutes').toDate();
-        if (hoursLeftForSession >= 18) {
-          mentorSessionReminderDateTime = moment(bookingDateTime).subtract(2, 'hours').toDate();
-        }
-
-        addToSchedule('mentorSessionNotificationB2B2C', mentorSessionReminderDateTime, {
-          batchSessionId,
-          courseName: get(batchSessionRes, 'data.batchSession.course.title'),
-          batchCode: get(batchSessionRes, 'data.batchSession.batch.code'),
-          schoolName: get(batchSessionRes, 'data.batchSession.batch.school.name'),
-          sessionDate,
-          sessionTime,
-          sessionLink,
-          mentorUserId,
-          mentorPhoneNumber: newMentorPhoneNumber,
-        });
+      let mentorSessionReminderDateTime = moment(bookingDateTime).subtract(30, 'minutes').toDate();
+      if (hoursLeftForSession >= 18) {
+        mentorSessionReminderDateTime = moment(bookingDateTime).subtract(2, 'hours').toDate();
       }
+
+      addToSchedule('mentorSessionNotificationB2B2C', mentorSessionReminderDateTime, {
+        batchSessionId,
+        courseName: get(batchSessionRes, 'data.batchSession.course.title'),
+        batchCode: get(batchSessionRes, 'data.batchSession.batch.code'),
+        schoolName: get(batchSessionRes, 'data.batchSession.batch.school.name'),
+        sessionDate,
+        sessionTime,
+        sessionLink,
+        mentorUserId,
+        mentorPhoneNumber: newMentorPhoneNumber,
+      });
     }
   }
 };
