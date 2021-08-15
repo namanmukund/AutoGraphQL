@@ -5,7 +5,6 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   sessionStatus,
-  TBA,
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
@@ -351,7 +350,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     }
   }
   const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
-  extractBatchSessionAndSendB2BC(batchSessionId, students, context.appName === TBA, context.prevStudentsAttendanceCount === 0);
+  extractBatchSessionAndSendB2BC(batchSessionId, students, context.isBookedByMentee, context.prevStudentsAttendanceCount === 0);
   if (mentorSessionConnectId) {
     const mentorUser = await getMentor(mentorSessionConnectId);
     const { id: mentorUserId, phone } = mentorUser;

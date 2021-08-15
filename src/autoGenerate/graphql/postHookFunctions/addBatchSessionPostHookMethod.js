@@ -3,7 +3,6 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   sessionStatus,
-  TBA,
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
@@ -179,7 +178,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     ));
   }
   const studentsId = (students && students.length) ? students.map((student) => get(student, 'id')) : [];
-  extractBatchSessionAndSendB2BC(batchSessionId, studentsId, context.appName === TBA);
+  extractBatchSessionAndSendB2BC(batchSessionId, studentsId, false);
 
   // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
   if (topicId && mentorSessionConnectId) {
