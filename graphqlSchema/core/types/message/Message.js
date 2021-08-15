@@ -27,6 +27,7 @@ const Message = `
     emoji: [StickerEmoji] @relation(name: "MessageEmoji", direction: "OneWay")
     image: File @relation(name: "MessageImage", direction: "OneWay")
     learningObjective: LearningObjective @relation(name: "LearningObjectiveMessage")
+    question: [QuestionBank] @relation(name: "QuestionBankMessage")
     terminalInput: String @trim
     terminalOutput: String @trim
     alignment: MessageAlignmentType!
