@@ -1,7 +1,6 @@
 /* eslint-disable no-await-in-loop, no-console */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
-import { log } from '../../../utils';
 
 const callMentorMenteeSessions = async (
   userId,
@@ -25,12 +24,14 @@ query{
 
 const callUpdateMentorMenteeSession = async (
   mentorMenteeId,
+  mentorSessionId,
   variables,
 ) => {
   const query = `
 mutation($input: MentorMenteeSessionUpdate){
   updateMentorMenteeSession(
     id:"${mentorMenteeId}"
+    ${!mentorSessionId ? '' : `mentorSessionConnectId: "${mentorSessionId}"`}
     input:$input
   ){
     id
@@ -179,7 +180,22 @@ mutation($input: MentorSessionUpdate){
   return get(res, 'data.updateMentorSession.id');
 };
 
-const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicId, bookingDate, slot, mentorSessionIdFromInput, courseId, sessionStatus, source, methodCallOriginComponent) => {
+const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicId, bookingDate, slot, mentorSessionIdFromInput, courseId, sessionStatus, source, methodCallOriginComponent, toUpdateMenteeSession) => {
+  const menteBookingDate = bookingDate;
+  const menteeBookingSlot = slot;
+  let menteeSessionId;
+  if (menteeUserId) {
+    const menteeSession = await getMenteeSession(
+      menteeUserId,
+      topicId,
+    );
+    if (menteeSession) {
+      const { id: menteeSessionIdFromMenteeQuery } = menteeSession;
+      menteeSessionId = menteeSessionIdFromMenteeQuery;
+    }
+    console.log('------------------------menteeSessionId', menteeSessionId);
+  }
+  let mentorSessionId = mentorSessionIdFromInput;
   // eslint-disable-next-line no-restricted-syntax
   try {
     console.log('------------------------menteeUserId', menteeUserId);
@@ -192,21 +208,54 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
     console.log('------------------------sessionStatus', sessionStatus);
     console.log('------------------------source', source);
     console.log('------------------------methodCallOriginComponent', methodCallOriginComponent);
+
+    // simply update existing mms if that's all it is to be done
     if (menteeUserId && topicId) {
       const mentorMenteeId = await callMentorMenteeSessions(menteeUserId, topicId);
       if (mentorMenteeId) {
-        await callUpdateMentorMenteeSession(mentorMenteeId, { input: { sessionStatus } });
+        if (toUpdateMenteeSession && menteeSessionId) {
+          const variables = {
+            input: {
+              bookingDate: menteBookingDate,
+              slot0: `slot${menteeBookingSlot}` === 'slot0',
+              slot1: `slot${menteeBookingSlot}` === 'slot1',
+              slot2: `slot${menteeBookingSlot}` === 'slot2',
+              slot3: `slot${menteeBookingSlot}` === 'slot3',
+              slot4: `slot${menteeBookingSlot}` === 'slot4',
+              slot5: `slot${menteeBookingSlot}` === 'slot5',
+              slot6: `slot${menteeBookingSlot}` === 'slot6',
+              slot7: `slot${menteeBookingSlot}` === 'slot7',
+              slot8: `slot${menteeBookingSlot}` === 'slot8',
+              slot9: `slot${menteeBookingSlot}` === 'slot9',
+              slot10: `slot${menteeBookingSlot}` === 'slot10',
+              slot11: `slot${menteeBookingSlot}` === 'slot11',
+              slot12: `slot${menteeBookingSlot}` === 'slot12',
+              slot13: `slot${menteeBookingSlot}` === 'slot13',
+              slot14: `slot${menteeBookingSlot}` === 'slot14',
+              slot15: `slot${menteeBookingSlot}` === 'slot15',
+              slot16: `slot${menteeBookingSlot}` === 'slot16',
+              slot17: `slot${menteeBookingSlot}` === 'slot17',
+              slot18: `slot${menteeBookingSlot}` === 'slot18',
+              slot19: `slot${menteeBookingSlot}` === 'slot19',
+              slot20: `slot${menteeBookingSlot}` === 'slot20',
+              slot21: `slot${menteeBookingSlot}` === 'slot21',
+              slot22: `slot${menteeBookingSlot}` === 'slot22',
+              slot23: `slot${menteeBookingSlot}` === 'slot23',
+            },
+          };
+          await callUpdateMenteeSession(
+            menteeSessionId,
+            variables,
+          );
+          console.log('------------------------updated menteeSessionId', menteeSessionId);
+        }
+        await callUpdateMentorMenteeSession(mentorMenteeId, mentorSessionIdFromInput, { input: { sessionStatus } });
         console.log('------------------------updated mentorMenteeId', mentorMenteeId);
         return true;
       }
     }
 
-    const menteBookingDate = bookingDate;
-    const menteeBookingSlot = slot;
-    let menteeSessionId;
-    let mentorSessionId = mentorSessionIdFromInput;
-
-    // add mentor  session
+    // add mentor session if mentorSessionId is not present in input
     if (!mentorSessionId && mentorUserId) {
       mentorSessionId = await getMentorSessionId(
         mentorUserId,
@@ -241,7 +290,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
             variables,
           );
         } catch (err) {
-          log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
+          console.log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
         }
         console.log('------------------------updated mentorSessionId', mentorSessionId);
       }
@@ -260,71 +309,60 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           variables,
         );
       } catch (err) {
-        log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
+        console.log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
       }
     }
 
-    if (menteeUserId) {
-      const menteeSession = await getMenteeSession(
-        menteeUserId,
-        topicId,
+    if (menteeSessionId) {
+      console.log('------------------------updating menteeSessionId', menteeSessionId);
+      // update
+      const variables = {
+        input: {
+          bookingDate: menteBookingDate,
+          slot0: `slot${menteeBookingSlot}` === 'slot0',
+          slot1: `slot${menteeBookingSlot}` === 'slot1',
+          slot2: `slot${menteeBookingSlot}` === 'slot2',
+          slot3: `slot${menteeBookingSlot}` === 'slot3',
+          slot4: `slot${menteeBookingSlot}` === 'slot4',
+          slot5: `slot${menteeBookingSlot}` === 'slot5',
+          slot6: `slot${menteeBookingSlot}` === 'slot6',
+          slot7: `slot${menteeBookingSlot}` === 'slot7',
+          slot8: `slot${menteeBookingSlot}` === 'slot8',
+          slot9: `slot${menteeBookingSlot}` === 'slot9',
+          slot10: `slot${menteeBookingSlot}` === 'slot10',
+          slot11: `slot${menteeBookingSlot}` === 'slot11',
+          slot12: `slot${menteeBookingSlot}` === 'slot12',
+          slot13: `slot${menteeBookingSlot}` === 'slot13',
+          slot14: `slot${menteeBookingSlot}` === 'slot14',
+          slot15: `slot${menteeBookingSlot}` === 'slot15',
+          slot16: `slot${menteeBookingSlot}` === 'slot16',
+          slot17: `slot${menteeBookingSlot}` === 'slot17',
+          slot18: `slot${menteeBookingSlot}` === 'slot18',
+          slot19: `slot${menteeBookingSlot}` === 'slot19',
+          slot20: `slot${menteeBookingSlot}` === 'slot20',
+          slot21: `slot${menteeBookingSlot}` === 'slot21',
+          slot22: `slot${menteeBookingSlot}` === 'slot22',
+          slot23: `slot${menteeBookingSlot}` === 'slot23',
+        },
+      };
+      await callUpdateMenteeSession(
+        menteeSessionId,
+        variables,
       );
-      if (menteeSession) {
-        const { id: menteeSessionIdFromMenteeQuery } = menteeSession;
-        menteeSessionId = menteeSessionIdFromMenteeQuery;
-      }
-      console.log('------------------------menteeSessionId', menteeSessionId);
-      if (menteeSessionId) {
-        console.log('------------------------updating menteeSessionId', menteeSessionId);
-        // update
+      console.log('------------------------updated menteeSessionId', menteeSessionId);
+    } else if (!menteeSessionId) {
+      // add mentee session
+      /* eslint no-lonely-if:0 */
+      if (menteBookingDate && menteeBookingSlot !== null && menteeBookingSlot !== undefined) {
         const variables = {
           input: {
             bookingDate: menteBookingDate,
-            slot0: `slot${menteeBookingSlot}` === 'slot0',
-            slot1: `slot${menteeBookingSlot}` === 'slot1',
-            slot2: `slot${menteeBookingSlot}` === 'slot2',
-            slot3: `slot${menteeBookingSlot}` === 'slot3',
-            slot4: `slot${menteeBookingSlot}` === 'slot4',
-            slot5: `slot${menteeBookingSlot}` === 'slot5',
-            slot6: `slot${menteeBookingSlot}` === 'slot6',
-            slot7: `slot${menteeBookingSlot}` === 'slot7',
-            slot8: `slot${menteeBookingSlot}` === 'slot8',
-            slot9: `slot${menteeBookingSlot}` === 'slot9',
-            slot10: `slot${menteeBookingSlot}` === 'slot10',
-            slot11: `slot${menteeBookingSlot}` === 'slot11',
-            slot12: `slot${menteeBookingSlot}` === 'slot12',
-            slot13: `slot${menteeBookingSlot}` === 'slot13',
-            slot14: `slot${menteeBookingSlot}` === 'slot14',
-            slot15: `slot${menteeBookingSlot}` === 'slot15',
-            slot16: `slot${menteeBookingSlot}` === 'slot16',
-            slot17: `slot${menteeBookingSlot}` === 'slot17',
-            slot18: `slot${menteeBookingSlot}` === 'slot18',
-            slot19: `slot${menteeBookingSlot}` === 'slot19',
-            slot20: `slot${menteeBookingSlot}` === 'slot20',
-            slot21: `slot${menteeBookingSlot}` === 'slot21',
-            slot22: `slot${menteeBookingSlot}` === 'slot22',
-            slot23: `slot${menteeBookingSlot}` === 'slot23',
+            [`slot${menteeBookingSlot}`]: true,
+            source: 'school',
           },
         };
-        await callUpdateMenteeSession(
-          menteeSessionId,
-          variables,
-        );
-        console.log('------------------------updated menteeSessionId', menteeSessionId);
-      } else if (!menteeSessionId) {
-        // add mentee session
-        /* eslint no-lonely-if:0 */
-        if (menteBookingDate && menteeBookingSlot) {
-          const variables = {
-            input: {
-              bookingDate: menteBookingDate,
-              [`slot${menteeBookingSlot}`]: true,
-              source: 'school',
-            },
-          };
-          menteeSessionId = await callAddMenteeSession(menteeUserId, topicId, variables);
-          console.log('------------------------added menteeSessionId', menteeSessionId);
-        }
+        menteeSessionId = await callAddMenteeSession(menteeUserId, topicId, variables);
+        console.log('------------------------added menteeSessionId', menteeSessionId);
       }
     }
 

@@ -10,6 +10,7 @@ const AuditQuestionSubSection = `
   ){
     title: String! @unique @trim
     order: Int
+    auditType: AuditType!
 }`;
 
 export default [AuditQuestionSubSection];

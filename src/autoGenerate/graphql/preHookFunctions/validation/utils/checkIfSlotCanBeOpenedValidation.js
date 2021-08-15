@@ -3,7 +3,7 @@ import getSelectedSlotsTime from './getSelectedSlotsTime';
 import { sessionType } from '../../../../../../constants';
 import { SlotsOccupiedError } from '../../../../../../constants/errors/db';
 
-const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsInPrevDoc) => {
+const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsInPrevDoc, userBatchCode = '') => {
   const { input } = params;
   const { ...slots } = input;
 
@@ -12,30 +12,58 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
   if (timeSlotsInPrevDoc && timeSlotsInPrevDoc.length) {
     slotTimeArray = slotTimeArray.filter((el) => !timeSlotsInPrevDoc.includes(el));
   }
-
   // array to store all the occupied slots of mentor on that availability date
   const occupiedSlotsArray = [];
+  // eslint-disable-next-line no-unused-vars
+  let customError = '';
+  let mmsflag = false;
+  let bsflag = false;
   if (slotTimeArray.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const mentorSession of prevMentorSessions) {
       const mentorMenteeSessions = get(mentorSession, 'mentorMenteeSessions', []);
       const batchSessions = get(mentorSession, 'batchSessions', []);
-
       // for a batch mentorSession we will check batchSessions and see which slots are occupied
       if ((mentorSession.sessionType === sessionType.trial || mentorSession.sessionType === sessionType.batch) && batchSessions.length) {
         // eslint-disable-next-line no-restricted-syntax
         for (const batchSession of batchSessions) {
-          const occupiedSlotTimeArrayForBatch = getSelectedSlotsTime(batchSession);
-          occupiedSlotsArray.push(...occupiedSlotTimeArrayForBatch);
+          if (userBatchCode !== get(batchSession, 'batch.code', '')) {
+            const occupiedSlotTimeArrayForBatch = getSelectedSlotsTime(batchSession);
+            occupiedSlotsArray.push(...occupiedSlotTimeArrayForBatch);
+            // eslint-disable no-loop-func
+            const intersection = slotTimeArray.filter((x) => occupiedSlotTimeArrayForBatch.includes(x));
+            if (intersection && intersection.length) {
+              if (!bsflag) {
+                bsflag = true;
+                customError += 'Batch(es) -> ';
+              }
+              customError += `${get(batchSession, 'batch.code', '')} `;
+            }
+          }
         }
       // for trial/paid mentorSession we will check mentorMenteeSessions and see which slots are occupied
-      } else if (mentorMenteeSessions.length) {
+      }
+      if (mentorMenteeSessions.length && !sessionType.batch) {
         // eslint-disable-next-line no-restricted-syntax
         for (const mentorMenteeSession of mentorMenteeSessions) {
           const menteeSession = get(mentorMenteeSession, 'menteeSession', '');
-          if (menteeSession) {
-            const occupiedSlotTimeArrayForMMS = getSelectedSlotsTime(menteeSession);
-            occupiedSlotsArray.push(...occupiedSlotTimeArrayForMMS);
+          if (userBatchCode !== get(menteeSession, 'user.studentProfile.batch.code', '')) {
+            if (menteeSession) {
+              const occupiedSlotTimeArrayForMMS = getSelectedSlotsTime(menteeSession);
+              occupiedSlotsArray.push(...occupiedSlotTimeArrayForMMS);
+              // eslint-disable no-loop-func
+              const intersection = slotTimeArray.filter((x) => occupiedSlotTimeArrayForMMS.includes(x));
+              if (intersection && intersection.length) {
+                if (!mmsflag) {
+                  mmsflag = true;
+                  customError += 'Mentee(s) -> ';
+                }
+                customError += `${get(menteeSession, 'user.name', '')} `;
+                if (get(menteeSession, 'user.studentProfile.batch.code', '')) {
+                  customError += `(${get(menteeSession, 'user.studentProfile.batch.code', '')})`;
+                }
+              }
+            }
           }
         }
       }
@@ -50,7 +78,8 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
       for (const intersectionSlot of intersectionSlots) {
         errorMessage += ` slot${intersectionSlot}`;
       }
-      errorMessage += ' are already present and booked';
+      errorMessage += ' are already present and booked for ';
+      errorMessage += customError;
       throw new SlotsOccupiedError({
         data: {
           message: errorMessage,

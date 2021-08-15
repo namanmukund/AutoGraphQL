@@ -24,6 +24,7 @@ const AuditQuestion = `
     ratingDisplayType: RatingDisplayType
     timestampTags: [TimestampTag]
     status: ContentStatus! @defaultValue(value: "unpublished")
+    description: String
   }
 `;
 

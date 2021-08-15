@@ -11,6 +11,8 @@ import { ConnectIdRequiredError, DatabaseRecordNotFoundError } from '../../../..
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetailsInParams';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
+import getMentorSessions from '../../../utils/getMentorSessions';
+import { checkIfSlotCanBeOpenedValidation } from './utils';
 
 // query to get mentor Sessions
 const mentorMenteeSessionsQuery = (menteeSessionConnectId, mentorSessionConnectId) => `
@@ -32,6 +34,11 @@ query{
     id
     bookingDate
     user{
+      studentProfile {
+        batch {
+          code
+        }
+      }
       id
       source
       country
@@ -43,12 +50,25 @@ query{
   }
 }`;
 
+// query to get mentor from mentorSessionConnectId
+const fetchMentor = (id) => `
+query{
+  mentorSession(id: "${id}"){
+    id
+    user{
+      id
+    }
+  }
+}`;
+
 const validateMenteeStartSessionData = (menteeSession, topicConnectId, params) => {
   // eslint-disable-next-line no-unused-vars
   const { bookingDate, topic: { id: topicId }, ...slots } = menteeSession;
   if (topicConnectId !== topicId) {
     throw new SessionTopicAndTopicConnectIdMismatchError();
   }
+
+
   // uncomment later on
   const slotTimeArray = getSelectedSlotsTime(slots);
   const date = new Date(bookingDate);
@@ -104,6 +124,25 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
     });
   }
   validateMenteeStartSessionData(menteeSession, topicConnectId, params);
+
+  // check if mentor already has another session in same slot
+
+  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
+  const { bookingDate } = menteeSession;
+  if (mentorUserId && bookingDate) {
+    const getMentorSessionsRes = await callLocalGraphqlApi(
+      getMentorSessions(
+        mentorUserId,
+        bookingDate,
+      ),
+    );
+    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+    // constucting data in appropriate format
+    const menteeSessionSlots = { input: { ...menteeSession } };
+    checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions, null, get(menteeSession, 'user.studentProfile.batch.code'));
+  }
+
   //update source & country in mentorMenteeSession
   const userData = get(menteeSession, 'user');
   updateUserSpecificDetailsInParams(userData, params);
