@@ -4,7 +4,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import { NoSlotSelectedError, OnlyOneSlotAllowedError } from '../../../../../../constants/errors/input';
 import { BatchFullError, DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
-import { addMenteeBookingLeadsquared } from '../../../postHookFunctions/leadsquared';
+// import { addMenteeBookingLeadsquared } from '../../../postHookFunctions/leadsquared';
 
 // query to fetch student profile id on basis of user id
 const fetchUser = (userId) => `
@@ -101,36 +101,36 @@ const removeStudentFromBatch = (batchId, studentId) => `
   }
   `;
 
-const fetchMentor = (batchId) => `
-  {
-    batchSessions(filter: {
-      batch_some: { id: "${batchId}" }
-    })  {
-      id
-      mentorSession{
-        user{
-          mentorProfile{
-            googleMeetLink
-            sessionLink
-          }
-        }
-      }
-    }
-  }
-`;
+// const fetchMentor = (batchId) => `
+//   {
+//     batchSessions(filter: {
+//       batch_some: { id: "${batchId}" }
+//     })  {
+//       id
+//       mentorSession{
+//         user{
+//           mentorProfile{
+//             googleMeetLink
+//             sessionLink
+//           }
+//         }
+//       }
+//     }
+//   }
+// `;
 
-const addMenteeToLS = async (phone, bookingDate, slots, batchId) => {
-  const res = await callLocalGraphqlApi(fetchMentor(batchId));
-  const { sessionLink, googleMeetLink } = get(res, 'data.batchSessions[0].mentorSession.user.mentorProfile', {}) || {};
-  const meetingLink = googleMeetLink || sessionLink;
-  await addMenteeBookingLeadsquared({
-    phone,
-    bookingDate,
-    slot: get(getSelectedSlotsTime(slots), '0', ''),
-    sessionLink: meetingLink,
-    type: 'b2b2c',
-  }, {}, [], {}, {}, true);
-};
+// const addMenteeToLS = async (phone, bookingDate, slots, batchId) => {
+//   const res = await callLocalGraphqlApi(fetchMentor(batchId));
+//   const { sessionLink, googleMeetLink } = get(res, 'data.batchSessions[0].mentorSession.user.mentorProfile', {}) || {};
+//   const meetingLink = googleMeetLink || sessionLink;
+//   await addMenteeBookingLeadsquared({
+//     phone,
+//     bookingDate,
+//     slot: get(getSelectedSlotsTime(slots), '0', ''),
+//     sessionLink: meetingLink,
+//     type: 'b2b2c',
+//   }, {}, [], {}, {}, true);
+// };
 
 /*
 This mutation is called when b2b2c user tries to book a slot
@@ -164,7 +164,7 @@ const bookB2B2CSlotsMutationResolver = async (
 
   const fetchUserRes = await callLocalGraphqlApi(fetchUser(userId));
   const studentProfileId = get(fetchUserRes, 'data.user.studentProfile.id', '');
-  const phone = get(fetchUserRes, 'data.user.studentProfile.parents[0].user.phone.number', '');
+  // const phone = get(fetchUserRes, 'data.user.studentProfile.parents[0].user.phone.number', '');
   if (!studentProfileId) {
     throw new DatabaseRecordNotFoundError();
   }
@@ -223,7 +223,7 @@ const bookB2B2CSlotsMutationResolver = async (
 
     // add student to the new batch
     await callLocalGraphqlApi(updateBatch(batchId, studentProfileId, courseId), context);
-    addMenteeToLS(phone, bookingDate, slots, batchId);
+    // addMenteeToLS(phone, bookingDate, slots, batchId);
   }
   return {
     result: true,

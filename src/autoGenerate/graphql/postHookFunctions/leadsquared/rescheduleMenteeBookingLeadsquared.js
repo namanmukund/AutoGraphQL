@@ -1,20 +1,36 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
+import getIntlDateTime from '../../../../../utils/timeZoneDiff';
 import { fetchAgentName } from '../utils/updateUserBookingAgent';
+
+const getUser = async (phoneNumber) => {
+  const user = await callLocalGraphqlApi(`{
+    users(filter: { phone_number_subDoc: "${phoneNumber}" }) {
+      timezone
+    }
+  }`);
+  return get(user, 'data.users[0]', {});
+};
 
 const rescheduleMenteeBookingLeadsquared = async (input, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, agentId) => {
   const { bookingDate } = input;
   const phoneNumber = get(userInfo, 'data.user.studentProfile.parents[0].user.phone.number');
   const topicOrder = get(topicInfo, 'data.topic.order');
+  const { timezone } = await getUser(phoneNumber);
   if (topicOrder === 1) {
     const slotNumber = slotTimeStringArray[0].split('slot')[1];
     const bookingDateTime = moment(bookingDate).minutes(0).hours(slotNumber).subtract(5, 'hours')
       .subtract(30, 'minutes')
       .format('YYYY-MM-DD HH:mm:ss');
+    const { dateObject, startTime } = getIntlDateTime(bookingDate, slotNumber, timezone);
+    const date = moment(dateObject).format('dddd, Do MMMM');
+    const time = startTime;
     const leadSquaredInput = {
       Phone: phoneNumber,
       mx_Booking_Date_Time: bookingDateTime,
+      mx_Booking_Date: date,
+      mx_Booking_Time: time,
     };
     const agentName = await fetchAgentName(agentId);
     if (!isBookedByMentee && agentName) {

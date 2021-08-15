@@ -1,11 +1,13 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import { batchType } from '../../../../../constants';
+import getFullFilePath from '../../../../../utils/getFullFilePath';
 import getSlotLabel from '../../../../../utils/getSlotLabel';
 import addToSchedule from '../../../../../utils/scheduleJobs/addToSchedule';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 import getSelectedSlotsTime from '../../preHookFunctions/validation/utils/getSelectedSlotsTime';
+import getMentorCodingLanguages from '../../resolvers/utils/getMentorCodingLanguages';
 import { addMenteeBookingLeadsquared } from '../leadsquared';
 import sendBookingReminderOrConfirmationB2BC from './sendBookingReminderOrConfirmationB2B2C';
 
@@ -22,6 +24,7 @@ const BATCH_SESSION = (batchSessionId) => `{
       type
       campaign {
         id
+        code
         type
       }
       school {
@@ -32,13 +35,27 @@ const BATCH_SESSION = (batchSessionId) => `{
       }
       allottedMentor {
         id
+        name
         phone {
           countryCode
           number
         }
+        profilePic{
+          id
+          uri
+        }
         mentorProfile {
           sessionLink
           googleMeetLink
+          experienceYear
+          codingLanguages {
+            value
+          }
+          pythonCourseRating5
+          pythonCourseRating4
+          pythonCourseRating3
+          pythonCourseRating2
+          pythonCourseRating1
         }
       }
     }
@@ -62,11 +79,51 @@ const BATCH_SESSION = (batchSessionId) => `{
   }
 }`;
 
+const minCap = (num, cap) => (num > cap ? num : cap);
+
+const getRating = (pythonCourseRating1, pythonCourseRating2, pythonCourseRating3, pythonCourseRating4, pythonCourseRating5) => {
+  let totalRatingUsers = 0;
+  let cumulativeRating = 0;
+  if (pythonCourseRating5) {
+    totalRatingUsers += pythonCourseRating5;
+    cumulativeRating += pythonCourseRating5 * 5;
+  }
+  if (pythonCourseRating4) {
+    totalRatingUsers += pythonCourseRating4;
+    cumulativeRating += pythonCourseRating4 * 4;
+  }
+  if (pythonCourseRating3) {
+    totalRatingUsers += pythonCourseRating3;
+    cumulativeRating += pythonCourseRating3 * 3;
+  }
+  if (pythonCourseRating2) {
+    totalRatingUsers += pythonCourseRating2;
+    cumulativeRating += pythonCourseRating2 * 2;
+  }
+  if (pythonCourseRating1) {
+    totalRatingUsers += pythonCourseRating1;
+    cumulativeRating += pythonCourseRating1;
+  }
+  return minCap(
+    totalRatingUsers === 0
+      ? 5
+      : Math.round(((cumulativeRating) / totalRatingUsers) * 100) / 100,
+    4.7,
+  );
+};
+
 const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId, isBookedByMentee, shouldSendMentorComms = true) => {
   const batchSessionRes = await callLocalGraphqlApi(BATCH_SESSION(batchSessionId));
   // Don't proceed if it is not the first topic
   if (get(batchSessionRes, 'data.batchSession.topic.order') !== 1) return;
+  const mentorUser = get(batchSessionRes, 'data.batchSession.batch.allottedMentor', {});
   const mentorUserId = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.id', '');
+  const mentorName = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.name', '');
+  const mentorProfile = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile', {});
+  const mentorExp = get(mentorProfile, 'experienceYear') || 3;
+  const {
+    pythonCourseRating1, pythonCourseRating2, pythonCourseRating3, pythonCourseRating4, pythonCourseRating5,
+  } = mentorProfile;
   const mentorPhoneNumber = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.phone.number', '');
   const mentorPhoneCountryCode = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.phone.countryCode', '');
   const studentBatchType = get(batchSessionRes, 'data.batchSession.batch.type');
@@ -86,7 +143,15 @@ const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId, isBook
         slot,
         sessionLink,
         type: 'b2b2c',
-      }, {}, [], {}, {}, isBookedByMentee);
+      }, {}, [], {}, {}, isBookedByMentee, null, {
+        mx_Mentor_Name: mentorName,
+        mx_Mentor_Exp_in_years: mentorExp,
+        mx_Mentor_Photo: get(mentorUser, 'profilePic.uri', getFullFilePath('python/email/mentor1.png')) || getFullFilePath('python/email/mentor1.png'),
+        mx_Mentor_Languages_Known: getMentorCodingLanguages(get(mentorProfile, 'experienceYear')) || 'Python',
+        mx_Mentor_Star_Rating: getRating(pythonCourseRating1, pythonCourseRating2, pythonCourseRating3, pythonCourseRating4, pythonCourseRating5),
+        mx_school_booking_code: get(batchSessionRes, 'data.batchSession.batch.campaign.code'),
+        mx_school_booking_link: `https://www.tekie.in/login?code=${get(batchSessionRes, 'data.batchSession.batch.campaign.code')}`,
+      });
       sendBookingReminderOrConfirmationB2BC(get(student, 'parents[0].user.id'), true);
     });
   }
