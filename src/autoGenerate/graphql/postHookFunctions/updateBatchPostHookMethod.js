@@ -295,7 +295,7 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
       callLocalGraphqlApi(updateBatchSessionQuery(
         batchSession.id,
         pushManyQuery,
-      ));
+      ), context);
     });
   }
 };

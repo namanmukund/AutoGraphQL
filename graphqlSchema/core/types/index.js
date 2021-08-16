@@ -109,6 +109,12 @@ import SessionReport from './sessionReport';
 import RebookMenteeSessionInput from './rebookMenteeSessionInput';
 import TopicQuestions from './topicQuestions';
 import TopicAssignmentQuestion from './topicAssignmentQuestion';
+import AuditQuestion from './auditQuestion';
+import PreSalesAudit from './preSalesAudit';
+import PostSalesAudit from './postSalesAudit';
+import AuditQuestionSection from './auditQuestionSection';
+import AuditQuestionSubSection from './auditQuestionSubSection';
+import GetSchoolCampaignSlots from './getSchoolCampaignSlots';
 
 export default [
   ...User,
@@ -222,4 +228,10 @@ export default [
   ...RebookMenteeSessionInput,
   ...TopicQuestions,
   ...TopicAssignmentQuestion,
+  ...AuditQuestion,
+  ...PreSalesAudit,
+  ...PostSalesAudit,
+  ...AuditQuestionSection,
+  ...AuditQuestionSubSection,
+  ...GetSchoolCampaignSlots,
 ];

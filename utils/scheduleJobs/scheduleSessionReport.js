@@ -148,6 +148,73 @@ const masterQuery = (todayStartDate,
   }){
     count
   }
+  mentorMenteeSessions: mentorMenteeSessions(filter:{
+    and:[
+      {source_not:school}
+      {topic_some:{order:1}}
+      {sessionStartDate_gte:"${todayStartDate}"}
+      {sessionStartDate_lte:"${todayEndDate}"}
+      {country: ${country}}
+    ]
+  }orderBy:sessionStartDate_DESC){
+    id
+    sessionStartDate
+    hasRescheduled
+    rescheduledDate
+    rescheduledDateProvided
+    zoomIssue
+    internetIssue
+    laptopIssue
+    chromeIssue
+    powerCut
+    notResponseAndDidNotTurnUp
+    classDurationExceeded
+    turnedUpButLeftAbruptly
+    leadNotVerifiedProperly
+    otherReasonForReschedule
+    otherReasonForChallenges
+    webSiteLoadingIssue
+    videoNotLoading
+    codePlaygroundIssue
+    logInOTPError
+    otherTechnicalReason
+    languageBarrier
+    otherLanguageBarrier
+  }
+  sessionLogs: sessionLogs(filter:{
+    and:[
+      {action:deleteMentorMenteeSession}
+      {source_not:school}
+      {topic_some:{order:1}}
+      {sessionStartDate_gte:"${todayStartDate}"}
+      {sessionStartDate_lte:"${todayEndDate}"}
+      {country: ${country}}
+    ]
+  }orderBy:sessionStartDate_DESC){
+    id
+    sessionStartDate
+    hasRescheduled
+    rescheduledDate
+    rescheduledDateProvided
+    zoomIssue
+    internetIssue
+    laptopIssue
+    chromeIssue
+    powerCut
+    notResponseAndDidNotTurnUp
+    classDurationExceeded
+    turnedUpButLeftAbruptly
+    leadNotVerifiedProperly
+    otherReasonForReschedule
+    otherReasonForChallenges
+    webSiteLoadingIssue
+    videoNotLoading
+    codePlaygroundIssue
+    logInOTPError
+    otherTechnicalReason
+    languageBarrier
+    otherLanguageBarrier
+  }
 }
   `;
 
@@ -255,7 +322,22 @@ mutation{
     }
     totalBooked: ${input.totalBooked},
     totalDemoCompleted: ${input.totalDemoCompleted},
-    totalConvertedUsers: ${input.totalConvertedUsers}
+    totalConvertedUsers: ${input.totalConvertedUsers},
+    hasRescheduled: ${input.hasRescheduled},
+    internetIssue: ${input.internetIssue},
+    zoomIssue: ${input.zoomIssue},
+    laptopIssue: ${input.laptopIssue},
+    chromeIssue: ${input.chromeIssue},
+    powerCut: ${input.powerCut},
+    notResponseAndDidNotTurnUp: ${input.notResponseAndDidNotTurnUp},
+    classDurationExceeded: ${input.classDurationExceeded},
+    turnedUpButLeftAbruptly: ${input.turnedUpButLeftAbruptly},
+    leadNotVerifiedProperly: ${input.leadNotVerifiedProperly},
+    otherReasonForReschedule: ${input.otherReasonForReschedule},
+    webSiteLoadingIssue: ${input.webSiteLoadingIssue},
+    videoNotLoading: ${input.videoNotLoading},
+    codePlaygroundIssue: ${input.codePlaygroundIssue},
+    logInOTPError: ${input.logInOTPError},
   }){
     id
   }
@@ -345,6 +427,59 @@ const generateSessionReport = async (numDaysToRunQuery) => {
         sessionReportsObj.totalConvertedUsers = data.totalConvertedUsers.count;
         sessionReportsObj.country = country;
         sessionReportsObj.date = todayStartDate;
+
+        // populate session reschedule reason count
+        sessionReportsObj.hasRescheduled = 0;
+        sessionReportsObj.internetIssue = 0;
+        sessionReportsObj.zoomIssue = 0;
+        sessionReportsObj.laptopIssue = 0;
+        sessionReportsObj.chromeIssue = 0;
+        sessionReportsObj.powerCut = 0;
+        sessionReportsObj.notResponseAndDidNotTurnUp = 0;
+        sessionReportsObj.classDurationExceeded = 0;
+        sessionReportsObj.turnedUpButLeftAbruptly = 0;
+        sessionReportsObj.leadNotVerifiedProperly = 0;
+        sessionReportsObj.otherReasonForReschedule = 0;
+        sessionReportsObj.webSiteLoadingIssue = 0;
+        sessionReportsObj.videoNotLoading = 0;
+        sessionReportsObj.codePlaygroundIssue = 0;
+        sessionReportsObj.logInOTPError = 0;
+
+        for (const sessionLog of get(data, 'sessionLogs')) {
+          sessionReportsObj.hasRescheduled = sessionLog.hasRescheduled ? sessionReportsObj.hasRescheduled += 1 : sessionReportsObj.hasRescheduled;
+          sessionReportsObj.internetIssue = sessionLog.internetIssue ? sessionReportsObj.internetIssue += 1 : sessionReportsObj.internetIssue;
+          sessionReportsObj.zoomIssue = sessionLog.zoomIssue ? sessionReportsObj.zoomIssue += 1 : sessionReportsObj.zoomIssue;
+          sessionReportsObj.laptopIssue = sessionLog.laptopIssue ? sessionReportsObj.laptopIssue += 1 : sessionReportsObj.laptopIssue;
+          sessionReportsObj.chromeIssue = sessionLog.chromeIssue ? sessionReportsObj.chromeIssue += 1 : sessionReportsObj.chromeIssue;
+          sessionReportsObj.powerCut = sessionLog.powerCut ? sessionReportsObj.powerCut += 1 : sessionReportsObj.powerCut;
+          sessionReportsObj.notResponseAndDidNotTurnUp = sessionLog.notResponseAndDidNotTurnUp ? sessionReportsObj.notResponseAndDidNotTurnUp += 1 : sessionReportsObj.notResponseAndDidNotTurnUp;
+          sessionReportsObj.classDurationExceeded = sessionLog.classDurationExceeded ? sessionReportsObj.classDurationExceeded += 1 : sessionReportsObj.classDurationExceeded;
+          sessionReportsObj.turnedUpButLeftAbruptly = sessionLog.turnedUpButLeftAbruptly ? sessionReportsObj.turnedUpButLeftAbruptly += 1 : sessionReportsObj.turnedUpButLeftAbruptly;
+          sessionReportsObj.leadNotVerifiedProperly = sessionLog.leadNotVerifiedProperly ? sessionReportsObj.leadNotVerifiedProperly += 1 : sessionReportsObj.leadNotVerifiedProperly;
+          sessionReportsObj.otherReasonForReschedule = sessionLog.otherReasonForReschedule ? sessionReportsObj.otherReasonForReschedule += 1 : sessionReportsObj.otherReasonForReschedule;
+          sessionReportsObj.webSiteLoadingIssue = sessionLog.webSiteLoadingIssue ? sessionReportsObj.webSiteLoadingIssue += 1 : sessionReportsObj.webSiteLoadingIssue;
+          sessionReportsObj.videoNotLoading = sessionLog.videoNotLoading ? sessionReportsObj.videoNotLoading += 1 : sessionReportsObj.videoNotLoading;
+          sessionReportsObj.codePlaygroundIssue = sessionLog.codePlaygroundIssue ? sessionReportsObj.codePlaygroundIssue += 1 : sessionReportsObj.codePlaygroundIssue;
+          sessionReportsObj.logInOTPError = sessionLog.logInOTPError ? sessionReportsObj.logInOTPError += 1 : sessionReportsObj.logInOTPError;
+        }
+
+        for (const mmSession of get(data, 'mentorMenteeSessions')) {
+          sessionReportsObj.hasRescheduled = mmSession.hasRescheduled ? sessionReportsObj.hasRescheduled += 1 : sessionReportsObj.hasRescheduled;
+          sessionReportsObj.internetIssue = mmSession.internetIssue ? sessionReportsObj.internetIssue += 1 : sessionReportsObj.internetIssue;
+          sessionReportsObj.zoomIssue = mmSession.zoomIssue ? sessionReportsObj.zoomIssue += 1 : sessionReportsObj.zoomIssue;
+          sessionReportsObj.laptopIssue = mmSession.laptopIssue ? sessionReportsObj.laptopIssue += 1 : sessionReportsObj.laptopIssue;
+          sessionReportsObj.chromeIssue = mmSession.chromeIssue ? sessionReportsObj.chromeIssue += 1 : sessionReportsObj.chromeIssue;
+          sessionReportsObj.powerCut = mmSession.powerCut ? sessionReportsObj.powerCut += 1 : sessionReportsObj.powerCut;
+          sessionReportsObj.notResponseAndDidNotTurnUp = mmSession.notResponseAndDidNotTurnUp ? sessionReportsObj.notResponseAndDidNotTurnUp += 1 : sessionReportsObj.notResponseAndDidNotTurnUp;
+          sessionReportsObj.classDurationExceeded = mmSession.classDurationExceeded ? sessionReportsObj.classDurationExceeded += 1 : sessionReportsObj.classDurationExceeded;
+          sessionReportsObj.turnedUpButLeftAbruptly = mmSession.turnedUpButLeftAbruptly ? sessionReportsObj.turnedUpButLeftAbruptly += 1 : sessionReportsObj.turnedUpButLeftAbruptly;
+          sessionReportsObj.leadNotVerifiedProperly = mmSession.leadNotVerifiedProperly ? sessionReportsObj.leadNotVerifiedProperly += 1 : sessionReportsObj.leadNotVerifiedProperly;
+          sessionReportsObj.otherReasonForReschedule = mmSession.otherReasonForReschedule ? sessionReportsObj.otherReasonForReschedule += 1 : sessionReportsObj.otherReasonForReschedule;
+          sessionReportsObj.webSiteLoadingIssue = mmSession.webSiteLoadingIssue ? sessionReportsObj.webSiteLoadingIssue += 1 : sessionReportsObj.webSiteLoadingIssue;
+          sessionReportsObj.videoNotLoading = mmSession.videoNotLoading ? sessionReportsObj.videoNotLoading += 1 : sessionReportsObj.videoNotLoading;
+          sessionReportsObj.codePlaygroundIssue = mmSession.codePlaygroundIssue ? sessionReportsObj.codePlaygroundIssue += 1 : sessionReportsObj.codePlaygroundIssue;
+          sessionReportsObj.logInOTPError = mmSession.logInOTPError ? sessionReportsObj.logInOTPError += 1 : sessionReportsObj.logInOTPError;
+        }
 
         forwardCount += 1;
         totalLoopDays -= 1;

@@ -70,6 +70,7 @@ const User = `
     verificationStatus: VerificationStatus @defaultValue(value: "unverified")
     verifiedBy: User @relation(name: "UserVerifiedBy", direction: "OneWay")
     mentorBatches: [Batch] @relation(name:"BatchMentor")
+    isPreSalesAudit: Boolean @defaultValue(value: "false")
   }
 `;
 

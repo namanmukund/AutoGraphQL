@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import moment from 'moment';
-import { MENTOR_RATING_AUDIT_THRESHOLD } from '../../../../constants';
+import { auditType, MENTOR_RATING_AUDIT_THRESHOLD } from '../../../../constants';
 import { MENTEE } from '../../../../constants/roles';
 import updateReferrerCreditsPostSessionOrUserPayment from './utils/updateReferrerCreditsPostSessionOrUserPayment';
 import referralCredits from '../../../../constants/referralCredits';
@@ -20,6 +20,9 @@ import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
 import addRescheduledSlot from './utils/addRescheduledSlot';
 import addSessionLog from './utils/addSessionLog';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
+import addSalesAudit from './utils/addSalesAudit';
+
+const { postSales } = auditType;
 // import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 /*
   - check if the user if from referral
@@ -112,6 +115,16 @@ const userPaymentPlanQuery = async (filterQuery) => {
   return data;
 };
 
+const intersection = (arr1, arr2) => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const v of arr1) {
+    if (arr2.includes(v)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const allowedRoles = [MENTEE];
 const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
   const {
@@ -198,12 +211,18 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const inputIsAudit = get(input, 'isAudit', false);
     const prevIsAudit = get(context, 'previousDocument.isAudit', false);
     const mentorMenteeSessionId = get(context, 'previousDocument.id', '');
+    const prevIsPostSalesAudit = get(context, 'previousDocument.isPostSalesAudit', false);
+    const isPostSalesAuditFromInput = get(context, 'isPostSalesAuditFromInput', false);
 
     if ((inputIsAudit && prevIsAudit !== inputIsAudit)
       || (inputMentorRating && inputMentorRating < MENTOR_RATING_AUDIT_THRESHOLD)
       || inputDistracted || inputRude || inputSlowPaced || inputFastPaced || inputNotPunctual
       || inputAverage || inputBoring || inputPoorExplanation || inputAverageExplanation) {
       addMentorMenteeSessionAudit(mentorMenteeSessionId);
+    }
+
+    if (isPostSalesAuditFromInput && prevIsPostSalesAudit === false) {
+      addSalesAudit({ mentorMenteeSessionId, auditType: postSales });
     }
 
     if (
@@ -217,8 +236,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
         get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.email'),
       );
     }
-
-    if (input && Object.keys(input).includes('hasRescheduled') && topic.order === 1) {
+    if (input && intersection(['hasRescheduled', 'sessionStatus', 'didNotPickTheCall', 'didNotTurnUpInSession', 'sessionNotConducted'], Object.keys(input)) && topic.order === 1) {
       updateMentorRescheduleLeadsquared(userInfo, input, params);
     }
 

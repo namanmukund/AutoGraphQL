@@ -15,6 +15,10 @@ const SALES_EXECUTIVE = 'salesExecutive';
 const TRANSFORMATION_TEAM = 'transformationTeam';
 const TRANSFORMATION_ADMIN = 'transformationAdmin';
 const SCHOOL_ADMIN = 'schoolAdmin';
+const AUDIT_ADMIN = 'auditAdmin';
+const PRE_SALES = 'preSales';
+const POST_SALES = 'postSales';
+const AUDITOR = 'auditor';
 
 const CMS_HEAD = `[
 "${ADMIN}",
@@ -56,6 +60,13 @@ const NOT_UMS_HEAD = `[
 "${SALES_EXECUTIVE}",
 "${TRANSFORMATION_TEAM}",
 "${TRANSFORMATION_ADMIN}"
+]`;
+
+const AUDIT_ROLES = `[
+  "${AUDIT_ADMIN}",
+  "${PRE_SALES}",
+  "${POST_SALES}"
+  "${AUDITOR}"
 ]`;
 
 const NOT_UMS_HEAD_ARR = [
@@ -178,6 +189,10 @@ const ALL_ROLES_ARRAY = [
   TRANSFORMATION_TEAM,
   TRANSFORMATION_ADMIN,
   SCHOOL_ADMIN,
+  AUDIT_ADMIN,
+  PRE_SALES,
+  POST_SALES,
+  AUDITOR,
 ];
 
 const CMS_HEAD_ARRAY = [
@@ -237,4 +252,9 @@ export {
   NOT_BATCH_HEAD_ARR,
   CMS_HEAD_ARRAY,
   NOT_CMS_HEAD_ARRAY,
+  AUDIT_ADMIN,
+  PRE_SALES,
+  POST_SALES,
+  AUDIT_ROLES,
+  AUDITOR,
 };

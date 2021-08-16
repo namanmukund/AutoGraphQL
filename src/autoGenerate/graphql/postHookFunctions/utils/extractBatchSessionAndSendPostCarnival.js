@@ -2,8 +2,8 @@ import { get } from 'lodash';
 import { DEFAULT_LS_OM_USER_ID } from '../../../../../constants';
 import updateLeadSquared from '../../../../../services/leadsquared/updateLeadSquared';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
-import sendTransactionalEmail from '../../resolvers/utils/sendTransactionalEmail';
+// import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
+// import sendTransactionalEmail from '../../resolvers/utils/sendTransactionalEmail';
 
 const BATCH_SESSION = (batchSessionId) => `{
   batchSession(id: "${batchSessionId}") {
@@ -16,6 +16,7 @@ const BATCH_SESSION = (batchSessionId) => `{
         mentorProfile {
           salesExecutive {
             id 
+            email
             user {
               name
             }
@@ -63,29 +64,29 @@ const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob,
   attendances.forEach(async (attendance) => {
     const attendanceStatus = get(attendance, 'status', 'notAssigned');
     const student = get(attendance, 'student', {});
-    const studentName = get(student, 'user.name');
-    const parentName = get(student, 'parents[0].user.name');
-    const parentEmail = get(student, 'parents[0].user.email');
+    // const studentName = get(student, 'user.name');
+    // const parentName = get(student, 'parents[0].user.name');
+    // const parentEmail = get(student, 'parents[0].user.email');
     const parentPhone = get(student, 'parents[0].user.phone.number');
-    const countryCode = get(student, 'parents[0].user.phone.countryCode', '').replace('+', '');
+    // const countryCode = get(student, 'parents[0].user.phone.countryCode', '').replace('+', '');
     let leadSquaredInput = {};
     let activityInput = {};
     if (attendanceStatus === 'present') {
       if (!ls) {
-        sendTransactionalEmail({
-          studentName,
-          parentEmail,
-        }, {
-          emailTemplate: 'PostCarnivalFeedback',
-          subject: `${studentName}, did you enjoy the Code Jam?`,
-        });
-        sendWhatsAppTemplateMessage(countryCode + parentPhone, 'workshop_post_demo', parentName, [{
-          name: 'parent_name',
-          value: parentName,
-        }, {
-          name: 'student_name',
-          value: studentName,
-        }]);
+        // sendTransactionalEmail({
+        //   studentName,
+        //   parentEmail,
+        // }, {
+        //   emailTemplate: 'PostCarnivalFeedback',
+        //   subject: `${studentName}, did you enjoy the Code Jam?`,
+        // });
+        // sendWhatsAppTemplateMessage(countryCode + parentPhone, 'workshop_post_demo', parentName, [{
+        //   name: 'parent_name',
+        //   value: parentName,
+        // }, {
+        //   name: 'student_name',
+        //   value: studentName,
+        // }]);
       }
       leadSquaredInput = {
         Phone: parentPhone,
