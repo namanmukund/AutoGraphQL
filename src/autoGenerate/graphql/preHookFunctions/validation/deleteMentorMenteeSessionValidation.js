@@ -10,6 +10,7 @@ const getMentorMenteeSessionData = async (id) => {
     query{
       mentorMenteeSession(id:"${id}"){
         id
+        country
         sessionStatus
         hasRescheduled
         rescheduledDate

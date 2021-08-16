@@ -14,6 +14,24 @@ const SessionBookedToday = `
   }
 `;
 
+const sessionRescheduledReasons = `
+    hasRescheduled: Int
+    internetIssue: Int
+    zoomIssue: Int
+    laptopIssue: Int
+    chromeIssue: Int
+    powerCut: Int
+    notResponseAndDidNotTurnUp: Int
+    classDurationExceeded: Int
+    turnedUpButLeftAbruptly: Int
+    leadNotVerifiedProperly: Int
+    otherReasonForReschedule: Int
+    webSiteLoadingIssue: Int
+    videoNotLoading: Int
+    codePlaygroundIssue: Int
+    logInOTPError: Int
+`;
+
 const SessionReport = `
   type SessionReport @model 
   ${getPermissionSchemaString('SessionReport')}
@@ -32,6 +50,7 @@ const SessionReport = `
     totalBooked: Int
     totalDemoCompleted: Int
     totalConvertedUsers: Int
+    ${sessionRescheduledReasons}
     country: Country @defaultValue(value: "india")
     date: Date
   }
