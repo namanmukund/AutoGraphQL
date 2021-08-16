@@ -58,7 +58,7 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
     leadSquaredInput.mx_Booking_Agent = agentName;
   }
   if (input.sessionLink) {
-    leadSquaredInput.mx_Session_Link = input.sessionLink;
+    leadSquaredInput.mx_Demo_Session_Link = input.sessionLink;
   }
   const activityInput = {
     ActivityEvent: 103,
