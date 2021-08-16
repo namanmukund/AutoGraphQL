@@ -80,6 +80,10 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
         SchemaName: 'mx_Custom_8',
         Value: bookingDateTime,
       },
+      {
+        SchemaName: 'mx_Custom_12',
+        Value: now,
+      },
     ],
   };
   updateLeadsquared(leadSquaredInput, false, activityInput);

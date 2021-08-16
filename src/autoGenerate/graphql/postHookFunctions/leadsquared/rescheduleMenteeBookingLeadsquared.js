@@ -57,6 +57,10 @@ const rescheduleMenteeBookingLeadsquared = async (input, slotTimeStringArray, us
           SchemaName: 'mx_Custom_8',
           Value: bookingDateTime,
         },
+        {
+          SchemaName: 'mx_Custom_12',
+          Value: now,
+        },
       ],
     };
     updateLeadsquared(leadSquaredInput, false, activityInput);
