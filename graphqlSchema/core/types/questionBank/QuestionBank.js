@@ -23,6 +23,7 @@ const QuestionBank = `
     order: Int!
     statement: String! @trim
     hint: String @trim
+    hints: [Hint]
     questionType: QuestionBankType! @defaultValue(value: "mcq")
     questionLayoutType: QuestionBankLayoutType! @defaultValue(value: "editor")
     difficulty: Int

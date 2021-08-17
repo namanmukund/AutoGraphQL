@@ -4,6 +4,7 @@ const MessageType = `
     image
     terminal
     sticker
+    question
   }`;
 
 export default MessageType;

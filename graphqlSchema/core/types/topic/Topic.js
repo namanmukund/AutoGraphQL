@@ -48,6 +48,7 @@ const Topic = `
     videoThumbnail: File @relation(name: "TopicVideoThumbnail", direction: "OneWay")
     videoStatus: ContentStatus! @defaultValue(value: "unpublished")
     videoStartTime: Int
+    isQuestionInMessageEnabled: Boolean @defaultValue(value: "false")
     videoEndTime: Int
     storyStartTime: Int
     storyEndTime: Int
