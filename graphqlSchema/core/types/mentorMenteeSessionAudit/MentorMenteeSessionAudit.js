@@ -80,6 +80,8 @@ const MentorMenteeSessionAudit = `
     timestampAnswer: [MentorMenteeSessionTimestamp] @relation(name: "MentorMenteeSessionAuditTimestamp")
     overallClassComment: String
     score: Float
+    customScore: Float
+    totalScore: Float
     customSectionScore: [CustomSectionScore]
 }`;
 
