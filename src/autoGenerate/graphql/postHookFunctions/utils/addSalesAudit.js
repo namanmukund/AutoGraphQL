@@ -12,6 +12,7 @@ export const fetchAllAuditQuestion = async (auditType) => {
         section{
           id
         }
+        score
       }
     }
   `;
@@ -19,11 +20,12 @@ export const fetchAllAuditQuestion = async (auditType) => {
   return get(res, 'data.auditQuestions');
 };
 
-const addPreSalesAuditQuery = (auditQuestionsIds, clientId, questionSectionsQuery) => `
+const addPreSalesAuditQuery = (auditQuestionsIds, clientId, questionSectionsQuery, totalScore) => `
 mutation {
     addPreSalesAudit(
       clientConnectId: "${clientId}"
       input: {
+        totalScore: ${totalScore}
         auditQuestions: [
           ${auditQuestionsIds}
         ]
@@ -36,11 +38,12 @@ mutation {
     }
 }`;
 
-const addPostSalesAuditQuery = (auditQuestionsIds, mentorMenteeSessionId, questionSectionsQuery) => `
+const addPostSalesAuditQuery = (auditQuestionsIds, mentorMenteeSessionId, questionSectionsQuery, totalScore) => `
 mutation {
   addPostSalesAudit(
     mentorMenteeSessionConnectId: "${mentorMenteeSessionId}"
     input: {
+      totalScore: ${totalScore}
       auditQuestions: [
         ${auditQuestionsIds}
       ]
@@ -57,11 +60,15 @@ const addSalesAudit = async ({ mentorMenteeSessionId, clientId, auditType }) => 
   const auditQuestions = await fetchAllAuditQuestion(auditType);
   let auditQuestionsIds = '';
   let sectionIdsArray = [];
+  let totalScore = 0;
   if (auditQuestions && auditQuestions.length > 0) {
     auditQuestions.forEach((auditQuestion) => {
       auditQuestionsIds += `{ auditQuestionConnectId: "${get(auditQuestion, 'id')}" }`;
       if (get(auditQuestion, 'section.id')) {
         sectionIdsArray.push(get(auditQuestion, 'section.id'));
+      }
+      if (get(auditQuestion, 'score', 0)) {
+        totalScore += get(auditQuestion, 'score');
       }
     });
   }
@@ -72,9 +79,9 @@ const addSalesAudit = async ({ mentorMenteeSessionId, clientId, auditType }) => 
   });
   if (auditQuestionsIds) {
     if (auditType === preSales) {
-      callLocalGraphqlApi(addPreSalesAuditQuery(auditQuestionsIds, clientId, questionSectionsQuery));
+      callLocalGraphqlApi(addPreSalesAuditQuery(auditQuestionsIds, clientId, questionSectionsQuery, totalScore));
     } else if (auditType === postSales) {
-      callLocalGraphqlApi(addPostSalesAuditQuery(auditQuestionsIds, mentorMenteeSessionId, questionSectionsQuery));
+      callLocalGraphqlApi(addPostSalesAuditQuery(auditQuestionsIds, mentorMenteeSessionId, questionSectionsQuery, totalScore));
     }
   }
 };
