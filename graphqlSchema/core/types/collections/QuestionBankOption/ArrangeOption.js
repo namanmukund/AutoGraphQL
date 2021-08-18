@@ -3,6 +3,7 @@ const ArrangeOption = `
    displayOrder: Int
    statement: String
    correctPosition: Int
+   correctPositions: [Int]
  }`;
 
 export default ArrangeOption;
