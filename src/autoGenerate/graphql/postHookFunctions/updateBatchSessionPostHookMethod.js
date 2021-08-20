@@ -310,38 +310,62 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         );
       }
     }
+    // console.log('bookingDate before if', bookingDate);
+    // console.log('bookingDateFromInput before if', bookingDateFromInput);
+    const bookingDateFromInputParsed = new Date(bookingDateFromInput);
+    // console.log('bookingDateFromInputParsed', bookingDateFromInputParsed);
 
+    const newStudentsArray = get(context, 'inputSlot.attendance.pushMany', []);
     // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
     // this should only happen if we are changing sessionStatus or bookingDateFromInput
-    if ((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput) {
-      // eslint-disable-next-line no-restricted-syntax
-      for (const student of students) {
-        if (student.user && student.user.id) {
-          addMentorMenteeSessionForBatch(
-            student.user.id,
-            '',
-            topicId,
-            bookingDateFromInput || bookingDate,
-            slotTimeArray[0],
-            mentorSessionId,
-            courseId,
-            sessionStatusFromInput || sessionStatus.allotted,
-            student.user.source,
-            'updateBatchSession',
-          );
+    if ((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || mentorSessionId !== mentorSessionConnectId) {
+      // console.log('bookingDate', bookingDate);
+      // console.log('bookingDateFromInput', bookingDateFromInput);
+      // console.log('slotTimeArray', slotTimeArray);
+      // console.log('inputSlotTimeArray', inputSlotTimeArray);
+      let toUpdateMenteeSession = false;
+      if (
+        (bookingDate && bookingDateFromInput && bookingDate.getTime() !== bookingDateFromInputParsed.getTime())
+        || (get(slotTimeArray, '0') !== get(inputSlotTimeArray, '0'))
+      ) {
+        toUpdateMenteeSession = true;
+      }
+
+      if ((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || newStudentsArray.length > 0) {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const student of students) {
+          if (student.user && student.user.id) {
+            addMentorMenteeSessionForBatch(
+              student.user.id,
+              '',
+              topicId,
+              bookingDateFromInput || bookingDate,
+              inputSlotTimeArray[0] || slotTimeArray[0],
+              mentorSessionConnectId || mentorSessionId,
+              courseId,
+              sessionStatusFromInput || sessionStatus.allotted,
+              student.user.source,
+              'updateBatchSession',
+              toUpdateMenteeSession,
+            );
+          }
         }
       }
-    }
 
-    // adding session logs when booking date or time is changed
-    if (inputSlotTimeArray && inputSlotTimeArray.length && slotTimeArray && slotTimeArray.length) {
-      const fromDate = new Date(bookingDate).toISOString();
-      const toDate = bookingDateFromInput ? new Date(bookingDateFromInput).toISOString() : new Date(bookingDate).toISOString();
-      const fromSlot = `slot${slotTimeArray[0]}`;
-      const toSlot = `slot${inputSlotTimeArray[0]}`;
-      // adding only in case the slots or date passed in input is different from that is already there in db
-      if ((fromDate !== toDate) || (fromSlot !== toSlot)) {
-        addSessionLog(bookingDateFromInput || bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
+      // adding session logs when booking date or time is changed
+      if (inputSlotTimeArray && inputSlotTimeArray.length && slotTimeArray && slotTimeArray.length) {
+        const fromDate = new Date(bookingDate).toISOString();
+        const toDate = bookingDateFromInput ? new Date(bookingDateFromInput).toISOString() : new Date(bookingDate).toISOString();
+        const fromSlot = `slot${slotTimeArray[0]}`;
+        const toSlot = `slot${inputSlotTimeArray[0]}`;
+        // adding only in case the slots or date passed in input is different from that is already there in db
+        if ((fromDate !== toDate) || (fromSlot !== toSlot)) {
+          addSessionLog(bookingDateFromInput || bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
+        }
+      }
+      // adding logs also when mentorSession is changed or status is changed
+      if (prevSessionStatus !== sessionStatusFromInput || (mentorSessionConnectId && (mentorSessionId !== mentorSessionConnectId))) {
+        addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
       }
     }
     // adding logs also when mentorSession is changed or status is changed
@@ -444,5 +468,4 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     }
   }
 };
-
 export default updateBatchSessionPostHookMethod;

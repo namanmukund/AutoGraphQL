@@ -51,6 +51,7 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       updateMentorMenteeSessionInput.languageBarrier = get(prevMentorMenteeSessionDoc, 'languageBarrier');
       updateMentorMenteeSessionInput.otherLanguageBarrier = get(prevMentorMenteeSessionDoc, 'otherLanguageBarrier', '');
       updateMentorMenteeSessionInput.sessionStartDate = get(prevMentorMenteeSessionDoc, 'sessionStartDate');
+      updateMentorMenteeSessionInput.country = get(prevMentorMenteeSessionDoc, 'country');
       const booleanReasons = ['sessionNotConducted', 'didNotTurnUpInSession', 'didNotPickTheCall', 'internetIssue', 'zoomIssue', 'laptopIssue', 'chromeIssue', 'powerCut', 'notResponseAndDidNotTurnUp', 'turnedUpButLeftAbruptly', 'classDurationExceeded', 'webSiteLoadingIssue', 'videoNotLoading', 'logInOTPError', 'codePlaygroundIssue'];
       booleanReasons.forEach((reason) => {
         if (typeof prevMentorMenteeSessionDoc[reason] === 'boolean') {

@@ -24,6 +24,12 @@ const ThemeType = `
  }
 `;
 
+const CourseTargetUserType = `
+ type CourseTargetUserType {
+   type: ProductTargetUserType
+ }
+`;
+
 const Course = `
   type Course @model 
   @appPermissions(
@@ -58,7 +64,7 @@ const Course = `
     topics: [Topic] @relation(name: "CourseTopic")
     secondaryCategory: String
     theme: ThemeType
-    targetGroup: ProductTargetUserType
+    targetGroup: [CourseTargetUserType]
     courseComponentRule: [CourseComponentsRule]
     badges: [Badge] @relation(name: "CourseBadge")
     badgeDescription: String @uniqueOrEmpty @trim
@@ -66,4 +72,4 @@ const Course = `
   }
 `;
 
-export default [Course, CourseComponentsRule, ThemeType];
+export default [Course, CourseComponentsRule, ThemeType, CourseTargetUserType];

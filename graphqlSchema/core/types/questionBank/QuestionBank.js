@@ -23,6 +23,7 @@ const QuestionBank = `
     order: Int!
     statement: String! @trim
     hint: String @trim
+    hints: [Hint]
     questionType: QuestionBankType! @defaultValue(value: "mcq")
     questionLayoutType: QuestionBankLayoutType! @defaultValue(value: "editor")
     difficulty: Int
@@ -38,6 +39,7 @@ const QuestionBank = `
     topic: Topic @relation(name: "TopicQuestionBank")
     status: ContentStatus! @defaultValue(value: "unpublished")
     courses: [Course] @relation(name: "CourseQuestionBank", direction: "OneWay")
+    tags: [ContentTag] @relation(name: "ContentTagQuestionBank")
   }
 `;
 
