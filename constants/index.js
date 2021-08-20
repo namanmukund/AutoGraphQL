@@ -197,6 +197,13 @@ const auditType = {
   postSales: 'postSales',
 };
 
+const auditSubType = {
+  b2bDemo: 'b2bDemo',
+  b2bPaid: 'b2bPaid',
+  b2cDemo: 'b2cDemo',
+  b2cPaid: 'b2cPaid',
+};
+
 const scholarshipThreshHolds = {
   proficient: 100,
   master: 80,
@@ -489,4 +496,5 @@ export {
   usWatiSMS,
   auditQuestionType,
   auditType,
+  auditSubType,
 };
