@@ -22,10 +22,12 @@ const addMentorMenteeSessionAuditQuery = (
   mentorMenteeSessionId,
   auditQuestionsIds,
   questionSectionsQuery,
+  totalScore,
 ) => `
   mutation{
   addMentorMenteeSessionAudit(mentorMenteeSessionConnectId: "${mentorMenteeSessionId}",
   input: {
+      totalScore: ${totalScore}
       auditQuestions: [
         ${auditQuestionsIds}
       ]
@@ -46,11 +48,15 @@ const addMentorMenteeSessionAudit = async (
     const auditQuestions = await fetchAllAuditQuestion(mentor);
     let auditQuestionsIds = '';
     let sectionIdsArray = [];
+    let totalScore = 0;
     if (auditQuestions && auditQuestions.length > 0) {
       auditQuestions.forEach((auditQuestion) => {
         auditQuestionsIds += `{ auditQuestionConnectId: "${get(auditQuestion, 'id')}" }`;
         if (get(auditQuestion, 'section.id')) {
           sectionIdsArray.push(get(auditQuestion, 'section.id'));
+        }
+        if (get(auditQuestion, 'score', 0)) {
+          totalScore += get(auditQuestion, 'score');
         }
       });
     }
@@ -63,6 +69,7 @@ const addMentorMenteeSessionAudit = async (
       mentorMenteeSessionId,
       auditQuestionsIds,
       questionSectionsQuery,
+      totalScore,
     ));
   }
 };

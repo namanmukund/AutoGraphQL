@@ -120,13 +120,13 @@ const testSchedule = {
 
 const schedule = process.env.NODE_ENV === 'production' ? productionSchedule : testSchedule;
 
-const sendB2CNoEmail = (phone, country) => {
+const sendB2CNoEmail = (country) => {
   if (country === 'india') {
-    sendWhatsAppTemplateMessage(phone, 'demo_registration_confirmation1', phone, []);
+    // sendWhatsAppTemplateMessage(phone, 'demo_registration_confirmation1', phone, []);
   } else if (country === 'usa') {
-    sendTextSms(`+${phone}`, usWatiSMS.trialRegistrationConfirmation);
+    // sendTextSms(`+${phone}`, usWatiSMS.trialRegistrationConfirmation);
   } else {
-    sendTextSms(`+${phone}`, meWatiSMS.trialRegistrationConfirmation);
+    // sendTextSms(`+${phone}`, meWatiSMS.trialRegistrationConfirmation);
   }
 };
 
@@ -139,40 +139,40 @@ const sendB2B2CNoEmail = (phone, schoolName, code, bookingLink, user, userId) =>
   addToSchedule('sendNextDayBookReminder', schedule.nextDaySessionReminder(), { userId, code });
 };
 
-const sendB2CWithEmail = (user, studentName, phone) => {
+const sendB2CWithEmail = (user) => {
   const country = get(user, 'country');
 
   if (country === 'india') {
-    sendWhatsAppTemplateMessage(phone, 'demo_registration_confirmation', phone, [
-      { name: 'parent_name', value: user.name },
-      { name: 'student_name', value: studentName },
-    ]);
+    // sendWhatsAppTemplateMessage(phone, 'demo_registration_confirmation', phone, [
+    //   { name: 'parent_name', value: user.name },
+    //   { name: 'student_name', value: studentName },
+    // ]);
   } else if (country === 'usa') {
-    sendTextSms(`+${phone}`, usWatiSMS.trialRegistrationConfirmation);
+    // sendTextSms(`+${phone}`, usWatiSMS.trialRegistrationConfirmation);
   } else {
-    sendTextSms(`+${phone}`, meWatiSMS.trialRegistrationConfirmation);
+    // sendTextSms(`+${phone}`, meWatiSMS.trialRegistrationConfirmation);
   }
 
   if (country === 'usa') {
-    sendTransactionalEmail({
-      parentName: user.name,
-      studentName,
-      parentEmail: user.email,
-    }, {
-      emailTemplate: 'textWelcomeEmail',
-      subject: `${studentName} is one step away from starting their coding journey!`,
-    }, country);
+    // sendTransactionalEmail({
+    //   parentName: user.name,
+    //   studentName,
+    //   parentEmail: user.email,
+    // }, {
+    //   emailTemplate: 'textWelcomeEmail',
+    //   subject: `${studentName} is one step away from starting their coding journey!`,
+    // }, country);
   } else {
-    sendTransactionalEmail({
-      parentName: user.name,
-      studentName,
-      parentEmail: user.email,
-    }, {
-      emailTemplate: 'B2CRegistrationWithoutBooking',
-      subject: `${studentName} is one step away from starting their coding journey!`,
-    }, country);
+    // sendTransactionalEmail({
+    //   parentName: user.name,
+    //   studentName,
+    //   parentEmail: user.email,
+    // }, {
+    //   emailTemplate: 'B2CRegistrationWithoutBooking',
+    //   subject: `${studentName} is one step away from starting their coding journey!`,
+    // }, country);
   }
-  addToSchedule('sendB2CBookReminderNextDay', schedule.nextDaySessionReminder(), { userId: get(user, 'id') });
+  // addToSchedule('sendB2CBookReminderNextDay', schedule.nextDaySessionReminder(), { userId: get(user, 'id') });
 };
 
 const sendB2B2CWithEmail = (user, phone, parentName, studentName, code, schoolName, bookingLink, userId) => {
