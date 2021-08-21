@@ -22,6 +22,8 @@ const mentorInfoQuery = (mentorSessionId) => `
         id
         mentorProfile {
           sessionLink
+          meetingId
+          meetingPassword
           googleMeetLink
           experienceYear
           codingLanguages {
@@ -118,14 +120,16 @@ const extractMentorMenteeSessionAndSendMessage = async (
   const {
     parentName, parentNumber, countryCode, name, grade, parentEmail,
   } = menteeObj;
-
+  const mentorPhoto = get(mentorSession, 'user.profilePic.uri', 'python/email/mentor1.png') || 'python/email/mentor1.png';
   // add session Link to LS
   updateLeadSquared({
     Phone: parentNumber,
     mx_mentor_Name: capitalize(mentorObj.name),
     mx_Session_Link: get(mentorInfo, 'data.mentorSession.user.mentorProfile.sessionLink'),
+    mx_Meeting_ID: get(mentorInfo, 'data.mentorSession.user.mentorProfile.meetingId'),
+    mx_Meeting_Password: get(mentorInfo, 'data.mentorSession.user.mentorProfile.meetingPassword'),
     mx_Mentor_Star_Rating: mentorObj.rating,
-    mx_Mentor_Photo: get(mentorSession, 'user.profilePic.uri', getFullFilePath('python/email/mentor1.png')) || getFullFilePath('python/email/mentor1.png'),
+    mx_Mentor_Photo: getFullFilePath(mentorPhoto),
     mx_Mentor_Exp_in_years: get(mentorProfile, 'experienceYear') || 3,
     mx_Mentor_Languages_Known: getMentorCodingLanguages(get(mentorProfile, 'experienceYear')) || 'Python',
   }, true, {}, true);

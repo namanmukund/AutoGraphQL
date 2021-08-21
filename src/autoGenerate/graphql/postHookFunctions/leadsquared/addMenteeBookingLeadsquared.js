@@ -60,6 +60,12 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
   if (input.sessionLink) {
     leadSquaredInput.mx_Session_Link = input.sessionLink;
   }
+  if (input.mx_Meeting_ID) {
+    leadSquaredInput.mx_Meeting_ID = input.mx_Meeting_ID;
+  }
+  if (input.mx_Meeting_Password) {
+    leadSquaredInput.mx_Meeting_Password = input.mx_Meeting_Password;
+  }
   const activityInput = {
     ActivityEvent: 103,
     ActivityNote: !isBookedByMentee ? 'Agent booked a session' : 'User booked a session',

@@ -76,6 +76,10 @@ const addUserLeadSquared = (params, create = true) => {
   if (get(params, 'input.utmMedium')) {
     leadSquaredInput.mx_utm_medium = get(params, 'input.utmMedium');
   }
+  if (get(params, 'input.campaignCode')) {
+    leadSquaredInput.mx_school_booking_code = get(params, 'input.campaignCode');
+    leadSquaredInput.mx_school_booking_link = `https://www.tekie.in/login?code=${leadSquaredInput.mx_school_booking_code}`;
+  }
 
   updateLeadsquared(leadSquaredInput, create);
 };
