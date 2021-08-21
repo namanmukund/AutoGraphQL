@@ -5,6 +5,7 @@ query{
   batchSession(id:"${batchSessionId}"){
     id
     bookingDate
+    isAudit
     topic{
       id 
       order
@@ -18,6 +19,7 @@ query{
     batch{
       id
       code
+      type
       allottedMentor{
         id
       }
