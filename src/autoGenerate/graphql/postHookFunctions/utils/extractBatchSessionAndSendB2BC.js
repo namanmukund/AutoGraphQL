@@ -164,7 +164,7 @@ const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId, isBook
         mx_Mentor_Name: mentorName,
         mx_Mentor_Exp_in_years: mentorExp,
         mx_Mentor_Photo: getFullFilePath(mentorPhoto),
-        mx_Mentor_Languages_Known: getMentorCodingLanguages(get(mentorProfile, 'experienceYear')) || 'Python',
+        mx_Mentor_Languages_Known: getMentorCodingLanguages(get(mentorProfile, 'codingLanguages')) || 'Python',
         mx_Mentor_Star_Rating: getRating(pythonCourseRating1, pythonCourseRating2, pythonCourseRating3, pythonCourseRating4, pythonCourseRating5),
       });
       sendBookingReminderOrConfirmationB2BC(get(student, 'parents[0].user.id'), true);

@@ -131,7 +131,7 @@ const extractMentorMenteeSessionAndSendMessage = async (
     mx_Mentor_Star_Rating: mentorObj.rating,
     mx_Mentor_Photo: getFullFilePath(mentorPhoto),
     mx_Mentor_Exp_in_years: get(mentorProfile, 'experienceYear') || 3,
-    mx_Mentor_Languages_Known: getMentorCodingLanguages(get(mentorProfile, 'experienceYear')) || 'Python',
+    mx_Mentor_Languages_Known: getMentorCodingLanguages(get(mentorProfile, 'codingLanguages')) || 'Python',
   }, true, {}, true);
 
   // send email
