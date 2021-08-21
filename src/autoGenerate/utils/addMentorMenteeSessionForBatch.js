@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop, no-console */
 import { get } from 'lodash';
+import { log } from '../../../utils';
 import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
 
 const callMentorMenteeSessions = async (
@@ -193,21 +194,21 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
       const { id: menteeSessionIdFromMenteeQuery } = menteeSession;
       menteeSessionId = menteeSessionIdFromMenteeQuery;
     }
-    console.log('------------------------menteeSessionId', menteeSessionId);
+    log(`------------------------menteeSessionId ${menteeSessionId}`);
   }
   let mentorSessionId = mentorSessionIdFromInput;
   // eslint-disable-next-line no-restricted-syntax
   try {
-    console.log('------------------------menteeUserId', menteeUserId);
-    console.log('------------------------mentorUserId', mentorUserId);
-    console.log('------------------------topicId', topicId);
-    console.log('------------------------bookingDate', bookingDate);
-    console.log('------------------------slot', slot);
-    console.log('------------------------mentorSessionIdFromInput', mentorSessionIdFromInput);
-    console.log('------------------------courseId', courseId);
-    console.log('------------------------sessionStatus', sessionStatus);
-    console.log('------------------------source', source);
-    console.log('------------------------methodCallOriginComponent', methodCallOriginComponent);
+    log(`------------------------menteeUserId ${menteeUserId}`);
+    log(`------------------------mentorUserId ${mentorUserId}`);
+    log(`------------------------topicId ${topicId}`);
+    log(`------------------------bookingDate ${bookingDate}`);
+    log(`------------------------slot ${slot}`);
+    log(`------------------------mentorSessionIdFromInput ${mentorSessionIdFromInput}`);
+    log(`------------------------courseId ${courseId}`);
+    log(`------------------------sessionStatus ${sessionStatus}`);
+    log(`------------------------source ${source}`);
+    log(`------------------------methodCallOriginComponent ${methodCallOriginComponent}`);
 
     // simply update existing mms if that's all it is to be done
     if (menteeUserId && topicId) {
@@ -247,10 +248,10 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
             menteeSessionId,
             variables,
           );
-          console.log('------------------------updated menteeSessionId', menteeSessionId);
+          log(`------------------------updated menteeSessionId ${menteeSessionId}`);
         }
         await callUpdateMentorMenteeSession(mentorMenteeId, mentorSessionIdFromInput, { input: { sessionStatus } });
-        console.log('------------------------updated mentorMenteeId', mentorMenteeId);
+        log(`------------------------updated mentorMenteeId ${mentorMenteeId}`);
         return true;
       }
     }
@@ -262,9 +263,9 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
         menteBookingDate,
         `slot${menteeBookingSlot}`,
       );
-      console.log('------------------------111 mentorSessionId', mentorSessionId);
+      log(`------------------------111 mentorSessionId ${mentorSessionId}`);
       if (!mentorSessionId) {
-        console.log('------------------------adding mentorSessionId');
+        log('------------------------adding mentorSessionId');
         const variables = {
           input: {
             availabilityDate: menteBookingDate,
@@ -273,7 +274,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           },
         };
         mentorSessionId = await callAddMentorSession(mentorUserId, courseId, variables);
-        console.log('------------------------added mentorSessionId', mentorSessionId);
+        log(`------------------------added mentorSessionId ${mentorSessionId}`);
       } else {
         // update
         const variables = {
@@ -290,12 +291,12 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
             variables,
           );
         } catch (err) {
-          console.log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
+          log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
         }
-        console.log('------------------------updated mentorSessionId', mentorSessionId);
+        log(`------------------------updated mentorSessionId ${mentorSessionId}`);
       }
     } else {
-      console.log('------------------------updated existing mentorSessionId', mentorSessionId);
+      log(`------------------------updated existing mentorSessionId ${mentorSessionId}`);
       const variables = {
         input: {
           availabilityDate: menteBookingDate,
@@ -309,12 +310,12 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           variables,
         );
       } catch (err) {
-        console.log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
+        log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
       }
     }
 
     if (menteeSessionId) {
-      console.log('------------------------updating menteeSessionId', menteeSessionId);
+      log(`------------------------updating menteeSessionId ${menteeSessionId}`);
       // update
       const variables = {
         input: {
@@ -349,7 +350,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
         menteeSessionId,
         variables,
       );
-      console.log('------------------------updated menteeSessionId', menteeSessionId);
+      log(`------------------------updated menteeSessionId ${menteeSessionId}`);
     } else if (!menteeSessionId) {
       // add mentee session
       /* eslint no-lonely-if:0 */
@@ -362,7 +363,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           },
         };
         menteeSessionId = await callAddMenteeSession(menteeUserId, topicId, variables);
-        console.log('------------------------added menteeSessionId', menteeSessionId);
+        log(`------------------------added menteeSessionId ${menteeSessionId}`);
       }
     }
 
@@ -380,10 +381,10 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
         mentorSessionId,
         variables,
       );
-      console.log('------------------------added mentorMenteeId');
+      log('------------------------added mentorMenteeId');
     }
   } catch (e) {
-    console.log('Error........', e);
+    log(`Error........ ${e}`);
   }
   return true;
 };
