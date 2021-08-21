@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { auditQuestionType, questionTypes } from '../../../../../constants';
+import { auditQuestionType, questionTypes, auditType as auditTypeValues } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import {
   OrderAndAuditTypeExists,
@@ -7,12 +7,15 @@ import {
   MaxRatingAndDisplayTypeNotFound,
 } from '../../../../../constants/errors';
 
-const auditQuestionQuery = (order, auditType) => `
+const { mentor } = auditTypeValues;
+
+const auditQuestionQuery = (order, auditType, auditSubType) => `
 {
   auditQuestions(filter: {
     and: [
       {order: ${order}},
-      {auditType: ${auditType}}
+      {auditType: ${auditType}},
+      ${auditSubType ? `{ auditSubType: ${auditSubType} }` : ''}
     ]
   }){
     id
@@ -28,12 +31,18 @@ const addAuditQuestionValidation = async (params, mutationOrQueryName, context) 
     order,
     auditType,
     questionType,
+    auditSubType,
     score,
   } = input;
   const maxRating = get(input, 'maxRating', null);
   const ratingDisplayType = get(input, 'ratingDisplayType', null);
   // check if previous question exists with the same order and auditType
-  const auditQuestionQueryRes = await callLocalGraphqlApi(auditQuestionQuery(order, auditType));
+  let auditQuestionQueryRes = null;
+  if (auditType === mentor && auditSubType) {
+    auditQuestionQueryRes = await callLocalGraphqlApi(auditQuestionQuery(order, auditType, auditSubType));
+  } else {
+    auditQuestionQueryRes = await callLocalGraphqlApi(auditQuestionQuery(order, auditType));
+  }
   const auditQuestions = get(auditQuestionQueryRes, 'data.auditQuestions', []);
   if (auditQuestions.length > 0) {
     throw new OrderAndAuditTypeExists();
