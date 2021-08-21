@@ -197,13 +197,6 @@ const auditType = {
   postSales: 'postSales',
 };
 
-const auditSubType = {
-  b2bDemo: 'b2bDemo',
-  b2bPaid: 'b2bPaid',
-  b2cDemo: 'b2cDemo',
-  b2cPaid: 'b2cPaid',
-};
-
 const scholarshipThreshHolds = {
   proficient: 100,
   master: 80,
@@ -287,6 +280,12 @@ const batchType = {
   b2b: 'b2b',
   b2b2c: 'b2b2c',
   b2c: 'b2c',
+};
+
+const auditSubType = {
+  b2cDemo: 'b2cDemo',
+  b2cPaid: 'b2cPaid',
+  b2b: batchType.b2b,
 };
 
 const sessionStatus = {
