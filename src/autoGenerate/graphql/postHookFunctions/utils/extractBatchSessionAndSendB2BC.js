@@ -155,10 +155,10 @@ const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId, isBook
         type: 'b2b2c',
       };
       if (lsInput) {
-        input.mx_Meeting_ID = meetingId;
+        lsInput.mx_Meeting_ID = meetingId;
       }
       if (lsInput) {
-        input.mx_Meeting_Password = meetingPassword;
+        lsInput.mx_Meeting_Password = meetingPassword;
       }
       addMenteeBookingLeadsquared(lsInput, {}, [], {}, {}, isBookedByMentee, null, {
         mx_Mentor_Name: mentorName,
