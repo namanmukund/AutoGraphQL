@@ -25,6 +25,7 @@ const FETCH_CAMPAIGN = (campaignId) => `{
     batchRules {
       batchSize 
     }
+    code
     school {
       name
     }
@@ -129,6 +130,7 @@ const signupOrLoginViaOtp = async (
         const campaignType = get(campaignRes, 'data.campaign.type', '');
         input.schoolName = get(campaignRes, 'data.campaign.school.name', '');
         input.Vertical = campaignType.replace('Event', '');
+        input.campaignCode = get(campaignRes, 'data.campaign.code');
         input.mx_Demo_Model = `1:${get(campaignRes, 'data.campaign.batchRules.batchSize', '')}`;
         parentChildSignupPostHookMethod(input, params);
       } else {

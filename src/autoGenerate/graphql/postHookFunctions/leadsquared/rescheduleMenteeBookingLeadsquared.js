@@ -2,6 +2,7 @@ import { get } from 'lodash';
 import moment from 'moment';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
 import getIntlDateTime from '../../../../../utils/timeZoneDiff';
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { fetchAgentName } from '../utils/updateUserBookingAgent';
 
 const getUser = async (phoneNumber) => {
