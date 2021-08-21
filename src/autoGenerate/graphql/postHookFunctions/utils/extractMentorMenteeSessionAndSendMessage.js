@@ -125,9 +125,9 @@ const extractMentorMenteeSessionAndSendMessage = async (
   updateLeadSquared({
     Phone: parentNumber,
     mx_mentor_Name: capitalize(mentorObj.name),
-    mx_Session_Link: get(mentorInfo, 'data.mentorSession.user.mentorProfile.sessionLink'),
     mx_Meeting_ID: get(mentorInfo, 'data.mentorSession.user.mentorProfile.meetingId'),
     mx_Meeting_Password: get(mentorInfo, 'data.mentorSession.user.mentorProfile.meetingPassword'),
+    mx_Demo_Session_Link: get(mentorInfo, 'data.mentorSession.user.mentorProfile.sessionLink'),
     mx_Mentor_Star_Rating: mentorObj.rating,
     mx_Mentor_Photo: getFullFilePath(mentorPhoto),
     mx_Mentor_Exp_in_years: get(mentorProfile, 'experienceYear') || 3,

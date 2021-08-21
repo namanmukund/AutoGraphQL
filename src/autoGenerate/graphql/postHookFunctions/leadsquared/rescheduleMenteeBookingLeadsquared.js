@@ -25,13 +25,18 @@ const rescheduleMenteeBookingLeadsquared = async (input, slotTimeStringArray, us
       .subtract(30, 'minutes')
       .format('YYYY-MM-DD HH:mm:ss');
     const { dateObject, startTime } = getIntlDateTime(bookingDate, slotNumber, timezone);
-    const date = moment(dateObject).format('dddd, Do MMMM');
+    const date = moment(dateObject).format('dddd, Do MMMM, YYYY');
     const time = startTime;
+    const now = moment()
+      .subtract(5, 'hours')
+      .subtract(30, 'minutes')
+      .format('YYYY-MM-DD HH:mm:ss');
     const leadSquaredInput = {
       Phone: phoneNumber,
       mx_Booking_Date_Time: bookingDateTime,
       mx_Booking_Date: date,
       mx_Booking_Time: time,
+      mx_Last_updated_booking: now,
     };
     const agentName = await fetchAgentName(agentId);
     if (!isBookedByMentee && agentName) {
@@ -52,6 +57,10 @@ const rescheduleMenteeBookingLeadsquared = async (input, slotTimeStringArray, us
         {
           SchemaName: 'mx_Custom_8',
           Value: bookingDateTime,
+        },
+        {
+          SchemaName: 'mx_Custom_12',
+          Value: now,
         },
       ],
     };
