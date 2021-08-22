@@ -1,13 +1,17 @@
 import { get } from 'lodash';
-import { auditType as auditTypesFilter } from '../../../../../constants';
+import { auditType as auditTypesFilter, batchType, auditSubType } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const { preSales, postSales } = auditTypesFilter;
+const { b2b, b2b2c, normal } = batchType;
 
-export const fetchAllAuditQuestion = async (auditType) => {
+const { preSales, postSales, mentor } = auditTypesFilter;
+
+const { b2cDemo, b2cPaid } = auditSubType;
+
+export const fetchAllAuditQuestion = async (auditType, filterQuery) => {
   const query = `
     {
-      auditQuestions(filter:{ and: [ { auditType: ${auditType} } { status: published } ] }){
+      auditQuestions(filter:{ and: [ { auditType: ${auditType} } { status: published } ${filterQuery || ''} ] }){
         id
         section{
           id
@@ -20,6 +24,7 @@ export const fetchAllAuditQuestion = async (auditType) => {
   return get(res, 'data.auditQuestions');
 };
 
+// mutation to add PreSalesAudit
 const addPreSalesAuditQuery = (auditQuestionsIds, clientId, questionSectionsQuery, totalScore) => `
 mutation {
     addPreSalesAudit(
@@ -38,6 +43,7 @@ mutation {
     }
 }`;
 
+// mutation to add PostSalesAudit
 const addPostSalesAuditQuery = (auditQuestionsIds, mentorMenteeSessionId, questionSectionsQuery, totalScore) => `
 mutation {
   addPostSalesAudit(
@@ -56,8 +62,47 @@ mutation {
   }
 }`;
 
-const addSalesAudit = async ({ mentorMenteeSessionId, clientId, auditType }) => {
-  const auditQuestions = await fetchAllAuditQuestion(auditType);
+// mutation to add mentorMenteeSessionAudit for batchSession
+const addMentorMenteeSessionAuditForBatchQuery = (
+  batchSessionId,
+  auditQuestionsIds,
+  questionSectionsQuery,
+  totalScore,
+) => `
+  mutation{
+  addMentorMenteeSessionAudit(batchSessionConnectId: "${batchSessionId}",
+  input: {
+      totalScore: ${totalScore}
+      auditQuestions: [
+        ${auditQuestionsIds}
+      ]
+      isBatchAudit: true
+      customSectionScore: [${questionSectionsQuery}]
+    }){
+    id
+  }
+}
+  `;
+
+const addSalesAudit = async ({
+  mentorMenteeSessionId, clientId, auditType, batchSessionId, batchTypeValue, batchTopicOrder,
+}) => {
+  let auditQuestions = null;
+  let isBatchAudit = false;
+  if (auditType === mentor && batchSessionId && batchTypeValue && batchTopicOrder) {
+    let filterQuery = '';
+    if (batchTypeValue === b2b) {
+      filterQuery = `{ auditSubType: ${b2b} }`;
+    } else if ((batchTypeValue === b2b2c || batchTypeValue === normal) && batchTopicOrder === 1) {
+      filterQuery = `{ auditSubType: ${b2cDemo} }`;
+    } else if ((batchTypeValue === b2b2c || batchTypeValue === normal) && batchTopicOrder !== 1) {
+      filterQuery = `{ auditSubType: ${b2cPaid} }`;
+    }
+    isBatchAudit = true;
+    auditQuestions = await fetchAllAuditQuestion(auditType, filterQuery);
+  } else {
+    auditQuestions = await fetchAllAuditQuestion(auditType);
+  }
   let auditQuestionsIds = '';
   let sectionIdsArray = [];
   let totalScore = 0;
@@ -82,6 +127,13 @@ const addSalesAudit = async ({ mentorMenteeSessionId, clientId, auditType }) => 
       callLocalGraphqlApi(addPreSalesAuditQuery(auditQuestionsIds, clientId, questionSectionsQuery, totalScore));
     } else if (auditType === postSales) {
       callLocalGraphqlApi(addPostSalesAuditQuery(auditQuestionsIds, mentorMenteeSessionId, questionSectionsQuery, totalScore));
+    } else if (isBatchAudit) {
+      callLocalGraphqlApi(addMentorMenteeSessionAuditForBatchQuery(
+        batchSessionId,
+        auditQuestionsIds,
+        questionSectionsQuery,
+        totalScore,
+      ));
     }
   }
 };

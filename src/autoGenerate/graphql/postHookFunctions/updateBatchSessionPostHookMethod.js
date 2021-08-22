@@ -5,6 +5,7 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   sessionStatus,
+  auditType as auditTypeValues,
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
@@ -17,6 +18,7 @@ import addSessionLog from './utils/addSessionLog';
 import sendWhatsAppTemplateMessage from '../../utils/sendWhatsAppTemplateMessage';
 import getSlotLabel from '../../../../utils/getSlotLabel';
 import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
+import addSalesAudit from './utils/addSalesAudit';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -217,6 +219,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     allottedMentorId,
     currentUser,
     prevSessionStatus,
+    prevIsAudit,
   } = context;
   let courseId = get(context, 'courseId');
   /*
@@ -466,6 +469,16 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         mentorPhoneNumber: newMentorPhoneNumber,
       });
     }
+  }
+  const isAuditFromInput = get(input, 'isAudit', false);
+  if (isAuditFromInput && prevIsAudit === false) {
+    const { batchTopicOrder, batchTypeValue } = context;
+    addSalesAudit({
+      batchSessionId,
+      batchTopicOrder,
+      batchTypeValue,
+      auditType: auditTypeValues.mentor,
+    });
   }
 };
 export default updateBatchSessionPostHookMethod;
