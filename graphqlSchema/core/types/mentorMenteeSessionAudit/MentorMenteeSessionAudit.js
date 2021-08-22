@@ -66,8 +66,9 @@ const codingExercise = `
 const MentorMenteeSessionAudit = `
   type MentorMenteeSessionAudit @model {
     auditor: User @relation(name: "UserMentorMenteeSessionAudit", direction: "OneWay")
-    mentorMenteeSession: MentorMenteeSession! @relation(name: "SessionDataMenteeSessionAudit", direction: "OneWay")
+    mentorMenteeSession: MentorMenteeSession @relation(name: "SessionDataMenteeSessionAudit", direction: "OneWay")
     status: MentorMenteeSessionAuditStatus @defaultValue(value: "allotted")
+    batchSession: BatchSession @relation(name: "BatchSessionAudit", direction: "OneWay")
     ${classQuality}
     ${interpersonalSkills}
     ${processMonitoring}
@@ -82,6 +83,7 @@ const MentorMenteeSessionAudit = `
     score: Float
     customScore: Float
     totalScore: Float
+    isBatchAudit: Boolean @defaultValue(value: "false")
     customSectionScore: [CustomSectionScore]
 }`;
 
