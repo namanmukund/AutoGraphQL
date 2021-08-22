@@ -20,10 +20,12 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
   let bookingDateTime = '';
   let date = '';
   let time = '';
-  const { timezone } = await getUser(phoneNumber);
+  let timezone = 'Asia/Kolkata';
   if (get(input, 'type') === 'b2b2c') {
     const { slot, phone } = input;
     phoneNumber = phone;
+    const user = await getUser(phoneNumber);
+    timezone = get(user, 'timezone');
     const { dateObject, startTime } = getIntlDateTime(bookingDate, slot, timezone);
     date = moment(dateObject).format('dddd, Do MMMM, YYYY');
     time = startTime;
@@ -32,8 +34,9 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
       .format('YYYY-MM-DD HH:mm:ss');
   } else {
     phoneNumber = get(userInfo, 'data.user.studentProfile.parents[0].user.phone.number');
+    const user = await getUser(phoneNumber);
+    timezone = get(user, 'timezone');
     const topicOrder = get(topicInfo, 'data.topic.order');
-
     if (topicOrder === 1) {
       const slotNumber = slotTimeStringArray[0].split('slot')[1];
       const { dateObject, startTime } = getIntlDateTime(bookingDate, slotNumber, timezone);
