@@ -120,6 +120,9 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     currentUser,
     currentApp,
   } = userInfo;
+  context.prevIsAudit = get(batchSession, 'isAudit', false);
+  context.batchTopicOrder = get(batchSession, 'topic.order');
+  context.batchTypeValue = get(batchSession, 'batch.type');
   context.currentUser = currentUser;
   context.appName = get(currentApp, 'name');
   return true;

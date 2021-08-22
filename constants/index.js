@@ -282,6 +282,12 @@ const batchType = {
   b2c: 'b2c',
 };
 
+const auditSubType = {
+  b2cDemo: 'b2cDemo',
+  b2cPaid: 'b2cPaid',
+  b2b: batchType.b2b,
+};
+
 const sessionStatus = {
   started: 'started',
   completed: 'completed',
@@ -489,4 +495,5 @@ export {
   usWatiSMS,
   auditQuestionType,
   auditType,
+  auditSubType,
 };
