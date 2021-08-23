@@ -2,7 +2,7 @@ import { get, startCase, toLower } from 'lodash';
 import moment from 'moment';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getIntlDateTime from '../../../../../utils/timeZoneDiff';
-import sendBookingReminderOrConfirmationB2BC from './sendBookingReminderOrConfirmationB2B2C';
+// import sendBookingReminderOrConfirmationB2BC from './sendBookingReminderOrConfirmationB2B2C';
 
 const menteeInfoQuery = (userId) => `
   query{

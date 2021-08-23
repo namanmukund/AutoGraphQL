@@ -32,7 +32,7 @@ import getBatchIdByBatchCreationBasis from './utils/getBatchIdByBatchCreationBas
 import getSchoolInformation from './utils/getSchoolInformation';
 import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
+// import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import getUserPasswordObject from './utils/getUserPasswordObject';
 
 const USER_TYPE = 'User';
