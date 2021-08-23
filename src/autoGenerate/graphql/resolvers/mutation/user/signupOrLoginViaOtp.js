@@ -123,7 +123,7 @@ const signupOrLoginViaOtp = async (
       input.unVerifiedLead = true;
       userData = generateCuid(newUser);
       await modelMutations.addDocument(userData);
-      sendBookingReminderOrConfirmationB2BC(userData.id);
+      // sendBookingReminderOrConfirmationB2BC(userData.id);
       // create on leadsquared
       if (input.campaignId) {
         const campaignRes = await callLocalGraphqlApi(FETCH_CAMPAIGN(input.campaignId));

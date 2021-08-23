@@ -81,187 +81,187 @@ const addToSchedule = async (jobType, scheduledDate, {
 }) => {
   switch (jobType) {
     case 'sendNextDayBookReminder': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, userId, scheduledDate, code,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        sendB2B2CBookReminderNextDay({ userId, code }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, userId, scheduledDate, code,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendB2B2CBookReminderNextDay({ userId, code }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     case 'sendB2CBookReminderNextDay': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, userId, scheduledDate,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        sendB2CBookReminderNextDay({ userId, code }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, userId, scheduledDate,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendB2CBookReminderNextDay({ userId, code }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     case 'engagementMail': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, userId, scheduledDate, code,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        sendB2B2CBookingReminder({ userId, code, jobType }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, userId, scheduledDate, code,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendB2B2CBookingReminder({ userId, code, jobType }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     case 'engagementMailWithMentor': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, userId, scheduledDate, code,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        sendB2B2CBookingReminder({ userId, code, jobType }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, userId, scheduledDate, code,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendB2B2CBookingReminder({ userId, code, jobType }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     case 'bookingFinalReminder': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, userId, scheduledDate, code,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        sendB2B2CBookingReminder({ userId, code, jobType }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, userId, scheduledDate, code,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendB2B2CBookingReminder({ userId, code, jobType }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     case 'bookingSameDayFinalReminder': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, userId, scheduledDate, code,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        sendB2B2CBookingReminder({ userId, code, jobType }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, userId, scheduledDate, code,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendB2B2CBookingReminder({ userId, code, jobType }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     case 'sessionReminderWati': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, userId, scheduledDate, code,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        sendB2B2CBookingReminder({ userId, code, jobType }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, userId, scheduledDate, code,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendB2B2CBookingReminder({ userId, code, jobType }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     case 'postCarnivalMail': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, batchSessionId, scheduledDate,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, batchSessionId, scheduledDate,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
       extractBatchSessionAndPostCarnival({ jobType, batchSessionId }, () => {}, true);
-      schedule.scheduleJob(scheduledDate, () => {
-        extractBatchSessionAndPostCarnival({ jobType, batchSessionId }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   extractBatchSessionAndPostCarnival({ jobType, batchSessionId }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     case 'B2CEngagementMail': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        sendB2CSessionReminder({
-          userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
-        }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendB2CSessionReminder({
+      //     userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+      //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     case 'B2CEngagementMailWithMentor': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        sendB2CSessionReminder({
-          userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
-        }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendB2CSessionReminder({
+      //     userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+      //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     case 'B2CBookingFinalReminder': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        sendB2CSessionReminder({
-          userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
-        }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendB2CSessionReminder({
+      //     userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+      //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     case 'B2CBookingSameDayFinalReminder': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        sendB2CSessionReminder({
-          userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
-        }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendB2CSessionReminder({
+      //     userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+      //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     case 'B2CSessionReminderWati': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        sendB2CSessionReminder({
-          userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
-        }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, menteeSessionId, menteeSessionUpdatedAt, scheduledDate, menteeId: userId,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendB2CSessionReminder({
+      //     userId, jobType, menteeSessionId, menteeSessionUpdatedAt,
+      //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     case 'mentorSessionNotificationB2C': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, mentorMenteeSessionId, scheduledDate,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        sendMentorSessionReminder({
-          mentorMenteeSessionId, jobType,
-        }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, mentorMenteeSessionId, scheduledDate,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendMentorSessionReminder({
+      //     mentorMenteeSessionId, jobType,
+      //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     case 'mentorSessionNotificationB2B2C': {
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType,
-        scheduledDate,
-        batchSessionId,
-        courseName,
-        batchCode,
-        schoolName,
-        sessionDate,
-        sessionTime,
-        sessionLink,
-        mentorPhoneNumber,
-        mentorUserId,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        sendMentorSessionReminderB2B2C({
-          jobType,
-          batchSessionId,
-          courseName,
-          batchCode,
-          schoolName,
-          sessionDate,
-          sessionTime,
-          sessionLink,
-          mentorUserId,
-          mentorPhoneNumber,
-        }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType,
+      //   scheduledDate,
+      //   batchSessionId,
+      //   courseName,
+      //   batchCode,
+      //   schoolName,
+      //   sessionDate,
+      //   sessionTime,
+      //   sessionLink,
+      //   mentorPhoneNumber,
+      //   mentorUserId,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendMentorSessionReminderB2B2C({
+      //     jobType,
+      //     batchSessionId,
+      //     courseName,
+      //     batchCode,
+      //     schoolName,
+      //     sessionDate,
+      //     sessionTime,
+      //     sessionLink,
+      //     mentorUserId,
+      //     mentorPhoneNumber,
+      //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
       break;
     }
     default:
