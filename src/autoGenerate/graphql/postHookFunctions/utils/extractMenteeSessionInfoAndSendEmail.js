@@ -61,7 +61,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
   const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId));
   const menteeInfo = get(userInfo, 'data.user');
   const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
-  const parentId = get(parentInfo, 'id');
+  // const parentId = get(parentInfo, 'id');
   const timezone = (get(menteeInfo, 'timezone') && get(menteeInfo, 'timezone') !== 'undefined') ? get(menteeInfo, 'timezone') : 'Asia/Kolkata';
   const {
     startTime, endTime, date, dateObject,

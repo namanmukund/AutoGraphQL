@@ -14,7 +14,7 @@ import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
 import { PARENT } from '../../../../../../constants/roles';
 import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
-import sendBookingReminderOrConfirmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
+// import sendBookingReminderOrConfirmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 const USER_TYPE = 'User';
