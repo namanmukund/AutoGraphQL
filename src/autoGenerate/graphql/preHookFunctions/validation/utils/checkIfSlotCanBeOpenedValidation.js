@@ -1,12 +1,17 @@
 import { get } from 'lodash';
+import moment from 'moment';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
 import { sessionType } from '../../../../../../constants';
 import { SlotsOccupiedError } from '../../../../../../constants/errors/db';
 
 const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsInPrevDoc, userBatchCode = '') => {
   const { input } = params;
+  const finalBookingDate = get(input, 'bookingDate') || get(input, 'availabilityDate');
   const { ...slots } = input;
-
+  let batchType;
+  let studentCount;
+  let lessThanTwoHours;
+  // const isToday = moment(finalBookingDate).diff(moment(new Date()), 'days') === 0;
   let slotTimeArray = getSelectedSlotsTime(slots);
   // if a slot is true from before we do not need to validate that, so will remove those slots from slotTimeArray
   if (timeSlotsInPrevDoc && timeSlotsInPrevDoc.length) {
@@ -27,6 +32,8 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
       if ((mentorSession.sessionType === sessionType.trial || mentorSession.sessionType === sessionType.batch) && batchSessions.length) {
         // eslint-disable-next-line no-restricted-syntax
         for (const batchSession of batchSessions) {
+          batchType = get(batchSession, 'batch.type');
+          studentCount = get(batchSession, 'batch.studentsMeta.count', 0);
           if (userBatchCode !== get(batchSession, 'batch.code', '')) {
             const occupiedSlotTimeArrayForBatch = getSelectedSlotsTime(batchSession);
             occupiedSlotsArray.push(...occupiedSlotTimeArrayForBatch);
@@ -73,6 +80,17 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
     // if any slot passed in input is in occupied slot( derived from batchSession and MMS) throw error
     const intersectionSlots = slotTimeArray.filter((x) => uniqueOccupiedSlotsArray.includes(x));
     if (intersectionSlots && intersectionSlots.length) {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const slot of intersectionSlots) {
+        const date = new Date(finalBookingDate);
+        const dateTime = date.setHours(
+          date.getHours() + slot,
+        );
+        const currentDate = new Date();
+        if (moment(dateTime).diff(moment(currentDate), 'hours') <= 2) {
+          lessThanTwoHours = true;
+        }
+      }
       let errorMessage = 'Sessions for slots ';
       // eslint-disable-next-line no-restricted-syntax
       for (const intersectionSlot of intersectionSlots) {
@@ -80,11 +98,13 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
       }
       errorMessage += ' are already present and booked for ';
       errorMessage += customError;
-      throw new SlotsOccupiedError({
-        data: {
-          message: errorMessage,
-        },
-      });
+      if (!(batchType === 'b2b2c' && studentCount === 0 && lessThanTwoHours)) {
+        throw new SlotsOccupiedError({
+          data: {
+            message: errorMessage,
+          },
+        });
+      }
     }
   }
   return true;
