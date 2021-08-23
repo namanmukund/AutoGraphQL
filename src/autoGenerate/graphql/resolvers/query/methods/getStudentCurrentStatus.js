@@ -1,6 +1,7 @@
 import { get } from 'lodash';
 import {
-  GLOBAL_COURSE_TITLE, installmentStatus, PUBLISHED,
+  enrollmentTypes,
+  GLOBAL_COURSE_TITLE, PUBLISHED,
   sessionStatus, studentCurrentStatus,
 } from '../../../../../../constants';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
@@ -37,9 +38,13 @@ const getBatchCurrentTopic = (userId) => `
   user(id: "${userId}") {
     id
     studentProfile {
+      school{
+        enrollmentType
+      }
       batch {
         id
         currentComponent {
+          enrollmentType
           currentTopic {
             id
             order
@@ -102,7 +107,7 @@ const getStatus = async (topicOrder, enrollmentType, userId) => {
 
       if (mentorMenteeSessionData && mentorMenteeSessionData.length > 0
         && get(mentorMenteeSessionData, '[0].sessionStatus') === sessionStatus.completed) {
-        if (enrollmentType && enrollmentType === installmentStatus.paid) {
+        if (enrollmentType && enrollmentType === enrollmentTypes.pro) {
           status = onBoarding;
         } else {
           status = postDemo;
@@ -114,7 +119,7 @@ const getStatus = async (topicOrder, enrollmentType, userId) => {
       status = preDemo;
     }
   } else if (topicOrder > 3) {
-    if (enrollmentType && enrollmentType === installmentStatus.paid) {
+    if (enrollmentType && enrollmentType === enrollmentTypes.pro) {
       status = paidUser;
     } else {
       status = onBoarding;
@@ -140,11 +145,15 @@ const getStudentCurrentStatus = (async (root, params) => {
       const batchTopicOrder = get(getBatchTopic, 'data.user.studentProfile.batch.currentComponent.currentTopic.order');
       const userTopicOrder = get(getUserTopic, 'data.userCurrentTopicComponentStatuses[0].currentTopic.order');
       const userEnrollmentType = get(getUserTopic, 'data.userCurrentTopicComponentStatuses[0].enrollmentType');
+      const batchEnrollmentType = get(getBatchTopic, 'data.user.studentProfile.batch.currentComponent.enrollmentType', enrollmentTypes.free);
+      const schoolEnrollmentType = get(getBatchTopic, 'data.user.studentProfile.school.enrollmentType', enrollmentTypes.free);
+
+      const combinedEnrollmentType = (userEnrollmentType === enrollmentTypes.free && batchEnrollmentType === enrollmentTypes.free && schoolEnrollmentType === enrollmentTypes.free) ? enrollmentTypes.free : enrollmentTypes.pro;
 
       // if the batch for the user exists then will check for the topic order from batch current component
 
       if (batchTopicOrder) {
-        studentStatus = getStatus(batchTopicOrder, userEnrollmentType, get(input, 'userId'));
+        studentStatus = getStatus(batchTopicOrder, combinedEnrollmentType, get(input, 'userId'));
       } else {
         // else will check for the topic order from student's current topic
         studentStatus = getStatus(userTopicOrder, userEnrollmentType, get(input, 'userId'));

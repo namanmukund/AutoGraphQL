@@ -5,6 +5,9 @@ const getMentorMenteeSession = async (menteeSessionId) => {
   const mentorMenteeSessionQuery = `{
     mentorMenteeSessions(filter: { menteeSession_some: { id: "${menteeSessionId}" } }) {
       id
+      hasRescheduled
+      rescheduledDate
+      rescheduledDateProvided
       mentorSession {
         id
       }

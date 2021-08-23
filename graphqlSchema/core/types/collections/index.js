@@ -19,6 +19,7 @@ import ErrorLog from './ErrorLog';
 import BulletPoint from './BulletPoint';
 import WorkbookExample from './WorkbookExample';
 import UpdateParentChildDetailInput from './UpdateParentChildDetailInput.js';
+import TimestampTag from './TimestampTag';
 import ProductFeature from './ProductFeature';
 
 export default [
@@ -43,5 +44,6 @@ export default [
   ErrorLog,
   ...BulletPoint,
   ...WorkbookExample,
+  ...TimestampTag,
   ...ProductFeature,
 ];

@@ -23,6 +23,7 @@ const QuestionBank = `
     order: Int!
     statement: String! @trim
     hint: String @trim
+    hints: [Hint]
     questionType: QuestionBankType! @defaultValue(value: "mcq")
     questionLayoutType: QuestionBankLayoutType! @defaultValue(value: "editor")
     difficulty: Int
@@ -34,10 +35,10 @@ const QuestionBank = `
     fibBlocksOptions: [FibBlocksOption]
     fibInputOptions: [FibInputOption]
     arrangeOptions: [ArrangeOption]
-    learningObjective: LearningObjective @relation(name: "kp4",  direction: "OneWay")
-    topic: Topic @relation(name: "kp3",  direction: "OneWay")
+    learningObjective: LearningObjective @relation(name: "OldLearningObjectiveQuestionBank",  direction: "OneWay")
+    topic: Topic @relation(name: "OldQuestionTopicQuestion",  direction: "OneWay")
     learningObjectives: [LearningObjective] @relation(name: "LearningObjectiveQuestionBank")
-    topics: [Topic] @relation(name: "TopicQuestionBank")
+    topics: [Topic] @relation(name: "QuestionTopicQuestion")
     status: ContentStatus! @defaultValue(value: "unpublished")
     courses: [Course] @relation(name: "CourseQuestionBank", direction: "OneWay")
   }

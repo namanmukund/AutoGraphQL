@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import updateSchoolCampaignCodeInSchool from '../scriptMethods/updateSchoolCampaignCodeInSchool';
 // import updateTopicsInAssignment from '../scriptMethods/updateTopicsInAssignment';
 // import updateTopicsInLearningObjective from '../scriptMethods/updateTopicsInLearningObjective';
 // import updateTopicsAndLearningObjectivesInQuestionBank
@@ -7,12 +8,16 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateBatchInUserScript from '../scriptMethods/updateBatchInUserScript';
 // import updateCourseInTopics from '../scriptMethods/updateCourseInTopics';
 // import updateCourse from '../scriptMethods/updateCourse';
+// import generateSessionReport from '../../../../../../utils/scheduleJobs/scheduleSessionReport';
+// import migrateBatchAttendanceToEnum from '../scriptMethods/migrateBatchAttendanceToEnum';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
   /*
   Add script functions
    */
+  // await updateSchoolCampaignCodeInSchool();
+  // await generateSessionReport(60);
   // await updateTopicsInAssignment();
   // await updateTopicsInLearningObjective();
   // await updateTopicsAndLearningObjectivesInQuestionBank();
@@ -36,6 +41,8 @@ const temporaryScript = (async (root, params, context) => {
   // await updateUserSavedCodeIsApprovedForDisplay();
   // await updateMMSandBatchSessionInMentorSession();
   // await updateCodeInCampaign();
+  // await updateCodeInSchool();
+  // await migrateBatchAttendanceToEnum();
   return {
     result: true,
   };

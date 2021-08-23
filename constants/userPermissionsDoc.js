@@ -11,7 +11,15 @@ import {
   UMS_VIEWER,
   NOT_CMS_HEAD_ARRAY,
   CMS_HEAD_ARRAY,
-  UMS_ADMIN, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM,
+  UMS_ADMIN,
+  TRANSFORMATION_ADMIN,
+  TRANSFORMATION_TEAM,
+  AUDIT_ADMIN,
+  PRE_SALES,
+  POST_SALES,
+  ADMIN,
+  NOT_ADMIN,
+  AUDITOR,
 } from './roles';
 
 const userPermissionsDoc = {
@@ -19,13 +27,14 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR],
-      exceptDelete: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN, TRANSFORMATION_ADMIN],
+      read: [PRE_SALES, POST_SALES, AUDITOR],
+      exceptDelete: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN, TRANSFORMATION_ADMIN, AUDIT_ADMIN],
     },
     fields: {
       role: {
         rule: 'allow',
         crud: [...UMS_HEAD_ARR],
-        read: [...NOT_UMS_HEAD_ARR],
+        read: [...NOT_UMS_HEAD_ARR, PRE_SALES, POST_SALES, AUDIT_ADMIN, AUDITOR],
         exceptDelete: [TRANSFORMATION_ADMIN],
       },
       savedPassword: {
@@ -125,6 +134,20 @@ const userPermissionsDoc = {
       rule: 'allow',
       crud: [...CMS_HEAD_ARRAY],
       read: [...NOT_CMS_HEAD_ARRAY],
+    },
+  },
+  AuditQuestion: {
+    collection: {
+      rule: 'allow',
+      crud: [...UMS_HEAD_ARR, AUDIT_ADMIN, AUDITOR],
+      read: [UMS_VIEWER, MENTOR, PRE_SALES, POST_SALES],
+    },
+  },
+  SessionReport: {
+    collection: {
+      rule: 'allow',
+      crud: [ADMIN],
+      read: [NOT_ADMIN],
     },
   },
 };

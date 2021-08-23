@@ -28,7 +28,7 @@ const LearningObjective = `
     videoStartTime: Int
     videoEndTime: Int
     videoThumbnail: File @relation(name: "LearningObjectiveVideoThumbnail", direction: "OneWay")
-    topic: Topic @relation(name: "kp1",  direction: "OneWay")
+    topic: Topic @relation(name: "OldTopicLearningObjective",  direction: "OneWay")
     topics: [Topic] @relation(name: "TopicLearningObjective")
     video: Video @relation(name: "VideoLearningObjective")
     messages: [Message] @relation(name: "LearningObjectiveMessage", isSubset: true)

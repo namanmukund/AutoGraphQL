@@ -16,6 +16,20 @@ const CourseComponentsRule = `
    min: Int @defaultValue(value: 1)
  }`;
 
+const ThemeType = `
+ type ThemeType {
+   primaryColor: String
+   secondaryColor: String
+   backdropColor: String
+ }
+`;
+
+const CourseTargetUserType = `
+ type CourseTargetUserType {
+   type: ProductTargetUserType
+ }
+`;
+
 const Course = `
   type Course @model 
   @appPermissions(
@@ -48,6 +62,9 @@ const Course = `
     thumbnail: File @relation(name: "CourseThumbnail", direction: "OneWay")
     bannerThumbnail: File @relation(name: "CourseBannerThumbnail", direction: "OneWay")
     topics: [Topic] @relation(name: "CourseTopic")
+    secondaryCategory: String
+    theme: ThemeType
+    targetGroup: [CourseTargetUserType]
     courseComponentRule: [CourseComponentsRule]
     badges: [Badge] @relation(name: "CourseBadge")
     badgeDescription: String @uniqueOrEmpty @trim
@@ -55,4 +72,4 @@ const Course = `
   }
 `;
 
-export default [Course, CourseComponentsRule];
+export default [Course, CourseComponentsRule, ThemeType, CourseTargetUserType];

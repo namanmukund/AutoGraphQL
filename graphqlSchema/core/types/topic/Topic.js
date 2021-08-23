@@ -1,6 +1,8 @@
 import { READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
-import { CMS_HEAD, NOT_CMS_HEAD, SCHOOL_ADMIN } from '../../../../constants/roles';
+import {
+  AUDIT_ROLES, CMS_HEAD, NOT_CMS_HEAD, SCHOOL_ADMIN,
+} from '../../../../constants/roles';
 import { CREATED } from '../../../../constants/subscriptionEvents';
 
 const TopicComponentsRule = `
@@ -27,7 +29,8 @@ const Topic = `
     permissions:[
       { userRole: ${CMS_HEAD} appName: "*" operations: "*" },
       { userRole: ${NOT_CMS_HEAD} appName: "*" operations: ${READ} },
-      { userRole: ${SCHOOL_ADMIN} appName: "*" operations: ${READ} }
+      { userRole: ${SCHOOL_ADMIN} appName: "*" operations: ${READ} },
+      { userRole: ${AUDIT_ROLES} appName: "*" operations: ${READ} },
       ], 
     rule: allow
   ) 
@@ -45,18 +48,21 @@ const Topic = `
     videoThumbnail: File @relation(name: "TopicVideoThumbnail", direction: "OneWay")
     videoStatus: ContentStatus! @defaultValue(value: "unpublished")
     videoStartTime: Int
+    isQuestionInMessageEnabled: Boolean @defaultValue(value: "false")
     videoEndTime: Int
     storyStartTime: Int
     storyEndTime: Int
     storyThumbnail: File @relation(name: "StoryThumbnail", direction: "OneWay")
     chapter: Chapter @relation(name: "ChapterTopic")
     learningObjectives: [LearningObjective] @relation(name: "TopicLearningObjective")
-    questions: [QuestionBank] @relation(name: "TopicQuestionBank")
+    questions: [QuestionBank] @relation(name: "OldTopicQuestionBank", direction: "OneWay")
+    topicQuestions: [TopicQuestion]
+    topicAssignmentQuestions: [TopicAssignmentQuestion]
     badges: [Badge] @relation(name: "TopicBadge", isSubset: true)
     thumbnail: File @relation(name: "TopicThumbnail", direction: "OneWay")
     thumbnailSmall: File @relation(name: "TopicThumbnailSmall", direction: "OneWay")
     isTrial: Boolean @defaultValue(value: "false")
-    assignmentQuestions: [AssignmentQuestion] @relation(name: "TopicAssignmentQuestion")
+    assignmentQuestions: [AssignmentQuestion] @relation(name: "OldTopicAssignmentQuestion", direction: "OneWay")
     bulletPoints: [BulletPoint]
     courses: [Course] @relation(name: "CourseTopic")
     blockBasedProjects: [BlockBasedProject] @relation(name: "TopicBlockBasedProject")

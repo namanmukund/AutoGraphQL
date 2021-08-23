@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const addSessionLogQuery = (bookingDate, slot, clientId, topicId, actionByUserId, courseId, action, batchCode, mentorId, sessionStatus, mentorAvailabilityDate, updateMentorMenteeSessionInput = {}) => `
+const addSessionLogQuery = (bookingDate, slot, clientId, topicId, actionByUserId, courseId, action, batchCode, mentorId, sessionStatus, mentorAvailabilityDate, updateMentorMenteeSessionInput = {}, salesOperationInput = null) => `
   mutation{
     addSessionLog(
         ${clientId ? `clientConnectId:"${clientId}"` : ''}
@@ -21,10 +21,13 @@ const addSessionLogQuery = (bookingDate, slot, clientId, topicId, actionByUserId
           ${updateMentorMenteeSessionInput.rescheduledDate ? `rescheduledDate: "${updateMentorMenteeSessionInput.rescheduledDate}"` : ''}
           ${updateMentorMenteeSessionInput.classMissedMessageStatus ? `classMissedMessageStatus: ${updateMentorMenteeSessionInput.classMissedMessageStatus}` : ''}
           ${updateMentorMenteeSessionInput.comment ? `comment: "${updateMentorMenteeSessionInput.comment}"` : ''}
-          ${updateMentorMenteeSessionInput.otherReasonForChallenges ? `otherReasonForChallenges: "${updateMentorMenteeSessionInput.otherReasonForChallenges}"` : ''}
+          ${updateMentorMenteeSessionInput.otherReasonForChallenges ? `otherReasonForChallenges: """${updateMentorMenteeSessionInput.otherReasonForChallenges}"""` : ''}
           ${updateMentorMenteeSessionInput.rating ? `rating: ${updateMentorMenteeSessionInput.rating}` : ''}
           ${updateMentorMenteeSessionInput.sessionRecordingLink ? `sessionRecordingLink: "${updateMentorMenteeSessionInput.sessionRecordingLink}"` : ''}
-          ${updateMentorMenteeSessionInput.sessionCommentByMentor ? `sessionCommentByMentor: "${updateMentorMenteeSessionInput.sessionCommentByMentor}"` : ''}
+          ${updateMentorMenteeSessionInput.sessionCommentByMentor ? `sessionCommentByMentor: """${updateMentorMenteeSessionInput.sessionCommentByMentor}"""` : ''}
+          ${updateMentorMenteeSessionInput.otherLanguageBarrier ? `otherLanguageBarrier: "${updateMentorMenteeSessionInput.otherLanguageBarrier}"` : ''}
+          ${updateMentorMenteeSessionInput.otherTechnicalReason ? `otherTechnicalReason: """${updateMentorMenteeSessionInput.otherTechnicalReason}"""` : ''}
+          ${updateMentorMenteeSessionInput.languageBarrier ? `languageBarrier: ${updateMentorMenteeSessionInput.languageBarrier}` : ''}
           ${updateMentorMenteeSessionInput.source ? `source: ${updateMentorMenteeSessionInput.source}` : ''}
           ${updateMentorMenteeSessionInput.country ? `country: ${updateMentorMenteeSessionInput.country}` : ''}
           ${updateMentorMenteeSessionInput.leadStatus ? `leadStatus: ${updateMentorMenteeSessionInput.leadStatus}` : ''}
@@ -54,6 +57,7 @@ const addSessionLogQuery = (bookingDate, slot, clientId, topicId, actionByUserId
           ${updateMentorMenteeSessionInput.zoomIssue || updateMentorMenteeSessionInput.zoomIssue === false ? `zoomIssue: ${updateMentorMenteeSessionInput.zoomIssue}` : ''}
           ${updateMentorMenteeSessionInput.laptopIssue || updateMentorMenteeSessionInput.laptopIssue === false ? `laptopIssue: ${updateMentorMenteeSessionInput.laptopIssue}` : ''}
           ${updateMentorMenteeSessionInput.chromeIssue || updateMentorMenteeSessionInput.chromeIssue === false ? `chromeIssue: ${updateMentorMenteeSessionInput.chromeIssue}` : ''}
+          ${updateMentorMenteeSessionInput.powerCut || updateMentorMenteeSessionInput.powerCut === false ? `powerCut: ${updateMentorMenteeSessionInput.powerCut}` : ''}
           ${updateMentorMenteeSessionInput.classDurationExceeded || updateMentorMenteeSessionInput.classDurationExceeded === false ? `classDurationExceeded: ${updateMentorMenteeSessionInput.classDurationExceeded}` : ''}
           ${updateMentorMenteeSessionInput.webSiteLoadingIssue || updateMentorMenteeSessionInput.webSiteLoadingIssue === false ? `webSiteLoadingIssue: ${updateMentorMenteeSessionInput.webSiteLoadingIssue}` : ''}
           ${updateMentorMenteeSessionInput.videoNotLoading || updateMentorMenteeSessionInput.videoNotLoading === false ? `videoNotLoading: ${updateMentorMenteeSessionInput.videoNotLoading}` : ''}
@@ -64,6 +68,22 @@ const addSessionLogQuery = (bookingDate, slot, clientId, topicId, actionByUserId
           ${updateMentorMenteeSessionInput.leadNotVerifiedProperly || updateMentorMenteeSessionInput.leadNotVerifiedProperly === false ? `leadNotVerifiedProperly: ${updateMentorMenteeSessionInput.leadNotVerifiedProperly}` : ''}
           ${updateMentorMenteeSessionInput.otherReasonForReschedule || updateMentorMenteeSessionInput.otherReasonForReschedule === false ? `otherReasonForReschedule: ${updateMentorMenteeSessionInput.otherReasonForReschedule}` : ''}
           ${updateMentorMenteeSessionInput.isFeedbackSubmitted || updateMentorMenteeSessionInput.isFeedbackSubmitted === false ? `isFeedbackSubmitted: ${updateMentorMenteeSessionInput.isFeedbackSubmitted}` : ''}
+          ${salesOperationInput ? `salesOperation: {
+            ${salesOperationInput.personality ? `personality: ${salesOperationInput.personality}` : ''}
+            ${salesOperationInput.learningSpeed ? `learningSpeed: ${salesOperationInput.learningSpeed}` : ''}
+            ${salesOperationInput.studentEnglishSpeakingSkill ? `studentEnglishSpeakingSkill: ${salesOperationInput.studentEnglishSpeakingSkill}` : ''}
+            ${salesOperationInput.parentEnglishSpeakingSkill ? `parentEnglishSpeakingSkill: ${salesOperationInput.parentEnglishSpeakingSkill}` : ''}
+            ${salesOperationInput.prodigyChild || salesOperationInput.prodigyChild === false ? `prodigyChild: ${salesOperationInput.prodigyChild}` : ''}
+            ${salesOperationInput.parentCounsellingDone || salesOperationInput.parentCounsellingDone === false ? `parentCounsellingDone: ${salesOperationInput.parentCounsellingDone}` : ''}
+            ${salesOperationInput.isMentorReadyToTakeClass || salesOperationInput.isMentorReadyToTakeClass === false ? `isMentorReadyToTakeClass: ${salesOperationInput.isMentorReadyToTakeClass}` : ''}
+            ${salesOperationInput.knowCoding || salesOperationInput.knowCoding === false ? `knowCoding: ${salesOperationInput.knowCoding}` : ''}
+            ${salesOperationInput.lookingForAdvanceCourse || salesOperationInput.lookingForAdvanceCourse === false ? `lookingForAdvanceCourse: ${salesOperationInput.lookingForAdvanceCourse}` : ''}
+            ${salesOperationInput.ageNotAppropriate || salesOperationInput.ageNotAppropriate === false ? `ageNotAppropriate: ${salesOperationInput.ageNotAppropriate}` : ''}
+            ${salesOperationInput.notInterestedInCoding || salesOperationInput.notInterestedInCoding === false ? `notInterestedInCoding: ${salesOperationInput.notInterestedInCoding}` : ''}
+            ${salesOperationInput.leadStatus ? `leadStatus: ${salesOperationInput.leadStatus}` : ''}
+            ${salesOperationInput.payingPower ? `payingPower: ${salesOperationInput.payingPower}` : ''}
+            ${salesOperationInput.ageNotAppropriate ? `ageNotAppropriate: ${salesOperationInput.ageNotAppropriate}` : ''}
+          }` : ''}
         }
     ){
       id
@@ -79,6 +99,28 @@ const getMentorSession = (mentorSessionId) => `query{
     user{
       id
     }
+  }
+}
+  `;
+
+// query to get sales Operation
+const getSalesOperationData = (clientId) => `query{
+  salesOperations(filter: {client_some:{id: "${clientId}"}}){
+    id
+    personality
+    prodigyChild
+    learningSpeed
+    studentEnglishSpeakingSkill
+    parentEnglishSpeakingSkill
+    parentCounsellingDone
+    leadStatus
+    isMentorReadyToTakeClass
+    knowCoding
+    lookingForAdvanceCourse
+    ageNotAppropriate
+    ageNotAppropriate
+    notInterestedInCoding
+    payingPower
   }
 }
   `;
@@ -100,6 +142,15 @@ const addSessionLog = async (
   let mentorId = '';
   let mentorAvailabilityDate = '';
   let topicOrder = 0;
+  let salesOperationInput = null;
+  if (clientId) {
+    const salesOperationDataRes = await callLocalGraphqlApi(
+      getSalesOperationData(
+        clientId,
+      ),
+    );
+    salesOperationInput = get(salesOperationDataRes, 'data.salesOperations[0]', null);
+  }
   if (mentorSessionId) {
     const getMentorSessionRes = await callLocalGraphqlApi(
       getMentorSession(
@@ -120,7 +171,7 @@ const addSessionLog = async (
   }
   if (topicOrder === 1 && actionByUserId) {
     callLocalGraphqlApi(addSessionLogQuery(
-      bookingDate, slot, clientId, topicId, actionByUserId, courseId, action, batchCode, mentorId, sessionStatus, mentorAvailabilityDate, updateMentorMenteeSessionInput,
+      bookingDate, slot, clientId, topicId, actionByUserId, courseId, action, batchCode, mentorId, sessionStatus, mentorAvailabilityDate, updateMentorMenteeSessionInput, salesOperationInput,
     ));
   }
 };

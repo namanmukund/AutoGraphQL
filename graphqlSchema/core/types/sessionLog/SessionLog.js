@@ -1,8 +1,24 @@
 import { TBA, TMS } from '../../../../constants';
 import getSlotTimeFields from '../../functions/getSlotTimeFields';
-import { READ } from '../../../../constants/graphqlOperations';
 
 const slotTimeFields = getSlotTimeFields('Boolean', false);
+
+const SessionLogSalesOperation = `
+  type SessionLogSalesOperation {
+    personality: UserPersonality
+    prodigyChild: Boolean
+    learningSpeed: WeakSlowAverageFast
+    studentEnglishSpeakingSkill: EnglishSpeakingSkill
+    parentEnglishSpeakingSkill: EnglishSpeakingSkill
+    parentCounsellingDone: Boolean
+    leadStatus: LeadStatus @groupBy @defaultValue(value: "unassigned")
+    isMentorReadyToTakeClass: Boolean
+    knowCoding: Boolean
+    lookingForAdvanceCourse: Boolean
+    ageNotAppropriate: Boolean
+    notInterestedInCoding: Boolean
+    payingPower: YesNoAverage
+  }`;
 
 const sendTransactionalMessageFields = `
     sendSessionLink: Boolean
@@ -30,6 +46,9 @@ const sessionRescheduledReasons = `
     videoNotLoading: Boolean
     codePlaygroundIssue: Boolean
     logInOTPError: Boolean
+    otherTechnicalReason: String
+    languageBarrier: Languages
+    otherLanguageBarrier: String
 `;
 
 const SessionLog = `
@@ -37,7 +56,7 @@ const SessionLog = `
   @appPermissions(
     permissions:[
       { appName: "${TBA}" operations: "*" },
-      { appName: "${TMS}" operations: ${READ} }
+      { appName: "${TMS}" operations: "*" }
       ],
     rule: allow
   )
@@ -82,7 +101,8 @@ const SessionLog = `
     source: UserOriginSource @defaultValue(value: "website")
     country: Country @defaultValue(value: "india")
     leadStatus: LeadStatus @groupBy
+    salesOperation: SessionLogSalesOperation
   }
 `;
 
-export default [SessionLog];
+export default [SessionLog, SessionLogSalesOperation];

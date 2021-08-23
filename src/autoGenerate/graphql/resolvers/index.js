@@ -73,6 +73,7 @@ import signUpAffiliate from './mutation/methods/signUpAffiliate';
 import salesOperationReport from './query/methods/salesOperationReport';
 import temporaryScript from './query/methods/temporaryScript';
 import sendTransactionalMessage from './query/methods/sendTransactionalMessage';
+import sendTextMessage from './query/methods/sendTextMessage';
 import getTotalAmountCollected from './query/methods/getTotalAmountCollected';
 import addUpdateBulkSchoolUserData from './mutation/methods/addUpdateBulkSchoolUserData';
 import updateVisitorReactionOnUserApprovedCode from './mutation/methods/updateVisitorReactionOnUserApprovedCode';
@@ -85,6 +86,8 @@ import bookB2B2CSlots from './mutation/methods/bookB2B2CSlots';
 import getStudentCurrentStatus from './query/methods/getStudentCurrentStatus';
 import getCourseCertificate from './query/methods/getCourseCertificate';
 import signUpSchool from './mutation/methods/signUpSchool';
+import rebookMenteeSession from './mutation/methods/rebookMenteeSession';
+import getSchoolCampaignSlots from './query/methods/getSchoolCampaignSlots';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -577,6 +580,7 @@ resolvers.Mutation.addUpdateBulkSchoolUserData = addUpdateBulkSchoolUserData;
 resolvers.Mutation.updateVisitorReactionOnUserApprovedCode = updateVisitorReactionOnUserApprovedCode;
 resolvers.Mutation.addBulkMentorSession = addBulkMentorSession;
 resolvers.Mutation.bookB2B2CSlots = bookB2B2CSlots;
+resolvers.Mutation.rebookMenteeSession = rebookMenteeSession;
 
 // queries
 resolvers.Query.me = me;
@@ -584,6 +588,7 @@ resolvers.Query.getPythonByteCode = getPythonByteCode;
 resolvers.Query.salesOperationReport = salesOperationReport;
 resolvers.Query.temporaryScript = temporaryScript;
 resolvers.Query.sendTransactionalMessage = sendTransactionalMessage;
+resolvers.Query.sendTextMessage = sendTextMessage;
 // Resolver to get total sell amount and amount colected
 resolvers.Query.getTotalAmountCollected = getTotalAmountCollected;
 // Resolver to get the cheatsheets
@@ -596,6 +601,8 @@ resolvers.Query.getStudentCurrentStatus = getStudentCurrentStatus;
 resolvers.Query.getCampaignSlots = getCampaignSlots;
 // Resolver to get school Details
 resolvers.Query.getSchoolDetails = getSchoolDetails;
+// Resolver to get school campaign slots
+resolvers.Query.getSchoolCampaignSlots = getSchoolCampaignSlots;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 

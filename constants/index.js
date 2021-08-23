@@ -183,6 +183,20 @@ const questionTypes = {
   arrange: 'arrange',
 };
 
+const auditQuestionType = {
+  mcq: questionTypes.mcq,
+  bool: 'bool',
+  rating: 'rating',
+  timestamp: 'timestamp',
+  input: 'input',
+};
+
+const auditType = {
+  mentor: 'mentor',
+  preSales: 'preSales',
+  postSales: 'postSales',
+};
+
 const scholarshipThreshHolds = {
   proficient: 100,
   master: 80,
@@ -352,6 +366,11 @@ const emailText = {
   },
 };
 
+const currencyTypes = {
+  RS: 'RS',
+  USD: 'USD',
+};
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export const MENTOR_REPORT_COUNTRY = 'india';
@@ -380,6 +399,26 @@ export const testMailingList = {
 };
 
 export const DEFAULT_LS_OM_USER_ID = 'b29041e3-5645-11eb-9166-0a68392cb7c4';
+
+export const SESSION_REPORT_DAYS = 4;
+
+export const COUNTRIES = [
+  'india',
+  'usa',
+  'uk',
+  'canada',
+  'jamaica',
+  'australia',
+  'singapore',
+  'bangladesh',
+  'qatar',
+  'uae',
+  'oman',
+  'kuwait',
+  'egypt',
+  'afghanistan',
+  'russia',
+];
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
@@ -453,4 +492,7 @@ export {
   emailText,
   meWatiSMS,
   usWatiSMS,
+  auditQuestionType,
+  auditType,
+  currencyTypes,
 };
