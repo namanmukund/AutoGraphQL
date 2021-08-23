@@ -366,6 +366,11 @@ const emailText = {
   },
 };
 
+const currencyTypes = {
+  RS: 'RS',
+  USD: 'USD',
+};
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export const MENTOR_REPORT_COUNTRY = 'india';
@@ -489,4 +494,5 @@ export {
   usWatiSMS,
   auditQuestionType,
   auditType,
+  currencyTypes,
 };
