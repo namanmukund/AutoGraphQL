@@ -394,7 +394,7 @@ If coming from campaign and the type os b2b allocate the user to the right batch
   parentChildSignupPostHookMethod(input, leadSquaredParams);
 
   // send b2b2c reg+booking
-  sendBookingReminderOrConfirmationB2B(parentId);
+  // sendBookingReminderOrConfirmationB2B(parentId);
 
   return userTokenData;
 };

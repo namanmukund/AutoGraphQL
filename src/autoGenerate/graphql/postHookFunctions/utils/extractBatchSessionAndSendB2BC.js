@@ -9,7 +9,7 @@ import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMess
 import getSelectedSlotsTime from '../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import getMentorCodingLanguages from '../../resolvers/utils/getMentorCodingLanguages';
 import { addMenteeBookingLeadsquared } from '../leadsquared';
-import sendBookingReminderOrConfirmationB2BC from './sendBookingReminderOrConfirmationB2B2C';
+// import sendBookingReminderOrConfirmationB2BC from './sendBookingReminderOrConfirmationB2B2C';
 
 const BATCH_SESSION = (batchSessionId) => `{
   batchSession(id: "${batchSessionId}") {
@@ -164,10 +164,10 @@ const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId, isBook
         mx_Mentor_Name: mentorName,
         mx_Mentor_Exp_in_years: mentorExp,
         mx_Mentor_Photo: getFullFilePath(mentorPhoto),
-        mx_Mentor_Languages_Known: getMentorCodingLanguages(get(mentorProfile, 'experienceYear')) || 'Python',
+        mx_Mentor_Languages_Known: getMentorCodingLanguages(get(mentorProfile, 'codingLanguages')) || 'Python',
         mx_Mentor_Star_Rating: getRating(pythonCourseRating1, pythonCourseRating2, pythonCourseRating3, pythonCourseRating4, pythonCourseRating5),
       });
-      sendBookingReminderOrConfirmationB2BC(get(student, 'parents[0].user.id'), true);
+      // sendBookingReminderOrConfirmationB2BC(get(student, 'parents[0].user.id'), true);
     });
   }
   if (shouldSendMentorComms && studentsId && studentsId.length && studentsId.length > 0) {

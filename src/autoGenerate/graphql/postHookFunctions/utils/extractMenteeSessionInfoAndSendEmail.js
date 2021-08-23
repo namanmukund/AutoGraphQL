@@ -96,11 +96,11 @@ const extractMenteeSessionInfoAndSendEmail = async (
   }
   switch (action) {
     case 'add': {
-      sendBookingReminderOrConfirmationB2BC(parentId, true);
+      // sendBookingReminderOrConfirmationB2BC(parentId, true);
       break;
     }
     case 'update': {
-      sendBookingReminderOrConfirmationB2BC(parentId, true);
+      // sendBookingReminderOrConfirmationB2BC(parentId, true);
       break;
     }
     default:
