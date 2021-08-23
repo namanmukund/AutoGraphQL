@@ -335,6 +335,7 @@ const topicComponents = {
   video: 'video',
   learningObjective: 'learningObjective',
   assignment: 'assignment',
+  homeworkAssignment: 'homeworkAssignment',
   quiz: 'quiz',
   blockBasedProject: 'blockBasedProject',
   blockBasedPractice: 'blockBasedPractice',
