@@ -23,7 +23,7 @@ import getNextComponent from './utils/getNextComponent';
 const userQuizQuery = (
   userId,
   topicId,
-  courseId
+  courseId,
 ) => `
    query{
       userQuizs(filter:{

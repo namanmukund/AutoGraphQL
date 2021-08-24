@@ -14,7 +14,7 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 const userAssignmentQuery = (
   userId,
   topicId,
-  courseId
+  courseId,
 ) => `
    query{
       userAssignments(filter:{

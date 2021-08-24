@@ -59,7 +59,7 @@ const addUserQuizMutation = (
   topicId,
   restQuery,
   quizQuery,
-  courseId
+  courseId,
 ) => `
   mutation{
     addUserQuiz(
@@ -168,13 +168,13 @@ const userQuizPostHookMethod = async (input, params) => {
       'quiz',
     );
   }
-  
+
   const result = await callLocalGraphqlApi(addUserQuizMutation(
     userId,
     topicId,
     restQuery,
     quizQuery,
-    courseId
+    courseId,
   ));
   if (result) {
     /*
