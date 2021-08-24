@@ -41,6 +41,7 @@ const QuestionBank = `
     topics: [Topic] @relation(name: "QuestionTopicQuestion")
     status: ContentStatus! @defaultValue(value: "unpublished")
     courses: [Course] @relation(name: "CourseQuestionBank", direction: "OneWay")
+    tags: [ContentTag] @relation(name: "ContentTagQuestionBank")
   }
 `;
 

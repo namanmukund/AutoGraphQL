@@ -14,7 +14,7 @@ import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
 import { PARENT } from '../../../../../../constants/roles';
 import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
-import sendBookingReminderOrConfirmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
+// import sendBookingReminderOrConfirmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 const USER_TYPE = 'User';
@@ -25,6 +25,7 @@ const FETCH_CAMPAIGN = (campaignId) => `{
     batchRules {
       batchSize 
     }
+    code
     school {
       name
     }
@@ -122,13 +123,14 @@ const signupOrLoginViaOtp = async (
       input.unVerifiedLead = true;
       userData = generateCuid(newUser);
       await modelMutations.addDocument(userData);
-      sendBookingReminderOrConfirmationB2BC(userData.id);
+      // sendBookingReminderOrConfirmationB2BC(userData.id);
       // create on leadsquared
       if (input.campaignId) {
         const campaignRes = await callLocalGraphqlApi(FETCH_CAMPAIGN(input.campaignId));
         const campaignType = get(campaignRes, 'data.campaign.type', '');
         input.schoolName = get(campaignRes, 'data.campaign.school.name', '');
         input.Vertical = campaignType.replace('Event', '');
+        input.campaignCode = get(campaignRes, 'data.campaign.code');
         input.mx_Demo_Model = `1:${get(campaignRes, 'data.campaign.batchRules.batchSize', '')}`;
         parentChildSignupPostHookMethod(input, params);
       } else {

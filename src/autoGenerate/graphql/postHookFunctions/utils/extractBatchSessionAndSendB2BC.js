@@ -9,7 +9,7 @@ import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMess
 import getSelectedSlotsTime from '../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import getMentorCodingLanguages from '../../resolvers/utils/getMentorCodingLanguages';
 import { addMenteeBookingLeadsquared } from '../leadsquared';
-import sendBookingReminderOrConfirmationB2BC from './sendBookingReminderOrConfirmationB2B2C';
+// import sendBookingReminderOrConfirmationB2BC from './sendBookingReminderOrConfirmationB2B2C';
 
 const BATCH_SESSION = (batchSessionId) => `{
   batchSession(id: "${batchSessionId}") {
@@ -46,6 +46,8 @@ const BATCH_SESSION = (batchSessionId) => `{
         }
         mentorProfile {
           sessionLink
+          meetingId
+          meetingPassword
           googleMeetLink
           experienceYear
           codingLanguages {
@@ -131,28 +133,41 @@ const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId, isBook
   const defaultSessionLink = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.sessionLink', '-');
   const googleMeetLink = get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.googleMeetLink', '-');
   const sessionLink = googleMeetLink || defaultSessionLink || '-';
+  const meetingId = googleMeetLink ? null : get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.googleMeetLink', '-');
+  const meetingPassword = googleMeetLink ? null : get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.googleMeetLink', '-');
+
   const slot = get(getSelectedSlotsTime(get(batchSessionRes, 'data.batchSession')), '[0]');
   if (studentsId && studentsId.length && studentsId.length > 0) {
     studentsId.forEach((studentId) => {
       const studentsInBatchSession = get(batchSessionRes, 'data.batchSession.attendance', []).map((attendance) => get(attendance, 'student'));
       const student = studentsInBatchSession.find((studentInBatchSession) => get(studentInBatchSession, 'id') === studentId);
       const phone = get(student, 'parents[0].user.phone.number');
-      addMenteeBookingLeadsquared({
+      const mentorPhoto = get(
+        mentorUser,
+        'profilePic.uri',
+        'python/email/mentor1.png',
+      ) || 'python/email/mentor1.png';
+      const lsInput = {
         phone,
         bookingDate: get(batchSessionRes, 'data.batchSession.bookingDate'),
         slot,
         sessionLink,
         type: 'b2b2c',
-      }, {}, [], {}, {}, isBookedByMentee, null, {
+      };
+      if (lsInput) {
+        lsInput.mx_Meeting_ID = meetingId;
+      }
+      if (lsInput) {
+        lsInput.mx_Meeting_Password = meetingPassword;
+      }
+      addMenteeBookingLeadsquared(lsInput, {}, [], {}, {}, isBookedByMentee, null, {
         mx_Mentor_Name: mentorName,
         mx_Mentor_Exp_in_years: mentorExp,
-        mx_Mentor_Photo: get(mentorUser, 'profilePic.uri', getFullFilePath('python/email/mentor1.png')) || getFullFilePath('python/email/mentor1.png'),
-        mx_Mentor_Languages_Known: getMentorCodingLanguages(get(mentorProfile, 'experienceYear')) || 'Python',
+        mx_Mentor_Photo: getFullFilePath(mentorPhoto),
+        mx_Mentor_Languages_Known: getMentorCodingLanguages(get(mentorProfile, 'codingLanguages')) || 'Python',
         mx_Mentor_Star_Rating: getRating(pythonCourseRating1, pythonCourseRating2, pythonCourseRating3, pythonCourseRating4, pythonCourseRating5),
-        mx_school_booking_code: get(batchSessionRes, 'data.batchSession.batch.campaign.code'),
-        mx_school_booking_link: `https://www.tekie.in/login?code=${get(batchSessionRes, 'data.batchSession.batch.campaign.code')}`,
       });
-      sendBookingReminderOrConfirmationB2BC(get(student, 'parents[0].user.id'), true);
+      // sendBookingReminderOrConfirmationB2BC(get(student, 'parents[0].user.id'), true);
     });
   }
   if (shouldSendMentorComms && studentsId && studentsId.length && studentsId.length > 0) {

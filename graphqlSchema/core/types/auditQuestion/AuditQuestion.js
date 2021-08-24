@@ -20,6 +20,7 @@ const AuditQuestion = `
     questionType: AuditQuestionType!
     isMandatory: Boolean @defaultValue(value: "false")
     auditType: AuditType!
+    auditSubType: AuditSubType
     mcqOptions: [McqOption]
     ratingDisplayType: RatingDisplayType
     timestampTags: [TimestampTag]
