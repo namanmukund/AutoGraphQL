@@ -33,11 +33,13 @@ const addUserAssignmentMutation = (
   userId,
   topicId,
   assignmentQuery,
+  courseId
 ) => `
   mutation{
     addUserAssignment(
     userConnectId:"${userId}"
     topicConnectId:"${topicId}"
+    ${courseId ? `courseConnectId:"${courseId}"` : ''}
     input:{
         ${assignmentQuery}
     }
@@ -85,6 +87,7 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
   const {
     userId,
     topicId,
+    courseId
   } = getInfoFromParams(params, 'quiz');
   // In case there is no topic id, empty data will be sent
   if (!topicId) {
@@ -322,6 +325,7 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
     userId,
     topicId,
     assignmentQuery,
+    courseId
   ));
 
   log('addUserAssignmentMutation result: ', result);

@@ -1,14 +1,17 @@
 import { get } from 'lodash';
 import {
+  OLD_COURSE_ID,
+  PUBLISHED,
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
 import { log } from '../../../../utils';
 import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
+import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 // query to get userLO to check if document exists for userId and learningObjectiveId
-const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
+const userLearningObjectiveQuery = (userId, learningObjectiveId, courseId) => `
   query{
     userLearningObjectives(filter:{
       and:[
@@ -18,10 +21,42 @@ const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
       {learningObjective_some:{
         id:"${learningObjectiveId}"
       }}
+      ${courseId ? `{course_some:{id:"${courseId}"}}` : ''}
       ]
     }){
       id
       chatStatus
+      learningObjective{
+        topic{
+          id
+          order
+          topicComponentRule{
+            componentName
+            order
+            childComponentName
+            learningObjective{
+              id
+              order
+              messagesMeta{
+                count
+              }
+              questionBankMeta(filter:{and:[{assessmentType:practiceQuestion}{status:${PUBLISHED}}]}){
+                count
+              }
+              comicStripsMeta(filter:{status:${PUBLISHED}}){
+                count
+              }
+            }
+            blockBasedProject{
+              id
+              order
+            }
+            video{
+              id
+            }
+          }
+        }
+      }
     }
   }
   `;
@@ -51,6 +86,7 @@ UserLearningObjective(bookmark, chatStatus) is updated based on-
 */
 const addUserActivityChatDumpPostHookMethod = async (input, mutationName, context) => {
   const userId = get(input, 'user.typeId');
+  const courseId = get(input, 'course.typeId');
   const learningObjectiveId = get(input, 'learningObjective.typeId');
   if (!userId || !learningObjectiveId) {
     log('Either one of userId or learningObjectiveId is missing in input of addUserActivityChatDumpPostHookMethod');
@@ -69,12 +105,14 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
     in that case if he is hitting back after chat consumption, status will not get updated
     if it is already completed
   */
-  const userLearningObjectiveQueryRes = await callLocalGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId));
+  const userLearningObjectiveQueryRes = await callLocalGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId, courseId));
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
     id: userLearningObjectiveId,
     chatStatus: existingChatStatus,
   } = userLearningObjectiveInfo;
+  const topicComponentRule = get(userLearningObjectiveInfo, 'learningObjective.topic.topicComponentRule', []);
+  const topicOrder = get(userLearningObjectiveInfo, 'learningObjective.topic.order');
   const { complete, incomplete, skip: skipStatus } = userTopicTypeStatus;
   const { next, skip } = userActionType;
   let chatStatus = incomplete;
@@ -94,13 +132,28 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
   /*
   Calling method to update current user Topic Component status
   */
-  await updateCurrentComponentStatus(
-    currentTopicComponentInfo,
-    chatAction,
-    topicId,
-    learningObjectiveIdInResult,
-    'message',
-  );
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
+    await updateCurrentComponentStatus(
+      currentTopicComponentInfo,
+      chatAction,
+      topicId,
+      learningObjectiveIdInResult,
+      'message',
+    );
+  } else {
+    await updateCurrentComponentStatusOfNewCourse(
+      courseId,
+      currentTopicComponentInfo,
+      chatAction,
+      topicId,
+      learningObjectiveIdInResult,
+      '',
+      '',
+      'message',
+      topicComponentRule,
+      topicOrder,
+    );
+  }
   // if existing chatStatus is complete, it will remain complete
   if (userLearningObjectiveInfo
       && existingChatStatus === complete) {

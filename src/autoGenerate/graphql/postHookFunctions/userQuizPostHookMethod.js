@@ -59,11 +59,13 @@ const addUserQuizMutation = (
   topicId,
   restQuery,
   quizQuery,
+  courseId
 ) => `
   mutation{
     addUserQuiz(
     userConnectId:"${userId}"
     topicConnectId:"${topicId}"
+    ${courseId ? `courseConnectId:"${courseId}"` : ''}
     input:{
         ${restQuery}
         ${quizQuery}
@@ -108,10 +110,12 @@ const userQuizPostHookMethod = async (input, params) => {
   if (input && input.length) {
     return input;
   }
+  let restQuery = '';
   const resultArray = [];
   const {
     userId,
     topicId,
+    courseId,
   } = getInfoFromParams(params, 'quiz');
   // In case there is no topic id, empty data will be sent
   if (!topicId) {
@@ -157,16 +161,20 @@ const userQuizPostHookMethod = async (input, params) => {
     nextTopicId = topicsList[currentTopicIndex + 1].id;
   }
 
-  const restQuery = getNextComponent(
-    '',
-    nextTopicId,
-    'quiz',
-  );
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
+    restQuery = getNextComponent(
+      '',
+      nextTopicId,
+      'quiz',
+    );
+  }
+  
   const result = await callLocalGraphqlApi(addUserQuizMutation(
     userId,
     topicId,
     restQuery,
     quizQuery,
+    courseId
   ));
   if (result) {
     /*

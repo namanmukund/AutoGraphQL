@@ -14,6 +14,7 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 const userAssignmentQuery = (
   userId,
   topicId,
+  courseId
 ) => `
    query{
       userAssignments(filter:{
@@ -24,6 +25,7 @@ const userAssignmentQuery = (
           {topic_some:{
             id:"${topicId}"
           }},
+          ${courseId ? `{course_some:{id:"${courseId}"}},` : ''}
         ]
       }){
         id
@@ -135,6 +137,7 @@ UserActivityAssignmentDump and and UserAssignment is updated according to -
 const addUserActivityAssignmentDumpPostHookMethod = async (input) => {
   const userId = get(input, 'user.typeId');
   const topicId = get(input, 'topic.typeId');
+  const courseId = get(input, 'course.typeId');
   if (!userId || !topicId) {
     log('Either one of userId or topicId is missing in input of addUserActivityQuizDumpPostHookMethod');
   }
@@ -143,7 +146,7 @@ const addUserActivityAssignmentDumpPostHookMethod = async (input) => {
   we are getting userAssignment for below purpose:
   -we get userAssignment id , which will be used further to update the document
   */
-  const userAssignmentQueryRes = await callLocalGraphqlApi(userAssignmentQuery(userId, topicId));
+  const userAssignmentQueryRes = await callLocalGraphqlApi(userAssignmentQuery(userId, topicId, courseId));
   const userAssignmentInfo = get(userAssignmentQueryRes, 'data.userAssignments[0]');
   const assignmentQuestionsInUserAssignment = get(userAssignmentInfo, 'assignment');
   const assignmentStatusInUserAssignment = get(userAssignmentInfo, 'assignmentStatus');

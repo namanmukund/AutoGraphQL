@@ -1,5 +1,7 @@
 import { get } from 'lodash';
 import {
+  OLD_COURSE_ID,
+  PUBLISHED,
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
@@ -8,12 +10,13 @@ import {
   DatabaseRecordNotFoundError,
   PracticeQuestionsNotPresentError,
 } from '../../../../constants/errors';
+import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 /* query to get userLO to check if document exists for userId and learningObjectiveId
 also we are doing computation for chatStatus and next component for this */
-const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
+const userLearningObjectiveQuery = (userId, learningObjectiveId, courseId) => `
   query{
     userLearningObjectives(filter:{
       and:[
@@ -23,10 +26,42 @@ const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
       {learningObjective_some:{
         id:"${learningObjectiveId}"
       }}
+      ${courseId ? `{course_some:{id:"${courseId}"}}` : ''}
       ]
     }){
       id
       practiceQuestionStatus
+      learningObjective{
+        topic{
+          id
+          order
+          topicComponentRule{
+            componentName
+            order
+            childComponentName
+            learningObjective{
+              id
+              order
+              messagesMeta{
+                count
+              }
+              questionBankMeta(filter:{and:[{assessmentType:practiceQuestion}{status:${PUBLISHED}}]}){
+                count
+              }
+              comicStripsMeta(filter:{status:${PUBLISHED}}){
+                count
+              }
+            }
+            blockBasedProject{
+              id
+              order
+            }
+            video{
+              id
+            }
+          }
+        }
+      }
       practiceQuestions{
         question{
           id
@@ -114,6 +149,7 @@ UserLearningObjective(bookmark, practiceQuestionStatus etc) is updated based on-
 const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context) => {
   const userId = get(input, 'user.typeId');
   const learningObjectiveId = get(input, 'learningObjective.typeId');
+  const courseId = get(input, 'course.typeId');
   if (!userId || !learningObjectiveId) {
     log('Either one of userId or learningObjectiveId is missing in input of addUserActivityPQDumpPostHookMethod');
   }
@@ -137,13 +173,15 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   -we get next component from the document and update user current topic component status with same
   */
   const userLearningObjectiveQueryRes = await callLocalGraphqlApi(
-    userLearningObjectiveQuery(userId, learningObjectiveId),
+    userLearningObjectiveQuery(userId, learningObjectiveId, courseId),
   );
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
     id: userLearningObjectiveId,
     practiceQuestionStatus: practiceQuestionStatusBeforeUpdate,
   } = userLearningObjectiveInfo;
+  const topicComponentRule = get(userLearningObjectiveInfo, 'learningObjective.topic.topicComponentRule', []);
+  const topicOrder = get(userLearningObjectiveInfo, 'learningObjective.topic.order');
   const { next, skip } = userActionType;
   const { complete, incomplete, skip: skipStatus } = userTopicTypeStatus;
   let practiceQuestionStatus = get(userLearningObjectiveInfo, 'practiceQuestionStatus', incomplete);
@@ -337,17 +375,34 @@ And current component status will not get changed when it is already consumed in
   /*
   Calling method to update current user Topic Component status
   */
-  await updateCurrentComponentStatus(
-    currentTopicComponentInfo,
-    pqAction,
-    topicId,
-    learningObjectiveIdInResult,
-    'practiceQuestion',
-    nextComponentType,
-    completedQuestionCount,
-    totalQuestions,
-    nextComponentLearningObjectiveId,
-  );
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
+    await updateCurrentComponentStatus(
+      currentTopicComponentInfo,
+      pqAction,
+      topicId,
+      learningObjectiveIdInResult,
+      'practiceQuestion',
+      nextComponentType,
+      completedQuestionCount,
+      totalQuestions,
+      nextComponentLearningObjectiveId,
+    );
+  } else {
+    await updateCurrentComponentStatusOfNewCourse(
+      courseId,
+      currentTopicComponentInfo,
+      pqAction,
+      topicId,
+      learningObjectiveIdInResult,
+      '',
+      '',
+      'practiceQuestion',
+      topicComponentRule,
+      topicOrder,
+      completedQuestionCount,
+      totalQuestions,
+    );
+  }
   // popping all the practice questions and sending rest of the fields for update
   await callLocalGraphqlApi(updateUserLearningObjectiveMutation(
     userLearningObjectiveId,
