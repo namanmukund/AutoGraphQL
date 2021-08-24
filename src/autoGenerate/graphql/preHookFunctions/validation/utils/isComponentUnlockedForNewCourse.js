@@ -84,7 +84,7 @@ const isComponentUnlockedForNewCourse = async (
     if (!userId || !learningObjectiveId) {
       throw new UserOrLearningObjectiveNotPresentError();
     }
-    const learningObjectiveQueryRes = await getLearningObjectiveAndTopicForValidation(learningObjectiveId);
+    const learningObjectiveQueryRes = await getLearningObjectiveAndTopicForValidation(learningObjectiveId, courseId);
     learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
     if (!learningObjectiveInfo) {
       throw new DatabaseRecordNotFoundError({
@@ -94,9 +94,9 @@ const isComponentUnlockedForNewCourse = async (
       });
     }
     const {
-      topic,
+      topic, topics,
     } = learningObjectiveInfo;
-    topicInfo = topic;
+    topicInfo = topics[0] || topic;
     // Fetching user current topic component status which will be compared against called LO
     currentTopicQuery = `currentTopic{
                                 id

@@ -1,7 +1,6 @@
 import { get } from 'lodash';
 import {
   OLD_COURSE_ID,
-  PUBLISHED,
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
@@ -13,6 +12,7 @@ import {
 import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import topicComponentRuleQuery from './utils/topicComponentRuleQuery';
 
 /* query to get userLO to check if document exists for userId and learningObjectiveId
 also we are doing computation for chatStatus and next component for this */
@@ -35,31 +35,14 @@ const userLearningObjectiveQuery = (userId, learningObjectiveId, courseId) => `
         topic{
           id
           order
-          topicComponentRule{
-            componentName
-            order
-            childComponentName
-            learningObjective{
-              id
-              order
-              messagesMeta{
-                count
-              }
-              questionBankMeta(filter:{and:[{assessmentType:practiceQuestion}{status:${PUBLISHED}}]}){
-                count
-              }
-              comicStripsMeta(filter:{status:${PUBLISHED}}){
-                count
-              }
-            }
-            blockBasedProject{
-              id
-              order
-            }
-            video{
-              id
-            }
-          }
+          ${topicComponentRuleQuery}
+        }
+        topics(filter:{and:[
+        ${courseId ? `{courses_some:{id:"${courseId}"}}` : ''}
+      ]}){
+          id
+          order
+          ${topicComponentRuleQuery}  
         }
       }
       practiceQuestions{
@@ -154,7 +137,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
     log('Either one of userId or learningObjectiveId is missing in input of addUserActivityPQDumpPostHookMethod');
   }
   const learningObjectiveInfo = get(context, `${mutationName}.learningObjective`);
-  const topicId = get(learningObjectiveInfo, 'topic.id');
+  const topicId = (get(learningObjectiveInfo, 'topics') && get(learningObjectiveInfo, 'topics[0].id')) || get(learningObjectiveInfo, 'topic.id');
   if (!topicId) {
     log('Not able to fetch LearningObjective.topic in addUserActivityPQDumpPostHookMethod');
   }
@@ -180,8 +163,8 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
     id: userLearningObjectiveId,
     practiceQuestionStatus: practiceQuestionStatusBeforeUpdate,
   } = userLearningObjectiveInfo;
-  const topicComponentRule = get(userLearningObjectiveInfo, 'learningObjective.topic.topicComponentRule', []);
-  const topicOrder = get(userLearningObjectiveInfo, 'learningObjective.topic.order');
+  const topicComponentRule = get(userLearningObjectiveInfo, 'learningObjective.topics[0].topicComponentRule', null) || get(userLearningObjectiveInfo, 'learningObjective.topic.topicComponentRule', []);
+  const topicOrder = get(userLearningObjectiveInfo, 'learningObjective.topics[0].order', null) || get(userLearningObjectiveInfo, 'learningObjective.topic.order');
   const { next, skip } = userActionType;
   const { complete, incomplete, skip: skipStatus } = userTopicTypeStatus;
   let practiceQuestionStatus = get(userLearningObjectiveInfo, 'practiceQuestionStatus', incomplete);
