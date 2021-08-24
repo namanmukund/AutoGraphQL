@@ -1,4 +1,6 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+import updateQuestionsWithCorrectPositions from '../scriptMethods/updateQuestionsWithCorrectPositions';
+import updateQuestionsWithHints from '../scriptMethods/updateQuestionsWithHints';
 // import updateSchoolCampaignCodeInSchool from '../scriptMethods/updateSchoolCampaignCodeInSchool';
 // import updateTopicsInAssignment from '../scriptMethods/updateTopicsInAssignment';
 // import updateTopicsInLearningObjective from '../scriptMethods/updateTopicsInLearningObjective';
@@ -43,6 +45,8 @@ const temporaryScript = (async (root, params, context) => {
   // await updateCodeInCampaign();
   // await updateCodeInSchool();
   // await migrateBatchAttendanceToEnum();
+  await updateQuestionsWithCorrectPositions();
+  await updateQuestionsWithHints();
   return {
     result: true,
   };
