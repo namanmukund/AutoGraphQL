@@ -23,6 +23,7 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
   let customError = '';
   let mmsflag = false;
   let bsflag = false;
+  let batchStudentsExists = false;
   if (slotTimeArray.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const mentorSession of prevMentorSessions) {
@@ -39,6 +40,9 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
             occupiedSlotsArray.push(...occupiedSlotTimeArrayForBatch);
             // eslint-disable no-loop-func
             const intersection = slotTimeArray.filter((x) => occupiedSlotTimeArrayForBatch.includes(x));
+            if (studentCount > 0) {
+              batchStudentsExists = 0;
+            }
             if (intersection && intersection.length) {
               if (!bsflag) {
                 bsflag = true;
@@ -98,7 +102,8 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
       }
       errorMessage += ' are already present and booked for ';
       errorMessage += customError;
-      if (!(batchType === 'b2b2c' && studentCount === 0 && lessThanTwoHours)) {
+      if (!(batchType === 'b2b2c' && studentCount === 0 && lessThanTwoHours)
+        && !batchStudentsExists) {
         throw new SlotsOccupiedError({
           data: {
             message: errorMessage,
