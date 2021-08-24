@@ -282,6 +282,12 @@ const batchType = {
   b2c: 'b2c',
 };
 
+const auditSubType = {
+  b2cDemo: 'b2cDemo',
+  b2cPaid: 'b2cPaid',
+  b2b: batchType.b2b,
+};
+
 const sessionStatus = {
   started: 'started',
   completed: 'completed',
@@ -335,6 +341,7 @@ const topicComponents = {
   video: 'video',
   learningObjective: 'learningObjective',
   assignment: 'assignment',
+  homeworkAssignment: 'homeworkAssignment',
   quiz: 'quiz',
   blockBasedProject: 'blockBasedProject',
   blockBasedPractice: 'blockBasedPractice',
@@ -366,6 +373,11 @@ const emailText = {
   },
 };
 
+const currencyTypes = {
+  RS: 'RS',
+  USD: 'USD',
+};
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export const MENTOR_REPORT_COUNTRY = 'india';
@@ -383,7 +395,7 @@ export const MAX_ALLOWED_BATCH_SESSIONS_DAYS_RANGE = 365;
 
 export const testMailingList = {
   production: {
-    email: ['sanatankc@gmail.com', 'naman.mukund@tekie.in', 'shravastivaidya@gmail.com', 'kriteshpk@gmail.com', 'amit.ranjan@tekie.in', 'rishabh.bucha@tekie.in'],
+    email: ['sanatankc@gmail.com'],
     phone: ['918368246974', '919654347463'],
   },
   staging: {
@@ -489,4 +501,6 @@ export {
   usWatiSMS,
   auditQuestionType,
   auditType,
+  auditSubType,
+  currencyTypes,
 };

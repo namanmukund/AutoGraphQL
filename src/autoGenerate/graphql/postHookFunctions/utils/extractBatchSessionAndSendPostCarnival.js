@@ -16,8 +16,8 @@ const BATCH_SESSION = (batchSessionId) => `{
         mentorProfile {
           salesExecutive {
             id 
-            email
             user {
+              email
               name
             }
           }

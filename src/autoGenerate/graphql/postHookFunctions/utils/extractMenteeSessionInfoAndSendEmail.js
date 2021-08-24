@@ -2,7 +2,7 @@ import { get, startCase, toLower } from 'lodash';
 import moment from 'moment';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getIntlDateTime from '../../../../../utils/timeZoneDiff';
-import sendBookingReminderOrConfirmationB2BC from './sendBookingReminderOrConfirmationB2B2C';
+// import sendBookingReminderOrConfirmationB2BC from './sendBookingReminderOrConfirmationB2B2C';
 
 const menteeInfoQuery = (userId) => `
   query{
@@ -61,7 +61,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
   const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId));
   const menteeInfo = get(userInfo, 'data.user');
   const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
-  const parentId = get(parentInfo, 'id');
+  // const parentId = get(parentInfo, 'id');
   const timezone = (get(menteeInfo, 'timezone') && get(menteeInfo, 'timezone') !== 'undefined') ? get(menteeInfo, 'timezone') : 'Asia/Kolkata';
   const {
     startTime, endTime, date, dateObject,
@@ -96,11 +96,11 @@ const extractMenteeSessionInfoAndSendEmail = async (
   }
   switch (action) {
     case 'add': {
-      sendBookingReminderOrConfirmationB2BC(parentId, true);
+      // sendBookingReminderOrConfirmationB2BC(parentId, true);
       break;
     }
     case 'update': {
-      sendBookingReminderOrConfirmationB2BC(parentId, true);
+      // sendBookingReminderOrConfirmationB2BC(parentId, true);
       break;
     }
     default:

@@ -29,8 +29,17 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     }
     // update user booking on leadsquared
     if (!get(userInfo, 'data.user.studentProfile.batch.id')) {
-      addMenteeBookingLeadsquared(input, params, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, get(context, 'userIdFromContext'));
+      addMenteeBookingLeadsquared(
+        input,
+        params,
+        slotTimeStringArray,
+        userInfo,
+        topicInfo,
+        isBookedByMentee,
+        get(context, 'userIdFromContext'),
+      );
     }
+
     // update session log entry
     const courseId = get(input, 'course.typeId', '');
     const clientId = get(userInfo, 'data.user.id', '');

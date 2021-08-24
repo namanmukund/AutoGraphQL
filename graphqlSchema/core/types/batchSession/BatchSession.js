@@ -29,6 +29,7 @@ const BatchSession = `
     mentorPaymentStatus: MentorPaymentStatus @defaultValue(value: "declined")
     mentorPaymentJustification: String
     paymentApprovedBy: User @relation(name: "MentorMenteeSessionPaymentApprovedUser", direction: "OneWay")
+    isAudit: Boolean @defaultValue(value: "false")
 }`;
 
 export default [BatchSession, batchAttendanceType];

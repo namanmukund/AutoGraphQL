@@ -87,6 +87,8 @@ import UserPersonality from './UserPersonality';
 import WeakSlowAverageFast from './WeakSlowAverageFast';
 import Languages from './Languages';
 import AttendanceStatus from './AttendanceStatus';
+import AuditSubType from './AuditSubType';
+import Currency from './Currency';
 
 export default [
   Status,
@@ -179,4 +181,6 @@ export default [
   WeakSlowAverageFast,
   Languages,
   AttendanceStatus,
+  AuditSubType,
+  Currency,
 ];

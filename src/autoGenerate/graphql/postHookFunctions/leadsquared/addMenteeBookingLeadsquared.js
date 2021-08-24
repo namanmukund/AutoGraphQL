@@ -20,24 +20,27 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
   let bookingDateTime = '';
   let date = '';
   let time = '';
-  const { timezone } = await getUser(phoneNumber);
+  let timezone = 'Asia/Kolkata';
   if (get(input, 'type') === 'b2b2c') {
     const { slot, phone } = input;
     phoneNumber = phone;
+    const user = await getUser(phoneNumber);
+    timezone = get(user, 'timezone');
     const { dateObject, startTime } = getIntlDateTime(bookingDate, slot, timezone);
-    date = moment(dateObject).format('dddd, Do MMMM');
+    date = moment(dateObject).format('dddd, Do MMMM, YYYY');
     time = startTime;
     bookingDateTime = moment(bookingDate).minutes(0).hours(slot).subtract(5, 'hours')
       .subtract(30, 'minutes')
       .format('YYYY-MM-DD HH:mm:ss');
   } else {
     phoneNumber = get(userInfo, 'data.user.studentProfile.parents[0].user.phone.number');
+    const user = await getUser(phoneNumber);
+    timezone = get(user, 'timezone');
     const topicOrder = get(topicInfo, 'data.topic.order');
-
     if (topicOrder === 1) {
       const slotNumber = slotTimeStringArray[0].split('slot')[1];
       const { dateObject, startTime } = getIntlDateTime(bookingDate, slotNumber, timezone);
-      date = moment(dateObject).format('dddd, Do MMMM');
+      date = moment(dateObject).format('dddd, Do MMMM, YYYY');
       time = startTime;
       bookingDateTime = moment(bookingDate).minutes(0).hours(slotNumber).subtract(5, 'hours')
         .subtract(30, 'minutes')
@@ -46,19 +49,29 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
   }
 
   const agentName = await fetchAgentName(agentId);
-
+  const now = moment()
+    .subtract(5, 'hours')
+    .subtract(30, 'minutes')
+    .format('YYYY-MM-DD HH:mm:ss');
   const leadSquaredInput = {
     Phone: phoneNumber,
     mx_Booking_Date_Time: bookingDateTime,
     mx_Booking_Date: date,
     mx_Booking_Time: time,
+    mx_Last_updated_booking: now,
     ...fields,
   };
   if (!isBookedByMentee && agentName) {
     leadSquaredInput.mx_Booking_Agent = agentName;
   }
   if (input.sessionLink) {
-    leadSquaredInput.mx_Session_Link = input.sessionLink;
+    leadSquaredInput.mx_Demo_Session_Link = input.sessionLink;
+  }
+  if (input.mx_Meeting_ID) {
+    leadSquaredInput.mx_Meeting_ID = input.mx_Meeting_ID;
+  }
+  if (input.mx_Meeting_Password) {
+    leadSquaredInput.mx_Meeting_Password = input.mx_Meeting_Password;
   }
   const activityInput = {
     ActivityEvent: 103,
@@ -75,6 +88,10 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
       {
         SchemaName: 'mx_Custom_8',
         Value: bookingDateTime,
+      },
+      {
+        SchemaName: 'mx_Custom_12',
+        Value: now,
       },
     ],
   };

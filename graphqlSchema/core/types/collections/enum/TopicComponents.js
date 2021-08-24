@@ -1,7 +1,8 @@
 import { topicComponents } from '../../../../../constants';
 
 const {
-  video, learningObjective, assignment, quiz, blockBasedProject, blockBasedPractice,
+  video, learningObjective, assignment, quiz, blockBasedProject,
+  blockBasedPractice, homeworkAssignment,
 } = topicComponents;
 const TopicComponents = `
   enum TopicComponents {
@@ -11,6 +12,7 @@ const TopicComponents = `
       ${quiz}
       ${blockBasedProject}
       ${blockBasedPractice}
+      ${homeworkAssignment}
   }`;
 
 export default TopicComponents;

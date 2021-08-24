@@ -6,6 +6,7 @@ const ContentTag = `
     cheatSheet: [CheatSheet] @relation(name: "CheatSheetContentTag")
     workbook: [Workbook] @relation(name: "WorkbookContentTag")
     blockBasedProject: [BlockBasedProject] @relation(name: "BlockBasedProjectTag")
+    questionBank: [QuestionBank] @relation(name: "ContentTagQuestionBank")
   }
 `;
 
