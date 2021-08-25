@@ -16,6 +16,12 @@ const CourseComponentsRule = `
    min: Int @defaultValue(value: 1)
  }`;
 
+const LearningObjectiveComponentsRule = `
+  type LearningObjectiveComponentsRule {
+   componentName: LearningObjectiveComponents
+   order: Int
+ }`;
+
 const ThemeType = `
  type ThemeType {
    primaryColor: String
@@ -66,10 +72,11 @@ const Course = `
     theme: ThemeType
     targetGroup: [CourseTargetUserType]
     courseComponentRule: [CourseComponentsRule]
+    defaultLoComponentRule: [LearningObjectiveComponentsRule]
     badges: [Badge] @relation(name: "CourseBadge")
     badgeDescription: String @uniqueOrEmpty @trim
     projectsCount: Int
   }
 `;
 
-export default [Course, CourseComponentsRule, ThemeType, CourseTargetUserType];
+export default [Course, CourseComponentsRule, ThemeType, CourseTargetUserType, LearningObjectiveComponentsRule];
