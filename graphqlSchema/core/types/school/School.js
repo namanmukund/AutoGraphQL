@@ -7,6 +7,7 @@ const School = `
     enrollmentType: EnrollmentType! @defaultValue(value: "free")
     classes: [SchoolClass] @relation(name: "SchoolClassSchool")
     students: [StudentProfile] @relation(name: "StudentProfileSchool")
+    bd: BDProfile @relation(name: "BDProfileSchool")
     coordinatorEmail: String @uniqueOrEmpty @trim
     coordinatorPhone: Phone @uniqueOrEmpty
     coordinatorRole: SchoolCoordinatorRole
