@@ -59,6 +59,7 @@ import {
   OrderAndAuditTypeExists,
   MCQOptionNotProvided,
   MaxRatingAndDisplayTypeNotFound,
+  BDProfileAlreadyExist,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -257,4 +258,5 @@ export {
   OrderAndAuditTypeExists,
   MCQOptionNotProvided,
   MaxRatingAndDisplayTypeNotFound,
+  BDProfileAlreadyExist,
 };

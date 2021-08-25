@@ -200,3 +200,7 @@ export const MCQOptionNotProvided = createError('MCQOptionNotProvided', {
 export const MaxRatingAndDisplayTypeNotFound = createError('MaxRatingAndDisplayTypeNotFound', {
   message: 'maxRating and ratingDisplayType should be passed.',
 });
+
+export const BDProfileAlreadyExist = createError('BDProfileAlreadyExist', {
+  message: 'BD Profile already exist for the user',
+});
