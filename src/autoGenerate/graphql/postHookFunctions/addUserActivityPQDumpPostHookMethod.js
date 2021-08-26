@@ -410,7 +410,7 @@ And current component status will not get changed when it is already consumed in
       threeOrMoreTryCount,
       helpUsedCount,
       answerUsedCount,
-      courseId
+      courseId,
     ));
   }
   return true;
