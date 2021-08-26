@@ -104,11 +104,13 @@ const addUserPracticeQuestionReportMutation = (
   threeOrMoreTryCount,
   helpUsedCount,
   answerUsedCount,
+  courseId,
 ) => `
   mutation{
     addUserPracticeQuestionReport(
     userConnectId:"${userId}"
     learningObjectiveConnectId:"${learningObjectiveId}"
+    ${courseId ? `courseConnectId:"${courseId}"` : ''}
     input:{
         firstTryCount: ${firstTryCount}
         secondTryCount: ${secondTryCount}
@@ -408,6 +410,7 @@ And current component status will not get changed when it is already consumed in
       threeOrMoreTryCount,
       helpUsedCount,
       answerUsedCount,
+      courseId
     ));
   }
   return true;
