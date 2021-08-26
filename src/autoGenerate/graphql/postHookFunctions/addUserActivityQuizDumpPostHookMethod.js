@@ -146,7 +146,7 @@ const addUserQuizReport = (
   learningObjectiveReportQuery,
   pushManyQuery,
   nextComponentQuery,
-  courseId
+  courseId,
 ) => `
   mutation{
     addUserQuizReport(
