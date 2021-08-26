@@ -146,11 +146,13 @@ const addUserQuizReport = (
   learningObjectiveReportQuery,
   pushManyQuery,
   nextComponentQuery,
+  courseId
 ) => `
   mutation{
     addUserQuizReport(
     userConnectId: "${userId}"
     topicConnectId: "${topicId}"
+    ${courseId ? `courseConnectId:"${courseId}"` : ''}
     input:{
       ${quizReportQuery}
       ${learningObjectiveReportQuery}
@@ -951,6 +953,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       learningObjectiveReportQuery,
       pushManyQuery,
       nextComponentQuery,
+      courseId,
     ));
     const addUserQuizReportId = get(addUserQuizReportRes, 'data.addUserQuizReport.id');
     Object.assign(input, {
