@@ -59,6 +59,8 @@ import {
   OrderAndAuditTypeExists,
   MCQOptionNotProvided,
   MaxRatingAndDisplayTypeNotFound,
+  BDEProfileAlreadyExist,
+  SalesExecutiveProfileAlreadyExist,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -257,4 +259,6 @@ export {
   OrderAndAuditTypeExists,
   MCQOptionNotProvided,
   MaxRatingAndDisplayTypeNotFound,
+  BDEProfileAlreadyExist,
+  SalesExecutiveProfileAlreadyExist,
 };
