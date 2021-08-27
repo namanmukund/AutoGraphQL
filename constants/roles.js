@@ -19,6 +19,7 @@ const AUDIT_ADMIN = 'auditAdmin';
 const PRE_SALES = 'preSales';
 const POST_SALES = 'postSales';
 const AUDITOR = 'auditor';
+const BDE = 'BDE';
 
 const CMS_HEAD = `[
 "${ADMIN}",
@@ -193,6 +194,7 @@ const ALL_ROLES_ARRAY = [
   PRE_SALES,
   POST_SALES,
   AUDITOR,
+  BDE,
 ];
 
 const CMS_HEAD_ARRAY = [
@@ -257,4 +259,5 @@ export {
   POST_SALES,
   AUDIT_ROLES,
   AUDITOR,
+  BDE,
 };
