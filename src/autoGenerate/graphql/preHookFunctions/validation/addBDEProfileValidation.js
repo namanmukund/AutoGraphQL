@@ -1,21 +1,21 @@
 import { get } from 'lodash';
-import { BDProfileAlreadyExist } from '../../../../../constants/errors';
+import { BDEProfileAlreadyExist } from '../../../../../constants/errors';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const fetchBDProfile = async (userId) => {
+const fetchBDEProfile = async (userId) => {
   const query = `
     {
-      bdProfiles(filter: { user_some: { id: "${userId}" } }) {
+      bdeProfiles(filter: { user_some: { id: "${userId}" } }) {
         id
       }
     }
     `;
-  const bdProfiles = await callLocalGraphqlApi(query);
-  return get(bdProfiles, 'data.bdProfiles', []);
+  const bdeProfiles = await callLocalGraphqlApi(query);
+  return get(bdeProfiles, 'data.bdeProfiles', []);
 };
 
-const addBDProfileValidation = async (params) => {
+const addBDEProfileValidation = async (params) => {
   // check if the document for user is already present
   const userId = get(params, 'userConnectId');
 
@@ -26,11 +26,11 @@ const addBDProfileValidation = async (params) => {
       },
     });
   }
-  const bdProfiles = await fetchBDProfile(userId);
-  if (bdProfiles && bdProfiles.length > 0) {
-    throw new BDProfileAlreadyExist();
+  const bdeProfiles = await fetchBDEProfile(userId);
+  if (bdeProfiles && bdeProfiles.length > 0) {
+    throw new BDEProfileAlreadyExist();
   }
   return true;
 };
 
-export default addBDProfileValidation;
+export default addBDEProfileValidation;

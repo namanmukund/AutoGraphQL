@@ -71,7 +71,7 @@ const User = `
     verifiedBy: User @relation(name: "UserVerifiedBy", direction: "OneWay")
     mentorBatches: [Batch] @relation(name:"BatchMentor")
     isPreSalesAudit: Boolean @defaultValue(value: "false")
-    bdProfile: BDProfile @relation(name:"BDProfileUser", isSubset: true)
+    bdeProfile: BDEProfile @relation(name:"BDEProfileUser", isSubset: true)
   }
 `;
 

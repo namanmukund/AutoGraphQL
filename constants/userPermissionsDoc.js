@@ -20,7 +20,7 @@ import {
   ADMIN,
   NOT_ADMIN,
   AUDITOR,
-  BD,
+  BDE,
 } from './roles';
 
 const userPermissionsDoc = {
@@ -28,14 +28,14 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR],
-      read: [PRE_SALES, POST_SALES, AUDITOR, BD],
+      read: [PRE_SALES, POST_SALES, AUDITOR, BDE],
       exceptDelete: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN, TRANSFORMATION_ADMIN, AUDIT_ADMIN],
     },
     fields: {
       role: {
         rule: 'allow',
         crud: [...UMS_HEAD_ARR],
-        read: [...NOT_UMS_HEAD_ARR, PRE_SALES, POST_SALES, AUDIT_ADMIN, AUDITOR, BD],
+        read: [...NOT_UMS_HEAD_ARR, PRE_SALES, POST_SALES, AUDIT_ADMIN, AUDITOR, BDE],
         exceptDelete: [TRANSFORMATION_ADMIN],
       },
       savedPassword: {
@@ -50,7 +50,7 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
-      read: [MENTEE, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
+      read: [MENTEE, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM, BDE],
     },
   },
   SalesOperationLog: {

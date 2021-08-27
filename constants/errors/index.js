@@ -59,7 +59,7 @@ import {
   OrderAndAuditTypeExists,
   MCQOptionNotProvided,
   MaxRatingAndDisplayTypeNotFound,
-  BDProfileAlreadyExist,
+  BDEProfileAlreadyExist,
   SalesExecutiveProfileAlreadyExist,
 } from './db';
 import {
@@ -259,6 +259,6 @@ export {
   OrderAndAuditTypeExists,
   MCQOptionNotProvided,
   MaxRatingAndDisplayTypeNotFound,
-  BDProfileAlreadyExist,
+  BDEProfileAlreadyExist,
   SalesExecutiveProfileAlreadyExist,
 };

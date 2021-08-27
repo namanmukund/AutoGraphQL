@@ -93,7 +93,7 @@ import addUserActivityBlockBasedPracticeDumpValidation
 import addMentorProfileValidation from './preHookFunctions/validation/addMentorProfileValidation';
 import deleteMentorMenteeSessionValidation from './preHookFunctions/validation/deleteMentorMenteeSessionValidation';
 import addAuditQuestionValidation from './preHookFunctions/validation/addAuditQuestionValidation';
-import addBDProfileValidation from './preHookFunctions/validation/addBDProfileValidation';
+import addBDEProfileValidation from './preHookFunctions/validation/addBDEProfileValidation';
 import addSalesExecutiveProfileValidation from './preHookFunctions/validation/addSalesExecutiveProfileValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -736,8 +736,8 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await addAuditQuestionValidation(params, mutationOrQueryName, context);
       break;
     }
-    case 'addBDProfile': {
-      await addBDProfileValidation(params, mutationOrQueryName, context);
+    case 'addBDEProfile': {
+      await addBDEProfileValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'addSalesExecutiveProfile': {
