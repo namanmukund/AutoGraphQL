@@ -60,6 +60,7 @@ import {
   MCQOptionNotProvided,
   MaxRatingAndDisplayTypeNotFound,
   BDProfileAlreadyExist,
+  SalesExecutiveProfileAlreadyExist,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -259,4 +260,5 @@ export {
   MCQOptionNotProvided,
   MaxRatingAndDisplayTypeNotFound,
   BDProfileAlreadyExist,
+  SalesExecutiveProfileAlreadyExist,
 };

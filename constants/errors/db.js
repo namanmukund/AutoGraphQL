@@ -204,3 +204,7 @@ export const MaxRatingAndDisplayTypeNotFound = createError('MaxRatingAndDisplayT
 export const BDProfileAlreadyExist = createError('BDProfileAlreadyExist', {
   message: 'BD Profile already exist for the user',
 });
+
+export const SalesExecutiveProfileAlreadyExist = createError('SalesExecutiveProfileAlreadyExist', {
+  message: 'Sales Executive Profile already exist for the user',
+});

@@ -94,6 +94,7 @@ import addMentorProfileValidation from './preHookFunctions/validation/addMentorP
 import deleteMentorMenteeSessionValidation from './preHookFunctions/validation/deleteMentorMenteeSessionValidation';
 import addAuditQuestionValidation from './preHookFunctions/validation/addAuditQuestionValidation';
 import addBDProfileValidation from './preHookFunctions/validation/addBDProfileValidation';
+import addSalesExecutiveProfileValidation from './preHookFunctions/validation/addSalesExecutiveProfileValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -737,6 +738,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'addBDProfile': {
       await addBDProfileValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addSalesExecutiveProfile': {
+      await addSalesExecutiveProfileValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'addSchool': {
