@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import {
-  topicTypes,
+  OLD_COURSE_ID, topicTypes,
   PUBLISHED, questionTypes, scholarshipThreshHolds,
   userActionType,
   userTopicTypeStatus,
@@ -11,6 +11,7 @@ import {
   QuizQuestionsNotPresentError,
 } from '../../../../constants/errors';
 import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
+import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 import getMasteryLevel from '../resolvers/utils/getMasteryLevel';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import validateTokenAndExtractInformation
@@ -22,6 +23,7 @@ import getNextComponent from './utils/getNextComponent';
 const userQuizQuery = (
   userId,
   topicId,
+  courseId,
 ) => `
    query{
       userQuizs(filter:{
@@ -32,6 +34,7 @@ const userQuizQuery = (
           {topic_some:{
             id:"${topicId}"
           }},
+          ${courseId ? `{course_some:{id:"${courseId}"}},` : ''}
           {
             quizStatus: ${userTopicTypeStatus.incomplete}
           }
@@ -45,7 +48,36 @@ const userQuizQuery = (
           questionDisplayOrder
         }
         quizStatus
-        nextComponent{
+        topic{
+        id
+        order
+        topicComponentRule{
+          componentName
+          order
+          childComponentName
+          learningObjective{
+            id
+            order
+            messagesMeta{
+              count
+            }
+            questionBankMeta(filter:{and:[{assessmentType:practiceQuestion}{status:${PUBLISHED}}]}){
+              count
+            }
+            comicStripsMeta(filter:{status:${PUBLISHED}}){
+              count
+            }
+          }
+          blockBasedProject{
+            id
+            order
+          }
+          video{
+            id
+          }
+        }
+      }
+      nextComponent{
         topic{
           id
           learningObjectives(filter:{
@@ -114,11 +146,13 @@ const addUserQuizReport = (
   learningObjectiveReportQuery,
   pushManyQuery,
   nextComponentQuery,
+  courseId,
 ) => `
   mutation{
     addUserQuizReport(
     userConnectId: "${userId}"
     topicConnectId: "${topicId}"
+    ${courseId ? `courseConnectId:"${courseId}"` : ''}
     input:{
       ${quizReportQuery}
       ${learningObjectiveReportQuery}
@@ -781,6 +815,7 @@ UserProfile is also updated if user is attempting quiz for the first time,
 const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, context) => {
   const userId = get(input, 'user.typeId');
   const topicId = get(input, 'topic.typeId');
+  const courseId = get(input, 'course.typeId');
   if (!userId || !topicId) {
     log('Either one of userId or topicId is missing in input of addUserActivityQuizDumpPostHookMethod');
   }
@@ -790,7 +825,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   -we get userQuiz id , which will be used further to update the document
   -we get next component from the document and update user current topic component status with same
   */
-  const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId));
+  const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId, courseId));
   const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
   const quizQuestionsInUserQuiz = get(userQuizInfo, 'quiz');
   const nextTopicId = get(userQuizInfo, 'nextComponent.topic.id');
@@ -807,18 +842,36 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   /*
   Calling method to update current user Topic Component status
   */
-  await updateCurrentComponentStatus(
-    currentTopicComponentInfo,
-    quizAction,
-    topicId,
-    '',
-    'quiz',
-    '',
-    '',
-    '',
-    learningObjectiveConnectId,
-    nextTopicId,
-  );
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
+    await updateCurrentComponentStatus(
+      currentTopicComponentInfo,
+      quizAction,
+      topicId,
+      '',
+      'quiz',
+      '',
+      '',
+      '',
+      learningObjectiveConnectId,
+      nextTopicId,
+    );
+  } else {
+    const topicComponentRule = get(userQuizInfo, 'topic.topicComponentRule', []);
+    const topicOrder = get(userQuizInfo, 'topic.order');
+
+    await updateCurrentComponentStatusOfNewCourse(
+      courseId,
+      currentTopicComponentInfo,
+      quizAction,
+      topicId,
+      '',
+      '',
+      '',
+      'quiz',
+      topicComponentRule,
+      topicOrder,
+    );
+  }
 
   // getting user role from context. We will allow updating mentorMenteeSession isQuizSubmitted if logged in user is mentee
   const userInfo = validateTokenAndExtractInformation(context, false);
@@ -900,6 +953,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       learningObjectiveReportQuery,
       pushManyQuery,
       nextComponentQuery,
+      courseId,
     ));
     const addUserQuizReportId = get(addUserQuizReportRes, 'data.addUserQuizReport.id');
     Object.assign(input, {
