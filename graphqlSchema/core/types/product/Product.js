@@ -5,7 +5,7 @@ import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPer
 const priceInputType = `
   type PriceInputType {
     amount: Float!
-    currency: String! @defaultValue(value: "RS")
+    currency: Currency! @defaultValue(value: "RS")
  }`;
 
 const Product = `
