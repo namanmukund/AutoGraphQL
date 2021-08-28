@@ -42,7 +42,7 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
             if (intersection && intersection.length) {
               // if called from mentorMenteeSession and BatchSesson, we will get a bookingDate
               if (bookingDate) {
-                const date = new Date(finalBookingDate);
+                const date = new Date(bookingDate);
                 const dateTime = date.setHours(
                   date.getHours() + intersection[0],
                 );
