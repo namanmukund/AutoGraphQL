@@ -115,6 +115,7 @@ import PostSalesAudit from './postSalesAudit';
 import AuditQuestionSection from './auditQuestionSection';
 import AuditQuestionSubSection from './auditQuestionSubSection';
 import GetSchoolCampaignSlots from './getSchoolCampaignSlots';
+import BDEProfile from './bdeProfile';
 
 export default [
   ...User,
@@ -234,4 +235,5 @@ export default [
   ...AuditQuestionSection,
   ...AuditQuestionSubSection,
   ...GetSchoolCampaignSlots,
+  ...BDEProfile,
 ];

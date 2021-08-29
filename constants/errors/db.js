@@ -200,3 +200,11 @@ export const MCQOptionNotProvided = createError('MCQOptionNotProvided', {
 export const MaxRatingAndDisplayTypeNotFound = createError('MaxRatingAndDisplayTypeNotFound', {
   message: 'maxRating and ratingDisplayType should be passed.',
 });
+
+export const BDEProfileAlreadyExist = createError('BDEProfileAlreadyExist', {
+  message: 'BDE Profile already exist for the user',
+});
+
+export const SalesExecutiveProfileAlreadyExist = createError('SalesExecutiveProfileAlreadyExist', {
+  message: 'Sales Executive Profile already exist for the user',
+});

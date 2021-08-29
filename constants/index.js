@@ -341,6 +341,7 @@ const topicComponents = {
   video: 'video',
   learningObjective: 'learningObjective',
   assignment: 'assignment',
+  homeworkAssignment: 'homeworkAssignment',
   quiz: 'quiz',
   blockBasedProject: 'blockBasedProject',
   blockBasedPractice: 'blockBasedPractice',
@@ -370,6 +371,11 @@ const emailText = {
     india: 'VISIT TEKIE.IN',
     default: 'VISIT TEKIE.US',
   },
+};
+
+const currencyTypes = {
+  RS: 'RS',
+  USD: 'USD',
 };
 
 export const GIFT_VOUCHER_AMOUNT = 2500;
@@ -496,4 +502,5 @@ export {
   auditQuestionType,
   auditType,
   auditSubType,
+  currencyTypes,
 };
