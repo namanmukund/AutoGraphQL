@@ -281,7 +281,6 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           input: {
             availabilityDate: menteBookingDate,
             [`slot${menteeBookingSlot}`]: true,
-            sessionType: 'batch',
           },
         };
 
@@ -301,7 +300,6 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
         input: {
           availabilityDate: menteBookingDate,
           [`slot${menteeBookingSlot}`]: true,
-          sessionType: 'batch',
         },
       };
       try {
