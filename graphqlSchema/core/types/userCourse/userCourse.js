@@ -1,4 +1,6 @@
-import { TBA, TLA, TMS, TWA } from '../../../../constants';
+import {
+  TBA, TLA, TMS, TWA,
+} from '../../../../constants';
 import { READ } from '../../../../constants/graphqlOperations';
 
 const UserCourse = `
@@ -6,8 +8,8 @@ const UserCourse = `
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
-      { appName: "${TLA}" operations: "*" },
-      { appName: "${TBA}" operations: "*" },
+      { appName: "${TLA}" operations: "*" }, 
+      { appName: "${TBA}" operations: "*" }, 
       { appName: "${TWA}" operations: ${READ} },
       ], 
     rule: allow
