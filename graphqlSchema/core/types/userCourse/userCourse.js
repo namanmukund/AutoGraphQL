@@ -15,7 +15,7 @@ const UserCourse = `
     rule: allow
   )
   {
-    courses: [Course] @relation(name: "UserCourse", direction: "OneWay")
+    courses: [Course] @relation(name: "CourseUserCourse", direction: "OneWay")
       @appPermissions(
         permissions:[
           { appName: "${TMS}" operations: "*" },
@@ -24,10 +24,11 @@ const UserCourse = `
           ], 
         rule: allow
       )
-    user: User! @relation(name: "UserCourse", direction: "OneWay")
+    user: User! @relation(name: "UserCourseUser", direction: "OneWay")
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
+          { appName: "${TMS}" operations: "*" },
           ], 
         rule: allow
       )
