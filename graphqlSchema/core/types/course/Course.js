@@ -76,6 +76,7 @@ const Course = `
     badges: [Badge] @relation(name: "CourseBadge")
     badgeDescription: String @uniqueOrEmpty @trim
     projectsCount: Int
+    codingLanguages: [CodingLanguage]
   }
 `;
 
