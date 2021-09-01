@@ -11,7 +11,7 @@ const getUserCoursesQuery = (userId) => `
       title
       order
       codingLanguages {
-      value
+        value
       }
       defaultLoComponentRule {
         componentName
@@ -40,7 +40,7 @@ const getUserCoursesQuery = (userId) => `
 
 const getUserCourseCompletion = (userId) => `
 {
-  userCourseCompletion(filter: { user_some: { id: "${userId}" } }) {
+  userCourseCompletions(filter: { user_some: { id: "${userId}" } }) {
     id
   }
 }
@@ -55,20 +55,23 @@ const getUserCourses = (async (root, params) => {
     let newPythonCourseExists = false;
     let oldPythonCourseExists = false;
     let updatedCourseArr = [];
-    updatedCourseArr = userCourses.filter(async (course) => {
-      if (get(course, 'id') === OLD_COURSE_ID) {
-        const userCourseCompletion = await callLocalGraphqlApi(getUserCourseCompletion(userId));
-        if (userCourseCompletion && userCourseCompletion.id) {
-          oldPythonCourseExists = true;
-          return true;
-        }
-        return false;
-      }
-      if (get(course, 'codingLanguages', []).includes('python') && get(course, 'id') !== OLD_COURSE_ID) {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const userCourseDoc of userCourses) {
+      if (get(userCourseDoc, 'codingLanguages', []).includes('python') && get(userCourseDoc, 'id') !== OLD_COURSE_ID) {
         newPythonCourseExists = true;
       }
-      return true;
-    });
+      if (get(userCourseDoc, 'id') === OLD_COURSE_ID) {
+        // eslint-disable-next-line no-await-in-loop
+        const userCourseCompletionRes = await callLocalGraphqlApi(getUserCourseCompletion(userId));
+        const userCourseCompletionId = get(userCourseCompletionRes, 'data.userCourseCompletions[0].id', null);
+        if (userCourseCompletionId) {
+          oldPythonCourseExists = true;
+          updatedCourseArr.push(userCourseDoc);
+        }
+      } else {
+        updatedCourseArr.push(userCourseDoc);
+      }
+    }
     if (newPythonCourseExists && oldPythonCourseExists) {
       updatedCourseArr = updatedCourseArr.filter((course) => get(course, 'id') !== OLD_COURSE_ID);
     }
