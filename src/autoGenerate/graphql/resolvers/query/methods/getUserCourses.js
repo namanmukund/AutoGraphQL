@@ -1,6 +1,10 @@
 import { get } from 'lodash';
+import { validate } from '../../../validation';
+import { getFieldsBeingFetched } from '../../../../utils';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { OLD_COURSE_ID } from '../../../../../../constants';
+import { SINGULAR } from '../../../../../../constants/graphqlOperations';
+import { ifAuthorized } from '../../../../../../utils';
 
 const getUserCoursesQuery = (userId) => `
 {
@@ -8,8 +12,19 @@ const getUserCoursesQuery = (userId) => `
     id
     courses {
       id
-      title
       order
+      title
+      description
+      secondaryCategory
+      theme {
+        primaryColor
+        secondaryColor
+        backdropColor
+      }
+      targetGroup {
+        type
+      }
+      projectsCount
       codingLanguages {
         value
       }
@@ -25,12 +40,35 @@ const getUserCoursesQuery = (userId) => `
         count
       }
       topics {
-        order
+        id
         title
-        topicComponentRule {
+        description
+        videoTitle
+        order
+        topicComponentRule{
           componentName
-          childComponentName
           order
+          childComponentName
+          learningObjective{
+              id
+              order
+              messagesMeta{
+                  count
+              }
+              questionBankMeta(filter:{and:[{assessmentType:practiceQuestion}{status:published}]}){
+                  count
+              }
+              comicStripsMeta(filter:{status:published}){
+                  count
+              }
+          }
+          blockBasedProject{
+              id
+              order
+          }
+          video{
+              id
+          }
         }
       }
     }
@@ -46,8 +84,21 @@ const getUserCourseCompletion = (userId) => `
 }
 `;
 
-const getUserCourses = (async (root, params) => {
+const getUserCourses = (async (root, params, context, info) => {
   const { input } = params;
+  const { fieldNodes } = info;
+  const { parsedASTMap } = context;
+  const authentication = ifAuthorized(context);
+  const fieldsFetched = getFieldsBeingFetched(fieldNodes);
+  validate(
+    'UserToken',
+    parsedASTMap,
+    SINGULAR,
+    fieldsFetched,
+    authentication,
+    {},
+  );
+
   if (input && get(input, 'userId')) {
     const userId = get(input, 'userId');
     const userCoursesRes = await callLocalGraphqlApi(getUserCoursesQuery(userId));
