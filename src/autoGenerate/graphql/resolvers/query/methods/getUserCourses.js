@@ -1,10 +1,8 @@
 import { get } from 'lodash';
-import { validate } from '../../../validation';
 import { getFieldsBeingFetched } from '../../../../utils';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { OLD_COURSE_ID } from '../../../../../../constants';
-import { SINGULAR } from '../../../../../../constants/graphqlOperations';
-import { ifAuthorized } from '../../../../../../utils';
+import { InvalidFieldType } from '../../../../../../constants/errors';
 
 const getUserCoursesQuery = (userId) => `
 {
@@ -14,17 +12,6 @@ const getUserCoursesQuery = (userId) => `
       id
       order
       title
-      description
-      secondaryCategory
-      theme {
-        primaryColor
-        secondaryColor
-        backdropColor
-      }
-      targetGroup {
-        type
-      }
-      projectsCount
       codingLanguages {
         value
       }
@@ -84,20 +71,24 @@ const getUserCourseCompletion = (userId) => `
 }
 `;
 
+const validateIncomingFields = (fieldsFetched = {}) => {
+  const whiteListedFields = [
+    'id', 'title', 'order', 'defaultLoComponentRule', 'codingLanguages',
+    'courseComponentRule', 'topicsMeta', 'codingLanguages', 'topics'];
+
+  const fieldsFetchedArr = Object.keys(fieldsFetched);
+  if (fieldsFetchedArr && fieldsFetchedArr.length) {
+    if (!fieldsFetchedArr.every((field) => whiteListedFields.includes(field))) {
+      throw new InvalidFieldType();
+    }
+  }
+};
+
 const getUserCourses = (async (root, params, context, info) => {
   const { input } = params;
   const { fieldNodes } = info;
-  const { parsedASTMap } = context;
-  const authentication = ifAuthorized(context);
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
-  validate(
-    'UserToken',
-    parsedASTMap,
-    SINGULAR,
-    fieldsFetched,
-    authentication,
-    {},
-  );
+  await validateIncomingFields(fieldsFetched);
 
   if (input && get(input, 'userId')) {
     const userId = get(input, 'userId');
