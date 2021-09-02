@@ -21,6 +21,11 @@ const application = process.env.APPLICATION || 'core';
 
 const app = express();
 
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+const routes = require('./payuAPI/routes');
+routes(app);
+
 const path = `/graphql/${application}`;
 
 // Must configure Raven before doing anything else with it
