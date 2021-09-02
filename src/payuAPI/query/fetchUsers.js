@@ -1,4 +1,3 @@
-
 const fetchUsers = (phone, email) => `
 {
   users(filter: {

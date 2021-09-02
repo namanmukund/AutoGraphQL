@@ -24,6 +24,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 const routes = require('./payuAPI/routes');
+
 routes(app);
 
 const path = `/graphql/${application}`;

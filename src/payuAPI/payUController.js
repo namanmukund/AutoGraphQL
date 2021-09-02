@@ -8,7 +8,6 @@ import fetchProducts from './query/fetchProducts';
 import fetchSalesOperations from './query/fetchSalesOperations';
 import fetchUsers from './query/fetchUsers';
 
-
 const users = async (req, res) => {
   const digest = getHashDigest(req.query);
   log(`digest ${digest}`);
@@ -21,11 +20,11 @@ const users = async (req, res) => {
     const phoneQuery = get(req, 'query.phone', '');
     const emailQuery = get(req, 'query.email', '');
     const countryCode = get(req, 'query.countryCode', '');
-    const countryCodeQuery = '+'+countryCode;
+    const countryCodeQuery = `+${countryCode}`;
 
     const phoneDoc = {
       countryCode: countryCodeQuery,
-      number: phoneQuery
+      number: phoneQuery,
     };
 
     let isValidParams = false;
@@ -38,17 +37,17 @@ const users = async (req, res) => {
     }
 
     if (phoneQuery && emailQuery && isValidParams) {
-      log('Phone and Email validated.')
+      log('Phone and Email validated.');
       const usersRes = await callLocalGraphqlApi(fetchUsers(phoneQuery, emailQuery));
       const usersFound = get(usersRes, 'data.users', []);
       if (usersFound.length === 1) {
-        log('User found.')
+        log('User found.');
         userExists = true;
         const clientId = get(usersFound, '[0].parentProfile.children[0].user.id', '');
         const salesOperationsRes = await callLocalGraphqlApi(fetchSalesOperations(clientId));
         const salesOperations = get(salesOperationsRes, 'data.salesOperations', []);
         hasPaid = salesOperations.length > 0;
-      } 
+      }
     } else {
       // send bad request error
       foundError = true;
@@ -63,10 +62,10 @@ const users = async (req, res) => {
     res.json({
       status: 'ok',
       userExists,
-      hasPaid
+      hasPaid,
     });
   }
-}
+};
 
 const productAmount = async (req, res) => {
   const digest = getHashDigest(req.query);
@@ -82,14 +81,13 @@ const productAmount = async (req, res) => {
 
     // if inputs are present
     if (productIdQuery && amountQuery) {
-      log('productId & amount sent in query.')
+      log('productId & amount sent in query.');
       const productsRes = await callLocalGraphqlApi(fetchProducts(productIdQuery));
       const productsFound = get(productsRes, 'data.products', []);
       if (productsFound.length === 1) {
-        log('Product found.')
+        log('Product found.');
         let productPriceAmount = get(productsFound, '[0].price.amount', 0);
         log(`productPriceAmount ${productPriceAmount}`);
-        
         // if discount code is passed in params
         if (discountCodeQuery) {
           const discountRes = await callLocalGraphqlApi(fetchDiscounts(discountCodeQuery, productIdQuery));
@@ -104,10 +102,10 @@ const productAmount = async (req, res) => {
             // if code has not expired
             if (!dateInPast(discountExpiryDate, today)) {
               log('discount not expired');
-              const discountPercentage = get(discountsFound, '[0].percentage', '')
+              const discountPercentage = get(discountsFound, '[0].percentage', '');
               log('discountPercentage', discountPercentage);
               const discount = Math.round(productPriceAmount * discountPercentage * 0.01);
-              productPriceAmount = productPriceAmount - discount;
+              productPriceAmount -= discount;
               productPriceAmount = Math.round((productPriceAmount + Number.EPSILON) * 100) / 100;
             }
           }
@@ -118,7 +116,6 @@ const productAmount = async (req, res) => {
         if (productPriceAmount.toString() === amountQuery) {
           isAmountValid = true;
         }
-
       }
     } else {
       // send bad request error
@@ -133,7 +130,7 @@ const productAmount = async (req, res) => {
   if (!foundError) {
     res.json({
       status: 'ok',
-      isAmountValid
+      isAmountValid,
     });
   }
 };
