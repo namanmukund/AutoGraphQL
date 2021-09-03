@@ -1,9 +1,9 @@
-const fetchDiscounts = (discountCode, productId) => `
+const fetchDiscounts = (productId, additionalFilter) => `
 {
   discounts(filter: {
     and:[
       {product_some: {id: "${productId}"}},
-      {code: "${discountCode}"}
+      ${!additionalFilter ? '' : additionalFilter}
     ]
   }){
     id
