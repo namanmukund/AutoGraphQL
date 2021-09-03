@@ -10,6 +10,7 @@ import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
 import Raven from './Raven';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
 import { getParsedASTMap } from './autoGenerate/utils';
+import routes from './payuAPI/routes';
 
 const http = require('http');
 
@@ -23,7 +24,6 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-const routes = require('./payuAPI/routes');
 
 routes(app);
 
