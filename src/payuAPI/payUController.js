@@ -67,7 +67,7 @@ const users = async (req, res) => {
   }
 };
 
-const productStatus = async (req, res) => {
+const paymentStatus = async (req, res) => {
   const digest = getHashDigest(req.query);
   log(`digest ${digest}`);
   let foundError = false;
@@ -211,7 +211,7 @@ const fetchProduct = async (req, res) => {
 
 const payUController = {};
 payUController.users = users;
-payUController.productStatus = productStatus;
+payUController.paymentStatus = paymentStatus;
 payUController.fetchProduct = fetchProduct;
 
 export default payUController;
