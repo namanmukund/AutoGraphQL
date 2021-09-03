@@ -108,12 +108,14 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
   This will be used to get the assignment questions based on skill level of the user
   */
   const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
-  const {
-    skillsLevel: userSkillsLevelFromDb,
-  } = currentTopicComponentInfo;
+  if (currentTopicComponentInfo) {
+    const {
+      skillsLevel: userSkillsLevelFromDb,
+    } = currentTopicComponentInfo;
 
-  if (skillsLevel) {
-    userSkillLevel = userSkillsLevelFromDb;
+    if (skillsLevel) {
+      userSkillLevel = userSkillsLevelFromDb;
+    }
   }
   /*
     we are getting below fields in topicQuery:
