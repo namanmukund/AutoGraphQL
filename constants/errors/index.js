@@ -61,6 +61,9 @@ import {
   MaxRatingAndDisplayTypeNotFound,
   BDEProfileAlreadyExist,
   SalesExecutiveProfileAlreadyExist,
+  ChapterWithSimilarTitleAlreadyExist,
+  TopicWithSimilarTitleAlreadyExist,
+  TopicWithSimilarOrderAlreadyExist,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -261,4 +264,7 @@ export {
   MaxRatingAndDisplayTypeNotFound,
   BDEProfileAlreadyExist,
   SalesExecutiveProfileAlreadyExist,
+  ChapterWithSimilarTitleAlreadyExist,
+  TopicWithSimilarTitleAlreadyExist,
+  TopicWithSimilarOrderAlreadyExist,
 };

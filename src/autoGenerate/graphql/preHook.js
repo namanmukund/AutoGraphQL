@@ -95,16 +95,22 @@ import deleteMentorMenteeSessionValidation from './preHookFunctions/validation/d
 import addAuditQuestionValidation from './preHookFunctions/validation/addAuditQuestionValidation';
 import addBDEProfileValidation from './preHookFunctions/validation/addBDEProfileValidation';
 import addSalesExecutiveProfileValidation from './preHookFunctions/validation/addSalesExecutiveProfileValidation';
+import addChapterValidation from './preHookFunctions/validation/addChapterValidation';
+import updateChapterValidation from './preHookFunctions/validation/updateChapterValidation';
+import addTopicValidation from './preHookFunctions/validation/addTopicValidation';
+import updateTopicValidation from './preHookFunctions/validation/updateTopicValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
     case 'updateTopic': {
       // await isUniqueOrderField(params, mutationOrQueryName);
+      await updateTopicValidation(params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
     case 'updateChapter': {
       await isUniqueOrderField(params, mutationOrQueryName);
+      await updateChapterValidation(input, mutationOrQueryName, context, params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
@@ -113,6 +119,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       //   throw new ConnectIdRequiredError({ data: { message: 'Chapter Id is required' } });
       // }
       // await isUniqueOrderField(params, mutationOrQueryName);
+      await addTopicValidation(params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
@@ -120,6 +127,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       if (!get(params, 'coursesConnectIds', []).length) {
         throw new ConnectIdRequiredError({ data: { message: 'Course Id is required' } });
       }
+      await addChapterValidation(input, mutationOrQueryName, context, params);
       // await isUniqueOrderField(params, mutationOrQueryName);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
