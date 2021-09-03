@@ -33,6 +33,7 @@ import isObject from './isObject';
 import isSentryAppAndEnv from './isSentryAppAndEnv';
 import throwAsyncError from './throwAsyncError';
 import getTimeDifferenceWithCurrentDateInSeconds from './getTimeDifferenceWithCurrentDateInSeconds';
+import dateInPast from './isDateInPast';
 
 const env = process.env.NODE_ENV || 'development';
 const application = process.env.APPLICATION || 'core';
@@ -79,4 +80,5 @@ export {
   isSentryAppAndEnv,
   throwAsyncError,
   getTimeDifferenceWithCurrentDateInSeconds,
+  dateInPast,
 };
