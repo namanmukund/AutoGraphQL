@@ -208,3 +208,23 @@ export const BDEProfileAlreadyExist = createError('BDEProfileAlreadyExist', {
 export const SalesExecutiveProfileAlreadyExist = createError('SalesExecutiveProfileAlreadyExist', {
   message: 'Sales Executive Profile already exist for the user',
 });
+
+export const ChapterWithSimilarTitleAlreadyExist = createError('ChapterWithSimilarTitleAlreadyExist', {
+  message: 'Chapter with similar title already exist.',
+});
+
+export const TopicWithSimilarTitleAlreadyExist = createError('TopicWithSimilarTitleAlreadyExist', {
+  message: 'Topic with similar title already exist.',
+});
+
+export const TopicWithSimilarOrderAlreadyExist = createError('TopicWithSimilarOrderAlreadyExist', {
+  message: 'Topic with similar order already exist.',
+});
+
+export const AssignmentQuestionIdPublished = createError('AssignmentQuestionIdPublished', {
+  message: 'Can not perform the current operation as Assignment Question is published',
+});
+
+export const BlockBasedProjectIsPublished = createError('BlockBasedProjectIsPublished', {
+  message: 'Can not perform the current operation as Block Based is published',
+});
