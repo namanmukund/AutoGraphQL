@@ -10,6 +10,7 @@ import fetchUsers from './query/fetchUsers';
 
 const users = async (req, res) => {
   const digest = getHashDigest(req.query);
+  console.log('digest', digest);
   log(`digest ${digest}`);
   let foundError = false;
   let userExists = false;
