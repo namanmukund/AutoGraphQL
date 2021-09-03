@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import {
+  OLD_COURSE_ID,
   PUBLISHED,
   skillsLevel,
 } from '../../../../constants';
@@ -14,6 +15,14 @@ const topicQuery = (topicId) => `
     topic(id:"${topicId}"){
       id
       order
+      topicAssignmentQuestions {
+        assignmentQuestion {
+          id
+          difficulty
+          isHomework
+        }
+        order
+      }
       assignmentQuestions(
         filter:{
           status: ${PUBLISHED}
@@ -127,7 +136,13 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
   // this logic will be changed based on assignment question sets
   let assignmentQuery = 'assignment:[';
   if (topicInfo) {
-    const assignmentQuestionsinTopic = get(topicInfo, 'assignmentQuestions');
+    let assignmentQuestionsinTopic = get(topicInfo, 'assignmentQuestions');
+    if (courseId && courseId !== OLD_COURSE_ID) {
+      assignmentQuestionsinTopic = get(topicInfo, 'topicAssignmentQuestions', []).map((topicAQ) => ({
+        ...get(topicAQ, 'assignmentQuestion', {}),
+        order: get(topicAQ, 'order'),
+      }));
+    }
     let sortedAssignmentQuestionsinTopic = [];
     const easyAssignmentQuestions = [];
     const mediumAssignmentQuestions = [];
