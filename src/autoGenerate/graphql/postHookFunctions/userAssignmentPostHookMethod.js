@@ -20,6 +20,7 @@ const topicQuery = (topicId) => `
           id
           difficulty
           isHomework
+          status
         }
         order
       }
@@ -85,13 +86,6 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
   if (input && input.length) {
     return input;
   }
-  const {
-    easy,
-    medium,
-    hard,
-  } = skillsLevel;
-
-  let userSkillLevel = easy;
   const resultArray = [];
   const {
     userId,
@@ -138,10 +132,12 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
   if (topicInfo) {
     let assignmentQuestionsinTopic = get(topicInfo, 'assignmentQuestions');
     if (courseId && courseId !== OLD_COURSE_ID) {
-      assignmentQuestionsinTopic = get(topicInfo, 'topicAssignmentQuestions', []).map((topicAQ) => ({
-        ...get(topicAQ, 'assignmentQuestion', {}),
-        order: get(topicAQ, 'order'),
-      }));
+      assignmentQuestionsinTopic = get(topicInfo, 'topicAssignmentQuestions', [])
+        .filter((topicAQ) => get(topicAQ, 'assignmentQuestion.status') === PUBLISHED)
+        .map((topicAQ) => ({
+          ...get(topicAQ, 'assignmentQuestion', {}),
+          order: get(topicAQ, 'order'),
+        }));
     }
     let sortedAssignmentQuestionsinTopic = [];
     const easyAssignmentQuestions = [];
@@ -167,7 +163,7 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
       }
     });
 
-    const finalAssignmentQuestionsForQuery = [];
+    const finalAssignmentQuestionsForQuery = sortedAssignmentQuestionsinTopic || [];
     // assignment question will populate on basis of user skill type and available questions
     // LOgic is as below.
     // Student' appetite:
@@ -175,152 +171,152 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
     // Easy-4(E1, E2,   E3, E4)
     // Medium-2 (E1, M1) (E3, M2)
     // Difficult -2  (M1 D1) (M2, D2)
-    let assignmentQuestionCount = 0;
-    let homeworkQuestionCount = 0;
-    switch (userSkillLevel) {
-      case easy:
-        // push 2 questions each for homewok and assignment from medium
-        if (easyAssignmentQuestions.length > 0) {
-          easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
-            if (easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
-              homeworkQuestionCount += 1;
-            }
+    // let assignmentQuestionCount = 0;
+    // let homeworkQuestionCount = 0;
+    // switch (userSkillLevel) {
+    //   case easy:
+    //     // push 2 questions each for homewok and assignment from medium
+    //     if (easyAssignmentQuestions.length > 0) {
+    //       easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
+    //         if (easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
+    //           finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
+    //           homeworkQuestionCount += 1;
+    //         }
 
-            if (easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
-              assignmentQuestionCount += 1;
-            }
-          });
-        }
+    //         if (easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
+    //           finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
+    //           assignmentQuestionCount += 1;
+    //         }
+    //       });
+    //     }
 
-        // if 2 easy questions are not there for each homework and assignment, got to medium
-        if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && mediumAssignmentQuestions.length > 0) {
-          mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
-            if (mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
-              homeworkQuestionCount += 1;
-            }
+    //     // if 2 easy questions are not there for each homework and assignment, got to medium
+    //     if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && mediumAssignmentQuestions.length > 0) {
+    //       mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
+    //         if (mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
+    //           finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
+    //           homeworkQuestionCount += 1;
+    //         }
 
-            if (mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
-              assignmentQuestionCount += 1;
-            }
-          });
-        }
+    //         if (mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
+    //           finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
+    //           assignmentQuestionCount += 1;
+    //         }
+    //       });
+    //     }
 
-        // if 2 questions are not still there go to difficult
-        if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && difficultAssignmentQuestions.length > 0) {
-          difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
-            if (difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
-              homeworkQuestionCount += 1;
-            }
+    //     // if 2 questions are not still there go to difficult
+    //     if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && difficultAssignmentQuestions.length > 0) {
+    //       difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
+    //         if (difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
+    //           finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
+    //           homeworkQuestionCount += 1;
+    //         }
 
-            if (difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
-              assignmentQuestionCount += 1;
-            }
-          });
-        }
-        break;
-      case medium:
-        // push 1 question each for homewok and assignment from medium
-        if (mediumAssignmentQuestions.length > 0) {
-          mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
-            if (mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 1) {
-              finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
-              homeworkQuestionCount += 1;
-            }
+    //         if (difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
+    //           finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
+    //           assignmentQuestionCount += 1;
+    //         }
+    //       });
+    //     }
+    //     break;
+    //   case medium:
+    //     // push 1 question each for homewok and assignment from medium
+    //     if (mediumAssignmentQuestions.length > 0) {
+    //       mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
+    //         if (mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 1) {
+    //           finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
+    //           homeworkQuestionCount += 1;
+    //         }
 
-            if (mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 1) {
-              finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
-              assignmentQuestionCount += 1;
-            }
-          });
-        }
+    //         if (mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 1) {
+    //           finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
+    //           assignmentQuestionCount += 1;
+    //         }
+    //       });
+    //     }
 
-        // push 1 question each for homewok and assignment from easy
-        // if there were no medium questions, this will get populated
-        if (easyAssignmentQuestions.length > 0) {
-          easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
-            if (easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
-              homeworkQuestionCount += 1;
-            }
+    //     // push 1 question each for homewok and assignment from easy
+    //     // if there were no medium questions, this will get populated
+    //     if (easyAssignmentQuestions.length > 0) {
+    //       easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
+    //         if (easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
+    //           finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
+    //           homeworkQuestionCount += 1;
+    //         }
 
-            if (easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
-              assignmentQuestionCount += 1;
-            }
-          });
-        }
+    //         if (easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
+    //           finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
+    //           assignmentQuestionCount += 1;
+    //         }
+    //       });
+    //     }
 
-        // if 2 questions are not still there go to difficult
-        if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && difficultAssignmentQuestions.length > 0) {
-          difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
-            if (difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
-              homeworkQuestionCount += 1;
-            }
+    //     // if 2 questions are not still there go to difficult
+    //     if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && difficultAssignmentQuestions.length > 0) {
+    //       difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
+    //         if (difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
+    //           finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
+    //           homeworkQuestionCount += 1;
+    //         }
 
-            if (difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
-              assignmentQuestionCount += 1;
-            }
-          });
-        }
+    //         if (difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
+    //           finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
+    //           assignmentQuestionCount += 1;
+    //         }
+    //       });
+    //     }
 
-        break;
-      case hard:
-        // push 1 question each for homewok and assignment from difficult
-        if (difficultAssignmentQuestions.length > 0) {
-          difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
-            if (difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 1) {
-              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
-              homeworkQuestionCount += 1;
-            }
+    //     break;
+    //   case hard:
+    //     // push 1 question each for homewok and assignment from difficult
+    //     if (difficultAssignmentQuestions.length > 0) {
+    //       difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
+    //         if (difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 1) {
+    //           finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
+    //           homeworkQuestionCount += 1;
+    //         }
 
-            if (difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 1) {
-              finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
-              assignmentQuestionCount += 1;
-            }
-          });
-        }
+    //         if (difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 1) {
+    //           finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
+    //           assignmentQuestionCount += 1;
+    //         }
+    //       });
+    //     }
 
-        // push remaining 1 question each for homewok and assignment from medium
-        // // if there were no difficult questions, this will get populated
-        if (mediumAssignmentQuestions.length > 0) {
-          mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
-            if (mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
-              homeworkQuestionCount += 1;
-            }
+    //     // push remaining 1 question each for homewok and assignment from medium
+    //     // // if there were no difficult questions, this will get populated
+    //     if (mediumAssignmentQuestions.length > 0) {
+    //       mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
+    //         if (mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
+    //           finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
+    //           homeworkQuestionCount += 1;
+    //         }
 
-            if (mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
-              assignmentQuestionCount += 1;
-            }
-          });
-        }
+    //         if (mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
+    //           finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
+    //           assignmentQuestionCount += 1;
+    //         }
+    //       });
+    //     }
 
-        // if 2 questions are not still there go to easy
-        if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && easyAssignmentQuestions.length > 0) {
-          easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
-            if (easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
-              homeworkQuestionCount += 1;
-            }
+    //     // if 2 questions are not still there go to easy
+    //     if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && easyAssignmentQuestions.length > 0) {
+    //       easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
+    //         if (easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
+    //           finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
+    //           homeworkQuestionCount += 1;
+    //         }
 
-            if (easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-              finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
-              assignmentQuestionCount += 1;
-            }
-          });
-        }
-        break;
-      default:
-    }
+    //         if (easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
+    //           finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
+    //           assignmentQuestionCount += 1;
+    //         }
+    //       });
+    //     }
+    //     break;
+    //   default:
+    // }
 
     // eslint-disable-next-line no-restricted-syntax
     for (const assignmentQuestion of finalAssignmentQuestionsForQuery) {
