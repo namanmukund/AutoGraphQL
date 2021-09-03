@@ -224,3 +224,7 @@ export const TopicWithSimilarOrderAlreadyExist = createError('TopicWithSimilarOr
 export const AssignmentQuestionIdPublished = createError('AssignmentQuestionIdPublished', {
   message: 'Can not perform the current operation as Assignment Question is published',
 });
+
+export const BlockBasedProjectIsPublished = createError('BlockBasedProjectIsPublished', {
+  message: 'Can not perform the current operation as Block Based is published',
+});
