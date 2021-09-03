@@ -64,6 +64,7 @@ import {
   ChapterWithSimilarTitleAlreadyExist,
   TopicWithSimilarTitleAlreadyExist,
   TopicWithSimilarOrderAlreadyExist,
+  AssignmentQuestionIdPublished,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -267,4 +268,5 @@ export {
   ChapterWithSimilarTitleAlreadyExist,
   TopicWithSimilarTitleAlreadyExist,
   TopicWithSimilarOrderAlreadyExist,
+  AssignmentQuestionIdPublished,
 };

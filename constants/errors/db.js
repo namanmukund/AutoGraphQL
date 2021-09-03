@@ -220,3 +220,7 @@ export const TopicWithSimilarTitleAlreadyExist = createError('TopicWithSimilarTi
 export const TopicWithSimilarOrderAlreadyExist = createError('TopicWithSimilarOrderAlreadyExist', {
   message: 'Topic with similar order already exist.',
 });
+
+export const AssignmentQuestionIdPublished = createError('AssignmentQuestionIdPublished', {
+  message: 'Can not perform the current operation as Assignment Question is published',
+});
