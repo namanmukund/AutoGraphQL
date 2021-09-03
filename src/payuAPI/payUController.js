@@ -67,7 +67,7 @@ const users = async (req, res) => {
   }
 };
 
-const productAmount = async (req, res) => {
+const productStatus = async (req, res) => {
   const digest = getHashDigest(req.query);
   log(`digest ${digest}`);
   let foundError = false;
@@ -90,7 +90,8 @@ const productAmount = async (req, res) => {
         log(`productPriceAmount ${productPriceAmount}`);
         // if discount code is passed in params
         if (discountCodeQuery) {
-          const discountRes = await callLocalGraphqlApi(fetchDiscounts(discountCodeQuery, productIdQuery));
+          const additionalFilter = `{code: "${discountCodeQuery}"}`;
+          const discountRes = await callLocalGraphqlApi(fetchDiscounts(productIdQuery, additionalFilter));
           const discountsFound = get(discountRes, 'data.discounts', []);
 
           // if discount document is found
@@ -135,8 +136,82 @@ const productAmount = async (req, res) => {
   }
 };
 
+const fetchProduct = async (req, res) => {
+  const digest = getHashDigest(req.query);
+  log(`digest ${digest}`);
+  let foundError = false;
+  let isDiscountApplicable = false;
+  let discountedAmount = 0;
+  let discountCodeFound = '';
+  let productPriceAmount = 0;
+  if (digest === req.headers['x-tekie-signature']) {
+    log('Request is Authorized');
+    // process it further
+    const productIdQuery = get(req, 'query.productId', '');
+    // if inputs are present
+    if (productIdQuery) {
+      log('productId sent in query.');
+      const productsRes = await callLocalGraphqlApi(fetchProducts(productIdQuery));
+      const productsFound = get(productsRes, 'data.products', []);
+      if (productsFound.length === 1) {
+        log('Product found.');
+        productPriceAmount = get(productsFound, '[0].price.amount', 0);
+        log(`productPriceAmount ${productPriceAmount}`);
+
+        const additionalFilter = '{isDefault: true}';
+        const discountRes = await callLocalGraphqlApi(fetchDiscounts(productIdQuery, additionalFilter));
+        const discountsFound = get(discountRes, 'data.discounts', []);
+
+        // if discount document is found
+        if (discountsFound.length === 1) {
+          const discountExpiryDateString = get(discountsFound, '[0].expiryDate', '');
+          discountCodeFound = get(discountsFound, '[0].code', '');
+          const discountExpiryDate = new Date(discountExpiryDateString);
+          const today = new Date();
+
+          // if code has not expired
+          if (!dateInPast(discountExpiryDate, today)) {
+            isDiscountApplicable = true;
+            log('discount not expired');
+            const discountPercentage = get(discountsFound, '[0].percentage', '');
+            log('discountPercentage', discountPercentage);
+            const discount = Math.round(productPriceAmount * discountPercentage * 0.01);
+            discountedAmount = productPriceAmount - discount;
+            discountedAmount = Math.round((discountedAmount + Number.EPSILON) * 100) / 100;
+          }
+        }
+
+        log(`discountedAmount ${discountedAmount}`);
+        log(`productPriceAmount ${productPriceAmount}`);
+      }
+    } else {
+      // send bad request error
+      foundError = true;
+      res.status(400).send('Valid product id not found');
+    }
+  } else {
+    foundError = true;
+    res.status(401).send('Unauthorized');
+  }
+  // reply to caller
+  if (!foundError && isDiscountApplicable) {
+    res.json({
+      status: 'ok',
+      productAmount: productPriceAmount,
+      discountCode: discountCodeFound,
+      discountedAmount,
+    });
+  } else if (!foundError && !isDiscountApplicable) {
+    res.json({
+      status: 'ok',
+      productAmount: productPriceAmount,
+    });
+  }
+};
+
 const payUController = {};
 payUController.users = users;
-payUController.productAmount = productAmount;
+payUController.productStatus = productStatus;
+payUController.fetchProduct = fetchProduct;
 
 export default payUController;

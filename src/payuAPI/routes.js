@@ -6,8 +6,12 @@ const routes = (app) => {
     .get(payUController.users);
 
   // route checks if amount corresponding to product is valid
-  app.route('/payU/productAmount')
-    .get(payUController.productAmount);
+  app.route('/payU/productStatus')
+    .get(payUController.productStatus);
+
+  // route returns amount and discount code if applicable
+  app.route('/payU/fetchProduct')
+    .get(payUController.fetchProduct);
 };
 
 export default routes;
