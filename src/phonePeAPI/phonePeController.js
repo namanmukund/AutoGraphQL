@@ -4,7 +4,7 @@ import callLocalGraphqlApi from '../api/callLocalGraphqlApi';
 import { commonUserValidation } from '../autoGenerate/graphql/preHookFunctions/validation/utils';
 import getHashDigest from './getHashDigest';
 import fetchDiscounts from './query/fetchDiscounts';
-import fetchProducts from './query/fetchProducts';
+import fetchProductsQuery from './query/fetchProducts';
 import fetchSalesOperations from './query/fetchSalesOperations';
 import fetchUsers from './query/fetchUsers';
 
@@ -136,58 +136,69 @@ const paymentStatus = async (req, res) => {
   }
 };
 
-const fetchProduct = async (req, res) => {
+const fetchProducts = async (req, res) => {
   const digest = getHashDigest(req.query);
   log(`digest ${digest}`);
   let foundError = false;
-  let isDiscountApplicable = false;
-  let discountedAmount = 0;
-  let discountCodeFound = '';
-  let productPriceAmount = 0;
+  let productsFetched = [];
   if (digest === req.headers['x-tekie-signature']) {
     log('Request is Authorized');
     // process it further
-    const productIdQuery = get(req, 'query.productId', '');
-    // if inputs are present
-    if (productIdQuery) {
-      log('productId sent in query.');
-      const productsRes = await callLocalGraphqlApi(fetchProducts(productIdQuery));
-      const productsFound = get(productsRes, 'data.products', []);
-      if (productsFound.length === 1) {
-        log('Product found.');
-        productPriceAmount = get(productsFound, '[0].price.amount', 0);
-        log(`productPriceAmount ${productPriceAmount}`);
+    // fetch products in which showOnMerchantSite field is marked true
+    const productsRes = await callLocalGraphqlApi(fetchProductsQuery());
+    const productsFound = get(productsRes, 'data.products', []);
+    if (productsFound.length > 0) {
+      log('Products found.');
+      for (const product of productsFound) {
+        log('Products found.');
+        const newProduct = {};
+        // constructing product object
+        newProduct.priceAmount = get(product, 'price.amount', 0);
+        log(`priceAmount ${newProduct.priceAmount}`);
+        newProduct.id = get(product, 'id', '');
+        newProduct.title = get(product, 'title', '');
+        newProduct.merchantDescription = get(product, 'merchantDescription', '');
+        newProduct.smallThumbnailUrl = `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'smallThumnail.uri', '')}`;
+        newProduct.mediumThumbnailUri = `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'mediumThumbnail.uri', '')}`;
+        newProduct.largeThumbnailUri = `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'largeThumnail.uri', '')}`;
+        newProduct.features = [];
+        for (const feature of get(product, 'features', [])) {
+          newProduct.features.push(get(feature, 'statement', ''));
+        }
+        newProduct.merchantDiscountCode = '';
+        newProduct.merchantDiscountAmount = 0;
+        newProduct.finalDiscountedPrice = 0;
 
-        const additionalFilter = '{isDefault: true}';
+        const additionalFilter = '{isDefaultMerchant: true}';
         const discountRes = await callLocalGraphqlApi(fetchDiscounts(productIdQuery, additionalFilter));
         const discountsFound = get(discountRes, 'data.discounts', []);
 
         // if discount document is found
         if (discountsFound.length === 1) {
           const discountExpiryDateString = get(discountsFound, '[0].expiryDate', '');
-          discountCodeFound = get(discountsFound, '[0].code', '');
+          newProduct.merchantDiscountCode = get(discountsFound, '[0].code', '');
           const discountExpiryDate = new Date(discountExpiryDateString);
           const today = new Date();
 
           // if code has not expired
           if (!dateInPast(discountExpiryDate, today)) {
-            isDiscountApplicable = true;
             log('discount not expired');
             const discountPercentage = get(discountsFound, '[0].percentage', '');
             log('discountPercentage', discountPercentage);
             const discount = Math.round(productPriceAmount * discountPercentage * 0.01);
             discountedAmount = productPriceAmount - discount;
             discountedAmount = Math.round((discountedAmount + Number.EPSILON) * 100) / 100;
+            newProduct.merchantDiscountAmount = discount;
+            newProduct.finalDiscountedPrice = discountedAmount;
           }
         }
 
         log(`discountedAmount ${discountedAmount}`);
         log(`productPriceAmount ${productPriceAmount}`);
+
+        console.log('new Product obj', newProduct);
+        productsFetched.push(newProduct);
       }
-    } else {
-      // send bad request error
-      foundError = true;
-      res.status(400).send('Valid product id not found');
     }
   } else {
     foundError = true;
@@ -209,9 +220,9 @@ const fetchProduct = async (req, res) => {
   }
 };
 
-const payUController = {};
-payUController.users = users;
-payUController.paymentStatus = paymentStatus;
-payUController.fetchProduct = fetchProduct;
+const phonePeController = {};
+phonePeController.users = users;
+phonePeController.paymentStatus = paymentStatus;
+phonePeController.fetchProducts = fetchProducts;
 
-export default payUController;
+export default phonePeController;

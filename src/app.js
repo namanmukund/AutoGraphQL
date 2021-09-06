@@ -10,7 +10,7 @@ import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
 import Raven from './Raven';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
 import { getParsedASTMap } from './autoGenerate/utils';
-import routes from './payuAPI/routes';
+import routes from './phonePeAPI/routes';
 
 const http = require('http');
 
