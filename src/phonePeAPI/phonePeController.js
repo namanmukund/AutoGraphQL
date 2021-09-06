@@ -11,7 +11,7 @@ import fetchUserMerchantsQuery from './query/fetchUserMerchants';
 
 /*
   fetchProducts endpoint
-  query parameters - nothing
+  query parameters - nil
   response - title, merchantDesc, totalSessionsCount, price, all thumbnails, merchantDiscountCode, merchantDiscountPrice, finalDiscountedPrice, features
 */
 
@@ -37,8 +37,8 @@ const fetchProducts = async (req, res) => {
         newProduct.title = get(product, 'title', '');
         newProduct.merchantDescription = get(product, 'merchantDescription', '');
         newProduct.smallThumbnailUrl = `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'smallThumnail.uri', '')}`;
-        newProduct.mediumThumbnailUri = `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'mediumThumbnail.uri', '')}`;
-        newProduct.largeThumbnailUri = `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'largeThumnail.uri', '')}`;
+        newProduct.mediumThumbnailUrl = `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'mediumThumbnail.uri', '')}`;
+        newProduct.largeThumbnailUrl = `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'largeThumbnail.uri', '')}`;
         newProduct.features = [];
         for (const feature of get(product, 'features', [])) {
           newProduct.features.push(get(feature, 'statement', ''));
@@ -99,9 +99,10 @@ const fetchProducts = async (req, res) => {
 
 /*
   fetchUsers endpoint
-  query parameters - nothing
-  response - title, merchantDesc, totalSessionsCount, price, all thumbnails, merchantDiscountCode, merchantDiscountPrice, finalDiscountedPrice, features
+  query parameters - phone, email, productId,  optional(amount), grade, parentName, studentName
+  response - true/false
 */
+
 const fetchUsers = async (req, res) => {
   const digest = getHashDigest(req.query);
   log(`digest ${digest}`);
@@ -113,6 +114,11 @@ const fetchUsers = async (req, res) => {
     // process it further
     const phoneQuery = get(req, 'query.phone', '');
     const emailQuery = get(req, 'query.email', '');
+    const productId = get(res, 'query.productId', '');
+    const amount = get(res, 'query.amount', 0);
+    const grade = get(res, 'query.grade', 0);
+    const parentName = get(res, 'query.parentName', '');
+    const studentName = get(res, 'query.studentName', '');
     const countryCodeQuery = '+91';
 
     const phoneDoc = {
@@ -151,7 +157,7 @@ const fetchUsers = async (req, res) => {
         if (userMerchantsFound.length === 1) {
           userPresentInUserMerchantCollection = true;
         }
-        
+
       }
 
       if (!userPresentInUserMerchantCollection) {
@@ -253,9 +259,85 @@ const paymentStatus = async (req, res) => {
   }
 };
 
+/*
+  postPaymentStatus endpoint
+  query parameters - amount, couponCode, productId, userId, status
+  response - isAmountValid: true/false ??
+*/
+
+const postPaymentStatus = async (req, res) => {
+  const digest = getHashDigest(req.query);
+  log(`digest ${digest}`);
+  let foundError = false;
+  let isAmountValid = false;
+  if (digest === req.headers['x-tekie-signature']) {
+    log('Request is Authorized');
+    // process it further
+    const productIdQuery = get(req, 'query.productId', '');
+    const amountQuery = get(req, 'query.amount', 0);
+    const discountCodeQuery = get(req, 'query.discountCode', '');
+
+    // if inputs are present
+    if (productIdQuery && amountQuery) {
+      log('productId & amount sent in query.');
+      const productsRes = await callLocalGraphqlApi(fetchProducts(productIdQuery));
+      const productsFound = get(productsRes, 'data.products', []);
+      if (productsFound.length === 1) {
+        log('Product found.');
+        let productPriceAmount = get(productsFound, '[0].price.amount', 0);
+        log(`productPriceAmount ${productPriceAmount}`);
+        // if discount code is passed in params
+        if (discountCodeQuery) {
+          const additionalFilter = `{code: "${discountCodeQuery}"}`;
+          const discountRes = await callLocalGraphqlApi(fetchDiscounts(productIdQuery, additionalFilter));
+          const discountsFound = get(discountRes, 'data.discounts', []);
+
+          // if discount document is found
+          if (discountsFound.length === 1) {
+            const discountExpiryDateString = get(discountsFound, '[0].expiryDate', '');
+            const discountExpiryDate = new Date(discountExpiryDateString);
+            const today = new Date();
+
+            // if code has not expired
+            if (!dateInPast(discountExpiryDate, today)) {
+              log('discount not expired');
+              const discountPercentage = get(discountsFound, '[0].percentage', '');
+              log('discountPercentage', discountPercentage);
+              const discount = Math.round(productPriceAmount * discountPercentage * 0.01);
+              productPriceAmount -= discount;
+              productPriceAmount = Math.round((productPriceAmount + Number.EPSILON) * 100) / 100;
+            }
+          }
+        }
+
+        log(`productPriceAmount ${productPriceAmount}`);
+
+        if (productPriceAmount.toString() === amountQuery) {
+          isAmountValid = true;
+        }
+      }
+    } else {
+      // send bad request error
+      foundError = true;
+      res.status(400).send('Valid product id or amount not found');
+    }
+  } else {
+    foundError = true;
+    res.status(401).send('Unauthorized');
+  }
+  // reply to caller
+  if (!foundError) {
+    res.json({
+      status: 'ok',
+      isAmountValid,
+    });
+  }
+};
+
 const phonePeController = {};
 phonePeController.fetchProducts = fetchProducts;
 phonePeController.fetchUsers = fetchUsers;
 phonePeController.paymentStatus = paymentStatus;
+phonePeController.postPaymentStatus = postPaymentStatus;
 
 export default phonePeController;

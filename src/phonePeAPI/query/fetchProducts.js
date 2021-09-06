@@ -1,7 +1,12 @@
 const fetchProducts = () => `
 {
   products(filter: {
-   showOnMerchantSite:true
+   and: [
+      {showOnMerchantSite: true},
+      {status: published},
+      {userRole: mentee},
+      {country: india}
+    ]
   }){
     id
     title

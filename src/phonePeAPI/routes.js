@@ -9,6 +9,10 @@ const routes = (app) => {
   app.route('/phonePe/paymentStatus')
     .get(phonePeController.paymentStatus);
 
+  // route checks if amount corresponding to product is valid & updates payment status
+  app.route('/phonePe/postPaymentStatus')
+    .get(phonePeController.postPaymentStatus);
+
   // route returns amount and discount code if applicable
   app.route('/phonePe/fetchProducts')
     .get(phonePeController.fetchProducts);
