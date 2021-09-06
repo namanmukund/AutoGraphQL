@@ -148,9 +148,8 @@ const fetchProducts = async (req, res) => {
     const productsRes = await callLocalGraphqlApi(fetchProductsQuery());
     const productsFound = get(productsRes, 'data.products', []);
     if (productsFound.length > 0) {
-      log('Products found.');
+      log(`${productsFound.length} Products found.`);
       for (const product of productsFound) {
-        log('Products found.');
         const newProduct = {};
         // constructing product object
         newProduct.priceAmount = get(product, 'price.amount', 0);
@@ -166,17 +165,20 @@ const fetchProducts = async (req, res) => {
           newProduct.features.push(get(feature, 'statement', ''));
         }
         newProduct.merchantDiscountCode = '';
-        newProduct.merchantDiscountAmount = 0;
-        newProduct.finalDiscountedPrice = 0;
 
         const additionalFilter = '{isDefaultMerchant: true}';
-        const discountRes = await callLocalGraphqlApi(fetchDiscounts(productIdQuery, additionalFilter));
+        const discountRes = await callLocalGraphqlApi(fetchDiscounts(get(product, 'id', ''), additionalFilter));
         const discountsFound = get(discountRes, 'data.discounts', []);
+
+        let productPriceAmount = get(product, 'price.amount', 0);
+        let discountedAmount = 0;
+        let discountCode = '';
+        let discount = 0;
 
         // if discount document is found
         if (discountsFound.length === 1) {
           const discountExpiryDateString = get(discountsFound, '[0].expiryDate', '');
-          newProduct.merchantDiscountCode = get(discountsFound, '[0].code', '');
+          discountCode = get(discountsFound, '[0].code', '');
           const discountExpiryDate = new Date(discountExpiryDateString);
           const today = new Date();
 
@@ -185,13 +187,15 @@ const fetchProducts = async (req, res) => {
             log('discount not expired');
             const discountPercentage = get(discountsFound, '[0].percentage', '');
             log('discountPercentage', discountPercentage);
-            const discount = Math.round(productPriceAmount * discountPercentage * 0.01);
+            discount = Math.round(productPriceAmount * discountPercentage * 0.01);
             discountedAmount = productPriceAmount - discount;
             discountedAmount = Math.round((discountedAmount + Number.EPSILON) * 100) / 100;
-            newProduct.merchantDiscountAmount = discount;
-            newProduct.finalDiscountedPrice = discountedAmount;
           }
         }
+
+        newProduct.merchantDiscountAmount = discount;
+        newProduct.finalDiscountedPrice = discountedAmount;
+        newProduct.merchantDiscountCode = discountCode;
 
         log(`discountedAmount ${discountedAmount}`);
         log(`productPriceAmount ${productPriceAmount}`);
@@ -205,17 +209,10 @@ const fetchProducts = async (req, res) => {
     res.status(401).send('Unauthorized');
   }
   // reply to caller
-  if (!foundError && isDiscountApplicable) {
+  if (!foundError) {
     res.json({
       status: 'ok',
-      productAmount: productPriceAmount,
-      discountCode: discountCodeFound,
-      discountedAmount,
-    });
-  } else if (!foundError && !isDiscountApplicable) {
-    res.json({
-      status: 'ok',
-      productAmount: productPriceAmount,
+      products: productsFetched
     });
   }
 };
