@@ -6,135 +6,14 @@ import getHashDigest from './getHashDigest';
 import fetchDiscounts from './query/fetchDiscounts';
 import fetchProductsQuery from './query/fetchProducts';
 import fetchSalesOperations from './query/fetchSalesOperations';
-import fetchUsers from './query/fetchUsers';
+import fetchUsersQuery from './query/fetchUsers';
+import fetchUserMerchantsQuery from './query/fetchUserMerchants';
 
-const users = async (req, res) => {
-  const digest = getHashDigest(req.query);
-  log(`digest ${digest}`);
-  let foundError = false;
-  let userExists = false;
-  let hasPaid = false;
-  if (digest === req.headers['x-tekie-signature']) {
-    log('Request is Authorized');
-    // process it further
-    const phoneQuery = get(req, 'query.phone', '');
-    const emailQuery = get(req, 'query.email', '');
-    const countryCode = get(req, 'query.countryCode', '');
-    const countryCodeQuery = `+${countryCode}`;
-
-    const phoneDoc = {
-      countryCode: countryCodeQuery,
-      number: phoneQuery,
-    };
-
-    let isValidParams = false;
-
-    try {
-      isValidParams = commonUserValidation({ email: emailQuery, phone: phoneDoc, name: '' });
-    } catch (err) {
-      foundError = true;
-      log('Phone/Country Code/Email Invalid');
-    }
-
-    if (phoneQuery && emailQuery && isValidParams) {
-      log('Phone and Email validated.');
-      const usersRes = await callLocalGraphqlApi(fetchUsers(phoneQuery, emailQuery));
-      const usersFound = get(usersRes, 'data.users', []);
-      if (usersFound.length === 1) {
-        log('User found.');
-        userExists = true;
-        const clientId = get(usersFound, '[0].parentProfile.children[0].user.id', '');
-        const salesOperationsRes = await callLocalGraphqlApi(fetchSalesOperations(clientId));
-        const salesOperations = get(salesOperationsRes, 'data.salesOperations', []);
-        hasPaid = salesOperations.length > 0;
-      }
-    } else {
-      // send bad request error
-      foundError = true;
-      res.status(400).send('Valid phone number or country code or email address not found');
-    }
-  } else {
-    foundError = true;
-    res.status(401).send('Unauthorized');
-  }
-  // reply to caller
-  if (!foundError) {
-    res.json({
-      status: 'ok',
-      userExists,
-      hasPaid,
-    });
-  }
-};
-
-const paymentStatus = async (req, res) => {
-  const digest = getHashDigest(req.query);
-  log(`digest ${digest}`);
-  let foundError = false;
-  let isAmountValid = false;
-  if (digest === req.headers['x-tekie-signature']) {
-    log('Request is Authorized');
-    // process it further
-    const productIdQuery = get(req, 'query.productId', '');
-    const amountQuery = get(req, 'query.amount', 0);
-    const discountCodeQuery = get(req, 'query.discountCode', '');
-
-    // if inputs are present
-    if (productIdQuery && amountQuery) {
-      log('productId & amount sent in query.');
-      const productsRes = await callLocalGraphqlApi(fetchProducts(productIdQuery));
-      const productsFound = get(productsRes, 'data.products', []);
-      if (productsFound.length === 1) {
-        log('Product found.');
-        let productPriceAmount = get(productsFound, '[0].price.amount', 0);
-        log(`productPriceAmount ${productPriceAmount}`);
-        // if discount code is passed in params
-        if (discountCodeQuery) {
-          const additionalFilter = `{code: "${discountCodeQuery}"}`;
-          const discountRes = await callLocalGraphqlApi(fetchDiscounts(productIdQuery, additionalFilter));
-          const discountsFound = get(discountRes, 'data.discounts', []);
-
-          // if discount document is found
-          if (discountsFound.length === 1) {
-            const discountExpiryDateString = get(discountsFound, '[0].expiryDate', '');
-            const discountExpiryDate = new Date(discountExpiryDateString);
-            const today = new Date();
-
-            // if code has not expired
-            if (!dateInPast(discountExpiryDate, today)) {
-              log('discount not expired');
-              const discountPercentage = get(discountsFound, '[0].percentage', '');
-              log('discountPercentage', discountPercentage);
-              const discount = Math.round(productPriceAmount * discountPercentage * 0.01);
-              productPriceAmount -= discount;
-              productPriceAmount = Math.round((productPriceAmount + Number.EPSILON) * 100) / 100;
-            }
-          }
-        }
-
-        log(`productPriceAmount ${productPriceAmount}`);
-
-        if (productPriceAmount.toString() === amountQuery) {
-          isAmountValid = true;
-        }
-      }
-    } else {
-      // send bad request error
-      foundError = true;
-      res.status(400).send('Valid product id or amount not found');
-    }
-  } else {
-    foundError = true;
-    res.status(401).send('Unauthorized');
-  }
-  // reply to caller
-  if (!foundError) {
-    res.json({
-      status: 'ok',
-      isAmountValid,
-    });
-  }
-};
+/*
+  fetchProducts endpoint
+  query parameters - nothing
+  response - title, merchantDesc, totalSessionsCount, price, all thumbnails, merchantDiscountCode, merchantDiscountPrice, finalDiscountedPrice, features
+*/
 
 const fetchProducts = async (req, res) => {
   const digest = getHashDigest(req.query);
@@ -217,9 +96,166 @@ const fetchProducts = async (req, res) => {
   }
 };
 
+
+/*
+  fetchUsers endpoint
+  query parameters - nothing
+  response - title, merchantDesc, totalSessionsCount, price, all thumbnails, merchantDiscountCode, merchantDiscountPrice, finalDiscountedPrice, features
+*/
+const fetchUsers = async (req, res) => {
+  const digest = getHashDigest(req.query);
+  log(`digest ${digest}`);
+  let foundError = false;
+  let userExists = false;
+  let hasPaid = false;
+  if (digest === req.headers['x-tekie-signature']) {
+    log('Request is Authorized');
+    // process it further
+    const phoneQuery = get(req, 'query.phone', '');
+    const emailQuery = get(req, 'query.email', '');
+    const countryCodeQuery = '+91';
+
+    const phoneDoc = {
+      countryCode: countryCodeQuery,
+      number: phoneQuery,
+    };
+
+    let isValidParams = false;
+
+    try {
+      isValidParams = commonUserValidation({ email: emailQuery, phone: phoneDoc, name: '' });
+    } catch (err) {
+      foundError = true;
+      log('Phone/Email Invalid');
+    }
+
+    if (phoneQuery && emailQuery && isValidParams) {
+      log('Phone and Email validated.');
+      const usersRes = await callLocalGraphqlApi(fetchUsersQuery(phoneQuery, emailQuery));
+      const usersFound = get(usersRes, 'data.users', []);
+
+      // if user is found in database, check if user is present in userMerchant collection, if not, then add it
+      // if user is not found in database, add to userMerchant collection
+      let userPresentInUserMerchantCollection = false;
+      if (usersFound.length === 1) {
+        log('User found in User collection.');
+        userExists = true;
+        const clientId = get(usersFound, '[0].parentProfile.children[0].user.id', '');
+        const salesOperationsRes = await callLocalGraphqlApi(fetchSalesOperations(clientId));
+        const salesOperations = get(salesOperationsRes, 'data.salesOperations', []);
+        hasPaid = salesOperations.length > 0;
+
+        const userMerchantsRes = await callLocalGraphqlApi(fetchUserMerchantsQuery(phoneQuery, emailQuery));
+        const userMerchantsFound = get(userMerchantsRes, 'data.userMerchants', []);
+
+        if (userMerchantsFound.length === 1) {
+          userPresentInUserMerchantCollection = true;
+        }
+        
+      }
+
+      if (!userPresentInUserMerchantCollection) {
+        // add to userMerchant collection
+
+      }
+
+    } else {
+      // send bad request error
+      foundError = true;
+      res.status(400).send('Valid phone number or country code or email address not found');
+    }
+  } else {
+    foundError = true;
+    res.status(401).send('Unauthorized');
+  }
+  // reply to caller
+  if (!foundError) {
+    res.json({
+      status: 'ok',
+      userExists,
+      hasPaid,
+    });
+  }
+};
+
+/*
+  paymentStatus endpoint
+  query parameters - amount, couponCode, productId, userId
+  response - isAmountValid: true/false
+*/
+
+const paymentStatus = async (req, res) => {
+  const digest = getHashDigest(req.query);
+  log(`digest ${digest}`);
+  let foundError = false;
+  let isAmountValid = false;
+  if (digest === req.headers['x-tekie-signature']) {
+    log('Request is Authorized');
+    // process it further
+    const productIdQuery = get(req, 'query.productId', '');
+    const amountQuery = get(req, 'query.amount', 0);
+    const discountCodeQuery = get(req, 'query.discountCode', '');
+
+    // if inputs are present
+    if (productIdQuery && amountQuery) {
+      log('productId & amount sent in query.');
+      const productsRes = await callLocalGraphqlApi(fetchProducts(productIdQuery));
+      const productsFound = get(productsRes, 'data.products', []);
+      if (productsFound.length === 1) {
+        log('Product found.');
+        let productPriceAmount = get(productsFound, '[0].price.amount', 0);
+        log(`productPriceAmount ${productPriceAmount}`);
+        // if discount code is passed in params
+        if (discountCodeQuery) {
+          const additionalFilter = `{code: "${discountCodeQuery}"}`;
+          const discountRes = await callLocalGraphqlApi(fetchDiscounts(productIdQuery, additionalFilter));
+          const discountsFound = get(discountRes, 'data.discounts', []);
+
+          // if discount document is found
+          if (discountsFound.length === 1) {
+            const discountExpiryDateString = get(discountsFound, '[0].expiryDate', '');
+            const discountExpiryDate = new Date(discountExpiryDateString);
+            const today = new Date();
+
+            // if code has not expired
+            if (!dateInPast(discountExpiryDate, today)) {
+              log('discount not expired');
+              const discountPercentage = get(discountsFound, '[0].percentage', '');
+              log('discountPercentage', discountPercentage);
+              const discount = Math.round(productPriceAmount * discountPercentage * 0.01);
+              productPriceAmount -= discount;
+              productPriceAmount = Math.round((productPriceAmount + Number.EPSILON) * 100) / 100;
+            }
+          }
+        }
+
+        log(`productPriceAmount ${productPriceAmount}`);
+
+        if (productPriceAmount.toString() === amountQuery) {
+          isAmountValid = true;
+        }
+      }
+    } else {
+      // send bad request error
+      foundError = true;
+      res.status(400).send('Valid product id or amount not found');
+    }
+  } else {
+    foundError = true;
+    res.status(401).send('Unauthorized');
+  }
+  // reply to caller
+  if (!foundError) {
+    res.json({
+      status: 'ok',
+      isAmountValid,
+    });
+  }
+};
+
 const phonePeController = {};
-phonePeController.users = users;
-phonePeController.paymentStatus = paymentStatus;
 phonePeController.fetchProducts = fetchProducts;
+phonePeController.fetchUsers = fetchUsers;
+phonePeController.paymentStatus = paymentStatus;
 
 export default phonePeController;

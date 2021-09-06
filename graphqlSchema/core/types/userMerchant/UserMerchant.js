@@ -1,16 +1,17 @@
-import { TBA } from '../../../../constants';
+import { TBA, TMS } from '../../../../constants';
 
 const UserMerchant = `
   type UserMerchant @model
   @appPermissions(
     permissions:[
-      { appName: "${TBA}" operations: "*" }
+      { appName: "${TBA}" operations: "*" },
+      { appName: "${TMS}" operations: "*" }
       ], 
     rule: allow
   )
   {
     id: String!
-    parentPhone: String
+    parentPhone: Phone @uniqueOrEmpty
     parentEmail: String
     productId: String!
     merchantCampaignType: String
