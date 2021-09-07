@@ -63,13 +63,14 @@ const getUserCoursesQuery = (userId) => `
 }
 `;
 
-const getUserCourseCompletion = (userId) => `
-{
-  userCourseCompletions(filter: { user_some: { id: "${userId}" } }) {
-    id
-  }
-}
-`;
+/** Not Required For Now */
+// const getUserCourseCompletion = (userId) => `
+// {
+//   userCourseCompletions(filter: { user_some: { id: "${userId}" } }) {
+//     id
+//   }
+// }
+// `;
 
 const validateIncomingFields = (fieldsFetched = {}) => {
   const whiteListedFields = [
@@ -103,13 +104,14 @@ const getUserCourses = (async (root, params, context, info) => {
         newPythonCourseExists = true;
       }
       if (get(userCourseDoc, 'id') === OLD_COURSE_ID) {
+        /** Not Required For Now */
         // eslint-disable-next-line no-await-in-loop
-        const userCourseCompletionRes = await callLocalGraphqlApi(getUserCourseCompletion(userId));
-        const userCourseCompletionId = get(userCourseCompletionRes, 'data.userCourseCompletions[0].id', null);
-        if (userCourseCompletionId) {
-          oldPythonCourseExists = true;
-          updatedCourseArr.push(userCourseDoc);
-        }
+        // const userCourseCompletionRes = await callLocalGraphqlApi(getUserCourseCompletion(userId));
+        // const userCourseCompletionId = get(userCourseCompletionRes, 'data.userCourseCompletions[0].id', null);
+        // if (userCourseCompletionId) {
+        oldPythonCourseExists = true;
+        updatedCourseArr.push(userCourseDoc);
+        // }
       } else {
         updatedCourseArr.push(userCourseDoc);
       }
