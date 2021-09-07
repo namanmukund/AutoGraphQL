@@ -8,6 +8,7 @@ import fetchProductsQuery from './query/fetchProducts';
 import fetchSalesOperations from './query/fetchSalesOperations';
 import fetchUsersQuery from './query/fetchUsers';
 import fetchUserMerchantsQuery from './query/fetchUserMerchants';
+import addUserMerchant from './mutation/addUserMerchant';
 
 /*
   fetchProducts endpoint
@@ -33,7 +34,7 @@ const fetchProducts = async (req, res) => {
         // constructing product object
         newProduct.priceAmount = get(product, 'price.amount', 0);
         log(`priceAmount ${newProduct.priceAmount}`);
-        newProduct.id = get(product, 'id', '');
+        // newProduct.id = get(product, 'id', '');
         newProduct.title = get(product, 'title', '');
         newProduct.merchantDescription = get(product, 'merchantDescription', '');
         newProduct.smallThumbnailUrl = `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'smallThumnail.uri', '')}`;
@@ -43,7 +44,6 @@ const fetchProducts = async (req, res) => {
         for (const feature of get(product, 'features', [])) {
           newProduct.features.push(get(feature, 'statement', ''));
         }
-        newProduct.merchantDiscountCode = '';
 
         const additionalFilter = '{isDefaultMerchant: true}';
         const discountRes = await callLocalGraphqlApi(fetchDiscounts(get(product, 'id', ''), additionalFilter));
@@ -114,11 +114,11 @@ const fetchUsers = async (req, res) => {
     // process it further
     const phoneQuery = get(req, 'query.phone', '');
     const emailQuery = get(req, 'query.email', '');
-    const productId = get(res, 'query.productId', '');
-    const amount = get(res, 'query.amount', 0);
-    const grade = get(res, 'query.grade', 0);
-    const parentName = get(res, 'query.parentName', '');
-    const studentName = get(res, 'query.studentName', '');
+    const productId = get(req, 'query.productId', '');
+    const amount = get(req, 'query.amount', 0);
+    const grade = get(req, 'query.grade', 0);
+    const parentName = get(req, 'query.parentName', '');
+    const studentName = get(req, 'query.studentName', '');
     const countryCodeQuery = '+91';
 
     const phoneDoc = {
@@ -162,7 +162,7 @@ const fetchUsers = async (req, res) => {
 
       if (!userPresentInUserMerchantCollection) {
         // add to userMerchant collection
-
+        const addUserMerchantRes = await callLocalGraphqlApi(addUserMerchant(get(req, 'query', {})));
       }
 
     } else {
@@ -202,8 +202,18 @@ const paymentStatus = async (req, res) => {
     const amountQuery = get(req, 'query.amount', 0);
     const discountCodeQuery = get(req, 'query.discountCode', '');
 
+    // check if userMerchant document is present and paymentStatus is not paid
+    const userMerchantsRes = await callLocalGraphqlApi(fetchUserMerchantsQuery('', '', userMerchantIdQuery));
+    const userMerchantsFound = get(userMerchantsRes, 'data.userMerchants', []);
+
+    let isPaymentStatusPaid = false;
+    if (userMerchantsFound.length === 1 && get(userMerchantsFound, '[0].paymentStatus', '') === 'paid') {
+      // here we proceed to ad
+      isPaymentStatusPaid = true;
+    }
+
     // if inputs are present
-    if (productIdQuery && amountQuery) {
+    if (productIdQuery && amountQuery && !isPaymentStatusPaid) {
       log('productId & amount sent in query.');
       const productsRes = await callLocalGraphqlApi(fetchProducts(productIdQuery));
       const productsFound = get(productsRes, 'data.products', []);
@@ -237,7 +247,7 @@ const paymentStatus = async (req, res) => {
 
         log(`productPriceAmount ${productPriceAmount}`);
 
-        if (productPriceAmount.toString() === amountQuery) {
+        if (Math.abs(productPriceAmount - Number.parseInt(amountQuery)) <= 2) {
           isAmountValid = true;
         }
       }
@@ -276,9 +286,20 @@ const postPaymentStatus = async (req, res) => {
     const productIdQuery = get(req, 'query.productId', '');
     const amountQuery = get(req, 'query.amount', 0);
     const discountCodeQuery = get(req, 'query.discountCode', '');
+    const userMerchantIdQuery = get(req, 'query.userId', '');
+
+    // check if userMerchant document is present and paymentStatus is not paid
+    const userMerchantsRes = await callLocalGraphqlApi(fetchUserMerchantsQuery('', '', userMerchantIdQuery));
+    const userMerchantsFound = get(userMerchantsRes, 'data.userMerchants', []);
+
+    let isPaymentStatusPaid = false;
+    if (userMerchantsFound.length === 1 && get(userMerchantsFound, '[0].paymentStatus', '') === 'paid') {
+      // here we proceed to ad
+      isPaymentStatusPaid = true;
+    }
 
     // if inputs are present
-    if (productIdQuery && amountQuery) {
+    if (productIdQuery && amountQuery && !isPaymentStatusPaid) {
       log('productId & amount sent in query.');
       const productsRes = await callLocalGraphqlApi(fetchProducts(productIdQuery));
       const productsFound = get(productsRes, 'data.products', []);
@@ -312,7 +333,7 @@ const postPaymentStatus = async (req, res) => {
 
         log(`productPriceAmount ${productPriceAmount}`);
 
-        if (productPriceAmount.toString() === amountQuery) {
+        if (Math.abs(productPriceAmount - Number.parseInt(amountQuery)) <= 2) {
           isAmountValid = true;
         }
       }
