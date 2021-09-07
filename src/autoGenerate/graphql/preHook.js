@@ -102,6 +102,8 @@ import updateTopicValidation from './preHookFunctions/validation/updateTopicVali
 import deleteVideoValidation from './preHookFunctions/validation/deleteVideoValidation';
 import deleteAssignmentQuestionValidation from './preHookFunctions/validation/deleteAssignmentQuestionValidation';
 import deleteBlockBasedProjectValidation from './preHookFunctions/validation/deleteBlockBasedProjectValidation';
+import addAssignmentQuestionValidation from './preHookFunctions/validation/addAssignmentQuestionValidation';
+import updateAssignmentQuestionValidation from './preHookFunctions/validation/updateAssignmentQuestionValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -765,6 +767,14 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'deleteBlockBasedProject': {
       await deleteBlockBasedProjectValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addAssignmentQuestion': {
+      await addAssignmentQuestionValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateAssignmentQuestion': {
+      await updateAssignmentQuestionValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'addSchool': {

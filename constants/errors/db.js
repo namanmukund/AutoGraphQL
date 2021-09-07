@@ -228,3 +228,7 @@ export const AssignmentQuestionIdPublished = createError('AssignmentQuestionIdPu
 export const BlockBasedProjectIsPublished = createError('BlockBasedProjectIsPublished', {
   message: 'Can not perform the current operation as Block Based is published',
 });
+
+export const AssignmentWithSimilarStatementAlreadyExist = createError('AssignmentWithSimilarStatementAlreadyExist', {
+  message: 'Assignment with similar statement already exist.',
+});
