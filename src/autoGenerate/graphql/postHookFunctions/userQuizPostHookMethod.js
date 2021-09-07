@@ -13,6 +13,15 @@ const topicQuery = (topicId) => `
     topic(id:"${topicId}"){
       id
       order
+      topicQuestions {
+        question {
+          id
+          order
+          assessmentType
+          status
+        }
+        order
+      }
       questions(filter:{
         and:[
           {
@@ -131,7 +140,17 @@ const userQuizPostHookMethod = async (input, params) => {
   // this logic will be changed based on question sets
   let quizQuery = 'quiz:[';
   if (topicInfo) {
-    const quizQuestionsinTopic = get(topicInfo, 'questions');
+    let quizQuestionsinTopic;
+    if (courseId && courseId !== OLD_COURSE_ID) {
+      quizQuestionsinTopic = get(topicInfo, 'topicQuestions', [])
+        .filter((topicQ) => ((get(topicQ, 'question.status') === PUBLISHED) && get(topicQ, 'question.assessmentType') === 'quiz'))
+        .map((topicQ) => ({
+          ...get(topicQ, 'question', {}),
+          order: get(topicQ, 'order'),
+        }));
+    } else {
+      quizQuestionsinTopic = get(topicInfo, 'questions');
+    }
     quizQuestionsinTopic.forEach((quizQuestion) => {
       const {
         id: quizQuestionId,
