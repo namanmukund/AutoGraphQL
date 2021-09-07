@@ -9,6 +9,7 @@ import fetchSalesOperations from './query/fetchSalesOperations';
 import fetchUsersQuery from './query/fetchUsers';
 import fetchUserMerchantsQuery from './query/fetchUserMerchants';
 import addUserMerchant from './mutation/addUserMerchant';
+import updateUserMerchant from './mutation/updateUserMerchant';
 
 /*
   fetchProducts endpoint
@@ -112,6 +113,7 @@ const fetchUsers = async (req, res) => {
   let message = '';
   let userMerchantCreatedId = '';
   let proceedWithPayment = true;
+  let campaignType = '';
   if (digest === req.headers['x-tekie-signature']) {
     log('Request is Authorized');
     // process it further
@@ -119,7 +121,7 @@ const fetchUsers = async (req, res) => {
     const emailQuery = get(req, 'query.email', '');
     const amount = get(req, 'query.amount', 0);
     // campaign type will be set based on amount sent
-    let campaignType = amount > 1 ? 'purchase' : 'booking';
+    campaignType = amount > 1 ? 'purchase' : 'booking';
     
     const countryCodeQuery = '+91';
 
@@ -186,7 +188,7 @@ const fetchUsers = async (req, res) => {
     message = 'User has already paid.'
   } else if (campaignType === 'booking' && userExists) {
     proceedWithPayment = false;
-    // TODO : decide what message to send
+    message = 'User is present.';
   }
   // reply to caller
   if (!foundError) {
@@ -209,27 +211,46 @@ const paymentStatus = async (req, res) => {
   log(`digest ${digest}`);
   let foundError = false;
   let isAmountValid = false;
+  let pmtStatus = true;
   if (digest === req.headers['x-tekie-signature']) {
     log('Request is Authorized');
     // process it further
     const productIdQuery = get(req, 'query.productId', '');
     const amountQuery = get(req, 'query.amount', 0);
     const discountCodeQuery = get(req, 'query.discountCode', '');
+    const transactionId = get(req, 'query.transactionId', '');
+    const userMerchantIdQuery = get(req, 'query.userId', '');
 
     // check if userMerchant document is present and paymentStatus is not paid
     const userMerchantsRes = await callLocalGraphqlApi(fetchUserMerchantsQuery('', '', userMerchantIdQuery));
     const userMerchantsFound = get(userMerchantsRes, 'data.userMerchants', []);
 
     let isPaymentStatusPaid = false;
-    if (userMerchantsFound.length === 1 && get(userMerchantsFound, '[0].paymentStatus', '') === 'paid') {
-      // here we proceed to ad
+    const userMerchantDocFound = userMerchantsFound.length === 1;
+    if (userMerchantDocFound && get(userMerchantsFound, '[0].paymentStatus', false)) {
       isPaymentStatusPaid = true;
     }
 
+    if (userMerchantDocFound) {
+      if (isPaymentStatusPaid) {
+        // we set this as false since we want to instruct the caller to not collect this payment since it is already paid
+        pmtStatus = false;
+        log('Payment status is Paid.');
+      } else {
+        const userMerchantId = get(userMerchantsFound, '[0].id', '');
+        // update transaction Id in userMerchant doc
+        const input = `{
+        merchantTransactionId: "${transactionId}"
+      }`;
+        await callLocalGraphqlApi(updateUserMerchant(userMerchantId, input));
+        log(`Updated user merchant doc ${userMerchantId} with transaction id ${transactionId}`);
+      }
+    }
+
     // if inputs are present
-    if (productIdQuery && amountQuery && !isPaymentStatusPaid) {
+    if (productIdQuery && amountQuery && userMerchantDocFound && !isPaymentStatusPaid) {
       log('productId & amount sent in query.');
-      const productsRes = await callLocalGraphqlApi(fetchProducts(productIdQuery));
+      const productsRes = await callLocalGraphqlApi(fetchProductsQuery(productIdQuery));
       const productsFound = get(productsRes, 'data.products', []);
       if (productsFound.length === 1) {
         log('Product found.');
@@ -260,7 +281,7 @@ const paymentStatus = async (req, res) => {
         }
 
         log(`productPriceAmount ${productPriceAmount}`);
-
+        log(`Absolute difference in price ${Math.abs(productPriceAmount - Number.parseInt(amountQuery))}`);
         if (Math.abs(productPriceAmount - Number.parseInt(amountQuery)) <= 2) {
           isAmountValid = true;
         }
@@ -278,7 +299,7 @@ const paymentStatus = async (req, res) => {
   if (!foundError) {
     res.json({
       status: 'ok',
-      isAmountValid,
+      paymentStatus: isAmountValid && pmtStatus,
     });
   }
 };
@@ -294,28 +315,46 @@ const verifyPaymentStatus = async (req, res) => {
   log(`digest ${digest}`);
   let foundError = false;
   let isAmountValid = false;
+  let pmtStatus = true;
   if (digest === req.headers['x-tekie-signature']) {
     log('Request is Authorized');
     // process it further
     const productIdQuery = get(req, 'query.productId', '');
     const amountQuery = get(req, 'query.amount', 0);
     const discountCodeQuery = get(req, 'query.discountCode', '');
+    const transactionId = get(req, 'query.transactionId', '');
     const userMerchantIdQuery = get(req, 'query.userId', '');
 
     // check if userMerchant document is present and paymentStatus is not paid
     const userMerchantsRes = await callLocalGraphqlApi(fetchUserMerchantsQuery('', '', userMerchantIdQuery));
-    const userMerchantsFound = get(userMerchantsRes, 'data.userMerchants', []);
 
     let isPaymentStatusPaid = false;
-    if (userMerchantsFound.length === 1 && get(userMerchantsFound, '[0].paymentStatus', '') === 'paid') {
-      // here we proceed to add
+    const userMerchantDocFound = userMerchantsFound.length === 1;
+    const userMerchantsFound = get(userMerchantsRes, 'data.userMerchants', []);
+    if (userMerchantDocFound && get(userMerchantsFound, '[0].paymentStatus', false)) {
       isPaymentStatusPaid = true;
     }
 
+    if (userMerchantDocFound) {
+      if (isPaymentStatusPaid) {
+        // we set this as false since we want to instruct the caller to not collect this payment since it is already paid
+        pmtStatus = false;
+        log('Payment status is Paid.');
+      } else {
+        const userMerchantId = get(userMerchantsFound, '[0].id', '');
+        // update transaction Id in userMerchant doc
+        const input = `{
+        merchantTransactionId: "${transactionId}"
+      }`;
+        await callLocalGraphqlApi(updateUserMerchant(userMerchantId, input));
+        log(`Updated user merchant doc ${userMerchantId} with transaction id ${transactionId}`);
+      }
+    }
+
     // if inputs are present
-    if (productIdQuery && amountQuery && !isPaymentStatusPaid) {
+    if (productIdQuery && amountQuery && userMerchantDocFound && !isPaymentStatusPaid) {
       log('productId & amount sent in query.');
-      const productsRes = await callLocalGraphqlApi(fetchProducts(productIdQuery));
+      const productsRes = await callLocalGraphqlApi(fetchProductsQuery(productIdQuery));
       const productsFound = get(productsRes, 'data.products', []);
       if (productsFound.length === 1) {
         log('Product found.');
@@ -364,7 +403,7 @@ const verifyPaymentStatus = async (req, res) => {
   if (!foundError) {
     res.json({
       status: 'ok',
-      isAmountValid,
+      paymentStatus: isAmountValid && pmtStatus,
     });
   }
 };
