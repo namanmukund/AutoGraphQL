@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import { log } from '../../../../../../utils';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 const fetchLatestMentorMenteeSession = async (clientId) => {
@@ -69,17 +70,19 @@ const updateCourseInSalesOperationScript = async () => {
   for (const operation of sOperations) {
     const clientId = get(operation, 'client.id', '');
     const sOperationId = get(operation, 'id', '');
-    console.log(`Working on sales operation id (${sOperationId})`);
+    log(`Working on sales operation id (${sOperationId})`);
     const sOperationCourseId = get(operation, 'course.id', '');
     // if student's userId is present and course is not connected to sOperation, proceed
     if (clientId && !sOperationCourseId) {
-      console.log(`Fetching MMS for client id ${clientId}`);
+      log(`Fetching MMS for client id ${clientId}`);
+      // eslint-disable-next-line no-await-in-loop
       const latestMMSession = await fetchLatestMentorMenteeSession(clientId);
-      console.log('latestMMSession', latestMMSession);
+      log('latestMMSession', latestMMSession);
       const courseId = get(latestMMSession, 'course.id', '');
       if (courseId) {
+        // eslint-disable-next-line no-await-in-loop
         await updateSalesOperation(sOperationId, courseId);
-        console.log(`updated sales operation (${sOperationId}) with course id (${courseId})`)
+        log(`updated sales operation (${sOperationId}) with course id (${courseId})`);
       }
     }
   }

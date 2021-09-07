@@ -1,5 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import updateCourseInSalesOperationScript from '../scriptMethods/updateCourseinSalesOperationScript';
+// import updateCourseInSalesOperationScript from '../scriptMethods/updateCourseinSalesOperationScript';
 // import updateQuestionsWithCorrectPositions from '../scriptMethods/updateQuestionsWithCorrectPositions';
 // import updateQuestionsWithHints from '../scriptMethods/updateQuestionsWithHints';
 // import updateSchoolCampaignCodeInSchool from '../scriptMethods/updateSchoolCampaignCodeInSchool';
@@ -19,7 +19,7 @@ const temporaryScript = (async (root, params, context) => {
   /*
   Add script functions
    */
-  await updateCourseInSalesOperationScript();
+  // await updateCourseInSalesOperationScript();
   // await updateSchoolCampaignCodeInSchool();
   // await generateSessionReport(60);
   // await updateTopicsInAssignment();

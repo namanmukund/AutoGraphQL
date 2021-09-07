@@ -22,7 +22,7 @@ const fetchUserMerchants = (phone, email, id) => `
     finalPreDiscountedPrice
     finalPostDiscountedPrice
     paymentStatus
-    transactionId
+    merchantTransactionId
   }
 }
 `;
