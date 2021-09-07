@@ -212,6 +212,7 @@ const paymentStatus = async (req, res) => {
   let foundError = false;
   let isAmountValid = false;
   let pmtStatus = true;
+  let message = '';
   if (digest === req.headers['x-tekie-signature']) {
     log('Request is Authorized');
     // process it further
@@ -234,6 +235,7 @@ const paymentStatus = async (req, res) => {
     if (userMerchantDocFound) {
       if (isPaymentStatusPaid) {
         // we set this as false since we want to instruct the caller to not collect this payment since it is already paid
+        message = 'Payment is already made.'
         pmtStatus = false;
         log('Payment status is Paid.');
       } else {
@@ -300,6 +302,7 @@ const paymentStatus = async (req, res) => {
     res.json({
       status: 'ok',
       paymentStatus: isAmountValid && pmtStatus,
+      message
     });
   }
 };
@@ -316,6 +319,7 @@ const verifyPaymentStatus = async (req, res) => {
   let foundError = false;
   let isAmountValid = false;
   let pmtStatus = true;
+  let message = '';
   if (digest === req.headers['x-tekie-signature']) {
     log('Request is Authorized');
     // process it further
@@ -334,10 +338,12 @@ const verifyPaymentStatus = async (req, res) => {
     if (userMerchantDocFound && get(userMerchantsFound, '[0].paymentStatus', false)) {
       isPaymentStatusPaid = true;
     }
+    const transactionIdFound = get(userMerchantsFound, '[0].transactionId', '');
 
     if (userMerchantDocFound) {
-      if (isPaymentStatusPaid) {
+      if (isPaymentStatusPaid || !transactionIdFound) {
         // we set this as false since we want to instruct the caller to not collect this payment since it is already paid
+        message = (isPaymentStatusPaid) ? 'Payment is already made.' : 'Transaction Id not stored in database.';
         pmtStatus = false;
         log('Payment status is Paid.');
       } else {
@@ -404,6 +410,7 @@ const verifyPaymentStatus = async (req, res) => {
     res.json({
       status: 'ok',
       paymentStatus: isAmountValid && pmtStatus,
+      message
     });
   }
 };
