@@ -66,6 +66,7 @@ import {
   TopicWithSimilarOrderAlreadyExist,
   AssignmentQuestionIdPublished,
   BlockBasedProjectIsPublished,
+  AssignmentWithSimilarStatementAlreadyExist,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -271,4 +272,5 @@ export {
   TopicWithSimilarOrderAlreadyExist,
   AssignmentQuestionIdPublished,
   BlockBasedProjectIsPublished,
+  AssignmentWithSimilarStatementAlreadyExist,
 };
