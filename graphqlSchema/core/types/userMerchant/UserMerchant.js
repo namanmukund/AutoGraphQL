@@ -24,7 +24,8 @@ const UserMerchant = `
     merchantDiscoutPrice: Int
     finalPreDiscountedPrice: Int
     finalPostDiscountedPrice: Int
-    paymentStatus: String! @defaultValue(value: "unpaid")
+    paymentStatus: Boolean! @defaultValue(value: "false")
+    merchantTransactionId: String
   }
 `;
 

@@ -99,8 +99,8 @@ const fetchProducts = async (req, res) => {
 
 /*
   fetchUsers endpoint
-  query parameters - phone, email, productId,  optional(amount), grade, parentName, studentName
-  response - true/false
+  query parameters - phone, email, productId,  amount, grade, parentName, studentName
+  response - true/false, message, userMerchantId
 */
 
 const fetchUsers = async (req, res) => {
@@ -109,16 +109,18 @@ const fetchUsers = async (req, res) => {
   let foundError = false;
   let userExists = false;
   let hasPaid = false;
+  let message = '';
+  let userMerchantCreatedId = '';
+  let proceedWithPayment = true;
   if (digest === req.headers['x-tekie-signature']) {
     log('Request is Authorized');
     // process it further
     const phoneQuery = get(req, 'query.phone', '');
     const emailQuery = get(req, 'query.email', '');
-    const productId = get(req, 'query.productId', '');
     const amount = get(req, 'query.amount', 0);
-    const grade = get(req, 'query.grade', 0);
-    const parentName = get(req, 'query.parentName', '');
-    const studentName = get(req, 'query.studentName', '');
+    // campaign type will be set based on amount sent
+    let campaignType = amount > 1 ? 'purchase' : 'booking';
+    
     const countryCodeQuery = '+91';
 
     const phoneDoc = {
@@ -127,7 +129,7 @@ const fetchUsers = async (req, res) => {
     };
 
     let isValidParams = false;
-
+    // validating phone and email input
     try {
       isValidParams = commonUserValidation({ email: emailQuery, phone: phoneDoc, name: '' });
     } catch (err) {
@@ -147,24 +149,29 @@ const fetchUsers = async (req, res) => {
         log('User found in User collection.');
         userExists = true;
         const clientId = get(usersFound, '[0].parentProfile.children[0].user.id', '');
-        const salesOperationsRes = await callLocalGraphqlApi(fetchSalesOperations(clientId));
-        const salesOperations = get(salesOperationsRes, 'data.salesOperations', []);
-        hasPaid = salesOperations.length > 0;
+
+        // if campaignType = 'purchase', check if sales operation lead status = won
+        if (campaignType === 'purchase') {
+          const salesOperationsRes = await callLocalGraphqlApi(fetchSalesOperations(clientId));
+          const salesOperations = get(salesOperationsRes, 'data.salesOperations', []);
+          hasPaid = salesOperations.length > 0;
+        }
 
         const userMerchantsRes = await callLocalGraphqlApi(fetchUserMerchantsQuery(phoneQuery, emailQuery));
         const userMerchantsFound = get(userMerchantsRes, 'data.userMerchants', []);
 
         if (userMerchantsFound.length === 1) {
+          log(`User found in User Merchant collection with id ${get(userMerchantsFound, '[0].id', '')}.`);
           userPresentInUserMerchantCollection = true;
+          userMerchantCreatedId = get(userMerchantsFound, '[0].id', '');
         }
-
       }
-
       if (!userPresentInUserMerchantCollection) {
         // add to userMerchant collection
         const addUserMerchantRes = await callLocalGraphqlApi(addUserMerchant(get(req, 'query', {})));
+        userMerchantCreatedId = get(addUserMerchantRes, 'id', '');
+        log(`Added user merchant of id ${userMerchantCreatedId}`)
       }
-
     } else {
       // send bad request error
       foundError = true;
@@ -174,12 +181,19 @@ const fetchUsers = async (req, res) => {
     foundError = true;
     res.status(401).send('Unauthorized');
   }
+  if (campaignType === 'purchase' && hasPaid) {
+    proceedWithPayment = false;
+    message = 'User has already paid.'
+  } else if (campaignType === 'booking' && userExists) {
+    proceedWithPayment = false;
+    // TODO : decide what message to send
+  }
   // reply to caller
   if (!foundError) {
     res.json({
       status: 'ok',
-      userExists,
-      hasPaid,
+      message,
+      proceedWithPayment,
     });
   }
 };
@@ -270,12 +284,12 @@ const paymentStatus = async (req, res) => {
 };
 
 /*
-  postPaymentStatus endpoint
+  verifyPaymentStatus endpoint
   query parameters - amount, couponCode, productId, userId, status
   response - isAmountValid: true/false ??
 */
 
-const postPaymentStatus = async (req, res) => {
+const verifyPaymentStatus = async (req, res) => {
   const digest = getHashDigest(req.query);
   log(`digest ${digest}`);
   let foundError = false;
@@ -294,7 +308,7 @@ const postPaymentStatus = async (req, res) => {
 
     let isPaymentStatusPaid = false;
     if (userMerchantsFound.length === 1 && get(userMerchantsFound, '[0].paymentStatus', '') === 'paid') {
-      // here we proceed to ad
+      // here we proceed to add
       isPaymentStatusPaid = true;
     }
 
@@ -359,6 +373,6 @@ const phonePeController = {};
 phonePeController.fetchProducts = fetchProducts;
 phonePeController.fetchUsers = fetchUsers;
 phonePeController.paymentStatus = paymentStatus;
-phonePeController.postPaymentStatus = postPaymentStatus;
+phonePeController.verifyPaymentStatus = verifyPaymentStatus;
 
 export default phonePeController;
