@@ -19,8 +19,8 @@ const fetchUserMerchants = (phone, email, id) => `
     merchantName
     merchantDiscountCode
     merchantPrice
-    finalPreDiscountedPrice
-    finalPostDiscountedPrice
+    merchantDiscountPrice
+    merchantSellingPrice
     paymentStatus
     merchantTransactionId
   }

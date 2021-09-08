@@ -21,9 +21,8 @@ const UserMerchant = `
     merchantName: String
     merchantDiscountCode: String
     merchantPrice: Int
-    merchantDiscoutPrice: Int
-    finalPreDiscountedPrice: Int
-    finalPostDiscountedPrice: Int
+    merchantDiscountPrice: Int
+    merchantSellingPrice: Int
     paymentStatus: Boolean! @defaultValue(value: "false")
     merchantTransactionId: String
     statusLog: String

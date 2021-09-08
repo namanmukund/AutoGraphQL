@@ -13,7 +13,7 @@ import fetchUsersQuery from './query/fetchUsers';
 import fetchUserMerchantsQuery from './query/fetchUserMerchants';
 import addUserMerchant from './mutation/addUserMerchant';
 import updateUserMerchant from './mutation/updateUserMerchant';
-import fetchCourseIdFromProduct from './query/fetchCourseIdFromProduct'
+import fetchCourseIdFromProduct from './query/fetchCourseIdFromProduct';
 
 /*
   fetchProducts endpoint
@@ -174,9 +174,10 @@ const fetchUsers = async (req, res) => {
           }
 
           const userMerchantsRes = await callLocalGraphqlApi(fetchUserMerchantsQuery(phoneQuery, emailQuery));
+          // console.log('userMerchantsRes', userMerchantsRes)
           const userMerchantsFound = get(userMerchantsRes, 'data.userMerchants', []);
-
-          if (userMerchantsFound.length === 1) {
+          // console.log('userMerchantsFound',userMerchantsFound)
+          if (userMerchantsFound.length > 0) {
             log(`User found in User Merchant collection with id ${get(userMerchantsFound, '[0].id', '')}.`);
             userPresentInUserMerchantCollection = true;
             userMerchantCreatedId = get(userMerchantsFound, '[0].id', '');
@@ -200,7 +201,7 @@ const fetchUsers = async (req, res) => {
   } catch (err) {
     log('Error thrown.');
   }
-  // TODO : update userMerchant doc with status for logging in below conditions.
+  // update userMerchant doc with status for logging in below conditions.
   // status accepted/declined
   if (campaignType === 'purchase' && hasPaid) {
     proceedWithPayment = false;
@@ -210,33 +211,40 @@ const fetchUsers = async (req, res) => {
     message = 'User has already booked this session from before.';
   }
 
-  if (proceedWithPayment) {
+  if (!proceedWithPayment) {
     try {
       const input = `{
-        statusLog: 'declined'
+        statusLog: "declined"
       }`;
       await callLocalGraphqlApi(updateUserMerchant(userMerchantCreatedId, input));
+      log(`Updated userMerchant of id ${userMerchantCreatedId}`);
     } catch (err) {
+      // console.log(err);
       log(`Err while updating userMerchant of id ${userMerchantCreatedId}`);
     }
   } else {
     try {
       const input = `{
-        statusLog: 'accepted'
+        statusLog: "accepted"
       }`;
       await callLocalGraphqlApi(updateUserMerchant(userMerchantCreatedId, input));
+      log(`Updated userMerchant of id ${userMerchantCreatedId}`);
     } catch (err) {
+      // console.log(err);
       log(`Err while updating userMerchant of id ${userMerchantCreatedId}`);
     }
   }
-  
+
+  const objectToReturn = {};
+  if (proceedWithPayment) {
+    objectToReturn.userId = userMerchantCreatedId;
+  }
+  objectToReturn.proceedWithPayment = proceedWithPayment;
+  objectToReturn.message = message;
+
   // reply to caller
   if (!foundError) {
-    res.json({
-      proceedWithPayment,
-      userId: userMerchantCreatedId,
-      message,
-    });
+    res.json(objectToReturn);
   }
 };
 
@@ -253,7 +261,8 @@ const paymentStatus = async (req, res) => {
   let isAmountValid = false;
   let pmtStatus = true;
   let message = '';
-
+  let discount = 0;
+  let merchantPrice = 0;
   try {
     if (digest === req.headers['x-tekie-signature']) {
       log('Request is Authorized');
@@ -270,7 +279,7 @@ const paymentStatus = async (req, res) => {
 
       // check if payment status is paid, then we send false
       let isPaymentStatusPaid = false;
-      const userMerchantDocFound = userMerchantsFound.length === 1;
+      const userMerchantDocFound = userMerchantsFound.length > 0;
       if (userMerchantDocFound && get(userMerchantsFound, '[0].paymentStatus', false)) {
         isPaymentStatusPaid = true;
       }
@@ -285,6 +294,7 @@ const paymentStatus = async (req, res) => {
           if (productsFound.length === 1) {
             log('Product found.');
             let productPriceAmount = get(productsFound, '[0].price.amount', 0);
+            merchantPrice = productPriceAmount;
             log(`productPriceAmount ${productPriceAmount}`);
             // if discount code is passed in params
             if (discountCodeQuery) {
@@ -303,7 +313,7 @@ const paymentStatus = async (req, res) => {
                   log('discount not expired');
                   const discountPercentage = get(discountsFound, '[0].percentage', '');
                   log('discountPercentage', discountPercentage);
-                  const discount = Math.round(productPriceAmount * discountPercentage * 0.01);
+                  discount = Math.round(productPriceAmount * discountPercentage * 0.01);
                   productPriceAmount -= discount;
                   productPriceAmount = Math.round((productPriceAmount + Number.EPSILON) * 100) / 100;
                 }
@@ -321,25 +331,28 @@ const paymentStatus = async (req, res) => {
           foundError = true;
           res.status(400).send('Valid product id or amount not found');
         }
-        
         if (isAmountValid) {
           // we save payment Status to true and update user merchant doc with the status and transaction id
           try {
-            const input =  `{
+            const input = `{
               merchantTransactionId: "${transactionId}"
               paymentStatus: true
+              merchantPrice: ${merchantPrice}
+              merchantDiscountPrice: ${discount}
+              merchantSellingPrice: ${productPriceAmount}
             }`;
             await callLocalGraphqlApi(updateUserMerchant(userMerchantIdQuery, input));
             log(`Updated user merchant doc ${userMerchantIdQuery} with transaction id ${transactionId}`);
           } catch (err) {
-            log('Error on updating user merchant.')
+            // console.log(err)
+            log('Error on updating user merchant.');
           }
         } else {
           message = 'Amount is invalid.';
           pmtStatus = false;
         }
       } else {
-        message = 'Payment is already made.';
+        message = 'User has already purchased this course.';
         pmtStatus = false;
       }
     } else {
@@ -347,6 +360,7 @@ const paymentStatus = async (req, res) => {
       res.status(401).send('Unauthorized');
     }
   } catch (err) {
+    // console.log(err);
     log('Error thrown.');
   }
   // reply to caller
@@ -368,9 +382,11 @@ const verifyPaymentStatus = async (req, res) => {
   const digest = getHashDigest(req.query);
   log(`digest ${digest}`);
   let foundError = false;
-  let isAmountValid = false;
+  let isAmountValid = true;
   let pmtStatus = true;
   let message = '';
+  let discount = 0;
+  let merchantPrice = 0;
   try {
     if (digest === req.headers['x-tekie-signature']) {
       log('Request is Authorized');
@@ -400,6 +416,7 @@ const verifyPaymentStatus = async (req, res) => {
           if (productsFound.length === 1) {
             log('Product found.');
             let productPriceAmount = get(productsFound, '[0].price.amount', 0);
+            merchantPrice = productPriceAmount;
             log(`productPriceAmount ${productPriceAmount}`);
             // if discount code is passed in params
             if (discountCodeQuery) {
@@ -418,7 +435,7 @@ const verifyPaymentStatus = async (req, res) => {
                   log('discount not expired');
                   const discountPercentage = get(discountsFound, '[0].percentage', '');
                   log('discountPercentage', discountPercentage);
-                  const discount = Math.round(productPriceAmount * discountPercentage * 0.01);
+                  discount = Math.round(productPriceAmount * discountPercentage * 0.01);
                   productPriceAmount -= discount;
                   productPriceAmount = Math.round((productPriceAmount + Number.EPSILON) * 100) / 100;
                 }
@@ -427,8 +444,8 @@ const verifyPaymentStatus = async (req, res) => {
 
             log(`productPriceAmount ${productPriceAmount}`);
 
-            if (Math.abs(productPriceAmount - Number.parseInt(amountQuery)) <= 2) {
-              isAmountValid = true;
+            if (Math.abs(productPriceAmount - Number.parseInt(amountQuery)) > 2) {
+              isAmountValid = false;
             }
           }
         } else {
@@ -443,11 +460,14 @@ const verifyPaymentStatus = async (req, res) => {
             const input = `{
               merchantTransactionId: "${transactionId}"
               paymentStatus: true
+              merchantPrice: ${merchantPrice}
+              merchantDiscountPrice: ${discount}
+              merchantSellingPrice: ${productPriceAmount}
             }`;
             await callLocalGraphqlApi(updateUserMerchant(userMerchantIdQuery, input));
             log(`Updated user merchant doc ${userMerchantIdQuery} with transaction id ${transactionId}`);
           } catch (err) {
-            log('Error on updating user merchant.')
+            log('Error on updating user merchant.');
           }
         } else {
           message = 'Amount is invalid.';
@@ -463,6 +483,9 @@ const verifyPaymentStatus = async (req, res) => {
   } catch (err) {
     log('Error thrown.');
   }
+
+  // console.log('isAmountValid', isAmountValid);
+  // console.log('pmtStatus', pmtStatus);
 
   // reply to caller
   if (!foundError) {
