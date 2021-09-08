@@ -13,6 +13,7 @@ import fetchUsersQuery from './query/fetchUsers';
 import fetchUserMerchantsQuery from './query/fetchUserMerchants';
 import addUserMerchant from './mutation/addUserMerchant';
 import updateUserMerchant from './mutation/updateUserMerchant';
+import fetchCourseIdFromProduct from './query/fetchCourseIdFromProduct'
 
 /*
   fetchProducts endpoint
@@ -37,9 +38,9 @@ const fetchProducts = async (req, res) => {
         for (const product of productsFound) {
           const newProduct = {};
           // constructing product object
-          newProduct.priceAmount = get(product, 'price.amount', 0);
-          log(`priceAmount ${newProduct.priceAmount}`);
-          // newProduct.id = get(product, 'id', '');
+          newProduct.price = get(product, 'price.amount', 0);
+          newProduct.id = get(product, 'id', '');
+          log(`priceAmount ${newProduct.price}`);
           newProduct.title = get(product, 'title', '');
           newProduct.merchantDescription = get(product, 'merchantDescription', '');
           newProduct.smallThumbnailUrl = `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'smallThumnail.uri', '')}`;
@@ -126,8 +127,9 @@ const fetchUsers = async (req, res) => {
       const phoneQuery = get(req, 'query.phone', '');
       const emailQuery = get(req, 'query.email', '');
       const amount = get(req, 'query.amount', 0);
+      const productId = get(req, 'query.productId', '');
       // campaign type will be set based on amount sent
-      campaignType = amount > 1 ? 'purchase' : 'booking';
+      campaignType = (amount > 0 && amount <= 3) ? 'booking' : 'purchase';
 
       const countryCodeQuery = '+91';
 
@@ -159,8 +161,14 @@ const fetchUsers = async (req, res) => {
           const clientId = get(usersFound, '[0].parentProfile.children[0].user.id', '');
 
           // if campaignType = 'purchase', check if sales operation lead status = won
+          // TODO : from prodId, get courseId and pass in salesOperation
+
+          const fetchedProductRes = await callLocalGraphqlApi(fetchCourseIdFromProduct(productId));
+          const fetchedProduct = get(fetchedProductRes, 'data.products[0]', {});
+          const courseIdFromProduct = get(fetchedProduct, 'course.id', '');
+
           if (campaignType === 'purchase') {
-            const salesOperationsRes = await callLocalGraphqlApi(fetchSalesOperations(clientId));
+            const salesOperationsRes = await callLocalGraphqlApi(fetchSalesOperations(clientId, courseIdFromProduct));
             const salesOperations = get(salesOperationsRes, 'data.salesOperations', []);
             hasPaid = salesOperations.length > 0;
           }
@@ -177,7 +185,7 @@ const fetchUsers = async (req, res) => {
         if (!userPresentInUserMerchantCollection) {
           // add to userMerchant collection
           const addUserMerchantRes = await callLocalGraphqlApi(addUserMerchant(get(req, 'query', {})));
-          userMerchantCreatedId = get(addUserMerchantRes, 'id', '');
+          userMerchantCreatedId = get(addUserMerchantRes, 'data.addUserMerchant.id', '');
           log(`Added user merchant of id ${userMerchantCreatedId}`);
         }
       } else {
@@ -192,17 +200,41 @@ const fetchUsers = async (req, res) => {
   } catch (err) {
     log('Error thrown.');
   }
+  // TODO : update userMerchant doc with status for logging in below conditions.
+  // status accepted/declined
   if (campaignType === 'purchase' && hasPaid) {
     proceedWithPayment = false;
-    message = 'User has already paid.';
+    message = 'User has already purchased this course.';
   } else if (campaignType === 'booking' && userExists) {
     proceedWithPayment = false;
-    message = 'User is present.';
+    message = 'User has already booked this session from before.';
   }
+
+  if (proceedWithPayment) {
+    try {
+      const input = `{
+        statusLog: 'declined'
+      }`;
+      await callLocalGraphqlApi(updateUserMerchant(userMerchantCreatedId, input));
+    } catch (err) {
+      log(`Err while updating userMerchant of id ${userMerchantCreatedId}`);
+    }
+  } else {
+    try {
+      const input = `{
+        statusLog: 'accepted'
+      }`;
+      await callLocalGraphqlApi(updateUserMerchant(userMerchantCreatedId, input));
+    } catch (err) {
+      log(`Err while updating userMerchant of id ${userMerchantCreatedId}`);
+    }
+  }
+  
   // reply to caller
   if (!foundError) {
     res.json({
       proceedWithPayment,
+      userId: userMerchantCreatedId,
       message,
     });
   }
@@ -236,72 +268,79 @@ const paymentStatus = async (req, res) => {
       const userMerchantsRes = await callLocalGraphqlApi(fetchUserMerchantsQuery('', '', userMerchantIdQuery));
       const userMerchantsFound = get(userMerchantsRes, 'data.userMerchants', []);
 
+      // check if payment status is paid, then we send false
       let isPaymentStatusPaid = false;
       const userMerchantDocFound = userMerchantsFound.length === 1;
       if (userMerchantDocFound && get(userMerchantsFound, '[0].paymentStatus', false)) {
         isPaymentStatusPaid = true;
       }
+      // if not paid already, we check if amount is valid,
+      // if amount is valid, then we can change payment status to paid on our end
+      if (!isPaymentStatusPaid) {
+        // if inputs are present
+        if (productIdQuery && amountQuery) {
+          log('productId & amount sent in query.');
+          const productsRes = await callLocalGraphqlApi(fetchProductsQuery(productIdQuery));
+          const productsFound = get(productsRes, 'data.products', []);
+          if (productsFound.length === 1) {
+            log('Product found.');
+            let productPriceAmount = get(productsFound, '[0].price.amount', 0);
+            log(`productPriceAmount ${productPriceAmount}`);
+            // if discount code is passed in params
+            if (discountCodeQuery) {
+              const additionalFilter = `{code: "${discountCodeQuery}"}`;
+              const discountRes = await callLocalGraphqlApi(fetchDiscounts(productIdQuery, additionalFilter));
+              const discountsFound = get(discountRes, 'data.discounts', []);
 
-      if (userMerchantDocFound) {
-        if (isPaymentStatusPaid) {
-          // we set this as false since we want to instruct the caller to not collect this payment since it is already paid
-          message = 'Payment is already made.';
-          pmtStatus = false;
-          log('Payment status is Paid.');
-        } else {
-          const userMerchantId = get(userMerchantsFound, '[0].id', '');
-          // update transaction Id in userMerchant doc
-          const input = `{
-        merchantTransactionId: "${transactionId}"
-      }`;
-          await callLocalGraphqlApi(updateUserMerchant(userMerchantId, input));
-          log(`Updated user merchant doc ${userMerchantId} with transaction id ${transactionId}`);
-        }
-      }
+              // if discount document is found
+              if (discountsFound.length === 1) {
+                const discountExpiryDateString = get(discountsFound, '[0].expiryDate', '');
+                const discountExpiryDate = new Date(discountExpiryDateString);
+                const today = new Date();
 
-      // if inputs are present
-      if (productIdQuery && amountQuery && userMerchantDocFound && !isPaymentStatusPaid) {
-        log('productId & amount sent in query.');
-        const productsRes = await callLocalGraphqlApi(fetchProductsQuery(productIdQuery));
-        const productsFound = get(productsRes, 'data.products', []);
-        if (productsFound.length === 1) {
-          log('Product found.');
-          let productPriceAmount = get(productsFound, '[0].price.amount', 0);
-          log(`productPriceAmount ${productPriceAmount}`);
-          // if discount code is passed in params
-          if (discountCodeQuery) {
-            const additionalFilter = `{code: "${discountCodeQuery}"}`;
-            const discountRes = await callLocalGraphqlApi(fetchDiscounts(productIdQuery, additionalFilter));
-            const discountsFound = get(discountRes, 'data.discounts', []);
-
-            // if discount document is found
-            if (discountsFound.length === 1) {
-              const discountExpiryDateString = get(discountsFound, '[0].expiryDate', '');
-              const discountExpiryDate = new Date(discountExpiryDateString);
-              const today = new Date();
-
-              // if code has not expired
-              if (!dateInPast(discountExpiryDate, today)) {
-                log('discount not expired');
-                const discountPercentage = get(discountsFound, '[0].percentage', '');
-                log('discountPercentage', discountPercentage);
-                const discount = Math.round(productPriceAmount * discountPercentage * 0.01);
-                productPriceAmount -= discount;
-                productPriceAmount = Math.round((productPriceAmount + Number.EPSILON) * 100) / 100;
+                // if code has not expired
+                if (!dateInPast(discountExpiryDate, today)) {
+                  log('discount not expired');
+                  const discountPercentage = get(discountsFound, '[0].percentage', '');
+                  log('discountPercentage', discountPercentage);
+                  const discount = Math.round(productPriceAmount * discountPercentage * 0.01);
+                  productPriceAmount -= discount;
+                  productPriceAmount = Math.round((productPriceAmount + Number.EPSILON) * 100) / 100;
+                }
               }
             }
-          }
 
-          log(`productPriceAmount ${productPriceAmount}`);
-          log(`Absolute difference in price ${Math.abs(productPriceAmount - Number.parseInt(amountQuery))}`);
-          if (Math.abs(productPriceAmount - Number.parseInt(amountQuery)) <= 2) {
-            isAmountValid = true;
+            log(`productPriceAmount ${productPriceAmount}`);
+            log(`Absolute difference in price ${Math.abs(productPriceAmount - Number.parseInt(amountQuery))}`);
+            if (Math.abs(productPriceAmount - Number.parseInt(amountQuery)) <= 2) {
+              isAmountValid = true;
+            }
           }
+        } else {
+          // send bad request error
+          foundError = true;
+          res.status(400).send('Valid product id or amount not found');
+        }
+        
+        if (isAmountValid) {
+          // we save payment Status to true and update user merchant doc with the status and transaction id
+          try {
+            const input =  `{
+              merchantTransactionId: "${transactionId}"
+              paymentStatus: true
+            }`;
+            await callLocalGraphqlApi(updateUserMerchant(userMerchantIdQuery, input));
+            log(`Updated user merchant doc ${userMerchantIdQuery} with transaction id ${transactionId}`);
+          } catch (err) {
+            log('Error on updating user merchant.')
+          }
+        } else {
+          message = 'Amount is invalid.';
+          pmtStatus = false;
         }
       } else {
-        // send bad request error
-        foundError = true;
-        res.status(400).send('Valid product id or amount not found');
+        message = 'Payment is already made.';
+        pmtStatus = false;
       }
     } else {
       foundError = true;
@@ -313,7 +352,7 @@ const paymentStatus = async (req, res) => {
   // reply to caller
   if (!foundError) {
     res.json({
-      paymentStatus: isAmountValid && pmtStatus,
+      allowPayment: isAmountValid && pmtStatus,
       message,
     });
   }
@@ -351,68 +390,71 @@ const verifyPaymentStatus = async (req, res) => {
       if (userMerchantDocFound && get(userMerchantsFound, '[0].paymentStatus', false)) {
         isPaymentStatusPaid = true;
       }
-      const transactionIdFound = get(userMerchantsFound, '[0].transactionId', '');
 
-      if (userMerchantDocFound) {
-        if (isPaymentStatusPaid || !transactionIdFound) {
-          // we set this as false since we want to instruct the caller to not collect this payment since it is already paid
-          message = (isPaymentStatusPaid) ? 'Payment is already made.' : 'Transaction Id not stored in database.';
-          pmtStatus = false;
-          log('Payment status is Paid.');
-        } else {
-          const userMerchantId = get(userMerchantsFound, '[0].id', '');
-          // update transaction Id in userMerchant doc
-          const input = `{
-            merchantTransactionId: "${transactionId}"
-          }`;
-          await callLocalGraphqlApi(updateUserMerchant(userMerchantId, input));
-          log(`Updated user merchant doc ${userMerchantId} with transaction id ${transactionId}`);
-        }
-      }
+      if (!isPaymentStatusPaid) {
+        // if inputs are present
+        if (productIdQuery && amountQuery) {
+          log('productId & amount sent in query.');
+          const productsRes = await callLocalGraphqlApi(fetchProductsQuery(productIdQuery));
+          const productsFound = get(productsRes, 'data.products', []);
+          if (productsFound.length === 1) {
+            log('Product found.');
+            let productPriceAmount = get(productsFound, '[0].price.amount', 0);
+            log(`productPriceAmount ${productPriceAmount}`);
+            // if discount code is passed in params
+            if (discountCodeQuery) {
+              const additionalFilter = `{code: "${discountCodeQuery}"}`;
+              const discountRes = await callLocalGraphqlApi(fetchDiscounts(productIdQuery, additionalFilter));
+              const discountsFound = get(discountRes, 'data.discounts', []);
 
-      // if inputs are present
-      if (productIdQuery && amountQuery && userMerchantDocFound && !isPaymentStatusPaid) {
-        log('productId & amount sent in query.');
-        const productsRes = await callLocalGraphqlApi(fetchProductsQuery(productIdQuery));
-        const productsFound = get(productsRes, 'data.products', []);
-        if (productsFound.length === 1) {
-          log('Product found.');
-          let productPriceAmount = get(productsFound, '[0].price.amount', 0);
-          log(`productPriceAmount ${productPriceAmount}`);
-          // if discount code is passed in params
-          if (discountCodeQuery) {
-            const additionalFilter = `{code: "${discountCodeQuery}"}`;
-            const discountRes = await callLocalGraphqlApi(fetchDiscounts(productIdQuery, additionalFilter));
-            const discountsFound = get(discountRes, 'data.discounts', []);
+              // if discount document is found
+              if (discountsFound.length === 1) {
+                const discountExpiryDateString = get(discountsFound, '[0].expiryDate', '');
+                const discountExpiryDate = new Date(discountExpiryDateString);
+                const today = new Date();
 
-            // if discount document is found
-            if (discountsFound.length === 1) {
-              const discountExpiryDateString = get(discountsFound, '[0].expiryDate', '');
-              const discountExpiryDate = new Date(discountExpiryDateString);
-              const today = new Date();
-
-              // if code has not expired
-              if (!dateInPast(discountExpiryDate, today)) {
-                log('discount not expired');
-                const discountPercentage = get(discountsFound, '[0].percentage', '');
-                log('discountPercentage', discountPercentage);
-                const discount = Math.round(productPriceAmount * discountPercentage * 0.01);
-                productPriceAmount -= discount;
-                productPriceAmount = Math.round((productPriceAmount + Number.EPSILON) * 100) / 100;
+                // if code has not expired
+                if (!dateInPast(discountExpiryDate, today)) {
+                  log('discount not expired');
+                  const discountPercentage = get(discountsFound, '[0].percentage', '');
+                  log('discountPercentage', discountPercentage);
+                  const discount = Math.round(productPriceAmount * discountPercentage * 0.01);
+                  productPriceAmount -= discount;
+                  productPriceAmount = Math.round((productPriceAmount + Number.EPSILON) * 100) / 100;
+                }
               }
             }
-          }
 
-          log(`productPriceAmount ${productPriceAmount}`);
+            log(`productPriceAmount ${productPriceAmount}`);
 
-          if (Math.abs(productPriceAmount - Number.parseInt(amountQuery)) <= 2) {
-            isAmountValid = true;
+            if (Math.abs(productPriceAmount - Number.parseInt(amountQuery)) <= 2) {
+              isAmountValid = true;
+            }
           }
+        } else {
+          // send bad request error
+          foundError = true;
+          res.status(400).send('Valid product id or amount not found');
+        }
+        // if amount passed is valid
+        if (isAmountValid) {
+          // we save payment Status to true and update user merchant doc with the status and transaction id
+          try {
+            const input = `{
+              merchantTransactionId: "${transactionId}"
+              paymentStatus: true
+            }`;
+            await callLocalGraphqlApi(updateUserMerchant(userMerchantIdQuery, input));
+            log(`Updated user merchant doc ${userMerchantIdQuery} with transaction id ${transactionId}`);
+          } catch (err) {
+            log('Error on updating user merchant.')
+          }
+        } else {
+          message = 'Amount is invalid.';
+          pmtStatus = false;
         }
       } else {
-        // send bad request error
-        foundError = true;
-        res.status(400).send('Valid product id or amount not found');
+        message = 'Payment is validated.';
       }
     } else {
       foundError = true;
@@ -425,7 +467,7 @@ const verifyPaymentStatus = async (req, res) => {
   // reply to caller
   if (!foundError) {
     res.json({
-      paymentStatus: isAmountValid && pmtStatus,
+      isPaid: isAmountValid && pmtStatus,
       message,
     });
   }

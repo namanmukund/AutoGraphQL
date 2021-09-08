@@ -26,6 +26,7 @@ const UserMerchant = `
     finalPostDiscountedPrice: Int
     paymentStatus: Boolean! @defaultValue(value: "false")
     merchantTransactionId: String
+    statusLog: String
   }
 `;
 
