@@ -1,9 +1,10 @@
-const fetchSalesOperations = (clientId) => `
+const fetchSalesOperations = (clientId, courseId) => `
 {
   salesOperations(filter: {
     and: [
       {client_some: {id: "${clientId}"}},
-      {leadStatus: won}
+      {leadStatus: won},
+      {course_some:{id:"${courseId}"}}
     ]
   }){
     id
