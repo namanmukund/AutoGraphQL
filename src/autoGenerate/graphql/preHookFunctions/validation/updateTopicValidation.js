@@ -27,7 +27,7 @@ const updateTopicValidation = async (params) => {
     // check if the topic with similar title exist
     const topicFilter = `{ id_not:"${topicId}" }`;
     if (title) {
-      const topicsDataForTitle = await getTopicsData(courseIds, title.toLowerCase(), null, topicFilter);
+      const topicsDataForTitle = await getTopicsData(courseIds, title, null, topicFilter);
       if (topicsDataForTitle && topicsDataForTitle.length > 0) {
         throw new TopicWithSimilarTitleAlreadyExist();
       }
