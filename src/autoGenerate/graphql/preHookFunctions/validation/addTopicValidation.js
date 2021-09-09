@@ -23,7 +23,7 @@ const addTopicValidation = async (params) => {
     coursesConnectIds.forEach((courseId) => { courseIds += `"${courseId}"`; });
     // check if the topic with similar title exist
     if (title) {
-      const topicsDataForTitle = await getTopicsData(courseIds, title.toLowerCase());
+      const topicsDataForTitle = await getTopicsData(courseIds, title);
       if (topicsDataForTitle && topicsDataForTitle.length > 0) {
         throw new TopicWithSimilarTitleAlreadyExist();
       }
