@@ -10,7 +10,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateBatchInUserScript from '../scriptMethods/updateBatchInUserScript';
 // import updateCourseInTopics from '../scriptMethods/updateCourseInTopics';
 // import updateCourse from '../scriptMethods/updateCourse';
-// import generateSessionReport from '../../../../../../utils/scheduleJobs/scheduleSessionReport';
+import generateSessionReport from '../../../../../../utils/scheduleJobs/scheduleSessionReport';
 // import migrateBatchAttendanceToEnum from '../scriptMethods/migrateBatchAttendanceToEnum';
 
 const temporaryScript = (async (root, params, context) => {
@@ -19,7 +19,7 @@ const temporaryScript = (async (root, params, context) => {
   Add script functions
    */
   // await updateSchoolCampaignCodeInSchool();
-  // await generateSessionReport(60);
+  await generateSessionReport(60);
   // await updateTopicsInAssignment();
   // await updateTopicsInLearningObjective();
   // await updateTopicsAndLearningObjectivesInQuestionBank();
