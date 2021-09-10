@@ -15,6 +15,15 @@ const topicQuery = (topicId) => `
     topic(id:"${topicId}"){
       id
       order
+      topicHomeworkAssignmentQuestion {
+        assignmentQuestion {
+          id
+          difficulty
+          isHomework
+          status
+        }
+        order
+      }
       topicAssignmentQuestions {
         assignmentQuestion {
           id
@@ -140,6 +149,15 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
           ...get(topicAQ, 'assignmentQuestion', {}),
           order: get(topicAQ, 'order'),
         }));
+      assignmentQuestionsinTopic = [
+        ...assignmentQuestionsinTopic,
+        ...get(topicInfo, 'topicHomeworkAssignmentQuestion', [])
+          .filter((topicAQ) => get(topicAQ, 'assignmentQuestion.status') === PUBLISHED)
+          .map((topicAQ) => ({
+            ...get(topicAQ, 'assignmentQuestion', {}),
+            order: get(topicAQ, 'order'),
+          })),
+      ];
     }
     let sortedAssignmentQuestionsinTopic = [];
     const easyAssignmentQuestions = [];
