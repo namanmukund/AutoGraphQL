@@ -120,6 +120,7 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
     if (skillsLevel) {
       userSkillLevel = userSkillsLevelFromDb;
     }
+    log('SkillLevel', userSkillLevel);
   }
   /*
     we are getting below fields in topicQuery:
