@@ -115,6 +115,7 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
     const {
       skillsLevel: userSkillsLevelFromDb,
     } = currentTopicComponentInfo;
+    let userSkillLevel = null;
 
     if (skillsLevel) {
       userSkillLevel = userSkillsLevelFromDb;
