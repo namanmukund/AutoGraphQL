@@ -357,10 +357,10 @@ const generateSessionReport = async (numDaysToRunQuery) => {
     // according to parameter 'numDaysToRunQuery', we add session report for that many days
     // SESSION_REPORT_DAYS gives till how many days back we have to include in our report (currently 4)
     let totalLoopDays = SESSION_REPORT_DAYS;
-    const todayStartDate = new Date();
-    const todayEndDate = new Date();
-    todayStartDate.setDate(currentStartDate.getDate() - dayCount);
-    todayEndDate.setDate(currentEndDate.getDate() - dayCount);
+    const todayStartDate = new Date(moment(currentStartDate).subtract(dayCount, 'days').toISOString());
+    const todayEndDate = new Date(moment(currentEndDate).subtract(dayCount, 'days').toISOString());
+    // todayStartDate.setDate(currentStartDate.getDate() - dayCount);
+    // todayEndDate.setDate(currentEndDate.getDate() - dayCount);
     todayStartDate.setHours(0, 0, 0, 0);
     todayEndDate.setHours(23, 59, 59, 999);
 
