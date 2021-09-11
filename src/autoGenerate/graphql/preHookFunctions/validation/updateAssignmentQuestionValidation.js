@@ -17,7 +17,9 @@ const fetchCoursesFromAssignmentQuestion = async (assignmentQuestionId) => {
 };
 
 const updateAssignmentQuestionValidation = async (params) => {
-  const { input: { statement, isHomework = false }, id: assignmentQuestionId } = params;
+  const { input = {}, id: assignmentQuestionId } = params;
+  const statement = get(input, 'statement');
+  const isHomework = get(input, 'isHomework', false);
   if (statement) {
     let courseIds = '';
     const assignmentQuestionData = await fetchCoursesFromAssignmentQuestion(assignmentQuestionId);
