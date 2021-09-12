@@ -240,3 +240,11 @@ export const ProjectWithSimilarTitleAlreadyExist = createError('ProjectWithSimil
 export const ProjectWithSimilarOrderAlreadyExist = createError('ProjectWithSimilarOrderAlreadyExist', {
   message: 'Project with similar order already exist.',
 });
+
+export const VideoWithSimilarTitleAlreadyExist = createError('VideoWithSimilarTitleAlreadyExist', {
+  message: 'Video with similar title already exist.',
+});
+
+export const LOWithSimilarTitleAlreadyExist = createError('LOWithSimilarTitleAlreadyExist', {
+  message: 'LO with similar title already exist.',
+});
