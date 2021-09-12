@@ -104,6 +104,9 @@ import deleteAssignmentQuestionValidation from './preHookFunctions/validation/de
 import deleteBlockBasedProjectValidation from './preHookFunctions/validation/deleteBlockBasedProjectValidation';
 import addAssignmentQuestionValidation from './preHookFunctions/validation/addAssignmentQuestionValidation';
 import updateAssignmentQuestionValidation from './preHookFunctions/validation/updateAssignmentQuestionValidation';
+import updateLearningObjectiveValidation from './preHookFunctions/validation/updateLearningObjectiveValidation';
+import addBlockBasedProjectValidation from './preHookFunctions/validation/addBlockBasedProjectValidation';
+import updateBlockBasedProjectValidation from './preHookFunctions/validation/updateBlockBasedProjectValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -775,6 +778,18 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateAssignmentQuestion': {
       await updateAssignmentQuestionValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateLearningObjective': {
+      await updateLearningObjectiveValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addBlockBasedProject': {
+      await addBlockBasedProjectValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateBlockBasedProject': {
+      await updateBlockBasedProjectValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'addSchool': {

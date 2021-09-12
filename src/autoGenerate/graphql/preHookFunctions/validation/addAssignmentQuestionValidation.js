@@ -27,11 +27,9 @@ const addAssignmentQuestionValidation = async (params) => {
     let courseIds = '';
     coursesConnectIds.forEach((courseId) => { courseIds += `"${courseId}"`; });
     // check if the assignmentQuestion with similar statement exist
-    if (statement) {
-      const assignmentQuestionsData = await getAssignmentQuestion(courseIds, statement, isHomework);
-      if (assignmentQuestionsData && assignmentQuestionsData.length > 0) {
-        throw new AssignmentWithSimilarStatementAlreadyExist();
-      }
+    const assignmentQuestionsData = await getAssignmentQuestion(courseIds, statement, isHomework);
+    if (assignmentQuestionsData && assignmentQuestionsData.length > 0) {
+      throw new AssignmentWithSimilarStatementAlreadyExist();
     }
   }
   return true;
