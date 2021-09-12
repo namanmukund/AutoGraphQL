@@ -244,3 +244,7 @@ export const ProjectWithSimilarOrderAlreadyExist = createError('ProjectWithSimil
 export const VideoWithSimilarTitleAlreadyExist = createError('VideoWithSimilarTitleAlreadyExist', {
   message: 'Video with similar title already exist.',
 });
+
+export const LOWithSimilarTitleAlreadyExist = createError('LOWithSimilarTitleAlreadyExist', {
+  message: 'LO with similar title already exist.',
+});

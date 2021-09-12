@@ -70,6 +70,7 @@ import {
   ProjectWithSimilarTitleAlreadyExist,
   ProjectWithSimilarOrderAlreadyExist,
   VideoWithSimilarTitleAlreadyExist,
+  LOWithSimilarTitleAlreadyExist,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -279,4 +280,5 @@ export {
   ProjectWithSimilarTitleAlreadyExist,
   ProjectWithSimilarOrderAlreadyExist,
   VideoWithSimilarTitleAlreadyExist,
+  LOWithSimilarTitleAlreadyExist,
 };

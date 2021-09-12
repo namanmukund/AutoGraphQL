@@ -21,7 +21,7 @@ const LearningObjective = `
   ) 
   {
     order: Int!
-    title: String! @trim
+    title: String @trim
     description: String @trim
     pqStory: String @trim
     pqStoryImage: File @relation(name: "LearningObjectivePqStoryImage", direction: "OneWay")

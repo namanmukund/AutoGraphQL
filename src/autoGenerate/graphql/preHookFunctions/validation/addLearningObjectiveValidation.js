@@ -2,16 +2,18 @@
 "BinaryExpression[operator='in']"] */
 import { get } from 'lodash';
 import {
+  LOWithSimilarTitleAlreadyExist,
   OrderAlreadyExistsError,
 } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-export const fetchLO = async (courseIds, order, LoFilter) => {
+export const fetchLO = async (courseIds, order, title, LoFilter) => {
   const query = `{
     learningObjectives(
       filter: { and: [
         ${courseIds ? `{ courses_some: { id_in: [${courseIds}] } }` : ''}
         ${order ? `{ order: ${order} }` : ''}
+        ${title ? `{title: "${title}"}` : ''}
         ${LoFilter || ''}
       ] }
     ) {
@@ -51,12 +53,21 @@ const addLearningObjectiveValidation = async (params) => {
     return true;
   }
   const order = get(input, 'order');
-  if (coursesConnectIds && coursesConnectIds.length > 0 && order) {
+  const title = get(input, 'title');
+  if (title || order) {
     let courseIds = '';
     coursesConnectIds.forEach((courseId) => { courseIds += `"${courseId}"`; });
-    const LoData = await fetchLO(courseIds, order);
-    if (LoData && LoData.length > 0) {
-      throw new OrderAlreadyExistsError();
+    if (order) {
+      const LoData = await fetchLO(courseIds, order);
+      if (LoData && LoData.length > 0) {
+        throw new OrderAlreadyExistsError();
+      }
+    }
+    if (title) {
+      const LoData = await fetchLO(courseIds, null, title);
+      if (LoData && LoData.length > 0) {
+        throw new LOWithSimilarTitleAlreadyExist();
+      }
     }
   }
   return true;
