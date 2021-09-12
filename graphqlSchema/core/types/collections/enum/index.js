@@ -89,6 +89,7 @@ import Languages from './Languages';
 import AttendanceStatus from './AttendanceStatus';
 import AuditSubType from './AuditSubType';
 import Currency from './Currency';
+import LearningObjectiveComponents from './LearningObjectiveComponents';
 
 export default [
   Status,
@@ -183,4 +184,5 @@ export default [
   AttendanceStatus,
   AuditSubType,
   Currency,
+  LearningObjectiveComponents,
 ];
