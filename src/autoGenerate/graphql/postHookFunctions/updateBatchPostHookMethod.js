@@ -26,6 +26,9 @@ const getBatchSessionsQuery = (batchId) => `
     }){
       id
       bookingDate
+      topic{
+        order
+      }
       ${getSlotTimesInString()}
     }
   }
@@ -45,9 +48,9 @@ const updateBatchSessionQuery = (
   `;
 
 // fetch mentor Sessions
-const fetchMentorSessions = (bookingDate, mentorId) => `
+const fetchMentorSessions = (bookingDate, mentorId, sessionType) => `
   {
-    mentorSessions(filter: {and: [{availabilityDate: "${bookingDate}"}, {user_some: {id: "${mentorId}"}}, {sessionType: batch}]}) {
+    mentorSessions(filter: {and: [{availabilityDate: "${bookingDate}"}, {user_some: {id: "${mentorId}"}}, {sessionType: ${sessionType}}]}) {
       id
       availabilityDate
       slot0
@@ -97,8 +100,7 @@ const updateMentorSession = (mentorSessionId, sessionsBookingDateInDB, slot) => 
   mutation{
     updateMentorSession(id: "${mentorSessionId}", input: {
       availabilityDate:"${sessionsBookingDateInDB}",
-      ${slot}: true,
-      sessionType:batch
+      ${slot}: true
     }) {
       id
     }
@@ -106,7 +108,7 @@ const updateMentorSession = (mentorSessionId, sessionsBookingDateInDB, slot) => 
   `;
 
 // add mentor Session
-const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot) => `
+const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot, sessionType) => `
   mutation {
     addMentorSession(
       userConnectId: "${mentorUserId}",
@@ -114,7 +116,7 @@ const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot)
     input:{
       availabilityDate:"${sessionsBookingDateInDB}",
       ${slot}: true,
-      sessionType:batch
+      sessionType: ${sessionType}
     }
     ) {
       id
@@ -122,12 +124,12 @@ const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot)
   }
   `;
 
-const getMentorSessionId = async (allottedMentorId, date, slotsInInput, courseId) => {
+const getMentorSessionId = async (allottedMentorId, date, slotsInInput, courseId, sessionType) => {
   let finalMentorSessionId = '';
   if (allottedMentorId) {
     const sentSlotsArray = getSelectedSlotsTime(slotsInInput);
     // eslint-disable-next-line no-await-in-loop
-    const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(date, allottedMentorId));
+    const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(date, allottedMentorId, sessionType));
     const mentorSession = get(mentorSessionsRes, 'data.mentorSessions[0]');
     if (mentorSession && mentorSession.id) {
       const { id: mentorSessionId, ...slotsInMentorSession } = mentorSession;
@@ -139,26 +141,36 @@ const getMentorSessionId = async (allottedMentorId, date, slotsInInput, courseId
       }
     } else {
       // eslint-disable-next-line no-await-in-loop
-      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, date, `slot${sentSlotsArray[0]}`));
+      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, date, `slot${sentSlotsArray[0]}`, sessionType));
       finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
     }
   }
   return finalMentorSessionId;
 };
 
-const createBatchSessions = async (batchId, possibleDates, filteredSlots, slotsInInput, possibleSessionCount, topics, allottedMentorId, courseId) => {
+const createBatchSessions = async (batchId, possibleDates, filteredSlots, slotsInInput, possibleSessionCount, topics, allottedMentorId, courseId, batchType) => {
   if (possibleDates.length <= possibleSessionCount) {
     // eslint-disable-next-line no-restricted-syntax
     for (const date of possibleDates) {
-      // eslint-disable-next-line no-await-in-loop
-      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, date, slotsInInput, courseId);
       const index = possibleDates.indexOf(date);
+      const topicOrder = topics[index].order;
+      let sessionType = 'batch';
+      if (batchType === 'b2b2c' && topicOrder === 1) {
+        sessionType = 'trial';
+      }
+      // eslint-disable-next-line no-await-in-loop
+      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, date, slotsInInput, courseId, sessionType);
       createBatchSession(batchId, date, filteredSlots, topics[index].id, finalMentorSessionId, courseId);
     }
   } else {
     for (let i = 0; i < possibleSessionCount; i += 1) {
+      const topicOrder = topics[i].order;
+      let sessionType = 'batch';
+      if (batchType === 'b2b2c' && topicOrder === 1) {
+        sessionType = 'trial';
+      }
       // eslint-disable-next-line no-await-in-loop
-      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId);
+      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId, sessionType);
       createBatchSession(batchId, possibleDates[i].toISOString(), filteredSlots, topics[i].id, finalMentorSessionId, courseId);
     }
   }
@@ -166,13 +178,18 @@ const createBatchSessions = async (batchId, possibleDates, filteredSlots, slotsI
   return true;
 };
 
-const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filteredSlotsString, slotsInInput, allottedMentorId, courseId) => {
+const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filteredSlotsString, slotsInInput, allottedMentorId, courseId, batchType) => {
   let i = 0;
   /* eslint-disable array-callback-return */
   // eslint-disable-next-line no-restricted-syntax
   for (const session of sessionsAllotted) {
+    const topicOrder = get(session, 'topic.order', -1);
+    let sessionType = 'batch';
+    if (batchType === 'b2b2c' && topicOrder === 1) {
+      sessionType = 'trial';
+    }
     // eslint-disable-next-line no-await-in-loop
-    const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId);
+    const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId, sessionType);
     /* eslint-disable array-callback-return */
     const date = possibleDates[i].toISOString();
     updateBatchSession(session.id, filteredSlotsString, date, finalMentorSessionId, courseId);
@@ -206,6 +223,7 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
   const mentorUserId = get(input, 'allottedMentor.typeId', '');
   const courseId = get(input, 'course.typeId', '');
   const timeTableRule = get(params, 'input.timeTableRule', null);
+  const batchType = get(input, 'type', '');
   /*
     -> Fetch total number of published topics (x), this will be the max possible number of batchSessions
     -> Fetch batchSessions that are either in the started or completed state (y)
@@ -248,7 +266,7 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
       const allottedSessionsCount = sessionsAllotted.length;
       if (allottedSessionsCount > 0) {
         possibleSessionCount -= allottedSessionsCount;
-        updateAllottedBatchSessions(sessionsAllotted, possibleDates, filteredSlotsString, slots, mentorUserId, courseId);
+        updateAllottedBatchSessions(sessionsAllotted, possibleDates, filteredSlotsString, slots, mentorUserId, courseId, batchType);
       }
       if (possibleSessionCount > 0) {
         // all the remaining sessions have to be created
@@ -256,13 +274,13 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
         possibleDates = possibleDates.slice(startFromIndex);
         const topicStartIndex = topicCount - possibleSessionCount;
         topics = topics.splice(topicStartIndex);
-        createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId);
+        createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId, batchType);
       }
     } else {
       // if there are no exisiting batchSessions for the given batch id, create all of them
       const possibleSessionCount = topicCount;
       const possibleDates = getPossibleDates(startDate, endDate, days);
-      createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId);
+      createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId, batchType);
     }
   } else if (allottedMentorConnectId) {
     const previouslyAllottedMentorId = get(context, 'previousDocument.allottedMentor.id', '');
@@ -273,7 +291,12 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
       notCompletedBatchSessions.forEach(async (batchSession) => {
         // we add or update mentor sessions of the new mentor based on the batch session dates
         const { id: batchSessionId, bookingDate, ...slots } = batchSession;
-        const finalMentorSessionId = await getMentorSessionId(allottedMentorConnectId, bookingDate, slots, courseId);
+        const topicOrder = get(batchSession, 'topic.order', -1);
+        let sessionType = 'batch';
+        if (batchType === 'b2b2c' && topicOrder === 1) {
+          sessionType = 'trial';
+        }
+        const finalMentorSessionId = await getMentorSessionId(allottedMentorConnectId, bookingDate, slots, courseId, sessionType);
         // update the new mentorSessionId in the batch Session
         callLocalGraphqlApi(updateNewMentorSessionInBatchSession(batchSessionId, finalMentorSessionId));
       });

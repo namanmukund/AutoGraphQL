@@ -118,6 +118,7 @@ import GetSchoolCampaignSlots from './getSchoolCampaignSlots';
 import BDEProfile from './bdeProfile';
 import UserCourse from './userCourse';
 import GetUserCourses from './getUserCourses';
+import UserMerchant from './userMerchant';
 
 export default [
   ...User,
@@ -240,4 +241,5 @@ export default [
   ...BDEProfile,
   ...GetUserCourses,
   ...UserCourse,
+  ...UserMerchant,
 ];

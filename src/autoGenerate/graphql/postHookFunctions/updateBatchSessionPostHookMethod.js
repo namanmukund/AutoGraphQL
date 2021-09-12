@@ -87,9 +87,9 @@ const nextTopicQuery = (courseId) => `
   `;
 
 // fetch mentor Sessions
-const fetchMentorSessions = (bookingDate, mentorId) => `
+const fetchMentorSessions = (bookingDate, mentorId, sessionType) => `
   {
-    mentorSessions(filter: {and: [{availabilityDate: "${bookingDate}"}, {user_some: {id: "${mentorId}"}}, {sessionType: batch}]}) {
+    mentorSessions(filter: {and: [{availabilityDate: "${bookingDate}"}, {user_some: {id: "${mentorId}"}}, {sessionType: ${sessionType}}]}) {
       id
       availabilityDate
       slot0
@@ -125,8 +125,7 @@ const updateMentorSession = (mentorSessionId, sessionsBookingDateInDB, slot) => 
   mutation{
     updateMentorSession(id: "${mentorSessionId}", input: {
       availabilityDate:"${sessionsBookingDateInDB}",
-      ${slot}: true,
-      sessionType:batch
+      ${slot}: true
     }) {
       id
     }
@@ -134,7 +133,7 @@ const updateMentorSession = (mentorSessionId, sessionsBookingDateInDB, slot) => 
   `;
 
 // add mentor Session
-const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot) => `
+const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot, sessionType) => `
   mutation {
     addMentorSession(
       userConnectId: "${mentorUserId}",
@@ -142,7 +141,7 @@ const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot)
     input:{
       availabilityDate:"${sessionsBookingDateInDB}",
       ${slot}: true,
-      sessionType:batch
+      sessionType: ${sessionType}
     }
     ) {
       id
@@ -220,6 +219,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     currentUser,
     prevSessionStatus,
     prevIsAudit,
+    batchTopicOrder,
+    batchTypeValue,
   } = context;
   let courseId = get(context, 'courseId');
   /*
@@ -241,10 +242,14 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   // if mentorSessionConnectId is not present in batch session, then we need t create mentor session on basis of
   // allotted mentor in batch
   if (!mentorSessionId && allottedMentorId) {
+    let sessionType = 'batch';
+    if (batchTypeValue === 'b2b2c' && batchTopicOrder === 1) {
+      sessionType = 'trial';
+    }
     let finalMentorSessionId = '';
     const { bookingDate: sessionsBookingDateInDB, ...slotsInDB } = input;
     const slotTimeInDBArray = getSelectedSlotsTime(slotsInDB);
-    const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(sessionsBookingDateInDB, allottedMentorId));
+    const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(sessionsBookingDateInDB, allottedMentorId, sessionType));
     const mentorSession = get(mentorSessionsRes, 'data.mentorSessions[0]');
     if (mentorSession && mentorSession.id) {
       const { id: mentorSessionIdOfAllottedMentor, ...slotsInMentorSession } = mentorSession;
@@ -254,7 +259,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         await callLocalGraphqlApi(updateMentorSession(mentorSessionIdOfAllottedMentor, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`));
       }
     } else {
-      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`));
+      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`, sessionType));
       finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
     }
     await callLocalGraphqlApi(updateBatchSession(batchSessionId, finalMentorSessionId));
@@ -472,7 +477,6 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   }
   const isAuditFromInput = get(input, 'isAudit', false);
   if (isAuditFromInput && prevIsAudit === false) {
-    const { batchTopicOrder, batchTypeValue } = context;
     addSalesAudit({
       batchSessionId,
       batchTopicOrder,

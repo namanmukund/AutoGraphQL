@@ -30,6 +30,9 @@ const getBatchSessions = async (batchId) => {
               id
               bookingDate
               sessionStatus
+              topic{
+                order
+              }
             }
           }
           `;

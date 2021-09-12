@@ -65,11 +65,11 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
         }
       // for trial/paid mentorSession we will check mentorMenteeSessions and see which slots are occupied
       }
-      if (mentorMenteeSessions.length && !sessionType.batch) {
+      if (mentorMenteeSessions.length && mentorSession.sessionType !== sessionType.batch) {
         // eslint-disable-next-line no-restricted-syntax
         for (const mentorMenteeSession of mentorMenteeSessions) {
           const menteeSession = get(mentorMenteeSession, 'menteeSession', '');
-          if (userBatchCode !== get(menteeSession, 'user.studentProfile.batch.code', '')) {
+          if (userBatchCode !== get(menteeSession, 'user.studentProfile.batch.code', null)) {
             if (menteeSession) {
               const occupiedSlotTimeArrayForMMS = getSelectedSlotsTime(menteeSession);
               occupiedSlotsArray.push(...occupiedSlotTimeArrayForMMS);
