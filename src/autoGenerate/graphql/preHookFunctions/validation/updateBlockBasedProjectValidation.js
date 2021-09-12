@@ -25,19 +25,20 @@ const updateBlockBasedProjectValidation = async (params) => {
   const { input = {}, id: projectId } = params;
   const title = get(input, 'title');
   const order = get(input, 'order');
-  if (title || order) {
+  const type = get(input, 'type');
+  if ((title || order) && type) {
     let courseIds = '';
     const projectData = await fetchCourseForProject(projectId);
     const courses = get(projectData, 'courses', []);
     courses.forEach((course) => { courseIds += `"${get(course, 'id')}"`; });
     if (title) {
-      const projectDataArray = await fetchProject(courseIds, title, null, `{ id_not: "${projectId}" }`);
+      const projectDataArray = await fetchProject(courseIds, title, null, type, `{ id_not: "${projectId}" }`);
       if (projectDataArray && projectDataArray.length > 0) {
         throw new ProjectWithSimilarTitleAlreadyExist();
       }
     }
     if (order) {
-      const projectDataArray = await fetchProject(courseIds, null, order, `{ id_not: "${projectId}" }`);
+      const projectDataArray = await fetchProject(courseIds, null, order, type, `{ id_not: "${projectId}" }`);
       if (projectDataArray && projectDataArray.length > 0) {
         throw new ProjectWithSimilarOrderAlreadyExist();
       }
