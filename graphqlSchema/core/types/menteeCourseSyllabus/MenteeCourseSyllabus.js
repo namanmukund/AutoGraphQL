@@ -80,6 +80,7 @@ const menteeCourseSyllabusProject = `
 const firstComponent = `
   type FirstComponent {
    componentName: String,
+   childComponentName: String,
    componentId: ID,
  }`;
 
