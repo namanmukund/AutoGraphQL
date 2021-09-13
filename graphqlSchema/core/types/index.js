@@ -116,6 +116,9 @@ import AuditQuestionSection from './auditQuestionSection';
 import AuditQuestionSubSection from './auditQuestionSubSection';
 import GetSchoolCampaignSlots from './getSchoolCampaignSlots';
 import BDEProfile from './bdeProfile';
+import UserCourse from './userCourse';
+import GetUserCourses from './getUserCourses';
+import UserMerchant from './userMerchant';
 
 export default [
   ...User,
@@ -236,4 +239,7 @@ export default [
   ...AuditQuestionSubSection,
   ...GetSchoolCampaignSlots,
   ...BDEProfile,
+  ...GetUserCourses,
+  ...UserCourse,
+  ...UserMerchant,
 ];

@@ -18,6 +18,7 @@ const Discount = `
     expiryDate: Date!
     description: String
     isDefault: Boolean @defaultValue(value: "false")
+    isDefaultMerchant: Boolean @defaultValue(value: "false")
   }
 `;
 

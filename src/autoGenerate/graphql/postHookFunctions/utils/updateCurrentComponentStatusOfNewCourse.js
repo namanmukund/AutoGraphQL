@@ -80,6 +80,8 @@ const updateCurrentComponentStatusOfNewCourse = async (
   page,
   topicComponentRule,
   topicOrder,
+  completedQuestionCount,
+  totalQuestions,
 ) => {
   const {
     video, message, practiceQuestion, comicStrip, quiz, blockBasedPractice, blockBasedProject,

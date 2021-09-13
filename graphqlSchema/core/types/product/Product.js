@@ -34,6 +34,12 @@ const Product = `
     features: [ProductFeature]
     showOnWebsite: Boolean @defaultValue(value: "false")
     targetUserType: ProductTargetUserType @defaultValue(value: "b2c")
+    totalSessions: Int
+    merchantDescription: String
+    showOnMerchantSite: Boolean @defaultValue(value: "false")
+    smallThumnail: File @relation(name: "ProductSmallThumbnail", direction: "OneWay")
+    mediumThumbnail: File @relation(name: "ProductMediumThumbnail", direction: "OneWay")
+    largeThumbnail: File @relation(name: "ProductLargeThumbnail", direction: "OneWay")
   }
 `;
 

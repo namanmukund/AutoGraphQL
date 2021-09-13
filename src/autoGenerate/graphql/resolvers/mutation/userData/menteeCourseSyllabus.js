@@ -632,6 +632,8 @@ const menteeCourseSyllabusMutationResolver = async (
   const upComingSession = [];
   const bookedSession = [];
   const completedSession = [];
+  let prevTopicComponentRule = [];
+  let prevTopicId;
   let lastTopicBookedOrder = 0;
   let lastCompletedTopicOrder = 0;
   let isPaid = false;
@@ -1187,6 +1189,25 @@ const menteeCourseSyllabusMutationResolver = async (
             componentId: bookedTopicId,
           };
         }
+        /** getting topicComponentRule of previous topic homework */
+        if (completedSession && completedSession.length) {
+          const bookedTopicOrder = bookedSession[0].topicOrder || '';
+          const prevCompletedSession = completedSession.filter((session) => get(session, 'topicOrder') === (bookedTopicOrder - 1));
+          if (prevCompletedSession && prevCompletedSession.length) {
+            const prevSessionTopicId = prevCompletedSession[0].topicId || '';
+            const prevTopicRes = await callLocalGraphqlApi(
+              getTopicQueryNewCourse(prevSessionTopicId),
+              context,
+              '',
+            );
+            const prevTopicInfo = get(prevTopicRes, 'data.topic');
+            // getting info of called prev topic
+            if (prevTopicInfo && prevTopicInfo.topicComponentRule) {
+              prevTopicComponentRule = prevTopicInfo.topicComponentRule;
+              prevTopicId = prevSessionTopicId;
+            }
+          }
+        }
       }
     }
   }
@@ -1202,6 +1223,10 @@ const menteeCourseSyllabusMutationResolver = async (
     // projects,
     mentor: mentorData,
     firstComponent,
+    previousTopic: {
+      topicComponentRule: prevTopicComponentRule,
+      topicId: prevTopicId,
+    },
   });
 
   return currentUserSyllabus;

@@ -10,6 +10,7 @@ import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
 import Raven from './Raven';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
 import { getParsedASTMap } from './autoGenerate/utils';
+import routes from './phonePeAPI/routes';
 
 const http = require('http');
 
@@ -20,6 +21,11 @@ const env = process.env.NODE_ENV || 'development';
 const application = process.env.APPLICATION || 'core';
 
 const app = express();
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+routes(app);
 
 const path = `/graphql/${application}`;
 

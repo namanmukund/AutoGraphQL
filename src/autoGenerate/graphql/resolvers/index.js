@@ -88,6 +88,7 @@ import getCourseCertificate from './query/methods/getCourseCertificate';
 import signUpSchool from './mutation/methods/signUpSchool';
 import rebookMenteeSession from './mutation/methods/rebookMenteeSession';
 import getSchoolCampaignSlots from './query/methods/getSchoolCampaignSlots';
+import getUserCourses from './query/methods/getUserCourses';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -601,6 +602,8 @@ resolvers.Query.getStudentCurrentStatus = getStudentCurrentStatus;
 resolvers.Query.getCampaignSlots = getCampaignSlots;
 // Resolver to get school Details
 resolvers.Query.getSchoolDetails = getSchoolDetails;
+// Resolver to get user's courses
+resolvers.Query.getUserCourses = getUserCourses;
 // Resolver to get school campaign slots
 resolvers.Query.getSchoolCampaignSlots = getSchoolCampaignSlots;
 // Resolver for a custom scalar type 'Date'

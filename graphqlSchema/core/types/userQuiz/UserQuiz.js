@@ -1,7 +1,7 @@
 const userQuizNextComponentType = `
   type UserQuizNextComponentType {
    topic: Topic @relation(name: "UserQuizNextComponentTypeTopic", direction: "OneWay")
-   nextComponentType: CurrentTopicComponentType!
+   nextComponentType: CurrentTopicComponentType
  }`;
 
 const quizType = `
