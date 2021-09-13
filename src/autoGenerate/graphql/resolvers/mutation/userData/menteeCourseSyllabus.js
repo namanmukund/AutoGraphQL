@@ -643,7 +643,7 @@ const getFilteredLoComponentRule = (learningObjective, loComponentRule) => {
           }
           return componentExists;
         })
-      );
+    );
   }
   return [];
 };
