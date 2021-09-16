@@ -108,7 +108,9 @@ const getUserCourses = (async (root, params, context, info) => {
       if (get(userCourseDoc, 'codingLanguages', []).includes('python') && get(userCourseDoc, 'id') !== OLD_COURSE_ID) {
         newPythonCourseExists = true;
       }
-      userCourseDoc.thumbnail = { type: 'File', typeId: `${get(userCourseDoc, 'thumbnail.id')}` };
+      if (get(userCourseDoc, 'thumbnail.id')) {
+        userCourseDoc.thumbnail = { type: 'File', typeId: `${get(userCourseDoc, 'thumbnail.id')}` };
+      }
       if (get(userCourseDoc, 'id') === OLD_COURSE_ID) {
         /** Not Required For Now */
         // eslint-disable-next-line no-await-in-loop
