@@ -125,10 +125,94 @@ const intersection = (arr1, arr2) => {
   return false;
 };
 
+const fetchCourseData = async (courseId) => {
+  const query = `{
+    course(id:"${courseId}") {
+      topics {
+        id
+        order
+        title
+      }
+    }
+  }`;
+  const res = await callLocalGraphqlApi(query);
+  const data = get(res, 'data.course', null);
+  return data;
+};
+
+const fetchMentorMenteeSession = async (userId, topicId) => {
+  const query = `{
+    mentorMenteeSessions(filter:{
+      and:[
+        { menteeSession_some:{user_some:{id:"${userId}"}}}
+        { topic_some: {id: "${topicId}" }}
+      ]
+    }) {
+      id
+      isSubmittedForReview
+      sessionStatus
+      topic {
+        title
+      }
+    }
+  }`;
+  const res = await callLocalGraphqlApi(query);
+  const data = get(res, 'data.mentorMenteeSessions[0]', null);
+  return data;
+};
+
+const fetchUserCourse = async (userId, courseId) => {
+  const query = `{
+    userCourses(filter:{
+      and:[
+        { courses_some: {id: "${courseId}" }}
+        { user_some: { id: "${userId}" }}
+      ]
+    }) {
+      id
+      courses {
+        id
+      }
+    }
+  }`;
+  const res = await callLocalGraphqlApi(query);
+  const data = get(res, 'data.userCourses[0]', null);
+  return data;
+};
+
+const updateMentorMenteeSession = async (id, input) => {
+  const query = `mutation {
+    updateMentorMenteeSession(id: "${id}", input: ${input}) {
+      id
+    }
+  }`;
+  const res = await callLocalGraphqlApi(query);
+  const data = get(res, 'data.updateMentorMenteeSession', null);
+  return data;
+};
+
+const updateUserCourseDoc = async (id, input) => {
+  const query = `mutation {
+    updateUserCourse(id: "${id}", input: ${input}) {
+      id
+    }
+  }`;
+  const res = await callLocalGraphqlApi(query);
+  const data = get(res, 'data.updateUserCourse', null);
+  return data;
+};
+
+const addOrDeleteHomeworkStreaks = async (context, userCourseRes, input, reviewSubmittedOnTime = false) => {
+    if (userCourseRes && get(userCourseRes, 'courses', []).length) {
+      await updateMentorMenteeSession(get(context, 'previousDocument.id', ''), { isReviewSubmittedOnTime: reviewSubmittedOnTime })
+      await updateUserCourseDoc(get(userCourseRes, 'id'), input)
+    }
+}
+
 const allowedRoles = [MENTEE];
 const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
   const {
-    currentUser, previousDocument: { sessionStatus: prevSessionStatus, topic, menteeSession: prevMenteeSession },
+    currentUser, previousDocument: { sessionStatus: prevSessionStatus, topic, menteeSession: prevMenteeSession, isSubmittedForReview: prevIsSubmittedForReview },
   } = context;
   const { sessionStartDate } = input;
   const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));
@@ -275,6 +359,46 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
         }
       }
       await updateUserPaymentPlanMutation(get(userPaymentPlanData, 'id'), updateObject, get(topic, 'id'));
+    }
+  }
+  if (prevIsSubmittedForReview === 'false' && get(input, 'isSubmittedForReview') === 'true' && courseId) {
+    /**
+     * 1. Fetch course topics.
+     * 2. Find next topic Id.
+     * 3. Fetch mentorMenteeSession with userId and nextTopicId.
+     *    a. if mentorMenteeSession doesn't exists --> increase streaks.
+     *    b. if mentorMenteeSession exists ---> check if session not started then increase streaks else break streak.  
+     */
+    const courseData = await fetchCourseData(courseId);
+    const topics = get(courseData, 'topics', []);
+    if (topics && topics.length) {
+      const sortedTopics = topics.sort((a, b) => a.order - b.order || -1);
+      const currentTopicIndex = sortedTopics.findIndex(topic => topic.id === topicId);
+      const nextTopicId = get(sortedTopics[currentTopicIndex + 1], 'id');
+      if (nextTopicId) {
+        const nextMentorMenteeSession = await fetchMentorMenteeSession(userId, nextTopicId);
+        if (nextMentorMenteeSession && nextMentorMenteeSession.length) {
+          const streaksInput = {
+            push: [{
+              homeworkSubmitDate: new Date().toISOString(),
+              mentorMenteeSessionConnectId: get(context, 'previousDocument.id', ''),
+            },],
+          };
+          const userCourseRes = await fetchUserCourse(userId, courseId);
+          if (get(nextMentorMenteeSession, 'sessionStatus') === 'allotted') {
+            // Add to Streak...
+            const input = { homeworkStreaks: streaksInput, homeworkStreaksLog: streaksInput };
+            await addOrDeleteHomeworkStreaks(context, userCourseRes, userId, courseId, input, true);
+          } else {
+            // Break Streak...
+            const input = { homeworkStreaks: { popAll: true } };
+            await addOrDeleteHomeworkStreaks(context, userCourseRes, userId, courseId, input, false);
+          }
+          // Add to Streak...
+          const input = { homeworkStreaks: streaksInput, homeworkStreaksLog: streaksInput };
+          await addOrDeleteHomeworkStreaks(context, userCourseRes, userId, courseId, input, true);
+        }
+      }
     }
   }
 };
