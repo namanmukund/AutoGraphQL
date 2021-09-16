@@ -36,6 +36,7 @@ const QuizReportQuestionsType = `
 const GetQuizReportInput = `
   input GetQuizReportInput {
     topicId: ID!
+    courseId: ID
     quizQuestions: [QuizReportQuestionsType]
   }`;
 

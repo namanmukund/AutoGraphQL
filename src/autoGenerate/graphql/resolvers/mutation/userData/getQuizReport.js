@@ -62,13 +62,14 @@ const getTopicQuery = (topicId) => `
   `;
 
 // query to get user quiz to get next component
-const userQuizQuery = (userId, topicId) => `
+const userQuizQuery = (userId, topicId, courseId) => `
   query{
     userQuizs(
       filter: {
         and: [
           { user_some: { id: "${userId}" } }
           { topic_some: { id: "${topicId}" } }
+          ${courseId ? `{course_some:{id:"${courseId}"}},` : ''}
         ]
       }
       orderBy: createdAt_DESC
@@ -136,11 +137,13 @@ const getQuizReportQuery = (userId, topicId) => `
 const addUserQuizDump = (
   userId,
   topicId,
+  courseId
 ) => `
   mutation addQuizDump($input: [QuizQuestionsTypeInput]!){
     addUserActivityQuizDump(
     userConnectId: "${userId}",
     topicConnectId: "${topicId}",
+    ${courseId ? `courseConnectId: "${courseId}",` : ''}
     input: {
       quizAction: ${userActionType.next},
        quizQuestions: $input
@@ -265,7 +268,7 @@ const getQuizReportMutationResolver = async (
     throw new UnauthenticatedUserError();
   }
 
-  const { topicId, quizQuestions } = input;
+  const { topicId, quizQuestions, courseId } = input;
   if (!topicId) {
     throw new DatabaseRecordNotFoundError({
       data: {
@@ -326,7 +329,7 @@ const getQuizReportMutationResolver = async (
   if (topicInfo.order > currentRunningTopic.order) {
     throw new ComponentLockedError();
   }
-  const userQuizQueryRes = await callGraphqlApi(userQuizQuery(userId, topicId));
+  const userQuizQueryRes = await callGraphqlApi(userQuizQuery(userId, topicId, courseId));
   const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
   const quizQuestionsInUserQuiz = get(userQuizInfo, 'quiz');
   if (!quizQuestionsInUserQuiz
@@ -343,10 +346,10 @@ const getQuizReportMutationResolver = async (
   Sending and awaiting user quiz dump
   This is called beforehand so that the userQuizReport document gets created for just sent quiz data
   */
-  await callGraphqlApi(
-    addUserQuizDump(userId, topicId),
-    {
-      input: quizQuestions,
+ await callGraphqlApi(
+   addUserQuizDump(userId, topicId, courseId),
+   {
+     input: quizQuestions,
     },
     '',
     '',
