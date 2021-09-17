@@ -18,7 +18,7 @@ import validateCurrentTopicComponent from '../../utils/validateCurrentTopicCompo
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = (userId) => `
+const getUserCurrentTopicComponentStatus = (userId, courseId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -28,7 +28,7 @@ const getUserCurrentTopicComponentStatus = (userId) => `
       {currentCourse_some:{
         and:[
           {status: ${PUBLISHED}},
-          {title: "${GLOBAL_COURSE_TITLE}"}
+          ${courseId ? `{id: "${courseId}"},` : `{title: "${GLOBAL_COURSE_TITLE}"},`}
         ]
       }}
       ]
@@ -259,7 +259,7 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
 
   const res = await callLocalGraphqlApi(
-    getUserCurrentTopicComponentStatus(userId),
+    getUserCurrentTopicComponentStatus(userId, courseId),
     context,
     '',
   );
@@ -285,16 +285,23 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     });
   }
   let currentRunningTopic;
+  let currentRunningTopicComponentType;
 
   // if user belongs to a batch, quiz report will be calculated on basis of batchCurrentComponentStatus
   if (batchCurrentComponentInfo) {
     currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
   } else {
     currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
+    currentRunningTopicComponentType = currentTopicComponentInfo && currentTopicComponentInfo.currentTopicComponentType;
   }
-  if (topicInfo.order >= currentRunningTopic.order) {
+  if (topicInfo.order > currentRunningTopic.order) {
     throw new ComponentLockedError();
+  } else if (topicInfo.order === currentRunningTopic.order) {
+    if (!batchCurrentComponentInfo && currentRunningTopicComponentType !== 'quiz') {
+      throw new ComponentLockedError();
+    }
   }
+  // If not equal then check if not quiz and throw eror ( allow for batch )
   // this object will be returned in output
   const userQuizReportData = {};
   let parsedLatestQuizReport;
