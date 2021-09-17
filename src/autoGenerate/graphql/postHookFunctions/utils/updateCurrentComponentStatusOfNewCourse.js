@@ -229,6 +229,28 @@ const updateCurrentComponentStatusOfNewCourse = async (
         updateUserCurrentTopicComponentStatus = true;
       }
       break;
+    case 'assignment':
+      currentComponentIndex = sortedTopicComponentRule.findIndex((comp) => comp.componentName === 'assignment');
+      nextComponentIndex = currentComponentIndex + 1;
+      /*
+      We are checking whether user current topic status should be updated, below are the conditions:
+      -user is hitting next and
+      -current topic component should be 'assignment'
+      -called topic in input should be equal to current topic and
+      -next published topic is present in the database, if it is not present we are assuming that it
+      -was the last topic in the course
+      Above conditions covers the case that current component status will only get changed, if
+      called component is  is equal to current component and user has just consumed(next action) it
+      And current component status will not get changed when it is already consumed in past
+      */
+      if (userAction === next
+        && currentTopicComponent === quiz
+        && currentTopicId === topicId
+      ) {
+        // updating current component in case quiz is completed by user
+        updateUserCurrentTopicComponentStatus = true;
+      }
+      break;
     case quiz:
       currentComponentIndex = sortedTopicComponentRule.findIndex((comp) => comp.componentName === quiz);
       nextComponentIndex = currentComponentIndex + 1;
@@ -236,6 +258,28 @@ const updateCurrentComponentStatusOfNewCourse = async (
       We are checking whether user current topic status should be updated, below are the conditions:
       -user is hitting next and
       -current topic component should be 'quiz'
+      -called topic in input should be equal to current topic and
+      -next published topic is present in the database, if it is not present we are assuming that it
+      -was the last topic in the course
+      Above conditions covers the case that current component status will only get changed, if
+      called component is  is equal to current component and user has just consumed(next action) it
+      And current component status will not get changed when it is already consumed in past
+      */
+      if (userAction === next
+        && currentTopicComponent === quiz
+        && currentTopicId === topicId
+      ) {
+        // updating current component in case quiz is completed by user
+        updateUserCurrentTopicComponentStatus = true;
+      }
+      break;
+    case 'homeworkAssignment':
+      currentComponentIndex = sortedTopicComponentRule.findIndex((comp) => comp.componentName === 'homeworkAssignment');
+      nextComponentIndex = currentComponentIndex + 1;
+      /*
+      We are checking whether user current topic status should be updated, below are the conditions:
+      -user is hitting next and
+      -current topic component should be 'homeworkAssignment'
       -called topic in input should be equal to current topic and
       -next published topic is present in the database, if it is not present we are assuming that it
       -was the last topic in the course
@@ -330,6 +374,8 @@ const updateCurrentComponentStatusOfNewCourse = async (
       } else if (comicStripCount) {
         nextCurrentTopicComponentType = comicStrip;
       }
+    } else if ((nextCurrentTopicComponent.componentName === 'assignment') || (nextCurrentTopicComponent.componentName === 'homeworkAssignment')) {
+      nextCurrentTopicComponentType = quiz;
     } else {
       nextCurrentTopicComponentType = nextCurrentTopicComponent.componentName;
     }

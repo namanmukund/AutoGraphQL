@@ -11,6 +11,7 @@ const UserActivityAssignmentDump = `
     user: User! @relation(name: "UserActivityAssignmentDump", direction: "OneWay")
     assignmentQuestions: [AssignmentQuestionsType]
     assignmentAction: UserActionType
+    isHomework: Boolean @defaultValue(value: "false")
     topic: Topic @relation(name: "TopicUserActivityAssignmentDump", direction: "OneWay")
     course: Course @relation(name: "UserActivityAssignmentDumpCourse", direction: "OneWay")
   }

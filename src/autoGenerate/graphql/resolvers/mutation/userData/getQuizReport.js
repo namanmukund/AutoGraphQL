@@ -20,7 +20,7 @@ import validateCurrentTopicComponent from '../../utils/validateCurrentTopicCompo
 import { log } from '../../../../../../utils';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = (userId) => `
+const getUserCurrentTopicComponentStatus = (userId, courseId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -30,7 +30,7 @@ const getUserCurrentTopicComponentStatus = (userId) => `
       {currentCourse_some:{
         and:[
           {status: ${PUBLISHED}},
-          {title: "${GLOBAL_COURSE_TITLE}"}
+          ${courseId ? `{id:"${courseId}"}` : `{title: "${GLOBAL_COURSE_TITLE}"}`}
         ]
       }}
       ]
@@ -279,7 +279,7 @@ const getQuizReportMutationResolver = async (
 
   const { authorization: token } = context;
   const res = await callGraphqlApi(
-    getUserCurrentTopicComponentStatus(userId),
+    getUserCurrentTopicComponentStatus(userId, courseId),
     '',
     '',
     '',
