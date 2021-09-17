@@ -137,7 +137,7 @@ const getQuizReportQuery = (userId, topicId) => `
 const addUserQuizDump = (
   userId,
   topicId,
-  courseId
+  courseId,
 ) => `
   mutation addQuizDump($input: [QuizQuestionsTypeInput]!){
     addUserActivityQuizDump(
@@ -346,10 +346,10 @@ const getQuizReportMutationResolver = async (
   Sending and awaiting user quiz dump
   This is called beforehand so that the userQuizReport document gets created for just sent quiz data
   */
- await callGraphqlApi(
-   addUserQuizDump(userId, topicId, courseId),
-   {
-     input: quizQuestions,
+  await callGraphqlApi(
+    addUserQuizDump(userId, topicId, courseId),
+    {
+      input: quizQuestions,
     },
     '',
     '',
