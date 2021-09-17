@@ -25,6 +25,7 @@ const MentorDemandSingleSlot = `
     date: Date!
     vertical: Vertical!
     mentorDemandSlot: MentorDemandSlot @relation(name: "MentorDemandSlotMentorDemandSingleSlot")
+    slotName: Slot
     paySlab: MentorSupplyPaySlab @relation(name: "MentorDemandSlotPaySlab", direction: "OneWay")
     countries: [Country]
     timezone: [String]
