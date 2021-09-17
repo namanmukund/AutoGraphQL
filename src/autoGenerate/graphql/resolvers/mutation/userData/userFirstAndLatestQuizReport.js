@@ -292,7 +292,7 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   } else {
     currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
   }
-  if (topicInfo.order > currentRunningTopic.order) {
+  if (topicInfo.order >= currentRunningTopic.order) {
     throw new ComponentLockedError();
   }
   // this object will be returned in output
