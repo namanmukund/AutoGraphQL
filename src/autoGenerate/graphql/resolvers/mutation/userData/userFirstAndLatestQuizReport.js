@@ -6,6 +6,7 @@ import {
   PUBLISHED,
   masteryLevels,
   topicTypes,
+  OLD_COURSE_ID,
 } from '../../../../../../constants';
 import {
   ComponentLockedError,
@@ -235,7 +236,7 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;
-  const { topicId } = params;
+  const { topicId, courseId } = params;
   if (!topicId) {
     throw new DatabaseRecordNotFoundError({
       data: {
@@ -319,20 +320,23 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   We are getting latest user quiz through this query.
   Then we will get next published topic
   */
-  const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId));
-  const nextTopicId = get(userQuizQueryRes, 'data.userQuizs[0].nextComponent.topic.id');
+  let nextComponentData = {};
+  if (!courseId || courseId === OLD_COURSE_ID) {
+    const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId));
+    const nextTopicId = get(userQuizQueryRes, 'data.userQuizs[0].nextComponent.topic.id');
 
-  const { video } = topicTypes;
+    const { video } = topicTypes;
+    // parsing data for next topic
+    const nextTopicData = { type: 'Topic', typeId: `${nextTopicId}` };
+    nextComponentData = {
+      topic: nextTopicData,
+      nextComponentType: video,
+    };
+  }
   // parsing data for topic
   const topicData = { type: 'Topic', typeId: `${topicInfo.id}` };
   // parsing data for user
   const userData = { type: 'User', typeId: `${userId}` };
-  // parsing data for next topic
-  const nextTopicData = { type: 'Topic', typeId: `${nextTopicId}` };
-  const nextComponentData = {
-    topic: nextTopicData,
-    nextComponentType: video,
-  };
 
   // Constructing data as per schema
   Object.assign(userQuizReportData, {
