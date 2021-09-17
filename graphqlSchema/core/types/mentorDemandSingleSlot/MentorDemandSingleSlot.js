@@ -4,6 +4,12 @@ import {
   UMS_HEAD, NOT_UMS_HEAD,
 } from '../../../../constants/roles';
 
+const SingleSlotCountry = `
+ type SingleSlotCountry {
+   value: Country
+ }
+`;
+
 const MentorDemandSingleSlot = `
   type MentorDemandSingleSlot @model
   @appPermissions(
@@ -27,7 +33,7 @@ const MentorDemandSingleSlot = `
     mentorDemandSlot: MentorDemandSlot @relation(name: "MentorDemandSlotMentorDemandSingleSlot")
     slotName: Slot
     paySlab: MentorSupplyPaySlab @relation(name: "MentorDemandSlotPaySlab", direction: "OneWay")
-    countries: [Country]
+    countries: [SingleSlotCountry]
     timezone: [String]
     count: Int
     schools: [School] @relation(name:"MentorDemandSingleSlotSchool", direction: "OneWay")
@@ -36,8 +42,8 @@ const MentorDemandSingleSlot = `
     menteeSessions: [MenteeSession] @relation(name:"MentorDemandSingleSlotMenteeSession")
     batchSessions: [BatchSession] @relation(name:"MentorDemandSingleSlotBatchSession")
     mentorSessions: [MentorSession] @relation(name:"MentorDemandSingleSlotMentorSession")
-    isBroadCasted: Boolean
+    isBroadCasted: Boolean @defaultValue(value: "false")
   }
 `;
 
-export default [MentorDemandSingleSlot];
+export default [MentorDemandSingleSlot, SingleSlotCountry];
