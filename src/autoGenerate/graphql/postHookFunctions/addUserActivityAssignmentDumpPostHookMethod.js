@@ -186,10 +186,12 @@ const addUserActivityAssignmentDumpPostHookMethod = async (input, mutationName, 
 
   const { assignmentAction, assignmentQuestions, isHomework } = input;
 
-  // throwing error if client has not send any assignment question in input
-  if (!assignmentQuestions || !assignmentQuestions.length) {
-    log('AssignmentQuestions are not present in input in addUserActivityAssignmentDumpPostHookMethod');
-    throw new AssignmentQuestionsNotPresentError();
+  if (!courseId || courseId === OLD_COURSE_ID) {
+    // throwing error if client has not send any assignment question in input
+    if (!assignmentQuestions || !assignmentQuestions.length) {
+      log('AssignmentQuestions are not present in input in addUserActivityAssignmentDumpPostHookMethod');
+      throw new AssignmentQuestionsNotPresentError();
+    }
   }
   // throwing error if there are no published assignment questions in database
   if (!assignmentQuestionsInUserAssignment
