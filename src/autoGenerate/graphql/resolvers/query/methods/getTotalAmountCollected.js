@@ -74,6 +74,9 @@ const getTotalAmountCollected = (async (root, params, context) => {
     if (input.oneToThree) {
       filter += '{userPaymentPlan_some: {product_some: {type: oneToThree}}}, ';
     }
+    if (input.schoolId) {
+      filter += `{client_some: {studentProfile_some: {school_some: {id:"${input.schoolId}"}}}}`;
+    }
     filter += ']}';
 
     const salesOperationRes = await callLocalGraphqlApi(
