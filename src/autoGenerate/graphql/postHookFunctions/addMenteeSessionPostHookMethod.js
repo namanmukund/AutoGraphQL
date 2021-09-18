@@ -2,12 +2,49 @@ import { get } from 'lodash';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import reduceParticularAvailableSlotOfADate from './utils/reduceParticularAvailableSlotOfADate';
 import extractMenteeSessionInfoAndSendEmail from './utils/extractMenteeSessionInfoAndSendEmail';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { addMenteeBookingLeadsquared } from './leadsquared';
 import getMenteeInfo from './utils/getMenteeInfo';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import getTopicInfo from './utils/getTopicInfo';
 import { byPassMenteeValidationApps } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
+
+const getUserCourses = async (userId) => {
+  const query = `
+      query{
+        userCourses(filter:{
+          and:[
+            {user_some:{id:"${userId}"}},
+          ]
+        }){
+          id
+          courses {
+            id
+          }
+        }
+      }
+    `;
+  const userCoursesRes = await callLocalGraphqlApi(query);
+  const userCourses = get(userCoursesRes, 'data.userCourses');
+  return userCourses;
+};
+
+const addUserCourseQuery = (userId, courseId) => `
+  mutation {
+      addUserCourse(userConnectId: "${userId}", coursesConnectIds: ["${courseId}"], input: {}) {
+          id
+      }
+  }
+`;
+
+const updateUserCourseQuery = (id, courseId) => `
+  mutation {
+      updateUserCourse(id: "${id}", coursesConnectIds: ["${courseId}"], input: {}) {
+          id
+      }
+  }
+`;
 
 const addMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
   // don't decrease the availability slot if it is done through backend
@@ -45,6 +82,19 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     const clientId = get(userInfo, 'data.user.id', '');
     const topicId = get(topicInfo, 'data.topic.id', '');
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    /**
+     * Add course into UserCourse Collection if not present already
+     */
+    const userCourses = await getUserCourses(clientId);
+    if (userCourses && userCourses.length) {
+      const userCourse = userCourses[0];
+      const filteredCourse = get(userCourse, 'courses', []).filter((course) => get(course, 'id') === courseId);
+      if (filteredCourse.length <= 0) {
+        callLocalGraphqlApi(updateUserCourseQuery(get(userCourse, 'id'), courseId));
+      }
+    } else {
+      callLocalGraphqlApi(addUserCourseQuery(clientId, courseId));
+    }
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMenteeSession', batchCode, '', '');
   }
 };
