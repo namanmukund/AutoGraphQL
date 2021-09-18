@@ -12,6 +12,11 @@ const getUserCoursesQuery = (userId) => `
       id
       order
       title
+      secondaryCategory
+      thumbnail {
+        id
+        uri
+      }
       codingLanguages {
         value
       }
@@ -75,7 +80,7 @@ const getUserCoursesQuery = (userId) => `
 const validateIncomingFields = (fieldsFetched = {}) => {
   const whiteListedFields = [
     'id', 'title', 'order', 'defaultLoComponentRule', 'codingLanguages',
-    'courseComponentRule', 'topicsMeta', 'codingLanguages', 'topics'];
+    'courseComponentRule', 'topicsMeta', 'codingLanguages', 'topics', 'thumbnail', 'secondaryCategory'];
 
   const fieldsFetchedArr = Object.keys(fieldsFetched);
   if (fieldsFetchedArr && fieldsFetchedArr.length) {
@@ -102,6 +107,9 @@ const getUserCourses = (async (root, params, context, info) => {
     for (const userCourseDoc of userCourses) {
       if (get(userCourseDoc, 'codingLanguages', []).includes('python') && get(userCourseDoc, 'id') !== OLD_COURSE_ID) {
         newPythonCourseExists = true;
+      }
+      if (get(userCourseDoc, 'thumbnail.id')) {
+        userCourseDoc.thumbnail = { type: 'File', typeId: `${get(userCourseDoc, 'thumbnail.id')}` };
       }
       if (get(userCourseDoc, 'id') === OLD_COURSE_ID) {
         /** Not Required For Now */
