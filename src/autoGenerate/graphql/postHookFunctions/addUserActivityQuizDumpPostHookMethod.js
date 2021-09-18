@@ -118,7 +118,7 @@ const questionBankQuery = (questionIdsQuery) => `
       }
       arrangeOptions{
         statement
-        correctPosition
+        correctPositions
       }
       learningObjective{
         id
@@ -475,11 +475,13 @@ const createQueryForUserAnswersAndOptions = (
         isCorrect = true;
         let userArrangeQuery = 'userArrangeAnswer: [';
         let arrangeOptionsQuery = 'arrangeOptions: [';
+        let optionPositions = [];
         const arrangeOptionsLength = arrangeOptions.length;
         const userArrangeAnswersLength = userArrangeAnswers && userArrangeAnswers.length;
         arrangeOptions.forEach((arrangeOption) => {
           statement = get(arrangeOption, 'statement').trim();
           optionPosition = get(arrangeOption, 'correctPosition');
+          optionPositions = get(arrangeOption, 'correctPositions');
           if (isAttempted && userArrangeAnswersLength) {
             userArrangeAnswers.forEach((userArrangeAnswer) => {
               userStatement = get(userArrangeAnswer, 'statement').trim();
@@ -490,7 +492,7 @@ const createQueryForUserAnswersAndOptions = (
                 userArrangeQuery += `position: ${userStatementPosition}}, `;
                 // if statement user order does not match correct order
                 // setting isCorrect to false
-                if (userStatementPosition !== optionPosition) {
+                if (optionPositions.indexOf(userStatementPosition) === -1) {
                   isCorrect = false;
                 }
               }
@@ -498,11 +500,17 @@ const createQueryForUserAnswersAndOptions = (
           } else {
             isCorrect = false;
           }
+          let correctPositionsQuery = '[';
+          optionPositions.forEach((optionCorrectPosition) => {
+            correctPositionsQuery += `${optionCorrectPosition}, `;
+          });
+          correctPositionsQuery += ']';
           // constructing query for correct arrangeOptions
           // replicating info from question Bank
           const escapedStatement = escapeString(statement);
           arrangeOptionsQuery += `{statement: "${escapedStatement}", `;
-          arrangeOptionsQuery += `correctPosition: ${optionPosition}}, `;
+          arrangeOptionsQuery += `correctPosition: ${optionPosition}, `;
+          arrangeOptionsQuery += `correctPositions: ${correctPositionsQuery}}, `;
         });
         if (arrangeOptionsLength !== userArrangeAnswersLength) {
           isCorrect = false;
