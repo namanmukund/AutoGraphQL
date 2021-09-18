@@ -1,3 +1,4 @@
 import GetUserCoursesInput from './getUserCoursesInput';
+import GetUserCoursesResults from './GetUserCoursesResults';
 
-export default [...GetUserCoursesInput];
+export default [...GetUserCoursesInput, ...GetUserCoursesResults];
