@@ -351,6 +351,7 @@ const childTopicComponents = {
   message: 'message',
   practiceQuestion: 'practiceQuestion',
   comicStrip: 'comicStrip',
+  chatbot: 'chatbot',
 };
 
 const blockBasedProjectType = {

@@ -11,12 +11,25 @@ import parseTopicComponentResultData from './utils/parseTopicComponentResultData
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
 // query to get learning objective and all the learning objectives of the topic associated
-const learningObjectiveQuery = (learningObjectiveId) => `
+const learningObjectiveQuery = (learningObjectiveId, courseId) => `
   query{
     learningObjective(id:"${learningObjectiveId}"){
       id
       order
       topic{
+        id
+        learningObjectives(
+          filter:{
+            status: ${PUBLISHED}
+          }
+          orderBy:order_ASC,
+        ){
+          id
+        }
+      }
+      topics(filter:{and:[
+        ${courseId ? `{courses_some:{id:"${courseId}"}}` : ''}
+      ]}) {
         id
         learningObjectives(
           filter:{
@@ -125,13 +138,13 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
     return resultArray;
   }
   const learningObjectiveQueryRes = await callLocalGraphqlApi(
-    learningObjectiveQuery(learningObjectiveId),
+    learningObjectiveQuery(learningObjectiveId, courseId),
   );
   const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
   const {
-    topic: topicInfo,
     questionBank: practiceQuestionsInLO,
   } = learningObjectiveInfo;
+  const topicInfo = get(learningObjectiveInfo, 'topics[0]', null) || get(learningObjectiveInfo, 'topic');
   if (!topicInfo) {
     throw new DatabaseRecordNotFoundError({
       data: {
