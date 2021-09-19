@@ -95,10 +95,12 @@ const userQuizQuery = (
     `;
 
 // getting questions from question bank to evaluate quiz report
-const questionBankQuery = (questionIdsQuery) => `
+const questionBankQuery = (questionIdsQuery, courseId) => `
   query{
     questionBanks(filter:{
-      id_in: ${questionIdsQuery}
+      and: [
+        {id_in: ${questionIdsQuery}},
+      ]
     }){
       id
       order
@@ -121,6 +123,11 @@ const questionBankQuery = (questionIdsQuery) => `
         correctPositions
       }
       learningObjective{
+        id
+      }
+      learningObjectives(filter:{
+        ${courseId ? `courses_some:{id:"${courseId}"}` : ''}
+      }){
         id
       }
     }
@@ -537,6 +544,7 @@ const createQueryForUserAnswersAndOptions = (
 const evaluateUserQuiz = async (
   quizQuestionsInUserQuiz,
   quizQuestions,
+  courseId,
 ) => {
   const totalQuestions = quizQuestionsInUserQuiz.length;
   // code to evaluate report of quiz
@@ -560,7 +568,7 @@ const evaluateUserQuiz = async (
     }
   });
   questionIdsQuery += ']';
-  const questionBankQueryRes = await callLocalGraphqlApi(questionBankQuery(questionIdsQuery));
+  const questionBankQueryRes = await callLocalGraphqlApi(questionBankQuery(questionIdsQuery, courseId));
   const questionBankInfo = get(questionBankQueryRes, 'data.questionBanks');
   const learningObjectiveReportObject = {};
   // Initializing quiz report with default count as 0 for all of fields
@@ -634,7 +642,10 @@ const evaluateUserQuiz = async (
     }
     pushManyQuery += userAnswersAndQuestionOptionsQuery;
     pushManyQuery += '}, ';
-    const loId = get(questionBank, 'learningObjective.id');
+    let loId = get(questionBank, 'learningObjective.id');
+    if (courseId) {
+      loId = get(questionBank, 'learningObjectives[0].id') || get(questionBank, 'learningObjective.id');
+    }
     // initializing learning objective report it is not already populated
     // Here loId is the learning objective id of the question
     if (!learningObjectiveReportObject[loId]) {
@@ -888,10 +899,12 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   } = userInfo;
   const userRoleFromContext = currentUser && currentUser.role;
 
-  // throwing error if client has not send any question in input
-  if (!quizQuestions || !quizQuestions.length) {
-    log('QuizQuestions are not present in input in addUserActivityQuizDumpPostHookMethod');
-    throw new QuizQuestionsNotPresentError();
+  if (!courseId || courseId === OLD_COURSE_ID) {
+    // throwing error if client has not send any question in input
+    if (!quizQuestions || !quizQuestions.length) {
+      log('QuizQuestions are not present in input in addUserActivityQuizDumpPostHookMethod');
+      throw new QuizQuestionsNotPresentError();
+    }
   }
   // throwing error if there are no published questions in database
   if (!quizQuestionsInUserQuiz
@@ -942,6 +955,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     } = await evaluateUserQuiz(
       quizQuestionsInUserQuiz,
       quizQuestions,
+      courseId,
     );
     if (!userQuizId) {
       log('Not able to fetch userQuizId in addUserActivityQuizDumpPostHookMethod');
