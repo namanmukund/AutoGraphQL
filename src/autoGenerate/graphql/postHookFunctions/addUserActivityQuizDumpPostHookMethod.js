@@ -516,7 +516,7 @@ const createQueryForUserAnswersAndOptions = (
           // replicating info from question Bank
           const escapedStatement = escapeString(statement);
           arrangeOptionsQuery += `{statement: "${escapedStatement}", `;
-          arrangeOptionsQuery += `correctPosition: ${optionPosition}, `;
+          // arrangeOptionsQuery += `correctPosition: ${optionPosition}, `;
           arrangeOptionsQuery += `correctPositions: ${correctPositionsQuery}}, `;
         });
         if (arrangeOptionsLength !== userArrangeAnswersLength) {
