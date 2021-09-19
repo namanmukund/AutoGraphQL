@@ -51,6 +51,7 @@ const temporaryScript = (async (root, params, context) => {
   // await migrateBatchAttendanceToEnum();
   // await updateQuestionsWithCorrectPositions();
   // await updateQuestionsWithHints();
+  // await updateQuestionsWithCorrectPositionIndex();
   return {
     result: true,
   };
