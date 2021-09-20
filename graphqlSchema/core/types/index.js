@@ -119,6 +119,10 @@ import BDEProfile from './bdeProfile';
 import UserCourse from './userCourse';
 import GetUserCourses from './getUserCourses';
 import UserMerchant from './userMerchant';
+import MentorSupplyPaySlab from './mentorSupplyPaySlab';
+import MentorDemandSlot from './mentorDemandSlot';
+import MentorDemandSingleSlot from './mentorDemandSingleSlot';
+import MentorAuditReport from './mentorAuditReport';
 
 export default [
   ...User,
@@ -242,4 +246,8 @@ export default [
   ...GetUserCourses,
   ...UserCourse,
   ...UserMerchant,
+  ...MentorSupplyPaySlab,
+  ...MentorDemandSlot,
+  ...MentorDemandSingleSlot,
+  ...MentorAuditReport,
 ];
