@@ -1,5 +1,8 @@
 import { get } from 'lodash';
-import { TopicWithSimilarOrderAlreadyExist, TopicWithSimilarTitleAlreadyExist } from '../../../../../constants/errors';
+import {
+  TopicWithSimilarOrderAlreadyExist,
+  TopicWithSimilarTitleAlreadyExist, MissingMandatoryInputInRequestError,
+} from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 export const getTopicsData = async (courseIds, title, order, topicFilter) => {
@@ -18,6 +21,13 @@ export const getTopicsData = async (courseIds, title, order, topicFilter) => {
 
 const addTopicValidation = async (params) => {
   const { coursesConnectIds = [], input: { title, order } } = params;
+  if (coursesConnectIds.length === 0) {
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'Course Ids is missing in input',
+      },
+    });
+  }
   if (title || order) {
     let courseIds = '';
     coursesConnectIds.forEach((courseId) => { courseIds += `"${courseId}"`; });

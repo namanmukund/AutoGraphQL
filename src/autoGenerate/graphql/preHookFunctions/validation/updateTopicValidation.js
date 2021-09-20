@@ -1,29 +1,19 @@
-import { get } from 'lodash';
 import { TopicWithSimilarOrderAlreadyExist, TopicWithSimilarTitleAlreadyExist } from '../../../../../constants/errors';
-import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { getTopicsData } from './addTopicValidation';
 
-const fetchCoursesFromTopic = async (topicId) => {
-  const query = `{
-  topic(id:"${topicId}"){
-    id
-    courses{
-      id
-    }
-  }
-}`;
-  const topicData = await callLocalGraphqlApi(query);
-  return get(topicData, 'data.topic', {});
-};
-
 const updateTopicValidation = async (params) => {
-  const { input: { title, order }, id: topicId } = params;
+  const { input: { title, order }, id: topicId, coursesConnectIds = [] } = params;
   if (title || order) {
-    let courseIds = '';
-    const topicData = await fetchCoursesFromTopic(topicId);
-    if (topicData) {
-      get(topicData, 'courses', []).forEach((course) => { courseIds += `"${get(course, 'id')}"`; });
+    if (coursesConnectIds.length === 0) {
+      throw new MissingMandatoryInputInRequestError({
+        data: {
+          message: 'Course Ids is missing in input',
+        },
+      });
     }
+    let courseIds = '';
+    coursesConnectIds.forEach((courseId) => { courseIds += `"${courseId}"`; });
     // check if the topic with similar title exist
     const topicFilter = `{ id_not:"${topicId}" }`;
     if (title) {
