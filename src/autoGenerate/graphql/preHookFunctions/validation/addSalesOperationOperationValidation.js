@@ -5,22 +5,23 @@ import { SimilarDocumentAlreadyExistError } from '../../../../../constants/error
 import getUserSource from './utils/getUserSource';
 import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetailsInParams';
 
-const salesOperationsMetaQuery = (clientConnectId) => `
+const salesOperationsMetaQuery = (clientConnectId, courseConnectId) => `
 query{
-  salesOperationsMeta(filter:{
-    client_some:{id:"${clientConnectId}"}
-  }){
+  salesOperationsMeta(filter:{ and: [
+    { client_some: { id: "${clientConnectId}" } }, 
+    { course_some: { id: "${courseConnectId}" } }
+  ] }){
     count
   }
 }
 `;
 
 const addSalesOperationValidation = async (params) => {
-  const { clientConnectId, monitoredByConnectId } = params;
-  if (!clientConnectId && !monitoredByConnectId) {
+  const { clientConnectId, monitoredByConnectId, courseConnectId } = params;
+  if (!clientConnectId && !monitoredByConnectId && !courseConnectId) {
     throw new ConnectIdRequiredError();
   }
-  const salesOperationsMeta = await callLocalGraphqlApi(salesOperationsMetaQuery(clientConnectId));
+  const salesOperationsMeta = await callLocalGraphqlApi(salesOperationsMetaQuery(clientConnectId, courseConnectId));
   const clientCount = get(salesOperationsMeta, 'data.salesOperationsMeta.count');
   if (clientCount > 0) {
     throw new SimilarDocumentAlreadyExistError();

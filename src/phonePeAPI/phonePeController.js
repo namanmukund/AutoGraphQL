@@ -56,7 +56,7 @@ const fetchProducts = async (req, res) => {
           const discountsFound = get(discountRes, 'data.discounts', []);
 
           const productPriceAmount = get(product, 'price.amount', 0);
-          let discountedAmount = 0;
+          let discountedAmount = productPriceAmount;
           let discountCode = '';
           let discount = 0;
 

@@ -112,6 +112,10 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
         bannerTitle
         bannerDescription
         badgeDescription
+        defaultLoComponentRule {
+          componentName
+          order
+        }
         chapters(
             filter: {
               status: ${PUBLISHED}
@@ -220,6 +224,10 @@ const getCourseQuery = (courseId) => `
         title
         description
         badgeDescription
+        defaultLoComponentRule {
+          componentName
+          order
+        }
         chapters(
             filter: {
               status: ${PUBLISHED}
@@ -271,7 +279,7 @@ query{
         id:"${userId}"
         }
       }
-      ${courseId && courseId !== OLD_COURSE_ID ? `{course_some:{id: "${courseId}"}}` : ''}
+      ${courseId ? `{course_some:{id: "${courseId}"}}` : ''}
     ]
     }){
       id
@@ -318,7 +326,7 @@ const getMentorMenteeSessions = (userId, courseId) => `
         {
           sessionStatus: completed
         }
-        ${courseId && courseId !== OLD_COURSE_ID ? `{course_some:{id: "${courseId}"}}` : ''}
+        ${courseId ? `{course_some:{id: "${courseId}"}}` : ''}
       ]
     }){
       id
@@ -581,6 +589,15 @@ query{
       componentName
       learningObjective{
         id
+        messagesMeta{
+            count
+        }
+        questionBankMeta(filter:{and:[{assessmentType:practiceQuestion}{status:published}]}){
+            count
+        }
+        comicStripsMeta(filter:{status:published}){
+            count
+        }
       }
       video{
         id
@@ -592,6 +609,44 @@ query{
   }
 }
 `;
+
+/** Fitler DefaultLoComponentRule based on Lo meta */
+const getFilteredLoComponentRule = (learningObjective, loComponentRule) => {
+  if (loComponentRule && loComponentRule.length && learningObjective) {
+    return (
+      loComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order)
+        .filter((componentRule) => {
+          let componentExists = false;
+          switch (get(componentRule, 'componentName')) {
+            case 'comicStrip':
+              if (get(learningObjective, 'comicStripsMeta.count', 0) > 0) {
+                componentExists = true;
+              }
+              break;
+            case 'practiceQuestion':
+              if (get(learningObjective, 'questionBankMeta.count', 0) > 0) {
+                componentExists = true;
+              }
+              break;
+            case 'message':
+              if (get(learningObjective, 'messagesMeta.count', 0) > 0) {
+                componentExists = true;
+              }
+              break;
+            case 'chatbot':
+              if ((get(learningObjective, 'messagesMeta.count', 0) > 0)) {
+                componentExists = true;
+              }
+              break;
+            default:
+              componentExists = false;
+          }
+          return componentExists;
+        })
+    );
+  }
+  return [];
+};
 
 /*
 This is called when mentee tries to load homepage
@@ -614,11 +669,7 @@ const menteeCourseSyllabusMutationResolver = async (
   both should be equal to perform further action
   */
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
-  let { courseId } = params;
-  // doing this for backward compatibility
-  if (courseId === OLD_COURSE_ID) {
-    courseId = '';
-  }
+  const { courseId } = params;
 
   const {
     userIdFromContext: userId,
@@ -1169,10 +1220,17 @@ const menteeCourseSyllabusMutationResolver = async (
         if (topicComponentRule && topicComponentRule.length) {
           const sortedTopicComponentRule = topicComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
           let componentId = '';
+          let childComponentName = null;
           if (sortedTopicComponentRule[0].componentName === video) {
             componentId = sortedTopicComponentRule[0].video && sortedTopicComponentRule[0].video.id;
           } else if (sortedTopicComponentRule[0].componentName === 'learningObjective') {
             componentId = sortedTopicComponentRule[0].learningObjective && sortedTopicComponentRule[0].learningObjective.id;
+            if (currentCourse && sortedTopicComponentRule[0].learningObjective && get(currentCourse, 'defaultLoComponentRule', []).length) {
+              const filteredLoComponent = getFilteredLoComponentRule(sortedTopicComponentRule[0].learningObjective, get(currentCourse, 'defaultLoComponentRule', []));
+              if (filteredLoComponent && filteredLoComponent.length) {
+                childComponentName = get(filteredLoComponent[0], 'componentName', 'comicStrip');
+              }
+            }
           } else if (sortedTopicComponentRule[0].componentName === blockBasedPractice) {
             componentId = sortedTopicComponentRule[0].blockBasedProject && sortedTopicComponentRule[0].blockBasedProject.id;
           } else if (sortedTopicComponentRule[0].componentName === blockBasedProject) {
@@ -1180,6 +1238,7 @@ const menteeCourseSyllabusMutationResolver = async (
           }
           firstComponent = {
             componentName: sortedTopicComponentRule[0].componentName,
+            childComponentName,
             componentId,
           };
         } else {
