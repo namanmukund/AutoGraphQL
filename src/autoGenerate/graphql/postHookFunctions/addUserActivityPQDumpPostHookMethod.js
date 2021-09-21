@@ -99,25 +99,14 @@ const updateUserLearningObjectiveMutationPracticeQuestions = (
 const addUserPracticeQuestionReportMutation = (
   userId,
   learningObjectiveId,
-  firstTryCount,
-  secondTryCount,
-  threeOrMoreTryCount,
-  helpUsedCount,
-  answerUsedCount,
   courseId,
 ) => `
-  mutation{
+  mutation addUserPracticeQuestionReport($input: UserPracticeQuestionReportInput!){
     addUserPracticeQuestionReport(
     userConnectId:"${userId}"
     learningObjectiveConnectId:"${learningObjectiveId}"
     ${courseId ? `courseConnectId:"${courseId}"` : ''}
-    input:{
-        firstTryCount: ${firstTryCount}
-        secondTryCount: ${secondTryCount}
-        threeOrMoreTryCount: ${threeOrMoreTryCount}
-        helpUsedCount: ${helpUsedCount}
-        answerUsedCount: ${answerUsedCount}
-    }
+    input: $input
   ){
       id
     }
@@ -182,6 +171,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   let helpUsedCount = 0;
   let answerUsedCount = 0;
   let completedQuestionCount = 0;
+  const detailedReport = [];
   /*
   creating push many query which will be used while updating userLearningObjective
   it will contain all info about practice questions(isHintUsed, isAnswerUser, try count etc.)
@@ -235,6 +225,15 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
         So, checking here for same question in both
         */
         if (questionConnectId === inputQuestionConnectId) {
+          detailedReport.push({
+            questionConnectId,
+            isCorrect,
+            isAnswerUsed,
+            isHintUsed,
+            firstTry: attemptNumber === 1,
+            secondTry: attemptNumber === 2,
+            thirdOrMoreTry: attemptNumber > 2,
+          });
           Object.assign(newPracticeQuestionInUserLearningObjective, { questionConnectId });
           /*
           Case: When individual question is incomplete and whole PQ is also incomplete.
@@ -405,13 +404,17 @@ And current component status will not get changed when it is already consumed in
     await callLocalGraphqlApi(addUserPracticeQuestionReportMutation(
       userId,
       learningObjectiveIdInResult,
-      firstTryCount,
-      secondTryCount,
-      threeOrMoreTryCount,
-      helpUsedCount,
-      answerUsedCount,
       courseId,
-    ));
+    ), '', {
+      input: {
+        firstTryCount,
+        secondTryCount,
+        threeOrMoreTryCount,
+        helpUsedCount,
+        answerUsedCount,
+        detailedReport,
+      },
+    });
   }
   return true;
 };

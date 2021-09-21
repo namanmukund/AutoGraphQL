@@ -77,6 +77,8 @@ const Course = `
     badgeDescription: String @uniqueOrEmpty @trim
     projectsCount: Int
     codingLanguages: [CodingLanguage]
+    minGrade: Int
+    maxGrade: Int
   }
 `;
 

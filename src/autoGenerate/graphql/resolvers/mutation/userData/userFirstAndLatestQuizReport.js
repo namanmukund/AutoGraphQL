@@ -6,6 +6,7 @@ import {
   PUBLISHED,
   masteryLevels,
   topicTypes,
+  OLD_COURSE_ID,
 } from '../../../../../../constants';
 import {
   ComponentLockedError,
@@ -17,7 +18,7 @@ import validateCurrentTopicComponent from '../../utils/validateCurrentTopicCompo
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = (userId) => `
+const getUserCurrentTopicComponentStatus = (userId, courseId) => `
   query{
     userCurrentTopicComponentStatuses(filter:{
       and:[
@@ -27,7 +28,7 @@ const getUserCurrentTopicComponentStatus = (userId) => `
       {currentCourse_some:{
         and:[
           {status: ${PUBLISHED}},
-          {title: "${GLOBAL_COURSE_TITLE}"}
+          ${courseId ? `{id: "${courseId}"},` : `{title: "${GLOBAL_COURSE_TITLE}"},`}
         ]
       }}
       ]
@@ -235,7 +236,7 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;
-  const { topicId } = params;
+  const { topicId, courseId } = params;
   if (!topicId) {
     throw new DatabaseRecordNotFoundError({
       data: {
@@ -258,7 +259,7 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
 
   const res = await callLocalGraphqlApi(
-    getUserCurrentTopicComponentStatus(userId),
+    getUserCurrentTopicComponentStatus(userId, courseId),
     context,
     '',
   );
@@ -284,16 +285,23 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     });
   }
   let currentRunningTopic;
+  let currentRunningTopicComponentType;
 
   // if user belongs to a batch, quiz report will be calculated on basis of batchCurrentComponentStatus
   if (batchCurrentComponentInfo) {
     currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
   } else {
     currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
+    currentRunningTopicComponentType = currentTopicComponentInfo && currentTopicComponentInfo.currentTopicComponentType;
   }
-  if (topicInfo.order >= currentRunningTopic.order) {
+  if (topicInfo.order > currentRunningTopic.order) {
     throw new ComponentLockedError();
+  } else if (topicInfo.order === currentRunningTopic.order) {
+    if (!batchCurrentComponentInfo && currentRunningTopicComponentType !== 'quiz') {
+      throw new ComponentLockedError();
+    }
   }
+  // If not equal then check if not quiz and throw eror ( allow for batch )
   // this object will be returned in output
   const userQuizReportData = {};
   let parsedLatestQuizReport;
@@ -319,20 +327,23 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   We are getting latest user quiz through this query.
   Then we will get next published topic
   */
-  const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId));
-  const nextTopicId = get(userQuizQueryRes, 'data.userQuizs[0].nextComponent.topic.id');
+  let nextComponentData = {};
+  if (!courseId || courseId === OLD_COURSE_ID) {
+    const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId));
+    const nextTopicId = get(userQuizQueryRes, 'data.userQuizs[0].nextComponent.topic.id');
 
-  const { video } = topicTypes;
+    const { video } = topicTypes;
+    // parsing data for next topic
+    const nextTopicData = { type: 'Topic', typeId: `${nextTopicId}` };
+    nextComponentData = {
+      topic: nextTopicData,
+      nextComponentType: video,
+    };
+  }
   // parsing data for topic
   const topicData = { type: 'Topic', typeId: `${topicInfo.id}` };
   // parsing data for user
   const userData = { type: 'User', typeId: `${userId}` };
-  // parsing data for next topic
-  const nextTopicData = { type: 'Topic', typeId: `${nextTopicId}` };
-  const nextComponentData = {
-    topic: nextTopicData,
-    nextComponentType: video,
-  };
 
   // Constructing data as per schema
   Object.assign(userQuizReportData, {
