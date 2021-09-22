@@ -29,7 +29,6 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
         }},
       {currentCourse_some:{
         and:[
-          {status: ${PUBLISHED}},
           ${courseId ? `{id:"${courseId}"}` : `{title: "${GLOBAL_COURSE_TITLE}"}`}
         ]
       }}
