@@ -3,7 +3,6 @@ import {
   GLOBAL_COURSE_TITLE,
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
-  PUBLISHED,
   masteryLevels,
   topicTypes,
   userActionType,
