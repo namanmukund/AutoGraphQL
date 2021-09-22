@@ -151,13 +151,6 @@ const userPermissionsDoc = {
       crud: [ADMIN],
       read: [NOT_ADMIN],
     },
-  },
-  School: {
-    collection: {
-      rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
-      read: [BDE, BDE_ADMIN]
-    }
   }
 };
 
