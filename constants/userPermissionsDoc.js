@@ -21,6 +21,7 @@ import {
   NOT_ADMIN,
   AUDITOR,
   BDE,
+  BDE_ADMIN
 } from './roles';
 
 const userPermissionsDoc = {
@@ -28,14 +29,14 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR],
-      read: [PRE_SALES, POST_SALES, AUDITOR, BDE],
+      read: [PRE_SALES, POST_SALES, AUDITOR, BDE, BDE_ADMIN],
       exceptDelete: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN, TRANSFORMATION_ADMIN, AUDIT_ADMIN],
     },
     fields: {
       role: {
         rule: 'allow',
         crud: [...UMS_HEAD_ARR],
-        read: [...NOT_UMS_HEAD_ARR, PRE_SALES, POST_SALES, AUDIT_ADMIN, AUDITOR, BDE],
+        read: [...NOT_UMS_HEAD_ARR, PRE_SALES, POST_SALES, AUDIT_ADMIN, AUDITOR, BDE, BDE_ADMIN],
         exceptDelete: [TRANSFORMATION_ADMIN],
       },
       savedPassword: {
@@ -50,7 +51,7 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
-      read: [MENTEE, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM, BDE],
+      read: [MENTEE, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM, BDE, BDE_ADMIN],
     },
   },
   SalesOperationLog: {
@@ -127,7 +128,7 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...CMS_HEAD_ARRAY, UMS_ADMIN],
-      read: [...NOT_CMS_HEAD_ARRAY, SCHOOL_ADMIN],
+      read: [...NOT_CMS_HEAD_ARRAY, SCHOOL_ADMIN, BDE_ADMIN],
     },
   },
   BlockBasedProject: {
@@ -151,6 +152,13 @@ const userPermissionsDoc = {
       read: [NOT_ADMIN],
     },
   },
+  School: {
+    collection: {
+      rule: 'allow',
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+      read: [BDE, BDE_ADMIN]
+    }
+  }
 };
 
 export default userPermissionsDoc;
