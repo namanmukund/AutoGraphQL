@@ -21,7 +21,7 @@ import {
   NOT_ADMIN,
   AUDITOR,
   BDE,
-  BDE_ADMIN
+  BDE_ADMIN,
 } from './roles';
 
 const userPermissionsDoc = {
@@ -151,7 +151,7 @@ const userPermissionsDoc = {
       crud: [ADMIN],
       read: [NOT_ADMIN],
     },
-  }
+  },
 };
 
 export default userPermissionsDoc;

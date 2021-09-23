@@ -20,7 +20,7 @@ const PRE_SALES = 'preSales';
 const POST_SALES = 'postSales';
 const AUDITOR = 'auditor';
 const BDE = 'BDE';
-const BDE_ADMIN = 'bdeAdmin'
+const BDE_ADMIN = 'bdeAdmin';
 
 const CMS_HEAD = `[
 "${ADMIN}",
