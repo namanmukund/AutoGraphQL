@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import moment from 'moment';
-import { auditType, MENTOR_RATING_AUDIT_THRESHOLD } from '../../../../constants';
+import { auditType, GLOBAL_COURSE_TITLE, MENTOR_RATING_AUDIT_THRESHOLD } from '../../../../constants';
 import { MENTEE } from '../../../../constants/roles';
 import updateReferrerCreditsPostSessionOrUserPayment from './utils/updateReferrerCreditsPostSessionOrUserPayment';
 import referralCredits from '../../../../constants/referralCredits';
@@ -21,6 +21,7 @@ import addRescheduledSlot from './utils/addRescheduledSlot';
 import addSessionLog from './utils/addSessionLog';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import addSalesAudit from './utils/addSalesAudit';
+import { log } from '../../../../utils';
 
 const { postSales } = auditType;
 // import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
@@ -127,7 +128,9 @@ const intersection = (arr1, arr2) => {
 
 const fetchCourseData = async (courseId) => {
   const query = `{
-    course(id:"${courseId}") {
+    courses(filter:{
+      ${courseId ? `id:"${courseId}"` : `title: "${GLOBAL_COURSE_TITLE}"`}
+    }) {
       topics {
         id
         order
@@ -136,16 +139,17 @@ const fetchCourseData = async (courseId) => {
     }
   }`;
   const res = await callLocalGraphqlApi(query);
-  const data = get(res, 'data.course', null);
+  const data = get(res, 'data.courses[0]', null);
   return data;
 };
 
-const fetchMentorMenteeSession = async (userId, topicId) => {
+const fetchMentorMenteeSession = async (userId, topicId, courseId) => {
   const query = `{
     mentorMenteeSessions(filter:{
       and:[
         { menteeSession_some:{user_some:{id:"${userId}"}}}
         { topic_some: {id: "${topicId}" }}
+        ${courseId ? `{course_some: {id: "${courseId}"}}` : ''}
       ]
     }) {
       id
@@ -157,7 +161,7 @@ const fetchMentorMenteeSession = async (userId, topicId) => {
     }
   }`;
   const res = await callLocalGraphqlApi(query);
-  const data = get(res, 'data.mentorMenteeSessions[0]', null);
+  const data = get(res, 'data.mentorMenteeSessions');
   return data;
 };
 
@@ -180,39 +184,97 @@ const fetchUserCourse = async (userId, courseId) => {
   return data;
 };
 
-const updateMentorMenteeSession = async (id, input) => {
+const updateMentorMenteeSession = async (id, isReviewSubmittedOnTime) => {
   const query = `mutation {
-    updateMentorMenteeSession(id: "${id}", input: ${input}) {
+    updateMentorMenteeSession(id: "${id}", input: {
+      isReviewSubmittedOnTime: ${isReviewSubmittedOnTime}
+    }) {
       id
     }
   }`;
+  log(`...................MMS QUERY, ${JSON.stringify(query, null, 2)}`);
   const res = await callLocalGraphqlApi(query);
   const data = get(res, 'data.updateMentorMenteeSession', null);
   return data;
 };
 
 const updateUserCourseDoc = async (id, input) => {
-  const query = `mutation {
-    updateUserCourse(id: "${id}", input: ${input}) {
+  const query = `mutation updateUserCourse($input: UserCourseUpdate!){
+    updateUserCourse(id: "${id}", input: $input) {
       id
     }
   }`;
-  const res = await callLocalGraphqlApi(query);
+  const variables = {
+    input,
+  };
+  log(`...................UCOURSE QUERY, ${JSON.stringify(query, null, 2)}`);
+  const res = await callLocalGraphqlApi(query, null, variables);
   const data = get(res, 'data.updateUserCourse', null);
   return data;
 };
 
-const addOrDeleteHomeworkStreaks = async (context, userCourseRes, input, reviewSubmittedOnTime = false) => {
-    if (userCourseRes && get(userCourseRes, 'courses', []).length) {
-      await updateMentorMenteeSession(get(context, 'previousDocument.id', ''), { isReviewSubmittedOnTime: reviewSubmittedOnTime })
-      await updateUserCourseDoc(get(userCourseRes, 'id'), input)
+const addOrDeleteHomeworkStreaks = async (context, userCourseRes, input, isReviewSubmittedOnTime = false) => {
+  log(`.............Input, ${JSON.stringify({ input, isReviewSubmittedOnTime }, null, 2)}`);
+  if (userCourseRes && get(userCourseRes, 'courses', []).length) {
+    await updateMentorMenteeSession(get(context, 'previousDocument.id', ''), isReviewSubmittedOnTime);
+    await updateUserCourseDoc(get(userCourseRes, 'id'), input);
+  }
+};
+
+const submittedForReviewStreaksFlow = async (topics, userId, courseId, context, topicId) => {
+  const sortedTopics = topics.sort((a, b) => a.order - b.order || -1);
+  const currentTopicIndex = sortedTopics.findIndex((topic) => topic.id === topicId);
+  const nextTopicId = get(sortedTopics[currentTopicIndex + 1], 'id');
+  log(`.............Next Topic, ${JSON.stringify(sortedTopics[currentTopicIndex + 1], null, 2)}`);
+  if (nextTopicId) {
+    const nextMentorMenteeSession = await fetchMentorMenteeSession(userId, nextTopicId, courseId);
+    log(`.............Next MMS, ${JSON.stringify(nextMentorMenteeSession, null, 2)}`);
+    const streaksInput = { push: { mentorMenteeSessionConnectId: get(context, 'previousDocument.id', '') } };
+    const userCourseRes = await fetchUserCourse(userId, courseId);
+    // Checking if next MMS exists
+    if (nextMentorMenteeSession && nextMentorMenteeSession.length) {
+      if (get(nextMentorMenteeSession[0], 'sessionStatus') === 'allotted') {
+        // increamenting streaks because next session has not started yet.
+        const input = { homeworkStreaks: streaksInput, homeworkStreaksLog: streaksInput };
+        await addOrDeleteHomeworkStreaks(context, userCourseRes, input, true);
+      } else {
+        // breaking streaks because next session has started/completed already.
+        const input = { homeworkStreaks: { popAll: true } };
+        await addOrDeleteHomeworkStreaks(context, userCourseRes, input, false);
+      }
     }
-}
+    if (nextMentorMenteeSession && nextMentorMenteeSession.length === 0) {
+      // increamenting streaks because next session has not been booked yet.
+      const input = { homeworkStreaks: streaksInput, homeworkStreaksLog: streaksInput };
+      await addOrDeleteHomeworkStreaks(context, userCourseRes, input, true);
+    }
+  }
+};
+
+const sessionStartedStreaksFlow = async (topics, userId, courseId, context) => {
+  const sortedTopics = topics.sort((a, b) => a.order - b.order || -1);
+  const currentTopicIndex = sortedTopics.findIndex((topic) => topic.id === topicId);
+  const prevTopicId = get(sortedTopics[currentTopicIndex - 1], 'id');
+  log(`.............Prev Topic, ${JSON.stringify(get(sortedTopics[currentTopicIndex - 1], 'id'), null, 2)}`);
+  if (prevTopicId) {
+    const prevMentorMenteeSession = await fetchMentorMenteeSession(userId, prevTopicId, courseId);
+    log(`.............Prev MMS, ${JSON.stringify(prevMentorMenteeSession, null, 2)}`);
+    const streaksInput = { push: { mentorMenteeSessionConnectId: get(context, 'previousDocument.id', '') } };
+    if (prevMentorMenteeSession && (get(prevMentorMenteeSession, 'isSubmittedForReview') === false)) {
+      const userCourseRes = await fetchUserCourse(userId, courseId);
+      log(`.............Prev USERCOURSE, ${JSON.stringify(userCourseRes, null, 2)}`);
+      const input = { homeworkStreaks: { popAll: true }, homeworkStreaksLog: streaksInput };
+      await addOrDeleteHomeworkStreaks(context, userCourseRes, input, false);
+    }
+  }
+};
 
 const allowedRoles = [MENTEE];
 const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
   const {
-    currentUser, previousDocument: { sessionStatus: prevSessionStatus, topic, menteeSession: prevMenteeSession, isSubmittedForReview: prevIsSubmittedForReview },
+    currentUser, previousDocument: {
+      sessionStatus: prevSessionStatus, topic, menteeSession: prevMenteeSession, isSubmittedForReview: prevIsSubmittedForReview,
+    },
   } = context;
   const { sessionStartDate } = input;
   const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));
@@ -361,45 +423,25 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       await updateUserPaymentPlanMutation(get(userPaymentPlanData, 'id'), updateObject, get(topic, 'id'));
     }
   }
-  if (prevIsSubmittedForReview === 'false' && get(input, 'isSubmittedForReview') === 'true' && courseId) {
-    /**
-     * 1. Fetch course topics.
-     * 2. Find next topic Id.
-     * 3. Fetch mentorMenteeSession with userId and nextTopicId.
-     *    a. if mentorMenteeSession doesn't exists --> increase streaks.
-     *    b. if mentorMenteeSession exists ---> check if session not started then increase streaks else break streak.  
-     */
-    const courseData = await fetchCourseData(courseId);
-    const topics = get(courseData, 'topics', []);
-    if (topics && topics.length) {
-      const sortedTopics = topics.sort((a, b) => a.order - b.order || -1);
-      const currentTopicIndex = sortedTopics.findIndex(topic => topic.id === topicId);
-      const nextTopicId = get(sortedTopics[currentTopicIndex + 1], 'id');
-      if (nextTopicId) {
-        const nextMentorMenteeSession = await fetchMentorMenteeSession(userId, nextTopicId);
-        if (nextMentorMenteeSession && nextMentorMenteeSession.length) {
-          const streaksInput = {
-            push: [{
-              homeworkSubmitDate: new Date().toISOString(),
-              mentorMenteeSessionConnectId: get(context, 'previousDocument.id', ''),
-            },],
-          };
-          const userCourseRes = await fetchUserCourse(userId, courseId);
-          if (get(nextMentorMenteeSession, 'sessionStatus') === 'allotted') {
-            // Add to Streak...
-            const input = { homeworkStreaks: streaksInput, homeworkStreaksLog: streaksInput };
-            await addOrDeleteHomeworkStreaks(context, userCourseRes, userId, courseId, input, true);
-          } else {
-            // Break Streak...
-            const input = { homeworkStreaks: { popAll: true } };
-            await addOrDeleteHomeworkStreaks(context, userCourseRes, userId, courseId, input, false);
-          }
-          // Add to Streak...
-          const input = { homeworkStreaks: streaksInput, homeworkStreaksLog: streaksInput };
-          await addOrDeleteHomeworkStreaks(context, userCourseRes, userId, courseId, input, true);
-        }
-      }
-    }
+  /**
+   * Homework Streaks Implementation
+   */
+  const courseTypeId = get(input, 'course.typeId', '');
+  const courseData = await fetchCourseData(courseId);
+  const topics = get(courseData, 'topics', []);
+  /**
+   * Updating streaks if user has submitted homework for review.
+   */
+  if ((prevIsSubmittedForReview === false) && (get(input, 'isSubmittedForReview') === true) && topics.length) {
+    log('.............In Review Flow');
+    submittedForReviewStreaksFlow(topics, userId, courseTypeId, context, topic.id);
+  }
+  /**
+   * Updating streaks if user has started next.
+   */
+  if (prevSessionStatus === 'allotted' && (get(input, 'sessionStatus') === 'started') && topics && topics.length) {
+    log('.............In Session Flow');
+    sessionStartedStreaksFlow(topics, userId, courseTypeId, context);
   }
 };
 export default updateMentorMenteeSessionPostHookMethod;

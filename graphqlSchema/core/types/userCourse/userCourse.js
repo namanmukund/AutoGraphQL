@@ -4,11 +4,11 @@ import {
 import { READ } from '../../../../constants/graphqlOperations';
 
 const HomeworkStreaksType = `
-  type HomeworkStreaksType {
-    homeworkSubmitDate: Date,
+  type HomeworkStreaks {
     mentorMenteeSession: MentorMenteeSession @relation(name: "UserCourseMentorMenteeSession", direction: "OneWay")
   }
-`
+`;
+
 const UserCourse = `
   type UserCourse @model
   @appPermissions(
@@ -38,8 +38,8 @@ const UserCourse = `
           ], 
         rule: allow
       )
-    homeworkStreaks: [HomeworkStreaksType]
-    homeworkStreaksLog: [HomeworkStreaksType]
+    homeworkStreaks: [HomeworkStreaks]
+    homeworkStreaksLog: [HomeworkStreaks]
   }
 `;
 
