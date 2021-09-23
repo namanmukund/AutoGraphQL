@@ -1,14 +1,15 @@
 import { get } from 'lodash';
-import { AssignmentWithSimilarStatementAlreadyExist } from '../../../../../constants/errors';
+import { AssignmentWithSimilarStatementAlreadyExist, OrderAlreadyExistsError } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-export const getAssignmentQuestion = async (courseIds, statement, isHomework, assignmentFilter) => {
+export const getAssignmentQuestion = async (courseIds, statement, isHomework, order, assignmentFilter) => {
   const query = `{
   assignmentQuestions(
     filter: {
       and: [
         ${courseIds ? `{ courses_some:{ id_in:[${courseIds}] } }` : ''}
         ${statement ? `{ statement: "${statement}" }` : ''}
+        ${order ? `{ order: ${order} }` : ''}
         { isHomework: ${isHomework} }
         ${assignmentFilter || ''}
       ]
@@ -22,8 +23,11 @@ export const getAssignmentQuestion = async (courseIds, statement, isHomework, as
 };
 
 const addAssignmentQuestionValidation = async (params) => {
-  const { coursesConnectIds = [], input: { statement, isHomework = false } } = params;
-  if (statement) {
+  const { coursesConnectIds = [], input = {} } = params;
+  const statement = get(input, 'statement');
+  const order = get(input, 'order');
+  const isHomework = get(input, 'isHomework');
+  if (statement || order) {
     let courseIds = '';
     coursesConnectIds.forEach((courseId) => { courseIds += `"${courseId}"`; });
     // check if the assignmentQuestion with similar statement exist
@@ -31,6 +35,12 @@ const addAssignmentQuestionValidation = async (params) => {
       const assignmentQuestionsData = await getAssignmentQuestion(courseIds, statement, isHomework);
       if (assignmentQuestionsData && assignmentQuestionsData.length > 0) {
         throw new AssignmentWithSimilarStatementAlreadyExist();
+      }
+    }
+    if (order) {
+      const assignmentQuestionsData = await getAssignmentQuestion(courseIds, null, isHomework, order);
+      if (assignmentQuestionsData && assignmentQuestionsData.length > 0) {
+        throw new OrderAlreadyExistsError();
       }
     }
   }

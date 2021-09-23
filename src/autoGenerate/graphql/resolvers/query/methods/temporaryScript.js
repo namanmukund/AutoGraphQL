@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import updateCourseInSalesOperationScript from '../scriptMethods/updateCourseinSalesOperationScript';
 // import updateQuestionsWithCorrectPositions from '../scriptMethods/updateQuestionsWithCorrectPositions';
 // import updateQuestionsWithHints from '../scriptMethods/updateQuestionsWithHints';
 // import updateSchoolCampaignCodeInSchool from '../scriptMethods/updateSchoolCampaignCodeInSchool';
@@ -12,12 +13,15 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateCourse from '../scriptMethods/updateCourse';
 // import generateSessionReport from '../../../../../../utils/scheduleJobs/scheduleSessionReport';
 // import migrateBatchAttendanceToEnum from '../scriptMethods/migrateBatchAttendanceToEnum';
+// import updateCourseInVideos from '../scriptMethods/updateCourseInVideos';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
   /*
   Add script functions
    */
+  // await updateCourseInVideos();
+  // await updateCourseInSalesOperationScript();
   // await updateSchoolCampaignCodeInSchool();
   // await generateSessionReport(60);
   // await updateTopicsInAssignment();
@@ -47,6 +51,7 @@ const temporaryScript = (async (root, params, context) => {
   // await migrateBatchAttendanceToEnum();
   // await updateQuestionsWithCorrectPositions();
   // await updateQuestionsWithHints();
+  // await updateQuestionsWithCorrectPositionIndex();
   return {
     result: true,
   };

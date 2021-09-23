@@ -67,6 +67,10 @@ import {
   AssignmentQuestionIdPublished,
   BlockBasedProjectIsPublished,
   AssignmentWithSimilarStatementAlreadyExist,
+  ProjectWithSimilarTitleAlreadyExist,
+  ProjectWithSimilarOrderAlreadyExist,
+  VideoWithSimilarTitleAlreadyExist,
+  LOWithSimilarTitleAlreadyExist,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -273,4 +277,8 @@ export {
   AssignmentQuestionIdPublished,
   BlockBasedProjectIsPublished,
   AssignmentWithSimilarStatementAlreadyExist,
+  ProjectWithSimilarTitleAlreadyExist,
+  ProjectWithSimilarOrderAlreadyExist,
+  VideoWithSimilarTitleAlreadyExist,
+  LOWithSimilarTitleAlreadyExist,
 };

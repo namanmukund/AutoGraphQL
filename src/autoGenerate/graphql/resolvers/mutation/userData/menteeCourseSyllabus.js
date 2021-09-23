@@ -279,7 +279,7 @@ query{
         id:"${userId}"
         }
       }
-      ${courseId && courseId !== OLD_COURSE_ID ? `{course_some:{id: "${courseId}"}}` : ''}
+      ${courseId ? `{course_some:{id: "${courseId}"}}` : ''}
     ]
     }){
       id
@@ -326,7 +326,7 @@ const getMentorMenteeSessions = (userId, courseId) => `
         {
           sessionStatus: completed
         }
-        ${courseId && courseId !== OLD_COURSE_ID ? `{course_some:{id: "${courseId}"}}` : ''}
+        ${courseId ? `{course_some:{id: "${courseId}"}}` : ''}
       ]
     }){
       id
@@ -669,11 +669,7 @@ const menteeCourseSyllabusMutationResolver = async (
   both should be equal to perform further action
   */
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
-  let { courseId } = params;
-  // doing this for backward compatibility
-  if (courseId === OLD_COURSE_ID) {
-    courseId = '';
-  }
+  const { courseId } = params;
 
   const {
     userIdFromContext: userId,

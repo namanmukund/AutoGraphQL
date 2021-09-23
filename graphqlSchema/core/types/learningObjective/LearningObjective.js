@@ -21,8 +21,8 @@ const LearningObjective = `
   ) 
   {
     order: Int!
-    title: String! @unique @trim
-    description: String @uniqueOrEmpty @unique @trim
+    title: String @trim
+    description: String @trim
     pqStory: String @trim
     pqStoryImage: File @relation(name: "LearningObjectivePqStoryImage", direction: "OneWay")
     videoStartTime: Int

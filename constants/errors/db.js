@@ -232,3 +232,19 @@ export const BlockBasedProjectIsPublished = createError('BlockBasedProjectIsPubl
 export const AssignmentWithSimilarStatementAlreadyExist = createError('AssignmentWithSimilarStatementAlreadyExist', {
   message: 'Assignment with similar statement already exist.',
 });
+
+export const ProjectWithSimilarTitleAlreadyExist = createError('ProjectWithSimilarTitleAlreadyExist', {
+  message: 'Project with similar name already exist.',
+});
+
+export const ProjectWithSimilarOrderAlreadyExist = createError('ProjectWithSimilarOrderAlreadyExist', {
+  message: 'Project with similar order already exist.',
+});
+
+export const VideoWithSimilarTitleAlreadyExist = createError('VideoWithSimilarTitleAlreadyExist', {
+  message: 'Video with similar title already exist.',
+});
+
+export const LOWithSimilarTitleAlreadyExist = createError('LOWithSimilarTitleAlreadyExist', {
+  message: 'LO with similar title already exist.',
+});

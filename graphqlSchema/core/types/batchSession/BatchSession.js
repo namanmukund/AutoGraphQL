@@ -30,6 +30,8 @@ const BatchSession = `
     mentorPaymentJustification: String
     paymentApprovedBy: User @relation(name: "MentorMenteeSessionPaymentApprovedUser", direction: "OneWay")
     isAudit: Boolean @defaultValue(value: "false")
+    mentorDemandSlot: MentorDemandSingleSlot @relation(name:"MentorDemandSingleSlotBatchSession")
+    broadCastedMentors: [MentorProfile] @relation(name:"MentorDemandSingleSlotMentor", direction: "OneWay")
 }`;
 
 export default [BatchSession, batchAttendanceType];
