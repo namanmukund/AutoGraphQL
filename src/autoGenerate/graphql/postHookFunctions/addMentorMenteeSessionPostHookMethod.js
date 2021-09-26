@@ -6,6 +6,7 @@ import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import extractMentorMenteeSessionAndSendMessage from './utils/extractMentorMenteeSessionAndSendMessage';
 import { backendApps } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
+import { updateHomeworkStreaksMethod } from './utils/homeworkStreakMethods'
 
 const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
   // don't do anything if it is done through backend
@@ -25,6 +26,7 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
 
     if (get(input, 'sessionStatus') === 'started') {
       setSessionStartedLeadsquared(userInfo, topicInfo);
+      updateHomeworkStreaksMethod(get(input, 'sessionStatus'), userId, context, topic.id, input);
     }
 
     // send message to mentor regarding the session
