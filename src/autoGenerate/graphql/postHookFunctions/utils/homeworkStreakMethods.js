@@ -1,5 +1,7 @@
 import { GLOBAL_COURSE_TITLE, OLD_COURSE_ID } from '../../../../../constants';
+import { get } from 'lodash'
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import { log } from '../../../../../utils';
 
 export const fetchCourseData = async (courseId) => {
   const query = `{
@@ -167,7 +169,7 @@ export const sessionStartedStreaksFlow = async (topics, userId, courseId, contex
   if (prevTopicId) {
     const prevMentorMenteeSession = await fetchMentorMenteeSession(userId, prevTopicId, courseId);
     log(`.............Prev MMS, ${JSON.stringify(prevMentorMenteeSession, null, 2)}`);
-    if (prevMentorMenteeSession && (get(prevMentorMenteeSession, 'isSubmittedForReview') === false)) {
+    if (prevMentorMenteeSession && prevMentorMenteeSession.length && (get(prevMentorMenteeSession[0], 'isSubmittedForReview') === false)) {
       const userCourseRes = await fetchUserCourse(userId, courseId);
       const streaksInput = {
         push: {
