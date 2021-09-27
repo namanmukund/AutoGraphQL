@@ -293,14 +293,14 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
    * Updating streaks if user has submitted homework for review.
    */
   if ((prevIsSubmittedForReview === false) && (get(input, 'isSubmittedForReview') === true) && topics.length) {
-    log('.............In Review Flow');
+    log('.............Homework Streaks Review Flow Started');
     submittedForReviewStreaksFlow(topics, userId, courseTypeId, context, topic.id);
   }
   /**
    * Updating streaks if user/mentor has started next session.
    */
   if ((prevSessionStatus === 'allotted') && (get(input, 'sessionStatus') === 'started') && topics.length) {
-    log('.............In Session Flow');
+    log('.............Homework Streaks Session Flow Started');
     sessionStartedStreaksFlow(topics, userId, courseTypeId, context, topic.id);
   }
 };

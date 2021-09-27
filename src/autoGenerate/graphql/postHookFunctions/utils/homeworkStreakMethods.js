@@ -1,5 +1,5 @@
+import { get } from 'lodash';
 import { GLOBAL_COURSE_TITLE, OLD_COURSE_ID } from '../../../../../constants';
-import { get } from 'lodash'
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { log } from '../../../../../utils';
 
@@ -107,18 +107,18 @@ const addOrDeleteHomeworkStreaks = async (context, userCourseRes, input, isRevie
 
 /**
  * This method is invoked when homework is submitted for first tym.
- * @param {*} topics 
- * @param {*} userId 
- * @param {*} courseId 
- * @param {*} context 
- * @param {*} topicId 
+ * @param {*} topics
+ * @param {*} userId
+ * @param {*} courseId
+ * @param {*} context
+ * @param {*} topicId
  * @returns void
  */
 export const submittedForReviewStreaksFlow = async (topics, userId, courseId, context, topicId) => {
   const sortedTopics = topics.sort((a, b) => a.order - b.order || -1);
   const currentTopicIndex = sortedTopics.findIndex((topic) => topic.id === topicId);
   const nextTopicId = get(sortedTopics[currentTopicIndex + 1], 'id');
-  log(`.............Next Topic, ${JSON.stringify(sortedTopics[currentTopicIndex + 1], null, 2)}`);
+  // log(`.............Next Topic, ${JSON.stringify(sortedTopics[currentTopicIndex + 1], null, 2)}`);
   const userCourseRes = await fetchUserCourse(userId, courseId);
   const streaksInput = {
     push: {
@@ -129,7 +129,7 @@ export const submittedForReviewStreaksFlow = async (topics, userId, courseId, co
   };
   if (nextTopicId) {
     const nextMentorMenteeSession = await fetchMentorMenteeSession(userId, nextTopicId, courseId);
-    log(`.............Next MMS, ${JSON.stringify(nextMentorMenteeSession, null, 2)}`);
+    // log(`.............Next MMS, ${JSON.stringify(nextMentorMenteeSession, null, 2)}`);
     // Checking if next MMS exists
     if (nextMentorMenteeSession && nextMentorMenteeSession.length) {
       if (get(nextMentorMenteeSession[0], 'sessionStatus') === 'allotted') {
@@ -138,12 +138,12 @@ export const submittedForReviewStreaksFlow = async (topics, userId, courseId, co
         await addOrDeleteHomeworkStreaks(context, userCourseRes, input, true);
       } else {
         return;
-        /** 
+        /**
          * @ImpNote
          *  commenting this logic bcuz we only need...
-         *  to break streak and update log when next session has started... 
+         *  to break streak and update log when next session has started...
          *  without submitting the homework, below logic would make this...
-         *  repetitive. still commenting to understand streaks logic better. 
+         *  repetitive. still commenting to understand streaks logic better.
          * */
         // breaking streaks because next session has started/completed already.
         // const input = { homeworkStreaks: { popAll: true } };
@@ -164,24 +164,24 @@ export const submittedForReviewStreaksFlow = async (topics, userId, courseId, co
 
 /**
  * This method is invoked when session is started.
- * @param {*} topics 
- * @param {*} userId 
- * @param {*} courseId 
- * @param {*} context 
- * @param {*} topicId 
+ * @param {*} topics
+ * @param {*} userId
+ * @param {*} courseId
+ * @param {*} context
+ * @param {*} topicId
  * @returns void
  */
 export const sessionStartedStreaksFlow = async (topics, userId, courseId, context, topicId) => {
   const sortedTopics = topics.sort((a, b) => a.order - b.order || -1);
   const currentTopicIndex = sortedTopics.findIndex((topic) => topic.id === topicId);
   const prevTopicId = get(sortedTopics[currentTopicIndex - 1], 'id');
-  log(`.............Prev Topic, ${JSON.stringify(get(sortedTopics[currentTopicIndex - 1], 'id'), null, 2)}`);
+  // log(`.............Prev Topic, ${JSON.stringify(get(sortedTopics[currentTopicIndex - 1], 'id'), null, 2)}`);
   if (prevTopicId) {
     const prevMentorMenteeSession = await fetchMentorMenteeSession(userId, prevTopicId, courseId);
-    log(`.............Prev MMS, ${JSON.stringify(prevMentorMenteeSession, null, 2)}`);
+    // log(`.............Prev MMS, ${JSON.stringify(prevMentorMenteeSession, null, 2)}`);
     if (prevMentorMenteeSession && prevMentorMenteeSession.length && (get(prevMentorMenteeSession[0], 'isSubmittedForReview') === false)) {
       const userCourseRes = await fetchUserCourse(userId, courseId);
-      log(`.............Current Streak, ${get(userCourseRes, 'homeworkStreaks', []).length}`);
+      // log(`.............Current Streak, ${get(userCourseRes, 'homeworkStreaks', []).length}`);
       if (userCourseRes && get(userCourseRes, 'homeworkStreaks', []).length) {
         const streaksInput = {
           push: {
@@ -190,14 +190,14 @@ export const sessionStartedStreaksFlow = async (topics, userId, courseId, contex
             createdAt: new Date().toISOString(),
           },
         };
-        log(`.............Prev USERCOURSE, ${JSON.stringify(userCourseRes, null, 2)}`);
+        // log(`.............Prev USERCOURSE, ${JSON.stringify(userCourseRes, null, 2)}`);
         const input = {
           homeworkStreaks: {
-            pop:{
+            pop: {
               courseReferenceId: courseId || OLD_COURSE_ID,
             },
           },
-          homeworkStreaksLog: streaksInput
+          homeworkStreaksLog: streaksInput,
         };
         await addOrDeleteHomeworkStreaks(context, userCourseRes, input, false);
       }
@@ -205,12 +205,10 @@ export const sessionStartedStreaksFlow = async (topics, userId, courseId, contex
   }
 };
 
-export const updateHomeworkStreaksMethod = async (sessionStatus, userId, context, topicId, input) => {
-    const courseTypeId = get(input, 'course.typeId', '');
-    const courseData = await fetchCourseData(courseTypeId);
-    const topics = get(courseData, 'topics', []);
-    if (sessionStatus === 'started') {
-        log('.............In Session Flow');
-        sessionStartedStreaksFlow(topics, userId, courseTypeId, context, topicId);
-    }
-}
+export const updateHomeworkStreaksMethod = async (userId, context, topicId, input) => {
+  const courseTypeId = get(input, 'course.typeId', '');
+  const courseData = await fetchCourseData(courseTypeId);
+  const topics = get(courseData, 'topics', []);
+  log('.............Homework Streaks Session Flow');
+  sessionStartedStreaksFlow(topics, userId, courseTypeId, context, topicId);
+};
