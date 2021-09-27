@@ -12,6 +12,9 @@ export const fetchCourseData = async (courseId) => {
         id
         order
         title
+        topicComponentRule {
+          componentName
+        }
       }
     }
   }`;
@@ -76,7 +79,6 @@ const updateMentorMenteeSession = async (id, isReviewSubmittedOnTime) => {
       id
     }
   }`;
-  log(`...................MMS QUERY, ${JSON.stringify(query, null, 2)}`);
   const res = await callLocalGraphqlApi(query);
   const data = get(res, 'data.updateMentorMenteeSession', null);
   return data;
@@ -91,14 +93,12 @@ const updateUserCourseDoc = async (id, input) => {
   const variables = {
     input,
   };
-  log(`...................UCOURSE QUERY, ${JSON.stringify(query, null, 2)}`);
   const res = await callLocalGraphqlApi(query, null, variables);
   const data = get(res, 'data.updateUserCourse', null);
   return data;
 };
 
 const addOrDeleteHomeworkStreaks = async (context, userCourseRes, input, isReviewSubmittedOnTime = false) => {
-  log(`.............Input, ${JSON.stringify({ input, isReviewSubmittedOnTime }, null, 2)}`);
   if (userCourseRes && get(userCourseRes, 'courses', []).length) {
     await updateMentorMenteeSession(get(context, 'previousDocument.id', ''), isReviewSubmittedOnTime);
     await updateUserCourseDoc(get(userCourseRes, 'id'), input);
@@ -209,6 +209,19 @@ export const updateHomeworkStreaksMethod = async (userId, context, topicId, inpu
   const courseTypeId = get(input, 'course.typeId', '');
   const courseData = await fetchCourseData(courseTypeId);
   const topics = get(courseData, 'topics', []);
+  const filteredTopics = topics.filter((topic) => {
+    if (courseTypeId !== OLD_COURSE_ID) {
+      let isHomeworkVisible = false;
+      const topicComponentRuleDoc = get(topic, 'topicComponentRule', []);
+      topicComponentRuleDoc.forEach((rule) => {
+        if (rule && (['homeworkAssignment', 'quiz'].includes(get(rule, 'componentName')))) {
+          isHomeworkVisible = true;
+        }
+      });
+      return isHomeworkVisible;
+    }
+    return true;
+  });
   log('.............Homework Streaks Session Flow');
-  sessionStartedStreaksFlow(topics, userId, courseTypeId, context, topicId);
+  sessionStartedStreaksFlow(filteredTopics, userId, courseTypeId, context, topicId);
 };

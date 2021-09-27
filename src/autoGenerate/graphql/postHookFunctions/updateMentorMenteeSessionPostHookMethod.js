@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import {
-  auditType, MENTOR_RATING_AUDIT_THRESHOLD,
+  auditType, MENTOR_RATING_AUDIT_THRESHOLD, OLD_COURSE_ID,
 } from '../../../../constants';
 import { MENTEE } from '../../../../constants/roles';
 import updateReferrerCreditsPostSessionOrUserPayment from './utils/updateReferrerCreditsPostSessionOrUserPayment';
@@ -289,19 +289,32 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   const courseTypeId = get(input, 'course.typeId', '');
   const courseData = await fetchCourseData(courseTypeId);
   const topics = get(courseData, 'topics', []);
+  const filteredTopics = topics.filter((topicObj) => {
+    if (courseTypeId !== OLD_COURSE_ID) {
+      let isHomeworkVisible = false;
+      const topicComponentRuleDoc = get(topicObj, 'topicComponentRule', []);
+      topicComponentRuleDoc.forEach((rule) => {
+        if (rule && (['homeworkAssignment', 'quiz'].includes(get(rule, 'componentName')))) {
+          isHomeworkVisible = true;
+        }
+      });
+      return isHomeworkVisible;
+    }
+    return true;
+  });
   /**
    * Updating streaks if user has submitted homework for review.
    */
-  if ((prevIsSubmittedForReview === false) && (get(input, 'isSubmittedForReview') === true) && topics.length) {
+  if ((prevIsSubmittedForReview === false) && (get(input, 'isSubmittedForReview') === true) && filteredTopics.length) {
     log('.............Homework Streaks Review Flow Started');
-    submittedForReviewStreaksFlow(topics, userId, courseTypeId, context, topic.id);
+    submittedForReviewStreaksFlow(filteredTopics, userId, courseTypeId, context, topic.id);
   }
   /**
    * Updating streaks if user/mentor has started next session.
    */
-  if ((prevSessionStatus === 'allotted') && (get(input, 'sessionStatus') === 'started') && topics.length) {
+  if ((prevSessionStatus === 'allotted') && (get(input, 'sessionStatus') === 'started') && filteredTopics.length) {
     log('.............Homework Streaks Session Flow Started');
-    sessionStartedStreaksFlow(topics, userId, courseTypeId, context, topic.id);
+    sessionStartedStreaksFlow(filteredTopics, userId, courseTypeId, context, topic.id);
   }
 };
 export default updateMentorMenteeSessionPostHookMethod;
