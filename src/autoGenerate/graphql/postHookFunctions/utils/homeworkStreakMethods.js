@@ -55,6 +55,9 @@ const fetchUserCourse = async (userId, courseId) => {
       ]
     }) {
       id
+      homeworkStreaks {
+        createdAt
+      }
       courses {
         id
       }
@@ -135,6 +138,13 @@ export const submittedForReviewStreaksFlow = async (topics, userId, courseId, co
         await addOrDeleteHomeworkStreaks(context, userCourseRes, input, true);
       } else {
         return;
+        /** 
+         * @ImpNote
+         *  commenting this logic bcuz we only need...
+         *  to break streak and update log when next session has started... 
+         *  without submitting the homework, below logic would make this...
+         *  repetitive. still commenting to understand streaks logic better. 
+         * */
         // breaking streaks because next session has started/completed already.
         // const input = { homeworkStreaks: { popAll: true } };
         // await addOrDeleteHomeworkStreaks(context, userCourseRes, input, false);
@@ -171,16 +181,26 @@ export const sessionStartedStreaksFlow = async (topics, userId, courseId, contex
     log(`.............Prev MMS, ${JSON.stringify(prevMentorMenteeSession, null, 2)}`);
     if (prevMentorMenteeSession && prevMentorMenteeSession.length && (get(prevMentorMenteeSession[0], 'isSubmittedForReview') === false)) {
       const userCourseRes = await fetchUserCourse(userId, courseId);
-      const streaksInput = {
-        push: {
-          courseConnectId: courseId || OLD_COURSE_ID,
-          mentorMenteeSessionConnectId: get(context, 'previousDocument.id', ''),
-          createdAt: new Date().toISOString(),
-        },
-      };
-      log(`.............Prev USERCOURSE, ${JSON.stringify(userCourseRes, null, 2)}`);
-      const input = { homeworkStreaks: { popAll: true }, homeworkStreaksLog: streaksInput };
-      await addOrDeleteHomeworkStreaks(context, userCourseRes, input, false);
+      log(`.............Current Streak, ${get(userCourseRes, 'homeworkStreaks', []).length}`);
+      if (userCourseRes && get(userCourseRes, 'homeworkStreaks', []).length) {
+        const streaksInput = {
+          push: {
+            courseConnectId: courseId || OLD_COURSE_ID,
+            mentorMenteeSessionConnectId: get(context, 'previousDocument.id', ''),
+            createdAt: new Date().toISOString(),
+          },
+        };
+        log(`.............Prev USERCOURSE, ${JSON.stringify(userCourseRes, null, 2)}`);
+        const input = {
+          homeworkStreaks: {
+            pop:{
+              courseReferenceId: courseId || OLD_COURSE_ID,
+            },
+          },
+          homeworkStreaksLog: streaksInput
+        };
+        await addOrDeleteHomeworkStreaks(context, userCourseRes, input, false);
+      }
     }
   }
 };
