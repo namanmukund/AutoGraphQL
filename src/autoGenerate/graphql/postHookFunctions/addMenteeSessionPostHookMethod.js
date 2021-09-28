@@ -7,8 +7,10 @@ import { addMenteeBookingLeadsquared } from './leadsquared';
 import getMenteeInfo from './utils/getMenteeInfo';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import getTopicInfo from './utils/getTopicInfo';
-import { byPassMenteeValidationApps } from '../../../../constants';
+import { byPassMenteeValidationApps, sessionType } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
+import isTrialSession from '../resolvers/utils/isTrialSession';
+import mentorDemandSingleSlotOperations from './utils/mentorDemandSingleSlotOperations';
 
 const getUserCourses = async (userId) => {
   const query = `
@@ -53,11 +55,19 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     /*
     Since addition of session by mentee will consume a slot
      */
+    const isTrial = await isTrialSession(get(input, 'topic.typeId'));
     const { id: menteeSessionId, bookingDate, ...slots } = input;
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
     const { availableSlots } = context;
     const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
     const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
+    await mentorDemandSingleSlotOperations({
+      slotTimeStringArray,
+      date: bookingDate,
+      mutationName,
+      sessionType: isTrial ? sessionType.trial : sessionType.paid,
+      sessionId: menteeSessionId,
+    });
     await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context, availableSlots);
     // send email to mentor admin regarding the session
     await extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);

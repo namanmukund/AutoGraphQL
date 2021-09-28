@@ -12,10 +12,11 @@ import getMenteeInfo from './utils/getMenteeInfo';
 import deleteMentorMenteeSessionQuery from './utils/deleteMentorMenteeSessionQuery';
 import getTopicInfo from './utils/getTopicInfo';
 import rescheduleMenteeBookingLeadsquared from './leadsquared/rescheduleMenteeBookingLeadsquared';
-import { byPassMenteeValidationApps } from '../../../../constants';
+import { byPassMenteeValidationApps, sessionType } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
+import mentorDemandSingleSlotOperations from './utils/mentorDemandSingleSlotOperations';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const { previousDocument, currentUser, mentorMenteeSessionDoc } = context;
@@ -125,6 +126,15 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     const clientId = get(userInfo, 'data.user.id', '');
     const topicId = get(topicInfo, 'data.topic.id', '');
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    const prevMentorDemandSlotId = get(input, 'mentorDemandSlot.typeId');
+    await mentorDemandSingleSlotOperations({
+      slotTimeStringArray,
+      date: bookingDate,
+      mutationName,
+      sessionType: isTrial ? sessionType.trial : sessionType.paid,
+      sessionId: menteeSessionId,
+      prevMentorDemandSlotId,
+    });
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMenteeSession', batchCode, '', '', updateMentorMenteeSessionInput);
   }
 };
