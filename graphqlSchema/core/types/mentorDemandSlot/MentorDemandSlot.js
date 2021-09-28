@@ -23,7 +23,8 @@ const MentorDemandSlot = `
   ) 
   {
     date: Date!
-    vertical: Vertical!
+    verticals: [SingleSlotVertical]!
+    sessionType: SessionType @defaultValue(value: "trial")
     slots: [MentorDemandSingleSlot] @relation(name: "MentorDemandSlotMentorDemandSingleSlot")
     broadCastedMentors: [MentorProfile] @relation(name:"MentorDemandSlotAllMentor", direction: "OneWay")
   }

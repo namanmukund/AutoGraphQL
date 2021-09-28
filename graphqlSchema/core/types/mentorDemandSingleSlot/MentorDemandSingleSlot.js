@@ -10,6 +10,12 @@ const SingleSlotCountry = `
  }
 `;
 
+const SingleSlotVertical = `
+ type SingleSlotVertical {
+   value: Vertical
+ }
+`;
+
 const MentorDemandSingleSlot = `
   type MentorDemandSingleSlot @model
   @appPermissions(
@@ -29,13 +35,14 @@ const MentorDemandSingleSlot = `
   ) 
   {
     date: Date!
-    vertical: Vertical!
+    verticals: [SingleSlotVertical]!
     mentorDemandSlot: MentorDemandSlot @relation(name: "MentorDemandSlotMentorDemandSingleSlot")
     slotName: Slot
-    paySlab: MentorSupplyPaySlab @relation(name: "MentorDemandSlotPaySlab", direction: "OneWay")
+    paySlab: MentorSupplyPaySlab @relation(name: "MentorDemandSingleSlotPaySlab", direction: "OneWay")
     countries: [SingleSlotCountry]
     timezone: [String]
     count: Int
+    sessionType: SessionType @defaultValue(value: "trial")
     schools: [School] @relation(name:"MentorDemandSingleSlotSchool", direction: "OneWay")
     campaigns: [Campaign] @relation(name:"MentorDemandSingleSlotCampaign", direction: "OneWay")
     broadCastedMentors: [MentorProfile] @relation(name:"MentorDemandSingleSlotMentor", direction: "OneWay")
@@ -46,4 +53,4 @@ const MentorDemandSingleSlot = `
   }
 `;
 
-export default [MentorDemandSingleSlot, SingleSlotCountry];
+export default [MentorDemandSingleSlot, SingleSlotCountry, SingleSlotVertical];
