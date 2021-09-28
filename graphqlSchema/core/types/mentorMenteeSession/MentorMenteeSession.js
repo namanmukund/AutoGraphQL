@@ -85,6 +85,7 @@ const MentorMenteeSession = `
     paymentApprovedBy: User @relation(name: "MentorMenteeSessionPaymentApprovedUser", direction: "OneWay")
     isAudit: Boolean @defaultValue(value: "false")
     isPostSalesAudit: Boolean @defaultValue(value: "false")
+    studentProfile: StudentProfile @relation(name:"MentorMenteeSessionStudentProfile")
 }`;
 
 export default [MentorMenteeSession, internetSpeed];
