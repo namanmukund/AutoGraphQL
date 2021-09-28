@@ -39,7 +39,7 @@ const UserCourseCompletion = `
     masteredTopicCount: Int
     familiarTopicCount: Int
     certificate: File @relation(name: "Certificate", direction: "OneWay")
-    journey: File @relation(name: "Certificate", direction: "OneWay")
+    journeySnapshot: File @relation(name: "JourneySnapshot", direction: "OneWay")
   }
 `;
 
