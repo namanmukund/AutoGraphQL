@@ -14,4 +14,20 @@ const getMentorProfile = async (userId) => {
   return get(mentorProfile, 'data.user', {});
 };
 
+export const getMentorProfileFromMentorSession = async (mentorSessionId) => {
+  const query = `{
+  mentorSession(id: "${mentorSessionId}") {
+    id
+    user {
+      id
+      mentorProfile {
+        id
+      }
+    }
+  }
+}`;
+  const mentorSession = await callLocalGraphqlApi(query);
+  return get(mentorSession, 'data.mentorSession', {});
+};
+
 export default getMentorProfile;

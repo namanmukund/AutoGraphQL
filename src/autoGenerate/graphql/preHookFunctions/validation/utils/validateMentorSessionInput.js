@@ -19,7 +19,7 @@ const validateMentorSessionInput = (params, prevMentorSession, context) => {
     });
   }
 
-  const slotTimeArray = getSelectedSlotsTime(slots);
+  const slotTimeArray = getSelectedSlotsTime(slots, '');
 
   if (!(prevMentorSession && prevMentorSession.id) && !slotTimeArray.length) {
     throw new NoSlotSelectedError();

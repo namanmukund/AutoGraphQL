@@ -14,6 +14,10 @@ export const getMentorDemandSingleSlot = async ({
         ] }
     ) {
         id
+        count
+        verticals{
+          value
+        }
     }
     }`;
   const mentorDemandSingleSlotData = await callLocalGraphqlApi(query);
@@ -71,18 +75,19 @@ const addMentorDemandSingleSlot = async (sessionId, mentorProfileId, paySlabId, 
   return get(addMentorDemandSingleSlotData, 'data.addMentorDemandSingleSlot');
 };
 
-const updateMentorDemandSingleSlot = async (mentorDemandSingleSlotId, sessionId, type, mentorProfileId) => {
-  const query = `mutation {
+const updateMentorDemandSingleSlot = async (mentorDemandSingleSlotId, sessionId, type, mentorProfileId, input = {}) => {
+  const query = `mutation($input: MentorDemandSingleSlotUpdate) {
     updateMentorDemandSingleSlot(id: "${mentorDemandSingleSlotId}",
     ${type === 'menteeSession' ? `menteeSessionsConnectIds: ["${sessionId}"]` : ''}
     ${type === 'mentorSession' ? `mentorSessionsConnectIds: ["${sessionId}"], 
     ${mentorProfileId ? `broadCastedMentorsConnectIds: ["${mentorProfileId}"]` : ''}` : ''}
     ${type === 'batchSession' ? `batchSessionsConnectIds: ["${sessionId}"]` : ''}
+    input:$input
     ) {
       id
     }
   }`;
-  const result = await callLocalGraphqlApi(query);
+  const result = await callLocalGraphqlApi(query, '', { input });
   return get(result, 'data.updateMentorDemandSingleSlot');
 };
 
@@ -127,17 +132,35 @@ export const removeLinkedFromMentorDemandSlot = async (mentorDemandSingleSlotId,
 };
 
 const mentorSessionOperation = async ({
-  singleSlotData, mentorProfileId, sessionId, date, slotName, sessionType,
+  singleSlotData, mentorProfileId, sessionId, date, slotName, sessionType, typeName,
 }) => {
   // if singleSlot exist for give slotName, date and sessionType then update with mentorSessionId
   if (singleSlotData && singleSlotData.length > 0) {
-    await updateMentorDemandSingleSlot(get(singleSlotData, '[0].id'), sessionId, 'mentorSession', mentorProfileId);
+    if (typeName === 'batchSession') {
+      const slotVerticals = get(singleSlotData, '[0].verticals', []);
+      let count = get(singleSlotData, '[0].count', 0);
+      const addedVerticals = slotVerticals.map((vertical) => get(vertical, 'value'));
+      if (!addedVerticals.includes('b2b2c')) {
+        count += 1;
+        slotVerticals.push({ value: 'b2b2c' });
+      }
+      await updateMentorDemandSingleSlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId, {
+        verticals: {
+          replace: slotVerticals,
+        },
+        count,
+      });
+    } else {
+      await updateMentorDemandSingleSlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId);
+    }
   } else {
     const paySlab = await getPaySlabDetails();
     const paySlabId = get(paySlab, '[0].id');
+    let vertical = 'b2c';
+    if (typeName === 'batchSession') vertical = 'b2b2c';
     const input = {
       date: `${date}`,
-      verticals: [{ value: 'b2c' }],
+      verticals: [{ value: vertical }],
       slotName,
       countries: [{ value: 'india' }],
       count: 1,
@@ -153,7 +176,7 @@ const mentorSessionOperation = async ({
     } else {
       await addMentorDemandSlot(get(addSingleSlot, 'id'), mentorProfileId, {
         date: `${date}`,
-        verticals: [{ value: 'b2c' }],
+        verticals: [{ value: vertical }],
         sessionType,
       });
     }
@@ -185,14 +208,31 @@ const mentorDemandSingleSlotOperations = async ({
         }
         case 'addMentorSession': {
           await mentorSessionOperation({
-            date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId,
+            date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'mentorSession',
           });
           break;
         }
         case 'updateMentorSession': {
           await mentorSessionOperation({
-            date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId,
+            date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'mentorSession',
           });
+          break;
+        }
+        case 'addBatchSession': {
+          await mentorSessionOperation({
+            date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'batchSession',
+          });
+          break;
+        }
+        case 'updateBatchSession': {
+          if (singleSlotData && singleSlotData.length > 0) {
+            if (prevMentorDemandSlotId) {
+              await removeLinkedFromMentorDemandSlot(prevMentorDemandSlotId, sessionId, 'batchSession');
+            }
+            await mentorSessionOperation({
+              date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'batchSession',
+            });
+          }
           break;
         }
         default:

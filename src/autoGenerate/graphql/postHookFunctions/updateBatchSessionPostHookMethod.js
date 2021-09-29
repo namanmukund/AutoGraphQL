@@ -6,6 +6,7 @@ import {
   PUBLISHED,
   sessionStatus,
   auditType as auditTypeValues,
+  sessionType as sessionTypeValue,
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
@@ -19,6 +20,9 @@ import sendWhatsAppTemplateMessage from '../../utils/sendWhatsAppTemplateMessage
 import getSlotLabel from '../../../../utils/getSlotLabel';
 import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 import addSalesAudit from './utils/addSalesAudit';
+import isTrialSession from '../resolvers/utils/isTrialSession';
+import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
+import mentorDemandSingleSlotOperations from './utils/mentorDemandSingleSlotOperations';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -241,12 +245,12 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
 
   // if mentorSessionConnectId is not present in batch session, then we need t create mentor session on basis of
   // allotted mentor in batch
+  let finalMentorSessionId = mentorSessionId;
   if (!mentorSessionId && allottedMentorId) {
     let sessionType = 'batch';
     if (batchTypeValue === 'b2b2c' && batchTopicOrder === 1) {
       sessionType = 'trial';
     }
-    let finalMentorSessionId = '';
     const { bookingDate: sessionsBookingDateInDB, ...slotsInDB } = input;
     const slotTimeInDBArray = getSelectedSlotsTime(slotsInDB);
     const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(sessionsBookingDateInDB, allottedMentorId, sessionType));
@@ -263,6 +267,20 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
     }
     await callLocalGraphqlApi(updateBatchSession(batchSessionId, finalMentorSessionId));
+  }
+
+  const isTrial = await isTrialSession(get(input, 'topic.typeId'));
+  if (isTrial) {
+    const mentorProfile = await getMentorProfileFromMentorSession(finalMentorSessionId);
+    await mentorDemandSingleSlotOperations({
+      slotTimeStringArray,
+      date: get(input, 'bookingDate'),
+      mutationName,
+      sessionType: sessionTypeValue.trial,
+      sessionId: batchSessionId,
+      mentorProfileId: get(mentorProfile, 'user.mentorProfile.id'),
+      prevMentorDemandSlotId: get(input, 'mentorDemandSlot.typeId'),
+    });
   }
 
   if (topicId) {
