@@ -17,12 +17,11 @@ import { sendJourneySnapshotToUser } from '../../../../../email/messages';
 // import updateCourseInVideos from '../scriptMethods/updateCourseInVideos';
 
 const temporaryScript = (async (root, params, context) => {
-  console.log('In temporary script')
   validateAuthentication(context);
   /*
   Add script functions
    */
-  await sendJourneySnapshotToUser('gokul99.gm@gmail.com', 'abc', 'backend');
+  await sendJourneySnapshotToUser('gokul.madhusudhan@tekie.in', 'abc', 'backend');
   // await updateCourseInVideos();
   // await updateCourseInSalesOperationScript();
   // await updateSchoolCampaignCodeInSchool();
