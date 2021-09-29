@@ -121,6 +121,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   /*
     get batch info
   */
+  console.log(input, mutationName)
   const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
   const batchInfo = get(batchResult, 'data.batch');
   const { students, currentComponent, code } = batchInfo;

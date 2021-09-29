@@ -1,13 +1,16 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const getMentorDemandSingleSlot = async ({ date, sessionType, slotName }) => {
+export const getMentorDemandSingleSlot = async ({
+  date, sessionType, slotName, mentorSessionId,
+}) => {
   const query = `{
     mentorDemandSingleSlots(
         filter: { and: [
             ${date ? `{ date: "${date}" }` : ''},
             ${sessionType ? `{ sessionType: ${sessionType} }` : ''},
             ${slotName ? `{ slotName: ${slotName} }` : ''}
+            ${mentorSessionId ? `{ mentorSessions_some: { id: "${mentorSessionId}" } }` : ''}
         ] }
     ) {
         id
@@ -93,7 +96,7 @@ const getPaySlabDetails = async () => {
   return get(paySlab, 'data.mentorSupplyPaySlabs');
 };
 
-const removeLinkedFromMentorDemandSlot = async (mentorDemandSingleSlotId, sessionId, type) => {
+export const removeLinkedFromMentorDemandSlot = async (mentorDemandSingleSlotId, sessionId, type) => {
   const query = `mutation{
     ${type === 'menteeSession' ? `removeFromMentorDemandSingleSlotMenteeSession(
     mentorDemandSingleSlotId: "${mentorDemandSingleSlotId}"
@@ -123,6 +126,40 @@ const removeLinkedFromMentorDemandSlot = async (mentorDemandSingleSlotId, sessio
   await callLocalGraphqlApi(query);
 };
 
+const mentorSessionOperation = async ({
+  singleSlotData, mentorProfileId, sessionId, date, slotName, sessionType,
+}) => {
+  // if singleSlot exist for give slotName, date and sessionType then update with mentorSessionId
+  if (singleSlotData && singleSlotData.length > 0) {
+    await updateMentorDemandSingleSlot(get(singleSlotData, '[0].id'), sessionId, 'mentorSession', mentorProfileId);
+  } else {
+    const paySlab = await getPaySlabDetails();
+    const paySlabId = get(paySlab, '[0].id');
+    const input = {
+      date: `${date}`,
+      verticals: [{ value: 'b2c' }],
+      slotName,
+      countries: [{ value: 'india' }],
+      count: 1,
+      sessionType,
+    };
+    // else add new singleSlot
+    const addSingleSlot = await addMentorDemandSingleSlot(sessionId, mentorProfileId, paySlabId, input);
+    const mentorDemandSlotData = await getMentorMentorDemandSlot(date);
+    // check if mentorDemandSlot exist for the give date and accordingly add or update it.
+    if (mentorDemandSlotData && mentorDemandSlotData.length > 0) {
+      const mentorDemandSlotId = get(mentorDemandSlotData, '[0].id');
+      await updateMentorDemandSlot(mentorDemandSlotId, get(addSingleSlot, 'id'), mentorProfileId, {});
+    } else {
+      await addMentorDemandSlot(get(addSingleSlot, 'id'), mentorProfileId, {
+        date: `${date}`,
+        verticals: [{ value: 'b2c' }],
+        sessionType,
+      });
+    }
+  }
+};
+
 const mentorDemandSingleSlotOperations = async ({
   slotTimeStringArray, date, sessionType, mutationName, sessionId, prevMentorDemandSlotId, mentorProfileId,
 }) => {
@@ -147,32 +184,15 @@ const mentorDemandSingleSlotOperations = async ({
           break;
         }
         case 'addMentorSession': {
-          if (singleSlotData && singleSlotData.length > 0) {
-            await updateMentorDemandSingleSlot(get(singleSlotData, '[0].id'), sessionId, 'mentorSession', mentorProfileId);
-          } else {
-            const paySlab = await getPaySlabDetails();
-            const paySlabId = get(paySlab, '[0].id');
-            const input = {
-              date: `${date}`,
-              verticals: [{ value: 'b2c' }],
-              slotName: slotTimeStringArray[i],
-              countries: [{ value: 'india' }],
-              count: 1,
-              sessionType,
-            };
-            const addSingleSlot = await addMentorDemandSingleSlot(sessionId, mentorProfileId, paySlabId, input);
-            const mentorDemandSlotData = await getMentorMentorDemandSlot(date);
-            if (mentorDemandSlotData && mentorDemandSlotData.length > 0) {
-              const mentorDemandSlotId = get(mentorDemandSlotData, '[0].id');
-              await updateMentorDemandSlot(mentorDemandSlotId, get(addSingleSlot, 'id'), mentorProfileId, {});
-            } else {
-              await addMentorDemandSlot(get(addSingleSlot, 'id'), mentorProfileId, {
-                date: `${date}`,
-                verticals: [{ value: 'b2c' }],
-                sessionType,
-              });
-            }
-          }
+          await mentorSessionOperation({
+            date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId,
+          });
+          break;
+        }
+        case 'updateMentorSession': {
+          await mentorSessionOperation({
+            date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId,
+          });
           break;
         }
         default:

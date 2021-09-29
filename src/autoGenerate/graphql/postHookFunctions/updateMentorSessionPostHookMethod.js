@@ -5,6 +5,7 @@ import availableSlotsQuery from '../graphqlQueries/availableSlotsQuery';
 import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery';
 import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
 import { byPassMenteeValidationApps } from '../../../../constants';
+import mentorDemandSingleSlotOperations, { getMentorDemandSingleSlot, removeLinkedFromMentorDemandSlot } from './utils/mentorDemandSingleSlotOperations';
 
 const updateMentorSessionPostHookMethod = async (input, mutationName, context) => {
   const { sessionType, availabilityDate, ...slots } = input;
@@ -29,6 +30,37 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
     if a mentor has changed the slots of the current date
     ---add for new slots and remove for old slots
    */
+  const removedSlot = [];
+  prevSlotTimeStringArray.forEach((slot) => {
+    if (!slotTimeStringArray.includes(slot)) {
+      removedSlot.push(slot);
+    }
+  });
+  const newSlots = [];
+  slotTimeStringArray.forEach((slot) => {
+    if (!prevSlotTimeStringArray.includes(slot)) {
+      newSlots.push(slot);
+    }
+  });
+  for (let slot = 0; slot < removedSlot.length; slot += 1) {
+    /* eslint-disable no-await-in-loop */
+    const singleSlot = await getMentorDemandSingleSlot({
+      date: availabilityDate,
+      slotName: removedSlot[slot],
+      sessionType,
+      mentorSessionId: get(input, 'id'),
+    });
+    if (singleSlot && singleSlot.length > 0) {
+      await removeLinkedFromMentorDemandSlot(get(singleSlot, '[0].id'), get(input, 'id'), 'mentorSession');
+    }
+  }
+  await mentorDemandSingleSlotOperations({
+    slotTimeStringArray: newSlots,
+    sessionType,
+    mutationName,
+    date: availabilityDate,
+    sessionId: get(input, 'id'),
+  });
   const currentAvailableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(availabilityDate));
   const currentAvailableSlots = get(currentAvailableSlotsRes, 'data.availableSlots', []);
 
