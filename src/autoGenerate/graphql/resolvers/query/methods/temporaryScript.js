@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+import { sendJourneySnapshotToUser } from '../../../../../email/messages';
 // import updateCourseInSalesOperationScript from '../scriptMethods/updateCourseinSalesOperationScript';
 // import updateQuestionsWithCorrectPositions from '../scriptMethods/updateQuestionsWithCorrectPositions';
 // import updateQuestionsWithHints from '../scriptMethods/updateQuestionsWithHints';
@@ -16,10 +17,12 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateCourseInVideos from '../scriptMethods/updateCourseInVideos';
 
 const temporaryScript = (async (root, params, context) => {
+  console.log('In temporary script')
   validateAuthentication(context);
   /*
   Add script functions
    */
+  await sendJourneySnapshotToUser('gokul99.gm@gmail.com', 'abc', 'backend');
   // await updateCourseInVideos();
   // await updateCourseInSalesOperationScript();
   // await updateSchoolCampaignCodeInSchool();
