@@ -84,6 +84,8 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     // update user booking on leadsquared
     const addBookingToLS = async () => {
       const courseName = await getCourseName(courseId);
+      const lsInput = input;
+      input.courseName = courseName;
       await addMenteeBookingLeadsquared(
         input,
         params,
@@ -92,7 +94,6 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
         topicInfo,
         isBookedByMentee,
         get(context, 'userIdFromContext'),
-        courseName,
       );
     };
 
