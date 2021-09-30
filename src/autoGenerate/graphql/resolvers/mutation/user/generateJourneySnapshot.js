@@ -34,6 +34,21 @@ const fetchUserApprovedCodes = (userId) => `
       id
       totalReactionCount
     }
+    userSavedCodes(filter: {
+      user_some:{id: "${userId}"}
+    }){
+      id
+    }
+    userPracticeQuestionReportsMeta(filter: {
+      user_some:{id: "${userId}"}
+    }){
+      count
+    }
+    userQuizReportsMeta(filter: {
+      user_some: {id: "${userId}"}
+    }){
+      count
+    }
   }
   `;
 
@@ -69,14 +84,20 @@ const generateJourneySnapshotMutationResolver = async (
   // check if the user has more than 0 codes published
   const fetchUserApprovedCodesRes = await callLocalGraphqlApi(fetchUserApprovedCodes(userId));
   let useLongerTemplate = false;
+  console.log('data', get(fetchUserApprovedCodesRes, 'data'));
   const userApprovedCodes = get(fetchUserApprovedCodesRes, 'data.userApprovedCodes', []);
+  const userSavedCodes = get(fetchUserApprovedCodesRes, 'data.userSavedCodes', []);
+  const userPqCount = get(fetchUserApprovedCodesRes, 'data.userPracticeQuestionReportsMeta.count', 0);
+  const userQuizReportsMeta = get(fetchUserApprovedCodesRes, 'data.userPracticeQuestionReportsMeta.count', 0);
+  const totalPqCountToDisplay = userPqCount + userQuizReportsMeta;
+
   if (userApprovedCodes && userApprovedCodes.length > 0) {
     useLongerTemplate = true;
   }
   console.log('useLongerTemplate', useLongerTemplate);
   // based on choice, fetch template from AWS and then proceed to construct the pdf
   const templateToFetch = useLongerTemplate ? 'JourneySnapshot-1' : 'JourneySnapshot-2';
-  const url = await generateJourneySnapshotUtil(templateToFetch, userCourseCompletion);
+  const url = await generateJourneySnapshotUtil(templateToFetch, userCourseCompletion, userSavedCodes, userApprovedCodes, totalPqCountToDisplay);
   console.log('url', url);
   return {
     url

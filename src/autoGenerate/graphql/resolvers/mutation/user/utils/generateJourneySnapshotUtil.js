@@ -15,7 +15,7 @@ const dataURItoBlob = (dataURI) => {
   return url
 }
 
-const generateJourneySnapshotUtil = async (templatetoFetch, data) => {
+const generateJourneySnapshotUtil = async (templatetoFetch, data, userSavedCodes, userApprovedCodes, userPqCount) => {
   const user = get(data, 'user', {});
   const userName = get(user, 'name');
   const sessionDate = format(new Date(get(data, 'courseEndingDate')), 'MMM dd, yyyy');
@@ -48,12 +48,21 @@ const generateJourneySnapshotUtil = async (templatetoFetch, data) => {
       const pages = pdfDoc.getPages()
       const firstPage = pages[0]
       // Draw a string of text diagonally across the first page
-      await firstPage.drawText('14', {
+      await firstPage.drawText(userSavedCodes && userSavedCodes.length.toString(), {
         x: 85,
         y: 1240,
         size: 224,
         font: GilroyExtraBoldFont,
         color: rgb(0.827, 0.294, 0.341),
+      })
+
+      // Draw a string of text diagonally across the first page
+      await firstPage.drawText(userPqCount.toString(), {
+        x: 1180,
+        y: 2040,
+        size: 224,
+        font: GilroyExtraBoldFont,
+        color: rgb(0.729, 0.219, 0.51),
       })
 
       /** PDF Meta Details */
@@ -69,6 +78,10 @@ const generateJourneySnapshotUtil = async (templatetoFetch, data) => {
       const pdfBytes = await pdfDoc.save();
       // const url = dataURItoBlob(pdfBase64)
       fs.writeFileSync('/Users/gokulmadhusudhan/Desktop/test-pdf.pdf', pdfBytes);
+
+      // TODO : convert pdf to image and save in userCourseCompletion/journeySnapshot
+      // TODO : then we return url of that journeySnapshot
+
       // to open the PDF in a new window
       // window.open(url, '_blank')
       return 'something'
