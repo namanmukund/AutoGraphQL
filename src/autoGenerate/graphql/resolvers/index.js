@@ -87,6 +87,7 @@ import getStudentCurrentStatus from './query/methods/getStudentCurrentStatus';
 import getCourseCertificate from './query/methods/getCourseCertificate';
 import signUpSchool from './mutation/methods/signUpSchool';
 import rebookMenteeSession from './mutation/methods/rebookMenteeSession';
+import generateJourneySnapshot from './mutation/methods/generateJourneySnapshot';
 import getSchoolCampaignSlots from './query/methods/getSchoolCampaignSlots';
 import getUserCourses from './query/methods/getUserCourses';
 
@@ -582,6 +583,7 @@ resolvers.Mutation.updateVisitorReactionOnUserApprovedCode = updateVisitorReacti
 resolvers.Mutation.addBulkMentorSession = addBulkMentorSession;
 resolvers.Mutation.bookB2B2CSlots = bookB2B2CSlots;
 resolvers.Mutation.rebookMenteeSession = rebookMenteeSession;
+resolvers.Mutation.generateJourneySnapshot = generateJourneySnapshot;
 
 // queries
 resolvers.Query.me = me;
