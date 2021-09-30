@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import generateJourneySnapshotUtil from './utils/generateJourneySnapshotUtil';
 
 // query to fetch user course completion document on basis of id
@@ -72,7 +73,7 @@ const generateJourneySnapshotMutationResolver = async (
   if (userApprovedCodes && userApprovedCodes.length > 0) {
     useLongerTemplate = true;
   }
-  console.log('userLongerTemplate', useLongerTemplate);
+  console.log('useLongerTemplate', useLongerTemplate);
   // based on choice, fetch template from AWS and then proceed to construct the pdf
   const templateToFetch = useLongerTemplate ? 'JourneySnapshot-1' : 'JourneySnapshot-2';
   const url = await generateJourneySnapshotUtil(templateToFetch, userCourseCompletion);

@@ -1,20 +1,18 @@
 /* eslint-disable no-console */
 import { PDFDocument, rgb } from 'pdf-lib'
 import { format } from 'date-fns'
+import * as fs from 'fs'
+import { Buffer } from 'buffer'
 import fontkit from '@pdf-lib/fontkit'
 import { get } from 'lodash'
-import { emailTemplates } from '../../../../../../../constants'
+import { emailTemplates, LATO_BOLD_FONT_URL } from '../../../../../../../constants'
 
 
 const dataURItoBlob = (dataURI) => {
-  const byteString = window.atob(dataURI)
-  const arrayBuffer = new ArrayBuffer(byteString.length)
-  const int8Array = new Uint8Array(arrayBuffer)
-  for (let i = 0; i < byteString.length; i += 1) {
-    int8Array[i] = byteString.charCodeAt(i)
-  }
-  const blob = new Blob([int8Array], { type: 'application/pdf' })
-  return blob
+  const byteString = Buffer.from(dataURI, 'base64').toString();
+  const url = `data:application/pdf;base64,${byteString}`
+
+  return url
 }
 
 const generateJourneySnapshotUtil = async (templatetoFetch, data) => {
@@ -25,7 +23,9 @@ const generateJourneySnapshotUtil = async (templatetoFetch, data) => {
 
   if (courseName && userName && sessionDate) {
     try {
-      const existingPdfBytes = await fetch(templatetoFetch === 'JourneySnapshot-1' ? get(emailTemplates, 'journeySnapshot.journeySnapshot1') : get(emailTemplates, 'journeySnapshot.journeySnapshot2')).then((res) => res.arrayBuffer())
+      const existingPdfBytes = await fetch(templatetoFetch === 'JourneySnapshot-1' ? get(emailTemplates, 'journeySnapshot.journeySnapshot1') : get(emailTemplates, 'journeySnapshot.journeySnapshot2')).then((res) => {
+        return res.buffer()
+      })
 
       // Load a PDFDocument from the existing PDF bytes
       const pdfDoc = await PDFDocument.load(existingPdfBytes)
@@ -33,7 +33,7 @@ const generateJourneySnapshotUtil = async (templatetoFetch, data) => {
 
       // get font
       const LatoBoldfontBytes = await fetch(LATO_BOLD_FONT_URL).then((res) =>
-        res.arrayBuffer()
+        res.buffer()
       )
 
       // Embed our custom font in the document
@@ -61,13 +61,12 @@ const generateJourneySnapshotUtil = async (templatetoFetch, data) => {
        * Serialize the PDFDocument to bytes (a Uint8Array)
        * const pdfBytes = await pdfDoc.save();
        * */
-      const pdfBase64 = await pdfDoc.saveAsBase64()
-
-      const blob = dataURItoBlob(pdfBase64)
-      const url = URL.createObjectURL(blob)
+      const pdfBytes = await pdfDoc.save();
+      // const url = dataURItoBlob(pdfBase64)
+      fs.writeFileSync('./test.pdf', pdfBytes);
       // to open the PDF in a new window
       // window.open(url, '_blank')
-      return url
+      return 'something'
     } catch (e) {
       console.log('PDF GENERATION EXCEPTION => ', e)
     }
