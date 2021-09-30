@@ -24,6 +24,7 @@ const completedSessionDetailType = `
    topicThumbnail: File
    topicThumbnailSmall: File
    topicDescription: String
+   isSubmittedForReview: Boolean
    topicOrder: Int
    endingDate: Date
    mentorId: String
