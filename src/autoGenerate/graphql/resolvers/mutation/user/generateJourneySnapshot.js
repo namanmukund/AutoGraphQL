@@ -51,11 +51,14 @@ const generateJourneySnapshotMutationResolver = async (
   const userCourseCompletionId = get(input, 'userCourseCompletionId', '');
   const userId = get(input, 'userId', '');
   console.log('userCourseCompletionId', userCourseCompletionId);
+  console.log('userId', userId);
   const fetchUserCourseCompletionRes = await callLocalGraphqlApi(fetchUserCourseCompletion(userCourseCompletionId));
+  console.log('fetchUserCourseCompletionRes', fetchUserCourseCompletionRes);
 
   // check whether there exists already a saved image of journey snapshot in user course completion
   const userCourseCompletion = get(fetchUserCourseCompletionRes, 'data.userCourseCompletion', {});
   const journeySnapshotFile = get(userCourseCompletion, 'journeySnapshot', {});
+  console.log('journeySnapshotFile', journeySnapshotFile);
   if (journeySnapshotFile) {
     return get(journeySnapshotFile, 'uri', '');
   }
@@ -69,11 +72,14 @@ const generateJourneySnapshotMutationResolver = async (
   if (userApprovedCodes && userApprovedCodes.length > 0) {
     useLongerTemplate = true;
   }
-
+  console.log('userLongerTemplate', useLongerTemplate);
   // based on choice, fetch template from AWS and then proceed to construct the pdf
   const templateToFetch = useLongerTemplate ? 'JourneySnapshot-1' : 'JourneySnapshot-2';
-  await generateJourneySnapshotUtil(templateToFetch, userCourseCompletion);
-  return '/sample/uri';
+  const url = await generateJourneySnapshotUtil(templateToFetch, userCourseCompletion);
+  console.log('url', url);
+  return {
+    url
+  };
 };
 
 export default generateJourneySnapshotMutationResolver;

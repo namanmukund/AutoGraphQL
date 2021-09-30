@@ -50,13 +50,6 @@ const generateJourneySnapshotUtil = async (templatetoFetch, data) => {
         font: LatoBoldFont,
         color: rgb(0.827, 0.294, 0.341),
       })
-      await firstPage.drawText('442', {
-        x: 80,
-        y: 2090,
-        size: 224,
-        font: LatoBoldFont,
-        color: rgb(1, 0.553, 0.929),
-      })
 
       /** PDF Meta Details */
       pdfDoc.setAuthor('Tekie')

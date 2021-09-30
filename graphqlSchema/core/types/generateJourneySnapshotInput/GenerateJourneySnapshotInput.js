@@ -1,6 +1,7 @@
 const GenerateJourneySnapshotInput = `
   input GenerateJourneySnapshotInput {
-    id: String!
+    userId: String!
+    userCourseCompletionId: String!
   }
 `;
 
