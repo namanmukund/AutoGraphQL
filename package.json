@@ -107,6 +107,7 @@
     "node-schedule": "^1.3.2",
     "object-path": "^0.11.4",
     "path": "^0.12.7",
+    "pdf-lib": "^1.16.0",
     "phone": "^2.4.8",
     "pluralize": "^8.0.0",
     "pretty-error": "^2.1.1",
