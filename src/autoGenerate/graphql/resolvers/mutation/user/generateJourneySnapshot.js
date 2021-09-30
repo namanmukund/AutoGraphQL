@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+import generateJourneySnapshotUtil from './utils/generateJourneySnapshotUtil';
 
 // query to fetch user course completion document on basis of id
 const fetchUserCourseCompletion = (uccId) => `
@@ -44,23 +45,27 @@ const generateJourneySnapshotMutationResolver = async (
   const userId = get(input, 'userId', '');
   console.log('userCourseCompletionId', userCourseCompletionId);
   const fetchUserCourseCompletionRes = await callLocalGraphqlApi(fetchUserCourseCompletion(userCourseCompletionId));
-  // TODO : check whether there exists already a saved image of journey snapshot in user course completion
-  const journeySnapshotFile = get(fetchUserCourseCompletionRes, 'data.userCourseCompletion.journeySnapshot', {});
+
+  // check whether there exists already a saved image of journey snapshot in user course completion
+  const userCourseCompletion = get(fetchUserCourseCompletionRes, 'data.userCourseCompletion', {});
+  const journeySnapshotFile = get(userCourseCompletion, 'journeySnapshot', {});
   if (journeySnapshotFile) {
-    // TODO : if yes then return that image url
     return get(journeySnapshotFile, 'uri', '');
   }
-  // TODO : if no then proceed..
-  // TODO : to generate the image, first use 'pdf-lib' to insert the dynamic elements into the pdf and then save it as an image.
-  // TODO : check if the user has more than 0 codes published
+
+  // to generate the image, first use 'pdf-lib' to insert the dynamic elements into the pdf and then save it as an image.
+
+  // check if the user has more than 0 codes published
   const fetchUserApprovedCodesRes = await callLocalGraphqlApi(fetchUserApprovedCodes(userId));
   let useLongerTemplate = false;
   const userApprovedCodes = get(fetchUserApprovedCodesRes, 'data.userApprovedCodes', []);
   if (userApprovedCodes && userApprovedCodes.length > 0) {
-    // TODO : user the longer template else use the smaller template
     useLongerTemplate = true;
   }
 
+  // based on choice, fetch template from AWS and then proceed to construct the pdf
+  const templateToFetch = useLongerTemplate ? 'JourneySnapshot-1' : 'JourneySnapshot-2';
+  await generateJourneySnapshotUtil(templateToFetch, userCourseCompletion);
   return '/sample/uri';
 };
 
