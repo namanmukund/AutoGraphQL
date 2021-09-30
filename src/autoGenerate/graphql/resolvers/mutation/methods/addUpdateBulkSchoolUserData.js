@@ -128,6 +128,7 @@ const callAddMentorMenteeSession = async (
   menteeSessionConnectId,
   mentorSessionConnectId,
   variables,
+  courseConnectId,
 ) => {
   const query = `
 mutation($input: MentorMenteeSessionInput!){
@@ -136,6 +137,7 @@ mutation($input: MentorMenteeSessionInput!){
     topicConnectId:"${topicConnectId}"
     menteeSessionConnectId:"${menteeSessionConnectId}"
     mentorSessionConnectId:"${mentorSessionConnectId}"
+    ${courseConnectId ? `courseConnectId: "${courseConnectId}"` : ''}
   ){
     id
   }
@@ -322,6 +324,7 @@ temp code
             menteeSessionId,
             mentorSessionId,
             variables,
+            courseConnectId,
           );
           console.log('Processed........', index + 2, result.id);
         }
