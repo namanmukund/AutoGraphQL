@@ -3,7 +3,7 @@ import { PDFDocument, rgb } from 'pdf-lib'
 import { format } from 'date-fns'
 import fontkit from '@pdf-lib/fontkit'
 import { get } from 'lodash'
-import { JOURNEY_SNAPSHOT_URL_1, JOURNEY_SNAPSHOT_URL_2, LATO_BOLD_FONT_URL, NUNITO_REGULAR_FONT_URL } from '../constants/courseCompletion'
+import { emailTemplates } from '../../../../../../../constants'
 
 
 const dataURItoBlob = (dataURI) => {
@@ -17,16 +17,15 @@ const dataURItoBlob = (dataURI) => {
   return blob
 }
 
-const generateJourneySnapshotUtil = async (data, templatetoFetch) => {
-  const user = get(data, 'user', {})
-  const userName = !nameEntered ? get(user, 'name') : nameEntered
-  const sessionDate = format(new Date(lastSessionDate), 'MMM dd, yyyy')
+const generateJourneySnapshotUtil = async (templatetoFetch, data) => {
+  const user = get(data, 'user', {});
+  const userName = get(user, 'name');
+  const sessionDate = format(new Date(get(data, 'courseEndingDate')), 'MMM dd, yyyy');
   const courseName = get(data, 'course.title')
-  const masteryLevel = proficiencyLevel
 
-  if (courseName && userName && sessionDate && masteryLevel) {
+  if (courseName && userName && sessionDate) {
     try {
-      const existingPdfBytes = await fetch(templatetoFetch === 'JourneySnapshot-1' ? JOURNEY_SNAPSHOT_URL_1 : JOURNEY_SNAPSHOT_URL_2).then((res) => res.arrayBuffer())
+      const existingPdfBytes = await fetch(templatetoFetch === 'JourneySnapshot-1' ? get(emailTemplates, 'journeySnapshot.journeySnapshot1') : get(emailTemplates, 'journeySnapshot.journeySnapshot2')).then((res) => res.arrayBuffer())
 
       // Load a PDFDocument from the existing PDF bytes
       const pdfDoc = await PDFDocument.load(existingPdfBytes)

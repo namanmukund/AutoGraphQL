@@ -7,6 +7,13 @@ const fetchUserCourseCompletion = (uccId) => `
   query{
     userCourseCompletion(id: "${uccId}"){
       id
+      user {
+        name
+      }
+      course {
+        title
+      }
+      courseEndingDate
       journeySnapshot{
         id
         name
