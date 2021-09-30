@@ -5,7 +5,7 @@ import * as fs from 'fs'
 import { Buffer } from 'buffer'
 import fontkit from '@pdf-lib/fontkit'
 import { get } from 'lodash'
-import { emailTemplates, LATO_BOLD_FONT_URL } from '../../../../../../../constants'
+import { emailTemplates, LATO_BOLD_FONT_URL, GILROY_EXTRA_BOLD_FONT_URL } from '../../../../../../../constants'
 
 
 const dataURItoBlob = (dataURI) => {
@@ -36,18 +36,23 @@ const generateJourneySnapshotUtil = async (templatetoFetch, data) => {
         res.buffer()
       )
 
+      const GilroyExtraBoldfontBytes = await fetch(GILROY_EXTRA_BOLD_FONT_URL).then((res) =>
+        res.buffer()
+      )
+
       // Embed our custom font in the document
       const LatoBoldFont = await pdfDoc.embedFont(LatoBoldfontBytes)
+      const GilroyExtraBoldFont = await pdfDoc.embedFont(GilroyExtraBoldfontBytes)
 
       // Get the first page of the document
       const pages = pdfDoc.getPages()
       const firstPage = pages[0]
       // Draw a string of text diagonally across the first page
       await firstPage.drawText('14', {
-        x: 80,
-        y: 2720,
+        x: 85,
+        y: 1240,
         size: 224,
-        font: LatoBoldFont,
+        font: GilroyExtraBoldFont,
         color: rgb(0.827, 0.294, 0.341),
       })
 
@@ -63,7 +68,7 @@ const generateJourneySnapshotUtil = async (templatetoFetch, data) => {
        * */
       const pdfBytes = await pdfDoc.save();
       // const url = dataURItoBlob(pdfBase64)
-      fs.writeFileSync('./test.pdf', pdfBytes);
+      fs.writeFileSync('/Users/gokulmadhusudhan/Desktop/test-pdf.pdf', pdfBytes);
       // to open the PDF in a new window
       // window.open(url, '_blank')
       return 'something'
