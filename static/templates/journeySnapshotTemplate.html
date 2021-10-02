@@ -11,6 +11,8 @@
   <!-- Use the latest (edge) version of IE rendering engine -->
   <meta name="x-apple-disable-message-reformatting">
   <!-- Disable auto-scale in iOS 10 Mail entirely -->
+  <meta name="color-scheme" content="light">>
+  <!-- Disable dark mode from changing border colors  -->
   <title></title>
   <!-- The title tag shows in email notifications, like Android 4.4. -->
 
@@ -154,7 +156,6 @@
     p {
       font-family: 'Nunito', sans-serif;
       font-size: 10px;
-      color-scheme: light only;
     }
 
     /* table,
@@ -179,29 +180,30 @@
               <!-- bg start -->
               <div
                 style='width: 100%; height: 2750px; background-image: url("https://tekie-backend.s3.amazonaws.com/python/email/JourneySnapshot-1.png"); background-size: cover; background-position: center center; padding-top: 20px; box-sizing: border-box;'>
-                <div
-                  style="width:10%; height: 60px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/auli.png); background-size: cover; background-position: center center; padding-top: 20px; box-sizing: border-box; margin-top: 50px; margin-left: 20px; display: inline-block; border-radius: 50%; background-color: white;">
-                </div>
-                <div
-                  style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 18px; color: #35E4E9; margin-top: 0px; margin-left: 40px; margin-bottom: 0px; display: inline-block;">
-                  #&nbsp;<%= studentName %>'s Python Wrap!
-                </div>
-                <div
-                  style="font-family: 'Gilroy', 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 1120px; margin-bottom: 0px; margin-right: 6%; opacity: 0.8; color: #B73882; text-align: right; font-size: 90px; font-weight: 700;">
-                  <%= pqSolved %>0
-                </div>
-                <div
-                  style="font-family: 'Gilroy', 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 200px; margin-bottom: 0px; margin-left: 34px; width: 100%; opacity: 0.8; color: #D34B57; font-size: 90px; font-weight: 700;">
-                  <%= savedCodes %>0
-                </div>
-                <div
-                  style="font-family: 'Gilroy', 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 140px; margin-bottom: 0px; margin-left: 34px; width: 100%; opacity: 0.8; color: #FF8DED; font-size: 90px;font-weight: 700;">
-                  <%= publishedCodes %>0
-                </div>
-                <div
-                  style="font-family: 'Gilroy', 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 60px; margin-bottom: 0px; margin-right: 6%; opacity: 0.8; color: #65DA7A; text-align: right; font-size: 90px;font-weight: 700;">
-                  <%= shoutouts %>0
-                </div>
+                <%= avatarDiv %>
+                  <!-- <div
+                    style="width:10%; height: 60px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/auli.png); background-size: cover; background-position: center center; padding-top: 20px; box-sizing: border-box; margin-top: 50px; margin-left: 20px; display: inline-block; border-radius: 50%; background-color: white;">
+                  </div> -->
+                  <div
+                    style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 18px; color: #35E4E9; margin-top: 0px; margin-left: 40px; margin-bottom: 0px; display: inline-block;">
+                    #&nbsp;<%= studentName %>'s Python Wrap!
+                  </div>
+                  <div
+                    style="font-family: 'Gilroy', 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 1120px; margin-bottom: 0px; margin-right: 6%; opacity: 0.8; color: #B73882; text-align: right; font-size: 90px; font-weight: 700;">
+                    <%= pqSolved %>0
+                  </div>
+                  <div
+                    style="font-family: 'Gilroy', 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 200px; margin-bottom: 0px; margin-left: 34px; width: 100%; opacity: 0.8; color: #D34B57; font-size: 90px; font-weight: 700;">
+                    <%= savedCodes %>0
+                  </div>
+                  <div
+                    style="font-family: 'Gilroy', 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 140px; margin-bottom: 0px; margin-left: 34px; width: 100%; opacity: 0.8; color: #FF8DED; font-size: 90px;font-weight: 700;">
+                    <%= publishedCodes %>0
+                  </div>
+                  <div
+                    style="font-family: 'Gilroy', 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 60px; margin-bottom: 0px; margin-right: 6%; opacity: 0.8; color: #65DA7A; text-align: right; font-size: 90px;font-weight: 700;">
+                    <%= shoutouts %>0
+                  </div>
               </div>
               <!-- bg end -->
             </td>

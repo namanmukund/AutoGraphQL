@@ -59,13 +59,12 @@ const sendJourneySnapshotOnCourseCompletion = async ({ userId }, deleteJob) => {
   const parentEmail = get(userRes, 'data.user.studentProfile.parents[0].user.email');
   const studentName = get(userRes, 'data.user.name', '');
   // TODO : Add default avatar code in get
-  const avatarCode = get(userRes, 'data.user.studentProfile.profileAvatarCode', '');
+  const avatarCode = get(userRes, 'data.user.studentProfile.profileAvatarCode', 'auli');
 
   const fetchUserApprovedCodesRes = await callLocalGraphqlApi(fetchUserApprovedCodes(userId));
   let useLongerTemplate = false;
 
   // fetch data and pass to insert into html
-  console.log('data', get(fetchUserApprovedCodesRes, 'data'));
   const userApprovedCodes = get(fetchUserApprovedCodesRes, 'data.userApprovedCodes', []);
   const userSavedCodes = get(fetchUserApprovedCodesRes, 'data.userSavedCodes', []);
   const userPqCount = get(fetchUserApprovedCodesRes, 'data.userPracticeQuestionReportsMeta.count', 0);
@@ -76,7 +75,6 @@ const sendJourneySnapshotOnCourseCompletion = async ({ userId }, deleteJob) => {
     useLongerTemplate = true;
   }
   const templateToFetch = useLongerTemplate ? 'JourneySnapshot-1' : 'JourneySnapshot-2';
-
   const input = {
     userApprovedCodes,
     userSavedCodes,
