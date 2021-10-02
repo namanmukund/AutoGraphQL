@@ -87,6 +87,8 @@ const MentorMenteeSession = `
     isReviewSubmittedOnTime: Boolean @defaultValue(value: "false")
     isPostSalesAudit: Boolean @defaultValue(value: "false")
     studentProfile: StudentProfile @relation(name:"MentorMenteeSessionStudentProfile")
+    mentorDemandSlot: MentorDemandSingleSlot @relation(name:"MentorDemandSingleSlotMentorMenteeSession")
+    isBroadCastedSession: Boolean @defaultValue(value: "false")
 }`;
 
 export default [MentorMenteeSession, internetSpeed];

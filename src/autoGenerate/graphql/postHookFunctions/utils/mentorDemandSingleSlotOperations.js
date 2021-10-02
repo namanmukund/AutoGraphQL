@@ -93,7 +93,7 @@ const updateMentorDemandSingleSlot = async (mentorDemandSingleSlotId, sessionId,
 
 const getPaySlabDetails = async () => {
   const query = `{
-  mentorSupplyPaySlabs(filter: { vertical: b2c }) {
+  mentorSupplyPaySlabs {
     id
   }
 }`;
@@ -131,7 +131,7 @@ export const removeLinkedFromMentorDemandSlot = async (mentorDemandSingleSlotId,
   await callLocalGraphqlApi(query);
 };
 
-const mentorSessionOperation = async ({
+const addUpdateMentorDemandSingleSlot = async ({
   singleSlotData, mentorProfileId, sessionId, date, slotName, sessionType, typeName,
 }) => {
   // if singleSlot exist for give slotName, date and sessionType then update with mentorSessionId
@@ -192,47 +192,45 @@ const mentorDemandSingleSlotOperations = async ({
       const singleSlotData = await getMentorDemandSingleSlot({ date, sessionType, slotName: slotTimeStringArray[i] });
       switch (mutationName) {
         case 'addMenteeSession': {
-          if (singleSlotData && singleSlotData.length > 0) {
-            await updateMentorDemandSingleSlot(get(singleSlotData, '[0].id'), sessionId, 'menteeSession');
-          }
+          await addUpdateMentorDemandSingleSlot({
+            date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, typeName: 'menteeSession',
+          });
           break;
         }
         case 'updateMenteeSession': {
-          if (singleSlotData && singleSlotData.length > 0) {
-            if (prevMentorDemandSlotId) {
-              await removeLinkedFromMentorDemandSlot(prevMentorDemandSlotId, sessionId, 'menteeSession');
-            }
-            await updateMentorDemandSingleSlot(get(singleSlotData, '[0].id'), sessionId, 'menteeSession');
+          if (prevMentorDemandSlotId) {
+            await removeLinkedFromMentorDemandSlot(prevMentorDemandSlotId, sessionId, 'menteeSession');
           }
+          await addUpdateMentorDemandSingleSlot({
+            date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, typeName: 'menteeSession',
+          });
           break;
         }
         case 'addMentorSession': {
-          await mentorSessionOperation({
+          await addUpdateMentorDemandSingleSlot({
             date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'mentorSession',
           });
           break;
         }
         case 'updateMentorSession': {
-          await mentorSessionOperation({
+          await addUpdateMentorDemandSingleSlot({
             date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'mentorSession',
           });
           break;
         }
         case 'addBatchSession': {
-          await mentorSessionOperation({
+          await addUpdateMentorDemandSingleSlot({
             date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'batchSession',
           });
           break;
         }
         case 'updateBatchSession': {
-          if (singleSlotData && singleSlotData.length > 0) {
-            if (prevMentorDemandSlotId) {
-              await removeLinkedFromMentorDemandSlot(prevMentorDemandSlotId, sessionId, 'batchSession');
-            }
-            await mentorSessionOperation({
-              date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'batchSession',
-            });
+          if (prevMentorDemandSlotId) {
+            await removeLinkedFromMentorDemandSlot(prevMentorDemandSlotId, sessionId, 'batchSession');
           }
+          await addUpdateMentorDemandSingleSlot({
+            date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'batchSession',
+          });
           break;
         }
         default:

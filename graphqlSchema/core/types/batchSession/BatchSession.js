@@ -32,6 +32,7 @@ const BatchSession = `
     isAudit: Boolean @defaultValue(value: "false")
     mentorDemandSlot: MentorDemandSingleSlot @relation(name:"MentorDemandSingleSlotBatchSession")
     broadCastedMentors: [MentorProfile] @relation(name:"BatchSessionBroadcastedMentors", direction: "OneWay")
+    isBroadCastedSession: Boolean @defaultValue(value: "false")
 }`;
 
 export default [BatchSession, batchAttendanceType];

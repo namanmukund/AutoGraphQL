@@ -49,6 +49,7 @@ const MentorDemandSingleSlot = `
     menteeSessions: [MenteeSession] @relation(name:"MentorDemandSingleSlotMenteeSession")
     batchSessions: [BatchSession] @relation(name:"MentorDemandSingleSlotBatchSession")
     mentorSessions: [MentorSession] @relation(name:"MentorDemandSingleSlotMentorSession")
+    mentorMenteeSessions: [MentorMenteeSession] @relation(name:"MentorDemandSingleSlotMentorMenteeSession")
     isBroadCasted: Boolean @defaultValue(value: "false")
   }
 `;

@@ -102,6 +102,9 @@ const SessionLog = `
     country: Country @defaultValue(value: "india")
     leadStatus: LeadStatus @groupBy
     salesOperation: SessionLogSalesOperation
+    isBroadCastedSession: Boolean @defaultValue(value: "false")
+    mentorDemandSlot: MentorDemandSingleSlot @relation(name:"MentorDemandSingleSlotSessionLog", direction: "OneWay")
+    broadCastedMentors: [MentorProfile] @relation(name:"BroadcastedMentorsSessionLog", direction: "OneWay")
   }
 `;
 
