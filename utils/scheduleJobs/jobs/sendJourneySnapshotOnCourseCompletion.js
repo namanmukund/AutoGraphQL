@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../src/api/callLocalGraphqlApi';
 import { sendJourneySnapshotToUser } from '../../../src/email/messages';
@@ -19,7 +20,6 @@ const USER = (id) => `
   }
 }
 `;
-
 
 // query to fetch user approved codes and reaction counts to determine shorter/longer template to choose
 const fetchUserApprovedCodes = (userId) => `
@@ -53,7 +53,6 @@ const fetchUserApprovedCodes = (userId) => `
 */
 
 const sendJourneySnapshotOnCourseCompletion = async ({ userId }, deleteJob) => {
-
   const userRes = await callLocalGraphqlApi(USER(userId));
 
   const parentEmail = get(userRes, 'data.user.studentProfile.parents[0].user.email');
@@ -81,10 +80,8 @@ const sendJourneySnapshotOnCourseCompletion = async ({ userId }, deleteJob) => {
     totalPqCountToDisplay,
     templateToFetch,
     studentName,
-    avatarCode
-  }
-  console.log('input-passed-to-sendJourneySnapshotToUser', input);
-  console.log('parentEmail', parentEmail);
+    avatarCode,
+  };
   // TODO : send parent email here
   await sendJourneySnapshotToUser('gokul.madhusudhan@tekie.in', input, 'backend');
   deleteJob();

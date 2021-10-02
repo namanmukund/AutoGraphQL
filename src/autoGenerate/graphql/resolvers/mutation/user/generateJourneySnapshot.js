@@ -52,7 +52,6 @@ const fetchUserApprovedCodes = (userId) => `
   }
   `;
 
-
 const generateJourneySnapshotMutationResolver = async (
   root,
   params,
@@ -66,15 +65,11 @@ const generateJourneySnapshotMutationResolver = async (
   const { input } = params;
   const userCourseCompletionId = get(input, 'userCourseCompletionId', '');
   const userId = get(input, 'userId', '');
-  console.log('userCourseCompletionId', userCourseCompletionId);
-  console.log('userId', userId);
   const fetchUserCourseCompletionRes = await callLocalGraphqlApi(fetchUserCourseCompletion(userCourseCompletionId));
-  console.log('fetchUserCourseCompletionRes', fetchUserCourseCompletionRes);
 
   // check whether there exists already a saved image of journey snapshot in user course completion
   const userCourseCompletion = get(fetchUserCourseCompletionRes, 'data.userCourseCompletion', {});
   const journeySnapshotFile = get(userCourseCompletion, 'journeySnapshot', {});
-  console.log('journeySnapshotFile', journeySnapshotFile);
   if (journeySnapshotFile) {
     return get(journeySnapshotFile, 'uri', '');
   }
@@ -84,7 +79,6 @@ const generateJourneySnapshotMutationResolver = async (
   // check if the user has more than 0 codes published
   const fetchUserApprovedCodesRes = await callLocalGraphqlApi(fetchUserApprovedCodes(userId));
   let useLongerTemplate = false;
-  console.log('data', get(fetchUserApprovedCodesRes, 'data'));
   const userApprovedCodes = get(fetchUserApprovedCodesRes, 'data.userApprovedCodes', []);
   const userSavedCodes = get(fetchUserApprovedCodesRes, 'data.userSavedCodes', []);
   const userPqCount = get(fetchUserApprovedCodesRes, 'data.userPracticeQuestionReportsMeta.count', 0);
@@ -94,13 +88,13 @@ const generateJourneySnapshotMutationResolver = async (
   if (userApprovedCodes && userApprovedCodes.length > 0) {
     useLongerTemplate = true;
   }
-  console.log('useLongerTemplate', useLongerTemplate);
+
   // based on choice, fetch template from AWS and then proceed to construct the pdf
   const templateToFetch = useLongerTemplate ? 'JourneySnapshot-1' : 'JourneySnapshot-2';
   const url = await generateJourneySnapshotUtil(templateToFetch, userCourseCompletion, userSavedCodes, userApprovedCodes, totalPqCountToDisplay);
-  console.log('url', url);
+
   return {
-    url
+    url,
   };
 };
 

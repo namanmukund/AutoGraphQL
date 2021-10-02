@@ -1,4 +1,4 @@
-import sendJourneySnapshotOnCourseCompletion from '../../../../../../utils/scheduleJobs/jobs/sendJourneySnapshotOnCourseCompletion';
+// import sendJourneySnapshotOnCourseCompletion from '../../../../../../utils/scheduleJobs/jobs/sendJourneySnapshotOnCourseCompletion';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 // import updateCourseInSalesOperationScript from '../scriptMethods/updateCourseinSalesOperationScript';
 // import updateQuestionsWithCorrectPositions from '../scriptMethods/updateQuestionsWithCorrectPositions';
@@ -21,7 +21,7 @@ const temporaryScript = (async (root, params, context) => {
   /*
   Add script functions
    */
-  await sendJourneySnapshotOnCourseCompletion({ userId: "ckqrpxo7u0002a0fi6p5lgclv" }, () => console.log('Delete Job WIll be triggered'));
+  // await sendJourneySnapshotOnCourseCompletion({ userId: 'ckqrpxo7u0002a0fi6p5lgclv' }, () => console.log('Delete Job WIll be triggered'));
   // await updateCourseInVideos();
   // await updateCourseInSalesOperationScript();
   // await updateSchoolCampaignCodeInSchool();

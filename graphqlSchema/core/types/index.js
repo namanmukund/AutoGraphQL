@@ -108,6 +108,7 @@ import SessionLog from './sessionLog';
 import SessionReport from './sessionReport';
 import RebookMenteeSessionInput from './rebookMenteeSessionInput';
 import GenerateJourneySnapshotInput from './generateJourneySnapshotInput';
+import sendJourneySnapshotInMailInput from './sendJourneySnapshotInMailInput';
 import TopicQuestions from './topicQuestions';
 import TopicAssignmentQuestion from './topicAssignmentQuestion';
 import AuditQuestion from './auditQuestion';
@@ -236,6 +237,7 @@ export default [
   ...SessionReport,
   ...RebookMenteeSessionInput,
   ...GenerateJourneySnapshotInput,
+  ...sendJourneySnapshotInMailInput,
   ...TopicQuestions,
   ...TopicAssignmentQuestion,
   ...AuditQuestion,

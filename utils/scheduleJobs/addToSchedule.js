@@ -272,7 +272,7 @@ const addToSchedule = async (jobType, scheduledDate, {
       const jobId = get(res, 'data.addScheduleJob.id');
       schedule.scheduleJob(scheduledDate, () => {
         sendJourneySnapshotOnCourseCompletion({
-          userId
+          userId,
         }, () => callLocalGraphqlApi(deleteJob(jobId)));
       });
       break;
