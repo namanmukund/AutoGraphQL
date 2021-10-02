@@ -64,7 +64,7 @@ import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/p
 // `;
 
 const addToSchedule = async (jobType, scheduledDate, {
-  // userId,
+  userId,
   // code,
   batchSessionId,
   // menteeId: menteeSessionId,
@@ -155,7 +155,7 @@ const addToSchedule = async (jobType, scheduledDate, {
       //   jobType, batchSessionId, scheduledDate,
       // }));
       // const jobId = get(res, 'data.addScheduleJob.id');
-      extractBatchSessionAndPostCarnival({ jobType, batchSessionId }, () => {}, true);
+      extractBatchSessionAndPostCarnival({ jobType, batchSessionId }, () => { }, true);
       // schedule.scheduleJob(scheduledDate, () => {
       //   extractBatchSessionAndPostCarnival({ jobType, batchSessionId }, () => callLocalGraphqlApi(deleteJob(jobId)));
       // });
@@ -262,6 +262,19 @@ const addToSchedule = async (jobType, scheduledDate, {
       //     mentorPhoneNumber,
       //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
       // });
+      break;
+    }
+    case 'sendJourneySnapshot': {
+      const res = await callLocalGraphqlApi(addScheduleJob({
+        jobType, userId, scheduledDate,
+      }));
+      // userId here is child userId
+      const jobId = get(res, 'data.addScheduleJob.id');
+      schedule.scheduleJob(scheduledDate, () => {
+        sendJourneySnapshotOnCourseCompletion({
+          userId
+        }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      });
       break;
     }
     default:
