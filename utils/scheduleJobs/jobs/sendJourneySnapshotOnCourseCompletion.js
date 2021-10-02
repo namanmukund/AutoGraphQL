@@ -57,7 +57,7 @@ const sendJourneySnapshotOnCourseCompletion = async ({ userId }, deleteJob) => {
 
   const parentEmail = get(userRes, 'data.user.studentProfile.parents[0].user.email');
   const studentName = get(userRes, 'data.user.name', '');
-  // TODO : Add default avatar code in get
+  // Add default avatar code in get
   const avatarCode = get(userRes, 'data.user.studentProfile.profileAvatarCode', 'auli');
 
   const fetchUserApprovedCodesRes = await callLocalGraphqlApi(fetchUserApprovedCodes(userId));
@@ -82,8 +82,8 @@ const sendJourneySnapshotOnCourseCompletion = async ({ userId }, deleteJob) => {
     studentName,
     avatarCode,
   };
-  // TODO : send parent email here
-  await sendJourneySnapshotToUser('gokul.madhusudhan@tekie.in', input, 'backend');
+  // change email here to test
+  await sendJourneySnapshotToUser(parentEmail, input, 'backend');
   deleteJob();
 };
 
