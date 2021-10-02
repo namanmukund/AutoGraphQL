@@ -1,4 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable import/extensions */
 const nodeExternals = require('webpack-node-externals');
 const slsw = require('serverless-webpack');
 

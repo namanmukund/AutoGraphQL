@@ -1,4 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable import/extensions */
 const nodeExternals = require('webpack-node-externals');
 /* eslint-enable import/no-extraneous-dependencies */
 const path = require('path');
