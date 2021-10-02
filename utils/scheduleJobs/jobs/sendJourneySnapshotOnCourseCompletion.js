@@ -8,6 +8,7 @@ const USER = (id) => `
     id
     name
     studentProfile{
+      profileAvatarCode
       parents{
         user{
           id
@@ -55,7 +56,10 @@ const sendJourneySnapshotOnCourseCompletion = async ({ userId }, deleteJob) => {
 
   const userRes = await callLocalGraphqlApi(USER(userId));
 
-  const parentEmail = get(userRes, 'data.user.studentProfile.parents[0].email');
+  const parentEmail = get(userRes, 'data.user.studentProfile.parents[0].user.email');
+  const studentName = get(userRes, 'data.user.name', '');
+  // TODO : Add default avatar code in get
+  const avatarCode = get(userRes, 'data.user.studentProfile.profileAvatarCode', '');
 
   const fetchUserApprovedCodesRes = await callLocalGraphqlApi(fetchUserApprovedCodes(userId));
   let useLongerTemplate = false;
@@ -77,11 +81,13 @@ const sendJourneySnapshotOnCourseCompletion = async ({ userId }, deleteJob) => {
     userApprovedCodes,
     userSavedCodes,
     totalPqCountToDisplay,
-    templateToFetch
+    templateToFetch,
+    studentName,
+    avatarCode
   }
   console.log('input-passed-to-sendJourneySnapshotToUser', input);
   console.log('parentEmail', parentEmail);
-  // send parent email here
+  // TODO : send parent email here
   await sendJourneySnapshotToUser('gokul.madhusudhan@tekie.in', input, 'backend');
   deleteJob();
 };
