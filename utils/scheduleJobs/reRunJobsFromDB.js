@@ -193,16 +193,6 @@ const reRunJobsFromDB = async () => {
         });
         break;
       }
-      case 'sendJourneySnapshot': {
-        if (isPast) {
-          sendB2CBookReminderNextDay({ userId }, deleteJob);
-        } else {
-          schedule.scheduleJob(new Date(scheduledDate), () => {
-            sendB2CBookReminderNextDay({ userId }, deleteJob);
-          });
-        }
-        break;
-      }
       default:
         break;
     }
