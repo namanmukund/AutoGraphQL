@@ -13,12 +13,13 @@ const uploadToS3 = (Key, Body) => new Promise((resolve, reject) => {
     ACL: awsConfig.ACL.publicReadWrite,
     Key,
     Body,
-  }, (err) => {
+  }, (err, data) => {
     if (err) {
       log(err, `Error uploading '${Key}'!`);
       reject(err);
     } else {
       log(`Successfully uploaded '${Key}'!`);
+      console.log(data)
       resolve();
     }
   });

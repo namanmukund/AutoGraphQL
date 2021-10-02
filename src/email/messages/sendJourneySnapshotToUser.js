@@ -2,11 +2,12 @@ import parsedHtmlFromTemplateFileAndObject from '../../../services/email/utils/p
 import getEmailObject from '../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../services/email/utils/sendEmail';
 
-const sendJourneySnapshotToUser = (emailTo, userOtp, appName) => {
+const sendJourneySnapshotToUser = (emailTo, input, appName) => {
+  // take in all the variables as input to insert into html
+  // send them inside template object to be inserted into the html file
   console.log('In sendJourneySnapshotToUser')
   const templateFileName = 'journeySnapshotTemplate';
   const templateObject = {
-    userOtp,
     appName,
   };
   console.log('templateObject', templateObject)

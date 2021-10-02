@@ -1,5 +1,5 @@
+import sendJourneySnapshotOnCourseCompletion from '../../../../../../utils/scheduleJobs/jobs/sendJourneySnapshotOnCourseCompletion';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import { sendJourneySnapshotToUser } from '../../../../../email/messages';
 // import updateCourseInSalesOperationScript from '../scriptMethods/updateCourseinSalesOperationScript';
 // import updateQuestionsWithCorrectPositions from '../scriptMethods/updateQuestionsWithCorrectPositions';
 // import updateQuestionsWithHints from '../scriptMethods/updateQuestionsWithHints';
@@ -21,7 +21,7 @@ const temporaryScript = (async (root, params, context) => {
   /*
   Add script functions
    */
-  await sendJourneySnapshotToUser('gokul.madhusudhan@tekie.in', 'abc', 'backend');
+  await sendJourneySnapshotOnCourseCompletion({ userId: "ckqrpxo7u0002a0fi6p5lgclv" }, () => console.log('Delete Job WIll be triggered'));
   // await updateCourseInVideos();
   // await updateCourseInSalesOperationScript();
   // await updateSchoolCampaignCodeInSchool();
