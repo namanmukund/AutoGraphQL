@@ -59,6 +59,7 @@ const fetchUserCourse = async (userId, courseId) => {
     }) {
       id
       homeworkStreaks {
+        course { id }
         createdAt
       }
       courses {
@@ -181,8 +182,15 @@ export const sessionStartedStreaksFlow = async (topics, userId, courseId, contex
     // log(`.............Prev MMS, ${JSON.stringify(prevMentorMenteeSession, null, 2)}`);
     if (prevMentorMenteeSession && prevMentorMenteeSession.length && (get(prevMentorMenteeSession[0], 'isSubmittedForReview') === false)) {
       const userCourseRes = await fetchUserCourse(userId, courseId);
-      // log(`.............Current Streak, ${get(userCourseRes, 'homeworkStreaks', []).length}`);
+      let streakExistsForCurrentCourse = false;
       if (userCourseRes && get(userCourseRes, 'homeworkStreaks', []).length) {
+        const courseStreaksDoc = get(userCourseRes, 'homeworkStreaks', []).filter((el) => el.course && (el.course.id === courseId));
+        if (courseStreaksDoc && courseStreaksDoc.length) {
+          streakExistsForCurrentCourse = true;
+        }
+      }
+      // log(`.............Current Streak, ${get(userCourseRes, 'homeworkStreaks', []).length}`);
+      if (streakExistsForCurrentCourse) {
         const streaksInput = {
           push: {
             courseConnectId: courseId || OLD_COURSE_ID,
