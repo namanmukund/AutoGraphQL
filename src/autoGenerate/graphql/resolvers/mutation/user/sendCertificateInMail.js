@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import sendJourneySnapshotOnCourseCompletion from '../../../../../../utils/scheduleJobs/jobs/sendJourneySnapshotOnCourseCompletion';
+import sendCertificateOnCourseCompletion from '../../../../../../utils/scheduleJobs/jobs/sendCertificateOnCourseCompletion';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 
 const sendCertificateInMailMutationResolver = async (
@@ -15,7 +15,7 @@ const sendCertificateInMailMutationResolver = async (
   const { input } = params;
   const userId = get(input, 'userId', '');
   try {
-    await sendJourneySnapshotOnCourseCompletion({ userId }, () => { });
+    await sendCertificateOnCourseCompletion({ userId }, () => { });
   } catch (err) {
     return {
       error: 'Error while trying to send mail',
