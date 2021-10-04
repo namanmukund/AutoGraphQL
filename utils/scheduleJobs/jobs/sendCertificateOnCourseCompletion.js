@@ -1,0 +1,43 @@
+/* eslint-disable no-unused-vars */
+import { get } from 'lodash';
+import callLocalGraphqlApi from '../../../src/api/callLocalGraphqlApi';
+import sendCertificateToUser from '../../../src/email/messages/sendCertificateToUser';
+
+const USER = (id) => `
+  {
+  user(id: "${id}") {
+    id
+    name
+    studentProfile{
+      profileAvatarCode
+      parents{
+        user{
+          id
+          email
+        }
+      }
+    }
+  }
+}
+`;
+
+/*
+  called with child userId, fetches parent email and other variables to send certificate email
+*/
+
+const sendCertificateOnCourseCompletion = async ({ userId }, deleteJob) => {
+  const userRes = await callLocalGraphqlApi(USER(userId));
+
+  const parentEmail = get(userRes, 'data.user.studentProfile.parents[0].user.email');
+  const studentName = get(userRes, 'data.user.name', '');
+
+  const input = {
+    studentName,
+  };
+  // change email here to test
+  console.log('parentEmail', parentEmail);
+  await sendCertificateToUser(parentEmail, input, 'backend');
+  deleteJob();
+};
+
+export default sendCertificateOnCourseCompletion;

@@ -89,6 +89,7 @@ import signUpSchool from './mutation/methods/signUpSchool';
 import rebookMenteeSession from './mutation/methods/rebookMenteeSession';
 import generateJourneySnapshot from './mutation/methods/generateJourneySnapshot';
 import sendJourneySnapshotInMail from './mutation/methods/sendJourneySnapshotInMail';
+import sendCertificateInMail from './mutation/methods/sendCertificateInMail';
 import getSchoolCampaignSlots from './query/methods/getSchoolCampaignSlots';
 import getUserCourses from './query/methods/getUserCourses';
 
@@ -586,6 +587,7 @@ resolvers.Mutation.bookB2B2CSlots = bookB2B2CSlots;
 resolvers.Mutation.rebookMenteeSession = rebookMenteeSession;
 resolvers.Mutation.generateJourneySnapshot = generateJourneySnapshot;
 resolvers.Mutation.sendJourneySnapshotInMail = sendJourneySnapshotInMail;
+resolvers.Mutation.sendCertificateInMail = sendCertificateInMail;
 
 // queries
 resolvers.Query.me = me;
