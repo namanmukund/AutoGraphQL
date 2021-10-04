@@ -102,6 +102,15 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
         topicInfo,
       );
     }
+    const prevMentorDemandSlotId = get(input, 'mentorDemandSlot.typeId');
+    await mentorDemandSingleSlotOperations({
+      slotTimeStringArray,
+      date: bookingDate,
+      mutationName,
+      sessionType: sessionType.trial,
+      sessionId: menteeSessionId,
+      prevMentorDemandSlotId,
+    });
   }
 
   const updateMentorMenteeSessionInput = {};
@@ -126,15 +135,6 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     const clientId = get(userInfo, 'data.user.id', '');
     const topicId = get(topicInfo, 'data.topic.id', '');
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
-    const prevMentorDemandSlotId = get(input, 'mentorDemandSlot.typeId');
-    await mentorDemandSingleSlotOperations({
-      slotTimeStringArray,
-      date: bookingDate,
-      mutationName,
-      sessionType: isTrial ? sessionType.trial : sessionType.paid,
-      sessionId: menteeSessionId,
-      prevMentorDemandSlotId,
-    });
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMenteeSession', batchCode, '', '', updateMentorMenteeSessionInput);
   }
 };

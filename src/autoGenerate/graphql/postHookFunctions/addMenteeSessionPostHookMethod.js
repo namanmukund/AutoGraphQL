@@ -9,7 +9,6 @@ import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import getTopicInfo from './utils/getTopicInfo';
 import { byPassMenteeValidationApps, sessionType } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
-import isTrialSession from '../resolvers/utils/isTrialSession';
 import mentorDemandSingleSlotOperations from './utils/mentorDemandSingleSlotOperations';
 
 const getUserCourses = async (userId) => {
@@ -61,24 +60,27 @@ const getCourseName = async (id) => {
 
 const addMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
   // don't decrease the availability slot if it is done through backend
-  const { appName, isBookedByMentee, currentUser } = context;
+  const {
+    appName, isBookedByMentee, currentUser, isTrialSession,
+  } = context;
   if (!byPassMenteeValidationApps.includes(appName)) {
     /*
     Since addition of session by mentee will consume a slot
      */
-    const isTrial = await isTrialSession(get(input, 'topic.typeId'));
     const { id: menteeSessionId, bookingDate, ...slots } = input;
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
     const { availableSlots } = context;
     const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
     const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
-    await mentorDemandSingleSlotOperations({
-      slotTimeStringArray,
-      date: bookingDate,
-      mutationName,
-      sessionType: isTrial ? sessionType.trial : sessionType.paid,
-      sessionId: menteeSessionId,
-    });
+    if (typeof isTrialSession === 'boolean' && isTrialSession) {
+      await mentorDemandSingleSlotOperations({
+        slotTimeStringArray,
+        date: bookingDate,
+        mutationName,
+        sessionType: sessionType.trial,
+        sessionId: menteeSessionId,
+      });
+    }
     await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context, availableSlots);
     // send email to mentor admin regarding the session
     await extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
@@ -95,9 +97,9 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     const addBookingToLS = async () => {
       const courseName = await getCourseName(courseId);
       const lsInput = input;
-      input.courseName = courseName;
+      lsInput.courseName = courseName;
       await addMenteeBookingLeadsquared(
-        input,
+        lsInput,
         params,
         slotTimeStringArray,
         userInfo,

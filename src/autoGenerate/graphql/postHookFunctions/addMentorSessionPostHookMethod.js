@@ -30,7 +30,7 @@ const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
   await mentorDemandSingleSlotOperations({
     sessionId: get(input, 'id'),
     slotTimeStringArray,
-    sessionType: get(input, 'sessionType'),
+    sessionType,
     date: availabilityDate,
     mutationName,
     mentorProfileId: get(userInfo, 'mentorProfile.id'),

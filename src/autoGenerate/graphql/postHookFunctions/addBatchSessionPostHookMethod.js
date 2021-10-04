@@ -127,7 +127,10 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   */
   const isTrial = await isTrialSession(get(input, 'topic.typeId'));
   if (isTrial) {
-    const mentorProfile = await getMentorProfileFromMentorSession(mentorSessionConnectId);
+    let mentorProfile;
+    if (mentorSessionConnectId) {
+      mentorProfile = await getMentorProfileFromMentorSession(mentorSessionConnectId);
+    }
     await mentorDemandSingleSlotOperations({
       slotTimeStringArray,
       date: get(input, 'bookingDate'),

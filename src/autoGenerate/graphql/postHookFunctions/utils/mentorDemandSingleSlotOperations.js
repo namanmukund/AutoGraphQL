@@ -63,9 +63,12 @@ const addMentorDemandSlot = async (slotId, mentorProfileId, input) => {
   return get(addMentorDemandSlotData, 'data.addMentorDemandSlot');
 };
 
-const addMentorDemandSingleSlot = async (sessionId, mentorProfileId, paySlabId, input) => {
+const addMentorDemandSingleSlot = async (sessionId, mentorProfileId, paySlabId, input, type) => {
   const mutationQuery = `mutation($input: MentorDemandSingleSlotInput!) {
-    addMentorDemandSingleSlot(input: $input, mentorSessionsConnectIds: ["${sessionId}"],
+    addMentorDemandSingleSlot(input: $input,
+    ${type === 'menteeSession' ? `menteeSessionsConnectIds: ["${sessionId}"]` : ''}
+    ${type === 'mentorSession' ? `mentorSessionsConnectIds: ["${sessionId}"]` : ''}
+    ${type === 'batchSession' ? `batchSessionsConnectIds: ["${sessionId}"]` : ''}
     ${paySlabId ? `paySlabConnectId: "${paySlabId}"` : ''}
     ${mentorProfileId ? `broadCastedMentorsConnectIds: ["${mentorProfileId}"]` : ''}) {
       id
@@ -134,7 +137,7 @@ export const removeLinkedFromMentorDemandSlot = async (mentorDemandSingleSlotId,
 const addUpdateMentorDemandSingleSlot = async ({
   singleSlotData, mentorProfileId, sessionId, date, slotName, sessionType, typeName,
 }) => {
-  // if singleSlot exist for give slotName, date and sessionType then update with mentorSessionId
+  // if singleSlot exist for give slotName, date and sessionType then update with sessionId
   if (singleSlotData && singleSlotData.length > 0) {
     if (typeName === 'batchSession') {
       const slotVerticals = get(singleSlotData, '[0].verticals', []);
@@ -167,7 +170,7 @@ const addUpdateMentorDemandSingleSlot = async ({
       sessionType,
     };
     // else add new singleSlot
-    const addSingleSlot = await addMentorDemandSingleSlot(sessionId, mentorProfileId, paySlabId, input);
+    const addSingleSlot = await addMentorDemandSingleSlot(sessionId, mentorProfileId, paySlabId, input, typeName);
     const mentorDemandSlotData = await getMentorMentorDemandSlot(date);
     // check if mentorDemandSlot exist for the give date and accordingly add or update it.
     if (mentorDemandSlotData && mentorDemandSlotData.length > 0) {
