@@ -15,6 +15,9 @@ const getCampaign = (code) => `
     poster {
       id
     }
+    posterMobile {
+      id
+    }
     classes {
       section
       grade
@@ -103,6 +106,7 @@ const getCampaignSlots = (async (root, params, context) => {
   const schoolName = get(getCampaignRes, 'data.campaigns[0].school.name', '');
   const schoolLogoId = get(getCampaignRes, 'data.campaigns[0].school.logo.id', '');
   const posterId = get(getCampaignRes, 'data.campaigns[0].poster.id', '');
+  const posterMobileId = get(getCampaignRes, 'data.campaigns[0].posterMobile.id', '');
   const title = get(getCampaignRes, 'data.campaigns[0].title', '');
   const whiteLabel = get(getCampaignRes, 'data.campaigns[0].school.whiteLabel', '');
   const classes = get(getCampaignRes, 'data.campaigns[0].classes', []);
@@ -130,7 +134,11 @@ const getCampaignSlots = (async (root, params, context) => {
   if (posterId) {
     result.poster = { type: 'File', typeId: `${posterId}` };
   }
+  if (posterMobileId) {
+    result.posterMobile = { type: 'File', typeId: `${posterMobileId}` };
+  }
   result.campaignType = type;
+  // console.log(poster)
 
   return result;
 });
