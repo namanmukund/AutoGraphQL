@@ -10,6 +10,17 @@ const fetchUser = async (id) => {
       user(id: "${id}") {
         id
         isPreSalesAudit
+        role
+        source
+        vertical
+        campaign {
+          type
+        }
+        studentProfile {
+          batch {
+            type
+          }
+        }
       }
     }
   `;
@@ -39,6 +50,33 @@ const updateUserValidation = async (params, context) => {
     currentUser,
   } = userInfo;
   const user = await fetchUser(userId);
+  
+  // if the user vertical is unassigned, try to change it
+  // check if vertical can be determined, first from source, then campaign type, and then lastly batch type
+  let userVertical = 'unassigned';
+  if (get(user, 'vertical') === 'unassigned' &&
+  (get(user, 'role') === 'mentee' || get(user, 'role') === 'parent')) {
+    if (get(user, 'source') !== 'school') {
+      userVertical = 'b2c';
+    } else if (get(user, 'campaign.type')) {
+      if (get(user, 'campaign.type') === 'b2b') {
+        userVertical = 'b2b';
+      } else {
+        userVertical = 'b2b2c';
+      }
+    } else {
+      if (get(user, 'studentProfile.batch.type') === 'normal') {
+        userVertical = 'b2c';
+      } else if (get(user, 'studentProfile.batch.type') === 'b2b') {
+        userVertical = 'b2b';
+      } else if (get(user, 'studentProfile.batch.type') === 'b2b2c') {
+        userVertical = 'b2b2c';
+      }
+    }
+  }
+
+  input.vertical = userVertical;
+
   context.currentUser = currentUser;
   context.verificationStatusFromInput = verificationStatus;
   context.prevIsPreSalesAudit = get(user, 'isPreSalesAudit');

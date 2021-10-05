@@ -72,6 +72,7 @@ const User = `
     mentorBatches: [Batch] @relation(name:"BatchMentor")
     isPreSalesAudit: Boolean @defaultValue(value: "false")
     bdeProfile: BDEProfile @relation(name:"BDEProfileUser", isSubset: true)
+    vertical: Vertical @defaultValue(value: "unassigned")
   }
 `;
 
