@@ -23,7 +23,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateCourseInVideos();
   // await updateCourseInSalesOperationScript();
   // await updateSchoolCampaignCodeInSchool();
-  // await generateSessionReport(60);
+  // await generateSessionReport(2);
   // await updateTopicsInAssignment();
   // await updateTopicsInLearningObjective();
   // await updateTopicsAndLearningObjectivesInQuestionBank();

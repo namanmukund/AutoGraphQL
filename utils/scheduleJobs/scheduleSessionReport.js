@@ -10,14 +10,15 @@ const masterQuery = (todayStartDate,
   todayEndDate,
   otherDayStartDate,
   otherDayEndDate,
-  country) => `
+  country,
+  filterQuery) => `
     query{
   registeredUsers: usersMeta(filter:{
     and:[
       {role: parent}
       {createdAt_gte:"${otherDayStartDate}"}
       {createdAt_lt:"${otherDayEndDate}"}
-      {source_not:school}
+      ${filterQuery.source}
       {country:${country}}
     ]
   }){
@@ -29,7 +30,7 @@ const masterQuery = (todayStartDate,
       {phoneVerified:true}
       {createdAt_gte:"${otherDayStartDate}"}
       {createdAt_lt:"${otherDayEndDate}"}
-      {source_not:school}
+      ${filterQuery.source}
       {country:${country}}
     ]
   }){
@@ -39,7 +40,7 @@ const masterQuery = (todayStartDate,
     and:[
       {bookingDate_gte:"${todayStartDate}"}
       {bookingDate_lte:"${todayEndDate}"}
-      {source_not:school}
+      ${filterQuery.source}
       {country:${country}}
       {topic_some:{order:1}}
       {
@@ -47,6 +48,7 @@ const masterQuery = (todayStartDate,
           and:[
             {createdAt_gte:"${otherDayStartDate}"}
             {createdAt_lt:"${otherDayEndDate}"}
+            ${filterQuery.user}
           ]
         }
       }
@@ -59,7 +61,7 @@ const masterQuery = (todayStartDate,
       {sessionStatus:completed}
       {sessionStartDate_gte:"${todayStartDate}"}
       {sessionStartDate_lt:"${todayEndDate}"}
-      {source_not:school}
+      ${filterQuery.source}
       {country:${country}}
       {topic_some:{order:1}}
       {
@@ -68,6 +70,7 @@ const masterQuery = (todayStartDate,
             and:[
               {createdAt_gte:"${otherDayStartDate}"}
               {createdAt_lt:"${otherDayEndDate}"}
+              ${filterQuery.user}
             ]
           }
         }
@@ -79,7 +82,7 @@ const masterQuery = (todayStartDate,
   convertedUsersToday: salesOperationsMeta(filter:{
     and:[
       {leadStatus:won}
-      {source_not:school}
+      ${filterQuery.source}
       {country:${country}}
       {createdAt_gt:"${todayStartDate}"}
       {createdAt_lt: "${todayEndDate}"}
@@ -88,6 +91,7 @@ const masterQuery = (todayStartDate,
           and:[
             {createdAt_gte:"${otherDayStartDate}"}
             {createdAt_lt:"${otherDayEndDate}"}
+            ${filterQuery.user}
           ]
         }
       }
@@ -99,7 +103,7 @@ const masterQuery = (todayStartDate,
     and:[
       {bookingDate_gte:"${todayStartDate}"}
       {bookingDate_lte:"${todayEndDate}"}
-      {source_not:school}
+      ${filterQuery.source}
       {country:${country}}
       {topic_some:{order:1}}
       {bookedBy: tekieTeam}
@@ -108,6 +112,7 @@ const masterQuery = (todayStartDate,
           and:[
             {createdAt_gte:"${otherDayStartDate}"}
             {createdAt_lt:"${otherDayEndDate}"}
+            ${filterQuery.user}
           ]
         }
       }
@@ -119,7 +124,8 @@ const masterQuery = (todayStartDate,
     and:[
       {bookingDate_gte:"${todayStartDate}"}
       {bookingDate_lte:"${todayEndDate}"}
-      {source_not:school}
+      ${filterQuery.source}
+      ${filterQuery.menteeSessionsMetaVertical}
       {country:${country}}
       {topic_some:{order:1}}
     ]
@@ -131,7 +137,8 @@ const masterQuery = (todayStartDate,
       {sessionStatus:completed}
       {sessionStartDate_gte:"${todayStartDate}"}
       {sessionStartDate_lt:"${todayEndDate}"}
-      {source_not:school}
+      ${filterQuery.source}
+      ${filterQuery.mentorMenteeSessionsMetaVertical}
       {country:${country}}
       {topic_some:{order:1}}
     ]
@@ -141,7 +148,8 @@ const masterQuery = (todayStartDate,
   totalConvertedUsers: salesOperationsMeta(filter:{
     and:[
       {leadStatus:won}
-      {source_not:school}
+      ${filterQuery.source}
+      ${filterQuery.salesOperationsMetaVertical}
       {country:${country}}
       {createdAt_gt:"${todayStartDate}"}
       {createdAt_lt: "${todayEndDate}"}
@@ -151,7 +159,8 @@ const masterQuery = (todayStartDate,
   }
   mentorMenteeSessions: mentorMenteeSessions(filter:{
     and:[
-      {source_not:school}
+      ${filterQuery.source}
+      ${filterQuery.mentorMenteeSessionsVertical}
       {topic_some:{order:1}}
       {sessionStartDate_gte:"${todayStartDate}"}
       {sessionStartDate_lte:"${todayEndDate}"}
@@ -185,7 +194,8 @@ const masterQuery = (todayStartDate,
   sessionLogs: sessionLogs(filter:{
     and:[
       {action:deleteMentorMenteeSession}
-      {source_not:school}
+      ${filterQuery.source}
+      ${filterQuery.sessionLogsVertical}
       {topic_some:{order:1}}
       {sessionStartDate_gte:"${todayStartDate}"}
       {sessionStartDate_lte:"${todayEndDate}"}
@@ -237,6 +247,7 @@ const addSessionReport = (input) => `
   addSessionReport(input: {
     date: "${input.date}",
     country: ${input.country},
+    vertical: ${input.vertical},
     registeredSameDay: {
       registered: ${input.registeredSameDay.registered},
       booked: ${input.registeredSameDay.booked},
@@ -367,142 +378,165 @@ const generateSessionReport = async (numDaysToRunQuery) => {
     // for every country in array
     /* eslint-disable no-restricted-syntax */
     for (const country of COUNTRIES) {
-      let forwardCount = 0;
-      const sessionReportsObj = {};
+      const verticals = ['b2b', 'b2c'];
       /*
-        Here we loop to populate single report for single day
+        Here we loop to populate single report, per vertical, per day
       */
-      while (totalLoopDays > 0) {
-        const otherDayStartDate = new Date(moment(todayStartDate).subtract(forwardCount, 'days').toISOString());
-        const otherDayEndDate = new Date(moment(todayEndDate).subtract(forwardCount, 'days').toISOString());
-        otherDayStartDate.setHours(0, 0, 0, 0);
-        otherDayEndDate.setHours(23, 59, 59, 999);
-        // console.log('otherDayStartDate', otherDayStartDate);
-        // console.log('otherDayEndDate',otherDayEndDate);
-        const queryRes = await callLocalGraphqlApi(masterQuery(todayStartDate, todayEndDate, otherDayStartDate, otherDayEndDate, country));
-        const data = get(queryRes, 'data', {});
-        // console.log(data);
-        if (forwardCount === 0) {
-          // we are in today bucket
-          sessionReportsObj.registeredSameDay = {};
-          sessionReportsObj.registeredSameDay.registered = data.registeredUsers.count;
-          sessionReportsObj.registeredSameDay.booked = data.bookedSessions.count;
-          sessionReportsObj.registeredSameDay.demoCompleted = data.completedSessions.count;
-          sessionReportsObj.registeredSameDay.converted = data.convertedUsersToday.count;
-          sessionReportsObj.registeredSameDay.phoneVerified = data.verifiedUsers.count;
-          sessionReportsObj.registeredSameDay.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
-          sessionReportsObj.registeredSameDay.bookedByAgent = data.bookedSessionsByAgent.count;
-        } else if (forwardCount === 1) {
-          sessionReportsObj.registeredOneDayBefore = {};
-          sessionReportsObj.registeredOneDayBefore.registered = data.registeredUsers.count;
-          sessionReportsObj.registeredOneDayBefore.booked = data.bookedSessions.count;
-          sessionReportsObj.registeredOneDayBefore.demoCompleted = data.completedSessions.count;
-          sessionReportsObj.registeredOneDayBefore.converted = data.convertedUsersToday.count;
-          sessionReportsObj.registeredOneDayBefore.phoneVerified = data.verifiedUsers.count;
-          sessionReportsObj.registeredOneDayBefore.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
-          sessionReportsObj.registeredOneDayBefore.bookedByAgent = data.bookedSessionsByAgent.count;
-        } else if (forwardCount === 2) {
-          sessionReportsObj.registeredTwoDaysBefore = {};
-          sessionReportsObj.registeredTwoDaysBefore.registered = data.registeredUsers.count;
-          sessionReportsObj.registeredTwoDaysBefore.booked = data.bookedSessions.count;
-          sessionReportsObj.registeredTwoDaysBefore.demoCompleted = data.completedSessions.count;
-          sessionReportsObj.registeredTwoDaysBefore.converted = data.convertedUsersToday.count;
-          sessionReportsObj.registeredTwoDaysBefore.phoneVerified = data.verifiedUsers.count;
-          sessionReportsObj.registeredTwoDaysBefore.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
-          sessionReportsObj.registeredTwoDaysBefore.bookedByAgent = data.bookedSessionsByAgent.count;
-        } else if (forwardCount === 3) {
-          sessionReportsObj.registeredThreeDaysBefore = {};
-          sessionReportsObj.registeredThreeDaysBefore.registered = data.registeredUsers.count;
-          sessionReportsObj.registeredThreeDaysBefore.booked = data.bookedSessions.count;
-          sessionReportsObj.registeredThreeDaysBefore.demoCompleted = data.completedSessions.count;
-          sessionReportsObj.registeredThreeDaysBefore.converted = data.convertedUsersToday.count;
-          sessionReportsObj.registeredThreeDaysBefore.phoneVerified = data.verifiedUsers.count;
-          sessionReportsObj.registeredThreeDaysBefore.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
-          sessionReportsObj.registeredThreeDaysBefore.bookedByAgent = data.bookedSessionsByAgent.count;
+      for (const vertical of verticals) {
+        let forwardCount = 0;
+        const sessionReportsObj = {};
+        const filterQuery = {};
+        if (vertical === 'b2c') {
+          filterQuery.source = '{source_not:school}';
+          filterQuery.user = '';
+          filterQuery.menteeSessionsMetaVertical = '';
+          filterQuery.mentorMenteeSessionsMetaVertical = '';
+          filterQuery.salesOperationsMetaVertical = '';
+          filterQuery.mentorMenteeSessionsVertical = '';
+          filterQuery.sessionLogsVertical = '';
+        } else if (vertical === 'b2b') {
+          filterQuery.source = '{source:school}';
+          filterQuery.user = '{vertical: b2b}';
+          filterQuery.menteeSessionsMetaVertical = '{user_some: {vertical: b2b}}';
+          filterQuery.mentorMenteeSessionsMetaVertical = '{menteeSession_some: {user_some: {vertical: b2b}}}';
+          filterQuery.salesOperationsMetaVertical = '{client_some: {vertical: b2b}}';
+          filterQuery.mentorMenteeSessionsVertical = '{menteeSession_some: {user_some: {vertical: b2b}}}';
+          filterQuery.sessionLogsVertical = '{client_some: {vertical: b2b}}';
+        }
+        // gathering data for past 4 days
+        while (totalLoopDays > 0) {
+          const otherDayStartDate = new Date(moment(todayStartDate).subtract(forwardCount, 'days').toISOString());
+          const otherDayEndDate = new Date(moment(todayEndDate).subtract(forwardCount, 'days').toISOString());
+          otherDayStartDate.setHours(0, 0, 0, 0);
+          otherDayEndDate.setHours(23, 59, 59, 999);
+          // console.log('otherDayStartDate', otherDayStartDate);
+          // console.log('otherDayEndDate',otherDayEndDate);
+          const queryRes = await callLocalGraphqlApi(masterQuery(todayStartDate, todayEndDate, otherDayStartDate, otherDayEndDate, country, filterQuery));
+          const data = get(queryRes, 'data', {});
+          // console.log(data);
+          if (forwardCount === 0) {
+            // we are in today bucket
+            sessionReportsObj.registeredSameDay = {};
+            sessionReportsObj.registeredSameDay.registered = data.registeredUsers.count;
+            sessionReportsObj.registeredSameDay.booked = data.bookedSessions.count;
+            sessionReportsObj.registeredSameDay.demoCompleted = data.completedSessions.count;
+            sessionReportsObj.registeredSameDay.converted = data.convertedUsersToday.count;
+            sessionReportsObj.registeredSameDay.phoneVerified = data.verifiedUsers.count;
+            sessionReportsObj.registeredSameDay.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
+            sessionReportsObj.registeredSameDay.bookedByAgent = data.bookedSessionsByAgent.count;
+          } else if (forwardCount === 1) {
+            sessionReportsObj.registeredOneDayBefore = {};
+            sessionReportsObj.registeredOneDayBefore.registered = data.registeredUsers.count;
+            sessionReportsObj.registeredOneDayBefore.booked = data.bookedSessions.count;
+            sessionReportsObj.registeredOneDayBefore.demoCompleted = data.completedSessions.count;
+            sessionReportsObj.registeredOneDayBefore.converted = data.convertedUsersToday.count;
+            sessionReportsObj.registeredOneDayBefore.phoneVerified = data.verifiedUsers.count;
+            sessionReportsObj.registeredOneDayBefore.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
+            sessionReportsObj.registeredOneDayBefore.bookedByAgent = data.bookedSessionsByAgent.count;
+          } else if (forwardCount === 2) {
+            sessionReportsObj.registeredTwoDaysBefore = {};
+            sessionReportsObj.registeredTwoDaysBefore.registered = data.registeredUsers.count;
+            sessionReportsObj.registeredTwoDaysBefore.booked = data.bookedSessions.count;
+            sessionReportsObj.registeredTwoDaysBefore.demoCompleted = data.completedSessions.count;
+            sessionReportsObj.registeredTwoDaysBefore.converted = data.convertedUsersToday.count;
+            sessionReportsObj.registeredTwoDaysBefore.phoneVerified = data.verifiedUsers.count;
+            sessionReportsObj.registeredTwoDaysBefore.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
+            sessionReportsObj.registeredTwoDaysBefore.bookedByAgent = data.bookedSessionsByAgent.count;
+          } else if (forwardCount === 3) {
+            sessionReportsObj.registeredThreeDaysBefore = {};
+            sessionReportsObj.registeredThreeDaysBefore.registered = data.registeredUsers.count;
+            sessionReportsObj.registeredThreeDaysBefore.booked = data.bookedSessions.count;
+            sessionReportsObj.registeredThreeDaysBefore.demoCompleted = data.completedSessions.count;
+            sessionReportsObj.registeredThreeDaysBefore.converted = data.convertedUsersToday.count;
+            sessionReportsObj.registeredThreeDaysBefore.phoneVerified = data.verifiedUsers.count;
+            sessionReportsObj.registeredThreeDaysBefore.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
+            sessionReportsObj.registeredThreeDaysBefore.bookedByAgent = data.bookedSessionsByAgent.count;
+          }
+
+          sessionReportsObj.totalBooked = data.totalBookedSessionsToday.count;
+          sessionReportsObj.totalDemoCompleted = data.totalCompletedSessionsToday.count;
+          sessionReportsObj.totalConvertedUsers = data.totalConvertedUsers.count;
+          sessionReportsObj.country = country;
+          sessionReportsObj.date = todayStartDate;
+          sessionReportsObj.vertical = vertical;
+
+          // populate session reschedule reason count
+          sessionReportsObj.hasRescheduled = 0;
+          sessionReportsObj.internetIssue = 0;
+          sessionReportsObj.zoomIssue = 0;
+          sessionReportsObj.laptopIssue = 0;
+          sessionReportsObj.chromeIssue = 0;
+          sessionReportsObj.powerCut = 0;
+          sessionReportsObj.notResponseAndDidNotTurnUp = 0;
+          sessionReportsObj.classDurationExceeded = 0;
+          sessionReportsObj.turnedUpButLeftAbruptly = 0;
+          sessionReportsObj.leadNotVerifiedProperly = 0;
+          sessionReportsObj.otherReasonForReschedule = 0;
+          sessionReportsObj.webSiteLoadingIssue = 0;
+          sessionReportsObj.videoNotLoading = 0;
+          sessionReportsObj.codePlaygroundIssue = 0;
+          sessionReportsObj.logInOTPError = 0;
+
+          for (const sessionLog of get(data, 'sessionLogs')) {
+            sessionReportsObj.hasRescheduled = sessionLog.hasRescheduled ? sessionReportsObj.hasRescheduled += 1 : sessionReportsObj.hasRescheduled;
+            sessionReportsObj.internetIssue = sessionLog.internetIssue ? sessionReportsObj.internetIssue += 1 : sessionReportsObj.internetIssue;
+            sessionReportsObj.zoomIssue = sessionLog.zoomIssue ? sessionReportsObj.zoomIssue += 1 : sessionReportsObj.zoomIssue;
+            sessionReportsObj.laptopIssue = sessionLog.laptopIssue ? sessionReportsObj.laptopIssue += 1 : sessionReportsObj.laptopIssue;
+            sessionReportsObj.chromeIssue = sessionLog.chromeIssue ? sessionReportsObj.chromeIssue += 1 : sessionReportsObj.chromeIssue;
+            sessionReportsObj.powerCut = sessionLog.powerCut ? sessionReportsObj.powerCut += 1 : sessionReportsObj.powerCut;
+            sessionReportsObj.notResponseAndDidNotTurnUp = sessionLog.notResponseAndDidNotTurnUp ? sessionReportsObj.notResponseAndDidNotTurnUp += 1 : sessionReportsObj.notResponseAndDidNotTurnUp;
+            sessionReportsObj.classDurationExceeded = sessionLog.classDurationExceeded ? sessionReportsObj.classDurationExceeded += 1 : sessionReportsObj.classDurationExceeded;
+            sessionReportsObj.turnedUpButLeftAbruptly = sessionLog.turnedUpButLeftAbruptly ? sessionReportsObj.turnedUpButLeftAbruptly += 1 : sessionReportsObj.turnedUpButLeftAbruptly;
+            sessionReportsObj.leadNotVerifiedProperly = sessionLog.leadNotVerifiedProperly ? sessionReportsObj.leadNotVerifiedProperly += 1 : sessionReportsObj.leadNotVerifiedProperly;
+            sessionReportsObj.otherReasonForReschedule = sessionLog.otherReasonForReschedule ? sessionReportsObj.otherReasonForReschedule += 1 : sessionReportsObj.otherReasonForReschedule;
+            sessionReportsObj.webSiteLoadingIssue = sessionLog.webSiteLoadingIssue ? sessionReportsObj.webSiteLoadingIssue += 1 : sessionReportsObj.webSiteLoadingIssue;
+            sessionReportsObj.videoNotLoading = sessionLog.videoNotLoading ? sessionReportsObj.videoNotLoading += 1 : sessionReportsObj.videoNotLoading;
+            sessionReportsObj.codePlaygroundIssue = sessionLog.codePlaygroundIssue ? sessionReportsObj.codePlaygroundIssue += 1 : sessionReportsObj.codePlaygroundIssue;
+            sessionReportsObj.logInOTPError = sessionLog.logInOTPError ? sessionReportsObj.logInOTPError += 1 : sessionReportsObj.logInOTPError;
+          }
+
+          for (const mmSession of get(data, 'mentorMenteeSessions')) {
+            sessionReportsObj.hasRescheduled = mmSession.hasRescheduled ? sessionReportsObj.hasRescheduled += 1 : sessionReportsObj.hasRescheduled;
+            sessionReportsObj.internetIssue = mmSession.internetIssue ? sessionReportsObj.internetIssue += 1 : sessionReportsObj.internetIssue;
+            sessionReportsObj.zoomIssue = mmSession.zoomIssue ? sessionReportsObj.zoomIssue += 1 : sessionReportsObj.zoomIssue;
+            sessionReportsObj.laptopIssue = mmSession.laptopIssue ? sessionReportsObj.laptopIssue += 1 : sessionReportsObj.laptopIssue;
+            sessionReportsObj.chromeIssue = mmSession.chromeIssue ? sessionReportsObj.chromeIssue += 1 : sessionReportsObj.chromeIssue;
+            sessionReportsObj.powerCut = mmSession.powerCut ? sessionReportsObj.powerCut += 1 : sessionReportsObj.powerCut;
+            sessionReportsObj.notResponseAndDidNotTurnUp = mmSession.notResponseAndDidNotTurnUp ? sessionReportsObj.notResponseAndDidNotTurnUp += 1 : sessionReportsObj.notResponseAndDidNotTurnUp;
+            sessionReportsObj.classDurationExceeded = mmSession.classDurationExceeded ? sessionReportsObj.classDurationExceeded += 1 : sessionReportsObj.classDurationExceeded;
+            sessionReportsObj.turnedUpButLeftAbruptly = mmSession.turnedUpButLeftAbruptly ? sessionReportsObj.turnedUpButLeftAbruptly += 1 : sessionReportsObj.turnedUpButLeftAbruptly;
+            sessionReportsObj.leadNotVerifiedProperly = mmSession.leadNotVerifiedProperly ? sessionReportsObj.leadNotVerifiedProperly += 1 : sessionReportsObj.leadNotVerifiedProperly;
+            sessionReportsObj.otherReasonForReschedule = mmSession.otherReasonForReschedule ? sessionReportsObj.otherReasonForReschedule += 1 : sessionReportsObj.otherReasonForReschedule;
+            sessionReportsObj.webSiteLoadingIssue = mmSession.webSiteLoadingIssue ? sessionReportsObj.webSiteLoadingIssue += 1 : sessionReportsObj.webSiteLoadingIssue;
+            sessionReportsObj.videoNotLoading = mmSession.videoNotLoading ? sessionReportsObj.videoNotLoading += 1 : sessionReportsObj.videoNotLoading;
+            sessionReportsObj.codePlaygroundIssue = mmSession.codePlaygroundIssue ? sessionReportsObj.codePlaygroundIssue += 1 : sessionReportsObj.codePlaygroundIssue;
+            sessionReportsObj.logInOTPError = mmSession.logInOTPError ? sessionReportsObj.logInOTPError += 1 : sessionReportsObj.logInOTPError;
+          }
+
+          forwardCount += 1;
+          totalLoopDays -= 1;
         }
 
-        sessionReportsObj.totalBooked = data.totalBookedSessionsToday.count;
-        sessionReportsObj.totalDemoCompleted = data.totalCompletedSessionsToday.count;
-        sessionReportsObj.totalConvertedUsers = data.totalConvertedUsers.count;
-        sessionReportsObj.country = country;
-        sessionReportsObj.date = todayStartDate;
-
-        // populate session reschedule reason count
-        sessionReportsObj.hasRescheduled = 0;
-        sessionReportsObj.internetIssue = 0;
-        sessionReportsObj.zoomIssue = 0;
-        sessionReportsObj.laptopIssue = 0;
-        sessionReportsObj.chromeIssue = 0;
-        sessionReportsObj.powerCut = 0;
-        sessionReportsObj.notResponseAndDidNotTurnUp = 0;
-        sessionReportsObj.classDurationExceeded = 0;
-        sessionReportsObj.turnedUpButLeftAbruptly = 0;
-        sessionReportsObj.leadNotVerifiedProperly = 0;
-        sessionReportsObj.otherReasonForReschedule = 0;
-        sessionReportsObj.webSiteLoadingIssue = 0;
-        sessionReportsObj.videoNotLoading = 0;
-        sessionReportsObj.codePlaygroundIssue = 0;
-        sessionReportsObj.logInOTPError = 0;
-
-        for (const sessionLog of get(data, 'sessionLogs')) {
-          sessionReportsObj.hasRescheduled = sessionLog.hasRescheduled ? sessionReportsObj.hasRescheduled += 1 : sessionReportsObj.hasRescheduled;
-          sessionReportsObj.internetIssue = sessionLog.internetIssue ? sessionReportsObj.internetIssue += 1 : sessionReportsObj.internetIssue;
-          sessionReportsObj.zoomIssue = sessionLog.zoomIssue ? sessionReportsObj.zoomIssue += 1 : sessionReportsObj.zoomIssue;
-          sessionReportsObj.laptopIssue = sessionLog.laptopIssue ? sessionReportsObj.laptopIssue += 1 : sessionReportsObj.laptopIssue;
-          sessionReportsObj.chromeIssue = sessionLog.chromeIssue ? sessionReportsObj.chromeIssue += 1 : sessionReportsObj.chromeIssue;
-          sessionReportsObj.powerCut = sessionLog.powerCut ? sessionReportsObj.powerCut += 1 : sessionReportsObj.powerCut;
-          sessionReportsObj.notResponseAndDidNotTurnUp = sessionLog.notResponseAndDidNotTurnUp ? sessionReportsObj.notResponseAndDidNotTurnUp += 1 : sessionReportsObj.notResponseAndDidNotTurnUp;
-          sessionReportsObj.classDurationExceeded = sessionLog.classDurationExceeded ? sessionReportsObj.classDurationExceeded += 1 : sessionReportsObj.classDurationExceeded;
-          sessionReportsObj.turnedUpButLeftAbruptly = sessionLog.turnedUpButLeftAbruptly ? sessionReportsObj.turnedUpButLeftAbruptly += 1 : sessionReportsObj.turnedUpButLeftAbruptly;
-          sessionReportsObj.leadNotVerifiedProperly = sessionLog.leadNotVerifiedProperly ? sessionReportsObj.leadNotVerifiedProperly += 1 : sessionReportsObj.leadNotVerifiedProperly;
-          sessionReportsObj.otherReasonForReschedule = sessionLog.otherReasonForReschedule ? sessionReportsObj.otherReasonForReschedule += 1 : sessionReportsObj.otherReasonForReschedule;
-          sessionReportsObj.webSiteLoadingIssue = sessionLog.webSiteLoadingIssue ? sessionReportsObj.webSiteLoadingIssue += 1 : sessionReportsObj.webSiteLoadingIssue;
-          sessionReportsObj.videoNotLoading = sessionLog.videoNotLoading ? sessionReportsObj.videoNotLoading += 1 : sessionReportsObj.videoNotLoading;
-          sessionReportsObj.codePlaygroundIssue = sessionLog.codePlaygroundIssue ? sessionReportsObj.codePlaygroundIssue += 1 : sessionReportsObj.codePlaygroundIssue;
-          sessionReportsObj.logInOTPError = sessionLog.logInOTPError ? sessionReportsObj.logInOTPError += 1 : sessionReportsObj.logInOTPError;
+        console.log('sessionReportsObj', sessionReportsObj);
+        const sessionReportQueryRes = await callLocalGraphqlApi(sessionReportQuery(todayStartDate, country));
+        const sessionReportId = get(sessionReportQueryRes, 'data.sessionReports[0].id', '');
+        if (sessionReportId) {
+          // update exisiting session report
+          const updateSessionReportRes = await callLocalGraphqlApi(updateSessionReport(sessionReportsObj, sessionReportId));
+          const sessionReportUpdatedId = get(updateSessionReportRes, 'data.updateSessionReport.id', '');
+          if (sessionReportUpdatedId) {
+            log(`******* SessionReport updated for date : ${todayStartDate}, vertical: ${vertical} and country : ${country}`);
+          }
+        } else {
+          const addSessionReportRes = await callLocalGraphqlApi(addSessionReport(sessionReportsObj));
+          const sessionReportAddedId = get(addSessionReportRes, 'data.addSessionReport.id', '');
+          if (sessionReportAddedId) {
+            log(`******* SessionReport added for date : ${todayStartDate}, vertical: ${vertical} and country : ${country}`);
+          }
         }
-
-        for (const mmSession of get(data, 'mentorMenteeSessions')) {
-          sessionReportsObj.hasRescheduled = mmSession.hasRescheduled ? sessionReportsObj.hasRescheduled += 1 : sessionReportsObj.hasRescheduled;
-          sessionReportsObj.internetIssue = mmSession.internetIssue ? sessionReportsObj.internetIssue += 1 : sessionReportsObj.internetIssue;
-          sessionReportsObj.zoomIssue = mmSession.zoomIssue ? sessionReportsObj.zoomIssue += 1 : sessionReportsObj.zoomIssue;
-          sessionReportsObj.laptopIssue = mmSession.laptopIssue ? sessionReportsObj.laptopIssue += 1 : sessionReportsObj.laptopIssue;
-          sessionReportsObj.chromeIssue = mmSession.chromeIssue ? sessionReportsObj.chromeIssue += 1 : sessionReportsObj.chromeIssue;
-          sessionReportsObj.powerCut = mmSession.powerCut ? sessionReportsObj.powerCut += 1 : sessionReportsObj.powerCut;
-          sessionReportsObj.notResponseAndDidNotTurnUp = mmSession.notResponseAndDidNotTurnUp ? sessionReportsObj.notResponseAndDidNotTurnUp += 1 : sessionReportsObj.notResponseAndDidNotTurnUp;
-          sessionReportsObj.classDurationExceeded = mmSession.classDurationExceeded ? sessionReportsObj.classDurationExceeded += 1 : sessionReportsObj.classDurationExceeded;
-          sessionReportsObj.turnedUpButLeftAbruptly = mmSession.turnedUpButLeftAbruptly ? sessionReportsObj.turnedUpButLeftAbruptly += 1 : sessionReportsObj.turnedUpButLeftAbruptly;
-          sessionReportsObj.leadNotVerifiedProperly = mmSession.leadNotVerifiedProperly ? sessionReportsObj.leadNotVerifiedProperly += 1 : sessionReportsObj.leadNotVerifiedProperly;
-          sessionReportsObj.otherReasonForReschedule = mmSession.otherReasonForReschedule ? sessionReportsObj.otherReasonForReschedule += 1 : sessionReportsObj.otherReasonForReschedule;
-          sessionReportsObj.webSiteLoadingIssue = mmSession.webSiteLoadingIssue ? sessionReportsObj.webSiteLoadingIssue += 1 : sessionReportsObj.webSiteLoadingIssue;
-          sessionReportsObj.videoNotLoading = mmSession.videoNotLoading ? sessionReportsObj.videoNotLoading += 1 : sessionReportsObj.videoNotLoading;
-          sessionReportsObj.codePlaygroundIssue = mmSession.codePlaygroundIssue ? sessionReportsObj.codePlaygroundIssue += 1 : sessionReportsObj.codePlaygroundIssue;
-          sessionReportsObj.logInOTPError = mmSession.logInOTPError ? sessionReportsObj.logInOTPError += 1 : sessionReportsObj.logInOTPError;
-        }
-
-        forwardCount += 1;
-        totalLoopDays -= 1;
+        // resetting looping variable for next country report
+        totalLoopDays = SESSION_REPORT_DAYS;
       }
-
-      // console.log(sessionReportsObj);
-      const sessionReportQueryRes = await callLocalGraphqlApi(sessionReportQuery(todayStartDate, country));
-      const sessionReportId = get(sessionReportQueryRes, 'data.sessionReports[0].id', '');
-      if (sessionReportId) {
-        // update exisiting session report
-        const updateSessionReportRes = await callLocalGraphqlApi(updateSessionReport(sessionReportsObj, sessionReportId));
-        const sessionReportUpdatedId = get(updateSessionReportRes, 'data.updateSessionReport.id', '');
-        if (sessionReportUpdatedId) {
-          log(`******* SessionReport updated for date : ${todayStartDate} and country : ${country}`);
-        }
-      } else {
-        const addSessionReportRes = await callLocalGraphqlApi(addSessionReport(sessionReportsObj));
-        const sessionReportAddedId = get(addSessionReportRes, 'data.addSessionReport.id', '');
-        if (sessionReportAddedId) {
-          log(`******* SessionReport added for date : ${todayStartDate} and country : ${country}`);
-        }
-      }
-      // resetting looping variable for next country report
-      totalLoopDays = SESSION_REPORT_DAYS;
     }
     dayCount += 1;
     /* eslint-disable no-param-reassign */

@@ -53,6 +53,7 @@ const SessionReport = `
     ${sessionRescheduledReasons}
     country: Country @defaultValue(value: "india")
     date: Date
+    vertical: Vertical
   }
 `;
 
