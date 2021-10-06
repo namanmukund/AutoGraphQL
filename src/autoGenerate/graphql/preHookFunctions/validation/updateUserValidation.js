@@ -50,12 +50,11 @@ const updateUserValidation = async (params, context) => {
     currentUser,
   } = userInfo;
   const user = await fetchUser(userId);
-  
   // if the user vertical is unassigned, try to change it
   // check if vertical can be determined, first from source, then campaign type, and then lastly batch type
   let userVertical = 'unassigned';
-  if (get(user, 'vertical') === 'unassigned' &&
-  (get(user, 'role') === 'mentee' || get(user, 'role') === 'parent')) {
+  if (get(user, 'vertical') === 'unassigned'
+  && (get(user, 'role') === 'mentee' || get(user, 'role') === 'parent')) {
     if (get(user, 'source') !== 'school') {
       userVertical = 'b2c';
     } else if (get(user, 'campaign.type')) {
@@ -65,6 +64,7 @@ const updateUserValidation = async (params, context) => {
         userVertical = 'b2b2c';
       }
     } else {
+      /* eslint-disable no-lonely-if */
       if (get(user, 'studentProfile.batch.type') === 'normal') {
         userVertical = 'b2c';
       } else if (get(user, 'studentProfile.batch.type') === 'b2b') {

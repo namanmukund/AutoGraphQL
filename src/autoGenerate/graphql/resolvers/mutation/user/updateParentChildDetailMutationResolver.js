@@ -211,7 +211,7 @@ Create student and their user profile
 
   // handle vertical, child same as parent
   if (existingUserDetails.vertical) {
-    childData.vertical = existingUserDetails.vertical
+    childData.vertical = existingUserDetails.vertical;
   }
 
   const childUserData = await addUserData({ bypass: true }, childDataWithId);

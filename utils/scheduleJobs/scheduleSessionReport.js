@@ -2,7 +2,7 @@
 /* eslint-disable no-await-in-loop */
 import { get } from 'lodash';
 import moment from 'moment';
-import { SESSION_REPORT_DAYS, COUNTRIES } from '../../constants';
+import { SESSION_REPORT_DAYS, COUNTRIES, VERTICALS } from '../../constants';
 import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
 import { log } from '../log';
 
@@ -378,11 +378,10 @@ const generateSessionReport = async (numDaysToRunQuery) => {
     // for every country in array
     /* eslint-disable no-restricted-syntax */
     for (const country of COUNTRIES) {
-      const verticals = ['b2b', 'b2c'];
       /*
         Here we loop to populate single report, per vertical, per day
       */
-      for (const vertical of verticals) {
+      for (const vertical of VERTICALS) {
         let forwardCount = 0;
         const sessionReportsObj = {};
         const filterQuery = {};
@@ -402,6 +401,14 @@ const generateSessionReport = async (numDaysToRunQuery) => {
           filterQuery.salesOperationsMetaVertical = '{client_some: {vertical: b2b}}';
           filterQuery.mentorMenteeSessionsVertical = '{menteeSession_some: {user_some: {vertical: b2b}}}';
           filterQuery.sessionLogsVertical = '{client_some: {vertical: b2b}}';
+        } else if (vertical === 'b2b2c') {
+          filterQuery.source = '{source:school}';
+          filterQuery.user = '{vertical: b2b2c}';
+          filterQuery.menteeSessionsMetaVertical = '{user_some: {vertical: b2b2c}}';
+          filterQuery.mentorMenteeSessionsMetaVertical = '{menteeSession_some: {user_some: {vertical: b2b2c}}}';
+          filterQuery.salesOperationsMetaVertical = '{client_some: {vertical: b2b2c}}';
+          filterQuery.mentorMenteeSessionsVertical = '{menteeSession_some: {user_some: {vertical: b2b2c}}}';
+          filterQuery.sessionLogsVertical = '{client_some: {vertical: b2b2c}}';
         }
         // gathering data for past 4 days
         while (totalLoopDays > 0) {

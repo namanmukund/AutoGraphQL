@@ -7,7 +7,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const packageJson = require('../package.json');
 /* eslint-enable import/no-extraneous-dependencies */
 
-const common = require('./webpack.serverless.cloudCommon.js');
+const common = require('./webpack.serverless.cloudCommon');
 
 const release = packageJson.version || 'norelease';
 const environment = process.env.NODE_ENV || 'development';
