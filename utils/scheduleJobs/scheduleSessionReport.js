@@ -231,12 +231,13 @@ const masterQuery = (todayStartDate,
 }
   `;
 
-const sessionReportQuery = (date, country) => `
+const sessionReportQuery = (date, country, vertical) => `
   {
     sessionReports(filter: {
       and: [
         {date: "${date}"},
         {country:${country}}
+        {vertical:${vertical}}
       ]
     }){
       id
@@ -532,7 +533,7 @@ const generateSessionReport = async (numDaysToRunQuery) => {
         }
 
         // console.log('sessionReportsObj', sessionReportsObj);
-        const sessionReportQueryRes = await callLocalGraphqlApi(sessionReportQuery(todayStartDate, country));
+        const sessionReportQueryRes = await callLocalGraphqlApi(sessionReportQuery(todayStartDate, country, vertical));
         const sessionReportId = get(sessionReportQueryRes, 'data.sessionReports[0].id', '');
         if (sessionReportId) {
           // update exisiting session report

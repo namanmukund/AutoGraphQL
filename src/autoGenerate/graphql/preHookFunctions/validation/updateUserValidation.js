@@ -57,19 +57,20 @@ const updateUserValidation = async (params, context) => {
   && (get(user, 'role') === 'mentee' || get(user, 'role') === 'parent')) {
     if (get(user, 'source') !== 'school') {
       userVertical = 'b2c';
-    } else if (get(user, 'campaign.type')) {
-      if (get(user, 'campaign.type') === 'b2b') {
-        userVertical = 'b2b';
-      } else {
-        userVertical = 'b2b2c';
-      }
-    } else {
+    } else if (get(user, 'studentProfile.batch.type')) {
       /* eslint-disable no-lonely-if */
       if (get(user, 'studentProfile.batch.type') === 'normal') {
         userVertical = 'b2c';
       } else if (get(user, 'studentProfile.batch.type') === 'b2b') {
         userVertical = 'b2b';
       } else if (get(user, 'studentProfile.batch.type') === 'b2b2c') {
+        userVertical = 'b2b2c';
+      }
+    } else {
+      /* eslint-disable no-lonely-if */
+      if (get(user, 'campaign.type') === 'b2b') {
+        userVertical = 'b2b';
+      } else if (get(user, 'campaign.type') === 'b2b2cEvent') {
         userVertical = 'b2b2c';
       }
     }
