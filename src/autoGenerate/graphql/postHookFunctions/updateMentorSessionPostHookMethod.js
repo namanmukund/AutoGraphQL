@@ -5,7 +5,11 @@ import availableSlotsQuery from '../graphqlQueries/availableSlotsQuery';
 import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery';
 import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
 import { byPassMenteeValidationApps } from '../../../../constants';
-import mentorDemandSingleSlotOperations, { getMentorDemandSingleSlot, removeLinkedFromMentorDemandSlot } from './utils/mentorDemandSingleSlotOperations';
+import mentorDemandSingleSlotOperations, {
+  getMentorDemandSingleSlot,
+  removeLinkedFromMentorDemandSlot,
+  updateMentorDemandSingleSlot,
+} from './utils/mentorDemandSingleSlotOperations';
 
 const updateMentorSessionPostHookMethod = async (input, mutationName, context) => {
   const { sessionType, availabilityDate, ...slots } = input;
@@ -52,6 +56,11 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
     });
     if (singleSlot && singleSlot.length > 0) {
       await removeLinkedFromMentorDemandSlot(get(singleSlot, '[0].id'), get(input, 'id'), 'mentorSession');
+      let count = get(singleSlot, '[0].count', 0);
+      if (count > 0) count -= 1;
+      await updateMentorDemandSingleSlot(get(singleSlot, '[0].id'), null, null, null, {
+        count,
+      });
     }
   }
   await mentorDemandSingleSlotOperations({

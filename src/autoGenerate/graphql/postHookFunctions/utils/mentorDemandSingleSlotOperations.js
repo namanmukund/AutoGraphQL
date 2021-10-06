@@ -78,7 +78,7 @@ const addMentorDemandSingleSlot = async (sessionId, mentorProfileId, paySlabId, 
   return get(addMentorDemandSingleSlotData, 'data.addMentorDemandSingleSlot');
 };
 
-const updateMentorDemandSingleSlot = async (mentorDemandSingleSlotId, sessionId, type, mentorProfileId, input = {}) => {
+export const updateMentorDemandSingleSlot = async (mentorDemandSingleSlotId, sessionId, type, mentorProfileId, input = {}) => {
   const query = `mutation($input: MentorDemandSingleSlotUpdate) {
     updateMentorDemandSingleSlot(id: "${mentorDemandSingleSlotId}",
     ${type === 'menteeSession' ? `menteeSessionsConnectIds: ["${sessionId}"]` : ''}
@@ -138,13 +138,13 @@ const addUpdateMentorDemandSingleSlot = async ({
   singleSlotData, mentorProfileId, sessionId, date, slotName, sessionType, typeName,
 }) => {
   // if singleSlot exist for give slotName, date and sessionType then update with sessionId
+  let count = get(singleSlotData, '[0].count', 0);
+  if (typeName === 'mentorSession') count += 1;
   if (singleSlotData && singleSlotData.length > 0) {
     if (typeName === 'batchSession') {
       const slotVerticals = get(singleSlotData, '[0].verticals', []);
-      let count = get(singleSlotData, '[0].count', 0);
       const addedVerticals = slotVerticals.map((vertical) => get(vertical, 'value'));
       if (!addedVerticals.includes('b2b2c')) {
-        count += 1;
         slotVerticals.push({ value: 'b2b2c' });
       }
       await updateMentorDemandSingleSlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId, {
@@ -154,7 +154,9 @@ const addUpdateMentorDemandSingleSlot = async ({
         count,
       });
     } else {
-      await updateMentorDemandSingleSlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId);
+      await updateMentorDemandSingleSlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId, {
+        count,
+      });
     }
   } else {
     const paySlab = await getPaySlabDetails();
