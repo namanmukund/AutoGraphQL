@@ -388,6 +388,7 @@ const generateSessionReport = async (numDaysToRunQuery) => {
         const sessionReportsObj = {};
         const filterQuery = {};
         // skip over all other countries if b2b or b2b2c (can change in future)
+        /* eslint-disable no-continue */
         if ((vertical === 'b2b' || vertical === 'b2b2c') && country !== 'uae' && country !== 'india') {
           continue;
         }
@@ -530,7 +531,7 @@ const generateSessionReport = async (numDaysToRunQuery) => {
           totalLoopDays -= 1;
         }
 
-        console.log('sessionReportsObj', sessionReportsObj);
+        // console.log('sessionReportsObj', sessionReportsObj);
         const sessionReportQueryRes = await callLocalGraphqlApi(sessionReportQuery(todayStartDate, country));
         const sessionReportId = get(sessionReportQueryRes, 'data.sessionReports[0].id', '');
         if (sessionReportId) {
