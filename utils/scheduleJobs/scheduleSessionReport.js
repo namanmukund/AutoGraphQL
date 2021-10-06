@@ -19,6 +19,7 @@ const masterQuery = (todayStartDate,
       {createdAt_gte:"${otherDayStartDate}"}
       {createdAt_lt:"${otherDayEndDate}"}
       ${filterQuery.source}
+      ${filterQuery.user}
       {country:${country}}
     ]
   }){
@@ -31,6 +32,7 @@ const masterQuery = (todayStartDate,
       {createdAt_gte:"${otherDayStartDate}"}
       {createdAt_lt:"${otherDayEndDate}"}
       ${filterQuery.source}
+      ${filterQuery.user}
       {country:${country}}
     ]
   }){
@@ -385,6 +387,10 @@ const generateSessionReport = async (numDaysToRunQuery) => {
         let forwardCount = 0;
         const sessionReportsObj = {};
         const filterQuery = {};
+        // skip over all other countries if b2b or b2b2c (can change in future)
+        if ((vertical === 'b2b' || vertical === 'b2b2c') && country !== 'uae' && country !== 'india') {
+          continue;
+        }
         if (vertical === 'b2c') {
           filterQuery.source = '{source_not:school}';
           filterQuery.user = '';
