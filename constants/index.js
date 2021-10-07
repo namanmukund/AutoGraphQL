@@ -230,6 +230,7 @@ const userSourceOrigin = {
   google: 'google',
   website: 'website',
   transformation: 'transformation',
+  radioStreet: 'radioStreet',
 };
 
 const freeTopicCount = 5;

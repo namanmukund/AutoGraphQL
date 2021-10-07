@@ -100,4 +100,4 @@ const callInQueue = (functionToCall, timeout) => (...args) => {
   }
 };
 
-export default callInQueue(updateLeadSquared, 500);
+export default callInQueue(updateLeadSquared, 2000);

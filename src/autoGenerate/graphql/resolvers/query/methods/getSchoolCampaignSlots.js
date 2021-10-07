@@ -20,6 +20,9 @@ const getSchoolCampaigns = (schoolCode) => `
     poster {
       id
     }
+    posterMobile {
+      id
+    }
     classes {
       section
       grade
@@ -111,6 +114,7 @@ const getSchoolCampaignSlots = (async (root, params, context) => {
     const schoolName = get(campaign, 'school.name', '');
     const schoolLogoId = get(campaign, 'school.logo.id', '');
     const posterId = get(campaign, 'poster.id', '');
+    const posterMobileId = get(campaign, 'posterMobile.id', '');
     const title = get(campaign, 'title', '');
     const whiteLabel = get(campaign, 'school.whiteLabel', '');
     const classes = get(campaign, 'classes', []);
@@ -138,6 +142,9 @@ const getSchoolCampaignSlots = (async (root, params, context) => {
     }
     if (posterId) {
       result.poster = { type: 'File', typeId: `${posterId}` };
+    }
+    if (posterMobileId) {
+      result.posterMobile = { type: 'File', typeId: `${posterMobileId}` };
     }
     result.campaignType = type;
     schoolResult.push(result);
