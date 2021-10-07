@@ -16,8 +16,8 @@ const SingleSlotVertical = `
  }
 `;
 
-const MentorDemandSingleSlot = `
-  type MentorDemandSingleSlot @model
+const MentorAvailabilitySlot = `
+  type MentorAvailabilitySlot @model
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
@@ -36,22 +36,22 @@ const MentorDemandSingleSlot = `
   {
     date: Date!
     verticals: [SingleSlotVertical]!
-    mentorDemandSlot: MentorDemandSlot @relation(name: "MentorDemandSlotMentorDemandSingleSlot")
+    mentorDemandSlot: MentorDemandSlot @relation(name: "MentorDemandSlotMentorAvailabilitySlot")
     slotName: Slot
-    paySlab: MentorSupplyPaySlab @relation(name: "MentorDemandSingleSlotPaySlab", direction: "OneWay")
+    paySlab: MentorSupplyPaySlab @relation(name: "MentorAvailabilitySlotPaySlab", direction: "OneWay")
     countries: [SingleSlotCountry]
     timezone: [String]
     count: Int
     sessionType: SessionType @defaultValue(value: "trial")
-    schools: [School] @relation(name:"MentorDemandSingleSlotSchool", direction: "OneWay")
-    campaigns: [Campaign] @relation(name:"MentorDemandSingleSlotCampaign", direction: "OneWay")
-    broadCastedMentors: [MentorProfile] @relation(name:"MentorDemandSingleSlotMentor", direction: "OneWay")
-    menteeSessions: [MenteeSession] @relation(name:"MentorDemandSingleSlotMenteeSession")
-    batchSessions: [BatchSession] @relation(name:"MentorDemandSingleSlotBatchSession")
-    mentorSessions: [MentorSession] @relation(name:"MentorDemandSingleSlotMentorSession")
-    mentorMenteeSessions: [MentorMenteeSession] @relation(name:"MentorDemandSingleSlotMentorMenteeSession")
+    schools: [School] @relation(name:"MentorAvailabilitySlotSchool", direction: "OneWay")
+    campaigns: [Campaign] @relation(name:"MentorAvailabilitySlotCampaign", direction: "OneWay")
+    broadCastedMentors: [MentorProfile] @relation(name:"MentorAvailabilitySlotMentor", direction: "OneWay")
+    menteeSessions: [MenteeSession] @relation(name:"MentorAvailabilitySlotMenteeSession")
+    batchSessions: [BatchSession] @relation(name:"MentorAvailabilitySlotBatchSession")
+    mentorSessions: [MentorSession] @relation(name:"MentorAvailabilitySlotMentorSession")
+    mentorMenteeSessions: [MentorMenteeSession] @relation(name:"MentorAvailabilitySlotMentorMenteeSession")
     isBroadCasted: Boolean @defaultValue(value: "false")
   }
 `;
 
-export default [MentorDemandSingleSlot, SingleSlotCountry, SingleSlotVertical];
+export default [MentorAvailabilitySlot, SingleSlotCountry, SingleSlotVertical];

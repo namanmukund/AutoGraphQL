@@ -5,7 +5,7 @@ import availableSlotsQuery from '../graphqlQueries/availableSlotsQuery';
 import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery';
 import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
 import { backendApps } from '../../../../constants';
-import mentorDemandSingleSlotOperations from './utils/mentorDemandSingleSlotOperations';
+import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import getMentorProfile from './utils/getMentorProfile';
 
 const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
@@ -27,7 +27,7 @@ const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
   const docToBeUpdated = {};
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
   const userInfo = await getMentorProfile(get(input, 'user.typeId'));
-  await mentorDemandSingleSlotOperations({
+  await mentorAvailabilitySlotOperation({
     sessionId: get(input, 'id'),
     slotTimeStringArray,
     sessionType,

@@ -1,11 +1,11 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-export const getMentorDemandSingleSlot = async ({
+export const getMentorAvailabilitySlots = async ({
   date, sessionType, slotName, sessionId, typeName,
 }) => {
   const query = `{
-    mentorDemandSingleSlots(
+    mentorAvailabilitySlots(
         filter: { and: [
             ${date ? `{ date: "${date}" }` : ''},
             ${sessionType ? `{ sessionType: ${sessionType} }` : ''},
@@ -22,11 +22,11 @@ export const getMentorDemandSingleSlot = async ({
         }
     }
     }`;
-  const mentorDemandSingleSlotData = await callLocalGraphqlApi(query);
-  return get(mentorDemandSingleSlotData, 'data.mentorDemandSingleSlots');
+  const mentorAvailabilitySlotData = await callLocalGraphqlApi(query);
+  return get(mentorAvailabilitySlotData, 'data.mentorAvailabilitySlots');
 };
 
-const getMentorMentorDemandSlot = async (date) => {
+const getMentorDemandSlot = async (date) => {
   const query = `{
     mentorDemandSlots(filter: { date: "${date}" }) {
       id
@@ -65,9 +65,9 @@ const addMentorDemandSlot = async (slotId, mentorProfileId, input) => {
   return get(addMentorDemandSlotData, 'data.addMentorDemandSlot');
 };
 
-const addMentorDemandSingleSlot = async (sessionId, mentorProfileId, paySlabId, input, type) => {
-  const mutationQuery = `mutation($input: MentorDemandSingleSlotInput!) {
-    addMentorDemandSingleSlot(input: $input,
+const addMentorAvailabilitySlot = async (sessionId, mentorProfileId, paySlabId, input, type) => {
+  const mutationQuery = `mutation($input: MentorAvailabilitySlotInput!) {
+    addMentorAvailabilitySlot(input: $input,
     ${type === 'menteeSession' ? `menteeSessionsConnectIds: ["${sessionId}"]` : ''}
     ${type === 'mentorSession' ? `mentorSessionsConnectIds: ["${sessionId}"]` : ''}
     ${type === 'batchSession' ? `batchSessionsConnectIds: ["${sessionId}"]` : ''}
@@ -76,13 +76,13 @@ const addMentorDemandSingleSlot = async (sessionId, mentorProfileId, paySlabId, 
       id
     }
   }`;
-  const addMentorDemandSingleSlotData = await callLocalGraphqlApi(mutationQuery, '', { input });
-  return get(addMentorDemandSingleSlotData, 'data.addMentorDemandSingleSlot');
+  const addMentorAvailabilitySlotData = await callLocalGraphqlApi(mutationQuery, '', { input });
+  return get(addMentorAvailabilitySlotData, 'data.addMentorAvailabilitySlot');
 };
 
-export const updateMentorDemandSingleSlot = async (mentorDemandSingleSlotId, sessionId, type, mentorProfileId, input = {}) => {
-  const query = `mutation($input: MentorDemandSingleSlotUpdate) {
-    updateMentorDemandSingleSlot(id: "${mentorDemandSingleSlotId}",
+export const updateMentorAvailabilitySlot = async (mentorAvailabilitySlotId, sessionId, type, mentorProfileId, input = {}) => {
+  const query = `mutation($input: MentorAvailabilitySlotUpdate) {
+    updateMentorAvailabilitySlot(id: "${mentorAvailabilitySlotId}",
     ${type === 'menteeSession' ? `menteeSessionsConnectIds: ["${sessionId}"]` : ''}
     ${type === 'mentorSession' ? `mentorSessionsConnectIds: ["${sessionId}"], 
     ${mentorProfileId ? `broadCastedMentorsConnectIds: ["${mentorProfileId}"]` : ''}` : ''}
@@ -93,7 +93,7 @@ export const updateMentorDemandSingleSlot = async (mentorDemandSingleSlotId, ses
     }
   }`;
   const result = await callLocalGraphqlApi(query, '', { input });
-  return get(result, 'data.updateMentorDemandSingleSlot');
+  return get(result, 'data.updateMentorAvailabilitySlot');
 };
 
 const getPaySlabDetails = async () => {
@@ -106,29 +106,29 @@ const getPaySlabDetails = async () => {
   return get(paySlab, 'data.mentorSupplyPaySlabs');
 };
 
-export const removeLinkedFromMentorDemandSlot = async (mentorDemandSingleSlotId, sessionId, type) => {
+export const removeFromMentorAvailabilitySlot = async (mentorAvailabilitySlotId, sessionId, type) => {
   const query = `mutation{
-    ${type === 'menteeSession' ? `removeFromMentorDemandSingleSlotMenteeSession(
-    mentorDemandSingleSlotId: "${mentorDemandSingleSlotId}"
+    ${type === 'menteeSession' ? `removeFromMentorAvailabilitySlotMenteeSession(
+    mentorAvailabilitySlotId: "${mentorAvailabilitySlotId}"
     menteeSessionId: "${sessionId}"
   ) {
-    mentorDemandSingleSlot {
+    mentorAvailabilitySlot {
       id
     }
   }` : ''}
-  ${type === 'mentorSession' ? `removeFromMentorDemandSingleSlotMentorSession(
-    mentorDemandSingleSlotId: "${mentorDemandSingleSlotId}"
+  ${type === 'mentorSession' ? `removeFromMentorAvailabilitySlotMentorSession(
+    mentorAvailabilitySlotId: "${mentorAvailabilitySlotId}"
     mentorSessionId: "${sessionId}"
   ) {
-    mentorDemandSingleSlot {
+    mentorAvailabilitySlot {
       id
     }
   }` : ''}
-  ${type === 'batchSession' ? `removeFromMentorDemandSingleSlotBatchSession(
-    mentorDemandSingleSlotId: "${mentorDemandSingleSlotId}"
+  ${type === 'batchSession' ? `removeFromMentorAvailabilitySlotBatchSession(
+    mentorAvailabilitySlotId: "${mentorAvailabilitySlotId}"
     batchSessionId: "${sessionId}"
   ) {
-    mentorDemandSingleSlot {
+    mentorAvailabilitySlot {
       id
     }
   }` : ''}
@@ -136,7 +136,7 @@ export const removeLinkedFromMentorDemandSlot = async (mentorDemandSingleSlotId,
   await callLocalGraphqlApi(query);
 };
 
-const addUpdateMentorDemandSingleSlot = async ({
+const addUpdateMentorAvailabilitySlots = async ({
   singleSlotData, mentorProfileId, sessionId, date, slotName, sessionType, typeName,
 }) => {
   // if singleSlot exist for give slotName, date and sessionType then update with sessionId
@@ -147,13 +147,13 @@ const addUpdateMentorDemandSingleSlot = async ({
       if (!addedVerticals.includes('b2b2c')) {
         slotVerticals.push({ value: 'b2b2c' });
       }
-      await updateMentorDemandSingleSlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId, {
+      await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId, {
         verticals: {
           replace: slotVerticals,
         },
       });
     } else {
-      await updateMentorDemandSingleSlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId);
+      await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId);
     }
   } else {
     const paySlab = await getPaySlabDetails();
@@ -169,8 +169,8 @@ const addUpdateMentorDemandSingleSlot = async ({
       sessionType,
     };
     // else add new singleSlot
-    const addSingleSlot = await addMentorDemandSingleSlot(sessionId, mentorProfileId, paySlabId, input, typeName);
-    const mentorDemandSlotData = await getMentorMentorDemandSlot(date);
+    const addSingleSlot = await addMentorAvailabilitySlot(sessionId, mentorProfileId, paySlabId, input, typeName);
+    const mentorDemandSlotData = await getMentorDemandSlot(date);
     // check if mentorDemandSlot exist for the give date and accordingly add or update it.
     if (mentorDemandSlotData && mentorDemandSlotData.length > 0) {
       const mentorDemandSlotId = get(mentorDemandSlotData, '[0].id');
@@ -185,52 +185,52 @@ const addUpdateMentorDemandSingleSlot = async ({
   }
 };
 
-const mentorDemandSingleSlotOperations = async ({
-  slotTimeStringArray, date, sessionType, mutationName, sessionId, prevMentorDemandSlotId, mentorProfileId,
+const mentorAvailabilitySlotOperation = async ({
+  slotTimeStringArray, date, sessionType, mutationName, sessionId, prevMentorAvailabilitySlot, mentorProfileId,
 }) => {
   for (let i = 0; i < slotTimeStringArray.length; i += 1) {
     /* eslint-disable no-await-in-loop */
     if (mutationName) {
-      const singleSlotData = await getMentorDemandSingleSlot({ date, sessionType, slotName: slotTimeStringArray[i] });
+      const singleSlotData = await getMentorAvailabilitySlots({ date, sessionType, slotName: slotTimeStringArray[i] });
       switch (mutationName) {
         case 'addMenteeSession': {
-          await addUpdateMentorDemandSingleSlot({
+          await addUpdateMentorAvailabilitySlots({
             date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, typeName: 'menteeSession',
           });
           break;
         }
         case 'updateMenteeSession': {
-          if (prevMentorDemandSlotId) {
-            await removeLinkedFromMentorDemandSlot(prevMentorDemandSlotId, sessionId, 'menteeSession');
+          if (prevMentorAvailabilitySlot) {
+            await removeFromMentorAvailabilitySlot(prevMentorAvailabilitySlot, sessionId, 'menteeSession');
           }
-          await addUpdateMentorDemandSingleSlot({
+          await addUpdateMentorAvailabilitySlots({
             date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, typeName: 'menteeSession',
           });
           break;
         }
         case 'addMentorSession': {
-          await addUpdateMentorDemandSingleSlot({
+          await addUpdateMentorAvailabilitySlots({
             date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'mentorSession',
           });
           break;
         }
         case 'updateMentorSession': {
-          await addUpdateMentorDemandSingleSlot({
+          await addUpdateMentorAvailabilitySlots({
             date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'mentorSession',
           });
           break;
         }
         case 'addBatchSession': {
-          await addUpdateMentorDemandSingleSlot({
+          await addUpdateMentorAvailabilitySlots({
             date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'batchSession',
           });
           break;
         }
         case 'updateBatchSession': {
-          if (prevMentorDemandSlotId) {
-            await removeLinkedFromMentorDemandSlot(prevMentorDemandSlotId, sessionId, 'batchSession');
+          if (prevMentorAvailabilitySlot) {
+            await removeFromMentorAvailabilitySlot(prevMentorAvailabilitySlot, sessionId, 'batchSession');
           }
-          await addUpdateMentorDemandSingleSlot({
+          await addUpdateMentorAvailabilitySlots({
             date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'batchSession',
           });
           break;
@@ -242,4 +242,4 @@ const mentorDemandSingleSlotOperations = async ({
   }
 };
 
-export default mentorDemandSingleSlotOperations;
+export default mentorAvailabilitySlotOperation;

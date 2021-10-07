@@ -14,7 +14,7 @@ const MenteeSession = `
     country: Country @defaultValue(value: "india")
     bookedBy: BookedBy @defaultValue(value: "customer")
     bookingAgent: User @relation(name: "BookingAgent", direction: "OneWay")
-    mentorDemandSlot: MentorDemandSingleSlot @relation(name:"MentorDemandSingleSlotMenteeSession")
+    mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name:"MentorAvailabilitySlotMenteeSession")
     broadCastedMentors: [MentorProfile] @relation(name:"MenteeSessionBroadcastedMentors", direction: "OneWay")
     studentProfile: StudentProfile @relation(name:"MenteeSessionStudentProfile", direction: "OneWay")
 }`;

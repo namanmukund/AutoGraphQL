@@ -13,7 +13,7 @@ import extractBatchSessionAndSendB2BC from './utils/extractBatchSessionAndSendB2
 import addSessionLog from './utils/addSessionLog';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import isTrialSession from '../resolvers/utils/isTrialSession';
-import mentorDemandSingleSlotOperations from './utils/mentorDemandSingleSlotOperations';
+import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
 
 // query to get chapters and topics belomngin to a course
@@ -131,7 +131,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     if (mentorSessionConnectId) {
       mentorProfile = await getMentorProfileFromMentorSession(mentorSessionConnectId);
     }
-    await mentorDemandSingleSlotOperations({
+    await mentorAvailabilitySlotOperation({
       slotTimeStringArray,
       date: get(input, 'bookingDate'),
       mutationName,

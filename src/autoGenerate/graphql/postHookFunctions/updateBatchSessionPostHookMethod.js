@@ -22,7 +22,7 @@ import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 import addSalesAudit from './utils/addSalesAudit';
 import isTrialSession from '../resolvers/utils/isTrialSession';
 import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
-import mentorDemandSingleSlotOperations from './utils/mentorDemandSingleSlotOperations';
+import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -272,14 +272,14 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   const isTrial = await isTrialSession(get(input, 'topic.typeId'));
   if (isTrial) {
     const mentorProfile = await getMentorProfileFromMentorSession(finalMentorSessionId);
-    await mentorDemandSingleSlotOperations({
+    await mentorAvailabilitySlotOperation({
       slotTimeStringArray,
       date: get(input, 'bookingDate'),
       mutationName,
       sessionType: sessionTypeValue.trial,
       sessionId: batchSessionId,
       mentorProfileId: get(mentorProfile, 'user.mentorProfile.id'),
-      prevMentorDemandSlotId: get(input, 'mentorDemandSlot.typeId'),
+      prevMentorAvailabilitySlot: get(input, 'mentorAvailabilitySlot.typeId'),
     });
   }
 

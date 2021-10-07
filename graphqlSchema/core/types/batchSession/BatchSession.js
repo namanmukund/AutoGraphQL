@@ -30,7 +30,7 @@ const BatchSession = `
     mentorPaymentJustification: String
     paymentApprovedBy: User @relation(name: "MentorMenteeSessionPaymentApprovedUser", direction: "OneWay")
     isAudit: Boolean @defaultValue(value: "false")
-    mentorDemandSlot: MentorDemandSingleSlot @relation(name:"MentorDemandSingleSlotBatchSession")
+    mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name:"MentorAvailabilitySlotBatchSession")
     broadCastedMentors: [MentorProfile] @relation(name:"BatchSessionBroadcastedMentors", direction: "OneWay")
     isBroadCastedSession: Boolean @defaultValue(value: "false")
 }`;

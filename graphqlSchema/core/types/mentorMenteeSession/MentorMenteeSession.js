@@ -87,7 +87,7 @@ const MentorMenteeSession = `
     isReviewSubmittedOnTime: Boolean @defaultValue(value: "false")
     isPostSalesAudit: Boolean @defaultValue(value: "false")
     studentProfile: StudentProfile @relation(name:"MentorMenteeSessionStudentProfile", direction: "OneWay")
-    mentorDemandSlot: MentorDemandSingleSlot @relation(name:"MentorDemandSingleSlotMentorMenteeSession")
+    mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name:"MentorAvailabilitySlotMentorMenteeSession")
     isBroadCastedSession: Boolean @defaultValue(value: "false")
 }`;
 

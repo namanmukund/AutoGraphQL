@@ -16,7 +16,7 @@ import { byPassMenteeValidationApps, sessionType } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
-import mentorDemandSingleSlotOperations from './utils/mentorDemandSingleSlotOperations';
+import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const { previousDocument, currentUser, mentorMenteeSessionDoc } = context;
@@ -101,14 +101,14 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
         topicInfo,
       );
     }
-    const prevMentorDemandSlotId = get(input, 'mentorDemandSlot.typeId');
-    await mentorDemandSingleSlotOperations({
+    const prevMentorAvailabilitySlot = get(input, 'mentorAvailabilitySlot.typeId');
+    await mentorAvailabilitySlotOperation({
       slotTimeStringArray,
       date: bookingDate,
       mutationName,
       sessionType: sessionType.trial,
       sessionId: menteeSessionId,
-      prevMentorDemandSlotId,
+      prevMentorAvailabilitySlot,
     });
   }
 
