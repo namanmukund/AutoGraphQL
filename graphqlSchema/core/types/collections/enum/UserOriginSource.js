@@ -8,6 +8,7 @@ const UserOriginSource = `
     ${userSourceOrigin.school}
     ${userSourceOrigin.website}
     ${userSourceOrigin.transformation}
+    ${userSourceOrigin.radioStreet}
   }`;
 
 export default UserOriginSource;
