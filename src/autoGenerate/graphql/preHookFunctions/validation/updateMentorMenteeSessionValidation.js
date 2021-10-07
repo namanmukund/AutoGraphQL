@@ -15,6 +15,7 @@ const getMentorMenteeSessionData = async (id) => {
         isAudit
         sessionStatus
         isPostSalesAudit
+        isSubmittedForReview
         topic{
           id
           order
