@@ -7,8 +7,10 @@ import { addMenteeBookingLeadsquared } from './leadsquared';
 import getMenteeInfo from './utils/getMenteeInfo';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import getTopicInfo from './utils/getTopicInfo';
-import { byPassMenteeValidationApps } from '../../../../constants';
+import { byPassMenteeValidationApps, sessionType } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
+import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
+import updateMenteeSessionQuery from './utils/updateMenteeSessionQuery';
 
 const getUserCourses = async (userId) => {
   const query = `
@@ -59,7 +61,9 @@ const getCourseName = async (id) => {
 
 const addMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
   // don't decrease the availability slot if it is done through backend
-  const { appName, isBookedByMentee, currentUser } = context;
+  const {
+    appName, isBookedByMentee, currentUser, isTrialSession,
+  } = context;
   if (!byPassMenteeValidationApps.includes(appName)) {
     /*
     Since addition of session by mentee will consume a slot
@@ -69,6 +73,15 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     const { availableSlots } = context;
     const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
     const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
+    if (typeof isTrialSession === 'boolean' && isTrialSession) {
+      await mentorAvailabilitySlotOperation({
+        slotTimeStringArray,
+        date: bookingDate,
+        mutationName,
+        sessionType: sessionType.trial,
+        sessionId: menteeSessionId,
+      });
+    }
     await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context, availableSlots);
     // send email to mentor admin regarding the session
     await extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
@@ -80,6 +93,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     const clientId = get(userInfo, 'data.user.id', '');
     const topicId = get(topicInfo, 'data.topic.id', '');
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
 
     // update user booking on leadsquared
     const addBookingToLS = async () => {
@@ -101,7 +115,14 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     if (!get(userInfo, 'data.user.studentProfile.batch.id')) {
       addBookingToLS();
     }
-
+    // udpdating the studentProfile in menteeSession
+    const updateInput = {
+      bookingDate,
+    };
+    slotTimeStringArray.forEach((slot) => {
+      updateInput[slot] = true;
+    });
+    if (studentProfileId) updateMenteeSessionQuery(menteeSessionId, studentProfileId, updateInput);
     /**
      * Add course into UserCourse Collection if not present already
      */

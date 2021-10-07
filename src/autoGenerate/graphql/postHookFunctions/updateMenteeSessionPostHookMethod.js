@@ -12,10 +12,11 @@ import getMenteeInfo from './utils/getMenteeInfo';
 import deleteMentorMenteeSessionQuery from './utils/deleteMentorMenteeSessionQuery';
 import getTopicInfo from './utils/getTopicInfo';
 import rescheduleMenteeBookingLeadsquared from './leadsquared/rescheduleMenteeBookingLeadsquared';
-import { byPassMenteeValidationApps } from '../../../../constants';
+import { byPassMenteeValidationApps, sessionType } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
+import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const { previousDocument, currentUser, mentorMenteeSessionDoc } = context;
@@ -36,7 +37,6 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   // console.log('bookingDate', bookingDate);
   // console.log('prevBookingDate', prevBookingDate);
   // console.log('previousDocument', previousDocument);
-
   const isTrial = await isTrialSession(input.topic.typeId);
   const { appName } = context;
   const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
@@ -101,6 +101,15 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
         topicInfo,
       );
     }
+    const prevMentorAvailabilitySlot = get(input, 'mentorAvailabilitySlot.typeId');
+    await mentorAvailabilitySlotOperation({
+      slotTimeStringArray,
+      date: bookingDate,
+      mutationName,
+      sessionType: sessionType.trial,
+      sessionId: menteeSessionId,
+      prevMentorAvailabilitySlot,
+    });
   }
 
   const updateMentorMenteeSessionInput = {};

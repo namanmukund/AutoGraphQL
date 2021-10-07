@@ -5,6 +5,8 @@ import availableSlotsQuery from '../graphqlQueries/availableSlotsQuery';
 import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery';
 import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
 import { backendApps } from '../../../../constants';
+import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
+import getMentorProfile from './utils/getMentorProfile';
 
 const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
   const { sessionType, availabilityDate, ...slots } = input;
@@ -24,7 +26,15 @@ const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
   // update if available slots for a particular date exist from before
   const docToBeUpdated = {};
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-
+  const userInfo = await getMentorProfile(get(input, 'user.typeId'));
+  await mentorAvailabilitySlotOperation({
+    sessionId: get(input, 'id'),
+    slotTimeStringArray,
+    sessionType,
+    date: availabilityDate,
+    mutationName,
+    mentorProfileId: get(userInfo, 'mentorProfile.id'),
+  });
   if (availableSlots && availableSlots.length) {
     slotTimeStringArray.forEach((slot) => {
       docToBeUpdated[slot] = (availableSlots[0][slot] >= 0 ? availableSlots[0][slot] : 0) + 1;
