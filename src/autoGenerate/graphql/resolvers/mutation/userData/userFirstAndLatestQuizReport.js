@@ -300,6 +300,14 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     if (topicInfo.order > currentRunningTopic.order) {
       throw new ComponentLockedError();
     }
+  } else {
+    if (topicInfo.order > currentRunningTopic.order) {
+      throw new ComponentLockedError();
+    } else if (topicInfo.order === currentRunningTopic.order) {
+      if (!batchCurrentComponentInfo && currentRunningTopicComponentType !== 'quiz') {
+        throw new ComponentLockedError();
+      }
+    }
   }
   // If not equal then check if not quiz and throw eror ( allow for batch )
   // this object will be returned in output
