@@ -2,7 +2,7 @@ import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 export const getMentorDemandSingleSlot = async ({
-  date, sessionType, slotName, mentorSessionId,
+  date, sessionType, slotName, sessionId, typeName,
 }) => {
   const query = `{
     mentorDemandSingleSlots(
@@ -10,7 +10,9 @@ export const getMentorDemandSingleSlot = async ({
             ${date ? `{ date: "${date}" }` : ''},
             ${sessionType ? `{ sessionType: ${sessionType} }` : ''},
             ${slotName ? `{ slotName: ${slotName} }` : ''}
-            ${mentorSessionId ? `{ mentorSessions_some: { id: "${mentorSessionId}" } }` : ''}
+            ${typeName === 'mentorSession' && sessionId ? `{ mentorSessions_some: { id: "${sessionId}" } }` : ''}
+            ${typeName === 'menteeSession' && sessionId ? `{ menteeSessions_some: { id: "${sessionId}" } }` : ''}
+            ${typeName === 'batchSession' && sessionId ? `{ batchSessions_some: { id: "${sessionId}" } }` : ''}
         ] }
     ) {
         id
@@ -138,8 +140,6 @@ const addUpdateMentorDemandSingleSlot = async ({
   singleSlotData, mentorProfileId, sessionId, date, slotName, sessionType, typeName,
 }) => {
   // if singleSlot exist for give slotName, date and sessionType then update with sessionId
-  let count = get(singleSlotData, '[0].count', 0);
-  if (typeName === 'mentorSession') count += 1;
   if (singleSlotData && singleSlotData.length > 0) {
     if (typeName === 'batchSession') {
       const slotVerticals = get(singleSlotData, '[0].verticals', []);
@@ -151,12 +151,9 @@ const addUpdateMentorDemandSingleSlot = async ({
         verticals: {
           replace: slotVerticals,
         },
-        count,
       });
     } else {
-      await updateMentorDemandSingleSlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId, {
-        count,
-      });
+      await updateMentorDemandSingleSlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId);
     }
   } else {
     const paySlab = await getPaySlabDetails();

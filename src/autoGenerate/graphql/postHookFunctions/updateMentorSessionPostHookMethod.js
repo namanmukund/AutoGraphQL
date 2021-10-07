@@ -53,6 +53,7 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
       slotName: removedSlot[slot],
       sessionType,
       mentorSessionId: get(input, 'id'),
+      typeName: 'mentorSession',
     });
     if (singleSlot && singleSlot.length > 0) {
       await removeLinkedFromMentorDemandSlot(get(singleSlot, '[0].id'), get(input, 'id'), 'mentorSession');
