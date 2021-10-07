@@ -37,7 +37,6 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   // console.log('bookingDate', bookingDate);
   // console.log('prevBookingDate', prevBookingDate);
   // console.log('previousDocument', previousDocument);
-
   const isTrial = await isTrialSession(input.topic.typeId);
   const { appName } = context;
   const userInfo = await getMenteeInfo(get(input, 'user.typeId'));

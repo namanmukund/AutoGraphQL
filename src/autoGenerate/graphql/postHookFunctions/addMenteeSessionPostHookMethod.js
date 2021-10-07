@@ -10,6 +10,7 @@ import getTopicInfo from './utils/getTopicInfo';
 import { byPassMenteeValidationApps, sessionType } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
 import mentorDemandSingleSlotOperations from './utils/mentorDemandSingleSlotOperations';
+import updateMenteeSessionQuery from './utils/updateMenteeSessionQuery';
 
 const getUserCourses = async (userId) => {
   const query = `
@@ -92,6 +93,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     const clientId = get(userInfo, 'data.user.id', '');
     const topicId = get(topicInfo, 'data.topic.id', '');
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
 
     // update user booking on leadsquared
     const addBookingToLS = async () => {
@@ -100,7 +102,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
       /* eslint-disable no-param-reassign */
       input.courseName = courseName;
       await addMenteeBookingLeadsquared(
-        lsInput,
+        input,
         params,
         slotTimeStringArray,
         userInfo,
@@ -113,7 +115,14 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     if (!get(userInfo, 'data.user.studentProfile.batch.id')) {
       addBookingToLS();
     }
-
+    // udpdating the studentProfile in menteeSession
+    const updateInput = {
+      bookingDate,
+    };
+    slotTimeStringArray.forEach((slot) => {
+      updateInput[slot] = true;
+    });
+    if (studentProfileId) updateMenteeSessionQuery(menteeSessionId, studentProfileId, updateInput);
     /**
      * Add course into UserCourse Collection if not present already
      */

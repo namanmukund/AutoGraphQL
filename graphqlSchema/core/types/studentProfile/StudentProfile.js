@@ -12,7 +12,6 @@ const StudentProfile = `
     schoolClass: SchoolClass @relation(name: "SchoolClassStudentProfile")
     parents: [ParentProfile] @relation(name: "StudentProfileParentProfile")
     batch: Batch @relation(name: "BatchStudentProfile")
-    mentorMenteeSession: MentorMenteeSession @relation(name:"MentorMenteeSessionStudentProfile")
 }`;
 
 export default [StudentProfile];
