@@ -7,11 +7,29 @@ const updateSchoolDataOfAStudent = async (input, studentProfileId) => {
     schoolName, schoolId, section, rollNo, batch, branch,
   } = input;
   let studentSchoolId = schoolId;
-  if (!schoolId) {
+  if (!schoolId && !schoolName) {
     studentSchoolId = await getSchoolInformation(schoolName);
     if (!studentSchoolId) {
       return false;
     }
+  }
+
+  if (schoolName) {
+    const query = `
+      mutation {
+        updateStudentProfile(
+          id:"${studentProfileId}"
+          input: {
+            schoolName: "${schoolName}"
+          }
+        ){
+          id
+        }
+      }
+    `;
+
+    const res = await callLocalGraphqlApi(query);
+    return get(res, 'data.updateStudentProfile.id');
   }
 
   const query = `
