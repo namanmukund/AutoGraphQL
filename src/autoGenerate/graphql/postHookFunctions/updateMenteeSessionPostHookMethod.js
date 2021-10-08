@@ -12,7 +12,7 @@ import getMenteeInfo from './utils/getMenteeInfo';
 import deleteMentorMenteeSessionQuery from './utils/deleteMentorMenteeSessionQuery';
 import getTopicInfo from './utils/getTopicInfo';
 import rescheduleMenteeBookingLeadsquared from './leadsquared/rescheduleMenteeBookingLeadsquared';
-import { byPassMenteeValidationApps, sessionType } from '../../../../constants';
+import { byPassMenteeValidationApps, sessionType, userSourceOrigin } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
@@ -102,14 +102,18 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
       );
     }
     const prevMentorAvailabilitySlot = get(input, 'mentorAvailabilitySlot.typeId');
-    await mentorAvailabilitySlotOperation({
-      slotTimeStringArray,
-      date: bookingDate,
-      mutationName,
-      sessionType: sessionType.trial,
-      sessionId: menteeSessionId,
-      prevMentorAvailabilitySlot,
-    });
+    const isNotSourceSchool = get(userInfo, 'data.user.source') !== userSourceOrigin.school;
+    const isBatchExist = get(userInfo, 'data.user.studentProfile.batch', false);
+    if (isNotSourceSchool && !isBatchExist) {
+      await mentorAvailabilitySlotOperation({
+        slotTimeStringArray,
+        date: bookingDate,
+        mutationName,
+        sessionType: sessionType.trial,
+        sessionId: menteeSessionId,
+        prevMentorAvailabilitySlot,
+      });
+    }
   }
 
   const updateMentorMenteeSessionInput = {};
