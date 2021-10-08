@@ -8,7 +8,8 @@ import {
   OnlyOneSlotAllowedError,
 } from '../../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import availableSlotsQuery from '../../../graphqlQueries/availableSlotsQuery';
+// import availableSlotsQuery from '../../../graphqlQueries/availableSlotsQuery';
+import getMentorAvailabilitySlots from '../../../graphqlQueries/getMentorAvailabilitySlots';
 import getSelectedSlotsStringArray from '../../../postHookFunctions/utils/getSelectedSlotsStringArray';
 import { NoSlotsAvailableForBooking } from '../../../../../../constants/errors/db';
 import { byPassMenteeValidationApps, backendApps } from '../../../../../../constants';
@@ -54,16 +55,34 @@ const validateMenteeSessionInput = async (params, context) => {
   }
 
   // check if the slot mentee trying to book is available in availableSlot
-  const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(bookingDate));
-  const availableSlots = get(availableSlotsRes, 'data.availableSlots');
+  // const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(bookingDate));
+  const mentorAvailabilitySlotRes = await callLocalGraphqlApi(getMentorAvailabilitySlots(bookingDate));
+  // const availableSlots = get(availableSlotsRes, 'data.availableSlots');
+  const mentorAvailabilitySlotsData = get(mentorAvailabilitySlotRes, 'data.mentorAvailabilitySlots', []);
+  let availability = {};
+  get(mentorAvailabilitySlotRes, 'data.mentorAvailabilitySlots').forEach((slotObj) => {
+    const occupied = get(slotObj, 'batchSessionsMeta.count', 0) + get(slotObj, 'menteeSessionsMeta.count', 0);
+    if (get(slotObj, 'mentorSessionsMeta.count', 0) > occupied) {
+      availability = {
+        ...availability,
+        [get(slotObj, 'slotName')]: get(slotObj, 'mentorSessionsMeta.count', 0) - occupied,
+      };
+    }
+  });
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-
-  if (!availableSlots || !availableSlots.length) {
+  if (!mentorAvailabilitySlotsData || !mentorAvailabilitySlotsData.length) {
     throw new NoSlotsAvailableForBooking();
   }
-  if (!(availableSlots[0][slotTimeStringArray[0]] > 0)) {
+  if (!(get(availability, slotTimeStringArray[0], 0) > 0)) {
     throw new NoSlotsAvailableForBooking();
   }
+  // prev availableSlots flow
+  // if (!availableSlots || !availableSlots.length) {
+  //   throw new NoSlotsAvailableForBooking();
+  // }
+  // if (!(availableSlots[0][slotTimeStringArray[0]] > 0)) {
+  //   throw new NoSlotsAvailableForBooking();
+  // }
   // eslint-disable-next-line no-param-reassign
   context.availableSlots = availableSlots;
   return true;

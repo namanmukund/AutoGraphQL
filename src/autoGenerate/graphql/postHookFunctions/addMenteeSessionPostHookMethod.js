@@ -7,7 +7,7 @@ import { addMenteeBookingLeadsquared } from './leadsquared';
 import getMenteeInfo from './utils/getMenteeInfo';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import getTopicInfo from './utils/getTopicInfo';
-import { byPassMenteeValidationApps, sessionType } from '../../../../constants';
+import { byPassMenteeValidationApps, sessionType, userSourceOrigin } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import updateMenteeSessionQuery from './utils/updateMenteeSessionQuery';
@@ -73,7 +73,9 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     const { availableSlots } = context;
     const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
     const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
-    if (typeof isTrialSession === 'boolean' && isTrialSession) {
+    const isNotSourceSchool = get(userInfo, 'data.user.source') !== userSourceOrigin.school;
+    const isBatchExist = get(userInfo, 'data.user.studentProfile.batch', false);
+    if (typeof isTrialSession === 'boolean' && isTrialSession && isNotSourceSchool && !isBatchExist) {
       await mentorAvailabilitySlotOperation({
         slotTimeStringArray,
         date: bookingDate,
