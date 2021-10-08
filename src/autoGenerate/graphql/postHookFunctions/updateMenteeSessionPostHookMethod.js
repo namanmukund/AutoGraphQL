@@ -113,7 +113,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   }
 
   const updateMentorMenteeSessionInput = {};
-  if (context.mmsId && (
+  if (context.mmsId && !get(userInfo, 'data.user.studentProfile.batch.code', null) && (
     (prevBookingDate.getTime() !== bookingDate.getTime())
     || (get(prevSlotTimeStringArray, '0') !== get(slotTimeStringArray, '0'))
   )) {
