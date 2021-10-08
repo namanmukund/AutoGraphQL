@@ -151,8 +151,6 @@ const updateUserAssignment = async (
   pushManyQuery += `assignmentStatus: ${assignmentStatus}`;
 
   const popAllQuery = 'assignment:{  popAll: true }';
-  console.log(updateUserAssignmentMutation(userAssignmentId, popAllQuery));
-  console.log(updateUserAssignmentMutation(userAssignmentId, pushManyQuery));
   // pop all the elements in the assignment array in userAssignment
   await callLocalGraphqlApi(updateUserAssignmentMutation(userAssignmentId, popAllQuery));
   // push all the existing elements with updated data in the assignment array in userAssignment
