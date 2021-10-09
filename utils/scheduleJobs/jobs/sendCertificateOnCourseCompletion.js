@@ -35,8 +35,7 @@ const sendCertificateOnCourseCompletion = async ({ userId }, deleteJob) => {
     studentName,
   };
   // change email here to test
-  console.log('parentEmail12313', parentEmail);
-  await sendCertificateToUser('gokul.madhusudhan@tekie.in', input, 'backend');
+  await sendCertificateToUser(parentEmail, input, 'backend');
   deleteJob();
 };
 
