@@ -38,8 +38,10 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       slotTimeStringArray = getSelectedSlotsStringArray(menteeSessionDoc);
     }
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', {AppName: context.currentAppName})
     if (context.currentAppName !== TBA
       || (context.currentAppName === TBA && prevMenteeSessionDoc)) {
+        console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Additing Session Logs')
       const updateMentorMenteeSessionInput = {};
       updateMentorMenteeSessionInput.hasRescheduled = get(prevMentorMenteeSessionDoc, 'hasRescheduled', false);
       updateMentorMenteeSessionInput.rescheduledDate = get(prevMentorMenteeSessionDoc, 'rescheduledDate', false);

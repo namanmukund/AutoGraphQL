@@ -7,6 +7,7 @@ import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfter
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorMenteeSession from '../../postHookFunctions/utils/getMentorMenteeSession';
 import { TMS } from '../../../../../constants';
+import { log } from '../../../../../utils';
 
 const updateMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: menteeSessionId } = params;
@@ -18,6 +19,7 @@ const updateMenteeSessionValidation = async (params, mutationOrQueryName, contex
   context.mentorSessionId = mentorSessionId;
   context.mmsId = mmsId;
   context.mentorMenteeSessionDoc = mentorMenteeSession;
+  log(`---MentorMenteeSession Recorded ---> ${mmsId}`)
   if (!menteeSession || !menteeSession.id) {
     throw new DatabaseRecordNotFoundError();
   }

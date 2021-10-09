@@ -214,10 +214,13 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
     log(`------------------------source ${source}`);
     log(`------------------------methodCallOriginComponent ${methodCallOriginComponent}`);
 
+    log(`########## Checking -> ${JSON.stringify({ menteeUserId, topicId })}`, 'debug')
     // simply update existing mms if that's all it is to be done
     if (menteeUserId && topicId) {
       const mentorMenteeId = await callMentorMenteeSessions(menteeUserId, topicId);
+      log(`########## mentorMenteeId -> ${JSON.stringify({mentorMenteeId})}`, 'debug')
       if (mentorMenteeId) {
+        log(`########## toUpdateMenteeSession -> ${JSON.stringify({ toUpdateMenteeSession, menteeSessionId })}`, 'debug')
         if (toUpdateMenteeSession && menteeSessionId) {
           const variables = {
             input: {
@@ -254,6 +257,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           );
           log(`------------------------updated menteeSessionId ${menteeSessionId}`);
         }
+        log(`########## PAYLOAD -> ${JSON.stringify({ mentorMenteeId, mentorSessionIdFromInput, input: { sessionStatus } })}`, 'debug')
         await callUpdateMentorMenteeSession(mentorMenteeId, mentorSessionIdFromInput, { input: { sessionStatus } });
         log(`------------------------updated mentorMenteeId ${mentorMenteeId}`);
         return true;
@@ -369,6 +373,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
       }
     }
 
+    console.log('>>>>>>>>>>> CHECKING <<<<<<<<<<<', {menteeSessionId, mentorSessionId})
     // add mentor mentee session
     if (menteeSessionId && mentorSessionId) {
       const variables = {
@@ -377,6 +382,9 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           source,
         },
       };
+      console.log('>>>>>>>>>>> variables <<<<<<<<<<<', {topicId,
+        variables,
+        courseId,})
       await callAddMentorMenteeSession(
         topicId,
         menteeSessionId,
@@ -387,6 +395,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
       log('------------------------added mentorMenteeId');
     }
   } catch (e) {
+    log('In AddMentorMenteeSessionForBatch............');
     log(`Error........ ${e}`);
   }
   return true;

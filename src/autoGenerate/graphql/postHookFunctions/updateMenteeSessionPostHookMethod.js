@@ -17,6 +17,7 @@ import addSessionLog from './utils/addSessionLog';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
+import { log } from '../../../../utils';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const { previousDocument, currentUser, mentorMenteeSessionDoc } = context;
@@ -112,14 +113,19 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     });
   }
 
+  log(`In UpdateMenteePost, ${JSON.stringify({mssId: context.mmsId, date: (prevBookingDate.getTime() !== bookingDate.getTime())
+    || (get(prevSlotTimeStringArray, '0') !== get(slotTimeStringArray, '0'))})}`)
   const updateMentorMenteeSessionInput = {};
-  if (context.mmsId && !get(userInfo, 'data.user.studentProfile.batch.code', null) && (
+  if (context.mmsId && (
     (prevBookingDate.getTime() !== bookingDate.getTime())
     || (get(prevSlotTimeStringArray, '0') !== get(slotTimeStringArray, '0'))
   )) {
     updateMentorMenteeSessionInput.hasRescheduled = get(mentorMenteeSessionDoc, 'hasRescheduled', false);
     updateMentorMenteeSessionInput.rescheduledDate = get(mentorMenteeSessionDoc, 'rescheduledDate', false);
     updateMentorMenteeSessionInput.rescheduledDateProvided = get(mentorMenteeSessionDoc, 'rescheduledDateProvided', null);
+    log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`)
+    log(`-----------Deleting MentorMenteeSession (updateMenteeSessionPostHook) -> ${context.mmsId}`)
+    log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`)
     await deleteMentorMenteeSessionQuery(context.mmsId, context);
   }
 
