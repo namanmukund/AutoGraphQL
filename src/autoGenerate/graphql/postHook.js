@@ -62,6 +62,7 @@ import deleteBatchSessionPostHookMethod from './postHookFunctions/deleteBatchSes
 import updateUserPostHookMethod from './postHookFunctions/updateUserPostHookMethod';
 import updatePreSalesAuditPostHookMethod from './postHookFunctions/updatePreSalesAuditPostHookMethod';
 import updatePostSalesAuditPostHookMethod from './postHookFunctions/updatePostSalesAuditPostHookMethod';
+import userPostHookMethod from './postHookFunctions/userPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -299,9 +300,15 @@ const posthook = async (input, mutationName, context, params) => {
       await updatePostSalesAuditPostHookMethod(input, mutationName, context, params);
       break;
     }
+    case 'user': {
+      await userPostHookMethod(input, mutationName, context);
+      console.log(22222, input);
+      break;
+    }
     default:
       break;
   }
-  return hook(input, mutationName, 'PostHook');
+  const abc = await hook(input, mutationName, 'PostHook');
+  return abc;
 };
 export { posthook };
