@@ -76,7 +76,7 @@ const validateMenteeSessionInput = async (params, context) => {
   if (!(get(availability, slotTimeStringArray[0], 0) > 0)) {
     throw new NoSlotsAvailableForBooking();
   }
-  // prev availableSlots flow
+  // ---------------------commenting out the previous availableSlots flow--------------
   // if (!availableSlots || !availableSlots.length) {
   //   throw new NoSlotsAvailableForBooking();
   // }
@@ -84,7 +84,7 @@ const validateMenteeSessionInput = async (params, context) => {
   //   throw new NoSlotsAvailableForBooking();
   // }
   // eslint-disable-next-line no-param-reassign
-  context.availableSlots = availableSlots;
+  // context.availableSlots = availableSlots;
   return true;
 };
 
