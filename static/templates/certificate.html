@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <!-- utf-8 works for most cases -->
+  <meta name="viewport" content="width=device-width">
+  <!-- Forcing initial-scale shouldn't be necessary -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- Use the latest (edge) version of IE rendering engine -->
+  <meta name="x-apple-disable-message-reformatting">
+  <!-- Disable auto-scale in iOS 10 Mail entirely -->
+  <title>Tekie Certificate</title>
+  <!-- The title tag shows in email notifications, like Android 4.4. -->
+
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+
+  <!-- CSS Reset : BEGIN -->
+  <style>
+    html,
+    body {
+      margin: 0 auto !important;
+      padding: 0 !important;
+      height: 100% !important;
+      width: 100% !important;
+      background: #f1f1f1;
+    }
+
+    /* What it does: Stops email clients resizing small text. */
+    * {
+      -ms-text-size-adjust: 100%;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    /* What it does: Centers email on Android 4.4 */
+    div[style*="margin: 16px 0"] {
+      margin: 0 !important;
+    }
+
+    /* What it does: Stops Outlook from adding extra spacing to tables. */
+    table,
+    td {
+      mso-table-lspace: 0pt !important;
+      mso-table-rspace: 0pt !important;
+    }
+
+    /* What it does: Fixes webkit padding issue. */
+    table {
+      border-spacing: 0 !important;
+      border-collapse: collapse !important;
+      table-layout: fixed !important;
+      margin: 0 auto !important;
+    }
+
+    /* What it does: Uses a better rendering method when resizing images in IE. */
+    img {
+      -ms-interpolation-mode: bicubic;
+    }
+
+    /* What it does: Prevents Windows 10 Mail from underlining links despite inline CSS. Styles for underlined links should be inline. */
+    a {
+      text-decoration: none;
+    }
+
+    /* What it does: A work-around for email clients meddling in triggered links. */
+    *[x-apple-data-detectors],
+    /* iOS */
+    .unstyle-auto-detected-links *,
+    .aBn {
+      border-bottom: 0 !important;
+      cursor: default !important;
+      color: inherit !important;
+      text-decoration: none !important;
+      font-size: inherit !important;
+      font-family: inherit !important;
+      font-weight: inherit !important;
+      line-height: inherit !important;
+    }
+
+    /* What it does: Prevents Gmail from displaying a download button on large, non-linked images. */
+    .a6S {
+      display: none !important;
+      opacity: 0.01 !important;
+    }
+
+    /* What it does: Prevents Gmail from changing the text color in conversation threads. */
+    .im {
+      color: inherit !important;
+    }
+
+    /* If the above doesn't work, add a .g-img class to any image in question. */
+    img.g-img+div {
+      display: none !important;
+    }
+
+    /* What it does: Removes right gutter in Gmail iOS app: https://github.com/TedGoas/Cerberus/issues/89  */
+    /* Create one of these media queries for each additional viewport size you'd like to fix */
+
+    /* iPhone 4, 4S, 5, 5S, 5C, and 5SE */
+    @media only screen and (min-device-width: 320px) and (max-device-width: 374px) {
+      u~div .email-container {
+        min-width: 320px !important;
+      }
+    }
+
+    /* iPhone 6, 6S, 7, 8, and X */
+    @media only screen and (min-device-width: 375px) and (max-device-width: 413px) {
+      u~div .email-container {
+        min-width: 375px !important;
+      }
+    }
+
+    /* iPhone 6+, 7+, and 8+ */
+    @media only screen and (min-device-width: 414px) {
+      u~div .email-container {
+        min-width: 414px !important;
+      }
+    }
+  </style>
+
+  <!-- CSS Reset : END -->
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&display=swap');
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .section-1 {
+      background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/sec1bg.png);
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      min-height: 100px;
+    }
+
+    .section-1 img {
+      margin-top: 20px;
+    }
+
+    .section-2 {
+      padding-top: 38px;
+      background-repeat: no-repeat;
+      background-position: left 5px top -25px;
+    }
+
+    .section-2-sname {
+      font-style: normal;
+      font-weight: normal;
+      font-size: 22px;
+      line-height: 150%;
+      text-align: center;
+      color: #000000;
+      margin-bottom: 12px;
+    }
+
+    .section-2-subtitle {
+      font-style: normal;
+      padding: 0 30px;
+      font-weight: normal;
+      font-size: 22px;
+      line-height: 25px;
+      text-align: center;
+      color: #504F4F;
+      margin-bottom: 24px;
+    }
+
+    .main-title {
+      font-weight: bold;
+      font-size: 22px;
+      line-height: 26px;
+      text-align: center;
+      letter-spacing: -0.02em;
+      color: #504F4F;
+      padding-bottom: 10px;
+      margin-bottom: 0;
+      margin-top: 47px;
+    }
+
+    .border-yellow {
+      width: 218px;
+      text-align: center;
+      border-top: 3px solid #FFC24C;
+      margin-right: auto;
+      margin-left: auto;
+    }
+
+    .sec-2-right {
+      margin-top: 25.11px;
+    }
+
+    .sec2-right-h3 {
+      font-weight: bold;
+      font-size: 12px;
+      line-height: 14px;
+      letter-spacing: 0.03em;
+      color: #00ADE6;
+      text-decoration: none;
+      margin-top: 14px;
+      margin-bottom: 1px;
+    }
+
+    .sec2-right-h2 {
+      font-weight: bold;
+      font-size: 18px;
+      line-height: 22px;
+      color: #504F4F;
+      margin-top: 1px;
+      margin-bottom: 18px;
+    }
+
+    .sec-2-h4 {
+      font-weight: normal;
+      font-size: 16px;
+      line-height: 19px;
+      letter-spacing: 0.03em;
+      color: #504F4F;
+      margin-bottom: 19px;
+    }
+
+    .sec-2-link {
+      font-weight: bold;
+      font-size: 14px;
+      line-height: 17%;
+      align-items: center;
+      text-align: center;
+      letter-spacing: 0.03em;
+      color: #00ADE6;
+      text-decoration: none;
+
+    }
+
+    .sec-2-link:hover {
+      text-decoration: none;
+      color: #00ADE6;
+    }
+
+    .sec2-link-icon {
+      margin-left: 10px;
+      margin-bottom: 4px;
+    }
+
+    .section-3 {
+      margin-top: 47px;
+    }
+
+    .left-sec-3 {
+      margin-top: 27px;
+      padding-left: 70px;
+    }
+
+    .left-sec-3-p {
+      font-weight: normal;
+      font-size: 18px;
+      line-height: 25px;
+      color: #504F4F;
+    }
+
+    .left-sec-3-p span {
+      margin-left: 15px;
+      font-weight: bold;
+    }
+
+    .right-sec-3 {
+      margin-top: 27px;
+    }
+
+    .button-span {
+      background: #8C61CB;
+      border-radius: 24px;
+      font-weight: bold;
+      font-size: 16px;
+      line-height: 22px;
+      text-transform: uppercase;
+      color: #FFFFFF;
+      padding: 5px 28px;
+    }
+
+    .section-4 {
+      background-color: #004AAD;
+      height: 188px;
+      margin-top: 85px;
+      padding: 25px 13px;
+      margin-bottom: 34px;
+    }
+
+    .sec-4-img {
+      position: absolute;
+      /* top: -72px;
+      right: -14px; */
+    }
+
+    .sec-4-p {
+      font-weight: bold;
+      font-size: 22px;
+      line-height: 33px;
+      text-align: center;
+      color: #FAFCFF;
+      padding-top: 25px;
+      margin-bottom: 18px;
+    }
+
+    .sec-4-link {
+      font-weight: bold;
+      font-size: 15px;
+      line-height: 18px;
+      align-items: center;
+      text-align: center;
+      letter-spacing: 0.03em;
+      text-decoration: none;
+      color: #002B67;
+      background: linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 100%);
+      border-radius: 40px;
+      padding: 12px 16px 11px;
+    }
+
+    .sec-5-title {
+      font-weight: normal;
+      font-size: 20px;
+      line-height: 27px;
+      text-align: center;
+      color: #000000;
+      margin-bottom: 22px;
+    }
+
+    .sec-5-sharelink {
+      font-weight: 800;
+      font-size: 15px;
+      line-height: 18px;
+      display: inline-block;
+      align-items: center;
+      text-align: center;
+      letter-spacing: 0.03em;
+      text-decoration: none;
+      color: #FFFFFF;
+      background: linear-gradient(180deg, #61DDFF 0%, #00ADE6 100%);
+      border-radius: 40px;
+      padding: 12px 26px 11px;
+    }
+
+    .sec-5-sharelink:hover {
+      color: #fff;
+    }
+
+    .sec-5-more-q {
+      font-weight: bold;
+      font-size: 20px;
+      line-height: 30px;
+      text-align: center;
+      color: #555555;
+      opacity: 0.8;
+    }
+
+    .sec-5-text-link {
+      font-weight: 300;
+      font-size: 18px;
+      line-height: 24px;
+      text-align: center;
+      color: #555555;
+      margin-bottom: 30px;
+    }
+
+    .email-link {
+      color: #61DDFF;
+    }
+
+    .email-link:hover {
+      color: #61DDFF;
+    }
+
+    .wp-link {
+      font-weight: 300;
+      font-size: 14px;
+      line-height: 22px;
+      color: #555555;
+      text-decoration: none;
+      border: 1px solid rgba(85, 85, 85, 0.5);
+      box-sizing: border-box;
+      border-radius: 41px;
+      padding: 12.5px 23px;
+    }
+
+    .wp-link img {
+      margin-right: 5px;
+      margin-bottom: 3px;
+    }
+
+    .wp-link:hover {
+      color: #555555;
+    }
+
+    .wp-link-wrapper {
+      margin-top: 42px;
+      margin-bottom: 46px;
+    }
+
+    .call-link {
+      color: #61DDFF;
+      text-decoration: underline;
+    }
+
+    .call-link:hover {
+      color: #61DDFF;
+      text-decoration: underline;
+
+    }
+
+    .footer-social-link {
+      list-style: none;
+    }
+
+    .social-img {
+      max-width: 33px;
+    }
+
+    .footer-social-link li {
+      display: inline;
+      padding-right: 25px;
+    }
+
+    .footer-link {
+      list-style: none;
+    }
+
+    .footer-link li {
+      display: inline;
+      padding-right: 5px;
+      padding-left: 5px;
+      height: 10px;
+    }
+
+    .footer-link li:not(:last-child) {
+      border-right: 1px solid #504F4F;
+      opacity: 0.8;
+    }
+
+    .footer-link a {
+      font-weight: normal;
+      font-size: 10.6305px;
+      line-height: 10px;
+      text-decoration-line: underline;
+      color: #504F4F;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+
+<body>
+  <div style="width:602px; margin: auto;">
+    <section class="section-1">
+      <div class="container-fluid">
+        <div class="row align-items-center">
+          <div class="col-md-12 text-center">
+            <img class="img-fluid" src="https://tekie-backend.s3.amazonaws.com/python/email/tekielogo.png"
+              style="margin-top: 20px; margin-left: 250px;">
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section-2"
+      style="background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/sec2bg.png);">
+      <!-- <div class="img-bg"> -->
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12">
+            <h2 class="section-2-sname">Dear <%= studentName %>,
+            </h2>
+            <h3 class="section-2-subtitle">Congratulations, you have successfully completed the (course name)
+            </h3>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <h2 class="main-title">About the Course</h2>
+            <div class="border-yellow"></div>
+          </div>
+        </div>
+        <div class="sec-2-right">
+          <div class="row">
+            <div class="col-md-6 text-end" style="width: 50%; display: inline-block">
+              <img class="img-fluid" src="https://tekie-backend.s3.amazonaws.com/python/email/imgs2.png">
+            </div>
+            <div class="col-md-6" style="width: 50%; display: inline">
+              <div style="text-align: center;">
+                <h3 class="sec2-right-h3">Block-based programming</h3>
+                <h2 class="sec2-right-h2">Introduction to Python</h2>
+                <h4 class="sec-2-h4">Class 6 - 8</h4>
+                <a class="sec-2-link" href="#">VIEW COURSE<img class="sec2-link-icon"
+                    src="https://tekie-backend.s3.amazonaws.com/python/email/external-link.png">
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- </div> -->
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12">
+            <h2 class="main-title">Course Snapshot</h2>
+            <div class="border-yellow"></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6" style="width: 50%;">
+            <div class="left-sec-3">
+              <p class="left-sec-3-p">Projects<span>16</span></p>
+              <p class="left-sec-3-p">Duration<span>12 Weeks</span></p>
+            </div>
+          </div>
+          <div class="col-md-6" style="width: 50%;">
+            <div class="right-sec-3">
+              <p class="left-sec-3-p">Mentors<span>John Doe</span></p>
+              <p class="left-sec-3-p">Profiency<span class="button-span">12 Weeks</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <section class="section-4">
+        <div
+          style="background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/sec-4bg.png); height: 140px; position: relative;">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-5 text-center" style="width: 50%;">
+                <p class="sec-4-p">Yay! You did well.</p>
+                <a href="#">
+                  <p class="sec-4-link">Download Certificate</p>
+                </a>
+              </div>
+              <div class="col-md-5" style="width: 50%;">
+                <img class="img-fluid sec-4-img"
+                  src="https://tekie-backend.s3.amazonaws.com/python/email/drop-scholar-scroll.png">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="section-5">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <h3 class="sec-5-title">Share this with your friends and family here</h3>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <div style="margin-left: 220px;">
+              <a class="sec-5-sharelink" href="#">Share Certificate</a>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <p class="sec-5-more-q">Have more questions?</p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <p class="sec-5-text-link">You can also write to us about your concerns on <a class="email-link"
+                href="#">hello@tekie.in</a>
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <a href="#" class="wp-link" style="margin-left: 240px;"><img class="img-fluid"
+                style="width: 22px; height: 22px; vertical-align: middle;"
+                src="https://tekie-backend.s3.amazonaws.com/python/email/whatsappIcon.png"> Send a Hi 👋</a>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <div class="wp-link-wrapper">
+              <a href="#" class="wp-link" style="margin-left: 180px;"><img class="img-fluid"
+                  style="width: 22px; height: 22px; vertical-align: middle;"
+                  src="https://tekie-backend.s3.amazonaws.com/python/email/call-icon-dark.png"> Call us at
+                <span class="call-link">+91-8047483415</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="footer-section">
+      <div class="container-fluid" style="margin-left: 120px;">
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <ul class="footer-social-link">
+              <li><a href="https://www.facebook.com/TekieApp/"><img class="img-fluid social-img"
+                    src="https://tekie-backend.s3.amazonaws.com/python/email/facebookGreyIcon.png"></a></li>
+              <li><a href="https://www.instagram.com/tekieapp/"><img class="img-fluid social-img"
+                    src="https://tekie-backend.s3.amazonaws.com/python/email/instagramGreyIcon.png"></a></li>
+              <li><a href="https://www.linkedin.com/company/tekie"><img class="img-fluid social-img"
+                    src="https://tekie-backend.s3.amazonaws.com/python/email/linkedinGreyIcon.png"></a></li>
+              <li><a href="https://www.youtube.com/channel/UCCr7GPlTdZRXFEfveeuKcbg"><img class="img-fluid social-img"
+                    src="https://tekie-backend.s3.amazonaws.com/python/email/youtubeGreyIcon.png"></a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="container-fluid mb-5" style="margin-left: 130px;">
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <ul class="footer-link">
+              <li><a href="https://www.tekie.in/terms">VIEW T&C</a></li>
+              <li><a href="https://www.tekie.in/">Visit tekie.in</a></li>
+              <li><a href="https://tekie.in/Unsubscribe">Unsubscribe</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
