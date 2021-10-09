@@ -83,7 +83,6 @@ const sendJourneySnapshotOnCourseCompletion = async ({ userId }, deleteJob) => {
     avatarCode,
   };
   // change email here to test
-  console.log('parentEmail', parentEmail);
   await sendJourneySnapshotToUser(parentEmail, input, 'backend');
   deleteJob();
 };

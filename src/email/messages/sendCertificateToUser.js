@@ -5,16 +5,13 @@ import sendEmail from '../../../services/email/utils/sendEmail';
 
 const sendCertificateToUser = async (emailTo, input, appName) => {
   const templateFileName = 'certificate';
-  console.log('templateFileName', templateFileName)
   const templateObject = {
     studentName: get(input, 'studentName'),
     appName,
   };
-  console.log('templateObject', templateObject)
   const templateString = parsedHtmlFromTemplateFileAndObject(
-    templateFileName, templateObject
+    templateFileName, templateObject,
   );
-  console.log('templateString', templateString)
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';
