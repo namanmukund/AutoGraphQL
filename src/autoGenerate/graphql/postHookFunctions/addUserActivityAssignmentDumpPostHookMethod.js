@@ -28,7 +28,7 @@ const userAssignmentQuery = (
           {topic_some:{
             id:"${topicId}"
           }},
-          ${courseId ? `{course_some:{id:"${courseId}"}},` : `{course_some:{id:"${OLD_COURSE_ID}"}},`}
+          ${courseId ? `{course_some:{id:"${courseId}"}},` : ''}
         ]
       }){
         id
