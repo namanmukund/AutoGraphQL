@@ -17,7 +17,6 @@ const deleteBatchValidation = async (params, mutationOrQueryName, context) => {
   if (studentsMeta && studentsMeta.count !== 0) {
     throw new StudentsLinked();
   }
-
   const batchSessions = await callLocalGraphqlApi(getBatchSessionForBatch(batchId));
   context.batchSessions = get(batchSessions, 'data.batchSessions');
   return true;
