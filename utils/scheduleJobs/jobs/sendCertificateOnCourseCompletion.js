@@ -32,7 +32,6 @@ const USER = (id) => `
 
 const sendCertificateOnCourseCompletion = async ({ userId }, deleteJob) => {
   const userRes = await callLocalGraphqlApi(USER(userId));
-
   const parentEmail = get(userRes, 'data.user.studentProfile.parents[0].user.email');
   const studentName = get(userRes, 'data.user.name', '');
   const mentorName = get(userRes, 'data.user.studentProfile.batch.allottedMentor.name', '');

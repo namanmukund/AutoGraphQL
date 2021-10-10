@@ -7,7 +7,7 @@ const sendCertificateToUser = async (emailTo, input, appName) => {
   const templateFileName = 'certificate';
   const templateObject = {
     studentName: get(input, 'studentName'),
-    mentorName: get(input, 'mentorName'),
+    mentorName: get(input, 'mentorName', '-'),
     appName,
   };
   const templateString = parsedHtmlFromTemplateFileAndObject(
