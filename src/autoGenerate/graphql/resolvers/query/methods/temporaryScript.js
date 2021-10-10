@@ -14,6 +14,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import generateSessionReport from '../../../../../../utils/scheduleJobs/scheduleSessionReport';
 // import migrateBatchAttendanceToEnum from '../scriptMethods/migrateBatchAttendanceToEnum';
 // import updateCourseInVideos from '../scriptMethods/updateCourseInVideos';
+// import removeCourseFromUserAssignments from '../scriptMethods/removeCourseFromUserAssignments';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -52,6 +53,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateQuestionsWithCorrectPositions();
   // await updateQuestionsWithHints();
   // await updateQuestionsWithCorrectPositionIndex();
+  // await removeCourseFromUserAssignments();
   return {
     result: true,
   };
