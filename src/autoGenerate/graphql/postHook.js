@@ -302,7 +302,6 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'user': {
       await userPostHookMethod(input, mutationName, context);
-      console.log(22222, input);
       break;
     }
     default:
