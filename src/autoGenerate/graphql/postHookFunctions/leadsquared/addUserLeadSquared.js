@@ -5,7 +5,7 @@ const addUserLeadSquared = (params, create = true) => {
   if (get(params, 'input.Vertical') === 'b2b') {
     return;
   }
-  if (get(params, 'input.schoolName') && !get(params, 'input.Vertical')) {
+  if (get(params, 'input.schoolName') && !get(params, 'input.Vertical') && get(params, 'input.utmSource') !== 'RadioStreet') {
     return;
   }
 
@@ -80,6 +80,8 @@ const addUserLeadSquared = (params, create = true) => {
     leadSquaredInput.mx_school_booking_code = get(params, 'input.campaignCode');
     leadSquaredInput.mx_school_booking_link = `https://www.tekie.in/login?code=${leadSquaredInput.mx_school_booking_code}`;
   }
+
+  console.log(JSON.stringify(null, 2));
 
   updateLeadsquared(leadSquaredInput, create);
 };
