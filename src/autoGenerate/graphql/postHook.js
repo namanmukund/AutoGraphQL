@@ -307,7 +307,6 @@ const posthook = async (input, mutationName, context, params) => {
     default:
       break;
   }
-  const abc = await hook(input, mutationName, 'PostHook');
-  return abc;
+  return hook(input, mutationName, 'PostHook');
 };
 export { posthook };
