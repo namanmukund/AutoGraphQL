@@ -16,6 +16,11 @@ const USER = (id) => `
           email
         }
       }
+      batch{
+        allottedMentor{
+          name
+        }
+      }
     }
   }
 }
@@ -30,9 +35,10 @@ const sendCertificateOnCourseCompletion = async ({ userId }, deleteJob) => {
 
   const parentEmail = get(userRes, 'data.user.studentProfile.parents[0].user.email');
   const studentName = get(userRes, 'data.user.name', '');
-
+  const mentorName = get(userRes, 'data.user.studentProfile.batch.allottedMentor.name', '');
   const input = {
     studentName,
+    mentorName
   };
   // change email here to test
   await sendCertificateToUser(parentEmail, input, 'backend');
