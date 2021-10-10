@@ -70,6 +70,7 @@ const validateUserOTPMutationResolver = async (
     phoneVerified,
     emailVerified,
     status,
+    utmSource,
   } = userData;
 
   const {
@@ -108,6 +109,47 @@ const validateUserOTPMutationResolver = async (
           Phone: number,
           mx_OTP_Verified: 'Yes',
         }, false);
+        setTimeout(() => {
+          if (utmSource === 'RadioStreet') {
+            updateLeadSquared({
+              Phone: number,
+            }, false, {
+              ActivityEvent: 208,
+              Fields: [
+                {
+                  SchemaName: 'mx_Custom_1',
+                  Value: 'RadioStreet',
+                },
+              ],
+            });
+
+            setTimeout(() => {
+              const activityInput = {
+                ActivityEvent: 103,
+                ActivityNote: 'User booked a session',
+                Fields: [
+                  {
+                    SchemaName: 'Status',
+                    Value: 'Booked (Verified)',
+                  },
+                  {
+                    SchemaName: 'mx_Custom_3',
+                    Value: 'Customer',
+                  },
+                  {
+                    SchemaName: 'mx_Custom_8',
+                    Value: '2021-10-17 05:30:00', // 11 am
+                  },
+                ],
+              };
+              const leadSquaredInput = {
+                Phone: number,
+                mx_Booking_Date_Time: '2021-10-17 05:30:00',
+              };
+              updateLeadSquared(leadSquaredInput, false, activityInput);
+            }, 4000);
+          }
+        }, 3000);
       }
     } else if (emailOtp) {
       if (userData.emailOtp !== emailOtp) {
