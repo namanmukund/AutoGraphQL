@@ -67,6 +67,7 @@ import MentorReport from './mentorReport';
 import Batch from './batch';
 import BatchCurrentComponentStatus from './batchCurrentComponentStatus';
 import BatchSession from './batchSession';
+import AdhocSession from './adhocSession';
 import UserLocationLog from './userLocationLog';
 import MentorMenteeSessionAudit from './mentorMenteeSessionAudit';
 import MentorMenteeSessionTimestamp from './mentorMenteeSessionTimestamp';
@@ -197,6 +198,7 @@ export default [
   ...Batch,
   ...BatchCurrentComponentStatus,
   ...BatchSession,
+  ...AdhocSession,
   ...UserLocationLog,
   ...MentorMenteeSessionAudit,
   ...MentorMenteeSessionTimestamp,

@@ -109,6 +109,7 @@ import addBlockBasedProjectValidation from './preHookFunctions/validation/addBlo
 import updateBlockBasedProjectValidation from './preHookFunctions/validation/updateBlockBasedProjectValidation';
 import addVideoValidation from './preHookFunctions/validation/addVideoValidation';
 import updateVideoValidation from './preHookFunctions/validation/updateVideoValidation';
+import addAdhocSessionValidation from './preHookFunctions/validation/addAdhocSessionValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -626,6 +627,32 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     case 'deleteBatchSession': {
       await deleteBatchSessionValidation(params, mutationOrQueryName, context);
       break;
+    }
+    case 'addAdhocSession': {
+      const { sessionStatus } = input;
+      const newInput = {
+        ...input,
+      };
+      switch (sessionStatus) {
+        case 'started': {
+          newInput.sessionStartDate = new Date().toISOString();
+          break;
+        }
+        default: {
+          newInput.sessionAllotmentDate = new Date().toISOString();
+          // temporary hack for backword compatibility
+          newInput.sessionStartDate = new Date().toISOString();
+        }
+      }
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await addAdhocSessionValidation(newParams, mutationOrQueryName, context);
+
+      return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'updateBatchCurrentComponentStatus': {
       await updateBatchCurrentComponentStatusValidation(params, mutationOrQueryName, context);
