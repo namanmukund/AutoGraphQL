@@ -67,7 +67,7 @@ const sendJourneySnapshotOnCourseCompletion = async ({ userId }, deleteJob) => {
   const userApprovedCodes = get(fetchUserApprovedCodesRes, 'data.userApprovedCodes', []);
   const userSavedCodes = get(fetchUserApprovedCodesRes, 'data.userSavedCodes', []);
   const userPqCount = get(fetchUserApprovedCodesRes, 'data.userPracticeQuestionReportsMeta.count', 0);
-  const userQuizReportsMeta = get(fetchUserApprovedCodesRes, 'data.userPracticeQuestionReportsMeta.count', 0);
+  const userQuizReportsMeta = get(fetchUserApprovedCodesRes, 'data.userQuizReportsMeta.count', 0);
   const totalPqCountToDisplay = userPqCount + userQuizReportsMeta;
 
   if (userApprovedCodes && userApprovedCodes.length > 0) {
