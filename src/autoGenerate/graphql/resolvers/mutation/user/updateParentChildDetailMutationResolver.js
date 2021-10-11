@@ -57,6 +57,7 @@ const getParentChildExistingDetails = async (userId) => {
             }
           }
           source
+          vertical
           parentProfile{
             id
             children{
@@ -207,6 +208,11 @@ Create student and their user profile
     childData.giftVoucherApplied = false;
   }
   const childDataWithId = generateCuid(childData);
+
+  // handle vertical, child same as parent
+  if (existingUserDetails.vertical) {
+    childData.vertical = existingUserDetails.vertical;
+  }
 
   const childUserData = await addUserData({ bypass: true }, childDataWithId);
   const { id: childUserId } = childUserData;

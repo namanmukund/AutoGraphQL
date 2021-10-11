@@ -121,13 +121,23 @@ const signupOrLoginViaOtp = async (
       input.country = input.country ? input.country : 'india';
       input.leadStatus = 'New Lead';
       input.unVerifiedLead = true;
+      // fetch campaign type early to modfiy newUser obj with vertical
+      let campaignRes = null;
+      let campaignType = null;
+      if (input.campaignId) {
+        campaignRes = await callLocalGraphqlApi(FETCH_CAMPAIGN(input.campaignId));
+        campaignType = get(campaignRes, 'data.campaign.type', '');
+      }
+      if (campaignType && campaignType === 'b2b') {
+        newUser.vertical = 'b2b';
+      } else if (campaignType) {
+        newUser.vertical = 'b2b2c';
+      }
       userData = generateCuid(newUser);
       await modelMutations.addDocument(userData);
       // sendBookingReminderOrConfirmationB2BC(userData.id);
       // create on leadsquared
       if (input.campaignId) {
-        const campaignRes = await callLocalGraphqlApi(FETCH_CAMPAIGN(input.campaignId));
-        const campaignType = get(campaignRes, 'data.campaign.type', '');
         input.schoolName = get(campaignRes, 'data.campaign.school.name', '');
         input.Vertical = campaignType.replace('Event', '');
         input.campaignCode = get(campaignRes, 'data.campaign.code');
