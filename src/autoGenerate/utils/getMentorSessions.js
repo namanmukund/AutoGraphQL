@@ -27,6 +27,7 @@ const getMentorSessions = (userId, availabilityDate) => `query{
         batchSessions{
           id
           batch {
+            id
             type
             code
             studentsMeta {

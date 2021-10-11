@@ -7,6 +7,8 @@ import { SlotsOccupiedError } from '../../../../../../constants/errors/db';
 const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsInPrevDoc, userBatchCode = '') => {
   const { input } = params;
   const bookingDate = get(input, 'bookingDate');
+  let batchCode = null;
+  let batchId = null;
   const { ...slots } = input;
   // const isToday = moment(finalBookingDate).diff(moment(new Date()), 'days') === 0;
   let slotTimeArray = getSelectedSlotsTime(slots);
@@ -60,6 +62,8 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
                 customError += 'Batch(es) -> ';
               }
               customError += `${get(batchSession, 'batch.code', '')} `;
+              batchCode = get(batchSession, 'batch.code', '');
+              batchId = get(batchSession, 'batch.id', '');
             }
           }
         }
@@ -84,6 +88,8 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
                 customError += `${get(menteeSession, 'user.name', '')} `;
                 if (get(menteeSession, 'user.studentProfile.batch.code', '')) {
                   customError += `(${get(menteeSession, 'user.studentProfile.batch.code', '')})`;
+                  batchCode = get(menteeSession, 'user.studentProfile.batch.code');
+                  batchId = get(menteeSession, 'user.studentProfile.batch.id');
                 }
               }
             }
@@ -97,9 +103,11 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
     const intersectionSlots = slotTimeArray.filter((x) => uniqueOccupiedSlotsArray.includes(x));
     if (intersectionSlots && intersectionSlots.length) {
       let errorMessage = 'Sessions for slots ';
+      let slotsObj = {}
       // eslint-disable-next-line no-restricted-syntax
       for (const intersectionSlot of intersectionSlots) {
         errorMessage += ` slot${intersectionSlot}`;
+        slotsObj[`slot${intersectionSlot}`] = true;
       }
       errorMessage += ' are already present and booked for ';
       errorMessage += customError;
@@ -107,6 +115,12 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
         throw new SlotsOccupiedError({
           data: {
             message: errorMessage,
+            batchInfo: {
+              slots: slotsObj,
+              bookingDate,
+              code: batchCode,
+              id: batchId,
+            } 
           },
         });
       }
