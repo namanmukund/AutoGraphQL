@@ -118,8 +118,6 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     }
   }
 
-  log(`In UpdateMenteePost, ${JSON.stringify({mssId: context.mmsId, date: (prevBookingDate.getTime() !== bookingDate.getTime())
-    || (get(prevSlotTimeStringArray, '0') !== get(slotTimeStringArray, '0'))})}`)
   const updateMentorMenteeSessionInput = {};
   if (context.mmsId && (
     (prevBookingDate.getTime() !== bookingDate.getTime())
@@ -128,9 +126,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     updateMentorMenteeSessionInput.hasRescheduled = get(mentorMenteeSessionDoc, 'hasRescheduled', false);
     updateMentorMenteeSessionInput.rescheduledDate = get(mentorMenteeSessionDoc, 'rescheduledDate', false);
     updateMentorMenteeSessionInput.rescheduledDateProvided = get(mentorMenteeSessionDoc, 'rescheduledDateProvided', null);
-    log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`)
-    log(`-----------Deleting MentorMenteeSession (updateMenteeSessionPostHook) -> ${context.mmsId}`)
-    log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`)
+    log(`-----------Deleting MentorMenteeSession (updateMenteeSessionPostHook) -> ${context.mmsId}`);
     await deleteMentorMenteeSessionQuery(context.mmsId, context);
   }
 

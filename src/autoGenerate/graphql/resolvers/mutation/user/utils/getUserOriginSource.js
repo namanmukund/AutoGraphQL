@@ -20,7 +20,7 @@ const getUserOriginSource = (utmSource, schoolName = '', schoolId = '') => {
   if (schoolName || schoolId) {
     source = school;
   }
-  if (schoolName && utmSource.toLowerCase().includes('radiostreet')) {
+  if (utmSource && utmSource.toLowerCase().includes('radiostreet')) {
     source = radioStreet;
   }
   return source;
