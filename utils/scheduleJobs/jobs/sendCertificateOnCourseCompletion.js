@@ -37,7 +37,7 @@ const sendCertificateOnCourseCompletion = async ({ userId }, deleteJob) => {
   const mentorName = get(userRes, 'data.user.studentProfile.batch.allottedMentor.name', '');
   const input = {
     studentName,
-    mentorName
+    mentorName,
   };
   // change email here to test
   await sendCertificateToUser(parentEmail, input, 'backend');
