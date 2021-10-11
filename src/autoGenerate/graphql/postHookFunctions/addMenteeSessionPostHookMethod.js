@@ -1,13 +1,13 @@
 import { get } from 'lodash';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
-import reduceParticularAvailableSlotOfADate from './utils/reduceParticularAvailableSlotOfADate';
+// import reduceParticularAvailableSlotOfADate from './utils/reduceParticularAvailableSlotOfADate';
 import extractMenteeSessionInfoAndSendEmail from './utils/extractMenteeSessionInfoAndSendEmail';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { addMenteeBookingLeadsquared } from './leadsquared';
 import getMenteeInfo from './utils/getMenteeInfo';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import getTopicInfo from './utils/getTopicInfo';
-import { byPassMenteeValidationApps, sessionType } from '../../../../constants';
+import { byPassMenteeValidationApps, sessionType, userSourceOrigin } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import updateMenteeSessionQuery from './utils/updateMenteeSessionQuery';
@@ -70,10 +70,12 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
      */
     const { id: menteeSessionId, bookingDate, ...slots } = input;
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-    const { availableSlots } = context;
+    // const { availableSlots } = context;
     const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
     const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
-    if (typeof isTrialSession === 'boolean' && isTrialSession) {
+    const isNotSourceSchool = get(userInfo, 'data.user.source') !== userSourceOrigin.school;
+    const isBatchExist = get(userInfo, 'data.user.studentProfile.batch', false);
+    if (typeof isTrialSession === 'boolean' && isTrialSession && isNotSourceSchool && !isBatchExist) {
       await mentorAvailabilitySlotOperation({
         slotTimeStringArray,
         date: bookingDate,
@@ -82,7 +84,8 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
         sessionId: menteeSessionId,
       });
     }
-    await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context, availableSlots);
+    // ---------------------commenting out the previous availableSlots flow--------------
+    // await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context, availableSlots);
     // send email to mentor admin regarding the session
     await extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
     if (get(context, 'userIdFromContext')) {

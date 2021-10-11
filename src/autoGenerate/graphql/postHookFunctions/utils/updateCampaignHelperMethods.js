@@ -4,8 +4,8 @@ import { batchType, batchCreationStatus, ADD_BATCH_TRY_LIMIT } from '../../../..
 import { log } from '../../../../../utils';
 import getSelectedSlotsTime from '../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import getFirstTopicAndLearningObjective from '../../../utils/getFirstTopicAndLearningObjective';
-import getSelectedSlotsStringArray from './getSelectedSlotsStringArray';
-import reduceParticularAvailableSlotOfADate from './reduceParticularAvailableSlotOfADate';
+// import getSelectedSlotsStringArray from './getSelectedSlotsStringArray';
+// import reduceParticularAvailableSlotOfADate from './reduceParticularAvailableSlotOfADate';
 
 const fetchSchoolClasses = async (schoolClassIds) => {
   const schoolClassIdsString = JSON.stringify(schoolClassIds);
@@ -403,7 +403,7 @@ const getSectionExists = (classes) => {
   });
   return noSectionInAnyClass;
 };
-
+// eslint-disable-next-line no-unused-vars
 const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolId, classesConnectIds, context) => {
   // update batchCreation status to in-progress
   await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
@@ -489,8 +489,8 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
       if (batchId) {
         try {
           await addB2B2CBatchSession(batchId, mentorSessionConnectId, firstTopicId, formattedBookingDate.toISOString(), selectedSlot, courseId);
-          const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-          await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
+          // const slotTimeStringArray = getSelectedSlotsStringArray(slots);
+          // await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
         } catch (err) {
           log(err);
           log(`Batch session was not added for batch: ${batchCode}.`);
