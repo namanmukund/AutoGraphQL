@@ -141,20 +141,21 @@ const addUpdateMentorAvailabilitySlots = async ({
 }) => {
   // if singleSlot exist for give slotName, date and sessionType then update with sessionId
   if (singleSlotData && singleSlotData.length > 0) {
-    if (typeName === 'batchSession') {
-      const slotVerticals = get(singleSlotData, '[0].verticals', []);
-      const addedVerticals = slotVerticals.map((vertical) => get(vertical, 'value'));
-      if (!addedVerticals.includes('b2b2c')) {
-        slotVerticals.push({ value: 'b2b2c' });
-      }
-      await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId, {
-        verticals: {
-          replace: slotVerticals,
-        },
-      });
-    } else {
-      await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId);
-    }
+    await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId);
+    // if (typeName === 'batchSession') {
+    //   const slotVerticals = get(singleSlotData, '[0].verticals', []);
+    //   const addedVerticals = slotVerticals.map((vertical) => get(vertical, 'value'));
+    //   if (!addedVerticals.includes('b2b2c')) {
+    //     slotVerticals.push({ value: 'b2b2c' });
+    //   }
+    //   await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId, {
+    //     verticals: {
+    //       replace: slotVerticals,
+    //     },
+    //   });
+    // } else {
+    //   await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId);
+    // }
   } else {
     const paySlab = await getPaySlabDetails();
     const paySlabId = get(paySlab, '[0].id');
@@ -194,18 +195,18 @@ const mentorAvailabilitySlotOperation = async ({
       const singleSlotData = await getMentorAvailabilitySlots({ date, sessionType, slotName: slotTimeStringArray[i] });
       switch (mutationName) {
         case 'addMenteeSession': {
-          await addUpdateMentorAvailabilitySlots({
-            date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, typeName: 'menteeSession',
-          });
+          if (singleSlotData && singleSlotData.length > 0) {
+            await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, 'menteeSession');
+          }
           break;
         }
         case 'updateMenteeSession': {
           if (prevMentorAvailabilitySlot) {
             await removeFromMentorAvailabilitySlot(prevMentorAvailabilitySlot, sessionId, 'menteeSession');
           }
-          await addUpdateMentorAvailabilitySlots({
-            date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, typeName: 'menteeSession',
-          });
+          if (singleSlotData && singleSlotData.length > 0) {
+            await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, 'menteeSession');
+          }
           break;
         }
         case 'addMentorSession': {
@@ -221,18 +222,36 @@ const mentorAvailabilitySlotOperation = async ({
           break;
         }
         case 'addBatchSession': {
-          await addUpdateMentorAvailabilitySlots({
-            date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'batchSession',
-          });
+          if (singleSlotData && singleSlotData.length > 0) {
+            const slotVerticals = get(singleSlotData, '[0].verticals', []);
+            const addedVerticals = slotVerticals.map((vertical) => get(vertical, 'value'));
+            if (!addedVerticals.includes('b2b2c')) {
+              slotVerticals.push({ value: 'b2b2c' });
+            }
+            await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, 'batchSession', mentorProfileId, {
+              verticals: {
+                replace: slotVerticals,
+              },
+            });
+          }
           break;
         }
         case 'updateBatchSession': {
           if (prevMentorAvailabilitySlot) {
             await removeFromMentorAvailabilitySlot(prevMentorAvailabilitySlot, sessionId, 'batchSession');
           }
-          await addUpdateMentorAvailabilitySlots({
-            date, sessionId, sessionType, slotName: slotTimeStringArray[i], singleSlotData, mentorProfileId, typeName: 'batchSession',
-          });
+          if (singleSlotData && singleSlotData.length > 0) {
+            const slotVerticals = get(singleSlotData, '[0].verticals', []);
+            const addedVerticals = slotVerticals.map((vertical) => get(vertical, 'value'));
+            if (!addedVerticals.includes('b2b2c')) {
+              slotVerticals.push({ value: 'b2b2c' });
+            }
+            await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, 'batchSession', mentorProfileId, {
+              verticals: {
+                replace: slotVerticals,
+              },
+            });
+          }
           break;
         }
         default:
