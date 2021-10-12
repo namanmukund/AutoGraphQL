@@ -13,7 +13,16 @@ const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
   if (sessionType && (sessionType === 'paid' || sessionType === 'batch')) {
     return true;
   }
-
+  const slotTimeStringArray = getSelectedSlotsStringArray(slots);
+  const userInfo = await getMentorProfile(get(input, 'user.typeId'));
+  await mentorAvailabilitySlotOperation({
+    sessionId: get(input, 'id'),
+    slotTimeStringArray,
+    sessionType,
+    date: availabilityDate,
+    mutationName,
+    mentorProfileId: get(userInfo, 'mentorProfile.id'),
+  });
   // don't increase the availability slot if it is done through backend
   const { appName } = context;
   if (backendApps.includes(appName)) {
@@ -25,16 +34,6 @@ const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
 
   // update if available slots for a particular date exist from before
   // const docToBeUpdated = {};
-  const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-  const userInfo = await getMentorProfile(get(input, 'user.typeId'));
-  await mentorAvailabilitySlotOperation({
-    sessionId: get(input, 'id'),
-    slotTimeStringArray,
-    sessionType,
-    date: availabilityDate,
-    mutationName,
-    mentorProfileId: get(userInfo, 'mentorProfile.id'),
-  });
   // ---------------------commenting out the previous availableSlots flow--------------
   // if (availableSlots && availableSlots.length) {
   //   slotTimeStringArray.forEach((slot) => {
