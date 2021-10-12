@@ -103,7 +103,7 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
     const intersectionSlots = slotTimeArray.filter((x) => uniqueOccupiedSlotsArray.includes(x));
     if (intersectionSlots && intersectionSlots.length) {
       let errorMessage = 'Sessions for slots ';
-      let slotsObj = {}
+      const slotsObj = {};
       // eslint-disable-next-line no-restricted-syntax
       for (const intersectionSlot of intersectionSlots) {
         errorMessage += ` slot${intersectionSlot}`;
@@ -120,7 +120,7 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
               bookingDate,
               code: batchCode,
               id: batchId,
-            } 
+            },
           },
         });
       }

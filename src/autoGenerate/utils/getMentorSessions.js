@@ -17,6 +17,7 @@ const getMentorSessions = (userId, availabilityDate) => `query{
               name
               studentProfile {
                 batch {
+                  id
                   code
                 }
               }
