@@ -429,6 +429,13 @@ export const COUNTRIES = [
   'russia',
 ];
 
+// used for session report, will add 'b2b2c' later
+export const VERTICALS = [
+  'b2b',
+  'b2c',
+  'b2b2c',
+];
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
