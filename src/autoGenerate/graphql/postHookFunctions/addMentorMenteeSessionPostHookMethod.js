@@ -6,8 +6,8 @@ import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import extractMentorMenteeSessionAndSendMessage from './utils/extractMentorMenteeSessionAndSendMessage';
 import { backendApps } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
-import updateMentorMenteeSessionQuery from './utils/updateMentorMenteeSessionMutaion';
 import { updateHomeworkStreaksMethod } from './utils/homeworkStreakMethods';
+import addToMentorMenteeSessionStudentProfile from './utils/addToMentorMenteeSessionStudentProfile';
 
 const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
   // don't do anything if it is done through backend
@@ -41,7 +41,7 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
     const sessionStatus = get(input, 'sessionStatus');
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
-    if (studentProfileId) updateMentorMenteeSessionQuery(mentorMenteeSessionId, studentProfileId, { sessionStatus });
+    if (studentProfileId) addToMentorMenteeSessionStudentProfile(mentorMenteeSessionId, studentProfileId);
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMentorMenteeSession', batchCode, mentorSessionConnectId, sessionStatus);
   }
 };
