@@ -107,9 +107,6 @@ import GetCourseCertificate from './getCourseCertificate';
 import SessionLog from './sessionLog';
 import SessionReport from './sessionReport';
 import RebookMenteeSessionInput from './rebookMenteeSessionInput';
-import GenerateJourneySnapshotInput from './generateJourneySnapshotInput';
-import sendJourneySnapshotInMailInput from './sendJourneySnapshotInMailInput';
-import sendCertificateInMailInput from './sendCertificateInMailInput';
 import TopicQuestions from './topicQuestions';
 import TopicAssignmentQuestion from './topicAssignmentQuestion';
 import AuditQuestion from './auditQuestion';
@@ -237,9 +234,6 @@ export default [
   ...SessionLog,
   ...SessionReport,
   ...RebookMenteeSessionInput,
-  ...GenerateJourneySnapshotInput,
-  ...sendJourneySnapshotInMailInput,
-  ...sendCertificateInMailInput,
   ...TopicQuestions,
   ...TopicAssignmentQuestion,
   ...AuditQuestion,
