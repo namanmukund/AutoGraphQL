@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import phone from 'phone';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { ADD } from '../../../../../../constants/graphqlOperations';
@@ -8,11 +9,11 @@ import {
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
 import { MENTEE, PARENT } from '../../../../../../constants/roles';
-import { generateCuid, log } from '../../../../../../utils';
+import { generateCuid, getRandomNumber, log } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import generateInviteCode from '../../../../../../utils/generateInviteCode';
-import { backendApps, REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
+import { backendApps, rangeOTP, REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
 import addUserCredit from './utils/addUserCredit';
 import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
@@ -34,6 +35,7 @@ import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentCh
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 // import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import getUserPasswordObject from './utils/getUserPasswordObject';
+import { getNumberAndSendSms } from '../../../../../sms';
 
 const USER_TYPE = 'User';
 
@@ -395,6 +397,12 @@ If coming from campaign and the type os b2b allocate the user to the right batch
 
   // send b2b2c reg+booking
   // sendBookingReminderOrConfirmationB2B(parentId);
+
+  // Send OTP if from RadioStreet event
+  if (source && source.toLowerCase() === 'radiostreet') {
+    const phoneOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
+    getNumberAndSendSms(parentPhone, phoneOtp, parentName);
+  }
 
   return userTokenData;
 };
