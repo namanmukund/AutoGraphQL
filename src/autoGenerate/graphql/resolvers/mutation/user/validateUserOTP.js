@@ -144,7 +144,8 @@ const validateUserOTPMutationResolver = async (
               };
               const leadSquaredInput = {
                 Phone: number,
-                mx_Booking_Date_Time: '2021-10-17 05:30:00',
+                mx_Event_Date: '17 October',
+                mx_Event_Time: '11:00 am',
               };
               updateLeadSquared(leadSquaredInput, false, activityInput);
             }, 4000);
