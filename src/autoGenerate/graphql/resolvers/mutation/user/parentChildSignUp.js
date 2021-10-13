@@ -118,11 +118,10 @@ const parentChildSignUpMutationResolver = async (
     bypass: true,
   });
   const source = getUserOriginSource(utmSource, schoolName, schoolId);
-  console.log('source', source);
   /* this campaign obj will be later in this method */
   /* fetching earlier to update vertical in user */
   let campaign = null;
-  if(campaignId){
+  if (campaignId) {
     campaign = await getBatchDetailsFromACampaign(campaignId);
   }
 
@@ -182,6 +181,7 @@ const parentChildSignUpMutationResolver = async (
     if (source !== 'school') {
       parentData.vertical = 'b2c';
     } else {
+      /* eslint-disable-next-line no-lonely-if */
       if (campaignId) {
         const campaignType = get(campaign, 'type');
         if (campaignType && campaignType === 'b2b') {
@@ -191,8 +191,6 @@ const parentChildSignUpMutationResolver = async (
         }
       }
     }
-
-    console.log('parentData.vertical', parentData.vertical);
 
     const parentDataWithId = generateCuid(parentData);
     let parentUserData;
@@ -270,6 +268,7 @@ const parentChildSignUpMutationResolver = async (
   if (source !== 'school') {
     childData.vertical = 'b2c';
   } else {
+    /* eslint-disable-next-line no-lonely-if */
     if (campaignId) {
       const campaignType = get(campaign, 'type');
       if (campaignType && campaignType === 'b2b') {
@@ -279,8 +278,6 @@ const parentChildSignUpMutationResolver = async (
       }
     }
   }
-
-  console.log('childData.vertical', childData.vertical);
 
   const childDataWithId = generateCuid(childData);
 
