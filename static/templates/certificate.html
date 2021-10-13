@@ -309,29 +309,6 @@
       right: -14px;
     }
 
-    .sec-4-p {
-      font-weight: bold;
-      font-size: 22px;
-      line-height: 33px;
-      text-align: center;
-      color: #FAFCFF;
-      margin-bottom: 18px;
-    }
-
-    .sec-4-link {
-      font-weight: bold;
-      font-size: 15px;
-      line-height: 18px;
-      align-items: center;
-      text-align: center;
-      letter-spacing: 0.03em;
-      text-decoration: none;
-      color: #002B67;
-      background: linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 100%);
-      border-radius: 40px;
-      padding: 12px 16px 11px;
-    }
-
     .sec-5-title {
       font-weight: normal;
       font-size: 20px;
@@ -464,7 +441,7 @@
 </head>
 
 <body>
-  <div style="background-color: #e5e5e5; width: 100%;">
+  <div style="background-color: #f7f7f7; width: 100%;">
     <div style="width:602px; margin: auto; background-color: white;">
       <section class="section-1">
         <div class="container-fluid">
@@ -480,9 +457,13 @@
         <div class="container-fluid">
           <div class="row">
             <div class="col-md-12">
-              <p class="section-2-sname" style='font-weight: 100;'>Dear <%= studentName %>,
+              <p class="section-2-sname"
+                style="font-family: Nunito,'Open Sans',Helvetica, Roboto, sans-serif;font-weight: 300;">Dear <%=
+                  studentName %>,
               </p>
-              <p class="section-2-subtitle" style='font-weight: 100;'>Congratulations, you have successfully completed
+              <p class="section-2-subtitle"
+                style="font-family: Nunito,'Open Sans',Helvetica, Roboto, sans-serif;font-weight: 300;">Congratulations,
+                you have successfully completed
                 the Introduction to Python
                 course
               </p>
@@ -493,7 +474,9 @@
               style="width: 470px; margin: auto; border: 3px solid #D1E7FD; border-bottom-left-radius: 30px; border-top-left-radius: 30px; border-bottom-right-radius: 30px; border-top-right-radius: 30px;">
               <div class="row">
                 <div class="col-md-12">
-                  <h2 class="main-title">About the Course</h2>
+                  <div class="main-title"
+                    style="font-family: Nunito,'Open Sans',Helvetica, Roboto, sans-serif;font-weight: 600;">About the
+                    Course</div>
                   <div class="border-yellow"></div>
                 </div>
               </div>
@@ -504,11 +487,16 @@
                 </div>
                 <div style="width: 45%; display: inline-block; padding-left: 5%">
                   <div style="text-align: left;">
-                    <h3 class="sec2-right-h3">Block-based programming</h3>
-                    <h2 class="sec2-right-h2">Introduction to Python</h2>
-                    <h4 class="sec-2-h4">Class 6 - 8</h4>
+                    <div class="sec2-right-h3" style="font-family: Nunito,'Open Sans',Helvetica, Roboto, sans-serif;">
+                      Block-based programming</div>
+                    <div class="sec2-right-h2" style="font-family: Nunito,'Open Sans',Helvetica, Roboto, sans-serif;">
+                      Introduction to Python</div>
+                    <div class="sec-2-h4" style="font-family: Nunito,'Open Sans',Helvetica, Roboto, sans-serif;">Class 6
+                      - 8</div>
                     <div>
-                      <a class="sec-2-link" style="color: #00ADE6" href="#">VIEW COURSE<img class="sec2-link-icon"
+                      <a class="sec-2-link" style="color: #00ADE6" href="#"
+                        style="font-family: Nunito,'Open Sans',Helvetica, Roboto, sans-serif;">VIEW COURSE<img
+                          class="sec2-link-icon"
                           src="https://tekie-backend.s3.amazonaws.com/python/email/external-link.png">
                       </a>
                     </div>
@@ -549,68 +537,117 @@
           </div>
           <section class="section-4">
             <div class="container-fluid">
-              <div
-                style="background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/sec-4bg.png); height: 140px; padding-bottom: 100px;">
-                <div>
+              <div class="row align-items-center">
+                <div class="col-md-12 text-center">
                   <div
-                    style="width: 47%; display: inline-block; padding-bottom: 50px; font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 500;">
-                    <p class="sec-4-p">Yay! You did well.</p>
-                    <a href="#">
-                      <p class="sec-4-link">Download Certificate</p>
-                    </a>
-                  </div>
-                  <div
-                    style="width: 47%; display: inline-block; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/drop-scholar-scroll.png); height: 180px;">
+                    style="background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/sec-4bg.png); height: 100px;">
+                    <!-- <div
+                      style="display: inline-block; padding-bottom: 50px; font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 500;">
+                      <p
+                        style="font-weight: bold;font-size: 22px;line-height: 33px;text-align: center;color: #FAFCFF;margin-bottom: 18px;">
+                        Yay! You did well.
+                      </p>
+                      <a href="#">
+                        <p
+                          style="font-weight: bold; font-size: 15px; line-height: 18px; align-items: center;text-align: center;letter-spacing: 0.03em;text-decoration: none;color: #002B67;background: linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 100%); border-radius: 40px; padding: 12px 16px 11px;">
+                          Download Certificate</p>
+                      </a>
+                    </div> -->
+                    <div style="display: inline-block; width: 47%;">
+                      <img src="https://tekie-backend.s3.amazonaws.com/python/email/drop-scholar-scroll.png">
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </section>
+        </div>
+      </section>
       </section>
       <section class="section-5">
         <div class="container-fluid">
           <div class="row">
             <div class="col-md-12 text-center">
-              <h3 class="sec-5-title">Share this with your friends and family here</h3>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12 text-center">
-              <div style="margin-left: 220px;">
-                <a class="sec-5-sharelink" href="#">Share Certificate</a>
+              <div
+                style="font-weight: normal;font-size: 20px;line-height: 27px; text-align: center;color: #000000;margin-bottom: 22px;font-family: Nunito,'Open Sans',Helvetica, Roboto, sans-serif;font-weight: 300;">
+                Share this with your friends and family here
               </div>
             </div>
+            <div class="row">
+              <td valign="top" width="33.333%">
+                <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                  <tr>
+                    <td style="text-align:center; opacity: 0.8;">
+                      <a href="#"
+                        style="width: fit-content;filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.22));display: block;min-width: 100px;text-decoration: none;font-family: Nunito,'Open Sans',Helvetica, Roboto, sans-serif;box-sizing: border-box;margin:auto;  font-weight: 800;font-size: 15px;line-height: 18px;align-items: center; text-align: center;letter-spacing: 0.03em;text-decoration: none;color: #FFFFFF;background: linear-gradient(180deg, #61DDFF 0%, #00ADE6 100%);border-radius: 40px;padding: 12px 26px 11px;"
+                        target="_blank">
+                        <div style='display: inline-block; vertical-align:middle; color: #FFFFFF;'>
+                          Show Certificate
+                        </div>
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </div>
           </div>
           <div class="row">
             <div class="col-md-12 text-center">
-              <p class="sec-5-more-q">Have more questions?</p>
+              <div
+                style="font-weight: normal;font-size: 20px;line-height: 27px; text-align: center;margin-bottom: 22px;font-family: Nunito,'Open Sans',Helvetica, Roboto, sans-serif;font-weight: bold;font-size: 20px;line-height: 30px;text-align: center;color: #555555;opacity: 0.8;">
+                <div style='display: inline-block; vertical-align:middle; color: 555555;'>Have more questions?</div>
+              </div>
             </div>
           </div>
           <div class="row">
             <div class="col-md-12 text-center">
               <p class="sec-5-text-link">You can also write to us about your concerns on <a class="email-link"
-                  href="#">hello@tekie.in</a>
+                  style="color: #61DDFF;" href="mailto:hello@tekie.in">hello@tekie.in</a>
               </p>
             </div>
           </div>
           <div class="row">
-            <div class="col-md-12 text-center">
-              <a href="#" class="wp-link" style="margin-left: 240px;"><img class="img-fluid"
-                  style="width: 22px; height: 22px; vertical-align: middle;"
-                  src="https://tekie-backend.s3.amazonaws.com/python/email/whatsappIcon.png"> Send a Hi 👋</a>
-            </div>
+            <td valign="top" width="33.333%">
+              <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                <tr>
+                  <td style="text-align:center; opacity: 0.8; padding-top: 15px;">
+                    <a href="http://tekie.app.link/sgnArKNfwdb"
+                      style="border: 1px solid rgba(85, 85, 85, 0.5);width: fit-content;filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.22));display: block;min-width: 100px;border-radius: 30px;text-decoration: none;color: black;font-family: Nunito,'Open Sans',Helvetica, Roboto, sans-serif;font-weight: 300;box-sizing: border-box;margin:auto; margin-bottom: 22px; padding: 7px 30px"
+                      target="_blank">
+                      <div
+                        style='display: inline-block; width: 18px; height: 18px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/whatsappIcon.png); background-size: cover; vertical-align:middle;'>
+                      </div>
+                      <div style='display: inline-block; vertical-align:middle; color: black;'>
+                        Send a Hi
+                      </div>
+                      <div
+                        style='vertical-align:middle; width: 16px; height: 16px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/handWaveEmoji.png); background-size: contain; display: inline-block;'>
+                      </div>
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
           </div>
           <div class="row">
-            <div class="col-md-12 text-center">
-              <div class="wp-link-wrapper">
-                <a href="tel:+91-8047483415" class="wp-link" style="margin-left: 180px;"><img class="img-fluid"
-                    style="width: 22px; height: 22px; vertical-align: middle;"
-                    src="https://tekie-backend.s3.amazonaws.com/python/email/call-icon-dark.png"> Call us at
-                  <span class="call-link">+91-8047483415</span></a>
-              </div>
-            </div>
+            <td valign="top" width="33.333%">
+              <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                <tr>
+                  <td style="text-align:center;opacity: 0.8;">
+                    <div href="http://tekie.app.link/sgnArKNfwdb"
+                      style="border: 1px solid rgba(85, 85, 85, 0.5);width: fit-content;filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.22));display: block;min-width: 100px;border-radius: 30px;text-decoration: none;color: black;font-family: Nunito,'Open Sans',Helvetica, Roboto, sans-serif;font-weight: 300;box-sizing: border-box;margin:auto; margin-bottom: 22px;padding: 7px 30px">
+                      <div
+                        style='display: inline-block; width: 16px; height: 16px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/call-icon-dark.png); background-size: cover; vertical-align:middle;'>
+                      </div>
+                      <div style='display: inline-block; vertical-align:middle; color: black;'>
+                        Call us at
+                        <u><a style='color: #04C3FF' href="tel:+91-8047483415">+91-8047483415</a></u>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
           </div>
-        </div>
       </section>
       <section class="footer-section">
         <div class="container-fluid" style="margin-left: 120px;">
