@@ -83,6 +83,7 @@ UserActivityBlockBasedProject(answerLink) is updated based on-
 */
 const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutationName, context) => {
   const userId = get(input, 'user.typeId');
+  const isHomework = get(input, 'isHomework');
   const blockBasedProjectId = get(input, 'blockBasedProject.typeId');
   const courseId = get(input, 'course.typeId');
   const topicId = get(input, 'topic.typeId');
@@ -129,6 +130,7 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
   /*
   Calling method to update current user Topic Component status
   */
+  const page = isHomework ? 'homeworkPractice' : 'blockBasedProject';
   await updateCurrentComponentStatusOfNewCourse(
     courseId,
     currentTopicComponentInfo,
@@ -137,7 +139,7 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
     '',
     blockBasedProjectId,
     '',
-    'blockBasedProject',
+    page,
     topicComponentRule,
     topicOrder,
   );

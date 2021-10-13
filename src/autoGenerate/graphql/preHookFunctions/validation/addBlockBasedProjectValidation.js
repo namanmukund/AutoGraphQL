@@ -40,12 +40,12 @@ const addBlockBasedProjectValidation = async (params) => {
         throw new ProjectWithSimilarTitleAlreadyExist();
       }
     }
-    if (order) {
-      const projectDataArray = await fetchProject(courseIds, null, order, type);
-      if (projectDataArray && projectDataArray.length > 0) {
-        throw new ProjectWithSimilarOrderAlreadyExist();
-      }
-    }
+    // if (order) {
+    //   const projectDataArray = await fetchProject(courseIds, null, order, type);
+    //   if (projectDataArray && projectDataArray.length > 0) {
+    //     throw new ProjectWithSimilarOrderAlreadyExist();
+    //   }
+    // }
   }
   return true;
 };
