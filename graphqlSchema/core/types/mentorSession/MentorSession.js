@@ -35,6 +35,7 @@ const MentorSession = `
     mentorMenteeSessions: [MentorMenteeSession] @relation(name: "SessionDataMentorSession")
     batchSessions: [BatchSession] @relation(name: "BatchSessionMentorSession")
     b2b2cBatch: [Batch] @relation(name: "BatchMentorSession")
+    mentorAvailabilitySlots: [MentorAvailabilitySlot] @relation(name:"MentorAvailabilitySlotMentorSession")
 }`;
 
 export default [MentorSession];

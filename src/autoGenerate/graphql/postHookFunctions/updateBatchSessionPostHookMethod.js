@@ -5,6 +5,8 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   sessionStatus,
+  auditType as auditTypeValues,
+  sessionType as sessionTypeValue,
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
@@ -17,6 +19,10 @@ import addSessionLog from './utils/addSessionLog';
 import sendWhatsAppTemplateMessage from '../../utils/sendWhatsAppTemplateMessage';
 import getSlotLabel from '../../../../utils/getSlotLabel';
 import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
+import addSalesAudit from './utils/addSalesAudit';
+import isTrialSession from '../resolvers/utils/isTrialSession';
+import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
+import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -85,9 +91,9 @@ const nextTopicQuery = (courseId) => `
   `;
 
 // fetch mentor Sessions
-const fetchMentorSessions = (bookingDate, mentorId) => `
+const fetchMentorSessions = (bookingDate, mentorId, sessionType) => `
   {
-    mentorSessions(filter: {and: [{availabilityDate: "${bookingDate}"}, {user_some: {id: "${mentorId}"}}, {sessionType: batch}]}) {
+    mentorSessions(filter: {and: [{availabilityDate: "${bookingDate}"}, {user_some: {id: "${mentorId}"}}, {sessionType: ${sessionType}}]}) {
       id
       availabilityDate
       slot0
@@ -123,8 +129,7 @@ const updateMentorSession = (mentorSessionId, sessionsBookingDateInDB, slot) => 
   mutation{
     updateMentorSession(id: "${mentorSessionId}", input: {
       availabilityDate:"${sessionsBookingDateInDB}",
-      ${slot}: true,
-      sessionType:batch
+      ${slot}: true
     }) {
       id
     }
@@ -132,7 +137,7 @@ const updateMentorSession = (mentorSessionId, sessionsBookingDateInDB, slot) => 
   `;
 
 // add mentor Session
-const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot) => `
+const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot, sessionType) => `
   mutation {
     addMentorSession(
       userConnectId: "${mentorUserId}",
@@ -140,7 +145,7 @@ const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot)
     input:{
       availabilityDate:"${sessionsBookingDateInDB}",
       ${slot}: true,
-      sessionType:batch
+      sessionType: ${sessionType}
     }
     ) {
       id
@@ -217,6 +222,9 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     allottedMentorId,
     currentUser,
     prevSessionStatus,
+    prevIsAudit,
+    batchTopicOrder,
+    batchTypeValue,
   } = context;
   let courseId = get(context, 'courseId');
   /*
@@ -237,11 +245,15 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
 
   // if mentorSessionConnectId is not present in batch session, then we need t create mentor session on basis of
   // allotted mentor in batch
+  let finalMentorSessionId = mentorSessionId;
   if (!mentorSessionId && allottedMentorId) {
-    let finalMentorSessionId = '';
+    let sessionType = 'batch';
+    if (batchTypeValue === 'b2b2c' && batchTopicOrder === 1) {
+      sessionType = 'trial';
+    }
     const { bookingDate: sessionsBookingDateInDB, ...slotsInDB } = input;
     const slotTimeInDBArray = getSelectedSlotsTime(slotsInDB);
-    const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(sessionsBookingDateInDB, allottedMentorId));
+    const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(sessionsBookingDateInDB, allottedMentorId, sessionType));
     const mentorSession = get(mentorSessionsRes, 'data.mentorSessions[0]');
     if (mentorSession && mentorSession.id) {
       const { id: mentorSessionIdOfAllottedMentor, ...slotsInMentorSession } = mentorSession;
@@ -251,10 +263,24 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         await callLocalGraphqlApi(updateMentorSession(mentorSessionIdOfAllottedMentor, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`));
       }
     } else {
-      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`));
+      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`, sessionType));
       finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
     }
     await callLocalGraphqlApi(updateBatchSession(batchSessionId, finalMentorSessionId));
+  }
+
+  const isTrial = await isTrialSession(get(input, 'topic.typeId'));
+  if (isTrial) {
+    const mentorProfile = await getMentorProfileFromMentorSession(finalMentorSessionId);
+    await mentorAvailabilitySlotOperation({
+      slotTimeStringArray,
+      date: get(input, 'bookingDate'),
+      mutationName,
+      sessionType: sessionTypeValue.trial,
+      sessionId: batchSessionId,
+      mentorProfileId: get(mentorProfile, 'user.mentorProfile.id'),
+      prevMentorAvailabilitySlot: get(input, 'mentorAvailabilitySlot.typeId'),
+    });
   }
 
   if (topicId) {
@@ -466,6 +492,15 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         mentorPhoneNumber: newMentorPhoneNumber,
       });
     }
+  }
+  const isAuditFromInput = get(input, 'isAudit', false);
+  if (isAuditFromInput && prevIsAudit === false) {
+    addSalesAudit({
+      batchSessionId,
+      batchTopicOrder,
+      batchTypeValue,
+      auditType: auditTypeValues.mentor,
+    });
   }
 };
 export default updateBatchSessionPostHookMethod;

@@ -23,8 +23,8 @@ const Video = `
   {
     status: ContentStatus! @defaultValue(value: "unpublished")
     videoFile: File @relation(name: "VideoFile", direction: "OneWay")
-    title: String @uniqueOrEmpty @trim
-    description: String @uniqueOrEmpty @trim
+    title: String @trim
+    description: String @trim
     subtitle: File @relation(name: "VideoSubtitle", direction: "OneWay")
     thumbnail: File @relation(name: "VideoThumbnail", direction: "OneWay")
     videoStartTime: Int

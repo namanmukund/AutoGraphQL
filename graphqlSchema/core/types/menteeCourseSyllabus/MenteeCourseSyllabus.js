@@ -24,6 +24,7 @@ const completedSessionDetailType = `
    topicThumbnail: File
    topicThumbnailSmall: File
    topicDescription: String
+   isSubmittedForReview: Boolean
    topicOrder: Int
    endingDate: Date
    mentorId: String
@@ -80,7 +81,20 @@ const menteeCourseSyllabusProject = `
 const firstComponent = `
   type FirstComponent {
    componentName: String,
+   childComponentName: String,
    componentId: ID,
+ }`;
+
+const PreviousTopicComponentRule = `
+ type PreviousTopicComponentRule {
+   componentName: String,
+   order: Int,
+ }
+`;
+const PreviousTopic = `
+  type PreviousTopic {
+    topicComponentRule: [PreviousTopicComponentRule],
+    topicId: ID,
  }`;
 
 const MenteeCourseSyllabus = `
@@ -95,8 +109,9 @@ const MenteeCourseSyllabus = `
     skills: [MenteeCourseSyllabusSkills]
     mentor: MenteeCourseSyllabusMentor
     projects: [MenteeCourseSyllabusProject]
-    firstComponent: FirstComponent
+    firstComponent: FirstComponent 
+    previousTopic: PreviousTopic
   }
 `;
 
-export default [MenteeCourseSyllabus, sessionDetailType, completedSessionDetailType, menteeCourseSyllabusCourse, menteeCourseSyllabusSkills, menteeCourseSyllabusMentor, menteeCourseSyllabusProject, firstComponent];
+export default [MenteeCourseSyllabus, sessionDetailType, completedSessionDetailType, menteeCourseSyllabusCourse, menteeCourseSyllabusSkills, menteeCourseSyllabusMentor, menteeCourseSyllabusProject, firstComponent, PreviousTopicComponentRule, PreviousTopic];

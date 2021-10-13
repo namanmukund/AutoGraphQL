@@ -13,6 +13,15 @@ const topicQuery = (topicId) => `
     topic(id:"${topicId}"){
       id
       order
+      topicQuestions {
+        question {
+          id
+          order
+          assessmentType
+          status
+        }
+        order
+      }
       questions(filter:{
         and:[
           {
@@ -59,11 +68,13 @@ const addUserQuizMutation = (
   topicId,
   restQuery,
   quizQuery,
+  courseId,
 ) => `
   mutation{
     addUserQuiz(
     userConnectId:"${userId}"
     topicConnectId:"${topicId}"
+    ${courseId ? `courseConnectId:"${courseId}"` : ''}
     input:{
         ${restQuery}
         ${quizQuery}
@@ -108,10 +119,12 @@ const userQuizPostHookMethod = async (input, params) => {
   if (input && input.length) {
     return input;
   }
+  let restQuery = '';
   const resultArray = [];
   const {
     userId,
     topicId,
+    courseId,
   } = getInfoFromParams(params, 'quiz');
   // In case there is no topic id, empty data will be sent
   if (!topicId) {
@@ -127,7 +140,17 @@ const userQuizPostHookMethod = async (input, params) => {
   // this logic will be changed based on question sets
   let quizQuery = 'quiz:[';
   if (topicInfo) {
-    const quizQuestionsinTopic = get(topicInfo, 'questions');
+    let quizQuestionsinTopic;
+    if (courseId && courseId !== OLD_COURSE_ID) {
+      quizQuestionsinTopic = get(topicInfo, 'topicQuestions', [])
+        .filter((topicQ) => ((get(topicQ, 'question.status') === PUBLISHED) && get(topicQ, 'question.assessmentType') === 'quiz'))
+        .map((topicQ) => ({
+          ...get(topicQ, 'question', {}),
+          order: get(topicQ, 'order'),
+        }));
+    } else {
+      quizQuestionsinTopic = get(topicInfo, 'questions');
+    }
     quizQuestionsinTopic.forEach((quizQuestion) => {
       const {
         id: quizQuestionId,
@@ -157,16 +180,20 @@ const userQuizPostHookMethod = async (input, params) => {
     nextTopicId = topicsList[currentTopicIndex + 1].id;
   }
 
-  const restQuery = getNextComponent(
-    '',
-    nextTopicId,
-    'quiz',
-  );
+  if (!courseId || (courseId === OLD_COURSE_ID)) {
+    restQuery = getNextComponent(
+      '',
+      nextTopicId,
+      'quiz',
+    );
+  }
+
   const result = await callLocalGraphqlApi(addUserQuizMutation(
     userId,
     topicId,
     restQuery,
     quizQuery,
+    courseId,
   ));
   if (result) {
     /*

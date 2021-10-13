@@ -115,6 +115,14 @@ import PostSalesAudit from './postSalesAudit';
 import AuditQuestionSection from './auditQuestionSection';
 import AuditQuestionSubSection from './auditQuestionSubSection';
 import GetSchoolCampaignSlots from './getSchoolCampaignSlots';
+import BDEProfile from './bdeProfile';
+import UserCourse from './userCourse';
+import GetUserCourses from './getUserCourses';
+import UserMerchant from './userMerchant';
+import MentorSupplyPaySlab from './mentorSupplyPaySlab';
+import MentorDemandSlot from './mentorDemandSlot';
+import MentorAvailabilitySlot from './mentorAvailabilitySlot';
+import MentorAuditReport from './mentorAuditReport';
 
 export default [
   ...User,
@@ -234,4 +242,12 @@ export default [
   ...AuditQuestionSection,
   ...AuditQuestionSubSection,
   ...GetSchoolCampaignSlots,
+  ...BDEProfile,
+  ...GetUserCourses,
+  ...UserCourse,
+  ...UserMerchant,
+  ...MentorSupplyPaySlab,
+  ...MentorDemandSlot,
+  ...MentorAvailabilitySlot,
+  ...MentorAuditReport,
 ];

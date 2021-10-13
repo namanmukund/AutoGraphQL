@@ -50,26 +50,24 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   const inputSlotTimeArray = getSelectedSlotsTime(inputSlot);
   const slotTimeArray = getSelectedSlotsTime(slots);
 
-  // console.log('bookingDate in prehoook', bookingDate);
-  // console.log('bookingDateFromInput in prehook', bookingDateFromInput);
-
   // check if mentor already has another session in same slot
   const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId || get(mentorSession, 'id', '')));
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
   if (mentorUserId && bookingDateFromInput) {
+    const finalBookingDate = bookingDateFromInput || bookingDate;
     const getMentorSessionsRes = await callLocalGraphqlApi(
       getMentorSessions(
         mentorUserId,
-        bookingDateFromInput || bookingDate,
+        finalBookingDate,
       ),
     );
     let tempObj = { ...inputSlot };
     if (inputSlotTimeArray.length === 0) {
-      tempObj = { ...slots };
+      tempObj = { bookingDate: finalBookingDate, ...slots };
     }
     const menteeSessionSlots = { input: tempObj };
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-    checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions);
+    checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions, null, get(batch, 'code'));
   }
 
   context.batchSessionId = batchSessionId;
@@ -120,6 +118,9 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     currentUser,
     currentApp,
   } = userInfo;
+  context.prevIsAudit = get(batchSession, 'isAudit', false);
+  context.batchTopicOrder = get(batchSession, 'topic.order');
+  context.batchTypeValue = get(batchSession, 'batch.type');
   context.currentUser = currentUser;
   context.appName = get(currentApp, 'name');
   return true;

@@ -10,6 +10,7 @@ const TotalAmountCollectedInput = `
     installmentType: InstallmentType
     installmentNumber: Int
     isSchool: Boolean @defaultValue(value: "false")
+    schoolId: String
   }`;
 
 export default [TotalAmountCollectedInput];

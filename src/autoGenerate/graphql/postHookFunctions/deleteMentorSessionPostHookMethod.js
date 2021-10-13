@@ -1,14 +1,15 @@
-import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
-import reduceParticularAvailableSlotOfADate from './utils/reduceParticularAvailableSlotOfADate';
+// import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
+// import reduceParticularAvailableSlotOfADate from './utils/reduceParticularAvailableSlotOfADate';
 import { byPassMenteeValidationApps } from '../../../../constants';
 
 const deleteMentorSessionPostHookMethod = async (input, mutationName, context) => {
   /*
   Since doc is deleted remove corresponding availability slots
    */
-  const { previousDocument, appName } = context;
-  const { availabilityDate, ...slots } = previousDocument;
-  const slotTimeStringArray = getSelectedSlotsStringArray(slots);
+  // const { previousDocument, appName } = context;
+  const { appName } = context;
+  // const { availabilityDate, ...slots } = previousDocument;
+  // const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
   const { sessionType } = input;
   if (sessionType && (sessionType === 'paid' || sessionType === 'batch')) {
@@ -20,7 +21,7 @@ const deleteMentorSessionPostHookMethod = async (input, mutationName, context) =
     return true;
   }
 
-  await reduceParticularAvailableSlotOfADate(slotTimeStringArray, availabilityDate, context);
+  // await reduceParticularAvailableSlotOfADate(slotTimeStringArray, availabilityDate, context);
   return true;
 };
 

@@ -15,6 +15,7 @@ const getMentorMenteeSessionData = async (id) => {
         isAudit
         sessionStatus
         isPostSalesAudit
+        isSubmittedForReview
         topic{
           id
           order
@@ -70,7 +71,7 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
       ),
     );
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-    const menteeSessionSlots = { input: { ...get(mentorMenteeSessionDoc, 'menteeSession', {}) } };
+    const menteeSessionSlots = { input: { bookingDate, ...get(mentorMenteeSessionDoc, 'menteeSession', {}) } };
     checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions, null, get(mentorMenteeSessionDoc, 'menteeSession.user.studentProfile.batch.code'));
   }
 

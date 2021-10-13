@@ -43,10 +43,11 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
   // check if the document for called user and topic is already present
   const userId = get(params, 'userConnectId');
   const topicId = get(params, 'topicConnectId');
+  const courseId = get(params, 'courseConnectId');
   context.isTrialSession = await isTrialSession(topicId);
 
   // log in case user or topic id is not present
-  if (!userId || !topicId) {
+  if (!userId || !topicId || !courseId) {
     throw new MissingMandatoryInputInRequestError({
       data: {
         message: 'Either userConnectId or topicConnectId or courseId or all missing in input',

@@ -1,5 +1,7 @@
 import { get } from 'lodash';
 import {
+  OLD_COURSE_ID,
+  PUBLISHED,
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
@@ -9,11 +11,13 @@ import {
   AssignmentQuestionsNotPresentError,
 } from '../../../../constants/errors';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 
 // query to fetch user assignment info
 const userAssignmentQuery = (
   userId,
   topicId,
+  courseId,
 ) => `
    query{
       userAssignments(filter:{
@@ -24,6 +28,7 @@ const userAssignmentQuery = (
           {topic_some:{
             id:"${topicId}"
           }},
+          ${courseId ? `{course_some:{id:"${courseId}"}},` : ''}
         ]
       }){
         id
@@ -36,6 +41,35 @@ const userAssignmentQuery = (
           isAttempted
         }
         assignmentStatus
+        topic {
+          id
+          order
+          topicComponentRule{
+            componentName
+            order
+            childComponentName
+            learningObjective{
+              id
+              order
+              messagesMeta{
+                count
+              }
+              questionBankMeta(filter:{and:[{assessmentType:practiceQuestion}{status:${PUBLISHED}}]}){
+                count
+              }
+              comicStripsMeta(filter:{status:${PUBLISHED}}){
+                count
+              }
+            }
+            blockBasedProject{
+              id
+              order
+            }
+            video{
+              id
+            }
+          }
+        }
       }
     }
     `;
@@ -132,9 +166,10 @@ UserActivityAssignmentDump and and UserAssignment is updated according to -
   -UserAssignment for provided userId and topic id
   -topic.
 */
-const addUserActivityAssignmentDumpPostHookMethod = async (input) => {
+const addUserActivityAssignmentDumpPostHookMethod = async (input, mutationName, context) => {
   const userId = get(input, 'user.typeId');
   const topicId = get(input, 'topic.typeId');
+  const courseId = get(input, 'course.typeId');
   if (!userId || !topicId) {
     log('Either one of userId or topicId is missing in input of addUserActivityQuizDumpPostHookMethod');
   }
@@ -143,18 +178,20 @@ const addUserActivityAssignmentDumpPostHookMethod = async (input) => {
   we are getting userAssignment for below purpose:
   -we get userAssignment id , which will be used further to update the document
   */
-  const userAssignmentQueryRes = await callLocalGraphqlApi(userAssignmentQuery(userId, topicId));
+  const userAssignmentQueryRes = await callLocalGraphqlApi(userAssignmentQuery(userId, topicId, courseId));
   const userAssignmentInfo = get(userAssignmentQueryRes, 'data.userAssignments[0]');
   const assignmentQuestionsInUserAssignment = get(userAssignmentInfo, 'assignment');
   const assignmentStatusInUserAssignment = get(userAssignmentInfo, 'assignmentStatus');
   const { id: userAssignmentId } = userAssignmentInfo;
 
-  const { assignmentAction, assignmentQuestions } = input;
+  const { assignmentAction, assignmentQuestions, isHomework } = input;
 
-  // throwing error if client has not send any assignment question in input
-  if (!assignmentQuestions || !assignmentQuestions.length) {
-    log('AssignmentQuestions are not present in input in addUserActivityAssignmentDumpPostHookMethod');
-    throw new AssignmentQuestionsNotPresentError();
+  if (!courseId || courseId === OLD_COURSE_ID) {
+    // throwing error if client has not send any assignment question in input
+    if (!assignmentQuestions || !assignmentQuestions.length) {
+      log('AssignmentQuestions are not present in input in addUserActivityAssignmentDumpPostHookMethod');
+      throw new AssignmentQuestionsNotPresentError();
+    }
   }
   // throwing error if there are no published assignment questions in database
   if (!assignmentQuestionsInUserAssignment
@@ -177,6 +214,26 @@ const addUserActivityAssignmentDumpPostHookMethod = async (input) => {
     assignmentAction,
     assignmentStatusInUserAssignment,
   );
+
+  const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
+
+  if (courseId && (courseId !== OLD_COURSE_ID)) {
+    const topicComponentRule = get(userAssignmentInfo, 'topic.topicComponentRule', []);
+    const topicOrder = get(userAssignmentInfo, 'topic.order');
+    const page = isHomework ? 'homeworkAssignment' : 'assignment';
+    await updateCurrentComponentStatusOfNewCourse(
+      courseId,
+      currentTopicComponentInfo,
+      assignmentAction,
+      topicId,
+      '',
+      '',
+      '',
+      page,
+      topicComponentRule,
+      topicOrder,
+    );
+  }
   return true;
 };
 

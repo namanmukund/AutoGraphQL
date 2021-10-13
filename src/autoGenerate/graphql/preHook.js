@@ -93,16 +93,34 @@ import addUserActivityBlockBasedPracticeDumpValidation
 import addMentorProfileValidation from './preHookFunctions/validation/addMentorProfileValidation';
 import deleteMentorMenteeSessionValidation from './preHookFunctions/validation/deleteMentorMenteeSessionValidation';
 import addAuditQuestionValidation from './preHookFunctions/validation/addAuditQuestionValidation';
+import addBDEProfileValidation from './preHookFunctions/validation/addBDEProfileValidation';
+import addSalesExecutiveProfileValidation from './preHookFunctions/validation/addSalesExecutiveProfileValidation';
+import addChapterValidation from './preHookFunctions/validation/addChapterValidation';
+import updateChapterValidation from './preHookFunctions/validation/updateChapterValidation';
+import addTopicValidation from './preHookFunctions/validation/addTopicValidation';
+import updateTopicValidation from './preHookFunctions/validation/updateTopicValidation';
+import deleteVideoValidation from './preHookFunctions/validation/deleteVideoValidation';
+import deleteAssignmentQuestionValidation from './preHookFunctions/validation/deleteAssignmentQuestionValidation';
+import deleteBlockBasedProjectValidation from './preHookFunctions/validation/deleteBlockBasedProjectValidation';
+import addAssignmentQuestionValidation from './preHookFunctions/validation/addAssignmentQuestionValidation';
+import updateAssignmentQuestionValidation from './preHookFunctions/validation/updateAssignmentQuestionValidation';
+import updateLearningObjectiveValidation from './preHookFunctions/validation/updateLearningObjectiveValidation';
+import addBlockBasedProjectValidation from './preHookFunctions/validation/addBlockBasedProjectValidation';
+import updateBlockBasedProjectValidation from './preHookFunctions/validation/updateBlockBasedProjectValidation';
+import addVideoValidation from './preHookFunctions/validation/addVideoValidation';
+import updateVideoValidation from './preHookFunctions/validation/updateVideoValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
     case 'updateTopic': {
       // await isUniqueOrderField(params, mutationOrQueryName);
+      await updateTopicValidation(params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
     case 'updateChapter': {
       await isUniqueOrderField(params, mutationOrQueryName);
+      await updateChapterValidation(input, mutationOrQueryName, context, params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
@@ -111,6 +129,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       //   throw new ConnectIdRequiredError({ data: { message: 'Chapter Id is required' } });
       // }
       // await isUniqueOrderField(params, mutationOrQueryName);
+      await addTopicValidation(params);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
@@ -118,6 +137,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       if (!get(params, 'coursesConnectIds', []).length) {
         throw new ConnectIdRequiredError({ data: { message: 'Course Id is required' } });
       }
+      await addChapterValidation(input, mutationOrQueryName, context, params);
       // await isUniqueOrderField(params, mutationOrQueryName);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
@@ -732,6 +752,54 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'addAuditQuestion': {
       await addAuditQuestionValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addBDEProfile': {
+      await addBDEProfileValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addSalesExecutiveProfile': {
+      await addSalesExecutiveProfileValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'deleteVideo': {
+      await deleteVideoValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'deleteAssignmentQuestion': {
+      await deleteAssignmentQuestionValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'deleteBlockBasedProject': {
+      await deleteBlockBasedProjectValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addAssignmentQuestion': {
+      await addAssignmentQuestionValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateAssignmentQuestion': {
+      await updateAssignmentQuestionValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateLearningObjective': {
+      await updateLearningObjectiveValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addBlockBasedProject': {
+      await addBlockBasedProjectValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateBlockBasedProject': {
+      await updateBlockBasedProjectValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addVideo': {
+      await addVideoValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateVideo': {
+      await updateVideoValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'addSchool': {

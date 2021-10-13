@@ -1,11 +1,11 @@
 import { get } from 'lodash';
 import {
-  PUBLISHED,
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
 import { log } from '../../../../utils';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import topicComponentRuleQuery from './utils/topicComponentRuleQuery';
 import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 
 // query to get userLO to check if document exists for userId and learningObjectiveId
@@ -28,31 +28,14 @@ const userLearningObjectiveQuery = (userId, learningObjectiveId, courseId) => `
         topic{
           id
           order
-          topicComponentRule{
-            componentName
-            order
-            childComponentName
-            learningObjective{
-              id
-              order
-              messagesMeta{
-                count
-              }
-              questionBankMeta(filter:{and:[{assessmentType:practiceQuestion}{status:${PUBLISHED}}]}){
-                count
-              }
-              comicStripsMeta(filter:{status:${PUBLISHED}}){
-                count
-              }
-            }
-            blockBasedProject{
-              id
-              order
-            }
-            video{
-              id
-            }
-          }
+          ${topicComponentRuleQuery}
+        }
+        topics(filter:{and:[
+        ${courseId ? `{courses_some:{id:"${courseId}"}}` : ''}
+      ]}){
+          id
+          order
+          ${topicComponentRuleQuery}  
         }
       }
     }
@@ -94,7 +77,7 @@ const addUserActivityComicStripDumpPostHookMethod = async (input, mutationName, 
   this will be used to get parent topic id for the learning objective
   */
   const learningObjectiveInfo = get(context, `${mutationName}.learningObjective`);
-  const topicId = get(learningObjectiveInfo, 'topic.id');
+  const topicId = (get(learningObjectiveInfo, 'topics') && get(learningObjectiveInfo, 'topics[0].id')) || get(learningObjectiveInfo, 'topic.id');
   const { id: learningObjectiveIdInResult } = learningObjectiveInfo;
   /*
   we are getting userLearningObjective for below purpose:
@@ -109,8 +92,8 @@ const addUserActivityComicStripDumpPostHookMethod = async (input, mutationName, 
     id: userLearningObjectiveId,
     comicStripStatus: existingComicStripStatus,
   } = userLearningObjectiveInfo;
-  const topicComponentRule = get(userLearningObjectiveInfo, 'learningObjective.topic.topicComponentRule', []);
-  const topicOrder = get(userLearningObjectiveInfo, 'learningObjective.topic.order');
+  const topicComponentRule = get(userLearningObjectiveInfo, 'learningObjective.topics[0].topicComponentRule', null) || get(userLearningObjectiveInfo, 'learningObjective.topic.topicComponentRule', []);
+  const topicOrder = get(userLearningObjectiveInfo, 'learningObjective.topics[0].order', null) || get(userLearningObjectiveInfo, 'learningObjective.topic.order');
   const { complete, incomplete, skip: skipStatus } = userTopicTypeStatus;
   const { next, skip } = userActionType;
   let comicStripStatus = incomplete;

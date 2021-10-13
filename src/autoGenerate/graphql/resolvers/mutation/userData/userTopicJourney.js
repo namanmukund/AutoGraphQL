@@ -600,6 +600,8 @@ const userTopicJourneyMutationResolver = async (
           description: topicComponent.learningObjective && topicComponent.learningObjective.description,
           thumbnail: topicComponent.learningObjective && topicComponent.learningObjective.thumbnail,
           comicStripStatus: incomplete,
+          practiceQuestionStatus: incomplete,
+          chatStatus: incomplete,
         });
       } else if (topicComponent.componentName === blockBasedPractice) {
         blockBasedPracticeData.push({
@@ -651,6 +653,8 @@ const userTopicJourneyMutationResolver = async (
       for (const learningObjective of learningObjectivesData) {
         learningObjective.isUnlocked = true;
         learningObjective.comicStripStatus = complete;
+        learningObjective.practiceQuestionStatus = complete;
+        learningObjective.chatStatus = complete;
       }
 
       for (const blockBasedPracticeElem of blockBasedPracticeData) {
@@ -672,6 +676,8 @@ const userTopicJourneyMutationResolver = async (
       for (const learningObjective of learningObjectivesData) {
         learningObjective.isUnlocked = false;
         learningObjective.comicStripStatus = complete;
+        learningObjective.practiceQuestionStatus = complete;
+        learningObjective.chatStatus = complete;
       }
 
       for (const blockBasedPracticeElem of blockBasedPracticeData) {
@@ -708,6 +714,8 @@ const userTopicJourneyMutationResolver = async (
           for (const learningObjective of learningObjectivesData) {
             learningObjective.isUnlocked = true;
             learningObjective.comicStripStatus = complete;
+            learningObjective.practiceQuestionStatus = complete;
+            learningObjective.chatStatus = complete;
           }
 
           for (const blockBasedPracticeElem of blockBasedPracticeData) {
@@ -766,9 +774,13 @@ const userTopicJourneyMutationResolver = async (
           if (learningObjective.order > currentTopicComponentOrder) {
             learningObjective.isUnlocked = false;
             learningObjective.comicStripStatus = incomplete;
+            learningObjective.practiceQuestionStatus = incomplete;
+            learningObjective.chatStatus = incomplete;
           } else {
             learningObjective.isUnlocked = true;
             learningObjective.comicStripStatus = complete;
+            learningObjective.practiceQuestionStatus = complete;
+            learningObjective.chatStatus = complete;
           }
         }
 

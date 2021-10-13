@@ -87,7 +87,11 @@ import UserPersonality from './UserPersonality';
 import WeakSlowAverageFast from './WeakSlowAverageFast';
 import Languages from './Languages';
 import AttendanceStatus from './AttendanceStatus';
+import AuditSubType from './AuditSubType';
 import Currency from './Currency';
+import LearningObjectiveComponents from './LearningObjectiveComponents';
+import Vertical from './Vertical';
+import Slot from './Slot';
 
 export default [
   Status,
@@ -180,5 +184,9 @@ export default [
   WeakSlowAverageFast,
   Languages,
   AttendanceStatus,
+  AuditSubType,
   Currency,
+  LearningObjectiveComponents,
+  Vertical,
+  Slot,
 ];

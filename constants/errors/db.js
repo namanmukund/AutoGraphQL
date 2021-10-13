@@ -200,3 +200,51 @@ export const MCQOptionNotProvided = createError('MCQOptionNotProvided', {
 export const MaxRatingAndDisplayTypeNotFound = createError('MaxRatingAndDisplayTypeNotFound', {
   message: 'maxRating and ratingDisplayType should be passed.',
 });
+
+export const BDEProfileAlreadyExist = createError('BDEProfileAlreadyExist', {
+  message: 'BDE Profile already exist for the user',
+});
+
+export const SalesExecutiveProfileAlreadyExist = createError('SalesExecutiveProfileAlreadyExist', {
+  message: 'Sales Executive Profile already exist for the user',
+});
+
+export const ChapterWithSimilarTitleAlreadyExist = createError('ChapterWithSimilarTitleAlreadyExist', {
+  message: 'Chapter with similar title already exist.',
+});
+
+export const TopicWithSimilarTitleAlreadyExist = createError('TopicWithSimilarTitleAlreadyExist', {
+  message: 'Topic with similar title already exist.',
+});
+
+export const TopicWithSimilarOrderAlreadyExist = createError('TopicWithSimilarOrderAlreadyExist', {
+  message: 'Topic with similar order already exist.',
+});
+
+export const AssignmentQuestionIdPublished = createError('AssignmentQuestionIdPublished', {
+  message: 'Can not perform the current operation as Assignment Question is published',
+});
+
+export const BlockBasedProjectIsPublished = createError('BlockBasedProjectIsPublished', {
+  message: 'Can not perform the current operation as Block Based is published',
+});
+
+export const AssignmentWithSimilarStatementAlreadyExist = createError('AssignmentWithSimilarStatementAlreadyExist', {
+  message: 'Assignment with similar statement already exist.',
+});
+
+export const ProjectWithSimilarTitleAlreadyExist = createError('ProjectWithSimilarTitleAlreadyExist', {
+  message: 'Project with similar name already exist.',
+});
+
+export const ProjectWithSimilarOrderAlreadyExist = createError('ProjectWithSimilarOrderAlreadyExist', {
+  message: 'Project with similar order already exist.',
+});
+
+export const VideoWithSimilarTitleAlreadyExist = createError('VideoWithSimilarTitleAlreadyExist', {
+  message: 'Video with similar title already exist.',
+});
+
+export const LOWithSimilarTitleAlreadyExist = createError('LOWithSimilarTitleAlreadyExist', {
+  message: 'LO with similar title already exist.',
+});

@@ -14,6 +14,9 @@ const MenteeSession = `
     country: Country @defaultValue(value: "india")
     bookedBy: BookedBy @defaultValue(value: "customer")
     bookingAgent: User @relation(name: "BookingAgent", direction: "OneWay")
+    mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name:"MentorAvailabilitySlotMenteeSession")
+    broadCastedMentors: [MentorProfile] @relation(name:"MenteeSessionBroadcastedMentors", direction: "OneWay")
+    studentProfile: StudentProfile @relation(name:"MenteeSessionStudentProfile", direction: "OneWay")
 }`;
 
 export default [MenteeSession];

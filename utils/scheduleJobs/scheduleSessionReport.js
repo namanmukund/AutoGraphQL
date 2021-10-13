@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
 import { get } from 'lodash';
+import moment from 'moment';
 import { SESSION_REPORT_DAYS, COUNTRIES } from '../../constants';
 import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
 import { log } from '../log';
@@ -356,10 +357,10 @@ const generateSessionReport = async (numDaysToRunQuery) => {
     // according to parameter 'numDaysToRunQuery', we add session report for that many days
     // SESSION_REPORT_DAYS gives till how many days back we have to include in our report (currently 4)
     let totalLoopDays = SESSION_REPORT_DAYS;
-    const todayStartDate = new Date();
-    const todayEndDate = new Date();
-    todayStartDate.setDate(currentStartDate.getDate() - dayCount);
-    todayEndDate.setDate(currentEndDate.getDate() - dayCount);
+    const todayStartDate = new Date(moment(currentStartDate).subtract(dayCount, 'days').toISOString());
+    const todayEndDate = new Date(moment(currentEndDate).subtract(dayCount, 'days').toISOString());
+    // todayStartDate.setDate(currentStartDate.getDate() - dayCount);
+    // todayEndDate.setDate(currentEndDate.getDate() - dayCount);
     todayStartDate.setHours(0, 0, 0, 0);
     todayEndDate.setHours(23, 59, 59, 999);
 
@@ -372,14 +373,12 @@ const generateSessionReport = async (numDaysToRunQuery) => {
         Here we loop to populate single report for single day
       */
       while (totalLoopDays > 0) {
-        const otherDayStartDate = new Date();
-        const otherDayEndDate = new Date();
-        otherDayStartDate.setDate(todayStartDate.getDate() - forwardCount);
-        otherDayEndDate.setDate(todayEndDate.getDate() - forwardCount);
+        const otherDayStartDate = new Date(moment(todayStartDate).subtract(forwardCount, 'days').toISOString());
+        const otherDayEndDate = new Date(moment(todayEndDate).subtract(forwardCount, 'days').toISOString());
         otherDayStartDate.setHours(0, 0, 0, 0);
         otherDayEndDate.setHours(23, 59, 59, 999);
-        // console.log(otherDayStartDate);
-        // console.log(otherDayEndDate);
+        // console.log('otherDayStartDate', otherDayStartDate);
+        // console.log('otherDayEndDate',otherDayEndDate);
         const queryRes = await callLocalGraphqlApi(masterQuery(todayStartDate, todayEndDate, otherDayStartDate, otherDayEndDate, country));
         const data = get(queryRes, 'data', {});
         // console.log(data);

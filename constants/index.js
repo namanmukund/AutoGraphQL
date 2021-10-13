@@ -230,6 +230,7 @@ const userSourceOrigin = {
   google: 'google',
   website: 'website',
   transformation: 'transformation',
+  radioStreet: 'radioStreet',
 };
 
 const freeTopicCount = 5;
@@ -280,6 +281,12 @@ const batchType = {
   b2b: 'b2b',
   b2b2c: 'b2b2c',
   b2c: 'b2c',
+};
+
+const auditSubType = {
+  b2cDemo: 'b2cDemo',
+  b2cPaid: 'b2cPaid',
+  b2b: batchType.b2b,
 };
 
 const sessionStatus = {
@@ -335,6 +342,7 @@ const topicComponents = {
   video: 'video',
   learningObjective: 'learningObjective',
   assignment: 'assignment',
+  homeworkAssignment: 'homeworkAssignment',
   quiz: 'quiz',
   blockBasedProject: 'blockBasedProject',
   blockBasedPractice: 'blockBasedPractice',
@@ -344,6 +352,7 @@ const childTopicComponents = {
   message: 'message',
   practiceQuestion: 'practiceQuestion',
   comicStrip: 'comicStrip',
+  chatbot: 'chatbot',
 };
 
 const blockBasedProjectType = {
@@ -388,7 +397,7 @@ export const MAX_ALLOWED_BATCH_SESSIONS_DAYS_RANGE = 365;
 
 export const testMailingList = {
   production: {
-    email: ['sanatankc@gmail.com', 'naman.mukund@tekie.in', 'shravastivaidya@gmail.com', 'kriteshpk@gmail.com', 'amit.ranjan@tekie.in', 'rishabh.bucha@tekie.in'],
+    email: ['sanatankc@gmail.com'],
     phone: ['918368246974', '919654347463'],
   },
   staging: {
@@ -494,5 +503,6 @@ export {
   usWatiSMS,
   auditQuestionType,
   auditType,
+  auditSubType,
   currencyTypes,
 };

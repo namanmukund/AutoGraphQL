@@ -1,12 +1,14 @@
 import { get } from 'lodash';
+import moment from 'moment';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
 import { sessionType } from '../../../../../../constants';
 import { SlotsOccupiedError } from '../../../../../../constants/errors/db';
 
 const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsInPrevDoc, userBatchCode = '') => {
   const { input } = params;
+  const bookingDate = get(input, 'bookingDate');
   const { ...slots } = input;
-
+  // const isToday = moment(finalBookingDate).diff(moment(new Date()), 'days') === 0;
   let slotTimeArray = getSelectedSlotsTime(slots);
   // if a slot is true from before we do not need to validate that, so will remove those slots from slotTimeArray
   if (timeSlotsInPrevDoc && timeSlotsInPrevDoc.length) {
@@ -16,8 +18,13 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
   const occupiedSlotsArray = [];
   // eslint-disable-next-line no-unused-vars
   let customError = '';
+  //  below mmsFlag and bsflag is used to conditionally update error message
   let mmsflag = false;
   let bsflag = false;
+  // flag to check if we need to bypass validation if slot closer than 2 hours and student length = 0
+  // byDefault we will bypass. If mms or batchSession which doesn't satisfy above condition, set it false
+  // and error will be thrown
+  let bypassValidation = true;
   if (slotTimeArray.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const mentorSession of prevMentorSessions) {
@@ -33,6 +40,21 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
             // eslint-disable no-loop-func
             const intersection = slotTimeArray.filter((x) => occupiedSlotTimeArrayForBatch.includes(x));
             if (intersection && intersection.length) {
+              // if called from mentorMenteeSession and BatchSesson, we will get a bookingDate
+              if (bookingDate) {
+                const date = new Date(bookingDate);
+                const dateTime = date.setHours(
+                  date.getHours() + intersection[0],
+                );
+                const currentDate = new Date();
+                if (moment(dateTime).diff(moment(currentDate), 'hours') > 2) {
+                  bypassValidation = false;
+                } else if (get(batchSession, 'batch.studentsMeta.count', 0) > 0) {
+                  bypassValidation = false;
+                }
+              } else {
+                bypassValidation = false;
+              }
               if (!bsflag) {
                 bsflag = true;
                 customError += 'Batch(es) -> ';
@@ -43,17 +65,18 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
         }
       // for trial/paid mentorSession we will check mentorMenteeSessions and see which slots are occupied
       }
-      if (mentorMenteeSessions.length && !sessionType.batch) {
+      if (mentorMenteeSessions.length && mentorSession.sessionType !== sessionType.batch) {
         // eslint-disable-next-line no-restricted-syntax
         for (const mentorMenteeSession of mentorMenteeSessions) {
           const menteeSession = get(mentorMenteeSession, 'menteeSession', '');
-          if (userBatchCode !== get(menteeSession, 'user.studentProfile.batch.code', '')) {
+          if (userBatchCode !== get(menteeSession, 'user.studentProfile.batch.code', null)) {
             if (menteeSession) {
               const occupiedSlotTimeArrayForMMS = getSelectedSlotsTime(menteeSession);
               occupiedSlotsArray.push(...occupiedSlotTimeArrayForMMS);
               // eslint-disable no-loop-func
               const intersection = slotTimeArray.filter((x) => occupiedSlotTimeArrayForMMS.includes(x));
               if (intersection && intersection.length) {
+                bypassValidation = false;
                 if (!mmsflag) {
                   mmsflag = true;
                   customError += 'Mentee(s) -> ';
@@ -80,11 +103,13 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
       }
       errorMessage += ' are already present and booked for ';
       errorMessage += customError;
-      throw new SlotsOccupiedError({
-        data: {
-          message: errorMessage,
-        },
-      });
+      if (!bypassValidation) {
+        throw new SlotsOccupiedError({
+          data: {
+            message: errorMessage,
+          },
+        });
+      }
     }
   }
   return true;

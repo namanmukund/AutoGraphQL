@@ -47,6 +47,7 @@ const UserQuizReport = `
     learningObjectiveReport: [QuizReportLearningObjective]
     topic: Topic @relation(name: "TopicUserQuizReport", direction: "OneWay")
     nextComponent: UserQuizReportNextComponentType
+    course: Course @relation(name: "UserQuizReportCourse", direction: "OneWay")
   }
 `;
 
