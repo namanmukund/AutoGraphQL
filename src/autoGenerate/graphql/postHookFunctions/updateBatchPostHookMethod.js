@@ -124,6 +124,34 @@ const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot,
   }
   `;
 
+// update user with vertical
+const updateUser = (userId, vertical) => `
+  mutation {
+    updateUser(
+      id: "${userId}"
+      input: {
+        vertical: ${vertical}
+      }
+    ) {
+      id
+    }
+  }
+`;
+
+// get users
+const getUsers = (studentConnectId) => `
+  {
+  users(filter: {
+    or: [
+      {studentProfile_some: {id: "${studentConnectId}"}}
+      {parentProfile_some: {children_some:{user_some: {studentProfile_some: {id: "${studentConnectId}"}}}}}
+    ]
+  }){
+    id
+  }
+}
+`;
+
 const getMentorSessionId = async (allottedMentorId, date, slotsInInput, courseId, sessionType) => {
   let finalMentorSessionId = '';
   if (allottedMentorId) {
@@ -320,6 +348,23 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
         pushManyQuery,
       ), context);
     });
+
+    const batchTypeFromContext = get(context, 'previousDocument.type', '');
+    let vertical = '';
+    if (batchTypeFromContext === 'b2b2c') {
+      vertical = 'b2cb2c';
+    } else if (batchTypeFromContext === 'b2b') {
+      vertical = 'b2b';
+    } else {
+      vertical = 'b2c';
+    }
+    /* eslint-disable-next-line no-restricted-syntax */
+    for (const studentConnectId of studentsConnectIds) {
+      /* eslint-disable-next-line no-await-in-loop */
+      const userRes = await callLocalGraphqlApi(getUsers(studentConnectId));
+      const userId = get(userRes, 'data.users[0].id', '');
+      callLocalGraphqlApi(updateUser(userId, vertical));
+    }
   }
 };
 
