@@ -118,6 +118,13 @@ const parentChildSignUpMutationResolver = async (
     bypass: true,
   });
   const source = getUserOriginSource(utmSource, schoolName, schoolId);
+  console.log('source', source);
+  /* this campaign obj will be later in this method */
+  /* fetching earlier to update vertical in user */
+  let campaign = null;
+  if(campaignId){
+    campaign = await getBatchDetailsFromACampaign(campaignId);
+  }
 
   // if parent exist don't add parent and check if the child exists too
   if (parentInfo && parentInfo.parentId && parentInfo.parentEmail) {
@@ -171,6 +178,21 @@ const parentChildSignUpMutationResolver = async (
         typeId: campaignId,
       };
     }
+
+    if (source !== 'school') {
+      parentData.vertical = 'b2c';
+    } else {
+      if (campaignId) {
+        const campaignType = get(campaign, 'type');
+        if (campaignType && campaignType === 'b2b') {
+          parentData.vertical = 'b2b';
+        } else {
+          parentData.vertical = 'b2b2c';
+        }
+      }
+    }
+
+    console.log('parentData.vertical', parentData.vertical);
 
     const parentDataWithId = generateCuid(parentData);
     let parentUserData;
@@ -243,6 +265,23 @@ const parentChildSignUpMutationResolver = async (
     childData.fromReferral = true;
     childData.giftVoucherApplied = false;
   }
+
+  // same logic for vertical as parent
+  if (source !== 'school') {
+    childData.vertical = 'b2c';
+  } else {
+    if (campaignId) {
+      const campaignType = get(campaign, 'type');
+      if (campaignType && campaignType === 'b2b') {
+        childData.vertical = 'b2b';
+      } else {
+        childData.vertical = 'b2b2c';
+      }
+    }
+  }
+
+  console.log('childData.vertical', childData.vertical);
+
   const childDataWithId = generateCuid(childData);
 
   const childUserData = await addUserData(authentication, childDataWithId);
@@ -283,7 +322,6 @@ Update school info too
   /*
 If coming from campaign and the type os b2b allocate the user to the right batch
 */
-  const campaign = await getBatchDetailsFromACampaign(campaignId);
   let batchId = '';
   if (campaign && campaign.id) {
     const campaignType = get(campaign, 'type');
