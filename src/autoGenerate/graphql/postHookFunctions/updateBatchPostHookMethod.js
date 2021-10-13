@@ -142,8 +142,9 @@ const updateUser = (userId, vertical) => `
 const getUsers = (studentConnectId) => `
   {
   users(filter: {
-    and: [
+    or: [
       {studentProfile_some: {id: "${studentConnectId}"}}
+      {parentProfile_some: {children_some:{user_some: {studentProfile_some: {id: "${studentConnectId}"}}}}}
     ]
   }){
     id
