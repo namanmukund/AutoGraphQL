@@ -297,7 +297,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       }
       break;
     case homeworkPractice:
-      currentComponentIndex = sortedTopicComponentRule.findIndex((comp) => comp.homeworkPractice && comp.homeworkPractice.id === blockBasedProjectId);
+      currentComponentIndex = sortedTopicComponentRule.findIndex((comp) => comp.blockBasedProject && comp.blockBasedProject.id === blockBasedProjectId);
       nextComponentIndex = currentComponentIndex + 1;
       /*
       Checking whether user current topic status should be updated, below are the conditions:
