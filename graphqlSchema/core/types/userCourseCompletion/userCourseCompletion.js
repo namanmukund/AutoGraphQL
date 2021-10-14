@@ -1,4 +1,9 @@
-import { TBA, TLA, TWA, TMS } from '../../../../constants';
+import {
+  TBA,
+  TLA,
+  TWA,
+  TMS,
+} from '../../../../constants';
 
 const UserCourseCompletion = `
   type UserCourseCompletion @model
