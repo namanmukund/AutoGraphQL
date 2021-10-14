@@ -111,6 +111,7 @@ import addVideoValidation from './preHookFunctions/validation/addVideoValidation
 import updateVideoValidation from './preHookFunctions/validation/updateVideoValidation';
 import addAdhocSessionValidation from './preHookFunctions/validation/addAdhocSessionValidation';
 import updateAdhocSessionValidation from './preHookFunctions/validation/updateAdhocSessionValidation';
+import deleteAdhocSessionValidation from './preHookFunctions/validation/deleteAdhocSessionValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -685,6 +686,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       };
       await updateAdhocSessionValidation(newParams, mutationOrQueryName, context);
       return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
+    case 'deleteAdhocSession': {
+      await deleteAdhocSessionValidation(params, mutationOrQueryName, context);
+      break;
     }
     case 'updateBatchCurrentComponentStatus': {
       await updateBatchCurrentComponentStatusValidation(params, mutationOrQueryName, context);
