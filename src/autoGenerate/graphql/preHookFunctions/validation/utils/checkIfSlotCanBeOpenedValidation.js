@@ -30,12 +30,14 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
     for (const mentorSession of prevMentorSessions) {
       const mentorMenteeSessions = get(mentorSession, 'mentorMenteeSessions', []);
       const batchSessions = get(mentorSession, 'batchSessions', []);
-      // for a batch mentorSession we will check batchSessions and see which slots are occupied
-      if ((mentorSession.sessionType === sessionType.trial || mentorSession.sessionType === sessionType.batch) && batchSessions.length) {
+      const adhocSessions = get(mentorSession, 'adhocSessions', []);
+      const batchAndAdhocSessions = batchSessions.concat(adhocSessions);
+      // for a batch mentorSession we will check batchSessions (and adhocSessions) and see which slots are occupied
+      if ((mentorSession.sessionType === sessionType.trial || mentorSession.sessionType === sessionType.batch) && batchAndAdhocSessions.length) {
         // eslint-disable-next-line no-restricted-syntax
-        for (const batchSession of batchSessions) {
-          if (userBatchCode !== get(batchSession, 'batch.code', '')) {
-            const occupiedSlotTimeArrayForBatch = getSelectedSlotsTime(batchSession);
+        for (const session of batchAndAdhocSessions) {
+          if (userBatchCode !== get(session, 'batch.code', '')) {
+            const occupiedSlotTimeArrayForBatch = getSelectedSlotsTime(session);
             occupiedSlotsArray.push(...occupiedSlotTimeArrayForBatch);
             // eslint-disable no-loop-func
             const intersection = slotTimeArray.filter((x) => occupiedSlotTimeArrayForBatch.includes(x));
@@ -49,7 +51,7 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
                 const currentDate = new Date();
                 if (moment(dateTime).diff(moment(currentDate), 'hours') > 2) {
                   bypassValidation = false;
-                } else if (get(batchSession, 'batch.studentsMeta.count', 0) > 0) {
+                } else if (get(session, 'batch.studentsMeta.count', 0) > 0) {
                   bypassValidation = false;
                 }
               } else {
@@ -59,11 +61,11 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
                 bsflag = true;
                 customError += 'Batch(es) -> ';
               }
-              customError += `${get(batchSession, 'batch.code', '')} `;
+              customError += `${get(session, 'batch.code', '')} `;
             }
           }
         }
-      // for trial/paid mentorSession we will check mentorMenteeSessions and see which slots are occupied
+        // for trial/paid mentorSession we will check mentorMenteeSessions and see which slots are occupied
       }
       if (mentorMenteeSessions.length && mentorSession.sessionType !== sessionType.batch) {
         // eslint-disable-next-line no-restricted-syntax

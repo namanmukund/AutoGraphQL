@@ -91,7 +91,6 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
       ),
     );
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-    // TODO : add check for adhoc sessions in following method checkIfSlotCanBeOpenedValidation
     checkIfSlotCanBeOpenedValidation(params, mentorSessions);
   }
 
