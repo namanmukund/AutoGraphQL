@@ -71,6 +71,7 @@ import {
   ProjectWithSimilarOrderAlreadyExist,
   VideoWithSimilarTitleAlreadyExist,
   LOWithSimilarTitleAlreadyExist,
+  BatchMustHaveAtleastOneSession,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -281,4 +282,5 @@ export {
   ProjectWithSimilarOrderAlreadyExist,
   VideoWithSimilarTitleAlreadyExist,
   LOWithSimilarTitleAlreadyExist,
+  BatchMustHaveAtleastOneSession,
 };

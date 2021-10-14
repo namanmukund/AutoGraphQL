@@ -248,3 +248,7 @@ export const VideoWithSimilarTitleAlreadyExist = createError('VideoWithSimilarTi
 export const LOWithSimilarTitleAlreadyExist = createError('LOWithSimilarTitleAlreadyExist', {
   message: 'LO with similar title already exist.',
 });
+
+export const BatchMustHaveAtleastOneSession = createError('BatchMustHaveAtleastOneSession', {
+  message: 'B2B batch must have atleast one batch session for adding Adhoc session.',
+});
