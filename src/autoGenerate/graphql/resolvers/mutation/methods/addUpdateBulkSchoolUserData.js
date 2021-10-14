@@ -67,13 +67,15 @@ const callAddMenteeSession = async (
   userConnectId,
   topicConnectId,
   variables,
+  courseConnectId,
 ) => {
   const query = `
 mutation ($input: MenteeSessionInput!) {
   addMenteeSession(
     input: $input, 
     userConnectId: "${userConnectId}", 
-    topicConnectId: "${topicConnectId}"
+    topicConnectId: "${topicConnectId}",
+    ${courseConnectId ? `courseConnectId: "${courseConnectId}"` : ''}
   ) {
     id
   }
@@ -128,6 +130,7 @@ const callAddMentorMenteeSession = async (
   menteeSessionConnectId,
   mentorSessionConnectId,
   variables,
+  courseConnectId,
 ) => {
   const query = `
 mutation($input: MentorMenteeSessionInput!){
@@ -136,6 +139,7 @@ mutation($input: MentorMenteeSessionInput!){
     topicConnectId:"${topicConnectId}"
     menteeSessionConnectId:"${menteeSessionConnectId}"
     mentorSessionConnectId:"${mentorSessionConnectId}"
+    ${courseConnectId ? `courseConnectId: "${courseConnectId}"` : ''}
   ){
     id
   }
@@ -271,7 +275,7 @@ temp code
             },
           };
           const userId = get(result, 'parentProfile.children[0].user.id');
-          menteeSessionId = await callAddMenteeSession(userId, firstTopicId, variables);
+          menteeSessionId = await callAddMenteeSession(userId, firstTopicId, variables, courseConnectId);
           console.log('menteeSessionId....', menteeSessionId);
         }
         // add mentor  session
@@ -322,6 +326,7 @@ temp code
             menteeSessionId,
             mentorSessionId,
             variables,
+            courseConnectId,
           );
           console.log('Processed........', index + 2, result.id);
         }
