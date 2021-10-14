@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { PermissionDeniedError } from '../../../../../constants/errors';
@@ -11,7 +10,6 @@ import validateTokenAndExtractInformation from './utils/validateTokenAndExtractI
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
-import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import getMentorSessions from '../../../utils/getMentorSessions';
 import { checkIfSlotCanBeOpenedValidation } from './utils';
 
@@ -45,16 +43,6 @@ query{
   }
 }`;
 
-const validateBatchStartSessionData = (params) => {
-  // eslint-disable-next-line no-unused-vars
-  const { bookingDate, ...slots } = params.input;
-  const slotTimeArray = getSelectedSlotsTime(slots);
-  const date = new Date(bookingDate);
-  const sessionStartDate = date.setHours(date.getHours() + slotTimeArray[0]);
-  params.input = { ...params.input, sessionStartDate: new Date(sessionStartDate).toISOString() }
-  return true;
-};
-
 // prehook logic to check if added Adhoc session(batch and order) is already present
 const addAdhocSessionValidation = async (params, mutationOrQueryName, context) => {
   // check if the document for called batch and topic is already present
@@ -70,12 +58,11 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
     });
   }
 
-
   // getting user role from context. We will allow adding batchSession if logged in user is admin
   const userInfo = validateTokenAndExtractInformation(context, false);
 
   const {
-    currentUser
+    currentUser,
   } = userInfo;
   const userRoleFromContext = currentUser && currentUser.role;
   context.currentUser = currentUser;
@@ -87,7 +74,7 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
     appName,
   } = userAndAppInfo;
 
-  context.appName = appName
+  context.appName = appName;
 
   // validate input (validate booking date and slots similar to addBatchSession)
   await validateBatchSessionInput(params, context, 'addBatch');
@@ -104,6 +91,7 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
       ),
     );
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+    // TODO : add check for adhoc sessions in following method checkIfSlotCanBeOpenedValidation
     checkIfSlotCanBeOpenedValidation(params, mentorSessions);
   }
 
