@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
@@ -71,6 +72,7 @@ const addMentorAvailabilitySlot = async (sessionId, mentorProfileId, paySlabId, 
     ${type === 'menteeSession' ? `menteeSessionsConnectIds: ["${sessionId}"]` : ''}
     ${type === 'mentorSession' ? `mentorSessionsConnectIds: ["${sessionId}"]` : ''}
     ${type === 'batchSession' ? `batchSessionsConnectIds: ["${sessionId}"]` : ''}
+    ${type === 'mentorSession' && mentorProfileId ? `openedByConnectId:"${mentorProfileId}"` : ''}
     ${paySlabId ? `paySlabConnectId: "${paySlabId}"` : ''}
     ${mentorProfileId ? `broadCastedMentorsConnectIds: ["${mentorProfileId}"]` : ''}) {
       id
@@ -141,6 +143,8 @@ const addUpdateMentorAvailabilitySlots = async ({
 }) => {
   // if singleSlot exist for give slotName, date and sessionType then update with sessionId
   if (singleSlotData && singleSlotData.length > 0) {
+    console.log('=====================================');
+    console.log('update with mentorSession', sessionId, 'with slot', slotName);
     await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId);
     // if (typeName === 'batchSession') {
     //   const slotVerticals = get(singleSlotData, '[0].verticals', []);
@@ -157,10 +161,12 @@ const addUpdateMentorAvailabilitySlots = async ({
     //   await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId);
     // }
   } else {
+    // eslint-disable
+    console.log('=====================================');
+    console.log('add with mentorSession', sessionId, 'with slot', slotName);
     const paySlab = await getPaySlabDetails();
     const paySlabId = get(paySlab, '[0].id');
-    let vertical = 'b2c';
-    if (typeName === 'batchSession') vertical = 'b2b2c';
+    const vertical = 'b2c';
     const input = {
       date: `${date}`,
       verticals: [{ value: vertical }],
