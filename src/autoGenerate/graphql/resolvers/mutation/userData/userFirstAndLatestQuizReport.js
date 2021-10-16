@@ -285,14 +285,14 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     });
   }
   let currentRunningTopic;
-  let currentRunningTopicComponentType;
+  // let currentRunningTopicComponentType;
 
   // if user belongs to a batch, quiz report will be calculated on basis of batchCurrentComponentStatus
   if (batchCurrentComponentInfo) {
     currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
   } else {
     currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
-    currentRunningTopicComponentType = currentTopicComponentInfo && currentTopicComponentInfo.currentTopicComponentType;
+    // currentRunningTopicComponentType = currentTopicComponentInfo && currentTopicComponentInfo.currentTopicComponentType;
   }
   if (!courseId || courseId === OLD_COURSE_ID) {
     /* eslint no-lonely-if:0 */
