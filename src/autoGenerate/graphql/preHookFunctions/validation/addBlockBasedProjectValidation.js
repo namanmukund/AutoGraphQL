@@ -2,7 +2,6 @@
 "BinaryExpression[operator='in']"] */
 import { get } from 'lodash';
 import {
-  ProjectWithSimilarOrderAlreadyExist,
   ProjectWithSimilarTitleAlreadyExist,
 } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';

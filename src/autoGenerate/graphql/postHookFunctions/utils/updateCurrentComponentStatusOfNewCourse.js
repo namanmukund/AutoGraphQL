@@ -1,6 +1,8 @@
 import { get } from 'lodash';
 import { log } from '../../../../../utils';
-import { PUBLISHED, topicComponents, topicTypes, userActionType } from '../../../../../constants';
+import {
+  PUBLISHED, topicComponents, topicTypes, userActionType,
+} from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 // query to get next topic
