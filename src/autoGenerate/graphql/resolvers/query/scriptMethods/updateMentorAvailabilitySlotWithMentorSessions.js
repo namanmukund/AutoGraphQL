@@ -140,7 +140,6 @@ const updateMentorAvailabilitySlotWithMentorSessions = async () => {
             const mentorAvailabilitySlot = await getMentorAvailabilitySlots({ date: availabilityDate, slotName: slot });
             if (mentorAvailabilitySlot && mentorAvailabilitySlot.length > 0) {
               await updateMentorAvailabilitySlot(get(mentorAvailabilitySlot, '[0].id'), get(mentorSession, 'id'), mentorProfileId);
-              console.log('updated mentorAvailability Slot', get(mentorAvailabilitySlot, '[0].id'), 'with mentorSession', get(mentorSession, 'id'), ' and mentorProfile ', mentorProfileId);
             } else {
               // else add new singleSlot
               const paySlab = await getPaySlabDetails();
@@ -167,7 +166,6 @@ const updateMentorAvailabilitySlotWithMentorSessions = async () => {
                   sessionType: sessionType.trial,
                 });
               }
-              console.log('added mentorAvailability Slot', get(addSingleSlot, 'id'), 'with mentorSession', get(mentorSession, 'id'), ' and mentorProfile ', mentorProfileId);
             }
             console.log('updated mentorSessions => ', get(mentorSession, 'id'), ' for ', slot, ' on date ', availabilityDate);
           }
