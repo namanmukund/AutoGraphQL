@@ -67,7 +67,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     }
     const menteeSessionSlots = { input: tempObj };
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-    checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions);
+    checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions, null, get(batch, 'code'));
   }
 
   context.batchSessionId = batchSessionId;

@@ -18,11 +18,6 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
 
   const { previousDocument, appName } = context;
 
-  // don't increase the availability slot if it is done through backend
-  if (byPassMenteeValidationApps.includes(appName)) {
-    return true;
-  }
-
   const { availabilityDate: prevAvailabilityDate, ...prevSlots } = previousDocument;
   const prevSlotTimeStringArray = getSelectedSlotsStringArray(prevSlots);
 
@@ -65,6 +60,11 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
     date: availabilityDate,
     sessionId: get(input, 'id'),
   });
+
+  // don't increase the availability slot if it is done through backend
+  if (byPassMenteeValidationApps.includes(appName)) {
+    return true;
+  }
   // ---------------------commenting out the previous availableSlots flow--------------
   // const currentAvailableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(availabilityDate));
   // const currentAvailableSlots = get(currentAvailableSlotsRes, 'data.availableSlots', []);

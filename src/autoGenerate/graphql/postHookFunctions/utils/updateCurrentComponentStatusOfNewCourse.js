@@ -1,6 +1,8 @@
 import { get } from 'lodash';
 import { log } from '../../../../../utils';
-import { PUBLISHED, topicTypes, userActionType } from '../../../../../constants';
+import {
+  PUBLISHED, topicComponents, topicTypes, userActionType,
+} from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 // query to get next topic
@@ -86,6 +88,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
   const {
     video, message, practiceQuestion, comicStrip, quiz, blockBasedPractice, blockBasedProject,
   } = topicTypes;
+  const { assignment, homeworkAssignment, homeworkPractice } = topicComponents;
   const sortedTopicComponentRule = topicComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
   const { next, skip } = userActionType;
   const {
@@ -229,7 +232,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
         updateUserCurrentTopicComponentStatus = true;
       }
       break;
-    case 'assignment':
+    case assignment:
       currentComponentIndex = sortedTopicComponentRule.findIndex((comp) => comp.componentName === 'assignment');
       nextComponentIndex = currentComponentIndex + 1;
       /*
@@ -273,7 +276,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
         updateUserCurrentTopicComponentStatus = true;
       }
       break;
-    case 'homeworkAssignment':
+    case homeworkAssignment:
       currentComponentIndex = sortedTopicComponentRule.findIndex((comp) => comp.componentName === 'homeworkAssignment');
       nextComponentIndex = currentComponentIndex + 1;
       /*
@@ -292,6 +295,26 @@ const updateCurrentComponentStatusOfNewCourse = async (
         && currentTopicId === topicId
       ) {
         // updating current component in case quiz is completed by user
+        updateUserCurrentTopicComponentStatus = true;
+      }
+      break;
+    case homeworkPractice:
+      currentComponentIndex = sortedTopicComponentRule.findIndex((comp) => comp.blockBasedProject && comp.blockBasedProject.id === blockBasedProjectId);
+      nextComponentIndex = currentComponentIndex + 1;
+      /*
+      Checking whether user current topic status should be updated, below are the conditions:
+      -user is hitting next and
+      -current topic component should be 'blockBasedProject'
+      -called topic in input should be equal to current topic and
+      -called blockBasedProject in input should be equal to current blockBasedProject
+      Above conditions covers the case that current component status will only get changed, if
+      called component is equal to  current component and user has just consumed(next action) it
+      and current component status will not get changed when it is already consumed in past
+      */
+      if ((userAction === next)
+        // && currentTopicComponent === blockBasedProject /** Temporarily removed to bypass check and eventually update to next component / topic */
+        && currentTopicId === topicId
+      ) {
         updateUserCurrentTopicComponentStatus = true;
       }
       break;
@@ -374,7 +397,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       } else if (comicStripCount) {
         nextCurrentTopicComponentType = comicStrip;
       }
-    } else if ((nextCurrentTopicComponent.componentName === 'assignment') || (nextCurrentTopicComponent.componentName === 'homeworkAssignment')) {
+    } else if ((nextCurrentTopicComponent.componentName === 'assignment') || (nextCurrentTopicComponent.componentName === 'homeworkAssignment') || (nextCurrentTopicComponent.componentName === 'homeworkPractice')) {
       nextCurrentTopicComponentType = quiz;
     } else {
       nextCurrentTopicComponentType = nextCurrentTopicComponent.componentName;

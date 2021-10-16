@@ -294,7 +294,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       let isHomeworkVisible = false;
       const topicComponentRuleDoc = get(topicObj, 'topicComponentRule', []);
       topicComponentRuleDoc.forEach((rule) => {
-        if (rule && (['homeworkAssignment', 'quiz'].includes(get(rule, 'componentName')))) {
+        if (rule && (['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(get(rule, 'componentName')))) {
           isHomeworkVisible = true;
         }
       });

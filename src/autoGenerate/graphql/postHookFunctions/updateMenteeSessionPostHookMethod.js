@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import { difference, get } from 'lodash';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 // import reduceParticularAvailableSlotOfADate from './utils/reduceParticularAvailableSlotOfADate';
 // import increaseParticularAvailableSlotOfADate from './utils/increaseParticularAvailableSlotOfADate';
@@ -103,10 +103,11 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
         topicInfo,
       );
     }
+    const slotsToBeIncreasedInUpdate = difference(slotTimeStringArray, prevSlotTimeStringArray);
     const prevMentorAvailabilitySlot = get(input, 'mentorAvailabilitySlot.typeId');
     const isNotSourceSchool = get(userInfo, 'data.user.source') !== userSourceOrigin.school;
     const isBatchExist = get(userInfo, 'data.user.studentProfile.batch', false);
-    if (isNotSourceSchool && !isBatchExist) {
+    if (isNotSourceSchool && !isBatchExist && slotsToBeIncreasedInUpdate.length > 0) {
       await mentorAvailabilitySlotOperation({
         slotTimeStringArray,
         date: bookingDate,
