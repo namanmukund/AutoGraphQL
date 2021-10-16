@@ -1,4 +1,6 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import updateMentorMenteeSessionWithStudentProfile from '../scriptMethods/updateMentorMenteeSessionWithStudentProfile';
+// import updateMenteeSessionWithStudentProfile from '../scriptMethods/updateMenteeSessionWithStudentProfile';
 // import updateCourseInSalesOperationScript from '../scriptMethods/updateCourseinSalesOperationScript';
 // import updateQuestionsWithCorrectPositions from '../scriptMethods/updateQuestionsWithCorrectPositions';
 // import updateQuestionsWithHints from '../scriptMethods/updateQuestionsWithHints';
@@ -53,6 +55,8 @@ const temporaryScript = (async (root, params, context) => {
   // await updateQuestionsWithCorrectPositions();
   // await updateQuestionsWithHints();
   // await updateQuestionsWithCorrectPositionIndex();
+  // await updateMenteeSessionWithStudentProfile();
+  // await updateMentorMenteeSessionWithStudentProfile();
   // await removeCourseFromUserAssignments();
   return {
     result: true,
