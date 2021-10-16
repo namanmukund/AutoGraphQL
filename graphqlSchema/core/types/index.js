@@ -107,6 +107,8 @@ import GetCourseCertificate from './getCourseCertificate';
 import SessionLog from './sessionLog';
 import SessionReport from './sessionReport';
 import RebookMenteeSessionInput from './rebookMenteeSessionInput';
+// import sendJourneySnapshotInMailInput from './sendJourneySnapshotInMailInput';
+// import sendCertificateInMailInput from './sendCertificateInMailInput';
 import TopicQuestions from './topicQuestions';
 import TopicAssignmentQuestion from './topicAssignmentQuestion';
 import AuditQuestion from './auditQuestion';
@@ -121,7 +123,7 @@ import GetUserCourses from './getUserCourses';
 import UserMerchant from './userMerchant';
 import MentorSupplyPaySlab from './mentorSupplyPaySlab';
 import MentorDemandSlot from './mentorDemandSlot';
-import MentorDemandSingleSlot from './mentorDemandSingleSlot';
+import MentorAvailabilitySlot from './mentorAvailabilitySlot';
 import MentorAuditReport from './mentorAuditReport';
 
 export default [
@@ -248,6 +250,6 @@ export default [
   ...UserMerchant,
   ...MentorSupplyPaySlab,
   ...MentorDemandSlot,
-  ...MentorDemandSingleSlot,
+  ...MentorAvailabilitySlot,
   ...MentorAuditReport,
 ];

@@ -1,4 +1,9 @@
-import { TBA, TLA, TWA } from '../../../../constants';
+import {
+  TBA,
+  TLA,
+  TWA,
+  TMS,
+} from '../../../../constants';
 
 const UserCourseCompletion = `
   type UserCourseCompletion @model
@@ -7,6 +12,7 @@ const UserCourseCompletion = `
       { appName: "${TLA}" operations: "*" },
       { appName: "${TBA}" operations: "*" },
       { appName: "${TWA}" operations: "*" },
+      { appName: "${TMS}" operations: "*" },
       ], 
     rule: allow
   )
@@ -15,6 +21,7 @@ const UserCourseCompletion = `
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
+          { appName: "${TMS}" operations: "*" },
           ], 
         rule: allow
       )
@@ -22,12 +29,14 @@ const UserCourseCompletion = `
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
+          { appName: "${TMS}" operations: "*" },
           ], 
         rule: allow
       )
     mentors: [User] @relation(name: "UserCourseCompletionMentors", direction: "OneWay")
     rating: Int
     comment: String
+    mentorComment: String
     courseDuration: String
     courseEndingDate: String
     topicsCompleted: Int
@@ -35,6 +44,7 @@ const UserCourseCompletion = `
     masteredTopicCount: Int
     familiarTopicCount: Int
     certificate: File @relation(name: "Certificate", direction: "OneWay")
+    journeySnapshot: File @relation(name: "JourneySnapshot", direction: "OneWay")
   }
 `;
 

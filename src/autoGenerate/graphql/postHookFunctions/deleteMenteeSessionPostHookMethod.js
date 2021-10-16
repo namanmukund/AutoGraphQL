@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
-import increaseParticularAvailableSlotOfADate from './utils/increaseParticularAvailableSlotOfADate';
+// import increaseParticularAvailableSlotOfADate from './utils/increaseParticularAvailableSlotOfADate';
 import isTrialSession from '../resolvers/utils/isTrialSession';
 import deleteMenteeBookingLeadSquared from './leadsquared/deleteMenteeBookingLeadSquared';
 import getMenteeInfo from './utils/getMenteeInfo';
@@ -27,7 +27,7 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
 
   // if call is from backend we will not update the availability slots, same for paid sessions
   if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
-    await increaseParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
+    // await increaseParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
     if (context.mentorSessionId) {
       sendSessionCancellationMessage(context.mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName);
     }

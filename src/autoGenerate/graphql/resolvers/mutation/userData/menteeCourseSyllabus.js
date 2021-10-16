@@ -437,6 +437,20 @@ const getBatchSessions = (batchId, courseId) => `
             uri
             name
           }
+          mentorProfile{
+            description
+            sessionLink
+            googleMeetLink
+            pythonCourseRating5
+            pythonCourseRating4
+            pythonCourseRating3
+            pythonCourseRating2
+            pythonCourseRating1
+            gitHubLink
+            linkedInLink
+            portfolioLink
+            experienceYear
+          }
         }
       }
       ${getSlotTimeFields()}
@@ -929,6 +943,9 @@ const menteeCourseSyllabusMutationResolver = async (
                     chapterTitle,
                     chapterOrder,
                   };
+                  if (get(mentorSession, 'user')) {
+                    mentorData = getMentorData(get(mentorSession, 'user'));
+                  }
                   bookedSession.push(bookedMenteeSession);
                   isUpcomingSession = false;
                 }

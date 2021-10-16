@@ -1,14 +1,16 @@
 import { get } from 'lodash';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
-import reduceParticularAvailableSlotOfADate from './utils/reduceParticularAvailableSlotOfADate';
+// import reduceParticularAvailableSlotOfADate from './utils/reduceParticularAvailableSlotOfADate';
 import extractMenteeSessionInfoAndSendEmail from './utils/extractMenteeSessionInfoAndSendEmail';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { addMenteeBookingLeadsquared } from './leadsquared';
 import getMenteeInfo from './utils/getMenteeInfo';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import getTopicInfo from './utils/getTopicInfo';
-import { byPassMenteeValidationApps } from '../../../../constants';
+import { byPassMenteeValidationApps, sessionType, userSourceOrigin } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
+import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
+import updateMenteeSessionQuery from './utils/updateMenteeSessionQuery';
 
 const getUserCourses = async (userId) => {
   const query = `
@@ -48,22 +50,37 @@ const updateUserCourseQuery = (id, courseId) => `
 
 const addMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
   // don't decrease the availability slot if it is done through backend
-  const { appName, isBookedByMentee, currentUser } = context;
+  const {
+    appName, isBookedByMentee, currentUser, isTrialSession,
+  } = context;
   if (!byPassMenteeValidationApps.includes(appName)) {
     /*
     Since addition of session by mentee will consume a slot
      */
     const { id: menteeSessionId, bookingDate, ...slots } = input;
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-    const { availableSlots } = context;
+    // const { availableSlots } = context;
     const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
     const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
-    await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context, availableSlots);
+    const isNotSourceSchool = get(userInfo, 'data.user.source') !== userSourceOrigin.school;
+    const isBatchExist = get(userInfo, 'data.user.studentProfile.batch', false);
+    if (typeof isTrialSession === 'boolean' && isTrialSession && isNotSourceSchool && !isBatchExist) {
+      await mentorAvailabilitySlotOperation({
+        slotTimeStringArray,
+        date: bookingDate,
+        mutationName,
+        sessionType: sessionType.trial,
+        sessionId: menteeSessionId,
+      });
+    }
+    // ---------------------commenting out the previous availableSlots flow--------------
+    // await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context, availableSlots);
     // send email to mentor admin regarding the session
     await extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
     if (get(context, 'userIdFromContext')) {
       updateUserBookingAgent(menteeSessionId, get(context, 'userIdFromContext'), bookingDate, get(slotTimeStringArray, '0'));
     }
+
     // update user booking on leadsquared
     if (!get(userInfo, 'data.user.studentProfile.batch.id')) {
       addMenteeBookingLeadsquared(
@@ -76,6 +93,15 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
         get(context, 'userIdFromContext'),
       );
     }
+    // udpdating the studentProfile in menteeSession
+    const updateInput = {
+      bookingDate,
+    };
+    slotTimeStringArray.forEach((slot) => {
+      updateInput[slot] = true;
+    });
+    const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
+    if (studentProfileId) updateMenteeSessionQuery(menteeSessionId, studentProfileId, updateInput);
 
     // update session log entry
     const courseId = get(input, 'course.typeId', '');
