@@ -330,7 +330,6 @@ const getMentorMenteeSessions = (userId, courseId) => `
       ]
     }){
       id
-      isSubmittedForReview
       topic{
         id
         title
@@ -437,6 +436,20 @@ const getBatchSessions = (batchId, courseId) => `
             id
             uri
             name
+          }
+          mentorProfile{
+            description
+            sessionLink
+            googleMeetLink
+            pythonCourseRating5
+            pythonCourseRating4
+            pythonCourseRating3
+            pythonCourseRating2
+            pythonCourseRating1
+            gitHubLink
+            linkedInLink
+            portfolioLink
+            experienceYear
           }
         }
       }
@@ -930,6 +943,9 @@ const menteeCourseSyllabusMutationResolver = async (
                     chapterTitle,
                     chapterOrder,
                   };
+                  if (get(mentorSession, 'user')) {
+                    mentorData = getMentorData(get(mentorSession, 'user'));
+                  }
                   bookedSession.push(bookedMenteeSession);
                   isUpcomingSession = false;
                 }
@@ -969,11 +985,9 @@ const menteeCourseSyllabusMutationResolver = async (
         } else {
           let mentorSession;
           let sessionDate;
-          let isSubmittedForReview = false;
           mentorMenteeSessions.forEach((mentorMenteeSession) => {
             if (mentorMenteeSession.topic && mentorMenteeSession.topic.id === topicId) {
               mentorSession = mentorMenteeSession.mentorSession;
-              isSubmittedForReview = mentorMenteeSession.isSubmittedForReview || false;
               sessionDate = mentorMenteeSession.sessionEndDate || mentorMenteeSession.sessionStartDate;
             }
           });
@@ -986,7 +1000,6 @@ const menteeCourseSyllabusMutationResolver = async (
             topicThumbnailSmall,
             topicDescription,
             isAccessible,
-            isSubmittedForReview,
             chapterId,
             chapterTitle,
             chapterOrder,
@@ -1007,7 +1020,6 @@ const menteeCourseSyllabusMutationResolver = async (
           sessionEndDate,
           sessionStartDate,
           mentorSession,
-          isSubmittedForReview,
         } = mentorMenteeSession;
         const {
           order: topicOrder,
@@ -1031,7 +1043,6 @@ const menteeCourseSyllabusMutationResolver = async (
           topicThumbnail,
           topicThumbnailSmall,
           topicDescription,
-          isSubmittedForReview,
           endingDate: sessionEndDate || sessionStartDate,
           chapterId: chapter && chapter.id,
           chapterTitle: chapter && chapter.title,

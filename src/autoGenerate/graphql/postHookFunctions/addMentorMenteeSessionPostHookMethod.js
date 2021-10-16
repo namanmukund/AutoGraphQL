@@ -6,8 +6,8 @@ import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import extractMentorMenteeSessionAndSendMessage from './utils/extractMentorMenteeSessionAndSendMessage';
 import { backendApps } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
-import updateMentorMenteeSessionQuery from './utils/updateMentorMenteeSessionMutaion';
 import { updateHomeworkStreaksMethod } from './utils/homeworkStreakMethods';
+import addToMentorMenteeSessionStudentProfile from './utils/addToMentorMenteeSessionStudentProfile';
 
 const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
   // don't do anything if it is done through backend
@@ -24,9 +24,13 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
     const userInfo = await getMenteeInfo(get(user, 'id'));
     const topicInfo = await getTopicInfo(get(params, 'topicConnectId'));
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
+    const courseId = get(input, 'course.typeId', '');
+    const clientId = get(userInfo, 'data.user.id', '');
+    const topicId = get(topicInfo, 'data.topic.id', '');
+    const sessionStatus = get(input, 'sessionStatus');
     if (get(input, 'sessionStatus') === 'started') {
       setSessionStartedLeadsquared(userInfo, topicInfo);
-      updateHomeworkStreaksMethod(userId, context, topic.id, input);
+      updateHomeworkStreaksMethod(clientId, context, topicId, input);
     }
     // send message to mentor regarding the session
     if (get(topicInfo, 'data.topic.order') === 1) {
@@ -35,13 +39,9 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
 
     // update session log entry
     const mentorMenteeSessionId = get(input, 'id');
-    const courseId = get(input, 'course.typeId', '');
-    const clientId = get(userInfo, 'data.user.id', '');
-    const topicId = get(topicInfo, 'data.topic.id', '');
-    const sessionStatus = get(input, 'sessionStatus');
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
-    if (studentProfileId) updateMentorMenteeSessionQuery(mentorMenteeSessionId, studentProfileId, { sessionStatus });
+    if (studentProfileId) addToMentorMenteeSessionStudentProfile(mentorMenteeSessionId, studentProfileId);
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMentorMenteeSession', batchCode, mentorSessionConnectId, sessionStatus);
   }
 };

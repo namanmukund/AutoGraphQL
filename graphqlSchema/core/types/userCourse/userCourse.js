@@ -3,23 +3,6 @@ import {
 } from '../../../../constants';
 import { READ } from '../../../../constants/graphqlOperations';
 
-const HomeworkStreaksType = `
-  type HomeworkStreaks {
-    course: Course @relation(name: "CourseHomeworkStreaks", direction: "OneWay")
-      @appPermissions(
-        permissions:[
-          { appName: "${TMS}" operations: ${READ} },
-          { appName: "${TLA}" operations: ${READ} },
-          { appName: "${TWA}" operations: ${READ} },
-          { appName: "${TBA}" operations: "*" },
-          ], 
-        rule: allow
-      )
-    mentorMenteeSession: MentorMenteeSession @relation(name: "UserCourseMentorMenteeSession", direction: "OneWay")
-    createdAt: Date
-  }
-`;
-
 const UserCourse = `
   type UserCourse @model
   @appPermissions(
@@ -49,9 +32,7 @@ const UserCourse = `
           ], 
         rule: allow
       )
-    homeworkStreaks: [HomeworkStreaks]
-    homeworkStreaksLog: [HomeworkStreaks]
   }
 `;
 
-export default [UserCourse, HomeworkStreaksType];
+export default UserCourse;

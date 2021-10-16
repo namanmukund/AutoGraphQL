@@ -346,6 +346,7 @@ const topicComponents = {
   quiz: 'quiz',
   blockBasedProject: 'blockBasedProject',
   blockBasedPractice: 'blockBasedPractice',
+  homeworkPractice: 'homeworkPractice',
 };
 
 const childTopicComponents = {
@@ -427,6 +428,13 @@ export const COUNTRIES = [
   'egypt',
   'afghanistan',
   'russia',
+];
+
+// used for session report, will add 'b2b2c' later
+export const VERTICALS = [
+  'b2b',
+  'b2c',
+  'b2b2c',
 ];
 
 export {

@@ -31,6 +31,16 @@ export const sendEmailInvoiceToUser = (payload) => {
       ];
     }
 
+    if (process.env.DATA_MASKING) {
+      emailTo = [
+        'shubham.gupta@tekie.in',
+      ];
+      ccEmail = [
+        'naman.mukund@tekie.in',
+        'kritesh.patel@tekie.in',
+      ];
+    }
+
     // bccemail should be in array. Can send the mail to mutiple people
     const bccEmail = [''];
 

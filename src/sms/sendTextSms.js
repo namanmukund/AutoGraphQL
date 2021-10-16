@@ -11,6 +11,9 @@ const sendTextSms = (receiverNumber, body) => {
     return null;
   }
 
+  // eslint-disable-next-line no-param-reassign
+  if (process.env.DATA_MASKING) receiverNumber = '+919999694605';
+
   return client.messages
     .create({
       to: receiverNumber,

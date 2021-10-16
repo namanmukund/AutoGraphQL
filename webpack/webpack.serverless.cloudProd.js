@@ -1,4 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable import/extensions */
 // const webpack = require('webpack');
 const merge = require('webpack-merge');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
@@ -7,7 +8,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const packageJson = require('../package.json');
 /* eslint-enable import/no-extraneous-dependencies */
 
-const common = require('./webpack.serverless.cloudCommon.js');
+const common = require('./webpack.serverless.cloudCommon');
 
 const release = packageJson.version || 'norelease';
 const environment = process.env.NODE_ENV || 'development';

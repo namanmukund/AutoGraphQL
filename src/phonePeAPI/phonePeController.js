@@ -43,9 +43,9 @@ const fetchProducts = async (req, res) => {
           log(`priceAmount ${newProduct.price}`);
           newProduct.title = get(product, 'title', '');
           newProduct.merchantDescription = get(product, 'merchantDescription', '');
-          newProduct.smallThumbnailUrl = `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'smallThumnail.uri', '')}`;
-          newProduct.mediumThumbnailUrl = `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'mediumThumbnail.uri', '')}`;
-          newProduct.largeThumbnailUrl = `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'largeThumbnail.uri', '')}`;
+          newProduct.smallThumbnailUrl = get(product, 'smallThumnail.uri', '') ? `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'smallThumnail.uri', '')}` : null;
+          newProduct.mediumThumbnailUrl = get(product, 'mediumThumbnail.uri', '') ? `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'mediumThumbnail.uri', '')}` : null;
+          newProduct.largeThumbnailUrl = get(product, 'largeThumbnail.uri', '') ? `${process.env.CLOUDFRONT_BASE_URL}/${get(product, 'largeThumbnail.uri', '')}` : null;
           newProduct.features = [];
           for (const feature of get(product, 'features', [])) {
             newProduct.features.push(get(feature, 'statement', ''));

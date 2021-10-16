@@ -899,10 +899,12 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   } = userInfo;
   const userRoleFromContext = currentUser && currentUser.role;
 
-  // throwing error if client has not send any question in input
-  if (!quizQuestions || !quizQuestions.length) {
-    log('QuizQuestions are not present in input in addUserActivityQuizDumpPostHookMethod');
-    throw new QuizQuestionsNotPresentError();
+  if (!courseId || courseId === OLD_COURSE_ID) {
+    // throwing error if client has not send any question in input
+    if (!quizQuestions || !quizQuestions.length) {
+      log('QuizQuestions are not present in input in addUserActivityQuizDumpPostHookMethod');
+      throw new QuizQuestionsNotPresentError();
+    }
   }
   // throwing error if there are no published questions in database
   if (!quizQuestionsInUserQuiz
