@@ -49,6 +49,8 @@ const MentorMenteeSession = `
     classMissedMessageStatus: ClassMissedMessageStatus @defaultValue(value: "pending")
     isQuizSubmitted: Boolean @defaultValue(value: "false")
     quizSubmitDate: Date
+    isPracticeSubmitted: Boolean @defaultValue(value: "false")
+    practiceSubmitDate: Date
     isAssignmentSubmitted: Boolean @defaultValue(value: "false")
     assignmentSubmitDate: Date
     isHomeworkCheckedByMentor: Boolean @defaultValue(value: "false")

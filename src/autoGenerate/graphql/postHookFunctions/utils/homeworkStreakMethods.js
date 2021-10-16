@@ -222,7 +222,7 @@ export const updateHomeworkStreaksMethod = async (userId, context, topicId, inpu
       let isHomeworkVisible = false;
       const topicComponentRuleDoc = get(topic, 'topicComponentRule', []);
       topicComponentRuleDoc.forEach((rule) => {
-        if (rule && (['homeworkAssignment', 'quiz'].includes(get(rule, 'componentName')))) {
+        if (rule && (['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(get(rule, 'componentName')))) {
           isHomeworkVisible = true;
         }
       });

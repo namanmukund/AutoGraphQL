@@ -346,6 +346,7 @@ const topicComponents = {
   quiz: 'quiz',
   blockBasedProject: 'blockBasedProject',
   blockBasedPractice: 'blockBasedPractice',
+  homeworkPractice: 'homeworkPractice',
 };
 
 const childTopicComponents = {
