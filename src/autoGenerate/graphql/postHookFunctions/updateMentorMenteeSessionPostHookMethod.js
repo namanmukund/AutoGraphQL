@@ -1,8 +1,6 @@
 import { get } from 'lodash';
 import moment from 'moment';
-import {
-  auditType, MENTOR_RATING_AUDIT_THRESHOLD, OLD_COURSE_ID,
-} from '../../../../constants';
+import { auditType, MENTOR_RATING_AUDIT_THRESHOLD } from '../../../../constants';
 import { MENTEE } from '../../../../constants/roles';
 import updateReferrerCreditsPostSessionOrUserPayment from './utils/updateReferrerCreditsPostSessionOrUserPayment';
 import referralCredits from '../../../../constants/referralCredits';
@@ -23,8 +21,6 @@ import addRescheduledSlot from './utils/addRescheduledSlot';
 import addSessionLog from './utils/addSessionLog';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import addSalesAudit from './utils/addSalesAudit';
-import { log } from '../../../../utils';
-import { fetchCourseData, sessionStartedStreaksFlow, submittedForReviewStreaksFlow } from './utils/homeworkStreakMethods';
 
 const { postSales } = auditType;
 // import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
@@ -132,9 +128,7 @@ const intersection = (arr1, arr2) => {
 const allowedRoles = [MENTEE];
 const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
   const {
-    currentUser, previousDocument: {
-      sessionStatus: prevSessionStatus, topic, menteeSession: prevMenteeSession, isSubmittedForReview: prevIsSubmittedForReview,
-    },
+    currentUser, previousDocument: { sessionStatus: prevSessionStatus, topic, menteeSession: prevMenteeSession },
   } = context;
   const { sessionStartDate } = input;
   const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));

@@ -236,8 +236,6 @@ export default [
   ...SessionLog,
   ...SessionReport,
   ...RebookMenteeSessionInput,
-  ...sendJourneySnapshotInMailInput,
-  ...sendCertificateInMailInput,
   ...TopicQuestions,
   ...TopicAssignmentQuestion,
   ...AuditQuestion,

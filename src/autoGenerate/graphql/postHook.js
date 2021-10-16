@@ -63,6 +63,7 @@ import updateUserPostHookMethod from './postHookFunctions/updateUserPostHookMeth
 import updatePreSalesAuditPostHookMethod from './postHookFunctions/updatePreSalesAuditPostHookMethod';
 import updatePostSalesAuditPostHookMethod from './postHookFunctions/updatePostSalesAuditPostHookMethod';
 import deleteBatchPostHookMethod from './postHookFunctions/deleteBatchPostHookMethod';
+import userPostHookMethod from './postHookFunctions/userPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -302,6 +303,10 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'deleteBatch': {
       await deleteBatchPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'user': {
+      await userPostHookMethod(input, mutationName, context);
       break;
     }
     default:

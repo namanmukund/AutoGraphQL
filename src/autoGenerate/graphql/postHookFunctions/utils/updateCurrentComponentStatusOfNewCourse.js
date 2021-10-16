@@ -137,7 +137,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       and current component status will not get changed when it is already consumed in past
       */
       if ((userAction === next || userAction === skip)
-        // && currentTopicComponent === video /** Temporarily removed to bypass check and eventually update to next component / topic */
+        && currentTopicComponent === video
         && currentTopicId === topicId
         && currentVideoId === videoId
       ) {
@@ -162,7 +162,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       and current component status will not get changed when it is already consumed in past
       */
       if ((userAction === next || userAction === skip)
-        // && currentTopicComponent === comicStrip /** Temporarily removed to bypass check and eventually update to next component / topic */
+        && currentTopicComponent === comicStrip
         && currentTopicId === topicId
         && currentLearningObjectiveId === learningObjectiveId
       ) {
@@ -187,7 +187,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       and current component status will not get changed when it is already consumed in past
       */
       if ((userAction === next || userAction === skip)
-        // && currentTopicComponent === message /** Temporarily removed to bypass check and eventually update to next component / topic */
+        && currentTopicComponent === message
         && currentTopicId === topicId
         && currentLearningObjectiveId === learningObjectiveId
       ) {
@@ -222,9 +222,9 @@ const updateCurrentComponentStatusOfNewCourse = async (
         || (
           userAction === next
           && completedQuestionCount === totalQuestions
-          // && (currentTopicComponent === practiceQuestion
-          //   || currentTopicComponent === message
-          // ) /** Temporarily removed to bypass check and eventually update to next component / topic */
+          && (currentTopicComponent === practiceQuestion
+            || currentTopicComponent === message
+          )
           && currentTopicId === topicId
           && currentLearningObjectiveId === learningObjectiveId
         )
@@ -247,7 +247,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       And current component status will not get changed when it is already consumed in past
       */
       if (userAction === next
-        // && currentTopicComponent === quiz /** Temporarily removed to bypass check and eventually update to next component / topic */
+        && currentTopicComponent === quiz
         && currentTopicId === topicId
       ) {
         // updating current component in case quiz is completed by user
@@ -269,7 +269,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       And current component status will not get changed when it is already consumed in past
       */
       if (userAction === next
-        // && currentTopicComponent === quiz /** Temporarily removed to bypass check and eventually update to next component / topic */
+        && currentTopicComponent === quiz
         && currentTopicId === topicId
       ) {
         // updating current component in case quiz is completed by user
@@ -291,7 +291,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       And current component status will not get changed when it is already consumed in past
       */
       if (userAction === next
-        // && currentTopicComponent === quiz /** Temporarily removed to bypass check and eventually update to next component / topic */
+        && currentTopicComponent === quiz
         && currentTopicId === topicId
       ) {
         // updating current component in case quiz is completed by user
@@ -336,7 +336,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       and current component status will not get changed when it is already consumed in past
       */
       if ((userAction === next || userAction === skip)
-        // && currentTopicComponent === blockBasedProject /** Temporarily removed to bypass check and eventually update to next component / topic */
+        && currentTopicComponent === blockBasedProject
         && currentTopicId === topicId
         && currentBlockBasedProjectId === blockBasedProjectId
       ) {
@@ -361,7 +361,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       and current component status will not get changed when it is already consumed in past
       */
       if ((userAction === next || userAction === skip)
-        // && currentTopicComponent === blockBasedPractice /** Temporarily removed to bypass check and eventually update to next component / topic */
+        && currentTopicComponent === blockBasedPractice
         && currentTopicId === topicId
         && currentBlockBasedProjectId === blockBasedProjectId
       ) {

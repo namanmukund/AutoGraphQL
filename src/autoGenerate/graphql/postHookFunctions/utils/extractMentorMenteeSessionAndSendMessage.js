@@ -122,10 +122,6 @@ const extractMentorMenteeSessionAndSendMessage = async (
   } = menteeObj;
   const mentorPhoto = get(mentorSession, 'user.profilePic.uri', 'python/email/mentor1.png') || 'python/email/mentor1.png';
   // add session Link to LS
-  const currentDate = moment()
-    .subtract(5, 'hours')
-    .subtract(30, 'minutes')
-    .format('YYYY-MM-DD HH:mm:ss');
   updateLeadSquared({
     Phone: parentNumber,
     mx_mentor_Name: capitalize(mentorObj.name),
@@ -136,23 +132,7 @@ const extractMentorMenteeSessionAndSendMessage = async (
     mx_Mentor_Photo: getFullFilePath(mentorPhoto),
     mx_Mentor_Exp_in_years: get(mentorProfile, 'experienceYear') || 3,
     mx_Mentor_Languages_Known: getMentorCodingLanguages(get(mentorProfile, 'codingLanguages')) || 'Python',
-  }, false, {
-    ActivityEvent: 206,
-    Fields: [
-      {
-        SchemaName: 'mx_Custom_1',
-        Value: 'Yes',
-      },
-      {
-        SchemaName: 'mx_Custom_2',
-        Value: capitalize(mentorObj.name),
-      },
-      {
-        SchemaName: 'mx_Custom_3',
-        Value: currentDate,
-      },
-    ],
-  });
+  }, true, {}, true);
 
   // send email
   if (process.env.NODE_ENV === 'production') {

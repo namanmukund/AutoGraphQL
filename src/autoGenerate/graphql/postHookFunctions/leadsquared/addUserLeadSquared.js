@@ -5,7 +5,7 @@ const addUserLeadSquared = (params, create = true) => {
   if (get(params, 'input.Vertical') === 'b2b') {
     return;
   }
-  if (get(params, 'input.schoolName') && !get(params, 'input.Vertical')) {
+  if (get(params, 'input.schoolName') && !get(params, 'input.Vertical') && get(params, 'input.utmSource') !== 'RadioStreet') {
     return;
   }
 

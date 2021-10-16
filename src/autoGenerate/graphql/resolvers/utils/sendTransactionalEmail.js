@@ -52,9 +52,19 @@ const sendTransactionalEmail = async (templateObject, emailBody, country = 'indi
     help,
   });
   // const emailTo = [transactionalMessageBody.testEmail];
-  const emailTo = [templateObject.parentEmail];
+  let emailTo = [templateObject.parentEmail];
 
-  const ccEmail = [];
+  let ccEmail = [];
+
+  if (process.env.DATA_MASKING) {
+    emailTo = [
+      'shubham.gupta@tekie.in',
+    ];
+    ccEmail = [
+      'naman.mukund@tekie.in',
+      'kritesh.patel@tekie.in',
+    ];
+  }
 
   if (templateObject.mentorEmail) {
     ccEmail.push(templateObject.mentorEmail);
