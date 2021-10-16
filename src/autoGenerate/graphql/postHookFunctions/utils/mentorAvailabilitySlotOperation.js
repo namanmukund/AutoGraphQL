@@ -38,7 +38,7 @@ const getMentorDemandSlot = async (date) => {
   return get(mentorDemandSlot, 'data.mentorDemandSlots');
 };
 
-const updateMentorDemandSlot = async (id, slotId, mentorProfileId, input) => {
+const updateMentorDemandSlot = async (id, slotId, mentorProfileId) => {
   const mutationQuery = `mutation {
     updateMentorDemandSlot(id: "${id}", 
     slotsConnectIds: ["${slotId}"],
@@ -47,7 +47,7 @@ const updateMentorDemandSlot = async (id, slotId, mentorProfileId, input) => {
       id
     }
   }`;
-  const updateMentorDemandSlotData = await callLocalGraphqlApi(mutationQuery, '', { input });
+  const updateMentorDemandSlotData = await callLocalGraphqlApi(mutationQuery);
   return get(updateMentorDemandSlotData, 'data.updateMentorDemandSlot');
 };
 
@@ -181,7 +181,7 @@ const addUpdateMentorAvailabilitySlots = async ({
     // check if mentorDemandSlot exist for the give date and accordingly add or update it.
     if (mentorDemandSlotData && mentorDemandSlotData.length > 0) {
       const mentorDemandSlotId = get(mentorDemandSlotData, '[0].id');
-      await updateMentorDemandSlot(mentorDemandSlotId, get(addSingleSlot, 'id'), mentorProfileId, {});
+      await updateMentorDemandSlot(mentorDemandSlotId, get(addSingleSlot, 'id'), mentorProfileId);
     } else {
       await addMentorDemandSlot(get(addSingleSlot, 'id'), mentorProfileId, {
         date: `${date}`,
