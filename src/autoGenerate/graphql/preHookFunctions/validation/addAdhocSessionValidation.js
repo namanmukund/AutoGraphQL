@@ -96,8 +96,7 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
 
   if (
     !backendApps.includes(appName)
-    && !(userRoleFromContext === ADMIN || userRoleFromContext === UMS_ADMIN
-      || userRoleFromContext === MENTOR || userRoleFromContext === UMS_VIEWER)
+    && !(userRoleFromContext === ADMIN || userRoleFromContext === UMS_ADMIN || userRoleFromContext === UMS_VIEWER)
   ) {
     throw new PermissionDeniedError();
   }
