@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../src/api/callLocalGraphqlApi';
-import { sendJourneySnapshotToUser } from '../../../src/email/messages';
+import sendJourneySnapshotToUser from '../../../src/email/messages/sendJourneySnapshotToUser';
 
 const USER = (id) => `
   {
