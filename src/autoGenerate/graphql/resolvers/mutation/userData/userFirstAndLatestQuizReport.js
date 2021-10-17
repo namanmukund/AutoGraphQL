@@ -3,7 +3,6 @@ import {
   GLOBAL_COURSE_TITLE,
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
-  PUBLISHED,
   masteryLevels,
   topicTypes,
   OLD_COURSE_ID,
@@ -27,7 +26,6 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
         }},
       {currentCourse_some:{
         and:[
-          {status: ${PUBLISHED}},
           ${courseId ? `{id: "${courseId}"},` : `{title: "${GLOBAL_COURSE_TITLE}"},`}
         ]
       }}

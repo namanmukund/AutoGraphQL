@@ -23,6 +23,7 @@ const completedSessionDetailType = `
    topicTitle: String
    topicThumbnail: File
    topicThumbnailSmall: File
+   isSubmittedForReview: Boolean
    topicDescription: String
    topicOrder: Int
    endingDate: Date

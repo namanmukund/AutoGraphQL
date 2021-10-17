@@ -52,6 +52,7 @@ const MentorMenteeSession = `
     isPracticeSubmitted: Boolean @defaultValue(value: "false")
     practiceSubmitDate: Date
     isAssignmentSubmitted: Boolean @defaultValue(value: "false")
+    isReviewSubmittedOnTime: Boolean @defaultValue(value: "false")
     assignmentSubmitDate: Date
     isHomeworkCheckedByMentor: Boolean @defaultValue(value: "false")
     isSubmittedForReview: Boolean @defaultValue(value: "false")
