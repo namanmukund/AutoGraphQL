@@ -91,6 +91,7 @@ import AuditSubType from './AuditSubType';
 import Currency from './Currency';
 import LearningObjectiveComponents from './LearningObjectiveComponents';
 import Vertical from './Vertical';
+import Slot from './Slot';
 
 export default [
   Status,
@@ -187,4 +188,5 @@ export default [
   Currency,
   LearningObjectiveComponents,
   Vertical,
+  Slot,
 ];

@@ -27,6 +27,7 @@ const BlockBasedProject = `
     topics: [Topic] @relation(name: "TopicBlockBasedProject")
     status: ContentStatus! @defaultValue(value: "unpublished")
     isSubmitAnswer: Boolean
+    isHomework: Boolean @defaultValue(value: "false")
     type: BlockBasedProjectType!
     courses: [Course] @relation(name: "CourseBlockBasedProject", direction: "OneWay")
     tags: [ContentTag] @relation(name: "BlockBasedProjectTag")

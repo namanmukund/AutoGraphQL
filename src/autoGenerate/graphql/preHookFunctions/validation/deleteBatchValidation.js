@@ -2,8 +2,9 @@ import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { DatabaseRecordNotFoundError, StudentsLinked } from '../../../../../constants/errors';
 import batchQuery from '../../graphqlQueries/batchQuery';
+import getBatchSessionForBatch from '../../graphqlQueries/getBatchSessionsForBatch';
 
-const deleteBatchValidation = async (params) => {
+const deleteBatchValidation = async (params, mutationOrQueryName, context) => {
   const { id: batchId } = params;
   const batchData = await callLocalGraphqlApi(batchQuery(batchId));
   const batch = get(batchData, 'data.batch');
@@ -16,6 +17,8 @@ const deleteBatchValidation = async (params) => {
   if (studentsMeta && studentsMeta.count !== 0) {
     throw new StudentsLinked();
   }
+  const batchSessions = await callLocalGraphqlApi(getBatchSessionForBatch(batchId));
+  context.batchSessions = get(batchSessions, 'data.batchSessions');
   return true;
 };
 

@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import moment from 'moment';
-import { auditType, MENTOR_RATING_AUDIT_THRESHOLD } from '../../../../constants';
+import { auditType, MENTOR_RATING_AUDIT_THRESHOLD, OLD_COURSE_ID } from '../../../../constants';
 import { MENTEE } from '../../../../constants/roles';
 import updateReferrerCreditsPostSessionOrUserPayment from './utils/updateReferrerCreditsPostSessionOrUserPayment';
 import referralCredits from '../../../../constants/referralCredits';
@@ -21,6 +21,7 @@ import addRescheduledSlot from './utils/addRescheduledSlot';
 import addSessionLog from './utils/addSessionLog';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import addSalesAudit from './utils/addSalesAudit';
+import { fetchCourseData, sessionStartedStreaksFlow, submittedForReviewStreaksFlow } from './utils/homeworkStreakMethods';
 
 const { postSales } = auditType;
 // import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
@@ -128,7 +129,12 @@ const intersection = (arr1, arr2) => {
 const allowedRoles = [MENTEE];
 const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
   const {
-    currentUser, previousDocument: { sessionStatus: prevSessionStatus, topic, menteeSession: prevMenteeSession },
+    currentUser, previousDocument: {
+      sessionStatus: prevSessionStatus,
+      topic,
+      menteeSession: prevMenteeSession,
+      isSubmittedForReview: prevIsSubmittedForReview,
+    },
   } = context;
   const { sessionStartDate } = input;
   const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));
@@ -276,6 +282,39 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       }
       await updateUserPaymentPlanMutation(get(userPaymentPlanData, 'id'), updateObject, get(topic, 'id'));
     }
+  }
+  /**
+   * Homework Streaks Implementation
+   */
+  const courseTypeId = get(input, 'course.typeId', '');
+  const courseData = await fetchCourseData(courseTypeId);
+  const topics = get(courseData, 'topics', []);
+  const filteredTopics = topics.filter((topicObj) => {
+    if (courseTypeId !== OLD_COURSE_ID) {
+      let isHomeworkVisible = false;
+      const topicComponentRuleDoc = get(topicObj, 'topicComponentRule', []);
+      topicComponentRuleDoc.forEach((rule) => {
+        if (rule && (['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(get(rule, 'componentName')))) {
+          isHomeworkVisible = true;
+        }
+      });
+      return isHomeworkVisible;
+    }
+    return true;
+  });
+  /**
+   * Updating streaks if user has submitted homework for review.
+   */
+  if ((prevIsSubmittedForReview === false) && (get(input, 'isSubmittedForReview') === true) && filteredTopics.length) {
+    log('.............Homework Streaks Review Flow Started');
+    submittedForReviewStreaksFlow(filteredTopics, userId, courseTypeId, context, topic.id);
+  }
+  /**
+   * Updating streaks if user/mentor has started next session.
+   */
+  if ((prevSessionStatus === 'allotted') && (get(input, 'sessionStatus') === 'started') && filteredTopics.length) {
+    log('.............Homework Streaks Session Flow Started');
+    sessionStartedStreaksFlow(filteredTopics, userId, courseTypeId, context, topic.id);
   }
 };
 export default updateMentorMenteeSessionPostHookMethod;

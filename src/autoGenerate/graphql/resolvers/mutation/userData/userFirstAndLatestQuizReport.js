@@ -3,7 +3,6 @@ import {
   GLOBAL_COURSE_TITLE,
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
-  PUBLISHED,
   masteryLevels,
   topicTypes,
   OLD_COURSE_ID,
@@ -27,7 +26,6 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
         }},
       {currentCourse_some:{
         and:[
-          {status: ${PUBLISHED}},
           ${courseId ? `{id: "${courseId}"},` : `{title: "${GLOBAL_COURSE_TITLE}"},`}
         ]
       }}
@@ -285,14 +283,14 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     });
   }
   let currentRunningTopic;
-  let currentRunningTopicComponentType;
+  // let currentRunningTopicComponentType;
 
   // if user belongs to a batch, quiz report will be calculated on basis of batchCurrentComponentStatus
   if (batchCurrentComponentInfo) {
     currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
   } else {
     currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
-    currentRunningTopicComponentType = currentTopicComponentInfo && currentTopicComponentInfo.currentTopicComponentType;
+    // currentRunningTopicComponentType = currentTopicComponentInfo && currentTopicComponentInfo.currentTopicComponentType;
   }
   if (!courseId || courseId === OLD_COURSE_ID) {
     /* eslint no-lonely-if:0 */
@@ -300,14 +298,20 @@ const userFirstAndLatestQuizReportMutationResolver = async (
       throw new ComponentLockedError();
     }
   } else {
+    /* eslint no-lonely-if:0 */
     if (topicInfo.order > currentRunningTopic.order) {
       throw new ComponentLockedError();
-    } else if (topicInfo.order === currentRunningTopic.order) {
-      if (!batchCurrentComponentInfo && currentRunningTopicComponentType !== 'quiz') {
-        throw new ComponentLockedError();
-      }
     }
   }
+  // else {
+  //   if (topicInfo.order > currentRunningTopic.order) {
+  //     throw new ComponentLockedError();
+  //   } else if (topicInfo.order === currentRunningTopic.order) {
+  //     if (!batchCurrentComponentInfo && currentRunningTopicComponentType !== 'quiz') {
+  //       throw new ComponentLockedError();
+  //     }
+  //   }
+  // }
   // If not equal then check if not quiz and throw eror ( allow for batch )
   // this object will be returned in output
   const userQuizReportData = {};

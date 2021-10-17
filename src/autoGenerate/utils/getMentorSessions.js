@@ -13,6 +13,7 @@ const getMentorSessions = (userId, availabilityDate) => `query{
        mentorMenteeSessions{
           id
           menteeSession{
+            bookingDate
             user {
               name
               studentProfile {
