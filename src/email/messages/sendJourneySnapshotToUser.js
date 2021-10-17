@@ -39,7 +39,7 @@ const sendJourneySnapshotToUser = async (emailTo, input, appName) => {
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';
-    const subject = 'Test : Journey Snapshot';
+    const subject = 'Tekie - Journey Snapshot';
     const text = '';
     const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html);
     sendEmail(emailMsgObject);

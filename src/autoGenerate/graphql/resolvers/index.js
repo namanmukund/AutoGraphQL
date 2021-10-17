@@ -89,6 +89,8 @@ import signUpSchool from './mutation/methods/signUpSchool';
 import rebookMenteeSession from './mutation/methods/rebookMenteeSession';
 import getSchoolCampaignSlots from './query/methods/getSchoolCampaignSlots';
 import getUserCourses from './query/methods/getUserCourses';
+import sendCertificateInMail from './mutation/methods/sendCertificateInMail';
+import sendJourneySnapshotInMail from './mutation/methods/sendJourneySnapshotInMail';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -582,6 +584,8 @@ resolvers.Mutation.updateVisitorReactionOnUserApprovedCode = updateVisitorReacti
 resolvers.Mutation.addBulkMentorSession = addBulkMentorSession;
 resolvers.Mutation.bookB2B2CSlots = bookB2B2CSlots;
 resolvers.Mutation.rebookMenteeSession = rebookMenteeSession;
+resolvers.Mutation.sendCertificateInMail = sendCertificateInMail;
+resolvers.Mutation.sendJourneySnapshotInMail = sendJourneySnapshotInMail;
 
 // queries
 resolvers.Query.me = me;
