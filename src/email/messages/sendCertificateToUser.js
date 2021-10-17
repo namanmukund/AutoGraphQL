@@ -17,7 +17,7 @@ const sendCertificateToUser = async (emailTo, input, appName) => {
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';
-    const subject = 'Course Completion Certificate';
+    const subject = 'Tekie - Course Completion Certificate';
     const text = '';
     const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html);
     sendEmail(emailMsgObject);
