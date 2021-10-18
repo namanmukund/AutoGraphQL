@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 // validate mentor session input variables
 import { get } from 'lodash';
 import validateBookingDate from './validateBookingDate';
@@ -59,13 +60,19 @@ const validateMenteeSessionInput = async (params, context) => {
   const mentorAvailabilitySlotRes = await callLocalGraphqlApi(getMentorAvailabilitySlots(bookingDate));
   // const availableSlots = get(availableSlotsRes, 'data.availableSlots');
   const mentorAvailabilitySlotsData = get(mentorAvailabilitySlotRes, 'data.mentorAvailabilitySlots', []);
+  mentorAvailabilitySlotsData.forEach((slot) => {
+    const batchSessions = get(slot, 'batchSessions', []).filter((session) => get(session, 'batch') && get(session, 'batch.type') !== 'b2b') || [];
+    slot.batchSessionsMeta = {
+      count: batchSessions.length,
+    };
+  });
   let availability = {};
   get(mentorAvailabilitySlotRes, 'data.mentorAvailabilitySlots').forEach((slotObj) => {
     const occupied = get(slotObj, 'batchSessionsMeta.count', 0) + get(slotObj, 'menteeSessionsMeta.count', 0);
-    if (get(slotObj, 'mentorSessionsMeta.count', 0) > occupied) {
+    if (get(slotObj, 'count', 0) > occupied) {
       availability = {
         ...availability,
-        [get(slotObj, 'slotName')]: get(slotObj, 'mentorSessionsMeta.count', 0) - occupied,
+        [get(slotObj, 'slotName')]: get(slotObj, 'count', 0) - occupied,
       };
     }
   });
