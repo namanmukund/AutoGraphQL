@@ -127,6 +127,7 @@ import MentorSupplyPaySlab from './mentorSupplyPaySlab';
 import MentorDemandSlot from './mentorDemandSlot';
 import MentorDemandSingleSlot from './mentorDemandSingleSlot';
 import MentorAuditReport from './mentorAuditReport';
+import ShiftBatchSessionsInput from './shiftBatchSessionsInput';
 
 export default [
   ...User,
@@ -258,4 +259,5 @@ export default [
   ...MentorDemandSlot,
   ...MentorDemandSingleSlot,
   ...MentorAuditReport,
+  ...ShiftBatchSessionsInput,
 ];

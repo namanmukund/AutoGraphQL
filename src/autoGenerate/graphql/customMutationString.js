@@ -41,6 +41,7 @@ const customMutationString = `
    generateJourneySnapshot ( input: GenerateJourneySnapshotInput ): UrlResult,
    sendJourneySnapshotInMail ( input: SendJourneySnapshotInMailInput ): BooleanResult,
    sendCertificateInMail ( input: SendCertificateInMailInput ): BooleanResult,
+   shiftBatchSessionsAfterGivenDate ( input: ShiftBatchSessionsInput ): BooleanResult,
    `;
 
 export default customMutationString;

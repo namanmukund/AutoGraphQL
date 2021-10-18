@@ -119,6 +119,11 @@ const fetchAllottedBatchSessions = async (batchId) => {
           {
             batchSessions(filter: {and: [{sessionStatus: allotted}, {batch_some: {id: "${batchId}"}}]}) {
               id
+              bookingDate
+              topic {
+                id
+                order
+              }
               batch {
                 id
               }
