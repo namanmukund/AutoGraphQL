@@ -22,6 +22,7 @@ import addSessionLog from './utils/addSessionLog';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import addSalesAudit from './utils/addSalesAudit';
 import { fetchCourseData, sessionStartedStreaksFlow, submittedForReviewStreaksFlow } from './utils/homeworkStreakMethods';
+import { log } from '../../../../utils';
 
 const { postSales } = auditType;
 // import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
