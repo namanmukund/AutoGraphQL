@@ -6,7 +6,7 @@ import { get } from 'lodash';
 In post-hook we are masking data for pre prod users
 */
 const userPostHookMethod = (input) => {
-  if (process.env.DATA_MASKING) {
+  if (process.env.DATA_MASKING && input) {
     if (Array.isArray(input) && input.length) {
       input.forEach((elem) => {
         const email = get(elem, 'email');
