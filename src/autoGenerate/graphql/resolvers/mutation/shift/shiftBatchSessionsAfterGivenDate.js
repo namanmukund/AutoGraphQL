@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { fetchAllottedBatchSessions } from '../../../postHookFunctions/utils/removeFromBatchStudentProfileHelperMethods';
 import isDateInPast from '../../../../../../utils/isDateInPast';
@@ -11,13 +11,32 @@ import log from '../../../../../../utils/log';
 - loops through all fetches sessions and deletes ones booked for before given date
 - for all remaining sessions, updates topic id starting from the one first deleted
 */
-
 const deleteBatchSession = (sessionId) => `
   mutation{
     deleteBatchSession(id: "${sessionId}"){
       id
     }
   }
+`;
+
+const updateBatchSession = (sessionId, topicId) => `
+mutation{
+  updateBatchSession(id: "${sessionId}",
+  topicConnectId: "${topicId}"){
+    id
+  }
+}
+`;
+
+const fetchBatch = (batchId) => `
+query{
+  batches(filter: {id: "${batchId}"}){
+    id
+    course{
+      id
+    }
+  }
+}
 `;
 
 const fetchTopics = (topicOrder, courseId) => `
@@ -43,22 +62,41 @@ const shiftBatchSessionsMutationResolver = async (
   ast,
   context,
 ) => {
-  validateAuthentication(context);
-  const { input: { date: inputDate, batchId } } = params;
+  // validateAuthentication(context);
+  console.log('Inside custom mutation')
+  const { input } = params;
+  console.log('input', input);
+  const batchId = get(input, 'batchId');
+  const inputDate = get(input, 'date');
+  console.log('batchId', batchId);
+  console.log('inputDate', inputDate);
   try {
-    const batchSessions = await callLocalGraphqlApi(fetchAllottedBatchSessions(batchId));
+    const batchSessions = await fetchAllottedBatchSessions(batchId);
+    // fetch courseId here
+    console.log('inputDate', inputDate);
+    console.log('batchId', batchId);
+    const batchesRes = await callLocalGraphqlApi(fetchBatch(batchId));
+    const batches = get(batchesRes, 'data.batches', []);
+    const courseId = get(batches, '[0].course.id', '');
+    console.log('courseId', courseId);
     let firstTopicOrderToBeDeleted = null;
     let topicsRemaining = null;
     let topicsUpdatedCounter = 0;
+    console.log('batchsessions', batchSessions);
     for (const batchSession of batchSessions) {
       const dateOfBooking = get(batchSession, 'bookingDate');
       const sessionId = get(batchSession, 'id');
-      if (isDateInPast(dateOfBooking, inputDate) || isEqualDates(dateOfBooking, inputDate)) {
+      console.log('dateOfBooking', dateOfBooking);
+      console.log('sessionId', sessionId);
+
+      // TODO : equal dates and slots check
+      if (isDateInPast(dateOfBooking, new Date(inputDate)) || isEqualDates(dateOfBooking, inputDate)) {
         if (!firstTopicOrderToBeDeleted) {
           firstTopicOrderToBeDeleted = get(batchSession, 'topic.order');
         }
+        // TODO : add variable in context to bypass slots in past error
         await callLocalGraphqlApi(deleteBatchSession(sessionId));
-        log(`Deleted batch session with sessionId ${sessionId} and order ${get(batchSession, 'topic.order')}`);
+        console.log(`Deleted batch session with sessionId ${sessionId} and order ${get(batchSession, 'topic.order')}`);
       } else {
         // if firstTopicOrderToBeDeleted = null, we can assume we haven't deleted any sessions
         if (!firstTopicOrderToBeDeleted) {
@@ -67,7 +105,7 @@ const shiftBatchSessionsMutationResolver = async (
         }
         // fetch topics (if not already feched), starting from firstTopicOrderToBeDeleted
         if (!topicsRemaining) {
-          const topicsRemainingRes = await callLocalGraphqlApi(fetchTopics(firstTopicOrderToBeDeleted));
+          const topicsRemainingRes = await callLocalGraphqlApi(fetchTopics(firstTopicOrderToBeDeleted, courseId));
           topicsRemaining = get(topicsRemainingRes, 'data.topics', []);
         }
         const topicIdToUpdate = get(topicsRemaining, `[${topicsUpdatedCounter}].id`);
@@ -76,8 +114,9 @@ const shiftBatchSessionsMutationResolver = async (
         topicsUpdatedCounter += 1;
       }
     }
-    // TODO : add new batch sessions in the end for remaining topics yet to be connected
+    // FUTURE ENHANCEMENT : add new batch sessions for remaining topics yet to be connected
   } catch (err) {
+    console.log(err)
     return {
       error: 'Error while trying to shift batch sessions',
     };

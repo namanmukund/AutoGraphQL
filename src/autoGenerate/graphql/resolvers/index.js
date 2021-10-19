@@ -92,6 +92,7 @@ import sendJourneySnapshotInMail from './mutation/methods/sendJourneySnapshotInM
 import sendCertificateInMail from './mutation/methods/sendCertificateInMail';
 import getSchoolCampaignSlots from './query/methods/getSchoolCampaignSlots';
 import getUserCourses from './query/methods/getUserCourses';
+import shiftBatchSessionsAfterGivenDate from './mutation/shift/shiftBatchSessionsAfterGivenDate';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -588,6 +589,7 @@ resolvers.Mutation.rebookMenteeSession = rebookMenteeSession;
 resolvers.Mutation.generateJourneySnapshot = generateJourneySnapshot;
 resolvers.Mutation.sendJourneySnapshotInMail = sendJourneySnapshotInMail;
 resolvers.Mutation.sendCertificateInMail = sendCertificateInMail;
+resolvers.Mutation.shiftBatchSessionsAfterGivenDate = shiftBatchSessionsAfterGivenDate;
 
 // queries
 resolvers.Query.me = me;

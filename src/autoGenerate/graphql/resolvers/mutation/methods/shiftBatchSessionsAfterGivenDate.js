@@ -1,8 +1,9 @@
-import { ifAuthorized, toObject } from '../../../../../../utils';
+import { toObject } from '../../../../../../utils';
+import shiftBatchSessionsMutationResolver from '../shift/shiftBatchSessionsAfterGivenDate';
 
 const shiftBatchSessionsAfterGivenDate = async (root, params, context, info) => {
   const { parsedASTMap } = context;
-  const authentication = ifAuthorized(context);
+  // const authentication = ifAuthorized(context);
   const typeName = 'shiftBatchSessionsAfterGivenDate';
   const mutationName = 'shiftBatchSessionsAfterGivenDate';
 
