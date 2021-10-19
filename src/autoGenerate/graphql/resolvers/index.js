@@ -92,7 +92,7 @@ import sendJourneySnapshotInMail from './mutation/methods/sendJourneySnapshotInM
 import sendCertificateInMail from './mutation/methods/sendCertificateInMail';
 import getSchoolCampaignSlots from './query/methods/getSchoolCampaignSlots';
 import getUserCourses from './query/methods/getUserCourses';
-import shiftBatchSessionsAfterGivenDate from './mutation/shift/shiftBatchSessionsAfterGivenDate';
+import shiftBatchSessionsAfterGivenDate from './mutation/methods/shiftBatchSessionsAfterGivenDate';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {

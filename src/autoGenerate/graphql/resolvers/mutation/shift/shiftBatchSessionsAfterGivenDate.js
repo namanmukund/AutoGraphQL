@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-// import validateAuthentication from '../../../../../../utils/validateAuthentication';
+import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { fetchAllottedBatchSessions } from '../../../postHookFunctions/utils/removeFromBatchStudentProfileHelperMethods';
 import isDateInPast from '../../../../../../utils/isDateInPast';
@@ -23,7 +23,7 @@ const deleteBatchSession = (sessionId) => `
 const updateBatchSession = (sessionId, topicId) => `
 mutation{
   updateBatchSession(id: "${sessionId}",
-  topicConnectId: "${topicId}"){
+    topicConnectId: "${topicId}"){
     id
   }
 }
@@ -47,7 +47,7 @@ query{
       {courses_some: {id: "${courseId}"}}
       {order_gte: ${topicOrder}}
     ]
-  }){
+  }orderBy: order_ASC){
     id
     order
   }
@@ -60,38 +60,29 @@ const shiftBatchSessionsMutationResolver = async (
   typeName,
   info,
   mutationName,
-  ast,
+  parsedASTMap,
+  authentication,
   context,
 ) => {
-  // validateAuthentication(context);
+  validateAuthentication(context);
   const { input: { date: inputDate, batchId, ...slots } } = params;
-  // console.log('input', input);
-  // console.log('batchId', batchId);
-  // console.log('inputDate', inputDate);
   const inputSlotTimeArray = getSelectedSlotsTime(slots);
   try {
     const batchSessions = await fetchAllottedBatchSessions(batchId);
     // fetch courseId here
-    console.log('inputDate', inputDate);
-    console.log('batchId', batchId);
     const batchesRes = await callLocalGraphqlApi(fetchBatch(batchId));
     const batches = get(batchesRes, 'data.batches', []);
     const courseId = get(batches, '[0].course.id', '');
-    console.log('courseId', courseId);
     let firstTopicOrderToBeDeleted = null;
     let topicsRemaining = null;
     let topicsUpdatedCounter = 0;
-    console.log('batchsessions', batchSessions);
     for (const batchSession of batchSessions) {
       const dateOfBooking = get(batchSession, 'bookingDate');
       const sessionId = get(batchSession, 'id');
-      console.log('dateOfBooking', dateOfBooking);
-      console.log('sessionId', sessionId);
       const sessionSlotTimeArray = getSelectedSlotsTime(batchSession);
-      let isSameDay = false;
+      let isSameDay = isEqualDates(dateOfBooking, inputDate);
       let isTimeInPast = false;
-      if (isEqualDates(dateOfBooking, inputDate)) {
-        isSameDay = true;
+      if (isSameDay) {
         if (sessionSlotTimeArray.length === 1 &&
           inputSlotTimeArray.length === 1 &&
           inputSlotTimeArray[0] <= sessionSlotTimeArray[0]) {
@@ -117,9 +108,10 @@ const shiftBatchSessionsMutationResolver = async (
         if (!topicsRemaining) {
           const topicsRemainingRes = await callLocalGraphqlApi(fetchTopics(firstTopicOrderToBeDeleted, courseId));
           topicsRemaining = get(topicsRemainingRes, 'data.topics', []);
+          log('Fetched Topics')
         }
         const topicIdToUpdate = get(topicsRemaining, `[${topicsUpdatedCounter}].id`);
-        await updateBatchSession(sessionId, topicIdToUpdate);
+        await callLocalGraphqlApi(updateBatchSession(sessionId, topicIdToUpdate));
         log(`Updated session ${sessionId} with topicConnectId ${topicIdToUpdate}`);
         topicsUpdatedCounter += 1;
       }
