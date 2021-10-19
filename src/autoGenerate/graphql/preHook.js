@@ -621,7 +621,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         },
       };
       await updateBatchSessionValidation(newParams, mutationOrQueryName, context);
-      return hook(newInput, mutationOrQueryName, 'PreHook');
+      return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'deleteBatchSession': {
       await deleteBatchSessionValidation(params, mutationOrQueryName, context);
