@@ -4,7 +4,8 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { fetchAllottedBatchSessions } from '../../../postHookFunctions/utils/removeFromBatchStudentProfileHelperMethods';
 import isDateInPast from '../../../../../../utils/isDateInPast';
 import isEqualDates from '../../../../../../utils/isEqualDates';
-import log from '../../../../../../utils/log';
+import { log } from '../../../../../../utils/log';
+import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 
 /*
 - Takes date and batchId as i/p, and fetches all allotted batch sessions
@@ -63,13 +64,11 @@ const shiftBatchSessionsMutationResolver = async (
   context,
 ) => {
   // validateAuthentication(context);
-  console.log('Inside custom mutation')
-  const { input } = params;
-  console.log('input', input);
-  const batchId = get(input, 'batchId');
-  const inputDate = get(input, 'date');
-  console.log('batchId', batchId);
-  console.log('inputDate', inputDate);
+  const { input: { date: inputDate, batchId, ...slots } } = params;
+  // console.log('input', input);
+  // console.log('batchId', batchId);
+  // console.log('inputDate', inputDate);
+  const inputSlotTimeArray = getSelectedSlotsTime(slots);
   try {
     const batchSessions = await fetchAllottedBatchSessions(batchId);
     // fetch courseId here
@@ -88,19 +87,30 @@ const shiftBatchSessionsMutationResolver = async (
       const sessionId = get(batchSession, 'id');
       console.log('dateOfBooking', dateOfBooking);
       console.log('sessionId', sessionId);
-
-      // TODO : equal dates and slots check
-      if (isDateInPast(dateOfBooking, new Date(inputDate)) || isEqualDates(dateOfBooking, inputDate)) {
+      const sessionSlotTimeArray = getSelectedSlotsTime(batchSession);
+      let isSameDay = false;
+      let isTimeInPast = false;
+      if (isEqualDates(dateOfBooking, inputDate)) {
+        isSameDay = true;
+        if (sessionSlotTimeArray.length === 1 &&
+          inputSlotTimeArray.length === 1 &&
+          inputSlotTimeArray[0] <= sessionSlotTimeArray[0]) {
+          isTimeInPast = true;
+        }
+      }
+      // equal dates and slots check
+      if (isDateInPast(dateOfBooking, new Date(inputDate)) || (isSameDay && isTimeInPast)) {
         if (!firstTopicOrderToBeDeleted) {
           firstTopicOrderToBeDeleted = get(batchSession, 'topic.order');
         }
-        // TODO : add variable in context to bypass slots in past error
-        await callLocalGraphqlApi(deleteBatchSession(sessionId));
-        console.log(`Deleted batch session with sessionId ${sessionId} and order ${get(batchSession, 'topic.order')}`);
+        // add variable in context to bypass slots in past error
+        context.previousDocument = 'shiftBatch';
+        await callLocalGraphqlApi(deleteBatchSession(sessionId, context));
+        log(`Deleted batch session with sessionId ${sessionId} and order ${get(batchSession, 'topic.order')}`);
       } else {
         // if firstTopicOrderToBeDeleted = null, we can assume we haven't deleted any sessions
         if (!firstTopicOrderToBeDeleted) {
-          log('No allotted batch sessions found before or on given date.');
+          log('No allotted batch sessions found before or on given date and slot.');
           break;
         }
         // fetch topics (if not already feched), starting from firstTopicOrderToBeDeleted
@@ -116,9 +126,8 @@ const shiftBatchSessionsMutationResolver = async (
     }
     // FUTURE ENHANCEMENT : add new batch sessions for remaining topics yet to be connected
   } catch (err) {
-    console.log(err)
     return {
-      error: 'Error while trying to shift batch sessions',
+      error: err,
     };
   }
   return {
