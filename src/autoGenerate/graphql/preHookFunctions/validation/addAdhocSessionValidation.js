@@ -49,11 +49,20 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
   const batchId = get(params, 'batchConnectId');
   const order = get(params, 'input.order');
   const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
+  const topicId = get(params, 'topicConnectId');
 
   if (!batchId) {
     throw new MissingMandatoryInputInRequestError({
       data: {
         message: 'batchConnectId is missing in input',
+      },
+    });
+  }
+
+  if (!topicId) {
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'topicConnnectId is missing in input',
       },
     });
   }
@@ -109,6 +118,10 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
       throw new SimilarDocumentAlreadyExistError();
     }
   }
+
+  // check is for given previous topic and type, if adhoc session exists from before throw err
+
+
 
   return true;
 };
