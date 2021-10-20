@@ -155,34 +155,8 @@ const addAdhocSessionPostHookMethod = async (input, params, mutationName, contex
     ));
   }
 
-  // shift the batch sessions in batch by changing topic by one order less than current topic order (pass other topicConnectId)
-  const batchSessionsData = await callLocalGraphqlApi(getBatchSessions(batchId));
-  const batchSessions = get(batchSessionsData, 'data.batchSessions', []);
-  let topicIdForNextSession = '';
-  let tempTopicId = '';
-  const firstRemainingSessTopicOrder = get(batchSessions, '[0].topic.order', '');
-  const topicOrderToFetch = firstRemainingSessTopicOrder - 1;
-  // TODO : move this to prehook
-  if (topicOrderToFetch < 0) {
-    throw new BatchMustHaveAtleastOneSession();
-  }
-  const lastTopicRes = await callLocalGraphqlApi(getLastTopic(topicOrderToFetch, courseId));
-  const lastTopicId = get(lastTopicRes, 'data.topics[0].id', '');
-  topicIdForNextSession = lastTopicId;
+  // TODO : shift batch sessions after date of adhoc session (call shiftBatchSessionAfterGivenDate mutation)
 
-  // TODO : same day and slot logic
-
-  /* eslint-disable-next-line no-restricted-syntax */
-  for (const batchSession of batchSessions) {
-    tempTopicId = get(batchSession, 'topic.id', '');
-    const sessionId = get(batchSession, 'id', 'id');
-    if (topicIdForNextSession && sessionId) {
-      /* eslint-disable-next-line no-await-in-loop */
-      await callLocalGraphqlApi(updateBatchSession(sessionId, topicIdForNextSession));
-      log(`****** Updated batch session ${sessionId} with topicConnectId ${topicIdForNextSession}`);
-    }
-    topicIdForNextSession = tempTopicId;
-  }
   log('****** Finished updates');
 };
 
