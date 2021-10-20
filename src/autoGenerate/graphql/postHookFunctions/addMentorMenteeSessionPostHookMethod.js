@@ -42,6 +42,8 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
     if (studentProfileId) addToMentorMenteeSessionStudentProfile(mentorMenteeSessionId, studentProfileId);
+    // if (context.mentorAvailabilitySlotId) {
+    // }
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMentorMenteeSession', batchCode, mentorSessionConnectId, sessionStatus);
   }
 };

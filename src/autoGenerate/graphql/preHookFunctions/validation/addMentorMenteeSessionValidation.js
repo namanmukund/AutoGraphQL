@@ -13,6 +13,7 @@ import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetails
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorSessions from '../../../utils/getMentorSessions';
 import { checkIfSlotCanBeOpenedValidation } from './utils';
+import isTrialSession from '../../resolvers/utils/isTrialSession';
 
 // query to get mentor Sessions
 const mentorMenteeSessionsQuery = (menteeSessionConnectId, mentorSessionConnectId) => `
@@ -33,6 +34,12 @@ query{
   menteeSession(id:"${menteeSessionId}"){
     id
     bookingDate
+    mentorAvailabilitySlot{
+      id
+    }
+    broadCastedMentors {
+      id
+    }
     user{
       studentProfile {
         batch {
@@ -156,6 +163,15 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   context.menteeSession = menteeSession;
   context.mentorSessionConnectId = mentorSessionConnectId;
   context.currentUser = currentUser;
+  const isTrial = await isTrialSession(topicConnectId);
+  if (typeof isTrial === 'boolean' && isTrial) {
+    console.log(JSON.stringify(menteeSession))
+    if (get(menteeSession, 'broadCastedMentors', []).length > 0) {
+      params.input.isBroadCastedSession = true;
+    }
+    if (get(menteeSession, 'mentorAvailabilitySlot.id'))
+      context.mentorAvailabilitySlotId = get(menteeSession, 'mentorAvailabilitySlot.id')
+  }
   return true;
 };
 
