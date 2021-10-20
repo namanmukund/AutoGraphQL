@@ -2,6 +2,8 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
+const getIsoDate = (date) => new Date(new Date(date).setHours(0, 0, 0, 0)).toISOString();
+
 export const getMentorAvailabilitySlots = async ({
   date, sessionType, slotName, sessionId, typeName,
 }) => {
@@ -168,7 +170,7 @@ const addUpdateMentorAvailabilitySlots = async ({
     const paySlabId = get(paySlab, '[0].id');
     const vertical = 'b2c';
     const input = {
-      date: `${date}`,
+      date: `${getIsoDate(date)}`,
       verticals: [{ value: vertical }],
       slotName,
       countries: [{ value: 'india' }],
@@ -184,7 +186,7 @@ const addUpdateMentorAvailabilitySlots = async ({
       await updateMentorDemandSlot(mentorDemandSlotId, get(addSingleSlot, 'id'), mentorProfileId);
     } else {
       await addMentorDemandSlot(get(addSingleSlot, 'id'), mentorProfileId, {
-        date: `${date}`,
+        date: `${getIsoDate(date)}`,
         verticals: [{ value: vertical }],
         sessionType,
       });
@@ -198,7 +200,11 @@ const mentorAvailabilitySlotOperation = async ({
   for (let i = 0; i < slotTimeStringArray.length; i += 1) {
     /* eslint-disable no-await-in-loop */
     if (mutationName) {
-      const singleSlotData = await getMentorAvailabilitySlots({ date, sessionType, slotName: slotTimeStringArray[i] });
+      const singleSlotData = await getMentorAvailabilitySlots({
+        date: getIsoDate(date),
+        sessionType,
+        slotName: slotTimeStringArray[i],
+      });
       switch (mutationName) {
         case 'addMenteeSession': {
           if (singleSlotData && singleSlotData.length > 0) {
