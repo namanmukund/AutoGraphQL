@@ -138,13 +138,13 @@ const validateUserOTPMutationResolver = async (
                   },
                   {
                     SchemaName: 'mx_Custom_8',
-                    Value: '2021-10-17 05:30:00', // 11 am
+                    Value: '2021-10-24 05:30:00', // 11 am
                   },
                 ],
               };
               const leadSquaredInput = {
                 Phone: number,
-                mx_Event_Date: '17 October',
+                mx_Event_Date: '24 October',
                 mx_Event_Time: '11:00 am',
               };
               updateLeadSquared(leadSquaredInput, false, activityInput);
