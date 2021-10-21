@@ -1,6 +1,6 @@
 const AdhocSessionType = `
   enum AdhocSessionType {
-    revision
+    revision,
     homework
   }`;
 

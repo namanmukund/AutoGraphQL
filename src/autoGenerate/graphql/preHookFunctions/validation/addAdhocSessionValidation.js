@@ -8,13 +8,13 @@ import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfter
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import {
-  SimilarDocumentAlreadyExistError,
   SessionMustBeCompletedError,
   MissingMandatoryInputInRequestError,
   PermissionDeniedError,
 } from '../../../../../constants/errors';
 import getMentorSessions from '../../../utils/getMentorSessions';
 import { checkIfSlotCanBeOpenedValidation } from './utils';
+import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 
 // query to get batch Sessions
 const getAdhocSession = (batchId,
@@ -36,13 +36,16 @@ const getAdhocSession = (batchId,
         },
         {
           and:[
+            {batch_some: {
+              id: "${batchId}"
+            }},
             {
               previousTopic_some:{
                 id: "${previousTopicConnectId}"
               }
             },
             {
-              type: "${type}"
+              type: ${type}
             }
           ]
         }
@@ -154,6 +157,7 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
   if (order) {
     const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, order, previousTopicConnectId, type));
     const adhocSessions = get(getAdhocSessionRes, 'data.adhocSessions');
+    // console.log('adhocSessions', adhocSessions);
     if (adhocSessions && adhocSessions.length) {
       throw new SimilarDocumentAlreadyExistError();
     }

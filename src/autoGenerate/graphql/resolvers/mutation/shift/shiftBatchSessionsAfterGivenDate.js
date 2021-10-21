@@ -70,6 +70,7 @@ const shiftBatchSessionsMutationResolver = async (
   const inputSlotTimeArray = getSelectedSlotsTime(slots);
   try {
     const batchSessions = await fetchAllottedBatchSessions(batchId);
+    // console.log('batchSessions', batchSessions)
     // fetch courseId here
     const batchesRes = await callLocalGraphqlApi(fetchBatch(batchId));
     const batches = get(batchesRes, 'data.batches', []);

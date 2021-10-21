@@ -72,7 +72,7 @@ const getBatchSessions = (batchId, bookingDate, slot) => `
             id: "${batchId}"
           }}
           {sessionStatus: allotted}
-          {bookingDate: ${bookingDate}
+          {bookingDate: "${bookingDate}"}
           {slot${slot}: true}
         ]
       }){
@@ -152,16 +152,14 @@ const addAdhocSessionPostHookMethod = async (input, params, mutationName, contex
   }
 
   const inputSlotTimeArray = getSelectedSlotsTime(slots);
-  console.log('inputSlotTimeArray', inputSlotTimeArray);
   // fetch batch session for same date and slot
   const batchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, bookingDate, inputSlotTimeArray[0]));
   const batchSessions = get(batchSessionsRes, 'data.batchSessions', []);
-  console.log('batchSessions', batchSessions);
+  // console.log('batchSessions', batchSessions);
   if (batchSessions.length > 0) {
     // if exists, call shiftBatchSessions mutation for same date and slot (this will delete that batch session and shift the others by one)
-    const { filteredSlots } = extractSlotsFromInput(slots);
-    console.log('filteredSlots', filteredSlots);
-    await callLocalGraphqlApi(shiftBatchSessionsAfterGivenDate(bookingDate, batchId, filteredSlots));
+    const { filteredSlotsString } = extractSlotsFromInput(slots);
+    await callLocalGraphqlApi(shiftBatchSessionsAfterGivenDate(bookingDate, batchId, filteredSlotsString));
     log('****** Finished shifting topics in batch sessions');
   }
 
