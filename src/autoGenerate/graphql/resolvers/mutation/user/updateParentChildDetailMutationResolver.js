@@ -132,6 +132,8 @@ const updateParentChildDetailMutationResolver = async (
   const { userId, schoolId } = params;
   const existingUserDetails = await getParentChildExistingDetails(userId);
   const existingUserId = get(existingUserDetails, 'id');
+  const campaign = get(existingUserDetails, 'campaign');
+  const campaignType = get(campaign, 'type');
 
   if (!existingUserId) {
     throw new DatabaseRecordNotFoundError();
@@ -151,6 +153,16 @@ const updateParentChildDetailMutationResolver = async (
     if (parentPhone && parentPhone.number && parentPhone.countryCode) {
       userInputData.phone = parentPhone;
     }
+    if (campaignType) {
+      if (campaignType === 'b2b') {
+        userInputData.vertical = 'b2b';
+      } else {
+        userInputData.vertical = 'b2b2c';
+      }
+    } else {
+      userInputData.vertical = 'b2c';
+    }
+
     const variables = {
       input: userInputData,
     };
@@ -248,8 +260,6 @@ Create student and their user profile
   /*
   If coming from campaign and the type os b2b allocate the user to the right batch
    */
-  const campaign = get(existingUserDetails, 'campaign');
-  const campaignType = get(campaign, 'type');
   let batchId = '';
   if (campaignType && campaignType === 'b2b') {
     const batchCreationBasis = get(campaign, 'batchRules.batchCreationBasis');

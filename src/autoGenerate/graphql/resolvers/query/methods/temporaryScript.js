@@ -1,5 +1,7 @@
-// import sendJourneySnapshotOnCourseCompletion from '../../../../../../utils/scheduleJobs/jobs/sendJourneySnapshotOnCourseCompletion';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import updateMentorAvailabilitySlotWithMentorSessions from '../scriptMethods/updateMentorAvailabilitySlotWithMentorSessions';
+// import updateMentorMenteeSessionWithStudentProfile from '../scriptMethods/updateMentorMenteeSessionWithStudentProfile';
+// import updateMenteeSessionWithStudentProfile from '../scriptMethods/updateMenteeSessionWithStudentProfile';
 // import updateCourseInSalesOperationScript from '../scriptMethods/updateCourseinSalesOperationScript';
 // import updateQuestionsWithCorrectPositions from '../scriptMethods/updateQuestionsWithCorrectPositions';
 // import updateQuestionsWithHints from '../scriptMethods/updateQuestionsWithHints';
@@ -15,13 +17,13 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import generateSessionReport from '../../../../../../utils/scheduleJobs/scheduleSessionReport';
 // import migrateBatchAttendanceToEnum from '../scriptMethods/migrateBatchAttendanceToEnum';
 // import updateCourseInVideos from '../scriptMethods/updateCourseInVideos';
+// import removeCourseFromUserAssignments from '../scriptMethods/removeCourseFromUserAssignments';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
   /*
   Add script functions
    */
-  // await sendJourneySnapshotOnCourseCompletion({ userId: 'ckqrpxo7u0002a0fi6p5lgclv' }, () => console.log('Delete Job WIll be triggered'));
   // await updateCourseInVideos();
   // await updateCourseInSalesOperationScript();
   // await updateSchoolCampaignCodeInSchool();
@@ -54,6 +56,10 @@ const temporaryScript = (async (root, params, context) => {
   // await updateQuestionsWithCorrectPositions();
   // await updateQuestionsWithHints();
   // await updateQuestionsWithCorrectPositionIndex();
+  // await updateMenteeSessionWithStudentProfile();
+  // await updateMentorMenteeSessionWithStudentProfile();
+  // await removeCourseFromUserAssignments();
+  // await updateMentorAvailabilitySlotWithMentorSessions();
   return {
     result: true,
   };

@@ -3,6 +3,7 @@ import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
   sessionStatus,
+  sessionType,
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
@@ -11,6 +12,9 @@ import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 import extractBatchSessionAndSendB2BC from './utils/extractBatchSessionAndSendB2BC';
 import addSessionLog from './utils/addSessionLog';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
+import isTrialSession from '../resolvers/utils/isTrialSession';
+import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
+import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -121,6 +125,21 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   /*
     get batch info
   */
+  const isTrial = await isTrialSession(get(input, 'topic.typeId'));
+  if (isTrial) {
+    let mentorProfile;
+    if (mentorSessionConnectId) {
+      mentorProfile = await getMentorProfileFromMentorSession(mentorSessionConnectId);
+    }
+    await mentorAvailabilitySlotOperation({
+      slotTimeStringArray,
+      date: get(input, 'bookingDate'),
+      mutationName,
+      sessionType: sessionType.trial,
+      sessionId: batchSessionId,
+      mentorProfileId: get(mentorProfile, 'user.mentorProfile.id'),
+    });
+  }
   const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
   const batchInfo = get(batchResult, 'data.batch');
   const { students, currentComponent, code } = batchInfo;

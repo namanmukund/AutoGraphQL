@@ -346,6 +346,7 @@ const topicComponents = {
   quiz: 'quiz',
   blockBasedProject: 'blockBasedProject',
   blockBasedPractice: 'blockBasedPractice',
+  homeworkPractice: 'homeworkPractice',
 };
 
 const childTopicComponents = {
@@ -406,20 +407,6 @@ export const testMailingList = {
   },
   usMailingList: ['rishabprachi26@gmail.com'],
 };
-
-export const emailTemplates = {
-  journeySnapshot: {
-    journeySnapshot1: `${process.env.FILE_BASE_URL}/python/email/JourneySnapshot-1.pdf`,
-    journeySnapshot2: `${process.env.FILE_BASE_URL}/python/email/JourneySnapshot-2.pdf`,
-  },
-};
-
-export const NUNITO_REGULAR_FONT_URL = `${process.env.FILE_BASE_URL}/python/email/Nunito-Regular.ttf`;
-export const NUNITO_SEMI_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/email/Nunito-SemiBold.ttf`;
-export const LATO_REGULAR_FONT_URL = `${process.env.FILE_BASE_URL}/python/email/Lato-Regular.ttf`;
-export const LATO_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/email/Lato-Bold.ttf`;
-export const GILROY_EXTRA_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/email/Gilroy-ExtraBold.otf`;
-export const NUNITO_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/email/Nunito-Bold.ttf`;
 
 export const DEFAULT_LS_OM_USER_ID = 'b29041e3-5645-11eb-9166-0a68392cb7c4';
 

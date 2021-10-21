@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../src/api/callLocalGraphqlApi';
-import { sendJourneySnapshotToUser } from '../../../src/email/messages';
+import sendJourneySnapshotToUser from '../../../src/email/messages/sendJourneySnapshotToUser';
 
 const USER = (id) => `
   {
@@ -67,7 +67,7 @@ const sendJourneySnapshotOnCourseCompletion = async ({ userId }, deleteJob) => {
   const userApprovedCodes = get(fetchUserApprovedCodesRes, 'data.userApprovedCodes', []);
   const userSavedCodes = get(fetchUserApprovedCodesRes, 'data.userSavedCodes', []);
   const userPqCount = get(fetchUserApprovedCodesRes, 'data.userPracticeQuestionReportsMeta.count', 0);
-  const userQuizReportsMeta = get(fetchUserApprovedCodesRes, 'data.userPracticeQuestionReportsMeta.count', 0);
+  const userQuizReportsMeta = get(fetchUserApprovedCodesRes, 'data.userQuizReportsMeta.count', 0);
   const totalPqCountToDisplay = userPqCount + userQuizReportsMeta;
 
   if (userApprovedCodes && userApprovedCodes.length > 0) {

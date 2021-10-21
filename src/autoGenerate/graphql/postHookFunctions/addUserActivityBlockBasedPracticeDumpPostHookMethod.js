@@ -106,6 +106,7 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
   const {
     answerLink,
   } = input;
+  const isHomework = get(input, 'isHomework');
   const topicComponentRule = get(userBlockBasedPracticeInfo, 'topic.topicComponentRule', []);
   const topicOrder = get(userBlockBasedPracticeInfo, 'topic.order');
   const { complete, incomplete, skip: skipStatus } = userTopicTypeStatus;
@@ -127,6 +128,7 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
   /*
   Calling method to update current user Topic Component status
   */
+  const page = isHomework ? 'homeworkPractice' : 'blockBasedPractice';
   await updateCurrentComponentStatusOfNewCourse(
     courseId,
     currentTopicComponentInfo,
@@ -135,7 +137,7 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
     '',
     blockBasedPracticeId,
     '',
-    'blockBasedPractice',
+    page,
     topicComponentRule,
     topicOrder,
   );

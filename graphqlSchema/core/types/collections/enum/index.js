@@ -92,6 +92,7 @@ import Currency from './Currency';
 import LearningObjectiveComponents from './LearningObjectiveComponents';
 import Vertical from './Vertical';
 import AdhocSessionType from './AdhocSessionType';
+import Slot from './Slot';
 
 export default [
   Status,
@@ -189,4 +190,5 @@ export default [
   LearningObjectiveComponents,
   Vertical,
   AdhocSessionType,
+  Slot,
 ];

@@ -87,12 +87,11 @@ import getStudentCurrentStatus from './query/methods/getStudentCurrentStatus';
 import getCourseCertificate from './query/methods/getCourseCertificate';
 import signUpSchool from './mutation/methods/signUpSchool';
 import rebookMenteeSession from './mutation/methods/rebookMenteeSession';
-import generateJourneySnapshot from './mutation/methods/generateJourneySnapshot';
-import sendJourneySnapshotInMail from './mutation/methods/sendJourneySnapshotInMail';
-import sendCertificateInMail from './mutation/methods/sendCertificateInMail';
 import getSchoolCampaignSlots from './query/methods/getSchoolCampaignSlots';
 import getUserCourses from './query/methods/getUserCourses';
 import shiftBatchSessionsAfterGivenDate from './mutation/methods/shiftBatchSessionsAfterGivenDate';
+import sendCertificateInMail from './mutation/methods/sendCertificateInMail';
+import sendJourneySnapshotInMail from './mutation/methods/sendJourneySnapshotInMail';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -586,10 +585,9 @@ resolvers.Mutation.updateVisitorReactionOnUserApprovedCode = updateVisitorReacti
 resolvers.Mutation.addBulkMentorSession = addBulkMentorSession;
 resolvers.Mutation.bookB2B2CSlots = bookB2B2CSlots;
 resolvers.Mutation.rebookMenteeSession = rebookMenteeSession;
-resolvers.Mutation.generateJourneySnapshot = generateJourneySnapshot;
-resolvers.Mutation.sendJourneySnapshotInMail = sendJourneySnapshotInMail;
 resolvers.Mutation.sendCertificateInMail = sendCertificateInMail;
 resolvers.Mutation.shiftBatchSessionsAfterGivenDate = shiftBatchSessionsAfterGivenDate;
+resolvers.Mutation.sendJourneySnapshotInMail = sendJourneySnapshotInMail;
 
 // queries
 resolvers.Query.me = me;
