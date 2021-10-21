@@ -72,6 +72,7 @@ import {
   VideoWithSimilarTitleAlreadyExist,
   LOWithSimilarTitleAlreadyExist,
   BatchMustHaveAtleastOneSession,
+  SessionMustBeCompletedError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -283,4 +284,5 @@ export {
   VideoWithSimilarTitleAlreadyExist,
   LOWithSimilarTitleAlreadyExist,
   BatchMustHaveAtleastOneSession,
+  SessionMustBeCompletedError,
 };

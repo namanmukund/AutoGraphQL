@@ -4,8 +4,10 @@ import {
   PUBLISHED,
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import { BatchMustHaveAtleastOneSession, DatabaseRecordNotFoundError } from '../../../../constants/errors';
+import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 import { log } from '../../../../utils';
+import extractSlotsFromInput from '../../../../utils/extractSlotsFromInput';
+import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -62,14 +64,16 @@ const updateAdhocSessionQuery = (
   `;
 
 // query to get future batch sessions
-const getBatchSessions = (batchId) => `
+const getBatchSessions = (batchId, bookingDate, slot) => `
     query{
       batchSessions(filter: {
         and: [
           {batch_some: {
             id: "${batchId}"
           }}
-          {status: allotted}
+          {sessionStatus: allotted}
+          {bookingDate: ${bookingDate}
+          {slot${slot}: true}
         ]
       }){
         id
@@ -81,24 +85,15 @@ const getBatchSessions = (batchId) => `
     }
   `;
 
-const getLastTopic = (topicOrderToFetch, courseId) => `
-query{
-  topics(filter: {
-    and: [
-      {order: ${topicOrderToFetch}}
-      {courses_some: {id: "${courseId}"}}
-    ]
+const shiftBatchSessionsAfterGivenDate = (date, batchId, slots) => `
+  mutation{
+  shiftBatchSessionsAfterGivenDate(input:{
+    date: "${date}"
+    batchId: "${batchId}"
+    ${slots}
   }){
-    id
-  }
-}
-`;
-
-const updateBatchSession = (sessionId, topicIdForNextSession) => `
-mutation{
-  updateBatchSession(id: "${sessionId}",
-    topicConnectId: "${topicIdForNextSession}"){
-    id
+    result
+    error
   }
 }
 `;
@@ -112,7 +107,8 @@ const addAdhocSessionPostHookMethod = async (input, params, mutationName, contex
   // const topicId = get(params, 'topicConnectId');
   let courseId = get(params, 'courseConnectId');
   const { id: adhocSessionId } = input;
-  const bookingDate = get(params, 'input.bookingDate', '');
+  const addAdhocInput = get(params, 'input', {});
+  const { bookingDate, ...slots } = addAdhocInput;
 
   /*
     get Course Id
@@ -155,7 +151,19 @@ const addAdhocSessionPostHookMethod = async (input, params, mutationName, contex
     ));
   }
 
-  // TODO : shift batch sessions after date of adhoc session (call shiftBatchSessionAfterGivenDate mutation)
+  const inputSlotTimeArray = getSelectedSlotsTime(slots);
+  console.log('inputSlotTimeArray', inputSlotTimeArray);
+  // fetch batch session for same date and slot
+  const batchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, bookingDate, inputSlotTimeArray[0]));
+  const batchSessions = get(batchSessionsRes, 'data.batchSessions', []);
+  console.log('batchSessions', batchSessions);
+  if (batchSessions.length > 0) {
+    // if exists, call shiftBatchSessions mutation for same date and slot (this will delete that batch session and shift the others by one)
+    const { filteredSlots } = extractSlotsFromInput(slots);
+    console.log('filteredSlots', filteredSlots);
+    await callLocalGraphqlApi(shiftBatchSessionsAfterGivenDate(bookingDate, batchId, filteredSlots));
+    log('****** Finished shifting topics in batch sessions');
+  }
 
   log('****** Finished updates');
 };

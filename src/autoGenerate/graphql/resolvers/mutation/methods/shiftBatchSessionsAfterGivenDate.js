@@ -4,7 +4,6 @@ import shiftBatchSessionsMutationResolver from '../shift/shiftBatchSessionsAfter
 const shiftBatchSessionsAfterGivenDate = async (root, params, context, info) => {
   const { parsedASTMap } = context;
   const authentication = ifAuthorized(context);
-  console.log('context', context);
   const typeName = 'shiftBatchSessionsAfterGivenDate';
   const mutationName = 'shiftBatchSessionsAfterGivenDate';
 

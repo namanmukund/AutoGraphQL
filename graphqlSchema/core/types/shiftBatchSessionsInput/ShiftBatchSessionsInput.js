@@ -1,4 +1,4 @@
-import getSlotTimeFields from "../../functions/getSlotTimeFields";
+import getSlotTimeFields from '../../functions/getSlotTimeFields';
 
 const slotTimeFields = getSlotTimeFields('Boolean', false);
 

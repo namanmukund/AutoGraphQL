@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { get } from 'lodash';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
@@ -76,16 +77,17 @@ const shiftBatchSessionsMutationResolver = async (
     let firstTopicOrderToBeDeleted = null;
     let topicsRemaining = null;
     let topicsUpdatedCounter = 0;
+    /* eslint-disable-next-line no-restricted-syntax */
     for (const batchSession of batchSessions) {
       const dateOfBooking = get(batchSession, 'bookingDate');
       const sessionId = get(batchSession, 'id');
       const sessionSlotTimeArray = getSelectedSlotsTime(batchSession);
-      let isSameDay = isEqualDates(dateOfBooking, inputDate);
+      const isSameDay = isEqualDates(dateOfBooking, inputDate);
       let isTimeInPast = false;
       if (isSameDay) {
-        if (sessionSlotTimeArray.length === 1 &&
-          inputSlotTimeArray.length === 1 &&
-          inputSlotTimeArray[0] <= sessionSlotTimeArray[0]) {
+        if (sessionSlotTimeArray.length === 1
+          && inputSlotTimeArray.length === 1
+          && inputSlotTimeArray[0] <= sessionSlotTimeArray[0]) {
           isTimeInPast = true;
         }
       }
@@ -108,7 +110,7 @@ const shiftBatchSessionsMutationResolver = async (
         if (!topicsRemaining) {
           const topicsRemainingRes = await callLocalGraphqlApi(fetchTopics(firstTopicOrderToBeDeleted, courseId));
           topicsRemaining = get(topicsRemainingRes, 'data.topics', []);
-          log('Fetched Topics')
+          log('Fetched Topics');
         }
         const topicIdToUpdate = get(topicsRemaining, `[${topicsUpdatedCounter}].id`);
         await callLocalGraphqlApi(updateBatchSession(sessionId, topicIdToUpdate));

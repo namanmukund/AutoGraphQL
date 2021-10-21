@@ -1,34 +1,56 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { PermissionDeniedError } from '../../../../../constants/errors';
 import {
-  ADMIN, UMS_ADMIN, MENTOR, UMS_VIEWER,
+  ADMIN, UMS_ADMIN, UMS_VIEWER,
 } from '../../../../../constants/roles';
 import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
-import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
-import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
+import {
+  SimilarDocumentAlreadyExistError,
+  SessionMustBeCompletedError,
+  MissingMandatoryInputInRequestError,
+  PermissionDeniedError,
+} from '../../../../../constants/errors';
 import getMentorSessions from '../../../utils/getMentorSessions';
 import { checkIfSlotCanBeOpenedValidation } from './utils';
 
 // query to get batch Sessions
-const getAdhocSession = (batchId, order) => `
+const getAdhocSession = (batchId,
+  order,
+  previousTopicConnectId,
+  type) => `
   query{
     adhocSessions(filter:{
-      and:[
-        {batch_some: {
-          id: "${batchId}"
-        }},
+      or: [
         {
-          order: ${order}
+          and:[
+          {batch_some: {
+            id: "${batchId}"
+          }},
+          {
+            order: ${order}
+          }
+        ]
+        },
+        {
+          and:[
+            {
+              previousTopic_some:{
+                id: "${previousTopicConnectId}"
+              }
+            },
+            {
+              type: "${type}"
+            }
+          ]
         }
       ]
-    }){
-      id
-      order
-    }
+      }){
+        id
+        order
+      }
   }
   `;
 
@@ -43,13 +65,30 @@ query{
   }
 }`;
 
+// query to get batch sessions with previous topic
+const getBatchSessions = (previousTopicConnectId, batchId) => `
+query{
+  batchSessions(filter: {
+    and: [
+      {batch_some: {
+        id: "${batchId}"
+      }}
+      {topic_some: { id: "${previousTopicConnectId}" }}
+    ]
+  }){
+    id
+    sessionStatus
+  }
+}`;
+
 // prehook logic to check if added Adhoc session(batch and order) is already present
 const addAdhocSessionValidation = async (params, mutationOrQueryName, context) => {
   // check if the document for called batch and topic is already present
   const batchId = get(params, 'batchConnectId');
   const order = get(params, 'input.order');
+  const type = get(params, 'input.type');
   const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
-  const topicId = get(params, 'topicConnectId');
+  const previousTopicConnectId = get(params, 'previousTopicConnectId');
 
   if (!batchId) {
     throw new MissingMandatoryInputInRequestError({
@@ -59,10 +98,10 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
     });
   }
 
-  if (!topicId) {
+  if (!previousTopicConnectId) {
     throw new MissingMandatoryInputInRequestError({
       data: {
-        message: 'topicConnnectId is missing in input',
+        message: 'previousTopicConnectId is missing in input',
       },
     });
   }
@@ -110,18 +149,22 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
     throw new PermissionDeniedError();
   }
 
+  // check is for given previous topic and type, if adhoc session exists from before throw err
   // throw error if document already exists with same order connected to same batch
   if (order) {
-    const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, order));
+    const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, order, previousTopicConnectId, type));
     const adhocSessions = get(getAdhocSessionRes, 'data.adhocSessions');
     if (adhocSessions && adhocSessions.length) {
       throw new SimilarDocumentAlreadyExistError();
     }
   }
 
-  // check is for given previous topic and type, if adhoc session exists from before throw err
-
-
+  // confirm if the previous topic batch session is complete before proceeding
+  const batchSessionPreviousTopicRes = await callLocalGraphqlApi(getBatchSessions(previousTopicConnectId, batchId));
+  const batchSessionPreviousTopicStatus = get(batchSessionPreviousTopicRes, 'data.batchSessions[0].sessionStatus', '');
+  if (batchSessionPreviousTopicStatus !== 'completed') {
+    throw new SessionMustBeCompletedError();
+  }
 
   return true;
 };
