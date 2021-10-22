@@ -88,8 +88,8 @@ export const updateMentorAvailabilitySlot = async (mentorAvailabilitySlotId, ses
   const query = `mutation($input: MentorAvailabilitySlotUpdate) {
     updateMentorAvailabilitySlot(id: "${mentorAvailabilitySlotId}",
     ${type === 'menteeSession' ? `menteeSessionsConnectIds: ["${sessionId}"]` : ''}
-    ${type === 'mentorSession' ? `mentorSessionsConnectIds: ["${sessionId}"], 
-    ${mentorProfileId ? `broadCastedMentorsConnectIds: ["${mentorProfileId}"]` : ''}` : ''}
+    ${type === 'mentorSession' ? `mentorSessionsConnectIds: ["${sessionId}"]` : ''}
+    ${mentorProfileId ? `broadCastedMentorsConnectIds: ["${mentorProfileId}"]` : ''}
     ${type === 'batchSession' ? `batchSessionsConnectIds: ["${sessionId}"]` : ''}
     input:$input
     ) {
@@ -196,6 +196,7 @@ const addUpdateMentorAvailabilitySlots = async ({
 
 const mentorAvailabilitySlotOperation = async ({
   slotTimeStringArray, date, sessionType, mutationName, sessionId, prevMentorAvailabilitySlot, mentorProfileId,
+  batchType,
 }) => {
   for (let i = 0; i < slotTimeStringArray.length; i += 1) {
     /* eslint-disable no-await-in-loop */
@@ -237,8 +238,8 @@ const mentorAvailabilitySlotOperation = async ({
           if (singleSlotData && singleSlotData.length > 0) {
             const slotVerticals = get(singleSlotData, '[0].verticals', []);
             const addedVerticals = slotVerticals.map((vertical) => get(vertical, 'value'));
-            if (!addedVerticals.includes('b2b2c')) {
-              slotVerticals.push({ value: 'b2b2c' });
+            if (batchType && batchType !== 'normal' && !addedVerticals.includes(batchType)) {
+              slotVerticals.push({ value: batchType });
             }
             await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, 'batchSession', mentorProfileId, {
               verticals: {
@@ -255,8 +256,8 @@ const mentorAvailabilitySlotOperation = async ({
           if (singleSlotData && singleSlotData.length > 0) {
             const slotVerticals = get(singleSlotData, '[0].verticals', []);
             const addedVerticals = slotVerticals.map((vertical) => get(vertical, 'value'));
-            if (!addedVerticals.includes('b2b2c')) {
-              slotVerticals.push({ value: 'b2b2c' });
+            if (batchType && batchType !== 'normal' && !addedVerticals.includes(batchType)) {
+              slotVerticals.push({ value: batchType });
             }
             await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, 'batchSession', mentorProfileId, {
               verticals: {

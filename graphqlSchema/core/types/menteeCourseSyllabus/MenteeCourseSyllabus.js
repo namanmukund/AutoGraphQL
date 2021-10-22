@@ -1,6 +1,7 @@
 const sessionDetailType = `
   type SessionDetailType {
    chapterId: ID
+   menteeSessionId: ID
    chapterOrder: Int
    chapterTitle: String
    topicId: ID
@@ -17,6 +18,7 @@ const sessionDetailType = `
 const completedSessionDetailType = `
   type CompletedSessionDetailType {
    chapterId: ID
+   menteeSessionId: ID
    chapterOrder: Int
    chapterTitle: String
    topicId: ID

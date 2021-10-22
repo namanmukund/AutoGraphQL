@@ -1,17 +1,27 @@
+import moment from 'moment';
+
 const getMentorAvailabilitySlots = (date) => `
 {
-  mentorAvailabilitySlots(filter: { date: "${date}" }) {
+  mentorAvailabilitySlots(filter: {
+    and:[
+      { date_gte: "${moment(date).startOf('day').toISOString()}" }
+      { date_lte: "${moment(date).endOf('day').toISOString()}" }
+    ]
+  }) {
     id
     slotName
     date
+    count
     menteeSessionsMeta {
       count
     }
     mentorSessionsMeta {
       count
     }
-    batchSessionsMeta(filter: { batch_some: { type_not: b2b } }) {
-      count
+    batchSessions{
+      batch{
+        type
+      }
     }
   }
 }

@@ -9,7 +9,7 @@ import {
 } from '../../../../../../constants/errors';
 import { MENTEE, PARENT } from '../../../../../../constants/roles';
 import { generateCuid, getRandomNumber, log } from '../../../../../../utils';
-import { QueryController } from '../../../controllers';
+import { MutationController, QueryController } from '../../../controllers';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import generateInviteCode from '../../../../../../utils/generateInviteCode';
 import { backendApps, rangeOTP, REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
@@ -46,6 +46,12 @@ const FETCH_CAMPAIGN = (campaignId) => `{
     }
   }
 }`;
+
+const updateExistingUserOTP = (
+  searchObj,
+  updateObj,
+  modelMutations,
+) => modelMutations.updateOne(searchObj, updateObj);
 
 /*
 - both the parent and a kid is registered
@@ -429,12 +435,18 @@ If coming from campaign and the type os b2b allocate the user to the right batch
 
   parentChildSignupPostHookMethod(input, leadSquaredParams);
 
-  // send b2b2c reg+booking
-  // sendBookingReminderOrConfirmationB2B(parentId);
-
   // Send OTP if from RadioStreet event
   if (source && source.toLowerCase() === 'radiostreet') {
+    // send b2b2c reg+booking
+    // sendBookingReminderOrConfirmationB2B(parentId);
     const phoneOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
+    const modelMutations = new MutationController(typeName, authentication);
+    const updateObj = {
+      phoneOtp,
+      phoneOtpCreationDate: new Date(),
+    };
+    // update phoneOtp in db
+    await updateExistingUserOTP({ id: parentId }, updateObj, modelMutations);
     getNumberAndSendSms(parentPhone, phoneOtp, parentName);
   }
 

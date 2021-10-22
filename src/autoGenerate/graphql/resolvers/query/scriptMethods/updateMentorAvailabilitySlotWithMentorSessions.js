@@ -10,7 +10,11 @@ const getMentorSessions = async () => {
   const query = `{
   mentorSessions(
     filter: {
-      and: [{ sessionType: trial }, { availabilityDate_gte: "${new Date(new Date().setHours(0, 0, 0, 0)).toISOString()}" }]
+      and: [
+        { sessionType: trial },
+        { availabilityDate_gte: "${new Date(new Date().setHours(0, 0, 0, 0)).toISOString()}" },
+        { mentorAvailabilitySlots_exists: false }
+      ]
     }
   ) {
     id

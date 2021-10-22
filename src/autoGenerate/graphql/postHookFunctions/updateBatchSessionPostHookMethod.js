@@ -44,6 +44,7 @@ const getBatchQuery = (batchId) => `
       batch(id:"${batchId}"){
         id
         code
+        type
         students{
           user{
             id
@@ -270,6 +271,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   }
 
   const isTrial = await isTrialSession(get(input, 'topic.typeId'));
+  const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
   if (isTrial) {
     const mentorProfile = await getMentorProfileFromMentorSession(finalMentorSessionId);
     await mentorAvailabilitySlotOperation({
@@ -280,6 +282,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       sessionId: batchSessionId,
       mentorProfileId: get(mentorProfile, 'user.mentorProfile.id'),
       prevMentorAvailabilitySlot: get(input, 'mentorAvailabilitySlot.typeId'),
+      batchType: get(batchResult, 'data.batch.type'),
     });
   }
 
@@ -287,7 +290,6 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     /*
       get batch info
     */
-    const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
     const batchInfo = get(batchResult, 'data.batch');
     const students = batchInfo && batchInfo.students;
     const currentComponent = batchInfo && batchInfo.currentComponent;
