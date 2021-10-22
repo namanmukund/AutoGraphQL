@@ -18,38 +18,23 @@ import { SimilarDocumentAlreadyExistError } from '../../../../../constants/error
 
 // query to get batch Sessions
 const getAdhocSession = (batchId,
-  order,
   previousTopicConnectId,
   type) => `
   query{
     adhocSessions(filter:{
-      or: [
-        {
-          and:[
+        and:[
           {batch_some: {
             id: "${batchId}"
           }},
           {
-            order: ${order}
+            previousTopic_some:{
+              id: "${previousTopicConnectId}"
+            }
+          },
+          {
+            type: ${type}
           }
         ]
-        },
-        {
-          and:[
-            {batch_some: {
-              id: "${batchId}"
-            }},
-            {
-              previousTopic_some:{
-                id: "${previousTopicConnectId}"
-              }
-            },
-            {
-              type: ${type}
-            }
-          ]
-        }
-      ]
       }){
         id
         order
@@ -88,7 +73,6 @@ query{
 const addAdhocSessionValidation = async (params, mutationOrQueryName, context) => {
   // check if the document for called batch and topic is already present
   const batchId = get(params, 'batchConnectId');
-  const order = get(params, 'input.order');
   const type = get(params, 'input.type');
   const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
   const previousTopicConnectId = get(params, 'previousTopicConnectId');
@@ -153,14 +137,11 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
   }
 
   // check is for given previous topic and type, if adhoc session exists from before throw err
-  // throw error if document already exists with same order connected to same batch
-  if (order) {
-    const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, order, previousTopicConnectId, type));
-    const adhocSessions = get(getAdhocSessionRes, 'data.adhocSessions');
-    // console.log('adhocSessions', adhocSessions);
-    if (adhocSessions && adhocSessions.length) {
-      throw new SimilarDocumentAlreadyExistError();
-    }
+  const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, previousTopicConnectId, type));
+  const adhocSessions = get(getAdhocSessionRes, 'data.adhocSessions');
+  // console.log('adhocSessions', adhocSessions);
+  if (adhocSessions && adhocSessions.length) {
+    throw new SimilarDocumentAlreadyExistError();
   }
 
   // confirm if the previous topic batch session is complete before proceeding

@@ -309,6 +309,7 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateAdhocSession': {
       await updateAdhocSessionPostHookMethod(input, params, mutationName, context);
+      break;
     }
     case 'deleteBatch': {
       await deleteBatchPostHookMethod(input, params, mutationName, context);

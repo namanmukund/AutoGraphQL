@@ -26,7 +26,7 @@ const AdhocSession = `
     batch: Batch! @relation(name: "AdhocSessionBatch", direction: "OneWay")
     previousTopic: Topic @relation(name: "AdhocSessionTopic", direction: "OneWay")
     type: AdhocSessionType!
-    order: Int!
+    order: Int
     mentorSession: MentorSession @relation(name: "AdhocSessionMentorSession")
     bookingDate: Date!
     ${slotTimeFields}
