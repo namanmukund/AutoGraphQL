@@ -70,7 +70,6 @@ const validateUserOTPMutationResolver = async (
     phoneVerified,
     emailVerified,
     status,
-    utmSource,
   } = userData;
 
   const {
