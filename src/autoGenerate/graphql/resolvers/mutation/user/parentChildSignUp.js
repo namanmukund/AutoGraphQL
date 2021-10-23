@@ -35,6 +35,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 // import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import getUserPasswordObject from './utils/getUserPasswordObject';
 import { getNumberAndSendSms } from '../../../../../sms';
+import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
 
 const USER_TYPE = 'User';
 
@@ -445,6 +446,50 @@ If coming from campaign and the type os b2b allocate the user to the right batch
       phoneOtp,
       phoneOtpCreationDate: new Date(),
     };
+
+    setTimeout(() => {
+      if (utmSource === 'RadioStreet') {
+        updateLeadSquared({
+          Phone: get(parentPhone, 'number'),
+        }, false, {
+          ActivityEvent: 208,
+          Fields: [
+            {
+              SchemaName: 'mx_Custom_1',
+              Value: 'RadioStreet',
+            },
+          ],
+        });
+
+        setTimeout(() => {
+          const activityInput = {
+            ActivityEvent: 103,
+            ActivityNote: 'User booked a session',
+            Fields: [
+              {
+                SchemaName: 'Status',
+                Value: 'Booked (Verified)',
+              },
+              {
+                SchemaName: 'mx_Custom_3',
+                Value: 'Customer',
+              },
+              {
+                SchemaName: 'mx_Custom_8',
+                Value: '2021-10-24 05:30:00', // 11 am
+              },
+            ],
+          };
+          const leadSquaredInput = {
+            Phone: get(parentPhone, 'number'),
+            mx_Event_Date: '24 October',
+            mx_Event_Time: '11:00 am',
+          };
+          updateLeadSquared(leadSquaredInput, false, activityInput);
+        }, 5000);
+      }
+    }, 1000 * 60 * 2);
+
     // update phoneOtp in db
     await updateExistingUserOTP({ id: parentId }, updateObj, modelMutations);
     getNumberAndSendSms(parentPhone, phoneOtp, parentName);
