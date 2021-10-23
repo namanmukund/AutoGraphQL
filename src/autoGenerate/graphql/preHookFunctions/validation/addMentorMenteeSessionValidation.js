@@ -166,12 +166,12 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   const isTrial = await isTrialSession(topicConnectId);
   if (typeof isTrial === 'boolean' && isTrial) {
     if (get(menteeSession, 'broadCastedMentors', []).length > 0) {
-      const mentorMenteeSessionsData = await callLocalGraphqlApi(
-        mentorMenteeSessionsQuery(
-          menteeSessionConnectId,
-        ),
-      );
-      console.log(JSON.stringify(mentorMenteeSessionsData))
+      // const mentorMenteeSessionsData = await callLocalGraphqlApi(
+      //   mentorMenteeSessionsQuery(
+      //     menteeSessionConnectId,
+      //   ),
+      // );
+      // console.log(JSON.stringify(mentorMenteeSessionsData))
       params.input.isBroadCastedSession = true;
     }
     if (get(menteeSession, 'mentorAvailabilitySlot.id'))

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { get } from 'lodash';
 import transactionalMessageBody from '../../../constants/transactionalMessageBody';
 import getLongDate from '../../../utils/getLongDate';
@@ -26,7 +27,7 @@ const getUserDetails = async (id) => {
   return get(result, 'data.mentorProfile');
 };
 
-const sendMailAndWhatsappMessageForSupplyRequest = async (mentorProfileId, slotDateTimeObj) => {
+const sendMailAndWhatsappMessageForSupplyRequest = async (mentorProfileId, slotDateTimeObj, fromMenteeSession = false) => {
   const mentorProfile = await getUserDetails(mentorProfileId);
   const mentorName = get(mentorProfile, 'user.name');
   const mentorEmail = get(mentorProfile, 'user.email');
@@ -43,9 +44,14 @@ const sendMailAndWhatsappMessageForSupplyRequest = async (mentorProfileId, slotD
     const environment = process.env.NODE_ENV;
     let link = '';
     if (environment === 'production') {
-      link = `https://tekie-managment-system.herokuapp.com/mentorDashboard?slot=${slotId}`;
+      link = 'https://tekie-managment-system.herokuapp.com/mentorDashboard';
     } else {
-      link = `https://tekie-tms-staging.herokuapp.com/mentorDashboard?slot=${slotId}`;
+      link = 'https://tekie-tms-staging.herokuapp.com/mentorDashboard';
+    }
+    if (!fromMenteeSession) {
+      link += `?slot=${slotId}`;
+    } else {
+      link += `?session=${slotId}`;
     }
     sendTransactionalEmail({
       name: mentorName,
@@ -86,12 +92,12 @@ const sendMailAndWhatsappMessageForSupplyRequest = async (mentorProfileId, slotD
         value: link,
       },
     ];
-    await sendWhatsAppTemplateMessage(
-      phone,
-      transactionalMessageBody.mentorSessionNotification,
-      mentorName,
-      parameters,
-    );
+    // await sendWhatsAppTemplateMessage(
+    //   phone,
+    //   transactionalMessageBody.mentorSessionNotification,
+    //   mentorName,
+    //   parameters,
+    // );
   }
 };
 
