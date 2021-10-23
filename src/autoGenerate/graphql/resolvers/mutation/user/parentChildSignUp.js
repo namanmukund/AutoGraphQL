@@ -449,8 +449,14 @@ If coming from campaign and the type os b2b allocate the user to the right batch
 
     setTimeout(() => {
       if (utmSource === 'RadioStreet') {
+        // updateLeadSquared({
+        //   mx_Event_Date: '24 October',
+        //   mx_Event_Time: '11:00 am',
+        // });
         updateLeadSquared({
           Phone: get(parentPhone, 'number'),
+          mx_Event_Date: '24 October',
+          mx_Event_Time: '11:00 am',
         }, false, {
           ActivityEvent: 208,
           Fields: [
@@ -461,32 +467,32 @@ If coming from campaign and the type os b2b allocate the user to the right batch
           ],
         });
 
-        setTimeout(() => {
-          const activityInput = {
-            ActivityEvent: 103,
-            ActivityNote: 'User booked a session',
-            Fields: [
-              {
-                SchemaName: 'Status',
-                Value: 'Booked (Verified)',
-              },
-              {
-                SchemaName: 'mx_Custom_3',
-                Value: 'Customer',
-              },
-              {
-                SchemaName: 'mx_Custom_8',
-                Value: '2021-10-24 05:30:00', // 11 am
-              },
-            ],
-          };
-          const leadSquaredInput = {
-            Phone: get(parentPhone, 'number'),
-            mx_Event_Date: '24 October',
-            mx_Event_Time: '11:00 am',
-          };
-          updateLeadSquared(leadSquaredInput, false, activityInput);
-        }, 5000);
+        // setTimeout(() => {
+        //   const activityInput = {
+        //     ActivityEvent: 103,
+        //     ActivityNote: 'User booked a session',
+        //     Fields: [
+        //       {
+        //         SchemaName: 'Status',
+        //         Value: 'Booked (Verified)',
+        //       },
+        //       {
+        //         SchemaName: 'mx_Custom_3',
+        //         Value: 'Customer',
+        //       },
+        //       {
+        //         SchemaName: 'mx_Custom_8',
+        //         Value: '2021-10-24 05:30:00', // 11 am
+        //       },
+        //     ],
+        //   };
+        //   const leadSquaredInput = {
+        //     Phone: get(parentPhone, 'number'),
+        //     mx_Event_Date: '24 October',
+        //     mx_Event_Time: '11:00 am',
+        //   };
+        //   updateLeadSquared(leadSquaredInput, false, activityInput);
+        // }, 5000);
       }
     }, 1000 * 60 * 2);
 
