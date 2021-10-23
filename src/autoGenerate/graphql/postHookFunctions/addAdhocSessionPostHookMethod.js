@@ -134,7 +134,7 @@ const addAdhocSessionPostHookMethod = async (input, params, mutationName, contex
   const { students } = batchInfo;
 
   // add students to the adhoc session and mark them absent as default
-  if (students && students.length && topicId) {
+  if (students && students.length) {
     let pushManyQuery = 'attendance:{ pushMany: [';
     students.forEach((studentElem) => {
       if (studentElem.user && studentElem.user.studentProfile && studentElem.user.studentProfile.id) {
