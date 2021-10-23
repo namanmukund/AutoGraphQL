@@ -44,6 +44,11 @@ const transactionalMessageBody = {
     subject: 'Tekie - Session was not conducted',
     whatsAppTemplate: 'oct14_session_not_conducted',
   },
+  newSlotRequest: {
+    emailTemplate: 'newSlotRequest',
+    subject: 'Tekie - New Slot Request',
+    whatsAppTemplate: '',
+  },
   testEmail: 'namanmukund@gmail.com',
   testWhatsAppNumber: '919654347463',
 };

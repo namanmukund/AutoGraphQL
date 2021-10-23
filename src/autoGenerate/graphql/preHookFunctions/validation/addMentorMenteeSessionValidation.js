@@ -21,7 +21,7 @@ query{
   mentorMenteeSessions(filter:{
     and:[
       {menteeSession_some:{id:"${menteeSessionConnectId}"}}
-      {mentorSession_some:{id:"${mentorSessionConnectId}"}}
+      ${mentorSessionConnectId ? `{mentorSession_some:{id:"${mentorSessionConnectId}"}}` : ''}
     ]   
   }){
     id
@@ -106,7 +106,7 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
     throw new ConnectIdRequiredError();
   }
 
-  // check if mentor mentee sessions already exist
+  // check if mentor mentee sessions already exist for same mentor
   const mentorMenteeSessionsData = await callLocalGraphqlApi(
     mentorMenteeSessionsQuery(
       menteeSessionConnectId,
@@ -165,8 +165,13 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   context.currentUser = currentUser;
   const isTrial = await isTrialSession(topicConnectId);
   if (typeof isTrial === 'boolean' && isTrial) {
-    console.log(JSON.stringify(menteeSession))
     if (get(menteeSession, 'broadCastedMentors', []).length > 0) {
+      const mentorMenteeSessionsData = await callLocalGraphqlApi(
+        mentorMenteeSessionsQuery(
+          menteeSessionConnectId,
+        ),
+      );
+      console.log(JSON.stringify(mentorMenteeSessionsData))
       params.input.isBroadCastedSession = true;
     }
     if (get(menteeSession, 'mentorAvailabilitySlot.id'))
