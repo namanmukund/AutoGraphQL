@@ -47,18 +47,19 @@ const fetchEventCertificate = (number) => `
       id
       name
     }
+    assetUrl
   }
 }
 `;
 
-const addEventCertificate = (userId, signedUrl) => `
+const addEventCertificate = (userId, assetUrl) => `
   mutation {
     addEventCertificate(userConnectId:"${userId}",
       input: {
-        signedUrl: "${signedUrl}"
+        assetUrl: "${assetUrl}"
       }){
         id
-        signedUrl
+        assetUrl
       }
   }
 `;
@@ -66,10 +67,10 @@ const addEventCertificate = (userId, signedUrl) => `
 const updateEventCertificate = (eventCertificateId, url) => `
  mutation{
   updateEventCertificate(id:"${eventCertificateId}",input:{
-    signedUrl:"${url}"
+    assetUrl:"${url}"
   }){
     id
-    signedUrl
+    assetUrl
   }
 }
 `;
@@ -91,10 +92,23 @@ const generateCertificateMutationResolver = async (
 
   const { input } = params;
 
-  const { phoneNumber } = input;
+  const { phoneNumber, regenerateCertificate } = input;
 
   const userRes = await callLocalGraphqlApi(fetchUser(phoneNumber));
   const users = get(userRes, 'data.users');
+  const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(phoneNumber));
+  const eventCertificates = get(eventCertificatesRes, 'data.eventCertificates');
+  let tekieUrl = '';
+
+  if (!regenerateCertificate && eventCertificates && eventCertificates.length) {
+    const exisitingEventCertificate = get(eventCertificates, '[0]', {});
+    tekieUrl = `https://www.tekie.in/event-certificate/${slugifyID(get(exisitingEventCertificate, 'id'))}`;
+    return {
+      id: get(exisitingEventCertificate, 'id'),
+      assetUrl: get(exisitingEventCertificate, 'assetUrl'),
+      tekieUrl,
+    };
+  }
 
   if (users && users.length) {
     const date = new Date();
@@ -156,8 +170,6 @@ const generateCertificateMutationResolver = async (
     }
     let eventCertificateCreated = null;
     if (fetchedUrl) {
-      const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(phoneNumber));
-      const eventCertificates = get(eventCertificatesRes, 'data.eventCertificates');
       if (eventCertificates && eventCertificates.length) {
         const eventCertificateId = get(eventCertificates, '[0].id');
         const eventCertificateCreatedRes = await callLocalGraphqlApi(updateEventCertificate(eventCertificateId, fetchedUrl));
@@ -167,7 +179,7 @@ const generateCertificateMutationResolver = async (
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.addEventCertificate');
       }
     }
-    const tekieUrl = `https://www.tekie.in/event-certificate/${slugifyID(get(eventCertificateCreated, 'id'))}`;
+    tekieUrl = `https://www.tekie.in/event-certificate/${slugifyID(get(eventCertificateCreated, 'id'))}`;
     return {
       ...eventCertificateCreated,
       tekieUrl,

@@ -1,7 +1,7 @@
 const GenerateCertificateOutput = `
   type GenerateCertificateOutput {
     id: String
-    signedUrl: String
+    assetUrl: String
     tekieUrl: String
 }`;
 
