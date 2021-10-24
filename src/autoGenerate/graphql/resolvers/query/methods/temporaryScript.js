@@ -19,7 +19,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import migrateBatchAttendanceToEnum from '../scriptMethods/migrateBatchAttendanceToEnum';
 // import updateCourseInVideos from '../scriptMethods/updateCourseInVideos';
 // import removeCourseFromUserAssignments from '../scriptMethods/removeCourseFromUserAssignments';
-// import generateCertificateScript from '../scriptMethods/generateCertificateScript';
+import generateCertificateScript from '../scriptMethods/generateCertificateScript';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -63,12 +63,12 @@ const temporaryScript = (async (root, params, context) => {
   // await removeCourseFromUserAssignments();
   // await updateMentorAvailabilitySlotWithMentorSessions();
   // await updateMentorAvailabilitySlotWithBatchAndMenteeSessions();
-  // await generateCertificateScript([
-  //   'ckbmeio4k00040vs1hquy1frq',
-  //   'ckdj2hbxb00020vusdwpca1jh',
-  //   'ckehjuz8q004m0vvcb07xayhe',
-  //   'ckf581vkm002x0v46bn3r21mo',
-  // ])
+  await generateCertificateScript([
+    'ckbmeio4k00040vs1hquy1frq',
+    'ckdj2hbxb00020vusdwpca1jh',
+    'ckehjuz8q004m0vvcb07xayhe',
+    'ckf581vkm002x0v46bn3r21mo',
+  ])
   return {
     result: true,
   };
