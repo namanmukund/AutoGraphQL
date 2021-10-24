@@ -21,6 +21,7 @@ const POST_SALES = 'postSales';
 const AUDITOR = 'auditor';
 const BDE = 'BDE';
 const BDE_ADMIN = 'bdeAdmin';
+const SUPPLY_DEMAND_MANAGER = 'supplyDemandManager';
 
 const CMS_HEAD = `[
 "${ADMIN}",
@@ -197,6 +198,7 @@ const ALL_ROLES_ARRAY = [
   AUDITOR,
   BDE,
   BDE_ADMIN,
+  SUPPLY_DEMAND_MANAGER,
 ];
 
 const CMS_HEAD_ARRAY = [
@@ -263,4 +265,5 @@ export {
   AUDITOR,
   BDE,
   BDE_ADMIN,
+  SUPPLY_DEMAND_MANAGER,
 };
