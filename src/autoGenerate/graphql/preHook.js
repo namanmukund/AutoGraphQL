@@ -109,6 +109,7 @@ import addBlockBasedProjectValidation from './preHookFunctions/validation/addBlo
 import updateBlockBasedProjectValidation from './preHookFunctions/validation/updateBlockBasedProjectValidation';
 import addVideoValidation from './preHookFunctions/validation/addVideoValidation';
 import updateVideoValidation from './preHookFunctions/validation/updateVideoValidation';
+import updateMentorAvailabilitySlotValidation from './preHookFunctions/validation/updateMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -621,7 +622,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
         },
       };
       await updateBatchSessionValidation(newParams, mutationOrQueryName, context);
-      return hook(newInput, mutationOrQueryName, 'PreHook');
+      return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'deleteBatchSession': {
       await deleteBatchSessionValidation(params, mutationOrQueryName, context);
@@ -800,6 +801,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateVideo': {
       await updateVideoValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateMentorAvailabilitySlot': {
+      await updateMentorAvailabilitySlotValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'addSchool': {

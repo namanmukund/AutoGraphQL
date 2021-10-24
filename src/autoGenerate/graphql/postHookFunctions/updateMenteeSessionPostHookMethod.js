@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { difference, get } from 'lodash';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 // import reduceParticularAvailableSlotOfADate from './utils/reduceParticularAvailableSlotOfADate';
@@ -17,9 +18,12 @@ import addSessionLog from './utils/addSessionLog';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
+import sendMailAndWhatsappMessageForSupplyRequest from '../../utils/sendMailAndWhatsappMessageForSupplyRequest';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
-  const { previousDocument, currentUser, mentorMenteeSessionDoc } = context;
+  const {
+    previousDocument, currentUser, mentorMenteeSessionDoc,
+  } = context;
   const { id: menteeSessionId, bookingDate: prevBookingDate, ...prevSlots } = previousDocument;
   const prevSlotTimeStringArray = getSelectedSlotsStringArray(prevSlots);
 
@@ -44,6 +48,15 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
   // if call is from backend we will not update the availability slots, same for paid sessions
   if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
+    const prevBroadCastedMentors = get(previousDocument, 'broadCastedMentors', []).map((mentor) => get(mentor, 'id'));
+    const newBroadcastedmentors = get(input, 'broadCastedMentors', []);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const mentorProfile of newBroadcastedmentors) {
+      if (!prevBroadCastedMentors.includes(get(mentorProfile, 'typeId'))) {
+        sendMailAndWhatsappMessageForSupplyRequest(get(mentorProfile, 'typeId'),
+          { date: bookingDate, time: get(slotTimeStringArray, '0'), slotId: get(input, 'id') }, true);
+      }
+    }
     if (bookingDate && bookingDate.getTime() !== prevBookingDate.getTime()) {
       // ---------------------commenting out the previous availableSlots flow--------------
       // -- decrease the availability slot of current availabilityDate
