@@ -21,9 +21,10 @@ import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOpera
 import sendMailAndWhatsappMessageForSupplyRequest from '../../utils/sendMailAndWhatsappMessageForSupplyRequest';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
-  const { previousDocument, currentUser, mentorMenteeSessionDoc } = context;
+  const {
+    previousDocument, currentUser, mentorMenteeSessionDoc,
+  } = context;
   const { id: menteeSessionId, bookingDate: prevBookingDate, ...prevSlots } = previousDocument;
-  console.log('prevDocument from frontend', JSON.stringify(previousDocument));
   const prevSlotTimeStringArray = getSelectedSlotsStringArray(prevSlots);
 
   const { bookingDate, ...slots } = input;
@@ -47,7 +48,6 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
   // if call is from backend we will not update the availability slots, same for paid sessions
   if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
-    console.log('prevDocument normal', appName, JSON.stringify(previousDocument));
     const prevBroadCastedMentors = get(previousDocument, 'broadCastedMentors', []).map((mentor) => get(mentor, 'id'));
     const newBroadcastedmentors = get(input, 'broadCastedMentors', []);
     // eslint-disable-next-line no-restricted-syntax
@@ -144,7 +144,6 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
 
   if (!byPassMenteeValidationApps.includes(appName)) {
     if (get(context, 'userIdFromContext')) {
-      console.log('update from backend');
       updateUserBookingAgent(menteeSessionId, get(context, 'userIdFromContext'), bookingDate, get(slotTimeStringArray, '0'));
     }
     // update booking time on leadsquared
