@@ -92,6 +92,8 @@ import Currency from './Currency';
 import LearningObjectiveComponents from './LearningObjectiveComponents';
 import Vertical from './Vertical';
 import Slot from './Slot';
+import EventType from './EventType';
+import EventName from './EventName';
 
 export default [
   Status,
@@ -189,4 +191,6 @@ export default [
   LearningObjectiveComponents,
   Vertical,
   Slot,
+  EventType,
+  EventName,
 ];
