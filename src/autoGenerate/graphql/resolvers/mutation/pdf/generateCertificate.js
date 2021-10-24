@@ -13,15 +13,11 @@ import getFormatedDate from '../../../../../../utils/getFormatedDate';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
 
-const fetchUser = (number) => `
+const fetchUser = (userId) => `
 {
   users(filter: {
     and: [
-      {studentProfile_some:
-        {parents_some:
-          {user_some: {
-            phone_number_subDoc: "${number}"
-          }}}}
+      {id: "${userId}"}
     ]
   }){
     id
@@ -30,16 +26,13 @@ const fetchUser = (number) => `
 }
 `;
 
-const fetchEventCertificate = (number) => `
+const fetchEventCertificate = (id) => `
 {
   eventCertificates(filter: {
     and: [
-      {user_some:
-      {studentProfile_some:
-        {parents_some:
-          {user_some: {
-            phone_number_subDoc: "${number}"
-          }}}}}
+      {user_some: {
+        id: "${id}"
+      }}
     ]
   }){
     id
@@ -79,6 +72,12 @@ const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).rep
 
 const slugifyID = (ID) => ID ? ID.toString().trim().toUpperCase().replace(/\w{5}(?=.)/g, '$&-') : '';
 
+/*
+- generate spy squad camp certificate and uploads to s3
+- returns s3 url (as assetUrl), tekieApp url (as tekieUrl), and EventCertificate document id
+  (as id)
+- script is at generateCertificateScript.js
+*/
 const generateCertificateMutationResolver = async (
   root,
   params,
@@ -92,11 +91,11 @@ const generateCertificateMutationResolver = async (
 
   const { input } = params;
 
-  const { phoneNumber, regenerateCertificate } = input;
+  const { userId, regenerateCertificate } = input;
 
-  const userRes = await callLocalGraphqlApi(fetchUser(phoneNumber));
+  const userRes = await callLocalGraphqlApi(fetchUser(userId));
   const users = get(userRes, 'data.users');
-  const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(phoneNumber));
+  const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(userId));
   const eventCertificates = get(eventCertificatesRes, 'data.eventCertificates');
   let tekieUrl = '';
 
@@ -113,7 +112,6 @@ const generateCertificateMutationResolver = async (
   if (users && users.length) {
     const date = new Date();
     const userName = get(users, '[0].name', '');
-    const userId = get(users, '[0].id');
     const formattedDate = getFormatedDate(date);
 
     const url = 'https://tekie-backend.s3.amazonaws.com/python/course/radiostreetCertificate.pdf';
@@ -152,18 +150,18 @@ const generateCertificateMutationResolver = async (
     /** PDF Meta Details */
     pdfDoc.setAuthor('Tekie');
     pdfDoc.setCreator('Kiwhode Learning Pvt Ltd');
-    pdfDoc.setSubject('Radio Street Certificate');
-    pdfDoc.setTitle('Radio Street Certificate');
+    pdfDoc.setSubject('Tekie\'s Spy Squad Camp Certificate');
+    pdfDoc.setTitle('Tekie\'s Spy Squad Camp Certificate');
     pdfDoc.setProducer('Tekie.in');
 
     const pdfBytes = await pdfDoc.save();
-    const path = '/tmp/radiostreet/certificate-pdf.pdf';
-    mkdirp.sync('/tmp/radiostreet');
+    const path = '/tmp/spysquadcamp/certificate-pdf.pdf';
+    mkdirp.sync('/tmp/spysquadcamp');
     fs.writeFileSync(path, pdfBytes);
     const fileContent = fs.readFileSync(path);
     let fetchedUrl = '';
     if (fileContent) {
-      const key = `python/event-certificate/radiostreet/${phoneNumber}-certificate.pdf`;
+      const key = `event-certificate/spysquadcamp/${slugifyID(userId)}-certificate.pdf`;
       await uploadToS3(key, fileContent);
       const fetchedUrlStr = await getSignedS3Uri(key);
       fetchedUrl = fetchedUrlStr.substring(0, fetchedUrlStr.indexOf('?'));

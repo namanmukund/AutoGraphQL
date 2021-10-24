@@ -1,6 +1,6 @@
 const GenerateCertificateInput = `
   input GenerateCertificateInput {
-    phoneNumber: String
+    userId: String
     regenerateCertificate: Boolean @defaultValue(value: "false")
   }
 `;
