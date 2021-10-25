@@ -101,7 +101,7 @@ const generateCertificateMutationResolver = async (
 
   if (!regenerateCertificate && eventCertificates && eventCertificates.length) {
     const exisitingEventCertificate = get(eventCertificates, '[0]', {});
-    tekieUrl = `${process.env.TEKIE_WEB_URL}/event-certificate/${slugifyID(get(exisitingEventCertificate, 'id'))}`;
+    tekieUrl = `event-certificate/${slugifyID(get(exisitingEventCertificate, 'id'))}`;
     return {
       id: get(exisitingEventCertificate, 'id'),
       assetUrl: get(exisitingEventCertificate, 'assetUrl'),
@@ -162,8 +162,7 @@ const generateCertificateMutationResolver = async (
     if (fileContent) {
       const key = `event-certificate/spysquadcamp/${slugifyID(userId)}-certificate.pdf`;
       await uploadToS3(key, fileContent);
-      const fetchedUrlStr = await getSignedS3Uri(key);
-      fetchedUrl = fetchedUrlStr.substring(0, fetchedUrlStr.indexOf('?'));
+      fetchedUrl = key;
     }
     let eventCertificateCreated = null;
     if (fetchedUrl) {
@@ -176,7 +175,7 @@ const generateCertificateMutationResolver = async (
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.addEventCertificate');
       }
     }
-    tekieUrl = `${process.env.TEKIE_WEB_URL}/event-certificate/${slugifyID(get(eventCertificateCreated, 'id'))}`;
+    tekieUrl = `event-certificate/${slugifyID(get(eventCertificateCreated, 'id'))}`;
     return {
       ...eventCertificateCreated,
       tekieUrl,
