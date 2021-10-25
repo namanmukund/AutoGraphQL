@@ -8,6 +8,9 @@ query{
     course{id}
     topic{id order}
     ${getSlotTimesInString()}
+    broadCastedMentors {
+      id
+    }
     user{
       id
       studentProfile{

@@ -127,6 +127,7 @@ import MentorDemandSlot from './mentorDemandSlot';
 import MentorAvailabilitySlot from './mentorAvailabilitySlot';
 import MentorAuditReport from './mentorAuditReport';
 import EventCertificate from './eventCertificate';
+import QuestionBankImage from './questionBankImage';
 
 export default [
   ...User,
@@ -258,4 +259,5 @@ export default [
   ...sendCertificateInMailInput,
   ...GenerateCertificate,
   ...EventCertificate,
+  ...QuestionBankImage,
 ];
