@@ -455,7 +455,7 @@ If coming from campaign and the type os b2b allocate the user to the right batch
         // });
         updateLeadSquared({
           Phone: get(parentPhone, 'number'),
-          mx_Event_Date: '24 October',
+          mx_Event_Date: '31 October',
           mx_Event_Time: '11:00 am',
         }, false, {
           ActivityEvent: 208,
