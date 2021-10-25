@@ -13,6 +13,7 @@ import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetails
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorSessions from '../../../utils/getMentorSessions';
 import { checkIfSlotCanBeOpenedValidation } from './utils';
+import isTrialSession from '../../resolvers/utils/isTrialSession';
 
 // query to get mentor Sessions
 const mentorMenteeSessionsQuery = (menteeSessionConnectId, mentorSessionConnectId) => `
@@ -20,7 +21,7 @@ query{
   mentorMenteeSessions(filter:{
     and:[
       {menteeSession_some:{id:"${menteeSessionConnectId}"}}
-      {mentorSession_some:{id:"${mentorSessionConnectId}"}}
+      ${mentorSessionConnectId ? `{mentorSession_some:{id:"${mentorSessionConnectId}"}}` : ''}
     ]   
   }){
     id
@@ -33,6 +34,12 @@ query{
   menteeSession(id:"${menteeSessionId}"){
     id
     bookingDate
+    mentorAvailabilitySlot{
+      id
+    }
+    broadCastedMentors {
+      id
+    }
     user{
       studentProfile {
         batch {
@@ -99,7 +106,7 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
     throw new ConnectIdRequiredError();
   }
 
-  // check if mentor mentee sessions already exist
+  // check if mentor mentee sessions already exist for same mentor
   const mentorMenteeSessionsData = await callLocalGraphqlApi(
     mentorMenteeSessionsQuery(
       menteeSessionConnectId,
@@ -156,6 +163,22 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   context.menteeSession = menteeSession;
   context.mentorSessionConnectId = mentorSessionConnectId;
   context.currentUser = currentUser;
+  const isTrial = await isTrialSession(topicConnectId);
+  if (typeof isTrial === 'boolean' && isTrial) {
+    if (get(menteeSession, 'broadCastedMentors', []).length > 0) {
+      const mentorMenteeSessionsData = await callLocalGraphqlApi(
+        mentorMenteeSessionsQuery(
+          menteeSessionConnectId,
+        ),
+      );
+      if (get(mentorMenteeSessionsData, 'data.mentorMenteeSessions', []).length > 0) {
+        throw new SimilarDocumentAlreadyExistError();
+      }
+      params.input.isBroadCastedSession = true;
+    }
+    if (get(menteeSession, 'mentorAvailabilitySlot.id'))
+      context.mentorAvailabilitySlotId = get(menteeSession, 'mentorAvailabilitySlot.id')
+  }
   return true;
 };
 
