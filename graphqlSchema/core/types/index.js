@@ -109,6 +109,7 @@ import SessionReport from './sessionReport';
 import RebookMenteeSessionInput from './rebookMenteeSessionInput';
 import sendJourneySnapshotInMailInput from './sendJourneySnapshotInMailInput';
 import sendCertificateInMailInput from './sendCertificateInMailInput';
+import GenerateCertificate from './generateCertificate';
 import TopicQuestions from './topicQuestions';
 import TopicAssignmentQuestion from './topicAssignmentQuestion';
 import AuditQuestion from './auditQuestion';
@@ -125,7 +126,10 @@ import MentorSupplyPaySlab from './mentorSupplyPaySlab';
 import MentorDemandSlot from './mentorDemandSlot';
 import MentorAvailabilitySlot from './mentorAvailabilitySlot';
 import MentorAuditReport from './mentorAuditReport';
-import AcceptedMentorSlotRequest from './acceptedMentorSlotRequest';
+import EventCertificate from './eventCertificate';
+import QuestionBankImage from './questionBankImage';
+import SessionGradeReport from './sessionGradeReport';
+import AcceptedSlotRequestByMentorLog from './acceptedSlotRequestByMentorLog';
 
 export default [
   ...User,
@@ -255,5 +259,9 @@ export default [
   ...MentorAuditReport,
   ...sendJourneySnapshotInMailInput,
   ...sendCertificateInMailInput,
-  ...AcceptedMentorSlotRequest,
+  ...GenerateCertificate,
+  ...EventCertificate,
+  ...QuestionBankImage,
+  ...SessionGradeReport,
+  ...AcceptedSlotRequestByMentorLog,
 ];

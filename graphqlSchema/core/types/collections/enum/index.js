@@ -92,6 +92,9 @@ import Currency from './Currency';
 import LearningObjectiveComponents from './LearningObjectiveComponents';
 import Vertical from './Vertical';
 import Slot from './Slot';
+import EventType from './EventType';
+import EventName from './EventName';
+import BlockLayoutType from './BlockLayoutType';
 import RequestType from './RequestType';
 
 export default [
@@ -190,5 +193,8 @@ export default [
   LearningObjectiveComponents,
   Vertical,
   Slot,
+  EventType,
+  EventName,
+  BlockLayoutType,
   RequestType,
 ];
