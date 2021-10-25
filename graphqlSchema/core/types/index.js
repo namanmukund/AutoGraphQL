@@ -128,6 +128,7 @@ import MentorAvailabilitySlot from './mentorAvailabilitySlot';
 import MentorAuditReport from './mentorAuditReport';
 import EventCertificate from './eventCertificate';
 import QuestionBankImage from './questionBankImage';
+import SessionGradeReport from './sessionGradeReport';
 
 export default [
   ...User,
@@ -260,4 +261,5 @@ export default [
   ...GenerateCertificate,
   ...EventCertificate,
   ...QuestionBankImage,
+  ...SessionGradeReport,
 ];
