@@ -101,7 +101,7 @@ const generateCertificateMutationResolver = async (
 
   if (!regenerateCertificate && eventCertificates && eventCertificates.length) {
     const exisitingEventCertificate = get(eventCertificates, '[0]', {});
-    tekieUrl = `https://www.tekie.in/event-certificate/${slugifyID(get(exisitingEventCertificate, 'id'))}`;
+    tekieUrl = `${process.env.TEKIE_WEB_URL}/event-certificate/${slugifyID(get(exisitingEventCertificate, 'id'))}`;
     return {
       id: get(exisitingEventCertificate, 'id'),
       assetUrl: get(exisitingEventCertificate, 'assetUrl'),
@@ -114,7 +114,7 @@ const generateCertificateMutationResolver = async (
     const userName = get(users, '[0].name', '');
     const formattedDate = getFormatedDate(date);
 
-    const url = 'https://tekie-backend.s3.amazonaws.com/python/course/radiostreetCertificate.pdf';
+    const url = `${process.env.FILE_BASE_URL}/python/course/radiostreetCertificate.pdf`;
     const existingPdfBytes = await fetch(url).then((res) => res.buffer());
 
     // Load a PDFDocument from the existing PDF bytes
@@ -177,7 +177,7 @@ const generateCertificateMutationResolver = async (
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.addEventCertificate');
       }
     }
-    tekieUrl = `https://www.tekie.in/event-certificate/${slugifyID(get(eventCertificateCreated, 'id'))}`;
+    tekieUrl = `${process.env.TEKIE_WEB_URL}/event-certificate/${slugifyID(get(eventCertificateCreated, 'id'))}`;
     return {
       ...eventCertificateCreated,
       tekieUrl,

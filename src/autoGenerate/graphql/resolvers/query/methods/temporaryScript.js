@@ -64,10 +64,12 @@ const temporaryScript = (async (root, params, context) => {
   // await updateMentorAvailabilitySlotWithMentorSessions();
   // await updateMentorAvailabilitySlotWithBatchAndMenteeSessions();
   await generateCertificateScript([
-    'ckbmeio4k00040vs1hquy1frq',
-    'ckdj2hbxb00020vusdwpca1jh',
-    'ckehjuz8q004m0vvcb07xayhe',
-    'ckf581vkm002x0v46bn3r21mo',
+    'ckgsshckl00020vqg9vd3ctpj',
+    // 'ckgt9ecip000n0vs894c0h8sr',
+    // 'ckgt9u42r00110vs8amtb1d03',
+    // 'ckgta7k7b001e0vs8dzl48otm',
+    // 'ckguc3xvm000s0vz1eot714sl',
+    // 'ckguzqk3d0002uwxe1g9g6dgd',
   ])
   return {
     result: true,

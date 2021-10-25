@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import sendWhatsAppTemplateMessage from '../../../../../autoGenerate/utils/sendWhatsAppTemplateMessage';
+import sendWhatsAppTemplateMessage from '../../../../utils/sendWhatsAppTemplateMessage';
 
 const generateCertificate = async (id) => {
   const query = `
@@ -16,7 +16,7 @@ const generateCertificate = async (id) => {
     }
   `;
   const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.updateBatchSession.id');
+  return get(res, 'data.generateCertificate', {});
 };
 
 const fetchUser = async (id) => {
@@ -51,20 +51,28 @@ const generateCertificateScript = async (userIdArray) => {
     // eslint-disable-next-line no-restricted-syntax
     for (const userId of userIdArray) {
       // eslint-disable-next-line no-await-in-loop
-      await generateCertificate(userId);
-      // const user = await fetchUser(userId);
-      // console.log(user)
-      // const parentPhone = get(user, 'studentProfile.parents[0].user.phone.number');
-      // const countryCode = get(user, 'studentProfile.parents[0].user.phone.countryCode');
-      // const studentName = get(user, 'name');
-      // const parentName = get(user, 'studentProfile.parents[0].user.name');
-      // sendWhatsAppTemplateMessage(countryCode.replace('+', '')  + parentPhone, 'spy_squad_camp', parentName, [{
-      //   name: 'parent_name',
-      //   value: parentName,
-      // }, {
-      //   name: 'student_name',
-      //   value: studentName,
-      // }]);
+      const certificateDetails = await generateCertificate(userId);
+      const certificateLink = get(certificateDetails, 'tekieUrl');
+      const user = await fetchUser(userId);
+      const parentPhoneNumber = get(user, 'studentProfile.parents[0].user.phone.number', '');
+      const parentPhoneCode = get(user, 'studentProfile.parents[0].user.phone.countryCode', '+91');
+      const parentPhone = parentPhoneCode.substring(1, parentPhoneCode.length) + parentPhoneNumber;
+      const studentName = get(user, 'name', '');
+      sendWhatsAppTemplateMessage(
+        parentPhone,
+        'radiostreet_post_event_certificate',
+        parentPhone,
+        [
+          {
+            name: 'student_name',
+            value: studentName,
+          },
+          {
+            name: 'spysquad_certificate',
+            value: certificateLink,
+          },
+        ]
+      )
     }
   }
 };

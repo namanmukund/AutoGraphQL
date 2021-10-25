@@ -7,6 +7,7 @@ import {
 
 const EventCertificate = `
   type EventCertificate @model
+  @userToken(isRequired:"false")
   @appPermissions(
     permissions:[
       { appName: "${TLA}" operations: "*" },
