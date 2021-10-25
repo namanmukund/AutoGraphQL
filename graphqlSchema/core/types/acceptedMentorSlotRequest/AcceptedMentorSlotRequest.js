@@ -1,0 +1,13 @@
+const AcceptedSlotRequestByMentorLog = `
+  type AcceptedSlotRequestByMentorLog @model {
+    date: Date!
+    slotName: Slot!
+    requestType: RequestType!
+    sessionType: SessionType @defaultValue(value: "trial")
+    mentor: MentorProfile! @relation(name:"AcceptedSlotRequestByMentorLogMentorProfile", isSubset: true)
+    mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name:"MentorAvailabilitySlotAcceptedSlotRequestByMentorLog", direction: "OneWay")
+    menteeSession: MenteeSession @relation(name:"AcceptedSlotRequestByMentorLogMenteeSession", direction: "OneWay")
+    batchSession: BatchSession @relation(name:"AcceptedSlotRequestByMentorLogBatchSession", direction: "OneWay")
+  }
+`;
+export default AcceptedSlotRequestByMentorLog;
