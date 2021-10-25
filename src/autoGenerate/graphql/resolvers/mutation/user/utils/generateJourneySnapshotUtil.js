@@ -86,8 +86,9 @@ const generateJourneySnapshotUtil = async (templatetoFetch, data, userSavedCodes
        * */
       const pdfBytes = await pdfDoc.save();
       // const url = dataURItoBlob(pdfBase64)
-      const path = '/Users/gokulmadhusudhan/Desktop/test-pdf.pdf';
-      fs.writeFileSync('/Users/gokulmadhusudhan/Desktop/test-pdf.pdf', pdfBytes);
+      const path = '/test-pdf.pdf';
+      // '/tmp/test-pdf.pdf'
+      fs.writeFileSync(path, pdfBytes);
       const fileContent = fs.readFileSync(path);
       if (fileContent) {
         uploadToS3('python/email/test-pdf.pdf', fileContent);

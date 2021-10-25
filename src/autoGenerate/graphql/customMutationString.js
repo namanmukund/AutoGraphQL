@@ -40,6 +40,7 @@ const customMutationString = `
    rebookMenteeSession ( input: RebookMenteeSessionInput ): MenteeSession,
    sendCertificateInMail ( input: SendCertificateInMailInput ): BooleanResult,
    sendJourneySnapshotInMail ( input: SendJourneySnapshotInMailInput ): BooleanResult,
+   generateCertificate ( input: GenerateCertificateInput ) : GenerateCertificateOutput,
    `;
 
 export default customMutationString;

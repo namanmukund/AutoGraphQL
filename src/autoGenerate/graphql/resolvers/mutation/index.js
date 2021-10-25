@@ -37,6 +37,7 @@ import bookB2B2CSlotsMutationResolver from './user/bookB2B2CSlots';
 import rebookMenteeSessionMutationResolver from './user/rebookMenteeSession';
 import sendCertificateInMailMutationResolver from './user/sendCertificateInMail';
 import sendJourneySnapshotInMailMutationResolver from './user/sendJourneySnapshotInMail';
+import generateCertificateMutationResolver from './pdf/generateCertificate';
 
 export {
   addMutationResolver,
@@ -78,4 +79,5 @@ export {
   rebookMenteeSessionMutationResolver,
   sendCertificateInMailMutationResolver,
   sendJourneySnapshotInMailMutationResolver,
+  generateCertificateMutationResolver,
 };

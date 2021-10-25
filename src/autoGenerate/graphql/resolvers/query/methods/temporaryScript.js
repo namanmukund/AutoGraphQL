@@ -1,5 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import updateMentorAvailabilitySlotWithBatchAndMenteeSessions from '../scriptMethods/updateMentorAvailabilitySlotWIthBatchAndMenteeSessions';
+// import updateMentorAvailabilitySlotWithBatchAndMenteeSessions from '../scriptMethods/updateMentorAvailabilitySlotWIthBatchAndMenteeSessions';
 // import updateMentorAvailabilitySlotWithMentorSessions from '../scriptMethods/updateMentorAvailabilitySlotWithMentorSessions';
 // import updateMentorMenteeSessionWithStudentProfile from '../scriptMethods/updateMentorMenteeSessionWithStudentProfile';
 // import updateMenteeSessionWithStudentProfile from '../scriptMethods/updateMenteeSessionWithStudentProfile';
@@ -19,6 +19,7 @@ import updateMentorAvailabilitySlotWithBatchAndMenteeSessions from '../scriptMet
 // import migrateBatchAttendanceToEnum from '../scriptMethods/migrateBatchAttendanceToEnum';
 // import updateCourseInVideos from '../scriptMethods/updateCourseInVideos';
 // import removeCourseFromUserAssignments from '../scriptMethods/removeCourseFromUserAssignments';
+// import generateCertificateScript from '../scriptMethods/generateCertificateScript';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -61,7 +62,10 @@ const temporaryScript = (async (root, params, context) => {
   // await updateMentorMenteeSessionWithStudentProfile();
   // await removeCourseFromUserAssignments();
   // await updateMentorAvailabilitySlotWithMentorSessions();
-  await updateMentorAvailabilitySlotWithBatchAndMenteeSessions();
+  // await updateMentorAvailabilitySlotWithBatchAndMenteeSessions();
+  // await generateCertificateScript([
+  //     'ckgsshckl00020vqg9vd3ctpj',
+  //   ]);
   return {
     result: true,
   };

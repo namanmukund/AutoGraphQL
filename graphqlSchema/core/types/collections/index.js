@@ -21,6 +21,7 @@ import WorkbookExample from './WorkbookExample';
 import UpdateParentChildDetailInput from './UpdateParentChildDetailInput.js';
 import TimestampTag from './TimestampTag';
 import ProductFeature from './ProductFeature';
+import UrlResult from './UrlResult';
 
 export default [
   ...Enum,
@@ -46,4 +47,5 @@ export default [
   ...WorkbookExample,
   ...TimestampTag,
   ...ProductFeature,
+  ...UrlResult,
 ];
