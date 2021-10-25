@@ -52,7 +52,7 @@ const generateCertificateScript = async (userIdArray) => {
     for (const userId of userIdArray) {
       // eslint-disable-next-line no-await-in-loop
       const certificateDetails = await generateCertificate(userId);
-      const certificateLink = get(certificateDetails, 'tekieUrl');
+      const certificateLink = `${process.env.TEKIE_WEB_URL}/${get(certificateDetails, 'tekieUrl')}`;
       // eslint-disable-next-line no-await-in-loop
       const user = await fetchUser(userId);
       const parentPhoneNumber = get(user, 'studentProfile.parents[0].user.phone.number', '');
