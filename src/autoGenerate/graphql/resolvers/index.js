@@ -91,6 +91,7 @@ import getSchoolCampaignSlots from './query/methods/getSchoolCampaignSlots';
 import getUserCourses from './query/methods/getUserCourses';
 import sendCertificateInMail from './mutation/methods/sendCertificateInMail';
 import sendJourneySnapshotInMail from './mutation/methods/sendJourneySnapshotInMail';
+import generateCertificate from './mutation/methods/generateCertificate';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -586,6 +587,7 @@ resolvers.Mutation.bookB2B2CSlots = bookB2B2CSlots;
 resolvers.Mutation.rebookMenteeSession = rebookMenteeSession;
 resolvers.Mutation.sendCertificateInMail = sendCertificateInMail;
 resolvers.Mutation.sendJourneySnapshotInMail = sendJourneySnapshotInMail;
+resolvers.Mutation.generateCertificate = generateCertificate;
 
 // queries
 resolvers.Query.me = me;

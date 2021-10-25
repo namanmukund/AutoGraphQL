@@ -26,6 +26,7 @@ const QuestionBank = `
     hints: [Hint]
     questionType: QuestionBankType! @defaultValue(value: "mcq")
     questionLayoutType: QuestionBankLayoutType! @defaultValue(value: "editor")
+    blockLayoutType: BlockLayoutType @defaultValue(value: "gridSm")
     difficulty: Int
     assessmentType: AssessmentType!
     questionCodeSnippet: String @trim

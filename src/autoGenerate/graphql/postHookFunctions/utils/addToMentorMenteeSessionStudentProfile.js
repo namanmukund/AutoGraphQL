@@ -2,7 +2,6 @@ import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 const addToMentorMenteeSessionStudentProfile = async (mentorMenteeSessionId, studentProfileId) => {
-//   input with sessionStatus is mandatory
   const query = `
   mutation {
   addToMentorMenteeSessionStudentProfile(
