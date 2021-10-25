@@ -125,7 +125,7 @@ import MentorSupplyPaySlab from './mentorSupplyPaySlab';
 import MentorDemandSlot from './mentorDemandSlot';
 import MentorAvailabilitySlot from './mentorAvailabilitySlot';
 import MentorAuditReport from './mentorAuditReport';
-import QuestionBankImage from './QuestionBankImage';
+import QuestionBankImage from './questionBankImage';
 
 export default [
   ...User,
