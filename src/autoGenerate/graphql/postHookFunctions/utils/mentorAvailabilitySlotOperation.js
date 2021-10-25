@@ -145,8 +145,6 @@ const addUpdateMentorAvailabilitySlots = async ({
 }) => {
   // if singleSlot exist for give slotName, date and sessionType then update with sessionId
   if (singleSlotData && singleSlotData.length > 0) {
-    console.log('=====================================');
-    console.log('update with ', typeName, sessionId, 'with slot', slotName);
     if (typeName === 'batchSession') {
       const slotVerticals = get(singleSlotData, '[0].verticals', []);
       const addedVerticals = slotVerticals.map((vertical) => get(vertical, 'value'));
@@ -162,9 +160,6 @@ const addUpdateMentorAvailabilitySlots = async ({
       await updateMentorAvailabilitySlot(get(singleSlotData, '[0].id'), sessionId, typeName, mentorProfileId);
     }
   } else {
-    // eslint-disable
-    console.log('=====================================');
-    console.log('add with ', typeName, sessionId, 'with slot', slotName);
     const paySlab = await getPaySlabDetails();
     const paySlabId = get(paySlab, '[0].id');
     const vertical = 'b2c';
