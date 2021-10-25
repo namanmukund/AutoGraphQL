@@ -64,6 +64,8 @@ import updatePreSalesAuditPostHookMethod from './postHookFunctions/updatePreSale
 import updatePostSalesAuditPostHookMethod from './postHookFunctions/updatePostSalesAuditPostHookMethod';
 import deleteBatchPostHookMethod from './postHookFunctions/deleteBatchPostHookMethod';
 import userPostHookMethod from './postHookFunctions/userPostHookMethod';
+import addMentorAvailabilitySlotPostHookMethod from './postHookFunctions/addmentorAvailabilitySlotPostHookMethod';
+import updateMentorAvailabilitySlotPostHookMethod from './postHookFunctions/updateMentorAvailabilitySlotPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -307,6 +309,14 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'user': {
       await userPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'addMentorAvailabilitySlot': {
+      await addMentorAvailabilitySlotPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'updateMentorAvailabilitySlot': {
+      await updateMentorAvailabilitySlotPostHookMethod(input, params, mutationName, context);
       break;
     }
     default:

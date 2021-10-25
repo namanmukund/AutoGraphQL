@@ -1,0 +1,188 @@
+/* eslint-disable no-console */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-confusing-arrow */
+import { PDFDocument, rgb } from 'pdf-lib';
+import * as fs from 'fs';
+import fontkit from '@pdf-lib/fontkit';
+import { get } from 'lodash';
+import mkdirp from 'mkdirp';
+import { NUNITO_BOLD_FONT_URL } from '../../../../../../constants';
+import { uploadToS3, getSignedS3Uri } from '../../../../../middlewares/utils/uploadToS3';
+import validateAuthentication from '../../../../../../utils/validateAuthentication';
+import getFormatedDate from '../../../../../../utils/getFormatedDate';
+import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
+
+const fetchUser = (userId) => `
+{
+  users(filter: {
+    and: [
+      {id: "${userId}"}
+    ]
+  }){
+    id
+    name
+  }
+}
+`;
+
+const fetchEventCertificate = (id) => `
+{
+  eventCertificates(filter: {
+    and: [
+      {user_some: {
+        id: "${id}"
+      }}
+    ]
+  }){
+    id
+    user{
+      id
+      name
+    }
+    assetUrl
+  }
+}
+`;
+
+const addEventCertificate = (userId, assetUrl) => `
+  mutation {
+    addEventCertificate(userConnectId:"${userId}",
+      input: {
+        assetUrl: "${assetUrl}"
+      }){
+        id
+        assetUrl
+      }
+  }
+`;
+
+const updateEventCertificate = (eventCertificateId, url) => `
+ mutation{
+  updateEventCertificate(id:"${eventCertificateId}",input:{
+    assetUrl:"${url}"
+  }){
+    id
+    assetUrl
+  }
+}
+`;
+
+const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
+
+const slugifyID = (ID) => ID ? ID.toString().trim().toUpperCase().replace(/\w{5}(?=.)/g, '$&-') : '';
+
+/*
+- generate spy squad camp certificate and uploads to s3
+- returns s3 url (as assetUrl), tekieApp url (as tekieUrl), and EventCertificate document id
+  (as id)
+- script is at generateCertificateScript.js
+*/
+const generateCertificateMutationResolver = async (
+  root,
+  params,
+  typeName,
+  info,
+  mutationName,
+  ast,
+  context,
+) => {
+  validateAuthentication(context);
+
+  const { input } = params;
+
+  const { userId, regenerateCertificate } = input;
+
+  const userRes = await callLocalGraphqlApi(fetchUser(userId));
+  const users = get(userRes, 'data.users');
+  const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(userId));
+  const eventCertificates = get(eventCertificatesRes, 'data.eventCertificates');
+  let tekieUrl = '';
+
+  if (!regenerateCertificate && eventCertificates && eventCertificates.length) {
+    const exisitingEventCertificate = get(eventCertificates, '[0]', {});
+    tekieUrl = `event-certificate/${slugifyID(get(exisitingEventCertificate, 'id'))}`;
+    return {
+      id: get(exisitingEventCertificate, 'id'),
+      assetUrl: get(exisitingEventCertificate, 'assetUrl'),
+      tekieUrl,
+    };
+  }
+
+  if (users && users.length) {
+    const userName = get(users, '[0].name', '');
+    const formattedDate = '24-10-2021';
+
+    const url = `${process.env.FILE_BASE_URL}/python/course/radiostreetCertificate.pdf`;
+    const existingPdfBytes = await fetch(url).then((res) => res.buffer());
+
+    // Load a PDFDocument from the existing PDF bytes
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+    pdfDoc.registerFontkit(fontkit);
+
+    // Get the first page of the document
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
+
+    // // Embed the Helvetica font
+    const NunitoBoldfontBytes = await fetch(NUNITO_BOLD_FONT_URL).then((res) => res.buffer());
+
+    const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
+
+    // Draw a string of text diagonally across the first page
+    firstPage.drawText(`${capitalize(userName)}`, {
+      x: 330,
+      y: 506,
+      size: 29,
+      font: NunitoBoldFont,
+      color: rgb(0, 0.678, 0.902),
+    });
+
+    firstPage.drawText(`${formattedDate}.`, {
+      x: 385,
+      y: 394,
+      size: 18,
+      font: NunitoBoldFont,
+      color: rgb(0.3137, 0.31, 0.31),
+    });
+
+    /** PDF Meta Details */
+    pdfDoc.setAuthor('Tekie');
+    pdfDoc.setCreator('Kiwhode Learning Pvt Ltd');
+    pdfDoc.setSubject('Tekie\'s Spy Squad Camp Certificate');
+    pdfDoc.setTitle('Tekie\'s Spy Squad Camp Certificate');
+    pdfDoc.setProducer('Tekie.in');
+
+    const pdfBytes = await pdfDoc.save();
+    const path = '/tmp/spysquadcamp/certificate-pdf.pdf';
+    mkdirp.sync('/tmp/spysquadcamp');
+    fs.writeFileSync(path, pdfBytes);
+    const fileContent = fs.readFileSync(path);
+    let fetchedUrl = '';
+    if (fileContent) {
+      const key = `event-certificate/spysquadcamp/${slugifyID(userId)}-certificate.pdf`;
+      await uploadToS3(key, fileContent);
+      fetchedUrl = key;
+    }
+    let eventCertificateCreated = null;
+    if (fetchedUrl) {
+      if (eventCertificates && eventCertificates.length) {
+        const eventCertificateId = get(eventCertificates, '[0].id');
+        const eventCertificateCreatedRes = await callLocalGraphqlApi(updateEventCertificate(eventCertificateId, fetchedUrl));
+        eventCertificateCreated = get(eventCertificateCreatedRes, 'data.updateEventCertificate');
+      } else {
+        const eventCertificateCreatedRes = await callLocalGraphqlApi(addEventCertificate(userId, fetchedUrl));
+        eventCertificateCreated = get(eventCertificateCreatedRes, 'data.addEventCertificate');
+      }
+    }
+    tekieUrl = `event-certificate/${slugifyID(get(eventCertificateCreated, 'id'))}`;
+    return {
+      ...eventCertificateCreated,
+      tekieUrl,
+    };
+  }
+  // if no such user found with given phone number
+  throw new DatabaseRecordNotFoundError();
+};
+
+export default generateCertificateMutationResolver;
