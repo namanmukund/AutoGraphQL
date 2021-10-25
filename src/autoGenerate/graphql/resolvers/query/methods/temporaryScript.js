@@ -70,7 +70,7 @@ const temporaryScript = (async (root, params, context) => {
     // 'ckgta7k7b001e0vs8dzl48otm',
     // 'ckguc3xvm000s0vz1eot714sl',
     // 'ckguzqk3d0002uwxe1g9g6dgd',
-  ])
+  ]);
   return {
     result: true,
   };

@@ -53,6 +53,7 @@ const generateCertificateScript = async (userIdArray) => {
       // eslint-disable-next-line no-await-in-loop
       const certificateDetails = await generateCertificate(userId);
       const certificateLink = get(certificateDetails, 'tekieUrl');
+      // eslint-disable-next-line no-await-in-loop
       const user = await fetchUser(userId);
       const parentPhoneNumber = get(user, 'studentProfile.parents[0].user.phone.number', '');
       const parentPhoneCode = get(user, 'studentProfile.parents[0].user.phone.countryCode', '+91');
@@ -71,8 +72,8 @@ const generateCertificateScript = async (userIdArray) => {
             name: 'spysquad_certificate',
             value: certificateLink,
           },
-        ]
-      )
+        ],
+      );
     }
   }
 };
