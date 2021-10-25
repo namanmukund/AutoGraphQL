@@ -19,7 +19,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import migrateBatchAttendanceToEnum from '../scriptMethods/migrateBatchAttendanceToEnum';
 // import updateCourseInVideos from '../scriptMethods/updateCourseInVideos';
 // import removeCourseFromUserAssignments from '../scriptMethods/removeCourseFromUserAssignments';
-import generateCertificateScript from '../scriptMethods/generateCertificateScript';
+// import generateCertificateScript from '../scriptMethods/generateCertificateScript';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
