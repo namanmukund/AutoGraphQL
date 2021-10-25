@@ -110,9 +110,8 @@ const generateCertificateMutationResolver = async (
   }
 
   if (users && users.length) {
-    const date = new Date();
     const userName = get(users, '[0].name', '');
-    const formattedDate = getFormatedDate(date);
+    const formattedDate = '24-10-2021';
 
     const url = `${process.env.FILE_BASE_URL}/python/course/radiostreetCertificate.pdf`;
     const existingPdfBytes = await fetch(url).then((res) => res.buffer());
