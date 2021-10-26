@@ -437,7 +437,8 @@ If coming from campaign and the type os b2b allocate the user to the right batch
   parentChildSignupPostHookMethod(input, leadSquaredParams);
 
   // Send OTP if from RadioStreet event
-  if (source && source.toLowerCase() === 'radiostreet') {
+  const eventSources = ['radiostreet', 'spysquadcamp'];
+  if (source && eventSources.includes(source.toLowerCase())) {
     // send b2b2c reg+booking
     // sendBookingReminderOrConfirmationB2B(parentId);
     const phoneOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
@@ -448,46 +449,19 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     };
 
     setTimeout(() => {
-      if (utmSource === 'RadioStreet') {
-        updateLeadSquared({
-          Phone: get(parentPhone, 'number'),
-        }, false, {
-          ActivityEvent: 208,
-          Fields: [
-            {
-              SchemaName: 'mx_Custom_1',
-              Value: 'RadioStreet',
-            },
-          ],
-        });
-
-        setTimeout(() => {
-          const activityInput = {
-            ActivityEvent: 103,
-            ActivityNote: 'User booked a session',
-            Fields: [
-              {
-                SchemaName: 'Status',
-                Value: 'Booked (Verified)',
-              },
-              {
-                SchemaName: 'mx_Custom_3',
-                Value: 'Customer',
-              },
-              {
-                SchemaName: 'mx_Custom_8',
-                Value: '2021-10-24 05:30:00', // 11 am
-              },
-            ],
-          };
-          const leadSquaredInput = {
-            Phone: get(parentPhone, 'number'),
-            mx_Event_Date: '24 October',
-            mx_Event_Time: '11:00 am',
-          };
-          updateLeadSquared(leadSquaredInput, false, activityInput);
-        }, 5000);
-      }
+      updateLeadSquared({
+        Phone: get(parentPhone, 'number'),
+        mx_Event_Date: '31 October',
+        mx_Event_Time: '11:00 am',
+      }, false, {
+        ActivityEvent: 208,
+        Fields: [
+          {
+            SchemaName: 'mx_Custom_1',
+            Value: 'RadioStreet',
+          },
+        ],
+      });
     }, 1000 * 60 * 2);
 
     // update phoneOtp in db
