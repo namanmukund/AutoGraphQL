@@ -8,6 +8,7 @@ const AcceptedSlotRequestByMentorLog = `
     mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name:"MentorAvailabilitySlotAcceptedSlotRequestByMentorLog", direction: "OneWay")
     menteeSession: MenteeSession @relation(name:"AcceptedSlotRequestByMentorLogMenteeSession", direction: "OneWay")
     batchSession: BatchSession @relation(name:"AcceptedSlotRequestByMentorLogBatchSession", direction: "OneWay")
+    reason: RequestReason
   }
 `;
 export default AcceptedSlotRequestByMentorLog;
