@@ -48,7 +48,6 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
   // if call is from backend we will not update the availability slots, same for paid sessions
   if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
-    console.log('update menteeSession')
     // const prevBroadCastedMentors = get(previousDocument, 'broadCastedMentors', []).map((mentor) => get(mentor, 'id'));
     // const newBroadcastedmentors = get(input, 'broadCastedMentors', []);
     // eslint-disable-next-line no-restricted-syntax
