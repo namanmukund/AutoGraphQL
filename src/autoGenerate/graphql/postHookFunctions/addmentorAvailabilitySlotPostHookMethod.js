@@ -1,7 +1,12 @@
 import { get } from 'lodash';
+import { backendApps } from '../../../../constants';
 import sendMailAndWhatsappMessageForSupplyRequest from '../../utils/sendMailAndWhatsappMessageForSupplyRequest';
 
-const addMentorAvailabilitySlotPostHookMethod = async (input) => {
+const addMentorAvailabilitySlotPostHookMethod = async (input, params, mutationName, context) => {
+  const { appName } = context;
+  if (backendApps.includes(appName)) {
+    return true;
+  }
   const { broadCastedMentors = [] } = input;
   if (broadCastedMentors.length > 0) {
     // eslint-disable-next-line no-restricted-syntax
@@ -12,6 +17,7 @@ const addMentorAvailabilitySlotPostHookMethod = async (input) => {
       }
     }
   }
+  return true;
 };
 
 export default addMentorAvailabilitySlotPostHookMethod;

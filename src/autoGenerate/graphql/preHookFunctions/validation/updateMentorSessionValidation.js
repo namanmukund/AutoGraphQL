@@ -1,12 +1,18 @@
 import { get } from 'lodash';
+import moment from 'moment';
 import validateMentorSessionInput from './utils/validateMentorSessionInput';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import mentorSessionQuery from '../../graphqlQueries/mentorSessionQuery';
-import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
+import {
+  DatabaseRecordNotFoundError, LateToAcceptRequest,
+  NotBroadcastedMentor, SlotAlreadyFilled, SlotAlreadyOpened,
+  SessionAlreadyAssigned,
+} from '../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import checkIfSlotCanBeOpenedValidation from './utils/checkIfSlotCanBeOpenedValidation';
 import checkIfSlotCanBeDeletedValidation from './utils/checkIfSlotCanBeDeletedValidation';
+import fetchMentorAvailabilitySlot, { fetchMenteeSessionForDemand, fetchMentorMenteeSessionForMenteeSession, fetchMentorSessionsForSlot } from './utils/mentorAvailabilityQueries/fetchMentorAvailabilitySlot';
 import getMentorSessions from '../../../utils/getMentorSessions';
 
 const updateMentorSessionValidation = async (params, mutationOrQueryName, context) => {
@@ -15,6 +21,48 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
   const mentorSession = get(mentorSessionData, 'data.mentorSession');
   if (mentorSession && !mentorSession) {
     throw new DatabaseRecordNotFoundError();
+  }
+  if (get(params, 'input.acceptanceObjects.replace', []).length > 0) {
+    const {
+      mentorAvailabilitySlotId, slotName, date, requestType, menteeSessionId,
+    } = get(params, 'input.acceptanceObjects.replace[0]', {});
+    const time = slotName.split('slot')[1];
+    const mentorProfileId = get(mentorSession, 'user.mentorProfile.id');
+    const mentorId = get(mentorSession, 'user.id');
+    const startTime = moment(date).set('hours', time);
+    if (requestType === 'supply') {
+      const mentorAvailabilitySlot = await fetchMentorAvailabilitySlot(mentorAvailabilitySlotId);
+      const broadCastedMentorsId = get(mentorAvailabilitySlot, 'broadCastedMentors', []).map((mentor) => get(mentor, 'id'));
+      const dateValue = new Date(new Date(date).setHours(0, 0, 0, 0)).toISOString();
+      if (!broadCastedMentorsId.includes(mentorProfileId)) {
+        throw new NotBroadcastedMentor();
+      }
+      if (!moment().isBefore(startTime)) {
+        throw new LateToAcceptRequest();
+      }
+      if (get(mentorAvailabilitySlot, 'count', 0) <= get(mentorAvailabilitySlot, 'mentorSessionsMeta.count', 0)) {
+        throw new SlotAlreadyFilled();
+      }
+      const mentorSessionsOfSlot = await fetchMentorSessionsForSlot({ date: dateValue, mentorId, slotNumber: time });
+      if (mentorSessionsOfSlot && mentorSessionsOfSlot.length > 0) {
+        throw new SlotAlreadyOpened();
+      }
+    } else if (requestType === 'demand') {
+      if (menteeSessionId) {
+        const menteeSessionsData = await fetchMenteeSessionForDemand(menteeSessionId);
+        const broadCastedMentorsId = get(menteeSessionsData, 'broadCastedMentors', []).map((mentor) => get(mentor, 'id'));
+        if (!broadCastedMentorsId.includes(mentorProfileId)) {
+          throw new NotBroadcastedMentor();
+        }
+        if (!moment().isBefore(startTime)) {
+          throw new LateToAcceptRequest();
+        }
+        const mentorMenteeSessionData = await fetchMentorMenteeSessionForMenteeSession(menteeSessionId);
+        if (mentorMenteeSessionData && mentorMenteeSessionData.length > 0) {
+          throw new SessionAlreadyAssigned();
+        }
+      }
+    }
   }
   const mentorUserId = get(mentorSession, 'user.id', '');
   const availabilityDate = get(params, 'input.availabilityDate', '');

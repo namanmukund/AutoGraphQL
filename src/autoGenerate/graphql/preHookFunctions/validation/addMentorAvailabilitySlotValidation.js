@@ -16,7 +16,7 @@ const getmentorAvailabilitySlot = async (id) => {
   return get(result, 'data.mentorAvailabilitySlot');
 };
 
-const updateMentorAvailabilitySlotValidation = async (params, mutationOrQueryName, context) => {
+const addMentorAvailabilitySlotValidation = async (params, mutationOrQueryName, context) => {
   const { id: mentorAvailabilitySlotId } = params;
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
   const {
@@ -30,4 +30,4 @@ const updateMentorAvailabilitySlotValidation = async (params, mutationOrQueryNam
   return true;
 };
 
-export default updateMentorAvailabilitySlotValidation;
+export default addMentorAvailabilitySlotValidation;

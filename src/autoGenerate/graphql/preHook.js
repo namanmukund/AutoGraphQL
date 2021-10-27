@@ -110,6 +110,7 @@ import updateBlockBasedProjectValidation from './preHookFunctions/validation/upd
 import addVideoValidation from './preHookFunctions/validation/addVideoValidation';
 import updateVideoValidation from './preHookFunctions/validation/updateVideoValidation';
 import updateMentorAvailabilitySlotValidation from './preHookFunctions/validation/updateMentorAvailabilitySlotValidation';
+import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -803,7 +804,15 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await updateVideoValidation(params, mutationOrQueryName, context);
       break;
     }
+    case 'addMentorAvailabilitySlot': {
+      await addMentorAvailabilitySlotValidation(params, mutationOrQueryName, context);
+      break;
+    }
     case 'updateMentorAvailabilitySlot': {
+      await updateMentorAvailabilitySlotValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addAcceptedSlotRequestByMentorLog': {
       await updateMentorAvailabilitySlotValidation(params, mutationOrQueryName, context);
       break;
     }

@@ -14,7 +14,7 @@ const AcceptanceObject = `
    mentorAvailabilitySlotId: String
    menteeSessionId: String
    batchSessionId: String
-   action: String
+   requestType: RequestType
  }`;
 
 const MentorSession = `

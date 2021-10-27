@@ -4,7 +4,7 @@ const AcceptedSlotRequestByMentorLog = `
     slotName: Slot!
     requestType: RequestType!
     sessionType: SessionType @defaultValue(value: "trial")
-    mentor: MentorProfile! @relation(name:"AcceptedSlotRequestByMentorLogMentorProfile", isSubset: true)
+    mentor: MentorProfile! @relation(name:"AcceptedSlotRequestByMentorLogMentorProfile", direction: "OneWay")
     mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name:"MentorAvailabilitySlotAcceptedSlotRequestByMentorLog", direction: "OneWay")
     menteeSession: MenteeSession @relation(name:"AcceptedSlotRequestByMentorLogMenteeSession", direction: "OneWay")
     batchSession: BatchSession @relation(name:"AcceptedSlotRequestByMentorLogBatchSession", direction: "OneWay")
