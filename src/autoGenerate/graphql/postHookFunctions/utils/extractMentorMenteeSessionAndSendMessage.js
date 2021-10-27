@@ -56,6 +56,7 @@ const extractMentorMenteeSessionAndSendMessage = async (
   user,
   topic,
   mentorMenteeSessionId,
+  course,
 ) => {
   if (get(user, 'data.user.studentProfile.batch.id')) return;
   const slotNumber = slotTimeStringArray[0].split('slot')[1];
@@ -118,7 +119,7 @@ const extractMentorMenteeSessionAndSendMessage = async (
   );
 
   const {
-    parentName, parentNumber, countryCode, name, grade, parentEmail,
+    parentName, parentNumber, countryCode, name, grade,
   } = menteeObj;
   const mentorPhoto = get(mentorSession, 'user.profilePic.uri', 'python/email/mentor1.png') || 'python/email/mentor1.png';
   // add session Link to LS
@@ -138,6 +139,10 @@ const extractMentorMenteeSessionAndSendMessage = async (
   if (process.env.NODE_ENV === 'production') {
     if (get(topic, 'data.topic.order') === 1) {
     // send whatsapp emailTemplate message
+      let sessionLink = get(mentorInfo, 'data.mentorSession.user.mentorProfile.sessionLink');
+      if (!get(mentorInfo, 'data.mentorSession.user.mentorProfile.sessionLink')) {
+        sessionLink = get(mentorInfo, 'data.mentorSession.user.mentorProfile.googleMeetLink');
+      }
       const {
         name: mentorName, phoneNumber: mentorPhoneNumber, countryCode: mentorCountryCode,
       } = mentorObj;
@@ -167,15 +172,18 @@ const extractMentorMenteeSessionAndSendMessage = async (
         value: grade,
       },
       {
-        name: 'email',
-        value: parentEmail,
+        name: 'course',
+        value: get(course, 'data.course.title'),
+      },
+      {
+        name: 'session_link',
+        value: sessionLink,
       },
       ];
       const phone = mentorCountryCode.split('+')[1] + mentorPhoneNumber;
-
       await sendWhatsAppTemplateMessage(
         phone,
-        transactionalMessageBody.mentorSessionNotification,
+        transactionalMessageBody.demoAssignedMentor,
         mentorName,
         parameters,
       );

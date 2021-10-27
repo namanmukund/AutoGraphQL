@@ -100,7 +100,16 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
       || (get(prevSlotTimeStringArray, '0') !== get(slotTimeStringArray, '0'))
     ) {
       if (context.mentorSessionId) {
-        sendSessionCancellationMessage(context.mentorSessionId, prevBookingDate, prevSlotTimeStringArray, studentName, parentName);
+        const parentNumber = `${get(
+          userInfo,
+          'data.user.studentProfile.parents[0].user.phone.countryCode',
+          '',
+        )}-${get(
+          userInfo,
+          'data.user.studentProfile.parents[0].user.phone.number',
+          '',
+        )}`;
+        sendSessionCancellationMessage(context.mentorSessionId, prevBookingDate, prevSlotTimeStringArray, studentName, parentName, parentNumber);
       }
 
       // send email to mentor admin regarding the session

@@ -65,7 +65,16 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const parentName = get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.name');
     if (get(menteeSession, 'data.menteeSession.topic.order') === 1) {
       if (context.currentAppName !== TBA) {
-        sendSessionCancellationMessage(mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName);
+        const parentNumber = `${get(
+          menteeSession,
+          'data.menteeSession.user.studentProfile.parents[0].user.phone.countryCode',
+          '',
+        )}-${get(
+          menteeSession,
+          'data.menteeSession.user.studentProfile.parents[0].user.phone.number',
+          '',
+        )}`;
+        sendSessionCancellationMessage(mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName, parentNumber);
       }
     }
   }
