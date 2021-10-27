@@ -13,6 +13,7 @@ getStudentCurrentStatus (input: getStudentCurrentStatusInput): StudentCurrentSta
 getCourseCertificate (input: GetCourseCertificateInput ): CourseCertificateResult
 getSchoolCampaignSlots (input: GetSchoolCampaignSlotsInput): [GetSchoolCampaignSlotsResult]
 getUserCourses (input: GetUserCoursesInput): [GetUserCoursesResults]
+getEventCertificate (input: GetEventCertificateInput): GetEventCertificateResult
 `;
 
 export default customQueryString;
