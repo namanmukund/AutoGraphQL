@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import { backendApps } from '../../../../constants';
+import getSlotLabel from '../../../../utils/getSlotLabel';
 import sendMailAndWhatsappMessageForSupplyRequest from '../../utils/sendMailAndWhatsappMessageForSupplyRequest';
 
 const addMentorAvailabilitySlotPostHookMethod = async (input, params, mutationName, context) => {
@@ -12,8 +13,10 @@ const addMentorAvailabilitySlotPostHookMethod = async (input, params, mutationNa
     // eslint-disable-next-line no-restricted-syntax
     for (const mentorProfile of broadCastedMentors) {
       if (mentorProfile && mentorProfile.typeId) {
+        const time = get(input, 'slotName').split('slot')[1];
+        const startTime = getSlotLabel(time).startTime;
         sendMailAndWhatsappMessageForSupplyRequest(mentorProfile.typeId,
-          { date: get(input, 'date'), time: get(input, 'slotName'), slotId: get(input, 'id') });
+          { date: get(input, 'date'), slotsTime: startTime, slotId: get(input, 'id') });
       }
     }
   }

@@ -179,6 +179,10 @@ const extractMentorMenteeSessionAndSendMessage = async (
         name: 'session_link',
         value: sessionLink,
       },
+      {
+        name: 'tms_url',
+        value: `mentorDashboard?demoSessionId=${mentorMenteeSessionId}`,
+      },
       ];
       const phone = mentorCountryCode.split('+')[1] + mentorPhoneNumber;
       await sendWhatsAppTemplateMessage(
