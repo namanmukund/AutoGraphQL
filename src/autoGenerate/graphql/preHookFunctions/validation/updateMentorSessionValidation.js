@@ -2,12 +2,15 @@ import { get } from 'lodash';
 import validateMentorSessionInput from './utils/validateMentorSessionInput';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import mentorSessionQuery from '../../graphqlQueries/mentorSessionQuery';
-import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
+import {
+  DatabaseRecordNotFoundError,
+} from '../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import checkIfSlotCanBeOpenedValidation from './utils/checkIfSlotCanBeOpenedValidation';
 import checkIfSlotCanBeDeletedValidation from './utils/checkIfSlotCanBeDeletedValidation';
 import getMentorSessions from '../../../utils/getMentorSessions';
+import addAcceptedSlotRequestByMentorLogCheck from './utils/addAcceptedSlotRequestByMentorLogCheck';
 
 const updateMentorSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: mentorSessionId } = params;
@@ -15,6 +18,18 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
   const mentorSession = get(mentorSessionData, 'data.mentorSession');
   if (mentorSession && !mentorSession) {
     throw new DatabaseRecordNotFoundError();
+  }
+  const mentorProfileId = get(mentorSession, 'user.mentorProfile.id');
+  const mentorId = get(mentorSession, 'user.id');
+  if (get(params, 'input.acceptanceObjects.replace', []).length > 0) {
+    const acceptanceObjectsArray = get(params, 'input.acceptanceObjects.replace', []);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const acceptanceObject of acceptanceObjectsArray) {
+      // eslint-disable-next-line no-await-in-loop
+      await addAcceptedSlotRequestByMentorLogCheck({
+        acceptanceObject, mentorProfileId, mentorId, action: 'updateMentorSession',
+      });
+    }
   }
   const mentorUserId = get(mentorSession, 'user.id', '');
   const availabilityDate = get(params, 'input.availabilityDate', '');

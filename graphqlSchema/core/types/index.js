@@ -129,6 +129,7 @@ import MentorAuditReport from './mentorAuditReport';
 import EventCertificate from './eventCertificate';
 import QuestionBankImage from './questionBankImage';
 import SessionGradeReport from './sessionGradeReport';
+import AcceptedSlotRequestByMentorLog from './acceptedSlotRequestByMentorLog';
 
 export default [
   ...User,
@@ -262,4 +263,5 @@ export default [
   ...EventCertificate,
   ...QuestionBankImage,
   ...SessionGradeReport,
+  ...AcceptedSlotRequestByMentorLog,
 ];

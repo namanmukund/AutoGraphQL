@@ -95,6 +95,8 @@ import Slot from './Slot';
 import EventType from './EventType';
 import EventName from './EventName';
 import BlockLayoutType from './BlockLayoutType';
+import RequestType from './RequestType';
+import RequestReason from './RequestReason';
 
 export default [
   Status,
@@ -195,4 +197,6 @@ export default [
   EventType,
   EventName,
   BlockLayoutType,
+  RequestType,
+  RequestReason,
 ];
