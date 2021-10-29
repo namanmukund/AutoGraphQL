@@ -54,7 +54,7 @@ import addMentorMenteeSessionValidation from './preHookFunctions/validation/addM
 import updateMentorMenteeSessionValidation from './preHookFunctions/validation/updateMentorMenteeSessionValidation';
 import deleteMenteeSessionValidation from './preHookFunctions/validation/deleteMenteeSessionValidation';
 import updateSalesOperationValidation from './preHookFunctions/validation/updateSalesOperationValidation';
-import addSalesOperationValidation from './preHookFunctions/validation/addSalesOperationOperationValidation';
+import addSalesOperationValidation from './preHookFunctions/validation/addSalesOperationValidation';
 import addNetPromoterScoreValidation from './preHookFunctions/validation/addNetPromoterScoreValidation';
 import addBatchSessionValidation from './preHookFunctions/validation/addBatchSessionValidation';
 import updateBatchSessionValidation from './preHookFunctions/validation/updateBatchSessionValidation';
@@ -110,6 +110,10 @@ import updateBlockBasedProjectValidation from './preHookFunctions/validation/upd
 import addVideoValidation from './preHookFunctions/validation/addVideoValidation';
 import updateVideoValidation from './preHookFunctions/validation/updateVideoValidation';
 import updateMentorAvailabilitySlotValidation from './preHookFunctions/validation/updateMentorAvailabilitySlotValidation';
+import addMentorDemandSlotValidation from './preHookFunctions/validation/addMentorDemandSlotValidation';
+import updateMentorDemandSlotValidation from './preHookFunctions/validation/updateMentorDemandSlotValidation';
+import addAcceptedSlotRequestByMentorLogValidation from './preHookFunctions/validation/addAcceptedSlotRequestByMentorLogValidation';
+// import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -803,8 +807,24 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await updateVideoValidation(params, mutationOrQueryName, context);
       break;
     }
+    // case 'addMentorAvailabilitySlot': {
+    //   await addMentorAvailabilitySlotValidation(params, mutationOrQueryName, context);
+    //   break;
+    // }
     case 'updateMentorAvailabilitySlot': {
       await updateMentorAvailabilitySlotValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addAcceptedSlotRequestByMentorLog': {
+      await addAcceptedSlotRequestByMentorLogValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addMentorDemandSlot': {
+      await addMentorDemandSlotValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateMentorDemandSlot': {
+      await updateMentorDemandSlotValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'addSchool': {
