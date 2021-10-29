@@ -1,5 +1,4 @@
 import { TBA, TMS } from '../../../../constants';
-import { READ } from '../../../../constants/graphqlOperations';
 import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
 
 const SessionCourseReport = `
@@ -8,7 +7,7 @@ const SessionCourseReport = `
   @appPermissions(
     permissions: [
     { appName: "${TBA}" operations: "*" },
-    { appName: "${TMS}" operations: ${READ} }
+    { appName: "${TMS}" operations: "*" }
   ],
     rule: allow
   )
