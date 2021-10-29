@@ -54,7 +54,7 @@ import addMentorMenteeSessionValidation from './preHookFunctions/validation/addM
 import updateMentorMenteeSessionValidation from './preHookFunctions/validation/updateMentorMenteeSessionValidation';
 import deleteMenteeSessionValidation from './preHookFunctions/validation/deleteMenteeSessionValidation';
 import updateSalesOperationValidation from './preHookFunctions/validation/updateSalesOperationValidation';
-import addSalesOperationValidation from './preHookFunctions/validation/addSalesOperationOperationValidation';
+import addSalesOperationValidation from './preHookFunctions/validation/addSalesOperationValidation';
 import addNetPromoterScoreValidation from './preHookFunctions/validation/addNetPromoterScoreValidation';
 import addBatchSessionValidation from './preHookFunctions/validation/addBatchSessionValidation';
 import updateBatchSessionValidation from './preHookFunctions/validation/updateBatchSessionValidation';
