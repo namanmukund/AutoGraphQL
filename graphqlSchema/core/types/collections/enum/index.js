@@ -91,6 +91,7 @@ import AuditSubType from './AuditSubType';
 import Currency from './Currency';
 import LearningObjectiveComponents from './LearningObjectiveComponents';
 import Vertical from './Vertical';
+import AdhocSessionType from './AdhocSessionType';
 import Slot from './Slot';
 import EventType from './EventType';
 import EventName from './EventName';
@@ -193,6 +194,7 @@ export default [
   Currency,
   LearningObjectiveComponents,
   Vertical,
+  AdhocSessionType,
   Slot,
   EventType,
   EventName,

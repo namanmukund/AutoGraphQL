@@ -3,31 +3,30 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import { PastDateOrSlotError } from '../../../../../constants/errors/db';
-import batchSessionQuery from '../../graphqlQueries/batchSessionQuery';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelectedSlotsStringArray';
+import adhocSessionQuery from '../../graphqlQueries/adhocSessionQuery';
 
-const deleteBatchSessionValidation = async (params, mutationOrQueryName, context) => {
-  const { id: batchSessionId } = params;
-  const batchSessionData = await callLocalGraphqlApi(batchSessionQuery(batchSessionId));
-  const batchSession = get(batchSessionData, 'data.batchSession');
+const deleteAdhocSessionValidation = async (params, mutationOrQueryName, context) => {
+  const { id: adhocSessionId } = params;
+  const adhocSessionData = await callLocalGraphqlApi(adhocSessionQuery(adhocSessionId));
+  const adhocSession = get(adhocSessionData, 'data.adhocSession');
 
-  if (!batchSession || !batchSession.id) {
+  if (!adhocSession || !adhocSession.id) {
     throw new DatabaseRecordNotFoundError();
   }
 
   const {
     sessionStatus,
     batch,
-    topic,
     bookingDate,
     course,
     mentorSession,
     ...slots
-  } = batchSession;
+  } = adhocSession;
   const slotTimeArray = getSelectedSlotsTime(slots);
-  // of any slots is taken or the date is of past then the doc can not be deleted (except while shifting batch sessions)
-  if (slotTimeArray && slotTimeArray.length && context.previousDocument !== 'shiftBatch') {
+  // of any slots is taken or the date is of past then the doc can not be deleted
+  if (slotTimeArray && slotTimeArray.length) {
     const date = new Date(bookingDate);
     const dateTime = date.setHours(
       date.getHours() + slotTimeArray[0],
@@ -40,7 +39,6 @@ const deleteBatchSessionValidation = async (params, mutationOrQueryName, context
 
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
-  context.topicId = topic && topic.id;
   context.batchCode = batch && batch.code;
   context.bookingDate = bookingDate;
   context.mentorSessionConnectId = mentorSession && mentorSession.id;
@@ -56,4 +54,4 @@ const deleteBatchSessionValidation = async (params, mutationOrQueryName, context
   context.currentUser = currentUser;
 };
 
-export default deleteBatchSessionValidation;
+export default deleteAdhocSessionValidation;

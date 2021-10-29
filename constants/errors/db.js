@@ -249,6 +249,14 @@ export const LOWithSimilarTitleAlreadyExist = createError('LOWithSimilarTitleAlr
   message: 'LO with similar title already exist.',
 });
 
+export const BatchMustHaveAtleastOneSession = createError('BatchMustHaveAtleastOneSession', {
+  message: 'B2B batch must have atleast one batch session for adding Adhoc session.',
+});
+
+export const SessionMustBeCompletedError = createError('SessionMustBeCompletedError', {
+  message: 'Batch Session must be completed to add Adhoc session of same topic.',
+});
+
 export const NotBroadcastedMentor = createError('NotBroadcastedMentor', {
   message: 'Slot not broadcasted to the mentor',
 });

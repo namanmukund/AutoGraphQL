@@ -44,6 +44,7 @@ const MentorSession = `
     ${slotTimeFields}
     mentorMenteeSessions: [MentorMenteeSession] @relation(name: "SessionDataMentorSession")
     batchSessions: [BatchSession] @relation(name: "BatchSessionMentorSession")
+    adhocSessions: [AdhocSession] @relation(name: "AdhocSessionMentorSession")
     b2b2cBatch: [Batch] @relation(name: "BatchMentorSession")
     mentorAvailabilitySlots: [MentorAvailabilitySlot] @relation(name:"MentorAvailabilitySlotMentorSession")
     acceptanceObjects: [AcceptanceObject]

@@ -38,9 +38,7 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
   if (input) {
     validateMentorSessionInput(params, mentorSession, context);
   }
-
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
-
   const {
     appName,
   } = userAndAppInfo;
@@ -48,7 +46,6 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
   // check for slots that are passed as false and as well as true
   // eslint-disable-next-line no-param-reassign
   context.previousDocument = mentorSession;
-
   if (mentorUserId && availabilityDate) {
     // get all mentorSessions for the availability date
     const getMentorSessionsRes = await callLocalGraphqlApi(
