@@ -93,6 +93,11 @@ import LearningObjectiveComponents from './LearningObjectiveComponents';
 import Vertical from './Vertical';
 import AdhocSessionType from './AdhocSessionType';
 import Slot from './Slot';
+import EventType from './EventType';
+import EventName from './EventName';
+import BlockLayoutType from './BlockLayoutType';
+import RequestType from './RequestType';
+import RequestReason from './RequestReason';
 
 export default [
   Status,
@@ -191,4 +196,9 @@ export default [
   Vertical,
   AdhocSessionType,
   Slot,
+  EventType,
+  EventName,
+  BlockLayoutType,
+  RequestType,
+  RequestReason,
 ];

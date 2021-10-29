@@ -35,6 +35,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 // import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import getUserPasswordObject from './utils/getUserPasswordObject';
 import { getNumberAndSendSms } from '../../../../../sms';
+import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
 
 const USER_TYPE = 'User';
 
@@ -436,7 +437,8 @@ If coming from campaign and the type os b2b allocate the user to the right batch
   parentChildSignupPostHookMethod(input, leadSquaredParams);
 
   // Send OTP if from RadioStreet event
-  if (source && source.toLowerCase() === 'radiostreet') {
+  const eventSources = ['radiostreet', 'spysquadcamp'];
+  if (source && eventSources.includes(source.toLowerCase())) {
     // send b2b2c reg+booking
     // sendBookingReminderOrConfirmationB2B(parentId);
     const phoneOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
@@ -445,6 +447,23 @@ If coming from campaign and the type os b2b allocate the user to the right batch
       phoneOtp,
       phoneOtpCreationDate: new Date(),
     };
+
+    setTimeout(() => {
+      updateLeadSquared({
+        Phone: get(parentPhone, 'number'),
+        mx_Event_Date: '31 October',
+        mx_Event_Time: '11:00 am',
+      }, false, {
+        ActivityEvent: 208,
+        Fields: [
+          {
+            SchemaName: 'mx_Custom_1',
+            Value: 'RadioStreet',
+          },
+        ],
+      });
+    }, 1000 * 60 * 2);
+
     // update phoneOtp in db
     await updateExistingUserOTP({ id: parentId }, updateObj, modelMutations);
     getNumberAndSendSms(parentPhone, phoneOtp, parentName);

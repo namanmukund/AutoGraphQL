@@ -32,7 +32,15 @@ const BatchSession = `
     isAudit: Boolean @defaultValue(value: "false")
     mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name:"MentorAvailabilitySlotBatchSession")
     broadCastedMentors: [MentorProfile] @relation(name:"BatchSessionBroadcastedMentors", direction: "OneWay")
-    isBroadCastedSession: Boolean @defaultValue(value: "false")
+    isBroadCastedSession: Date
+    videoLinkClickByMentor: Date
+    videoLinkClickByMentee: Date
+    startSessionByMentee: Date
+    endSessionByMentee: Date
+    mentorStartAttendance: Date
+    mentorSavesAttendance: Date
+    videoLinkClickByMenteePlatform: String
+    startSessionByMenteePlatform: String
 }`;
 
 export default [BatchSession, batchAttendanceType];

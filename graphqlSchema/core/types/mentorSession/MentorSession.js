@@ -7,6 +7,16 @@ import { TLA, TMS, TWA } from '../../../../constants';
 
 const slotTimeFields = getSlotTimeFields('Boolean', false);
 
+const AcceptanceObject = `
+  type AcceptanceObject {
+   slotName: Slot
+   date: Date
+   mentorAvailabilitySlotId: String
+   menteeSessionId: String
+   batchSessionId: String
+   requestType: RequestType
+ }`;
+
 const MentorSession = `
   type MentorSession @model
     @appPermissions(
@@ -37,6 +47,7 @@ const MentorSession = `
     adhocSessions: [AdhocSession] @relation(name: "AdhocSessionMentorSession")
     b2b2cBatch: [Batch] @relation(name: "BatchMentorSession")
     mentorAvailabilitySlots: [MentorAvailabilitySlot] @relation(name:"MentorAvailabilitySlotMentorSession")
+    acceptanceObjects: [AcceptanceObject]
 }`;
 
-export default [MentorSession];
+export default [MentorSession, AcceptanceObject];

@@ -437,6 +437,8 @@ export const VERTICALS = [
   'b2b2c',
 ];
 
+export const NUNITO_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Nunito-Bold.ttf`;
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,

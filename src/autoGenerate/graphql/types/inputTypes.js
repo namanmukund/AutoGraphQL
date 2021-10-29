@@ -255,9 +255,9 @@ const fileConnectedTypeFieldEnumSchema = getFileUploadEnumType(
 );
 const fileConnectInputSchema = `
   input FileConnectInput {
-      typeId: ID!, 
-      type: FileConnectedType!, 
-      typeField: FileConnectedTypeField!
+      typeId: ID, 
+      type: FileConnectedType, 
+      typeField: FileConnectedTypeField
       fileId: ID
   }
 `;

@@ -85,6 +85,7 @@ import getSchoolDetails from './query/methods/getSchoolDetails';
 import bookB2B2CSlots from './mutation/methods/bookB2B2CSlots';
 import getStudentCurrentStatus from './query/methods/getStudentCurrentStatus';
 import getCourseCertificate from './query/methods/getCourseCertificate';
+import getEventCertificate from './query/methods/getEventCertificate';
 import signUpSchool from './mutation/methods/signUpSchool';
 import rebookMenteeSession from './mutation/methods/rebookMenteeSession';
 import getSchoolCampaignSlots from './query/methods/getSchoolCampaignSlots';
@@ -92,6 +93,7 @@ import getUserCourses from './query/methods/getUserCourses';
 import shiftBatchSessionsAfterGivenDate from './mutation/methods/shiftBatchSessionsAfterGivenDate';
 import sendCertificateInMail from './mutation/methods/sendCertificateInMail';
 import sendJourneySnapshotInMail from './mutation/methods/sendJourneySnapshotInMail';
+import generateCertificate from './mutation/methods/generateCertificate';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -588,6 +590,7 @@ resolvers.Mutation.rebookMenteeSession = rebookMenteeSession;
 resolvers.Mutation.sendCertificateInMail = sendCertificateInMail;
 resolvers.Mutation.shiftBatchSessionsAfterGivenDate = shiftBatchSessionsAfterGivenDate;
 resolvers.Mutation.sendJourneySnapshotInMail = sendJourneySnapshotInMail;
+resolvers.Mutation.generateCertificate = generateCertificate;
 
 // queries
 resolvers.Query.me = me;
@@ -602,6 +605,8 @@ resolvers.Query.getTotalAmountCollected = getTotalAmountCollected;
 resolvers.Query.getCheatSheet = getCheatSheet;
 // Resolver to get User's Course Completion Certificate
 resolvers.Query.getCourseCertificate = getCourseCertificate;
+// Resolver to get Event's Certificate
+resolvers.Query.getEventCertificate = getEventCertificate;
 // Resolver to get students Status
 resolvers.Query.getStudentCurrentStatus = getStudentCurrentStatus;
 // Resolver to get the campaign slots

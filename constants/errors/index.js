@@ -73,6 +73,11 @@ import {
   LOWithSimilarTitleAlreadyExist,
   BatchMustHaveAtleastOneSession,
   SessionMustBeCompletedError,
+  NotBroadcastedMentor,
+  LateToAcceptRequest,
+  SlotAlreadyOpened,
+  SlotAlreadyFilled,
+  SessionAlreadyAssigned,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -285,4 +290,9 @@ export {
   LOWithSimilarTitleAlreadyExist,
   BatchMustHaveAtleastOneSession,
   SessionMustBeCompletedError,
+  NotBroadcastedMentor,
+  LateToAcceptRequest,
+  SlotAlreadyOpened,
+  SlotAlreadyFilled,
+  SessionAlreadyAssigned,
 };

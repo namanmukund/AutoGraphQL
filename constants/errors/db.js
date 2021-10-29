@@ -256,3 +256,23 @@ export const BatchMustHaveAtleastOneSession = createError('BatchMustHaveAtleastO
 export const SessionMustBeCompletedError = createError('SessionMustBeCompletedError', {
   message: 'Batch Session must be completed to add Adhoc session of same topic.',
 });
+
+export const NotBroadcastedMentor = createError('NotBroadcastedMentor', {
+  message: 'Slot not broadcasted to the mentor',
+});
+
+export const LateToAcceptRequest = createError('LateToAcceptRequest', {
+  message: 'Late to accept request',
+});
+
+export const SlotAlreadyOpened = createError('SlotAlreadyOpened', {
+  message: 'Accepted slot is already opened',
+});
+
+export const SlotAlreadyFilled = createError('SlotAlreadyFilled', {
+  message: 'You were late as slot already filled',
+});
+
+export const SessionAlreadyAssigned = createError('SessionAlreadyAssigned', {
+  message: 'The session is already assigned',
+});

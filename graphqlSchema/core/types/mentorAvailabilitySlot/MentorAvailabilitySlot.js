@@ -52,6 +52,7 @@ const MentorAvailabilitySlot = `
     mentorMenteeSessions: [MentorMenteeSession] @relation(name:"MentorAvailabilitySlotMentorMenteeSession")
     isBroadCasted: Boolean @defaultValue(value: "false")
     openedBy: MentorProfile @relation(name: "MentorAvailabilitySlotOpenedBy", direction: "OneWay")
+    acceptedMentorSlotRequest: [AcceptedSlotRequestByMentorLog] @relation(name:"MentorAvailabilitySlotAcceptedSlotRequestByMentorLog")
   }
 `;
 
