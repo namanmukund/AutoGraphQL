@@ -148,7 +148,7 @@ const userPermissionsDoc = {
   SessionReport: {
     collection: {
       rule: 'allow',
-      crud: [ADMIN],
+      crud: [ADMIN, UMS_ADMIN],
       read: [NOT_ADMIN],
     },
   },
