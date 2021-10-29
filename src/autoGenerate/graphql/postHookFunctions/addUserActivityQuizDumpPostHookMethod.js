@@ -108,6 +108,11 @@ const questionBankQuery = (questionIdsQuery, courseId) => `
       mcqOptions{
         statement
         isCorrect
+        blocksJSON
+        initialXML
+        questionBankImage {
+          id
+        }
       }
       fibInputOptions{
         answers
@@ -290,6 +295,7 @@ const createQueryForUserAnswersAndOptions = (
   let userStatement;
   let isOptionSelected;
   let statement;
+  let questionBankImageId;
   let isOptionCorrect;
   let userStatementPosition;
   let optionCorrectPositions;
@@ -320,6 +326,7 @@ const createQueryForUserAnswersAndOptions = (
         mcqOptions.forEach((mcqOption) => {
           statement = get(mcqOption, 'statement').trim();
           isOptionCorrect = get(mcqOption, 'isCorrect');
+          questionBankImageId = get(mcqOption, 'questionBankImage.id', null);
           /*
           Iterating over each option in question in Question Bank and user answer and
           when statement matches, we are checking if option and user answer match
@@ -333,6 +340,11 @@ const createQueryForUserAnswersAndOptions = (
               if (userStatement === statement) {
                 const escapedUserStatement = escapeString(userStatement);
                 userMcqQuery += `{statement: "${escapedUserStatement}", `;
+                userMcqQuery += `blocksJSON: "${get(mcqOption, 'blocksJSON', '')}", `;
+                userMcqQuery += `initialXML: "${get(mcqOption, 'initialXML', '')}", `;
+                if (questionBankImageId) {
+                  userMcqQuery += `questionBankImageConnectId: "${questionBankImageId}", `;
+                }
                 userMcqQuery += `isSelected: ${isOptionSelected}}, `;
                 // setting isCorrect to false if correct option is not selected
                 if (isOptionSelected !== isOptionCorrect) {
@@ -350,6 +362,11 @@ const createQueryForUserAnswersAndOptions = (
           // replicating info from question Bank
           const escapedStatement = escapeString(statement);
           mcqOptionQuery += `{statement: "${escapedStatement}", `;
+          mcqOptionQuery += `blocksJSON: "${get(mcqOption, 'blocksJSON', '')}", `;
+          mcqOptionQuery += `initialXML: "${get(mcqOption, 'initialXML', '')}", `;
+          if (questionBankImageId) {
+            mcqOptionQuery += `questionBankImageConnectId: "${questionBankImageId}", `;
+          }
           mcqOptionQuery += `isCorrect: ${isOptionCorrect}}, `;
         });
         userMcqQuery += ']';
@@ -358,6 +375,7 @@ const createQueryForUserAnswersAndOptions = (
                                           ${userMcqQuery}
                                           ${mcqOptionQuery}
                                          `;
+        log(`userAnswersAndQuestionOptionsQuery -------------> \n ${userMcqQuery} ${mcqOptionQuery}`);
       } else {
         log(`mcqOptions are not present for question: ${questionBankId}`);
       }
