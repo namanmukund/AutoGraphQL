@@ -90,15 +90,7 @@ const MentorMenteeSession = `
     isPostSalesAudit: Boolean @defaultValue(value: "false")
     studentProfile: StudentProfile @relation(name:"MentorMenteeSessionStudentProfile", direction: "OneWay")
     mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name:"MentorAvailabilitySlotMentorMenteeSession")
-    isBroadCastedSession: Date
-    videoLinkClickByMentor: Date
-    videoLinkClickByMentee: Date
-    startSessionByMentee: Date
-    endSessionByMentee: Date
-    mentorStartAttendance: Date
-    mentorSavesAttendance: Date
-    videoLinkClickByMenteePlatform: String
-    startSessionByMenteePlatform: String
+    isBroadCastedSession: Boolean @defaultValue(value: "false")
 }`;
 
 export default [MentorMenteeSession, internetSpeed];
