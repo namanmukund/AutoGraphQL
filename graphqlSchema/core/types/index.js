@@ -130,6 +130,7 @@ import EventCertificate from './eventCertificate';
 import QuestionBankImage from './questionBankImage';
 import SessionGradeReport from './sessionGradeReport';
 import AcceptedSlotRequestByMentorLog from './acceptedSlotRequestByMentorLog';
+import SessionCourseReport from './sessionCourseReport';
 
 export default [
   ...User,
@@ -264,4 +265,5 @@ export default [
   ...QuestionBankImage,
   ...SessionGradeReport,
   ...AcceptedSlotRequestByMentorLog,
+  ...SessionCourseReport,
 ];
