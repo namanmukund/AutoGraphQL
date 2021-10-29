@@ -132,6 +132,7 @@ import SessionGradeReport from './sessionGradeReport';
 import AcceptedSlotRequestByMentorLog from './acceptedSlotRequestByMentorLog';
 import SessionCourseReport from './sessionCourseReport';
 import GetEventCertificate from './getEventCertificate';
+import Event from './event';
 
 export default [
   ...User,
@@ -268,4 +269,5 @@ export default [
   ...AcceptedSlotRequestByMentorLog,
   ...SessionCourseReport,
   ...GetEventCertificate,
+  ...Event,
 ];
