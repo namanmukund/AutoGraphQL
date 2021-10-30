@@ -5,7 +5,16 @@ import generateCertificateScript from '../autoGenerate/graphql/resolvers/query/s
 import getCountryCodeAndNumber from '../autoGenerate/graphql/validation/getCountryCodeAndNumber';
 import getHashDigest from './typeform-utils/getHashDigest';
 
-const EVENT_ID = 'ckvdiavp70000igujfgxh8mt6';
+const getEventId = () => {
+  let eventId = 'ckvdiavp70000igujfgxh8mt6';
+  if (process.env.NODE_ENV === 'production') {
+    eventId = 'ckve5izxq0000ucui47b89pmf';
+    if (process.env.DATA_MASKING) {
+      eventId = 'ckve5fm7o00090t1dd1v4dy13';
+    }
+  }
+  return eventId;
+};
 
 const updateEventAttendanceStatus = async (eventAttendanceId) => {
   const query = `mutation {
@@ -47,90 +56,102 @@ const getEventAttendances = async (userId, eventId) => {
 const usersData = async (studentDetailsObject) => {
   let filter = '';
   const {
-    childName, parentName, parentEmail, grade, parentPhone: { number },
+    childName, parentEmail = '', parentPhone: { number = '' },
   } = studentDetailsObject;
-  if (parentEmail && number) {
-    // if the student with same parent is filling form, so we also check of the childName
-    filter = `{
-      and:[
-        {studentProfile_some: {
+  if (number) {
+    filter = `{studentProfile_some: {
         parents_some: {
-          user_some: { and: [
-            { phone_number_subDoc: "${number}" },
-            { email: "${parentEmail}" },
-            ] }
-        }
-      }}
-      { name: "${childName}" }
-      ]
-    }`;
-  } else {
-    filter = `{and: [
-        {
-          studentProfile_some: {
-            and: [
-              { parents_some: { user_some: { name: "${parentName}" } } }
-              { grade: ${grade} }
+          user_some:{
+            and:[
+              {phone_number_subDoc: "${number}"}
             ]
           }
         }
-        { name: "${childName}" }
-      ]}`;
-  }
-  const query = `{
-  users(
-    filter: ${filter}
-  ) {
-    id
-    studentProfile{
+      }}`;
+    const numberQuery = `{
+    users(
+      filter: ${filter}
+    ) {
       id
-    }
-  }
-}`;
-  const users = get(await callLocalGraphqlApi(query), 'data.users', []);
-  if (users && users.length) {
-    const eventAttendances = await getEventAttendances(get(users, '[0].id'), EVENT_ID);
-    if (eventAttendances && eventAttendances.length) {
-      log(`updating attendance for ${childName} with id ${get(users, '[0].id')}`);
-      updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
-      generateCertificateScript([get(users, '[0].id')]);
-    } else {
-      log(`adding attendance for ${childName} with id ${get(users, '[0].id')}`);
-      addNewEventAttendanceWithStatus(get(users, '[0].id'), get(users, '[0].studentProfile.id'), EVENT_ID);
-      generateCertificateScript([get(users, '[0].id')]);
-    }
-  } else {
-    const parentChildSignUpQuery = `mutation parentChildSignUp($input: ParentChildSignUpInput) {
-    parentChildSignUp(input: $input) {
-      id
-      name
-      email
-      parentProfile {
+      studentProfile{
         id
-        children {
+      }
+    }
+  }`;
+    const users = get(await callLocalGraphqlApi(numberQuery), 'data.users', []);
+    if (users && users.length) {
+      const eventAttendances = await getEventAttendances(get(users, '[0].id'), getEventId());
+      if (eventAttendances && eventAttendances.length) {
+        log(`updating attendance for ${childName} with id ${get(users, '[0].id')}`);
+        updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
+        generateCertificateScript([get(users, '[0].id')]);
+      } else {
+        log(`adding attendance for ${childName} with id ${get(users, '[0].id')}`);
+        addNewEventAttendanceWithStatus(get(users, '[0].id'), get(users, '[0].studentProfile.id'), getEventId());
+        generateCertificateScript([get(users, '[0].id')]);
+      }
+    } else if (parentEmail) {
+      filter = `{studentProfile_some: {
+          parents_some: {
+            user_some: {email:"${parentEmail.trim()}"}
+          }
+        }}`;
+      const query = `{
+      users(
+        filter: ${filter}
+      ) {
+        id
+        studentProfile{
           id
-          grade
-          user {
+        }
+      }
+    }`;
+      const user = get(await callLocalGraphqlApi(query), 'data.users', []);
+      if (user && user.length) {
+        const eventAttendances = await getEventAttendances(get(user, '[0].id'), getEventId());
+        if (eventAttendances && eventAttendances.length) {
+          log(`updating attendance for ${childName} with id ${get(user, '[0].id')}`);
+          updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
+          generateCertificateScript([get(user, '[0].id')]);
+        } else {
+          log(`adding attendance for ${childName} with id ${get(user, '[0].id')}`);
+          addNewEventAttendanceWithStatus(get(user, '[0].id'), get(user, '[0].studentProfile.id'), getEventId());
+          generateCertificateScript([get(user, '[0].id')]);
+        }
+      } else {
+        const parentChildSignUpQuery = `mutation parentChildSignUp($input: ParentChildSignUpInput) {
+        parentChildSignUp(input: $input) {
+          id
+          name
+          email
+          parentProfile {
             id
-            name
+            children {
+              id
+              grade
+              user {
+                id
+                name
+              }
+            }
           }
         }
       }
-    }
-  }
-  `;
-    log(`creating a parentChildSignUp for ${childName}`);
-    const result = await callLocalGraphqlApi(parentChildSignUpQuery, '', { input: studentDetailsObject });
-    if (get(result, 'data.parentChildSignUp')) {
-      const children = get(result, 'data.parentChildSignUp.parentProfile.children');
-      // eslint-disable-next-line no-restricted-syntax
-      for (const child of children) {
-        log(`got added child for ${get(child, 'user.name')}`);
-        if (get(child, 'user.name') === childName) {
-          // adding attendance for only that child how filled the form
-          log(`adding attendance for ${childName} with id ${get(child, 'user.id')}`);
-          addNewEventAttendanceWithStatus(get(child, 'user.id'), get(child, 'id'), EVENT_ID);
-          generateCertificateScript([get(child, 'user.id')]);
+      `;
+        log(`creating a parentChildSignUp for ${childName}`);
+        const result = await callLocalGraphqlApi(parentChildSignUpQuery, '', { input: studentDetailsObject });
+        if (get(result, 'data.parentChildSignUp')) {
+          const children = get(result, 'data.parentChildSignUp.parentProfile.children');
+          // eslint-disable-next-line no-restricted-syntax
+          for (const child of children) {
+            log(`got added child for ${get(child, 'user.name')}`);
+            if (get(child, 'user.name') === childName) {
+              // adding attendance for only that child how filled the form
+              log(`adding attendance for ${childName} with id ${get(child, 'user.id')}`);
+              addNewEventAttendanceWithStatus(get(child, 'user.id'), get(child, 'id'), getEventId());
+              generateCertificateScript([get(child, 'user.id')]);
+            }
+          }
         }
       }
     }
