@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
+import { log } from '../../../../../../utils';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 // import sendWhatsAppTemplateMessage from '../../../../utils/sendWhatsAppTemplateMessage';
 
@@ -57,6 +58,7 @@ const generateCertificateScript = async (userIdArray) => {
       // eslint-disable-next-line no-await-in-loop
       const user = await fetchUser(userId);
       const parentPhoneNumber = get(user, 'studentProfile.parents[0].user.phone.number', '');
+      log(`sending certificate ${certificateLink}`);
       updateLeadSquared({
         Phone: parentPhoneNumber,
         mx_Event_Ceritificate: certificateLink,

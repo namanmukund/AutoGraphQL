@@ -32,6 +32,18 @@ const addNewEventAttendanceWithStatus = async (userId, studentProfileId, eventId
   return get(await callLocalGraphqlApi(query), 'data.addEventAttendance');
 };
 
+const getEventAttendances = async (userId, eventId) => {
+  const query = `{
+  eventAttendances(
+    filter: { and: [{ user_some: { id: "${userId}" } }, { event_some: { id: "${eventId}" } }] }
+  ) {
+    id
+  }
+}
+`;
+  return get(await callLocalGraphqlApi(query), 'data.eventAttendances', []);
+};
+
 const usersData = async (studentDetailsObject) => {
   let filter = '';
   const {
