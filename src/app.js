@@ -11,6 +11,7 @@ import Raven from './Raven';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
 import { getParsedASTMap } from './autoGenerate/utils';
 import routes from './phonePeAPI/routes';
+import typeformRoute from './typeformAPI';
 
 const http = require('http');
 
@@ -26,6 +27,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 routes(app);
+typeformRoute(app);
 
 const path = `/graphql/${application}`;
 
