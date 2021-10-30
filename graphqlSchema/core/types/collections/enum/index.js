@@ -98,6 +98,7 @@ import EventName from './EventName';
 import BlockLayoutType from './BlockLayoutType';
 import RequestType from './RequestType';
 import RequestReason from './RequestReason';
+import Platform from './Platform';
 
 export default [
   Status,
@@ -201,4 +202,5 @@ export default [
   BlockLayoutType,
   RequestType,
   RequestReason,
+  Platform,
 ];

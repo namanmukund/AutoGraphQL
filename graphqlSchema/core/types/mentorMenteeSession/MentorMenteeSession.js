@@ -91,6 +91,14 @@ const MentorMenteeSession = `
     studentProfile: StudentProfile @relation(name:"MentorMenteeSessionStudentProfile", direction: "OneWay")
     mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name:"MentorAvailabilitySlotMentorMenteeSession")
     isBroadCastedSession: Boolean @defaultValue(value: "false")
+    videoLinkClickByMentor: Date
+    videoLinkClickByMentee: Date
+    startSessionByMentee: Date
+    endSessionByMentee: Date
+    mentorStartAttendance: Date
+    mentorSavesAttendance: Date
+    videoLinkClickByMenteePlatform: Platform
+    startSessionByMenteePlatform: Platform
 }`;
 
 export default [MentorMenteeSession, internetSpeed];
