@@ -1,6 +1,7 @@
 import { get } from 'lodash';
+import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import sendWhatsAppTemplateMessage from '../../../../utils/sendWhatsAppTemplateMessage';
+// import sendWhatsAppTemplateMessage from '../../../../utils/sendWhatsAppTemplateMessage';
 
 const generateCertificate = async (id) => {
   const query = `
@@ -56,24 +57,37 @@ const generateCertificateScript = async (userIdArray) => {
       // eslint-disable-next-line no-await-in-loop
       const user = await fetchUser(userId);
       const parentPhoneNumber = get(user, 'studentProfile.parents[0].user.phone.number', '');
-      const parentPhoneCode = get(user, 'studentProfile.parents[0].user.phone.countryCode', '+91');
-      const parentPhone = parentPhoneCode.substring(1, parentPhoneCode.length) + parentPhoneNumber;
-      const studentName = get(user, 'name', '');
-      sendWhatsAppTemplateMessage(
-        parentPhone,
-        'radiostreet_post_event_certificate',
-        parentPhone,
-        [
+      updateLeadSquared({
+        Phone: parentPhoneNumber,
+        mx_Event_Ceritificate: certificateLink,
+      }, false, {
+        ActivityEvent: 210,
+        Fields: [
           {
-            name: 'student_name',
-            value: studentName,
+            SchemaName: 'Status',
+            Value: 'Active',
           },
           {
-            name: 'spysquad_certificate',
-            value: certificateLink,
+            SchemaName: 'mx_Custom_1',
+            Value: 'Present',
           },
         ],
-      );
+      });
+      // sendWhatsAppTemplateMessage(
+      //   parentPhone,
+      //   'radiostreet_post_event_certificate',
+      //   parentPhone,
+      //   [
+      //     {
+      //       name: 'student_name',
+      //       value: studentName,
+      //     },
+      //     {
+      //       name: 'spysquad_certificate',
+      //       value: certificateLink,
+      //     },
+      //   ],
+      // );
     }
   }
 };
