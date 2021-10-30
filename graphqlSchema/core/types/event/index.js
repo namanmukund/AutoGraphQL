@@ -1,3 +1,3 @@
 import Event from './Event';
 
-export default [Event];
+export default Event;
