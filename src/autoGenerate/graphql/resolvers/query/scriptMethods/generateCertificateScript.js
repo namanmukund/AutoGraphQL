@@ -4,11 +4,12 @@ import { log } from '../../../../../../utils';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 // import sendWhatsAppTemplateMessage from '../../../../utils/sendWhatsAppTemplateMessage';
 
-const generateCertificate = async (id) => {
+const generateCertificate = async (id, regenerateCertificate) => {
   const query = `
     mutation{
       generateCertificate(input:{
         userId:"${id}"
+        regenerateCertificate:${regenerateCertificate ? 'true' : 'false'}
       })
       {
         id
@@ -48,12 +49,36 @@ const fetchUser = async (id) => {
   return get(res, 'data.user', {});
 };
 
-const generateCertificateScript = async (userIdArray) => {
+const getEventAttendances = async () => {
+  const query = `{
+  eventAttendances {
+    id
+    user {
+      id
+      name
+    }
+    attendance
+  }
+}`;
+  const result = await callLocalGraphqlApi(query);
+  return get(result, 'data.eventAttendances', []);
+};
+
+const generateCertificateScript = async (regenerateCertificate = true) => {
+  const events = await getEventAttendances();
+  const userIdArray = [];
+  if (events && events.length > 0) {
+    events.forEach((event) => {
+      if (get(event, 'user.id') && !userIdArray.includes(get(event, 'user.id'))) {
+        userIdArray.push(get(event, 'user.id'));
+      }
+    });
+  }
   if (userIdArray && userIdArray.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const userId of userIdArray) {
       // eslint-disable-next-line no-await-in-loop
-      const certificateDetails = await generateCertificate(userId);
+      const certificateDetails = await generateCertificate(userId, regenerateCertificate);
       const certificateLink = `${process.env.TEKIE_WEB_URL}/${get(certificateDetails, 'tekieUrl')}`;
       // eslint-disable-next-line no-await-in-loop
       const user = await fetchUser(userId);
@@ -64,16 +89,6 @@ const generateCertificateScript = async (userIdArray) => {
         mx_Event_Ceritificate: certificateLink,
       }, false, {
         ActivityEvent: 210,
-        Fields: [
-          {
-            SchemaName: 'Status',
-            Value: 'Active',
-          },
-          {
-            SchemaName: 'mx_Custom_1',
-            Value: 'Present',
-          },
-        ],
       });
       // sendWhatsAppTemplateMessage(
       //   parentPhone,
