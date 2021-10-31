@@ -1,7 +1,7 @@
 const GenerateCertificateInput = `
   input GenerateCertificateInput {
     userId: String
-    regenerateCertificate: Boolean @defaultValue(value: "true")
+    regenerateCertificate: Boolean @defaultValue(value: "false")
   }
 `;
 
