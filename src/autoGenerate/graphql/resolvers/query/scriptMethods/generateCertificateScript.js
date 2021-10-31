@@ -49,31 +49,22 @@ const fetchUser = async (id) => {
   return get(res, 'data.user', {});
 };
 
-const getEventAttendances = async () => {
-  const query = `{
-  eventAttendances {
-    id
-    user {
-      id
-      name
-    }
-    attendance
-  }
-}`;
-  const result = await callLocalGraphqlApi(query);
-  return get(result, 'data.eventAttendances', []);
-};
+// const getEventAttendances = async () => {
+//   const query = `{
+//   eventAttendances {
+//     id
+//     user {
+//       id
+//       name
+//     }
+//     attendance
+//   }
+// }`;
+//   const result = await callLocalGraphqlApi(query);
+//   return get(result, 'data.eventAttendances', []);
+// };
 
-const generateCertificateScript = async (regenerateCertificate = true) => {
-  const events = await getEventAttendances();
-  const userIdArray = [];
-  if (events && events.length > 0) {
-    events.forEach((event) => {
-      if (get(event, 'user.id') && !userIdArray.includes(get(event, 'user.id'))) {
-        userIdArray.push(get(event, 'user.id'));
-      }
-    });
-  }
+const generateCertificateScript = async (userIdArray, regenerateCertificate = false) => {
   if (userIdArray && userIdArray.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const userId of userIdArray) {
@@ -89,6 +80,16 @@ const generateCertificateScript = async (regenerateCertificate = true) => {
         mx_Event_Ceritificate: certificateLink,
       }, false, {
         ActivityEvent: 210,
+        Fields: [
+          {
+            SchemaName: 'Status',
+            Value: 'Active',
+          },
+          {
+            SchemaName: 'mx_Custom_1',
+            Value: 'Present',
+          },
+        ],
       });
       // sendWhatsAppTemplateMessage(
       //   parentPhone,

@@ -1,5 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import generateCertificateScript from '../scriptMethods/generateCertificateScript';
+// import generateCertificateScript from '../scriptMethods/generateCertificateScript';
 // import updateMentorAvailabilitySlotWithBatchAndMenteeSessions from '../scriptMethods/updateMentorAvailabilitySlotWIthBatchAndMenteeSessions';
 // import updateMentorAvailabilitySlotWithMentorSessions from '../scriptMethods/updateMentorAvailabilitySlotWithMentorSessions';
 // import updateMentorMenteeSessionWithStudentProfile from '../scriptMethods/updateMentorMenteeSessionWithStudentProfile';
@@ -64,7 +64,7 @@ const temporaryScript = (async (root, params, context) => {
   // await removeCourseFromUserAssignments();
   // await updateMentorAvailabilitySlotWithMentorSessions();
   // await updateMentorAvailabilitySlotWithBatchAndMenteeSessions();
-  await generateCertificateScript();
+  // await generateCertificateScript();
   return {
     result: true,
   };
