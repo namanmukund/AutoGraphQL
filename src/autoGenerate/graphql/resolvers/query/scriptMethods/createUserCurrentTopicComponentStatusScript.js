@@ -56,11 +56,10 @@ const createUserCurrentTopicComponentStatusScript = async () => {
         const userCurrentTopicComponentStatus = await getUserCurrentTopicComponentStatus(userId, courseId);
         if (userCurrentTopicComponentStatus.length === 0) {
           // eslint-disable-next-line no-await-in-loop
-          await addUserCurrentTopicComponentStatusOperation(get(input, 'course.typeId'), get(input, 'client.typeId'));
+          await addUserCurrentTopicComponentStatusOperation(courseId, userId);
           // eslint-disable-next-line no-console
           console.log(`created UserCurrentTopicComponentStatus for user ${userId}`);
         }
-        i += 1;
       }
     }
   }
