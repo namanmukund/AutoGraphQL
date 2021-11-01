@@ -11,6 +11,7 @@ import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorSessions from '../../../utils/getMentorSessions';
 import { checkIfSlotCanBeOpenedValidation } from './utils';
+import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 
 // query to get mentor from mentorSessionConnectId
 const fetchMentor = (id) => `
@@ -23,9 +24,43 @@ query{
   }
 }`;
 
+// query to get batch Sessions
+const getAdhocSession = (batchId,
+  previousTopicConnectId,
+  type) => `
+  query{
+    adhocSessions(filter:{
+        and:[
+          {batch_some: {
+            id: "${batchId}"
+          }},
+          {
+            previousTopic_some:{
+              id: "${previousTopicConnectId}"
+            }
+          },
+          {
+            type: ${type}
+          }
+        ]
+      }){
+        id
+        order
+      }
+  }
+  `;
+
 const updateAdhocSessionValidation = async (params, mutationOrQueryName, context) => {
   const {
-    id: adhocSessionId, mentorSessionConnectId, input: { sessionStatus: sessionStatusInInput, bookingDate: bookingDateFromInput, ...inputSlot },
+    id: adhocSessionId,
+    mentorSessionConnectId,
+    previousTopicConnectId,
+    input: {
+      sessionStatus: sessionStatusInInput,
+      bookingDate: bookingDateFromInput,
+      type,
+      ...inputSlot
+    },
   } = params;
   const adhocSessionData = await callLocalGraphqlApi(adhocSessionQuery(adhocSessionId));
   const adhocSession = get(adhocSessionData, 'data.adhocSession');
@@ -44,6 +79,12 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
     mentorSession,
     ...slots
   } = adhocSession;
+
+  const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(get(batch, 'id'), previousTopicConnectId, type));
+  const adhocSessions = get(getAdhocSessionRes, 'data.adhocSessions');
+  if (adhocSessions && adhocSessions.length) {
+    throw new SimilarDocumentAlreadyExistError();
+  }
 
   const inputSlotTimeArray = getSelectedSlotsTime(inputSlot);
   const slotTimeArray = getSelectedSlotsTime(slots);
