@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import fontkit from '@pdf-lib/fontkit';
 import { get } from 'lodash';
 import mkdirp from 'mkdirp';
+import moment from 'moment';
 import { NUNITO_BOLD_FONT_URL } from '../../../../../../constants';
 import { uploadToS3, getSignedS3Uri } from '../../../../../middlewares/utils/uploadToS3';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
@@ -111,7 +112,7 @@ const generateCertificateMutationResolver = async (
 
   if (users && users.length) {
     const userName = get(users, '[0].name', '');
-    const formattedDate = '24-10-2021';
+    const formattedDate = moment(new Date().setHours(0, 0, 0, 0)).format('DD-MM-YYYY');
 
     const url = `${process.env.FILE_BASE_URL}/python/course/radiostreetCertificate.pdf`;
     const existingPdfBytes = await fetch(url).then((res) => res.buffer());
