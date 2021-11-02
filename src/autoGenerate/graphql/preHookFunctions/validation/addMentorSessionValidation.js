@@ -12,6 +12,18 @@ import { MissingMandatoryInputInRequestError } from '../../../../../constants/er
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import checkIfSlotCanBeOpenedValidation from './utils/checkIfSlotCanBeOpenedValidation';
 import getMentorSessions from '../../../utils/getMentorSessions';
+import addAcceptedSlotRequestByMentorLogCheck from './utils/addAcceptedSlotRequestByMentorLogCheck';
+
+const getMentorProfile = async (mentorId) => {
+  const query = `{
+  mentorProfiles(filter: { user_some: { id: "${mentorId}" } }) {
+    id
+  }
+}
+`;
+  const result = await callLocalGraphqlApi(query);
+  return get(result, 'data.mentorProfiles', []);
+};
 
 // prehook logic to check if added MentorSession(user id and availabilityDate) already exists
 const addMentorSessionValidation = async (params, mutationOrQueryName, context) => {
@@ -22,6 +34,19 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
   */
 
   // getting user role from context. We will allow adding mentorSession if logged in user is admin
+  if (get(params, 'input.acceptanceObjects', []).length > 0) {
+    const mentorId = get(params, 'userConnectId');
+    const mentorProfile = await getMentorProfile(mentorId);
+    const mentorProfileId = get(mentorProfile, '[0].id');
+    const acceptanceObjectsArray = get(params, 'input.acceptanceObjects', []);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const acceptanceObject of acceptanceObjectsArray) {
+      // eslint-disable-next-line no-await-in-loop
+      await addAcceptedSlotRequestByMentorLogCheck({
+        acceptanceObject, mentorProfileId, mentorId, action: 'addMentorSession',
+      });
+    }
+  }
   const userInfo = validateTokenAndExtractInformation(context, false);
   const {
     currentUser,

@@ -14,12 +14,13 @@ const checkIfSlotCanBeDeletedValidation = (params, mentorSession) => {
   if (slotTimeArray.length) {
     const mentorMenteeSessions = get(mentorSession, 'mentorMenteeSessions', []);
     const batchSessions = get(mentorSession, 'batchSessions', []);
-
-    // for a batch mentorSession we will check batchSessions and see which slots are occupied
-    if ((mentorSession.sessionType === sessionType.trial || mentorSession.sessionType === sessionType.batch) && batchSessions.length) {
+    const adhocSessions = get(mentorSession, 'adhocSessions', []);
+    const batchAndAdhocSessions = batchSessions.concat(adhocSessions);
+    // for a batch mentorSession we will check batchSessions (and adhocSessions) and see which slots are occupied
+    if ((mentorSession.sessionType === sessionType.trial || mentorSession.sessionType === sessionType.batch) && batchAndAdhocSessions.length) {
       // eslint-disable-next-line no-restricted-syntax
-      for (const batchSession of batchSessions) {
-        const occupiedSlotTimeArrayForBatch = getSelectedSlotsTime(batchSession);
+      for (const session of batchAndAdhocSessions) {
+        const occupiedSlotTimeArrayForBatch = getSelectedSlotsTime(session);
         occupiedSlotsArray.push(...occupiedSlotTimeArrayForBatch);
       }
       // for trial/paid mentorSession we will check mentorMenteeSessions and see which slots are occupied
