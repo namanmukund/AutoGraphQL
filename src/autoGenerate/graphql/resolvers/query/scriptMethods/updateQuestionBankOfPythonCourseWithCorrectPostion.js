@@ -31,6 +31,9 @@ const updateQuestion = async (questionId, variable) => {
     mutation($input: QuestionBankUpdate) {
         updateQuestionBank(id: "${questionId}", input: $input) {
             id
+            arrangeOptions {
+              correctPosition
+            }
         }
     }`;
   const result = await callLocalGraphqlApi(mutation, '', variable);
@@ -45,6 +48,7 @@ const updateQuestionBankOfPythonCourseWithCorrectPostion = async () => {
       const questionId = question.id;
       const arrangeOptions = get(question, 'arrangeOptions', []);
       const newArrangeOptions = [];
+      let isUpdating = false;
       arrangeOptions.forEach((arrange) => {
         let correctPosition = get(arrange, 'correctPosition', 0);
         const correctPositions = get(arrange, 'correctPositions', []);
@@ -52,6 +56,7 @@ const updateQuestionBankOfPythonCourseWithCorrectPostion = async () => {
         const displayOrder = get(arrange, 'displayOrder');
         if (!correctPosition && correctPositions.length > 0) {
           correctPosition = correctPositions[0];
+          isUpdating = true;
         }
         newArrangeOptions.push({
           correctPosition,
@@ -60,7 +65,7 @@ const updateQuestionBankOfPythonCourseWithCorrectPostion = async () => {
           statement,
         });
       });
-      if (questionId) {
+      if (questionId && isUpdating) {
         const variable = {
           input: { arrangeOptions: { replace: newArrangeOptions } },
         };
