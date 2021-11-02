@@ -37,7 +37,7 @@ const updateQuestion = async (questionId, variable) => {
   return get(result, 'data.updateQuestionBank', {});
 };
 
-const updateQuestOfPythonCourseWithCorrectPosition = async () => {
+const updateQuestionBankOfPythonCourseWithCorrectPostion = async () => {
   const questionBanks = await getQuestionBanks();
   if (questionBanks && questionBanks.length > 0) {
     // eslint-disable-next-line no-restricted-syntax
@@ -46,7 +46,7 @@ const updateQuestOfPythonCourseWithCorrectPosition = async () => {
       const arrangeOptions = get(question, 'arrangeOptions', []);
       const newArrangeOptions = [];
       arrangeOptions.forEach((arrange) => {
-        let correctPosition = get(arrange, 'correctPosition');
+        let correctPosition = get(arrange, 'correctPosition', 0);
         const correctPositions = get(arrange, 'correctPositions', []);
         const statement = get(arrange, 'statement');
         const displayOrder = get(arrange, 'displayOrder');
@@ -73,4 +73,4 @@ const updateQuestOfPythonCourseWithCorrectPosition = async () => {
   }
 };
 
-export default updateQuestOfPythonCourseWithCorrectPosition;
+export default updateQuestionBankOfPythonCourseWithCorrectPostion;

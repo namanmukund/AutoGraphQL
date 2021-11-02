@@ -1,5 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-// import updateQuestOfPythonCourseWithCorrectPosition from '../scriptMethods/updateQuestionBankOfPythonCourseWithCorrectPostion';
+// import updateQuestionBankOfPythonCourseWithCorrectPostion from '../scriptMethods/updateQuestionBankOfPythonCourseWithCorrectPostion';
 // import createUserCurrentTopicComponentStatusScript from '../scriptMethods/createUserCurrentTopicComponentStatusScript';
 // import generateCertificateScript from '../scriptMethods/generateCertificateScript';
 // import updateMentorAvailabilitySlotWithBatchAndMenteeSessions from '../scriptMethods/updateMentorAvailabilitySlotWIthBatchAndMenteeSessions';
@@ -68,7 +68,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateMentorAvailabilitySlotWithBatchAndMenteeSessions();
   // await generateCertificateScript();
   // await createUserCurrentTopicComponentStatusScript();
-  // await updateQuestOfPythonCourseWithCorrectPosition();
+  // await updateQuestionBankOfPythonCourseWithCorrectPostion();
   return {
     result: true,
   };
