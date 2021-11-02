@@ -1,9 +1,13 @@
 import { MutationController } from '../../../controllers';
-import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
 import { generateCuid } from '../../../../../../utils';
+import { FileUploadConnectionFailedError } from '../../../../../../constants/errors/db';
 // resolver for file upload
 const connectFileWithTheGivenType = (params, authentication, fileId) => {
-  const { connectInput: { type, typeId, typeField } } = params;
+  const { connectInput } = params;
+  if (!connectInput || !connectInput.type || !connectInput.typeId || !connectInput.typeField) {
+    return Promise.resolve();
+  }
+  const { type, typeId, typeField } = connectInput;
   const modelMutations = new MutationController(type, authentication);
   const updateObj = {
     [`${typeField}`]: {
@@ -29,8 +33,8 @@ const uploadFileResolver = (root, params, authentication, context) => {
     const { id: fileId } = res;
     return connectFileWithTheGivenType(params, authentication, fileId)
       .then((typeData) => {
-        if (!typeData.nModified) {
-          throw new DatabaseRecordNotFoundError();
+        if (typeData && !typeData.nModified) {
+          throw new FileUploadConnectionFailedError();
         }
         return res;
       });
