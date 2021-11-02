@@ -58,7 +58,7 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
     input: {
       sessionStatus: sessionStatusInInput,
       bookingDate: bookingDateFromInput,
-      type,
+      type: typeFromInput,
       ...inputSlot
     },
   } = params;
@@ -77,12 +77,16 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
     bookingDate,
     course,
     mentorSession,
+    type,
     ...slots
   } = adhocSession;
 
-  const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(get(batch, 'id'), previousTopicConnectId, type));
+  const differentMentor = get(mentorSession, 'user.id') !== mentorSessionConnectId;
+  const differentType = type !== typeFromInput;
+  const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(get(batch, 'id'), previousTopicConnectId, typeFromInput));
   const adhocSessions = get(getAdhocSessionRes, 'data.adhocSessions');
-  if (adhocSessions && adhocSessions.length) {
+  if (adhocSessions && adhocSessions.length
+    && !differentMentor && !differentType) {
     throw new SimilarDocumentAlreadyExistError();
   }
 
