@@ -5,6 +5,10 @@ export const DatabaseRecordNotFoundError = createError('DatabaseRecordNotFoundEr
   message: 'Database record not found',
 });
 
+export const FileUploadConnectionFailedError = createError('FileUploadConnectionFailedError', {
+  message: 'File uploaded but connection failed due to connection record not found',
+});
+
 export const UserAlreadyExistsError = createError('UserAlreadyExistsError', {
   message: 'User already exist',
 });
