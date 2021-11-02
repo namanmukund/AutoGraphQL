@@ -2,6 +2,7 @@ import mkdirp from 'mkdirp';
 import formidable from 'formidable';
 import objectPath from 'object-path';
 import fs from 'fs';
+import cuid from 'cuid';
 import {
   includes, camelCase, get, find,
 } from 'lodash';
@@ -106,7 +107,10 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
         operations = request.headers.querystring;
       }
       operations = JSON.parse(operations);
-      const filePayload = await checkActionTypeBeforeFileUpload(operations);
+      let filePayload = { action: 'add' }
+      if(operations && operations.variables && operations.variables.connectInput) {
+        filePayload = await checkActionTypeBeforeFileUpload(operations);
+      }
       const { data, middlewareErrorType: errorBeforeUpload } = filePayload;
       middlewareErrorType = errorBeforeUpload;
       /* eslint-enable no-param-reassign */
@@ -140,21 +144,29 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
               fileInput: {
                 fileBucket,
               },
-              connectInput: {
-                typeId,
-                type: connectType,
-                typeField,
-              },
+              connectInput,
             },
           } = operations;
-          const modifiedFileName = (data && data.name)
-            ? data.name
-            : `${typeField}_${typeId}_${Date.now()}.${ext}`;
-          const filePath = `${fileBucket}/${connectType.toLowerCase()}/${modifiedFileName}`;
-
+          let modifiedFileName = ''
+          let filePath = '';
+          if (connectInput && connectInput.typeId) {
+            const {
+              typeId,
+              type: connectType,
+              typeField,
+            } = connectInput;
+            modifiedFileName = (data && data.name)
+              ? data.name
+              : `${typeField}_${typeId}_${Date.now()}.${ext}`;
+              filePath = `${fileBucket}/${connectType.toLowerCase()}/${modifiedFileName}`;
+          } else {
+            const RawFileName = (name && name.split('.')) ? name.split('.')[0] : name
+            modifiedFileName = `${RawFileName}_${cuid()}_${Date.now()}.${ext}`;
+            filePath = `${fileBucket}/${modifiedFileName}`;
+          }
           // get authentication message
           const authenticationErrorMsg = getAuthenticationErrorMessage(request);
-          if (fileBucket && typeId && connectType && typeField && !middlewareErrorType) {
+          if (fileBucket && !middlewareErrorType) {
             if (!authenticationErrorMsg) {
               if (!isValidSize || !isValidExtension || !fileTypeName) {
                 filePayload.middlewareErrorType = getFileSizeExtErrorName(
@@ -188,8 +200,8 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
           if (includes(variablesPath, 'variables')) {
             operationsPath.set(variablesPath, fileInfo);
           } else {
-            const { fileInput, connectInput } = operations.variables;
-            if (fileInput && connectInput) {
+            const { fileInput } = operations.variables;
+            if (fileInput) {
               Object.assign(operations.variables, {
                 fileInput: fileInfo,
               });
