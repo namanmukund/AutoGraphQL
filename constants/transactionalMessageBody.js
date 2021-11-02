@@ -7,6 +7,9 @@ const transactionalMessageBody = {
   sessionReminder: 'oct19_class_reminder',
   sessionReminderInternational: 'reminder_link_usa',
   mentorSessionNotification: 'mentor_notification',
+  demoAssignedMentor: 'demo_assigned_for_mentor',
+  supplyRequest: 'supply_request_for_mentor_final',
+  demoRequestMentor: 'demo_request_for_mentor',
   sessionMissed: {
     emailTemplate: 'sessionMissed',
     emailTemplateInternational: 'sessionMissed',

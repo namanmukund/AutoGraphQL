@@ -6,6 +6,9 @@ query{
     id
     user{
       id
+      mentorProfile{
+        id
+      }
     }
     availabilityDate
     ${getSlotTimesInString()}

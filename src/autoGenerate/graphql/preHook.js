@@ -109,7 +109,14 @@ import addBlockBasedProjectValidation from './preHookFunctions/validation/addBlo
 import updateBlockBasedProjectValidation from './preHookFunctions/validation/updateBlockBasedProjectValidation';
 import addVideoValidation from './preHookFunctions/validation/addVideoValidation';
 import updateVideoValidation from './preHookFunctions/validation/updateVideoValidation';
+import addAdhocSessionValidation from './preHookFunctions/validation/addAdhocSessionValidation';
+import updateAdhocSessionValidation from './preHookFunctions/validation/updateAdhocSessionValidation';
+import deleteAdhocSessionValidation from './preHookFunctions/validation/deleteAdhocSessionValidation';
 import updateMentorAvailabilitySlotValidation from './preHookFunctions/validation/updateMentorAvailabilitySlotValidation';
+import addMentorDemandSlotValidation from './preHookFunctions/validation/addMentorDemandSlotValidation';
+import updateMentorDemandSlotValidation from './preHookFunctions/validation/updateMentorDemandSlotValidation';
+import addAcceptedSlotRequestByMentorLogValidation from './preHookFunctions/validation/addAcceptedSlotRequestByMentorLogValidation';
+// import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
   switch (mutationOrQueryName) {
@@ -628,6 +635,67 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await deleteBatchSessionValidation(params, mutationOrQueryName, context);
       break;
     }
+    case 'addAdhocSession': {
+      const { sessionStatus } = input;
+      const newInput = {
+        ...input,
+      };
+      switch (sessionStatus) {
+        case 'started': {
+          newInput.sessionStartDate = new Date().toISOString();
+          break;
+        }
+        default: {
+          newInput.sessionAllotmentDate = new Date().toISOString();
+          // temporary hack for backword compatibility
+          newInput.sessionStartDate = new Date().toISOString();
+        }
+      }
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await addAdhocSessionValidation(newParams, mutationOrQueryName, context);
+
+      return hook(newParams.input, mutationOrQueryName, 'PreHook');
+    }
+    case 'updateAdhocSession': {
+      const sessionStatus = get(input, 'sessionStatus', '');
+      const newInput = {
+        ...input,
+      };
+      if (sessionStatus) {
+        switch (sessionStatus) {
+          case 'allotted': {
+            newInput.sessionStartDate = new Date().toISOString();
+            break;
+          }
+          case 'started': {
+            newInput.sessionStartDate = new Date().toISOString();
+            break;
+          }
+          case 'completed': {
+            newInput.sessionEndDate = new Date().toISOString();
+            break;
+          }
+          default:
+        }
+      }
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await updateAdhocSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
+    case 'deleteAdhocSession': {
+      await deleteAdhocSessionValidation(params, mutationOrQueryName, context);
+      break;
+    }
     case 'updateBatchCurrentComponentStatus': {
       await updateBatchCurrentComponentStatusValidation(params, mutationOrQueryName, context);
       break;
@@ -803,8 +871,24 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await updateVideoValidation(params, mutationOrQueryName, context);
       break;
     }
+    // case 'addMentorAvailabilitySlot': {
+    //   await addMentorAvailabilitySlotValidation(params, mutationOrQueryName, context);
+    //   break;
+    // }
     case 'updateMentorAvailabilitySlot': {
       await updateMentorAvailabilitySlotValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addAcceptedSlotRequestByMentorLog': {
+      await addAcceptedSlotRequestByMentorLogValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addMentorDemandSlot': {
+      await addMentorDemandSlotValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateMentorDemandSlot': {
+      await updateMentorDemandSlotValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'addSchool': {

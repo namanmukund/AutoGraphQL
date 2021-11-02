@@ -2,12 +2,15 @@ import { get } from 'lodash';
 import validateMentorSessionInput from './utils/validateMentorSessionInput';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import mentorSessionQuery from '../../graphqlQueries/mentorSessionQuery';
-import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
+import {
+  DatabaseRecordNotFoundError,
+} from '../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import checkIfSlotCanBeOpenedValidation from './utils/checkIfSlotCanBeOpenedValidation';
 import checkIfSlotCanBeDeletedValidation from './utils/checkIfSlotCanBeDeletedValidation';
 import getMentorSessions from '../../../utils/getMentorSessions';
+import addAcceptedSlotRequestByMentorLogCheck from './utils/addAcceptedSlotRequestByMentorLogCheck';
 
 const updateMentorSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: mentorSessionId } = params;
@@ -16,6 +19,18 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
   if (mentorSession && !mentorSession) {
     throw new DatabaseRecordNotFoundError();
   }
+  const mentorProfileId = get(mentorSession, 'user.mentorProfile.id');
+  const mentorId = get(mentorSession, 'user.id');
+  if (get(params, 'input.acceptanceObjects.replace', []).length > 0) {
+    const acceptanceObjectsArray = get(params, 'input.acceptanceObjects.replace', []);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const acceptanceObject of acceptanceObjectsArray) {
+      // eslint-disable-next-line no-await-in-loop
+      await addAcceptedSlotRequestByMentorLogCheck({
+        acceptanceObject, mentorProfileId, mentorId, action: 'updateMentorSession',
+      });
+    }
+  }
   const mentorUserId = get(mentorSession, 'user.id', '');
   const availabilityDate = get(params, 'input.availabilityDate', '');
   const { input } = params;
@@ -23,9 +38,7 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
   if (input) {
     validateMentorSessionInput(params, mentorSession, context);
   }
-
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
-
   const {
     appName,
   } = userAndAppInfo;
@@ -33,7 +46,6 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
   // check for slots that are passed as false and as well as true
   // eslint-disable-next-line no-param-reassign
   context.previousDocument = mentorSession;
-
   if (mentorUserId && availabilityDate) {
     // get all mentorSessions for the availability date
     const getMentorSessionsRes = await callLocalGraphqlApi(

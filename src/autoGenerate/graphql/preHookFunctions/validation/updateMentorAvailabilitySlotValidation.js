@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import { getUserIdandAppNameAfterValidation } from './utils';
 
 const getmentorAvailabilitySlot = async (id) => {
   const query = `{
@@ -17,6 +18,11 @@ const getmentorAvailabilitySlot = async (id) => {
 
 const updateMentorAvailabilitySlotValidation = async (params, mutationOrQueryName, context) => {
   const { id: mentorAvailabilitySlotId } = params;
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+  const {
+    appName,
+  } = userAndAppInfo;
+  context.appName = appName;
   const mentorAvailabilitySlot = await getmentorAvailabilitySlot(mentorAvailabilitySlotId);
   if (get(mentorAvailabilitySlot, 'broadCastedMentors', []).length > 0) {
     context.prevBroadCastedMentorsConnectIds = get(mentorAvailabilitySlot, 'broadCastedMentors', []);
