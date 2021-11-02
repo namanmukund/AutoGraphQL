@@ -22,9 +22,9 @@ const getMentorSessions = (userId, availabilityDate) => `query{
                 }
               }
             }
+            ${getSlotTimesInString()}
           }
         }
-      }
       batchSessions{
         id
         batch {
@@ -48,6 +48,7 @@ const getMentorSessions = (userId, availabilityDate) => `query{
         ${getSlotTimesInString()}
       }
     }
+  }
   `;
 
 export default getMentorSessions;
