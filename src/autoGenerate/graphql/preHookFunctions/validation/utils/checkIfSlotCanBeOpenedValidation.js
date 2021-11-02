@@ -49,9 +49,10 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
                   date.getHours() + intersection[0],
                 );
                 const currentDate = new Date();
-                if (moment(dateTime).diff(moment(currentDate), 'hours') > 2) {
+                if (moment(dateTime).diff(moment(currentDate), 'hours') >= 0) {
                   bypassValidation = false;
-                } else if (get(session, 'batch.studentsMeta.count', 0) > 0) {
+                }
+                if (get(session, 'batch.studentsMeta.count', 0) > 0) {
                   bypassValidation = false;
                 }
               } else {
