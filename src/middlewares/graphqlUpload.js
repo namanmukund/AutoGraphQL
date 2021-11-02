@@ -107,8 +107,8 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
         operations = request.headers.querystring;
       }
       operations = JSON.parse(operations);
-      let filePayload = { action: 'add' }
-      if(operations && operations.variables && operations.variables.connectInput) {
+      let filePayload = { action: 'add' };
+      if (operations && operations.variables && operations.variables.connectInput) {
         filePayload = await checkActionTypeBeforeFileUpload(operations);
       }
       const { data, middlewareErrorType: errorBeforeUpload } = filePayload;
@@ -145,11 +145,12 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
                 fileBucket,
               },
               connectInput,
+              fileName,
             },
           } = operations;
-          let modifiedFileName = ''
+          let modifiedFileName = '';
           let filePath = '';
-          if (connectInput && connectInput.typeId) {
+          if (connectInput && connectInput.typeId && connectInput.type) {
             const {
               typeId,
               type: connectType,
@@ -158,10 +159,10 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
             modifiedFileName = (data && data.name)
               ? data.name
               : `${typeField}_${typeId}_${Date.now()}.${ext}`;
-              filePath = `${fileBucket}/${connectType.toLowerCase()}/${modifiedFileName}`;
+            filePath = `${fileBucket}/${connectType.toLowerCase()}/${modifiedFileName}`;
           } else {
-            const RawFileName = (name && name.split('.')) ? name.split('.')[0] : name
-            modifiedFileName = `${RawFileName}_${cuid()}_${Date.now()}.${ext}`;
+            const rawFileName = (name && name.split('.')) ? name.split('.')[0] : name;
+            modifiedFileName = `${fileName || rawFileName}_${cuid()}_${Date.now()}.${ext}`;
             filePath = `${fileBucket}/${modifiedFileName}`;
           }
           // get authentication message

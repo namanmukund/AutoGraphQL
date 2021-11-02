@@ -1,6 +1,7 @@
 const FileBucket = `
   enum FileBucket {
     python
+    email
     TMSUploads
   }`;
 

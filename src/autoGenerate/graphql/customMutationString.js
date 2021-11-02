@@ -22,7 +22,7 @@ const customMutationString = `
    getQuizReport ( input: GetQuizReportInput): GetQuizReportResult,
    menteeCourseSyllabus (courseId: ID): MenteeCourseSyllabus,
    tcirtSdrowssaPtes ( id: ID!, password: String! ): User,
-   uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,
+   uploadFile (fileInput: FileInput, connectInput: FileConnectInput, fileName: String): File! ,
    parentChildSignUp ( schoolId: ID, campaignId: ID, input: ParentChildSignUpInput ): ParentChildToken,
    updateParentChildDetail ( userId:ID!, schoolId: ID, input: UpdateParentChildDetailInput ): ParentChildToken,
    signUpAffiliate ( input: SignUpAffiliateInput ): UserToken,
