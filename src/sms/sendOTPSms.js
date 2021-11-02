@@ -11,6 +11,8 @@ const sendOTPSms = (receiverNumber, phoneOtp, name) => {
     log(`sendOTPSms method called in ${env} environment`);
     return null;
   }
+  // eslint-disable-next-line no-param-reassign
+  if (process.env.DATA_MASKING) receiverNumber = '+919999694605';
 
   const { bodyBeforeName, bodyAfterName, bodyBeforeIfNoName } = smsOTPMessage;
   const body = name

@@ -62,7 +62,14 @@ import deleteBatchSessionPostHookMethod from './postHookFunctions/deleteBatchSes
 import updateUserPostHookMethod from './postHookFunctions/updateUserPostHookMethod';
 import updatePreSalesAuditPostHookMethod from './postHookFunctions/updatePreSalesAuditPostHookMethod';
 import updatePostSalesAuditPostHookMethod from './postHookFunctions/updatePostSalesAuditPostHookMethod';
+import addAdhocSessionPostHookMethod from './postHookFunctions/addAdhocSessionPostHookMethod';
+import updateAdhocSessionPostHookMethod from './postHookFunctions/updateAdhocSessionPostHookMethod';
 import deleteBatchPostHookMethod from './postHookFunctions/deleteBatchPostHookMethod';
+import userPostHookMethod from './postHookFunctions/userPostHookMethod';
+// import addMentorAvailabilitySlotPostHookMethod from './postHookFunctions/addmentorAvailabilitySlotPostHookMethod';
+import updateMentorAvailabilitySlotPostHookMethod from './postHookFunctions/updateMentorAvailabilitySlotPostHookMethod';
+import addMentorDemandSlotPostHookMethod from './postHookFunctions/addMentorDemandSlotPostHookMethod';
+import updateMentorDemandSlotPostHookMethod from './postHookFunctions/updateMentorDemandSlotPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -300,8 +307,36 @@ const posthook = async (input, mutationName, context, params) => {
       await updatePostSalesAuditPostHookMethod(input, mutationName, context, params);
       break;
     }
+    case 'addAdhocSession': {
+      await addAdhocSessionPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'updateAdhocSession': {
+      await updateAdhocSessionPostHookMethod(input, params, mutationName, context);
+      break;
+    }
     case 'deleteBatch': {
       await deleteBatchPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'user': {
+      await userPostHookMethod(input, mutationName, context);
+      break;
+    }
+    // case 'addMentorAvailabilitySlot': {
+    //   await addMentorAvailabilitySlotPostHookMethod(input, params, mutationName, context);
+    //   break;
+    // }
+    case 'updateMentorAvailabilitySlot': {
+      await updateMentorAvailabilitySlotPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'addMentorDemandSlot': {
+      await addMentorDemandSlotPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'updateMentorDemandSlot': {
+      await updateMentorDemandSlotPostHookMethod(input, params, mutationName, context);
       break;
     }
     default:

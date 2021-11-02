@@ -71,6 +71,13 @@ import {
   ProjectWithSimilarOrderAlreadyExist,
   VideoWithSimilarTitleAlreadyExist,
   LOWithSimilarTitleAlreadyExist,
+  BatchMustHaveAtleastOneSession,
+  SessionMustBeCompletedError,
+  NotBroadcastedMentor,
+  LateToAcceptRequest,
+  SlotAlreadyOpened,
+  SlotAlreadyFilled,
+  SessionAlreadyAssigned,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -281,4 +288,11 @@ export {
   ProjectWithSimilarOrderAlreadyExist,
   VideoWithSimilarTitleAlreadyExist,
   LOWithSimilarTitleAlreadyExist,
+  BatchMustHaveAtleastOneSession,
+  SessionMustBeCompletedError,
+  NotBroadcastedMentor,
+  LateToAcceptRequest,
+  SlotAlreadyOpened,
+  SlotAlreadyFilled,
+  SessionAlreadyAssigned,
 };

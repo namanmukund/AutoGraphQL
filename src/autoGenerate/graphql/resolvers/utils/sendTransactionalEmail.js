@@ -29,12 +29,14 @@ const getText = (key, country = 'india') => {
   return '';
 };
 
-const sendTransactionalEmail = async (templateObject, emailBody, country = 'india') => {
+const sendTransactionalEmail = async (templateObject, emailBody, country = 'india', sendToMentor = false) => {
   const templateFileName = get(emailBody, 'emailTemplate');
   const subject = get(emailBody, 'subject');
-  const res = await callLocalGraphqlApi(USER_QUERY(templateObject.parentEmail));
-  const isBatchTypeB2B = get(res, 'data.users[0].parentProfile.children', []).find((child) => get(child, 'batch.type') === 'b2b');
-  if (isBatchTypeB2B) return;
+  if (!sendToMentor) {
+    const res = await callLocalGraphqlApi(USER_QUERY(templateObject.parentEmail));
+    const isBatchTypeB2B = get(res, 'data.users[0].parentProfile.children', []).find((child) => get(child, 'batch.type') === 'b2b');
+    if (isBatchTypeB2B) return;
+  }
   const footerDark = await parsedHtmlFromTemplateFileAndObject(
     'footerDark', {
       instagramLink: getText('instagramLink', country),
@@ -52,9 +54,19 @@ const sendTransactionalEmail = async (templateObject, emailBody, country = 'indi
     help,
   });
   // const emailTo = [transactionalMessageBody.testEmail];
-  const emailTo = [templateObject.parentEmail];
+  let emailTo = [templateObject.parentEmail];
 
-  const ccEmail = [];
+  let ccEmail = [];
+
+  if (process.env.DATA_MASKING) {
+    emailTo = [
+      'shubham.gupta@tekie.in',
+    ];
+    ccEmail = [
+      'naman.mukund@tekie.in',
+      'kritesh.patel@tekie.in',
+    ];
+  }
 
   if (templateObject.mentorEmail) {
     ccEmail.push(templateObject.mentorEmail);

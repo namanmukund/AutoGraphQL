@@ -48,17 +48,6 @@ const updateUserCourseQuery = (id, courseId) => `
   }
 `;
 
-const getCourseName = async (id) => {
-  const course = await callLocalGraphqlApi(`{
-    course(id: "${id}") {
-      id
-      title
-    }
-  }`);
-  const courseName = get(course, 'data.course.title');
-  return courseName;
-};
-
 const addMenteeSessionPostHookMethod = async (input, mutationName, context, params) => {
   // don't decrease the availability slot if it is done through backend
   const {
@@ -92,19 +81,9 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
       updateUserBookingAgent(menteeSessionId, get(context, 'userIdFromContext'), bookingDate, get(slotTimeStringArray, '0'));
     }
 
-    const courseId = get(input, 'course.typeId', '');
-    const clientId = get(userInfo, 'data.user.id', '');
-    const topicId = get(topicInfo, 'data.topic.id', '');
-    const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
-    const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
-
     // update user booking on leadsquared
-    const addBookingToLS = async () => {
-      const courseName = await getCourseName(courseId);
-      // const lsInput = input;
-      /* eslint-disable no-param-reassign */
-      input.courseName = courseName;
-      await addMenteeBookingLeadsquared(
+    if (!get(userInfo, 'data.user.studentProfile.batch.id')) {
+      addMenteeBookingLeadsquared(
         input,
         params,
         slotTimeStringArray,
@@ -113,10 +92,6 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
         isBookedByMentee,
         get(context, 'userIdFromContext'),
       );
-    };
-
-    if (!get(userInfo, 'data.user.studentProfile.batch.id')) {
-      addBookingToLS();
     }
     // udpdating the studentProfile in menteeSession
     const updateInput = {
@@ -125,7 +100,14 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     slotTimeStringArray.forEach((slot) => {
       updateInput[slot] = true;
     });
+    const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
     if (studentProfileId) updateMenteeSessionQuery(menteeSessionId, studentProfileId, updateInput);
+
+    // update session log entry
+    const courseId = get(input, 'course.typeId', '');
+    const clientId = get(userInfo, 'data.user.id', '');
+    const topicId = get(topicInfo, 'data.topic.id', '');
+    const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     /**
      * Add course into UserCourse Collection if not present already
      */
@@ -139,7 +121,6 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     } else {
       callLocalGraphqlApi(addUserCourseQuery(clientId, courseId));
     }
-    // update session log entry
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMenteeSession', batchCode, '', '');
   }
 };

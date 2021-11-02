@@ -35,8 +35,9 @@ import getPaymentResponseMutationResolver from './payment/getPaymentResponse';
 import addBulkMentorSessionMutationResolver from './mentor/addBulkMentorSession';
 import bookB2B2CSlotsMutationResolver from './user/bookB2B2CSlots';
 import rebookMenteeSessionMutationResolver from './user/rebookMenteeSession';
-import sendJourneySnapshotInMailMutationResolver from './user/sendJourneySnapshotInMail';
 import sendCertificateInMailMutationResolver from './user/sendCertificateInMail';
+import sendJourneySnapshotInMailMutationResolver from './user/sendJourneySnapshotInMail';
+import generateCertificateMutationResolver from './pdf/generateCertificate';
 
 export {
   addMutationResolver,
@@ -76,6 +77,7 @@ export {
   addBulkMentorSessionMutationResolver,
   bookB2B2CSlotsMutationResolver,
   rebookMenteeSessionMutationResolver,
-  sendJourneySnapshotInMailMutationResolver,
   sendCertificateInMailMutationResolver,
+  sendJourneySnapshotInMailMutationResolver,
+  generateCertificateMutationResolver,
 };

@@ -9,6 +9,7 @@ import mentorAvailabilitySlotOperation, {
   getMentorAvailabilitySlots,
   removeFromMentorAvailabilitySlot,
 } from './utils/mentorAvailabilitySlotOperation';
+import getMentorProfile from './utils/getMentorProfile';
 
 const updateMentorSessionPostHookMethod = async (input, mutationName, context) => {
   const { sessionType, availabilityDate, ...slots } = input;
@@ -20,7 +21,6 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
 
   const { availabilityDate: prevAvailabilityDate, ...prevSlots } = previousDocument;
   const prevSlotTimeStringArray = getSelectedSlotsStringArray(prevSlots);
-
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
   /* if a mentor has changed the date to future
     --remove the availability slot from the prevAvailabilityDate
@@ -53,14 +53,15 @@ const updateMentorSessionPostHookMethod = async (input, mutationName, context) =
       await removeFromMentorAvailabilitySlot(get(singleSlot, '[0].id'), get(input, 'id'), 'mentorSession');
     }
   }
+  const userInfo = await getMentorProfile(get(input, 'user.typeId'));
   await mentorAvailabilitySlotOperation({
     slotTimeStringArray: newSlots,
     sessionType,
     mutationName,
     date: availabilityDate,
     sessionId: get(input, 'id'),
+    mentorProfileId: get(userInfo, 'mentorProfile.id'),
   });
-
   // don't increase the availability slot if it is done through backend
   if (byPassMenteeValidationApps.includes(appName)) {
     return true;

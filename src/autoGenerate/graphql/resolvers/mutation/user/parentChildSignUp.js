@@ -8,11 +8,11 @@ import {
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
 import { MENTEE, PARENT } from '../../../../../../constants/roles';
-import { generateCuid, log } from '../../../../../../utils';
-import { QueryController } from '../../../controllers';
+import { generateCuid, getRandomNumber, log } from '../../../../../../utils';
+import { MutationController, QueryController } from '../../../controllers';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import generateInviteCode from '../../../../../../utils/generateInviteCode';
-import { backendApps, REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
+import { backendApps, rangeOTP, REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
 import addUserCredit from './utils/addUserCredit';
 import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
@@ -34,6 +34,8 @@ import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentCh
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 // import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import getUserPasswordObject from './utils/getUserPasswordObject';
+import { getNumberAndSendSms } from '../../../../../sms';
+import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
 
 const USER_TYPE = 'User';
 
@@ -45,6 +47,12 @@ const FETCH_CAMPAIGN = (campaignId) => `{
     }
   }
 }`;
+
+const updateExistingUserOTP = (
+  searchObj,
+  updateObj,
+  modelMutations,
+) => modelMutations.updateOne(searchObj, updateObj);
 
 /*
 - both the parent and a kid is registered
@@ -117,6 +125,12 @@ const parentChildSignUpMutationResolver = async (
     bypass: true,
   });
   const source = getUserOriginSource(utmSource, schoolName, schoolId);
+  /* this campaign obj will be later in this method */
+  /* fetching earlier to update vertical in user */
+  let campaign = null;
+  if (campaignId) {
+    campaign = await getBatchDetailsFromACampaign(campaignId);
+  }
 
   // if parent exist don't add parent and check if the child exists too
   if (parentInfo && parentInfo.parentId && parentInfo.parentEmail) {
@@ -169,6 +183,20 @@ const parentChildSignUpMutationResolver = async (
         type: 'Campaign',
         typeId: campaignId,
       };
+    }
+
+    if (source !== 'school') {
+      parentData.vertical = 'b2c';
+    } else {
+      /* eslint-disable-next-line no-lonely-if */
+      if (campaignId) {
+        const campaignType = get(campaign, 'type');
+        if (campaignType && campaignType === 'b2b') {
+          parentData.vertical = 'b2b';
+        } else {
+          parentData.vertical = 'b2b2c';
+        }
+      }
     }
 
     const parentDataWithId = generateCuid(parentData);
@@ -242,6 +270,22 @@ const parentChildSignUpMutationResolver = async (
     childData.fromReferral = true;
     childData.giftVoucherApplied = false;
   }
+
+  // same logic for vertical as parent
+  if (source !== 'school') {
+    childData.vertical = 'b2c';
+  } else {
+    /* eslint-disable-next-line no-lonely-if */
+    if (campaignId) {
+      const campaignType = get(campaign, 'type');
+      if (campaignType && campaignType === 'b2b') {
+        childData.vertical = 'b2b';
+      } else {
+        childData.vertical = 'b2b2c';
+      }
+    }
+  }
+
   const childDataWithId = generateCuid(childData);
 
   const childUserData = await addUserData(authentication, childDataWithId);
@@ -282,7 +326,6 @@ Update school info too
   /*
 If coming from campaign and the type os b2b allocate the user to the right batch
 */
-  const campaign = await getBatchDetailsFromACampaign(campaignId);
   let batchId = '';
   if (campaign && campaign.id) {
     const campaignType = get(campaign, 'type');
@@ -393,8 +436,38 @@ If coming from campaign and the type os b2b allocate the user to the right batch
 
   parentChildSignupPostHookMethod(input, leadSquaredParams);
 
-  // send b2b2c reg+booking
-  // sendBookingReminderOrConfirmationB2B(parentId);
+  // Send OTP if from RadioStreet event
+  const eventSources = ['radiostreet', 'spysquadcamp'];
+  if (source && eventSources.includes(source.toLowerCase())) {
+    // send b2b2c reg+booking
+    // sendBookingReminderOrConfirmationB2B(parentId);
+    const phoneOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
+    const modelMutations = new MutationController(typeName, authentication);
+    const updateObj = {
+      phoneOtp,
+      phoneOtpCreationDate: new Date(),
+    };
+
+    setTimeout(() => {
+      updateLeadSquared({
+        Phone: get(parentPhone, 'number'),
+        mx_Event_Date: '31 October',
+        mx_Event_Time: '11:00 am',
+      }, false, {
+        ActivityEvent: 208,
+        Fields: [
+          {
+            SchemaName: 'mx_Custom_1',
+            Value: 'RadioStreet',
+          },
+        ],
+      });
+    }, 1000 * 60 * 2);
+
+    // update phoneOtp in db
+    await updateExistingUserOTP({ id: parentId }, updateObj, modelMutations);
+    getNumberAndSendSms(parentPhone, phoneOtp, parentName);
+  }
 
   return userTokenData;
 };

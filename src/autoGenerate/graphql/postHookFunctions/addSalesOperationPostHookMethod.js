@@ -7,6 +7,43 @@ import addSalesOperationActivityQuery from './utils/addSalesOperationActivityQue
 import { updateSalesOperationLeadsquared } from './leadsquared';
 import getMenteeInfo from './utils/getMenteeInfo';
 import updateMentorMenteeSession from '../resolvers/query/scriptMethods/utils/updateMentorMenteeSession';
+import { enrollmentTypes, topicTypes } from '../../../../constants';
+
+const { free } = enrollmentTypes;
+const { video } = topicTypes;
+
+const addUserCurrentTopicComponentStatusOperation = async (userId, courseId, topicId) => {
+  const query = `mutation{
+    addUserCurrentTopicComponentStatus(
+      input: {
+        enrollmentType: ${free}
+        currentTopicComponentType: ${video}
+      }
+      userConnectId:"${userId}"
+      currentCourseConnectId:"${courseId}"
+      currentTopicConnectId:"${topicId}"
+    ){
+      id
+    }
+  }`;
+  const result = await callLocalGraphqlApi(query);
+  return get(result, 'data.addUserCurrentTopicComponentStatus');
+};
+
+const getFirstTopicOfCourse = async (courseId) => {
+  const query = `{
+  topics(
+    filter: { courses_some: { id: "${courseId}" } }
+    first: 1
+  ) {
+    id
+    title
+  }
+}
+`;
+  const result = await callLocalGraphqlApi(query);
+  return get(result, 'data.topics');
+};
 
 const allowedRoles = [ADMIN, UMS_ADMIN, UMS_VIEWER];
 const addSalesOperationPostHookMethod = async (input, params, mutationName, context) => {
@@ -51,6 +88,8 @@ const addSalesOperationPostHookMethod = async (input, params, mutationName, cont
       ),
     );
   }
+  const firstTopic = await getFirstTopicOfCourse(get(input, 'course.typeId'));
+  addUserCurrentTopicComponentStatusOperation(get(input, 'client.typeId'), get(input, 'course.typeId'), get(firstTopic, '[0].id'));
   const userInfo = await getMenteeInfo(get(input, 'client.typeId'));
   updateSalesOperationLeadsquared(input.id, userInfo);
 };

@@ -38,8 +38,10 @@ const customMutationString = `
    addBulkMentorSession ( input: BulkMentorSessionInput ): [MentorSession],
    bookB2B2CSlots ( input: BookB2B2CSlotsInput ): BooleanResult, 
    rebookMenteeSession ( input: RebookMenteeSessionInput ): MenteeSession,
-   sendJourneySnapshotInMail ( input: SendJourneySnapshotInMailInput ): BooleanResult,
    sendCertificateInMail ( input: SendCertificateInMailInput ): BooleanResult,
+   shiftBatchSessionsAfterGivenDate ( input: ShiftBatchSessionsInput ): BooleanResult,
+   sendJourneySnapshotInMail ( input: SendJourneySnapshotInMailInput ): BooleanResult,
+   generateCertificate ( input: GenerateCertificateInput ) : GenerateCertificateOutput,
    `;
 
 export default customMutationString;

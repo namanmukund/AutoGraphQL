@@ -36,6 +36,7 @@ const getBatchQuery = (batchId) => `
       batch(id:"${batchId}"){
         id
         code
+        type
         students{
           id
           user{
@@ -125,8 +126,10 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   /*
     get batch info
   */
+  const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
   const isTrial = await isTrialSession(get(input, 'topic.typeId'));
   if (isTrial) {
+    const batchType = get(batchResult, 'data.batch.type');
     let mentorProfile;
     if (mentorSessionConnectId) {
       mentorProfile = await getMentorProfileFromMentorSession(mentorSessionConnectId);
@@ -138,9 +141,9 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
       sessionType: sessionType.trial,
       sessionId: batchSessionId,
       mentorProfileId: get(mentorProfile, 'user.mentorProfile.id'),
+      batchType,
     });
   }
-  const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
   const batchInfo = get(batchResult, 'data.batch');
   const { students, currentComponent, code } = batchInfo;
   const batchCurrentComponentId = currentComponent && currentComponent.id;

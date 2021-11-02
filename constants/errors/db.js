@@ -5,6 +5,10 @@ export const DatabaseRecordNotFoundError = createError('DatabaseRecordNotFoundEr
   message: 'Database record not found',
 });
 
+export const FileUploadConnectionFailedError = createError('FileUploadConnectionFailedError', {
+  message: 'File uploaded but connection failed due to connection record not found',
+});
+
 export const UserAlreadyExistsError = createError('UserAlreadyExistsError', {
   message: 'User already exist',
 });
@@ -247,4 +251,32 @@ export const VideoWithSimilarTitleAlreadyExist = createError('VideoWithSimilarTi
 
 export const LOWithSimilarTitleAlreadyExist = createError('LOWithSimilarTitleAlreadyExist', {
   message: 'LO with similar title already exist.',
+});
+
+export const BatchMustHaveAtleastOneSession = createError('BatchMustHaveAtleastOneSession', {
+  message: 'B2B batch must have atleast one batch session for adding Adhoc session.',
+});
+
+export const SessionMustBeCompletedError = createError('SessionMustBeCompletedError', {
+  message: 'Batch Session must be completed to add Adhoc session of same topic.',
+});
+
+export const NotBroadcastedMentor = createError('NotBroadcastedMentor', {
+  message: 'Slot not broadcasted to the mentor',
+});
+
+export const LateToAcceptRequest = createError('LateToAcceptRequest', {
+  message: 'Late to accept request',
+});
+
+export const SlotAlreadyOpened = createError('SlotAlreadyOpened', {
+  message: 'Accepted slot is already opened',
+});
+
+export const SlotAlreadyFilled = createError('SlotAlreadyFilled', {
+  message: 'You were late as slot already filled',
+});
+
+export const SessionAlreadyAssigned = createError('SessionAlreadyAssigned', {
+  message: 'The session is already assigned',
 });

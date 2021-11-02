@@ -1,4 +1,9 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import generateCertificateScript from '../scriptMethods/generateCertificateScript';
+// import updateMentorAvailabilitySlotWithBatchAndMenteeSessions from '../scriptMethods/updateMentorAvailabilitySlotWIthBatchAndMenteeSessions';
+// import updateMentorAvailabilitySlotWithMentorSessions from '../scriptMethods/updateMentorAvailabilitySlotWithMentorSessions';
+// import updateMentorMenteeSessionWithStudentProfile from '../scriptMethods/updateMentorMenteeSessionWithStudentProfile';
+// import updateMenteeSessionWithStudentProfile from '../scriptMethods/updateMenteeSessionWithStudentProfile';
 // import updateCourseInSalesOperationScript from '../scriptMethods/updateCourseinSalesOperationScript';
 // import updateQuestionsWithCorrectPositions from '../scriptMethods/updateQuestionsWithCorrectPositions';
 // import updateQuestionsWithHints from '../scriptMethods/updateQuestionsWithHints';
@@ -14,6 +19,8 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import generateSessionReport from '../../../../../../utils/scheduleJobs/scheduleSessionReport';
 // import migrateBatchAttendanceToEnum from '../scriptMethods/migrateBatchAttendanceToEnum';
 // import updateCourseInVideos from '../scriptMethods/updateCourseInVideos';
+// import removeCourseFromUserAssignments from '../scriptMethods/removeCourseFromUserAssignments';
+// import generateCertificateScript from '../scriptMethods/generateCertificateScript';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -23,7 +30,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateCourseInVideos();
   // await updateCourseInSalesOperationScript();
   // await updateSchoolCampaignCodeInSchool();
-  // await generateSessionReport(60);
+  // await generateSessionReport(2);
   // await updateTopicsInAssignment();
   // await updateTopicsInLearningObjective();
   // await updateTopicsAndLearningObjectivesInQuestionBank();
@@ -52,6 +59,12 @@ const temporaryScript = (async (root, params, context) => {
   // await updateQuestionsWithCorrectPositions();
   // await updateQuestionsWithHints();
   // await updateQuestionsWithCorrectPositionIndex();
+  // await updateMenteeSessionWithStudentProfile();
+  // await updateMentorMenteeSessionWithStudentProfile();
+  // await removeCourseFromUserAssignments();
+  // await updateMentorAvailabilitySlotWithMentorSessions();
+  // await updateMentorAvailabilitySlotWithBatchAndMenteeSessions();
+  // await generateCertificateScript();
   return {
     result: true,
   };

@@ -355,6 +355,9 @@ const getMentorMenteeSessions = (userId, courseId) => `
       sessionEndDate
       sessionStartDate
       sessionStatus
+      menteeSession {
+        id
+      }
       mentorSession{
         user{
           id
@@ -1025,6 +1028,7 @@ const menteeCourseSyllabusMutationResolver = async (
           sessionStartDate,
           mentorSession,
           isSubmittedForReview,
+          menteeSession,
         } = mentorMenteeSession;
         const {
           order: topicOrder,
@@ -1049,6 +1053,7 @@ const menteeCourseSyllabusMutationResolver = async (
           topicThumbnailSmall,
           topicDescription,
           isSubmittedForReview,
+          menteeSessionId: get(menteeSession, 'id'),
           endingDate: sessionEndDate || sessionStartDate,
           chapterId: chapter && chapter.id,
           chapterTitle: chapter && chapter.title,
@@ -1105,6 +1110,7 @@ const menteeCourseSyllabusMutationResolver = async (
             bookingDate,
             slotTime,
             isAccessible,
+            menteeSessionId: get(menteeSession, 'id'),
             chapterId: chapter && chapter.id,
             chapterTitle: chapter && chapter.title,
             chapterOrder: chapter && chapter.order,

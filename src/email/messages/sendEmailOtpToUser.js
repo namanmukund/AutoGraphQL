@@ -11,6 +11,13 @@ const sendEmailOtpToUser = (emailTo, userOtp, appName) => {
   const templateString = parsedHtmlFromTemplateFileAndObject(
     templateFileName, templateObject,
   );
+  if (process.env.DATA_MASKING) {
+    // eslint-disable-next-line no-param-reassign
+    emailTo = [
+      'shubham.gupta@tekie.in',
+    ];
+  }
+
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';

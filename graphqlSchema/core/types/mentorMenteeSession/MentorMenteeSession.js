@@ -52,6 +52,7 @@ const MentorMenteeSession = `
     isPracticeSubmitted: Boolean @defaultValue(value: "false")
     practiceSubmitDate: Date
     isAssignmentSubmitted: Boolean @defaultValue(value: "false")
+    isReviewSubmittedOnTime: Boolean @defaultValue(value: "false")
     assignmentSubmitDate: Date
     isHomeworkCheckedByMentor: Boolean @defaultValue(value: "false")
     isSubmittedForReview: Boolean @defaultValue(value: "false")
@@ -86,11 +87,18 @@ const MentorMenteeSession = `
     mentorPaymentJustification: String
     paymentApprovedBy: User @relation(name: "MentorMenteeSessionPaymentApprovedUser", direction: "OneWay")
     isAudit: Boolean @defaultValue(value: "false")
-    isReviewSubmittedOnTime: Boolean @defaultValue(value: "false")
     isPostSalesAudit: Boolean @defaultValue(value: "false")
     studentProfile: StudentProfile @relation(name:"MentorMenteeSessionStudentProfile", direction: "OneWay")
     mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name:"MentorAvailabilitySlotMentorMenteeSession")
     isBroadCastedSession: Boolean @defaultValue(value: "false")
+    videoLinkClickByMentor: Date
+    videoLinkClickByMentee: Date
+    startSessionByMentee: Date
+    endSessionByMentee: Date
+    mentorStartAttendance: Date
+    mentorSavesAttendance: Date
+    videoLinkClickByMenteePlatform: Platform
+    startSessionByMenteePlatform: Platform
 }`;
 
 export default [MentorMenteeSession, internetSpeed];

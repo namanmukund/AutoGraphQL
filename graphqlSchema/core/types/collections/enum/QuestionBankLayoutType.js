@@ -3,6 +3,7 @@ const QuestionBankLayoutType = `
       text
       editor
       blockly
+      image
   }`;
 
 export default QuestionBankLayoutType;

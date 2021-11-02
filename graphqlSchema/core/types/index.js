@@ -67,6 +67,7 @@ import MentorReport from './mentorReport';
 import Batch from './batch';
 import BatchCurrentComponentStatus from './batchCurrentComponentStatus';
 import BatchSession from './batchSession';
+import AdhocSession from './adhocSession';
 import UserLocationLog from './userLocationLog';
 import MentorMenteeSessionAudit from './mentorMenteeSessionAudit';
 import MentorMenteeSessionTimestamp from './mentorMenteeSessionTimestamp';
@@ -109,6 +110,7 @@ import SessionReport from './sessionReport';
 import RebookMenteeSessionInput from './rebookMenteeSessionInput';
 import sendJourneySnapshotInMailInput from './sendJourneySnapshotInMailInput';
 import sendCertificateInMailInput from './sendCertificateInMailInput';
+import GenerateCertificate from './generateCertificate';
 import TopicQuestions from './topicQuestions';
 import TopicAssignmentQuestion from './topicAssignmentQuestion';
 import AuditQuestion from './auditQuestion';
@@ -125,6 +127,14 @@ import MentorSupplyPaySlab from './mentorSupplyPaySlab';
 import MentorDemandSlot from './mentorDemandSlot';
 import MentorAvailabilitySlot from './mentorAvailabilitySlot';
 import MentorAuditReport from './mentorAuditReport';
+import ShiftBatchSessionsInput from './shiftBatchSessionsInput';
+import EventCertificate from './eventCertificate';
+import QuestionBankImage from './questionBankImage';
+import SessionGradeReport from './sessionGradeReport';
+import AcceptedSlotRequestByMentorLog from './acceptedSlotRequestByMentorLog';
+import SessionCourseReport from './sessionCourseReport';
+import GetEventCertificate from './getEventCertificate';
+import Event from './event';
 
 export default [
   ...User,
@@ -196,6 +206,7 @@ export default [
   ...Batch,
   ...BatchCurrentComponentStatus,
   ...BatchSession,
+  ...AdhocSession,
   ...UserLocationLog,
   ...MentorMenteeSessionAudit,
   ...MentorMenteeSessionTimestamp,
@@ -236,8 +247,6 @@ export default [
   ...SessionLog,
   ...SessionReport,
   ...RebookMenteeSessionInput,
-  ...sendJourneySnapshotInMailInput,
-  ...sendCertificateInMailInput,
   ...TopicQuestions,
   ...TopicAssignmentQuestion,
   ...AuditQuestion,
@@ -254,4 +263,15 @@ export default [
   ...MentorDemandSlot,
   ...MentorAvailabilitySlot,
   ...MentorAuditReport,
+  ...ShiftBatchSessionsInput,
+  ...sendJourneySnapshotInMailInput,
+  ...sendCertificateInMailInput,
+  ...GenerateCertificate,
+  ...EventCertificate,
+  ...QuestionBankImage,
+  ...SessionGradeReport,
+  ...AcceptedSlotRequestByMentorLog,
+  ...SessionCourseReport,
+  ...GetEventCertificate,
+  ...Event,
 ];
