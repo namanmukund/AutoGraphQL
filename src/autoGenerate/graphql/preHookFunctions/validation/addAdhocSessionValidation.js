@@ -137,12 +137,8 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
   }
 
   // check is for given previous topic and type, if adhoc session exists from before throw err
-  // console.log('batchId', batchId)
-  // console.log('previousTopicConnectId', previousTopicConnectId)
-  // console.log('type', type)
   const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, previousTopicConnectId, type));
   const adhocSessions = get(getAdhocSessionRes, 'data.adhocSessions');
-  // console.log('adhocSessions', adhocSessions);
   if (adhocSessions && adhocSessions.length) {
     throw new SimilarDocumentAlreadyExistError();
   }
