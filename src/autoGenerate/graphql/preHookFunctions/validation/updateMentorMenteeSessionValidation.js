@@ -78,6 +78,10 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   if (!(mentorMenteeSessionDoc && mentorMenteeSessionDoc.id)) {
     throw new DatabaseRecordNotFoundError();
   }
+  // if changing session status without mentorSession, throw error
+  if (sessionStatus && !get(mentorMenteeSessionDoc, 'mentorSession.id')) {
+    throw new CanNotStartSessionWithoutMentorError();
+  }
   const { sessionStatus: prevSessionStatus } = mentorMenteeSessionDoc;
   // if session is complete and user is trying to change the status then throw error
   if (prevSessionStatus === 'completed' && sessionStatus && sessionStatus !== 'completed') {

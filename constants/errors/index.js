@@ -135,6 +135,7 @@ import {
   InvalidBannerDateRangeError,
   BannerFieldRequiredError,
   CanNotDeleteCompletedSessionError,
+  CanNotStartSessionWithoutMentorError,
 } from './input';
 
 // assessment validation sqs  profile apolloErrorPackageTest maxSync transcoder
@@ -295,4 +296,5 @@ export {
   SlotAlreadyOpened,
   SlotAlreadyFilled,
   SessionAlreadyAssigned,
+  CanNotStartSessionWithoutMentorError,
 };

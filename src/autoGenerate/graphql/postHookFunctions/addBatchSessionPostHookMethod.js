@@ -134,6 +134,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     if (mentorSessionConnectId) {
       mentorProfile = await getMentorProfileFromMentorSession(mentorSessionConnectId);
     }
+    console.log('change2 *** addBatchSessionPostHook ** availability slot operation')
     await mentorAvailabilitySlotOperation({
       slotTimeStringArray,
       date: get(input, 'bookingDate'),
@@ -205,6 +206,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
   // mentorSessionConnectId made non-mandatory
   if (topicId) {
+    console.log('change2 *** addBatchSessionPostHook')
     // eslint-disable-next-line no-restricted-syntax
     for (const student of students) {
       if (student.user && student.user.id) {

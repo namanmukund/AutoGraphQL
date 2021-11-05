@@ -106,6 +106,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   await validateBatchSessionInput(params, context, 'addBatch');
 
   // check if mentor already has another session in same slot
+  console.log('change1 *** addBatchSessionValidation')
   if (mentorSessionConnectId) {
     const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
     const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');

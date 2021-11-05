@@ -254,6 +254,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           );
           log(`------------------------updated menteeSessionId ${menteeSessionId}`);
         }
+        console.log('change3 *** update mentor mentee session, might fail')
         await callUpdateMentorMenteeSession(mentorMenteeId, mentorSessionIdFromInput, { input: { sessionStatus } });
         log(`------------------------updated mentorMenteeId ${mentorMenteeId}`);
         return true;
@@ -315,7 +316,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
         log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
       }
     }
-
+    console.log('change4 *** test if mentee session is being added correctly')
     if (menteeSessionId) {
       log(`------------------------updating menteeSessionId ${menteeSessionId}`);
       // update
@@ -368,6 +369,8 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
         log(`------------------------added menteeSessionId ${menteeSessionId}`);
       }
     }
+
+    console.log('change5 *** test if add mms is working without mentorsessionConnectid')
 
     // add mentor mentee session, made mentorSessionId non-mandatory
     if (menteeSessionId) {
