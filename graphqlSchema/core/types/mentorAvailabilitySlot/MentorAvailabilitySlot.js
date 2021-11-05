@@ -1,8 +1,6 @@
 import { READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
-import {
-  UMS_HEAD, NOT_UMS_HEAD,
-} from '../../../../constants/roles';
+import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
 
 const SingleSlotCountry = `
  type SingleSlotCountry {
@@ -25,14 +23,8 @@ const MentorAvailabilitySlot = `
       { appName: "${TWA}" operations: ${READ} }
       ], 
     rule: allow
-  ) 
-  @userPermissions(
-    permissions:[
-      { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
-      { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${READ} },
-      ], 
-    rule: allow
-  ) 
+  )
+  ${getPermissionSchemaString('MentorAvailabilitySlot')}
   {
     date: Date!
     verticals: [SingleSlotVertical]!
