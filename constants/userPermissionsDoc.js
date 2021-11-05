@@ -22,6 +22,10 @@ import {
   AUDITOR,
   BDE,
   BDE_ADMIN,
+  SUPPLY_DEMAND_ADMIN,
+  SUPPLY_MANAGER,
+  DEMAND_MANAGER,
+  SUPPLY_DEMAND_ROLES_ARRAY,
 } from './roles';
 
 const userPermissionsDoc = {
@@ -29,14 +33,14 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR],
-      read: [PRE_SALES, POST_SALES, AUDITOR, BDE, BDE_ADMIN],
+      read: [PRE_SALES, POST_SALES, AUDITOR, BDE, BDE_ADMIN, SUPPLY_DEMAND_ADMIN, SUPPLY_MANAGER, DEMAND_MANAGER],
       exceptDelete: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN, TRANSFORMATION_ADMIN, AUDIT_ADMIN],
     },
     fields: {
       role: {
         rule: 'allow',
         crud: [...UMS_HEAD_ARR],
-        read: [...NOT_UMS_HEAD_ARR, PRE_SALES, POST_SALES, AUDIT_ADMIN, AUDITOR, BDE, BDE_ADMIN],
+        read: [...NOT_UMS_HEAD_ARR, PRE_SALES, POST_SALES, AUDIT_ADMIN, AUDITOR, BDE, BDE_ADMIN, SUPPLY_DEMAND_ADMIN, DEMAND_MANAGER],
         exceptDelete: [TRANSFORMATION_ADMIN],
       },
       savedPassword: {
@@ -150,6 +154,13 @@ const userPermissionsDoc = {
       rule: 'allow',
       crud: [ADMIN, UMS_ADMIN],
       read: [NOT_ADMIN],
+    },
+  },
+  MentorAvailabilitySlot: {
+    collection: {
+      rule: 'allow',
+      crud: [...UMS_HEAD_ARR, ...SUPPLY_DEMAND_ROLES_ARRAY],
+      read: [...NOT_UMS_HEAD_ARR],
     },
   },
 };

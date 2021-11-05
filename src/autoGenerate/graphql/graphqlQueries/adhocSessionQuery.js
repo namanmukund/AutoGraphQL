@@ -6,6 +6,7 @@ query{
     id
     bookingDate
     isAudit
+    type
     attendance {
       student {
         id

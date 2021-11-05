@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import moment from 'moment';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
 import { sessionType } from '../../../../../../constants';
 import { SlotsOccupiedError } from '../../../../../../constants/errors/db';
@@ -45,21 +44,7 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
             const intersection = slotTimeArray.filter((x) => occupiedSlotTimeArrayForBatch.includes(x));
             if (intersection && intersection.length) {
               // if called from mentorMenteeSession and BatchSesson, we will get a bookingDate
-              if (bookingDate) {
-                const date = new Date(bookingDate);
-                const dateTime = date.setHours(
-                  date.getHours() + intersection[0],
-                );
-                const currentDate = new Date();
-                if (moment(dateTime).diff(moment(currentDate), 'hours') >= 0) {
-                  bypassValidation = false;
-                }
-                if (get(session, 'batch.studentsMeta.count', 0) > 0) {
-                  bypassValidation = false;
-                }
-              } else {
-                bypassValidation = false;
-              }
+              bypassValidation = false;
               if (!bsflag) {
                 bsflag = true;
                 customError += 'Batch(es) -> ';

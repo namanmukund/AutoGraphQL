@@ -39,9 +39,7 @@ const getAdhocSession = (batchId,
               id: "${previousTopicConnectId}"
             }
           },
-          {
-            type: ${type}
-          }
+          ${type ? `{ type: ${type} }` : ''}
         ]
       }){
         id
@@ -58,7 +56,7 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
     input: {
       sessionStatus: sessionStatusInInput,
       bookingDate: bookingDateFromInput,
-      type,
+      type: typeFromInput,
       ...inputSlot
     },
   } = params;
@@ -77,13 +75,19 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
     bookingDate,
     course,
     mentorSession,
+    type,
     ...slots
   } = adhocSession;
 
-  const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(get(batch, 'id'), previousTopicConnectId, type));
-  const adhocSessions = get(getAdhocSessionRes, 'data.adhocSessions');
-  if (adhocSessions && adhocSessions.length) {
-    throw new SimilarDocumentAlreadyExistError();
+  if (typeFromInput) {
+    // const differentMentor = get(mentorSession, 'user.id') !== mentorSessionConnectId;
+    const differentType = type !== typeFromInput;
+    const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(get(batch, 'id'), previousTopicConnectId, typeFromInput));
+    const adhocSessions = get(getAdhocSessionRes, 'data.adhocSessions');
+    if (adhocSessions && adhocSessions.length
+      && typeFromInput && differentType) {
+      throw new SimilarDocumentAlreadyExistError();
+    }
   }
 
   const inputSlotTimeArray = getSelectedSlotsTime(inputSlot);
@@ -92,7 +96,7 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
   // check if mentor already has another session in same slot
   const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId || get(mentorSession, 'id', '')));
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
-  if (mentorUserId && bookingDateFromInput) {
+  if (mentorUserId && bookingDateFromInput && inputSlotTimeArray[0] !== slotTimeArray[0]) {
     const finalBookingDate = bookingDateFromInput || bookingDate;
     const getMentorSessionsRes = await callLocalGraphqlApi(
       getMentorSessions(
