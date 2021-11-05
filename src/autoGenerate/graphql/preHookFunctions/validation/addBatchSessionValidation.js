@@ -106,18 +106,20 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   await validateBatchSessionInput(params, context, 'addBatch');
 
   // check if mentor already has another session in same slot
-  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
-  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
-  const bookingDate = get(params, 'input.bookingDate', '');
-  if (mentorUserId && bookingDate) {
-    const getMentorSessionsRes = await callLocalGraphqlApi(
-      getMentorSessions(
-        mentorUserId,
-        bookingDate,
-      ),
-    );
-    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-    checkIfSlotCanBeOpenedValidation(params, mentorSessions);
+  if (mentorSessionConnectId) {
+    const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+    const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
+    const bookingDate = get(params, 'input.bookingDate', '');
+    if (mentorUserId && bookingDate) {
+      const getMentorSessionsRes = await callLocalGraphqlApi(
+        getMentorSessions(
+          mentorUserId,
+          bookingDate,
+        ),
+      );
+      const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+      checkIfSlotCanBeOpenedValidation(params, mentorSessions);
+    }
   }
 
   if (
