@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
-import { CanNotChangeSessionStatusError } from '../../../../../constants/errors/input';
+import { CanNotChangeSessionStatusError, CanNotStartSessionWithoutMentorError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
@@ -78,8 +78,9 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   if (!(mentorMenteeSessionDoc && mentorMenteeSessionDoc.id)) {
     throw new DatabaseRecordNotFoundError();
   }
-  // if changing session status without mentorSession, throw error
-  if (sessionStatus && !get(mentorMenteeSessionDoc, 'mentorSession.id')) {
+  // if changing session to started or completed without mentorSession, throw error
+  console.log('&&& sessionStatus', sessionStatus)
+  if (sessionStatus && sessionStatus !== 'allotted' && !get(mentorMenteeSessionDoc, 'mentorSession.id')) {
     throw new CanNotStartSessionWithoutMentorError();
   }
   const { sessionStatus: prevSessionStatus } = mentorMenteeSessionDoc;

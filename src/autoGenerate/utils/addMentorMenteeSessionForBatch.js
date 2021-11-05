@@ -255,6 +255,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           log(`------------------------updated menteeSessionId ${menteeSessionId}`);
         }
         console.log('change3 *** update mentor mentee session, might fail')
+        console.log('mentorSessionIdFromInput')
         await callUpdateMentorMenteeSession(mentorMenteeId, mentorSessionIdFromInput, { input: { sessionStatus } });
         log(`------------------------updated mentorMenteeId ${mentorMenteeId}`);
         return true;
