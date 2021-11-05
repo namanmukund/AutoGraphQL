@@ -327,8 +327,7 @@ const createBatchGroupByGrade = async (classesGroupByGrade, campaignId, courseId
   }
   // update batchCreation status to complete
   await updateBatchCreationStatus(campaignId, batchCreationStatus.complete);
-  // update batchCreation status to complete
-  await updateBatchCreationStatus(campaignId, batchCreationStatus.complete);
+  return true;
 };
 
 const createBatchGroupBySection = async (classes, campaignId, courseId) => {
