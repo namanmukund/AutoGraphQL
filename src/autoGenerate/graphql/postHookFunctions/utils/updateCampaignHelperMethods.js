@@ -121,11 +121,11 @@ const createB2B2CBatch = async (batchCode, schoolId, campaignId, courseId, booki
                   b2b2ctimeTable:{
                     bookingDate: "${bookingDate}",
                     ${selectedSlot}: true,
-                    mentorSessionConnectId: "${mentorSessionConnectId}"
+                    ${mentorSessionConnectId ? `mentorSessionConnectId: "${mentorSessionConnectId}"` : ''}
                   }
                 }, schoolConnectId:"${schoolId}",
                   campaignConnectId:"${campaignId}",
-                  allottedMentorConnectId:"${allottedMentorConnectId}",
+                  ${allottedMentorConnectId ? `allottedMentorConnectId:"${allottedMentorConnectId}"` : ''},
                   ${classIdsString ? `classesConnectIds: ${classIdsString}` : ''}
                   courseConnectId: "${courseId}") {
                   id
@@ -241,7 +241,8 @@ const addB2B2CBatchSession = async (batchId, mentorSessionConnectId, firstTopicI
       },
         batchConnectId: "${batchId}",
         topicConnectId: "${firstTopicId}",
-        mentorSessionConnectId:"${mentorSessionConnectId}",
+        ${mentorSessionConnectId
+    ? `mentorSessionConnectId:"${mentorSessionConnectId}"` : ''},
         ${courseId ? `courseConnectId: "${courseId}"` : ''}) {
         id
       }

@@ -36,7 +36,7 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
       updateHomeworkStreaksMethod(clientId, context, topicId, input);
     }
     // send message to mentor regarding the session
-    if (get(topicInfo, 'data.topic.order') === 1) {
+    if (get(topicInfo, 'data.topic.order') === 1 && mentorSessionConnectId) {
       await extractMentorMenteeSessionAndSendMessage(bookingDate, slotTimeStringArray, mentorSessionConnectId, userInfo, topicInfo, input.id, courseInfo);
     }
 

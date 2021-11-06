@@ -79,7 +79,6 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
     throw new DatabaseRecordNotFoundError();
   }
   // if changing session to started or completed without mentorSession, throw error
-  console.log('&&& sessionStatus', sessionStatus)
   if (sessionStatus && sessionStatus !== 'allotted' && !get(mentorMenteeSessionDoc, 'mentorSession.id')) {
     throw new CanNotStartSessionWithoutMentorError();
   }

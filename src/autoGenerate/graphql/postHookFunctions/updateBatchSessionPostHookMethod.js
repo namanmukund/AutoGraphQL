@@ -209,7 +209,7 @@ const batchSessionQuery = (id) => `{
 const updateBatchSessionPostHookMethod = async (input, params, mutationName, context) => {
   const { sessionStatus: sessionStatusFromInput, ...slots } = input;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-  const mentorSessionId = get(input, 'mentorSession.typeId')
+  const mentorSessionId = get(input, 'mentorSession.typeId');
   const {
     batchSessionId,
     inputSlotTimeArray,
@@ -226,8 +226,6 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     batchTopicOrder,
     batchTypeValue,
   } = context;
-  console.log('mentorSessionId', mentorSessionId)
-  console.log('mentorSessionConnectId', mentorSessionConnectId)
   let courseId = get(context, 'courseId');
   /*
   get Course Id
