@@ -323,11 +323,14 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
             batchCurrentComponentId,
             sessionStatus.allotted,
             nextTopicId,
+            context,
           );
         } else {
           await updateBatchCurrentComponentStatus(
             batchCurrentComponentId,
             sessionStatusFromInput,
+            null,
+            context,
           );
         }
         const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
@@ -336,6 +339,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         await updateBatchCurrentComponentStatus(
           batchCurrentComponentId,
           sessionStatusFromInput,
+          null,
+          context,
         );
       }
     }
@@ -365,6 +370,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         for (const student of students) {
           if (student.user && student.user.id) {
             addMentorMenteeSessionForBatch(
+              context,
               student.user.id,
               '',
               topicId,

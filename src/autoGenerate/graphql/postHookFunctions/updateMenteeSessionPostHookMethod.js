@@ -18,6 +18,7 @@ import addSessionLog from './utils/addSessionLog';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
+import { log } from '../../../../utils';
 import sendMailAndWhatsappMessageForSupplyRequest from '../../utils/sendMailAndWhatsappMessageForSupplyRequest';
 import getCourseInfo from './utils/getCourseInfo';
 import getSlotLabel from '../../../../utils/getSlotLabel';
@@ -159,6 +160,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     updateMentorMenteeSessionInput.hasRescheduled = get(mentorMenteeSessionDoc, 'hasRescheduled', false);
     updateMentorMenteeSessionInput.rescheduledDate = get(mentorMenteeSessionDoc, 'rescheduledDate', false);
     updateMentorMenteeSessionInput.rescheduledDateProvided = get(mentorMenteeSessionDoc, 'rescheduledDateProvided', null);
+    log(`-----------Deleting MentorMenteeSession (updateMenteeSessionPostHook) -> ${context.mmsId}`);
     await deleteMentorMenteeSessionQuery(context.mmsId, context);
   }
 

@@ -174,11 +174,14 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
         batchCurrentComponentId,
         sessionStatusFromInput,
         nextTopicId,
+        context,
       );
     } else {
       await updateBatchCurrentComponentStatus(
         batchCurrentComponentId,
         sessionStatusFromInput,
+        null,
+        context,
       );
     }
   }
@@ -198,7 +201,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     await callLocalGraphqlApi(updateBatchSessionQuery(
       batchSessionId,
       pushManyQuery,
-    ));
+    ), context);
   }
   const studentsId = (students && students.length) ? students.map((student) => get(student, 'id')) : [];
   extractBatchSessionAndSendB2BC(batchSessionId, studentsId, false);
@@ -211,6 +214,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     for (const student of students) {
       if (student.user && student.user.id) {
         addMentorMenteeSessionForBatch(
+          context,
           student.user.id,
           '',
           topicId,
