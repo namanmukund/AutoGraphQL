@@ -28,7 +28,12 @@ const uploadFileResolver = (root, params, authentication, context) => {
   }
 
   const fileWithId = generateCuid(fileInput);
-  Object.assign(fileWithId, { usageCount: 1 });
+  let usageCount = 1;
+  const { connectInput } = params;
+  if (!connectInput || !connectInput.type || !connectInput.typeId || !connectInput.typeField) {
+    usageCount = 0;
+  }
+  Object.assign(fileWithId, { usageCount });
   return modelMutations.addDocument(fileWithId).then(async (res) => {
     const { id: fileId } = res;
     return connectFileWithTheGivenType(params, authentication, fileId)
