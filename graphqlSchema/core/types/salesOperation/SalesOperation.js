@@ -57,6 +57,15 @@ const userPaymentPlan = `
   userPaymentPlan: UserPaymentPlan @relation(name: "SalesOperationUserPaymentPlan")
 `;
 
+const studentIQQuestions = `
+  criticalthinking: Int @length(min: 1, max: 5)
+  logicalthinking: Int @length(min: 1, max: 5)
+  communicationSkills: Int @length(min: 1, max: 5)
+  problemSolvingAbility: Int @length(min: 1, max: 5)
+  creativeSkills: Int @length(min: 1, max: 5)
+  studentNote: StudentNoteForIQ
+`;
+
 const SalesOperation = `
   type SalesOperation @model
   @appPermissions(
@@ -88,6 +97,7 @@ ${getPermissionSchemaString('SalesOperation')}
     ${mentorPitch}
     ${studentPersonna}
     ${userPaymentPlan}
+    ${studentIQQuestions}
     sessionCommentByMentor: String
   }
 `;
