@@ -58,8 +58,8 @@ const userPaymentPlan = `
 `;
 
 const studentIQQuestions = `
-  criticalthinking: Int @length(min: 1, max: 5)
-  logicalthinking: Int @length(min: 1, max: 5)
+  criticalThinking: Int @length(min: 1, max: 5)
+  logicalThinking: Int @length(min: 1, max: 5)
   communicationSkills: Int @length(min: 1, max: 5)
   problemSolvingAbility: Int @length(min: 1, max: 5)
   creativeSkills: Int @length(min: 1, max: 5)
