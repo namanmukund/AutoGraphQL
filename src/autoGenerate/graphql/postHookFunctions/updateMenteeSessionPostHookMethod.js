@@ -19,6 +19,8 @@ import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 // import sendMailAndWhatsappMessageForSupplyRequest from '../../utils/sendMailAndWhatsappMessageForSupplyRequest';
+// import getCourseInfo from './utils/getCourseInfo';
+// import getSlotLabel from '../../../../utils/getSlotLabel';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const {
@@ -48,15 +50,24 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
   // if call is from backend we will not update the availability slots, same for paid sessions
   if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
-    // const prevBroadCastedMentors = get(previousDocument, 'broadCastedMentors', []).map((mentor) => get(mentor, 'id'));
-    // const newBroadcastedmentors = get(input, 'broadCastedMentors', []);
+    // const courseInfo = await getCourseInfo(get(input, 'course.typeId'));
+    const prevBroadCastedMentors = get(previousDocument, 'broadCastedMentors', []).map((mentor) => get(mentor, 'id'));
+    const newBroadcastedmentors = get(input, 'broadCastedMentors', []);
     // eslint-disable-next-line no-restricted-syntax
-    // for (const mentorProfile of newBroadcastedmentors) {
-    //   if (!prevBroadCastedMentors.includes(get(mentorProfile, 'typeId'))) {
-    //     sendMailAndWhatsappMessageForSupplyRequest(get(mentorProfile, 'typeId'),
-    //       { date: bookingDate, time: get(slotTimeStringArray, '0'), slotId: get(input, 'id') }, true);
-    //   }
-    // }
+    for (const mentorProfile of newBroadcastedmentors) {
+      if (!prevBroadCastedMentors.includes(get(mentorProfile, 'typeId'))) {
+        // const time = get(slotTimeStringArray, '0').split('slot')[1];
+        // const startTime = getSlotLabel(time).startTime;
+        // sendMailAndWhatsappMessageForSupplyRequest(get(mentorProfile, 'typeId'),
+        //   {
+        //     date: bookingDate,
+        //     slotId: get(input, 'id'),
+        //     course: get(courseInfo, 'data.course.title'),
+        //     studentName: get(userInfo, 'data.user.name'),
+        //     slotsTime: startTime,
+        //   }, true);
+      }
+    }
     if (bookingDate && bookingDate.getTime() !== prevBookingDate.getTime()) {
       // ---------------------commenting out the previous availableSlots flow--------------
       // -- decrease the availability slot of current availabilityDate
@@ -100,7 +111,16 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
       || (get(prevSlotTimeStringArray, '0') !== get(slotTimeStringArray, '0'))
     ) {
       if (context.mentorSessionId) {
-        sendSessionCancellationMessage(context.mentorSessionId, prevBookingDate, prevSlotTimeStringArray, studentName, parentName);
+        const parentNumber = `${get(
+          userInfo,
+          'data.user.studentProfile.parents[0].user.phone.countryCode',
+          '',
+        )}-${get(
+          userInfo,
+          'data.user.studentProfile.parents[0].user.phone.number',
+          '',
+        )}`;
+        sendSessionCancellationMessage(context.mentorSessionId, prevBookingDate, prevSlotTimeStringArray, studentName, parentName, parentNumber);
       }
 
       // send email to mentor admin regarding the session

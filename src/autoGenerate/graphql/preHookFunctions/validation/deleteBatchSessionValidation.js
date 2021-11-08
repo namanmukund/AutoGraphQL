@@ -26,8 +26,8 @@ const deleteBatchSessionValidation = async (params, mutationOrQueryName, context
     ...slots
   } = batchSession;
   const slotTimeArray = getSelectedSlotsTime(slots);
-  // of any slots is taken or the date is of past then the doc can not be deleted
-  if (slotTimeArray && slotTimeArray.length) {
+  // of any slots is taken or the date is of past then the doc can not be deleted (except while shifting batch sessions)
+  if (slotTimeArray && slotTimeArray.length && context.previousDocument !== 'shiftBatch') {
     const date = new Date(bookingDate);
     const dateTime = date.setHours(
       date.getHours() + slotTimeArray[0],

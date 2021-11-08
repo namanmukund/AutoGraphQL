@@ -1,6 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { GLOBAL_COURSE_TITLE } from '../../../../../constants';
+import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 
 const fetchStudentProfile = async (studentProfileId, batchId) => {
   const query = `
@@ -119,9 +120,15 @@ const fetchAllottedBatchSessions = async (batchId) => {
           {
             batchSessions(filter: {and: [{sessionStatus: allotted}, {batch_some: {id: "${batchId}"}}]}) {
               id
+              bookingDate
+              topic {
+                id
+                order
+              }
               batch {
                 id
               }
+              ${getSlotTimesInString()}
               attendance {
                 student {
                   id
