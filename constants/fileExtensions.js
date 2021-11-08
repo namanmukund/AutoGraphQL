@@ -5,7 +5,7 @@ const fileExtensions = {
   excelExtensions: ['xlsx'],
   subtitleExtensions: ['octet-stream'],
   lottieExtensions: ['json'],
-  documentExtensions: ['pdf']
+  documentExtensions: ['pdf'],
 };
 
 export default fileExtensions;
