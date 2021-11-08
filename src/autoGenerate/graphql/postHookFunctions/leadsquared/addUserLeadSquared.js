@@ -5,7 +5,7 @@ const addUserLeadSquared = (params, create = true) => {
   if (get(params, 'input.Vertical') === 'b2b') {
     return;
   }
-  if (get(params, 'input.schoolName') && !get(params, 'input.Vertical') && get(params, 'input.utmSource') !== 'RadioStreet') {
+  if (get(params, 'input.schoolName') && !get(params, 'input.Vertical') && get(params, 'input.fromEventsPage')) {
     return;
   }
 
@@ -17,9 +17,6 @@ const addUserLeadSquared = (params, create = true) => {
 
   if (get(params, 'input.grade')) {
     leadSquaredInput.mx_Student_Grade = get(params, 'input.grade').replace('Grade', '');
-  }
-  if (get(params, 'input.grade')) {
-    leadSquaredInput.mx_Student_Name = get(params, 'input.grade').replace('Grade', '');
   }
   if (get(params, 'input.parentName')) {
     leadSquaredInput.FirstName = get(params, 'input.parentName');

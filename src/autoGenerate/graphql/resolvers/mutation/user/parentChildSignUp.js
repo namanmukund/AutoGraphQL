@@ -416,6 +416,10 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     log('Failed to get first published topic or first published learning objective corresponding to it in parentChildSignUp');
   }
 
+  const eventSources = ['radiostreet', 'spysquadcamp', 'communityevent'];
+
+  const fromEventsPage = utmSource && eventSources.includes(utmSource.toLowerCase());
+
   const leadSquaredParams = params;
 
   if (campaignId) {
@@ -433,12 +437,12 @@ If coming from campaign and the type os b2b allocate the user to the right batch
   leadSquaredParams.input.unVerifiedLead = true;
 
   leadSquaredParams.input.phone = get(input, 'parentPhone');
+  leadSquaredParams.input.fromEventsPage = fromEventsPage;
 
   parentChildSignupPostHookMethod(input, leadSquaredParams);
 
   // Send OTP if from RadioStreet event
-  const eventSources = ['radiostreet', 'spysquadcamp', 'communityevent'];
-  if (utmSource && eventSources.includes(utmSource.toLowerCase())) {
+  if (fromEventsPage) {
     // send b2b2c reg+booking
     // sendBookingReminderOrConfirmationB2B(parentId);
     const phoneOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
@@ -449,6 +453,7 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     };
 
     setTimeout(() => {
+      console.log('helllo...');
       updateLeadSquared({
         Phone: get(parentPhone, 'number'),
         mx_Event_Date: utmSource.includes('SpySquadCamp') ? '13 November' : '14 November',
