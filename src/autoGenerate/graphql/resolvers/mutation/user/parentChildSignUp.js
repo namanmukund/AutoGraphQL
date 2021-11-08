@@ -437,8 +437,8 @@ If coming from campaign and the type os b2b allocate the user to the right batch
   parentChildSignupPostHookMethod(input, leadSquaredParams);
 
   // Send OTP if from RadioStreet event
-  const eventSources = ['radiostreet', 'spysquadcamp'];
-  if (source && eventSources.includes(source.toLowerCase())) {
+  const eventSources = ['radiostreet', 'spysquadcamp', 'communityevent'];
+  if (utmSource && eventSources.includes(utmSource.toLowerCase())) {
     // send b2b2c reg+booking
     // sendBookingReminderOrConfirmationB2B(parentId);
     const phoneOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
@@ -451,7 +451,7 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     setTimeout(() => {
       updateLeadSquared({
         Phone: get(parentPhone, 'number'),
-        mx_Event_Date: '31 October',
+        mx_Event_Date: utmSource.includes('SpySquadCamp') ? '13 November' : '14 November',
         mx_Event_Time: '11:00 am',
       }, false, {
         ActivityEvent: 208,
