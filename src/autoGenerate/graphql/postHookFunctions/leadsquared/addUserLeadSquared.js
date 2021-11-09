@@ -5,7 +5,7 @@ const addUserLeadSquared = (params, create = true) => {
   if (get(params, 'input.Vertical') === 'b2b') {
     return;
   }
-  if (get(params, 'input.schoolName') && !get(params, 'input.Vertical') && get(params, 'input.fromEventsPage')) {
+  if (get(params, 'input.schoolName') && !get(params, 'input.Vertical') && !get(params, 'input.fromEventsPage')) {
     return;
   }
 
@@ -34,9 +34,12 @@ const addUserLeadSquared = (params, create = true) => {
   if (get(params, 'input.status')) {
     leadSquaredInput.mx_Lead_Status = get(params, 'input.status');
   }
+
   if (get(params, 'input.Vertical')) {
     leadSquaredInput.mx_Vertical = get(params, 'input.Vertical');
   } else if (!get(params, 'input.schoolName')) {
+    leadSquaredInput.mx_Vertical = 'b2c';
+  } else {
     leadSquaredInput.mx_Vertical = 'b2c';
   }
 

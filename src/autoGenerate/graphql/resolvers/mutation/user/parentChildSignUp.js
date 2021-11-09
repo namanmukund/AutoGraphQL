@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import moment from 'moment';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { ADD } from '../../../../../../constants/graphqlOperations';
@@ -416,7 +417,7 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     log('Failed to get first published topic or first published learning objective corresponding to it in parentChildSignUp');
   }
 
-  const eventSources = ['radiostreet', 'spysquadcamp', 'communityevent'];
+  const eventSources = ['radiostreet', 'spysquadcamp', 'communityevent', 'spysquad'];
 
   const fromEventsPage = utmSource && eventSources.includes(utmSource.toLowerCase());
 
