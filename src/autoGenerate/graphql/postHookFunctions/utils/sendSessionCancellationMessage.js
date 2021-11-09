@@ -17,7 +17,7 @@ const mentorSessionQuery = (id) => `{
   }
 }`;
 
-const sendSessionCancellationMessage = async (mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName) => {
+const sendSessionCancellationMessage = async (mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName, parentNumber) => {
   const mentorSession = await callLocalGraphqlApi(mentorSessionQuery(mentorSessionId));
   const slotNumber = Number(get(slotTimeStringArray, '0', '').replace('slot', ''));
   const sessionTime = getSlotLabel(slotNumber).startTime;
@@ -42,7 +42,7 @@ const sendSessionCancellationMessage = async (mentorSessionId, bookingDate, slot
     ).setHours(slotNumber, 0, 0, 0),
   );
   if (moment().isBefore(moment(sessionDateTime).add(20, 'minutes'))) {
-    sendWhatsAppTemplateMessage(mentorPhoneNumber, 'mentor_cancellation3', mentorName, [
+    sendWhatsAppTemplateMessage(mentorPhoneNumber, 'demo_cancelled_mentor', mentorName, [
       {
         name: 'session_date',
         value: sessionDate,
@@ -58,6 +58,10 @@ const sendSessionCancellationMessage = async (mentorSessionId, bookingDate, slot
       {
         name: 'parent_name',
         value: parentName,
+      },
+      {
+        name: 'number',
+        value: parentNumber,
       },
     ]);
   }

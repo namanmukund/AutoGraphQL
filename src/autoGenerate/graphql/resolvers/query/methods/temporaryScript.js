@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import updateQuestionBankOfPythonCourseWithCorrectPostion from '../scriptMethods/updateQuestionBankOfPythonCourseWithCorrectPostion';
 // import createUserCurrentTopicComponentStatusScript from '../scriptMethods/createUserCurrentTopicComponentStatusScript';
 // import generateCertificateScript from '../scriptMethods/generateCertificateScript';
 // import updateMentorAvailabilitySlotWithBatchAndMenteeSessions from '../scriptMethods/updateMentorAvailabilitySlotWIthBatchAndMenteeSessions';
@@ -67,6 +68,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateMentorAvailabilitySlotWithBatchAndMenteeSessions();
   // await generateCertificateScript();
   // await createUserCurrentTopicComponentStatusScript();
+  // await updateQuestionBankOfPythonCourseWithCorrectPostion();
   return {
     result: true,
   };

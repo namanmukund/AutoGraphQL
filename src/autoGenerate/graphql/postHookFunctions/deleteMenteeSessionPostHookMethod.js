@@ -29,7 +29,16 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
     // await increaseParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
     if (context.mentorSessionId) {
-      sendSessionCancellationMessage(context.mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName);
+      const parentNumber = `${get(
+        userInfo,
+        'data.user.studentProfile.parents[0].user.phone.countryCode',
+        '',
+      )}-${get(
+        userInfo,
+        'data.user.studentProfile.parents[0].user.phone.number',
+        '',
+      )}`;
+      sendSessionCancellationMessage(context.mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName, parentNumber);
     }
   }
 

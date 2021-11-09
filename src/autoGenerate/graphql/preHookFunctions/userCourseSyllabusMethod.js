@@ -13,6 +13,10 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getFirstTopicComponents from '../../utils/getFirstTopicComponents';
 import addUserCurrentTopicComponentStatusForNewCourse from '../../utils/addUserCurrentTopicComponentStatusForNewCourse';
 
+const {
+  message, practiceQuestion, comicStrip, quiz,
+} = topicTypes;
+
 // query to get current component status of user
 const userCurrentTopicComponentStatusesQuery = (userId, courseId) => `
   query{
@@ -112,7 +116,7 @@ const userCourseSyllabusMethod = async (context, params) => {
         }
 
         const sortedTopicComponentRule = topicComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
-        const firstComponentName = sortedTopicComponentRule[0].componentName;
+        let firstComponentName = sortedTopicComponentRule[0].componentName;
         let isVideoPresent = false;
         let firstVideoId = '';
         let isLearningObjectivePresent = false;
@@ -135,6 +139,21 @@ const userCourseSyllabusMethod = async (context, params) => {
             firstBlockedBasedProjectId = topicComponent.blockBasedProject && topicComponent.blockBasedProject.id;
           }
         });
+
+        if (firstComponentName === 'learningObjective') {
+          const messageCount = get(sortedTopicComponentRule[0], 'learningObjective.messagesMeta.count', 0);
+          const pqCount = get(sortedTopicComponentRule[0], 'learningObjective.questionBankMeta.count', 0);
+          const comicStripCount = get(sortedTopicComponentRule[0], 'learningObjective.comicStripsMeta.count', 0);
+          if (messageCount) {
+            firstComponentName = message;
+          } else if (pqCount) {
+            firstComponentName = practiceQuestion;
+          } else if (comicStripCount) {
+            firstComponentName = comicStrip;
+          }
+        } else if (['assignment', 'homeworkAssignment', 'homeworkPractice'].includes(firstComponentName)) {
+          currentTopicComponentType = quiz;
+        }
 
         // returning error if there is no published video
         if (isVideoPresent && !firstVideoId) {
