@@ -453,11 +453,11 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     };
 
     setTimeout(() => {
-      console.log('helllo...');
       updateLeadSquared({
         Phone: get(parentPhone, 'number'),
-        mx_Event_Date: utmSource.includes('SpySquadCamp') ? '13 November' : '14 November',
-        mx_Event_Time: '11:00 am',
+        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '13 November' : '14 November',
+        mx_Event_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '03:00 pm' : '11:00 am',
+        mx_Event_Date_Time: moment().utc().format('YYYY-MM-DD HH:mm:ss'),
       }, false, {
         ActivityEvent: 208,
         Fields: [
