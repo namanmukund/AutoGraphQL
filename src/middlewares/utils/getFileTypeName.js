@@ -17,6 +17,9 @@ const getFileTypeName = (type) => {
   } else if (includes(type, 'json')) {
     // if invalid fileType then graphql will give the required error
     fileType = 'lottie';
+  } else if (includes(type, 'pdf')) {
+    // if invalid fileType then graphql will give the required error
+    fileType = 'pdf';
   } else {
     log('File Type is not defined');
     fileType = '';
