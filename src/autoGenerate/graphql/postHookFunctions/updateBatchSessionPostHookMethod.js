@@ -267,7 +267,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`, sessionType));
       finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
     }
-    await callLocalGraphqlApi(updateBatchSession(batchSessionId, finalMentorSessionId));
+    await callLocalGraphqlApi(updateBatchSession(batchSessionId, finalMentorSessionId), context);
   }
 
   const isTrial = await isTrialSession(get(input, 'topic.typeId'));
@@ -322,11 +322,14 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
             batchCurrentComponentId,
             sessionStatus.allotted,
             nextTopicId,
+            context,
           );
         } else {
           await updateBatchCurrentComponentStatus(
             batchCurrentComponentId,
             sessionStatusFromInput,
+            null,
+            context,
           );
         }
         const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
@@ -335,6 +338,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         await updateBatchCurrentComponentStatus(
           batchCurrentComponentId,
           sessionStatusFromInput,
+          null,
+          context,
         );
       }
     }
@@ -364,6 +369,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         for (const student of students) {
           if (student.user && student.user.id) {
             addMentorMenteeSessionForBatch(
+              context,
               student.user.id,
               '',
               topicId,
