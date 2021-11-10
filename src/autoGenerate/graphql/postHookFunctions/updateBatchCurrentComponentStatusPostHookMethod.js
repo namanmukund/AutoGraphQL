@@ -91,6 +91,7 @@ const updateBatchCurrentComponentStatusPostHookMethod = async (input, params, mu
           if (student.user && student.user.id && topic && topic.id) {
             // eslint-disable-next-line no-await-in-loop
             await addMentorMenteeSessionForBatch(
+              context,
               student.user.id,
               mentorId,
               topic.id,
