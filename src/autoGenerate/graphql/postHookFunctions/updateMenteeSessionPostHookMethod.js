@@ -18,9 +18,9 @@ import addSessionLog from './utils/addSessionLog';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
-// import sendMailAndWhatsappMessageForSupplyRequest from '../../utils/sendMailAndWhatsappMessageForSupplyRequest';
-// import getCourseInfo from './utils/getCourseInfo';
-// import getSlotLabel from '../../../../utils/getSlotLabel';
+import sendMailAndWhatsappMessageForSupplyRequest from '../../utils/sendMailAndWhatsappMessageForSupplyRequest';
+import getCourseInfo from './utils/getCourseInfo';
+import getSlotLabel from '../../../../utils/getSlotLabel';
 import { log } from '../../../../utils';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
