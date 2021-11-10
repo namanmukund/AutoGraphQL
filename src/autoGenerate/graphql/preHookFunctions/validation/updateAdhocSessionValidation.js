@@ -116,15 +116,15 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
     const menteeSessionSlots = { input: tempObj };
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
     checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions);
+  }
 
-    // check if batch session already exists
-    const batchId = get(batch, 'id');
-    const { filteredSlotsStringForFilterQuery } = extractSlotsFromInput(inputSlot);
-    const adhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, null, null, bookingDateFromInput, filteredSlotsStringForFilterQuery));
-    const existingAdhocSessions = get(adhocSessionRes, 'data.adhocSessions', []);
-    if (existingAdhocSessions.length) {
-      throw new SimilarDocumentAlreadyExistError();
-    }
+  // check if batch session already exists
+  const batchId = get(batch, 'id');
+  const { filteredSlotsStringForFilterQuery } = extractSlotsFromInput(inputSlot);
+  const adhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, null, null, bookingDateFromInput, filteredSlotsStringForFilterQuery));
+  const existingAdhocSessions = get(adhocSessionRes, 'data.adhocSessions', []);
+  if (existingAdhocSessions.length) {
+    throw new SimilarDocumentAlreadyExistError();
   }
 
   context.adhocSessionId = adhocSessionId;
