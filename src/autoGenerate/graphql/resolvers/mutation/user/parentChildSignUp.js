@@ -458,7 +458,7 @@ If coming from campaign and the type os b2b allocate the user to the right batch
         Phone: get(parentPhone, 'number'),
         mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '13 November' : '14 November',
         mx_Event_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '03:00 pm' : '11:00 am',
-        mx_Event_Date_Time: moment().utc().format('YYYY-MM-DD HH:mm:ss'),
+        mx_Event_Date_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '2021-11-13 09:30:00' : '2021-11-14 05:30:00',
       }, false, {
         ActivityEvent: 208,
         Fields: [
