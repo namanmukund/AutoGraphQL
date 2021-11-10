@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import moment from 'moment';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { ADD } from '../../../../../../constants/graphqlOperations';
@@ -416,6 +417,10 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     log('Failed to get first published topic or first published learning objective corresponding to it in parentChildSignUp');
   }
 
+  const eventSources = ['radiostreet', 'spysquadcamp', 'communityevent', 'spysquad'];
+
+  const fromEventsPage = utmSource && eventSources.includes(utmSource.toLowerCase());
+
   const leadSquaredParams = params;
 
   if (campaignId) {
@@ -433,12 +438,12 @@ If coming from campaign and the type os b2b allocate the user to the right batch
   leadSquaredParams.input.unVerifiedLead = true;
 
   leadSquaredParams.input.phone = get(input, 'parentPhone');
+  leadSquaredParams.input.fromEventsPage = fromEventsPage;
 
   parentChildSignupPostHookMethod(input, leadSquaredParams);
 
   // Send OTP if from RadioStreet event
-  const eventSources = ['radiostreet', 'spysquadcamp', 'communityevent'];
-  if (utmSource && eventSources.includes(utmSource.toLowerCase())) {
+  if (fromEventsPage) {
     // send b2b2c reg+booking
     // sendBookingReminderOrConfirmationB2B(parentId);
     const phoneOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
@@ -451,8 +456,9 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     setTimeout(() => {
       updateLeadSquared({
         Phone: get(parentPhone, 'number'),
-        mx_Event_Date: utmSource.includes('SpySquadCamp') ? '13 November' : '14 November',
-        mx_Event_Time: '11:00 am',
+        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '13 November' : '14 November',
+        mx_Event_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '03:00 pm' : '11:00 am',
+        mx_Event_Date_Time: moment().utc().format('YYYY-MM-DD HH:mm:ss'),
       }, false, {
         ActivityEvent: 208,
         Fields: [
