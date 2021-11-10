@@ -102,7 +102,7 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   //   context,
   // );
   const { menteeSessionConnectId, mentorSessionConnectId, topicConnectId } = params;
-  if (!menteeSessionConnectId || !mentorSessionConnectId || !topicConnectId) {
+  if (!menteeSessionConnectId || !topicConnectId) {
     throw new ConnectIdRequiredError();
   }
 

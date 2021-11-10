@@ -160,7 +160,7 @@ mutation($input: MentorMenteeSessionInput!){
     input:$input
     topicConnectId:"${topicConnectId}"
     menteeSessionConnectId:"${menteeSessionConnectId}"
-    mentorSessionConnectId:"${mentorSessionConnectId}"
+    ${mentorSessionConnectId ? `mentorSessionConnectId: "${mentorSessionConnectId}"` : ''}
     ${courseConnectId ? `courseConnectId: "${courseConnectId}"` : ''}
   ){
     id
@@ -260,7 +260,7 @@ const addMentorMenteeSessionForBatch = async (context, menteeUserId, mentorUserI
           );
           log(`------------------------updated menteeSessionId ${menteeSessionId}`);
         }
-        await callUpdateMentorMenteeSession(mentorMenteeId, mentorSessionIdFromInput, { input: { sessionStatus } }, context);
+        await callUpdateMentorMenteeSession(mentorMenteeId, mentorSessionIdFromInput, { input: { sessionStatus } });
         log(`------------------------updated mentorMenteeId ${mentorMenteeId}`);
         return true;
       }
@@ -322,7 +322,6 @@ const addMentorMenteeSessionForBatch = async (context, menteeUserId, mentorUserI
         log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
       }
     }
-
     if (menteeSessionId) {
       log(`------------------------updating menteeSessionId ${menteeSessionId}`);
       // update
@@ -377,8 +376,8 @@ const addMentorMenteeSessionForBatch = async (context, menteeUserId, mentorUserI
       }
     }
 
-    // add mentor mentee session
-    if (menteeSessionId && mentorSessionId) {
+    // add mentor mentee session, made mentorSessionId non-mandatory
+    if (menteeSessionId) {
       const variables = {
         input: {
           sessionStatus,
