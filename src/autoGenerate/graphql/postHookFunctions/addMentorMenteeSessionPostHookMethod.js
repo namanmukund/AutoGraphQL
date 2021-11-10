@@ -10,6 +10,43 @@ import { updateHomeworkStreaksMethod } from './utils/homeworkStreakMethods';
 import addToMentorMenteeSessionStudentProfile from './utils/addToMentorMenteeSessionStudentProfile';
 import addToMentorAvailabilitySlotMentorMenteeSession from './utils/addToMentorAvailabilitySlotMentorMenteeSession';
 import getCourseInfo from './utils/getCourseInfo';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
+
+const getMentorMenteeSessionData = async (id) => {
+  const query = `
+    query{
+      mentorMenteeSession(id:"${id}"){
+        id
+        isAudit
+        sessionStatus
+        isPostSalesAudit
+        isSubmittedForReview
+        topic{
+          id
+          order
+        }
+        menteeSession{
+          id
+          user {
+            studentProfile {
+              batch {
+                code
+              }
+            }
+          }
+          bookingDate
+          ${getSlotTimesInString()}
+        }
+        mentorSession {
+          id
+        }
+      }
+    }
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.mentorMenteeSession');
+};
 
 const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
   // don't do anything if it is done through backend
@@ -31,6 +68,9 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
     const clientId = get(userInfo, 'data.user.id', '');
     const topicId = get(topicInfo, 'data.topic.id', '');
     const sessionStatus = get(input, 'sessionStatus');
+    const mentorMenteeSessionId = get(input, 'id');
+    const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id);
+    context.previousDocument = mentorMenteeSessionDoc;
     if (get(input, 'sessionStatus') === 'started') {
       setSessionStartedLeadsquared(userInfo, topicInfo);
       updateHomeworkStreaksMethod(clientId, context, topicId, input);
@@ -41,7 +81,6 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
     }
 
     // update session log entry
-    const mentorMenteeSessionId = get(input, 'id');
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
     if (studentProfileId) addToMentorMenteeSessionStudentProfile(mentorMenteeSessionId, studentProfileId);
