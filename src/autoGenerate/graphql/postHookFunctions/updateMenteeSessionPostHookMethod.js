@@ -51,22 +51,22 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
   // if call is from backend we will not update the availability slots, same for paid sessions
   if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
-    // const courseInfo = await getCourseInfo(get(input, 'course.typeId'));
+    const courseInfo = await getCourseInfo(get(input, 'course.typeId'));
     const prevBroadCastedMentors = get(previousDocument, 'broadCastedMentors', []).map((mentor) => get(mentor, 'id'));
     const newBroadcastedmentors = get(input, 'broadCastedMentors', []);
     // eslint-disable-next-line no-restricted-syntax
     for (const mentorProfile of newBroadcastedmentors) {
       if (!prevBroadCastedMentors.includes(get(mentorProfile, 'typeId'))) {
-        // const time = get(slotTimeStringArray, '0').split('slot')[1];
-        // const startTime = getSlotLabel(time).startTime;
-        // sendMailAndWhatsappMessageForSupplyRequest(get(mentorProfile, 'typeId'),
-        //   {
-        //     date: bookingDate,
-        //     slotId: get(input, 'id'),
-        //     course: get(courseInfo, 'data.course.title'),
-        //     studentName: get(userInfo, 'data.user.name'),
-        //     slotsTime: startTime,
-        //   }, true);
+        const time = get(slotTimeStringArray, '0').split('slot')[1];
+        const startTime = getSlotLabel(time).startTime;
+        sendMailAndWhatsappMessageForSupplyRequest(get(mentorProfile, 'typeId'),
+          {
+            date: bookingDate,
+            slotId: get(input, 'id'),
+            course: get(courseInfo, 'data.course.title'),
+            studentName: get(userInfo, 'data.user.name'),
+            slotsTime: startTime,
+          }, true);
       }
     }
     if (bookingDate && bookingDate.getTime() !== prevBookingDate.getTime()) {
