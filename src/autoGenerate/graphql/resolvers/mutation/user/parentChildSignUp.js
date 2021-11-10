@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import moment from 'moment';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { ADD } from '../../../../../../constants/graphqlOperations';
