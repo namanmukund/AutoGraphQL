@@ -102,7 +102,7 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
   const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId || get(mentorSession, 'id', '')));
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
   if (mentorUserId && bookingDateFromInput
-    && (inputSlotTimeArray[0] !== slotTimeArray[0] || bookingDateFromInput !== bookingDate)) {
+    && (inputSlotTimeArray[0] !== slotTimeArray[0] || new Date(bookingDateFromInput).getTime() !== new Date(bookingDate).getTime())) {
     const finalBookingDate = bookingDateFromInput || bookingDate;
     const getMentorSessionsRes = await callLocalGraphqlApi(
       getMentorSessions(
