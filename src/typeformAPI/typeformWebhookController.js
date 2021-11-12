@@ -108,11 +108,11 @@ const usersData = async (studentDetailsObject, formId) => {
       const eventAttendances = await getEventAttendances(get(users, '[0].id'), getEventId(formId));
       if (eventAttendances && eventAttendances.length) {
         log(`updating attendance for ${childName} with id ${get(users, '[0].id')}`);
-        updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
+        await updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
         generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
       } else {
         log(`adding attendance for ${childName} with id ${get(users, '[0].id')}`);
-        addNewEventAttendanceWithStatus(get(users, '[0].id'), get(users, '[0].studentProfile.id'), getEventId(formId));
+        await addNewEventAttendanceWithStatus(get(users, '[0].id'), get(users, '[0].studentProfile.id'), getEventId(formId));
         generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
       }
     } else if (parentEmail) {
@@ -136,11 +136,11 @@ const usersData = async (studentDetailsObject, formId) => {
         const eventAttendances = await getEventAttendances(get(user, '[0].id'), getEventId(formId));
         if (eventAttendances && eventAttendances.length) {
           log(`updating attendance for ${childName} with id ${get(user, '[0].id')}`);
-          updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
+          await updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
           generateCertificateScript([get(user, '[0].id')], false, getEventId(formId));
         } else {
           log(`adding attendance for ${childName} with id ${get(user, '[0].id')}`);
-          addNewEventAttendanceWithStatus(get(user, '[0].id'), get(user, '[0].studentProfile.id'), getEventId(formId));
+          await addNewEventAttendanceWithStatus(get(user, '[0].id'), get(user, '[0].studentProfile.id'), getEventId(formId));
           generateCertificateScript([get(user, '[0].id')], false, getEventId(formId));
         }
       } else {
@@ -173,7 +173,8 @@ const usersData = async (studentDetailsObject, formId) => {
             if (get(child, 'user.name') === childName) {
               // adding attendance for only that child how filled the form
               log(`adding attendance for ${childName} with id ${get(child, 'user.id')}`);
-              addNewEventAttendanceWithStatus(get(child, 'user.id'), get(child, 'id'), getEventId(formId));
+              // eslint-disable-next-line no-await-in-loop
+              await addNewEventAttendanceWithStatus(get(child, 'user.id'), get(child, 'id'), getEventId(formId));
               generateCertificateScript([get(child, 'user.id')], false, getEventId(formId));
             }
           }

@@ -1,24 +1,20 @@
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-confusing-arrow */
-import { PDFDocument, rgb } from 'pdf-lib';
-import * as fs from 'fs';
-import fontkit from '@pdf-lib/fontkit';
 import { get } from 'lodash';
-import mkdirp from 'mkdirp';
 import moment from 'moment';
-import { NUNITO_BOLD_FONT_URL } from '../../../../../../constants';
-import { uploadToS3, getSignedS3Uri } from '../../../../../middlewares/utils/uploadToS3';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import getFormatedDate from '../../../../../../utils/getFormatedDate';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
+import getSpySquadCampCertificateUrl from './uploadCertificates/spysquadcamp';
+import getCanvaEventCertificateUrl from './uploadCertificates/canvaEvent';
 
-const fetchUser = (userId) => `
+const fetchUser = (userId, eventId) => `
 {
   users(filter: {
     and: [
       {id: "${userId}"}
+      {eventAttandances_some: {event_some:{id: "${eventId}"}}}
     ]
   }){
     id
@@ -27,13 +23,16 @@ const fetchUser = (userId) => `
 }
 `;
 
-const fetchEventCertificate = (id) => `
+const fetchEventCertificate = (id, eventId) => `
 {
   eventCertificates(filter: {
     and: [
       {user_some: {
         id: "${id}"
       }}
+      ${eventId ? `{event_some: {
+        id: "${eventId}"
+      }}` : ''}
     ]
   }){
     id
@@ -91,16 +90,22 @@ const generateCertificateMutationResolver = async (
   validateAuthentication(context);
 
   const { input } = params;
-
-  const { userId, regenerateCertificate } = input;
-
-  const userRes = await callLocalGraphqlApi(fetchUser(userId));
+  // TODO  : eventId to be passed here too in input
+  const { userId, regenerateCertificate, eventId } = input;
+  console.log('11');
+  console.log('userId', userId);
+  console.log('eventId', eventId);
+  const userRes = await callLocalGraphqlApi(fetchUser(userId, eventId));
+  console.log('userRes', userRes);
   const users = get(userRes, 'data.users');
-  const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(userId));
+  // TODO : get eventCertificate based on event type
+  const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(userId, eventId));
+  console.log('22');
   const eventCertificates = get(eventCertificatesRes, 'data.eventCertificates');
   let tekieUrl = '';
-
+  console.log('334');
   if (!regenerateCertificate && eventCertificates && eventCertificates.length) {
+    console.log('33');
     const exisitingEventCertificate = get(eventCertificates, '[0]', {});
     tekieUrl = `event-certificate/${slugifyID(get(exisitingEventCertificate, 'id'))}`;
     return {
@@ -109,74 +114,43 @@ const generateCertificateMutationResolver = async (
       tekieUrl,
     };
   }
-
+  console.log('335');
+  console.log('users', users);
   if (users && users.length) {
     const userName = get(users, '[0].name', '');
+    console.log('34');
     const formattedDate = moment(new Date().setHours(0, 0, 0, 0)).format('DD-MM-YYYY');
-
-    const url = `${process.env.FILE_BASE_URL}/python/course/radiostreetCertificate.pdf`;
-    const existingPdfBytes = await fetch(url).then((res) => res.buffer());
-
-    // Load a PDFDocument from the existing PDF bytes
-    const pdfDoc = await PDFDocument.load(existingPdfBytes);
-    pdfDoc.registerFontkit(fontkit);
-
-    // Get the first page of the document
-    const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
-
-    // // Embed the Helvetica font
-    const NunitoBoldfontBytes = await fetch(NUNITO_BOLD_FONT_URL).then((res) => res.buffer());
-
-    const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
-
-    // Draw a string of text diagonally across the first page
-    firstPage.drawText(`${capitalize(userName)}`, {
-      x: 330,
-      y: 506,
-      size: 29,
-      font: NunitoBoldFont,
-      color: rgb(0, 0.678, 0.902),
-    });
-
-    firstPage.drawText(`${formattedDate}.`, {
-      x: 385,
-      y: 394,
-      size: 18,
-      font: NunitoBoldFont,
-      color: rgb(0.3137, 0.31, 0.31),
-    });
-
-    /** PDF Meta Details */
-    pdfDoc.setAuthor('Tekie');
-    pdfDoc.setCreator('Kiwhode Learning Pvt Ltd');
-    pdfDoc.setSubject('Tekie\'s Spy Squad Camp Certificate');
-    pdfDoc.setTitle('Tekie\'s Spy Squad Camp Certificate');
-    pdfDoc.setProducer('Tekie.in');
-
-    const pdfBytes = await pdfDoc.save();
-    const path = '/tmp/spysquadcamp/certificate-pdf.pdf';
-    mkdirp.sync('/tmp/spysquadcamp');
-    fs.writeFileSync(path, pdfBytes);
-    const fileContent = fs.readFileSync(path);
     let fetchedUrl = '';
-    if (fileContent) {
-      const key = `event-certificate/spysquadcamp/${slugifyID(userId)}-certificate.pdf`;
-      await uploadToS3(key, fileContent);
-      fetchedUrl = key;
+    switch (eventId) {
+      case 'ckvdiavp70000igujfgxh8mt6':
+      case 'ckve5izxq0000ucui47b89pmf':
+      case 'ckve5fm7o00090t1dd1v4dy13':
+        fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
+        break;
+      case 'ckvw6s3df000039in32ewhy89':
+        console.log('44');
+        fetchedUrl = await getCanvaEventCertificateUrl(userId, userName, formattedDate);
+        break;
+      default:
+        fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
+        break;
     }
+    console.log('fetchedUrl', fetchedUrl);
     let eventCertificateCreated = null;
     if (fetchedUrl) {
       if (eventCertificates && eventCertificates.length) {
+        console.log('55');
         const eventCertificateId = get(eventCertificates, '[0].id');
         const eventCertificateCreatedRes = await callLocalGraphqlApi(updateEventCertificate(eventCertificateId, fetchedUrl));
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.updateEventCertificate');
       } else {
+        console.log('66');
         const eventCertificateCreatedRes = await callLocalGraphqlApi(addEventCertificate(userId, fetchedUrl));
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.addEventCertificate');
       }
     }
     tekieUrl = `event-certificate/${slugifyID(get(eventCertificateCreated, 'id'))}`;
+    console.log('77');
     return {
       ...eventCertificateCreated,
       tekieUrl,

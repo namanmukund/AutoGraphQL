@@ -4,12 +4,13 @@ import { log } from '../../../../../../utils';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 // import sendWhatsAppTemplateMessage from '../../../../utils/sendWhatsAppTemplateMessage';
 
-const generateCertificate = async (id, regenerateCertificate) => {
+const generateCertificate = async (id, regenerateCertificate, eventId) => {
   const query = `
     mutation{
       generateCertificate(input:{
         userId:"${id}"
         regenerateCertificate:${regenerateCertificate ? 'true' : 'false'}
+        eventId:"${eventId}"
       })
       {
         id
@@ -70,12 +71,13 @@ const fetchUser = async (id, eventId) => {
 // };
 
 const generateCertificateScript = async (userIdArray, regenerateCertificate = false, eventId) => {
-  // TODO : make this dynamic based on a third paramenter eventId, use switch case
+  // make this dynamic based on a third paramenter eventId, use switch case
+  // pass eventId param to generateCertificate
   if (userIdArray && userIdArray.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const userId of userIdArray) {
       // eslint-disable-next-line no-await-in-loop
-      const certificateDetails = await generateCertificate(userId, regenerateCertificate);
+      const certificateDetails = await generateCertificate(userId, regenerateCertificate, eventId);
       const certificateLink = `${process.env.TEKIE_WEB_URL}/${get(certificateDetails, 'tekieUrl')}`;
       // eslint-disable-next-line no-await-in-loop
       const user = await fetchUser(userId, eventId);
