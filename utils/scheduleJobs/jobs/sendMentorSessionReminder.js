@@ -50,7 +50,7 @@ const mentorMenteeSessionQuery = (mentorMenteeSessionId) => `{
 const sendMentorSessionReminder = async ({ mentorMenteeSessionId }, deleteJob) => {
   const res = await callLocalGraphqlApi(mentorMenteeSessionQuery(mentorMenteeSessionId));
   const mms = get(res, 'data.mentorMenteeSession', {});
-  if (!get(mms, 'id')) return;
+  if (!get(mms, 'id') || !get(mms, 'mentorSession')) return;
   const courseName = get(mms, 'course.title', '');
   const sessionLink = get(mms, 'mentorSession.user.mentorProfile.sessionLink', '');
   const mentorPhone = get(mms, 'mentorSession.user.phone', {});
