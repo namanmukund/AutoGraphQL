@@ -90,22 +90,15 @@ const generateCertificateMutationResolver = async (
   validateAuthentication(context);
 
   const { input } = params;
-  // TODO  : eventId to be passed here too in input
+  // eventId to be passed here too in input
   const { userId, regenerateCertificate, eventId } = input;
-  console.log('11');
-  console.log('userId', userId);
-  console.log('eventId', eventId);
   const userRes = await callLocalGraphqlApi(fetchUser(userId, eventId));
-  console.log('userRes', userRes);
   const users = get(userRes, 'data.users');
-  // TODO : get eventCertificate based on event type
+  // get eventCertificate based on event type
   const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(userId, eventId));
-  console.log('22');
   const eventCertificates = get(eventCertificatesRes, 'data.eventCertificates');
   let tekieUrl = '';
-  console.log('334');
   if (!regenerateCertificate && eventCertificates && eventCertificates.length) {
-    console.log('33');
     const exisitingEventCertificate = get(eventCertificates, '[0]', {});
     tekieUrl = `event-certificate/${slugifyID(get(exisitingEventCertificate, 'id'))}`;
     return {
@@ -114,11 +107,8 @@ const generateCertificateMutationResolver = async (
       tekieUrl,
     };
   }
-  console.log('335');
-  console.log('users', users);
   if (users && users.length) {
     const userName = get(users, '[0].name', '');
-    console.log('34');
     const formattedDate = moment(new Date().setHours(0, 0, 0, 0)).format('DD-MM-YYYY');
     let fetchedUrl = '';
     switch (eventId) {
@@ -128,29 +118,24 @@ const generateCertificateMutationResolver = async (
         fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
         break;
       case 'ckvw6s3df000039in32ewhy89':
-        console.log('44');
         fetchedUrl = await getCanvaEventCertificateUrl(userId, userName, formattedDate);
         break;
       default:
         fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
         break;
     }
-    console.log('fetchedUrl', fetchedUrl);
     let eventCertificateCreated = null;
     if (fetchedUrl) {
       if (eventCertificates && eventCertificates.length) {
-        console.log('55');
         const eventCertificateId = get(eventCertificates, '[0].id');
         const eventCertificateCreatedRes = await callLocalGraphqlApi(updateEventCertificate(eventCertificateId, fetchedUrl));
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.updateEventCertificate');
       } else {
-        console.log('66');
         const eventCertificateCreatedRes = await callLocalGraphqlApi(addEventCertificate(userId, fetchedUrl));
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.addEventCertificate');
       }
     }
     tekieUrl = `event-certificate/${slugifyID(get(eventCertificateCreated, 'id'))}`;
-    console.log('77');
     return {
       ...eventCertificateCreated,
       tekieUrl,
