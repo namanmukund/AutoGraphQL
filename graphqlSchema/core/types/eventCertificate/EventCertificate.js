@@ -27,6 +27,7 @@ const EventCertificate = `
         rule: allow
       )
     file: File @relation(name: "EventCertificateFile", direction: "OneWay")
+    event: Event @relation(name: "EventCertificateEvent", direction: "OneWay")
     assetUrl: String
     eventType: EventType @defaultValue(value: "radioStreet")
     eventName: EventName @defaultValue(value: "spySquadCamp")
