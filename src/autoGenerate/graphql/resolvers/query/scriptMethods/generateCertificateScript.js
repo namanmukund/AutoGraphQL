@@ -22,10 +22,15 @@ const generateCertificate = async (id, regenerateCertificate) => {
   return get(res, 'data.generateCertificate', {});
 };
 
-const fetchUser = async (id) => {
+const fetchUser = async (id, eventId) => {
   const query = `
     query{
-      user(id: "${id}")
+      users(filter:{
+        and:[
+          {id: "${id}"},
+          {eventAttandances_some: {event_some:{id: "${eventId}"}}}
+        ]
+      })
       {
         id
         name
@@ -46,7 +51,7 @@ const fetchUser = async (id) => {
     }
   `;
   const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.user', {});
+  return get(res, 'data.users', []);
 };
 
 // const getEventAttendances = async () => {
@@ -64,7 +69,8 @@ const fetchUser = async (id) => {
 //   return get(result, 'data.eventAttendances', []);
 // };
 
-const generateCertificateScript = async (userIdArray, regenerateCertificate = false) => {
+const generateCertificateScript = async (userIdArray, regenerateCertificate = false, eventId) => {
+  // TODO : make this dynamic based on a third paramenter eventId, use switch case
   if (userIdArray && userIdArray.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const userId of userIdArray) {
@@ -72,8 +78,8 @@ const generateCertificateScript = async (userIdArray, regenerateCertificate = fa
       const certificateDetails = await generateCertificate(userId, regenerateCertificate);
       const certificateLink = `${process.env.TEKIE_WEB_URL}/${get(certificateDetails, 'tekieUrl')}`;
       // eslint-disable-next-line no-await-in-loop
-      const user = await fetchUser(userId);
-      const parentPhoneNumber = get(user, 'studentProfile.parents[0].user.phone.number', '');
+      const user = await fetchUser(userId, eventId);
+      const parentPhoneNumber = get(user, '[0].studentProfile.parents[0].user.phone.number', '');
       log(`sending certificate ${certificateLink}`);
       updateLeadSquared({
         Phone: parentPhoneNumber,
