@@ -41,7 +41,7 @@ const getCanvaEventCertificateUrl = async (userId, userName, formattedDate) => {
 
   firstPage.drawText(`${formattedDate}.`, {
     x: 278,
-    y: 391,
+    y: 390,
     size: 18,
     font: NunitoBoldFont,
     color: rgb(0.3137, 0.31, 0.31),

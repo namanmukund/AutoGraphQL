@@ -45,13 +45,11 @@ const fetchEventCertificate = (id, eventId) => `
 }
 `;
 
-const addEventCertificate = (userId, assetUrl, eventType, eventName) => `
+const addEventCertificate = (userId, assetUrl) => `
   mutation {
     addEventCertificate(userConnectId:"${userId}",
       input: {
         assetUrl: "${assetUrl}"
-        eventType: ${eventType}
-        eventName: ${eventName}
       }){
         id
         assetUrl
@@ -59,12 +57,10 @@ const addEventCertificate = (userId, assetUrl, eventType, eventName) => `
   }
 `;
 
-const updateEventCertificate = (eventCertificateId, url, eventType, eventName) => `
+const updateEventCertificate = (eventCertificateId, url) => `
  mutation{
   updateEventCertificate(id:"${eventCertificateId}",input:{
     assetUrl:"${url}"
-    eventType: ${eventType}
-    eventName: ${eventName}
   }){
     id
     assetUrl
@@ -111,41 +107,32 @@ const generateCertificateMutationResolver = async (
       tekieUrl,
     };
   }
-  // TODO : change event type and event name while adding/updating cert
   if (users && users.length) {
     const userName = get(users, '[0].name', '');
     const formattedDate = moment(new Date().setHours(0, 0, 0, 0)).format('DD-MM-YYYY');
     let fetchedUrl = '';
-    let eventType = '';
-    let eventName = '';
     switch (eventId) {
       case 'ckvdiavp70000igujfgxh8mt6':
       case 'ckve5izxq0000ucui47b89pmf':
       case 'ckve5fm7o00090t1dd1v4dy13':
         fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
-        eventType = 'radioStreet';
-        eventName = 'spySquadCamp';
         break;
       case 'ckvw6s3df000039in32ewhy89':
       case 'ckvwncjv400001sin0ppigr3s':
-        eventType = 'communityEvent';
-        eventName = 'canvaMasterclass';
         fetchedUrl = await getCanvaEventCertificateUrl(userId, userName, formattedDate);
         break;
       default:
         fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
-        eventType = 'radioStreet';
-        eventName = 'spySquadCamp';
         break;
     }
     let eventCertificateCreated = null;
     if (fetchedUrl) {
       if (eventCertificates && eventCertificates.length) {
         const eventCertificateId = get(eventCertificates, '[0].id');
-        const eventCertificateCreatedRes = await callLocalGraphqlApi(updateEventCertificate(eventCertificateId, fetchedUrl, eventType, eventName));
+        const eventCertificateCreatedRes = await callLocalGraphqlApi(updateEventCertificate(eventCertificateId, fetchedUrl));
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.updateEventCertificate');
       } else {
-        const eventCertificateCreatedRes = await callLocalGraphqlApi(addEventCertificate(userId, fetchedUrl, eventType, eventName));
+        const eventCertificateCreatedRes = await callLocalGraphqlApi(addEventCertificate(userId, fetchedUrl));
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.addEventCertificate');
       }
     }

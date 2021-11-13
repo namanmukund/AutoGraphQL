@@ -83,9 +83,7 @@ const usersData = async (studentDetailsObject, formId) => {
     childName, parentEmail = '', parentPhone: { number = '' },
   } = studentDetailsObject;
   if (number) {
-    filter = `{
-      and: [
-      {studentProfile_some: {
+    filter = `{studentProfile_some: {
         parents_some: {
           user_some:{
             and:[
@@ -93,10 +91,7 @@ const usersData = async (studentDetailsObject, formId) => {
             ]
           }
         }
-      }}
-      {name: "${childName}"}
-    ]
-    }`;
+      }}`;
     const numberQuery = `{
     users(
       filter: ${filter}
@@ -121,16 +116,11 @@ const usersData = async (studentDetailsObject, formId) => {
         generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
       }
     } else if (parentEmail) {
-      filter = `{
-        and: [
-          {studentProfile_some: {
+      filter = `{studentProfile_some: {
           parents_some: {
             user_some: {email:"${parentEmail.trim()}"}
           }
-        }}
-        {name: "${childName}"}
-        ]
-      }`;
+        }}`;
       const query = `{
       users(
         filter: ${filter}
