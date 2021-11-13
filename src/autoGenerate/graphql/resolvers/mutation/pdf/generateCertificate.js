@@ -118,6 +118,7 @@ const generateCertificateMutationResolver = async (
         fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
         break;
       case 'ckvw6s3df000039in32ewhy89':
+      case 'ckvwncjv400001sin0ppigr3s':
         fetchedUrl = await getCanvaEventCertificateUrl(userId, userName, formattedDate);
         break;
       default:
