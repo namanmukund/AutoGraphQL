@@ -46,8 +46,7 @@ const updateLeadSquared = async (leadSquaredParams = {}, create = false, leadAct
   } else {
     LEAD_ENDPOINT = LEAD_UPDATE_ENDPOINT;
   }
-  if (process.env.NODE_ENV === 'production'
-    || process.env.NODE_ENV === 'staging') {
+  if (process.env.NODE_ENV === 'production') {
     if (!create || pseudoCreate) {
       try {
         const res = await fetch(
