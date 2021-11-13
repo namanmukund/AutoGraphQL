@@ -30,6 +30,7 @@ const PostSalesAudit = `
     totalScore: Float
     auditAudioFile: File @relation(name: "PostSalesAuditAudioFile", direction: "OneWay")
     customSectionScore: [CustomSectionScore]
+    auditCompletedOn: Date
 }`;
 
 export default [PostSalesAudit, postSalesAuditQuestion];
