@@ -127,6 +127,7 @@ const generateCertificateMutationResolver = async (
         break;
       case 'ckvw6s3df000039in32ewhy89':
       case 'ckvwncjv400001sin0ppigr3s':
+      case 'ckvxsrwlb001c0usf9lxwapt4':
         fetchedUrl = await getCanvaEventCertificateUrl(userId, userName, formattedDate);
         eventType = 'communityEvent';
         eventName = 'canvaMasterclass';
