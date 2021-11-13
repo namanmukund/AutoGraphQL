@@ -18,6 +18,7 @@ const getMentorSessions = (userId, availabilityDate) => `query{
               name
               studentProfile {
                 batch {
+                  id
                   code
                 }
               }
@@ -28,6 +29,7 @@ const getMentorSessions = (userId, availabilityDate) => `query{
       batchSessions{
         id
         batch {
+          id
           type
           code
           studentsMeta {

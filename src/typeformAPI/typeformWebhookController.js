@@ -5,13 +5,37 @@ import generateCertificateScript from '../autoGenerate/graphql/resolvers/query/s
 import getCountryCodeAndNumber from '../autoGenerate/graphql/validation/getCountryCodeAndNumber';
 import getHashDigest from './typeform-utils/getHashDigest';
 
-const getEventId = () => {
-  let eventId = 'ckvdiavp70000igujfgxh8mt6';
-  if (process.env.NODE_ENV === 'production') {
-    eventId = 'ckve5izxq0000ucui47b89pmf';
-    if (process.env.DATA_MASKING) {
-      eventId = 'ckve5fm7o00090t1dd1v4dy13';
-    }
+const getEventId = (formId) => {
+  let eventId = '';
+  switch (formId) {
+    case 'm47rmq7f':
+      eventId = 'ckvdiavp70000igujfgxh8mt6';
+      if (process.env.NODE_ENV === 'production') {
+        eventId = 'ckve5izxq0000ucui47b89pmf';
+        if (process.env.DATA_MASKING) {
+          eventId = 'ckve5fm7o00090t1dd1v4dy13';
+        }
+      }
+      break;
+    case 'N5rTz2zX':
+      eventId = 'ckvw6s3df000039in32ewhy89';
+      // TODO : change prod and pre-prod eventId when created
+      if (process.env.NODE_ENV === 'production') {
+        eventId = 'ckvw6s3df000039in32ewhy89';
+        if (process.env.DATA_MASKING) {
+          eventId = 'ckvwncjv400001sin0ppigr3s';
+        }
+      }
+      break;
+    default:
+      eventId = 'ckvdiavp70000igujfgxh8mt6';
+      if (process.env.NODE_ENV === 'production') {
+        eventId = 'ckve5izxq0000ucui47b89pmf';
+        if (process.env.DATA_MASKING) {
+          eventId = 'ckve5fm7o00090t1dd1v4dy13';
+        }
+      }
+      break;
   }
   return eventId;
 };
@@ -53,13 +77,15 @@ const getEventAttendances = async (userId, eventId) => {
   return get(await callLocalGraphqlApi(query), 'data.eventAttendances', []);
 };
 
-const usersData = async (studentDetailsObject) => {
+const usersData = async (studentDetailsObject, formId) => {
   let filter = '';
   const {
     childName, parentEmail = '', parentPhone: { number = '' },
   } = studentDetailsObject;
   if (number) {
-    filter = `{studentProfile_some: {
+    filter = `{
+      and: [
+        {studentProfile_some: {
         parents_some: {
           user_some:{
             and:[
@@ -67,7 +93,10 @@ const usersData = async (studentDetailsObject) => {
             ]
           }
         }
-      }}`;
+      }}
+      {name: "${childName}"}
+      ]
+    }`;
     const numberQuery = `{
     users(
       filter: ${filter}
@@ -79,23 +108,29 @@ const usersData = async (studentDetailsObject) => {
     }
   }`;
     const users = get(await callLocalGraphqlApi(numberQuery), 'data.users', []);
+    // uses the same formId parameter passed from controller, to generate eventId dynamically
     if (users && users.length) {
-      const eventAttendances = await getEventAttendances(get(users, '[0].id'), getEventId());
+      const eventAttendances = await getEventAttendances(get(users, '[0].id'), getEventId(formId));
       if (eventAttendances && eventAttendances.length) {
         log(`updating attendance for ${childName} with id ${get(users, '[0].id')}`);
-        updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
-        generateCertificateScript([get(users, '[0].id')]);
+        await updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
+        generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
       } else {
         log(`adding attendance for ${childName} with id ${get(users, '[0].id')}`);
-        addNewEventAttendanceWithStatus(get(users, '[0].id'), get(users, '[0].studentProfile.id'), getEventId());
-        generateCertificateScript([get(users, '[0].id')]);
+        await addNewEventAttendanceWithStatus(get(users, '[0].id'), get(users, '[0].studentProfile.id'), getEventId(formId));
+        generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
       }
     } else if (parentEmail) {
-      filter = `{studentProfile_some: {
+      filter = `{
+        and: [
+          {studentProfile_some: {
           parents_some: {
             user_some: {email:"${parentEmail.trim()}"}
           }
-        }}`;
+        }}
+        {name: "${childName}"}
+        ]
+      }`;
       const query = `{
       users(
         filter: ${filter}
@@ -108,15 +143,15 @@ const usersData = async (studentDetailsObject) => {
     }`;
       const user = get(await callLocalGraphqlApi(query), 'data.users', []);
       if (user && user.length) {
-        const eventAttendances = await getEventAttendances(get(user, '[0].id'), getEventId());
+        const eventAttendances = await getEventAttendances(get(user, '[0].id'), getEventId(formId));
         if (eventAttendances && eventAttendances.length) {
           log(`updating attendance for ${childName} with id ${get(user, '[0].id')}`);
-          updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
-          generateCertificateScript([get(user, '[0].id')]);
+          await updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
+          generateCertificateScript([get(user, '[0].id')], false, getEventId(formId));
         } else {
           log(`adding attendance for ${childName} with id ${get(user, '[0].id')}`);
-          addNewEventAttendanceWithStatus(get(user, '[0].id'), get(user, '[0].studentProfile.id'), getEventId());
-          generateCertificateScript([get(user, '[0].id')]);
+          await addNewEventAttendanceWithStatus(get(user, '[0].id'), get(user, '[0].studentProfile.id'), getEventId(formId));
+          generateCertificateScript([get(user, '[0].id')], false, getEventId(formId));
         }
       } else {
         const parentChildSignUpQuery = `mutation parentChildSignUp($input: ParentChildSignUpInput) {
@@ -148,8 +183,9 @@ const usersData = async (studentDetailsObject) => {
             if (get(child, 'user.name') === childName) {
               // adding attendance for only that child how filled the form
               log(`adding attendance for ${childName} with id ${get(child, 'user.id')}`);
-              addNewEventAttendanceWithStatus(get(child, 'user.id'), get(child, 'id'), getEventId());
-              generateCertificateScript([get(child, 'user.id')]);
+              // eslint-disable-next-line no-await-in-loop
+              await addNewEventAttendanceWithStatus(get(child, 'user.id'), get(child, 'id'), getEventId(formId));
+              generateCertificateScript([get(child, 'user.id')], false, getEventId(formId));
             }
           }
         }
@@ -175,14 +211,41 @@ const typeformWebhookController = async (req, res) => {
       if (title === 'Grade/Standard') studentDetailsObject.grade = `Grade${get(studentAnswer, 'choice.label')}`;
       if (title === 'Phone Number') studentDetailsObject.parentPhone = getCountryCodeAndNumber(get(studentAnswer, type));
     }
+    // include switch case based on event parameter form_response.form_id
+    // check this form_id param from typeform admin dashboard
+    const formId = get(req, 'body.form_response.form_id', '');
+    let country;
+    let timezone;
+    let utmSource;
+    let utmCampaign;
+    switch (formId) {
+      case 'm47rmq7f':
+        country = 'india';
+        timezone = 'Asia/Kolkata';
+        utmSource = 'RadioStreet';
+        utmCampaign = 'Spy Squad Camp - 31th Oct';
+        break;
+      case 'N5rTz2zX':
+        country = 'india';
+        timezone = 'Asia/Kolkata';
+        utmSource = 'communityevent';
+        utmCampaign = 'canva_Nov14';
+        break;
+      default:
+        country = 'india';
+        timezone = 'Asia/Kolkata';
+        utmSource = 'RadioStreet';
+        utmCampaign = 'Spy Squad Camp - 31th Oct';
+        break;
+    }
     studentDetailsObject = {
       ...studentDetailsObject,
-      country: 'india',
-      timezone: 'Asia/Kolkata',
-      utmSource: 'RadioStreet',
-      utmCampaign: 'Spy Squad Camp - 31th Oct',
+      country,
+      timezone,
+      utmSource,
+      utmCampaign,
     };
-    usersData(studentDetailsObject);
+    usersData(studentDetailsObject, formId);
     res.sendStatus(200);
   } else {
     res.status(401).send('Unauthorized');

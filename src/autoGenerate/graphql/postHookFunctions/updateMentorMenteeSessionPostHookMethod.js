@@ -23,6 +23,8 @@ import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import addSalesAudit from './utils/addSalesAudit';
 import { fetchCourseData, sessionStartedStreaksFlow, submittedForReviewStreaksFlow } from './utils/homeworkStreakMethods';
 import { log } from '../../../../utils';
+import getTopicInfo from './utils/getTopicInfo';
+import getCourseInfo from './utils/getCourseInfo';
 
 const { postSales } = auditType;
 // import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
@@ -141,6 +143,8 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));
   const userId = get(menteeSession, 'data.menteeSession.user.id');
   const userInfo = await getMenteeInfo(userId);
+  const topicInfo = await getTopicInfo(get(params, 'topicConnectId'));
+  const courseInfo = await getCourseInfo(get(params, 'courseConnectId'));
 
   const oldSlotTimeArray = getSelectedSlotsTime(prevMenteeSession);
   const newSlotTimeArray = getSelectedSlotsTime(get(menteeSession, 'data.menteeSession', []));
@@ -256,6 +260,10 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const { bookingDate, ...slots } = menteeSessionDoc;
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
+    // if mentorSession is updated at a later stage, send comms
+    if (context.hasMentorSessionChanged && context.mentorSessionConnectId) {
+      await extractMentorMenteeSessionAndSendMessage(bookingDate, slotTimeStringArray, context.mentorSessionConnectId, userInfo, topicInfo, input.id, courseInfo);
+    }
     const mentorSessionId = get(input, 'mentorSession.typeId');
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     // adding logs when menteeSession is changed or mentorSession is changed or status is changed

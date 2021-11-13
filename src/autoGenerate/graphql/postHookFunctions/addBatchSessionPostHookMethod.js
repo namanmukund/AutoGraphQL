@@ -173,11 +173,14 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
         batchCurrentComponentId,
         sessionStatusFromInput,
         nextTopicId,
+        context,
       );
     } else {
       await updateBatchCurrentComponentStatus(
         batchCurrentComponentId,
         sessionStatusFromInput,
+        null,
+        context,
       );
     }
   }
@@ -197,17 +200,19 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     await callLocalGraphqlApi(updateBatchSessionQuery(
       batchSessionId,
       pushManyQuery,
-    ));
+    ), context);
   }
   const studentsId = (students && students.length) ? students.map((student) => get(student, 'id')) : [];
   extractBatchSessionAndSendB2BC(batchSessionId, studentsId, false);
 
   // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
-  if (topicId && mentorSessionConnectId) {
+  // mentorSessionConnectId made non-mandatory
+  if (topicId) {
     // eslint-disable-next-line no-restricted-syntax
     for (const student of students) {
       if (student.user && student.user.id) {
         addMentorMenteeSessionForBatch(
+          context,
           student.user.id,
           '',
           topicId,

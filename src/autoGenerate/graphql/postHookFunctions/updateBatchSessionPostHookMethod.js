@@ -11,7 +11,7 @@ import {
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
 import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
-import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
+// import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import extractBatchSessionAndSendB2BC from './utils/extractBatchSessionAndSendB2BC';
 import addToSchedule from '../../../../utils/scheduleJobs/addToSchedule';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
@@ -92,76 +92,76 @@ const nextTopicQuery = (courseId) => `
   `;
 
 // fetch mentor Sessions
-const fetchMentorSessions = (bookingDate, mentorId, sessionType) => `
-  {
-    mentorSessions(filter: {and: [{availabilityDate: "${bookingDate}"}, {user_some: {id: "${mentorId}"}}, {sessionType: ${sessionType}}]}) {
-      id
-      availabilityDate
-      slot0
-      slot1
-      slot2
-      slot3
-      slot4
-      slot5
-      slot6
-      slot7
-      slot8
-      slot9
-      slot10
-      slot11
-      slot12
-      slot13
-      slot14
-      slot15
-      slot16
-      slot17
-      slot18
-      slot19
-      slot20
-      slot21
-      slot22
-      slot23
-    }
-  }
-  `;
+// const fetchMentorSessions = (bookingDate, mentorId, sessionType) => `
+//   {
+//     mentorSessions(filter: {and: [{availabilityDate: "${bookingDate}"}, {user_some: {id: "${mentorId}"}}, {sessionType: ${sessionType}}]}) {
+//       id
+//       availabilityDate
+//       slot0
+//       slot1
+//       slot2
+//       slot3
+//       slot4
+//       slot5
+//       slot6
+//       slot7
+//       slot8
+//       slot9
+//       slot10
+//       slot11
+//       slot12
+//       slot13
+//       slot14
+//       slot15
+//       slot16
+//       slot17
+//       slot18
+//       slot19
+//       slot20
+//       slot21
+//       slot22
+//       slot23
+//     }
+//   }
+//   `;
 
 // update mentor Session
-const updateMentorSession = (mentorSessionId, sessionsBookingDateInDB, slot) => `
-  mutation{
-    updateMentorSession(id: "${mentorSessionId}", input: {
-      availabilityDate:"${sessionsBookingDateInDB}",
-      ${slot}: true
-    }) {
-      id
-    }
-  }
-  `;
+// const updateMentorSession = (mentorSessionId, sessionsBookingDateInDB, slot) => `
+//   mutation{
+//     updateMentorSession(id: "${mentorSessionId}", input: {
+//       availabilityDate:"${sessionsBookingDateInDB}",
+//       ${slot}: true
+//     }) {
+//       id
+//     }
+//   }
+//   `;
 
 // add mentor Session
-const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot, sessionType) => `
-  mutation {
-    addMentorSession(
-      userConnectId: "${mentorUserId}",
-      courseConnectId: "${courseId}",
-    input:{
-      availabilityDate:"${sessionsBookingDateInDB}",
-      ${slot}: true,
-      sessionType: ${sessionType}
-    }
-    ) {
-      id
-    }
-  }
-  `;
+// const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot, sessionType) => `
+//   mutation {
+//     addMentorSession(
+//       userConnectId: "${mentorUserId}",
+//       courseConnectId: "${courseId}",
+//     input:{
+//       availabilityDate:"${sessionsBookingDateInDB}",
+//       ${slot}: true,
+//       sessionType: ${sessionType}
+//     }
+//     ) {
+//       id
+//     }
+//   }
+//   `;
 
 // update batch Session
-const updateBatchSession = (batchSessionId, mentorSessionId) => `
-  mutation{
-    updateBatchSession(id: "${batchSessionId}", mentorSessionConnectId: "${mentorSessionId}") {
-      id
-    }
-  }
-  `;
+// const updateBatchSession = (batchSessionId, mentorSessionId) => `
+//   mutation{
+//     updateBatchSession(id: "${batchSessionId}", mentorSessionConnectId: "${mentorSessionId}") {
+//       id
+//     }
+//   }
+//   `;
 
 const getMentor = async (mentorSessionId) => {
   const mentorSession = await callLocalGraphqlApi(`{
@@ -220,7 +220,6 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     mentorSessionConnectId,
     prevMentor,
     bookingDateFromInput,
-    allottedMentorId,
     currentUser,
     prevSessionStatus,
     prevIsAudit,
@@ -246,29 +245,29 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
 
   // if mentorSessionConnectId is not present in batch session, then we need t create mentor session on basis of
   // allotted mentor in batch
-  let finalMentorSessionId = mentorSessionId;
-  if (!mentorSessionId && allottedMentorId) {
-    let sessionType = 'batch';
-    if (batchTypeValue === 'b2b2c' && batchTopicOrder === 1) {
-      sessionType = 'trial';
-    }
-    const { bookingDate: sessionsBookingDateInDB, ...slotsInDB } = input;
-    const slotTimeInDBArray = getSelectedSlotsTime(slotsInDB);
-    const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(sessionsBookingDateInDB, allottedMentorId, sessionType));
-    const mentorSession = get(mentorSessionsRes, 'data.mentorSessions[0]');
-    if (mentorSession && mentorSession.id) {
-      const { id: mentorSessionIdOfAllottedMentor, ...slotsInMentorSession } = mentorSession;
-      finalMentorSessionId = mentorSessionIdOfAllottedMentor;
-      const slotsInMentorSessionArray = getSelectedSlotsTime(slotsInMentorSession);
-      if (slotTimeInDBArray && slotTimeInDBArray.length && slotsInMentorSessionArray && slotsInMentorSessionArray.length && slotTimeInDBArray[0] !== slotsInMentorSessionArray[0]) {
-        await callLocalGraphqlApi(updateMentorSession(mentorSessionIdOfAllottedMentor, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`));
-      }
-    } else {
-      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`, sessionType));
-      finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
-    }
-    await callLocalGraphqlApi(updateBatchSession(batchSessionId, finalMentorSessionId));
-  }
+  const finalMentorSessionId = mentorSessionId;
+  // if (!mentorSessionId && allottedMentorId) {
+  //   let sessionType = 'batch';
+  //   if (batchTypeValue === 'b2b2c' && batchTopicOrder === 1) {
+  //     sessionType = 'trial';
+  //   }
+  //   const { bookingDate: sessionsBookingDateInDB, ...slotsInDB } = input;
+  //   const slotTimeInDBArray = getSelectedSlotsTime(slotsInDB);
+  //   const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(sessionsBookingDateInDB, allottedMentorId, sessionType));
+  //   const mentorSession = get(mentorSessionsRes, 'data.mentorSessions[0]');
+  //   if (mentorSession && mentorSession.id) {
+  //     const { id: mentorSessionIdOfAllottedMentor, ...slotsInMentorSession } = mentorSession;
+  //     finalMentorSessionId = mentorSessionIdOfAllottedMentor;
+  //     const slotsInMentorSessionArray = getSelectedSlotsTime(slotsInMentorSession);
+  //     if (slotTimeInDBArray && slotTimeInDBArray.length && slotsInMentorSessionArray && slotsInMentorSessionArray.length && slotTimeInDBArray[0] !== slotsInMentorSessionArray[0]) {
+  //       await callLocalGraphqlApi(updateMentorSession(mentorSessionIdOfAllottedMentor, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`));
+  //     }
+  //   } else {
+  //     const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`, sessionType));
+  //     finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
+  //   }
+  //   await callLocalGraphqlApi(updateBatchSession(batchSessionId, finalMentorSessionId));
+  // }
 
   const isTrial = await isTrialSession(get(input, 'topic.typeId'));
   const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
@@ -322,11 +321,14 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
             batchCurrentComponentId,
             sessionStatus.allotted,
             nextTopicId,
+            context,
           );
         } else {
           await updateBatchCurrentComponentStatus(
             batchCurrentComponentId,
             sessionStatusFromInput,
+            null,
+            context,
           );
         }
         const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
@@ -335,6 +337,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         await updateBatchCurrentComponentStatus(
           batchCurrentComponentId,
           sessionStatusFromInput,
+          null,
+          context,
         );
       }
     }
@@ -364,6 +368,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         for (const student of students) {
           if (student.user && student.user.id) {
             addMentorMenteeSessionForBatch(
+              context,
               student.user.id,
               '',
               topicId,

@@ -27,6 +27,7 @@ const callUpdateMentorMenteeSession = async (
   mentorMenteeId,
   mentorSessionId,
   variables,
+  context,
 ) => {
   const query = `
 mutation($input: MentorMenteeSessionUpdate){
@@ -39,7 +40,7 @@ mutation($input: MentorMenteeSessionUpdate){
   }
 }
 `;
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.updateMentorMenteeSession.id');
 };
 
@@ -48,6 +49,7 @@ const callAddMenteeSession = async (
   topicConnectId,
   variables,
   courseConnectId,
+  context,
 ) => {
   const query = `
 mutation ($input: MenteeSessionInput!) {
@@ -61,7 +63,7 @@ mutation ($input: MenteeSessionInput!) {
   }
 }
 `;
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.addMenteeSession.id');
 };
 
@@ -89,6 +91,7 @@ query {
 const callUpdateMenteeSession = async (
   menteeSessionId,
   variables,
+  context,
 ) => {
   const query = `
 mutation($input: MenteeSessionUpdate){
@@ -100,7 +103,7 @@ mutation($input: MenteeSessionUpdate){
   }
 }
 `;
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.updateMenteeSession.id');
 };
 
@@ -139,7 +142,7 @@ mutation ($input: MentorSessionInput!) {
   }
 }
 `;
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.addMentorSession.id');
 };
 
@@ -149,6 +152,7 @@ const callAddMentorMenteeSession = async (
   mentorSessionConnectId,
   variables,
   courseConnectId,
+  context,
 ) => {
   const query = `
 mutation($input: MentorMenteeSessionInput!){
@@ -156,20 +160,21 @@ mutation($input: MentorMenteeSessionInput!){
     input:$input
     topicConnectId:"${topicConnectId}"
     menteeSessionConnectId:"${menteeSessionConnectId}"
-    mentorSessionConnectId:"${mentorSessionConnectId}"
+    ${mentorSessionConnectId ? `mentorSessionConnectId: "${mentorSessionConnectId}"` : ''}
     ${courseConnectId ? `courseConnectId: "${courseConnectId}"` : ''}
   ){
     id
   }
 }
 `;
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.addMentorMenteeSession.id');
 };
 
 const callUpdateMentorSession = async (
   mentorSessionId,
   variables,
+  context,
 ) => {
   const query = `
 mutation($input: MentorSessionUpdate){
@@ -181,11 +186,11 @@ mutation($input: MentorSessionUpdate){
   }
 }
 `;
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.updateMentorSession.id');
 };
 
-const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicId, bookingDate, slot, mentorSessionIdFromInput, courseId, sessionStatus, source, methodCallOriginComponent, toUpdateMenteeSession) => {
+const addMentorMenteeSessionForBatch = async (context, menteeUserId, mentorUserId, topicId, bookingDate, slot, mentorSessionIdFromInput, courseId, sessionStatus, source, methodCallOriginComponent, toUpdateMenteeSession) => {
   const menteBookingDate = bookingDate;
   const menteeBookingSlot = slot;
   let menteeSessionId;
@@ -251,6 +256,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           await callUpdateMenteeSession(
             menteeSessionId,
             variables,
+            context,
           );
           log(`------------------------updated menteeSessionId ${menteeSessionId}`);
         }
@@ -277,7 +283,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
             sessionType: 'batch',
           },
         };
-        mentorSessionId = await callAddMentorSession(mentorUserId, courseId, variables);
+        mentorSessionId = await callAddMentorSession(mentorUserId, courseId, variables, context);
         log(`------------------------added mentorSessionId ${mentorSessionId}`);
       } else {
         // update
@@ -292,6 +298,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
           await callUpdateMentorSession(
             mentorSessionId,
             variables,
+            context,
           );
         } catch (err) {
           log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
@@ -315,7 +322,6 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
         log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);
       }
     }
-
     if (menteeSessionId) {
       log(`------------------------updating menteeSessionId ${menteeSessionId}`);
       // update
@@ -351,6 +357,7 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
       await callUpdateMenteeSession(
         menteeSessionId,
         variables,
+        context,
       );
       log(`------------------------updated menteeSessionId ${menteeSessionId}`);
     } else if (!menteeSessionId) {
@@ -364,13 +371,13 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
             source: 'school',
           },
         };
-        menteeSessionId = await callAddMenteeSession(menteeUserId, topicId, variables, courseId);
+        menteeSessionId = await callAddMenteeSession(menteeUserId, topicId, variables, courseId, context);
         log(`------------------------added menteeSessionId ${menteeSessionId}`);
       }
     }
 
-    // add mentor mentee session
-    if (menteeSessionId && mentorSessionId) {
+    // add mentor mentee session, made mentorSessionId non-mandatory
+    if (menteeSessionId) {
       const variables = {
         input: {
           sessionStatus,
@@ -383,10 +390,12 @@ const addMentorMenteeSessionForBatch = async (menteeUserId, mentorUserId, topicI
         mentorSessionId,
         variables,
         courseId,
+        context,
       );
       log('------------------------added mentorMenteeId');
     }
   } catch (e) {
+    log('In AddMentorMenteeSessionForBatch............');
     log(`Error........ ${e}`);
   }
   return true;
