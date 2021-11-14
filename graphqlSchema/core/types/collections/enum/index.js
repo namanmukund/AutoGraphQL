@@ -100,6 +100,7 @@ import RequestType from './RequestType';
 import RequestReason from './RequestReason';
 import Platform from './Platform';
 import StudentNoteForIQ from './StudentNoteForIQ';
+import LeadPartnerType from './LeadPartnerType';
 
 export default [
   Status,
@@ -205,4 +206,5 @@ export default [
   RequestReason,
   Platform,
   StudentNoteForIQ,
+  LeadPartnerType,
 ];
