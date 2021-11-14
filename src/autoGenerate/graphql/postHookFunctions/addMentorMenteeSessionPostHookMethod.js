@@ -69,7 +69,7 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
     const topicId = get(topicInfo, 'data.topic.id', '');
     const sessionStatus = get(input, 'sessionStatus');
     const mentorMenteeSessionId = get(input, 'id');
-    const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id);
+    const mentorMenteeSessionDoc = await getMentorMenteeSessionData(mentorMenteeSessionId);
     context.previousDocument = mentorMenteeSessionDoc;
     if (get(input, 'sessionStatus') === 'started') {
       setSessionStartedLeadsquared(userInfo, topicInfo);
