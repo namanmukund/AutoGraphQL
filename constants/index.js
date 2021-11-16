@@ -381,6 +381,14 @@ const currencyTypes = {
   USD: 'USD',
 };
 
+const studentNoteForIQ = {
+  smartAndAttentive: 'The student is very smart & attentive and understood the concepts clearly. Also, the kid tried answering all the question and was very curious. Overall the kid has great potential',
+  interestedAndEagerToLearn: 'The student was really interested in coding and was eager to learn as well. Also, the student was asking questions constantly.',
+  goodCommunicationAndCurious: 'The student is an extrovert and has amazing communication skills, also the kid was able to quickly grasp the concepts and had a lot of curiosity to learn more. The kid has great potential overall',
+  interactiveAndFocused: 'The student was good at catching concepts and was really interactive and focused throughout the sessions and was very interested to learn coding',
+  problemSolvingAndCreativeThinkingSkill: 'The student was really curious and filled with tons of energy also, had good problem-solving skills and creative thinking. Amazing kid!',
+};
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export const MENTOR_REPORT_COUNTRY = 'india';
@@ -515,4 +523,5 @@ export {
   auditType,
   auditSubType,
   currencyTypes,
+  studentNoteForIQ,
 };

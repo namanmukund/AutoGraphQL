@@ -4,10 +4,14 @@ const extractSlotsFromInput = (slots) => {
   const filteredSlots = {};
   const seen = new Set();
   let filteredSlotsString = '';
+  let filteredSlotsStringForFilterQuery = '';
   Object.keys(slots).forEach((slot) => {
     if (slot.includes('slot')) {
       filteredSlots[slot] = slots[slot];
       filteredSlotsString += ` ${slot}: ${slots[slot]} `;
+      if (slots[slot]) {
+        filteredSlotsStringForFilterQuery += ` {${slot}: ${slots[slot]}} `;
+      }
       seen.add(slot);
     }
   });
@@ -22,7 +26,11 @@ const extractSlotsFromInput = (slots) => {
     }
   });
 
-  return { filteredSlots, filteredSlotsString };
+  return {
+    filteredSlots,
+    filteredSlotsString,
+    filteredSlotsStringForFilterQuery,
+  };
 };
 
 export default extractSlotsFromInput;

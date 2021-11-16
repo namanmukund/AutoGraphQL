@@ -2,7 +2,9 @@ const FileBucket = `
   enum FileBucket {
     python
     email
-    TMSUploads
+    landingPage
+    editor
+    webDevelopment
   }`;
 
 export default FileBucket;

@@ -12,6 +12,8 @@ import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorSessions from '../../../utils/getMentorSessions';
 import { checkIfSlotCanBeOpenedValidation } from './utils';
+import extractSlotsFromInput from '../../../../../utils/extractSlotsFromInput';
+import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 
 // query to get mentor from mentorSessionConnectId
 const fetchMentor = (id) => `
@@ -23,6 +25,26 @@ query{
     }
   }
 }`;
+
+const getBatchSession = (batchId,
+  bookingDate,
+  slots) => `
+  {
+    batchSessions(filter:{
+      and:[
+        {batch_some:{id:"${batchId}"}}
+        {bookingDate: "${bookingDate}"}
+        {
+        and:[
+          ${slots}
+        ]
+      }
+      ]
+    }){
+      id
+    }
+  }
+`;
 
 const updateBatchSessionValidation = async (params, mutationOrQueryName, context) => {
   const {
@@ -68,6 +90,17 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     const menteeSessionSlots = { input: tempObj };
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
     checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions, null, get(batch, 'code'));
+
+    // check batch session exists for the same batch at the same slot
+    if (inputSlotTimeArray[0] !== slotTimeArray[0]) {
+      const batchId = get(batch, 'id');
+      const { filteredSlotsStringForFilterQuery } = extractSlotsFromInput(inputSlot);
+      const batchSessionRes = await callLocalGraphqlApi(getBatchSession(batchId, bookingDateFromInput, filteredSlotsStringForFilterQuery));
+      const existingBatchSessions = get(batchSessionRes, 'data.batchSessions', []);
+      if (existingBatchSessions.length) {
+        throw new SimilarDocumentAlreadyExistError();
+      }
+    }
   }
 
   context.batchSessionId = batchSessionId;

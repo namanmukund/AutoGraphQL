@@ -26,6 +26,7 @@ const BatchSession = `
     sessionRecordingLink: String
     sessionCommentByMentor: String
     attendance: [BatchAttendanceType]
+    isFeedbackSubmitted: Boolean @defauly(value: "false")
     mentorPaymentStatus: MentorPaymentStatus @defaultValue(value: "declined")
     mentorPaymentJustification: String
     paymentApprovedBy: User @relation(name: "MentorMenteeSessionPaymentApprovedUser", direction: "OneWay")
