@@ -100,7 +100,7 @@ const updateSalesOperationLeadSquared = async (salesOperationId, userInfo) => {
     mx_Notes_from_your_mentor: get(data, 'studentNote') ? studentNoteForIQ[get(data, 'studentNote')] : '',
     mx_Critical_Thinking: get(data, 'criticalThinking'),
     mx_Logical_Thinking: get(data, 'logicalThinking'),
-    mx_Communication_skills: get(data, 'communicationSkills'),
+    mx_Communication_Skills: get(data, 'communicationSkills'),
     mx_Problem_Solving: get(data, 'problemSolvingAbility'),
     mx_Creativity_Skills: get(data, 'creativeSkills'),
   };
