@@ -23,6 +23,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateCourseInVideos from '../scriptMethods/updateCourseInVideos';
 // import removeCourseFromUserAssignments from '../scriptMethods/removeCourseFromUserAssignments';
 // import generateCertificateScript from '../scriptMethods/generateCertificateScript';
+import eventResponsesToLeadsquaredScript from '../scriptMethods/eventResponsesToLeadsquaredScript';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -69,6 +70,7 @@ const temporaryScript = (async (root, params, context) => {
   // await generateCertificateScript();
   // await createUserCurrentTopicComponentStatusScript();
   // await updateQuestionBankOfPythonCourseWithCorrectPostion();
+  await eventResponsesToLeadsquaredScript();
   return {
     result: true,
   };

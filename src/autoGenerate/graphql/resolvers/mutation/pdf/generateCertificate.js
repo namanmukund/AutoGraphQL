@@ -95,7 +95,9 @@ const generateCertificateMutationResolver = async (
 
   const { input } = params;
   // eventId to be passed here too in input
-  const { userId, regenerateCertificate, eventId } = input;
+  const {
+    userId, regenerateCertificate, eventId, date,
+  } = input;
   const userRes = await callLocalGraphqlApi(fetchUser(userId, eventId));
   const users = get(userRes, 'data.users');
   // get eventCertificate based on event type
@@ -113,7 +115,10 @@ const generateCertificateMutationResolver = async (
   }
   if (users && users.length) {
     const userName = get(users, '[0].name', '');
-    const formattedDate = moment(new Date().setHours(0, 0, 0, 0)).format('DD-MM-YYYY');
+    let formattedDate = moment(new Date().setHours(0, 0, 0, 0)).format('DD-MM-YYYY');
+    if (date) {
+      formattedDate = moment(new Date(date).setHours(0, 0, 0, 0)).format('DD-MM-YYYY');
+    }
     let fetchedUrl = '';
     let eventType = '';
     let eventName = '';
