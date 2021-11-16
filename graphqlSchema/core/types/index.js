@@ -136,6 +136,7 @@ import SessionCourseReport from './sessionCourseReport';
 import GetEventCertificate from './getEventCertificate';
 import Event from './event';
 import UtmDetail from './utmDetail';
+import IqaReport from './iqaReport';
 
 export default [
   ...User,
@@ -276,4 +277,5 @@ export default [
   ...GetEventCertificate,
   ...Event,
   ...UtmDetail,
+  ...IqaReport,
 ];
