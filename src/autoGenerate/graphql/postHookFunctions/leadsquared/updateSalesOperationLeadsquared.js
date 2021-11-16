@@ -1,4 +1,5 @@
 import { get, capitalize } from 'lodash';
+import { studentNoteForIQ } from '../../../../../constants';
 import updateLeadsquared from '../../../../../services/leadsquared/updateLeadSquared';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
@@ -26,6 +27,12 @@ const salesOperationQuery = (salesOperationId) => `{
     notInterestedInCoding
     notAQualifiedLeadComment
     learningAptitudeIssue
+    criticalThinking
+    logicalThinking
+    communicationSkills
+    problemSolvingAbility
+    creativeSkills
+    studentNote
   }
 }`;
 
@@ -90,6 +97,12 @@ const updateSalesOperationLeadSquared = async (salesOperationId, userInfo) => {
     mx_Interested_Course_Model: get(data, 'courseInterestedIn'),
     mx_mentor_session_comment: get(data, 'otherReasonsComment'),
     mx_Potential_Interested_Lead: get(data, 'leadStatus') === 'hot' ? 'Yes' : 'No',
+    mx_Notes_from_your_mentor: get(data, 'studentNote') ? studentNoteForIQ[get(data, 'studentNote')] : '',
+    mx_Critical_Thinking: get(data, 'criticalThinking'),
+    mx_Logical_Thinking: get(data, 'logicalThinking'),
+    mx_Communication_skills: get(data, 'communicationSkills'),
+    mx_Problem_Solving: get(data, 'problemSolvingAbility'),
+    mx_Creativity_Skills: get(data, 'creativeSkills'),
   };
   if (get(data, 'leadStatus')) {
     if (get(data, 'leadStatus') === 'unfit') {
