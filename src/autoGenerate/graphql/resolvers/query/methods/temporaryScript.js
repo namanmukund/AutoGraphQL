@@ -23,7 +23,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateCourseInVideos from '../scriptMethods/updateCourseInVideos';
 // import removeCourseFromUserAssignments from '../scriptMethods/removeCourseFromUserAssignments';
 // import generateCertificateScript from '../scriptMethods/generateCertificateScript';
-import updateMentorMenteeSessionAuditForCompletedAudits from '../scriptMethods/updateMentorMenteeSessionAuditForCompletedAudits';
+// import updateMentorMenteeSessionAuditForCompletedAudits from '../scriptMethods/updateMentorMenteeSessionAuditForCompletedAudits';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -70,7 +70,7 @@ const temporaryScript = (async (root, params, context) => {
   // await generateCertificateScript();
   // await createUserCurrentTopicComponentStatusScript();
   // await updateQuestionBankOfPythonCourseWithCorrectPostion();
-  await updateMentorMenteeSessionAuditForCompletedAudits();
+  // await updateMentorMenteeSessionAuditForCompletedAudits();
   return {
     result: true,
   };
