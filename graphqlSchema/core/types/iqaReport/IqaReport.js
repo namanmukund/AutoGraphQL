@@ -32,6 +32,8 @@ const IqaReport = `
           ],
         rule: allow
       )
+    email: String!
+    phone: PhoneInput!
     tekieUrl: String
     assetUrl: String
     iqaScore: Int!
