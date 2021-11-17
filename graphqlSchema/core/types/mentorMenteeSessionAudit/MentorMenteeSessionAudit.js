@@ -85,6 +85,7 @@ const MentorMenteeSessionAudit = `
     totalScore: Float
     isBatchAudit: Boolean @defaultValue(value: "false")
     customSectionScore: [CustomSectionScore]
+    auditCompletedOn: Date
 }`;
 
 export default [MentorMenteeSessionAudit, mentorAuditQuestion, customSectionScore];
