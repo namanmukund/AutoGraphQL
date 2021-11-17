@@ -74,6 +74,7 @@ const User = `
     bdeProfile: BDEProfile @relation(name:"BDEProfileUser", isSubset: true)
     vertical: Vertical @defaultValue(value: "unassigned")
     eventAttandances: [EventAttendance] @relation(name:"EventAttendanceUser")
+    leadPartnerType: LeadPartnerType
   }
 `;
 
