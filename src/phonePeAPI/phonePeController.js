@@ -263,6 +263,7 @@ const paymentStatus = async (req, res) => {
   let message = '';
   let discount = 0;
   let merchantPrice = 0;
+  let productPriceAmountGlobal = 0;
   try {
     if (digest === req.headers['x-tekie-signature']) {
       log('Request is Authorized');
@@ -320,6 +321,8 @@ const paymentStatus = async (req, res) => {
               }
             }
 
+            productPriceAmountGlobal = productPriceAmount;
+
             log(`productPriceAmount ${productPriceAmount}`);
             log(`Absolute difference in price ${Math.abs(productPriceAmount - Number.parseInt(amountQuery))}`);
             if (Math.abs(productPriceAmount - Number.parseInt(amountQuery)) <= 2) {
@@ -339,7 +342,7 @@ const paymentStatus = async (req, res) => {
               paymentStatus: true
               merchantPrice: ${merchantPrice}
               merchantDiscountPrice: ${discount}
-              merchantSellingPrice: ${productPriceAmount}
+              merchantSellingPrice: ${productPriceAmountGlobal}
             }`;
             await callLocalGraphqlApi(updateUserMerchant(userMerchantIdQuery, input));
             log(`Updated user merchant doc ${userMerchantIdQuery} with transaction id ${transactionId}`);
@@ -387,6 +390,7 @@ const verifyPaymentStatus = async (req, res) => {
   let message = '';
   let discount = 0;
   let merchantPrice = 0;
+  let productPriceAmountGlobal = 0;
   try {
     if (digest === req.headers['x-tekie-signature']) {
       log('Request is Authorized');
@@ -442,6 +446,8 @@ const verifyPaymentStatus = async (req, res) => {
               }
             }
 
+            productPriceAmountGlobal = productPriceAmount;
+
             log(`productPriceAmount ${productPriceAmount}`);
 
             if (Math.abs(productPriceAmount - Number.parseInt(amountQuery)) > 2) {
@@ -462,7 +468,7 @@ const verifyPaymentStatus = async (req, res) => {
               paymentStatus: true
               merchantPrice: ${merchantPrice}
               merchantDiscountPrice: ${discount}
-              merchantSellingPrice: ${productPriceAmount}
+              merchantSellingPrice: ${productPriceAmountGlobal}
             }`;
             await callLocalGraphqlApi(updateUserMerchant(userMerchantIdQuery, input));
             log(`Updated user merchant doc ${userMerchantIdQuery} with transaction id ${transactionId}`);
