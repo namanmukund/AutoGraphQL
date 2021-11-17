@@ -201,51 +201,79 @@ const typeformWebhookController = async (req, res) => {
     const fields = get(req, 'body.form_response.definition.fields', []);
     let studentDetailsObject = {};
     const answers = get(req, 'body.form_response.answers', []);
-    // eslint-disable-next-line no-restricted-syntax
-    for (const field of fields) {
-      const { title, ref, type } = field;
-      const studentAnswer = answers.find((answer) => get(answer, 'field.ref') === ref);
-      if (title === 'Student Name') studentDetailsObject.childName = get(studentAnswer, 'text');
-      if (title === 'Parent Name') studentDetailsObject.parentName = get(studentAnswer, 'text');
-      if (title === 'Email') studentDetailsObject.parentEmail = get(studentAnswer, type);
-      if (title === 'Grade/Standard') studentDetailsObject.grade = `Grade${get(studentAnswer, 'choice.label')}`;
-      if (title === 'Phone Number') studentDetailsObject.parentPhone = getCountryCodeAndNumber(get(studentAnswer, type));
-    }
-    // include switch case based on event parameter form_response.form_id
-    // check this form_id param from typeform admin dashboard
+    const variables = get(req, 'body.form_response.variables', []);
     const formId = get(req, 'body.form_response.form_id', '');
-    let country;
-    let timezone;
-    let utmSource;
-    let utmCampaign;
-    switch (formId) {
-      case 'm47rmq7f':
-        country = 'india';
-        timezone = 'Asia/Kolkata';
-        utmSource = 'RadioStreet';
-        utmCampaign = 'Spy Squad Camp - 31th Oct';
-        break;
-      case 'N5rTz2zX':
-        country = 'india';
-        timezone = 'Asia/Kolkata';
-        utmSource = 'communityevent';
-        utmCampaign = 'canva_Nov14';
-        break;
-      default:
-        country = 'india';
-        timezone = 'Asia/Kolkata';
-        utmSource = 'RadioStreet';
-        utmCampaign = 'Spy Squad Camp - 31th Oct';
-        break;
+
+    // Form - IQA test, Grade6 and above
+    if (formId === 'weKBAxh5') {
+      // loop over fields and store details in object, then calculate score and create IQA report
+      // eslint-disable-next-line no-restricted-syntax
+      for (const variable of variables) {
+        const { key, number } = variable;
+        if (key === 'global_rank') studentDetailsObject.globalRank = number;
+        if (key === 'iqa_rank') studentDetailsObject.iqaRank = number;
+        if (key === 'score') studentDetailsObject.iqaScore = number;
+      }
+      studentDetailsObject.maximumScore = 100;
+      // eslint-disable-next-line no-restricted-syntax
+      for (const field of fields) {
+        const { title, ref, type } = field;
+        const studentAnswer = answers.find((answer) => get(answer, 'field.ref') === ref);
+        if (title === 'Child Name') studentDetailsObject.childName = get(studentAnswer, 'text');
+        if (title === 'Parent Name') studentDetailsObject.parentName = get(studentAnswer, 'text');
+        if (title === 'Email ID') studentDetailsObject.parentEmail = get(studentAnswer, type);
+        if (title === 'Student Grade') studentDetailsObject.grade = `Grade${get(studentAnswer, 'choice.label')}`;
+        if (title === 'Phone number ') studentDetailsObject.parentPhone = getCountryCodeAndNumber(get(studentAnswer, type));
+      }
+    } else if (formId === '') {
+      // TODO : loop over fields and store details in object, then calculate score and create IQA report
+
+    } else {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const field of fields) {
+        const { title, ref, type } = field;
+        const studentAnswer = answers.find((answer) => get(answer, 'field.ref') === ref);
+        if (title === 'Student Name') studentDetailsObject.childName = get(studentAnswer, 'text');
+        if (title === 'Parent Name') studentDetailsObject.parentName = get(studentAnswer, 'text');
+        if (title === 'Email') studentDetailsObject.parentEmail = get(studentAnswer, type);
+        if (title === 'Grade/Standard') studentDetailsObject.grade = `Grade${get(studentAnswer, 'choice.label')}`;
+        if (title === 'Phone Number') studentDetailsObject.parentPhone = getCountryCodeAndNumber(get(studentAnswer, type));
+      }
+      // include switch case based on event parameter form_response.form_id
+      // check this form_id param from typeform admin dashboard
+      let country;
+      let timezone;
+      let utmSource;
+      let utmCampaign;
+      switch (formId) {
+        case 'm47rmq7f':
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'RadioStreet';
+          utmCampaign = 'Spy Squad Camp - 31th Oct';
+          break;
+        case 'N5rTz2zX':
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'canva_Nov14';
+          break;
+        default:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'RadioStreet';
+          utmCampaign = 'Spy Squad Camp - 31th Oct';
+          break;
+      }
+      studentDetailsObject = {
+        ...studentDetailsObject,
+        country,
+        timezone,
+        utmSource,
+        utmCampaign,
+      };
+      usersData(studentDetailsObject, formId);
     }
-    studentDetailsObject = {
-      ...studentDetailsObject,
-      country,
-      timezone,
-      utmSource,
-      utmCampaign,
-    };
-    usersData(studentDetailsObject, formId);
     res.sendStatus(200);
   } else {
     res.status(401).send('Unauthorized');
