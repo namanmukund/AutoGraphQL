@@ -309,23 +309,25 @@
                             </tr>
                             <tr>
                                 <td style="padding-top: 20px">
-                                    <div style="display: flex; justify-content: center; width: 100%;">
-                                        <div>
-                                            <canvas id="myChart" style="width:100%;max-width:100%"></canvas>
-                                        </div>
-                                        <div>
-                                            <div style="font-size: 12px; color: #004AAD;">
-                                                IQA Rank
+                                    <div style="display: flex; justify-content: center; width: 100%;" >
+                                        <div style="display: flex; justify-content: center; width: 800%;">
+                                            <div style="width: 100%;display: flex; justify-content: flex-end;" >
+                                                <canvas id="myChart" style="width:100%;max-width:100%"></canvas>
                                             </div>
-                                            <div style="font-size: 15px; font-weight: 700; color: black;">
-                                                21ST
-                                            </div>
-
-                                            <div style="font-size: 12px; color: #004AAD;">
-                                                GLOBAL RANK
-                                            </div>
-                                            <div style="font-size: 15px; font-weight: 700;">
-                                                1211
+                                            <div style="width: 100%;" >
+                                                <div style="font-size: 12px; color: #004AAD;">
+                                                    IQA Rank
+                                                </div>
+                                                <div style="font-size: 15px; font-weight: 700; color: black;">
+                                                    21ST
+                                                </div>
+    
+                                                <div style="font-size: 12px; color: #004AAD;">
+                                                    GLOBAL RANK
+                                                </div>
+                                                <div style="font-size: 15px; font-weight: 700;">
+                                                    1211
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -700,10 +702,16 @@
                         minFontSize: 25, // Default is 20 (in px), set to false and text will not wrap.
                         lineHeight: 25 // Default is 25 (in px), used for when text wraps
                     },
-                    arc:{
-                        borderWidth: 3
+                    arc: {
+                        borderWidth: 1
                     }
-                }
+                },
+                layout: {
+                    padding: 0,
+                    margin: 0
+                },
+                percentageInnerCutout: 50,
+                cutoutPercentage: 90
             }
         });
     </script>
