@@ -446,7 +446,7 @@ export const VERTICALS = [
 ];
 
 export const GRADE = [
-  'Grade1',
+  'grade1',
   'Grade2',
   'Grade3',
   'Grade4',

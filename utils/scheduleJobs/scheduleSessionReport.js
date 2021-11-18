@@ -8,6 +8,8 @@ import {
 import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
 import { log } from '../log';
 
+const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
+
 const masterQuery = (todayStartDate,
   todayEndDate,
   otherDayStartDate,
@@ -304,7 +306,7 @@ const sessionGradeReportQuery = (date, country, vertical) => `
     sessionGradeReports(filter: {
       and: [
         {date: "${date}"},
-        {country:${country}}
+        {country:${country}},
         {vertical:${vertical}}
       ]
     }){
@@ -427,6 +429,161 @@ mutation{
 }
 `;
 
+// const addSessionGradeReport = async (input) => {
+//   const query = `
+//     mutation($input: SessionGradeReportInput!){
+//       addSessionGradeReport(
+//       input:$input
+//       ){
+//         id
+//       }
+//     }
+//   `;
+//   const variables = {
+//     input,
+//   };
+//   const res = await callLocalGraphqlApi(query, '', variables);
+//   return get(res, 'data.addSessionGradeReport.id');
+// };
+
+const addSessionGradeReport = (input) => `
+  mutation{
+  addSessionGradeReport(input: {
+    date: "${input.date}",
+    country: ${input.country},
+    vertical: ${input.vertical},
+    grade1: {
+      registered: ${input.grade1.registered},
+      booked: ${input.grade1.booked},
+      demoCompleted: ${input.grade1.demoCompleted},
+      converted: ${input.grade1.converted},
+      phoneVerified: ${input.grade1.phoneVerified},
+      bookedBySelf: ${input.grade1.bookedBySelf},
+      bookedByAgent: ${input.grade1.bookedByAgent}
+    },
+    grade2: {
+      registered: ${input.grade1.registered},
+      booked: ${input.grade1.booked},
+      demoCompleted: ${input.grade1.demoCompleted},
+      converted: ${input.grade1.converted},
+      phoneVerified: ${input.grade1.phoneVerified},
+      bookedBySelf: ${input.grade1.bookedBySelf},
+      bookedByAgent: ${input.grade1.bookedByAgent}
+    },
+    grade3: {
+      registered: ${input.grade1.registered},
+      booked: ${input.grade1.booked},
+      demoCompleted: ${input.grade1.demoCompleted},
+      converted: ${input.grade1.converted},
+      phoneVerified: ${input.grade1.phoneVerified},
+      bookedBySelf: ${input.grade1.bookedBySelf},
+      bookedByAgent: ${input.grade1.bookedByAgent}
+    },
+    grade4: {
+      registered: ${input.grade1.registered},
+      booked: ${input.grade1.booked},
+      demoCompleted: ${input.grade1.demoCompleted},
+      converted: ${input.grade1.converted},
+      phoneVerified: ${input.grade1.phoneVerified},
+      bookedBySelf: ${input.grade1.bookedBySelf},
+      bookedByAgent: ${input.grade1.bookedByAgent}
+    },
+    grade5: {
+      registered: ${input.grade1.registered},
+      booked: ${input.grade1.booked},
+      demoCompleted: ${input.grade1.demoCompleted},
+      converted: ${input.grade1.converted},
+      phoneVerified: ${input.grade1.phoneVerified},
+      bookedBySelf: ${input.grade1.bookedBySelf},
+      bookedByAgent: ${input.grade1.bookedByAgent}
+    },
+    grade6: {
+      registered: ${input.grade1.registered},
+      booked: ${input.grade1.booked},
+      demoCompleted: ${input.grade1.demoCompleted},
+      converted: ${input.grade1.converted},
+      phoneVerified: ${input.grade1.phoneVerified},
+      bookedBySelf: ${input.grade1.bookedBySelf},
+      bookedByAgent: ${input.grade1.bookedByAgent}
+    },
+    grade7: {
+      registered: ${input.grade1.registered},
+      booked: ${input.grade1.booked},
+      demoCompleted: ${input.grade1.demoCompleted},
+      converted: ${input.grade1.converted},
+      phoneVerified: ${input.grade1.phoneVerified},
+      bookedBySelf: ${input.grade1.bookedBySelf},
+      bookedByAgent: ${input.grade1.bookedByAgent}
+    },
+    grade8: {
+      registered: ${input.grade1.registered},
+      booked: ${input.grade1.booked},
+      demoCompleted: ${input.grade1.demoCompleted},
+      converted: ${input.grade1.converted},
+      phoneVerified: ${input.grade1.phoneVerified},
+      bookedBySelf: ${input.grade1.bookedBySelf},
+      bookedByAgent: ${input.grade1.bookedByAgent}
+    },
+    grade9: {
+      registered: ${input.grade1.registered},
+      booked: ${input.grade1.booked},
+      demoCompleted: ${input.grade1.demoCompleted},
+      converted: ${input.grade1.converted},
+      phoneVerified: ${input.grade1.phoneVerified},
+      bookedBySelf: ${input.grade1.bookedBySelf},
+      bookedByAgent: ${input.grade1.bookedByAgent}
+    },
+    grade10: {
+      registered: ${input.grade1.registered},
+      booked: ${input.grade1.booked},
+      demoCompleted: ${input.grade1.demoCompleted},
+      converted: ${input.grade1.converted},
+      phoneVerified: ${input.grade1.phoneVerified},
+      bookedBySelf: ${input.grade1.bookedBySelf},
+      bookedByAgent: ${input.grade1.bookedByAgent}
+    },
+    grade11: {
+      registered: ${input.grade1.registered},
+      booked: ${input.grade1.booked},
+      demoCompleted: ${input.grade1.demoCompleted},
+      converted: ${input.grade1.converted},
+      phoneVerified: ${input.grade1.phoneVerified},
+      bookedBySelf: ${input.grade1.bookedBySelf},
+      bookedByAgent: ${input.grade1.bookedByAgent}
+    },
+    grade12: {
+      registered: ${input.grade1.registered},
+      booked: ${input.grade1.booked},
+      demoCompleted: ${input.grade1.demoCompleted},
+      converted: ${input.grade1.converted},
+      phoneVerified: ${input.grade1.phoneVerified},
+      bookedBySelf: ${input.grade1.bookedBySelf},
+      bookedByAgent: ${input.grade1.bookedByAgent}
+    },
+  }){
+    id
+  }
+}
+`;
+
+const updateSessionGradeReport = async (input, id) => {
+  const query = `
+mutation($input: SessionGradeReportUpdate!){
+  updateSessionGradeReport(
+  input:$input
+  id: "${id}"
+  ){
+    id
+  }
+}
+`;
+  const variables = {
+    input,
+  };
+  const res = await callLocalGraphqlApi(query, '', variables);
+  return get(res, 'data.updateSessionGradeReport.id');
+};
+
 const generateSessionReport = async (numDaysToRunQuery) => {
   // setting current date (start and end times)
   // console.log('start');
@@ -456,6 +613,7 @@ const generateSessionReport = async (numDaysToRunQuery) => {
       for (const vertical of VERTICALS) {
         let forwardCount = 0;
         const sessionReportsObj = {};
+        const sessionGradeReportsObj = {};
         sessionReportsObj.hasRescheduled = 0;
         sessionReportsObj.internetIssue = 0;
         sessionReportsObj.zoomIssue = 0;
@@ -502,6 +660,10 @@ const generateSessionReport = async (numDaysToRunQuery) => {
           filterQuery.mentorMenteeSessionsVertical = '{menteeSession_some: {user_some: {vertical: b2b2c}}}';
           filterQuery.sessionLogsVertical = '{client_some: {vertical: b2b2c}}';
         }
+
+        let totalBookedByGrade = 0;
+        let totalCompletedByGrade = 0;
+        let totalConvertedByGrade = 0;
         // gathering data for past 4 days
         while (totalLoopDays > 0) {
           let registered = 0;
@@ -511,27 +673,28 @@ const generateSessionReport = async (numDaysToRunQuery) => {
           let phoneVerified = 0;
           let bookedBySelf = 0;
           let bookedByAgent = 0;
-
-          const sessionGradeReportObj = {};
+          sessionGradeReportsObj.country = country;
+          sessionGradeReportsObj.date = new Date(todayStartDate);
+          sessionGradeReportsObj.vertical = vertical;
 
           for (const grade of GRADE) {
             const otherDayStartDate = new Date(moment(todayStartDate).subtract(forwardCount, 'days').toISOString());
             const otherDayEndDate = new Date(moment(todayEndDate).subtract(forwardCount, 'days').toISOString());
             otherDayStartDate.setHours(0, 0, 0, 0);
             otherDayEndDate.setHours(23, 59, 59, 999);
-            filterQuery.grade = `{grade: ${grade}}`;
+            filterQuery.grade = `{grade: ${capitalize(grade)}}`;
             const queryRes = await callLocalGraphqlApi(masterQuery(todayStartDate, todayEndDate, otherDayStartDate, otherDayEndDate, country, filterQuery));
             const data = get(queryRes, 'data', {});
             log(`getData for date ${otherDayStartDate} country ${country} grade ${grade}`);
 
-            sessionGradeReportObj[`${grade}`] = {};
-            sessionGradeReportObj[`${grade}`].registered = data.registeredUsers.count;
-            sessionGradeReportObj[`${grade}`].booked = data.bookedSessions.count;
-            sessionGradeReportObj[`${grade}`].demoCompleted = data.completedSessions.count;
-            sessionGradeReportObj[`${grade}`].converted = data.totalConvertedUsers.count;
-            sessionGradeReportObj[`${grade}`].phoneVerified = data.verifiedUsers.count;
-            sessionGradeReportObj[`${grade}`].bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
-            sessionGradeReportObj[`${grade}`].bookedByAgent = data.bookedSessionsByAgent.count;
+            sessionGradeReportsObj[`${grade}`] = {};
+            sessionGradeReportsObj[`${grade}`].registered = data.registeredUsers.count;
+            sessionGradeReportsObj[`${grade}`].booked = data.bookedSessions.count;
+            sessionGradeReportsObj[`${grade}`].demoCompleted = data.completedSessions.count;
+            sessionGradeReportsObj[`${grade}`].converted = data.totalConvertedUsers.count;
+            sessionGradeReportsObj[`${grade}`].phoneVerified = data.verifiedUsers.count;
+            sessionGradeReportsObj[`${grade}`].bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
+            sessionGradeReportsObj[`${grade}`].bookedByAgent = data.bookedSessionsByAgent.count;
 
             registered += data.registeredUsers.count;
             booked += data.bookedSessions.count;
@@ -540,6 +703,12 @@ const generateSessionReport = async (numDaysToRunQuery) => {
             phoneVerified += data.verifiedUsers.count;
             bookedBySelf += data.bookedSessions.count - data.bookedSessionsByAgent.count;
             bookedByAgent += data.bookedSessionsByAgent.count;
+
+            if (totalLoopDays === SESSION_REPORT_DAYS) {
+              totalBookedByGrade += data.totalBookedSessionsToday.count;
+              totalCompletedByGrade += data.totalCompletedSessionsToday.count;
+              totalConvertedByGrade += data.totalConvertedUsers.count;
+            }
 
             for (const sessionLog of get(data, 'sessionLogs')) {
               sessionReportsObj.hasRescheduled = sessionLog.hasRescheduled ? sessionReportsObj.hasRescheduled += 1 : sessionReportsObj.hasRescheduled;
@@ -618,25 +787,25 @@ const generateSessionReport = async (numDaysToRunQuery) => {
             sessionReportsObj.registeredThreeDaysBefore.bookedByAgent = bookedByAgent;
           }
 
-          sessionReportsObj.totalBooked = booked;
-          sessionReportsObj.totalDemoCompleted = demoCompleted;
-          sessionReportsObj.totalConvertedUsers = converted;
-          sessionReportsObj.country = country;
-          sessionReportsObj.date = todayStartDate;
-          sessionReportsObj.vertical = vertical;
-
-          // populate session reschedule reason count
-
           forwardCount += 1;
           totalLoopDays -= 1;
+          console.log('totalLoopDays', totalLoopDays);
         }
+
+        sessionReportsObj.totalBooked = totalBookedByGrade;
+        sessionReportsObj.totalDemoCompleted = totalCompletedByGrade;
+        sessionReportsObj.totalConvertedUsers = totalConvertedByGrade;
+        sessionReportsObj.country = country;
+        sessionReportsObj.date = todayStartDate;
+        sessionReportsObj.vertical = vertical;
 
         const sessionGradeReportQueryRes = await callLocalGraphqlApi(sessionGradeReportQuery(todayStartDate, country, vertical));
         const sessionGradeReportId = get(sessionGradeReportQueryRes, 'data.sessionGradeReports[0].id', '');
+        console.log('sessionGradeReportId', sessionGradeReportId);
+        console.log(JSON.stringify(sessionGradeReportsObj));
         if (sessionGradeReportId) {
           // update exisiting session report
-          const updateSessionGradeReportRes = await callLocalGraphqlApi(updateSessionGradeReport(sessionGradeReportsObj, sessionGradeReportId));
-          const sessionGradeReportUpdatedId = get(updateSessionGradeReportRes, 'data.updateSessionGradeReport.id', '');
+          const sessionGradeReportUpdatedId = await updateSessionGradeReport(sessionGradeReportsObj, sessionGradeReportId);
           if (sessionGradeReportUpdatedId) {
             log(`*** SessionGradeReport updated for date : ${todayStartDate}, vertical: ${vertical} and country : ${country}`);
           }
