@@ -254,6 +254,10 @@
                 font-weight: 500;
             }
         }
+
+        .star {
+            color: #FAD02C;
+        }
     </style>
 </head>
 
@@ -309,24 +313,32 @@
                             </tr>
                             <tr>
                                 <td style="padding-top: 20px">
-                                    <div style="display: flex; justify-content: center; width: 100%;" >
-                                        <div style="display: flex; justify-content: center; width: 800%;">
-                                            <div style="width: 100%;display: flex; justify-content: flex-end;" >
-                                                <canvas id="myChart" style="width:100%;max-width:100%"></canvas>
+                                    <div style="display: flex; justify-content: center; width: 100%;">
+                                        <div style="display: flex; justify-content: center; width: 80%;">
+                                            <div style="width: 100%;display: flex; justify-content: center;">
+                                                <div class="dial">
+                                                    IQA SCORE
+                                                </div>
                                             </div>
-                                            <div style="width: 100%;" >
-                                                <div style="font-size: 12px; color: #004AAD;">
-                                                    IQA Rank
+                                            <div
+                                                style="width: 100%; display: flex; flex-direction: column; justify-content: center;">
+                                                <div>
+                                                    <div style="font-size: 13px; color: #004AAD;">
+                                                        IQA Rank
+                                                    </div>
+                                                    <div
+                                                        style="font-size: 20px; font-weight: 700; color: black; margin-bottom: 10px;">
+                                                        21ST
+                                                    </div>
                                                 </div>
-                                                <div style="font-size: 15px; font-weight: 700; color: black;">
-                                                    21ST
-                                                </div>
-    
-                                                <div style="font-size: 12px; color: #004AAD;">
-                                                    GLOBAL RANK
-                                                </div>
-                                                <div style="font-size: 15px; font-weight: 700;">
-                                                    1211
+
+                                                <div>
+                                                    <div style="font-size: 13px; color: #004AAD;">
+                                                        GLOBAL RANK
+                                                    </div>
+                                                    <div style="font-size: 20px; font-weight: 700; color: black;">
+                                                        1211
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -374,7 +386,7 @@
                                         <div style="display: flex; justify-content: space-evenly;">
                                             <div>
                                                 <div class='knowYourMentorContainer'
-                                                    style='display: inline-block; border-right: 1px solid rgba(216, 216, 216, 0.5); padding-right: 34px; padding-top: 12px; padding-bottom: 12px;'>
+                                                    style='display: inline-block; border-right: 1px solid rgba(216, 216, 216, 0.5); padding-right: 34px; padding-top: 12px; padding-bottom: 12px; text-align: center;'>
                                                     <div>
                                                         <table>
                                                             <tr>
@@ -386,8 +398,7 @@
                                                             </tr>
                                                             <tr>
                                                                 <td>
-                                                                    <div
-                                                                        style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; font-size: 16px; color: #504F4F; font-weight: bold; margin-top: 8px">
+                                                                    <div class="data">
                                                                         <%= mentorName %>
                                                                     </div>
                                                                 </td>
@@ -396,11 +407,16 @@
                                                                 <td>
                                                                     <div
                                                                         style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; font-size: 16px; color: #00ADE6; font-weight: bold;">
-                                                                        <span style="margin-right: 4px;">&#9733;</span>
-                                                                        <span style="margin-right: 4px;">&#9733;</span>
-                                                                        <span style="margin-right: 4px;">&#9733;</span>
-                                                                        <span style="margin-right: 4px;">&#9733;</span>
-                                                                        <span style="margin-right: 4px;">&#9733;</span>
+                                                                        <span class="star"
+                                                                            style="margin-right: 4px;">&#9733;</span>
+                                                                        <span class="star"
+                                                                            style="margin-right: 4px;">&#9733;</span>
+                                                                        <span class="star"
+                                                                            style="margin-right: 4px;">&#9733;</span>
+                                                                        <span class="star"
+                                                                            style="margin-right: 4px;">&#9733;</span>
+                                                                        <span
+                                                                            style="margin-right: 4px; color: grey;">&#9733;</span>
                                                                     </div>
                                                                 </td>
                                                             </tr>
@@ -469,6 +485,9 @@
                                         <div>
                                             <button
                                                 style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; color: #FFFFFF; margin: 20px; border: none; background-image: linear-gradient(to left, #00ADE6, #3770E3); padding: 15px; border-radius: 40px; font-size: 12px;">
+                                                <div
+                                                    style='display: inline-block; width: 15px; height: 15px; background-image: url(https://img.icons8.com/ios-filled/24/ffffff/calendar.png); background-size: cover; margin-right: 8px; vertical-align:middle;'>
+                                                </div>
                                                 Book My Counselling Session
                                             </button>
                                         </div>
@@ -512,10 +531,10 @@
                                     <a href="http://tekie.app.link/sgnArKNfwdb"
                                         style="border: 1px solid #555555;width: fit-content;background-color: #fff;display: block;border-radius: 40px;text-decoration: none;color: white;font-family: Lato,'Open Sans',Helvetica, Roboto, sans-serif;text-transform: uppercase;box-sizing: border-box;margin:auto;margin-bottom: 10px;padding: 5px 20px">
                                         <div
-                                            style='display: inline-block; width: 15px; height: 15px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/whatsappIcon.png); background-size: cover; margin-right: 8px; vertical-align:middle;'>
+                                            style='display: inline-block; width: 15px; height: 15px; background-image: url(https://img.icons8.com/material-outlined/24/000000/phone.png); background-size: cover; margin-right: 8px; vertical-align:middle;'>
                                         </div>
                                         <div
-                                            style='display: inline-block; vertical-align:middle; color: #4CAF50; font-size: 15px;'>
+                                            style='display: inline-block; vertical-align:middle; color: rgba(0, 0, 0, 0.685); font-size: 15px;'>
                                             Call us at +91-8047483415
                                         </div>
                                     </a>
