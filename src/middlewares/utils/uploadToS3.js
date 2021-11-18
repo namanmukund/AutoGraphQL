@@ -14,7 +14,7 @@ const uploadToS3 = (Key, Body, fileMimeType = null) => new Promise((resolve, rej
   if (typeof fileMimeType === 'string'
     && ALLOWED_MIME_TYPES.some((type) => fileMimeType.includes(type))
   ) {
-    s3ContentType.ContentType = fileMimeType;
+    S3ContentType.ContentType = fileMimeType;
   }
   S3.putObject({
     Bucket: s3Bucket,
