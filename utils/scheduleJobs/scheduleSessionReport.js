@@ -456,6 +456,21 @@ const generateSessionReport = async (numDaysToRunQuery) => {
       for (const vertical of VERTICALS) {
         let forwardCount = 0;
         const sessionReportsObj = {};
+        sessionReportsObj.hasRescheduled = 0;
+        sessionReportsObj.internetIssue = 0;
+        sessionReportsObj.zoomIssue = 0;
+        sessionReportsObj.laptopIssue = 0;
+        sessionReportsObj.chromeIssue = 0;
+        sessionReportsObj.powerCut = 0;
+        sessionReportsObj.notResponseAndDidNotTurnUp = 0;
+        sessionReportsObj.classDurationExceeded = 0;
+        sessionReportsObj.turnedUpButLeftAbruptly = 0;
+        sessionReportsObj.leadNotVerifiedProperly = 0;
+        sessionReportsObj.otherReasonForReschedule = 0;
+        sessionReportsObj.webSiteLoadingIssue = 0;
+        sessionReportsObj.videoNotLoading = 0;
+        sessionReportsObj.codePlaygroundIssue = 0;
+        sessionReportsObj.logInOTPError = 0;
         const filterQuery = {};
         // skip over all other countries if b2b or b2b2c (can change in future)
         /* eslint-disable no-continue */
@@ -507,6 +522,7 @@ const generateSessionReport = async (numDaysToRunQuery) => {
             filterQuery.grade = `{grade: ${grade}}`;
             const queryRes = await callLocalGraphqlApi(masterQuery(todayStartDate, todayEndDate, otherDayStartDate, otherDayEndDate, country, filterQuery));
             const data = get(queryRes, 'data', {});
+            log(`getData for date ${otherDayStartDate} country ${country} grade ${grade}`);
 
             sessionGradeReportObj[`${grade}`] = {};
             sessionGradeReportObj[`${grade}`].registered = data.registeredUsers.count;
@@ -524,9 +540,45 @@ const generateSessionReport = async (numDaysToRunQuery) => {
             phoneVerified += data.verifiedUsers.count;
             bookedBySelf += data.bookedSessions.count - data.bookedSessionsByAgent.count;
             bookedByAgent += data.bookedSessionsByAgent.count;
+
+            for (const sessionLog of get(data, 'sessionLogs')) {
+              sessionReportsObj.hasRescheduled = sessionLog.hasRescheduled ? sessionReportsObj.hasRescheduled += 1 : sessionReportsObj.hasRescheduled;
+              sessionReportsObj.internetIssue = sessionLog.internetIssue ? sessionReportsObj.internetIssue += 1 : sessionReportsObj.internetIssue;
+              sessionReportsObj.zoomIssue = sessionLog.zoomIssue ? sessionReportsObj.zoomIssue += 1 : sessionReportsObj.zoomIssue;
+              sessionReportsObj.laptopIssue = sessionLog.laptopIssue ? sessionReportsObj.laptopIssue += 1 : sessionReportsObj.laptopIssue;
+              sessionReportsObj.chromeIssue = sessionLog.chromeIssue ? sessionReportsObj.chromeIssue += 1 : sessionReportsObj.chromeIssue;
+              sessionReportsObj.powerCut = sessionLog.powerCut ? sessionReportsObj.powerCut += 1 : sessionReportsObj.powerCut;
+              sessionReportsObj.notResponseAndDidNotTurnUp = sessionLog.notResponseAndDidNotTurnUp ? sessionReportsObj.notResponseAndDidNotTurnUp += 1 : sessionReportsObj.notResponseAndDidNotTurnUp;
+              sessionReportsObj.classDurationExceeded = sessionLog.classDurationExceeded ? sessionReportsObj.classDurationExceeded += 1 : sessionReportsObj.classDurationExceeded;
+              sessionReportsObj.turnedUpButLeftAbruptly = sessionLog.turnedUpButLeftAbruptly ? sessionReportsObj.turnedUpButLeftAbruptly += 1 : sessionReportsObj.turnedUpButLeftAbruptly;
+              sessionReportsObj.leadNotVerifiedProperly = sessionLog.leadNotVerifiedProperly ? sessionReportsObj.leadNotVerifiedProperly += 1 : sessionReportsObj.leadNotVerifiedProperly;
+              sessionReportsObj.otherReasonForReschedule = sessionLog.otherReasonForReschedule ? sessionReportsObj.otherReasonForReschedule += 1 : sessionReportsObj.otherReasonForReschedule;
+              sessionReportsObj.webSiteLoadingIssue = sessionLog.webSiteLoadingIssue ? sessionReportsObj.webSiteLoadingIssue += 1 : sessionReportsObj.webSiteLoadingIssue;
+              sessionReportsObj.videoNotLoading = sessionLog.videoNotLoading ? sessionReportsObj.videoNotLoading += 1 : sessionReportsObj.videoNotLoading;
+              sessionReportsObj.codePlaygroundIssue = sessionLog.codePlaygroundIssue ? sessionReportsObj.codePlaygroundIssue += 1 : sessionReportsObj.codePlaygroundIssue;
+              sessionReportsObj.logInOTPError = sessionLog.logInOTPError ? sessionReportsObj.logInOTPError += 1 : sessionReportsObj.logInOTPError;
+            }
+
+            for (const mmSession of get(data, 'mentorMenteeSessions')) {
+              sessionReportsObj.hasRescheduled = mmSession.hasRescheduled ? sessionReportsObj.hasRescheduled += 1 : sessionReportsObj.hasRescheduled;
+              sessionReportsObj.internetIssue = mmSession.internetIssue ? sessionReportsObj.internetIssue += 1 : sessionReportsObj.internetIssue;
+              sessionReportsObj.zoomIssue = mmSession.zoomIssue ? sessionReportsObj.zoomIssue += 1 : sessionReportsObj.zoomIssue;
+              sessionReportsObj.laptopIssue = mmSession.laptopIssue ? sessionReportsObj.laptopIssue += 1 : sessionReportsObj.laptopIssue;
+              sessionReportsObj.chromeIssue = mmSession.chromeIssue ? sessionReportsObj.chromeIssue += 1 : sessionReportsObj.chromeIssue;
+              sessionReportsObj.powerCut = mmSession.powerCut ? sessionReportsObj.powerCut += 1 : sessionReportsObj.powerCut;
+              sessionReportsObj.notResponseAndDidNotTurnUp = mmSession.notResponseAndDidNotTurnUp ? sessionReportsObj.notResponseAndDidNotTurnUp += 1 : sessionReportsObj.notResponseAndDidNotTurnUp;
+              sessionReportsObj.classDurationExceeded = mmSession.classDurationExceeded ? sessionReportsObj.classDurationExceeded += 1 : sessionReportsObj.classDurationExceeded;
+              sessionReportsObj.turnedUpButLeftAbruptly = mmSession.turnedUpButLeftAbruptly ? sessionReportsObj.turnedUpButLeftAbruptly += 1 : sessionReportsObj.turnedUpButLeftAbruptly;
+              sessionReportsObj.leadNotVerifiedProperly = mmSession.leadNotVerifiedProperly ? sessionReportsObj.leadNotVerifiedProperly += 1 : sessionReportsObj.leadNotVerifiedProperly;
+              sessionReportsObj.otherReasonForReschedule = mmSession.otherReasonForReschedule ? sessionReportsObj.otherReasonForReschedule += 1 : sessionReportsObj.otherReasonForReschedule;
+              sessionReportsObj.webSiteLoadingIssue = mmSession.webSiteLoadingIssue ? sessionReportsObj.webSiteLoadingIssue += 1 : sessionReportsObj.webSiteLoadingIssue;
+              sessionReportsObj.videoNotLoading = mmSession.videoNotLoading ? sessionReportsObj.videoNotLoading += 1 : sessionReportsObj.videoNotLoading;
+              sessionReportsObj.codePlaygroundIssue = mmSession.codePlaygroundIssue ? sessionReportsObj.codePlaygroundIssue += 1 : sessionReportsObj.codePlaygroundIssue;
+              sessionReportsObj.logInOTPError = mmSession.logInOTPError ? sessionReportsObj.logInOTPError += 1 : sessionReportsObj.logInOTPError;
+            }
           }
 
-          // console.log(data);
+          console.log(1);
           if (forwardCount === 0) {
             // we are in today bucket
             sessionReportsObj.registeredSameDay = {};
@@ -574,57 +626,6 @@ const generateSessionReport = async (numDaysToRunQuery) => {
           sessionReportsObj.vertical = vertical;
 
           // populate session reschedule reason count
-          sessionReportsObj.hasRescheduled = 0;
-          sessionReportsObj.internetIssue = 0;
-          sessionReportsObj.zoomIssue = 0;
-          sessionReportsObj.laptopIssue = 0;
-          sessionReportsObj.chromeIssue = 0;
-          sessionReportsObj.powerCut = 0;
-          sessionReportsObj.notResponseAndDidNotTurnUp = 0;
-          sessionReportsObj.classDurationExceeded = 0;
-          sessionReportsObj.turnedUpButLeftAbruptly = 0;
-          sessionReportsObj.leadNotVerifiedProperly = 0;
-          sessionReportsObj.otherReasonForReschedule = 0;
-          sessionReportsObj.webSiteLoadingIssue = 0;
-          sessionReportsObj.videoNotLoading = 0;
-          sessionReportsObj.codePlaygroundIssue = 0;
-          sessionReportsObj.logInOTPError = 0;
-
-          for (const sessionLog of get(data, 'sessionLogs')) {
-            sessionReportsObj.hasRescheduled = sessionLog.hasRescheduled ? sessionReportsObj.hasRescheduled += 1 : sessionReportsObj.hasRescheduled;
-            sessionReportsObj.internetIssue = sessionLog.internetIssue ? sessionReportsObj.internetIssue += 1 : sessionReportsObj.internetIssue;
-            sessionReportsObj.zoomIssue = sessionLog.zoomIssue ? sessionReportsObj.zoomIssue += 1 : sessionReportsObj.zoomIssue;
-            sessionReportsObj.laptopIssue = sessionLog.laptopIssue ? sessionReportsObj.laptopIssue += 1 : sessionReportsObj.laptopIssue;
-            sessionReportsObj.chromeIssue = sessionLog.chromeIssue ? sessionReportsObj.chromeIssue += 1 : sessionReportsObj.chromeIssue;
-            sessionReportsObj.powerCut = sessionLog.powerCut ? sessionReportsObj.powerCut += 1 : sessionReportsObj.powerCut;
-            sessionReportsObj.notResponseAndDidNotTurnUp = sessionLog.notResponseAndDidNotTurnUp ? sessionReportsObj.notResponseAndDidNotTurnUp += 1 : sessionReportsObj.notResponseAndDidNotTurnUp;
-            sessionReportsObj.classDurationExceeded = sessionLog.classDurationExceeded ? sessionReportsObj.classDurationExceeded += 1 : sessionReportsObj.classDurationExceeded;
-            sessionReportsObj.turnedUpButLeftAbruptly = sessionLog.turnedUpButLeftAbruptly ? sessionReportsObj.turnedUpButLeftAbruptly += 1 : sessionReportsObj.turnedUpButLeftAbruptly;
-            sessionReportsObj.leadNotVerifiedProperly = sessionLog.leadNotVerifiedProperly ? sessionReportsObj.leadNotVerifiedProperly += 1 : sessionReportsObj.leadNotVerifiedProperly;
-            sessionReportsObj.otherReasonForReschedule = sessionLog.otherReasonForReschedule ? sessionReportsObj.otherReasonForReschedule += 1 : sessionReportsObj.otherReasonForReschedule;
-            sessionReportsObj.webSiteLoadingIssue = sessionLog.webSiteLoadingIssue ? sessionReportsObj.webSiteLoadingIssue += 1 : sessionReportsObj.webSiteLoadingIssue;
-            sessionReportsObj.videoNotLoading = sessionLog.videoNotLoading ? sessionReportsObj.videoNotLoading += 1 : sessionReportsObj.videoNotLoading;
-            sessionReportsObj.codePlaygroundIssue = sessionLog.codePlaygroundIssue ? sessionReportsObj.codePlaygroundIssue += 1 : sessionReportsObj.codePlaygroundIssue;
-            sessionReportsObj.logInOTPError = sessionLog.logInOTPError ? sessionReportsObj.logInOTPError += 1 : sessionReportsObj.logInOTPError;
-          }
-
-          for (const mmSession of get(data, 'mentorMenteeSessions')) {
-            sessionReportsObj.hasRescheduled = mmSession.hasRescheduled ? sessionReportsObj.hasRescheduled += 1 : sessionReportsObj.hasRescheduled;
-            sessionReportsObj.internetIssue = mmSession.internetIssue ? sessionReportsObj.internetIssue += 1 : sessionReportsObj.internetIssue;
-            sessionReportsObj.zoomIssue = mmSession.zoomIssue ? sessionReportsObj.zoomIssue += 1 : sessionReportsObj.zoomIssue;
-            sessionReportsObj.laptopIssue = mmSession.laptopIssue ? sessionReportsObj.laptopIssue += 1 : sessionReportsObj.laptopIssue;
-            sessionReportsObj.chromeIssue = mmSession.chromeIssue ? sessionReportsObj.chromeIssue += 1 : sessionReportsObj.chromeIssue;
-            sessionReportsObj.powerCut = mmSession.powerCut ? sessionReportsObj.powerCut += 1 : sessionReportsObj.powerCut;
-            sessionReportsObj.notResponseAndDidNotTurnUp = mmSession.notResponseAndDidNotTurnUp ? sessionReportsObj.notResponseAndDidNotTurnUp += 1 : sessionReportsObj.notResponseAndDidNotTurnUp;
-            sessionReportsObj.classDurationExceeded = mmSession.classDurationExceeded ? sessionReportsObj.classDurationExceeded += 1 : sessionReportsObj.classDurationExceeded;
-            sessionReportsObj.turnedUpButLeftAbruptly = mmSession.turnedUpButLeftAbruptly ? sessionReportsObj.turnedUpButLeftAbruptly += 1 : sessionReportsObj.turnedUpButLeftAbruptly;
-            sessionReportsObj.leadNotVerifiedProperly = mmSession.leadNotVerifiedProperly ? sessionReportsObj.leadNotVerifiedProperly += 1 : sessionReportsObj.leadNotVerifiedProperly;
-            sessionReportsObj.otherReasonForReschedule = mmSession.otherReasonForReschedule ? sessionReportsObj.otherReasonForReschedule += 1 : sessionReportsObj.otherReasonForReschedule;
-            sessionReportsObj.webSiteLoadingIssue = mmSession.webSiteLoadingIssue ? sessionReportsObj.webSiteLoadingIssue += 1 : sessionReportsObj.webSiteLoadingIssue;
-            sessionReportsObj.videoNotLoading = mmSession.videoNotLoading ? sessionReportsObj.videoNotLoading += 1 : sessionReportsObj.videoNotLoading;
-            sessionReportsObj.codePlaygroundIssue = mmSession.codePlaygroundIssue ? sessionReportsObj.codePlaygroundIssue += 1 : sessionReportsObj.codePlaygroundIssue;
-            sessionReportsObj.logInOTPError = mmSession.logInOTPError ? sessionReportsObj.logInOTPError += 1 : sessionReportsObj.logInOTPError;
-          }
 
           forwardCount += 1;
           totalLoopDays -= 1;
