@@ -11,7 +11,7 @@ const generateCertificate = async (id, regenerateCertificate, eventId, date) => 
         userId:"${id}"
         regenerateCertificate:${regenerateCertificate ? 'true' : 'false'}
         eventId:"${eventId}"
-        date: "${date}"
+        ${date ? `date: "${date}"` : ''}
       })
       {
         id

@@ -19,7 +19,16 @@ const getEventId = (formId) => {
       break;
     case 'N5rTz2zX':
       eventId = 'ckvw6s3df000039in32ewhy89';
-      // TODO : change prod and pre-prod eventId when created
+      if (process.env.NODE_ENV === 'production') {
+        eventId = 'ckvxsrwlb001c0usf9lxwapt4';
+        if (process.env.DATA_MASKING) {
+          eventId = 'ckvwncjv400001sin0ppigr3s';
+        }
+      }
+      break;
+    case 'cUepvPND':
+      // TODO : change pre-prod and prod eventIds when created
+      eventId = 'ckw4unvyp0000kpinc2515c88';
       if (process.env.NODE_ENV === 'production') {
         eventId = 'ckvxsrwlb001c0usf9lxwapt4';
         if (process.env.DATA_MASKING) {
@@ -222,14 +231,20 @@ const typeformWebhookController = async (req, res) => {
       case 'm47rmq7f':
         country = 'india';
         timezone = 'Asia/Kolkata';
-        utmSource = 'RadioStreet';
-        utmCampaign = 'Spy Squad Camp - 31th Oct';
+        utmSource = 'communityevent';
+        utmCampaign = 'spysquadcamp_20nov';
         break;
       case 'N5rTz2zX':
         country = 'india';
         timezone = 'Asia/Kolkata';
         utmSource = 'communityevent';
         utmCampaign = 'canva_Nov14';
+        break;
+      case 'cUepvPND':
+        country = 'india';
+        timezone = 'Asia/Kolkata';
+        utmSource = 'communityevent';
+        utmCampaign = 'storyspree_21nov';
         break;
       default:
         country = 'india';
