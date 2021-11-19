@@ -140,6 +140,7 @@ const generateCertificateMutationResolver = async (
         break;
       case 'ckw4unvyp0000kpinc2515c88':
       case 'ckw5wg9rj0000gtin1st0hry6':
+      case 'ckw6eq3f30000xgin7yrxgk2l':
         fetchedUrl = await getStoryspreeCertificateUrl(userId, userName, formattedDate);
         eventType = 'communityEvent';
         eventName = 'storyspree';
