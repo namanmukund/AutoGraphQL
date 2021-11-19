@@ -139,6 +139,7 @@ const generateCertificateMutationResolver = async (
         eventName = 'canvaMasterclass';
         break;
       case 'ckw4unvyp0000kpinc2515c88':
+      case 'ckw5wg9rj0000gtin1st0hry6':
         fetchedUrl = await getStoryspreeCertificateUrl(userId, userName, formattedDate);
         eventType = 'communityEvent';
         eventName = 'storyspree';
