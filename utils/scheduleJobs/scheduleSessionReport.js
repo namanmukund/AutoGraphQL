@@ -586,7 +586,6 @@ mutation($input: SessionGradeReportUpdate!){
 
 const generateSessionReport = async (numDaysToRunQuery) => {
   // setting current date (start and end times)
-  // console.log('start');
   let dayCount = 0;
   const currentStartDate = new Date();
   const currentEndDate = new Date();
@@ -747,7 +746,6 @@ const generateSessionReport = async (numDaysToRunQuery) => {
             }
           }
 
-          console.log(1);
           if (forwardCount === 0) {
             // we are in today bucket
             sessionReportsObj.registeredSameDay = {};
@@ -789,7 +787,6 @@ const generateSessionReport = async (numDaysToRunQuery) => {
 
           forwardCount += 1;
           totalLoopDays -= 1;
-          console.log('totalLoopDays', totalLoopDays);
         }
 
         sessionReportsObj.totalBooked = totalBookedByGrade;
@@ -801,8 +798,6 @@ const generateSessionReport = async (numDaysToRunQuery) => {
 
         const sessionGradeReportQueryRes = await callLocalGraphqlApi(sessionGradeReportQuery(todayStartDate, country, vertical));
         const sessionGradeReportId = get(sessionGradeReportQueryRes, 'data.sessionGradeReports[0].id', '');
-        console.log('sessionGradeReportId', sessionGradeReportId);
-        console.log(JSON.stringify(sessionGradeReportsObj));
         if (sessionGradeReportId) {
           // update exisiting session report
           const sessionGradeReportUpdatedId = await updateSessionGradeReport(sessionGradeReportsObj, sessionGradeReportId);
@@ -817,9 +812,7 @@ const generateSessionReport = async (numDaysToRunQuery) => {
           }
         }
 
-        // console.log('sessionReportsObj', sessionReportsObj);
         const sessionReportQueryRes = await callLocalGraphqlApi(sessionReportQuery(todayStartDate, country, vertical));
-        // console.log('sessionReportQueryRes', sessionReportQueryRes);
         const sessionReportId = get(sessionReportQueryRes, 'data.sessionReports[0].id', '');
         if (sessionReportId) {
           // update exisiting session report
@@ -832,7 +825,6 @@ const generateSessionReport = async (numDaysToRunQuery) => {
           const addSessionReportRes = await callLocalGraphqlApi(addSessionReport(sessionReportsObj));
           const sessionReportAddedId = get(addSessionReportRes, 'data.addSessionReport.id', '');
           if (sessionReportAddedId) {
-            // console.log(sessionReportAddedId);
             log(`*** SessionReport added for date : ${todayStartDate}, vertical: ${vertical} and country : ${country}`);
           }
         }

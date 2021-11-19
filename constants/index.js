@@ -447,17 +447,17 @@ export const VERTICALS = [
 
 export const GRADE = [
   'grade1',
-  'Grade2',
-  'Grade3',
-  'Grade4',
-  'Grade5',
-  'Grade6',
-  'Grade7',
-  'Grade8',
-  'Grade9',
-  'Grade10',
-  'Grade11',
-  'Grade12',
+  'grade2',
+  'grade3',
+  'grade4',
+  'grade5',
+  'grade6',
+  'grade7',
+  'grade8',
+  'grade9',
+  'grade10',
+  'grade11',
+  'grade12',
 ];
 
 export const NUNITO_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Nunito-Bold.ttf`;
