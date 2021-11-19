@@ -94,6 +94,7 @@ import shiftBatchSessionsAfterGivenDate from './mutation/methods/shiftBatchSessi
 import sendCertificateInMail from './mutation/methods/sendCertificateInMail';
 import sendJourneySnapshotInMail from './mutation/methods/sendJourneySnapshotInMail';
 import generateCertificate from './mutation/methods/generateCertificate';
+import getMagicLink from './query/methods/getMagicLink';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -617,6 +618,8 @@ resolvers.Query.getSchoolDetails = getSchoolDetails;
 resolvers.Query.getUserCourses = getUserCourses;
 // Resolver to get school campaign slots
 resolvers.Query.getSchoolCampaignSlots = getSchoolCampaignSlots;
+// Resolver to get magic link
+resolvers.Query.getMagicLink = getMagicLink;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 

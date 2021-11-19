@@ -14,6 +14,7 @@ const coreAuthParams = {
   ALGORITHM: 'HS256',
   SALT: 12,
   OTP_EXPIRATION_TIME_IN_SEC: 300,
+  EXPIRY_FOR_MAGIC_TOKEN: '1 day',
 };
 
 export default coreAuthParams;

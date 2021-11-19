@@ -36,6 +36,7 @@ const validateUserOTPMutationResolver = async (
   authentication,
 ) => {
   const { input } = params;
+  console.log(input);
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
