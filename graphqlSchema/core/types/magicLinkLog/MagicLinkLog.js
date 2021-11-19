@@ -1,6 +1,6 @@
 const MagicLinkLog = `
   type MagicLinkLog @model {
-    user: User!
+    user: User! @relation(name: "MagicLinkLogUser", direction: "OneWay")
     userToken: String!
     expiresIn: String
     expiryToken: String
@@ -10,4 +10,4 @@ const MagicLinkLog = `
     generatedLink: String
 }`;
 
-export default [MagicLinkLog];
+export default MagicLinkLog;

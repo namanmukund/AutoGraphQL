@@ -8,6 +8,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
 import getSpySquadCampCertificateUrl from './uploadCertificates/spysquadcamp';
 import getCanvaEventCertificateUrl from './uploadCertificates/canvaEvent';
+import getStoryspreeCertificateUrl from './uploadCertificates/storyspree';
 
 const fetchUser = (userId, eventId) => `
 {
@@ -136,6 +137,13 @@ const generateCertificateMutationResolver = async (
         fetchedUrl = await getCanvaEventCertificateUrl(userId, userName, formattedDate);
         eventType = 'communityEvent';
         eventName = 'canvaMasterclass';
+        break;
+      case 'ckw4unvyp0000kpinc2515c88':
+      case 'ckw5wg9rj0000gtin1st0hry6':
+      case 'ckw6eq3f30000xgin7yrxgk2l':
+        fetchedUrl = await getStoryspreeCertificateUrl(userId, userName, formattedDate);
+        eventType = 'communityEvent';
+        eventName = 'storyspree';
         break;
       default:
         fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);

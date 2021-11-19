@@ -138,6 +138,7 @@ import Event from './event';
 import UtmDetail from './utmDetail';
 import getMagicLink from './getMagicLink';
 import magicLinkLog from './magicLinkLog';
+import LeadPartner from './leadPartner';
 
 export default [
   ...User,
@@ -280,4 +281,5 @@ export default [
   ...UtmDetail,
   ...getMagicLink,
   ...magicLinkLog,
+  ...LeadPartner,
 ];
