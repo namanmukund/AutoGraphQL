@@ -429,23 +429,6 @@ mutation{
 }
 `;
 
-// const addSessionGradeReport = async (input) => {
-//   const query = `
-//     mutation($input: SessionGradeReportInput!){
-//       addSessionGradeReport(
-//       input:$input
-//       ){
-//         id
-//       }
-//     }
-//   `;
-//   const variables = {
-//     input,
-//   };
-//   const res = await callLocalGraphqlApi(query, '', variables);
-//   return get(res, 'data.addSessionGradeReport.id');
-// };
-
 const addSessionGradeReport = (input) => `
   mutation{
   addSessionGradeReport(input: {
