@@ -32,8 +32,8 @@ const getStoryspreeCertificateUrl = async (userId, userName, formattedDate) => {
 
   // Draw a string of text diagonally across the first page
   firstPage.drawText(`${capitalize(userName)}`, {
-    x: 305,
-    y: 502,
+    x: 70,
+    y: 484,
     size: 29,
     font: NunitoBoldFont,
     color: rgb(0, 0.678, 0.902),
@@ -41,7 +41,7 @@ const getStoryspreeCertificateUrl = async (userId, userName, formattedDate) => {
 
   firstPage.drawText(`${formattedDate}.`, {
     x: 278,
-    y: 391,
+    y: 368,
     size: 18,
     font: NunitoBoldFont,
     color: rgb(0.3137, 0.31, 0.31),

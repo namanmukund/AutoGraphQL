@@ -27,10 +27,9 @@ const getEventId = (formId) => {
       }
       break;
     case 'cUepvPND':
-      // TODO : change pre-prod and prod eventIds when created
       eventId = 'ckw4unvyp0000kpinc2515c88';
       if (process.env.NODE_ENV === 'production') {
-        eventId = 'ckvxsrwlb001c0usf9lxwapt4';
+        eventId = 'ckw6eq3f30000xgin7yrxgk2l';
         if (process.env.DATA_MASKING) {
           eventId = 'ckw5wg9rj0000gtin1st0hry6';
         }
