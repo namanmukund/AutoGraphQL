@@ -32,7 +32,7 @@ const getEventId = (formId) => {
       if (process.env.NODE_ENV === 'production') {
         eventId = 'ckvxsrwlb001c0usf9lxwapt4';
         if (process.env.DATA_MASKING) {
-          eventId = 'ckvwncjv400001sin0ppigr3s';
+          eventId = 'ckw5wg9rj0000gtin1st0hry6';
         }
       }
       break;
