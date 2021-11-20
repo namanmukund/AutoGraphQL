@@ -34,6 +34,7 @@ const addUserBlockBasedProjectMutation = (
         id
       }
       answerLink
+      savedBlocks
     }
     }
     `;
