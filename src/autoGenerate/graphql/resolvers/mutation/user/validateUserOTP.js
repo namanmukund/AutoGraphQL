@@ -34,6 +34,8 @@ const getuserInfo = async (userId) => {
         id
         user {
           id
+          email
+          emailOtp
           phone {
             number
             countryCode
@@ -92,6 +94,7 @@ const validateUserOTPMutationResolver = async (
   const { input } = params;
   const userToken = get(input, 'userToken');
   const linkToken = get(input, 'linkToken');
+  let loginViaEmail = false;
   if (linkToken && userToken) {
     const magicLinkDetails = await getTokenDetails(linkToken, userToken);
     if (magicLinkDetails.length > 0) {
@@ -113,8 +116,14 @@ const validateUserOTPMutationResolver = async (
               }
               const userId = get(decodedData, 'userInfo.id');
               const userInfo = await getuserInfo(userId);
-              input.phone = get(userInfo, 'studentProfile.parents[0].user.phone');
-              input.phoneOtp = MASTER_OTP;
+              const userPhone = get(userInfo, 'studentProfile.parents[0].user.phone');
+              if (get(userPhone, 'number')) {
+                input.phone = userPhone;
+                input.phoneOtp = MASTER_OTP;
+              } else if (get(userInfo, 'studentProfile.parents[0].user.email')) {
+                input.email = get(userInfo, 'studentProfile.parents[0].user.email');
+                loginViaEmail = true;
+              }
             });
           }
         });
@@ -206,11 +215,11 @@ const validateUserOTPMutationResolver = async (
         emailVerified: true,
         status: 'active',
       };
-    } else {
+    } else if (!loginViaEmail) {
       throw new SendOtpFirstError();
     }
   }
-  // if user is already verified
+  // if user is already verifiedj
   if (
     (phoneOtp && phoneVerified && status === 'active')
     || (emailOtp && emailVerified && status === 'active')
