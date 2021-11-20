@@ -8,6 +8,7 @@ const MagicLinkLog = `
     visitedCount: Int
     linkType: LinkType @defaultValue(value: "login")
     generatedLink: String
+    appName: AppName
 }`;
 
 export default MagicLinkLog;

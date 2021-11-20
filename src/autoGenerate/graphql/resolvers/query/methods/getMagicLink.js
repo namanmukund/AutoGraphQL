@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import moment from 'moment';
 import coreAuthParams from '../../../../../../config/authParams';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 
 const fetchClassStudent = async (classId) => {
   const query = `{
@@ -68,12 +69,17 @@ const getUserToken = (user, createdAt) => {
 const getMagicLink = (async (root, params, context) => {
   const { input } = params;
   // getting input from params
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+  const {
+    appName,
+  } = userAndAppInfo;
   const classId = get(input, 'classId');
   if (classId) {
     const classStudents = await fetchClassStudent(classId);
     const tokens = [];
     if (classStudents && classStudents.length > 0) {
-      classStudents.forEach((student) => {
+      let addMagicLinkLogQuery = '';
+      classStudents.forEach((student, index) => {
         const { user } = student;
         const { userToken, expiresIn, expiryToken } = getUserToken(user, new Date());
         let loginLink = 'https://www.tekie.in/login?';
@@ -81,6 +87,21 @@ const getMagicLink = (async (root, params, context) => {
           loginLink = 'https://tekie-web-staging.herokuapp.com/login?';
         }
         loginLink += `linkToken=${expiryToken}&userToken=${userToken}`;
+        addMagicLinkLogQuery += `addMagicLinkLog${index}: addMagicLinkLog(
+          input: {
+            userToken: "${userToken}"
+            expiresIn: "${expiresIn}"
+            expiryToken: "${expiryToken}"
+            isActive: true
+            visitedCount: 0
+            linkType: login
+            generatedLink: "${loginLink}"
+            appName: ${appName}
+          }
+          userConnectId: "${get(user, 'id')}"
+        ) {
+          id
+        }`;
         tokens.push({
           userToken,
           expiryToken,
@@ -88,6 +109,9 @@ const getMagicLink = (async (root, params, context) => {
           loginLink,
         });
       });
+      if (addMagicLinkLogQuery) {
+        callLocalGraphqlApi(`mutation{ ${addMagicLinkLogQuery} }`);
+      }
     }
     return tokens;
   }

@@ -5,6 +5,7 @@ const ValidateUserInput = `
     phoneOtp: Int 
     emailOtp: Int
     userToken: String
+    linkToken: String
   }`;
 
 export default ValidateUserInput;
