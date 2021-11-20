@@ -1,4 +1,4 @@
-const fetchProducts = () => `
+const fetchProducts = (id) => `
 {
   products(filter: {
    and: [
@@ -6,6 +6,9 @@ const fetchProducts = () => `
       {status: published},
       {userRole: mentee},
       {country: india}
+      ${id ? `{
+        id: "${id}"
+      }` : ''}
     ]
   }){
     id
