@@ -1,8 +1,10 @@
 const GetMagicLinkInput = `
   input GetMagicLinkInput {
     classId: String
+    userId: String
     email: String
-    phoneNumber: String
+    phone: PhoneInput
+    linkType: LinkType @defaultValue(value: "login")
   }
 `;
 
