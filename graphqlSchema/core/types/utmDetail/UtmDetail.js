@@ -5,7 +5,8 @@ const UtmDetail = `
   ${getPermissionSchemaString('User')}
   {
     leadPartnerType: LeadPartnerType!
-    utmSource: String
+    leadPartner: LeadPartner @relation(name: "LeadPartnerUtmDetail")
+    source: String
     campaign: String
     term: String
     content: String
