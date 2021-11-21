@@ -102,7 +102,6 @@ const usersData = async (studentDetailsObject, formId) => {
           }
         }
       }}
-      {name: "${childName}"}
       ]
     }`;
     const numberQuery = `{
@@ -136,7 +135,6 @@ const usersData = async (studentDetailsObject, formId) => {
             user_some: {email:"${parentEmail.trim()}"}
           }
         }}
-        {name: "${childName}"}
         ]
       }`;
       const query = `{
