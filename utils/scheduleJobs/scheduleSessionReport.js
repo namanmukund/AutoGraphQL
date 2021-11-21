@@ -27,9 +27,7 @@ const masterQuery = (todayStartDate,
       {country:${country}}
       {parentProfile_some:{
         children_some:{
-          user_some:{
-            studentProfile_some:${filterQuery.grade}
-          }
+          studentProfile_some:${filterQuery.grade}
         }
       }}
     ]
@@ -47,9 +45,8 @@ const masterQuery = (todayStartDate,
       {country:${country}}
       {parentProfile_some:{
         children_some:{
-          user_some:{
-            studentProfile_some:${filterQuery.grade}
-          }
+          studentProfile_some:${filterQuery.grade}
+          
         }
       }}
     ]
