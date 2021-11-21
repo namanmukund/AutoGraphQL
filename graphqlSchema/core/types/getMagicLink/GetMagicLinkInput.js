@@ -1,10 +1,12 @@
 const GetMagicLinkInput = `
   input GetMagicLinkInput {
-    classId: String
+    schoolId: String
+    grade: Grade
+    section: Section
     userId: String
     email: String
     phone: PhoneInput
-    linkType: LinkType @defaultValue(value: "login")
+    expiresIn:Int
   }
 `;
 

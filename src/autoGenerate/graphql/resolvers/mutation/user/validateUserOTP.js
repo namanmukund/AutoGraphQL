@@ -1,11 +1,8 @@
 import { get } from 'lodash';
-import jwt from 'jsonwebtoken';
-import moment from 'moment';
 import {
   DatabaseRecordNotFoundError,
   OTPMismatchError, SendOtpFirstError,
-  SomethingWentWrongError,
-  UserTokenNotRequiredError, InvalidToken,
+  UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
 import { QueryController, MutationController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
@@ -20,59 +17,6 @@ import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import getTimeDifferenceWithCurrentDateInSeconds
   from '../../../../../../utils/getTimeDifferenceWithCurrentDateInSeconds';
 import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
-import { LinkExpiredError } from '../../../../../../constants/errors/auth';
-import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import { MASTER_OTP } from '../../../../../../constants';
-
-const getuserInfo = async (userId) => {
-  const query = `{
-  user(id: "${userId}") {
-    id
-    studentProfile {
-      id
-      parents {
-        id
-        user {
-          id
-          email
-          emailOtp
-          phone {
-            number
-            countryCode
-          }
-        }
-      }
-    }
-  }
-}`;
-  const userData = await callLocalGraphqlApi(query);
-  return get(userData, 'data.user');
-};
-
-const getTokenDetails = async (linkToken, userToken) => {
-  const query = `{
-  magicLinkLogs(filter: { and: [{ expiryToken: "${linkToken}" }, { userToken: "${userToken}" }] }) {
-    id
-    userToken
-    expiresIn
-    expiryToken
-    isActive
-    visitedCount
-  }
-}`;
-  const result = await callLocalGraphqlApi(query);
-  return get(result, 'data.magicLinkLogs', []);
-};
-
-const updateTokenDetail = async (tokenLogId, isActive, visitedCount = 0) => {
-  const query = `mutation {
-  updateMagicLinkLog(id: "${tokenLogId}", input: { ${isActive ? 'isActive: false' : ''}, visitedCount: ${visitedCount + 1} }) {
-    id
-  }
-}`;
-  const result = await callLocalGraphqlApi(query);
-  return get(result, 'data.updateMagicLinkLog');
-};
 
 const USER_TYPE = 'User';
 const validateUserOTPMutationPromise = (
@@ -92,48 +36,6 @@ const validateUserOTPMutationResolver = async (
   authentication,
 ) => {
   const { input } = params;
-  const userToken = get(input, 'userToken');
-  const linkToken = get(input, 'linkToken');
-  let loginViaEmail = false;
-  if (linkToken && userToken) {
-    const magicLinkDetails = await getTokenDetails(linkToken, userToken);
-    if (magicLinkDetails.length > 0) {
-      const { id: tokenLogId, isActive = false, visitedCount } = get(magicLinkDetails, '[0]');
-      updateTokenDetail(tokenLogId, isActive, visitedCount);
-      if (isActive) {
-        const secret = process.env.SECRET;
-        await jwt.verify(linkToken, secret, async (err, decodedValue) => {
-          if (err) {
-            throw new SomethingWentWrongError();
-          }
-          const expiresIn = get(decodedValue, 'expiryData.expiresIn');
-          if (moment().isAfter(moment(expiresIn))) {
-            throw new LinkExpiredError();
-          } else {
-            await jwt.verify(userToken, secret, async (error, decodedData) => {
-              if (error) {
-                throw new SomethingWentWrongError();
-              }
-              const userId = get(decodedData, 'userInfo.id');
-              const userInfo = await getuserInfo(userId);
-              const userPhone = get(userInfo, 'studentProfile.parents[0].user.phone');
-              if (get(userPhone, 'number')) {
-                input.phone = userPhone;
-                input.phoneOtp = MASTER_OTP;
-              } else if (get(userInfo, 'studentProfile.parents[0].user.email')) {
-                input.email = get(userInfo, 'studentProfile.parents[0].user.email');
-                loginViaEmail = true;
-              }
-            });
-          }
-        });
-      } else {
-        throw new LinkExpiredError();
-      }
-    } else {
-      throw new InvalidToken();
-    }
-  }
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
 
@@ -186,7 +88,7 @@ const validateUserOTPMutationResolver = async (
       const phoneNumber = countryCode + number;
       const businessPartnerDemoNumber = '+918827706789';
 
-      if (!(phoneOtp === MASTER_OTP || (phoneOtp === 7777 && phoneNumber === businessPartnerDemoNumber))) {
+      if (!(phoneOtp === 3007 || (phoneOtp === 7777 && phoneNumber === businessPartnerDemoNumber))) {
         if (userData.phoneOtp !== phoneOtp) {
           throw new OTPMismatchError();
         }
@@ -215,11 +117,11 @@ const validateUserOTPMutationResolver = async (
         emailVerified: true,
         status: 'active',
       };
-    } else if (!loginViaEmail) {
+    } else {
       throw new SendOtpFirstError();
     }
   }
-  // if user is already verifiedj
+  // if user is already verified
   if (
     (phoneOtp && phoneVerified && status === 'active')
     || (emailOtp && emailVerified && status === 'active')

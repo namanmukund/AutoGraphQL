@@ -1,5 +1,7 @@
 const SECRET = process.env.SECRET;
 const FORGOT_PASSWORD_SECRET = process.env.FORGOT_PASSWORD_SECRET;
+const EXPIRY_TOKEN_SECRET = process.env.EXPIRY_TOKEN_SECRET;
+const USER_TOKEN_SECRET = process.env.USER_TOKEN_SECRET;
 
 const coreAuthParams = {
   SECRET,
@@ -14,7 +16,8 @@ const coreAuthParams = {
   ALGORITHM: 'HS256',
   SALT: 12,
   OTP_EXPIRATION_TIME_IN_SEC: 300,
-  EXPIRY_FOR_MAGIC_TOKEN: '1 day',
+  EXPIRY_TOKEN_SECRET,
+  USER_TOKEN_SECRET,
 };
 
 export default coreAuthParams;

@@ -42,6 +42,7 @@ const customMutationString = `
    shiftBatchSessionsAfterGivenDate ( input: ShiftBatchSessionsInput ): BooleanResult,
    sendJourneySnapshotInMail ( input: SendJourneySnapshotInMailInput ): BooleanResult,
    generateCertificate ( input: GenerateCertificateInput ) : GenerateCertificateOutput,
+   validateMagicLink ( input: ValidateMagicLinkInput  ): ParentChildToken,
    `;
 
 export default customMutationString;

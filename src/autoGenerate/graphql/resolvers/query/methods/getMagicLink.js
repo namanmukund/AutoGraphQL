@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-tabs */
 /* eslint-disable no-unused-vars */
 import { get, pick } from 'lodash';
@@ -7,192 +8,157 @@ import coreAuthParams from '../../../../../../config/authParams';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import { TLA, TMS } from '../../../../../../constants';
+import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 
-const getUserToken = (user, createdAt) => {
-  const expiresIn = coreAuthParams.EXPIRY_FOR_MAGIC_TOKEN;
+const getUserToken = (user, createdAt, expiresIn) => {
   const userInfo = pick(user, ['id', 'username']);
-  const secret = coreAuthParams.SECRET;
+  const userTokenSecret = coreAuthParams.USER_TOKEN_SECRET;
+  const expiryTokenSecret = coreAuthParams.EXPIRY_TOKEN_SECRET;
   const userToken = jwt.sign(
     {
       userInfo,
     },
-    secret,
+    userTokenSecret,
     {
-      expiresIn,
+      expiresIn: `${expiresIn}h`,
       algorithm: coreAuthParams.ALGORITHM,
     },
   );
+  // always taking expire value in hours
   const expiryToken = jwt.sign(
     {
       expiryData: {
-        expiresIn: moment(createdAt).add(1, 'day'),
+        expiresIn: moment(createdAt).add(24, 'hours'),
       },
     },
-    secret,
+    expiryTokenSecret,
     {
-      expiresIn,
+      expiresIn: `${expiresIn}h`,
       algorithm: coreAuthParams.ALGORITHM,
     },
   );
-  return { userToken, expiryToken, expiresIn };
+  return { userToken, expiryToken };
 };
 
-const fetchClassStudent = async (classId) => {
+const fetchUserDetails = async (queryFilter) => {
   const query = `{
-  schoolClass(id: "${classId}") {
+  studentProfiles(
+    filter: {
+      and: [${queryFilter}]
+    }
+  ) {
     id
-    students {
+    user {
       id
-      parents {
-        id
-        user {
-          id
-          phone {
-            number
-            countryCode
-          }
-        }
-      }
-      user {
-        id
-        name
-        role
-      }
+      name
+      role
     }
   }
 }
 `;
   const result = await callLocalGraphqlApi(query);
-  return get(result, 'data.schoolClass.students', []);
+  return get(result, 'data.studentProfiles', []);
 };
 
-const fetchUser = async ({ userId, email, number }) => {
-  const query = `{
-  users(filter: { ${userId ? `id: "${userId}"` : ''} ${email ? `email:"${email}"` : ''} ${number ? `phone_number_subDoc:"${number}"` : ''} }) {
-    id
-    name
-    role
+const generateAndReturnToken = (user, addMagicLinkLogQuery = '', index, {
+  appName, grade, section, userIdFromContext, schoolId, expiresIn,
+}) => {
+  const { userToken, expiryToken } = getUserToken(user, new Date(), expiresIn);
+  let linkUri = 'https://www.tekie.in/login?';
+  if (process.env.NODE_ENV !== 'production') {
+    linkUri = 'https://tekie-web-staging.herokuapp.com/login?';
   }
-}`;
-  const result = await callLocalGraphqlApi(query);
-  return get(result, 'data.user');
-};
-
-const generateTokenAndReturn = (user, linkType = 'login', appName) => {
-  const { userToken, expiresIn, expiryToken } = getUserToken(user, new Date());
-  let magicLink = '';
-  if (appName === TLA) {
-    if (linkType === 'login') {
-      magicLink = 'https://www.tekie.in/login?';
-      if (process.env.NODE_ENV !== 'production') {
-        magicLink = 'https://tekie-web-staging.herokuapp.com/login?';
-      }
-    } else {
-      magicLink = 'https://www.tekie.in/forget-password?';
-      if (process.env.NODE_ENV !== 'production') {
-        magicLink = 'https://tekie-web-staging.herokuapp.com/forget-password?';
-      }
-    }
-  } else if (appName === TMS) {
-    magicLink = 'https://tekie-managment-system.herokuapp.com/forget-password?';
-    if (process.env.NODE_ENV !== 'production') {
-      magicLink = 'https://tekie-tms-staging.herokuapp.com/forget-password?';
-    }
-  }
-  magicLink += `linkToken=${expiryToken}&userToken=${userToken}`;
-  addMagicLinkLogQuery += `addMagicLinkLog1: addMagicLinkLog(
+  linkUri += `linkToken=${expiryToken}&userToken=${userToken}`;
+  addMagicLinkLogQuery = `addMagicLinkLog${index}: addMagicLinkLog(
     input: {
       userToken: "${userToken}"
-      expiresIn: "${expiresIn}"
+      expiresIn: ${expiresIn}
       expiryToken: "${expiryToken}"
-      isActive: true
+      isLinkVisited: false
       visitedCount: 0
-      linkType: ${linkType}
-      generatedLink: "${magicLink}"
-      appName: ${appName}
+      linkUri: "${linkUri}"
+      linkGeneratedFrom: ${appName}
+      ${grade ? `grade: ${grade}` : ''}
+      ${section ? `section:${section}` : ''}
     }
     userConnectId: "${get(user, 'id')}"
+    ${schoolId ? `schoolConnectId:"${schoolId}"` : ''}
+    ${userIdFromContext ? `linkGeneratedbyConnectId: "${userIdFromContext}"` : ''}
   ) {
     id
   }`;
-  if (addMagicLinkLogQuery) {
-    callLocalGraphqlApi(`mutation{ ${addMagicLinkLogQuery} }`);
-  }
   return {
     userToken,
     expiryToken,
     expiresIn,
-    loginLink,
+    linkUri,
+    addMagicLinkLogQuery,
   };
 };
 
 // this API will return magic link uri for auto login
 const getMagicLink = (async (root, params, context) => {
-  const { input } = params;
+  const {
+    input: {
+      schoolId, grade, section, userId, email, phone, expiresIn = 24,
+    },
+  } = params;
   // getting input from params
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
   const {
     appName,
+    userIdFromContext,
   } = userAndAppInfo;
-  const classId = get(input, 'classId');
-  const userId = get(input, 'userId');
-  const userEmail = get(input, 'email');
-  const userPhoneNumber = get(input, 'phone.number');
-  const linkType = get(input, 'linkType');
   const tokens = [];
-  if (classId) {
-    const classStudents = await fetchClassStudent(classId);
-    if (classStudents && classStudents.length > 0) {
-      let addMagicLinkLogQuery = '';
-      classStudents.forEach((student, index) => {
-        const { user } = student;
-        const { userToken, expiresIn, expiryToken } = getUserToken(user, new Date());
-        let loginLink = 'https://www.tekie.in/login?';
-        if (process.env.NODE_ENV !== 'production') {
-          loginLink = 'https://tekie-web-staging.herokuapp.com/login?';
-        }
-        loginLink += `linkToken=${expiryToken}&userToken=${userToken}`;
-        addMagicLinkLogQuery += `addMagicLinkLog${index}: addMagicLinkLog(
-          input: {
-            userToken: "${userToken}"
-            expiresIn: "${expiresIn}"
-            expiryToken: "${expiryToken}"
-            isActive: true
-            visitedCount: 0
-            linkType: login
-            generatedLink: "${loginLink}"
-            appName: ${appName}
+  let fetchQueryFilter = '';
+  if (schoolId || grade || section) {
+    if (schoolId) fetchQueryFilter += `{ school_some: { id: "${schoolId}" } }`;
+    if (grade) fetchQueryFilter += `{ grade: ${grade} }`;
+    if (section) fetchQueryFilter += `{ section: ${section} }`;
+  } else if (userId) fetchQueryFilter = `{ user_some: { id: "${userId}" } }`;
+  else if (email || phone) {
+    if (email) {
+      fetchQueryFilter = `{
+          user_some: {
+            parentProfile_some: {
+              user_some: { or: [{ email: "${email.trim()}" }, { email: "${email.trim().toLowerCase()}" }] }
+            }
           }
-          userConnectId: "${get(user, 'id')}"
-        ) {
-          id
         }`;
+    }
+    if (phone) {
+      fetchQueryFilter += `{
+          user_some: {
+            parentProfile_some: { user_some: { phone_number_subDoc: "${phone}" } }
+          }
+        }`;
+    }
+  }
+  if (!fetchQueryFilter) {
+    throw new MissingMandatoryInputInRequestError();
+  } else {
+    let addMagicLinkLogQuery = '';
+    const studentDetails = await fetchUserDetails(fetchQueryFilter);
+    if (studentDetails.length > 0) {
+      studentDetails.forEach((student, index) => {
+        const { user } = student;
+        const {
+          userToken, expiresIn: expiresInValue, expiryToken, linkUri, addMagicLinkLogQuery: addLogQuery,
+        } = generateAndReturnToken(user, '', index, {
+          appName, grade, section, userIdFromContext, schoolId, expiresIn,
+        });
         tokens.push({
           userToken,
           expiryToken,
-          expiresIn,
-          loginLink,
+          expiresIn: expiresInValue,
+          linkUri,
         });
+        addMagicLinkLogQuery += addLogQuery;
       });
       if (addMagicLinkLogQuery) {
         callLocalGraphqlApi(`mutation{ ${addMagicLinkLogQuery} }`);
       }
     }
-  } else if (userId) {
-    const user = await fetchUser({ userId });
-    tokens.push({
-      ...generateTokenAndReturn(user),
-    });
-  } else if (userEmail) {
-    const user = await fetchUser({ email: userEmail });
-    tokens.push({
-      ...generateTokenAndReturn(user, linkType, appName),
-    });
-  } else if (userPhoneNumber) {
-    const user = await fetchUser({ number: userPhoneNumber });
-    tokens.push({
-      ...generateTokenAndReturn(user, linkType, appName),
-    });
   }
   return tokens;
 });

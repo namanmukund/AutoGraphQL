@@ -95,6 +95,7 @@ import sendCertificateInMail from './mutation/methods/sendCertificateInMail';
 import sendJourneySnapshotInMail from './mutation/methods/sendJourneySnapshotInMail';
 import generateCertificate from './mutation/methods/generateCertificate';
 import getMagicLink from './query/methods/getMagicLink';
+import validateMagicLink from './mutation/methods/validateMagicLink';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -592,6 +593,7 @@ resolvers.Mutation.sendCertificateInMail = sendCertificateInMail;
 resolvers.Mutation.shiftBatchSessionsAfterGivenDate = shiftBatchSessionsAfterGivenDate;
 resolvers.Mutation.sendJourneySnapshotInMail = sendJourneySnapshotInMail;
 resolvers.Mutation.generateCertificate = generateCertificate;
+resolvers.Mutation.validateMagicLink = validateMagicLink;
 
 // queries
 resolvers.Query.me = me;
