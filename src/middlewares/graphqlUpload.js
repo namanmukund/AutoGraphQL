@@ -131,6 +131,7 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
           upload in case wrong type is defined
           */
           const ext = type.split('/')[1];
+          const fileMimeType = type;
           const fileTypeName = getFileTypeName(type);
           // compare file size with the predefined allowed sizes
           const { isValidSize, isValidExtension } = checkFileSizeAndExtensions(
@@ -158,7 +159,7 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
             } = connectInput;
             modifiedFileName = (data && data.name)
               ? data.name
-              : `${typeField}_${typeId}_${Date.now()}.${ext}`;
+              : `${fileName || typeField}_${typeId}_${Date.now()}.${ext}`;
             filePath = `${fileBucket}/${connectType.toLowerCase()}/${modifiedFileName}`;
           } else {
             const rawFileName = (name && name.split('.')) ? name.split('.')[0] : name;
@@ -178,7 +179,7 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
                 try {
                   const fileContent = fs.readFileSync(path);
                   if (fileContent) {
-                    resizeAndUpload(fileTypeName, name, fileContent, fileBucket, filePath);
+                    resizeAndUpload(fileTypeName, name, fileContent, fileBucket, filePath, fileMimeType);
                   }
                 } catch (err) {
                   log(err);

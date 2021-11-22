@@ -6,6 +6,9 @@ const FileType = `
     subtitle
     lottie
     pdf
+    html
+    css
+    javascript
   }`;
 
 export default FileType;

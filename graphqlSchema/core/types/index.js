@@ -137,6 +137,7 @@ import GetEventCertificate from './getEventCertificate';
 import Event from './event';
 import UtmDetail from './utmDetail';
 import IqaReport from './iqaReport';
+import LeadPartner from './leadPartner';
 
 export default [
   ...User,
@@ -278,4 +279,5 @@ export default [
   ...Event,
   ...UtmDetail,
   ...IqaReport,
+  ...LeadPartner,
 ];
