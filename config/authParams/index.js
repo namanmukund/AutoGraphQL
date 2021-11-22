@@ -18,6 +18,7 @@ const coreAuthParams = {
   OTP_EXPIRATION_TIME_IN_SEC: 300,
   EXPIRY_TOKEN_SECRET,
   USER_TOKEN_SECRET,
+  DEFAULT_EXPIRY_TOKEN_TIME_IN_HOUR: 24,
 };
 
 export default coreAuthParams;

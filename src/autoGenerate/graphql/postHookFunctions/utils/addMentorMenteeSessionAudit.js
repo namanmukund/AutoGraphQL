@@ -1,9 +1,11 @@
 import { get } from 'lodash';
-import { auditType } from '../../../../../constants';
+import { auditType, auditSubType } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { fetchAllAuditQuestion } from './addSalesAudit';
 
 const { mentor } = auditType;
+
+const { b2cDemo, b2cPaid } = auditSubType;
 
 const mentorMenteeSessionAuditQuery = (mentorMenteeSessionId) => `
   query{
@@ -39,13 +41,19 @@ const addMentorMenteeSessionAuditQuery = (
   `;
 
 const addMentorMenteeSessionAudit = async (
-  mentorMenteeSessionId,
+  mentorMenteeSessionId, order,
 ) => {
   const mentorMenteeSessionAuditInfo = await callLocalGraphqlApi(mentorMenteeSessionAuditQuery(mentorMenteeSessionId));
   const mentorMenteeSessionAuditId = get(mentorMenteeSessionAuditInfo, 'data.mentorMenteeSessionAudits[0].id', false);
 
   if (!mentorMenteeSessionAuditId) {
-    const auditQuestions = await fetchAllAuditQuestion(mentor);
+    let auditFilter = '';
+    if (order === 1) {
+      auditFilter = `{ auditSubType: ${b2cDemo} }`;
+    } else {
+      auditFilter = `{ auditSubType: ${b2cPaid} }`;
+    }
+    const auditQuestions = await fetchAllAuditQuestion(mentor, auditFilter);
     let auditQuestionsIds = '';
     let sectionIdsArray = [];
     let totalScore = 0;

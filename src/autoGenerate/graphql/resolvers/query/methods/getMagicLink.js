@@ -28,7 +28,7 @@ const getUserToken = (user, createdAt, expiresIn) => {
   const expiryToken = jwt.sign(
     {
       expiryData: {
-        expiresIn: moment(createdAt).add(24, 'hours'),
+        expiresIn: moment(createdAt).add(expiresIn, 'hours'),
       },
     },
     expiryTokenSecret,
@@ -100,7 +100,7 @@ const generateAndReturnToken = (user, addMagicLinkLogQuery = '', index, {
 const getMagicLink = (async (root, params, context) => {
   const {
     input: {
-      schoolId, grade, section, userId, email, phone, expiresIn = 24,
+      schoolId, grade, section, userId, email, phone, expiresIn = coreAuthParams.DEFAULT_EXPIRY_TOKEN_TIME_IN_HOUR,
     },
   } = params;
   // getting input from params

@@ -57,7 +57,10 @@ const getTokenDetails = async (linkToken, userToken) => {
 
 const updateTokenDetail = async (tokenLogId, isLinkVisited, visitedCount = 0) => {
   const query = `mutation {
-  updateMagicLinkLog(id: "${tokenLogId}", input: { ${!isLinkVisited ? 'isLinkVisited: true' : ''}, visitedCount: ${visitedCount + 1} }) {
+  updateMagicLinkLog(id: "${tokenLogId}", input: {
+    ${!isLinkVisited ? 'isLinkVisited: true' : ''},
+    ${!isLinkVisited ? `firstLinkVisitedDate: "${new Date()}"` : ''}
+     visitedCount: ${visitedCount + 1} }) {
     id
   }
 }`;
