@@ -135,6 +135,8 @@ import AcceptedSlotRequestByMentorLog from './acceptedSlotRequestByMentorLog';
 import SessionCourseReport from './sessionCourseReport';
 import GetEventCertificate from './getEventCertificate';
 import Event from './event';
+import UtmDetail from './utmDetail';
+import LeadPartner from './leadPartner';
 
 export default [
   ...User,
@@ -274,4 +276,6 @@ export default [
   ...SessionCourseReport,
   ...GetEventCertificate,
   ...Event,
+  ...UtmDetail,
+  ...LeadPartner,
 ];

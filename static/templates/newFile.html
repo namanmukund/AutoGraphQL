@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"><!-- utf-8 works for most cases -->
+    <meta content="width=device-width" name="viewport"><!-- Forcing initial-scale shouldn't be necessary -->
+    <meta content="IE=edge" http-equiv="X-UA-Compatible"><!-- Use the latest (edge) version of IE rendering engine -->
+    <meta name="x-apple-disable-message-reformatting"><!-- Disable auto-scale in iOS 10 Mail entirely -->
+    <title></title><!-- The title tag shows in email notifications, like Android 4.4. -->
+    <link href="https://fonts.gstatic.com" rel="preconnect"><!-- Lato Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+    <!-- Nunito Font -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Nunito:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap"
+        rel="stylesheet"><!-- CSS Reset : BEGIN -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+    </script>
+
+    <style>
+        html,
+        body {
+            margin: 0 auto !important;
+            padding: 0 !important;
+            height: 100% !important;
+            width: 100% !important;
+            background: #f1f1f1;
+        }
+
+        /* What it does: Stops email clients resizing small text. */
+        * {
+            -ms-text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        /* What it does: Centers email on Android 4.4 */
+        div[style*="margin: 16px 0"] {
+            margin: 0 !important;
+        }
+
+        .data {
+            color: #004AAD;
+            font-size: 15px;
+            font-weight: 800;
+            line-height: normal;
+            margin-top: 20px;
+        }
+
+        .sub-data {
+            color: #8B959F;
+            font-size: 10px;
+            line-height: normal;
+        }
+
+        /* What it does: Stops Outlook from adding extra spacing to tables. */
+        table,
+        td {
+            mso-table-lspace: 0pt !important;
+            mso-table-rspace: 0pt !important;
+        }
+
+        /* What it does: Fixes webkit padding issue. */
+        table {
+            border-spacing: 0 !important;
+            border-collapse: collapse !important;
+            table-layout: fixed !important;
+            margin: 0 auto !important;
+        }
+
+        /* What it does: Uses a better rendering method when resizing images in IE. */
+        img {
+            -ms-interpolation-mode: bicubic;
+        }
+
+        /* What it does: Prevents Windows 10 Mail from underlining links despite inline CSS. Styles for underlined links should be inline. */
+        a {
+            text-decoration: none;
+        }
+
+        /* What it does: A work-around for email clients meddling in triggered links. */
+        *[x-apple-data-detectors],
+        /* iOS */
+        .unstyle-auto-detected-links *,
+        .aBn {
+            border-bottom: 0 !important;
+            cursor: default !important;
+            color: inherit !important;
+            text-decoration: none !important;
+            font-size: inherit !important;
+            font-family: inherit !important;
+            font-weight: inherit !important;
+            line-height: inherit !important;
+        }
+
+        /* What it does: Prevents Gmail from displaying a download button on large, non-linked images. */
+        .a6S {
+            display: none !important;
+            opacity: 0.01 !important;
+        }
+
+        /* What it does: Prevents Gmail from changing the text color in conversation threads. */
+        .im {
+            color: inherit !important;
+        }
+
+        /* If the above doesn't work, add a .g-img class to any image in question. */
+        img.g-img+div {
+            display: none !important;
+        }
+
+        /* What it does: Removes right gutter in Gmail iOS app: https://github.com/TedGoas/Cerberus/issues/89  */
+        /* Create one of these media queries for each additional viewport size you'd like to fix */
+
+        /* iPhone 4, 4S, 5, 5S, 5C, and 5SE */
+        @media only screen and (min-device-width: 320px) and (max-device-width: 374px) {
+            u~div .email-container {
+                min-width: 320px !important;
+            }
+        }
+
+        /* iPhone 6, 6S, 7, 8, and X */
+        @media only screen and (min-device-width: 375px) and (max-device-width: 413px) {
+            u~div .email-container {
+                min-width: 375px !important;
+            }
+        }
+
+        /* iPhone 6+, 7+, and 8+ */
+        @media only screen and (min-device-width: 414px) {
+            u~div .email-container {
+                min-width: 414px !important;
+            }
+        }
+    </style><!-- CSS Reset : END -->
+    <!-- Progressive Enhancements : BEGIN -->
+
+    <style>
+        .bg_white {
+            background: #ffffff;
+        }
+
+        .bg_light {
+            background: #fafafa;
+        }
+
+        .bg_black {
+            background: #191B1C;
+        }
+
+        .bg_dark {
+            background: rgba(0, 0, 0, .8);
+        }
+
+        .email-section {
+            padding: 30px;
+        }
+
+        .top-section p {
+            width: 500px;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            color: #000000;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        h3 {
+            font-weight: 700;
+            font-size: 22px;
+            color: #00ADE6;
+        }
+
+        p {
+            font-family: 'Nunito', serif;
+            font-size: 15px;
+            color: #504F4F;
+            opacity: 0.8;
+            margin-top: 0;
+            margin-bottom: 0;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', 'Open Sans', Helvetica, Roboto, sans-serif;
+            font-weight: 400;
+            font-size: 15px;
+            line-height: 1.8;
+            color: rgba(0, 0, 0, .4);
+        }
+
+        /*HEADING SECTION*/
+        .heading-section {}
+
+        .heading-section h2 {
+            color: #000000;
+            font-size: 28px;
+            margin-top: 0;
+            line-height: 1.4;
+        }
+
+        .heading-section-white {
+            color: rgba(255, 255, 255, .8);
+        }
+
+        .heading-section-white h2 {
+            font-size: 28px;
+            font-family: 'Nunito';
+            line-height: 1;
+            padding-bottom: 0;
+        }
+
+        .heading-section-white h2 {
+            color: #ffffff;
+        }
+
+
+        .workshopTiming {
+            font-size: 14px;
+            letter-spacing: .7px;
+        }
+
+        .flex-container {
+            flex-direction: row;
+            align-items: flex-end;
+        }
+
+        .blogElement {
+            flex-direction: row;
+        }
+
+        @media screen and (max-width: 500px) {
+            .icon {
+                text-align: left;
+            }
+
+            .blogElement {
+                flex-direction: column;
+            }
+
+            .text-services {
+                padding-left: 0;
+                padding-right: 20px;
+                text-align: left;
+            }
+
+            h2 {
+                font-weight: 500;
+            }
+        }
+
+        .star {
+            color: #FAD02C;
+        }
+    </style>
+</head>
+
+<body style="margin: 0; padding: 0 !important; mso-line-height-rule: exactly; background-color: #222222;">
+    <center style="width: 100%; background-color: #f1f1f1;">
+        <div class="email-container" style="max-width: 600px; margin: 0 auto; background: #fff;">
+            <!-- BEGIN BODY -->
+            <!-- <img src='https://tekie-backend.s3.amazonaws.com/python/email/tekieMailBanner.png' style='width: 100%;'></img> -->
+            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation"
+                style="margin: auto;overflow: hidden;" width="100%">
+                <tr>
+                    <td class="bg_white">
+                        <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                            <tr>
+                                <td style="text-align:center;">
+                                    <img src="./temp/Group 16488.png" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center;">
+                                    <h3
+                                        style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; font-weight: 700; font-size: 15px; color: #000000; margin-top: 0px; margin-bottom: 0px;text-align: center;">
+                                        Dear <%= parentName %>
+                                    </h3>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center; padding-top: 15px">
+                                    <div
+                                        style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 75%; margin: auto; opacity: 0.8; color: #000000; font-size: 16px;text-align: center;">
+                                        We have prepared a detailed report to give you an insight into your child’s
+                                        skill development.
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding-top: 20px">
+                                    <div
+                                        style="display:flex;align-items: center;flex-direction:row; align-items: center;justify-content:flex-start;font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: fit-content; margin: auto; color: #004AAD; font-size: 18px;padding: 20px 18px 10px 0px;line-height: 24px;font-weight: 800;">
+                                        <%= Student Name %>’s IQA Report
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding-top: 20px">
+                                    <div style="display: flex; justify-content: center; width: 100%;">
+                                        <div style="display: flex; justify-content: center; width: 80%;">
+                                            <div style="width: 100%;display: flex; justify-content: center;">
+                                                <div class="dial">
+                                                    IQA SCORE
+                                                </div>
+                                            </div>
+                                            <div
+                                                style="width: 100%; display: flex; flex-direction: column; justify-content: center;">
+                                                <div style="display: flex; align-items: center;" >
+                                                    <div style="margin-right: 10px;" >
+                                                        <img src="./temp/md.png" width="50px" />
+                                                    </div>
+                                                    <div>
+                                                        <div style="font-size: 13px; color: #004AAD;">
+                                                            IQA Rank
+                                                        </div>
+                                                        <div
+                                                            style="font-size: 20px; font-weight: 700; color: black; margin-bottom: 10px;">
+                                                            <%=IQARank%>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div style="display: flex; align-items: center;" >
+                                                    <div style="margin-right: 10px;" >
+                                                        <img width="50px" src="./temp/tr.png" />
+                                                    </div>
+                                                    <div>
+                                                        <div style="font-size: 13px; color: #004AAD;">
+                                                            GLOBAL RANK
+                                                        </div>
+                                                        <div style="font-size: 20px; font-weight: 700; color: black;">
+                                                            <%=GlobalRank%>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding-top: 20px">
+                                    <div
+                                        style="display:flex;align-items: center;justify-content:space-evenly;font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; width: 70%; margin: auto; font-size: 18px;padding: 20px; box-shadow: 2px 8px 4px rgba(0,0,0,.3); border-radius: 10px;">
+                                        <table style="color: rgba(0, 0, 0, 0.822);table-layout:fixed; width: 100%;">
+                                            <tr>
+                                                <td style="font-size: 12px; color: #004AAD;">
+                                                    CHILD NAME
+                                                </td>
+                                                <td style="font-size: 12px; color: #004AAD;">
+                                                    GRADE
+                                                </td>
+                                                <td style="font-size: 12px; color: #004AAD;">
+                                                    ASSESMENT SESSION
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size: 15px; font-weight: 700;">
+                                                    <%=StudentName%>
+                                                </td>
+                                                <td style="font-size: 15px; font-weight: 700;">
+                                                    <%=studentGrade%>
+                                                </td>
+                                                <td style="font-size: 15px; font-weight: 700;">
+                                                    <%=comlpetionDate%>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding-top: 20px">
+                                    <div
+                                        style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; width: 70%; margin: auto; font-size: 18px;padding: 20px; box-shadow: 2px 8px 4px rgba(0,0,0,.3); border-radius: 10px;">
+                                        <div style="text-align: center;font-size: 12px; color: #004AAD; width: 100%;">
+                                            MENTOR DETAILS
+                                        </div>
+                                        <div style="display: flex; justify-content: space-evenly;">
+                                            <div>
+                                                <div class='knowYourMentorContainer'
+                                                    style='display: inline-block; border-right: 1px solid rgba(216, 216, 216, 0.5); padding-right: 34px; padding-top: 12px; padding-bottom: 12px; text-align: center;'>
+                                                    <div>
+                                                        <table>
+                                                            <tr>
+                                                                <td>
+                                                                    <div
+                                                                        style="width: 92px; height: 94px; background-image: url('<%=  mentorProfilePic %>'); background-size: cover; border-radius: 50%; border: 2px solid #34E4EA; display: inline-block; vertical-align: top">
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="data">
+                                                                        <%= mentorName %>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <div
+                                                                        style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; font-size: 16px; color: #00ADE6; font-weight: bold;">
+                                                                        <span class="star"
+                                                                            style="margin-right: 4px;">&#9733;</span>
+                                                                        <span class="star"
+                                                                            style="margin-right: 4px;">&#9733;</span>
+                                                                        <span class="star"
+                                                                            style="margin-right: 4px;">&#9733;</span>
+                                                                        <span class="star"
+                                                                            style="margin-right: 4px;">&#9733;</span>
+                                                                        <span
+                                                                            style="margin-right: 4px; color: grey;">&#9733;</span>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="height: 100%; width: 5px; background-color: #AAACAE;">
+
+                                            </div>
+                                            <div>
+                                                <div>
+                                                    <div class="data">
+                                                        <%=mentorExp%>
+                                                    </div>
+                                                    <div class="sub-data">
+                                                        Experience in Coding
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="data">
+                                                        <%=mentorReview%>
+                                                    </div>
+                                                    <div class="sub-data">
+                                                        Most Common Review
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="data">
+                                                        <%=mentorLanguages%>
+                                                    </div>
+                                                    <div class="sub-data">
+                                                        Languages Familiar With
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td
+                                    style="text-align:center; padding-top: 40px; font-size: 20px; font-weight: 800; color: #E6C700;">
+                                    Well Done! Now it's time to <br />
+                                    discover your child's unique skillsets!
+                                </td>
+                            </tr>
+                            <tr>
+                                <td
+                                    style="display: flex; justify-content: space-evenly; align-items: center; margin: 20px 0px; font-size: 12px; font-weight: 700; color: #000000;">
+                                    <div>
+                                        ✅ In-depth Skill Analysis
+                                    </div>
+                                    <div>
+                                        ✅ Detailed Expert Report
+                                    </div>
+                                    <div>
+                                        ✅ Personalised Feedbacks
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center; padding-top: 0px">
+                                    <div
+                                        style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 100%; color: #504F4F; display: inline-block; vertical-align: top">
+                                        <div>
+                                            <button
+                                                style="font-family: 'Lato', 'Open Sans', Helvetica, Roboto, sans-serif; color: #FFFFFF; margin: 20px; border: none; background-image: linear-gradient(to left, #00ADE6, #3770E3); padding: 15px; border-radius: 40px; font-size: 12px;">
+                                                <div
+                                                    style='display: inline-block; width: 15px; height: 15px; background-image: url(https://img.icons8.com/ios-filled/24/ffffff/calendar.png); background-size: cover; margin-right: 8px; vertical-align:middle;'>
+                                                </div>
+                                                Book My Counselling Session
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p style="font-size: 20px; font-weight: 700; text-align: center;">
+                                        Have more questions?
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center; padding-top: 10px">
+                                    <div
+                                        style="font-family: 'Nunito', 'Open Sans', Helvetica, Roboto, sans-serif; margin-top: 0px; margin-bottom: 0px; width: 85%; margin-left: 7.5%; margin-top: 10px; opacity: 0.8; color: #504F4F; font-size: 16px">
+                                        You can also write to us about your concerns on <a href="mailto:ello@tekie.in" >hello@tekie.in</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center; padding-top: 17px; opacity: 0.8;">
+                                    <a href="http://tekie.app.link/sgnArKNfwdb"
+                                        style="border: 1px solid #555555;width: fit-content;background-color: #fff;display: block;border-radius: 40px;text-decoration: none;color: white;font-family: Lato,'Open Sans',Helvetica, Roboto, sans-serif;text-transform: uppercase;box-sizing: border-box;margin:auto;margin-bottom: 10px;padding: 5px 20px">
+                                        <div
+                                            style='display: inline-block; width: 15px; height: 15px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/whatsappIcon.png); background-size: cover; margin-right: 8px; vertical-align:middle;'>
+                                        </div>
+                                        <div
+                                            style='display: inline-block; vertical-align:middle; color: #4CAF50; font-size: 15px;'>
+                                            Send a ‘Hi
+                                        </div>
+                                        <div
+                                            style='vertical-align:middle; width: 16px; height: 16px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/handWaveEmoji.png); background-size: contain; display: inline-block;'>
+                                        </div>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center; padding-top: 17px; opacity: 0.8;">
+                                    <a href="http://tekie.app.link/sgnArKNfwdb"
+                                        style="border: 1px solid #555555;width: fit-content;background-color: #fff;display: block;border-radius: 40px;text-decoration: none;color: white;font-family: Lato,'Open Sans',Helvetica, Roboto, sans-serif;box-sizing: border-box;margin:auto;margin-bottom: 10px;padding: 5px 20px">
+                                        <div
+                                            style='display: inline-block; width: 15px; height: 15px; background-image: url(https://img.icons8.com/material-outlined/24/000000/phone.png); background-size: cover; margin-right: 8px; vertical-align:middle;'>
+                                        </div>
+                                        <div
+                                            style='display: inline-block; vertical-align:middle; color: rgba(0, 0, 0, 0.685); font-size: 15px;'>
+                                            Call us at +91-8047483415
+                                        </div>
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr><!-- end:tr -->
+                <!-- 1 Column Text + Button : END -->
+            </table>
+            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin: auto;"
+                width="100%">
+                <tr>
+                    <td class="bg_black footer email-section" style="background: #FFFFFF; padding-bottom: 30px;"
+                        valign="middle">
+                        <table>
+                            <tr>
+                                <td valign="top" width="33.333%">
+                                    <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                                        <tr>
+                                            <td style="text-align: center;">
+                                                <div style='display: inline-block; margin-top: 25px;'>
+                                                    <a href='https://www.facebook.com/TekieApp/'
+                                                        style='text-decoration: none;' target='_blank'>
+                                                        <div
+                                                            style='display: inline-block; width: 38px; height: 38px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/facebookGreyIcon.png); background-size: cover; margin-right: 30px;'>
+                                                        </div>
+                                                    </a> <a href='https://www.instagram.com/tekieapp/'
+                                                        style='text-decoration: none;' target='_blank'>
+                                                        <div
+                                                            style='display: inline-block; width: 38px; height: 38px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/instagramGreyIcon.png); background-size: cover; margin-right: 30px;'>
+                                                        </div>
+                                                    </a> <a href='https://www.linkedin.com/company/tekie'
+                                                        style='text-decoration: none;' target='_blank'>
+                                                        <div
+                                                            style='display: inline-block; width: 38px; height: 38px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/linkedinGreyIcon.png); background-size: cover; margin-right: 30px;'>
+                                                        </div>
+                                                    </a> <a
+                                                        href='https://www.youtube.com/channel/UCCr7GPlTdZRXFEfveeuKcbg'
+                                                        style='text-decoration: none;' target='_blank'>
+                                                        <div
+                                                            style='display: inline-block; width: 38px; height: 38px; background-image: url(https://tekie-backend.s3.amazonaws.com/python/email/youtubeGreyIcon.png); background-size: cover;'>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td valign="top" width="33.333%">
+                                    <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                                        <tr>
+                                            <td style="text-align: center; opacity: 0.6;color: #c6c6c6;">
+                                                <a href="https://www.tekie.in/terms"
+                                                    style="font-family: Lato, 'Open Sans', Helvetica, Roboto, sans-serif; color: #c6c6c6; font-size: 14px; font-weight: regular; border-bottom: 1px solid #C6C6C6; padding-bottom: 2px; text-transform: uppercase; text-decoration: none;">VIEW
+                                                    T&C</a> <span>&nbsp;&nbsp;|&nbsp;&nbsp;</span> <a
+                                                    href="https://www.tekie.in"
+                                                    style="font-family: Lato,'Open Sans', Helvetica, Roboto, sans-serif; color: #c6c6c6; font-size: 14px; font-weight: regular; border-bottom: 1px solid #C6C6C6; padding-bottom: 2px; text-transform: uppercase; text-decoration: none">Visit
+                                                    tekie.in</a>
+                                                <span>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                                                <a href="https://www.tekie.in"
+                                                    style="font-family: Lato,'Open Sans', Helvetica, Roboto, sans-serif; color: #c6c6c6; font-size: 14px; font-weight: regular; border-bottom: 1px solid #C6C6C6; padding-bottom: 2px; text-transform: uppercase; text-decoration: none">
+                                                    Unsubscribe</a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </center>
+    <script>
+        Chart.pluginService.register({
+            beforeDraw: function (chart) {
+                if (chart.config.options.elements.center) {
+                    // Get ctx from string
+                    var ctx = chart.chart.ctx;
+
+                    // Get options from the center object in options
+                    var centerConfig = chart.config.options.elements.center;
+                    var fontStyle = centerConfig.fontStyle || 'Arial';
+                    var txt = centerConfig.text;
+                    var color = centerConfig.color || '#000';
+                    var maxFontSize = centerConfig.maxFontSize || 75;
+                    var sidePadding = centerConfig.sidePadding || 20;
+                    var sidePaddingCalculated = (sidePadding / 100) * (chart.innerRadius * 2)
+                    // Start with a base font of 30px
+                    ctx.font = "30px " + fontStyle;
+
+                    // Get the width of the string and also the width of the element minus 10 to give it 5px side padding
+                    var stringWidth = ctx.measureText(txt).width;
+                    var elementWidth = (chart.innerRadius * 2) - sidePaddingCalculated;
+
+                    // Find out how much the font can grow in width.
+                    var widthRatio = elementWidth / stringWidth;
+                    var newFontSize = Math.floor(30 * widthRatio);
+                    var elementHeight = (chart.innerRadius * 2);
+
+                    // Pick a new font size so it will not be larger than the height of label.
+                    var fontSizeToUse = Math.min(newFontSize, elementHeight, maxFontSize);
+                    var minFontSize = centerConfig.minFontSize;
+                    var lineHeight = centerConfig.lineHeight || 25;
+                    var wrapText = false;
+
+                    if (minFontSize === undefined) {
+                        minFontSize = 20;
+                    }
+
+                    if (minFontSize && fontSizeToUse < minFontSize) {
+                        fontSizeToUse = minFontSize;
+                        wrapText = true;
+                    }
+
+                    // Set font settings to draw it correctly.
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    var centerX = ((chart.chartArea.left + chart.chartArea.right) / 2);
+                    var centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
+                    ctx.font = fontSizeToUse + "px " + fontStyle;
+                    ctx.fillStyle = color;
+
+                    if (!wrapText) {
+                        ctx.fillText(txt, centerX, centerY);
+                        return;
+                    }
+
+                    var words = txt.split(' ');
+                    var line = '';
+                    var lines = [];
+
+                    // Break words up into multiple lines if necessary
+                    for (var n = 0; n < words.length; n++) {
+                        var testLine = line + words[n] + ' ';
+                        var metrics = ctx.measureText(testLine);
+                        var testWidth = metrics.width;
+                        if (testWidth > elementWidth && n > 0) {
+                            lines.push(line);
+                            line = words[n] + ' ';
+                        } else {
+                            line = testLine;
+                        }
+                    }
+
+                    // Move the center up depending on line height and number of lines
+                    centerY -= (lines.length / 2) * lineHeight;
+
+                    for (var n = 0; n < lines.length; n++) {
+                        ctx.fillText(lines[n], centerX, centerY);
+                        centerY += lineHeight;
+                    }
+                    //Draw text in center
+                    ctx.fillText(line, centerX, centerY);
+                }
+            }
+        });
+
+        const data = {
+            datasets: [{
+                label: 'Performance',
+                data: [300, 50],
+                backgroundColor: [
+                    'rgb(54, 162, 235)',
+                    'rgb(255, 255, 255)'
+                ],
+                hoverOffset: 4
+            }]
+        };
+
+        new Chart("myChart", {
+            type: 'doughnut',
+            data: data,
+            options: {
+                elements: {
+                    center: {
+                        text: '90%',
+                        color: '#FF6384', // Default is #000000
+                        fontStyle: 'Arial', // Default is Arial
+                        sidePadding: 20, // Default is 20 (as a percentage)
+                        minFontSize: 25, // Default is 20 (in px), set to false and text will not wrap.
+                        lineHeight: 25 // Default is 25 (in px), used for when text wraps
+                    },
+                    arc: {
+                        borderWidth: 1
+                    }
+                },
+                layout: {
+                    padding: 0,
+                    margin: 0
+                },
+                percentageInnerCutout: 50,
+                cutoutPercentage: 90
+            }
+        });
+    </script>
+</body>
+
+</html>

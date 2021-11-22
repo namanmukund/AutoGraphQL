@@ -447,6 +447,8 @@ export const VERTICALS = [
 
 export const NUNITO_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Nunito-Bold.ttf`;
 
+const ALLOWED_MIME_TYPES = ['html', 'css', 'javascript'];
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -524,4 +526,5 @@ export {
   auditSubType,
   currencyTypes,
   studentNoteForIQ,
+  ALLOWED_MIME_TYPES,
 };
