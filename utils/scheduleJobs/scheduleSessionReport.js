@@ -25,9 +25,10 @@ const masterQuery = (todayStartDate,
       ${filterQuery.source}
       ${filterQuery.user}
       {country:${country}}
-      {
-        studentProfile_some:${filterQuery.grade}     
-      }
+      {parentProfile_some:{
+        children_some:
+          ${filterQuery.grade}
+      }}
     ]
   }){
     count
@@ -41,9 +42,10 @@ const masterQuery = (todayStartDate,
       ${filterQuery.source}
       ${filterQuery.user}
       {country:${country}}
-      {
-        studentProfile_some:${filterQuery.grade}     
-      }
+      {parentProfile_some:{
+        children_some:
+          ${filterQuery.grade}
+      }}
     ]
   }){
     count

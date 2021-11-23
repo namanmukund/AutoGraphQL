@@ -2,7 +2,7 @@ import * as schedule from 'node-schedule';
 import scheduleTrialSessionReminder from './scheduleJobs/scheduleTrialSessionReminder';
 import scheduleMentorReport from './scheduleJobs/scheduleMentorReport';
 import scheduleSessionReport from './scheduleJobs/scheduleSessionReport';
-import generateSessionCourseReport from './scheduleJobs/generateSessionCourseReport';
+import generateSessionCourseReport from './scheduleJobs/scheduleCourseReport';
 
 // create scheduler for different functionalities
 const createScheduler = (schedulerName) => {
