@@ -159,7 +159,7 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
             } = connectInput;
             modifiedFileName = (data && data.name)
               ? data.name
-              : `${typeField}_${typeId}_${Date.now()}.${ext}`;
+              : `${fileName || typeField}_${typeId}_${Date.now()}.${ext}`;
             filePath = `${fileBucket}/${connectType.toLowerCase()}/${modifiedFileName}`;
           } else {
             const rawFileName = (name && name.split('.')) ? name.split('.')[0] : name;
