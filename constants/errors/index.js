@@ -78,6 +78,7 @@ import {
   SlotAlreadyOpened,
   SlotAlreadyFilled,
   SessionAlreadyAssigned,
+  FileNameAlreadyExists,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -297,4 +298,5 @@ export {
   SlotAlreadyFilled,
   SessionAlreadyAssigned,
   CanNotStartSessionWithoutMentorError,
+  FileNameAlreadyExists,
 };
