@@ -41,7 +41,8 @@ const addMentorMenteeSessionAuditQuery = (
   `;
 
 const addMentorMenteeSessionAudit = async (
-  mentorMenteeSessionId, order,
+  mentorMenteeSessionId,
+  order,
 ) => {
   const mentorMenteeSessionAuditInfo = await callLocalGraphqlApi(mentorMenteeSessionAuditQuery(mentorMenteeSessionId));
   const mentorMenteeSessionAuditId = get(mentorMenteeSessionAuditInfo, 'data.mentorMenteeSessionAudits[0].id', false);
