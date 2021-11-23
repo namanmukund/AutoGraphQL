@@ -9,13 +9,14 @@ import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors'
 import getSpySquadCampCertificateUrl from './uploadCertificates/spysquadcamp';
 import getCanvaEventCertificateUrl from './uploadCertificates/canvaEvent';
 import getStoryspreeCertificateUrl from './uploadCertificates/storyspree';
+import getDemoCompletionCertificateUrl from './uploadCertificates/demoCompletion';
 
 const fetchUser = (userId, eventId) => `
 {
   users(filter: {
     and: [
       {id: "${userId}"}
-      {eventAttandances_some: {event_some:{id: "${eventId}"}}}
+      ${eventId ? `{eventAttandances_some: {event_some:{id: "${eventId}"}}}` : ''}
     ]
   }){
     id
@@ -97,9 +98,14 @@ const generateCertificateMutationResolver = async (
   const { input } = params;
   // eventId to be passed here too in input
   const {
-    userId, regenerateCertificate, eventId, date,
+    userId, regenerateCertificate, eventId, date, isEventCertificate,
   } = input;
-  const userRes = await callLocalGraphqlApi(fetchUser(userId, eventId));
+  let userRes;
+  if (!isEventCertificate) {
+    userRes = await callLocalGraphqlApi(fetchUser(userId));
+  } else {
+    userRes = await callLocalGraphqlApi(fetchUser(userId, eventId));
+  }
   const users = get(userRes, 'data.users');
   // get eventCertificate based on event type
   const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(userId, eventId));
@@ -144,6 +150,11 @@ const generateCertificateMutationResolver = async (
         fetchedUrl = await getStoryspreeCertificateUrl(userId, userName, formattedDate);
         eventType = 'communityEvent';
         eventName = 'storyspree';
+        break;
+      case 'ckwakpd7k0000erin7yizcfi1':
+        fetchedUrl = await getDemoCompletionCertificateUrl(userId, userName);
+        eventType = 'userAchievement';
+        eventName = 'demoCompletion';
         break;
       default:
         fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
