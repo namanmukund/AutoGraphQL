@@ -18,6 +18,7 @@ const getLinkToken = (user, createdAt, expiresIn) => {
       linkData: {
         expiresIn: moment(createdAt).add(expiresIn, 'hours'),
         userInfo,
+        createdAt: new Date(createdAt),
       },
     },
     linkTokenSecret,
@@ -53,11 +54,7 @@ const generateAndReturnToken = (user, addMagicLinkLogQuery = '', index, {
   appName, grade, section, userIdFromContext, schoolId, expiresIn,
 }) => {
   const linkToken = getLinkToken(user, new Date(), expiresIn);
-  let linkUri = 'https://www.tekie.in/login?';
-  if (process.env.NODE_ENV !== 'production') {
-    linkUri = 'https://tekie-web-staging.herokuapp.com/login?';
-  }
-  linkUri += `authToken=${linkToken}`;
+  const linkUri = `/login?authToken=${linkToken}`;
   addMagicLinkLogQuery = `addMagicLinkLog${index}: addMagicLinkLog(
     input: {
       expiresIn: ${expiresIn}

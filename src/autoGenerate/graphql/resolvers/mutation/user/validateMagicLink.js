@@ -91,38 +91,37 @@ const validateMagicLinkMutationResolver = async (
     throw new UserTokenNotRequiredError();
   }
   const { linkToken } = input;
-  if (linkToken) {
-    await jwt.verify(linkToken, linkTokenSecret, async (error, values) => {
-      if (error) {
-        throw new SomethingWentWrongError();
-      }
-      const { expiresIn, userInfo: { id } } = get(values, 'linkData');
-      const magicLinkDetails = await getTokenDetails(linkToken, id);
-      if (magicLinkDetails.length > 0) {
-        const { id: tokenLogId, isLinkVisited = false, visitedCount } = get(magicLinkDetails, '[0]');
-        updateTokenDetail(tokenLogId, isLinkVisited, visitedCount);
-        if (!isLinkVisited) {
-          if (moment().isAfter(moment(expiresIn))) {
-            throw new LinkExpiredError();
-          } else {
-            const userInfo = await getuserInfo(id);
-            const userPhone = get(userInfo, 'studentProfile.parents[0].user.phone');
-            if (get(userPhone, 'number')) {
-              input.phone = userPhone;
-            } else if (get(userInfo, 'studentProfile.parents[0].user.email')) {
-              input.email = get(userInfo, 'studentProfile.parents[0].user.email');
-            }
-          }
-        } else {
-          throw new LinkExpiredError();
-        }
-      } else {
-        throw new InvalidToken();
-      }
-    });
-  } else {
+  if (!linkToken) {
     throw new MissingMandatoryInputInRequestError();
   }
+  // decoding user and expiry time from token received
+  await jwt.verify(linkToken, linkTokenSecret, async (error, values) => {
+    if (error) {
+      throw new SomethingWentWrongError();
+    }
+    const { expiresIn, userInfo: { id } } = get(values, 'linkData');
+    // getting link details from logs
+    const magicLinkDetails = await getTokenDetails(linkToken, id);
+    if (!magicLinkDetails.length) {
+      throw new InvalidToken();
+    }
+    const { id: tokenLogId, isLinkVisited = false, visitedCount } = get(magicLinkDetails, '[0]');
+    updateTokenDetail(tokenLogId, isLinkVisited, visitedCount);
+    // if link is already visited
+    if (isLinkVisited) {
+      throw new LinkExpiredError();
+    }
+    if (moment().isAfter(moment(expiresIn))) {
+      throw new LinkExpiredError();
+    }
+    const userInfo = await getuserInfo(id);
+    const userPhone = get(userInfo, 'studentProfile.parents[0].user.phone');
+    if (get(userPhone, 'number')) {
+      input.phone = userPhone;
+    } else if (get(userInfo, 'studentProfile.parents[0].user.email')) {
+      input.email = get(userInfo, 'studentProfile.parents[0].user.email');
+    }
+  });
 
   Object.assign(authentication, {
     bypass: true,
