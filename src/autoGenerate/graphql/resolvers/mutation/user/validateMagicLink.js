@@ -14,6 +14,9 @@ import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import { LinkExpiredError } from '../../../../../../constants/errors/auth';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import coreAuthParams from '../../../../../../config/authParams';
+import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
+
+const linkTokenSecret = coreAuthParams.LINK_TOKEN_SECRET;
 
 const getuserInfo = async (userId) => {
   const query = `{
@@ -40,13 +43,14 @@ const getuserInfo = async (userId) => {
   return get(userData, 'data.user');
 };
 
-const getTokenDetails = async (linkToken, userToken) => {
+const getTokenDetails = async (linkToken, userId) => {
   const query = `{
-  magicLinkLogs(filter: { and: [{ expiryToken: "${linkToken}" }, { userToken: "${userToken}" }] }) {
+  magicLinkLogs(
+    filter: { and: [{ linkToken: "${linkToken}" }, { user_some: { id: "${userId}" } }] }
+  ) {
     id
-    userToken
+    linkToken
     expiresIn
-    expiryToken
     isLinkVisited
     visitedCount
   }
@@ -86,45 +90,38 @@ const validateMagicLinkMutationResolver = async (
   if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
-  const { userToken, linkToken } = input;
-  if (linkToken && userToken) {
-    const magicLinkDetails = await getTokenDetails(linkToken, userToken);
-    if (magicLinkDetails.length > 0) {
-      const { id: tokenLogId, isLinkVisited = false, visitedCount } = get(magicLinkDetails, '[0]');
-      updateTokenDetail(tokenLogId, isLinkVisited, visitedCount);
-      if (!isLinkVisited) {
-        const linkTokenSecret = coreAuthParams.LINK_TOKEN_SECRET;
-        await jwt.verify(linkToken, linkTokenSecret, async (err, decodedValue) => {
-          if (err) {
-            throw new SomethingWentWrongError();
-          }
-          const expiresIn = get(decodedValue, 'expiryData.expiresIn');
+  const { linkToken } = input;
+  if (linkToken) {
+    await jwt.verify(linkToken, linkTokenSecret, async (error, values) => {
+      if (error) {
+        throw new SomethingWentWrongError();
+      }
+      const { expiresIn, userInfo: { id } } = get(values, 'linkData');
+      const magicLinkDetails = await getTokenDetails(linkToken, id);
+      if (magicLinkDetails.length > 0) {
+        const { id: tokenLogId, isLinkVisited = false, visitedCount } = get(magicLinkDetails, '[0]');
+        updateTokenDetail(tokenLogId, isLinkVisited, visitedCount);
+        if (!isLinkVisited) {
           if (moment().isAfter(moment(expiresIn))) {
             throw new LinkExpiredError();
           } else {
-            await jwt.verify(userToken, userTokenSecret, async (error, decodedData) => {
-              if (error) {
-                throw new SomethingWentWrongError();
-              }
-              const userId = get(decodedData, 'userInfo.id');
-              const userInfo = await getuserInfo(userId);
-              const userPhone = get(userInfo, 'studentProfile.parents[0].user.phone');
-              if (get(userPhone, 'number')) {
-                input.phone = userPhone;
-              } else if (get(userInfo, 'studentProfile.parents[0].user.email')) {
-                input.email = get(userInfo, 'studentProfile.parents[0].user.email');
-              }
-            });
+            const userInfo = await getuserInfo(id);
+            const userPhone = get(userInfo, 'studentProfile.parents[0].user.phone');
+            if (get(userPhone, 'number')) {
+              input.phone = userPhone;
+            } else if (get(userInfo, 'studentProfile.parents[0].user.email')) {
+              input.email = get(userInfo, 'studentProfile.parents[0].user.email');
+            }
           }
-        });
+        } else {
+          throw new LinkExpiredError();
+        }
       } else {
-        throw new LinkExpiredError();
+        throw new InvalidToken();
       }
-    } else {
-      throw new InvalidToken();
-    }
+    });
   } else {
-    throw new InvalidToken();
+    throw new MissingMandatoryInputInRequestError();
   }
 
   Object.assign(authentication, {

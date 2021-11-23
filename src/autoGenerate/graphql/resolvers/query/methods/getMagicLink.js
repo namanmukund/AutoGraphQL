@@ -15,7 +15,7 @@ const getLinkToken = (user, createdAt, expiresIn) => {
   // always taking expire value in hours
   const linkToken = jwt.sign(
     {
-      expiryData: {
+      linkData: {
         expiresIn: moment(createdAt).add(expiresIn, 'hours'),
         userInfo,
       },
