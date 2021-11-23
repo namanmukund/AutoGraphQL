@@ -1,9 +1,8 @@
 const MagicLinkLog = `
   type MagicLinkLog @model {
     user: User! @relation(name: "MagicLinkLogUser", direction: "OneWay")
-    userToken: String!
+    linkToken: String!
     expiresIn: Int
-    expiryToken: String
     isLinkVisited: Boolean @defaultValue(value: "false")
     visitedCount: Int
     linkUri: String

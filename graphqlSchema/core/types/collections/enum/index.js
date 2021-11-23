@@ -101,7 +101,6 @@ import RequestReason from './RequestReason';
 import Platform from './Platform';
 import StudentNoteForIQ from './StudentNoteForIQ';
 import LeadPartnerType from './LeadPartnerType';
-import PeriodValue from './PeriodValue';
 
 export default [
   Status,
@@ -208,5 +207,4 @@ export default [
   Platform,
   StudentNoteForIQ,
   LeadPartnerType,
-  PeriodValue,
 ];

@@ -1,7 +1,6 @@
 const ValidateMagicLinkInput = `
   input ValidateMagicLinkInput {
-    userToken: String
-    linkToken: String
+    linkToken
   }`;
 
 export default ValidateMagicLinkInput;

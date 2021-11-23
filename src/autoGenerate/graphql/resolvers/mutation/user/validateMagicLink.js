@@ -93,9 +93,8 @@ const validateMagicLinkMutationResolver = async (
       const { id: tokenLogId, isLinkVisited = false, visitedCount } = get(magicLinkDetails, '[0]');
       updateTokenDetail(tokenLogId, isLinkVisited, visitedCount);
       if (!isLinkVisited) {
-        const userTokenSecret = coreAuthParams.USER_TOKEN_SECRET;
-        const expiryTokenSecret = coreAuthParams.EXPIRY_TOKEN_SECRET;
-        await jwt.verify(linkToken, expiryTokenSecret, async (err, decodedValue) => {
+        const linkTokenSecret = coreAuthParams.LINK_TOKEN_SECRET;
+        await jwt.verify(linkToken, linkTokenSecret, async (err, decodedValue) => {
           if (err) {
             throw new SomethingWentWrongError();
           }

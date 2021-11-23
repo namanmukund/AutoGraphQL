@@ -8,7 +8,6 @@ import SocialLoginInput from './SocialLoginInput';
 import EmailLoginInput from './EmailLoginInput';
 import ValidateUserInput from './ValidateUserInput';
 import ValidateMagicLinkInput from './ValidateMagicLinkInput';
-import ResetUserPasswordInput from './ResetUserPasswordInput';
 
 export default [
   ...User, ...SignUpInput,
@@ -19,5 +18,4 @@ export default [
   ...EmailLoginInput,
   ValidateUserInput,
   ValidateMagicLinkInput,
-  ...ResetUserPasswordInput,
 ];

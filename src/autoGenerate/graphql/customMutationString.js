@@ -43,7 +43,6 @@ const customMutationString = `
    sendJourneySnapshotInMail ( input: SendJourneySnapshotInMailInput ): BooleanResult,
    generateCertificate ( input: GenerateCertificateInput ) : GenerateCertificateOutput,
    validateMagicLink ( input: ValidateMagicLinkInput  ): ParentChildToken,
-   resetPasswordAndLogin ( input: ResetUserPasswordInput ): UserToken,
    `;
 
 export default customMutationString;

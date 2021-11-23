@@ -1,7 +1,6 @@
 const GetMagicLinkOutput = `
   type GetMagicLinkOutput {
-    userToken: String
-    expiryToken: String
+    linkToken: String
     expiresIn: Int
     linkUri: String
   }

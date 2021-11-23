@@ -7,37 +7,26 @@ import moment from 'moment';
 import coreAuthParams from '../../../../../../config/authParams';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
-import { TLA, TMS } from '../../../../../../constants';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 
-const getUserToken = (user, createdAt, expiresIn) => {
+const getLinkToken = (user, createdAt, expiresIn) => {
   const userInfo = pick(user, ['id', 'username']);
-  const userTokenSecret = coreAuthParams.USER_TOKEN_SECRET;
-  const expiryTokenSecret = coreAuthParams.EXPIRY_TOKEN_SECRET;
-  const userToken = jwt.sign(
-    {
-      userInfo,
-    },
-    userTokenSecret,
-    {
-      expiresIn: `${expiresIn}h`,
-      algorithm: coreAuthParams.ALGORITHM,
-    },
-  );
+  const linkTokenSecret = coreAuthParams.LINK_TOKEN_SECRET;
   // always taking expire value in hours
-  const expiryToken = jwt.sign(
+  const linkToken = jwt.sign(
     {
       expiryData: {
         expiresIn: moment(createdAt).add(expiresIn, 'hours'),
+        userInfo,
       },
     },
-    expiryTokenSecret,
+    linkTokenSecret,
     {
       expiresIn: `${expiresIn}h`,
       algorithm: coreAuthParams.ALGORITHM,
     },
   );
-  return { userToken, expiryToken };
+  return linkToken;
 };
 
 const fetchUserDetails = async (queryFilter) => {
@@ -63,17 +52,16 @@ const fetchUserDetails = async (queryFilter) => {
 const generateAndReturnToken = (user, addMagicLinkLogQuery = '', index, {
   appName, grade, section, userIdFromContext, schoolId, expiresIn,
 }) => {
-  const { userToken, expiryToken } = getUserToken(user, new Date(), expiresIn);
+  const linkToken = getLinkToken(user, new Date(), expiresIn);
   let linkUri = 'https://www.tekie.in/login?';
   if (process.env.NODE_ENV !== 'production') {
     linkUri = 'https://tekie-web-staging.herokuapp.com/login?';
   }
-  linkUri += `linkToken=${expiryToken}&userToken=${userToken}`;
+  linkUri += `authToken=${linkToken}`;
   addMagicLinkLogQuery = `addMagicLinkLog${index}: addMagicLinkLog(
     input: {
-      userToken: "${userToken}"
       expiresIn: ${expiresIn}
-      expiryToken: "${expiryToken}"
+      linkToken: "${linkToken}"
       isLinkVisited: false
       visitedCount: 0
       linkUri: "${linkUri}"
@@ -88,8 +76,7 @@ const generateAndReturnToken = (user, addMagicLinkLogQuery = '', index, {
     id
   }`;
   return {
-    userToken,
-    expiryToken,
+    linkToken,
     expiresIn,
     linkUri,
     addMagicLinkLogQuery,
@@ -143,13 +130,12 @@ const getMagicLink = (async (root, params, context) => {
       studentDetails.forEach((student, index) => {
         const { user } = student;
         const {
-          userToken, expiresIn: expiresInValue, expiryToken, linkUri, addMagicLinkLogQuery: addLogQuery,
+          expiresIn: expiresInValue, linkToken, linkUri, addMagicLinkLogQuery: addLogQuery,
         } = generateAndReturnToken(user, '', index, {
           appName, grade, section, userIdFromContext, schoolId, expiresIn,
         });
         tokens.push({
-          userToken,
-          expiryToken,
+          linkToken,
           expiresIn: expiresInValue,
           linkUri,
         });
