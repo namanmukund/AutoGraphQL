@@ -23,14 +23,14 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateCourseInVideos from '../scriptMethods/updateCourseInVideos';
 // import removeCourseFromUserAssignments from '../scriptMethods/removeCourseFromUserAssignments';
 // import generateCertificateScript from '../scriptMethods/generateCertificateScript';
-// import generateSessionReportByCourse from '../../../../../../utils/scheduleJobs/scheduleSessionReportByCourse';
+// import generateSessionCourseReport from '../../../../../../utils/scheduleJobs/generateSessionCourseReport';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
   /*
   Add script functions
    */
-  // await generateSessionReportByCourse(2);
+  // await generateSessionCourseReport(2);
   // await updateCourseInVideos();
   // await updateCourseInSalesOperationScript();
   // await updateSchoolCampaignCodeInSchool();

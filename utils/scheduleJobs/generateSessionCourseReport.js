@@ -242,7 +242,7 @@ const addSessionCourseReport = (input, courseId) => `
 }
 `;
 
-const generateSessionReportByCourse = async (numDaysToRunQuery) => {
+const generateSessionCourseReport = async (numDaysToRunQuery) => {
   let dayCount = 0;
   const currentStartDate = new Date();
   const currentEndDate = new Date();
@@ -336,4 +336,4 @@ const generateSessionReportByCourse = async (numDaysToRunQuery) => {
   }
 };
 
-export default generateSessionReportByCourse;
+export default generateSessionCourseReport;
