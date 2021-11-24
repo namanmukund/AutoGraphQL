@@ -16,11 +16,11 @@ const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).rep
 
 const slugifyID = (ID) => ID ? ID.toString().trim().toUpperCase().replace(/\w{5}(?=.)/g, '$&-') : '';
 
-const getDialUrl = () => `${process.env.FILE_BASE_URL}/python/course/iqaScoreDial90.png`;
+const round5 = (x) => Math.round(x / 5) * 5;
+
+const getDialUrl = (score) => `${process.env.FILE_BASE_URL}/python/course/iqaScores/score${round5(score)}.png`;
 
 const getMentorRatingStars = (rating) => `${process.env.FILE_BASE_URL}/python/course/mentorRatings/${rating}star.png`;
-
-const round5 = (x) => Math.round(x / 5) * 5;
 
 const iqaReportQuery = (id) => `{
 iqaReports(filter: {
@@ -74,7 +74,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
 
   const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
 
-  const dialImageBytes = await fetch(getDialUrl()).then((res) => res.buffer());
+  const dialImageBytes = await fetch(getDialUrl(get(iqaReports, '[0].iqaScoree', 70))).then((res) => res.buffer());
 
   const dialImage = await pdfDoc.embedPng(dialImageBytes);
   const dialDims = dialImage.scale(1);
@@ -132,9 +132,10 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     color: rgb(0.314, 0.310, 0.310),
   });
 
+  // dial image
   firstPage.drawImage(dialImage, {
-    x: 83,
-    y: 857,
+    x: 87,
+    y: 862,
     width: dialDims.width,
     height: dialDims.height,
   });
@@ -165,7 +166,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
 
   // experience in coding
   firstPage.drawText(`${'3.5+ Years'}`, {
-    x: 316,
+    x: 317,
     y: 660,
     size: 14,
     font: NunitoBoldFont,
@@ -174,7 +175,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
 
   // most common review
   firstPage.drawText(`${'Friendly & Dedicated'}`, {
-    x: 316,
+    x: 317,
     y: 607,
     size: 14,
     font: NunitoBoldFont,
@@ -183,7 +184,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
 
   // Languages
   firstPage.drawText(`${'Java, Python'}`, {
-    x: 316,
+    x: 317,
     y: 554,
     size: 14,
     font: NunitoBoldFont,
@@ -191,9 +192,9 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   });
 
   // languages familiar with
-  firstPage.drawText(`${capitalize('Shivangi Kamboj')}`, {
-    x: ((width - getStringWidth(`${capitalize('Shivangi Kamboj')}`)) / 4) + 35,
-    y: 560,
+  firstPage.drawText(`${capitalize('Gokul Madhusudhan')}`, {
+    x: ((width - getStringWidth(`${capitalize('Gokul Madhusudhan')}`)) / 4) + 40,
+    y: 557,
     size: 14,
     font: NunitoBoldFont,
     color: rgb(0, 0.29, 0.678),
@@ -209,8 +210,8 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
 
   // mentor circle
   firstPage.drawCircle({
-    x: 185,
-    y: 630,
+    x: 200,
+    y: 620,
     size: 40,
     color: rgb(0.969, 0.729, 0.290),
     opacity: 1,

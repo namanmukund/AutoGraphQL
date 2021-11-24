@@ -25,7 +25,8 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import generateCertificateScript from '../scriptMethods/generateCertificateScript';
 // import eventResponsesToLeadsquaredScript from '../scriptMethods/eventResponsesToLeadsquaredScript';
 // import updateMentorMenteeSessionAuditForCompletedAudits from '../scriptMethods/updateMentorMenteeSessionAuditForCompletedAudits';
-import getIqaReportSnapshotUrl from '../../mutation/pdf/uploadCertificates/iqaReport';
+// import getIqaReportSnapshotUrl from '../../mutation/pdf/uploadCertificates/iqaReport';
+import getPostDemoSalesReportUrl from '../../mutation/pdf/uploadCertificates/postDemoSalesReport';
 // import scheduleSessionCourseReport from '../../../../../../utils/scheduleJobs/scheduleCourseReport';
 
 const temporaryScript = (async (root, params, context) => {
@@ -76,7 +77,8 @@ const temporaryScript = (async (root, params, context) => {
   // await updateQuestionBankOfPythonCourseWithCorrectPostion();
   // await eventResponsesToLeadsquaredScript();
   // await updateMentorMenteeSessionAuditForCompletedAudits();
-  await getIqaReportSnapshotUrl('ckgsshcir00000vqgdftbf2f4', 'Gokul');
+  // await getIqaReportSnapshotUrl('ckgsshcir00000vqgdftbf2f4', 'Gokul');
+  await getPostDemoSalesReportUrl('ckgsshcir00000vqgdftbf2f4');
   return {
     result: true,
   };

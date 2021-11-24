@@ -29,6 +29,7 @@ const sendDemoCompletionCertificate = async (userId) => {
   // TODO : edit all these values
   const eventId = 'ckwakpd7k0000erin7yizcfi1';
   const certificateDetails = await generateCertificate(userId, false, eventId);
+  // check if iqa report is generated to send that also
   const certificateLink = `${process.env.TEKIE_WEB_URL}/${get(certificateDetails, 'tekieUrl')}`;
   log(`##### Demo Completion Certificate Link - ${certificateLink}`);
   const parameters = [

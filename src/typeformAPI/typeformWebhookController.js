@@ -85,6 +85,26 @@ const getEventAttendances = async (userId, eventId) => {
   return get(await callLocalGraphqlApi(query), 'data.eventAttendances', []);
 };
 
+const generateCertificate = async (id, regenerateCertificate, eventId, date) => {
+  const query = `
+    mutation{
+      generateCertificate(input:{
+        userId:"${id}"
+        regenerateCertificate:${regenerateCertificate ? 'true' : 'false'}
+        eventId:"${eventId}"
+        ${date ? `date: "${date}"` : ''}
+      })
+      {
+        id
+        assetUrl
+        tekieUrl
+      }
+    }
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.generateCertificate', {});
+};
+
 const usersData = async (studentDetailsObject, formId) => {
   let filter = '';
   const {
@@ -267,6 +287,10 @@ const addIqaReport = async (studentDetailsObject) => {
         try {
           await callLocalGraphqlApi(addIqaReportMutation);
           // create a iqa report
+          const certificateDetails = await generateCertificate(userId, false, eventId, '');
+          const certificateLink = `${process.env.TEKIE_WEB_URL}/${get(certificateDetails, 'tekieUrl')}`;
+          log(`cert link ${certificateLink}`);
+          // update iqaReport with new tekieUrl
         } catch (err) {
           log('Error while adding IQA Report');
         }
