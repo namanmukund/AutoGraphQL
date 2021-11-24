@@ -230,7 +230,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       || (inputMentorRating && inputMentorRating < MENTOR_RATING_AUDIT_THRESHOLD)
       || inputDistracted || inputRude || inputSlowPaced || inputFastPaced || inputNotPunctual
       || inputAverage || inputBoring || inputPoorExplanation || inputAverageExplanation) {
-      addMentorMenteeSessionAudit(mentorMenteeSessionId);
+      addMentorMenteeSessionAudit(mentorMenteeSessionId, get(topic, 'order'));
     }
 
     if (isPostSalesAuditFromInput && prevIsPostSalesAudit === false) {
