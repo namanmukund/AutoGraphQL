@@ -447,6 +447,8 @@ export const VERTICALS = [
 
 export const NUNITO_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Nunito-Bold.ttf`;
 
+export const GILROY_EXTRA_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Gilroy-ExtraBold.otf`;
+
 const ALLOWED_MIME_TYPES = ['html', 'css', 'javascript'];
 
 const MASTER_OTP = 3007;

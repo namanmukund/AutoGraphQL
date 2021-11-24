@@ -3,6 +3,7 @@ const EventName = `
     spySquadCamp
     canvaMasterclass
     storyspree
+    demoCompletion
   }`;
 
 export default EventName;
