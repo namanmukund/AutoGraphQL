@@ -260,6 +260,7 @@ const addIqaReport = async (studentDetailsObject) => {
       `;
         try {
           await callLocalGraphqlApi(addIqaReportMutation);
+          // create a iqa report
         } catch (err) {
           log('Error while adding IQA Report');
         }

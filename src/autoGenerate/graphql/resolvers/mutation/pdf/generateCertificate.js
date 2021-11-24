@@ -129,6 +129,7 @@ const generateCertificateMutationResolver = async (
     let fetchedUrl = '';
     let eventType = '';
     let eventName = '';
+    // the three ids here are the event.ids created in three environments (local, pre-prod, prod)
     switch (eventId) {
       case 'ckvdiavp70000igujfgxh8mt6':
       case 'ckve5izxq0000ucui47b89pmf':
@@ -155,6 +156,11 @@ const generateCertificateMutationResolver = async (
         fetchedUrl = await getDemoCompletionCertificateUrl(userId, userName);
         eventType = 'userAchievement';
         eventName = 'demoCompletion';
+        break;
+      case '':
+        fetchedUrl = await getIqaReportSnapshotUrl(userId, userName);
+        eventType = 'userAchievement';
+        eventName = 'iqaReport';
         break;
       default:
         fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);

@@ -25,6 +25,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import generateCertificateScript from '../scriptMethods/generateCertificateScript';
 // import eventResponsesToLeadsquaredScript from '../scriptMethods/eventResponsesToLeadsquaredScript';
 // import updateMentorMenteeSessionAuditForCompletedAudits from '../scriptMethods/updateMentorMenteeSessionAuditForCompletedAudits';
+import getIqaReportSnapshotUrl from '../../mutation/pdf/uploadCertificates/iqaReport';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -73,6 +74,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateQuestionBankOfPythonCourseWithCorrectPostion();
   // await eventResponsesToLeadsquaredScript();
   // await updateMentorMenteeSessionAuditForCompletedAudits();
+  await getIqaReportSnapshotUrl('ckgsshcir00000vqgdftbf2f4', 'Gokul');
   return {
     result: true,
   };
