@@ -229,7 +229,7 @@ const typeformWebhookController = async (req, res) => {
         country = 'india';
         timezone = 'Asia/Kolkata';
         utmSource = 'communityevent';
-        utmCampaign = 'spysquadcamp_20nov';
+        utmCampaign = 'spysquadcamp_28nov';
         break;
       case 'N5rTz2zX':
         country = 'india';
