@@ -200,6 +200,76 @@ const usersData = async (studentDetailsObject, formId) => {
   }
 };
 
+const addIqaReport = async (studentDetailsObject) => {
+  let filter = '';
+  const {
+    parentPhone: { number = '' },
+    iqaRank,
+    globalRank,
+    iqaScore,
+    maximumScore,
+  } = studentDetailsObject;
+  if (number) {
+    filter = `{
+      and:[
+        {user_some: {
+          phone_number_subDoc:"${number}"
+        }}
+      ]
+    }`;
+    const iqaReportQuery = `{
+      iqaReports(filter:${filter}){
+        id
+        user{
+          id
+        }
+      }
+    }`;
+    const iqaReports = get(await callLocalGraphqlApi(iqaReportQuery), 'data.iqaReports', []);
+    // uses the same formId parameter passed from controller, to generate eventId dynamically
+    if (iqaReports && iqaReports.length) {
+      log(`IqaReport Cannot be added as Document already exists for given phone number ${number}`);
+    } else {
+      filter = `{
+          phone_number_subDoc:"${number}"
+        }`;
+      const usersQuery = `{
+        users(filter:${filter}){
+          id
+        }
+      }`;
+      const users = get(await callLocalGraphqlApi(usersQuery), 'data.users', []);
+      if (users && users.length) {
+        const addIqaReportMutation = `mutation{
+        addIqaReport(
+          userConnectId:"${get(users, '[0].id')}"
+          input:{
+          phone:{
+              countryCode:"${get(users, '[0].phone.countryCode')}"
+              number:"${get(users, '[0].phone.number')}"
+            }
+            email:"${get(users, '[0].email')}"
+            iqaRank:${iqaRank}
+            globalRank:${globalRank}
+            iqaScore:${iqaScore}
+            maximumScore:${maximumScore}
+        }){
+          id
+        }
+      }
+      `;
+        try {
+          await callLocalGraphqlApi(addIqaReportMutation);
+        } catch (err) {
+          log('Error while adding IQA Report');
+        }
+      } else {
+        log(`User does not exist with given phone number ${number}`);
+      }
+    }
+  }
+};
+
 const typeformWebhookController = async (req, res) => {
   const digest = getHashDigest(get(req, 'body'));
   log(`digest ${digest}`);
@@ -211,7 +281,7 @@ const typeformWebhookController = async (req, res) => {
     const formId = get(req, 'body.form_response.form_id', '');
 
     // Form - IQA test, Grade6 and above
-    if (formId === 'weKBAxh5') {
+    if (formId === 'weKBAxh5' || formId === 'l3s8cO8K') {
       // loop over fields and store details in object, then calculate score and create IQA report
       // eslint-disable-next-line no-restricted-syntax
       for (const variable of variables) {
@@ -231,9 +301,7 @@ const typeformWebhookController = async (req, res) => {
         if (title === 'Student Grade') studentDetailsObject.grade = `Grade${get(studentAnswer, 'choice.label')}`;
         if (title === 'Phone number ') studentDetailsObject.parentPhone = getCountryCodeAndNumber(get(studentAnswer, type));
       }
-    } else if (formId === '') {
-      // TODO : loop over fields and store details in object, then calculate score and create IQA report
-
+      addIqaReport(studentDetailsObject);
     } else {
       // eslint-disable-next-line no-restricted-syntax
       for (const field of fields) {
