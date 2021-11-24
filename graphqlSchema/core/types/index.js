@@ -136,6 +136,7 @@ import SessionCourseReport from './sessionCourseReport';
 import GetEventCertificate from './getEventCertificate';
 import Event from './event';
 import UtmDetail from './utmDetail';
+import IqaReport from './iqaReport';
 import getMagicLink from './getMagicLink';
 import magicLinkLog from './magicLinkLog';
 import LeadPartner from './leadPartner';
@@ -279,6 +280,7 @@ export default [
   ...GetEventCertificate,
   ...Event,
   ...UtmDetail,
+  ...IqaReport,
   ...getMagicLink,
   ...magicLinkLog,
   ...LeadPartner,
