@@ -439,103 +439,103 @@ const addSessionGradeReport = (input) => `
       bookedByAgent: ${input.grade1.bookedByAgent}
     },
     grade2: {
-      registered: ${input.grade1.registered},
-      booked: ${input.grade1.booked},
-      demoCompleted: ${input.grade1.demoCompleted},
-      converted: ${input.grade1.converted},
-      phoneVerified: ${input.grade1.phoneVerified},
-      bookedBySelf: ${input.grade1.bookedBySelf},
-      bookedByAgent: ${input.grade1.bookedByAgent}
+      registered: ${input.grade2.registered},
+      booked: ${input.grade2.booked},
+      demoCompleted: ${input.grade2.demoCompleted},
+      converted: ${input.grade2.converted},
+      phoneVerified: ${input.grade2.phoneVerified},
+      bookedBySelf: ${input.grade2.bookedBySelf},
+      bookedByAgent: ${input.grade2.bookedByAgent}
     },
     grade3: {
-      registered: ${input.grade1.registered},
-      booked: ${input.grade1.booked},
-      demoCompleted: ${input.grade1.demoCompleted},
-      converted: ${input.grade1.converted},
-      phoneVerified: ${input.grade1.phoneVerified},
-      bookedBySelf: ${input.grade1.bookedBySelf},
-      bookedByAgent: ${input.grade1.bookedByAgent}
+      registered: ${input.grade3.registered},
+      booked: ${input.grade3.booked},
+      demoCompleted: ${input.grade3.demoCompleted},
+      converted: ${input.grade3.converted},
+      phoneVerified: ${input.grade3.phoneVerified},
+      bookedBySelf: ${input.grade3.bookedBySelf},
+      bookedByAgent: ${input.grade3.bookedByAgent}
     },
     grade4: {
-      registered: ${input.grade1.registered},
-      booked: ${input.grade1.booked},
-      demoCompleted: ${input.grade1.demoCompleted},
-      converted: ${input.grade1.converted},
-      phoneVerified: ${input.grade1.phoneVerified},
-      bookedBySelf: ${input.grade1.bookedBySelf},
-      bookedByAgent: ${input.grade1.bookedByAgent}
+      registered: ${input.grade4.registered},
+      booked: ${input.grade4.booked},
+      demoCompleted: ${input.grade4.demoCompleted},
+      converted: ${input.grade4.converted},
+      phoneVerified: ${input.grade4.phoneVerified},
+      bookedBySelf: ${input.grade4.bookedBySelf},
+      bookedByAgent: ${input.grade4.bookedByAgent}
     },
     grade5: {
-      registered: ${input.grade1.registered},
-      booked: ${input.grade1.booked},
-      demoCompleted: ${input.grade1.demoCompleted},
-      converted: ${input.grade1.converted},
-      phoneVerified: ${input.grade1.phoneVerified},
-      bookedBySelf: ${input.grade1.bookedBySelf},
-      bookedByAgent: ${input.grade1.bookedByAgent}
+      registered: ${input.grade5.registered},
+      booked: ${input.grade5.booked},
+      demoCompleted: ${input.grade5.demoCompleted},
+      converted: ${input.grade5.converted},
+      phoneVerified: ${input.grade5.phoneVerified},
+      bookedBySelf: ${input.grade5.bookedBySelf},
+      bookedByAgent: ${input.grade5.bookedByAgent}
     },
     grade6: {
-      registered: ${input.grade1.registered},
-      booked: ${input.grade1.booked},
-      demoCompleted: ${input.grade1.demoCompleted},
-      converted: ${input.grade1.converted},
-      phoneVerified: ${input.grade1.phoneVerified},
-      bookedBySelf: ${input.grade1.bookedBySelf},
-      bookedByAgent: ${input.grade1.bookedByAgent}
+      registered: ${input.grade6.registered},
+      booked: ${input.grade6.booked},
+      demoCompleted: ${input.grade6.demoCompleted},
+      converted: ${input.grade6.converted},
+      phoneVerified: ${input.grade6.phoneVerified},
+      bookedBySelf: ${input.grade6.bookedBySelf},
+      bookedByAgent: ${input.grade6.bookedByAgent}
     },
     grade7: {
-      registered: ${input.grade1.registered},
-      booked: ${input.grade1.booked},
-      demoCompleted: ${input.grade1.demoCompleted},
-      converted: ${input.grade1.converted},
-      phoneVerified: ${input.grade1.phoneVerified},
-      bookedBySelf: ${input.grade1.bookedBySelf},
-      bookedByAgent: ${input.grade1.bookedByAgent}
+      registered: ${input.grade7.registered},
+      booked: ${input.grade7.booked},
+      demoCompleted: ${input.grade7.demoCompleted},
+      converted: ${input.grade7.converted},
+      phoneVerified: ${input.grade7.phoneVerified},
+      bookedBySelf: ${input.grade7.bookedBySelf},
+      bookedByAgent: ${input.grade7.bookedByAgent}
     },
     grade8: {
-      registered: ${input.grade1.registered},
-      booked: ${input.grade1.booked},
-      demoCompleted: ${input.grade1.demoCompleted},
-      converted: ${input.grade1.converted},
-      phoneVerified: ${input.grade1.phoneVerified},
-      bookedBySelf: ${input.grade1.bookedBySelf},
-      bookedByAgent: ${input.grade1.bookedByAgent}
+      registered: ${input.grade8.registered},
+      booked: ${input.grade8.booked},
+      demoCompleted: ${input.grade8.demoCompleted},
+      converted: ${input.grade8.converted},
+      phoneVerified: ${input.grade8.phoneVerified},
+      bookedBySelf: ${input.grade8.bookedBySelf},
+      bookedByAgent: ${input.grade8.bookedByAgent}
     },
     grade9: {
-      registered: ${input.grade1.registered},
-      booked: ${input.grade1.booked},
-      demoCompleted: ${input.grade1.demoCompleted},
-      converted: ${input.grade1.converted},
-      phoneVerified: ${input.grade1.phoneVerified},
-      bookedBySelf: ${input.grade1.bookedBySelf},
-      bookedByAgent: ${input.grade1.bookedByAgent}
+      registered: ${input.grade9.registered},
+      booked: ${input.grade9.booked},
+      demoCompleted: ${input.grade9.demoCompleted},
+      converted: ${input.grade9.converted},
+      phoneVerified: ${input.grade9.phoneVerified},
+      bookedBySelf: ${input.grade9.bookedBySelf},
+      bookedByAgent: ${input.grade9.bookedByAgent}
     },
     grade10: {
-      registered: ${input.grade1.registered},
-      booked: ${input.grade1.booked},
-      demoCompleted: ${input.grade1.demoCompleted},
-      converted: ${input.grade1.converted},
-      phoneVerified: ${input.grade1.phoneVerified},
-      bookedBySelf: ${input.grade1.bookedBySelf},
-      bookedByAgent: ${input.grade1.bookedByAgent}
+      registered: ${input.grade10.registered},
+      booked: ${input.grade10.booked},
+      demoCompleted: ${input.grade10.demoCompleted},
+      converted: ${input.grade10.converted},
+      phoneVerified: ${input.grade10.phoneVerified},
+      bookedBySelf: ${input.grade10.bookedBySelf},
+      bookedByAgent: ${input.grade10.bookedByAgent}
     },
     grade11: {
-      registered: ${input.grade1.registered},
-      booked: ${input.grade1.booked},
-      demoCompleted: ${input.grade1.demoCompleted},
-      converted: ${input.grade1.converted},
-      phoneVerified: ${input.grade1.phoneVerified},
-      bookedBySelf: ${input.grade1.bookedBySelf},
-      bookedByAgent: ${input.grade1.bookedByAgent}
+      registered: ${input.grade11.registered},
+      booked: ${input.grade11.booked},
+      demoCompleted: ${input.grade11.demoCompleted},
+      converted: ${input.grade11.converted},
+      phoneVerified: ${input.grade11.phoneVerified},
+      bookedBySelf: ${input.grade11.bookedBySelf},
+      bookedByAgent: ${input.grade11.bookedByAgent}
     },
     grade12: {
-      registered: ${input.grade1.registered},
-      booked: ${input.grade1.booked},
-      demoCompleted: ${input.grade1.demoCompleted},
-      converted: ${input.grade1.converted},
-      phoneVerified: ${input.grade1.phoneVerified},
-      bookedBySelf: ${input.grade1.bookedBySelf},
-      bookedByAgent: ${input.grade1.bookedByAgent}
+      registered: ${input.grade12.registered},
+      booked: ${input.grade12.booked},
+      demoCompleted: ${input.grade12.demoCompleted},
+      converted: ${input.grade12.converted},
+      phoneVerified: ${input.grade12.phoneVerified},
+      bookedBySelf: ${input.grade12.bookedBySelf},
+      bookedByAgent: ${input.grade12.bookedByAgent}
     },
   }){
     id

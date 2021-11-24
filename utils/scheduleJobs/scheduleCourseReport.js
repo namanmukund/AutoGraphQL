@@ -145,46 +145,6 @@ const masterQuery = (todayStartDate,
       }){
         count
       }
-      totalBookedSessionsToday: menteeSessionsMeta(filter:{
-        and:[
-          {bookingDate_gte:"${todayStartDate}"}
-          {bookingDate_lte:"${todayEndDate}"}
-          ${filterQuery.source}
-          ${filterQuery.menteeSessionsMetaVertical}
-          {country:${country}}
-          {topic_some:{order:1}}
-          {course_some:${filterQuery.courseId}}
-        ]
-      }){
-        count
-      }
-      totalCompletedSessionsToday: mentorMenteeSessionsMeta(filter:{
-        and:[
-          {sessionStatus:completed}
-          {sessionStartDate_gte:"${todayStartDate}"}
-          {sessionStartDate_lt:"${todayEndDate}"}
-          ${filterQuery.source}
-          ${filterQuery.mentorMenteeSessionsMetaVertical}
-          {country:${country}}
-          {topic_some:{order:1}}
-          {course_some:${filterQuery.courseId}}
-        ]
-      }){
-        count
-      }
-      totalConvertedUsers: salesOperationsMeta(filter:{
-        and:[
-          {leadStatus:won}
-          ${filterQuery.source}
-          ${filterQuery.salesOperationsMetaVertical}
-          {country:${country}}
-          {createdAt_gt:"${todayStartDate}"}
-          {createdAt_lt: "${todayEndDate}"}
-          {course_some:${filterQuery.courseId}}
-        ]
-      }){
-        count
-      }
     }
   `;
 const sessionCourseReportQuery = (date, country, vertical, courseId) => `
@@ -295,7 +255,6 @@ const generateSessionCourseReport = async (numDaysToRunQuery) => {
         sessionCourseReportObj.country = country;
         sessionCourseReportObj.date = new Date(todayStartDate);
         sessionCourseReportObj.vertical = vertical;
-
         // eslint-disable-next-line no-restricted-syntax
         for (const course of courses) {
           filterQuery.courseId = `{id : "${course.id}"}`;
@@ -306,7 +265,7 @@ const generateSessionCourseReport = async (numDaysToRunQuery) => {
           sessionCourseReportObj.registered = data.registeredUsers.count;
           sessionCourseReportObj.booked = data.bookedSessions.count;
           sessionCourseReportObj.demoCompleted = data.completedSessions.count;
-          sessionCourseReportObj.converted = data.totalConvertedUsers.count;
+          sessionCourseReportObj.converted = data.convertedUsersToday.count;
           sessionCourseReportObj.phoneVerified = data.verifiedUsers.count;
           sessionCourseReportObj.bookedBySelf = data.bookedSessions.count - data.bookedSessionsByAgent.count;
           sessionCourseReportObj.bookedByAgent = data.bookedSessionsByAgent.count;
@@ -317,14 +276,14 @@ const generateSessionCourseReport = async (numDaysToRunQuery) => {
             // update exisiting session report
             const sessionCourseReportUpdatedId = updateSessionCourseReport(sessionCourseReportObj, sessionCourseReportId);
             if (sessionCourseReportUpdatedId) {
-              log(`*** SessionCourseReport updated for date : ${todayStartDate}, vertical: ${vertical} and country : ${country}`);
+              log(`*** SessionCourseReport updated for date : ${todayStartDate}, vertical: ${vertical} and country : ${country} and course : ${course.title}`);
             }
           } else {
             // eslint-disable-next-line no-await-in-loop
             const addSessionCourseReportRes = await callLocalGraphqlApi(addSessionCourseReport(sessionCourseReportObj, course.id));
             const sessionCourseReportAddedId = get(addSessionCourseReportRes, 'data.addSessionCourseReport.id', '');
             if (sessionCourseReportAddedId) {
-              log(`*** SessionCourseReport added for date : ${todayStartDate}, vertical: ${vertical} and country : ${country}`);
+              log(`*** SessionCourseReport added for date : ${todayStartDate}, vertical: ${vertical} and country : ${country} and course : ${course.title}`);
             }
           }
         }
