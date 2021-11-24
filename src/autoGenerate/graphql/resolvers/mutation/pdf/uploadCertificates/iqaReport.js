@@ -6,11 +6,17 @@ import { PDFDocument, rgb } from 'pdf-lib';
 import * as fs from 'fs';
 import fontkit from '@pdf-lib/fontkit';
 import mkdirp from 'mkdirp';
-import { GILROY_EXTRA_BOLD_FONT_URL } from '../../../../../../../constants';
+import { get } from 'lodash';
+import { GILROY_EXTRA_BOLD_FONT_URL, NUNITO_BOLD_FONT_URL } from '../../../../../../../constants';
 import { uploadToS3 } from '../../../../../../middlewares/utils/uploadToS3';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
+import getStringWidth from '../utils/getStringWidthForEmbeddedFont';
+
+const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
 
 const slugifyID = (ID) => ID ? ID.toString().trim().toUpperCase().replace(/\w{5}(?=.)/g, '$&-') : '';
+
+const getDialUrl = () => `${process.env.FILE_BASE_URL}/python/course/iqaScoreDial90.png`;
 
 const iqaReportQuery = (id) => `{
 iqaReports(filter: {
@@ -23,8 +29,20 @@ iqaReports(filter: {
   ]
 } ){
     id
+    iqaRank
+    iqaScore
+    globalRank
+    maximumScore
     user{
       id
+      name
+      studentProfile{
+        parents{
+          user{
+            name
+          }
+        }
+      }
     }
   }
 }`;
@@ -41,19 +59,75 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   // Get the first page of the document
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
+  const { width } = firstPage.getSize();
 
   // // Embed the Helvetica font
   const GilroyExtraBoldfontBytes = await fetch(GILROY_EXTRA_BOLD_FONT_URL).then((res) => res.buffer());
 
   const GilroyExtraBoldFont = await pdfDoc.embedFont(GilroyExtraBoldfontBytes);
 
-  // Draw a string of text diagonally across the first page
-  firstPage.drawText(`${userName.toUpperCase()}`, {
-    x: 75,
-    y: 675,
-    size: 60,
+  const NunitoBoldfontBytes = await fetch(NUNITO_BOLD_FONT_URL).then((res) => res.buffer());
+
+  const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
+
+  const dialImageBytes = await fetch(getDialUrl()).then((res) => res.buffer());
+
+  const dialImage = await pdfDoc.embedPng(dialImageBytes);
+  const dialDims = dialImage.scale(1);
+
+  firstPage.drawText(`${capitalize(get(iqaReports, '[0].user.name', ''))}'s IQA Report`, {
+    x: (width - getStringWidth(`${capitalize(get(iqaReports, '[0].user.name', ''))}'s IQA Report`)) / 2,
+    y: 1125,
+    size: 24,
+    font: NunitoBoldFont,
+    color: rgb(0, 0.29, 0.678),
+  });
+
+  firstPage.drawText(`Dear ${capitalize('Gokul Madhusudhan')},`, {
+    x: (width - getStringWidth(`Dear ${capitalize('Gokul')},`)) / 2,
+    y: 1240,
+    size: 16,
+    font: NunitoBoldFont,
+    color: rgb(0, 0, 0),
+  });
+
+  firstPage.drawText(`${get(iqaReports, '[0].iqaScore', 70)}`, {
+    x: 170,
+    y: 940,
+    size: 50,
     font: GilroyExtraBoldFont,
-    color: rgb(0, 0.678, 0.902),
+    color: rgb(0, 0.29, 0.678),
+  });
+
+  firstPage.drawText(`/${get(iqaReports, '[0].maximumScore', 100)}`, {
+    x: 170,
+    y: 910,
+    size: 20,
+    font: GilroyExtraBoldFont,
+    color: rgb(0.522, 0.518, 0.518),
+  });
+
+  firstPage.drawText(`${get(iqaReports, '[0].iqaRank', 70)}`, {
+    x: 415,
+    y: 997,
+    size: 20,
+    font: NunitoBoldFont,
+    color: rgb(0.314, 0.310, 0.310),
+  });
+
+  firstPage.drawText(`${get(iqaReports, '[0].globalRank', 70)}`, {
+    x: 415,
+    y: 909,
+    size: 20,
+    font: NunitoBoldFont,
+    color: rgb(0.314, 0.310, 0.310),
+  });
+
+  firstPage.drawImage(dialImage, {
+    x: 90,
+    y: 867,
+    width: dialDims.width,
+    height: dialDims.height,
   });
 
   /** PDF Meta Details */

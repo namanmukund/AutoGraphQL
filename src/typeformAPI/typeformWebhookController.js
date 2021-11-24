@@ -213,7 +213,13 @@ const addIqaReport = async (studentDetailsObject) => {
     filter = `{
       and:[
         {user_some: {
-          phone_number_subDoc:"${number}"
+          studentProfile_some: {
+            parents_some: {
+              user_some: {
+                phone_number_subDoc: "${number}"
+              }
+            }
+          }
         }}
       ]
     }`;
