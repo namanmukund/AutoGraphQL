@@ -445,6 +445,21 @@ export const VERTICALS = [
   'b2b2c',
 ];
 
+export const GRADE = [
+  'grade1',
+  'grade2',
+  'grade3',
+  'grade4',
+  'grade5',
+  'grade6',
+  'grade7',
+  'grade8',
+  'grade9',
+  'grade10',
+  'grade11',
+  'grade12',
+];
+
 export const NUNITO_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Nunito-Bold.ttf`;
 
 export const GILROY_EXTRA_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Gilroy-ExtraBold.otf`;

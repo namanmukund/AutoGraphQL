@@ -26,12 +26,14 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import eventResponsesToLeadsquaredScript from '../scriptMethods/eventResponsesToLeadsquaredScript';
 // import updateMentorMenteeSessionAuditForCompletedAudits from '../scriptMethods/updateMentorMenteeSessionAuditForCompletedAudits';
 import getIqaReportSnapshotUrl from '../../mutation/pdf/uploadCertificates/iqaReport';
+// import scheduleSessionCourseReport from '../../../../../../utils/scheduleJobs/scheduleCourseReport';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
   /*
   Add script functions
    */
+  // await scheduleSessionCourseReport(1);
   // await updateCourseInVideos();
   // await updateCourseInSalesOperationScript();
   // await updateSchoolCampaignCodeInSchool();
