@@ -248,7 +248,7 @@ const stickerEmojiType = {
 const forgotPassWebURL = {
   development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword/',
   staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
-  production: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
+  production: 'https://tekie-managment-system.herokuapp.com/forgotPassword/',
 };
 
 const slotTimes = [
@@ -462,7 +462,11 @@ export const GRADE = [
 
 export const NUNITO_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Nunito-Bold.ttf`;
 
+export const GILROY_EXTRA_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Gilroy-ExtraBold.otf`;
+
 const ALLOWED_MIME_TYPES = ['html', 'css', 'javascript'];
+
+const MASTER_OTP = 3007;
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
@@ -542,4 +546,5 @@ export {
   currencyTypes,
   studentNoteForIQ,
   ALLOWED_MIME_TYPES,
+  MASTER_OTP,
 };

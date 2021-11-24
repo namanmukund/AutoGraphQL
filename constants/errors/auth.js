@@ -57,3 +57,7 @@ export const InvalidToken = createError('InvalidToken', {
 export const SomethingWentWrongError = createError('SomethingWentWrongError', {
   message: 'Something went wrong',
 });
+
+export const LinkExpiredError = createError('LinkExpiredError', {
+  message: 'Login link expired',
+});

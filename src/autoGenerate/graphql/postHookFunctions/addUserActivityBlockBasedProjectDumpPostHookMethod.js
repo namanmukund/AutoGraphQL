@@ -63,10 +63,11 @@ const userBlockBasedProjectQuery = (userId, topicId, blockBasedProjectId, course
 // query to update user LO based on activity done by user
 const updateUserBlockBasedProjectMutation = (userBlockBasedProjectId,
   blockBasedProjectStatus,
-  answerLink) => `
+  answerLink, savedBlocks) => `
   mutation{
     updateUserBlockBasedProject(id:"${userBlockBasedProjectId}",  input:{
       ${answerLink ? `answerLink: "${answerLink}"` : ''}
+      ${savedBlocks ? `savedBlocks: "${savedBlocks}"` : ''}
       status: ${blockBasedProjectStatus}
     }){
       id
@@ -106,6 +107,7 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
   } = userBlockBasedProjectInfo;
   const {
     answerLink,
+    savedBlocks,
   } = input;
 
   const topicComponentRule = get(userBlockBasedProjectInfo, 'topic.topicComponentRule', []);
@@ -158,6 +160,7 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
     userBlockBasedProjectId,
     blockBasedProjectStatus,
     answerLink,
+    savedBlocks,
   ));
   return true;
 };
