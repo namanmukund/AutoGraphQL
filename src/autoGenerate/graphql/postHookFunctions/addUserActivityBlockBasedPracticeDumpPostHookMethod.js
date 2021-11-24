@@ -63,10 +63,11 @@ const userBlockBasedPracticeQuery = (userId, topicId, blockBasedPracticeId, cour
 // query to update user LO based on activity done by user
 const updateUserBlockBasedPracticeMutation = (userBlockBasedPracticeId,
   blockBasedPracticeStatus,
-  answerLink) => `
+  answerLink, savedBlocks) => `
   mutation{
     updateUserBlockBasedPractice(id:"${userBlockBasedPracticeId}",  input:{
       ${answerLink ? `answerLink: "${answerLink}"` : ''}
+      ${savedBlocks ? `savedBlocks: "${savedBlocks}"` : ''}
       status: ${blockBasedPracticeStatus}
     }){
       id
@@ -105,6 +106,7 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
   } = userBlockBasedPracticeInfo;
   const {
     answerLink,
+    savedBlocks,
   } = input;
   const isHomework = get(input, 'isHomework');
   const topicComponentRule = get(userBlockBasedPracticeInfo, 'topic.topicComponentRule', []);
@@ -158,6 +160,7 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
     userBlockBasedPracticeId,
     blockBasedPracticeStatus,
     answerLink,
+    savedBlocks,
   ));
   return true;
 };
