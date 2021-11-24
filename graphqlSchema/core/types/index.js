@@ -136,12 +136,9 @@ import SessionCourseReport from './sessionCourseReport';
 import GetEventCertificate from './getEventCertificate';
 import Event from './event';
 import UtmDetail from './utmDetail';
-<<<<<<< HEAD
 import IqaReport from './iqaReport';
-=======
 import getMagicLink from './getMagicLink';
 import magicLinkLog from './magicLinkLog';
->>>>>>> master-dev
 import LeadPartner from './leadPartner';
 
 export default [
