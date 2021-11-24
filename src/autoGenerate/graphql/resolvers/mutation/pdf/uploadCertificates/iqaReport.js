@@ -18,6 +18,10 @@ const slugifyID = (ID) => ID ? ID.toString().trim().toUpperCase().replace(/\w{5}
 
 const getDialUrl = () => `${process.env.FILE_BASE_URL}/python/course/iqaScoreDial90.png`;
 
+const getMentorRatingStars = (rating) => `${process.env.FILE_BASE_URL}/python/course/mentorRatings/${rating}star.png`;
+
+const round5 = (x) => Math.round(x / 5) * 5;
+
 const iqaReportQuery = (id) => `{
 iqaReports(filter: {
   and: [
@@ -75,16 +79,21 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   const dialImage = await pdfDoc.embedPng(dialImageBytes);
   const dialDims = dialImage.scale(1);
 
+  const mentorRatingStarBytes = await fetch(getMentorRatingStars(5)).then((res) => res.buffer());
+
+  const mentorRatingStarImage = await pdfDoc.embedPng(mentorRatingStarBytes);
+  const mentorRatingStarDim = mentorRatingStarImage.scale(1);
+
   firstPage.drawText(`${capitalize(get(iqaReports, '[0].user.name', ''))}'s IQA Report`, {
     x: (width - getStringWidth(`${capitalize(get(iqaReports, '[0].user.name', ''))}'s IQA Report`)) / 2,
-    y: 1125,
+    y: 1122,
     size: 24,
     font: NunitoBoldFont,
     color: rgb(0, 0.29, 0.678),
   });
 
   firstPage.drawText(`Dear ${capitalize('Gokul Madhusudhan')},`, {
-    x: (width - getStringWidth(`Dear ${capitalize('Gokul')},`)) / 2,
+    x: ((width - getStringWidth(`Dear ${capitalize('Gokul Madhusudhan')},`)) / 2) + 15,
     y: 1240,
     size: 16,
     font: NunitoBoldFont,
@@ -124,10 +133,87 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   });
 
   firstPage.drawImage(dialImage, {
-    x: 90,
-    y: 867,
+    x: 83,
+    y: 857,
     width: dialDims.width,
     height: dialDims.height,
+  });
+
+  firstPage.drawText(`${get(iqaReports, '[0].user.name', '').split(' ')[0].toUpperCase()}`, {
+    x: 115,
+    y: 790,
+    size: 12,
+    font: NunitoBoldFont,
+    color: rgb(0.314, 0.310, 0.310),
+  });
+
+  firstPage.drawText(`${get(iqaReports, '[0].user.name', '').split(' ')[0].toUpperCase()}`, {
+    x: 225,
+    y: 790,
+    size: 12,
+    font: NunitoBoldFont,
+    color: rgb(0.314, 0.310, 0.310),
+  });
+
+  firstPage.drawText(`${get(iqaReports, '[0].user.name', '').split(' ')[0].toUpperCase()}`, {
+    x: 315,
+    y: 790,
+    size: 12,
+    font: NunitoBoldFont,
+    color: rgb(0.314, 0.310, 0.310),
+  });
+
+  // experience in coding
+  firstPage.drawText(`${'3.5+ Years'}`, {
+    x: 316,
+    y: 660,
+    size: 14,
+    font: NunitoBoldFont,
+    color: rgb(0, 0.29, 0.678),
+  });
+
+  // most common review
+  firstPage.drawText(`${'Friendly & Dedicated'}`, {
+    x: 316,
+    y: 607,
+    size: 14,
+    font: NunitoBoldFont,
+    color: rgb(0, 0.29, 0.678),
+  });
+
+  // Languages
+  firstPage.drawText(`${'Java, Python'}`, {
+    x: 316,
+    y: 554,
+    size: 14,
+    font: NunitoBoldFont,
+    color: rgb(0, 0.29, 0.678),
+  });
+
+  // languages familiar with
+  firstPage.drawText(`${capitalize('Shivangi Kamboj')}`, {
+    x: ((width - getStringWidth(`${capitalize('Shivangi Kamboj')}`)) / 4) + 35,
+    y: 560,
+    size: 14,
+    font: NunitoBoldFont,
+    color: rgb(0, 0.29, 0.678),
+  });
+
+  // mentor rating stars
+  firstPage.drawImage(mentorRatingStarImage, {
+    x: 155,
+    y: 526,
+    width: mentorRatingStarDim.width,
+    height: mentorRatingStarDim.height,
+  });
+
+  // mentor circle
+  firstPage.drawCircle({
+    x: 185,
+    y: 630,
+    size: 40,
+    color: rgb(0.969, 0.729, 0.290),
+    opacity: 1,
   });
 
   /** PDF Meta Details */
