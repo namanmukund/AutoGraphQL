@@ -18,23 +18,25 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateBatchInUserScript from '../scriptMethods/updateBatchInUserScript';
 // import updateCourseInTopics from '../scriptMethods/updateCourseInTopics';
 // import updateCourse from '../scriptMethods/updateCourse';
-import generateSessionReport from '../../../../../../utils/scheduleJobs/scheduleSessionReport';
+// import generateSessionReport from '../../../../../../utils/scheduleJobs/scheduleSessionReport';
 // import migrateBatchAttendanceToEnum from '../scriptMethods/migrateBatchAttendanceToEnum';
 // import updateCourseInVideos from '../scriptMethods/updateCourseInVideos';
 // import removeCourseFromUserAssignments from '../scriptMethods/removeCourseFromUserAssignments';
 // import generateCertificateScript from '../scriptMethods/generateCertificateScript';
 // import eventResponsesToLeadsquaredScript from '../scriptMethods/eventResponsesToLeadsquaredScript';
 // import updateMentorMenteeSessionAuditForCompletedAudits from '../scriptMethods/updateMentorMenteeSessionAuditForCompletedAudits';
+// import scheduleSessionCourseReport from '../../../../../../utils/scheduleJobs/scheduleCourseReport';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
   /*
   Add script functions
    */
+  // await scheduleSessionCourseReport(1);
   // await updateCourseInVideos();
   // await updateCourseInSalesOperationScript();
   // await updateSchoolCampaignCodeInSchool();
-  await generateSessionReport(2);
+  // await generateSessionReport(2);
   // await updateTopicsInAssignment();
   // await updateTopicsInLearningObjective();
   // await updateTopicsAndLearningObjectivesInQuestionBank();
