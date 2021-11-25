@@ -12,6 +12,7 @@ const MagicLinkLog = `
     grade: Grade
     section: Section
     firstLinkVisitedDate: Date
+    linkVisitLimit: Int
 }`;
 
 export default MagicLinkLog;

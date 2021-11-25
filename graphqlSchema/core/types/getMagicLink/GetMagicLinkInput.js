@@ -7,6 +7,7 @@ const GetMagicLinkInput = `
     email: String
     phone: PhoneInput
     expiresIn:Int
+    linkVisitLimit: Int
   }
 `;
 
