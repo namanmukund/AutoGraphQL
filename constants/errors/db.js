@@ -280,3 +280,7 @@ export const SlotAlreadyFilled = createError('SlotAlreadyFilled', {
 export const SessionAlreadyAssigned = createError('SessionAlreadyAssigned', {
   message: 'The session is already assigned',
 });
+
+export const FileNameAlreadyExists = createError('FileNameAlreadyExists', {
+  message: 'File with same name already exists!',
+});

@@ -81,6 +81,7 @@ const Course = `
     codingLanguages: [CodingLanguage]
     minGrade: Int
     maxGrade: Int
+    documentationUrl: String
   }
 `;
 
