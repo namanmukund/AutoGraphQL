@@ -30,41 +30,39 @@ const masterQuery = (todayStartDate,
   country,
   filterQuery) => `
     query{
-      registeredUsers: usersMeta(filter:{
-        and:[
-          {role: parent}
-          {createdAt_gte:"${todayStartDate}"}
-          {createdAt_lt:"${todayEndDate}"}
-          ${filterQuery.source}
-          ${filterQuery.user}
-          {country:${country}}
-          {studentProfile_some: {
-            batch_some: {
-              course_some:${filterQuery.courseId}
-            }
-          }}
-        ]
-      }){
-        count
-      }
-      verifiedUsers: usersMeta(filter:{
-        and:[
-          {role: parent}
-          {phoneVerified:true}
-          {createdAt_gte:"${todayStartDate}"}
-          {createdAt_lt:"${todayEndDate}"}
-          ${filterQuery.source}
-          ${filterQuery.user}
-          {country:${country}}
-          {studentProfile_some: {
-            batch_some: {
-              course_some:${filterQuery.courseId}
-            }
-          }}
-        ]
-      }){
-        count
-      }
+      registeredUsers: userCurrentTopicComponentStatusesMeta(filter:{
+          and:[
+            {currentCourse_some: ${filterQuery.courseId}}
+            {user_some:{
+              and:[
+                {role: parent}
+                {createdAt_gte:"${todayStartDate}"}
+                {createdAt_lt:"${todayEndDate}"}
+                ${filterQuery.source}
+                {country:${country}}
+              ]
+            }}
+          ]
+        }){
+          count
+        }
+        verifiedUsers: userCurrentTopicComponentStatusesMeta(filter:{
+          and:[
+            {currentCourse_some: ${filterQuery.courseId}}
+            {user_some:{
+              and:[
+                {role: parent}
+                {createdAt_gte:"${todayStartDate}"}
+                {createdAt_lt:"${todayEndDate}"}
+                ${filterQuery.source}
+                {country:${country}}
+                {phoneVerified: true}
+              ]
+            }}
+          ]
+        }){
+          count
+        }
       bookedSessions: menteeSessionsMeta(filter:{
         and:[
           {bookingDate_gte:"${todayStartDate}"}
