@@ -4,6 +4,7 @@ const UserBlockBasedProject = `
     status: UserTopicTypeStatus @defaultValue(value: "incomplete")
     blockBasedProject: BlockBasedProject! @relation(name: "ProjectUserBlockBasedProject", direction: "OneWay")
     answerLink: String
+    savedBlocks: String
     topic: Topic! @relation(name: "TopicUserBlockBasedProject", direction: "OneWay")
     course: Course @relation(name: "UserBlockBasedProjectCourse", direction: "OneWay")
   }

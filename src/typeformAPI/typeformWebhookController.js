@@ -4,43 +4,54 @@ import callLocalGraphqlApi from '../api/callLocalGraphqlApi';
 import generateCertificateScript from '../autoGenerate/graphql/resolvers/query/scriptMethods/generateCertificateScript';
 import getCountryCodeAndNumber from '../autoGenerate/graphql/validation/getCountryCodeAndNumber';
 import getHashDigest from './typeform-utils/getHashDigest';
+import EVENTS from './typeform-utils/eventConstants';
+import updateLeadSquared from '../../services/leadsquared/updateLeadSquared';
 
 const getEventId = (formId) => {
   let eventId = '';
   switch (formId) {
-    case 'm47rmq7f':
-      eventId = 'ckvdiavp70000igujfgxh8mt6';
+    case EVENTS.SPYSQUADCAMP.formId:
+      eventId = EVENTS.SPYSQUADCAMP.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
-        eventId = 'ckve5izxq0000ucui47b89pmf';
+        eventId = EVENTS.SPYSQUADCAMP.eventId.production;
         if (process.env.DATA_MASKING) {
-          eventId = 'ckve5fm7o00090t1dd1v4dy13';
+          eventId = EVENTS.SPYSQUADCAMP.eventId.preprod;
         }
       }
       break;
-    case 'N5rTz2zX':
-      eventId = 'ckvw6s3df000039in32ewhy89';
+    case EVENTS.CANVA.formId:
+      eventId = EVENTS.CANVA.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
-        eventId = 'ckvxsrwlb001c0usf9lxwapt4';
+        eventId = EVENTS.CANVA.eventId.production;
         if (process.env.DATA_MASKING) {
-          eventId = 'ckvwncjv400001sin0ppigr3s';
+          eventId = EVENTS.CANVA.eventId.preprod;
         }
       }
       break;
-    case 'cUepvPND':
-      eventId = 'ckw4unvyp0000kpinc2515c88';
+    case EVENTS.STORYSPREE.formId:
+      eventId = EVENTS.STORYSPREE.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
-        eventId = 'ckw6eq3f30000xgin7yrxgk2l';
+        eventId = EVENTS.STORYSPREE.eventId.production;
         if (process.env.DATA_MASKING) {
-          eventId = 'ckw5wg9rj0000gtin1st0hry6';
+          eventId = EVENTS.STORYSPREE.eventId.preprod;
+        }
+      }
+      break;
+    case EVENTS.GENZENVIRONMENT.formId:
+      eventId = EVENTS.GENZENVIRONMENT.eventId.staging;
+      if (process.env.NODE_ENV === 'production') {
+        eventId = EVENTS.GENZENVIRONMENT.eventId.production;
+        if (process.env.DATA_MASKING) {
+          eventId = EVENTS.GENZENVIRONMENT.eventId.preprod;
         }
       }
       break;
     default:
-      eventId = 'ckvdiavp70000igujfgxh8mt6';
+      eventId = EVENTS.SPYSQUADCAMP.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
-        eventId = 'ckve5izxq0000ucui47b89pmf';
+        eventId = EVENTS.SPYSQUADCAMP.eventId.production;
         if (process.env.DATA_MASKING) {
-          eventId = 'ckve5fm7o00090t1dd1v4dy13';
+          eventId = EVENTS.SPYSQUADCAMP.eventId.preprod;
         }
       }
       break;
@@ -85,14 +96,13 @@ const getEventAttendances = async (userId, eventId) => {
   return get(await callLocalGraphqlApi(query), 'data.eventAttendances', []);
 };
 
-const usersData = async (studentDetailsObject, formId) => {
+const usersData = async (studentDetailsObject, formId, doGenerateCertificate) => {
   let filter = '';
   const {
     childName, parentEmail = '', parentPhone: { number = '' },
   } = studentDetailsObject;
   if (number) {
-    filter = `{
-      and: [
+    filter = `
         {studentProfile_some: {
         parents_some: {
           user_some:{
@@ -101,10 +111,7 @@ const usersData = async (studentDetailsObject, formId) => {
             ]
           }
         }
-      }}
-      {name: "${childName}"}
-      ]
-    }`;
+      }}`;
     const numberQuery = `{
     users(
       filter: ${filter}
@@ -118,27 +125,24 @@ const usersData = async (studentDetailsObject, formId) => {
     const users = get(await callLocalGraphqlApi(numberQuery), 'data.users', []);
     // uses the same formId parameter passed from controller, to generate eventId dynamically
     if (users && users.length) {
-      const eventAttendances = await getEventAttendances(get(users, '[0].id'), getEventId(formId));
-      if (eventAttendances && eventAttendances.length) {
-        log(`updating attendance for ${childName} with id ${get(users, '[0].id')}`);
-        await updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
-        generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
-      } else {
-        log(`adding attendance for ${childName} with id ${get(users, '[0].id')}`);
-        await addNewEventAttendanceWithStatus(get(users, '[0].id'), get(users, '[0].studentProfile.id'), getEventId(formId));
-        generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
+      if (doGenerateCertificate) {
+        const eventAttendances = await getEventAttendances(get(users, '[0].id'), getEventId(formId));
+        if (eventAttendances && eventAttendances.length) {
+          log(`updating attendance for ${childName} with id ${get(users, '[0].id')}`);
+          await updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
+          generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
+        } else {
+          log(`adding attendance for ${childName} with id ${get(users, '[0].id')}`);
+          await addNewEventAttendanceWithStatus(get(users, '[0].id'), get(users, '[0].studentProfile.id'), getEventId(formId));
+          generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
+        }
       }
     } else if (parentEmail) {
-      filter = `{
-        and: [
-          {studentProfile_some: {
+      filter = `{studentProfile_some: {
           parents_some: {
             user_some: {email:"${parentEmail.trim()}"}
           }
-        }}
-        {name: "${childName}"}
-        ]
-      }`;
+        }}`;
       const query = `{
       users(
         filter: ${filter}
@@ -151,15 +155,17 @@ const usersData = async (studentDetailsObject, formId) => {
     }`;
       const user = get(await callLocalGraphqlApi(query), 'data.users', []);
       if (user && user.length) {
-        const eventAttendances = await getEventAttendances(get(user, '[0].id'), getEventId(formId));
-        if (eventAttendances && eventAttendances.length) {
-          log(`updating attendance for ${childName} with id ${get(user, '[0].id')}`);
-          await updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
-          generateCertificateScript([get(user, '[0].id')], false, getEventId(formId));
-        } else {
-          log(`adding attendance for ${childName} with id ${get(user, '[0].id')}`);
-          await addNewEventAttendanceWithStatus(get(user, '[0].id'), get(user, '[0].studentProfile.id'), getEventId(formId));
-          generateCertificateScript([get(user, '[0].id')], false, getEventId(formId));
+        if (doGenerateCertificate) {
+          const eventAttendances = await getEventAttendances(get(user, '[0].id'), getEventId(formId));
+          if (eventAttendances && eventAttendances.length) {
+            log(`updating attendance for ${childName} with id ${get(user, '[0].id')}`);
+            await updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
+            generateCertificateScript([get(user, '[0].id')], false, getEventId(formId));
+          } else {
+            log(`adding attendance for ${childName} with id ${get(user, '[0].id')}`);
+            await addNewEventAttendanceWithStatus(get(user, '[0].id'), get(user, '[0].studentProfile.id'), getEventId(formId));
+            generateCertificateScript([get(user, '[0].id')], false, getEventId(formId));
+          }
         }
       } else {
         const parentChildSignUpQuery = `mutation parentChildSignUp($input: ParentChildSignUpInput) {
@@ -183,7 +189,7 @@ const usersData = async (studentDetailsObject, formId) => {
       `;
         log(`creating a parentChildSignUp for ${childName}`);
         const result = await callLocalGraphqlApi(parentChildSignUpQuery, '', { input: studentDetailsObject });
-        if (get(result, 'data.parentChildSignUp')) {
+        if (get(result, 'data.parentChildSignUp') && doGenerateCertificate) {
           const children = get(result, 'data.parentChildSignUp.parentProfile.children');
           // eslint-disable-next-line no-restricted-syntax
           for (const child of children) {
@@ -200,6 +206,25 @@ const usersData = async (studentDetailsObject, formId) => {
       }
     }
   }
+  if (!doGenerateCertificate) {
+    log('Sending Lead on Registration');
+    setTimeout(() => {
+      updateLeadSquared({
+        Phone: number,
+        mx_Event_Date: '27 November',
+        mx_Event_Time: '03:00 pm',
+        mx_Event_Date_Time: '2021-11-27 09:30:00',
+      }, false, {
+        ActivityEvent: 208,
+        Fields: [
+          {
+            SchemaName: 'mx_Custom_1',
+            Value: 'RadioStreet',
+          },
+        ],
+      });
+    }, 1000 * 60 * 2);
+  }
 };
 
 const typeformWebhookController = async (req, res) => {
@@ -209,57 +234,93 @@ const typeformWebhookController = async (req, res) => {
     const fields = get(req, 'body.form_response.definition.fields', []);
     let studentDetailsObject = {};
     const answers = get(req, 'body.form_response.answers', []);
-    // eslint-disable-next-line no-restricted-syntax
-    for (const field of fields) {
-      const { title, ref, type } = field;
-      const studentAnswer = answers.find((answer) => get(answer, 'field.ref') === ref);
-      if (title === 'Student Name') studentDetailsObject.childName = get(studentAnswer, 'text');
-      if (title === 'Parent Name') studentDetailsObject.parentName = get(studentAnswer, 'text');
-      if (title === 'Email') studentDetailsObject.parentEmail = get(studentAnswer, type);
-      if (title === 'Grade/Standard') studentDetailsObject.grade = `Grade${get(studentAnswer, 'choice.label')}`;
-      if (title === 'Phone Number') studentDetailsObject.parentPhone = getCountryCodeAndNumber(get(studentAnswer, type));
-    }
-    // include switch case based on event parameter form_response.form_id
-    // check this form_id param from typeform admin dashboard
+    const variables = get(req, 'body.form_response.variables', []);
     const formId = get(req, 'body.form_response.form_id', '');
-    let country;
-    let timezone;
-    let utmSource;
-    let utmCampaign;
-    switch (formId) {
-      case 'm47rmq7f':
-        country = 'india';
-        timezone = 'Asia/Kolkata';
-        utmSource = 'communityevent';
-        utmCampaign = 'spysquadcamp_20nov';
-        break;
-      case 'N5rTz2zX':
-        country = 'india';
-        timezone = 'Asia/Kolkata';
-        utmSource = 'communityevent';
-        utmCampaign = 'canva_Nov14';
-        break;
-      case 'cUepvPND':
-        country = 'india';
-        timezone = 'Asia/Kolkata';
-        utmSource = 'communityevent';
-        utmCampaign = 'storyspree_21nov';
-        break;
-      default:
-        country = 'india';
-        timezone = 'Asia/Kolkata';
-        utmSource = 'RadioStreet';
-        utmCampaign = 'Spy Squad Camp - 31th Oct';
-        break;
+
+    // Form - IQA test, Grade6 and above
+    if (formId === 'weKBAxh5') {
+      // loop over fields and store details in object, then calculate score and create IQA report
+      // eslint-disable-next-line no-restricted-syntax
+      for (const variable of variables) {
+        const { key, number } = variable;
+        if (key === 'global_rank') studentDetailsObject.globalRank = number;
+        if (key === 'iqa_rank') studentDetailsObject.iqaRank = number;
+        if (key === 'score') studentDetailsObject.iqaScore = number;
+      }
+      studentDetailsObject.maximumScore = 100;
+      // eslint-disable-next-line no-restricted-syntax
+      for (const field of fields) {
+        const { title, ref, type } = field;
+        const studentAnswer = answers.find((answer) => get(answer, 'field.ref') === ref);
+        if (title === 'Child Name') studentDetailsObject.childName = get(studentAnswer, 'text');
+        if (title === 'Parent Name') studentDetailsObject.parentName = get(studentAnswer, 'text');
+        if (title === 'Email ID') studentDetailsObject.parentEmail = get(studentAnswer, type);
+        if (title === 'Student Grade') studentDetailsObject.grade = `Grade${get(studentAnswer, 'choice.label')}`;
+        if (title === 'Phone number ') studentDetailsObject.parentPhone = getCountryCodeAndNumber(get(studentAnswer, type));
+      }
+    } else if (formId === '') {
+      // TODO : loop over fields and store details in object, then calculate score and create IQA report
+
+    } else {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const field of fields) {
+        const { title, ref, type } = field;
+        const studentAnswer = answers.find((answer) => get(answer, 'field.ref') === ref);
+        if (title === 'Student Name') studentDetailsObject.childName = get(studentAnswer, 'text');
+        if (title === 'Parent Name') studentDetailsObject.parentName = get(studentAnswer, 'text');
+        if (title === 'Email') studentDetailsObject.parentEmail = get(studentAnswer, type);
+        if (title === 'Grade/Standard') studentDetailsObject.grade = `Grade${get(studentAnswer, 'choice.label')}`;
+        if (title === 'Phone Number') studentDetailsObject.parentPhone = getCountryCodeAndNumber(get(studentAnswer, type));
+      }
+      // include switch case based on event parameter form_response.form_id
+      // check this form_id param from typeform admin dashboard
+      let country;
+      let timezone;
+      let utmSource;
+      let utmCampaign;
+      let doGenerateCertificate = true;
+      switch (formId) {
+        case EVENTS.SPYSQUADCAMP.formId:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'RadioStreet';
+          utmCampaign = 'Spy Squad Camp - 31th Oct';
+          break;
+        case EVENTS.CANVA.formId:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'canva_Nov14';
+          break;
+        case EVENTS.GENZENVIRONMENT.formId:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'environment_30nov';
+          break;
+        case EVENTS.GENZENVIRONMENT.registrationFormId:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'environment_30nov';
+          doGenerateCertificate = false;
+          break;
+        default:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'RadioStreet';
+          utmCampaign = 'Spy Squad Camp - 31th Oct';
+          break;
+      }
+      studentDetailsObject = {
+        ...studentDetailsObject,
+        country,
+        timezone,
+        utmSource,
+        utmCampaign,
+      };
+      usersData(studentDetailsObject, formId, doGenerateCertificate);
     }
-    studentDetailsObject = {
-      ...studentDetailsObject,
-      country,
-      timezone,
-      utmSource,
-      utmCampaign,
-    };
-    usersData(studentDetailsObject, formId);
     res.sendStatus(200);
   } else {
     res.status(401).send('Unauthorized');
