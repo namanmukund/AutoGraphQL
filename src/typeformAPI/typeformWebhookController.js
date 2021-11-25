@@ -4,43 +4,53 @@ import callLocalGraphqlApi from '../api/callLocalGraphqlApi';
 import generateCertificateScript from '../autoGenerate/graphql/resolvers/query/scriptMethods/generateCertificateScript';
 import getCountryCodeAndNumber from '../autoGenerate/graphql/validation/getCountryCodeAndNumber';
 import getHashDigest from './typeform-utils/getHashDigest';
+import EVENTS from './typeform-utils/eventConstants';
 
 const getEventId = (formId) => {
   let eventId = '';
   switch (formId) {
-    case 'm47rmq7f':
-      eventId = 'ckvdiavp70000igujfgxh8mt6';
+    case EVENTS.SPYSQUADCAMP.formId:
+      eventId = EVENTS.SPYSQUADCAMP.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
-        eventId = 'ckve5izxq0000ucui47b89pmf';
+        eventId = EVENTS.SPYSQUADCAMP.eventId.production;
         if (process.env.DATA_MASKING) {
-          eventId = 'ckve5fm7o00090t1dd1v4dy13';
+          eventId = EVENTS.SPYSQUADCAMP.eventId.preprod;
         }
       }
       break;
-    case 'N5rTz2zX':
-      eventId = 'ckvw6s3df000039in32ewhy89';
+    case EVENTS.CANVA.formId:
+      eventId = EVENTS.CANVA.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
-        eventId = 'ckvxsrwlb001c0usf9lxwapt4';
+        eventId = EVENTS.CANVA.eventId.production;
         if (process.env.DATA_MASKING) {
-          eventId = 'ckvwncjv400001sin0ppigr3s';
+          eventId = EVENTS.CANVA.eventId.preprod;
         }
       }
       break;
-    case 'cUepvPND':
-      eventId = 'ckw4unvyp0000kpinc2515c88';
+    case EVENTS.STORYSPREE.formId:
+      eventId = EVENTS.STORYSPREE.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
-        eventId = 'ckw6eq3f30000xgin7yrxgk2l';
+        eventId = EVENTS.STORYSPREE.eventId.production;
         if (process.env.DATA_MASKING) {
-          eventId = 'ckw5wg9rj0000gtin1st0hry6';
+          eventId = EVENTS.STORYSPREE.eventId.preprod;
+        }
+      }
+      break;
+    case EVENTS.GENZENVIRONMENT.formId:
+      eventId = EVENTS.GENZENVIRONMENT.eventId.staging;
+      if (process.env.NODE_ENV === 'production') {
+        eventId = EVENTS.GENZENVIRONMENT.eventId.production;
+        if (process.env.DATA_MASKING) {
+          eventId = EVENTS.GENZENVIRONMENT.eventId.preprod;
         }
       }
       break;
     default:
-      eventId = 'ckvdiavp70000igujfgxh8mt6';
+      eventId = EVENTS.SPYSQUADCAMP.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
-        eventId = 'ckve5izxq0000ucui47b89pmf';
+        eventId = EVENTS.SPYSQUADCAMP.eventId.production;
         if (process.env.DATA_MASKING) {
-          eventId = 'ckve5fm7o00090t1dd1v4dy13';
+          eventId = EVENTS.SPYSQUADCAMP.eventId.preprod;
         }
       }
       break;
@@ -85,14 +95,13 @@ const getEventAttendances = async (userId, eventId) => {
   return get(await callLocalGraphqlApi(query), 'data.eventAttendances', []);
 };
 
-const usersData = async (studentDetailsObject, formId) => {
+const usersData = async (studentDetailsObject, formId, doGenerateCertificate) => {
   let filter = '';
   const {
     childName, parentEmail = '', parentPhone: { number = '' },
   } = studentDetailsObject;
   if (number) {
-    filter = `{
-      and: [
+    filter = `
         {studentProfile_some: {
         parents_some: {
           user_some:{
@@ -101,9 +110,7 @@ const usersData = async (studentDetailsObject, formId) => {
             ]
           }
         }
-      }}
-      ]
-    }`;
+      }}`;
     const numberQuery = `{
     users(
       filter: ${filter}
@@ -116,7 +123,7 @@ const usersData = async (studentDetailsObject, formId) => {
   }`;
     const users = get(await callLocalGraphqlApi(numberQuery), 'data.users', []);
     // uses the same formId parameter passed from controller, to generate eventId dynamically
-    if (users && users.length) {
+    if (users && users.length && doGenerateCertificate) {
       const eventAttendances = await getEventAttendances(get(users, '[0].id'), getEventId(formId));
       if (eventAttendances && eventAttendances.length) {
         log(`updating attendance for ${childName} with id ${get(users, '[0].id')}`);
@@ -128,15 +135,11 @@ const usersData = async (studentDetailsObject, formId) => {
         generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
       }
     } else if (parentEmail) {
-      filter = `{
-        and: [
-          {studentProfile_some: {
+      filter = `{studentProfile_some: {
           parents_some: {
             user_some: {email:"${parentEmail.trim()}"}
           }
-        }}
-        ]
-      }`;
+        }}`;
       const query = `{
       users(
         filter: ${filter}
@@ -148,7 +151,7 @@ const usersData = async (studentDetailsObject, formId) => {
       }
     }`;
       const user = get(await callLocalGraphqlApi(query), 'data.users', []);
-      if (user && user.length) {
+      if (user && user.length && doGenerateCertificate) {
         const eventAttendances = await getEventAttendances(get(user, '[0].id'), getEventId(formId));
         if (eventAttendances && eventAttendances.length) {
           log(`updating attendance for ${childName} with id ${get(user, '[0].id')}`);
@@ -181,7 +184,7 @@ const usersData = async (studentDetailsObject, formId) => {
       `;
         log(`creating a parentChildSignUp for ${childName}`);
         const result = await callLocalGraphqlApi(parentChildSignUpQuery, '', { input: studentDetailsObject });
-        if (get(result, 'data.parentChildSignUp')) {
+        if (get(result, 'data.parentChildSignUp') && doGenerateCertificate) {
           const children = get(result, 'data.parentChildSignUp.parentProfile.children');
           // eslint-disable-next-line no-restricted-syntax
           for (const child of children) {
@@ -251,18 +254,32 @@ const typeformWebhookController = async (req, res) => {
       let timezone;
       let utmSource;
       let utmCampaign;
+      let doGenerateCertificate = true;
       switch (formId) {
-        case 'm47rmq7f':
+        case EVENTS.SPYSQUADCAMP.formId:
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'RadioStreet';
           utmCampaign = 'Spy Squad Camp - 31th Oct';
           break;
-        case 'N5rTz2zX':
+        case EVENTS.CANVA.formId:
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
           utmCampaign = 'canva_Nov14';
+          break;
+        case EVENTS.GENZENVIRONMENT.formId:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'environment_30nov';
+          break;
+        case EVENTS.GENZENVIRONMENT.registrationFormId:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'environment_30nov';
+          doGenerateCertificate = false;
           break;
         default:
           country = 'india';
@@ -278,7 +295,7 @@ const typeformWebhookController = async (req, res) => {
         utmSource,
         utmCampaign,
       };
-      usersData(studentDetailsObject, formId);
+      usersData(studentDetailsObject, formId, doGenerateCertificate);
     }
     res.sendStatus(200);
   } else {
