@@ -51,7 +51,7 @@ const fetchUserDetails = async (queryFilter) => {
 };
 
 const generateAndReturnToken = (user, addMagicLinkLogQuery = '', index, {
-  appName, grade, section, userIdFromContext, schoolId, expiresIn,
+  appName, grade, section, userIdFromContext, schoolId, expiresIn, linkVisitLimit,
 }) => {
   const linkToken = getLinkToken(user, new Date(), expiresIn);
   const linkUri = `/login?authToken=${linkToken}`;
@@ -63,6 +63,7 @@ const generateAndReturnToken = (user, addMagicLinkLogQuery = '', index, {
       visitedCount: 0
       linkUri: "${linkUri}"
       linkGeneratedFrom: ${appName}
+      linkVisitLimit: ${linkVisitLimit}
       ${grade ? `grade: ${grade}` : ''}
       ${section ? `section:${section}` : ''}
     }
@@ -85,6 +86,7 @@ const getMagicLink = (async (root, params, context) => {
   const {
     input: {
       schoolId, grade, section, userId, email, phone, expiresIn = coreAuthParams.DEFAULT_EXPIRY_TOKEN_TIME_IN_HOUR,
+      linkVisitLimit = 2,
     },
   } = params;
   // getting input from params
@@ -129,7 +131,7 @@ const getMagicLink = (async (root, params, context) => {
         const {
           expiresIn: expiresInValue, linkToken, linkUri, addMagicLinkLogQuery: addLogQuery,
         } = generateAndReturnToken(user, '', index, {
-          appName, grade, section, userIdFromContext, schoolId, expiresIn,
+          appName, grade, section, userIdFromContext, schoolId, expiresIn, linkVisitLimit,
         });
         tokens.push({
           linkToken,
