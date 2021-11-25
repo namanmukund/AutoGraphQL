@@ -208,22 +208,24 @@ const usersData = async (studentDetailsObject, formId, doGenerateCertificate) =>
   }
   if (!doGenerateCertificate) {
     log('Sending Lead on Registration');
-    setTimeout(() => {
-      updateLeadSquared({
-        Phone: number,
-        mx_Event_Date: '27 November',
-        mx_Event_Time: '03:00 pm',
-        mx_Event_Date_Time: '2021-11-27 09:30:00',
-      }, false, {
-        ActivityEvent: 208,
-        Fields: [
-          {
-            SchemaName: 'mx_Custom_1',
-            Value: 'RadioStreet',
-          },
-        ],
-      });
-    }, 1000 * 60 * 2);
+    updateLeadSquared({
+      Phone: number,
+      mx_Event_Date: '27 November',
+      mx_Event_Time: '03:00 pm',
+      mx_Event_Date_Time: '2021-11-27 09:30:00',
+    }, false, {
+      ActivityEvent: 208,
+      Fields: [
+        {
+          SchemaName: 'mx_Custom_1',
+          Value: 'communityevent',
+        },
+        {
+          SchemaName: 'mx_Custom_2',
+          Value: 'environment_30nov',
+        },
+      ],
+    });
   }
 };
 
@@ -308,8 +310,8 @@ const typeformWebhookController = async (req, res) => {
         default:
           country = 'india';
           timezone = 'Asia/Kolkata';
-          utmSource = 'RadioStreet';
-          utmCampaign = 'Spy Squad Camp - 31th Oct';
+          utmSource = 'communityevent';
+          utmCampaign = 'environment_30nov';
           break;
       }
       studentDetailsObject = {
