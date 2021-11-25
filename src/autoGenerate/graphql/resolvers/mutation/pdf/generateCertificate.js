@@ -9,6 +9,7 @@ import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors'
 import getSpySquadCampCertificateUrl from './uploadCertificates/spysquadcamp';
 import getCanvaEventCertificateUrl from './uploadCertificates/canvaEvent';
 import getStoryspreeCertificateUrl from './uploadCertificates/storyspree';
+import getGenZEventCertificateUrl from './uploadCertificates/genzenvironment';
 
 const fetchUser = (userId, eventId) => `
 {
@@ -137,6 +138,13 @@ const generateCertificateMutationResolver = async (
         fetchedUrl = await getCanvaEventCertificateUrl(userId, userName, formattedDate);
         eventType = 'communityEvent';
         eventName = 'canvaMasterclass';
+        break;
+      case 'ckweruavk0000sxin201114uv':
+      case 'ckwerqvz10000r2in5ihxd8ly':
+      case 'ckweriv6q0000mzin99jm8mm2':
+        fetchedUrl = await getGenZEventCertificateUrl(userId, userName, formattedDate);
+        eventType = 'communityEvent';
+        eventName = 'genZEnvironment';
         break;
       case 'ckw4unvyp0000kpinc2515c88':
       case 'ckw5wg9rj0000gtin1st0hry6':

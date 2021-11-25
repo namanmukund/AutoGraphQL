@@ -3,6 +3,7 @@ const EventName = `
     spySquadCamp
     canvaMasterclass
     storyspree
+    genZEnvironment
   }`;
 
 export default EventName;
