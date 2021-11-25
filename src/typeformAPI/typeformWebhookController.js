@@ -5,6 +5,7 @@ import generateCertificateScript from '../autoGenerate/graphql/resolvers/query/s
 import getCountryCodeAndNumber from '../autoGenerate/graphql/validation/getCountryCodeAndNumber';
 import getHashDigest from './typeform-utils/getHashDigest';
 import EVENTS from './typeform-utils/eventConstants';
+import updateLeadSquared from '../../services/leadsquared/updateLeadSquared';
 
 const getEventId = (formId) => {
   let eventId = '';
@@ -123,16 +124,18 @@ const usersData = async (studentDetailsObject, formId, doGenerateCertificate) =>
   }`;
     const users = get(await callLocalGraphqlApi(numberQuery), 'data.users', []);
     // uses the same formId parameter passed from controller, to generate eventId dynamically
-    if (users && users.length && doGenerateCertificate) {
-      const eventAttendances = await getEventAttendances(get(users, '[0].id'), getEventId(formId));
-      if (eventAttendances && eventAttendances.length) {
-        log(`updating attendance for ${childName} with id ${get(users, '[0].id')}`);
-        await updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
-        generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
-      } else {
-        log(`adding attendance for ${childName} with id ${get(users, '[0].id')}`);
-        await addNewEventAttendanceWithStatus(get(users, '[0].id'), get(users, '[0].studentProfile.id'), getEventId(formId));
-        generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
+    if (users && users.length) {
+      if (doGenerateCertificate) {
+        const eventAttendances = await getEventAttendances(get(users, '[0].id'), getEventId(formId));
+        if (eventAttendances && eventAttendances.length) {
+          log(`updating attendance for ${childName} with id ${get(users, '[0].id')}`);
+          await updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
+          generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
+        } else {
+          log(`adding attendance for ${childName} with id ${get(users, '[0].id')}`);
+          await addNewEventAttendanceWithStatus(get(users, '[0].id'), get(users, '[0].studentProfile.id'), getEventId(formId));
+          generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
+        }
       }
     } else if (parentEmail) {
       filter = `{studentProfile_some: {
@@ -151,16 +154,18 @@ const usersData = async (studentDetailsObject, formId, doGenerateCertificate) =>
       }
     }`;
       const user = get(await callLocalGraphqlApi(query), 'data.users', []);
-      if (user && user.length && doGenerateCertificate) {
-        const eventAttendances = await getEventAttendances(get(user, '[0].id'), getEventId(formId));
-        if (eventAttendances && eventAttendances.length) {
-          log(`updating attendance for ${childName} with id ${get(user, '[0].id')}`);
-          await updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
-          generateCertificateScript([get(user, '[0].id')], false, getEventId(formId));
-        } else {
-          log(`adding attendance for ${childName} with id ${get(user, '[0].id')}`);
-          await addNewEventAttendanceWithStatus(get(user, '[0].id'), get(user, '[0].studentProfile.id'), getEventId(formId));
-          generateCertificateScript([get(user, '[0].id')], false, getEventId(formId));
+      if (user && user.length) {
+        if (doGenerateCertificate) {
+          const eventAttendances = await getEventAttendances(get(user, '[0].id'), getEventId(formId));
+          if (eventAttendances && eventAttendances.length) {
+            log(`updating attendance for ${childName} with id ${get(user, '[0].id')}`);
+            await updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
+            generateCertificateScript([get(user, '[0].id')], false, getEventId(formId));
+          } else {
+            log(`adding attendance for ${childName} with id ${get(user, '[0].id')}`);
+            await addNewEventAttendanceWithStatus(get(user, '[0].id'), get(user, '[0].studentProfile.id'), getEventId(formId));
+            generateCertificateScript([get(user, '[0].id')], false, getEventId(formId));
+          }
         }
       } else {
         const parentChildSignUpQuery = `mutation parentChildSignUp($input: ParentChildSignUpInput) {
@@ -200,6 +205,25 @@ const usersData = async (studentDetailsObject, formId, doGenerateCertificate) =>
         }
       }
     }
+  }
+  if (!doGenerateCertificate) {
+    log('Sending Lead on Registration');
+    setTimeout(() => {
+      updateLeadSquared({
+        Phone: number,
+        mx_Event_Date: '27 November',
+        mx_Event_Time: '03:00 pm',
+        mx_Event_Date_Time: '2021-11-27 09:30:00',
+      }, false, {
+        ActivityEvent: 208,
+        Fields: [
+          {
+            SchemaName: 'mx_Custom_1',
+            Value: 'RadioStreet',
+          },
+        ],
+      });
+    }, 1000 * 60 * 2);
   }
 };
 
