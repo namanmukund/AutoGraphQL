@@ -5,6 +5,7 @@ import generateCertificateScript from '../autoGenerate/graphql/resolvers/query/s
 import getCountryCodeAndNumber from '../autoGenerate/graphql/validation/getCountryCodeAndNumber';
 import getHashDigest from './typeform-utils/getHashDigest';
 import EVENTS from './typeform-utils/eventConstants';
+import updateLeadSquared from '../../services/leadsquared/updateLeadSquared';
 
 const getEventId = (formId) => {
   let eventId = '';
@@ -200,6 +201,25 @@ const usersData = async (studentDetailsObject, formId, doGenerateCertificate) =>
         }
       }
     }
+  }
+  if (!doGenerateCertificate) {
+    log('Sending Lead on Registration');
+    setTimeout(() => {
+      updateLeadSquared({
+        Phone: number,
+        mx_Event_Date: '27 November',
+        mx_Event_Time: '03:00 pm',
+        mx_Event_Date_Time: '2021-11-27 09:30:00',
+      }, false, {
+        ActivityEvent: 208,
+        Fields: [
+          {
+            SchemaName: 'mx_Custom_1',
+            Value: 'RadioStreet',
+          },
+        ],
+      });
+    }, 1000 * 60 * 2);
   }
 };
 
