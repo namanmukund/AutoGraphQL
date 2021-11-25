@@ -11,7 +11,7 @@ const Event = `
   {
     eventType: EventType @defaultValue(value: "radioStreet")
     name: String @trim
-    date: Date!
+    date: Date
     time: Int
     eventAttendances: [EventAttendance] @relation(name:"EventAttendanceEvent")
   }

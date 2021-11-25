@@ -10,6 +10,7 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
     subtitle: subtitleSizeLimit,
     lottie: lottieSizeLimit,
     pdf: pdfSizeLimit,
+    programFiles: programFilesSizeLimit,
   } = fileSizeLimitInMB;
 
   const {
@@ -20,6 +21,7 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
     subtitleExtensions,
     lottieExtensions,
     documentExtensions,
+    programExtensions,
   } = fileExtensions;
 
   const doc = {};
@@ -90,7 +92,17 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
       }
       break;
     }
-
+    case 'html':
+    case 'css':
+    case 'javascript': {
+      if (size <= (programFilesSizeLimit * 1024 * 1024)) {
+        doc.isValidSize = true;
+      }
+      if (includes(programExtensions, caseInsensitiveExt)) {
+        doc.isValidExtension = true;
+      }
+      break;
+    }
     default:
   }
   return doc;

@@ -4,9 +4,9 @@ import { log } from '../../../utils';
 import { uploadToS3 } from './uploadToS3';
 import generateFileNameForResizedImage from './generateFileNameForResizedImage';
 
-const resizeAndUpload = (fileTypeName, name, fileContent, fileKind, path) => {
+const resizeAndUpload = (fileTypeName, name, fileContent, fileKind, path, fileMimeType = null) => {
   // upload normal size file to s3
-  uploadToS3(path, fileContent);
+  uploadToS3(path, fileContent, fileMimeType);
   // if resize dimension is given upload file according to that size
   if (resizePicDimensions[fileKind] && fileTypeName === 'image') {
     const resizePicKeys = Object.keys(resizePicDimensions[fileKind]);

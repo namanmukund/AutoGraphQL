@@ -14,6 +14,7 @@ getCourseCertificate (input: GetCourseCertificateInput ): CourseCertificateResul
 getSchoolCampaignSlots (input: GetSchoolCampaignSlotsInput): [GetSchoolCampaignSlotsResult]
 getUserCourses (input: GetUserCoursesInput): [GetUserCoursesResults]
 getEventCertificate (input: GetEventCertificateInput): GetEventCertificateResult
+getMagicLink (input: GetMagicLinkInput): [GetMagicLinkOutput]
 `;
 
 export default customQueryString;

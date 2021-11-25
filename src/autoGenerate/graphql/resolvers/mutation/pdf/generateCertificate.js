@@ -8,13 +8,16 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
 import getSpySquadCampCertificateUrl from './uploadCertificates/spysquadcamp';
 import getCanvaEventCertificateUrl from './uploadCertificates/canvaEvent';
+import getStoryspreeCertificateUrl from './uploadCertificates/storyspree';
+import getDemoCompletionCertificateUrl from './uploadCertificates/demoCompletion';
+import getGenZEventCertificateUrl from './uploadCertificates/genzenvironment';
 
 const fetchUser = (userId, eventId) => `
 {
   users(filter: {
     and: [
       {id: "${userId}"}
-      {eventAttandances_some: {event_some:{id: "${eventId}"}}}
+      ${eventId ? `{eventAttandances_some: {event_some:{id: "${eventId}"}}}` : ''}
     ]
   }){
     id
@@ -95,8 +98,15 @@ const generateCertificateMutationResolver = async (
 
   const { input } = params;
   // eventId to be passed here too in input
-  const { userId, regenerateCertificate, eventId } = input;
-  const userRes = await callLocalGraphqlApi(fetchUser(userId, eventId));
+  const {
+    userId, regenerateCertificate, eventId, date, isEventCertificate,
+  } = input;
+  let userRes;
+  if (!isEventCertificate) {
+    userRes = await callLocalGraphqlApi(fetchUser(userId));
+  } else {
+    userRes = await callLocalGraphqlApi(fetchUser(userId, eventId));
+  }
   const users = get(userRes, 'data.users');
   // get eventCertificate based on event type
   const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(userId, eventId));
@@ -113,7 +123,10 @@ const generateCertificateMutationResolver = async (
   }
   if (users && users.length) {
     const userName = get(users, '[0].name', '');
-    const formattedDate = moment(new Date().setHours(0, 0, 0, 0)).format('DD-MM-YYYY');
+    let formattedDate = moment(new Date().setHours(0, 0, 0, 0)).format('DD-MM-YYYY');
+    if (date) {
+      formattedDate = moment(new Date(date).setHours(0, 0, 0, 0)).format('DD-MM-YYYY');
+    }
     let fetchedUrl = '';
     let eventType = '';
     let eventName = '';
@@ -131,6 +144,25 @@ const generateCertificateMutationResolver = async (
         fetchedUrl = await getCanvaEventCertificateUrl(userId, userName, formattedDate);
         eventType = 'communityEvent';
         eventName = 'canvaMasterclass';
+        break;
+      case 'ckweruavk0000sxin201114uv':
+      case 'ckwerqvz10000r2in5ihxd8ly':
+      case 'ckweriv6q0000mzin99jm8mm2':
+        fetchedUrl = await getGenZEventCertificateUrl(userId, userName, formattedDate);
+        eventType = 'communityEvent';
+        eventName = 'genZEnvironment';
+        break;
+      case 'ckw4unvyp0000kpinc2515c88':
+      case 'ckw5wg9rj0000gtin1st0hry6':
+      case 'ckw6eq3f30000xgin7yrxgk2l':
+        fetchedUrl = await getStoryspreeCertificateUrl(userId, userName, formattedDate);
+        eventType = 'communityEvent';
+        eventName = 'storyspree';
+        break;
+      case 'ckwakpd7k0000erin7yizcfi1':
+        fetchedUrl = await getDemoCompletionCertificateUrl(userId, userName);
+        eventType = 'userAchievement';
+        eventName = 'demoCompletion';
         break;
       default:
         fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);

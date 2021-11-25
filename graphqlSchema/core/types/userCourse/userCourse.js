@@ -49,6 +49,15 @@ const UserCourse = `
           ], 
         rule: allow
       )
+    iqaReport: [IqaReport] @relation(name: "IqaReportUserCourse", direction: "OneWay")
+    @appPermissions(
+        permissions:[
+          { appName: "${TMS}" operations: "*" },
+          { appName: "${TLA}" operations: "*" },
+          { appName: "${TWA}" operations: ${READ} },
+          ],
+        rule: allow
+      )
     homeworkStreaks: [HomeworkStreaks]
     homeworkStreaksLog: [HomeworkStreaks]
   }
