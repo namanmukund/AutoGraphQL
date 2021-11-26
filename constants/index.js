@@ -195,6 +195,7 @@ const auditType = {
   mentor: 'mentor',
   preSales: 'preSales',
   postSales: 'postSales',
+  demoWow: 'demoWow',
 };
 
 const scholarshipThreshHolds = {
