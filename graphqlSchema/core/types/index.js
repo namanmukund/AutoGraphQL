@@ -140,6 +140,7 @@ import IqaReport from './iqaReport';
 import getMagicLink from './getMagicLink';
 import magicLinkLog from './magicLinkLog';
 import LeadPartner from './leadPartner';
+import DemoWowAudit from './demoWowAudits';
 
 export default [
   ...User,
@@ -284,4 +285,5 @@ export default [
   ...getMagicLink,
   ...magicLinkLog,
   ...LeadPartner,
+  ...DemoWowAudit,
 ];

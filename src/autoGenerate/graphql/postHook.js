@@ -70,6 +70,7 @@ import userPostHookMethod from './postHookFunctions/userPostHookMethod';
 import updateMentorAvailabilitySlotPostHookMethod from './postHookFunctions/updateMentorAvailabilitySlotPostHookMethod';
 import addMentorDemandSlotPostHookMethod from './postHookFunctions/addMentorDemandSlotPostHookMethod';
 import updateMentorDemandSlotPostHookMethod from './postHookFunctions/updateMentorDemandSlotPostHookMethod';
+import updateDemoWowAuditPostHookMethod from './postHookFunctions/updateDemoWowAuditPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -337,6 +338,10 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateMentorDemandSlot': {
       await updateMentorDemandSlotPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'updateDemoWowAudit': {
+      await updateDemoWowAuditPostHookMethod(input, params, mutationName, context);
       break;
     }
     default:
