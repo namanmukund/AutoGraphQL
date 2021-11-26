@@ -26,7 +26,7 @@ import { log } from '../../../../utils';
 import getTopicInfo from './utils/getTopicInfo';
 import getCourseInfo from './utils/getCourseInfo';
 
-const { postSales } = auditType;
+const { postSales, demoWow } = auditType;
 // import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 /*
   - check if the user if from referral
@@ -224,6 +224,8 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const mentorMenteeSessionId = get(context, 'previousDocument.id', '');
     const prevIsPostSalesAudit = get(context, 'previousDocument.isPostSalesAudit', false);
     const isPostSalesAuditFromInput = get(context, 'isPostSalesAuditFromInput', false);
+    const prevIsDemoWowAudit = get(context, 'previousDocument.isDemoWowAudit', false);
+    const isDemoWowAuditFromInput = get(input, 'isDemoWowAudit', false);
 
     if ((inputIsAudit && prevIsAudit !== inputIsAudit)
       || (inputMentorRating && inputMentorRating < MENTOR_RATING_AUDIT_THRESHOLD)
@@ -234,6 +236,10 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
 
     if (isPostSalesAuditFromInput && prevIsPostSalesAudit === false) {
       addSalesAudit({ mentorMenteeSessionId, auditType: postSales });
+    }
+
+    if (isDemoWowAuditFromInput && prevIsDemoWowAudit === false) {
+      addSalesAudit({ mentorMenteeSessionId, auditType: demoWow });
     }
 
     if (
