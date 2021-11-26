@@ -5,6 +5,7 @@ const EventName = `
     storyspree
     demoCompletion
     iqaReport
+    genZEnvironment
   }`;
 
 export default EventName;

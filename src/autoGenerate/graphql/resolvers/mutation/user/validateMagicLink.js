@@ -53,6 +53,7 @@ const getTokenDetails = async (linkToken, userId) => {
     expiresIn
     isLinkVisited
     visitedCount
+    linkVisitLimit
   }
 }`;
   const result = await callLocalGraphqlApi(query);
@@ -105,10 +106,12 @@ const validateMagicLinkMutationResolver = async (
     if (!magicLinkDetails.length) {
       throw new InvalidToken();
     }
-    const { id: tokenLogId, isLinkVisited = false, visitedCount } = get(magicLinkDetails, '[0]');
+    const {
+      id: tokenLogId, isLinkVisited = false, visitedCount, linkVisitLimit,
+    } = get(magicLinkDetails, '[0]');
     updateTokenDetail(tokenLogId, isLinkVisited, visitedCount);
-    // if link is already visited
-    if (isLinkVisited) {
+    // if link visit exceeds the limit
+    if (visitedCount >= linkVisitLimit) {
       throw new LinkExpiredError();
     }
     if (moment().isAfter(moment(expiresIn))) {
