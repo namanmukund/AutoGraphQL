@@ -86,14 +86,14 @@ const addMentorMenteeSessionAuditForBatchQuery = (
 }
   `;
 
-const addMentorMenteeSessionAuditQuery = (
+const addDemoWowAuditQuery = (
   mentorMenteeSessionId,
   auditQuestionsIds,
   questionSectionsQuery,
   totalScore,
 ) => `
   mutation{
-  addMentorMenteeSessionAudit(mentorMenteeSessionConnectId: "${mentorMenteeSessionId}",
+  addDemoWowAudit(mentorMenteeSessionConnectId: "${mentorMenteeSessionId}",
   input: {
       totalScore: ${totalScore}
       auditQuestions: [
@@ -157,7 +157,7 @@ const addSalesAudit = async ({
         totalScore,
       ));
     } else if (auditType === demoWow) {
-      callLocalGraphqlApi(addMentorMenteeSessionAuditQuery(
+      callLocalGraphqlApi(addDemoWowAuditQuery(
         mentorMenteeSessionId,
         auditQuestionsIds,
         questionSectionsQuery,
