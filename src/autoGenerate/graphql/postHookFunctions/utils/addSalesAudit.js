@@ -4,7 +4,9 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 const { b2b, b2b2c, normal } = batchType;
 
-const { preSales, postSales, mentor } = auditTypesFilter;
+const {
+  preSales, postSales, mentor, demoWow,
+} = auditTypesFilter;
 
 const { b2cDemo, b2cPaid } = auditSubType;
 
@@ -84,6 +86,26 @@ const addMentorMenteeSessionAuditForBatchQuery = (
 }
   `;
 
+const addMentorMenteeSessionAuditQuery = (
+  mentorMenteeSessionId,
+  auditQuestionsIds,
+  questionSectionsQuery,
+  totalScore,
+) => `
+  mutation{
+  addMentorMenteeSessionAudit(mentorMenteeSessionConnectId: "${mentorMenteeSessionId}",
+  input: {
+      totalScore: ${totalScore}
+      auditQuestions: [
+        ${auditQuestionsIds}
+      ]
+      customSectionScore: [${questionSectionsQuery}]
+    }){
+    id
+  }
+}
+  `;
+
 const addSalesAudit = async ({
   mentorMenteeSessionId, clientId, auditType, batchSessionId, batchTypeValue, batchTopicOrder,
 }) => {
@@ -130,6 +152,13 @@ const addSalesAudit = async ({
     } else if (isBatchAudit) {
       callLocalGraphqlApi(addMentorMenteeSessionAuditForBatchQuery(
         batchSessionId,
+        auditQuestionsIds,
+        questionSectionsQuery,
+        totalScore,
+      ));
+    } else if (auditType === demoWow) {
+      callLocalGraphqlApi(addMentorMenteeSessionAuditQuery(
+        mentorMenteeSessionId,
         auditQuestionsIds,
         questionSectionsQuery,
         totalScore,
