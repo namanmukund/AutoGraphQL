@@ -468,6 +468,36 @@ const ALLOWED_MIME_TYPES = ['html', 'css', 'javascript'];
 
 const MASTER_OTP = 3007;
 
+const courseToGradeMapping = [
+  {
+    grade: [1, 2],
+    courseId: 'cks5y78w0000t0vwcauvc2rtm',
+  },
+  {
+    grade: [3, 4, 5],
+    courseId: 'cks94x3jq00fc0w24e92pb9ku',
+  },
+  {
+    grade: [6, 7, 8, 9, 10, 11, 12],
+    courseId: 'cks5r4pzv000r0v29gk231bcy',
+  },
+];
+
+const courseToGradeMappingForStaging = [
+  {
+    grade: [1, 2],
+    courseId: 'ckpwgsqpx00010txl9q1s19f2',
+  },
+  {
+    grade: [3, 4, 5],
+    courseId: 'ckpwvp8gb00000t06f78t6dbz',
+  },
+  {
+    grade: [6, 7, 8, 9, 10, 11, 12],
+    courseId: 'cjs8skrd200041huzz78kncz5',
+  },
+];
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -547,4 +577,6 @@ export {
   studentNoteForIQ,
   ALLOWED_MIME_TYPES,
   MASTER_OTP,
+  courseToGradeMapping,
+  courseToGradeMappingForStaging,
 };
