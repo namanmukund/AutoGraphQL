@@ -463,7 +463,11 @@ If coming from campaign and the type os b2b allocate the user to the right batch
         Fields: [
           {
             SchemaName: 'mx_Custom_1',
-            Value: 'RadioStreet',
+            Value: 'communityevent',
+          },
+          {
+            SchemaName: 'mx_Custom_2',
+            Value: 'environment_30nov',
           },
         ],
       });

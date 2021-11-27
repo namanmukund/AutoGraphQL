@@ -3,6 +3,7 @@ const AuditType = `
     mentor
     preSales
     postSales
+    demoWow
   }`;
 
 export default AuditType;

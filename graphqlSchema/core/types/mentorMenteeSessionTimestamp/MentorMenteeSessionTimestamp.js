@@ -38,6 +38,7 @@ const MentorMenteeSessionTimestamp = `
     auditDocument: MentorMenteeSessionAudit @relation(name: "MentorMenteeSessionAuditTimestamp")
     preSalesDocument: PreSalesAudit @relation(name: "PreSalesAuditTimestamp")
     postSalesDocument: PostSalesAudit @relation(name: "PostSalesAuditTimestamp")
+    demoWowDocument: DemoWowAudit @relation(name: "DemoWowAuditTimestamp")
     auditQuestion: AuditQuestion @relation(name: "MentorMenteeSessionTimestampAuditQuestion", direction: "OneWay")
     ${timestampComment}
     ${tags}

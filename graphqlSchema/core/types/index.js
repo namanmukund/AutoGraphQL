@@ -137,6 +137,7 @@ import GetEventCertificate from './getEventCertificate';
 import Event from './event';
 import UtmDetail from './utmDetail';
 import LeadPartner from './leadPartner';
+import DemoWowAudit from './demoWowAudits';
 
 export default [
   ...User,
@@ -278,4 +279,5 @@ export default [
   ...Event,
   ...UtmDetail,
   ...LeadPartner,
+  ...DemoWowAudit,
 ];
