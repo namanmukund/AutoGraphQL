@@ -44,7 +44,7 @@ const addUserCourseQuery = (userId, courseId, certificateId, iqaReportId) => `
       addUserCourse(userConnectId: "${userId}",
       coursesConnectIds: ["${courseId}"],
       demoCompletionConnectIds: ["${certificateId}"],
-      iqaReportConnectIds: ["${iqaReportId}"]
+      ${iqaReportId ? `iqaReportConnectIds: ["${iqaReportId}"]` : ''}
       input: {}) {
           id
       }
@@ -55,7 +55,7 @@ const updateUserCourseQuery = (id, certificateId, iqaReportId) => `
   mutation {
       updateUserCourse(id: "${id}",
       demoCompletionConnectIds: ["${certificateId}"],
-      iqaReportConnectIds: ["${iqaReportId}"]
+      ${iqaReportId ? `iqaReportConnectIds: ["${iqaReportId}"]` : ''}
       input: {}) {
           id
       }

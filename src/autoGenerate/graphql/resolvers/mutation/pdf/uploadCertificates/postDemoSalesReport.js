@@ -11,6 +11,7 @@ import { GILROY_EXTRA_BOLD_FONT_URL, NUNITO_BOLD_FONT_URL } from '../../../../..
 import { uploadToS3 } from '../../../../../../middlewares/utils/uploadToS3';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
 import getStringWidth from '../utils/getStringWidthForEmbeddedFont';
+import updateLeadSquared from '../../../../../../../services/leadsquared/updateLeadSquared';
 
 const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
 
@@ -58,8 +59,16 @@ const getPostDemoSalesReportUrl = async (userId) => {
   let url = '';
   let existingPdfBytes = null;
   let pdfDoc = null;
-  console.log('iqaReports');
-  if (iqaReports && iqaReports.length) {
+  // fetch mentorMenteeSessionAudit for the given userId
+  // fetch the audit report feilds for the various star ratings
+  const tagsArray = ['ENERGETIC', 'MOTIVATED', 'AMBITIOUS', 'CURIOUS'];
+  const shuffledTags = tagsArray.sort(() => 0.5 - Math.random());
+  const selectedTags = shuffledTags.slice(0, 3);
+
+  const mentorNote = 'The child was very enthusiastic in the class.';
+  const mentorName = 'Kavita Naresh';
+
+  if ((iqaReports && iqaReports.length) || true) {
     url = `${process.env.FILE_BASE_URL}/python/course/postDemoPostTest.pdf`;
     existingPdfBytes = await fetch(url).then((res) => res.buffer());
     // Load a PDFDocument from the existing PDF bytes
@@ -90,6 +99,22 @@ const getPostDemoSalesReportUrl = async (userId) => {
     const mentorRatingDialImage = await pdfDoc.embedPng(mentorRatingDialBytes);
     const mentorRatingDialDim = mentorRatingDialImage.scale(1);
 
+    const Star1Bytes = await fetch(getMentorRatingStars(1)).then((res) => res.buffer());
+    const Star1Image = await pdfDoc.embedPng(Star1Bytes);
+    const Star1Dim = Star1Image.scale(1);
+    const Star2Bytes = await fetch(getMentorRatingStars(2)).then((res) => res.buffer());
+    const Star2Image = await pdfDoc.embedPng(Star2Bytes);
+    const Star2Dim = Star2Image.scale(1);
+    const Star3Bytes = await fetch(getMentorRatingStars(3)).then((res) => res.buffer());
+    const Star3Image = await pdfDoc.embedPng(Star3Bytes);
+    const Star3Dim = Star3Image.scale(1);
+    const Star4Bytes = await fetch(getMentorRatingStars(4)).then((res) => res.buffer());
+    const Star4Image = await pdfDoc.embedPng(Star4Bytes);
+    const Star4Dim = Star4Image.scale(1);
+    const Star5Bytes = await fetch(getMentorRatingStars(5)).then((res) => res.buffer());
+    const Star5Image = await pdfDoc.embedPng(Star5Bytes);
+    const Star5Dim = Star5Image.scale(1);
+
     /*
       FIRST PAGE
     */
@@ -102,7 +127,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     });
 
     firstPage.drawText(`${'Student Name'}.`, {
-      x: 166,
+      x: 170,
       y: 623,
       size: 15,
       font: NunitoBoldFont,
@@ -233,10 +258,95 @@ const getPostDemoSalesReportUrl = async (userId) => {
     */
     // mentor rating dial
     thirdPage.drawImage(mentorRatingDialImage, {
-      x: 150,
-      y: 700,
+      x: 200,
+      y: 800,
       width: mentorRatingDialDim.width,
       height: mentorRatingDialDim.height,
+    });
+
+    // critical thinking
+    thirdPage.drawImage(Star1Image, {
+      x: 335,
+      y: 786,
+      width: Star1Dim.width,
+      height: Star1Dim.height,
+    });
+
+    // logical thinking
+    thirdPage.drawImage(Star2Image, {
+      x: 335,
+      y: 753,
+      width: Star2Dim.width,
+      height: Star2Dim.height,
+    });
+
+    // communication skills
+    thirdPage.drawImage(Star3Image, {
+      x: 335,
+      y: 720,
+      width: Star3Dim.width,
+      height: Star3Dim.height,
+    });
+
+    // problem solving ability
+    thirdPage.drawImage(Star4Image, {
+      x: 335,
+      y: 687,
+      width: Star4Dim.width,
+      height: Star4Dim.height,
+    });
+
+    // creativity skills
+    thirdPage.drawImage(Star5Image, {
+      x: 335,
+      y: 654,
+      width: Star5Dim.width,
+      height: Star5Dim.height,
+    });
+
+    /*
+      student tags
+    */
+    thirdPage.drawText(selectedTags[0], {
+      x: 146,
+      y: 496,
+      size: 11,
+      font: NunitoBoldFont,
+      color: rgb(0.09, 0.675, 1),
+    });
+
+    thirdPage.drawText(selectedTags[1], {
+      x: 226,
+      y: 496,
+      size: 11,
+      font: NunitoBoldFont,
+      color: rgb(0.09, 0.675, 1),
+    });
+
+    thirdPage.drawText(selectedTags[2], {
+      x: 306,
+      y: 496,
+      size: 11,
+      font: NunitoBoldFont,
+      color: rgb(0.09, 0.675, 1),
+    });
+
+    // notes from the mentor
+    thirdPage.drawText(mentorNote, {
+      x: 42,
+      y: 570,
+      size: 11,
+      font: NunitoBoldFont,
+      color: rgb(0.31, 0.31, 0.31),
+    });
+
+    // mentor name
+    thirdPage.drawText(mentorName, {
+      x: 412,
+      y: 570,
+      size: 11,
+      font: NunitoBoldFont,
+      color: rgb(0.31, 0.31, 0.31),
     });
   } else {
     url = `${process.env.FILE_BASE_URL}/python/course/postDemoPreTest.pdf`;
@@ -254,6 +364,26 @@ const getPostDemoSalesReportUrl = async (userId) => {
     const GilroyExtraBoldFont = await pdfDoc.embedFont(GilroyExtraBoldfontBytes);
     const NunitoBoldfontBytes = await fetch(NUNITO_BOLD_FONT_URL).then((res) => res.buffer());
     const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
+
+    const mentorRatingDialBytes = await fetch(getMentorDialUrl(5)).then((res) => res.buffer());
+    const mentorRatingDialImage = await pdfDoc.embedPng(mentorRatingDialBytes);
+    const mentorRatingDialDim = mentorRatingDialImage.scale(1);
+
+    const Star1Bytes = await fetch(getMentorRatingStars(1)).then((res) => res.buffer());
+    const Star1Image = await pdfDoc.embedPng(Star1Bytes);
+    const Star1Dim = Star1Image.scale(1);
+    const Star2Bytes = await fetch(getMentorRatingStars(2)).then((res) => res.buffer());
+    const Star2Image = await pdfDoc.embedPng(Star2Bytes);
+    const Star2Dim = Star2Image.scale(1);
+    const Star3Bytes = await fetch(getMentorRatingStars(3)).then((res) => res.buffer());
+    const Star3Image = await pdfDoc.embedPng(Star3Bytes);
+    const Star3Dim = Star3Image.scale(1);
+    const Star4Bytes = await fetch(getMentorRatingStars(4)).then((res) => res.buffer());
+    const Star4Image = await pdfDoc.embedPng(Star4Bytes);
+    const Star4Dim = Star4Image.scale(1);
+    const Star5Bytes = await fetch(getMentorRatingStars(5)).then((res) => res.buffer());
+    const Star5Image = await pdfDoc.embedPng(Star5Bytes);
+    const Star5Dim = Star5Image.scale(1);
     /*
       FIRST PAGE
     */
@@ -266,7 +396,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     });
 
     firstPage.drawText(`${'Student Name'}.`, {
-      x: 166,
+      x: 170,
       y: 623,
       size: 15,
       font: NunitoBoldFont,
@@ -277,10 +407,95 @@ const getPostDemoSalesReportUrl = async (userId) => {
     */
     // mentor rating dial
     secondPage.drawImage(mentorRatingDialImage, {
-      x: 150,
-      y: 700,
+      x: 200,
+      y: 800,
       width: mentorRatingDialDim.width,
       height: mentorRatingDialDim.height,
+    });
+
+    // critical thinking
+    secondPage.drawImage(Star1Image, {
+      x: 335,
+      y: 786,
+      width: Star1Dim.width,
+      height: Star1Dim.height,
+    });
+
+    // logical thinking
+    secondPage.drawImage(Star2Image, {
+      x: 335,
+      y: 753,
+      width: Star2Dim.width,
+      height: Star2Dim.height,
+    });
+
+    // communication skills
+    secondPage.drawImage(Star3Image, {
+      x: 335,
+      y: 720,
+      width: Star3Dim.width,
+      height: Star3Dim.height,
+    });
+
+    // problem solving ability
+    secondPage.drawImage(Star4Image, {
+      x: 335,
+      y: 687,
+      width: Star4Dim.width,
+      height: Star4Dim.height,
+    });
+
+    // creativity skills
+    secondPage.drawImage(Star5Image, {
+      x: 335,
+      y: 654,
+      width: Star5Dim.width,
+      height: Star5Dim.height,
+    });
+
+    /*
+      student tags
+    */
+    secondPage.drawText(selectedTags[0], {
+      x: 146,
+      y: 496,
+      size: 11,
+      font: NunitoBoldFont,
+      color: rgb(0.09, 0.675, 1),
+    });
+
+    secondPage.drawText(selectedTags[1], {
+      x: 226,
+      y: 496,
+      size: 11,
+      font: NunitoBoldFont,
+      color: rgb(0.09, 0.675, 1),
+    });
+
+    secondPage.drawText(selectedTags[2], {
+      x: 306,
+      y: 496,
+      size: 11,
+      font: NunitoBoldFont,
+      color: rgb(0.09, 0.675, 1),
+    });
+
+    // notes from the mentor
+    secondPage.drawText(mentorNote, {
+      x: 42,
+      y: 570,
+      size: 11,
+      font: NunitoBoldFont,
+      color: rgb(0.31, 0.31, 0.31),
+    });
+
+    // mentor name
+    secondPage.drawText(mentorName, {
+      x: 412,
+      y: 570,
+      size: 11,
+      font: NunitoBoldFont,
+      color: rgb(0.31, 0.31, 0.31),
     });
   }
   /** PDF Meta Details */
@@ -301,6 +516,16 @@ const getPostDemoSalesReportUrl = async (userId) => {
     await uploadToS3(key, fileContent);
     fetchedUrl = key;
   }
+
+  // send the newly generated url as lead capture
+  updateLeadSquared({
+    Phone: '919972181832',
+    mx_IQA_Test_Report: fetchedUrl,
+  }, false, {
+    ActivityEvent: 103,
+    Fields: [],
+  });
+
   return fetchedUrl;
 };
 
