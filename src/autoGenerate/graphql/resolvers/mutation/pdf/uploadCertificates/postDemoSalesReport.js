@@ -58,6 +58,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
   let url = '';
   let existingPdfBytes = null;
   let pdfDoc = null;
+  console.log('iqaReports');
   if (iqaReports && iqaReports.length) {
     url = `${process.env.FILE_BASE_URL}/python/course/postDemoPostTest.pdf`;
     existingPdfBytes = await fetch(url).then((res) => res.buffer());
@@ -246,12 +247,41 @@ const getPostDemoSalesReportUrl = async (userId) => {
     // Get the first page of the document
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
+    const secondPage = pages[1];
     const { width } = firstPage.getSize();
     // // Embed the Helvetica font
     const GilroyExtraBoldfontBytes = await fetch(GILROY_EXTRA_BOLD_FONT_URL).then((res) => res.buffer());
     const GilroyExtraBoldFont = await pdfDoc.embedFont(GilroyExtraBoldfontBytes);
     const NunitoBoldfontBytes = await fetch(NUNITO_BOLD_FONT_URL).then((res) => res.buffer());
     const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
+    /*
+      FIRST PAGE
+    */
+    firstPage.drawText(`${'Parent Name'},`, {
+      x: 100,
+      y: 678,
+      size: 15,
+      font: NunitoBoldFont,
+      color: rgb(0, 0.29, 0.678),
+    });
+
+    firstPage.drawText(`${'Student Name'}.`, {
+      x: 166,
+      y: 623,
+      size: 15,
+      font: NunitoBoldFont,
+      color: rgb(0, 0.29, 0.678),
+    });
+    /*
+      SECOND PAGE
+    */
+    // mentor rating dial
+    secondPage.drawImage(mentorRatingDialImage, {
+      x: 150,
+      y: 700,
+      width: mentorRatingDialDim.width,
+      height: mentorRatingDialDim.height,
+    });
   }
   /** PDF Meta Details */
   pdfDoc.setAuthor('Tekie');

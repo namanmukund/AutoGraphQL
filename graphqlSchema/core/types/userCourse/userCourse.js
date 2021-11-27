@@ -50,6 +50,7 @@ const UserCourse = `
         rule: allow
       )
     iqaReport: [IqaReport] @relation(name: "IqaReportUserCourse", direction: "OneWay")
+    demoCompletion: [EventCertificate] @relation(name: "DemoCompletionEventCertificate", direction: "OneWay")
     @appPermissions(
         permissions:[
           { appName: "${TMS}" operations: "*" },
