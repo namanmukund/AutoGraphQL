@@ -10,6 +10,7 @@ import getSpySquadCampCertificateUrl from './uploadCertificates/spysquadcamp';
 import getCanvaEventCertificateUrl from './uploadCertificates/canvaEvent';
 import getStoryspreeCertificateUrl from './uploadCertificates/storyspree';
 import getDemoCompletionCertificateUrl from './uploadCertificates/demoCompletion';
+import getGenZEventCertificateUrl from './uploadCertificates/genzenvironment';
 
 const fetchUser = (userId, eventId) => `
 {
@@ -129,6 +130,7 @@ const generateCertificateMutationResolver = async (
     let fetchedUrl = '';
     let eventType = '';
     let eventName = '';
+    // the three ids here are the event.ids created in three environments (local, pre-prod, prod)
     switch (eventId) {
       case 'ckvdiavp70000igujfgxh8mt6':
       case 'ckve5izxq0000ucui47b89pmf':
@@ -144,6 +146,13 @@ const generateCertificateMutationResolver = async (
         eventType = 'communityEvent';
         eventName = 'canvaMasterclass';
         break;
+      case 'ckweruavk0000sxin201114uv':
+      case 'ckwerqvz10000r2in5ihxd8ly':
+      case 'ckweriv6q0000mzin99jm8mm2':
+        fetchedUrl = await getGenZEventCertificateUrl(userId, userName, formattedDate);
+        eventType = 'communityEvent';
+        eventName = 'genZEnvironment';
+        break;
       case 'ckw4unvyp0000kpinc2515c88':
       case 'ckw5wg9rj0000gtin1st0hry6':
       case 'ckw6eq3f30000xgin7yrxgk2l':
@@ -155,6 +164,11 @@ const generateCertificateMutationResolver = async (
         fetchedUrl = await getDemoCompletionCertificateUrl(userId, userName);
         eventType = 'userAchievement';
         eventName = 'demoCompletion';
+        break;
+      case '':
+        fetchedUrl = await getIqaReportSnapshotUrl(userId, userName);
+        eventType = 'userAchievement';
+        eventName = 'iqaReport';
         break;
       default:
         fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);

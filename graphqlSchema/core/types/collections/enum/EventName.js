@@ -4,6 +4,8 @@ const EventName = `
     canvaMasterclass
     storyspree
     demoCompletion
+    iqaReport
+    genZEnvironment
   }`;
 
 export default EventName;
