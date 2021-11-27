@@ -36,6 +36,7 @@ const fetchUser = async (id, eventId) => {
       {
         id
         name
+        utmCampaign
         studentProfile{
           parents{
             user{
@@ -97,6 +98,10 @@ const generateCertificateScript = async (userIdArray, regenerateCertificate = fa
           {
             SchemaName: 'mx_Custom_1',
             Value: 'Present',
+          },
+          {
+            SchemaName: 'mx_Custom_2',
+            Value: 'environment_30nov',
           },
         ],
       });
