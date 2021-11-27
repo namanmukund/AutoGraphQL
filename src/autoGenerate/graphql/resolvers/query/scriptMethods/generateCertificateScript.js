@@ -101,7 +101,7 @@ const generateCertificateScript = async (userIdArray, regenerateCertificate = fa
           },
           {
             SchemaName: 'mx_Custom_2',
-            Value: 'environment_30nov',
+            Value: 'spysquadcamp',
           },
         ],
       });
