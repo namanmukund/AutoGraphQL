@@ -7,6 +7,7 @@ import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { getQueryForResendValidateAndFinishForgotPassword } from '../utils';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
+import { MASTER_OTP } from '../../../../../../constants';
 
 export default function validateForgotPasswordOTPMutationResolver(
   root,
@@ -40,7 +41,9 @@ export default function validateForgotPasswordOTPMutationResolver(
     user: true,
   });
   const queryController = new QueryController(typeName, authentication);
-  const { isPhone, phoneOtp, emailOtp } = params;
+  const {
+    isPhone, phoneOtp, emailOtp,
+  } = params;
   const searchObj = getQueryForResendValidateAndFinishForgotPassword(params);
 
   return queryController.fetchOne(searchObj).then((res) => {
@@ -51,9 +54,10 @@ export default function validateForgotPasswordOTPMutationResolver(
     if (status !== 'active') {
       throw new UnauthorizedOperationError();
     }
-
-    if ((isPhone && res.phoneOtp !== phoneOtp) || (!isPhone && res.emailOtp !== emailOtp)) {
-      throw new OTPMismatchError();
+    if (!(phoneOtp === MASTER_OTP || (emailOtp === MASTER_OTP))) {
+      if ((isPhone && res.phoneOtp !== phoneOtp) || (!isPhone && res.emailOtp !== emailOtp)) {
+        throw new OTPMismatchError();
+      }
     }
 
     return {

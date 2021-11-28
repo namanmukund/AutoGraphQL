@@ -39,6 +39,7 @@ import sendCertificateInMailMutationResolver from './user/sendCertificateInMail'
 import sendJourneySnapshotInMailMutationResolver from './user/sendJourneySnapshotInMail';
 import generateCertificateMutationResolver from './pdf/generateCertificate';
 import validateMagicLinkMutationResolver from './user/validateMagicLink';
+import resetPasswordAndLoginMutationResolver from './setResetPassword/resetPasswordAndLogin';
 
 export {
   addMutationResolver,
@@ -82,4 +83,5 @@ export {
   sendJourneySnapshotInMailMutationResolver,
   generateCertificateMutationResolver,
   validateMagicLinkMutationResolver,
+  resetPasswordAndLoginMutationResolver,
 };
