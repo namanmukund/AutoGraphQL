@@ -11,6 +11,7 @@ import getCanvaEventCertificateUrl from './uploadCertificates/canvaEvent';
 import getStoryspreeCertificateUrl from './uploadCertificates/storyspree';
 import getDemoCompletionCertificateUrl from './uploadCertificates/demoCompletion';
 import getGenZEventCertificateUrl from './uploadCertificates/genzenvironment';
+import getIqaReportSnapshotUrl from './uploadCertificates/iqaReport';
 
 const fetchUser = (userId, eventId) => `
 {
@@ -161,11 +162,15 @@ const generateCertificateMutationResolver = async (
         eventName = 'storyspree';
         break;
       case 'ckwakpd7k0000erin7yizcfi1':
+      case 'ckwjwf4lm0000pgin7o9bbf1m':
+      case 'ckwjwiigq0000rninbsqialy2':
         fetchedUrl = await getDemoCompletionCertificateUrl(userId, userName);
         eventType = 'userAchievement';
         eventName = 'demoCompletion';
         break;
-      case '':
+      case 'ckwjl99kq0001i6in4ir2ez4z':
+      case 'ckwjwg75y0001pginazc277b9':
+      case 'ckwjwitwb0001rningq5ma1ei':
         fetchedUrl = await getIqaReportSnapshotUrl(userId, userName);
         eventType = 'userAchievement';
         eventName = 'iqaReport';
