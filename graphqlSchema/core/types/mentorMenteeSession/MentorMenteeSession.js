@@ -99,6 +99,7 @@ const MentorMenteeSession = `
     mentorSavesAttendance: Date
     videoLinkClickByMenteePlatform: Platform
     startSessionByMenteePlatform: Platform
+    isDemoWowAudit: Boolean @defaultValue(value: "false")
 }`;
 
 export default [MentorMenteeSession, internetSpeed];
