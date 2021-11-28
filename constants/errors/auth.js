@@ -61,3 +61,7 @@ export const SomethingWentWrongError = createError('SomethingWentWrongError', {
 export const LinkExpiredError = createError('LinkExpiredError', {
   message: 'Login link expired',
 });
+
+export const ResetPasswordLinkExpired = createError('ResetPasswordLinkExpired', {
+  message: 'Reset Password link expired',
+});

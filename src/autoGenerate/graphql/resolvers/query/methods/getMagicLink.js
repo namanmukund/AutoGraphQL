@@ -1,34 +1,12 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-tabs */
 /* eslint-disable no-unused-vars */
-import { get, pick } from 'lodash';
-import jwt from 'jsonwebtoken';
-import moment from 'moment';
+import { get } from 'lodash';
 import coreAuthParams from '../../../../../../config/authParams';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
-
-const getLinkToken = (user, createdAt, expiresIn) => {
-  const userInfo = pick(user, ['id', 'username']);
-  const linkTokenSecret = coreAuthParams.LINK_TOKEN_SECRET;
-  // always taking expire value in hours
-  const linkToken = jwt.sign(
-    {
-      linkData: {
-        expiresIn: moment(createdAt).add(expiresIn, 'hours'),
-        userInfo,
-        createdAt: new Date(createdAt),
-      },
-    },
-    linkTokenSecret,
-    {
-      expiresIn: `${expiresIn}h`,
-      algorithm: coreAuthParams.ALGORITHM,
-    },
-  );
-  return linkToken;
-};
+import getTokenForLoginLink from '../../utils/getTokenForLoginLink';
 
 const fetchUserDetails = async (queryFilter) => {
   const query = `{
@@ -53,7 +31,7 @@ const fetchUserDetails = async (queryFilter) => {
 const generateAndReturnToken = (user, addMagicLinkLogQuery = '', index, {
   appName, grade, section, userIdFromContext, schoolId, expiresIn, linkVisitLimit,
 }) => {
-  const linkToken = getLinkToken(user, new Date(), expiresIn);
+  const linkToken = getTokenForLoginLink(user, new Date(), expiresIn);
   const linkUri = `/login?authToken=${linkToken}`;
   addMagicLinkLogQuery = `addMagicLinkLog${index}: addMagicLinkLog(
     input: {

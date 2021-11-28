@@ -1,15 +1,21 @@
 import { UserTokenNotRequiredError, DatabaseRecordNotFoundError, UnauthorizedOperationError } from '../../../../../../constants/errors';
-import { QueryController } from '../../../controllers';
+import { QueryController, MutationController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { sendEmailForSendForgotPasswordLink } from '../utils';
 import { UPDATE } from '../../../../../../constants/graphqlOperations';
-import createToken from '../../../../../auth/createToken';
 import { forgotPassWebURL } from '../../../../../../constants';
+import getTokenForLoginLink from '../../utils/getTokenForLoginLink';
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 
 const sendForgotPasswordLinkMutationPromise = (input, modelQueries) => modelQueries.fetchOne(input);
+
+const updateForgotPasswordLinkStatus = (
+  searchObj,
+  updateObj,
+  modelMutations,
+) => modelMutations.updateOne(searchObj, updateObj);
 
 export default function sendForgotPasswordLinkMutationResolver(
   root,
@@ -54,14 +60,25 @@ export default function sendForgotPasswordLinkMutationResolver(
     if (status !== 'active') {
       throw new UnauthorizedOperationError();
     }
+    const modelMutations = new MutationController(typeName, authentication);
+    return updateForgotPasswordLinkStatus(
+      searchObj,
+      {
+        resetPasswordFromLink: true,
+      },
+      modelMutations,
+    ).then((result) => {
+      if (!result) {
+        throw new DatabaseRecordNotFoundError();
+      }
+      const token = getTokenForLoginLink(fetchedUser, new Date(), 1);
+      const forgotPassLink = `${forgotPassWebURL[nodeEnv]}?authToken=${token}`;
+      // Send email to user with forgot password link
+      sendEmailForSendForgotPasswordLink(fetchedUser, authentication, forgotPassLink);
 
-    const token = createToken(fetchedUser, authentication, false, true);
-    const forgotPassLink = forgotPassWebURL[nodeEnv] + token;
-    // Send email to user with forgot password link
-    sendEmailForSendForgotPasswordLink(fetchedUser, authentication, forgotPassLink);
-
-    return {
-      result: true,
-    };
+      return {
+        result: true,
+      };
+    });
   });
 }

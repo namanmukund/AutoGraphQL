@@ -1,14 +1,27 @@
-import bcrypt from 'bcryptjs';
-import authParams from '../../../../../../config/authParams';
-import { DatabaseRecordNotFoundError, PasswordMismatchError } from '../../../../../../constants/errors';
-import { MutationController } from '../../../controllers';
+import { get } from 'lodash';
+import jwt from 'jsonwebtoken';
+import moment from 'moment';
+import {
+  DatabaseRecordNotFoundError, PasswordMismatchError,
+  SomethingWentWrongError, ResetPasswordLinkExpired,
+} from '../../../../../../constants/errors';
+import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
+import { MutationController, QueryController } from '../../../controllers';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
-import { UPDATE } from '../../../../../../constants/graphqlOperations';
+import getUserPasswordObject from '../user/utils/getUserPasswordObject';
+import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
+import { SINGULAR } from '../../../../../../constants/graphqlOperations';
+import coreAuthParams from '../../../../../../config/authParams';
+import { LinkExpiredError } from '../../../../../../constants/errors/auth';
+
+const linkTokenSecret = coreAuthParams.LINK_TOKEN_SECRET;
 
 const findUserMutationPromise = (input, modelQueries) => modelQueries.fetchOne(input);
 
-export default function resetPasswordAndLoginMutationResolver(
+const resetPasswordAndLoginMutationPromise = (searchObj, updateObj, modelMutations) => modelMutations.updateOne(searchObj, updateObj);
+
+export default async function resetPasswordAndLoginMutationResolver(
   root,
   params,
   typeName,
@@ -18,14 +31,12 @@ export default function resetPasswordAndLoginMutationResolver(
   authentication,
 ) {
   const { fieldNodes } = info;
-  const {
-    phone: { countryCode, number }, password, confirmPassword, email,
-  } = params;
+  const { input } = params;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
   validate(
-    typeName,
+    'UserToken',
     ast,
-    UPDATE,
+    SINGULAR,
     fieldsFetched,
     authentication,
     {},
@@ -36,39 +47,63 @@ export default function resetPasswordAndLoginMutationResolver(
   Object.assign(authentication, {
     user: true,
   });
+  if (!get(input, 'password') || !get(input, 'confirmPassword')) {
+    throw new MissingMandatoryInputInRequestError();
+  }
   let searchUserObj;
-  if (countryCode && number) {
+  if (get(input, 'countryCode') && get(input, 'number')) {
     searchUserObj = {
-      'phone.countryCode': countryCode,
-      'phone.number': number,
+      'phone.countryCode': get(input, 'countryCode'),
+      'phone.number': get(input, 'number'),
     };
-  } else {
+  } else if (get(input, 'email')) {
     searchUserObj = {
       email,
     };
+  } else {
+    // decoding user and expiry time from token received
+    await jwt.verify(get(input, 'linkToken'), linkTokenSecret, async (error, values) => {
+      if (error) {
+        throw new SomethingWentWrongError();
+      }
+      const { expiresIn, userInfo: { id } } = get(values, 'linkData');
+      // if link visit exceeds the limit
+      if (moment().isAfter(moment(expiresIn))) {
+        throw new LinkExpiredError();
+      }
+      searchUserObj = {
+        id,
+      };
+    });
   }
-  return findUserMutationPromise(searchUserObj).then((fetchedUser) => {
+  const modelQueries = new QueryController(typeName, authentication);
+  return findUserMutationPromise(searchUserObj, modelQueries).then(async (fetchedUser) => {
     if (!fetchedUser) {
       throw new DatabaseRecordNotFoundError();
     }
-    console.log(JSON.stringify(fetchedUser), password, confirmPassword);
+    if (get(input, 'password') !== get(input, 'confirmPassword')) {
+      throw new PasswordMismatchError();
+    }
+    const { id, resetPasswordFromLink } = fetchedUser;
+    const updateObj = getUserPasswordObject(get(input, 'password'), true);
+    if (get(input, 'linkToken')) {
+      if (!resetPasswordFromLink) {
+        throw new ResetPasswordLinkExpired();
+      }
+      Object.assign(updateObj, {
+        resetPasswordFromLink: false,
+      });
+    }
     const modelMutations = new MutationController(typeName, authentication);
-    // const {
-    //     id, oldPassword, newPassword, password,
-    // } = params;
-    // const valid = bcrypt.compareSync(oldPassword, password);
-    // if (!valid) {
-    //     throw new PasswordMismatchError();
-    // }
-    // const searchObj = { id };
-    // const hashedNewPwd = bcrypt.hashSync(newPassword, authParams.SALT);
-    // const updateObj = { password: hashedNewPwd, isSetPassword: true };
-
-    // return resetPasswordAndLoginMutationPromise(
-    //     searchObj,
-    //     updateObj,
-    //     modelMutations,
-    // ).then((user) => user)
-    //     .catch((err) => err);
+    const searchObj = { id };
+    return resetPasswordAndLoginMutationPromise(
+      searchObj,
+      updateObj,
+      modelMutations,
+    ).then(() => {
+      const data = createUserTokenTypeData(fetchedUser, authentication);
+      return data;
+    })
+      .catch((err) => err);
   });
 }
