@@ -4,6 +4,9 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
+import getPostDemoSalesReportUrl from '../../resolvers/mutation/pdf/uploadCertificates/postDemoSalesReport';
+
+const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
 
 const generateCertificate = async (id, regenerateCertificate, eventId, date) => {
   const query = `
@@ -30,8 +33,8 @@ const userCoursesQuery = (userId, courseId) => `
 {
   userCourses(filter:{
     and:[
-    {user_some: {id: ${userId}}}
-      {courses_some: {id: ${courseId}}}
+    {user_some: {id: "${userId}"}}
+      {courses_some: {id: "${courseId}"}}
     ]
   }){
     id
@@ -71,6 +74,7 @@ const userQuery = (userId) => `
       parents{
         user{
           name
+          email
           phone{
             number
             countryCode
@@ -95,6 +99,18 @@ const eventsQuery = () => `
 }
 `;
 
+const iqaReportQuery = (userId) => `
+{
+  iqaReports(filter: {
+    and: [
+      {user_some: {id: "${userId}"}}
+    ]
+  }){
+    id
+  }
+}
+`;
+
 const addEventMutation = () => `
 mutation{
   addEvent(input:{
@@ -106,6 +122,8 @@ mutation{
 }
 `;
 
+const slugifyID = (ID) => (ID ? ID.toString().trim().toUpperCase().replace(/\w{5}(?=.)/g, '$&-') : '');
+
 const sendDemoCompletionCertificate = async (userId, courseId) => {
   // first create an event corresponding to demo completion if not already created else fethc the created event id
   const events = get(await callLocalGraphqlApi(eventsQuery()), 'data.events', []);
@@ -115,30 +133,35 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
   } else {
     eventId = get(await callLocalGraphqlApi(addEventMutation()), 'data.addEvent.id');
   }
+  let hasGivenIqaTest = false;
   const certificateDetails = await generateCertificate(userId, false, eventId);
+  const certificateId = get(certificateDetails, 'id');
   // check if iqa report is generated to send that also
-  const { id: certificateId, certificateLink } = `${process.env.TEKIE_WEB_URL}/${get(certificateDetails, 'tekieUrl')}`;
-
-  const user = await get(callLocalGraphqlApi(userQuery(userId)), 'data.user');
+  const user = get(await callLocalGraphqlApi(userQuery(userId)), 'data.user');
   const childName = get(user, 'name', '');
   const parentName = get(user, 'studentProfile.parents[0].user.name', '');
-  const parentPhone = get(user, 'studentProfile.parents[0].user.phone.countryCode', '+91').substring(1) + get(user, 'studentProfile.parents[0].user.phone.number');
+  const parentPhone = get(user, 'studentProfile.parents[0].user.phone.countryCode', '+91').split('+')[1] + get(user, 'studentProfile.parents[0].user.phone.number');
   let iqaReportId = '';
+  const parentEmail = get(user, 'studentProfile.parents[0].user.email');
+
   // check if the iqa report is already present for the given user, then link it to the userCourse else we don't
   const iqaReports = await get(callLocalGraphqlApi(iqaReportQuery(userId)), 'data.iqaReports', []);
   if (iqaReports && iqaReports.length) {
+    hasGivenIqaTest = true;
     iqaReportId = get(iqaReports, '[0].id');
   }
   // check if the userCourse exists, if it does, then update it with the given demo certificate, else we just add the userCourse and the demoCompletion certificate with it
   const userCourses = get(await callLocalGraphqlApi(userCoursesQuery(userId, courseId)), 'data.userCourses', []);
+  let userCourseId = '';
   if (userCourses && userCourses.length) {
-    const userCourseId = get(userCourses, '[0].id');
+    userCourseId = get(userCourses, '[0].id');
     await callLocalGraphqlApi(updateUserCourseQuery(userCourseId, certificateId, iqaReportId));
     log('Updated user course with demo completion certificate');
   } else {
-    await callLocalGraphqlApi(addUserCourseQuery(userId, courseId, certificateId, iqaReportId));
+    userCourseId = get(await callLocalGraphqlApi(addUserCourseQuery(userId, courseId, certificateId, iqaReportId)), 'data.addUserCourse.id');
     log('Added user course with demo completion certificate');
   }
+  const certificateLink = `${process.env.TEKIE_WEB_URL}/iqa-report/${slugifyID(userCourseId)}`;
 
   // wati send
   const parameters = [
@@ -146,18 +169,23 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
     { name: 'student_name', value: childName },
     { name: 'iqa_report_snapshot_link', value: certificateLink },
   ];
-  const bookTemplate = 'iqa_report_snapshot_and_certificate';
+  const bookTemplate = hasGivenIqaTest ? 'iqa_report_snapshot_and_certificate' : 'iqa_report_only_certificate';
   // email send
+  const emailTo = [`${parentEmail}`];
   const ccEmail = '';
   const bccEmail = '';
   const subject = 'Tekie - Demo Completion Certificate';
-  const text = `Congratulations ${parentName}!
-Our Academic experts found ${childName}'s performance at the IQ assessment extraordinary and have created a personalized report for you.
+  const html = hasGivenIqaTest ? `Congratulations ${capitalize(parentName)}!
+Our Academic experts found ${capitalize(childName)}'s performance at the IQ assessment extraordinary and have created a personalized report for you.
+You can download their certificate here : ${certificateLink}` : `Congratulations ${capitalize(parentName)}!
+Our Computer Science Expert found ${capitalize(childName)}'s performance during the session extraordinary and shared a personalized certificate for you.
 You can download their certificate here : ${certificateLink}
 `;
-  getEmailObject(emailTo, ccEmail, bccEmail, subject, text);
+  const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
   sendEmail(emailMsgObject);
-  sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
+  await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
+  // send the post demo pre/post test report to leadsquared
+  getPostDemoSalesReportUrl(userId);
   return true;
 };
 

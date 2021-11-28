@@ -68,7 +68,9 @@ const getPostDemoSalesReportUrl = async (userId) => {
   const mentorNote = 'The child was very enthusiastic in the class.';
   const mentorName = 'Kavita Naresh';
 
-  if ((iqaReports && iqaReports.length) || true) {
+  // fetch sales operation
+
+  if ((iqaReports && iqaReports.length)) {
     url = `${process.env.FILE_BASE_URL}/python/course/postDemoPostTest.pdf`;
     existingPdfBytes = await fetch(url).then((res) => res.buffer());
     // Load a PDFDocument from the existing PDF bytes
@@ -519,12 +521,9 @@ const getPostDemoSalesReportUrl = async (userId) => {
 
   // send the newly generated url as lead capture
   updateLeadSquared({
-    Phone: '919972181832',
-    mx_IQA_Test_Report: fetchedUrl,
-  }, false, {
-    ActivityEvent: 103,
-    Fields: [],
-  });
+    Phone: '9972181832',
+    mx_IQA_Test_Report: `${process.env.FILE_BASE_URL}/${fetchedUrl}`,
+  }, false);
 
   return fetchedUrl;
 };

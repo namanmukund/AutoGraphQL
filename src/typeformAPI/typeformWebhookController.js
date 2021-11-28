@@ -6,6 +6,9 @@ import getCountryCodeAndNumber from '../autoGenerate/graphql/validation/getCount
 import getHashDigest from './typeform-utils/getHashDigest';
 import EVENTS from './typeform-utils/eventConstants';
 import updateLeadSquared from '../../services/leadsquared/updateLeadSquared';
+import sendEmail from '../../services/email/utils/sendEmail';
+import getEmailObject from '../../services/email/utils/getEmailObject';
+import sendWhatsAppTemplateMessage from '../autoGenerate/utils/sendWhatsAppTemplateMessage';
 
 const getEventId = (formId) => {
   let eventId = '';
@@ -252,11 +255,14 @@ const usersData = async (studentDetailsObject, formId, doGenerateCertificate) =>
 const addIqaReport = async (studentDetailsObject) => {
   let filter = '';
   const {
-    parentPhone: { number = '' },
+    parentPhone: { number = '', countryCode = '+91' },
     iqaRank,
     globalRank,
     iqaScore,
     maximumScore,
+    parentName,
+    childName,
+    parentEmail,
   } = studentDetailsObject;
   if (number) {
     filter = `{
@@ -295,9 +301,10 @@ const addIqaReport = async (studentDetailsObject) => {
       }`;
       const users = get(await callLocalGraphqlApi(usersQuery), 'data.users', []);
       if (users && users.length) {
+        const userId = get(users, '[0].id');
         const addIqaReportMutation = `mutation{
         addIqaReport(
-          userConnectId:"${get(users, '[0].id')}"
+          userConnectId:"${userId}"
           input:{
           phone:{
               countryCode:"${get(users, '[0].phone.countryCode')}"
@@ -313,13 +320,118 @@ const addIqaReport = async (studentDetailsObject) => {
         }
       }
       `;
+        const updateIqaReportMutation = (iqaReportId, tekieUrl) => `mutation{
+        updateIqaReport(id:"${iqaReportId}",
+        input:{
+          tekieUrl:"${tekieUrl}"
+        }){
+          id
+        }
+      }
+      `;
+        const userCourseQuery = `{
+        userCourses(filter:{
+          user_some: {id: "${userId}"}
+        }){
+          id
+          demoCompletion{
+            id
+          }
+        }
+      }
+      `;
+        const addUserCourse = (iqaReportId) => `mutation{
+          addUserCourse(
+            userConnectId: "${userId}"
+            iqaReportConnectIds: ["${iqaReportId}"]
+            input:{}
+          ){
+            id
+          }
+        }
+      `;
+        const updateUserCourse = (userCourseId, iqaReportId) => `mutation{
+        updateUserCourse(id: "${userCourseId}",
+        iqaReportConnectIds: ["${iqaReportId}"]
+        input:{}){
+          id
+        }
+      }
+      `;
+        const eventsQuery = () => `
+        {
+          events(filter:{
+            and: [
+              {eventType:userAchievement}
+              {eventName:iqaReport}
+            ]
+          }){
+            id
+          }
+        }
+        `;
+        const addEventMutation = () => `
+        mutation{
+          addEvent(input:{
+            eventType: userAchievement
+            eventName: iqaReport
+          }){
+            id
+          }
+        }
+        `;
+        const slugifyID = (ID) => (ID ? ID.toString().trim().toUpperCase().replace(/\w{5}(?=.)/g, '$&-') : '');
+        const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
         try {
-          await callLocalGraphqlApi(addIqaReportMutation);
+          const iqaReportId = get(await callLocalGraphqlApi(addIqaReportMutation), 'data.addIqaReport.id');
+          const userCourses = get(await callLocalGraphqlApi(userCourseQuery), 'data.userCourses', []);
+          let userCourseId = '';
+          let isDemoCompleted = false;
+          // if userCourse is found, then we add the user
+          if (userCourses && userCourses.length) {
+            if (get(userCourses, '[0].demoCompletion.id')) {
+              isDemoCompleted = true;
+            }
+            userCourseId = get(userCourses, '[0].id');
+            await callLocalGraphqlApi(updateUserCourse(userCourseId, iqaReportId));
+          } else {
+            userCourseId = get(await callLocalGraphqlApi(addUserCourse(iqaReportId)), 'data.addUserCourse.id');
+          }
+          const events = get(await callLocalGraphqlApi(eventsQuery()), 'data.events', []);
+          let eventId = '';
+          if (events && events.length) {
+            eventId = get(events, '[0].id');
+          } else {
+            eventId = get(await callLocalGraphqlApi(addEventMutation()), 'data.addEvent.id');
+          }
           // create a iqa report
-          const certificateDetails = await generateCertificate(userId, false, eventId, '');
-          const certificateLink = `${process.env.TEKIE_WEB_URL}/${get(certificateDetails, 'tekieUrl')}`;
+          await generateCertificate(userId, false, eventId, '');
+          const certificateLink = `${process.env.TEKIE_WEB_URL}/iqa-report/${slugifyID(userCourseId)}`;
+          // if the demo is completed, we have to ensure that the link is sent again
+          if (isDemoCompleted) {
+            // wati send
+            const parameters = [
+              { name: 'parent_name', value: parentName },
+              { name: 'student_name', value: childName },
+              { name: 'iqa_report_snapshot_link', value: certificateLink },
+            ];
+            const parentPhone = countryCode.split('+')[1] + number;
+            const bookTemplate = 'iqa_report_snapshot_and_certificate';
+            // email send
+            const emailTo = [`${parentEmail}`];
+            const ccEmail = '';
+            const bccEmail = '';
+            const subject = 'Tekie - IQA Report Certificate';
+            const html = `Congratulations ${capitalize(parentName)}!
+Our Academic experts found ${capitalize(childName)}'s performance at the IQ assessment extraordinary and have created a personalized report for you.
+You can download their certificate here : ${certificateLink}`;
+            const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
+            sendEmail(emailMsgObject);
+            sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
+          }
           log(`cert link ${certificateLink}`);
           // update iqaReport with new tekieUrl
+          await callLocalGraphqlApi(updateIqaReportMutation(iqaReportId, certificateLink));
         } catch (err) {
           log('Error while adding IQA Report');
         }
@@ -339,7 +451,6 @@ const typeformWebhookController = async (req, res) => {
     const answers = get(req, 'body.form_response.answers', []);
     const variables = get(req, 'body.form_response.variables', []);
     const formId = get(req, 'body.form_response.form_id', '');
-
     // Form - IQA test, Grade6 and above
     if (formId === 'weKBAxh5' || formId === 'l3s8cO8K') {
       // loop over fields and store details in object, then calculate score and create IQA report
@@ -357,9 +468,9 @@ const typeformWebhookController = async (req, res) => {
         const studentAnswer = answers.find((answer) => get(answer, 'field.ref') === ref);
         if (title === 'Child Name') studentDetailsObject.childName = get(studentAnswer, 'text');
         if (title === 'Parent Name') studentDetailsObject.parentName = get(studentAnswer, 'text');
-        if (title === 'Email ID') studentDetailsObject.parentEmail = get(studentAnswer, type);
+        if (title === 'Email ID' || title === 'Email ID ') studentDetailsObject.parentEmail = get(studentAnswer, type);
         if (title === 'Student Grade') studentDetailsObject.grade = `Grade${get(studentAnswer, 'choice.label')}`;
-        if (title === 'Phone number ') studentDetailsObject.parentPhone = getCountryCodeAndNumber(get(studentAnswer, type));
+        if (title === 'Phone number ' || title === 'Phone number') studentDetailsObject.parentPhone = getCountryCodeAndNumber(get(studentAnswer, type));
       }
       addIqaReport(studentDetailsObject);
     } else {

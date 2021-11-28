@@ -46,6 +46,7 @@ const UserCourse = `
         permissions:[
           { appName: "${TBA}" operations: "*" },
           { appName: "${TMS}" operations: "*" },
+          { appName: "${TWA}" operations: ${READ} },
           ], 
         rule: allow
       )
