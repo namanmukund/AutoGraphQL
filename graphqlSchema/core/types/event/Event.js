@@ -10,8 +10,9 @@ const Event = `
   type Event @model
   {
     eventType: EventType @defaultValue(value: "radioStreet")
+    eventName: EventName @defaultValue(value: "spySquadCamp")
     name: String @trim
-    date: Date!
+    date: Date
     time: Int
     eventAttendances: [EventAttendance] @relation(name:"EventAttendanceEvent")
   }

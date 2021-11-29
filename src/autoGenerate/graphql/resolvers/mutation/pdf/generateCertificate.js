@@ -9,14 +9,16 @@ import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors'
 import getSpySquadCampCertificateUrl from './uploadCertificates/spysquadcamp';
 import getCanvaEventCertificateUrl from './uploadCertificates/canvaEvent';
 import getStoryspreeCertificateUrl from './uploadCertificates/storyspree';
+import getDemoCompletionCertificateUrl from './uploadCertificates/demoCompletion';
 import getGenZEventCertificateUrl from './uploadCertificates/genzenvironment';
+import getIqaReportSnapshotUrl from './uploadCertificates/iqaReport';
 
 const fetchUser = (userId, eventId) => `
 {
   users(filter: {
     and: [
       {id: "${userId}"}
-      {eventAttandances_some: {event_some:{id: "${eventId}"}}}
+      ${eventId ? `{eventAttandances_some: {event_some:{id: "${eventId}"}}}` : ''}
     ]
   }){
     id
@@ -98,9 +100,14 @@ const generateCertificateMutationResolver = async (
   const { input } = params;
   // eventId to be passed here too in input
   const {
-    userId, regenerateCertificate, eventId, date,
+    userId, regenerateCertificate, eventId, date, isEventCertificate,
   } = input;
-  const userRes = await callLocalGraphqlApi(fetchUser(userId, eventId));
+  let userRes;
+  if (!isEventCertificate) {
+    userRes = await callLocalGraphqlApi(fetchUser(userId));
+  } else {
+    userRes = await callLocalGraphqlApi(fetchUser(userId, eventId));
+  }
   const users = get(userRes, 'data.users');
   // get eventCertificate based on event type
   const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(userId, eventId));
@@ -124,6 +131,7 @@ const generateCertificateMutationResolver = async (
     let fetchedUrl = '';
     let eventType = '';
     let eventName = '';
+    // the three ids here are the event.ids created in three environments (local, pre-prod, prod)
     switch (eventId) {
       case 'ckvdiavp70000igujfgxh8mt6':
       case 'ckve5izxq0000ucui47b89pmf':
@@ -152,6 +160,20 @@ const generateCertificateMutationResolver = async (
         fetchedUrl = await getStoryspreeCertificateUrl(userId, userName, formattedDate);
         eventType = 'communityEvent';
         eventName = 'storyspree';
+        break;
+      case 'ckwakpd7k0000erin7yizcfi1':
+      case 'ckwjwf4lm0000pgin7o9bbf1m':
+      case 'ckwjwiigq0000rninbsqialy2':
+        fetchedUrl = await getDemoCompletionCertificateUrl(userId, userName);
+        eventType = 'userAchievement';
+        eventName = 'demoCompletion';
+        break;
+      case 'ckwjl99kq0001i6in4ir2ez4z':
+      case 'ckwjwg75y0001pginazc277b9':
+      case 'ckwjwitwb0001rningq5ma1ei':
+        fetchedUrl = await getIqaReportSnapshotUrl(userId, userName);
+        eventType = 'userAchievement';
+        eventName = 'iqaReport';
         break;
       default:
         fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);

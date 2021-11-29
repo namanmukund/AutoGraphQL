@@ -9,6 +9,7 @@ import {
   MandatoryFieldNotSetError,
   InvalidToken,
   SomethingWentWrongError,
+  ResetPasswordLinkExpired,
 } from './auth';
 
 import {
@@ -299,4 +300,5 @@ export {
   SessionAlreadyAssigned,
   CanNotStartSessionWithoutMentorError,
   FileNameAlreadyExists,
+  ResetPasswordLinkExpired,
 };

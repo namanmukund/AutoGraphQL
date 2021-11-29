@@ -25,6 +25,7 @@ import { fetchCourseData, sessionStartedStreaksFlow, submittedForReviewStreaksFl
 import { log } from '../../../../utils';
 import getTopicInfo from './utils/getTopicInfo';
 import getCourseInfo from './utils/getCourseInfo';
+import sendDemoCompletionCertificate from './utils/sendDemoCompletionCertificate';
 
 const { postSales, demoWow } = auditType;
 // import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
@@ -237,6 +238,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     if (isPostSalesAuditFromInput && prevIsPostSalesAudit === false) {
       addSalesAudit({ mentorMenteeSessionId, auditType: postSales });
     }
+    const courseId = get(input, 'course.typeId', '');
 
     if (isDemoWowAuditFromInput && prevIsDemoWowAudit === false) {
       addSalesAudit({ mentorMenteeSessionId, auditType: demoWow });
@@ -252,13 +254,14 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
         get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.name'),
         get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.email'),
       );
+      // also generate the demo completion certificate and send the webpage link through comms
+      sendDemoCompletionCertificate(userId, courseId);
     }
     if (input && intersection(['hasRescheduled', 'sessionStatus', 'didNotPickTheCall', 'didNotTurnUpInSession', 'sessionNotConducted'], Object.keys(input)) && topic.order === 1) {
       updateMentorRescheduleLeadsquared(userInfo, input, params);
     }
 
     // update session log entry
-    const courseId = get(input, 'course.typeId', '');
     const clientId = get(userInfo, 'data.user.id', '');
     const topicId = topic && topic.id;
     const sessionStatus = get(input, 'sessionStatus');
