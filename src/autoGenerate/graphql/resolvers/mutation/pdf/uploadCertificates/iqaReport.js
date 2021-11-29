@@ -51,14 +51,51 @@ iqaReports(filter: {
   }
 }`;
 
+const salesOperationQuery = (userId) => `
+{
+  salesOperations(filter:{
+    client_some:{id:"${userId}"}
+  }){
+    client{
+      name
+      studentProfile{
+        parents{
+          user{
+            name
+            phone{
+              number
+            }
+          }
+        }
+      }
+    }
+    allottedMentor{
+      name
+      mentorProfile{
+        codingLanguages{
+          value
+        }
+        experienceYear
+        pythonCourseRating1
+      }
+    }
+  }
+}
+`;
+
 const getIqaReportSnapshotUrl = async (userId, userName) => {
   const iqaReports = get(await callLocalGraphqlApi(iqaReportQuery(userId)), 'data.iqaReports', []);
-  console.log(iqaReports);
   const url = `${process.env.FILE_BASE_URL}/python/course/iqaReportSnapshotCompressed.pdf`;
   const existingPdfBytes = await fetch(url).then((res) => res.buffer());
   // Load a PDFDocument from the existing PDF bytes
   const pdfDoc = await PDFDocument.load(existingPdfBytes);
   pdfDoc.registerFontkit(fontkit);
+
+  const salesOperations = get(await callLocalGraphqlApi(salesOperationQuery(userId)), 'data.salesOperations', []);
+  const mentorName = get(salesOperations, '[0].allottedMentor.name', '-');
+  const parentPhone = get(salesOperations, '[0].client.studentProfile.parents[0].user.phone.number');
+  const parentName = get(salesOperations, '[0].client.studentProfile.parents[0].user.name');
+  const experience = get(salesOperations, '[0].allottedMentor.mentorProfile.experienceYear', 2);
 
   // Get the first page of the document
   const pages = pdfDoc.getPages();
@@ -92,8 +129,8 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     color: rgb(0, 0.29, 0.678),
   });
 
-  firstPage.drawText(`Dear ${capitalize('Gokul Madhusudhan')},`, {
-    x: ((width - getStringWidth(`Dear ${capitalize('Gokul Madhusudhan')},`)) / 2) + 15,
+  firstPage.drawText(`Dear ${capitalize(parentName)},`, {
+    x: ((width - getStringWidth(`Dear ${capitalize(parentName)},`)) / 2) + 15,
     y: 1240,
     size: 16,
     font: NunitoBoldFont,
@@ -165,7 +202,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   });
 
   // experience in coding
-  firstPage.drawText(`${'3.5+ Years'}`, {
+  firstPage.drawText(`${experience}+ Years`, {
     x: 317,
     y: 660,
     size: 14,
@@ -192,8 +229,8 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   });
 
   // languages familiar with
-  firstPage.drawText(`${capitalize('Gokul Madhusudhan')}`, {
-    x: ((width - getStringWidth(`${capitalize('Gokul Madhusudhan')}`)) / 4) + 40,
+  firstPage.drawText(`${capitalize(mentorName)}`, {
+    x: ((width - getStringWidth(`${capitalize(mentorName)}`)) / 4) + 40,
     y: 557,
     size: 14,
     font: NunitoBoldFont,

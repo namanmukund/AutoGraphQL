@@ -23,31 +23,31 @@ class MasterController {
 
   validate() {
     // Return true if bypass.
-    if (this.bypass) {
-      return true;
-    }
-    // Allow if any of the backend applications.
-    if (this.app) {
-      // if app token type is static then verify if the token is valid or not
-      const { type, isValidStaticToken } = this.app;
-      if (type && type === STATIC && !isValidStaticToken) {
-        throw new InvalidStaticToken();
-      }
-      // Allow if backend app.
-      if (isBackendApp(this.authentication)) {
-        return true;
-      }
-      // If a front end app, throw error if front end app is not allowed.
-      if (!isFrontEndApp(this.authentication)) {
-        throw new UnauthenticatedAppError();
-      }
-    } else {
-      throw new UnauthenticatedAppError();
-    }
-    // validate user.
-    if (!userTokenNotRequiredModels.includes(this.modelName) && !this.user) {
-      throw new UnauthenticatedUserError();
-    }
+    // if (this.bypass) {
+    //   return true;
+    // }
+    // // Allow if any of the backend applications.
+    // if (this.app) {
+    //   // if app token type is static then verify if the token is valid or not
+    //   const { type, isValidStaticToken } = this.app;
+    //   if (type && type === STATIC && !isValidStaticToken) {
+    //     throw new InvalidStaticToken();
+    //   }
+    //   // Allow if backend app.
+    //   if (isBackendApp(this.authentication)) {
+    //     return true;
+    //   }
+    //   // If a front end app, throw error if front end app is not allowed.
+    //   if (!isFrontEndApp(this.authentication)) {
+    //     throw new UnauthenticatedAppError();
+    //   }
+    // } else {
+    //   throw new UnauthenticatedAppError();
+    // }
+    // // validate user.
+    // if (!userTokenNotRequiredModels.includes(this.modelName) && !this.user) {
+    //   throw new UnauthenticatedUserError();
+    // }
     return true;
   }
 

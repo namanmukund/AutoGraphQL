@@ -22,6 +22,7 @@ const HomeworkStreaksType = `
 
 const UserCourse = `
   type UserCourse @model
+  @userToken(isRequired:"false")
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },

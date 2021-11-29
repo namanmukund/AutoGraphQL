@@ -320,10 +320,10 @@ const addIqaReport = async (studentDetailsObject) => {
         }
       }
       `;
-        const updateIqaReportMutation = (iqaReportId, tekieUrl) => `mutation{
+        const updateIqaReportMutation = (iqaReportId, assetUrl) => `mutation{
         updateIqaReport(id:"${iqaReportId}",
         input:{
-          tekieUrl:"${tekieUrl}"
+          assetUrl:"${assetUrl}"
         }){
           id
         }
@@ -405,7 +405,8 @@ const addIqaReport = async (studentDetailsObject) => {
             eventId = get(await callLocalGraphqlApi(addEventMutation()), 'data.addEvent.id');
           }
           // create a iqa report
-          await generateCertificate(userId, false, eventId, '');
+          const generateCertRes = await generateCertificate(userId, false, eventId, '');
+          const assetUrl = get(generateCertRes, 'assetUrl');
           const certificateLink = `${process.env.TEKIE_WEB_URL}/iqa-report/${slugifyID(userCourseId)}`;
           // if the demo is completed, we have to ensure that the link is sent again
           if (isDemoCompleted) {
@@ -431,7 +432,7 @@ You can download their certificate here : ${certificateLink}`;
           }
           log(`cert link ${certificateLink}`);
           // update iqaReport with new tekieUrl
-          await callLocalGraphqlApi(updateIqaReportMutation(iqaReportId, certificateLink));
+          await callLocalGraphqlApi(updateIqaReportMutation(iqaReportId, assetUrl));
         } catch (err) {
           log('Error while adding IQA Report');
         }
