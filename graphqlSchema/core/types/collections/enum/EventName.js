@@ -3,6 +3,8 @@ const EventName = `
     spySquadCamp
     canvaMasterclass
     storyspree
+    demoCompletion
+    iqaReport
     genZEnvironment
   }`;
 

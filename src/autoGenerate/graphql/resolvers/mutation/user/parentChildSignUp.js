@@ -12,7 +12,9 @@ import { generateCuid, getRandomNumber, log } from '../../../../../../utils';
 import { MutationController, QueryController } from '../../../controllers';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import generateInviteCode from '../../../../../../utils/generateInviteCode';
-import { backendApps, rangeOTP, REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
+import {
+  backendApps, rangeOTP, REGISTRATION_BASE_CREDIT, TMS,
+} from '../../../../../../constants';
 import addUserCredit from './utils/addUserCredit';
 import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
@@ -88,6 +90,7 @@ const parentChildSignUpMutationResolver = async (
 
   const currentUser = authentication && authentication.user;
   const isBackendApp = backendApps.includes(get(authentication, 'app.name'));
+  const istmsApp = get(authentication, 'app.name') === TMS;
 
   if (!isBackendApp && currentUser && currentUser) {
     throw new UserTokenNotRequiredError();
@@ -173,7 +176,7 @@ const parentChildSignUpMutationResolver = async (
     }
 
     // set parent password
-    if (isBackendApp && parentPassword) {
+    if ((isBackendApp || istmsApp) && parentPassword) {
       const passwordObj = getUserPasswordObject(parentPassword, true);
       Object.assign(parentData, passwordObj);
     }

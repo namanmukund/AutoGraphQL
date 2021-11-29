@@ -46,7 +46,18 @@ const UserCourse = `
         permissions:[
           { appName: "${TBA}" operations: "*" },
           { appName: "${TMS}" operations: "*" },
+          { appName: "${TWA}" operations: ${READ} },
           ], 
+        rule: allow
+      )
+    iqaReport: [IqaReport] @relation(name: "IqaReportUserCourse", direction: "OneWay")
+    demoCompletion: [EventCertificate] @relation(name: "DemoCompletionEventCertificate", direction: "OneWay")
+    @appPermissions(
+        permissions:[
+          { appName: "${TMS}" operations: "*" },
+          { appName: "${TLA}" operations: "*" },
+          { appName: "${TWA}" operations: ${READ} },
+          ],
         rule: allow
       )
     homeworkStreaks: [HomeworkStreaks]
