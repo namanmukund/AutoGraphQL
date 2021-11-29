@@ -15,7 +15,7 @@ const generateCertificate = async (id, regenerateCertificate, eventId, date) => 
         userId:"${id}"
         regenerateCertificate:${regenerateCertificate ? 'true' : 'false'}
         isEventCertificate: false
-        ${eventId ? `date: "${eventId}"` : ''}
+        ${eventId ? `eventId: "${eventId}"` : ''}
         ${date ? `date: "${date}"` : ''}
       })
       {
@@ -134,7 +134,7 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
     eventId = get(await callLocalGraphqlApi(addEventMutation()), 'data.addEvent.id');
   }
   let hasGivenIqaTest = false;
-  const certificateDetails = await generateCertificate(userId, false, eventId);
+  const certificateDetails = await generateCertificate(userId, true, eventId);
   const certificateId = get(certificateDetails, 'id');
   // check if iqa report is generated to send that also
   const user = get(await callLocalGraphqlApi(userQuery(userId)), 'data.user');
@@ -172,6 +172,7 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
   const bookTemplate = hasGivenIqaTest ? 'iqa_report_snapshot_and_certificate' : 'iqa_report_only_certificate';
   // email send
   const emailTo = [`${parentEmail}`];
+  // const emailTo = ['gokul.madhusudhan@tekie.in'];
   const ccEmail = '';
   const bccEmail = '';
   const subject = 'Tekie - Demo Completion Certificate';

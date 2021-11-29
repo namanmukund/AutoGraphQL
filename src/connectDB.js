@@ -2,7 +2,6 @@ import { log, dbConfig } from '../utils';
 import db from './db';
 import createScheduler from '../utils/createScheduler';
 import reRunJobsFromDB from '../utils/scheduleJobs/reRunJobsFromDB';
-import sendDemoCompletionCertificate from './autoGenerate/graphql/postHookFunctions/utils/sendDemoCompletionCertificate';
 
 let dbReconnectCount = 1;
 db.on('error', (err) => {
@@ -21,7 +20,6 @@ db.on('error', (err) => {
   log('MongoDB disconnected!');
 }).once('open', async () => {
   log('Connected to DB.');
-  // sendDemoCompletionCertificate('ckwex07n800003jinddynfed1', 'cjs8skrd200041huzz78kncz5');
   if (
     process.env.NODE_ENV === 'production'
     && process.env.IS_SCHEDULER_INSTANCE
