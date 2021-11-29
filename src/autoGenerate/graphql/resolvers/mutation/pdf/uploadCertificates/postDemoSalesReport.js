@@ -54,6 +54,44 @@ iqaReports(filter: {
   }
 }`;
 
+const salesOperationQuery = (userId) => `
+{
+  salesOperations(filter:{
+    client_some:{id:"${userId}"}
+  }){
+    client{
+      name
+      studentProfile{
+        parents{
+          user{
+            name
+            phone{
+              number
+            }
+          }
+        }
+      }
+    }
+    criticalThinking
+    logicalThinking
+    communicationSkills
+    problemSolvingAbility
+    creativeSkills
+    studentNote
+    allottedMentor{
+      name
+      mentorProfile{
+        codingLanguages{
+          value
+        }
+        experienceYear
+        pythonCourseRating1
+      }
+    }
+  }
+}
+`;
+
 const getPostDemoSalesReportUrl = async (userId) => {
   const iqaReports = get(await callLocalGraphqlApi(iqaReportQuery(userId)), 'data.iqaReports', []);
   let url = '';
@@ -65,10 +103,13 @@ const getPostDemoSalesReportUrl = async (userId) => {
   const shuffledTags = tagsArray.sort(() => 0.5 - Math.random());
   const selectedTags = shuffledTags.slice(0, 3);
 
-  const mentorNote = 'The child was very enthusiastic in the class.';
-  const mentorName = 'Kavita Naresh';
-
-  // fetch sales operation
+  const salesOperations = get(await callLocalGraphqlApi(salesOperationQuery(userId)), 'data.salesOperations', []);
+  const mentorNote = get(salesOperations, '[0].studentNote', 'The class was interesting and fun to teach!');
+  const mentorName = get(salesOperations, '[0].allottedMentor.name', '-');
+  const parentPhone = get(salesOperations, '[0].client.studentProfile.parents[0].user.phone.number');
+  const parentName = get(salesOperations, '[0].client.studentProfile.parents[0].user.name');
+  const studentName = get(salesOperations, '[0].client.name');
+  const experience = get(salesOperations, '[0].allottedMentor.mentorProfile.experienceYear', 2);
 
   if ((iqaReports && iqaReports.length)) {
     url = `${process.env.FILE_BASE_URL}/python/course/postDemoPostTest.pdf`;
@@ -88,7 +129,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     const NunitoBoldfontBytes = await fetch(NUNITO_BOLD_FONT_URL).then((res) => res.buffer());
     const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
 
-    const dialImageBytes = await fetch(getDialUrl(get(iqaReports, '[0].iqaScoree', 70))).then((res) => res.buffer());
+    const dialImageBytes = await fetch(getDialUrl(get(iqaReports, '[0].iqaScore', 70))).then((res) => res.buffer());
 
     const dialImage = await pdfDoc.embedPng(dialImageBytes);
     const dialDims = dialImage.scale(1);
@@ -120,7 +161,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     /*
       FIRST PAGE
     */
-    firstPage.drawText(`${'Parent Name'},`, {
+    firstPage.drawText(`${parentName},`, {
       x: 100,
       y: 678,
       size: 15,
@@ -128,7 +169,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
       color: rgb(0, 0.29, 0.678),
     });
 
-    firstPage.drawText(`${'Student Name'}.`, {
+    firstPage.drawText(`${studentName}.`, {
       x: 170,
       y: 623,
       size: 15,
@@ -204,7 +245,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     });
 
     // experience in coding
-    secondPage.drawText(`${'3.5+ Years'}`, {
+    secondPage.drawText(`${experience}+ Years`, {
       x: 317,
       y: 360,
       size: 14,
@@ -231,8 +272,8 @@ const getPostDemoSalesReportUrl = async (userId) => {
     });
 
     // languages familiar with
-    secondPage.drawText(`${capitalize('Gokul Madhusudhan')}`, {
-      x: ((width - getStringWidth(`${capitalize('Gokul Madhusudhan')}`)) / 4) + 40,
+    secondPage.drawText(`${capitalize(mentorName)}`, {
+      x: ((width - getStringWidth(`${capitalize(mentorName)}`)) / 4) + 40,
       y: 257,
       size: 14,
       font: NunitoBoldFont,
@@ -389,7 +430,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     /*
       FIRST PAGE
     */
-    firstPage.drawText(`${'Parent Name'},`, {
+    firstPage.drawText(`${parentName},`, {
       x: 100,
       y: 678,
       size: 15,
@@ -397,7 +438,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
       color: rgb(0, 0.29, 0.678),
     });
 
-    firstPage.drawText(`${'Student Name'}.`, {
+    firstPage.drawText(`${studentName}.`, {
       x: 170,
       y: 623,
       size: 15,
@@ -521,7 +562,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
 
   // send the newly generated url as lead capture
   updateLeadSquared({
-    Phone: '9972181832',
+    Phone: parentPhone,
     mx_IQA_Test_Report: `${process.env.FILE_BASE_URL}/${fetchedUrl}`,
   }, false);
 
