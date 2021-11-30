@@ -91,7 +91,7 @@ const updateUserValidation = async (params, context) => {
     if (!allowedRoles.includes(currentUserRole)) {
       throw new InsufficientPermissionError();
     }
-    const passwordObj = getUserPasswordObject(password, false);
+    const passwordObj = getUserPasswordObject(password, true);
     Object.assign(userObj, passwordObj);
   }
 
