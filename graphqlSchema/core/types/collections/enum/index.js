@@ -102,6 +102,7 @@ import Platform from './Platform';
 import StudentNoteForIQ from './StudentNoteForIQ';
 import LeadPartnerType from './LeadPartnerType';
 import BlockBasedProjectLayout from './BlockBasedProjectLayout';
+import IQATag from './IQATag';
 
 export default [
   Status,
@@ -209,4 +210,5 @@ export default [
   StudentNoteForIQ,
   LeadPartnerType,
   BlockBasedProjectLayout,
+  IQATag,
 ];
