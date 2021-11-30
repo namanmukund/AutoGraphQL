@@ -390,6 +390,8 @@ const studentNoteForIQ = {
   problemSolvingAndCreativeThinkingSkill: 'The student was really curious and filled with tons of energy also, had good problem-solving skills and creative thinking. Amazing kid!',
 };
 
+const iqaTags = ['ambitious', 'energetic', 'curious', 'quickLearner', 'focused', 'determined'];
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export const MENTOR_REPORT_COUNTRY = 'india';
@@ -580,4 +582,5 @@ export {
   MASTER_OTP,
   courseToGradeMapping,
   courseToGradeMappingForStaging,
+  iqaTags,
 };
