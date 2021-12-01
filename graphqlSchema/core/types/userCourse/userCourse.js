@@ -34,6 +34,7 @@ const UserCourse = `
   )
   {
     courses: [Course] @relation(name: "CourseUserCourse", direction: "OneWay")
+      @userToken(isRequired:"false")
       @appPermissions(
         permissions:[
           { appName: "${TMS}" operations: "*" },
@@ -43,6 +44,7 @@ const UserCourse = `
         rule: allow
       )
     user: User! @relation(name: "UserCourseUser", direction: "OneWay")
+      @userToken(isRequired:"false")
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
@@ -51,8 +53,8 @@ const UserCourse = `
           ], 
         rule: allow
       )
-    iqaReport: [IqaReport] @relation(name: "IqaReportUserCourse", direction: "OneWay")
-    demoCompletion: [EventCertificate] @relation(name: "DemoCompletionEventCertificate", direction: "OneWay")
+    iqaReport: [IqaReport] @userToken(isRequired:"false") @relation(name: "IqaReportUserCourse", direction: "OneWay")
+    demoCompletion: [EventCertificate] @relation(name: "DemoCompletionEventCertificate", direction: "OneWay") @userToken(isRequired:"false")
     @appPermissions(
         permissions:[
           { appName: "${TMS}" operations: "*" },
