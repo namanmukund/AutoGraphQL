@@ -539,7 +539,6 @@ const typeformWebhookController = async (req, res) => {
       const counsellingDate = moment(new Date(`${studentDetailsObject.preferredDate} ${studentDetailsObject.preferredTime}`))
         .format('YYYY-MM-DD HH:mm:ss');
       const parentPhone = `${get(hidden, 'phone_number').trim()}`;
-      console.log(parentPhone);
       updateLeadSquared({
         Phone: parentPhone,
       }, false, {

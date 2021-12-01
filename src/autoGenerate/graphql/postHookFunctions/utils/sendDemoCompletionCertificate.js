@@ -29,12 +29,11 @@ const generateCertificate = async (id, regenerateCertificate, eventId, date) => 
   return get(res, 'data.generateCertificate', {});
 };
 
-const userCoursesQuery = (userId, courseId) => `
+const userCoursesQuery = (userId) => `
 {
   userCourses(filter:{
     and:[
     {user_some: {id: "${userId}"}}
-      {courses_some: {id: "${courseId}"}}
     ]
   }){
     id
@@ -151,7 +150,7 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
     iqaReportId = get(iqaReports, '[0].id');
   }
   // check if the userCourse exists, if it does, then update it with the given demo certificate, else we just add the userCourse and the demoCompletion certificate with it
-  const userCourses = get(await callLocalGraphqlApi(userCoursesQuery(userId, courseId)), 'data.userCourses', []);
+  const userCourses = get(await callLocalGraphqlApi(userCoursesQuery(userId)), 'data.userCourses', []);
   let userCourseId = '';
   if (userCourses && userCourses.length) {
     userCourseId = get(userCourses, '[0].id');
