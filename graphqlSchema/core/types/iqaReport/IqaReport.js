@@ -5,6 +5,7 @@ import { READ } from '../../../../constants/graphqlOperations';
 
 const IqaReport = `
   type IqaReport @model
+  @userToken(isRequired:"false")
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },

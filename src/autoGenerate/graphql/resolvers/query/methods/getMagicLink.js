@@ -7,6 +7,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 import getTokenForLoginLink from '../../utils/getTokenForLoginLink';
+import { TMS } from '../../../../../../constants';
 
 const fetchUserDetails = async (queryFilter) => {
   const query = `{
@@ -63,7 +64,7 @@ const generateAndReturnToken = (user, addMagicLinkLogQuery = '', index, {
 const getMagicLink = (async (root, params, context) => {
   const {
     input: {
-      schoolId, grade, section, userId, email, phone, expiresIn = coreAuthParams.DEFAULT_EXPIRY_TOKEN_TIME_IN_HOUR,
+      schoolId, grade, section, userId, email, phone, expiresIn,
       linkVisitLimit = 2,
     },
   } = params;
@@ -74,6 +75,11 @@ const getMagicLink = (async (root, params, context) => {
     userIdFromContext,
   } = userAndAppInfo;
   const tokens = [];
+  let expiresInValue = expiresIn;
+  if (!expiresIn) {
+    if (appName === TMS) expiresInValue = coreAuthParams.DEFAULT_EXPIRY_TOKEN_TIME_IN_HOUR;
+    else expiresInValue = coreAuthParams.DEFAULT_EXPIRY_TOKEN_TIME_IN_HOUR_FOR_WEB;
+  }
   let fetchQueryFilter = '';
   if (schoolId || grade || section) {
     if (schoolId) fetchQueryFilter += `{ school_some: { id: "${schoolId}" } }`;
@@ -107,13 +113,13 @@ const getMagicLink = (async (root, params, context) => {
       studentDetails.forEach((student, index) => {
         const { user } = student;
         const {
-          expiresIn: expiresInValue, linkToken, linkUri, addMagicLinkLogQuery: addLogQuery,
+          expiresIn: expiryValue, linkToken, linkUri, addMagicLinkLogQuery: addLogQuery,
         } = generateAndReturnToken(user, '', index, {
-          appName, grade, section, userIdFromContext, schoolId, expiresIn, linkVisitLimit,
+          appName, grade, section, userIdFromContext, schoolId, expiresIn: expiresInValue, linkVisitLimit,
         });
         tokens.push({
           linkToken,
-          expiresIn: expiresInValue,
+          expiresIn: expiryValue,
           linkUri,
         });
         addMagicLinkLogQuery += addLogQuery;

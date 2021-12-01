@@ -2,8 +2,12 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-confusing-arrow */
 
-import { PDFDocument, rgb } from 'pdf-lib';
+import {
+  PDFDocument, PDFName, PDFString,
+  rgb,
+} from 'pdf-lib';
 import * as fs from 'fs';
+import moment from 'moment';
 import fontkit from '@pdf-lib/fontkit';
 import mkdirp from 'mkdirp';
 import { get } from 'lodash';
@@ -16,9 +20,43 @@ const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).rep
 
 const slugifyID = (ID) => ID ? ID.toString().trim().toUpperCase().replace(/\w{5}(?=.)/g, '$&-') : '';
 
-const round5 = (x) => Math.round(x / 5) * 5;
+const round = (score) => {
+  if (score < 75) {
+    return 70;
+  } if (score < 85) {
+    return 80;
+  } if (score < 100) {
+    return 90;
+  }
+  return 100;
+};
 
-const getDialUrl = (score) => `${process.env.FILE_BASE_URL}/python/course/iqaScores/score${round5(score)}.png`;
+const getDialParams = (score) => {
+  const dialOffset = {
+    score70: {
+      x: -2,
+      y: -5,
+    },
+    score80: {
+      x: -4,
+      y: -7,
+    },
+    score90: {
+      x: -4,
+      y: -7,
+    },
+    score100: {
+      x: -4,
+      y: -7,
+    },
+  };
+  const roundedScore = round(score);
+  return {
+    dialX: dialOffset[`score${roundedScore}`].x,
+    dialY: dialOffset[`score${roundedScore}`].y,
+    dialUrl: `${process.env.FILE_BASE_URL}/python/course/iqaScores/score${roundedScore}.png`,
+  };
+};
 
 const getMentorRatingStars = (rating) => `${process.env.FILE_BASE_URL}/python/course/mentorRatings/${rating}star.png`;
 
@@ -31,7 +69,7 @@ iqaReports(filter: {
       }
     }
   ]
-} ){
+}, orderBy:createdAt_DESC){
     id
     iqaRank
     iqaScore
@@ -41,9 +79,13 @@ iqaReports(filter: {
       id
       name
       studentProfile{
+        grade
         parents{
           user{
             name
+            phone{
+              number
+            }
           }
         }
       }
@@ -51,14 +93,52 @@ iqaReports(filter: {
   }
 }`;
 
+const mentorMenteeSessionsQuery = (userId) => `
+{
+  mentorMenteeSessions(filter:{
+    and:[
+      {menteeSession_some:{
+        user_some:{id: "${userId}"}
+      }}
+      {topic_some:{order: 1}}
+    ]
+  }){
+    mentorSession{
+      user{
+        id
+        name
+        profilePic{
+          uri
+        }
+        mentorProfile{
+          codingLanguages{
+          value
+        }
+        experienceYear
+        pythonCourseRating1
+        }
+      }
+    }
+  }
+}
+`;
+
 const getIqaReportSnapshotUrl = async (userId, userName) => {
   const iqaReports = get(await callLocalGraphqlApi(iqaReportQuery(userId)), 'data.iqaReports', []);
-  console.log(iqaReports);
-  const url = `${process.env.FILE_BASE_URL}/python/course/iqaReportSnapshotCompressed.pdf`;
+  const url = `${process.env.FILE_BASE_URL}/python/course/iqaReportCompressed.pdf`;
   const existingPdfBytes = await fetch(url).then((res) => res.buffer());
   // Load a PDFDocument from the existing PDF bytes
   const pdfDoc = await PDFDocument.load(existingPdfBytes);
   pdfDoc.registerFontkit(fontkit);
+
+  const mentorMenteeSessions = get(await callLocalGraphqlApi(mentorMenteeSessionsQuery(userId)), 'data.mentorMenteeSessions', []);
+  const mentorName = get(mentorMenteeSessions, '[0].mentorSession.user.name', '-');
+  const mentorPicUri = get(mentorMenteeSessions, '[0].mentorSession.user.profilePic.uri', 'python/course/mentorAvatar.png');
+  const parentPhone = get(iqaReports, '[0].user.studentProfile.parents[0].user.phone.number', 'xxxxxx');
+  const grade = get(iqaReports, '[0].user.studentProfile.grade', 'xx');
+  const parentName = get(iqaReports, '[0].user.studentProfile.parents[0].user.name', '-');
+  const experience = get(mentorMenteeSessions, '[0].mentorSession.user.experienceYear', 2);
+  const mentorRating = get(mentorMenteeSessions, '[0].mentorSession.user.pythonCourseRating1', 5);
 
   // Get the first page of the document
   const pages = pdfDoc.getPages();
@@ -74,12 +154,19 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
 
   const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
 
-  const dialImageBytes = await fetch(getDialUrl(get(iqaReports, '[0].iqaScoree', 70))).then((res) => res.buffer());
+  const { dialX, dialY, dialUrl } = getDialParams(get(iqaReports, '[0].iqaScore', 70));
+  const dialImageBytes = await fetch(dialUrl).then((res) => res.buffer());
 
   const dialImage = await pdfDoc.embedPng(dialImageBytes);
   const dialDims = dialImage.scale(1);
 
-  const mentorRatingStarBytes = await fetch(getMentorRatingStars(5)).then((res) => res.buffer());
+  const mentorSilhoutteUrl = `${process.env.FILE_BASE_URL}/${mentorPicUri}`;
+  const mentorSilhoutteBytes = await fetch(mentorSilhoutteUrl).then((res) => res.buffer());
+
+  const mentorSilhoutte = await pdfDoc.embedPng(mentorSilhoutteBytes);
+  const mentorImageDims = mentorSilhoutte.scale(1);
+
+  const mentorRatingStarBytes = await fetch(getMentorRatingStars(mentorRating)).then((res) => res.buffer());
 
   const mentorRatingStarImage = await pdfDoc.embedPng(mentorRatingStarBytes);
   const mentorRatingStarDim = mentorRatingStarImage.scale(1);
@@ -92,8 +179,8 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     color: rgb(0, 0.29, 0.678),
   });
 
-  firstPage.drawText(`Dear ${capitalize('Gokul Madhusudhan')},`, {
-    x: ((width - getStringWidth(`Dear ${capitalize('Gokul Madhusudhan')},`)) / 2) + 15,
+  firstPage.drawText(`Dear ${capitalize(parentName)},`, {
+    x: ((width - getStringWidth(`Dear ${capitalize(parentName)},`)) / 2) + 15,
     y: 1240,
     size: 16,
     font: NunitoBoldFont,
@@ -134,38 +221,41 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
 
   // dial image
   firstPage.drawImage(dialImage, {
-    x: 87,
-    y: 862,
+    x: 87 + dialX,
+    y: 862 + dialY,
     width: dialDims.width,
     height: dialDims.height,
   });
 
-  firstPage.drawText(`${get(iqaReports, '[0].user.name', '').split(' ')[0].toUpperCase()}`, {
-    x: 115,
-    y: 790,
+  // child name
+  firstPage.drawText(`${get(iqaReports, '[0].user.name', 'xxx').split(' ')[0].toUpperCase()}`, {
+    x: 126,
+    y: 786,
     size: 12,
     font: NunitoBoldFont,
     color: rgb(0.314, 0.310, 0.310),
   });
 
-  firstPage.drawText(`${get(iqaReports, '[0].user.name', '').split(' ')[0].toUpperCase()}`, {
-    x: 225,
-    y: 790,
+  // child grade
+  firstPage.drawText(`${grade}`, {
+    x: 237,
+    y: 786,
     size: 12,
     font: NunitoBoldFont,
     color: rgb(0.314, 0.310, 0.310),
   });
 
-  firstPage.drawText(`${get(iqaReports, '[0].user.name', '').split(' ')[0].toUpperCase()}`, {
-    x: 315,
-    y: 790,
+  // assessment Date
+  firstPage.drawText(`${moment(new Date()).format('DD-MM-YYYY')}`, {
+    x: 320,
+    y: 786,
     size: 12,
     font: NunitoBoldFont,
     color: rgb(0.314, 0.310, 0.310),
   });
 
   // experience in coding
-  firstPage.drawText(`${'3.5+ Years'}`, {
+  firstPage.drawText(`${experience}+ Years`, {
     x: 317,
     y: 660,
     size: 14,
@@ -192,8 +282,8 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   });
 
   // languages familiar with
-  firstPage.drawText(`${capitalize('Gokul Madhusudhan')}`, {
-    x: ((width - getStringWidth(`${capitalize('Gokul Madhusudhan')}`)) / 4) + 40,
+  firstPage.drawText(`${capitalize(mentorName)}`, {
+    x: ((width - getStringWidth(`${capitalize(mentorName)}`)) / 4) + 40,
     y: 557,
     size: 14,
     font: NunitoBoldFont,
@@ -216,6 +306,39 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     color: rgb(0.969, 0.729, 0.290),
     opacity: 1,
   });
+
+  // mentor rating stars
+  firstPage.drawImage(mentorSilhoutte, {
+    x: 180,
+    y: 600,
+    width: 40,
+    height: 40,
+  });
+
+  // Book counselling session CTA
+  const linkAnnotation = pdfDoc.context.obj({
+    Type: 'Annot',
+    Subtype: 'Link',
+    Rect: [229, 322, 358, 368],
+    Border: [0, 0, 0],
+    C: [0, 0, 1],
+    A: {
+      Type: 'Action',
+      S: 'URI',
+      URI: PDFString.of(`https://lt5w9obz0m7.typeform.com/counsel-session#phone_number=${parentPhone}`),
+    },
+  });
+  const linkAnnotationRef = pdfDoc.context.register(linkAnnotation);
+
+  firstPage.drawText('Book My Councelling Session', {
+    x: 229,
+    y: 322,
+    font: NunitoBoldFont,
+    size: 12,
+    color: rgb(1, 1, 1),
+  });
+
+  firstPage.node.set(PDFName.of('Annots'), pdfDoc.context.obj([linkAnnotationRef]));
 
   /** PDF Meta Details */
   pdfDoc.setAuthor('Tekie');
