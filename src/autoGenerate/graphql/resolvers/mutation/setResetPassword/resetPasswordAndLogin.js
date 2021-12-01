@@ -51,10 +51,10 @@ export default async function resetPasswordAndLoginMutationResolver(
     throw new MissingMandatoryInputInRequestError();
   }
   let searchUserObj;
-  if (get(input, 'countryCode') && get(input, 'number')) {
+  if (get(input, 'phone.countryCode') && get(input, 'phone.number')) {
     searchUserObj = {
-      'phone.countryCode': get(input, 'countryCode'),
-      'phone.number': get(input, 'number'),
+      'phone.countryCode': get(input, 'phone.countryCode'),
+      'phone.number': get(input, 'phone.number'),
     };
   } else if (get(input, 'email')) {
     searchUserObj = {

@@ -151,6 +151,14 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   const newSlotTimeArray = getSelectedSlotsTime(get(menteeSession, 'data.menteeSession', []));
   const oldBookingDate = get(prevMenteeSession, 'bookingDate', '');
   const newBookingDate = get(menteeSession, 'data.menteeSession.bookingDate', '');
+  const courseId = get(input, 'course.typeId', '');
+
+  if (
+    (prevSessionStatus !== 'completed' && get(input, 'sessionStatus') === 'completed')
+    && topic.order === 1
+  ) {
+    sendDemoCompletionCertificate(userId, courseId);
+  }
 
   // adding Rescheduled Slot async if we get changed mentee session
   // constructing fromDate and fromSLot from values in previous document
@@ -210,6 +218,18 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       await updateReferrerCreditsPostSessionOrUserPayment(currentUser.id, trialTaken, context, variables, TRIAL_TAKEN_FROM_REFERRAL);
       // set session completed on leadsquared
     }
+    if (
+      (prevSessionStatus !== 'completed' && (input && input.sessionStatus && input.sessionStatus === 'completed'))
+      && topic.order === 1
+    ) {
+      setSessionCompletedLeadsquared(
+        userInfo,
+        get(mmsFirstData, 'mentorSession.user.name'),
+        get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.name'),
+        get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.email'),
+      );
+    }
+
     const inputMentorRating = get(input, 'rating');
     const inputDistracted = get(input, 'distracted', false);
     const inputRude = get(input, 'rude', false);
@@ -238,25 +258,11 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     if (isPostSalesAuditFromInput && prevIsPostSalesAudit === false) {
       addSalesAudit({ mentorMenteeSessionId, auditType: postSales });
     }
-    const courseId = get(input, 'course.typeId', '');
 
     if (isDemoWowAuditFromInput && prevIsDemoWowAudit === false) {
       addSalesAudit({ mentorMenteeSessionId, auditType: demoWow });
     }
 
-    if (
-      (prevSessionStatus !== 'completed' && (input && input.sessionStatus && input.sessionStatus === 'completed'))
-      && topic.order === 1
-    ) {
-      setSessionCompletedLeadsquared(
-        userInfo,
-        get(mmsFirstData, 'mentorSession.user.name'),
-        get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.name'),
-        get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.email'),
-      );
-      // also generate the demo completion certificate and send the webpage link through comms
-      sendDemoCompletionCertificate(userId, courseId);
-    }
     if (input && intersection(['hasRescheduled', 'sessionStatus', 'didNotPickTheCall', 'didNotTurnUpInSession', 'sessionNotConducted'], Object.keys(input)) && topic.order === 1) {
       updateMentorRescheduleLeadsquared(userInfo, input, params);
     }
