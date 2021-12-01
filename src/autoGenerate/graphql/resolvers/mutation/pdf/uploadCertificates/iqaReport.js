@@ -124,9 +124,7 @@ const mentorMenteeSessionsQuery = (userId) => `
 `;
 
 const getIqaReportSnapshotUrl = async (userId, userName) => {
-  console.log('userId', userId);
   const iqaReports = get(await callLocalGraphqlApi(iqaReportQuery(userId)), 'data.iqaReports', []);
-  console.log('iqaReports', iqaReports);
   const url = `${process.env.FILE_BASE_URL}/python/course/iqaReportCompressed.pdf`;
   const existingPdfBytes = await fetch(url).then((res) => res.buffer());
   // Load a PDFDocument from the existing PDF bytes
@@ -136,13 +134,11 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   const mentorMenteeSessions = get(await callLocalGraphqlApi(mentorMenteeSessionsQuery(userId)), 'data.mentorMenteeSessions', []);
   const mentorName = get(mentorMenteeSessions, '[0].mentorSession.user.name', '-');
   const mentorPicUri = get(mentorMenteeSessions, '[0].mentorSession.user.profilePic.uri', 'python/course/mentorAvatar.png');
-  console.log('mentorPicUri', mentorPicUri);
   const parentPhone = get(iqaReports, '[0].user.studentProfile.parents[0].user.phone.number', 'xxxxxx');
   const grade = get(iqaReports, '[0].user.studentProfile.grade', 'xx');
   const parentName = get(iqaReports, '[0].user.studentProfile.parents[0].user.name', '-');
   const experience = get(mentorMenteeSessions, '[0].mentorSession.user.experienceYear', 2);
   const mentorRating = get(mentorMenteeSessions, '[0].mentorSession.user.pythonCourseRating1', 5);
-  console.log(mentorRating);
 
   // Get the first page of the document
   const pages = pdfDoc.getPages();
@@ -158,7 +154,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
 
   const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
 
-  const { dialX, dialY, dialUrl } = getDialParams(100);
+  const { dialX, dialY, dialUrl } = getDialParams(get(iqaReports, '[0].iqaScore', 70));
   const dialImageBytes = await fetch(dialUrl).then((res) => res.buffer());
 
   const dialImage = await pdfDoc.embedPng(dialImageBytes);

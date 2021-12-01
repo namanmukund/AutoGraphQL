@@ -17,13 +17,49 @@ const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).rep
 
 const slugifyID = (ID) => ID ? ID.toString().trim().toUpperCase().replace(/\w{5}(?=.)/g, '$&-') : '';
 
+const round = (score) => {
+  if (score < 75) {
+    return 70;
+  } if (score < 85) {
+    return 80;
+  } if (score < 100) {
+    return 90;
+  }
+  return 100;
+};
+
+const getDialParams = (score) => {
+  const dialOffset = {
+    score70: {
+      x: -2,
+      y: -5,
+    },
+    score80: {
+      x: -4,
+      y: -7,
+    },
+    score90: {
+      x: -4,
+      y: -7,
+    },
+    score100: {
+      x: -4,
+      y: -7,
+    },
+  };
+  const roundedScore = round(score);
+  return {
+    dialX: dialOffset[`score${roundedScore}`].x,
+    dialY: dialOffset[`score${roundedScore}`].y,
+    dialUrl: `${process.env.FILE_BASE_URL}/python/course/iqaScores/score${roundedScore}.png`,
+  };
+};
+
 const round5 = (x) => Math.round(x / 5) * 5;
 
-const getDialUrl = (score) => `${process.env.FILE_BASE_URL}/python/course/iqaScores/score${round5(score)}.png`;
+const getMentorRatingStars = (rating) => `${process.env.FILE_BASE_URL}/python/course/mentorRatings/${rating}star.png`;
 
 const getMentorDialUrl = (score) => `${process.env.FILE_BASE_URL}/python/course/ratingsDial/rating${round5(score)}.png`;
-
-const getMentorRatingStars = (rating) => `${process.env.FILE_BASE_URL}/python/course/mentorRatings/${rating}star.png`;
 
 const iqaReportQuery = (id) => `{
 iqaReports(filter: {
@@ -34,7 +70,7 @@ iqaReports(filter: {
       }
     }
   ]
-} ){
+}, orderBy:createdAt_DESC){
     id
     iqaRank
     iqaScore
@@ -44,9 +80,13 @@ iqaReports(filter: {
       id
       name
       studentProfile{
+        grade
         parents{
           user{
             name
+            phone{
+              number
+            }
           }
         }
       }
@@ -92,6 +132,36 @@ const salesOperationQuery = (userId) => `
 }
 `;
 
+const mentorMenteeSessionsQuery = (userId) => `
+{
+  mentorMenteeSessions(filter:{
+    and:[
+      {menteeSession_some:{
+        user_some:{id: "${userId}"}
+      }}
+      {topic_some:{order: 1}}
+    ]
+  }){
+    mentorSession{
+      user{
+        id
+        name
+        profilePic{
+          uri
+        }
+        mentorProfile{
+          codingLanguages{
+          value
+        }
+        experienceYear
+        pythonCourseRating1
+        }
+      }
+    }
+  }
+}
+`;
+
 const getPostDemoSalesReportUrl = async (userId) => {
   const iqaReports = get(await callLocalGraphqlApi(iqaReportQuery(userId)), 'data.iqaReports', []);
   let url = '';
@@ -105,11 +175,16 @@ const getPostDemoSalesReportUrl = async (userId) => {
 
   const salesOperations = get(await callLocalGraphqlApi(salesOperationQuery(userId)), 'data.salesOperations', []);
   const mentorNote = get(salesOperations, '[0].studentNote', 'The class was interesting and fun to teach!');
-  const mentorName = get(salesOperations, '[0].allottedMentor.name', '-');
-  const parentPhone = get(salesOperations, '[0].client.studentProfile.parents[0].user.phone.number');
-  const parentName = get(salesOperations, '[0].client.studentProfile.parents[0].user.name');
-  const studentName = get(salesOperations, '[0].client.name');
-  const experience = get(salesOperations, '[0].allottedMentor.mentorProfile.experienceYear', 2);
+
+  const mentorMenteeSessions = get(await callLocalGraphqlApi(mentorMenteeSessionsQuery(userId)), 'data.mentorMenteeSessions', []);
+  const mentorName = get(mentorMenteeSessions, '[0].mentorSession.user.name', '-');
+  const mentorPicUri = get(mentorMenteeSessions, '[0].mentorSession.user.profilePic.uri', 'python/course/mentorAvatar.png');
+  const parentPhone = get(iqaReports, '[0].user.studentProfile.parents[0].user.phone.number', 'xxxxxx');
+  const grade = get(iqaReports, '[0].user.studentProfile.grade', 'xx');
+  const parentName = get(iqaReports, '[0].user.studentProfile.parents[0].user.name', '-');
+  const experience = get(mentorMenteeSessions, '[0].mentorSession.user.experienceYear', 2);
+  const mentorRating = get(mentorMenteeSessions, '[0].mentorSession.user.pythonCourseRating1', 5);
+  const studentName = get(iqaReports, '[0].user.name', '');
 
   if ((iqaReports && iqaReports.length)) {
     url = `${process.env.FILE_BASE_URL}/python/course/postDemoPostTest.pdf`;
@@ -129,7 +204,8 @@ const getPostDemoSalesReportUrl = async (userId) => {
     const NunitoBoldfontBytes = await fetch(NUNITO_BOLD_FONT_URL).then((res) => res.buffer());
     const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
 
-    const dialImageBytes = await fetch(getDialUrl(get(iqaReports, '[0].iqaScore', 70))).then((res) => res.buffer());
+    const { dialX, dialY, dialUrl } = getDialParams(get(iqaReports, '[0].iqaScore', 70));
+    const dialImageBytes = await fetch(dialUrl).then((res) => res.buffer());
 
     const dialImage = await pdfDoc.embedPng(dialImageBytes);
     const dialDims = dialImage.scale(1);
@@ -141,6 +217,12 @@ const getPostDemoSalesReportUrl = async (userId) => {
     const mentorRatingDialBytes = await fetch(getMentorDialUrl(5)).then((res) => res.buffer());
     const mentorRatingDialImage = await pdfDoc.embedPng(mentorRatingDialBytes);
     const mentorRatingDialDim = mentorRatingDialImage.scale(1);
+
+    const mentorSilhoutteUrl = `${process.env.FILE_BASE_URL}/${mentorPicUri}`;
+    const mentorSilhoutteBytes = await fetch(mentorSilhoutteUrl).then((res) => res.buffer());
+
+    const mentorSilhoutte = await pdfDoc.embedPng(mentorSilhoutteBytes);
+    const mentorImageDims = mentorSilhoutte.scale(1);
 
     const Star1Bytes = await fetch(getMentorRatingStars(1)).then((res) => res.buffer());
     const Star1Image = await pdfDoc.embedPng(Star1Bytes);
@@ -214,8 +296,8 @@ const getPostDemoSalesReportUrl = async (userId) => {
 
     // dial image
     secondPage.drawImage(dialImage, {
-      x: 87,
-      y: 562,
+      x: 87 + dialX,
+      y: 562 + dialY,
       width: dialDims.width,
       height: dialDims.height,
     });
@@ -295,6 +377,13 @@ const getPostDemoSalesReportUrl = async (userId) => {
       size: 40,
       color: rgb(0.969, 0.729, 0.290),
       opacity: 1,
+    });
+
+    secondPage.drawImage(mentorSilhoutte, {
+      x: 180,
+      y: 300,
+      width: 40,
+      height: 40,
     });
     /*
       THIRD PAGE
