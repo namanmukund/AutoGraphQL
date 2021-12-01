@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import moment from 'moment';
 import { log } from '../../utils';
 import callLocalGraphqlApi from '../api/callLocalGraphqlApi';
 import generateCertificateScript from '../autoGenerate/graphql/resolvers/query/scriptMethods/generateCertificateScript';
@@ -286,19 +287,64 @@ const addIqaReport = async (studentDetailsObject) => {
         }
       }
     }`;
+    filter = `{
+      and:[
+        {
+          studentProfile_some: {
+            parents_some: {
+              user_some: {
+                phone_number_subDoc: "${number}"
+              }
+            }
+          }
+        }
+      ]
+    }`;
+    const usersQuery = `{
+        users(filter:${filter}){
+          id
+          studentProfile{
+            parents{
+              user{
+                phone{
+                  number
+                  countryCode
+                }
+                email
+              }
+            }
+          }
+        }
+      }`;
     const iqaReports = get(await callLocalGraphqlApi(iqaReportQuery), 'data.iqaReports', []);
     // uses the same formId parameter passed from controller, to generate eventId dynamically
     if (iqaReports && iqaReports.length) {
-      log(`IqaReport Cannot be added as Document already exists for given phone number ${number}`);
-    } else {
-      filter = `{
-          phone_number_subDoc:"${number}"
-        }`;
-      const usersQuery = `{
-        users(filter:${filter}){
+      log(`Updating Existing IQA report for given phone number ${number}`);
+      const users = get(await callLocalGraphqlApi(usersQuery), 'data.users', []);
+      if (users && users.length) {
+        const userId = get(users, '[0].id');
+        const updateIqaReport = `mutation{
+        updateIqaReport(
+          id:"${get(iqaReports, '[0].id')}"
+          userConnectId:"${userId}"
+          input:{
+          phone:{
+            countryCode:"${get(users, '[0].studentProfile.parents[0].user.phone.countryCode')}"
+            number:"${get(users, '[0].studentProfile.parents[0].user.phone.number')}"
+          }
+          email:"${get(users, '[0].studentProfile.parents[0].user.email')}"
+          iqaRank:${iqaRank}
+          globalRank:${globalRank}
+          iqaScore:${iqaScore}
+          maximumScore:${maximumScore}
+        }){
           id
         }
-      }`;
+      }
+      `;
+        get(await callLocalGraphqlApi(updateIqaReport), 'data.addIqaReport.id');
+      }
+    } else {
       const users = get(await callLocalGraphqlApi(usersQuery), 'data.users', []);
       if (users && users.length) {
         const userId = get(users, '[0].id');
@@ -307,14 +353,14 @@ const addIqaReport = async (studentDetailsObject) => {
           userConnectId:"${userId}"
           input:{
           phone:{
-              countryCode:"${get(users, '[0].phone.countryCode')}"
-              number:"${get(users, '[0].phone.number')}"
-            }
-            email:"${get(users, '[0].email')}"
-            iqaRank:${iqaRank}
-            globalRank:${globalRank}
-            iqaScore:${iqaScore}
-            maximumScore:${maximumScore}
+            countryCode:"${get(users, '[0].studentProfile.parents[0].user.phone.countryCode')}"
+            number:"${get(users, '[0].studentProfile.parents[0].user.phone.number')}"
+          }
+          email:"${get(users, '[0].studentProfile.parents[0].user.email')}"
+          iqaRank:${iqaRank}
+          globalRank:${globalRank}
+          iqaScore:${iqaScore}
+          maximumScore:${maximumScore}
         }){
           id
         }
@@ -420,6 +466,7 @@ const addIqaReport = async (studentDetailsObject) => {
             const bookTemplate = 'iqa_report_snapshot_and_certificate';
             // email send
             const emailTo = [`${parentEmail}`];
+            // const emailTo = ['gokul99.gm@gmail.com'];
             const ccEmail = '';
             const bccEmail = '';
             const subject = 'Tekie - IQA Report Certificate';
@@ -452,6 +499,7 @@ const typeformWebhookController = async (req, res) => {
     const answers = get(req, 'body.form_response.answers', []);
     const variables = get(req, 'body.form_response.variables', []);
     const formId = get(req, 'body.form_response.form_id', '');
+    const hidden = get(req, 'body.form_response.hidden', '');
     // Form - IQA test, Grade6 and above
     if (formId === 'weKBAxh5' || formId === 'l3s8cO8K') {
       // loop over fields and store details in object, then calculate score and create IQA report
@@ -474,6 +522,35 @@ const typeformWebhookController = async (req, res) => {
         if (title === 'Phone number ' || title === 'Phone number') studentDetailsObject.parentPhone = getCountryCodeAndNumber(get(studentAnswer, type));
       }
       addIqaReport(studentDetailsObject);
+    } else if (formId === 'Rk1uvLn9') {
+      // form to receive councelling session date/time from CTA on IQA Report
+      // eslint-disable-next-line no-restricted-syntax
+      for (const field of fields) {
+        const { title, ref } = field;
+        const studentAnswer = answers.find((answer) => get(answer, 'field.ref') === ref);
+        if (title === 'Preferred date for counselling session') studentDetailsObject.preferredDate = get(studentAnswer, 'date');
+        if (title === 'Preferred time for counselling session on {{field:01FNK51S4DBT5K77W5W644BTDF}}') studentDetailsObject.preferredTime = get(studentAnswer, 'choice.label').toUpperCase();
+      }
+      if (studentDetailsObject.preferredTime.length === 4) {
+        studentDetailsObject.preferredTime = `0${studentDetailsObject.preferredTime}`;
+      }
+      studentDetailsObject.preferredTime = `${studentDetailsObject.preferredTime.substring(0, 2)}:00:00 ${studentDetailsObject.preferredTime.substring(3, 5)}`;
+
+      const counsellingDate = moment(new Date(`${studentDetailsObject.preferredDate} ${studentDetailsObject.preferredTime}`))
+        .format('YYYY-MM-DD HH:mm:ss');
+      const parentPhone = `${get(hidden, 'phone_number').trim()}`;
+      console.log(parentPhone);
+      updateLeadSquared({
+        Phone: parentPhone,
+      }, false, {
+        ActivityEvent: 211,
+        Fields: [
+          {
+            SchemaName: 'mx_Custom_1',
+            Value: counsellingDate,
+          },
+        ],
+      });
     } else {
       // eslint-disable-next-line no-restricted-syntax
       for (const field of fields) {
