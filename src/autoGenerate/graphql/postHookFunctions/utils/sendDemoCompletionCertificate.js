@@ -1,12 +1,12 @@
 import { get } from 'lodash';
 import { log } from '../../../../../utils';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import getEmailObject from '../../../../../services/email/utils/getEmailObject';
-import sendEmail from '../../../../../services/email/utils/sendEmail';
+// import getEmailObject from '../../../../../services/email/utils/getEmailObject';
+// import sendEmail from '../../../../../services/email/utils/sendEmail';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 import getPostDemoSalesReportUrl from '../../resolvers/mutation/pdf/uploadCertificates/postDemoSalesReport';
 
-const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
+// const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
 
 const generateCertificate = async (id, regenerateCertificate, eventId, date) => {
   const query = `
@@ -141,7 +141,7 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
   const parentName = get(user, 'studentProfile.parents[0].user.name', '');
   const parentPhone = get(user, 'studentProfile.parents[0].user.phone.countryCode', '+91').split('+')[1] + get(user, 'studentProfile.parents[0].user.phone.number');
   let iqaReportId = '';
-  const parentEmail = get(user, 'studentProfile.parents[0].user.email');
+  // const parentEmail = get(user, 'studentProfile.parents[0].user.email');
 
   // check if the iqa report is already present for the given user, then link it to the userCourse else we don't
   const iqaReports = await get(callLocalGraphqlApi(iqaReportQuery(userId)), 'data.iqaReports', []);
@@ -170,19 +170,19 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
   ];
   const bookTemplate = hasGivenIqaTest ? 'iqa_report_snapshot_and_certificate' : 'iqa_report_only_certificate';
   // email send
-  const emailTo = [`${parentEmail}`];
+  // const emailTo = [`${parentEmail}`];
   // const emailTo = ['gokul.madhusudhan@tekie.in'];
-  const ccEmail = '';
-  const bccEmail = '';
-  const subject = 'Tekie - Demo Completion Certificate';
-  const html = hasGivenIqaTest ? `Congratulations ${capitalize(parentName)}!
-Our Academic experts found ${capitalize(childName)}'s performance at the IQ assessment extraordinary and have created a personalized report for you.
-You can download their certificate here : ${certificateLink}` : `Congratulations ${capitalize(parentName)}!
-Our Computer Science Expert found ${capitalize(childName)}'s performance during the session extraordinary and shared a personalized certificate for you.
-You can download their certificate here : ${certificateLink}
-`;
-  const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
-  sendEmail(emailMsgObject);
+  //   const ccEmail = '';
+  //   const bccEmail = '';
+  //   const subject = 'Tekie - Demo Completion Certificate';
+  //   const html = hasGivenIqaTest ? `Congratulations ${capitalize(parentName)}!
+  // Our Academic experts found ${capitalize(childName)}'s performance at the IQ assessment extraordinary and have created a personalized report for you.
+  // You can download their certificate here : ${certificateLink}` : `Congratulations ${capitalize(parentName)}!
+  // Our Computer Science Expert found ${capitalize(childName)}'s performance during the session extraordinary and shared a personalized certificate for you.
+  // You can download their certificate here : ${certificateLink}
+  // `;
+  //   const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
+  //   sendEmail(emailMsgObject);
   await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
   // send the post demo pre/post test report to leadsquared
   getPostDemoSalesReportUrl(userId);
