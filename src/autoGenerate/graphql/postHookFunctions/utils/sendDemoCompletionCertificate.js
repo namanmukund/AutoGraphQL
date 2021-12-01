@@ -15,7 +15,7 @@ const generateCertificate = async (id, regenerateCertificate, eventId, date) => 
         userId:"${id}"
         regenerateCertificate:${regenerateCertificate ? 'true' : 'false'}
         isEventCertificate: false
-        ${eventId ? `date: "${eventId}"` : ''}
+        ${eventId ? `eventId: "${eventId}"` : ''}
         ${date ? `date: "${date}"` : ''}
       })
       {
@@ -29,12 +29,11 @@ const generateCertificate = async (id, regenerateCertificate, eventId, date) => 
   return get(res, 'data.generateCertificate', {});
 };
 
-const userCoursesQuery = (userId, courseId) => `
+const userCoursesQuery = (userId) => `
 {
   userCourses(filter:{
     and:[
     {user_some: {id: "${userId}"}}
-      {courses_some: {id: "${courseId}"}}
     ]
   }){
     id
@@ -134,7 +133,7 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
     eventId = get(await callLocalGraphqlApi(addEventMutation()), 'data.addEvent.id');
   }
   let hasGivenIqaTest = false;
-  const certificateDetails = await generateCertificate(userId, false, eventId);
+  const certificateDetails = await generateCertificate(userId, true, eventId);
   const certificateId = get(certificateDetails, 'id');
   // check if iqa report is generated to send that also
   const user = get(await callLocalGraphqlApi(userQuery(userId)), 'data.user');
@@ -151,7 +150,7 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
     iqaReportId = get(iqaReports, '[0].id');
   }
   // check if the userCourse exists, if it does, then update it with the given demo certificate, else we just add the userCourse and the demoCompletion certificate with it
-  const userCourses = get(await callLocalGraphqlApi(userCoursesQuery(userId, courseId)), 'data.userCourses', []);
+  const userCourses = get(await callLocalGraphqlApi(userCoursesQuery(userId)), 'data.userCourses', []);
   let userCourseId = '';
   if (userCourses && userCourses.length) {
     userCourseId = get(userCourses, '[0].id');
@@ -172,6 +171,7 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
   const bookTemplate = hasGivenIqaTest ? 'iqa_report_snapshot_and_certificate' : 'iqa_report_only_certificate';
   // email send
   const emailTo = [`${parentEmail}`];
+  // const emailTo = ['gokul.madhusudhan@tekie.in'];
   const ccEmail = '';
   const bccEmail = '';
   const subject = 'Tekie - Demo Completion Certificate';
