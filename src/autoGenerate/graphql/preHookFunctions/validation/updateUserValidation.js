@@ -3,6 +3,10 @@ import { validateUsername } from '../../validation';
 import { commonUserValidation, validateTokenAndExtractInformation } from './utils';
 import getUserPasswordObject from '../../resolvers/mutation/user/utils/getUserPasswordObject';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import { ADMIN, UMS_ADMIN } from '../../../../../constants/roles';
+import { InsufficientPermissionError } from '../../../../../constants/errors';
+
+const allowedRoles = [ADMIN, UMS_ADMIN];
 
 const fetchUser = async (id) => {
   const query = `
@@ -82,9 +86,12 @@ const updateUserValidation = async (params, context) => {
   context.verificationStatusFromInput = verificationStatus;
   context.prevIsPreSalesAudit = get(user, 'isPreSalesAudit');
   context.isPreSalesAuditFromInput = isPreSalesAuditFromInput;
-
   if (password) {
-    const passwordObj = getUserPasswordObject(password, false);
+    const currentUserRole = get(currentUser, 'role');
+    if (!allowedRoles.includes(currentUserRole)) {
+      throw new InsufficientPermissionError();
+    }
+    const passwordObj = getUserPasswordObject(password, true);
     Object.assign(userObj, passwordObj);
   }
 

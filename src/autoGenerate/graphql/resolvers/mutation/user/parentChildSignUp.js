@@ -12,7 +12,9 @@ import { generateCuid, getRandomNumber, log } from '../../../../../../utils';
 import { MutationController, QueryController } from '../../../controllers';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import generateInviteCode from '../../../../../../utils/generateInviteCode';
-import { backendApps, rangeOTP, REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
+import {
+  backendApps, rangeOTP, REGISTRATION_BASE_CREDIT, TMS,
+} from '../../../../../../constants';
 import addUserCredit from './utils/addUserCredit';
 import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
@@ -88,6 +90,7 @@ const parentChildSignUpMutationResolver = async (
 
   const currentUser = authentication && authentication.user;
   const isBackendApp = backendApps.includes(get(authentication, 'app.name'));
+  const istmsApp = get(authentication, 'app.name') === TMS;
 
   if (!isBackendApp && currentUser && currentUser) {
     throw new UserTokenNotRequiredError();
@@ -173,7 +176,7 @@ const parentChildSignUpMutationResolver = async (
     }
 
     // set parent password
-    if (isBackendApp && parentPassword) {
+    if ((isBackendApp || istmsApp) && parentPassword) {
       const passwordObj = getUserPasswordObject(parentPassword, true);
       Object.assign(parentData, passwordObj);
     }
@@ -455,9 +458,9 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     setTimeout(() => {
       updateLeadSquared({
         Phone: get(parentPhone, 'number'),
-        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '4 November' : '5 December',
+        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '4 December' : '4 December',
         mx_Event_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '03:00 pm' : '11:00 am',
-        mx_Event_Date_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '2021-12-4 09:30:00' : '2021-11-5 05:30:00',
+        mx_Event_Date_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '2021-12-4 15:00:00' : '2021-12-4 15:00:00',
       }, false, {
         ActivityEvent: 208,
         Fields: [
@@ -467,7 +470,7 @@ If coming from campaign and the type os b2b allocate the user to the right batch
           },
           {
             SchemaName: 'mx_Custom_2',
-            Value: 'environment_30nov',
+            Value: 'spysquadcamp_4dec',
           },
         ],
       });
