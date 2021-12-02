@@ -35,7 +35,7 @@ const getDialParams = (score) => {
   const dialOffset = {
     score70: {
       x: -2,
-      y: -5,
+      y: -7,
     },
     score80: {
       x: -4,
@@ -59,6 +59,26 @@ const getDialParams = (score) => {
 };
 
 const getMentorRatingStars = (rating) => `${process.env.FILE_BASE_URL}/python/course/mentorRatings/${rating}star.png`;
+
+const getGradeToDisplay = (grade) => {
+  const numerical = grade.split('Grade')[1];
+  let output = numerical;
+  switch (numerical) {
+    case '1':
+      output += 'ST';
+      break;
+    case '2':
+      output += 'ND';
+      break;
+    case '3':
+      output += 'RD';
+      break;
+    default:
+      output += 'TH';
+      break;
+  }
+  return output;
+};
 
 const iqaReportQuery = (id) => `{
 iqaReports(filter: {
@@ -135,7 +155,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   const mentorName = get(mentorMenteeSessions, '[0].mentorSession.user.name', '-');
   const mentorPicUri = get(mentorMenteeSessions, '[0].mentorSession.user.profilePic.uri', 'python/course/mentorAvatar.png');
   const parentPhone = get(iqaReports, '[0].user.studentProfile.parents[0].user.phone.number', 'xxxxxx');
-  const grade = get(iqaReports, '[0].user.studentProfile.grade', 'xx');
+  const grade = getGradeToDisplay(get(iqaReports, '[0].user.studentProfile.grade', 'xx'));
   const parentName = get(iqaReports, '[0].user.studentProfile.parents[0].user.name', '-');
   const experience = get(mentorMenteeSessions, '[0].mentorSession.user.experienceYear', 2);
   const mentorRating = get(mentorMenteeSessions, '[0].mentorSession.user.pythonCourseRating1', 5);
@@ -187,7 +207,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     color: rgb(0, 0, 0),
   });
 
-  firstPage.drawText(`${get(iqaReports, '[0].iqaScore', 70)}`, {
+  firstPage.drawText(`${get(iqaReports, '[0].iqaScore', 70) < 70 ? 70 : get(iqaReports, '[0].iqaScore', 70)}`, {
     x: 170,
     y: 940,
     size: 50,
