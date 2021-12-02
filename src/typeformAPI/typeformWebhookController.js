@@ -577,8 +577,8 @@ const typeformWebhookController = async (req, res) => {
         case EVENTS.SPYSQUADCAMP.formId:
           country = 'india';
           timezone = 'Asia/Kolkata';
-          utmSource = 'RadioStreet';
-          utmCampaign = 'Spy Squad Camp - 31th Oct';
+          utmSource = 'communityevent';
+          utmCampaign = 'spysquadcamp_4dec';
           break;
         case EVENTS.CANVA.formId:
           country = 'india';
@@ -603,7 +603,7 @@ const typeformWebhookController = async (req, res) => {
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
-          utmCampaign = 'environment_30nov';
+          utmCampaign = 'spysquadcamp_4dec';
           break;
       }
       studentDetailsObject = {
