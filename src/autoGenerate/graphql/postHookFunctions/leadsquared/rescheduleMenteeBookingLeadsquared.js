@@ -24,6 +24,7 @@ const rescheduleMenteeBookingLeadsquared = async (input, slotTimeStringArray, us
     const bookingDateTime = moment(bookingDate).minutes(0).hours(slotNumber).subtract(5, 'hours')
       .subtract(30, 'minutes')
       .format('YYYY-MM-DD HH:mm:ss');
+    const bookingDateTimeISO = moment(bookingDate).toISOString();
     const { dateObject, startTime } = getIntlDateTime(bookingDate, slotNumber, timezone);
     const date = moment(dateObject).format('dddd, Do MMMM, YYYY');
     const time = startTime;
@@ -34,6 +35,7 @@ const rescheduleMenteeBookingLeadsquared = async (input, slotTimeStringArray, us
     const leadSquaredInput = {
       Phone: phoneNumber,
       mx_Booking_Date_Time: bookingDateTime,
+      mx_ISO_Booking_Date_Time: bookingDateTimeISO,
       mx_Booking_Date: date,
       mx_Booking_Time: time,
       mx_Last_updated_booking: now,

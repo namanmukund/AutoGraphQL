@@ -18,6 +18,7 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
   const { bookingDate } = input;
   let phoneNumber = input.phone;
   let bookingDateTime = '';
+  let bookingDateTimeISO = '';
   let date = '';
   let time = '';
   let timezone = 'Asia/Kolkata';
@@ -32,6 +33,7 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
     bookingDateTime = moment(bookingDate).minutes(0).hours(slot).subtract(5, 'hours')
       .subtract(30, 'minutes')
       .format('YYYY-MM-DD HH:mm:ss');
+    bookingDateTimeISO = moment(bookingDate).toISOString();
   } else {
     phoneNumber = get(userInfo, 'data.user.studentProfile.parents[0].user.phone.number');
     const user = await getUser(phoneNumber);
@@ -45,6 +47,7 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
       bookingDateTime = moment(bookingDate).minutes(0).hours(slotNumber).subtract(5, 'hours')
         .subtract(30, 'minutes')
         .format('YYYY-MM-DD HH:mm:ss');
+      bookingDateTimeISO = moment(bookingDate).toISOString();
     }
   }
 
@@ -59,6 +62,7 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
     mx_Booking_Date: date,
     mx_Booking_Time: time,
     mx_Last_updated_booking: now,
+    mx_ISO_Booking_Date_Time: bookingDateTimeISO,
     ...fields,
   };
   if (!isBookedByMentee && agentName) {
