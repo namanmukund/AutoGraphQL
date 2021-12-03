@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { get } from 'lodash';
 import moment from 'moment';
 import { log } from '../../utils';
@@ -475,7 +476,7 @@ const addIqaReport = async (studentDetailsObject) => {
             // You can download their certificate here : ${certificateLink}`;
             //             const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
             //             sendEmail(emailMsgObject);
-            await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
+            // await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
             // send the newly generated url as lead capture
             updateLeadSquared({
               Phone: parentPhone,
