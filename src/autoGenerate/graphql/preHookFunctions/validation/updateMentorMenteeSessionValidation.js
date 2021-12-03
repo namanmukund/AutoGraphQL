@@ -16,6 +16,7 @@ const getMentorMenteeSessionData = async (id) => {
         sessionStatus
         isPostSalesAudit
         isDemoWowAudit
+        isFeedbackSubmitted
         isSubmittedForReview
         topic{
           id
