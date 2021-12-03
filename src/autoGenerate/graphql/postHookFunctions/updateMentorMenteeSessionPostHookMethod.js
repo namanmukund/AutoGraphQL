@@ -135,12 +135,13 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   const {
     currentUser, previousDocument: {
       sessionStatus: prevSessionStatus,
+      isFeedbackSubmitted: prevIsFeedbackSubmitted,
       topic,
       menteeSession: prevMenteeSession,
       isSubmittedForReview: prevIsSubmittedForReview,
     },
   } = context;
-  const { sessionStartDate } = input;
+  const { sessionStartDate, isFeedbackSubmitted } = input;
   const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));
   const userId = get(menteeSession, 'data.menteeSession.user.id');
   const userInfo = await getMenteeInfo(userId);
@@ -154,7 +155,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   const courseId = get(input, 'course.typeId', '');
 
   if (
-    (prevSessionStatus !== 'completed' && get(input, 'sessionStatus') === 'completed')
+    (!prevIsFeedbackSubmitted && isFeedbackSubmitted)
     && topic.order === 1
   ) {
     sendDemoCompletionCertificate(userId, courseId);
