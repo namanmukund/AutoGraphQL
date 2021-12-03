@@ -5,6 +5,9 @@ const FileBucket = `
     landingPage
     editor
     webDevelopment
+    codeOrg
+    blockly
+    temp
   }`;
 
 export default FileBucket;

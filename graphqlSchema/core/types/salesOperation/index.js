@@ -1,3 +1,3 @@
-import Chapter from './SalesOperation';
+import SalesOperation from './SalesOperation';
 
-export default [Chapter];
+export default SalesOperation;
