@@ -105,7 +105,7 @@ const STATIC = 'static';
 const fetchRetries = 5;
 const fetchRetryDelay = 1000;
 
-const defaultLimitValue = 1000;
+const defaultLimitValue = process.env.DATA_PLATFORM ? 100000 : 1000;
 const defaultDeleteLimitValue = 100;
 
 const defaultPermissionErrorMsg = 'Not authorised to perform this operation.';
