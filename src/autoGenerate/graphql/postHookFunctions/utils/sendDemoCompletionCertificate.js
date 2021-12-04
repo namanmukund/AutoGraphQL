@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { get } from 'lodash';
 import updateLeadSquared from '../../../../../services/leadsquared/updateLeadSquared';
 import { log } from '../../../../../utils';
