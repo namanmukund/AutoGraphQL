@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { get } from 'lodash';
+import updateLeadSquared from '../../../../../services/leadsquared/updateLeadSquared';
 import { log } from '../../../../../utils';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 // import getEmailObject from '../../../../../services/email/utils/getEmailObject';
@@ -162,7 +163,6 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
     log('Added user course with demo completion certificate');
   }
   const certificateLink = `${process.env.TEKIE_WEB_URL}/iqa-report/${slugifyID(userCourseId)}`;
-
   // wati send
   const parameters = [
     { name: 'parent_name', value: parentName },
@@ -184,7 +184,14 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
   // `;
   //   const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
   //   sendEmail(emailMsgObject);
-  // await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
+  await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
+  // send the newly generated url as lead capture
+  setTimeout(() => {
+    updateLeadSquared({
+      Phone: parentPhone,
+      mx_IQA_Certificate_Snapshot: certificateLink,
+    }, false);
+  }, 1000 * 60 * 1);
   // send the post demo pre/post test report to leadsquared
   getPostDemoSalesReportUrl(userId);
   return true;

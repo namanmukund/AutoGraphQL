@@ -476,12 +476,7 @@ const addIqaReport = async (studentDetailsObject) => {
             // You can download their certificate here : ${certificateLink}`;
             //             const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
             //             sendEmail(emailMsgObject);
-            // await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
-            // send the newly generated url as lead capture
-            updateLeadSquared({
-              Phone: parentPhone,
-              mx_IQA_Certificate_Snapshot: `${process.env.FILE_BASE_URL}/${assetUrl}`,
-            }, false);
+            await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
           }
           log(`cert link ${certificateLink}`);
           // update iqaReport with new tekieUrl
