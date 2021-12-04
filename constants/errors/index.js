@@ -80,6 +80,7 @@ import {
   SlotAlreadyFilled,
   SessionAlreadyAssigned,
   FileNameAlreadyExists,
+  LeadPartnerWithSimilarTitleAlreadyExist,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -301,4 +302,5 @@ export {
   CanNotStartSessionWithoutMentorError,
   FileNameAlreadyExists,
   ResetPasswordLinkExpired,
+  LeadPartnerWithSimilarTitleAlreadyExist,
 };
