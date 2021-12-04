@@ -117,6 +117,8 @@ import addMentorDemandSlotValidation from './preHookFunctions/validation/addMent
 import updateMentorDemandSlotValidation from './preHookFunctions/validation/updateMentorDemandSlotValidation';
 import addAcceptedSlotRequestByMentorLogValidation from './preHookFunctions/validation/addAcceptedSlotRequestByMentorLogValidation';
 import updateFileValidation from './preHookFunctions/validation/updateFileValidation';
+import addLeadPartnerValidation from './preHookFunctions/validation/addLeadPartnerValidation';
+import updateLeadPartnerValidation from './preHookFunctions/validation/updateLeadPartnerValidation';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -894,6 +896,14 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateFile': {
       await updateFileValidation(input, mutationOrQueryName, context, params);
+      break;
+    }
+    case 'addLeadPartner': {
+      await addLeadPartnerValidation(input, mutationOrQueryName, context, params);
+      break;
+    }
+    case 'updateLeadPartner': {
+      await updateLeadPartnerValidation(input, mutationOrQueryName, context, params);
       break;
     }
     case 'addSchool': {

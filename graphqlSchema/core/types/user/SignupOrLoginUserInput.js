@@ -6,6 +6,7 @@ const SignupOrLoginUserInput = `
     utmSource: String
     utmCampaign: String
     utmTerm: String
+    name: String
     utmContent: String
     utmMedium: String
     source: UserOriginSource
