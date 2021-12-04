@@ -101,6 +101,9 @@ const signupOrLoginViaOtp = async (
       if (input.source) {
         newUser.source = input.source;
       }
+      if (input.name) {
+        newUser.name = input.name;
+      }
       if (input.utmSource) {
         newUser.utmSource = input.utmSource;
       }
