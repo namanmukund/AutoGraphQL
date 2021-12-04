@@ -184,7 +184,7 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
   // `;
   //   const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
   //   sendEmail(emailMsgObject);
-  // await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
+  await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
   // send the post demo pre/post test report to leadsquared
   getPostDemoSalesReportUrl(userId);
   return true;
