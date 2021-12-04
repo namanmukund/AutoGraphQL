@@ -40,7 +40,7 @@ const MentorMenteeSession = `
     course: Course @relation(name: "MentorMenteeSessionCourse", direction: "OneWay")
     topic: Topic! @relation(name: "MentorMenteeSessionTopic", direction: "OneWay")
     menteeSession: MenteeSession! @relation(name: "SessionDataMenteeSession", direction: "OneWay")
-    mentorSession: MentorSession! @relation(name: "SessionDataMentorSession")
+    mentorSession: MentorSession @relation(name: "SessionDataMentorSession")
     salesOperation: SalesOperation @relation(name:"SalesOperationFirstMentorMenteeSession")
     sessionAllotmentDate: Date
     sessionStartDate: Date
@@ -99,6 +99,7 @@ const MentorMenteeSession = `
     mentorSavesAttendance: Date
     videoLinkClickByMenteePlatform: Platform
     startSessionByMenteePlatform: Platform
+    isDemoWowAudit: Boolean @defaultValue(value: "false")
 }`;
 
 export default [MentorMenteeSession, internetSpeed];

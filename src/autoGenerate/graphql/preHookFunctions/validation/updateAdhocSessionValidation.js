@@ -101,7 +101,8 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
   // check if mentor already has another session in same slot
   const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId || get(mentorSession, 'id', '')));
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
-  if (mentorUserId && bookingDateFromInput && inputSlotTimeArray[0] !== slotTimeArray[0]) {
+  if (mentorUserId && bookingDateFromInput
+    && (inputSlotTimeArray[0] !== slotTimeArray[0] || new Date(bookingDateFromInput).getTime() !== new Date(bookingDate).getTime())) {
     const finalBookingDate = bookingDateFromInput || bookingDate;
     const getMentorSessionsRes = await callLocalGraphqlApi(
       getMentorSessions(
@@ -116,7 +117,6 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
     const menteeSessionSlots = { input: tempObj };
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
     checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions);
-
     // check if batch session already exists
     const batchId = get(batch, 'id');
     const { filteredSlotsStringForFilterQuery } = extractSlotsFromInput(inputSlot);

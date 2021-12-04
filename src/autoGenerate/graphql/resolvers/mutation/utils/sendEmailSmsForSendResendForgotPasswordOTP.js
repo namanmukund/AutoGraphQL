@@ -6,11 +6,7 @@ const sendEmailSmsForSendResendForgotPasswordOTP = (fetchedUser, isPhone, authen
     name, phoneOtp, emailOtp, phone, email,
   } = fetchedUser;
   if (isPhone) {
-    const phoneInfo = {
-      phone,
-      phoneOtp,
-    };
-    getNumberAndSendSms(phoneInfo, name);
+    getNumberAndSendSms(phone, phoneOtp, name);
   } else {
     const appName = authentication.app.name;
     sendEmailOtpToUser(email, emailOtp, appName);

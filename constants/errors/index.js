@@ -9,6 +9,7 @@ import {
   MandatoryFieldNotSetError,
   InvalidToken,
   SomethingWentWrongError,
+  ResetPasswordLinkExpired,
 } from './auth';
 
 import {
@@ -78,6 +79,7 @@ import {
   SlotAlreadyOpened,
   SlotAlreadyFilled,
   SessionAlreadyAssigned,
+  FileNameAlreadyExists,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -135,6 +137,7 @@ import {
   InvalidBannerDateRangeError,
   BannerFieldRequiredError,
   CanNotDeleteCompletedSessionError,
+  CanNotStartSessionWithoutMentorError,
 } from './input';
 
 // assessment validation sqs  profile apolloErrorPackageTest maxSync transcoder
@@ -295,4 +298,7 @@ export {
   SlotAlreadyOpened,
   SlotAlreadyFilled,
   SessionAlreadyAssigned,
+  CanNotStartSessionWithoutMentorError,
+  FileNameAlreadyExists,
+  ResetPasswordLinkExpired,
 };

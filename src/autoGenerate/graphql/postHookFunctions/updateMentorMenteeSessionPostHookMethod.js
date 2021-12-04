@@ -23,8 +23,11 @@ import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import addSalesAudit from './utils/addSalesAudit';
 import { fetchCourseData, sessionStartedStreaksFlow, submittedForReviewStreaksFlow } from './utils/homeworkStreakMethods';
 import { log } from '../../../../utils';
+import getTopicInfo from './utils/getTopicInfo';
+import getCourseInfo from './utils/getCourseInfo';
+import sendDemoCompletionCertificate from './utils/sendDemoCompletionCertificate';
 
-const { postSales } = auditType;
+const { postSales, demoWow } = auditType;
 // import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 /*
   - check if the user if from referral
@@ -141,11 +144,21 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));
   const userId = get(menteeSession, 'data.menteeSession.user.id');
   const userInfo = await getMenteeInfo(userId);
+  const topicInfo = await getTopicInfo(get(params, 'topicConnectId'));
+  const courseInfo = await getCourseInfo(get(params, 'courseConnectId'));
 
   const oldSlotTimeArray = getSelectedSlotsTime(prevMenteeSession);
   const newSlotTimeArray = getSelectedSlotsTime(get(menteeSession, 'data.menteeSession', []));
   const oldBookingDate = get(prevMenteeSession, 'bookingDate', '');
   const newBookingDate = get(menteeSession, 'data.menteeSession.bookingDate', '');
+  const courseId = get(input, 'course.typeId', '');
+
+  if (
+    (prevSessionStatus !== 'completed' && get(input, 'sessionStatus') === 'completed')
+    && topic.order === 1
+  ) {
+    sendDemoCompletionCertificate(userId, courseId);
+  }
 
   // adding Rescheduled Slot async if we get changed mentee session
   // constructing fromDate and fromSLot from values in previous document
@@ -205,6 +218,18 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       await updateReferrerCreditsPostSessionOrUserPayment(currentUser.id, trialTaken, context, variables, TRIAL_TAKEN_FROM_REFERRAL);
       // set session completed on leadsquared
     }
+    if (
+      (prevSessionStatus !== 'completed' && (input && input.sessionStatus && input.sessionStatus === 'completed'))
+      && topic.order === 1
+    ) {
+      setSessionCompletedLeadsquared(
+        userInfo,
+        get(mmsFirstData, 'mentorSession.user.name'),
+        get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.name'),
+        get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.email'),
+      );
+    }
+
     const inputMentorRating = get(input, 'rating');
     const inputDistracted = get(input, 'distracted', false);
     const inputRude = get(input, 'rude', false);
@@ -220,35 +245,29 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const mentorMenteeSessionId = get(context, 'previousDocument.id', '');
     const prevIsPostSalesAudit = get(context, 'previousDocument.isPostSalesAudit', false);
     const isPostSalesAuditFromInput = get(context, 'isPostSalesAuditFromInput', false);
+    const prevIsDemoWowAudit = get(context, 'previousDocument.isDemoWowAudit', false);
+    const isDemoWowAuditFromInput = get(input, 'isDemoWowAudit', false);
 
     if ((inputIsAudit && prevIsAudit !== inputIsAudit)
       || (inputMentorRating && inputMentorRating < MENTOR_RATING_AUDIT_THRESHOLD)
       || inputDistracted || inputRude || inputSlowPaced || inputFastPaced || inputNotPunctual
       || inputAverage || inputBoring || inputPoorExplanation || inputAverageExplanation) {
-      addMentorMenteeSessionAudit(mentorMenteeSessionId);
+      addMentorMenteeSessionAudit(mentorMenteeSessionId, get(topic, 'order'));
     }
 
     if (isPostSalesAuditFromInput && prevIsPostSalesAudit === false) {
       addSalesAudit({ mentorMenteeSessionId, auditType: postSales });
     }
 
-    if (
-      (prevSessionStatus !== 'completed' && (input && input.sessionStatus && input.sessionStatus === 'completed'))
-      && topic.order === 1
-    ) {
-      setSessionCompletedLeadsquared(
-        userInfo,
-        get(mmsFirstData, 'mentorSession.user.name'),
-        get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.name'),
-        get(mmsFirstData, 'mentorSession.user.mentorProfile.salesExecutive.user.email'),
-      );
+    if (isDemoWowAuditFromInput && prevIsDemoWowAudit === false) {
+      addSalesAudit({ mentorMenteeSessionId, auditType: demoWow });
     }
+
     if (input && intersection(['hasRescheduled', 'sessionStatus', 'didNotPickTheCall', 'didNotTurnUpInSession', 'sessionNotConducted'], Object.keys(input)) && topic.order === 1) {
       updateMentorRescheduleLeadsquared(userInfo, input, params);
     }
 
     // update session log entry
-    const courseId = get(input, 'course.typeId', '');
     const clientId = get(userInfo, 'data.user.id', '');
     const topicId = topic && topic.id;
     const sessionStatus = get(input, 'sessionStatus');
@@ -256,6 +275,10 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const { bookingDate, ...slots } = menteeSessionDoc;
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
+    // if mentorSession is updated at a later stage, send comms
+    if (context.hasMentorSessionChanged && context.mentorSessionConnectId) {
+      await extractMentorMenteeSessionAndSendMessage(bookingDate, slotTimeStringArray, context.mentorSessionConnectId, userInfo, topicInfo, input.id, courseInfo);
+    }
     const mentorSessionId = get(input, 'mentorSession.typeId');
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     // adding logs when menteeSession is changed or mentorSession is changed or status is changed

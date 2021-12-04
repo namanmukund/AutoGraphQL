@@ -100,6 +100,8 @@ import RequestType from './RequestType';
 import RequestReason from './RequestReason';
 import Platform from './Platform';
 import StudentNoteForIQ from './StudentNoteForIQ';
+import LeadPartnerType from './LeadPartnerType';
+import BlockBasedProjectLayout from './BlockBasedProjectLayout';
 
 export default [
   Status,
@@ -205,4 +207,6 @@ export default [
   RequestReason,
   Platform,
   StudentNoteForIQ,
+  LeadPartnerType,
+  BlockBasedProjectLayout,
 ];

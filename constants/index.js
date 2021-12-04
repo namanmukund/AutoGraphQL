@@ -195,6 +195,7 @@ const auditType = {
   mentor: 'mentor',
   preSales: 'preSales',
   postSales: 'postSales',
+  demoWow: 'demoWow',
 };
 
 const scholarshipThreshHolds = {
@@ -248,7 +249,7 @@ const stickerEmojiType = {
 const forgotPassWebURL = {
   development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword/',
   staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
-  production: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
+  production: 'https://tekie-managment-system.herokuapp.com/forgotPassword/',
 };
 
 const slotTimes = [
@@ -445,7 +446,58 @@ export const VERTICALS = [
   'b2b2c',
 ];
 
+export const GRADE = [
+  'grade1',
+  'grade2',
+  'grade3',
+  'grade4',
+  'grade5',
+  'grade6',
+  'grade7',
+  'grade8',
+  'grade9',
+  'grade10',
+  'grade11',
+  'grade12',
+];
+
 export const NUNITO_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Nunito-Bold.ttf`;
+
+export const GILROY_EXTRA_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Gilroy-ExtraBold.otf`;
+
+const ALLOWED_MIME_TYPES = ['html', 'css', 'javascript'];
+
+const MASTER_OTP = 3007;
+
+const courseToGradeMapping = [
+  {
+    grade: [1, 2],
+    courseId: 'cks5y78w0000t0vwcauvc2rtm',
+  },
+  {
+    grade: [3, 4, 5],
+    courseId: 'cks94x3jq00fc0w24e92pb9ku',
+  },
+  {
+    grade: [6, 7, 8, 9, 10, 11, 12],
+    courseId: 'cks5r4pzv000r0v29gk231bcy',
+  },
+];
+
+const courseToGradeMappingForStaging = [
+  {
+    grade: [1, 2],
+    courseId: 'ckpwgsqpx00010txl9q1s19f2',
+  },
+  {
+    grade: [3, 4, 5],
+    courseId: 'ckpwvp8gb00000t06f78t6dbz',
+  },
+  {
+    grade: [6, 7, 8, 9, 10, 11, 12],
+    courseId: 'cjs8skrd200041huzz78kncz5',
+  },
+];
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
@@ -524,4 +576,8 @@ export {
   auditSubType,
   currencyTypes,
   studentNoteForIQ,
+  ALLOWED_MIME_TYPES,
+  MASTER_OTP,
+  courseToGradeMapping,
+  courseToGradeMappingForStaging,
 };

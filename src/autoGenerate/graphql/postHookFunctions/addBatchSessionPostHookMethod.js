@@ -206,7 +206,8 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   extractBatchSessionAndSendB2BC(batchSessionId, studentsId, false);
 
   // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
-  if (topicId && mentorSessionConnectId) {
+  // mentorSessionConnectId made non-mandatory
+  if (topicId) {
     // eslint-disable-next-line no-restricted-syntax
     for (const student of students) {
       if (student.user && student.user.id) {

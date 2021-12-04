@@ -135,6 +135,12 @@ import AcceptedSlotRequestByMentorLog from './acceptedSlotRequestByMentorLog';
 import SessionCourseReport from './sessionCourseReport';
 import GetEventCertificate from './getEventCertificate';
 import Event from './event';
+import UtmDetail from './utmDetail';
+import IqaReport from './iqaReport';
+import getMagicLink from './getMagicLink';
+import magicLinkLog from './magicLinkLog';
+import LeadPartner from './leadPartner';
+import DemoWowAudit from './demoWowAudits';
 
 export default [
   ...User,
@@ -274,4 +280,10 @@ export default [
   ...SessionCourseReport,
   ...GetEventCertificate,
   ...Event,
+  ...UtmDetail,
+  ...IqaReport,
+  ...getMagicLink,
+  ...magicLinkLog,
+  ...LeadPartner,
+  ...DemoWowAudit,
 ];
