@@ -15,6 +15,7 @@ import { GILROY_EXTRA_BOLD_FONT_URL, NUNITO_BOLD_FONT_URL } from '../../../../..
 import { uploadToS3 } from '../../../../../../middlewares/utils/uploadToS3';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
 import getStringWidth from '../utils/getStringWidthForEmbeddedFont';
+import getUrlExtension from '../utils/getUrlExtension';
 
 const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
 
@@ -180,10 +181,19 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   const dialImage = await pdfDoc.embedPng(dialImageBytes);
   const dialDims = dialImage.scale(1);
 
-  const mentorSilhoutteUrl = `${process.env.FILE_BASE_URL}/${mentorPicUri}`;
-  const mentorSilhoutteBytes = await fetch(mentorSilhoutteUrl).then((res) => res.buffer());
-
-  const mentorSilhoutte = await pdfDoc.embedPng(mentorSilhoutteBytes);
+  const fileType = getUrlExtension(mentorPicUri);
+  let mentorSilhoutteUrl = null;
+  let mentorSilhoutteBytes = null;
+  let mentorSilhoutte = null;
+  if (fileType === 'png') {
+    mentorSilhoutteUrl = `${process.env.FILE_BASE_URL}/${mentorPicUri}`;
+    mentorSilhoutteBytes = await fetch(mentorSilhoutteUrl).then((res) => res.buffer());
+    mentorSilhoutte = await pdfDoc.embedPng(mentorSilhoutteBytes);
+  } else {
+    mentorSilhoutteUrl = `${process.env.FILE_BASE_URL}/python/course/mentorAvatar.png`;
+    mentorSilhoutteBytes = await fetch(mentorSilhoutteUrl).then((res) => res.buffer());
+    mentorSilhoutte = await pdfDoc.embedPng(mentorSilhoutteBytes);
+  }
   const mentorImageDims = mentorSilhoutte.scale(1);
 
   const mentorRatingStarBytes = await fetch(getMentorRatingStars(mentorRating)).then((res) => res.buffer());
@@ -357,9 +367,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     size: 12,
     color: rgb(1, 1, 1),
   });
-
   firstPage.node.set(PDFName.of('Annots'), pdfDoc.context.obj([linkAnnotationRef]));
-
   /** PDF Meta Details */
   pdfDoc.setAuthor('Tekie');
   pdfDoc.setCreator('Kiwhode Learning Pvt Ltd');
