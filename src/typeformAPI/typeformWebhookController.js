@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 import { get } from 'lodash';
 import moment from 'moment';
@@ -456,15 +457,15 @@ const addIqaReport = async (studentDetailsObject) => {
           const assetUrl = get(generateCertRes, 'assetUrl');
           const certificateLink = `${process.env.TEKIE_WEB_URL}/iqa-report/${slugifyID(userCourseId)}`;
           // if the demo is completed, we have to ensure that the link is sent again
-          if (isDemoCompleted) {
+          // if (isDemoCompleted) {
             // wati send
-            const parameters = [
-              { name: 'parent_name', value: parentName },
-              { name: 'student_name', value: childName },
-              { name: 'iqa_report_snapshot_link', value: certificateLink },
-            ];
-            const parentPhone = countryCode.split('+')[1] + number;
-            const bookTemplate = 'iqa_report_snapshot_and_certificate';
+            // const parameters = [
+            //   { name: 'parent_name', value: parentName },
+            //   { name: 'student_name', value: childName },
+            //   { name: 'iqa_report_snapshot_link', value: certificateLink },
+            // ];
+            // const parentPhone = countryCode.split('+')[1] + number;
+            // const bookTemplate = 'iqa_report_snapshot_and_certificate';
             // email send
             // const emailTo = [`${parentEmail}`];
             // const emailTo = ['gokul99.gm@gmail.com'];
@@ -476,11 +477,15 @@ const addIqaReport = async (studentDetailsObject) => {
             // You can download their certificate here : ${certificateLink}`;
             //             const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
             //             sendEmail(emailMsgObject);
-            await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
-          }
+          //   await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
+          // }
           log(`cert link ${certificateLink}`);
           // update iqaReport with new tekieUrl
           await callLocalGraphqlApi(updateIqaReportMutation(iqaReportId, assetUrl));
+          updateLeadSquared({
+            Phone: number,
+            mx_IQA_Certificate_Snapshot: certificateLink,
+          }, false);
         } catch (err) {
           log('Error while adding IQA Report');
         }

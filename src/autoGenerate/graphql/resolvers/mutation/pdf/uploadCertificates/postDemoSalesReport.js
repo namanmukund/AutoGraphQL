@@ -142,6 +142,20 @@ const mentorMenteeSessionsQuery = (userId) => `
       {topic_some:{order: 1}}
     ]
   }){
+    menteeSession{
+      user{
+        studentProfile{
+          parents{
+            user{
+              name
+              phone{
+                number
+              }
+            }
+          }
+        }
+      }
+    }
     mentorSession{
       user{
         id
@@ -179,7 +193,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
   const mentorMenteeSessions = get(await callLocalGraphqlApi(mentorMenteeSessionsQuery(userId)), 'data.mentorMenteeSessions', []);
   const mentorName = get(mentorMenteeSessions, '[0].mentorSession.user.name', '-');
   const mentorPicUri = get(mentorMenteeSessions, '[0].mentorSession.user.profilePic.uri', 'python/course/mentorAvatar.png');
-  const parentPhone = get(iqaReports, '[0].user.studentProfile.parents[0].user.phone.number', 'xxxxxx');
+  const parentPhone = get(mentorMenteeSessions, '[0].menteeSession.user.studentProfile.parents[0].user.phone.number', 'xxxxxx');
   const grade = get(iqaReports, '[0].user.studentProfile.grade', 'xx');
   const parentName = get(iqaReports, '[0].user.studentProfile.parents[0].user.name', '-');
   const experience = get(mentorMenteeSessions, '[0].mentorSession.user.experienceYear', 2);
@@ -648,7 +662,6 @@ const getPostDemoSalesReportUrl = async (userId) => {
     await uploadToS3(key, fileContent);
     fetchedUrl = key;
   }
-
   // send the newly generated url as lead capture
   updateLeadSquared({
     Phone: parentPhone,
