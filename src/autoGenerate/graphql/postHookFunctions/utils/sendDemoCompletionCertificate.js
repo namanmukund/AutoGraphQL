@@ -141,7 +141,9 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
   const user = get(await callLocalGraphqlApi(userQuery(userId)), 'data.user');
   const childName = get(user, 'name', '');
   const parentName = get(user, 'studentProfile.parents[0].user.name', '');
-  const parentPhone = get(user, 'studentProfile.parents[0].user.phone.number');
+  const phoneNumber = get(user, 'studentProfile.parents[0].user.phone.number');
+  const phoneCode = get(user, 'studentProfile.parents[0].user.phone.countryCode', '+91').split('+')[1];
+  const parentPhone = `${phoneCode}${phoneNumber}`;
   let iqaReportId = '';
   // const parentEmail = get(user, 'studentProfile.parents[0].user.email');
 
@@ -187,7 +189,7 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
   await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
   // send the newly generated url as lead capture
   updateLeadSquared({
-    Phone: parentPhone,
+    Phone: phoneNumber,
     mx_IQA_Certificate_Snapshot: certificateLink,
   }, false);
   // send the post demo pre/post test report to leadsquared

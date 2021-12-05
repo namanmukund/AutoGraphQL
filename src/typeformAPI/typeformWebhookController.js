@@ -487,7 +487,7 @@ const addIqaReport = async (studentDetailsObject) => {
             mx_IQA_Certificate_Snapshot: certificateLink,
           }, false);
         } catch (err) {
-          log('Error while adding IQA Report');
+          log(err);
         }
       } else {
         log(`User does not exist with given phone number ${number}`);
