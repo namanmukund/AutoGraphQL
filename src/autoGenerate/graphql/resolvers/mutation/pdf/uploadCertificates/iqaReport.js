@@ -360,7 +360,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   });
   const linkAnnotationRef = pdfDoc.context.register(linkAnnotation);
 
-  firstPage.drawText('Book My Councelling Session', {
+  firstPage.drawText('Book My Counselling Session', {
     x: 229,
     y: 322,
     font: NunitoBoldFont,
