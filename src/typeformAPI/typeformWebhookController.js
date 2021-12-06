@@ -12,6 +12,7 @@ import updateLeadSquared from '../../services/leadsquared/updateLeadSquared';
 // import sendEmail from '../../services/email/utils/sendEmail';
 // import getEmailObject from '../../services/email/utils/getEmailObject';
 import sendWhatsAppTemplateMessage from '../autoGenerate/utils/sendWhatsAppTemplateMessage';
+import getPostDemoSalesReportUrl from '../autoGenerate/graphql/resolvers/mutation/pdf/uploadCertificates/postDemoSalesReport';
 
 const getEventId = (formId) => {
   let eventId = '';
@@ -486,6 +487,7 @@ const addIqaReport = async (studentDetailsObject) => {
             Phone: number,
             mx_IQA_Certificate_Snapshot: certificateLink,
           }, false);
+          getPostDemoSalesReportUrl(userId);
         } catch (err) {
           log(err);
         }

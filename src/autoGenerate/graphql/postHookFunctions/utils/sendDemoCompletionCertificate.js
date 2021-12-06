@@ -8,8 +8,6 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 import getPostDemoSalesReportUrl from '../../resolvers/mutation/pdf/uploadCertificates/postDemoSalesReport';
 
-// const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
-
 const generateCertificate = async (id, regenerateCertificate, eventId, date) => {
   const query = `
     mutation{
