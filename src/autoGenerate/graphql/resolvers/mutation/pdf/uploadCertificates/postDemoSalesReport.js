@@ -34,19 +34,19 @@ const round = (score) => {
 const getDialParams = (score) => {
   const dialOffset = {
     score70: {
-      x: -6,
+      x: -7,
       y: -5,
     },
     score80: {
-      x: -8,
+      x: -10,
       y: -7,
     },
     score90: {
-      x: -8,
+      x: -10,
       y: -7,
     },
     score100: {
-      x: -8,
+      x: -10,
       y: -7,
     },
   };
@@ -62,7 +62,7 @@ const round5 = (x) => Math.round(x / 5) * 5;
 
 const getMentorRatingStars = (rating) => `${process.env.FILE_BASE_URL}/python/course/mentorRatings/${rating}star.png`;
 
-const getMentorDialUrl = (score) => `${process.env.FILE_BASE_URL}/python/course/ratingsDial/rating${round5(score)}.png`;
+const getMentorDialUrl = (score) => `${process.env.FILE_BASE_URL}/python/course/ratingsDial/rating${Math.ceil(score)}.png`;
 
 const iqaReportQuery = (id) => `{
 iqaReports(filter: {
@@ -184,6 +184,26 @@ const mentorMenteeSessionsQuery = (userId) => `
 }
 `;
 
+const getGradeToDisplay = (grade) => {
+  const numerical = grade.split('Grade')[1];
+  let output = numerical;
+  switch (numerical) {
+    case '1':
+      output += 'ST';
+      break;
+    case '2':
+      output += 'ND';
+      break;
+    case '3':
+      output += 'RD';
+      break;
+    default:
+      output += 'TH';
+      break;
+  }
+  return output;
+};
+
 const getNote = (key) => {
   switch (key) {
     case 'smartAndAttentive':
@@ -238,7 +258,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
   const mentorName = get(mentorMenteeSessions, '[0].mentorSession.user.name', '-');
   const mentorPicUri = get(mentorMenteeSessions, '[0].mentorSession.user.profilePic.uri', 'python/course/mentorAvatar.png');
   const parentPhone = get(mentorMenteeSessions, '[0].menteeSession.user.studentProfile.parents[0].user.phone.number', 'xxxxxx');
-  const grade = get(iqaReports, '[0].user.studentProfile.grade', 'xx');
+  const grade = getGradeToDisplay(get(iqaReports, '[0].user.studentProfile.grade', 'xx'));
   const parentName = get(mentorMenteeSessions, '[0].menteeSession.user.studentProfile.parents[0].user.name', 'xxxxxx', '-');
   const experience = get(mentorMenteeSessions, '[0].mentorSession.user.experienceYear', 2);
   const mentorRating = get(mentorMenteeSessions, '[0].mentorSession.user.pythonCourseRating1', 5);
@@ -331,7 +351,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     /*
       SECOND PAGE
     */
-    secondPage.drawText(`${get(iqaReports, '[0].iqaScore', 70)}`, {
+    secondPage.drawText(`${get(iqaReports, '[0].iqaScore', 70) < 70 ? 70 : get(iqaReports, '[0].iqaScore', 70)}`, {
       x: 170,
       y: 640,
       size: 50,
@@ -374,7 +394,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     // child name
     secondPage.drawText(`${get(iqaReports, '[0].user.name', 'xxx').split(' ')[0].toUpperCase()}`, {
       x: 120,
-      y: 490,
+      y: 488,
       size: 12,
       font: NunitoBoldFont,
       color: rgb(0.314, 0.310, 0.310),
@@ -383,7 +403,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     // child grade
     secondPage.drawText(`${grade}`, {
       x: 233,
-      y: 490,
+      y: 488,
       size: 12,
       font: NunitoBoldFont,
       color: rgb(0.314, 0.310, 0.310),
@@ -392,7 +412,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     // assessment Date
     secondPage.drawText(`${moment(new Date()).format('DD-MM-YYYY')}`, {
       x: 315,
-      y: 490,
+      y: 488,
       size: 12,
       font: NunitoBoldFont,
       color: rgb(0.314, 0.310, 0.310),
@@ -463,7 +483,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     // mentor rating dial
     thirdPage.drawImage(mentorRatingDialImage, {
       x: 200,
-      y: 800,
+      y: 825,
       width: mentorRatingDialDim.width,
       height: mentorRatingDialDim.height,
     });
@@ -614,7 +634,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     // mentor rating dial
     secondPage.drawImage(mentorRatingDialImage, {
       x: 200,
-      y: 800,
+      y: 825,
       width: mentorRatingDialDim.width,
       height: mentorRatingDialDim.height,
     });
