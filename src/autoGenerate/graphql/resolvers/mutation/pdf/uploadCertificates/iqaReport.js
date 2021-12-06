@@ -354,7 +354,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     Type: 'Annot',
     Subtype: 'Link',
     Rect: [199, 292, 388, 338],
-    Border: [0, 0, 2],
+    Border: [0, 0, 0],
     C: [0, 0, 1],
     A: {
       Type: 'Action',
@@ -377,7 +377,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     Type: 'Annot',
     Subtype: 'Link',
     Rect: [230, 165, 370, 200],
-    Border: [0, 0, 1],
+    Border: [0, 0, 0],
     C: [0, 0, 1],
     A: {
       Type: 'Action',
@@ -392,7 +392,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     Type: 'Annot',
     Subtype: 'Link',
     Rect: [200, 55, 230, 85],
-    Border: [0, 0, 1],
+    Border: [0, 0, 0],
     C: [0, 0, 1],
     A: {
       Type: 'Action',
@@ -407,7 +407,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     Type: 'Annot',
     Subtype: 'Link',
     Rect: [255, 55, 285, 85],
-    Border: [0, 0, 1],
+    Border: [0, 0, 0],
     C: [0, 0, 1],
     A: {
       Type: 'Action',
@@ -422,7 +422,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     Type: 'Annot',
     Subtype: 'Link',
     Rect: [310, 55, 340, 85],
-    Border: [0, 0, 1],
+    Border: [0, 0, 0],
     C: [0, 0, 1],
     A: {
       Type: 'Action',
@@ -437,7 +437,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     Type: 'Annot',
     Subtype: 'Link',
     Rect: [365, 55, 395, 85],
-    Border: [0, 0, 1],
+    Border: [0, 0, 0],
     C: [0, 0, 1],
     A: {
       Type: 'Action',
@@ -452,7 +452,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     Type: 'Annot',
     Subtype: 'Link',
     Rect: [200, 15, 245, 35],
-    Border: [0, 0, 1],
+    Border: [0, 0, 0],
     C: [0, 0, 1],
     A: {
       Type: 'Action',
@@ -467,7 +467,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     Type: 'Annot',
     Subtype: 'Link',
     Rect: [270, 15, 330, 35],
-    Border: [0, 0, 1],
+    Border: [0, 0, 0],
     C: [0, 0, 1],
     A: {
       Type: 'Action',
@@ -482,7 +482,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     Type: 'Annot',
     Subtype: 'Link',
     Rect: [350, 15, 395, 35],
-    Border: [0, 0, 1],
+    Border: [0, 0, 0],
     C: [0, 0, 1],
     A: {
       Type: 'Action',
