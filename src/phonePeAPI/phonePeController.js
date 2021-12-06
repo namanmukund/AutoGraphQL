@@ -192,7 +192,10 @@ const fetchUsers = async (req, res) => {
       } else {
         // send bad request error
         foundError = true;
-        res.status(400).send('Valid phone number or country code or email address not found');
+        const object = {};
+        object.proceedWithPayment = false;
+        object.message = 'Valid phone number or country code or email address not found';
+        res.json(object);
       }
     } else {
       foundError = true;
@@ -332,7 +335,11 @@ const paymentStatus = async (req, res) => {
         } else {
           // send bad request error
           foundError = true;
-          res.status(400).send('Valid product id or amount not found');
+          const object = {};
+          object.allowPayment = false;
+          object.message = 'Valid product id or amount not found';
+          res.json(object);
+          // res.status(400).send('Valid product id or amount not found');
         }
         if (isAmountValid) {
           // we save payment Status to true and update user merchant doc with the status and transaction id
@@ -457,7 +464,10 @@ const verifyPaymentStatus = async (req, res) => {
         } else {
           // send bad request error
           foundError = true;
-          res.status(400).send('Valid product id or amount not found');
+          const object = {};
+          object.message = 'Valid product id or amount not found';
+          res.json(object);
+          // res.status(400).send('Valid product id or amount not found');
         }
         // if amount passed is valid
         if (isAmountValid) {
