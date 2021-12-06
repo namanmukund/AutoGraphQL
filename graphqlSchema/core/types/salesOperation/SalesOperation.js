@@ -66,6 +66,12 @@ const studentIQQuestions = `
   studentNote: StudentNoteForIQ
 `;
 
+const iqaTag = `
+ type iqaTag {
+   value: IQATag
+ }
+`;
+
 const SalesOperation = `
   type SalesOperation @model
   @appPermissions(
@@ -99,7 +105,8 @@ ${getPermissionSchemaString('SalesOperation')}
     ${userPaymentPlan}
     ${studentIQQuestions}
     sessionCommentByMentor: String
+    iqaTags: [iqaTag]
   }
 `;
 
-export default SalesOperation;
+export default [SalesOperation, iqaTag];
