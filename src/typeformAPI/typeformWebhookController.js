@@ -1,3 +1,5 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 import { get } from 'lodash';
 import moment from 'moment';
 import { log } from '../../utils';
@@ -10,6 +12,7 @@ import updateLeadSquared from '../../services/leadsquared/updateLeadSquared';
 // import sendEmail from '../../services/email/utils/sendEmail';
 // import getEmailObject from '../../services/email/utils/getEmailObject';
 import sendWhatsAppTemplateMessage from '../autoGenerate/utils/sendWhatsAppTemplateMessage';
+import getPostDemoSalesReportUrl from '../autoGenerate/graphql/resolvers/mutation/pdf/uploadCertificates/postDemoSalesReport';
 
 const getEventId = (formId) => {
   let eventId = '';
@@ -455,38 +458,38 @@ const addIqaReport = async (studentDetailsObject) => {
           const assetUrl = get(generateCertRes, 'assetUrl');
           const certificateLink = `${process.env.TEKIE_WEB_URL}/iqa-report/${slugifyID(userCourseId)}`;
           // if the demo is completed, we have to ensure that the link is sent again
-          if (isDemoCompleted) {
-            // wati send
-            const parameters = [
-              { name: 'parent_name', value: parentName },
-              { name: 'student_name', value: childName },
-              { name: 'iqa_report_snapshot_link', value: certificateLink },
-            ];
-            const parentPhone = countryCode.split('+')[1] + number;
-            const bookTemplate = 'iqa_report_snapshot_and_certificate';
-            // email send
-            // const emailTo = [`${parentEmail}`];
-            // const emailTo = ['gokul99.gm@gmail.com'];
-            //             const ccEmail = '';
-            //             const bccEmail = '';
-            //             const subject = 'Tekie - IQA Report Certificate';
-            //             const html = `Congratulations ${capitalize(parentName)}!
-            // Our Academic experts found ${capitalize(childName)}'s performance at the IQ assessment extraordinary and have created a personalized report for you.
-            // You can download their certificate here : ${certificateLink}`;
-            //             const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
-            //             sendEmail(emailMsgObject);
-            await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
-            // send the newly generated url as lead capture
-            updateLeadSquared({
-              Phone: parentPhone,
-              mx_IQA_Certificate_Snapshot: `${process.env.FILE_BASE_URL}/${assetUrl}`,
-            }, false);
-          }
+          // if (isDemoCompleted) {
+          // wati send
+          // const parameters = [
+          //   { name: 'parent_name', value: parentName },
+          //   { name: 'student_name', value: childName },
+          //   { name: 'iqa_report_snapshot_link', value: certificateLink },
+          // ];
+          // const parentPhone = countryCode.split('+')[1] + number;
+          // const bookTemplate = 'iqa_report_snapshot_and_certificate';
+          // email send
+          // const emailTo = [`${parentEmail}`];
+          // const emailTo = ['gokul99.gm@gmail.com'];
+          //             const ccEmail = '';
+          //             const bccEmail = '';
+          //             const subject = 'Tekie - IQA Report Certificate';
+          //             const html = `Congratulations ${capitalize(parentName)}!
+          // Our Academic experts found ${capitalize(childName)}'s performance at the IQ assessment extraordinary and have created a personalized report for you.
+          // You can download their certificate here : ${certificateLink}`;
+          //             const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
+          //             sendEmail(emailMsgObject);
+          //   await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
+          // }
           log(`cert link ${certificateLink}`);
           // update iqaReport with new tekieUrl
           await callLocalGraphqlApi(updateIqaReportMutation(iqaReportId, assetUrl));
+          updateLeadSquared({
+            Phone: number,
+            mx_IQA_Certificate_Snapshot: certificateLink,
+          }, false);
+          getPostDemoSalesReportUrl(userId);
         } catch (err) {
-          log('Error while adding IQA Report');
+          log(err);
         }
       } else {
         log(`User does not exist with given phone number ${number}`);
@@ -542,7 +545,7 @@ const typeformWebhookController = async (req, res) => {
       studentDetailsObject.preferredTime = `${studentDetailsObject.preferredTime.substring(0, 2)}:00:00 ${studentDetailsObject.preferredTime.substring(3, 5)}`;
 
       const counsellingDate = moment(new Date(`${studentDetailsObject.preferredDate} ${studentDetailsObject.preferredTime}`))
-        .format('YYYY-MM-DD HH:mm:ss');
+        .subtract(5, 'hours').subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss');
       const parentPhone = `${get(hidden, 'phone_number').trim()}`;
       updateLeadSquared({
         Phone: parentPhone,

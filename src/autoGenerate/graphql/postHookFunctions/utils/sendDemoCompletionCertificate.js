@@ -1,12 +1,12 @@
+/* eslint-disable no-unused-vars */
 import { get } from 'lodash';
+import updateLeadSquared from '../../../../../services/leadsquared/updateLeadSquared';
 import { log } from '../../../../../utils';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 // import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 // import sendEmail from '../../../../../services/email/utils/sendEmail';
 import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMessage';
 import getPostDemoSalesReportUrl from '../../resolvers/mutation/pdf/uploadCertificates/postDemoSalesReport';
-
-// const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
 
 const generateCertificate = async (id, regenerateCertificate, eventId, date) => {
   const query = `
@@ -139,7 +139,9 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
   const user = get(await callLocalGraphqlApi(userQuery(userId)), 'data.user');
   const childName = get(user, 'name', '');
   const parentName = get(user, 'studentProfile.parents[0].user.name', '');
-  const parentPhone = get(user, 'studentProfile.parents[0].user.phone.countryCode', '+91').split('+')[1] + get(user, 'studentProfile.parents[0].user.phone.number');
+  const phoneNumber = get(user, 'studentProfile.parents[0].user.phone.number');
+  const phoneCode = get(user, 'studentProfile.parents[0].user.phone.countryCode', '+91').split('+')[1];
+  const parentPhone = `${phoneCode}${phoneNumber}`;
   let iqaReportId = '';
   // const parentEmail = get(user, 'studentProfile.parents[0].user.email');
 
@@ -161,7 +163,6 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
     log('Added user course with demo completion certificate');
   }
   const certificateLink = `${process.env.TEKIE_WEB_URL}/iqa-report/${slugifyID(userCourseId)}`;
-
   // wati send
   const parameters = [
     { name: 'parent_name', value: parentName },
@@ -184,6 +185,11 @@ const sendDemoCompletionCertificate = async (userId, courseId) => {
   //   const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
   //   sendEmail(emailMsgObject);
   await sendWhatsAppTemplateMessage(parentPhone, bookTemplate, parentPhone, parameters);
+  // send the newly generated url as lead capture
+  updateLeadSquared({
+    Phone: phoneNumber,
+    mx_IQA_Certificate_Snapshot: certificateLink,
+  }, false);
   // send the post demo pre/post test report to leadsquared
   getPostDemoSalesReportUrl(userId);
   return true;
