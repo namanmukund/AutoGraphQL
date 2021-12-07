@@ -212,17 +212,40 @@ const getGradeToDisplay = (grade) => {
 const getNote = (key) => {
   switch (key) {
     case 'smartAndAttentive':
-      return 'The student was very smart and attentive.';
+      return {
+        line1: 'The student is very smart & attentive and understood the',
+        line2: 'clearly. Also, the kid tried answering all the question',
+        line3: 'and was very curious. Overall the kid has great potential.',
+      };
     case 'interestedAndEagerToLearn':
-      return 'The student was really interested in coding.';
+      return {
+        line1: 'The student was really interested in coding and was eager',
+        line2: 'to learn as well. Also, the student was asking questions constantly.',
+      };
     case 'goodCommunicationAndCurious':
-      return 'The student has amazing communication skills.';
+      return {
+        line1: 'The student is an extrovert and has amazing communication',
+        line2: 'skills, also the kid was able to quickly grasp the concepts',
+        line3: 'and had a lot of curiosity to learn more. The kid has great',
+        line4: 'potential overall.',
+      };
     case 'interactiveAndFocused':
-      return 'The student was interactive and focused throughout the class.';
+      return {
+        line1: 'The student was good at catching concepts and was really',
+        line2: 'interactive and focused throughout the sessions and was',
+        line3: 'very interested to learn coding.',
+      };
     case 'problemSolvingAndCreativeThinkingSkill':
-      return 'The student was highly creative and is good at problem solving.';
+      return {
+        line1: 'The student was really curious and filled with tons of',
+        line2: 'energy also, had good problem-solving skills and creative',
+        line3: 'thinking. Amazing kid!',
+      };
     default:
-      return '';
+      return {
+        line1: 'The student was really interested in coding and was eager',
+        line2: 'to learn as well. Also, the student was asking questions constantly.',
+      };
   }
 };
 
@@ -269,7 +292,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
   const mentorRating = get(mentorMenteeSessions, '[0].mentorSession.user.pythonCourseRating1', 5);
   const studentName = get(mentorMenteeSessions, '[0].menteeSession.user.name', 'xxxxxx', '');
 
-  if ((iqaReports && iqaReports.length) && false) {
+  if ((iqaReports && iqaReports.length)) {
     url = `${process.env.FILE_BASE_URL}/python/course/postDemoPostTestCompressed.pdf`;
     existingPdfBytes = await fetch(url).then((res) => res.buffer());
     // Load a PDFDocument from the existing PDF bytes
@@ -561,13 +584,45 @@ const getPostDemoSalesReportUrl = async (userId) => {
     });
 
     // notes from the mentor
-    thirdPage.drawText(mentorNote, {
-      x: 42,
-      y: 570,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.31, 0.31, 0.31),
-    });
+    if (mentorNote.line1) {
+      thirdPage.drawText(mentorNote.line1, {
+        x: 42,
+        y: 570,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
+
+    if (mentorNote.line2) {
+      thirdPage.drawText(mentorNote.line2, {
+        x: 42,
+        y: 554,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
+
+    if (mentorNote.line3) {
+      thirdPage.drawText(mentorNote.line3, {
+        x: 42,
+        y: 538,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
+
+    if (mentorNote.line4) {
+      thirdPage.drawText(mentorNote.line4, {
+        x: 42,
+        y: 522,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
 
     // mentor name
     thirdPage.drawText(capitalize(mentorName), {
@@ -848,13 +903,45 @@ const getPostDemoSalesReportUrl = async (userId) => {
     });
 
     // notes from the mentor
-    secondPage.drawText(mentorNote, {
-      x: 42,
-      y: 570,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.31, 0.31, 0.31),
-    });
+    if (mentorNote.line1) {
+      secondPage.drawText(mentorNote.line1, {
+        x: 42,
+        y: 570,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
+
+    if (mentorNote.line2) {
+      secondPage.drawText(mentorNote.line2, {
+        x: 42,
+        y: 554,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
+
+    if (mentorNote.line3) {
+      secondPage.drawText(mentorNote.line3, {
+        x: 42,
+        y: 538,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
+
+    if (mentorNote.line4) {
+      secondPage.drawText(mentorNote.line4, {
+        x: 42,
+        y: 522,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
 
     // mentor name
     secondPage.drawText(capitalize(mentorName), {
