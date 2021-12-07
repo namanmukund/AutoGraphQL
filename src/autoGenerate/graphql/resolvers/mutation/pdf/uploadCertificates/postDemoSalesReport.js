@@ -249,16 +249,41 @@ const getNote = (key) => {
   }
 };
 
-const getIqaTags = (iqaTags) => {
+const getIqaTags = async (iqaTags, pdfDoc) => {
   let tags = [];
+  const arr = [];
   if (iqaTags && iqaTags.length) {
     for (const iqaTag of iqaTags) {
-      tags.push(iqaTag.value.toUpperCase());
+      tags.push(iqaTag.value);
     }
   } else {
-    tags = ['CURIOUS', 'SMART', 'AMBITIOUS'];
+    tags = ['curious', 'focused', 'ambitious'];
   }
-  return tags;
+  const tag1Url = `${process.env.FILE_BASE_URL}/python/course/childTags/${tags[0]}.png`;
+  const tag1Bytes = await fetch(tag1Url).then((res) => res.buffer());
+  const tag1Image = await pdfDoc.embedPng(tag1Bytes);
+  const tag1ImageDim = tag1Image.scale(1);
+  arr.push({
+    image: tag1Image,
+    size: tag1ImageDim,
+  });
+  const tag2Url = `${process.env.FILE_BASE_URL}/python/course/childTags/${tags[1]}.png`;
+  const tag2Bytes = await fetch(tag2Url).then((res) => res.buffer());
+  const tag2Image = await pdfDoc.embedPng(tag2Bytes);
+  const tag2ImageDim = tag2Image.scale(1);
+  arr.push({
+    image: tag2Image,
+    size: tag2ImageDim,
+  });
+  const tag3Url = `${process.env.FILE_BASE_URL}/python/course/childTags/${tags[2]}.png`;
+  const tag3Bytes = await fetch(tag3Url).then((res) => res.buffer());
+  const tag3Image = await pdfDoc.embedPng(tag3Bytes);
+  const tag3ImageDim = tag3Image.scale(1);
+  arr.push({
+    image: tag3Image,
+    size: tag3ImageDim,
+  });
+  return arr;
 };
 
 const getPostDemoSalesReportUrl = async (userId) => {
@@ -279,8 +304,6 @@ const getPostDemoSalesReportUrl = async (userId) => {
     creativeSkills = 5,
     iqaTags,
   } = get(salesOperations, '[0]');
-  const shuffledTags = getIqaTags(iqaTags).sort(() => 0.5 - Math.random());
-  const selectedTags = shuffledTags.slice(0, 3);
 
   const mentorMenteeSessions = get(await callLocalGraphqlApi(mentorMenteeSessionsQuery(userId)), 'data.mentorMenteeSessions', []);
   const mentorName = get(mentorMenteeSessions, '[0].mentorSession.user.name', '-');
@@ -293,7 +316,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
   const studentName = get(mentorMenteeSessions, '[0].menteeSession.user.name', 'xxxxxx', '');
 
   if ((iqaReports && iqaReports.length)) {
-    url = `${process.env.FILE_BASE_URL}/python/course/postDemoPostTestCompressed.pdf`;
+    url = `${process.env.FILE_BASE_URL}/python/course/postDemoPostTestCombined.pdf`;
     existingPdfBytes = await fetch(url).then((res) => res.buffer());
     // Load a PDFDocument from the existing PDF bytes
     pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -356,7 +379,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     const mentorRatingDialBytes = await fetch(getMentorDialUrl(ratingAverage)).then((res) => res.buffer());
     const mentorRatingDialImage = await pdfDoc.embedPng(mentorRatingDialBytes);
     const mentorRatingDialDim = mentorRatingDialImage.scale(1);
-
+    const selectedTags = await getIqaTags(iqaTags, pdfDoc);
     /*
       FIRST PAGE
     */
@@ -559,28 +582,25 @@ const getPostDemoSalesReportUrl = async (userId) => {
     /*
       student tags
     */
-    thirdPage.drawText(selectedTags[0], {
-      x: 146,
-      y: 496,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.09, 0.675, 1),
+    thirdPage.drawImage(selectedTags[0].image, {
+      x: 140,
+      y: 490,
+      width: selectedTags[0].size.width / 3,
+      height: selectedTags[0].size.height / 3,
     });
 
-    thirdPage.drawText(selectedTags[1], {
-      x: 226,
-      y: 496,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.09, 0.675, 1),
+    thirdPage.drawImage(selectedTags[1].image, {
+      x: 250,
+      y: 490,
+      width: selectedTags[1].size.width / 3,
+      height: selectedTags[1].size.height / 3,
     });
 
-    thirdPage.drawText(selectedTags[2], {
-      x: 306,
-      y: 496,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.09, 0.675, 1),
+    thirdPage.drawImage(selectedTags[2].image, {
+      x: 360,
+      y: 490,
+      width: selectedTags[2].size.width / 3,
+      height: selectedTags[2].size.height / 3,
     });
 
     // notes from the mentor
@@ -769,7 +789,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     const unsLinkAnnotationRef = pdfDoc.context.register(unsLinkAnnotation);
     thirdPage.node.set(PDFName.of('Annots'), pdfDoc.context.obj([whatsappLinkAnnotationRef, telLinkAnnotationRef, fbLinkAnnotationRef, igLinkAnnotationRef, liLinkAnnotationRef, ytLinkAnnotationRef, termsLinkAnnotationRef, tekiewebLinkAnnotationRef, unsLinkAnnotationRef]));
   } else {
-    url = `${process.env.FILE_BASE_URL}/python/course/postDemoPreTestCompressed.pdf`;
+    url = `${process.env.FILE_BASE_URL}/python/course/postDemoPreTestCombined.pdf`;
     existingPdfBytes = await fetch(url).then((res) => res.buffer());
     // Load a PDFDocument from the existing PDF bytes
     pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -806,6 +826,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     const mentorRatingDialBytes = await fetch(getMentorDialUrl(ratingAverage)).then((res) => res.buffer());
     const mentorRatingDialImage = await pdfDoc.embedPng(mentorRatingDialBytes);
     const mentorRatingDialDim = mentorRatingDialImage.scale(1);
+    const selectedTags = await getIqaTags(iqaTags, pdfDoc);
     /*
       FIRST PAGE
     */
@@ -878,28 +899,25 @@ const getPostDemoSalesReportUrl = async (userId) => {
     /*
       student tags
     */
-    secondPage.drawText(selectedTags[0], {
-      x: 146,
-      y: 496,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.09, 0.675, 1),
+    secondPage.drawImage(selectedTags[0].image, {
+      x: 140,
+      y: 490,
+      width: selectedTags[0].size.width / 3,
+      height: selectedTags[0].size.height / 3,
     });
 
-    secondPage.drawText(selectedTags[1], {
-      x: 226,
-      y: 496,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.09, 0.675, 1),
+    secondPage.drawImage(selectedTags[1].image, {
+      x: 250,
+      y: 490,
+      width: selectedTags[1].size.width / 3,
+      height: selectedTags[1].size.height / 3,
     });
 
-    secondPage.drawText(selectedTags[2], {
-      x: 306,
-      y: 496,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.09, 0.675, 1),
+    secondPage.drawImage(selectedTags[2].image, {
+      x: 360,
+      y: 490,
+      width: selectedTags[2].size.width / 3,
+      height: selectedTags[2].size.height / 3,
     });
 
     // notes from the mentor
