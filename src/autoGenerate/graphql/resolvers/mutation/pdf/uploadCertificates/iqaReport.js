@@ -59,7 +59,7 @@ const getDialParams = (score) => {
   };
 };
 
-const getMentorRatingStars = (rating) => `${process.env.FILE_BASE_URL}/python/course/mentorRatings/${rating}star.png`;
+const getMentorRatingStars = (rating) => `${process.env.FILE_BASE_URL}/python/course/mentorRatings/${rating}starHighRes.png`;
 
 const getGradeToDisplay = (grade) => {
   const numerical = grade.split('Grade')[1];
@@ -324,8 +324,8 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   firstPage.drawImage(mentorRatingStarImage, {
     x: 155,
     y: 526,
-    width: mentorRatingStarDim.width,
-    height: mentorRatingStarDim.height,
+    width: mentorRatingStarDim.width / 3,
+    height: mentorRatingStarDim.height / 3,
   });
 
   // mentor circle

@@ -65,9 +65,9 @@ const getDialParams = (score) => {
 
 const round5 = (x) => Math.round(x / 5) * 5;
 
-const getMentorRatingStars = (rating) => `${process.env.FILE_BASE_URL}/python/course/mentorRatings/${rating}star.png`;
+const getMentorRatingStars = (rating) => `${process.env.FILE_BASE_URL}/python/course/mentorRatings/${rating}starHighRes.png`;
 
-const getMentorDialUrl = (score) => `${process.env.FILE_BASE_URL}/python/course/ratingsDial/rating${Math.ceil(score)}.png`;
+const getMentorDialUrl = (score) => `${process.env.FILE_BASE_URL}/python/course/ratingsDial/rating${Math.ceil(score)}HighRes.png`;
 
 const iqaReportQuery = (id) => `{
 iqaReports(filter: {
@@ -486,8 +486,8 @@ const getPostDemoSalesReportUrl = async (userId) => {
     secondPage.drawImage(mentorRatingStarImage, {
       x: 155,
       y: 226,
-      width: mentorRatingStarDim.width,
-      height: mentorRatingStarDim.height,
+      width: mentorRatingStarDim.width / 3,
+      height: mentorRatingStarDim.height / 3,
     });
 
     // mentor circle
@@ -512,48 +512,48 @@ const getPostDemoSalesReportUrl = async (userId) => {
     thirdPage.drawImage(mentorRatingDialImage, {
       x: 200,
       y: 825,
-      width: mentorRatingDialDim.width,
-      height: mentorRatingDialDim.height,
+      width: mentorRatingDialDim.width / 3,
+      height: mentorRatingDialDim.height / 3,
     });
 
     // critical thinking
     thirdPage.drawImage(Star1Image, {
       x: 335,
       y: 786,
-      width: Star1Dim.width,
-      height: Star1Dim.height,
+      width: Star1Dim.width / 3,
+      height: Star1Dim.height / 3,
     });
 
     // logical thinking
     thirdPage.drawImage(Star2Image, {
       x: 335,
       y: 753,
-      width: Star2Dim.width,
-      height: Star2Dim.height,
+      width: Star2Dim.width / 3,
+      height: Star2Dim.height / 3,
     });
 
     // communication skills
     thirdPage.drawImage(Star3Image, {
       x: 335,
       y: 720,
-      width: Star3Dim.width,
-      height: Star3Dim.height,
+      width: Star3Dim.width / 3,
+      height: Star3Dim.height / 3,
     });
 
     // problem solving ability
     thirdPage.drawImage(Star4Image, {
       x: 335,
       y: 687,
-      width: Star4Dim.width,
-      height: Star4Dim.height,
+      width: Star4Dim.width / 3,
+      height: Star4Dim.height / 3,
     });
 
     // creativity skills
     thirdPage.drawImage(Star5Image, {
       x: 335,
       y: 654,
-      width: Star5Dim.width,
-      height: Star5Dim.height,
+      width: Star5Dim.width / 3,
+      height: Star5Dim.height / 3,
     });
 
     /*
@@ -831,48 +831,48 @@ const getPostDemoSalesReportUrl = async (userId) => {
     secondPage.drawImage(mentorRatingDialImage, {
       x: 200,
       y: 825,
-      width: mentorRatingDialDim.width,
-      height: mentorRatingDialDim.height,
+      width: mentorRatingDialDim.width / 3,
+      height: mentorRatingDialDim.height / 3,
     });
 
     // critical thinking
     secondPage.drawImage(Star1Image, {
       x: 335,
       y: 786,
-      width: Star1Dim.width,
-      height: Star1Dim.height,
+      width: Star1Dim.width / 3,
+      height: Star1Dim.height / 3,
     });
 
     // logical thinking
     secondPage.drawImage(Star2Image, {
       x: 335,
       y: 753,
-      width: Star2Dim.width,
-      height: Star2Dim.height,
+      width: Star2Dim.width / 3,
+      height: Star2Dim.height / 3,
     });
 
     // communication skills
     secondPage.drawImage(Star3Image, {
       x: 335,
       y: 720,
-      width: Star3Dim.width,
-      height: Star3Dim.height,
+      width: Star3Dim.width / 3,
+      height: Star3Dim.height / 3,
     });
 
     // problem solving ability
     secondPage.drawImage(Star4Image, {
       x: 335,
       y: 687,
-      width: Star4Dim.width,
-      height: Star4Dim.height,
+      width: Star4Dim.width / 3,
+      height: Star4Dim.height / 3,
     });
 
     // creativity skills
     secondPage.drawImage(Star5Image, {
       x: 335,
       y: 654,
-      width: Star5Dim.width,
-      height: Star5Dim.height,
+      width: Star5Dim.width / 3,
+      height: Star5Dim.height / 3,
     });
 
     /*
