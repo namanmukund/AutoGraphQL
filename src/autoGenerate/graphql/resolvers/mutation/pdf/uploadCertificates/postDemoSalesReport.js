@@ -3,7 +3,12 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-confusing-arrow */
 
-import { PDFDocument, rgb } from 'pdf-lib';
+import {
+  PDFDocument,
+  PDFName,
+  PDFString,
+  rgb,
+} from 'pdf-lib';
 import * as fs from 'fs';
 import fontkit from '@pdf-lib/fontkit';
 import mkdirp from 'mkdirp';
@@ -264,7 +269,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
   const mentorRating = get(mentorMenteeSessions, '[0].mentorSession.user.pythonCourseRating1', 5);
   const studentName = get(mentorMenteeSessions, '[0].menteeSession.user.name', 'xxxxxx', '');
 
-  if ((iqaReports && iqaReports.length)) {
+  if ((iqaReports && iqaReports.length) && false) {
     url = `${process.env.FILE_BASE_URL}/python/course/postDemoPostTestCompressed.pdf`;
     existingPdfBytes = await fetch(url).then((res) => res.buffer());
     // Load a PDFDocument from the existing PDF bytes
@@ -572,6 +577,142 @@ const getPostDemoSalesReportUrl = async (userId) => {
       font: NunitoBoldFont,
       color: rgb(0.31, 0.31, 0.31),
     });
+
+    // link to whatsapp
+    const whatsappLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [230, 215, 370, 250],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('http://tekie.app.link/sgnArKNfwdb'),
+      },
+    });
+    const whatsappLinkAnnotationRef = pdfDoc.context.register(whatsappLinkAnnotation);
+
+    // link to tel
+    const telLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [230, 160, 370, 195],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('tel:+918047483415'),
+      },
+    });
+    const telLinkAnnotationRef = pdfDoc.context.register(telLinkAnnotation);
+
+    // link to facebook
+    const fbLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [200, 105, 230, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.facebook.com/Tekie.in/'),
+      },
+    });
+    const fbLinkAnnotationRef = pdfDoc.context.register(fbLinkAnnotation);
+
+    // link to instagram
+    const igLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [255, 105, 285, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.instagram.com/tekie.in/'),
+      },
+    });
+    const igLinkAnnotationRef = pdfDoc.context.register(igLinkAnnotation);
+
+    // link to linkedin
+    const liLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [310, 105, 340, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.linkedin.com/company/tekie'),
+      },
+    });
+    const liLinkAnnotationRef = pdfDoc.context.register(liLinkAnnotation);
+
+    // link to youtube
+    const ytLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [365, 105, 395, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.youtube.com/channel/UCCr7GPlTdZRXFEfveeuKcbg'),
+      },
+    });
+    const ytLinkAnnotationRef = pdfDoc.context.register(ytLinkAnnotation);
+
+    // link to terms
+    const termsLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [200, 65, 245, 85],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.tekie.in/terms'),
+      },
+    });
+    const termsLinkAnnotationRef = pdfDoc.context.register(termsLinkAnnotation);
+
+    // link to tekie.in
+    const tekiewebLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [270, 65, 330, 85],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.tekie.in/'),
+      },
+    });
+    const tekiewebLinkAnnotationRef = pdfDoc.context.register(tekiewebLinkAnnotation);
+
+    // link to unsibscribe
+    const unsLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [350, 65, 395, 85],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://tekie.in/Unsubscribe'),
+      },
+    });
+    const unsLinkAnnotationRef = pdfDoc.context.register(unsLinkAnnotation);
+    thirdPage.node.set(PDFName.of('Annots'), pdfDoc.context.obj([whatsappLinkAnnotationRef, telLinkAnnotationRef, fbLinkAnnotationRef, igLinkAnnotationRef, liLinkAnnotationRef, ytLinkAnnotationRef, termsLinkAnnotationRef, tekiewebLinkAnnotationRef, unsLinkAnnotationRef]));
   } else {
     url = `${process.env.FILE_BASE_URL}/python/course/postDemoPreTestCompressed.pdf`;
     existingPdfBytes = await fetch(url).then((res) => res.buffer());
@@ -723,6 +864,142 @@ const getPostDemoSalesReportUrl = async (userId) => {
       font: NunitoBoldFont,
       color: rgb(0.31, 0.31, 0.31),
     });
+
+    // link to whatsapp
+    const whatsappLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [230, 215, 370, 250],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('http://tekie.app.link/sgnArKNfwdb'),
+      },
+    });
+    const whatsappLinkAnnotationRef = pdfDoc.context.register(whatsappLinkAnnotation);
+
+    // link to tel
+    const telLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [230, 160, 370, 195],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('tel:+918047483415'),
+      },
+    });
+    const telLinkAnnotationRef = pdfDoc.context.register(telLinkAnnotation);
+
+    // link to facebook
+    const fbLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [200, 105, 230, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.facebook.com/Tekie.in/'),
+      },
+    });
+    const fbLinkAnnotationRef = pdfDoc.context.register(fbLinkAnnotation);
+
+    // link to instagram
+    const igLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [255, 105, 285, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.instagram.com/tekie.in/'),
+      },
+    });
+    const igLinkAnnotationRef = pdfDoc.context.register(igLinkAnnotation);
+
+    // link to linkedin
+    const liLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [310, 105, 340, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.linkedin.com/company/tekie'),
+      },
+    });
+    const liLinkAnnotationRef = pdfDoc.context.register(liLinkAnnotation);
+
+    // link to youtube
+    const ytLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [365, 105, 395, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.youtube.com/channel/UCCr7GPlTdZRXFEfveeuKcbg'),
+      },
+    });
+    const ytLinkAnnotationRef = pdfDoc.context.register(ytLinkAnnotation);
+
+    // link to terms
+    const termsLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [200, 65, 245, 85],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.tekie.in/terms'),
+      },
+    });
+    const termsLinkAnnotationRef = pdfDoc.context.register(termsLinkAnnotation);
+
+    // link to tekie.in
+    const tekiewebLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [270, 65, 330, 85],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.tekie.in/'),
+      },
+    });
+    const tekiewebLinkAnnotationRef = pdfDoc.context.register(tekiewebLinkAnnotation);
+
+    // link to unsibscribe
+    const unsLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [350, 65, 395, 85],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://tekie.in/Unsubscribe'),
+      },
+    });
+    const unsLinkAnnotationRef = pdfDoc.context.register(unsLinkAnnotation);
+    secondPage.node.set(PDFName.of('Annots'), pdfDoc.context.obj([whatsappLinkAnnotationRef, telLinkAnnotationRef, fbLinkAnnotationRef, igLinkAnnotationRef, liLinkAnnotationRef, ytLinkAnnotationRef, termsLinkAnnotationRef, tekiewebLinkAnnotationRef, unsLinkAnnotationRef]));
   }
   /** PDF Meta Details */
   pdfDoc.setAuthor('Tekie');
