@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-confusing-arrow */
@@ -7,11 +8,13 @@ import * as fs from 'fs';
 import fontkit from '@pdf-lib/fontkit';
 import mkdirp from 'mkdirp';
 import { get } from 'lodash';
+import moment from 'moment';
 import { GILROY_EXTRA_BOLD_FONT_URL, NUNITO_BOLD_FONT_URL } from '../../../../../../../constants';
 import { uploadToS3 } from '../../../../../../middlewares/utils/uploadToS3';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
 import getStringWidth from '../utils/getStringWidthForEmbeddedFont';
 import updateLeadSquared from '../../../../../../../services/leadsquared/updateLeadSquared';
+import getUrlExtension from '../utils/getUrlExtension';
 
 const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
 
@@ -31,19 +34,19 @@ const round = (score) => {
 const getDialParams = (score) => {
   const dialOffset = {
     score70: {
-      x: -2,
+      x: -7,
       y: -5,
     },
     score80: {
-      x: -4,
+      x: -10,
       y: -7,
     },
     score90: {
-      x: -4,
+      x: -10,
       y: -7,
     },
     score100: {
-      x: -4,
+      x: -10,
       y: -7,
     },
   };
@@ -59,7 +62,7 @@ const round5 = (x) => Math.round(x / 5) * 5;
 
 const getMentorRatingStars = (rating) => `${process.env.FILE_BASE_URL}/python/course/mentorRatings/${rating}star.png`;
 
-const getMentorDialUrl = (score) => `${process.env.FILE_BASE_URL}/python/course/ratingsDial/rating${round5(score)}.png`;
+const getMentorDialUrl = (score) => `${process.env.FILE_BASE_URL}/python/course/ratingsDial/rating${Math.ceil(score)}.png`;
 
 const iqaReportQuery = (id) => `{
 iqaReports(filter: {
@@ -118,6 +121,10 @@ const salesOperationQuery = (userId) => `
     problemSolvingAbility
     creativeSkills
     studentNote
+    otherReasonsComment
+    iqaTags{
+      value
+    }
     allottedMentor{
       name
       mentorProfile{
@@ -142,6 +149,21 @@ const mentorMenteeSessionsQuery = (userId) => `
       {topic_some:{order: 1}}
     ]
   }){
+    menteeSession{
+      user{
+        name
+        studentProfile{
+          parents{
+            user{
+              name
+              phone{
+                number
+              }
+            }
+          }
+        }
+      }
+    }
     mentorSession{
       user{
         id
@@ -162,6 +184,55 @@ const mentorMenteeSessionsQuery = (userId) => `
 }
 `;
 
+const getGradeToDisplay = (grade) => {
+  const numerical = grade.split('Grade')[1];
+  let output = numerical;
+  switch (numerical) {
+    case '1':
+      output += 'ST';
+      break;
+    case '2':
+      output += 'ND';
+      break;
+    case '3':
+      output += 'RD';
+      break;
+    default:
+      output += 'TH';
+      break;
+  }
+  return output;
+};
+
+const getNote = (key) => {
+  switch (key) {
+    case 'smartAndAttentive':
+      return 'The student was very smart and attentive.';
+    case 'interestedAndEagerToLearn':
+      return 'The student was really interested in coding.';
+    case 'goodCommunicationAndCurious':
+      return 'The student has amazing communication skills.';
+    case 'interactiveAndFocused':
+      return 'The student was interactive and focused throughout the class.';
+    case 'problemSolvingAndCreativeThinkingSkill':
+      return 'The student was highly creative and is good at problem solving.';
+    default:
+      return '';
+  }
+};
+
+const getIqaTags = (iqaTags) => {
+  let tags = [];
+  if (iqaTags && iqaTags.length) {
+    for (const iqaTag of iqaTags) {
+      tags.push(iqaTag.value.toUpperCase());
+    }
+  } else {
+    tags = ['CURIOUS', 'SMART', 'AMBITIOUS'];
+  }
+  return tags;
+};
+
 const getPostDemoSalesReportUrl = async (userId) => {
   const iqaReports = get(await callLocalGraphqlApi(iqaReportQuery(userId)), 'data.iqaReports', []);
   let url = '';
@@ -169,25 +240,32 @@ const getPostDemoSalesReportUrl = async (userId) => {
   let pdfDoc = null;
   // fetch mentorMenteeSessionAudit for the given userId
   // fetch the audit report feilds for the various star ratings
-  const tagsArray = ['ENERGETIC', 'MOTIVATED', 'AMBITIOUS', 'CURIOUS'];
-  const shuffledTags = tagsArray.sort(() => 0.5 - Math.random());
-  const selectedTags = shuffledTags.slice(0, 3);
 
   const salesOperations = get(await callLocalGraphqlApi(salesOperationQuery(userId)), 'data.salesOperations', []);
-  const mentorNote = get(salesOperations, '[0].studentNote', 'The class was interesting and fun to teach!');
+  const mentorNote = getNote(get(salesOperations, '[0].studentNote', 'smartAndAttentive'));
+  const {
+    criticalThinking = 4,
+    logicalThinking = 5,
+    communicationSkills = 4,
+    problemSolvingAbility = 5,
+    creativeSkills = 5,
+    iqaTags,
+  } = get(salesOperations, '[0]');
+  const shuffledTags = getIqaTags(iqaTags).sort(() => 0.5 - Math.random());
+  const selectedTags = shuffledTags.slice(0, 3);
 
   const mentorMenteeSessions = get(await callLocalGraphqlApi(mentorMenteeSessionsQuery(userId)), 'data.mentorMenteeSessions', []);
   const mentorName = get(mentorMenteeSessions, '[0].mentorSession.user.name', '-');
   const mentorPicUri = get(mentorMenteeSessions, '[0].mentorSession.user.profilePic.uri', 'python/course/mentorAvatar.png');
-  const parentPhone = get(iqaReports, '[0].user.studentProfile.parents[0].user.phone.number', 'xxxxxx');
-  const grade = get(iqaReports, '[0].user.studentProfile.grade', 'xx');
-  const parentName = get(iqaReports, '[0].user.studentProfile.parents[0].user.name', '-');
+  const parentPhone = get(mentorMenteeSessions, '[0].menteeSession.user.studentProfile.parents[0].user.phone.number', 'xxxxxx');
+  const grade = getGradeToDisplay(get(iqaReports, '[0].user.studentProfile.grade', 'xx'));
+  const parentName = get(mentorMenteeSessions, '[0].menteeSession.user.studentProfile.parents[0].user.name', 'xxxxxx', '-');
   const experience = get(mentorMenteeSessions, '[0].mentorSession.user.experienceYear', 2);
   const mentorRating = get(mentorMenteeSessions, '[0].mentorSession.user.pythonCourseRating1', 5);
-  const studentName = get(iqaReports, '[0].user.name', '');
+  const studentName = get(mentorMenteeSessions, '[0].menteeSession.user.name', 'xxxxxx', '');
 
   if ((iqaReports && iqaReports.length)) {
-    url = `${process.env.FILE_BASE_URL}/python/course/postDemoPostTest.pdf`;
+    url = `${process.env.FILE_BASE_URL}/python/course/postDemoPostTestCompressed.pdf`;
     existingPdfBytes = await fetch(url).then((res) => res.buffer());
     // Load a PDFDocument from the existing PDF bytes
     pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -210,40 +288,51 @@ const getPostDemoSalesReportUrl = async (userId) => {
     const dialImage = await pdfDoc.embedPng(dialImageBytes);
     const dialDims = dialImage.scale(1);
 
-    const mentorRatingStarBytes = await fetch(getMentorRatingStars(5)).then((res) => res.buffer());
+    const mentorRatingStarBytes = await fetch(getMentorRatingStars(Math.ceil(mentorRating))).then((res) => res.buffer());
     const mentorRatingStarImage = await pdfDoc.embedPng(mentorRatingStarBytes);
     const mentorRatingStarDim = mentorRatingStarImage.scale(1);
 
-    const mentorRatingDialBytes = await fetch(getMentorDialUrl(5)).then((res) => res.buffer());
-    const mentorRatingDialImage = await pdfDoc.embedPng(mentorRatingDialBytes);
-    const mentorRatingDialDim = mentorRatingDialImage.scale(1);
-
-    const mentorSilhoutteUrl = `${process.env.FILE_BASE_URL}/${mentorPicUri}`;
-    const mentorSilhoutteBytes = await fetch(mentorSilhoutteUrl).then((res) => res.buffer());
-
-    const mentorSilhoutte = await pdfDoc.embedPng(mentorSilhoutteBytes);
+    const fileType = getUrlExtension(mentorPicUri);
+    let mentorSilhoutteUrl = null;
+    let mentorSilhoutteBytes = null;
+    let mentorSilhoutte = null;
+    if (fileType === 'png') {
+      mentorSilhoutteUrl = `${process.env.FILE_BASE_URL}/${mentorPicUri}`;
+      mentorSilhoutteBytes = await fetch(mentorSilhoutteUrl).then((res) => res.buffer());
+      mentorSilhoutte = await pdfDoc.embedPng(mentorSilhoutteBytes);
+    } else {
+      mentorSilhoutteUrl = `${process.env.FILE_BASE_URL}/python/course/mentorAvatar.png`;
+      mentorSilhoutteBytes = await fetch(mentorSilhoutteUrl).then((res) => res.buffer());
+      mentorSilhoutte = await pdfDoc.embedPng(mentorSilhoutteBytes);
+    }
     const mentorImageDims = mentorSilhoutte.scale(1);
 
-    const Star1Bytes = await fetch(getMentorRatingStars(1)).then((res) => res.buffer());
+    const ratingAverage = Math.ceil((criticalThinking + logicalThinking + communicationSkills + problemSolvingAbility + creativeSkills) / 5);
+    // star 1 = critical thinking
+    const Star1Bytes = await fetch(getMentorRatingStars(criticalThinking)).then((res) => res.buffer());
     const Star1Image = await pdfDoc.embedPng(Star1Bytes);
     const Star1Dim = Star1Image.scale(1);
-    const Star2Bytes = await fetch(getMentorRatingStars(2)).then((res) => res.buffer());
+    const Star2Bytes = await fetch(getMentorRatingStars(logicalThinking)).then((res) => res.buffer());
     const Star2Image = await pdfDoc.embedPng(Star2Bytes);
     const Star2Dim = Star2Image.scale(1);
-    const Star3Bytes = await fetch(getMentorRatingStars(3)).then((res) => res.buffer());
+    const Star3Bytes = await fetch(getMentorRatingStars(communicationSkills)).then((res) => res.buffer());
     const Star3Image = await pdfDoc.embedPng(Star3Bytes);
     const Star3Dim = Star3Image.scale(1);
-    const Star4Bytes = await fetch(getMentorRatingStars(4)).then((res) => res.buffer());
+    const Star4Bytes = await fetch(getMentorRatingStars(problemSolvingAbility)).then((res) => res.buffer());
     const Star4Image = await pdfDoc.embedPng(Star4Bytes);
     const Star4Dim = Star4Image.scale(1);
-    const Star5Bytes = await fetch(getMentorRatingStars(5)).then((res) => res.buffer());
+    const Star5Bytes = await fetch(getMentorRatingStars(creativeSkills)).then((res) => res.buffer());
     const Star5Image = await pdfDoc.embedPng(Star5Bytes);
     const Star5Dim = Star5Image.scale(1);
+
+    const mentorRatingDialBytes = await fetch(getMentorDialUrl(ratingAverage)).then((res) => res.buffer());
+    const mentorRatingDialImage = await pdfDoc.embedPng(mentorRatingDialBytes);
+    const mentorRatingDialDim = mentorRatingDialImage.scale(1);
 
     /*
       FIRST PAGE
     */
-    firstPage.drawText(`${parentName},`, {
+    firstPage.drawText(`${capitalize(parentName)},`, {
       x: 100,
       y: 678,
       size: 15,
@@ -251,7 +340,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
       color: rgb(0, 0.29, 0.678),
     });
 
-    firstPage.drawText(`${studentName}.`, {
+    firstPage.drawText(`${capitalize(studentName)}.`, {
       x: 170,
       y: 623,
       size: 15,
@@ -262,7 +351,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     /*
       SECOND PAGE
     */
-    secondPage.drawText(`${get(iqaReports, '[0].iqaScore', 70)}`, {
+    secondPage.drawText(`${get(iqaReports, '[0].iqaScore', 70) < 70 ? 70 : get(iqaReports, '[0].iqaScore', 70)}`, {
       x: 170,
       y: 640,
       size: 50,
@@ -302,25 +391,28 @@ const getPostDemoSalesReportUrl = async (userId) => {
       height: dialDims.height,
     });
 
-    secondPage.drawText(`${get(iqaReports, '[0].user.name', '').split(' ')[0].toUpperCase()}`, {
-      x: 115,
-      y: 490,
+    // child name
+    secondPage.drawText(`${get(iqaReports, '[0].user.name', 'xxx').split(' ')[0].toUpperCase()}`, {
+      x: 120,
+      y: 488,
       size: 12,
       font: NunitoBoldFont,
       color: rgb(0.314, 0.310, 0.310),
     });
 
-    secondPage.drawText(`${get(iqaReports, '[0].user.name', '').split(' ')[0].toUpperCase()}`, {
-      x: 225,
-      y: 490,
+    // child grade
+    secondPage.drawText(`${grade}`, {
+      x: 233,
+      y: 488,
       size: 12,
       font: NunitoBoldFont,
       color: rgb(0.314, 0.310, 0.310),
     });
 
-    secondPage.drawText(`${get(iqaReports, '[0].user.name', '').split(' ')[0].toUpperCase()}`, {
+    // assessment Date
+    secondPage.drawText(`${moment(new Date()).format('DD-MM-YYYY')}`, {
       x: 315,
-      y: 490,
+      y: 488,
       size: 12,
       font: NunitoBoldFont,
       color: rgb(0.314, 0.310, 0.310),
@@ -391,7 +483,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     // mentor rating dial
     thirdPage.drawImage(mentorRatingDialImage, {
       x: 200,
-      y: 800,
+      y: 825,
       width: mentorRatingDialDim.width,
       height: mentorRatingDialDim.height,
     });
@@ -473,7 +565,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     });
 
     // mentor name
-    thirdPage.drawText(mentorName, {
+    thirdPage.drawText(capitalize(mentorName), {
       x: 412,
       y: 570,
       size: 11,
@@ -481,7 +573,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
       color: rgb(0.31, 0.31, 0.31),
     });
   } else {
-    url = `${process.env.FILE_BASE_URL}/python/course/postDemoPreTest.pdf`;
+    url = `${process.env.FILE_BASE_URL}/python/course/postDemoPreTestCompressed.pdf`;
     existingPdfBytes = await fetch(url).then((res) => res.buffer());
     // Load a PDFDocument from the existing PDF bytes
     pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -497,29 +589,31 @@ const getPostDemoSalesReportUrl = async (userId) => {
     const NunitoBoldfontBytes = await fetch(NUNITO_BOLD_FONT_URL).then((res) => res.buffer());
     const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
 
-    const mentorRatingDialBytes = await fetch(getMentorDialUrl(5)).then((res) => res.buffer());
-    const mentorRatingDialImage = await pdfDoc.embedPng(mentorRatingDialBytes);
-    const mentorRatingDialDim = mentorRatingDialImage.scale(1);
-
-    const Star1Bytes = await fetch(getMentorRatingStars(1)).then((res) => res.buffer());
+    const ratingAverage = Math.ceil((criticalThinking + logicalThinking + communicationSkills + problemSolvingAbility + creativeSkills) / 5);
+    // star 1 = critical thinking
+    const Star1Bytes = await fetch(getMentorRatingStars(criticalThinking)).then((res) => res.buffer());
     const Star1Image = await pdfDoc.embedPng(Star1Bytes);
     const Star1Dim = Star1Image.scale(1);
-    const Star2Bytes = await fetch(getMentorRatingStars(2)).then((res) => res.buffer());
+    const Star2Bytes = await fetch(getMentorRatingStars(logicalThinking)).then((res) => res.buffer());
     const Star2Image = await pdfDoc.embedPng(Star2Bytes);
     const Star2Dim = Star2Image.scale(1);
-    const Star3Bytes = await fetch(getMentorRatingStars(3)).then((res) => res.buffer());
+    const Star3Bytes = await fetch(getMentorRatingStars(communicationSkills)).then((res) => res.buffer());
     const Star3Image = await pdfDoc.embedPng(Star3Bytes);
     const Star3Dim = Star3Image.scale(1);
-    const Star4Bytes = await fetch(getMentorRatingStars(4)).then((res) => res.buffer());
+    const Star4Bytes = await fetch(getMentorRatingStars(problemSolvingAbility)).then((res) => res.buffer());
     const Star4Image = await pdfDoc.embedPng(Star4Bytes);
     const Star4Dim = Star4Image.scale(1);
-    const Star5Bytes = await fetch(getMentorRatingStars(5)).then((res) => res.buffer());
+    const Star5Bytes = await fetch(getMentorRatingStars(creativeSkills)).then((res) => res.buffer());
     const Star5Image = await pdfDoc.embedPng(Star5Bytes);
     const Star5Dim = Star5Image.scale(1);
+
+    const mentorRatingDialBytes = await fetch(getMentorDialUrl(ratingAverage)).then((res) => res.buffer());
+    const mentorRatingDialImage = await pdfDoc.embedPng(mentorRatingDialBytes);
+    const mentorRatingDialDim = mentorRatingDialImage.scale(1);
     /*
       FIRST PAGE
     */
-    firstPage.drawText(`${parentName},`, {
+    firstPage.drawText(`${capitalize(parentName)},`, {
       x: 100,
       y: 678,
       size: 15,
@@ -527,7 +621,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
       color: rgb(0, 0.29, 0.678),
     });
 
-    firstPage.drawText(`${studentName}.`, {
+    firstPage.drawText(`${capitalize(studentName)}.`, {
       x: 170,
       y: 623,
       size: 15,
@@ -540,7 +634,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     // mentor rating dial
     secondPage.drawImage(mentorRatingDialImage, {
       x: 200,
-      y: 800,
+      y: 825,
       width: mentorRatingDialDim.width,
       height: mentorRatingDialDim.height,
     });
@@ -622,7 +716,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     });
 
     // mentor name
-    secondPage.drawText(mentorName, {
+    secondPage.drawText(capitalize(mentorName), {
       x: 412,
       y: 570,
       size: 11,
@@ -648,7 +742,6 @@ const getPostDemoSalesReportUrl = async (userId) => {
     await uploadToS3(key, fileContent);
     fetchedUrl = key;
   }
-
   // send the newly generated url as lead capture
   updateLeadSquared({
     Phone: parentPhone,

@@ -15,6 +15,7 @@ import { GILROY_EXTRA_BOLD_FONT_URL, NUNITO_BOLD_FONT_URL } from '../../../../..
 import { uploadToS3 } from '../../../../../../middlewares/utils/uploadToS3';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
 import getStringWidth from '../utils/getStringWidthForEmbeddedFont';
+import getUrlExtension from '../utils/getUrlExtension';
 
 const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
 
@@ -180,10 +181,19 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   const dialImage = await pdfDoc.embedPng(dialImageBytes);
   const dialDims = dialImage.scale(1);
 
-  const mentorSilhoutteUrl = `${process.env.FILE_BASE_URL}/${mentorPicUri}`;
-  const mentorSilhoutteBytes = await fetch(mentorSilhoutteUrl).then((res) => res.buffer());
-
-  const mentorSilhoutte = await pdfDoc.embedPng(mentorSilhoutteBytes);
+  const fileType = getUrlExtension(mentorPicUri);
+  let mentorSilhoutteUrl = null;
+  let mentorSilhoutteBytes = null;
+  let mentorSilhoutte = null;
+  if (fileType === 'png') {
+    mentorSilhoutteUrl = `${process.env.FILE_BASE_URL}/${mentorPicUri}`;
+    mentorSilhoutteBytes = await fetch(mentorSilhoutteUrl).then((res) => res.buffer());
+    mentorSilhoutte = await pdfDoc.embedPng(mentorSilhoutteBytes);
+  } else {
+    mentorSilhoutteUrl = `${process.env.FILE_BASE_URL}/python/course/mentorAvatar.png`;
+    mentorSilhoutteBytes = await fetch(mentorSilhoutteUrl).then((res) => res.buffer());
+    mentorSilhoutte = await pdfDoc.embedPng(mentorSilhoutteBytes);
+  }
   const mentorImageDims = mentorSilhoutte.scale(1);
 
   const mentorRatingStarBytes = await fetch(getMentorRatingStars(mentorRating)).then((res) => res.buffer());
@@ -335,11 +345,15 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     height: 40,
   });
 
+  // in rect, first value is the positive x axis value, left side
+  // second value is the positive y axis value, bottom side
+  // third value is the positive x axis value, right side
+  // fourth value is the positive y axis value, top side
   // Book counselling session CTA
   const linkAnnotation = pdfDoc.context.obj({
     Type: 'Annot',
     Subtype: 'Link',
-    Rect: [229, 322, 358, 368],
+    Rect: [199, 292, 388, 338],
     Border: [0, 0, 0],
     C: [0, 0, 1],
     A: {
@@ -350,7 +364,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   });
   const linkAnnotationRef = pdfDoc.context.register(linkAnnotation);
 
-  firstPage.drawText('Book My Councelling Session', {
+  firstPage.drawText('Book My Counselling Session', {
     x: 229,
     y: 322,
     font: NunitoBoldFont,
@@ -358,8 +372,126 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     color: rgb(1, 1, 1),
   });
 
-  firstPage.node.set(PDFName.of('Annots'), pdfDoc.context.obj([linkAnnotationRef]));
+  // link to whatsapp
+  const whatsappLinkAnnotation = pdfDoc.context.obj({
+    Type: 'Annot',
+    Subtype: 'Link',
+    Rect: [230, 165, 370, 200],
+    Border: [0, 0, 0],
+    C: [0, 0, 1],
+    A: {
+      Type: 'Action',
+      S: 'URI',
+      URI: PDFString.of('http://tekie.app.link/sgnArKNfwdb'),
+    },
+  });
+  const whatsappLinkAnnotationRef = pdfDoc.context.register(whatsappLinkAnnotation);
 
+  // link to facebook
+  const fbLinkAnnotation = pdfDoc.context.obj({
+    Type: 'Annot',
+    Subtype: 'Link',
+    Rect: [200, 55, 230, 85],
+    Border: [0, 0, 0],
+    C: [0, 0, 1],
+    A: {
+      Type: 'Action',
+      S: 'URI',
+      URI: PDFString.of('https://www.facebook.com/Tekie.in/'),
+    },
+  });
+  const fbLinkAnnotationRef = pdfDoc.context.register(fbLinkAnnotation);
+
+  // link to instagram
+  const igLinkAnnotation = pdfDoc.context.obj({
+    Type: 'Annot',
+    Subtype: 'Link',
+    Rect: [255, 55, 285, 85],
+    Border: [0, 0, 0],
+    C: [0, 0, 1],
+    A: {
+      Type: 'Action',
+      S: 'URI',
+      URI: PDFString.of('https://www.instagram.com/tekie.in/'),
+    },
+  });
+  const igLinkAnnotationRef = pdfDoc.context.register(igLinkAnnotation);
+
+  // link to linkedin
+  const liLinkAnnotation = pdfDoc.context.obj({
+    Type: 'Annot',
+    Subtype: 'Link',
+    Rect: [310, 55, 340, 85],
+    Border: [0, 0, 0],
+    C: [0, 0, 1],
+    A: {
+      Type: 'Action',
+      S: 'URI',
+      URI: PDFString.of('https://www.linkedin.com/company/tekie'),
+    },
+  });
+  const liLinkAnnotationRef = pdfDoc.context.register(liLinkAnnotation);
+
+  // link to youtube
+  const ytLinkAnnotation = pdfDoc.context.obj({
+    Type: 'Annot',
+    Subtype: 'Link',
+    Rect: [365, 55, 395, 85],
+    Border: [0, 0, 0],
+    C: [0, 0, 1],
+    A: {
+      Type: 'Action',
+      S: 'URI',
+      URI: PDFString.of('https://www.youtube.com/channel/UCCr7GPlTdZRXFEfveeuKcbg'),
+    },
+  });
+  const ytLinkAnnotationRef = pdfDoc.context.register(ytLinkAnnotation);
+
+  // link to terms
+  const termsLinkAnnotation = pdfDoc.context.obj({
+    Type: 'Annot',
+    Subtype: 'Link',
+    Rect: [200, 15, 245, 35],
+    Border: [0, 0, 0],
+    C: [0, 0, 1],
+    A: {
+      Type: 'Action',
+      S: 'URI',
+      URI: PDFString.of('https://www.tekie.in/terms'),
+    },
+  });
+  const termsLinkAnnotationRef = pdfDoc.context.register(termsLinkAnnotation);
+
+  // link to tekie.in
+  const tekiewebLinkAnnotation = pdfDoc.context.obj({
+    Type: 'Annot',
+    Subtype: 'Link',
+    Rect: [270, 15, 330, 35],
+    Border: [0, 0, 0],
+    C: [0, 0, 1],
+    A: {
+      Type: 'Action',
+      S: 'URI',
+      URI: PDFString.of('https://www.tekie.in/'),
+    },
+  });
+  const tekiewebLinkAnnotationRef = pdfDoc.context.register(tekiewebLinkAnnotation);
+
+  // link to unsibscribe
+  const unsLinkAnnotation = pdfDoc.context.obj({
+    Type: 'Annot',
+    Subtype: 'Link',
+    Rect: [350, 15, 395, 35],
+    Border: [0, 0, 0],
+    C: [0, 0, 1],
+    A: {
+      Type: 'Action',
+      S: 'URI',
+      URI: PDFString.of('https://tekie.in/Unsubscribe'),
+    },
+  });
+  const unsLinkAnnotationRef = pdfDoc.context.register(unsLinkAnnotation);
+  firstPage.node.set(PDFName.of('Annots'), pdfDoc.context.obj([linkAnnotationRef, whatsappLinkAnnotationRef, fbLinkAnnotationRef, igLinkAnnotationRef, liLinkAnnotationRef, ytLinkAnnotationRef, termsLinkAnnotationRef, tekiewebLinkAnnotationRef, unsLinkAnnotationRef]));
   /** PDF Meta Details */
   pdfDoc.setAuthor('Tekie');
   pdfDoc.setCreator('Kiwhode Learning Pvt Ltd');
