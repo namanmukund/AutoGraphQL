@@ -387,6 +387,21 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
   });
   const whatsappLinkAnnotationRef = pdfDoc.context.register(whatsappLinkAnnotation);
 
+  // link to tel
+  const telLinkAnnotation = pdfDoc.context.obj({
+    Type: 'Annot',
+    Subtype: 'Link',
+    Rect: [230, 110, 370, 145],
+    Border: [0, 0, 0],
+    C: [0, 0, 1],
+    A: {
+      Type: 'Action',
+      S: 'URI',
+      URI: PDFString.of('tel:+918047483415'),
+    },
+  });
+  const telLinkAnnotationRef = pdfDoc.context.register(telLinkAnnotation);
+
   // link to facebook
   const fbLinkAnnotation = pdfDoc.context.obj({
     Type: 'Annot',
@@ -491,7 +506,7 @@ const getIqaReportSnapshotUrl = async (userId, userName) => {
     },
   });
   const unsLinkAnnotationRef = pdfDoc.context.register(unsLinkAnnotation);
-  firstPage.node.set(PDFName.of('Annots'), pdfDoc.context.obj([linkAnnotationRef, whatsappLinkAnnotationRef, fbLinkAnnotationRef, igLinkAnnotationRef, liLinkAnnotationRef, ytLinkAnnotationRef, termsLinkAnnotationRef, tekiewebLinkAnnotationRef, unsLinkAnnotationRef]));
+  firstPage.node.set(PDFName.of('Annots'), pdfDoc.context.obj([linkAnnotationRef, whatsappLinkAnnotationRef, telLinkAnnotationRef, fbLinkAnnotationRef, igLinkAnnotationRef, liLinkAnnotationRef, ytLinkAnnotationRef, termsLinkAnnotationRef, tekiewebLinkAnnotationRef, unsLinkAnnotationRef]));
   /** PDF Meta Details */
   pdfDoc.setAuthor('Tekie');
   pdfDoc.setCreator('Kiwhode Learning Pvt Ltd');
