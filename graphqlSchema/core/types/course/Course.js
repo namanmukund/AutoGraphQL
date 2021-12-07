@@ -5,6 +5,7 @@ import {
   NOT_CMS_HEAD,
   SCHOOL_ADMIN,
   SUPPLY_DEMAND_ROLES,
+  LEAD_PARTNER,
 } from '../../../../constants/roles';
 
 // video, lo, chat, pq, coding assignment, home assignment, quiz
@@ -53,6 +54,7 @@ const Course = `
       { userRole: ${NOT_CMS_HEAD} appName: "*" operations: ${READ} }
       { userRole: ${SCHOOL_ADMIN} appName: "*" operations: ${READ} }
       { userRole: ${SUPPLY_DEMAND_ROLES} appName: "*" operations: ${READ} }
+      { userRole: ${LEAD_PARTNER} appName: "*" operations: ${READ} }
       ], 
     rule: allow
   ) 
