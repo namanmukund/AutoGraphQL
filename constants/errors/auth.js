@@ -65,3 +65,7 @@ export const LinkExpiredError = createError('LinkExpiredError', {
 export const ResetPasswordLinkExpired = createError('ResetPasswordLinkExpired', {
   message: 'Reset Password link expired',
 });
+
+export const PasswordMismatchMessageError = createError('PasswordMismatchMessageError', {
+  message: 'Password Mismatched',
+});
