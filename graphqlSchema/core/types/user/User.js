@@ -75,6 +75,7 @@ const User = `
     vertical: Vertical @defaultValue(value: "unassigned")
     eventAttandances: [EventAttendance] @relation(name:"EventAttendanceUser")
     leadPartnerType: LeadPartnerType
+    leadPartner: LeadPartner @relation(name: "LeadPartnerUser", direction: "OneWay")
     resetPasswordFromLink: Boolean @defaultValue(value: "false")
   }
 `;
