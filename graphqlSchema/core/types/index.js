@@ -142,7 +142,7 @@ import magicLinkLog from './magicLinkLog';
 import LeadPartner from './leadPartner';
 import DemoWowAudit from './demoWowAudits';
 import SenseiProfile from './senseiProfile';
-import MentorTeam from './mentorTeam';
+import SenseiMentorTeam from './senseiMentorTeam';
 
 export default [
   ...User,
@@ -289,5 +289,5 @@ export default [
   ...LeadPartner,
   ...DemoWowAudit,
   ...SenseiProfile,
-  ...MentorTeam,
+  ...SenseiMentorTeam,
 ];
