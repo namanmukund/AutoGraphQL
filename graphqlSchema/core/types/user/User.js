@@ -77,6 +77,7 @@ const User = `
     leadPartnerType: LeadPartnerType
     leadPartner: LeadPartner @relation(name: "LeadPartnerUser", direction: "OneWay")
     resetPasswordFromLink: Boolean @defaultValue(value: "false")
+    senseiProfile: SenseiProfile @relation(name:"SenseiProfileUser", isSubset: true)
   }
 `;
 
