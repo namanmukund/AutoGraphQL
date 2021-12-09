@@ -72,7 +72,7 @@ const fetchUser = async (id, eventId) => {
 //   return get(result, 'data.eventAttendances', []);
 // };
 
-const generateCertificateScript = async (userIdArray, regenerateCertificate = false, eventId, date) => {
+const generateCertificateScript = async (userIdArray, regenerateCertificate = false, eventId, date, utmDetails) => {
   // make this dynamic based on a third paramenter eventId, use switch case
   // pass eventId param to generateCertificate
   if (userIdArray && userIdArray.length) {
@@ -101,7 +101,7 @@ const generateCertificateScript = async (userIdArray, regenerateCertificate = fa
           },
           {
             SchemaName: 'mx_Custom_2',
-            Value: 'spysquadcamp',
+            Value: utmDetails.utmCampaign,
           },
         ],
       });

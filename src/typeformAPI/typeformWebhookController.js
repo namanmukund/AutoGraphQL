@@ -127,7 +127,12 @@ const usersData = async (studentDetailsObject, formId, doGenerateCertificate) =>
   let filter = '';
   const {
     childName, parentEmail = '', parentPhone: { number = '' },
+    utmCampaign, utmSource,
   } = studentDetailsObject;
+  const utmDetails = {
+    utmCampaign,
+    utmSource,
+  };
   if (number) {
     filter = `
         {studentProfile_some: {
@@ -157,11 +162,11 @@ const usersData = async (studentDetailsObject, formId, doGenerateCertificate) =>
         if (eventAttendances && eventAttendances.length) {
           log(`updating attendance for ${childName} with id ${get(users, '[0].id')}`);
           await updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
-          generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
+          generateCertificateScript([get(users, '[0].id')], false, getEventId(formId), null, utmDetails);
         } else {
           log(`adding attendance for ${childName} with id ${get(users, '[0].id')}`);
           await addNewEventAttendanceWithStatus(get(users, '[0].id'), get(users, '[0].studentProfile.id'), getEventId(formId));
-          generateCertificateScript([get(users, '[0].id')], false, getEventId(formId));
+          generateCertificateScript([get(users, '[0].id')], false, getEventId(formId), null, utmDetails);
         }
       }
     } else if (parentEmail) {
@@ -187,11 +192,11 @@ const usersData = async (studentDetailsObject, formId, doGenerateCertificate) =>
           if (eventAttendances && eventAttendances.length) {
             log(`updating attendance for ${childName} with id ${get(user, '[0].id')}`);
             await updateEventAttendanceStatus(get(eventAttendances, '[0].id'));
-            generateCertificateScript([get(user, '[0].id')], false, getEventId(formId));
+            generateCertificateScript([get(user, '[0].id')], false, getEventId(formId), null, utmDetails);
           } else {
             log(`adding attendance for ${childName} with id ${get(user, '[0].id')}`);
             await addNewEventAttendanceWithStatus(get(user, '[0].id'), get(user, '[0].studentProfile.id'), getEventId(formId));
-            generateCertificateScript([get(user, '[0].id')], false, getEventId(formId));
+            generateCertificateScript([get(user, '[0].id')], false, getEventId(formId), null, utmDetails);
           }
         }
       } else {
@@ -226,7 +231,7 @@ const usersData = async (studentDetailsObject, formId, doGenerateCertificate) =>
               log(`adding attendance for ${childName} with id ${get(child, 'user.id')}`);
               // eslint-disable-next-line no-await-in-loop
               await addNewEventAttendanceWithStatus(get(child, 'user.id'), get(child, 'id'), getEventId(formId));
-              generateCertificateScript([get(child, 'user.id')], false, getEventId(formId));
+              generateCertificateScript([get(child, 'user.id')], false, getEventId(formId), null, utmDetails);
             }
           }
         }
@@ -594,6 +599,12 @@ const typeformWebhookController = async (req, res) => {
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
           utmCampaign = 'environment_30nov';
+          break;
+        case EVENTS.STORYSPREE.formId:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'storyspree_12dec';
           break;
         case EVENTS.GENZENVIRONMENT.registrationFormId:
           country = 'india';
