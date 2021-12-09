@@ -103,6 +103,10 @@ const generateCertificateScript = async (userIdArray, regenerateCertificate = fa
             SchemaName: 'mx_Custom_2',
             Value: utmDetails.utmCampaign,
           },
+          {
+            SchemaName: 'mx_Custom_3',
+            Value: utmDetails.utmSource,
+          },
         ],
       });
       // sendWhatsAppTemplateMessage(
