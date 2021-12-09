@@ -25,6 +25,7 @@ const SUPPLY_DEMAND_ADMIN = 'supplyDemandAdmin';
 const SUPPLY_MANAGER = 'supplyManager';
 const DEMAND_MANAGER = 'demandManager';
 const LEAD_PARTNER = 'leadPartner';
+const SENSEI = 'sensei';
 
 const CMS_HEAD = `[
 "${ADMIN}",
@@ -210,6 +211,7 @@ const ALL_ROLES_ARRAY = [
   SUPPLY_MANAGER,
   DEMAND_MANAGER,
   LEAD_PARTNER,
+  SENSEI,
 ];
 
 const CMS_HEAD_ARRAY = [
@@ -286,4 +288,5 @@ export {
   SUPPLY_DEMAND_ROLES,
   SUPPLY_DEMAND_ROLES_ARRAY,
   LEAD_PARTNER,
+  SENSEI,
 };
