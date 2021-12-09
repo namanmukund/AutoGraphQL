@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+import updateNetPromoterScoresWithCourseAndMmSession from '../scriptMethods/updateNetPromoterScoresWithCourseAndMmSession';
 // import updateQuestionBankOfPythonCourseWithCorrectPostion from '../scriptMethods/updateQuestionBankOfPythonCourseWithCorrectPostion';
 // import createUserCurrentTopicComponentStatusScript from '../scriptMethods/createUserCurrentTopicComponentStatusScript';
 // import generateCertificateScript from '../scriptMethods/generateCertificateScript';
@@ -79,6 +80,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateMentorMenteeSessionAuditForCompletedAudits();
   // await getIqaReportSnapshotUrl('ckgsshcir00000vqgdftbf2f4', 'Gokul');
   // await getPostDemoSalesReportUrl('ckgsshcir00000vqgdftbf2f4');
+  await updateNetPromoterScoresWithCourseAndMmSession();
   return {
     result: true,
   };
