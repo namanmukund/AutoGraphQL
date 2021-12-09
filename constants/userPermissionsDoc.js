@@ -33,15 +33,15 @@ const userPermissionsDoc = {
   User: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR],
-      read: [PRE_SALES, POST_SALES, AUDITOR, BDE, BDE_ADMIN, SUPPLY_DEMAND_ADMIN, SUPPLY_MANAGER, DEMAND_MANAGER, LEAD_PARTNER],
+      crud: [...UMS_HEAD_ARR, LEAD_PARTNER],
+      read: [PRE_SALES, POST_SALES, AUDITOR, BDE, BDE_ADMIN, SUPPLY_DEMAND_ADMIN, SUPPLY_MANAGER, DEMAND_MANAGER],
       exceptDelete: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN, TRANSFORMATION_ADMIN, AUDIT_ADMIN],
     },
     fields: {
       role: {
         rule: 'allow',
-        crud: [...UMS_HEAD_ARR],
-        read: [...NOT_UMS_HEAD_ARR, PRE_SALES, POST_SALES, AUDIT_ADMIN, AUDITOR, BDE, BDE_ADMIN, SUPPLY_DEMAND_ADMIN, DEMAND_MANAGER, LEAD_PARTNER],
+        crud: [...UMS_HEAD_ARR, LEAD_PARTNER],
+        read: [...NOT_UMS_HEAD_ARR, PRE_SALES, POST_SALES, AUDIT_ADMIN, AUDITOR, BDE, BDE_ADMIN, SUPPLY_DEMAND_ADMIN, DEMAND_MANAGER],
         exceptDelete: [TRANSFORMATION_ADMIN],
       },
       savedPassword: {

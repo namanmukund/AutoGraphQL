@@ -217,8 +217,8 @@ export const ChapterWithSimilarTitleAlreadyExist = createError('ChapterWithSimil
   message: 'Chapter with similar title already exist.',
 });
 
-export const LeadPartnerWithSimilarTitleAlreadyExist = createError('LeadPartnerWithSimilarTitleAlreadyExist', {
-  message: 'Lead Partner with similar title already exist.',
+export const LeadPartnerWithSimilarTitleAndAgentAlreadyExist = createError('LeadPartnerWithSimilarTitleAndAgentAlreadyExist', {
+  message: 'Lead Partner with similar title and agent already exist.',
 });
 
 export const TopicWithSimilarTitleAlreadyExist = createError('TopicWithSimilarTitleAlreadyExist', {
