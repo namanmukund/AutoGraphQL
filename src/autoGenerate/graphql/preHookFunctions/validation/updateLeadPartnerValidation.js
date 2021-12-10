@@ -1,13 +1,13 @@
 import { get } from 'lodash';
-import { LeadPartnerWithSimilarTitleAndAgentAlreadyExist } from '../../../../../constants/errors';
+import { LeadPartnerWithSimilarTitleAlreadyExist } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const leadPartners = (title, agentId) => `
+const leadPartners = (title, leadPartnerId) => `
 query{
   leadPartners(filter: {
     and: [
       {title: "${title}"}
-      { agent_some: { id: "${agentId}" } }
+      { id_not:"${leadPartnerId}" }
     ]
   }){
     id
@@ -17,12 +17,12 @@ query{
 `;
 
 const updateLeadPartnerValidation = async (input, mutationOrQueryName, context, params) => {
-  const { input: { title }, agentConnectId } = params;
+  const { input: { title }, id: leadPartnerId } = params;
   //   to check if the lead partner exist with similar title
-  if (title && agentConnectId) {
-    const leadPartnerData = get(await callLocalGraphqlApi(leadPartners(title, agentConnectId)), 'data.leadPartners', []);
+  if (title) {
+    const leadPartnerData = get(await callLocalGraphqlApi(leadPartners(title, leadPartnerId)), 'data.leadPartners', []);
     if (leadPartnerData && leadPartnerData.length > 0) {
-      throw new LeadPartnerWithSimilarTitleAndAgentAlreadyExist();
+      throw new LeadPartnerWithSimilarTitleAlreadyExist();
     }
   }
   return true;

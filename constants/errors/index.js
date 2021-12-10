@@ -80,7 +80,7 @@ import {
   SlotAlreadyFilled,
   SessionAlreadyAssigned,
   FileNameAlreadyExists,
-  LeadPartnerWithSimilarTitleAndAgentAlreadyExist,
+  LeadPartnerWithSimilarTitleAlreadyExist,
   SenseiProfileAlreadyExist,
 } from './db';
 import {
@@ -303,6 +303,6 @@ export {
   CanNotStartSessionWithoutMentorError,
   FileNameAlreadyExists,
   ResetPasswordLinkExpired,
-  LeadPartnerWithSimilarTitleAndAgentAlreadyExist,
+  LeadPartnerWithSimilarTitleAlreadyExist,
   SenseiProfileAlreadyExist,
 };

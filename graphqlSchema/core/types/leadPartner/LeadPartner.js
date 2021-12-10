@@ -1,8 +1,15 @@
 const LeadPartner = `
   type LeadPartner @model {
-    utmDetails: [UtmDetail] @relation(name: "LeadPartnerUtmDetail")
+    admins: [User] @relation(name:"LeadPartnerAdminUser", direction: "OneWay")
+    agents: [LeadPartnerAgent] @relation(name:"LeadPartnerAgentUser")
     title: String!
-    agent: User @relation(name:"LeadPartnerUser", direction: "OneWay")
 }`;
 
-export default [LeadPartner];
+const LeadPartnerAgent = `
+  type LeadPartnerAgent @model {
+    utmDetails: [UtmDetail] @relation(name: "LeadPartnerAgentUtmDetail") 
+    leadPartner: LeadPartner @relation(name:"LeadPartnerAgentUser")
+    agent: User @relation(name:"LeadPartnerAgentUser", direction: "OneWay")
+}`;
+
+export default [LeadPartner, LeadPartnerAgent];
