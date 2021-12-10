@@ -74,8 +74,6 @@ const User = `
     bdeProfile: BDEProfile @relation(name:"BDEProfileUser", isSubset: true)
     vertical: Vertical @defaultValue(value: "unassigned")
     eventAttandances: [EventAttendance] @relation(name:"EventAttendanceUser")
-    leadPartnerType: LeadPartnerType
-    leadPartner: LeadPartner @relation(name: "LeadPartnerUser", direction: "OneWay")
     resetPasswordFromLink: Boolean @defaultValue(value: "false")
     senseiProfile: SenseiProfile @relation(name:"SenseiProfileUser", isSubset: true)
   }

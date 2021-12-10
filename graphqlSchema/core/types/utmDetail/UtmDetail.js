@@ -4,7 +4,6 @@ const UtmDetail = `
   type UtmDetail @model 
   ${getPermissionSchemaString('User')}
   {
-    leadPartnerType: LeadPartnerType
     leadPartnerAgent: LeadPartnerAgent @relation(name: "LeadPartnerAgentUtmDetail")
     source: String
     campaign: String
