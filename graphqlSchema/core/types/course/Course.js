@@ -6,6 +6,7 @@ import {
   SCHOOL_ADMIN,
   SUPPLY_DEMAND_ROLES,
   LEAD_PARTNER,
+  SENSEI,
 } from '../../../../constants/roles';
 
 // video, lo, chat, pq, coding assignment, home assignment, quiz
@@ -55,6 +56,7 @@ const Course = `
       { userRole: ${SCHOOL_ADMIN} appName: "*" operations: ${READ} }
       { userRole: ${SUPPLY_DEMAND_ROLES} appName: "*" operations: ${READ} }
       { userRole: ${LEAD_PARTNER} appName: "*" operations: ${READ} }
+      { userRole: ${SENSEI} appName: "*" operations: ${READ} }
       ], 
     rule: allow
   ) 
