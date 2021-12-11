@@ -39,6 +39,7 @@ const fetchMentorMenteeSession = async (userIds) => {
         { topic_some: { order: 1 } }
       ]
     }
+    orderBy:createdAt_ASC
   ) {
     id
     menteeSession {
@@ -58,6 +59,21 @@ const fetchMentorMenteeSession = async (userIds) => {
   return get(npsData, 'data.mentorMenteeSessions', []);
 };
 
+const updateNpsData = async (npsId, courseConnectId, mentorMenteeSessionConnectId) => {
+  const updateQuery = `mutation {
+  updateNetPromoterScore(
+    id: "${npsId}"
+    courseConnectId: "${courseConnectId}"
+    mentorMenteeSessionConnectId: "${mentorMenteeSessionConnectId}"
+  ) {
+    id
+  }
+}
+`;
+  const result = await callLocalGraphqlApi(updateQuery);
+  return get(result, 'data.updateNetPromoterScore');
+};
+
 const updateNetPromoterScoresWithCourseAndMmSession = async () => {
   const npsData = await fetchNpsData();
   if (npsData && npsData.length > 0) {
@@ -69,12 +85,11 @@ const updateNetPromoterScoresWithCourseAndMmSession = async () => {
       if (get(nps, 'user.id')) {
         const mmsOfUser = mmsData.filter((mmSession) => get(mmSession, 'menteeSession.user.id') === get(nps, 'user.id'));
         if (mmsOfUser.length > 0) {
-          console.log(JSON.stringify(mmsOfUser));
+
+          console.log(JSON.stringify(get(mmsOfUser, '[0]')));
         }
       }
     }
-    console.log(mmsData.length);
-    console.log(npsData.length);
   }
 };
 
