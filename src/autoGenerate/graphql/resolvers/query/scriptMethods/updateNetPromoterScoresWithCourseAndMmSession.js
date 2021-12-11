@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import { log } from '../../../../../../utils';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 
 const fetchNpsData = async () => {
@@ -85,8 +86,12 @@ const updateNetPromoterScoresWithCourseAndMmSession = async () => {
       if (get(nps, 'user.id')) {
         const mmsOfUser = mmsData.filter((mmSession) => get(mmSession, 'menteeSession.user.id') === get(nps, 'user.id'));
         if (mmsOfUser.length > 0) {
-
-          console.log(JSON.stringify(get(mmsOfUser, '[0]')));
+          const npsId = get(nps, 'id');
+          const courseConnectId = get(get(mmsOfUser, '[0]'), 'course.id');
+          const mentorMenteeSessionConnectId = get(get(mmsOfUser, '[0]'), 'id');
+          // eslint-disable-next-line no-await-in-loop
+          const updatedNPS = await updateNpsData(npsId, courseConnectId, mentorMenteeSessionConnectId);
+          log(`Updated NetPromoterScore: ${get(updatedNPS, 'id')} with course: ${courseConnectId} and mentorMenteeSession: ${mentorMenteeSessionConnectId}`);
         }
       }
     }
