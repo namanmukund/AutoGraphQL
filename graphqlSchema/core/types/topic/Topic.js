@@ -1,7 +1,7 @@
 import { READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
 import {
-  AUDIT_ROLES, CMS_HEAD, LEAD_PARTNER, NOT_CMS_HEAD, SCHOOL_ADMIN, SUPPLY_DEMAND_ROLES,
+  AUDIT_ROLES, CMS_HEAD, LEAD_PARTNER, NOT_CMS_HEAD, SCHOOL_ADMIN, SENSEI, SUPPLY_DEMAND_ROLES,
 } from '../../../../constants/roles';
 import { CREATED } from '../../../../constants/subscriptionEvents';
 
@@ -33,6 +33,7 @@ const Topic = `
       { userRole: ${AUDIT_ROLES} appName: "*" operations: ${READ} },
       { userRole: ${SUPPLY_DEMAND_ROLES} appName: "*" operations: ${READ} }
       { userRole: ${LEAD_PARTNER} appName: "*" operations: ${READ} }
+      { userRole: ${SENSEI} appName: "*" operations: ${READ} }
       ], 
     rule: allow
   ) 
