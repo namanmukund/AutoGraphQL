@@ -2,7 +2,7 @@ import { get } from 'lodash';
 import jwt from 'jsonwebtoken';
 import moment from 'moment';
 import {
-  DatabaseRecordNotFoundError, PasswordMismatchError,
+  DatabaseRecordNotFoundError,
   SomethingWentWrongError, ResetPasswordLinkExpired,
 } from '../../../../../../constants/errors';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
@@ -13,7 +13,7 @@ import getUserPasswordObject from '../user/utils/getUserPasswordObject';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import coreAuthParams from '../../../../../../config/authParams';
-import { LinkExpiredError } from '../../../../../../constants/errors/auth';
+import { LinkExpiredError, PasswordMismatchMessageError } from '../../../../../../constants/errors/auth';
 
 const linkTokenSecret = coreAuthParams.LINK_TOKEN_SECRET;
 
@@ -82,7 +82,7 @@ export default async function resetPasswordAndLoginMutationResolver(
       throw new DatabaseRecordNotFoundError();
     }
     if (get(input, 'password') !== get(input, 'confirmPassword')) {
-      throw new PasswordMismatchError();
+      throw new PasswordMismatchMessageError();
     }
     const { id, resetPasswordFromLink } = fetchedUser;
     const updateObj = getUserPasswordObject(get(input, 'password'), true);

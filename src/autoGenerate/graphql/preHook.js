@@ -119,6 +119,7 @@ import addAcceptedSlotRequestByMentorLogValidation from './preHookFunctions/vali
 import updateFileValidation from './preHookFunctions/validation/updateFileValidation';
 import addLeadPartnerValidation from './preHookFunctions/validation/addLeadPartnerValidation';
 import updateLeadPartnerValidation from './preHookFunctions/validation/updateLeadPartnerValidation';
+import addSenseiProfileValidation from './preHookFunctions/validation/addSenseiProfileValidation';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -904,6 +905,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateLeadPartner': {
       await updateLeadPartnerValidation(input, mutationOrQueryName, context, params);
+      break;
+    }
+    case 'addSenseiProfile': {
+      await addSenseiProfileValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'addSchool': {
