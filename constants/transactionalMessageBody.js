@@ -52,6 +52,11 @@ const transactionalMessageBody = {
     subject: 'Tekie - New Slot Request',
     whatsAppTemplate: '',
   },
+  sendResetPasswordLink: {
+    emailTemplate: 'forgetUserTemplate',
+    subject: 'Reset Your Password',
+    whatsAppTemplate: '',
+  },
   testEmail: 'namanmukund@gmail.com',
   testWhatsAppNumber: '919654347463',
 };
