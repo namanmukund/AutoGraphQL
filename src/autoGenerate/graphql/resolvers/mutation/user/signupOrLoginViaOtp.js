@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import { getFieldsBeingFetched } from '../../../../utils';
-import { validate } from '../../../validation';
+import { validate, validateName } from '../../../validation';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import {
   DatabaseRecordNotFoundError,
@@ -62,6 +62,10 @@ const signupOrLoginViaOtp = async (
     authentication,
     {},
   );
+
+  if (input.name) {
+    validateName(input.name);
+  }
 
   const currentUser = authentication && authentication.user;
 
