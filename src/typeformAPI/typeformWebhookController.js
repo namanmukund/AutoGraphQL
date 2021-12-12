@@ -53,6 +53,15 @@ const getEventId = (formId) => {
         }
       }
       break;
+    case EVENTS.CRACKTHECODE.formId:
+      eventId = EVENTS.CRACKTHECODE.eventId.staging;
+      if (process.env.NODE_ENV === 'production') {
+        eventId = EVENTS.CRACKTHECODE.eventId.production;
+        if (process.env.DATA_MASKING) {
+          eventId = EVENTS.CRACKTHECODE.eventId.preprod;
+        }
+      }
+      break;
     default:
       eventId = EVENTS.SPYSQUADCAMP.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
@@ -600,6 +609,13 @@ const typeformWebhookController = async (req, res) => {
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
           utmCampaign = 'environment_30nov';
+          doGenerateCertificate = false;
+          break;
+        case EVENTS.CRACKTHECODE.formId:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'radiostreet';
+          utmCampaign = 'crackthecode';
           doGenerateCertificate = false;
           break;
         default:
