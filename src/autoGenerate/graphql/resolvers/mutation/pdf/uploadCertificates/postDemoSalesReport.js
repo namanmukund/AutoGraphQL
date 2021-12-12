@@ -403,16 +403,16 @@ const getPostDemoSalesReportUrl = async (userId) => {
       SECOND PAGE
     */
     secondPage.drawText(`${get(iqaReports, '[0].iqaScore', 70) < 70 ? 70 : get(iqaReports, '[0].iqaScore', 70)}`, {
-      x: 170,
-      y: 640,
+      x: 165,
+      y: 645,
       size: 50,
       font: GilroyExtraBoldFont,
       color: rgb(0, 0.29, 0.678),
     });
 
     secondPage.drawText(`/${get(iqaReports, '[0].maximumScore', 100)}`, {
-      x: 170,
-      y: 610,
+      x: 165,
+      y: 615,
       size: 20,
       font: GilroyExtraBoldFont,
       color: rgb(0.522, 0.518, 0.518),
