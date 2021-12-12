@@ -84,14 +84,14 @@ const userPermissionsDoc = {
   UserPaymentInstallment: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI],
       read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
   UserPaymentLink: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI],
       read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
