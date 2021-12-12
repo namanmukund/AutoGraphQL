@@ -627,7 +627,6 @@ const typeformWebhookController = async (req, res) => {
           timezone = 'Asia/Kolkata';
           utmSource = 'radiostreet';
           utmCampaign = 'crackthecode';
-          doGenerateCertificate = false;
           break;
         default:
           country = 'india';

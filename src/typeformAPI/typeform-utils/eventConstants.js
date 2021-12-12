@@ -34,10 +34,9 @@ const EVENTS = {
   },
   CRACKTHECODE: {
     formId: 'd6j0QvvX',
-    // TODO : change the production and pre-prod variables
     eventId: {
-      production: 'ckw6eq3f30000xgin7yrxgk2l',
-      preprod: 'ckw5wg9rj0000gtin1st0hry6',
+      production: 'ckx3cxe39000018in96do53zp',
+      preprod: 'ckx3cuo200000zein8wwz3qid',
       staging: 'ckx3bgy7p0000n1incbzkb36i',
     },
   },
