@@ -163,6 +163,8 @@ const generateCertificateMutationResolver = async (
         eventName = 'storyspree';
         break;
       case 'ckx3bgy7p0000n1incbzkb36i':
+      case 'ckx3cuo200000zein8wwz3qid':
+      case 'ckx3cxe39000018in96do53zp':
         fetchedUrl = await getCrackTheCodeCertificateUrl(userId, userName, formattedDate);
         eventType = 'radioStreet';
         eventName = 'crackTheCode';
