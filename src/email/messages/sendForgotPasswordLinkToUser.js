@@ -3,7 +3,7 @@ import getEmailObject from '../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../services/email/utils/sendEmail';
 
 const sendForgotPasswordLinkToUser = (emailTo, forgotPassLink, appName) => {
-  const templateFileName = 'userEmailForgotPasswordLinkTemplate';
+  const templateFileName = 'forgetUserTemplate';
   const templateObject = {
     forgotPassLink,
     appName,
@@ -20,7 +20,7 @@ const sendForgotPasswordLinkToUser = (emailTo, forgotPassLink, appName) => {
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';
-    const subject = 'Forgot Password Sample';
+    const subject = 'Reset Your Password';
     const text = '';
     const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html);
     sendEmail(emailMsgObject);
