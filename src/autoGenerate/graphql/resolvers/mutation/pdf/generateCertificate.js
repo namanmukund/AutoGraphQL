@@ -12,6 +12,7 @@ import getStoryspreeCertificateUrl from './uploadCertificates/storyspree';
 import getDemoCompletionCertificateUrl from './uploadCertificates/demoCompletion';
 import getGenZEventCertificateUrl from './uploadCertificates/genzenvironment';
 import getIqaReportSnapshotUrl from './uploadCertificates/iqaReport';
+import getCrackTheCodeCertificateUrl from './uploadCertificates/crackTheCode';
 
 const fetchUser = (userId, eventId) => `
 {
@@ -160,6 +161,11 @@ const generateCertificateMutationResolver = async (
         fetchedUrl = await getStoryspreeCertificateUrl(userId, userName, formattedDate);
         eventType = 'communityEvent';
         eventName = 'storyspree';
+        break;
+      case 'ckx3bgy7p0000n1incbzkb36i':
+        fetchedUrl = await getCrackTheCodeCertificateUrl(userId, userName, formattedDate);
+        eventType = 'radioStreet';
+        eventName = 'crackTheCode';
         break;
       case 'ckwjgmccj0000kcin04q39xe4':
       case 'ckwjwd1cz0000o4in6br2cng6':
