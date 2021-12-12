@@ -19,6 +19,7 @@ const MentorProfile = `
     gitHubLink: String
     linkedInLink: String
     portfolioLink: String
+    senseiProfile: SenseiProfile @relation(name: "SenseiProfileMentorProfile")
 }`;
 
 export default [MentorProfile];

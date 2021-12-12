@@ -288,3 +288,7 @@ export const SessionAlreadyAssigned = createError('SessionAlreadyAssigned', {
 export const FileNameAlreadyExists = createError('FileNameAlreadyExists', {
   message: 'File with same name already exists!',
 });
+
+export const SenseiProfileAlreadyExist = createError('SenseiProfileAlreadyExist', {
+  message: 'Sensei Profile already exist for the user',
+});

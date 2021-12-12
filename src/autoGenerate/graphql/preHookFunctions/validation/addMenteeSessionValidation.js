@@ -3,6 +3,7 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { UserMismatchError } from '../../../../../constants/errors';
 import {
   ADMIN, UMS_ADMIN, MENTOR, UMS_VIEWER, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN,
+  LEAD_PARTNER,
 } from '../../../../../constants/roles';
 import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
@@ -78,7 +79,7 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
 
   // validate input
   await validateMenteeSessionInput(params, context);
-  const allowedRoles = [ADMIN, UMS_ADMIN, UMS_VIEWER, MENTOR, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN];
+  const allowedRoles = [ADMIN, UMS_ADMIN, UMS_VIEWER, MENTOR, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN, LEAD_PARTNER];
 
   context.userIdFromContext = userIdFromContext;
   context.isBookedByMentee = userIdFromContext === userId;
