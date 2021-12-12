@@ -6,6 +6,7 @@ const EventName = `
     demoCompletion
     iqaReport
     genZEnvironment
+    crackTheCode
   }`;
 
 export default EventName;
