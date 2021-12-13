@@ -56,7 +56,7 @@ const userPermissionsDoc = {
   SalesOperation: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI],
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI, PRE_SALES],
       read: [MENTEE, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM, BDE, BDE_ADMIN],
     },
   },
