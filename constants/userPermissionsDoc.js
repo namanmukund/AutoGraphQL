@@ -161,7 +161,7 @@ const userPermissionsDoc = {
   MentorAvailabilitySlot: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, ...SUPPLY_DEMAND_ROLES_ARRAY],
+      crud: [...UMS_HEAD_ARR, ...SUPPLY_DEMAND_ROLES_ARRAY, SENSEI],
       read: [...NOT_UMS_HEAD_ARR],
     },
   },
