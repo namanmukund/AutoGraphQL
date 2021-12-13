@@ -106,6 +106,7 @@ ${getPermissionSchemaString('SalesOperation')}
     ${studentIQQuestions}
     sessionCommentByMentor: String
     iqaTags: [iqaTag]
+    addedBy: User @relation(name:"SalesOperationAddedBy", direction: "OneWay")
   }
 `;
 
