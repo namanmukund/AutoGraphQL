@@ -32,6 +32,14 @@ const EVENTS = {
       staging: 'ckweriv6q0000mzin99jm8mm2',
     },
   },
+  CRACKTHECODE: {
+    formId: 'd6j0QvvX',
+    eventId: {
+      production: 'ckx3cxe39000018in96do53zp',
+      preprod: 'ckx3cuo200000zein8wwz3qid',
+      staging: 'ckx3bgy7p0000n1incbzkb36i',
+    },
+  },
 };
 
 export default EVENTS;

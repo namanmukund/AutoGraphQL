@@ -27,21 +27,22 @@ import {
   DEMAND_MANAGER,
   SUPPLY_DEMAND_ROLES_ARRAY,
   LEAD_PARTNER,
+  SENSEI,
 } from './roles';
 
 const userPermissionsDoc = {
   User: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR],
-      read: [PRE_SALES, POST_SALES, AUDITOR, BDE, BDE_ADMIN, SUPPLY_DEMAND_ADMIN, SUPPLY_MANAGER, DEMAND_MANAGER, LEAD_PARTNER],
+      crud: [...UMS_HEAD_ARR, LEAD_PARTNER],
+      read: [PRE_SALES, POST_SALES, AUDITOR, BDE, BDE_ADMIN, SUPPLY_DEMAND_ADMIN, SUPPLY_MANAGER, DEMAND_MANAGER],
       exceptDelete: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN, TRANSFORMATION_ADMIN, AUDIT_ADMIN],
     },
     fields: {
       role: {
         rule: 'allow',
-        crud: [...UMS_HEAD_ARR],
-        read: [...NOT_UMS_HEAD_ARR, PRE_SALES, POST_SALES, AUDIT_ADMIN, AUDITOR, BDE, BDE_ADMIN, SUPPLY_DEMAND_ADMIN, DEMAND_MANAGER, LEAD_PARTNER],
+        crud: [...UMS_HEAD_ARR, LEAD_PARTNER],
+        read: [...NOT_UMS_HEAD_ARR, PRE_SALES, POST_SALES, AUDIT_ADMIN, AUDITOR, BDE, BDE_ADMIN, SUPPLY_DEMAND_ADMIN, DEMAND_MANAGER],
         exceptDelete: [TRANSFORMATION_ADMIN],
       },
       savedPassword: {
@@ -55,28 +56,28 @@ const userPermissionsDoc = {
   SalesOperation: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI],
       read: [MENTEE, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM, BDE, BDE_ADMIN],
     },
   },
   SalesOperationLog: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI],
       read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
   SalesOperationActivity: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI],
       read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
   UserPaymentPlan: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI],
       read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
@@ -133,7 +134,7 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...CMS_HEAD_ARRAY, UMS_ADMIN],
-      read: [...NOT_CMS_HEAD_ARRAY, SCHOOL_ADMIN, BDE_ADMIN],
+      read: [...NOT_CMS_HEAD_ARRAY, SCHOOL_ADMIN, BDE_ADMIN, SENSEI],
     },
   },
   BlockBasedProject: {

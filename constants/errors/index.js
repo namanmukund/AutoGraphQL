@@ -81,6 +81,7 @@ import {
   SessionAlreadyAssigned,
   FileNameAlreadyExists,
   LeadPartnerWithSimilarTitleAlreadyExist,
+  SenseiProfileAlreadyExist,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -303,4 +304,5 @@ export {
   FileNameAlreadyExists,
   ResetPasswordLinkExpired,
   LeadPartnerWithSimilarTitleAlreadyExist,
+  SenseiProfileAlreadyExist,
 };
