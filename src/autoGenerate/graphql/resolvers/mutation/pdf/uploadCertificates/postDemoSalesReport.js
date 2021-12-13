@@ -3,7 +3,12 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-confusing-arrow */
 
-import { PDFDocument, rgb } from 'pdf-lib';
+import {
+  PDFDocument,
+  PDFName,
+  PDFString,
+  rgb,
+} from 'pdf-lib';
 import * as fs from 'fs';
 import fontkit from '@pdf-lib/fontkit';
 import mkdirp from 'mkdirp';
@@ -60,9 +65,9 @@ const getDialParams = (score) => {
 
 const round5 = (x) => Math.round(x / 5) * 5;
 
-const getMentorRatingStars = (rating) => `${process.env.FILE_BASE_URL}/python/course/mentorRatings/${rating}star.png`;
+const getMentorRatingStars = (rating) => `${process.env.FILE_BASE_URL}/python/course/mentorRatings/${rating}starHighRes.png`;
 
-const getMentorDialUrl = (score) => `${process.env.FILE_BASE_URL}/python/course/ratingsDial/rating${Math.ceil(score)}.png`;
+const getMentorDialUrl = (score) => `${process.env.FILE_BASE_URL}/python/course/ratingsDial/rating${Math.ceil(score)}HighRes.png`;
 
 const iqaReportQuery = (id) => `{
 iqaReports(filter: {
@@ -207,30 +212,78 @@ const getGradeToDisplay = (grade) => {
 const getNote = (key) => {
   switch (key) {
     case 'smartAndAttentive':
-      return 'The student was very smart and attentive.';
+      return {
+        line1: 'The student is very smart & attentive and understood the',
+        line2: 'clearly. Also, the kid tried answering all the question',
+        line3: 'and was very curious. Overall the kid has great potential.',
+      };
     case 'interestedAndEagerToLearn':
-      return 'The student was really interested in coding.';
+      return {
+        line1: 'The student was really interested in coding and was eager',
+        line2: 'to learn as well. Also, the student was asking questions constantly.',
+      };
     case 'goodCommunicationAndCurious':
-      return 'The student has amazing communication skills.';
+      return {
+        line1: 'The student is an extrovert and has amazing communication',
+        line2: 'skills, also the kid was able to quickly grasp the concepts',
+        line3: 'and had a lot of curiosity to learn more. The kid has great',
+        line4: 'potential overall.',
+      };
     case 'interactiveAndFocused':
-      return 'The student was interactive and focused throughout the class.';
+      return {
+        line1: 'The student was good at catching concepts and was really',
+        line2: 'interactive and focused throughout the sessions and was',
+        line3: 'very interested to learn coding.',
+      };
     case 'problemSolvingAndCreativeThinkingSkill':
-      return 'The student was highly creative and is good at problem solving.';
+      return {
+        line1: 'The student was really curious and filled with tons of',
+        line2: 'energy also, had good problem-solving skills and creative',
+        line3: 'thinking. Amazing kid!',
+      };
     default:
-      return '';
+      return {
+        line1: 'The student was really interested in coding and was eager',
+        line2: 'to learn as well. Also, the student was asking questions constantly.',
+      };
   }
 };
 
-const getIqaTags = (iqaTags) => {
+const getIqaTags = async (iqaTags, pdfDoc) => {
   let tags = [];
+  const arr = [];
   if (iqaTags && iqaTags.length) {
     for (const iqaTag of iqaTags) {
-      tags.push(iqaTag.value.toUpperCase());
+      tags.push(iqaTag.value);
     }
   } else {
-    tags = ['CURIOUS', 'SMART', 'AMBITIOUS'];
+    tags = ['curious', 'focused', 'ambitious'];
   }
-  return tags;
+  const tag1Url = `${process.env.FILE_BASE_URL}/python/course/childTags/${tags[0]}.png`;
+  const tag1Bytes = await fetch(tag1Url).then((res) => res.buffer());
+  const tag1Image = await pdfDoc.embedPng(tag1Bytes);
+  const tag1ImageDim = tag1Image.scale(1);
+  arr.push({
+    image: tag1Image,
+    size: tag1ImageDim,
+  });
+  const tag2Url = `${process.env.FILE_BASE_URL}/python/course/childTags/${tags[1]}.png`;
+  const tag2Bytes = await fetch(tag2Url).then((res) => res.buffer());
+  const tag2Image = await pdfDoc.embedPng(tag2Bytes);
+  const tag2ImageDim = tag2Image.scale(1);
+  arr.push({
+    image: tag2Image,
+    size: tag2ImageDim,
+  });
+  const tag3Url = `${process.env.FILE_BASE_URL}/python/course/childTags/${tags[2]}.png`;
+  const tag3Bytes = await fetch(tag3Url).then((res) => res.buffer());
+  const tag3Image = await pdfDoc.embedPng(tag3Bytes);
+  const tag3ImageDim = tag3Image.scale(1);
+  arr.push({
+    image: tag3Image,
+    size: tag3ImageDim,
+  });
+  return arr;
 };
 
 const getPostDemoSalesReportUrl = async (userId) => {
@@ -251,8 +304,6 @@ const getPostDemoSalesReportUrl = async (userId) => {
     creativeSkills = 5,
     iqaTags,
   } = get(salesOperations, '[0]');
-  const shuffledTags = getIqaTags(iqaTags).sort(() => 0.5 - Math.random());
-  const selectedTags = shuffledTags.slice(0, 3);
 
   const mentorMenteeSessions = get(await callLocalGraphqlApi(mentorMenteeSessionsQuery(userId)), 'data.mentorMenteeSessions', []);
   const mentorName = get(mentorMenteeSessions, '[0].mentorSession.user.name', '-');
@@ -265,7 +316,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
   const studentName = get(mentorMenteeSessions, '[0].menteeSession.user.name', 'xxxxxx', '');
 
   if ((iqaReports && iqaReports.length)) {
-    url = `${process.env.FILE_BASE_URL}/python/course/postDemoPostTestCompressed.pdf`;
+    url = `${process.env.FILE_BASE_URL}/python/course/postDemoPostTestCombined.pdf`;
     existingPdfBytes = await fetch(url).then((res) => res.buffer());
     // Load a PDFDocument from the existing PDF bytes
     pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -328,7 +379,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     const mentorRatingDialBytes = await fetch(getMentorDialUrl(ratingAverage)).then((res) => res.buffer());
     const mentorRatingDialImage = await pdfDoc.embedPng(mentorRatingDialBytes);
     const mentorRatingDialDim = mentorRatingDialImage.scale(1);
-
+    const selectedTags = await getIqaTags(iqaTags, pdfDoc);
     /*
       FIRST PAGE
     */
@@ -352,16 +403,16 @@ const getPostDemoSalesReportUrl = async (userId) => {
       SECOND PAGE
     */
     secondPage.drawText(`${get(iqaReports, '[0].iqaScore', 70) < 70 ? 70 : get(iqaReports, '[0].iqaScore', 70)}`, {
-      x: 170,
-      y: 640,
+      x: 165,
+      y: 645,
       size: 50,
       font: GilroyExtraBoldFont,
       color: rgb(0, 0.29, 0.678),
     });
 
     secondPage.drawText(`/${get(iqaReports, '[0].maximumScore', 100)}`, {
-      x: 170,
-      y: 610,
+      x: 165,
+      y: 615,
       size: 20,
       font: GilroyExtraBoldFont,
       color: rgb(0.522, 0.518, 0.518),
@@ -458,8 +509,8 @@ const getPostDemoSalesReportUrl = async (userId) => {
     secondPage.drawImage(mentorRatingStarImage, {
       x: 155,
       y: 226,
-      width: mentorRatingStarDim.width,
-      height: mentorRatingStarDim.height,
+      width: mentorRatingStarDim.width / 3,
+      height: mentorRatingStarDim.height / 3,
     });
 
     // mentor circle
@@ -484,85 +535,114 @@ const getPostDemoSalesReportUrl = async (userId) => {
     thirdPage.drawImage(mentorRatingDialImage, {
       x: 200,
       y: 825,
-      width: mentorRatingDialDim.width,
-      height: mentorRatingDialDim.height,
+      width: mentorRatingDialDim.width / 3,
+      height: mentorRatingDialDim.height / 3,
     });
 
     // critical thinking
     thirdPage.drawImage(Star1Image, {
       x: 335,
       y: 786,
-      width: Star1Dim.width,
-      height: Star1Dim.height,
+      width: Star1Dim.width / 3,
+      height: Star1Dim.height / 3,
     });
 
     // logical thinking
     thirdPage.drawImage(Star2Image, {
       x: 335,
       y: 753,
-      width: Star2Dim.width,
-      height: Star2Dim.height,
+      width: Star2Dim.width / 3,
+      height: Star2Dim.height / 3,
     });
 
     // communication skills
     thirdPage.drawImage(Star3Image, {
       x: 335,
       y: 720,
-      width: Star3Dim.width,
-      height: Star3Dim.height,
+      width: Star3Dim.width / 3,
+      height: Star3Dim.height / 3,
     });
 
     // problem solving ability
     thirdPage.drawImage(Star4Image, {
       x: 335,
       y: 687,
-      width: Star4Dim.width,
-      height: Star4Dim.height,
+      width: Star4Dim.width / 3,
+      height: Star4Dim.height / 3,
     });
 
     // creativity skills
     thirdPage.drawImage(Star5Image, {
       x: 335,
       y: 654,
-      width: Star5Dim.width,
-      height: Star5Dim.height,
+      width: Star5Dim.width / 3,
+      height: Star5Dim.height / 3,
     });
 
     /*
       student tags
     */
-    thirdPage.drawText(selectedTags[0], {
-      x: 146,
-      y: 496,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.09, 0.675, 1),
+    thirdPage.drawImage(selectedTags[0].image, {
+      x: 140,
+      y: 490,
+      width: selectedTags[0].size.width / 3,
+      height: selectedTags[0].size.height / 3,
     });
 
-    thirdPage.drawText(selectedTags[1], {
-      x: 226,
-      y: 496,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.09, 0.675, 1),
+    thirdPage.drawImage(selectedTags[1].image, {
+      x: 250,
+      y: 490,
+      width: selectedTags[1].size.width / 3,
+      height: selectedTags[1].size.height / 3,
     });
 
-    thirdPage.drawText(selectedTags[2], {
-      x: 306,
-      y: 496,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.09, 0.675, 1),
+    thirdPage.drawImage(selectedTags[2].image, {
+      x: 360,
+      y: 490,
+      width: selectedTags[2].size.width / 3,
+      height: selectedTags[2].size.height / 3,
     });
 
     // notes from the mentor
-    thirdPage.drawText(mentorNote, {
-      x: 42,
-      y: 570,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.31, 0.31, 0.31),
-    });
+    if (mentorNote.line1) {
+      thirdPage.drawText(mentorNote.line1, {
+        x: 42,
+        y: 570,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
+
+    if (mentorNote.line2) {
+      thirdPage.drawText(mentorNote.line2, {
+        x: 42,
+        y: 554,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
+
+    if (mentorNote.line3) {
+      thirdPage.drawText(mentorNote.line3, {
+        x: 42,
+        y: 538,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
+
+    if (mentorNote.line4) {
+      thirdPage.drawText(mentorNote.line4, {
+        x: 42,
+        y: 522,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
 
     // mentor name
     thirdPage.drawText(capitalize(mentorName), {
@@ -572,8 +652,144 @@ const getPostDemoSalesReportUrl = async (userId) => {
       font: NunitoBoldFont,
       color: rgb(0.31, 0.31, 0.31),
     });
+
+    // link to whatsapp
+    const whatsappLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [230, 215, 370, 250],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('http://tekie.app.link/sgnArKNfwdb'),
+      },
+    });
+    const whatsappLinkAnnotationRef = pdfDoc.context.register(whatsappLinkAnnotation);
+
+    // link to tel
+    const telLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [230, 160, 370, 195],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('tel:+918047483415'),
+      },
+    });
+    const telLinkAnnotationRef = pdfDoc.context.register(telLinkAnnotation);
+
+    // link to facebook
+    const fbLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [200, 105, 230, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.facebook.com/Tekie.in/'),
+      },
+    });
+    const fbLinkAnnotationRef = pdfDoc.context.register(fbLinkAnnotation);
+
+    // link to instagram
+    const igLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [255, 105, 285, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.instagram.com/tekie.in/'),
+      },
+    });
+    const igLinkAnnotationRef = pdfDoc.context.register(igLinkAnnotation);
+
+    // link to linkedin
+    const liLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [310, 105, 340, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.linkedin.com/company/tekie'),
+      },
+    });
+    const liLinkAnnotationRef = pdfDoc.context.register(liLinkAnnotation);
+
+    // link to youtube
+    const ytLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [365, 105, 395, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.youtube.com/channel/UCCr7GPlTdZRXFEfveeuKcbg'),
+      },
+    });
+    const ytLinkAnnotationRef = pdfDoc.context.register(ytLinkAnnotation);
+
+    // link to terms
+    const termsLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [200, 65, 245, 85],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.tekie.in/terms'),
+      },
+    });
+    const termsLinkAnnotationRef = pdfDoc.context.register(termsLinkAnnotation);
+
+    // link to tekie.in
+    const tekiewebLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [270, 65, 330, 85],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.tekie.in/'),
+      },
+    });
+    const tekiewebLinkAnnotationRef = pdfDoc.context.register(tekiewebLinkAnnotation);
+
+    // link to unsibscribe
+    const unsLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [350, 65, 395, 85],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://tekie.in/Unsubscribe'),
+      },
+    });
+    const unsLinkAnnotationRef = pdfDoc.context.register(unsLinkAnnotation);
+    thirdPage.node.set(PDFName.of('Annots'), pdfDoc.context.obj([whatsappLinkAnnotationRef, telLinkAnnotationRef, fbLinkAnnotationRef, igLinkAnnotationRef, liLinkAnnotationRef, ytLinkAnnotationRef, termsLinkAnnotationRef, tekiewebLinkAnnotationRef, unsLinkAnnotationRef]));
   } else {
-    url = `${process.env.FILE_BASE_URL}/python/course/postDemoPreTestCompressed.pdf`;
+    url = `${process.env.FILE_BASE_URL}/python/course/postDemoPreTestCombined.pdf`;
     existingPdfBytes = await fetch(url).then((res) => res.buffer());
     // Load a PDFDocument from the existing PDF bytes
     pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -610,6 +826,7 @@ const getPostDemoSalesReportUrl = async (userId) => {
     const mentorRatingDialBytes = await fetch(getMentorDialUrl(ratingAverage)).then((res) => res.buffer());
     const mentorRatingDialImage = await pdfDoc.embedPng(mentorRatingDialBytes);
     const mentorRatingDialDim = mentorRatingDialImage.scale(1);
+    const selectedTags = await getIqaTags(iqaTags, pdfDoc);
     /*
       FIRST PAGE
     */
@@ -635,85 +852,114 @@ const getPostDemoSalesReportUrl = async (userId) => {
     secondPage.drawImage(mentorRatingDialImage, {
       x: 200,
       y: 825,
-      width: mentorRatingDialDim.width,
-      height: mentorRatingDialDim.height,
+      width: mentorRatingDialDim.width / 3,
+      height: mentorRatingDialDim.height / 3,
     });
 
     // critical thinking
     secondPage.drawImage(Star1Image, {
       x: 335,
       y: 786,
-      width: Star1Dim.width,
-      height: Star1Dim.height,
+      width: Star1Dim.width / 3,
+      height: Star1Dim.height / 3,
     });
 
     // logical thinking
     secondPage.drawImage(Star2Image, {
       x: 335,
       y: 753,
-      width: Star2Dim.width,
-      height: Star2Dim.height,
+      width: Star2Dim.width / 3,
+      height: Star2Dim.height / 3,
     });
 
     // communication skills
     secondPage.drawImage(Star3Image, {
       x: 335,
       y: 720,
-      width: Star3Dim.width,
-      height: Star3Dim.height,
+      width: Star3Dim.width / 3,
+      height: Star3Dim.height / 3,
     });
 
     // problem solving ability
     secondPage.drawImage(Star4Image, {
       x: 335,
       y: 687,
-      width: Star4Dim.width,
-      height: Star4Dim.height,
+      width: Star4Dim.width / 3,
+      height: Star4Dim.height / 3,
     });
 
     // creativity skills
     secondPage.drawImage(Star5Image, {
       x: 335,
       y: 654,
-      width: Star5Dim.width,
-      height: Star5Dim.height,
+      width: Star5Dim.width / 3,
+      height: Star5Dim.height / 3,
     });
 
     /*
       student tags
     */
-    secondPage.drawText(selectedTags[0], {
-      x: 146,
-      y: 496,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.09, 0.675, 1),
+    secondPage.drawImage(selectedTags[0].image, {
+      x: 140,
+      y: 490,
+      width: selectedTags[0].size.width / 3,
+      height: selectedTags[0].size.height / 3,
     });
 
-    secondPage.drawText(selectedTags[1], {
-      x: 226,
-      y: 496,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.09, 0.675, 1),
+    secondPage.drawImage(selectedTags[1].image, {
+      x: 250,
+      y: 490,
+      width: selectedTags[1].size.width / 3,
+      height: selectedTags[1].size.height / 3,
     });
 
-    secondPage.drawText(selectedTags[2], {
-      x: 306,
-      y: 496,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.09, 0.675, 1),
+    secondPage.drawImage(selectedTags[2].image, {
+      x: 360,
+      y: 490,
+      width: selectedTags[2].size.width / 3,
+      height: selectedTags[2].size.height / 3,
     });
 
     // notes from the mentor
-    secondPage.drawText(mentorNote, {
-      x: 42,
-      y: 570,
-      size: 11,
-      font: NunitoBoldFont,
-      color: rgb(0.31, 0.31, 0.31),
-    });
+    if (mentorNote.line1) {
+      secondPage.drawText(mentorNote.line1, {
+        x: 42,
+        y: 570,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
+
+    if (mentorNote.line2) {
+      secondPage.drawText(mentorNote.line2, {
+        x: 42,
+        y: 554,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
+
+    if (mentorNote.line3) {
+      secondPage.drawText(mentorNote.line3, {
+        x: 42,
+        y: 538,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
+
+    if (mentorNote.line4) {
+      secondPage.drawText(mentorNote.line4, {
+        x: 42,
+        y: 522,
+        size: 11,
+        font: NunitoBoldFont,
+        color: rgb(0.31, 0.31, 0.31),
+      });
+    }
 
     // mentor name
     secondPage.drawText(capitalize(mentorName), {
@@ -723,6 +969,142 @@ const getPostDemoSalesReportUrl = async (userId) => {
       font: NunitoBoldFont,
       color: rgb(0.31, 0.31, 0.31),
     });
+
+    // link to whatsapp
+    const whatsappLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [230, 215, 370, 250],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('http://tekie.app.link/sgnArKNfwdb'),
+      },
+    });
+    const whatsappLinkAnnotationRef = pdfDoc.context.register(whatsappLinkAnnotation);
+
+    // link to tel
+    const telLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [230, 160, 370, 195],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('tel:+918047483415'),
+      },
+    });
+    const telLinkAnnotationRef = pdfDoc.context.register(telLinkAnnotation);
+
+    // link to facebook
+    const fbLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [200, 105, 230, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.facebook.com/Tekie.in/'),
+      },
+    });
+    const fbLinkAnnotationRef = pdfDoc.context.register(fbLinkAnnotation);
+
+    // link to instagram
+    const igLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [255, 105, 285, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.instagram.com/tekie.in/'),
+      },
+    });
+    const igLinkAnnotationRef = pdfDoc.context.register(igLinkAnnotation);
+
+    // link to linkedin
+    const liLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [310, 105, 340, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.linkedin.com/company/tekie'),
+      },
+    });
+    const liLinkAnnotationRef = pdfDoc.context.register(liLinkAnnotation);
+
+    // link to youtube
+    const ytLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [365, 105, 395, 135],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.youtube.com/channel/UCCr7GPlTdZRXFEfveeuKcbg'),
+      },
+    });
+    const ytLinkAnnotationRef = pdfDoc.context.register(ytLinkAnnotation);
+
+    // link to terms
+    const termsLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [200, 65, 245, 85],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.tekie.in/terms'),
+      },
+    });
+    const termsLinkAnnotationRef = pdfDoc.context.register(termsLinkAnnotation);
+
+    // link to tekie.in
+    const tekiewebLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [270, 65, 330, 85],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://www.tekie.in/'),
+      },
+    });
+    const tekiewebLinkAnnotationRef = pdfDoc.context.register(tekiewebLinkAnnotation);
+
+    // link to unsibscribe
+    const unsLinkAnnotation = pdfDoc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [350, 65, 395, 85],
+      Border: [0, 0, 0],
+      C: [0, 0, 1],
+      A: {
+        Type: 'Action',
+        S: 'URI',
+        URI: PDFString.of('https://tekie.in/Unsubscribe'),
+      },
+    });
+    const unsLinkAnnotationRef = pdfDoc.context.register(unsLinkAnnotation);
+    secondPage.node.set(PDFName.of('Annots'), pdfDoc.context.obj([whatsappLinkAnnotationRef, telLinkAnnotationRef, fbLinkAnnotationRef, igLinkAnnotationRef, liLinkAnnotationRef, ytLinkAnnotationRef, termsLinkAnnotationRef, tekiewebLinkAnnotationRef, unsLinkAnnotationRef]));
   }
   /** PDF Meta Details */
   pdfDoc.setAuthor('Tekie');
