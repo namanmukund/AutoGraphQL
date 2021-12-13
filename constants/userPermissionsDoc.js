@@ -147,7 +147,7 @@ const userPermissionsDoc = {
   AuditQuestion: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, AUDIT_ADMIN, AUDITOR],
+      crud: [...UMS_HEAD_ARR, AUDIT_ADMIN, AUDITOR, SALES_EXECUTIVE, SENSEI],
       read: [UMS_VIEWER, MENTOR, PRE_SALES, POST_SALES],
     },
   },
