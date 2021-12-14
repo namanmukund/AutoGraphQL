@@ -59,7 +59,8 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
   if (bookedByUserRole && bookedByUserRole === LEAD_PARTNER) {
     activityNote = 'LeadParnter booked a session';
     bookingStatus = 'Booked (Non Verified)';
-    bookedBy = agentName;
+    // bookedBy = agentName;
+    bookedBy = 'Tekie Team';
   } else if (!isBookedByMentee) {
     activityNote = 'Agent booked a session';
     bookingStatus = 'Booked (Verified)';

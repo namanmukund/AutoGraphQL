@@ -19,6 +19,15 @@ const getMagicLinkForUser = async (userId) => {
   return magicLink;
 };
 
+const getUser = async (phoneNumber) => {
+  const user = await callLocalGraphqlApi(`{
+    users(filter: { phone_number_subDoc: "${phoneNumber}" }) {
+      timezone
+    }
+  }`);
+  return get(user, 'data.users[0]', {});
+};
+
 const sendWhatsappMessageForBookingConfirmedByLeadParnter = async (userInfo, slotTimeStringArray, bookingDate) => {
   const getMagicLink = await getMagicLinkForUser(get(userInfo, 'data.user.id', ''));
   if (getMagicLink.length > 0) {
@@ -26,7 +35,9 @@ const sendWhatsappMessageForBookingConfirmedByLeadParnter = async (userInfo, slo
     const { name, phone: { number, countryCode } } = get(userInfo, 'data.user.studentProfile.parents[0].user');
     if (number) {
       const slotNumber = slotTimeStringArray[0].split('slot')[1];
-      const { dateObject, startTime } = getIntlDateTime(bookingDate, slotNumber, 'Asia/Kolkata');
+      const user = await getUser(number);
+      const timezone = get(user, 'timezone');
+      const { dateObject, startTime } = getIntlDateTime(bookingDate, slotNumber, timezone);
       const date = moment(dateObject).format('dddd, Do MMMM, YYYY');
       const phone = countryCode.split('+')[1] + number;
       await sendWhatsAppTemplateMessage(
