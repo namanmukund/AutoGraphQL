@@ -8,6 +8,7 @@ const GetMagicLinkInput = `
     phone: PhoneInput
     expiresIn:Int
     linkVisitLimit: Int
+    isLeadLogin: Boolean @defaultValue(value: "false")
   }
 `;
 
