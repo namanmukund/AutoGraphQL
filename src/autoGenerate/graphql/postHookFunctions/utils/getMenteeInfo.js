@@ -6,6 +6,11 @@ const menteeInfoQuery = (userId) => `
       id
       name
       source
+      utmTerm
+      utmSource
+      utmMedium
+      utmContent
+      utmCampaign
       studentProfile{
         id
         grade

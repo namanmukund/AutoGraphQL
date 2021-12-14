@@ -7,7 +7,7 @@ import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMess
 
 const getMagicLinkForUser = async (userId) => {
   const query = `{
-  getMagicLink(input: { userId: "${userId}", isLeadLogin: true, linkVisitLimit: 1 }) {
+  getMagicLink(input: { userId: "${userId}", isLeadLogin: true }) {
     linkUri
     expiresIn
     linkToken

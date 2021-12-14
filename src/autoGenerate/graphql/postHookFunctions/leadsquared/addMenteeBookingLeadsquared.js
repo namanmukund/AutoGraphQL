@@ -15,6 +15,40 @@ const getUser = async (phoneNumber) => {
   return get(user, 'data.users[0]', {});
 };
 
+const getLeadPartnerType = async (leadPartnerId, term, medium, source, campaign, content) => {
+  const query = `{
+  leadPartners(
+    filter: {
+      and: [
+        {
+          or: [
+            { admins_some: { id: "${leadPartnerId}" } }
+            { agents_some: { agent_some: { id: "${leadPartnerId}" } } }
+          ]
+        }
+        {
+          agents_some: {
+            utmDetails_some: {
+              and: [
+                ${term ? `{ term: "${term}" }` : ''}
+                ${medium ? `{ medium: "${medium}" }` : ''}
+                ${source ? `{ source: "${source}" }` : ''}
+                ${campaign ? `{ campaign: "${campaign}" }` : ''}
+                ${content ? `{ content: "${content}" }` : ''}
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ) {
+    title
+  }
+}`;
+  const leadPartnerType = await callLocalGraphqlApi(query);
+  return get(leadPartnerType, 'data.leadPartners[0]');
+};
+
 const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, agentId, fields = {}, bookedByUserRole) => {
   const { bookingDate } = input;
   let phoneNumber = input.phone;
@@ -57,7 +91,16 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
   let bookingStatus = '';
   let bookedBy = '';
   if (bookedByUserRole && bookedByUserRole === LEAD_PARTNER) {
+    const term = get(userInfo, 'data.user.utmTerm');
+    const source = get(userInfo, 'data.user.utmSource');
+    const medium = get(userInfo, 'data.user.utmMedium');
+    const content = get(userInfo, 'data.user.utmContent');
+    const campaign = get(userInfo, 'data.user.utmCampaign');
+    const leadPartnertype = await getLeadPartnerType(agentId, term, medium, source, campaign, content);
     activityNote = 'LeadParnter booked a session';
+    if (get(leadPartnertype, 'title')) {
+      activityNote = `LeadParnter from ${get(leadPartnertype, 'title')} booked a session`;
+    }
     bookingStatus = 'Booked (Non Verified)';
     // bookedBy = agentName;
     bookedBy = 'Tekie Team';
