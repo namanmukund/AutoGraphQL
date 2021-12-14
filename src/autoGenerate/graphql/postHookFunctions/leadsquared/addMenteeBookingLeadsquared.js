@@ -97,9 +97,9 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
     const content = get(userInfo, 'data.user.utmContent');
     const campaign = get(userInfo, 'data.user.utmCampaign');
     const leadPartnertype = await getLeadPartnerType(agentId, term, medium, source, campaign, content);
-    activityNote = 'LeadParnter booked a session';
+    activityNote = 'LeadPartner booked a session';
     if (get(leadPartnertype, 'title')) {
-      activityNote = `LeadParnter from ${get(leadPartnertype, 'title')} booked a session`;
+      activityNote = `LeadPartner from ${get(leadPartnertype, 'title')} booked a session`;
     }
     bookingStatus = 'Booked (Non Verified)';
     // bookedBy = agentName;
