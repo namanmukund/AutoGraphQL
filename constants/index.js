@@ -232,6 +232,7 @@ const userSourceOrigin = {
   website: 'website',
   transformation: 'transformation',
   radioStreet: 'radioStreet',
+  agent: 'agent',
 };
 
 const freeTopicCount = 5;

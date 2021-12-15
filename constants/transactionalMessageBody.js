@@ -10,6 +10,7 @@ const transactionalMessageBody = {
   demoAssignedMentor: 'demo_assigned_for_mentor',
   supplyRequest: 'supply_request_for_mentor_final',
   demoRequestMentor: 'demo_request_for_mentor',
+  leadPartnerBookingConfirmation: 'lead_partner_booking_confirmation_w_magic_link_final',
   sessionMissed: {
     emailTemplate: 'sessionMissed',
     emailTemplateInternational: 'sessionMissed',
@@ -50,6 +51,11 @@ const transactionalMessageBody = {
   newSlotRequest: {
     emailTemplate: 'newSlotRequest',
     subject: 'Tekie - New Slot Request',
+    whatsAppTemplate: '',
+  },
+  sendResetPasswordLink: {
+    emailTemplate: 'forgetUserTemplate',
+    subject: 'Reset Your Password',
     whatsAppTemplate: '',
   },
   testEmail: 'namanmukund@gmail.com',

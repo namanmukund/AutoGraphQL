@@ -13,6 +13,7 @@ const MagicLinkLog = `
     section: Section
     firstLinkVisitedDate: Date
     linkVisitLimit: Int
+    isLeadLogin: Boolean @defaultValue(value: "false")
 }`;
 
 export default MagicLinkLog;
