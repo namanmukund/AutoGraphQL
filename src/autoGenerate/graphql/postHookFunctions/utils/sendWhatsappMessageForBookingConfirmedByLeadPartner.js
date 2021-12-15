@@ -31,19 +31,21 @@ const getUser = async (phoneNumber) => {
 const sendWhatsappMessageForBookingConfirmedByLeadParnter = async (userInfo, slotTimeStringArray, bookingDate) => {
   const getMagicLink = await getMagicLinkForUser(get(userInfo, 'data.user.id', ''));
   if (getMagicLink.length > 0) {
-    const magicLink = get(getMagicLink, '[0].linkUri');
+    let magicLink = get(getMagicLink, '[0].linkUri');
     const { name, phone: { number, countryCode } } = get(userInfo, 'data.user.studentProfile.parents[0].user');
-    if (number) {
+    if (number && magicLink) {
       const slotNumber = slotTimeStringArray[0].split('slot')[1];
       const user = await getUser(number);
       const timezone = get(user, 'timezone');
       const { dateObject, startTime } = getIntlDateTime(bookingDate, slotNumber, timezone);
       const date = moment(dateObject).format('dddd, Do MMMM, YYYY');
       const phone = countryCode.split('+')[1] + number;
+      const dateString = new Date(new Date(dateObject).setHours(slotNumber, 0, 0, 0)).toISOString();
+      magicLink = `${magicLink}&date=${dateString}`;
       await sendWhatsAppTemplateMessage(
         phone,
         transactionalMessageBody.leadPartnerBookingConfirmation,
-        phone,
+        name,
         [
           {
             name: 'parent_name',
