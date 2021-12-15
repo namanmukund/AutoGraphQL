@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { UserMismatchError } from '../../../../../constants/errors';
@@ -83,12 +84,14 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
 
   context.userIdFromContext = userIdFromContext;
   context.isBookedByMentee = userIdFromContext === userId;
+  context.userRoleFromContext = userRoleFromContext;
 
   if (userIdFromContext === userId) {
     // eslint-disable-next-line no-param-reassign
     params.input.bookedBy = 'customer';
+  } else if (userRoleFromContext === LEAD_PARTNER) {
+    params.input.bookedBy = 'leadPartner';
   } else {
-    // eslint-disable-next-line no-param-reassign
     params.input.bookedBy = 'tekieTeam';
   }
 

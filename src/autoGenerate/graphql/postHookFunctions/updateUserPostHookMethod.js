@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import { auditType } from '../../../../constants';
+import { MENTEE, PARENT } from '../../../../constants/roles';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { updateUserLeadSquared } from './leadsquared';
 import addSalesAudit from './utils/addSalesAudit';
@@ -38,6 +39,21 @@ const fetchAgentName = async (id) => {
   const res = await callLocalGraphqlApi(query);
   return get(res, 'data.user.name');
 };
+
+const fetchBookedSession = async (id) => {
+  const query = `
+  {
+    menteeSessions(
+      filter: { and: [{ user_some: { id: "${id}" } }, { topic_some: { order: 1 } }] }
+    ) {
+      id
+    }
+  }
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.menteeSessions', []).length;
+};
+
 const updateUserVerificationStatus = async (userId, verfiedByUserId) => {
   const query = `
     mutation {
@@ -55,13 +71,20 @@ const updateUserVerificationStatus = async (userId, verfiedByUserId) => {
 const updateUserPostHookMethod = async (input, mutationName, context) => {
   const userId = get(input, 'id');
   if (get(context, 'verificationStatusFromInput')) {
+    const isVerified = get(context, 'verificationStatusFromInput') === 'verified';
     updateUserVerificationStatus(userId, get(context, 'currentUser.id'));
-
+    let agentName = '';
+    if (get(context, 'currentUser.role') === PARENT || get(context, 'currentUser.role') === MENTEE) {
+      agentName = 'Parent';
+    } else {
+      agentName = await fetchAgentName(get(context, 'currentUser.id'));
+    }
     const user = await fetchUser(userId);
-    const agentName = await fetchAgentName(get(context, 'currentUser.id'));
     updateUserLeadSquared(
       get(user, 'studentProfile.parents[0].user.phone.number'),
       agentName,
+      isVerified,
+      await fetchBookedSession(userId),
     );
   }
   const isPreSalesAuditFromInput = get(context, 'isPreSalesAuditFromInput');
