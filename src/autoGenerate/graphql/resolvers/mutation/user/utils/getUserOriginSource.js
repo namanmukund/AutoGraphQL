@@ -2,7 +2,7 @@ import { userSourceOrigin } from '../../../../../../../constants';
 
 const getUserOriginSource = (utmSource, schoolName = '', schoolId = '') => {
   const {
-    website, facebook, google, instagram, school, transformation, radioStreet,
+    website, facebook, google, instagram, school, transformation, radioStreet, agent,
   } = userSourceOrigin;
   let source = website;
   if (utmSource && utmSource.toLowerCase().includes('transformation')) {
@@ -22,6 +22,9 @@ const getUserOriginSource = (utmSource, schoolName = '', schoolId = '') => {
   }
   if (schoolName && utmSource && utmSource.toLowerCase().includes('radiostreet')) {
     source = radioStreet;
+  }
+  if (utmSource && utmSource.toLowerCase().includes('agent')) {
+    source = agent;
   }
   return source;
 };
