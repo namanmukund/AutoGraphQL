@@ -5,7 +5,7 @@ export const getAppNameEnum = () => {
   frontEndApps.forEach((app) => {
     appNameEnum += `${app} `;
   });
-  appNameEnum += '}';
+  appNameEnum += 'core}';
   return appNameEnum;
 };
 
