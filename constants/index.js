@@ -251,6 +251,7 @@ const forgotPassWebURL = {
   development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword',
   staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword',
   production: 'https://tekie-managment-system.herokuapp.com/forgotPassword',
+  preProd: 'https://tekie-tms-pre-prod.herokuapp.com/forgotPassword',
 };
 
 const slotTimes = [
