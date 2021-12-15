@@ -127,7 +127,7 @@ const parentChildSignUpMutationResolver = async (
   Object.assign(authentication, {
     bypass: true,
   });
-  const source = getUserOriginSource(utmSource, schoolName, schoolId);
+  const source = getUserOriginSource(utmSource, schoolName, schoolId, istmsApp);
   /* this campaign obj will be later in this method */
   /* fetching earlier to update vertical in user */
   let campaign = null;
