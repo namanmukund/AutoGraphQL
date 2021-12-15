@@ -113,6 +113,7 @@ const NOT_UMS_HEAD_AND_SALES_EXECUTIVE = `[
 "${UMS_VIEWER}",
 "${CMS_UMS_VIEWER}",
 "${MENTOR}",
+"${PRE_SALES}"
 ]`;
 
 const ALL_ROLES = `[
