@@ -595,7 +595,7 @@ const typeformWebhookController = async (req, res) => {
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
-          utmCampaign = 'spysquadcamp_4dec';
+          utmCampaign = 'spysquadcamp_18dec';
           break;
         case EVENTS.CANVA.formId:
           country = 'india';
@@ -613,7 +613,7 @@ const typeformWebhookController = async (req, res) => {
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
-          utmCampaign = 'storyspree_12dec';
+          utmCampaign = 'storyspree_19dec';
           break;
         case EVENTS.GENZENVIRONMENT.registrationFormId:
           country = 'india';
@@ -632,7 +632,7 @@ const typeformWebhookController = async (req, res) => {
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
-          utmCampaign = 'spysquadcamp_4dec';
+          utmCampaign = 'spysquadcamp_18dec';
           break;
       }
       studentDetailsObject = {
