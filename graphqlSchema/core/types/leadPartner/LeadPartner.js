@@ -10,6 +10,10 @@ const LeadPartnerAgent = `
     utmDetails: [UtmDetail] @relation(name: "LeadPartnerAgentUtmDetail") 
     leadPartner: LeadPartner @relation(name:"LeadPartnerAgentUser")
     agent: User @relation(name:"LeadPartnerAgentUser", direction: "OneWay")
+    dayWiseBooking: Int
+    monthlyBooking: Int
+    dayWiseConduction: Int
+    monthlyConduction: Int
 }`;
 
 export default [LeadPartner, LeadPartnerAgent];

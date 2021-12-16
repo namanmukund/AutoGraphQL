@@ -7,6 +7,7 @@ const addStudentProfile = async (
   parentProfileId,
   studentSchoolId,
   batchId,
+  registrationAgentId,
 ) => {
   let schoolConnectId = '';
   if (studentSchoolId) {
@@ -15,6 +16,10 @@ const addStudentProfile = async (
   let batchConnectId = '';
   if (batchId) {
     batchConnectId = `batchConnectId: "${batchId}"`;
+  }
+  let registrationAgentConnectId = '';
+  if (registrationAgentId) {
+    registrationAgentConnectId = `registrationAgentConnectId: "${registrationAgentId}"`;
   }
 
   const query = `
@@ -25,6 +30,7 @@ mutation($input: StudentProfileInput!){
   parentsConnectIds:["${parentProfileId}"],
   ${schoolConnectId}
   ${batchConnectId}
+  ${registrationAgentConnectId}
   ){
     id
   }

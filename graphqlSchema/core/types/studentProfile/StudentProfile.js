@@ -13,6 +13,7 @@ const StudentProfile = `
     parents: [ParentProfile] @relation(name: "StudentProfileParentProfile")
     batch: Batch @relation(name: "BatchStudentProfile")
     eventAttendances: [EventAttendance] @relation(name:"EventAttendanceStudentProfile")
+    registrationAgent: User @relation(name: "UserRegistrationAgent", direction: "OneWay")
 }`;
 
 export default [StudentProfile];
