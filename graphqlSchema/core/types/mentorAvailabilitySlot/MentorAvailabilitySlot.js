@@ -2,8 +2,8 @@ import { READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
 import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
 
-const SingleSlotCountry = `
- type SingleSlotCountry {
+const Countries = `
+ type Countries {
    value: Country
  }
 `;
@@ -31,7 +31,7 @@ const MentorAvailabilitySlot = `
     mentorDemandSlot: MentorDemandSlot @relation(name: "MentorDemandSlotMentorAvailabilitySlot")
     slotName: Slot
     paySlab: MentorSupplyPaySlab @relation(name: "MentorAvailabilitySlotPaySlab", direction: "OneWay")
-    countries: [SingleSlotCountry]
+    countries: [Countries]
     timezone: [String]
     count: Int
     sessionType: SessionType @defaultValue(value: "trial")
@@ -48,4 +48,4 @@ const MentorAvailabilitySlot = `
   }
 `;
 
-export default [MentorAvailabilitySlot, SingleSlotCountry, SingleSlotVertical];
+export default [MentorAvailabilitySlot, Countries, SingleSlotVertical];
