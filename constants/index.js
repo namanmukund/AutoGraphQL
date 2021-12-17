@@ -473,6 +473,8 @@ const ALLOWED_MIME_TYPES = ['html', 'css', 'javascript'];
 
 const MASTER_OTP = 1101;
 
+const BLOCKED = 'blocked';
+
 const courseToGradeMapping = [
   {
     grade: [1, 2],
@@ -585,4 +587,5 @@ export {
   courseToGradeMapping,
   courseToGradeMappingForStaging,
   iqaTags,
+  BLOCKED,
 };

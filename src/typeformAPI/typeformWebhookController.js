@@ -62,6 +62,15 @@ const getEventId = (formId) => {
         }
       }
       break;
+    case EVENTS.CHRISTMASCARNIVAL.formId:
+      eventId = EVENTS.CHRISTMASCARNIVAL.eventId.staging;
+      if (process.env.NODE_ENV === 'production') {
+        eventId = EVENTS.CHRISTMASCARNIVAL.eventId.production;
+        if (process.env.DATA_MASKING) {
+          eventId = EVENTS.CHRISTMASCARNIVAL.eventId.preprod;
+        }
+      }
+      break;
     default:
       eventId = EVENTS.SPYSQUADCAMP.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
@@ -623,7 +632,7 @@ const typeformWebhookController = async (req, res) => {
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
-          utmCampaign = 'spysquadcamp_4dec';
+          utmCampaign = 'spysquadcamp_18dec';
           break;
         case EVENTS.CANVA.formId:
           country = 'india';
@@ -641,7 +650,7 @@ const typeformWebhookController = async (req, res) => {
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
-          utmCampaign = 'storyspree_12dec';
+          utmCampaign = 'storyspree_19dec';
           break;
         case EVENTS.GENZENVIRONMENT.registrationFormId:
           country = 'india';
@@ -687,7 +696,7 @@ const typeformWebhookController = async (req, res) => {
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
-          utmCampaign = 'spysquadcamp_4dec';
+          utmCampaign = 'spysquadcamp_18dec';
           break;
       }
       studentDetailsObject = {

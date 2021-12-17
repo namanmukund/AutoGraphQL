@@ -458,19 +458,15 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     setTimeout(() => {
       updateLeadSquared({
         Phone: get(parentPhone, 'number'),
-        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '11 December' : '5 December',
+        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '18 December' : '19 December',
         mx_Event_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '03:00 pm' : '11:00 am',
-        mx_Event_Date_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '2021-12-11 09:30:00' : '2021-12-05 05:30:00',
+        mx_Event_Date_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '2021-12-18 09:30:00' : '2021-12-19 05:30:00',
       }, false, {
         ActivityEvent: 208,
         Fields: [
           {
             SchemaName: 'mx_Custom_1',
             Value: 'communityevent',
-          },
-          {
-            SchemaName: 'mx_Custom_2',
-            Value: 'spysquadcamp_4dec',
           },
         ],
       });
