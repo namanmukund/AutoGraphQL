@@ -14,7 +14,7 @@ const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).rep
 const slugifyID = (ID) => ID ? ID.toString().trim().toUpperCase().replace(/\w{5}(?=.)/g, '$&-') : '';
 
 const getChristmasCarnivalCertificateUrl = async (userId, userName, formattedDate) => {
-  const url = `${process.env.FILE_BASE_URL}/python/course/radiostreetCertificate.pdf`;
+  const url = `${process.env.FILE_BASE_URL}/python/course/christmasCarnival.pdf`;
   const existingPdfBytes = await fetch(url).then((res) => res.buffer());
 
   // Load a PDFDocument from the existing PDF bytes
@@ -37,14 +37,6 @@ const getChristmasCarnivalCertificateUrl = async (userId, userName, formattedDat
     size: 29,
     font: NunitoBoldFont,
     color: rgb(0, 0.678, 0.902),
-  });
-
-  firstPage.drawText(`${formattedDate}.`, {
-    x: 385,
-    y: 394,
-    size: 18,
-    font: NunitoBoldFont,
-    color: rgb(0.3137, 0.31, 0.31),
   });
 
   /** PDF Meta Details */
