@@ -17,6 +17,10 @@ const LeadPartnerAgent = `
     leadPartner: LeadPartner @relation(name:"LeadPartnerAgentUser")
     countries: [Countries]
     agent: User @relation(name:"LeadPartnerAgentUser", direction: "OneWay")
+    dayWiseBooking: Int @defaultValue(value: 0)
+    monthlyBooking: Int @defaultValue(value: 0)
+    dayWiseConduction: Int @defaultValue(value: 0)
+    monthlyConduction: Int @defaultValue(value: 0)
     timezones: [Timezones]
 }`;
 

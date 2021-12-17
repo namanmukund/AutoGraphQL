@@ -83,7 +83,8 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
     // update session log entry
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
     const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
-    if (studentProfileId) addToMentorMenteeSessionStudentProfile(mentorMenteeSessionId, studentProfileId);
+    const bookingAgentId = get(userInfo, 'data.user.studentProfile.bookingAgent.id');
+    if (studentProfileId) addToMentorMenteeSessionStudentProfile(mentorMenteeSessionId, studentProfileId, bookingAgentId);
     if (context.mentorAvailabilitySlotId) {
       addToMentorAvailabilitySlotMentorMenteeSession(mentorMenteeSessionId, context.mentorAvailabilitySlotId);
     }
