@@ -11,6 +11,7 @@ const menteeInfoQuery = (userId) => `
       utmMedium
       utmContent
       utmCampaign
+      verificationStatus
       studentProfile{
         id
         grade
