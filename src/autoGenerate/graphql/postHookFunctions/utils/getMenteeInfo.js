@@ -18,6 +18,9 @@ const menteeInfoQuery = (userId) => `
           id
           code
         }
+        bookingAgent {
+          id
+        }
         parents{
           id
           user{

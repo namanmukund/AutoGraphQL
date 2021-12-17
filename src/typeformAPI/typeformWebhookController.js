@@ -75,6 +75,33 @@ const getEventId = (formId) => {
   return eventId;
 };
 
+const getEventDetails = (formId) => {
+  const eventDetailsObject = {};
+  switch (formId) {
+    case EVENTS.CHRISTMASCARNIVAL.registrationFormId24th:
+      eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec24;
+      eventDetailsObject.eventTime = EVENTS.CHRISTMASCARNIVAL.eventTime.dec24;
+      eventDetailsObject.eventDateTime = EVENTS.CHRISTMASCARNIVAL.eventDateTime.dec24;
+      break;
+    case EVENTS.CHRISTMASCARNIVAL.registrationFormId25th:
+      eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec25;
+      eventDetailsObject.eventTime = EVENTS.CHRISTMASCARNIVAL.eventTime.dec25;
+      eventDetailsObject.eventDateTime = EVENTS.CHRISTMASCARNIVAL.eventDateTime.dec25;
+      break;
+    case EVENTS.CHRISTMASCARNIVAL.registrationFormId26th:
+      eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec26;
+      eventDetailsObject.eventTime = EVENTS.CHRISTMASCARNIVAL.eventTime.dec26;
+      eventDetailsObject.eventDateTime = EVENTS.CHRISTMASCARNIVAL.eventDateTime.dec26;
+      break;
+    default:
+      eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec24;
+      eventDetailsObject.eventTime = EVENTS.CHRISTMASCARNIVAL.eventTime.dec24;
+      eventDetailsObject.eventDateTime = EVENTS.CHRISTMASCARNIVAL.eventDateTime.dec24;
+      break;
+  }
+  return eventDetailsObject;
+};
+
 const updateEventAttendanceStatus = async (eventAttendanceId) => {
   const query = `mutation {
   updateEventAttendance(id: "${eventAttendanceId}", input: { attendance: present }) {
@@ -248,22 +275,23 @@ const usersData = async (studentDetailsObject, formId, doGenerateCertificate) =>
     }
   }
   if (!doGenerateCertificate) {
+    const eventDetails = getEventDetails(formId);
     log('Sending Lead on Registration');
     updateLeadSquared({
       Phone: number,
-      mx_Event_Date: '27 November',
-      mx_Event_Time: '03:00 pm',
-      mx_Event_Date_Time: '2021-11-27 09:30:00',
+      mx_Event_Date: eventDetails.eventDate,
+      mx_Event_Time: eventDetails.eventTime,
+      mx_Event_Date_Time: eventDetails.eventDateTime,
     }, false, {
       ActivityEvent: 208,
       Fields: [
         {
           SchemaName: 'mx_Custom_1',
-          Value: 'communityevent',
+          Value: utmSource,
         },
         {
           SchemaName: 'mx_Custom_2',
-          Value: 'environment_30nov',
+          Value: utmCampaign,
         },
       ],
     });
@@ -627,6 +655,33 @@ const typeformWebhookController = async (req, res) => {
           timezone = 'Asia/Kolkata';
           utmSource = 'radiostreet';
           utmCampaign = 'crackthecode';
+          break;
+        case EVENTS.CHRISTMASCARNIVAL.registrationFormId24th:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'christmascarnival_24dec';
+          doGenerateCertificate = false;
+          break;
+        case EVENTS.CHRISTMASCARNIVAL.registrationFormId25th:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'christmascarnival_25dec';
+          doGenerateCertificate = false;
+          break;
+        case EVENTS.CHRISTMASCARNIVAL.registrationFormId26th:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'christmascarnival_26dec';
+          doGenerateCertificate = false;
+          break;
+        case EVENTS.CHRISTMASCARNIVAL.formId:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'christmascarnival_24dec';
           break;
         default:
           country = 'india';

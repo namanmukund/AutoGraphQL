@@ -1,11 +1,11 @@
 import { userSourceOrigin } from '../../../../../../../constants';
 
-const getUserOriginSource = (utmSource, schoolName = '', schoolId = '', isTmsApp = false, registrationAgentId = '') => {
+const getUserOriginSource = (utmSource, schoolName = '', schoolId = '', isTmsApp = false, bookingAgentId = '') => {
   const {
     website, facebook, google, instagram, school, transformation, radioStreet, agent,
   } = userSourceOrigin;
   let source = website;
-  if (isTmsApp && registrationAgentId) {
+  if (isTmsApp && bookingAgentId) {
     source = agent;
   }
   if (utmSource && utmSource.toLowerCase().includes('transformation')) {

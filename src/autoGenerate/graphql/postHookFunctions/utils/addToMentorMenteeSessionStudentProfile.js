@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const addToMentorMenteeSessionStudentProfile = async (mentorMenteeSessionId, studentProfileId) => {
+const addToMentorMenteeSessionStudentProfile = async (mentorMenteeSessionId, studentProfileId, bookingAgentId) => {
   const query = `
   mutation {
   addToMentorMenteeSessionStudentProfile(
@@ -12,6 +12,11 @@ const addToMentorMenteeSessionStudentProfile = async (mentorMenteeSessionId, stu
       id
     }
   }
+  ${bookingAgentId ? `addToMentorMenteeSessionBookingAgent(mentorMenteeSessionId: "${mentorMenteeSessionId}", userId: "${bookingAgentId}") {
+    user {
+      id
+    }
+  }` : ''}
 }
   `;
   const result = await callLocalGraphqlApi(query);
