@@ -62,6 +62,15 @@ const getEventId = (formId) => {
         }
       }
       break;
+    case EVENTS.CHRISTMASCARNIVAL.formId:
+      eventId = EVENTS.CHRISTMASCARNIVAL.eventId.staging;
+      if (process.env.NODE_ENV === 'production') {
+        eventId = EVENTS.CHRISTMASCARNIVAL.eventId.production;
+        if (process.env.DATA_MASKING) {
+          eventId = EVENTS.CHRISTMASCARNIVAL.eventId.preprod;
+        }
+      }
+      break;
     default:
       eventId = EVENTS.SPYSQUADCAMP.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
