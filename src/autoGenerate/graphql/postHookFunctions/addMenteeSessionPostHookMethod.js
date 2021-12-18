@@ -109,7 +109,8 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
       updateInput[slot] = true;
     });
     const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
-    if (studentProfileId) updateMenteeSessionQuery(menteeSessionId, studentProfileId, updateInput);
+    const bookingAgentId = get(userInfo, 'data.user.studentProfile.bookingAgent.id');
+    if (studentProfileId) updateMenteeSessionQuery(menteeSessionId, studentProfileId, updateInput, bookingAgentId);
 
     // update session log entry
     const courseId = get(input, 'course.typeId', '');
