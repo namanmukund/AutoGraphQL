@@ -33,6 +33,12 @@ const sessionRescheduledReasons = `
 const mentorPitch = `
     pricingPitched: Boolean
     parentCounsellingDone: Boolean
+    parentsWereInterested: Boolean
+    explainedAboutCourse: Boolean
+    discussedPerformance: Boolean
+    scheduledCounselDateFrom: Date
+    scheduledCounselDateTo: Date
+    scheduledCounselCondition: DateCondition
     courseInterestedIn: ProductType
     oneToOne: Boolean
     oneToTwo: Boolean
