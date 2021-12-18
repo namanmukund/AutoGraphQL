@@ -249,8 +249,6 @@
         class="email-container"
         style="max-width: 600px; margin: 0 auto; background: #fff"
       >
-        <!-- BEGIN BODY -->
-        <!-- <img src='https://tekie-backend.s3.amazonaws.com/python/email/tekieMailBanner.png' style='width: 100%;'></img> -->
         <table
           align="center"
           border="0"
@@ -283,149 +281,9 @@
                   ></td>
                 </tr>
                 <tr>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td style="text-align: center">
-                    <p
-                      style="
-                        font-family: 'Nunito', sans-serif;
-                        font-size: 16px;
-                        font-weight: 500;
-                        margin: auto;
-                        margin-top: 30px;
-                        margin-bottom: 0px;
-                        text-align: center;
-                        color: #000000;
-                        opacity: 1;
-                      "
-                    >
-                      Dear Parent,
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="text-align: center; padding-top: 15px">
-                    <div
-                      style="
-                        font-family: 'Nunito', 'Open Sans', Helvetica, Roboto,
-                          sans-serif;
-                        margin-top: 0px;
-                        margin-bottom: 0px;
-                        width: 75%;
-                        margin: auto;
-                        opacity: 1;
-                        color: #000000;
-                        font-size: 16px;
-                        text-align: center;
-                      "
-                    >
-                      <span style="font-weight: bolder"
-                        ><%= studentName %>'s</span
-                      >
-                      coding class with Tekie, arranged by <br /><span
-                        style="font-weight: bolder"
-                        ><%= schoolName %></span
-                      >, is scheduled on
-                      <span style="font-weight: bolder"><%= day %></span> at
-                      <span style="font-weight: bolder"><%= time %></span>.
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="height: 20px"></td>
-                </tr>
-                <tr>
-                  <td style="padding-top: 15px; background: #f1f7ff">
-                    <div style="display: flex; position: relative">
-                      <div style="width: 100%">
-                        <img
-                          style="position: absolute; bottom: 0px"
-                          src="./b2bJoinSessionReminder/girl.png"
-                        />
-                      </div>
-
-                      <div style="margin-right: 50px">
-                        <table>
-                          <tr>
-                            <td>
-                              <p
-                                style="
-                                  font-size: 16px;
-                                  line-height: 20px;
-                                  color: #004aad;
-                                  font-weight: bold;
-                                  opacity: 1;
-                                "
-                              >
-                                In this session we will learn <%= topic %>
-                              </p>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <p
-                                style="
-                                  font-family: Nunito;
-                                  font-style: normal;
-                                  font-weight: normal;
-                                  font-size: 16px;
-                                  line-height: 20px;
-                                  color: #000000;
-                                  margin-top: 10px;
-                                  opacity: 1;
-                                "
-                              >
-                                You can check your class schedule and updates on
-                                your Tekie student app.
-                              </p>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <a
-                                href="<%= sessionLink %>"
-                                style="
-                                  display: inline-block;
-                                  min-width: 150px;
-                                  text-decoration: none;
-                                  color: white;
-                                  font-family: 'Nunito';
-                                  text-transform: uppercase;
-                                  font-size: 14px;
-                                  line-height: 0px;
-                                  box-sizing: border-box;
-                                  margin: 10px 0px;
-                                  padding: 0 10px;
-                                  background: linear-gradient(
-                                    180deg,
-                                    #04c3ff 0%,
-                                    #006dfe 100%
-                                  );
-                                  border-radius: 6px;
-                                  margin-bottom: 15px;
-                                "
-                              >
-                                <div
-                                  style="
-                                    font-family: 'Nunito', 'Open Sans',
-                                      Helvetica, Roboto, sans-serif;
-                                    vertical-align: middle;
-                                    display: inline-block;
-                                    color: #fff;
-                                    text-transform: uppercase;
-                                    line-height: 2;
-                                    font-weight: bold;
-                                    font-size: 16px;
-                                  "
-                                >
-                                  LOGIN TO STUDENT APP
-                                </div>
-                              </a>
-                            </td>
-                          </tr>
-                        </table>
-                      </div>
+                  <td>
+                    <div style="text-align: center">
+                      <img src="./assets/absentImg.png" alt="" />
                     </div>
                   </td>
                 </tr>
@@ -433,26 +291,7 @@
                   <td>
                     <div style="position: relative">
                       <img
-                        style="position: absolute; top: 50px; left: 0px"
-                        src="./b2bJoinSessionReminder/bg.png"
-                        alt=""
-                      />
-                      <h3
-                        style="
-                          font-family: Nunito;
-                          font-style: normal;
-                          font-weight: bold;
-                          font-size: 16.23px;
-                          line-height: 22px;
-                          text-align: center;
-                          margin-top: 40px;
-                          color: #000000;
-                        "
-                      >
-                        How to join the class
-                      </h3>
-                      <img
-                        style="position: absolute; top: -100px; right: 0px"
+                        style="position: absolute; right: 0"
                         src="./b2bJoinSessionReminder/bg.png"
                         alt=""
                       />
@@ -463,284 +302,86 @@
                   <td>
                     <div
                       style="
-                        display: flex;
-                        justify-content: space-evenly;
-                        text-align: center;
-                        margin: 30px auto;
-                        margin-bottom: 10px;
-                      "
-                    >
-                      <div style="width: 21%">
-                        <div style="height: 70px">
-                          <img
-                            src="./b2bJoinSessionReminder/icon3.png"
-                            alt=""
-                          />
-                        </div>
-                        <p
-                          style="
-                            font-family: Nunito;
-                            font-style: normal;
-                            font-weight: bold;
-                            font-size: 11.2337px;
-                            line-height: 15px;
-                            text-align: center;
-                            opacity: 1;
-                            color: #3f4348;
-                            padding: 0 20px;
-                          "
-                        >
-                          Click on the session link
-                        </p>
-                      </div>
-                      <div style="width: 21%">
-                        <div style="height: 70px">
-                          <img
-                            src="./b2bJoinSessionReminder/icon1.png"
-                            alt=""
-                          />
-                        </div>
-                        <p
-                          style="
-                            font-family: Nunito;
-                            font-style: normal;
-                            font-weight: bold;
-                            font-size: 11.2337px;
-                            line-height: 15px;
-                            text-align: center;
-                            opacity: 1;
-                            color: #3f4348;
-                          "
-                        >
-                          Join 5 minutes before the class
-                        </p>
-                      </div>
-                      <div style="width: 21%">
-                        <div style="height: 70px">
-                          <img
-                            src="./b2bJoinSessionReminder/icon2.png"
-                            alt=""
-                          />
-                        </div>
-                        <p
-                          style="
-                            font-family: Nunito;
-                            font-style: normal;
-                            font-weight: bold;
-                            font-size: 11.2337px;
-                            line-height: 15px;
-                            text-align: center;
-                            opacity: 1;
-                            color: #3f4348;
-                          "
-                        >
-                          Say hello to your mentor and get started
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    style="
-                      text-align: center;
-                      padding-top: 17px;
-                      padding-bottom: 17px;
-                      opacity: 0.4;
-                    "
-                  >
-                    <div
-                      style="
-                        width: 60%;
-                        margin: auto;
-                        height: 1px;
-                        opacity: 0.9;
-                        background-color: #c9c9c9;
-                      "
-                    ></div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <h3
-                      style="
                         font-family: Nunito;
-                        font-style: normal;
-                        font-weight: bold;
-                        font-size: 16.23px;
-                        line-height: 22px;
-                        text-align: center;
-                        margin-top: 20px;
-                        color: #000000;
-                      "
-                    >
-                      How to ensure a smooth session:
-                    </h3>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div
-                      style="
-                        display: flex;
-                        justify-content: space-evenly;
-                        text-align: center;
-                        margin: 30px auto;
-                        margin-bottom: 10px;
-                      "
-                    >
-                      <div style="width: 21%">
-                        <div style="height: 70px">
-                          <img
-                            src="./b2bJoinSessionReminder/icon4.png"
-                            alt=""
-                          />
-                        </div>
-                        <p
-                          style="
-                            font-family: Nunito;
-                            font-style: normal;
-                            font-weight: bold;
-                            font-size: 11.2337px;
-                            line-height: 15px;
-                            text-align: center;
-                            opacity: 1;
-                            color: #3f4348;
-                          "
-                        >
-                          Laptop or Desktop with webcam installed
-                        </p>
-                      </div>
-                      <div style="width: 21%">
-                        <div style="height: 70px">
-                          <img
-                            src="./b2bJoinSessionReminder/icon6.png"
-                            alt=""
-                          />
-                        </div>
-                        <p
-                          style="
-                            font-family: Nunito;
-                            font-style: normal;
-                            font-weight: bold;
-                            font-size: 11.2337px;
-                            line-height: 15px;
-                            text-align: center;
-                            opacity: 1;
-                            color: #3f4348;
-                          "
-                        >
-                          Stable internet connection
-                        </p>
-                      </div>
-                      <div style="width: 21%">
-                        <div style="height: 70px">
-                          <img
-                            src="./b2bJoinSessionReminder/icon5.png"
-                            alt=""
-                          />
-                        </div>
-                        <p
-                          style="
-                            font-family: Nunito;
-                            font-style: normal;
-                            font-weight: bold;
-                            font-size: 11.2337px;
-                            line-height: 15px;
-                            text-align: center;
-                            opacity: 1;
-                            color: #3f4348;
-                          "
-                        >
-                          Google Chrome downloaded
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    style="
-                      text-align: center;
-                      padding-top: 17px;
-                      padding-bottom: 17px;
-                      opacity: 0.4;
-                    "
-                  >
-                    <div
-                      style="
-                        width: 60%;
-                        margin: auto;
-                        height: 1px;
-                        opacity: 0.9;
-                        background-color: #c9c9c9;
-                      "
-                    ></div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>
-                    <p
-                      style="
-                        opacity: 1;
-                        font-family: Nunito;
-                        font-style: normal;
                         font-weight: normal;
                         font-size: 16px;
                         line-height: 22px;
                         text-align: center;
-                        width: 80%;
                         color: #000000;
-                        margin: 15px auto;
+                        opacity: 1;
+                        width: 75%;
+                        margin: auto;
                       "
                     >
-                      If you have any doubts about the session or have trouble
-                      logging in, please feel free to reach out on
-                    </p>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="text-align: center">
-                    <a
-                      href="<%= supportLink %>"
-                      style="
-                        display: inline-block;
-                        min-width: 150px;
-                        text-decoration: none;
-                        color: white;
-                        font-family: 'Nunito';
-                        text-transform: uppercase;
-                        font-size: 14px;
-                        line-height: 0px;
-                        box-sizing: border-box;
-                        margin: 10px auto;
-                        padding: 0 10px;
-                        border-radius: 6px;
-                        margin-bottom: 15px;
-                        border: 1px solid #04c3ff;
-                      "
-                    >
-                      <div
-                        style="
-                          font-family: 'Nunito', 'Open Sans', Helvetica, Roboto,
-                            sans-serif;
-                          vertical-align: middle;
-                          display: inline-block;
-                          color: #04c3ff;
-                          text-transform: uppercase;
-                          line-height: 2;
-                          font-weight: bold;
-                          font-size: 16px;
-                        "
-                      >
-                        TEKIE SUPPORT
+                      <div style="margin-bottom: 20px">
+                        Hello
+                        <span style="font-weight: bolder"
+                          ><%= parentName %></span
+                        >,
                       </div>
-                    </a>
+                      <div>
+                        <span style="font-weight: bolder"
+                          ><%= studentName %></span
+                        >
+                        missed their coding class with Tekie scheduled on
+                        <span style="font-weight: bolder"
+                          ><%= date, time %></span
+                        >
+                      </div>
+                      <div style="margin: 25px 0">
+                        Don’t worry, we’ll help them catch up on the missed
+                        topic.
+                      </div>
+                      <div style="margin: 25px 0">
+                        The topic we covered in the session was
+                        <span style="font-weight: bolder"><%= topicName %></span
+                        >.
+                      </div>
+                      <div style="margin: 25px 0">
+                        We suggest you go through the session content on your
+                        student app.
+                      </div>
+                    </div>
                   </td>
                 </tr>
-
+                <tr>
+                  <td>
+                    <div
+                      style="
+                        text-align: center;
+                        color: #000000;
+                        opacity: 1;
+                        font-family: Nunito;
+                        font-weight: normal;
+                        font-size: 16px;
+                        line-height: 22px;
+                      "
+                    >
+                      <div style="text-align: center; margin: 14px 0">
+                        <span
+                          style="
+                            border-radius: 100px;
+                            background-color: #04c3ff;
+                            padding: 10px 13px;
+                            align-self: center;
+                          "
+                        >
+                          <img src="./assets/attachment.png" alt="" />
+                        </span>
+                      </div>
+                      <div>Click here to access the lesson:</div>
+                      <a
+                        href="<%= sessionTopicLink %>"
+                        style="
+                          color: #34e4ea;
+                          text-decoration: underline;
+                          font-weight: bold;
+                        "
+                        ><%= sessionTopicLink %></a
+                      >
+                    </div>
+                  </td>
+                </tr>
                 <tr>
                   <td>
                     <p
@@ -753,7 +394,7 @@
                         text-align: center;
                         color: #686868;
                         opacity: 0.8;
-                        margin-top: 20px;
+                        margin-top: 40px;
                       "
                     >
                       Have more questions ?
@@ -768,7 +409,7 @@
                         font-family: Nunito;
                         font-style: normal;
                         font-weight: 300;
-                        font-size: 18px;
+                        font-size: 16px;
                         line-height: 132.4%;
                         text-align: center;
                         color: #555555;
