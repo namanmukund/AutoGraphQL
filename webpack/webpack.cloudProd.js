@@ -22,7 +22,7 @@ const eslintOptions = {
 
 module.exports = merge(common, {
   devtool: 'source-map',
-  mode: environment === 'production' ? environment : 'development',
+  mode: (environment === 'production') ? environment : 'development',
   target: 'node',
   plugins: [
     new UglifyJSPlugin({
