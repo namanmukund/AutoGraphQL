@@ -17,6 +17,7 @@ const environment = process.env.NODE_ENV || 'development';
 const eslintOptions = {
   extensions: ['js'],
   exclude: ['/node_modules/'],
+  failOnError: false,
 };
 
 module.exports = merge(common, {
