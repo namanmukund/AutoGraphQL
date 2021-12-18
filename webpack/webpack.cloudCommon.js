@@ -42,16 +42,13 @@ config.module = {};
 
 config.module.rules = [
 
-  // Use babel and eslint to build and validate JavaScript
+  // Use babel to build and validate JavaScript
   {
     test: /\.js$/,
     exclude: /node_modules/,
     use: [
       {
         loader: 'babel-loader',
-      },
-      {
-        loader: 'eslint-loader',
       },
     ],
   },
