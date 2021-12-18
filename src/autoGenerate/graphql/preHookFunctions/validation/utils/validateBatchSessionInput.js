@@ -6,9 +6,12 @@ import {
   NoSlotSelectedError,
   OnlyOneSlotAllowedError,
 } from '../../../../../../constants/errors/input';
+import {
+  ALLOWED_ROLE_FOR_MANUAL_SESSIONS, TIME_DIFF_FOR_MANUAL_SESSION,
+} from '../../../../../../constants';
 
-const PRE_BOOKING_HOUR_LIMIT = 0;
-const validateBatchSessionInput = async (params, context, originMethod) => {
+let PRE_BOOKING_HOUR_LIMIT = 0;
+const validateBatchSessionInput = async (params, context, originMethod, userRoleFromContext) => {
   const { input } = params;
   const { bookingDate, ...slots } = input;
   if (!bookingDate && originMethod === 'addBatch') {
@@ -27,6 +30,9 @@ const validateBatchSessionInput = async (params, context, originMethod) => {
   }
   context.slotTimeArray = slotTimeArray;
 
+  if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext)) {
+    PRE_BOOKING_HOUR_LIMIT = TIME_DIFF_FOR_MANUAL_SESSION;
+  }
   // eslint-disable-next-line no-unused-expressions
   bookingDate && slotTimeArray && slotTimeArray.length && validateBookingDate(
     bookingDate,

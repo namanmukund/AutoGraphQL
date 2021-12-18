@@ -56,8 +56,16 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     throw new DatabaseRecordNotFoundError();
   }
 
+  // getting current user from context to send in logs
+  const userInfo = validateTokenAndExtractInformation(context, false);
+  const {
+    currentUser,
+    currentApp,
+  } = userInfo;
+  const userRoleFromContext = currentUser && currentUser.role;
+
   // validate input
-  await validateBatchSessionInput(params, context);
+  await validateBatchSessionInput(params, context, '', userRoleFromContext);
 
   const {
     sessionStatus: prevSessionStatus,
@@ -145,12 +153,6 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     throw new CanNotChangeSessionStatusError();
   }
 
-  // getting current user from context to send in logs
-  const userInfo = validateTokenAndExtractInformation(context, false);
-  const {
-    currentUser,
-    currentApp,
-  } = userInfo;
   context.prevIsAudit = get(batchSession, 'isAudit', false);
   context.batchTopicOrder = get(batchSession, 'topic.order');
   context.batchTypeValue = get(batchSession, 'batch.type');

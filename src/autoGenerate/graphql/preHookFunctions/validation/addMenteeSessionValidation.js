@@ -79,7 +79,7 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
   context.currentUser = currentUser;
 
   // validate input
-  await validateMenteeSessionInput(params, context);
+  await validateMenteeSessionInput(params, context, userRoleFromContext);
   const allowedRoles = [ADMIN, UMS_ADMIN, UMS_VIEWER, MENTOR, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN, LEAD_PARTNER];
 
   context.userIdFromContext = userIdFromContext;

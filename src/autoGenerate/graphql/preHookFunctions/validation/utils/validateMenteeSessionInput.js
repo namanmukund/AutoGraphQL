@@ -12,10 +12,13 @@ import {
 // import getMentorAvailabilitySlots from '../../../graphqlQueries/getMentorAvailabilitySlots';
 // import getSelectedSlotsStringArray from '../../../postHookFunctions/utils/getSelectedSlotsStringArray';
 // import { NoSlotsAvailableForBooking } from '../../../../../../constants/errors/db';
-import { byPassMenteeValidationApps, backendApps } from '../../../../../../constants';
+import {
+  byPassMenteeValidationApps, backendApps,
+  ALLOWED_ROLE_FOR_MANUAL_SESSIONS, TIME_DIFF_FOR_MANUAL_SESSION,
+} from '../../../../../../constants';
 
-const PRE_BOOKING_HOUR_LIMIT = 0;
-const validateMenteeSessionInput = async (params, context) => {
+let PRE_BOOKING_HOUR_LIMIT = 0;
+const validateMenteeSessionInput = async (params, context, userRoleFromContext) => {
   const { input } = params;
   const { bookingDate, ...slots } = input;
   if (!bookingDate) {
@@ -38,7 +41,9 @@ const validateMenteeSessionInput = async (params, context) => {
   if (backendApps.includes(appName)) {
     return true;
   }
-
+  if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext)) {
+    PRE_BOOKING_HOUR_LIMIT = TIME_DIFF_FOR_MANUAL_SESSION;
+  }
   validateBookingDate(
     bookingDate,
     slotTimeArray,

@@ -103,7 +103,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   context.appName = appName
 
   // validate input
-  await validateBatchSessionInput(params, context, 'addBatch');
+  await validateBatchSessionInput(params, context, 'addBatch', userRoleFromContext);
 
   // check if mentor already has another session in same slot
   console.log('change1 *** addBatchSessionValidation')
