@@ -36,9 +36,9 @@ const mentorPitch = `
     parentsWereInterested: Boolean
     explainedAboutCourse: Boolean
     discussedPerformance: Boolean
-    scheduleCounselDateFrom: Date
-    scheduleCounselDateTo: Date
-    scheduleCounselCondition: DateCondition
+    scheduledCounselDateFrom: Date
+    scheduledCounselDateTo: Date
+    scheduledCounselCondition: DateCondition
     courseInterestedIn: ProductType
     oneToOne: Boolean
     oneToTwo: Boolean
