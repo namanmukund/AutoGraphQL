@@ -1,8 +1,10 @@
 /* eslint-disable no-console */
 /* eslint-disable quote-props */
+import { log } from '../../../utils';
+
 const https = require('https');
 
-const uploadToMailModo = async (contact) => {
+const uploadToMailModo = (contact) => new Promise((resolve, reject) => {
   const data = JSON.stringify(contact);
   const options = {
     protocol: 'https:',
@@ -17,18 +19,25 @@ const uploadToMailModo = async (contact) => {
   };
 
   const req = https.request(options, (res) => {
+    res.setEncoding('utf8');
+    let responseBody = '';
     res.on('data', (d) => {
-      process.stdout.write(d);
+      responseBody += d;
+    });
+    res.on('end', () => {
+      console.log(JSON.parse(responseBody));
+      resolve(JSON.parse(responseBody));
     });
   });
 
   req.on('error', (error) => {
-    console.error(error);
+    console.log(error);
+    reject(error);
   });
 
   req.write(data);
   req.end();
-};
+});
 
 /**
  * Contacts array takes in objects of the form -
@@ -44,11 +53,13 @@ const uploadToMailModo = async (contact) => {
   }
  */
 const uploadContacts = async (contactsArray) => {
+  log('******* Uploading contacts to Mailmodo');
   // eslint-disable-next-line no-restricted-syntax
   for (const contact of contactsArray) {
     // eslint-disable-next-line no-await-in-loop
     await uploadToMailModo(contact);
   }
+  log('******* Finished uploading contacts to Mailmodo');
 };
 
 export default uploadContacts;
