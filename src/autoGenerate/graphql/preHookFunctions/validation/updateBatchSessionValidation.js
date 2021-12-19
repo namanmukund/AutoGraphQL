@@ -7,7 +7,7 @@ import {
   MissingMandatoryInputInRequestError,
 } from '../../../../../constants/errors/input';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
-import { sessionStatus } from '../../../../../constants';
+import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, sessionStatus } from '../../../../../constants';
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorSessions from '../../../utils/getMentorSessions';
@@ -15,6 +15,7 @@ import { checkIfSlotCanBeOpenedValidation } from './utils';
 import extractSlotsFromInput from '../../../../../utils/extractSlotsFromInput';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import isTrialSession from '../../resolvers/utils/isTrialSession';
+import { getHoursDiff } from './utils/validateMenteeSessionInput';
 
 // query to get mentor from mentorSessionConnectId
 const fetchMentor = (id) => `
@@ -107,6 +108,18 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     // check batch session exists for the same batch at the same slot
     if (inputSlotTimeArray.length > 0 && inputSlotTimeArray[0] !== slotTimeArray[0]) {
       const batchId = get(batch, 'id');
+      if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext) && get(context, 'isTrialSession', false)) {
+        if (inputSlotTimeArray.length > 0) {
+          let date = bookingDate;
+          if (bookingDateFromInput) {
+            date = bookingDateFromInput;
+          }
+          const timeDiff = getHoursDiff(inputSlotTimeArray[0], date);
+          if (timeDiff) {
+            context.isManualSession = timeDiff;
+          }
+        }
+      }
       const { filteredSlotsStringForFilterQuery } = extractSlotsFromInput(inputSlot);
       const batchSessionRes = await callLocalGraphqlApi(getBatchSession(batchId, bookingDateFromInput, filteredSlotsStringForFilterQuery));
       const existingBatchSessions = get(batchSessionRes, 'data.batchSessions', []);

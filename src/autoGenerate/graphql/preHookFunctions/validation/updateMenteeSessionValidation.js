@@ -51,8 +51,12 @@ const updateMenteeSessionValidation = async (params, mutationOrQueryName, contex
     Object.assign(params.input, {
       bookedAt: `${new Date()}`,
     });
+    let date = get(menteeSession, 'bookingDate');
+    if (get(params, 'input.bookingDate')) {
+      date = get(params, 'input.bookingDate');
+    }
     if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext) && get(context, 'isTrialSession', false)) {
-      const timeDiff = getHoursDiff(slotTimeStringArray[0].split('slot')[1], get(menteeSession, 'bookingDate'));
+      const timeDiff = getHoursDiff(slotTimeStringArray[0].split('slot')[1], date);
       if (timeDiff) {
         context.isManualSession = timeDiff;
       }
