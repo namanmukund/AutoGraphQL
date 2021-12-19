@@ -147,7 +147,6 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
     const slotTimeStringArray = getSelectedSlotsStringArray(get(params, 'input'));
     if (slotTimeStringArray.length > 0) {
       const timeDiff = getHoursDiff(slotTimeStringArray[0].split('slot')[1], get(params, 'input.bookingDate'));
-      console.log(timeDiff)
       if (timeDiff) {
         context.isManualSession = timeDiff;
       }
