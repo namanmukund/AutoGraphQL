@@ -1,4 +1,5 @@
 // validate mentor session input variables
+import { get } from 'lodash';
 import validateBookingDate from './validateBookingDate';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
 import {
@@ -29,8 +30,7 @@ const validateBatchSessionInput = async (params, context, originMethod, userRole
     throw new OnlyOneSlotAllowedError();
   }
   context.slotTimeArray = slotTimeArray;
-
-  if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext)) {
+  if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext) && get(context, 'isTrialSession', false)) {
     PRE_BOOKING_HOUR_LIMIT = TIME_DIFF_FOR_MANUAL_SESSION;
   }
   // eslint-disable-next-line no-unused-expressions

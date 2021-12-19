@@ -14,6 +14,7 @@ import { SimilarDocumentAlreadyExistError } from '../../../../../constants/error
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import getMentorSessions from '../../../utils/getMentorSessions';
 import { checkIfSlotCanBeOpenedValidation } from './utils';
+import isTrialSession from '../../resolvers/utils/isTrialSession';
 
 // query to get batch Sessions
 const getBatchSessions = (batchId, topicId) => `
@@ -66,6 +67,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   const batchId = get(params, 'batchConnectId');
   const topicId = get(params, 'topicConnectId');
   const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
+  context.isTrialSession = await isTrialSession(topicId);
 
   // log in case batch or topic id is not present
   // if (!batchId || !topicId || !mentorSessionConnectId) {

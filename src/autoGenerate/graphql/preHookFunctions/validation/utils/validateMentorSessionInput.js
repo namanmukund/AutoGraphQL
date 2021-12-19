@@ -7,7 +7,7 @@ import isToday from '../../../../../../utils/isToday';
 import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, backendApps, TIME_DIFF_FOR_MANUAL_SESSION } from '../../../../../../constants';
 
 let PRE_BOOKING_HOUR_LIMIT = 0;
-const validateMentorSessionInput = (params, prevMentorSession, context, userRoleFromContext) => {
+const validateMentorSessionInput = (params, prevMentorSession, context, userRoleFromContext, sessionType) => {
   const { input } = params;
   const { availabilityDate = '', ...slots } = input;
 
@@ -44,7 +44,7 @@ const validateMentorSessionInput = (params, prevMentorSession, context, userRole
       modifiedSlotTimeArray = [...trueOnlyCurrentSlots, ...falseOnlyCurrentSlots];
     }
   }
-  if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext)) {
+  if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext) && sessionType === 'trial') {
     PRE_BOOKING_HOUR_LIMIT = TIME_DIFF_FOR_MANUAL_SESSION;
   }
   validateBookingDate(

@@ -84,6 +84,7 @@ const addSessionLogQuery = (bookingDate, slot, clientId, topicId, actionByUserId
             ${salesOperationInput.payingPower ? `payingPower: ${salesOperationInput.payingPower}` : ''}
             ${salesOperationInput.ageNotAppropriate ? `ageNotAppropriate: ${salesOperationInput.ageNotAppropriate}` : ''}
           }` : ''}
+          ${postBookingDateTime ? `postBookingDateTime:"${postBookingDateTime}"` : ''}
         }
     ){
       id
@@ -136,6 +137,7 @@ const getTopic = (topicId) => `query{
 
 const addSessionLog = async (
   bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, action, batchCode, mentorSessionId, sessionStatus, updateMentorMenteeSessionInput,
+  postBookingDateTime,
 ) => {
   const slot = slotTimeStringArray && slotTimeStringArray.length ? slotTimeStringArray[0] : '';
   const actionByUserId = currentUser && currentUser.id;
@@ -171,7 +173,7 @@ const addSessionLog = async (
   }
   if (topicOrder === 1 && actionByUserId) {
     callLocalGraphqlApi(addSessionLogQuery(
-      bookingDate, slot, clientId, topicId, actionByUserId, courseId, action, batchCode, mentorId, sessionStatus, mentorAvailabilityDate, updateMentorMenteeSessionInput, salesOperationInput,
+      bookingDate, slot, clientId, topicId, actionByUserId, courseId, action, batchCode, mentorId, sessionStatus, mentorAvailabilityDate, updateMentorMenteeSessionInput, salesOperationInput, postBookingDateTime,
     ));
   }
 };

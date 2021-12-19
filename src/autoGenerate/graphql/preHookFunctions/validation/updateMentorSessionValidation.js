@@ -42,8 +42,8 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
       currentUser,
     } = userInfo;
     const userRoleFromContext = currentUser && currentUser.role;
-
-    validateMentorSessionInput(params, mentorSession, context, userRoleFromContext);
+    const sessionType = get(mentorSession, 'sessionType');
+    validateMentorSessionInput(params, mentorSession, context, userRoleFromContext, sessionType);
   }
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
   const {

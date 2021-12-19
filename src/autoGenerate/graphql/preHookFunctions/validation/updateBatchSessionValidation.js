@@ -14,6 +14,7 @@ import getMentorSessions from '../../../utils/getMentorSessions';
 import { checkIfSlotCanBeOpenedValidation } from './utils';
 import extractSlotsFromInput from '../../../../../utils/extractSlotsFromInput';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
+import isTrialSession from '../../resolvers/utils/isTrialSession';
 
 // query to get mentor from mentorSessionConnectId
 const fetchMentor = (id) => `
@@ -64,9 +65,6 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   } = userInfo;
   const userRoleFromContext = currentUser && currentUser.role;
 
-  // validate input
-  await validateBatchSessionInput(params, context, '', userRoleFromContext);
-
   const {
     sessionStatus: prevSessionStatus,
     batch,
@@ -76,6 +74,13 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     mentorSession,
     ...slots
   } = batchSession;
+
+  context.topicId = topic && topic.id;
+  if (topic && topic.id) {
+    context.isTrialSession = await isTrialSession(get(topic, 'id'));
+  }
+  // validate input
+  await validateBatchSessionInput(params, context, '', userRoleFromContext);
 
   const inputSlotTimeArray = getSelectedSlotsTime(inputSlot);
   const slotTimeArray = getSelectedSlotsTime(slots);
@@ -100,7 +105,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions, null, get(batch, 'code'));
 
     // check batch session exists for the same batch at the same slot
-    if (inputSlotTimeArray[0] !== slotTimeArray[0]) {
+    if (inputSlotTimeArray.length > 0 && inputSlotTimeArray[0] !== slotTimeArray[0]) {
       const batchId = get(batch, 'id');
       const { filteredSlotsStringForFilterQuery } = extractSlotsFromInput(inputSlot);
       const batchSessionRes = await callLocalGraphqlApi(getBatchSession(batchId, bookingDateFromInput, filteredSlotsStringForFilterQuery));
@@ -112,7 +117,6 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   }
 
   context.batchSessionId = batchSessionId;
-  context.topicId = topic && topic.id;
   context.inputSlot = inputSlot;
   context.batchId = batch && batch.id;
   context.bookingDate = bookingDate;
