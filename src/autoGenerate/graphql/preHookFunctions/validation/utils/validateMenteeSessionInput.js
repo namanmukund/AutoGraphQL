@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 // validate mentor session input variables
 import { get } from 'lodash';
+import moment from 'moment';
 import validateBookingDate from './validateBookingDate';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
 import {
@@ -17,6 +18,14 @@ import {
   byPassMenteeValidationApps, backendApps,
   ALLOWED_ROLE_FOR_MANUAL_SESSIONS, TIME_DIFF_FOR_MANUAL_SESSION,
 } from '../../../../../../constants';
+
+export const getHoursDiff = (slot, date) => {
+  slot = Number(slot);
+  const newtime = moment(date).set('hours', slot);
+  const startOfHour = moment().startOf('hour');
+  if (moment(newtime).isSame(startOfHour)) return true;
+  return false;
+};
 
 let PRE_BOOKING_HOUR_LIMIT = 0;
 const validateMenteeSessionInput = async (params, context, userRoleFromContext) => {
@@ -43,7 +52,6 @@ const validateMenteeSessionInput = async (params, context, userRoleFromContext) 
     return true;
   }
   if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext) && get(context, 'isTrialSession', false)) {
-    context.postBookingDateTime = new Date();
     PRE_BOOKING_HOUR_LIMIT = TIME_DIFF_FOR_MANUAL_SESSION;
   }
   validateBookingDate(

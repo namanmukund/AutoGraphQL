@@ -7,7 +7,7 @@ const MenteeSession = `
     course: Course @relation(name: "MenteeSessionCourse", direction: "OneWay")
     user: User! @relation(name: "MenteeSessionUser", direction: "OneWay")
     topic: Topic! @relation(name: "MenteeSessionTopic", direction: "OneWay")
-    bookingDate: Date!
+  bookingDate: Date!
     scheduleRunStatus: ScheduleRunStatus
     ${slotTimeFields}
     source: UserOriginSource @defaultValue(value: "website")
@@ -18,6 +18,7 @@ const MenteeSession = `
     broadCastedMentors: [MentorProfile] @relation(name:"MenteeSessionBroadcastedMentors", direction: "OneWay")
     studentProfile: StudentProfile @relation(name:"MenteeSessionStudentProfile", direction: "OneWay")
     bookingAgent: User @relation(name: "MenteeSessionBookingAgent", direction: "OneWay")
+    bookedAt: Date
 }`;
 
 export default [MenteeSession];

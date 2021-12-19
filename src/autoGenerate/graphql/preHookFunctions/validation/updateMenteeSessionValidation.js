@@ -1,12 +1,13 @@
 import { get } from 'lodash';
-import validateMenteeSessionInput from './utils/validateMenteeSessionInput';
+import validateMenteeSessionInput, { getHoursDiff } from './utils/validateMenteeSessionInput';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import menteeSessionQuery from '../../graphqlQueries/menteeSessionQuery';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorMenteeSession from '../../postHookFunctions/utils/getMentorMenteeSession';
-import { TMS } from '../../../../../constants';
+import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, TMS } from '../../../../../constants';
+import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelectedSlotsStringArray';
 
 const updateMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: menteeSessionId } = params;
@@ -30,6 +31,7 @@ const updateMenteeSessionValidation = async (params, mutationOrQueryName, contex
 
   context.isTrialSession = get(menteeSession, 'topic.order') === 1;
   context.currentUser = currentUser;
+  const userRoleFromContext = currentUser && currentUser.role;
 
   /*
   Calling method to get app name, we will skip validation if it is called from backend
@@ -42,7 +44,20 @@ const updateMenteeSessionValidation = async (params, mutationOrQueryName, contex
 
   context.userIdFromContext = userIdFromContext;
   context.appName = appName;
-
+  // getHoursDiff()
+  const prevSlotTimeStringArray = getSelectedSlotsStringArray(menteeSession);
+  const slotTimeStringArray = getSelectedSlotsStringArray(get(params, 'input'));
+  if (prevSlotTimeStringArray.length && slotTimeStringArray.length && (prevSlotTimeStringArray[0] !== slotTimeStringArray[0])) {
+    Object.assign(params.input, {
+      bookedAt: `${new Date()}`,
+    });
+    if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext) && get(context, 'isTrialSession', false)) {
+      const timeDiff = getHoursDiff(slotTimeStringArray[0].split('slot')[1], get(menteeSession, 'bookingDate'));
+      if (timeDiff) {
+        context.isManualSession = timeDiff;
+      }
+    }
+  }
   // validate input if call is not from TMS, allowing user to reschedule as per his choice
   if (appName !== TMS) {
     await validateMenteeSessionInput(params, context);

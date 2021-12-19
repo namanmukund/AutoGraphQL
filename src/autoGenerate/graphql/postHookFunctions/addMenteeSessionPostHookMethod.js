@@ -130,7 +130,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     } else {
       callLocalGraphqlApi(addUserCourseQuery(clientId, courseId));
     }
-    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMenteeSession', batchCode, '', '', '', get(context, 'postBookingDateTime'));
+    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMenteeSession', batchCode, '', '', '', get(context, 'isManualSession', false));
   }
 };
 

@@ -6,15 +6,16 @@ import {
   ADMIN, UMS_ADMIN, MENTOR, UMS_VIEWER, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN,
   LEAD_PARTNER,
 } from '../../../../../constants/roles';
-import { backendApps } from '../../../../../constants';
+import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
-import validateMenteeSessionInput from './utils/validateMenteeSessionInput';
+import validateMenteeSessionInput, { getHoursDiff } from './utils/validateMenteeSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import isTrialSession from '../../resolvers/utils/isTrialSession';
 import getUserSource from './utils/getUserSource';
 import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetailsInParams';
+import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelectedSlotsStringArray';
 
 // query to get mentee Sessions
 const getMenteeSessions = (userId, topicId) => `
@@ -77,7 +78,18 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
 
   context.appName = appName;
   context.currentUser = currentUser;
-
+  Object.assign(params.input, {
+    bookedAt: `${new Date()}`,
+  });
+  if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext) && get(context, 'isTrialSession', false)) {
+    const slotTimeStringArray = getSelectedSlotsStringArray(get(params, 'input'));
+    if (slotTimeStringArray.length > 0) {
+      const timeDiff = getHoursDiff(slotTimeStringArray[0].split('slot')[1], get(params, 'input.bookingDate'));
+      if (timeDiff) {
+        context.isManualSession = timeDiff;
+      }
+    }
+  }
   // validate input
   await validateMenteeSessionInput(params, context, userRoleFromContext);
   const allowedRoles = [ADMIN, UMS_ADMIN, UMS_VIEWER, MENTOR, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN, LEAD_PARTNER];

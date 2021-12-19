@@ -105,7 +105,7 @@ const SessionLog = `
     isBroadCastedSession: Boolean @defaultValue(value: "false")
     mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name:"MentorAvailabilitySlotSessionLog", direction: "OneWay")
     broadCastedMentors: [MentorProfile] @relation(name:"BroadcastedMentorsSessionLog", direction: "OneWay")
-    postBookingDateTime: Date
+    isManualSession: Boolean @defaultValue(value: "false")
   }
 `;
 
