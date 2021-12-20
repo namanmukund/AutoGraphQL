@@ -207,3 +207,7 @@ export const MandatorySessionLinkError = createError('MandatorySessionLinkError'
 export const CanNotDeleteCompletedSessionError = createError('CanNotDeleteCompletedSessionError', {
   message: 'Can not delete a completed session',
 });
+
+export const GradeFieldRequiredError = createError('GradeFieldRequiredError', {
+  message: 'Grade field is mandatory in input',
+});
