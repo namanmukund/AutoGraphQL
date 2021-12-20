@@ -43,6 +43,7 @@ const EVENTS = {
   CHRISTMASCARNIVAL: {
     registrationFormId24th: 'J3t2KPlv',
     registrationFormId25th: 'JvjnwAp8',
+    registrationFormId25thRS: 'jS87G4GX',
     registrationFormId26th: 'WI3FCSg4',
     formId: 'RyMkZuXw',
     eventId: {
@@ -53,16 +54,19 @@ const EVENTS = {
     eventDate: {
       dec24: '24 December',
       dec25: '25 December',
+      dec25RS: '25 December',
       dec26: '26 December',
     },
     eventTime: {
       dec24: '06:00 pm',
       dec25: '03:00 pm',
+      dec25RS: '03:00 pm',
       dec26: '03:00 pm',
     },
     eventDateTime: {
       dec24: '2021-12-24 12:30:00',
       dec25: '2021-12-25 09:30:00',
+      dec25RS: '2021-12-25 09:30:00',
       dec26: '2021-12-26 09:30:00',
     },
   },
