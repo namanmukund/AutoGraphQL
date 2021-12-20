@@ -74,7 +74,7 @@ const parentChildSignUpMutationResolver = async (
   authentication,
 ) => {
   const {
-    input, schoolId, campaignId = false,
+    input, schoolId, campaignId = false, bookingAgentId = false,
   } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
@@ -127,7 +127,7 @@ const parentChildSignUpMutationResolver = async (
   Object.assign(authentication, {
     bypass: true,
   });
-  const source = getUserOriginSource(utmSource, schoolName, schoolId);
+  const source = getUserOriginSource(utmSource, schoolName, schoolId, istmsApp, bookingAgentId);
   /* this campaign obj will be later in this method */
   /* fetching earlier to update vertical in user */
   let campaign = null;
@@ -354,6 +354,7 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     parentProfileId,
     studentSchoolId,
     batchId,
+    bookingAgentId,
   );
 
   if (!studentProfileId) {

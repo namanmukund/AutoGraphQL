@@ -8,9 +8,11 @@ import getMenteeInfo from './utils/getMenteeInfo';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import getTopicInfo from './utils/getTopicInfo';
 import { byPassMenteeValidationApps, sessionType, userSourceOrigin } from '../../../../constants';
+import { LEAD_PARTNER } from '../../../../constants/roles';
 import addSessionLog from './utils/addSessionLog';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import updateMenteeSessionQuery from './utils/updateMenteeSessionQuery';
+import sendWhatsappMessageForBookingConfirmedByLeadParnter from './utils/sendWhatsappMessageForBookingConfirmedByLeadPartner';
 
 const getUserCourses = async (userId) => {
   const query = `
@@ -91,7 +93,13 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
         topicInfo,
         isBookedByMentee,
         get(context, 'userIdFromContext'),
+        null,
+        get(context, 'userRoleFromContext'),
       );
+    }
+    if (typeof isTrialSession === 'boolean' && isTrialSession && !isBookedByMentee
+      && get(context, 'userRoleFromContext') && get(context, 'userRoleFromContext') === LEAD_PARTNER) {
+      await sendWhatsappMessageForBookingConfirmedByLeadParnter(userInfo, slotTimeStringArray, bookingDate);
     }
     // udpdating the studentProfile in menteeSession
     const updateInput = {
@@ -101,7 +109,8 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
       updateInput[slot] = true;
     });
     const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
-    if (studentProfileId) updateMenteeSessionQuery(menteeSessionId, studentProfileId, updateInput);
+    const bookingAgentId = get(userInfo, 'data.user.studentProfile.bookingAgent.id');
+    if (studentProfileId) updateMenteeSessionQuery(menteeSessionId, studentProfileId, updateInput, bookingAgentId);
 
     // update session log entry
     const courseId = get(input, 'course.typeId', '');

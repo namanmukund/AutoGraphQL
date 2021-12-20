@@ -6,12 +6,21 @@ const menteeInfoQuery = (userId) => `
       id
       name
       source
+      utmTerm
+      utmSource
+      utmMedium
+      utmContent
+      utmCampaign
+      verificationStatus
       studentProfile{
         id
         grade
         batch {
           id
           code
+        }
+        bookingAgent {
+          id
         }
         parents{
           id

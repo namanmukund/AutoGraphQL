@@ -232,6 +232,7 @@ const userSourceOrigin = {
   website: 'website',
   transformation: 'transformation',
   radioStreet: 'radioStreet',
+  agent: 'agent',
 };
 
 const freeTopicCount = 5;
@@ -250,6 +251,7 @@ const forgotPassWebURL = {
   development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword',
   staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword',
   production: 'https://tekie-managment-system.herokuapp.com/forgotPassword',
+  preProd: 'https://tekie-tms-pre-prod.herokuapp.com/forgotPassword',
 };
 
 const slotTimes = [
@@ -471,6 +473,8 @@ const ALLOWED_MIME_TYPES = ['html', 'css', 'javascript'];
 
 const MASTER_OTP = 1101;
 
+const BLOCKED = 'blocked';
+
 const courseToGradeMapping = [
   {
     grade: [1, 2],
@@ -583,4 +587,5 @@ export {
   courseToGradeMapping,
   courseToGradeMappingForStaging,
   iqaTags,
+  BLOCKED,
 };

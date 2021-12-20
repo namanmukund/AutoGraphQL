@@ -7,7 +7,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 import getTokenForLoginLink from '../../utils/getTokenForLoginLink';
-import { TMS } from '../../../../../../constants';
+import { TMS, byPassMenteeValidationApps, TBA } from '../../../../../../constants';
 
 const fetchUserDetails = async (queryFilter) => {
   const query = `{
@@ -17,6 +17,11 @@ const fetchUserDetails = async (queryFilter) => {
     }
   ) {
     id
+    school {
+      id
+      name
+      code
+    }
     user {
       id
       name
@@ -30,10 +35,10 @@ const fetchUserDetails = async (queryFilter) => {
 };
 
 const generateAndReturnToken = (user, addMagicLinkLogQuery = '', index, {
-  appName, grade, section, userIdFromContext, schoolId, expiresIn, linkVisitLimit,
+  appName, grade, section, userIdFromContext, schoolId, expiresIn, linkVisitLimit, isLeadLogin,
 }) => {
   const linkToken = getTokenForLoginLink(user, new Date(), expiresIn);
-  const linkUri = `/login?authToken=${linkToken}`;
+  const linkUri = `login?authToken=${linkToken}`;
   addMagicLinkLogQuery = `addMagicLinkLog${index}: addMagicLinkLog(
     input: {
       expiresIn: ${expiresIn}
@@ -45,6 +50,7 @@ const generateAndReturnToken = (user, addMagicLinkLogQuery = '', index, {
       linkVisitLimit: ${linkVisitLimit}
       ${grade ? `grade: ${grade}` : ''}
       ${section ? `section:${section}` : ''}
+      ${isLeadLogin ? 'isLeadLogin: true' : ''}
     }
     userConnectId: "${get(user, 'id')}"
     ${schoolId ? `schoolConnectId:"${schoolId}"` : ''}
@@ -65,7 +71,7 @@ const getMagicLink = (async (root, params, context) => {
   const {
     input: {
       schoolId, grade, section, userId, email, phone, expiresIn,
-      linkVisitLimit = 2,
+      linkVisitLimit = 2, isLeadLogin = false,
     },
   } = params;
   // getting input from params
@@ -77,7 +83,7 @@ const getMagicLink = (async (root, params, context) => {
   const tokens = [];
   let expiresInValue = expiresIn;
   if (!expiresIn) {
-    if (appName === TMS) expiresInValue = coreAuthParams.DEFAULT_EXPIRY_TOKEN_TIME_IN_HOUR;
+    if (appName === TMS || appName === TBA) expiresInValue = coreAuthParams.DEFAULT_EXPIRY_TOKEN_TIME_IN_HOUR;
     else expiresInValue = coreAuthParams.DEFAULT_EXPIRY_TOKEN_TIME_IN_HOUR_FOR_WEB;
   }
   let fetchQueryFilter = '';
@@ -115,12 +121,18 @@ const getMagicLink = (async (root, params, context) => {
         const {
           expiresIn: expiryValue, linkToken, linkUri, addMagicLinkLogQuery: addLogQuery,
         } = generateAndReturnToken(user, '', index, {
-          appName, grade, section, userIdFromContext, schoolId, expiresIn: expiresInValue, linkVisitLimit,
+          appName, grade, section, userIdFromContext, schoolId, expiresIn: expiresInValue, linkVisitLimit, isLeadLogin,
         });
+        let loginLink = linkUri;
+        if (!byPassMenteeValidationApps.includes(appName)) {
+          // here will send comms
+        } else if (byPassMenteeValidationApps.includes(appName) && isLeadLogin) {
+          loginLink = `${linkUri}&isLeadLogin=${isLeadLogin}`;
+        }
         tokens.push({
           linkToken,
           expiresIn: expiryValue,
-          linkUri,
+          linkUri: loginLink,
         });
         addMagicLinkLogQuery += addLogQuery;
       });

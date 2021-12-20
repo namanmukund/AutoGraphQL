@@ -62,6 +62,15 @@ const getEventId = (formId) => {
         }
       }
       break;
+    case EVENTS.CHRISTMASCARNIVAL.formId:
+      eventId = EVENTS.CHRISTMASCARNIVAL.eventId.staging;
+      if (process.env.NODE_ENV === 'production') {
+        eventId = EVENTS.CHRISTMASCARNIVAL.eventId.production;
+        if (process.env.DATA_MASKING) {
+          eventId = EVENTS.CHRISTMASCARNIVAL.eventId.preprod;
+        }
+      }
+      break;
     default:
       eventId = EVENTS.SPYSQUADCAMP.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
@@ -73,6 +82,38 @@ const getEventId = (formId) => {
       break;
   }
   return eventId;
+};
+
+const getEventDetails = (formId) => {
+  const eventDetailsObject = {};
+  switch (formId) {
+    case EVENTS.CHRISTMASCARNIVAL.registrationFormId24th:
+      eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec24;
+      eventDetailsObject.eventTime = EVENTS.CHRISTMASCARNIVAL.eventTime.dec24;
+      eventDetailsObject.eventDateTime = EVENTS.CHRISTMASCARNIVAL.eventDateTime.dec24;
+      break;
+    case EVENTS.CHRISTMASCARNIVAL.registrationFormId25th:
+      eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec25;
+      eventDetailsObject.eventTime = EVENTS.CHRISTMASCARNIVAL.eventTime.dec25;
+      eventDetailsObject.eventDateTime = EVENTS.CHRISTMASCARNIVAL.eventDateTime.dec25;
+      break;
+    case EVENTS.CHRISTMASCARNIVAL.registrationFormId25thRS:
+      eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec25RS;
+      eventDetailsObject.eventTime = EVENTS.CHRISTMASCARNIVAL.eventTime.dec25RS;
+      eventDetailsObject.eventDateTime = EVENTS.CHRISTMASCARNIVAL.eventDateTime.dec25RS;
+      break;
+    case EVENTS.CHRISTMASCARNIVAL.registrationFormId26th:
+      eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec26;
+      eventDetailsObject.eventTime = EVENTS.CHRISTMASCARNIVAL.eventTime.dec26;
+      eventDetailsObject.eventDateTime = EVENTS.CHRISTMASCARNIVAL.eventDateTime.dec26;
+      break;
+    default:
+      eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec24;
+      eventDetailsObject.eventTime = EVENTS.CHRISTMASCARNIVAL.eventTime.dec24;
+      eventDetailsObject.eventDateTime = EVENTS.CHRISTMASCARNIVAL.eventDateTime.dec24;
+      break;
+  }
+  return eventDetailsObject;
 };
 
 const updateEventAttendanceStatus = async (eventAttendanceId) => {
@@ -248,22 +289,23 @@ const usersData = async (studentDetailsObject, formId, doGenerateCertificate) =>
     }
   }
   if (!doGenerateCertificate) {
+    const eventDetails = getEventDetails(formId);
     log('Sending Lead on Registration');
     updateLeadSquared({
       Phone: number,
-      mx_Event_Date: '27 November',
-      mx_Event_Time: '03:00 pm',
-      mx_Event_Date_Time: '2021-11-27 09:30:00',
+      mx_Event_Date: eventDetails.eventDate,
+      mx_Event_Time: eventDetails.eventTime,
+      mx_Event_Date_Time: eventDetails.eventDateTime,
     }, false, {
       ActivityEvent: 208,
       Fields: [
         {
           SchemaName: 'mx_Custom_1',
-          Value: 'communityevent',
+          Value: utmSource,
         },
         {
           SchemaName: 'mx_Custom_2',
-          Value: 'environment_30nov',
+          Value: utmCampaign,
         },
       ],
     });
@@ -595,7 +637,7 @@ const typeformWebhookController = async (req, res) => {
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
-          utmCampaign = 'spysquadcamp_4dec';
+          utmCampaign = 'spysquadcamp_18dec';
           break;
         case EVENTS.CANVA.formId:
           country = 'india';
@@ -613,7 +655,7 @@ const typeformWebhookController = async (req, res) => {
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
-          utmCampaign = 'storyspree_12dec';
+          utmCampaign = 'storyspree_19dec';
           break;
         case EVENTS.GENZENVIRONMENT.registrationFormId:
           country = 'india';
@@ -628,11 +670,45 @@ const typeformWebhookController = async (req, res) => {
           utmSource = 'radiostreet';
           utmCampaign = 'crackthecode';
           break;
+        case EVENTS.CHRISTMASCARNIVAL.registrationFormId24th:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'christmascarnival_24dec';
+          doGenerateCertificate = false;
+          break;
+        case EVENTS.CHRISTMASCARNIVAL.registrationFormId25th:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'christmascarnival_25dec';
+          doGenerateCertificate = false;
+          break;
+        case EVENTS.CHRISTMASCARNIVAL.registrationFormId25thRS:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'radiostreet';
+          utmCampaign = 'christmascarnival_25dec';
+          doGenerateCertificate = false;
+          break;
+        case EVENTS.CHRISTMASCARNIVAL.registrationFormId26th:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'christmascarnival_26dec';
+          doGenerateCertificate = false;
+          break;
+        case EVENTS.CHRISTMASCARNIVAL.formId:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'christmascarnival_24dec';
+          break;
         default:
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
-          utmCampaign = 'spysquadcamp_4dec';
+          utmCampaign = 'spysquadcamp_18dec';
           break;
       }
       studentDetailsObject = {

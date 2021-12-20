@@ -7,6 +7,7 @@ const EventName = `
     iqaReport
     genZEnvironment
     crackTheCode
+    christmasCarnival
   }`;
 
 export default EventName;

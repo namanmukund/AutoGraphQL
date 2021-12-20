@@ -2,11 +2,12 @@ import parsedHtmlFromTemplateFileAndObject from '../../../services/email/utils/p
 import getEmailObject from '../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../services/email/utils/sendEmail';
 
-const sendForgotPasswordLinkToUser = (emailTo, forgotPassLink, appName) => {
-  const templateFileName = 'userEmailForgotPasswordLinkTemplate';
+const sendForgotPasswordLinkToUser = (emailTo, forgotPassLink, appName, name) => {
+  const templateFileName = 'forgetUserTemplate';
   const templateObject = {
     forgotPassLink,
     appName,
+    name,
   };
   const templateString = parsedHtmlFromTemplateFileAndObject(
     templateFileName, templateObject,
@@ -20,9 +21,9 @@ const sendForgotPasswordLinkToUser = (emailTo, forgotPassLink, appName) => {
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';
-    const subject = 'Forgot Password Sample';
+    const subject = 'Reset Password';
     const text = '';
-    const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html);
+    const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
     sendEmail(emailMsgObject);
   });
 };
