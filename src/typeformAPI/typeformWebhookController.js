@@ -63,6 +63,7 @@ const getEventId = (formId) => {
       }
       break;
     case EVENTS.CHRISTMASCARNIVAL.formId:
+    case EVENTS.CHRISTMASCARNIVAL.formId25th:
       eventId = EVENTS.CHRISTMASCARNIVAL.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
         eventId = EVENTS.CHRISTMASCARNIVAL.eventId.production;
@@ -703,6 +704,12 @@ const typeformWebhookController = async (req, res) => {
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
           utmCampaign = 'christmascarnival_24dec';
+          break;
+        case EVENTS.CHRISTMASCARNIVAL.formId25th:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'christmascarnival_25dec';
           break;
         default:
           country = 'india';
