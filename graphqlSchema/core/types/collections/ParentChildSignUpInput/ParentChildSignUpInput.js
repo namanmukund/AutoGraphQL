@@ -2,7 +2,7 @@ const ParentChildSignUpInput = `
   input ParentChildSignUpInput {
     parentName: String!
     childName: String!
-    parentEmail: String!
+    parentEmail: String
     parentPhone: PhoneInput
     parentPassword: String
     childPassword: String
