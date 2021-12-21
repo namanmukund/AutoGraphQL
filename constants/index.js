@@ -8,6 +8,7 @@ import forceDeleteTypeNames from './forceDeleteTypeNames';
 import regexValidation from './regexValidation';
 import loginType from './loginType';
 import { meWatiSMS, usWatiSMS } from './messagingText';
+import { ADMIN, UMS_ADMIN, SUPPLY_DEMAND_ADMIN } from './roles';
 
 const TMS = 'tekieTms';
 const TLA = 'tekieLearningApp';
@@ -505,6 +506,10 @@ const courseToGradeMappingForStaging = [
   },
 ];
 
+const ALLOWED_ROLE_FOR_MANUAL_SESSIONS = [ADMIN, UMS_ADMIN, SUPPLY_DEMAND_ADMIN];
+
+const TIME_DIFF_FOR_MANUAL_SESSION = -1;
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -588,4 +593,6 @@ export {
   courseToGradeMappingForStaging,
   iqaTags,
   BLOCKED,
+  ALLOWED_ROLE_FOR_MANUAL_SESSIONS,
+  TIME_DIFF_FOR_MANUAL_SESSION,
 };

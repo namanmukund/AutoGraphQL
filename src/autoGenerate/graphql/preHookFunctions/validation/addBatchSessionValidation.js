@@ -5,7 +5,7 @@ import { PermissionDeniedError } from '../../../../../constants/errors';
 import {
   ADMIN, UMS_ADMIN, MENTOR, UMS_VIEWER,
 } from '../../../../../constants/roles';
-import { backendApps } from '../../../../../constants';
+import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
@@ -14,6 +14,9 @@ import { SimilarDocumentAlreadyExistError } from '../../../../../constants/error
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import getMentorSessions from '../../../utils/getMentorSessions';
 import { checkIfSlotCanBeOpenedValidation } from './utils';
+import isTrialSession from '../../resolvers/utils/isTrialSession';
+import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelectedSlotsStringArray';
+import { getHoursDiff } from './utils/validateMenteeSessionInput';
 
 // query to get batch Sessions
 const getBatchSessions = (batchId, topicId) => `
@@ -66,6 +69,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   const batchId = get(params, 'batchConnectId');
   const topicId = get(params, 'topicConnectId');
   const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
+  context.isTrialSession = await isTrialSession(topicId);
 
   // log in case batch or topic id is not present
   // if (!batchId || !topicId || !mentorSessionConnectId) {
@@ -103,7 +107,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   context.appName = appName
 
   // validate input
-  await validateBatchSessionInput(params, context, 'addBatch');
+  await validateBatchSessionInput(params, context, 'addBatch', userRoleFromContext);
 
   // check if mentor already has another session in same slot
   console.log('change1 *** addBatchSessionValidation')
@@ -137,6 +141,15 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
     const batchSessions = get(getBatchSessionsRes, 'data.batchSessions');
     if (batchSessions && batchSessions.length) {
       throw new SimilarDocumentAlreadyExistError();
+    }
+  }
+  if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext) && get(context, 'isTrialSession', false)) {
+    const slotTimeStringArray = getSelectedSlotsStringArray(get(params, 'input'));
+    if (slotTimeStringArray.length > 0) {
+      const timeDiff = getHoursDiff(slotTimeStringArray[0].split('slot')[1], get(params, 'input.bookingDate'));
+      if (timeDiff) {
+        context.isManualSession = timeDiff;
+      }
     }
   }
 

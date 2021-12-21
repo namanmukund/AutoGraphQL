@@ -18,6 +18,7 @@ const MenteeSession = `
     broadCastedMentors: [MentorProfile] @relation(name:"MenteeSessionBroadcastedMentors", direction: "OneWay")
     studentProfile: StudentProfile @relation(name:"MenteeSessionStudentProfile", direction: "OneWay")
     bookingAgent: User @relation(name: "MenteeSessionBookingAgent", direction: "OneWay")
+    bookedAt: Date
 }`;
 
 export default [MenteeSession];

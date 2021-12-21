@@ -4,10 +4,10 @@ import validateBookingDate from './validateBookingDate';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
 import { MissingMandatoryInputInRequestError, NoSlotSelectedError } from '../../../../../../constants/errors/input';
 import isToday from '../../../../../../utils/isToday';
-import { backendApps } from '../../../../../../constants';
+import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, backendApps, TIME_DIFF_FOR_MANUAL_SESSION } from '../../../../../../constants';
 
-const PRE_BOOKING_HOUR_LIMIT = 0;
-const validateMentorSessionInput = (params, prevMentorSession, context) => {
+let PRE_BOOKING_HOUR_LIMIT = 0;
+const validateMentorSessionInput = (params, prevMentorSession, context, userRoleFromContext, sessionType) => {
   const { input } = params;
   const { availabilityDate = '', ...slots } = input;
 
@@ -44,7 +44,9 @@ const validateMentorSessionInput = (params, prevMentorSession, context) => {
       modifiedSlotTimeArray = [...trueOnlyCurrentSlots, ...falseOnlyCurrentSlots];
     }
   }
-
+  if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext) && sessionType === 'trial') {
+    PRE_BOOKING_HOUR_LIMIT = TIME_DIFF_FOR_MANUAL_SESSION;
+  }
   validateBookingDate(
     availabilityDate,
     modifiedSlotTimeArray,
