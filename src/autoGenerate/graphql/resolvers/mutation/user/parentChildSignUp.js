@@ -50,6 +50,33 @@ const FETCH_CAMPAIGN = (campaignId) => `{
   }
 }`;
 
+const fetchUtmAgent = async (utmSource, utmCampaign, utmTerm, utmContent, utmMedium) => {
+  const query = `{
+  leadPartnerAgents(
+    filter: {
+      utmDetails_some: {
+        and: [
+          ${utmSource ? `{ source: "${utmSource}" }` : ''}
+          ${utmCampaign ? `{ campaign: "${utmCampaign}" }` : ''}
+          ${utmTerm ? `{ term: "${utmTerm}" }` : ''}
+          ${utmContent ? `{ content: "${utmContent}" }` : ''}
+          ${utmMedium ? `{ medium: "${utmMedium}" }` : ''}
+        ]
+      }
+    }
+  ) {
+    id
+    agent {
+      id
+      name
+    }
+  }
+}
+`;
+  const result = await callLocalGraphqlApi(query);
+  return get(result, 'data.leadPartnerAgents[0].agent.id');
+};
+
 const updateExistingUserOTP = (
   searchObj,
   updateObj,
@@ -74,10 +101,11 @@ const parentChildSignUpMutationResolver = async (
   authentication,
 ) => {
   const {
-    input, schoolId, campaignId = false,
+    input, schoolId, campaignId = false, bookingAgentId = '',
   } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
+  let bookingAgentConnectId = bookingAgentId;
 
   validate(
     'UserToken',
@@ -122,12 +150,19 @@ const parentChildSignUpMutationResolver = async (
   } = input;
   // check if parent exist in db
   const parentInfo = await getParentInfo(context, parentEmail, parentPhone, isBackendApp);
+  // check for leadPartnerAgent based on utmParams
+  if (utmSource || utmCampaign || utmTerm || utmContent || utmMedium) {
+    const bookingAgent = await fetchUtmAgent(utmSource, utmCampaign, utmTerm, utmContent, utmMedium);
+    if (bookingAgent) {
+      bookingAgentConnectId = bookingAgent;
+    }
+  }
   let parentId;
   let parentProfileId;
   Object.assign(authentication, {
     bypass: true,
   });
-  const source = getUserOriginSource(utmSource, schoolName, schoolId, istmsApp);
+  const source = getUserOriginSource(utmSource, schoolName, schoolId, istmsApp, bookingAgentConnectId);
   /* this campaign obj will be later in this method */
   /* fetching earlier to update vertical in user */
   let campaign = null;
@@ -354,6 +389,7 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     parentProfileId,
     studentSchoolId,
     batchId,
+    bookingAgentConnectId,
   );
 
   if (!studentProfileId) {
@@ -458,19 +494,15 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     setTimeout(() => {
       updateLeadSquared({
         Phone: get(parentPhone, 'number'),
-        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '11 December' : '5 December',
+        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '18 December' : '26 December',
         mx_Event_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '03:00 pm' : '11:00 am',
-        mx_Event_Date_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '2021-12-11 09:30:00' : '2021-12-05 05:30:00',
+        mx_Event_Date_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '2021-12-18 09:30:00' : '2021-12-26 05:30:00',
       }, false, {
         ActivityEvent: 208,
         Fields: [
           {
             SchemaName: 'mx_Custom_1',
-            Value: 'communityevent',
-          },
-          {
-            SchemaName: 'mx_Custom_2',
-            Value: 'spysquadcamp_4dec',
+            Value: utmSource,
           },
         ],
       });

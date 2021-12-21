@@ -211,3 +211,7 @@ export const CanNotDeleteCompletedSessionError = createError('CanNotDeleteComple
 export const EitherPhoneOrEmailIsMandatory = createError('EitherPhoneOrEmailIsMandatory', {
   message: 'Either Phone or Email is mandatory',
 });
+
+export const GradeFieldRequiredError = createError('GradeFieldRequiredError', {
+  message: 'Grade field is mandatory in input',
+});

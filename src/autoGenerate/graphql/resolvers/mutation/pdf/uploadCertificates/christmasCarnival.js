@@ -32,8 +32,8 @@ const getChristmasCarnivalCertificateUrl = async (userId, userName, formattedDat
 
   // Draw a string of text diagonally across the first page
   firstPage.drawText(`${capitalize(userName)}`, {
-    x: 330,
-    y: 506,
+    x: 313,
+    y: 527,
     size: 29,
     font: NunitoBoldFont,
     color: rgb(0, 0.678, 0.902),

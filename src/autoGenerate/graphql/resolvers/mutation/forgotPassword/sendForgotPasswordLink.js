@@ -72,7 +72,11 @@ export default function sendForgotPasswordLinkMutationResolver(
         throw new DatabaseRecordNotFoundError();
       }
       const token = getTokenForLoginLink(fetchedUser, new Date(), 1);
-      const forgotPassLink = `${forgotPassWebURL[nodeEnv]}?authToken=${token}`;
+      let forgotPassLink = `${forgotPassWebURL[nodeEnv]}?authToken=${token}`;
+      if (process.env.DATA_MASKING) {
+        // eslint-disable-next-line no-param-reassign
+        forgotPassLink = `${forgotPassWebURL.preProd}?authToken=${token}`;
+      }
       // Send email to user with forgot password link
       sendEmailForSendForgotPasswordLink(fetchedUser, authentication, forgotPassLink);
 

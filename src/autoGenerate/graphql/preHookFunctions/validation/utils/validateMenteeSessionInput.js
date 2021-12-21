@@ -1,5 +1,7 @@
 /* eslint-disable no-param-reassign */
 // validate mentor session input variables
+import { get } from 'lodash';
+import moment from 'moment';
 import validateBookingDate from './validateBookingDate';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
 import {
@@ -12,10 +14,21 @@ import {
 // import getMentorAvailabilitySlots from '../../../graphqlQueries/getMentorAvailabilitySlots';
 // import getSelectedSlotsStringArray from '../../../postHookFunctions/utils/getSelectedSlotsStringArray';
 // import { NoSlotsAvailableForBooking } from '../../../../../../constants/errors/db';
-import { byPassMenteeValidationApps, backendApps } from '../../../../../../constants';
+import {
+  byPassMenteeValidationApps, backendApps,
+  ALLOWED_ROLE_FOR_MANUAL_SESSIONS, TIME_DIFF_FOR_MANUAL_SESSION,
+} from '../../../../../../constants';
 
-const PRE_BOOKING_HOUR_LIMIT = 0;
-const validateMenteeSessionInput = async (params, context) => {
+export const getHoursDiff = (slot, date) => {
+  slot = Number(slot);
+  const newtime = moment(date).set('hours', slot);
+  const startOfHour = moment().startOf('hour');
+  if (moment(newtime).isSame(startOfHour)) return true;
+  return false;
+};
+
+let PRE_BOOKING_HOUR_LIMIT = 0;
+const validateMenteeSessionInput = async (params, context, userRoleFromContext) => {
   const { input } = params;
   const { bookingDate, ...slots } = input;
   if (!bookingDate) {
@@ -38,7 +51,9 @@ const validateMenteeSessionInput = async (params, context) => {
   if (backendApps.includes(appName)) {
     return true;
   }
-
+  if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext) && get(context, 'isTrialSession', false)) {
+    PRE_BOOKING_HOUR_LIMIT = TIME_DIFF_FOR_MANUAL_SESSION;
+  }
   validateBookingDate(
     bookingDate,
     slotTimeArray,

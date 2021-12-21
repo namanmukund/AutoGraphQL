@@ -41,6 +41,7 @@ const userIdQuery = (menteeSessionId) => `{
     id
     bookingDate
     ${getSlotTimesInString()}
+    bookedBy
     user {
       id
       name
@@ -61,6 +62,16 @@ const userIdQuery = (menteeSessionId) => `{
     }
   }
 }`;
+
+const updateUserVerificationStatus = async (userId) => {
+  const updateQuery = `mutation {
+  updateUser(id: "${userId}", input: { verificationStatus: verified }) {
+    id
+  }
+}
+`;
+  await callLocalGraphqlApi(updateQuery);
+};
 
 const mentorMenteeSessionsQuery = async (userId, orderBy = 'latest') => {
   let orderByString = '';
@@ -292,6 +303,10 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   /** Update MenteeMentorSession If Session Completed  */
   if (prevSessionStatus === 'completed' || get(input, 'sessionStatus') === 'completed') {
     const userPaymentPlanData = await userPaymentPlanQuery(`{user_some:{id:"${menteeId}"}}`);
+    if (get(menteeSession, 'data.menteeSession.bookedBy') === 'leadPartner'
+      && get(userInfo, 'data.user.verificationStatus') !== 'verified') {
+      updateUserVerificationStatus(userId);
+    }
     if (userPaymentPlanData && userPaymentPlanData.id) {
       const updateObject = {};
       if (sessionStartDate) {

@@ -30,6 +30,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import getPostDemoSalesReportUrl from '../../mutation/pdf/uploadCertificates/postDemoSalesReport';
 // import scheduleSessionCourseReport from '../../../../../../utils/scheduleJobs/scheduleCourseReport';
 // import addOrUpdateUsersInBulk from '../scriptMethods/addOrUpdateUsersInBulk';
+// import updateLeadAnalyticsForPastLeads from '../scriptMethods/updateLeadAnalyticsForPastLeads';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -83,6 +84,7 @@ const temporaryScript = (async (root, params, context) => {
   // await getPostDemoSalesReportUrl('ckgsshcir00000vqgdftbf2f4');
   // await updateNetPromoterScoresWithCourseAndMmSession();
   // await addOrUpdateUsersInBulk();
+  // await updateLeadAnalyticsForPastLeads();
   return {
     result: true,
   };
