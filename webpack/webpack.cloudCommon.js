@@ -50,9 +50,9 @@ config.module.rules = [
       {
         loader: 'babel-loader',
       },
-      {
-        loader: 'eslint-loader',
-      },
+      // {
+      //   loader: 'eslint-loader',
+      // },
     ],
   },
 ];
