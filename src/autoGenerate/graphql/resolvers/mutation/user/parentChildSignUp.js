@@ -50,33 +50,6 @@ const FETCH_CAMPAIGN = (campaignId) => `{
   }
 }`;
 
-const fetchUtmAgent = async (utmSource, utmCampaign, utmTerm, utmContent, utmMedium) => {
-  const query = `{
-  leadPartnerAgents(
-    filter: {
-      utmDetails_some: {
-        and: [
-          ${utmSource ? `{ source: "${utmSource}" }` : ''}
-          ${utmCampaign ? `{ campaign: "${utmCampaign}" }` : ''}
-          ${utmTerm ? `{ term: "${utmTerm}" }` : ''}
-          ${utmContent ? `{ content: "${utmContent}" }` : ''}
-          ${utmMedium ? `{ medium: "${utmMedium}" }` : ''}
-        ]
-      }
-    }
-  ) {
-    id
-    agent {
-      id
-      name
-    }
-  }
-}
-`;
-  const result = await callLocalGraphqlApi(query);
-  return get(result, 'data.leadPartnerAgents[0].agent.id');
-};
-
 const updateExistingUserOTP = (
   searchObj,
   updateObj,
@@ -101,11 +74,10 @@ const parentChildSignUpMutationResolver = async (
   authentication,
 ) => {
   const {
-    input, schoolId, campaignId = false, bookingAgentId = '',
+    input, schoolId, campaignId = false, bookingAgentId = false,
   } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
-  let bookingAgentConnectId = bookingAgentId;
 
   validate(
     'UserToken',
@@ -150,19 +122,12 @@ const parentChildSignUpMutationResolver = async (
   } = input;
   // check if parent exist in db
   const parentInfo = await getParentInfo(context, parentEmail, parentPhone, isBackendApp);
-  // check for leadPartnerAgent based on utmParams
-  if (utmSource || utmCampaign || utmTerm || utmContent || utmMedium) {
-    const bookingAgent = await fetchUtmAgent(utmSource, utmCampaign, utmTerm, utmContent, utmMedium);
-    if (bookingAgent) {
-      bookingAgentConnectId = bookingAgent;
-    }
-  }
   let parentId;
   let parentProfileId;
   Object.assign(authentication, {
     bypass: true,
   });
-  const source = getUserOriginSource(utmSource, schoolName, schoolId, istmsApp, bookingAgentConnectId);
+  const source = getUserOriginSource(utmSource, schoolName, schoolId, istmsApp, bookingAgentId);
   /* this campaign obj will be later in this method */
   /* fetching earlier to update vertical in user */
   let campaign = null;
@@ -389,7 +354,7 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     parentProfileId,
     studentSchoolId,
     batchId,
-    bookingAgentConnectId,
+    bookingAgentId,
   );
 
   if (!studentProfileId) {
@@ -503,6 +468,10 @@ If coming from campaign and the type os b2b allocate the user to the right batch
           {
             SchemaName: 'mx_Custom_1',
             Value: utmSource,
+          },
+          {
+            SchemaName: 'mx_Custom_2',
+            Value: utmCampaign,
           },
         ],
       });
