@@ -29,7 +29,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import getIqaReportSnapshotUrl from '../../mutation/pdf/uploadCertificates/iqaReport';
 // import getPostDemoSalesReportUrl from '../../mutation/pdf/uploadCertificates/postDemoSalesReport';
 // import scheduleSessionCourseReport from '../../../../../../utils/scheduleJobs/scheduleCourseReport';
-import updateLeadAnalyticsForPastLeads from '../scriptMethods/updateLeadAnalyticsForPastLeads';
+// import updateLeadAnalyticsForPastLeads from '../scriptMethods/updateLeadAnalyticsForPastLeads';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -82,7 +82,7 @@ const temporaryScript = (async (root, params, context) => {
   // await getIqaReportSnapshotUrl('ckgsshcir00000vqgdftbf2f4', 'Gokul');
   // await getPostDemoSalesReportUrl('ckgsshcir00000vqgdftbf2f4');
   // await updateNetPromoterScoresWithCourseAndMmSession();
-  await updateLeadAnalyticsForPastLeads();
+  // await updateLeadAnalyticsForPastLeads();
   return {
     result: true,
   };
