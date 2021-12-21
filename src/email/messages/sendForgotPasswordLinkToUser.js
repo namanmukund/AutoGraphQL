@@ -21,7 +21,7 @@ const sendForgotPasswordLinkToUser = (emailTo, forgotPassLink, appName, name) =>
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';
-    const subject = 'Forgot Password Sample';
+    const subject = 'Reset Password';
     const text = '';
     const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
     sendEmail(emailMsgObject);

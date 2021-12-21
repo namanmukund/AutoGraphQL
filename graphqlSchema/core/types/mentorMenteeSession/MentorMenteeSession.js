@@ -100,6 +100,7 @@ const MentorMenteeSession = `
     videoLinkClickByMenteePlatform: Platform
     startSessionByMenteePlatform: Platform
     isDemoWowAudit: Boolean @defaultValue(value: "false")
+    bookingAgent: User @relation(name: "MentorMenteeSessionBookingAgent", direction: "OneWay")
 }`;
 
 export default [MentorMenteeSession, internetSpeed];

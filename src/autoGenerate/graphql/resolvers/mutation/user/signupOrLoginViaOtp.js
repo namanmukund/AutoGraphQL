@@ -3,13 +3,14 @@ import { getFieldsBeingFetched } from '../../../../utils';
 import { validate, validateName } from '../../../validation';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import {
+  BlockedOperationError,
   DatabaseRecordNotFoundError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
 import { MutationController, QueryController } from '../../../controllers';
 import { getUserFromDBQuery } from './utils';
 import { generateCuid, getRandomNumber } from '../../../../../../utils';
-import { rangeOTP } from '../../../../../../constants';
+import { BLOCKED, rangeOTP } from '../../../../../../constants';
 import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
 import { PARENT } from '../../../../../../constants/roles';
@@ -68,7 +69,6 @@ const signupOrLoginViaOtp = async (
   }
 
   const currentUser = authentication && authentication.user;
-
   if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
@@ -80,6 +80,10 @@ const signupOrLoginViaOtp = async (
 
   const modelQueries = new QueryController(USER_TYPE, authentication);
   let userData = await getUserFromDBQuery(input, modelQueries);
+
+  if (get(userData, 'status') === BLOCKED) {
+    throw new BlockedOperationError();
+  }
 
   if (!userData || !userData.id) {
     // create user if it doesn't exist and phone is passed in input else throw error

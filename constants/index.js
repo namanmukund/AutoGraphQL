@@ -8,6 +8,7 @@ import forceDeleteTypeNames from './forceDeleteTypeNames';
 import regexValidation from './regexValidation';
 import loginType from './loginType';
 import { meWatiSMS, usWatiSMS } from './messagingText';
+import { ADMIN, UMS_ADMIN, SUPPLY_DEMAND_ADMIN } from './roles';
 
 const TMS = 'tekieTms';
 const TLA = 'tekieLearningApp';
@@ -251,6 +252,7 @@ const forgotPassWebURL = {
   development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword',
   staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword',
   production: 'https://tekie-managment-system.herokuapp.com/forgotPassword',
+  preProd: 'https://tekie-tms-pre-prod.herokuapp.com/forgotPassword',
 };
 
 const slotTimes = [
@@ -472,6 +474,8 @@ const ALLOWED_MIME_TYPES = ['html', 'css', 'javascript'];
 
 const MASTER_OTP = 1101;
 
+const BLOCKED = 'blocked';
+
 const courseToGradeMapping = [
   {
     grade: [1, 2],
@@ -501,6 +505,10 @@ const courseToGradeMappingForStaging = [
     courseId: 'cjs8skrd200041huzz78kncz5',
   },
 ];
+
+const ALLOWED_ROLE_FOR_MANUAL_SESSIONS = [ADMIN, UMS_ADMIN, SUPPLY_DEMAND_ADMIN];
+
+const TIME_DIFF_FOR_MANUAL_SESSION = -1;
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
@@ -584,4 +592,7 @@ export {
   courseToGradeMapping,
   courseToGradeMappingForStaging,
   iqaTags,
+  BLOCKED,
+  ALLOWED_ROLE_FOR_MANUAL_SESSIONS,
+  TIME_DIFF_FOR_MANUAL_SESSION,
 };

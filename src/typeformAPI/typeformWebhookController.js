@@ -62,6 +62,16 @@ const getEventId = (formId) => {
         }
       }
       break;
+    case EVENTS.CHRISTMASCARNIVAL.formId:
+    case EVENTS.CHRISTMASCARNIVAL.formId25th:
+      eventId = EVENTS.CHRISTMASCARNIVAL.eventId.staging;
+      if (process.env.NODE_ENV === 'production') {
+        eventId = EVENTS.CHRISTMASCARNIVAL.eventId.production;
+        if (process.env.DATA_MASKING) {
+          eventId = EVENTS.CHRISTMASCARNIVAL.eventId.preprod;
+        }
+      }
+      break;
     default:
       eventId = EVENTS.SPYSQUADCAMP.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
@@ -87,6 +97,11 @@ const getEventDetails = (formId) => {
       eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec25;
       eventDetailsObject.eventTime = EVENTS.CHRISTMASCARNIVAL.eventTime.dec25;
       eventDetailsObject.eventDateTime = EVENTS.CHRISTMASCARNIVAL.eventDateTime.dec25;
+      break;
+    case EVENTS.CHRISTMASCARNIVAL.registrationFormId25thRS:
+      eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec25RS;
+      eventDetailsObject.eventTime = EVENTS.CHRISTMASCARNIVAL.eventTime.dec25RS;
+      eventDetailsObject.eventDateTime = EVENTS.CHRISTMASCARNIVAL.eventDateTime.dec25RS;
       break;
     case EVENTS.CHRISTMASCARNIVAL.registrationFormId26th:
       eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec26;
@@ -623,7 +638,7 @@ const typeformWebhookController = async (req, res) => {
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
-          utmCampaign = 'spysquadcamp_4dec';
+          utmCampaign = 'spysquadcamp_18dec';
           break;
         case EVENTS.CANVA.formId:
           country = 'india';
@@ -641,7 +656,7 @@ const typeformWebhookController = async (req, res) => {
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
-          utmCampaign = 'storyspree_12dec';
+          utmCampaign = 'storyspree_19dec';
           break;
         case EVENTS.GENZENVIRONMENT.registrationFormId:
           country = 'india';
@@ -670,6 +685,13 @@ const typeformWebhookController = async (req, res) => {
           utmCampaign = 'christmascarnival_25dec';
           doGenerateCertificate = false;
           break;
+        case EVENTS.CHRISTMASCARNIVAL.registrationFormId25thRS:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'radiostreet';
+          utmCampaign = 'christmascarnival_25dec';
+          doGenerateCertificate = false;
+          break;
         case EVENTS.CHRISTMASCARNIVAL.registrationFormId26th:
           country = 'india';
           timezone = 'Asia/Kolkata';
@@ -683,11 +705,17 @@ const typeformWebhookController = async (req, res) => {
           utmSource = 'communityevent';
           utmCampaign = 'christmascarnival_24dec';
           break;
+        case EVENTS.CHRISTMASCARNIVAL.formId25th:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'communityevent';
+          utmCampaign = 'christmascarnival_25dec';
+          break;
         default:
           country = 'india';
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
-          utmCampaign = 'spysquadcamp_4dec';
+          utmCampaign = 'spysquadcamp_18dec';
           break;
       }
       studentDetailsObject = {

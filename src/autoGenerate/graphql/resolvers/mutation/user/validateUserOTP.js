@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import {
+  BlockedOperationError,
   DatabaseRecordNotFoundError,
   OTPMismatchError, SendOtpFirstError,
   UserTokenNotRequiredError,
@@ -17,7 +18,7 @@ import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import getTimeDifferenceWithCurrentDateInSeconds
   from '../../../../../../utils/getTimeDifferenceWithCurrentDateInSeconds';
 import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
-import { MASTER_OTP } from '../../../../../../constants';
+import { BLOCKED, MASTER_OTP } from '../../../../../../constants';
 
 const USER_TYPE = 'User';
 const validateUserOTPMutationPromise = (
@@ -62,6 +63,10 @@ const validateUserOTPMutationResolver = async (
   const userData = await getUserFromDBQuery(input, modelQueries);
   if (!userData || !userData.id) {
     throw new DatabaseRecordNotFoundError();
+  }
+
+  if (get(userData, 'status') === BLOCKED) {
+    throw new BlockedOperationError();
   }
 
   const {
