@@ -2,14 +2,17 @@ import { get } from 'lodash';
 import isValidEmail from '../../../../validation/isValidEmail';
 import { InvalidEmailError, InvalidPhoneError } from '../../../../../../../constants/errors';
 import { isValidPhoneNumber, validateName } from '../../../../validation';
-import { PhoneFieldRequiredError } from '../../../../../../../constants/errors/input';
+import { EitherPhoneOrEmailIsMandatory } from '../../../../../../../constants/errors/input';
 
-const validateParentChildSignUpInput = (input, isBackendApp) => {
+const validateParentChildSignUpInput = (input) => {
   const {
     parentName, childName, parentEmail, parentPhone, childEmail,
   } = input;
-    // check email
-  if (!isValidEmail(parentEmail)) {
+  if (!parentEmail && (!get(parentPhone, 'countryCode') || !get(parentPhone, 'number'))) {
+    throw new EitherPhoneOrEmailIsMandatory();
+  }
+  // check email
+  if (parentEmail && !isValidEmail(parentEmail)) {
     throw new InvalidEmailError();
   }
 
@@ -17,9 +20,9 @@ const validateParentChildSignUpInput = (input, isBackendApp) => {
     throw new InvalidEmailError();
   }
 
-  if (!isBackendApp && (!get(parentPhone, 'countryCode') || !get(parentPhone, 'number'))) {
-    throw new PhoneFieldRequiredError();
-  }
+  // if (!isBackendApp && (!get(parentPhone, 'countryCode') || !get(parentPhone, 'number'))) {
+  //   throw new PhoneFieldRequiredError();
+  // }
   // check phone number
   if (get(parentPhone, 'countryCode') && get(parentPhone, 'number') && !isValidPhoneNumber(parentPhone)) {
     throw new InvalidPhoneError();

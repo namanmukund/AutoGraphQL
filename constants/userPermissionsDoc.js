@@ -35,63 +35,63 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...UMS_HEAD_ARR, LEAD_PARTNER],
-      read: [PRE_SALES, POST_SALES, AUDITOR, BDE, BDE_ADMIN, SUPPLY_DEMAND_ADMIN, SUPPLY_MANAGER, DEMAND_MANAGER],
-      exceptDelete: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN, TRANSFORMATION_ADMIN, AUDIT_ADMIN],
+      read: [POST_SALES, AUDITOR, BDE, BDE_ADMIN, SUPPLY_DEMAND_ADMIN, SUPPLY_MANAGER, DEMAND_MANAGER],
+      exceptDelete: [...NOT_UMS_HEAD_ARR, SCHOOL_ADMIN, TRANSFORMATION_ADMIN, AUDIT_ADMIN, PRE_SALES],
     },
     fields: {
       role: {
         rule: 'allow',
         crud: [...UMS_HEAD_ARR, LEAD_PARTNER],
-        read: [...NOT_UMS_HEAD_ARR, PRE_SALES, POST_SALES, AUDIT_ADMIN, AUDITOR, BDE, BDE_ADMIN, SUPPLY_DEMAND_ADMIN, DEMAND_MANAGER],
-        exceptDelete: [TRANSFORMATION_ADMIN],
+        read: [...NOT_UMS_HEAD_ARR, POST_SALES, AUDIT_ADMIN, AUDITOR, BDE, BDE_ADMIN, SUPPLY_DEMAND_ADMIN, DEMAND_MANAGER],
+        exceptDelete: [TRANSFORMATION_ADMIN, PRE_SALES],
       },
       savedPassword: {
         rule: 'allow',
         crud: [...UMS_HEAD_ARR],
         read: [...NOT_UMS_HEAD_ARR],
-        exceptDelete: [TRANSFORMATION_ADMIN],
+        exceptDelete: [TRANSFORMATION_ADMIN, PRE_SALES],
       },
     },
   },
   SalesOperation: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI],
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI, PRE_SALES],
       read: [MENTEE, TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM, BDE, BDE_ADMIN],
     },
   },
   SalesOperationLog: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI],
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI, PRE_SALES],
       read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
   SalesOperationActivity: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI],
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI, PRE_SALES],
       read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
   UserPaymentPlan: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI],
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI, PRE_SALES],
       read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
   UserPaymentInstallment: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI, PRE_SALES],
       read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
   UserPaymentLink: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE],
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR, SALES, SALES_EXECUTIVE, SENSEI],
       read: [TRANSFORMATION_ADMIN, TRANSFORMATION_TEAM],
     },
   },
@@ -134,7 +134,7 @@ const userPermissionsDoc = {
     collection: {
       rule: 'allow',
       crud: [...CMS_HEAD_ARRAY, UMS_ADMIN],
-      read: [...NOT_CMS_HEAD_ARRAY, SCHOOL_ADMIN, BDE_ADMIN, SENSEI],
+      read: [...NOT_CMS_HEAD_ARRAY, SCHOOL_ADMIN, BDE_ADMIN, SENSEI, PRE_SALES],
     },
   },
   BlockBasedProject: {
@@ -147,7 +147,7 @@ const userPermissionsDoc = {
   AuditQuestion: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, AUDIT_ADMIN, AUDITOR],
+      crud: [...UMS_HEAD_ARR, AUDIT_ADMIN, AUDITOR, SALES_EXECUTIVE, SENSEI],
       read: [UMS_VIEWER, MENTOR, PRE_SALES, POST_SALES],
     },
   },
@@ -161,7 +161,7 @@ const userPermissionsDoc = {
   MentorAvailabilitySlot: {
     collection: {
       rule: 'allow',
-      crud: [...UMS_HEAD_ARR, ...SUPPLY_DEMAND_ROLES_ARRAY],
+      crud: [...UMS_HEAD_ARR, ...SUPPLY_DEMAND_ROLES_ARRAY, SENSEI],
       read: [...NOT_UMS_HEAD_ARR],
     },
   },
