@@ -32,15 +32,8 @@ const preUserDataValidation = (userData, mutationName) => {
       break;
     }
     case 'updateUser': {
-      const { email, phone } = userData;
-      query.$or = [];
-      if (email) {
-        query.$or.push({ email });
-      }
-      if (phone) {
-        query.$or.push({ phone });
-      }
-      // query.email = email;
+      const { email } = userData;
+      query.email = email;
       break;
     }
     default: {

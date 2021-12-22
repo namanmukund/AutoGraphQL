@@ -296,3 +296,7 @@ export const SenseiProfileAlreadyExist = createError('SenseiProfileAlreadyExist'
 export const UserWithSimilarNumberAlreadyExist = createError('UserWithSimilarNumberAlreadyExist', {
   message: 'User with similar phone number already exist.',
 });
+
+export const UserWithSimilarEmailAlreadyExist = createError('UserWithSimilarEmailAlreadyExist', {
+  message: 'User with similar email already exist.',
+});

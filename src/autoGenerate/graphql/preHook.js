@@ -120,7 +120,6 @@ import updateFileValidation from './preHookFunctions/validation/updateFileValida
 import addLeadPartnerValidation from './preHookFunctions/validation/addLeadPartnerValidation';
 import updateLeadPartnerValidation from './preHookFunctions/validation/updateLeadPartnerValidation';
 import addSenseiProfileValidation from './preHookFunctions/validation/addSenseiProfileValidation';
-import { UserWithSimilarNumberAlreadyExist } from '../../../constants/errors/db';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -247,16 +246,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       // validate username, phone, email and name and returns email or phone verified accordingly
       const verifiedData = await updateUserValidation(params, context, mutationOrQueryName);
       Object.assign(input, verifiedData);
-      const { phone } = input;
-      if (get(phone, 'number')) {
-        return preUserDataValidation(input, mutationOrQueryName)
-          .then((userData) => {
-            if (userData && (get(params, 'id') !== get(userData, 'id'))) {
-              throw new UserWithSimilarNumberAlreadyExist();
-            }
-            return hook(input, mutationOrQueryName, 'PreHook');
-          });
-      }
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'resendUserOTP': {
