@@ -292,3 +292,7 @@ export const FileNameAlreadyExists = createError('FileNameAlreadyExists', {
 export const SenseiProfileAlreadyExist = createError('SenseiProfileAlreadyExist', {
   message: 'Sensei Profile already exist for the user',
 });
+
+export const UserWithSimilarNumberAlreadyExist = createError('UserWithSimilarNumberAlreadyExist', {
+  message: 'User with similar phone number already exist.',
+});
