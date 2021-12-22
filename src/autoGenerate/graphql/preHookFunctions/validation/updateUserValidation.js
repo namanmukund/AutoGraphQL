@@ -32,19 +32,21 @@ const fetchUser = async (id) => {
   return get(res, 'data.user');
 };
 
-const updateUserValidation = async (params, context) => {
+const updateUserValidation = async (params, context, mutationOrQueryName) => {
   const { input, id: userId } = params;
   const userObj = {};
   const {
     name,
     username,
     email,
-    phone,
     verificationStatus,
     password,
+    phone,
     isPreSalesAudit: isPreSalesAuditFromInput,
   } = input;
-  commonUserValidation({ name, email, phone });
+  commonUserValidation({
+    name, email, phone, mutationOrQueryName,
+  });
   if (username) {
     validateUsername(username);
   }
