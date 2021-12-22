@@ -4,11 +4,11 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import { courseToGradeMapping, courseToGradeMappingForStaging } from '../../../../../constants';
 
-const getNetPromoterScoreByAUser = async (userId, courseId) => {
+const getNetPromoterScoreByAUser = async (userId, courseId, mentorMenteeSessionConnectId) => {
   const query = `
         query{
           netPromoterScores(filter:{
-            and: [{ user_some: { id: "${userId}" } }, { course_some: { id: "${courseId}" } }]
+            and: [{ user_some: { id: "${userId}" } }, { course_some: { id: "${courseId}" } } { mentorMenteeSession_some: { id: "${mentorMenteeSessionConnectId}" } }]
           }){
             id
           }
@@ -34,7 +34,7 @@ const fetchUserDetails = async (userId) => {
 };
 
 const addNetPromoterScoreValidation = async (params) => {
-  const { userConnectId, courseConnectId } = params;
+  const { userConnectId, courseConnectId, mentorMenteeSessionConnectId } = params;
   if (!userConnectId) {
     throw new ConnectIdRequiredError();
   }
@@ -52,7 +52,7 @@ const addNetPromoterScoreValidation = async (params) => {
     });
     courseId = get(defaultCourse, 'courseId');
   }
-  const netPromoterScores = await getNetPromoterScoreByAUser(userConnectId, courseId);
+  const netPromoterScores = await getNetPromoterScoreByAUser(userConnectId, courseId, mentorMenteeSessionConnectId);
   if (netPromoterScores && netPromoterScores.length) {
     throw new SimilarDocumentAlreadyExistError();
   }
