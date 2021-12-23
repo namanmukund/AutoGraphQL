@@ -31,3 +31,11 @@ export const UserRolesNotFoundError = createError('UserRolesNotFoundError', {
 export const MentorAvailabilitySlotNotBookedError = createError('MentorAvailabilitySlotNotBookedError', {
   message: 'Mentor has not booked the session for the current time',
 });
+
+export const PhoneOtpMaxRetryTimeLimitError = createError('PhoneOtpMaxRetryTimeLimitError', {
+  message: 'Please wait for a minute before requesting for next OTP',
+});
+
+export const PhoneOtpPerDayLimitError = createError('PhoneOtpPerDayLimitError', {
+  message: 'Please contact support to get OTP',
+});
