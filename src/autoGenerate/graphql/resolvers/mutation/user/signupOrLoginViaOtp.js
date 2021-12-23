@@ -116,11 +116,11 @@ const signupOrLoginViaOtp = async (
 
   // setting nextAllowedPhoneOtpDate to that of 60 seconds otherwise throwing error
   const phoneOtpCreationDate = get(userData, 'phoneOtpCreationDate');
-  if (phoneOtpCreationDate && Math.abs(moment().diff(moment(new Date(phoneOtpCreationDate)), 'seconds')) < PHONE_OTP_MAX_RETRY_WAIT_SECOND) {
+  if (!input.email && phoneOtpCreationDate && Math.abs(moment().diff(moment(new Date(phoneOtpCreationDate)), 'seconds')) < PHONE_OTP_MAX_RETRY_WAIT_SECOND) {
     throw new PhoneOtpMaxRetryTimeLimitError();
   }
 
-  if (get(userData, 'id')) {
+  if (!input.email && get(userData, 'id')) {
     // fetching userOtpLogs count for past 1 day for a user
     const fromDate = new Date();
     fromDate.setDate(fromDate.getDate() - 1);
