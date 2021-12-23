@@ -31,6 +31,7 @@ const AssignmentQuestion = `
     topic: Topic @relation(name: "OldAssignmentTopicAssignmentQuestion",  direction: "OneWay")
     topics: [Topic] @relation(name: "AssignmentTopicAssignmentQuestion")
     status: ContentStatus! @defaultValue(value: "unpublished")
+    mode: EditorModes
     courses: [Course] @relation(name: "CourseAssignmentQuestion", direction: "OneWay")
   }
 `;
