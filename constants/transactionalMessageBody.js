@@ -33,6 +33,14 @@ const transactionalMessageBody = {
     whatsAppTemplate: 'demo_reminder_1',
     whatsAppTemplateInternational: 'demo_reminder_1',
   },
+  sendSessionLinkB2B: {
+    emailTemplate: 'B2BJoinSessionReminder',
+    emailTemplateInternational: 'B2BJoinSessionReminder',
+    subject: 'Tekie - Meeting link for coding session',
+    subjectInternational: 'Tekie - Meeting link for coding session',
+    whatsAppTemplate: 'demo_reminder_1',
+    whatsAppTemplateInternational: 'demo_reminder_1',
+  },
   didNotPickTheCall: {
     emailTemplate: 'didNotPickTheCall',
     subject: 'Tekie - We tried calling you',
