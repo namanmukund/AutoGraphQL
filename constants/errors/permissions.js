@@ -37,5 +37,5 @@ export const PhoneOtpMaxRetryTimeLimitError = createError('PhoneOtpMaxRetryTimeL
 });
 
 export const PhoneOtpPerDayLimitError = createError('PhoneOtpPerDayLimitError', {
-  message: 'Please contact support to get OTP',
+  message: 'Daily OTP limit exceeded, please contact support.',
 });
