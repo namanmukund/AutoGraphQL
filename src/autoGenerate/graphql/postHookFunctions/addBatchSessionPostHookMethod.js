@@ -229,7 +229,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
 
   if (topicId) {
     // update session log entry
-    addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'addBatchSession', code, mentorSessionConnectId, sessionStatusFromInput || sessionStatus.allotted);
+    addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'addBatchSession', code, mentorSessionConnectId, sessionStatusFromInput || sessionStatus.allotted, '', get(context, 'isManualSession', false));
   }
 };
 

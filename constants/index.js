@@ -8,6 +8,7 @@ import forceDeleteTypeNames from './forceDeleteTypeNames';
 import regexValidation from './regexValidation';
 import loginType from './loginType';
 import { meWatiSMS, usWatiSMS } from './messagingText';
+import { ADMIN, UMS_ADMIN, SUPPLY_DEMAND_ADMIN } from './roles';
 
 const TMS = 'tekieTms';
 const TLA = 'tekieLearningApp';
@@ -509,6 +510,10 @@ const PHONE_OTP_LIMIT_PER_DAY = 5;
 
 const PHONE_OTP_MAX_RETRY_WAIT_SECOND = 60;
 
+const ALLOWED_ROLE_FOR_MANUAL_SESSIONS = [ADMIN, UMS_ADMIN, SUPPLY_DEMAND_ADMIN];
+
+const TIME_DIFF_FOR_MANUAL_SESSION = -1;
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -594,4 +599,6 @@ export {
   BLOCKED,
   PHONE_OTP_LIMIT_PER_DAY,
   PHONE_OTP_MAX_RETRY_WAIT_SECOND,
+  ALLOWED_ROLE_FOR_MANUAL_SESSIONS,
+  TIME_DIFF_FOR_MANUAL_SESSION,
 };
