@@ -103,7 +103,7 @@ import StudentNoteForIQ from './StudentNoteForIQ';
 import BlockBasedProjectLayout from './BlockBasedProjectLayout';
 import IQATag from './IQATag';
 import DateCondition from './DateCondition';
-import EditorModes from './EditorModes';
+import EditorMode from './EditorMode';
 
 export default [
   Status,
@@ -212,5 +212,5 @@ export default [
   BlockBasedProjectLayout,
   IQATag,
   DateCondition,
-  EditorModes,
+  EditorMode,
 ];
