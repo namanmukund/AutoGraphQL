@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import uploadUsersToMailModo from '../scriptMethods/uploadUsersToMailModo';
 // import updateNetPromoterScoresWithCourseAndMmSession from '../scriptMethods/updateNetPromoterScoresWithCourseAndMmSession';
 // import updateQuestionBankOfPythonCourseWithCorrectPostion from '../scriptMethods/updateQuestionBankOfPythonCourseWithCorrectPostion';
 // import createUserCurrentTopicComponentStatusScript from '../scriptMethods/createUserCurrentTopicComponentStatusScript';
@@ -37,6 +38,7 @@ const temporaryScript = (async (root, params, context) => {
   /*
   Add script functions
    */
+  // await uploadUsersToMailModo();
   // await scheduleSessionCourseReport(1);
   // await updateCourseInVideos();
   // await updateCourseInSalesOperationScript();
