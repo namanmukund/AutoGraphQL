@@ -505,6 +505,10 @@ const courseToGradeMappingForStaging = [
   },
 ];
 
+const PHONE_OTP_LIMIT_PER_DAY = 5;
+
+const PHONE_OTP_MAX_RETRY_WAIT_SECOND = 60;
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -588,4 +592,6 @@ export {
   courseToGradeMappingForStaging,
   iqaTags,
   BLOCKED,
+  PHONE_OTP_LIMIT_PER_DAY,
+  PHONE_OTP_MAX_RETRY_WAIT_SECOND,
 };
