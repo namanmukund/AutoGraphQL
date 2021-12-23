@@ -274,7 +274,7 @@
                     style="
                       height: 117px;
                       width: 100%;
-                      background: url('./b2bJoinSessionReminder/header.png');
+                      background: url('https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/header.png');
                       background-size: cover;
                       background-position: center center;
                       box-sizing: border-box;
@@ -327,8 +327,8 @@
                         style="font-weight: bolder"
                         ><%= schoolName %></span
                       >, is scheduled on
-                      <span style="font-weight: bolder"><%= day %></span> at
-                      <span style="font-weight: bolder"><%= time %></span>.
+                      <span style="font-weight: bolder"><%= date %></span> at
+                      <span style="font-weight: bolder"><%= startTime %></span>.
                     </div>
                   </td>
                 </tr>
@@ -341,7 +341,7 @@
                       <div style="width: 100%">
                         <img
                           style="position: absolute; bottom: 0px"
-                          src="./b2bJoinSessionReminder/girl.png"
+                          src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/girl.png"
                         />
                       </div>
 
@@ -358,7 +358,7 @@
                                   opacity: 1;
                                 "
                               >
-                                In this session we will learn <%= topic %>
+                                In this session we will learn <%= topicTitle %>
                               </p>
                             </td>
                           </tr>
@@ -384,7 +384,7 @@
                           <tr>
                             <td>
                               <a
-                                href="<%= sessionLink %>"
+                                href="<%= loginUrl %>"
                                 style="
                                   display: inline-block;
                                   min-width: 150px;
@@ -434,7 +434,7 @@
                     <div style="position: relative">
                       <img
                         style="position: absolute; top: 50px; left: 0px"
-                        src="./b2bJoinSessionReminder/bg.png"
+                        src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/bg.png"
                         alt=""
                       />
                       <h3
@@ -453,7 +453,7 @@
                       </h3>
                       <img
                         style="position: absolute; top: -100px; right: 0px"
-                        src="./b2bJoinSessionReminder/bg.png"
+                        src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/bg.png"
                         alt=""
                       />
                     </div>
@@ -473,7 +473,7 @@
                       <div style="width: 21%">
                         <div style="height: 70px">
                           <img
-                            src="./b2bJoinSessionReminder/icon3.png"
+                            src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/icon3.png"
                             alt=""
                           />
                         </div>
@@ -496,7 +496,7 @@
                       <div style="width: 21%">
                         <div style="height: 70px">
                           <img
-                            src="./b2bJoinSessionReminder/icon1.png"
+                            src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/icon1.png"
                             alt=""
                           />
                         </div>
@@ -518,7 +518,7 @@
                       <div style="width: 21%">
                         <div style="height: 70px">
                           <img
-                            src="./b2bJoinSessionReminder/icon2.png"
+                            src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/icon2.png"
                             alt=""
                           />
                         </div>
@@ -592,7 +592,7 @@
                       <div style="width: 21%">
                         <div style="height: 70px">
                           <img
-                            src="./b2bJoinSessionReminder/icon4.png"
+                            src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/icon4.png"
                             alt=""
                           />
                         </div>
@@ -614,7 +614,7 @@
                       <div style="width: 21%">
                         <div style="height: 70px">
                           <img
-                            src="./b2bJoinSessionReminder/icon6.png"
+                            src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/icon6.png"
                             alt=""
                           />
                         </div>
@@ -636,7 +636,7 @@
                       <div style="width: 21%">
                         <div style="height: 70px">
                           <img
-                            src="./b2bJoinSessionReminder/icon5.png"
+                            src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/icon5.png"
                             alt=""
                           />
                         </div>
@@ -789,7 +789,7 @@
                 <tr>
                   <td style="text-align: center">
                     <a
-                      href="<%= whatsappLink %>"
+                      href="http://tekie.app.link/sgnArKNfwdb"
                       style="
                         display: inline-block;
                         text-decoration: none;
@@ -815,7 +815,7 @@
                         "
                       >
                         <img
-                          src="./b2bJoinSessionReminder/whatsapp.png"
+                          src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/whatsapp.png"
                           alt=""
                           style="vertical-align: text-top; margin-right: 5px"
                         />
@@ -828,7 +828,7 @@
                 <tr>
                   <td style="text-align: center">
                     <div
-                      href="<%= contactLink %>"
+                      href="tel: 8827706789"
                       style="
                         display: inline-block;
                         text-decoration: none;
@@ -854,8 +854,8 @@
                         "
                       >
                         <img
-                          src="./b2bJoinSessionReminder/phone.png"
-                          alt=""
+                          src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/phone.png"
+                          alt="phone"
                           style="vertical-align: middle"
                         />
                         <span
@@ -875,23 +875,23 @@
                     <div
                       style="width: fit-content; margin: auto; margin-top: 10px"
                     >
-                      <a href="<%= facebookLink %>" style="margin: 0 10px"
+                      <a href="https://www.facebook.com/TekieApp/" style="margin: 0 10px"
                         ><img
-                          src="./b2bJoinSessionReminder/facebook.png"
+                          src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/facebook.png"
                           alt=""
                       /></a>
-                      <a href="<%= instagramLink %>" style="margin: 0 10px"
+                      <a href="https://www.instagram.com/tekieapp/" style="margin: 0 10px"
                         ><img
-                          src="./b2bJoinSessionReminder/instagram.png"
+                          src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/instagram.png"
                           alt=""
                       /></a>
-                      <a href="<%= linkedinLink %>" style="margin: 0 10px"
+                      <a href="https://www.linkedin.com/company/tekie" style="margin: 0 10px"
                         ><img
-                          src="./b2bJoinSessionReminder/linkedin.png"
+                          src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/linkedin.png"
                           alt=""
                       /></a>
-                      <a href="<%= youtubeLink %>" style="margin: 0 10px"
-                        ><img src="./b2bJoinSessionReminder/youtube.png" alt=""
+                      <a href="https://www.youtube.com/channel/UCCr7GPlTdZRXFEfveeuKcbg" style="margin: 0 10px"
+                        ><img src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/youtube.png" alt=""
                       /></a>
                     </div>
                   </td>
@@ -906,7 +906,7 @@
                       "
                     >
                       <a
-                        href="<%= tcLink %>"
+                        href="https://www.tekie.in/terms"
                         style="
                           color: #504f4f;
                           opacity: 0.8;
@@ -922,7 +922,7 @@
                       </a>
                       |
                       <a
-                        href="<%= tekieLink %>"
+                        href="https://www.tekie.in/"
                         style="
                           color: #504f4f;
                           opacity: 0.8;
@@ -938,7 +938,7 @@
                       </a>
                       |
                       <a
-                        href="<%= unsubscribeLink %>"
+                        href="https://tekie.in/Unsubscribe"
                         style="
                           color: #504f4f;
                           opacity: 0.8;

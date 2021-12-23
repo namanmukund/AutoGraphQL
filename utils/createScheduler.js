@@ -1,5 +1,6 @@
 import * as schedule from 'node-schedule';
 import scheduleTrialSessionReminder from './scheduleJobs/scheduleTrialSessionReminder';
+import scheduleB2BSessionReminder from './scheduleJobs/scheduleB2BSessionReminder';
 import scheduleMentorReport from './scheduleJobs/scheduleMentorReport';
 import scheduleSessionReport from './scheduleJobs/scheduleSessionReport';
 import scheduleSessionCourseReport from './scheduleJobs/scheduleCourseReport';
@@ -16,6 +17,17 @@ const createScheduler = (schedulerName) => {
         // eslint-disable-next-line no-console
         console.log('scheduler started for: ', schedulerName);
         await scheduleTrialSessionReminder();
+      });
+      break;
+    case 'b2bSessionReminder':
+      rule.tz = 'Asia/Kolkata';
+      rule.hour = 1;
+      rule.minute = 30;
+      // eslint-disable-next-line no-unused-vars
+      schedule.scheduleJob(rule, async () => {
+        // eslint-disable-next-line no-console
+        console.log('scheduler started for: ', schedulerName);
+        await scheduleB2BSessionReminder();
       });
       break;
     case 'mentorReport':
