@@ -2,12 +2,14 @@
 /* eslint-disable no-tabs */
 /* eslint-disable no-unused-vars */
 import { get } from 'lodash';
+import fetch from 'node-fetch';
 import coreAuthParams from '../../../../../../config/authParams';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 import getTokenForLoginLink from '../../utils/getTokenForLoginLink';
 import { TMS, byPassMenteeValidationApps, TBA } from '../../../../../../constants';
+import { log } from '../../../../../../utils';
 
 const fetchUserDetails = async (queryFilter) => {
   const query = `{
@@ -21,6 +23,11 @@ const fetchUserDetails = async (queryFilter) => {
       id
       name
       code
+    }
+    parents {
+      user {
+        email
+      }
     }
     user {
       id
@@ -36,9 +43,25 @@ const fetchUserDetails = async (queryFilter) => {
 
 const generateAndReturnToken = (user, addMagicLinkLogQuery = '', index, {
   appName, grade, section, userIdFromContext, schoolId, expiresIn, linkVisitLimit, isLeadLogin,
+  parents, school,
 }) => {
   const linkToken = getTokenForLoginLink(user, new Date(), expiresIn);
-  const linkUri = `login?authToken=${linkToken}`;
+  let linkUri = `?authToken=${linkToken}`;
+  if (!byPassMenteeValidationApps.includes(appName)) {
+    if (parents.length && get(parents, '[0].user.email')) {
+      if (get(school, 'code')) {
+        fetch(`https://${get(school, 'code')}.tekie.in`).then((res) => {
+          if (get(res, 'status') === 200) {
+            linkUri = `https://${get(school, 'code')}.tekie.in/${linkToken}`;
+          }
+        }).catch((err) => log('something went wrong'));
+      } else {
+        linkUri = `https://${process.env.TEKIE_WEB_URL}/login${linkUri}`;
+      }
+    }
+  } else if (byPassMenteeValidationApps.includes(appName) && isLeadLogin) {
+    linkUri = `login${linkUri}&isLeadLogin=${isLeadLogin}`;
+  }
   addMagicLinkLogQuery = `addMagicLinkLog${index}: addMagicLinkLog(
     input: {
       expiresIn: ${expiresIn}
@@ -117,22 +140,32 @@ const getMagicLink = (async (root, params, context) => {
     const studentDetails = await fetchUserDetails(fetchQueryFilter);
     if (studentDetails.length > 0) {
       studentDetails.forEach((student, index) => {
-        const { user } = student;
+        const { user, parents = [], school } = student;
         const {
           expiresIn: expiryValue, linkToken, linkUri, addMagicLinkLogQuery: addLogQuery,
         } = generateAndReturnToken(user, '', index, {
-          appName, grade, section, userIdFromContext, schoolId, expiresIn: expiresInValue, linkVisitLimit, isLeadLogin,
+          appName,
+          grade,
+          section,
+          userIdFromContext,
+          schoolId,
+          expiresIn: expiresInValue,
+          linkVisitLimit,
+          isLeadLogin,
+          parents,
+          school,
         });
-        let loginLink = linkUri;
         if (!byPassMenteeValidationApps.includes(appName)) {
-          // here will send comms
-        } else if (byPassMenteeValidationApps.includes(appName) && isLeadLogin) {
-          loginLink = `${linkUri}&isLeadLogin=${isLeadLogin}`;
+          if (parents.length && get(parents, '[0].user.email')) {
+            if (linkUri) {
+              console.log(linkUri);
+            }
+          }
         }
         tokens.push({
           linkToken,
           expiresIn: expiryValue,
-          linkUri: loginLink,
+          linkUri,
         });
         addMagicLinkLogQuery += addLogQuery;
       });
