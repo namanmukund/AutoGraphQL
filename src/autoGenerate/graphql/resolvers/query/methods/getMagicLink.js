@@ -3,13 +3,32 @@
 /* eslint-disable no-unused-vars */
 import { get } from 'lodash';
 import fetch from 'node-fetch';
+import moment from 'moment';
 import coreAuthParams from '../../../../../../config/authParams';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 import getTokenForLoginLink from '../../utils/getTokenForLoginLink';
-import { TMS, byPassMenteeValidationApps, TBA } from '../../../../../../constants';
+import {
+  TMS, byPassMenteeValidationApps, TBA, newTekieWebLinks,
+} from '../../../../../../constants';
 import { log } from '../../../../../../utils';
+import sendMagicLinkToUser from '../../../../../email/messages/sendMagicLinkToUser';
+
+const getLoginLinkUri = (linkUri, code) => {
+  if (process.env.NODE_ENV === 'production') {
+    if (code) {
+      linkUri = `https://${code}.tekie.in/${linkUri}`;
+    } else {
+      linkUri = `${process.env.TEKIE_WEB_URL}/login${linkUri}`;
+    }
+  } else if (process.env.DATA_MASKING) {
+    linkUri = `${newTekieWebLinks.preProd}/login${linkUri}`;
+  } else {
+    linkUri = `${newTekieWebLinks.staging}/login${linkUri}`;
+  }
+  return linkUri;
+};
 
 const fetchUserDetails = async (queryFilter) => {
   const query = `{
@@ -23,10 +42,22 @@ const fetchUserDetails = async (queryFilter) => {
       id
       name
       code
+      schoolCampaignCode
+    }
+    batch {
+      course {
+        id
+        title
+      }
     }
     parents {
       user {
+        phone{
+          number
+          countryCode
+        }
         email
+        savedPassword
       }
     }
     user {
@@ -41,7 +72,47 @@ const fetchUserDetails = async (queryFilter) => {
   return get(result, 'data.studentProfiles', []);
 };
 
-const generateAndReturnToken = (user, addMagicLinkLogQuery = '', index, {
+const updateMagicLinkLog = async (magicLogId, visitedCount) => {
+  const updateQuery = `mutation {
+  updateMagicLinkLog(id: "${magicLogId}", input: { ${visitedCount ? `visitedCount: ${visitedCount}` : ''} }) {
+    id
+  }
+}`;
+  const updateData = await callLocalGraphqlApi(updateQuery);
+  return get(updateData, 'data.updateMagicLinkLog');
+};
+
+const getMagicLinkLogs = async (userId) => {
+  const query = `{
+  magicLinkLogs(
+    filter: {
+      and: [
+        { user_some: { id: "${userId}" } }
+        { createdAt_gte: "${moment().startOf('day').toISOString()}" }
+        { createdAt_lte: "${moment().endOf('day').toISOString()}" }
+      ]
+    }
+  ) {
+    id
+    linkVisitLimit
+    visitedCount
+  }
+}
+`;
+  const result = await callLocalGraphqlApi(query);
+  if (get(result, 'data.magicLinkLogs', []).length > 0) {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const linkLog of get(result, 'data.magicLinkLogs', [])) {
+      const { linkVisitLimit, visitedCount } = linkLog;
+      if (visitedCount < linkVisitLimit) {
+        // eslint-disable-next-line no-await-in-loop
+        await updateMagicLinkLog(get(linkLog, 'id'), linkVisitLimit);
+      }
+    }
+  }
+};
+
+const generateAndReturnToken = async (user, addMagicLinkLogQuery = '', index, {
   appName, grade, section, userIdFromContext, schoolId, expiresIn, linkVisitLimit, isLeadLogin,
   parents, school,
 }) => {
@@ -49,14 +120,23 @@ const generateAndReturnToken = (user, addMagicLinkLogQuery = '', index, {
   let linkUri = `?authToken=${linkToken}`;
   if (!byPassMenteeValidationApps.includes(appName)) {
     if (parents.length && get(parents, '[0].user.email')) {
-      if (get(school, 'code')) {
-        fetch(`https://${get(school, 'code')}.tekie.in`).then((res) => {
-          if (get(res, 'status') === 200) {
-            linkUri = `https://${get(school, 'code')}.tekie.in/${linkToken}`;
+      if (get(school, 'id') && get(school, 'code')) {
+        // if user is of school will send link with school domain
+        try {
+          const resp = await fetch(`https://${get(school, 'code')}.tekie.in`);
+          if (get(resp, 'status') === 200) {
+            linkUri = getLoginLinkUri(linkUri, get(school, 'code'));
+          } else {
+            linkUri = getLoginLinkUri(linkUri);
           }
-        }).catch((err) => log('something went wrong'));
+        } catch (error) {
+          // if school domain doesn`t exist will send link with the tekie.in domain
+          linkUri = getLoginLinkUri(linkUri);
+          log('something went wrong');
+        }
       } else {
-        linkUri = `https://${process.env.TEKIE_WEB_URL}/login${linkUri}`;
+        // if user doesn`t belong to school, will send link with tekie.in
+        linkUri = getLoginLinkUri(linkUri);
       }
     }
   } else if (byPassMenteeValidationApps.includes(appName) && isLeadLogin) {
@@ -139,36 +219,63 @@ const getMagicLink = (async (root, params, context) => {
     let addMagicLinkLogQuery = '';
     const studentDetails = await fetchUserDetails(fetchQueryFilter);
     if (studentDetails.length > 0) {
-      studentDetails.forEach((student, index) => {
-        const { user, parents = [], school } = student;
-        const {
-          expiresIn: expiryValue, linkToken, linkUri, addMagicLinkLogQuery: addLogQuery,
-        } = generateAndReturnToken(user, '', index, {
-          appName,
-          grade,
-          section,
-          userIdFromContext,
-          schoolId,
-          expiresIn: expiresInValue,
-          linkVisitLimit,
-          isLeadLogin,
-          parents,
-          school,
-        });
-        if (!byPassMenteeValidationApps.includes(appName)) {
-          if (parents.length && get(parents, '[0].user.email')) {
-            if (linkUri) {
-              console.log(linkUri);
+      let index = 0;
+      // eslint-disable-next-line no-restricted-syntax
+      for (const studentDetail of studentDetails) {
+        if (studentDetail) {
+          const { user, parents = [], school } = studentDetail;
+          const {
+            expiresIn: expiryValue, linkToken, linkUri, addMagicLinkLogQuery: addLogQuery,
+          // eslint-disable-next-line no-await-in-loop
+          } = await generateAndReturnToken(user, '', index, {
+            appName,
+            grade,
+            section,
+            userIdFromContext,
+            schoolId,
+            expiresIn: expiresInValue,
+            linkVisitLimit,
+            isLeadLogin,
+            parents,
+            school,
+          });
+          if (!byPassMenteeValidationApps.includes(appName)) {
+            if (parents.length && get(parents, '[0].user.email')) {
+              if (linkUri) {
+                getMagicLinkLogs(get(user, 'id'));
+                let schoolCampaignCode = '';
+                if (get(school, 'schoolCampaignCode')) {
+                  if (process.env.NODE_ENV === 'production') {
+                    schoolCampaignCode = `${process.env.TEKIE_WEB_URL}/login?schoolCode=${get(school, 'schoolCampaignCode')}`;
+                  } else if (process.env.DATA_MASKING) {
+                    schoolCampaignCode = `${newTekieWebLinks.preProd}/login?schoolCode=${get(school, 'schoolCampaignCode')}`;
+                  } else {
+                    schoolCampaignCode = `${newTekieWebLinks.staging}/login?schoolCode=${get(school, 'schoolCampaignCode')}`;
+                  }
+                }
+                const emailMessageObj = {
+                  loginLink: linkUri,
+                  studentName: get(user, 'name'),
+                  schoolName: get(school, 'name'),
+                  phone: get(parents, '[0].user.phone.number') ? `${get(parents, '[0].user.phone.countryCode')}${get(parents, '[0].user.phone.number')}` : '',
+                  email: get(parents, '[0].user.email') || '',
+                  password: get(parents, '[0].user.savedPassword') || '',
+                  getStartedLink: schoolCampaignCode,
+                  tekieIntoToCodingCourse: '',
+                };
+                sendMagicLinkToUser(get(parents, '[0].user.email'), emailMessageObj);
+              }
             }
           }
+          tokens.push({
+            linkToken,
+            expiresIn: expiryValue,
+            linkUri,
+          });
+          addMagicLinkLogQuery += addLogQuery;
+          index += 1;
         }
-        tokens.push({
-          linkToken,
-          expiresIn: expiryValue,
-          linkUri,
-        });
-        addMagicLinkLogQuery += addLogQuery;
-      });
+      }
       if (addMagicLinkLogQuery) {
         callLocalGraphqlApi(`mutation{ ${addMagicLinkLogQuery} }`);
       }
