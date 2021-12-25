@@ -114,7 +114,7 @@ const getMagicLinkLogs = async (userId) => {
 
 const generateAndReturnToken = async (user, addMagicLinkLogQuery = '', index, {
   appName, grade, section, userIdFromContext, schoolId, expiresIn, linkVisitLimit, isLeadLogin,
-  parents, school,
+  parents, school, isDownloadExcel,
 }) => {
   const linkToken = getTokenForLoginLink(user, new Date(), expiresIn);
   let linkUri = `?authToken=${linkToken}`;
@@ -151,6 +151,7 @@ const generateAndReturnToken = async (user, addMagicLinkLogQuery = '', index, {
       linkUri: "${linkUri}"
       linkGeneratedFrom: ${appName}
       linkVisitLimit: ${linkVisitLimit}
+      ${isDownloadExcel ? 'isDownloadExcel:true' : ''}
       ${grade ? `grade: ${grade}` : ''}
       ${section ? `section:${section}` : ''}
       ${isLeadLogin ? 'isLeadLogin: true' : ''}
@@ -174,7 +175,7 @@ const getMagicLink = (async (root, params, context) => {
   const {
     input: {
       schoolId, grade, section, userId, email, phone, expiresIn,
-      linkVisitLimit = 2, isLeadLogin = false,
+      linkVisitLimit = 2, isLeadLogin = false, isDownloadExcel = false,
     },
   } = params;
   // getting input from params
@@ -223,7 +224,9 @@ const getMagicLink = (async (root, params, context) => {
       // eslint-disable-next-line no-restricted-syntax
       for (const studentDetail of studentDetails) {
         if (studentDetail) {
-          const { user, parents = [], school } = studentDetail;
+          const {
+            user, parents = [], school, batch,
+          } = studentDetail;
           const {
             expiresIn: expiryValue, linkToken, linkUri, addMagicLinkLogQuery: addLogQuery,
           // eslint-disable-next-line no-await-in-loop
@@ -238,40 +241,50 @@ const getMagicLink = (async (root, params, context) => {
             isLeadLogin,
             parents,
             school,
+            isDownloadExcel,
           });
           if (!byPassMenteeValidationApps.includes(appName)) {
-            if (parents.length && get(parents, '[0].user.email')) {
+            getMagicLinkLogs(get(user, 'id'));
+            if (!isDownloadExcel) {
               if (linkUri) {
-                getMagicLinkLogs(get(user, 'id'));
-                let schoolCampaignCode = '';
-                if (get(school, 'schoolCampaignCode')) {
-                  if (process.env.NODE_ENV === 'production') {
-                    schoolCampaignCode = `${process.env.TEKIE_WEB_URL}/login?schoolCode=${get(school, 'schoolCampaignCode')}`;
-                  } else if (process.env.DATA_MASKING) {
-                    schoolCampaignCode = `${newTekieWebLinks.preProd}/login?schoolCode=${get(school, 'schoolCampaignCode')}`;
-                  } else {
-                    schoolCampaignCode = `${newTekieWebLinks.staging}/login?schoolCode=${get(school, 'schoolCampaignCode')}`;
+                if (parents.length && get(parents, '[0].user.email')) {
+                  let schoolCampaignCode = '';
+                  if (get(school, 'schoolCampaignCode')) {
+                    if (process.env.NODE_ENV === 'production') {
+                      schoolCampaignCode = `${process.env.TEKIE_WEB_URL}/login?schoolCode=${get(school, 'schoolCampaignCode')}`;
+                    } else if (process.env.DATA_MASKING) {
+                      schoolCampaignCode = `${newTekieWebLinks.preProd}/login?schoolCode=${get(school, 'schoolCampaignCode')}`;
+                    } else {
+                      schoolCampaignCode = `${newTekieWebLinks.staging}/login?schoolCode=${get(school, 'schoolCampaignCode')}`;
+                    }
                   }
+                  const emailMessageObj = {
+                    loginLink: linkUri,
+                    studentName: get(user, 'name'),
+                    schoolName: get(school, 'name'),
+                    phone: get(parents, '[0].user.phone.number') ? `${get(parents, '[0].user.phone.countryCode')}${get(parents, '[0].user.phone.number')}` : '',
+                    email: get(parents, '[0].user.email') || '',
+                    password: get(parents, '[0].user.savedPassword') || '',
+                    getStartedLink: schoolCampaignCode,
+                    tekieIntoToCodingCourse: get(batch, 'course.title'),
+                  };
+                  sendMagicLinkToUser(get(parents, '[0].user.email'), emailMessageObj);
                 }
-                const emailMessageObj = {
-                  loginLink: linkUri,
-                  studentName: get(user, 'name'),
-                  schoolName: get(school, 'name'),
-                  phone: get(parents, '[0].user.phone.number') ? `${get(parents, '[0].user.phone.countryCode')}${get(parents, '[0].user.phone.number')}` : '',
-                  email: get(parents, '[0].user.email') || '',
-                  password: get(parents, '[0].user.savedPassword') || '',
-                  getStartedLink: schoolCampaignCode,
-                  tekieIntoToCodingCourse: '',
-                };
-                sendMagicLinkToUser(get(parents, '[0].user.email'), emailMessageObj);
               }
             }
           }
-          tokens.push({
+          const tokenObj = {
             linkToken,
             expiresIn: expiryValue,
             linkUri,
-          });
+          };
+          if (get(user, 'id')) {
+            tokenObj.user = { type: 'User', typeId: `${get(user, 'id')}` };
+          }
+          if (get(school, 'id')) {
+            tokenObj.school = { type: 'School', typeId: `${get(school, 'id')}` };
+          }
+          tokens.push(tokenObj);
           addMagicLinkLogQuery += addLogQuery;
           index += 1;
         }
