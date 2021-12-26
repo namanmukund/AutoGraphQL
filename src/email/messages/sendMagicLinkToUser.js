@@ -13,9 +13,6 @@ const sendMagicLinkToUser = (emailTo, sendEmailObject) => {
       'shubham.gupta@tekie.in',
     ];
   }
-  emailTo = [
-    'pawan.kv612@gmail.com',
-  ];
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';
