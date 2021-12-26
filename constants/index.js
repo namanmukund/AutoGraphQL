@@ -510,6 +510,11 @@ const ALLOWED_ROLE_FOR_MANUAL_SESSIONS = [ADMIN, UMS_ADMIN, SUPPLY_DEMAND_ADMIN]
 
 const TIME_DIFF_FOR_MANUAL_SESSION = -1;
 
+const newTekieWebLinks = {
+  staging: 'https://tekie-web-staging-28b1816977c254e7.onporter.run',
+  preProd: 'https://tekie-web-pre-prod-dd811f1acf374a8c.onporter.run',
+};
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -595,4 +600,5 @@ export {
   BLOCKED,
   ALLOWED_ROLE_FOR_MANUAL_SESSIONS,
   TIME_DIFF_FOR_MANUAL_SESSION,
+  newTekieWebLinks,
 };
