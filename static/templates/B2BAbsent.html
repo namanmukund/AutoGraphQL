@@ -272,7 +272,7 @@
                     style="
                       height: 117px;
                       width: 100%;
-                      background: url('./b2bJoinSessionReminder/header.png');
+                      background: url('https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/header.png');
                       background-size: cover;
                       background-position: center center;
                       box-sizing: border-box;
@@ -283,7 +283,7 @@
                 <tr>
                   <td>
                     <div style="text-align: center">
-                      <img src="./assets/absentImg.png" alt="" />
+                      <img src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/absentImg.png" alt="" />
                     </div>
                   </td>
                 </tr>
@@ -302,7 +302,7 @@
                         width: 90%;
                         padding: 0 45px;
                         margin: auto;
-                        background-image: url('./b2bJoinSessionReminder/bg.png');
+                        background-image: url('https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/bg.png');
                         background-repeat: no-repeat;
                         background-size: 40px;
                         background-position: right 0px;
@@ -320,7 +320,7 @@
                         >
                         missed their coding class with Tekie scheduled on
                         <span style="font-weight: bolder"
-                          ><%= date, time %></span
+                          ><%= date, startTime %></span
                         >
                       </div>
                       <div style="margin: 25px 0">
@@ -329,7 +329,7 @@
                       </div>
                       <div style="margin: 25px 0">
                         The topic we covered in the session was
-                        <span style="font-weight: bolder"><%= topicName %></span
+                        <span style="font-weight: bolder"><%= topicTitle %></span
                         >.
                       </div>
                       <div style="margin: 25px 0">
@@ -361,7 +361,7 @@
                             align-self: center;
                           "
                         >
-                          <img src="./assets/attachment.png" alt="" />
+                          <img src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/attachment.png" alt="" />
                         </span>
                       </div>
                       <div>Click here to access the lesson:</div>
@@ -417,7 +417,7 @@
                     >
                       You can also write to us about your concerns on
                       <a
-                        href="mailto:mentorsupport@tekie.in"
+                        href="mailto:hello@tekie.in"
                         style="
                           color: #04c3ff;
                           text-decoration: underline;
@@ -429,7 +429,7 @@
                           opacity: 1;
                           font-size: 17.2px;
                         "
-                        >mentorsupport@tekie.in
+                        >hello@tekie.in
                       </a>
                     </span>
                   </td>

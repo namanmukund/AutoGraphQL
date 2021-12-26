@@ -41,6 +41,22 @@ const transactionalMessageBody = {
     whatsAppTemplate: 'demo_reminder_1',
     whatsAppTemplateInternational: 'demo_reminder_1',
   },
+  sendAbsentLinkB2B: {
+    emailTemplate: 'B2BAbsent',
+    emailTemplateInternational: 'B2BAbsent',
+    subject: 'Tekie - Oh no! You missed your coding session!',
+    subjectInternational: 'Tekie - Oh no! You missed your coding session!',
+    whatsAppTemplate: 'demo_reminder_1',
+    whatsAppTemplateInternational: 'demo_reminder_1',
+  },
+  sendHomeWorkLinkB2B: {
+    emailTemplate: 'B2BHomework',
+    emailTemplateInternational: 'B2BHomework',
+    subject: 'Tekie - Oh no! You missed your homework!',
+    subjectInternational: 'Tekie - Oh no! You missed your homework!',
+    whatsAppTemplate: 'demo_reminder_1',
+    whatsAppTemplateInternational: 'demo_reminder_1',
+  },
   didNotPickTheCall: {
     emailTemplate: 'didNotPickTheCall',
     subject: 'Tekie - We tried calling you',

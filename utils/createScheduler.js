@@ -1,9 +1,11 @@
 import * as schedule from 'node-schedule';
 import scheduleTrialSessionReminder from './scheduleJobs/scheduleTrialSessionReminder';
-import scheduleB2BSessionReminder from './scheduleJobs/scheduleB2BSessionReminder';
 import scheduleMentorReport from './scheduleJobs/scheduleMentorReport';
 import scheduleSessionReport from './scheduleJobs/scheduleSessionReport';
 import scheduleSessionCourseReport from './scheduleJobs/scheduleCourseReport';
+import scheduleB2BSessionReminder from './scheduleJobs/scheduleB2BSessionReminder';
+import scheduleB2BHomeworkMissed from './scheduleJobs/scheduleB2BHomeworkMissed';
+import scheduleB2BSessionMissed from './scheduleJobs/scheduleB2BSessionMissed';
 
 // create scheduler for different functionalities
 const createScheduler = (schedulerName) => {
@@ -20,14 +22,30 @@ const createScheduler = (schedulerName) => {
       });
       break;
     case 'b2bSessionReminder':
-      rule.tz = 'Asia/Kolkata';
-      rule.hour = 1;
-      rule.minute = 30;
+      rule.minute = 20;
       // eslint-disable-next-line no-unused-vars
       schedule.scheduleJob(rule, async () => {
         // eslint-disable-next-line no-console
         console.log('scheduler started for: ', schedulerName);
         await scheduleB2BSessionReminder();
+      });
+      break;
+    case 'b2bHomeworkMissed':
+      rule.minute = 40;
+      // eslint-disable-next-line no-unused-vars
+      schedule.scheduleJob(rule, async () => {
+        // eslint-disable-next-line no-console
+        console.log('scheduler started for: ', schedulerName);
+        await scheduleB2BHomeworkMissed();
+      });
+      break;
+    case 'b2bSessionMissed':
+      rule.minute = 50;
+      // eslint-disable-next-line no-unused-vars
+      schedule.scheduleJob(rule, async () => {
+        // eslint-disable-next-line no-console
+        console.log('scheduler started for: ', schedulerName);
+        await scheduleB2BSessionMissed();
       });
       break;
     case 'mentorReport':
