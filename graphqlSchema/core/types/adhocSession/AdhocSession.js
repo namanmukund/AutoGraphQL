@@ -1,6 +1,8 @@
 import { TLA, TMS, TWA } from '../../../../constants';
 import { READ } from '../../../../constants/graphqlOperations';
-import { MENTOR, SCHOOL_ADMIN, UMS_HEAD } from '../../../../constants/roles';
+import {
+  MENTOR, SALES_EXECUTIVE, SCHOOL_ADMIN, SENSEI, UMS_HEAD,
+} from '../../../../constants/roles';
 import getSlotTimeFields from '../../functions/getSlotTimeFields';
 
 const slotTimeFields = getSlotTimeFields('Boolean', false);
@@ -20,6 +22,8 @@ const AdhocSession = `
     { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
     { userRole: ${MENTOR} appName: "*" operations: ${READ} },
     { userRole: ${SCHOOL_ADMIN} appName: "*" operations: "*" },
+    { userRole: ${SALES_EXECUTIVE} appName: "*" operations: "*" },
+    { userRole: ${SENSEI} appName: "*" operations: "*" },
     ],
   rule: allow
   )

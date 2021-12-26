@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import uploadUsersToMailModo from '../scriptMethods/uploadUsersToMailModo';
 // import updateNetPromoterScoresWithCourseAndMmSession from '../scriptMethods/updateNetPromoterScoresWithCourseAndMmSession';
 // import updateQuestionBankOfPythonCourseWithCorrectPostion from '../scriptMethods/updateQuestionBankOfPythonCourseWithCorrectPostion';
 // import createUserCurrentTopicComponentStatusScript from '../scriptMethods/createUserCurrentTopicComponentStatusScript';
@@ -29,6 +30,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import getIqaReportSnapshotUrl from '../../mutation/pdf/uploadCertificates/iqaReport';
 // import getPostDemoSalesReportUrl from '../../mutation/pdf/uploadCertificates/postDemoSalesReport';
 // import scheduleSessionCourseReport from '../../../../../../utils/scheduleJobs/scheduleCourseReport';
+// import addOrUpdateUsersInBulk from '../scriptMethods/addOrUpdateUsersInBulk';
 // import updateLeadAnalyticsForPastLeads from '../scriptMethods/updateLeadAnalyticsForPastLeads';
 
 const temporaryScript = (async (root, params, context) => {
@@ -36,6 +38,7 @@ const temporaryScript = (async (root, params, context) => {
   /*
   Add script functions
    */
+  // await uploadUsersToMailModo();
   // await scheduleSessionCourseReport(1);
   // await updateCourseInVideos();
   // await updateCourseInSalesOperationScript();
@@ -82,6 +85,7 @@ const temporaryScript = (async (root, params, context) => {
   // await getIqaReportSnapshotUrl('ckgsshcir00000vqgdftbf2f4', 'Gokul');
   // await getPostDemoSalesReportUrl('ckgsshcir00000vqgdftbf2f4');
   // await updateNetPromoterScoresWithCourseAndMmSession();
+  // await addOrUpdateUsersInBulk();
   // await updateLeadAnalyticsForPastLeads();
   return {
     result: true,

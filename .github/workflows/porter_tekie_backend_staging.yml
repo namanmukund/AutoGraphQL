@@ -17,9 +17,9 @@ jobs:
       uses: porter-dev/porter-update-action@v0.1.0
       with:
         app: tekie-backend-staging
-        cluster: "1420"
+        cluster: "1421"
         host: https://dashboard.getporter.dev
         namespace: default
-        project: "2685"
+        project: "2696"
         tag: ${{ steps.vars.outputs.sha_short }}
-        token: ${{ secrets.PORTER_TOKEN_2685 }}
+        token: ${{ secrets.PORTER_TOKEN_2696 }}
