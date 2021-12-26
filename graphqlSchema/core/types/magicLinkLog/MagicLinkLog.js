@@ -14,6 +14,7 @@ const MagicLinkLog = `
     firstLinkVisitedDate: Date
     linkVisitLimit: Int
     isLeadLogin: Boolean @defaultValue(value: "false")
+    isDownloadExcel: Boolean @defaultValue(value: "false")
 }`;
 
 export default MagicLinkLog;
