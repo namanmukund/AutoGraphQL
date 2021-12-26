@@ -5,6 +5,7 @@ const EventSession = `
         sessionLink: String
         meetingId: String
         meetingPassword: String
+        attendance: [StudentProfile] @relation(name:"EventAttendanceStudentProfile")
     }
 `;
 

@@ -19,11 +19,14 @@ const EventTimeTableRule = `
    endDate: Date
    ${weekDaysFields}
  }`;
-const EventPrize = `
-  type EventPrize {
-   startDate: Date
-   endDate: Date
-   ${weekDaysFields}
+
+const UTM = `
+  type UTM {
+    utmSource: String
+    utmCampaign: String
+    utmContent: String
+    utmMedium: String
+    utmTerm: String
  }`;
 
 const Event = `
@@ -31,8 +34,10 @@ const Event = `
   {
     eventType: EventType @defaultValue(value: "radioStreet")
     eventName: EventName @defaultValue(value: "spySquadCamp")
+    geoLocation: String
     name: String @trim
-    speakers: [EventSpeaker] @relation(name:"EventEventSpeaker")
+    category: EventCategory @relation(name: "EventCategoryEvent")
+    speakers: [EventSpeaker] @relation(name: "EventSpeakerEvent")
     date: Date
     time: Int
     eventAttendances: [EventAttendance] @relation(name:"EventAttendanceEvent")
@@ -45,18 +50,16 @@ const Event = `
     timeZone: Date
     summary: String
     overview: String
-    utmSource: String
-    utmCampaign: String
-    utmContent: String
-    utmMedium: String
-    utmTerm: String
-    webUtl: String
+    utm: [UTM]
+    webUrl: String
     isListedOnWeb: Boolean
     status: ContentStatus
     embeds: [EventCertificateEmbed]
     timeTableRule: EventTimeTableRules
-    prizes: [EventPrize]
+    prizes: EventPrize @relation(name: "EventPrizeEvent")
+    tags: [ContentTag] @relation(name: "ContentTagEvent")
+    registeredUsers: [StudentProfile] @relation(name:"EventAttendanceStudentProfile")
   }
 `;
 
-export default [Event, EventAttendance, EventCertificateEmbed, EventTimeTableRule, EventPrize];
+export default [Event, EventAttendance, EventCertificateEmbed, EventTimeTableRule, UTM];
