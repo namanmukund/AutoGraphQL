@@ -64,7 +64,7 @@ const getMentorMenteeSession = async (menteeSessionId) => {
   const res = await callLocalGraphqlApi(query);
   return get(res, 'data.mentorMenteeSessions[0]');
 };
-const scheduleB2BSessionReminder = async () => {
+const scheduleB2BSessionMissed = async () => {
   // eslint-disable-next-line no-console
   const dt = new Date().setHours(0, 0, 0, 0);
   const parsedDate = new Date(dt).toISOString();
@@ -279,4 +279,4 @@ const scheduleB2BSessionReminder = async () => {
   }
 };
 
-export default scheduleB2BSessionReminder;
+export default scheduleB2BSessionMissed;
