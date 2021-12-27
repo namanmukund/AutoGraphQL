@@ -16,6 +16,7 @@ const NetPromoterScore = `
     user: User! @relation(name: "NetPromoterScoreUser", direction: "OneWay")
     course: Course @relation(name: "NetPromoterScoreCourse", direction: "OneWay")
     mentorMenteeSession: MentorMenteeSession @relation(name: "NetPromoterScoreMentorMenteeSession", direction: "OneWay")
+    batchSession: BatchSession @relation(name: "NetPromoterScoreBatchSession", direction: "OneWay")
   }
 `;
 

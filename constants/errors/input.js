@@ -208,6 +208,10 @@ export const CanNotDeleteCompletedSessionError = createError('CanNotDeleteComple
   message: 'Can not delete a completed session',
 });
 
+export const EitherPhoneOrEmailIsMandatory = createError('EitherPhoneOrEmailIsMandatory', {
+  message: 'Either Phone or Email is mandatory',
+});
+
 export const GradeFieldRequiredError = createError('GradeFieldRequiredError', {
   message: 'Grade field is mandatory in input',
 });

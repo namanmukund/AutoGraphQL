@@ -393,17 +393,17 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         const toSlot = `slot${inputSlotTimeArray[0]}`;
         // adding only in case the slots or date passed in input is different from that is already there in db
         if ((fromDate !== toDate) || (fromSlot !== toSlot)) {
-          addSessionLog(bookingDateFromInput || bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
+          addSessionLog(bookingDateFromInput || bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted, '', get(context, 'isManualSession', false));
         }
       }
       // adding logs also when mentorSession is changed or status is changed
       if (prevSessionStatus !== sessionStatusFromInput || (mentorSessionConnectId && (mentorSessionId !== mentorSessionConnectId))) {
-        addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
+        addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted, '', get(context, 'isManualSession', false));
       }
     }
     // adding logs also when mentorSession is changed or status is changed
     if (prevSessionStatus !== sessionStatusFromInput || (mentorSessionConnectId && (mentorSessionId !== mentorSessionConnectId))) {
-      addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted);
+      addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'updateBatchSession', code, mentorSessionId, sessionStatusFromInput || sessionStatus.allotted, '', get(context, 'isManualSession', false));
     }
   }
   const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));

@@ -244,7 +244,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateUser': {
       // validate username, phone, email and name and returns email or phone verified accordingly
-      const verifiedData = await updateUserValidation(params, context);
+      const verifiedData = await updateUserValidation(params, context, mutationOrQueryName);
       Object.assign(input, verifiedData);
       return hook(input, mutationOrQueryName, 'PreHook');
     }

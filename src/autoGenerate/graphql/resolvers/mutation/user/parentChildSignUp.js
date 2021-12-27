@@ -136,7 +136,7 @@ const parentChildSignUpMutationResolver = async (
   }
 
   // if parent exist don't add parent and check if the child exists too
-  if (parentInfo && parentInfo.parentId && parentInfo.parentEmail) {
+  if (parentInfo && parentInfo.parentId) {
     parentId = parentInfo.parentId;
     parentProfileId = parentInfo.parentProfileId;
     const { childrenName } = parentInfo;
@@ -159,7 +159,7 @@ const parentChildSignUpMutationResolver = async (
   } else {
     const parentData = {
       name: parentName.trim(),
-      email: parentEmail.trim().toLowerCase(),
+      email: parentEmail && parentEmail.trim().toLowerCase(),
       role: PARENT,
       utmSource,
       utmCampaign,
