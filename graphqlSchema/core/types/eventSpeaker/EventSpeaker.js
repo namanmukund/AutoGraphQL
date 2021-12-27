@@ -3,7 +3,6 @@ const EventSpeaker = `
     user: User! @relation(name: "EventSpeakerUser")
     event: Event @relation(name: "EventSpeakerEvent")
     linkedInLink: String
-    portfolioLink: String
     roleAtOrganization: String
     organization: String
     about: String

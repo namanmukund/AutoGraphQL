@@ -20,8 +20,8 @@ const EventTimeTableRule = `
    ${weekDaysFields}
  }`;
 
-const UTMCode = `
-  type UTM {
+const UTMParameters = `
+  type UTMParameters {
     utmSource: String
     utmCampaign: String
     utmContent: String
@@ -52,7 +52,7 @@ const Event = `
     timeZone: Date
     summary: String
     overview: String
-    utm: [UTMCode]
+    utm: [UTMParameters]
     isListedOnWeb: Boolean
     status: ContentStatus
     embeds: [EventCertificateEmbed]
@@ -63,4 +63,4 @@ const Event = `
   }
 `;
 
-export default [Event, EventAttendance, EventCertificateEmbed, EventTimeTableRule, UTMCode];
+export default [Event, EventAttendance, EventCertificateEmbed, EventTimeTableRule, UTMParameters];
