@@ -20,13 +20,14 @@ const EventTimeTableRule = `
    ${weekDaysFields}
  }`;
 
-const UTM = `
+const UTMCode = `
   type UTM {
     utmSource: String
     utmCampaign: String
     utmContent: String
     utmMedium: String
     utmTerm: String
+    webUrl: String
  }`;
 
 const Event = `
@@ -34,6 +35,7 @@ const Event = `
   {
     eventType: EventType @defaultValue(value: "radioStreet")
     eventName: EventName @defaultValue(value: "spySquadCamp")
+    type: EventEnum
     geoLocation: String
     name: String @trim
     category: EventCategory @relation(name: "EventCategoryEvent")
@@ -50,16 +52,15 @@ const Event = `
     timeZone: Date
     summary: String
     overview: String
-    utm: [UTM]
-    webUrl: String
+    utm: [UTMCode]
     isListedOnWeb: Boolean
     status: ContentStatus
     embeds: [EventCertificateEmbed]
     timeTableRule: EventTimeTableRules
-    prizes: EventPrize @relation(name: "EventPrizeEvent")
+    prizes: [EventPrize] @relation(name: "EventPrizeEvent")
     tags: [ContentTag] @relation(name: "ContentTagEvent")
     registeredUsers: [StudentProfile] @relation(name:"EventAttendanceStudentProfile")
   }
 `;
 
-export default [Event, EventAttendance, EventCertificateEmbed, EventTimeTableRule, UTM];
+export default [Event, EventAttendance, EventCertificateEmbed, EventTimeTableRule, UTMCode];
