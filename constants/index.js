@@ -514,6 +514,8 @@ const ALLOWED_ROLE_FOR_MANUAL_SESSIONS = [ADMIN, UMS_ADMIN, SUPPLY_DEMAND_ADMIN]
 
 const TIME_DIFF_FOR_MANUAL_SESSION = -1;
 
+const EXCLUDE_NUMBER = ['7000287388'];
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -601,4 +603,5 @@ export {
   PHONE_OTP_MAX_RETRY_WAIT_SECOND,
   ALLOWED_ROLE_FOR_MANUAL_SESSIONS,
   TIME_DIFF_FOR_MANUAL_SESSION,
+  EXCLUDE_NUMBER,
 };

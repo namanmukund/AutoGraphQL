@@ -13,6 +13,7 @@ import { getUserFromDBQuery } from './utils';
 import { generateCuid, getRandomNumber } from '../../../../../../utils';
 import {
   BLOCKED,
+  EXCLUDE_NUMBER,
   PHONE_OTP_LIMIT_PER_DAY,
   PHONE_OTP_MAX_RETRY_WAIT_SECOND,
   rangeOTP,
@@ -116,7 +117,7 @@ const signupOrLoginViaOtp = async (
 
   // setting nextAllowedPhoneOtpDate to that of 60 seconds otherwise throwing error
   const phoneOtpCreationDate = get(userData, 'phoneOtpCreationDate');
-  if (!input.email && phoneOtpCreationDate && Math.abs(moment().diff(moment(new Date(phoneOtpCreationDate)), 'seconds')) < PHONE_OTP_MAX_RETRY_WAIT_SECOND) {
+  if (!input.email && phoneOtpCreationDate && Math.abs(moment().diff(moment(new Date(phoneOtpCreationDate)), 'seconds')) < PHONE_OTP_MAX_RETRY_WAIT_SECOND && !EXCLUDE_NUMBER.includes(get(input, 'phone.number'))) {
     throw new PhoneOtpMaxRetryTimeLimitError();
   }
 
@@ -126,7 +127,7 @@ const signupOrLoginViaOtp = async (
     fromDate.setDate(fromDate.getDate() - 1);
     const userOtpLogMetaRes = await callLocalGraphqlApi(FETCH_USER_OTP_LOG_META(get(userData, 'id'), fromDate, new Date()));
     const userOtpLogCount = get(userOtpLogMetaRes, 'data.userOtpLogsMeta.count', 0);
-    if (userOtpLogCount >= PHONE_OTP_LIMIT_PER_DAY) {
+    if (userOtpLogCount >= PHONE_OTP_LIMIT_PER_DAY && !EXCLUDE_NUMBER.includes(get(input, 'phone.number'))) {
       throw new PhoneOtpPerDayLimitError();
     }
   }
