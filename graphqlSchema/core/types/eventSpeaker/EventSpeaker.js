@@ -1,7 +1,7 @@
 const EventSpeaker = `
   type EventSpeaker @model {
     user: User! @relation(name: "EventSpeakerUser")
-    event: Event @relation(name: "EventSpeakerEvent")
+    event: [Event] @relation(name: "EventSpeakerEvent")
     linkedInLink: String
     roleAtOrganization: String
     organization: String

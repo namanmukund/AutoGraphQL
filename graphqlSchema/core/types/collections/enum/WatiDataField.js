@@ -1,11 +1,11 @@
 const WatiDataField = `
   enum WatiDataField {
-    Student Name
-    Parent Name
-    Student Grade
-    Event date
-    Event Name
-    Speaker Name
+    studentName
+    parentName
+    studentGrade
+    eventDate
+    eventName
+    speakerName
   }`;
 
 export default WatiDataField;

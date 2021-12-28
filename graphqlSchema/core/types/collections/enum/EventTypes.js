@@ -1,4 +1,4 @@
-const EventEnum = `
+const EventTypes = `
   enum EventTypes {
     oneDay
     recurring
@@ -6,4 +6,4 @@ const EventEnum = `
     Offline
   }`;
 
-export default EventEnum;
+export default EventTypes;

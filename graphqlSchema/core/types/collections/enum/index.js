@@ -104,6 +104,7 @@ import BlockBasedProjectLayout from './BlockBasedProjectLayout';
 import IQATag from './IQATag';
 import DateCondition from './DateCondition';
 import EditorMode from './EditorMode';
+import EventTypes from './EventTypes';
 
 export default [
   Status,
@@ -213,4 +214,5 @@ export default [
   IQATag,
   DateCondition,
   EditorMode,
+  EventTypes,
 ];

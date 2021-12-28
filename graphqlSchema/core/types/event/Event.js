@@ -13,13 +13,6 @@ const EventCertificateEmbed = `
     text: String
   }
 `;
-const EventTimeTableRule = `
-  type EventTimeTableRule {
-   startDate: Date
-   endDate: Date
-   ${weekDaysFields}
- }`;
-
 const UTMParameters = `
   type UTMParameters {
     utmSource: String
@@ -35,7 +28,7 @@ const Event = `
   {
     eventType: EventType @defaultValue(value: "radioStreet")
     eventName: EventName @defaultValue(value: "spySquadCamp")
-    type: EventEnum
+    type: EventTypes
     geoLocation: String
     name: String @trim
     category: EventCategory @relation(name: "EventCategoryEvent")
@@ -56,11 +49,12 @@ const Event = `
     isListedOnWeb: Boolean
     status: ContentStatus
     embeds: [EventCertificateEmbed]
-    timeTableRule: EventTimeTableRules
+    eventTimeTableRule: BatchTimeTableRule
     prizes: [EventPrize] @relation(name: "EventPrizeEvent")
     tags: [ContentTag] @relation(name: "ContentTagEvent")
-    registeredUsers: [StudentProfile] @relation(name:"EventAttendanceStudentProfile")
+    registeredUsers: [StudentProfile] @relation(name:"EventAttendanceStudentProfile", direction: "OneWay")
+    whatsAppVariable: [WhatsAppVariable] @relation(name: "WhatsAppVariableEvent")
   }
 `;
 
-export default [Event, EventAttendance, EventCertificateEmbed, EventTimeTableRule, UTMParameters];
+export default [Event, EventAttendance, EventCertificateEmbed, UTMParameters];

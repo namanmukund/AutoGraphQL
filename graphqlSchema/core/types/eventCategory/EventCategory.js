@@ -6,7 +6,7 @@ const EventCategory = `
     displayOnWebsite: Boolean
     createdOn: Date
     createdBy: User! @relation(name: "EventCategoryUser", direction: "OneWay")
-    status: [EventStatus]
+    status: EventStatus
   }
 `;
 
