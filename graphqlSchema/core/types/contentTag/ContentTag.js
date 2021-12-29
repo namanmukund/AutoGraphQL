@@ -7,7 +7,8 @@ const ContentTag = `
     workbook: [Workbook] @relation(name: "WorkbookContentTag")
     blockBasedProject: [BlockBasedProject] @relation(name: "BlockBasedProjectTag")
     questionBank: [QuestionBank] @relation(name: "ContentTagQuestionBank")
-    events: [Event] @relation(name: "ContentTagEvent")
+    event: [Event] @relation(name: "ContentTagEvent")
+    tagStatus : EventStatus
   }
 `;
 
