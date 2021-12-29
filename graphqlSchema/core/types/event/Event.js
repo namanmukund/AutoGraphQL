@@ -59,11 +59,11 @@ const Event = `
     prizes: [EventPrize] @relation(name: "EventPrizeEvent")
     tags: [ContentTag] @relation(name: "ContentTagEvent")
     registeredUsers: [StudentProfile] @relation(name:"EventRegisteredStudentProfile", direction: "OneWay")
-    whatsAppVariable: [WhatsAppVariable] @relation(name: "WhatsAppVariableEvent")
+    whatsAppVariables: [WhatsAppVariable] @relation(name: "WhatsAppVariableEvent")
     isSchoolEvent: Boolean
     eventBanner: File @relation(name: "EventBannerEvent", direction: "OneWay")
     listingImage: File @relation(name: "ListingImageEvent", direction: "OneWay")
-    school: [School] @relation(name: "EventSchool", direction: "OneWay")
+    schools: [School] @relation(name: "EventSchool", direction: "OneWay")
   }
 `;
 

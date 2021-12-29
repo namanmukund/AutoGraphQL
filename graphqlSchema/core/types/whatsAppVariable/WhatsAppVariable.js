@@ -4,7 +4,7 @@ const WhatsAppVariable = `
     variableName: String
     dataField: WatiDataField
     createdBy: User! @relation(name: "WhatsAppVariableUser", direction: "OneWay")
-    event: [Event] @relation(name: "WhatsAppVariableEvent")
+    events: [Event] @relation(name: "WhatsAppVariableEvent")
   }
 `;
 
