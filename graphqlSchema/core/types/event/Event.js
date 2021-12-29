@@ -11,6 +11,9 @@ const EventCertificateEmbed = `
     xDim: Int
     yDim: Int
     text: String
+    textSize: Int
+    fontFamily: String
+    variableName: String
   }
 `;
 const UTMParameters = `
@@ -31,10 +34,13 @@ const Event = `
     type: EventTypes
     geoLocation: String
     name: String @trim
+    organizer: EventOrganizer
+    locationType: LocationType
     category: EventCategory @relation(name: "EventCategoryEvent")
     speakers: [EventSpeakerProfile] @relation(name: "EventSpeakerProfileEvent")
     date: Date
     time: Date
+    eventJoinReason: EventJoinReason @relation(name: "EventJoinReasonEvent")
     eventAttendances: [EventAttendance] @relation(name:"EventAttendanceEvent")
     address: String
     city: String
@@ -42,7 +48,7 @@ const Event = `
     pincode: Int
     startTime: Date
     endTime: Date
-    timeZone: Date
+    timeZone: String
     summary: String
     overview: String
     utm: [UTMParameters]
@@ -54,6 +60,10 @@ const Event = `
     tags: [ContentTag] @relation(name: "ContentTagEvent")
     registeredUsers: [StudentProfile] @relation(name:"EventRegisteredStudentProfile", direction: "OneWay")
     whatsAppVariable: [WhatsAppVariable] @relation(name: "WhatsAppVariableEvent")
+    isSchoolEvent: Boolean
+    eventBanner: File @relation(name: "EventBannerEvent", direction: "OneWay")
+    listingImage: File @relation(name: "ListingImageEvent", direction: "OneWay")
+    school: [School] @relation(name: "EventSchool", direction: "OneWay")
   }
 `;
 

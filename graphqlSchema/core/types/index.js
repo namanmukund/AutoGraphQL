@@ -148,6 +148,7 @@ import EventCategory from './eventCategory';
 import EventSpeakerProfile from './eventSpeakerProfile';
 import EventSession from './eventSession';
 import WhatsAppVariable from './whatsAppVariable';
+import EventJoinReason from './eventJoinReason';
 
 export default [
   ...User,
@@ -300,4 +301,5 @@ export default [
   ...EventSpeakerProfile,
   ...EventSession,
   ...WhatsAppVariable,
+  ...EventJoinReason,
 ];

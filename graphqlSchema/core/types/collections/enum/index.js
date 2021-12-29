@@ -107,6 +107,9 @@ import EditorMode from './EditorMode';
 import EventTypes from './EventTypes';
 import EventStatus from './EventStatus';
 import WatiDataField from './WatiDataField';
+import TagStatus from './TagStatus';
+import LocationType from './LocationType';
+import EventOrganizer from './EventOrganizer';
 
 export default [
   Status,
@@ -219,4 +222,7 @@ export default [
   EventTypes,
   EventStatus,
   WatiDataField,
+  TagStatus,
+  LocationType,
+  EventOrganizer,
 ];

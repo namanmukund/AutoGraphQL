@@ -8,6 +8,7 @@ const ContentTag = `
     blockBasedProject: [BlockBasedProject] @relation(name: "BlockBasedProjectTag")
     questionBank: [QuestionBank] @relation(name: "ContentTagQuestionBank")
     event: [Event] @relation(name: "ContentTagEvent")
+    tagStatus : TagStatus
   }
 `;
 
