@@ -34,7 +34,7 @@ const Event = `
     category: EventCategory @relation(name: "EventCategoryEvent")
     speakers: [EventSpeaker] @relation(name: "EventSpeakerEvent")
     date: Date
-    time: Int
+    time: Date
     eventAttendances: [EventAttendance] @relation(name:"EventAttendanceEvent")
     address: String
     city: String

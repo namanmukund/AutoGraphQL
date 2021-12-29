@@ -76,7 +76,7 @@ const User = `
     eventAttandances: [EventAttendance] @relation(name:"EventAttendanceUser")
     resetPasswordFromLink: Boolean @defaultValue(value: "false")
     senseiProfile: SenseiProfile @relation(name:"SenseiProfileUser", isSubset: true)
-    eventSpeaker: [EventSpeaker] @relation(name: "EventSpeakerEvent")
+    eventSpeaker: [EventSpeaker] @relation(name: "EventSpeakerUser")
   }
 `;
 
