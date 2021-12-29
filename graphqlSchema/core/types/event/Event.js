@@ -42,7 +42,7 @@ const Event = `
     pincode: Int
     startTime: Date
     endTime: Date
-    timeZone: Date
+    timezone: String
     summary: String
     overview: String
     utm: [UTMParameters]
