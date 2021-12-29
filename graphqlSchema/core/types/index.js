@@ -143,6 +143,11 @@ import LeadPartner from './leadPartner';
 import DemoWowAudit from './demoWowAudits';
 import SenseiProfile from './senseiProfile';
 import SenseiMentorTeam from './senseiMentorTeam';
+import EventPrize from './eventPrize';
+import EventCategory from './eventCategory';
+import EventSpeakerProfile from './eventSpeakerProfile';
+import EventSession from './eventSession';
+import WhatsAppVariable from './whatsAppVariable';
 
 export default [
   ...User,
@@ -290,4 +295,9 @@ export default [
   ...DemoWowAudit,
   ...SenseiProfile,
   ...SenseiMentorTeam,
+  ...EventPrize,
+  ...EventCategory,
+  ...EventSpeakerProfile,
+  ...EventSession,
+  ...WhatsAppVariable,
 ];

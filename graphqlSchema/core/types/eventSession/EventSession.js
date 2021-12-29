@@ -1,3 +1,10 @@
+const eventAttendanceType = `
+  type EventAttendanceType {
+   student: StudentProfile! @relation(name:"EventSessionStudentProfile", direction: "OneWay")
+   isPresent: Boolean
+   status: AttendanceStatus @defaultValue(value: "notAssigned")
+ }`;
+
 const EventSession = `
     type EventSession @model {
         event: Event! @relation(name: "EventSessionEvent", direction: "OneWay")
@@ -5,8 +12,8 @@ const EventSession = `
         sessionLink: String
         meetingId: String
         meetingPassword: String
-        attendance: [StudentProfile] @relation(name:"EventAttendanceStudentProfile")
+        attendance: [EventAttendanceType]
     }
 `;
 
-export default EventSession;
+export default [EventSession, eventAttendanceType];

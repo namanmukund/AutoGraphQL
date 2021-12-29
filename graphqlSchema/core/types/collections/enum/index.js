@@ -105,6 +105,8 @@ import IQATag from './IQATag';
 import DateCondition from './DateCondition';
 import EditorMode from './EditorMode';
 import EventTypes from './EventTypes';
+import EventStatus from './EventStatus';
+import WatiDataField from './WatiDataField';
 
 export default [
   Status,
@@ -215,4 +217,6 @@ export default [
   DateCondition,
   EditorMode,
   EventTypes,
+  EventStatus,
+  WatiDataField,
 ];

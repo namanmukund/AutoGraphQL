@@ -6,8 +6,8 @@ type EventAttendance @model {
   event: Event @relation(name:"EventAttendanceEvent")
 }`;
 const EventCertificateEmbed = `
-  type EventCertificateEmbed {
-    image: File @relation(name: "EventCertificateEmbedFile")
+  type EventCertificateEmbed @model{
+    image: File @relation(name: "EventCertificateEmbedFile", direction: "OneWay")
     xDim: Int
     yDim: Int
     text: String
@@ -32,7 +32,7 @@ const Event = `
     geoLocation: String
     name: String @trim
     category: EventCategory @relation(name: "EventCategoryEvent")
-    speakers: [EventSpeaker] @relation(name: "EventSpeakerEvent")
+    speakers: [EventSpeakerProfile] @relation(name: "EventSpeakerProfileEvent")
     date: Date
     time: Int
     eventAttendances: [EventAttendance] @relation(name:"EventAttendanceEvent")
@@ -48,11 +48,11 @@ const Event = `
     utm: [UTMParameters]
     isListedOnWeb: Boolean
     status: ContentStatus
-    embeds: [EventCertificateEmbed]
+    embeds: [EventCertificateEmbed] @relation(name: "EventCertificateEmbedEvent", direction: "OneWay")
     eventTimeTableRule: BatchTimeTableRule
     prizes: [EventPrize] @relation(name: "EventPrizeEvent")
     tags: [ContentTag] @relation(name: "ContentTagEvent")
-    registeredUsers: [StudentProfile] @relation(name:"EventAttendanceStudentProfile", direction: "OneWay")
+    registeredUsers: [StudentProfile] @relation(name:"EventRegisteredStudentProfile", direction: "OneWay")
     whatsAppVariable: [WhatsAppVariable] @relation(name: "WhatsAppVariableEvent")
   }
 `;
