@@ -143,6 +143,8 @@ import LeadPartner from './leadPartner';
 import DemoWowAudit from './demoWowAudits';
 import SenseiProfile from './senseiProfile';
 import SenseiMentorTeam from './senseiMentorTeam';
+import Notification from './notification';
+import Task from './task';
 
 export default [
   ...User,
@@ -290,4 +292,6 @@ export default [
   ...DemoWowAudit,
   ...SenseiProfile,
   ...SenseiMentorTeam,
+  ...Notification,
+  ...Task,
 ];
