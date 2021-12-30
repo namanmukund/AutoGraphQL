@@ -9,6 +9,8 @@ const ContentTag = `
     questionBank: [QuestionBank] @relation(name: "ContentTagQuestionBank")
     event: [Event] @relation(name: "ContentTagEvent")
     tagStatus : EventStatus
+    displayOnWebsite: Boolean
+    isEventTag: Boolean
   }
 `;
 

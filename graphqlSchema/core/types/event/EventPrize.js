@@ -5,7 +5,7 @@ const EventPrize = `
     image: File @relation(name: "EventPrizeFile", direction: "OneWay")
     minRank: Int
     maxRank: Int
-    event: Event! @relation(name: "EventPrizeEvent")
+    event: [Event] @relation(name: "EventPrizeEvent")
   }
 `;
 

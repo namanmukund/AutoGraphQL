@@ -5,9 +5,9 @@ type EventAttendance @model {
   attendance: AttendanceStatus @defaultValue(value: "absent")
   event: Event @relation(name:"EventAttendanceEvent")
 }`;
-const EventCertificateEmbed = `
-  type EventCertificateEmbed @model{
-    image: File @relation(name: "EventCertificateEmbedFile", direction: "OneWay")
+const EventCertificate = `
+  type EventCertificate @model{
+    image: File @relation(name: "EventCertificateFile", direction: "OneWay")
     xDim: Int
     yDim: Int
     text: String
@@ -54,17 +54,18 @@ const Event = `
     utm: [UTMParameters]
     isListedOnWeb: Boolean
     status: ContentStatus
-    embeds: [EventCertificateEmbed] @relation(name: "EventCertificateEmbedEvent", direction: "OneWay")
+    embeds: [EventCertificate] @relation(name: "EventCertificateEvent", direction: "OneWay")
     eventTimeTableRule: BatchTimeTableRule
     prizes: [EventPrize] @relation(name: "EventPrizeEvent")
     tags: [ContentTag] @relation(name: "ContentTagEvent")
     registeredUsers: [StudentProfile] @relation(name:"EventRegisteredStudentProfile", direction: "OneWay")
-    whatsAppVariables: [WhatsAppVariable] @relation(name: "WhatsAppVariableEvent")
+    whatsAppVariables: [WhatsAppCommsVariable] @relation(name: "WhatsAppCommsVariableEvent")
     isSchoolEvent: Boolean
     eventBanner: File @relation(name: "EventBannerEvent", direction: "OneWay")
     listingImage: File @relation(name: "ListingImageEvent", direction: "OneWay")
     schools: [School] @relation(name: "EventSchool", direction: "OneWay")
+    eventSessions: [EventSession] @relation(name: "EventSessionEvent")
   }
 `;
 
-export default [Event, EventAttendance, EventCertificateEmbed, UTMParameters];
+export default [Event, EventAttendance, EventCertificate, UTMParameters];

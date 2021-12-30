@@ -7,7 +7,7 @@ const eventAttendanceType = `
 
 const EventSession = `
     type EventSession @model {
-        event: Event! @relation(name: "EventSessionEvent", direction: "OneWay")
+        event: Event! @relation(name: "EventSessionEvent")
         sessionDate: Date
         sessionLink: String
         meetingId: String

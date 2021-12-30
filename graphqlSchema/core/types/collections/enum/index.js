@@ -106,7 +106,7 @@ import DateCondition from './DateCondition';
 import EditorMode from './EditorMode';
 import EventTypes from './EventTypes';
 import EventStatus from './EventStatus';
-import WatiDataField from './WatiDataField';
+import CommsDataField from './CommsDataField';
 import LocationType from './LocationType';
 import EventOrganizer from './EventOrganizer';
 
@@ -220,7 +220,7 @@ export default [
   EditorMode,
   EventTypes,
   EventStatus,
-  WatiDataField,
+  CommsDataField,
   LocationType,
   EventOrganizer,
 ];

@@ -1,5 +1,5 @@
-const WatiDataField = `
-  enum WatiDataField {
+const CommsDataField = `
+  enum CommsDataField {
     studentName
     parentName
     studentGrade
@@ -8,4 +8,4 @@ const WatiDataField = `
     speakerName
   }`;
 
-export default WatiDataField;
+export default CommsDataField;
