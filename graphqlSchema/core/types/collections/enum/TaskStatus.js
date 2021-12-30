@@ -1,7 +1,12 @@
 const TaskStatus = `
   enum TaskStatus {
     pending
-    unassigned
+    confirmed
+    completed
+    mentorUnavailable
+    mentorRejected
+    leadRejected
+    leadNotInterested
   }`;
 
 export default TaskStatus;
