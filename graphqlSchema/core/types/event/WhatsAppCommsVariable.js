@@ -3,7 +3,7 @@ const WhatsAppCommsVariable = `
   {
     variableName: String
     dataField: CommsDataField
-    createdBy: User! @relation(name: "WhatsAppCommsVariableUser", direction: "OneWay")
+    createdBy: User @relation(name: "WhatsAppCommsVariableUser", direction: "OneWay")
     events: [Event] @relation(name: "WhatsAppCommsVariableEvent")
   }
 `;

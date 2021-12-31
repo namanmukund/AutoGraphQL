@@ -11,6 +11,7 @@ const ContentTag = `
     tagStatus : EventStatus
     displayOnWebsite: Boolean
     isEventTag: Boolean
+    createdBy: User @relation(name: "ContentTagUser", direction: "OneWay")
   }
 `;
 

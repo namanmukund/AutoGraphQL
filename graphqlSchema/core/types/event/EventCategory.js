@@ -4,7 +4,7 @@ const EventCategory = `
     title: String
     events: [Event] @relation(name: "EventCategoryEvent")
     displayOnWebsite: Boolean
-    createdBy: User! @relation(name: "EventCategoryUser", direction: "OneWay")
+    createdBy: User @relation(name: "EventCategoryUser", direction: "OneWay")
     status: EventStatus
   }
 `;
