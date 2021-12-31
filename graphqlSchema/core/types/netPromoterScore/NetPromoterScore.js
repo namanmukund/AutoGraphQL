@@ -17,6 +17,17 @@ const NetPromoterScore = `
     course: Course @relation(name: "NetPromoterScoreCourse", direction: "OneWay")
     mentorMenteeSession: MentorMenteeSession @relation(name: "NetPromoterScoreMentorMenteeSession", direction: "OneWay")
     batchSession: BatchSession @relation(name: "NetPromoterScoreBatchSession", direction: "OneWay")
+    likedMentor: Boolean
+    likedAnimatedVideos: Boolean
+    likedChats: Boolean
+    likedCodingProjects: Boolean
+    easySessionScheduling: Boolean
+    otherReason: Boolean
+    mentorIssue: Boolean
+    techIssue: Boolean
+    contentIssue: Boolean
+    tooManyCalls: Boolean
+    feedbackByMentee: String
   }
 `;
 
