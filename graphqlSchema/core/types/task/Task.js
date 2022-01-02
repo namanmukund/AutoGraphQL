@@ -18,7 +18,8 @@ const Task = `
     menteeSession: MenteeSession @relation(name: "TaskMenteeSession", direction: "OneWay")
     batchSession: BatchSession @relation(name: "TaskBatchSession", direction: "OneWay")
     sessionLog: SessionLog @relation(name: "TaskSessionLog", direction: "OneWay")
-    leadStatus: String
+    mentorDemandSingleSlot: MentorDemandSingleSlot @relation(name: "TaskMentorDemandSingleSlot", direction: "OneWay")
+    leadStatus: TaskLeadStatus
     bookingStatus: String
     bookingComment: String
     rejectionComment: String
@@ -28,6 +29,7 @@ const Task = `
     contactReason: String
     isHighPriority: Boolean
     broadcastCount: Int
+    allotmentCount: Int
   }
 `;
 

@@ -21,6 +21,7 @@ const Notification = `
     mentorMenteeSession: MentorMenteeSession @relation(name: "NotificationMentorMenteeSession", direction: "OneWay")
     menteeSession: MenteeSession @relation(name: "NotificationMenteeSession", direction: "OneWay")
     batchSession: BatchSession @relation(name: "NotificationBatchSession", direction: "OneWay")
+    mentorDemandSingleSlot: MentorDemandSingleSlot @relation(name: "TaskMentorDemandSingleSlot", direction: "OneWay")
   }
 `;
 
