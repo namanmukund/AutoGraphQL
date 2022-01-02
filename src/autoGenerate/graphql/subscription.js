@@ -8,6 +8,8 @@ const subscriptionPayloadTypes = [];
 
 const parsedASTMap = getParsedASTMap(types);
 
+const getFilterName = (typeName) => `${typeName}Filter`;
+
 const makeSubscriptionTypePayload = (
   type,
 ) => `type ${type}${SUBSCRIPTION_PAYLOAD}{
@@ -21,7 +23,8 @@ Object.keys(parsedASTMap).forEach((type) => {
     subscribe,
   } = definition;
   if (get(subscribe, 'events', []).length) {
-    subscriptionString += `${camelCase(type)} : ${type}${SUBSCRIPTION_PAYLOAD},`;
+    const filterName = getFilterName(type);
+    subscriptionString += `${camelCase(type)}(filter: ${filterName}) : ${type}${SUBSCRIPTION_PAYLOAD},`;
     subscriptionPayloadTypes.push(makeSubscriptionTypePayload(type));
   }
 });
