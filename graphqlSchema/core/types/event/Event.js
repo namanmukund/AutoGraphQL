@@ -88,6 +88,7 @@ const Event = `
     schools: [School] @relation(name: "EventSchool", direction: "OneWay")
     eventSessions: [EventSession] @relation(name: "EventSessionEvent")
     isEmailCommsEnabled: Boolean @defaultValue(value: "false")
+    eventTicket: [EventTicket] @relation(name: "EventTicketEvent")
   }
 `;
 
