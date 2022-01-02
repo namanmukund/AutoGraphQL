@@ -5,16 +5,36 @@ type EventAttendance @model {
   attendance: AttendanceStatus @defaultValue(value: "absent")
   event: Event @relation(name:"EventAttendanceEvent")
 }`;
-const EventCertificate = `
-  type EventCertificate @model{
-    image: File @relation(name: "EventCertificateFile", direction: "OneWay")
+const EventCertificateEmbed = `
+  type EventCertificateEmbed @model{
+    image: File @relation(name: "EventCertificateEmbedFile", direction: "OneWay")
     xDim: Int
     yDim: Int
     text: String
     textSize: Int
     fontFamily: String
-    variableName: String
+    variableName: CommsDataField
   }
+`;
+
+const CommsVariableType = `
+ type CommsVariableType{
+  whatsappVariableName: String
+  emailVariableName: String
+  dataField: CommsDataField
+ }
+`;
+
+const EventCommsRule = `
+ type EventCommsRule {
+  templateName: String!
+  commsVariables: [CommsVariableType]
+  condition: DateCondition
+  unit: DurationType
+  value: Int
+  isTested: Boolean
+  isPassed: Boolean
+ }
 `;
 const UTMParameters = `
   type UTMParameters {
@@ -25,7 +45,6 @@ const UTMParameters = `
     utmTerm: String
     webUrl: String
  }`;
-
 const Event = `
   type Event @model
   {
@@ -54,18 +73,21 @@ const Event = `
     utm: [UTMParameters]
     isListedOnWeb: Boolean
     status: ContentStatus
-    embeds: [EventCertificate] @relation(name: "EventCertificateEvent", direction: "OneWay")
+    embeds: [EventCertificateEmbed] @relation(name: "EventCertificateEmbedEvent", direction: "OneWay")
+    baseCertificate: File @relation(name: "BaseCertificateEvent", direction: "OneWay")
     eventTimeTableRule: BatchTimeTableRule
+    eventCommsRule: [EventCommsRule]
     prizes: [EventPrize] @relation(name: "EventPrizeEvent")
     tags: [ContentTag] @relation(name: "ContentTagEvent")
     registeredUsers: [StudentProfile] @relation(name:"EventRegisteredStudentProfile", direction: "OneWay")
-    whatsAppVariables: [WhatsAppCommsVariable] @relation(name: "WhatsAppCommsVariableEvent")
+    commsVariables: [CommsVariable] @relation(name: "CommsVariableEvent")
     isSchoolEvent: Boolean
     eventBanner: File @relation(name: "EventBannerEvent", direction: "OneWay")
     listingImage: File @relation(name: "ListingImageEvent", direction: "OneWay")
     schools: [School] @relation(name: "EventSchool", direction: "OneWay")
     eventSessions: [EventSession] @relation(name: "EventSessionEvent")
+    isEmailCommsEnabled: Boolean @defaultValue(value: "false")
   }
 `;
 
-export default [Event, EventAttendance, EventCertificate, UTMParameters];
+export default [Event, EventAttendance, EventCertificateEmbed, UTMParameters, EventCommsRule, CommsVariableType];

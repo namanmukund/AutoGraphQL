@@ -4,10 +4,10 @@ import EventJoinReason from './EventJoinReason';
 import EventPrize from './EventPrize';
 import EventSession from './EventSession';
 import EventSpeakerProfile from './EventSpeakerProfile';
-import WhatsAppCommsVariable from './WhatsAppCommsVariable';
+import CommsVariable from './CommsVariable';
 
 export default [
   ...Event,
   ...EventCategory, ...EventJoinReason, ...EventPrize, ...EventSession,
-  ...EventSpeakerProfile, ...WhatsAppCommsVariable,
+  ...EventSpeakerProfile, ...CommsVariable,
 ];

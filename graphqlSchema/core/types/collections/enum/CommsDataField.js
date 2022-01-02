@@ -6,6 +6,8 @@ const CommsDataField = `
     eventDate
     eventName
     speakerName
+    parentEmail
+    parentPhone
   }`;
 
 export default CommsDataField;

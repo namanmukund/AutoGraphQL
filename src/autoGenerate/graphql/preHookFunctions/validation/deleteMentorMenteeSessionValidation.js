@@ -1,10 +1,9 @@
 import { get } from 'lodash';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
-import { DatabaseRecordNotFoundError, UserMismatchError } from '../../../../../constants/errors';
+import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import { CanNotDeleteCompletedSessionError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
-import { backendApps, TWA } from '../../../../../constants';
 
 const getMentorMenteeSessionData = async (id) => {
   const query = `
@@ -99,19 +98,6 @@ const deleteMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
     currentUser,
     currentApp,
   } = userInfo;
-
-  if (
-    get(currentApp, 'name') === TWA
-    && prevSessionStatus !== 'completed'
-  ) {
-    console.log('inside app and status check');
-    if (get(currentUser, 'id') !== get(menteeSessionDoc, 'data.menteeSession.user.id')) {
-      throw new UserMismatchError();
-    }
-    if (get(menteeSessionDoc, 'data.menteeSession.user.studentProfile')) {
-      console.log(JSON.stringify(menteeSessionDoc));
-    }
-  }
 
   // eslint-disable-next-line no-param-reassign
   context.currentUser = currentUser;
