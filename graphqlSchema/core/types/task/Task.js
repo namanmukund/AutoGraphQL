@@ -27,6 +27,7 @@ const Task = `
     comment: String
     contactReason: String
     isHighPriority: Boolean
+    broadcastCount: Int
   }
 `;
 

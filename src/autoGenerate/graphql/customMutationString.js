@@ -44,6 +44,7 @@ const customMutationString = `
    generateCertificate ( input: GenerateCertificateInput ) : GenerateCertificateOutput,
    validateMagicLink ( input: ValidateMagicLinkInput  ): ParentChildToken,
    resetPasswordAndLogin ( input: ResetPasswordAndLoginInput ): UserToken,
+   generateMentorPayoutReport ( input: MentorPayoutReportInput ): MentorPayoutReportOutput,
    `;
 
 export default customMutationString;
