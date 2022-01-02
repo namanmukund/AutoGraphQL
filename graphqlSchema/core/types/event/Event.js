@@ -34,6 +34,7 @@ const EventCommsRule = `
   value: Int
   isTested: Boolean
   isPassed: Boolean
+  isSend: Boolean @defaultValue(value: "false")
  }
 `;
 const UTMParameters = `
