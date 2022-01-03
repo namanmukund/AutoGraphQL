@@ -146,6 +146,7 @@ import SenseiProfile from './senseiProfile';
 import SenseiMentorTeam from './senseiMentorTeam';
 import Notification from './notification';
 import Task from './task';
+import UserOtpLog from './userOtpLog';
 
 export default [
   ...User,
@@ -296,4 +297,5 @@ export default [
   ...SenseiMentorTeam,
   ...Notification,
   ...Task,
+  ...UserOtpLog,
 ];
