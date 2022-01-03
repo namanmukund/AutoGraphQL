@@ -108,6 +108,7 @@ import TaskStatus from './TaskStatus';
 import TaskCompletionStatus from './TaskCompletionStatus';
 import TaskLeadStatus from './TaskLeadStatus';
 import TaskBookingStatus from './TaskBookingStatus';
+import TaskContactReason from './TaskContactReason';
 
 export default [
   Status,
@@ -221,4 +222,5 @@ export default [
   TaskCompletionStatus,
   TaskLeadStatus,
   TaskBookingStatus,
+  TaskContactReason,
 ];
