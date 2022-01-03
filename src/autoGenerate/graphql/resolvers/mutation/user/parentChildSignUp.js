@@ -438,6 +438,8 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     leadSquaredParams.input.Vertical = campaignType.replace('Event', '');
   }
 
+  leadSquaredParams.input.hasLaptopOrDesktop = hasLaptopOrDesktop ? 'Yes' : 'No';
+
   leadSquaredParams.input.unVerifiedLead = true;
 
   leadSquaredParams.input.phone = get(input, 'parentPhone');
