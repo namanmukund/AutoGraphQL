@@ -117,6 +117,8 @@ const MentorMenteeSession = `
     startSessionByMenteePlatform: Platform
     isDemoWowAudit: Boolean @defaultValue(value: "false")
     bookingAgent: User @relation(name: "MentorMenteeSessionBookingAgent", direction: "OneWay")
+    verificationStatus: VerificationStatus @defaultValue(value: "unverified")
+    verifiedBy: User @relation(name: "MentorMenteeSessionVerifiedBy", direction: "OneWay")
 }`;
 
 export default [MentorMenteeSession, internetSpeed];
