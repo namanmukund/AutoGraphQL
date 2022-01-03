@@ -1,6 +1,7 @@
 import { trimEnd, get, camelCase } from 'lodash';
 import getParsedASTMap from '../utils/getParsedASTMap';
 import { types } from '../../../utils';
+import customSubscriptionString from './customSubscriptionString';
 
 let subscriptionString = 'type Subscription {';
 const SUBSCRIPTION_PAYLOAD = 'SubscriptionPayload';
@@ -28,6 +29,11 @@ Object.keys(parsedASTMap).forEach((type) => {
     subscriptionPayloadTypes.push(makeSubscriptionTypePayload(type));
   }
 });
+
+/*
+Add custom subscription string along with the generic subscriptions
+ */
+subscriptionString += customSubscriptionString;
 
 subscriptionString = trimEnd(subscriptionString, ',');
 subscriptionString += '}';

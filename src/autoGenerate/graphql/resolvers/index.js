@@ -11,6 +11,7 @@ import {
   deleteMultipleMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
+import injectSubscriptionWithCommonAsyncIterator from './utils/injectSubscriptionWithCommonAsyncIterator';
 import {
   types, ifAuthorized, toObject, isErrorThrown,
 } from '../../../../utils';
@@ -655,5 +656,8 @@ resolvers.Query.getSchoolCampaignSlots = getSchoolCampaignSlots;
 resolvers.Query.getMagicLink = getMagicLink;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
+
+// subscriptions
+resolvers.Subscription.userUpdated = injectSubscriptionWithCommonAsyncIterator(['USER_UPDATED']);
 
 export default resolvers;

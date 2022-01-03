@@ -128,6 +128,8 @@ const updateUserValidation = async (params, context, mutationOrQueryName) => {
     Object.assign(userObj, passwordObj);
   }
 
+  const { pubsub } = context;
+  pubsub.publish('USER_UPDATED', user);
   return userObj;
 };
 
