@@ -27,7 +27,7 @@ const Task = `
     assignedBy: User @relation(name: "TaskUserAssignedBy", direction: "OneWay")
     comment: String
     contactMsmReason: TaskContactReason
-    hasSameMentorAccept: Boolean
+    hasSameMentorAccepted: Boolean
     contactMsmComment: String
     isHighPriority: Boolean
     broadcastCount: Int
