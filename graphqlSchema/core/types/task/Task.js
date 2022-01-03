@@ -12,15 +12,15 @@ const Task = `
     rule: allow
   )
   {
-    status: TaskStatus
-    completionStatus: TaskCompletionStatus
+    status: TaskStatus @defaultValue(value: "unassigned")
+    completionStatus: TaskCompletionStatus @defaultValue(value: "incomplete")
     mentorMenteeSession: MentorMenteeSession @relation(name: "TaskMentorMenteeSession", direction: "OneWay")
     menteeSession: MenteeSession @relation(name: "TaskMenteeSession", direction: "OneWay")
     batchSession: BatchSession @relation(name: "TaskBatchSession", direction: "OneWay")
     sessionLog: SessionLog @relation(name: "TaskSessionLog", direction: "OneWay")
     mentorDemandSingleSlot: MentorDemandSingleSlot @relation(name: "TaskMentorDemandSingleSlot", direction: "OneWay")
-    leadStatus: TaskLeadStatus
-    bookingStatus: String
+    leadStatus: TaskLeadStatus @defaultValue(value: "verificationPending")
+    bookingStatus: TaskBookingStatus @defaultValue(value: "notConfirmed")
     bookingComment: String
     rejectionComment: String
     assignedTo: User @relation(name: "TaskUserAssignedTo", direction: "OneWay")

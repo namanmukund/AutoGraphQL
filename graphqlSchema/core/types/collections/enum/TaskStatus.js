@@ -1,6 +1,7 @@
 const TaskStatus = `
   enum TaskStatus {
-    pending
+    unassigned
+    assigned
     confirmed
     completed
     mentorUnavailable
