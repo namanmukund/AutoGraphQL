@@ -60,7 +60,7 @@ const sendTransactionalEmail = async (templateObject, emailBody, country = 'indi
 
   if (process.env.DATA_MASKING) {
     emailTo = [
-      'shubham.gupta@tekie.in',
+      'shubham.gupta+1@tekie.in',
     ];
     ccEmail = [
       'naman.mukund@tekie.in',
