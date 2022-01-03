@@ -18,7 +18,7 @@ const Task = `
     menteeSession: MenteeSession @relation(name: "TaskMenteeSession", direction: "OneWay")
     batchSession: BatchSession @relation(name: "TaskBatchSession", direction: "OneWay")
     sessionLog: SessionLog @relation(name: "TaskSessionLog", direction: "OneWay")
-    mentorDemandSingleSlot: MentorDemandSingleSlot @relation(name: "TaskMentorDemandSingleSlot", direction: "OneWay")
+    mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name: "TaskMentorAvailabilitySlot", direction: "OneWay")
     leadStatus: TaskLeadStatus @defaultValue(value: "verificationPending")
     bookingStatus: TaskBookingStatus @defaultValue(value: "notConfirmed")
     bookingComment: String
