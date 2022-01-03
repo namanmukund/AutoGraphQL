@@ -1,3 +1,7 @@
+import getSlotTimeFields from '../../functions/getSlotTimeFields';
+
+const slotTimeFields = getSlotTimeFields('Boolean', false);
+
 const eventAttendanceType = `
   type EventAttendanceType {
    student: StudentProfile! @relation(name:"EventSessionStudentProfile", direction: "OneWay")
@@ -13,6 +17,7 @@ const EventSession = `
         meetingId: String
         meetingPassword: String
         attendance: [EventAttendanceType]
+        ${slotTimeFields}
     }
 `;
 

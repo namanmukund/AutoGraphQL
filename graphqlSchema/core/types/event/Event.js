@@ -37,6 +37,14 @@ const EventCommsRule = `
   isSend: Boolean @defaultValue(value: "false")
  }
 `;
+
+const OnlineEventMeetingRule = `
+type OnlineEventMeetingRule {
+  sessionLink: String
+  meetingId: String
+  meetingPassword: String
+}`;
+
 const UTMParameters = `
   type UTMParameters {
     utmSource: String
@@ -86,7 +94,8 @@ const Event = `
     eventSessions: [EventSession] @relation(name: "EventSessionEvent")
     isEmailCommsEnabled: Boolean @defaultValue(value: "false")
     eventTicket: [EventTicket] @relation(name: "EventTicketEvent")
+    onlineEventMeetingRule: OnlineEventMeetingRule
   }
 `;
 
-export default [Event, EventAttendance, EventCertificateEmbed, UTMParameters, EventCommsRule, CommsVariableType];
+export default [Event, EventAttendance, EventCertificateEmbed, UTMParameters, EventCommsRule, CommsVariableType, OnlineEventMeetingRule];
