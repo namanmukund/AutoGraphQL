@@ -7,7 +7,6 @@ import validateTokenAndExtractInformation from './utils/validateTokenAndExtractI
 import getMentorSessions from '../../../utils/getMentorSessions';
 import { checkIfSlotCanBeOpenedValidation, getUserIdandAppNameAfterValidation } from './utils';
 import { TMS } from '../../../../../constants';
-import { MENTOR } from '../../../../../constants/roles';
 
 const getMentorMenteeSessionData = async (id) => {
   const query = `
@@ -102,14 +101,13 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   const {
     appName,
   } = userAndAppInfo;
-  const userRoleFromContext = currentUser && currentUser.role;
   // eslint-disable-next-line no-param-reassign
   context.previousDocument = mentorMenteeSessionDoc;
   context.menteeSessionConnectId = menteeSessionConnectId;
   context.currentUser = currentUser;
   context.mentorSessionConnectId = mentorSessionConnectId;
   context.isPostSalesAuditFromInput = isPostSalesAuditFromInput;
-  if (appName === TMS && userRoleFromContext === MENTOR && sessionStatus === 'started') {
+  if (appName === TMS && sessionStatus === 'started') {
     Object.assign(newParams.input, {
       sessionStartedByMentorAt: new Date().toISOString(),
     });

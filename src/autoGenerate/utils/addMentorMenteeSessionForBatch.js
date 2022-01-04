@@ -193,7 +193,6 @@ mutation($input: MentorSessionUpdate){
 const addMentorMenteeSessionForBatch = async (context, menteeUserId, mentorUserId, topicId, bookingDate, slot, mentorSessionIdFromInput, courseId, sessionStatus, source, methodCallOriginComponent, toUpdateMenteeSession) => {
   const menteBookingDate = bookingDate;
   const menteeBookingSlot = slot;
-  log('calling AddMentorMenteeForBatch ***********************************************************');
   let menteeSessionId;
   if (menteeUserId) {
     const menteeSession = await getMenteeSession(
