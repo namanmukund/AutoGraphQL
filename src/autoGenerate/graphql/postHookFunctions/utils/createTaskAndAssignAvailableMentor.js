@@ -79,12 +79,16 @@ const createTaskAndAssignAvailableMentor = async (
 ) => {
   const { id: menteeSessionId, bookingDate, ...slots } = input;
   const { filteredSlotsStringForFilterQuery } = extractSlotsFromInput(slots);
+  // console.log('filteredSlotsStringForFilterQuery', filteredSlotsStringForFilterQuery);
   const topicId = get(topicInfo, 'data.topic.id', '');
   const courseId = get(input, 'course.typeId', '');
+  // console.log('topicId', topicId);
+  // console.log('courseId', courseId);
   let mentorUserId = '';
   let mentorMenteeSessionId = '';
   // fetch mentor sessions, from the earliest created
   const avalilableMentorSession = await fetchMentorSessions(bookingDate, filteredSlotsStringForFilterQuery);
+  // console.log('avalilableMentorSession', avalilableMentorSession);
   if (avalilableMentorSession && avalilableMentorSession.length && get(avalilableMentorSession, '[0].id')) {
     const mentorSessionId = get(avalilableMentorSession, '[0].id');
     mentorUserId = get(avalilableMentorSession, '[0].user.id');
@@ -96,13 +100,15 @@ const createTaskAndAssignAvailableMentor = async (
     // add mentor mentee session
     mentorMenteeSessionId = await callAddMentorMenteeSession(topicId, menteeSessionId, mentorSessionId, variables, courseId);
   }
+  // console.log('mentorMenteeSessionId', mentorMenteeSessionId);
   // add task irrespective of whether the mentorMenteeSession is created or not
   // if mentorMenteeSession is created, taskStatus should be "assigned" else "pending"
-  let taskStatus = 'pending';
+  let taskStatus = 'unassigned';
   if (mentorMenteeSessionId) {
     taskStatus = 'assigned';
   }
   const taskId = await callAddTask(mentorMenteeSessionId, menteeSessionId, mentorUserId, taskStatus);
+  // console.log('taskId', taskId);
   return {
     mentorMenteeSessionId,
     taskId,
