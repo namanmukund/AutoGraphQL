@@ -260,8 +260,27 @@ const addMentorMenteeSessionForBatch = async (context, menteeUserId, mentorUserI
           );
           log(`------------------------updated menteeSessionId ${menteeSessionId}`);
         }
-        await callUpdateMentorMenteeSession(mentorMenteeId, mentorSessionIdFromInput, { input: { sessionStatus } });
-        log(`------------------------updated mentorMenteeId ${mentorMenteeId}`);
+        if (toUpdateMenteeSession) {
+          const variables = {
+            input: {
+              sessionStatus,
+              source,
+            },
+          };
+          // calling add MMSession as update MenteeSession deletes existing MMSession when date or slot are updated
+          await callAddMentorMenteeSession(
+            topicId,
+            menteeSessionId,
+            mentorSessionId,
+            variables,
+            courseId,
+            context,
+          );
+          log('------------------------added mentorMenteeId after updating MenteeSession');
+        } else {
+          await callUpdateMentorMenteeSession(mentorMenteeId, mentorSessionIdFromInput, { input: { sessionStatus } });
+          log(`------------------------updated mentorMenteeId ${mentorMenteeId}`);
+        }
         return true;
       }
     }

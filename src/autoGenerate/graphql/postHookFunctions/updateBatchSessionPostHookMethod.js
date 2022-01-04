@@ -363,7 +363,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         toUpdateMenteeSession = true;
       }
 
-      if ((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || newStudentsArray.length > 0) {
+      if (((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || newStudentsArray.length > 0)
+        && !get(context, 'fromAddBatchSession', false)) {
         // eslint-disable-next-line no-restricted-syntax
         for (const student of students) {
           if (student.user && student.user.id) {

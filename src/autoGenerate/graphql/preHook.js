@@ -29,10 +29,8 @@ import { createStaticAppToken } from '../../auth';
 import deleteTopicValidation from './preHookFunctions/validation/deleteTopicValidation';
 import deleteLearningObjectiveValidation from './preHookFunctions/validation/deleteLearningObjectiveValidation';
 import deleteQuestionBankValidation from './preHookFunctions/validation/deleteQuestionBankValidation';
-import addUserCurrentTopicComponentStatusValidation
-  from './preHookFunctions/validation/addUserCurrentTopicComponentStatusValidation';
-import updateUserCurrentTopicComponentStatusValidation
-  from './preHookFunctions/validation/updateUserCurrentTopicComponentStatusValidation';
+import addUserCurrentTopicComponentStatusValidation from './preHookFunctions/validation/addUserCurrentTopicComponentStatusValidation';
+import updateUserCurrentTopicComponentStatusValidation from './preHookFunctions/validation/updateUserCurrentTopicComponentStatusValidation';
 import userCourseSyllabusMethod from './preHookFunctions/userCourseSyllabusMethod';
 import addUserActivityVideoDumpValidation from './preHookFunctions/validation/addUserActivityVideoDumpValidation';
 import addUserActivityChatDumpValidation from './preHookFunctions/validation/addUserActivityChatDumpValidation';
@@ -43,8 +41,7 @@ import userLearningObjectiveValidation from './preHookFunctions/validation/userL
 import userQuizValidation from './preHookFunctions/validation/userQuizValidation';
 import { addLearningObjectiveValidation } from './preHookFunctions/validation';
 import userAssignmentValidation from './preHookFunctions/validation/userAssignmentValidation';
-import addUserActivityAssignmentDumpValidation
-  from './preHookFunctions/validation/addUserActivityAssignmentDumpValidation';
+import addUserActivityAssignmentDumpValidation from './preHookFunctions/validation/addUserActivityAssignmentDumpValidation';
 import addMenteeSessionValidation from './preHookFunctions/validation/addMenteeSessionValidation';
 import updateMenteeSessionValidation from './preHookFunctions/validation/updateMenteeSessionValidation';
 import addMentorSessionValidation from './preHookFunctions/validation/addMentorSessionValidation';
@@ -88,8 +85,7 @@ import addUserActivityComicStripDumpValidation from './preHookFunctions/validati
 import userBlockBasedPracticeValidation from './preHookFunctions/validation/userBlockBasedPracticeValidation';
 import userBlockBasedProjectValidation from './preHookFunctions/validation/userBlockBasedProjectValidation';
 import addUserActivityBlockBasedProjectDumpValidation from './preHookFunctions/validation/addUserActivityBlockBasedProjectDumpValidation';
-import addUserActivityBlockBasedPracticeDumpValidation
-  from './preHookFunctions/validation/addUserActivityBlockBasedPracticeDumpValidation';
+import addUserActivityBlockBasedPracticeDumpValidation from './preHookFunctions/validation/addUserActivityBlockBasedPracticeDumpValidation';
 import addMentorProfileValidation from './preHookFunctions/validation/addMentorProfileValidation';
 import deleteMentorMenteeSessionValidation from './preHookFunctions/validation/deleteMentorMenteeSessionValidation';
 import addAuditQuestionValidation from './preHookFunctions/validation/addAuditQuestionValidation';

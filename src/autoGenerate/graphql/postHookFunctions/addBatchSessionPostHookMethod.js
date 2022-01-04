@@ -196,6 +196,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
       }
     });
     pushManyQuery += ']}';
+    context.fromAddBatchSession = true;
     // pushing new array of students in batch session
     await callLocalGraphqlApi(updateBatchSessionQuery(
       batchSessionId,
