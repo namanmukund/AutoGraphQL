@@ -18,7 +18,7 @@ const Task = `
     menteeSession: MenteeSession @relation(name: "TaskMenteeSession", direction: "OneWay")
     batchSession: BatchSession @relation(name: "TaskBatchSession", direction: "OneWay")
     sessionLog: SessionLog @relation(name: "TaskSessionLog", direction: "OneWay")
-    mentorDemandSingleSlot: MentorDemandSingleSlot @relation(name: "TaskMentorDemandSingleSlot", direction: "OneWay")
+    mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name: "TaskMentorAvailabilitySlot", direction: "OneWay")
     leadStatus: TaskLeadStatus @defaultValue(value: "verificationPending")
     bookingStatus: TaskBookingStatus @defaultValue(value: "notConfirmed")
     bookingComment: String
@@ -27,11 +27,11 @@ const Task = `
     assignedBy: User @relation(name: "TaskUserAssignedBy", direction: "OneWay")
     comment: String
     contactMsmReason: TaskContactReason
-    hasSameMentorAccepted: Boolean
+    hasSameMentorAccepted: Boolean @defaultValue(value: "false")
     contactMsmComment: String
-    isHighPriority: Boolean
-    broadcastCount: Int
-    allotmentCount: Int
+    isHighPriority: Boolean @defaultValue(value: "false")
+    broadcastCount: Int @defaultValue(value: "0")
+    allotmentCount: Int @defaultValue(value: "0")
   }
 `;
 

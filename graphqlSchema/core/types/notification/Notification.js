@@ -1,5 +1,6 @@
 import { READ } from '../../../../constants/graphqlOperations';
 import { TMS, TLA, TWA } from '../../../../constants';
+import { CREATED } from '../../../../constants/subscriptionEvents';
 
 const Notification = `
   type Notification @model
@@ -11,6 +12,7 @@ const Notification = `
   ],
     rule: allow
   )
+  @subscribe(events: [${CREATED}])
   {
     title: String! @trim
     description: String @trim
@@ -21,7 +23,7 @@ const Notification = `
     mentorMenteeSession: MentorMenteeSession @relation(name: "NotificationMentorMenteeSession", direction: "OneWay")
     menteeSession: MenteeSession @relation(name: "NotificationMenteeSession", direction: "OneWay")
     batchSession: BatchSession @relation(name: "NotificationBatchSession", direction: "OneWay")
-    mentorDemandSingleSlot: MentorDemandSingleSlot @relation(name: "NotificationMentorDemandSingleSlot", direction: "OneWay")
+    mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name: "NotificationMentorAvailabilitySlot", direction: "OneWay")
   }
 `;
 
