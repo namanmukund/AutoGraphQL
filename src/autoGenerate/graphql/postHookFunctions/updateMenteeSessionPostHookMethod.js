@@ -22,6 +22,38 @@ import sendMailAndWhatsappMessageForSupplyRequest from '../../utils/sendMailAndW
 import getCourseInfo from './utils/getCourseInfo';
 import getSlotLabel from '../../../../utils/getSlotLabel';
 import { log } from '../../../../utils';
+import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+
+const fetchTasks = (menteeSessionId) => `
+{
+  tasks(filter: {
+    menteeSession_some: {
+      id:"${menteeSessionId}"
+    }
+  }){
+    id
+  }
+}
+`;
+
+// mutation to update task with new broadcast count
+const updateTaskMutation = async (
+  taskId,
+  variables,
+) => {
+  const query = `
+mutation($input: TaskUpdate!){
+  updateTask(
+    input:$input
+    id: "${taskId}"
+  ){
+    id
+  }
+}
+`;
+  const res = await callLocalGraphqlApi(query, '', variables);
+  return get(res, 'data.updateTask.id');
+};
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const {
@@ -49,6 +81,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
   const isBookedByMentee = get(context, 'userIdFromContext') === get(input, 'user.typeId');
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
+  const task = get(await callLocalGraphqlApi(fetchTasks(menteeSessionId)), 'data.tasks[0]');
   // if call is from backend we will not update the availability slots, same for paid sessions
   if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
     const courseInfo = await getCourseInfo(get(input, 'course.typeId'));
@@ -68,6 +101,16 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
             slotsTime: startTime,
           }, true);
       }
+    }
+    // update "Task" with broadcast count
+    if (get(task, 'id')) {
+      const variables = {
+        input: {
+          broadcastCount: get(task, 'broadcastCount', 0) + 1,
+        },
+      };
+      console.log('variables', variables);
+      await updateTaskMutation(get(task, 'id'), variables);
     }
     if (bookingDate && bookingDate.getTime() !== prevBookingDate.getTime()) {
       // ---------------------commenting out the previous availableSlots flow--------------
