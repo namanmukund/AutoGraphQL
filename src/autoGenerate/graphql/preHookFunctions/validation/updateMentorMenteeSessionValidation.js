@@ -5,7 +5,9 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorSessions from '../../../utils/getMentorSessions';
-import { checkIfSlotCanBeOpenedValidation } from './utils';
+import { checkIfSlotCanBeOpenedValidation, getUserIdandAppNameAfterValidation } from './utils';
+import { TMS } from '../../../../../constants';
+import { MENTOR } from '../../../../../constants/roles';
 
 const getMentorMenteeSessionData = async (id) => {
   const query = `
@@ -95,12 +97,23 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   const {
     currentUser,
   } = userInfo;
+
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+  const {
+    appName,
+  } = userAndAppInfo;
+  const userRoleFromContext = currentUser && currentUser.role;
   // eslint-disable-next-line no-param-reassign
   context.previousDocument = mentorMenteeSessionDoc;
   context.menteeSessionConnectId = menteeSessionConnectId;
   context.currentUser = currentUser;
   context.mentorSessionConnectId = mentorSessionConnectId;
   context.isPostSalesAuditFromInput = isPostSalesAuditFromInput;
+  if (appName === TMS && userRoleFromContext === MENTOR && sessionStatus === 'started') {
+    Object.assign(newParams.input, {
+      sessionStartedByMentorAt: new Date().toISOString(),
+    });
+  }
   if (menteeSessionConnectId && menteeSessionConnectId !== get(mentorMenteeSessionDoc, 'menteeSession.id')) {
     context.hasMenteeSessionChanged = true;
   }
