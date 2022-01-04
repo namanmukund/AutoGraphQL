@@ -27,11 +27,11 @@ const Task = `
     assignedBy: User @relation(name: "TaskUserAssignedBy", direction: "OneWay")
     comment: String
     contactMsmReason: TaskContactReason
-    hasSameMentorAccepted: Boolean
+    hasSameMentorAccepted: Boolean @defaultValue(value: "false")
     contactMsmComment: String
-    isHighPriority: Boolean
-    broadcastCount: Int
-    allotmentCount: Int
+    isHighPriority: Boolean @defaultValue(value: "false")
+    broadcastCount: Int @defaultValue(value: "0")
+    allotmentCount: Int @defaultValue(value: "0")
   }
 `;
 
