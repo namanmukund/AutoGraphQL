@@ -358,11 +358,10 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       let toUpdateMenteeSession = false;
       if (
         (bookingDate && bookingDateFromInput && bookingDate.getTime() !== bookingDateFromInputParsed.getTime())
-        || (get(slotTimeArray, '0') !== get(inputSlotTimeArray, '0'))
+        || ((slotTimeArray.length > 0 && inputSlotTimeArray.length > 0) && get(slotTimeArray, '0') !== get(inputSlotTimeArray, '0'))
       ) {
         toUpdateMenteeSession = true;
       }
-
       if (((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || newStudentsArray.length > 0)
         && !get(context, 'fromAddBatchSession', false)) {
         // eslint-disable-next-line no-restricted-syntax
