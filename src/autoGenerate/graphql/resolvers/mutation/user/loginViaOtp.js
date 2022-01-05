@@ -11,6 +11,7 @@ import { getRandomNumber } from '../../../../../../utils';
 import { rangeOTP } from '../../../../../../constants';
 import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
+import userLogsActivity from '../utils/userLogsActivity';
 
 const USER_TYPE = 'User';
 
@@ -62,6 +63,10 @@ const loginViaOtpMutationResolver = async (
   if (!userData || !userData.id) {
     throw new DatabaseRecordNotFoundError();
   }
+  // check if the last opt send was within one minute and throw error
+  await userLogsActivity(userData, '', 'phoneOTPTime');
+  // check if the opt limit reach for the day and throw error
+  await userLogsActivity(userData, '', 'OTPLimit');
   const phoneOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
   const modelMutations = new MutationController(typeName, authentication);
   const updateObj = {
@@ -74,6 +79,8 @@ const loginViaOtpMutationResolver = async (
   // send otp to the client
   const { name, phone } = userData;
   getNumberAndSendSms(phone, phoneOtp, name);
+  // adding user OTP logs
+  await userLogsActivity(userData, phoneOtp, 'addOTPLog');
   return {
     result: true,
   };
