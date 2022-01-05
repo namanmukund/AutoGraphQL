@@ -108,6 +108,11 @@ const getEventDetails = (formId) => {
       eventDetailsObject.eventTime = EVENTS.CHRISTMASCARNIVAL.eventTime.dec26;
       eventDetailsObject.eventDateTime = EVENTS.CHRISTMASCARNIVAL.eventDateTime.dec26;
       break;
+    case EVENTS.STORYSPREE.rsRegiformId:
+      eventDetailsObject.eventDate = EVENTS.STORYSPREE.eventDate;
+      eventDetailsObject.eventTime = EVENTS.STORYSPREE.eventTime;
+      eventDetailsObject.eventDateTime = EVENTS.STORYSPREE.eventDateTime;
+      break;
     default:
       eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec24;
       eventDetailsObject.eventTime = EVENTS.CHRISTMASCARNIVAL.eventTime.dec24;
@@ -657,6 +662,13 @@ const typeformWebhookController = async (req, res) => {
           timezone = 'Asia/Kolkata';
           utmSource = 'communityevent';
           utmCampaign = 'storyspree_19dec';
+          break;
+        case EVENTS.STORYSPREE.rsRegiformId:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'radiostreet';
+          utmCampaign = 'storyspree';
+          doGenerateCertificate = false;
           break;
         case EVENTS.GENZENVIRONMENT.registrationFormId:
           country = 'india';
