@@ -49,7 +49,7 @@ const getLeadPartnerType = async (leadPartnerId, term, medium, source, campaign,
   return get(leadPartnerType, 'data.leadPartners[0]');
 };
 
-const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, agentId, fields = {}, bookedByUserRole) => {
+const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, agentId, fields = {}, bookedByUserRole, isAutoAssigned = false) => {
   const { bookingDate } = input;
   let phoneNumber = input.phone;
   let bookingDateTime = '';
@@ -137,6 +137,9 @@ const addMenteeBookingLeadsquared = async (input, params, slotTimeStringArray, u
   }
   if (input.mx_Meeting_Password) {
     leadSquaredInput.mx_Meeting_Password = input.mx_Meeting_Password;
+  }
+  if (isAutoAssigned) {
+    leadSquaredInput.mx_Booking_type = 'Automated';
   }
   const activityInput = {
     ActivityEvent: 103,

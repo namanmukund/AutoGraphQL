@@ -4,11 +4,14 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import { courseToGradeMapping, courseToGradeMappingForStaging } from '../../../../../constants';
 
-const getNetPromoterScoreByAUser = async (userId, courseId) => {
+const getNetPromoterScoreByAUser = async (userId, courseId, mentorMenteeSessionConnectId, batchSessionConnectId) => {
   const query = `
         query{
           netPromoterScores(filter:{
-            and: [{ user_some: { id: "${userId}" } }, { course_some: { id: "${courseId}" } }]
+            and: [{ user_some: { id: "${userId}" } }, { course_some: { id: "${courseId}" } }
+            ${mentorMenteeSessionConnectId ? `{ mentorMenteeSession_some: { id: "${mentorMenteeSessionConnectId}" } }` : ''}
+            ${batchSessionConnectId ? `{ batchSession_some: { id: "${batchSessionConnectId}" } }` : ''}
+          ]
           }){
             id
           }
@@ -34,7 +37,9 @@ const fetchUserDetails = async (userId) => {
 };
 
 const addNetPromoterScoreValidation = async (params) => {
-  const { userConnectId, courseConnectId } = params;
+  const {
+    userConnectId, courseConnectId, mentorMenteeSessionConnectId, batchSessionConnectId,
+  } = params;
   if (!userConnectId) {
     throw new ConnectIdRequiredError();
   }
@@ -52,7 +57,7 @@ const addNetPromoterScoreValidation = async (params) => {
     });
     courseId = get(defaultCourse, 'courseId');
   }
-  const netPromoterScores = await getNetPromoterScoreByAUser(userConnectId, courseId);
+  const netPromoterScores = await getNetPromoterScoreByAUser(userConnectId, courseId, mentorMenteeSessionConnectId, batchSessionConnectId);
   if (netPromoterScores && netPromoterScores.length) {
     throw new SimilarDocumentAlreadyExistError();
   }
