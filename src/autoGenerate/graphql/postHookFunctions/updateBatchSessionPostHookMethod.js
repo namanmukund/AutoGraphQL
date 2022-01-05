@@ -317,6 +317,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
           nextTopicId = topicsList[currentTopicIndex + 1].id;
         }
         if (nextTopicId) {
+          context.shouldUpdateMentorMentee = false;
           await updateBatchCurrentComponentStatus(
             batchCurrentComponentId,
             sessionStatus.allotted,
@@ -324,6 +325,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
             context,
           );
         } else {
+          context.shouldUpdateMentorMentee = false;
           await updateBatchCurrentComponentStatus(
             batchCurrentComponentId,
             sessionStatusFromInput,
@@ -334,6 +336,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
         addToSchedule('postCarnivalMail', postCarnivalFeedbackDate, { batchSessionId });
       } else {
+        context.shouldUpdateMentorMentee = false;
         await updateBatchCurrentComponentStatus(
           batchCurrentComponentId,
           sessionStatusFromInput,
