@@ -24,18 +24,18 @@ const sendCommsMessage = async (root, params, context) => {
   validateAuthentication(context);
   const commsVariables = await fetchComms();
   const { mail } = params;
+  const {
+    templateName,
+    studentName,
+    parentName,
+    studentGrade,
+    eventDate,
+    eventName,
+    speakerName,
+    parentEmail,
+    parentPhone,
+  } = params;
   if (mail === false) {
-    const {
-      templateName,
-      studentName,
-      parentName,
-      studentGrade,
-      eventDate,
-      eventName,
-      speakerName,
-      parentEmail,
-      parentPhone,
-    } = params;
     const mapCommsWithDataFields = new Map();
     // eslint-disable-next-line array-callback-return
     commsVariables.map((obj) => {
@@ -102,24 +102,47 @@ const sendCommsMessage = async (root, params, context) => {
     }
     sendWhatsAppTemplateMessage(parentPhone, templateName, broadcastName, parameters);
   } else {
-    // eslint-disable-next-line no-unused-vars
-    const templateFileName = 'forgetUserTemplate';
-    // eslint-disable-next-line no-unused-vars
-    const templateObject = {
-      forgotPassLink: 'abhay@gmail.com',
-      appName: 'Tekie-test',
-      name: 'Abhay',
-    };
-    // eslint-disable-next-line no-unused-vars
+    const mapCommsWithDataFields = new Map();
+    // eslint-disable-next-line array-callback-return
+    commsVariables.map((obj) => {
+      if (obj.emailVariableName !== NULL) {
+        mapCommsWithDataFields.set(obj.dataField, obj.emailVariableName);
+      }
+    });
+    const templateObject = {};
+    if (studentName && mapCommsWithDataFields.get('studentName') !== NULL) {
+      templateObject[mapCommsWithDataFields.get('studentName')] = studentName;
+    }
+    if (parentName && mapCommsWithDataFields.get('parentName') !== NULL) {
+      templateObject[mapCommsWithDataFields.get('parentName')] = parentName;
+    }
+    if (studentGrade && mapCommsWithDataFields.get('studentGrade') !== NULL) {
+      templateObject[mapCommsWithDataFields.get('studentGrade')] = studentGrade;
+    }
+    if (eventDate && mapCommsWithDataFields.get('eventDate') !== NULL) {
+      templateObject[mapCommsWithDataFields.get('eventDate')] = eventDate;
+    }
+    if (eventName && mapCommsWithDataFields.get('eventName') !== NULL) {
+      templateObject[mapCommsWithDataFields.get('eventName')] = eventName;
+    }
+    if (speakerName && mapCommsWithDataFields.get('speakerName') !== NULL) {
+      templateObject[mapCommsWithDataFields.get('speakerName')] = speakerName;
+    }
+    if (parentEmail && mapCommsWithDataFields.get('parentEmail') !== NULL) {
+      templateObject[mapCommsWithDataFields.get('parentEmail')] = parentEmail;
+    }
+    if (parentPhone && mapCommsWithDataFields.get('parentPhone') !== NULL) {
+      templateObject[mapCommsWithDataFields.get('parentPhone')] = parentPhone;
+    }
     const templateString = parsedHtmlFromTemplateFileAndObject(
-      templateFileName, templateObject,
+      templateName, templateObject,
     );
     templateString.then((html) => {
       const ccEmail = '';
       const bccEmail = '';
-      const subject = 'Reset Password';
-      const text = 'This is test email';
-      const emailMsgObject = getEmailObject('cotabhay@gmail.com', ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
+      const subject = 'Event Tekie';
+      const text = '';
+      const emailMsgObject = getEmailObject(parentEmail, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
       sendEmail(emailMsgObject);
     });
   }
