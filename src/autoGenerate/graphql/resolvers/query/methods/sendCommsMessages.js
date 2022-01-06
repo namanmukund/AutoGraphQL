@@ -39,11 +39,11 @@ const sendCommsMessage = async (root, params, context) => {
     mail,
   } = input;
   let dataFieldFilter = '';
-  const l = Object.keys(input).length;
+  const dataFieldLength = Object.keys(input).length;
   // eslint-disable-next-line array-callback-return
   Object.keys(input).map((i) => {
     if (i !== 'mail' && i !== 'templateName') {
-      if (i === l - 1) {
+      if (i === dataFieldLength - 1) {
         dataFieldFilter += i;
       } else {
         dataFieldFilter += `${i},`;

@@ -36,5 +36,5 @@ export const InvalidRuleValueError = createError('InvalidRuleValueError', {
 });
 
 export const CommsError = createError('CommsError', {
-  message: 'Comms input are not valid',
+  message: 'Comms failed to send',
 });

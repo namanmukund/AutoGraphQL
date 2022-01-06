@@ -110,6 +110,7 @@ import CommsDataField from './CommsDataField';
 import LocationType from './LocationType';
 import EventOrganizer from './EventOrganizer';
 import DurationType from './DurationType';
+import AttendanceFilter from './AttendanceFilter';
 
 export default [
   Status,
@@ -225,4 +226,5 @@ export default [
   LocationType,
   EventOrganizer,
   DurationType,
+  AttendanceFilter,
 ];
