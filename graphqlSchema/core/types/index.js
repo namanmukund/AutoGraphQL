@@ -138,6 +138,7 @@ import Event from './event';
 import UtmDetail from './utmDetail';
 import IqaReport from './iqaReport';
 import getMagicLink from './getMagicLink';
+import commsInput from './commsMessage';
 import magicLinkLog from './magicLinkLog';
 import LeadPartner from './leadPartner';
 import DemoWowAudit from './demoWowAudits';
@@ -286,6 +287,7 @@ export default [
   ...IqaReport,
   ...getMagicLink,
   ...magicLinkLog,
+  ...commsInput,
   ...LeadPartner,
   ...DemoWowAudit,
   ...SenseiProfile,

@@ -74,6 +74,7 @@ import salesOperationReport from './query/methods/salesOperationReport';
 import temporaryScript from './query/methods/temporaryScript';
 import sendTransactionalMessage from './query/methods/sendTransactionalMessage';
 import sendTextMessage from './query/methods/sendTextMessage';
+import sendCommsMessage from './query/methods/sendCommsMessages';
 import getTotalAmountCollected from './query/methods/getTotalAmountCollected';
 import addUpdateBulkSchoolUserData from './mutation/methods/addUpdateBulkSchoolUserData';
 import updateVisitorReactionOnUserApprovedCode from './mutation/methods/updateVisitorReactionOnUserApprovedCode';
@@ -604,6 +605,7 @@ resolvers.Query.salesOperationReport = salesOperationReport;
 resolvers.Query.temporaryScript = temporaryScript;
 resolvers.Query.sendTransactionalMessage = sendTransactionalMessage;
 resolvers.Query.sendTextMessage = sendTextMessage;
+resolvers.Query.sendCommsMessage = sendCommsMessage;
 // Resolver to get total sell amount and amount colected
 resolvers.Query.getTotalAmountCollected = getTotalAmountCollected;
 // Resolver to get the cheatsheets
