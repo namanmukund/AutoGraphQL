@@ -12,6 +12,7 @@ import { getUserFromDBQuery } from './utils';
 import { generateCuid, getRandomNumber } from '../../../../../../utils';
 import {
   BLOCKED,
+  EXCLUDE_NUMBER,
   rangeOTP,
 } from '../../../../../../constants';
 import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
@@ -89,12 +90,12 @@ const signupOrLoginViaOtp = async (
     throw new BlockedOperationError();
   }
 
-  if (!input.email) {
+  if (!input.email && !EXCLUDE_NUMBER.includes(get(input, 'phone.number'))) {
     // setting nextAllowedPhoneOtpDate to that of 60 seconds otherwise throwing error
     await userLogsActivity(userData, '', 'phoneOTPTime');
   }
 
-  if (!input.email && get(userData, 'id')) {
+  if (!input.email && get(userData, 'id') && !EXCLUDE_NUMBER.includes(get(input, 'phone.number'))) {
     // action to fetch OTP log for user and to check if limit exceeds
     await userLogsActivity(userData, '', 'OTPLimit');
   }
