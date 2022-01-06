@@ -438,6 +438,8 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     leadSquaredParams.input.Vertical = campaignType.replace('Event', '');
   }
 
+  leadSquaredParams.input.hasLaptopOrDesktop = hasLaptopOrDesktop ? 'Yes' : 'No';
+
   leadSquaredParams.input.unVerifiedLead = true;
 
   leadSquaredParams.input.phone = get(input, 'parentPhone');
@@ -459,9 +461,9 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     setTimeout(() => {
       updateLeadSquared({
         Phone: get(parentPhone, 'number'),
-        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '18 December' : '26 December',
-        mx_Event_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '03:00 pm' : '11:00 am',
-        mx_Event_Date_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '2021-12-18 09:30:00' : '2021-12-26 05:30:00',
+        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '9 January' : '9 January',
+        mx_Event_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '11:00 am' : '11:00 am',
+        mx_Event_Date_Time: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '2022-01-09 05:30:00' : '2022-01-09 05:30:00',
       }, false, {
         ActivityEvent: 208,
         Fields: [

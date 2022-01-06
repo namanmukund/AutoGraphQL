@@ -16,12 +16,16 @@ const EVENTS = {
     },
   },
   STORYSPREE: {
+    rsRegiformId: 'VuXUTUED',
     formId: 'cUepvPND',
     eventId: {
       production: 'ckw6eq3f30000xgin7yrxgk2l',
       preprod: 'ckw5wg9rj0000gtin1st0hry6',
       staging: 'ckw4unvyp0000kpinc2515c88',
     },
+    eventDate: '8 January',
+    eventTime: '03:00 pm',
+    eventDateTime: '2022-01-08 09:30:00',
   },
   GENZENVIRONMENT: {
     registrationFormId: 'GganG5WQ',
