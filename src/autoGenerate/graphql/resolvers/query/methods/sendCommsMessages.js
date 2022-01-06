@@ -5,10 +5,13 @@ import getEmailObject from '../../../../../../services/email/utils/getEmailObjec
 import sendEmail from '../../../../../../services/email/utils/sendEmail';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import sendWhatsAppTemplateMessage from '../../../../utils/sendWhatsAppTemplateMessage';
+import { CommsError } from '../../../../../../constants/errors';
 
-const fetchComms = async () => {
+const NULL = null;
+
+const fetchComms = async (dataFieldFilter) => {
   const query = `{
-    commsVariables(filter: {dataField_in: [parentName,studentName,parentEmail,speakerName,eventDate,eventName]}){
+    commsVariables(filter: {dataField_in: [${dataFieldFilter}]}){
       id
       whatsappVariableName
       emailVariableName
@@ -22,8 +25,7 @@ const fetchComms = async () => {
 
 const sendCommsMessage = async (root, params, context) => {
   validateAuthentication(context);
-  const commsVariables = await fetchComms();
-  const { mail } = params;
+  const { input } = params;
   const {
     templateName,
     studentName,
@@ -34,12 +36,26 @@ const sendCommsMessage = async (root, params, context) => {
     speakerName,
     parentEmail,
     parentPhone,
-  } = params;
+    mail,
+  } = input;
+  let dataFieldFilter = '';
+  const l = Object.keys(input).length;
+  // eslint-disable-next-line array-callback-return
+  Object.keys(input).map((i) => {
+    if (i !== 'mail' && i !== 'templateName') {
+      if (i === l - 1) {
+        dataFieldFilter += i;
+      } else {
+        dataFieldFilter += `${i},`;
+      }
+    }
+  });
+  const commsVariables = await fetchComms(dataFieldFilter);
   if (mail === false) {
     const mapCommsWithDataFields = new Map();
     // eslint-disable-next-line array-callback-return
     commsVariables.map((obj) => {
-      if (obj.whatsappVariableName !== NULL) {
+      if (obj.whatsappVariableName !== null) {
         mapCommsWithDataFields.set(obj.dataField, obj.whatsappVariableName);
       }
     });
@@ -100,7 +116,12 @@ const sendCommsMessage = async (root, params, context) => {
       };
       parameters.push(tempObj);
     }
-    sendWhatsAppTemplateMessage(parentPhone, templateName, broadcastName, parameters);
+    const broadcastName = 'Tekie';
+    try {
+      sendWhatsAppTemplateMessage(parentPhone, templateName, broadcastName, parameters);
+    } catch (e) {
+      throw new CommsError();
+    }
   } else {
     const mapCommsWithDataFields = new Map();
     // eslint-disable-next-line array-callback-return
@@ -143,7 +164,11 @@ const sendCommsMessage = async (root, params, context) => {
       const subject = 'Event Tekie';
       const text = '';
       const emailMsgObject = getEmailObject(parentEmail, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
-      sendEmail(emailMsgObject);
+      try {
+        sendEmail(emailMsgObject);
+      } catch (e) {
+        throw new CommsError();
+      }
     });
   }
   return {

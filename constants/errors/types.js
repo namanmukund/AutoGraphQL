@@ -34,3 +34,7 @@ export const UnsupportedListFieldInsideSubDocumentObjectError = createError('Uns
 export const InvalidRuleValueError = createError('InvalidRuleValueError', {
   message: 'Only accepted rules are allow and deny',
 });
+
+export const CommsError = createError('CommsError', {
+  message: 'Comms input are not valid',
+});
