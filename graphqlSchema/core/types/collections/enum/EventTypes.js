@@ -1,9 +1,9 @@
 const EventTypes = `
   enum EventTypes {
-    oneDay
+    oneday
     recurring
     workshop
-    Offline
+    offline
   }`;
 
 export default EventTypes;
