@@ -33,6 +33,7 @@ import loginViaPasswordMutationResolver from './user/loginViaPassword';
 import getPaymentRequestMutationResolver from './payment/getPaymentRequest';
 import getPaymentResponseMutationResolver from './payment/getPaymentResponse';
 import addBulkMentorSessionMutationResolver from './mentor/addBulkMentorSession';
+import generateMentorPayoutReportMutationResolver from './mentor/generateMentorPayoutReport';
 import bookB2B2CSlotsMutationResolver from './user/bookB2B2CSlots';
 import rebookMenteeSessionMutationResolver from './user/rebookMenteeSession';
 import sendCertificateInMailMutationResolver from './user/sendCertificateInMail';
@@ -84,4 +85,5 @@ export {
   generateCertificateMutationResolver,
   validateMagicLinkMutationResolver,
   resetPasswordAndLoginMutationResolver,
+  generateMentorPayoutReportMutationResolver,
 };

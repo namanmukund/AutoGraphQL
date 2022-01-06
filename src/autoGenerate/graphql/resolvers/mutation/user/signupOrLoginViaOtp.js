@@ -1,11 +1,10 @@
 import { get } from 'lodash';
-import moment from 'moment';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate, validateName } from '../../../validation';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import {
   BlockedOperationError,
-  DatabaseRecordNotFoundError, PhoneOtpMaxRetryTimeLimitError, PhoneOtpPerDayLimitError,
+  DatabaseRecordNotFoundError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
 import { MutationController, QueryController } from '../../../controllers';
@@ -13,9 +12,6 @@ import { getUserFromDBQuery } from './utils';
 import { generateCuid, getRandomNumber } from '../../../../../../utils';
 import {
   BLOCKED,
-  EXCLUDE_NUMBER,
-  PHONE_OTP_LIMIT_PER_DAY,
-  PHONE_OTP_MAX_RETRY_WAIT_SECOND,
   rangeOTP,
 } from '../../../../../../constants';
 import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
@@ -24,10 +20,9 @@ import { PARENT } from '../../../../../../constants/roles';
 import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
 // import sendBookingReminderOrConfirmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import userLogsActivity from '../utils/userLogsActivity';
 
 const USER_TYPE = 'User';
-
-const USER_OTP_LOG_TYPE = 'UserOtpLog';
 
 const FETCH_CAMPAIGN = (campaignId) => `{
   campaign(id: "${campaignId}") {
@@ -39,27 +34,6 @@ const FETCH_CAMPAIGN = (campaignId) => `{
     school {
       name
     }
-  }
-}`;
-
-const FETCH_USER_OTP_LOG_META = (userId, fromDate, toDate) => `{
-  userOtpLogsMeta(filter:{
-    and:[
-      {
-        user_some:{
-          id: "${userId}"
-        }
-      }
-      {
-        createdAt_gt: "${fromDate}"
-      }
-      {
-        createdAt_lt: "${toDate}"
-      }
-    ]
-    
-  }){
-    count
   }
 }`;
 
@@ -115,21 +89,14 @@ const signupOrLoginViaOtp = async (
     throw new BlockedOperationError();
   }
 
-  // setting nextAllowedPhoneOtpDate to that of 60 seconds otherwise throwing error
-  const phoneOtpCreationDate = get(userData, 'phoneOtpCreationDate');
-  if (!input.email && phoneOtpCreationDate && Math.abs(moment().diff(moment(new Date(phoneOtpCreationDate)), 'seconds')) < PHONE_OTP_MAX_RETRY_WAIT_SECOND && !EXCLUDE_NUMBER.includes(get(input, 'phone.number'))) {
-    throw new PhoneOtpMaxRetryTimeLimitError();
+  if (!input.email) {
+    // setting nextAllowedPhoneOtpDate to that of 60 seconds otherwise throwing error
+    await userLogsActivity(userData, '', 'phoneOTPTime');
   }
 
   if (!input.email && get(userData, 'id')) {
-    // fetching userOtpLogs count for past 1 day for a user
-    const fromDate = new Date();
-    fromDate.setDate(fromDate.getDate() - 1);
-    const userOtpLogMetaRes = await callLocalGraphqlApi(FETCH_USER_OTP_LOG_META(get(userData, 'id'), fromDate, new Date()));
-    const userOtpLogCount = get(userOtpLogMetaRes, 'data.userOtpLogsMeta.count', 0);
-    if (userOtpLogCount >= PHONE_OTP_LIMIT_PER_DAY && !EXCLUDE_NUMBER.includes(get(input, 'phone.number'))) {
-      throw new PhoneOtpPerDayLimitError();
-    }
+    // action to fetch OTP log for user and to check if limit exceeds
+    await userLogsActivity(userData, '', 'OTPLimit');
   }
 
   if (!userData || !userData.id) {
@@ -223,18 +190,7 @@ const signupOrLoginViaOtp = async (
   const { name, phone } = userData;
   if (!input.email) {
     getNumberAndSendSms(phone, phoneOtp, name);
-    const userOtpLogModelMutations = new MutationController(USER_OTP_LOG_TYPE, { bypass: true });
-    const newUserOtpLog = {
-      phoneOtp,
-    };
-    if (userData && userData.id) {
-      newUserOtpLog.user = {
-        type: 'User',
-        typeId: userData.id,
-      };
-    }
-    const userOtpLogData = generateCuid(newUserOtpLog);
-    userOtpLogModelMutations.addDocument(userOtpLogData);
+    await userLogsActivity(userData, phoneOtp, 'addOTPLog');
   }
   return {
     result: true,

@@ -119,6 +119,8 @@ const MentorMenteeSession = `
     bookingAgent: User @relation(name: "MentorMenteeSessionBookingAgent", direction: "OneWay")
     sessionStartedByMentorAt: Date
     sessionJoinedByMenteeAt: Date
+    verificationStatus: VerificationStatus @defaultValue(value: "unverified")
+    verifiedBy: User @relation(name: "MentorMenteeSessionVerifiedBy", direction: "OneWay")
 }`;
 
 export default [MentorMenteeSession, internetSpeed];
