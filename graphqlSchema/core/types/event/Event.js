@@ -30,6 +30,7 @@ const EventCommsRule = `
   templateName: String!
   commsVariables: [CommsVariableType]
   condition: DateCondition
+  attendanceFilter: AttendanceFilter
   unit: DurationType
   value: Int
   isTested: Boolean

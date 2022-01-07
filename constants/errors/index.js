@@ -116,6 +116,7 @@ import {
   InvalidDateFormatError,
   UnsupportedListFieldInsideSubDocumentObjectError,
   InvalidRuleValueError,
+  CommsError,
 } from './types';
 import {
   EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
@@ -239,6 +240,7 @@ export {
   UnauthorizedFieldOrTypeAccessByAppError,
   InsufficientPermissionError,
   InvalidRuleValueError,
+  CommsError,
   InvalidGmailTokenError,
   InvalidFacebookTokenError,
   InvalidPasswordLengthError,
