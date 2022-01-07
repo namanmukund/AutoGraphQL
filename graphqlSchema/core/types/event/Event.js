@@ -80,6 +80,7 @@ const Event = `
     utm: [UTMParameters]
     isListedOnWeb: Boolean
     status: ContentStatus
+    sessionCreationStatus: BatchCreationStatus
     embeds: [EventCertificateEmbed] @relation(name: "EventCertificateEmbedEvent", direction: "OneWay")
     baseCertificate: File @relation(name: "BaseCertificateEvent", direction: "OneWay")
     eventTimeTableRule: BatchTimeTableRule
