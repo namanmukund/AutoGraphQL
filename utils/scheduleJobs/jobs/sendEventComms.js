@@ -67,6 +67,7 @@ const eventQuery = (id) => `{
         emailVariableName
         dataField
       }
+      attendanceFilter
       condition
       unit
       value
@@ -87,12 +88,6 @@ const sendEmailTemplateMessage = (email, subject) => {
     templateFileName, templateObject,
   );
   const emailTo = [email];
-  // if (process.env.DATA_MASKING) {
-  //   // eslint-disable-next-line no-param-reassign
-  //   emailTo = [
-  //     email,
-  //   ];
-  // }
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';
@@ -128,98 +123,10 @@ const updateCommsRuleStatus = async (eventId, variable) => {
 };
 
 const sendEventComms = async () => {
-  // const event = await callLocalGraphqlApi(eventQuery(eventId));
-  const event = {
-    id: '1',
-    date: '2019-12-12T00:00:00.000Z',
-    eventName: 'event 1',
-    registeredUsers: [
-      {
-        id: '1',
-        grade: '10',
-        parents: {
-          id: '1',
-          user: {
-            id: '1',
-            phone: {
-              number: '123456789',
-              countryCode: '+91',
-            },
-            email: 'abc@gmail.com',
-          },
-        },
-        user: {
-          id: '1',
-        },
-      },
-      {
-        id: '2',
-        grade: '11',
-        parents: {
-          id: '1',
-          user: {
-            id: '1',
-            phone: {
-              number: '12345678912',
-              countryCode: '+92',
-            },
-            email: 'abcd@gmail.com',
-          },
-        },
-        user: {
-          id: '1',
-        },
-      },
-    ],
-    speakers: [
-      {
-        user: {
-          name: 'sp1',
-        },
-      },
-      {
-        user: {
-          name: 'ps2',
-        },
-      },
-    ],
-    eventCommsRule: [
-      {
-        templateName: 'event is about to start',
-        commsVariables: [
-          {
-            whatsappVariableName: 'event_name',
-            emailVariableName: 'event_name',
-            dataField: 'event_name',
-          },
-        ],
-        condition: 'before',
-        unit: '10',
-        value: 'minute',
-        isTested: true,
-        isPassed: true,
-        isSend: false,
-      },
-      {
-        templateName: 'event_over',
-        commsVariables: [
-          {
-            whatsappVariableName: 'event_name',
-            emailVariableName: 'event_name',
-            dataField: 'event_name',
-          },
-        ],
-        condition: 'after',
-        unit: '10',
-        value: 'minute',
-        isTested: true,
-        isPassed: true,
-        isSend: false,
-      },
-    ],
-  };
+  const event = await callLocalGraphqlApi(eventQuery(eventId));
+
   if (!get(event, 'id')) return;
-  const attendeters = get(event, 'registeredUsers');
+
   const eventsCommsRule = get(event, 'eventCommsRule');
   // eslint-disable-next-line no-restricted-syntax
   for (const rule of eventsCommsRule) {
@@ -290,73 +197,93 @@ const sendEventComms = async () => {
       }
     }
     if (get(rule, 'condition') === 'after') {
-      if (moment(get(event, 'date')).fromNow().includes(` ${rule.value} ${rule.unit} ago`) || true) {
-        // eslint-disable-next-line no-console
-        console.log('after');
-        // create an array of object from eventsCommsRule array without the object whose condition is 'before'
+      if (moment(get(event, 'date')).fromNow().includes(` ${rule.value} ${rule.unit} ago`)) {
         const newEventsCommsRule = eventsCommsRule.filter(
           (item) => item.condition !== 'after',
         );
-        if ('toall') {
+        const speakers = get(event, 'speakers', []).map((speaker) => (speaker.user.name ? speaker.user.name : null)).join(', ');
+        const commsVariableswhatsappInfoList = [{
+          name: 'event_name',
+          value: get(event, 'eventName'),
+        }, {
+          name: 'event_dame',
+          value: get(event, 'date'),
+        },
+        {
+          name: 'speaker_name',
+          value: speakers,
+        }];
+        if (get(rule, 'attendanceFilter') === 'allUser') {
+          const attenders = get(event, 'registeredUsers');
           attenders.forEach((attender) => {
-            const commsVariableswhatsappInfoList = get(rule, 'commsVariables').map((variables) => {
+            get(rule, 'commsVariables').forEach((variables) => {
               const value = get(attender, mapDataFieldToVariableName(get(variables, 'dataField')));
-              return {
-                name: `${variables.whatsappVariableName}`,
-                value,
-              };
+              commsVariableswhatsappInfoList.push(
+                {
+                  name: `${variables.whatsappVariableName}`,
+                  value,
+                },
+              );
             });
-            const speakers = get(event, 'speakers', []).map((speaker) => (speaker.user.name ? speaker.user.name : null)).join(', ');
-            commsVariableswhatsappInfoList.push(...[{
-              name: 'event_name',
-              value: get(event, 'eventName'),
-            }, {
-              name: 'event_dame',
-              value: get(event, 'date'),
-            },
-            {
-              name: 'speaker_name',
-              value: speakers,
-            }]);
             const phoneNumber = get(attender, 'parents.user.phone.countryCode').split('+')[1] + get(attender, 'parents.user.phone.number');
-            // sendWhatsAppTemplateMessage(
-            //   918384065652,
-            //   get(rule, 'templateName'),
-            //   918384065652,
-            //   commsVariableswhatsappInfoList,
-            // );
-            sendEmailTemplateMessage('keshavjhaa2678@gmail.com', 'Tekie Event Remainder');
+            sendWhatsAppTemplateMessage(
+              phoneNumber,
+              get(rule, 'templateName'),
+              phoneNumber,
+              commsVariableswhatsappInfoList,
+            );
+            sendEmailTemplateMessage(get(attender, 'parents.email'), 'Tekie Event Remainder');
           });
-        }
-        if ('attenders') {
-          // map over eventSessions from event query in which map over attendence and filter the attenders who are not present isPresent is true and store the result in a const attender attenders array
-          const eventSessions = get(event, 'eventSessions', []);
-          eventSessions.forEach((session) => get(session, 'attendence', []).forEach((attendee) => {
-            if (attendee.isPresent === true) {
-              // eslint-disable-next-line no-console
-              console.log(attendee);
-            }
-          }));
-        }
-        if ('notattenders') {
-          const eventSessions = get(event, 'eventSessions', []);
-          eventSessions.forEach((session) => get(session, 'attendence', []).forEach((attendee) => {
-            if (attendee.isPresent === false) {
-              // eslint-disable-next-line no-console
-              console.log(attendee);
-            }
-          }));
+        } else {
+          const commsReceivers = [];
+          if (get(rule, 'attendanceFilter') === 'attendees') {
+            const eventSessions = get(event, 'eventSessions', []);
+            eventSessions.forEach((session) => get(session, 'attendence', []).forEach((attendee) => {
+              if (!commsReceivers.includes(attendee)) {
+                if (attendee.isPresent) {
+                  commsReceivers.push(attendee);
+                }
+              }
+            }));
+          }
+          if (get(rule, 'attendanceFilter') === ' nonAttendees') {
+            const eventSessions = get(event, 'eventSessions', []);
+            eventSessions.forEach((session) => get(session, 'attendence', []).forEach((attendee) => {
+              if (!commsReceivers.includes(attendee)) {
+                if (!attendee.isPresent) {
+                  commsReceivers.push(attendee);
+                }
+              }
+            }));
+          }
+          commsReceivers.forEach((receiver) => {
+            get(rule, 'commsVariables').forEach((variables) => {
+              const value = get(receiver, mapDataFieldToVariableName(get(variables, 'dataField')));
+              commsVariableswhatsappInfoList.push(
+                {
+                  name: `${variables.whatsappVariableName}`,
+                  value,
+                },
+              );
+            });
+            const phoneNumber = get(receiver, 'parents.user.phone.countryCode').split('+')[1] + get(receiver, 'parents.user.phone.number');
+            sendWhatsAppTemplateMessage(
+              phoneNumber,
+              get(rule, 'templateName'),
+              phoneNumber,
+              commsVariableswhatsappInfoList,
+            );
+            sendEmailTemplateMessage(get(receiver, 'parents.email'), 'Tekie Event Remainder');
+          });
         }
         newEventsCommsRule.push({
           ...rule,
           isSend: true,
         });
-        // eslint-disable-next-line no-console
-        console.log({ newEventsCommsRule });
-        // const variable = { input: { eventCommsRule: { replace: newEventsCommsRule } } };
-        // // eslint-disable-next-line no-await-in-loop
-        // await updateCommsRuleStatus(eventId, variable);
-        // deleteJob();
+        const variable = { input: { eventCommsRule: { replace: newEventsCommsRule } } };
+        // eslint-disable-next-line no-await-in-loop
+        await updateCommsRuleStatus(eventId, variable);
+        deleteJob();
       }
     }
   }

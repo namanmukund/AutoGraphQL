@@ -50,7 +50,6 @@ const deleteJobQuery = (id) => `
 const reRunJobsFromDB = async () => {
   const res = await callLocalGraphqlApi(FETCH_JOBS);
   const scheduledJobs = get(res, 'data.scheduleJobs', []);
-  sendEventComms();
   scheduledJobs.forEach(async (scheduledJob) => {
     const {
       jobType,

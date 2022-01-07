@@ -23,7 +23,6 @@ const eventSessionQuery = (id) => `{
       }
     }
   }`;
-// before and after session to all attendes or according to other cases of attendence
 const sendEventRemainderComms = async ({ eventSessionId }, deleteJob) => {
   const res = await callLocalGraphqlApi(eventSessionQuery(eventSessionId));
   const eventSession = get(res, 'data.eventSession', {});
