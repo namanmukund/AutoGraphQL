@@ -1,3 +1,5 @@
+import { blockBasedProjectType, childTopicComponents, topicComponents } from '../../../../../constants';
+
 const { comicStrip, chatbot } = childTopicComponents;
 const { video } = topicComponents;
 const { project, practice } = blockBasedProjectType;
