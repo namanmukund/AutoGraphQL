@@ -120,6 +120,10 @@ import updateFileValidation from './preHookFunctions/validation/updateFileValida
 import addLeadPartnerValidation from './preHookFunctions/validation/addLeadPartnerValidation';
 import updateLeadPartnerValidation from './preHookFunctions/validation/updateLeadPartnerValidation';
 import addSenseiProfileValidation from './preHookFunctions/validation/addSenseiProfileValidation';
+import addEventCategoryValidation from './preHookFunctions/validation/addEventCategoryValidation';
+import addContentTagValidation from './preHookFunctions/validation/addContentTagValidation';
+import addEventSpeakerProfileValidation from './preHookFunctions/validation/addEventSpeakerProfileValidation';
+import addCommsVariableValidation from './preHookFunctions/validation/addCommsVariableValidation';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -881,6 +885,22 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     // }
     case 'updateMentorAvailabilitySlot': {
       await updateMentorAvailabilitySlotValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addEventSpeakerProfileValidation': {
+      await addEventSpeakerProfileValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addCommsVariableValidation': {
+      await addCommsVariableValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addEventCategoryValidation': {
+      await addEventCategoryValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addContentTagValidation': {
+      await addContentTagValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'addAcceptedSlotRequestByMentorLog': {
