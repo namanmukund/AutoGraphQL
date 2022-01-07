@@ -7,8 +7,6 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 import sendWhatsAppTemplateMessage from '../../../../utils/sendWhatsAppTemplateMessage';
 import { CommsError } from '../../../../../../constants/errors';
 
-const NULL = null;
-
 const fetchComms = async (dataFieldFilter) => {
   const query = `{
     commsVariables(filter: {dataField_in: [${dataFieldFilter}]}){
@@ -28,12 +26,6 @@ const sendCommsMessage = async (root, params, context) => {
   const { input } = params;
   const {
     templateName,
-    studentName,
-    parentName,
-    studentGrade,
-    eventDate,
-    eventName,
-    speakerName,
     parentEmail,
     parentPhone,
     mail,
@@ -51,71 +43,23 @@ const sendCommsMessage = async (root, params, context) => {
     }
   });
   const commsVariables = await fetchComms(dataFieldFilter);
+  const mapCommsWithDataFields = {};
+  // eslint-disable-next-line array-callback-return
+  commsVariables.map((obj) => {
+    if (obj.whatsappVariableName !== null) {
+      mapCommsWithDataFields[obj.dataField] = mail ? obj.emailVariableName : obj.whatsappVariableName;
+    }
+  });
   if (mail === false) {
-    const mapCommsWithDataFields = new Map();
-    // eslint-disable-next-line array-callback-return
-    commsVariables.map((obj) => {
-      if (obj.whatsappVariableName !== null) {
-        mapCommsWithDataFields.set(obj.dataField, obj.whatsappVariableName);
+    const parameters = [];
+    Object.keys(mapCommsWithDataFields).forEach((key) => {
+      if (get(params, `input.${key}`) && mapCommsWithDataFields[key]) {
+        parameters.push({
+          name: mapCommsWithDataFields[key],
+          value: get(params, `input.${key}`),
+        });
       }
     });
-    const parameters = [];
-    if (studentName && mapCommsWithDataFields.get('studentName') !== NULL) {
-      const tempObj = {
-        name: mapCommsWithDataFields.get('studentName'),
-        value: studentName,
-      };
-      parameters.push(tempObj);
-    }
-    if (parentName && mapCommsWithDataFields.get('parentName') !== NULL) {
-      const tempObj = {
-        name: mapCommsWithDataFields.get('parentName'),
-        value: parentName,
-      };
-      parameters.push(tempObj);
-    }
-    if (studentGrade && mapCommsWithDataFields.get('studentGrade') !== NULL) {
-      const tempObj = {
-        name: mapCommsWithDataFields.get('studentGrade'),
-        value: studentGrade,
-      };
-      parameters.push(tempObj);
-    }
-    if (eventDate && mapCommsWithDataFields.get('eventDate') !== NULL) {
-      const tempObj = {
-        name: mapCommsWithDataFields.get('eventDate'),
-        value: eventDate,
-      };
-      parameters.push(tempObj);
-    }
-    if (eventName && mapCommsWithDataFields.get('eventName') !== NULL) {
-      const tempObj = {
-        name: mapCommsWithDataFields.get('eventName'),
-        value: eventName,
-      };
-      parameters.push(tempObj);
-    }
-    if (speakerName && mapCommsWithDataFields.get('speakerName') !== NULL) {
-      const tempObj = {
-        name: mapCommsWithDataFields.get('speakerName'),
-        value: speakerName,
-      };
-      parameters.push(tempObj);
-    }
-    if (parentEmail && mapCommsWithDataFields.get('parentEmail') !== NULL) {
-      const tempObj = {
-        name: mapCommsWithDataFields.get('parentEmail'),
-        value: parentEmail,
-      };
-      parameters.push(tempObj);
-    }
-    if (parentPhone && mapCommsWithDataFields.get('parentPhone') !== NULL) {
-      const tempObj = {
-        name: mapCommsWithDataFields.get('parentPhone'),
-        value: parentPhone,
-      };
-      parameters.push(tempObj);
-    }
     const broadcastName = 'Tekie';
     try {
       sendWhatsAppTemplateMessage(parentPhone, templateName, broadcastName, parameters);
@@ -123,38 +67,12 @@ const sendCommsMessage = async (root, params, context) => {
       throw new CommsError();
     }
   } else {
-    const mapCommsWithDataFields = new Map();
-    // eslint-disable-next-line array-callback-return
-    commsVariables.map((obj) => {
-      if (obj.emailVariableName !== NULL) {
-        mapCommsWithDataFields.set(obj.dataField, obj.emailVariableName);
+    const templateObject = {};
+    Object.keys(mapCommsWithDataFields).forEach((key) => {
+      if (get(params, `input.${key}`) && mapCommsWithDataFields[key]) {
+        templateObject[mapCommsWithDataFields[key]] = get(params, `input.${key}`);
       }
     });
-    const templateObject = {};
-    if (studentName && mapCommsWithDataFields.get('studentName') !== NULL) {
-      templateObject[mapCommsWithDataFields.get('studentName')] = studentName;
-    }
-    if (parentName && mapCommsWithDataFields.get('parentName') !== NULL) {
-      templateObject[mapCommsWithDataFields.get('parentName')] = parentName;
-    }
-    if (studentGrade && mapCommsWithDataFields.get('studentGrade') !== NULL) {
-      templateObject[mapCommsWithDataFields.get('studentGrade')] = studentGrade;
-    }
-    if (eventDate && mapCommsWithDataFields.get('eventDate') !== NULL) {
-      templateObject[mapCommsWithDataFields.get('eventDate')] = eventDate;
-    }
-    if (eventName && mapCommsWithDataFields.get('eventName') !== NULL) {
-      templateObject[mapCommsWithDataFields.get('eventName')] = eventName;
-    }
-    if (speakerName && mapCommsWithDataFields.get('speakerName') !== NULL) {
-      templateObject[mapCommsWithDataFields.get('speakerName')] = speakerName;
-    }
-    if (parentEmail && mapCommsWithDataFields.get('parentEmail') !== NULL) {
-      templateObject[mapCommsWithDataFields.get('parentEmail')] = parentEmail;
-    }
-    if (parentPhone && mapCommsWithDataFields.get('parentPhone') !== NULL) {
-      templateObject[mapCommsWithDataFields.get('parentPhone')] = parentPhone;
-    }
     const templateString = parsedHtmlFromTemplateFileAndObject(
       templateName, templateObject,
     );
