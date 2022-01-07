@@ -110,6 +110,8 @@ import TaskLeadStatus from './TaskLeadStatus';
 import TaskLeadStatusReason from './TaskLeadStatusReason';
 import TaskBookingStatus from './TaskBookingStatus';
 import TaskContactReason from './TaskContactReason';
+import AttentionAmount from './AttentionAmount';
+import LearningObjectiveComponentsB2B from './LearningObjectiveComponentsB2B';
 
 export default [
   Status,
@@ -225,4 +227,6 @@ export default [
   TaskLeadStatusReason,
   TaskBookingStatus,
   TaskContactReason,
+  AttentionAmount,
+  LearningObjectiveComponentsB2B,
 ];
