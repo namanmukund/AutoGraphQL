@@ -107,6 +107,7 @@ import EditorMode from './EditorMode';
 import TaskStatus from './TaskStatus';
 import TaskCompletionStatus from './TaskCompletionStatus';
 import TaskLeadStatus from './TaskLeadStatus';
+import TaskLeadStatusReason from './TaskLeadStatusReason';
 import TaskBookingStatus from './TaskBookingStatus';
 import TaskContactReason from './TaskContactReason';
 
@@ -221,6 +222,7 @@ export default [
   TaskStatus,
   TaskCompletionStatus,
   TaskLeadStatus,
+  TaskLeadStatusReason,
   TaskBookingStatus,
   TaskContactReason,
 ];

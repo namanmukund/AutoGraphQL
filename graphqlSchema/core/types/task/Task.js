@@ -20,6 +20,7 @@ const Task = `
     sessionLog: SessionLog @relation(name: "TaskSessionLog", direction: "OneWay")
     mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name: "TaskMentorAvailabilitySlot", direction: "OneWay")
     leadStatus: TaskLeadStatus @defaultValue(value: "verificationPending")
+    leadStatusReason: TaskLeadStatusReason @defaultValue(value: "busy")
     bookingStatus: TaskBookingStatus @defaultValue(value: "notConfirmed")
     bookingComment: String
     rejectionComment: String

@@ -40,6 +40,7 @@ const User = `
     email: String @uniqueOrEmpty @trim
     emailVerified: Boolean @defaultValue(value: "false") @readOnly
     phone: Phone @uniqueOrEmpty
+    alternatePhone: Phone @uniqueOrEmpty
     phoneVerified: Boolean @defaultValue(value: "false")
     dateOfBirth: Date
     gender: Gender
