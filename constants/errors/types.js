@@ -34,3 +34,11 @@ export const UnsupportedListFieldInsideSubDocumentObjectError = createError('Uns
 export const InvalidRuleValueError = createError('InvalidRuleValueError', {
   message: 'Only accepted rules are allow and deny',
 });
+
+export const SubscriptionKeyNotDefinedError = createError('SubscriptionKeyNotDefinedError', {
+  message: 'Subscription Key is Required To Iterate! \n For Example: [\'POST_CREATED\'], now you can use this key to publish data using PubSub.',
+});
+
+export const InvalidSubscriptionKeyError = createError('InvalidSubscriptionKeyError', {
+  message: 'Subscription Key Must Be An Array!',
+});

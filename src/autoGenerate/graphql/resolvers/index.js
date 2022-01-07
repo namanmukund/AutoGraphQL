@@ -1,6 +1,7 @@
 /* AutoGenerates resolvers for model types  */
 import { camelCase, isArray, get } from 'lodash';
 import pluralize from 'pluralize';
+import { withFilter } from 'graphql-subscriptions';
 import { getParsedASTMap, checkIfArgumentsAreFromSameType, getFieldsBeingFetched } from '../../utils';
 import getRelationMutationNames from '../../utils/getRelationMutationNames';
 import {
@@ -10,6 +11,7 @@ import {
   deleteMultipleMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
+import injectSubscriptionWithCommonAsyncIterator from './utils/injectSubscriptionWithCommonAsyncIterator';
 import {
   types, ifAuthorized, toObject, isErrorThrown,
 } from '../../../../utils';
@@ -187,10 +189,38 @@ Object.keys(parsedASTMap).forEach((type) => {
     const subscribedEvents = get(subscribe, 'events', []);
     if (subscribedEvents.length) {
       resolvers.Subscription[modelSingular] = {
-        subscribe: (root, params, context) => {
-          const { pubsub } = context;
-          return pubsub.asyncIterator([modelSingular]);
-        },
+        subscribe: withFilter(
+          (root, params, context) => {
+            const { pubsub } = context;
+            return pubsub.asyncIterator([modelSingular]);
+          },
+          async (payload, variables) => {
+            const { typeId } = payload;
+            const { filter: subscriptionFilter } = variables;
+            // Return result only if updated payload exists for the the supplied filter.
+            if (subscriptionFilter && Object.keys(subscriptionFilter).length) {
+              const query = `query ${typeName}($subscriptionFilter: ${typeName}Filter){
+                ${modelPlural}(filter: $subscriptionFilter){
+                  id
+                }
+              }`;
+              const result = await callLocalGraphqlApi(query, null, {
+                subscriptionFilter: {
+                  and: [
+                    subscriptionFilter,
+                    {
+                      id: typeId,
+                    },
+                  ],
+                },
+              });
+              const finalResult = get(result, `data.${modelPlural}`, []);
+              return Boolean(finalResult && finalResult.length);
+            }
+            // Always return result if no filter is sent.
+            return true;
+          },
+        ),
         resolve: async (payload, args, context, info) => {
           const { fieldNodes } = info;
           const fieldsFetched = getFieldsBeingFetched(fieldNodes);
@@ -626,5 +656,8 @@ resolvers.Query.getSchoolCampaignSlots = getSchoolCampaignSlots;
 resolvers.Query.getMagicLink = getMagicLink;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
+
+// subscriptions
+resolvers.Subscription.userUpdated = injectSubscriptionWithCommonAsyncIterator(['USER_UPDATED']);
 
 export default resolvers;
