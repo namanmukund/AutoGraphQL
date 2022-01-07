@@ -205,7 +205,7 @@ const generateSessionCourseReport = async (numDaysToRunQuery) => {
   const currentStartDate = new Date();
   const currentEndDate = new Date();
   currentStartDate.setHours(0, 0, 0, 0);
-  currentEndDate.setHours(23, 59, 59, 999);
+  currentEndDate.setHours(23, 59, 59, 999); 
   const courses = await coursesQuery();
   while (numDaysToRunQuery > 0 && courses.length > 0) {
     const todayStartDate = new Date(moment(currentStartDate).subtract(dayCount, 'days').toISOString());

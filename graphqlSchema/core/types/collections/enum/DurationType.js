@@ -1,5 +1,6 @@
 const DurationType = `
   enum DurationType {
+    minute
     hour
     day
     week

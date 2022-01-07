@@ -21,7 +21,7 @@ db.on('error', (err) => {
 }).once('open', async () => {
   log('Connected to DB.');
   if (
-    process.env.NODE_ENV === 'production'
+    process.env.NODE_ENV === 'staging'
     && process.env.IS_SCHEDULER_INSTANCE
     && process.env.IS_SCHEDULER_INSTANCE !== 'false') {
     createScheduler('mentorReport');
