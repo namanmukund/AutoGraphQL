@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { difference, get } from 'lodash';
+// import moment from 'moment';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 // import reduceParticularAvailableSlotOfADate from './utils/reduceParticularAvailableSlotOfADate';
 // import increaseParticularAvailableSlotOfADate from './utils/increaseParticularAvailableSlotOfADate';
@@ -87,11 +88,14 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     const courseInfo = await getCourseInfo(get(input, 'course.typeId'));
     const prevBroadCastedMentors = get(previousDocument, 'broadCastedMentors', []).map((mentor) => get(mentor, 'id'));
     const newBroadcastedmentors = get(input, 'broadCastedMentors', []);
+    let hasBroadcasted = false;
+    let startTime = '';
     // eslint-disable-next-line no-restricted-syntax
     for (const mentorProfile of newBroadcastedmentors) {
       if (!prevBroadCastedMentors.includes(get(mentorProfile, 'typeId'))) {
         const time = get(slotTimeStringArray, '0').split('slot')[1];
-        const startTime = getSlotLabel(time).startTime;
+        startTime = getSlotLabel(time).startTime;
+        hasBroadcasted = true;
         sendMailAndWhatsappMessageForSupplyRequest(get(mentorProfile, 'typeId'),
           {
             date: bookingDate,
@@ -103,13 +107,17 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
       }
     }
     // update "Task" with broadcast count
-    if (get(task, 'id')) {
+    if (get(task, 'id') && hasBroadcasted) {
+      const previousBcastCount = get(task, 'broadcastCount', 0);
       const variables = {
         input: {
-          broadcastCount: get(task, 'broadcastCount', 0) + 1,
+          broadcastCount: previousBcastCount + 1,
         },
       };
-      console.log('variables', variables);
+      if (previousBcastCount >= 5) {
+        variables.input.status = 'failedToAssign';
+      }
+      // TODO : "high priority" if start time is less than two hours from current time
       await updateTaskMutation(get(task, 'id'), variables);
     }
     if (bookingDate && bookingDate.getTime() !== prevBookingDate.getTime()) {
