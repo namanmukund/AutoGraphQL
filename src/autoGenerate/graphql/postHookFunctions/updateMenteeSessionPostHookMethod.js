@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { difference, get } from 'lodash';
-// import moment from 'moment';
+import moment from 'moment';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 // import reduceParticularAvailableSlotOfADate from './utils/reduceParticularAvailableSlotOfADate';
 // import increaseParticularAvailableSlotOfADate from './utils/increaseParticularAvailableSlotOfADate';
@@ -90,10 +90,11 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     const newBroadcastedmentors = get(input, 'broadCastedMentors', []);
     let hasBroadcasted = false;
     let startTime = '';
+    let time = '';
     // eslint-disable-next-line no-restricted-syntax
     for (const mentorProfile of newBroadcastedmentors) {
       if (!prevBroadCastedMentors.includes(get(mentorProfile, 'typeId'))) {
-        const time = get(slotTimeStringArray, '0').split('slot')[1];
+        time = get(slotTimeStringArray, '0').split('slot')[1];
         startTime = getSlotLabel(time).startTime;
         hasBroadcasted = true;
         sendMailAndWhatsappMessageForSupplyRequest(get(mentorProfile, 'typeId'),
@@ -117,7 +118,13 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
       if (previousBcastCount >= 5) {
         variables.input.status = 'failedToAssign';
       }
-      // TODO : "high priority" if start time is less than two hours from current time
+      // "high priority" if start time is less than two hours from current time
+      const bookingDateTime = new Date(moment(bookingDate).toDate().setHours(time, 0, 0, 0)).toISOString();
+
+      const hoursLeftForSession = Math.abs(moment(bookingDateTime).diff(moment(), 'hours'));
+      if (hoursLeftForSession <= 2) {
+        variables.input.isHighPriority = true;
+      }
       await updateTaskMutation(get(task, 'id'), variables);
     }
     if (bookingDate && bookingDate.getTime() !== prevBookingDate.getTime()) {

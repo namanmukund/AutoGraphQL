@@ -1,6 +1,7 @@
 import { get } from 'lodash';
 import extractSlotsFromInput from '../../../../../utils/extractSlotsFromInput';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import sendAutoAssignmentFailedMessage from './sendAutoAssignmentFailedMessage';
 
 // query to fetch mentorSession
 const fetchMentorSessions = async (date, slots) => {
@@ -99,6 +100,9 @@ const createTaskAndAssignAvailableMentor = async (
     };
     // add mentor mentee session
     mentorMenteeSessionId = await callAddMentorMenteeSession(topicId, menteeSessionId, mentorSessionId, variables, courseId);
+  } else {
+    // send message to MSM when auto assignment failed
+    sendAutoAssignmentFailedMessage(userInfo);
   }
   // console.log('mentorMenteeSessionId', mentorMenteeSessionId);
   // add task irrespective of whether the mentorMenteeSession is created or not
