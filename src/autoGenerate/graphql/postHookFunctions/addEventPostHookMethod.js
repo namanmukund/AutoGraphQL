@@ -13,8 +13,9 @@ import {
   Post hook of update event
 */
 /* eslint-disable no-unused-vars */
-const updateEventPostHookMethod = async (input, params, mutationName, context) => {
-  const { id: eventId } = params;
+const addEventPostHookMethod = async (input, params, mutationName, context) => {
+  const { id: eventId } = input;
+  // console.log('eventId');
   const timeTableRule = get(params, 'input.eventTimeTableRule', null);
   // console.log('timeTableRule', timeTableRule);
   if (timeTableRule) {
@@ -53,10 +54,11 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
         // if there exists some started or completed sessions, don't count them, create/update sessions for the remaining
         possibleSessionCount -= sessionsStartedOrCompleted.length;
       }
-      // console.log('possibleSessionCount', possibleSessionCount);
 
+      // console.log('possibleDates', possibleDates);
       // for the sessions which are still in the allotted state, update them
       const allottedSessionsCount = sessionsAllotted.length;
+      // console.log('allottedSessionsCount', allottedSessionsCount);
       if (allottedSessionsCount > 0) {
         possibleSessionCount -= allottedSessionsCount;
         updateExistingEventSessions(sessionsAllotted, possibleDates, filteredSlotsString);
@@ -70,9 +72,11 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
       // if there are no exisiting eventSessions for the given event id, create all of them
       const possibleDates = getPossibleDates(startDate, endDate, days);
       const possibleSessionCount = possibleDates.length;
+      // console.log('possibleSessionCount', possibleSessionCount);
+      // console.log('possibleDates', possibleDates);
       createEventSessions(eventId, possibleDates, filteredSlotsString, possibleSessionCount);
     }
   }
 };
 
-export default updateEventPostHookMethod;
+export default addEventPostHookMethod;
