@@ -514,6 +514,10 @@ const ALLOWED_ROLE_FOR_MANUAL_SESSIONS = [ADMIN, UMS_ADMIN, SUPPLY_DEMAND_ADMIN]
 
 const TIME_DIFF_FOR_MANUAL_SESSION = -1;
 
+const newTekieWebLinks = {
+  staging: 'https://tekie-web-staging-28b1816977c254e7.onporter.run',
+  preProd: 'https://tekie-web-pre-prod-dd811f1acf374a8c.onporter.run',
+};
 const EXCLUDE_NUMBER = ['7000287388'];
 
 export {
@@ -603,5 +607,6 @@ export {
   PHONE_OTP_MAX_RETRY_WAIT_SECOND,
   ALLOWED_ROLE_FOR_MANUAL_SESSIONS,
   TIME_DIFF_FOR_MANUAL_SESSION,
+  newTekieWebLinks,
   EXCLUDE_NUMBER,
 };

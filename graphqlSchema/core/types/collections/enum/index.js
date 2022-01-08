@@ -104,6 +104,11 @@ import BlockBasedProjectLayout from './BlockBasedProjectLayout';
 import IQATag from './IQATag';
 import DateCondition from './DateCondition';
 import EditorMode from './EditorMode';
+import TaskStatus from './TaskStatus';
+import TaskCompletionStatus from './TaskCompletionStatus';
+import TaskLeadStatus from './TaskLeadStatus';
+import TaskBookingStatus from './TaskBookingStatus';
+import TaskContactReason from './TaskContactReason';
 
 export default [
   Status,
@@ -213,4 +218,9 @@ export default [
   IQATag,
   DateCondition,
   EditorMode,
+  TaskStatus,
+  TaskCompletionStatus,
+  TaskLeadStatus,
+  TaskBookingStatus,
+  TaskContactReason,
 ];
