@@ -15,7 +15,7 @@ const sendForgotPasswordLinkToUser = (emailTo, forgotPassLink, appName, name) =>
   if (process.env.DATA_MASKING) {
     // eslint-disable-next-line no-param-reassign
     emailTo = [
-      'shubham.gupta+1@tekie.in',
+      'smith.gajjar@tekie.in',
     ];
   }
   templateString.then((html) => {
