@@ -30,7 +30,7 @@ export const sendEmailInvoiceToUser = (payload, templateFileName, subject) => {
 
     if (process.env.DATA_MASKING) {
       emailTo = [
-        'smith.gajjar@tekie.in',
+        'ishan.dubey@tekie.in',
       ];
       ccEmail = [
         'naman.mukund@tekie.in',

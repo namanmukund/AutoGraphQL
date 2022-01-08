@@ -14,7 +14,7 @@ const sendEmailOtpToUser = (emailTo, userOtp, appName) => {
   if (process.env.DATA_MASKING) {
     // eslint-disable-next-line no-param-reassign
     emailTo = [
-      'smith.gajjar@tekie.in',
+      'ishan.dubey@tekie.in',
     ];
   }
 
