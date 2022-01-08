@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { EventTitleAlreadyExist } from '../../../../../constants/errors';
+import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
@@ -16,8 +16,8 @@ const fetchContentTags = async (title) => {
 };
 
 const addContentTagValidation = async (params) => {
-  const title = get(params, 'title');
-  const isEventTag = get(params, 'isEventTag');
+  const title = get(params, 'input.title');
+  const isEventTag = get(params, 'input.isEventTag');
 
   if (!title) {
     throw new MissingMandatoryInputInRequestError({
@@ -29,7 +29,7 @@ const addContentTagValidation = async (params) => {
   if (isEventTag) {
     const contentTags = await fetchContentTags(title);
     if (contentTags && contentTags.length > 0) {
-      throw new EventTitleAlreadyExist();
+      throw new SimilarDocumentAlreadyExistError();
     }
   }
   return true;

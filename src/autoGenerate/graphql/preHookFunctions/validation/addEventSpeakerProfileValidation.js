@@ -3,10 +3,10 @@ import { SpeakerIdAlreadyExist } from '../../../../../constants/errors';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const fetchSpeakerProfiles = async (speakerId) => {
+const fetchSpeakerProfiles = async (userConnectId) => {
   const query = `
     {
-        eventSpeakerProfiles(filter: user_some: { { id: "${speakerId}" } } ) {
+        eventSpeakerProfiles(filter: { user_some:{id: "${userConnectId}" }} ) {
         id
       }
     }
@@ -16,16 +16,16 @@ const fetchSpeakerProfiles = async (speakerId) => {
 };
 
 const addEventSpeakerProfileValidation = async (params) => {
-  const speakerId = get(params, 'speaker');
+  const userConnectId = get(params, 'userConnectId');
 
   if (!speakerId) {
     throw new MissingMandatoryInputInRequestError({
       data: {
-        message: 'SpeakerId  field is missing',
+        message: 'userConnectId  field is missing',
       },
     });
   }
-  const speakerProfiles = await fetchSpeakerProfiles(title);
+  const speakerProfiles = await fetchSpeakerProfiles(userConnectId);
   if (speakerProfiles && speakerProfiles.length > 0) {
     throw new SpeakerIdAlreadyExist();
   }

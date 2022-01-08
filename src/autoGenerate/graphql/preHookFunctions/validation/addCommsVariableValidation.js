@@ -16,29 +16,14 @@ const fetchCommsDataField = async (dataField) => {
 };
 
 const addCommsVariableValidation = async (params) => {
-  // check if the document for user is already present
   const dataField = get(params, 'userConnectId');
   const whatsappVariableName = get(params, 'whatsappVariableName');
   const emailVariableName = get(params, 'emailVariableName');
 
-  if (!dataField) {
+  if (!dataField || !whatsappVariableName || !emailVariableName) {
     throw new MissingMandatoryInputInRequestError({
       data: {
-        message: 'DataField is missing in input',
-      },
-    });
-  }
-  if (!whatsappVariableName) {
-    throw new MissingMandatoryInputInRequestError({
-      data: {
-        message: 'WhatsappVariableName is missing in input',
-      },
-    });
-  }
-  if (!emailVariableName) {
-    throw new MissingMandatoryInputInRequestError({
-      data: {
-        message: 'EmailVariableName is missing in input',
+        message: 'Mandatory field is missing in input',
       },
     });
   }

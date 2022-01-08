@@ -887,19 +887,19 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await updateMentorAvailabilitySlotValidation(params, mutationOrQueryName, context);
       break;
     }
-    case 'addEventSpeakerProfileValidation': {
+    case 'addEventSpeakerProfile': {
       await addEventSpeakerProfileValidation(params, mutationOrQueryName, context);
       break;
     }
-    case 'addCommsVariableValidation': {
+    case 'addCommsVariable': {
       await addCommsVariableValidation(params, mutationOrQueryName, context);
       break;
     }
-    case 'addEventCategoryValidation': {
+    case 'addEventCategory': {
       await addEventCategoryValidation(params, mutationOrQueryName, context);
       break;
     }
-    case 'addContentTagValidation': {
+    case 'addContentTag': {
       await addContentTagValidation(params, mutationOrQueryName, context);
       break;
     }

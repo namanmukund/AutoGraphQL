@@ -197,11 +197,7 @@ export const EventTitleAlreadyExist = createError('EventTitleAlreadyExist', {
   message: 'Event with this title already exist',
 });
 export const CommsDatafieldAlreadyExist = createError('CommsDatafieldAlreadyExist', {
-  message: 'This data field already exist',
-});
-
-export const ContentTagTitleAlreadyExist = createError('ContentTagTitleAlreadyExist', {
-  message: 'Content tag with htis title already exist',
+  message: 'Variables with similar data field already exist',
 });
 
 export const SpeakerIdAlreadyExist = createError('SpeakerIdAlreadyExist', {
