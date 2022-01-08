@@ -32,7 +32,7 @@ export const sendEmailInvoiceToUser = (payload) => {
 
     if (process.env.DATA_MASKING) {
       emailTo = [
-        'shubham.gupta+1@tekie.in',
+        'smith.gajjar@tekie.in',
       ];
       ccEmail = [
         'naman.mukund@tekie.in',

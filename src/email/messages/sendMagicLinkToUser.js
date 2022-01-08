@@ -10,7 +10,7 @@ const sendMagicLinkToUser = (emailTo, sendEmailObject) => {
   if (process.env.DATA_MASKING) {
     // eslint-disable-next-line no-param-reassign
     emailTo = [
-      'shubham.gupta@tekie.in',
+      'smith.gajjar@tekie.in',
     ];
   }
   templateString.then((html) => {
