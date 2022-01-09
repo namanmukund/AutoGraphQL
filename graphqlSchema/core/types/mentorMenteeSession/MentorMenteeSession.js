@@ -25,7 +25,7 @@ const sessionRescheduledReasons = `
     videoNotLoading: Boolean
     codePlaygroundIssue: Boolean
     logInOTPError: Boolean
-    otherTechnicalReason: String
+    otherTechnicalReason: Boolean
     languageBarrier: Languages
     otherLanguageBarrier: String
 `;
@@ -53,7 +53,7 @@ const internetSpeed = `
 const b2bFormFields = `
   attentionCount: AttentionAmount @defaultValue(value: "all")
   attentionAmount: Int @length(min: 1, max: 10)
-  interationCount: AttentionAmount @defaultValue(value: "all")
+  interactionCount: AttentionAmount @defaultValue(value: "all")
   interactionAmount: Int @length(min: 1, max: 10)
   studentBehaviour: String
   ableToCompleteContent: Boolean
