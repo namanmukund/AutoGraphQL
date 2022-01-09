@@ -129,7 +129,9 @@ const updateUserValidation = async (params, context, mutationOrQueryName) => {
   }
 
   const { pubsub } = context;
-  pubsub.publish('USER_UPDATED', user);
+  if (pubsub && pubsub.publish) {
+    pubsub.publish('USER_UPDATED', user);
+  }
   return userObj;
 };
 
