@@ -48,22 +48,7 @@ const internetSpeed = `
   type InternetSpeed {
    speed: Float
    unit: InternetSpeedUnit
- }`;
-
-const b2bFormFields = `
-  attentionCount: AttentionAmount @defaultValue(value: "all")
-  attentionAmount: Int @length(min: 1, max: 10)
-  interactionCount: AttentionAmount @defaultValue(value: "all")
-  interactionAmount: Int @length(min: 1, max: 10)
-  studentBehaviour: String
-  ableToCompleteContent: Boolean
-  contentWasLengthy: Boolean
-  kidsEnjoyedContent: Boolean
-  learningObjectiveComponent: LearningObjectiveComponentsB2B @defaultValue(value: "practice")
-  contentImprovementSuggestion: String
-  functionalitySuggestion: String
-  generalSuggestion: String
-`;
+}`;
 
 const MentorMenteeSession = `
   type MentorMenteeSession @model {
@@ -109,7 +94,6 @@ const MentorMenteeSession = `
     ${sessionRescheduledReasons}
     ${studentUnderstandingFields}
     ${studentAbilityFields}
-    ${b2bFormFields}
     isFeedbackSubmitted: Boolean @defaultValue(value: "false")
     sessionCommentByMentor: String
     source: UserOriginSource @defaultValue(value: "website")
