@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { SpeakerIdAlreadyExist } from '../../../../../constants/errors';
+import { SpeakerProfileAlreadyExist } from '../../../../../constants/errors';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
@@ -18,7 +18,7 @@ const fetchSpeakerProfiles = async (userConnectId) => {
 const addEventSpeakerProfileValidation = async (params) => {
   const userConnectId = get(params, 'userConnectId');
 
-  if (!speakerId) {
+  if (!userConnectId) {
     throw new MissingMandatoryInputInRequestError({
       data: {
         message: 'userConnectId  field is missing',
@@ -27,7 +27,7 @@ const addEventSpeakerProfileValidation = async (params) => {
   }
   const speakerProfiles = await fetchSpeakerProfiles(userConnectId);
   if (speakerProfiles && speakerProfiles.length > 0) {
-    throw new SpeakerIdAlreadyExist();
+    throw new SpeakerProfileAlreadyExist();
   }
   return true;
 };

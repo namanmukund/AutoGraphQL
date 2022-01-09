@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors';
+import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 

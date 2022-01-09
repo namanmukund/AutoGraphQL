@@ -883,22 +883,6 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await updateMentorAvailabilitySlotValidation(params, mutationOrQueryName, context);
       break;
     }
-    case 'addEventSpeakerProfile': {
-      await addEventSpeakerProfileValidation(params, mutationOrQueryName, context);
-      break;
-    }
-    case 'addCommsVariable': {
-      await addCommsVariableValidation(params, mutationOrQueryName, context);
-      break;
-    }
-    case 'addEventCategory': {
-      await addEventCategoryValidation(params, mutationOrQueryName, context);
-      break;
-    }
-    case 'addContentTag': {
-      await addContentTagValidation(params, mutationOrQueryName, context);
-      break;
-    }
     case 'addAcceptedSlotRequestByMentorLog': {
       await addAcceptedSlotRequestByMentorLogValidation(params, mutationOrQueryName, context);
       break;
@@ -925,6 +909,22 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'addSenseiProfile': {
       await addSenseiProfileValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addEventSpeakerProfile': {
+      await addEventSpeakerProfileValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addCommsVariable': {
+      await addCommsVariableValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addEventCategory': {
+      await addEventCategoryValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addContentTag': {
+      await addContentTagValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'addSchool': {

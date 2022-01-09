@@ -1,12 +1,12 @@
 import { get } from 'lodash';
-import { CommsDatafieldAlreadyExist } from '../../../../../constants/errors';
+import { CommsVariableAlreadyExist } from '../../../../../constants/errors';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 const fetchCommsDataField = async (dataField) => {
   const query = `
     {
-        commsVariables(filter: { dataField_in: "${dataField}"}) {
+        commsVariables(filter: { dataField: ${dataField}}) {
         id
       }
     }
@@ -16,20 +16,13 @@ const fetchCommsDataField = async (dataField) => {
 };
 
 const addCommsVariableValidation = async (params) => {
-  const dataField = get(params, 'userConnectId');
-  const whatsappVariableName = get(params, 'whatsappVariableName');
-  const emailVariableName = get(params, 'emailVariableName');
-
+  const { input: { dataField, whatsappVariableName, emailVariableName } } = params;
   if (!dataField || !whatsappVariableName || !emailVariableName) {
-    throw new MissingMandatoryInputInRequestError({
-      data: {
-        message: 'Mandatory field is missing in input',
-      },
-    });
+    throw new MissingMandatoryInputInRequestError();
   }
   const commsVariables = await fetchCommsDataField(dataField);
   if (commsVariables && commsVariables.length > 0) {
-    throw new CommsDatafieldAlreadyExist();
+    throw new CommsVariableAlreadyExist();
   }
   return true;
 };

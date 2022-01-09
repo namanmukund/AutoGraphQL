@@ -57,9 +57,8 @@ import {
   BatchFullError,
   MentorMandatoryError,
   MentorProfileAlreadyExist,
-  EventTitleAlreadyExist,
-  SpeakerIdAlreadyExist,
-  CommsDatafieldAlreadyExist,
+  CategoryAlreadyExist,
+  CommsVariableAlreadyExist,
   ContentTagTitleAlreadyExist,
   OrderAndAuditTypeExists,
   MCQOptionNotProvided,
@@ -86,6 +85,7 @@ import {
   FileNameAlreadyExists,
   LeadPartnerWithSimilarTitleAlreadyExist,
   SenseiProfileAlreadyExist,
+  SpeakerProfileAlreadyExist,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -284,9 +284,8 @@ export {
   MentorMandatoryError,
   MentorProfileAlreadyExist,
   ContentTagTitleAlreadyExist,
-  EventTitleAlreadyExist,
-  CommsDatafieldAlreadyExist,
-  SpeakerIdAlreadyExist,
+  CategoryAlreadyExist,
+  CommsVariableAlreadyExist,
   CanNotDeleteCompletedSessionError,
   OrderAndAuditTypeExists,
   MCQOptionNotProvided,
@@ -315,4 +314,5 @@ export {
   ResetPasswordLinkExpired,
   LeadPartnerWithSimilarTitleAlreadyExist,
   SenseiProfileAlreadyExist,
+  SpeakerProfileAlreadyExist,
 };

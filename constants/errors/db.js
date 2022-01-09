@@ -193,17 +193,6 @@ export const MentorProfileAlreadyExist = createError('MentorProfileAlreadyExist'
   message: 'Mentor Profile already exist for the user',
 });
 
-export const EventTitleAlreadyExist = createError('EventTitleAlreadyExist', {
-  message: 'Event with this title already exist',
-});
-export const CommsDatafieldAlreadyExist = createError('CommsDatafieldAlreadyExist', {
-  message: 'Variables with similar data field already exist',
-});
-
-export const SpeakerIdAlreadyExist = createError('SpeakerIdAlreadyExist', {
-  message: 'Speaker already exists',
-});
-
 export const OrderAndAuditTypeExists = createError('OrderAndAuditTypeExists', {
   message: 'Question with given order and audit type already exists.',
 });
@@ -310,4 +299,16 @@ export const UserWithSimilarNumberAlreadyExist = createError('UserWithSimilarNum
 
 export const UserWithSimilarEmailAlreadyExist = createError('UserWithSimilarEmailAlreadyExist', {
   message: 'User with similar email already exist.',
+});
+
+export const SpeakerProfileAlreadyExist = createError('SpeakerProfileAlreadyExist', {
+  message: 'Speaker Profile already exist for the user',
+});
+
+export const CommsVariableAlreadyExist = createError('CommsVariableAlreadyExist', {
+  message: 'Variables with similar data field already exist',
+});
+
+export const CategoryAlreadyExist = createError('CategoryAlreadyExist', {
+  message: 'Category with similar title already exist',
 });

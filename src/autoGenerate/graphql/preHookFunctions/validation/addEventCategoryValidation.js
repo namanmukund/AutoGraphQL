@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { EventTitleAlreadyExist } from '../../../../../constants/errors';
+import { CategoryAlreadyExist } from '../../../../../constants/errors';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
@@ -16,7 +16,7 @@ const fetchEventCategories = async (title) => {
 };
 
 const addEventCategoryValidation = async (params) => {
-  const title = get(params, 'title');
+  const { input: { title } } = params;
 
   if (!title) {
     throw new MissingMandatoryInputInRequestError({
@@ -27,7 +27,7 @@ const addEventCategoryValidation = async (params) => {
   }
   const eventCategories = await fetchEventCategories(title);
   if (eventCategories && eventCategories.length > 0) {
-    throw new EventTitleAlreadyExist();
+    throw new CategoryAlreadyExist();
   }
   return true;
 };
