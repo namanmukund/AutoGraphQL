@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-console */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
@@ -13,11 +15,10 @@ const getRegisteredUserFromEvent = async (eventId) => {
     `;
   const result = await callLocalGraphqlApi(eventQuery);
   console.log(JSON.stringify(result));
-  return get(result, 'data.event', null);
 };
 
 const addEventSessionPostHookMethod = async (input, params, mutationName, context) => {
-  const eventConnectId = get(params, 'eventConnectId');
+  tId = get(params, 'eventConnectId');
   const registeredUsers = await getRegisteredUserFromEvent(eventConnectId);
   console.log(params);
 };
