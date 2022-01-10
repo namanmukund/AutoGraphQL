@@ -16,25 +16,19 @@ import {
 const updateEventPostHookMethod = async (input, params, mutationName, context) => {
   const { id: eventId } = params;
   const timeTableRule = get(params, 'input.eventTimeTableRule', null);
-  // console.log('timeTableRule', timeTableRule);
   if (timeTableRule) {
     // event sessions
     const eventSessions = await getEventSessions(eventId);
-
     // start, end dates
     const days = getSelectedDays(timeTableRule);
-    // console.log('days', days);
     const startDate = new Date(timeTableRule.startDate);
     startDate.setHours(0, 0, 0, 0);
     const endDate = new Date(timeTableRule.endDate);
     endDate.setHours(0, 0, 0, 0);
-    // console.log(startDate, endDate);
 
     // slots passed in input
     const { ...slots } = timeTableRule;
     const { filteredSlotsString } = extractSlotsFromInput(slots);
-    // console.log('filteredSlotsString', filteredSlotsString);
-    // console.log('eventSessions', eventSessions);
     if (eventSessions && eventSessions.length) {
       // sorting the existing event sessions into started/completed and allotted
       // function to sort event sessions
@@ -53,15 +47,12 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
         // if there exists some started or completed sessions, don't count them, create/update sessions for the remaining
         possibleSessionCount -= sessionsStartedOrCompleted.length;
       }
-      // console.log('possibleSessionCount', possibleSessionCount);
-
       // for the sessions which are still in the allotted state, update them
       const allottedSessionsCount = sessionsAllotted.length;
       if (allottedSessionsCount > 0) {
         possibleSessionCount -= allottedSessionsCount;
         updateExistingEventSessions(sessionsAllotted, possibleDates, filteredSlotsString);
       }
-      // console.log('possibleSessionCount', possibleSessionCount);
       if (possibleSessionCount > 0) {
         // all the remaining sessions have to be created
         createEventSessions(eventId, possibleDates, filteredSlotsString, possibleSessionCount);
