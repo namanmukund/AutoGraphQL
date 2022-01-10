@@ -40,6 +40,7 @@ const User = `
     email: String @uniqueOrEmpty @trim
     emailVerified: Boolean @defaultValue(value: "false") @readOnly
     phone: Phone @uniqueOrEmpty
+    alternatePhone: Phone @uniqueOrEmpty
     phoneVerified: Boolean @defaultValue(value: "false")
     dateOfBirth: Date
     gender: Gender
@@ -76,6 +77,7 @@ const User = `
     eventAttandances: [EventAttendance] @relation(name:"EventAttendanceUser")
     resetPasswordFromLink: Boolean @defaultValue(value: "false")
     senseiProfile: SenseiProfile @relation(name:"SenseiProfileUser", isSubset: true)
+    lastActive: Date
   }
 `;
 

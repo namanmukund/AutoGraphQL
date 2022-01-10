@@ -16,6 +16,7 @@ const sessionRescheduledReasons = `
     powerCut: Boolean
     notResponseAndDidNotTurnUp: Boolean
     turnedUpButLeftAbruptly: Boolean
+    hadOtherCommitments: Boolean
     classDurationExceeded: Boolean
     leadNotVerifiedProperly: Boolean
     otherReasonForReschedule: Boolean
@@ -24,7 +25,7 @@ const sessionRescheduledReasons = `
     videoNotLoading: Boolean
     codePlaygroundIssue: Boolean
     logInOTPError: Boolean
-    otherTechnicalReason: String
+    otherTechnicalReason: Boolean
     languageBarrier: Languages
     otherLanguageBarrier: String
 `;
@@ -47,7 +48,7 @@ const internetSpeed = `
   type InternetSpeed {
    speed: Float
    unit: InternetSpeedUnit
- }`;
+}`;
 
 const MentorMenteeSession = `
   type MentorMenteeSession @model {
@@ -117,6 +118,8 @@ const MentorMenteeSession = `
     startSessionByMenteePlatform: Platform
     isDemoWowAudit: Boolean @defaultValue(value: "false")
     bookingAgent: User @relation(name: "MentorMenteeSessionBookingAgent", direction: "OneWay")
+    verificationStatus: VerificationStatus @defaultValue(value: "unverified")
+    verifiedBy: User @relation(name: "MentorMenteeSessionVerifiedBy", direction: "OneWay")
 }`;
 
 export default [MentorMenteeSession, internetSpeed];

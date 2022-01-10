@@ -3,7 +3,7 @@ import { TLA, TMS, TWA } from '../../../../constants';
 import {
   AUDIT_ROLES, CMS_HEAD, LEAD_PARTNER, NOT_CMS_HEAD, SCHOOL_ADMIN, SENSEI, SUPPLY_DEMAND_ROLES,
 } from '../../../../constants/roles';
-import { CREATED } from '../../../../constants/subscriptionEvents';
+import { CREATED, UPDATED } from '../../../../constants/subscriptionEvents';
 
 const TopicComponentsRule = `
   type TopicComponentsRule {
@@ -37,7 +37,7 @@ const Topic = `
       ], 
     rule: allow
   ) 
-  @subscribe(events: [${CREATED}])
+  @subscribe(events: [${CREATED}, ${UPDATED}])
   {
     order: Int! 
     title: String!

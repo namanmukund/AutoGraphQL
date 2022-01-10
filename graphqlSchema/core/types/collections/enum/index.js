@@ -103,6 +103,15 @@ import StudentNoteForIQ from './StudentNoteForIQ';
 import BlockBasedProjectLayout from './BlockBasedProjectLayout';
 import IQATag from './IQATag';
 import DateCondition from './DateCondition';
+import EditorMode from './EditorMode';
+import TaskStatus from './TaskStatus';
+import TaskCompletionStatus from './TaskCompletionStatus';
+import TaskLeadStatus from './TaskLeadStatus';
+import TaskLeadStatusReason from './TaskLeadStatusReason';
+import TaskBookingStatus from './TaskBookingStatus';
+import TaskContactReason from './TaskContactReason';
+import AttentionAmount from './AttentionAmount';
+import LearningObjectiveComponentsB2B from './LearningObjectiveComponentsB2B';
 
 export default [
   Status,
@@ -211,4 +220,13 @@ export default [
   BlockBasedProjectLayout,
   IQATag,
   DateCondition,
+  EditorMode,
+  TaskStatus,
+  TaskCompletionStatus,
+  TaskLeadStatus,
+  TaskLeadStatusReason,
+  TaskBookingStatus,
+  TaskContactReason,
+  AttentionAmount,
+  LearningObjectiveComponentsB2B,
 ];

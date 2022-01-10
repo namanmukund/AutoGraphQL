@@ -13,6 +13,7 @@ import addSessionLog from './utils/addSessionLog';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import updateMenteeSessionQuery from './utils/updateMenteeSessionQuery';
 import sendWhatsappMessageForBookingConfirmedByLeadParnter from './utils/sendWhatsappMessageForBookingConfirmedByLeadPartner';
+import createTaskAndAssignAvailableMentor from './utils/createTaskAndAssignAvailableMentor';
 
 const getUserCourses = async (userId) => {
   const query = `
@@ -83,6 +84,9 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
       updateUserBookingAgent(menteeSessionId, get(context, 'userIdFromContext'), bookingDate, get(slotTimeStringArray, '0'));
     }
 
+    // create a Task corresponding to the new lead and auto-assign available mentor
+    const { mentorMenteeSessionId } = await createTaskAndAssignAvailableMentor(userInfo, topicInfo, input);
+
     // update user booking on leadsquared
     if (!get(userInfo, 'data.user.studentProfile.batch.id')) {
       addMenteeBookingLeadsquared(
@@ -95,6 +99,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
         get(context, 'userIdFromContext'),
         null,
         get(context, 'userRoleFromContext'),
+        mentorMenteeSessionId,
       );
     }
     if (typeof isTrialSession === 'boolean' && isTrialSession && !isBookedByMentee

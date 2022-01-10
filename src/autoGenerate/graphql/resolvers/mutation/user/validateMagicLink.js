@@ -98,6 +98,9 @@ const validateMagicLinkMutationResolver = async (
   // decoding user and expiry time from token received
   await jwt.verify(linkToken, linkTokenSecret, async (error, values) => {
     if (error) {
+      if (error.name && error.name === 'TokenExpiredError') {
+        throw new LinkExpiredError();
+      }
       throw new SomethingWentWrongError();
     }
     const { expiresIn, userInfo: { id } } = get(values, 'linkData');

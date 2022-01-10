@@ -102,7 +102,7 @@ import {
 import {
   InvalidWriteAccessError, InvalidReadAccessError, InvalidActionOnDefaultFieldsError,
   UnauthorizedOperationError, BlockedOperationError, PermissionDeniedError,
-  UserRolesNotFoundError,
+  UserRolesNotFoundError, PhoneOtpMaxRetryTimeLimitError, PhoneOtpPerDayLimitError,
 } from './permissions';
 
 import {
@@ -305,4 +305,6 @@ export {
   ResetPasswordLinkExpired,
   LeadPartnerWithSimilarTitleAlreadyExist,
   SenseiProfileAlreadyExist,
+  PhoneOtpMaxRetryTimeLimitError,
+  PhoneOtpPerDayLimitError,
 };

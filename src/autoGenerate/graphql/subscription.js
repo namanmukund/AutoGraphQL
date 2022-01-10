@@ -1,12 +1,15 @@
 import { trimEnd, get, camelCase } from 'lodash';
 import getParsedASTMap from '../utils/getParsedASTMap';
 import { types } from '../../../utils';
+import customSubscriptionString from './customSubscriptionString';
 
 let subscriptionString = 'type Subscription {';
 const SUBSCRIPTION_PAYLOAD = 'SubscriptionPayload';
 const subscriptionPayloadTypes = [];
 
 const parsedASTMap = getParsedASTMap(types);
+
+const getFilterName = (typeName) => `${typeName}Filter`;
 
 const makeSubscriptionTypePayload = (
   type,
@@ -21,10 +24,16 @@ Object.keys(parsedASTMap).forEach((type) => {
     subscribe,
   } = definition;
   if (get(subscribe, 'events', []).length) {
-    subscriptionString += `${camelCase(type)} : ${type}${SUBSCRIPTION_PAYLOAD},`;
+    const filterName = getFilterName(type);
+    subscriptionString += `${camelCase(type)}(filter: ${filterName}) : ${type}${SUBSCRIPTION_PAYLOAD},`;
     subscriptionPayloadTypes.push(makeSubscriptionTypePayload(type));
   }
 });
+
+/*
+Add custom subscription string along with the generic subscriptions
+ */
+subscriptionString += customSubscriptionString;
 
 subscriptionString = trimEnd(subscriptionString, ',');
 subscriptionString += '}';
