@@ -75,6 +75,18 @@ const EVENTS = {
       dec26: '2021-12-26 09:30:00',
     },
   },
+  DOODLING: {
+    registrationFormId: 'JvjnwAp8',
+    formId: 'PjaDd9pI',
+    eventId: {
+      production: 'ckx8sez1l0000ncin1hbv5gyk',
+      preprod: 'ckx8sau1d0000lrinb526hp0v',
+      staging: 'ckyaeenu10001ncuj0yyedyqj',
+    },
+    eventDate: '16th January',
+    eventTime: '03:00 pm',
+    eventDateTime: '2022-01-16 09:30:00',
+  },
 };
 
 export default EVENTS;

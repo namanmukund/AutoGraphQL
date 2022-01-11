@@ -14,6 +14,7 @@ import getGenZEventCertificateUrl from './uploadCertificates/genzenvironment';
 import getIqaReportSnapshotUrl from './uploadCertificates/iqaReport';
 import getCrackTheCodeCertificateUrl from './uploadCertificates/crackTheCode';
 import getChristmasCarnivalCertificateUrl from './uploadCertificates/christmasCarnival';
+import getCrackTheCodeCertificateUpdatedUrl from './uploadCertificates/crackTheCodeUpdated';
 
 const fetchUser = (userId, eventId) => `
 {
@@ -191,6 +192,20 @@ const generateCertificateMutationResolver = async (
         fetchedUrl = await getChristmasCarnivalCertificateUrl(userId, userName);
         eventType = 'communityEvent';
         eventName = 'christmasCarnival';
+        break;
+      case 'ckyaeenu10001ncuj0yyedyqj':
+      // case 'ckyaeenu10001ncuj0yyedyqj':
+      // case 'ckyaeenu10001ncuj0yyedyqj':
+        fetchedUrl = await getCrackTheCodeCertificateUrl(userId, userName, formattedDate);
+        eventType = 'communityEvent';
+        eventName = 'doodling';
+        break;
+      case 'ckyafx0fr0000u0ujabso8263':
+      // case 'ckyaeenu10001ncuj0yyedyqj':
+      // case 'ckyaeenu10001ncuj0yyedyqj':
+        fetchedUrl = await getCrackTheCodeCertificateUpdatedUrl(userId, userName, formattedDate);
+        eventType = 'communityEvent';
+        eventName = 'crackTheCode';
         break;
       default:
         fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
