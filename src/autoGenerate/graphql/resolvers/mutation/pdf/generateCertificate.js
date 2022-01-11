@@ -14,6 +14,7 @@ import getGenZEventCertificateUrl from './uploadCertificates/genzenvironment';
 import getIqaReportSnapshotUrl from './uploadCertificates/iqaReport';
 import getCrackTheCodeCertificateUrl from './uploadCertificates/crackTheCode';
 import getChristmasCarnivalCertificateUrl from './uploadCertificates/christmasCarnival';
+import getCertificateUrl from './uploadCertificates/getCertificateUrl';
 
 const fetchUser = (userId, eventId) => `
 {
@@ -56,8 +57,8 @@ const addEventCertificate = (userId, assetUrl, eventType, eventName) => `
     addEventCertificate(userConnectId:"${userId}",
       input: {
         assetUrl: "${assetUrl}"
-        eventType: ${eventType}
-        eventName: ${eventName}
+        ${eventType ? `eventType: ${eventType}` : ''}
+        ${eventName ? `eventName: ${eventName}` : ''}
       }){
         id
         assetUrl
@@ -69,8 +70,8 @@ const updateEventCertificate = (eventCertificateId, url, eventType, eventName) =
  mutation{
   updateEventCertificate(id:"${eventCertificateId}",input:{
     assetUrl:"${url}"
-    eventType: ${eventType}
-    eventName: ${eventName}
+    ${eventType ? `eventType: ${eventType}` : ''}
+    ${eventName ? `eventName: ${eventName}` : ''}
   }){
     id
     assetUrl
@@ -135,7 +136,7 @@ const generateCertificateMutationResolver = async (
     let eventType = '';
     let eventName = '';
     if (isBulkGenerate) {
-      fetchedUrl = await getCertificateUrl(userId, userName, formattedDate);
+      fetchedUrl = await getCertificateUrl(userId, eventId, userName, formattedDate);
     } else {
       // the three ids here are the event.ids created in three environments (local, pre-prod, prod)
       switch (eventId) {
