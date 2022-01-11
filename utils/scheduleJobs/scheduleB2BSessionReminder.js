@@ -8,14 +8,17 @@ import sendWhatsAppTemplateMessage from '../../src/autoGenerate/utils/sendWhatsA
 
 const getBatchSessions = async () => {
   const dt = new Date().setHours(0, 0, 0, 0);
-  const parsedDate = new Date(dt).toISOString();
+  const todayParsedDate = new Date(dt).toISOString();
   const hourValue = new Date().getHours();
   const slotNo = (hourValue + 1) < 23 ? hourValue + 1 : 0;
+  const tomorrow = new Date(dt);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowParsedDate = tomorrow.toISOString();
   const query = `
  query{
   batchSessions(filter:{and:[
     {batch_some:{type:b2b}},
-    {bookingDate: "${parsedDate}"},
+    {bookingDate: "${slotNo === 0 ? tomorrowParsedDate : todayParsedDate}"},
     {slot${slotNo}: true},
   ]}){
     id
