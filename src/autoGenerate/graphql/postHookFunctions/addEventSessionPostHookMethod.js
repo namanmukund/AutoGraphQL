@@ -14,13 +14,13 @@ const getRegisteredUserFromEvent = async (eventId) => {
     }
     `;
   const result = await callLocalGraphqlApi(eventQuery);
-  console.log(JSON.stringify(result));
+  // console.log(JSON.stringify(result));
 };
 
 const addEventSessionPostHookMethod = async (input, params, mutationName, context) => {
-  tId = get(params, 'eventConnectId');
+  const eventConnectId = get(params, 'eventConnectId');
   const registeredUsers = await getRegisteredUserFromEvent(eventConnectId);
-  console.log(params);
+  // console.log(params);
 };
 
 export default addEventSessionPostHookMethod;

@@ -120,6 +120,7 @@ import addEventCategoryValidation from './preHookFunctions/validation/addEventCa
 import addContentTagValidation from './preHookFunctions/validation/addContentTagValidation';
 import addEventSpeakerProfileValidation from './preHookFunctions/validation/addEventSpeakerProfileValidation';
 import addCommsVariableValidation from './preHookFunctions/validation/addCommsVariableValidation';
+import updateEventValidation from './preHookFunctions/updateEventValidation';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -929,6 +930,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'addSchool': {
       return hook({ ...input, schoolCampaignCode: generateInviteCode(8) }, mutationOrQueryName, 'PreHook');
+    }
+    case 'updateEvent': {
+      await updateEventValidation(params, input, mutationOrQueryName, context);
+      break;
     }
     default: {
       /* If context is not present then it means user is not authenticated and the

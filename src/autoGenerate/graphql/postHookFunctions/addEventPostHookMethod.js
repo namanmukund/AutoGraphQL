@@ -72,6 +72,7 @@ const addEventPostHookMethod = async (input, params, mutationName, context) => {
       // if there are no exisiting eventSessions for the given event id, create all of them
       const possibleDates = getPossibleDates(startDate, endDate, days);
       const possibleSessionCount = possibleDates.length;
+      console.log(possibleDates, possibleSessionCount);
       // console.log('possibleSessionCount', possibleSessionCount);
       // console.log('possibleDates', possibleDates);
       createEventSessions(eventId, possibleDates, filteredSlotsString, possibleSessionCount);

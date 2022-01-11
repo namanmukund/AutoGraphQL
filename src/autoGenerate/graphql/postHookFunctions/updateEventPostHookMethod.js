@@ -16,6 +16,7 @@ import {
 const updateEventPostHookMethod = async (input, params, mutationName, context) => {
   const { id: eventId } = params;
   const timeTableRule = get(params, 'input.eventTimeTableRule', null);
+  const { prevTimeTableRule } = context;
   if (timeTableRule) {
     // event sessions
     const eventSessions = await getEventSessions(eventId);
@@ -56,6 +57,16 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
       if (possibleSessionCount > 0) {
         // all the remaining sessions have to be created
         createEventSessions(eventId, possibleDates, filteredSlotsString, possibleSessionCount);
+      }
+      if (prevTimeTableRule && timeTableRule) {
+      // start, end dates
+        const prevDays = getSelectedDays(prevTimeTableRule);
+        const prevStartDate = new Date(prevTimeTableRule.startDate);
+        prevStartDate.setHours(0, 0, 0, 0);
+        const prevEndDate = new Date(prevTimeTableRule.endDate);
+        prevEndDate.setHours(0, 0, 0, 0);
+        const possiblePrevDates = getPossibleDates(prevStartDate, prevEndDate, prevDays);
+        console.log(possibleDates, possiblePrevDates);
       }
     } else {
       // if there are no exisiting eventSessions for the given event id, create all of them
