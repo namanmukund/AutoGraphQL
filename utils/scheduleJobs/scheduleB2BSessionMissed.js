@@ -74,6 +74,7 @@ const scheduleB2BSessionMissed = async (input, params, mutationName, context) =>
     const parentName = get(attendee, 'student.user.parentProfile.user.name');
     const parentEmail = get(attendee, 'student.user.parentProfile.user.email');
     const parentPhone = get(attendee, 'student.user.parentProfile.user.phone.countryCode').split('+')[1] + get(attendee, 'student.user.parentProfile.user.phone.number');
+    const homeworkLink = `${process.env.TEKIE_WEB_URL}/homework`;
     sendWhatsAppTemplateMessage(
       parentPhone,
       'B2BHomework',
@@ -109,14 +110,13 @@ const scheduleB2BSessionMissed = async (input, params, mutationName, context) =>
         },
       ],
     );
-    const homeworkLink = 'tekie.in/homework';
     sendSessionAttendenceMail(
       parentEmail,
       'B2BHomework',
       {
         parentName, topicTitle, sessionTopicLink, studentName, date, startTime, homeworkLink,
       },
-      'Completed homework assignment',
+      'Tekie - Maintain your Homework Streak!',
     );
   });
   nonAttendes.forEach(async (attendee) => {
@@ -161,7 +161,7 @@ const scheduleB2BSessionMissed = async (input, params, mutationName, context) =>
       {
         parentName, topicTitle, sessionTopicLink, studentName, date, startTime,
       },
-      'student Missed the session',
+      "Tekie - You missed today's coding session!",
     );
   });
 };

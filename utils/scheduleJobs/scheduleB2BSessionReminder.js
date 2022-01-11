@@ -10,12 +10,13 @@ const getBatchSessions = async () => {
   const dt = new Date().setHours(0, 0, 0, 0);
   const parsedDate = new Date(dt).toISOString();
   const hourValue = new Date().getHours();
+  const slotNo = (hourValue + 1) < 23 ? hourValue + 1 : 0;
   const query = `
  query{
   batchSessions(filter:{and:[
     {batch_some:{type:b2b}},
     {bookingDate: "${parsedDate}"},
-    {slot${hourValue + 1}: true},
+    {slot${slotNo}: true},
   ]}){
     id
     sessionStartDate
@@ -65,7 +66,7 @@ const sendSessionRemainderMail = (email, sendEmailObject) => {
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';
-    const subject = 'Session About to start';
+    const subject = 'Tekie - Session Reminder!';
     const text = '';
     const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
     sendEmail(emailMsgObject);
