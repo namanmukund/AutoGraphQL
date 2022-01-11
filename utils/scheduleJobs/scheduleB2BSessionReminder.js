@@ -10,7 +10,7 @@ const getBatchSessions = async () => {
   const dt = new Date().setHours(0, 0, 0, 0);
   const todayParsedDate = new Date(dt).toISOString();
   const hourValue = new Date().getHours();
-  const slotNo = (hourValue + 1) < 23 ? hourValue + 1 : 0;
+  const slotNo = (hourValue + 1) <= 23 ? hourValue + 1 : 0;
   const tomorrow = new Date(dt);
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowParsedDate = tomorrow.toISOString();
