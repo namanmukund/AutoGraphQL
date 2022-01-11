@@ -4,7 +4,6 @@ import scheduleMentorReport from './scheduleJobs/scheduleMentorReport';
 import scheduleSessionReport from './scheduleJobs/scheduleSessionReport';
 import scheduleSessionCourseReport from './scheduleJobs/scheduleCourseReport';
 import scheduleB2BSessionReminder from './scheduleJobs/scheduleB2BSessionReminder';
-import scheduleB2BHomeworkMissed from './scheduleJobs/scheduleB2BHomeworkMissed';
 import scheduleB2BSessionMissed from './scheduleJobs/scheduleB2BSessionMissed';
 
 // create scheduler for different functionalities
