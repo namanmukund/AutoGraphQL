@@ -14,7 +14,22 @@ const getRegisteredUserFromEvent = async (eventId) => {
     }
     `;
   const result = await callLocalGraphqlApi(eventQuery);
-  // console.log(JSON.stringify(result));
+  return get(result, 'data.event.registeredUsers', []);
+};
+
+const getPrevAddedStudentsToSession = async (eventSessionId) => {
+  const query = `{
+  eventSession(id:"${eventSessionId}") {
+    id
+    attendance {
+      student {
+        id
+      }
+    }
+  }
+}`;
+  const result = await callLocalGraphqlApi(query);
+  return get(result, 'data.eventSession.attendance', []);
 };
 
 const addEventSessionPostHookMethod = async (input, params, mutationName, context) => {

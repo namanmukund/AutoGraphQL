@@ -9,11 +9,10 @@ import {
 /* eslint-disable no-unused-vars */
 const updateEventPostHookMethod = async (input, params, mutationName, context) => {
   const { id: eventId } = params;
+  const registeredUsers = get(input, 'registeredUsers', []);
   const timeTableRule = get(params, 'input.eventTimeTableRule', null);
   const { prevTimeTableRule } = context;
-  if (timeTableRule) {
-    addUpdateEventSessionsForEvent(eventId, timeTableRule, prevTimeTableRule);
-  }
+  addUpdateEventSessionsForEvent(eventId, timeTableRule, prevTimeTableRule, registeredUsers);
 };
 
 export default updateEventPostHookMethod;

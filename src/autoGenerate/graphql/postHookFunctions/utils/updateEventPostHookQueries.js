@@ -1,3 +1,4 @@
+/* eslint-disable no-loop-func */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-unused-vars */
@@ -10,7 +11,7 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSelectedDays from './getSelectedDays';
 
 // query to get eventSessions
-const getEventSessions = async (eventId, sessionDatesFilter) => {
+const getEventSessions = async (eventId, sessionDatesFilter, fetchAttendance = false) => {
   const query = `
           {
             eventSessions(filter: {
@@ -18,15 +19,18 @@ const getEventSessions = async (eventId, sessionDatesFilter) => {
               { event_some: { id: "${eventId}" } }
               ${sessionDatesFilter ? `{
                 or: [
-                  { sessionDate: "2022-01-25T18:30:00.000Z" }
-                  { sessionDate: "2022-01-23T18:30:00.000Z" }
-                  { sessionDate: "2022-01-24T18:30:00.000Z" }
+                  ${sessionDatesFilter}
                 ]
               }` : ''}
             ]
           }, orderBy:sessionDate_ASC){
               id
               sessionDate
+              ${fetchAttendance ? `attendance{
+                student{
+                  id
+                }
+              }` : ''}
             }
           }
           `;
@@ -52,14 +56,26 @@ const createEventSession = async (eventId, date, slots) => {
   return true;
 };
 
-const updateEventSession = async (sessionId, slots, date) => {
+const deleteEventSession = async (eventSessionId) => {
+  const deleteQuery = `mutation {
+  deleteEventSession(id: "${eventSessionId}") {
+    id
+  }
+}
+`;
+  await callLocalGraphqlApi(deleteQuery);
+  log(`deleted eventSession with Id ${eventSessionId}`);
+};
+
+const updateEventSession = async (sessionId, slots, date, pushManyQuery = '') => {
   const query = `
           mutation{
             updateEventSession(
             id: "${sessionId}",
             input:{
-              sessionDate:"${date}",
-              ${slots}
+              ${date ? `sessionDate:"${date}",` : ''}
+              ${slots || ''}
+              ${pushManyQuery || ''}
             }
             ){
               id
@@ -67,7 +83,11 @@ const updateEventSession = async (sessionId, slots, date) => {
           }
           `;
   await callLocalGraphqlApi(query);
-  log(`Event Session ${sessionId} updated for date ${date}`);
+  if (pushManyQuery) {
+    log(`Event Session ${sessionId} updated for attendance`);
+  } else {
+    log(`Event Session ${sessionId} updated for date ${date}`);
+  }
   return true;
 };
 
@@ -110,7 +130,7 @@ const createEventSessions = async (eventId, possibleDates, filteredSlots, possib
   return true;
 };
 
-const addUpdateEventSessionsForEvent = async (eventId, timeTableRule, prevTimeTableRule) => {
+const addUpdateEventSessionsForEvent = async (eventId, timeTableRule, prevTimeTableRule, registeredUsers = []) => {
   // start, end dates
   if (timeTableRule) {
     const days = getSelectedDays(timeTableRule);
@@ -145,12 +165,17 @@ const addUpdateEventSessionsForEvent = async (eventId, timeTableRule, prevTimeTa
       });
       newDates = newDates.filter((date) => !(moment().diff(date) > 0));
       newDates.forEach((date) => {
-        console.log(date);
+        sessionDatesFilter += ` { sessionDate: "${new Date(date).toDateString()}" }`;
       });
       if (sessionDatesFilter) {
-        console.log(sessionDatesFilter);
         const eventSessions = await getEventSessions(eventId, sessionDatesFilter);
-        console.log(JSON.stringify(eventSessions));
+        if (eventSessions && eventSessions.length > 0) {
+          for (const eventSession of eventSessions) {
+            if (get(eventSession, 'id')) {
+              await deleteEventSession(get(eventSession, 'id'));
+            }
+          }
+        }
       }
     }
     const eventSessions = await getEventSessions(eventId);
@@ -171,16 +196,39 @@ const addUpdateEventSessionsForEvent = async (eventId, timeTableRule, prevTimeTa
       const allottedSessionsCount = sessionsAllotted.length;
       if (allottedSessionsCount > 0) {
         possibleSessionCount -= allottedSessionsCount;
-        updateExistingEventSessions(sessionsAllotted, possibleDates, filteredSlotsString);
+        await updateExistingEventSessions(sessionsAllotted, possibleDates, filteredSlotsString);
       }
       if (possibleSessionCount > 0) {
         // all the remaining sessions have to be created
-        createEventSessions(eventId, possibleDates, filteredSlotsString, possibleSessionCount);
+        await createEventSessions(eventId, possibleDates, filteredSlotsString, possibleSessionCount);
       }
     } else {
       // if there are no exisiting eventSessions for the given event id, create all of them
       const possibleSessionCount = possibleDates.length;
-      createEventSessions(eventId, possibleDates, filteredSlotsString, possibleSessionCount);
+      await createEventSessions(eventId, possibleDates, filteredSlotsString, possibleSessionCount);
+    }
+  }
+  if (registeredUsers.length > 0) {
+    const eventSessions = await getEventSessions(eventId, '', true);
+    if (eventSessions && eventSessions.length) {
+      const {
+        sessionsAllotted,
+      } = sortEventSessions(eventSessions);
+      for (const eventSession of sessionsAllotted) {
+        let pushManyQuery = '';
+        const alreadyAddedUser = get(eventSession, 'attendance', []).map((attendance) => get(attendance, 'student.id'));
+        registeredUsers.forEach((user) => {
+          if (!alreadyAddedUser.includes(get(user, 'typeId'))) {
+            pushManyQuery += `{studentConnectId: "${get(user, 'typeId')}", 
+                          isPresent: false, 
+                          }, `;
+          }
+        });
+        if (pushManyQuery) pushManyQuery = `attendance:{ pushMany: [${pushManyQuery}] }`;
+        if (get(eventSession, 'id') && pushManyQuery) {
+          updateEventSession(get(eventSession, 'id'), '', '', pushManyQuery);
+        }
+      }
     }
   }
 };
