@@ -1,280 +1,121 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-unused-vars */
-import { get, startCase, toLower } from 'lodash';
+import { get } from 'lodash';
+import moment from 'moment';
 import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
-import getSelectedSlotsStringArray
-  from '../../src/autoGenerate/graphql/postHookFunctions/utils/getSelectedSlotsStringArray';
-import getFormatedDate from '../getFormatedDate';
-// import sendWhatsAppTemplateMessage from '../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
-import getLongDate from '../getLongDate';
-import transactionalMessageBody from '../../constants/transactionalMessageBody';
-import updateScheduleStatusOfMenteeSession from './updateScheduleStatusOfMenteeSession';
-import getFullFilePath from '../getFullFilePath';
-import calculateMentorRating from '../../src/autoGenerate/graphql/resolvers/utils/calculateMentorRating';
-import sendTransactionalEmail from '../../src/autoGenerate/graphql/resolvers/utils/sendTransactionalEmail';
-import getMentorCodingLanguages from '../../src/autoGenerate/graphql/resolvers/utils/getMentorCodingLanguages';
-import getIntlDateTime from '../timeZoneDiff';
 import sendEmail from '../../services/email/utils/sendEmail';
 import parsedHtmlFromTemplateFileAndObject from '../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../services/email/utils/getEmailObject';
-import { log } from '..';
+import sendWhatsAppTemplateMessage from '../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
 
-const getMentorMenteeSession = async (menteeSessionId) => {
+const getBatchSessions = async () => {
+  const dt = new Date().setHours(0, 0, 0, 0);
+  const todayParsedDate = new Date(dt).toISOString();
+  const hourValue = new Date().getHours();
+  const slotNo = (hourValue + 1) <= 23 ? hourValue + 1 : 0;
+  const tomorrow = new Date(dt);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowParsedDate = tomorrow.toISOString();
   const query = `
  query{
-  mentorMenteeSessions(filter:{
-      menteeSession_some:{id:"${menteeSessionId}"}
-  }){
+  batchSessions(filter:{and:[
+    {batch_some:{type:b2b}},
+    {bookingDate: "${slotNo === 0 ? tomorrowParsedDate : todayParsedDate}"},
+    {slot${slotNo}: true},
+  ]}){
     id
-    mentorSession{
-      id
-      user{
-        id
-        name
-        username
-        email
-        country
-        timezone
-        phone{
-          countryCode
-          number
-        }
-        profilePic{
-          id
-          uri
-        }
-        mentorProfile{
-          id
-          codingLanguages{value}
-          experienceYear
+    sessionStartDate
+    topic {
+      title
+    }
+    batch {
+      allottedMentor {
+        mentorProfile {
           sessionLink
-          meetingId
-          meetingPassword
-          pythonCourseRating1
-          pythonCourseRating2
-          pythonCourseRating3
-          pythonCourseRating4
-          pythonCourseRating5
+        }
+      }
+      school {
+        name
+      }
+      students{
+        user {
+          studentProfile {
+            user {
+              name
+            }
+          }
+          parentProfile{
+            user {
+              name
+              phone {
+                countryCode
+                number
+              }
+            }
+          }
         }
       }
     }
   }
 }
-  `;
+`;
   const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.mentorMenteeSessions[0]');
+  return get(res, 'data.batchSessions', []);
+};
+const sendSessionRemainderMail = (email, sendEmailObject) => {
+  const templateFileName = 'B2BJoinSessionReminder';
+  const templateString = parsedHtmlFromTemplateFileAndObject(
+    templateFileName, sendEmailObject,
+  );
+  const emailTo = [email];
+  templateString.then((html) => {
+    const ccEmail = '';
+    const bccEmail = '';
+    const subject = 'Tekie - Session Reminder!';
+    const text = '';
+    const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
+    sendEmail(emailMsgObject);
+  });
 };
 const scheduleB2BSessionReminder = async () => {
-  // eslint-disable-next-line no-console
-  const dt = new Date().setHours(0, 0, 0, 0);
-  const parsedDate = new Date(dt).toISOString();
-  const hourValue = new Date().getHours();
-  const query = `
-    query{
-      menteeSessions(
-        filter:{
-          and:[
-            {scheduleRunStatus_not_in:[completed]}
-            {bookingDate: "${parsedDate}"}
-            {or:[
-              {slot${(hourValue + 1) % 24}:true}
-              {slot${(hourValue + 2) % 24}:true}
-              {slot${(hourValue + 3) % 24}:true}
-            ]}
-          ]
-        }
-      ){
-        id
-        bookingDate
-        topic{
-          id
-          title
-          order
-        }
-        slot${(hourValue + 1) % 24}
-        slot${(hourValue + 2) % 24}
-        slot${(hourValue + 3) % 24}
-        user{
-          id
-          name
-          country
-          timezone
-          studentProfile{
-            id
-            batch {
-              id
-              type
-              school {
-                id
-                name
-              }
-            }
-            parents{
-              id
-              user{
-                id
-                name
-                email
-                phone{
-                  countryCode
-                  number
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  `;
-  const menteeSessionsData = await callLocalGraphqlApi(query);
-  const menteeSessions = get(menteeSessionsData, 'data.menteeSessions');
-  log(`Mentee Sessons Length ${menteeSessions.length}`);
-  if ((menteeSessions && menteeSessions.length) || true) {
+  const batchSessions = getBatchSessions();
+  if (batchSessions && batchSessions.length) {
     // eslint-disable-next-line no-restricted-syntax
-    for (const menteeSession of menteeSessions) {
-      const {
-        id: menteeSessionId, user: menteeInfo, bookingDate, ...slots
-      } = menteeSession;
-
-      const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-      if (slotTimeStringArray && slotTimeStringArray.length) {
-        const slotNumber = slotTimeStringArray[0].split('slot')[1];
-        const { startTime, endTime, dateObject } = getIntlDateTime(
-          bookingDate,
-          slotNumber,
-          get(menteeInfo, 'timezone') || 'Asia/Kolkata',
+    for (const batchSession of batchSessions) {
+      const topicTitle = get(batchSession, 'topic.title');
+      const loginUrl = get(batchSession, 'allottedMentor.mentorProfile.sessionLink');
+      const schoolName = get(batchSession, 'batch.school.name');
+      const date = moment(get(batchSession, 'sessionStartDate')).format('D/MM/YY');
+      const startTime = moment(get(batchSession, 'sessionStartDate')).format('HH:mm a');
+      const students = get(batchSession, 'batch.students');
+      students.forEach((student) => {
+        const studentName = get(student, 'user.studentProfile.user.name');
+        const parentName = get(student, 'user.parentProfile.user.name');
+        const phoneNumber = get(student, 'user.parentProfile.user.phone.countryCode').split('+')[1] + get(student, 'user.parentProfile.user.phone.number');
+        sendWhatsAppTemplateMessage(
+          phoneNumber,
+          'B2Bsessionremainder',
+          phoneNumber,
+          [
+            {
+              name: 'parentsName',
+              value: parentName,
+            },
+            {
+              name: 'topicTitle',
+              value: topicTitle,
+            },
+            {
+              name: 'studentName',
+              value: studentName,
+            },
+          ],
         );
-
-        const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
-        const isB2BBatch = get(menteeInfo, 'studentProfile.batch.type') === 'b2b';
-        // eslint-disable-next-line no-await-in-loop
-        const mentorMenteeSession = await getMentorMenteeSession(menteeSessionId);
-        if (mentorMenteeSession && mentorMenteeSession.id && isB2BBatch) {
-          const sessionLink = get(mentorMenteeSession, 'mentorSession.user.mentorProfile.sessionLink');
-          const mentorProfileFile = get(mentorMenteeSession, 'mentorSession.user.profilePic.uri', '');
-          const mentorInfo = get(mentorMenteeSession, 'mentorSession.user.mentorProfile');
-          const mentorProfilePic = mentorProfileFile ? getFullFilePath(mentorProfileFile) : getFullFilePath('python/email/mentor1.png');
-          const topicTitle = get(menteeSession, 'topic.title', '');
-          const menteeObj = {
-            date: getFormatedDate(dateObject),
-            bookingDateLong: getLongDate(dateObject),
-            startTime,
-            endTime,
-            studentName: startCase(toLower(get(menteeInfo, 'name') || '')),
-            country: get(menteeInfo, 'country') || '',
-            timezone: get(menteeInfo, 'timezone') || 'Asia/Kolkata',
-            grade: get(menteeInfo, 'studentProfile.grade') || '',
-            schoolName: get(menteeInfo, 'studentProfile.batch.school.name') || '',
-            parentName: startCase(toLower(get(parentInfo, 'name') || '')),
-            parentEmail: get(parentInfo, 'email') || '',
-            parentNumber: get(parentInfo, 'phone.number') || '',
-            countryCode: get(parentInfo, 'phone.countryCode') || '',
-            mentorPhoneNumber: `${get(mentorMenteeSession, 'mentorSession.user.phone.countryCode')}-${get(mentorMenteeSession, 'mentorSession.user.phone.number')}`,
-            mentorName: get(mentorMenteeSession, 'mentorSession.user.name'),
-            mentorEmail: get(mentorMenteeSession, 'mentorSession.user.email'),
-            mentorCountryCode: get(mentorMenteeSession, 'mentorSession.user.phone.countryCode'),
-            mentorProfilePic,
-            mentorRating: calculateMentorRating(mentorInfo) || 5,
-            codingLanguages: getMentorCodingLanguages(get(mentorInfo, 'codingLanguages')) || 'Python',
-            experienceYear: get(mentorInfo, 'experienceYear') || 3,
-            topicTitle,
-            meetingId: get(mentorInfo, 'meetingId'),
-            meetingPassword: get(mentorInfo, 'meetingPassword'),
-            loginUrl: 'www.tekie.in/login',
-            supportLink: 'www.tekie.in/login',
-            sessionTopicLink: 'sessionTopicLink',
-            homeworkLink: 'homeworkLink',
-          };
-          menteeObj.sessionLink = sessionLink;
-          const {
-            parentName, parentNumber, countryCode, studentName, meetingId, meetingPassword,
-          } = menteeObj;
-
-          const parameters = [{
-            name: 'parent_name',
-            value: parentName,
-          },
+        sendSessionRemainderMail(
+          get(student, 'user.parentProfile.user.email'),
           {
-            name: 'student_name',
-            value: studentName,
+            topicTitle, studentName, schoolName, loginUrl, date, startTime,
           },
-          {
-            name: 'session_date',
-            value: getLongDate(dateObject),
-          },
-          {
-            name: 'session_time',
-            value: startTime,
-          },
-          {
-            name: 'phone',
-            value: `${countryCode}-${parentNumber}`,
-          },
-          {
-            name: 'session_link',
-            value: sessionLink,
-          },
-          {
-            name: 'meeting_id',
-            value: meetingId,
-          },
-          {
-            name: 'meeting_password',
-            value: meetingPassword,
-          },
-          ];
-          // const phone = 919654347463;
-          // const phone = countryCode.split('+')[1] + parentNumber;
-          if (!menteeObj.country || menteeObj.country === 'india') {
-            // eslint-disable-next-line no-await-in-loop
-            // await sendWhatsAppTemplateMessage(
-            //   phone,
-            //   transactionalMessageBody.sessionReminder,
-            //   parentName,
-            //   parameters,
-            // );
-          } else {
-            // eslint-disable-next-line no-await-in-loop
-            // await sendWhatsAppTemplateMessage(
-            //   phone,
-            //   transactionalMessageBody.sendSessionLink.whatsAppTemplateInternational,
-            //   parentName,
-            //   parameters,
-            // );
-          }
-          // send email
-          const templateFileName = get(transactionalMessageBody.sendHomeWorkLinkB2B, 'emailTemplate');
-
-          const subject = get(transactionalMessageBody.sendHomeWorkLinkB2B, 'subject');
-          const html = await parsedHtmlFromTemplateFileAndObject(templateFileName, {
-            ...menteeObj,
-          });
-          let emailTo = ['gokul.madhusudhan@tekie.in'];
-
-          let ccEmail = [];
-          if (process.env.DATA_MASKING) {
-            emailTo = [
-              'shubham.gupta@tekie.in',
-            ];
-            ccEmail = [
-              'naman.mukund@tekie.in',
-              'kritesh.patel@tekie.in',
-            ];
-          }
-          // if (menteeObj.mentorEmail) {
-          //   ccEmail.push(menteeObj.mentorEmail);
-          // }
-          const bccEmail = [];
-          const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, '', html, 'hello@tekie.in');
-          sendEmail(emailMsgObject);
-          return;
-          // eslint-disable-next-line no-await-in-loop
-          // await sendTransactionalEmail(menteeObj, transactionalMessageBody.sendSessionLink, menteeObj.country);
-          // update  status
-          // eslint-disable-next-line no-await-in-loop
-          // await updateScheduleStatusOfMenteeSession(menteeSessionId, 'completed');
-        }
-      }
+        );
+      });
     }
   }
 };
