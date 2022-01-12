@@ -64,12 +64,12 @@ const getEventId = (formId) => {
       break;
     case EVENTS.CRACKTHECODE.formId:
       eventId = EVENTS.CRACKTHECODE.eventId.staging;
-      if (process.env.NODE_ENV === 'production') {
-        eventId = EVENTS.CRACKTHECODE.eventId.production;
-        if (process.env.DATA_MASKING) {
-          eventId = EVENTS.CRACKTHECODE.eventId.preprod;
-        }
-      }
+      // if (process.env.NODE_ENV === 'production') {
+      //   eventId = EVENTS.CRACKTHECODE.eventId.production;
+      //   if (process.env.DATA_MASKING) {
+      //     eventId = EVENTS.CRACKTHECODE.eventId.preprod;
+      //   }
+      // }
       break;
     case EVENTS.CHRISTMASCARNIVAL.formId:
     case EVENTS.CHRISTMASCARNIVAL.formId25th:
@@ -735,8 +735,8 @@ const typeformWebhookController = async (req, res) => {
         case EVENTS.CHRISTMASCARNIVAL.formId25th:
           country = 'india';
           timezone = 'Asia/Kolkata';
-          utmSource = 'communityevent';
-          utmCampaign = 'christmascarnival_25dec';
+          utmSource = 'events';
+          utmCampaign = 'doodling';
           break;
         case EVENTS.DOODLING.formId:
           country = 'india';
@@ -758,7 +758,6 @@ const typeformWebhookController = async (req, res) => {
         utmSource,
         utmCampaign,
       };
-      console.log(studentDetailsObject, formId);
       usersData(studentDetailsObject, formId, doGenerateCertificate);
     }
     res.sendStatus(200);

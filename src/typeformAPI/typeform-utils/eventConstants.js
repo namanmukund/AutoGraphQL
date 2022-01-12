@@ -58,7 +58,7 @@ const EVENTS = {
     },
     eventDate: {
       dec24: '24 December',
-      dec25: '25 December',
+      dec25: '16 January',
       dec25RS: '25 December',
       dec26: '26 December',
     },
@@ -70,7 +70,7 @@ const EVENTS = {
     },
     eventDateTime: {
       dec24: '2021-12-24 12:30:00',
-      dec25: '2021-12-25 09:30:00',
+      dec25: '2022-01-16 09:30:00',
       dec25RS: '2021-12-25 09:30:00',
       dec26: '2021-12-26 09:30:00',
     },
@@ -79,7 +79,7 @@ const EVENTS = {
     registrationFormId: 'JvjnwAp8',
     formId: 'PjaDd9pI',
     eventId: {
-      production: 'ckx8sez1l0000ncin1hbv5gyk',
+      production: 'ckyb15tah00013kuj2wepa79p',
       preprod: 'ckx8sau1d0000lrinb526hp0v',
       staging: 'ckyaeenu10001ncuj0yyedyqj',
     },
