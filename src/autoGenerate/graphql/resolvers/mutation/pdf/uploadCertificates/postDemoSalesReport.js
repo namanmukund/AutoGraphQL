@@ -296,15 +296,14 @@ const getPostDemoSalesReportUrl = async (userId) => {
 
   const salesOperations = get(await callLocalGraphqlApi(salesOperationQuery(userId)), 'data.salesOperations', []);
   const mentorNote = getNote(get(salesOperations, '[0].studentNote', 'smartAndAttentive'));
-  const {
+  let {
     criticalThinking = 4,
     logicalThinking = 5,
     communicationSkills = 4,
     problemSolvingAbility = 5,
     creativeSkills = 5,
-    iqaTags,
   } = get(salesOperations, '[0]');
-
+  const { iqaTags } = get(salesOperations, '[0]');
   const mentorMenteeSessions = get(await callLocalGraphqlApi(mentorMenteeSessionsQuery(userId)), 'data.mentorMenteeSessions', []);
   const mentorName = get(mentorMenteeSessions, '[0].mentorSession.user.name', '-');
   const mentorPicUri = get(mentorMenteeSessions, '[0].mentorSession.user.profilePic.uri', 'python/course/mentorAvatar.png');
@@ -357,6 +356,44 @@ const getPostDemoSalesReportUrl = async (userId) => {
       mentorSilhoutte = await pdfDoc.embedPng(mentorSilhoutteBytes);
     }
     const mentorImageDims = mentorSilhoutte.scale(1);
+
+    const studentRatings = {
+      criticalThinking,
+      logicalThinking,
+      communicationSkills,
+      problemSolvingAbility,
+      creativeSkills,
+    };
+    const getRandomIndex = (len) => {
+      let first = Math.floor(Math.random() * len);
+      let second = Math.floor(Math.random() * len);
+      while (first === second) {
+        first = Math.floor(Math.random() * len);
+        second = Math.floor(Math.random() * len);
+      }
+      return [first, second];
+    };
+
+    const howManyFive = Object.keys(studentRatings).filter((item) => studentRatings[item] === 5);
+    const len = howManyFive.length;
+    if (len > 2) {
+      const [first, second] = getRandomIndex(len);
+      studentRatings[howManyFive[first]] = 3;
+      studentRatings[howManyFive[second]] = 4;
+    }
+
+    const areEqual = Object.values(studentRatings).every((item) => item === studentRatings.criticalThinking);
+    if (areEqual) {
+      const [first, second] = getRandomIndex(5);
+      studentRatings[Object.keys(studentRatings)[first]] = 3;
+      studentRatings[Object.keys(studentRatings)[second]] = 4;
+    }
+
+    criticalThinking = studentRatings.criticalThinking;
+    logicalThinking = studentRatings.logicalThinking;
+    communicationSkills = studentRatings.communicationSkills;
+    problemSolvingAbility = studentRatings.problemSolvingAbility;
+    creativeSkills = studentRatings.creativeSkills;
 
     const ratingAverage = Math.ceil((criticalThinking + logicalThinking + communicationSkills + problemSolvingAbility + creativeSkills) / 5);
     // star 1 = critical thinking
