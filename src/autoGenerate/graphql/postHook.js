@@ -64,7 +64,6 @@ import updateMentorDemandSlotPostHookMethod from './postHookFunctions/updateMent
 import updateDemoWowAuditPostHookMethod from './postHookFunctions/updateDemoWowAuditPostHookMethod';
 import updateEventPostHookMethod from './postHookFunctions/updateEventPostHookMethod';
 import addEventPostHookMethod from './postHookFunctions/addEventPostHookMethod';
-import addEventSessionPostHookMethod from './postHookFunctions/addEventSessionPostHookMethod';
 
 const posthook = async (input, mutationName, context, params) => {
   switch (mutationName) {
@@ -344,10 +343,6 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateEvent': {
       await updateEventPostHookMethod(input, params, mutationName, context);
-      break;
-    }
-    case 'addEventSession': {
-      await addEventSessionPostHookMethod(input, params, mutationName, context);
       break;
     }
     default:
