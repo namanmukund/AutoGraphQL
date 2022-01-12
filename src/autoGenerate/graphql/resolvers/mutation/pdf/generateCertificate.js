@@ -14,7 +14,7 @@ import getGenZEventCertificateUrl from './uploadCertificates/genzenvironment';
 import getIqaReportSnapshotUrl from './uploadCertificates/iqaReport';
 import getCrackTheCodeCertificateUrl from './uploadCertificates/crackTheCode';
 import getChristmasCarnivalCertificateUrl from './uploadCertificates/christmasCarnival';
-import getCrackTheCodeCertificateUpdatedUrl from './uploadCertificates/crackTheCodeUpdated';
+import getDoodleAllTheWayCertificateUrl from './uploadCertificates/doodleAllTheWay';
 
 const fetchUser = (userId, eventId) => `
 {
@@ -195,7 +195,7 @@ const generateCertificateMutationResolver = async (
         break;
       case 'ckyaeenu10001ncuj0yyedyqj':
       case 'ckyb15tah00013kuj2wepa79p':
-        fetchedUrl = await getCrackTheCodeCertificateUrl(userId, userName, formattedDate);
+        fetchedUrl = await getDoodleAllTheWayCertificateUrl(userId, userName, formattedDate);
         eventType = 'communityEvent';
         eventName = 'doodling';
         break;

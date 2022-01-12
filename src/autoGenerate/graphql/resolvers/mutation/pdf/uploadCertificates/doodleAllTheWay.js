@@ -13,8 +13,8 @@ const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).rep
 
 const slugifyID = (ID) => ID ? ID.toString().trim().toUpperCase().replace(/\w{5}(?=.)/g, '$&-') : '';
 
-const getCrackTheCodeCertificateUpdatedUrl = async (userId, userName, formattedDate) => {
-  const url = `${process.env.FILE_BASE_URL}/python/course/crackTheCode.pdf`;
+const getDoodleAllTheWayCertificateUrl = async (userId, userName, formattedDate) => {
+  const url = `${process.env.FILE_BASE_URL}/python/course/doodle.pdf`;
   const existingPdfBytes = await fetch(url).then((res) => res.buffer());
 
   // Load a PDFDocument from the existing PDF bytes
@@ -30,9 +30,18 @@ const getCrackTheCodeCertificateUpdatedUrl = async (userId, userName, formattedD
 
   const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
 
+  // Draw a string of text diagonally across the first page
+  firstPage.drawText(`${capitalize(userName)}`, {
+    x: 300,
+    y: 502.5,
+    size: 29,
+    font: NunitoBoldFont,
+    color: rgb(0, 0.678, 0.902),
+  });
+
   firstPage.drawText(`${formattedDate}.`, {
-    x: 125,
-    y: 362,
+    x: 275,
+    y: 391,
     size: 18,
     font: NunitoBoldFont,
     color: rgb(0.3137, 0.31, 0.31),
@@ -41,22 +50,22 @@ const getCrackTheCodeCertificateUpdatedUrl = async (userId, userName, formattedD
   /** PDF Meta Details */
   pdfDoc.setAuthor('Tekie');
   pdfDoc.setCreator('Kiwhode Learning Pvt Ltd');
-  pdfDoc.setSubject('Tekie\'s Crack the Code Certificate');
-  pdfDoc.setTitle('Tekie\'s Crack the Code Certificate');
+  pdfDoc.setSubject('Tekie\'s Doodle all the way Certificate');
+  pdfDoc.setTitle('Tekie\'s Doodle all the way Certificate');
   pdfDoc.setProducer('Tekie.in');
 
   const pdfBytes = await pdfDoc.save();
-  const path = '/tmp/crackthecode/certificate-pdf.pdf';
-  mkdirp.sync('/tmp/crackthecode');
+  const path = '/tmp/doodlealltheway/certificate-pdf.pdf';
+  mkdirp.sync('/tmp/doodlealltheway');
   fs.writeFileSync(path, pdfBytes);
   const fileContent = fs.readFileSync(path);
   let fetchedUrl = '';
   if (fileContent) {
-    const key = `event-certificate/crackthecode/${slugifyID(userId)}-certificate.pdf`;
+    const key = `event-certificate/doodlealltheway/${slugifyID(userId)}-certificate.pdf`;
     await uploadToS3(key, fileContent);
     fetchedUrl = key;
   }
   return fetchedUrl;
 };
 
-export default getCrackTheCodeCertificateUpdatedUrl;
+export default getDoodleAllTheWayCertificateUrl;
