@@ -111,6 +111,7 @@ import RebookMenteeSessionInput from './rebookMenteeSessionInput';
 import sendJourneySnapshotInMailInput from './sendJourneySnapshotInMailInput';
 import sendCertificateInMailInput from './sendCertificateInMailInput';
 import GenerateCertificate from './generateCertificate';
+import GenerateCertificateInBulk from './generateCertificateInBulk';
 import TopicQuestions from './topicQuestions';
 import TopicAssignmentQuestion from './topicAssignmentQuestion';
 import AuditQuestion from './auditQuestion';
@@ -276,6 +277,7 @@ export default [
   ...sendJourneySnapshotInMailInput,
   ...sendCertificateInMailInput,
   ...GenerateCertificate,
+  ...GenerateCertificateInBulk,
   ...EventCertificate,
   ...QuestionBankImage,
   ...SessionGradeReport,
