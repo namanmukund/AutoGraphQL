@@ -109,6 +109,7 @@ import TaskCompletionStatus from './TaskCompletionStatus';
 import TaskLeadStatus from './TaskLeadStatus';
 import TaskLeadStatusReason from './TaskLeadStatusReason';
 import TaskBookingStatus from './TaskBookingStatus';
+import TaskBookingStatusReason from './TaskBookingStatusReason';
 import TaskContactReason from './TaskContactReason';
 import AttentionAmount from './AttentionAmount';
 import LearningObjectiveComponentsB2B from './LearningObjectiveComponentsB2B';
@@ -226,6 +227,7 @@ export default [
   TaskLeadStatus,
   TaskLeadStatusReason,
   TaskBookingStatus,
+  TaskBookingStatusReason,
   TaskContactReason,
   AttentionAmount,
   LearningObjectiveComponentsB2B,
