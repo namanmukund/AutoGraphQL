@@ -518,6 +518,7 @@ const newTekieWebLinks = {
   staging: 'https://tekie-web-staging-28b1816977c254e7.onporter.run',
   preProd: 'https://tekie-web-pre-prod-dd811f1acf374a8c.onporter.run',
 };
+const EXCLUDE_NUMBER = ['7000287388'];
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
@@ -607,4 +608,5 @@ export {
   ALLOWED_ROLE_FOR_MANUAL_SESSIONS,
   TIME_DIFF_FOR_MANUAL_SESSION,
   newTekieWebLinks,
+  EXCLUDE_NUMBER,
 };

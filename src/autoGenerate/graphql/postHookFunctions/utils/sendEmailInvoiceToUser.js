@@ -1,5 +1,4 @@
-import parsedHtmlFromTemplateFileAndObject
-  from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
+import parsedHtmlFromTemplateFileAndObject from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
 
@@ -31,7 +30,7 @@ export const sendEmailInvoiceToUser = (payload, templateFileName, subject) => {
 
     if (process.env.DATA_MASKING) {
       emailTo = [
-        'shubham.gupta@tekie.in',
+        'ishan.dubey@tekie.in',
       ];
       ccEmail = [
         'naman.mukund@tekie.in',
