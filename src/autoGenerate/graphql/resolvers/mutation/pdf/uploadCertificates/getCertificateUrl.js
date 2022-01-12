@@ -56,7 +56,7 @@ const getCertificateUrl = async (userId, eventId) => {
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
 
-    // // Embed the different possible fonts
+    // Embed the different possible fonts
     const NunitoBoldfontBytes = await fetch(NUNITO_BOLD_FONT_URL).then((res) => res.buffer());
 
     const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
@@ -74,7 +74,7 @@ const getCertificateUrl = async (userId, eventId) => {
       res.properties.y = embed.yDim;
       res.properties.size = embed.textSize;
       res.properties.font = NunitoBoldFont;
-      res.properties.font = rgb(0.3137, 0.31, 0.31);
+      res.properties.color = rgb(0.3137, 0.31, 0.31);
       return res;
     };
 

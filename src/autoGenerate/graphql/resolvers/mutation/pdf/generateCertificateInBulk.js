@@ -1,13 +1,9 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
-/* eslint-disable no-console */
-/* eslint-disable no-unused-vars */
 /* eslint-disable no-confusing-arrow */
 import { get } from 'lodash';
-import moment from 'moment';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
 
 const fetchEventSessions = async (eventId) => {
   const query = `
