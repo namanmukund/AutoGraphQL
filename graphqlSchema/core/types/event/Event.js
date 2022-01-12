@@ -14,6 +14,10 @@ const EventCertificateEmbed = `
     textSize: Int
     fontFamily: String
     variableName: CommsDataField
+    red: Int @length(min: 0, max: 255)
+    green: Int @length(min: 0, max: 255)
+    blue: Int @length(min: 0, max: 255)
+    rotate: Int @length(min: -359, max: 359)
   }
 `;
 
@@ -92,6 +96,10 @@ const Event = `
     eventSessions: [EventSession] @relation(name: "EventSessionEvent")
     isEmailCommsEnabled: Boolean @defaultValue(value: "false")
     eventTicket: [EventTicket] @relation(name: "EventTicketEvent")
+    shouldSendRescheduledComms: Boolean @defaultValue(value: "false")
+    rescheduledReason: String
+    shouldSendCanceledComms: Boolean @defaultValue(value: "false")
+    cancellationReason: String
   }
 `;
 
