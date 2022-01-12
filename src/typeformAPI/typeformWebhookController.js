@@ -19,12 +19,12 @@ const getEventId = (formId) => {
   switch (formId) {
     case EVENTS.DOODLING.formId:
       eventId = EVENTS.DOODLING.eventId.staging;
-      // if (process.env.NODE_ENV === 'production') {
-      //   eventId = EVENTS.DOODLING.eventId.production;
-      //   if (process.env.DATA_MASKING) {
-      //     eventId = EVENTS.DOODLING.eventId.preprod;
-      //   }
-      // }
+      if (process.env.NODE_ENV === 'production') {
+        eventId = EVENTS.DOODLING.eventId.production;
+        if (process.env.DATA_MASKING) {
+          eventId = EVENTS.DOODLING.eventId.preprod;
+        }
+      }
       break;
     case EVENTS.SPYSQUADCAMP.formId:
       eventId = EVENTS.SPYSQUADCAMP.eventId.staging;
@@ -64,12 +64,12 @@ const getEventId = (formId) => {
       break;
     case EVENTS.CRACKTHECODE.formId:
       eventId = EVENTS.CRACKTHECODE.eventId.staging;
-      // if (process.env.NODE_ENV === 'production') {
-      //   eventId = EVENTS.CRACKTHECODE.eventId.production;
-      //   if (process.env.DATA_MASKING) {
-      //     eventId = EVENTS.CRACKTHECODE.eventId.preprod;
-      //   }
-      // }
+      if (process.env.NODE_ENV === 'production') {
+        eventId = EVENTS.CRACKTHECODE.eventId.production;
+        if (process.env.DATA_MASKING) {
+          eventId = EVENTS.CRACKTHECODE.eventId.preprod;
+        }
+      }
       break;
     case EVENTS.CHRISTMASCARNIVAL.formId:
     case EVENTS.CHRISTMASCARNIVAL.formId25th:
