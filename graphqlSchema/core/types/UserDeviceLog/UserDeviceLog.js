@@ -5,7 +5,7 @@ const UserDeviceLog = `
     deviceType: String
     deviceOs: String
     osVersion: String
-    user: User @relation(name:"UserDeviceLogUser") 
+    user: User! @relation(name:"UserDeviceLogUser") 
   }
 `;
 
