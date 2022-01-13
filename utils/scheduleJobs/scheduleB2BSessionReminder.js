@@ -81,31 +81,42 @@ const scheduleB2BSessionReminder = async () => {
     // eslint-disable-next-line no-restricted-syntax
     for (const batchSession of batchSessions) {
       const topicTitle = get(batchSession, 'topic.title');
-      const loginUrl = get(batchSession, 'allottedMentor.mentorProfile.sessionLink');
+      const loginUrl = get(batchSession, 'batch.allottedMentor.mentorProfile.sessionLink');
       const schoolName = get(batchSession, 'batch.school.name');
       const date = moment(get(batchSession, 'sessionStartDate')).format('D/MM/YY');
       const startTime = moment(get(batchSession, 'sessionStartDate')).format('HH:mm a');
       const students = get(batchSession, 'batch.students');
       students.forEach((student) => {
         const studentName = get(student, 'user.studentProfile.user.name');
-        const parentName = get(student, 'user.parentProfile.user.name');
         const phoneNumber = get(student, 'user.parentProfile.user.phone.countryCode').split('+')[1] + get(student, 'user.parentProfile.user.phone.number');
         sendWhatsAppTemplateMessage(
           phoneNumber,
-          'B2Bsessionremainder',
+          'b2b_session_reminder_1',
           phoneNumber,
           [
             {
-              name: 'parentsName',
-              value: parentName,
+              name: 'student_name',
+              value: studentName,
             },
             {
-              name: 'topicTitle',
+              name: 'topic_title',
               value: topicTitle,
             },
             {
-              name: 'studentName',
-              value: studentName,
+              name: 'school_name',
+              value: schoolName,
+            },
+            {
+              name: 'session_date',
+              value: date,
+            },
+            {
+              name: 'session_time',
+              value: startTime,
+            },
+            {
+              name: 'login_link',
+              value: loginUrl,
             },
           ],
         );
