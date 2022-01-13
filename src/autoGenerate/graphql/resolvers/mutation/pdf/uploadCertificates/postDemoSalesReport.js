@@ -368,8 +368,8 @@ const getPostDemoSalesReportUrl = async (userId) => {
     const getRandomIndex = (size, len) => {
       let result = [];
       for (let i = 0; i < size; i += 1) {
-        const ran = Math.floor(Math.random() * len);
-        result.push(ran);
+        const ran = Math.round(Math.random() * len);
+        result.push(ran === len ? ran - 1 : ran);
       }
       while (true) {
         if (checkArrayUnique(result)) {
@@ -377,13 +377,13 @@ const getPostDemoSalesReportUrl = async (userId) => {
         }
         result = [];
         for (let i = 0; i < size; i += 1) {
-          const ran = Math.floor(Math.random() * len);
-          result.push(ran);
+          const ran = Math.round(Math.random() * len);
+          result.push(ran === len ? ran - 1 : ran);
         }
       }
       return result;
     };
-    const getRandomNum = () => Math.floor(Math.random() * 2) + 3;
+    const getRandomNum = () => Math.round(Math.random() * 1) + 3;
 
     const howManyFive = Object.keys(studentRatings).filter((item) => studentRatings[item] === 5);
     const len = howManyFive.length;
