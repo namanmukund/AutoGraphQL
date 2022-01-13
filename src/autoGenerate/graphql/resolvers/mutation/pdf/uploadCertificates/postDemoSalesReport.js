@@ -364,29 +364,41 @@ const getPostDemoSalesReportUrl = async (userId) => {
       problemSolvingAbility,
       creativeSkills,
     };
-    const getRandomIndex = (len) => {
-      let first = Math.floor(Math.random() * len);
-      let second = Math.floor(Math.random() * len);
-      while (first === second) {
-        first = Math.floor(Math.random() * len);
-        second = Math.floor(Math.random() * len);
+    const checkArrayUnique = (arr) => arr.length === new Set(arr).size;
+    const getRandomIndex = (size, len) => {
+      let result = [];
+      for (let i = 0; i < size; i += 1) {
+        const ran = Math.floor(Math.random() * len);
+        result.push(ran);
       }
-      return [first, second];
+      while (true) {
+        if (checkArrayUnique(result)) {
+          break;
+        }
+        result = [];
+        for (let i = 0; i < size; i += 1) {
+          const ran = Math.floor(Math.random() * len);
+          result.push(ran);
+        }
+      }
+      return result;
     };
+    const getRandomNum = () => Math.floor(Math.random() * 2) + 3;
 
     const howManyFive = Object.keys(studentRatings).filter((item) => studentRatings[item] === 5);
     const len = howManyFive.length;
     if (len > 2) {
-      const [first, second] = getRandomIndex(len);
-      studentRatings[howManyFive[first]] = 3;
-      studentRatings[howManyFive[second]] = 4;
+      const [first, second] = getRandomIndex(2, len);
+      studentRatings[howManyFive[first]] = getRandomNum();
+      studentRatings[howManyFive[second]] = getRandomNum();
     }
 
     const areEqual = Object.values(studentRatings).every((item) => item === studentRatings.criticalThinking);
     if (areEqual) {
-      const [first, second] = getRandomIndex(5);
-      studentRatings[Object.keys(studentRatings)[first]] = 3;
-      studentRatings[Object.keys(studentRatings)[second]] = 4;
+      const [first, second, third] = getRandomIndex(3, 5);
+      studentRatings[Object.keys(studentRatings)[first]] = getRandomNum();
+      studentRatings[Object.keys(studentRatings)[second]] = getRandomNum();
+      studentRatings[Object.keys(studentRatings)[third]] = getRandomNum();
     }
 
     criticalThinking = studentRatings.criticalThinking;
