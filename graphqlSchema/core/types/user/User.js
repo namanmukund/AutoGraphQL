@@ -64,7 +64,7 @@ const User = `
     utmContent: String
     utmMedium: String
     source: UserOriginSource @defaultValue(value: "website")
-    ${affilateInfo}  
+    ${affilateInfo}
     ${socialInfo}
     ${promotionalInfo}
     verificationStatus: VerificationStatus @defaultValue(value: "unverified")

@@ -100,6 +100,12 @@ const Event = `
     rescheduledReason: String
     shouldSendCanceledComms: Boolean @defaultValue(value: "false")
     cancellationReason: String
+    ticketName: String
+    ticketregistrationLimit: Int
+    ticketPrice: Float
+    ticketEndsCondition: DateCondition
+    ticketEndsInUnit: DurationType
+    ticketEndsInValue: Int
   }
 `;
 

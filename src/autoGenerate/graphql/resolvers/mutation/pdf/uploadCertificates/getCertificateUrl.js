@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-confusing-arrow */
 
-import { PDFDocument, rgb } from 'pdf-lib';
+import { PDFDocument, rgb, degrees } from 'pdf-lib';
 import { get } from 'lodash';
 import * as fs from 'fs';
 import fontkit from '@pdf-lib/fontkit';
@@ -74,7 +74,14 @@ const getCertificateUrl = async (userId, eventId) => {
       res.properties.y = embed.yDim;
       res.properties.size = embed.textSize;
       res.properties.font = NunitoBoldFont;
-      res.properties.color = rgb(0.3137, 0.31, 0.31);
+      if (get(embed, 'red') && get(embed, 'green') && get(embed, 'blue')) {
+        res.properties.color = rgb(get(embed, 'red'), get(embed, 'green'), get(embed, 'blue'));
+      } else {
+        res.properties.color = rgb(0.3137, 0.31, 0.31);
+      }
+      if (get(embed, 'rotate')) {
+        res.properties.rotate = degrees(get(embed, 'rotate'));
+      }
       return res;
     };
 

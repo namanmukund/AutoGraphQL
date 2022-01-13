@@ -5,7 +5,7 @@ const slotTimeFields = getSlotTimeFields('Boolean', false);
 const eventAttendanceType = `
   type EventAttendanceType {
    student: StudentProfile! @relation(name:"EventSessionStudentProfile", direction: "OneWay")
-   isPresent: Boolean
+   isPresent:  Boolean @defaultValue(value: "false")
    status: AttendanceStatus @defaultValue(value: "notAssigned")
  }`;
 
