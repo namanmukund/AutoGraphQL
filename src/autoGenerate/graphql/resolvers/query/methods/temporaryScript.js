@@ -87,6 +87,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateNetPromoterScoresWithCourseAndMmSession();
   // await addOrUpdateUsersInBulk();
   // await updateLeadAnalyticsForPastLeads();
+  await updateMentorMenteeSessionIsAssignmentAttempted();
   return {
     result: true,
   };
