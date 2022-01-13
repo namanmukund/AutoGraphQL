@@ -14,6 +14,7 @@ const StudentProfile = `
     batch: Batch @relation(name: "BatchStudentProfile")
     eventAttendances: [EventAttendance] @relation(name:"EventAttendanceStudentProfile")
     bookingAgent: User @relation(name: "BookingAgentStudentProfile", direction: "OneWay")
+    mentor: MentorProfile @relation(name: "StudentProfileMentorProfile")
 }`;
 
 export default [StudentProfile];
