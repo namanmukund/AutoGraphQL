@@ -106,7 +106,7 @@ const scheduleB2BSessionMissed = async (input, params, mutationName, context) =>
         },
         {
           name: 'homeworkLink',
-          value: 'homeworkLink.com',
+          value: homeworkLink,
         },
       ],
     );
@@ -114,7 +114,7 @@ const scheduleB2BSessionMissed = async (input, params, mutationName, context) =>
       parentEmail,
       'B2BHomework',
       {
-        parentName, topicTitle, sessionTopicLink, studentName, date, startTime, homeworkLink,
+        parentName, studentName, date, startTime, homeworkLink,
       },
       'Tekie - Maintain your Homework Streak!',
     );
