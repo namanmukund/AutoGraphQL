@@ -1,7 +1,8 @@
-/*eslint-disable*/
-import { MENTOR, MENTEE } from "../../../../constants/roles";
-import { get } from 'lodash'
+import { get } from 'lodash';
+import { MENTOR, MENTEE } from '../../../../constants/roles';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import addUserData from '../resolvers/mutation/user/utils/addUserData';
+import { generateCuid } from '../../../../utils';
 
 const addMentorProfileQuery = (userConnectId) => `
 mutation {
@@ -11,48 +12,34 @@ mutation {
 }
 `;
 
-const addUserWithMenteeRoleForMentor = (name) => `
-mutation {
-    addUser(input: {
-      name: "${name}",
-      role: ${MENTEE}   
-    }) {
-      id
-    }
-  }
-`
-
 const addStudentProfileQuery = (userConnectId, mentorConnectId) => `
 mutation {
     addStudentProfile(userConnectId: "${userConnectId}", mentorConnectId: "${mentorConnectId}", input:{
-      grade: 6
+      grade: Grade6
     }) {
       id
     }
   }
-`
+`;
 
 const addUserPostHookMethod = async (input, params) => {
-    if (get(params, 'input.role') === MENTOR) {
-        console.log("mentorid", get(input, 'id'))
-        const res = await callLocalGraphqlApi(addMentorProfileQuery(get(input, 'id')))
-        console.log("response afrter mentor profile query", res);
-      console.log(get(res.data, 'addMentorProfile.id'));
-        if(get(res.data, 'addMentorProfile.id')) {
-        const mentorConnectId = get(res.data, 'addMentorProfile.id')
-        console.log("mentorConnectId", mentorConnectId)
-        const email = get(input, 'email');
-        const name = get(input, 'name')
-        const userData = await callLocalGraphqlApi(addUserWithMenteeRoleForMentor(name))
-        console.log("userdata", userData)
-        const userConnectId = get(userData.data, 'addUser.id');
-        console.log("userconnectid", userConnectId)
-        if(get(userData.data, 'addUser.id')) {
-        const fresp = await callLocalGraphqlApi(addStudentProfileQuery(userConnectId, mentorConnectId))
-        console.log("final", fresp)
-        }
-        }
+  if (get(params, 'input.role') === MENTOR) {
+    const res = await callLocalGraphqlApi(addMentorProfileQuery(get(input, 'id')));
+    if (get(res.data, 'addMentorProfile.id')) {
+      const mentorConnectId = get(res.data, 'addMentorProfile.id');
+      const newAuthentication = {
+        bypass: true,
+      };
+      const childData = {
+        name: get(input, 'name'),
+        role: MENTEE,
+      };
+      const childDataWithId = generateCuid(childData);
+      const childUserData = await addUserData(newAuthentication, childDataWithId);
+      const { id: childUserId } = childUserData;
+      await callLocalGraphqlApi(addStudentProfileQuery(childUserId, mentorConnectId));
     }
+  }
 };
-  
-  export default addUserPostHookMethod;
+
+export default addUserPostHookMethod;
