@@ -58,6 +58,7 @@ const User = `
     campaign: Campaign @relation(name:"UserCampaign", direction: "OneWay")
     profilePic: File @relation(name: "UserProfilePic", direction: "OneWay", isSubset: true)
     userLocationLog: UserLocationLog @relation(name:"UserLocationLogUser", isSubset: true) 
+    userDeviceLog: UserDeviceLog @relation(name:"UserDeviceLogUser", isSubset: true) 
     utmSource: String
     utmCampaign: String
     utmTerm: String
