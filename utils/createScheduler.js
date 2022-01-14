@@ -3,6 +3,7 @@ import scheduleTrialSessionReminder from './scheduleJobs/scheduleTrialSessionRem
 import scheduleMentorReport from './scheduleJobs/scheduleMentorReport';
 import scheduleSessionReport from './scheduleJobs/scheduleSessionReport';
 import scheduleSessionCourseReport from './scheduleJobs/scheduleCourseReport';
+import scheduleEventSessionRemainder from './scheduleJobs/scheduleEventSessionRemainder';
 
 // create scheduler for different functionalities
 const createScheduler = (schedulerName) => {
@@ -54,6 +55,19 @@ const createScheduler = (schedulerName) => {
         // eslint-disable-next-line no-console
         console.log('scheduler started for: ', schedulerName);
         await scheduleSessionCourseReport(2);
+      });
+      break;
+    case 'eventSessionRemainder':
+      rule.tz = 'Asia/Kolkata';
+      rule.hour = 1;
+      rule.minute = 0;
+      rule.second = 0;
+      rule.dayOfWeek = new schedule.Range(0, 6);
+      // eslint-disable-next-line no-unused-vars
+      schedule.scheduleJob(rule, async () => {
+        // eslint-disable-next-line no-console
+        console.log('scheduler started for: ', schedulerName);
+        await scheduleEventSessionRemainder();
       });
       break;
     default:
