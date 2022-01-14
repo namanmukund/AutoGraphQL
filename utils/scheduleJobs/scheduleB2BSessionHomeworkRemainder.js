@@ -23,7 +23,8 @@ const getBatchSessions = async () => {
     batchSessions(filter:{and:[
         {batch_some:{type:b2b}},
         {sessionStartDate:"${sessionDate}"},
-        {slot${slotNo}:true}
+        {slot${slotNo}:true},
+        {sessionStatus_in:[completed, started]},
       ]}){
         id
         sessionStartDate
@@ -65,13 +66,16 @@ const getBatchSessions = async () => {
   const batchSessions = get(res, 'data.batchSessions', []);
   return { batchSessions, sessionDate };
 };
-const isHomeworkSubmitted = async (topicId, courseId, sessionDate, userId) => {
+const isHomeworkSubmitted = async (topicId, courseId, sessionStartDate, userId) => {
+  const sessionEndDate = new Date(sessionDate).setHours(23, 59, 59, 999);
+  const parsedSessionEndDate = new Date(sessionEndDate).toISOString();
   const query = `
     query{
         mentorMenteeSessions(
             filter:{and:[
               {topic_some:{id:"${topicId}"}},
-              {sessionStartDate:"${sessionDate}"},
+              {sessionStartDate_gte: "${sessionStartDate}"},
+              {sessionStartDate_lte: "${parsedSessionEndDate}"},
               {course_some:{id:"${courseId}"}},
             ]}
           ) {
@@ -119,7 +123,7 @@ const scheduleB2BSessionHomeworkRemainder = async () => {
       const courseId = get(batchSession, 'batch.courses')[0].id;
       const students = get(batchSession, 'batch.students');
       const schoolCode = get(batchSession, 'batch.school.code');
-      const homeworkLink = `https://${schoolCode}.tekie.in/homework`;
+      const homeworkLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/homework` : `${process.env.TEKIE_WEB_URL}/homework`;
       students.forEach((student) => {
         const studentName = get(student, 'user.studentProfile.user.name');
         const parentName = get(student, 'user.parentProfile.user.name');
