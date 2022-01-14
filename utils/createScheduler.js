@@ -59,7 +59,7 @@ const createScheduler = (schedulerName) => {
       break;
     case 'eventSessionRemainder':
       rule.tz = 'Asia/Kolkata';
-      rule.hour = 1;
+      rule.hour = 2;
       rule.minute = 0;
       rule.second = 0;
       rule.dayOfWeek = new schedule.Range(0, 6);
