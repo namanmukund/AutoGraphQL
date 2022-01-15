@@ -82,7 +82,7 @@ const updateMagicLinkLog = async (magicLogId, visitedCount) => {
   return get(updateData, 'data.updateMagicLinkLog');
 };
 
-const getMagicLinkLogs = async (userId) => {
+const getMagicLinkLogs = async (userId, linkToken) => {
   const query = `{
   magicLinkLogs(
     filter: {
@@ -90,6 +90,9 @@ const getMagicLinkLogs = async (userId) => {
         { user_some: { id: "${userId}" } }
         { createdAt_gte: "${moment().startOf('day').toISOString()}" }
         { createdAt_lte: "${moment().endOf('day').toISOString()}" }
+        {
+          linkToken_not: "${linkToken}"
+        }
       ]
     }
   ) {
@@ -243,8 +246,8 @@ const getMagicLink = (async (root, params, context) => {
             school,
             isDownloadExcel,
           });
+          getMagicLinkLogs(get(user, 'id'), linkToken);
           if (!byPassMenteeValidationApps.includes(appName)) {
-            getMagicLinkLogs(get(user, 'id'));
             if (!isDownloadExcel) {
               if (linkUri) {
                 if (parents.length && get(parents, '[0].user.email')) {
