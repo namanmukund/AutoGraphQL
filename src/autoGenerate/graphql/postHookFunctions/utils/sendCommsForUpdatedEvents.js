@@ -8,6 +8,7 @@ import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
 import getIntlDateTime from '../../../../../utils/timeZoneDiff';
 import getSelectedSlotsStringArray from './getSelectedSlotsStringArray';
+import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 
 const getEvent = async (eventId) => {
   const query = `
@@ -18,30 +19,7 @@ const getEvent = async (eventId) => {
             eventTimeTableRule {
               startDate
               endDate
-              slot0
-              slot1
-              slot2
-              slot3
-              slot4
-              slot5
-              slot6
-              slot7
-              slot8
-              slot9
-              slot10
-              slot11
-              slot12
-              slot13
-              slot14
-              slot15
-              slot16
-              slot17
-              slot18
-              slot19
-              slot20
-              slot21
-              slot22
-              slot23
+              ${getSlotTimesInString()}
             }
             locationType
             geoLocation
@@ -52,7 +30,7 @@ const getEvent = async (eventId) => {
             meetingId
             meetingPassword
             sessionLink
-            timezone
+            timeZone
             registeredUsers {
                 user {
                     name
@@ -90,284 +68,268 @@ const sendEmailCommsForUpdatedEvents = (email, templateFileName, sendEmailObject
 
 const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdateStatus) => {
   const event = await getEvent(eventId);
-  const registeredUsers = get(event, 'registeredUsers', []);
-  const timezone = get(event, 'timezone', '');
-  const { ...slots } = get(event, 'eventTimeTableRule', {});
+  const {
+    registeredUsers = [], timeZone, eventTimeTableRule, name: eventName,
+    locationType, meetingId, meetingPassword, sessionLink, geoLocation,
+    address, state, city, pincode,
+  } = event;
+  const {
+    startDate, endDate, isEmailCommsEnabled, ...slots
+  } = eventTimeTableRule;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
   const slotNumber = slotTimeStringArray[0].split('slot')[1];
-  const startDate = get(event, 'eventTimeTableRule.startDate', '');
-  const { dateObject, startTime } = getIntlDateTime(startDate, slotNumber, timezone);
+  const { dateObject, startTime } = getIntlDateTime(startDate, slotNumber, timeZone);
   const eventStartdate = moment(dateObject).format('dddd, Do MMMM, YYYY');
-  const endDate = get(event, 'eventTimeTableRule.endDate', '');
   const eventEndDate = moment(endDate).format('dddd, Do MMMM, YYYY');
-  const toSendEmailComms = get(event, 'isEmailCommsEnabled');
-  const eventName = get(batch, 'eventName');
-  const locationType = get(batch, 'locationType');
-  const meetingId = get(batch, 'meetingId');
-  const meetingPassword = get(batch, 'meetingPassword');
-  const sessionLink = get(batch, 'sessionLink');
-  const geoLocation = get(batch, 'geoLocation');
-  const address = get(batch, 'address');
-  const state = get(batch, 'state');
-  const city = get(batch, 'city');
-  const pincode = get(eventSession, 'pincode');
   for (const registeredUser of registeredUsers) {
-    const { user } = registeredUser.parents[0];
+    const user = get(registeredUser, 'parents[0].user');
     const parentEmail = get(user, 'email');
     const parentPhone = get(user, 'phone.countryCode').split('+')[1] + (user, 'phone.number');
     const studentName = get(registeredUser, 'user.name');
     if (eventUpdateStatus === 'reschedule') {
+      let parameters = [];
       if (locationType === 'online') {
-        sendWhatsAppTemplateMessage(
-          parentPhone,
-          'Event Rescheduled',
-          parentPhone,
-          [
-            {
-              name: 'studentName',
-              content: studentName,
-            },
-            {
-              name: 'eventName',
-              content: eventName,
-            },
-            {
-              name: 'meetingId',
-              content: meetingId,
-            },
-            {
-              name: 'meetingPassword',
-              content: meetingPassword,
-            },
-            {
-              name: 'sessionLink',
-              content: sessionLink,
-            },
-            {
-              name: 'eventUpdateReason',
-              content: eventUpdateReason,
-            },
-            {
-              name: 'eventStartdate',
-              content: eventStartdate,
-            },
-            {
-              name: 'eventEndDate',
-              content: eventEndDate,
-            },
-            {
-              name: 'startTime',
-              content: startTime,
-            },
-          ],
-        );
+        parameters = [
+          {
+            name: 'studentName',
+            content: studentName,
+          },
+          {
+            name: 'eventName',
+            content: eventName,
+          },
+          {
+            name: 'meetingId',
+            content: meetingId,
+          },
+          {
+            name: 'meetingPassword',
+            content: meetingPassword,
+          },
+          {
+            name: 'sessionLink',
+            content: sessionLink,
+          },
+          {
+            name: 'eventUpdateReason',
+            content: eventUpdateReason,
+          },
+          {
+            name: 'eventStartdate',
+            content: eventStartdate,
+          },
+          {
+            name: 'eventEndDate',
+            content: eventEndDate,
+          },
+          {
+            name: 'startTime',
+            content: startTime,
+          },
+        ];
       }
       if (locationType === 'venue') {
-        sendWhatsAppTemplateMessage(
-          parentPhone,
-          'Event Rescheduled',
-          parentPhone,
-          [
-            {
-              name: 'studentName',
-              content: studentName,
-            },
-            {
-              name: 'eventName',
-              content: eventName,
-            },
-            {
-              name: 'geoLocation',
-              content: geoLocation,
-            },
-            {
-              name: 'address',
-              content: address,
-            },
-            {
-              name: 'state',
-              content: state,
-            },
-            {
-              name: 'city',
-              content: city,
-            },
-            {
-              name: 'pincode',
-              content: pincode,
-            },
-            {
-              name: 'eventUpdateReason',
-              content: eventUpdateReason,
-            },
-            {
-              name: 'eventStartdate',
-              content: eventStartdate,
-            },
-            {
-              name: 'eventEndDate',
-              content: eventEndDate,
-            },
-            {
-              name: 'startTime',
-              content: startTime,
-            },
-          ],
-        );
+        parameters = [
+          {
+            name: 'studentName',
+            content: studentName,
+          },
+          {
+            name: 'eventName',
+            content: eventName,
+          },
+          {
+            name: 'geoLocation',
+            content: geoLocation,
+          },
+          {
+            name: 'address',
+            content: address,
+          },
+          {
+            name: 'state',
+            content: state,
+          },
+          {
+            name: 'city',
+            content: city,
+          },
+          {
+            name: 'pincode',
+            content: pincode,
+          },
+          {
+            name: 'eventUpdateReason',
+            content: eventUpdateReason,
+          },
+          {
+            name: 'eventStartdate',
+            content: eventStartdate,
+          },
+          {
+            name: 'eventEndDate',
+            content: eventEndDate,
+          },
+          {
+            name: 'startTime',
+            content: startTime,
+          },
+        ];
       }
-      if (toSendEmailComms) {
+      sendWhatsAppTemplateMessage(
+        parentPhone,
+        'Event Rescheduled',
+        parentPhone,
+        parameters,
+      );
+      if (isEmailCommsEnabled) {
+        let sendEmailObj = {};
         if (locationType === 'online') {
-          sendEmailCommsForUpdatedEvents(parentEmail,
-            'eventRescheduleOnline',
-            {
-              eventName,
-              meetingId,
-              meetingPassword,
-              sessionLink,
-              studentName,
-              eventUpdateReason,
-              eventStartdate,
-              eventEndDate,
-              startTime,
-            },
-            'Tekie Event Rescheduled');
+          sendEmailObj = {
+            eventName,
+            meetingId,
+            meetingPassword,
+            sessionLink,
+            studentName,
+            eventUpdateReason,
+            eventStartdate,
+            eventEndDate,
+            startTime,
+          };
         }
         if (locationType === 'venue') {
-          sendEmailCommsForUpdatedEvents(parentEmail,
-            'eventRescheduleOnline',
-            {
-              eventName,
-              studentName,
-              geoLocation,
-              address,
-              state,
-              city,
-              pincode,
-              timeZone,
-              eventUpdateReason,
-              eventStartdate,
-              eventEndDate,
-              startTime,
-            },
-            'Tekie Event Rescheduled');
+          sendEmailObj = {
+            eventName,
+            studentName,
+            geoLocation,
+            address,
+            state,
+            city,
+            pincode,
+            timeZone,
+            eventUpdateReason,
+            eventStartdate,
+            eventEndDate,
+            startTime,
+          };
         }
+        sendEmailCommsForUpdatedEvents(parentEmail,
+          'eventRescheduleOnline',
+          sendEmailObj,
+          'Tekie Event Rescheduled');
       }
     }
     if (eventUpdateStatus === 'cancelled') {
+      let parameters = [];
       if (locationType === 'online') {
-        sendWhatsAppTemplateMessage(
-          parentPhone,
-          'Event Rescheduled',
-          parentPhone,
-          [
-            {
-              name: 'studentName',
-              content: studentName,
-            },
-            {
-              name: 'eventName',
-              content: eventName,
-            },
-            {
-              name: 'meetingId',
-              content: meetingId,
-            },
-            {
-              name: 'eventUpdateReason',
-              content: eventUpdateReason,
-            },
-            {
-              name: 'eventStartdate',
-              content: eventStartdate,
-            },
-            {
-              name: 'eventEndDate',
-              content: eventEndDate,
-            },
-          ],
-        );
+        parameters = [
+          {
+            name: 'studentName',
+            content: studentName,
+          },
+          {
+            name: 'eventName',
+            content: eventName,
+          },
+          {
+            name: 'meetingId',
+            content: meetingId,
+          },
+          {
+            name: 'eventUpdateReason',
+            content: eventUpdateReason,
+          },
+          {
+            name: 'eventStartdate',
+            content: eventStartdate,
+          },
+          {
+            name: 'eventEndDate',
+            content: eventEndDate,
+          },
+        ];
       }
       if (locationType === 'venue') {
-        sendWhatsAppTemplateMessage(
-          parentPhone,
-          'Event Rescheduled',
-          parentPhone,
-          [
-            {
-              name: 'studentName',
-              content: studentName,
-            },
-            {
-              name: 'eventName',
-              content: eventName,
-            },
-            {
-              name: 'geoLocation',
-              content: geoLocation,
-            },
-            {
-              name: 'address',
-              content: address,
-            },
-            {
-              name: 'state',
-              content: state,
-            },
-            {
-              name: 'city',
-              content: city,
-            },
-            {
-              name: 'pincode',
-              content: pincode,
-            },
-            {
-              name: 'eventUpdateReason',
-              content: eventUpdateReason,
-            },
-            {
-              name: 'eventStartdate',
-              content: eventStartdate,
-            },
-            {
-              name: 'eventEndDate',
-              content: eventEndDate,
-            },
-          ],
-        );
+        parameters = [
+          {
+            name: 'studentName',
+            content: studentName,
+          },
+          {
+            name: 'eventName',
+            content: eventName,
+          },
+          {
+            name: 'geoLocation',
+            content: geoLocation,
+          },
+          {
+            name: 'address',
+            content: address,
+          },
+          {
+            name: 'state',
+            content: state,
+          },
+          {
+            name: 'city',
+            content: city,
+          },
+          {
+            name: 'pincode',
+            content: pincode,
+          },
+          {
+            name: 'eventUpdateReason',
+            content: eventUpdateReason,
+          },
+          {
+            name: 'eventStartdate',
+            content: eventStartdate,
+          },
+          {
+            name: 'eventEndDate',
+            content: eventEndDate,
+          },
+        ];
       }
-      if (toSendEmailComms) {
+      sendWhatsAppTemplateMessage(
+        parentPhone,
+        'Event Rescheduled',
+        parentPhone,
+        parameters,
+      );
+      if (isEmailCommsEnabled) {
+        let sendEmailObj = {};
         if (locationType === 'online') {
-          sendEmailCommsForUpdatedEvents(parentEmail,
-            'eventCancelMailTemplate',
-            {
-              eventName,
-              meetingId,
-              studentName,
-              eventUpdateReason,
-              eventStartdate,
-              eventEndDate,
-            },
-            'Tekie Event Canceled');
+          sendEmailObj = {
+            eventName,
+            meetingId,
+            studentName,
+            eventUpdateReason,
+            eventStartdate,
+            eventEndDate,
+          };
         }
         if (locationType === 'venue') {
-          sendEmailCommsForUpdatedEvents(parentEmail,
-            'eventCancelMailTemplate',
-            {
-              eventName,
-              studentName,
-              geoLocation,
-              address,
-              state,
-              city,
-              pincode,
-              timeZone,
-              eventUpdateReason,
-              eventStartdate,
-              eventEndDate,
-            },
-            'Tekie Event Canceled');
+          sendEmailObj = {
+            eventName,
+            studentName,
+            geoLocation,
+            address,
+            state,
+            city,
+            pincode,
+            timeZone,
+            eventUpdateReason,
+            eventStartdate,
+            eventEndDate,
+          };
         }
+        sendEmailCommsForUpdatedEvents(parentEmail,
+          'eventCancelMailTemplate',
+          sendEmailObj,
+          'Tekie Event Canceled');
       }
     }
   }
