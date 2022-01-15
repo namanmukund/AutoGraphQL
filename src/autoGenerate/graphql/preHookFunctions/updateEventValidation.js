@@ -5,6 +5,7 @@ const getEventTimeTableRule = async (eventId) => {
   const query = `{
   event(id:"${eventId}") {
     id
+    status
     eventTimeTableRule {
       monday
       tuesday
@@ -51,6 +52,7 @@ const updateEventValidation = async (params, input, mutationName, context) => {
   const { id: eventId } = params;
   const prevTimeTableRule = await getEventTimeTableRule(eventId);
   context.prevTimeTableRule = get(prevTimeTableRule, 'eventTimeTableRule');
+  context.previousEventStatus = get(prevTimeTableRule, 'status');
 };
 
 export default updateEventValidation;
