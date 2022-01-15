@@ -6,8 +6,6 @@ const TaskStatus = `
     completed
     mentorUnavailable
     mentorRejected
-    leadRejected
-    leadNotInterested
   }`;
 
 export default TaskStatus;

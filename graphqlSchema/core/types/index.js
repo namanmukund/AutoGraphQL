@@ -147,6 +147,7 @@ import SenseiMentorTeam from './senseiMentorTeam';
 import Notification from './notification';
 import Task from './task';
 import UserOtpLog from './userOtpLog';
+import UserDeviceLog from './UserDeviceLog';
 
 export default [
   ...User,
@@ -298,4 +299,5 @@ export default [
   ...Notification,
   ...Task,
   ...UserOtpLog,
+  ...UserDeviceLog,
 ];

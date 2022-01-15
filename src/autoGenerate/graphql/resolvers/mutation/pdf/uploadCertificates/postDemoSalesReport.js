@@ -1,3 +1,4 @@
+/* eslint-disable no-constant-condition */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
@@ -296,15 +297,14 @@ const getPostDemoSalesReportUrl = async (userId) => {
 
   const salesOperations = get(await callLocalGraphqlApi(salesOperationQuery(userId)), 'data.salesOperations', []);
   const mentorNote = getNote(get(salesOperations, '[0].studentNote', 'smartAndAttentive'));
-  const {
+  let {
     criticalThinking = 4,
     logicalThinking = 5,
     communicationSkills = 4,
     problemSolvingAbility = 5,
     creativeSkills = 5,
-    iqaTags,
   } = get(salesOperations, '[0]');
-
+  const { iqaTags } = get(salesOperations, '[0]');
   const mentorMenteeSessions = get(await callLocalGraphqlApi(mentorMenteeSessionsQuery(userId)), 'data.mentorMenteeSessions', []);
   const mentorName = get(mentorMenteeSessions, '[0].mentorSession.user.name', '-');
   const mentorPicUri = get(mentorMenteeSessions, '[0].mentorSession.user.profilePic.uri', 'python/course/mentorAvatar.png');
@@ -314,6 +314,58 @@ const getPostDemoSalesReportUrl = async (userId) => {
   const experience = get(mentorMenteeSessions, '[0].mentorSession.user.experienceYear', 2);
   const mentorRating = get(mentorMenteeSessions, '[0].mentorSession.user.pythonCourseRating1', 5);
   const studentName = get(mentorMenteeSessions, '[0].menteeSession.user.name', 'xxxxxx', '');
+
+  const studentRatings = {
+    criticalThinking,
+    logicalThinking,
+    communicationSkills,
+    problemSolvingAbility,
+    creativeSkills,
+  };
+  const checkArrayUnique = (arr) => arr.length === new Set(arr).size;
+  const getRandomIndex = (size, len) => {
+    let result = [];
+    for (let i = 0; i < size; i += 1) {
+      const ran = Math.round(Math.random() * len);
+      result.push(ran === len ? ran - 1 : ran);
+    }
+    while (true) {
+      if (checkArrayUnique(result)) {
+        break;
+      }
+      result = [];
+      for (let i = 0; i < size; i += 1) {
+        const ran = Math.round(Math.random() * len);
+        result.push(ran === len ? ran - 1 : ran);
+      }
+    }
+    return result;
+  };
+  const getRandomNum = () => Math.round(Math.random() * 1) + 3;
+
+  const areEqual = Object.values(studentRatings).every((item) => item === studentRatings.criticalThinking);
+
+  if (areEqual) {
+    const [first, second, third] = getRandomIndex(3, 5);
+    studentRatings[Object.keys(studentRatings)[first]] = getRandomNum();
+    studentRatings[Object.keys(studentRatings)[second]] = getRandomNum();
+    studentRatings[Object.keys(studentRatings)[third]] = getRandomNum();
+  }
+
+  const howManyFive = Object.keys(studentRatings).filter((item) => studentRatings[item] === 5);
+
+  const len = howManyFive.length;
+  if (len > 2) {
+    const [first, second] = getRandomIndex(2, len);
+    studentRatings[howManyFive[first]] = getRandomNum();
+    studentRatings[howManyFive[second]] = getRandomNum();
+  }
+
+  criticalThinking = studentRatings.criticalThinking;
+  logicalThinking = studentRatings.logicalThinking;
+  communicationSkills = studentRatings.communicationSkills;
+  problemSolvingAbility = studentRatings.problemSolvingAbility;
+  creativeSkills = studentRatings.creativeSkills;
 
   if ((iqaReports && iqaReports.length)) {
     url = `${process.env.FILE_BASE_URL}/python/course/postDemoPostTestCombined.pdf`;
