@@ -15,6 +15,9 @@ const getBatchAttendanceDetails = async (batchSessionId) => {
       title
     }
     batch {
+      school {
+        code
+      }
       allottedMentor {
         mentorProfile {
           sessionLink
@@ -66,59 +69,9 @@ const scheduleB2BSessionMissed = async (input, params, mutationName, context) =>
   const topicTitle = get(batchDetails, 'topic.title');
   const date = moment(get(batchDetails, 'sessionStartDate')).format('D/MM/YY');
   const startTime = moment(get(batchDetails, 'sessionStartDate')).format('HH:mm a');
-  const sessionTopicLink = get(batchDetails, 'batch.allottedMentor.mentorProfile.sessionLink');
-  const attendees = get(batchDetails, 'attendance', []).filter((attendee) => get(attendee, 'status') === 'present');
+  const schoolCode = get(batchDetails, 'batch.school.code');
+  const revisitLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/sessions` : `${process.env.TEKIE_WEB_URL}/sessions`;
   const nonAttendes = get(batchDetails, 'attendance', []).filter((attendee) => attendee.status === 'absent');
-  attendees.forEach(async (attendee) => {
-    const studentName = get(attendee, 'student.user.name');
-    const parentName = get(attendee, 'student.user.parentProfile.user.name');
-    const parentEmail = get(attendee, 'student.user.parentProfile.user.email');
-    const parentPhone = get(attendee, 'student.user.parentProfile.user.phone.countryCode').split('+')[1] + get(attendee, 'student.user.parentProfile.user.phone.number');
-    const homeworkLink = `${process.env.TEKIE_WEB_URL}/homework`;
-    sendWhatsAppTemplateMessage(
-      parentPhone,
-      'B2BHomework',
-      parentPhone,
-      [
-        {
-          name: 'parentName',
-          value: parentName,
-        },
-        {
-          name: 'topicTitle',
-          value: topicTitle,
-        },
-        {
-          name: 'sessionTopicLink',
-          value: sessionTopicLink,
-        },
-        {
-          name: 'studentName',
-          value: studentName,
-        },
-        {
-          name: 'Date',
-          value: date,
-        },
-        {
-          name: 'startTime',
-          value: startTime,
-        },
-        {
-          name: 'homeworkLink',
-          value: homeworkLink,
-        },
-      ],
-    );
-    sendSessionAttendenceMail(
-      parentEmail,
-      'B2BHomework',
-      {
-        parentName, studentName, date, startTime, homeworkLink,
-      },
-      'Tekie - Maintain your Homework Streak!',
-    );
-  });
   nonAttendes.forEach(async (attendee) => {
     const studentName = get(attendee, 'student.user.name');
     const parentName = get(attendee, 'student.user.parentProfile.user.name');
@@ -126,31 +79,31 @@ const scheduleB2BSessionMissed = async (input, params, mutationName, context) =>
     const parentPhone = get(attendee, 'student.user.parentProfile.user.phone.countryCode').split('+')[1] + get(attendee, 'student.user.parentProfile.user.phone.number');
     sendWhatsAppTemplateMessage(
       parentPhone,
-      'B2BAbsent',
+      'b2b2_missed_session_update',
       parentPhone,
       [
         {
-          name: 'parentName',
+          name: 'parent_name',
           value: parentName,
         },
         {
-          name: 'topicTitle',
+          name: 'topic_title',
           value: topicTitle,
         },
         {
-          name: 'sessionTopicLink',
-          value: sessionTopicLink,
+          name: 'revisit_link',
+          value: revisitLink,
         },
         {
-          name: 'studentName',
+          name: 'student_name',
           value: studentName,
         },
         {
-          name: 'Date',
+          name: 'session_date',
           value: date,
         },
         {
-          name: 'startTime',
+          name: 'session_time',
           value: startTime,
         },
       ],
@@ -161,7 +114,7 @@ const scheduleB2BSessionMissed = async (input, params, mutationName, context) =>
       {
         parentName, topicTitle, sessionTopicLink, studentName, date, startTime,
       },
-      "Tekie - You missed today's coding session!",
+      'Tekie - You missed today\'s coding session!',
     );
   });
 };
