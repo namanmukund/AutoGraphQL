@@ -1,6 +1,6 @@
 import { get } from 'lodash';
-import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
-import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 const getEventTimeTableRule = async (eventId) => {
   const query = `{

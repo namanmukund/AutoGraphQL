@@ -1,11 +1,13 @@
 import { get } from 'lodash';
+import sgMail from '@sendgrid/mail';
+import fetch from 'node-fetch';
 import parsedHtmlFromTemplateFileAndObject from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
-import sendEmail from '../../../../../../services/email/utils/sendEmail';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import sendWhatsAppTemplateMessage from '../../../../utils/sendWhatsAppTemplateMessage';
 import { CommsError } from '../../../../../../constants/errors';
+import { PhoneFieldRequiredError, EmailFieldRequiredError } from '../../../../../../constants/errors/input';
+import sendGridApi from '../../../../../../config/sendGrid';
 
 const fetchComms = async (dataFieldFilter) => {
   const query = `{
@@ -50,7 +52,10 @@ const sendCommsMessage = async (root, params, context) => {
       mapCommsWithDataFields[obj.dataField] = mail ? obj.emailVariableName : obj.whatsappVariableName;
     }
   });
-  if (mail === false) {
+  if (!mail) {
+    if (!parentPhone) {
+      throw new PhoneFieldRequiredError();
+    }
     const parameters = [];
     Object.keys(mapCommsWithDataFields).forEach((key) => {
       if (get(params, `input.${key}`) && mapCommsWithDataFields[key]) {
@@ -61,12 +66,31 @@ const sendCommsMessage = async (root, params, context) => {
       }
     });
     const broadcastName = 'Tekie';
-    try {
-      sendWhatsAppTemplateMessage(parentPhone, templateName, broadcastName, parameters);
-    } catch (e) {
-      throw new CommsError();
-    }
+    let phoneNumber = parentPhone;
+    if (process.env.DATA_MASKING) phoneNumber = '919999694605';
+    phoneNumber = '919766236884';
+    const bodyJson = {
+      template_name: templateName,
+      broadcast_name: broadcastName || 'Tekie',
+      parameters: JSON.stringify(parameters),
+    };
+    const headers = {
+      Authorization: process.env.WATI_SECRET,
+      'Content-Type': 'application/json',
+    };
+    const url = process.env.WATI_API_URL + phoneNumber;
+
+    await fetch(url, {
+      method: 'POST', headers, body: JSON.stringify(bodyJson),
+    }).then((res) => res.json()).then((result) => {
+      if (!get(result, 'result')) {
+        throw new CommsError();
+      }
+    });
   } else {
+    if (!parentEmail) {
+      throw new EmailFieldRequiredError();
+    }
     const templateObject = {};
     Object.keys(mapCommsWithDataFields).forEach((key) => {
       if (get(params, `input.${key}`) && mapCommsWithDataFields[key]) {
@@ -76,17 +100,19 @@ const sendCommsMessage = async (root, params, context) => {
     const templateString = parsedHtmlFromTemplateFileAndObject(
       templateName, templateObject,
     );
-    templateString.then((html) => {
+    await templateString.then(async (html) => {
       const ccEmail = '';
       const bccEmail = '';
       const subject = 'Event Tekie';
       const text = '';
       const emailMsgObject = getEmailObject(parentEmail, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
-      try {
-        sendEmail(emailMsgObject);
-      } catch (e) {
-        throw new CommsError();
-      }
+      sgMail.setApiKey(sendGridApi.SENDGRID_API_KEY);
+      await sgMail
+        .send(emailMsgObject, (error) => {
+          if (error) {
+            throw new CommsError();
+          }
+        });
     });
   }
   return {

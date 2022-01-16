@@ -120,7 +120,8 @@ import addEventCategoryValidation from './preHookFunctions/validation/addEventCa
 import addContentTagValidation from './preHookFunctions/validation/addContentTagValidation';
 import addEventSpeakerProfileValidation from './preHookFunctions/validation/addEventSpeakerProfileValidation';
 import addCommsVariableValidation from './preHookFunctions/validation/addCommsVariableValidation';
-import updateEventValidation from './preHookFunctions/updateEventValidation';
+import updateEventValidation from './preHookFunctions/validation/updateEventValidation';
+import addWeekDayForOneDayEvent from './preHookFunctions/validation/utils/addWeekDayForOneDayEvent';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -931,7 +932,12 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     case 'addSchool': {
       return hook({ ...input, schoolCampaignCode: generateInviteCode(8) }, mutationOrQueryName, 'PreHook');
     }
+    case 'addEvent': {
+      addWeekDayForOneDayEvent(params);
+      break;
+    }
     case 'updateEvent': {
+      addWeekDayForOneDayEvent(params);
       await updateEventValidation(params, input, mutationOrQueryName, context);
       break;
     }
