@@ -124,6 +124,7 @@ const scheduleB2BSessionHomeworkRemainder = async () => {
       const students = get(batchSession, 'batch.students');
       const schoolCode = get(batchSession, 'batch.school.code');
       const homeworkLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/homework` : `${process.env.TEKIE_WEB_URL}/homework`;
+      const revisitLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/sessions` : `${process.env.TEKIE_WEB_URL}/sessions`;
       students.forEach((student) => {
         const studentName = get(student, 'user.studentProfile.user.name');
         const parentName = get(student, 'user.parentProfile.user.name');
@@ -133,28 +134,32 @@ const scheduleB2BSessionHomeworkRemainder = async () => {
         if (isHomeworkSubmitted(topicId, courseId, sessionDate, studentId)) {
           sendWhatsAppTemplateMessage(
             parentPhone,
-            'B2BHomework',
+            'b2b_homework_reminder_24hrs',
             parentPhone,
             [
               {
-                name: 'parentName',
+                name: 'parent_name',
                 value: parentName,
               },
               {
-                name: 'studentName',
+                name: 'student_name',
                 value: studentName,
               },
               {
-                name: 'Date',
+                name: 'session_date',
                 value: date,
               },
               {
-                name: 'startTime',
+                name: 'session_time',
                 value: startTime,
               },
               {
-                name: 'homeworkLink',
+                name: 'homework_link',
                 value: homeworkLink,
+              },
+              {
+                name: 'revisit_link',
+                value: revisitLink,
               },
             ],
           );
