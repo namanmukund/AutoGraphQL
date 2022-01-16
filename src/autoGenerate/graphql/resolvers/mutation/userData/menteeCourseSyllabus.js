@@ -1,4 +1,3 @@
-/*eslint-disable*/
 import { get } from 'lodash';
 import {
   enrollmentTypes,
@@ -714,7 +713,6 @@ const menteeCourseSyllabusMutationResolver = async (
   let firstComponent = {};
 
   // if we get userId through token, then we will return syllabus for that user
-  console.log(" this is user id and course id ", userId, " and ", courseId)
   if (userId) {
     const res = await callLocalGraphqlApi(
       getUserCurrentTopicComponentStatus(userId, courseId),
@@ -1022,7 +1020,6 @@ const menteeCourseSyllabusMutationResolver = async (
     });
   } else {
     // iterating over each of mentorMenteeSessions to send sessions that are already completed by mentee
-    console.log(" this is mentor mentee session ", mentorMenteeSessions);
     if (mentorMenteeSessions && mentorMenteeSessions.length) {
       mentorMenteeSessions.forEach((mentorMenteeSession) => {
         const {
@@ -1069,7 +1066,6 @@ const menteeCourseSyllabusMutationResolver = async (
     }
 
     // iterating over each of MenteeSessions to send sessions that are already booked and not yet completed by mentee
-    console.log(" this is mentee session ", menteeSessions)
     if (menteeSessions && menteeSessions.length) {
       menteeSessions.forEach((menteeSession) => {
         let slotTime = null;
