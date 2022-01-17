@@ -41,6 +41,8 @@ const FETCH_JOBS = `{
       commsVariables: [CommsVariableType]
       condition: DateCondition
       attendanceFilter: AttendanceFilter
+      unit
+      value
     }
   }
 }`;

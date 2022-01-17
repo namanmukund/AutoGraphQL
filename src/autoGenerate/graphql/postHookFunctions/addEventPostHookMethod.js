@@ -1,4 +1,3 @@
-/* eslint-disable no-case-declarations */
 /* eslint-disable no-restricted-syntax */
 import { get } from 'lodash';
 import {

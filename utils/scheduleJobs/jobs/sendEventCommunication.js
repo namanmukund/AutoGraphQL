@@ -1,3 +1,4 @@
+/* eslint-disable comma-dangle */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-unused-vars */
 import { get } from 'lodash';
@@ -152,7 +153,11 @@ const sendEventCommunication = async ({ eventId, eventCommsRule }, deleteJob) =>
 
   const eventCommsRules = get(event, 'event.eventCommsRule', []);
   const newEventsCommsRule = eventCommsRules.filter(
-    (rule) => rule.templateName !== eventCommsRule.templateName && rule.condition !== eventCommsRule.condition,
+    (rule) => (rule.templateName !== eventCommsRule.templateName
+      && rule.condition !== eventCommsRule.condition
+      && rule.unit !== eventCommsRule.unit
+      && rule.value !== eventCommsRule.value
+      && rule.attendanceFilter !== eventCommsRule.attendanceFilter)
   );
 
   const toSendEmailComms = get(event, 'isEmailCommsEnabled');
