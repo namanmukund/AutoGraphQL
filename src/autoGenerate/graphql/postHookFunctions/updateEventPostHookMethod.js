@@ -49,8 +49,8 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
         }
         case 'after': {
           const endDate = get(timeTableRule, 'endDate', null);
-          const scheduledTime1 = moment(endDate).add(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
-          addToSchedule('eventCommsJob', scheduledTime1, {
+          const scheduledTime = moment(endDate).add(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
+          addToSchedule('eventCommsJob', scheduledTime, {
             eventId,
             eventCommsRule,
           });
