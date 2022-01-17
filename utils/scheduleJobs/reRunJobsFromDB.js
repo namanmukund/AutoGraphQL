@@ -35,7 +35,7 @@ const FETCH_JOBS = `{
     mentorUserId
     mentorPhoneNumber
     eventId
-    eventSessionId
+    eventCommsRule
   }
 }`;
 
@@ -72,6 +72,7 @@ const reRunJobsFromDB = async () => {
       mentorPhoneNumber,
       eventId,
       eventSessionId,
+      eventCommsRule,
     } = scheduledJob;
     const deleteJob = () => callLocalGraphqlApi(deleteJobQuery(id));
     const isPast = moment().isAfter(scheduledDate);
@@ -207,6 +208,12 @@ const reRunJobsFromDB = async () => {
       case 'eventComms': {
         schedule.scheduleJob(new Date(scheduledDate), () => {
           sendEventComms({ eventId, jobType }, deleteJob);
+        });
+        break;
+      }
+      case 'eventCommsJob': {
+        schedule.scheduleJob(new Date(scheduledDate), () => {
+          sendEventCommunication({ eventId, jobType, eventCommsRule }, deleteJob);
         });
         break;
       }

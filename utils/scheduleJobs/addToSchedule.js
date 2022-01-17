@@ -264,6 +264,9 @@ const addToSchedule = async (jobType, scheduledDate, {
       // });
       break;
     }
+    case 'eventCommsJob': {
+      break;
+    }
     default:
       break;
   }
