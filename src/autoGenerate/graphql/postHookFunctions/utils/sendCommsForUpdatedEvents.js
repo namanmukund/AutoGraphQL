@@ -66,7 +66,14 @@ const sendEmailCommsForUpdatedEvents = (email, templateFileName, sendEmailObject
   });
 };
 
-// eslint-disable-next-line no-unused-vars
+const deleteJobQuery = (id) => `
+  mutation {
+    deleteScheduleJob(id: "${id}") {
+      id
+    }
+  }
+`;
+
 const deleteJobsForCancelledEvents = async (eventId) => {
   const query = `
   {
@@ -77,8 +84,8 @@ const deleteJobsForCancelledEvents = async (eventId) => {
   `;
   const res = await callLocalGraphqlApi(query);
   const scheduleJobs = get(res, 'data.scheduleJobs');
-  scheduleJobs.forEach((job) => {
-    deleteJob(get(job, 'id'));
+  scheduleJobs.forEach(async (job) => {
+    await callLocalGraphqlApi(deleteJobQuery(get(job, 'id')));
   });
 };
 const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdateStatus) => {
