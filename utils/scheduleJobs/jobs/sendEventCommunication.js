@@ -53,7 +53,7 @@ const eventQuery = (id) => `{
     meetingId
     meetingPassword
     sessionLink
-    timezone
+    timeZone
     registeredUsers {
       id
       grade
@@ -81,7 +81,8 @@ const eventQuery = (id) => `{
     }
     eventSessions {
       attendance {
-        id
+        isPresent
+        student {
         grade
         parents {
           id
@@ -99,7 +100,7 @@ const eventQuery = (id) => `{
           id
           name
         }
-        isPresent
+        }
       }
     }
     eventCommsRule {
@@ -161,9 +162,9 @@ const sendEventCommunication = async ({ eventId, eventCommsRule }, deleteJob) =>
   );
 
   const toSendEmailComms = get(event, 'isEmailCommsEnabled');
-  const eventName = get(batch, 'eventName');
+  const eventName = get(event, 'eventName');
   const condition = get(eventCommsRule, 'condition');
-  const timezone = get(event, 'timezone', '');
+  const timezone = get(event, 'timeZone', '');
   const { ...slots } = get(event, 'eventTimeTableRule', {});
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
   const slotNumber = slotTimeStringArray[0].split('slot')[1];
@@ -172,21 +173,21 @@ const sendEventCommunication = async ({ eventId, eventCommsRule }, deleteJob) =>
   const eventStartdate = moment(dateObject).format('dddd, Do MMMM, YYYY');
   const endDate = get(event, 'eventTimeTableRule.endDate', '');
   const eventEndDate = moment(endDate).format('dddd, Do MMMM, YYYY');
+  const locationType = get(event, 'locationType');
+  const meetingId = get(event, 'meetingId');
+  const meetingPassword = get(event, 'meetingPassword');
+  const sessionLink = get(event, 'sessionLink');
+  const geoLocation = get(event, 'geoLocation');
+  const address = get(event, 'address');
+  const state = get(event, 'state');
+  const city = get(event, 'city');
+  const pincode = get(event, 'pincode');
   if (condition === 'before') {
     for (const registeredUser of registeredUsers) {
-      const { user } = registeredUser.parents[0];
-      const parentEmail = get(user, 'email');
-      const parentPhone = get(user, 'phone.countryCode').split('+')[1] + (user, 'phone.number');
+      const parent = get(receiver, 'student.parents[0].user');
+      const parentEmail = get(parent, 'email');
+      const parentPhone = get(parent, 'phone.countryCode').split('+')[1] + (parent, 'phone.number');
       const studentName = get(registeredUser, 'user.name');
-      const locationType = get(batch, 'locationType');
-      const meetingId = get(batch, 'meetingId');
-      const meetingPassword = get(batch, 'meetingPassword');
-      const sessionLink = get(batch, 'sessionLink');
-      const geoLocation = get(batch, 'geoLocation');
-      const address = get(batch, 'address');
-      const state = get(batch, 'state');
-      const city = get(batch, 'city');
-      const pincode = get(eventSession, 'pincode');
       const whatsappCommsVariablesList = get(eventCommsRule, 'commsVariables', []).map((commsVariable) => (
         {
           name: get(commsVariable, 'whatsappVariableName'),
@@ -245,10 +246,10 @@ const sendEventCommunication = async ({ eventId, eventCommsRule }, deleteJob) =>
       if (attendanceFilter === 'attendees') {
         const eventSessions = get(event, 'eventSessions', []);
         eventSessions.forEach((session) => get(session, 'attendance', []).forEach((registeredUser) => {
-          if (!commsReceiversIds.includes(get(registeredUser, 'user.id'))) {
+          if (!commsReceiversIds.includes(get(registeredUser, 'student.user.id'))) {
             if (get(registeredUser, 'isPresent')) {
               commsReceivers.push(registeredUser);
-              commsReceiversIds.push(get(registeredUser, 'user.id'));
+              commsReceiversIds.push(get(registeredUser, 'student.user.id'));
             }
           }
         }));
@@ -256,19 +257,19 @@ const sendEventCommunication = async ({ eventId, eventCommsRule }, deleteJob) =>
       if (attendanceFilter === ' nonAttendees') {
         const eventSessions = get(event, 'eventSessions', []);
         eventSessions.forEach((session) => get(session, 'attendance', []).forEach((registeredUser) => {
-          if (!commsReceivers.includes(get(registeredUser, 'user.id'))) {
+          if (!commsReceivers.includes(get(registeredUser, 'student.user.id'))) {
             if (!get(registeredUser, 'isPresent')) {
               commsReceivers.push(registeredUser);
-              commsReceiversIds.push(get(registeredUser, 'user.id'));
+              commsReceiversIds.push(get(registeredUser, 'student.user.id'));
             }
           }
         }));
       }
       commsReceivers.forEach((receiver) => {
-        const { user } = receiver.parents[0];
-        const studentName = get(receiver, 'user.name');
-        const parentEmail = get(user, 'email');
-        const phoneNumber = get(receiver, 'parents.user.phone.countryCode').split('+')[1] + get(receiver, 'parents.user.phone.number');
+        const parent = get(receiver, 'student.parents[0].user');
+        const studentName = get(receiver, 'student.user.name');
+        const parentEmail = get(parent, 'email');
+        const phoneNumber = get(parent, 'phone.countryCode').split('+')[1] + get(parent, 'phone.number');
         const whatsappCommsVariablesList = get(eventCommsRule, 'commsVariables', []).map((commsVariable) => (
           {
             name: get(commsVariable, 'whatsappVariableName'),
