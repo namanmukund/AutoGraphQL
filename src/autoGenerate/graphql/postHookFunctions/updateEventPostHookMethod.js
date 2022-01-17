@@ -19,6 +19,7 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
   const eventRescheduledReason = get(params, 'input.rescheduledReason', null);
   const eventCancellationReason = get(params, 'input.cancellationReason', null);
   const eventCommsRules = get(params, 'input.eventCommsRule', null);
+  const eventStatus = get(params, 'input.status', null);
   const {
     prevTimeTableRule,
     previousEventStatus,
@@ -33,7 +34,7 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
   if (previousEventStatus === 'cancelled' && shouldSendCanceledComms) {
     sendCommsForUpdatedEvents(eventId, eventCancellationReason, 'canceled');
   }
-  if (previousEventStatus === 'published') {
+  if (eventStatus === 'published') {
     for (const eventCommsRule of eventCommsRules) {
       const dateCondition = get(eventCommsRule, 'condition', null);
       switch (dateCondition) {
