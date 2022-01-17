@@ -66,6 +66,21 @@ const sendEmailCommsForUpdatedEvents = (email, templateFileName, sendEmailObject
   });
 };
 
+// eslint-disable-next-line no-unused-vars
+const deleteJobsForCancelledEvents = async (eventId) => {
+  const query = `
+  {
+    scheduleJobs(filter:{and:[{eventId:"${eventId}"}]}) {
+      id
+    }
+  }
+  `;
+  const res = await callLocalGraphqlApi(query);
+  const scheduleJobs = get(res, 'data.scheduleJobs');
+  scheduleJobs.forEach((job) => {
+    deleteJob(get(job, 'id'));
+  });
+};
 const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdateStatus) => {
   const event = await getEvent(eventId);
   const {
@@ -331,6 +346,7 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
           sendEmailObj,
           'Tekie Event Canceled');
       }
+      deleteJobsForCancelledEvents(eventId);
     }
   }
 };

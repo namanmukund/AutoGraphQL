@@ -18,15 +18,16 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
   const shouldSendCanceledComms = get(params, 'input.shouldSendCanceledComms', false);
   const eventRescheduledReason = get(params, 'input.rescheduledReason', null);
   const eventCancellationReason = get(params, 'input.cancellationReason', null);
-  const eventCommsRules = get(params, 'input.eventCommsRule', null);
-  const eventStatus = get(params, 'input.status', null);
+  const eventCommsRules = get(input, 'eventCommsRule', null);
+  const eventStatus = get(input, 'status', null);
   const {
     prevTimeTableRule,
     previousEventStatus,
   } = context;
   addUpdateEventSessionsForEvent(eventId, timeTableRule, prevTimeTableRule, registeredUsers);
-  if ((get(timeTableRule, 'startDate') !== get(prevTimeTableRule, 'startDate')
-  || get(timeTableRule, 'endDate') !== get(prevTimeTableRule, 'endDate'))) {
+  const isEventRescheduled = (get(timeTableRule, 'startDate') !== get(prevTimeTableRule, 'startDate')
+  || get(timeTableRule, 'endDate') !== get(prevTimeTableRule, 'endDate'));
+  if (isEventRescheduled) {
     if (shouldSendRescheduledComms) {
       sendCommsForUpdatedEvents(eventId, eventRescheduledReason, 'rescheduled');
     }
@@ -34,30 +35,32 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
   if (previousEventStatus === 'cancelled' && shouldSendCanceledComms) {
     sendCommsForUpdatedEvents(eventId, eventCancellationReason, 'canceled');
   }
-  if (eventStatus === 'published') {
+  if (eventStatus === 'published' || isEventRescheduled) {
     for (const eventCommsRule of eventCommsRules) {
-      const dateCondition = get(eventCommsRule, 'condition', null);
-      switch (dateCondition) {
-        case 'before': {
-          const startDate = get(timeTableRule, 'startDate', null);
-          const scheduledTime = moment(startDate).subtract(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
-          addToSchedule('eventCommsJob', scheduledTime, {
-            eventId,
-            eventCommsRule,
-          });
-          break;
+      if (!get(eventCommsRule, 'isSend')) {
+        const dateCondition = get(eventCommsRule, 'condition', null);
+        switch (dateCondition) {
+          case 'before': {
+            const startDate = get(timeTableRule, 'startDate', null);
+            const scheduledDate = moment(startDate).subtract(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
+            addToSchedule('eventCommsJob', scheduledDate, {
+              eventId,
+              eventCommsRule,
+            });
+            break;
+          }
+          case 'after': {
+            const endDate = get(timeTableRule, 'endDate', null);
+            const scheduledDate = moment(endDate).add(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
+            addToSchedule('eventCommsJob', scheduledDate, {
+              eventId,
+              eventCommsRule,
+            });
+            break;
+          }
+          default:
+            break;
         }
-        case 'after': {
-          const endDate = get(timeTableRule, 'endDate', null);
-          const scheduledTime = moment(endDate).add(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
-          addToSchedule('eventCommsJob', scheduledTime, {
-            eventId,
-            eventCommsRule,
-          });
-          break;
-        }
-        default:
-          break;
       }
     }
   }

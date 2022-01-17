@@ -11,6 +11,7 @@ import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
 import sendEventRemainderComms from './jobs/sendEventRemainderComms';
 import sendEventComms from './jobs/sendEventComms';
+import sendEventCommunication from './jobs/sendEventCommunication';
 
 const FETCH_JOBS = `{
   scheduleJobs {
@@ -35,7 +36,12 @@ const FETCH_JOBS = `{
     mentorUserId
     mentorPhoneNumber
     eventId
-    eventCommsRule
+    eventCommsRule {
+      templateName: String!
+      commsVariables: [CommsVariableType]
+      condition: DateCondition
+      attendanceFilter: AttendanceFilter
+    }
   }
 }`;
 

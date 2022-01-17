@@ -172,140 +172,27 @@ const sendEventCommunication = async ({ eventId, eventCommsRule }, deleteJob) =>
       const state = get(batch, 'state');
       const city = get(batch, 'city');
       const pincode = get(eventSession, 'pincode');
-      if (locationType === 'online') {
-        sendWhatsAppTemplateMessage(
-          parentPhone,
-          'Online Event Reainder',
-          parentPhone,
-          [
-            {
-              name: 'studentName',
-              content: studentName,
-            },
-            {
-              name: 'eventName',
-              content: eventName,
-            },
-            {
-              name: 'meetingId',
-              content: meetingId,
-            },
-            {
-              name: 'meetingPassword',
-              content: meetingPassword,
-            },
-            {
-              name: 'sessionLink',
-              content: sessionLink,
-            },
-            {
-              name: 'eventUpdateReason',
-              content: eventUpdateReason,
-            },
-            {
-              name: 'eventStartdate',
-              content: eventStartdate,
-            },
-            {
-              name: 'eventEndDate',
-              content: eventEndDate,
-            },
-            {
-              name: 'startTime',
-              content: startTime,
-            },
-          ],
-        );
-      }
-      if (locationType === 'venue') {
-        sendWhatsAppTemplateMessage(
-          parentPhone,
-          'Offline Event Remainder',
-          parentPhone,
-          [
-            {
-              name: 'studentName',
-              content: studentName,
-            },
-            {
-              name: 'eventName',
-              content: eventName,
-            },
-            {
-              name: 'geoLocation',
-              content: geoLocation,
-            },
-            {
-              name: 'address',
-              content: address,
-            },
-            {
-              name: 'state',
-              content: state,
-            },
-            {
-              name: 'city',
-              content: city,
-            },
-            {
-              name: 'pincode',
-              content: pincode,
-            },
-            {
-              name: 'eventUpdateReason',
-              content: eventUpdateReason,
-            },
-            {
-              name: 'eventStartdate',
-              content: eventStartdate,
-            },
-            {
-              name: 'eventEndDate',
-              content: eventEndDate,
-            },
-            {
-              name: 'startTime',
-              content: startTime,
-            },
-          ],
-        );
-      }
+      const whatsappCommsVariablesList = get(eventCommsRule, 'commsVariables', []).map((commsVariable) => (
+        {
+          name: get(commsVariable, 'whatsappVariableName'),
+          value: get(commsVariable, 'dataField'),
+        }
+      ));
+      const emailCommsVariableObject = get(eventCommsRule, 'commsVariables', []).reduce((acc, commsVariable) => {
+        acc[get(commsVariable, 'emailVariableName')] = get(commsVariable, 'dataField');
+        return acc;
+      });
+      sendWhatsAppTemplateMessage(
+        parentPhone,
+        'Event Reainder',
+        parentPhone,
+        whatsappCommsVariablesList,
+      );
       if (toSendEmailComms) {
-        if (locationType === 'online') {
-          sendEmailCommsForUpdatedEvents(parentEmail,
-            'OnlineEventRemainder',
-            {
-              eventName,
-              meetingId,
-              meetingPassword,
-              sessionLink,
-              studentName,
-              eventUpdateReason,
-              eventStartdate,
-              eventEndDate,
-              startTime,
-            },
-            'Tekie Event Reminder');
-        }
-        if (locationType === 'venue') {
-          sendEmailCommsForUpdatedEvents(parentEmail,
-            'OfflineEventRemainder',
-            {
-              eventName,
-              studentName,
-              geoLocation,
-              address,
-              state,
-              city,
-              pincode,
-              timeZone,
-              eventUpdateReason,
-              eventStartdate,
-              eventEndDate,
-              startTime,
-            },
-            'Tekie Event Remainder');
-        }
+        sendEmailCommsForUpdatedEvents(parentEmail,
+          'OnlineEventRemainder',
+          emailCommsVariableObject,
+          'Tekie Event Reminder');
       }
     }
   }
@@ -317,33 +204,36 @@ const sendEventCommunication = async ({ eventId, eventCommsRule }, deleteJob) =>
         const parentEmail = get(user, 'email');
         const parentPhone = get(user, 'phone.countryCode').split('+')[1] + (user, 'phone.number');
         const studentName = get(registeredUser, 'user.name');
+        const whatsappCommsVariablesList = get(eventCommsRule, 'commsVariables', []).map((commsVariable) => (
+          {
+            name: get(commsVariable, 'whatsappVariableName'),
+            value: get(commsVariable, 'dataField'),
+          }
+        ));
+        const emailCommsVariableObject = get(eventCommsRule, 'commsVariables', []).reduce((acc, commsVariable) => {
+          acc[get(commsVariable, 'emailVariableName')] = get(commsVariable, 'dataField');
+          return acc;
+        });
         sendWhatsAppTemplateMessage(
           parentPhone,
           get(eventCommsRule, 'templateName'),
           parentPhone,
-          [
-            {
-              name: 'studentName',
-              content: studentName,
-            },
-            {
-              name: 'eventName',
-              content: eventName,
-            },
-          ],
+          whatsappCommsVariablesList,
         );
         if (toSendEmailComms) {
-          sendEmailTemplateMessage(parentEmail, 'EventComplete', { eventName, studentName }, 'Tekie Event Remainder');
+          sendEmailTemplateMessage(parentEmail, 'EventComplete', emailCommsVariableObject, 'Tekie Event Remainder');
         }
       });
     } else {
       const commsReceivers = [];
+      const commsReceiversIds = [];
       if (attendanceFilter === 'attendees') {
         const eventSessions = get(event, 'eventSessions', []);
         eventSessions.forEach((session) => get(session, 'attendance', []).forEach((registeredUser) => {
-          if (!commsReceivers.includes(registeredUser)) {
-            if (registeredUser.isPresent) {
+          if (!commsReceiversIds.includes(get(registeredUser, 'user.id'))) {
+            if (get(registeredUser, 'isPresent')) {
               commsReceivers.push(registeredUser);
+              commsReceiversIds.push(get(registeredUser, 'user.id'));
             }
           }
         }));
@@ -351,9 +241,10 @@ const sendEventCommunication = async ({ eventId, eventCommsRule }, deleteJob) =>
       if (attendanceFilter === ' nonAttendees') {
         const eventSessions = get(event, 'eventSessions', []);
         eventSessions.forEach((session) => get(session, 'attendance', []).forEach((registeredUser) => {
-          if (!commsReceivers.includes(registeredUser)) {
-            if (!registeredUser.isPresent) {
+          if (!commsReceivers.includes(get(registeredUser, 'user.id'))) {
+            if (!get(registeredUser, 'isPresent')) {
               commsReceivers.push(registeredUser);
+              commsReceiversIds.push(get(registeredUser, 'user.id'));
             }
           }
         }));
@@ -363,17 +254,24 @@ const sendEventCommunication = async ({ eventId, eventCommsRule }, deleteJob) =>
         const studentName = get(receiver, 'user.name');
         const parentEmail = get(user, 'email');
         const phoneNumber = get(receiver, 'parents.user.phone.countryCode').split('+')[1] + get(receiver, 'parents.user.phone.number');
+        const whatsappCommsVariablesList = get(eventCommsRule, 'commsVariables', []).map((commsVariable) => (
+          {
+            name: get(commsVariable, 'whatsappVariableName'),
+            value: get(commsVariable, 'dataField'),
+          }
+        ));
+        const emailCommsVariableObject = get(eventCommsRule, 'commsVariables', []).reduce((acc, commsVariable) => {
+          acc[get(commsVariable, 'emailVariableName')] = get(commsVariable, 'dataField');
+          return acc;
+        });
         sendWhatsAppTemplateMessage(
           phoneNumber,
           get(eventCommsRule, 'templateName'),
           phoneNumber,
-          [
-            { name: 'eventName', content: eventName },
-            { name: 'studentName', content: studentName },
-          ],
+          whatsappCommsVariablesList,
         );
         if (toSendEmailComms) {
-          sendEmailTemplateMessage(parentEmail, 'EventComplete', { eventName, studentName }, 'Tekie Event Remainder');
+          sendEmailTemplateMessage(parentEmail, 'EventComplete', emailCommsVariableObject, 'Tekie Event Remainder');
         }
       });
     }
