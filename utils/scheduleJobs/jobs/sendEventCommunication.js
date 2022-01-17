@@ -137,16 +137,27 @@ const sendEmailTemplateMessage = (email, templateFileName, templateObject, subje
     sendEmail(emailMsgObject);
   });
 };
+const updateCommsRuleStatus = async (eventId, variable) => {
+  const mutation = `mutation($input: updatedEventCommsRuleInput!) {
+      updateEvent(id :"${eventId}", input: $input) {
+        id
+      }
+  }`;
+  await callLocalGraphqlApi(mutation, '', variable);
+};
 
 const sendEventCommunication = async ({ eventId, eventCommsRule }, deleteJob) => {
   const event = await callLocalGraphqlApi(eventQuery(eventId));
   const registeredUsers = get(event, 'registeredUsers', []);
 
+  const eventCommsRules = get(event, 'event.eventCommsRule', []);
+  const newEventsCommsRule = eventCommsRules.filter(
+    (rule) => rule.templateName !== eventCommsRule.templateName && rule.condition !== eventCommsRule.condition,
+  );
+
   const toSendEmailComms = get(event, 'isEmailCommsEnabled');
   const eventName = get(batch, 'eventName');
-
   const condition = get(eventCommsRule, 'condition');
-
   const timezone = get(event, 'timezone', '');
   const { ...slots } = get(event, 'eventTimeTableRule', {});
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
@@ -156,7 +167,6 @@ const sendEventCommunication = async ({ eventId, eventCommsRule }, deleteJob) =>
   const eventStartdate = moment(dateObject).format('dddd, Do MMMM, YYYY');
   const endDate = get(event, 'eventTimeTableRule.endDate', '');
   const eventEndDate = moment(endDate).format('dddd, Do MMMM, YYYY');
-
   if (condition === 'before') {
     for (const registeredUser of registeredUsers) {
       const { user } = registeredUser.parents[0];
@@ -276,6 +286,13 @@ const sendEventCommunication = async ({ eventId, eventCommsRule }, deleteJob) =>
       });
     }
   }
+  newEventsCommsRule.push({
+    ...eventCommsRule,
+    isSend: true,
+  });
+  const variable = { input: { eventCommsRule: { replace: newEventsCommsRule } } };
+  // eslint-disable-next-line no-await-in-loop
+  await updateCommsRuleStatus(eventId, variable);
   deleteJob();
 };
 
