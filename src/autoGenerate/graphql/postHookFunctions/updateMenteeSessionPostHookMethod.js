@@ -23,6 +23,7 @@ import getCourseInfo from './utils/getCourseInfo';
 import getSlotLabel from '../../../../utils/getSlotLabel';
 import { log } from '../../../../utils';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import isMentorChild from './utils/isMentorChild';
 
 const fetchTasks = (menteeSessionId) => `
 {
@@ -211,8 +212,11 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     if (get(context, 'userIdFromContext')) {
       updateUserBookingAgent(menteeSessionId, get(context, 'userIdFromContext'), bookingDate, get(slotTimeStringArray, '0'));
     }
+
+    if (!isMentorChild(get(userInfo, 'data.user.id', ''))) {
     // update booking time on leadsquared
-    rescheduleMenteeBookingLeadsquared(input, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, get(context, 'userIdFromContext'));
+      rescheduleMenteeBookingLeadsquared(input, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, get(context, 'userIdFromContext'));
+    }
     // update session log entry
     const courseId = get(input, 'course.typeId', '');
     const clientId = get(userInfo, 'data.user.id', '');

@@ -4,6 +4,7 @@ import addSessionLog from './utils/addSessionLog';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import { TBA } from '../../../../constants';
+import isMentorChild from './utils/isMentorChild';
 /*
   - check if the user if from referral
   - check if the session is the first session
@@ -61,20 +62,22 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMentorMenteeSession', batchCode, mentorSessionId, sessionStatus, updateMentorMenteeSessionInput);
     }
 
-    const studentName = get(menteeSession, 'data.menteeSession.user.name');
-    const parentName = get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.name');
-    if (get(menteeSession, 'data.menteeSession.topic.order') === 1) {
-      if (context.currentAppName !== TBA) {
-        const parentNumber = `${get(
-          menteeSession,
-          'data.menteeSession.user.studentProfile.parents[0].user.phone.countryCode',
-          '',
-        )}-${get(
-          menteeSession,
-          'data.menteeSession.user.studentProfile.parents[0].user.phone.number',
-          '',
-        )}`;
-        sendSessionCancellationMessage(mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName, parentNumber);
+    if (!isMentorChild(userId)) {
+      const studentName = get(menteeSession, 'data.menteeSession.user.name');
+      const parentName = get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.name');
+      if (get(menteeSession, 'data.menteeSession.topic.order') === 1) {
+        if (context.currentAppName !== TBA) {
+          const parentNumber = `${get(
+            menteeSession,
+            'data.menteeSession.user.studentProfile.parents[0].user.phone.countryCode',
+            '',
+          )}-${get(
+            menteeSession,
+            'data.menteeSession.user.studentProfile.parents[0].user.phone.number',
+            '',
+          )}`;
+          sendSessionCancellationMessage(mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName, parentNumber);
+        }
       }
     }
   }

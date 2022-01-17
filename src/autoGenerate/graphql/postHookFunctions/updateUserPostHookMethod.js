@@ -4,6 +4,7 @@ import { MENTEE, PARENT } from '../../../../constants/roles';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { updateUserLeadSquared } from './leadsquared';
 import addSalesAudit from './utils/addSalesAudit';
+import isMentorChild from './utils/isMentorChild';
 
 const { preSales } = auditType;
 
@@ -80,12 +81,14 @@ const updateUserPostHookMethod = async (input, mutationName, context) => {
       agentName = await fetchAgentName(get(context, 'currentUser.id'));
     }
     const user = await fetchUser(userId);
-    updateUserLeadSquared(
-      get(user, 'studentProfile.parents[0].user.phone.number'),
-      agentName,
-      isVerified,
-      await fetchBookedSession(userId),
-    );
+    if (!isMentorChild(userId)) {
+      updateUserLeadSquared(
+        get(user, 'studentProfile.parents[0].user.phone.number'),
+        agentName,
+        isVerified,
+        await fetchBookedSession(userId),
+      );
+    }
   }
   const isPreSalesAuditFromInput = get(context, 'isPreSalesAuditFromInput');
   const prevIsPreSalesAudit = get(context, 'prevIsPreSalesAudit');

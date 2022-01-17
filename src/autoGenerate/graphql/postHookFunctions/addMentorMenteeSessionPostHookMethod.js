@@ -12,6 +12,7 @@ import addToMentorAvailabilitySlotMentorMenteeSession from './utils/addToMentorA
 import getCourseInfo from './utils/getCourseInfo';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
+import isMentorChild from './utils/isMentorChild';
 
 const getMentorMenteeSessionData = async (id) => {
   const query = `
@@ -71,13 +72,15 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
     const mentorMenteeSessionId = get(input, 'id');
     const mentorMenteeSessionDoc = await getMentorMenteeSessionData(mentorMenteeSessionId);
     context.previousDocument = mentorMenteeSessionDoc;
-    if (get(input, 'sessionStatus') === 'started') {
-      setSessionStartedLeadsquared(userInfo, topicInfo);
-      updateHomeworkStreaksMethod(clientId, context, topicId, input);
-    }
-    // send message to mentor regarding the session
-    if (get(topicInfo, 'data.topic.order') === 1 && mentorSessionConnectId) {
-      await extractMentorMenteeSessionAndSendMessage(bookingDate, slotTimeStringArray, mentorSessionConnectId, userInfo, topicInfo, input.id, courseInfo);
+    if (!isMentorChild(clientId)) {
+      if (get(input, 'sessionStatus') === 'started') {
+        setSessionStartedLeadsquared(userInfo, topicInfo);
+        updateHomeworkStreaksMethod(clientId, context, topicId, input);
+      }
+      // send message to mentor regarding the session
+      if (get(topicInfo, 'data.topic.order') === 1 && mentorSessionConnectId) {
+        await extractMentorMenteeSessionAndSendMessage(bookingDate, slotTimeStringArray, mentorSessionConnectId, userInfo, topicInfo, input.id, courseInfo);
+      }
     }
 
     // update session log entry

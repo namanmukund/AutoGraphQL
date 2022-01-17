@@ -9,6 +9,7 @@ import { byPassMenteeValidationApps } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import deleteMentorMenteeSessionQuery from './utils/deleteMentorMenteeSessionQuery';
+import isMentorChild from './utils/isMentorChild';
 
 const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   /*
@@ -54,7 +55,9 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
   addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMenteeSession', batchCode, '', '');
 
-  deleteMenteeBookingLeadSquared(userInfo, topicInfo, context.userIdFromContext === clientId);
+  if (!isMentorChild(clientIid)) {
+    deleteMenteeBookingLeadSquared(userInfo, topicInfo, context.userIdFromContext === clientId);
+  }
 };
 
 export default deleteMenteeSessionPostHookMethod;
