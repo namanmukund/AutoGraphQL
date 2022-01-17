@@ -216,9 +216,9 @@ const sendEventCommunication = async ({ eventId, eventCommsRule }, deleteJob) =>
     const attendanceFilter = get(eventCommsRule, 'attendanceFilter');
     if (attendanceFilter === 'allUser') {
       registeredUsers.forEach((registeredUser) => {
-        const { user } = registeredUser.parents[0];
-        const parentEmail = get(user, 'email');
-        const parentPhone = get(user, 'phone.countryCode').split('+')[1] + (user, 'phone.number');
+        const parent = get(receiver, 'student.parents[0].user');
+        const parentEmail = get(parent, 'email');
+        const parentPhone = get(parent, 'phone.countryCode').split('+')[1] + (parent, 'phone.number');
         const studentName = get(registeredUser, 'user.name');
         const whatsappCommsVariablesList = get(eventCommsRule, 'commsVariables', []).map((commsVariable) => (
           {
