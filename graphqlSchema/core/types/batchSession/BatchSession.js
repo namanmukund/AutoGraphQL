@@ -16,9 +16,7 @@ const b2bFormFields = `
   interactionCount: AttentionAmount @defaultValue(value: "all")
   interactionAmount: Int @length(min: 1, max: 10)
   studentBehaviour: String
-  ableToCompleteContent: Boolean
-  contentWasLengthy: Boolean
-  kidsEnjoyedContent: Boolean
+  lengthOfContent: LengthOfContent @defaultValue(value: "brief")
   learningObjectiveComponent: LearningObjectiveComponentsB2B @defaultValue(value: "practice")
   contentImprovementSuggestion: String
   functionalitySuggestion: String
