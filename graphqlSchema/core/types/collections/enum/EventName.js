@@ -8,6 +8,7 @@ const EventName = `
     genZEnvironment
     crackTheCode
     christmasCarnival
+    doodling
   }`;
 
 export default EventName;

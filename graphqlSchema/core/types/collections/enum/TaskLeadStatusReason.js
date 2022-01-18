@@ -5,6 +5,16 @@ const TaskLeadStatusReason = `
     lookingForFreeCourse
     dontRememberRegistering
     choseCompetitor
+    incorrectNumber
+    dontHaveLaptopPc
+    lookingForOtherCourse
+    affordabilityIssue
+    languageBarrier
+    other
+    notAParent
+    lookingForJob
+    overage
+    underage
     busy
     notReachable
     switchedOff

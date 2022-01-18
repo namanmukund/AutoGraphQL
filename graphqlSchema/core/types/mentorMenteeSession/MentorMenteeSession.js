@@ -25,7 +25,7 @@ const sessionRescheduledReasons = `
     videoNotLoading: Boolean
     codePlaygroundIssue: Boolean
     logInOTPError: Boolean
-    otherTechnicalReason: String
+    otherTechnicalReason: Boolean
     languageBarrier: Languages
     otherLanguageBarrier: String
 `;
@@ -48,22 +48,7 @@ const internetSpeed = `
   type InternetSpeed {
    speed: Float
    unit: InternetSpeedUnit
- }`;
-
-const b2bFormFields = `
-  attentionCount: AttentionAmount @defaultValue(value: "all")
-  attentionAmount: Int @length(min: 1, max: 10)
-  interationCount: AttentionAmount @defaultValue(value: "all")
-  interactionAmount: Int @length(min: 1, max: 10)
-  studentBehaviour: String
-  ableToCompleteContent: Boolean
-  contentWasLengthy: Boolean
-  kidsEnjoyedContent: Boolean
-  learningObjectiveComponent: LearningObjectiveComponentsB2B @defaultValue(value: "practice")
-  contentImprovementSuggestion: String
-  functionalitySuggestion: String
-  generalSuggestion: String
-`;
+}`;
 
 const MentorMenteeSession = `
   type MentorMenteeSession @model {
@@ -82,6 +67,7 @@ const MentorMenteeSession = `
     isPracticeSubmitted: Boolean @defaultValue(value: "false")
     practiceSubmitDate: Date
     isAssignmentSubmitted: Boolean @defaultValue(value: "false")
+    isAssignmentAttempted: Boolean @defaultValue(value: "false")
     isReviewSubmittedOnTime: Boolean @defaultValue(value: "false")
     assignmentSubmitDate: Date
     isHomeworkCheckedByMentor: Boolean @defaultValue(value: "false")
@@ -109,7 +95,6 @@ const MentorMenteeSession = `
     ${sessionRescheduledReasons}
     ${studentUnderstandingFields}
     ${studentAbilityFields}
-    ${b2bFormFields}
     isFeedbackSubmitted: Boolean @defaultValue(value: "false")
     sessionCommentByMentor: String
     source: UserOriginSource @defaultValue(value: "website")
@@ -134,6 +119,8 @@ const MentorMenteeSession = `
     startSessionByMenteePlatform: Platform
     isDemoWowAudit: Boolean @defaultValue(value: "false")
     bookingAgent: User @relation(name: "MentorMenteeSessionBookingAgent", direction: "OneWay")
+    sessionStartedByMentorAt: Date
+    sessionJoinedByMenteeAt: Date
     verificationStatus: VerificationStatus @defaultValue(value: "unverified")
     verifiedBy: User @relation(name: "MentorMenteeSessionVerifiedBy", direction: "OneWay")
 }`;

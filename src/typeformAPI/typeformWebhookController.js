@@ -17,6 +17,15 @@ import getPostDemoSalesReportUrl from '../autoGenerate/graphql/resolvers/mutatio
 const getEventId = (formId) => {
   let eventId = '';
   switch (formId) {
+    case EVENTS.DOODLING.formId:
+      eventId = EVENTS.DOODLING.eventId.staging;
+      if (process.env.NODE_ENV === 'production') {
+        eventId = EVENTS.DOODLING.eventId.production;
+        if (process.env.DATA_MASKING) {
+          eventId = EVENTS.DOODLING.eventId.preprod;
+        }
+      }
+      break;
     case EVENTS.SPYSQUADCAMP.formId:
       eventId = EVENTS.SPYSQUADCAMP.eventId.staging;
       if (process.env.NODE_ENV === 'production') {
@@ -107,6 +116,16 @@ const getEventDetails = (formId) => {
       eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec26;
       eventDetailsObject.eventTime = EVENTS.CHRISTMASCARNIVAL.eventTime.dec26;
       eventDetailsObject.eventDateTime = EVENTS.CHRISTMASCARNIVAL.eventDateTime.dec26;
+      break;
+    case EVENTS.STORYSPREE.rsRegiformId:
+      eventDetailsObject.eventDate = EVENTS.STORYSPREE.eventDate;
+      eventDetailsObject.eventTime = EVENTS.STORYSPREE.eventTime;
+      eventDetailsObject.eventDateTime = EVENTS.STORYSPREE.eventDateTime;
+      break;
+    case EVENTS.DOODLING.registrationFormId:
+      eventDetailsObject.eventDate = EVENTS.DOODLING.eventDate;
+      eventDetailsObject.eventTime = EVENTS.DOODLING.eventTime;
+      eventDetailsObject.eventDateTime = EVENTS.DOODLING.eventDateTime;
       break;
     default:
       eventDetailsObject.eventDate = EVENTS.CHRISTMASCARNIVAL.eventDate.dec24;
@@ -655,8 +674,15 @@ const typeformWebhookController = async (req, res) => {
         case EVENTS.STORYSPREE.formId:
           country = 'india';
           timezone = 'Asia/Kolkata';
-          utmSource = 'communityevent';
-          utmCampaign = 'storyspree_19dec';
+          utmSource = 'radiostreet';
+          utmCampaign = 'storyspree';
+          break;
+        case EVENTS.STORYSPREE.rsRegiformId:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'radiostreet';
+          utmCampaign = 'storyspree';
+          doGenerateCertificate = false;
           break;
         case EVENTS.GENZENVIRONMENT.registrationFormId:
           country = 'india';
@@ -668,7 +694,7 @@ const typeformWebhookController = async (req, res) => {
         case EVENTS.CRACKTHECODE.formId:
           country = 'india';
           timezone = 'Asia/Kolkata';
-          utmSource = 'radiostreet';
+          utmSource = 'events';
           utmCampaign = 'crackthecode';
           break;
         case EVENTS.CHRISTMASCARNIVAL.registrationFormId24th:
@@ -681,8 +707,9 @@ const typeformWebhookController = async (req, res) => {
         case EVENTS.CHRISTMASCARNIVAL.registrationFormId25th:
           country = 'india';
           timezone = 'Asia/Kolkata';
-          utmSource = 'communityevent';
-          utmCampaign = 'christmascarnival_25dec';
+          utmSource = 'events';
+          utmCampaign = 'doodling';
+          studentDetailsObject.utmTerm = '16thJan2022';
           doGenerateCertificate = false;
           break;
         case EVENTS.CHRISTMASCARNIVAL.registrationFormId25thRS:
@@ -708,8 +735,14 @@ const typeformWebhookController = async (req, res) => {
         case EVENTS.CHRISTMASCARNIVAL.formId25th:
           country = 'india';
           timezone = 'Asia/Kolkata';
-          utmSource = 'communityevent';
-          utmCampaign = 'christmascarnival_25dec';
+          utmSource = 'events';
+          utmCampaign = 'doodling';
+          break;
+        case EVENTS.DOODLING.formId:
+          country = 'india';
+          timezone = 'Asia/Kolkata';
+          utmSource = 'events';
+          utmCampaign = 'doodling';
           break;
         default:
           country = 'india';
