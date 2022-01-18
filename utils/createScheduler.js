@@ -29,15 +29,6 @@ const createScheduler = (schedulerName) => {
         await scheduleB2BSessionReminder();
       });
       break;
-    case 'b2bSessionMissed':
-      rule.minute = 50;
-      // eslint-disable-next-line no-unused-vars
-      schedule.scheduleJob(rule, async () => {
-        // eslint-disable-next-line no-console
-        console.log('scheduler started for: ', schedulerName);
-        await scheduleB2BSessionMissed();
-      });
-      break;
     case 'mentorReport':
       rule.hour = 10;
       rule.minute = 32;
