@@ -58,6 +58,7 @@ const BatchSession = `
     mentorSavesAttendance: Date
     videoLinkClickByMenteePlatform: Platform
     startSessionByMenteePlatform: Platform
+    sessionJoinedByMentorAt: Date
 }`;
 
 export default [BatchSession, batchAttendanceType];
