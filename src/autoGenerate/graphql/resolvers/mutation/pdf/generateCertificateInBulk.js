@@ -71,10 +71,14 @@ const generateCertificateInBulkMutationResolver = async (
   try {
     for (const eventSession of eventSessions) {
       // loop through event attendees (present)
+      const attendantUser = [];
       const attendance = get(eventSession, 'attendance', []);
       for (const studentAttendance of attendance) {
         if (get(studentAttendance, 'status', 'absent') === 'present') {
-          await generateCertificate(get(studentAttendance, 'student.user.id', ''), null, eventId, true);
+          if (!attendantUser.includes(get(studentAttendance, 'student.user.id', ''))) {
+            await generateCertificate(get(studentAttendance, 'student.user.id', ''), null, eventId, true);
+            attendantUser.push(get(studentAttendance, 'student.user.id', ''));
+          }
         }
       }
     }

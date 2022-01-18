@@ -91,39 +91,23 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
       if (locationType === 'online') {
         parameters = [
           {
-            name: 'studentName',
+            name: 'student_name',
             content: studentName,
           },
           {
-            name: 'eventName',
+            name: 'event_name',
             content: eventName,
-          },
-          {
-            name: 'meetingId',
-            content: meetingId,
-          },
-          {
-            name: 'meetingPassword',
-            content: meetingPassword,
           },
           {
             name: 'sessionLink',
             content: sessionLink,
           },
           {
-            name: 'eventUpdateReason',
-            content: eventUpdateReason,
-          },
-          {
-            name: 'eventStartdate',
+            name: 'event_date',
             content: eventStartdate,
           },
           {
-            name: 'eventEndDate',
-            content: eventEndDate,
-          },
-          {
-            name: 'startTime',
+            name: 'event_time',
             content: startTime,
           },
         ];
@@ -178,7 +162,7 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
       }
       sendWhatsAppTemplateMessage(
         parentPhone,
-        'Event Rescheduled',
+        'event_rescheduled_information',
         parentPhone,
         parameters,
       );
@@ -224,78 +208,46 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
       if (locationType === 'online') {
         parameters = [
           {
-            name: 'studentName',
+            name: 'student_name',
             content: studentName,
           },
           {
-            name: 'eventName',
+            name: 'event_name',
             content: eventName,
           },
           {
-            name: 'meetingId',
-            content: meetingId,
-          },
-          {
-            name: 'eventUpdateReason',
-            content: eventUpdateReason,
-          },
-          {
-            name: 'eventStartdate',
+            name: 'event_date',
             content: eventStartdate,
           },
           {
-            name: 'eventEndDate',
-            content: eventEndDate,
+            name: 'event_time',
+            content: startTime,
           },
         ];
       }
       if (locationType === 'venue') {
         parameters = [
           {
-            name: 'studentName',
+            name: 'student_name',
             content: studentName,
           },
           {
-            name: 'eventName',
+            name: 'event_name',
             content: eventName,
           },
           {
-            name: 'geoLocation',
-            content: geoLocation,
-          },
-          {
-            name: 'address',
-            content: address,
-          },
-          {
-            name: 'state',
-            content: state,
-          },
-          {
-            name: 'city',
-            content: city,
-          },
-          {
-            name: 'pincode',
-            content: pincode,
-          },
-          {
-            name: 'eventUpdateReason',
-            content: eventUpdateReason,
-          },
-          {
-            name: 'eventStartdate',
+            name: 'event_date',
             content: eventStartdate,
           },
           {
-            name: 'eventEndDate',
-            content: eventEndDate,
+            name: 'event_time',
+            content: startTime,
           },
         ];
       }
       sendWhatsAppTemplateMessage(
         parentPhone,
-        'Event Rescheduled',
+        'event_cancellation_information',
         parentPhone,
         parameters,
       );

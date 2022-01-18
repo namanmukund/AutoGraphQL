@@ -40,6 +40,7 @@ const EventCommsRule = `
   isTested: Boolean
   isPassed: Boolean
   isSend: Boolean @defaultValue(value: "false")
+  isEmailRule: Boolean @defaultValue(value: "false")
  }
 `;
 
@@ -52,6 +53,7 @@ const UTMParameters = `
     utmTerm: String
     webUrl: String
  }`;
+
 const Event = `
   type Event @model
   {
@@ -65,6 +67,7 @@ const Event = `
     category: EventCategory @relation(name: "EventCategoryEvent")
     speakers: [EventSpeakerProfile] @relation(name: "EventSpeakerProfileEvent")
     date: Date
+    dateType: EventTypes
     eventJoinReasons: [EventJoinReason] @relation(name: "EventJoinReasonEvent")
     eventAttendances: [EventAttendance] @relation(name:"EventAttendanceEvent")
     address: String
@@ -88,6 +91,7 @@ const Event = `
     prizes: [EventPrize] @relation(name: "EventPrizeEvent")
     tags: [ContentTag] @relation(name: "ContentTagEvent")
     registeredUsers: [StudentProfile] @relation(name:"EventRegisteredStudentProfile", direction: "OneWay")
+    congratulatedStudents: [StudentProfile] @relation(name:"EventCongratsStudentProfile", direction: "OneWay")
     commsVariables: [CommsVariable] @relation(name: "CommsVariableEvent")
     isSchoolEvent: Boolean
     eventBanner: File @relation(name: "EventBannerEvent", direction: "OneWay")

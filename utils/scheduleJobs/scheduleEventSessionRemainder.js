@@ -109,35 +109,19 @@ const scheduleEventSessionRemainder = async () => {
       if (locationType === 'online') {
         parameters = [
           {
-            name: 'studentName',
+            name: 'student_name',
             content: studentName,
           },
           {
-            name: 'studentGrade',
-            content: studentGrade,
-          },
-          {
-            name: 'eventName',
+            name: 'event_name',
             content: eventName,
           },
           {
-            name: 'meetingId',
-            content: meetingId,
+            name: 'event_session_link',
+            content: 'link',
           },
           {
-            name: 'meetingPassword',
-            content: meetingPassword,
-          },
-          {
-            name: 'sessionLink',
-            content: sessionLink,
-          },
-          {
-            name: 'sessionDate',
-            content: date,
-          },
-          {
-            name: 'sessionTime',
+            name: 'event_time',
             content: startTime,
           },
         ];
@@ -189,7 +173,7 @@ const scheduleEventSessionRemainder = async () => {
       if (get(parents, 'phone.number')) {
         sendWhatsAppTemplateMessage(
           parentPhone,
-          'Event session remainder',
+          'event_reminder_t_1_hour',
           parentPhone,
           parameters,
         );
