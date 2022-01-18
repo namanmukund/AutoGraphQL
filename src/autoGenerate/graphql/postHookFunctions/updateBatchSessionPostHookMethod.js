@@ -23,6 +23,7 @@ import addSalesAudit from './utils/addSalesAudit';
 import isTrialSession from '../resolvers/utils/isTrialSession';
 import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
+import scheduleB2BSessionMissed from '../../../../utils/scheduleJobs/scheduleB2BSessionMissed';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -302,7 +303,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         We are getting published topics list through this query.
         Then we will get next published topic
         */
-
+        scheduleB2BSessionMissed(input, params, mutationName, context);
         const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
         const topicsList = get(nextTopicQueryRes, 'data.topics');
 
