@@ -120,6 +120,7 @@ import LocationType from './LocationType';
 import EventOrganizer from './EventOrganizer';
 import DurationType from './DurationType';
 import AttendanceFilter from './AttendanceFilter';
+import LengthOfContent from './LengthOfContent';
 
 export default [
   Status,
@@ -245,4 +246,5 @@ export default [
   EventOrganizer,
   DurationType,
   AttendanceFilter,
+  LengthOfContent,
 ];
