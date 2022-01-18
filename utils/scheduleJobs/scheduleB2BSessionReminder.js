@@ -66,7 +66,7 @@ const getBatchSessions = async () => {
 };
 const getMagicLinkForUser = async (userId) => {
   const query = `{
-  getMagicLink(input: { userId: "${userId}") {
+  getMagicLink(input: { userId: "${userId}"}) {
     linkUri
     expiresIn
     linkToken
@@ -100,7 +100,7 @@ const scheduleB2BSessionReminder = async () => {
       const topicTitle = get(batchSession, 'topic.title');
       const schoolCode = get(batchSession, 'batch.school.code');
       const loginUrlForWhatsapp = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/login` : `${process.env.TEKIE_WEB_URL}/login`;
-      const schoolName = get(batchSession, 'batch.school.name');
+      const schoolName = get(batchSession, 'batch.school.name', '-');
       const date = moment(get(batchSession, 'sessionStartDate')).format('D/MM/YY');
       const startTime = moment(get(batchSession, 'sessionStartDate')).format('HH:mm a');
       const students = get(batchSession, 'batch.students');
@@ -110,7 +110,7 @@ const scheduleB2BSessionReminder = async () => {
         const userId = get(student, 'user.studentProfile.user.id', '');
         const getMagicLink = await getMagicLinkForUser(userId);
         const loginUrlForEmail = getMagicLink.length > 0 ? get(getMagicLink, '[0].linkUri', '') : loginUrlForWhatsapp;
-        const studentName = get(student, 'user.studentProfile.user.name');
+        const studentName = get(student, 'user.studentProfile.user.name', '-');
         const phoneNumber = get(student, 'user.parentProfile.user.phone.countryCode', '+91').split('+')[1] + get(student, 'user.parentProfile.user.phone.number');
         if (isWhatsAppCommsEnabled) {
           sendWhatsAppTemplateMessage(
