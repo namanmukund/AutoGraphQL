@@ -83,7 +83,7 @@ const EVENTS = {
       preprod: 'ckx8sau1d0000lrinb526hp0v',
       staging: 'ckyaeenu10001ncuj0yyedyqj',
     },
-    eventDate: '23th January',
+    eventDate: '23rd January',
     eventTime: '11:00 am',
     eventDateTime: '2022-01-23 05:30:00',
   },
