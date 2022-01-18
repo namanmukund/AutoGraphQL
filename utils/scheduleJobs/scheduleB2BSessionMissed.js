@@ -65,7 +65,7 @@ const sendSessionAttendenceMail = (email, templateName, sendEmailObject, mailSub
 };
 const scheduleB2BSessionMissed = async (input, params, mutationName, context) => {
   const { batchSessionId } = context;
-  const batchDetails = getBatchAttendanceDetails(batchSessionId);
+  const batchDetails = await getBatchAttendanceDetails(batchSessionId);
   const topicTitle = get(batchDetails, 'topic.title');
   const date = moment(get(batchDetails, 'sessionStartDate')).format('D/MM/YY');
   const startTime = moment(get(batchDetails, 'sessionStartDate')).format('HH:mm a');
