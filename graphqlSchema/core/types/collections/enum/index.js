@@ -109,9 +109,18 @@ import TaskCompletionStatus from './TaskCompletionStatus';
 import TaskLeadStatus from './TaskLeadStatus';
 import TaskLeadStatusReason from './TaskLeadStatusReason';
 import TaskBookingStatus from './TaskBookingStatus';
+import TaskBookingStatusReason from './TaskBookingStatusReason';
 import TaskContactReason from './TaskContactReason';
 import AttentionAmount from './AttentionAmount';
 import LearningObjectiveComponentsB2B from './LearningObjectiveComponentsB2B';
+import EventTypes from './EventTypes';
+import EventStatus from './EventStatus';
+import CommsDataField from './CommsDataField';
+import LocationType from './LocationType';
+import EventOrganizer from './EventOrganizer';
+import DurationType from './DurationType';
+import AttendanceFilter from './AttendanceFilter';
+import LengthOfContent from './LengthOfContent';
 
 export default [
   Status,
@@ -226,7 +235,16 @@ export default [
   TaskLeadStatus,
   TaskLeadStatusReason,
   TaskBookingStatus,
+  TaskBookingStatusReason,
   TaskContactReason,
   AttentionAmount,
   LearningObjectiveComponentsB2B,
+  EventTypes,
+  EventStatus,
+  CommsDataField,
+  LocationType,
+  EventOrganizer,
+  DurationType,
+  AttendanceFilter,
+  LengthOfContent,
 ];

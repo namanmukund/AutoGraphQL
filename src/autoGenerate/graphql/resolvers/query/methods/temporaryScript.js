@@ -32,6 +32,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import scheduleSessionCourseReport from '../../../../../../utils/scheduleJobs/scheduleCourseReport';
 // import addOrUpdateUsersInBulk from '../scriptMethods/addOrUpdateUsersInBulk';
 // import updateLeadAnalyticsForPastLeads from '../scriptMethods/updateLeadAnalyticsForPastLeads';
+// import updateMentorMenteeSessionIsAssignmentAttempted from '../scriptMethods/updateMentorMenteeSessionIsAssignmentAttempted';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -87,6 +88,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateNetPromoterScoresWithCourseAndMmSession();
   // await addOrUpdateUsersInBulk();
   // await updateLeadAnalyticsForPastLeads();
+  // await updateMentorMenteeSessionIsAssignmentAttempted();
   return {
     result: true,
   };

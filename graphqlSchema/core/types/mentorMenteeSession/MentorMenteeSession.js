@@ -67,6 +67,7 @@ const MentorMenteeSession = `
     isPracticeSubmitted: Boolean @defaultValue(value: "false")
     practiceSubmitDate: Date
     isAssignmentSubmitted: Boolean @defaultValue(value: "false")
+    isAssignmentAttempted: Boolean @defaultValue(value: "false")
     isReviewSubmittedOnTime: Boolean @defaultValue(value: "false")
     assignmentSubmitDate: Date
     isHomeworkCheckedByMentor: Boolean @defaultValue(value: "false")
@@ -118,6 +119,8 @@ const MentorMenteeSession = `
     startSessionByMenteePlatform: Platform
     isDemoWowAudit: Boolean @defaultValue(value: "false")
     bookingAgent: User @relation(name: "MentorMenteeSessionBookingAgent", direction: "OneWay")
+    sessionStartedByMentorAt: Date
+    sessionJoinedByMenteeAt: Date
     verificationStatus: VerificationStatus @defaultValue(value: "unverified")
     verifiedBy: User @relation(name: "MentorMenteeSessionVerifiedBy", direction: "OneWay")
 }`;

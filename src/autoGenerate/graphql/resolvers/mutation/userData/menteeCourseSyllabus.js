@@ -9,8 +9,7 @@ import {
 import {
   DatabaseRecordNotFoundError,
 } from '../../../../../../constants/errors';
-import getUserIdandAppNameAfterValidation
-  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
@@ -671,6 +670,9 @@ This is called when mentee tries to load homepage
 It will return all the booked and upcoming sessions based on User current topic component status
 and sessions booked so far by a mentee which is in MenteeSession
 It also returns the total no. of topics and chapters
+bookedSession -> only next 1 session will come here
+upComingSession -> all the sessions after booked session will come here
+completedSession -> all completed session will come here
 */
 const menteeCourseSyllabusMutationResolver = async (
   root,
@@ -950,7 +952,11 @@ const menteeCourseSyllabusMutationResolver = async (
                   if (get(mentorSession, 'user')) {
                     mentorData = getMentorData(get(mentorSession, 'user'));
                   }
-                  bookedSession.push(bookedMenteeSession);
+                  if (bookedSession.length) {
+                    upComingSession.push(bookedMenteeSession);
+                  } else {
+                    bookedSession.push(bookedMenteeSession);
+                  }
                   isUpcomingSession = false;
                 }
               }
@@ -1115,7 +1121,11 @@ const menteeCourseSyllabusMutationResolver = async (
             chapterTitle: chapter && chapter.title,
             chapterOrder: chapter && chapter.order,
           };
-          bookedSession.push(bookedMenteeSession);
+          if (bookedSession.length) {
+            upComingSession.push(bookedMenteeSession);
+          } else {
+            bookedSession.push(bookedMenteeSession);
+          }
         }
       });
     }

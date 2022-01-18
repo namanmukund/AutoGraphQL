@@ -300,3 +300,15 @@ export const UserWithSimilarNumberAlreadyExist = createError('UserWithSimilarNum
 export const UserWithSimilarEmailAlreadyExist = createError('UserWithSimilarEmailAlreadyExist', {
   message: 'User with similar email already exist.',
 });
+
+export const SpeakerProfileAlreadyExist = createError('SpeakerProfileAlreadyExist', {
+  message: 'Speaker Profile already exist for the user',
+});
+
+export const CommsVariableAlreadyExist = createError('CommsVariableAlreadyExist', {
+  message: 'Variables with similar data field already exist',
+});
+
+export const CategoryAlreadyExist = createError('CategoryAlreadyExist', {
+  message: 'Category with similar title already exist',
+});

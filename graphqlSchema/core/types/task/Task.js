@@ -22,6 +22,7 @@ const Task = `
     leadStatus: TaskLeadStatus @defaultValue(value: "verificationPending")
     leadStatusReason: TaskLeadStatusReason @defaultValue(value: "busy")
     bookingStatus: TaskBookingStatus @defaultValue(value: "notConfirmed")
+    bookingStatusReason: TaskBookingStatusReason @defaultValue(value: "notQualified")
     bookingComment: String
     rejectionComment: String
     assignedTo: User @relation(name: "TaskUserAssignedTo", direction: "OneWay")

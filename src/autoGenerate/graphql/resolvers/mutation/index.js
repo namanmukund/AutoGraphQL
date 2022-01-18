@@ -39,6 +39,7 @@ import rebookMenteeSessionMutationResolver from './user/rebookMenteeSession';
 import sendCertificateInMailMutationResolver from './user/sendCertificateInMail';
 import sendJourneySnapshotInMailMutationResolver from './user/sendJourneySnapshotInMail';
 import generateCertificateMutationResolver from './pdf/generateCertificate';
+import generateCertificateInBulkMutationResolver from './pdf/generateCertificateInBulk';
 import validateMagicLinkMutationResolver from './user/validateMagicLink';
 import resetPasswordAndLoginMutationResolver from './setResetPassword/resetPasswordAndLogin';
 
@@ -83,6 +84,7 @@ export {
   sendCertificateInMailMutationResolver,
   sendJourneySnapshotInMailMutationResolver,
   generateCertificateMutationResolver,
+  generateCertificateInBulkMutationResolver,
   validateMagicLinkMutationResolver,
   resetPasswordAndLoginMutationResolver,
   generateMentorPayoutReportMutationResolver,

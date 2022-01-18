@@ -318,6 +318,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
           nextTopicId = topicsList[currentTopicIndex + 1].id;
         }
         if (nextTopicId) {
+          context.shouldUpdateMentorMentee = false;
           await updateBatchCurrentComponentStatus(
             batchCurrentComponentId,
             sessionStatus.allotted,
@@ -325,6 +326,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
             context,
           );
         } else {
+          context.shouldUpdateMentorMentee = false;
           await updateBatchCurrentComponentStatus(
             batchCurrentComponentId,
             sessionStatusFromInput,
@@ -335,6 +337,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
         addToSchedule('postCarnivalMail', postCarnivalFeedbackDate, { batchSessionId });
       } else {
+        context.shouldUpdateMentorMentee = false;
         await updateBatchCurrentComponentStatus(
           batchCurrentComponentId,
           sessionStatusFromInput,
@@ -359,12 +362,12 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       let toUpdateMenteeSession = false;
       if (
         (bookingDate && bookingDateFromInput && bookingDate.getTime() !== bookingDateFromInputParsed.getTime())
-        || (get(slotTimeArray, '0') !== get(inputSlotTimeArray, '0'))
+        || ((slotTimeArray.length > 0 && inputSlotTimeArray.length > 0) && get(slotTimeArray, '0') !== get(inputSlotTimeArray, '0'))
       ) {
         toUpdateMenteeSession = true;
       }
-
-      if ((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || newStudentsArray.length > 0) {
+      if (((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || newStudentsArray.length > 0)
+        && !get(context, 'fromAddBatchSession', false)) {
         // eslint-disable-next-line no-restricted-syntax
         for (const student of students) {
           if (student.user && student.user.id) {

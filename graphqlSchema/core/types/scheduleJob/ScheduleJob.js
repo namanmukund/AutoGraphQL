@@ -19,6 +19,9 @@ const ScheduleJob = `
     sessionLink: String
     mentorUserId: String
     mentorPhoneNumber: String
+    eventId: String
+    eventSessionId: String
+    eventCommsRule: EventCommsRule
 }`;
 
 export default [ScheduleJob];

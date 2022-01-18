@@ -29,10 +29,8 @@ import { createStaticAppToken } from '../../auth';
 import deleteTopicValidation from './preHookFunctions/validation/deleteTopicValidation';
 import deleteLearningObjectiveValidation from './preHookFunctions/validation/deleteLearningObjectiveValidation';
 import deleteQuestionBankValidation from './preHookFunctions/validation/deleteQuestionBankValidation';
-import addUserCurrentTopicComponentStatusValidation
-  from './preHookFunctions/validation/addUserCurrentTopicComponentStatusValidation';
-import updateUserCurrentTopicComponentStatusValidation
-  from './preHookFunctions/validation/updateUserCurrentTopicComponentStatusValidation';
+import addUserCurrentTopicComponentStatusValidation from './preHookFunctions/validation/addUserCurrentTopicComponentStatusValidation';
+import updateUserCurrentTopicComponentStatusValidation from './preHookFunctions/validation/updateUserCurrentTopicComponentStatusValidation';
 import userCourseSyllabusMethod from './preHookFunctions/userCourseSyllabusMethod';
 import addUserActivityVideoDumpValidation from './preHookFunctions/validation/addUserActivityVideoDumpValidation';
 import addUserActivityChatDumpValidation from './preHookFunctions/validation/addUserActivityChatDumpValidation';
@@ -43,8 +41,7 @@ import userLearningObjectiveValidation from './preHookFunctions/validation/userL
 import userQuizValidation from './preHookFunctions/validation/userQuizValidation';
 import { addLearningObjectiveValidation } from './preHookFunctions/validation';
 import userAssignmentValidation from './preHookFunctions/validation/userAssignmentValidation';
-import addUserActivityAssignmentDumpValidation
-  from './preHookFunctions/validation/addUserActivityAssignmentDumpValidation';
+import addUserActivityAssignmentDumpValidation from './preHookFunctions/validation/addUserActivityAssignmentDumpValidation';
 import addMenteeSessionValidation from './preHookFunctions/validation/addMenteeSessionValidation';
 import updateMenteeSessionValidation from './preHookFunctions/validation/updateMenteeSessionValidation';
 import addMentorSessionValidation from './preHookFunctions/validation/addMentorSessionValidation';
@@ -88,8 +85,7 @@ import addUserActivityComicStripDumpValidation from './preHookFunctions/validati
 import userBlockBasedPracticeValidation from './preHookFunctions/validation/userBlockBasedPracticeValidation';
 import userBlockBasedProjectValidation from './preHookFunctions/validation/userBlockBasedProjectValidation';
 import addUserActivityBlockBasedProjectDumpValidation from './preHookFunctions/validation/addUserActivityBlockBasedProjectDumpValidation';
-import addUserActivityBlockBasedPracticeDumpValidation
-  from './preHookFunctions/validation/addUserActivityBlockBasedPracticeDumpValidation';
+import addUserActivityBlockBasedPracticeDumpValidation from './preHookFunctions/validation/addUserActivityBlockBasedPracticeDumpValidation';
 import addMentorProfileValidation from './preHookFunctions/validation/addMentorProfileValidation';
 import deleteMentorMenteeSessionValidation from './preHookFunctions/validation/deleteMentorMenteeSessionValidation';
 import addAuditQuestionValidation from './preHookFunctions/validation/addAuditQuestionValidation';
@@ -120,6 +116,12 @@ import updateFileValidation from './preHookFunctions/validation/updateFileValida
 import addLeadPartnerValidation from './preHookFunctions/validation/addLeadPartnerValidation';
 import updateLeadPartnerValidation from './preHookFunctions/validation/updateLeadPartnerValidation';
 import addSenseiProfileValidation from './preHookFunctions/validation/addSenseiProfileValidation';
+import addEventCategoryValidation from './preHookFunctions/validation/addEventCategoryValidation';
+import addContentTagValidation from './preHookFunctions/validation/addContentTagValidation';
+import addEventSpeakerProfileValidation from './preHookFunctions/validation/addEventSpeakerProfileValidation';
+import addCommsVariableValidation from './preHookFunctions/validation/addCommsVariableValidation';
+import updateEventValidation from './preHookFunctions/validation/updateEventValidation';
+import addWeekDayForOneDayEvent from './preHookFunctions/validation/utils/addWeekDayForOneDayEvent';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -911,8 +913,33 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await addSenseiProfileValidation(params, mutationOrQueryName, context);
       break;
     }
+    case 'addEventSpeakerProfile': {
+      await addEventSpeakerProfileValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addCommsVariable': {
+      await addCommsVariableValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addEventCategory': {
+      await addEventCategoryValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addContentTag': {
+      await addContentTagValidation(params, mutationOrQueryName, context);
+      break;
+    }
     case 'addSchool': {
       return hook({ ...input, schoolCampaignCode: generateInviteCode(8) }, mutationOrQueryName, 'PreHook');
+    }
+    case 'addEvent': {
+      addWeekDayForOneDayEvent(params);
+      break;
+    }
+    case 'updateEvent': {
+      addWeekDayForOneDayEvent(params);
+      await updateEventValidation(params, input, mutationOrQueryName, context);
+      break;
     }
     default: {
       /* If context is not present then it means user is not authenticated and the
