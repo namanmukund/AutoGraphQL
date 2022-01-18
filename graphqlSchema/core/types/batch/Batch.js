@@ -44,6 +44,7 @@ const Batch = `
     school: School @relation(name: "BatchSchool", direction: "OneWay")
     timeTableRule: BatchTimeTableRule
     b2b2ctimeTable: B2b2cTimeTable
+    customSessionLink: String
   }
 `;
 

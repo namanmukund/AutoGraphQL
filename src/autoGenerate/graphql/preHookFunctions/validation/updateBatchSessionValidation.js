@@ -7,7 +7,7 @@ import {
   MissingMandatoryInputInRequestError,
 } from '../../../../../constants/errors/input';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
-import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, sessionStatus } from '../../../../../constants';
+import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, sessionStatus, TMS } from '../../../../../constants';
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorSessions from '../../../utils/getMentorSessions';
@@ -168,6 +168,12 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   // if session is complete and user is trying to change the status then throw error
   if (prevSessionStatus === sessionStatus.completed && sessionStatusInInput && sessionStatusInInput !== sessionStatus.completed) {
     throw new CanNotChangeSessionStatusError();
+  }
+  if (get(currentApp, 'name') === TMS && sessionStatusInInput === 'started'
+    && get(batch, 'type') === 'b2b' && get(batch, 'customSessionLink')) {
+    Object.assign(params.input, {
+      sessionJoinedByMentorAt: new Date().toISOString(),
+    });
   }
 
   context.prevIsAudit = get(batchSession, 'isAudit', false);
