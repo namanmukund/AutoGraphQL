@@ -683,8 +683,9 @@ const typeformWebhookController = async (req, res) => {
         case EVENTS.STORYSPREE.rsRegiformId:
           country = 'india';
           timezone = 'Asia/Kolkata';
-          utmSource = 'radiostreet';
+          utmSource = 'events';
           utmCampaign = 'storyspree';
+          utmTerm = '23rdJan2022';
           doGenerateCertificate = false;
           break;
         case EVENTS.GENZENVIRONMENT.registrationFormId:
