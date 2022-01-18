@@ -38,6 +38,8 @@ const getBatchSessions = async () => {
         batch {
           school {
             code
+            isWhatsAppCommsEnabled
+            isEmailCommsEnabled
           }
           students{
             user {
@@ -123,6 +125,8 @@ const scheduleB2BSessionHomeworkRemainder = async () => {
       const courseId = get(batchSession, 'batch.courses[0].id');
       const students = get(batchSession, 'batch.students');
       const schoolCode = get(batchSession, 'batch.school.code');
+      const isWhatsAppCommsEnabled = get(batchSession, 'batch.school.isWhatsAppCommsEnabled', false);
+      const isEmailCommsEnabled = get(batchSession, 'batch.school.isEmailCommsEnabled', false);
       const homeworkLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/homework` : `${process.env.TEKIE_WEB_URL}/homework`;
       const revisitLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/sessions` : `${process.env.TEKIE_WEB_URL}/sessions`;
       students.forEach(async (student) => {
@@ -133,43 +137,47 @@ const scheduleB2BSessionHomeworkRemainder = async () => {
         const parentPhone = get(student, 'user.parentProfile.user.phone.countryCode', '+91').split('+')[1] + get(student, 'user.parentProfile.user.phone.number');
         const hasStudentSubmittedHomework = await isHomeworkSubmitted(topicId, courseId, sessionDate, studentId);
         if (!hasStudentSubmittedHomework) {
-          sendWhatsAppTemplateMessage(
-            parentPhone,
-            'b2b_homework_reminder_24hrs',
-            parentPhone,
-            [
+          if (isWhatsAppCommsEnabled) {
+            sendWhatsAppTemplateMessage(
+              parentPhone,
+              'b2b_homework_reminder_24hrs',
+              parentPhone,
+              [
+                {
+                  name: 'parent_name',
+                  value: parentName,
+                },
+                {
+                  name: 'student_name',
+                  value: studentName,
+                },
+                {
+                  name: 'session_date',
+                  value: date,
+                },
+                {
+                  name: 'session_time',
+                  value: startTime,
+                },
+                {
+                  name: 'homework_link',
+                  value: homeworkLink,
+                },
+                {
+                  name: 'revisit_link',
+                  value: revisitLink,
+                },
+              ],
+            );
+          }
+          if (isEmailCommsEnabled) {
+            sendSessionRemainderMail(
+              parentEmail,
               {
-                name: 'parent_name',
-                value: parentName,
+                parentName, studentName, date, startTime, homeworkLink,
               },
-              {
-                name: 'student_name',
-                value: studentName,
-              },
-              {
-                name: 'session_date',
-                value: date,
-              },
-              {
-                name: 'session_time',
-                value: startTime,
-              },
-              {
-                name: 'homework_link',
-                value: homeworkLink,
-              },
-              {
-                name: 'revisit_link',
-                value: revisitLink,
-              },
-            ],
-          );
-          sendSessionRemainderMail(
-            parentEmail,
-            {
-              parentName, studentName, date, startTime, homeworkLink,
-            },
-          );
+            );
+          }
         }
       });
     }

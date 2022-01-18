@@ -17,6 +17,8 @@ const getBatchAttendanceDetails = async (batchSessionId) => {
     batch {
       school {
         code
+        isWhatsAppCommsEnabled
+        isEmailCommsEnabled
       }
       allottedMentor {
         mentorProfile {
@@ -70,6 +72,8 @@ const scheduleB2BSessionMissed = async (input, params, mutationName, context) =>
   const date = moment(get(batchDetails, 'sessionStartDate')).format('D/MM/YY');
   const startTime = moment(get(batchDetails, 'sessionStartDate')).format('HH:mm a');
   const schoolCode = get(batchDetails, 'batch.school.code');
+  const isWhatsAppCommsEnabled = get(batchDetails, 'batch.school.isWhatsAppCommsEnabled', false);
+  const isEmailCommsEnabled = get(batchDetails, 'batch.school.isEmailCommsEnabled', false);
   const revisitLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/sessions` : `${process.env.TEKIE_WEB_URL}/sessions`;
   const nonAttendes = get(batchDetails, 'attendance', []).filter((attendee) => attendee.status === 'absent');
   nonAttendes.forEach(async (attendee) => {
@@ -77,45 +81,49 @@ const scheduleB2BSessionMissed = async (input, params, mutationName, context) =>
     const parentName = get(attendee, 'student.user.parentProfile.user.name');
     const parentEmail = get(attendee, 'student.user.parentProfile.user.email');
     const parentPhone = get(attendee, 'student.user.parentProfile.user.phone.countryCode').split('+')[1] + get(attendee, 'student.user.parentProfile.user.phone.number');
-    sendWhatsAppTemplateMessage(
-      parentPhone,
-      'b2b2_missed_session_update',
-      parentPhone,
-      [
+    if (isWhatsAppCommsEnabled) {
+      sendWhatsAppTemplateMessage(
+        parentPhone,
+        'b2b2_missed_session_update',
+        parentPhone,
+        [
+          {
+            name: 'parent_name',
+            value: parentName,
+          },
+          {
+            name: 'topic_title',
+            value: topicTitle,
+          },
+          {
+            name: 'revisit_link',
+            value: revisitLink,
+          },
+          {
+            name: 'student_name',
+            value: studentName,
+          },
+          {
+            name: 'session_date',
+            value: date,
+          },
+          {
+            name: 'session_time',
+            value: startTime,
+          },
+        ],
+      );
+    }
+    if (isEmailCommsEnabled) {
+      sendSessionAttendenceMail(
+        parentEmail,
+        'B2BAbsent',
         {
-          name: 'parent_name',
-          value: parentName,
+          parentName, topicTitle, sessionTopicLink, studentName, date, startTime,
         },
-        {
-          name: 'topic_title',
-          value: topicTitle,
-        },
-        {
-          name: 'revisit_link',
-          value: revisitLink,
-        },
-        {
-          name: 'student_name',
-          value: studentName,
-        },
-        {
-          name: 'session_date',
-          value: date,
-        },
-        {
-          name: 'session_time',
-          value: startTime,
-        },
-      ],
-    );
-    sendSessionAttendenceMail(
-      parentEmail,
-      'B2BAbsent',
-      {
-        parentName, topicTitle, sessionTopicLink, studentName, date, startTime,
-      },
-      'Tekie - You missed today\'s coding session!',
-    );
+        'Tekie - You missed today\'s coding session!',
+      );
+    }
   });
 };
 
