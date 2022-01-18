@@ -67,7 +67,7 @@ const getBatchSessions = async () => {
   return { batchSessions, sessionDate };
 };
 const isHomeworkSubmitted = async (topicId, courseId, sessionStartDate, userId) => {
-  const sessionEndDate = new Date(sessionDate).setHours(23, 59, 59, 999);
+  const sessionEndDate = new Date(sessionStartDate).setHours(23, 59, 59, 999);
   const parsedSessionEndDate = new Date(sessionEndDate).toISOString();
   const query = `
     query{
@@ -113,25 +113,26 @@ const sendSessionRemainderMail = (email, sendEmailObject) => {
   });
 };
 const scheduleB2BSessionHomeworkRemainder = async () => {
-  const { batchSessions, sessionDate } = getBatchSessions();
+  const { batchSessions, sessionDate } = await getBatchSessions();
   if (batchSessions && batchSessions.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const batchSession of batchSessions) {
       const date = moment(get(batchSession, 'sessionStartDate')).format('D/MM/YY');
       const startTime = moment(get(batchSession, 'sessionStartDate')).format('HH:mm a');
       const topicId = get(batchSession, 'batch.topic.id');
-      const courseId = get(batchSession, 'batch.courses')[0].id;
+      const courseId = get(batchSession, 'batch.courses[0].id');
       const students = get(batchSession, 'batch.students');
       const schoolCode = get(batchSession, 'batch.school.code');
       const homeworkLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/homework` : `${process.env.TEKIE_WEB_URL}/homework`;
       const revisitLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/sessions` : `${process.env.TEKIE_WEB_URL}/sessions`;
-      students.forEach((student) => {
-        const studentName = get(student, 'user.studentProfile.user.name');
-        const parentName = get(student, 'user.parentProfile.user.name');
-        const studentId = get(student, 'user.studentProfile.user.id');
-        const parentEmail = get(student, 'user.parentProfile.user.email');
-        const parentPhone = get(student, 'user.parentProfile.user.phone.countryCode').split('+')[1] + get(student, 'user.parentProfile.user.phone.number');
-        if (isHomeworkSubmitted(topicId, courseId, sessionDate, studentId)) {
+      students.forEach(async (student) => {
+        const studentName = get(student, 'user.studentProfile.user.name', '');
+        const parentName = get(student, 'user.parentProfile.user.name', '-');
+        const studentId = get(student, 'user.studentProfile.user.id', '');
+        const parentEmail = get(student, 'user.parentProfile.user.email', '');
+        const parentPhone = get(student, 'user.parentProfile.user.phone.countryCode', '+91').split('+')[1] + get(student, 'user.parentProfile.user.phone.number');
+        const hasStudentSubmittedHomework = await isHomeworkSubmitted(topicId, courseId, sessionDate, studentId);
+        if (!hasStudentSubmittedHomework) {
           sendWhatsAppTemplateMessage(
             parentPhone,
             'b2b_homework_reminder_24hrs',
