@@ -42,3 +42,7 @@ export const SubscriptionKeyNotDefinedError = createError('SubscriptionKeyNotDef
 export const InvalidSubscriptionKeyError = createError('InvalidSubscriptionKeyError', {
   message: 'Subscription Key Must Be An Array!',
 });
+
+export const CommsError = createError('CommsError', {
+  message: 'Comms failed to send',
+});

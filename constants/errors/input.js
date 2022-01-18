@@ -215,3 +215,7 @@ export const EitherPhoneOrEmailIsMandatory = createError('EitherPhoneOrEmailIsMa
 export const GradeFieldRequiredError = createError('GradeFieldRequiredError', {
   message: 'Grade field is mandatory in input',
 });
+
+export const EmailFieldRequiredError = createError('EmailFieldRequiredError', {
+  message: 'Email field is mandatory in input',
+});

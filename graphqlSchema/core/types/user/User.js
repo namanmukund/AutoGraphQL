@@ -66,7 +66,7 @@ const User = `
     utmContent: String
     utmMedium: String
     source: UserOriginSource @defaultValue(value: "website")
-    ${affilateInfo}  
+    ${affilateInfo}
     ${socialInfo}
     ${promotionalInfo}
     verificationStatus: VerificationStatus @defaultValue(value: "unverified")
@@ -79,6 +79,7 @@ const User = `
     resetPasswordFromLink: Boolean @defaultValue(value: "false")
     senseiProfile: SenseiProfile @relation(name:"SenseiProfileUser", isSubset: true)
     lastActive: Date
+    eventSpeakerProfile: EventSpeakerProfile @relation(name: "EventSpeakerProfileUser",  isSubset: true)
   }
 `;
 
