@@ -303,8 +303,6 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         We are getting published topics list through this query.
         Then we will get next published topic
         */
-        // eslint-disable-next-line no-console
-        console.log('i am here, batch session completed');
         scheduleB2BSessionMissed(input, params, mutationName, context);
         const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
         const topicsList = get(nextTopicQueryRes, 'data.topics');
