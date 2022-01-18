@@ -300,3 +300,7 @@ export const UserWithSimilarNumberAlreadyExist = createError('UserWithSimilarNum
 export const UserWithSimilarEmailAlreadyExist = createError('UserWithSimilarEmailAlreadyExist', {
   message: 'User with similar email already exist.',
 });
+
+export const CurrentChildIsMentorChild = createError('CurrentChildIsMentorChild', {
+  message: 'Current child is a mentor child',
+});

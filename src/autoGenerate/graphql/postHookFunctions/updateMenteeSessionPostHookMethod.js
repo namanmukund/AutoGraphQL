@@ -81,6 +81,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const { appName } = context;
   const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
   const isBookedByMentee = get(context, 'userIdFromContext') === get(input, 'user.typeId');
+  const isItMentorChild = await isMentorChild(get(userInfo, 'data.user.id', ''));
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
   const task = get(await callLocalGraphqlApi(fetchTasks(menteeSessionId)), 'data.tasks[0]');
   // if call is from backend we will not update the availability slots, same for paid sessions
@@ -213,7 +214,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
       updateUserBookingAgent(menteeSessionId, get(context, 'userIdFromContext'), bookingDate, get(slotTimeStringArray, '0'));
     }
 
-    if (!isMentorChild(get(userInfo, 'data.user.id', ''))) {
+    if (!isItMentorChild) {
     // update booking time on leadsquared
       rescheduleMenteeBookingLeadsquared(input, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, get(context, 'userIdFromContext'));
     }
