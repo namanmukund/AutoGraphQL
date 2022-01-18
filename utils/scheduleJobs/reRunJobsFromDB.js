@@ -11,6 +11,7 @@ import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
 import sendEventRemainderComms from './jobs/sendEventRemainderComms';
 import sendEventComms from './jobs/sendEventComms';
+import sendEventCommunication from './jobs/sendEventCommunication';
 
 const FETCH_JOBS = `{
   scheduleJobs {
@@ -35,7 +36,14 @@ const FETCH_JOBS = `{
     mentorUserId
     mentorPhoneNumber
     eventId
-    eventSessionId
+    eventCommsRule {
+      templateName: String!
+      commsVariables: [CommsVariableType]
+      condition: DateCondition
+      attendanceFilter: AttendanceFilter
+      unit
+      value
+    }
   }
 }`;
 
@@ -72,6 +80,7 @@ const reRunJobsFromDB = async () => {
       mentorPhoneNumber,
       eventId,
       eventSessionId,
+      eventCommsRule,
     } = scheduledJob;
     const deleteJob = () => callLocalGraphqlApi(deleteJobQuery(id));
     const isPast = moment().isAfter(scheduledDate);
@@ -207,6 +216,12 @@ const reRunJobsFromDB = async () => {
       case 'eventComms': {
         schedule.scheduleJob(new Date(scheduledDate), () => {
           sendEventComms({ eventId, jobType }, deleteJob);
+        });
+        break;
+      }
+      case 'eventCommsJob': {
+        schedule.scheduleJob(new Date(scheduledDate), () => {
+          sendEventCommunication({ eventId, jobType, eventCommsRule }, deleteJob);
         });
         break;
       }

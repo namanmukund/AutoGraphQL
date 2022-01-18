@@ -27,6 +27,8 @@ import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/p
 //   sessionLink,
 //   mentorUserId,
 //   mentorPhoneNumber,
+//   eventId,
+//   eventCommsRule,
 // }) => `
 //   mutation {
 //     addScheduleJob(
@@ -47,6 +49,8 @@ import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/p
 //         ${mentorUserId ? `mentorUserId: "${mentorUserId}"` : ''}
 //         ${mentorPhoneNumber ? `mentorPhoneNumber: "${mentorPhoneNumber}"` : ''}
 //         scheduledDate: "${scheduledDate.toISOString()}"
+//         ${eventId ? `eventId: "${eventId}"` : ''}
+//         ${eventCommsRule ? `eventCommsRule: "${eventCommsRule}"` : ''}
 //       }
 //       ${userId ? `parentConnectId: "${userId}"` : ''}
 //     ) {
@@ -78,6 +82,8 @@ const addToSchedule = async (jobType, scheduledDate, {
   // sessionLink,
   // mentorUserId,
   // mentorPhoneNumber,
+  // eventId,
+  // eventCommsRule,
 }) => {
   switch (jobType) {
     case 'sendNextDayBookReminder': {
@@ -260,6 +266,18 @@ const addToSchedule = async (jobType, scheduledDate, {
       //     sessionLink,
       //     mentorUserId,
       //     mentorPhoneNumber,
+      //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
+      break;
+    }
+    case 'eventCommsJob': {
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, eventId, scheduledDate, eventCommsRule
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendEventCommunication({
+      //     eventId, eventCommsRule, jobType,
       //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
       // });
       break;
