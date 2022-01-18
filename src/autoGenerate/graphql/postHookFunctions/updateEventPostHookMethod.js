@@ -37,7 +37,7 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
   }
   if (eventStatus === 'published' || isEventRescheduled) {
     for (const eventCommsRule of eventCommsRules) {
-      if (!get(eventCommsRule, 'isSend')) {
+      if (!get(eventCommsRule, 'isSend') && get(eventCommsRule, 'condition') !== 'afterRegistration') {
         const dateCondition = get(eventCommsRule, 'condition', null);
         switch (dateCondition) {
           case 'before': {
