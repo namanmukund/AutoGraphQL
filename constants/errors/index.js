@@ -9,6 +9,7 @@ import {
   MandatoryFieldNotSetError,
   InvalidToken,
   SomethingWentWrongError,
+  ResetPasswordLinkExpired,
 } from './auth';
 
 import {
@@ -71,11 +72,16 @@ import {
   ProjectWithSimilarOrderAlreadyExist,
   VideoWithSimilarTitleAlreadyExist,
   LOWithSimilarTitleAlreadyExist,
+  BatchMustHaveAtleastOneSession,
+  SessionMustBeCompletedError,
   NotBroadcastedMentor,
   LateToAcceptRequest,
   SlotAlreadyOpened,
   SlotAlreadyFilled,
   SessionAlreadyAssigned,
+  FileNameAlreadyExists,
+  LeadPartnerWithSimilarTitleAlreadyExist,
+  SenseiProfileAlreadyExist,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -96,7 +102,7 @@ import {
 import {
   InvalidWriteAccessError, InvalidReadAccessError, InvalidActionOnDefaultFieldsError,
   UnauthorizedOperationError, BlockedOperationError, PermissionDeniedError,
-  UserRolesNotFoundError,
+  UserRolesNotFoundError, PhoneOtpMaxRetryTimeLimitError, PhoneOtpPerDayLimitError,
 } from './permissions';
 
 import {
@@ -133,6 +139,7 @@ import {
   InvalidBannerDateRangeError,
   BannerFieldRequiredError,
   CanNotDeleteCompletedSessionError,
+  CanNotStartSessionWithoutMentorError,
 } from './input';
 
 // assessment validation sqs  profile apolloErrorPackageTest maxSync transcoder
@@ -286,9 +293,18 @@ export {
   ProjectWithSimilarOrderAlreadyExist,
   VideoWithSimilarTitleAlreadyExist,
   LOWithSimilarTitleAlreadyExist,
+  BatchMustHaveAtleastOneSession,
+  SessionMustBeCompletedError,
   NotBroadcastedMentor,
   LateToAcceptRequest,
   SlotAlreadyOpened,
   SlotAlreadyFilled,
   SessionAlreadyAssigned,
+  CanNotStartSessionWithoutMentorError,
+  FileNameAlreadyExists,
+  ResetPasswordLinkExpired,
+  LeadPartnerWithSimilarTitleAlreadyExist,
+  SenseiProfileAlreadyExist,
+  PhoneOtpMaxRetryTimeLimitError,
+  PhoneOtpPerDayLimitError,
 };

@@ -105,6 +105,9 @@ const SessionLog = `
     isBroadCastedSession: Boolean @defaultValue(value: "false")
     mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name:"MentorAvailabilitySlotSessionLog", direction: "OneWay")
     broadCastedMentors: [MentorProfile] @relation(name:"BroadcastedMentorsSessionLog", direction: "OneWay")
+    isManualSession: Boolean @defaultValue(value: "false")
+    verificationStatus: VerificationStatus @defaultValue(value: "unverified")
+    verifiedBy: User @relation(name: "SessionLogVerifiedBy", direction: "OneWay")
   }
 `;
 

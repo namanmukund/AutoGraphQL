@@ -21,6 +21,7 @@ import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOpera
 import sendMailAndWhatsappMessageForSupplyRequest from '../../utils/sendMailAndWhatsappMessageForSupplyRequest';
 import getCourseInfo from './utils/getCourseInfo';
 import getSlotLabel from '../../../../utils/getSlotLabel';
+import { log } from '../../../../utils';
 
 const updateMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   const {
@@ -159,6 +160,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     updateMentorMenteeSessionInput.hasRescheduled = get(mentorMenteeSessionDoc, 'hasRescheduled', false);
     updateMentorMenteeSessionInput.rescheduledDate = get(mentorMenteeSessionDoc, 'rescheduledDate', false);
     updateMentorMenteeSessionInput.rescheduledDateProvided = get(mentorMenteeSessionDoc, 'rescheduledDateProvided', null);
+    log(`-----------Deleting MentorMenteeSession (updateMenteeSessionPostHook) -> ${context.mmsId}`);
     await deleteMentorMenteeSessionQuery(context.mmsId, context);
   }
 
@@ -173,7 +175,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     const clientId = get(userInfo, 'data.user.id', '');
     const topicId = get(topicInfo, 'data.topic.id', '');
     const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
-    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMenteeSession', batchCode, '', '', updateMentorMenteeSessionInput);
+    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMenteeSession', batchCode, '', '', updateMentorMenteeSessionInput, get(context, 'isManualSession', false));
   }
 };
 

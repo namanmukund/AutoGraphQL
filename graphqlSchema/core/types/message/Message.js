@@ -30,6 +30,7 @@ const Message = `
     question: QuestionBank @relation(name: "QuestionBankMessage", direction: "OneWay")
     terminalInput: String @trim
     terminalOutput: String @trim
+    editorMode: EditorMode
     alignment: MessageAlignmentType!
   }
 `;

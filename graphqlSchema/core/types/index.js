@@ -67,6 +67,7 @@ import MentorReport from './mentorReport';
 import Batch from './batch';
 import BatchCurrentComponentStatus from './batchCurrentComponentStatus';
 import BatchSession from './batchSession';
+import AdhocSession from './adhocSession';
 import UserLocationLog from './userLocationLog';
 import MentorMenteeSessionAudit from './mentorMenteeSessionAudit';
 import MentorMenteeSessionTimestamp from './mentorMenteeSessionTimestamp';
@@ -124,8 +125,10 @@ import GetUserCourses from './getUserCourses';
 import UserMerchant from './userMerchant';
 import MentorSupplyPaySlab from './mentorSupplyPaySlab';
 import MentorDemandSlot from './mentorDemandSlot';
+import MentorDemandSingleSlot from './mentorDemandSingleSlot';
 import MentorAvailabilitySlot from './mentorAvailabilitySlot';
 import MentorAuditReport from './mentorAuditReport';
+import ShiftBatchSessionsInput from './shiftBatchSessionsInput';
 import EventCertificate from './eventCertificate';
 import QuestionBankImage from './questionBankImage';
 import SessionGradeReport from './sessionGradeReport';
@@ -133,6 +136,17 @@ import AcceptedSlotRequestByMentorLog from './acceptedSlotRequestByMentorLog';
 import SessionCourseReport from './sessionCourseReport';
 import GetEventCertificate from './getEventCertificate';
 import Event from './event';
+import UtmDetail from './utmDetail';
+import IqaReport from './iqaReport';
+import getMagicLink from './getMagicLink';
+import magicLinkLog from './magicLinkLog';
+import LeadPartner from './leadPartner';
+import DemoWowAudit from './demoWowAudits';
+import SenseiProfile from './senseiProfile';
+import SenseiMentorTeam from './senseiMentorTeam';
+import Notification from './notification';
+import Task from './task';
+import UserOtpLog from './userOtpLog';
 
 export default [
   ...User,
@@ -204,6 +218,7 @@ export default [
   ...Batch,
   ...BatchCurrentComponentStatus,
   ...BatchSession,
+  ...AdhocSession,
   ...UserLocationLog,
   ...MentorMenteeSessionAudit,
   ...MentorMenteeSessionTimestamp,
@@ -258,8 +273,10 @@ export default [
   ...UserMerchant,
   ...MentorSupplyPaySlab,
   ...MentorDemandSlot,
+  ...MentorDemandSingleSlot,
   ...MentorAvailabilitySlot,
   ...MentorAuditReport,
+  ...ShiftBatchSessionsInput,
   ...sendJourneySnapshotInMailInput,
   ...sendCertificateInMailInput,
   ...GenerateCertificate,
@@ -270,4 +287,15 @@ export default [
   ...SessionCourseReport,
   ...GetEventCertificate,
   ...Event,
+  ...UtmDetail,
+  ...IqaReport,
+  ...getMagicLink,
+  ...magicLinkLog,
+  ...LeadPartner,
+  ...DemoWowAudit,
+  ...SenseiProfile,
+  ...SenseiMentorTeam,
+  ...Notification,
+  ...Task,
+  ...UserOtpLog,
 ];

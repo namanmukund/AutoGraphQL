@@ -29,6 +29,15 @@ const topicQuery = (courseId) => `
         learningObjective{
           id
           order
+          messagesMeta{
+            count
+          }
+          questionBankMeta(filter:{and:[{assessmentType:practiceQuestion}{status:${PUBLISHED}}]}){
+            count
+          }
+          comicStripsMeta(filter:{status:${PUBLISHED}}){
+            count
+          }
         }
         blockBasedProject{
           id

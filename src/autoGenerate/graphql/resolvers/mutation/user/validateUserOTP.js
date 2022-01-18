@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import {
+  BlockedOperationError,
   DatabaseRecordNotFoundError,
   OTPMismatchError, SendOtpFirstError,
   UserTokenNotRequiredError,
@@ -17,6 +18,7 @@ import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import getTimeDifferenceWithCurrentDateInSeconds
   from '../../../../../../utils/getTimeDifferenceWithCurrentDateInSeconds';
 import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
+import { BLOCKED, MASTER_OTP } from '../../../../../../constants';
 
 const USER_TYPE = 'User';
 const validateUserOTPMutationPromise = (
@@ -63,6 +65,10 @@ const validateUserOTPMutationResolver = async (
     throw new DatabaseRecordNotFoundError();
   }
 
+  if (get(userData, 'status') === BLOCKED) {
+    throw new BlockedOperationError();
+  }
+
   const {
     id,
     phoneOtpCreationDate,
@@ -88,7 +94,7 @@ const validateUserOTPMutationResolver = async (
       const phoneNumber = countryCode + number;
       const businessPartnerDemoNumber = '+918827706789';
 
-      if (!(phoneOtp === 3007 || (phoneOtp === 7777 && phoneNumber === businessPartnerDemoNumber))) {
+      if (!(phoneOtp === MASTER_OTP || (phoneOtp === 7777 && phoneNumber === businessPartnerDemoNumber))) {
         if (userData.phoneOtp !== phoneOtp) {
           throw new OTPMismatchError();
         }

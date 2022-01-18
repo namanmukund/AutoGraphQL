@@ -8,9 +8,12 @@ import getMenteeInfo from './utils/getMenteeInfo';
 import updateUserBookingAgent from './utils/updateUserBookingAgent';
 import getTopicInfo from './utils/getTopicInfo';
 import { byPassMenteeValidationApps, sessionType, userSourceOrigin } from '../../../../constants';
+import { LEAD_PARTNER } from '../../../../constants/roles';
 import addSessionLog from './utils/addSessionLog';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import updateMenteeSessionQuery from './utils/updateMenteeSessionQuery';
+import sendWhatsappMessageForBookingConfirmedByLeadParnter from './utils/sendWhatsappMessageForBookingConfirmedByLeadPartner';
+// import createTaskAndAssignAvailableMentor from './utils/createTaskAndAssignAvailableMentor';
 
 const getUserCourses = async (userId) => {
   const query = `
@@ -81,6 +84,9 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
       updateUserBookingAgent(menteeSessionId, get(context, 'userIdFromContext'), bookingDate, get(slotTimeStringArray, '0'));
     }
 
+    // create a Task corresponding to the new lead and auto-assign available mentor
+    // const { mentorMenteeSessionId } = await createTaskAndAssignAvailableMentor(userInfo, topicInfo, input);
+
     // update user booking on leadsquared
     if (!get(userInfo, 'data.user.studentProfile.batch.id')) {
       addMenteeBookingLeadsquared(
@@ -91,7 +97,14 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
         topicInfo,
         isBookedByMentee,
         get(context, 'userIdFromContext'),
+        null,
+        get(context, 'userRoleFromContext'),
+        // mentorMenteeSessionId,
       );
+    }
+    if (typeof isTrialSession === 'boolean' && isTrialSession && !isBookedByMentee
+      && get(context, 'userRoleFromContext') && get(context, 'userRoleFromContext') === LEAD_PARTNER) {
+      await sendWhatsappMessageForBookingConfirmedByLeadParnter(userInfo, slotTimeStringArray, bookingDate);
     }
     // udpdating the studentProfile in menteeSession
     const updateInput = {
@@ -101,7 +114,8 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
       updateInput[slot] = true;
     });
     const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
-    if (studentProfileId) updateMenteeSessionQuery(menteeSessionId, studentProfileId, updateInput);
+    const bookingAgentId = get(userInfo, 'data.user.studentProfile.bookingAgent.id');
+    if (studentProfileId) updateMenteeSessionQuery(menteeSessionId, studentProfileId, updateInput, bookingAgentId);
 
     // update session log entry
     const courseId = get(input, 'course.typeId', '');
@@ -121,7 +135,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     } else {
       callLocalGraphqlApi(addUserCourseQuery(clientId, courseId));
     }
-    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMenteeSession', batchCode, '', '');
+    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMenteeSession', batchCode, '', '', '', get(context, 'isManualSession', false));
   }
 };
 

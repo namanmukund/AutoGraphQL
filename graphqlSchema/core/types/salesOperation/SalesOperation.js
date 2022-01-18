@@ -33,6 +33,12 @@ const sessionRescheduledReasons = `
 const mentorPitch = `
     pricingPitched: Boolean
     parentCounsellingDone: Boolean
+    parentsWereInterested: Boolean
+    explainedAboutCourse: Boolean
+    discussedPerformance: Boolean
+    scheduledCounselDateFrom: Date
+    scheduledCounselDateTo: Date
+    scheduledCounselCondition: DateCondition
     courseInterestedIn: ProductType
     oneToOne: Boolean
     oneToTwo: Boolean
@@ -55,6 +61,21 @@ const studentPersonna = `
 
 const userPaymentPlan = `
   userPaymentPlan: UserPaymentPlan @relation(name: "SalesOperationUserPaymentPlan")
+`;
+
+const studentIQQuestions = `
+  criticalThinking: Int @length(min: 1, max: 5)
+  logicalThinking: Int @length(min: 1, max: 5)
+  communicationSkills: Int @length(min: 1, max: 5)
+  problemSolvingAbility: Int @length(min: 1, max: 5)
+  creativeSkills: Int @length(min: 1, max: 5)
+  studentNote: StudentNoteForIQ
+`;
+
+const iqaTag = `
+ type iqaTag {
+   value: IQATag
+ }
 `;
 
 const SalesOperation = `
@@ -88,8 +109,11 @@ ${getPermissionSchemaString('SalesOperation')}
     ${mentorPitch}
     ${studentPersonna}
     ${userPaymentPlan}
+    ${studentIQQuestions}
     sessionCommentByMentor: String
+    iqaTags: [iqaTag]
+    addedBy: User @relation(name:"SalesOperationAddedBy", direction: "OneWay")
   }
 `;
 
-export default SalesOperation;
+export default [SalesOperation, iqaTag];

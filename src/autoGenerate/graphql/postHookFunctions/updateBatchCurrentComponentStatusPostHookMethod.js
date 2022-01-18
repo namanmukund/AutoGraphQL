@@ -88,9 +88,10 @@ const updateBatchCurrentComponentStatusPostHookMethod = async (input, params, mu
       for (const student of studentsList) {
         // eslint-disable-next-line no-restricted-syntax
         for (const topic of topicsList) {
-          if (student.user && student.user.id && topic && topic.id) {
+          if (student.user && student.user.id && topic && topic.id && get(context, 'shouldUpdateMentorMentee', true)) {
             // eslint-disable-next-line no-await-in-loop
             await addMentorMenteeSessionForBatch(
+              context,
               student.user.id,
               mentorId,
               topic.id,

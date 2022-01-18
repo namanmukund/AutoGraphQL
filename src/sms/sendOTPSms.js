@@ -7,8 +7,8 @@ const client = require('twilio')(twilioConfig.accountSid, twilioConfig.authToken
 
 const env = process.env.NODE_ENV || 'development';
 const sendOTPSms = (receiverNumber, phoneOtp, name) => {
-  if (env === 'test' || env === 'testBackend' || env === 'staging') {
-    log(`sendOTPSms method called in ${env} environment`);
+  log(`sendOTPSms method called in ${env} environment`);
+  if (env === 'test' || env === 'testBackend' || env === 'staging' || env === 'development') {
     return null;
   }
   // eslint-disable-next-line no-param-reassign
@@ -18,7 +18,6 @@ const sendOTPSms = (receiverNumber, phoneOtp, name) => {
   const body = name
     ? bodyBeforeName + name + bodyAfterName + phoneOtp
     : bodyBeforeIfNoName + bodyAfterName + phoneOtp;
-
   return client.messages
     .create({
       to: receiverNumber,

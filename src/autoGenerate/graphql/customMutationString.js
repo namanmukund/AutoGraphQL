@@ -22,8 +22,8 @@ const customMutationString = `
    getQuizReport ( input: GetQuizReportInput): GetQuizReportResult,
    menteeCourseSyllabus (courseId: ID): MenteeCourseSyllabus,
    tcirtSdrowssaPtes ( id: ID!, password: String! ): User,
-   uploadFile (fileInput: FileInput, connectInput: FileConnectInput): File! ,
-   parentChildSignUp ( schoolId: ID, campaignId: ID, input: ParentChildSignUpInput ): ParentChildToken,
+   uploadFile (fileInput: FileInput, connectInput: FileConnectInput, fileName: String): File! ,
+   parentChildSignUp ( schoolId: ID, campaignId: ID, input: ParentChildSignUpInput, bookingAgentId: ID ): ParentChildToken,
    updateParentChildDetail ( userId:ID!, schoolId: ID, input: UpdateParentChildDetailInput ): ParentChildToken,
    signUpAffiliate ( input: SignUpAffiliateInput ): UserToken,
    signUpSchool ( schoolId: ID!, input: SignUpAffiliateInput ): UserToken,
@@ -39,8 +39,12 @@ const customMutationString = `
    bookB2B2CSlots ( input: BookB2B2CSlotsInput ): BooleanResult, 
    rebookMenteeSession ( input: RebookMenteeSessionInput ): MenteeSession,
    sendCertificateInMail ( input: SendCertificateInMailInput ): BooleanResult,
+   shiftBatchSessionsAfterGivenDate ( input: ShiftBatchSessionsInput ): BooleanResult,
    sendJourneySnapshotInMail ( input: SendJourneySnapshotInMailInput ): BooleanResult,
    generateCertificate ( input: GenerateCertificateInput ) : GenerateCertificateOutput,
+   validateMagicLink ( input: ValidateMagicLinkInput  ): ParentChildToken,
+   resetPasswordAndLogin ( input: ResetPasswordAndLoginInput ): UserToken,
+   generateMentorPayoutReport ( input: MentorPayoutReportInput ): MentorPayoutReportOutput,
    `;
 
 export default customMutationString;

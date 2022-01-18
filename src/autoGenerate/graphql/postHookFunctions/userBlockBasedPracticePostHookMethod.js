@@ -34,6 +34,7 @@ const addUserBlockBasedPracticeMutation = (
         id
       }
       answerLink
+      savedBlocks
     }
     }
     `;

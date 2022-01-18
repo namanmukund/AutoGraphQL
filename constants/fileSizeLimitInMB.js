@@ -5,6 +5,8 @@ const fileSizeLimitInMB = {
   excel: 30,
   subtitle: 10,
   lottie: 1,
+  pdf: 12,
+  programFiles: 1,
 };
 
 export default fileSizeLimitInMB;

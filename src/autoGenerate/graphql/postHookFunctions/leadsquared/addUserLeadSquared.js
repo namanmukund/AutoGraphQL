@@ -5,7 +5,7 @@ const addUserLeadSquared = (params, create = true) => {
   if (get(params, 'input.Vertical') === 'b2b') {
     return;
   }
-  if (get(params, 'input.schoolName') && !get(params, 'input.Vertical') && get(params, 'input.utmSource') !== 'RadioStreet') {
+  if (get(params, 'input.schoolName') && !get(params, 'input.Vertical') && !get(params, 'input.fromEventsPage')) {
     return;
   }
 
@@ -17,9 +17,6 @@ const addUserLeadSquared = (params, create = true) => {
 
   if (get(params, 'input.grade')) {
     leadSquaredInput.mx_Student_Grade = get(params, 'input.grade').replace('Grade', '');
-  }
-  if (get(params, 'input.grade')) {
-    leadSquaredInput.mx_Student_Name = get(params, 'input.grade').replace('Grade', '');
   }
   if (get(params, 'input.parentName')) {
     leadSquaredInput.FirstName = get(params, 'input.parentName');
@@ -37,9 +34,12 @@ const addUserLeadSquared = (params, create = true) => {
   if (get(params, 'input.status')) {
     leadSquaredInput.mx_Lead_Status = get(params, 'input.status');
   }
+
   if (get(params, 'input.Vertical')) {
     leadSquaredInput.mx_Vertical = get(params, 'input.Vertical');
   } else if (!get(params, 'input.schoolName')) {
+    leadSquaredInput.mx_Vertical = 'b2c';
+  } else {
     leadSquaredInput.mx_Vertical = 'b2c';
   }
 
@@ -75,6 +75,9 @@ const addUserLeadSquared = (params, create = true) => {
   }
   if (get(params, 'input.utmMedium')) {
     leadSquaredInput.mx_utm_medium = get(params, 'input.utmMedium');
+  }
+  if (get(params, 'input.hasLaptopOrDesktop')) {
+    leadSquaredInput.mx_Laptop_Available = get(params, 'input.hasLaptopOrDesktop');
   }
   if (get(params, 'input.campaignCode')) {
     leadSquaredInput.mx_school_booking_code = get(params, 'input.campaignCode');

@@ -9,6 +9,8 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
     excel: excelSizeLimit,
     subtitle: subtitleSizeLimit,
     lottie: lottieSizeLimit,
+    pdf: pdfSizeLimit,
+    programFiles: programFilesSizeLimit,
   } = fileSizeLimitInMB;
 
   const {
@@ -18,6 +20,8 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
     excelExtensions,
     subtitleExtensions,
     lottieExtensions,
+    documentExtensions,
+    programExtensions,
   } = fileExtensions;
 
   const doc = {};
@@ -52,6 +56,15 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
       }
       break;
     }
+    case 'pdf': {
+      if (size <= (pdfSizeLimit * 1024 * 1024)) {
+        doc.isValidSize = true;
+      }
+      if (includes(documentExtensions, caseInsensitiveExt)) {
+        doc.isValidExtension = true;
+      }
+      break;
+    }
     case 'excel': {
       if (size <= (excelSizeLimit * 1024 * 1024)) {
         doc.isValidSize = true;
@@ -79,7 +92,17 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
       }
       break;
     }
-
+    case 'html':
+    case 'css':
+    case 'javascript': {
+      if (size <= (programFilesSizeLimit * 1024 * 1024)) {
+        doc.isValidSize = true;
+      }
+      if (includes(programExtensions, caseInsensitiveExt)) {
+        doc.isValidExtension = true;
+      }
+      break;
+    }
     default:
   }
   return doc;

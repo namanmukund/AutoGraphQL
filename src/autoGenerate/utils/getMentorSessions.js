@@ -10,7 +10,7 @@ const getMentorSessions = (userId, availabilityDate) => `query{
     }){
       id
       sessionType
-       mentorMenteeSessions{
+      mentorMenteeSessions{
           id
           menteeSession{
             bookingDate
@@ -18,6 +18,7 @@ const getMentorSessions = (userId, availabilityDate) => `query{
               name
               studentProfile {
                 batch {
+                  id
                   code
                 }
               }
@@ -25,17 +26,29 @@ const getMentorSessions = (userId, availabilityDate) => `query{
             ${getSlotTimesInString()}
           }
         }
-        batchSessions{
+      batchSessions{
+        id
+        batch {
           id
-          batch {
-            type
-            code
-            studentsMeta {
-              count
-            }
+          type
+          code
+          studentsMeta {
+            count
           }
-          ${getSlotTimesInString()}
         }
+        ${getSlotTimesInString()}
+      }
+      adhocSessions{
+        id
+        batch {
+          type
+          code
+          studentsMeta {
+            count
+          }
+        }
+        ${getSlotTimesInString()}
+      }
     }
   }
   `;

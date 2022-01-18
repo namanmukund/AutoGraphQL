@@ -73,7 +73,10 @@ const User = `
     isPreSalesAudit: Boolean @defaultValue(value: "false")
     bdeProfile: BDEProfile @relation(name:"BDEProfileUser", isSubset: true)
     vertical: Vertical @defaultValue(value: "unassigned")
-    events: [Event] @relation(name:"UserEvent")
+    eventAttandances: [EventAttendance] @relation(name:"EventAttendanceUser")
+    resetPasswordFromLink: Boolean @defaultValue(value: "false")
+    senseiProfile: SenseiProfile @relation(name:"SenseiProfileUser", isSubset: true)
+    lastActive: Date
   }
 `;
 

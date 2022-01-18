@@ -1,11 +1,12 @@
 import { get } from 'lodash';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
-import { CanNotChangeSessionStatusError } from '../../../../../constants/errors/input';
+import { CanNotChangeSessionStatusError, CanNotStartSessionWithoutMentorError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorSessions from '../../../utils/getMentorSessions';
-import { checkIfSlotCanBeOpenedValidation } from './utils';
+import { checkIfSlotCanBeOpenedValidation, getUserIdandAppNameAfterValidation } from './utils';
+import { TMS } from '../../../../../constants';
 
 const getMentorMenteeSessionData = async (id) => {
   const query = `
@@ -15,6 +16,8 @@ const getMentorMenteeSessionData = async (id) => {
         isAudit
         sessionStatus
         isPostSalesAudit
+        isDemoWowAudit
+        isFeedbackSubmitted
         isSubmittedForReview
         topic{
           id
@@ -78,6 +81,10 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   if (!(mentorMenteeSessionDoc && mentorMenteeSessionDoc.id)) {
     throw new DatabaseRecordNotFoundError();
   }
+  // if changing session to started or completed without mentorSession, throw error
+  if (sessionStatus && sessionStatus !== 'allotted' && !get(mentorMenteeSessionDoc, 'mentorSession.id')) {
+    throw new CanNotStartSessionWithoutMentorError();
+  }
   const { sessionStatus: prevSessionStatus } = mentorMenteeSessionDoc;
   // if session is complete and user is trying to change the status then throw error
   if (prevSessionStatus === 'completed' && sessionStatus && sessionStatus !== 'completed') {
@@ -89,12 +96,22 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
   const {
     currentUser,
   } = userInfo;
+
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+  const {
+    appName,
+  } = userAndAppInfo;
   // eslint-disable-next-line no-param-reassign
   context.previousDocument = mentorMenteeSessionDoc;
   context.menteeSessionConnectId = menteeSessionConnectId;
   context.currentUser = currentUser;
   context.mentorSessionConnectId = mentorSessionConnectId;
   context.isPostSalesAuditFromInput = isPostSalesAuditFromInput;
+  if (appName === TMS && sessionStatus === 'started') {
+    Object.assign(newParams.input, {
+      sessionStartedByMentorAt: new Date().toISOString(),
+    });
+  }
   if (menteeSessionConnectId && menteeSessionConnectId !== get(mentorMenteeSessionDoc, 'menteeSession.id')) {
     context.hasMenteeSessionChanged = true;
   }

@@ -184,6 +184,10 @@ export const CanNotChangeSessionStatusError = createError('CanNotChangeSessionSt
   message: 'Can not change the status of a completed session',
 });
 
+export const CanNotStartSessionWithoutMentorError = createError('CanNotStartSessionWithoutMentorError', {
+  message: 'Batch Session does not have a mentor assigned.',
+});
+
 export const CanNotCompleteSessionBeforeStartingError = createError('CanNotCompleteSessionBeforeStartingError', {
   message: 'Can not complete the session before starting it',
 });
@@ -202,4 +206,12 @@ export const MandatorySessionLinkError = createError('MandatorySessionLinkError'
 
 export const CanNotDeleteCompletedSessionError = createError('CanNotDeleteCompletedSessionError', {
   message: 'Can not delete a completed session',
+});
+
+export const EitherPhoneOrEmailIsMandatory = createError('EitherPhoneOrEmailIsMandatory', {
+  message: 'Either Phone or Email is mandatory',
+});
+
+export const GradeFieldRequiredError = createError('GradeFieldRequiredError', {
+  message: 'Grade field is mandatory in input',
 });

@@ -1,4 +1,9 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import uploadUsersToMailModo from '../scriptMethods/uploadUsersToMailModo';
+// import updateNetPromoterScoresWithCourseAndMmSession from '../scriptMethods/updateNetPromoterScoresWithCourseAndMmSession';
+// import updateQuestionBankOfPythonCourseWithCorrectPostion from '../scriptMethods/updateQuestionBankOfPythonCourseWithCorrectPostion';
+// import createUserCurrentTopicComponentStatusScript from '../scriptMethods/createUserCurrentTopicComponentStatusScript';
+// import generateCertificateScript from '../scriptMethods/generateCertificateScript';
 // import updateMentorAvailabilitySlotWithBatchAndMenteeSessions from '../scriptMethods/updateMentorAvailabilitySlotWIthBatchAndMenteeSessions';
 // import updateMentorAvailabilitySlotWithMentorSessions from '../scriptMethods/updateMentorAvailabilitySlotWithMentorSessions';
 // import updateMentorMenteeSessionWithStudentProfile from '../scriptMethods/updateMentorMenteeSessionWithStudentProfile';
@@ -20,12 +25,21 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateCourseInVideos from '../scriptMethods/updateCourseInVideos';
 // import removeCourseFromUserAssignments from '../scriptMethods/removeCourseFromUserAssignments';
 // import generateCertificateScript from '../scriptMethods/generateCertificateScript';
+// import eventResponsesToLeadsquaredScript from '../scriptMethods/eventResponsesToLeadsquaredScript';
+// import updateMentorMenteeSessionAuditForCompletedAudits from '../scriptMethods/updateMentorMenteeSessionAuditForCompletedAudits';
+// import getIqaReportSnapshotUrl from '../../mutation/pdf/uploadCertificates/iqaReport';
+// import getPostDemoSalesReportUrl from '../../mutation/pdf/uploadCertificates/postDemoSalesReport';
+// import scheduleSessionCourseReport from '../../../../../../utils/scheduleJobs/scheduleCourseReport';
+// import addOrUpdateUsersInBulk from '../scriptMethods/addOrUpdateUsersInBulk';
+// import updateLeadAnalyticsForPastLeads from '../scriptMethods/updateLeadAnalyticsForPastLeads';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
   /*
   Add script functions
    */
+  // await uploadUsersToMailModo();
+  // await scheduleSessionCourseReport(1);
   // await updateCourseInVideos();
   // await updateCourseInSalesOperationScript();
   // await updateSchoolCampaignCodeInSchool();
@@ -63,9 +77,16 @@ const temporaryScript = (async (root, params, context) => {
   // await removeCourseFromUserAssignments();
   // await updateMentorAvailabilitySlotWithMentorSessions();
   // await updateMentorAvailabilitySlotWithBatchAndMenteeSessions();
-  // await generateCertificateScript([
-  //     'ckgsshckl00020vqg9vd3ctpj',
-  //   ]);
+  // await generateCertificateScript();
+  // await createUserCurrentTopicComponentStatusScript();
+  // await updateQuestionBankOfPythonCourseWithCorrectPostion();
+  // await eventResponsesToLeadsquaredScript();
+  // await updateMentorMenteeSessionAuditForCompletedAudits();
+  // await getIqaReportSnapshotUrl('ckgsshcir00000vqgdftbf2f4', 'Gokul');
+  // await getPostDemoSalesReportUrl('ckgsshcir00000vqgdftbf2f4');
+  // await updateNetPromoterScoresWithCourseAndMmSession();
+  // await addOrUpdateUsersInBulk();
+  // await updateLeadAnalyticsForPastLeads();
   return {
     result: true,
   };

@@ -12,7 +12,9 @@ import { generateCuid, getRandomNumber, log } from '../../../../../../utils';
 import { MutationController, QueryController } from '../../../controllers';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import generateInviteCode from '../../../../../../utils/generateInviteCode';
-import { backendApps, rangeOTP, REGISTRATION_BASE_CREDIT } from '../../../../../../constants';
+import {
+  backendApps, rangeOTP, REGISTRATION_BASE_CREDIT, TMS,
+} from '../../../../../../constants';
 import addUserCredit from './utils/addUserCredit';
 import { SIGN_UP_BONUS } from '../../../../../../constants/userCreditReason';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
@@ -48,6 +50,33 @@ const FETCH_CAMPAIGN = (campaignId) => `{
   }
 }`;
 
+const fetchUtmAgent = async (utmSource, utmCampaign, utmTerm, utmContent, utmMedium) => {
+  const query = `{
+  leadPartnerAgents(
+    filter: {
+      utmDetails_some: {
+        and: [
+          ${utmSource ? `{ source: "${utmSource}" }` : ''}
+          ${utmCampaign ? `{ campaign: "${utmCampaign}" }` : ''}
+          ${utmTerm ? `{ term: "${utmTerm}" }` : ''}
+          ${utmContent ? `{ content: "${utmContent}" }` : ''}
+          ${utmMedium ? `{ medium: "${utmMedium}" }` : ''}
+        ]
+      }
+    }
+  ) {
+    id
+    agent {
+      id
+      name
+    }
+  }
+}
+`;
+  const result = await callLocalGraphqlApi(query);
+  return get(result, 'data.leadPartnerAgents[0].agent.id');
+};
+
 const updateExistingUserOTP = (
   searchObj,
   updateObj,
@@ -72,10 +101,12 @@ const parentChildSignUpMutationResolver = async (
   authentication,
 ) => {
   const {
-    input, schoolId, campaignId = false,
+    input, schoolId, campaignId = false, bookingAgentId = '',
   } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
+
+  let bookingAgentConnectId = bookingAgentId;
 
   validate(
     'UserToken',
@@ -88,6 +119,7 @@ const parentChildSignUpMutationResolver = async (
 
   const currentUser = authentication && authentication.user;
   const isBackendApp = backendApps.includes(get(authentication, 'app.name'));
+  const istmsApp = get(authentication, 'app.name') === TMS;
 
   if (!isBackendApp && currentUser && currentUser) {
     throw new UserTokenNotRequiredError();
@@ -119,12 +151,20 @@ const parentChildSignUpMutationResolver = async (
   } = input;
   // check if parent exist in db
   const parentInfo = await getParentInfo(context, parentEmail, parentPhone, isBackendApp);
+
+  // check for leadPartnerAgent based on utmParams
+  if (utmSource || utmCampaign || utmTerm || utmContent || utmMedium) {
+    const bookingAgent = await fetchUtmAgent(utmSource, utmCampaign, utmTerm, utmContent, utmMedium);
+    if (bookingAgent) {
+      bookingAgentConnectId = bookingAgent;
+    }
+  }
   let parentId;
   let parentProfileId;
   Object.assign(authentication, {
     bypass: true,
   });
-  const source = getUserOriginSource(utmSource, schoolName, schoolId);
+  const source = getUserOriginSource(utmSource, schoolName, schoolId, istmsApp, bookingAgentConnectId);
   /* this campaign obj will be later in this method */
   /* fetching earlier to update vertical in user */
   let campaign = null;
@@ -133,7 +173,7 @@ const parentChildSignUpMutationResolver = async (
   }
 
   // if parent exist don't add parent and check if the child exists too
-  if (parentInfo && parentInfo.parentId && parentInfo.parentEmail) {
+  if (parentInfo && parentInfo.parentId) {
     parentId = parentInfo.parentId;
     parentProfileId = parentInfo.parentProfileId;
     const { childrenName } = parentInfo;
@@ -156,7 +196,7 @@ const parentChildSignUpMutationResolver = async (
   } else {
     const parentData = {
       name: parentName.trim(),
-      email: parentEmail.trim().toLowerCase(),
+      email: parentEmail && parentEmail.trim().toLowerCase(),
       role: PARENT,
       utmSource,
       utmCampaign,
@@ -173,7 +213,7 @@ const parentChildSignUpMutationResolver = async (
     }
 
     // set parent password
-    if (isBackendApp && parentPassword) {
+    if ((isBackendApp || istmsApp) && parentPassword) {
       const passwordObj = getUserPasswordObject(parentPassword, true);
       Object.assign(parentData, passwordObj);
     }
@@ -351,6 +391,7 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     parentProfileId,
     studentSchoolId,
     batchId,
+    bookingAgentConnectId,
   );
 
   if (!studentProfileId) {
@@ -416,6 +457,10 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     log('Failed to get first published topic or first published learning objective corresponding to it in parentChildSignUp');
   }
 
+  const eventSources = ['radiostreet', 'spysquadcamp', 'communityevent', 'spysquad', 'events'];
+
+  const fromEventsPage = utmSource && eventSources.includes(utmSource.toLowerCase());
+
   const leadSquaredParams = params;
 
   if (campaignId) {
@@ -430,15 +475,17 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     leadSquaredParams.input.Vertical = campaignType.replace('Event', '');
   }
 
+  leadSquaredParams.input.hasLaptopOrDesktop = hasLaptopOrDesktop ? 'Yes' : 'No';
+
   leadSquaredParams.input.unVerifiedLead = true;
 
   leadSquaredParams.input.phone = get(input, 'parentPhone');
+  leadSquaredParams.input.fromEventsPage = fromEventsPage;
 
   parentChildSignupPostHookMethod(input, leadSquaredParams);
 
   // Send OTP if from RadioStreet event
-  const eventSources = ['radiostreet', 'spysquadcamp'];
-  if (source && eventSources.includes(source.toLowerCase())) {
+  if (fromEventsPage) {
     // send b2b2c reg+booking
     // sendBookingReminderOrConfirmationB2B(parentId);
     const phoneOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
@@ -451,14 +498,19 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     setTimeout(() => {
       updateLeadSquared({
         Phone: get(parentPhone, 'number'),
-        mx_Event_Date: '31 October',
-        mx_Event_Time: '11:00 am',
+        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '16 January' : '16 January',
+        mx_Event_Time: utmCampaign.includes('doodling') || utmSource.includes('communityevent') ? '03:00 pm' : '11:00 am',
+        mx_Event_Date_Time: utmCampaign.includes('doodling') || utmSource.includes('communityevent') ? '2022-01-16 09:30:00' : '2022-01-16 05:30:00',
       }, false, {
         ActivityEvent: 208,
         Fields: [
           {
             SchemaName: 'mx_Custom_1',
-            Value: 'RadioStreet',
+            Value: utmSource,
+          },
+          {
+            SchemaName: 'mx_Custom_2',
+            Value: utmCampaign,
           },
         ],
       });

@@ -8,6 +8,7 @@ import forceDeleteTypeNames from './forceDeleteTypeNames';
 import regexValidation from './regexValidation';
 import loginType from './loginType';
 import { meWatiSMS, usWatiSMS } from './messagingText';
+import { ADMIN, UMS_ADMIN, SUPPLY_DEMAND_ADMIN } from './roles';
 
 const TMS = 'tekieTms';
 const TLA = 'tekieLearningApp';
@@ -105,7 +106,7 @@ const STATIC = 'static';
 const fetchRetries = 5;
 const fetchRetryDelay = 1000;
 
-const defaultLimitValue = 1000;
+const defaultLimitValue = process.env.DATA_PLATFORM ? 100000 : 1000;
 const defaultDeleteLimitValue = 100;
 
 const defaultPermissionErrorMsg = 'Not authorised to perform this operation.';
@@ -195,6 +196,7 @@ const auditType = {
   mentor: 'mentor',
   preSales: 'preSales',
   postSales: 'postSales',
+  demoWow: 'demoWow',
 };
 
 const scholarshipThreshHolds = {
@@ -231,6 +233,7 @@ const userSourceOrigin = {
   website: 'website',
   transformation: 'transformation',
   radioStreet: 'radioStreet',
+  agent: 'agent',
 };
 
 const freeTopicCount = 5;
@@ -246,9 +249,10 @@ const stickerEmojiType = {
 };
 
 const forgotPassWebURL = {
-  development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword/',
-  staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
-  production: 'https://tekie-tms-staging.herokuapp.com/forgotPassword/',
+  development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword',
+  staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword',
+  production: 'https://tekie-managment-system.herokuapp.com/forgotPassword',
+  preProd: 'https://tekie-tms-pre-prod.herokuapp.com/forgotPassword',
 };
 
 const slotTimes = [
@@ -381,6 +385,16 @@ const currencyTypes = {
   USD: 'USD',
 };
 
+const studentNoteForIQ = {
+  smartAndAttentive: 'The student is very smart & attentive and understood the concepts clearly. Also, the kid tried answering all the question and was very curious. Overall the kid has great potential',
+  interestedAndEagerToLearn: 'The student was really interested in coding and was eager to learn as well. Also, the student was asking questions constantly.',
+  goodCommunicationAndCurious: 'The student is an extrovert and has amazing communication skills, also the kid was able to quickly grasp the concepts and had a lot of curiosity to learn more. The kid has great potential overall',
+  interactiveAndFocused: 'The student was good at catching concepts and was really interactive and focused throughout the sessions and was very interested to learn coding',
+  problemSolvingAndCreativeThinkingSkill: 'The student was really curious and filled with tons of energy also, had good problem-solving skills and creative thinking. Amazing kid!',
+};
+
+const iqaTags = ['ambitious', 'energetic', 'curious', 'quickLearner', 'focused', 'determined'];
+
 export const GIFT_VOUCHER_AMOUNT = 2500;
 
 export const MENTOR_REPORT_COUNTRY = 'india';
@@ -437,7 +451,74 @@ export const VERTICALS = [
   'b2b2c',
 ];
 
+export const GRADE = [
+  'grade1',
+  'grade2',
+  'grade3',
+  'grade4',
+  'grade5',
+  'grade6',
+  'grade7',
+  'grade8',
+  'grade9',
+  'grade10',
+  'grade11',
+  'grade12',
+];
+
 export const NUNITO_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Nunito-Bold.ttf`;
+
+export const GILROY_EXTRA_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Gilroy-ExtraBold.otf`;
+
+const ALLOWED_MIME_TYPES = ['html', 'css', 'javascript'];
+
+const MASTER_OTP = 1101;
+
+const BLOCKED = 'blocked';
+
+const courseToGradeMapping = [
+  {
+    grade: [1, 2],
+    courseId: 'cks5y78w0000t0vwcauvc2rtm',
+  },
+  {
+    grade: [3, 4, 5],
+    courseId: 'cks94x3jq00fc0w24e92pb9ku',
+  },
+  {
+    grade: [6, 7, 8, 9, 10, 11, 12],
+    courseId: 'cks5r4pzv000r0v29gk231bcy',
+  },
+];
+
+const courseToGradeMappingForStaging = [
+  {
+    grade: [1, 2],
+    courseId: 'ckpwgsqpx00010txl9q1s19f2',
+  },
+  {
+    grade: [3, 4, 5],
+    courseId: 'ckpwvp8gb00000t06f78t6dbz',
+  },
+  {
+    grade: [6, 7, 8, 9, 10, 11, 12],
+    courseId: 'cjs8skrd200041huzz78kncz5',
+  },
+];
+
+const PHONE_OTP_LIMIT_PER_DAY = 5;
+
+const PHONE_OTP_MAX_RETRY_WAIT_SECOND = 60;
+
+const ALLOWED_ROLE_FOR_MANUAL_SESSIONS = [ADMIN, UMS_ADMIN, SUPPLY_DEMAND_ADMIN];
+
+const TIME_DIFF_FOR_MANUAL_SESSION = -1;
+
+const newTekieWebLinks = {
+  staging: 'https://tekie-web-staging-28b1816977c254e7.onporter.run',
+  preProd: 'https://tekie-web-pre-prod-dd811f1acf374a8c.onporter.run',
+};
+const EXCLUDE_NUMBER = ['7000287388'];
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
@@ -515,4 +596,17 @@ export {
   auditType,
   auditSubType,
   currencyTypes,
+  studentNoteForIQ,
+  ALLOWED_MIME_TYPES,
+  MASTER_OTP,
+  courseToGradeMapping,
+  courseToGradeMappingForStaging,
+  iqaTags,
+  BLOCKED,
+  PHONE_OTP_LIMIT_PER_DAY,
+  PHONE_OTP_MAX_RETRY_WAIT_SECOND,
+  ALLOWED_ROLE_FOR_MANUAL_SESSIONS,
+  TIME_DIFF_FOR_MANUAL_SESSION,
+  newTekieWebLinks,
+  EXCLUDE_NUMBER,
 };

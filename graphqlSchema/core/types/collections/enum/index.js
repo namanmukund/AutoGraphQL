@@ -91,12 +91,24 @@ import AuditSubType from './AuditSubType';
 import Currency from './Currency';
 import LearningObjectiveComponents from './LearningObjectiveComponents';
 import Vertical from './Vertical';
+import AdhocSessionType from './AdhocSessionType';
 import Slot from './Slot';
 import EventType from './EventType';
 import EventName from './EventName';
 import BlockLayoutType from './BlockLayoutType';
 import RequestType from './RequestType';
 import RequestReason from './RequestReason';
+import Platform from './Platform';
+import StudentNoteForIQ from './StudentNoteForIQ';
+import BlockBasedProjectLayout from './BlockBasedProjectLayout';
+import IQATag from './IQATag';
+import DateCondition from './DateCondition';
+import EditorMode from './EditorMode';
+import TaskStatus from './TaskStatus';
+import TaskCompletionStatus from './TaskCompletionStatus';
+import TaskLeadStatus from './TaskLeadStatus';
+import TaskBookingStatus from './TaskBookingStatus';
+import TaskContactReason from './TaskContactReason';
 
 export default [
   Status,
@@ -193,10 +205,22 @@ export default [
   Currency,
   LearningObjectiveComponents,
   Vertical,
+  AdhocSessionType,
   Slot,
   EventType,
   EventName,
   BlockLayoutType,
   RequestType,
   RequestReason,
+  Platform,
+  StudentNoteForIQ,
+  BlockBasedProjectLayout,
+  IQATag,
+  DateCondition,
+  EditorMode,
+  TaskStatus,
+  TaskCompletionStatus,
+  TaskLeadStatus,
+  TaskBookingStatus,
+  TaskContactReason,
 ];

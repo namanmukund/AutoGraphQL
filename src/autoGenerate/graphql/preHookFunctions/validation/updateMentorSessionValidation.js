@@ -11,6 +11,7 @@ import checkIfSlotCanBeOpenedValidation from './utils/checkIfSlotCanBeOpenedVali
 import checkIfSlotCanBeDeletedValidation from './utils/checkIfSlotCanBeDeletedValidation';
 import getMentorSessions from '../../../utils/getMentorSessions';
 import addAcceptedSlotRequestByMentorLogCheck from './utils/addAcceptedSlotRequestByMentorLogCheck';
+import { validateTokenAndExtractInformation } from './utils';
 
 const updateMentorSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: mentorSessionId } = params;
@@ -36,11 +37,15 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
   const { input } = params;
   // only if input is passed, proceed to validate
   if (input) {
-    validateMentorSessionInput(params, mentorSession, context);
+    const userInfo = validateTokenAndExtractInformation(context, false);
+    const {
+      currentUser,
+    } = userInfo;
+    const userRoleFromContext = currentUser && currentUser.role;
+    const sessionType = get(mentorSession, 'sessionType');
+    validateMentorSessionInput(params, mentorSession, context, userRoleFromContext, sessionType);
   }
-
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
-
   const {
     appName,
   } = userAndAppInfo;
@@ -48,7 +53,6 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
   // check for slots that are passed as false and as well as true
   // eslint-disable-next-line no-param-reassign
   context.previousDocument = mentorSession;
-
   if (mentorUserId && availabilityDate) {
     // get all mentorSessions for the availability date
     const getMentorSessionsRes = await callLocalGraphqlApi(

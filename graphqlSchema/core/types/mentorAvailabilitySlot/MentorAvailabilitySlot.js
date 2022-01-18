@@ -1,11 +1,9 @@
 import { READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
-import {
-  UMS_HEAD, NOT_UMS_HEAD,
-} from '../../../../constants/roles';
+import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
 
-const SingleSlotCountry = `
- type SingleSlotCountry {
+const Countries = `
+ type Countries {
    value: Country
  }
 `;
@@ -25,21 +23,15 @@ const MentorAvailabilitySlot = `
       { appName: "${TWA}" operations: ${READ} }
       ], 
     rule: allow
-  ) 
-  @userPermissions(
-    permissions:[
-      { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
-      { userRole: ${NOT_UMS_HEAD} appName: "*" operations: ${READ} },
-      ], 
-    rule: allow
-  ) 
+  )
+  ${getPermissionSchemaString('MentorAvailabilitySlot')}
   {
     date: Date!
     verticals: [SingleSlotVertical]!
     mentorDemandSlot: MentorDemandSlot @relation(name: "MentorDemandSlotMentorAvailabilitySlot")
     slotName: Slot
     paySlab: MentorSupplyPaySlab @relation(name: "MentorAvailabilitySlotPaySlab", direction: "OneWay")
-    countries: [SingleSlotCountry]
+    countries: [Countries]
     timezone: [String]
     count: Int
     sessionType: SessionType @defaultValue(value: "trial")
@@ -56,4 +48,4 @@ const MentorAvailabilitySlot = `
   }
 `;
 
-export default [MentorAvailabilitySlot, SingleSlotCountry, SingleSlotVertical];
+export default [MentorAvailabilitySlot, Countries, SingleSlotVertical];

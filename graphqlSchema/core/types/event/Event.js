@@ -1,14 +1,21 @@
+const EventAttendance = `
+type EventAttendance @model {
+  user: User! @relation(name:"EventAttendanceUser")
+  studentProfile: StudentProfile @relation(name:"EventAttendanceStudentProfile")
+  attendance: AttendanceStatus @defaultValue(value: "absent")
+  event: Event @relation(name:"EventAttendanceEvent")
+}`;
+
 const Event = `
   type Event @model
   {
     eventType: EventType @defaultValue(value: "radioStreet")
+    eventName: EventName @defaultValue(value: "spySquadCamp")
     name: String @trim
-    date: Date!
+    date: Date
     time: Int
-    status: AttendanceStatus @defaultValue(value: "absent")
-    user: User! @relation(name:"UserEvent")
-    studentProfile: StudentProfile @relation(name:"StudentProfileEvent")
+    eventAttendances: [EventAttendance] @relation(name:"EventAttendanceEvent")
   }
 `;
 
-export default [Event];
+export default [Event, EventAttendance];

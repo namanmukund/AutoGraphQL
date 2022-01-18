@@ -1,23 +1,27 @@
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-confusing-arrow */
-import { PDFDocument, rgb } from 'pdf-lib';
-import * as fs from 'fs';
-import fontkit from '@pdf-lib/fontkit';
 import { get } from 'lodash';
-import mkdirp from 'mkdirp';
-import { NUNITO_BOLD_FONT_URL } from '../../../../../../constants';
-import { uploadToS3, getSignedS3Uri } from '../../../../../middlewares/utils/uploadToS3';
+import moment from 'moment';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
-import getFormatedDate from '../../../../../../utils/getFormatedDate';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
+import getSpySquadCampCertificateUrl from './uploadCertificates/spysquadcamp';
+import getCanvaEventCertificateUrl from './uploadCertificates/canvaEvent';
+import getStoryspreeCertificateUrl from './uploadCertificates/storyspree';
+import getDemoCompletionCertificateUrl from './uploadCertificates/demoCompletion';
+import getGenZEventCertificateUrl from './uploadCertificates/genzenvironment';
+import getIqaReportSnapshotUrl from './uploadCertificates/iqaReport';
+import getCrackTheCodeCertificateUrl from './uploadCertificates/crackTheCode';
+import getChristmasCarnivalCertificateUrl from './uploadCertificates/christmasCarnival';
+import getDoodleAllTheWayCertificateUrl from './uploadCertificates/doodleAllTheWay';
 
-const fetchUser = (userId) => `
+const fetchUser = (userId, eventId) => `
 {
   users(filter: {
     and: [
       {id: "${userId}"}
+      ${eventId ? `{eventAttandances_some: {event_some:{id: "${eventId}"}}}` : ''}
     ]
   }){
     id
@@ -26,13 +30,16 @@ const fetchUser = (userId) => `
 }
 `;
 
-const fetchEventCertificate = (id) => `
+const fetchEventCertificate = (id, eventId) => `
 {
   eventCertificates(filter: {
     and: [
       {user_some: {
         id: "${id}"
       }}
+      ${eventId ? `{event_some: {
+        id: "${eventId}"
+      }}` : ''}
     ]
   }){
     id
@@ -45,11 +52,13 @@ const fetchEventCertificate = (id) => `
 }
 `;
 
-const addEventCertificate = (userId, assetUrl) => `
+const addEventCertificate = (userId, assetUrl, eventType, eventName) => `
   mutation {
     addEventCertificate(userConnectId:"${userId}",
       input: {
         assetUrl: "${assetUrl}"
+        eventType: ${eventType}
+        eventName: ${eventName}
       }){
         id
         assetUrl
@@ -57,10 +66,12 @@ const addEventCertificate = (userId, assetUrl) => `
   }
 `;
 
-const updateEventCertificate = (eventCertificateId, url) => `
+const updateEventCertificate = (eventCertificateId, url, eventType, eventName) => `
  mutation{
   updateEventCertificate(id:"${eventCertificateId}",input:{
     assetUrl:"${url}"
+    eventType: ${eventType}
+    eventName: ${eventName}
   }){
     id
     assetUrl
@@ -90,15 +101,21 @@ const generateCertificateMutationResolver = async (
   validateAuthentication(context);
 
   const { input } = params;
-
-  const { userId, regenerateCertificate } = input;
-
-  const userRes = await callLocalGraphqlApi(fetchUser(userId));
+  // eventId to be passed here too in input
+  const {
+    userId, regenerateCertificate, eventId, date, isEventCertificate,
+  } = input;
+  let userRes;
+  if (!isEventCertificate) {
+    userRes = await callLocalGraphqlApi(fetchUser(userId));
+  } else {
+    userRes = await callLocalGraphqlApi(fetchUser(userId, eventId));
+  }
   const users = get(userRes, 'data.users');
-  const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(userId));
+  // get eventCertificate based on event type
+  const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(userId, eventId));
   const eventCertificates = get(eventCertificatesRes, 'data.eventCertificates');
   let tekieUrl = '';
-
   if (!regenerateCertificate && eventCertificates && eventCertificates.length) {
     const exisitingEventCertificate = get(eventCertificates, '[0]', {});
     tekieUrl = `event-certificate/${slugifyID(get(exisitingEventCertificate, 'id'))}`;
@@ -108,70 +125,94 @@ const generateCertificateMutationResolver = async (
       tekieUrl,
     };
   }
-
   if (users && users.length) {
     const userName = get(users, '[0].name', '');
-    const formattedDate = '24-10-2021';
-
-    const url = `${process.env.FILE_BASE_URL}/python/course/radiostreetCertificate.pdf`;
-    const existingPdfBytes = await fetch(url).then((res) => res.buffer());
-
-    // Load a PDFDocument from the existing PDF bytes
-    const pdfDoc = await PDFDocument.load(existingPdfBytes);
-    pdfDoc.registerFontkit(fontkit);
-
-    // Get the first page of the document
-    const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
-
-    // // Embed the Helvetica font
-    const NunitoBoldfontBytes = await fetch(NUNITO_BOLD_FONT_URL).then((res) => res.buffer());
-
-    const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
-
-    // Draw a string of text diagonally across the first page
-    firstPage.drawText(`${capitalize(userName)}`, {
-      x: 330,
-      y: 506,
-      size: 29,
-      font: NunitoBoldFont,
-      color: rgb(0, 0.678, 0.902),
-    });
-
-    firstPage.drawText(`${formattedDate}.`, {
-      x: 385,
-      y: 394,
-      size: 18,
-      font: NunitoBoldFont,
-      color: rgb(0.3137, 0.31, 0.31),
-    });
-
-    /** PDF Meta Details */
-    pdfDoc.setAuthor('Tekie');
-    pdfDoc.setCreator('Kiwhode Learning Pvt Ltd');
-    pdfDoc.setSubject('Tekie\'s Spy Squad Camp Certificate');
-    pdfDoc.setTitle('Tekie\'s Spy Squad Camp Certificate');
-    pdfDoc.setProducer('Tekie.in');
-
-    const pdfBytes = await pdfDoc.save();
-    const path = '/tmp/spysquadcamp/certificate-pdf.pdf';
-    mkdirp.sync('/tmp/spysquadcamp');
-    fs.writeFileSync(path, pdfBytes);
-    const fileContent = fs.readFileSync(path);
+    let formattedDate = moment(new Date().setHours(0, 0, 0, 0)).format('DD-MM-YYYY');
+    if (date) {
+      formattedDate = moment(new Date(date).setHours(0, 0, 0, 0)).format('DD-MM-YYYY');
+    }
     let fetchedUrl = '';
-    if (fileContent) {
-      const key = `event-certificate/spysquadcamp/${slugifyID(userId)}-certificate.pdf`;
-      await uploadToS3(key, fileContent);
-      fetchedUrl = key;
+    let eventType = '';
+    let eventName = '';
+    // the three ids here are the event.ids created in three environments (local, pre-prod, prod)
+    switch (eventId) {
+      case 'ckvdiavp70000igujfgxh8mt6':
+      case 'ckve5izxq0000ucui47b89pmf':
+      case 'ckve5fm7o00090t1dd1v4dy13':
+        fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
+        eventType = 'radioStreet';
+        eventName = 'spySquadCamp';
+        break;
+      case 'ckvw6s3df000039in32ewhy89':
+      case 'ckvwncjv400001sin0ppigr3s':
+      case 'ckvxsrwlb001c0usf9lxwapt4':
+        fetchedUrl = await getCanvaEventCertificateUrl(userId, userName, formattedDate);
+        eventType = 'communityEvent';
+        eventName = 'canvaMasterclass';
+        break;
+      case 'ckweruavk0000sxin201114uv':
+      case 'ckwerqvz10000r2in5ihxd8ly':
+      case 'ckweriv6q0000mzin99jm8mm2':
+        fetchedUrl = await getGenZEventCertificateUrl(userId, userName, formattedDate);
+        eventType = 'communityEvent';
+        eventName = 'genZEnvironment';
+        break;
+      case 'ckw4unvyp0000kpinc2515c88':
+      case 'ckw5wg9rj0000gtin1st0hry6':
+      case 'ckw6eq3f30000xgin7yrxgk2l':
+        fetchedUrl = await getStoryspreeCertificateUrl(userId, userName, formattedDate);
+        eventType = 'communityEvent';
+        eventName = 'storyspree';
+        break;
+      case 'ckx3bgy7p0000n1incbzkb36i':
+      case 'ckx3cuo200000zein8wwz3qid':
+      case 'ckx3cxe39000018in96do53zp':
+        fetchedUrl = await getCrackTheCodeCertificateUrl(userId, userName, formattedDate);
+        eventType = 'communityEvent';
+        eventName = 'crackTheCode';
+        break;
+      case 'ckwjgmccj0000kcin04q39xe4':
+      case 'ckwjwd1cz0000o4in6br2cng6':
+      case 'ckwjwf4lm0000pgin7o9bbf1m':
+      case 'ckwjwiigq0000rninbsqialy2':
+        fetchedUrl = await getDemoCompletionCertificateUrl(userId, userName);
+        eventType = 'userAchievement';
+        eventName = 'demoCompletion';
+        break;
+      case 'ckwjl99kq0001i6in4ir2ez4z':
+      case 'ckwjwg75y0001pginazc277b9':
+      case 'ckwjwitwb0001rningq5ma1ei':
+        fetchedUrl = await getIqaReportSnapshotUrl(userId, userName);
+        eventType = 'userAchievement';
+        eventName = 'iqaReport';
+        break;
+      case 'ckx8sez1l0000ncin1hbv5gyk':
+      case 'ckx8sau1d0000lrinb526hp0v':
+      case 'ckx8s8dp40000iqineagieolt':
+        fetchedUrl = await getChristmasCarnivalCertificateUrl(userId, userName);
+        eventType = 'communityEvent';
+        eventName = 'christmasCarnival';
+        break;
+      case 'ckyaeenu10001ncuj0yyedyqj':
+      case 'ckyb15tah00013kuj2wepa79p':
+        fetchedUrl = await getDoodleAllTheWayCertificateUrl(userId, userName, formattedDate);
+        eventType = 'communityEvent';
+        eventName = 'doodling';
+        break;
+      default:
+        fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
+        eventType = 'radioStreet';
+        eventName = 'spySquadCamp';
+        break;
     }
     let eventCertificateCreated = null;
     if (fetchedUrl) {
       if (eventCertificates && eventCertificates.length) {
         const eventCertificateId = get(eventCertificates, '[0].id');
-        const eventCertificateCreatedRes = await callLocalGraphqlApi(updateEventCertificate(eventCertificateId, fetchedUrl));
+        const eventCertificateCreatedRes = await callLocalGraphqlApi(updateEventCertificate(eventCertificateId, fetchedUrl, eventType, eventName));
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.updateEventCertificate');
       } else {
-        const eventCertificateCreatedRes = await callLocalGraphqlApi(addEventCertificate(userId, fetchedUrl));
+        const eventCertificateCreatedRes = await callLocalGraphqlApi(addEventCertificate(userId, fetchedUrl, eventType, eventName));
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.addEventCertificate');
       }
     }

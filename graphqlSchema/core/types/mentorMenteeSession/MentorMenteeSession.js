@@ -29,6 +29,20 @@ const sessionRescheduledReasons = `
     otherLanguageBarrier: String
 `;
 
+const studentUnderstandingFields = `
+  attentionLevel: Int @length(min: 1, max: 10)
+  previousSessionUnderstandingLevel: Int @length(min: 1, max: 10)
+  currentSessionUnderstandingLevel: Int @length(min: 1, max: 10)
+`;
+
+const studentAbilityFields = `
+  learningSpeed: Int @length(min: 1, max: 5)
+  analyticSkills: Int @length(min: 1, max: 5)
+  problemSolvingAbility: Int @length(min: 1, max: 5)
+  interestInLearning: Int @length(min: 1, max: 5)
+  eagerness: Int @length(min: 1, max: 5)
+`;
+
 const internetSpeed = `
   type InternetSpeed {
    speed: Float
@@ -40,7 +54,7 @@ const MentorMenteeSession = `
     course: Course @relation(name: "MentorMenteeSessionCourse", direction: "OneWay")
     topic: Topic! @relation(name: "MentorMenteeSessionTopic", direction: "OneWay")
     menteeSession: MenteeSession! @relation(name: "SessionDataMenteeSession", direction: "OneWay")
-    mentorSession: MentorSession! @relation(name: "SessionDataMentorSession")
+    mentorSession: MentorSession @relation(name: "SessionDataMentorSession")
     salesOperation: SalesOperation @relation(name:"SalesOperationFirstMentorMenteeSession")
     sessionAllotmentDate: Date
     sessionStartDate: Date
@@ -77,6 +91,8 @@ const MentorMenteeSession = `
     sessionRecordingLink: String
     ${sendTransactionalMessageFields} 
     ${sessionRescheduledReasons}
+    ${studentUnderstandingFields}
+    ${studentAbilityFields}
     isFeedbackSubmitted: Boolean @defaultValue(value: "false")
     sessionCommentByMentor: String
     source: UserOriginSource @defaultValue(value: "website")
@@ -91,6 +107,20 @@ const MentorMenteeSession = `
     studentProfile: StudentProfile @relation(name:"MentorMenteeSessionStudentProfile", direction: "OneWay")
     mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name:"MentorAvailabilitySlotMentorMenteeSession")
     isBroadCastedSession: Boolean @defaultValue(value: "false")
+    videoLinkClickByMentor: Date
+    videoLinkClickByMentee: Date
+    startSessionByMentee: Date
+    endSessionByMentee: Date
+    mentorStartAttendance: Date
+    mentorSavesAttendance: Date
+    videoLinkClickByMenteePlatform: Platform
+    startSessionByMenteePlatform: Platform
+    isDemoWowAudit: Boolean @defaultValue(value: "false")
+    bookingAgent: User @relation(name: "MentorMenteeSessionBookingAgent", direction: "OneWay")
+    sessionStartedByMentorAt: Date
+    sessionJoinedByMenteeAt: Date
+    verificationStatus: VerificationStatus @defaultValue(value: "unverified")
+    verifiedBy: User @relation(name: "MentorMenteeSessionVerifiedBy", direction: "OneWay")
 }`;
 
 export default [MentorMenteeSession, internetSpeed];

@@ -22,6 +22,7 @@ const HomeworkStreaksType = `
 
 const UserCourse = `
   type UserCourse @model
+  @userToken(isRequired:"false")
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
@@ -33,6 +34,7 @@ const UserCourse = `
   )
   {
     courses: [Course] @relation(name: "CourseUserCourse", direction: "OneWay")
+      @userToken(isRequired:"false")
       @appPermissions(
         permissions:[
           { appName: "${TMS}" operations: "*" },
@@ -42,11 +44,23 @@ const UserCourse = `
         rule: allow
       )
     user: User! @relation(name: "UserCourseUser", direction: "OneWay")
+      @userToken(isRequired:"false")
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
           { appName: "${TMS}" operations: "*" },
+          { appName: "${TWA}" operations: ${READ} },
           ], 
+        rule: allow
+      )
+    iqaReport: [IqaReport] @userToken(isRequired:"false") @relation(name: "IqaReportUserCourse", direction: "OneWay")
+    demoCompletion: [EventCertificate] @relation(name: "DemoCompletionEventCertificate", direction: "OneWay") @userToken(isRequired:"false")
+    @appPermissions(
+        permissions:[
+          { appName: "${TMS}" operations: "*" },
+          { appName: "${TLA}" operations: "*" },
+          { appName: "${TWA}" operations: ${READ} },
+          ],
         rule: allow
       )
     homeworkStreaks: [HomeworkStreaks]

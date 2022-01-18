@@ -20,7 +20,7 @@ const updateBatchCurrentComponentStatusMutation = (
   `;
 
 // menthod starts from here
-const updateBatchCurrentComponentStatus = async (batchCurrentComponentId, sessionStatus, nextTopicId) => {
+const updateBatchCurrentComponentStatus = async (batchCurrentComponentId, sessionStatus, nextTopicId, context = '') => {
   let currentTopicConnectQuery = '';
   if (nextTopicId) {
     currentTopicConnectQuery = `currentTopicConnectId: "${nextTopicId}"`;
@@ -29,7 +29,7 @@ const updateBatchCurrentComponentStatus = async (batchCurrentComponentId, sessio
     batchCurrentComponentId,
     sessionStatus,
     currentTopicConnectQuery,
-  ));
+  ), context);
 
   return true;
 };

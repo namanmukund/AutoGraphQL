@@ -5,6 +5,10 @@ const FileType = `
     image
     subtitle
     lottie
+    pdf
+    html
+    css
+    javascript
   }`;
 
 export default FileType;

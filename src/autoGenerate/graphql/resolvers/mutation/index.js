@@ -33,11 +33,14 @@ import loginViaPasswordMutationResolver from './user/loginViaPassword';
 import getPaymentRequestMutationResolver from './payment/getPaymentRequest';
 import getPaymentResponseMutationResolver from './payment/getPaymentResponse';
 import addBulkMentorSessionMutationResolver from './mentor/addBulkMentorSession';
+import generateMentorPayoutReportMutationResolver from './mentor/generateMentorPayoutReport';
 import bookB2B2CSlotsMutationResolver from './user/bookB2B2CSlots';
 import rebookMenteeSessionMutationResolver from './user/rebookMenteeSession';
 import sendCertificateInMailMutationResolver from './user/sendCertificateInMail';
 import sendJourneySnapshotInMailMutationResolver from './user/sendJourneySnapshotInMail';
 import generateCertificateMutationResolver from './pdf/generateCertificate';
+import validateMagicLinkMutationResolver from './user/validateMagicLink';
+import resetPasswordAndLoginMutationResolver from './setResetPassword/resetPasswordAndLogin';
 
 export {
   addMutationResolver,
@@ -80,4 +83,7 @@ export {
   sendCertificateInMailMutationResolver,
   sendJourneySnapshotInMailMutationResolver,
   generateCertificateMutationResolver,
+  validateMagicLinkMutationResolver,
+  resetPasswordAndLoginMutationResolver,
+  generateMentorPayoutReportMutationResolver,
 };

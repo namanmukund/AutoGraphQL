@@ -29,10 +29,8 @@ import { createStaticAppToken } from '../../auth';
 import deleteTopicValidation from './preHookFunctions/validation/deleteTopicValidation';
 import deleteLearningObjectiveValidation from './preHookFunctions/validation/deleteLearningObjectiveValidation';
 import deleteQuestionBankValidation from './preHookFunctions/validation/deleteQuestionBankValidation';
-import addUserCurrentTopicComponentStatusValidation
-  from './preHookFunctions/validation/addUserCurrentTopicComponentStatusValidation';
-import updateUserCurrentTopicComponentStatusValidation
-  from './preHookFunctions/validation/updateUserCurrentTopicComponentStatusValidation';
+import addUserCurrentTopicComponentStatusValidation from './preHookFunctions/validation/addUserCurrentTopicComponentStatusValidation';
+import updateUserCurrentTopicComponentStatusValidation from './preHookFunctions/validation/updateUserCurrentTopicComponentStatusValidation';
 import userCourseSyllabusMethod from './preHookFunctions/userCourseSyllabusMethod';
 import addUserActivityVideoDumpValidation from './preHookFunctions/validation/addUserActivityVideoDumpValidation';
 import addUserActivityChatDumpValidation from './preHookFunctions/validation/addUserActivityChatDumpValidation';
@@ -43,8 +41,7 @@ import userLearningObjectiveValidation from './preHookFunctions/validation/userL
 import userQuizValidation from './preHookFunctions/validation/userQuizValidation';
 import { addLearningObjectiveValidation } from './preHookFunctions/validation';
 import userAssignmentValidation from './preHookFunctions/validation/userAssignmentValidation';
-import addUserActivityAssignmentDumpValidation
-  from './preHookFunctions/validation/addUserActivityAssignmentDumpValidation';
+import addUserActivityAssignmentDumpValidation from './preHookFunctions/validation/addUserActivityAssignmentDumpValidation';
 import addMenteeSessionValidation from './preHookFunctions/validation/addMenteeSessionValidation';
 import updateMenteeSessionValidation from './preHookFunctions/validation/updateMenteeSessionValidation';
 import addMentorSessionValidation from './preHookFunctions/validation/addMentorSessionValidation';
@@ -88,8 +85,7 @@ import addUserActivityComicStripDumpValidation from './preHookFunctions/validati
 import userBlockBasedPracticeValidation from './preHookFunctions/validation/userBlockBasedPracticeValidation';
 import userBlockBasedProjectValidation from './preHookFunctions/validation/userBlockBasedProjectValidation';
 import addUserActivityBlockBasedProjectDumpValidation from './preHookFunctions/validation/addUserActivityBlockBasedProjectDumpValidation';
-import addUserActivityBlockBasedPracticeDumpValidation
-  from './preHookFunctions/validation/addUserActivityBlockBasedPracticeDumpValidation';
+import addUserActivityBlockBasedPracticeDumpValidation from './preHookFunctions/validation/addUserActivityBlockBasedPracticeDumpValidation';
 import addMentorProfileValidation from './preHookFunctions/validation/addMentorProfileValidation';
 import deleteMentorMenteeSessionValidation from './preHookFunctions/validation/deleteMentorMenteeSessionValidation';
 import addAuditQuestionValidation from './preHookFunctions/validation/addAuditQuestionValidation';
@@ -109,10 +105,17 @@ import addBlockBasedProjectValidation from './preHookFunctions/validation/addBlo
 import updateBlockBasedProjectValidation from './preHookFunctions/validation/updateBlockBasedProjectValidation';
 import addVideoValidation from './preHookFunctions/validation/addVideoValidation';
 import updateVideoValidation from './preHookFunctions/validation/updateVideoValidation';
+import addAdhocSessionValidation from './preHookFunctions/validation/addAdhocSessionValidation';
+import updateAdhocSessionValidation from './preHookFunctions/validation/updateAdhocSessionValidation';
+import deleteAdhocSessionValidation from './preHookFunctions/validation/deleteAdhocSessionValidation';
 import updateMentorAvailabilitySlotValidation from './preHookFunctions/validation/updateMentorAvailabilitySlotValidation';
 import addMentorDemandSlotValidation from './preHookFunctions/validation/addMentorDemandSlotValidation';
 import updateMentorDemandSlotValidation from './preHookFunctions/validation/updateMentorDemandSlotValidation';
 import addAcceptedSlotRequestByMentorLogValidation from './preHookFunctions/validation/addAcceptedSlotRequestByMentorLogValidation';
+import updateFileValidation from './preHookFunctions/validation/updateFileValidation';
+import addLeadPartnerValidation from './preHookFunctions/validation/addLeadPartnerValidation';
+import updateLeadPartnerValidation from './preHookFunctions/validation/updateLeadPartnerValidation';
+import addSenseiProfileValidation from './preHookFunctions/validation/addSenseiProfileValidation';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -237,7 +240,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateUser': {
       // validate username, phone, email and name and returns email or phone verified accordingly
-      const verifiedData = await updateUserValidation(params, context);
+      const verifiedData = await updateUserValidation(params, context, mutationOrQueryName);
       Object.assign(input, verifiedData);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
@@ -632,6 +635,67 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await deleteBatchSessionValidation(params, mutationOrQueryName, context);
       break;
     }
+    case 'addAdhocSession': {
+      const { sessionStatus } = input;
+      const newInput = {
+        ...input,
+      };
+      switch (sessionStatus) {
+        case 'started': {
+          newInput.sessionStartDate = new Date().toISOString();
+          break;
+        }
+        default: {
+          newInput.sessionAllotmentDate = new Date().toISOString();
+          // temporary hack for backword compatibility
+          newInput.sessionStartDate = new Date().toISOString();
+        }
+      }
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await addAdhocSessionValidation(newParams, mutationOrQueryName, context);
+
+      return hook(newParams.input, mutationOrQueryName, 'PreHook');
+    }
+    case 'updateAdhocSession': {
+      const sessionStatus = get(input, 'sessionStatus', '');
+      const newInput = {
+        ...input,
+      };
+      if (sessionStatus) {
+        switch (sessionStatus) {
+          case 'allotted': {
+            newInput.sessionStartDate = new Date().toISOString();
+            break;
+          }
+          case 'started': {
+            newInput.sessionStartDate = new Date().toISOString();
+            break;
+          }
+          case 'completed': {
+            newInput.sessionEndDate = new Date().toISOString();
+            break;
+          }
+          default:
+        }
+      }
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await updateAdhocSessionValidation(newParams, mutationOrQueryName, context);
+      return hook(newInput, mutationOrQueryName, 'PreHook');
+    }
+    case 'deleteAdhocSession': {
+      await deleteAdhocSessionValidation(params, mutationOrQueryName, context);
+      break;
+    }
     case 'updateBatchCurrentComponentStatus': {
       await updateBatchCurrentComponentStatusValidation(params, mutationOrQueryName, context);
       break;
@@ -825,6 +889,22 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateMentorDemandSlot': {
       await updateMentorDemandSlotValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'updateFile': {
+      await updateFileValidation(input, mutationOrQueryName, context, params);
+      break;
+    }
+    case 'addLeadPartner': {
+      await addLeadPartnerValidation(input, mutationOrQueryName, context, params);
+      break;
+    }
+    case 'updateLeadPartner': {
+      await updateLeadPartnerValidation(input, mutationOrQueryName, context, params);
+      break;
+    }
+    case 'addSenseiProfile': {
+      await addSenseiProfileValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'addSchool': {

@@ -192,7 +192,10 @@ const fetchUsers = async (req, res) => {
       } else {
         // send bad request error
         foundError = true;
-        res.status(400).send('Valid phone number or country code or email address not found');
+        const object = {};
+        object.proceedWithPayment = false;
+        object.message = 'Valid phone number or country code or email address not found';
+        res.json(object);
       }
     } else {
       foundError = true;
@@ -263,6 +266,7 @@ const paymentStatus = async (req, res) => {
   let message = '';
   let discount = 0;
   let merchantPrice = 0;
+  let productPriceAmountGlobal = 0;
   try {
     if (digest === req.headers['x-tekie-signature']) {
       log('Request is Authorized');
@@ -320,6 +324,8 @@ const paymentStatus = async (req, res) => {
               }
             }
 
+            productPriceAmountGlobal = productPriceAmount;
+
             log(`productPriceAmount ${productPriceAmount}`);
             log(`Absolute difference in price ${Math.abs(productPriceAmount - Number.parseInt(amountQuery))}`);
             if (Math.abs(productPriceAmount - Number.parseInt(amountQuery)) <= 2) {
@@ -329,7 +335,11 @@ const paymentStatus = async (req, res) => {
         } else {
           // send bad request error
           foundError = true;
-          res.status(400).send('Valid product id or amount not found');
+          const object = {};
+          object.allowPayment = false;
+          object.message = 'Valid product id or amount not found';
+          res.json(object);
+          // res.status(400).send('Valid product id or amount not found');
         }
         if (isAmountValid) {
           // we save payment Status to true and update user merchant doc with the status and transaction id
@@ -339,7 +349,7 @@ const paymentStatus = async (req, res) => {
               paymentStatus: true
               merchantPrice: ${merchantPrice}
               merchantDiscountPrice: ${discount}
-              merchantSellingPrice: ${productPriceAmount}
+              merchantSellingPrice: ${productPriceAmountGlobal}
             }`;
             await callLocalGraphqlApi(updateUserMerchant(userMerchantIdQuery, input));
             log(`Updated user merchant doc ${userMerchantIdQuery} with transaction id ${transactionId}`);
@@ -387,6 +397,7 @@ const verifyPaymentStatus = async (req, res) => {
   let message = '';
   let discount = 0;
   let merchantPrice = 0;
+  let productPriceAmountGlobal = 0;
   try {
     if (digest === req.headers['x-tekie-signature']) {
       log('Request is Authorized');
@@ -442,6 +453,8 @@ const verifyPaymentStatus = async (req, res) => {
               }
             }
 
+            productPriceAmountGlobal = productPriceAmount;
+
             log(`productPriceAmount ${productPriceAmount}`);
 
             if (Math.abs(productPriceAmount - Number.parseInt(amountQuery)) > 2) {
@@ -451,7 +464,10 @@ const verifyPaymentStatus = async (req, res) => {
         } else {
           // send bad request error
           foundError = true;
-          res.status(400).send('Valid product id or amount not found');
+          const object = {};
+          object.message = 'Valid product id or amount not found';
+          res.json(object);
+          // res.status(400).send('Valid product id or amount not found');
         }
         // if amount passed is valid
         if (isAmountValid) {
@@ -462,7 +478,7 @@ const verifyPaymentStatus = async (req, res) => {
               paymentStatus: true
               merchantPrice: ${merchantPrice}
               merchantDiscountPrice: ${discount}
-              merchantSellingPrice: ${productPriceAmount}
+              merchantSellingPrice: ${productPriceAmountGlobal}
             }`;
             await callLocalGraphqlApi(updateUserMerchant(userMerchantIdQuery, input));
             log(`Updated user merchant doc ${userMerchantIdQuery} with transaction id ${transactionId}`);

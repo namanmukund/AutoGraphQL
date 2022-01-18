@@ -1,21 +1,27 @@
 import { get } from 'lodash';
 import { getFieldsBeingFetched } from '../../../../utils';
-import { validate } from '../../../validation';
+import { validate, validateName } from '../../../validation';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import {
+  BlockedOperationError,
   DatabaseRecordNotFoundError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
 import { MutationController, QueryController } from '../../../controllers';
 import { getUserFromDBQuery } from './utils';
 import { generateCuid, getRandomNumber } from '../../../../../../utils';
-import { rangeOTP } from '../../../../../../constants';
+import {
+  BLOCKED,
+  EXCLUDE_NUMBER,
+  rangeOTP,
+} from '../../../../../../constants';
 import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
 import { PARENT } from '../../../../../../constants/roles';
 import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
 // import sendBookingReminderOrConfirmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import userLogsActivity from '../utils/userLogsActivity';
 
 const USER_TYPE = 'User';
 
@@ -63,8 +69,11 @@ const signupOrLoginViaOtp = async (
     {},
   );
 
-  const currentUser = authentication && authentication.user;
+  if (input.name) {
+    validateName(input.name);
+  }
 
+  const currentUser = authentication && authentication.user;
   if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
@@ -76,6 +85,20 @@ const signupOrLoginViaOtp = async (
 
   const modelQueries = new QueryController(USER_TYPE, authentication);
   let userData = await getUserFromDBQuery(input, modelQueries);
+
+  if (get(userData, 'status') === BLOCKED) {
+    throw new BlockedOperationError();
+  }
+
+  if (!input.email && !EXCLUDE_NUMBER.includes(get(input, 'phone.number'))) {
+    // setting nextAllowedPhoneOtpDate to that of 60 seconds otherwise throwing error
+    await userLogsActivity(userData, '', 'phoneOTPTime');
+  }
+
+  if (!input.email && get(userData, 'id') && !EXCLUDE_NUMBER.includes(get(input, 'phone.number'))) {
+    // action to fetch OTP log for user and to check if limit exceeds
+    await userLogsActivity(userData, '', 'OTPLimit');
+  }
 
   if (!userData || !userData.id) {
     // create user if it doesn't exist and phone is passed in input else throw error
@@ -100,6 +123,9 @@ const signupOrLoginViaOtp = async (
       }
       if (input.source) {
         newUser.source = input.source;
+      }
+      if (input.name) {
+        newUser.name = input.name;
       }
       if (input.utmSource) {
         newUser.utmSource = input.utmSource;
@@ -150,8 +176,10 @@ const signupOrLoginViaOtp = async (
       throw new DatabaseRecordNotFoundError();
     }
   }
+
   const phoneOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
   const modelMutations = new MutationController(typeName, authentication);
+
   const updateObj = {
     phoneOtp,
     phoneOtpCreationDate: new Date(),
@@ -163,6 +191,7 @@ const signupOrLoginViaOtp = async (
   const { name, phone } = userData;
   if (!input.email) {
     getNumberAndSendSms(phone, phoneOtp, name);
+    await userLogsActivity(userData, phoneOtp, 'addOTPLog');
   }
   return {
     result: true,

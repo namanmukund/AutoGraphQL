@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import moment from 'moment';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
 import { sessionType } from '../../../../../../constants';
 import { SlotsOccupiedError } from '../../../../../../constants/errors/db';
@@ -7,6 +6,8 @@ import { SlotsOccupiedError } from '../../../../../../constants/errors/db';
 const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsInPrevDoc, userBatchCode = '') => {
   const { input } = params;
   const bookingDate = get(input, 'bookingDate');
+  let batchCode = null;
+  let batchId = null;
   const { ...slots } = input;
   // const isToday = moment(finalBookingDate).diff(moment(new Date()), 'days') === 0;
   let slotTimeArray = getSelectedSlotsTime(slots);
@@ -30,40 +31,31 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
     for (const mentorSession of prevMentorSessions) {
       const mentorMenteeSessions = get(mentorSession, 'mentorMenteeSessions', []);
       const batchSessions = get(mentorSession, 'batchSessions', []);
-      // for a batch mentorSession we will check batchSessions and see which slots are occupied
-      if ((mentorSession.sessionType === sessionType.trial || mentorSession.sessionType === sessionType.batch) && batchSessions.length) {
+      const adhocSessions = get(mentorSession, 'adhocSessions', []);
+      const batchAndAdhocSessions = batchSessions.concat(adhocSessions);
+      // for a batch mentorSession we will check batchSessions (and adhocSessions) and see which slots are occupied
+      if ((mentorSession.sessionType === sessionType.trial || mentorSession.sessionType === sessionType.batch) && batchAndAdhocSessions.length) {
         // eslint-disable-next-line no-restricted-syntax
-        for (const batchSession of batchSessions) {
-          if (userBatchCode !== get(batchSession, 'batch.code', '')) {
-            const occupiedSlotTimeArrayForBatch = getSelectedSlotsTime(batchSession);
+        for (const session of batchAndAdhocSessions) {
+          if (userBatchCode !== get(session, 'batch.code', '')) {
+            const occupiedSlotTimeArrayForBatch = getSelectedSlotsTime(session);
             occupiedSlotsArray.push(...occupiedSlotTimeArrayForBatch);
             // eslint-disable no-loop-func
             const intersection = slotTimeArray.filter((x) => occupiedSlotTimeArrayForBatch.includes(x));
             if (intersection && intersection.length) {
               // if called from mentorMenteeSession and BatchSesson, we will get a bookingDate
-              if (bookingDate) {
-                const date = new Date(bookingDate);
-                const dateTime = date.setHours(
-                  date.getHours() + intersection[0],
-                );
-                const currentDate = new Date();
-                if (moment(dateTime).diff(moment(currentDate), 'hours') > 2) {
-                  bypassValidation = false;
-                } else if (get(batchSession, 'batch.studentsMeta.count', 0) > 0) {
-                  bypassValidation = false;
-                }
-              } else {
-                bypassValidation = false;
-              }
+              bypassValidation = false;
               if (!bsflag) {
                 bsflag = true;
                 customError += 'Batch(es) -> ';
               }
-              customError += `${get(batchSession, 'batch.code', '')} `;
+              batchCode = get(session, 'batch.code', '');
+              batchId = get(session, 'batch.id', '');
+              customError += `${get(session, 'batch.code', '')} `;
             }
           }
         }
-      // for trial/paid mentorSession we will check mentorMenteeSessions and see which slots are occupied
+        // for trial/paid mentorSession we will check mentorMenteeSessions and see which slots are occupied
       }
       if (mentorMenteeSessions.length && mentorSession.sessionType !== sessionType.batch) {
         // eslint-disable-next-line no-restricted-syntax
@@ -84,6 +76,8 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
                 customError += `${get(menteeSession, 'user.name', '')} `;
                 if (get(menteeSession, 'user.studentProfile.batch.code', '')) {
                   customError += `(${get(menteeSession, 'user.studentProfile.batch.code', '')})`;
+                  batchCode = get(menteeSession, 'user.studentProfile.batch.code');
+                  batchId = get(menteeSession, 'user.studentProfile.batch.id');
                 }
               }
             }
@@ -97,9 +91,11 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
     const intersectionSlots = slotTimeArray.filter((x) => uniqueOccupiedSlotsArray.includes(x));
     if (intersectionSlots && intersectionSlots.length) {
       let errorMessage = 'Sessions for slots ';
+      const slotsObj = {};
       // eslint-disable-next-line no-restricted-syntax
       for (const intersectionSlot of intersectionSlots) {
         errorMessage += ` slot${intersectionSlot}`;
+        slotsObj[`slot${intersectionSlot}`] = true;
       }
       errorMessage += ' are already present and booked for ';
       errorMessage += customError;
@@ -107,6 +103,12 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
         throw new SlotsOccupiedError({
           data: {
             message: errorMessage,
+            batchInfo: {
+              slots: slotsObj,
+              bookingDate,
+              code: batchCode,
+              id: batchId,
+            },
           },
         });
       }

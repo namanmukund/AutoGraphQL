@@ -60,9 +60,9 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
     appName,
   } = userAndAppInfo;
   context.appName = appName;
-
+  const sessionType = get(params, 'input.sessionType') || 'trial';
   // validate input before proceeding
-  validateMentorSessionInput(params, '', context);
+  validateMentorSessionInput(params, '', context, userRoleFromContext, sessionType);
   // check if the document for called user and availabilityDate is already present
   const userId = get(params, 'userConnectId');
   // courseId not mandatory for mentorSession
@@ -86,7 +86,6 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
     throw new UserMismatchError();
   }
 
-  const sessionType = get(params, 'input.sessionType') || 'trial';
   // throw error if document already exists
   const getMentorSessionsRes = await callLocalGraphqlApi(
     getMentorSessions(

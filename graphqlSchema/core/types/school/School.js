@@ -19,6 +19,8 @@ const School = `
     schoolPicture: File @relation(name: "SchoolPicture", direction: "OneWay")
     hubspotId: String
     schoolCampaignCode: String @unique @trim
+    isWhatsAppCommsEnabled: Boolean @defaultValue(value: "false")
+    isEmailCommsEnabled: Boolean @defaultValue(value: "false")
   }
 `;
 export default [School];

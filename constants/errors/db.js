@@ -5,6 +5,10 @@ export const DatabaseRecordNotFoundError = createError('DatabaseRecordNotFoundEr
   message: 'Database record not found',
 });
 
+export const FileUploadConnectionFailedError = createError('FileUploadConnectionFailedError', {
+  message: 'File uploaded but connection failed due to connection record not found',
+});
+
 export const UserAlreadyExistsError = createError('UserAlreadyExistsError', {
   message: 'User already exist',
 });
@@ -213,6 +217,10 @@ export const ChapterWithSimilarTitleAlreadyExist = createError('ChapterWithSimil
   message: 'Chapter with similar title already exist.',
 });
 
+export const LeadPartnerWithSimilarTitleAlreadyExist = createError('LeadPartnerWithSimilarTitleAlreadyExist', {
+  message: 'Lead Partner with similar title already exist.',
+});
+
 export const TopicWithSimilarTitleAlreadyExist = createError('TopicWithSimilarTitleAlreadyExist', {
   message: 'Topic with similar title already exist.',
 });
@@ -249,6 +257,14 @@ export const LOWithSimilarTitleAlreadyExist = createError('LOWithSimilarTitleAlr
   message: 'LO with similar title already exist.',
 });
 
+export const BatchMustHaveAtleastOneSession = createError('BatchMustHaveAtleastOneSession', {
+  message: 'B2B batch must have atleast one batch session for adding Adhoc session.',
+});
+
+export const SessionMustBeCompletedError = createError('SessionMustBeCompletedError', {
+  message: 'Batch Session must be completed to add Adhoc session of same topic.',
+});
+
 export const NotBroadcastedMentor = createError('NotBroadcastedMentor', {
   message: 'Slot not broadcasted to the mentor',
 });
@@ -267,4 +283,20 @@ export const SlotAlreadyFilled = createError('SlotAlreadyFilled', {
 
 export const SessionAlreadyAssigned = createError('SessionAlreadyAssigned', {
   message: 'The session is already assigned',
+});
+
+export const FileNameAlreadyExists = createError('FileNameAlreadyExists', {
+  message: 'File with same name already exists!',
+});
+
+export const SenseiProfileAlreadyExist = createError('SenseiProfileAlreadyExist', {
+  message: 'Sensei Profile already exist for the user',
+});
+
+export const UserWithSimilarNumberAlreadyExist = createError('UserWithSimilarNumberAlreadyExist', {
+  message: 'User with similar phone number already exist.',
+});
+
+export const UserWithSimilarEmailAlreadyExist = createError('UserWithSimilarEmailAlreadyExist', {
+  message: 'User with similar email already exist.',
 });
