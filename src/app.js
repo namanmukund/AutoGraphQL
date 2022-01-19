@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import { ApolloServer, PubSub } from 'apollo-server-express';
+import { BaseRedisCache } from 'apollo-server-cache-redis';
 import schema from './graphql';
 import { log, types } from '../utils';
 import { authMiddleware, graphqlUpload } from './middlewares';
@@ -12,6 +13,7 @@ import dataExtractedFromReq from '../constants/dataExtractedFromReq';
 import { getParsedASTMap } from './autoGenerate/utils';
 import routes from './phonePeAPI/routes';
 import typeformRoute from './typeformAPI';
+import redis from './redis';
 
 const http = require('http');
 
@@ -77,6 +79,12 @@ const server = new ApolloServer({
   },
   debug: true,
   uploads: false,
+  cache: new BaseRedisCache({
+    client: redis,
+  }),
+  cacheControl: {
+    defaultMaxAge: 5,
+  },
   formatError: (error) => {
     if (error.name !== 'GraphQLError') {
       Raven.captureException(error);
@@ -96,6 +104,7 @@ const server = new ApolloServer({
         ...connection.context,
         pubsub,
         parsedASTMap,
+        redis,
       };
     }
     // file info from middleware
@@ -150,6 +159,7 @@ const server = new ApolloServer({
       filePayload,
       pubsub,
       parsedASTMap,
+      redis,
     };
   },
 });

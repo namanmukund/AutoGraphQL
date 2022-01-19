@@ -109,6 +109,7 @@ import TaskCompletionStatus from './TaskCompletionStatus';
 import TaskLeadStatus from './TaskLeadStatus';
 import TaskBookingStatus from './TaskBookingStatus';
 import TaskContactReason from './TaskContactReason';
+import CacheControlScope from './CacheControlScope';
 
 export default [
   Status,
@@ -223,4 +224,5 @@ export default [
   TaskLeadStatus,
   TaskBookingStatus,
   TaskContactReason,
+  CacheControlScope,
 ];

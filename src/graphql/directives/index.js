@@ -37,6 +37,13 @@ directive @groupBy on FIELD
 
 # relational field where count can be fetched using filters
 directive @relationalMeta on FIELD
+
+# cache control
+directive @cacheControl(
+  maxAge: Int
+  scope: CacheControlScope
+  inheritMaxAge: Boolean
+) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION
 `;
 
 export default directive;
