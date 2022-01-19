@@ -17,6 +17,7 @@ const CommsDataField = `
     pincode
     eventUpdateReason
     eventCancellationReason
+    eventCertificateLink
   }`;
 
 export default CommsDataField;
