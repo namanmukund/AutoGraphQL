@@ -13,6 +13,8 @@ import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/valida
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import { log } from '../../../../../../utils';
+import { QueryController, RedisController } from '../../../controllers';
 // import { parseBadges } from '../utils/parseBadges';
 // import { sortBadges } from '../utils/sortBadges';
 
@@ -683,6 +685,7 @@ const menteeCourseSyllabusMutationResolver = async (
   ast,
   context,
 ) => {
+  const mcsMRTime = process.hrtime();
   /*
   Calling method to validate token and return userId.
   we will compare this userId against userId passed in input
@@ -694,6 +697,13 @@ const menteeCourseSyllabusMutationResolver = async (
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;
+  const redisClient = new RedisController({
+    bypass: true,
+  });
+  const cachedResponse = await redisClient.get(userId)
+  if (cachedResponse) {
+    return cachedResponse
+  }
   let batchCurrentComponentInfo;
   let schoolInfo;
   let currentTopicComponentInfo;
@@ -717,6 +727,10 @@ const menteeCourseSyllabusMutationResolver = async (
 
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
+    console.log({
+      userId,
+      courseId,
+    });
     const res = await callLocalGraphqlApi(
       getUserCurrentTopicComponentStatus(userId, courseId),
       context,
@@ -743,8 +757,273 @@ const menteeCourseSyllabusMutationResolver = async (
       }
     }
 
+    const start = process.hrtime();
     const getMentorMenteeSessionsRes = await callLocalGraphqlApi(getMentorMenteeSessions(userId, courseId));
-    mentorMenteeSessions = get(getMentorMenteeSessionsRes, 'data.mentorMenteeSessions');
+    // mentorMenteeSessions = get(getMentorMenteeSessionsRes, 'data.mentorMenteeSessions');
+    const stop = process.hrtime(start);
+    log(`Time Taken to execute graphQL operation: ${(stop[0] * 1e9 + stop[1]) / 1e9} seconds`);
+
+    const mongoStart = process.hrtime();
+    const modelQuery = new QueryController('MentorMenteeSession', { bypass: true });
+    mentorMenteeSessions = await modelQuery.aggregate([
+      {
+        $match: {
+          sessionStatus: 'completed',
+          'course.typeId': courseId,
+        },
+      },
+      {
+        $lookup: {
+          from: 'MenteeSession',
+          let: {
+            menteeSession: '$menteeSession.typeId',
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$id', '$$menteeSession'],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: 'User',
+                let: {
+                  user: '$user.typeId',
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $eq: ['$id', '$$user'],
+                      },
+                    },
+                  },
+                ],
+                as: 'user',
+              },
+            },
+            {
+              $unwind: '$user',
+            },
+          ],
+          as: 'menteeSession',
+        },
+      },
+      {
+        $match: {
+          'menteeSession.user.id': userId,
+        },
+      },
+      {
+        $lookup: {
+          from: 'MentorSession',
+          let: {
+            mentorSession: '$mentorSession.typeId',
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$id', '$$mentorSession'],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: 'User',
+                let: {
+                  user: '$user.typeId',
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $eq: ['$id', '$$user'],
+                      },
+                    },
+                  },
+                  {
+                    $lookup: {
+                      from: 'File',
+                      let: {
+                        profilePic: '$profilePic.typeId',
+                      },
+                      pipeline: [
+                        {
+                          $match: {
+                            $expr: {
+                              $eq: ['$id', '$$profilePic'],
+                            },
+                          },
+                        },
+                      ],
+                      as: 'profilePic',
+                    },
+                  },
+                  {
+                    $unwind: '$profilePic',
+                  },
+                ],
+                as: 'user',
+              },
+            },
+            {
+              $unwind: '$user',
+            },
+          ],
+          as: 'mentorSession',
+        },
+      },
+      {
+        $unwind: {
+          path: '$mentorSession',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $unwind: {
+          path: '$menteeSession',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'Topic',
+          let: {
+            topic: '$topic.typeId',
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$id', '$$topic'],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: 'Chapter',
+                let: {
+                  chapter: '$chapter.typeId',
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $eq: ['$id', '$$chapter'],
+                      },
+                    },
+                  },
+                ],
+                as: 'chapter',
+              },
+            },
+            {
+              $unwind: '$chapter',
+            },
+            {
+              $lookup: {
+                from: 'File',
+                let: {
+                  thumbnail: '$thumbnail.typeId',
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $eq: ['$id', '$$thumbnail'],
+                      },
+                    },
+                  },
+                ],
+                as: 'thumbnail',
+              },
+            },
+            {
+              $unwind: '$thumbnail',
+            },
+            {
+              $lookup: {
+                from: 'File',
+                let: {
+                  thumbnailSmall: '$thumbnailSmall.typeId',
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $eq: ['$id', '$$thumbnailSmall'],
+                      },
+                    },
+                  },
+                ],
+                as: 'thumbnailSmall',
+              },
+            },
+            {
+              $unwind: '$thumbnailSmall',
+            },
+          ],
+          as: 'topic',
+        },
+      },
+      {
+        $unwind: {
+          path: '$topic',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          id: 1,
+          isSubmittedForReview: 1,
+          topic: {
+            id: 1,
+            title: 1,
+            order: 1,
+            chapter: {
+              id: 1,
+              title: 1,
+              order: 1,
+            },
+            thumbnail: {
+              id: 1,
+              uri: 1,
+              name: 1,
+            },
+            thumbnailSmall: {
+              id: 1,
+              uri: 1,
+              name: 1,
+            },
+            description: 1,
+          },
+          sessionEndDate: 1,
+          sessionStartDate: 1,
+          sessionStatus: 1,
+          menteeSession: {
+            id: 1,
+          },
+          mentorSession: {
+            id: 1,
+            user: {
+              id: 1,
+              name: 1,
+              profilePic: {
+                id: 1,
+                uri: 1,
+                name: 1,
+              },
+            },
+          },
+        },
+      },
+    ]);
+    const mongoStop = process.hrtime(mongoStart);
+    log(`Time Taken to execute mongodb aggregation: ${(mongoStop[0] * 1e9 + mongoStop[1]) / 1e9} seconds`);
+    // log(`DATA ${JSON.stringify(mongoData)}`);
     // menteeSessions and mentorMenteeSessions will be called if user is not from batch
     if (batchCurrentComponentInfo) {
       const batchId = get(res, 'data.userCurrentTopicComponentStatuses[0].user.studentProfile.batch.id');
@@ -1326,7 +1605,12 @@ const menteeCourseSyllabusMutationResolver = async (
       topicId: prevTopicId,
     },
   });
-
+  const mcsMRTimeStop = process.hrtime(mcsMRTime);
+  log(`Time Taken to execute mcsMR : ${(mcsMRTimeStop[0] * 1e9 + mcsMRTimeStop[1]) / 1e9} seconds`);
+  redisClient.set(
+    currentUserSyllabus,
+    { hkey: userId , maxAge: 60 }
+  );
   return currentUserSyllabus;
 };
 
