@@ -64,8 +64,9 @@ import updateMentorDemandSlotPostHookMethod from './postHookFunctions/updateMent
 import updateDemoWowAuditPostHookMethod from './postHookFunctions/updateDemoWowAuditPostHookMethod';
 import updateEventPostHookMethod from './postHookFunctions/updateEventPostHookMethod';
 import addEventPostHookMethod from './postHookFunctions/addEventPostHookMethod';
+import fetchEventPostHookMethod from './postHookFunctions/fetchEventPostHookMethod';
 
-const posthook = async (input, mutationName, context, params) => {
+const posthook = async (input, mutationName, context, params, info) => {
   switch (mutationName) {
     case 'deleteFile': {
       const { uri } = input;
@@ -343,6 +344,10 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateEvent': {
       await updateEventPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'event': {
+      await fetchEventPostHookMethod(input, params, mutationName, context, info);
       break;
     }
     default:

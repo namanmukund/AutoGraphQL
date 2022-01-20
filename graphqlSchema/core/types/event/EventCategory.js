@@ -9,7 +9,9 @@ const EventCategory = `
   @appPermissions(
         permissions:[
           { appName: "${TLA}" operations: ${READ} },
-          { appName: "${TWA}" operations: ${READ} }
+          { appName: "${TWA}" operations: ${READ} },
+          { appName: "${TMS}" operations: "*" },
+          { appName: "${TBA}" operations: "*" },
           ],
         rule: allow
       )
