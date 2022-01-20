@@ -160,7 +160,7 @@ const defaultMutationsResolverWrapper = async (
     } else {
       newResult = toObject(result);
     }
-    const dbData = await posthook(newResult, mutationName, context, params);
+    const dbData = await posthook(newResult, mutationName, context, params, info);
     // allow subscription on defined events
     subscribeToEvents(
       typeName,
@@ -297,7 +297,7 @@ Object.keys(parsedASTMap).forEach((type) => {
           authentication,
         ).then(async (result) => {
           const newResult = toObject(result);
-          const postHookResult = await posthook(newResult, modelSingular, context, params);
+          const postHookResult = await posthook(newResult, modelSingular, context, params, info);
           return postHookResult;
         });
       });
@@ -324,7 +324,7 @@ Object.keys(parsedASTMap).forEach((type) => {
           authentication,
         ).then(async (result) => {
           const newResult = toObject(result);
-          const postHookResult = await posthook(newResult, modelSingular, context, params);
+          const postHookResult = await posthook(newResult, modelSingular, context, params, info);
           return postHookResult;
         });
       });
@@ -527,7 +527,7 @@ Object.keys(parsedASTMap).forEach((type) => {
               connectedTypeName: relatedType,
               connectedFieldName: relatedTypeField,
             });
-            return posthook(newResult, addRelationMutationName, context, params);
+            return posthook(newResult, addRelationMutationName, context, params, info);
           });
         },
         [removeRelationMutationName]: async (root, params, context, info) => {
@@ -560,7 +560,7 @@ Object.keys(parsedASTMap).forEach((type) => {
               connectedFieldName: relatedTypeField,
             });
 
-            return posthook(newResult, removeRelationMutationName, context, params);
+            return posthook(newResult, removeRelationMutationName, context, params, info);
           });
         },
       };

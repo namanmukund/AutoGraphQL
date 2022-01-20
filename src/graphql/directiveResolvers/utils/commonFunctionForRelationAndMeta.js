@@ -147,7 +147,7 @@ const commonFunctionForRelationAndMeta = async (
       authentication,
     ).then(async (res) => {
       const finalRelationValue = addAdditionalRelationFieldsToResponse(result, res);
-      const postHookResult = await posthook(finalRelationValue, modelSingular, context, params);
+      const postHookResult = await posthook(finalRelationValue, modelSingular, context, params, info);
       return postHookResult;
     });
   }
@@ -181,7 +181,7 @@ const commonFunctionForRelationAndMeta = async (
     true, // Allow multiple
   ).then(async (res) => {
     const finalRelationValue = addAdditionalRelationFieldsToResponse([result], [res]);
-    const postHookResult = await posthook(finalRelationValue[0], modelSingular, context, params);
+    const postHookResult = await posthook(finalRelationValue[0], modelSingular, context, params, info);
     return postHookResult;
   });
 };
