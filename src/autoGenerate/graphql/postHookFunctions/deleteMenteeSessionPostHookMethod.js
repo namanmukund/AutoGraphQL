@@ -22,7 +22,7 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
   const clientId = get(userInfo, 'data.user.id', '');
-  const isItMentorChild = isMentorChild(clientId);
+  const isItMentorChild = await isMentorChild(clientId);
 
   const studentName = get(userInfo, 'data.user.name', '');
   const parentName = get(userInfo, 'data.user.studentProfile.parents[0].user.name', '');

@@ -68,7 +68,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
     const isNotSourceSchool = get(userInfo, 'data.user.source') !== userSourceOrigin.school;
     const isBatchExist = get(userInfo, 'data.user.studentProfile.batch', false);
-    const isMentorChild = IsMentorChild(get(userInfo, 'data.user.id'));
+    const isMentorChild = await IsMentorChild(get(userInfo, 'data.user.id'));
     if (typeof isTrialSession === 'boolean' && isTrialSession && isNotSourceSchool && !isBatchExist) {
       await mentorAvailabilitySlotOperation({
         slotTimeStringArray,

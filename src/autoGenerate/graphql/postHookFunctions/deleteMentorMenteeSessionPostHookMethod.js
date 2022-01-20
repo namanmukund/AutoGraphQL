@@ -61,8 +61,8 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       });
       addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMentorMenteeSession', batchCode, mentorSessionId, sessionStatus, updateMentorMenteeSessionInput);
     }
-
-    if (!isMentorChild(userId)) {
+    const isItMentorChild = await isMentorChild(userId);
+    if (!isItMentorChild) {
       const studentName = get(menteeSession, 'data.menteeSession.user.name');
       const parentName = get(menteeSession, 'data.menteeSession.user.studentProfile.parents[0].user.name');
       if (get(menteeSession, 'data.menteeSession.topic.order') === 1) {

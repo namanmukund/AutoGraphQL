@@ -81,7 +81,8 @@ const updateUserPostHookMethod = async (input, mutationName, context) => {
       agentName = await fetchAgentName(get(context, 'currentUser.id'));
     }
     const user = await fetchUser(userId);
-    if (!isMentorChild(userId)) {
+    const isItMentorChild = await isMentorChild(userId);
+    if (!isItMentorChild) {
       updateUserLeadSquared(
         get(user, 'studentProfile.parents[0].user.phone.number'),
         agentName,

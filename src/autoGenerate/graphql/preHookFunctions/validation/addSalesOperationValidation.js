@@ -1,3 +1,4 @@
+/*eslint-disable*/
 import { get } from 'lodash';
 import { ConnectIdRequiredError } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
@@ -19,7 +20,8 @@ query{
 
 const addSalesOperationValidation = async (params) => {
   const { clientConnectId, monitoredByConnectId, courseConnectId } = params;
-  if (isMentorChild(clientConnectId)) {
+  const isItMentorChild = await isMentorChild(clientConnectId);
+  if (isItMentorChild) {
     throw new CurrentChildIsMentorChild();
   }
   if (!clientConnectId && !monitoredByConnectId && !courseConnectId) {

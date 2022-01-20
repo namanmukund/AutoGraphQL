@@ -71,8 +71,9 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
     const sessionStatus = get(input, 'sessionStatus');
     const mentorMenteeSessionId = get(input, 'id');
     const mentorMenteeSessionDoc = await getMentorMenteeSessionData(mentorMenteeSessionId);
+    const isItMentorChild = await isMentorChild(clientId);
     context.previousDocument = mentorMenteeSessionDoc;
-    if (!isMentorChild(clientId)) {
+    if (!isItMentorChild) {
       if (get(input, 'sessionStatus') === 'started') {
         setSessionStartedLeadsquared(userInfo, topicInfo);
         updateHomeworkStreaksMethod(clientId, context, topicId, input);
