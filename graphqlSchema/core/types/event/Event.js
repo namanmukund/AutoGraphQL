@@ -97,7 +97,7 @@ const Event = `
     overview: String
     utm: [UTMParameters]
     isListedOnWeb: Boolean
-    status: ContentStatus
+    status: ContentStatus @defaultValue(value: "unpublished")
     sessionCreationStatus: BatchCreationStatus
     embeds: [EventCertificateEmbed] @relation(name: "EventCertificateEmbedEvent", direction: "OneWay")
     baseCertificate: File @relation(name: "BaseCertificateEvent", direction: "OneWay")
