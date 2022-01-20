@@ -1,7 +1,6 @@
 import {
   TBA, TLA, TMS, TWA,
 } from '../../../../constants';
-import { READ } from '../../../../constants/graphqlOperations';
 
 const EventAttendance = `
 type EventAttendance @model {
@@ -66,8 +65,8 @@ const Event = `
     permissions:[
       { appName: "${TMS}" operations: "*" }, 
       { appName: "${TBA}" operations: "*" }, 
-      { appName: "${TLA}" operations: ${READ} },
-      { appName: "${TWA}" operations: ${READ} },
+      { appName: "${TLA}" operations: "*" },
+      { appName: "${TWA}" operations: "*" },
       ], 
     rule: allow
   )
@@ -106,13 +105,6 @@ const Event = `
     prizes: [EventPrize] @relation(name: "EventPrizeEvent")
     tags: [ContentTag] @relation(name: "ContentTagEvent")
     registeredUsers: [StudentProfile] @relation(name:"EventStudentProfile")
-    @appPermissions(
-        permissions:[
-          { appName: "${TMS}" operations: "*" },
-          { appName: "${TBA}" operations: "*" },
-          ],
-        rule: allow
-      ) 
     commsVariables: [CommsVariable] @relation(name: "CommsVariableEvent")
     isSchoolEvent: Boolean
     eventBanner: File @relation(name: "EventBannerEvent", direction: "OneWay")

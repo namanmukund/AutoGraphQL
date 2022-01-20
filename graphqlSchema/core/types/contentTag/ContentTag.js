@@ -1,8 +1,18 @@
-import { TBA, TMS } from '../../../../constants';
+import {
+  TBA, TLA, TMS, TWA,
+} from '../../../../constants';
+import { READ } from '../../../../constants/graphqlOperations';
 
 const ContentTag = `
   type ContentTag @model 
   @userToken(isRequired:"false")
+  @appPermissions(
+      permissions:[
+        { appName: "${TLA}" operations: ${READ} },
+        { appName: "${TWA}" operations: ${READ} }
+        ],
+      rule: allow
+    )
   {
     title: String! @unique @trim
     status: ContentStatus @defaultValue(value: "unpublished")
@@ -10,7 +20,8 @@ const ContentTag = `
     @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
-          { appName: "${TMS}" operations: "*" }],
+          { appName: "${TMS}" operations: "*" }
+        ],
         rule: allow
       ) 
     workbook: [Workbook] @relation(name: "WorkbookContentTag")
@@ -35,6 +46,12 @@ const ContentTag = `
         rule: allow
       ) 
     events: [Event] @relation(name: "ContentTagEvent")
+    @appPermissions(
+        permissions:[
+          { appName: "${TBA}" operations: "*" },
+          { appName: "${TMS}" operations: "*" }],
+        rule: allow
+      ) 
     tagStatus : EventStatus
     displayOnWebsite: Boolean
     isEventTag: Boolean
