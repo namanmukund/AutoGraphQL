@@ -1,3 +1,8 @@
+import {
+  TBA, TLA, TMS, TWA,
+} from '../../../../constants';
+import { READ } from '../../../../constants/graphqlOperations';
+
 const EventAttendance = `
 type EventAttendance @model {
   user: User! @relation(name:"EventAttendanceUser")
@@ -56,6 +61,16 @@ const UTMParameters = `
 
 const Event = `
   type Event @model
+  @userToken(isRequired:"false") 
+  @appPermissions(
+    permissions:[
+      { appName: "${TMS}" operations: "*" }, 
+      { appName: "${TBA}" operations: "*" }, 
+      { appName: "${TLA}" operations: ${READ} },
+      { appName: "${TWA}" operations: ${READ} },
+      ], 
+    rule: allow
+  )
   {
     eventType: EventType @defaultValue(value: "radioStreet")
     eventName: EventName @defaultValue(value: "spySquadCamp")
@@ -82,7 +97,7 @@ const Event = `
     overview: String
     utm: [UTMParameters]
     isListedOnWeb: Boolean
-    status: ContentStatus
+    status: ContentStatus @defaultValue(value: "unpublished")
     sessionCreationStatus: BatchCreationStatus
     embeds: [EventCertificateEmbed] @relation(name: "EventCertificateEmbedEvent", direction: "OneWay")
     baseCertificate: File @relation(name: "BaseCertificateEvent", direction: "OneWay")
@@ -90,8 +105,14 @@ const Event = `
     eventCommsRule: [EventCommsRule]
     prizes: [EventPrize] @relation(name: "EventPrizeEvent")
     tags: [ContentTag] @relation(name: "ContentTagEvent")
-    registeredUsers: [StudentProfile] @relation(name:"EventRegisteredStudentProfile", direction: "OneWay")
-    congratulatedStudents: [StudentProfile] @relation(name:"EventCongratsStudentProfile", direction: "OneWay")
+    registeredUsers: [StudentProfile] @relation(name:"EventStudentProfile")
+    @appPermissions(
+        permissions:[
+          { appName: "${TMS}" operations: "*" },
+          { appName: "${TBA}" operations: "*" },
+          ],
+        rule: allow
+      ) 
     commsVariables: [CommsVariable] @relation(name: "CommsVariableEvent")
     isSchoolEvent: Boolean
     eventBanner: File @relation(name: "EventBannerEvent", direction: "OneWay")

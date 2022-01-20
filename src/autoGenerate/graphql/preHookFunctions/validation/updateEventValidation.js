@@ -1,6 +1,8 @@
 import { get } from 'lodash';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
+import validateBookingDate from './utils/validateBookingDate';
 
 const getEventTimeTableRule = async (eventId) => {
   const query = `{
@@ -28,9 +30,16 @@ const getEventTimeTableRule = async (eventId) => {
 
 const updateEventValidation = async (params, input, mutationName, context) => {
   const { id: eventId } = params;
-  const prevTimeTableRule = await getEventTimeTableRule(eventId);
-  context.prevTimeTableRule = get(prevTimeTableRule, 'eventTimeTableRule');
-  context.previousEventStatus = get(prevTimeTableRule, 'status');
+  const eventTimeTableRule = get(params, 'input.eventTimeTableRule');
+  if (get(eventTimeTableRule, 'startDate')) {
+    const { startDate, ...slots } = eventTimeTableRule;
+    const slotsTime = getSelectedSlotsTime(slots);
+    validateBookingDate(startDate, slotsTime, 0);
+    context.prevSlotTimes = slotsTime;
+  }
+  const eventData = await getEventTimeTableRule(eventId);
+  context.prevTimeTableRule = get(eventData, 'eventTimeTableRule');
+  context.previousEventStatus = get(eventData, 'status');
 };
 
 export default updateEventValidation;

@@ -6,6 +6,7 @@ import {
 } from './utils/updateEventPostHookQueries';
 import sendCommsForUpdatedEvents from './utils/sendCommsForUpdatedEvents';
 import addToSchedule from '../../../../utils/scheduleJobs/addToSchedule';
+import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
 /*
   Post hook of update event
 */
@@ -24,18 +25,20 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
     prevTimeTableRule,
     previousEventStatus,
   } = context;
-  addUpdateEventSessionsForEvent(eventId, timeTableRule, prevTimeTableRule, registeredUsers);
-  const isEventRescheduled = (get(timeTableRule, 'startDate') !== get(prevTimeTableRule, 'startDate')
-  || get(timeTableRule, 'endDate') !== get(prevTimeTableRule, 'endDate'));
+  const { ...slots } = timeTableRule;
+  const slotsTime = getSelectedSlotsTime(slots);
+  const isEventRescheduled = (get(prevTimeTableRule, 'startDate') && get(timeTableRule, 'startDate') !== get(prevTimeTableRule, 'startDate'))
+    || (slotsTime.length && get(context, 'prevSlotTimes').length && slotsTime[0] !== get(context, 'prevSlotTimes')[0]);
   if (isEventRescheduled) {
+    addUpdateEventSessionsForEvent(eventId, timeTableRule, prevTimeTableRule, registeredUsers);
     if (shouldSendRescheduledComms) {
       sendCommsForUpdatedEvents(eventId, eventRescheduledReason, 'rescheduled');
     }
   }
-  if (previousEventStatus === 'cancelled' && shouldSendCanceledComms) {
+  if ((previousEventStatus !== 'cancelled' && eventStatus === 'cancelled') && shouldSendCanceledComms) {
     sendCommsForUpdatedEvents(eventId, eventCancellationReason, 'canceled');
   }
-  if (eventStatus === 'published' || isEventRescheduled) {
+  if ((previousEventStatus !== 'published' && eventStatus === 'published') || isEventRescheduled) {
     for (const eventCommsRule of eventCommsRules) {
       if (!get(eventCommsRule, 'isSend') && get(eventCommsRule, 'condition') !== 'afterRegistration') {
         const dateCondition = get(eventCommsRule, 'condition', null);
