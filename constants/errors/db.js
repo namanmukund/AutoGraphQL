@@ -302,5 +302,17 @@ export const UserWithSimilarEmailAlreadyExist = createError('UserWithSimilarEmai
 });
 
 export const CurrentChildIsMentorChild = createError('CurrentChildIsMentorChild', {
-  message: 'Current child is a mentor child',
+  message: 'Sales Operation is not permitted for Mentor.',
+});
+
+export const SpeakerProfileAlreadyExist = createError('SpeakerProfileAlreadyExist', {
+  message: 'Speaker Profile already exist for the user',
+});
+
+export const CommsVariableAlreadyExist = createError('CommsVariableAlreadyExist', {
+  message: 'Variables with similar data field already exist',
+});
+
+export const CategoryAlreadyExist = createError('CategoryAlreadyExist', {
+  message: 'Category with similar title already exist',
 });

@@ -31,7 +31,7 @@ const User = `
     phoneOtpCreationDate: Date @writeOnly
     emailOtp: Int @writeOnly
     emailOtpCreationDate: Date @writeOnly
-    name: String @trim
+    name: String @trim @nameCase
     role: UserRole! @defaultValue(value: "selfLearner") ${getPermissionSchemaString('User', 'role')}
     status: Status! @defaultValue(value: "active") @readOnly
     username: String @uniqueOrEmpty @trim
@@ -59,13 +59,14 @@ const User = `
     campaign: Campaign @relation(name:"UserCampaign", direction: "OneWay")
     profilePic: File @relation(name: "UserProfilePic", direction: "OneWay", isSubset: true)
     userLocationLog: UserLocationLog @relation(name:"UserLocationLogUser", isSubset: true) 
+    userDeviceLog: UserDeviceLog @relation(name:"UserDeviceLogUser", isSubset: true) 
     utmSource: String
     utmCampaign: String
     utmTerm: String
     utmContent: String
     utmMedium: String
     source: UserOriginSource @defaultValue(value: "website")
-    ${affilateInfo}  
+    ${affilateInfo}
     ${socialInfo}
     ${promotionalInfo}
     verificationStatus: VerificationStatus @defaultValue(value: "unverified")
@@ -78,6 +79,7 @@ const User = `
     resetPasswordFromLink: Boolean @defaultValue(value: "false")
     senseiProfile: SenseiProfile @relation(name:"SenseiProfileUser", isSubset: true)
     lastActive: Date
+    eventSpeakerProfile: EventSpeakerProfile @relation(name: "EventSpeakerProfileUser",  isSubset: true)
   }
 `;
 
