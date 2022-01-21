@@ -17,7 +17,7 @@ const isUserIsMentorChild = async (userId) => {
   const userData = await callLocalGraphqlApi(mentorChildCheckQuery(userId));
   const mentorChildId = get(userData, 'data.user.studentProfile.mentor.id', null);
 
-  return mentorChildId !== null;
+  return Boolean(mentorChildId);
 };
 
 export default isUserIsMentorChild;
