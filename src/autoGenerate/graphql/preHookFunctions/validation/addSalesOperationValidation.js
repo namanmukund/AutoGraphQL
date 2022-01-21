@@ -1,9 +1,11 @@
+/*eslint-disable*/
 import { get } from 'lodash';
 import { ConnectIdRequiredError } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
+import { SimilarDocumentAlreadyExistError, CurrentChildIsMentorChild } from '../../../../../constants/errors/db';
 import getUserSource from './utils/getUserSource';
 import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetailsInParams';
+import isMentorChild from '../../postHookFunctions/utils/isMentorChild';
 
 const salesOperationsMetaQuery = (clientConnectId, courseConnectId) => `
 query{
@@ -18,6 +20,10 @@ query{
 
 const addSalesOperationValidation = async (params) => {
   const { clientConnectId, monitoredByConnectId, courseConnectId } = params;
+  const isItMentorChild = await isMentorChild(clientConnectId);
+  if (isItMentorChild) {
+    throw new CurrentChildIsMentorChild();
+  }
   if (!clientConnectId && !monitoredByConnectId && !courseConnectId) {
     throw new ConnectIdRequiredError();
   }

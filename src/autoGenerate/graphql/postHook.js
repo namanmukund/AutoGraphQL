@@ -27,6 +27,7 @@ import updateUserPaymentInstallmentPostHookMethod from './postHookFunctions/upda
 import addMentorMenteeSessionPostHookMethod from './postHookFunctions/addMentorMenteeSessionPostHookMethod';
 import addUserPaymentPlanPostHookMethod from './postHookFunctions/addUserPaymentPlanPostHookMethod';
 import addUserCurrentTopicComponentStatusPostHookMethod from './postHookFunctions/addUserCurrentTopicComponentStatusPostHookMethod';
+import addUserPostHookMethod from './postHookFunctions/addUserPostHookMethod';
 import updateUserCurrentTopicComponentStatusPostHookMethod from './postHookFunctions/updateUserCurrentTopicComponentStatusPostHookMethod';
 import addBatchPostHookMethod from './postHookFunctions/addBatchPostHookMethod';
 import addBatchSessionPostHookMethod from './postHookFunctions/addBatchSessionPostHookMethod';
@@ -236,6 +237,10 @@ const posthook = async (input, mutationName, context, params, info) => {
     }
     case 'addUserSavedCode': {
       await addUserSavedCodePostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'addUser': {
+      await addUserPostHookMethod(input, params, mutationName, context);
       break;
     }
     case 'updateBatchSession': {

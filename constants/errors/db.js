@@ -301,6 +301,10 @@ export const UserWithSimilarEmailAlreadyExist = createError('UserWithSimilarEmai
   message: 'User with similar email already exist.',
 });
 
+export const CurrentChildIsMentorChild = createError('CurrentChildIsMentorChild', {
+  message: 'Sales Operation is not permitted for Mentor.',
+});
+
 export const SpeakerProfileAlreadyExist = createError('SpeakerProfileAlreadyExist', {
   message: 'Speaker Profile already exist for the user',
 });
