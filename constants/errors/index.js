@@ -121,6 +121,8 @@ import {
   UnsupportedListFieldInsideSubDocumentObjectError,
   InvalidRuleValueError,
   CommsError,
+  MultipleRegistrationError,
+  AlreadyRegisteredForEvent,
 } from './types';
 import {
   EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
@@ -317,4 +319,6 @@ export {
   PhoneOtpMaxRetryTimeLimitError,
   PhoneOtpPerDayLimitError,
   SpeakerProfileAlreadyExist,
+  MultipleRegistrationError,
+  AlreadyRegisteredForEvent,
 };

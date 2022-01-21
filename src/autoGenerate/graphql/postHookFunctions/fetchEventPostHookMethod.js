@@ -35,7 +35,7 @@ const fetchEventPostHookMethod = async (input, params, mutationName, context, in
     userIdFromContext,
     appName,
   } = userAndAppInfo;
-  if ((appName === TMS || appName === TBA) && userIdFromContext) return input;
+  if (appName === TMS || appName === TBA) return input;
   const userInfo = validateTokenAndExtractInformation(context, true);
   const {
     currentUser,
