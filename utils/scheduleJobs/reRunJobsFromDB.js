@@ -10,7 +10,7 @@ import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
 import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
 import sendEventRemainderComms from './jobs/sendEventRemainderComms';
-import sendEventComms from './jobs/sendEventComms';
+// import sendEventComms from './jobs/sendEventComms';
 import sendEventCommunication from './jobs/sendEventCommunication';
 
 const FETCH_JOBS = `{
@@ -213,12 +213,12 @@ const reRunJobsFromDB = async () => {
         });
         break;
       }
-      case 'eventComms': {
-        schedule.scheduleJob(new Date(scheduledDate), () => {
-          sendEventComms({ eventId, jobType }, deleteJob);
-        });
-        break;
-      }
+      // case 'eventComms': {
+      //   schedule.scheduleJob(new Date(scheduledDate), () => {
+      //     sendEventComms({ eventId, jobType }, deleteJob);
+      //   });
+      //   break;
+      // }
       case 'eventCommsJob': {
         schedule.scheduleJob(new Date(scheduledDate), () => {
           sendEventCommunication({ eventId, jobType, eventCommsRule }, deleteJob);
