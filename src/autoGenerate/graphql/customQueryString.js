@@ -16,6 +16,7 @@ getSchoolCampaignSlots (input: GetSchoolCampaignSlotsInput): [GetSchoolCampaignS
 getUserCourses (input: GetUserCoursesInput): [GetUserCoursesResults]
 getEventCertificate (input: GetEventCertificateInput): GetEventCertificateResult
 getMagicLink (input: GetMagicLinkInput): [GetMagicLinkOutput]
+getEventSpeaker (eventId: String): [GetEventSpeaker]
 `;
 
 export default customQueryString;

@@ -101,6 +101,7 @@ import generateCertificateInBulk from './mutation/methods/generateCertificateInB
 import getMagicLink from './query/methods/getMagicLink';
 import validateMagicLink from './mutation/methods/validateMagicLink';
 import resetPasswordAndLogin from './mutation/methods/resetPasswordAndLogin';
+import getEventSpeaker from './query/methods/getEventSpeaker';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -658,6 +659,8 @@ resolvers.Query.getUserCourses = getUserCourses;
 resolvers.Query.getSchoolCampaignSlots = getSchoolCampaignSlots;
 // Resolver to get magic link
 resolvers.Query.getMagicLink = getMagicLink;
+// Resolver to get event Speaker
+resolvers.Query.getEventSpeaker = getEventSpeaker;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 

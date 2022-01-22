@@ -4,7 +4,7 @@ import {
 import { READ } from '../../../../constants/graphqlOperations';
 
 const EventCategory = `
-  type EventCategory @model
+  type EventCategory @model 
   @appPermissions(
         permissions:[
           { appName: "${TLA}" operations: ${READ} },

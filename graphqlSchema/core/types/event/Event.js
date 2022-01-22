@@ -60,7 +60,6 @@ const UTMParameters = `
 
 const Event = `
   type Event @model
-  @userToken(isRequired:"false") 
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" }, 
