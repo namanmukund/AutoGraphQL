@@ -34,13 +34,15 @@ const getBatchAttendanceDetails = async (batchSessionId) => {
       student {
         user {
           name
-          parentProfile {
-            user {
-              name
-              email
-              phone {
-                countryCode
-                number
+          studentProfile {
+            parents {
+              user {
+                name
+                email
+                phone {
+                  countryCode
+                  number
+                }
               }
             }
           }
@@ -81,10 +83,11 @@ const scheduleB2BSessionMissed = async (batchSessionId) => {
   const sessionTopicLink = revisitLink;
   const nonAttendes = get(batchDetails, 'attendance', []).filter((attendee) => attendee.status === 'absent' || attendee.status === 'notAssigned');
   nonAttendes.forEach(async (attendee) => {
-    const studentName = get(attendee, 'student.user.name');
-    const parentName = get(attendee, 'student.user.parentProfile.user.name');
-    const parentEmail = get(attendee, 'student.user.parentProfile.user.email');
-    const parentPhone = get(attendee, 'student.user.parentProfile.user.phone.countryCode').split('+')[1] + get(attendee, 'student.user.parentProfile.user.phone.number');
+    const studentName = get(attendee, 'student.user.name', '-');
+    const parentName = get(attendee, 'student.user.studentProfile.parents[0].user.name', '-');
+    const parentEmail = get(attendee, 'student.user.studentProfile.parents[0].user.email', '-');
+    const parentPhone = get(attendee, 'student.user.studentProfile.parents[0].user.phone.countryCode', '+91').split('+')[1] + get(attendee, 'student.user.studentProfile.parents[0].user.phone.number');
+
     if (isWhatsAppCommsEnabled) {
       sendWhatsAppTemplateMessage(
         parentPhone,

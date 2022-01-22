@@ -35,14 +35,14 @@ const BATCH_SESSION = (batchSessionId) => `{
               id
               name
             }
-          }
-          parentProfile{
-            user {
-              id
-              name
-              phone {
-                countryCode
-                number
+            parents {
+              user {
+                id
+                name
+                phone {
+                  countryCode
+                  number
+                }
               }
             }
           }
@@ -116,10 +116,10 @@ const scheduleB2BSessionHomeworkRemainder = async (batchSessionId, deleteJob = (
   const revisitLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/sessions` : `${process.env.TEKIE_WEB_URL}/sessions`;
   students.forEach(async (student) => {
     const studentName = get(student, 'user.studentProfile.user.name', '');
-    const parentName = get(student, 'user.parentProfile.user.name', '-');
+    const parentName = get(student, 'user.studentProfile.parents[0].user.name', '-');
     const studentId = get(student, 'user.studentProfile.user.id', '');
-    const parentEmail = get(student, 'user.parentProfile.user.email', '');
-    const parentPhone = get(student, 'user.parentProfile.user.phone.countryCode', '+91').split('+')[1] + get(student, 'user.parentProfile.user.phone.number');
+    const parentEmail = get(student, 'user.studentProfile.parents[0].user.email', '');
+    const parentPhone = get(student, 'user.studentProfile.parents[0].user.phone.countryCode', '+91').split('+')[1] + get(student, 'user.studentProfile.parents[0].user.phone.number');
     const hasStudentSubmittedHomework = await isHomeworkSubmitted(topicId, courseId, studentId);
     if (!hasStudentSubmittedHomework) {
       if (isWhatsAppCommsEnabled) {

@@ -24,7 +24,7 @@ import isTrialSession from '../resolvers/utils/isTrialSession';
 import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import scheduleB2BSessionMissed from '../../../../utils/scheduleJobs/scheduleB2BSessionMissed';
-import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
+// import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -308,6 +308,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         addToSchedule('sendB2BHomeworkReminder', reminderDateTime, {
           batchSessionId,
         });
+        // console.log('scheduleB2BSessionMissed', scheduleB2BSessionMissed)
         scheduleB2BSessionMissed(batchSessionId);
         const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
         const topicsList = get(nextTopicQueryRes, 'data.topics');
@@ -417,7 +418,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   }
   const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
   extractBatchSessionAndSendB2BC(batchSessionId, students, context.isBookedByMentee, context.prevStudentsAttendanceCount === 0);
-  extractBatchSessionAndSendB2B(batchSessionId);
+  // console.log('extractBatchSessionAndSendB2B', extractBatchSessionAndSendB2B)
+  // extractBatchSessionAndSendB2B(batchSessionId);
   if (mentorSessionConnectId) {
     const mentorUser = await getMentor(mentorSessionConnectId);
     const { id: mentorUserId, phone } = mentorUser;

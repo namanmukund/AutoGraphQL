@@ -31,13 +31,13 @@ const BATCH_SESSION = (batchSessionId) => `{
               id
               name
             }
-          }
-          parentProfile{
-            user {
-              name
-              phone {
-                countryCode
-                number
+            parents {
+              user {
+                name
+                phone {
+                  countryCode
+                  number
+                }
               }
             }
           }
@@ -99,7 +99,7 @@ const scheduleB2BSessionReminder = async (batchSessionId, deleteJob = () => { })
     const getMagicLink = await getMagicLinkForUser(userId);
     const loginUrlForEmail = getMagicLink.length > 0 ? get(getMagicLink, '[0].linkUri', '') : loginUrlForWhatsapp;
     const studentName = get(student, 'user.studentProfile.user.name', '-');
-    const phoneNumber = get(student, 'user.parentProfile.user.phone.countryCode', '+91').split('+')[1] + get(student, 'user.parentProfile.user.phone.number');
+    const phoneNumber = get(student, 'user.studentProfile.parents[0].user.phone.countryCode', '+91').split('+')[1] + get(student, 'user.studentProfile.parents[0].user.phone.number');
     if (isWhatsAppCommsEnabled) {
       sendWhatsAppTemplateMessage(
         phoneNumber,
@@ -135,7 +135,7 @@ const scheduleB2BSessionReminder = async (batchSessionId, deleteJob = () => { })
     }
     if (isEmailCommsEnabled) {
       sendSessionRemainderMail(
-        get(student, 'user.parentProfile.user.email'),
+        get(student, 'user.studentProfile.parents[0].user.email'),
         {
           topicTitle, studentName, schoolName, loginUrl: loginUrlForEmail, date, startTime,
         },
