@@ -12,6 +12,11 @@ const UpdateParentChildDetailInput = `
     hasLaptopOrDesktop: Boolean
     referralCode: String
     schoolName: String
+    browser: String
+    browserVersion: String
+    deviceType: String
+    deviceOs: String
+    osVersion: String
   }
 `;
 
