@@ -10,6 +10,7 @@ import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentCompone
 import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
 import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 import extractBatchSessionAndSendB2BC from './utils/extractBatchSessionAndSendB2BC';
+import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 import addSessionLog from './utils/addSessionLog';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import isTrialSession from '../resolvers/utils/isTrialSession';
@@ -205,6 +206,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   }
   const studentsId = (students && students.length) ? students.map((student) => get(student, 'id')) : [];
   extractBatchSessionAndSendB2BC(batchSessionId, studentsId, false);
+  extractBatchSessionAndSendB2B(batchSessionId);
 
   // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
   // mentorSessionConnectId made non-mandatory

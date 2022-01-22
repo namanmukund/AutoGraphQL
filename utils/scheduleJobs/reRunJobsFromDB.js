@@ -9,6 +9,8 @@ import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
 import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
 import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
+import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
+import scheduleB2BSessionHomeworkRemainder from './scheduleB2BSessionHomeworkRemainder';
 
 const FETCH_JOBS = `{
   scheduleJobs {
@@ -72,6 +74,26 @@ const reRunJobsFromDB = async () => {
     const isPast = moment().isAfter(scheduledDate);
     const userId = get(parent, 'id');
     switch (jobType) {
+      case 'sendB2BReminder': {
+        if (isPast) {
+          scheduleB2BSessionReminder(batchSessionId, deleteJob);
+        } else {
+          schedule.scheduleJob(new Date(scheduledDate), () => {
+            scheduleB2BSessionReminder(batchSessionId, deleteJob);
+          });
+        }
+        break;
+      }
+      case 'sendB2BHomeworkReminder': {
+        if (isPast) {
+          scheduleB2BSessionHomeworkRemainder(batchSessionId, deleteJob);
+        } else {
+          schedule.scheduleJob(new Date(scheduledDate), () => {
+            scheduleB2BSessionHomeworkRemainder(batchSessionId, deleteJob);
+          });
+        }
+        break;
+      }
       case 'sendNextDayBookReminder': {
         if (isPast) {
           sendB2B2CBookReminderNextDay({ userId: get(parent, 'id'), code }, deleteJob);
