@@ -5,63 +5,65 @@
 // import sendB2B2CBookingReminder from './jobs/sendB2B2CBookingReminder';
 // import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
 import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/postHookFunctions/utils/extractBatchSessionAndSendPostCarnival';
+import scheduleB2BSessionHomeworkRemainder from './scheduleB2BSessionHomeworkRemainder';
+import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 // import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
 // import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 // import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
 
-// const addScheduleJob = ({
-//   jobType,
-//   userId,
-//   scheduledDate,
-//   code,
-//   menteeSessionId,
-//   menteeSessionUpdatedAt,
-//   menteeId,
-//   mentorMenteeSessionId,
-//   batchSessionId,
-//   courseName,
-//   batchCode,
-//   schoolName,
-//   sessionDate,
-//   sessionTime,
-//   sessionLink,
-//   mentorUserId,
-//   mentorPhoneNumber,
-// }) => `
-//   mutation {
-//     addScheduleJob(
-//       input: {
-//         jobType: "${jobType}"
-//         ${code ? `code: "${code}"` : ''}
-//         ${batchSessionId ? `batchSessionId: "${batchSessionId}"` : ''}
-//         ${menteeSessionId ? `menteeSessionId: "${menteeSessionId}"` : ''}
-//         ${menteeId ? `menteeId: "${menteeId}"` : ''}
-//         ${menteeSessionUpdatedAt ? `menteeSessionUpdatedAt: "${menteeSessionUpdatedAt}"` : ''}
-//         ${mentorMenteeSessionId ? `mentorMenteeSessionId: "${mentorMenteeSessionId}"` : ''}
-//         ${courseName ? `courseName: "${courseName}"` : ''}
-//         ${batchCode ? `batchCode: "${batchCode}"` : ''}
-//         ${schoolName ? `schoolName: "${schoolName}"` : ''}
-//         ${sessionDate ? `sessionDate: "${sessionDate}"` : ''}
-//         ${sessionTime ? `sessionTime: "${sessionTime}"` : ''}
-//         ${sessionLink ? `sessionLink: "${sessionLink}"` : ''}
-//         ${mentorUserId ? `mentorUserId: "${mentorUserId}"` : ''}
-//         ${mentorPhoneNumber ? `mentorPhoneNumber: "${mentorPhoneNumber}"` : ''}
-//         scheduledDate: "${scheduledDate.toISOString()}"
-//       }
-//       ${userId ? `parentConnectId: "${userId}"` : ''}
-//     ) {
-//       id
-//     }
-//   }
-// `;
+const addScheduleJob = ({
+  jobType,
+  userId,
+  scheduledDate,
+  code,
+  menteeSessionId,
+  menteeSessionUpdatedAt,
+  menteeId,
+  mentorMenteeSessionId,
+  batchSessionId,
+  courseName,
+  batchCode,
+  schoolName,
+  sessionDate,
+  sessionTime,
+  sessionLink,
+  mentorUserId,
+  mentorPhoneNumber,
+}) => `
+  mutation {
+    addScheduleJob(
+      input: {
+        jobType: "${jobType}"
+        ${code ? `code: "${code}"` : ''}
+        ${batchSessionId ? `batchSessionId: "${batchSessionId}"` : ''}
+        ${menteeSessionId ? `menteeSessionId: "${menteeSessionId}"` : ''}
+        ${menteeId ? `menteeId: "${menteeId}"` : ''}
+        ${menteeSessionUpdatedAt ? `menteeSessionUpdatedAt: "${menteeSessionUpdatedAt}"` : ''}
+        ${mentorMenteeSessionId ? `mentorMenteeSessionId: "${mentorMenteeSessionId}"` : ''}
+        ${courseName ? `courseName: "${courseName}"` : ''}
+        ${batchCode ? `batchCode: "${batchCode}"` : ''}
+        ${schoolName ? `schoolName: "${schoolName}"` : ''}
+        ${sessionDate ? `sessionDate: "${sessionDate}"` : ''}
+        ${sessionTime ? `sessionTime: "${sessionTime}"` : ''}
+        ${sessionLink ? `sessionLink: "${sessionLink}"` : ''}
+        ${mentorUserId ? `mentorUserId: "${mentorUserId}"` : ''}
+        ${mentorPhoneNumber ? `mentorPhoneNumber: "${mentorPhoneNumber}"` : ''}
+        scheduledDate: "${scheduledDate.toISOString()}"
+      }
+      ${userId ? `parentConnectId: "${userId}"` : ''}
+    ) {
+      id
+    }
+  }
+`;
 
-// const deleteJob = (id) => `
-//   mutation {
-//     deleteScheduleJob(id: "${id}") {
-//       id
-//     }
-//   }
-// `;
+const deleteJob = (id) => `
+  mutation {
+    deleteScheduleJob(id: "${id}") {
+      id
+    }
+  }
+`;
 
 const addToSchedule = async (jobType, scheduledDate, {
   // userId,
@@ -88,6 +90,26 @@ const addToSchedule = async (jobType, scheduledDate, {
       // schedule.scheduleJob(scheduledDate, () => {
       //   sendB2B2CBookReminderNextDay({ userId, code }, () => callLocalGraphqlApi(deleteJob(jobId)));
       // });
+      break;
+    }
+    case 'sendB2BReminder': {
+      const res = await callLocalGraphqlApi(addScheduleJob({
+        jobType, scheduledDate, batchSessionId,
+      }));
+      const jobId = get(res, 'data.addScheduleJob.id');
+      schedule.scheduleJob(scheduledDate, () => {
+        scheduleB2BSessionReminder(batchSessionId, deleteJob(jobId));
+      });
+      break;
+    }
+    case 'sendB2BHomeworkReminder': {
+      const res = await callLocalGraphqlApi(addScheduleJob({
+        jobType, scheduledDate, batchSessionId,
+      }));
+      const jobId = get(res, 'data.addScheduleJob.id');
+      schedule.scheduleJob(scheduledDate, () => {
+        scheduleB2BSessionHomeworkRemainder(batchSessionId, deleteJob(jobId));
+      });
       break;
     }
     case 'sendB2CBookReminderNextDay': {
