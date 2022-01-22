@@ -858,6 +858,9 @@ const menteeCourseSyllabusMutationResolver = async (
       },
     });
   }
+  if (chapters && chapters.length) {
+    chapters.sort((a, b) => a.order - b.order);
+  }
   // if user belongs to a batch, the syllbaus will be calculated on basis of batchCurrentComponentStatus
   if (batchCurrentComponentInfo) {
     const {
@@ -876,9 +879,12 @@ const menteeCourseSyllabusMutationResolver = async (
           },
         });
       }
-      totalTopics += chapter.topics.length;
+      const chapterTopics = chapter.topics;
+      chapterTopics.sort((a, b) => a.order - b.order);
+      totalTopics += chapterTopics.length;
       // iterating over topics of each chapter  and setting isUnlocked field
-      chapter.topics.forEach((topic) => {
+
+      chapterTopics.forEach((topic) => {
         const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
         if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
         if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
@@ -1140,9 +1146,11 @@ const menteeCourseSyllabusMutationResolver = async (
           },
         });
       }
-      totalTopics += chapter.topics.length;
+      const chapterTopics = chapter.topics;
+      chapterTopics.sort((a, b) => a.order - b.order);
+      totalTopics += chapterTopics.length;
       // iterating over topics of each chapter  and setting isUnlocked field
-      chapter.topics.forEach((topic) => {
+      chapterTopics.forEach((topic) => {
         const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
         if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
         if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
