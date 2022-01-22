@@ -60,7 +60,13 @@ const sendSessionAttendenceMail = (email, templateName, sendEmailObject, mailSub
   const templateString = parsedHtmlFromTemplateFileAndObject(
     templateFileName, sendEmailObject,
   );
-  const emailTo = [email];
+  let emailTo = [email];
+  if (process.env.DATA_MASKING) {
+    // eslint-disable-next-line no-param-reassign
+    emailTo = [
+      'gokul.madhusudhan@tekie.in',
+    ];
+  }
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';
