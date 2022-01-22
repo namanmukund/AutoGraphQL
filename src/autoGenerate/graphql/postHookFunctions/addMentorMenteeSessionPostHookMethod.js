@@ -88,7 +88,7 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
     if (context.mentorAvailabilitySlotId) {
       addToMentorAvailabilitySlotMentorMenteeSession(mentorMenteeSessionId, context.mentorAvailabilitySlotId);
     }
-    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMentorMenteeSession', batchCode, mentorSessionConnectId, sessionStatus);
+    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMentorMenteeSession', batchCode, mentorSessionConnectId, sessionStatus, '', get(context, 'isManualSession', false));
   }
 };
 

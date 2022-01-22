@@ -4,6 +4,9 @@ import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import { CanNotDeleteCompletedSessionError } from '../../../../../constants/errors/input';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
+import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS } from '../../../../../constants';
+import { getHoursDiff } from './utils/validateMenteeSessionInput';
+import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelectedSlotsStringArray';
 
 const getMentorMenteeSessionData = async (id) => {
   const query = `
@@ -98,6 +101,17 @@ const deleteMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
     currentUser,
     currentApp,
   } = userInfo;
+  const userRoleFromContext = currentUser && currentUser.role;
+  const isTrial = get(menteeSessionDoc, 'data.menteeSession.topic.order') === 1;
+  if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext) && isTrial) {
+    const slotTimeStringArray = getSelectedSlotsStringArray(get(menteeSessionDoc, 'data.menteeSession'));
+    if (slotTimeStringArray.length > 0) {
+      const timeDiff = getHoursDiff(slotTimeStringArray[0].split('slot')[1], get(menteeSessionDoc, 'data.menteeSession.bookingDate'));
+      if (timeDiff) {
+        context.isManualSession = timeDiff;
+      }
+    }
+  }
 
   // eslint-disable-next-line no-param-reassign
   context.currentUser = currentUser;
