@@ -1,6 +1,6 @@
-// import { get } from 'lodash';
-// import schedule from 'node-schedule';
-// import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
+import { get } from 'lodash';
+import schedule from 'node-schedule';
+import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
 // import sendB2B2CBookReminderNextDay from './jobs/sendB2B2CBookReminderNextDay';
 // import sendB2B2CBookingReminder from './jobs/sendB2B2CBookingReminder';
 // import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
