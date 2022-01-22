@@ -59,7 +59,7 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
           updateMentorMenteeSessionInput[reason] = prevMentorMenteeSessionDoc[reason];
         }
       });
-      addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMentorMenteeSession', batchCode, mentorSessionId, sessionStatus, updateMentorMenteeSessionInput);
+      addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMentorMenteeSession', batchCode, mentorSessionId, sessionStatus, updateMentorMenteeSessionInput, get(context, 'isManualSession', false));
     }
     const isItMentorChild = await isMentorChild(userId);
     if (!isItMentorChild) {

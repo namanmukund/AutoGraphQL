@@ -6,78 +6,61 @@ import sendEmail from '../../services/email/utils/sendEmail';
 import parsedHtmlFromTemplateFileAndObject from '../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../services/email/utils/getEmailObject';
 import sendWhatsAppTemplateMessage from '../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
+import getSlotLabel from '../getSlotLabel';
+import getSelectedSlotsTime from '../../src/autoGenerate/graphql/preHookFunctions/validation/utils/getSelectedSlotsTime';
 
-const getBatchSessions = async () => {
-  const dt = new Date().setHours(0, 0, 0, 0);
-  const hourValue = new Date().getHours();
-  const slotNo = hourValue > 0 ? hourValue - 1 : 23;
-  const yesterday = new Date(dt);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayParsedDate = yesterday.toISOString();
-  const dayBeforeYesterday = new Date(dt);
-  dayBeforeYesterday.setDate(dayBeforeYesterday.getDate() - 2);
-  const dayBeforeYesterdayParsedDate = dayBeforeYesterday.toISOString();
-  const sessionDate = slotNo === 23 ? dayBeforeYesterdayParsedDate : yesterdayParsedDate;
-  const query = `
- query{
-    batchSessions(filter:{and:[
-        {batch_some:{type:b2b}},
-        {sessionStartDate:"${sessionDate}"},
-        {slot${slotNo}:true},
-        {sessionStatus_in:[completed, started]},
-      ]}){
-        id
-        sessionStartDate
-        topic {
-            id
-            courses {
-              id
-              title
-            }
-          }
-        batch {
-          school {
-            code
-            isWhatsAppCommsEnabled
-            isEmailCommsEnabled
-          }
-          students{
+const BATCH_SESSION = (batchSessionId) => `{
+  batchSession(id: "${batchSessionId}") {
+    id
+    course {
+      id
+    }
+    topic {
+      title
+      order
+    }
+    batch {
+      code
+      type
+      school {
+        code
+        name
+        isWhatsAppCommsEnabled
+        isEmailCommsEnabled
+      }
+      students{
+        user {
+          studentProfile {
             user {
-              studentProfile {
-                user {
-                    id
-                  name
-                }
-              }
-              parentProfile{
-                user {
-                  name
-                  phone {
-                    countryCode
-                    number
-                  }
+              id
+              name
+            }
+            parents {
+              user {
+                id
+                name
+                phone {
+                  countryCode
+                  number
                 }
               }
             }
           }
         }
       }
-}
-`;
-  const res = await callLocalGraphqlApi(query);
-  const batchSessions = get(res, 'data.batchSessions', []);
-  return { batchSessions, sessionDate };
-};
-const isHomeworkSubmitted = async (topicId, courseId, sessionStartDate, userId) => {
-  const sessionEndDate = new Date(sessionStartDate).setHours(23, 59, 59, 999);
-  const parsedSessionEndDate = new Date(sessionEndDate).toISOString();
+    }
+    bookingDate
+    ${new Array(24).fill('').map((_, i) => `slot${i}`).join('\n')}
+  }
+}`;
+
+const isHomeworkSubmitted = async (topicId, courseId, studentId) => {
   const query = `
     query{
         mentorMenteeSessions(
             filter:{and:[
               {topic_some:{id:"${topicId}"}},
-              {sessionStartDate_gte: "${sessionStartDate}"},
-              {sessionStartDate_lte: "${parsedSessionEndDate}"},
+              {menteeSession_some: {user_some: {id: "${studentId}"}}},
               {course_some:{id:"${courseId}"}},
             ]}
           ) {
@@ -92,9 +75,8 @@ const isHomeworkSubmitted = async (topicId, courseId, sessionStartDate, userId) 
    `;
   const res = await callLocalGraphqlApi(query);
   const mentorMenteeSessions = get(res, 'data.mentorMenteeSessions');
-  const isAssignmentSubmitted = get(mentorMenteeSessions, 'isSubmittedForReview', false);
-  const menteeId = get(mentorMenteeSessions, 'studentProfile.user.id');
-  if (menteeId && menteeId === userId && isAssignmentSubmitted) {
+  const isAssignmentSubmitted = get(mentorMenteeSessions, '[0].isSubmittedForReview', false);
+  if (isAssignmentSubmitted) {
     return true;
   }
   return false;
@@ -104,7 +86,13 @@ const sendSessionRemainderMail = (email, sendEmailObject) => {
   const templateString = parsedHtmlFromTemplateFileAndObject(
     templateFileName, sendEmailObject,
   );
-  const emailTo = [email];
+  let emailTo = [email];
+  if (process.env.DATA_MASKING) {
+    // eslint-disable-next-line no-param-reassign
+    emailTo = [
+      'gokul.madhusudhan@tekie.in',
+    ];
+  }
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';
@@ -114,74 +102,75 @@ const sendSessionRemainderMail = (email, sendEmailObject) => {
     sendEmail(emailMsgObject);
   });
 };
-const scheduleB2BSessionHomeworkRemainder = async () => {
-  const { batchSessions, sessionDate } = await getBatchSessions();
-  if (batchSessions && batchSessions.length) {
-    // eslint-disable-next-line no-restricted-syntax
-    for (const batchSession of batchSessions) {
-      const date = moment(get(batchSession, 'sessionStartDate')).format('D/MM/YY');
-      const startTime = moment(get(batchSession, 'sessionStartDate')).format('HH:mm a');
-      const topicId = get(batchSession, 'batch.topic.id');
-      const courseId = get(batchSession, 'batch.courses[0].id');
-      const students = get(batchSession, 'batch.students');
-      const schoolCode = get(batchSession, 'batch.school.code');
-      const isWhatsAppCommsEnabled = get(batchSession, 'batch.school.isWhatsAppCommsEnabled', false);
-      const isEmailCommsEnabled = get(batchSession, 'batch.school.isEmailCommsEnabled', false);
-      const homeworkLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/homework` : `${process.env.TEKIE_WEB_URL}/homework`;
-      const revisitLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/sessions` : `${process.env.TEKIE_WEB_URL}/sessions`;
-      students.forEach(async (student) => {
-        const studentName = get(student, 'user.studentProfile.user.name', '');
-        const parentName = get(student, 'user.parentProfile.user.name', '-');
-        const studentId = get(student, 'user.studentProfile.user.id', '');
-        const parentEmail = get(student, 'user.parentProfile.user.email', '');
-        const parentPhone = get(student, 'user.parentProfile.user.phone.countryCode', '+91').split('+')[1] + get(student, 'user.parentProfile.user.phone.number');
-        const hasStudentSubmittedHomework = await isHomeworkSubmitted(topicId, courseId, sessionDate, studentId);
-        if (!hasStudentSubmittedHomework) {
-          if (isWhatsAppCommsEnabled) {
-            sendWhatsAppTemplateMessage(
-              parentPhone,
-              'b2b_homework_reminder_24hrs',
-              parentPhone,
-              [
-                {
-                  name: 'parent_name',
-                  value: parentName,
-                },
-                {
-                  name: 'student_name',
-                  value: studentName,
-                },
-                {
-                  name: 'session_date',
-                  value: date,
-                },
-                {
-                  name: 'session_time',
-                  value: startTime,
-                },
-                {
-                  name: 'homework_link',
-                  value: homeworkLink,
-                },
-                {
-                  name: 'revisit_link',
-                  value: revisitLink,
-                },
-              ],
-            );
-          }
-          if (isEmailCommsEnabled) {
-            sendSessionRemainderMail(
-              parentEmail,
-              {
-                parentName, studentName, date, startTime, homeworkLink,
-              },
-            );
-          }
-        }
-      });
+
+const scheduleB2BSessionHomeworkRemainder = async (batchSessionId, deleteJob = () => {}) => {
+  const batchSessionRes = await callLocalGraphqlApi(BATCH_SESSION(batchSessionId));
+  const batchSession = get(batchSessionRes, 'data.batchSession', {});
+  if (!(batchSession || batchSession.id)) return;
+  const bookingDate = get(batchSessionRes, 'data.batchSession.bookingDate');
+  const date = moment(bookingDate).format('DD/MM/YY');
+  const slot = get(getSelectedSlotsTime(get(batchSessionRes, 'data.batchSession')), '[0]');
+  const startTime = getSlotLabel(slot).startTime;
+  const topicId = get(batchSession, 'batch.topic.id');
+  const courseId = get(batchSession, 'course.id');
+  const students = get(batchSession, 'batch.students');
+  const schoolCode = get(batchSession, 'batch.school.code');
+  const isWhatsAppCommsEnabled = get(batchSession, 'batch.school.isWhatsAppCommsEnabled', false);
+  const isEmailCommsEnabled = get(batchSession, 'batch.school.isEmailCommsEnabled', false);
+  const homeworkLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/homework` : `${process.env.TEKIE_WEB_URL}/homework`;
+  const revisitLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/sessions` : `${process.env.TEKIE_WEB_URL}/sessions`;
+  students.forEach(async (student) => {
+    const studentName = get(student, 'user.studentProfile.user.name', '');
+    const parentName = get(student, 'user.studentProfile.parents[0].user.name', '-');
+    const studentId = get(student, 'user.studentProfile.user.id', '');
+    const parentEmail = get(student, 'user.studentProfile.parents[0].user.email', '');
+    const parentPhone = get(student, 'user.studentProfile.parents[0].user.phone.countryCode', '+91').split('+')[1] + get(student, 'user.studentProfile.parents[0].user.phone.number');
+    const hasStudentSubmittedHomework = await isHomeworkSubmitted(topicId, courseId, studentId);
+    if (!hasStudentSubmittedHomework) {
+      if (isWhatsAppCommsEnabled) {
+        sendWhatsAppTemplateMessage(
+          parentPhone,
+          'b2b_homework_reminder_24hrs',
+          parentPhone,
+          [
+            {
+              name: 'parent_name',
+              value: parentName,
+            },
+            {
+              name: 'student_name',
+              value: studentName,
+            },
+            {
+              name: 'session_date',
+              value: date,
+            },
+            {
+              name: 'session_time',
+              value: startTime,
+            },
+            {
+              name: 'homework_link',
+              value: homeworkLink,
+            },
+            {
+              name: 'revisit_link',
+              value: revisitLink,
+            },
+          ],
+        );
+      }
+      if (isEmailCommsEnabled) {
+        sendSessionRemainderMail(
+          parentEmail,
+          {
+            parentName, studentName, date, startTime, homeworkLink,
+          },
+        );
+      }
     }
-  }
+  });
+  deleteJob();
 };
 
 export default scheduleB2BSessionHomeworkRemainder;
