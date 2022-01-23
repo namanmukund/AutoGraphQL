@@ -35,20 +35,21 @@ const getEventDetails = async (eventId, registeredUserId) => {
 const updateEventValidation = async (params, input, mutationName, context) => {
   const { id: eventId, registeredUsersConnectIds = [] } = params;
   const eventTimeTableRule = get(params, 'input.eventTimeTableRule');
+  const eventData = await getEventDetails(eventId);
   if (get(eventTimeTableRule, 'startDate') && get(eventTimeTableRule, 'endDate')) {
     const { startDate, ...slots } = eventTimeTableRule;
     const slotsTime = getSelectedSlotsTime(slots);
     validateBookingDate(startDate, slotsTime, 0);
     context.prevSlotTimes = slotsTime;
-    const eventData = await getEventDetails(eventId);
     context.prevTimeTableRule = get(eventData, 'eventTimeTableRule');
-    context.previousEventStatus = get(eventData, 'status');
   }
+  context.previousEventStatus = get(eventData, 'status');
   if (registeredUsersConnectIds.length) {
     if (registeredUsersConnectIds.length > 1) {
       throw new MultipleRegistrationError();
     }
     const currentEvent = await getEventDetails(eventId, get(registeredUsersConnectIds, '[0]'));
+    context.newRegisteredUserId = get(registeredUsersConnectIds, '[0]');
     if (get(currentEvent, 'registeredUsers', []).length) {
       throw new AlreadyRegisteredForEvent();
     }

@@ -86,7 +86,7 @@ const sendEventSessionRemainderMail = (email, sendEmailObject) => {
 };
 
 const scheduleEventSessionRemainder = async () => {
-  const eventSessions = getEventSessions();
+  const eventSessions = await getEventSessions();
   for (const eventSession of eventSessions) {
     const {
       sessionDate, event: {

@@ -148,7 +148,15 @@ const updateCommsRuleStatus = async (eventId, variable) => {
   await callLocalGraphqlApi(mutation, '', variable);
 };
 
-const sendEventCommunication = async ({ eventId, eventCommsRule }, deleteJob) => {
+const sendEventCommunication = async ({
+  eventId,
+  eventCommsRule,
+  jobType,
+  studentProfileId,
+  commsVariables,
+  templateName,
+  isEmailRule
+}, deleteJob) => {
   const event = await callLocalGraphqlApi(eventQuery(eventId));
   const registeredUsers = get(event, 'registeredUsers', []);
 

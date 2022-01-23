@@ -11,6 +11,7 @@ import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
 import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 import scheduleB2BSessionHomeworkRemainder from './scheduleB2BSessionHomeworkRemainder';
+import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
 
 const FETCH_JOBS = `{
   scheduleJobs {
@@ -35,14 +36,14 @@ const FETCH_JOBS = `{
     mentorUserId
     mentorPhoneNumber
     eventId
-    eventCommsRule {
-      templateName: String!
-      commsVariables: [CommsVariableType]
-      condition: DateCondition
-      attendanceFilter: AttendanceFilter
-      unit
-      value
+    commsVariables{
+      dataField
+      whatsappVariableName
+      emailVariableName
     }
+    studentProfileId
+    templateName
+    isEmailRule
   }
 }`;
 
@@ -79,7 +80,10 @@ const reRunJobsFromDB = async () => {
       mentorPhoneNumber,
       eventId,
       eventSessionId,
-      eventCommsRule,
+      commsVariables,
+      studentProfileId,
+      templateName,
+      isEmailRule,
     } = scheduledJob;
     const deleteJob = () => callLocalGraphqlApi(deleteJobQuery(id));
     const isPast = moment().isAfter(scheduledDate);
@@ -242,6 +246,30 @@ const reRunJobsFromDB = async () => {
         schedule.scheduleJob(new Date(scheduledDate), () => {
           sendEventCommunication({ eventId, jobType, eventCommsRule }, deleteJob);
         });
+        break;
+      }
+      case 'eventNewRegistrationReminder': {
+        if (isPast) {
+          eventNewRegistrationReminder({
+            eventId,
+            jobType,
+            studentProfileId,
+            commsVariables,
+            templateName,
+            isEmailRule,
+          }, deleteJob);
+        } else {
+          schedule.scheduleJob(new Date(scheduledDate), () => {
+            eventNewRegistrationReminder({
+              eventId,
+              jobType,
+              studentProfileId,
+              commsVariables,
+              templateName,
+              isEmailRule,
+            }, deleteJob);
+          });
+        }
         break;
       }
       default:
