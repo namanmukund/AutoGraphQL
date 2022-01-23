@@ -22,6 +22,7 @@ const HomeworkStreaksType = `
 
 const UserCourse = `
   type UserCourse @model
+  @userToken(isRequired:"false")
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
@@ -33,6 +34,7 @@ const UserCourse = `
   )
   {
     courses: [Course] @relation(name: "CourseUserCourse", direction: "OneWay")
+      @userToken(isRequired:"false")
       @appPermissions(
         permissions:[
           { appName: "${TMS}" operations: "*" },
@@ -42,6 +44,7 @@ const UserCourse = `
         rule: allow
       )
     user: User! @relation(name: "UserCourseUser", direction: "OneWay")
+      @userToken(isRequired:"false")
       @appPermissions(
         permissions:[
           { appName: "${TBA}" operations: "*" },
