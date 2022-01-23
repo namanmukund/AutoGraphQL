@@ -4,8 +4,7 @@ import {
 import { READ } from '../../../../constants/graphqlOperations';
 
 const ContentTag = `
-  type ContentTag @model 
-  @userToken(isRequired:"false")
+  type ContentTag @model
   @appPermissions(
       permissions:[
         { appName: "${TLA}" operations: ${READ} },

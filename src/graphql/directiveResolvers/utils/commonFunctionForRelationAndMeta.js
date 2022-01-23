@@ -9,8 +9,7 @@ import { InvalidParamsError } from '../../../../constants/errors';
 import { ifAuthorized, types } from '../../../../utils';
 import { verifyToken } from '../../../auth';
 import { handleUserToken } from '../../../middlewares/authMiddleware';
-import fetchListAggregationQueryResolver
-  from '../../../autoGenerate/graphql/resolvers/query/fetchListAggregationQueryResolver';
+import fetchListAggregationQueryResolver from '../../../autoGenerate/graphql/resolvers/query/fetchListAggregationQueryResolver';
 import addAdditionalRelationFieldsToResponse from './addAdditionalRelationFieldsToResponse';
 import { prehook } from '../../../autoGenerate/graphql/preHook';
 import { posthook } from '../../../autoGenerate/graphql/postHook';
