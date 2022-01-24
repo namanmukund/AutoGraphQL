@@ -773,7 +773,7 @@ const allotedMentorFromMMSAggregation = (userId, courseId) => [
   },
   {
     $match: {
-      "user.typeId": userId,
+      "menteeSession.user.typeId": userId,
     },
   },
   {
