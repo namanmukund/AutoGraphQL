@@ -29,6 +29,7 @@ const FETCH_USER_OTP_LOG_META = (userId, fromDate, toDate) => `{
 }`;
 
 const userLogsActivity = async (userData, phoneOtp, action) => {
+  if (process.env.NODE_ENV !== 'production') return;
   if (action === 'addOTPLog') {
     const userOtpLogModelMutations = new MutationController(USER_OTP_LOG_TYPE, { bypass: true });
     const newUserOtpLog = {

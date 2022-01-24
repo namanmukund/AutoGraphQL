@@ -13,6 +13,7 @@ import addSessionLog from './utils/addSessionLog';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import updateMenteeSessionQuery from './utils/updateMenteeSessionQuery';
 import sendWhatsappMessageForBookingConfirmedByLeadParnter from './utils/sendWhatsappMessageForBookingConfirmedByLeadPartner';
+import IsMentorChild from './utils/isMentorChild';
 // import createTaskAndAssignAvailableMentor from './utils/createTaskAndAssignAvailableMentor';
 
 const getUserCourses = async (userId) => {
@@ -67,6 +68,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
     const isNotSourceSchool = get(userInfo, 'data.user.source') !== userSourceOrigin.school;
     const isBatchExist = get(userInfo, 'data.user.studentProfile.batch', false);
+    const isMentorChild = await IsMentorChild(get(userInfo, 'data.user.id'));
     if (typeof isTrialSession === 'boolean' && isTrialSession && isNotSourceSchool && !isBatchExist) {
       await mentorAvailabilitySlotOperation({
         slotTimeStringArray,
@@ -79,7 +81,9 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     // ---------------------commenting out the previous availableSlots flow--------------
     // await reduceParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context, availableSlots);
     // send email to mentor admin regarding the session
-    await extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
+    if (!isMentorChild) {
+      await extractMenteeSessionInfoAndSendEmail('add', input, bookingDate, slotTimeStringArray, '', [], userInfo, topicInfo);
+    }
     if (get(context, 'userIdFromContext')) {
       updateUserBookingAgent(menteeSessionId, get(context, 'userIdFromContext'), bookingDate, get(slotTimeStringArray, '0'));
     }
@@ -88,7 +92,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     // const { mentorMenteeSessionId } = await createTaskAndAssignAvailableMentor(userInfo, topicInfo, input);
 
     // update user booking on leadsquared
-    if (!get(userInfo, 'data.user.studentProfile.batch.id')) {
+    if (!get(userInfo, 'data.user.studentProfile.batch.id') && !isMentorChild) {
       addMenteeBookingLeadsquared(
         input,
         params,
@@ -103,7 +107,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
       );
     }
     if (typeof isTrialSession === 'boolean' && isTrialSession && !isBookedByMentee
-      && get(context, 'userRoleFromContext') && get(context, 'userRoleFromContext') === LEAD_PARTNER) {
+      && get(context, 'userRoleFromContext') && get(context, 'userRoleFromContext') === LEAD_PARTNER && !isMentorChild) {
       await sendWhatsappMessageForBookingConfirmedByLeadParnter(userInfo, slotTimeStringArray, bookingDate);
     }
     // udpdating the studentProfile in menteeSession

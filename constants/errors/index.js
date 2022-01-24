@@ -57,6 +57,9 @@ import {
   BatchFullError,
   MentorMandatoryError,
   MentorProfileAlreadyExist,
+  CategoryAlreadyExist,
+  CommsVariableAlreadyExist,
+  ContentTagTitleAlreadyExist,
   OrderAndAuditTypeExists,
   MCQOptionNotProvided,
   MaxRatingAndDisplayTypeNotFound,
@@ -82,6 +85,7 @@ import {
   FileNameAlreadyExists,
   LeadPartnerWithSimilarTitleAlreadyExist,
   SenseiProfileAlreadyExist,
+  SpeakerProfileAlreadyExist,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -116,6 +120,9 @@ import {
   InvalidDateFormatError,
   UnsupportedListFieldInsideSubDocumentObjectError,
   InvalidRuleValueError,
+  CommsError,
+  MultipleRegistrationError,
+  AlreadyRegisteredForEvent,
 } from './types';
 import {
   EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
@@ -239,6 +246,7 @@ export {
   UnauthorizedFieldOrTypeAccessByAppError,
   InsufficientPermissionError,
   InvalidRuleValueError,
+  CommsError,
   InvalidGmailTokenError,
   InvalidFacebookTokenError,
   InvalidPasswordLengthError,
@@ -277,6 +285,9 @@ export {
   BatchFullError,
   MentorMandatoryError,
   MentorProfileAlreadyExist,
+  ContentTagTitleAlreadyExist,
+  CategoryAlreadyExist,
+  CommsVariableAlreadyExist,
   CanNotDeleteCompletedSessionError,
   OrderAndAuditTypeExists,
   MCQOptionNotProvided,
@@ -307,4 +318,7 @@ export {
   SenseiProfileAlreadyExist,
   PhoneOtpMaxRetryTimeLimitError,
   PhoneOtpPerDayLimitError,
+  SpeakerProfileAlreadyExist,
+  MultipleRegistrationError,
+  AlreadyRegisteredForEvent,
 };

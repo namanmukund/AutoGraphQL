@@ -11,8 +11,7 @@ import addUserActivityPQDumpPostHookMethod from './postHookFunctions/addUserActi
 import addUserActivityQuizDumpPostHookMethod from './postHookFunctions/addUserActivityQuizDumpPostHookMethod';
 import userPracticeQuestionReportPostHookMethod from './postHookFunctions/userPracticeQuestionReportPostHookMethod';
 import userAssignmentPostHookMethod from './postHookFunctions/userAssignmentPostHookMethod';
-import addUserActivityAssignmentDumpPostHookMethod
-  from './postHookFunctions/addUserActivityAssignmentDumpPostHookMethod';
+import addUserActivityAssignmentDumpPostHookMethod from './postHookFunctions/addUserActivityAssignmentDumpPostHookMethod';
 import addMentorSessionPostHookMethod from './postHookFunctions/addMentorSessionPostHookMethod';
 import updateMentorSessionPostHookMethod from './postHookFunctions/updateMentorSessionPostHookMethod';
 import deleteMentorSessionPostHookMethod from './postHookFunctions/deleteMentorSessionPostHookMethod';
@@ -27,18 +26,13 @@ import addUserPaymentInstallmentPostHookMethod from './postHookFunctions/addUser
 import updateUserPaymentInstallmentPostHookMethod from './postHookFunctions/updateUserPaymentInstallmentPostHookMethod';
 import addMentorMenteeSessionPostHookMethod from './postHookFunctions/addMentorMenteeSessionPostHookMethod';
 import addUserPaymentPlanPostHookMethod from './postHookFunctions/addUserPaymentPlanPostHookMethod';
-import addUserCurrentTopicComponentStatusPostHookMethod
-  from './postHookFunctions/addUserCurrentTopicComponentStatusPostHookMethod';
-import updateUserCurrentTopicComponentStatusPostHookMethod
-  from './postHookFunctions/updateUserCurrentTopicComponentStatusPostHookMethod';
-import addBatchPostHookMethod
-  from './postHookFunctions/addBatchPostHookMethod';
-import addBatchSessionPostHookMethod
-  from './postHookFunctions/addBatchSessionPostHookMethod';
-import updateBatchSessionPostHookMethod
-  from './postHookFunctions/updateBatchSessionPostHookMethod';
-import updateBatchCurrentComponentStatusPostHookMethod
-  from './postHookFunctions/updateBatchCurrentComponentStatusPostHookMethod';
+import addUserCurrentTopicComponentStatusPostHookMethod from './postHookFunctions/addUserCurrentTopicComponentStatusPostHookMethod';
+import addUserPostHookMethod from './postHookFunctions/addUserPostHookMethod';
+import updateUserCurrentTopicComponentStatusPostHookMethod from './postHookFunctions/updateUserCurrentTopicComponentStatusPostHookMethod';
+import addBatchPostHookMethod from './postHookFunctions/addBatchPostHookMethod';
+import addBatchSessionPostHookMethod from './postHookFunctions/addBatchSessionPostHookMethod';
+import updateBatchSessionPostHookMethod from './postHookFunctions/updateBatchSessionPostHookMethod';
+import updateBatchCurrentComponentStatusPostHookMethod from './postHookFunctions/updateBatchCurrentComponentStatusPostHookMethod';
 import updateUserSavedCodePostHookMethod from './postHookFunctions/updateUserSavedCodePostHookMethod';
 import addUserApprovedCodeTagMappingPostHookMethod from './postHookFunctions/addUserApprovedCodeTagMappingPostHookMethod';
 import deleteUserApprovedCodeTagMappingPostHookMethod from './postHookFunctions/deleteUserApprovedCodeTagMappingPostHookMethod';
@@ -53,10 +47,8 @@ import removeFromBatchStudentProfilePosthookMethod from './postHookFunctions/rem
 import addUserActivityComicStripDumpPostHookMethod from './postHookFunctions/addUserActivityComicStripDumpPostHookMethod';
 import userBlockBasedProjectPostHookMethod from './postHookFunctions/userBlockBasedProjectPostHookMethod';
 import userBlockBasedPracticePostHookMethod from './postHookFunctions/userBlockBasedPracticePostHookMethod';
-import addUserActivityBlockBasedPracticeDumpPostHookMethod
-  from './postHookFunctions/addUserActivityBlockBasedPracticeDumpPostHookMethod';
-import addUserActivityBlockBasedProjectDumpPostHookMethod
-  from './postHookFunctions/addUserActivityBlockBasedProjectDumpPostHookMethod';
+import addUserActivityBlockBasedPracticeDumpPostHookMethod from './postHookFunctions/addUserActivityBlockBasedPracticeDumpPostHookMethod';
+import addUserActivityBlockBasedProjectDumpPostHookMethod from './postHookFunctions/addUserActivityBlockBasedProjectDumpPostHookMethod';
 import deleteMentorMenteeSessionPostHookMethod from './postHookFunctions/deleteMentorMenteeSessionPostHookMethod';
 import deleteBatchSessionPostHookMethod from './postHookFunctions/deleteBatchSessionPostHookMethod';
 import updateUserPostHookMethod from './postHookFunctions/updateUserPostHookMethod';
@@ -71,8 +63,12 @@ import updateMentorAvailabilitySlotPostHookMethod from './postHookFunctions/upda
 import addMentorDemandSlotPostHookMethod from './postHookFunctions/addMentorDemandSlotPostHookMethod';
 import updateMentorDemandSlotPostHookMethod from './postHookFunctions/updateMentorDemandSlotPostHookMethod';
 import updateDemoWowAuditPostHookMethod from './postHookFunctions/updateDemoWowAuditPostHookMethod';
+import updateEventPostHookMethod from './postHookFunctions/updateEventPostHookMethod';
+import addEventPostHookMethod from './postHookFunctions/addEventPostHookMethod';
+import fetchEventPostHookMethod from './postHookFunctions/fetchEventPostHookMethod';
+import updateEventSessionPostHookMethod from './postHookFunctions/updateEventSessionPostHookMethod';
 
-const posthook = async (input, mutationName, context, params) => {
+const posthook = async (input, mutationName, context, params, info) => {
   switch (mutationName) {
     case 'deleteFile': {
       const { uri } = input;
@@ -244,6 +240,10 @@ const posthook = async (input, mutationName, context, params) => {
       await addUserSavedCodePostHookMethod(input, params, mutationName, context);
       break;
     }
+    case 'addUser': {
+      await addUserPostHookMethod(input, params, mutationName, context);
+      break;
+    }
     case 'updateBatchSession': {
       await updateBatchSessionPostHookMethod(input, params, mutationName, context);
       break;
@@ -342,6 +342,22 @@ const posthook = async (input, mutationName, context, params) => {
     }
     case 'updateDemoWowAudit': {
       await updateDemoWowAuditPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'addEvent': {
+      await addEventPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'updateEvent': {
+      await updateEventPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'event': {
+      await fetchEventPostHookMethod(input, params, mutationName, context, info);
+      break;
+    }
+    case 'updateEventSession': {
+      await updateEventSessionPostHookMethod(input, params, mutationName, context, info);
       break;
     }
     default:

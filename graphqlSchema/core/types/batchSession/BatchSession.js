@@ -10,6 +10,19 @@ const batchAttendanceType = `
    absentReason: String
  }`;
 
+const b2bFormFields = `
+  attentionCount: AttentionAmount @defaultValue(value: "all")
+  attentionAmount: Int @length(min: 1, max: 10)
+  interactionCount: AttentionAmount @defaultValue(value: "all")
+  interactionAmount: Int @length(min: 1, max: 10)
+  studentBehaviour: String
+  lengthOfContent: LengthOfContent @defaultValue(value: "brief")
+  learningObjectiveComponent: LearningObjectiveComponentsB2B @defaultValue(value: "practice")
+  contentImprovementSuggestion: String
+  functionalitySuggestion: String
+  generalSuggestion: String
+`;
+
 const BatchSession = `
   type BatchSession @model {
     course: Course @relation(name: "BatchSessionCourse", direction: "OneWay")
@@ -19,6 +32,7 @@ const BatchSession = `
     bookingDate: Date!
     scheduleRunStatus: ScheduleRunStatus
     ${slotTimeFields}
+    ${b2bFormFields}
     sessionAllotmentDate: Date
     sessionStartDate: Date
     sessionEndDate: Date
@@ -42,6 +56,7 @@ const BatchSession = `
     mentorSavesAttendance: Date
     videoLinkClickByMenteePlatform: Platform
     startSessionByMenteePlatform: Platform
+    sessionJoinedByMentorAt: Date
 }`;
 
 export default [BatchSession, batchAttendanceType];

@@ -9,6 +9,7 @@ import sendWhatsAppTemplateMessage from '../../../utils/sendWhatsAppTemplateMess
 import getSelectedSlotsTime from '../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import getMentorCodingLanguages from '../../resolvers/utils/getMentorCodingLanguages';
 import { addMenteeBookingLeadsquared } from '../leadsquared';
+import isMentorChild from './isMentorChild';
 // import sendBookingReminderOrConfirmationB2BC from './sendBookingReminderOrConfirmationB2B2C';
 
 const BATCH_SESSION = (batchSessionId) => `{
@@ -137,7 +138,8 @@ const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId, isBook
   const meetingPassword = googleMeetLink ? null : get(batchSessionRes, 'data.batchSession.batch.allottedMentor.mentorProfile.googleMeetLink', '-');
 
   const slot = get(getSelectedSlotsTime(get(batchSessionRes, 'data.batchSession')), '[0]');
-  if (studentsId && studentsId.length && studentsId.length > 0) {
+  const isItMentorChild = await isMentorChild(studentsId[0]);
+  if (!isItMentorChild && studentsId && studentsId.length && studentsId.length > 0) {
     studentsId.forEach((studentId) => {
       const studentsInBatchSession = get(batchSessionRes, 'data.batchSession.attendance', []).map((attendance) => get(attendance, 'student'));
       const student = studentsInBatchSession.find((studentInBatchSession) => get(studentInBatchSession, 'id') === studentId);

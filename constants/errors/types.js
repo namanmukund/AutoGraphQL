@@ -34,3 +34,23 @@ export const UnsupportedListFieldInsideSubDocumentObjectError = createError('Uns
 export const InvalidRuleValueError = createError('InvalidRuleValueError', {
   message: 'Only accepted rules are allow and deny',
 });
+
+export const SubscriptionKeyNotDefinedError = createError('SubscriptionKeyNotDefinedError', {
+  message: 'Subscription Key is Required To Iterate! \n For Example: [\'POST_CREATED\'], now you can use this key to publish data using PubSub.',
+});
+
+export const InvalidSubscriptionKeyError = createError('InvalidSubscriptionKeyError', {
+  message: 'Subscription Key Must Be An Array!',
+});
+
+export const CommsError = createError('CommsError', {
+  message: 'Comms failed to send',
+});
+
+export const MultipleRegistrationError = createError('MultipleRegistrationError', {
+  message: 'Cannot register two or more user at the same time',
+});
+
+export const AlreadyRegisteredForEvent = createError('AlreadyRegisteredForEvent', {
+  message: 'Child is already registered for event',
+});
