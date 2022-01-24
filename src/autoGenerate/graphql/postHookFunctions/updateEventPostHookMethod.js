@@ -21,16 +21,18 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
   const eventCancellationReason = get(params, 'input.cancellationReason', null);
   const eventCommsRules = get(input, 'eventCommsRule', null);
   const eventStatus = get(input, 'status', null);
+  const eventTimeTableRuleFromDb = get(input, 'eventTimeTableRule');
   const {
     prevTimeTableRule,
     previousEventStatus,
   } = context;
   const { ...slots } = timeTableRule;
   const slotsTime = getSelectedSlotsTime(slots);
-  const isEventRescheduled = (get(prevTimeTableRule, 'startDate') && get(timeTableRule, 'startDate') !== get(prevTimeTableRule, 'startDate'))
+  const isEventRescheduled = (get(prevTimeTableRule, 'startDate') && !moment(get(timeTableRule, 'startDate')).isSame(moment(get(prevTimeTableRule, 'startDate'))))
+    || (get(prevTimeTableRule, 'endDate') && !moment(get(timeTableRule, 'endDate')).isSame(moment(get(prevTimeTableRule, 'endDate'))))
     || (slotsTime.length && get(context, 'prevSlotTimes').length && slotsTime[0] !== get(context, 'prevSlotTimes')[0]);
+  addUpdateEventSessionsForEvent(eventId, timeTableRule, prevTimeTableRule, registeredUsers);
   if (isEventRescheduled) {
-    addUpdateEventSessionsForEvent(eventId, timeTableRule, prevTimeTableRule, registeredUsers);
     if (shouldSendRescheduledComms) {
       sendCommsForUpdatedEvents(eventId, eventRescheduledReason, 'rescheduled');
     }
@@ -42,10 +44,11 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
     for (const eventCommsRule of eventCommsRules) {
       if (!get(eventCommsRule, 'isSend') && get(eventCommsRule, 'condition') !== 'afterRegistration') {
         const dateCondition = get(eventCommsRule, 'condition', null);
+        const slotsFromDb = getSelectedSlotsTime(eventTimeTableRuleFromDb);
         switch (dateCondition) {
           case 'before': {
-            const startDate = get(timeTableRule, 'startDate', null);
-            const scheduledDate = moment(startDate).subtract(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
+            const startDate = get(eventTimeTableRuleFromDb, 'startDate', null);
+            const scheduledDate = moment(moment(startDate).set('hours', get(slotsFromDb, '[0]'))).subtract(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
             addToSchedule('eventCommsJob', scheduledDate, {
               eventId,
               eventCommsRule,
@@ -53,8 +56,8 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
             break;
           }
           case 'after': {
-            const endDate = get(timeTableRule, 'endDate', null);
-            const scheduledDate = moment(endDate).add(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
+            const endDate = get(eventTimeTableRuleFromDb, 'endDate', null);
+            const scheduledDate = moment(moment(endDate).set('hours', get(slotsFromDb, '[0]') + 1)).add(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
             addToSchedule('eventCommsJob', scheduledDate, {
               eventId,
               eventCommsRule,
@@ -64,6 +67,18 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
           default:
             break;
         }
+      }
+    }
+  }
+  if (get(context, 'newRegisteredUserId') && eventStatus === 'published') {
+    for (const eventCommsRule of eventCommsRules) {
+      if (get(eventCommsRule, 'condition') === 'afterRegistration') {
+        const scheduledDate = moment().add(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
+        addToSchedule('eventNewRegistrationReminder', scheduledDate, {
+          eventId,
+          eventCommsRule,
+          studentProfileId: get(context, 'newRegisteredUserId'),
+        });
       }
     }
   }

@@ -14,13 +14,36 @@ const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).rep
 
 const slugifyID = (ID) => ID ? ID.toString().trim().toUpperCase().replace(/\w{5}(?=.)/g, '$&-') : '';
 
-const fetchEventDetails = async (eventId) => {
+const fetchEventDetails = async (eventId, userId) => {
   const query = `
   {
   event(id: "${eventId}"){
     id
     eventType
     eventName
+    name
+    geoLocation
+    address
+    summary
+    state
+    pincode
+    city
+    registeredUsers(filter: { user_some: { id: "${userId}" } }) {
+      id
+      user {
+        name
+      }
+      grade
+      parents {
+        id
+        user {
+          name
+        }
+      }
+    }
+    eventTimeTableRule {
+      startDate
+    }
     baseCertificate{
       uri
     }
@@ -43,7 +66,7 @@ const fetchEventDetails = async (eventId) => {
 };
 
 const getCertificateUrl = async (userId, eventId) => {
-  const eventDetails = await fetchEventDetails(eventId);
+  const eventDetails = await fetchEventDetails(eventId, userId);
   if (eventDetails && eventDetails.id) {
     const url = `${process.env.FILE_BASE_URL}/${get(eventDetails, 'baseCertificate.uri', '')}`;
     const existingPdfBytes = await fetch(url).then((res) => res.buffer());
@@ -60,14 +83,21 @@ const getCertificateUrl = async (userId, eventId) => {
     const NunitoBoldfontBytes = await fetch(NUNITO_BOLD_FONT_URL).then((res) => res.buffer());
 
     const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
-
+    const certificateData = {
+      studentName: get(eventDetails, 'registeredUsers[0].user.name'),
+      parentName: get(eventDetails, 'registeredUsers[0].parents[0].user.name'),
+      studentGrade: get(eventDetails, 'registeredUsers[0].grade'),
+      eventDate: get(eventDetails, 'eventTimeTableRule.startDate'),
+      eventName: get(eventDetails, 'name'),
+      summary: get(eventDetails, 'summary'),
+    };
     // TODO : handle text color, images and fonts
     const getEmbedValues = (embed) => {
       const res = {};
-      if (embed.text && embed.text.includes('Name')) {
-        res.value = capitalize(embed.text);
+      if (embed.variableName && embed.variableName.includes('studentName')) {
+        res.value = capitalize(certificateData[get(embed, 'variableName')]);
       } else {
-        res.value = embed.text;
+        res.value = certificateData[get(embed, 'variableName')];
       }
       res.properties = {};
       res.properties.x = embed.xDim;
@@ -94,18 +124,18 @@ const getCertificateUrl = async (userId, eventId) => {
     /** PDF Meta Details */
     pdfDoc.setAuthor('Tekie');
     pdfDoc.setCreator('Kiwhode Learning Pvt Ltd');
-    pdfDoc.setSubject(`Tekie's ${capitalize(eventDetails.eventName)} Certificate`);
-    pdfDoc.setTitle(`Tekie's ${capitalize(eventDetails.eventName)} Certificate`);
+    pdfDoc.setSubject(`Tekie's ${capitalize(certificateData.eventName)} Certificate`);
+    pdfDoc.setTitle(`Tekie's ${capitalize(certificateData.eventName)} Certificate`);
     pdfDoc.setProducer('Tekie.in');
 
     const pdfBytes = await pdfDoc.save();
-    const path = `/tmp/${eventDetails.eventName}/certificate-pdf.pdf`;
-    mkdirp.sync(`/tmp/${eventDetails.eventName}`);
+    const path = `/tmp/${certificateData.eventName}/certificate-pdf.pdf`;
+    mkdirp.sync(`/tmp/${certificateData.eventName}`);
     fs.writeFileSync(path, pdfBytes);
     const fileContent = fs.readFileSync(path);
     let fetchedUrl = '';
     if (fileContent) {
-      const key = `event-certificate/${eventDetails.eventName}/${slugifyID(userId)}-certificate.pdf`;
+      const key = `event-certificate/${certificateData.eventName}/${slugifyID(userId)}-certificate.pdf`;
       await uploadToS3(key, fileContent);
       fetchedUrl = key;
     }

@@ -8,7 +8,17 @@ const CommsDataField = `
     speakerName
     parentEmail
     parentPhone
+    eventTime
     eventCertificateLink
+    meetingId
+    meetingLink
+    meetingPassword
+    geoLocation
+    address
+    summary
+    description
+    paymentLink
+    eventRegistrationLink
   }`;
 
 export default CommsDataField;
