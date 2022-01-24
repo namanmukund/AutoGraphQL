@@ -13,10 +13,6 @@ export const UserAlreadyExistsError = createError('UserAlreadyExistsError', {
   message: 'User already exist',
 });
 
-export const UserDonotExistsError = createError('UserDonotExistsError', {
-  message: 'User do not exist',
-});
-
 export const EmailOrPhoneMismatchError = createError('EmailOrPhoneMismatchError', {
   message: 'To add a sibling parent must use the same email and phone number that was used to register the first kid',
 });
@@ -310,7 +306,7 @@ export const CurrentChildIsMentorChild = createError('CurrentChildIsMentorChild'
 });
 
 export const MentorIdIsMandatoryError = createError('MentorIdIsMandatoryError', {
-  message: 'Mentor id is mandatory to pass.',
+  message: 'Input mentorId is Mandatory!',
 });
 
 export const SpeakerProfileAlreadyExist = createError('SpeakerProfileAlreadyExist', {

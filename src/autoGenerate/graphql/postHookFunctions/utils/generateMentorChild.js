@@ -1,11 +1,11 @@
-/*eslint-disable*/
+/* eslint-disable consistent-return */
 import { get } from 'lodash';
 import { MENTEE } from '../../../../../constants/roles';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import addUserData from '../../resolvers/mutation/user/utils/addUserData';
 import { generateCuid } from '../../../../../utils';
 
-const MentorProfile = (userConnectId) => `
+const fetchMentorProfile = (userConnectId) => `{
   mentorProfiles(filter: {
       user_some: {
           id: "${userConnectId}"
@@ -13,7 +13,7 @@ const MentorProfile = (userConnectId) => `
   }) {
       id
   }
-`
+}`;
 
 const addMentorProfileQuery = (userConnectId) => `
 mutation {
@@ -34,30 +34,29 @@ mutation {
 `;
 
 const generateMentorChild = async (mentorId, mentorName) => {
-    const mentorProfile = await callLocalGraphqlApi(MentorProfile(mentorId));
-    const isMentorProfileExist = mentorProfile && mentorProfile.length > 0;
-    
-    // case when mentor profile don't exist
-    let mentorConnectId = mentorId;
-    if(!isMentorProfileExist) {
-        const res = await callLocalGraphqlApi(addMentorProfileQuery(mentorId));
-        mentorConnectId = get(res.data, 'addMentorProfile.id');
-    } 
-    // if we received id from mentorProfile query the skip below step
-    if (mentorConnectId) {
-      const newAuthentication = {
-        bypass: true,
-      };
-      const childData = {
-        name: mentorName,
-        role: MENTEE,
-      };
-      const childDataWithId = generateCuid(childData);
-      const childUserData = await addUserData(newAuthentication, childDataWithId);
-      const { id: childUserId } = childUserData;
-      await callLocalGraphqlApi(addStudentProfileQuery(childUserId, mentorConnectId));
-      return childUserId;
-    }
+  const mentorProfilesRes = await callLocalGraphqlApi(fetchMentorProfile(mentorId));
+  const mentorProfiles = get(mentorProfilesRes, 'data.mentorProfiles');
+  const mentorProfileExists = get(mentorProfiles[0], 'id');
+
+  let mentorConnectId = mentorProfileExists;
+  if (!mentorProfileExists) {
+    const res = await callLocalGraphqlApi(addMentorProfileQuery(mentorId));
+    mentorConnectId = get(res.data, 'addMentorProfile.id');
+  }
+  if (mentorConnectId) {
+    const newAuthentication = {
+      bypass: true,
+    };
+    const childData = {
+      name: mentorName,
+      role: MENTEE,
+    };
+    const childDataWithId = generateCuid(childData);
+    const childUserData = await addUserData(newAuthentication, childDataWithId);
+    const { id: childUserId } = childUserData;
+    await callLocalGraphqlApi(addStudentProfileQuery(childUserId, mentorConnectId));
+    return childUserId;
+  }
 };
 
 export default generateMentorChild;

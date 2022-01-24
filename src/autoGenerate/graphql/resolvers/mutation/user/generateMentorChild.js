@@ -1,56 +1,51 @@
-/*eslint-disable*/
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import { MentorIdIsMandatoryError, UserDonotExistsError } from '../../../../../../constants/errors/db';
+import { MentorIdIsMandatoryError, DatabaseRecordNotFoundError } from '../../../../../../constants/errors/db';
 import generateMentorChild from '../../../postHookFunctions/utils/generateMentorChild';
+import { MENTOR } from '../../../../../../constants/roles';
 
-const FETCH_USER_DATA = (mentorId) => `
+const fetchUserQuery = (mentorId) => `
 {
   users( filter: {
     and :[
-    {role: mentor}, 
+    {role: ${MENTOR}}, 
     {
       id: "${mentorId}"
     }]
   }) 
   {
    id
-   username
+   name
   }
 }
-`
+`;
 
 const generateMentorChildMutationResolver = async (
   root,
   params,
 ) => {
-  const {
-    mentorId
-  } = params;
+  const { mentorId } = params;
 
-  // // throw error when not mentor id sent throw mentor id is mandatory
-  if(!mentorId) {
+  if (!mentorId) {
     throw new MentorIdIsMandatoryError();
   }
+  const usersRes = await callLocalGraphqlApi(fetchUserQuery(mentorId));
+  const usersDoc = get(usersRes, 'data.users');
+  const userExists = get(usersDoc[0], 'id');
 
-  const user = await callLocalGraphqlApi(FETCH_USER_DATA(mentorId));
-  const isUserExist = user && user.length > 0;
-
-  if(!isUserExist) {
-    throw new UserDonotExistsError()
+  if (!userExists) {
+    throw new DatabaseRecordNotFoundError({
+      data: {
+        error: 'Mentor Not Found!',
+      },
+    });
   }
 
-  
-  // call api for user data and get it's name from there
-  // call api with user id and role mentor
-  // user don'yt exist error if user id is not correct
-  const mentorName = get(user[0], 'username');
-
-  // call the utils function for creating child
+  const mentorName = get(usersDoc[0], 'name');
   const childId = await generateMentorChild(mentorId, mentorName);
 
   return {
-    mentorChildId: childId
+    mentorChildId: childId,
   };
 };
 
