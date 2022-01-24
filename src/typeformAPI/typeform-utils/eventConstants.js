@@ -23,9 +23,9 @@ const EVENTS = {
       preprod: 'ckw5wg9rj0000gtin1st0hry6',
       staging: 'ckw4unvyp0000kpinc2515c88',
     },
-    eventDate: '23 January',
+    eventDate: '30 January',
     eventTime: '03:00 pm',
-    eventDateTime: '2022-01-23 09:30:00',
+    eventDateTime: '2022-01-30 09:30:00',
   },
   GENZENVIRONMENT: {
     registrationFormId: 'GganG5WQ',
@@ -58,7 +58,7 @@ const EVENTS = {
     },
     eventDate: {
       dec24: '24 December',
-      dec25: '23 January',
+      dec25: '30 January',
       dec25RS: '25 December',
       dec26: '26 December',
     },
@@ -70,7 +70,7 @@ const EVENTS = {
     },
     eventDateTime: {
       dec24: '2021-12-24 12:30:00',
-      dec25: '2022-01-23 05:30:00',
+      dec25: '2022-01-30 05:30:00',
       dec25RS: '2021-12-25 09:30:00',
       dec26: '2021-12-26 09:30:00',
     },
@@ -83,9 +83,9 @@ const EVENTS = {
       preprod: 'ckx8sau1d0000lrinb526hp0v',
       staging: 'ckyaeenu10001ncuj0yyedyqj',
     },
-    eventDate: '23rd January',
+    eventDate: '30 January',
     eventTime: '11:00 am',
-    eventDateTime: '2022-01-23 05:30:00',
+    eventDateTime: '2022-01-30 05:30:00',
   },
 };
 

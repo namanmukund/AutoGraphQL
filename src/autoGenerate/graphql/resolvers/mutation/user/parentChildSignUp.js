@@ -498,9 +498,9 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     setTimeout(() => {
       updateLeadSquared({
         Phone: get(parentPhone, 'number'),
-        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '23 January' : '23 January',
+        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '30 January' : '30 January',
         mx_Event_Time: utmCampaign.includes('doodling') || utmSource.includes('communityevent') ? '11:00 am' : '03:00 pm',
-        mx_Event_Date_Time: utmCampaign.includes('doodling') || utmSource.includes('communityevent') ? '2022-01-23 05:30:00' : '2022-01-23 09:30:00',
+        mx_Event_Date_Time: utmCampaign.includes('doodling') || utmSource.includes('communityevent') ? '2022-01-30 05:30:00' : '2022-01-30 09:30:00',
       }, false, {
         ActivityEvent: 208,
         Fields: [
