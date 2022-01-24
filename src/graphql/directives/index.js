@@ -38,7 +38,10 @@ directive @groupBy on FIELD
 # relational field where count can be fetched using filters
 directive @relationalMeta on FIELD
 
-# cache control
+# Namecases a string
+directive @nameCase on FIELD
+
+# Cache control for CDN and Redis.
 directive @cacheControl(
   maxAge: Int
   scope: CacheControlScope

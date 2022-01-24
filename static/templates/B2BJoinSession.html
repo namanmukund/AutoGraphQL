@@ -23,8 +23,15 @@
       rel="stylesheet"
     />
     <!-- CSS Reset : BEGIN -->
-
     <style>
+      .login-button {
+        font-size: 16px;
+      }
+      @media (max-width: 400px) {
+        .login-button {
+          font-size: 11px;
+        }
+      }
       html,
       body {
         margin: 0 auto !important;
@@ -414,8 +421,8 @@
                                   color: #fff;
                                   text-transform: uppercase;
                                   line-height: 2;
-                                  font-size: 16px;
                                 "
+                                class="login-button"
                               >
                                 LOGIN TO TEKIE
                               </div>

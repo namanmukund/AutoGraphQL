@@ -1,6 +1,7 @@
 /* AutoGenerates resolvers for model types  */
 import { camelCase, isArray, get } from 'lodash';
 import pluralize from 'pluralize';
+import { withFilter } from 'graphql-subscriptions';
 import { getParsedASTMap, checkIfArgumentsAreFromSameType, getFieldsBeingFetched } from '../../utils';
 import getRelationMutationNames from '../../utils/getRelationMutationNames';
 import {
@@ -10,6 +11,7 @@ import {
   deleteMultipleMutationResolver,
 } from './mutation';
 import { fetchSingleQueryResolver, fetchListQueryResolver, fetchListAggregationQueryResolver } from './query';
+import injectSubscriptionWithCommonAsyncIterator from './utils/injectSubscriptionWithCommonAsyncIterator';
 import {
   types, ifAuthorized, toObject, isErrorThrown,
 } from '../../../../utils';
@@ -74,6 +76,7 @@ import salesOperationReport from './query/methods/salesOperationReport';
 import temporaryScript from './query/methods/temporaryScript';
 import sendTransactionalMessage from './query/methods/sendTransactionalMessage';
 import sendTextMessage from './query/methods/sendTextMessage';
+import sendCommsMessage from './query/methods/sendCommsMessages';
 import getTotalAmountCollected from './query/methods/getTotalAmountCollected';
 import addUpdateBulkSchoolUserData from './mutation/methods/addUpdateBulkSchoolUserData';
 import updateVisitorReactionOnUserApprovedCode from './mutation/methods/updateVisitorReactionOnUserApprovedCode';
@@ -94,9 +97,11 @@ import shiftBatchSessionsAfterGivenDate from './mutation/methods/shiftBatchSessi
 import sendCertificateInMail from './mutation/methods/sendCertificateInMail';
 import sendJourneySnapshotInMail from './mutation/methods/sendJourneySnapshotInMail';
 import generateCertificate from './mutation/methods/generateCertificate';
+import generateCertificateInBulk from './mutation/methods/generateCertificateInBulk';
 import getMagicLink from './query/methods/getMagicLink';
 import validateMagicLink from './mutation/methods/validateMagicLink';
 import resetPasswordAndLogin from './mutation/methods/resetPasswordAndLogin';
+import getEventSpeaker from './query/methods/getEventSpeaker';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -156,7 +161,7 @@ const defaultMutationsResolverWrapper = async (
     } else {
       newResult = toObject(result);
     }
-    const dbData = await posthook(newResult, mutationName, context, params);
+    const dbData = await posthook(newResult, mutationName, context, params, info);
     // allow subscription on defined events
     subscribeToEvents(
       typeName,
@@ -187,10 +192,38 @@ Object.keys(parsedASTMap).forEach((type) => {
     const subscribedEvents = get(subscribe, 'events', []);
     if (subscribedEvents.length) {
       resolvers.Subscription[modelSingular] = {
-        subscribe: (root, params, context) => {
-          const { pubsub } = context;
-          return pubsub.asyncIterator([modelSingular]);
-        },
+        subscribe: withFilter(
+          (root, params, context) => {
+            const { pubsub } = context;
+            return pubsub.asyncIterator([modelSingular]);
+          },
+          async (payload, variables) => {
+            const { typeId } = payload;
+            const { filter: subscriptionFilter } = variables;
+            // Return result only if updated payload exists for the the supplied filter.
+            if (subscriptionFilter && Object.keys(subscriptionFilter).length) {
+              const query = `query ${typeName}($subscriptionFilter: ${typeName}Filter){
+                ${modelPlural}(filter: $subscriptionFilter){
+                  id
+                }
+              }`;
+              const result = await callLocalGraphqlApi(query, null, {
+                subscriptionFilter: {
+                  and: [
+                    subscriptionFilter,
+                    {
+                      id: typeId,
+                    },
+                  ],
+                },
+              });
+              const finalResult = get(result, `data.${modelPlural}`, []);
+              return Boolean(finalResult && finalResult.length);
+            }
+            // Always return result if no filter is sent.
+            return true;
+          },
+        ),
         resolve: async (payload, args, context, info) => {
           const { fieldNodes } = info;
           const fieldsFetched = getFieldsBeingFetched(fieldNodes);
@@ -265,7 +298,7 @@ Object.keys(parsedASTMap).forEach((type) => {
           authentication,
         ).then(async (result) => {
           const newResult = toObject(result);
-          const postHookResult = await posthook(newResult, modelSingular, context, params);
+          const postHookResult = await posthook(newResult, modelSingular, context, params, info);
           return postHookResult;
         });
       });
@@ -292,7 +325,7 @@ Object.keys(parsedASTMap).forEach((type) => {
           authentication,
         ).then(async (result) => {
           const newResult = toObject(result);
-          const postHookResult = await posthook(newResult, modelSingular, context, params);
+          const postHookResult = await posthook(newResult, modelSingular, context, params, info);
           return postHookResult;
         });
       });
@@ -495,7 +528,7 @@ Object.keys(parsedASTMap).forEach((type) => {
               connectedTypeName: relatedType,
               connectedFieldName: relatedTypeField,
             });
-            return posthook(newResult, addRelationMutationName, context, params);
+            return posthook(newResult, addRelationMutationName, context, params, info);
           });
         },
         [removeRelationMutationName]: async (root, params, context, info) => {
@@ -528,7 +561,7 @@ Object.keys(parsedASTMap).forEach((type) => {
               connectedFieldName: relatedTypeField,
             });
 
-            return posthook(newResult, removeRelationMutationName, context, params);
+            return posthook(newResult, removeRelationMutationName, context, params, info);
           });
         },
       };
@@ -594,6 +627,7 @@ resolvers.Mutation.sendCertificateInMail = sendCertificateInMail;
 resolvers.Mutation.shiftBatchSessionsAfterGivenDate = shiftBatchSessionsAfterGivenDate;
 resolvers.Mutation.sendJourneySnapshotInMail = sendJourneySnapshotInMail;
 resolvers.Mutation.generateCertificate = generateCertificate;
+resolvers.Mutation.generateCertificateInBulk = generateCertificateInBulk;
 resolvers.Mutation.validateMagicLink = validateMagicLink;
 resolvers.Mutation.resetPasswordAndLogin = resetPasswordAndLogin;
 
@@ -604,6 +638,7 @@ resolvers.Query.salesOperationReport = salesOperationReport;
 resolvers.Query.temporaryScript = temporaryScript;
 resolvers.Query.sendTransactionalMessage = sendTransactionalMessage;
 resolvers.Query.sendTextMessage = sendTextMessage;
+resolvers.Query.sendCommsMessage = sendCommsMessage;
 // Resolver to get total sell amount and amount colected
 resolvers.Query.getTotalAmountCollected = getTotalAmountCollected;
 // Resolver to get the cheatsheets
@@ -624,7 +659,12 @@ resolvers.Query.getUserCourses = getUserCourses;
 resolvers.Query.getSchoolCampaignSlots = getSchoolCampaignSlots;
 // Resolver to get magic link
 resolvers.Query.getMagicLink = getMagicLink;
+// Resolver to get event Speaker
+resolvers.Query.getEventSpeaker = getEventSpeaker;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
+
+// subscriptions
+resolvers.Subscription.userUpdated = injectSubscriptionWithCommonAsyncIterator(['USER_UPDATED']);
 
 export default resolvers;

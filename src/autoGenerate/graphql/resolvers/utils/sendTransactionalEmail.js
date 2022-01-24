@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import parsedHtmlFromTemplateFileAndObject
-  from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
+from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
@@ -39,10 +39,10 @@ const sendTransactionalEmail = async (templateObject, emailBody, country = 'indi
   }
   const footerDark = await parsedHtmlFromTemplateFileAndObject(
     'footerDark', {
-      instagramLink: getText('instagramLink', country),
-      tekieLink: getText('tekieLink', country),
-      tekieText: getText('tekieText', country),
-    },
+    instagramLink: getText('instagramLink', country),
+    tekieLink: getText('tekieLink', country),
+    tekieText: getText('tekieText', country),
+  },
   );
   const help = await parsedHtmlFromTemplateFileAndObject('help', { country });
   const footer = await parsedHtmlFromTemplateFileAndObject('footer', templateObject);
@@ -60,7 +60,7 @@ const sendTransactionalEmail = async (templateObject, emailBody, country = 'indi
 
   if (process.env.DATA_MASKING) {
     emailTo = [
-      'shubham.gupta+1@tekie.in',
+      'gokul.madhusudhan@tekie.in',
     ];
     ccEmail = [
       'naman.mukund@tekie.in',
