@@ -23,7 +23,7 @@ const getSlotTimeFields = (returnObj = false) => {
   let slotTimeObj = {};
   slotTimes.forEach((slotTime) => {
     slotTimeFields += `${slotTime} `;
-    slotTimeObj[`${slotTime} `] = 1;
+    slotTimeObj[`${slotTime}`] = 1;
   });
   if (returnObj) return slotTimeObj
   return slotTimeFields;
@@ -931,6 +931,26 @@ query{
 }
 `;
 
+const fetchOrCacheQueryRes = async ({hkey, maxAge = 9000, dbCallback = () => {}}) => {
+  const redisClient = new RedisController({
+    bypass: true,
+  });
+  let finalRes = null;
+  const cachedRes = await redisClient.get(hkey);
+  if (cachedRes) {
+    log(`CACHE_HIT: ${hkey}`);
+    finalRes = cachedRes;
+  } else {
+    log(`CACHE_MISS: ${hkey}`);
+    finalRes = await dbCallback();
+    await redisClient.set(finalRes, {
+      hkey,
+      maxAge,
+    });
+  }
+  return finalRes;
+}
+
 /** Fitler DefaultLoComponentRule based on Lo meta */
 const getFilteredLoComponentRule = (learningObjective, loComponentRule) => {
   if (loComponentRule && loComponentRule.length && learningObjective) {
@@ -999,13 +1019,6 @@ const menteeCourseSyllabusMutationResolver = async (
   const {
     userIdFromContext: userId,
   } = userAndAppInfo;
-  const redisClient = new RedisController({
-    bypass: true,
-  });
-  const cachedResponse = await redisClient.get(userId)
-  if (cachedResponse) {
-    return cachedResponse
-  }
   let batchCurrentComponentInfo;
   let schoolInfo;
   let currentTopicComponentInfo;
@@ -1029,15 +1042,22 @@ const menteeCourseSyllabusMutationResolver = async (
 
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
-    console.log({
-      userId,
-      courseId,
+    const res = await fetchOrCacheQueryRes({
+      hkey: `mcs_UCTCS_${courseId}_${userId}`,
+      maxAge: '2000',
+      dbCallback: async () => {
+        return await callLocalGraphqlApi(
+          getUserCurrentTopicComponentStatus(userId, courseId),
+          context,
+          '',
+        );
+      },
     });
-    const res = await callLocalGraphqlApi(
-      getUserCurrentTopicComponentStatus(userId, courseId),
-      context,
-      '',
-    );
+    // const res = await callLocalGraphqlApi(
+    //   getUserCurrentTopicComponentStatus(userId, courseId),
+    //   context,
+    //   '',
+    // );
 
     currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
     // calling method to validate user current topic component status
@@ -1313,10 +1333,7 @@ const menteeCourseSyllabusMutationResolver = async (
       // const graphlStop = process.hrtime(graphlStart);
       // log(`Time Taken to execute graphql query : ${(graphlStop[0] * 1e9 + graphlStop[1]) / 1e9} seconds`);
       const menteeSessionsModel = new QueryController('MenteeSession', { bypass: true });
-      const mongoStart = process.hrtime();
       menteeSessions = await menteeSessionsModel.aggregate(getMenteeSessionAggregation(userId, courseId));
-      const mongoStop = process.hrtime(mongoStart);
-    log(`Time Taken to execute mongodb aggregation: ${(mongoStop[0] * 1e9 + mongoStop[1]) / 1e9} seconds`);
       // currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
 
       if (mentorMenteeSessions && mentorMenteeSessions.length) {
@@ -1339,7 +1356,6 @@ const menteeCourseSyllabusMutationResolver = async (
         if (allottedMentor && allottedMentor.name) {
           mentorData = getMentorData(allottedMentor);
         }
-        console.log('AFTER_HERE_ALLOTTED_MENTOR')
       }
     }
     /*
@@ -1364,7 +1380,13 @@ const menteeCourseSyllabusMutationResolver = async (
     //     },
     //   });
     // }
-    const courseResult = await callLocalGraphqlApi(getCourseQuery(courseId));
+    // const courseResult = await callLocalGraphqlApi(getCourseQuery(courseId));
+    const courseResult = await fetchOrCacheQueryRes({
+      hkey: `mcs_CQ_${courseId}`,
+      dbCallback: async () => {
+        return await callLocalGraphqlApi(getCourseQuery(courseId));
+      },
+    });
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
       throw new DatabaseRecordNotFoundError({
@@ -1475,7 +1497,6 @@ const menteeCourseSyllabusMutationResolver = async (
               } = batchSession.topic;
 
               const isBatchTopicAccessible = isTopicAccessible(combinedEnrollmentType, batchSessionIsTrial);
-
               slotTimes.forEach((time, index) => {
                 if (batchSession[time]) {
                   slotTime = index;
@@ -1810,11 +1831,16 @@ const menteeCourseSyllabusMutationResolver = async (
           componentId: bookedTopicId,
         };
       } else {
-        const topicRes = await callLocalGraphqlApi(
-          getTopicQueryNewCourse(bookedTopicId),
-          context,
-          '',
-        );
+        const topicRes = await fetchOrCacheQueryRes({
+          hkey: `mcs_tQNC_${bookedTopicId}`,
+          dbCallback: async () => {
+            return await callLocalGraphqlApi(
+              getTopicQueryNewCourse(bookedTopicId),
+              context,
+              '',
+            );
+          },
+        });
         // getting info of called topic
         const topicInfo = get(topicRes, 'data.topic');
         if (!topicInfo) {
