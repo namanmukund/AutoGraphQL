@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import { getFieldsBeingFetched } from '../../../../utils';
-import { QueryController } from '../../../controllers';
+import { QueryController, RedisController } from '../../../controllers';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { OLD_COURSE_ID } from '../../../../../../constants';
 import { InvalidFieldType } from '../../../../../../constants/errors';
@@ -393,14 +393,23 @@ const getUserCurrentTopic = async (
 const getTypeQueryController = (typeName) => new QueryController(typeName, { bypass: true });
 
 const getUserCourses = (async (root, params, context, info) => {
-  const start = process.hrtime();
   const { input } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
   await validateIncomingFields(fieldsFetched);
 
+  const redisClient = new RedisController({
+    bypass: true,
+  });
   if (input && get(input, 'userId')) {
     const userId = get(input, 'userId');
+    /** Check if data exists in redis */ 
+    const cachedContent = await redisClient.get(`userCourses_${userId}`);
+    if (cachedContent) {
+      log(`[USER_COURSES] CACHE_HIT: ${`userCourses_${userId}`}`);
+      return cachedContent;
+    }
+
     const userCoursesModel = getTypeQueryController('UserCourse');
     const userCoursesRes = await userCoursesModel.aggregate(getUserCoursesAggregation(userId));
     if (userCoursesRes && userCoursesRes.length) {
@@ -460,8 +469,11 @@ const getUserCourses = (async (root, params, context, info) => {
       if (newPythonCourseExists && oldPythonCourseExists) {
         updatedCourseArr = updatedCourseArr.filter((course) => get(course, 'id') !== OLD_COURSE_ID);
       }
-      const stop = process.hrtime(start);
-      log(`[USER COURSES]: ${(stop[0] * 1e9 + stop[1]) / 1e9} seconds`);
+      await redisClient.set(updatedCourseArr, {
+        hkey: `userCourses_${userId}`,
+        maxAge: 900,
+      });
+      log(`[USER_COURSES] CACHE_MISS: ${`userCourses_${userId}`}`);
       return updatedCourseArr;
     }
   }

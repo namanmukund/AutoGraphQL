@@ -938,10 +938,10 @@ const fetchOrCacheQueryRes = async ({hkey, maxAge = 9000, dbCallback = () => {}}
   let finalRes = null;
   const cachedRes = await redisClient.get(hkey);
   if (cachedRes) {
-    log(`CACHE_HIT: ${hkey}`);
+    log(`[MCS] CACHE_HIT: ${hkey}`);
     finalRes = cachedRes;
   } else {
-    log(`CACHE_MISS: ${hkey}`);
+    log(`[MCS] CACHE_MISS: ${hkey}`);
     finalRes = await dbCallback();
     await redisClient.set(finalRes, {
       hkey,
