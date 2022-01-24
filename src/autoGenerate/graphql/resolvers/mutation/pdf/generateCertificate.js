@@ -53,9 +53,10 @@ const fetchEventCertificate = (id, eventId) => `
 }
 `;
 
-const addEventCertificate = (userId, assetUrl, eventType, eventName) => `
+const addEventCertificate = (userId, assetUrl, eventType, eventName, eventConnectId) => `
   mutation {
     addEventCertificate(userConnectId:"${userId}",
+    ${eventConnectId ? `eventConnectId:"${eventConnectId}"` : ''}
       input: {
         assetUrl: "${assetUrl}"
         ${eventType ? `eventType: ${eventType}` : ''}
@@ -69,7 +70,8 @@ const addEventCertificate = (userId, assetUrl, eventType, eventName) => `
 
 const updateEventCertificate = (eventCertificateId, url, eventType, eventName) => `
  mutation{
-  updateEventCertificate(id:"${eventCertificateId}",input:{
+  updateEventCertificate(id:"${eventCertificateId}",
+  input:{
     assetUrl:"${url}"
     ${eventType ? `eventType: ${eventType}` : ''}
     ${eventName ? `eventName: ${eventName}` : ''}
@@ -218,7 +220,7 @@ const generateCertificateMutationResolver = async (
         const eventCertificateCreatedRes = await callLocalGraphqlApi(updateEventCertificate(eventCertificateId, fetchedUrl, eventType, eventName));
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.updateEventCertificate');
       } else {
-        const eventCertificateCreatedRes = await callLocalGraphqlApi(addEventCertificate(userId, fetchedUrl, eventType, eventName));
+        const eventCertificateCreatedRes = await callLocalGraphqlApi(addEventCertificate(userId, fetchedUrl, eventType, eventName, isBulkGenerate ? eventId : ''));
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.addEventCertificate');
       }
     }

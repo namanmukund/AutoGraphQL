@@ -25,6 +25,10 @@ const ScheduleJob = `
     studentProfileId: String
     templateName: String
     isEmailRule: Boolean
+    condition: DateCondition
+    attendanceFilter: AttendanceFilter
+    unit: DurationType
+    value: Int
 }`;
 
 export default [ScheduleJob];

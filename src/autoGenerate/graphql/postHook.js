@@ -66,6 +66,7 @@ import updateDemoWowAuditPostHookMethod from './postHookFunctions/updateDemoWowA
 import updateEventPostHookMethod from './postHookFunctions/updateEventPostHookMethod';
 import addEventPostHookMethod from './postHookFunctions/addEventPostHookMethod';
 import fetchEventPostHookMethod from './postHookFunctions/fetchEventPostHookMethod';
+import updateEventSessionPostHookMethod from './postHookFunctions/updateEventSessionPostHookMethod';
 
 const posthook = async (input, mutationName, context, params, info) => {
   switch (mutationName) {
@@ -353,6 +354,10 @@ const posthook = async (input, mutationName, context, params, info) => {
     }
     case 'event': {
       await fetchEventPostHookMethod(input, params, mutationName, context, info);
+      break;
+    }
+    case 'updateEventSession': {
+      await updateEventSessionPostHookMethod(input, params, mutationName, context, info);
       break;
     }
     default:

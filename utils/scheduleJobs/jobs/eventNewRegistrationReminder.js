@@ -89,7 +89,7 @@ const eventNewRegistrationReminder = async ({
   const sessionLink = get(eventDetail, 'sessionLink');
   const summary = get(eventDetail, 'summary');
   const geoLocation = get(eventDetail, 'geoLocation');
-  const address = `${get(eventDetail, 'address')}, ${get(eventDetail, 'city')}, ${get(eventDetail, 'state')}, ${get(eventDetail, 'pincode')}`;
+  const address = `${get(eventDetail, 'address') || ''}, ${get(eventDetail, 'city') || ''}, ${get(eventDetail, 'state') || ''}, ${get(eventDetail, 'pincode') || ''}`;
   get(eventDetail, 'speakers', []).forEach((speaker, index) => { speakerName += `${get(speaker, 'user.name')}${index === get(eventDetail, 'speakers', []).length - 1 ? '' : ','}`; });
   const commsObj = {
     studentName: get(userDetail, 'user.name'),

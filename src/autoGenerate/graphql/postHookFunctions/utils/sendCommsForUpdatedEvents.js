@@ -78,7 +78,7 @@ const deleteJobQuery = (id) => `
 const deleteJobsForCancelledEvents = async (eventId) => {
   const query = `
   {
-    scheduleJobs(filter:{and:[{eventId:"${eventId}"}]}) {
+    scheduleJobs(filter: { and: [{ eventId: "${eventId}" }, { condition_not: afterRegistration }] }) {
       id
     }
   }

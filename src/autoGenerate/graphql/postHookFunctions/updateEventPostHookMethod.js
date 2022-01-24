@@ -44,10 +44,11 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
     for (const eventCommsRule of eventCommsRules) {
       if (!get(eventCommsRule, 'isSend') && get(eventCommsRule, 'condition') !== 'afterRegistration') {
         const dateCondition = get(eventCommsRule, 'condition', null);
+        const slotsFromDb = getSelectedSlotsTime(eventTimeTableRuleFromDb);
         switch (dateCondition) {
           case 'before': {
             const startDate = get(eventTimeTableRuleFromDb, 'startDate', null);
-            const scheduledDate = moment(startDate).subtract(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
+            const scheduledDate = moment(moment(startDate).set('hours', get(slotsFromDb, '[0]'))).subtract(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
             addToSchedule('eventCommsJob', scheduledDate, {
               eventId,
               eventCommsRule,
@@ -56,7 +57,7 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
           }
           case 'after': {
             const endDate = get(eventTimeTableRuleFromDb, 'endDate', null);
-            const scheduledDate = moment(endDate).add(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
+            const scheduledDate = moment(moment(endDate).set('hours', get(slotsFromDb, '[0]') + 1)).add(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
             addToSchedule('eventCommsJob', scheduledDate, {
               eventId,
               eventCommsRule,
