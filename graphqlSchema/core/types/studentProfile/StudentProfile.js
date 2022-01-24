@@ -16,6 +16,7 @@ const StudentProfile = `
     bookingAgent: User @relation(name: "BookingAgentStudentProfile", direction: "OneWay")
     mentor: MentorProfile @relation(name: "MentorStudentProfile")
     events: [Event] @relation(name:"EventStudentProfile")
+    wonEvents: [EventWinner] @relation(name:"EventWinnerStudentProfile")
 }`;
 
 export default [StudentProfile];

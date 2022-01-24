@@ -6,9 +6,9 @@ import { get } from 'lodash';
 import * as fs from 'fs';
 import fontkit from '@pdf-lib/fontkit';
 import mkdirp from 'mkdirp';
-import { NUNITO_BOLD_FONT_URL } from '../../../../../../../constants';
 import { uploadToS3 } from '../../../../../../middlewares/utils/uploadToS3';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
+import { NUNITO_BOLD_FONT_URL } from '../../../../../../../constants';
 
 const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
 
@@ -90,7 +90,8 @@ const getCertificateUrl = async (userId, eventId) => {
     // TODO : handle text color, images and fonts
     const getFontFamily = async (fontFamily) => {
       // Embed the different possible fonts
-      const fontBytes = await fetch(`${process.env.FILE_BASE_URL}${fontFamily}`).then((res) => res.buffer());
+      const fontBytes = fontFamily ? await fetch(`${process.env.FILE_BASE_URL}${fontFamily}`).then((res) => res.buffer())
+        : await fetch(NUNITO_BOLD_FONT_URL).then((res) => res.buffer());
 
       const fontValue = await pdfDoc.embedFont(fontBytes);
       return fontValue;
