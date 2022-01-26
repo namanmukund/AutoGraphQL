@@ -9,6 +9,7 @@ import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
 import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
 import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
+import sendMentorVerifyBookingReminder from './jobs/sendMentorVerifyBookingReminder';
 import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 import scheduleB2BSessionHomeworkRemainder from './scheduleB2BSessionHomeworkRemainder';
 import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
@@ -36,6 +37,7 @@ const FETCH_JOBS = `{
     sessionLink
     mentorUserId
     mentorPhoneNumber
+    taskId
     eventId
     commsVariables{
       dataField
@@ -83,6 +85,7 @@ const reRunJobsFromDB = async () => {
       sessionLink,
       mentorUserId,
       mentorPhoneNumber,
+      taskId,
       eventId,
       commsVariables,
       studentProfileId,
@@ -237,6 +240,14 @@ const reRunJobsFromDB = async () => {
             sessionLink,
             mentorUserId,
             mentorPhoneNumber,
+          }, deleteJob);
+        });
+        break;
+      }
+      case 'sendMentorVerifyBookingReminder': {
+        schedule.scheduleJob(new Date(scheduledDate), () => {
+          sendMentorVerifyBookingReminder({
+            taskId, mentorUserId, jobType,
           }, deleteJob);
         });
         break;

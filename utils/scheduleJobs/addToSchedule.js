@@ -10,6 +10,7 @@ import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 // import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
 // import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 // import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
+import sendMentorVerifyBookingReminder from './jobs/sendMentorVerifyBookingReminder';
 import sendEventCommunication from './jobs/sendEventCommunication';
 import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
 
@@ -31,6 +32,7 @@ const addScheduleJob = ({
   sessionLink,
   mentorUserId,
   mentorPhoneNumber,
+  taskId,
   studentProfileId,
   templateName,
   isEmailRule = false,
@@ -58,6 +60,9 @@ const addScheduleJob = ({
         ${sessionTime ? `sessionTime: "${sessionTime}"` : ''}
         ${sessionLink ? `sessionLink: "${sessionLink}"` : ''}
         ${mentorUserId ? `mentorUserId: "${mentorUserId}"` : ''}
+        ${taskId ? `taskId: "${taskId}"` : ''}
+        ${mentorPhoneNumber ? `mentorPhoneNumber: "${mentorPhoneNumber}"` : ''}
+        scheduledDate: "${scheduledDate.toISOString()}"
         ${mentorPhoneNumber ? `mentorPhoneNumber: "${mentorPhoneNumber}"` : ''}
         scheduledDate: "${scheduledDate.toISOString()}"
         ${studentProfileId ? `studentProfileId:"${studentProfileId}"` : ''}
@@ -98,8 +103,9 @@ const addToSchedule = async (jobType, scheduledDate, {
   // sessionDate,
   // sessionTime,
   // sessionLink,
-  // mentorUserId,
+  mentorUserId,
   // mentorPhoneNumber,
+  taskId,
   studentProfileId,
   eventId,
   eventCommsRule,
@@ -307,6 +313,18 @@ const addToSchedule = async (jobType, scheduledDate, {
       //     mentorPhoneNumber,
       //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
       // });
+      break;
+    }
+    case 'sendMentorVerifyBookingReminder': {
+      const res = await callLocalGraphqlApi(addScheduleJob({
+        jobType, mentorUserId, taskId, scheduledDate,
+      }));
+      const jobId = get(res, 'data.addScheduleJob.id');
+      schedule.scheduleJob(scheduledDate, () => {
+        sendMentorVerifyBookingReminder({
+          taskId, mentorUserId, jobType,
+        }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      });
       break;
     }
     case 'eventCommsJob': {
