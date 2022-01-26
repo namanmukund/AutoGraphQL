@@ -24,6 +24,11 @@ const ParentChildSignUpInput = `
     utmTerm: String
     utmContent: String
     utmMedium: String
+    browser: String
+    browserVersion: String
+    deviceType: String
+    deviceOs: String
+    osVersion: String
   }
 `;
 

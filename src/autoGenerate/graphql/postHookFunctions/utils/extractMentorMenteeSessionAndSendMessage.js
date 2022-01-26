@@ -139,9 +139,9 @@ const extractMentorMenteeSessionAndSendMessage = async (
   if (process.env.NODE_ENV === 'production') {
     if (get(topic, 'data.topic.order') === 1) {
     // send whatsapp emailTemplate message
-      let sessionLink = get(mentorInfo, 'data.mentorSession.user.mentorProfile.sessionLink');
+      let sessionLink = get(mentorInfo, 'data.mentorSession.user.mentorProfile.sessionLink', 'sessionLink');
       if (!get(mentorInfo, 'data.mentorSession.user.mentorProfile.sessionLink')) {
-        sessionLink = get(mentorInfo, 'data.mentorSession.user.mentorProfile.googleMeetLink');
+        sessionLink = get(mentorInfo, 'data.mentorSession.user.mentorProfile.googleMeetLink', 'googleMeetLink');
       }
       const {
         name: mentorName, phoneNumber: mentorPhoneNumber, countryCode: mentorCountryCode,

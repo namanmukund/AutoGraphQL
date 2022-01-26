@@ -42,9 +42,11 @@ const customMutationString = `
    shiftBatchSessionsAfterGivenDate ( input: ShiftBatchSessionsInput ): BooleanResult,
    sendJourneySnapshotInMail ( input: SendJourneySnapshotInMailInput ): BooleanResult,
    generateCertificate ( input: GenerateCertificateInput ) : GenerateCertificateOutput,
+   generateCertificateInBulk ( input: GenerateCertificateInBulkInput ) : BooleanResult,
    validateMagicLink ( input: ValidateMagicLinkInput  ): ParentChildToken,
    resetPasswordAndLogin ( input: ResetPasswordAndLoginInput ): UserToken,
    generateMentorPayoutReport ( input: MentorPayoutReportInput ): MentorPayoutReportOutput,
+   generateMentorChild ( mentorId: String ): MentorChildOutput 
    `;
 
 export default customMutationString;
