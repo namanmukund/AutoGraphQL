@@ -1,3 +1,4 @@
+import { log } from '../../../../utils';
 import redis from '../../../redis';
 import MasterController from './MasterController';
 
@@ -13,23 +14,23 @@ class RedisController extends MasterController {
   validateRedisConn() {
     if (this.redis && this.REDIS_SUCCESS_STATE.includes(this.redis.status)) {
       return true;
-    } 
+    }
     return false;
   }
 
   async get(hkey) {
     if (this.validateRedisConn()) {
-      let data = await this.redis.get(hkey);
+      const data = await this.redis.get(hkey);
       return JSON.parse(data);
     }
     return null;
   }
- 
-  async set(obj, { hkey , maxAge } = {}) {
+
+  async set(obj, { hkey, maxAge } = {}) {
     try {
-      await this.redis.set(hkey, JSON.stringify(obj), 'EX', maxAge)
+      await this.redis.set(hkey, JSON.stringify(obj), 'EX', maxAge);
     } catch (e) {
-      console.log(e)
+      log(e);
     }
     return hkey;
   }
