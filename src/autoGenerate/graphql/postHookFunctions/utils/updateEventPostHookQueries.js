@@ -63,8 +63,8 @@ const deleteEventSession = async (eventSessionId) => {
   }
 }
 `;
-  await callLocalGraphqlApi(deleteQuery);
   log(`deleted eventSession with Id ${eventSessionId}`);
+  await callLocalGraphqlApi(deleteQuery);
 };
 
 const updateEventSession = async (sessionId, slots, date, pushManyQuery = '') => {
