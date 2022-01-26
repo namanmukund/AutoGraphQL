@@ -63,8 +63,8 @@ const deleteEventSession = async (eventSessionId) => {
   }
 }
 `;
-  await callLocalGraphqlApi(deleteQuery);
   log(`deleted eventSession with Id ${eventSessionId}`);
+  await callLocalGraphqlApi(deleteQuery);
 };
 
 const updateEventSession = async (sessionId, slots, date, pushManyQuery = '') => {
@@ -219,7 +219,7 @@ const addUpdateEventSessionsForEvent = async (eventId, timeTableRule, prevTimeTa
         const alreadyAddedUser = get(eventSession, 'attendance', []).map((attendance) => get(attendance, 'student.id'));
         registeredUsers.forEach((user) => {
           if (!alreadyAddedUser.includes(get(user, 'typeId'))) {
-            pushManyQuery += `{studentConnectId: "${get(user, 'typeId')}",}, `;
+            pushManyQuery += `{studentConnectId: "${get(user, 'typeId')}",},`;
           }
         });
         if (pushManyQuery) pushManyQuery = `attendance:{ pushMany: [${pushManyQuery}] }`;

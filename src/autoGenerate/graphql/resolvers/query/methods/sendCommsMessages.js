@@ -68,7 +68,7 @@ const sendCommsMessage = async (root, params, context) => {
     const broadcastName = 'Tekie';
     let phoneNumber = parentPhone;
     if (process.env.DATA_MASKING) phoneNumber = '919999694605';
-    phoneNumber = '919766236884';
+    if (!phoneNumber.startsWith('91') && phoneNumber.length === 10) phoneNumber = `91${phoneNumber}`;
     const bodyJson = {
       template_name: templateName,
       broadcast_name: broadcastName || 'Tekie',
@@ -79,7 +79,6 @@ const sendCommsMessage = async (root, params, context) => {
       'Content-Type': 'application/json',
     };
     const url = process.env.WATI_API_URL + phoneNumber;
-
     await fetch(url, {
       method: 'POST', headers, body: JSON.stringify(bodyJson),
     }).then((res) => res.json()).then((result) => {

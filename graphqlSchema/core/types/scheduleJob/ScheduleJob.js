@@ -21,7 +21,14 @@ const ScheduleJob = `
     mentorPhoneNumber: String
     eventId: String
     eventSessionId: String
-    eventCommsRule: EventCommsRule
+    commsVariables: [CommsVariableType]
+    studentProfileId: String
+    templateName: String
+    isEmailRule: Boolean
+    condition: DateCondition
+    attendanceFilter: AttendanceFilter
+    unit: DurationType
+    value: Int
 }`;
 
 export default [ScheduleJob];

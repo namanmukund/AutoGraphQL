@@ -15,6 +15,7 @@ const getEvent = async (eventId) => {
     {
         event(id:"${eventId}") {
             eventName
+            name
             isEmailCommsEnabled
             eventTimeTableRule {
               startDate
@@ -77,7 +78,7 @@ const deleteJobQuery = (id) => `
 const deleteJobsForCancelledEvents = async (eventId) => {
   const query = `
   {
-    scheduleJobs(filter:{and:[{eventId:"${eventId}"}]}) {
+    scheduleJobs(filter: { and: [{ eventId: "${eventId}" }, { condition_not: afterRegistration }] }) {
       id
     }
   }
@@ -108,29 +109,29 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
     const parentEmail = get(user, 'email');
     const parentPhone = get(user, 'phone.countryCode').split('+')[1] + (user, 'phone.number');
     const studentName = get(registeredUser, 'user.name');
-    if (eventUpdateStatus === 'reschedule') {
+    if (eventUpdateStatus === 'rescheduled') {
       let parameters = [];
       if (locationType === 'online') {
         parameters = [
           {
             name: 'student_name',
-            content: studentName,
+            value: studentName,
           },
           {
             name: 'event_name',
-            content: eventName,
+            value: eventName,
           },
           {
             name: 'sessionLink',
-            content: sessionLink,
+            value: sessionLink,
           },
           {
             name: 'event_date',
-            content: eventStartdate,
+            value: eventStartdate,
           },
           {
             name: 'event_time',
-            content: startTime,
+            value: startTime,
           },
         ];
       }
@@ -138,47 +139,47 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
         parameters = [
           {
             name: 'studentName',
-            content: studentName,
+            value: studentName,
           },
           {
             name: 'eventName',
-            content: eventName,
+            value: eventName,
           },
           {
             name: 'geoLocation',
-            content: geoLocation,
+            value: geoLocation,
           },
           {
             name: 'address',
-            content: address,
+            value: address,
           },
           {
             name: 'state',
-            content: state,
+            value: state,
           },
           {
             name: 'city',
-            content: city,
+            value: city,
           },
           {
             name: 'pincode',
-            content: pincode,
+            value: pincode,
           },
           {
             name: 'eventUpdateReason',
-            content: eventUpdateReason,
+            value: eventUpdateReason,
           },
           {
             name: 'eventStartdate',
-            content: eventStartdate,
+            value: eventStartdate,
           },
           {
             name: 'eventEndDate',
-            content: eventEndDate,
+            value: eventEndDate,
           },
           {
             name: 'startTime',
-            content: startTime,
+            value: startTime,
           },
         ];
       }
@@ -225,25 +226,25 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
           'Tekie Event Rescheduled');
       }
     }
-    if (eventUpdateStatus === 'cancelled') {
+    if (eventUpdateStatus === 'canceled') {
       let parameters = [];
       if (locationType === 'online') {
         parameters = [
           {
             name: 'student_name',
-            content: studentName,
+            value: studentName,
           },
           {
             name: 'event_name',
-            content: eventName,
+            value: eventName,
           },
           {
             name: 'event_date',
-            content: eventStartdate,
+            value: eventStartdate,
           },
           {
             name: 'event_time',
-            content: startTime,
+            value: startTime,
           },
         ];
       }
@@ -251,19 +252,19 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
         parameters = [
           {
             name: 'student_name',
-            content: studentName,
+            value: studentName,
           },
           {
             name: 'event_name',
-            content: eventName,
+            value: eventName,
           },
           {
             name: 'event_date',
-            content: eventStartdate,
+            value: eventStartdate,
           },
           {
             name: 'event_time',
-            content: startTime,
+            value: startTime,
           },
         ];
       }

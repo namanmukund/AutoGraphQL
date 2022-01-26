@@ -122,6 +122,11 @@ const Event = `
     ticketEndsCondition: DateCondition
     ticketEndsInUnit: DurationType
     ticketEndsInValue: Int
+    showWinnersOnWeb: Boolean @defaultValue(value: "false")
+    showMomentsOnWeb: Boolean @defaultValue(value: "false")
+    showCompletedEvent: Boolean @defaultValue(value: "false")
+    momentFromEventLink: String
+    eventWinners: [EventWinner] @relation(name:"EventWinnerEvent")
   }
 `;
 

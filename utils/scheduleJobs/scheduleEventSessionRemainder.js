@@ -86,10 +86,11 @@ const sendEventSessionRemainderMail = (email, sendEmailObject) => {
 };
 
 const scheduleEventSessionRemainder = async () => {
-  const eventSessions = getEventSessions();
+  const eventSessions = await getEventSessions();
   for (const eventSession of eventSessions) {
     const {
       sessionDate, event: {
+        id: eventId,
         timeZone, isEmailCommsEnabled, name: eventName,
         meetingId, meetingPassword, sessionLink, locationType, geoLocation,
         address, state, city, pincode, registeredUsers = [],
@@ -118,7 +119,7 @@ const scheduleEventSessionRemainder = async () => {
           },
           {
             name: 'event_session_link',
-            content: 'link',
+            content: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
           },
           {
             name: 'event_time',

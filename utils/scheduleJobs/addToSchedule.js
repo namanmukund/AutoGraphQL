@@ -10,6 +10,8 @@ import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 // import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
 // import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 // import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
+import sendEventCommunication from './jobs/sendEventCommunication';
+import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
 
 const addScheduleJob = ({
   jobType,
@@ -29,6 +31,15 @@ const addScheduleJob = ({
   sessionLink,
   mentorUserId,
   mentorPhoneNumber,
+  studentProfileId,
+  templateName,
+  isEmailRule = false,
+  commsVariables,
+  eventId,
+  condition,
+  attendanceFilter,
+  value,
+  unit,
 }) => `
   mutation {
     addScheduleJob(
@@ -49,6 +60,15 @@ const addScheduleJob = ({
         ${mentorUserId ? `mentorUserId: "${mentorUserId}"` : ''}
         ${mentorPhoneNumber ? `mentorPhoneNumber: "${mentorPhoneNumber}"` : ''}
         scheduledDate: "${scheduledDate.toISOString()}"
+        ${studentProfileId ? `studentProfileId:"${studentProfileId}"` : ''}
+        ${commsVariables ? `commsVariables: ${commsVariables}` : ''}
+        ${templateName ? `templateName: "${templateName}"` : ''}
+        ${isEmailRule ? 'isEmailRule: true' : ''}
+        ${eventId ? `eventId: "${eventId}"` : ''}
+        ${condition ? `condition: ${condition}` : ''}
+        ${attendanceFilter ? `attendanceFilter: ${attendanceFilter}` : ''}
+        ${value ? `value: ${value}` : ''}
+        ${unit ? `unit: ${unit}` : ''}
       }
       ${userId ? `parentConnectId: "${userId}"` : ''}
     ) {
@@ -80,8 +100,9 @@ const addToSchedule = async (jobType, scheduledDate, {
   // sessionLink,
   // mentorUserId,
   // mentorPhoneNumber,
-  // eventId,
-  // eventCommsRule,
+  studentProfileId,
+  eventId,
+  eventCommsRule,
 }) => {
   switch (jobType) {
     case 'sendNextDayBookReminder': {
@@ -289,15 +310,78 @@ const addToSchedule = async (jobType, scheduledDate, {
       break;
     }
     case 'eventCommsJob': {
-      // const res = await callLocalGraphqlApi(addScheduleJob({
-      //   jobType, eventId, scheduledDate, eventCommsRule
-      // }));
-      // const jobId = get(res, 'data.addScheduleJob.id');
-      // schedule.scheduleJob(scheduledDate, () => {
-      //   sendEventCommunication({
-      //     eventId, eventCommsRule, jobType,
-      //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      // });
+      let commsVariables = '';
+      get(eventCommsRule, 'commsVariables', []).forEach((comms) => {
+        if (get(comms, 'dataField')) {
+          commsVariables += `{
+            whatsappVariableName: "${get(comms, 'whatsappVariableName') || ''}",
+            emailVariableName: "${get(comms, 'emailVariableName') || ''}",
+            dataField: ${get(comms, 'dataField')}
+          },`;
+        }
+      });
+      commsVariables = `[${commsVariables}]`;
+      const res = await callLocalGraphqlApi(addScheduleJob({
+        jobType,
+        eventId,
+        scheduledDate,
+        templateName: get(eventCommsRule, 'templateName'),
+        isEmailRule: get(eventCommsRule, 'isEmailRule', false),
+        commsVariables,
+        condition: get(eventCommsRule, 'condition'),
+        attendanceFilter: get(eventCommsRule, 'attendanceFilter'),
+        value: get(eventCommsRule, 'value'),
+        unit: get(eventCommsRule, 'unit'),
+      }));
+      const jobId = get(res, 'data.addScheduleJob.id');
+      schedule.scheduleJob(new Date(scheduledDate), () => {
+        sendEventCommunication({
+          eventId,
+          eventCommsRule,
+          jobType,
+          commsVariables: get(eventCommsRule, 'commsVariables', []),
+          templateName: get(eventCommsRule, 'templateName'),
+          isEmailRule: get(eventCommsRule, 'isEmailRule', false),
+          condition: get(eventCommsRule, 'condition'),
+          attendanceFilter: get(eventCommsRule, 'attendanceFilter'),
+          value: get(eventCommsRule, 'value'),
+          unit: get(eventCommsRule, 'unit'),
+        }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      });
+      break;
+    }
+    case 'eventNewRegistrationReminder': {
+      let commsVariables = '';
+      get(eventCommsRule, 'commsVariables', []).forEach((comms) => {
+        if (get(comms, 'dataField')) {
+          commsVariables += `{
+            whatsappVariableName: "${get(comms, 'whatsappVariableName') || ''}",
+            emailVariableName: "${get(comms, 'emailVariableName') || ''}",
+            dataField: ${get(comms, 'dataField')}
+          },`;
+        }
+      });
+      commsVariables = `[${commsVariables}]`;
+      const res = await callLocalGraphqlApi(addScheduleJob({
+        jobType,
+        eventId,
+        scheduledDate,
+        commsVariables,
+        studentProfileId,
+        templateName: get(eventCommsRule, 'templateName'),
+        isEmailRule: get(eventCommsRule, 'isEmailRule', false),
+      }));
+      const jobId = get(res, 'data.addScheduleJob.id');
+      schedule.scheduleJob(new Date(scheduledDate), () => {
+        eventNewRegistrationReminder({
+          eventId,
+          jobType,
+          studentProfileId,
+          commsVariables: get(eventCommsRule, 'commsVariables', []),
+          templateName: get(eventCommsRule, 'templateName'),
+          isEmailRule: get(eventCommsRule, 'isEmailRule', false),
+        }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      });
       break;
     }
     default:
