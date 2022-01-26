@@ -19,6 +19,7 @@ const ScheduleJob = `
     sessionLink: String
     mentorUserId: String
     mentorPhoneNumber: String
+    taskId: String
 }`;
 
 export default [ScheduleJob];

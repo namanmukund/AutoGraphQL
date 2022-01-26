@@ -8,60 +8,63 @@ import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/p
 // import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
 // import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 // import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
+import sendMentorVerifyBookingReminder from './jobs/sendMentorVerifyBookingReminder';
 
-// const addScheduleJob = ({
-//   jobType,
-//   userId,
-//   scheduledDate,
-//   code,
-//   menteeSessionId,
-//   menteeSessionUpdatedAt,
-//   menteeId,
-//   mentorMenteeSessionId,
-//   batchSessionId,
-//   courseName,
-//   batchCode,
-//   schoolName,
-//   sessionDate,
-//   sessionTime,
-//   sessionLink,
-//   mentorUserId,
-//   mentorPhoneNumber,
-// }) => `
-//   mutation {
-//     addScheduleJob(
-//       input: {
-//         jobType: "${jobType}"
-//         ${code ? `code: "${code}"` : ''}
-//         ${batchSessionId ? `batchSessionId: "${batchSessionId}"` : ''}
-//         ${menteeSessionId ? `menteeSessionId: "${menteeSessionId}"` : ''}
-//         ${menteeId ? `menteeId: "${menteeId}"` : ''}
-//         ${menteeSessionUpdatedAt ? `menteeSessionUpdatedAt: "${menteeSessionUpdatedAt}"` : ''}
-//         ${mentorMenteeSessionId ? `mentorMenteeSessionId: "${mentorMenteeSessionId}"` : ''}
-//         ${courseName ? `courseName: "${courseName}"` : ''}
-//         ${batchCode ? `batchCode: "${batchCode}"` : ''}
-//         ${schoolName ? `schoolName: "${schoolName}"` : ''}
-//         ${sessionDate ? `sessionDate: "${sessionDate}"` : ''}
-//         ${sessionTime ? `sessionTime: "${sessionTime}"` : ''}
-//         ${sessionLink ? `sessionLink: "${sessionLink}"` : ''}
-//         ${mentorUserId ? `mentorUserId: "${mentorUserId}"` : ''}
-//         ${mentorPhoneNumber ? `mentorPhoneNumber: "${mentorPhoneNumber}"` : ''}
-//         scheduledDate: "${scheduledDate.toISOString()}"
-//       }
-//       ${userId ? `parentConnectId: "${userId}"` : ''}
-//     ) {
-//       id
-//     }
-//   }
-// `;
+const addScheduleJob = ({
+  jobType,
+  userId,
+  scheduledDate,
+  code,
+  menteeSessionId,
+  menteeSessionUpdatedAt,
+  menteeId,
+  mentorMenteeSessionId,
+  batchSessionId,
+  courseName,
+  batchCode,
+  schoolName,
+  sessionDate,
+  sessionTime,
+  sessionLink,
+  mentorUserId,
+  mentorPhoneNumber,
+  taskId,
+}) => `
+  mutation {
+    addScheduleJob(
+      input: {
+        jobType: "${jobType}"
+        ${code ? `code: "${code}"` : ''}
+        ${batchSessionId ? `batchSessionId: "${batchSessionId}"` : ''}
+        ${menteeSessionId ? `menteeSessionId: "${menteeSessionId}"` : ''}
+        ${menteeId ? `menteeId: "${menteeId}"` : ''}
+        ${menteeSessionUpdatedAt ? `menteeSessionUpdatedAt: "${menteeSessionUpdatedAt}"` : ''}
+        ${mentorMenteeSessionId ? `mentorMenteeSessionId: "${mentorMenteeSessionId}"` : ''}
+        ${courseName ? `courseName: "${courseName}"` : ''}
+        ${batchCode ? `batchCode: "${batchCode}"` : ''}
+        ${schoolName ? `schoolName: "${schoolName}"` : ''}
+        ${sessionDate ? `sessionDate: "${sessionDate}"` : ''}
+        ${sessionTime ? `sessionTime: "${sessionTime}"` : ''}
+        ${sessionLink ? `sessionLink: "${sessionLink}"` : ''}
+        ${mentorUserId ? `mentorUserId: "${mentorUserId}"` : ''}
+        ${taskId ? `taskId: "${taskId}"` : ''}
+        ${mentorPhoneNumber ? `mentorPhoneNumber: "${mentorPhoneNumber}"` : ''}
+        scheduledDate: "${scheduledDate.toISOString()}"
+      }
+      ${userId ? `parentConnectId: "${userId}"` : ''}
+    ) {
+      id
+    }
+  }
+`;
 
-// const deleteJob = (id) => `
-//   mutation {
-//     deleteScheduleJob(id: "${id}") {
-//       id
-//     }
-//   }
-// `;
+const deleteJob = (id) => `
+  mutation {
+    deleteScheduleJob(id: "${id}") {
+      id
+    }
+  }
+`;
 
 const addToSchedule = async (jobType, scheduledDate, {
   // userId,
@@ -76,8 +79,9 @@ const addToSchedule = async (jobType, scheduledDate, {
   // sessionDate,
   // sessionTime,
   // sessionLink,
-  // mentorUserId,
+  mentorUserId,
   // mentorPhoneNumber,
+  taskId,
 }) => {
   switch (jobType) {
     case 'sendNextDayBookReminder': {
@@ -262,6 +266,18 @@ const addToSchedule = async (jobType, scheduledDate, {
       //     mentorPhoneNumber,
       //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
       // });
+      break;
+    }
+    case 'sendMentorVerifyBookingReminder': {
+      const res = await callLocalGraphqlApi(addScheduleJob({
+        jobType, mentorUserId, taskId, scheduledDate,
+      }));
+      const jobId = get(res, 'data.addScheduleJob.id');
+      schedule.scheduleJob(scheduledDate, () => {
+        sendMentorVerifyBookingReminder({
+          taskId, mentorUserId, jobType,
+        }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      });
       break;
     }
     default:

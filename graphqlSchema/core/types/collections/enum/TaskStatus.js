@@ -5,6 +5,7 @@ const TaskStatus = `
     assigned
     confirmed
     completed
+    cancelled
     mentorUnavailable
     mentorRejected
   }`;
