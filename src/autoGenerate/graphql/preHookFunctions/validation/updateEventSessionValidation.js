@@ -48,9 +48,10 @@ const updateEventSessionValidation = async (params, input, mutationName, context
     if (studentProfileId !== get(params, 'input.attendance.updateWhere.studentReferenceId')) {
       throw new UnauthorizedOperationError();
     }
+    context.currentUserId = get(currentUser, 'id');
+    context.eventId = eventId;
+    context.currentApp = get(currentApp, 'name');
   }
-  context.currentUserId = get(currentUser, 'id');
-  context.eventId = eventId;
   return true;
 };
 
