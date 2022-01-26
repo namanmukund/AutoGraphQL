@@ -2,7 +2,7 @@ import { get } from 'lodash';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { ApolloServer, PubSub } from 'apollo-server-express';
+import { ApolloServer } from 'apollo-server-express';
 import { BaseRedisCache } from 'apollo-server-cache-redis';
 import schema from './graphql';
 import { log, types } from '../utils';
@@ -14,10 +14,9 @@ import { getParsedASTMap } from './autoGenerate/utils';
 import routes from './phonePeAPI/routes';
 import typeformRoute from './typeformAPI';
 import redis from './redis';
+import pubsub from './pubsub';
 
 const http = require('http');
-
-const pubsub = new PubSub();
 
 const port = process.env.PORT || 80;
 const env = process.env.NODE_ENV || 'development';

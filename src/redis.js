@@ -2,10 +2,7 @@ import Redis from 'ioredis';
 import redisConfig from '../config/redis';
 import { log } from '../utils';
 
-const redisClient = new Redis({
-  host: redisConfig.host,
-  port: redisConfig.port,
-});
+const redisClient = new Redis(redisConfig);
 
 redisClient
   .on('error', (error) => {

@@ -98,6 +98,7 @@
     "google-libphonenumber": "^3.2.15",
     "google-spreadsheet": "^3.0.13",
     "graphql": "git+https://github.com/tekie-labs/graphql.git",
+    "graphql-redis-subscriptions": "^2.4.2",
     "graphql-subscriptions": "^1.1.0",
     "graphql-tools": "^4.0.7",
     "imagemagick": "^0.1.3",
