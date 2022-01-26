@@ -403,14 +403,19 @@ const getUserCourses = (async (root, params, context, info) => {
   if (input && get(input, 'userId')) {
     const userId = get(input, 'userId');
     /** Check if data exists in redis */
-    const cachedContent = await redisClient.get(`userCourses_${userId}`);
-    if (cachedContent) {
+    const cachedUserCourses = await redisClient.get(`userCourses_${userId}`);
+    const userCoursesRes = null;
+    if (cachedUserCourses) {
       log(`[USER_COURSES] CACHE_HIT: ${`userCourses_${userId}`}`);
-      return cachedContent;
+      userCoursesRes = cachedUserCourses;
+    } else {
+      const userCoursesModel = getTypeQueryController('UserCourse');
+      userCoursesRes = await userCoursesModel.aggregate(getUserCoursesAggregation(userId));
+      await redisClient.set(userCoursesRes, {
+        hkey: `userCourses_${userId}`,
+        maxAge: 900,
+      });
     }
-
-    const userCoursesModel = getTypeQueryController('UserCourse');
-    const userCoursesRes = await userCoursesModel.aggregate(getUserCoursesAggregation(userId));
     if (userCoursesRes && userCoursesRes.length) {
       const userCourses = get(userCoursesRes[0], 'courses', []);
       let newPythonCourseExists = false;
@@ -467,11 +472,6 @@ const getUserCourses = (async (root, params, context, info) => {
       if (newPythonCourseExists && oldPythonCourseExists) {
         updatedCourseArr = updatedCourseArr.filter((course) => get(course, 'id') !== OLD_COURSE_ID);
       }
-      await redisClient.set(updatedCourseArr, {
-        hkey: `userCourses_${userId}`,
-        maxAge: 900,
-      });
-      log(`[USER_COURSES] CACHE_MISS: ${`userCourses_${userId}`}`);
       return updatedCourseArr;
     }
   }
