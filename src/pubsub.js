@@ -19,7 +19,7 @@ const dateReviver = (key, value) => {
 
 /**
  * Initializing PubSub from Apollo or Redis based on current environment.
- * Reason : 
+ * Reason :
  *   This is because in case of having multiple instances, Apollo creates separate pubSub client
  *  per instance. Which would only publish data if client is connected to only that particular
  *  instance on which pubSub was earlier initialized.
