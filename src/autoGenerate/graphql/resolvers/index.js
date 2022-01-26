@@ -102,6 +102,7 @@ import getMagicLink from './query/methods/getMagicLink';
 import validateMagicLink from './mutation/methods/validateMagicLink';
 import resetPasswordAndLogin from './mutation/methods/resetPasswordAndLogin';
 import getEventSpeaker from './query/methods/getEventSpeaker';
+import generateMentorChild from './mutation/methods/generateMentorChild';
 import getEventWinner from './query/methods/getEventWinner';
 
 const parsedASTMap = getParsedASTMap(types);
@@ -631,6 +632,7 @@ resolvers.Mutation.generateCertificate = generateCertificate;
 resolvers.Mutation.generateCertificateInBulk = generateCertificateInBulk;
 resolvers.Mutation.validateMagicLink = validateMagicLink;
 resolvers.Mutation.resetPasswordAndLogin = resetPasswordAndLogin;
+resolvers.Mutation.generateMentorChild = generateMentorChild;
 
 // queries
 resolvers.Query.me = me;
