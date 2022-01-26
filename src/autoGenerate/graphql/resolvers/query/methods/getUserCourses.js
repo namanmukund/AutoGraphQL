@@ -1,7 +1,6 @@
 import { get } from 'lodash';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { QueryController, RedisController } from '../../../controllers';
-import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { OLD_COURSE_ID } from '../../../../../../constants';
 import { InvalidFieldType } from '../../../../../../constants/errors';
 import { log } from '../../../../../../utils';
@@ -10,23 +9,23 @@ import { log } from '../../../../../../utils';
 const getUserCurrentTopicComponentStatusAggregation = (userId, courseIds) => [
   {
     $match: {
-      "user.typeId": userId,
-      "currentCourse.typeId": {
+      'user.typeId': userId,
+      'currentCourse.typeId': {
         $in: courseIds,
       },
     },
   },
   {
     $lookup: {
-      from: "Topic",
+      from: 'Topic',
       let: {
-        topicId: "$currentTopic.typeId",
+        topicId: '$currentTopic.typeId',
       },
       pipeline: [
         {
           $match: {
             $expr: {
-              $eq: ["$id", "$$topicId"],
+              $eq: ['$id', '$$topicId'],
             },
           },
         },
@@ -40,15 +39,15 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseIds) => [
         },
         {
           $lookup: {
-            from: "File",
+            from: 'File',
             let: {
-              thumbnailId: "$thumbnail.typeId",
+              thumbnailId: '$thumbnail.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ["$id", "$$thumbnailId"],
+                    $eq: ['$id', '$$thumbnailId'],
                   },
                 },
               },
@@ -59,7 +58,7 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseIds) => [
                 },
               },
             ],
-            as: "thumbnail",
+            as: 'thumbnail',
           },
         },
         {
@@ -68,37 +67,37 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseIds) => [
             title: 1,
             description: 1,
             thumbnail: {
-              $arrayElemAt: ["$thumbnail", 0],
+              $arrayElemAt: ['$thumbnail', 0],
             },
           },
         },
       ],
-      as: "currentTopic",
+      as: 'currentTopic',
     },
   },
   {
     $project: {
       id: 1,
       currentCourse: {
-        id: "$currentCourse.typeId",
+        id: '$currentCourse.typeId',
       },
       currentTopic: {
-        $arrayElemAt: ["$currentTopic", 0],
+        $arrayElemAt: ['$currentTopic', 0],
       },
       user: 1,
     },
   },
   {
     $lookup: {
-      from: "User",
+      from: 'User',
       let: {
-        userId: "$user.typeId",
+        userId: '$user.typeId',
       },
       pipeline: [
         {
           $match: {
             $expr: {
-              $eq: ["$id", "$$userId"],
+              $eq: ['$id', '$$userId'],
             },
           },
         },
@@ -109,15 +108,15 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseIds) => [
         },
         {
           $lookup: {
-            from: "StudentProfile",
+            from: 'StudentProfile',
             let: {
-              studentProfileId: "$studentProfile.typeId",
+              studentProfileId: '$studentProfile.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ["$id", "$$studentProfileId"],
+                    $eq: ['$id', '$$studentProfileId'],
                   },
                 },
               },
@@ -128,51 +127,51 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseIds) => [
               },
               {
                 $lookup: {
-                  from: "Batch",
+                  from: 'Batch',
                   let: {
-                    batchId: "$batch.typeId",
+                    batchId: '$batch.typeId',
                   },
                   pipeline: [
                     {
                       $match: {
                         $expr: {
-                          $eq: ["$id", "$$batchId"],
+                          $eq: ['$id', '$$batchId'],
                         },
                       },
                     },
                     {
                       $lookup: {
-                        from: "BatchCurrentComponentStatus",
+                        from: 'BatchCurrentComponentStatus',
                         let: {
-                          ccId: "$currentComponent.typeId",
+                          ccId: '$currentComponent.typeId',
                         },
                         pipeline: [
                           {
                             $match: {
                               $expr: {
-                                $eq: ["$id", "$$ccId"],
+                                $eq: ['$id', '$$ccId'],
                               },
                             },
                           },
                           {
                             $project: {
                               currentCourse: {
-                                id: "$currentCourse.typeId",
+                                id: '$currentCourse.typeId',
                               },
                               currentTopic: 1,
                             },
                           },
                           {
                             $lookup: {
-                              from: "Topic",
+                              from: 'Topic',
                               let: {
-                                currentTopicId: "$currentTopic.typeId",
+                                currentTopicId: '$currentTopic.typeId',
                               },
                               pipeline: [
                                 {
                                   $match: {
                                     $expr: {
-                                      $eq: ["$id", "$$currentTopicId"],
+                                      $eq: ['$id', '$$currentTopicId'],
                                     },
                                   },
                                 },
@@ -183,57 +182,57 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseIds) => [
                                     order: 1,
                                     description: 1,
                                     thumbnail: {
-                                      id: "$thumbnail.typeId",
+                                      id: '$thumbnail.typeId',
                                     },
                                   },
                                 },
                               ],
-                              as: "currentTopic",
+                              as: 'currentTopic',
                             },
                           },
                           {
                             $project: {
                               currentCourse: 1,
                               currentTopic: {
-                                $arrayElemAt: ["$currentTopic", 0],
+                                $arrayElemAt: ['$currentTopic', 0],
                               },
                             },
                           },
                         ],
-                        as: "currentComponent",
+                        as: 'currentComponent',
                       },
                     },
                     {
                       $project: {
                         currentComponent: {
-                          $arrayElemAt: ["$currentComponent", 0],
+                          $arrayElemAt: ['$currentComponent', 0],
                         },
                       },
                     },
                   ],
-                  as: "batch",
+                  as: 'batch',
                 },
               },
               {
                 $project: {
                   batch: {
-                    $arrayElemAt: ["$batch", 0],
+                    $arrayElemAt: ['$batch', 0],
                   },
                 },
               },
             ],
-            as: "studentProfile",
+            as: 'studentProfile',
           },
         },
         {
           $project: {
             studentProfile: {
-              $arrayElemAt: ["$studentProfile", 0],
+              $arrayElemAt: ['$studentProfile', 0],
             },
           },
         },
       ],
-      as: "user",
+      as: 'user',
     },
   },
   {
@@ -243,7 +242,7 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseIds) => [
       currentCourse: 1,
       currentTopic: 1,
       user: {
-        $arrayElemAt: ["$user", 0],
+        $arrayElemAt: ['$user', 0],
       },
     },
   },
@@ -403,7 +402,7 @@ const getUserCourses = (async (root, params, context, info) => {
   });
   if (input && get(input, 'userId')) {
     const userId = get(input, 'userId');
-    /** Check if data exists in redis */ 
+    /** Check if data exists in redis */
     const cachedContent = await redisClient.get(`userCourses_${userId}`);
     if (cachedContent) {
       log(`[USER_COURSES] CACHE_HIT: ${`userCourses_${userId}`}`);
@@ -421,13 +420,12 @@ const getUserCourses = (async (root, params, context, info) => {
       let userCurrentTopicComponentStatuses = [];
       if (userCourses && userCourses.length) {
         const userCurrentTopicComponentStatusesModel = getTypeQueryController('UserCurrentTopicComponentStatus');
-        userCurrentTopicComponentStatuses =
-          await userCurrentTopicComponentStatusesModel.aggregate(
-            getUserCurrentTopicComponentStatusAggregation(
-              userId,
-              userCourses.map((el) => get(el, "id"))
-            )
-          ) || [];
+        userCurrentTopicComponentStatuses = await userCurrentTopicComponentStatusesModel.aggregate(
+          getUserCurrentTopicComponentStatusAggregation(
+            userId,
+            userCourses.map((el) => get(el, 'id')),
+          ),
+        ) || [];
         const userCourseCompletionModel = getTypeQueryController('UserCourseCompletion');
         userCourseCompletions = await userCourseCompletionModel.aggregate(getUserCourseCompletionAggregation(userId)) || [];
       }

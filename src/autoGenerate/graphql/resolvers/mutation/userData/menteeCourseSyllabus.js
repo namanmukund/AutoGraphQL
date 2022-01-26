@@ -20,12 +20,12 @@ import { QueryController, RedisController } from '../../../controllers';
 
 const getSlotTimeFields = (returnObj = false) => {
   let slotTimeFields = '';
-  let slotTimeObj = {};
+  const slotTimeObj = {};
   slotTimes.forEach((slotTime) => {
     slotTimeFields += `${slotTime} `;
     slotTimeObj[`${slotTime}`] = 1;
   });
-  if (returnObj) return slotTimeObj
+  if (returnObj) return slotTimeObj;
   return slotTimeFields;
 };
 
@@ -277,35 +277,35 @@ const getCourseQuery = (courseId) => `
 const getMenteeSessionAggregation = (userId, courseId) => [
   {
     $match: {
-      "user.typeId": userId,
-      "course.typeId": courseId || OLD_COURSE_ID,
+      'user.typeId': userId,
+      'course.typeId': courseId || OLD_COURSE_ID,
     },
   },
   {
     $lookup: {
-      from: "Topic",
+      from: 'Topic',
       let: {
-        topicId: "$topic.typeId",
+        topicId: '$topic.typeId',
       },
       pipeline: [
         {
           $match: {
             $expr: {
-              $eq: ["$id", "$$topicId"],
+              $eq: ['$id', '$$topicId'],
             },
           },
         },
         {
           $lookup: {
-            from: "Chapter",
+            from: 'Chapter',
             let: {
-              chapterId: "$chapter.typeId",
+              chapterId: '$chapter.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ["$id", "$$chapterId"],
+                    $eq: ['$id', '$$chapterId'],
                   },
                 },
               },
@@ -317,20 +317,20 @@ const getMenteeSessionAggregation = (userId, courseId) => [
                 },
               },
             ],
-            as: "chapter",
+            as: 'chapter',
           },
         },
         {
           $lookup: {
-            from: "File",
+            from: 'File',
             let: {
-              thumbnailId: "$thumbnail.typeId",
+              thumbnailId: '$thumbnail.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ["$id", "$$thumbnailId"],
+                    $eq: ['$id', '$$thumbnailId'],
                   },
                 },
               },
@@ -342,20 +342,20 @@ const getMenteeSessionAggregation = (userId, courseId) => [
                 },
               },
             ],
-            as: "thumbnail",
+            as: 'thumbnail',
           },
         },
         {
           $lookup: {
-            from: "File",
+            from: 'File',
             let: {
-              thumbnailSmallId: "$thumbnailSmall.typeId",
+              thumbnailSmallId: '$thumbnailSmall.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ["$id", "$$thumbnailSmallId"],
+                    $eq: ['$id', '$$thumbnailSmallId'],
                   },
                 },
               },
@@ -367,7 +367,7 @@ const getMenteeSessionAggregation = (userId, courseId) => [
                 },
               },
             ],
-            as: "thumbnailSmall",
+            as: 'thumbnailSmall',
           },
         },
         {
@@ -378,18 +378,18 @@ const getMenteeSessionAggregation = (userId, courseId) => [
             order: 1,
             isTrial: 1,
             chapter: {
-              $arrayElemAt: ["$chapter", 0],
+              $arrayElemAt: ['$chapter', 0],
             },
             thumbnail: {
-              $arrayElemAt: ["$thumbnail", 0],
+              $arrayElemAt: ['$thumbnail', 0],
             },
             thumbnailSmall: {
-              $arrayElemAt: ["$thumbnailSmall", 0],
+              $arrayElemAt: ['$thumbnailSmall', 0],
             },
           },
         },
       ],
-      as: "topic",
+      as: 'topic',
     },
   },
   {
@@ -400,42 +400,42 @@ const getMenteeSessionAggregation = (userId, courseId) => [
       },
       bookingDate: 1,
       ...getSlotTimeFields(true),
-    }
-  }
-]; 
+    },
+  },
+];
 
 const getBatchSessionsAggregation = (batchId, courseId) => [
   {
     $match: {
-      "batch.typeId": batchId,
-      "course.typeId": courseId || OLD_COURSE_ID,
+      'batch.typeId': batchId,
+      'course.typeId': courseId || OLD_COURSE_ID,
     },
   },
   {
     $lookup: {
-      from: "Topic",
+      from: 'Topic',
       let: {
-        topicId: "$topic.typeId",
+        topicId: '$topic.typeId',
       },
       pipeline: [
         {
           $match: {
             $expr: {
-              $eq: ["$id", "$$topicId"],
+              $eq: ['$id', '$$topicId'],
             },
           },
         },
         {
           $lookup: {
-            from: "File",
+            from: 'File',
             let: {
-              thumbnailId: "$thumbnail.typeId",
+              thumbnailId: '$thumbnail.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ["$id", "$$thumbnailId"],
+                    $eq: ['$id', '$$thumbnailId'],
                   },
                 },
               },
@@ -447,20 +447,20 @@ const getBatchSessionsAggregation = (batchId, courseId) => [
                 },
               },
             ],
-            as: "thumbnail",
+            as: 'thumbnail',
           },
         },
         {
           $lookup: {
-            from: "File",
+            from: 'File',
             let: {
-              thumbnailSmallId: "$thumbnailSmall.typeId",
+              thumbnailSmallId: '$thumbnailSmall.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ["$id", "$$thumbnailSmallId"],
+                    $eq: ['$id', '$$thumbnailSmallId'],
                   },
                 },
               },
@@ -472,7 +472,7 @@ const getBatchSessionsAggregation = (batchId, courseId) => [
                 },
               },
             ],
-            as: "thumbnailSmall",
+            as: 'thumbnailSmall',
           },
         },
         {
@@ -483,56 +483,56 @@ const getBatchSessionsAggregation = (batchId, courseId) => [
             order: 1,
             isTrial: 1,
             thumbnail: {
-              $arrayElemAt: ["$thumbnail", 0],
+              $arrayElemAt: ['$thumbnail', 0],
             },
             thumbnailSmall: {
-              $arrayElemAt: ["$thumbnailSmall", 0],
+              $arrayElemAt: ['$thumbnailSmall', 0],
             },
           },
         },
       ],
-      as: "topic",
+      as: 'topic',
     },
   },
   {
     $lookup: {
-      from: "MentorSession",
+      from: 'MentorSession',
       let: {
-        mentorSessionId: "$mentorSession.typeId",
+        mentorSessionId: '$mentorSession.typeId',
       },
       pipeline: [
         {
           $match: {
             $expr: {
-              $eq: ["$id", "$$mentorSessionId"],
+              $eq: ['$id', '$$mentorSessionId'],
             },
           },
         },
         {
           $lookup: {
-            from: "User",
+            from: 'User',
             let: {
-              userId: "$user.typeId",
+              userId: '$user.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ["$id", "$$userId"],
+                    $eq: ['$id', '$$userId'],
                   },
                 },
               },
               {
                 $lookup: {
-                  from: "File",
+                  from: 'File',
                   let: {
-                    profilePicId: "$profilePic.typeId",
+                    profilePicId: '$profilePic.typeId',
                   },
                   pipeline: [
                     {
                       $match: {
                         $expr: {
-                          $eq: ["$id", "$$profilePicId"],
+                          $eq: ['$id', '$$profilePicId'],
                         },
                       },
                     },
@@ -544,20 +544,20 @@ const getBatchSessionsAggregation = (batchId, courseId) => [
                       },
                     },
                   ],
-                  as: "profilePic",
+                  as: 'profilePic',
                 },
               },
               {
                 $lookup: {
-                  from: "MentorProfile",
+                  from: 'MentorProfile',
                   let: {
-                    mentorProfileId: "$mentorProfile.typeId",
+                    mentorProfileId: '$mentorProfile.typeId',
                   },
                   pipeline: [
                     {
                       $match: {
                         $expr: {
-                          $eq: ["$id", "$$mentorProfileId"],
+                          $eq: ['$id', '$$mentorProfileId'],
                         },
                       },
                     },
@@ -578,7 +578,7 @@ const getBatchSessionsAggregation = (batchId, courseId) => [
                       },
                     },
                   ],
-                  as: "mentorProfile",
+                  as: 'mentorProfile',
                 },
               },
               {
@@ -586,33 +586,33 @@ const getBatchSessionsAggregation = (batchId, courseId) => [
                   id: 1,
                   name: 1,
                   profilePic: {
-                    $arrayElemAt: ["$profilePic", 0],
+                    $arrayElemAt: ['$profilePic', 0],
                   },
                   mentorProfile: {
-                    $arrayElemAt: ["$mentorProfile", 0],
+                    $arrayElemAt: ['$mentorProfile', 0],
                   },
                 },
               },
             ],
-            as: "user",
+            as: 'user',
           },
         },
         {
           $project: {
             user: {
-              $arrayElemAt: ["$user", 0],
+              $arrayElemAt: ['$user', 0],
             },
           },
         },
       ],
-      as: "mentorSession",
+      as: 'mentorSession',
     },
   },
   {
     $project: {
       id: 1,
       mentorSession: {
-        $arrayElemAt: ["$mentorSession", 0],
+        $arrayElemAt: ['$mentorSession', 0],
       },
       bookingDate: 1,
       sessionEndDate: 1,
@@ -625,38 +625,38 @@ const getBatchSessionsAggregation = (batchId, courseId) => [
 const allotedMentorAggregation = (userId, courseId) => [
   {
     $match: {
-      "client.typeId": userId,
-      "course.typeId": courseId || OLD_COURSE_ID,
+      'client.typeId': userId,
+      'course.typeId': courseId || OLD_COURSE_ID,
       leadStatus: {
-        $ne: 'unassigned'
-      }
+        $ne: 'unassigned',
+      },
     },
   },
   {
     $lookup: {
-      from: "User",
+      from: 'User',
       let: {
-        userId: "$allottedMentor.typeId",
+        userId: '$allottedMentor.typeId',
       },
       pipeline: [
         {
           $match: {
             $expr: {
-              $eq: ["$id", "$$userId"],
+              $eq: ['$id', '$$userId'],
             },
           },
         },
         {
           $lookup: {
-            from: "File",
+            from: 'File',
             let: {
-              profilePicId: "$profilePic.typeId",
+              profilePicId: '$profilePic.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ["$id", "$$profilePicId"],
+                    $eq: ['$id', '$$profilePicId'],
                   },
                 },
               },
@@ -668,20 +668,20 @@ const allotedMentorAggregation = (userId, courseId) => [
                 },
               },
             ],
-            as: "profilePic",
+            as: 'profilePic',
           },
         },
         {
           $lookup: {
-            from: "MentorProfile",
+            from: 'MentorProfile',
             let: {
-              mentorProfileId: "$mentorProfile.typeId",
+              mentorProfileId: '$mentorProfile.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ["$id", "$$mentorProfileId"],
+                    $eq: ['$id', '$$mentorProfileId'],
                   },
                 },
               },
@@ -702,7 +702,7 @@ const allotedMentorAggregation = (userId, courseId) => [
                 },
               },
             ],
-            as: "mentorProfile",
+            as: 'mentorProfile',
           },
         },
         {
@@ -710,22 +710,22 @@ const allotedMentorAggregation = (userId, courseId) => [
             id: 1,
             name: 1,
             profilePic: {
-              $arrayElemAt: ["$profilePic", 0],
+              $arrayElemAt: ['$profilePic', 0],
             },
             mentorProfile: {
-              $arrayElemAt: ["$mentorProfile", 0],
+              $arrayElemAt: ['$mentorProfile', 0],
             },
           },
         },
       ],
-      as: "allottedMentor",
+      as: 'allottedMentor',
     },
   },
   {
     $project: {
       id: 1,
       allottedMentor: {
-        $arrayElemAt: ["$allottedMentor", 0],
+        $arrayElemAt: ['$allottedMentor', 0],
       },
     },
   },
@@ -735,20 +735,20 @@ const allotedMentorAggregation = (userId, courseId) => [
 const allotedMentorFromMMSAggregation = (userId, courseId) => [
   {
     $match: {
-      "course.typeId": courseId || OLD_COURSE_ID,
+      'course.typeId': courseId || OLD_COURSE_ID,
     },
   },
   {
     $lookup: {
-      from: "MenteeSession",
+      from: 'MenteeSession',
       let: {
-        menteeSessionId: "$menteeSession.typeId",
+        menteeSessionId: '$menteeSession.typeId',
       },
       pipeline: [
         {
           $match: {
             $expr: {
-              $eq: ["$id", "$$menteeSessionId"],
+              $eq: ['$id', '$$menteeSessionId'],
             },
           },
         },
@@ -759,62 +759,62 @@ const allotedMentorFromMMSAggregation = (userId, courseId) => [
           },
         },
       ],
-      as: "menteeSession",
+      as: 'menteeSession',
     },
   },
   {
     $project: {
       id: 1,
       menteeSession: {
-        $arrayElemAt: ["$menteeSession", 0],
+        $arrayElemAt: ['$menteeSession', 0],
       },
       mentorSession: 1,
     },
   },
   {
     $match: {
-      "menteeSession.user.typeId": userId,
+      'menteeSession.user.typeId': userId,
     },
   },
   {
     $lookup: {
-      from: "MentorSession",
+      from: 'MentorSession',
       let: {
-        mentorSessionId: "$mentorSession.typeId",
+        mentorSessionId: '$mentorSession.typeId',
       },
       pipeline: [
         {
           $match: {
             $expr: {
-              $eq: ["$id", "$$mentorSessionId"],
+              $eq: ['$id', '$$mentorSessionId'],
             },
           },
         },
         {
           $lookup: {
-            from: "User",
+            from: 'User',
             let: {
-              userId: "$user.typeId",
+              userId: '$user.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ["$id", "$$userId"],
+                    $eq: ['$id', '$$userId'],
                   },
                 },
               },
               {
                 $lookup: {
-                  from: "File",
+                  from: 'File',
                   let: {
-                    profilePicId: "$profilePic.typeId",
+                    profilePicId: '$profilePic.typeId',
                   },
                   pipeline: [
                     {
                       $match: {
                         $expr: {
-                          $eq: ["$id", "$$profilePicId"],
+                          $eq: ['$id', '$$profilePicId'],
                         },
                       },
                     },
@@ -826,20 +826,20 @@ const allotedMentorFromMMSAggregation = (userId, courseId) => [
                       },
                     },
                   ],
-                  as: "profilePic",
+                  as: 'profilePic',
                 },
               },
               {
                 $lookup: {
-                  from: "MentorProfile",
+                  from: 'MentorProfile',
                   let: {
-                    mentorProfileId: "$mentorProfile.typeId",
+                    mentorProfileId: '$mentorProfile.typeId',
                   },
                   pipeline: [
                     {
                       $match: {
                         $expr: {
-                          $eq: ["$id", "$$mentorProfileId"],
+                          $eq: ['$id', '$$mentorProfileId'],
                         },
                       },
                     },
@@ -860,7 +860,7 @@ const allotedMentorFromMMSAggregation = (userId, courseId) => [
                       },
                     },
                   ],
-                  as: "mentorProfile",
+                  as: 'mentorProfile',
                 },
               },
               {
@@ -868,33 +868,33 @@ const allotedMentorFromMMSAggregation = (userId, courseId) => [
                   id: 1,
                   name: 1,
                   profilePic: {
-                    $arrayElemAt: ["$profilePic", 0],
+                    $arrayElemAt: ['$profilePic', 0],
                   },
                   mentorProfile: {
-                    $arrayElemAt: ["$mentorProfile", 0],
+                    $arrayElemAt: ['$mentorProfile', 0],
                   },
                 },
               },
             ],
-            as: "user",
+            as: 'user',
           },
         },
         {
           $project: {
             user: {
-              $arrayElemAt: ["$user", 0],
+              $arrayElemAt: ['$user', 0],
             },
           },
         },
       ],
-      as: "mentorSession",
+      as: 'mentorSession',
     },
   },
   {
     $project: {
       id: 1,
       mentorSession: {
-        $arrayElemAt: ["$mentorSession", 0],
+        $arrayElemAt: ['$mentorSession', 0],
       },
     },
   },
@@ -931,7 +931,7 @@ query{
 }
 `;
 
-const fetchOrCacheQueryRes = async ({hkey, maxAge = 9000, dbCallback = () => {}}) => {
+const fetchOrCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => {} }) => {
   const redisClient = new RedisController({
     bypass: true,
   });
@@ -949,7 +949,7 @@ const fetchOrCacheQueryRes = async ({hkey, maxAge = 9000, dbCallback = () => {}}
     });
   }
   return finalRes;
-}
+};
 
 /** Fitler DefaultLoComponentRule based on Lo meta */
 const getFilteredLoComponentRule = (learningObjective, loComponentRule) => {
@@ -1045,13 +1045,11 @@ const menteeCourseSyllabusMutationResolver = async (
     const res = await fetchOrCacheQueryRes({
       hkey: `mcs_UCTCS_${courseId}_${userId}`,
       maxAge: '2000',
-      dbCallback: async () => {
-        return await callLocalGraphqlApi(
-          getUserCurrentTopicComponentStatus(userId, courseId),
-          context,
-          '',
-        );
-      },
+      dbCallback: () => callLocalGraphqlApi(
+        getUserCurrentTopicComponentStatus(userId, courseId),
+        context,
+        '',
+      ),
     });
     // const res = await callLocalGraphqlApi(
     //   getUserCurrentTopicComponentStatus(userId, courseId),
@@ -1081,108 +1079,108 @@ const menteeCourseSyllabusMutationResolver = async (
 
     // const getMentorMenteeSessionsRes = await callLocalGraphqlApi(getMentorMenteeSessions(userId, courseId));
     // mentorMenteeSessions = get(getMentorMenteeSessionsRes, 'data.mentorMenteeSessions');
-    
+
     const modelQuery = new QueryController('MentorMenteeSession', { bypass: true });
     mentorMenteeSessions = await modelQuery.aggregate([
       {
         $match: {
-          sessionStatus: "completed",
-          "course.typeId": courseId || OLD_COURSE_ID,
+          sessionStatus: 'completed',
+          'course.typeId': courseId || OLD_COURSE_ID,
         },
       },
       {
         $lookup: {
-          from: "MenteeSession",
+          from: 'MenteeSession',
           let: {
-            menteeSession: "$menteeSession.typeId",
+            menteeSession: '$menteeSession.typeId',
           },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $eq: ["$id", "$$menteeSession"],
+                  $eq: ['$id', '$$menteeSession'],
                 },
               },
             },
             {
               $lookup: {
-                from: "User",
+                from: 'User',
                 let: {
-                  user: "$user.typeId",
+                  user: '$user.typeId',
                 },
                 pipeline: [
                   {
                     $match: {
                       $expr: {
-                        $eq: ["$id", "$$user"],
+                        $eq: ['$id', '$$user'],
                       },
                     },
                   },
                 ],
-                as: "user",
+                as: 'user',
               },
             },
             {
               $project: {
                 id: 1,
                 user: {
-                  $arrayElemAt: ["$user", 0],
+                  $arrayElemAt: ['$user', 0],
                 },
               },
             },
           ],
-          as: "menteeSession",
+          as: 'menteeSession',
         },
       },
       {
         $match: {
-          "menteeSession.user.id": userId,
+          'menteeSession.user.id': userId,
         },
       },
       {
         $lookup: {
-          from: "MentorSession",
+          from: 'MentorSession',
           let: {
-            mentorSession: "$mentorSession.typeId",
+            mentorSession: '$mentorSession.typeId',
           },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $eq: ["$id", "$$mentorSession"],
+                  $eq: ['$id', '$$mentorSession'],
                 },
               },
             },
             {
               $lookup: {
-                from: "User",
+                from: 'User',
                 let: {
-                  user: "$user.typeId",
+                  user: '$user.typeId',
                 },
                 pipeline: [
                   {
                     $match: {
                       $expr: {
-                        $eq: ["$id", "$$user"],
+                        $eq: ['$id', '$$user'],
                       },
                     },
                   },
                   {
                     $lookup: {
-                      from: "File",
+                      from: 'File',
                       let: {
-                        profilePic: "$profilePic.typeId",
+                        profilePic: '$profilePic.typeId',
                       },
                       pipeline: [
                         {
                           $match: {
                             $expr: {
-                              $eq: ["$id", "$$profilePic"],
+                              $eq: ['$id', '$$profilePic'],
                             },
                           },
                         },
                       ],
-                      as: "profilePic",
+                      as: 'profilePic',
                     },
                   },
                   {
@@ -1190,92 +1188,92 @@ const menteeCourseSyllabusMutationResolver = async (
                       id: 1,
                       name: 1,
                       profilePic: {
-                        $arrayElemAt: ["$profilePic", 0],
+                        $arrayElemAt: ['$profilePic', 0],
                       },
                     },
                   },
                 ],
-                as: "user",
+                as: 'user',
               },
             },
             {
               $project: {
                 id: 1,
                 user: {
-                  $arrayElemAt: ["$user", 0],
+                  $arrayElemAt: ['$user', 0],
                 },
               },
             },
           ],
-          as: "mentorSession",
+          as: 'mentorSession',
         },
       },
       {
         $lookup: {
-          from: "Topic",
+          from: 'Topic',
           let: {
-            topic: "$topic.typeId",
+            topic: '$topic.typeId',
           },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $eq: ["$id", "$$topic"],
+                  $eq: ['$id', '$$topic'],
                 },
               },
             },
             {
               $lookup: {
-                from: "Chapter",
+                from: 'Chapter',
                 let: {
-                  chapter: "$chapter.typeId",
+                  chapter: '$chapter.typeId',
                 },
                 pipeline: [
                   {
                     $match: {
                       $expr: {
-                        $eq: ["$id", "$$chapter"],
+                        $eq: ['$id', '$$chapter'],
                       },
                     },
                   },
                 ],
-                as: "chapter",
+                as: 'chapter',
               },
             },
             {
               $lookup: {
-                from: "File",
+                from: 'File',
                 let: {
-                  thumbnail: "$thumbnail.typeId",
+                  thumbnail: '$thumbnail.typeId',
                 },
                 pipeline: [
                   {
                     $match: {
                       $expr: {
-                        $eq: ["$id", "$$thumbnail"],
+                        $eq: ['$id', '$$thumbnail'],
                       },
                     },
                   },
                 ],
-                as: "thumbnail",
+                as: 'thumbnail',
               },
             },
             {
               $lookup: {
-                from: "File",
+                from: 'File',
                 let: {
-                  thumbnailSmall: "$thumbnailSmall.typeId",
+                  thumbnailSmall: '$thumbnailSmall.typeId',
                 },
                 pipeline: [
                   {
                     $match: {
                       $expr: {
-                        $eq: ["$id", "$$thumbnailSmall"],
+                        $eq: ['$id', '$$thumbnailSmall'],
                       },
                     },
                   },
                 ],
-                as: "thumbnailSmall",
+                as: 'thumbnailSmall',
               },
             },
             {
@@ -1284,19 +1282,19 @@ const menteeCourseSyllabusMutationResolver = async (
                 title: 1,
                 order: 1,
                 chapter: {
-                  $arrayElemAt: ["$chapter", 0],
+                  $arrayElemAt: ['$chapter', 0],
                 },
                 thumbnail: {
-                  $arrayElemAt: ["$thumbnail", 0],
+                  $arrayElemAt: ['$thumbnail', 0],
                 },
                 thumbnailSmall: {
-                  $arrayElemAt: ["$thumbnailSmall", 0],
+                  $arrayElemAt: ['$thumbnailSmall', 0],
                 },
                 description: 1,
               },
             },
           ],
-          as: "topic",
+          as: 'topic',
         },
       },
       {
@@ -1304,16 +1302,16 @@ const menteeCourseSyllabusMutationResolver = async (
           id: 1,
           isSubmittedForReview: 1,
           topic: {
-            $arrayElemAt: ["$topic", 0],
+            $arrayElemAt: ['$topic', 0],
           },
           sessionEndDate: 1,
           sessionStartDate: 1,
           sessionStatus: 1,
           menteeSession: {
-            $arrayElemAt: ["$menteeSession", 0],
+            $arrayElemAt: ['$menteeSession', 0],
           },
           mentorSession: {
-            $arrayElemAt: ["$mentorSession", 0],
+            $arrayElemAt: ['$mentorSession', 0],
           },
         },
       },
@@ -1323,8 +1321,8 @@ const menteeCourseSyllabusMutationResolver = async (
     if (batchCurrentComponentInfo) {
       const batchId = get(res, 'data.userCurrentTopicComponentStatuses[0].user.studentProfile.batch.id');
       const batchSessionModel = new QueryController('BatchSession', {
-        bypass: true
-      })
+        bypass: true,
+      });
       batchSessions = await batchSessionModel.aggregate(getBatchSessionsAggregation(batchId, courseId));
       // currentTopicOrder = get(batchCurrentComponentInfo, 'currentTopic.order');
     } else {
@@ -1338,10 +1336,10 @@ const menteeCourseSyllabusMutationResolver = async (
 
       if (mentorMenteeSessions && mentorMenteeSessions.length) {
         const allottedMentorModel = new QueryController('SalesOperation', {
-          bypass: true
-        })
+          bypass: true,
+        });
         const allottedMentorRes = await allottedMentorModel.aggregate(allotedMentorAggregation(userId, courseId));
-        const allottedMentor = get(allottedMentorRes, "allottedMentor");
+        const allottedMentor = get(allottedMentorRes, 'allottedMentor');
         if (allottedMentor && allottedMentor.name) {
           mentorData = getMentorData(allottedMentor);
         }
@@ -1349,8 +1347,8 @@ const menteeCourseSyllabusMutationResolver = async (
 
       if (!mentorData.name) {
         const allottedMentorFromMMSModel = new QueryController('MentorMenteeSession', {
-          bypass: true
-        })
+          bypass: true,
+        });
         const allottedMentorFromMMSQueryRes = await allottedMentorFromMMSModel.aggregate(allotedMentorFromMMSAggregation(userId, courseId));
         const allottedMentor = get(allottedMentorFromMMSQueryRes[0], 'mentorSession.user');
         if (allottedMentor && allottedMentor.name) {
@@ -1383,9 +1381,7 @@ const menteeCourseSyllabusMutationResolver = async (
     // const courseResult = await callLocalGraphqlApi(getCourseQuery(courseId));
     const courseResult = await fetchOrCacheQueryRes({
       hkey: `mcs_CQ_${courseId}`,
-      dbCallback: async () => {
-        return await callLocalGraphqlApi(getCourseQuery(courseId));
-      },
+      dbCallback: () => callLocalGraphqlApi(getCourseQuery(courseId)),
     });
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
@@ -1833,13 +1829,11 @@ const menteeCourseSyllabusMutationResolver = async (
       } else {
         const topicRes = await fetchOrCacheQueryRes({
           hkey: `mcs_tQNC_${bookedTopicId}`,
-          dbCallback: async () => {
-            return await callLocalGraphqlApi(
-              getTopicQueryNewCourse(bookedTopicId),
-              context,
-              '',
-            );
-          },
+          dbCallback: () => callLocalGraphqlApi(
+            getTopicQueryNewCourse(bookedTopicId),
+            context,
+            '',
+          ),
         });
         // getting info of called topic
         const topicInfo = get(topicRes, 'data.topic');

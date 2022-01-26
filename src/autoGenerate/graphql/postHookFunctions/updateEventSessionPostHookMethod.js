@@ -13,7 +13,6 @@ const generateEventCertificate = async (userId, eventId) => {
     }
     }`;
   const res = await callLocalGraphqlApi(query);
-  console.log(JSON.stringify(res));
   return get(res, 'data.generateCertificate');
 };
 
