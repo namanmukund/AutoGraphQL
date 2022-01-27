@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { UnauthorizedOperationError } from '../../../../../constants/errors';
+import { DatabaseRecordNotFoundError, UnauthorizedOperationError } from '../../../../../constants/errors';
 import {
   TWA,
 } from '../../../../../constants';
