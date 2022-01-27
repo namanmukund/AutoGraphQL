@@ -51,6 +51,7 @@ const updateEventSessionValidation = async (params, input, mutationName, context
     context.currentUserId = get(currentUser, 'id');
     context.eventId = eventId;
     context.currentApp = get(currentApp, 'name');
+    context.studentProfileId = studentProfileId;
   }
   return true;
 };

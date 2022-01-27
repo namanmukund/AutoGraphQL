@@ -21,7 +21,7 @@ const getEventDetails = async (eventId, registeredUserId) => {
       friday
       saturday
       sunday
-       ${getSlotTimesInString()}
+      ${getSlotTimesInString()}
       startDate
       endDate
     }` : ''}

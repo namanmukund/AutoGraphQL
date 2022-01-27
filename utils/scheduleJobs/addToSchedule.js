@@ -63,8 +63,6 @@ const addScheduleJob = ({
         ${taskId ? `taskId: "${taskId}"` : ''}
         ${mentorPhoneNumber ? `mentorPhoneNumber: "${mentorPhoneNumber}"` : ''}
         scheduledDate: "${scheduledDate.toISOString()}"
-        ${mentorPhoneNumber ? `mentorPhoneNumber: "${mentorPhoneNumber}"` : ''}
-        scheduledDate: "${scheduledDate.toISOString()}"
         ${studentProfileId ? `studentProfileId:"${studentProfileId}"` : ''}
         ${commsVariables ? `commsVariables: ${commsVariables}` : ''}
         ${templateName ? `templateName: "${templateName}"` : ''}

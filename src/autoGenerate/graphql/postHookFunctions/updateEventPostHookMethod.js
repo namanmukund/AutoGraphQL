@@ -7,6 +7,7 @@ import {
 import sendCommsForUpdatedEvents from './utils/sendCommsForUpdatedEvents';
 import addToSchedule from '../../../../utils/scheduleJobs/addToSchedule';
 import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
+import eventsLSQActions from './utils/eventsLSQActions';
 /*
   Post hook of update event
 */
@@ -71,6 +72,7 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
     }
   }
   if (get(context, 'newRegisteredUserId') && eventStatus === 'published') {
+    eventsLSQActions(eventId, get(context, 'newRegisteredUserId'), 'eventRegistration');
     for (const eventCommsRule of eventCommsRules) {
       if (get(eventCommsRule, 'condition') === 'afterRegistration') {
         const scheduledDate = moment().add(get(eventCommsRule, 'value', 0), get(eventCommsRule, 'unit', 'days'));
