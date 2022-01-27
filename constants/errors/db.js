@@ -305,6 +305,10 @@ export const CurrentChildIsMentorChild = createError('CurrentChildIsMentorChild'
   message: 'Sales Operation is not permitted for Mentor.',
 });
 
+export const MentorIdIsMandatoryError = createError('MentorIdIsMandatoryError', {
+  message: 'Input mentorId is Mandatory!',
+});
+
 export const SpeakerProfileAlreadyExist = createError('SpeakerProfileAlreadyExist', {
   message: 'Speaker Profile already exist for the user',
 });

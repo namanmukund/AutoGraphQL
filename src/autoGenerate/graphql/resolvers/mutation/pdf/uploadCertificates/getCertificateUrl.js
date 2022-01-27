@@ -4,15 +4,22 @@
 import { PDFDocument, rgb, degrees } from 'pdf-lib';
 import { get } from 'lodash';
 import * as fs from 'fs';
+import moment from 'moment';
 import fontkit from '@pdf-lib/fontkit';
 import mkdirp from 'mkdirp';
-import { NUNITO_BOLD_FONT_URL } from '../../../../../../../constants';
 import { uploadToS3 } from '../../../../../../middlewares/utils/uploadToS3';
 import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
+import { NUNITO_BOLD_FONT_URL } from '../../../../../../../constants';
 
 const capitalize = (str, lower = false) => (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
 
 const slugifyID = (ID) => ID ? ID.toString().trim().toUpperCase().replace(/\w{5}(?=.)/g, '$&-') : '';
+
+const makeColorInteger = (number) => {
+  // eslint-disable-next-line radix
+  if (number) return Number((parseInt(number) / 255).toFixed(2));
+  return 0;
+};
 
 const fetchEventDetails = async (eventId, userId) => {
   const query = `
@@ -48,15 +55,17 @@ const fetchEventDetails = async (eventId, userId) => {
       uri
     }
     embeds{
-      image{
-        uri
-      }
+      id
       xDim
       yDim
-      text
+      fontFamily
       textSize
       fontFamily
       variableName
+      red
+      green
+      blue
+      rotate
     }
   }
 }
@@ -79,20 +88,23 @@ const getCertificateUrl = async (userId, eventId) => {
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
 
-    // Embed the different possible fonts
-    const NunitoBoldfontBytes = await fetch(NUNITO_BOLD_FONT_URL).then((res) => res.buffer());
-
-    const NunitoBoldFont = await pdfDoc.embedFont(NunitoBoldfontBytes);
     const certificateData = {
       studentName: get(eventDetails, 'registeredUsers[0].user.name'),
       parentName: get(eventDetails, 'registeredUsers[0].parents[0].user.name'),
       studentGrade: get(eventDetails, 'registeredUsers[0].grade'),
-      eventDate: get(eventDetails, 'eventTimeTableRule.startDate'),
+      eventDate: `${moment(get(eventDetails, 'eventTimeTableRule.startDate')).format('DD-MM-YYYY')}`,
       eventName: get(eventDetails, 'name'),
       summary: get(eventDetails, 'summary'),
     };
     // TODO : handle text color, images and fonts
-    const getEmbedValues = (embed) => {
+    const getFontFamily = async (fontFamily) => {
+      // Embed the different possible fonts
+      const fontBytes = fontFamily ? await fetch(`${process.env.FILE_BASE_URL}${fontFamily}`).then((res) => res.buffer())
+        : await fetch(NUNITO_BOLD_FONT_URL).then((res) => res.buffer());
+      const fontValue = await pdfDoc.embedFont(fontBytes);
+      return fontValue;
+    };
+    const getEmbedValues = async (embed) => {
       const res = {};
       if (embed.variableName && embed.variableName.includes('studentName')) {
         res.value = capitalize(certificateData[get(embed, 'variableName')]);
@@ -103,9 +115,9 @@ const getCertificateUrl = async (userId, eventId) => {
       res.properties.x = embed.xDim;
       res.properties.y = embed.yDim;
       res.properties.size = embed.textSize;
-      res.properties.font = NunitoBoldFont;
-      if (get(embed, 'red') && get(embed, 'green') && get(embed, 'blue')) {
-        res.properties.color = rgb(get(embed, 'red'), get(embed, 'green'), get(embed, 'blue'));
+      res.properties.font = await getFontFamily(get(embed, 'fontFamily'));
+      if (get(embed, 'red') || get(embed, 'green') || get(embed, 'blue')) {
+        res.properties.color = rgb(makeColorInteger(get(embed, 'red')), makeColorInteger(get(embed, 'green')), makeColorInteger(get(embed, 'blue')));
       } else {
         res.properties.color = rgb(0.3137, 0.31, 0.31);
       }
@@ -117,7 +129,8 @@ const getCertificateUrl = async (userId, eventId) => {
 
     // TODO : handle for more than one pages
     for (const embed of get(eventDetails, 'embeds', [])) {
-      const embedValues = getEmbedValues(embed);
+      // eslint-disable-next-line no-await-in-loop
+      const embedValues = await getEmbedValues(embed);
       firstPage.drawText(embedValues.value, embedValues.properties);
     }
 

@@ -7,16 +7,21 @@ import { getUserIdandAppNameAfterValidation } from '../../../preHookFunctions/va
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 
-const getSpeakers = async (eventId) => {
+const getEventWinners = async (eventId) => {
   const query = `{
-  eventSpeakerProfiles(filter: { events_some: { id: "${eventId}" } }) {
-    id
-    linkedInLink
-    roleAtOrganization
-    organization
-    about
-    user {
+  eventWinners(filter: { event_some: { id: "${eventId}" } }) {
+    studentProfile {
+      user {
+        id
+        profilePic {
+          id
+          uri
+        }
+      }
+    }
+    image {
       id
+      uri
     }
   }
 }
@@ -25,7 +30,7 @@ const getSpeakers = async (eventId) => {
   return get(result, 'data.eventSpeakerProfiles', []);
 };
 
-const getEventSpeaker = (async (root, params, context, info) => {
+const getEventWinner = (async (root, params, context, info) => {
   // getting input from params
   if (!get(params, 'eventId')) {
     throw new MissingMandatoryInputInRequestError();
@@ -46,20 +51,23 @@ const getEventSpeaker = (async (root, params, context, info) => {
       }
     }
   }
-  const speakers = await getSpeakers(get(params, 'eventId'));
-  const speakersResponse = [];
-  if (speakers && speakers.length) {
-    speakers.forEach((speaker) => {
-      speakersResponse.push({
-        linkedInLink: get(speaker, 'linkedInLink'),
-        roleAtOrganization: get(speaker, 'roleAtOrganization'),
-        organization: get(speaker, 'organization'),
-        about: get(speaker, 'about'),
-        user: { type: 'User', typeId: `${get(speaker, 'user.id')}` },
+  const winners = await getEventWinners(get(params, 'eventId'));
+  const winnersResponse = [];
+  if (winners && winners.length) {
+    winners.forEach((winner) => {
+      let picture = '';
+      if (get(winner, 'image.id')) {
+        picture = { type: 'File', typeId: `${get(winner, 'image.id')}` };
+      } else if (get(winner, 'studentProfile.user.profilePic.id')) {
+        picture = { type: 'File', typeId: `${get(winner, 'studentProfile.user.profilePic.id')}` };
+      }
+      winnersResponse.push({
+        profilePic: picture,
+        user: { type: 'User', typeId: `${get(winner, 'studentProfile.user.id')}` },
       });
     });
   }
-  return speakersResponse;
+  return winnersResponse;
 });
 
-export default getEventSpeaker;
+export default getEventWinner;
