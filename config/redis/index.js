@@ -1,9 +1,11 @@
 const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
 const REDIS_PORT = process.env.REDIS_PORT || '6379';
+const REDIS_SECRET = process.env.REDIS_SECRET || '';
 
 const redisConfig = {
   host: REDIS_HOST,
   port: REDIS_PORT,
+  password: REDIS_SECRET,
   retryStrategy: (times) => Math.min(times * 50, 2000),
 };
 

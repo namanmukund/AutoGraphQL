@@ -70,6 +70,7 @@ const parsedASTMap = getParsedASTMap(types);
 // using apollo-server
 const server = new ApolloServer({
   schema,
+  introspection: process.env.ENABLE_GRAPHQL_INTROSPECTION,
   playground: {
     endpoint: `http://0.0.0.0:${port}${path}`,
     settings: {

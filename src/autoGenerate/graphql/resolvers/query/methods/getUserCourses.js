@@ -404,11 +404,12 @@ const getUserCourses = (async (root, params, context, info) => {
     const userId = get(input, 'userId');
     /** Check if data exists in redis */
     const cachedUserCourses = await redisClient.get(`userCourses_${userId}`);
-    const userCoursesRes = null;
+    let userCoursesRes = null;
     if (cachedUserCourses) {
       log(`[USER_COURSES] CACHE_HIT: ${`userCourses_${userId}`}`);
       userCoursesRes = cachedUserCourses;
     } else {
+      log(`[USER_COURSES] CACHE_MISS: ${`userCourses_${userId}`}`);
       const userCoursesModel = getTypeQueryController('UserCourse');
       userCoursesRes = await userCoursesModel.aggregate(getUserCoursesAggregation(userId));
       await redisClient.set(userCoursesRes, {
