@@ -327,7 +327,7 @@ const sendEventCommunication = async ({
           address,
           summary,
           eventRegistrationLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
-          eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}?certificate=true`
+          eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`
         };
         const whatsappCommsVariablesList = commsVariables.map((commsVariable) => (
           {

@@ -17,6 +17,7 @@ getUserCourses (input: GetUserCoursesInput): [GetUserCoursesResults]
 getEventCertificate (input: GetEventCertificateInput): GetEventCertificateResult
 getMagicLink (input: GetMagicLinkInput): [GetMagicLinkOutput]
 getEventSpeaker (eventId: String): [GetEventSpeaker]
+getEventWinner (eventId: String): [GetEventWinner]
 `;
 
 export default customQueryString;

@@ -1,5 +1,9 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import {
+  TWA,
+} from '../../../../constants';
+import eventsLSQActions from './utils/eventsLSQActions';
 
 const generateEventCertificate = async (userId, eventId) => {
   const query = `
@@ -13,13 +17,34 @@ const generateEventCertificate = async (userId, eventId) => {
     }
     }`;
   const res = await callLocalGraphqlApi(query);
-  console.log(JSON.stringify(res));
   return get(res, 'data.generateCertificate');
 };
 
+const getUserCertificate = async (userId, eventId) => {
+  const query = `{
+  eventCertificates(
+    filter: { and: [{ user_some: { id: "${userId}" } }, { event_some: { id: "${eventId}" } }] }
+  ) {
+    id
+    assetUrl
+  }
+}
+`;
+  const certificate = await callLocalGraphqlApi(query);
+  return get(certificate, 'data.eventCertificates', []).length;
+};
+
 const updateEventSessionPostHookMethod = async (input, params, mutationName, context) => {
-  const { currentUserId, eventId } = context;
-  generateEventCertificate(currentUserId, eventId);
+  const {
+    currentUserId, eventId, currentApp, studentProfileId,
+  } = context;
+  if (currentApp === TWA && currentUserId && eventId) {
+    const userCertificate = await getUserCertificate(currentUserId, eventId);
+    if (!userCertificate) {
+      generateEventCertificate(currentUserId, eventId);
+      eventsLSQActions(eventId, studentProfileId, 'eventCompletion');
+    }
+  }
   return input;
 };
 

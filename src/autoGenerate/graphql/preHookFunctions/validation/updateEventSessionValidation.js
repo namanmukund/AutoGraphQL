@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { UnauthorizedOperationError } from '../../../../../constants/errors';
+import { DatabaseRecordNotFoundError, UnauthorizedOperationError } from '../../../../../constants/errors';
 import {
   TWA,
 } from '../../../../../constants';
@@ -48,9 +48,11 @@ const updateEventSessionValidation = async (params, input, mutationName, context
     if (studentProfileId !== get(params, 'input.attendance.updateWhere.studentReferenceId')) {
       throw new UnauthorizedOperationError();
     }
+    context.currentUserId = get(currentUser, 'id');
+    context.eventId = eventId;
+    context.currentApp = get(currentApp, 'name');
+    context.studentProfileId = studentProfileId;
   }
-  context.currentUserId = get(currentUser, 'id');
-  context.eventId = eventId;
   return true;
 };
 

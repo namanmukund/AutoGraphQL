@@ -21,7 +21,7 @@ const getEventDetails = async (eventId, registeredUserId) => {
       friday
       saturday
       sunday
-       ${getSlotTimesInString()}
+      ${getSlotTimesInString()}
       startDate
       endDate
     }` : ''}
@@ -49,10 +49,10 @@ const updateEventValidation = async (params, input, mutationName, context) => {
       throw new MultipleRegistrationError();
     }
     const currentEvent = await getEventDetails(eventId, get(registeredUsersConnectIds, '[0]'));
-    context.newRegisteredUserId = get(registeredUsersConnectIds, '[0]');
     if (get(currentEvent, 'registeredUsers', []).length) {
       throw new AlreadyRegisteredForEvent();
     }
+    context.newRegisteredUserId = get(registeredUsersConnectIds, '[0]');
   }
   return true;
 };
