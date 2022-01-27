@@ -11,7 +11,6 @@ const sendWhatsAppTemplateMessage = async (
   if (process.env.NODE_ENV !== 'production') return null;
   // eslint-disable-next-line no-param-reassign
   if (process.env.DATA_MASKING) phoneNumber = '919999694605';
-  // eslint-disable-next-line no-param-reassign
   const bodyJson = {
     template_name,
     broadcast_name: broadcast_name || 'Tekie',

@@ -42,6 +42,7 @@ import generateCertificateMutationResolver from './pdf/generateCertificate';
 import generateCertificateInBulkMutationResolver from './pdf/generateCertificateInBulk';
 import validateMagicLinkMutationResolver from './user/validateMagicLink';
 import resetPasswordAndLoginMutationResolver from './setResetPassword/resetPasswordAndLogin';
+import generateMentorChildMutationResolver from './user/generateMentorChild';
 
 export {
   addMutationResolver,
@@ -88,4 +89,5 @@ export {
   validateMagicLinkMutationResolver,
   resetPasswordAndLoginMutationResolver,
   generateMentorPayoutReportMutationResolver,
+  generateMentorChildMutationResolver,
 };

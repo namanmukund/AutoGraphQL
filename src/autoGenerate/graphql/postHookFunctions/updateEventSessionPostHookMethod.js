@@ -1,5 +1,8 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import {
+  TWA,
+} from '../../../../constants';
 
 const generateEventCertificate = async (userId, eventId) => {
   const query = `
@@ -13,13 +16,14 @@ const generateEventCertificate = async (userId, eventId) => {
     }
     }`;
   const res = await callLocalGraphqlApi(query);
-  console.log(JSON.stringify(res));
   return get(res, 'data.generateCertificate');
 };
 
 const updateEventSessionPostHookMethod = async (input, params, mutationName, context) => {
-  const { currentUserId, eventId } = context;
-  generateEventCertificate(currentUserId, eventId);
+  const { currentUserId, eventId, currentApp } = context;
+  if (currentApp === TWA && currentUserId && eventId) {
+    generateEventCertificate(currentUserId, eventId);
+  }
   return input;
 };
 

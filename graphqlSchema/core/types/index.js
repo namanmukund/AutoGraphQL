@@ -150,6 +150,7 @@ import Notification from './notification';
 import Task from './task';
 import UserOtpLog from './userOtpLog';
 import UserDeviceLog from './UserDeviceLog';
+import GenerateMentorChild from './generateMentorChild';
 
 export default [
   ...User,
@@ -304,4 +305,5 @@ export default [
   ...Task,
   ...UserOtpLog,
   ...UserDeviceLog,
+  ...GenerateMentorChild,
 ];

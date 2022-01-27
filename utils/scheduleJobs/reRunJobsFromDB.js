@@ -9,6 +9,7 @@ import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
 import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
 import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
+import sendMentorVerifyBookingReminder from './jobs/sendMentorVerifyBookingReminder';
 import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 import scheduleB2BSessionHomeworkRemainder from './scheduleB2BSessionHomeworkRemainder';
 import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
@@ -36,6 +37,7 @@ const FETCH_JOBS = `{
     sessionLink
     mentorUserId
     mentorPhoneNumber
+    taskId
     eventId
     commsVariables{
       dataField
@@ -83,8 +85,8 @@ const reRunJobsFromDB = async () => {
       sessionLink,
       mentorUserId,
       mentorPhoneNumber,
+      taskId,
       eventId,
-      eventSessionId,
       commsVariables,
       studentProfileId,
       templateName,
@@ -97,6 +99,9 @@ const reRunJobsFromDB = async () => {
     const deleteJob = () => callLocalGraphqlApi(deleteJobQuery(id));
     const isPast = moment().isAfter(scheduledDate);
     const userId = get(parent, 'id');
+    // temp code to test event comms
+    if (process.env.NODE_ENV !== 'production'
+      && (jobType !== 'eventCommsJob' || jobType !== 'eventNewRegistrationReminder')) return;
     switch (jobType) {
       case 'sendB2BReminder': {
         if (isPast) {
@@ -239,18 +244,14 @@ const reRunJobsFromDB = async () => {
         });
         break;
       }
-      case 'eventSessionRemainder': {
+      case 'sendMentorVerifyBookingReminder': {
         schedule.scheduleJob(new Date(scheduledDate), () => {
-          sendEventRemainderComms({ eventSessionId, jobType }, deleteJob);
+          sendMentorVerifyBookingReminder({
+            taskId, mentorUserId, jobType,
+          }, deleteJob);
         });
         break;
       }
-      // case 'eventComms': {
-      //   schedule.scheduleJob(new Date(scheduledDate), () => {
-      //     sendEventComms({ eventId, jobType }, deleteJob);
-      //   });
-      //   break;
-      // }
       case 'eventCommsJob': {
         if (isPast) {
           sendEventCommunication({

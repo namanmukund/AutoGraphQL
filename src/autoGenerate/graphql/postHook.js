@@ -63,6 +63,7 @@ import updateMentorAvailabilitySlotPostHookMethod from './postHookFunctions/upda
 import addMentorDemandSlotPostHookMethod from './postHookFunctions/addMentorDemandSlotPostHookMethod';
 import updateMentorDemandSlotPostHookMethod from './postHookFunctions/updateMentorDemandSlotPostHookMethod';
 import updateDemoWowAuditPostHookMethod from './postHookFunctions/updateDemoWowAuditPostHookMethod';
+import updateTaskPostHookMethod from './postHookFunctions/updateTaskPostHookMethod';
 import updateEventPostHookMethod from './postHookFunctions/updateEventPostHookMethod';
 import addEventPostHookMethod from './postHookFunctions/addEventPostHookMethod';
 import fetchEventPostHookMethod from './postHookFunctions/fetchEventPostHookMethod';
@@ -342,6 +343,10 @@ const posthook = async (input, mutationName, context, params, info) => {
     }
     case 'updateDemoWowAudit': {
       await updateDemoWowAuditPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'updateTask': {
+      await updateTaskPostHookMethod(input, params, mutationName, context);
       break;
     }
     case 'addEvent': {
