@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { get } from 'lodash';
+import moment from 'moment';
 // import extractSlotsFromInput from '../../../../utils/extractSlotsFromInput';
 // import getSelectedDays from './utils/getSelectedDays';
 // import getPossibleDates from '../../../../utils/getPossibleDates';
@@ -127,11 +128,6 @@ const updateTaskPostHookMethod = async (input, params, mutationName, context) =>
   /*
     b. If marked not interested, task should be marked cancelled from frontend
   */
-  // if ((leadStatus === 'leadNotInterested'
-  // || leadStatus === 'leadNotQualified')
-  // && bookingStatus === 'rejected') {
-  //   updateTaskInput.status = 'cancelled';
-  // }
   /*
     c. If marked not connected
   */
