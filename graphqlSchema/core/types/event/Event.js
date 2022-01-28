@@ -107,6 +107,7 @@ const Event = `
     commsVariables: [CommsVariable] @relation(name: "CommsVariableEvent")
     isSchoolEvent: Boolean
     eventBanner: File @relation(name: "EventBannerEvent", direction: "OneWay")
+    eventMobileBanner: File @relation(name: "EventMobileBannerEvent", direction: "OneWay")
     listingImage: File @relation(name: "ListingImageEvent", direction: "OneWay")
     schools: [School] @relation(name: "EventSchool", direction: "OneWay")
     eventSessions: [EventSession] @relation(name: "EventSessionEvent")
