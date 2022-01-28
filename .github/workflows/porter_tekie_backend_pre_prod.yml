@@ -1,8 +1,5 @@
-"on":
-  push:
-    branches:
-    - master-pre-prod
-name: Deploy to Porter
+on: workflow_dispatch
+name: Deploy PreProd to Porter
 jobs:
   porter-deploy:
     runs-on: ubuntu-latest
