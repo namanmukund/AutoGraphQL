@@ -111,6 +111,7 @@ import TaskLeadStatusReason from './TaskLeadStatusReason';
 import TaskBookingStatus from './TaskBookingStatus';
 import TaskBookingStatusReason from './TaskBookingStatusReason';
 import TaskContactReason from './TaskContactReason';
+import CacheControlScope from './CacheControlScope';
 import AttentionAmount from './AttentionAmount';
 import LearningObjectiveComponentsB2B from './LearningObjectiveComponentsB2B';
 import EventTypes from './EventTypes';
@@ -237,6 +238,7 @@ export default [
   TaskBookingStatus,
   TaskBookingStatusReason,
   TaskContactReason,
+  CacheControlScope,
   AttentionAmount,
   LearningObjectiveComponentsB2B,
   EventTypes,
