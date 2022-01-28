@@ -84,19 +84,13 @@ const addUserLeadSquared = (params, create = true) => {
     leadSquaredInput.mx_school_booking_link = `https://www.tekie.in/login?code=${leadSquaredInput.mx_school_booking_code}`;
   }
   if (get(params, 'input.browser')) {
-    leadSquaredInput.mx_user_browser = get(params, 'input.browser');
-  }
-  if (get(params, 'input.browserVersion')) {
-    leadSquaredInput.mx_user_browser_version = get(params, 'input.browserVersion');
+    leadSquaredInput.mx_User_Browser = get(params, 'input.browser');
   }
   if (get(params, 'input.deviceType')) {
-    leadSquaredInput.mx_user_device_type = get(params, 'input.deviceType');
+    leadSquaredInput.mx_User_Device_Type = get(params, 'input.deviceType');
   }
   if (get(params, 'input.deviceOs')) {
-    leadSquaredInput.mx_user_device_os = get(params, 'input.deviceOs');
-  }
-  if (get(params, 'input.osVersion')) {
-    leadSquaredInput.mx_user_os_version = get(params, 'input.osVersion');
+    leadSquaredInput.mx_User_Device_OS = `${get(params, 'input.deviceOs', '')} - ${get(params, 'input.osVersion', '')}`;
   }
   updateLeadsquared(leadSquaredInput, create);
 };
