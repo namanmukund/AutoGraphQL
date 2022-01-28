@@ -152,7 +152,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       isSubmittedForReview: prevIsSubmittedForReview,
     },
   } = context;
-  const { sessionStartDate, isFeedbackSubmitted } = input;
+  const { sessionStartDate, isFeedbackSubmitted, sessionStatus: currentSessionStatus } = input;
   const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));
   const userId = get(menteeSession, 'data.menteeSession.user.id');
   const userInfo = await getMenteeInfo(userId);
@@ -165,10 +165,14 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   const newBookingDate = get(menteeSession, 'data.menteeSession.bookingDate', '');
   const courseId = get(input, 'course.typeId', '');
 
-  if (
-    (!prevIsFeedbackSubmitted && isFeedbackSubmitted)
-    && topic.order === 1
-  ) {
+  // if (
+  //   (!prevIsFeedbackSubmitted && isFeedbackSubmitted)
+  //   && topic.order === 1
+  // ) {
+  //   sendDemoCompletionCertificate(userId, courseId);
+  // }
+  if (get(topic, 'order') === 1 && ((prevSessionStatus === 'completed' && !prevIsFeedbackSubmitted && isFeedbackSubmitted)
+    || (isFeedbackSubmitted && prevSessionStatus !== 'completed' && currentSessionStatus === 'completed'))) {
     sendDemoCompletionCertificate(userId, courseId);
   }
 
