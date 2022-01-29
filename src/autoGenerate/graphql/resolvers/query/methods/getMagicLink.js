@@ -1,3 +1,4 @@
+/* eslint-disable no-lonely-if */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-tabs */
 /* eslint-disable no-unused-vars */
@@ -121,7 +122,9 @@ const generateAndReturnToken = async (user, addMagicLinkLogQuery = '', index, {
 }) => {
   const linkToken = getTokenForLoginLink(user, new Date(), expiresIn);
   let linkUri = `?authToken=${linkToken}`;
-  if (!byPassMenteeValidationApps.includes(appName)) {
+  if (byPassMenteeValidationApps.includes(appName) && isLeadLogin) {
+    linkUri = `login${linkUri}&isLeadLogin=${isLeadLogin}`;
+  } else {
     if (parents.length && get(parents, '[0].user.email')) {
       if (get(school, 'id') && get(school, 'code')) {
         // if user is of school will send link with school domain
@@ -142,8 +145,6 @@ const generateAndReturnToken = async (user, addMagicLinkLogQuery = '', index, {
         linkUri = getLoginLinkUri(linkUri);
       }
     }
-  } else if (byPassMenteeValidationApps.includes(appName) && isLeadLogin) {
-    linkUri = `login${linkUri}&isLeadLogin=${isLeadLogin}`;
   }
   addMagicLinkLogQuery = `addMagicLinkLog${index}: addMagicLinkLog(
     input: {

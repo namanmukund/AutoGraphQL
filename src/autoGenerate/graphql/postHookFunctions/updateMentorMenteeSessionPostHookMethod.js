@@ -155,7 +155,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       isSubmittedForReview: prevIsSubmittedForReview,
     },
   } = context;
-  const { sessionStartDate, isFeedbackSubmitted } = input;
+  const { sessionStartDate, isFeedbackSubmitted, sessionStatus: currentSessionStatus } = input;
   const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));
   const userId = get(menteeSession, 'data.menteeSession.user.id');
   const userInfo = await getMenteeInfo(userId);
@@ -169,15 +169,9 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   const courseId = get(input, 'course.typeId', '');
   const mentorChildId = get(menteeSession, 'data.menteeSession.user.studentProfile.mentor.id', null);
 
-  if (
-    (!prevIsFeedbackSubmitted && isFeedbackSubmitted)
-    && topic.order === 1
-  ) {
-    // show not occur for mentor
-    if (!mentorChildId) {
-      sendDemoCompletionCertificate(userId, courseId);
-    }
-    // email send function or lead squared based function
+  if (get(topic, 'order') === 1 && ((prevSessionStatus === 'completed' && !prevIsFeedbackSubmitted && isFeedbackSubmitted)
+    || (isFeedbackSubmitted && prevSessionStatus !== 'completed' && currentSessionStatus === 'completed'))) {
+    sendDemoCompletionCertificate(userId, courseId);
   }
 
   // adding Rescheduled Slot async if we get changed mentee session

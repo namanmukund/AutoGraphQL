@@ -1,8 +1,5 @@
-"on":
-  push:
-    branches:
-    - master-staging
-name: Deploy to Porter
+on: workflow_dispatch
+name: Deploy Staging to Porter
 jobs:
   porter-deploy:
     runs-on: ubuntu-latest

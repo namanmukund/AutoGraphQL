@@ -126,7 +126,6 @@ import GetUserCourses from './getUserCourses';
 import UserMerchant from './userMerchant';
 import MentorSupplyPaySlab from './mentorSupplyPaySlab';
 import MentorDemandSlot from './mentorDemandSlot';
-import MentorDemandSingleSlot from './mentorDemandSingleSlot';
 import MentorAvailabilitySlot from './mentorAvailabilitySlot';
 import MentorAuditReport from './mentorAuditReport';
 import ShiftBatchSessionsInput from './shiftBatchSessionsInput';
@@ -277,7 +276,6 @@ export default [
   ...UserMerchant,
   ...MentorSupplyPaySlab,
   ...MentorDemandSlot,
-  ...MentorDemandSingleSlot,
   ...MentorAvailabilitySlot,
   ...MentorAuditReport,
   ...ShiftBatchSessionsInput,
