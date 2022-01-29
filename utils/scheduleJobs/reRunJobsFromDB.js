@@ -99,9 +99,6 @@ const reRunJobsFromDB = async () => {
     const deleteJob = () => callLocalGraphqlApi(deleteJobQuery(id));
     const isPast = moment().isAfter(scheduledDate);
     const userId = get(parent, 'id');
-    // temp code to test event comms
-    if (process.env.NODE_ENV !== 'production'
-      && (jobType !== 'eventCommsJob' || jobType !== 'eventNewRegistrationReminder')) return;
     switch (jobType) {
       case 'sendB2BReminder': {
         if (isPast) {
