@@ -122,6 +122,7 @@ import EventOrganizer from './EventOrganizer';
 import DurationType from './DurationType';
 import AttendanceFilter from './AttendanceFilter';
 import LengthOfContent from './LengthOfContent';
+import TriedToReachParent from './TriedToReachParent';
 
 export default [
   Status,
@@ -249,4 +250,5 @@ export default [
   DurationType,
   AttendanceFilter,
   LengthOfContent,
+  TriedToReachParent,
 ];
