@@ -77,6 +77,7 @@ const User = `
     resetPasswordFromLink: Boolean @defaultValue(value: "false")
     senseiProfile: SenseiProfile @relation(name:"SenseiProfileUser", isSubset: true)
     lastActive: Date
+    rollNo: String
   }
 `;
 

@@ -2,6 +2,7 @@ import { get } from 'lodash';
 import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
+  rangeOTP,
   sessionStatus,
   sessionType,
 } from '../../../../constants';
@@ -15,6 +16,7 @@ import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import isTrialSession from '../resolvers/utils/isTrialSession';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
+import getRandomNumber from '../../../../utils/getRandomNumber';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -44,6 +46,9 @@ const getBatchQuery = (batchId) => `
             source
             studentProfile{
               id
+              section
+              branch
+              rollNo
             }
           }
         }
@@ -93,7 +98,6 @@ const updateBatchSessionQuery = (
     }
   }
   `;
-
 /*
   Post hook of addBatchSession
 */
@@ -187,6 +191,8 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
 
   // add students to the batch session and mark them absent as default
   if (students && students.length && topicId) {
+    const batchOtpForLiveSession = getRandomNumber(rangeOTP.min, rangeOTP.max);
+    let pushManyQueryToUpadateOtp = 'schoolSessionOtp: { pushMany: [';
     let pushManyQuery = 'attendance:{ pushMany: [';
     students.forEach((studentElem) => {
       if (studentElem.user && studentElem.user.studentProfile && studentElem.user.studentProfile.id) {
@@ -194,13 +200,23 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
                                                isPresent: false, 
                                                }, `;
       }
+      pushManyQueryToUpadateOtp += `{grade: "${studentElem.user.studentProfile.grade}",
+                                               section: "${studentElem.user.studentProfile.section}",
+                                               otp: "${batchOtpForLiveSession}",
+                                               batchConnectId: "${batchId}",
+                                              },`;
     });
     pushManyQuery += ']}';
+    pushManyQueryToUpadateOtp += ']}';
     context.fromAddBatchSession = true;
     // pushing new array of students in batch session
     await callLocalGraphqlApi(updateBatchSessionQuery(
       batchSessionId,
       pushManyQuery,
+    ), context);
+    await callLocalGraphqlApi(updateBatchSessionQuery(
+      batchSessionId,
+      pushManyQueryToUpadateOtp,
     ), context);
   }
   const studentsId = (students && students.length) ? students.map((student) => get(student, 'id')) : [];

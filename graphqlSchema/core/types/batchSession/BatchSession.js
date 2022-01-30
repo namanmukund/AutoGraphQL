@@ -42,6 +42,7 @@ const BatchSession = `
     mentorSavesAttendance: Date
     videoLinkClickByMenteePlatform: Platform
     startSessionByMenteePlatform: Platform
+    schoolSessionsOtp: [SchoolSessionOtp] @relation(name:"SchoolSessionOtpBatchSession")
 }`;
 
 export default [BatchSession, batchAttendanceType];
