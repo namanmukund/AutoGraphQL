@@ -111,6 +111,7 @@ import RebookMenteeSessionInput from './rebookMenteeSessionInput';
 import sendJourneySnapshotInMailInput from './sendJourneySnapshotInMailInput';
 import sendCertificateInMailInput from './sendCertificateInMailInput';
 import GenerateCertificate from './generateCertificate';
+import GenerateCertificateInBulk from './generateCertificateInBulk';
 import TopicQuestions from './topicQuestions';
 import TopicAssignmentQuestion from './topicAssignmentQuestion';
 import AuditQuestion from './auditQuestion';
@@ -125,7 +126,6 @@ import GetUserCourses from './getUserCourses';
 import UserMerchant from './userMerchant';
 import MentorSupplyPaySlab from './mentorSupplyPaySlab';
 import MentorDemandSlot from './mentorDemandSlot';
-import MentorDemandSingleSlot from './mentorDemandSingleSlot';
 import MentorAvailabilitySlot from './mentorAvailabilitySlot';
 import MentorAuditReport from './mentorAuditReport';
 import ShiftBatchSessionsInput from './shiftBatchSessionsInput';
@@ -139,6 +139,7 @@ import Event from './event';
 import UtmDetail from './utmDetail';
 import IqaReport from './iqaReport';
 import getMagicLink from './getMagicLink';
+import commsInput from './commsMessage';
 import magicLinkLog from './magicLinkLog';
 import LeadPartner from './leadPartner';
 import DemoWowAudit from './demoWowAudits';
@@ -148,6 +149,8 @@ import Notification from './notification';
 import Task from './task';
 import UserOtpLog from './userOtpLog';
 import SchoolSessionOtp from './schoolSessionOtp';
+import UserDeviceLog from './UserDeviceLog';
+import GenerateMentorChild from './generateMentorChild';
 
 export default [
   ...User,
@@ -274,13 +277,13 @@ export default [
   ...UserMerchant,
   ...MentorSupplyPaySlab,
   ...MentorDemandSlot,
-  ...MentorDemandSingleSlot,
   ...MentorAvailabilitySlot,
   ...MentorAuditReport,
   ...ShiftBatchSessionsInput,
   ...sendJourneySnapshotInMailInput,
   ...sendCertificateInMailInput,
   ...GenerateCertificate,
+  ...GenerateCertificateInBulk,
   ...EventCertificate,
   ...QuestionBankImage,
   ...SessionGradeReport,
@@ -292,6 +295,7 @@ export default [
   ...IqaReport,
   ...getMagicLink,
   ...magicLinkLog,
+  ...commsInput,
   ...LeadPartner,
   ...DemoWowAudit,
   ...SenseiProfile,
@@ -300,4 +304,6 @@ export default [
   ...Task,
   ...UserOtpLog,
   ...SchoolSessionOtp,
+  ...UserDeviceLog,
+  ...GenerateMentorChild,
 ];

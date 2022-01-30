@@ -19,6 +19,17 @@ const ScheduleJob = `
     sessionLink: String
     mentorUserId: String
     mentorPhoneNumber: String
+    taskId: String
+    eventId: String
+    eventSessionId: String
+    commsVariables: [CommsVariableType]
+    studentProfileId: String
+    templateName: String
+    isEmailRule: Boolean
+    condition: DateCondition
+    attendanceFilter: AttendanceFilter
+    unit: DurationType
+    value: Int
 }`;
 
 export default [ScheduleJob];

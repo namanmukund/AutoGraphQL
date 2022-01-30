@@ -5,12 +5,15 @@ import sendEmail from '../../services/email/utils/sendEmail';
 import parsedHtmlFromTemplateFileAndObject from '../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../services/email/utils/getEmailObject';
 import sendWhatsAppTemplateMessage from '../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
+import getSelectedSlotsTime from '../../src/autoGenerate/graphql/preHookFunctions/validation/utils/getSelectedSlotsTime';
+import getSlotLabel from '../getSlotLabel';
 
 const getBatchAttendanceDetails = async (batchSessionId) => {
   const query = `
  query{
   batchSession(id:"${batchSessionId}") {
-    sessionStartDate
+    bookingDate
+    ${new Array(24).fill('').map((_, i) => `slot${i}`).join('\n')}
     topic {
       title
     }
@@ -31,13 +34,15 @@ const getBatchAttendanceDetails = async (batchSessionId) => {
       student {
         user {
           name
-          parentProfile {
-            user {
-              name
-              email
-              phone {
-                countryCode
-                number
+          studentProfile {
+            parents {
+              user {
+                name
+                email
+                phone {
+                  countryCode
+                  number
+                }
               }
             }
           }
@@ -55,7 +60,13 @@ const sendSessionAttendenceMail = (email, templateName, sendEmailObject, mailSub
   const templateString = parsedHtmlFromTemplateFileAndObject(
     templateFileName, sendEmailObject,
   );
-  const emailTo = [email];
+  let emailTo = [email];
+  if (process.env.DATA_MASKING) {
+    // eslint-disable-next-line no-param-reassign
+    emailTo = [
+      'gokul.madhusudhan@tekie.in',
+    ];
+  }
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';
@@ -65,22 +76,24 @@ const sendSessionAttendenceMail = (email, templateName, sendEmailObject, mailSub
     sendEmail(emailMsgObject);
   });
 };
-const scheduleB2BSessionMissed = async (input, params, mutationName, context) => {
-  const { batchSessionId } = context;
+const scheduleB2BSessionMissed = async (batchSessionId) => {
   const batchDetails = await getBatchAttendanceDetails(batchSessionId);
   const topicTitle = get(batchDetails, 'topic.title');
-  const date = moment(get(batchDetails, 'sessionStartDate')).format('D/MM/YY');
-  const startTime = moment(get(batchDetails, 'sessionStartDate')).format('HH:mm a');
+  const date = moment(get(batchDetails, 'bookingDate')).format('DD/MM/YY');
+  const slot = get(getSelectedSlotsTime(batchDetails), '[0]');
+  const startTime = getSlotLabel(slot).startTime;
   const schoolCode = get(batchDetails, 'batch.school.code');
   const isWhatsAppCommsEnabled = get(batchDetails, 'batch.school.isWhatsAppCommsEnabled', false);
   const isEmailCommsEnabled = get(batchDetails, 'batch.school.isEmailCommsEnabled', false);
   const revisitLink = schoolCode && schoolCode.length ? `https://${schoolCode}.tekie.in/sessions` : `${process.env.TEKIE_WEB_URL}/sessions`;
-  const nonAttendes = get(batchDetails, 'attendance', []).filter((attendee) => attendee.status === 'absent');
+  const sessionTopicLink = revisitLink;
+  const nonAttendes = get(batchDetails, 'attendance', []).filter((attendee) => attendee.status === 'absent' || attendee.status === 'notAssigned');
   nonAttendes.forEach(async (attendee) => {
-    const studentName = get(attendee, 'student.user.name');
-    const parentName = get(attendee, 'student.user.parentProfile.user.name');
-    const parentEmail = get(attendee, 'student.user.parentProfile.user.email');
-    const parentPhone = get(attendee, 'student.user.parentProfile.user.phone.countryCode').split('+')[1] + get(attendee, 'student.user.parentProfile.user.phone.number');
+    const studentName = get(attendee, 'student.user.name', '-');
+    const parentName = get(attendee, 'student.user.studentProfile.parents[0].user.name', '-');
+    const parentEmail = get(attendee, 'student.user.studentProfile.parents[0].user.email', '-');
+    const parentPhone = get(attendee, 'student.user.studentProfile.parents[0].user.phone.countryCode', '+91').split('+')[1] + get(attendee, 'student.user.studentProfile.parents[0].user.phone.number');
+
     if (isWhatsAppCommsEnabled) {
       sendWhatsAppTemplateMessage(
         parentPhone,

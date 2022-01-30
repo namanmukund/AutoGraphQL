@@ -9,6 +9,7 @@ import { byPassMenteeValidationApps } from '../../../../constants';
 import addSessionLog from './utils/addSessionLog';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import deleteMentorMenteeSessionQuery from './utils/deleteMentorMenteeSessionQuery';
+import isMentorChild from './utils/isMentorChild';
 
 const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   /*
@@ -20,13 +21,15 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const isTrial = await isTrialSession(input.topic.typeId);
   const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
+  const clientId = get(userInfo, 'data.user.id', '');
+  const isItMentorChild = await isMentorChild(clientId);
 
   const studentName = get(userInfo, 'data.user.name', '');
   const parentName = get(userInfo, 'data.user.studentProfile.parents[0].user.name', '');
   const { appName } = context;
 
   // if call is from backend we will not update the availability slots, same for paid sessions
-  if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
+  if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName) && !isItMentorChild) {
     // await increaseParticularAvailableSlotOfADate(slotTimeStringArray, bookingDate, context);
     if (context.mentorSessionId) {
       const parentNumber = `${get(
@@ -49,12 +52,13 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
 
   // update session log entry
   const courseId = get(input, 'course.typeId', '');
-  const clientId = get(userInfo, 'data.user.id', '');
   const topicId = get(topicInfo, 'data.topic.id', '');
   const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
   addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMenteeSession', batchCode, '', '');
 
-  deleteMenteeBookingLeadSquared(userInfo, topicInfo, context.userIdFromContext === clientId);
+  if (!isItMentorChild) {
+    deleteMenteeBookingLeadSquared(userInfo, topicInfo, context.userIdFromContext === clientId);
+  }
 };
 
 export default deleteMenteeSessionPostHookMethod;

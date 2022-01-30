@@ -20,6 +20,7 @@ query{
       id
       code
       type
+      customSessionLink
       allottedMentor{
         id
       }

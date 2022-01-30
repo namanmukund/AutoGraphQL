@@ -13,14 +13,15 @@ const Task = `
   )
   {
     status: TaskStatus @defaultValue(value: "unassigned")
-    completionStatus: TaskCompletionStatus @defaultValue(value: "incomplete")
     mentorMenteeSession: MentorMenteeSession @relation(name: "TaskMentorMenteeSession", direction: "OneWay")
     menteeSession: MenteeSession @relation(name: "TaskMenteeSession", direction: "OneWay")
     batchSession: BatchSession @relation(name: "TaskBatchSession", direction: "OneWay")
     sessionLog: SessionLog @relation(name: "TaskSessionLog", direction: "OneWay")
     mentorAvailabilitySlot: MentorAvailabilitySlot @relation(name: "TaskMentorAvailabilitySlot", direction: "OneWay")
     leadStatus: TaskLeadStatus @defaultValue(value: "verificationPending")
+    leadStatusReason: TaskLeadStatusReason @defaultValue(value: "busy")
     bookingStatus: TaskBookingStatus @defaultValue(value: "notConfirmed")
+    bookingStatusReason: TaskBookingStatusReason @defaultValue(value: "notQualified")
     bookingComment: String
     rejectionComment: String
     assignedTo: User @relation(name: "TaskUserAssignedTo", direction: "OneWay")
@@ -32,6 +33,7 @@ const Task = `
     isHighPriority: Boolean @defaultValue(value: "false")
     broadcastCount: Int @defaultValue(value: "0")
     allotmentCount: Int @defaultValue(value: "0")
+    hasMentorAttemptedContact: Boolean @defaultValue(value: "false")
   }
 `;
 

@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import parsedHtmlFromTemplateFileAndObject
-from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
+  from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
@@ -60,7 +60,7 @@ const sendTransactionalEmail = async (templateObject, emailBody, country = 'indi
 
   if (process.env.DATA_MASKING) {
     emailTo = [
-      'ishan.dubey@tekie.in',
+      'gokul.madhusudhan@tekie.in',
     ];
     ccEmail = [
       'naman.mukund@tekie.in',

@@ -1,13 +1,15 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { DatabaseRecordNotFoundError, MentorMandatoryError } from '../../../../../constants/errors';
+import { DatabaseRecordNotFoundError, MentorMandatoryError, UnauthorizedOperationError } from '../../../../../constants/errors';
 import batchSessionQuery from '../../graphqlQueries/batchSessionQuery';
 import {
   CanNotChangeSessionStatusError,
   MissingMandatoryInputInRequestError,
 } from '../../../../../constants/errors/input';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
-import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, sessionStatus } from '../../../../../constants';
+import {
+  ALLOWED_ROLE_FOR_MANUAL_SESSIONS, sessionStatus, TMS, TWA,
+} from '../../../../../constants';
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorSessions from '../../../utils/getMentorSessions';
@@ -48,6 +50,17 @@ const getBatchSession = (batchId,
   }
 `;
 
+const getCurrentUser = async (userId) => {
+  const query = `{
+  studentProfiles(filter: { user_some: { id: "${userId}" } }) {
+    id
+  }
+}
+`;
+  const result = await callLocalGraphqlApi(query);
+  return get(result, 'data.studentProfiles[0].id');
+};
+
 const updateBatchSessionValidation = async (params, mutationOrQueryName, context) => {
   const {
     id: batchSessionId, topicConnectId, mentorSessionConnectId, input: { sessionStatus: sessionStatusInInput, bookingDate: bookingDateFromInput, ...inputSlot },
@@ -65,6 +78,13 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     currentApp,
   } = userInfo;
   const userRoleFromContext = currentUser && currentUser.role;
+  if (get(params, 'input.attendance.updateWhere.studentReferenceId')
+    && get(currentApp, 'name') === TWA) {
+    const studentProfileId = await getCurrentUser(get(currentUser, 'id'));
+    if (studentProfileId !== get(params, 'input.attendance.updateWhere.studentReferenceId')) {
+      throw new UnauthorizedOperationError();
+    }
+  }
 
   const {
     sessionStatus: prevSessionStatus,
@@ -168,6 +188,12 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   // if session is complete and user is trying to change the status then throw error
   if (prevSessionStatus === sessionStatus.completed && sessionStatusInInput && sessionStatusInInput !== sessionStatus.completed) {
     throw new CanNotChangeSessionStatusError();
+  }
+  if (get(currentApp, 'name') === TMS && sessionStatusInInput === 'started'
+    && get(batch, 'type') === 'b2b' && get(batch, 'customSessionLink')) {
+    Object.assign(params.input, {
+      sessionJoinedByMentorAt: new Date().toISOString(),
+    });
   }
 
   context.prevIsAudit = get(batchSession, 'isAudit', false);

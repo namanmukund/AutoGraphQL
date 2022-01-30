@@ -20,6 +20,7 @@ const MentorProfile = `
     linkedInLink: String
     portfolioLink: String
     senseiProfile: SenseiProfile @relation(name: "SenseiProfileMentorProfile")
+    studentProfile: StudentProfile @relation(name: "MentorStudentProfile")
 }`;
 
 export default [MentorProfile];

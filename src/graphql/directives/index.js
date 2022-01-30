@@ -37,6 +37,9 @@ directive @groupBy on FIELD
 
 # relational field where count can be fetched using filters
 directive @relationalMeta on FIELD
+
+# Namecases a string
+directive @nameCase on FIELD
 `;
 
 export default directive;

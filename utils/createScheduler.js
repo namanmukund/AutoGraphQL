@@ -5,6 +5,7 @@ import scheduleSessionReport from './scheduleJobs/scheduleSessionReport';
 import scheduleSessionCourseReport from './scheduleJobs/scheduleCourseReport';
 import scheduleB2BSessionReminder from './scheduleJobs/scheduleB2BSessionReminder';
 import scheduleB2BSessionHomeworkRemainder from './scheduleJobs/scheduleB2BSessionHomeworkRemainder';
+import scheduleEventSessionRemainder from './scheduleJobs/scheduleEventSessionRemainder';
 
 // create scheduler for different functionalities
 const createScheduler = (schedulerName) => {
@@ -68,12 +69,25 @@ const createScheduler = (schedulerName) => {
       });
       break;
     case 'b2bSessionHomeworkRemainder':
+      rule.tz = 'Asia/Kolkata';
       rule.minute = 50;
+      rule.dayOfWeek = new schedule.Range(0, 6);
       // eslint-disable-next-line no-unused-vars
       schedule.scheduleJob(rule, async () => {
         // eslint-disable-next-line no-console
         console.log('scheduler started for: ', schedulerName);
         await scheduleB2BSessionHomeworkRemainder();
+      });
+      break;
+    case 'eventSessionRemainder':
+      rule.tz = 'Asia/Kolkata';
+      rule.hour = 1;
+      rule.dayOfWeek = new schedule.Range(0, 6);
+      // eslint-disable-next-line no-unused-vars
+      schedule.scheduleJob(rule, async () => {
+        // eslint-disable-next-line no-console
+        console.log('scheduler started for: ', schedulerName);
+        await scheduleEventSessionRemainder();
       });
       break;
     default:

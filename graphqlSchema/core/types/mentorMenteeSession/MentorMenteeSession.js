@@ -16,6 +16,7 @@ const sessionRescheduledReasons = `
     powerCut: Boolean
     notResponseAndDidNotTurnUp: Boolean
     turnedUpButLeftAbruptly: Boolean
+    hadOtherCommitments: Boolean
     classDurationExceeded: Boolean
     leadNotVerifiedProperly: Boolean
     otherReasonForReschedule: Boolean
@@ -24,7 +25,7 @@ const sessionRescheduledReasons = `
     videoNotLoading: Boolean
     codePlaygroundIssue: Boolean
     logInOTPError: Boolean
-    otherTechnicalReason: String
+    otherTechnicalReason: Boolean
     languageBarrier: Languages
     otherLanguageBarrier: String
 `;
@@ -47,7 +48,7 @@ const internetSpeed = `
   type InternetSpeed {
    speed: Float
    unit: InternetSpeedUnit
- }`;
+}`;
 
 const MentorMenteeSession = `
   type MentorMenteeSession @model {
@@ -60,6 +61,7 @@ const MentorMenteeSession = `
     sessionStartDate: Date
     sessionEndDate: Date
     sessionStatus: SessionStatus! @defaultValue(value: "allotted")
+    triedToReachParent: TriedToReachParent @defaultValue(value: "didNotTriedToReachParent")
     classMissedMessageStatus: ClassMissedMessageStatus @defaultValue(value: "pending")
     isQuizSubmitted: Boolean @defaultValue(value: "false")
     quizSubmitDate: Date

@@ -7,6 +7,7 @@ import {
   sessionStatus,
   auditType as auditTypeValues,
   sessionType as sessionTypeValue,
+  TWA,
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
@@ -24,6 +25,7 @@ import isTrialSession from '../resolvers/utils/isTrialSession';
 import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import scheduleB2BSessionMissed from '../../../../utils/scheduleJobs/scheduleB2BSessionMissed';
+// import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -226,8 +228,13 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     prevIsAudit,
     batchTopicOrder,
     batchTypeValue,
+    appName,
   } = context;
   let courseId = get(context, 'courseId');
+  // check if performed from TLA while marking student`s attendance
+  if (appName && appName === TWA) {
+    return;
+  }
   /*
   get Course Id
   */
@@ -296,6 +303,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     const code = batchInfo && batchInfo.code;
     const batchCurrentComponentId = currentComponent && currentComponent.id;
     const currentComponentTopicId = get(currentComponent, 'currentTopic.id');
+    const reminderDateTime = moment(new Date()).add(1, 'days').toDate();
     // logic to change current component status if topic is completed
     if (batchCurrentComponentId && sessionStatusFromInput && topicId === currentComponentTopicId) {
       if (sessionStatusFromInput === sessionStatus.completed) {
@@ -303,7 +311,11 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         We are getting published topics list through this query.
         Then we will get next published topic
         */
-        scheduleB2BSessionMissed(input, params, mutationName, context);
+        addToSchedule('sendB2BHomeworkReminder', reminderDateTime, {
+          batchSessionId,
+        });
+        // console.log('scheduleB2BSessionMissed', scheduleB2BSessionMissed)
+        scheduleB2BSessionMissed(batchSessionId);
         const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
         const topicsList = get(nextTopicQueryRes, 'data.topics');
 
@@ -412,6 +424,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   }
   const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
   extractBatchSessionAndSendB2BC(batchSessionId, students, context.isBookedByMentee, context.prevStudentsAttendanceCount === 0);
+  // console.log('extractBatchSessionAndSendB2B', extractBatchSessionAndSendB2B)
+  // extractBatchSessionAndSendB2B(batchSessionId);
   if (mentorSessionConnectId) {
     const mentorUser = await getMentor(mentorSessionConnectId);
     const { id: mentorUserId, phone } = mentorUser;

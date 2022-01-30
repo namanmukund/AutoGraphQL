@@ -7,7 +7,7 @@ import {
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
 import isValidEmail from '../../../validation/isValidEmail';
-import { PARENT } from '../../../../../../constants/roles';
+import { MENTOR, PARENT } from '../../../../../../constants/roles';
 import { QueryController } from '../../../controllers';
 import { getUserFromDBQuery } from './utils';
 import { checkPasswordAndReturnUserWithToken } from '../utils/checkPasswordAndReturnUserWithToken';
@@ -70,8 +70,8 @@ const loginViaPasswordMutationResolver = async (
 
   const userTokenData = checkPasswordAndReturnUserWithToken(userData, input, authentication);
   // if user is a parent then get children tokens as well
-  if (role === PARENT) {
-    userTokenData.children = await getChildrenToken(context, userId);
+  if (role === PARENT || role === MENTOR) {
+    userTokenData.children = await getChildrenToken(context, userId, role);
   }
 
   return userTokenData;

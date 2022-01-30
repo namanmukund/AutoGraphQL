@@ -20,6 +20,16 @@ const AcceptanceObject = `
    requestType: RequestType
  }`;
 
+const RejectionObject = `
+  type RejectionObject {
+   slotName: Slot
+   date: Date
+   mentorAvailabilitySlotId: String
+   menteeSessionId: String
+   batchSessionId: String
+   requestType: RequestType
+ }`;
+
 const MentorSession = `
   type MentorSession @model
     @appPermissions(
@@ -55,6 +65,7 @@ const MentorSession = `
     b2b2cBatch: [Batch] @relation(name: "BatchMentorSession")
     mentorAvailabilitySlots: [MentorAvailabilitySlot] @relation(name:"MentorAvailabilitySlotMentorSession")
     acceptanceObjects: [AcceptanceObject]
+    rejectionObjects: [RejectionObject]
 }`;
 
-export default [MentorSession, AcceptanceObject];
+export default [MentorSession, AcceptanceObject, RejectionObject];

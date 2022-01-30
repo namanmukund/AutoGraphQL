@@ -651,6 +651,9 @@ const typeformWebhookController = async (req, res) => {
       let timezone;
       let utmSource;
       let utmCampaign;
+      let utmContent;
+      let utmMedium;
+      let utmTerm;
       let doGenerateCertificate = true;
       switch (formId) {
         case EVENTS.SPYSQUADCAMP.formId:
@@ -680,8 +683,9 @@ const typeformWebhookController = async (req, res) => {
         case EVENTS.STORYSPREE.rsRegiformId:
           country = 'india';
           timezone = 'Asia/Kolkata';
-          utmSource = 'radiostreet';
+          utmSource = 'events';
           utmCampaign = 'storyspree';
+          utmTerm = '30thJan2022';
           doGenerateCertificate = false;
           break;
         case EVENTS.GENZENVIRONMENT.registrationFormId:
@@ -709,7 +713,7 @@ const typeformWebhookController = async (req, res) => {
           timezone = 'Asia/Kolkata';
           utmSource = 'events';
           utmCampaign = 'doodling';
-          studentDetailsObject.utmTerm = '16thJan2022';
+          utmTerm = '30thJan2022';
           doGenerateCertificate = false;
           break;
         case EVENTS.CHRISTMASCARNIVAL.registrationFormId25thRS:
@@ -751,12 +755,31 @@ const typeformWebhookController = async (req, res) => {
           utmCampaign = 'spysquadcamp_18dec';
           break;
       }
+
+      if (get(hidden, 'utm_campaign')) {
+        utmCampaign = get(hidden, 'utm_campaign');
+      }
+      if (get(hidden, 'utm_content')) {
+        utmContent = get(hidden, 'utm_content');
+      }
+      if (get(hidden, 'utm_medium')) {
+        utmMedium = get(hidden, 'utm_medium');
+      }
+      if (get(hidden, 'utm_source')) {
+        utmSource = get(hidden, 'utm_source');
+      }
+      if (get(hidden, 'utm_term')) {
+        utmTerm = get(hidden, 'utm_term');
+      }
       studentDetailsObject = {
         ...studentDetailsObject,
         country,
         timezone,
         utmSource,
         utmCampaign,
+        utmContent,
+        utmMedium,
+        utmTerm,
       };
       usersData(studentDetailsObject, formId, doGenerateCertificate);
     }
