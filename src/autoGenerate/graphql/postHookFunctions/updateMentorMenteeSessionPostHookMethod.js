@@ -47,6 +47,9 @@ const userIdQuery = (menteeSessionId) => `{
       name
       country
       studentProfile {
+        mentor {
+          id
+        }
         parents {
           user {
             id
@@ -164,13 +167,8 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   const oldBookingDate = get(prevMenteeSession, 'bookingDate', '');
   const newBookingDate = get(menteeSession, 'data.menteeSession.bookingDate', '');
   const courseId = get(input, 'course.typeId', '');
+  const mentorChildId = get(menteeSession, 'data.menteeSession.user.studentProfile.mentor.id', null);
 
-  // if (
-  //   (!prevIsFeedbackSubmitted && isFeedbackSubmitted)
-  //   && topic.order === 1
-  // ) {
-  //   sendDemoCompletionCertificate(userId, courseId);
-  // }
   if (get(topic, 'order') === 1 && ((prevSessionStatus === 'completed' && !prevIsFeedbackSubmitted && isFeedbackSubmitted)
     || (isFeedbackSubmitted && prevSessionStatus !== 'completed' && currentSessionStatus === 'completed'))) {
     sendDemoCompletionCertificate(userId, courseId);
@@ -235,7 +233,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       // set session completed on leadsquared
     }
     if (
-      (prevSessionStatus !== 'completed' && (input && input.sessionStatus && input.sessionStatus === 'completed'))
+      !mentorChildId && (prevSessionStatus !== 'completed' && (input && input.sessionStatus && input.sessionStatus === 'completed'))
       && topic.order === 1
     ) {
       setSessionCompletedLeadsquared(
@@ -279,7 +277,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       addSalesAudit({ mentorMenteeSessionId, auditType: demoWow });
     }
 
-    if (input && intersection(['hasRescheduled', 'sessionStatus', 'didNotPickTheCall', 'didNotTurnUpInSession', 'sessionNotConducted'], Object.keys(input)) && topic.order === 1) {
+    if (!mentorChildId && input && intersection(['hasRescheduled', 'sessionStatus', 'didNotPickTheCall', 'didNotTurnUpInSession', 'sessionNotConducted'], Object.keys(input)) && topic.order === 1) {
       updateMentorRescheduleLeadsquared(userInfo, input, params);
     }
 
@@ -292,7 +290,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
 
     // if mentorSession is updated at a later stage, send comms
-    if (context.hasMentorSessionChanged && context.mentorSessionConnectId) {
+    if (!mentorChildId && context.hasMentorSessionChanged && context.mentorSessionConnectId) {
       await extractMentorMenteeSessionAndSendMessage(bookingDate, slotTimeStringArray, context.mentorSessionConnectId, userInfo, topicInfo, input.id, courseInfo);
     }
     const mentorSessionId = get(input, 'mentorSession.typeId');
@@ -349,14 +347,14 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   /**
    * Updating streaks if user has submitted homework for review.
    */
-  if ((prevIsSubmittedForReview === false) && (get(input, 'isSubmittedForReview') === true) && filteredTopics.length) {
+  if (!mentorChildId && (prevIsSubmittedForReview === false) && (get(input, 'isSubmittedForReview') === true) && filteredTopics.length) {
     log('.............Homework Streaks Review Flow Started');
     submittedForReviewStreaksFlow(filteredTopics, userId, courseTypeId, context, topic.id);
   }
   /**
    * Updating streaks if user/mentor has started next session.
    */
-  if ((prevSessionStatus === 'allotted') && (get(input, 'sessionStatus') === 'started') && filteredTopics.length) {
+  if (!mentorChildId && (prevSessionStatus === 'allotted') && (get(input, 'sessionStatus') === 'started') && filteredTopics.length) {
     log('.............Homework Streaks Session Flow Started');
     sessionStartedStreaksFlow(filteredTopics, userId, courseTypeId, context, topic.id);
   }

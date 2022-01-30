@@ -82,7 +82,6 @@ const isHomeworkSubmitted = async (topicId, courseId, studentId) => {
   }
   return false;
 };
-
 const sendSessionRemainderMail = (email, sendEmailObject) => {
   const templateFileName = 'B2BHomework';
   const templateString = parsedHtmlFromTemplateFileAndObject(

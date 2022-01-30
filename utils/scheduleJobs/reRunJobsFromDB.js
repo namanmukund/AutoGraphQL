@@ -9,8 +9,11 @@ import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
 import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
 import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
+import sendMentorVerifyBookingReminder from './jobs/sendMentorVerifyBookingReminder';
 import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 import scheduleB2BSessionHomeworkRemainder from './scheduleB2BSessionHomeworkRemainder';
+import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
+import sendEventCommunication from './jobs/sendEventCommunication';
 
 const FETCH_JOBS = `{
   scheduleJobs {
@@ -34,6 +37,20 @@ const FETCH_JOBS = `{
     sessionLink
     mentorUserId
     mentorPhoneNumber
+    taskId
+    eventId
+    commsVariables{
+      dataField
+      whatsappVariableName
+      emailVariableName
+    }
+    studentProfileId
+    templateName
+    isEmailRule
+    condition
+    attendanceFilter
+    unit
+    value
   }
 }`;
 
@@ -47,7 +64,6 @@ const deleteJobQuery = (id) => `
 
 const reRunJobsFromDB = async () => {
   const res = await callLocalGraphqlApi(FETCH_JOBS);
-
   const scheduledJobs = get(res, 'data.scheduleJobs', []);
   scheduledJobs.forEach(async (scheduledJob) => {
     const {
@@ -69,6 +85,16 @@ const reRunJobsFromDB = async () => {
       sessionLink,
       mentorUserId,
       mentorPhoneNumber,
+      taskId,
+      eventId,
+      commsVariables,
+      studentProfileId,
+      templateName,
+      isEmailRule,
+      condition,
+      attendanceFilter,
+      unit,
+      value,
     } = scheduledJob;
     const deleteJob = () => callLocalGraphqlApi(deleteJobQuery(id));
     const isPast = moment().isAfter(scheduledDate);
@@ -213,6 +239,68 @@ const reRunJobsFromDB = async () => {
             mentorPhoneNumber,
           }, deleteJob);
         });
+        break;
+      }
+      case 'sendMentorVerifyBookingReminder': {
+        schedule.scheduleJob(new Date(scheduledDate), () => {
+          sendMentorVerifyBookingReminder({
+            taskId, mentorUserId, jobType,
+          }, deleteJob);
+        });
+        break;
+      }
+      case 'eventCommsJob': {
+        if (isPast) {
+          sendEventCommunication({
+            eventId,
+            jobType,
+            commsVariables,
+            templateName,
+            isEmailRule,
+            condition,
+            attendanceFilter,
+            value,
+            unit,
+          }, deleteJob);
+        } else {
+          schedule.scheduleJob(new Date(scheduledDate), () => {
+            sendEventCommunication({
+              eventId,
+              jobType,
+              commsVariables,
+              templateName,
+              isEmailRule,
+              condition,
+              attendanceFilter,
+              value,
+              unit,
+            }, deleteJob);
+          });
+        }
+        break;
+      }
+      case 'eventNewRegistrationReminder': {
+        if (isPast) {
+          eventNewRegistrationReminder({
+            eventId,
+            jobType,
+            studentProfileId,
+            commsVariables,
+            templateName,
+            isEmailRule,
+          }, deleteJob);
+        } else {
+          schedule.scheduleJob(new Date(scheduledDate), () => {
+            eventNewRegistrationReminder({
+              eventId,
+              jobType,
+              studentProfileId,
+              commsVariables,
+              templateName,
+              isEmailRule,
+            }, deleteJob);
+          });
+        }
         break;
       }
       default:

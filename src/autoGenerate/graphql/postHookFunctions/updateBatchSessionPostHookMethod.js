@@ -7,6 +7,7 @@ import {
   sessionStatus,
   auditType as auditTypeValues,
   sessionType as sessionTypeValue,
+  TWA,
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
@@ -227,8 +228,13 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     prevIsAudit,
     batchTopicOrder,
     batchTypeValue,
+    appName,
   } = context;
   let courseId = get(context, 'courseId');
+  // check if performed from TLA while marking student`s attendance
+  if (appName && appName === TWA) {
+    return;
+  }
   /*
   get Course Id
   */

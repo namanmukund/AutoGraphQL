@@ -63,7 +63,6 @@ const getMagicLinkForUser = async (userId) => {
   const magicLink = get(magicLinkResp, 'data.getMagicLink', []);
   return magicLink;
 };
-
 const sendSessionRemainderMail = (email, sendEmailObject) => {
   const templateFileName = 'B2BJoinSessionReminder';
   const templateString = parsedHtmlFromTemplateFileAndObject(

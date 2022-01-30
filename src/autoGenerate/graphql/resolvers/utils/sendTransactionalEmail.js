@@ -39,10 +39,10 @@ const sendTransactionalEmail = async (templateObject, emailBody, country = 'indi
   }
   const footerDark = await parsedHtmlFromTemplateFileAndObject(
     'footerDark', {
-    instagramLink: getText('instagramLink', country),
-    tekieLink: getText('tekieLink', country),
-    tekieText: getText('tekieText', country),
-  },
+      instagramLink: getText('instagramLink', country),
+      tekieLink: getText('tekieLink', country),
+      tekieText: getText('tekieText', country),
+    },
   );
   const help = await parsedHtmlFromTemplateFileAndObject('help', { country });
   const footer = await parsedHtmlFromTemplateFileAndObject('footer', templateObject);

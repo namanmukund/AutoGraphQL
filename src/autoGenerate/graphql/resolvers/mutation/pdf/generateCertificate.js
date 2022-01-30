@@ -15,6 +15,7 @@ import getIqaReportSnapshotUrl from './uploadCertificates/iqaReport';
 import getCrackTheCodeCertificateUrl from './uploadCertificates/crackTheCode';
 import getChristmasCarnivalCertificateUrl from './uploadCertificates/christmasCarnival';
 import getDoodleAllTheWayCertificateUrl from './uploadCertificates/doodleAllTheWay';
+import getCertificateUrl from './uploadCertificates/getCertificateUrl';
 
 const fetchUser = (userId, eventId) => `
 {
@@ -52,13 +53,14 @@ const fetchEventCertificate = (id, eventId) => `
 }
 `;
 
-const addEventCertificate = (userId, assetUrl, eventType, eventName) => `
+const addEventCertificate = (userId, assetUrl, eventType, eventName, eventConnectId) => `
   mutation {
     addEventCertificate(userConnectId:"${userId}",
+    ${eventConnectId ? `eventConnectId:"${eventConnectId}"` : ''}
       input: {
         assetUrl: "${assetUrl}"
-        eventType: ${eventType}
-        eventName: ${eventName}
+        ${eventType ? `eventType: ${eventType}` : ''}
+        ${eventName ? `eventName: ${eventName}` : ''}
       }){
         id
         assetUrl
@@ -68,10 +70,11 @@ const addEventCertificate = (userId, assetUrl, eventType, eventName) => `
 
 const updateEventCertificate = (eventCertificateId, url, eventType, eventName) => `
  mutation{
-  updateEventCertificate(id:"${eventCertificateId}",input:{
+  updateEventCertificate(id:"${eventCertificateId}",
+  input:{
     assetUrl:"${url}"
-    eventType: ${eventType}
-    eventName: ${eventName}
+    ${eventType ? `eventType: ${eventType}` : ''}
+    ${eventName ? `eventName: ${eventName}` : ''}
   }){
     id
     assetUrl
@@ -104,6 +107,7 @@ const generateCertificateMutationResolver = async (
   // eventId to be passed here too in input
   const {
     userId, regenerateCertificate, eventId, date, isEventCertificate,
+    isBulkGenerate,
   } = input;
   let userRes;
   if (!isEventCertificate) {
@@ -134,76 +138,80 @@ const generateCertificateMutationResolver = async (
     let fetchedUrl = '';
     let eventType = '';
     let eventName = '';
-    // the three ids here are the event.ids created in three environments (local, pre-prod, prod)
-    switch (eventId) {
-      case 'ckvdiavp70000igujfgxh8mt6':
-      case 'ckve5izxq0000ucui47b89pmf':
-      case 'ckve5fm7o00090t1dd1v4dy13':
-        fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
-        eventType = 'radioStreet';
-        eventName = 'spySquadCamp';
-        break;
-      case 'ckvw6s3df000039in32ewhy89':
-      case 'ckvwncjv400001sin0ppigr3s':
-      case 'ckvxsrwlb001c0usf9lxwapt4':
-        fetchedUrl = await getCanvaEventCertificateUrl(userId, userName, formattedDate);
-        eventType = 'communityEvent';
-        eventName = 'canvaMasterclass';
-        break;
-      case 'ckweruavk0000sxin201114uv':
-      case 'ckwerqvz10000r2in5ihxd8ly':
-      case 'ckweriv6q0000mzin99jm8mm2':
-        fetchedUrl = await getGenZEventCertificateUrl(userId, userName, formattedDate);
-        eventType = 'communityEvent';
-        eventName = 'genZEnvironment';
-        break;
-      case 'ckw4unvyp0000kpinc2515c88':
-      case 'ckw5wg9rj0000gtin1st0hry6':
-      case 'ckw6eq3f30000xgin7yrxgk2l':
-        fetchedUrl = await getStoryspreeCertificateUrl(userId, userName, formattedDate);
-        eventType = 'communityEvent';
-        eventName = 'storyspree';
-        break;
-      case 'ckx3bgy7p0000n1incbzkb36i':
-      case 'ckx3cuo200000zein8wwz3qid':
-      case 'ckx3cxe39000018in96do53zp':
-        fetchedUrl = await getCrackTheCodeCertificateUrl(userId, userName, formattedDate);
-        eventType = 'communityEvent';
-        eventName = 'crackTheCode';
-        break;
-      case 'ckwjgmccj0000kcin04q39xe4':
-      case 'ckwjwd1cz0000o4in6br2cng6':
-      case 'ckwjwf4lm0000pgin7o9bbf1m':
-      case 'ckwjwiigq0000rninbsqialy2':
-        fetchedUrl = await getDemoCompletionCertificateUrl(userId, userName);
-        eventType = 'userAchievement';
-        eventName = 'demoCompletion';
-        break;
-      case 'ckwjl99kq0001i6in4ir2ez4z':
-      case 'ckwjwg75y0001pginazc277b9':
-      case 'ckwjwitwb0001rningq5ma1ei':
-        fetchedUrl = await getIqaReportSnapshotUrl(userId, userName);
-        eventType = 'userAchievement';
-        eventName = 'iqaReport';
-        break;
-      case 'ckx8sez1l0000ncin1hbv5gyk':
-      case 'ckx8sau1d0000lrinb526hp0v':
-      case 'ckx8s8dp40000iqineagieolt':
-        fetchedUrl = await getChristmasCarnivalCertificateUrl(userId, userName);
-        eventType = 'communityEvent';
-        eventName = 'christmasCarnival';
-        break;
-      case 'ckyaeenu10001ncuj0yyedyqj':
-      case 'ckyb15tah00013kuj2wepa79p':
-        fetchedUrl = await getDoodleAllTheWayCertificateUrl(userId, userName, formattedDate);
-        eventType = 'communityEvent';
-        eventName = 'doodling';
-        break;
-      default:
-        fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
-        eventType = 'radioStreet';
-        eventName = 'spySquadCamp';
-        break;
+    if (isBulkGenerate) {
+      fetchedUrl = await getCertificateUrl(userId, eventId, userName, formattedDate);
+    } else {
+      // the three ids here are the event.ids created in three environments (local, pre-prod, prod)
+      switch (eventId) {
+        case 'ckvdiavp70000igujfgxh8mt6':
+        case 'ckve5izxq0000ucui47b89pmf':
+        case 'ckve5fm7o00090t1dd1v4dy13':
+          fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
+          eventType = 'radioStreet';
+          eventName = 'spySquadCamp';
+          break;
+        case 'ckvw6s3df000039in32ewhy89':
+        case 'ckvwncjv400001sin0ppigr3s':
+        case 'ckvxsrwlb001c0usf9lxwapt4':
+          fetchedUrl = await getCanvaEventCertificateUrl(userId, userName, formattedDate);
+          eventType = 'communityEvent';
+          eventName = 'canvaMasterclass';
+          break;
+        case 'ckweruavk0000sxin201114uv':
+        case 'ckwerqvz10000r2in5ihxd8ly':
+        case 'ckweriv6q0000mzin99jm8mm2':
+          fetchedUrl = await getGenZEventCertificateUrl(userId, userName, formattedDate);
+          eventType = 'communityEvent';
+          eventName = 'genZEnvironment';
+          break;
+        case 'ckw4unvyp0000kpinc2515c88':
+        case 'ckw5wg9rj0000gtin1st0hry6':
+        case 'ckw6eq3f30000xgin7yrxgk2l':
+          fetchedUrl = await getStoryspreeCertificateUrl(userId, userName, formattedDate);
+          eventType = 'communityEvent';
+          eventName = 'storyspree';
+          break;
+        case 'ckx3bgy7p0000n1incbzkb36i':
+        case 'ckx3cuo200000zein8wwz3qid':
+        case 'ckx3cxe39000018in96do53zp':
+          fetchedUrl = await getCrackTheCodeCertificateUrl(userId, userName, formattedDate);
+          eventType = 'communityEvent';
+          eventName = 'crackTheCode';
+          break;
+        case 'ckwjgmccj0000kcin04q39xe4':
+        case 'ckwjwd1cz0000o4in6br2cng6':
+        case 'ckwjwf4lm0000pgin7o9bbf1m':
+        case 'ckwjwiigq0000rninbsqialy2':
+          fetchedUrl = await getDemoCompletionCertificateUrl(userId, userName);
+          eventType = 'userAchievement';
+          eventName = 'demoCompletion';
+          break;
+        case 'ckwjl99kq0001i6in4ir2ez4z':
+        case 'ckwjwg75y0001pginazc277b9':
+        case 'ckwjwitwb0001rningq5ma1ei':
+          fetchedUrl = await getIqaReportSnapshotUrl(userId, userName);
+          eventType = 'userAchievement';
+          eventName = 'iqaReport';
+          break;
+        case 'ckx8sez1l0000ncin1hbv5gyk':
+        case 'ckx8sau1d0000lrinb526hp0v':
+        case 'ckx8s8dp40000iqineagieolt':
+          fetchedUrl = await getChristmasCarnivalCertificateUrl(userId, userName);
+          eventType = 'communityEvent';
+          eventName = 'christmasCarnival';
+          break;
+        case 'ckyaeenu10001ncuj0yyedyqj':
+        case 'ckyb15tah00013kuj2wepa79p':
+          fetchedUrl = await getDoodleAllTheWayCertificateUrl(userId, userName, formattedDate);
+          eventType = 'communityEvent';
+          eventName = 'doodling';
+          break;
+        default:
+          fetchedUrl = await getSpySquadCampCertificateUrl(userId, userName, formattedDate);
+          eventType = 'radioStreet';
+          eventName = 'spySquadCamp';
+          break;
+      }
     }
     let eventCertificateCreated = null;
     if (fetchedUrl) {
@@ -212,7 +220,7 @@ const generateCertificateMutationResolver = async (
         const eventCertificateCreatedRes = await callLocalGraphqlApi(updateEventCertificate(eventCertificateId, fetchedUrl, eventType, eventName));
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.updateEventCertificate');
       } else {
-        const eventCertificateCreatedRes = await callLocalGraphqlApi(addEventCertificate(userId, fetchedUrl, eventType, eventName));
+        const eventCertificateCreatedRes = await callLocalGraphqlApi(addEventCertificate(userId, fetchedUrl, eventType, eventName, isBulkGenerate ? eventId : ''));
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.addEventCertificate');
       }
     }
