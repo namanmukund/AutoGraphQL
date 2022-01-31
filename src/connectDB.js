@@ -20,6 +20,9 @@ db.on('error', (err) => {
   log('MongoDB disconnected!');
 }).once('open', async () => {
   log('Connected to DB.');
+  // temp check for events
+  createScheduler('eventSessionRemainder');
+  reRunJobsFromDB();
   if (
     process.env.NODE_ENV === 'production'
     && process.env.IS_SCHEDULER_INSTANCE
@@ -27,7 +30,7 @@ db.on('error', (err) => {
     createScheduler('mentorReport');
     createScheduler('sessionReport');
     createScheduler('sessionCourseReport');
-    createScheduler('eventSessionRemainder');
-    reRunJobsFromDB();
+    // createScheduler('eventSessionRemainder');
+    // reRunJobsFromDB();
   }
 });
