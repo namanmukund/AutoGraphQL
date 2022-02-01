@@ -295,7 +295,7 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
     const defaultFields = [];
     // To store defaultFields Value
     const defaultFieldsWithValue = {};
-     // To store indexed fields
+    // To store indexed fields
     const indexedFields = [];
     // To store indexedFields Value
     const indexedFieldsWithValue = {};
