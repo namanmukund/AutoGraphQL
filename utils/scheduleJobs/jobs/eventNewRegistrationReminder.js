@@ -7,6 +7,23 @@ import getSelectedSlotsStringArray from '../../../src/autoGenerate/graphql/postH
 import getSlotTimesInString from '../../getSlotTimesInString';
 import sendWhatsAppTemplateMessage from '../../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
 
+const addToCommsSendLogs = async ({
+  templateName, triggeredAt, studentProfileId, eventId,
+}) => {
+  const addQuery = `mutation {
+    addCommsSendLog(
+      input: { templateName: "${templateName}", triggeredAt: "${new Date(triggeredAt).toISOString()}" }
+      studentProfileConnectId: "${studentProfileId}"
+      eventConnectId: "${eventId}"
+    ) {
+      id
+    }
+  }
+  `;
+  const result = await callLocalGraphqlApi(addQuery);
+  return get(result, 'data.addCommsSendLog', null);
+};
+
 const getEventDetails = async (eventId) => {
   const query = `{
   event(id: "${eventId}") {
@@ -126,6 +143,9 @@ const eventNewRegistrationReminder = async ({
       newPhoneNumber,
       parameters,
     );
+    addToCommsSendLogs({
+      templateName, triggeredAt: new Date(), eventId, studentProfileId,
+    });
   }
   deleteJob();
 };

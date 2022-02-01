@@ -7,7 +7,9 @@ import moment from 'moment';
 import { log } from '../../../../../utils';
 import extractSlotsFromInput from '../../../../../utils/extractSlotsFromInput';
 import getPossibleDates from '../../../../../utils/getPossibleDates';
+import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import getSelectedSlotsTime from '../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import getSelectedDays from './getSelectedDays';
 
 // query to get eventSessions
@@ -26,6 +28,7 @@ const getEventSessions = async (eventId, sessionDatesFilter, fetchAttendance = f
           }, orderBy:sessionDate_ASC){
               id
               sessionDate
+              ${getSlotTimesInString()}
               ${fetchAttendance ? `attendance{
                 student{
                   id
@@ -98,7 +101,8 @@ const sortEventSessions = (eventSessions) => {
   const sessionsStartedOrCompleted = [];
   const sessionsAllotted = [];
   for (const eventSession of eventSessions) {
-    const sessionDate = get(eventSession, 'sessionDate');
+    const slotsArray = getSelectedSlotsTime(eventSession);
+    const sessionDate = new Date(new Date(get(eventSession, 'sessionDate')).setHours(get(slotsArray, '[0]'), 0, 0, 0)).toISOString();
     if (today.diff(sessionDate) > 0) {
       sessionsStartedOrCompleted.push(eventSession);
     } else {
