@@ -23,9 +23,9 @@ const EVENTS = {
       preprod: 'ckw5wg9rj0000gtin1st0hry6',
       staging: 'ckw4unvyp0000kpinc2515c88',
     },
-    eventDate: '30 January',
+    eventDate: '06 February',
     eventTime: '03:00 pm',
-    eventDateTime: '2022-01-30 09:30:00',
+    eventDateTime: '2022-02-06 09:30:00',
   },
   GENZENVIRONMENT: {
     registrationFormId: 'GganG5WQ',
@@ -83,9 +83,9 @@ const EVENTS = {
       preprod: 'ckx8sau1d0000lrinb526hp0v',
       staging: 'ckyaeenu10001ncuj0yyedyqj',
     },
-    eventDate: '30 January',
+    eventDate: '06 February',
     eventTime: '11:00 am',
-    eventDateTime: '2022-01-30 05:30:00',
+    eventDateTime: '2022-02-06 05:30:00',
   },
 };
 
