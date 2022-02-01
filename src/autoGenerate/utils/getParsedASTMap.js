@@ -295,6 +295,10 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
     const defaultFields = [];
     // To store defaultFields Value
     const defaultFieldsWithValue = {};
+     // To store indexed fields
+    const indexedFields = [];
+    // To store indexedFields Value
+    const indexedFieldsWithValue = {};
 
     fields.forEach((fieldDefinition) => {
       // field type should be fieldDefinition
@@ -320,6 +324,10 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
           const directiveArguments = directive.arguments;
           if (directiveName === 'defaultValue') {
             defaultFieldsWithValue[fieldName] = directiveArguments[0].value.value;
+          }
+          if (directiveName === 'createIndex') {
+            // TODO: assign default value as 1
+            indexedFieldsWithValue[fieldName] = directiveArguments[0].value.value;
           }
           const argsObject = {};
           // Convert directiveArguments into Object.
@@ -381,6 +389,10 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
                   }
                 }
               });
+              break;
+
+            case 'createIndex':
+              indexedFields.push(fieldName);
               break;
 
             case 'readOnly':
@@ -492,6 +504,7 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
       readOnlyFields,
       writeOnlyFields,
       defaultFields,
+      indexedFields,
       localUniqueFields,
       localNonNullFields,
       localNonNullAndUniqueFields,
@@ -503,6 +516,7 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
       remoteNonNullFieldsApplicationWise,
       remoteNonNullAndUniqueFieldsApplicationWise,
       defaultFieldsWithValue,
+      indexedFieldsWithValue,
       additionalRelationFields,
       appPermissions,
       userPermissions,
