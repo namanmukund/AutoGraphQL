@@ -1,9 +1,9 @@
 import { get } from 'lodash';
 import { getFieldsBeingFetched } from '../../../../utils';
-import { QueryController, RedisController } from '../../../controllers';
+import { QueryController } from '../../../controllers';
 import { OLD_COURSE_ID } from '../../../../../../constants';
 import { InvalidFieldType } from '../../../../../../constants/errors';
-import { log } from '../../../../../../utils';
+// import { log } from '../../../../../../utils';
 
 // query to get current component status of user.
 const getUserCurrentTopicComponentStatusAggregation = (userId, courseIds) => [
@@ -397,26 +397,26 @@ const getUserCourses = (async (root, params, context, info) => {
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
   await validateIncomingFields(fieldsFetched);
 
-  const redisClient = new RedisController({
-    bypass: true,
-  });
+  // const redisClient = new RedisController({
+  //   bypass: true,
+  // });
   if (input && get(input, 'userId')) {
     const userId = get(input, 'userId');
     /** Check if data exists in redis */
     // const cachedUserCourses = await redisClient.get(`userCourses_${userId}`);
-    let userCoursesRes = null;
-    if (cachedUserCourses && false) {
-      log(`[USER_COURSES] CACHE_HIT: ${`userCourses_${userId}`}`);
-      userCoursesRes = cachedUserCourses;
-    } else {
-      // log(`[USER_COURSES] CACHE_MISS: ${`userCourses_${userId}`}`);
-      const userCoursesModel = getTypeQueryController('UserCourse');
-      userCoursesRes = await userCoursesModel.aggregate(getUserCoursesAggregation(userId));
-      // await redisClient.set(userCoursesRes, {
-      //   hkey: `userCourses_${userId}`,
-      //   maxAge: 900,
-      // });
-    }
+    // let userCoursesRes = null;
+    // if (cachedUserCourses && false) {
+    //   log(`[USER_COURSES] CACHE_HIT: ${`userCourses_${userId}`}`);
+    //   userCoursesRes = cachedUserCourses;
+    // } else {
+    // log(`[USER_COURSES] CACHE_MISS: ${`userCourses_${userId}`}`);
+    const userCoursesModel = getTypeQueryController('UserCourse');
+    const userCoursesRes = await userCoursesModel.aggregate(getUserCoursesAggregation(userId));
+    // await redisClient.set(userCoursesRes, {
+    //   hkey: `userCourses_${userId}`,
+    //   maxAge: 900,
+    // });
+    // }
     if (userCoursesRes && userCoursesRes.length) {
       const userCourses = get(userCoursesRes[0], 'courses', []);
       let newPythonCourseExists = false;
