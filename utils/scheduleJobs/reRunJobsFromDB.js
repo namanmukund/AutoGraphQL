@@ -307,12 +307,19 @@ const reRunJobsFromDB = async () => {
         break;
       }
       case 'eventSessionAttendance': {
-        schedule.scheduleJob(new Date(scheduledDate), () => {
+        if (isPast) {
           addStudentToEventSession({
             eventSessionId,
             jobId: id,
           }, deleteJob);
-        });
+        } else {
+          schedule.scheduleJob(new Date(scheduledDate), () => {
+            addStudentToEventSession({
+              eventSessionId,
+              jobId: id,
+            }, deleteJob);
+          });
+        }
         break;
       }
       default:

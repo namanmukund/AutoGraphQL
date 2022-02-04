@@ -82,15 +82,20 @@ const createEventSession = async (eventId, date, slots) => {
   return true;
 };
 
-const deleteEventSession = async (eventSessionId) => {
-  const deleteQuery = `mutation {
-  deleteEventSession(id: "${eventSessionId}") {
-    id
+const deleteEventSessions = async (eventSessionIds = []) => {
+  eventSessionIds.forEach((sessionId) => {
+    const deleteQuery = `mutation {
+    deleteEventSession(id:"${sessionId}") {
+      id
+    }
+    deleteScheduleJobs(filter: { eventSessionId: "${sessionId}" }) {
+      id
+    }
   }
-}
-`;
-  log(`deleted eventSession with Id ${eventSessionId}`);
-  await callLocalGraphqlApi(deleteQuery);
+  `;
+    log(`deleted eventSession with Id ${sessionId}`);
+    callLocalGraphqlApi(deleteQuery);
+  });
 };
 
 const updateEventSession = async (sessionId, slots, date, pushManyQuery = '') => {
@@ -197,10 +202,14 @@ const addUpdateEventSessionsForEvent = async (eventId, timeTableRule, prevTimeTa
       if (sessionDatesFilter) {
         const eventSessions = await getEventSessions(eventId, sessionDatesFilter);
         if (eventSessions && eventSessions.length > 0) {
+          const eventSessionIds = [];
           for (const eventSession of eventSessions) {
             if (get(eventSession, 'id')) {
-              await deleteEventSession(get(eventSession, 'id'));
+              eventSessionIds.push(get(eventSession, 'id'));
             }
+          }
+          if (eventSessionIds.length) {
+            await deleteEventSessions(eventSessionIds);
           }
         }
       }

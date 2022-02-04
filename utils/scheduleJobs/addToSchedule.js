@@ -24,13 +24,17 @@ const getScheduleJobAndDelete = async (eventSessionId) => {
 `;
   const scheduleJob = await callLocalGraphqlApi(query);
   if (get(scheduleJob, 'data.scheduleJobs', []).length) {
-    const deleteQuery = `mutation {
-    deleteScheduleJob(id: "${get(get(scheduleJob, 'data.scheduleJobs[0].id'))}") {
-      id
+    let jobIds = '';
+    get(scheduleJob, 'data.scheduleJobs', []).forEach((job) => { jobIds += `"${get(job, 'id')}"`; });
+    if (jobIds) {
+      const deleteQuery = `mutation {
+      deleteScheduleJobs(filter: { id_in: [${jobIds}] }) {
+        id
+      }
     }
-  }
-  `;
-    await callLocalGraphqlApi(deleteQuery);
+    `;
+      await callLocalGraphqlApi(deleteQuery);
+    }
   }
 };
 
