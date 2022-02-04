@@ -85,6 +85,23 @@ const sendEventSessionRemainderMail = (email, sendEmailObject) => {
   });
 };
 
+const addToCommsSendLogs = async ({
+  templateName, triggeredAt, studentProfileId, eventId,
+}) => {
+  const addQuery = `mutation {
+    addCommsSendLog(
+      input: { templateName: "${templateName}", triggeredAt: "${new Date(triggeredAt).toISOString()}" }
+      studentProfileConnectId: "${studentProfileId}"
+      eventConnectId: "${eventId}"
+    ) {
+      id
+    }
+  }
+  `;
+  const result = await callLocalGraphqlApi(addQuery);
+  return get(result, 'data.addCommsSendLog', null);
+};
+
 const scheduleEventSessionRemainder = async () => {
   const eventSessions = await getEventSessions();
   for (const eventSession of eventSessions) {
@@ -102,6 +119,7 @@ const scheduleEventSessionRemainder = async () => {
     const date = moment(dateObject).format('dddd, Do MMMM, YYYY');
     registeredUsers.forEach((registeredUser) => {
       const studentName = get(registeredUser, 'user.name');
+      const studentProfileId = get(registeredUser, 'id');
       const studentGrade = get(registeredUser, 'grade');
       const parents = get(registeredUser, 'parents[0].user');
       const parentEmail = get(parents, 'email');
@@ -178,6 +196,12 @@ const scheduleEventSessionRemainder = async () => {
           parentPhone,
           parameters,
         );
+        addToCommsSendLogs({
+          templateName: 'event_reminder_t_1_hour',
+          triggeredAt: new Date(),
+          eventId,
+          studentProfileId,
+        });
       }
       if (isEmailCommsEnabled) {
         let emailCommsObj = {};
