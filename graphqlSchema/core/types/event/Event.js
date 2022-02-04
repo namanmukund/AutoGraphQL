@@ -100,6 +100,8 @@ const Event = `
     embeds: [EventCertificateEmbed] @relation(name: "EventCertificateEmbedEvent", direction: "OneWay")
     baseCertificate: File @relation(name: "BaseCertificateEvent", direction: "OneWay")
     eventTimeTableRule: BatchTimeTableRule
+    eventStartTime: Date
+    eventEndTime: Date
     eventCommsRule: [EventCommsRule]
     prizes: [EventPrize] @relation(name: "EventPrizeEvent")
     tags: [ContentTag] @relation(name: "ContentTagEvent")

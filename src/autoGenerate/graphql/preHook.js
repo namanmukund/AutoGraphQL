@@ -937,15 +937,15 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       addWeekDayForOneDayEvent(params);
       break;
     }
-    case 'updateEvent': {
-      addWeekDayForOneDayEvent(params);
-      await updateEventValidation(params, input, mutationOrQueryName, context);
-      break;
-    }
-    case 'updateEventSession': {
-      await updateEventSessionValidation(params, input, mutationOrQueryName, context);
-      break;
-    }
+    // case 'updateEvent': {
+    //   addWeekDayForOneDayEvent(params);
+    //   await updateEventValidation(params, input, mutationOrQueryName, context);
+    //   break;
+    // }
+    // case 'updateEventSession': {
+    //   await updateEventSessionValidation(params, input, mutationOrQueryName, context);
+    //   break;
+    // }
     default: {
       /* If context is not present then it means user is not authenticated and the
       user won't be able to make any db query

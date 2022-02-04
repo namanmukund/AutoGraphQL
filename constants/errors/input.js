@@ -219,3 +219,7 @@ export const GradeFieldRequiredError = createError('GradeFieldRequiredError', {
 export const EmailFieldRequiredError = createError('EmailFieldRequiredError', {
   message: 'Email field is mandatory in input',
 });
+
+export const InvalidStartTimeError = createError('InvalidStartTimeError', {
+  message: 'Time has to be 1 hour more than selected start time',
+});

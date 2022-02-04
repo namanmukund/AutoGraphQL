@@ -123,6 +123,7 @@ import {
   CommsError,
   MultipleRegistrationError,
   AlreadyRegisteredForEvent,
+  RegistrationClosedForEvent,
 } from './types';
 import {
   EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
@@ -321,4 +322,5 @@ export {
   SpeakerProfileAlreadyExist,
   MultipleRegistrationError,
   AlreadyRegisteredForEvent,
+  RegistrationClosedForEvent,
 };

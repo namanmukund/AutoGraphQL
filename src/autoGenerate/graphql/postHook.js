@@ -68,6 +68,7 @@ import updateEventPostHookMethod from './postHookFunctions/updateEventPostHookMe
 import addEventPostHookMethod from './postHookFunctions/addEventPostHookMethod';
 import fetchEventPostHookMethod from './postHookFunctions/fetchEventPostHookMethod';
 import updateEventSessionPostHookMethod from './postHookFunctions/updateEventSessionPostHookMethod';
+import addEventSessionPostHookMethod from './postHookFunctions/addEventSessionPostHookMethod';
 
 const posthook = async (input, mutationName, context, params, info) => {
   switch (mutationName) {
@@ -353,18 +354,22 @@ const posthook = async (input, mutationName, context, params, info) => {
       await addEventPostHookMethod(input, params, mutationName, context);
       break;
     }
-    case 'updateEvent': {
-      await updateEventPostHookMethod(input, params, mutationName, context);
-      break;
-    }
+    // case 'updateEvent': {
+    //   await updateEventPostHookMethod(input, params, mutationName, context);
+    //   break;
+    // }
     case 'event': {
       await fetchEventPostHookMethod(input, params, mutationName, context, info);
       break;
     }
-    case 'updateEventSession': {
-      await updateEventSessionPostHookMethod(input, params, mutationName, context, info);
-      break;
-    }
+    // case 'updateEventSession': {
+    //   await updateEventSessionPostHookMethod(input, params, mutationName, context, info);
+    //   break;
+    // }
+    // case 'addEventSession': {
+    //   await addEventSessionPostHookMethod(input, params, mutationName, context, info);
+    //   break;
+    // }
     default:
       break;
   }

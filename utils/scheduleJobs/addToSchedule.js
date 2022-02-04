@@ -14,6 +14,25 @@ import sendMentorVerifyBookingReminder from './jobs/sendMentorVerifyBookingRemin
 import sendEventCommunication from './jobs/sendEventCommunication';
 import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
 
+const getScheduleJobAndDelete = async (eventSessionId) => {
+  const query = `{
+  scheduleJobs(filter: { eventSessionId: "${eventSessionId}" }) {
+    id
+  }
+}
+`;
+  const scheduleJob = await callLocalGraphqlApi(query);
+  if (get(scheduleJob, 'data.scheduleJobs', []).length) {
+    const deleteQuery = `mutation {
+    deleteScheduleJob(id: "${get(get(scheduleJob, 'data.scheduleJobs[0].id'))}") {
+      id
+    }
+  }
+  `;
+    await callLocalGraphqlApi(deleteQuery);
+  }
+};
+
 const addScheduleJob = ({
   jobType,
   userId,
@@ -42,6 +61,7 @@ const addScheduleJob = ({
   attendanceFilter,
   value,
   unit,
+  eventSessionId,
 }) => `
   mutation {
     addScheduleJob(
@@ -72,6 +92,7 @@ const addScheduleJob = ({
         ${attendanceFilter ? `attendanceFilter: ${attendanceFilter}` : ''}
         ${value ? `value: ${value}` : ''}
         ${unit ? `unit: ${unit}` : ''}
+        ${eventSessionId ? `eventSessionId: "${eventSessionId}"` : ''}
       }
       ${userId ? `parentConnectId: "${userId}"` : ''}
     ) {
@@ -107,6 +128,7 @@ const addToSchedule = async (jobType, scheduledDate, {
   studentProfileId,
   eventId,
   eventCommsRule,
+  eventSessionId,
 }) => {
   switch (jobType) {
     case 'sendNextDayBookReminder': {
@@ -397,6 +419,18 @@ const addToSchedule = async (jobType, scheduledDate, {
           templateName: get(eventCommsRule, 'templateName'),
           isEmailRule: get(eventCommsRule, 'isEmailRule', false),
         }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      });
+      break;
+    }
+    case 'eventSessionAttendance': {
+      const res = await callLocalGraphqlApi(addScheduleJob({
+        jobType, eventSessionId, scheduledDate,
+      }));
+      const jobId = get(res, 'data.addScheduleJob.id');
+      schedule.scheduleJob(scheduledDate, () => {
+        // sendMentorVerifyBookingReminder({
+        //   taskId, mentorUserId, jobType,
+        // }, () => callLocalGraphqlApi(deleteJob(jobId)));
       });
       break;
     }

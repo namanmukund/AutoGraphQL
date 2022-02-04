@@ -4,6 +4,7 @@ import {
   TWA,
 } from '../../../../constants';
 import eventsLSQActions from './utils/eventsLSQActions';
+import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
 
 const generateEventCertificate = async (userId, eventId) => {
   const query = `
@@ -45,6 +46,9 @@ const updateEventSessionPostHookMethod = async (input, params, mutationName, con
       eventsLSQActions(eventId, studentProfileId, 'eventCompletion');
     }
   }
+  const { sessionDate, ...slots } = get(params, 'input');
+  const slotsTime = getSelectedSlotsTime(slots);
+  console.log(slotsTime, sessionDate);
   return input;
 };
 
