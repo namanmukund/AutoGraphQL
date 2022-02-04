@@ -124,6 +124,7 @@ import {
   MultipleRegistrationError,
   AlreadyRegisteredForEvent,
   RegistrationClosedForEvent,
+  EventCancelledError,
 } from './types';
 import {
   EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
@@ -323,4 +324,5 @@ export {
   MultipleRegistrationError,
   AlreadyRegisteredForEvent,
   RegistrationClosedForEvent,
+  EventCancelledError,
 };

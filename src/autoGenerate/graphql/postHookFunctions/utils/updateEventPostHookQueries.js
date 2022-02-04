@@ -157,7 +157,7 @@ const createEventSessions = async (eventId, possibleDates, filteredSlots, possib
   return true;
 };
 
-const addUpdateEventSessionsForEvent = async (eventId, timeTableRule, prevTimeTableRule, registeredUsers = [], shouldAddInSession = false) => {
+const addUpdateEventSessionsForEvent = async (eventId, timeTableRule, prevTimeTableRule, newRegisteredUserId, shouldAddInSession = false) => {
   // start, end dates
   if (timeTableRule) {
     const days = getSelectedDays(timeTableRule);
@@ -235,17 +235,15 @@ const addUpdateEventSessionsForEvent = async (eventId, timeTableRule, prevTimeTa
       createEventSessions(eventId, possibleDates, filteredSlotsString, possibleSessionCount);
     }
   }
-  if (registeredUsers.length > 0 && shouldAddInSession) {
+  if (newRegisteredUserId && shouldAddInSession) {
     const eventSessions = await getEventSessionForData(eventId);
     if (eventSessions && eventSessions.length) {
       for (const eventSession of eventSessions) {
         let pushManyQuery = '';
         const alreadyAddedUser = get(eventSession, 'attendance', []).map((attendance) => get(attendance, 'student.id'));
-        registeredUsers.forEach((user) => {
-          if (!alreadyAddedUser.includes(get(user, 'typeId'))) {
-            pushManyQuery += `{studentConnectId: "${get(user, 'typeId')}",},`;
-          }
-        });
+        if (!alreadyAddedUser.includes(newRegisteredUserId)) {
+          pushManyQuery += `{studentConnectId: "${newRegisteredUserId}",},`;
+        }
         if (pushManyQuery) pushManyQuery = `attendance:{ pushMany: [${pushManyQuery}] }`;
         if (get(eventSession, 'id') && pushManyQuery) {
           updateEventSession(get(eventSession, 'id'), '', '', pushManyQuery);

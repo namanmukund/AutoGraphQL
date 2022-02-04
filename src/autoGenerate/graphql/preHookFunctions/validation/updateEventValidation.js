@@ -1,6 +1,9 @@
 import { get } from 'lodash';
 import moment from 'moment';
-import { MultipleRegistrationError, AlreadyRegisteredForEvent, RegistrationClosedForEvent } from '../../../../../constants/errors';
+import {
+  MultipleRegistrationError,
+  AlreadyRegisteredForEvent, RegistrationClosedForEvent, EventCancelledError,
+} from '../../../../../constants/errors';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
@@ -56,8 +59,11 @@ const updateEventValidation = async (params, input, mutationName, context) => {
     const registrationEndTime = moment(eventStartTime).subtract(30, 'minutes');
     const shouldAddInSession = moment().isBetween(moment(eventStartTime).subtract(1, 'hour'), moment(eventStartTime));
     context.shouldAddInSession = shouldAddInSession;
-    if (moment().isAfter(registrationEndTime) || get(eventData, 'status') !== 'published') {
+    if (moment().isAfter(registrationEndTime)) {
       throw new RegistrationClosedForEvent();
+    }
+    if (get(eventData, 'status') !== 'published') {
+      throw new EventCancelledError();
     }
     context.newRegisteredUserId = get(registeredUsersConnectIds, '[0]');
   }

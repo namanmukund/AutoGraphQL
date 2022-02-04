@@ -58,3 +58,7 @@ export const AlreadyRegisteredForEvent = createError('AlreadyRegisteredForEvent'
 export const RegistrationClosedForEvent = createError('RegistrationClosedForEvent', {
   message: 'Registration closed for this event',
 });
+
+export const EventCancelledError = createError('EventCancelledError', {
+  message: 'Event is cancelled',
+});

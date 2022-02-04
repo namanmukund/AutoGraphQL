@@ -13,6 +13,7 @@ import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 import sendMentorVerifyBookingReminder from './jobs/sendMentorVerifyBookingReminder';
 import sendEventCommunication from './jobs/sendEventCommunication';
 import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
+import addStudentToEventSession from './jobs/addStudentsToEventSession';
 
 const getScheduleJobAndDelete = async (eventSessionId) => {
   const query = `{
@@ -129,6 +130,7 @@ const addToSchedule = async (jobType, scheduledDate, {
   eventId,
   eventCommsRule,
   eventSessionId,
+  isUpdatingEventSession = false,
 }) => {
   switch (jobType) {
     case 'sendNextDayBookReminder': {
@@ -423,14 +425,18 @@ const addToSchedule = async (jobType, scheduledDate, {
       break;
     }
     case 'eventSessionAttendance': {
+      if (isUpdatingEventSession) {
+        await getScheduleJobAndDelete(eventSessionId);
+      }
       const res = await callLocalGraphqlApi(addScheduleJob({
         jobType, eventSessionId, scheduledDate,
       }));
       const jobId = get(res, 'data.addScheduleJob.id');
       schedule.scheduleJob(scheduledDate, () => {
-        // sendMentorVerifyBookingReminder({
-        //   taskId, mentorUserId, jobType,
-        // }, () => callLocalGraphqlApi(deleteJob(jobId)));
+        addStudentToEventSession({
+          eventSessionId,
+          jobId,
+        }, () => callLocalGraphqlApi(deleteJob(jobId)));
       });
       break;
     }

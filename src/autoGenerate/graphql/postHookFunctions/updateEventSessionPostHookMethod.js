@@ -4,7 +4,7 @@ import {
   TWA,
 } from '../../../../constants';
 import eventsLSQActions from './utils/eventsLSQActions';
-import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
+import addToSchedule from '../../../../utils/scheduleJobs/addToSchedule';
 
 const generateEventCertificate = async (userId, eventId) => {
   const query = `
@@ -38,7 +38,9 @@ const getUserCertificate = async (userId, eventId) => {
 const updateEventSessionPostHookMethod = async (input, params, mutationName, context) => {
   const {
     currentUserId, eventId, currentApp, studentProfileId,
+    newScheduledDate = false,
   } = context;
+  const { id: eventSessionId } = input;
   if (currentApp === TWA && currentUserId && eventId) {
     const userCertificate = await getUserCertificate(currentUserId, eventId);
     if (!userCertificate) {
@@ -46,9 +48,12 @@ const updateEventSessionPostHookMethod = async (input, params, mutationName, con
       eventsLSQActions(eventId, studentProfileId, 'eventCompletion');
     }
   }
-  const { sessionDate, ...slots } = get(params, 'input');
-  const slotsTime = getSelectedSlotsTime(slots);
-  console.log(slotsTime, sessionDate);
+  if (newScheduledDate) {
+    addToSchedule('eventSessionAttendance', newScheduledDate, {
+      eventSessionId,
+      isUpdatingEventSession: true,
+    });
+  }
   return input;
 };
 
