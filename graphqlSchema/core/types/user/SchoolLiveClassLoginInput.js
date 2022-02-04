@@ -4,4 +4,4 @@ const SchoolLiveClassLoginInput = `
       otp: Int
   }`;
 
-export default SchoolLiveClassLoginInput;
+export default [SchoolLiveClassLoginInput];

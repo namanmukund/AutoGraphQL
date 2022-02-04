@@ -17,7 +17,8 @@ import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import isTrialSession from '../resolvers/utils/isTrialSession';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
-import getRandomNumber from '../../../../utils/getRandomNumber';
+import findSectionAndGradeCombination from './utils/findSectionAndGradeCombination';
+import arrayCombinations from './utils/generateOtpMap';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -192,7 +193,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
 
   // add students to the batch session and mark them absent as default
   if (students && students.length && topicId) {
-    const batchOtpForLiveSession = getRandomNumber(rangeOTP.min, rangeOTP.max);
+    let otpMap = arrayCombinations()
     let pushManyQueryToUpadateOtp = 'schoolSessionOtp: { pushMany: [';
     let pushManyQuery = 'attendance:{ pushMany: [';
     students.forEach((studentElem) => {
@@ -201,9 +202,10 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
                                                isPresent: false, 
                                                }, `;
       }
+      let sectionAndGradeCombination = findSectionAndGradeCombination(studentElem.user.studentProfile.section, studentElem.user.studentProfile.grade)
       pushManyQueryToUpadateOtp += `{grade: "${studentElem.user.studentProfile.grade}",
                                                section: "${studentElem.user.studentProfile.section}",
-                                               otp: "${batchOtpForLiveSession}",
+                                               otp: "${otpMap[sectionAndGradeCombination]}",
                                                batchConnectId: "${batchId}",
                                               },`;
     });
