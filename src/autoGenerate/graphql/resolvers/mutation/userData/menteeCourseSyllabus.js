@@ -130,7 +130,16 @@ const getUserCurrentTopicComponentStatus = (userId, courseId) => `
           order
           topics(
             filter: {
-              status: ${PUBLISHED}
+              and:[
+                {
+                  status:${PUBLISHED}
+                }
+                {
+                  courses_some:{
+                    ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
+                  }
+                }
+              ]
             }
           ){
             id
@@ -242,7 +251,16 @@ const getCourseQuery = (courseId) => `
           order
           topics(
             filter: {
-              status: ${PUBLISHED}
+              and:[
+                {
+                  status:${PUBLISHED}
+                }
+                {
+                  courses_some:{
+                    ${courseId ? `id: "${courseId}"` : `and:[ {status: ${PUBLISHED}}, {title: "${GLOBAL_COURSE_TITLE}"}]`}
+                  }
+                }
+              ]
             }
           ){
             id
@@ -1428,6 +1446,9 @@ const menteeCourseSyllabusMutationResolver = async (
       },
     });
   }
+  if (chapters && chapters.length) {
+    chapters.sort((a, b) => a.order - b.order);
+  }
   // if user belongs to a batch, the syllbaus will be calculated on basis of batchCurrentComponentStatus
   if (batchCurrentComponentInfo) {
     const {
@@ -1446,9 +1467,11 @@ const menteeCourseSyllabusMutationResolver = async (
           },
         });
       }
-      totalTopics += chapter.topics.length;
+      const chapterTopics = chapter.topics;
+      chapterTopics.sort((a, b) => a.order - b.order);
+      totalTopics += chapterTopics.length;
       // iterating over topics of each chapter  and setting isUnlocked field
-      chapter.topics.forEach((topic) => {
+      chapterTopics.forEach((topic) => {
         const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
         if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
         if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
@@ -1473,84 +1496,77 @@ const menteeCourseSyllabusMutationResolver = async (
         if (
           topicOrder >= lastTopicBookedOrder
         ) {
-          let isUpcomingSession = true;
-          if (batchSessions && batchSessions.length) {
-            batchSessions.forEach((batchSession) => {
-              let slotTime = null;
-              const {
-                bookingDate,
-                mentorSession,
-                sessionEndDate,
-              } = batchSession;
-              const {
-                order: batchSessionTopicOrder,
-                id: batchSessionTopicId,
-                title: batchSessionTopicTitle,
-                description: batchSessionTopicDescription,
-                thumbnail: batchSessionTopicThumbnail,
-                thumbnailSmall: batchSessionTopicThumbnailSmall,
-                isTrial: batchSessionIsTrial,
-              } = batchSession.topic;
+          const batchSessionArray = batchSessions && batchSessions.filter((item) => item.topic && item.topic.id === topicId);
 
-              const isBatchTopicAccessible = isTopicAccessible(combinedEnrollmentType, batchSessionIsTrial);
-              slotTimes.forEach((time, index) => {
-                if (batchSession[time]) {
-                  slotTime = index;
-                }
-              });
-              // checking logic if topic is already consumed or yet to be watched
-              if (
-                topicId === batchSessionTopicId
-              ) {
-                if (topicOrder === lastTopicBookedOrder && lastTopicSessionStatus === sessionStatus.completed) {
-                  const completedMenteeSession = {
-                    topicId,
-                    topicOrder,
-                    topicTitle,
-                    topicThumbnail,
-                    topicThumbnailSmall,
-                    topicDescription,
-                    isAccessible,
-                    chapterId,
-                    chapterTitle,
-                    chapterOrder,
-                    endingDate: sessionEndDate,
-                    mentorId: mentorSession && mentorSession.user && mentorSession.user.id,
-                    mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
-                    mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
-                  };
-                  completedSession.push(completedMenteeSession);
-                  isUpcomingSession = false;
-                } else {
-                  const bookedMenteeSession = {
-                    topicId: batchSessionTopicId,
-                    topicOrder: batchSessionTopicOrder,
-                    topicTitle: batchSessionTopicTitle,
-                    topicThumbnail: batchSessionTopicThumbnail,
-                    topicThumbnailSmall: batchSessionTopicThumbnailSmall,
-                    topicDescription: batchSessionTopicDescription,
-                    bookingDate,
-                    slotTime,
-                    isAccessible: isBatchTopicAccessible,
-                    chapterId,
-                    chapterTitle,
-                    chapterOrder,
-                  };
-                  if (get(mentorSession, 'user')) {
-                    mentorData = getMentorData(get(mentorSession, 'user'));
-                  }
-                  if (bookedSession.length) {
-                    upComingSession.push(bookedMenteeSession);
-                  } else {
-                    bookedSession.push(bookedMenteeSession);
-                  }
-                  isUpcomingSession = false;
-                }
+          if (batchSessionArray && batchSessionArray.length) {
+            const batchSession = batchSessionArray[0];
+            let slotTime = null;
+            const {
+              bookingDate,
+              mentorSession,
+              sessionEndDate,
+            } = batchSession;
+            const {
+              order: batchSessionTopicOrder,
+              id: batchSessionTopicId,
+              title: batchSessionTopicTitle,
+              description: batchSessionTopicDescription,
+              thumbnail: batchSessionTopicThumbnail,
+              thumbnailSmall: batchSessionTopicThumbnailSmall,
+              isTrial: batchSessionIsTrial,
+            } = batchSession.topic;
+
+            const isBatchTopicAccessible = isTopicAccessible(combinedEnrollmentType, batchSessionIsTrial);
+
+            slotTimes.forEach((time, index) => {
+              if (batchSession[time]) {
+                slotTime = index;
               }
             });
-          }
-
-          if (isUpcomingSession) {
+            // checking logic if topic is already consumed or yet to be watched
+            if (topicOrder === lastTopicBookedOrder && lastTopicSessionStatus === sessionStatus.completed) {
+              const completedMenteeSession = {
+                topicId,
+                topicOrder,
+                topicTitle,
+                topicThumbnail,
+                topicThumbnailSmall,
+                topicDescription,
+                isAccessible,
+                chapterId,
+                chapterTitle,
+                chapterOrder,
+                endingDate: sessionEndDate,
+                mentorId: mentorSession && mentorSession.user && mentorSession.user.id,
+                mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
+                mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
+              };
+              completedSession.push(completedMenteeSession);
+            } else {
+              const bookedMenteeSession = {
+                topicId: batchSessionTopicId,
+                topicOrder: batchSessionTopicOrder,
+                topicTitle: batchSessionTopicTitle,
+                topicThumbnail: batchSessionTopicThumbnail,
+                topicThumbnailSmall: batchSessionTopicThumbnailSmall,
+                topicDescription: batchSessionTopicDescription,
+                bookingDate,
+                slotTime,
+                isAccessible: isBatchTopicAccessible,
+                chapterId,
+                chapterTitle,
+                chapterOrder,
+              };
+              if (get(mentorSession, 'user')) {
+                mentorData = getMentorData(get(mentorSession, 'user'));
+              }
+              if (bookedSession.length) {
+                upComingSession.push(bookedMenteeSession);
+              } else {
+                bookedSession.push(bookedMenteeSession);
+              }
+            }
+          } else {
             const upComingMenteeSession = {
               topicId,
               topicOrder,
@@ -1563,22 +1579,12 @@ const menteeCourseSyllabusMutationResolver = async (
               chapterTitle,
               chapterOrder,
             };
-            upComingSession.push(upComingMenteeSession);
+            if (bookedSession.length) {
+              upComingSession.push(upComingMenteeSession);
+            } else {
+              bookedSession.push(upComingMenteeSession);
+            }
           }
-
-          // const upComingMenteeSession = {
-          //   topicId,
-          //   topicOrder,
-          //   topicTitle,
-          //   topicThumbnail,
-          //   topicThumbnailSmall,
-          //   topicDescription,
-          //   isAccessible,
-          //   chapterId,
-          //   chapterTitle,
-          //   chapterOrder,
-          // };
-          // upComingSession.push(upComingMenteeSession);
         } else {
           let mentorSession;
           let sessionDate;
@@ -1590,7 +1596,6 @@ const menteeCourseSyllabusMutationResolver = async (
               sessionDate = mentorMenteeSession.sessionEndDate || mentorMenteeSession.sessionStartDate;
             }
           });
-
           const completedMenteeSession = {
             topicId,
             topicOrder,
@@ -1727,9 +1732,11 @@ const menteeCourseSyllabusMutationResolver = async (
           },
         });
       }
-      totalTopics += chapter.topics.length;
+      const chapterTopics = chapter.topics;
+      chapterTopics.sort((a, b) => a.order - b.order);
+      totalTopics += chapterTopics.length;
       // iterating over topics of each chapter  and setting isUnlocked field
-      chapter.topics.forEach((topic) => {
+      chapterTopics.forEach((topic) => {
         const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
         if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
         if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;

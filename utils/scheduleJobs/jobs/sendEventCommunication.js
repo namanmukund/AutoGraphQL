@@ -11,6 +11,23 @@ import sendEmail from '../../../services/email/utils/sendEmail';
 import getIntlDateTime from '../../timeZoneDiff';
 import getSelectedSlotsStringArray from '../../../src/autoGenerate/graphql/postHookFunctions/utils/getSelectedSlotsStringArray';
 
+const addToCommsSendLogs = async ({
+  templateName, triggeredAt, studentProfileId, eventId,
+}) => {
+  const addQuery = `mutation {
+    addCommsSendLog(
+      input: { templateName: "${templateName}", triggeredAt: "${new Date(triggeredAt).toISOString()}" }
+      studentProfileConnectId: "${studentProfileId}"
+      eventConnectId: "${eventId}"
+    ) {
+      id
+    }
+  }
+  `;
+  const result = await callLocalGraphqlApi(addQuery);
+  return get(result, 'data.addCommsSendLog', null);
+};
+
 const eventQuery = (id) => `{
   event(id: "${id}") {
     id
@@ -195,6 +212,7 @@ const sendEventCommunication = async ({
   if (condition === 'before') {
     for (const registeredUser of registeredUsers) {
       const parent = get(registeredUser, 'parents[0].user');
+      const studentProfileId = get(registeredUser, 'id');
       const commsObj = {
         studentName: get(registeredUser, 'user.name'),
         parentName: get(parent, 'name'),
@@ -231,6 +249,9 @@ const sendEventCommunication = async ({
         newPhoneNumber,
         whatsappCommsVariablesList,
       );
+      addToCommsSendLogs({
+        templateName, triggeredAt: new Date(), eventId, studentProfileId,
+      });
       if (toSendEmailComms) {
         sendEmailCommsForUpdatedEvents(parentEmail,
           templateName,
@@ -243,6 +264,7 @@ const sendEventCommunication = async ({
     if (attendanceFilter === 'allUser') {
       registeredUsers.forEach((registeredUser) => {
         const parent = get(registeredUser, 'parents[0].user');
+        const studentProfileId = get(registeredUser, 'id');
         const commsObj = {
           studentName: get(registeredUser, 'user.name'),
           parentName: get(parent, 'name'),
@@ -260,7 +282,7 @@ const sendEventCommunication = async ({
           address,
           summary,
           eventRegistrationLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
-          eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}?certificate=true`
+          eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`
         };
         const whatsappCommsVariablesList = commsVariables.map((commsVariable) => (
           {
@@ -279,6 +301,9 @@ const sendEventCommunication = async ({
           newPhoneNumber,
           whatsappCommsVariablesList,
         );
+        addToCommsSendLogs({
+          templateName, triggeredAt: new Date(), eventId, studentProfileId,
+        });
         if (toSendEmailComms) {
           sendEmailTemplateMessage(parentEmail, 'EventComplete', emailCommsVariableObject, 'Tekie Event Remainder');
         }
@@ -310,6 +335,7 @@ const sendEventCommunication = async ({
       }
       commsReceivers.forEach((receiver) => {
         const parent = get(receiver, 'student.parents[0].user');
+        const studentProfileId = get(receiver, 'student.id');
         const commsObj = {
           studentName: get(receiver, 'student.user.name'),
           parentName: get(parent, 'name'),
@@ -346,6 +372,9 @@ const sendEventCommunication = async ({
           newPhoneNumber,
           whatsappCommsVariablesList,
         );
+        addToCommsSendLogs({
+          templateName, triggeredAt: new Date(), eventId, studentProfileId,
+        });
         if (toSendEmailComms) {
           sendEmailTemplateMessage(parentEmail, 'EventComplete', emailCommsVariableObject, 'Tekie Event Remainder');
         }

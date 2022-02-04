@@ -39,6 +39,7 @@ const BATCH_SESSION = (batchSessionId) => `{
               user {
                 id
                 name
+                email
                 phone {
                   countryCode
                   number
