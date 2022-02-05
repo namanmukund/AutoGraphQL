@@ -88,9 +88,6 @@ const deleteEventSessions = async (eventSessionIds = []) => {
     deleteEventSession(id:"${sessionId}") {
       id
     }
-    deleteScheduleJobs(filter: { eventSessionId: "${sessionId}" }) {
-      id
-    }
   }
   `;
     log(`deleted eventSession with Id ${sessionId}`);
@@ -244,22 +241,22 @@ const addUpdateEventSessionsForEvent = async (eventId, timeTableRule, prevTimeTa
       createEventSessions(eventId, possibleDates, filteredSlotsString, possibleSessionCount);
     }
   }
-  if (newRegisteredUserId && shouldAddInSession) {
-    const eventSessions = await getEventSessionForData(eventId);
-    if (eventSessions && eventSessions.length) {
-      for (const eventSession of eventSessions) {
-        let pushManyQuery = '';
-        const alreadyAddedUser = get(eventSession, 'attendance', []).map((attendance) => get(attendance, 'student.id'));
-        if (!alreadyAddedUser.includes(newRegisteredUserId)) {
-          pushManyQuery += `{studentConnectId: "${newRegisteredUserId}",},`;
-        }
-        if (pushManyQuery) pushManyQuery = `attendance:{ pushMany: [${pushManyQuery}] }`;
-        if (get(eventSession, 'id') && pushManyQuery) {
-          updateEventSession(get(eventSession, 'id'), '', '', pushManyQuery);
-        }
-      }
-    }
-  }
+  // if (newRegisteredUserId && shouldAddInSession) {
+  //   const eventSessions = await getEventSessionForData(eventId);
+  //   if (eventSessions && eventSessions.length) {
+  //     for (const eventSession of eventSessions) {
+  //       let pushManyQuery = '';
+  //       const alreadyAddedUser = get(eventSession, 'attendance', []).map((attendance) => get(attendance, 'student.id'));
+  //       if (!alreadyAddedUser.includes(newRegisteredUserId)) {
+  //         pushManyQuery += `{studentConnectId: "${newRegisteredUserId}",},`;
+  //       }
+  //       if (pushManyQuery) pushManyQuery = `attendance:{ pushMany: [${pushManyQuery}] }`;
+  //       if (get(eventSession, 'id') && pushManyQuery) {
+  //         updateEventSession(get(eventSession, 'id'), '', '', pushManyQuery);
+  //       }
+  //     }
+  //   }
+  // }
 };
 
 export {

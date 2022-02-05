@@ -18,10 +18,10 @@ const addWeekDayForOneDayEvent = (params) => {
     const { startDate, endDate, ...slots } = eventTimeTableRule;
     const slotsTime = getSelectedSlotsTime(slots);
     validateBookingDate(startDate, slotsTime, 0);
-    if (moment().add(TIME_BEFORE_EVENT_CREATION, 'hour').isAfter(moment(startDate).set('hours', get(slotsTime, '[0]')).toISOString())) {
-      throw new InvalidStartTimeError();
-    }
     if (slotsTime.length) {
+      if (moment().add(TIME_BEFORE_EVENT_CREATION, 'hour').isAfter(moment(startDate).set('hours', get(slotsTime, '[0]')).toISOString())) {
+        throw new InvalidStartTimeError();
+      }
       Object.assign(params.input, {
         eventStartTime: moment(startDate).set('hours', get(slotsTime, '[0]')).toISOString(),
         eventEndTime: moment(endDate).set('hours', get(slotsTime, '[0]', 0) + 1).toISOString(),

@@ -8,10 +8,12 @@ import CommsVariable from './CommsVariable';
 import EventTicket from './EventTicket';
 import EventWinner from './EventWinner';
 import CommsSendLog from './CommsSendLog';
+import EventAttendanceInput from './EventAttendanceInput';
 
 export default [
   ...Event,
   ...EventCategory, ...EventJoinReason, ...EventPrize, ...EventSession,
   ...EventSpeakerProfile, ...CommsVariable,
   ...EventTicket, ...EventWinner, ...CommsSendLog,
+  ...EventAttendanceInput,
 ];

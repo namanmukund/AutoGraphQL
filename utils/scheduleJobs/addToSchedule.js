@@ -13,30 +13,30 @@ import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 import sendMentorVerifyBookingReminder from './jobs/sendMentorVerifyBookingReminder';
 import sendEventCommunication from './jobs/sendEventCommunication';
 import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
-import addStudentToEventSession from './jobs/addStudentsToEventSession';
+// import addStudentToEventSession from './jobs/addStudentsToEventSession';
 
-const getScheduleJobAndDelete = async (eventSessionId) => {
-  const query = `{
-  scheduleJobs(filter: { eventSessionId: "${eventSessionId}" }) {
-    id
-  }
-}
-`;
-  const scheduleJob = await callLocalGraphqlApi(query);
-  if (get(scheduleJob, 'data.scheduleJobs', []).length) {
-    let jobIds = '';
-    get(scheduleJob, 'data.scheduleJobs', []).forEach((job) => { jobIds += `"${get(job, 'id')}"`; });
-    if (jobIds) {
-      const deleteQuery = `mutation {
-      deleteScheduleJobs(filter: { id_in: [${jobIds}] }) {
-        id
-      }
-    }
-    `;
-      await callLocalGraphqlApi(deleteQuery);
-    }
-  }
-};
+// const getScheduleJobAndDelete = async (eventSessionId) => {
+//   const query = `{
+//   scheduleJobs(filter: { eventSessionId: "${eventSessionId}" }) {
+//     id
+//   }
+// }
+// `;
+//   const scheduleJob = await callLocalGraphqlApi(query);
+//   if (get(scheduleJob, 'data.scheduleJobs', []).length) {
+//     let jobIds = '';
+//     get(scheduleJob, 'data.scheduleJobs', []).forEach((job) => { jobIds += `"${get(job, 'id')}"`; });
+//     if (jobIds) {
+//       const deleteQuery = `mutation {
+//       deleteScheduleJobs(filter: { id_in: [${jobIds}] }) {
+//         id
+//       }
+//     }
+//     `;
+//       await callLocalGraphqlApi(deleteQuery);
+//     }
+//   }
+// };
 
 const addScheduleJob = ({
   jobType,
@@ -133,8 +133,6 @@ const addToSchedule = async (jobType, scheduledDate, {
   studentProfileId,
   eventId,
   eventCommsRule,
-  eventSessionId,
-  isUpdatingEventSession = false,
 }) => {
   switch (jobType) {
     case 'sendNextDayBookReminder': {
@@ -428,22 +426,22 @@ const addToSchedule = async (jobType, scheduledDate, {
       });
       break;
     }
-    case 'eventSessionAttendance': {
-      if (isUpdatingEventSession) {
-        await getScheduleJobAndDelete(eventSessionId);
-      }
-      const res = await callLocalGraphqlApi(addScheduleJob({
-        jobType, eventSessionId, scheduledDate,
-      }));
-      const jobId = get(res, 'data.addScheduleJob.id');
-      schedule.scheduleJob(scheduledDate, () => {
-        addStudentToEventSession({
-          eventSessionId,
-          jobId,
-        }, () => callLocalGraphqlApi(deleteJob(jobId)));
-      });
-      break;
-    }
+    // case 'eventSessionAttendance': {
+    //   if (isUpdatingEventSession) {
+    //     await getScheduleJobAndDelete(eventSessionId);
+    //   }
+    //   const res = await callLocalGraphqlApi(addScheduleJob({
+    //     jobType, eventSessionId, scheduledDate,
+    //   }));
+    //   const jobId = get(res, 'data.addScheduleJob.id');
+    //   schedule.scheduleJob(scheduledDate, () => {
+    //     addStudentToEventSession({
+    //       eventSessionId,
+    //       jobId,
+    //     }, () => callLocalGraphqlApi(deleteJob(jobId)));
+    //   });
+    //   break;
+    // }
     default:
       break;
   }

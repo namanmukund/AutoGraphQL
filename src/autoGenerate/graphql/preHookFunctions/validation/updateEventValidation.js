@@ -57,8 +57,8 @@ const updateEventValidation = async (params, input, mutationName, context) => {
     }
     const { eventStartTime } = eventData;
     const registrationEndTime = moment(eventStartTime).subtract(30, 'minutes');
-    const shouldAddInSession = moment().isBetween(moment(eventStartTime).subtract(1, 'hour'), moment(eventStartTime));
-    context.shouldAddInSession = shouldAddInSession;
+    // const shouldAddInSession = moment().isBetween(moment(eventStartTime).subtract(1, 'hour'), moment(eventStartTime));
+    // context.shouldAddInSession = shouldAddInSession;
     if (moment().isAfter(registrationEndTime)) {
       throw new RegistrationClosedForEvent();
     }

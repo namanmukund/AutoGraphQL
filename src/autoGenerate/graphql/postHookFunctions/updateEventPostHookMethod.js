@@ -33,7 +33,7 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
   const isEventRescheduled = (get(prevTimeTableRule, 'startDate') && !moment(get(timeTableRule, 'startDate')).isSame(moment(get(prevTimeTableRule, 'startDate'))))
     || (get(prevTimeTableRule, 'endDate') && !moment(get(timeTableRule, 'endDate')).isSame(moment(get(prevTimeTableRule, 'endDate'))))
     || (slotsTime.length && get(context, 'prevSlotTimes').length && slotsTime[0] !== get(context, 'prevSlotTimes')[0]);
-  addUpdateEventSessionsForEvent(eventId, timeTableRule, prevTimeTableRule, get(context, 'newRegisteredUserId'), shouldAddInSession);
+  addUpdateEventSessionsForEvent(eventId, timeTableRule, prevTimeTableRule, get(context, 'newRegisteredUserId'));
   if (isEventRescheduled) {
     if (shouldSendRescheduledComms) {
       sendCommsForUpdatedEvents(eventId, eventRescheduledReason, 'rescheduled');

@@ -67,8 +67,8 @@ import updateTaskPostHookMethod from './postHookFunctions/updateTaskPostHookMeth
 import updateEventPostHookMethod from './postHookFunctions/updateEventPostHookMethod';
 import addEventPostHookMethod from './postHookFunctions/addEventPostHookMethod';
 import fetchEventPostHookMethod from './postHookFunctions/fetchEventPostHookMethod';
-import updateEventSessionPostHookMethod from './postHookFunctions/updateEventSessionPostHookMethod';
-import addEventSessionPostHookMethod from './postHookFunctions/addEventSessionPostHookMethod';
+// import updateEventSessionPostHookMethod from './postHookFunctions/updateEventSessionPostHookMethod';
+// import addEventSessionPostHookMethod from './postHookFunctions/addEventSessionPostHookMethod';
 
 const posthook = async (input, mutationName, context, params, info) => {
   switch (mutationName) {
@@ -362,14 +362,14 @@ const posthook = async (input, mutationName, context, params, info) => {
       await fetchEventPostHookMethod(input, params, mutationName, context, info);
       break;
     }
-    case 'updateEventSession': {
-      await updateEventSessionPostHookMethod(input, params, mutationName, context, info);
-      break;
-    }
-    case 'addEventSession': {
-      await addEventSessionPostHookMethod(input, params, mutationName, context, info);
-      break;
-    }
+    // case 'updateEventSession': {
+    //   await updateEventSessionPostHookMethod(input, params, mutationName, context, info);
+    //   break;
+    // }
+    // case 'addEventSession': {
+    //   await addEventSessionPostHookMethod(input, params, mutationName, context, info);
+    //   break;
+    // }
     default:
       break;
   }

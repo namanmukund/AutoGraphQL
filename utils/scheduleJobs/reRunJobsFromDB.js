@@ -14,7 +14,7 @@ import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 import scheduleB2BSessionHomeworkRemainder from './scheduleB2BSessionHomeworkRemainder';
 import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
 import sendEventCommunication from './jobs/sendEventCommunication';
-import addStudentToEventSession from './jobs/addStudentsToEventSession';
+// import addStudentToEventSession from './jobs/addStudentsToEventSession';
 
 const FETCH_JOBS = `{
   scheduleJobs {
@@ -52,7 +52,6 @@ const FETCH_JOBS = `{
     attendanceFilter
     unit
     value
-    eventSessionId
   }
 }`;
 
@@ -97,7 +96,6 @@ const reRunJobsFromDB = async () => {
       attendanceFilter,
       unit,
       value,
-      eventSessionId,
     } = scheduledJob;
     const deleteJob = () => callLocalGraphqlApi(deleteJobQuery(id));
     const isPast = moment().isAfter(scheduledDate);
@@ -306,22 +304,22 @@ const reRunJobsFromDB = async () => {
         }
         break;
       }
-      case 'eventSessionAttendance': {
-        if (isPast) {
-          addStudentToEventSession({
-            eventSessionId,
-            jobId: id,
-          }, deleteJob);
-        } else {
-          schedule.scheduleJob(new Date(scheduledDate), () => {
-            addStudentToEventSession({
-              eventSessionId,
-              jobId: id,
-            }, deleteJob);
-          });
-        }
-        break;
-      }
+      // case 'eventSessionAttendance': {
+      //   if (isPast) {
+      //     addStudentToEventSession({
+      //       eventSessionId,
+      //       jobId: id,
+      //     }, deleteJob);
+      //   } else {
+      //     schedule.scheduleJob(new Date(scheduledDate), () => {
+      //       addStudentToEventSession({
+      //         eventSessionId,
+      //         jobId: id,
+      //       }, deleteJob);
+      //     });
+      //   }
+      //   break;
+      // }
       default:
         break;
     }
