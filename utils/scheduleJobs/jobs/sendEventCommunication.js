@@ -381,10 +381,12 @@ const sendEventCommunication = async ({
       });
     }
   }
-  newEventsCommsRule.push({
-    ...filteredCommsRule,
-    isSend: true,
-  });
+  if (filteredCommsRule) {
+    newEventsCommsRule.push({
+      ...filteredCommsRule,
+      isSend: true,
+    });
+  }
   const variable = { input: { eventCommsRule: { replace: newEventsCommsRule } } };
   // eslint-disable-next-line no-await-in-loop
   await updateCommsRuleStatus(eventId, variable);

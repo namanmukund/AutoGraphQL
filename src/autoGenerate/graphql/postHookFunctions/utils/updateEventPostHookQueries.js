@@ -12,6 +12,29 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from '../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import getSelectedDays from './getSelectedDays';
 
+const getEventSessionForData = async (eventId) => {
+  const query = `
+    {
+      eventSessions(filter: {
+      and: [
+        { event_some: { id: "${eventId}" } }
+        { sessionDate: "${moment().startOf('day').toISOString()}" }
+      ]
+    }, orderBy:sessionDate_ASC){
+        id
+        sessionDate
+        attendance{
+          student{
+            id
+          }
+        }
+      }
+    }
+    `;
+  const eventSessions = await callLocalGraphqlApi(query);
+  return get(eventSessions, 'data.eventSessions', []);
+};
+
 // query to get eventSessions
 const getEventSessions = async (eventId, sessionDatesFilter, fetchAttendance = false) => {
   const query = `
@@ -59,15 +82,17 @@ const createEventSession = async (eventId, date, slots) => {
   return true;
 };
 
-const deleteEventSession = async (eventSessionId) => {
-  const deleteQuery = `mutation {
-  deleteEventSession(id: "${eventSessionId}") {
-    id
+const deleteEventSessions = async (eventSessionIds = []) => {
+  eventSessionIds.forEach((sessionId) => {
+    const deleteQuery = `mutation {
+    deleteEventSession(id:"${sessionId}") {
+      id
+    }
   }
-}
-`;
-  log(`deleted eventSession with Id ${eventSessionId}`);
-  await callLocalGraphqlApi(deleteQuery);
+  `;
+    log(`deleted eventSession with Id ${sessionId}`);
+    callLocalGraphqlApi(deleteQuery);
+  });
 };
 
 const updateEventSession = async (sessionId, slots, date, pushManyQuery = '') => {
@@ -134,7 +159,7 @@ const createEventSessions = async (eventId, possibleDates, filteredSlots, possib
   return true;
 };
 
-const addUpdateEventSessionsForEvent = async (eventId, timeTableRule, prevTimeTableRule, registeredUsers = []) => {
+const addUpdateEventSessionsForEvent = async (eventId, timeTableRule, prevTimeTableRule, newRegisteredUserId, shouldAddInSession = false) => {
   // start, end dates
   if (timeTableRule) {
     const days = getSelectedDays(timeTableRule);
@@ -174,10 +199,14 @@ const addUpdateEventSessionsForEvent = async (eventId, timeTableRule, prevTimeTa
       if (sessionDatesFilter) {
         const eventSessions = await getEventSessions(eventId, sessionDatesFilter);
         if (eventSessions && eventSessions.length > 0) {
+          const eventSessionIds = [];
           for (const eventSession of eventSessions) {
             if (get(eventSession, 'id')) {
-              await deleteEventSession(get(eventSession, 'id'));
+              eventSessionIds.push(get(eventSession, 'id'));
             }
+          }
+          if (eventSessionIds.length) {
+            await deleteEventSessions(eventSessionIds);
           }
         }
       }
@@ -200,39 +229,34 @@ const addUpdateEventSessionsForEvent = async (eventId, timeTableRule, prevTimeTa
       const allottedSessionsCount = sessionsAllotted.length;
       if (allottedSessionsCount > 0) {
         possibleSessionCount -= allottedSessionsCount;
-        await updateExistingEventSessions(sessionsAllotted, possibleDates, filteredSlotsString);
+        updateExistingEventSessions(sessionsAllotted, possibleDates, filteredSlotsString);
       }
       if (possibleSessionCount > 0) {
         // all the remaining sessions have to be created
-        await createEventSessions(eventId, possibleDates, filteredSlotsString, possibleSessionCount);
+        createEventSessions(eventId, possibleDates, filteredSlotsString, possibleSessionCount);
       }
     } else {
       // if there are no exisiting eventSessions for the given event id, create all of them
       const possibleSessionCount = possibleDates.length;
-      await createEventSessions(eventId, possibleDates, filteredSlotsString, possibleSessionCount);
+      createEventSessions(eventId, possibleDates, filteredSlotsString, possibleSessionCount);
     }
   }
-  if (registeredUsers.length > 0) {
-    const eventSessions = await getEventSessions(eventId, '', true);
-    if (eventSessions && eventSessions.length) {
-      const {
-        sessionsAllotted,
-      } = sortEventSessions(eventSessions);
-      for (const eventSession of sessionsAllotted) {
-        let pushManyQuery = '';
-        const alreadyAddedUser = get(eventSession, 'attendance', []).map((attendance) => get(attendance, 'student.id'));
-        registeredUsers.forEach((user) => {
-          if (!alreadyAddedUser.includes(get(user, 'typeId'))) {
-            pushManyQuery += `{studentConnectId: "${get(user, 'typeId')}",},`;
-          }
-        });
-        if (pushManyQuery) pushManyQuery = `attendance:{ pushMany: [${pushManyQuery}] }`;
-        if (get(eventSession, 'id') && pushManyQuery) {
-          updateEventSession(get(eventSession, 'id'), '', '', pushManyQuery);
-        }
-      }
-    }
-  }
+  // if (newRegisteredUserId && shouldAddInSession) {
+  //   const eventSessions = await getEventSessionForData(eventId);
+  //   if (eventSessions && eventSessions.length) {
+  //     for (const eventSession of eventSessions) {
+  //       let pushManyQuery = '';
+  //       const alreadyAddedUser = get(eventSession, 'attendance', []).map((attendance) => get(attendance, 'student.id'));
+  //       if (!alreadyAddedUser.includes(newRegisteredUserId)) {
+  //         pushManyQuery += `{studentConnectId: "${newRegisteredUserId}",},`;
+  //       }
+  //       if (pushManyQuery) pushManyQuery = `attendance:{ pushMany: [${pushManyQuery}] }`;
+  //       if (get(eventSession, 'id') && pushManyQuery) {
+  //         updateEventSession(get(eventSession, 'id'), '', '', pushManyQuery);
+  //       }
+  //     }
+  //   }
+  // }
 };
 
 export {

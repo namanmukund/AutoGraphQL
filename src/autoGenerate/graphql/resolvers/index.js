@@ -104,6 +104,7 @@ import resetPasswordAndLogin from './mutation/methods/resetPasswordAndLogin';
 import getEventSpeaker from './query/methods/getEventSpeaker';
 import generateMentorChild from './mutation/methods/generateMentorChild';
 import getEventWinner from './query/methods/getEventWinner';
+import updateEventSessionAttendance from './mutation/methods/updateEventSessionAttendance';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -633,6 +634,7 @@ resolvers.Mutation.generateCertificateInBulk = generateCertificateInBulk;
 resolvers.Mutation.validateMagicLink = validateMagicLink;
 resolvers.Mutation.resetPasswordAndLogin = resetPasswordAndLogin;
 resolvers.Mutation.generateMentorChild = generateMentorChild;
+resolvers.Mutation.updateEventSessionAttendance = updateEventSessionAttendance;
 
 // queries
 resolvers.Query.me = me;
