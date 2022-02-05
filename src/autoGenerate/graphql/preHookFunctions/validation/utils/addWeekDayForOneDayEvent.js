@@ -2,6 +2,7 @@ import { get } from 'lodash';
 import moment from 'moment';
 import { TIME_BEFORE_EVENT_CREATION, weekDays } from '../../../../../../constants';
 import { InvalidStartTimeError } from '../../../../../../constants/errors/input';
+import { SlotsInvalidError } from '../../../../../../constants/errors';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
 import validateBookingDate from './validateBookingDate';
 
@@ -18,6 +19,7 @@ const addWeekDayForOneDayEvent = (params) => {
     const { startDate, endDate, ...slots } = eventTimeTableRule;
     const slotsTime = getSelectedSlotsTime(slots);
     validateBookingDate(startDate, slotsTime, 0);
+    if (!slotsTime.length) throw new SlotsInvalidError();
     if (slotsTime.length) {
       if (moment().add(TIME_BEFORE_EVENT_CREATION, 'hour').isAfter(moment(startDate).set('hours', get(slotsTime, '[0]')).toISOString())) {
         throw new InvalidStartTimeError();
