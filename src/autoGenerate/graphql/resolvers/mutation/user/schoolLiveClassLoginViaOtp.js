@@ -16,7 +16,7 @@ const getStudentClassDetails = async (otp) => {
     batchSessions(filter:{and:[
       {
         schoolSessionsOtp_some:{
-          otp:"${otp}"
+          otp:${otp}
         }
       }
     ]}){
@@ -76,7 +76,7 @@ const signupOrLoginViaOtp = async (
   const studentDetails = await getStudentClassDetails(otp);
   // if !studentdetails return false
   if (!studentDetails) {
-    throw new Error(OTPMismatchError());
+    throw new OTPMismatchError();
   }
   const grade = get(studentDetails, "grade");
   const section = get(studentDetails, "section");

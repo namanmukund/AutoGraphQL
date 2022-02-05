@@ -7,7 +7,7 @@ import checkIfOtpPresent from "./checkIfOtpPresent";
 const finalOtp = (otpMap) => {
     let otp = getRandomNumber(rangeOTP.min, rangeOTP.max)
     let alreadyExists = checkIfOtpPresent(otp)
-    if (!otpMap[otp] && !alreadyExists) {
+    if (!Object.values(otpMap).includes(otp) && !alreadyExists) {
         return otp
     }
     return finalOtp(otpMap)

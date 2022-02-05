@@ -6,7 +6,7 @@ const checkIfOtpPresent = async (otp) => {
       batchSessions(filter:{and:[
         {
           schoolSessionsOtp_some:{
-            otp:"${otp}"
+            otp:${otp}
           }
         }
       ]}){
