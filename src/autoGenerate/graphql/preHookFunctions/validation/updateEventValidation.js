@@ -57,13 +57,11 @@ const updateEventValidation = async (params, input, mutationName, context) => {
     }
     const { eventStartTime } = eventData;
     const registrationEndTime = moment(eventStartTime).subtract(30, 'minutes');
-    // const shouldAddInSession = moment().isBetween(moment(eventStartTime).subtract(1, 'hour'), moment(eventStartTime));
-    // context.shouldAddInSession = shouldAddInSession;
-    if (moment().isAfter(registrationEndTime)) {
-      throw new RegistrationClosedForEvent();
-    }
     if (get(eventData, 'status') !== 'published') {
       throw new EventCancelledError();
+    }
+    if (moment().isAfter(registrationEndTime)) {
+      throw new RegistrationClosedForEvent();
     }
     context.newRegisteredUserId = get(registeredUsersConnectIds, '[0]');
   }
