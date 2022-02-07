@@ -21,8 +21,8 @@ db.on('error', (err) => {
 }).once('open', async () => {
   log('Connected to DB.');
   // temp config for pre-prod testing
-  createScheduler('eventSessionRemainder');
-  reRunJobsFromDB();
+  // createScheduler('eventSessionRemainder');
+  // reRunJobsFromDB();
   if (
     process.env.NODE_ENV === 'production'
     && process.env.IS_SCHEDULER_INSTANCE
