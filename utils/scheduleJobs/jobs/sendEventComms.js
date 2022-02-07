@@ -132,9 +132,7 @@ const sendEventComms = async () => {
   for (const rule of eventsCommsRule) {
     if (get(rule, 'isSend')) return;
     if (get(rule, 'condition') === 'before') {
-      if (moment(get(event, 'date')).toNow().includes(` in ${rule.value} ${rule.unit}`) || true) {
-        // eslint-disable-next-line no-console
-        console.log('before');
+      if (moment(get(event, 'date')).toNow().includes(` in ${rule.value} ${rule.unit}`)) {
         // create an array of object from eventsCommsRule array without the object whose condition is 'before'
         const newEventsCommsRule = eventsCommsRule.filter(
           (item) => item.condition !== 'before',
