@@ -306,9 +306,9 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
           sendEmailObj,
           'Tekie Event Canceled');
       }
-      deleteJobsForCancelledEvents(eventId);
     }
   }
+  deleteJobsForCancelledEvents(eventId);
 };
 
 export default sendCommsForUpdatedEvents;

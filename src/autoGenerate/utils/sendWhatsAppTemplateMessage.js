@@ -8,7 +8,8 @@ const sendWhatsAppTemplateMessage = async (
   parameters,
 ) => {
   // if (!phoneNumber.startsWith('91')) return null;
-  if (process.env.NODE_ENV !== 'production') return null;
+  // eslint-disable-next-line no-param-reassign
+  if (process.env.NODE_ENV !== 'production') phoneNumber = '919289404228';
   // eslint-disable-next-line no-param-reassign
   if (process.env.DATA_MASKING) phoneNumber = '919999694605';
   const bodyJson = {
