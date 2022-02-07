@@ -20,6 +20,7 @@ db.on('error', (err) => {
   log('MongoDB disconnected!');
 }).once('open', async () => {
   log('Connected to DB.');
+  // temp config for pre-prod testing
   createScheduler('eventSessionRemainder');
   reRunJobsFromDB();
   if (
