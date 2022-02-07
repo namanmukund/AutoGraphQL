@@ -18,7 +18,7 @@ let customQueryString = `
     getMagicLink (input: GetMagicLinkInput): [GetMagicLinkOutput]
     getEventSpeaker (eventId: String): [GetEventSpeaker]
     getEventWinner (eventId: String): [GetEventWinner]
-    classroomSessions (filter: ClassroomSessionFilter!): ClassroomSessionResult
+    classroomSessions (filter: ClassroomSessionFilter!): [ClassroomSessionResult]
 `;
 
 export default customQueryString;
