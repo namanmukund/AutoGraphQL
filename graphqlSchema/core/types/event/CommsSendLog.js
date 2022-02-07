@@ -3,6 +3,10 @@ const CommsSendLog = `
   {
     templateName: String
     triggeredAt: Date
+    condition: String
+    unit: String
+    value: String
+    attendanceFilter: String
     studentProfile: StudentProfile @relation(name: "CommsSendLogStudentProfile", direction: "OneWay")
     event: Event @relation(name: "CommsSendLogEvent", direction: "OneWay")
   }
