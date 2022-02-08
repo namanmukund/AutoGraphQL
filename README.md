@@ -1,4 +1,4 @@
-# tekie-backend app
+# tekie backend app
 
 ## Prerequisite
 1. [Node.js](https://nodejs.org/en/)
