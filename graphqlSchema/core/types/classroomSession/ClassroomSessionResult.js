@@ -12,13 +12,20 @@ const ClassroomSessionType = `
   }
 `;
 
+const ClassroomSessionDocumentType = `
+  enum ClassroomSessionDocumentType {
+    batchSession
+    adhocSession
+  }
+`;
+
 const ClassroomSessionTopic = `
   type ClassroomSessionTopic {
     id: ID
     order: Int! 
     title: String! @trim
     description: String @trim
-    thumbnailSmallUri: String
+    thumbnailSmall: File
   }
 `;
 
@@ -27,13 +34,14 @@ const ClassroomDetails = `
     code: String! @uniqueOrEmpty @trim @uppercase
     classroomTitle: String!
     description: String
+    classes: [SchoolClass] @relation(name: "ClassroomSchoolClass", direction: "OneWay")
     school: School @relation(name: "ClassroomSchool", direction: "OneWay")
   }
 `;
   
 const ClassroomSessionResult = `
   type ClassroomSessionResult {
-    id: String
+    id: String!
     bookingDate: Date!
     ${slotTimeFields}
     sessionStartDate: Date
@@ -42,14 +50,16 @@ const ClassroomSessionResult = `
     sessionMode: SessionMode @defaultValue(value: "online")
     sessionRecordingLink: String
     sessionType: ClassroomSessionType @defaultValue(value: "learning")
-    documentType: SessionDocumentType @defaultValue(value: "batch")
+    documentType: ClassroomSessionDocumentType @defaultValue(value: "batchSession")
     attendance: [BatchAttendanceType]
     classroom: ClassroomDetails
-    previousTopic: Topic @relation(name: "ClassroomSessionTopic", direction: "OneWay")
+    topic: ClassroomSessionTopic
+    previousTopic: ClassroomSessionTopic
   }
 `;
 
 export default [
+  ClassroomSessionDocumentType,
   ClassroomSessionResult,
   ClassroomSessionTopic,
   ClassroomSessionType,
