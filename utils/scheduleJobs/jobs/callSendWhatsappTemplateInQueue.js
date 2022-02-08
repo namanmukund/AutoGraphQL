@@ -1,7 +1,7 @@
 import sendWhatsAppTemplateMessage from '../../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
 
 const queue = [];
-const callInQueue = (functionToCall, timeout) => (...args) => {
+const callInQueue = (functionToCall) => (...args) => {
   if (queue.length === 0) {
     // if queue is empty
     queue.push(args);
@@ -15,11 +15,11 @@ const callInQueue = (functionToCall, timeout) => (...args) => {
       functionToCall(...queue[0]);
       // delete first function call
       queue.shift();
-    }, timeout);
+    }, Math.floor(Math.random() * 5) * 1000);
   } else {
     // If queue is more than 0, keep pushing function calls to queue
     queue.push(args);
   }
 };
 
-export default callInQueue(sendWhatsAppTemplateMessage, 2000);
+export default callInQueue(sendWhatsAppTemplateMessage);
