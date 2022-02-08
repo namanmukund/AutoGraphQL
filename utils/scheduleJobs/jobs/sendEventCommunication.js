@@ -13,12 +13,17 @@ import getSelectedSlotsStringArray from '../../../src/autoGenerate/graphql/postH
 
 const addToCommsSendLogs = async ({
   templateName, triggeredAt, studentProfileId, eventId,
+  condition, unit, value, attendanceFilter
 }) => {
   const addQuery = `mutation {
     addCommsSendLog(
       input: { templateName: "${templateName}", triggeredAt: "${new Date(triggeredAt).toISOString()}" }
       studentProfileConnectId: "${studentProfileId}"
       eventConnectId: "${eventId}"
+      ${condition ? `condition:"${condition}"` : ''}
+      ${unit ? `unit:"${unit}"` : ''}
+      ${value ? `value:"${value}"` : ''}
+      ${attendanceFilter ? `attendanceFilter:"${attendanceFilter}"` : ''}
     ) {
       id
     }
@@ -250,7 +255,14 @@ const sendEventCommunication = async ({
         whatsappCommsVariablesList,
       );
       addToCommsSendLogs({
-        templateName, triggeredAt: new Date(), eventId, studentProfileId,
+        templateName,
+        triggeredAt: new Date(),
+        eventId,
+        studentProfileId,
+        condition,
+        value,
+        unit,
+        attendanceFilter
       });
       if (toSendEmailComms) {
         sendEmailCommsForUpdatedEvents(parentEmail,
@@ -302,7 +314,14 @@ const sendEventCommunication = async ({
           whatsappCommsVariablesList,
         );
         addToCommsSendLogs({
-          templateName, triggeredAt: new Date(), eventId, studentProfileId,
+          templateName,
+          triggeredAt: new Date(),
+          eventId,
+          studentProfileId,
+          condition,
+          value,
+          unit,
+          attendanceFilter
         });
         if (toSendEmailComms) {
           sendEmailTemplateMessage(parentEmail, 'EventComplete', emailCommsVariableObject, 'Tekie Event Remainder');
@@ -373,7 +392,14 @@ const sendEventCommunication = async ({
           whatsappCommsVariablesList,
         );
         addToCommsSendLogs({
-          templateName, triggeredAt: new Date(), eventId, studentProfileId,
+          templateName,
+          triggeredAt: new Date(),
+          eventId,
+          studentProfileId,
+          condition,
+          value,
+          unit,
+          attendanceFilter
         });
         if (toSendEmailComms) {
           sendEmailTemplateMessage(parentEmail, 'EventComplete', emailCommsVariableObject, 'Tekie Event Remainder');
@@ -381,10 +407,12 @@ const sendEventCommunication = async ({
       });
     }
   }
-  newEventsCommsRule.push({
-    ...filteredCommsRule,
-    isSend: true,
-  });
+  if (filteredCommsRule) {
+    newEventsCommsRule.push({
+      ...filteredCommsRule,
+      isSend: true,
+    });
+  }
   const variable = { input: { eventCommsRule: { replace: newEventsCommsRule } } };
   // eslint-disable-next-line no-await-in-loop
   await updateCommsRuleStatus(eventId, variable);

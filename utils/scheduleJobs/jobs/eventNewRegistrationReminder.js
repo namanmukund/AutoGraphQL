@@ -9,12 +9,14 @@ import sendWhatsAppTemplateMessage from '../../../src/autoGenerate/utils/sendWha
 
 const addToCommsSendLogs = async ({
   templateName, triggeredAt, studentProfileId, eventId,
+  condition = 'afterRegistration',
 }) => {
   const addQuery = `mutation {
     addCommsSendLog(
       input: { templateName: "${templateName}", triggeredAt: "${new Date(triggeredAt).toISOString()}" }
       studentProfileConnectId: "${studentProfileId}"
       eventConnectId: "${eventId}"
+      ${condition ? `condition:"${condition}"` : ''}
     ) {
       id
     }

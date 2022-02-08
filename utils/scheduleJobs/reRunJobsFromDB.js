@@ -14,6 +14,7 @@ import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 import scheduleB2BSessionHomeworkRemainder from './scheduleB2BSessionHomeworkRemainder';
 import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
 import sendEventCommunication from './jobs/sendEventCommunication';
+// import addStudentToEventSession from './jobs/addStudentsToEventSession';
 
 const FETCH_JOBS = `{
   scheduleJobs {
@@ -303,6 +304,22 @@ const reRunJobsFromDB = async () => {
         }
         break;
       }
+      // case 'eventSessionAttendance': {
+      //   if (isPast) {
+      //     addStudentToEventSession({
+      //       eventSessionId,
+      //       jobId: id,
+      //     }, deleteJob);
+      //   } else {
+      //     schedule.scheduleJob(new Date(scheduledDate), () => {
+      //       addStudentToEventSession({
+      //         eventSessionId,
+      //         jobId: id,
+      //       }, deleteJob);
+      //     });
+      //   }
+      //   break;
+      // }
       default:
         break;
     }
