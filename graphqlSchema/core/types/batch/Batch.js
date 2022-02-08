@@ -14,6 +14,14 @@ const BatchTimeTableRule = `
    ${weekDaysFields}
  }`;
 
+const BatchEventTimeTableRule = `
+  type BatchEventTimeTableRule {
+   startDate: Date
+   endDate: Date
+   ${slotTimeFields}
+   ${weekDaysFields}
+ }`;
+
 const B2b2cTimeTable = `
   type B2b2cTimeTable {
    bookingDate: Date
@@ -43,9 +51,10 @@ const Batch = `
     classes: [SchoolClass] @relation(name: "BatchSchoolClass", direction: "OneWay")
     school: School @relation(name: "BatchSchool", direction: "OneWay")
     timeTableRule: BatchTimeTableRule
+    batchEventTimeTableRule: BatchEventTimeTableRule
     b2b2ctimeTable: B2b2cTimeTable
     customSessionLink: String
   }
 `;
 
-export default [Batch, BatchTimeTableRule, B2b2cTimeTable];
+export default [Batch, BatchTimeTableRule, B2b2cTimeTable, BatchEventTimeTableRule];
