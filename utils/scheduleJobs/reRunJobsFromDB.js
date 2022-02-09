@@ -263,6 +263,7 @@ const reRunJobsFromDB = async () => {
             attendanceFilter,
             value,
             unit,
+            jobId: id,
           }, deleteJob);
         } else {
           schedule.scheduleJob(new Date(scheduledDate), () => {
@@ -276,6 +277,7 @@ const reRunJobsFromDB = async () => {
               attendanceFilter,
               value,
               unit,
+              jobId: id,
             }, deleteJob);
           });
         }
