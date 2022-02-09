@@ -48,6 +48,7 @@ const Batch = `
     timeTableRule: BatchTimeTableRule
     b2b2ctimeTable: B2b2cTimeTable
     customSessionLink: String
+    studentReviewByMentor: [StudentReviewByMentor] @relation(name: "BatchStudentReviewByMentor")
   }
 `;
 
