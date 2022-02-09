@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 const fetch = require('node-fetch');
 
 const sendMailModoTemplate = async (
@@ -25,7 +24,7 @@ const sendMailModoTemplate = async (
     mmApiKey: process.env.mmApiKey,
     'Content-Type': 'application/json',
   };
-  const url = process.env.WATI_API_URL.concat(`/triggerTemplateEmail/${templateID}`);
+  const url = process.env.MAIL_MODO_URL.concat(`/triggerTemplateEmail/t/${templateID}`);
 
   return fetch(url, { method: 'POST', headers, body: JSON.stringify(bodyJson) });
 };
