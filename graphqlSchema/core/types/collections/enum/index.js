@@ -124,7 +124,7 @@ import AttendanceFilter from './AttendanceFilter';
 import LengthOfContent from './LengthOfContent';
 import TriedToReachParent from './TriedToReachParent';
 import SessionMode from './SessionMode';
-import SessionDocumentType from "./SessionDocumentType";
+import SessionDocumentType from './SessionDocumentType';
 
 export default [
   Status,

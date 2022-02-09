@@ -37,6 +37,7 @@ const Batch = `
     code: String! @uniqueOrEmpty @trim @uppercase
     classroomTitle: String!
     description: String
+    thumbnail: File @relation(name: "ClassroomThumbnail", direction: "OneWay")
     students: [StudentProfile] @relation(name: "BatchStudentProfile")
     currentComponent: BatchCurrentComponentStatus @relation(name: "BatchCurrentComponentStatusBatch", isSubset: true)
     documentType: SessionDocumentType @defaultValue(value: "batch")

@@ -1,6 +1,6 @@
-import getSlotTimeFields from "../../functions/getSlotTimeFields";
+import getSlotTimeFields from '../../functions/getSlotTimeFields';
 
-const slotTimeFields = getSlotTimeFields("Boolean", false);
+const slotTimeFields = getSlotTimeFields('Boolean', false);
 
 const ClassroomSessionType = `
   enum ClassroomSessionType {
@@ -38,7 +38,7 @@ const ClassroomDetails = `
     school: School @relation(name: "ClassroomSchool", direction: "OneWay")
   }
 `;
-  
+
 const ClassroomSessionResult = `
   type ClassroomSessionResult {
     id: String!

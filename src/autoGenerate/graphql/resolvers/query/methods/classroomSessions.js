@@ -1,7 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable arrow-parens */
-/* eslint-disable dot-notation */
-/* eslint-disable prefer-const */
 import { get, sortBy } from 'lodash';
 import { slotTimes } from '../../../../../../constants';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
@@ -447,8 +443,8 @@ const constructDocFilters = (filters) => {
    *  sessionStatus: [ 'started', 'completed' ]
    *  schools: ['ID']
    */
-  let sessionFilters = {};
-  let classroomFilters = {};
+  const sessionFilters = {};
+  const classroomFilters = {};
   if (get(filters, 'grades', []).length) {
     classroomFilters['classroom.classes.grade'] = {
       $in: get(filters, 'grades'),
@@ -465,7 +461,7 @@ const constructDocFilters = (filters) => {
     };
   }
   if (get(filters, 'sessionStatusFilter', []).length) {
-    sessionFilters['sessionStatus'] = {
+    sessionFilters.sessionStatus = {
       $in: ['allotted', 'completed'],
     };
   }
@@ -537,7 +533,7 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
   return sortBy(finalResult, ['bookingDate']);
 };
 
-const classroomSessions = (async (root, params, context, info) => {
+const classroomSessions = (async (root, params, context) => {
   const startTime = process.hrtime();
   const authentication = ifAuthorized(context);
 
