@@ -123,6 +123,7 @@ import DurationType from './DurationType';
 import AttendanceFilter from './AttendanceFilter';
 import LengthOfContent from './LengthOfContent';
 import TriedToReachParent from './TriedToReachParent';
+import ScheduleEventType from './ScheduleEventType';
 
 export default [
   Status,
@@ -251,4 +252,5 @@ export default [
   AttendanceFilter,
   LengthOfContent,
   TriedToReachParent,
+  ScheduleEventType,
 ];

@@ -18,6 +18,7 @@ const BatchEventTimeTableRule = `
   type BatchEventTimeTableRule {
    startDate: Date
    endDate: Date
+   type: ScheduleEventType
    ${slotTimeFields}
    ${weekDaysFields}
  }`;
