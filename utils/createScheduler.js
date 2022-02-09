@@ -81,7 +81,7 @@ const createScheduler = (schedulerName) => {
       break;
     case 'eventSessionRemainder':
       rule.tz = 'Asia/Kolkata';
-      rule.hour = 1;
+      rule.minute = 10;
       rule.dayOfWeek = new schedule.Range(0, 6);
       // eslint-disable-next-line no-unused-vars
       schedule.scheduleJob(rule, async () => {
