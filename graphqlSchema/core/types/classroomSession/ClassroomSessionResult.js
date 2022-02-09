@@ -1,0 +1,67 @@
+import getSlotTimeFields from "../../functions/getSlotTimeFields";
+
+const slotTimeFields = getSlotTimeFields("Boolean", false);
+
+const ClassroomSessionType = `
+  enum ClassroomSessionType {
+    learning
+    revision
+    homework
+    assessment
+    project
+  }
+`;
+
+const ClassroomSessionDocumentType = `
+  enum ClassroomSessionDocumentType {
+    batchSession
+    adhocSession
+  }
+`;
+
+const ClassroomSessionTopic = `
+  type ClassroomSessionTopic {
+    id: ID
+    order: Int! 
+    title: String! @trim
+    description: String @trim
+    thumbnailSmall: File
+  }
+`;
+
+const ClassroomDetails = `
+  type ClassroomDetails {
+    code: String! @uniqueOrEmpty @trim @uppercase
+    classroomTitle: String!
+    description: String
+    classes: [SchoolClass] @relation(name: "ClassroomSchoolClass", direction: "OneWay")
+    school: School @relation(name: "ClassroomSchool", direction: "OneWay")
+  }
+`;
+  
+const ClassroomSessionResult = `
+  type ClassroomSessionResult {
+    id: String!
+    bookingDate: Date!
+    ${slotTimeFields}
+    sessionStartDate: Date
+    sessionEndDate: Date
+    sessionStatus: SessionStatus! @defaultValue(value: "allotted")
+    sessionMode: SessionMode @defaultValue(value: "online")
+    sessionRecordingLink: String
+    sessionType: ClassroomSessionType @defaultValue(value: "learning")
+    documentType: ClassroomSessionDocumentType @defaultValue(value: "batchSession")
+    attendance: [BatchAttendanceType]
+    classroom: ClassroomDetails
+    topic: ClassroomSessionTopic
+    previousTopic: ClassroomSessionTopic
+  }
+`;
+
+export default [
+  ClassroomSessionDocumentType,
+  ClassroomSessionResult,
+  ClassroomSessionTopic,
+  ClassroomSessionType,
+  ClassroomDetails,
+];

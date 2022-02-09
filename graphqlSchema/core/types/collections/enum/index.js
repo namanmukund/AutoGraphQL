@@ -123,6 +123,8 @@ import DurationType from './DurationType';
 import AttendanceFilter from './AttendanceFilter';
 import LengthOfContent from './LengthOfContent';
 import TriedToReachParent from './TriedToReachParent';
+import SessionMode from './SessionMode';
+import SessionDocumentType from "./SessionDocumentType";
 
 export default [
   Status,
@@ -251,4 +253,6 @@ export default [
   AttendanceFilter,
   LengthOfContent,
   TriedToReachParent,
+  SessionMode,
+  SessionDocumentType,
 ];
