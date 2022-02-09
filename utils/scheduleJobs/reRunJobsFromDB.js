@@ -99,6 +99,7 @@ const reRunJobsFromDB = async () => {
     } = scheduledJob;
     const deleteJob = () => callLocalGraphqlApi(deleteJobQuery(id));
     const isPast = moment().isAfter(scheduledDate);
+    if (process.env.NODE_ENV === 'staging' && (jobType !== 'eventNewRegistrationReminder' || jobType !== 'eventCommsJob')) return null;
     const userId = get(parent, 'id');
     switch (jobType) {
       case 'sendB2BReminder': {
@@ -307,6 +308,7 @@ const reRunJobsFromDB = async () => {
       default:
         break;
     }
+    return true;
   });
 };
 
