@@ -32,6 +32,7 @@ const AdhocSession = `
     batch: Batch! @relation(name: "AdhocSessionBatch", direction: "OneWay")
     previousTopic: Topic @relation(name: "AdhocSessionTopic", direction: "OneWay")
     type: AdhocSessionType!
+    sessionMode: SessionMode @defaultValue(value: "online")
     order: Int
     mentorSession: MentorSession @relation(name: "AdhocSessionMentorSession")
     bookingDate: Date!

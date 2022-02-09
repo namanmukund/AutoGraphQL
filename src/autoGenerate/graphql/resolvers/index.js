@@ -104,6 +104,7 @@ import resetPasswordAndLogin from './mutation/methods/resetPasswordAndLogin';
 import getEventSpeaker from './query/methods/getEventSpeaker';
 import generateMentorChild from './mutation/methods/generateMentorChild';
 import getEventWinner from './query/methods/getEventWinner';
+import classroomSessions from './query/methods/classroomSessions';
 import updateEventSessionAttendance from './mutation/methods/updateEventSessionAttendance';
 
 const parsedASTMap = getParsedASTMap(types);
@@ -668,6 +669,8 @@ resolvers.Query.getMagicLink = getMagicLink;
 resolvers.Query.getEventSpeaker = getEventSpeaker;
 // Resolver to get event winner
 resolvers.Query.getEventWinner = getEventWinner;
+// Resolver to get classroom sessions
+resolvers.Query.classroomSessions = classroomSessions;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 

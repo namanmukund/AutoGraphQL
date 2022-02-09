@@ -33,6 +33,7 @@ const BatchSession = `
     scheduleRunStatus: ScheduleRunStatus
     ${slotTimeFields}
     ${b2bFormFields}
+    sessionMode: SessionMode @defaultValue(value: "online")
     sessionAllotmentDate: Date
     sessionStartDate: Date
     sessionEndDate: Date
