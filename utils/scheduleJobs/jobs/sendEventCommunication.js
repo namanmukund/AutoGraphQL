@@ -12,6 +12,17 @@ import getSelectedSlotsStringArray from '../../../src/autoGenerate/graphql/postH
 import callSendWhatsappTemplateInQueue from './callSendWhatsappTemplateInQueue';
 import getSlotTimesInString from '../../getSlotTimesInString';
 
+const getJobData = async (jobId) => {
+  const query = `{
+  scheduleJob(id: "${jobId}") {
+    id
+    }
+  }
+  `;
+  const job = await callLocalGraphqlApi(query);
+  return get(job, 'data.scheduleJob.id');
+};
+
 const addToCommsSendLogs = async ({
   templateName, triggeredAt, studentProfileId, eventId,
   condition, unit, value, attendanceFilter
@@ -162,7 +173,12 @@ const sendEventCommunication = async ({
   attendanceFilter,
   value,
   unit,
+  jobId,
 }, deleteJob = () => { }) => {
+  if (jobId) {
+    const jobData = await getJobData(jobId);
+    if (!jobData) return null;
+  }
   const eventData = await callLocalGraphqlApi(eventQuery(eventId));
   const event = get(eventData, 'data.event');
   const registeredUsers = get(event, 'registeredUsers', []);
@@ -444,6 +460,7 @@ const sendEventCommunication = async ({
     await updateCommsRuleStatus(eventId, variable);
   }
   deleteJob();
+  return true;
 };
 
 export default sendEventCommunication;

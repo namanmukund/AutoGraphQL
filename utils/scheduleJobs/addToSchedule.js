@@ -388,6 +388,7 @@ const addToSchedule = async (jobType, scheduledDate, {
           attendanceFilter: get(eventCommsRule, 'attendanceFilter'),
           value: get(eventCommsRule, 'value'),
           unit: get(eventCommsRule, 'unit'),
+          jobId,
         }, () => callLocalGraphqlApi(deleteJob(jobId)));
       });
       break;
