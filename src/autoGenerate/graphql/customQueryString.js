@@ -1,4 +1,4 @@
-let customQueryString = `
+const customQueryString = `
     me: User,
     getPythonByteCode (pythonCode: String!): PythonByteCode
     salesOperationReport (fromDate: Date, toDate: Date, country: Country):  [SalesOperationReport]
