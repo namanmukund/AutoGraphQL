@@ -125,6 +125,8 @@ import LengthOfContent from './LengthOfContent';
 import TriedToReachParent from './TriedToReachParent';
 import SessionMode from './SessionMode';
 import SessionDocumentType from './SessionDocumentType';
+import NoticeType from './NoticeType';
+import ReviewType from './ReviewType';
 
 export default [
   Status,
@@ -255,4 +257,6 @@ export default [
   TriedToReachParent,
   SessionMode,
   SessionDocumentType,
+  NoticeType,
+  ReviewType,
 ];

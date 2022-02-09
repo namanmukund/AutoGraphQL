@@ -151,6 +151,8 @@ import UserOtpLog from './userOtpLog';
 import UserDeviceLog from './UserDeviceLog';
 import GenerateMentorChild from './generateMentorChild';
 import ClassroomSession from './classroomSession';
+import Notice from './Notice';
+import StudentReviewByMentor from './StudentReviewByMentor';
 
 export default [
   ...User,
@@ -306,4 +308,6 @@ export default [
   ...UserDeviceLog,
   ...GenerateMentorChild,
   ...ClassroomSession,
+  ...Notice,
+  ...StudentReviewByMentor,
 ];
