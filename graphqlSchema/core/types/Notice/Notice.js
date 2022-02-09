@@ -14,7 +14,7 @@ const Notice = `
     attachedFiles: [NoticeAttachment] @relation(name: "NoticeAttachmentAttachedFile", direction: "OneWay")
     messgae: String!
     scheduledAt: Date
-    batch: Batch @relation(name: "NoticeBatch", direction: "OneWay")
+    batch: Batch @relation(name: "BatchNotice")
   }
 `;
 
