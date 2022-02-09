@@ -307,7 +307,7 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
 
     // slots passed in input
     const { ...workingDaySlots } = timeTableRule;
-    const { workingDayFilteredSlotsString } = extractSlotsFromInput(workingDaySlots);
+    const { filteredSlotsString: workingDayFilteredSlotsString } = extractSlotsFromInput(workingDaySlots);
 
     if (batchSessions && batchSessions.length) {
       // sorting the existing batch sessions into started/completed and allotted
