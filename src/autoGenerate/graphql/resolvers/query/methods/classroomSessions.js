@@ -1,4 +1,8 @@
-import { filter, get, sortBy } from 'lodash';
+/* eslint-disable no-unused-vars */
+/* eslint-disable arrow-parens */
+/* eslint-disable dot-notation */
+/* eslint-disable prefer-const */
+import { get, sortBy } from 'lodash';
 import { slotTimes } from '../../../../../../constants';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
@@ -479,7 +483,7 @@ const constructDocFilters = (filters) => {
 const transformMongoResults = (batchSessions, adhocSessions) => {
   const finalResult = [];
   if (batchSessions && batchSessions.length) {
-    batchSessions.map(session => {
+    batchSessions.forEach((session) => {
       finalResult.push({
         id: get(session, 'id'),
         bookingDate: get(session, 'bookingDate', null),
@@ -502,10 +506,10 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
         topic: get(session, 'topic', null),
         previousTopic: null,
       });
-    })
+    });
   }
   if (adhocSessions && adhocSessions.length) {
-    adhocSessions.map((session) => {
+    adhocSessions.fprEach((session) => {
       finalResult.push({
         id: get(session, 'id'),
         bookingDate: get(session, 'bookingDate', null),
@@ -531,7 +535,7 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
     });
   }
   return sortBy(finalResult, ['bookingDate']);
-}
+};
 
 const classroomSessions = (async (root, params, context, info) => {
   const startTime = process.hrtime();
@@ -555,11 +559,11 @@ const classroomSessions = (async (root, params, context, info) => {
 
   const batchSessionModel = getTypeQueryController(
     'BatchSession',
-    authentication
+    authentication,
   );
   const adhocSessionModel = getTypeQueryController(
     'AdhocSession',
-    authentication
+    authentication,
   );
 
   /**
@@ -576,7 +580,7 @@ const classroomSessions = (async (root, params, context, info) => {
       startDate,
       endDate,
       docFilters,
-    })
+    }),
   );
 
   const adhocSessionRes = await adhocSessionModel.aggregate(
@@ -585,7 +589,7 @@ const classroomSessions = (async (root, params, context, info) => {
       startDate,
       endDate,
       docFilters,
-    })
+    }),
   );
 
   /**
@@ -593,7 +597,7 @@ const classroomSessions = (async (root, params, context, info) => {
    */
   const transformedClassroomResult = transformMongoResults(
     batchSessionRes,
-    adhocSessionRes
+    adhocSessionRes,
   );
 
   log(`Total Doc Returned ---> ${transformedClassroomResult.length}`);
