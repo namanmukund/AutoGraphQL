@@ -5,10 +5,10 @@ import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
 import sendEmail from '../../services/email/utils/sendEmail';
 import parsedHtmlFromTemplateFileAndObject from '../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../services/email/utils/getEmailObject';
-import sendWhatsAppTemplateMessage from '../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
 import getSelectedSlotsStringArray from '../../src/autoGenerate/graphql/postHookFunctions/utils/getSelectedSlotsStringArray';
 import getIntlDateTime from '../timeZoneDiff';
 import getSlotTimesInString from '../getSlotTimesInString';
+import callSendWhatsappTemplateInQueue from './jobs/callSendWhatsappTemplateInQueue';
 
 const getEventSessions = async () => {
   const dt = new Date().setHours(0, 0, 0, 0);
@@ -31,6 +31,11 @@ const getEventSessions = async () => {
       ${getSlotTimesInString()}
       sessionDate
       event {
+        id
+        eventSessions(orderBy: sessionDate_ASC, first: 1) {
+          id
+          sessionDate
+        }
         isEmailCommsEnabled
         name
         locationType
@@ -103,138 +108,140 @@ const addToCommsSendLogs = async ({
 };
 
 const scheduleEventSessionRemainder = async () => {
-  const eventSessions = await getEventSessions();
-  for (const eventSession of eventSessions) {
+  const eventSessionsData = await getEventSessions();
+  for (const eventSession of eventSessionsData) {
     const {
+      id: eventSessionId,
       sessionDate, event: {
         id: eventId,
         timeZone, isEmailCommsEnabled, name: eventName,
         meetingId, meetingPassword, sessionLink, locationType, geoLocation,
         address, state, city, pincode, registeredUsers = [],
+        eventSessions = [],
       }, ...slots
     } = eventSession;
-    const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-    const slotNumber = slotTimeStringArray[0].split('slot')[1];
-    const { dateObject, startTime } = getIntlDateTime(sessionDate, slotNumber, timeZone);
-    const date = moment(dateObject).format('dddd, Do MMMM, YYYY');
-    registeredUsers.forEach((registeredUser) => {
-      const studentName = get(registeredUser, 'user.name');
-      const studentProfileId = get(registeredUser, 'id');
-      const studentGrade = get(registeredUser, 'grade');
-      const parents = get(registeredUser, 'parents[0].user');
-      const parentEmail = get(parents, 'email');
-      const parentPhone = get(parents, 'phone.countryCode').split('+')[1] + get(parents, 'phone.number');
-      let parameters = [];
-      if (locationType === 'online') {
-        parameters = [
-          {
-            name: 'student_name',
-            content: studentName,
-          },
-          {
-            name: 'event_name',
-            content: eventName,
-          },
-          {
-            name: 'event_session_link',
-            content: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
-          },
-          {
-            name: 'event_time',
-            content: startTime,
-          },
-        ];
-      }
-      if (locationType === 'venue') {
-        parameters = [
-          {
-            name: 'studentName',
-            content: studentName,
-          },
-          {
-            name: 'studentGrade',
-            content: studentGrade,
-          },
-          {
-            name: 'eventName',
-            content: eventName,
-          },
-          {
-            name: 'geoLocation',
-            content: geoLocation,
-          },
-          {
-            name: 'address',
-            content: address,
-          },
-          {
-            name: 'state',
-            content: state,
-          },
-          {
-            name: 'city',
-            content: city,
-          },
-          {
-            name: 'pincode',
-            content: pincode,
-          },
-          {
-            name: 'sessionDate',
-            content: date,
-          },
-          {
-            name: 'sessionTime',
-            content: startTime,
-          },
-        ];
-      }
-      if (get(parents, 'phone.number')) {
-        sendWhatsAppTemplateMessage(
-          parentPhone,
-          'event_reminder_t_1_hour',
-          parentPhone,
-          parameters,
-        );
-        addToCommsSendLogs({
-          templateName: 'event_reminder_t_1_hour',
-          triggeredAt: new Date(),
-          eventId,
-          studentProfileId,
-        });
-      }
-      if (isEmailCommsEnabled) {
-        let emailCommsObj = {};
+    if (get(eventSessions, '[0].id') !== eventSessionId) {
+      const slotTimeStringArray = getSelectedSlotsStringArray(slots);
+      const slotNumber = slotTimeStringArray[0].split('slot')[1];
+      const { dateObject, startTime } = getIntlDateTime(sessionDate, slotNumber, timeZone);
+      const date = moment(dateObject).format('dddd, Do MMMM, YYYY');
+      registeredUsers.forEach((registeredUser) => {
+        const studentName = get(registeredUser, 'user.name');
+        const studentProfileId = get(registeredUser, 'id');
+        const studentGrade = get(registeredUser, 'grade');
+        const parents = get(registeredUser, 'parents[0].user');
+        const parentEmail = get(parents, 'email');
+        const parentPhone = get(parents, 'phone.countryCode').split('+')[1] + get(parents, 'phone.number');
+        let parameters = [];
         if (locationType === 'online') {
-          emailCommsObj = {
-            eventName,
-            meetingId,
-            meetingPassword,
-            date,
-            sessionLink,
-            studentName,
-            startTime,
-          };
+          parameters = [
+            {
+              name: 'student_name',
+              value: studentName,
+            },
+            {
+              name: 'event_name',
+              value: eventName,
+            },
+            {
+              name: 'event_session_link',
+              value: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
+            },
+            {
+              name: 'event_time',
+              value: startTime,
+            },
+          ];
         }
         if (locationType === 'venue') {
-          emailCommsObj = {
-            eventName,
-            studentName,
-            geoLocation,
-            address,
-            state,
-            city,
-            pincode,
-            timeZone,
-            date,
-            startTime,
-          };
+          parameters = [
+            {
+              name: 'studentName',
+              value: studentName,
+            },
+            {
+              name: 'studentGrade',
+              value: studentGrade,
+            },
+            {
+              name: 'eventName',
+              value: eventName,
+            },
+            {
+              name: 'geoLocation',
+              value: geoLocation,
+            },
+            {
+              name: 'address',
+              value: address,
+            },
+            {
+              name: 'state',
+              value: state,
+            },
+            {
+              name: 'city',
+              value: city,
+            },
+            {
+              name: 'pincode',
+              value: pincode,
+            },
+            {
+              name: 'sessionDate',
+              value: date,
+            },
+            {
+              name: 'sessionTime',
+              value: startTime,
+            },
+          ];
         }
-        if (parentEmail) {
-          sendEventSessionRemainderMail(parentEmail, emailCommsObj);
+        if (get(parents, 'phone.number')) {
+          callSendWhatsappTemplateInQueue(parentPhone,
+            'event_reminder_t_1_hour',
+            parentPhone,
+            parameters);
+          addToCommsSendLogs({
+            templateName: 'event_reminder_t_1_hour',
+            triggeredAt: new Date(),
+            eventId,
+            studentProfileId,
+          });
         }
-      }
-    });
+        if (isEmailCommsEnabled) {
+          let emailCommsObj = {};
+          if (locationType === 'online') {
+            emailCommsObj = {
+              eventName,
+              meetingId,
+              meetingPassword,
+              date,
+              sessionLink,
+              studentName,
+              startTime,
+            };
+          }
+          if (locationType === 'venue') {
+            emailCommsObj = {
+              eventName,
+              studentName,
+              geoLocation,
+              address,
+              state,
+              city,
+              pincode,
+              timeZone,
+              date,
+              startTime,
+            };
+          }
+          if (parentEmail) {
+            sendEventSessionRemainderMail(parentEmail, emailCommsObj);
+          }
+        }
+      });
+    }
   }
 };
 
