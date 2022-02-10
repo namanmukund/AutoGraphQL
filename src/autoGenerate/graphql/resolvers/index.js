@@ -106,7 +106,7 @@ import generateMentorChild from './mutation/methods/generateMentorChild';
 import getEventWinner from './query/methods/getEventWinner';
 import classroomSessions from './query/methods/classroomSessions';
 import updateEventSessionAttendance from './mutation/methods/updateEventSessionAttendance';
-import getNextOrPrevClassroomSessions from "./query/methods/getNextOrPrevClassroomSessions";
+import getNextOrPrevClassroomSessions from './query/methods/getNextOrPrevClassroomSessions';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {

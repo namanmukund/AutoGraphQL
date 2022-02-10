@@ -38,6 +38,8 @@ const getBatchSessionAggregation = ({
       sessionStartDate: 1,
       sessionEndDate: 1,
       sessionStatus: 1,
+      startMinutes: 1,
+      endMinutes: 1,
       sessionMode: 1,
       sessionRecordingLink: 1,
       batch: 1,
@@ -199,6 +201,8 @@ const getBatchSessionAggregation = ({
       sessionEndDate: 1,
       sessionStatus: 1,
       sessionMode: 1,
+      startMinutes: 1,
+      endMinutes: 1,
       sessionRecordingLink: 1,
       classroom: {
         $arrayElemAt: ['$classroom', 0],
@@ -243,6 +247,8 @@ const getAdhocSessionAggregation = ({
       sessionEndDate: 1,
       sessionStatus: 1,
       sessionMode: 1,
+      startMinutes: 1,
+      endMinutes: 1,
       sessionRecordingLink: 1,
       type: 1,
       batch: 1,
@@ -405,6 +411,8 @@ const getAdhocSessionAggregation = ({
       sessionStatus: 1,
       sessionMode: 1,
       type: 1,
+      startMinutes: 1,
+      endMinutes: 1,
       sessionRecordingLink: 1,
       classroom: {
         $arrayElemAt: ['$classroom', 0],
@@ -491,6 +499,8 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
         attendance: get(session, 'attendance', []),
         sessionType: 'learning',
         documentType: 'batchSession',
+        startMinutes: get(session, 'startMinutes', 0),
+        endMinutes: get(session, 'endMinutes', 0),
         classroom: {
           code: get(session, 'classroom.code', ''),
           classroomTitle: get(session, 'classroom.classroomTitle', ''),
@@ -505,7 +515,7 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
     });
   }
   if (adhocSessions && adhocSessions.length) {
-    adhocSessions.fprEach((session) => {
+    adhocSessions.forEach((session) => {
       finalResult.push({
         id: get(session, 'id'),
         bookingDate: get(session, 'bookingDate', null),
@@ -517,6 +527,8 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
         attendance: get(session, 'attendance', []),
         sessionType: get(session, 'type', null),
         documentType: 'adhocSession',
+        startMinutes: get(session, 'startMinutes', 0),
+        endMinutes: get(session, 'endMinutes', 0),
         classroom: {
           code: get(session, 'classroom.code', ''),
           classroomTitle: get(session, 'classroom.classroomTitle', ''),
