@@ -42,7 +42,7 @@ const updateEventValidation = async (params, input, mutationName, context) => {
   const eventTimeTableRule = get(params, 'input.eventTimeTableRule');
   const eventData = await getEventDetails(eventId, get(registeredUsersConnectIds, '[0]'));
   if (get(eventTimeTableRule, 'startDate') && get(eventTimeTableRule, 'endDate')) {
-    const { startDate, endDate, ...slots } = eventTimeTableRule;
+    const { startDate, endDate, ...slots } = get(eventData, 'eventTimeTableRule');
     const slotsTime = getSelectedSlotsTime(slots);
     context.prevSlotTimes = slotsTime;
     context.prevTimeTableRule = get(eventData, 'eventTimeTableRule');

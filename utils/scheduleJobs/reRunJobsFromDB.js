@@ -262,6 +262,8 @@ const reRunJobsFromDB = async () => {
             attendanceFilter,
             value,
             unit,
+            jobId: id,
+            isPast,
           }, deleteJob);
         } else {
           schedule.scheduleJob(new Date(scheduledDate), () => {
@@ -275,6 +277,8 @@ const reRunJobsFromDB = async () => {
               attendanceFilter,
               value,
               unit,
+              jobId: id,
+              isPast,
             }, deleteJob);
           });
         }
@@ -304,22 +308,6 @@ const reRunJobsFromDB = async () => {
         }
         break;
       }
-      // case 'eventSessionAttendance': {
-      //   if (isPast) {
-      //     addStudentToEventSession({
-      //       eventSessionId,
-      //       jobId: id,
-      //     }, deleteJob);
-      //   } else {
-      //     schedule.scheduleJob(new Date(scheduledDate), () => {
-      //       addStudentToEventSession({
-      //         eventSessionId,
-      //         jobId: id,
-      //       }, deleteJob);
-      //     });
-      //   }
-      //   break;
-      // }
       default:
         break;
     }
