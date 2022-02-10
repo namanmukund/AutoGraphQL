@@ -187,12 +187,12 @@ const getBatchSessionAggregation = ({
       as: 'mentorSession',
     },
   },
-  {
-    $match: {
-      'mentorSession.user.id': mentorId,
-      'classroom.documentType': 'classroom',
-    },
-  },
+  // {
+  //   $match: {
+  //     'mentorSession.user.id': mentorId,
+  //     'classroom.documentType': 'classroom',
+  //   },
+  // },
   {
     $project: {
       id: 1,
@@ -396,12 +396,12 @@ const getAdhocSessionAggregation = ({
       as: 'mentorSession',
     },
   },
-  {
-    $match: {
-      'mentorSession.user.id': mentorId,
-      'classroom.documentType': 'classroom',
-    },
-  },
+  // {
+  //   $match: {
+  //     'mentorSession.user.id': mentorId,
+  //     'classroom.documentType': 'classroom',
+  //   },
+  // },
   {
     $project: {
       id: 1,
