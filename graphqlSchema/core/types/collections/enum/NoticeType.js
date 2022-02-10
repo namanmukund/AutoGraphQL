@@ -1,6 +1,8 @@
 const NoticeType = `
   enum NoticeType {
-      annoucement
+      announcement
+      update
+      notice
   }`;
 
 export default NoticeType;

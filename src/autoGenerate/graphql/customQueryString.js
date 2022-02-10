@@ -19,7 +19,7 @@ const customQueryString = `
     getEventSpeaker (eventId: String): [GetEventSpeaker]
     getEventWinner (eventId: String): [GetEventWinner]
     classroomSessions (filter: ClassroomSessionFilter!): [ClassroomSessionResult]
-    courseDetail (batchId: String): CourseDetailResult
+    classroomDetail (batchId: String): ClassroomDetailResult
 `;
 
 export default customQueryString;
