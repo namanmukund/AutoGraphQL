@@ -36,6 +36,8 @@ const AdhocSession = `
     order: Int
     mentorSession: MentorSession @relation(name: "AdhocSessionMentorSession")
     bookingDate: Date!
+    startMinutes: Int @defaultValue(value: "0")
+    endMinutes: Int @defaultValue(value: "0")
     ${slotTimeFields}
     sessionStartDate: Date
     sessionEndDate: Date

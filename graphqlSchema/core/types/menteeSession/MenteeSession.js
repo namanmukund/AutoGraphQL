@@ -10,6 +10,8 @@ const MenteeSession = `
     bookingDate: Date!
     scheduleRunStatus: ScheduleRunStatus
     ${slotTimeFields}
+    startMinutes: Int @defaultValue(value: "0")
+    endMinutes: Int @defaultValue(value: "0")
     source: UserOriginSource @defaultValue(value: "website")
     country: Country @defaultValue(value: "india")
     bookedBy: BookedBy @defaultValue(value: "customer")

@@ -45,6 +45,8 @@ const ClassroomSessionResult = `
     id: String!
     bookingDate: Date
     ${slotTimeFields}
+    startMinutes: Int @defaultValue(value: "0")
+    endMinutes: Int @defaultValue(value: "0")
     sessionStartDate: Date
     sessionEndDate: Date
     sessionStatus: SessionStatus! @defaultValue(value: "allotted")

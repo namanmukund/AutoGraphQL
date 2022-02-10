@@ -106,6 +106,7 @@ import generateMentorChild from './mutation/methods/generateMentorChild';
 import getEventWinner from './query/methods/getEventWinner';
 import classroomSessions from './query/methods/classroomSessions';
 import updateEventSessionAttendance from './mutation/methods/updateEventSessionAttendance';
+import getNextOrPrevClassroomSessions from './query/methods/getNextOrPrevClassroomSessions';
 import courseDetail from './query/methods/courseDetail';
 
 const parsedASTMap = getParsedASTMap(types);
@@ -672,6 +673,8 @@ resolvers.Query.getEventSpeaker = getEventSpeaker;
 resolvers.Query.getEventWinner = getEventWinner;
 // Resolver to get classroom sessions
 resolvers.Query.classroomSessions = classroomSessions;
+// Resolver to get next or prev classroom sessions
+resolvers.Query.getNextOrPrevClassroomSessions = getNextOrPrevClassroomSessions;
 // Resolver to get classroom sessions
 resolvers.Query.courseDetail = courseDetail;
 // Resolver for a custom scalar type 'Date'
