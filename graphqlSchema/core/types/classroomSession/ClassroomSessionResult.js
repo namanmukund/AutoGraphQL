@@ -16,6 +16,7 @@ const ClassroomSessionDocumentType = `
   enum ClassroomSessionDocumentType {
     batchSession
     adhocSession
+    notYetBooked
   }
 `;
 
@@ -42,7 +43,7 @@ const ClassroomDetails = `
 const ClassroomSessionResult = `
   type ClassroomSessionResult {
     id: String!
-    bookingDate: Date!
+    bookingDate: Date
     ${slotTimeFields}
     sessionStartDate: Date
     sessionEndDate: Date

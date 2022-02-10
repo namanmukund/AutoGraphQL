@@ -153,6 +153,7 @@ import GenerateMentorChild from './generateMentorChild';
 import ClassroomSession from './classroomSession';
 import Notice from './Notice';
 import StudentReviewByMentor from './StudentReviewByMentor';
+import CourseDetail from './courseDetail';
 
 export default [
   ...User,
@@ -310,4 +311,5 @@ export default [
   ...ClassroomSession,
   ...Notice,
   ...StudentReviewByMentor,
+  ...CourseDetail,
 ];

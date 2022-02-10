@@ -15,7 +15,7 @@ const callInQueue = (functionToCall) => (...args) => {
       functionToCall(...queue[0]);
       // delete first function call
       queue.shift();
-    }, Math.floor(Math.random() * 5) * 1000);
+    }, Math.floor(Math.random() * 10) * 1000);
   } else {
     // If queue is more than 0, keep pushing function calls to queue
     queue.push(args);

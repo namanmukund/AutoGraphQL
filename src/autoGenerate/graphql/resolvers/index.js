@@ -106,6 +106,7 @@ import generateMentorChild from './mutation/methods/generateMentorChild';
 import getEventWinner from './query/methods/getEventWinner';
 import classroomSessions from './query/methods/classroomSessions';
 import updateEventSessionAttendance from './mutation/methods/updateEventSessionAttendance';
+import courseDetail from './query/methods/courseDetail';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -671,6 +672,8 @@ resolvers.Query.getEventSpeaker = getEventSpeaker;
 resolvers.Query.getEventWinner = getEventWinner;
 // Resolver to get classroom sessions
 resolvers.Query.classroomSessions = classroomSessions;
+// Resolver to get classroom sessions
+resolvers.Query.courseDetail = courseDetail;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 
