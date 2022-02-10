@@ -12,6 +12,7 @@ import { QueryController } from '../../../controllers';
 import { getUserFromDBQuery } from './utils';
 import { checkPasswordAndReturnUserWithToken } from '../utils/checkPasswordAndReturnUserWithToken';
 import getChildrenToken from './utils/getChildrenToken';
+import { EmailOrUsernameRequired } from '../../../../../../constants/errors/db';
 
 const USER_TYPE = 'User';
 
@@ -54,11 +55,15 @@ const loginViaPasswordMutationResolver = async (
   if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
-  loginViaEmailInputValidation(input);
+  if(input.email) loginViaEmailInputValidation(input);
 
   Object.assign(authentication, {
     bypass: true,
   });
+
+  if (!input.email && !input.username) {
+    throw new EmailOrUsernameRequired()
+  }
 
   const modelQueries = new QueryController(USER_TYPE, authentication);
 

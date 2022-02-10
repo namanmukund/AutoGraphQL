@@ -320,3 +320,7 @@ export const CommsVariableAlreadyExist = createError('CommsVariableAlreadyExist'
 export const CategoryAlreadyExist = createError('CategoryAlreadyExist', {
   message: 'Category with similar title already exist',
 });
+
+export const EmailOrUsernameRequired = createError("EmailOrUsernameRequired",{
+  message: 'Either Email or Username is required'
+})

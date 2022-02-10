@@ -33,7 +33,7 @@ export default function finishForgotPasswordMutationResolver(
     authentication,
     {},
   );
-
+  // ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmhjSEJKYm1adklqcDdJbTVoYldVaU9pSjBaV3RwWlZSdGN5SXNJblI1Y0dVaU9pSnpkR0YwYVdNaWZTd2lhV0YwSWpveE5UVXdNREF5TkRReExDSmxlSEFpT2pFNE5qVTFOemcwTkRGOS4yWFpmcU1FdEphUGFWakdMcjZ2M3VrLWQzMGlqLUNKMjduQTEtd0NvOU9FOjpleUpoYkdjaU9pSklVekkxTmlJc0luUjVjQ0k2SWtwWFZDSjkuZXlKMWMyVnlTVzVtYnlJNmV5SnBaQ0k2SW1OcmREaHBjVEEwTURBd01IQXdkM1Z4WnpWMmNHRmhjR1lpTENKMWMyVnlibUZ0WlNJNkluTnlhV3BoYmlKOUxDSnBZWFFpT2pFMk16TXdPVFUzTURJc0ltVjRjQ0k2TVRZMk5EWTFNek13TW4wLllqVVFGS0FJcDhFYWFnTkowY1VlM2lmTW1TZHp4T0JvYUx2QmtvTUtuZ2M=
   const currentUser = authentication && authentication.user;
   if (currentUser) {
     throw new UserTokenNotRequiredError();
