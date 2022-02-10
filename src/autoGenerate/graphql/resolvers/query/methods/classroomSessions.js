@@ -18,7 +18,6 @@ const getSlotTimeFields = (session) => {
 };
 
 const getBatchSessionAggregation = ({
-  mentorId,
   startDate,
   endDate,
   docFilters = {},
@@ -226,7 +225,6 @@ const getBatchSessionAggregation = ({
 ];
 
 const getAdhocSessionAggregation = ({
-  mentorId,
   startDate,
   endDate,
   docFilters = {},
@@ -584,7 +582,6 @@ const classroomSessions = (async (root, params, context) => {
    */
   const batchSessionRes = await batchSessionModel.aggregate(
     getBatchSessionAggregation({
-      mentorId,
       startDate,
       endDate,
       docFilters,
@@ -593,7 +590,6 @@ const classroomSessions = (async (root, params, context) => {
 
   const adhocSessionRes = await adhocSessionModel.aggregate(
     getAdhocSessionAggregation({
-      mentorId,
       startDate,
       endDate,
       docFilters,
