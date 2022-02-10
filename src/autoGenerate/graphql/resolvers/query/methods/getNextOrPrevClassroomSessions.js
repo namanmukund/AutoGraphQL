@@ -154,11 +154,11 @@ const getBatchSessionAggregation = ({
         as: 'topic',
       },
     },
-    // {
-    //   $match: {
-    //     'classroom.documentType': 'classroom',
-    //   },
-    // },
+    {
+      $match: {
+        'classroom.documentType': 'classroom',
+      },
+    },
     {
       $project: {
         id: 1,
@@ -329,11 +329,11 @@ const getAdhocSessionAggregation = ({
         as: 'previousTopic',
       },
     },
-    // {
-    //   $match: {
-    //     'classroom.documentType': 'classroom',
-    //   },
-    // },
+    {
+      $match: {
+        'classroom.documentType': 'classroom',
+      },
+    },
     {
       $project: {
         id: 1,
