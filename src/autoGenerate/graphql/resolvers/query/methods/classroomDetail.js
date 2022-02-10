@@ -406,7 +406,6 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
       previousTopic: null,
     });
   });
-  batchDetail.course.topics = [];
   const returnedObj = {
     id: get(batchDetail, 'id'),
     classroomDetail: {
@@ -424,7 +423,7 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
   return returnedObj;
 };
 
-const courseDetail = (async (root, params, context) => {
+const classroomDetail = (async (root, params, context) => {
   const authentication = ifAuthorized(context);
 
   if (!(authentication && authentication.app && authentication.user)) {
@@ -469,12 +468,12 @@ const courseDetail = (async (root, params, context) => {
     }),
   );
 
-  const transformedCourseDetail = transformMongoResults(
+  const transformedclassroomDetail = transformMongoResults(
     batchSessionRes,
     adhocSessionRes,
     batchnRes,
   );
-  return transformedCourseDetail || {};
+  return transformedclassroomDetail || {};
 });
 
-export default courseDetail;
+export default classroomDetail;

@@ -12,7 +12,7 @@ const Notice = `
     sentBy: User! @relation(name: "NoticeSentByUser", direction: "OneWay")
     sentTo: [User]! @relation(name: "NoticeSentToUser", direction: "OneWay")
     attachedFiles: [NoticeAttachment] @relation(name: "NoticeAttachmentAttachedFile", direction: "OneWay")
-    messgae: String!
+    message: String!
     scheduledAt: Date
     batch: Batch @relation(name: "BatchNotice")
   }

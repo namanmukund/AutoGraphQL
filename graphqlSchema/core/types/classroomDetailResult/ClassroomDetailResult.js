@@ -1,5 +1,5 @@
-const CourseDetailResult = `
-  type CourseDetailResult {
+const ClassroomDetailResult = `
+  type ClassroomDetailResult {
     id: String!
     classroomDetail: ClassroomDetails
     sessions: [ClassroomSessionResult]
@@ -12,5 +12,5 @@ const CourseDetailResult = `
 `;
 
 export default [
-  CourseDetailResult,
+  ClassroomDetailResult,
 ];

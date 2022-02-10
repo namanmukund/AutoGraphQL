@@ -107,7 +107,7 @@ import getEventWinner from './query/methods/getEventWinner';
 import classroomSessions from './query/methods/classroomSessions';
 import updateEventSessionAttendance from './mutation/methods/updateEventSessionAttendance';
 import getNextOrPrevClassroomSessions from './query/methods/getNextOrPrevClassroomSessions';
-import courseDetail from './query/methods/courseDetail';
+import classroomDetail from './query/methods/classroomDetail';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -676,7 +676,7 @@ resolvers.Query.classroomSessions = classroomSessions;
 // Resolver to get next or prev classroom sessions
 resolvers.Query.getNextOrPrevClassroomSessions = getNextOrPrevClassroomSessions;
 // Resolver to get classroom sessions
-resolvers.Query.courseDetail = courseDetail;
+resolvers.Query.classroomDetail = classroomDetail;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 

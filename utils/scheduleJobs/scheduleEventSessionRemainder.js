@@ -120,7 +120,7 @@ const scheduleEventSessionRemainder = async () => {
         eventSessions = [],
       }, ...slots
     } = eventSession;
-    if (get(eventSessions, '[0].id') === eventSessionId) {
+    if (get(eventSessions, '[0].id') !== eventSessionId) {
       const slotTimeStringArray = getSelectedSlotsStringArray(slots);
       const slotNumber = slotTimeStringArray[0].split('slot')[1];
       const { dateObject, startTime } = getIntlDateTime(sessionDate, slotNumber, timeZone);
