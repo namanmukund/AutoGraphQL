@@ -18,7 +18,7 @@ const sendMailModoTemplate = async (
     subject,
     senderName,
     campaignName,
-    data: JSON.stringify(data),
+    data,
   };
   const headers = {
     mmApiKey: process.env.mmApiKey,
