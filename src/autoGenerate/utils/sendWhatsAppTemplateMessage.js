@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable no-param-reassign */
 /* eslint-disable camelcase */
 const fetch = require('node-fetch');
 
@@ -22,7 +24,7 @@ const sendWhatsAppTemplateMessage = async (
     'Content-Type': 'application/json',
   };
   const url = process.env.WATI_API_URL + phoneNumber;
-
+  console.log('whatsapp sent');
   return fetch(url, { method: 'POST', headers, body: JSON.stringify(bodyJson) });
 };
 
