@@ -35,9 +35,12 @@ const Batch = `
     course: Course! @relation(name: "BatchCurrentComponentStatusCourse", direction: "OneWay")
     allottedMentor: User @relation(name:"BatchMentor")
     code: String! @uniqueOrEmpty @trim @uppercase
+    classroomTitle: String
     description: String
+    thumbnailSmall: String
     students: [StudentProfile] @relation(name: "BatchStudentProfile")
     currentComponent: BatchCurrentComponentStatus @relation(name: "BatchCurrentComponentStatusBatch", isSubset: true)
+    documentType: SessionDocumentType @defaultValue(value: "batch")
     type: BatchType @defaultValue(value: "normal")
     campaign: Campaign @relation(name: "CampaignBatch")
     classes: [SchoolClass] @relation(name: "BatchSchoolClass", direction: "OneWay")
@@ -46,6 +49,8 @@ const Batch = `
     b2b2ctimeTable: B2b2cTimeTable
     customSessionLink: String
     timetableSchedule: [TimetableSchedule] @relation(name: "BatchTimetableSchedule")
+    studentReviewsByMentor: [StudentReviewByMentor] @relation(name: "BatchStudentReviewByMentor")
+    notices: [Notice] @relation(name: "BatchNotice")
   }
 `;
 

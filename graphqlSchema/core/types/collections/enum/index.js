@@ -126,6 +126,10 @@ import TriedToReachParent from './TriedToReachParent';
 import TimetableScheduleType from './TimetableScheduleType';
 import ClassMode from './ClassMode';
 import TimetableScheduleEventType from './TimetableScheduleEventType';
+import SessionMode from './SessionMode';
+import SessionDocumentType from './SessionDocumentType';
+import NoticeType from './NoticeType';
+import ReviewType from './ReviewType';
 
 export default [
   Status,
@@ -257,4 +261,8 @@ export default [
   TimetableScheduleType,
   ClassMode,
   TimetableScheduleEventType,
+  SessionMode,
+  SessionDocumentType,
+  NoticeType,
+  ReviewType,
 ];

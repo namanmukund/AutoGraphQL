@@ -5,7 +5,7 @@ import getIntlDateTime from '../../timeZoneDiff';
 import callLocalGraphqlApi from '../../../src/api/callLocalGraphqlApi';
 import getSelectedSlotsStringArray from '../../../src/autoGenerate/graphql/postHookFunctions/utils/getSelectedSlotsStringArray';
 import getSlotTimesInString from '../../getSlotTimesInString';
-import sendWhatsAppTemplateMessage from '../../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
+import callSendWhatsappTemplateInQueue from './callSendWhatsappTemplateInQueue';
 
 const addToCommsSendLogs = async ({
   templateName, triggeredAt, studentProfileId, eventId,
@@ -13,10 +13,11 @@ const addToCommsSendLogs = async ({
 }) => {
   const addQuery = `mutation {
     addCommsSendLog(
-      input: { templateName: "${templateName}", triggeredAt: "${new Date(triggeredAt).toISOString()}" }
+      input: { templateName: "${templateName}", triggeredAt: "${new Date(triggeredAt).toISOString()}"
+      ${condition ? `condition:"${condition}"` : ''}
+     }
       studentProfileConnectId: "${studentProfileId}"
       eventConnectId: "${eventId}"
-      ${condition ? `condition:"${condition}"` : ''}
     ) {
       id
     }
@@ -139,7 +140,7 @@ const eventNewRegistrationReminder = async ({
       }
     });
     const newPhoneNumber = get(commsObj, 'parentPhone').replace('+', '');
-    sendWhatsAppTemplateMessage(
+    callSendWhatsappTemplateInQueue(
       newPhoneNumber,
       templateName,
       newPhoneNumber,
