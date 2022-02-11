@@ -56,7 +56,7 @@ const MentorProfile = `
     portfolioLink: String
     senseiProfile: SenseiProfile @relation(name: "SenseiProfileMentorProfile")
     studentProfile: StudentProfile @relation(name: "MentorStudentProfile")
-    school: School @relation(name: "MentorProfileSchool")
+    schools: [School] @relation(name: "MentorProfileSchool")
     scheduleManagement: ScheduleManagement
     classroomControl: ClassroomControl
     courseControl: CourseControl
