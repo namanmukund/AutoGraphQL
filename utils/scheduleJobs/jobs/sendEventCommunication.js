@@ -44,6 +44,8 @@ const addToCommsSendLogs = async ({
   }
   `;
   const result = await callLocalGraphqlApi(addQuery);
+  // eslint-disable-next-line no-console
+  console.log(`added comms====================${get(result, 'data.addCommsSendLog.id')}`);
   return get(result, 'data.addCommsSendLog', null);
 };
 
