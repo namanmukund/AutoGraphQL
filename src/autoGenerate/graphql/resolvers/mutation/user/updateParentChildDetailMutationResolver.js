@@ -281,6 +281,10 @@ Create student and their user profile
     studentProfileInputData.section = section;
   }
 
+  if (get(input, 'schoolName') && !schoolId && !studentSchoolId) {
+    studentProfileInputData.schoolName = get(input, 'schoolName');
+  }
+
   studentProfileInputData.profileAvatarCode = studentProfileAvatarCodes[Math.floor((Math.random() * studentProfileAvatarCodes.length))] || 'theo';
   const studentProfileInput = {
     input: studentProfileInputData,

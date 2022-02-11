@@ -22,6 +22,7 @@ import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentCh
 // import sendBookingReminderOrConfirmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import userLogsActivity from '../utils/userLogsActivity';
+import getUserOriginSource from './utils/getUserOriginSource';
 
 const USER_TYPE = 'User';
 
@@ -182,6 +183,10 @@ const signupOrLoginViaOtp = async (
       newUser.country = input.country || 'india';
       newUser.timezone = input.timezone || 'Asia/Kolkata';
       input.country = input.country ? input.country : 'india';
+      if (!get(newUser, 'source')) {
+        const source = getUserOriginSource(get(newUser, 'utmSource'), '', '', '', '');
+        newUser.source = source;
+      }
       input.leadStatus = 'New Lead';
       input.unVerifiedLead = true;
       // fetch campaign type early to modfiy newUser obj with vertical
