@@ -150,6 +150,7 @@ import Task from './task';
 import UserOtpLog from './userOtpLog';
 import UserDeviceLog from './UserDeviceLog';
 import GenerateMentorChild from './generateMentorChild';
+import TimetableSchedule from './timetableSchedule';
 
 export default [
   ...User,
@@ -304,4 +305,5 @@ export default [
   ...UserOtpLog,
   ...UserDeviceLog,
   ...GenerateMentorChild,
+  ...TimetableSchedule,
 ];

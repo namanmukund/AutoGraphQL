@@ -123,7 +123,9 @@ import DurationType from './DurationType';
 import AttendanceFilter from './AttendanceFilter';
 import LengthOfContent from './LengthOfContent';
 import TriedToReachParent from './TriedToReachParent';
-import ScheduleEventType from './ScheduleEventType';
+import TimetableScheduleType from './TimetableScheduleType';
+import ClassMode from './ClassMode';
+import TimetableScheduleEventType from './TimetableScheduleEventType';
 
 export default [
   Status,
@@ -252,5 +254,7 @@ export default [
   AttendanceFilter,
   LengthOfContent,
   TriedToReachParent,
-  ScheduleEventType,
+  TimetableScheduleType,
+  ClassMode,
+  TimetableScheduleEventType,
 ];

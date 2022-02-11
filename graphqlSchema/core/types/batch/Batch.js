@@ -18,7 +18,6 @@ const BatchEventTimeTableRule = `
   type BatchEventTimeTableRule {
    startDate: Date
    endDate: Date
-   type: ScheduleEventType
    ${slotTimeFields}
    ${weekDaysFields}
  }`;
@@ -55,6 +54,7 @@ const Batch = `
     batchEventTimeTableRule: BatchEventTimeTableRule
     b2b2ctimeTable: B2b2cTimeTable
     customSessionLink: String
+    timetableSchedule: [TimetableSchedule] @relation(name: "BatchTimetableSchedule")
   }
 `;
 
