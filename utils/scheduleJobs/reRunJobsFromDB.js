@@ -251,6 +251,8 @@ const reRunJobsFromDB = async () => {
         break;
       }
       case 'eventCommsJob': {
+        // eslint-disable-next-line no-console
+        console.log('scheduler', jobType);
         if (isPast) {
           sendEventCommunication({
             eventId,
@@ -285,6 +287,8 @@ const reRunJobsFromDB = async () => {
         break;
       }
       case 'eventNewRegistrationReminder': {
+        // eslint-disable-next-line no-console
+        console.log('scheduler regi', jobType);
         if (isPast) {
           eventNewRegistrationReminder({
             eventId,
