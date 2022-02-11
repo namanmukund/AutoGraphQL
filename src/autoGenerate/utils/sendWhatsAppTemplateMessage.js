@@ -24,7 +24,7 @@ const sendWhatsAppTemplateMessage = async (
     'Content-Type': 'application/json',
   };
   const url = process.env.WATI_API_URL + phoneNumber;
-  console.log('whatsapp sent');
+  console.log('sending wati');
   return fetch(url, { method: 'POST', headers, body: JSON.stringify(bodyJson) });
 };
 
