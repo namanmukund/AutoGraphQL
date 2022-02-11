@@ -206,7 +206,7 @@ const createBatchSessions = async (batchId, possibleDates, filteredSlots, slotsI
   return true;
 };
 
-const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, workingDayFilteredSlotsString, slotsInInput, allottedMentorId, courseId, batchType) => {
+const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filteredSlotsString, slotsInInput, allottedMentorId, courseId, batchType) => {
   let i = 0;
   /* eslint-disable array-callback-return */
   // eslint-disable-next-line no-restricted-syntax
@@ -220,7 +220,7 @@ const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, work
     const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId, sessionType);
     /* eslint-disable array-callback-return */
     const date = possibleDates[i].toISOString();
-    updateBatchSession(session.id, workingDayFilteredSlotsString, date, finalMentorSessionId, courseId);
+    updateBatchSession(session.id, filteredSlotsString, date, finalMentorSessionId, courseId);
     i += 1;
   }
 };
@@ -250,8 +250,7 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
   const { id: batchId, studentsConnectIds, allottedMentorConnectId } = params;
   const mentorUserId = get(input, 'allottedMentor.typeId', '');
   const courseId = get(input, 'course.typeId', '');
-  let timeTableRule = get(params, 'input.timeTableRule', null);
-  let batchEventTimeTableRule = get(params, 'input.batchEventTimeTableRule', null);
+  const timeTableRule = get(params, 'input.timeTableRule', null);
   const batchType = get(input, 'type', '');
   /*
     -> Fetch total number of published topics (x), this will be the max possible number of batchSessions
@@ -261,53 +260,23 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
     -> if there are no batchSessions in the Db, create batchSessions for all the dates in the date array
     -> if there are some batchSessions, update the remaining batchSessions with the new passed values and create batchSessions if necessary.
   */
-  if (timeTableRule || batchEventTimeTableRule) {
-    /*
-      -> If timeTableRule is not passed in input
-        -> Try to fetch it from existing document and proceed
-        -> if not found, return without creating batch sessions
-    */
-    if (!timeTableRule) {
-      timeTableRule = get(context, 'previousDocument.timeTableRule');
-    }
-    if (!timeTableRule) return;
-    /*
-      -> If batchEventTimeTableRule is not passed in input
-        -> Try to fetch it from existing document and proceed
-        -> if not found, proceed normally with event values null
-    */
-    if (!batchEventTimeTableRule) {
-      batchEventTimeTableRule = get(context, 'previousDocument.batchEventTimeTableRule');
-    }
-    const considerEvents = batchEventTimeTableRule;
+  if (timeTableRule) {
+    // topic count
     let topics = await getTopics(courseId);
     const topicCount = topics && topics.length;
-    // existing batch sessions
+    // batch sessions
     const batchSessions = await getBatchSessions(batchId);
 
-    // start, end dates (working)
-    const workingDays = getSelectedDays(timeTableRule);
-    const workingDayStartDate = new Date(timeTableRule.startDate);
-    workingDayStartDate.setHours(0, 0, 0, 0);
-    const workingDayEndDate = new Date(timeTableRule.endDate);
-    workingDayEndDate.setHours(0, 0, 0, 0);
-
-    let eventDays = null;
-    let eventDayStartDate = null;
-    let eventDayEndDate = null;
-
-    // start, end dates (events)
-    if (considerEvents) {
-      eventDays = getSelectedDays(batchEventTimeTableRule);
-      eventDayStartDate = new Date(batchEventTimeTableRule.startDate);
-      eventDayStartDate.setHours(0, 0, 0, 0);
-      eventDayEndDate = new Date(batchEventTimeTableRule.endDate);
-      eventDayEndDate.setHours(0, 0, 0, 0);
-    }
+    // start, end dates
+    const days = getSelectedDays(timeTableRule);
+    const startDate = new Date(timeTableRule.startDate);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(timeTableRule.endDate);
+    endDate.setHours(0, 0, 0, 0);
 
     // slots passed in input
-    const { ...workingDaySlots } = timeTableRule;
-    const { filteredSlotsString: workingDayFilteredSlotsString } = extractSlotsFromInput(workingDaySlots);
+    const { ...slots } = timeTableRule;
+    const { filteredSlotsString } = extractSlotsFromInput(slots);
 
     if (batchSessions && batchSessions.length) {
       // sorting the existing batch sessions into started/completed and allotted
@@ -320,12 +289,12 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
         // if there exists some started or completed sessions, don't count them, create/update sessions for the remaining
         possibleSessionCount -= sessionsStartedOrCompleted.length;
       }
-      let possibleDates = getPossibleDates(workingDayStartDate, workingDayEndDate, workingDays, eventDayStartDate, eventDayEndDate, eventDays);
+      let possibleDates = getPossibleDates(startDate, endDate, days);
       // for the sessions which are still in the allotted state, update them
       const allottedSessionsCount = sessionsAllotted.length;
       if (allottedSessionsCount > 0) {
         possibleSessionCount -= allottedSessionsCount;
-        updateAllottedBatchSessions(sessionsAllotted, possibleDates, workingDayFilteredSlotsString, workingDaySlots, mentorUserId, courseId, batchType);
+        updateAllottedBatchSessions(sessionsAllotted, possibleDates, filteredSlotsString, slots, mentorUserId, courseId, batchType);
       }
       if (possibleSessionCount > 0) {
         // all the remaining sessions have to be created
@@ -333,13 +302,13 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
         possibleDates = possibleDates.slice(startFromIndex);
         const topicStartIndex = topicCount - possibleSessionCount;
         topics = topics.splice(topicStartIndex);
-        createBatchSessions(batchId, possibleDates, workingDayFilteredSlotsString, workingDaySlots, possibleSessionCount, topics, mentorUserId, courseId, batchType);
+        createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId, batchType);
       }
     } else {
       // if there are no exisiting batchSessions for the given batch id, create all of them
       const possibleSessionCount = topicCount;
-      const possibleDates = getPossibleDates(workingDayStartDate, workingDayEndDate, workingDays, eventDayStartDate, eventDayEndDate, eventDays);
-      createBatchSessions(batchId, possibleDates, workingDayFilteredSlotsString, workingDaySlots, possibleSessionCount, topics, mentorUserId, courseId, batchType);
+      const possibleDates = getPossibleDates(startDate, endDate, days);
+      createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId, batchType);
     }
   } else if (allottedMentorConnectId) {
     const previouslyAllottedMentorId = get(context, 'previousDocument.allottedMentor.id', '');
