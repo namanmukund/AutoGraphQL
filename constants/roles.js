@@ -27,6 +27,7 @@ const DEMAND_MANAGER = 'demandManager';
 const LEAD_PARTNER = 'leadPartner';
 const SENSEI = 'sensei';
 const EVENT_SPEAKER = 'eventSpeaker';
+const SCHOOL_TEACHER = 'schoolTeacher';
 
 const CMS_HEAD = `[
 "${ADMIN}",
@@ -215,6 +216,7 @@ const ALL_ROLES_ARRAY = [
   LEAD_PARTNER,
   SENSEI,
   EVENT_SPEAKER,
+  SCHOOL_TEACHER,
 ];
 
 const CMS_HEAD_ARRAY = [
