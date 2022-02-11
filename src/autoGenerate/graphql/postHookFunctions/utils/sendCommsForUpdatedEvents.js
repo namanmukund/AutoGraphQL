@@ -189,6 +189,9 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
           'event_rescheduled_information',
           parentPhone,
           parameters,
+          {
+            triggeredAt: new Date(),
+          },
         );
         if (isEmailCommsEnabled) {
           let sendEmailObj = {};
@@ -274,6 +277,9 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
           'event_cancellation_information',
           parentPhone,
           parameters,
+          {
+            triggeredAt: new Date(),
+          },
         );
         if (isEmailCommsEnabled) {
           let sendEmailObj = {};

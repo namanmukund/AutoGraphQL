@@ -7,28 +7,6 @@ import getSelectedSlotsStringArray from '../../../src/autoGenerate/graphql/postH
 import getSlotTimesInString from '../../getSlotTimesInString';
 import callSendWhatsappTemplateInQueue from './callSendWhatsappTemplateInQueue';
 
-const addToCommsSendLogs = async ({
-  templateName, triggeredAt, studentProfileId, eventId,
-  condition = 'afterRegistration',
-}) => {
-  const addQuery = `mutation {
-    addCommsSendLog(
-      input: { templateName: "${templateName}", triggeredAt: "${new Date(triggeredAt).toISOString()}"
-      ${condition ? `condition:"${condition}"` : ''}
-     }
-      studentProfileConnectId: "${studentProfileId}"
-      eventConnectId: "${eventId}"
-    ) {
-      id
-    }
-  }
-  `;
-  const result = await callLocalGraphqlApi(addQuery);
-  // eslint-disable-next-line no-console
-  console.log(`added comms====================${get(result, 'data.addCommsSendLog.id')}`);
-  return get(result, 'data.addCommsSendLog', null);
-};
-
 const getEventDetails = async (eventId) => {
   const query = `{
   event(id: "${eventId}") {
@@ -147,10 +125,13 @@ const eventNewRegistrationReminder = async ({
       templateName,
       newPhoneNumber,
       parameters,
+      {
+        templateName,
+        triggeredAt: new Date(),
+        eventId,
+        studentProfileId,
+      },
     );
-    addToCommsSendLogs({
-      templateName, triggeredAt: new Date(), eventId, studentProfileId,
-    });
   }
   deleteJob();
 };
