@@ -58,6 +58,11 @@ const getParentChildExistingDetails = async (userId) => {
           }
           source
           vertical
+          utmSource
+          utmCampaign
+          utmTerm
+          utmContent
+          utmMedium
           parentProfile{
             id
             children{
@@ -142,6 +147,7 @@ const updateParentChildDetailMutationResolver = async (
   /*
       update parent user details if provided in the input
   */
+  let vertical = '';
   if (parentName || parentEmail || (parentPhone && parentPhone.number)) {
     const userInputData = {};
     if (parentName) {
@@ -155,14 +161,14 @@ const updateParentChildDetailMutationResolver = async (
     }
     if (campaignType) {
       if (campaignType === 'b2b') {
-        userInputData.vertical = 'b2b';
+        vertical = 'b2b';
       } else {
-        userInputData.vertical = 'b2b2c';
+        vertical = 'b2b2c';
       }
     } else {
-      userInputData.vertical = 'b2c';
+      vertical = 'b2c';
     }
-
+    userInputData.vertical = vertical;
     const variables = {
       input: userInputData,
     };
@@ -211,8 +217,30 @@ Create student and their user profile
     source: existingUserDetails.source,
     country: country || 'india',
     timezone,
+    vertical,
   };
 
+  const {
+    utmSource,
+    utmCampaign,
+    utmTerm,
+    utmContent,
+    utmMedium,
+  } = existingUserDetails;
+
+  if (utmSource || utmCampaign || utmTerm || utmContent || utmMedium) {
+    if (utmSource) childData.utmSource = utmSource;
+    if (utmCampaign) childData.utmCampaign = utmCampaign;
+    if (utmTerm) childData.utmTerm = utmTerm;
+    if (utmContent) childData.utmContent = utmContent;
+    if (utmMedium) childData.utmMedium = utmMedium;
+  } else {
+    if (get(input, 'utmSource')) childData.utmSource = get(input, 'utmSource');
+    if (get(input, 'utmCampaign')) childData.utmCampaign = get(input, 'utmCampaign');
+    if (get(input, 'utmTerm')) childData.utmTerm = get(input, 'utmTerm');
+    if (get(input, 'utmContent')) childData.utmContent = get(input, 'utmContent');
+    if (get(input, 'utmMedium')) childData.utmMedium = get(input, 'utmMedium');
+  }
   // check if the child has been referred by a valid user
   const referredByUserData = await checkForValidReferralCode(referralCode);
   if (referredByUserData && referredByUserData.id) {
@@ -324,6 +352,7 @@ Create student and their user profile
     ...params,
     input: {
       ...params.input,
+      fromEventsPage: get(input, 'eventId'),
       phone: {
         number: get(existingUserDetails, 'phone.number'),
         countryCode: get(existingUserDetails, 'phone.countryCode'),

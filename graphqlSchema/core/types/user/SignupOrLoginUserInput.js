@@ -14,6 +14,7 @@ const SignupOrLoginUserInput = `
     city: String
     timezone: String
     role: UserRole @defaultValue(value: "parent")
+    eventId: String
   }`;
 
 export default SignupOrLoginUserInput;
