@@ -130,6 +130,7 @@ import SessionMode from './SessionMode';
 import SessionDocumentType from './SessionDocumentType';
 import NoticeType from './NoticeType';
 import ReviewType from './ReviewType';
+import ScheduleSessionType from './ScheduleSessionType';
 
 export default [
   Status,
@@ -265,4 +266,5 @@ export default [
   SessionDocumentType,
   NoticeType,
   ReviewType,
+  ScheduleSessionType,
 ];

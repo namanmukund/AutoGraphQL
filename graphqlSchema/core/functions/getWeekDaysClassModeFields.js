@@ -2,10 +2,11 @@ import { weekDays } from '../../../constants';
 
 const getWeekDaysClassModeFields = (
   fieldType,
+  excludeType,
 ) => {
   let weekDaysClassModeFields = '';
   weekDays.forEach((day) => {
-    weekDaysClassModeFields += `${day}ClassMode: ${fieldType} `;
+    weekDaysClassModeFields += excludeType ? `${day}ClassMode` : `${day}ClassMode: ${fieldType} `;
   });
   return weekDaysClassModeFields;
 };

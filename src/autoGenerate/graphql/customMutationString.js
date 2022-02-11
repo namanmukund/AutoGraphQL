@@ -48,6 +48,7 @@ const customMutationString = `
    generateMentorPayoutReport ( input: MentorPayoutReportInput ): MentorPayoutReportOutput,
    generateMentorChild ( mentorId: String ): MentorChildOutput
    updateEventSessionAttendance (input: EventAttendanceInput): BooleanResult
+   scheduleSessions (input: ScheduleSessionsInput): BooleanResult
    `;
 
 export default customMutationString;
