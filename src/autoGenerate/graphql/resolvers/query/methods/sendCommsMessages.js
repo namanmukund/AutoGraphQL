@@ -1,13 +1,9 @@
 import { get } from 'lodash';
-import sgMail from '@sendgrid/mail';
 import fetch from 'node-fetch';
-import parsedHtmlFromTemplateFileAndObject from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import { CommsError } from '../../../../../../constants/errors';
 import { PhoneFieldRequiredError, EmailFieldRequiredError } from '../../../../../../constants/errors/input';
-import sendGridApi from '../../../../../../config/sendGrid';
 
 const fetchComms = async (dataFieldFilter) => {
   const query = `{
@@ -96,22 +92,27 @@ const sendCommsMessage = async (root, params, context) => {
         templateObject[mapCommsWithDataFields[key]] = get(params, `input.${key}`);
       }
     });
-    const templateString = parsedHtmlFromTemplateFileAndObject(
-      templateName, templateObject,
-    );
-    await templateString.then(async (html) => {
-      const ccEmail = '';
-      const bccEmail = '';
-      const subject = 'Event Tekie';
-      const text = '';
-      const emailMsgObject = getEmailObject(parentEmail, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
-      sgMail.setApiKey(sendGridApi.SENDGRID_API_KEY);
-      await sgMail
-        .send(emailMsgObject, (error) => {
-          if (error) {
-            throw new CommsError();
-          }
-        });
+    templateObject.student_name = 'pawan';
+    const bodyJson = {
+      toEmail: parentEmail,
+      senderEmail: 'hello@tekie.in',
+      subject: 'Testing Comms',
+      senderName: 'Tekie',
+      campaignName: '',
+      data: templateObject,
+    };
+    const headers = {
+      mmApiKey: process.env.MAILMODO_KEY,
+      'Content-Type': 'application/json',
+    };
+    const url = process.env.MAIL_MODO_URL + templateName;
+
+    await fetch(url, { method: 'POST', headers, body: JSON.stringify(bodyJson) }).then((res) => {
+      res.json().then((resp) => {
+        if (!get(resp, 'success')) {
+          throw new CommsError();
+        }
+      });
     });
   }
   return {
