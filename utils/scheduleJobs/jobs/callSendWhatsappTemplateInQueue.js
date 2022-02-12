@@ -1,4 +1,6 @@
+/* eslint-disable no-console */
 import sendWhatsAppTemplateMessage from '../../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
+import addToCommsSendLogs from './addToCommsSendLogs';
 
 const queue = [];
 const callInQueue = (functionToCall) => (...args) => {
@@ -13,6 +15,9 @@ const callInQueue = (functionToCall) => (...args) => {
       }
       // call first function call
       functionToCall(...queue[0]);
+      if (queue[0][queue[0].length - 1]) {
+        addToCommsSendLogs({ ...queue[0][queue[0].length - 1] });
+      }
       // delete first function call
       queue.shift();
     }, Math.floor(Math.random() * 10) * 1000);

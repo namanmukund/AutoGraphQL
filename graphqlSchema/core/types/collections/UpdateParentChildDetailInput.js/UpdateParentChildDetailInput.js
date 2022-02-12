@@ -22,6 +22,7 @@ const UpdateParentChildDetailInput = `
     utmTerm: String
     utmContent: String
     utmMedium: String
+    eventId: String
   }
 `;
 

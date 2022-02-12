@@ -37,7 +37,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 // import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import getUserPasswordObject from './utils/getUserPasswordObject';
 import { getNumberAndSendSms } from '../../../../../sms';
-import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
+// import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
 
 const USER_TYPE = 'User';
 
@@ -495,26 +495,26 @@ If coming from campaign and the type os b2b allocate the user to the right batch
       phoneOtpCreationDate: new Date(),
     };
 
-    setTimeout(() => {
-      updateLeadSquared({
-        Phone: get(parentPhone, 'number'),
-        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '06 February' : '06 February',
-        mx_Event_Time: utmCampaign.includes('doodling') || utmSource.includes('communityevent') ? '11:00 am' : '03:00 pm',
-        mx_Event_Date_Time: utmCampaign.includes('doodling') || utmSource.includes('communityevent') ? '2022-02-06 05:30:00' : '2022-02-06 09:30:00',
-      }, false, {
-        ActivityEvent: 208,
-        Fields: [
-          {
-            SchemaName: 'mx_Custom_1',
-            Value: utmSource,
-          },
-          {
-            SchemaName: 'mx_Custom_2',
-            Value: utmCampaign,
-          },
-        ],
-      });
-    }, 1000 * 60 * 2);
+    // setTimeout(() => {
+    //   updateLeadSquared({
+    //     Phone: get(parentPhone, 'number'),
+    //     mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '06 February' : '06 February',
+    //     mx_Event_Time: utmCampaign.includes('doodling') || utmSource.includes('communityevent') ? '11:00 am' : '03:00 pm',
+    //     mx_Event_Date_Time: utmCampaign.includes('doodling') || utmSource.includes('communityevent') ? '2022-02-06 05:30:00' : '2022-02-06 09:30:00',
+    //   }, false, {
+    //     ActivityEvent: 208,
+    //     Fields: [
+    //       {
+    //         SchemaName: 'mx_Custom_1',
+    //         Value: utmSource,
+    //       },
+    //       {
+    //         SchemaName: 'mx_Custom_2',
+    //         Value: utmCampaign,
+    //       },
+    //     ],
+    //   });
+    // }, 1000 * 60 * 2);
 
     // update phoneOtp in db
     await updateExistingUserOTP({ id: parentId }, updateObj, modelMutations);
