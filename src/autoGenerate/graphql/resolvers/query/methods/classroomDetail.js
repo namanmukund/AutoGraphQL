@@ -235,6 +235,14 @@ const getBatchAggregation = ({ batchId }) => [
   },
   {
     $lookup: {
+      from: 'StudentProfile',
+      localField: 'students.typeId',
+      foreignField: 'id',
+      as: 'students',
+    },
+  },
+  {
+    $lookup: {
       from: 'Course',
       let: { courseId: '$course.typeId' },
       pipeline: [
@@ -317,11 +325,14 @@ const getBatchAggregation = ({ batchId }) => [
       course: {
         $arrayElemAt: ['$course', 0],
       },
+      createdAt: 1,
+      thumbnailSmall: 1,
       classes: {
         id: 1,
         grade: 1,
         section: 1,
       },
+      students: 1,
       documentType: 1,
     },
   },
@@ -406,12 +417,14 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
       previousTopic: null,
     });
   });
+  const { course } = batchDetail;
   const returnedObj = {
     id: get(batchDetail, 'id'),
     classroomDetail: {
       code: get(batchDetail, 'code'),
       classroomTitle: get(batchDetail, 'classroomTitle', ''),
       description: get(batchDetail, 'description', ''),
+      students: get(batchDetail, 'students'),
     },
     sessions: finalResult,
     learingCount: batchSessions ? batchSessions.length : 0,
@@ -419,6 +432,15 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
     testCount: adhocSessions ? adhocSessions.filter((session) => get(session, 'type') === 'assessment').length : 0,
     assignmentCount: 0,
     tools: get(batchDetail, 'course.tools', []),
+    classroomCourse: {
+      id: get(course, 'id'),
+      order: get(course, 'order'),
+      description: get(course, 'description'),
+      thumbnail: get(course, 'thumbnail.uri'),
+      title: get(course, 'title'),
+    },
+    createdAt: get(batchDetail, 'createdAt'),
+    batchThumbnail: get(batchDetail, 'thumbnailSmall'),
   };
   return returnedObj;
 };
