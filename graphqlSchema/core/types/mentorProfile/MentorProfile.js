@@ -61,6 +61,8 @@ const MentorProfile = `
     classroomControl: ClassroomControl
     courseControl: CourseControl
     sessionReporting: SessionReporting
+    accessType: SchoolTeacherAccessType @defaultValue(value: "teacher")
+    schoolClasses: [SchoolClass] @relation(name: "MentorProfileSchoolClass", direction: "OneWay")
 }`;
 
 export default [MentorProfile, ScheduleManagement, ClassroomControl, CourseControl, SessionReporting];
