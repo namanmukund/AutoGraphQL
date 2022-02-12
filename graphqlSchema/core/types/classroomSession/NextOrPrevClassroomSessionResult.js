@@ -14,7 +14,7 @@ const NextOrPrevClassroomSession = `
     totalStudents: Int
     completedHomeworkMeta: Int
     thumbnailSmall: File
-    documentType: ClassroomSessionDocumentType @defaultValue(value: "batchSession")
+    recordType: ClassroomSessionDocumentType @defaultValue(value: "batchSession")
     sessionMode: SessionMode @defaultValue(value: "online")
     sessionStartDate: Date
     sessionEndDate: Date
@@ -28,6 +28,7 @@ const NextOrPrevClassroomSessionResult = `
     classroomId: ID!
     limit: Int!
     queryType: NextOrPrevSessionType!
+    documentType: SessionDocumentType! @defaultValue(value: "batch")
     sessions: [NextOrPrevClassroomSession]!
   }
 `;

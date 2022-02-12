@@ -90,23 +90,6 @@ const sendEventSessionRemainderMail = (email, sendEmailObject) => {
   });
 };
 
-const addToCommsSendLogs = async ({
-  templateName, triggeredAt, studentProfileId, eventId,
-}) => {
-  const addQuery = `mutation {
-    addCommsSendLog(
-      input: { templateName: "${templateName}", triggeredAt: "${new Date(triggeredAt).toISOString()}" }
-      studentProfileConnectId: "${studentProfileId}"
-      eventConnectId: "${eventId}"
-    ) {
-      id
-    }
-  }
-  `;
-  const result = await callLocalGraphqlApi(addQuery);
-  return get(result, 'data.addCommsSendLog', null);
-};
-
 const scheduleEventSessionRemainder = async () => {
   const eventSessionsData = await getEventSessions();
   for (const eventSession of eventSessionsData) {
@@ -201,13 +184,12 @@ const scheduleEventSessionRemainder = async () => {
           callSendWhatsappTemplateInQueue(parentPhone,
             'event_reminder_t_1_hour',
             parentPhone,
-            parameters);
-          addToCommsSendLogs({
-            templateName: 'event_reminder_t_1_hour',
-            triggeredAt: new Date(),
-            eventId,
-            studentProfileId,
-          });
+            parameters, {
+              templateName: 'event_reminder_t_1_hour',
+              triggeredAt: new Date(),
+              eventId,
+              studentProfileId,
+            });
         }
         if (isEmailCommsEnabled) {
           let emailCommsObj = {};

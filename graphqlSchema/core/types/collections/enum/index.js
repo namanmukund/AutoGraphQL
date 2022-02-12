@@ -131,6 +131,7 @@ import SessionDocumentType from './SessionDocumentType';
 import NoticeType from './NoticeType';
 import ReviewType from './ReviewType';
 import ScheduleSessionType from './ScheduleSessionType';
+import SchoolTeacherAccessType from './SchoolTeacherAccessType';
 
 export default [
   Status,
@@ -267,4 +268,5 @@ export default [
   NoticeType,
   ReviewType,
   ScheduleSessionType,
+  SchoolTeacherAccessType,
 ];

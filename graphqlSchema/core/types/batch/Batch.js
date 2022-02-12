@@ -26,8 +26,8 @@ const Batch = `
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
+      { appName: "${TWA}" operations: "*" },
       { appName: "${TLA}" operations: ${READ} },
-      { appName: "${TWA}" operations: ${READ} }
       ], 
     rule: allow
   )

@@ -23,30 +23,6 @@ const getJobData = async (jobId) => {
   return get(job, 'data.scheduleJob.id');
 };
 
-const addToCommsSendLogs = async ({
-  templateName, triggeredAt, studentProfileId, eventId,
-  condition, unit, value, attendanceFilter
-}) => {
-  const addQuery = `mutation {
-    addCommsSendLog(
-      input: {
-        templateName: "${templateName}", triggeredAt: "${new Date(triggeredAt).toISOString()}" 
-        ${condition ? `condition:"${condition}"` : ''}
-        ${unit ? `unit:"${unit}"` : ''}
-        ${value ? `value:"${value}"` : ''}
-        ${attendanceFilter ? `attendanceFilter:"${attendanceFilter}"` : ''}
-      }
-      studentProfileConnectId: "${studentProfileId}"
-      eventConnectId: "${eventId}"
-    ) {
-      id
-    }
-  }
-  `;
-  const result = await callLocalGraphqlApi(addQuery);
-  return get(result, 'data.addCommsSendLog', null);
-};
-
 const eventQuery = (id) => `{
   event(id: "${id}") {
     id
@@ -244,17 +220,16 @@ const sendEventCommunication = async ({
       callSendWhatsappTemplateInQueue(newPhoneNumber,
         templateName,
         newPhoneNumber,
-        whatsappCommsVariablesList);
-      addToCommsSendLogs({
-        templateName,
-        triggeredAt: new Date(),
-        eventId,
-        studentProfileId,
-        condition,
-        value,
-        unit,
-        attendanceFilter
-      });
+        whatsappCommsVariablesList, {
+          templateName,
+          triggeredAt: new Date(),
+          eventId,
+          studentProfileId,
+          condition,
+          value,
+          unit,
+          attendanceFilter
+        });
       if (toSendEmailComms && commsVariables.length) {
         const emailCommsVariableObject = commsVariables.reduce((acc, commsVariable) => {
           acc[get(commsVariable, 'emailVariableName')] = commsObj[get(commsVariable, 'dataField')];
@@ -301,17 +276,16 @@ const sendEventCommunication = async ({
         callSendWhatsappTemplateInQueue(newPhoneNumber,
           templateName,
           newPhoneNumber,
-          whatsappCommsVariablesList);
-        addToCommsSendLogs({
-          templateName,
-          triggeredAt: new Date(),
-          eventId,
-          studentProfileId,
-          condition,
-          value,
-          unit,
-          attendanceFilter
-        });
+          whatsappCommsVariablesList, {
+            templateName,
+            triggeredAt: new Date(),
+            eventId,
+            studentProfileId,
+            condition,
+            value,
+            unit,
+            attendanceFilter
+          });
         if (toSendEmailComms && commsVariables.length) {
           const emailCommsVariableObject = commsVariables.reduce((acc, commsVariable) => {
             acc[get(commsVariable, 'emailVariableName')] = commsObj[get(commsVariable, 'dataField')];
@@ -365,17 +339,16 @@ const sendEventCommunication = async ({
           callSendWhatsappTemplateInQueue(newPhoneNumber,
             templateName,
             newPhoneNumber,
-            whatsappCommsVariablesList);
-          addToCommsSendLogs({
-            templateName,
-            triggeredAt: new Date(),
-            eventId,
-            studentProfileId,
-            condition,
-            value,
-            unit,
-            attendanceFilter
-          });
+            whatsappCommsVariablesList, {
+              templateName,
+              triggeredAt: new Date(),
+              eventId,
+              studentProfileId,
+              condition,
+              value,
+              unit,
+              attendanceFilter
+            });
           if (toSendEmailComms && commsVariables.length) {
             const emailCommsVariableObject = commsVariables.reduce((acc, commsVariable) => {
               acc[get(commsVariable, 'emailVariableName')] = commsObj[get(commsVariable, 'dataField')];
@@ -428,17 +401,16 @@ const sendEventCommunication = async ({
           callSendWhatsappTemplateInQueue(newPhoneNumber,
             templateName,
             newPhoneNumber,
-            whatsappCommsVariablesList);
-          addToCommsSendLogs({
-            templateName,
-            triggeredAt: new Date(),
-            eventId,
-            studentProfileId,
-            condition,
-            value,
-            unit,
-            attendanceFilter
-          });
+            whatsappCommsVariablesList, {
+              templateName,
+              triggeredAt: new Date(),
+              eventId,
+              studentProfileId,
+              condition,
+              value,
+              unit,
+              attendanceFilter
+            });
           if (toSendEmailComms && commsVariables.length) {
             const emailCommsVariableObject = commsVariables.reduce((acc, commsVariable) => {
               acc[get(commsVariable, 'emailVariableName')] = commsObj[get(commsVariable, 'dataField')];

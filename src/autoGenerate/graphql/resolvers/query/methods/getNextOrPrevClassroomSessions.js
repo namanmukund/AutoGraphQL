@@ -22,8 +22,13 @@ const getBatchSessionAggregation = ({
   bookingDate,
   queryType = '',
   limit,
+  documentType,
 }) => {
   const matchQuery = { 'batch.typeId': classroomId };
+  const classroomMatchQuery = {};
+  if (documentType === 'classroom') {
+    classroomMatchQuery['classroom.documentType'] = 'classroom';
+  }
   if (queryType === 'next') {
     matchQuery.bookingDate = {
       $gte: new Date(bookingDate),
@@ -156,7 +161,7 @@ const getBatchSessionAggregation = ({
     },
     {
       $match: {
-        'classroom.documentType': 'classroom',
+        ...classroomMatchQuery,
       },
     },
     {
@@ -196,8 +201,13 @@ const getAdhocSessionAggregation = ({
   bookingDate,
   queryType = '',
   limit,
+  documentType,
 }) => {
   const matchQuery = { 'batch.typeId': classroomId };
+  const classroomMatchQuery = {};
+  if (documentType === 'classroom') {
+    classroomMatchQuery['classroom.documentType'] = 'classroom';
+  }
   if (queryType === 'next') {
     matchQuery.bookingDate = {
       $gte: new Date(bookingDate),
@@ -331,7 +341,7 @@ const getAdhocSessionAggregation = ({
     },
     {
       $match: {
-        'classroom.documentType': 'classroom',
+        ...classroomMatchQuery,
       },
     },
     {
@@ -389,7 +399,7 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
         sessionStatus: get(batchSession, 'sessionStatus', 'allotted'),
         sessionMode: get(batchSession, 'sessionMode', 'online'),
         sessionRecordingLink: get(batchSession, 'sessionRecordingLink', null),
-        documentType: 'batchSession',
+        recordType: 'batchSession',
         ...getSlotTimeFields(batchSession),
         startMinutes: get(batchSession, 'startMinutes', 0),
         endMinutes: get(batchSession, 'endMinutes', 0),
@@ -412,7 +422,7 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
         sessionStatus: get(adhocSession, 'sessionStatus', 'allotted'),
         sessionMode: get(adhocSession, 'sessionMode', 'online'),
         sessionRecordingLink: get(adhocSession, 'sessionRecordingLink', null),
-        documentType: 'adhocSession',
+        recordType: 'adhocSession',
         startMinutes: get(batchSession, 'startMinutes', 0),
         endMinutes: get(batchSession, 'endMinutes', 0),
         ...getSlotTimeFields(adhocSession),
@@ -441,6 +451,7 @@ const getNextOrPrevClassroomSessions = async (root, params, context) => {
     for (const input of inputArr) {
       const classroomId = get(input, 'classroomId');
       const bookingDate = get(input, 'bookingDate');
+      const documentType = get(input, 'documentType');
       const limit = get(input, 'limit', 0);
       const queryType = get(input, 'queryType');
       if (limit < 1 || limit > 3) {
@@ -465,6 +476,7 @@ const getNextOrPrevClassroomSessions = async (root, params, context) => {
           bookingDate,
           queryType,
           limit,
+          documentType,
         }),
       );
 
@@ -474,6 +486,7 @@ const getNextOrPrevClassroomSessions = async (root, params, context) => {
           bookingDate,
           queryType,
           limit,
+          documentType,
         }),
       );
 
@@ -500,6 +513,7 @@ const getNextOrPrevClassroomSessions = async (root, params, context) => {
           classroomId,
           limit,
           queryType,
+          documentType,
           sessions: sortBy(transformedClassroomResult, ['bookingDate']).slice(0, limit),
         });
       } else {
@@ -507,6 +521,7 @@ const getNextOrPrevClassroomSessions = async (root, params, context) => {
           classroomId,
           limit,
           queryType,
+          documentType,
           sessions: orderBy(transformedClassroomResult, ['bookingDate'], ['desc']).slice(
             0,
             limit,
