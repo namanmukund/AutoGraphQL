@@ -37,6 +37,7 @@ const ClassroomDetails = `
     description: String
     classes: [SchoolClass] @relation(name: "ClassroomSchoolClass", direction: "OneWay")
     school: School @relation(name: "ClassroomSchool", direction: "OneWay")
+    students: [StudentProfile] @relation(name: "ClassroomStudentProfile", direction: "OneWay")
   }
 `;
 

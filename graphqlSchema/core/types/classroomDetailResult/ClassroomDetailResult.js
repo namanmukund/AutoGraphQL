@@ -1,3 +1,12 @@
+const ClassroomCourse = `  
+type ClassroomCourse {
+  id: String!
+  order: Int
+  description: String
+  thumbnail: String
+  title: String
+}`;
+
 const ClassroomDetailResult = `
   type ClassroomDetailResult {
     id: String!
@@ -8,9 +17,13 @@ const ClassroomDetailResult = `
     revisionCount: Int
     assignmentCount: Int
     tools: [ArrayValue]
+    classroomCourse: ClassroomCourse
+    createdAt: Date
+    batchThumbnail:String
   }
 `;
 
 export default [
   ClassroomDetailResult,
+  ClassroomCourse,
 ];
