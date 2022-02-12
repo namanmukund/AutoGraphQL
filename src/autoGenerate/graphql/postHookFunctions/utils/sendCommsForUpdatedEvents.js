@@ -96,9 +96,10 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
       registeredUsers = [], timeZone, eventTimeTableRule, name: eventName,
       locationType, meetingId, meetingPassword, sessionLink, geoLocation,
       address, state, city, pincode,
+      isEmailCommsEnabled,
     } = event;
     const {
-      startDate, endDate, isEmailCommsEnabled, ...slots
+      startDate, endDate, ...slots
     } = eventTimeTableRule;
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
     const slotNumber = slotTimeStringArray[0].split('slot')[1];
