@@ -5,6 +5,9 @@ type ClassroomCourse {
   description: String
   thumbnail: String
   title: String
+  tools: [ArrayValue]
+  programming: [ArrayValue]
+  theory: [ArrayValue]
 }`;
 
 const ClassroomDetailResult = `
@@ -16,7 +19,6 @@ const ClassroomDetailResult = `
     testCount: Int
     revisionCount: Int
     assignmentCount: Int
-    tools: [ArrayValue]
     classroomCourse: ClassroomCourse
     createdAt: Date
     batchThumbnail:String
