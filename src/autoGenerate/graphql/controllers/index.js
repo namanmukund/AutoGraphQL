@@ -3,6 +3,7 @@ import QueryController from './QueryController';
 import RemoteController from './RemoteController';
 import FirebaseController from './FirebaseController';
 import TokenController from './TokenController';
+import RedisController from './RedisController';
 
 export {
   MutationController,
@@ -10,4 +11,5 @@ export {
   RemoteController,
   FirebaseController,
   TokenController,
+  RedisController,
 };

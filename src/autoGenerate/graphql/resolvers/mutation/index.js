@@ -43,6 +43,7 @@ import generateCertificateInBulkMutationResolver from './pdf/generateCertificate
 import validateMagicLinkMutationResolver from './user/validateMagicLink';
 import resetPasswordAndLoginMutationResolver from './setResetPassword/resetPasswordAndLogin';
 import generateMentorChildMutationResolver from './user/generateMentorChild';
+import updateEventSessionAttendanceMutationResolver from './user/updateEventSessionAttendance';
 
 export {
   addMutationResolver,
@@ -90,4 +91,5 @@ export {
   resetPasswordAndLoginMutationResolver,
   generateMentorPayoutReportMutationResolver,
   generateMentorChildMutationResolver,
+  updateEventSessionAttendanceMutationResolver,
 };

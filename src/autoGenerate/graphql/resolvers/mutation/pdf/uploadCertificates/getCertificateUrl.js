@@ -87,7 +87,6 @@ const getCertificateUrl = async (userId, eventId) => {
     // Get the first page of the document
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
-
     const certificateData = {
       studentName: get(eventDetails, 'registeredUsers[0].user.name'),
       parentName: get(eventDetails, 'registeredUsers[0].parents[0].user.name'),

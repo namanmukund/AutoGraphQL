@@ -54,3 +54,11 @@ export const MultipleRegistrationError = createError('MultipleRegistrationError'
 export const AlreadyRegisteredForEvent = createError('AlreadyRegisteredForEvent', {
   message: 'Child is already registered for event',
 });
+
+export const RegistrationClosedForEvent = createError('RegistrationClosedForEvent', {
+  message: 'Registration closed for this event',
+});
+
+export const EventCancelledError = createError('EventCancelledError', {
+  message: 'Event is cancelled',
+});

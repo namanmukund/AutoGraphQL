@@ -150,6 +150,11 @@ import Task from './task';
 import UserOtpLog from './userOtpLog';
 import UserDeviceLog from './UserDeviceLog';
 import GenerateMentorChild from './generateMentorChild';
+import TimetableSchedule from './timetableSchedule';
+import ClassroomSession from './classroomSession';
+import Notice from './Notice';
+import StudentReviewByMentor from './StudentReviewByMentor';
+import ClassroomDetailResult from './classroomDetailResult';
 
 export default [
   ...User,
@@ -304,4 +309,9 @@ export default [
   ...UserOtpLog,
   ...UserDeviceLog,
   ...GenerateMentorChild,
+  ...TimetableSchedule,
+  ...ClassroomSession,
+  ...Notice,
+  ...StudentReviewByMentor,
+  ...ClassroomDetailResult,
 ];

@@ -34,6 +34,12 @@ const ThemeType = `
  }
 `;
 
+const ArrayValue = `
+ type ArrayValue {
+   value: String
+ }
+`;
+
 const CourseTargetUserType = `
  type CourseTargetUserType {
    type: ProductTargetUserType
@@ -85,10 +91,13 @@ const Course = `
     badgeDescription: String @uniqueOrEmpty @trim
     projectsCount: Int
     codingLanguages: [CodingLanguage]
+    tools: [ArrayValue]
+    programming: [ArrayValue]
+    theory: [ArrayValue]
     minGrade: Int
     maxGrade: Int
     documentationUrl: String
   }
 `;
 
-export default [Course, CourseComponentsRule, ThemeType, CourseTargetUserType, LearningObjectiveComponentsRule];
+export default [Course, CourseComponentsRule, ThemeType, CourseTargetUserType, LearningObjectiveComponentsRule, ArrayValue];

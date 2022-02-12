@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import schedule from 'node-schedule';
 import moment from 'moment';
 import { get } from 'lodash';
@@ -14,6 +15,7 @@ import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 import scheduleB2BSessionHomeworkRemainder from './scheduleB2BSessionHomeworkRemainder';
 import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
 import sendEventCommunication from './jobs/sendEventCommunication';
+// import addStudentToEventSession from './jobs/addStudentsToEventSession';
 
 const FETCH_JOBS = `{
   scheduleJobs {
@@ -65,6 +67,7 @@ const deleteJobQuery = (id) => `
 const reRunJobsFromDB = async () => {
   const res = await callLocalGraphqlApi(FETCH_JOBS);
   const scheduledJobs = get(res, 'data.scheduleJobs', []);
+  console.log('jobs length', scheduledJobs.length);
   scheduledJobs.forEach(async (scheduledJob) => {
     const {
       jobType,
@@ -250,6 +253,8 @@ const reRunJobsFromDB = async () => {
         break;
       }
       case 'eventCommsJob': {
+        // eslint-disable-next-line no-console
+        console.log('scheduler', jobType);
         if (isPast) {
           sendEventCommunication({
             eventId,
@@ -261,6 +266,8 @@ const reRunJobsFromDB = async () => {
             attendanceFilter,
             value,
             unit,
+            jobId: id,
+            isPast,
           }, deleteJob);
         } else {
           schedule.scheduleJob(new Date(scheduledDate), () => {
@@ -274,12 +281,16 @@ const reRunJobsFromDB = async () => {
               attendanceFilter,
               value,
               unit,
+              jobId: id,
+              isPast,
             }, deleteJob);
           });
         }
         break;
       }
       case 'eventNewRegistrationReminder': {
+        // eslint-disable-next-line no-console
+        console.log('scheduler regi', jobType, isPast);
         if (isPast) {
           eventNewRegistrationReminder({
             eventId,

@@ -31,8 +31,11 @@ const BatchSession = `
     mentorSession: MentorSession @relation(name: "BatchSessionMentorSession")
     bookingDate: Date!
     scheduleRunStatus: ScheduleRunStatus
+    startMinutes: Int @defaultValue(value: "0")
+    endMinutes: Int @defaultValue(value: "0")
     ${slotTimeFields}
     ${b2bFormFields}
+    sessionMode: SessionMode @defaultValue(value: "online")
     sessionAllotmentDate: Date
     sessionStartDate: Date
     sessionEndDate: Date
