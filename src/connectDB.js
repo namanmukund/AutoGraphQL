@@ -21,16 +21,10 @@ db.on('error', (err) => {
   log('MongoDB disconnected!');
 }).once('open', async () => {
   log('Connected to DB.');
-  console.log('connect initialized', process.env.NODE_ENV === 'production'
-    && process.env.IS_SCHEDULER_INSTANCE
-    && process.env.IS_SCHEDULER_INSTANCE !== 'false', typeof process.env.IS_SCHEDULER_INSTANCE, process.env.IS_SCHEDULER_INSTANCE);
   if (
     process.env.NODE_ENV === 'production'
     && process.env.IS_SCHEDULER_INSTANCE
     && process.env.IS_SCHEDULER_INSTANCE !== 'false') {
-    console.log('connect initialized inside if', process.env.NODE_ENV === 'production'
-      && process.env.IS_SCHEDULER_INSTANCE
-      && process.env.IS_SCHEDULER_INSTANCE !== 'false', typeof process.env.IS_SCHEDULER_INSTANCE, process.env.IS_SCHEDULER_INSTANCE);
     createScheduler('mentorReport');
     createScheduler('sessionReport');
     createScheduler('sessionCourseReport');
