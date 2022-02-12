@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import schedule from 'node-schedule';
 import moment from 'moment';
 import { get } from 'lodash';
@@ -66,6 +67,7 @@ const deleteJobQuery = (id) => `
 const reRunJobsFromDB = async () => {
   const res = await callLocalGraphqlApi(FETCH_JOBS);
   const scheduledJobs = get(res, 'data.scheduleJobs', []);
+  console.log('jobs length', scheduledJobs.length);
   scheduledJobs.forEach(async (scheduledJob) => {
     const {
       jobType,
@@ -288,7 +290,7 @@ const reRunJobsFromDB = async () => {
       }
       case 'eventNewRegistrationReminder': {
         // eslint-disable-next-line no-console
-        console.log('scheduler regi', jobType);
+        console.log('scheduler regi', jobType, isPast);
         if (isPast) {
           eventNewRegistrationReminder({
             eventId,

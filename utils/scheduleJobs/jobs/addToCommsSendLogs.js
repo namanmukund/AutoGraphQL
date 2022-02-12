@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../src/api/callLocalGraphqlApi';
 
@@ -5,7 +6,8 @@ const addToCommsSendLogs = async ({
   templateName, triggeredAt, studentProfileId, eventId,
   condition, unit, value, attendanceFilter,
 }) => {
-  const addQuery = `mutation {
+  if (templateName && triggeredAt) {
+    const addQuery = `mutation {
     addCommsSendLog(
       input: {
         templateName: "${templateName}", triggeredAt: "${new Date(triggeredAt).toISOString()}" 
@@ -21,10 +23,12 @@ const addToCommsSendLogs = async ({
     }
   }
   `;
-  const result = await callLocalGraphqlApi(addQuery);
-  // eslint-disable-next-line no-console
-  console.log(`comms log added ${get(result, 'data.addCommsSendLog.id')}`);
-  return get(result, 'data.addCommsSendLog', null);
+    const result = await callLocalGraphqlApi(addQuery);
+    // eslint-disable-next-line no-console
+    console.log(`comms log added ${get(result, 'data.addCommsSendLog.id')}`);
+    return get(result, 'data.addCommsSendLog', null);
+  }
+  return true;
 };
 
 export default addToCommsSendLogs;

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { log, dbConfig } from '../utils';
 import db from './db';
 import createScheduler from '../utils/createScheduler';

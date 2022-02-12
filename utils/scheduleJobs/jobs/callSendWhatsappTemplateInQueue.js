@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import sendWhatsAppTemplateMessage from '../../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
 import addToCommsSendLogs from './addToCommsSendLogs';
 
