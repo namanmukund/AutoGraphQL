@@ -7,6 +7,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import { CommsError } from '../../../../../../constants/errors';
 import { PhoneFieldRequiredError, EmailFieldRequiredError } from '../../../../../../constants/errors/input';
+// import sendMailModoTemplate from '../../../../utils/sendMailModoTemplate';
 // import getSlotTimesInString from '../../../../../../utils/getSlotTimesInString';
 // import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 
@@ -126,6 +127,7 @@ const sendCommsMessage = async (root, params, context) => {
     if (!parentEmail) {
       throw new EmailFieldRequiredError();
     }
+    // console.log('check');
     const templateObject = {};
     Object.keys(mapCommsWithDataFields).forEach((key) => {
       if (get(params, `input.${key}`) && mapCommsWithDataFields[key]) {
@@ -142,13 +144,15 @@ const sendCommsMessage = async (root, params, context) => {
       data: templateObject,
     };
     const headers = {
-      mmApiKey: process.env.MAILMODO_KEY,
+      mmApiKey: process.env.mmApiKey,
       'Content-Type': 'application/json',
     };
     const url = process.env.MAIL_MODO_URL + templateName;
-
+    // console.log(url, templateObject, JSON.stringify(bodyJson));
+    // sendMailModoTemplate(templateName, bodyJson);
     await fetch(url, { method: 'POST', headers, body: JSON.stringify(bodyJson) }).then((res) => {
       res.json().then((resp) => {
+        // console.log(resp);
         if (!get(resp, 'success')) {
           throw new CommsError();
         }

@@ -2,24 +2,19 @@ const fetch = require('node-fetch');
 
 const sendMailModoTemplate = async (
   templateID,
-  toEmail,
-  senderEmail,
-  subject,
-  senderName,
-  campaignName,
-  data,
+  bodyJson,
 ) => {
   // if (process.env.NODE_ENV !== 'production') return null;
-  const bodyJson = {
-    toEmail,
-    senderEmail,
-    subject,
-    senderName,
-    campaignName,
-    data,
-  };
+  // const bodyJson = {
+  //   toEmail,
+  //   senderEmail,
+  //   subject,
+  //   senderName,
+  //   campaignName,
+  //   data,
+  // };
   const headers = {
-    mmApiKey: process.env.MAILMODO_KEY,
+    mmApiKey: process.env.mmApiKey,
     'Content-Type': 'application/json',
   };
   const url = process.env.MAIL_MODO_URL + templateID;
