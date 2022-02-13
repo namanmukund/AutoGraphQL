@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-restricted-syntax */
 import { get } from 'lodash';
 import moment from 'moment';
@@ -9,6 +10,8 @@ import getIntlDateTime from '../../../../../utils/timeZoneDiff';
 import getSelectedSlotsStringArray from './getSelectedSlotsStringArray';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import callSendWhatsappTemplateInQueue from '../../../../../utils/scheduleJobs/jobs/callSendWhatsappTemplateInQueue';
+import sendCommsMessage from '../../resolvers/query/methods/sendCommsMessages';
+import sendMailModoTemplate from '../../../utils/sendMailModoTemplate';
 
 const getEvent = async (eventId) => {
   const query = `
@@ -62,8 +65,8 @@ const sendEmailCommsForUpdatedEvents = (email, templateFileName, sendEmailObject
     const ccEmail = '';
     const bccEmail = '';
     const text = '';
-    const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
-    sendEmail(emailMsgObject);
+    // const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
+    // sendEmail(emailMsgObject);
   });
 };
 
@@ -89,7 +92,7 @@ const deleteJobsForCancelledEvents = async (eventId) => {
     callLocalGraphqlApi(deleteJobQuery(get(job, 'id')));
   });
 };
-const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdateStatus, shouldSendComms = false) => {
+const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdateStatus, shouldSendComms = true) => {
   if (shouldSendComms) {
     const event = await getEvent(eventId);
     const {
@@ -225,10 +228,18 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
               startTime,
             };
           }
-          sendEmailCommsForUpdatedEvents(parentEmail,
-            'eventRescheduleOnline',
-            sendEmailObj,
-            'Tekie Event Rescheduled');
+          sendMailModoTemplate('6821bf9a-d3db-48d1-8e7f-5343ccefabd2', {
+            toEmail: parentEmail,
+            senderEmail: 'hello@tekie.in',
+            subject: 'Testing Comms',
+            senderName: 'Tekie',
+            campaignName: '',
+            data: sendEmailObj,
+          });
+          // sendEmailCommsForUpdatedEvents(parentEmail,
+          //   'eventRescheduleOnline',
+          //   sendEmailObj,
+          //   'Tekie Event Rescheduled');
         }
       }
       if (eventUpdateStatus === 'canceled') {
@@ -292,6 +303,7 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
               eventUpdateReason,
               eventStartdate,
               eventEndDate,
+              startTime,
             };
           }
           if (locationType === 'venue') {
@@ -307,12 +319,17 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
               eventUpdateReason,
               eventStartdate,
               eventEndDate,
+              startTime,
             };
           }
-          sendEmailCommsForUpdatedEvents(parentEmail,
-            'eventCancelMailTemplate',
-            sendEmailObj,
-            'Tekie Event Canceled');
+          sendMailModoTemplate('0fc48595-8432-486f-995c-00262de24b26', {
+            toEmail: parentEmail,
+            senderEmail: 'hello@tekie.in',
+            subject: 'Cancel Comms Test',
+            senderName: 'Tekie',
+            campaignName: '',
+            data: sendEmailObj,
+          });
         }
       }
     }

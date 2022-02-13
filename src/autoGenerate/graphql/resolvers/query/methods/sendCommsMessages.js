@@ -144,7 +144,7 @@ const sendCommsMessage = async (root, params, context) => {
       data: templateObject,
     };
     const headers = {
-      mmApiKey: process.env.mmApiKey,
+      mmApiKey: process.env.MAILMODO_KEY,
       'Content-Type': 'application/json',
     };
     const url = process.env.MAIL_MODO_URL + templateName;
