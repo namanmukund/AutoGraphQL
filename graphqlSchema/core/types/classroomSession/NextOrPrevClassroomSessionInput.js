@@ -1,7 +1,7 @@
 const NextOrPrevSessionType = `
   enum NextOrPrevSessionType {
     next
-    prev
+    previous
   }
 `;
 
@@ -11,6 +11,7 @@ const NextOrPrevClassroomSessionInput = `
     limit: Int!
     queryType: NextOrPrevSessionType!
     bookingDate: Date!
+    documentType: SessionDocumentType! @defaultValue(value: "batch")
   }
 `;
 

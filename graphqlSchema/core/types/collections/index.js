@@ -22,6 +22,7 @@ import UpdateParentChildDetailInput from './UpdateParentChildDetailInput.js';
 import TimestampTag from './TimestampTag';
 import ProductFeature from './ProductFeature';
 import UrlResult from './UrlResult';
+import ScheduleSessionsInput from './ScheduleSessions';
 
 export default [
   ...Enum,
@@ -48,4 +49,5 @@ export default [
   ...TimestampTag,
   ...ProductFeature,
   ...UrlResult,
+  ...ScheduleSessionsInput,
 ];

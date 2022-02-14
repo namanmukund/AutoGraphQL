@@ -2,10 +2,11 @@ import { slotTimes } from '../../../constants';
 
 const getSlotTimeFields = (
   fieldType,
+  excludeType,
 ) => {
   let slotTimeFields = '';
   slotTimes.forEach((slotTime) => {
-    slotTimeFields += `${slotTime}: ${fieldType} `;
+    slotTimeFields += excludeType ? `${slotTime}` : `${slotTime}: ${fieldType} `;
   });
   return slotTimeFields;
 };

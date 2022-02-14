@@ -1,18 +1,12 @@
+/* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import { get } from 'lodash';
-import sgMail from '@sendgrid/mail';
 import fetch from 'node-fetch';
-// import moment from 'moment';
-import parsedHtmlFromTemplateFileAndObject from '../../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import getEmailObject from '../../../../../../services/email/utils/getEmailObject';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import { CommsError } from '../../../../../../constants/errors';
 import { PhoneFieldRequiredError, EmailFieldRequiredError } from '../../../../../../constants/errors/input';
-import sendGridApi from '../../../../../../config/sendGrid';
-// import getSlotTimesInString from '../../../../../../utils/getSlotTimesInString';
-// import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 
 const fetchComms = async (dataFieldFilter) => {
   const query = `{
@@ -38,41 +32,6 @@ const sendCommsMessage = async (root, params, context) => {
     mail,
   } = input;
   let dataFieldFilter = '';
-  // const fetchAllEvents = `{
-  //   events {
-  //     id
-  //     eventStartTime
-  //     eventEndTime
-  //     eventTimeTableRule {
-  //       startDate
-  //       endDate
-  //       ${getSlotTimesInString()}
-  //     }
-  //   }
-  // }
-  // `;
-  // const events = await callLocalGraphqlApi(fetchAllEvents);
-  // const updateEvent = async (id, startDate, endDate) => {
-  //   const updateEventQuery = `mutation {
-  //     updateEvent(id: "${id}", input: { eventStartTime: "${startDate}", eventEndTime: "${endDate}" }) {
-  //       id
-  //     }
-  //   }
-  //   `;
-  //   await callLocalGraphqlApi(updateEventQuery);
-  // };
-  // if (events) {
-  //   for (const event of get(events, 'data.events', [])) {
-  //     const { eventStartTime, eventEndTime, eventTimeTableRule } = event;
-  //     if (!eventStartTime && !eventEndTime && eventTimeTableRule) {
-  //       const { startDate, endDate, ...slots } = eventTimeTableRule;
-  //       const slotsTime = getSelectedSlotsTime(slots);
-  //       if (startDate && endDate && slotsTime.length) {
-  //         await updateEvent(get(event, 'id'), moment(startDate).set('hours', get(slotsTime, '[0]')).toISOString(), moment(endDate).set('hours', get(slotsTime, '[0]') + 1).toISOString())
-  //       }
-  //     }
-  //   }
-  // }
   const dataFieldLength = Object.keys(input).length;
   // eslint-disable-next-line array-callback-return
   Object.keys(input).map((i) => {
@@ -136,22 +95,27 @@ const sendCommsMessage = async (root, params, context) => {
         templateObject[mapCommsWithDataFields[key]] = get(params, `input.${key}`);
       }
     });
-    const templateString = parsedHtmlFromTemplateFileAndObject(
-      templateName, templateObject,
-    );
-    await templateString.then(async (html) => {
-      const ccEmail = '';
-      const bccEmail = '';
-      const subject = 'Event Tekie';
-      const text = '';
-      const emailMsgObject = getEmailObject(parentEmail, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
-      sgMail.setApiKey(sendGridApi.SENDGRID_API_KEY);
-      await sgMail
-        .send(emailMsgObject, (error) => {
-          if (error) {
-            throw new CommsError();
-          }
-        });
+    templateObject.student_name = 'pawan';
+    const bodyJson = {
+      toEmail: parentEmail,
+      senderEmail: 'hello@tekie.in',
+      subject: 'Testing Comms',
+      senderName: 'Tekie',
+      campaignName: '',
+      data: templateObject,
+    };
+    const headers = {
+      mmApiKey: process.env.MAILMODO_KEY,
+      'Content-Type': 'application/json',
+    };
+    const url = process.env.MAIL_MODO_URL + templateName;
+
+    await fetch(url, { method: 'POST', headers, body: JSON.stringify(bodyJson) }).then((res) => {
+      res.json().then((resp) => {
+        if (!get(resp, 'success')) {
+          throw new CommsError();
+        }
+      });
     });
   }
   return {

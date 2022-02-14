@@ -86,6 +86,7 @@ import {
   LeadPartnerWithSimilarTitleAlreadyExist,
   SenseiProfileAlreadyExist,
   SpeakerProfileAlreadyExist,
+  CannotScheduleOutsideWorkingHoursError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -325,4 +326,5 @@ export {
   AlreadyRegisteredForEvent,
   RegistrationClosedForEvent,
   EventCancelledError,
+  CannotScheduleOutsideWorkingHoursError,
 };

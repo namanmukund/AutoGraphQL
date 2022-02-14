@@ -123,10 +123,15 @@ import DurationType from './DurationType';
 import AttendanceFilter from './AttendanceFilter';
 import LengthOfContent from './LengthOfContent';
 import TriedToReachParent from './TriedToReachParent';
+import TimetableScheduleType from './TimetableScheduleType';
+import ClassMode from './ClassMode';
+import TimetableScheduleEventType from './TimetableScheduleEventType';
 import SessionMode from './SessionMode';
 import SessionDocumentType from './SessionDocumentType';
 import NoticeType from './NoticeType';
 import ReviewType from './ReviewType';
+import ScheduleSessionType from './ScheduleSessionType';
+import SchoolTeacherAccessType from './SchoolTeacherAccessType';
 
 export default [
   Status,
@@ -255,8 +260,13 @@ export default [
   AttendanceFilter,
   LengthOfContent,
   TriedToReachParent,
+  TimetableScheduleType,
+  ClassMode,
+  TimetableScheduleEventType,
   SessionMode,
   SessionDocumentType,
   NoticeType,
   ReviewType,
+  ScheduleSessionType,
+  SchoolTeacherAccessType,
 ];

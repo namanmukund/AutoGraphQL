@@ -27,6 +27,9 @@ const ClassroomSessionTopic = `
     title: String! @trim
     description: String @trim
     thumbnailSmall: File
+    topicComponentRule: [TopicComponentsRule]
+    topicAssignmentQuestionsCount: Int
+    questionsQuizCount: Int
   }
 `;
 
@@ -37,6 +40,7 @@ const ClassroomDetails = `
     description: String
     classes: [SchoolClass] @relation(name: "ClassroomSchoolClass", direction: "OneWay")
     school: School @relation(name: "ClassroomSchool", direction: "OneWay")
+    students: [StudentProfile] @relation(name: "ClassroomStudentProfile", direction: "OneWay")
   }
 `;
 
