@@ -191,6 +191,8 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
               eventStartdate,
               eventEndDate,
               startTime,
+              eventDate: eventStartdate,
+              eventTime: startTime,
             };
           }
           if (locationType === 'venue') {
@@ -207,6 +209,8 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
               eventStartdate,
               eventEndDate,
               startTime,
+              eventDate: eventStartdate,
+              eventTime: startTime,
             };
           }
           sendMailModoTemplate('6821bf9a-d3db-48d1-8e7f-5343ccefabd2', {
@@ -281,6 +285,8 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
               eventStartdate,
               eventEndDate,
               startTime,
+              eventDate: eventStartdate,
+              eventTime: startTime,
             };
           }
           if (locationType === 'venue') {
@@ -297,6 +303,8 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
               eventStartdate,
               eventEndDate,
               startTime,
+              eventDate: eventStartdate,
+              eventTime: startTime,
             };
           }
           sendMailModoTemplate('0fc48595-8432-486f-995c-00262de24b26', {
