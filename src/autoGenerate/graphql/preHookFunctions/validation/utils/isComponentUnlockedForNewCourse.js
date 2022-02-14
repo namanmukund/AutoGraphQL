@@ -136,7 +136,7 @@ const isComponentUnlockedForNewCourse = async (
                                 order
                              }`;
   }
-  if (!backendApps.includes(appName) && userIdFromContext !== userId) {
+  if (!backendApps.includes(appName) && userIdFromContext !== userId && page !== 'quiz') {
     throw new UserMismatchError();
   }
   if (!topicInfo) {

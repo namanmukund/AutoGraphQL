@@ -14,7 +14,7 @@ const customMutationString = `
    resetPasswordFromForgotPasswordLink (newPassword: String!): BooleanResult,
    userCourseSyllabus (courseId: ID): UserCourseSyllabus,
    userTopicJourney ( topicId: ID!, courseId: ID): UserTopicJourney,
-   userFirstAndLatestQuizReport ( topicId: ID!, courseId: ID): UserFirstAndLatestQuizReport,
+   userFirstAndLatestQuizReport ( topicId: ID!, courseId: ID, userId: ID): UserFirstAndLatestQuizReport,
    skipVideo ( topicId: ID!): SkipVideo,
    skipPracticeQuestion ( learningObjectiveId: ID!): BooleanResult,
    userBadge (courseId: ID): UserBadge,
