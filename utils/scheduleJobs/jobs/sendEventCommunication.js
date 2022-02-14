@@ -202,13 +202,14 @@ const sendEventCommunication = async ({
         speakerName,
         eventTime: startTime,
         meetingId,
-        meetingLink: sessionLink,
+        meetingLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
         meetingPassword,
         geoLocation,
         address,
         summary,
         eventRegistrationLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
-        eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`
+        eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
+        sessionLink,
       };
       const whatsappCommsVariablesList = commsVariables.map((commsVariable) => (
         {
@@ -258,13 +259,14 @@ const sendEventCommunication = async ({
           speakerName,
           eventTime: startTime,
           meetingId,
-          meetingLink: sessionLink,
+          meetingLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
           meetingPassword,
           geoLocation,
           address,
           summary,
           eventRegistrationLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
-          eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`
+          eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
+          sessionLink,
         };
         const whatsappCommsVariablesList = commsVariables.map((commsVariable) => (
           {
@@ -321,13 +323,14 @@ const sendEventCommunication = async ({
             speakerName,
             eventTime: startTime,
             meetingId,
-            meetingLink: sessionLink,
+            meetingLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
             meetingPassword,
             geoLocation,
             address,
             summary,
             eventRegistrationLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
-            eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`
+            eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
+            sessionLink,
           };
           const whatsappCommsVariablesList = commsVariables.map((commsVariable) => (
             {
@@ -383,13 +386,14 @@ const sendEventCommunication = async ({
             speakerName,
             eventTime: startTime,
             meetingId,
-            meetingLink: sessionLink,
+            meetingLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
             meetingPassword,
             geoLocation,
             address,
             summary,
             eventRegistrationLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
-            eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`
+            eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
+            sessionLink,
           };
           const whatsappCommsVariablesList = commsVariables.map((commsVariable) => (
             {

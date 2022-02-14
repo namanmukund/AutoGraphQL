@@ -26,8 +26,8 @@ const Batch = `
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
+      { appName: "${TWA}" operations: "*" },
       { appName: "${TLA}" operations: ${READ} },
-      { appName: "${TWA}" operations: ${READ} }
       ], 
     rule: allow
   )
@@ -48,6 +48,7 @@ const Batch = `
     timeTableRule: BatchTimeTableRule
     b2b2ctimeTable: B2b2cTimeTable
     customSessionLink: String
+    timetableSchedule: [TimetableSchedule] @relation(name: "BatchTimetableSchedule")
     studentReviewsByMentor: [StudentReviewByMentor] @relation(name: "BatchStudentReviewByMentor")
     notices: [Notice] @relation(name: "BatchNotice")
   }

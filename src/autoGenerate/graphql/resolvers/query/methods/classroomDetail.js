@@ -85,6 +85,13 @@ const getBatchSessionAggregation = ({
             order: 1,
             title: 1,
             description: 1,
+            topicComponentRule: 1,
+            questions: {
+              id: 1,
+            },
+            topicAssignmentQuestions: {
+              order: 1,
+            },
             thumbnailSmall: {
               $arrayElemAt: ['$thumbnailSmall', 0],
             },
@@ -182,6 +189,13 @@ const getAdhocSessionAggregation = ({
             order: 1,
             title: 1,
             description: 1,
+            topicComponentRule: 1,
+            questions: {
+              id: 1,
+            },
+            topicAssignmentQuestions: {
+              order: 1,
+            },
             thumbnailSmall: {
               $arrayElemAt: ['$thumbnailSmall', 0],
             },
@@ -231,6 +245,14 @@ const getBatchAggregation = ({ batchId }) => [
       localField: 'school.typeId',
       foreignField: 'id',
       as: 'school',
+    },
+  },
+  {
+    $lookup: {
+      from: 'StudentProfile',
+      localField: 'students.typeId',
+      foreignField: 'id',
+      as: 'students',
     },
   },
   {
@@ -296,6 +318,8 @@ const getBatchAggregation = ({ batchId }) => [
             description: 1,
             topicThumbnailSmall: 1,
             tools: 1,
+            programming: 1,
+            theory: 1,
             thumbnail: {
               $arrayElemAt: ['$thumbnail', 0],
             },
@@ -317,11 +341,14 @@ const getBatchAggregation = ({ batchId }) => [
       course: {
         $arrayElemAt: ['$course', 0],
       },
+      createdAt: 1,
+      thumbnailSmall: 1,
       classes: {
         id: 1,
         grade: 1,
         section: 1,
       },
+      students: 1,
       documentType: 1,
     },
   },
@@ -351,7 +378,11 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
         sessionType: 'learning',
         documentType: 'batchSession',
         ...getSlotTimeFields(session),
-        topic: get(session, 'topic', null),
+        topic: {
+          ...get(session, 'topic', null),
+          questionsQuizCount: get(session, 'topic.questions', []).length,
+          topicAssignmentQuestionsCount: get(session, 'topic.topicAssignmentQuestions', []).length,
+        },
         previousTopic: null,
       });
     });
@@ -371,7 +402,11 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
         documentType: 'adhocSession',
         ...getSlotTimeFields(session),
         topic: null,
-        previousTopic: get(session, 'previousTopic', null),
+        previousTopic: {
+          ...get(session, 'previousTopic', null),
+          questionsQuizCount: get(session, 'previousTopic.questions', []).length,
+          topicAssignmentQuestionsCount: get(session, 'previousTopic.topicAssignmentQuestions', []).length,
+        },
       });
     });
   }
@@ -402,23 +437,40 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
       sessionType: null,
       id: get(topic, 'id'),
       documentType: 'notYetBooked',
-      topic,
+      topic: {
+        ...topic,
+        questionsQuizCount: get(topic, 'questions', []).length,
+        topicAssignmentQuestionsCount: get(topic, 'topicAssignmentQuestions', []).length,
+      },
       previousTopic: null,
     });
   });
+  const { course } = batchDetail;
   const returnedObj = {
     id: get(batchDetail, 'id'),
     classroomDetail: {
       code: get(batchDetail, 'code'),
       classroomTitle: get(batchDetail, 'classroomTitle', ''),
       description: get(batchDetail, 'description', ''),
+      students: get(batchDetail, 'students'),
     },
     sessions: finalResult,
     learingCount: batchSessions ? batchSessions.length : 0,
     revisionCount: adhocSessions ? adhocSessions.filter((session) => get(session, 'type') === 'revision').length : 0,
     testCount: adhocSessions ? adhocSessions.filter((session) => get(session, 'type') === 'assessment').length : 0,
     assignmentCount: 0,
-    tools: get(batchDetail, 'course.tools', []),
+    classroomCourse: {
+      id: get(course, 'id'),
+      order: get(course, 'order'),
+      description: get(course, 'description'),
+      thumbnail: get(course, 'thumbnail.uri'),
+      title: get(course, 'title'),
+      tools: get(batchDetail, 'course.tools', []),
+      programming: get(batchDetail, 'course.programming', []),
+      theory: get(batchDetail, 'course.theory', []),
+    },
+    createdAt: get(batchDetail, 'createdAt'),
+    batchThumbnail: get(batchDetail, 'thumbnailSmall'),
   };
   return returnedObj;
 };

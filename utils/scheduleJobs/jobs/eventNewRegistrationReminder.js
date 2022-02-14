@@ -102,12 +102,13 @@ const eventNewRegistrationReminder = async ({
     speakerName,
     eventTime: startTime,
     meetingId,
-    meetingLink: sessionLink,
+    meetingLink: `${process.env.TEKIE_WEB_URL}/events/${get(eventDetail, 'id')}`,
     meetingPassword,
     geoLocation,
     address,
     summary,
     eventRegistrationLink: `${process.env.TEKIE_WEB_URL}/events/${get(eventDetail, 'id')}`,
+    sessionLink,
   };
   if (get(commsObj, 'parentPhone')) {
     const parameters = [];
