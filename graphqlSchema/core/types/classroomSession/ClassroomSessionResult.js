@@ -27,6 +27,9 @@ const ClassroomSessionTopic = `
     title: String! @trim
     description: String @trim
     thumbnailSmall: File
+    topicComponentRule: [TopicComponentsRule]
+    topicAssignmentQuestionsCount: Int
+    questionsQuizCount: Int
   }
 `;
 
