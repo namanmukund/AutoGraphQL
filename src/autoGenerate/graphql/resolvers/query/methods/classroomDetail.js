@@ -85,6 +85,13 @@ const getBatchSessionAggregation = ({
             order: 1,
             title: 1,
             description: 1,
+            topicComponentRule: 1,
+            questions: {
+              id: 1,
+            },
+            topicAssignmentQuestions: {
+              order: 1,
+            },
             thumbnailSmall: {
               $arrayElemAt: ['$thumbnailSmall', 0],
             },
@@ -182,6 +189,13 @@ const getAdhocSessionAggregation = ({
             order: 1,
             title: 1,
             description: 1,
+            topicComponentRule: 1,
+            questions: {
+              id: 1,
+            },
+            topicAssignmentQuestions: {
+              order: 1,
+            },
             thumbnailSmall: {
               $arrayElemAt: ['$thumbnailSmall', 0],
             },
@@ -364,7 +378,11 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
         sessionType: 'learning',
         documentType: 'batchSession',
         ...getSlotTimeFields(session),
-        topic: get(session, 'topic', null),
+        topic: {
+          ...get(session, 'topic', null),
+          questionsQuizCount: get(session, 'topic.questions', []).length,
+          topicAssignmentQuestionsCount: get(session, 'topic.topicAssignmentQuestions', []).length,
+        },
         previousTopic: null,
       });
     });
@@ -384,7 +402,11 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
         documentType: 'adhocSession',
         ...getSlotTimeFields(session),
         topic: null,
-        previousTopic: get(session, 'previousTopic', null),
+        previousTopic: {
+          ...get(session, 'previousTopic', null),
+          questionsQuizCount: get(session, 'previousTopic.questions', []).length,
+          topicAssignmentQuestionsCount: get(session, 'previousTopic.topicAssignmentQuestions', []).length,
+        },
       });
     });
   }
@@ -415,7 +437,11 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
       sessionType: null,
       id: get(topic, 'id'),
       documentType: 'notYetBooked',
-      topic,
+      topic: {
+        ...topic,
+        questionsQuizCount: get(topic, 'questions', []).length,
+        topicAssignmentQuestionsCount: get(topic, 'topicAssignmentQuestions', []).length,
+      },
       previousTopic: null,
     });
   });
