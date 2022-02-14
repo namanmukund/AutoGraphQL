@@ -1,16 +1,11 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable no-restricted-syntax */
 import { get } from 'lodash';
 import moment from 'moment';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import parsedHtmlFromTemplateFileAndObject from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
-import getEmailObject from '../../../../../services/email/utils/getEmailObject';
-import sendEmail from '../../../../../services/email/utils/sendEmail';
 import getIntlDateTime from '../../../../../utils/timeZoneDiff';
 import getSelectedSlotsStringArray from './getSelectedSlotsStringArray';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import callSendWhatsappTemplateInQueue from '../../../../../utils/scheduleJobs/jobs/callSendWhatsappTemplateInQueue';
-import sendCommsMessage from '../../resolvers/query/methods/sendCommsMessages';
 import sendMailModoTemplate from '../../../utils/sendMailModoTemplate';
 
 const getEvent = async (eventId) => {
@@ -54,20 +49,6 @@ const getEvent = async (eventId) => {
     `;
   const res = await callLocalGraphqlApi(query);
   return get(res, 'data.event');
-};
-
-const sendEmailCommsForUpdatedEvents = (email, templateFileName, sendEmailObject, subject) => {
-  const templateString = parsedHtmlFromTemplateFileAndObject(
-    templateFileName, sendEmailObject,
-  );
-  const emailTo = [email];
-  templateString.then((html) => {
-    const ccEmail = '';
-    const bccEmail = '';
-    const text = '';
-    // const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
-    // sendEmail(emailMsgObject);
-  });
 };
 
 const deleteJobQuery = (id) => `
@@ -236,10 +217,6 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
             campaignName: '',
             data: sendEmailObj,
           });
-          // sendEmailCommsForUpdatedEvents(parentEmail,
-          //   'eventRescheduleOnline',
-          //   sendEmailObj,
-          //   'Tekie Event Rescheduled');
         }
       }
       if (eventUpdateStatus === 'canceled') {
