@@ -11,6 +11,7 @@ const GetSchoolDetailsResult = `
     country: Country
     logo: File @relation(name: "GetSchoolDetailsResultFile", direction: "OneWay")
     bgImage: File @relation(name: "GetSchoolDetailsResultPictureFile", direction: "OneWay")
+    batchId: String
   }
 `;
 
