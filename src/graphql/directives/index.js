@@ -47,6 +47,9 @@ directive @cacheControl(
   scope: CacheControlScope
   inheritMaxAge: Boolean
 ) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION
+
+# Create index for a field
+directive @createIndex on FIELD
 `;
 
 export default directive;
