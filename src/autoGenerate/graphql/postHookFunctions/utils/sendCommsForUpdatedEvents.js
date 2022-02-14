@@ -73,7 +73,7 @@ const deleteJobsForCancelledEvents = async (eventId) => {
     callLocalGraphqlApi(deleteJobQuery(get(job, 'id')));
   });
 };
-const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdateStatus, shouldSendComms = true) => {
+const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdateStatus, shouldSendComms = false) => {
   if (shouldSendComms) {
     const event = await getEvent(eventId);
     const {
