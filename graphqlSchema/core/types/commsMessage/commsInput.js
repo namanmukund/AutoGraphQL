@@ -21,6 +21,7 @@ const commsInput = `
     description: String
     paymentLink: String
     eventRegistrationLink: String
+    sessionLink: String
   }
 `;
 

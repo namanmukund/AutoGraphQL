@@ -1,14 +1,12 @@
+/* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import { get } from 'lodash';
 import fetch from 'node-fetch';
-// import moment from 'moment';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import { CommsError } from '../../../../../../constants/errors';
 import { PhoneFieldRequiredError, EmailFieldRequiredError } from '../../../../../../constants/errors/input';
-// import getSlotTimesInString from '../../../../../../utils/getSlotTimesInString';
-// import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 
 const fetchComms = async (dataFieldFilter) => {
   const query = `{
@@ -34,41 +32,6 @@ const sendCommsMessage = async (root, params, context) => {
     mail,
   } = input;
   let dataFieldFilter = '';
-  // const fetchAllEvents = `{
-  //   events {
-  //     id
-  //     eventStartTime
-  //     eventEndTime
-  //     eventTimeTableRule {
-  //       startDate
-  //       endDate
-  //       ${getSlotTimesInString()}
-  //     }
-  //   }
-  // }
-  // `;
-  // const events = await callLocalGraphqlApi(fetchAllEvents);
-  // const updateEvent = async (id, startDate, endDate) => {
-  //   const updateEventQuery = `mutation {
-  //     updateEvent(id: "${id}", input: { eventStartTime: "${startDate}", eventEndTime: "${endDate}" }) {
-  //       id
-  //     }
-  //   }
-  //   `;
-  //   await callLocalGraphqlApi(updateEventQuery);
-  // };
-  // if (events) {
-  //   for (const event of get(events, 'data.events', [])) {
-  //     const { eventStartTime, eventEndTime, eventTimeTableRule } = event;
-  //     if (!eventStartTime && !eventEndTime && eventTimeTableRule) {
-  //       const { startDate, endDate, ...slots } = eventTimeTableRule;
-  //       const slotsTime = getSelectedSlotsTime(slots);
-  //       if (startDate && endDate && slotsTime.length) {
-  //         await updateEvent(get(event, 'id'), moment(startDate).set('hours', get(slotsTime, '[0]')).toISOString(), moment(endDate).set('hours', get(slotsTime, '[0]') + 1).toISOString())
-  //       }
-  //     }
-  //   }
-  // }
   const dataFieldLength = Object.keys(input).length;
   // eslint-disable-next-line array-callback-return
   Object.keys(input).map((i) => {
