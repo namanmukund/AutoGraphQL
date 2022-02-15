@@ -15,8 +15,8 @@ const TimetableSchedule = `
     ${slotTimeFields}
     ${weekDaysFields}
     ${weekDaysClassModeFields}
-    school: School @relation(name: "TimetableScheduleSchool")
-    batch: [Batch] @relation(name: "TimetableScheduleBatch")
+    school: School @relation(name: "SchoolTimetableSchedule")
+    batch: [Batch] @relation(name: "BatchTimetableSchedule")
 }`;
 
 export default [TimetableSchedule];
