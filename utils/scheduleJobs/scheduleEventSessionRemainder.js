@@ -2,13 +2,14 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
-import sendEmail from '../../services/email/utils/sendEmail';
-import parsedHtmlFromTemplateFileAndObject from '../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
-import getEmailObject from '../../services/email/utils/getEmailObject';
+// import sendEmail from '../../services/email/utils/sendEmail';
+// import parsedHtmlFromTemplateFileAndObject from '../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
+// import getEmailObject from '../../services/email/utils/getEmailObject';
 import getSelectedSlotsStringArray from '../../src/autoGenerate/graphql/postHookFunctions/utils/getSelectedSlotsStringArray';
 import getIntlDateTime from '../timeZoneDiff';
 import getSlotTimesInString from '../getSlotTimesInString';
 import callSendWhatsappTemplateInQueue from './jobs/callSendWhatsappTemplateInQueue';
+import sendMailModoTemplate from '../../src/autoGenerate/utils/sendMailModoTemplate';
 
 const getEventSessions = async () => {
   const dt = new Date().setHours(0, 0, 0, 0);
@@ -74,21 +75,21 @@ const getEventSessions = async () => {
   return get(res, 'data.eventSessions', []);
 };
 
-const sendEventSessionRemainderMail = (email, sendEmailObject) => {
-  const templateFileName = 'B2BAbsent';
-  const templateString = parsedHtmlFromTemplateFileAndObject(
-    templateFileName, sendEmailObject,
-  );
-  const emailTo = [email];
-  templateString.then((html) => {
-    const ccEmail = '';
-    const bccEmail = '';
-    const subject = 'Tekie - event Session Reminder!';
-    const text = '';
-    const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
-    sendEmail(emailMsgObject);
-  });
-};
+// const sendEventSessionRemainderMail = (email, sendEmailObject) => {
+//   const templateFileName = 'B2BAbsent';
+//   const templateString = parsedHtmlFromTemplateFileAndObject(
+//     templateFileName, sendEmailObject,
+//   );
+//   const emailTo = [email];
+//   templateString.then((html) => {
+//     const ccEmail = '';
+//     const bccEmail = '';
+//     const subject = 'Tekie - event Session Reminder!';
+//     const text = '';
+//     const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
+//     sendEmail(emailMsgObject);
+//   });
+// };
 
 const scheduleEventSessionRemainder = async () => {
   const eventSessionsData = await getEventSessions();
@@ -98,12 +99,13 @@ const scheduleEventSessionRemainder = async () => {
       sessionDate, event: {
         id: eventId,
         timeZone, isEmailCommsEnabled, name: eventName,
-        meetingId, meetingPassword, sessionLink, locationType, geoLocation,
+        // meetingId, meetingPassword, sessionLink,
+        locationType, geoLocation,
         address, state, city, pincode, registeredUsers = [],
         eventSessions = [],
       }, ...slots
     } = eventSession;
-    if (get(eventSessions, '[0].id') !== eventSessionId) {
+    if (get(eventSessions, '[0].id') === eventSessionId) {
       const slotTimeStringArray = getSelectedSlotsStringArray(slots);
       const slotNumber = slotTimeStringArray[0].split('slot')[1];
       const { dateObject, startTime } = getIntlDateTime(sessionDate, slotNumber, timeZone);
@@ -196,31 +198,28 @@ const scheduleEventSessionRemainder = async () => {
           if (locationType === 'online') {
             emailCommsObj = {
               eventName,
-              meetingId,
-              meetingPassword,
-              date,
-              sessionLink,
               studentName,
-              startTime,
+              eventTime: startTime,
             };
           }
           if (locationType === 'venue') {
             emailCommsObj = {
               eventName,
               studentName,
-              geoLocation,
-              address,
-              state,
-              city,
-              pincode,
-              timeZone,
-              date,
-              startTime,
+              eventTime: startTime,
             };
           }
-          if (parentEmail) {
-            sendEventSessionRemainderMail(parentEmail, emailCommsObj);
-          }
+          // if (parentEmail) {
+          //   sendEventSessionRemainderMail(parentEmail, emailCommsObj);
+          // }
+          sendMailModoTemplate('8a6f16f2-9eb6-4e63-aca4-e3ce329a5f16', {
+            toEmail: parentEmail,
+            sendEmail: 'hello@tekie.in',
+            subject: 'Reminder for upcomming event.',
+            senderName: 'Tekie',
+            campainName: '',
+            data: emailCommsObj,
+          });
         }
       });
     }

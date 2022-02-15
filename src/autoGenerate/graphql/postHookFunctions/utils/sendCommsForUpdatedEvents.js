@@ -201,7 +201,7 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
         sendMailModoTemplate('6821bf9a-d3db-48d1-8e7f-5343ccefabd2', {
           toEmail: parentEmail,
           senderEmail: 'hello@tekie.in',
-          subject: 'Testing Comms',
+          subject: 'Regarding reschedule of event.',
           senderName: 'Tekie',
           campaignName: '',
           data: sendEmailObj,
@@ -278,7 +278,7 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
         sendMailModoTemplate('0fc48595-8432-486f-995c-00262de24b26', {
           toEmail: parentEmail,
           senderEmail: 'hello@tekie.in',
-          subject: 'Cancel Comms Test',
+          subject: 'Regardinig cancelation of event.',
           senderName: 'Tekie',
           campaignName: '',
           data: sendEmailObj,
