@@ -6,7 +6,7 @@ const getWeekDaysFields = (
 ) => {
   let weekDaysFields = '';
   weekDays.forEach((day) => {
-    weekDaysFields += excludeType ? `${day}` : `${day}: ${fieldType} `;
+    weekDaysFields += excludeType ? `${day}\n` : `${day}: ${fieldType} `;
   });
   return weekDaysFields;
 };

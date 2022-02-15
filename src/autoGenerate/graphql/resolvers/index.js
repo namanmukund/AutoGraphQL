@@ -108,6 +108,7 @@ import classroomSessions from './query/methods/classroomSessions';
 import updateEventSessionAttendance from './mutation/methods/updateEventSessionAttendance';
 import getNextOrPrevClassroomSessions from './query/methods/getNextOrPrevClassroomSessions';
 import classroomDetail from './query/methods/classroomDetail';
+import scheduleSessions from './mutation/shift/scheduleSessions';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -638,6 +639,7 @@ resolvers.Mutation.validateMagicLink = validateMagicLink;
 resolvers.Mutation.resetPasswordAndLogin = resetPasswordAndLogin;
 resolvers.Mutation.generateMentorChild = generateMentorChild;
 resolvers.Mutation.updateEventSessionAttendance = updateEventSessionAttendance;
+resolvers.Mutation.scheduleSessions = scheduleSessions;
 
 // queries
 resolvers.Query.me = me;
