@@ -89,12 +89,24 @@ const getBatchSessionAggregation = ({
             },
           },
           {
+            $lookup: {
+              from: 'StudentProfile',
+              localField: 'students.typeId',
+              foreignField: 'id',
+              as: 'students',
+            },
+          },
+          {
             $project: {
               code: 1,
               classroomTitle: 1,
               description: 1,
               school: 1,
-              students: 1,
+              students: {
+                grade: 1,
+                section: 1,
+                user: 1,
+              },
               classes: {
                 id: 1,
                 grade: 1,
@@ -269,12 +281,24 @@ const getAdhocSessionAggregation = ({
             },
           },
           {
+            $lookup: {
+              from: 'StudentProfile',
+              localField: 'students.typeId',
+              foreignField: 'id',
+              as: 'students',
+            },
+          },
+          {
             $project: {
               code: 1,
               classroomTitle: 1,
               description: 1,
               school: 1,
-              students: 1,
+              students: {
+                grade: 1,
+                section: 1,
+                user: 1,
+              },
               classes: {
                 id: 1,
                 grade: 1,
@@ -377,6 +401,79 @@ const getAdhocSessionAggregation = ({
   ];
 };
 
+const mentorMentorMenteeSessionAggregation = (topicId, userIds) => [
+  {
+    $match: {
+      sessionStatus: 'completed',
+      'topic.typeId': topicId,
+    },
+  },
+  {
+    $lookup: {
+      from: 'MenteeSession',
+      let: { menteeSessionId: '$menteeSession.typeId' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: ['$id', '$$menteeSessionId'],
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: 'User',
+            localField: 'user.typeId',
+            foreignField: 'id',
+            as: 'user',
+          },
+        },
+        {
+          $project: {
+            user: {
+              $arrayElemAt: ['$user', 0],
+            },
+          },
+        },
+        {
+          $project: {
+            user: {
+              id: 1,
+              name: 1,
+              email: 1,
+              username: 1,
+            },
+          },
+        },
+      ],
+      as: 'menteeSession',
+    },
+  },
+  {
+    $project: {
+      menteeSession: {
+        $arrayElemAt: ['$menteeSession', 0],
+      },
+      bookingDate: 1,
+      isSubmittedForReview: 1,
+      isQuizSubmitted: 1,
+      isAssignmentSubmitted: 1,
+      isAssignmentAttempted: 1,
+      isPracticeSubmitted: 1,
+      quizSubmitDate: 1,
+      practiceSubmitDate: 1,
+      assignmentSubmitDate: 1,
+    },
+  },
+  {
+    $match: {
+      'menteeSession.user.id': {
+        $in: userIds || [],
+      },
+    },
+  },
+];
+
 const getTypeQueryController = (
   typeName,
   authentication = {
@@ -384,13 +481,30 @@ const getTypeQueryController = (
   },
 ) => new QueryController(typeName, authentication);
 
-const getHomeworkCompletedMeta = async () => 0;
+const getHomeworkCompletedMeta = async (session, model, queryType = 'next') => {
+  if (queryType === 'next') {
+    return 'NA';
+  }
+  const topicId = get(session, 'topic.id');
+  const userIds = get(session, 'classroom.students', []).map((el) => get(el, 'user.typeId'));
+  let homeworkCount = 0;
+  if (topicId && userIds.length) {
+    const mmsData = await model.aggregate(mentorMentorMenteeSessionAggregation(topicId, userIds));
+    if (mmsData && mmsData.length) {
+      const filteredResult = mmsData.filter((el) => get(el, 'isSubmittedForReview') === true);
+      homeworkCount = filteredResult.length || 0;
+    }
+  }
+  return homeworkCount;
+};
 
-const transformMongoResults = (batchSessions, adhocSessions) => {
+const transformMongoResults = async (batchSessions, adhocSessions, queryType) => {
   const finalResult = [];
+  const mentorMenteeSessionModel = getTypeQueryController('MentorMenteeSession');
   if (batchSessions && batchSessions.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const batchSession of batchSessions) {
+      const completedHomeworkMeta = await getHomeworkCompletedMeta(batchSession, mentorMenteeSessionModel, queryType);
       finalResult.push({
         id: get(batchSession, 'id'),
         bookingDate: get(batchSession, 'bookingDate', null),
@@ -403,17 +517,19 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
         ...getSlotTimeFields(batchSession),
         startMinutes: get(batchSession, 'startMinutes', 0),
         endMinutes: get(batchSession, 'endMinutes', 0),
+        topicId: get(batchSession, 'topic.id', null),
         topicTitle: get(batchSession, 'topic.title', null),
         topicOrder: get(batchSession, 'topic.order', null),
         thumbnailSmall: get(batchSession, 'topic.thumbnailSmall', null),
         totalStudents: get(batchSession, 'classroom.students', []).length,
-        completedHomeworkMeta: getHomeworkCompletedMeta(batchSession),
+        completedHomeworkMeta,
       });
     }
   }
   if (adhocSessions && adhocSessions.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const adhocSession of adhocSessions) {
+      const completedHomeworkMeta = await getHomeworkCompletedMeta(adhocSession, mentorMenteeSessionModel, queryType);
       finalResult.push({
         id: get(adhocSession, 'id'),
         bookingDate: get(adhocSession, 'bookingDate', null),
@@ -430,7 +546,7 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
         topicOrder: get(adhocSession, 'topic.order', null),
         thumbnailSmall: get(adhocSession, 'topic.thumbnailSmall', null),
         totalStudents: get(adhocSession, 'classroom.students', []).length,
-        completedHomeworkMeta: getHomeworkCompletedMeta(adhocSession),
+        completedHomeworkMeta,
       });
     }
   }
@@ -493,11 +609,11 @@ const getNextOrPrevClassroomSessions = async (root, params, context) => {
       /**
        * Transforming aggregation result into required format i.e ClassroomSessionResult Type
        */
-      const transformedClassroomResult = transformMongoResults(
+      const transformedClassroomResult = await transformMongoResults(
         batchSessionRes,
         adhocSessionRes,
-        limit,
         queryType,
+        limit,
       );
 
       log(`Total Doc Returned ---> ${transformedClassroomResult.length}`);

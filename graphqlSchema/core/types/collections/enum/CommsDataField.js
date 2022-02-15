@@ -19,6 +19,7 @@ const CommsDataField = `
     description
     paymentLink
     eventRegistrationLink
+    sessionLink
   }`;
 
 export default CommsDataField;
