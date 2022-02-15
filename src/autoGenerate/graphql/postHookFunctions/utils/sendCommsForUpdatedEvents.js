@@ -80,7 +80,7 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
       registeredUsers = [], timeZone, eventTimeTableRule, name: eventName,
       locationType, meetingId, meetingPassword, sessionLink, geoLocation,
       address, state, city, pincode,
-      isEmailCommsEnabled,
+      // isEmailCommsEnabled,
     } = event;
     const {
       startDate, endDate, ...slots
@@ -178,50 +178,48 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
             triggeredAt: new Date(),
           },
         );
-        if (isEmailCommsEnabled) {
-          let sendEmailObj = {};
-          if (locationType === 'online') {
-            sendEmailObj = {
-              eventName,
-              meetingId,
-              meetingPassword,
-              sessionLink,
-              studentName,
-              eventUpdateReason,
-              eventStartdate,
-              eventEndDate,
-              startTime,
-              eventDate: eventStartdate,
-              eventTime: startTime,
-            };
-          }
-          if (locationType === 'venue') {
-            sendEmailObj = {
-              eventName,
-              studentName,
-              geoLocation,
-              address,
-              state,
-              city,
-              pincode,
-              timeZone,
-              eventUpdateReason,
-              eventStartdate,
-              eventEndDate,
-              startTime,
-              eventDate: eventStartdate,
-              eventTime: startTime,
-            };
-          }
-          sendMailModoTemplate('6821bf9a-d3db-48d1-8e7f-5343ccefabd2', {
-            toEmail: parentEmail,
-            senderEmail: 'hello@tekie.in',
-            subject: 'Testing Comms',
-            senderName: 'Tekie',
-            campaignName: '',
-            data: sendEmailObj,
-          });
+        let sendEmailObj = {};
+        if (locationType === 'online') {
+          sendEmailObj = {
+            eventName,
+            meetingId,
+            meetingPassword,
+            sessionLink,
+            studentName,
+            eventUpdateReason,
+            eventStartdate,
+            eventEndDate,
+            startTime,
+            eventDate: eventStartdate,
+            eventTime: startTime,
+          };
         }
+        if (locationType === 'venue') {
+          sendEmailObj = {
+            eventName,
+            studentName,
+            geoLocation,
+            address,
+            state,
+            city,
+            pincode,
+            timeZone,
+            eventUpdateReason,
+            eventStartdate,
+            eventEndDate,
+            startTime,
+            eventDate: eventStartdate,
+            eventTime: startTime,
+          };
+        }
+        sendMailModoTemplate('6821bf9a-d3db-48d1-8e7f-5343ccefabd2', {
+          toEmail: parentEmail,
+          senderEmail: 'hello@tekie.in',
+          subject: 'Testing Comms',
+          senderName: 'Tekie',
+          campaignName: '',
+          data: sendEmailObj,
+        });
       }
       if (eventUpdateStatus === 'canceled') {
         let parameters = [];
@@ -274,48 +272,46 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
             triggeredAt: new Date(),
           },
         );
-        if (isEmailCommsEnabled) {
-          let sendEmailObj = {};
-          if (locationType === 'online') {
-            sendEmailObj = {
-              eventName,
-              meetingId,
-              studentName,
-              eventUpdateReason,
-              eventStartdate,
-              eventEndDate,
-              startTime,
-              eventDate: eventStartdate,
-              eventTime: startTime,
-            };
-          }
-          if (locationType === 'venue') {
-            sendEmailObj = {
-              eventName,
-              studentName,
-              geoLocation,
-              address,
-              state,
-              city,
-              pincode,
-              timeZone,
-              eventUpdateReason,
-              eventStartdate,
-              eventEndDate,
-              startTime,
-              eventDate: eventStartdate,
-              eventTime: startTime,
-            };
-          }
-          sendMailModoTemplate('0fc48595-8432-486f-995c-00262de24b26', {
-            toEmail: parentEmail,
-            senderEmail: 'hello@tekie.in',
-            subject: 'Cancel Comms Test',
-            senderName: 'Tekie',
-            campaignName: '',
-            data: sendEmailObj,
-          });
+        let sendEmailObj = {};
+        if (locationType === 'online') {
+          sendEmailObj = {
+            eventName,
+            meetingId,
+            studentName,
+            eventUpdateReason,
+            eventStartdate,
+            eventEndDate,
+            startTime,
+            eventDate: eventStartdate,
+            eventTime: startTime,
+          };
         }
+        if (locationType === 'venue') {
+          sendEmailObj = {
+            eventName,
+            studentName,
+            geoLocation,
+            address,
+            state,
+            city,
+            pincode,
+            timeZone,
+            eventUpdateReason,
+            eventStartdate,
+            eventEndDate,
+            startTime,
+            eventDate: eventStartdate,
+            eventTime: startTime,
+          };
+        }
+        sendMailModoTemplate('0fc48595-8432-486f-995c-00262de24b26', {
+          toEmail: parentEmail,
+          senderEmail: 'hello@tekie.in',
+          subject: 'Cancel Comms Test',
+          senderName: 'Tekie',
+          campaignName: '',
+          data: sendEmailObj,
+        });
       }
     }
   }
