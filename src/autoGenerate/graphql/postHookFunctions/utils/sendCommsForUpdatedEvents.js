@@ -78,7 +78,10 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
     const event = await getEvent(eventId);
     const {
       registeredUsers = [], timeZone, eventTimeTableRule, name: eventName,
-      locationType, meetingId, meetingPassword, sessionLink, geoLocation,
+      locationType,
+      // meetingId,
+      // meetingPassword,
+      sessionLink, geoLocation,
       address, state, city, pincode,
       // isEmailCommsEnabled,
     } = event;
@@ -182,14 +185,7 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
         if (locationType === 'online') {
           sendEmailObj = {
             eventName,
-            meetingId,
-            meetingPassword,
-            sessionLink,
             studentName,
-            eventUpdateReason,
-            eventStartdate,
-            eventEndDate,
-            startTime,
             eventDate: eventStartdate,
             eventTime: startTime,
           };
@@ -198,16 +194,6 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
           sendEmailObj = {
             eventName,
             studentName,
-            geoLocation,
-            address,
-            state,
-            city,
-            pincode,
-            timeZone,
-            eventUpdateReason,
-            eventStartdate,
-            eventEndDate,
-            startTime,
             eventDate: eventStartdate,
             eventTime: startTime,
           };
@@ -276,12 +262,7 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
         if (locationType === 'online') {
           sendEmailObj = {
             eventName,
-            meetingId,
             studentName,
-            eventUpdateReason,
-            eventStartdate,
-            eventEndDate,
-            startTime,
             eventDate: eventStartdate,
             eventTime: startTime,
           };
@@ -290,16 +271,6 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
           sendEmailObj = {
             eventName,
             studentName,
-            geoLocation,
-            address,
-            state,
-            city,
-            pincode,
-            timeZone,
-            eventUpdateReason,
-            eventStartdate,
-            eventEndDate,
-            startTime,
             eventDate: eventStartdate,
             eventTime: startTime,
           };
