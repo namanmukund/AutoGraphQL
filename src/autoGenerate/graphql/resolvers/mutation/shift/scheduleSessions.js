@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable consistent-return */
 /* eslint-disable array-callback-return */
 /* eslint-disable guard-for-in */
@@ -6,7 +7,7 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import { log } from '../../../../../../utils/log';
-import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getSelectedDays from '../../../postHookFunctions/utils/getSelectedDays';
 import extractSlotsFromInput from '../../../../../../utils/extractSlotsFromInput';
@@ -28,10 +29,13 @@ import {
 const getCombinedSchedules = (schoolTimetableScheduleArray, batchTimetableScheduleArray) => {
   const combinedWorkingDaySchedule = {};
   const combinedEventScheduleArray = [];
+  // console.log('schoolTimetableScheduleArray', schoolTimetableScheduleArray);
+  // console.log('batchTimetableScheduleArray', batchTimetableScheduleArray);
   for (const schoolSchedule of schoolTimetableScheduleArray) {
     const isWorkingDay = get(schoolSchedule, 'type') === 'workingDay';
+    // console.log('insideSchoolScheduleisWorkingDay', isWorkingDay);
     if (isWorkingDay) {
-      for (const key in Object.keys(schoolSchedule)) {
+      for (const key in schoolSchedule) {
         if ((key === 'startDate' || key === 'endDate')
         || (key.includes('slot') && schoolSchedule[key])
         || (key.includes('day') && schoolSchedule[key])) {
@@ -44,8 +48,10 @@ const getCombinedSchedules = (schoolTimetableScheduleArray, batchTimetableSchedu
   }
   for (const batchSchedule of batchTimetableScheduleArray) {
     const isWorkingDay = get(batchSchedule, 'type') === 'workingDay';
+    // console.log('isWorkingDay', isWorkingDay);
     if (isWorkingDay) {
-      for (const key in Object.keys(batchSchedule)) {
+      for (const key in batchSchedule) {
+        // console.log('key', key);
         if ((key === 'startDate' && (!combinedWorkingDaySchedule.startDate || moment(new Date(batchSchedule[key])).isBefore(moment(new Date(combinedWorkingDaySchedule.startDate)))))
           || (key === 'endDate' && (!combinedWorkingDaySchedule.startDate || moment(new Date(batchSchedule[key])).isAfter(moment(new Date(combinedWorkingDaySchedule.endDate)))))
           || (key.includes('slot') && batchSchedule[key])
@@ -205,8 +211,9 @@ const scheduleSessionsMutationResolver = async (
   authentication,
   context,
 ) => {
-  validateAuthentication(context);
+  // validateAuthentication(context);
   const { input: timeTableRule } = params;
+  // console.log('timeTableRule', timeTableRule);
   const courseId = get(timeTableRule, 'courseId');
   const batchId = get(timeTableRule, 'batchId');
   const isRecurring = get(timeTableRule, 'isRecurring');
@@ -218,6 +225,7 @@ const scheduleSessionsMutationResolver = async (
   startDate.setHours(0, 0, 0, 0);
   const endDate = new Date(timeTableRule.endDate);
   endDate.setHours(0, 0, 0, 0);
+  // console.log('startDateEndDate', { startDate, endDate });
 
   // slots passed in input
   const { ...slots } = timeTableRule;
@@ -226,15 +234,24 @@ const scheduleSessionsMutationResolver = async (
 
   // Fetch Batch TimetableSchedule and School time table schedule and combine them
   const batch = await fetchBatch(get(timeTableRule, 'batchId', ''));
-  const schoolTimetableScheduleArray = get(batch, 'school.timeTableSchedule', []);
-  const batchTimetableScheduleArray = get(batch, 'timeTableSchedule', []);
+  // console.log('batch', batch);
+  const schoolTimetableScheduleArray = get(batch, 'school.timetableSchedule', []);
+  const batchTimetableScheduleArray = get(batch, 'timetableSchedule', []);
+  const mentorUserId = get(batch, 'allottedMentor.id', '');
+  const batchType = get(batch, 'type');
 
   const { combinedWorkingDaySchedule, combinedEventScheduleArray } = getCombinedSchedules(schoolTimetableScheduleArray, batchTimetableScheduleArray);
 
+  // console.log('combinedWorkingDaySchedule', combinedWorkingDaySchedule);
+  // console.log('combinedEventScheduleArray', combinedEventScheduleArray);
+
   // See if force flag is set to false/or not sent in input
   const forceScheduleSessions = get(timeTableRule, 'forceScheduleSessions', false);
+
+  // console.log('forceScheduleSessions', forceScheduleSessions);
   if (!forceScheduleSessions && combinedWorkingDaySchedule.startDate && combinedWorkingDaySchedule.endDate) {
     const isOutsideWorkingSchedule = checkIfOutsideWorkingSchedule(combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule);
+    // console.log('isOutsideWorkingSchedule', isOutsideWorkingSchedule);
     if (isOutsideWorkingSchedule) {
       throw new CannotScheduleOutsideWorkingHoursError();
     }
@@ -246,9 +263,10 @@ const scheduleSessionsMutationResolver = async (
       // topic count
       let topics = await getTopics(courseId);
       const topicCount = topics && topics.length;
+      // console.log('topics.length', topics.length);
       // batch sessions
       const batchSessions = await getBatchSessions(batchId);
-
+      // console.log('batchSessions.lenght', batchSessions.length);
       if (batchSessions && batchSessions.length) {
         // sorting the existing batch sessions into started/completed and allotted
         const {
@@ -256,15 +274,19 @@ const scheduleSessionsMutationResolver = async (
           sessionsAllotted,
         } = sortBatchSessions(batchSessions);
         let possibleSessionCount = topicCount;
+        // console.log('sesssionsStartedOrCompleted', sessionsStartedOrCompleted.length);
+        // console.log('sessionsAllotted', sessionsAllotted.length);
         if (sessionsStartedOrCompleted.length > 0) {
           // if there exists some started or completed sessions, don't count them, create/update sessions for the remaining
           possibleSessionCount -= sessionsStartedOrCompleted.length;
         }
         let possibleDates = getPossibleDates(startDate, endDate, days);
+        // console.log('possibleDate', possibleDates);
         // for the sessions which are still in the allotted state, update them
         const allottedSessionsCount = sessionsAllotted.length;
         if (allottedSessionsCount > 0) {
           possibleSessionCount -= allottedSessionsCount;
+          // console.log('here1');
           updateAllottedBatchSessions(sessionsAllotted, possibleDates, filteredSlotsString, slots, mentorUserId, courseId, batchType);
         }
         if (possibleSessionCount > 0) {
@@ -273,6 +295,7 @@ const scheduleSessionsMutationResolver = async (
           possibleDates = possibleDates.slice(startFromIndex);
           const topicStartIndex = topicCount - possibleSessionCount;
           topics = topics.splice(topicStartIndex);
+          // console.log('here2');
           createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId, batchType);
         }
       } else {
@@ -283,7 +306,6 @@ const scheduleSessionsMutationResolver = async (
       }
     }
   } else {
-    // do something else -> ADHOC
     // if adhoc and recurring, return
     if (isRecurring) {
       return;

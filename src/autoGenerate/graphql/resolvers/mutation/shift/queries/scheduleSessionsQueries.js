@@ -1,5 +1,7 @@
+import { get } from 'lodash';
 import getSlotTimeFields from '../../../../../../../graphqlSchema/core/functions/getSlotTimeFields';
 import getWeekDaysFields from '../../../../../../../graphqlSchema/core/functions/getWeekDaysFields';
+import callLocalGraphqlApi from '../../../../../../api/callLocalGraphqlApi';
 
 const slotTimeFields = getSlotTimeFields('Boolean', true);
 const weekDaysFields = getWeekDaysFields('Boolean', true);
@@ -9,6 +11,10 @@ const fetchBatch = async (batchId) => {
     query {
       batch(id: "${batchId}"){
         id
+        allottedMentor {
+          id
+        }
+        type
         timeTableRule {
           ${slotTimeFields}
           ${weekDaysFields}
@@ -18,16 +24,16 @@ const fetchBatch = async (batchId) => {
         school {
           timetableSchedule {
             type
-            startDate: Date
-            endDate: Date
+            startDate
+            endDate
             ${slotTimeFields}
             ${weekDaysFields}
           }
         }
         timetableSchedule {
           type
-          startDate: Date
-          endDate: Date
+          startDate
+          endDate
           ${slotTimeFields}
           ${weekDaysFields}
         }
@@ -101,7 +107,7 @@ const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot,
   }
   `;
 
-export default {
+export {
   fetchBatch,
   fetchMentorSessions,
   updateMentorSession,
