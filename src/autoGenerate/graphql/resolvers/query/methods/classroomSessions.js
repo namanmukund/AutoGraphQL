@@ -1,7 +1,6 @@
 import { get, sortBy } from 'lodash';
 import { slotTimes } from '../../../../../../constants';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
-import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 import { ifAuthorized, log } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
 
@@ -555,14 +554,7 @@ const classroomSessions = (async (root, params, context) => {
   const mentorId = get(filters, 'userId');
   const startDate = get(filters, 'startDate');
   const endDate = get(filters, 'endDate');
-  if (!mentorId || !startDate || !endDate) {
-    throw new MissingMandatoryInputInRequestError({
-      data: {
-        message: 'userId/startDate/endDate is missing in filter',
-      },
-    });
-  }
-
+  log(`${mentorId}`);
   const batchSessionModel = getTypeQueryController(
     'BatchSession',
     authentication,

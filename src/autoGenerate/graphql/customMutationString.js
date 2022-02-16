@@ -27,7 +27,7 @@ const customMutationString = `
    updateParentChildDetail ( userId:ID!, schoolId: ID, batchId: ID, input: UpdateParentChildDetailInput ): ParentChildToken,
    signUpAffiliate ( input: SignUpAffiliateInput ): UserToken,
    signUpSchool ( schoolId: ID!, input: SignUpAffiliateInput ): UserToken,
-   loginViaPassword ( input: EmailLoginInput ): ParentChildToken,
+   loginViaPassword ( input: EmailUsernameLoginInput ): ParentChildToken,
    loginViaOtp ( input: ExistingUserInput ): BooleanResult,
    signupOrLoginViaOtp ( input: SignupOrLoginUserInput ): BooleanResult,
    validateUserOTP ( input: ValidateUserInput  ): ParentChildToken,
