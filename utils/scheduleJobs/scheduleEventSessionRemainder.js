@@ -209,9 +209,6 @@ const scheduleEventSessionRemainder = async () => {
               eventTime: startTime,
             };
           }
-          // if (parentEmail) {
-          //   sendEventSessionRemainderMail(parentEmail, emailCommsObj);
-          // }
           sendMailModoTemplate('8a6f16f2-9eb6-4e63-aca4-e3ce329a5f16', {
             toEmail: parentEmail,
             sendEmail: 'hello@tekie.in',
