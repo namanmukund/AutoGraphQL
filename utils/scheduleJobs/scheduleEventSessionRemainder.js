@@ -2,9 +2,6 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
-// import sendEmail from '../../services/email/utils/sendEmail';
-// import parsedHtmlFromTemplateFileAndObject from '../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
-// import getEmailObject from '../../services/email/utils/getEmailObject';
 import getSelectedSlotsStringArray from '../../src/autoGenerate/graphql/postHookFunctions/utils/getSelectedSlotsStringArray';
 import getIntlDateTime from '../timeZoneDiff';
 import getSlotTimesInString from '../getSlotTimesInString';
@@ -75,22 +72,6 @@ const getEventSessions = async () => {
   return get(res, 'data.eventSessions', []);
 };
 
-// const sendEventSessionRemainderMail = (email, sendEmailObject) => {
-//   const templateFileName = 'B2BAbsent';
-//   const templateString = parsedHtmlFromTemplateFileAndObject(
-//     templateFileName, sendEmailObject,
-//   );
-//   const emailTo = [email];
-//   templateString.then((html) => {
-//     const ccEmail = '';
-//     const bccEmail = '';
-//     const subject = 'Tekie - event Session Reminder!';
-//     const text = '';
-//     const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
-//     sendEmail(emailMsgObject);
-//   });
-// };
-
 const scheduleEventSessionRemainder = async () => {
   const eventSessionsData = await getEventSessions();
   for (const eventSession of eventSessionsData) {
@@ -99,7 +80,6 @@ const scheduleEventSessionRemainder = async () => {
       sessionDate, event: {
         id: eventId,
         timeZone, isEmailCommsEnabled, name: eventName,
-        // meetingId, meetingPassword, sessionLink,
         locationType, geoLocation,
         address, state, city, pincode, registeredUsers = [],
         eventSessions = [],
