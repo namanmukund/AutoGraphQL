@@ -34,14 +34,14 @@ const getBatchSessionAggregation = ({
       $gte: new Date(bookingDate),
     };
     matchQuery.sessionStatus = {
-      $in: ['allotted'],
+      $in: ['allotted', 'started'],
     };
   } else {
     matchQuery.bookingDate = {
       $lte: new Date(bookingDate),
     };
     matchQuery.sessionStatus = {
-      $in: ['started', 'completed'],
+      $in: ['completed'],
     };
   }
   return [
