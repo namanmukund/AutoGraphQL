@@ -21,5 +21,5 @@ export default [
   ValidateUserInput,
   ValidateMagicLinkInput,
   ...ResetPasswordAndLoginInput,
-  ...SchoolLiveClassLoginInput
+  ...SchoolLiveClassLoginInput,
 ];
