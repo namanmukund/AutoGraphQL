@@ -4,7 +4,7 @@ import getWeekDaysClassModeFields from '../../../functions/getWeekDaysClassModeF
 
 const slotTimeFields = getSlotTimeFields('Boolean', false);
 const weekDaysFields = getWeekDaysFields('Boolean', false);
-const weekDaysClassModeFields = getWeekDaysClassModeFields('Boolean', false);
+const weekDaysClassModeFields = getWeekDaysClassModeFields('ClassMode', false);
 
 const ScheduleSessionsInput = `
   input ScheduleSessionsInput {
@@ -13,6 +13,7 @@ const ScheduleSessionsInput = `
     ${slotTimeFields}
     ${weekDaysFields}
     ${weekDaysClassModeFields}
+    sessionMode: ClassMode
     startDate: Date
     endDate: Date
     startTime: Int @length(min: 0, max: 59)
