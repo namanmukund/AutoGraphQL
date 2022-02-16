@@ -1,7 +1,7 @@
-import callLocalGraphqlApi from "../../../../api/callLocalGraphqlApi";
+import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 const checkIfOtpPresent = async (otp) => {
-    const query = `
+  const query = `
     query{
       batchSessions(filter:{and:[
         {
@@ -16,13 +16,13 @@ const checkIfOtpPresent = async (otp) => {
           }
         }
       }`;
-    const result = await callLocalGraphqlApi(query);
-    const otpAlreadyPresent = get(
-      result,
-      "data.batchSessions[0].schoolSessionsOtp[0]",
-      null
-    );
-    return !!otpAlreadyPresent;   //converting to boolean
-  };
+  const result = await callLocalGraphqlApi(query);
+  const otpAlreadyPresent = get(
+    result,
+    'data.batchSessions[0].schoolSessionsOtp[0]',
+    null,
+  );
+  return !!otpAlreadyPresent; // converting to boolean
+};
 
-  export default checkIfOtpPresent
+export default checkIfOtpPresent;
