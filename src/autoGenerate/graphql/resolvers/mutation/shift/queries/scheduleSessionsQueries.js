@@ -23,6 +23,7 @@ const fetchBatch = async (batchId) => {
         }
         school {
           timetableSchedule {
+            id
             type
             startDate
             endDate
@@ -31,6 +32,7 @@ const fetchBatch = async (batchId) => {
           }
         }
         timetableSchedule {
+          id
           type
           startDate
           endDate
@@ -107,9 +109,23 @@ const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot,
   }
   `;
 
+const shiftBatchSessionsAfterGivenDate = (date, batchId, slots) => `
+  mutation{
+  shiftBatchSessionsAfterGivenDate(input:{
+    date: "${date}"
+    batchId: "${batchId}"
+    ${slots}
+  }){
+    result
+    error
+  }
+}
+`;
+
 export {
   fetchBatch,
   fetchMentorSessions,
   updateMentorSession,
   addMentorSession,
+  shiftBatchSessionsAfterGivenDate,
 };
