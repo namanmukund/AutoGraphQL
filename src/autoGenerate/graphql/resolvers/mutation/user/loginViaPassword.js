@@ -55,14 +55,14 @@ const loginViaPasswordMutationResolver = async (
   if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
-  if(input.email) loginViaEmailInputValidation(input);
+  if (input.email) loginViaEmailInputValidation(input);
 
   Object.assign(authentication, {
     bypass: true,
   });
 
   if (!input.email && !input.username) {
-    throw new EmailOrUsernameRequired()
+    throw new EmailOrUsernameRequired();
   }
 
   const modelQueries = new QueryController(USER_TYPE, authentication);

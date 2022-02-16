@@ -2,7 +2,6 @@ import { get } from 'lodash';
 import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
-  rangeOTP,
   sessionStatus,
   sessionType,
 } from '../../../../constants';
@@ -193,7 +192,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
 
   // add students to the batch session and mark them absent as default
   if (students && students.length && topicId) {
-    let otpMap = arrayCombinations()
+    const otpMap = arrayCombinations();
     let pushManyQueryToUpadateOtp = 'schoolSessionOtp: { pushMany: [';
     let pushManyQuery = 'attendance:{ pushMany: [';
     students.forEach((studentElem) => {
@@ -202,7 +201,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
                                                isPresent: false, 
                                                }, `;
       }
-      let sectionAndGradeCombination = findSectionAndGradeCombination(studentElem.user.studentProfile.section, studentElem.user.studentProfile.grade)
+      const sectionAndGradeCombination = findSectionAndGradeCombination(studentElem.user.studentProfile.section, studentElem.user.studentProfile.grade);
       pushManyQueryToUpadateOtp += `{grade: "${studentElem.user.studentProfile.grade}",
                                                section: "${studentElem.user.studentProfile.section}",
                                                otp: "${otpMap[sectionAndGradeCombination]}",
