@@ -324,3 +324,7 @@ export const CategoryAlreadyExist = createError('CategoryAlreadyExist', {
 export const EmailOrUsernameRequired = createError('EmailOrUsernameRequired', {
   message: 'Either Email or Username is required',
 });
+
+export const CannotScheduleOutsideWorkingHoursError = createError('CannotScheduleOutsideWorkingHoursError', {
+  message: 'Cannot Schedule Sessions outside working hours.',
+});

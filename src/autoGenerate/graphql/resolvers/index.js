@@ -105,6 +105,11 @@ import resetPasswordAndLogin from './mutation/methods/resetPasswordAndLogin';
 import getEventSpeaker from './query/methods/getEventSpeaker';
 import generateMentorChild from './mutation/methods/generateMentorChild';
 import getEventWinner from './query/methods/getEventWinner';
+import classroomSessions from './query/methods/classroomSessions';
+import updateEventSessionAttendance from './mutation/methods/updateEventSessionAttendance';
+import getNextOrPrevClassroomSessions from './query/methods/getNextOrPrevClassroomSessions';
+import classroomDetail from './query/methods/classroomDetail';
+import scheduleSessions from './mutation/shift/scheduleSessions';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -635,6 +640,8 @@ resolvers.Mutation.generateCertificateInBulk = generateCertificateInBulk;
 resolvers.Mutation.validateMagicLink = validateMagicLink;
 resolvers.Mutation.resetPasswordAndLogin = resetPasswordAndLogin;
 resolvers.Mutation.generateMentorChild = generateMentorChild;
+resolvers.Mutation.updateEventSessionAttendance = updateEventSessionAttendance;
+resolvers.Mutation.scheduleSessions = scheduleSessions;
 
 // queries
 resolvers.Query.me = me;
@@ -668,6 +675,12 @@ resolvers.Query.getMagicLink = getMagicLink;
 resolvers.Query.getEventSpeaker = getEventSpeaker;
 // Resolver to get event winner
 resolvers.Query.getEventWinner = getEventWinner;
+// Resolver to get classroom sessions
+resolvers.Query.classroomSessions = classroomSessions;
+// Resolver to get next or prev classroom sessions
+resolvers.Query.getNextOrPrevClassroomSessions = getNextOrPrevClassroomSessions;
+// Resolver to get classroom sessions
+resolvers.Query.classroomDetail = classroomDetail;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 

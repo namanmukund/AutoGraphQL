@@ -17,6 +17,12 @@ const UpdateParentChildDetailInput = `
     deviceType: String
     deviceOs: String
     osVersion: String
+    utmSource: String
+    utmCampaign: String
+    utmTerm: String
+    utmContent: String
+    utmMedium: String
+    eventId: String
   }
 `;
 

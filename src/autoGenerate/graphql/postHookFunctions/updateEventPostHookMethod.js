@@ -26,22 +26,23 @@ const updateEventPostHookMethod = async (input, params, mutationName, context) =
   const {
     prevTimeTableRule,
     previousEventStatus,
+    shouldAddInSession = false,
   } = context;
   const { ...slots } = timeTableRule;
   const slotsTime = getSelectedSlotsTime(slots);
   const isEventRescheduled = (get(prevTimeTableRule, 'startDate') && !moment(get(timeTableRule, 'startDate')).isSame(moment(get(prevTimeTableRule, 'startDate'))))
     || (get(prevTimeTableRule, 'endDate') && !moment(get(timeTableRule, 'endDate')).isSame(moment(get(prevTimeTableRule, 'endDate'))))
     || (slotsTime.length && get(context, 'prevSlotTimes').length && slotsTime[0] !== get(context, 'prevSlotTimes')[0]);
-  addUpdateEventSessionsForEvent(eventId, timeTableRule, prevTimeTableRule, registeredUsers);
-  if (isEventRescheduled) {
-    if (shouldSendRescheduledComms) {
-      sendCommsForUpdatedEvents(eventId, eventRescheduledReason, 'rescheduled');
-    }
+  addUpdateEventSessionsForEvent(eventId, timeTableRule, prevTimeTableRule, get(context, 'newRegisteredUserId'));
+  if (isEventRescheduled && !get(context, 'newRegisteredUserId')) {
+    await sendCommsForUpdatedEvents(eventId, eventRescheduledReason, 'rescheduled', shouldSendRescheduledComms);
   }
-  if ((previousEventStatus !== 'cancelled' && eventStatus === 'cancelled') && shouldSendCanceledComms) {
-    sendCommsForUpdatedEvents(eventId, eventCancellationReason, 'canceled');
+  if (((previousEventStatus !== 'cancelled' && eventStatus === 'cancelled')
+    || (previousEventStatus !== 'unpublished' && eventStatus === 'unpublished')) && !get(context, 'newRegisteredUserId')) {
+    sendCommsForUpdatedEvents(eventId, eventCancellationReason, 'canceled', shouldSendCanceledComms);
   }
-  if ((previousEventStatus !== 'published' && eventStatus === 'published') || isEventRescheduled) {
+  if (((previousEventStatus !== 'published' && eventStatus === 'published')
+    || (eventStatus === 'published' && isEventRescheduled)) && !get(context, 'newRegisteredUserId')) {
     for (const eventCommsRule of eventCommsRules) {
       if (!get(eventCommsRule, 'isSend') && get(eventCommsRule, 'condition') !== 'afterRegistration') {
         const dateCondition = get(eventCommsRule, 'condition', null);

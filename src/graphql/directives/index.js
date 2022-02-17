@@ -40,6 +40,16 @@ directive @relationalMeta on FIELD
 
 # Namecases a string
 directive @nameCase on FIELD
+
+# Cache control for CDN and Redis.
+directive @cacheControl(
+  maxAge: Int
+  scope: CacheControlScope
+  inheritMaxAge: Boolean
+) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION
+
+# Create index for a field
+directive @createIndex on FIELD
 `;
 
 export default directive;

@@ -17,7 +17,7 @@
       href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap"
       rel="stylesheet"
     />
-    <!-- Nunito Font -->
+    <!-- 'Nunito' ,sans-serif Font -->
     <link
       href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Nunito:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap"
       rel="stylesheet"
@@ -292,7 +292,7 @@
                     <div
                       style="
                         box-sizing: border-box;
-                        font-family: Nunito;
+                        font-family: 'Nunito' ,sans-serif;
                         font-weight: normal;
                         font-size: 16px;
                         line-height: 22px;
@@ -308,31 +308,31 @@
                         background-position: right 0px;
                       "
                     >
-                      <div style="margin-bottom: 20px">
+                      <div style="margin-bottom: 20px; font-family: 'Nunito' ,sans-serif;">
                         Hello
                         <span style="font-weight: bolder"
                           ><%= parentName %></span
                         >,
                       </div>
-                      <div>
+                      <div style="font-family: 'Nunito' ,sans-serif;">
                         <span style="font-weight: bolder"
                           ><%= studentName %></span
                         >
                         missed their coding class with Tekie scheduled on
                         <span style="font-weight: bolder"
-                          ><%= date, startTime %></span
+                          ><%= date %>, <%= startTime %></span
                         >
                       </div>
-                      <div style="margin: 25px 0">
-                        Don’t worry, we’ll help them catch up on the missed
+                      <div style="margin: 25px 0; font-family: 'Nunito' ,sans-serif;">
+                        Don't worry, we'll help them catch up on the missed
                         topic.
                       </div>
-                      <div style="margin: 25px 0">
+                      <div style="margin: 25px 0; font-family: 'Nunito' ,sans-serif;">
                         The topic we covered in the session was
                         <span style="font-weight: bolder"><%= topicTitle %></span
                         >.
                       </div>
-                      <div style="margin: 25px 0">
+                      <div style="margin: 25px 0; font-family: 'Nunito' ,sans-serif;">
                         We suggest you go through the session content on your
                         student app.
                       </div>
@@ -346,31 +346,23 @@
                         text-align: center;
                         color: #000000;
                         opacity: 1;
-                        font-family: Nunito;
+                        font-family: 'Nunito' ,sans-serif;
                         font-weight: normal;
                         font-size: 16px;
                         line-height: 22px;
                       "
                     >
                       <div style="text-align: center; margin: 14px 0">
-                        <span
-                          style="
-                            border-radius: 100px;
-                            background-color: #04c3ff;
-                            padding: 10px 13px;
-                            align-self: center;
-                          "
-                        >
-                          <img src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/attachment.png" alt="" />
-                        </span>
+                        <img src="https://tekie-backend.s3.amazonaws.com/python/email/b2bJoinSessionReminder/attachment.png" alt="" />
                       </div>
-                      <div>Click here to access the lesson:</div>
+                      <div style="font-family: 'Nunito' ,sans-serif;">Click here to access the lesson:</div>
                       <a
                         href="<%= sessionTopicLink %>"
                         style="
                           color: #34e4ea;
                           text-decoration: underline;
                           font-weight: bold;
+                          font-family: 'Nunito' ,sans-serif;
                         "
                         ><%= sessionTopicLink %></a
                       >
@@ -381,7 +373,7 @@
                   <td>
                     <p
                       style="
-                        font-family: sans-serif;
+                        font-family: 'Nunito' ,sans-serif;
                         font-style: normal;
                         font-weight: bold;
                         font-size: 18px;
@@ -403,8 +395,7 @@
                   <td>
                     <span
                       style="
-                        font-family: 'Nunito', sans-serif, 'Open Sans',
-                          Helvetica, Roboto, sans-serif;
+                        font-family: 'Nunito' ,sans-serif;
                         font-style: normal;
                         line-height: 132.4%;
                         text-align: center;
@@ -421,8 +412,7 @@
                         style="
                           color: #04c3ff;
                           text-decoration: underline;
-                          font-family: 'Nunito', sans-serif, 'Open Sans',
-                            Helvetica, Roboto, sans-serif;
+                          font-family: 'Nunito' ,sans-serif;
                           font-style: normal;
                           line-height: 132.4%;
                           text-align: center;
@@ -443,7 +433,7 @@
                         display: inline-block;
                         text-decoration: none;
                         color: white;
-                        font-family: 'Nunito';
+                        font-family: 'Nunito' ,sans-serif;
                         font-size: 14px;
                         line-height: 0px;
                         margin: 10px auto;
@@ -471,7 +461,7 @@
                         display: inline-block;
                         text-decoration: none;
                         color: white;
-                        font-family: 'Nunito';
+                        font-family: 'Nunito' ,sans-serif;
                         font-size: 14px;
                         line-height: 0px;
                         margin: 15px auto;
@@ -642,6 +632,7 @@
                                       font-weight: normal;
                                       font-size: 10.6305px;
                                       line-height: 150%;
+                                      opacity: 0.8;
                                     "
                                     >VIEW T&C</a
                                   >
@@ -661,6 +652,7 @@
                                       font-weight: normal;
                                       font-size: 10.6305px;
                                       line-height: 150%;
+                                      opacity: 0.8;
                                     "
                                     >Visit Tekie.In</a
                                   >
@@ -680,6 +672,7 @@
                                       font-weight: normal;
                                       font-size: 10.6305px;
                                       line-height: 150%;
+                                      opacity: 0.8;
                                     "
                                     >Unsubscribe</a
                                   >

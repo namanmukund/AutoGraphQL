@@ -3,6 +3,7 @@ import { validate } from '../../../validation';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import {
   DatabaseRecordNotFoundError,
+  EitherUsernameEmailOrPhoneRequiredError,
   InvalidEmailError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
@@ -17,9 +18,12 @@ import { EmailOrUsernameRequired } from '../../../../../../constants/errors/db';
 const USER_TYPE = 'User';
 
 const loginViaEmailInputValidation = (input) => {
-  const { email } = input;
+  const { email, username } = input;
+  if (!username && !email) {
+    throw new EitherUsernameEmailOrPhoneRequiredError();
+  }
   // check email
-  if (!isValidEmail(email)) {
+  if (!username && !isValidEmail(email)) {
     throw new InvalidEmailError();
   }
   return true;

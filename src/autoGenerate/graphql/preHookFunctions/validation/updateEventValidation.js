@@ -1,9 +1,12 @@
 import { get } from 'lodash';
-import { MultipleRegistrationError, AlreadyRegisteredForEvent } from '../../../../../constants/errors';
+import moment from 'moment';
+import {
+  MultipleRegistrationError,
+  AlreadyRegisteredForEvent, RegistrationClosedForEvent, EventCancelledError,
+} from '../../../../../constants/errors';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
-import validateBookingDate from './utils/validateBookingDate';
 
 const getEventDetails = async (eventId, registeredUserId) => {
   const query = `{
@@ -13,6 +16,8 @@ const getEventDetails = async (eventId, registeredUserId) => {
     ${registeredUserId ? `registeredUsers(filter: { id: "${registeredUserId}" }) {
       id
     }` : ''}
+    eventStartTime
+    eventEndTime
     ${!registeredUserId ? `eventTimeTableRule {
       monday
       tuesday
@@ -35,11 +40,10 @@ const getEventDetails = async (eventId, registeredUserId) => {
 const updateEventValidation = async (params, input, mutationName, context) => {
   const { id: eventId, registeredUsersConnectIds = [] } = params;
   const eventTimeTableRule = get(params, 'input.eventTimeTableRule');
-  const eventData = await getEventDetails(eventId);
+  const eventData = await getEventDetails(eventId, get(registeredUsersConnectIds, '[0]'));
   if (get(eventTimeTableRule, 'startDate') && get(eventTimeTableRule, 'endDate')) {
-    const { startDate, ...slots } = eventTimeTableRule;
+    const { startDate, endDate, ...slots } = get(eventData, 'eventTimeTableRule');
     const slotsTime = getSelectedSlotsTime(slots);
-    validateBookingDate(startDate, slotsTime, 0);
     context.prevSlotTimes = slotsTime;
     context.prevTimeTableRule = get(eventData, 'eventTimeTableRule');
   }
@@ -48,9 +52,16 @@ const updateEventValidation = async (params, input, mutationName, context) => {
     if (registeredUsersConnectIds.length > 1) {
       throw new MultipleRegistrationError();
     }
-    const currentEvent = await getEventDetails(eventId, get(registeredUsersConnectIds, '[0]'));
-    if (get(currentEvent, 'registeredUsers', []).length) {
+    if (get(eventData, 'registeredUsers', []).length) {
       throw new AlreadyRegisteredForEvent();
+    }
+    const { eventStartTime } = eventData;
+    const registrationEndTime = moment(eventStartTime).subtract(30, 'minutes');
+    if (get(eventData, 'status') !== 'published') {
+      throw new EventCancelledError();
+    }
+    if (moment().isAfter(registrationEndTime)) {
+      throw new RegistrationClosedForEvent();
     }
     context.newRegisteredUserId = get(registeredUsersConnectIds, '[0]');
   }

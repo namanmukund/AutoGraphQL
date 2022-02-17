@@ -122,7 +122,7 @@ import addEventSpeakerProfileValidation from './preHookFunctions/validation/addE
 import addCommsVariableValidation from './preHookFunctions/validation/addCommsVariableValidation';
 import updateEventValidation from './preHookFunctions/validation/updateEventValidation';
 import addWeekDayForOneDayEvent from './preHookFunctions/validation/utils/addWeekDayForOneDayEvent';
-import updateEventSessionValidation from './preHookFunctions/validation/updateEventSessionValidation';
+// import updateEventSessionValidation from './preHookFunctions/validation/updateEventSessionValidation';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -942,10 +942,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await updateEventValidation(params, input, mutationOrQueryName, context);
       break;
     }
-    case 'updateEventSession': {
-      await updateEventSessionValidation(params, input, mutationOrQueryName, context);
-      break;
-    }
+    // case 'updateEventSession': {
+    //   await updateEventSessionValidation(params, input, mutationOrQueryName, context);
+    //   break;
+    // }
     default: {
       /* If context is not present then it means user is not authenticated and the
       user won't be able to make any db query

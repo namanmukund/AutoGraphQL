@@ -5,7 +5,7 @@ import LoginInput from './LoginInput';
 import ExistingUserInput from './ExistingUserInput';
 import SignupOrLoginUserInput from './SignupOrLoginUserInput';
 import SocialLoginInput from './SocialLoginInput';
-import EmailLoginInput from './EmailLoginInput';
+import EmailUsernameLoginInput from './EmailUsernameLoginInput';
 import ValidateUserInput from './ValidateUserInput';
 import ValidateMagicLinkInput from './ValidateMagicLinkInput';
 import ResetPasswordAndLoginInput from './ResetPasswordAndLoginInput';
@@ -17,7 +17,7 @@ export default [
   ...LoginInput, ExistingUserInput,
   SignupOrLoginUserInput,
   ...SocialLoginInput,
-  ...EmailLoginInput,
+  ...EmailUsernameLoginInput,
   ValidateUserInput,
   ValidateMagicLinkInput,
   ...ResetPasswordAndLoginInput,

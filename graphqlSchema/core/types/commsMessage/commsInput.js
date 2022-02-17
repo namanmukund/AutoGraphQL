@@ -10,6 +10,18 @@ const commsInput = `
     speakerName: String
     parentEmail: String
     parentPhone: String
+    eventTime: String
+    eventCertificateLink: String
+    meetingId: String
+    meetingLink: String
+    meetingPassword: String
+    geoLocation: String
+    address: String
+    summary: String
+    description: String
+    paymentLink: String
+    eventRegistrationLink: String
+    sessionLink: String
   }
 `;
 

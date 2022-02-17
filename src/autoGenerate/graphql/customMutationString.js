@@ -14,7 +14,7 @@ const customMutationString = `
    resetPasswordFromForgotPasswordLink (newPassword: String!): BooleanResult,
    userCourseSyllabus (courseId: ID): UserCourseSyllabus,
    userTopicJourney ( topicId: ID!, courseId: ID): UserTopicJourney,
-   userFirstAndLatestQuizReport ( topicId: ID!, courseId: ID): UserFirstAndLatestQuizReport,
+   userFirstAndLatestQuizReport ( topicId: ID!, courseId: ID, userId: ID): UserFirstAndLatestQuizReport,
    skipVideo ( topicId: ID!): SkipVideo,
    skipPracticeQuestion ( learningObjectiveId: ID!): BooleanResult,
    userBadge (courseId: ID): UserBadge,
@@ -24,10 +24,10 @@ const customMutationString = `
    tcirtSdrowssaPtes ( id: ID!, password: String! ): User,
    uploadFile (fileInput: FileInput, connectInput: FileConnectInput, fileName: String): File! ,
    parentChildSignUp ( schoolId: ID, campaignId: ID, input: ParentChildSignUpInput, bookingAgentId: ID ): ParentChildToken,
-   updateParentChildDetail ( userId:ID!, schoolId: ID, input: UpdateParentChildDetailInput ): ParentChildToken,
+   updateParentChildDetail ( userId:ID!, schoolId: ID, batchId: ID, input: UpdateParentChildDetailInput ): ParentChildToken,
    signUpAffiliate ( input: SignUpAffiliateInput ): UserToken,
    signUpSchool ( schoolId: ID!, input: SignUpAffiliateInput ): UserToken,
-   loginViaPassword ( input: EmailLoginInput ): ParentChildToken,
+   loginViaPassword ( input: EmailUsernameLoginInput ): ParentChildToken,
    loginViaOtp ( input: ExistingUserInput ): BooleanResult,
    signupOrLoginViaOtp ( input: SignupOrLoginUserInput ): BooleanResult,
    validateUserOTP ( input: ValidateUserInput  ): ParentChildToken,
@@ -46,8 +46,10 @@ const customMutationString = `
    validateMagicLink ( input: ValidateMagicLinkInput  ): ParentChildToken,
    resetPasswordAndLogin ( input: ResetPasswordAndLoginInput ): UserToken,
    generateMentorPayoutReport ( input: MentorPayoutReportInput ): MentorPayoutReportOutput,
-   schoolLiveClassLoginViaOtp ( input: SchoolLiveClassLoginInput ): ParentChildToken,  
-   generateMentorChild ( mentorId: String ): MentorChildOutput 
+   generateMentorChild ( mentorId: String ): MentorChildOutput
+   updateEventSessionAttendance (input: EventAttendanceInput): BooleanResult
+   scheduleSessions (input: ScheduleSessionsInput): BooleanResult
+   schoolLiveClassLoginViaOtp ( input: SchoolLiveClassLoginInput ): ParentChildToken,
    `;
 
 export default customMutationString;

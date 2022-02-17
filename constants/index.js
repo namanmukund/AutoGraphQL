@@ -520,6 +520,8 @@ const newTekieWebLinks = {
 };
 const EXCLUDE_NUMBER = ['7000287388'];
 
+const TIME_BEFORE_EVENT_CREATION = 1;
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -609,4 +611,5 @@ export {
   TIME_DIFF_FOR_MANUAL_SESSION,
   newTekieWebLinks,
   EXCLUDE_NUMBER,
+  TIME_BEFORE_EVENT_CREATION,
 };

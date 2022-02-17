@@ -685,7 +685,7 @@ const typeformWebhookController = async (req, res) => {
           timezone = 'Asia/Kolkata';
           utmSource = 'events';
           utmCampaign = 'storyspree';
-          utmTerm = '30thJan2022';
+          utmTerm = '6thFeb2022';
           doGenerateCertificate = false;
           break;
         case EVENTS.GENZENVIRONMENT.registrationFormId:
@@ -713,7 +713,7 @@ const typeformWebhookController = async (req, res) => {
           timezone = 'Asia/Kolkata';
           utmSource = 'events';
           utmCampaign = 'doodling';
-          utmTerm = '30thJan2022';
+          utmTerm = '6thFeb2022';
           doGenerateCertificate = false;
           break;
         case EVENTS.CHRISTMASCARNIVAL.registrationFormId25thRS:

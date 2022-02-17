@@ -230,10 +230,14 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   /*
   Calling method to validate token and return userId.
   */
-  const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
-  const {
-    userIdFromContext: userId,
-  } = userAndAppInfo;
+  let { userId } = params;
+  if (!userId) {
+    const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
+    const {
+      userIdFromContext,
+    } = userAndAppInfo;
+    userId = userIdFromContext;
+  }
   const { topicId, courseId } = params;
   if (!topicId) {
     throw new DatabaseRecordNotFoundError({

@@ -5,7 +5,7 @@ import getIntlDateTime from '../../timeZoneDiff';
 import callLocalGraphqlApi from '../../../src/api/callLocalGraphqlApi';
 import getSelectedSlotsStringArray from '../../../src/autoGenerate/graphql/postHookFunctions/utils/getSelectedSlotsStringArray';
 import getSlotTimesInString from '../../getSlotTimesInString';
-import sendWhatsAppTemplateMessage from '../../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
+import callSendWhatsappTemplateInQueue from './callSendWhatsappTemplateInQueue';
 
 const getEventDetails = async (eventId) => {
   const query = `{
@@ -102,12 +102,13 @@ const eventNewRegistrationReminder = async ({
     speakerName,
     eventTime: startTime,
     meetingId,
-    meetingLink: sessionLink,
+    meetingLink: `${process.env.TEKIE_WEB_URL}/events/${get(eventDetail, 'id')}`,
     meetingPassword,
     geoLocation,
     address,
     summary,
     eventRegistrationLink: `${process.env.TEKIE_WEB_URL}/events/${get(eventDetail, 'id')}`,
+    sessionLink,
   };
   if (get(commsObj, 'parentPhone')) {
     const parameters = [];
@@ -120,11 +121,17 @@ const eventNewRegistrationReminder = async ({
       }
     });
     const newPhoneNumber = get(commsObj, 'parentPhone').replace('+', '');
-    sendWhatsAppTemplateMessage(
+    callSendWhatsappTemplateInQueue(
       newPhoneNumber,
       templateName,
       newPhoneNumber,
       parameters,
+      {
+        templateName,
+        triggeredAt: new Date(),
+        eventId,
+        studentProfileId,
+      },
     );
   }
   deleteJob();
