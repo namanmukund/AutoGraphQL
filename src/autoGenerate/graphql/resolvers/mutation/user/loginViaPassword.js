@@ -76,13 +76,11 @@ const loginViaPasswordMutationResolver = async (
     throw new DatabaseRecordNotFoundError();
   }
   const { role, id: userId } = userData;
-
   const userTokenData = checkPasswordAndReturnUserWithToken(userData, input, authentication);
   // if user is a parent then get children tokens as well
   if (role === PARENT || role === MENTOR) {
     userTokenData.children = await getChildrenToken(context, userId, role);
   }
-
   return userTokenData;
 };
 

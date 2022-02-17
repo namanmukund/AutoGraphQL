@@ -6,9 +6,13 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getChildrenToken from './utils/getChildrenToken';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import {
-  UnknownUserError,
   OTPMismatchError,
 } from '../../../../../../constants/errors';
+import { QueryController } from '../../../controllers';
+import { getUserFromDBQuery } from './utils';
+import { RollNumberMismatchMessageError } from '../../../../../../constants/errors/auth';
+
+const USER_TYPE = 'User';
 
 const getStudentClassDetails = async (otp) => {
   const query = `
@@ -49,11 +53,16 @@ const getStudentDetails = async (section, grade, rollNo) => {
       ]
     }){
       id
+      role
+      name
+      studentProfile{
+        id
+      }
     }
   }
   `;
   const result = await callLocalGraphqlApi(query);
-  const studentDetails = get(result, 'data.users[0].id', null);
+  const studentDetails = get(result, 'data.users[0]', null);
   return studentDetails;
 };
 
@@ -70,7 +79,13 @@ const signupOrLoginViaOtp = async (
   const { input } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
-  validate('BooleanResult', ast, SINGULAR, fieldsFetched, authentication, {});
+  validate('ParentChildToken', ast, SINGULAR, fieldsFetched, authentication, {});
+  const currentUser = authentication && authentication.user;
+
+  if (currentUser) {
+    throw new UserTokenNotRequiredError();
+  }
+
   const rollNo = get(input, 'rollNo');
   const otp = get(input, 'otp');
   const studentDetails = await getStudentClassDetails(otp);
@@ -80,14 +95,17 @@ const signupOrLoginViaOtp = async (
   }
   const grade = get(studentDetails, 'grade');
   const section = get(studentDetails, 'section');
-  const studentId = await getStudentDetails(section, grade, rollNo);
+  const studentData = await getStudentDetails(section, grade, rollNo);
   // if !studentdetails return false
-  if (!studentDetails) {
-    throw new Error(UnknownUserError());
+  if (!studentData) {
+    throw new RollNumberMismatchMessageError();
   }
-  const userTokenData = createUserTokenTypeData(studentId, authentication);
+  const modelQueries = new QueryController(USER_TYPE, authentication);
+
+  const userData = await getUserFromDBQuery({ id: studentData.id }, modelQueries);
+  const userTokenData = createUserTokenTypeData(userData, authentication);
   // if user is a parent then get children tokens as well
-  if (role === PARENT) {
+  if (studentData.role === 'parent') {
     userTokenData.children = await getChildrenToken(context, studentId);
   }
   return userTokenData;
