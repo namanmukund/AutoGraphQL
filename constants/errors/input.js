@@ -223,3 +223,7 @@ export const EmailFieldRequiredError = createError('EmailFieldRequiredError', {
 export const InvalidStartTimeError = createError('InvalidStartTimeError', {
   message: 'Time has to be 1 hour more than selected start time',
 });
+
+export const InvalidScheduleParameters = createError('InvalidScheduleParameters', {
+  message: 'Please provide valid parameters for scheduling sessions.',
+});

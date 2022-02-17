@@ -11,7 +11,11 @@ import { log } from '../../../../../../utils/log';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getSelectedDays from '../../../postHookFunctions/utils/getSelectedDays';
 import extractSlotsFromInput from '../../../../../../utils/extractSlotsFromInput';
-import { CannotScheduleOutsideWorkingHoursError, SlotsOccupiedError } from '../../../../../../constants/errors';
+import {
+  CannotScheduleOutsideWorkingHoursError,
+  SlotsOccupiedError,
+  InvalidScheduleParameters,
+} from '../../../../../../constants/errors';
 import getPossibleDates from '../../../../../../utils/getPossibleDates';
 import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import { weekDays, slotTimes } from '../../../../../../constants';
@@ -198,6 +202,22 @@ const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filt
   }
 };
 
+/**
+ * @description This method is used to schedule batch or adhoc sessions, recurring or non recurring
+ * NON RECURRING BATCH OR ADHOC SESSION
+ * @input { courseId, batchId, topicId, sessionMode, startDate, startTime, endTime }
+ * @summary used to schedule single batch or adhoc session on given startDate
+ * -> endDate is not considered, defaults to an hour slot, taken from startTime
+ * -> In case outside working hours, error thrown (can be bypassed by forceScheduleSessions = true)
+ * -> in case of clash, forceShiftSessions flag can be used, which shifts the already assigned sessions by one.
+ * RECURRING BATCH SESSIONS
+ * @input { courseId, batchId, sessionModes corresponding to every day, startDate, endDate, startTime, endTime }
+ * @summary used to schedule recurring batch sessions (no support for adhoc sessions as yet)
+ * -> endDate is mandatory in this case
+ * -> in case outside working hours, error thrown (can be bypassed by forceScheduleSessions = true)
+ * -> in case of clash, TBD
+ */
+
 const scheduleSessionsMutationResolver = async (
   root,
   params,
@@ -265,7 +285,7 @@ const scheduleSessionsMutationResolver = async (
       }
     }
 
-    // if not recurring schedule
+    // if not recurring schedule, create singular batch session
     if (!isRecurring) {
       const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, filteredSlotsString, courseId, sessionType);
       createBatchSession(batchId, startDate, filteredSlotsString, topicId, finalMentorSessionId, courseId);
@@ -305,9 +325,9 @@ const scheduleSessionsMutationResolver = async (
       }
     }
   } else {
-    // if adhoc and recurring, return
+    // if adhoc and recurring, throw error
     if (isRecurring) {
-      return;
+      throw new InvalidScheduleParameters();
     }
     const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, filteredSlotsString, courseId, sessionType);
     createAdhocSession(batchId, startDate, filteredSlotsString, topicId, finalMentorSessionId, courseId);
