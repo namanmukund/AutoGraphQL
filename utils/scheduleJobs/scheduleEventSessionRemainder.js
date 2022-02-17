@@ -34,7 +34,6 @@ const getEventSessions = async () => {
           id
           sessionDate
         }
-        isEmailCommsEnabled
         name
         locationType
         geoLocation
@@ -79,13 +78,13 @@ const scheduleEventSessionRemainder = async () => {
       id: eventSessionId,
       sessionDate, event: {
         id: eventId,
-        timeZone, isEmailCommsEnabled, name: eventName,
+        timeZone, name: eventName,
         locationType, geoLocation,
         address, state, city, pincode, registeredUsers = [],
         eventSessions = [],
       }, ...slots
     } = eventSession;
-    if (get(eventSessions, '[0].id') === eventSessionId) {
+    if (get(eventSessions, '[0].id') !== eventSessionId) {
       const slotTimeStringArray = getSelectedSlotsStringArray(slots);
       const slotNumber = slotTimeStringArray[0].split('slot')[1];
       const { dateObject, startTime } = getIntlDateTime(sessionDate, slotNumber, timeZone);
@@ -173,7 +172,7 @@ const scheduleEventSessionRemainder = async () => {
               studentProfileId,
             });
         }
-        if (isEmailCommsEnabled) {
+        if (parentEmail) {
           let emailCommsObj = {};
           if (locationType === 'online') {
             emailCommsObj = {
@@ -190,8 +189,8 @@ const scheduleEventSessionRemainder = async () => {
             };
           }
           sendMailModoTemplate('8a6f16f2-9eb6-4e63-aca4-e3ce329a5f16', {
-            toEmail: parentEmail,
-            sendEmail: 'hello@tekie.in',
+            toEmail: 'pawan.kumar@tekie.in',
+            senderEmail: 'hello@tekie.in',
             subject: 'Reminder for upcomming event.',
             senderName: 'Tekie',
             campainName: '',

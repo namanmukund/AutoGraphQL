@@ -79,11 +79,8 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
     const {
       registeredUsers = [], timeZone, eventTimeTableRule, name: eventName,
       locationType,
-      // meetingId,
-      // meetingPassword,
       sessionLink, geoLocation,
       address, state, city, pincode,
-      // isEmailCommsEnabled,
     } = event;
     const {
       startDate, endDate, ...slots
@@ -201,7 +198,7 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
         sendMailModoTemplate('6821bf9a-d3db-48d1-8e7f-5343ccefabd2', {
           toEmail: parentEmail,
           senderEmail: 'hello@tekie.in',
-          subject: 'Regarding reschedule of event.',
+          subject: 'Event Rescheduled',
           senderName: 'Tekie',
           campaignName: '',
           data: sendEmailObj,
@@ -278,7 +275,7 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
         sendMailModoTemplate('0fc48595-8432-486f-995c-00262de24b26', {
           toEmail: parentEmail,
           senderEmail: 'hello@tekie.in',
-          subject: 'Regardinig cancelation of event.',
+          subject: 'Event Cancelled',
           senderName: 'Tekie',
           campaignName: '',
           data: sendEmailObj,
