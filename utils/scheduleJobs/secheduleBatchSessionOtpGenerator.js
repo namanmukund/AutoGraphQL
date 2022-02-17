@@ -48,8 +48,8 @@ const getBatchSessionAggregation = ({
 }) => [
   {
     $match: {
-      bookingDate: new Date(bookingDate),
-      [`slot${slot}`]: true,
+      // bookingDate: new Date(bookingDate),
+      // [`slot${slot}`]: true,
     },
   },
   {

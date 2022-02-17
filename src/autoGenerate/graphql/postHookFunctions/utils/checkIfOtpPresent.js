@@ -37,12 +37,12 @@ const checkIfOtpPresent = async (otp) => {
   const batchSessionModel = getTypeQueryController(
     'BatchSession',
   );
-  const addOtpBatchSessions = await batchSessionModel.aggregate(
+  const otpExist = await batchSessionModel.aggregate(
     getBatchSessionAggregation({
       otp,
     }),
   );
-  return addOtpBatchSessions.length; // converting to boolean
+  return otpExist.length; // converting to boolean
 };
 
 export default checkIfOtpPresent;
