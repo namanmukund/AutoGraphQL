@@ -21,6 +21,8 @@ const getBatchSessions = async (batchId, grade, section) => {
         filter: { and: [{ grade_not: ${grade} }, { section_not: ${section} }] }
       ) {
         id
+        section
+        grade
       }
     }
   }`;

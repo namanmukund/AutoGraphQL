@@ -89,10 +89,8 @@ const addSchoolSessionOtp = async ({
 
 const scheduleBatchSessionOtpGenerator = async () => {
   const { addOtpBatchSessions = [], deleteOtpBatchSessions = [] } = await getBatchSessions();
-  let i = 0;
   for (const batchSession of addOtpBatchSessions) {
     if (get(batchSession, 'attendance', []).length) {
-      if (i >= 10) break;
       const uniqueGradesArray = [];
       const uniqueSectionsArray = [];
       const otpMapArray = [];
@@ -125,7 +123,6 @@ const scheduleBatchSessionOtpGenerator = async () => {
         addSchoolSessionOtp({ ...otpObj, batchSessionId: get(batchSession, 'id') });
         log(`Creating schoolSessionOtp for grade ${otpObj.grade}, section ${otpObj.section} with OTP: ${otpObj.otp} for batchSession: ${get(batchSession, 'id')}`);
       });
-      i += 1;
     }
   }
   for (const batchSession of deleteOtpBatchSessions) {
