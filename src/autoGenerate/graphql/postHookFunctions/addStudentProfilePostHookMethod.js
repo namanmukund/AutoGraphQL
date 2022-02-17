@@ -7,7 +7,6 @@ const addStudentProfilePostHookMethod = async (input, params) => {
   const currentGrade = input.grade;
   const schoolId = get(input, 'school.typeId');
   const batchId = get(input, 'batch.typeId');
-  const studentProfileId = get(input, 'id');
   if (schoolId && currentGrade && currentSection) {
     const schoolClassId = await addUpdateSchoolClass(
       {
@@ -19,7 +18,7 @@ const addStudentProfilePostHookMethod = async (input, params) => {
     );
     Object.assign(input, { schoolClass: { type: 'SchoolClass', typeId: schoolClassId } });
     if (batchId && currentGrade && currentSection) {
-      addSchoolSessionOtpInBatchSession(batchId, studentProfileId, currentGrade, currentSection);
+      addSchoolSessionOtpInBatchSession(batchId, currentGrade, currentSection);
     }
   }
 };

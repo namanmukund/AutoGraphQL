@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 const checkIfOtpPresent = async (otp) => {
@@ -10,19 +11,16 @@ const checkIfOtpPresent = async (otp) => {
           }
         }
       ]}){
-          schoolSessionsOtp{
-            grade
-            section
-          }
+          id
         }
       }`;
   const result = await callLocalGraphqlApi(query);
   const otpAlreadyPresent = get(
     result,
-    'data.batchSessions[0].schoolSessionsOtp[0]',
+    'data.batchSessions[0]',
     null,
   );
-  return !!otpAlreadyPresent; // converting to boolean
+  return Boolean(otpAlreadyPresent); // converting to boolean
 };
 
 export default checkIfOtpPresent;

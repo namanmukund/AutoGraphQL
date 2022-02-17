@@ -1,8 +1,8 @@
 const SchoolSessionOtp = `
-  type SchoolSessionOtp {
+  type SchoolSessionOtp @model {
     grade: Grade!
     section: Section!
-    student: StudentProfile! @relation(name:"StudentProfileSchoolSessionOtp", direction: "OneWay")
+    batchSession: BatchSession! @relation(name:"SchoolSessionOtpBatchSession")
     otp: Int!
   }`;
 
