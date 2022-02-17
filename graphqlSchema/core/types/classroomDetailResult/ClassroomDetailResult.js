@@ -22,6 +22,7 @@ const ClassroomDetailResult = `
     classroomCourse: ClassroomCourse
     createdAt: Date
     batchThumbnail:String
+    customSessionLink: String
   }
 `;
 

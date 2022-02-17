@@ -343,6 +343,7 @@ const getBatchAggregation = ({ batchId }) => [
       },
       createdAt: 1,
       thumbnailSmall: 1,
+      customSessionLink: 1,
       classes: {
         id: 1,
         grade: 1,
@@ -471,6 +472,7 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
     },
     createdAt: get(batchDetail, 'createdAt'),
     batchThumbnail: get(batchDetail, 'thumbnailSmall'),
+    customSessionLink: get(batchDetail, 'customSessionLink', ''),
   };
   return returnedObj;
 };
