@@ -12,6 +12,7 @@ import scheduleBatchSessionOtpGenerator from './scheduleJobs/secheduleBatchSessi
 const createScheduler = (schedulerName) => {
   // eslint-disable-next-line no-unused-vars
   const rule = new schedule.RecurrenceRule();
+  scheduleBatchSessionOtpGenerator();
   switch (schedulerName) {
     case 'sessionReminder':
       rule.minute = 30;
