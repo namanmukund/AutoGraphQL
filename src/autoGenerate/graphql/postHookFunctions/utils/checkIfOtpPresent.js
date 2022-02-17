@@ -1,26 +1,48 @@
-import { get } from 'lodash';
-import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import { QueryController } from '../../controllers';
+
+const getTypeQueryController = (
+  typeName,
+  authentication = {
+    bypass: true,
+  },
+) => new QueryController(typeName, authentication);
+
+const getBatchSessionAggregation = ({
+  otp,
+}) => [
+  {
+    $lookup: {
+      from: 'SchoolSessionOtp',
+      localField: 'schoolSessionsOtp.typeId',
+      foreignField: 'id',
+      as: 'schoolSessionOtp',
+    },
+  },
+  {
+    $project: {
+      schoolSessionOtp: {
+        id: 1,
+        otp: 1,
+      },
+    },
+  },
+  {
+    $match: {
+      'schoolSessionOtp.otp': otp,
+    },
+  },
+];
 
 const checkIfOtpPresent = async (otp) => {
-  const query = `
-    query{
-      batchSessions(filter:{and:[
-        {
-          schoolSessionsOtp_some:{
-            otp:${otp}
-          }
-        }
-      ]}){
-          id
-        }
-      }`;
-  const result = await callLocalGraphqlApi(query);
-  const otpAlreadyPresent = get(
-    result,
-    'data.batchSessions[0]',
-    null,
+  const batchSessionModel = getTypeQueryController(
+    'BatchSession',
   );
-  return Boolean(otpAlreadyPresent); // converting to boolean
+  const addOtpBatchSessions = await batchSessionModel.aggregate(
+    getBatchSessionAggregation({
+      otp,
+    }),
+  );
+  return addOtpBatchSessions.length; // converting to boolean
 };
 
 export default checkIfOtpPresent;
