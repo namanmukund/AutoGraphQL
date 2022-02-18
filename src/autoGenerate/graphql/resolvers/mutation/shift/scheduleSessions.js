@@ -31,8 +31,34 @@ import {
   shiftBatchSessionsAfterGivenDate,
 } from './queries/scheduleSessionsQueries';
 
+// schedule sessions groupBy day (like Object.day.field)
+const getScheduleSessionsRulesGroupedByDay = (scheduleSessionsRules) => {
+  const daysRule = {};
+  scheduleSessionsRules.forEach((rule) => {
+    // loop through keys in rule
+    for (const key in rule) {
+      if (key.includes('day') && !key.includes('ClassMode') && key) {
+        if (!daysRule[key]) {
+          daysRule[key] = {};
+        }
+        // loop through same keys in rule and store the slots, mode, start and end times
+        for (const key2 in rule) {
+          if ((key2.includes('slot') && key2)
+            || (key2 === `${key}ClassMode`)
+            || (key2 === 'startTime' || key2 === 'endTime')) {
+            daysRule[key][key2] = key2.includes('slot') ? true : rule[key2];
+          }
+        }
+      }
+    }
+  });
+  return daysRule;
+};
+
 // combines the working day and event schedules
-const getCombinedSchedules = (schoolTimetableScheduleArray, batchTimetableScheduleArray) => {
+const getCombinedSchedules = (batch) => {
+  const schoolTimetableScheduleArray = get(batch, 'school.timetableSchedule', []);
+  const batchTimetableScheduleArray = get(batch, 'timetableSchedule', []);
   const combinedWorkingDaySchedule = {};
   const combinedEventScheduleArray = [];
   for (const schoolSchedule of schoolTimetableScheduleArray) {
@@ -61,7 +87,7 @@ const getCombinedSchedules = (schoolTimetableScheduleArray, batchTimetableSchedu
         }
       }
     } else {
-      combinedEventScheduleArray.push(schoolSchedule);
+      combinedEventScheduleArray.push(batchSchedule);
     }
   }
   return {
@@ -71,7 +97,7 @@ const getCombinedSchedules = (schoolTimetableScheduleArray, batchTimetableSchedu
 };
 
 // method to check if given schedule will lie outside working hour schedule
-const checkIfOutsideWorkingSchedule = (combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule) => {
+const checkIfOutsideWorkingSchedule = (combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule) => {
   // checking if days are within bounds
   if (moment(timeTableRule.startDate).isBefore(moment(combinedWorkingDaySchedule.startDate))
     || moment(timeTableRule.endDate).isAfter(moment(combinedWorkingDaySchedule.endDate))) {
@@ -79,21 +105,26 @@ const checkIfOutsideWorkingSchedule = (combinedWorkingDaySchedule, combinedEvent
   }
   // checking if weekdays or slots are outside scheduled working hours
   for (const weekDay in weekDays) {
-    if (!combinedWorkingDaySchedule[weekDay] && timeTableRule[weekDay]) {
+    if (!combinedWorkingDaySchedule[weekDay] && daysRule[weekDay]) {
       return true;
     }
   }
   for (const slotTime in slotTimes) {
-    if (!combinedWorkingDaySchedule[slotTime] && timeTableRule[slotTime]) {
-      return true;
+    if (!combinedWorkingDaySchedule[slotTime]) {
+      for (const rule in daysRule) {
+        if (rule[slotTime]) {
+          return true;
+        }
+      }
     }
   }
   // for events, we check return true if events schedule exactly matches (opposite logic for working day)
   for (const combinedEventScheduleItem in combinedEventScheduleArray) {
     for (const weekDay in weekDays) {
-      if (combinedEventScheduleItem[weekDay] && timeTableRule[weekDay]) {
+      if (combinedEventScheduleItem[weekDay] && daysRule[weekDay]) {
+        const dayObj = daysRule[weekDay];
         for (const slotTime in slotTimes) {
-          if (combinedEventScheduleItem[slotTime] && timeTableRule[slotTime]) {
+          if (combinedEventScheduleItem[slotTime] && dayObj[slotTime]) {
             return true;
           }
         }
@@ -215,7 +246,9 @@ const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filt
  * @summary used to schedule recurring batch sessions (no support for adhoc sessions as yet)
  * -> endDate is mandatory in this case
  * -> in case outside working hours, error thrown (can be bypassed by forceScheduleSessions = true)
- * -> in case of clash, TBD
+ * -> logic is to delete all existing started / completed sessions and start
+ * clashes priority (test, adhoc, normal)
+ * -> will be rescheduled to next sessions as per timetableRule
  */
 
 const scheduleSessionsMutationResolver = async (
@@ -230,10 +263,18 @@ const scheduleSessionsMutationResolver = async (
 ) => {
   // validateAuthentication(context);
   const { input: timeTableRule } = params;
+  const scheduleSessionsRules = get(timeTableRule, 'scheduleSessionsRules', []);
   const courseId = get(timeTableRule, 'courseId');
   const topicId = get(timeTableRule, 'topicId');
   const batchId = get(timeTableRule, 'batchId');
   const isRecurring = get(timeTableRule, 'isRecurring');
+
+  if (scheduleSessionsRules.length === 0
+    || (scheduleSessionsRules.length > 1 && !isRecurring)) {
+    throw new InvalidScheduleParameters();
+  }
+
+  const daysRule = getScheduleSessionsRulesGroupedByDay(scheduleSessionsRules);
 
   // start, end dates
   const days = getSelectedDays(timeTableRule);
@@ -242,29 +283,29 @@ const scheduleSessionsMutationResolver = async (
   const endDate = new Date(timeTableRule.endDate);
   endDate.setHours(0, 0, 0, 0);
 
+  // TODO : change this
   // slots passed in input
-  const { ...slots } = timeTableRule;
-  const { filteredSlotsString } = extractSlotsFromInput(slots);
+  // const { ...slots } = timeTableRule;
+  // const { filteredSlotsString } = extractSlotsFromInput(slots);
 
   // combine school and batch timetableschedules
   const batch = await fetchBatch(get(timeTableRule, 'batchId', ''));
-  const schoolTimetableScheduleArray = get(batch, 'school.timetableSchedule', []);
-  const batchTimetableScheduleArray = get(batch, 'timetableSchedule', []);
   const mentorUserId = get(batch, 'allottedMentor.id', '');
   const batchType = get(batch, 'type');
 
-  const { combinedWorkingDaySchedule, combinedEventScheduleArray } = getCombinedSchedules(schoolTimetableScheduleArray, batchTimetableScheduleArray);
+  const { combinedWorkingDaySchedule, combinedEventScheduleArray } = getCombinedSchedules(batch);
 
   // See if force flag is set to false or not sent in input
   const forceScheduleSessions = get(timeTableRule, 'forceScheduleSessions', false);
 
   if (!forceScheduleSessions && combinedWorkingDaySchedule.startDate && combinedWorkingDaySchedule.endDate) {
-    const isOutsideWorkingSchedule = checkIfOutsideWorkingSchedule(combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule);
+    const isOutsideWorkingSchedule = checkIfOutsideWorkingSchedule(combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule);
     if (isOutsideWorkingSchedule) {
       throw new CannotScheduleOutsideWorkingHoursError();
     }
   }
 
+  // TODO : modify from here
   // if force schedule, we can schedule anywhere irrespective of working day or event schedule
   const sessionType = get(timeTableRule, 'type', 'batch');
   if (sessionType === 'batch') {
