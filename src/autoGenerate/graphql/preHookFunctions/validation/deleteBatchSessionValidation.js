@@ -3,7 +3,7 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import { PastDateOrSlotError } from '../../../../../constants/errors/db';
-import batchSessionQuery from '../../graphqlQueries/batchSessionQuery';
+import batchSessionQuery, { schoolSessionOtpQuery } from '../../graphqlQueries/batchSessionQuery';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelectedSlotsStringArray';
 
@@ -53,6 +53,8 @@ const deleteBatchSessionValidation = async (params, mutationOrQueryName, context
   const {
     currentUser,
   } = userInfo;
+  const schoolSessionOtp = await callLocalGraphqlApi(schoolSessionOtpQuery(batchSessionId));
+  context.schoolSessionOtpArray = get(schoolSessionOtp, 'data.schoolSessionOtps');
   context.currentUser = currentUser;
 };
 
