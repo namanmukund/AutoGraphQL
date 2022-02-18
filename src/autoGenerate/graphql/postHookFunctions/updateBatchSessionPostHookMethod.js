@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import { get } from 'lodash';
 import moment from 'moment';
 import {
@@ -49,6 +50,9 @@ const getBatchQuery = (batchId) => `
         code
         type
         students{
+          id
+          grade
+          section
           user{
             id
             source
@@ -206,6 +210,8 @@ const batchSessionQuery = (id) => `{
     }
   }
 }`;
+
+// mutation to update batch sessions
 /*
   Post hook of addBatchSession
 */

@@ -40,6 +40,8 @@ const getBatchQuery = (batchId) => `
         type
         students{
           id
+          section
+          grade
           user{
             id
             source
@@ -94,7 +96,6 @@ const updateBatchSessionQuery = (
     }
   }
   `;
-
 /*
   Post hook of addBatchSession
 */

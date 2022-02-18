@@ -148,6 +148,7 @@ import SenseiMentorTeam from './senseiMentorTeam';
 import Notification from './notification';
 import Task from './task';
 import UserOtpLog from './userOtpLog';
+import SchoolSessionOtp from './schoolSessionOtp';
 import UserDeviceLog from './UserDeviceLog';
 import GenerateMentorChild from './generateMentorChild';
 import TimetableSchedule from './timetableSchedule';
@@ -307,6 +308,7 @@ export default [
   ...Notification,
   ...Task,
   ...UserOtpLog,
+  ...SchoolSessionOtp,
   ...UserDeviceLog,
   ...GenerateMentorChild,
   ...TimetableSchedule,

@@ -47,6 +47,7 @@ import getQuizReport from './mutation/methods/getQuizReport';
 import getPaymentRequest from './mutation/methods/getPaymentRequest';
 import loginViaOtp from './mutation/methods/loginViaOtp';
 import signupOrLoginViaOtp from './mutation/methods/signupOrLoginViaOtp';
+import schoolLiveClassLoginViaOtp from './mutation/methods/schoolLiveClassLoginViaOtp';
 import sendForgotPasswordLink from './mutation/methods/sendForgotPasswordLink';
 import getUnlockedUserBadge from './mutation/methods/getUnlockedUserBadge';
 import userBadge from './mutation/methods/userBadge';
@@ -620,6 +621,7 @@ resolvers.Mutation.updateParentChildDetail = updateParentChildDetail;
 resolvers.Mutation.loginViaPassword = loginViaPassword;
 resolvers.Mutation.loginViaOtp = loginViaOtp;
 resolvers.Mutation.signupOrLoginViaOtp = signupOrLoginViaOtp;
+resolvers.Mutation.schoolLiveClassLoginViaOtp = schoolLiveClassLoginViaOtp;
 resolvers.Mutation.validateUserOTP = validateUserOTP;
 // Resolver for a custom get user payment information, when user buys a product
 resolvers.Mutation.getPaymentRequest = getPaymentRequest;
