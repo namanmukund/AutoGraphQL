@@ -13,6 +13,8 @@ const ScheduleSessionsInput = `
     forceScheduleSessions: Boolean @defaultValue(value: "false")
     isRecurring: Boolean @defaultValue(value: "false")
     doReschedule: Boolean @defaultValue(value: "false")
+    adhocSessionId: String
+    batchSessionId: String
   }
 `;
 

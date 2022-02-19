@@ -1,3 +1,4 @@
+/* eslint-disable no-lonely-if */
 /* eslint-disable no-unused-vars */
 /* eslint-disable consistent-return */
 /* eslint-disable array-callback-return */
@@ -15,13 +16,15 @@ import {
   CannotScheduleOutsideWorkingHoursError,
   SlotsOccupiedError,
   InvalidScheduleParameters,
+  InvalidRescheduleParameters,
+  DatabaseRecordNotFoundError,
 } from '../../../../../../constants/errors';
 import getPossibleDates from '../../../../../../utils/getPossibleDates';
 import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import { weekDays, slotTimes } from '../../../../../../constants';
 import {
   getTopics, getBatchSessions, createBatchSession, updateBatchSession,
-  createAdhocSession, getAdhocSessions,
+  createAdhocSession, getAdhocSessions, updateAdhocSession,
 } from '../../../postHookFunctions/utils/updateBatchPostHookQueries';
 import {
   fetchBatch,
@@ -29,6 +32,8 @@ import {
   updateMentorSession,
   addMentorSession,
   shiftBatchSessionsAfterGivenDate,
+  fetchBatchSession,
+  fetchAdhocSession,
 } from './queries/scheduleSessionsQueries';
 
 // schedule sessions groupBy day (like Object.day.field)
@@ -233,6 +238,17 @@ const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filt
   }
 };
 
+// check if sessions already exist at provided date and slot
+const sessionExistsCheck = async (rescheduleSlots, batchId, startDate) => {
+  const sentSlotsArray = getSelectedSlotsTime(rescheduleSlots);
+  const batchSessionsOnSameDateAndSlot = await getBatchSessions(batchId, startDate, sentSlotsArray[0], 'allotted');
+  const adhocSessionsOnSameDateAndSlot = await getAdhocSessions(batchId, startDate, sentSlotsArray[0], 'allotted');
+  if (batchSessionsOnSameDateAndSlot.length > 0 || adhocSessionsOnSameDateAndSlot.length > 0) {
+    return true;
+  }
+  return false;
+};
+
 /**
  * @description This method is used to schedule batch or adhoc sessions, recurring or non recurring
  * NON RECURRING BATCH OR ADHOC SESSION
@@ -266,8 +282,65 @@ const scheduleSessionsMutationResolver = async (
   const scheduleSessionsRules = get(timeTableRule, 'scheduleSessionsRules', []);
   const courseId = get(timeTableRule, 'courseId');
   const topicId = get(timeTableRule, 'topicId');
-  const batchId = get(timeTableRule, 'batchId');
   const isRecurring = get(timeTableRule, 'isRecurring');
+  const doReschedule = get(timeTableRule, 'doReschedule', false);
+  const batchSessionId = get(timeTableRule, 'batchSessionId', '');
+  const adhocSessionId = get(timeTableRule, 'adhocSessionId', '');
+  const forceShiftSessions = get(timeTableRule, 'forceShiftSessions', false);
+  const sessionType = get(timeTableRule, 'type', 'batch');
+
+  let batch = null;
+  if (!doReschedule) {
+    batch = await fetchBatch(get(timeTableRule, 'batchId', ''));
+  } else if (batchSessionId) {
+    batch = get(await fetchBatchSession(batchSessionId), 'batch', null);
+  } else {
+    batch = get(await fetchAdhocSession(adhocSessionId), 'batch', null);
+  }
+
+  const batchId = get(batch, 'id');
+
+  if (!batchId) {
+    throw new DatabaseRecordNotFoundError();
+  }
+  const mentorUserId = get(batch, 'allottedMentor.id', '');
+  const batchType = get(batch, 'type');
+
+  const startDate = new Date(timeTableRule.startDate);
+  startDate.setHours(0, 0, 0, 0);
+  const endDate = new Date(timeTableRule.endDate);
+  endDate.setHours(0, 0, 0, 0);
+
+  // to reschedule sessions
+  if (doReschedule) {
+    if (!adhocSessionId && !batchSessionId) {
+      throw new InvalidRescheduleParameters();
+    } else if (adhocSessionId && batchSessionId) {
+      throw new InvalidRescheduleParameters();
+    } else {
+      // for reschedule cases, we only consider first object in array as input
+      const { ...rescheduleSlots } = get(scheduleSessionsRules, '[0]', {});
+      const { filteredSlotsString } = extractSlotsFromInput(rescheduleSlots);
+      // check if sessions already exist at provided date and slot
+      const sessionsExist = await sessionExistsCheck(rescheduleSlots, batchId, startDate);
+      if (sessionsExist) {
+        throw new SlotsOccupiedError();
+      }
+      // TODO : change logic to reschedule all sessions based on new timetable rules in array format
+      if (forceShiftSessions) {
+        log(`Shifting batch sessions before ${startDate.toISOString()} to after ${startDate.toISOString()}`);
+        callLocalGraphqlApi(shiftBatchSessionsAfterGivenDate(startDate, batchId, rescheduleSlots));
+      }
+      if (adhocSessionId) {
+        await updateAdhocSession(adhocSessionId, filteredSlotsString, startDate);
+      } else {
+        await updateBatchSession(batchSessionId, filteredSlotsString, startDate);
+      }
+    }
+    return {
+      result: true,
+    };
+  }
 
   if (scheduleSessionsRules.length === 0
     || (scheduleSessionsRules.length > 1 && !isRecurring)) {
@@ -275,13 +348,7 @@ const scheduleSessionsMutationResolver = async (
   }
 
   const daysRule = getScheduleSessionsRulesGroupedByDay(scheduleSessionsRules);
-
-  // start, end dates
-  const days = getSelectedDays(timeTableRule);
-  const startDate = new Date(timeTableRule.startDate);
-  startDate.setHours(0, 0, 0, 0);
-  const endDate = new Date(timeTableRule.endDate);
-  endDate.setHours(0, 0, 0, 0);
+  const days = getSelectedDays(daysRule);
 
   // TODO : change this
   // slots passed in input
@@ -289,10 +356,6 @@ const scheduleSessionsMutationResolver = async (
   // const { filteredSlotsString } = extractSlotsFromInput(slots);
 
   // combine school and batch timetableschedules
-  const batch = await fetchBatch(get(timeTableRule, 'batchId', ''));
-  const mentorUserId = get(batch, 'allottedMentor.id', '');
-  const batchType = get(batch, 'type');
-
   const { combinedWorkingDaySchedule, combinedEventScheduleArray } = getCombinedSchedules(batch);
 
   // See if force flag is set to false or not sent in input
@@ -307,22 +370,18 @@ const scheduleSessionsMutationResolver = async (
 
   // TODO : modify from here
   // if force schedule, we can schedule anywhere irrespective of working day or event schedule
-  const sessionType = get(timeTableRule, 'type', 'batch');
   if (sessionType === 'batch') {
     let topics = await getTopics(courseId);
     const topicCount = topics && topics.length;
     const batchSessions = await getBatchSessions(batchId);
 
-    // checking if sessions are present on the same date
-    const sentSlotsArray = getSelectedSlotsTime(slots);
-    const batchSessionsOnSameDateAndSlot = await getBatchSessions(batchId, startDate, sentSlotsArray[0], 'allotted');
-    const adhocSessionsOnSameDateAndSlot = await getAdhocSessions(batchId, startDate, sentSlotsArray[0], 'allotted');
-    if (batchSessionsOnSameDateAndSlot.length > 0 || adhocSessionsOnSameDateAndSlot.length > 0) {
+    // check if sessions already exist at provided date and slot
+    const sessionsExist = await sessionExistsCheck(slots, batchId, startDate);
+    if (sessionsExist) {
       if (!forceScheduleSessions) {
         throw new SlotsOccupiedError();
       } else {
-        // ENHANCEMENT : handle the case where only future slots from given date should be shifted, not allotted slots in the past
-        await callLocalGraphqlApi(shiftBatchSessionsAfterGivenDate(startDate, batchId, filteredSlotsString));
+        // TODO : schedule sessions by replacing existing sessions
       }
     }
 

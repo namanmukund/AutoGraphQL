@@ -227,3 +227,7 @@ export const InvalidStartTimeError = createError('InvalidStartTimeError', {
 export const InvalidScheduleParameters = createError('InvalidScheduleParameters', {
   message: 'Please provide valid parameters for scheduling sessions.',
 });
+
+export const InvalidRescheduleParameters = createError('InvalidRescheduleParameters', {
+  message: 'Please provide valid parameters for re-scheduling sessions.',
+});

@@ -151,6 +151,7 @@ import {
   CanNotDeleteCompletedSessionError,
   CanNotStartSessionWithoutMentorError,
   InvalidScheduleParameters,
+  InvalidRescheduleParameters,
 } from './input';
 
 // assessment validation sqs  profile apolloErrorPackageTest maxSync transcoder
@@ -329,4 +330,5 @@ export {
   EventCancelledError,
   CannotScheduleOutsideWorkingHoursError,
   InvalidScheduleParameters,
+  InvalidRescheduleParameters,
 };

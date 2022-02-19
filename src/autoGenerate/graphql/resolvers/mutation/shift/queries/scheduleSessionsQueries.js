@@ -122,10 +122,40 @@ const shiftBatchSessionsAfterGivenDate = (date, batchId, slots) => `
 }
 `;
 
+const fetchBatchSession = async (batchSessionId) => {
+  const query = `
+  {
+    batchSession(id: "${batchSessionId}") {
+      batch {
+        id
+      }
+    }
+  }
+`;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.batchSession', {});
+};
+
+const fetchAdhocSession = async (adhocSessionId) => {
+  const query = `
+  {
+    adhocSession(id: "${adhocSessionId}") {
+      batch {
+        id
+      }
+    }
+  }
+`;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.adhocSession', {});
+};
+
 export {
   fetchBatch,
   fetchMentorSessions,
   updateMentorSession,
   addMentorSession,
   shiftBatchSessionsAfterGivenDate,
+  fetchBatchSession,
+  fetchAdhocSession,
 };

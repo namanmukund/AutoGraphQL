@@ -163,7 +163,27 @@ const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId
   const query = `
           mutation{
             addAdhocSession(batchConnectId: "${batchId}",
-            ${topicId ? `topicConnectId: "${topicId}"` : ''}
+            ${topicId ? `previousTopicConnectId: "${topicId}"` : ''}
+            ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
+            ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            input:{
+              bookingDate:"${date}",
+              ${slots}
+            }
+            ){
+              id
+            }
+          }
+          `;
+  await callLocalGraphqlApi(query);
+  return true;
+};
+
+const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, courseId) => {
+  const query = `
+          mutation{
+            updateAdhocSession(
+            id: "${sessionId}",
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             ${courseId ? `courseConnectId: "${courseId}"` : ''}
             input:{
@@ -180,4 +200,4 @@ const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId
 };
 
 /* eslint-disable object-curly-newline */
-export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession, getAdhocSessions };
+export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession, getAdhocSessions, updateAdhocSession };
