@@ -601,6 +601,7 @@ resolvers.Mutation.menteeCourseSyllabus = menteeCourseSyllabus;
 resolvers.Mutation.userTopicJourney = userTopicJourney;
 // Resolver for custom quiz reports for user
 resolvers.Mutation.userFirstAndLatestQuizReport = userFirstAndLatestQuizReport;
+resolvers.Mutation.userFirstAndLatestQuizReports = userFirstAndLatestQuizReport;
 // Resolver for custom skip video by user
 resolvers.Mutation.skipVideo = skipVideo;
 // Resolver for custom skip practice question by user
