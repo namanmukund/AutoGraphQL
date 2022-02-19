@@ -9,6 +9,7 @@ import EmailUsernameLoginInput from './EmailUsernameLoginInput';
 import ValidateUserInput from './ValidateUserInput';
 import ValidateMagicLinkInput from './ValidateMagicLinkInput';
 import ResetPasswordAndLoginInput from './ResetPasswordAndLoginInput';
+import SchoolLiveClassLoginInput from './SchoolLiveClassLoginInput';
 
 export default [
   ...User, ...SignUpInput,
@@ -20,4 +21,5 @@ export default [
   ValidateUserInput,
   ValidateMagicLinkInput,
   ...ResetPasswordAndLoginInput,
+  ...SchoolLiveClassLoginInput,
 ];

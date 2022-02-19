@@ -43,4 +43,11 @@ query{
 }
 `;
 
+export const schoolSessionOtpQuery = (batchSessionId) => `{
+  schoolSessionOtps(filter: { batchSession_some: { id: "${batchSessionId}" } }) {
+    id
+  }
+}
+`;
+
 export default batchSessionQuery;

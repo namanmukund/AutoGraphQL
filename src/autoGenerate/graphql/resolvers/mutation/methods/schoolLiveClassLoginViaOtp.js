@@ -1,12 +1,12 @@
 import { ifAuthorized, toObject } from '../../../../../../utils';
 import { prehook } from '../../../preHook';
-import loginViaOtpMutationResolver from '../user/loginViaOtp';
+import schoolLiveClassLoginViaOtpMutationResolver from '../user/schoolLiveClassLoginViaOtp';
 import { posthook } from '../../../postHook';
 
-const loginViaOtp = async (root, params, context, info) => {
+const schoolLiveClassLoginViaOtp = async (root, params, context, info) => {
   const authentication = ifAuthorized(context);
   const typeName = 'User';
-  const mutationName = 'loginViaOtp';
+  const mutationName = 'schoolLiveClassLoginViaOtp';
   const { parsedASTMap } = context;
 
   const { input } = params;
@@ -15,7 +15,7 @@ const loginViaOtp = async (root, params, context, info) => {
   const newParams = params;
   newParams.input = hookInput;
 
-  return loginViaOtpMutationResolver(
+  return schoolLiveClassLoginViaOtpMutationResolver(
     root,
     params,
     context,
@@ -26,8 +26,8 @@ const loginViaOtp = async (root, params, context, info) => {
     authentication,
   ).then((result) => {
     const newResult = toObject(result);
-    return posthook(newResult, mutationName);
+    return posthook(newResult, mutationName, context, params);
   });
 };
 
-export default loginViaOtp;
+export default schoolLiveClassLoginViaOtp;

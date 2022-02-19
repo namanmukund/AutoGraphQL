@@ -50,6 +50,7 @@ const customMutationString = `
    generateMentorChild ( mentorId: String ): MentorChildOutput
    updateEventSessionAttendance (input: EventAttendanceInput): BooleanResult
    scheduleSessions (input: ScheduleSessionsInput): BooleanResult
+   schoolLiveClassLoginViaOtp ( input: SchoolLiveClassLoginInput ): ParentChildToken,
    `;
 
 export default customMutationString;

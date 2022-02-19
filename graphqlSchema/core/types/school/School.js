@@ -21,6 +21,7 @@ const School = `
     schoolCampaignCode: String @unique @trim
     isWhatsAppCommsEnabled: Boolean @defaultValue(value: "false")
     isEmailCommsEnabled: Boolean @defaultValue(value: "false")
+    isOtpLoginEnabled: Boolean @defaultValue(value: "false")
     timetableSchedule: [TimetableSchedule] @relation(name: "SchoolTimetableSchedule")
     teachers: [MentorProfile] @relation(name: "MentorProfileSchool")
   }
