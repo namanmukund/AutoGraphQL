@@ -311,6 +311,11 @@ const scheduleSessionsMutationResolver = async (
   const endDate = new Date(timeTableRule.endDate);
   endDate.setHours(0, 0, 0, 0);
 
+  // slots passed in input (non-recurring)
+  // for non recurring cases, we only consider first object in array as input
+  const { ...nonRecurringslots } = get(scheduleSessionsRules, '[0]', {});
+  const { nonRecurringfilteredSlotsString } = extractSlotsFromInput(nonRecurringslots);
+
   // to reschedule sessions
   if (doReschedule) {
     if (!adhocSessionId && !batchSessionId) {
@@ -318,23 +323,20 @@ const scheduleSessionsMutationResolver = async (
     } else if (adhocSessionId && batchSessionId) {
       throw new InvalidRescheduleParameters();
     } else {
-      // for reschedule cases, we only consider first object in array as input
-      const { ...rescheduleSlots } = get(scheduleSessionsRules, '[0]', {});
-      const { filteredSlotsString } = extractSlotsFromInput(rescheduleSlots);
-      // check if sessions already exist at provided date and slot
+      // check if sessions already exist at provided date and slot and have to reschedule batch session
       const sessionsExist = await sessionExistsCheck(rescheduleSlots, batchId, startDate);
-      if (sessionsExist) {
+      if (sessionsExist && batchSessionId) {
         throw new SlotsOccupiedError();
       }
       // TODO : change logic to reschedule all sessions based on new timetable rules in array format
       if (forceShiftSessions) {
         log(`Shifting batch sessions before ${startDate.toISOString()} to after ${startDate.toISOString()}`);
-        callLocalGraphqlApi(shiftBatchSessionsAfterGivenDate(startDate, batchId, rescheduleSlots));
+        // callLocalGraphqlApi(shiftBatchSessionsAfterGivenDate(startDate, batchId, rescheduleSlots));
       }
       if (adhocSessionId) {
-        await updateAdhocSession(adhocSessionId, filteredSlotsString, startDate);
+        await updateAdhocSession(adhocSessionId, nonRecurringfilteredSlotsString, startDate);
       } else {
-        await updateBatchSession(batchSessionId, filteredSlotsString, startDate);
+        await updateBatchSession(batchSessionId, nonRecurringfilteredSlotsString, startDate);
       }
     }
     return {
@@ -350,11 +352,6 @@ const scheduleSessionsMutationResolver = async (
   const daysRule = getScheduleSessionsRulesGroupedByDay(scheduleSessionsRules);
   const days = getSelectedDays(daysRule);
 
-  // TODO : change this
-  // slots passed in input
-  // const { ...slots } = timeTableRule;
-  // const { filteredSlotsString } = extractSlotsFromInput(slots);
-
   // combine school and batch timetableschedules
   const { combinedWorkingDaySchedule, combinedEventScheduleArray } = getCombinedSchedules(batch);
 
@@ -368,7 +365,7 @@ const scheduleSessionsMutationResolver = async (
     }
   }
 
-  // TODO : modify from here
+  // TODO : modify from here for recurring
   // if force schedule, we can schedule anywhere irrespective of working day or event schedule
   if (sessionType === 'batch') {
     let topics = await getTopics(courseId);
@@ -376,7 +373,7 @@ const scheduleSessionsMutationResolver = async (
     const batchSessions = await getBatchSessions(batchId);
 
     // check if sessions already exist at provided date and slot
-    const sessionsExist = await sessionExistsCheck(slots, batchId, startDate);
+    const sessionsExist = await sessionExistsCheck(nonRecurringslots, batchId, startDate);
     if (sessionsExist) {
       if (!forceScheduleSessions) {
         throw new SlotsOccupiedError();
@@ -387,8 +384,11 @@ const scheduleSessionsMutationResolver = async (
 
     // if not recurring schedule, create singular batch session
     if (!isRecurring) {
-      const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, filteredSlotsString, courseId, sessionType);
-      createBatchSession(batchId, startDate, filteredSlotsString, topicId, finalMentorSessionId, courseId);
+      const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringfilteredSlotsString, courseId, sessionType);
+      if (!(batchId && startDate && nonRecurringfilteredSlotsString && topicId && finalMentorSessionId && courseId)) {
+        throw new InvalidScheduleParameters();
+      }
+      createBatchSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId);
     } else if (timeTableRule) {
       if (batchSessions && batchSessions.length) {
         // sorting the existing batch sessions into started/completed and allotted
@@ -430,7 +430,7 @@ const scheduleSessionsMutationResolver = async (
       throw new InvalidScheduleParameters();
     }
     const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, filteredSlotsString, courseId, sessionType);
-    createAdhocSession(batchId, startDate, filteredSlotsString, topicId, finalMentorSessionId, courseId);
+    createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId);
   }
   return {
     result: true,
