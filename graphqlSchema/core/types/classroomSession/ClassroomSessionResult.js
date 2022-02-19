@@ -44,6 +44,13 @@ const ClassroomDetails = `
   }
 `;
 
+const SessionOtpResult = `
+type SessionOtpResult {
+    grade: Grade
+    section: Section
+    otp: Int
+  }`;
+
 const ClassroomSessionResult = `
   type ClassroomSessionResult {
     id: String!
@@ -62,6 +69,7 @@ const ClassroomSessionResult = `
     classroom: ClassroomDetails
     topic: ClassroomSessionTopic
     previousTopic: ClassroomSessionTopic
+    sessionOtp: [SessionOtpResult]
   }
 `;
 
@@ -71,4 +79,5 @@ export default [
   ClassroomSessionTopic,
   ClassroomSessionType,
   ClassroomDetails,
+  SessionOtpResult,
 ];

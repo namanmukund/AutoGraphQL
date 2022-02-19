@@ -26,23 +26,6 @@ const getBatchSessionAggregation = ({
     },
   },
   {
-    $project: {
-      id: 1,
-      bookingDate: 1,
-      sessionStartDate: 1,
-      sessionEndDate: 1,
-      sessionStatus: 1,
-      sessionMode: 1,
-      sessionRecordingLink: 1,
-      batch: 1,
-      topic: 1,
-      course: 1,
-      mentorSession: 1,
-      attendance: 1,
-      ...getSlotTimeFields(),
-    },
-  },
-  {
     $lookup: {
       from: 'Topic',
       let: { topicId: '$topic.typeId' },
@@ -102,6 +85,14 @@ const getBatchSessionAggregation = ({
     },
   },
   {
+    $lookup: {
+      from: 'SchoolSessionOtp',
+      localField: 'schoolSessionsOtp.typeId',
+      foreignField: 'id',
+      as: 'schoolSessionOtp',
+    },
+  },
+  {
     $project: {
       id: 1,
       bookingDate: 1,
@@ -115,6 +106,11 @@ const getBatchSessionAggregation = ({
       },
       course: 1,
       attendance: 1,
+      schoolSessionOtp: {
+        grade: 1,
+        section: 1,
+        otp: 1,
+      },
       ...getSlotTimeFields(),
     },
   },
@@ -385,6 +381,7 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
           topicAssignmentQuestionsCount: get(session, 'topic.topicAssignmentQuestions', []).length,
         },
         previousTopic: null,
+        sessionOtp: get(session, 'schoolSessionOtp'),
       });
     });
   }
@@ -446,7 +443,7 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
       previousTopic: null,
     });
   });
-  const { course } = batchDetail;
+  const course = get(batchDetail, 'course');
   const returnedObj = {
     id: get(batchDetail, 'id'),
     classroomDetail: {
