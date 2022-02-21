@@ -71,6 +71,7 @@ const getBatchSessionAggregation = ({
         },
         {
           $project: {
+            id: 1,
             code: 1,
             classroomTitle: 1,
             description: 1,
@@ -280,6 +281,7 @@ const getAdhocSessionAggregation = ({
         },
         {
           $project: {
+            id: 1,
             code: 1,
             classroomTitle: 1,
             description: 1,
@@ -535,6 +537,7 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
         startMinutes: get(session, 'startMinutes', 0),
         endMinutes: get(session, 'endMinutes', 0),
         classroom: {
+          id: get(session, 'classroom.id', ''),
           code: get(session, 'classroom.code', ''),
           classroomTitle: get(session, 'classroom.classroomTitle', ''),
           description: get(session, 'classroom.description', null),
@@ -563,6 +566,7 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
         startMinutes: get(session, 'startMinutes', 0),
         endMinutes: get(session, 'endMinutes', 0),
         classroom: {
+          id: get(session, 'classroom.id', ''),
           code: get(session, 'classroom.code', ''),
           classroomTitle: get(session, 'classroom.classroomTitle', ''),
           description: get(session, 'classroom.description', null),

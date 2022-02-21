@@ -36,6 +36,7 @@ const ClassroomSessionTopic = `
 
 const ClassroomDetails = `
   type ClassroomDetails {
+    id: ID!
     code: String! @uniqueOrEmpty @trim @uppercase
     classroomTitle: String!
     description: String
