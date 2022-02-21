@@ -1,7 +1,7 @@
 import { get, sortBy } from 'lodash';
 import { slotTimes } from '../../../../../../constants';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
-import { ifAuthorized, log } from '../../../../../../utils';
+import { ifAuthorized } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
 
 const getSlotTimeFields = (session) => {
@@ -600,7 +600,6 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
 };
 
 const classroomSessions = (async (root, params, context) => {
-  const startTime = process.hrtime();
   const authentication = ifAuthorized(context);
 
   if (!(authentication && authentication.app && authentication.user)) {
@@ -668,9 +667,6 @@ const classroomSessions = (async (root, params, context) => {
     events,
   );
 
-  log(`Total Doc Returned ---> ${transformedClassroomResult.length}`);
-  const stopTime = process.hrtime(startTime);
-  log(`Total Time Taken ---> ${(stopTime[0] * 1e9 + stopTime[1]) / 1e9} seconds`);
   return transformedClassroomResult || [];
 });
 
