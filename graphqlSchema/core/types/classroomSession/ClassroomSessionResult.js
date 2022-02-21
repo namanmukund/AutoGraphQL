@@ -17,6 +17,7 @@ const ClassroomSessionDocumentType = `
     batchSession
     adhocSession
     notYetBooked
+    event
   }
 `;
 
@@ -60,10 +61,11 @@ const ClassroomSessionResult = `
     endMinutes: Int @defaultValue(value: "0")
     sessionStartDate: Date
     sessionEndDate: Date
-    sessionStatus: SessionStatus! @defaultValue(value: "allotted")
+    sessionStatus: SessionStatus @defaultValue(value: "allotted")
     sessionMode: SessionMode @defaultValue(value: "online")
     sessionRecordingLink: String
     sessionType: ClassroomSessionType @defaultValue(value: "learning")
+    eventType: TimetableScheduleEventType
     documentType: ClassroomSessionDocumentType @defaultValue(value: "batchSession")
     attendance: [BatchAttendanceType]
     classroom: ClassroomDetails

@@ -19,6 +19,7 @@ const getSlotTimeFields = (session) => {
 const getBatchSessionAggregation = ({
   startDate,
   endDate,
+  mentorId,
   docFilters = {},
 }) => [
   {
@@ -185,12 +186,12 @@ const getBatchSessionAggregation = ({
       as: 'mentorSession',
     },
   },
-  // {
-  //   $match: {
-  //     'mentorSession.user.id': mentorId,
-  //     'classroom.documentType': 'classroom',
-  //   },
-  // },
+  {
+    $match: {
+      'mentorSession.user.id': mentorId,
+      'classroom.documentType': 'classroom',
+    },
+  },
   {
     $project: {
       id: 1,
@@ -226,6 +227,7 @@ const getBatchSessionAggregation = ({
 const getAdhocSessionAggregation = ({
   startDate,
   endDate,
+  mentorId,
   docFilters = {},
 }) => [
   {
@@ -393,12 +395,12 @@ const getAdhocSessionAggregation = ({
       as: 'mentorSession',
     },
   },
-  // {
-  //   $match: {
-  //     'mentorSession.user.id': mentorId,
-  //     'classroom.documentType': 'classroom',
-  //   },
-  // },
+  {
+    $match: {
+      'mentorSession.user.id': mentorId,
+      'classroom.documentType': 'classroom',
+    },
+  },
   {
     $project: {
       id: 1,
@@ -428,6 +430,40 @@ const getAdhocSessionAggregation = ({
   {
     $match: {
       ...docFilters,
+    },
+  },
+];
+
+const getEventsScheduleAggregation = ({ startDate, endDate, schoolIds }) => [
+  {
+    $match: {
+      startDate: {
+        $gte: new Date(startDate),
+      },
+      endDate: {
+        $lte: new Date(endDate),
+      },
+      type: 'event',
+      'school.typeId': {
+        $in: schoolIds || [],
+      },
+    },
+  },
+  {
+    $project: {
+      id: 1,
+      eventType: 1,
+      type: 1,
+      startDate: 1,
+      endDate: 1,
+      ...getSlotTimeFields(),
+      school: 1,
+      batch: {
+        id: 1,
+        school: 1,
+        code: 1,
+        classroomTitle: 1,
+      },
     },
   },
 ];
@@ -465,9 +501,9 @@ const constructDocFilters = (filters) => {
       $in: get(filters, 'schools'),
     };
   }
-  if (get(filters, 'sessionStatusFilter', []).length) {
+  if (get(filters, 'sessionStatus', []).length) {
     sessionFilters.sessionStatus = {
-      $in: ['allotted', 'completed'],
+      $in: get(filters, 'sessionStatus'),
     };
   }
   if (get(filters, 'courses', []).length) {
@@ -481,7 +517,7 @@ const constructDocFilters = (filters) => {
   };
 };
 
-const transformMongoResults = (batchSessions, adhocSessions) => {
+const transformMongoResults = (batchSessions, adhocSessions, events) => {
   const finalResult = [];
   if (batchSessions && batchSessions.length) {
     batchSessions.forEach((session) => {
@@ -539,6 +575,23 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
       });
     });
   }
+  if (events && events.length) {
+    events.forEach((event) => {
+      finalResult.push({
+        id: get(event, 'id'),
+        bookingDate: get(event, 'startDate', null),
+        eventType: get(event, 'eventType', 'holiday'),
+        documentType: 'event',
+        startMinutes: get(event, 'startMinutes', 0),
+        endMinutes: get(event, 'endMinutes', 0),
+        classroom: {
+          code: get(event, 'batch.code', ''),
+          classroomTitle: get(event, 'batch.classroomTitle', ''),
+        },
+        ...getSlotTimeFields(event),
+      });
+    });
+  }
   return sortBy(finalResult, ['bookingDate']);
 };
 
@@ -554,13 +607,17 @@ const classroomSessions = (async (root, params, context) => {
   const mentorId = get(filters, 'userId');
   const startDate = get(filters, 'startDate');
   const endDate = get(filters, 'endDate');
-  log(`${mentorId}`);
+  const schoolIds = get(filters, 'schools', []);
   const batchSessionModel = getTypeQueryController(
     'BatchSession',
     authentication,
   );
   const adhocSessionModel = getTypeQueryController(
     'AdhocSession',
+    authentication,
+  );
+  const timetableScheduleModel = getTypeQueryController(
+    'TimetableSchedule',
     authentication,
   );
 
@@ -576,6 +633,7 @@ const classroomSessions = (async (root, params, context) => {
     getBatchSessionAggregation({
       startDate,
       endDate,
+      mentorId,
       docFilters,
     }),
   );
@@ -584,7 +642,16 @@ const classroomSessions = (async (root, params, context) => {
     getAdhocSessionAggregation({
       startDate,
       endDate,
+      mentorId,
       docFilters,
+    }),
+  );
+
+  const events = await timetableScheduleModel.aggregate(
+    getEventsScheduleAggregation({
+      startDate,
+      endDate,
+      schoolIds,
     }),
   );
 
@@ -594,6 +661,7 @@ const classroomSessions = (async (root, params, context) => {
   const transformedClassroomResult = transformMongoResults(
     batchSessionRes,
     adhocSessionRes,
+    events,
   );
 
   log(`Total Doc Returned ---> ${transformedClassroomResult.length}`);
