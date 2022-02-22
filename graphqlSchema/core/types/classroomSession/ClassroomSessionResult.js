@@ -36,8 +36,8 @@ const ClassroomSessionTopic = `
 
 const ClassroomDetails = `
   type ClassroomDetails {
-    id: ID!
-    code: String! @uniqueOrEmpty @trim @uppercase
+    id: ID
+    code: String @uniqueOrEmpty @trim @uppercase
     classroomTitle: String!
     description: String
     classes: [SchoolClass] @relation(name: "ClassroomSchoolClass", direction: "OneWay")

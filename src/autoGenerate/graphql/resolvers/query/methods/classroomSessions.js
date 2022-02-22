@@ -1,4 +1,5 @@
 import { get, sortBy } from 'lodash';
+import moment from 'moment';
 import { slotTimes } from '../../../../../../constants';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { ifAuthorized } from '../../../../../../utils';
@@ -440,10 +441,10 @@ const getEventsScheduleAggregation = ({ startDate, endDate, schoolIds }) => [
   {
     $match: {
       startDate: {
-        $gte: new Date(startDate),
+        $gte: new Date(moment(startDate).subtract({ days: 1 })),
       },
       endDate: {
-        $lte: new Date(endDate),
+        $lte: new Date(moment(endDate).add({ days: 1 })),
       },
       type: 'event',
       'school.typeId': {
@@ -498,11 +499,11 @@ const constructDocFilters = (filters) => {
       $in: get(filters, 'sections', []),
     };
   }
-  if (get(filters, 'schools', []).length) {
-    classroomFilters['classroom.schools.typeId'] = {
-      $in: get(filters, 'schools'),
-    };
-  }
+  // if (get(filters, 'schools', []).length) {
+  //   classroomFilters['classroom.schools.typeId'] = {
+  //     $in: get(filters, 'schools'),
+  //   };
+  // }
   if (get(filters, 'sessionStatus', []).length) {
     sessionFilters.sessionStatus = {
       $in: get(filters, 'sessionStatus'),
