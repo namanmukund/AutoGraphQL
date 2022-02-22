@@ -53,6 +53,15 @@ type SessionOtpResult {
     otp: Int
   }`;
 
+const ClassroomSessionStatus = `
+  enum ClassroomSessionStatus {
+    started
+    completed
+    allotted
+    unattended
+  }
+`;
+
 const ClassroomSessionResult = `
   type ClassroomSessionResult {
     id: String!
@@ -62,7 +71,7 @@ const ClassroomSessionResult = `
     endMinutes: Int @defaultValue(value: "0")
     sessionStartDate: Date
     sessionEndDate: Date
-    sessionStatus: SessionStatus @defaultValue(value: "allotted")
+    sessionStatus: ClassroomSessionStatus @defaultValue(value: "allotted")
     sessionMode: SessionMode @defaultValue(value: "online")
     sessionRecordingLink: String
     sessionType: ClassroomSessionType @defaultValue(value: "learning")
@@ -83,4 +92,5 @@ export default [
   ClassroomSessionType,
   ClassroomDetails,
   SessionOtpResult,
+  ClassroomSessionStatus,
 ];
