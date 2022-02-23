@@ -18,6 +18,7 @@ const getSchoolData = (code, batchId = '') => `
     coordinatorName
     city
     country
+    isTeachersAppEnabled
     schoolPicture {
       id
     }
@@ -62,6 +63,7 @@ const getSchoolDetails = (async (root, params, context) => {
   result.coordinatorRole = get(getSchoolRes, 'data.school.coordinatorRole', '');
   result.coordinatorName = get(getSchoolRes, 'data.school.coordinatorName', '');
   result.city = get(getSchoolRes, 'data.school.city', '');
+  result.isTeachersAppEnabled = get(getSchoolRes, 'data.school.isTeachersAppEnabled', false);
   result.country = get(getSchoolRes, 'data.school.country', '');
   if (schoolLogoId) {
     result.logo = { type: 'File', typeId: `${schoolLogoId}` };
