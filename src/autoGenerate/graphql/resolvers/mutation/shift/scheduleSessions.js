@@ -46,7 +46,7 @@ const getScheduleSessionsRulesGroupedByDay = (scheduleSessionsRules) => {
         if (!daysRule[key]) {
           daysRule[key] = {};
         }
-        // loop through same keys in rule and store the slots, mode, start and end times
+        // loop through same keys in rule and store the nonRecurringslots, mode, start and end times
         for (const key2 in rule) {
           if ((key2.includes('slot') && key2)
             || (key2 === `${key}ClassMode`)
@@ -71,8 +71,8 @@ const getCombinedSchedules = (batch) => {
     if (isWorkingDay) {
       for (const key in schoolSchedule) {
         if ((key === 'startDate' || key === 'endDate')
-        || (key.includes('slot') && schoolSchedule[key])
-        || (key.includes('day') && schoolSchedule[key])) {
+          || (key.includes('slot') && schoolSchedule[key])
+          || (key.includes('day') && schoolSchedule[key])) {
           combinedWorkingDaySchedule[key] = schoolSchedule[key];
         }
       }
@@ -108,27 +108,29 @@ const checkIfOutsideWorkingSchedule = (combinedWorkingDaySchedule, combinedEvent
     || moment(timeTableRule.endDate).isAfter(moment(combinedWorkingDaySchedule.endDate))) {
     return true;
   }
-  // checking if weekdays or slots are outside scheduled working hours
-  for (const weekDay in weekDays) {
+  // checking if weekdays or nonRecurringslots are outside scheduled working hours
+  for (const weekDay of weekDays) {
     if (!combinedWorkingDaySchedule[weekDay] && daysRule[weekDay]) {
       return true;
     }
   }
-  for (const slotTime in slotTimes) {
+  for (const slotTime of slotTimes) {
     if (!combinedWorkingDaySchedule[slotTime]) {
-      for (const rule in daysRule) {
-        if (rule[slotTime]) {
-          return true;
+      for (const day in daysRule) {
+        for (const rule in daysRule[day]) {
+          if (rule[slotTime]) {
+            return true;
+          }
         }
       }
     }
   }
   // for events, we check return true if events schedule exactly matches (opposite logic for working day)
-  for (const combinedEventScheduleItem in combinedEventScheduleArray) {
-    for (const weekDay in weekDays) {
+  for (const combinedEventScheduleItem of combinedEventScheduleArray) {
+    for (const weekDay of weekDays) {
       if (combinedEventScheduleItem[weekDay] && daysRule[weekDay]) {
         const dayObj = daysRule[weekDay];
-        for (const slotTime in slotTimes) {
+        for (const slotTime of slotTimes) {
           if (combinedEventScheduleItem[slotTime] && dayObj[slotTime]) {
             return true;
           }
@@ -217,7 +219,7 @@ const createBatchSessions = async (batchId, possibleDates, filteredSlots, slotsI
 };
 
 // update existing batch sessions with topic id
-const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filteredSlotsString, slotsInInput, allottedMentorId, courseId, batchType) => {
+const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, allottedMentorId, courseId, batchType) => {
   let i = 0;
   /* eslint-disable array-callback-return */
   // eslint-disable-next-line no-restricted-syntax
@@ -229,11 +231,14 @@ const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filt
       sessionType = 'trial';
     }
 
+    const slotObj = {};
+    slotObj[possibleDates[i].slot] = true;
     // eslint-disable-next-line no-await-in-loop
-    const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId, sessionType);
+    const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i].date, slotObj, courseId, sessionType);
+
     /* eslint-disable array-callback-return */
-    const date = possibleDates[i].toISOString();
-    updateBatchSession(session.id, filteredSlotsString, date, finalMentorSessionId, courseId);
+    const date = possibleDates[i].date.toISOString();
+    updateBatchSession(session.id, `${possibleDates[i].slot}: true`, date, finalMentorSessionId, courseId);
     i += 1;
   }
 };
@@ -247,6 +252,37 @@ const sessionExistsCheck = async (rescheduleSlots, batchId, startDate) => {
     return true;
   }
   return false;
+};
+
+// get possible date objects with corresponding slots inside
+const getPossileDatesFromRule = async (startDate, endDate, daysRule) => {
+  const days = getSelectedDays(daysRule);
+  const dayMapping = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  // here days is Set which hold the integer values of days of the week (0-6), for better lookup
+  const dates = [];
+  let currentDate = startDate;
+  /* eslint-disable func-names */
+  const addDays = function (daysToAdd) {
+    const date = new Date(this.valueOf());
+    date.setDate(date.getDate() + daysToAdd);
+    return date;
+  };
+
+  while (currentDate <= endDate) {
+    if (days.has(currentDate.getDay())) {
+      const dateObj = {};
+      dateObj.date = currentDate;
+      for (const key in daysRule[dayMapping[currentDate.getDay()]]) {
+        if (key.includes('slot') && key) {
+          dateObj.slot = key;
+          break;
+        }
+      }
+      dates.push(dateObj);
+    }
+    currentDate = addDays.call(currentDate, 1);
+  }
+  return dates;
 };
 
 /**
@@ -311,10 +347,10 @@ const scheduleSessionsMutationResolver = async (
   const endDate = new Date(timeTableRule.endDate);
   endDate.setHours(0, 0, 0, 0);
 
-  // slots passed in input (non-recurring)
+  // nonRecurringslots passed in input (non-recurring)
   // for non recurring cases, we only consider first object in array as input
   const { ...nonRecurringslots } = get(scheduleSessionsRules, '[0]', {});
-  const { nonRecurringfilteredSlotsString } = extractSlotsFromInput(nonRecurringslots);
+  const { filteredSlotsString: nonRecurringfilteredSlotsString } = extractSlotsFromInput(nonRecurringslots);
 
   // to reschedule sessions
   if (doReschedule) {
@@ -358,14 +394,13 @@ const scheduleSessionsMutationResolver = async (
   // See if force flag is set to false or not sent in input
   const forceScheduleSessions = get(timeTableRule, 'forceScheduleSessions', false);
 
-  if (!forceScheduleSessions && combinedWorkingDaySchedule.startDate && combinedWorkingDaySchedule.endDate) {
+  if (!forceScheduleSessions && combinedWorkingDaySchedule.startDate) {
     const isOutsideWorkingSchedule = checkIfOutsideWorkingSchedule(combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule);
     if (isOutsideWorkingSchedule) {
       throw new CannotScheduleOutsideWorkingHoursError();
     }
   }
 
-  // TODO : modify from here for recurring
   // if force schedule, we can schedule anywhere irrespective of working day or event schedule
   if (sessionType === 'batch') {
     let topics = await getTopics(courseId);
@@ -401,12 +436,15 @@ const scheduleSessionsMutationResolver = async (
           // if there exists some started or completed sessions, don't count them, create/update sessions for the remaining
           possibleSessionCount -= sessionsStartedOrCompleted.length;
         }
-        let possibleDates = getPossibleDates(startDate, endDate, days);
+
+        // let possibleDates = getPossibleDates(startDate, endDate, days);
+        let possibleDates = await getPossileDatesFromRule(startDate, endDate, daysRule);
+
         // for the sessions which are still in the allotted state, update them
         const allottedSessionsCount = sessionsAllotted.length;
         if (allottedSessionsCount > 0) {
           possibleSessionCount -= allottedSessionsCount;
-          updateAllottedBatchSessions(sessionsAllotted, possibleDates, filteredSlotsString, slots, mentorUserId, courseId, batchType);
+          updateAllottedBatchSessions(sessionsAllotted, possibleDates, mentorUserId, courseId, batchType);
         }
         if (possibleSessionCount > 0) {
           // all the remaining sessions have to be created
@@ -414,14 +452,13 @@ const scheduleSessionsMutationResolver = async (
           possibleDates = possibleDates.slice(startFromIndex);
           const topicStartIndex = topicCount - possibleSessionCount;
           topics = topics.splice(topicStartIndex);
-        } else {
-          createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId, batchType);
+          createBatchSessions(batchId, possibleDates, nonRecurringfilteredSlotsString, nonRecurringslots, possibleSessionCount, topics, mentorUserId, courseId, batchType);
         }
       } else {
         // if there are no exisiting batchSessions for the given batch id, create all of them
         const possibleSessionCount = topicCount;
         const possibleDates = getPossibleDates(startDate, endDate, days);
-        createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId, batchType);
+        createBatchSessions(batchId, possibleDates, nonRecurringfilteredSlotsString, nonRecurringslots, possibleSessionCount, topics, mentorUserId, courseId, batchType);
       }
     }
   } else {
@@ -429,7 +466,7 @@ const scheduleSessionsMutationResolver = async (
     if (isRecurring) {
       throw new InvalidScheduleParameters();
     }
-    const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, filteredSlotsString, courseId, sessionType);
+    const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringfilteredSlotsString, courseId, sessionType);
     createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId);
   }
   return {
