@@ -28,7 +28,9 @@ class RedisController extends MasterController {
 
   async set(obj, { hkey, maxAge } = {}) {
     try {
-      await this.redis.set(hkey, JSON.stringify(obj), 'EX', maxAge);
+      if (this.validateRedisConn()) {
+        await this.redis.set(hkey, JSON.stringify(obj), 'EX', maxAge);
+      }
     } catch (e) {
       log(e);
     }
