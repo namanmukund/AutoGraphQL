@@ -11,6 +11,9 @@ import { log } from '../../../../../../utils/log';
 // import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getSelectedDays from '../../../postHookFunctions/utils/getSelectedDays';
+import getCombinedSchedules from '../../../postHookFunctions/utils/getCombinedSchedulesForBatch';
+import checkIfOutsideWorkingSchedule from '../../../postHookFunctions/utils/checkIfOutsideWorkingSchedule';
+import getScheduleSessionsRulesGroupedByDay from '../../../postHookFunctions/utils/getScheduledSessionsRulesGroupedByDay';
 import extractSlotsFromInput from '../../../../../../utils/extractSlotsFromInput';
 import {
   CannotScheduleOutsideWorkingHoursError,
@@ -21,7 +24,6 @@ import {
 } from '../../../../../../constants/errors';
 import getPossibleDates from '../../../../../../utils/getPossibleDates';
 import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
-import { weekDays, slotTimes } from '../../../../../../constants';
 import {
   getTopics, getBatchSessions, createBatchSession, updateBatchSession,
   createAdhocSession, getAdhocSessions, updateAdhocSession,
@@ -35,112 +37,6 @@ import {
   fetchBatchSession,
   fetchAdhocSession,
 } from './queries/scheduleSessionsQueries';
-
-// schedule sessions groupBy day (like Object.day.field)
-const getScheduleSessionsRulesGroupedByDay = (scheduleSessionsRules) => {
-  const daysRule = {};
-  scheduleSessionsRules.forEach((rule) => {
-    // loop through keys in rule
-    for (const key in rule) {
-      if (key.includes('day') && !key.includes('ClassMode') && key) {
-        if (!daysRule[key]) {
-          daysRule[key] = {};
-        }
-        // loop through same keys in rule and store the nonRecurringslots, mode, start and end times
-        for (const key2 in rule) {
-          if ((key2.includes('slot') && key2)
-            || (key2 === `${key}ClassMode`)
-            || (key2 === 'startTime' || key2 === 'endTime')) {
-            daysRule[key][key2] = key2.includes('slot') ? true : rule[key2];
-          }
-        }
-      }
-    }
-  });
-  return daysRule;
-};
-
-// combines the working day and event schedules
-const getCombinedSchedules = (batch) => {
-  const schoolTimetableScheduleArray = get(batch, 'school.timetableSchedule', []);
-  const batchTimetableScheduleArray = get(batch, 'timetableSchedule', []);
-  const combinedWorkingDaySchedule = {};
-  const combinedEventScheduleArray = [];
-  for (const schoolSchedule of schoolTimetableScheduleArray) {
-    const isWorkingDay = get(schoolSchedule, 'type') === 'workingDay';
-    if (isWorkingDay) {
-      for (const key in schoolSchedule) {
-        if ((key === 'startDate' || key === 'endDate')
-          || (key.includes('slot') && schoolSchedule[key])
-          || (key.includes('day') && schoolSchedule[key])) {
-          combinedWorkingDaySchedule[key] = schoolSchedule[key];
-        }
-      }
-    } else {
-      combinedEventScheduleArray.push(schoolSchedule);
-    }
-  }
-  for (const batchSchedule of batchTimetableScheduleArray) {
-    const isWorkingDay = get(batchSchedule, 'type') === 'workingDay';
-    if (isWorkingDay) {
-      for (const key in batchSchedule) {
-        if ((key === 'startDate' && (!combinedWorkingDaySchedule.startDate || moment(new Date(batchSchedule[key])).isBefore(moment(new Date(combinedWorkingDaySchedule.startDate)))))
-          || (key === 'endDate' && (!combinedWorkingDaySchedule.startDate || moment(new Date(batchSchedule[key])).isAfter(moment(new Date(combinedWorkingDaySchedule.endDate)))))
-          || (key.includes('slot') && batchSchedule[key])
-          || (key.includes('day') && batchSchedule[key])) {
-          combinedWorkingDaySchedule[key] = batchSchedule[key];
-        }
-      }
-    } else {
-      combinedEventScheduleArray.push(batchSchedule);
-    }
-  }
-  return {
-    combinedWorkingDaySchedule,
-    combinedEventScheduleArray,
-  };
-};
-
-// method to check if given schedule will lie outside working hour schedule
-const checkIfOutsideWorkingSchedule = (combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule) => {
-  // checking if days are within bounds
-  if (moment(timeTableRule.startDate).isBefore(moment(combinedWorkingDaySchedule.startDate))
-    || moment(timeTableRule.endDate).isAfter(moment(combinedWorkingDaySchedule.endDate))) {
-    return true;
-  }
-  // checking if weekdays or nonRecurringslots are outside scheduled working hours
-  for (const weekDay of weekDays) {
-    if (!combinedWorkingDaySchedule[weekDay] && daysRule[weekDay]) {
-      return true;
-    }
-  }
-  for (const slotTime of slotTimes) {
-    if (!combinedWorkingDaySchedule[slotTime]) {
-      for (const day in daysRule) {
-        for (const rule in daysRule[day]) {
-          if (rule[slotTime]) {
-            return true;
-          }
-        }
-      }
-    }
-  }
-  // for events, we check return true if events schedule exactly matches (opposite logic for working day)
-  for (const combinedEventScheduleItem of combinedEventScheduleArray) {
-    for (const weekDay of weekDays) {
-      if (combinedEventScheduleItem[weekDay] && daysRule[weekDay]) {
-        const dayObj = daysRule[weekDay];
-        for (const slotTime of slotTimes) {
-          if (combinedEventScheduleItem[slotTime] && dayObj[slotTime]) {
-            return true;
-          }
-        }
-      }
-    }
-  }
-  // if inside working schedule
-  return false;
-};
 
 // method to sort batchSessions
 const sortBatchSessions = (batchSessions) => {
@@ -360,7 +256,7 @@ const scheduleSessionsMutationResolver = async (
       throw new InvalidRescheduleParameters();
     } else {
       // check if sessions already exist at provided date and slot and have to reschedule batch session
-      const sessionsExist = await sessionExistsCheck(rescheduleSlots, batchId, startDate);
+      const sessionsExist = await sessionExistsCheck(nonRecurringslots, batchId, startDate);
       if (sessionsExist && batchSessionId) {
         throw new SlotsOccupiedError();
       }
