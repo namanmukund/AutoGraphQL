@@ -33,6 +33,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import addOrUpdateUsersInBulk from '../scriptMethods/addOrUpdateUsersInBulk';
 // import updateLeadAnalyticsForPastLeads from '../scriptMethods/updateLeadAnalyticsForPastLeads';
 // import updateMentorMenteeSessionIsAssignmentAttempted from '../scriptMethods/updateMentorMenteeSessionIsAssignmentAttempted';
+import updateStudentHomework from '../scriptMethods/updateStudentHomework';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -89,6 +90,7 @@ const temporaryScript = (async (root, params, context) => {
   // await addOrUpdateUsersInBulk();
   // await updateLeadAnalyticsForPastLeads();
   // await updateMentorMenteeSessionIsAssignmentAttempted();
+  await updateStudentHomework();
   return {
     result: true,
   };
