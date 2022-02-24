@@ -110,6 +110,7 @@ import updateEventSessionAttendance from './mutation/methods/updateEventSessionA
 import getNextOrPrevClassroomSessions from './query/methods/getNextOrPrevClassroomSessions';
 import classroomDetail from './query/methods/classroomDetail';
 import scheduleSessions from './mutation/shift/scheduleSessions';
+import getSchoolAndBatchDetail from './query/methods/getSchoolAndBatchDetail';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -682,6 +683,8 @@ resolvers.Query.classroomSessions = classroomSessions;
 resolvers.Query.getNextOrPrevClassroomSessions = getNextOrPrevClassroomSessions;
 // Resolver to get classroom sessions
 resolvers.Query.classroomDetail = classroomDetail;
+// Resolver to get classroom sessions
+resolvers.Query.getSchoolAndBatchDetail = getSchoolAndBatchDetail;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 
