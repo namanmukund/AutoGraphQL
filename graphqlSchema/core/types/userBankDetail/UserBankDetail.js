@@ -6,6 +6,7 @@ const UserBankDetail = `
     accountName: String
     accountNumber: String
     ifscCode: String
+    branchName: String
     documentFile: File @relation(name: "UserBankDetailDocumentFile", direction: "OneWay")
     accountType: BankAccountType  @defaultValue(value: "saving")
   }
