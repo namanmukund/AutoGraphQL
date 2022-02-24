@@ -3,7 +3,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
 
-const getSchoolData = (code, batchId = '') => `
+const getSchoolData = (code) => `
 {
   school(code:"${code}"){
     id
@@ -26,9 +26,6 @@ const getSchoolData = (code, batchId = '') => `
       id
     }
   }
-  ${batchId ? `batches(filter: { and: [{ id: "${batchId}" }, { school_some: { code: "${code}" } }] }) {
-    id
-  }` : ''}
 }
 `;
 
@@ -37,21 +34,16 @@ const getSchoolDetails = (async (root, params, context) => {
   validateAuthentication(context, 'app');
   context.currentUser = true;
   // getting input from params
-  const { input: { code, batchId } } = params;
+  const { input: { code } } = params;
   // this will be sent in output
   const result = {};
 
-  const getSchoolRes = await callLocalGraphqlApi(getSchoolData(code, batchId));
+  const getSchoolRes = await callLocalGraphqlApi(getSchoolData(code));
   const schoolId = get(getSchoolRes, 'data.school.id', '');
   const schoolLogoId = get(getSchoolRes, 'data.school.logo.id', '');
   const schoolPictureId = get(getSchoolRes, 'data.school.schoolPicture.id', '');
-  const batchData = get(getSchoolRes, 'data.batches', []);
   // by default taking value as 1 in worst case
   if (!schoolId) {
-    throw new DatabaseRecordNotFoundError();
-  }
-
-  if (batchId && !batchData.length) {
     throw new DatabaseRecordNotFoundError();
   }
 
@@ -71,7 +63,6 @@ const getSchoolDetails = (async (root, params, context) => {
   if (schoolPictureId) {
     result.bgImage = { type: 'File', typeId: `${schoolPictureId}` };
   }
-  result.batchId = batchId ? get(batchData, '[0].id') : '';
 
   return result;
 });

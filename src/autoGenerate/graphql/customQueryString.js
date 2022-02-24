@@ -21,6 +21,7 @@ const customQueryString = `
     classroomSessions (filter: ClassroomSessionFilter!): [ClassroomSessionResult]
     getNextOrPrevClassroomSessions (input: [NextOrPrevClassroomSessionInput]!): [NextOrPrevClassroomSessionResult]
     classroomDetail (batchId: String): ClassroomDetailResult
+    getSchoolAndBatchDetail (schoolId: String, batchId: String): BooleanResult
 `;
 
 export default customQueryString;
