@@ -8,6 +8,11 @@ import {
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
+import getCombinedSchedules from './utils/getCombinedSchedulesForBatch';
+import { fetchBatch } from '../resolvers/mutation/shift/queries/scheduleSessionsQueries';
+import { CannotScheduleOutsideWorkingHoursError } from '../../../../constants/errors';
+import checkIfOutsideWorkingSchedule from './utils/checkIfOutsideWorkingSchedule';
+import getScheduleSessionsRulesGroupedByDay from './utils/getScheduledSessionsRulesGroupedByDay';
 
 // query to get all not completed batchSessions of a batch to update student
 const getBatchSessionsQuery = (batchId) => `
@@ -260,7 +265,23 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
     -> if there are no batchSessions in the Db, create batchSessions for all the dates in the date array
     -> if there are some batchSessions, update the remaining batchSessions with the new passed values and create batchSessions if necessary.
   */
+
   if (timeTableRule) {
+    const batch = await fetchBatch(batchId);
+    const sessionRules = [];
+    sessionRules.push(timeTableRule);
+    const daysRule = getScheduleSessionsRulesGroupedByDay(sessionRules);
+
+    // combine school and batch timetableschedules
+    const { combinedWorkingDaySchedule, combinedEventScheduleArray } = getCombinedSchedules(batch);
+
+    if (combinedWorkingDaySchedule.startDate && combinedWorkingDaySchedule.endDate) {
+      const isOutsideWorkingSchedule = checkIfOutsideWorkingSchedule(combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule);
+      if (isOutsideWorkingSchedule) {
+        throw new CannotScheduleOutsideWorkingHoursError();
+      }
+    }
+
     // topic count
     let topics = await getTopics(courseId);
     const topicCount = topics && topics.length;
