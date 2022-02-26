@@ -238,18 +238,22 @@ const scheduleSessionsMutationResolver = async (
   const mentorUserId = get(batch, 'allottedMentor.id', '');
   const batchType = get(batch, 'type');
 
-  const startDate = new Date(timeTableRule.startDate);
-  startDate.setHours(0, 0, 0, 0);
-  const endDate = new Date(timeTableRule.endDate);
-  endDate.setHours(0, 0, 0, 0);
+  let startDate = timeTableRule.startDate ? new Date(timeTableRule.startDate) : null;
+  if (startDate) {
+    startDate.setHours(0, 0, 0, 0);
+  }
+  const endDate = timeTableRule.endDate ? new Date(timeTableRule.endDate) : null;
+  if (endDate) {
+    endDate.setHours(0, 0, 0, 0);
+  }
 
   // nonRecurringslots passed in input (non-recurring)
   // for non recurring cases, we only consider first object in array as input
   const { ...nonRecurringslots } = get(scheduleSessionsRules, '[0]', {});
   const { filteredSlotsString: nonRecurringfilteredSlotsString } = extractSlotsFromInput(nonRecurringslots);
 
-  // to reschedule sessions
-  if (doReschedule) {
+  // to reschedule single session
+  if (doReschedule && startDate) {
     if (!adhocSessionId && !batchSessionId) {
       throw new InvalidRescheduleParameters();
     } else if (adhocSessionId && batchSessionId) {
@@ -276,13 +280,45 @@ const scheduleSessionsMutationResolver = async (
     };
   }
 
+  const daysRule = getScheduleSessionsRulesGroupedByDay(scheduleSessionsRules);
+  const days = getSelectedDays(daysRule);
+  let topics = await getTopics(courseId);
+  const topicCount = topics && topics.length;
+  const batchSessions = await getBatchSessions(batchId);
+
+  if (doReschedule && !startDate) {
+    if (batchSessions && batchSessions.length) {
+      // sorting the existing batch sessions into started/completed and allotted
+      const {
+        sessionsStartedOrCompleted,
+        sessionsAllotted,
+      } = sortBatchSessions(batchSessions);
+      let possibleSessionCount = topicCount;
+      if (sessionsStartedOrCompleted.length > 0) {
+        // if there exists some started or completed sessions, don't count them, create/update sessions for the remaining
+        possibleSessionCount -= sessionsStartedOrCompleted.length;
+      }
+      startDate = get(sessionsAllotted, '[0].bookingDate', new Date());
+
+      // let possibleDates = getPossibleDates(startDate, endDate, days);
+      const possibleDates = await getPossileDatesFromRule(startDate, endDate, daysRule);
+
+      // for the sessions which are still in the allotted state, update them
+      const allottedSessionsCount = sessionsAllotted.length;
+      if (allottedSessionsCount > 0) {
+        possibleSessionCount -= allottedSessionsCount;
+        updateAllottedBatchSessions(sessionsAllotted, possibleDates, mentorUserId, courseId, batchType);
+      }
+    }
+    return {
+      result: true,
+    };
+  }
+
   if (scheduleSessionsRules.length === 0
     || (scheduleSessionsRules.length > 1 && !isRecurring)) {
     throw new InvalidScheduleParameters();
   }
-
-  const daysRule = getScheduleSessionsRulesGroupedByDay(scheduleSessionsRules);
-  const days = getSelectedDays(daysRule);
 
   // combine school and batch timetableschedules
   const { combinedWorkingDaySchedule, combinedEventScheduleArray } = getCombinedSchedules(batch);
@@ -299,10 +335,6 @@ const scheduleSessionsMutationResolver = async (
 
   // if force schedule, we can schedule anywhere irrespective of working day or event schedule
   if (sessionType === 'batch') {
-    let topics = await getTopics(courseId);
-    const topicCount = topics && topics.length;
-    const batchSessions = await getBatchSessions(batchId);
-
     // check if sessions already exist at provided date and slot
     const sessionsExist = await sessionExistsCheck(nonRecurringslots, batchId, startDate);
     if (sessionsExist) {
