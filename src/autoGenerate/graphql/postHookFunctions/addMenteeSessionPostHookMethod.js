@@ -14,7 +14,7 @@ import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOpera
 import updateMenteeSessionQuery from './utils/updateMenteeSessionQuery';
 import sendWhatsappMessageForBookingConfirmedByLeadParnter from './utils/sendWhatsappMessageForBookingConfirmedByLeadPartner';
 import IsMentorChild from './utils/isMentorChild';
-import createTaskAndAssignAvailableMentor from './utils/createTaskAndAssignAvailableMentor';
+// import createTaskAndAssignAvailableMentor from './utils/createTaskAndAssignAvailableMentor';
 
 const getUserCourses = async (userId) => {
   const query = `
@@ -89,7 +89,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     }
 
     // create a Task corresponding to the new lead and auto-assign available mentor
-    createTaskAndAssignAvailableMentor(context, userInfo, topicInfo, input);
+    // createTaskAndAssignAvailableMentor(context, userInfo, topicInfo, input);
     // update user booking on leadsquared
     if (!get(userInfo, 'data.user.studentProfile.batch.id') && !isMentorChild) {
       addMenteeBookingLeadsquared(
