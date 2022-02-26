@@ -24,67 +24,6 @@ const fetchComms = async (dataFieldFilter) => {
 
 const sendCommsMessage = async (root, params, context) => {
   validateAuthentication(context);
-  //   const query = `{
-  //   eventDetailsData: event(id: "ckzdtqpno00270z3k120qbphv") {
-  //     id
-  //     registeredUsers(
-  //       filter: {
-  //         user_some: {
-  //           and: [
-  //             { utmMedium: "radiostreet" }
-  //             { userLocationLog_exists: true }
-  //           ]
-  //         }
-  //       }
-  //     ) {
-  //       id
-  //       grade
-  //       user {
-  //         id
-  //         name
-  //         userLocationLog {
-  //           ip
-  //           city
-  //           countryName
-  //           countryCode
-  //         }
-  //         utmMedium
-  //       }
-  //       parents {
-  //         id
-  //         user {
-  //           id
-  //           name
-  //           email
-  //           phoneVerified
-  //           phone {
-  //             number
-  //             countryCode
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-  // `;
-  //   const result = await callLocalGraphqlApi(query);
-  //   const usersArray = [];
-  //   console.log(result);
-  //   for (const user of get(result, 'data.eventDetailsData.registeredUsers', [])) {
-  //     const userObj = {};
-  //     userObj['Student Name'] = get(user, 'user.name');
-  //     userObj['Student Grade'] = get(user, 'grade');
-  //     userObj['Parent Name'] = get(user, 'parents[0].user.name');
-  //     userObj['Parent Email'] = get(user, 'parents[0].user.email');
-  //     userObj['Parent Number'] = `${get(user, 'parents[0].user.phone.countryCode')} ${get(user, 'parents[0].user.phone.number')}`;
-  //     userObj['Utm Medium'] = get(user, 'user.utmMedium');
-  //     userObj['Phone verfied'] = get(user, 'parents[0].user.phoneVerified');
-  //     userObj['Logged City'] = get(user, 'user.userLocationLog.city');
-  //     userObj['Logged IP Address'] = get(user, 'user.userLocationLog.ip');
-  //     usersArray.push({ ...userObj });
-  //   }
-  //   console.log(usersArray.length);
-  //   console.log(JSON.stringify(usersArray));
   const { input } = params;
   const {
     templateName,

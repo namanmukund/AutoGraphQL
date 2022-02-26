@@ -378,7 +378,7 @@ const sendEventCommunication = async ({
         }));
         const isSessionLinkExist = commsVariables.find((variables) => get(variables, 'dataField') === 'meetingLink' || get(variables, 'dataField') === 'eventCertificateLink');
         let magicLinkUrls = [];
-        const filterStudentId = commsReceiversIds.map((registeredUser) => `"${registeredUser}"`);
+        const filterStudentId = commsReceivers.map((registeredUser) => `"${get(registeredUser, 'student.id')}"`);
         if (isSessionLinkExist) {
           magicLinkUrls = await generateMagicLink(`[${filterStudentId}]`);
         }
@@ -460,7 +460,7 @@ const sendEventCommunication = async ({
         });
         const isSessionLinkExist = commsVariables.find((variables) => get(variables, 'dataField') === 'meetingLink' || get(variables, 'dataField') === 'eventCertificateLink');
         let magicLinkUrls = [];
-        const filterStudentId = commsReceiversIds.map((registeredUser) => `"${registeredUser}"`);
+        const filterStudentId = commsReceivers.map((registeredUser) => `"${get(registeredUser, 'id')}"`);
         if (isSessionLinkExist) {
           magicLinkUrls = await generateMagicLink(`[${filterStudentId}]`);
         }
