@@ -11,6 +11,7 @@ const userTokenNotRequiredModels = [
   'Event',
   'EventJoinReason',
   'EventPrize',
+  'ShortLink',
 ];
 
 export default userTokenNotRequiredModels;
