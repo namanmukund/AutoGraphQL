@@ -155,6 +155,7 @@ import ClassroomSession from './classroomSession';
 import Notice from './Notice';
 import StudentReviewByMentor from './StudentReviewByMentor';
 import ClassroomDetailResult from './classroomDetailResult';
+import ShortLink from './shortLink';
 
 export default [
   ...User,
@@ -314,4 +315,5 @@ export default [
   ...Notice,
   ...StudentReviewByMentor,
   ...ClassroomDetailResult,
+  ...ShortLink,
 ];

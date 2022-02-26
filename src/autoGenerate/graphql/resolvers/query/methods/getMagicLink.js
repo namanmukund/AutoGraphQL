@@ -180,6 +180,7 @@ const getMagicLink = (async (root, params, context) => {
     input: {
       schoolId, grade, section, userId, email, phone, expiresIn,
       linkVisitLimit = 2, isLeadLogin = false, isDownloadExcel = false,
+      filterString,
     },
   } = params;
   // getting input from params
@@ -218,6 +219,7 @@ const getMagicLink = (async (root, params, context) => {
         }`;
     }
   }
+  if (filterString) fetchQueryFilter = filterString;
   if (!fetchQueryFilter) {
     throw new MissingMandatoryInputInRequestError();
   } else {

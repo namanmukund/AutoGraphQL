@@ -155,6 +155,7 @@ const sendEventCommunication = async ({
     const jobData = await getJobData(jobId);
     if (!jobData) return null;
   }
+  console.log(templateName, commsVariables);
   const eventData = await callLocalGraphqlApi(eventQuery(eventId));
   const event = get(eventData, 'data.event');
   const registeredUsers = get(event, 'registeredUsers', []);
@@ -188,6 +189,12 @@ const sendEventCommunication = async ({
   const address = `${get(event, 'address') || ''}, ${get(event, 'city') || ''}, ${get(event, 'state') || ''}, ${get(event, 'pincode') || ''}`;
   get(event, 'speakers', []).forEach((speaker, index) => { speakerName += `${get(speaker, 'user.name')}${index === get(event, 'speakers', []).length - 1 ? '' : ','}`; });
   if (condition === 'before') {
+    const isSessionLinkExist = commsVariables.find((variables) => get(variables, 'dataField') === 'meetingLink');
+    console.log(isSessionLinkExist);
+    const filterStudentId = registeredUsers.map((registeredUser) => `"${get(registeredUser, 'id')}"`);
+    console.log(filterStudentId);
+    const filteredQuery = `{ id_in: [${filterStudentId}] }`;
+    console.log(filteredQuery);
     for (const registeredUser of registeredUsers) {
       const parent = get(registeredUser, 'parents[0].user');
       const studentProfileId = get(registeredUser, 'id');
@@ -245,6 +252,12 @@ const sendEventCommunication = async ({
   }
   if (condition === 'after') {
     if (attendanceFilter === 'allUser') {
+      const isSessionLinkExist = commsVariables.find((variables) => get(variables, 'dataField') === 'meetingLink');
+      console.log(isSessionLinkExist);
+      const filterStudentId = registeredUsers.map((registeredUser) => `"${get(registeredUser, 'id')}"`);
+      console.log(filterStudentId);
+      const filteredQuery = `{ id_in: [${filterStudentId}] }`;
+      console.log(filteredQuery);
       registeredUsers.forEach((registeredUser) => {
         const parent = get(registeredUser, 'parents[0].user');
         const studentProfileId = get(registeredUser, 'id');
