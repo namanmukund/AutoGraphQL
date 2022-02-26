@@ -347,7 +347,7 @@ const scheduleSessionsMutationResolver = async (
 
     // if not recurring schedule, create singular batch session
     if (!isRecurring) {
-      const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringfilteredSlotsString, courseId, sessionType);
+      const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, sessionType);
       if (!(batchId && startDate && nonRecurringfilteredSlotsString && topicId && finalMentorSessionId && courseId)) {
         throw new InvalidScheduleParameters();
       }
@@ -394,7 +394,7 @@ const scheduleSessionsMutationResolver = async (
     if (isRecurring) {
       throw new InvalidScheduleParameters();
     }
-    const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringfilteredSlotsString, courseId, sessionType);
+    const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, sessionType);
     createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId);
   }
   return {
