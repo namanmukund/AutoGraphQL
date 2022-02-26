@@ -72,9 +72,11 @@ const getMentorSessionId = async (allottedMentorId, date, slotsInInput, courseId
         await callLocalGraphqlApi(updateMentorSession(mentorSessionId, date, `slot${sentSlotsArray[0]}`));
       }
     } else {
-      // eslint-disable-next-line no-await-in-loop
-      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, date, `slot${sentSlotsArray[0]}`, sessionType));
-      finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
+      if (sentSlotsArray && sentSlotsArray.length) {
+        // eslint-disable-next-line no-await-in-loop
+        const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, date, `slot${sentSlotsArray[0]}`, sessionType));
+        finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
+      }
     }
   }
   return finalMentorSessionId;
