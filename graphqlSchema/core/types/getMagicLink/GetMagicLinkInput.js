@@ -10,7 +10,7 @@ const GetMagicLinkInput = `
     linkVisitLimit: Int
     isLeadLogin: Boolean @defaultValue(value: "false")
     isDownloadExcel: Boolean @defaultValue(value: "false")
-    filterString: String
+    studentIds: [ID]
   }
 `;
 

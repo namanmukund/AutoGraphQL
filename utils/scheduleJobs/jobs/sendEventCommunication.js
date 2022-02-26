@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable comma-dangle */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-unused-vars */
@@ -21,6 +22,34 @@ const getJobData = async (jobId) => {
   `;
   const job = await callLocalGraphqlApi(query);
   return get(job, 'data.scheduleJob.id');
+};
+
+const addShortLink = async (link) => {
+  const addQuery = `mutation {
+  addShortLink(input: { link: "${link}" }) {
+    id
+  }
+}
+`;
+  const result = await callLocalGraphqlApi(addQuery);
+  return get(result, 'data.addShortLink.id');
+};
+
+const generateMagicLink = async (filterString) => {
+  const magicQuery = `{
+  getMagicLink(input: { studentIds: ${filterString}, linkVisitLimit: 5 }) {
+    linkUri
+    linkToken
+    user {
+      id
+      studentProfile {
+        id
+      }
+    }
+  }
+}`;
+  const magicLinks = await callLocalGraphqlApi(magicQuery);
+  return get(magicLinks, 'data.getMagicLink');
 };
 
 const eventQuery = (id) => `{
@@ -155,7 +184,6 @@ const sendEventCommunication = async ({
     const jobData = await getJobData(jobId);
     if (!jobData) return null;
   }
-  console.log(templateName, commsVariables);
   const eventData = await callLocalGraphqlApi(eventQuery(eventId));
   const event = get(eventData, 'data.event');
   const registeredUsers = get(event, 'registeredUsers', []);
@@ -189,15 +217,28 @@ const sendEventCommunication = async ({
   const address = `${get(event, 'address') || ''}, ${get(event, 'city') || ''}, ${get(event, 'state') || ''}, ${get(event, 'pincode') || ''}`;
   get(event, 'speakers', []).forEach((speaker, index) => { speakerName += `${get(speaker, 'user.name')}${index === get(event, 'speakers', []).length - 1 ? '' : ','}`; });
   if (condition === 'before') {
-    const isSessionLinkExist = commsVariables.find((variables) => get(variables, 'dataField') === 'meetingLink');
-    console.log(isSessionLinkExist);
+    const isSessionLinkExist = commsVariables.find((variables) => get(variables, 'dataField') === 'meetingLink' || get(variables, 'dataField') === 'eventCertificateLink');
+    let magicLinkUrls = [];
     const filterStudentId = registeredUsers.map((registeredUser) => `"${get(registeredUser, 'id')}"`);
-    console.log(filterStudentId);
-    const filteredQuery = `{ id_in: [${filterStudentId}] }`;
-    console.log(filteredQuery);
+    if (isSessionLinkExist) {
+      magicLinkUrls = await generateMagicLink(`[${filterStudentId}]`);
+    }
     for (const registeredUser of registeredUsers) {
       const parent = get(registeredUser, 'parents[0].user');
       const studentProfileId = get(registeredUser, 'id');
+      let meetingLink = `${process.env.TEKIE_WEB_URL}/events/${eventId}?joinSession=true`;
+      let eventCertificateLink = `${process.env.TEKIE_WEB_URL}/events/${eventId}`;
+      if (isSessionLinkExist && magicLinkUrls.length) {
+        const isMagicLinkExist = magicLinkUrls.find((link) => get(link, 'user.studentProfile.id') === studentProfileId);
+        if (isMagicLinkExist) {
+          meetingLink = `${get(isMagicLinkExist, 'linkUri')}&redirectTo=${meetingLink}`;
+          const newMeetingLink = await addShortLink(meetingLink);
+          meetingLink = `${process.env.TEKIE_WEB_URL}/redirect/${newMeetingLink}`;
+          eventCertificateLink = `${get(isMagicLinkExist, 'linkUri')}&redirectTo=${eventCertificateLink}`;
+          const neweventCertificateLink = await addShortLink(eventCertificateLink);
+          eventCertificateLink = `${process.env.TEKIE_WEB_URL}/redirect/${neweventCertificateLink}`;
+        }
+      }
       const commsObj = {
         studentName: get(registeredUser, 'user.name'),
         parentName: get(parent, 'name'),
@@ -209,13 +250,13 @@ const sendEventCommunication = async ({
         speakerName,
         eventTime: startTime,
         meetingId,
-        meetingLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
+        meetingLink,
         meetingPassword,
         geoLocation,
         address,
         summary,
         eventRegistrationLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
-        eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
+        eventCertificateLink,
         sessionLink,
       };
       const whatsappCommsVariablesList = commsVariables.map((commsVariable) => (
@@ -243,24 +284,37 @@ const sendEventCommunication = async ({
           acc[get(commsVariable, 'emailVariableName')] = commsObj[get(commsVariable, 'dataField')];
           return acc;
         });
-        sendEmailCommsForUpdatedEvents(parentEmail,
-          templateName,
-          emailCommsVariableObject,
-          'Tekie Event Reminder');
+        // sendEmailCommsForUpdatedEvents(parentEmail,
+        //   templateName,
+        //   emailCommsVariableObject,
+        //   'Tekie Event Reminder');
       }
     }
   }
   if (condition === 'after') {
     if (attendanceFilter === 'allUser') {
-      const isSessionLinkExist = commsVariables.find((variables) => get(variables, 'dataField') === 'meetingLink');
-      console.log(isSessionLinkExist);
+      const isSessionLinkExist = commsVariables.find((variables) => get(variables, 'dataField') === 'meetingLink' || get(variables, 'dataField') === 'eventCertificateLink');
+      let magicLinkUrls = [];
       const filterStudentId = registeredUsers.map((registeredUser) => `"${get(registeredUser, 'id')}"`);
-      console.log(filterStudentId);
-      const filteredQuery = `{ id_in: [${filterStudentId}] }`;
-      console.log(filteredQuery);
-      registeredUsers.forEach((registeredUser) => {
+      if (isSessionLinkExist) {
+        magicLinkUrls = await generateMagicLink(`[${filterStudentId}]`);
+      }
+      registeredUsers.forEach(async (registeredUser) => {
         const parent = get(registeredUser, 'parents[0].user');
         const studentProfileId = get(registeredUser, 'id');
+        let meetingLink = `${process.env.TEKIE_WEB_URL}/events/${eventId}?joinSession=true`;
+        let eventCertificateLink = `${process.env.TEKIE_WEB_URL}/events/${eventId}`;
+        if (isSessionLinkExist && magicLinkUrls.length) {
+          const isMagicLinkExist = magicLinkUrls.find((link) => get(link, 'user.studentProfile.id') === studentProfileId);
+          if (isMagicLinkExist) {
+            meetingLink = `${get(isMagicLinkExist, 'linkUri')}&redirectTo=${meetingLink}`;
+            const newMeetingLink = await addShortLink(meetingLink);
+            meetingLink = `${process.env.TEKIE_WEB_URL}/redirect/${newMeetingLink}`;
+            eventCertificateLink = `${get(isMagicLinkExist, 'linkUri')}&redirectTo=${eventCertificateLink}`;
+            const neweventCertificateLink = await addShortLink(eventCertificateLink);
+            eventCertificateLink = `${process.env.TEKIE_WEB_URL}/redirect/${neweventCertificateLink}`;
+          }
+        }
         const commsObj = {
           studentName: get(registeredUser, 'user.name'),
           parentName: get(parent, 'name'),
@@ -272,13 +326,13 @@ const sendEventCommunication = async ({
           speakerName,
           eventTime: startTime,
           meetingId,
-          meetingLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
+          meetingLink,
           meetingPassword,
           geoLocation,
           address,
           summary,
           eventRegistrationLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
-          eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
+          eventCertificateLink,
           sessionLink,
         };
         const whatsappCommsVariablesList = commsVariables.map((commsVariable) => (
@@ -306,7 +360,7 @@ const sendEventCommunication = async ({
             acc[get(commsVariable, 'emailVariableName')] = commsObj[get(commsVariable, 'dataField')];
             return acc;
           });
-          sendEmailTemplateMessage(parentEmail, 'EventComplete', emailCommsVariableObject, 'Tekie Event Remainder');
+          // sendEmailTemplateMessage(parentEmail, 'EventComplete', emailCommsVariableObject, 'Tekie Event Remainder');
         }
       });
     } else {
@@ -322,9 +376,28 @@ const sendEventCommunication = async ({
             }
           }
         }));
-        commsReceivers.forEach((receiver) => {
+        const isSessionLinkExist = commsVariables.find((variables) => get(variables, 'dataField') === 'meetingLink' || get(variables, 'dataField') === 'eventCertificateLink');
+        let magicLinkUrls = [];
+        const filterStudentId = commsReceiversIds.map((registeredUser) => `"${registeredUser}"`);
+        if (isSessionLinkExist) {
+          magicLinkUrls = await generateMagicLink(`[${filterStudentId}]`);
+        }
+        commsReceivers.forEach(async (receiver) => {
           const parent = get(receiver, 'student.parents[0].user');
           const studentProfileId = get(receiver, 'student.id');
+          let meetingLink = `${process.env.TEKIE_WEB_URL}/events/${eventId}?joinSession=true`;
+          let eventCertificateLink = `${process.env.TEKIE_WEB_URL}/events/${eventId}`;
+          if (isSessionLinkExist && magicLinkUrls.length) {
+            const isMagicLinkExist = magicLinkUrls.find((link) => get(link, 'user.studentProfile.id') === studentProfileId);
+            if (isMagicLinkExist) {
+              meetingLink = `${get(isMagicLinkExist, 'linkUri')}&redirectTo=${meetingLink}`;
+              const newMeetingLink = await addShortLink(meetingLink);
+              meetingLink = `${process.env.TEKIE_WEB_URL}/redirect/${newMeetingLink}`;
+              eventCertificateLink = `${get(isMagicLinkExist, 'linkUri')}&redirectTo=${eventCertificateLink}`;
+              const neweventCertificateLink = await addShortLink(eventCertificateLink);
+              eventCertificateLink = `${process.env.TEKIE_WEB_URL}/redirect/${neweventCertificateLink}`;
+            }
+          }
           const commsObj = {
             studentName: get(receiver, 'student.user.name'),
             parentName: get(parent, 'name'),
@@ -336,13 +409,13 @@ const sendEventCommunication = async ({
             speakerName,
             eventTime: startTime,
             meetingId,
-            meetingLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
+            meetingLink,
             meetingPassword,
             geoLocation,
             address,
             summary,
             eventRegistrationLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
-            eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
+            eventCertificateLink,
             sessionLink,
           };
           const whatsappCommsVariablesList = commsVariables.map((commsVariable) => (
@@ -370,7 +443,7 @@ const sendEventCommunication = async ({
               acc[get(commsVariable, 'emailVariableName')] = commsObj[get(commsVariable, 'dataField')];
               return acc;
             });
-            sendEmailTemplateMessage(parentEmail, 'EventComplete', emailCommsVariableObject, 'Tekie Event Remainder');
+            // sendEmailTemplateMessage(parentEmail, 'EventComplete', emailCommsVariableObject, 'Tekie Event Remainder');
           }
         });
       }
@@ -385,9 +458,28 @@ const sendEventCommunication = async ({
             commsReceiversIds.push(get(registeredUser, 'user.id'));
           }
         });
-        commsReceivers.forEach((receiver) => {
+        const isSessionLinkExist = commsVariables.find((variables) => get(variables, 'dataField') === 'meetingLink' || get(variables, 'dataField') === 'eventCertificateLink');
+        let magicLinkUrls = [];
+        const filterStudentId = commsReceiversIds.map((registeredUser) => `"${registeredUser}"`);
+        if (isSessionLinkExist) {
+          magicLinkUrls = await generateMagicLink(`[${filterStudentId}]`);
+        }
+        commsReceivers.forEach(async (receiver) => {
           const parent = get(receiver, 'parents[0].user');
           const studentProfileId = get(receiver, 'id');
+          let meetingLink = `${process.env.TEKIE_WEB_URL}/events/${eventId}?joinSession=true`;
+          let eventCertificateLink = `${process.env.TEKIE_WEB_URL}/events/${eventId}`;
+          if (isSessionLinkExist && magicLinkUrls.length) {
+            const isMagicLinkExist = magicLinkUrls.find((link) => get(link, 'user.studentProfile.id') === studentProfileId);
+            if (isMagicLinkExist) {
+              meetingLink = `${get(isMagicLinkExist, 'linkUri')}&redirectTo=${meetingLink}`;
+              const newMeetingLink = await addShortLink(meetingLink);
+              meetingLink = `${process.env.TEKIE_WEB_URL}/redirect/${newMeetingLink}`;
+              eventCertificateLink = `${get(isMagicLinkExist, 'linkUri')}&redirectTo=${eventCertificateLink}`;
+              const neweventCertificateLink = await addShortLink(eventCertificateLink);
+              eventCertificateLink = `${process.env.TEKIE_WEB_URL}/redirect/${neweventCertificateLink}`;
+            }
+          }
           const commsObj = {
             studentName: get(receiver, 'user.name'),
             parentName: get(parent, 'name'),
@@ -399,13 +491,13 @@ const sendEventCommunication = async ({
             speakerName,
             eventTime: startTime,
             meetingId,
-            meetingLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
+            meetingLink,
             meetingPassword,
             geoLocation,
             address,
             summary,
             eventRegistrationLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
-            eventCertificateLink: `${process.env.TEKIE_WEB_URL}/events/${eventId}`,
+            eventCertificateLink,
             sessionLink,
           };
           const whatsappCommsVariablesList = commsVariables.map((commsVariable) => (
@@ -433,7 +525,7 @@ const sendEventCommunication = async ({
               acc[get(commsVariable, 'emailVariableName')] = commsObj[get(commsVariable, 'dataField')];
               return acc;
             });
-            sendEmailTemplateMessage(parentEmail, 'EventComplete', emailCommsVariableObject, 'Tekie Event Remainder');
+            // sendEmailTemplateMessage(parentEmail, 'EventComplete', emailCommsVariableObject, 'Tekie Event Remainder');
           }
         });
       }
