@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-lonely-if */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-tabs */
@@ -111,6 +112,7 @@ const getMagicLinkLogs = async (userId, linkToken) => {
       if (visitedCount < linkVisitLimit) {
         // eslint-disable-next-line no-await-in-loop
         await updateMagicLinkLog(get(linkLog, 'id'), linkVisitLimit);
+        log(`updating link Log with ID: ${get(linkLog, 'id')}`);
       }
     }
   }
@@ -252,7 +254,7 @@ const getMagicLink = (async (root, params, context) => {
             school,
             isDownloadExcel,
           });
-          getMagicLinkLogs(get(user, 'id'), linkToken);
+          await getMagicLinkLogs(get(user, 'id'), linkToken);
           if (!byPassMenteeValidationApps.includes(appName)) {
             if (!isDownloadExcel) {
               if (linkUri) {
