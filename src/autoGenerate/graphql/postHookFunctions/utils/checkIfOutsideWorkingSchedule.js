@@ -1,3 +1,4 @@
+/* eslint-disable no-continue */
 /* eslint-disable guard-for-in */
 /* eslint-disable no-restricted-syntax */
 import moment from 'moment';
@@ -6,8 +7,8 @@ import { weekDays, slotTimes } from '../../../../../constants';
 // method to check if given schedule will lie outside working hour schedule
 const checkIfOutsideWorkingSchedule = (combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule) => {
   // checking if days are within bounds
-  if (moment(timeTableRule.startDate).isBefore(moment(combinedWorkingDaySchedule.startDate))
-    || moment(timeTableRule.endDate).isAfter(moment(combinedWorkingDaySchedule.endDate))) {
+  if (!(moment(timeTableRule.startDate).isSameOrAfter(moment(combinedWorkingDaySchedule.startDate))
+    && moment(timeTableRule.endDate).isSameOrBefore(moment(combinedWorkingDaySchedule.endDate)))) {
     return true;
   }
   // checking if weekdays or nonRecurringslots are outside scheduled working hours
@@ -29,6 +30,10 @@ const checkIfOutsideWorkingSchedule = (combinedWorkingDaySchedule, combinedEvent
   }
   // for events, we check return true if events schedule exactly matches (opposite logic for working day)
   for (const combinedEventScheduleItem of combinedEventScheduleArray) {
+    if (moment(timeTableRule.endDate).isBefore(moment(combinedEventScheduleItem.startDate))
+      || moment(timeTableRule.startDate).isAfter(moment(combinedEventScheduleItem.endDate))) {
+      continue;
+    }
     for (const weekDay of weekDays) {
       if (combinedEventScheduleItem[weekDay] && daysRule[weekDay]) {
         const dayObj = daysRule[weekDay];
