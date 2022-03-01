@@ -1,4 +1,5 @@
 /* eslint-disable no-plusplus */
+import { isBefore, isToday } from 'date-fns';
 import { get, sortBy } from 'lodash';
 import moment from 'moment';
 import { slotTimes } from '../../../../../../constants';
@@ -535,16 +536,18 @@ const getSessionStatus = (session) => {
     /**
      * Checking If allotted session lies before current date.
      */
-    if (moment(get(session, 'bookingDate')).isBefore(new Date())) {
-      const currentSlot = new Date().getHours() || 0;
-      let sessionSlot = 23;
-      for (let i = 0; i < 24; i++) {
-        if (session[`slot${i}`]) {
-          sessionSlot = i;
+    if (isBefore(get(session, 'bookingDate'), new Date())) {
+      if (isToday(get(session, 'bookingDate'))) {
+        const currentSlot = new Date().getHours() || 0;
+        let sessionSlot = 23;
+        for (let i = 0; i < 24; i++) {
+          if (session[`slot${i}`]) {
+            sessionSlot = i;
+          }
         }
-      }
-      if (currentSlot < sessionSlot) {
-        return sessionStatus;
+        if (currentSlot < sessionSlot) {
+          return sessionStatus;
+        }
       }
       return 'unattended';
     }
@@ -706,7 +709,7 @@ const classroomSessions = (async (root, params, context) => {
   if (
     filters
     && get(filters, 'sessionStatus', []).length
-    && get(filters, 'sessionStatus', []).includes('unattended')
+    && (get(filters, 'sessionStatus', []).includes('unattended') || get(filters, 'sessionStatus', []).includes('allotted'))
   ) {
     return (transformedClassroomResult || []).filter((session) => {
       if (get(session, 'documentType') === 'event') {
