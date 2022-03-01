@@ -12,8 +12,8 @@ const AdhocSession = `
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
-      { appName: "${TLA}" operations: ${READ} },
-      { appName: "${TWA}" operations: ${READ} }
+      { appName: "${TWA}" operations: "*" },
+      { appName: "${TLA}" operations: ${READ} }
       ], 
     rule: allow
   )  

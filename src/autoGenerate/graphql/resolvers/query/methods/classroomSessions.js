@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 import { get, sortBy } from 'lodash';
 import moment from 'moment';
 import { slotTimes } from '../../../../../../constants';
@@ -509,7 +510,12 @@ const constructDocFilters = (filters) => {
   // }
   if (get(filters, 'sessionStatus', []).length) {
     sessionFilters.sessionStatus = {
-      $in: get(filters, 'sessionStatus'),
+      $in: get(filters, 'sessionStatus', []).map((status) => {
+        if (status === 'unattended') {
+          return 'allotted';
+        }
+        return status;
+      }),
     };
   }
   if (get(filters, 'courses', []).length) {
@@ -523,6 +529,30 @@ const constructDocFilters = (filters) => {
   };
 };
 
+const getSessionStatus = (session) => {
+  const sessionStatus = get(session, 'sessionStatus', 'allotted');
+  if (sessionStatus === 'allotted') {
+    /**
+     * Checking If allotted session lies before current date.
+     */
+    if (moment(get(session, 'bookingDate')).isBefore(new Date())) {
+      const currentSlot = new Date().getHours() || 0;
+      let sessionSlot = 23;
+      for (let i = 0; i < 24; i++) {
+        if (session[`slot${i}`]) {
+          sessionSlot = i;
+        }
+      }
+      if (currentSlot < sessionSlot) {
+        return sessionStatus;
+      }
+      return 'unattended';
+    }
+    return sessionStatus;
+  }
+  return sessionStatus;
+};
+
 const transformMongoResults = (batchSessions, adhocSessions, events) => {
   const finalResult = [];
   if (batchSessions && batchSessions.length) {
@@ -532,7 +562,7 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
         bookingDate: get(session, 'bookingDate', null),
         sessionStartDate: get(session, 'sessionStartDate', null),
         sessionEndDate: get(session, 'sessionEndDate', null),
-        sessionStatus: get(session, 'sessionStatus', 'allotted'),
+        sessionStatus: getSessionStatus(session),
         sessionMode: get(session, 'sessionMode', 'online'),
         sessionRecordingLink: get(session, 'sessionRecordingLink', null),
         attendance: get(session, 'attendance', []),
@@ -562,7 +592,7 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
         bookingDate: get(session, 'bookingDate', null),
         sessionStartDate: get(session, 'sessionStartDate', null),
         sessionEndDate: get(session, 'sessionEndDate', null),
-        sessionStatus: get(session, 'sessionStatus', 'allotted'),
+        sessionStatus: getSessionStatus(session),
         sessionMode: get(session, 'sessionMode', 'online'),
         sessionRecordingLink: get(session, 'sessionRecordingLink', null),
         attendance: get(session, 'attendance', []),
@@ -673,6 +703,21 @@ const classroomSessions = (async (root, params, context) => {
     events,
   );
 
+  if (
+    filters
+    && get(filters, 'sessionStatus', []).length
+    && get(filters, 'sessionStatus', []).includes('unattended')
+  ) {
+    return (transformedClassroomResult || []).filter((session) => {
+      if (get(session, 'documentType') === 'event') {
+        return true;
+      }
+      if (get(filters, 'sessionStatus', []).includes(get(session, 'sessionStatus'))) {
+        return true;
+      }
+      return false;
+    });
+  }
   return transformedClassroomResult || [];
 });
 
