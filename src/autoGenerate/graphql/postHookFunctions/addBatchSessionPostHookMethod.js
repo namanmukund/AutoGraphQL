@@ -17,6 +17,7 @@ import isTrialSession from '../resolvers/utils/isTrialSession';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
 import generateOtpForBatchSession from './utils/generateOtpForBatchSession';
+import getSlotDifference from './utils/getTimeDifference';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -206,7 +207,8 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
       pushManyQuery,
     ), context);
   }
-  generateOtpForBatchSession(batchSessionId, students);
+  const isBetweenTwoHrs = getSlotDifference(get(slotTimeStringArray, '[0]'), bookingDate, 2);
+  if (isBetweenTwoHrs) generateOtpForBatchSession(batchSessionId, students);
   const studentsId = (students && students.length) ? students.map((student) => get(student, 'id')) : [];
   extractBatchSessionAndSendB2BC(batchSessionId, studentsId, false);
   extractBatchSessionAndSendB2B(batchSessionId);
