@@ -199,5 +199,25 @@ const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, cours
   return true;
 };
 
+const getBatchSession = (batchId,
+  bookingDate,
+  slots) => `
+  {
+    batchSessions(filter:{
+      and:[
+        {batch_some:{id:"${batchId}"}}
+        {bookingDate: "${bookingDate}"}
+        {
+        and:[
+          ${slots}
+        ]
+      }
+      ]
+    }){
+      id
+    }
+  }
+`;
+
 /* eslint-disable object-curly-newline */
-export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession, getAdhocSessions, updateAdhocSession };
+export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession, getAdhocSessions, updateAdhocSession, getBatchSession };
