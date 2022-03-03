@@ -26,7 +26,7 @@ import getPossibleDates from '../../../../../../utils/getPossibleDates';
 import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import {
   getTopics, getBatchSessions, createBatchSession, updateBatchSession,
-  createAdhocSession, getAdhocSessions, updateAdhocSession,
+  createAdhocSession, getAdhocSessions, updateAdhocSession, getBatchSession,
 } from '../../../postHookFunctions/utils/updateBatchPostHookQueries';
 import {
   fetchBatch,
@@ -37,6 +37,7 @@ import {
   fetchBatchSession,
   fetchAdhocSession,
 } from './queries/scheduleSessionsQueries';
+import { SimilarDocumentAlreadyExistError } from '../../../../../../constants/errors/db';
 
 // method to sort batchSessions
 const sortBatchSessions = (batchSessions) => {
@@ -252,7 +253,7 @@ const scheduleSessionsMutationResolver = async (
   // nonRecurringslots passed in input (non-recurring)
   // for non recurring cases, we only consider first object in array as input
   const { ...nonRecurringslots } = get(scheduleSessionsRules, '[0]', {});
-  const { filteredSlotsString: nonRecurringfilteredSlotsString } = extractSlotsFromInput(nonRecurringslots);
+  const { filteredSlotsString: nonRecurringfilteredSlotsString, filteredSlotsStringForFilterQuery } = extractSlotsFromInput(nonRecurringslots);
 
   // to reschedule single session
   if (doReschedule && startDate) {
@@ -349,6 +350,11 @@ const scheduleSessionsMutationResolver = async (
 
     // if not recurring schedule, create singular batch session
     if (!isRecurring) {
+      const batchSessionRes = await callLocalGraphqlApi(getBatchSession(batchId, startDate, filteredSlotsStringForFilterQuery));
+      const existingBatchSessions = get(batchSessionRes, 'data.batchSessions', []);
+      if (existingBatchSessions.length) {
+        throw new SimilarDocumentAlreadyExistError();
+      }
       const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, sessionType);
       if (!(batchId && startDate && nonRecurringfilteredSlotsString && topicId && finalMentorSessionId && courseId)) {
         throw new InvalidScheduleParameters();

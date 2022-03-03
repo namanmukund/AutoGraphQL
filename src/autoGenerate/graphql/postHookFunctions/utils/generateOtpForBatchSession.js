@@ -4,6 +4,7 @@
 import { get } from 'lodash';
 import { log } from '../../../../../utils';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import { QueryController } from '../../controllers';
 import findSectionAndGradeCombination from './findSectionAndGradeCombination';
 import arrayCombinations from './generateOtpMap';
 
@@ -23,8 +24,55 @@ const addSchoolSessionOtp = async ({
   return get(result, 'data.addSchoolSessionOtp', null);
 };
 
+const getBatchSessionAggregation = ({
+  batchSessionId,
+}) => [
+  {
+    $match: {
+      id: batchSessionId,
+    },
+  },
+  {
+    $lookup: {
+      from: 'SchoolSessionOtp',
+      localField: 'schoolSessionsOtp.typeId',
+      foreignField: 'id',
+      as: 'schoolSessionOtp',
+    },
+  },
+  {
+    $project: {
+      id: 1,
+      bookingDate: 1,
+      schoolSessionOtp: {
+        id: 1,
+        grade: 1,
+        section: 1,
+        otp: 1,
+      },
+    },
+  },
+];
+
+const getTypeQueryController = (
+  typeName,
+  authentication = {
+    bypass: true,
+  },
+) => new QueryController(typeName, authentication);
+
+const batchSessionModel = getTypeQueryController(
+  'BatchSession',
+);
+
 const generateOtpForBatchSession = async (batchSessionId, students = []) => {
   if (students.length) {
+    const addOtpBatchSessions = await batchSessionModel.aggregate(
+      getBatchSessionAggregation({
+        batchSessionId,
+      }),
+    );
+    const schoolSessionOtpData = get(addOtpBatchSessions, '[0].schoolSessionOtp');
     const uniqueGradesArray = [];
     const uniqueSectionsArray = [];
     const otpMapArray = [];
@@ -34,7 +82,9 @@ const generateOtpForBatchSession = async (batchSessionId, students = []) => {
         if (!uniqueSectionsArray.includes(get(student, 'section'))) uniqueSectionsArray.push(get(student, 'section'));
         const gradeSectionCombination = findSectionAndGradeCombination(get(student, 'section'), get(student, 'grade'));
         const isExist = otpMapArray.find((otpObj) => otpObj.gradeSectionCombination === gradeSectionCombination);
-        if (!isExist) {
+        const isAlreadyCreated = schoolSessionOtpData.find((sessionOtp) => findSectionAndGradeCombination(get(sessionOtp, 'section'), get(sessionOtp, 'grade'))
+          === gradeSectionCombination);
+        if (!isExist && !isAlreadyCreated) {
           otpMapArray.push({
             grade: get(student, 'grade'),
             section: get(student, 'section'),
