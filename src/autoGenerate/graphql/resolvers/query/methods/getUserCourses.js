@@ -3,8 +3,6 @@ import { getFieldsBeingFetched } from '../../../../utils';
 import { QueryController } from '../../../controllers';
 import { OLD_COURSE_ID } from '../../../../../../constants';
 import { InvalidFieldType } from '../../../../../../constants/errors';
-import { log } from '../../../../../../utils';
-// import { log } from '../../../../../../utils';
 
 // query to get current component status of user.
 const getUserCurrentTopicComponentStatusAggregation = (userId, courseIds) => [
@@ -336,7 +334,7 @@ const getUserCourseCompletionAggregation = (userId) => [
 
 const validateIncomingFields = (fieldsFetched = {}) => {
   const whiteListedFields = ['id', 'title', 'order', 'thumbnail',
-    'secondaryCategory', 'currentTopic', 'isCourseCompleted'];
+    'secondaryCategory', 'currentTopic', 'isCourseCompleted', '__typename'];
 
   const fieldsFetchedArr = Object.keys(fieldsFetched);
   if (fieldsFetchedArr && fieldsFetchedArr.length) {
@@ -396,7 +394,6 @@ const getUserCourses = (async (root, params, context, info) => {
   const { input } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
-  log(`FIELDS ----> ${JSON.stringify(fieldsFetched)}`);
   await validateIncomingFields(fieldsFetched);
 
   // const redisClient = new RedisController({
