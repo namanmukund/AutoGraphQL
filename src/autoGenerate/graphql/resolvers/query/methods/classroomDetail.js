@@ -413,13 +413,15 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
   let notConductedTopics = [];
   const topicThumbnailSmalls = get(batchDetail, 'course.topicThumbnailSmall', []);
   topics.forEach((topic) => {
-    const addedTopics = sortedSessions.map((session) => (get(session, 'documentType') === 'adhocSession'
-      ? get(session, 'previousTopic.id') : get(session, 'topic.id')));
-    if (!addedTopics.includes(get(topic, 'id'))) {
-      const findThumbnail = topicThumbnailSmalls.find((thumbnail) => get(thumbnail, 'id') === get(topic, 'thumbnailSmall.typeId'));
-      // eslint-disable-next-line no-param-reassign
-      topic.thumbnailSmall = findThumbnail;
-      notConductedTopics.push(topic);
+    if (get(topic, 'status') === 'published') {
+      const addedTopics = sortedSessions.map((session) => (get(session, 'documentType') === 'adhocSession'
+        ? get(session, 'previousTopic.id') : get(session, 'topic.id')));
+      if (!addedTopics.includes(get(topic, 'id'))) {
+        const findThumbnail = topicThumbnailSmalls.find((thumbnail) => get(thumbnail, 'id') === get(topic, 'thumbnailSmall.typeId'));
+        // eslint-disable-next-line no-param-reassign
+        topic.thumbnailSmall = findThumbnail;
+        notConductedTopics.push(topic);
+      }
     }
   });
   notConductedTopics = sortBy(notConductedTopics, 'order');

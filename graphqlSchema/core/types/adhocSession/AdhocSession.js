@@ -1,8 +1,3 @@
-import { TLA, TMS, TWA } from '../../../../constants';
-import { READ } from '../../../../constants/graphqlOperations';
-import {
-  MENTOR, SALES_EXECUTIVE, SCHOOL_ADMIN, SENSEI, UMS_HEAD,
-} from '../../../../constants/roles';
 import getSlotTimeFields from '../../functions/getSlotTimeFields';
 
 const slotTimeFields = getSlotTimeFields('Boolean', false);

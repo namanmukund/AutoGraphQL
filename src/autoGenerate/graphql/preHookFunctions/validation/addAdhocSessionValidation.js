@@ -11,6 +11,7 @@ import {
   SessionMustBeCompletedError,
   MissingMandatoryInputInRequestError,
   PermissionDeniedError,
+  MentorIsInactiveError,
 } from '../../../../../constants/errors';
 import getMentorSessions from '../../../utils/getMentorSessions';
 import { checkIfSlotCanBeOpenedValidation } from './utils';
@@ -49,6 +50,9 @@ query{
     id
     user{
       id
+      mentorProfile{
+        isMentorActive
+      }
     }
   }
 }`;
@@ -118,6 +122,10 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
   const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
   const bookingDate = get(params, 'input.bookingDate', '');
+  const isMentorActive = get(fetchMentorRes, 'data.mentorSession.user.mentorProfile.isMentorActive');
+  if (!isMentorActive) {
+    throw new MentorIsInactiveError();
+  }
   if (mentorUserId && bookingDate) {
     const getMentorSessionsRes = await callLocalGraphqlApi(
       getMentorSessions(
