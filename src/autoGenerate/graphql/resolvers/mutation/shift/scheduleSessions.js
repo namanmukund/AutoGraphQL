@@ -353,8 +353,13 @@ const scheduleSessionsMutationResolver = async (
     if (!isRecurring) {
       const batchSessionRes = await callLocalGraphqlApi(getBatchSession(batchId, topicId));
       const existingBatchSessions = get(batchSessionRes, 'data.batchSessions', []);
+      const existingSessionDate = get(existingBatchSessions, '[0].bookingDate', null);
       if (existingBatchSessions.length) {
-        throw new SimilarDocumentAlreadyExistError();
+        throw new SimilarDocumentAlreadyExistError({
+          data: {
+            message: `Session with same topic for the same batch exists on ${moment(existingSessionDate).format('Do MMM YYYY')}.`,
+          },
+        });
       }
       const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, sessionType);
       if (!(batchId && startDate && nonRecurringfilteredSlotsString && topicId && finalMentorSessionId && courseId)) {
@@ -405,8 +410,13 @@ const scheduleSessionsMutationResolver = async (
     }
     const adhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, topicId));
     const existingAdhocSessions = get(adhocSessionRes, 'data.adhocSessions', []);
+    const existingSessionDate = get(existingAdhocSessions, '[0].bookingDate', null);
     if (existingAdhocSessions.length) {
-      throw new SimilarDocumentAlreadyExistError();
+      throw new SimilarDocumentAlreadyExistError({
+        data: {
+          message: `Session with same topic for the same batch exists on ${moment(existingSessionDate).format('Do MMM YYYY')}.`,
+        },
+      });
     }
     const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, sessionType);
     createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId);

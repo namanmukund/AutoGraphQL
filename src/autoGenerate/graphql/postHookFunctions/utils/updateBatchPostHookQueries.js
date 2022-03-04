@@ -209,6 +209,7 @@ const getBatchSession = (batchId,
       ]
     }){
       id
+      bookingDate
     }
   }
 `;
@@ -223,6 +224,7 @@ const getAdhocSession = (batchId,
       ]
     }){
       id
+      bookingDate
     }
   }
 `;
