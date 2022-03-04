@@ -213,5 +213,19 @@ const getBatchSession = (batchId,
   }
 `;
 
+const getAdhocSession = (batchId,
+  topicId) => `
+  {
+    adhocSessions(filter:{
+      and:[
+        {batch_some:{id:"${batchId}"}}
+        {previousTopic_some:{id: "${topicId}"}}
+      ]
+    }){
+      id
+    }
+  }
+`;
+
 /* eslint-disable object-curly-newline */
-export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession, getAdhocSessions, updateAdhocSession, getBatchSession };
+export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession, getAdhocSessions, updateAdhocSession, getBatchSession, getAdhocSession };

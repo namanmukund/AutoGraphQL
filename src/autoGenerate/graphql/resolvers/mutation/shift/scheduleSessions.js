@@ -27,6 +27,7 @@ import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/get
 import {
   getTopics, getBatchSessions, createBatchSession, updateBatchSession,
   createAdhocSession, getAdhocSessions, updateAdhocSession, getBatchSession,
+  getAdhocSession,
 } from '../../../postHookFunctions/utils/updateBatchPostHookQueries';
 import {
   fetchBatch,
@@ -401,6 +402,11 @@ const scheduleSessionsMutationResolver = async (
     // if adhoc and recurring, throw error
     if (isRecurring) {
       throw new InvalidScheduleParameters();
+    }
+    const adhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, topicId));
+    const existingAdhocSessions = get(adhocSessionRes, 'data.adhocSessions', []);
+    if (existingAdhocSessions.length) {
+      throw new SimilarDocumentAlreadyExistError();
     }
     const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, sessionType);
     createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId);
