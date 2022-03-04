@@ -328,3 +328,10 @@ export const EmailOrUsernameRequired = createError('EmailOrUsernameRequired', {
 export const CannotScheduleOutsideWorkingHoursError = createError('CannotScheduleOutsideWorkingHoursError', {
   message: 'Cannot Schedule Sessions outside working hours.',
 });
+
+export const MentorHasExistingSessionsError = createError('MentorHasExistingSessionsError', {
+  message: 'Mentor has existing sessions',
+});
+export const MentorIsInactiveError = createError(' MentorIsInactiveError', {
+  message: 'Mentor is not active',
+});
