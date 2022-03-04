@@ -350,7 +350,7 @@ const scheduleSessionsMutationResolver = async (
 
     // if not recurring schedule, create singular batch session
     if (!isRecurring) {
-      const batchSessionRes = await callLocalGraphqlApi(getBatchSession(batchId, startDate, filteredSlotsStringForFilterQuery));
+      const batchSessionRes = await callLocalGraphqlApi(getBatchSession(batchId, topicId));
       const existingBatchSessions = get(batchSessionRes, 'data.batchSessions', []);
       if (existingBatchSessions.length) {
         throw new SimilarDocumentAlreadyExistError();

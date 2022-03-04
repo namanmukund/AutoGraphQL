@@ -200,18 +200,12 @@ const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, cours
 };
 
 const getBatchSession = (batchId,
-  bookingDate,
-  slots) => `
+  topicId) => `
   {
     batchSessions(filter:{
       and:[
         {batch_some:{id:"${batchId}"}}
-        {bookingDate: "${bookingDate}"}
-        {
-        and:[
-          ${slots}
-        ]
-      }
+        {topic_some:{id: "${topicId}"}}
       ]
     }){
       id
