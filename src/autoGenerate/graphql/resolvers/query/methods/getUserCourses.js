@@ -3,6 +3,7 @@ import { getFieldsBeingFetched } from '../../../../utils';
 import { QueryController } from '../../../controllers';
 import { OLD_COURSE_ID } from '../../../../../../constants';
 import { InvalidFieldType } from '../../../../../../constants/errors';
+import { log } from '../../../../../../utils';
 // import { log } from '../../../../../../utils';
 
 // query to get current component status of user.
@@ -395,6 +396,7 @@ const getUserCourses = (async (root, params, context, info) => {
   const { input } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
+  log(`FIELDS ----> ${JSON.stringify(fieldsFetched)}`);
   await validateIncomingFields(fieldsFetched);
 
   // const redisClient = new RedisController({
