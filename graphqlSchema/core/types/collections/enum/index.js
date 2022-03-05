@@ -132,6 +132,7 @@ import NoticeType from './NoticeType';
 import ReviewType from './ReviewType';
 import ScheduleSessionType from './ScheduleSessionType';
 import SchoolTeacherAccessType from './SchoolTeacherAccessType';
+import SpokenLanguage from './SpokenLanguage';
 
 export default [
   Status,
@@ -269,4 +270,5 @@ export default [
   ReviewType,
   ScheduleSessionType,
   SchoolTeacherAccessType,
+  SpokenLanguage,
 ];
