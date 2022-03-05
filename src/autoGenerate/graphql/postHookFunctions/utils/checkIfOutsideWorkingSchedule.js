@@ -9,12 +9,12 @@ const checkIfOutsideWorkingSchedule = (combinedWorkingDaySchedule, combinedEvent
   // checking if days are within bounds
   if (!(moment(timeTableRule.startDate).isSameOrAfter(moment(combinedWorkingDaySchedule.startDate))
     && moment(timeTableRule.endDate).isSameOrBefore(moment(combinedWorkingDaySchedule.endDate)))) {
-    return true;
+    return { isOutsideWorkingSchedule: true, errorMessage: 'Given range does not lie within scheduled working hours.' };
   }
   // checking if weekdays or nonRecurringslots are outside scheduled working hours
   for (const weekDay of weekDays) {
     if (!combinedWorkingDaySchedule[weekDay] && daysRule[weekDay]) {
-      return true;
+      return { isOutsideWorkingSchedule: true, errorMessage: 'Given week day not in scheduled working hours.' };
     }
   }
   for (const slotTime of slotTimes) {
@@ -22,7 +22,9 @@ const checkIfOutsideWorkingSchedule = (combinedWorkingDaySchedule, combinedEvent
       for (const day in daysRule) {
         for (const rule in daysRule[day]) {
           if (rule[slotTime]) {
-            return true;
+            return {
+              isOutsideWorkingSchedule: true, errorMessage: 'Given time slots not in scheduled working hours.',
+            };
           }
         }
       }
@@ -39,14 +41,14 @@ const checkIfOutsideWorkingSchedule = (combinedWorkingDaySchedule, combinedEvent
         const dayObj = daysRule[weekDay];
         for (const slotTime of slotTimes) {
           if (combinedEventScheduleItem[slotTime] && dayObj[slotTime]) {
-            return true;
+            return { isOutsideWorkingSchedule: true, errorMessage: 'Event Scheduled at the same time.' };
           }
         }
       }
     }
   }
   // if inside working schedule
-  return false;
+  return { isOutsideWorkingSchedule: false, errorMessage: '' };
 };
 
 export default checkIfOutsideWorkingSchedule;

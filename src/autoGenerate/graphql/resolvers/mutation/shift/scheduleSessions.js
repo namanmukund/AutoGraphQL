@@ -331,9 +331,13 @@ const scheduleSessionsMutationResolver = async (
   const forceScheduleSessions = get(timeTableRule, 'forceScheduleSessions', false);
 
   if (!forceScheduleSessions && combinedWorkingDaySchedule.startDate) {
-    const isOutsideWorkingSchedule = checkIfOutsideWorkingSchedule(combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule);
+    const { isOutsideWorkingSchedule, errorMessage } = checkIfOutsideWorkingSchedule(combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule);
     if (isOutsideWorkingSchedule) {
-      throw new CannotScheduleOutsideWorkingHoursError();
+      throw new CannotScheduleOutsideWorkingHoursError({
+        data: {
+          message: errorMessage,
+        },
+      });
     }
   }
 
