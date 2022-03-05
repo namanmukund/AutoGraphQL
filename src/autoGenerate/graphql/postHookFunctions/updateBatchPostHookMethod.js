@@ -276,9 +276,13 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
     const { combinedWorkingDaySchedule, combinedEventScheduleArray } = getCombinedSchedules(batch);
 
     if (combinedWorkingDaySchedule.startDate && combinedWorkingDaySchedule.endDate) {
-      const isOutsideWorkingSchedule = checkIfOutsideWorkingSchedule(combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule);
+      const { isOutsideWorkingSchedule, errorMessage } = checkIfOutsideWorkingSchedule(combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule);
       if (isOutsideWorkingSchedule) {
-        throw new CannotScheduleOutsideWorkingHoursError();
+        throw new CannotScheduleOutsideWorkingHoursError({
+          data: {
+            message: errorMessage,
+          },
+        });
       }
     }
 
