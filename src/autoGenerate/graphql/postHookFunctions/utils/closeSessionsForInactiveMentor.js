@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import { get } from 'lodash';
+import moment from 'moment';
 import { log } from '../../../../../utils';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import getSelectedSlotsStringArray from './getSelectedSlotsStringArray';
@@ -11,7 +12,7 @@ const closeSessionsForInactiveMentor = async (input) => {
           filter: {
             and: [
               {
-                availabilityDate_gt: "${new Date().toISOString()}"
+                availabilityDate_gte: "${moment().startOf('day').toISOString()}"
               }
               {
                 user_some:{
@@ -28,7 +29,6 @@ const closeSessionsForInactiveMentor = async (input) => {
           availabilityDate
         }
       }`;
-
   const deleteMentorSessionQuery = (sessionId) => `
   mutation{
     deleteMentorSession(id:"${sessionId}"){
@@ -42,7 +42,7 @@ const closeSessionsForInactiveMentor = async (input) => {
   for (let i = 0; i < mentorSessions.length; i += 1) {
     const listOfTrueSlots = getSelectedSlotsStringArray(mentorSessions[i]);
     if (listOfTrueSlots.length) {
-      await callLocalGraphqlApi(deleteMentorSessionQuery(get(mentorSessions[i], 'id')));
+      callLocalGraphqlApi(deleteMentorSessionQuery(get(mentorSessions[i], 'id')));
       log(`deleted session id ${get(mentorSessions[i], 'id')}`);
     }
   }

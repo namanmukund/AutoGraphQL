@@ -1,4 +1,5 @@
 /* eslint-disable no-await-in-loop */
+import { get } from 'lodash';
 import { log } from '../../../../../utils';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
@@ -55,12 +56,12 @@ const closeMentorMenteeAndBatchSessionsForInactiveMentor = async (input) => {
   const batchSessions = get(res, 'data.batchSessions', []);
 
   for (let i = 0; i < mentorMenteeSessions.length; i += 1) {
-    await callLocalGraphqlApi(deleteMentorMenteeSessionQuery(get(mentorMenteeSessions[i], 'id')));
+    callLocalGraphqlApi(deleteMentorMenteeSessionQuery(get(mentorMenteeSessions[i], 'id')));
     log(`deleted mentorMenteeSession id ${get(mentorMenteeSessions[i], 'id')}`);
   }
 
   for (let i = 0; i < batchSessions.length; i += 1) {
-    await callLocalGraphqlApi(deleteBatchSessionQuery(get(batchSessions[i], 'id')));
+    callLocalGraphqlApi(deleteBatchSessionQuery(get(batchSessions[i], 'id')));
     log(`deleted batchSession id ${get(batchSessions[i], 'id')}`);
   }
 };
