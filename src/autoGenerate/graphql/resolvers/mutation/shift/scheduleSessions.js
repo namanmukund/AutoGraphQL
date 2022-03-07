@@ -223,7 +223,7 @@ const scheduleSessionsMutationResolver = async (
   const batchSessionId = get(timeTableRule, 'batchSessionId', '');
   const adhocSessionId = get(timeTableRule, 'adhocSessionId', '');
   const forceShiftSessions = get(timeTableRule, 'forceShiftSessions', false);
-  const sessionType = get(timeTableRule, 'type', 'batch');
+  const sessionType = get(timeTableRule, 'scheduleSessionType', 'batch');
 
   let batch = null;
   if (!doReschedule) {
@@ -365,7 +365,7 @@ const scheduleSessionsMutationResolver = async (
           },
         });
       }
-      const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, sessionType);
+      const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, 'batch');
       if (!(batchId && startDate && nonRecurringfilteredSlotsString && topicId && finalMentorSessionId && courseId)) {
         throw new InvalidScheduleParameters();
       }
@@ -412,7 +412,7 @@ const scheduleSessionsMutationResolver = async (
     if (isRecurring) {
       throw new InvalidScheduleParameters();
     }
-    const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, sessionType);
+    const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, 'batch');
     createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId);
   }
   return {
