@@ -159,7 +159,7 @@ const updateBatchSession = async (sessionId, slots, date, mentorSessionId, cours
   return true;
 };
 
-const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId, courseId) => {
+const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId, courseId, adhocSessionType) => {
   const query = `
           mutation{
             addAdhocSession(batchConnectId: "${batchId}",
@@ -168,6 +168,7 @@ const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId
             ${courseId ? `courseConnectId: "${courseId}"` : ''}
             input:{
               bookingDate:"${date}",
+              type: ${adhocSessionType}
               ${slots}
             }
             ){

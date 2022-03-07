@@ -223,7 +223,8 @@ const scheduleSessionsMutationResolver = async (
   const batchSessionId = get(timeTableRule, 'batchSessionId', '');
   const adhocSessionId = get(timeTableRule, 'adhocSessionId', '');
   const forceShiftSessions = get(timeTableRule, 'forceShiftSessions', false);
-  const sessionType = get(timeTableRule, 'type', 'batch');
+  const sessionType = get(timeTableRule, 'scheduleSessionType', 'batch');
+  const adhocSessionType = get(timeTableRule, 'adhocSessionType', 'revision');
 
   let batch = null;
   if (!doReschedule) {
@@ -365,7 +366,7 @@ const scheduleSessionsMutationResolver = async (
           },
         });
       }
-      const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, sessionType);
+      const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, 'batch');
       if (!(batchId && startDate && nonRecurringfilteredSlotsString && topicId && finalMentorSessionId && courseId)) {
         throw new InvalidScheduleParameters();
       }
@@ -412,18 +413,8 @@ const scheduleSessionsMutationResolver = async (
     if (isRecurring) {
       throw new InvalidScheduleParameters();
     }
-    const adhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, topicId));
-    const existingAdhocSessions = get(adhocSessionRes, 'data.adhocSessions', []);
-    const existingSessionDate = get(existingAdhocSessions, '[0].bookingDate', null);
-    if (existingAdhocSessions.length) {
-      throw new SimilarDocumentAlreadyExistError({
-        data: {
-          message: `Session with same topic for the same batch exists on ${moment(existingSessionDate).format('Do MMM YYYY')}.`,
-        },
-      });
-    }
-    const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, sessionType);
-    createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId);
+    const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, 'batch');
+    createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId, adhocSessionType);
   }
   return {
     result: true,
