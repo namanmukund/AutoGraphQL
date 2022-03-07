@@ -414,7 +414,7 @@ const scheduleSessionsMutationResolver = async (
       throw new InvalidScheduleParameters();
     }
     const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, 'batch');
-    createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId, adhocSessionType);
+    await createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId, adhocSessionType);
   }
   return {
     result: true,
