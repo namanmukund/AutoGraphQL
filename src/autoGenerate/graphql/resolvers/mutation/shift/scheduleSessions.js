@@ -224,6 +224,7 @@ const scheduleSessionsMutationResolver = async (
   const adhocSessionId = get(timeTableRule, 'adhocSessionId', '');
   const forceShiftSessions = get(timeTableRule, 'forceShiftSessions', false);
   const sessionType = get(timeTableRule, 'scheduleSessionType', 'batch');
+  const adhocSessionType = get(timeTableRule, 'adhocSessionType', 'revision');
 
   let batch = null;
   if (!doReschedule) {
@@ -413,7 +414,7 @@ const scheduleSessionsMutationResolver = async (
       throw new InvalidScheduleParameters();
     }
     const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseId, 'batch');
-    createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId);
+    createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId, adhocSessionType);
   }
   return {
     result: true,
