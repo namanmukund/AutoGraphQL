@@ -6,6 +6,7 @@ import { slotTimes } from '../../../../../../constants';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { ifAuthorized } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
+import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 
 const getSlotTimeFields = (session) => {
   const slotTimeObj = {};
@@ -22,10 +23,15 @@ const getSlotTimeFields = (session) => {
 const getBatchSessionAggregation = ({
   startDate,
   endDate,
-  mentorId,
+  mentorIds,
   docFilters = {},
-}) => [
-  {
+}) => { 
+  const mentorIdsFilter = {};
+  if (mentorIds.length) {
+    mentorIdsFilter['mentorSession.user.id'] = mentorIds;
+  }
+  return [
+    {
     $match: {
       bookingDate: {
         $gte: new Date(startDate),
@@ -193,7 +199,7 @@ const getBatchSessionAggregation = ({
   },
   {
     $match: {
-      'mentorSession.user.id': mentorId,
+      ...mentorIdsFilter,
       'classroom.documentType': 'classroom',
     },
   },
@@ -227,14 +233,19 @@ const getBatchSessionAggregation = ({
       ...docFilters,
     },
   },
-];
+]};
 
 const getAdhocSessionAggregation = ({
   startDate,
   endDate,
-  mentorId,
+  mentorIds,
   docFilters = {},
-}) => [
+}) => {
+  const mentorIdsFilter = {};
+  if (mentorIds.length) {
+    mentorIdsFilter['mentorSession.user.id'] = mentorIds;
+  }
+  return [
   {
     $match: {
       bookingDate: {
@@ -404,7 +415,7 @@ const getAdhocSessionAggregation = ({
   },
   {
     $match: {
-      'mentorSession.user.id': mentorId,
+       ...mentorIdsFilter,
       'classroom.documentType': 'classroom',
     },
   },
@@ -439,7 +450,7 @@ const getAdhocSessionAggregation = ({
       ...docFilters,
     },
   },
-];
+]};
 
 const getEventsScheduleAggregation = ({ startDate, endDate, schoolIds }) => [
   {
@@ -504,11 +515,11 @@ const constructDocFilters = (filters) => {
       $in: get(filters, 'sections', []),
     };
   }
-  // if (get(filters, 'schools', []).length) {
-  //   classroomFilters['classroom.schools.typeId'] = {
-  //     $in: get(filters, 'schools'),
-  //   };
-  // }
+  if (get(filters, 'schools', []).length) {
+    classroomFilters['classroom.school.typeId'] = {
+      $in: get(filters, 'schools'),
+    };
+  }
   if (get(filters, 'sessionStatus', []).length) {
     sessionFilters.sessionStatus = {
       $in: get(filters, 'sessionStatus', []).map((status) => {
@@ -646,10 +657,19 @@ const classroomSessions = (async (root, params, context) => {
   }
 
   const filters = get(params, 'filter', null);
-  const mentorId = get(filters, 'userId');
+  const mentorIds = get(filters, 'userIds');
+  const isAdmin = get(filters, 'isAdmin', 'false');
   const startDate = get(filters, 'startDate');
   const endDate = get(filters, 'endDate');
   const schoolIds = get(filters, 'schools', []);
+
+  if ((isAdmin && !schoolIds.length) || (!isAdmin && !mentorIds.length)) {
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'MentorId or School Id is missing in filter.',
+      },
+    });
+  }
   const batchSessionModel = getTypeQueryController(
     'BatchSession',
     authentication,
@@ -675,7 +695,7 @@ const classroomSessions = (async (root, params, context) => {
     getBatchSessionAggregation({
       startDate,
       endDate,
-      mentorId,
+      mentorIds,
       docFilters,
     }),
   );
@@ -684,7 +704,7 @@ const classroomSessions = (async (root, params, context) => {
     getAdhocSessionAggregation({
       startDate,
       endDate,
-      mentorId,
+      mentorIds,
       docFilters,
     }),
   );
