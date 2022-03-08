@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
@@ -41,7 +42,7 @@ const updateTimetableScheduleValidation = async (params) => {
     if (timetableSchedules.length > 0) {
       // delete all existing schedules
       for (const schedule of timetableSchedules) {
-        deleteTimetableSchedule(schedule.id);
+        await deleteTimetableSchedule(schedule.id);
       }
     }
   }
@@ -50,7 +51,7 @@ const updateTimetableScheduleValidation = async (params) => {
     if (timetableSchedules.length > 0) {
       // delete all existing schedules
       for (const schedule of timetableSchedules) {
-        deleteTimetableSchedule(schedule.id);
+        await deleteTimetableSchedule(schedule.id);
       }
     }
   }
