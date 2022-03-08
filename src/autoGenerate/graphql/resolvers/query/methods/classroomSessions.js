@@ -25,6 +25,7 @@ const getBatchSessionAggregation = ({
   endDate,
   mentorIds,
   docFilters = {},
+  classroomDocumentType,
 }) => {
   const mentorIdsFilter = {};
   if (mentorIds.length) {
@@ -200,7 +201,7 @@ const getBatchSessionAggregation = ({
     {
       $match: {
         ...mentorIdsFilter,
-        'classroom.documentType': 'classroom',
+        'classroom.documentType': `${classroomDocumentType}`,
       },
     },
     {
@@ -241,6 +242,7 @@ const getAdhocSessionAggregation = ({
   endDate,
   mentorIds,
   docFilters = {},
+  classroomDocumentType,
 }) => {
   const mentorIdsFilter = {};
   if (mentorIds.length) {
@@ -417,7 +419,7 @@ const getAdhocSessionAggregation = ({
     {
       $match: {
         ...mentorIdsFilter,
-        'classroom.documentType': 'classroom',
+        'classroom.documentType': `${classroomDocumentType}`,
       },
     },
     {
@@ -661,6 +663,7 @@ const classroomSessions = (async (root, params, context) => {
   const filters = get(params, 'filter', null);
   const mentorIds = get(filters, 'userIds');
   const isAdmin = get(filters, 'isAdmin', 'false');
+  const classroomDocumentType = get(filters, 'documentType', 'classroom');
   const startDate = get(filters, 'startDate');
   const endDate = get(filters, 'endDate');
   const schoolIds = get(filters, 'schools', []);
@@ -699,6 +702,7 @@ const classroomSessions = (async (root, params, context) => {
       endDate,
       mentorIds,
       docFilters,
+      classroomDocumentType,
     }),
   );
 
@@ -708,6 +712,7 @@ const classroomSessions = (async (root, params, context) => {
       endDate,
       mentorIds,
       docFilters,
+      classroomDocumentType,
     }),
   );
 
