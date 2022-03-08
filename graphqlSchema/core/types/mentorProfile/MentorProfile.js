@@ -33,6 +33,11 @@ const SessionReporting = `
  }
 `;
 
+const KnownLanguage = `
+type KnownLanguage{
+   value: SpokenLanguage
+}`;
+
 const MentorProfile = `
   type MentorProfile @model {
     user: User! @relation(name: "MentorProfileUser")
@@ -63,6 +68,7 @@ const MentorProfile = `
     sessionReporting: SessionReporting
     accessType: SchoolTeacherAccessType @defaultValue(value: "teacher")
     schoolClasses: [SchoolClass] @relation(name: "MentorProfileSchoolClass", direction: "OneWay")
+    knownLanguages:[KnownLanguage]
 }`;
 
-export default [MentorProfile, ScheduleManagement, ClassroomControl, CourseControl, SessionReporting];
+export default [MentorProfile, ScheduleManagement, ClassroomControl, CourseControl, SessionReporting, KnownLanguage];

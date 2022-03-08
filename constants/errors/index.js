@@ -87,6 +87,8 @@ import {
   SenseiProfileAlreadyExist,
   SpeakerProfileAlreadyExist,
   CannotScheduleOutsideWorkingHoursError,
+  MentorHasExistingSessionsError,
+  MentorIsInactiveError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -329,6 +331,8 @@ export {
   RegistrationClosedForEvent,
   EventCancelledError,
   CannotScheduleOutsideWorkingHoursError,
+  MentorHasExistingSessionsError,
+  MentorIsInactiveError,
   InvalidScheduleParameters,
   InvalidRescheduleParameters,
 };
