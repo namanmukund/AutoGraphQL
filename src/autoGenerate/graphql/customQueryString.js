@@ -25,3 +25,4 @@ const customQueryString = `
 `;
 
 export default customQueryString;
+//    menteeCourseHomework (courseId: ID): MenteeCourseHomework,
