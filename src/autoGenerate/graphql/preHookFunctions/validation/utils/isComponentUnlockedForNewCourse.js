@@ -10,7 +10,7 @@ import {
   PaidComponentLockedError,
 } from '../../../../../../constants/errors';
 import getUserCurrentTopicComponentStatusForNewCourse
-  from '../../../../utils/getUserCurrentTopicComponentStatusForNewCourse';
+from '../../../../utils/getUserCurrentTopicComponentStatusForNewCourse';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
 import {
   backendApps,
@@ -20,9 +20,9 @@ import {
 import getTopicForValidation from './getTopicForValidation';
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
 import getBatchCurrentComponentStatus
-  from '../../../../utils/getBatchCurrentComponentStatus';
+from '../../../../utils/getBatchCurrentComponentStatus';
 import validateMentorMenteePermissionForComponentForNewCourse
-  from './validateMentorMenteePermissionForComponentForNewCourse';
+from './validateMentorMenteePermissionForComponentForNewCourse';
 import { getMentorMenteeSessionForValidation } from './index';
 
 /*
