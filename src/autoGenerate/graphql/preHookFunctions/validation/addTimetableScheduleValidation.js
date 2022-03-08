@@ -9,7 +9,7 @@ const fetchTimetableSchedules = async (schoolConnectId, batchConnectIds) => {
         and: [
           {type: workingDay}
           ${batchConnectIds ? `{batch_some: {id_in: ${batchConnectIds}}}` : ''}
-          ${schoolConnectId ? `{school_some: {id: ${schoolConnectId}}}` : ''}
+          ${schoolConnectId ? `{school_some: {id: "${schoolConnectId}"}}` : ''}
         ]
       }){
         id
@@ -33,7 +33,7 @@ const deleteTimetableSchedule = async (scheduleId) => {
 };
 
 const addTimetableScheduleValidation = async (params) => {
-  const { batchConnectIds, schoolConnectId, input: { type } } = params;
+  const { batchConnectIds = [], schoolConnectId, input: { type } } = params;
   // check if working day connect id is passed and if one of the batches/schools has working day already in it
   if (type !== 'workingDay') return true;
   if (batchConnectIds.length > 0) {
