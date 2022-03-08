@@ -15,31 +15,6 @@ const USER_TYPE = 'User';
 
 const fetchUserForGradeSectionAndRollNum = (input, modelQueries) => modelQueries.fetchOne(input);
 
-// const getStudentClassDetails = async (otp) => {
-//   const query = `
-//   query{
-//     batchSessions(filter:{and:[
-//       {
-//         schoolSessionsOtp_some:{
-//           otp:${otp}
-//         }
-//       }
-//     ]}){
-//         schoolSessionsOtp{
-//           grade
-//           section
-//         }
-//       }
-//     }`;
-//   const result = await callLocalGraphqlApi(query);
-//   const studentDetails = get(
-//     result,
-//     'data.batchSessions[0].schoolSessionsOtp[0]',
-//     null,
-//   );
-//   return studentDetails;
-// };
-
 const getTypeQueryController = (
   typeName,
   authentication = {
@@ -51,26 +26,52 @@ const getBatchSessionAggregation = ({
   otp,
 }) => [
   {
+    $match: {
+      otp,
+    },
+  },
+  {
     $lookup: {
-      from: 'SchoolSessionOtp',
-      localField: 'schoolSessionsOtp.typeId',
-      foreignField: 'id',
-      as: 'schoolSessionOtp',
+      from: 'BatchSession',
+      let: {
+        batchSessionId: '$batchSession.typeId',
+      },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: ['$id', '$$batchSessionId'],
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: 'Batch',
+            localField: 'batch.typeId',
+            foreignField: 'id',
+            as: 'batch',
+          },
+        },
+        {
+          $project: {
+            batch: {
+              id: 1,
+            },
+          },
+        },
+      ],
+      as: 'batchSession',
     },
   },
   {
     $project: {
-      schoolSessionOtp: {
-        id: 1,
-        otp: 1,
-        grade: 1,
-        section: 1,
+      id: 1,
+      otp: 1,
+      grade: 1,
+      section: 1,
+      batchSession: {
+        $arrayElemAt: ['$batchSession', 0],
       },
-    },
-  },
-  {
-    $match: {
-      'schoolSessionOtp.otp': otp,
     },
   },
 ];
@@ -125,7 +126,7 @@ const signupOrLoginViaOtp = async (
   const rollNo = get(input, 'rollNo');
   const otp = get(input, 'otp');
   const batchSessionModel = getTypeQueryController(
-    'BatchSession',
+    'SchoolSessionOtp',
   );
   const otpExist = await batchSessionModel.aggregate(
     getBatchSessionAggregation({
@@ -133,16 +134,16 @@ const signupOrLoginViaOtp = async (
     }),
   );
   // if !studentdetails return false
-  if (!get(otpExist, '[0].schoolSessionOtp', []).length) {
+  if (!get(otpExist, '[0].otp')) {
     throw new OTPMismatchError();
   }
-  const sessionOtpObj = get(otpExist, '[0].schoolSessionOtp', []).find((sessionOtp) => get(sessionOtp, 'otp') === otp);
-  if (!sessionOtpObj) {
-    throw new OTPMismatchError();
-  }
-  const { section, grade } = sessionOtpObj;
+  const grade = get(otpExist, '[0].grade');
+  const section = get(otpExist, '[0].section');
+  const batchId = get(otpExist, '[0].batchSession.batch[0].id');
   const modelQueries = new QueryController('StudentProfile', authentication);
-  const studentProfile = await fetchUserForGradeSectionAndRollNum({ grade, section, rollNo }, modelQueries);
+  const studentProfile = await fetchUserForGradeSectionAndRollNum({
+    grade, section, rollNo, 'batch.typeId': batchId,
+  }, modelQueries);
   if (!studentProfile) {
     throw new RollNumberMismatchMessageError();
   }
