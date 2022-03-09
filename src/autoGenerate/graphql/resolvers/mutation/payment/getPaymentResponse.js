@@ -6,7 +6,7 @@ import {
   TransactionIdNotPresentError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation
-  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { MENTEE } from '../../../../../../constants/roles';
 import payUConfig from '../../../../../../config/payment/payUConfig';

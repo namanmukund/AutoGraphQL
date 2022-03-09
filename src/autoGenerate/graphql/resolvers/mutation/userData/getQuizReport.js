@@ -14,7 +14,7 @@ import {
 import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getUserIdandAppNameAfterValidation
-  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import { log } from '../../../../../../utils';
 
