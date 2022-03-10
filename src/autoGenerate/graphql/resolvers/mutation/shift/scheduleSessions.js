@@ -228,7 +228,7 @@ const scheduleSessionsMutationResolver = async (
   // validateAuthentication(context);
   const { input: timeTableRule } = params;
   const scheduleSessionsRules = get(timeTableRule, 'scheduleSessionsRules', []);
-  const courseId = get(timeTableRule, 'courseId');
+  let courseId = get(timeTableRule, 'courseId');
   const topicId = get(timeTableRule, 'topicId');
   const isRecurring = get(timeTableRule, 'isRecurring');
   const doReschedule = get(timeTableRule, 'doReschedule', false);
@@ -254,12 +254,15 @@ const scheduleSessionsMutationResolver = async (
   }
   const mentorUserId = get(batch, 'allottedMentor.id', '');
   const batchType = get(batch, 'type');
+  if (!courseId) {
+    courseId = get(batch, 'course.id', '');
+  }
 
   let startDate = timeTableRule.startDate ? new Date(timeTableRule.startDate) : null;
   if (startDate) {
     startDate.setHours(0, 0, 0, 0);
   }
-  const endDate = timeTableRule.endDate ? new Date(timeTableRule.endDate) : null;
+  let endDate = timeTableRule.endDate ? new Date(timeTableRule.endDate) : null;
   if (endDate) {
     endDate.setHours(0, 0, 0, 0);
   }
@@ -315,13 +318,16 @@ const scheduleSessionsMutationResolver = async (
         // if there exists some started or completed sessions, don't count them, create/update sessions for the remaining
         possibleSessionCount -= sessionsStartedOrCompleted.length;
       }
-      startDate = get(sessionsAllotted, '[0].bookingDate', new Date());
-
+      startDate = get(sessionsAllotted, '[1].bookingDate', new Date());
+      const endIndex = sessionsAllotted.length - 1;
+      endDate = get(sessionsAllotted, `[${endIndex}].bookingDate`, new Date());
+      endDate = moment(endDate).add(7, 'days').toDate();
       // let possibleDates = getPossibleDates(startDate, endDate, days);
       const possibleDates = await getPossileDatesFromRule(startDate, endDate, daysRule);
 
       // for the sessions which are still in the allotted state, update them
       const allottedSessionsCount = sessionsAllotted.length;
+
       if (allottedSessionsCount > 0) {
         possibleSessionCount -= allottedSessionsCount;
         updateAllottedBatchSessions(sessionsAllotted, possibleDates, mentorUserId, courseId, batchType);
@@ -413,6 +419,15 @@ const scheduleSessionsMutationResolver = async (
               createBatchSessions(batchId, possibleDates, possibleSessionCount, topics, mentorUserId, courseId, batchType);
             }
           });
+        } else {
+          if (possibleSessionCount > 0) {
+            // all the remaining sessions have to be created
+            const startFromIndex = allottedSessionsCount;
+            possibleDates = possibleDates.slice(startFromIndex);
+            const topicStartIndex = topicCount - possibleSessionCount;
+            topics = topics.splice(topicStartIndex);
+            createBatchSessions(batchId, possibleDates, possibleSessionCount, topics, mentorUserId, courseId, batchType);
+          }
         }
       } else {
         // if there are no exisiting batchSessions for the given batch id, create all of them
