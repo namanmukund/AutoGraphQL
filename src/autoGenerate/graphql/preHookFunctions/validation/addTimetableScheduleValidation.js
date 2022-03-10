@@ -37,7 +37,7 @@ const addTimetableScheduleValidation = async (params) => {
   const { batchConnectIds = [], schoolConnectId, input: { type } } = params;
   // check if working day connect id is passed and if one of the batches/schools has working day already in it
   if (type !== 'workingDay') return true;
-  if (batchConnectIds.length > 0) {
+  if (batchConnectIds.length > 0 && !schoolConnectId) {
     const timetableSchedules = await fetchTimetableSchedules(null, JSON.stringify(batchConnectIds));
     if (timetableSchedules.length > 0) {
       // delete all existing schedules
