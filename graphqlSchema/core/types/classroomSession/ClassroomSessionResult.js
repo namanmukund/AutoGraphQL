@@ -31,9 +31,9 @@ const ClassroomSessionTopic = `
     topicComponentRule: [TopicComponentsRule]
     topicAssignmentQuestionsCount: Int
     questionsQuizCount: Int
-    tools: [String]
-    programming: [String]
-    theory: [String]
+    tools: [ArrayValue]
+    programming: [ArrayValue]
+    theory: [ArrayValue]
   }
 `;
 
@@ -43,7 +43,7 @@ const ClassroomDetails = `
     code: String @uniqueOrEmpty @trim @uppercase
     classroomTitle: String!
     description: String
-    alottedMentor: User
+    allottedMentor: User
     classes: [SchoolClass] @relation(name: "ClassroomSchoolClass", direction: "OneWay")
     school: School @relation(name: "ClassroomSchool", direction: "OneWay")
     students: [StudentProfile] @relation(name: "ClassroomStudentProfile", direction: "OneWay")
