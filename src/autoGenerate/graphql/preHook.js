@@ -477,7 +477,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
           ...params,
         };
       }
-      // await updateMentorSessionValidation(newParams, mutationOrQueryName, context);
+      await updateMentorSessionValidation(newParams, mutationOrQueryName, context);
       return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     case 'deleteMentorSession': {

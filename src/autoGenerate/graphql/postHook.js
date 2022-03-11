@@ -160,7 +160,7 @@ const posthook = async (input, mutationName, context, params, info) => {
       break;
     }
     case 'updateMentorSession': {
-      // await updateMentorSessionPostHookMethod(input, mutationName, context);
+      await updateMentorSessionPostHookMethod(input, mutationName, context);
       break;
     }
     case 'updateMentorProfile': {
