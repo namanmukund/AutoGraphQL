@@ -128,6 +128,31 @@ const fetchBatchSession = async (batchSessionId) => {
     batchSession(id: "${batchSessionId}") {
       batch {
         id
+        allottedMentor{
+          id
+        }
+        course{
+          id
+        }
+        type
+        school {
+          timetableSchedule {
+            id
+            type
+            startDate
+            endDate
+            ${slotTimeFields}
+            ${weekDaysFields}
+          }
+        }
+        timetableSchedule {
+          id
+          type
+          startDate
+          endDate
+          ${slotTimeFields}
+          ${weekDaysFields}
+        }
       }
     }
   }
@@ -142,6 +167,28 @@ const fetchAdhocSession = async (adhocSessionId) => {
     adhocSession(id: "${adhocSessionId}") {
       batch {
         id
+        allottedMentor{
+          id
+        }
+        type
+        school {
+          timetableSchedule {
+            id
+            type
+            startDate
+            endDate
+            ${slotTimeFields}
+            ${weekDaysFields}
+          }
+        }
+        timetableSchedule {
+          id
+          type
+          startDate
+          endDate
+          ${slotTimeFields}
+          ${weekDaysFields}
+        }
       }
     }
   }
