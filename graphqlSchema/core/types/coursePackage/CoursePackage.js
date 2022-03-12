@@ -34,7 +34,9 @@ const CoursePackage = `
   )  
   {
     title: String! @length(min: 3, max: 100) @trim
+    internalName: String @trim
     bannerTitle: String
+    version: Int @defaultValue(value: 1)
     bannerDescription: String
     category: CourseCategory!
     description: String @length(min: 6, max: 1000) @trim
