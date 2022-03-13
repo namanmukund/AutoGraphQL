@@ -5,7 +5,7 @@ import moment from 'moment';
 import { weekDays, slotTimes } from '../../../../../constants';
 
 // method to check if given schedule will lie outside working hour schedule
-const checkIfOutsideWorkingSchedule = (combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule) => {
+const checkIfOutsideWorkingSchedule = async (combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule) => {
   // checking if days are within bounds
   if (!(moment(timeTableRule.startDate).isSameOrAfter(moment(combinedWorkingDaySchedule.startDate))
     && moment(timeTableRule.endDate).isSameOrBefore(moment(combinedWorkingDaySchedule.endDate)))) {
@@ -20,12 +20,10 @@ const checkIfOutsideWorkingSchedule = (combinedWorkingDaySchedule, combinedEvent
   for (const slotTime of slotTimes) {
     if (!combinedWorkingDaySchedule[slotTime]) {
       for (const day in daysRule) {
-        for (const rule in daysRule[day]) {
-          if (rule[slotTime]) {
-            return {
-              isOutsideWorkingSchedule: true, errorMessage: 'Given time slots not in scheduled working hours.',
-            };
-          }
+        if (daysRule[day][slotTime]) {
+          return {
+            isOutsideWorkingSchedule: true, errorMessage: 'Given time slots not in scheduled working hours.',
+          };
         }
       }
     }
