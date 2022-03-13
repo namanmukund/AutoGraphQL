@@ -1,6 +1,7 @@
 const MenteeCourseHomework = `
   type MenteeCourseHomework {
-    sessionStatus: SessionStatus! @defaultValue(value: "allotted")
+    id: ID
+    sessionStatus: SessionStatus @defaultValue(value: "allotted")
     assignmentSubmitDate: Date
     quizSubmitDate: Date
     isSubmittedForReview: Boolean @defaultValue(value: "false")
@@ -13,7 +14,7 @@ const MenteeCourseHomework = `
     isHomeworkCheckedByMentor: Boolean @defaultValue(value: "false")
     isReviewSubmittedOnTime: Boolean @defaultValue(value: "false")
     mentorMenteeSessionAvailable: Boolean @defaultValue(value: "false")
-    topic: Topic! @relation(name: "MentorMenteeSessionTopic", direction: "OneWay")
+    topic: Topic!
 }`;
 
 export default [MenteeCourseHomework];

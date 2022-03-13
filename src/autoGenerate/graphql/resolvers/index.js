@@ -689,7 +689,7 @@ resolvers.Query.getSchoolAndBatchDetail = getSchoolAndBatchDetail;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 // Resolver to retrieve homework status based on filters
-// resolvers.Query.menteeCourseHomework = menteeCourseHomework;
+resolvers.Query.menteeCourseHomework = menteeCourseHomework;
 
 // subscriptions
 resolvers.Subscription.userUpdated = injectSubscriptionWithCommonAsyncIterator(['USER_UPDATED']);
