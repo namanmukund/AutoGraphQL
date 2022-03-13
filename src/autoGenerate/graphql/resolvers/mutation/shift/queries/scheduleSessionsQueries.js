@@ -135,6 +135,24 @@ const fetchBatchSession = async (batchSessionId) => {
           id
         }
         type
+        school {
+          timetableSchedule {
+            id
+            type
+            startDate
+            endDate
+            ${slotTimeFields}
+            ${weekDaysFields}
+          }
+        }
+        timetableSchedule {
+          id
+          type
+          startDate
+          endDate
+          ${slotTimeFields}
+          ${weekDaysFields}
+        }
       }
     }
   }
@@ -153,6 +171,24 @@ const fetchAdhocSession = async (adhocSessionId) => {
           id
         }
         type
+        school {
+          timetableSchedule {
+            id
+            type
+            startDate
+            endDate
+            ${slotTimeFields}
+            ${weekDaysFields}
+          }
+        }
+        timetableSchedule {
+          id
+          type
+          startDate
+          endDate
+          ${slotTimeFields}
+          ${weekDaysFields}
+        }
       }
     }
   }

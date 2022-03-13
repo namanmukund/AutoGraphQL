@@ -272,6 +272,24 @@ const scheduleSessionsMutationResolver = async (
   const { ...nonRecurringslots } = get(scheduleSessionsRules, '[0]', {});
   const { filteredSlotsString: nonRecurringfilteredSlotsString, filteredSlotsStringForFilterQuery } = extractSlotsFromInput(nonRecurringslots);
 
+  // combine school and batch timetableschedules
+  const { combinedWorkingDaySchedule, combinedEventScheduleArray } = getCombinedSchedules(batch);
+
+  const daysRule = getScheduleSessionsRulesGroupedByDay(scheduleSessionsRules);
+
+  if (Object.keys(daysRule).length === 0) {
+    const dayIndex = moment(timeTableRule.startDate).day();
+    const dayMapping = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayVal = dayMapping[dayIndex];
+    daysRule[dayVal] = {};
+    for (const key2 in scheduleSessionsRules[0]) {
+      if ((key2.includes('slot') && scheduleSessionsRules[0][key2])
+        || (key2 === 'startTime' || key2 === 'endTime')) {
+        daysRule[dayVal][key2] = key2.includes('slot') ? true : scheduleSessionsRules[0][key2];
+      }
+    }
+  }
+
   // to reschedule single session
   if (doReschedule && startDate) {
     if (!adhocSessionId && !batchSessionId) {
@@ -289,6 +307,17 @@ const scheduleSessionsMutationResolver = async (
         log(`Shifting batch sessions before ${startDate.toISOString()} to after ${startDate.toISOString()}`);
         // callLocalGraphqlApi(shiftBatchSessionsAfterGivenDate(startDate, batchId, rescheduleSlots));
       }
+      if (!timeTableRule.endDate) {
+        timeTableRule.endDate = timeTableRule.startDate;
+      }
+      const { isOutsideWorkingSchedule, errorMessage } = await checkIfOutsideWorkingSchedule(combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule);
+      if (isOutsideWorkingSchedule) {
+        throw new CannotScheduleOutsideWorkingHoursError({
+          data: {
+            message: errorMessage,
+          },
+        });
+      }
       if (adhocSessionId) {
         await updateAdhocSession(adhocSessionId, nonRecurringfilteredSlotsString, startDate);
       } else {
@@ -300,7 +329,6 @@ const scheduleSessionsMutationResolver = async (
     };
   }
 
-  const daysRule = getScheduleSessionsRulesGroupedByDay(scheduleSessionsRules);
   const days = getSelectedDays(daysRule);
   let topics = await getTopics(courseId);
   const topicCount = topics && topics.length;
@@ -343,14 +371,14 @@ const scheduleSessionsMutationResolver = async (
     throw new InvalidScheduleParameters();
   }
 
-  // combine school and batch timetableschedules
-  const { combinedWorkingDaySchedule, combinedEventScheduleArray } = getCombinedSchedules(batch);
-
   // See if force flag is set to false or not sent in input
   const forceScheduleSessions = get(timeTableRule, 'forceScheduleSessions', false);
 
   if (!forceScheduleSessions && combinedWorkingDaySchedule.startDate) {
-    const { isOutsideWorkingSchedule, errorMessage } = checkIfOutsideWorkingSchedule(combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule);
+    if (!timeTableRule.endDate) {
+      timeTableRule.endDate = timeTableRule.startDate;
+    }
+    const { isOutsideWorkingSchedule, errorMessage } = await checkIfOutsideWorkingSchedule(combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule);
     if (isOutsideWorkingSchedule) {
       throw new CannotScheduleOutsideWorkingHoursError({
         data: {
