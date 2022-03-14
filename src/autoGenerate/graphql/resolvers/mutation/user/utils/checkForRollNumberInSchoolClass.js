@@ -13,6 +13,7 @@ const getSchoolClassAggregation = ({
   schoolId,
   section,
   grade,
+  rollNo,
 }) => [
   {
     $match: {
@@ -21,18 +22,44 @@ const getSchoolClassAggregation = ({
       grade,
     },
   },
+  // {
+  //   $lookup: {
+  //     from: 'StudentProfile',
+  //     localField: 'students.typeId',
+  //     foreignField: 'id',
+  //     as: 'students',
+  //   },
+  // },
   {
     $lookup: {
       from: 'StudentProfile',
-      localField: 'students.typeId',
-      foreignField: 'id',
+      let: {
+        studentProfileId: '$students.typeId',
+      },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $in: ['$id', '$$studentProfileId'],
+            },
+          },
+        },
+        {
+          $project: {
+            rollNo: 1,
+          },
+        },
+        {
+          $match: {
+            rollNo,
+          },
+        },
+      ],
       as: 'students',
     },
   },
   {
     $project: {
-      id: 1,
-      bookingDate: 1,
       students: {
         rollNo: 1,
       },
@@ -40,7 +67,7 @@ const getSchoolClassAggregation = ({
   },
 ];
 
-const checkForRollNumberInSchoolClass = async (grade, section, schoolId) => {
+const checkForRollNumberInSchoolClass = async (rollNo, grade, section, schoolId) => {
   const schoolClassModel = getTypeQueryController(
     'SchoolClass',
   );
