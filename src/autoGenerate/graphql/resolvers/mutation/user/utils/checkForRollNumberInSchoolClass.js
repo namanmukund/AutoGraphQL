@@ -22,14 +22,6 @@ const getSchoolClassAggregation = ({
       grade,
     },
   },
-  // {
-  //   $lookup: {
-  //     from: 'StudentProfile',
-  //     localField: 'students.typeId',
-  //     foreignField: 'id',
-  //     as: 'students',
-  //   },
-  // },
   {
     $lookup: {
       from: 'StudentProfile',
