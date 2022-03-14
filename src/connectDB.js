@@ -30,6 +30,7 @@ db.on('error', (err) => {
     createScheduler('sessionCourseReport');
     createScheduler('eventSessionRemainder');
     createScheduler('batchSessionOtpGeneration');
+    createScheduler('updateLeadSource');
     reRunJobsFromDB();
   }
 });

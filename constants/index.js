@@ -522,6 +522,10 @@ const EXCLUDE_NUMBER = ['7000287388'];
 
 const TIME_BEFORE_EVENT_CREATION = 1;
 
+const DAY_BEFORE_DEMO_COMPLETED = 5;
+
+const LEAD_PARTNERS_TO_CHECK_FOR_DEMO = ['virgo_india', 'ICCS'];
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -612,4 +616,6 @@ export {
   newTekieWebLinks,
   EXCLUDE_NUMBER,
   TIME_BEFORE_EVENT_CREATION,
+  DAY_BEFORE_DEMO_COMPLETED,
+  LEAD_PARTNERS_TO_CHECK_FOR_DEMO,
 };

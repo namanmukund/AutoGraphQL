@@ -261,7 +261,7 @@ const getCourseQuery = (courseId) => `
                   }
                 }
               ]
-            }
+            },
           ){
             id
             title
@@ -634,6 +634,9 @@ const getBatchSessionsAggregation = (batchId, courseId) => [
       },
       bookingDate: 1,
       sessionEndDate: 1,
+      topic: {
+        $arrayElemAt: ['$topic', 0],
+      },
       ...getSlotTimeFields(true),
     },
   },
@@ -1497,7 +1500,6 @@ const menteeCourseSyllabusMutationResolver = async (
           topicOrder >= lastTopicBookedOrder
         ) {
           const batchSessionArray = batchSessions && batchSessions.filter((item) => item.topic && item.topic.id === topicId);
-
           if (batchSessionArray && batchSessionArray.length) {
             const batchSession = batchSessionArray[0];
             let slotTime = null;
