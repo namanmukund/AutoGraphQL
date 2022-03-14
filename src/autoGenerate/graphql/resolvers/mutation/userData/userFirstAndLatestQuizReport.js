@@ -230,10 +230,16 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   /*
   Calling method to validate token and return userId.
   */
-  const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
-  const {
-    userIdFromContext: userId,
-  } = userAndAppInfo;
+  let { userIds } = params;
+  let userReceivedFromContext = false;
+  if (!userIds || !userIds.length) {
+    const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
+    const {
+      userIdFromContext,
+    } = userAndAppInfo;
+    userIds = [userIdFromContext];
+    userReceivedFromContext = true;
+  }
   const { topicId, courseId } = params;
   if (!topicId) {
     throw new DatabaseRecordNotFoundError({
@@ -243,129 +249,139 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     });
   }
 
-  if (!userId) {
-    throw new UnauthenticatedUserError();
-  }
+  const allUserReports = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for (const userId of userIds) {
+    if (!userId) {
+      throw new UnauthenticatedUserError();
+    }
 
-  // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
-  const batchRes = await callLocalGraphqlApi(
-    getBatchStatus(userId),
-    context,
-    '',
-  );
+    // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
+    /* eslint no-await-in-loop:0 */
+    const batchRes = await callLocalGraphqlApi(
+      getBatchStatus(userId),
+      context,
+      '',
+    );
 
-  const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+    const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+    /* eslint no-await-in-loop:0 */
+    const res = await callLocalGraphqlApi(
+      getUserCurrentTopicComponentStatus(userId, courseId),
+      context,
+      '',
+    );
 
-  const res = await callLocalGraphqlApi(
-    getUserCurrentTopicComponentStatus(userId, courseId),
-    context,
-    '',
-  );
+    const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
 
-  const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
+    // calling method to validate user current topic component status
+    validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
 
-  // calling method to validate user current topic component status
-  validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
+    // calling API to get data of fetched topic
+    /* eslint no-await-in-loop:0 */
+    const topicRes = await callLocalGraphqlApi(
+      getTopicQuery(topicId),
+      context,
+      '',
+    );
+    // getting info of called topic
+    const topicInfo = get(topicRes, 'data.topic');
+    if (!topicInfo) {
+      throw new DatabaseRecordNotFoundError({
+        data: {
+          error: 'Topic is not present',
+        },
+      });
+    }
+    let currentRunningTopic;
+    // let currentRunningTopicComponentType;
 
-  // calling API to get data of fetched topic
-  const topicRes = await callLocalGraphqlApi(
-    getTopicQuery(topicId),
-    context,
-    '',
-  );
-  // getting info of called topic
-  const topicInfo = get(topicRes, 'data.topic');
-  if (!topicInfo) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'Topic is not present',
-      },
+    // if user belongs to a batch, quiz report will be calculated on basis of batchCurrentComponentStatus
+    if (batchCurrentComponentInfo) {
+      currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
+    } else {
+      currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
+      // currentRunningTopicComponentType = currentTopicComponentInfo && currentTopicComponentInfo.currentTopicComponentType;
+    }
+    if (!courseId || courseId === OLD_COURSE_ID) {
+      /* eslint no-lonely-if:0 */
+      if (topicInfo.order >= currentRunningTopic.order) {
+        throw new ComponentLockedError();
+      }
+    } else {
+      /* eslint no-lonely-if:0 */
+      if (topicInfo.order > currentRunningTopic.order) {
+        throw new ComponentLockedError();
+      }
+    }
+    // else {
+    //   if (topicInfo.order > currentRunningTopic.order) {
+    //     throw new ComponentLockedError();
+    //   } else if (topicInfo.order === currentRunningTopic.order) {
+    //     if (!batchCurrentComponentInfo && currentRunningTopicComponentType !== 'quiz') {
+    //       throw new ComponentLockedError();
+    //     }
+    //   }
+    // }
+    // If not equal then check if not quiz and throw eror ( allow for batch )
+    // this object will be returned in output
+    const userQuizReportData = {};
+    let parsedLatestQuizReport;
+    let parsedFirstQuizReport;
+    /* eslint no-await-in-loop:0 */
+    const quizRes = await callLocalGraphqlApi(
+      getQuizReportQuery(userId, topicId),
+      context,
+      '',
+    );
+    const quizInfo = get(quizRes, 'data.userQuizReports');
+    // Constructing data for first and latest quiz report
+    if (quizInfo.length) {
+      const latestQuizReport = quizInfo[0];
+      parsedLatestQuizReport = parseQuizReport(latestQuizReport);
+      parsedLatestQuizReport.quizReportNumber = 'latest';
+      if (quizInfo.length > 1) {
+        const firstQuizReport = quizInfo[quizInfo.length - 1];
+        parsedFirstQuizReport = parseQuizReport(firstQuizReport);
+        parsedFirstQuizReport.quizReportNumber = 'first';
+      }
+    }
+    /*
+    We are getting latest user quiz through this query.
+    Then we will get next published topic
+    */
+    let nextComponentData = {};
+    if (!courseId || courseId === OLD_COURSE_ID) {
+      /* eslint no-await-in-loop:0 */
+      const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId));
+      const nextTopicId = get(userQuizQueryRes, 'data.userQuizs[0].nextComponent.topic.id');
+
+      const { video } = topicTypes;
+      // parsing data for next topic
+      const nextTopicData = { type: 'Topic', typeId: `${nextTopicId}` };
+      nextComponentData = {
+        topic: nextTopicData,
+        nextComponentType: video,
+      };
+    }
+    // parsing data for topic
+    const topicData = { type: 'Topic', typeId: `${topicInfo.id}` };
+    // parsing data for user
+    const userData = { type: 'User', typeId: `${userId}` };
+
+    // Constructing data as per schema
+    Object.assign(userQuizReportData, {
+      topic: topicData,
+      user: userData,
+      firstQuizReport: parsedFirstQuizReport,
+      latestQuizReport: parsedLatestQuizReport,
+      nextComponent: nextComponentData,
     });
+    allUserReports.push(userQuizReportData);
   }
-  let currentRunningTopic;
-  // let currentRunningTopicComponentType;
 
-  // if user belongs to a batch, quiz report will be calculated on basis of batchCurrentComponentStatus
-  if (batchCurrentComponentInfo) {
-    currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
-  } else {
-    currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
-    // currentRunningTopicComponentType = currentTopicComponentInfo && currentTopicComponentInfo.currentTopicComponentType;
-  }
-  if (!courseId || courseId === OLD_COURSE_ID) {
-    /* eslint no-lonely-if:0 */
-    if (topicInfo.order >= currentRunningTopic.order) {
-      throw new ComponentLockedError();
-    }
-  } else {
-    /* eslint no-lonely-if:0 */
-    if (topicInfo.order > currentRunningTopic.order) {
-      throw new ComponentLockedError();
-    }
-  }
-  // else {
-  //   if (topicInfo.order > currentRunningTopic.order) {
-  //     throw new ComponentLockedError();
-  //   } else if (topicInfo.order === currentRunningTopic.order) {
-  //     if (!batchCurrentComponentInfo && currentRunningTopicComponentType !== 'quiz') {
-  //       throw new ComponentLockedError();
-  //     }
-  //   }
-  // }
-  // If not equal then check if not quiz and throw eror ( allow for batch )
-  // this object will be returned in output
-  const userQuizReportData = {};
-  let parsedLatestQuizReport;
-  let parsedFirstQuizReport;
-  const quizRes = await callLocalGraphqlApi(
-    getQuizReportQuery(userId, topicId),
-    context,
-    '',
-  );
-  const quizInfo = get(quizRes, 'data.userQuizReports');
-  // Constructing data for first and latest quiz report
-  if (quizInfo.length) {
-    const latestQuizReport = quizInfo[0];
-    parsedLatestQuizReport = parseQuizReport(latestQuizReport);
-    parsedLatestQuizReport.quizReportNumber = 'latest';
-    if (quizInfo.length > 1) {
-      const firstQuizReport = quizInfo[quizInfo.length - 1];
-      parsedFirstQuizReport = parseQuizReport(firstQuizReport);
-      parsedFirstQuizReport.quizReportNumber = 'first';
-    }
-  }
-  /*
-  We are getting latest user quiz through this query.
-  Then we will get next published topic
-  */
-  let nextComponentData = {};
-  if (!courseId || courseId === OLD_COURSE_ID) {
-    const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId));
-    const nextTopicId = get(userQuizQueryRes, 'data.userQuizs[0].nextComponent.topic.id');
-
-    const { video } = topicTypes;
-    // parsing data for next topic
-    const nextTopicData = { type: 'Topic', typeId: `${nextTopicId}` };
-    nextComponentData = {
-      topic: nextTopicData,
-      nextComponentType: video,
-    };
-  }
-  // parsing data for topic
-  const topicData = { type: 'Topic', typeId: `${topicInfo.id}` };
-  // parsing data for user
-  const userData = { type: 'User', typeId: `${userId}` };
-
-  // Constructing data as per schema
-  Object.assign(userQuizReportData, {
-    topic: topicData,
-    user: userData,
-    firstQuizReport: parsedFirstQuizReport,
-    latestQuizReport: parsedLatestQuizReport,
-    nextComponent: nextComponentData,
-  });
-
-  return userQuizReportData;
+  if (userReceivedFromContext) return allUserReports[0];
+  return allUserReports;
 };
 
 export default userFirstAndLatestQuizReportMutationResolver;

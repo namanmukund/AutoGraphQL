@@ -26,23 +26,6 @@ const getBatchSessionAggregation = ({
     },
   },
   {
-    $project: {
-      id: 1,
-      bookingDate: 1,
-      sessionStartDate: 1,
-      sessionEndDate: 1,
-      sessionStatus: 1,
-      sessionMode: 1,
-      sessionRecordingLink: 1,
-      batch: 1,
-      topic: 1,
-      course: 1,
-      mentorSession: 1,
-      attendance: 1,
-      ...getSlotTimeFields(),
-    },
-  },
-  {
     $lookup: {
       from: 'Topic',
       let: { topicId: '$topic.typeId' },
@@ -102,6 +85,14 @@ const getBatchSessionAggregation = ({
     },
   },
   {
+    $lookup: {
+      from: 'SchoolSessionOtp',
+      localField: 'schoolSessionsOtp.typeId',
+      foreignField: 'id',
+      as: 'schoolSessionOtp',
+    },
+  },
+  {
     $project: {
       id: 1,
       bookingDate: 1,
@@ -115,6 +106,11 @@ const getBatchSessionAggregation = ({
       },
       course: 1,
       attendance: 1,
+      schoolSessionOtp: {
+        grade: 1,
+        section: 1,
+        otp: 1,
+      },
       ...getSlotTimeFields(),
     },
   },
@@ -343,6 +339,7 @@ const getBatchAggregation = ({ batchId }) => [
       },
       createdAt: 1,
       thumbnailSmall: 1,
+      customSessionLink: 1,
       classes: {
         id: 1,
         grade: 1,
@@ -384,6 +381,7 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
           topicAssignmentQuestionsCount: get(session, 'topic.topicAssignmentQuestions', []).length,
         },
         previousTopic: null,
+        sessionOtp: get(session, 'schoolSessionOtp'),
       });
     });
   }
@@ -415,13 +413,15 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
   let notConductedTopics = [];
   const topicThumbnailSmalls = get(batchDetail, 'course.topicThumbnailSmall', []);
   topics.forEach((topic) => {
-    const addedTopics = sortedSessions.map((session) => (get(session, 'documentType') === 'adhocSession'
-      ? get(session, 'previousTopic.id') : get(session, 'topic.id')));
-    if (!addedTopics.includes(get(topic, 'id'))) {
-      const findThumbnail = topicThumbnailSmalls.find((thumbnail) => get(thumbnail, 'id') === get(topic, 'thumbnailSmall.typeId'));
-      // eslint-disable-next-line no-param-reassign
-      topic.thumbnailSmall = findThumbnail;
-      notConductedTopics.push(topic);
+    if (get(topic, 'status') === 'published') {
+      const addedTopics = sortedSessions.map((session) => (get(session, 'documentType') === 'adhocSession'
+        ? get(session, 'previousTopic.id') : get(session, 'topic.id')));
+      if (!addedTopics.includes(get(topic, 'id'))) {
+        const findThumbnail = topicThumbnailSmalls.find((thumbnail) => get(thumbnail, 'id') === get(topic, 'thumbnailSmall.typeId'));
+        // eslint-disable-next-line no-param-reassign
+        topic.thumbnailSmall = findThumbnail;
+        notConductedTopics.push(topic);
+      }
     }
   });
   notConductedTopics = sortBy(notConductedTopics, 'order');
@@ -445,7 +445,7 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
       previousTopic: null,
     });
   });
-  const { course } = batchDetail;
+  const course = get(batchDetail, 'course');
   const returnedObj = {
     id: get(batchDetail, 'id'),
     classroomDetail: {
@@ -471,6 +471,7 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
     },
     createdAt: get(batchDetail, 'createdAt'),
     batchThumbnail: get(batchDetail, 'thumbnailSmall'),
+    customSessionLink: get(batchDetail, 'customSessionLink', ''),
   };
   return returnedObj;
 };

@@ -10,6 +10,12 @@ type ClassroomCourse {
   theory: [ArrayValue]
 }`;
 
+const BatchClass = `
+type BatchClass {
+  grade: Grade
+  section: Section
+}`;
+
 const ClassroomDetailResult = `
   type ClassroomDetailResult {
     id: String!
@@ -22,10 +28,21 @@ const ClassroomDetailResult = `
     classroomCourse: ClassroomCourse
     createdAt: Date
     batchThumbnail:String
+    customSessionLink: String
+  }
+`;
+
+const BatchAndSchoolResult = `
+  type BatchAndSchoolResult {
+    batchId: ID
+    schoolId: ID
+    batchClasses: [BatchClass]
   }
 `;
 
 export default [
   ClassroomDetailResult,
   ClassroomCourse,
+  BatchAndSchoolResult,
+  BatchClass,
 ];

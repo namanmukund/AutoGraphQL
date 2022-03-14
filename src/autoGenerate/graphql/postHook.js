@@ -67,6 +67,7 @@ import updateTaskPostHookMethod from './postHookFunctions/updateTaskPostHookMeth
 import updateEventPostHookMethod from './postHookFunctions/updateEventPostHookMethod';
 import addEventPostHookMethod from './postHookFunctions/addEventPostHookMethod';
 import fetchEventPostHookMethod from './postHookFunctions/fetchEventPostHookMethod';
+import updateMentorProfilePostHookMethod from './postHookFunctions/updateMentorProfilePostHookMethod';
 // import updateEventSessionPostHookMethod from './postHookFunctions/updateEventSessionPostHookMethod';
 // import addEventSessionPostHookMethod from './postHookFunctions/addEventSessionPostHookMethod';
 
@@ -160,6 +161,10 @@ const posthook = async (input, mutationName, context, params, info) => {
     }
     case 'updateMentorSession': {
       await updateMentorSessionPostHookMethod(input, mutationName, context);
+      break;
+    }
+    case 'updateMentorProfile': {
+      await updateMentorProfilePostHookMethod(input, params);
       break;
     }
     case 'addStudentProfile': {

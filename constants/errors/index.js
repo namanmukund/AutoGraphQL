@@ -87,6 +87,8 @@ import {
   SenseiProfileAlreadyExist,
   SpeakerProfileAlreadyExist,
   CannotScheduleOutsideWorkingHoursError,
+  MentorHasExistingSessionsError,
+  MentorIsInactiveError,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -150,6 +152,8 @@ import {
   BannerFieldRequiredError,
   CanNotDeleteCompletedSessionError,
   CanNotStartSessionWithoutMentorError,
+  InvalidScheduleParameters,
+  InvalidRescheduleParameters,
 } from './input';
 
 // assessment validation sqs  profile apolloErrorPackageTest maxSync transcoder
@@ -327,4 +331,8 @@ export {
   RegistrationClosedForEvent,
   EventCancelledError,
   CannotScheduleOutsideWorkingHoursError,
+  MentorHasExistingSessionsError,
+  MentorIsInactiveError,
+  InvalidScheduleParameters,
+  InvalidRescheduleParameters,
 };

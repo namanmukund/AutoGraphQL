@@ -1,14 +1,9 @@
-import getSlotTimeFields from '../../../functions/getSlotTimeFields';
-import getWeekDaysFields from '../../../functions/getWeekDaysFields';
-
-const slotTimeFields = getSlotTimeFields('Boolean', false);
-const weekDaysFields = getWeekDaysFields('Boolean', false);
-
 const ScheduleSessionsInput = `
   input ScheduleSessionsInput {
     scheduleSessionType: ScheduleSessionType
-    ${slotTimeFields}
-    ${weekDaysFields}
+    adhocSessionType: AdhocSessionType
+    scheduleSessionsRules: [ScheduleSessionsRule]
+    sessionMode: ClassMode
     startDate: Date
     endDate: Date
     batchId: String
@@ -17,7 +12,10 @@ const ScheduleSessionsInput = `
     forceShiftSessions: Boolean @defaultValue(value: "false")
     forceScheduleSessions: Boolean @defaultValue(value: "false")
     isRecurring: Boolean @defaultValue(value: "false")
+    doReschedule: Boolean @defaultValue(value: "false")
+    adhocSessionId: String
+    batchSessionId: String
   }
 `;
 
-export default ScheduleSessionsInput;
+export default [ScheduleSessionsInput];

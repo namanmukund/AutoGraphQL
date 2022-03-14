@@ -268,7 +268,7 @@ const sendEventCommunication = async ({
       const newPhoneNumber = get(commsObj, 'parentPhone').replace('+', '');
       callSendWhatsappTemplateInQueue(newPhoneNumber,
         templateName,
-        newPhoneNumber,
+        commsObj.parentName,
         whatsappCommsVariablesList, {
           templateName,
           triggeredAt: new Date(),
@@ -344,7 +344,7 @@ const sendEventCommunication = async ({
         const newPhoneNumber = get(commsObj, 'parentPhone').replace('+', '');
         callSendWhatsappTemplateInQueue(newPhoneNumber,
           templateName,
-          newPhoneNumber,
+          commsObj.parentName,
           whatsappCommsVariablesList, {
             templateName,
             triggeredAt: new Date(),
@@ -427,7 +427,7 @@ const sendEventCommunication = async ({
           const newPhoneNumber = get(commsObj, 'parentPhone').replace('+', '');
           callSendWhatsappTemplateInQueue(newPhoneNumber,
             templateName,
-            newPhoneNumber,
+            commsObj.parentName,
             whatsappCommsVariablesList, {
               templateName,
               triggeredAt: new Date(),
@@ -509,7 +509,7 @@ const sendEventCommunication = async ({
           const newPhoneNumber = get(commsObj, 'parentPhone').replace('+', '');
           callSendWhatsappTemplateInQueue(newPhoneNumber,
             templateName,
-            newPhoneNumber,
+            commsObj.parentName,
             whatsappCommsVariablesList, {
               templateName,
               triggeredAt: new Date(),

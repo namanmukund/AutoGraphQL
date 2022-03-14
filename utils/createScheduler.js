@@ -6,6 +6,7 @@ import scheduleSessionCourseReport from './scheduleJobs/scheduleCourseReport';
 import scheduleB2BSessionReminder from './scheduleJobs/scheduleB2BSessionReminder';
 import scheduleB2BSessionHomeworkRemainder from './scheduleJobs/scheduleB2BSessionHomeworkRemainder';
 import scheduleEventSessionRemainder from './scheduleJobs/scheduleEventSessionRemainder';
+import scheduleBatchSessionOtpGenerator from './scheduleJobs/secheduleBatchSessionOtpGenerator';
 import scheduleUpdateLeadSource from './scheduleJobs/scheduleUpdateLeadSource';
 
 // create scheduler for different functionalities
@@ -89,6 +90,17 @@ const createScheduler = (schedulerName) => {
         // eslint-disable-next-line no-console
         console.log('scheduler started for: ', schedulerName);
         await scheduleEventSessionRemainder();
+      });
+      break;
+    case 'batchSessionOtpGeneration':
+      rule.tz = 'Asia/Kolkata';
+      rule.minute = 25;
+      rule.dayOfWeek = new schedule.Range(0, 6);
+      // eslint-disable-next-line no-unused-vars
+      schedule.scheduleJob(rule, async () => {
+        // eslint-disable-next-line no-console
+        console.log('scheduler started for: ', schedulerName);
+        await scheduleBatchSessionOtpGenerator();
       });
       break;
     case 'updateLeadSource':

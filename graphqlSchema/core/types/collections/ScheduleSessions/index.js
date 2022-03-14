@@ -1,3 +1,4 @@
 import ScheduleSessionsInput from './ScheduleSessionsInput';
+import ScheduleSessionsRule from './ScheduleSessionsRule';
 
-export default [ScheduleSessionsInput];
+export default [...ScheduleSessionsInput, ...ScheduleSessionsRule];

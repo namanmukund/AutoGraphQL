@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { PermissionDeniedError } from '../../../../../constants/errors';
+import { PermissionDeniedError, MentorIsInactiveError } from '../../../../../constants/errors';
 import {
   ADMIN, UMS_ADMIN, MENTOR, UMS_VIEWER,
 } from '../../../../../constants/roles';
@@ -49,6 +49,9 @@ query{
     id
     user{
       id
+      mentorProfile{
+        isMentorActive
+      }
     }
   }
 }`;
@@ -86,7 +89,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
       },
     });
   }
-
+  
 
   // getting user role from context. We will allow adding batchSession if logged in user is admin
   const userInfo = validateTokenAndExtractInformation(context, false);
@@ -115,6 +118,11 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
     const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
     const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
     const bookingDate = get(params, 'input.bookingDate', '');
+    const isMentorActive = get(fetchMentorRes,'data.mentorSession.user.mentorProfile.isMentorActive')
+    if(!isMentorActive){
+      throw new MentorIsInactiveError()
+    }
+  
     if (mentorUserId && bookingDate) {
       const getMentorSessionsRes = await callLocalGraphqlApi(
         getMentorSessions(

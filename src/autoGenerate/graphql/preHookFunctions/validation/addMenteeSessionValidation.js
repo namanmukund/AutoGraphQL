@@ -6,7 +6,7 @@ import {
   ADMIN, UMS_ADMIN, MENTOR, UMS_VIEWER, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN,
   LEAD_PARTNER,
 } from '../../../../../constants/roles';
-import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, backendApps } from '../../../../../constants';
+import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, backendApps, TWA } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import validateMenteeSessionInput, { getHoursDiff } from './utils/validateMenteeSessionInput';
@@ -90,8 +90,10 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
       }
     }
   }
-  // validate input
-  await validateMenteeSessionInput(params, context, userRoleFromContext);
+  // validate input if call is not from TMS, allowing user to add session, added flow for batch student
+  if (appName !== TWA) {
+    await validateMenteeSessionInput(params, context, userRoleFromContext);
+  }
   const allowedRoles = [ADMIN, UMS_ADMIN, UMS_VIEWER, MENTOR, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN, LEAD_PARTNER];
 
   context.userIdFromContext = userIdFromContext;

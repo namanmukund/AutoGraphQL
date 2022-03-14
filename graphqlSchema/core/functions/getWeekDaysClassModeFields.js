@@ -6,7 +6,7 @@ const getWeekDaysClassModeFields = (
 ) => {
   let weekDaysClassModeFields = '';
   weekDays.forEach((day) => {
-    weekDaysClassModeFields += excludeType ? `${day}ClassMode` : `${day}ClassMode: ${fieldType} `;
+    weekDaysClassModeFields += excludeType ? `${day}ClassMode\n` : `${day}ClassMode: ${fieldType} `;
   });
   return weekDaysClassModeFields;
 };
