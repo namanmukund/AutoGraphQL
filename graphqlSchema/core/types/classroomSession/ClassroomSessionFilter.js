@@ -1,7 +1,16 @@
 const ClassroomSessionFilter = `
   input ClassroomSessionFilter {
-    # User ID*
-    userId: String!
+    # User IDs
+    userIds: [String]
+
+    # Filter By Schools
+    schools: [ID]
+
+    # Is Admin
+    isAdmin: Boolean @defaultValue(value: "false")
+
+    # Document Type*
+    documentType: SessionDocumentType @defaultValue(value: "classroom")
 
     # Starting Booking Date*  
     startDate: Date!
@@ -20,9 +29,6 @@ const ClassroomSessionFilter = `
 
     # Filter By Session Status
     sessionStatus: [ClassroomSessionStatus]
-
-    # Filter By Schools
-    schools: [ID]
   }
 `;
 
