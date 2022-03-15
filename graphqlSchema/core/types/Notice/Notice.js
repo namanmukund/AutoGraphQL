@@ -10,7 +10,7 @@ const Notice = `
   {
     type: NoticeType!
     sentBy: User! @relation(name: "NoticeSentByUser", direction: "OneWay")
-    sentTo: [User]! @relation(name: "NoticeSentToUser", direction: "OneWay")
+    sentTo: [User] @relation(name: "NoticeSentToUser", direction: "OneWay")
     attachedFiles: [NoticeAttachment] @relation(name: "NoticeAttachmentAttachedFile", direction: "OneWay")
     message: String!
     scheduledAt: Date
