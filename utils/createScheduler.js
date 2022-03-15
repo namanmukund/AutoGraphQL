@@ -93,7 +93,7 @@ const createScheduler = (schedulerName) => {
       break;
     case 'updateLeadSource':
       rule.tz = 'Asia/Kolkata';
-      rule.hour = 12;
+      rule.hour = 13;
       rule.minute = 0;
       rule.dayOfWeek = new schedule.Range(0, 6);
       // eslint-disable-next-line no-unused-vars
