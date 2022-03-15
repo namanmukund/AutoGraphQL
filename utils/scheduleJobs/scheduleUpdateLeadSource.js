@@ -119,6 +119,7 @@ const scheduleUpdateLeadSource = async () => {
   const users = await userModal.aggregate(
     getUserAggregation({ startDate, endDate }),
   );
+  console.log(startDate, endDate, '=====updating utmSource');
   let updatedUserIds = [];
   for (const user of users) {
     const parentPhone = get(user, 'phone.number');
