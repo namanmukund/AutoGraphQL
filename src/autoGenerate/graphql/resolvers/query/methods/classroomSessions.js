@@ -29,7 +29,7 @@ const getBatchSessionAggregation = ({
 }) => {
   const mentorIdsFilter = {};
   if (mentorIds && mentorIds.length) {
-    mentorIdsFilter["mentorSession.user.id"] = {
+    mentorIdsFilter['mentorSession.user.id'] = {
       $in: mentorIds,
     };
   }
@@ -250,7 +250,7 @@ const getAdhocSessionAggregation = ({
   if (mentorIds && mentorIds.length) {
     mentorIdsFilter['mentorSession.user.id'] = {
       $in: mentorIds,
-    }
+    };
   }
   return [
     {
