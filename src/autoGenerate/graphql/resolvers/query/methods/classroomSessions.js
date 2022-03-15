@@ -28,8 +28,10 @@ const getBatchSessionAggregation = ({
   documentType,
 }) => {
   const mentorIdsFilter = {};
-  if (mentorIds.length) {
-    mentorIdsFilter['mentorSession.user.id'] = mentorIds;
+  if (mentorIds && mentorIds.length) {
+    mentorIdsFilter["mentorSession.user.id"] = {
+      $in: mentorIds,
+    };
   }
   return [
     {
@@ -245,8 +247,10 @@ const getAdhocSessionAggregation = ({
   documentType,
 }) => {
   const mentorIdsFilter = {};
-  if (mentorIds.length) {
-    mentorIdsFilter['mentorSession.user.id'] = mentorIds;
+  if (mentorIds && mentorIds.length) {
+    mentorIdsFilter['mentorSession.user.id'] = {
+      $in: mentorIds,
+    }
   }
   return [
     {
