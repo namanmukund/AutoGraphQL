@@ -10,17 +10,21 @@ import { MissingMandatoryInputInRequestError } from '../../../../../../constants
 const getEventWinners = async (eventId) => {
   const query = `{
   eventWinners(filter: { event_some: { id: "${eventId}" } }) {
+    prize{
+      id
+      title
+      minRank
+      maxRank
+    }
     studentProfile {
       user {
-        id
+        name
         profilePic {
-          id
           uri
         }
       }
     }
     image {
-      id
       uri
     }
   }
@@ -52,20 +56,36 @@ const getEventWinner = (async (root, params, context, info) => {
     }
   }
   const winners = await getEventWinners(get(params, 'eventId'));
-  const winnersResponse = [];
+  let winnersResponse = [];
   if (winners && winners.length) {
     winners.forEach((winner) => {
-      let picture = '';
-      if (get(winner, 'image.id')) {
-        picture = { type: 'File', typeId: `${get(winner, 'image.id')}` };
-      } else if (get(winner, 'studentProfile.user.profilePic.id')) {
-        picture = { type: 'File', typeId: `${get(winner, 'studentProfile.user.profilePic.id')}` };
+      let profilePicUrl = '';
+      if (get(winner, 'image.uri')) profilePicUrl = get(winner, 'image.uri');
+      else profilePicUrl = get(winner, 'studentProfile.user.profilePic.uri');
+      const { minRank } = get(winner, 'prize');
+      let prizeCount = minRank;
+      const prizeId = get(winner, 'prize.id');
+      const prizeAddedArr = winnersResponse.filter((res) => get(res, 'prizeId') === prizeId);
+      if (prizeAddedArr.length) {
+        const lastPrizeCount = get(prizeAddedArr.pop(), 'prizeCount');
+        prizeCount = lastPrizeCount + 1;
       }
       winnersResponse.push({
-        profilePic: picture,
-        user: { type: 'User', typeId: `${get(winner, 'studentProfile.user.id')}` },
+        userName: get(winner, 'studentProfile.user.name'),
+        profilePicUrl,
+        prizeTitle: get(winner, 'prize.title'),
+        prizeCount,
+        prizeId: get(winner, 'prize.id'),
       });
     });
+    winnersResponse = winnersResponse.map(({
+      userName, profilePicUrl, prizeTitle, prizeCount,
+    }) => ({
+      userName,
+      profilePicUrl,
+      prizeTitle,
+      prizeCount,
+    }));
   }
   return winnersResponse;
 });

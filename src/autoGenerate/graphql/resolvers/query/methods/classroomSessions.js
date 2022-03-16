@@ -6,6 +6,7 @@ import { slotTimes } from '../../../../../../constants';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { ifAuthorized } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
+import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 
 const getSlotTimeFields = (session) => {
   const slotTimeObj = {};
@@ -22,424 +23,442 @@ const getSlotTimeFields = (session) => {
 const getBatchSessionAggregation = ({
   startDate,
   endDate,
-  mentorId,
+  mentorIds,
   docFilters = {},
-}) => [
-  {
-    $match: {
-      bookingDate: {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
+  documentType,
+}) => {
+  const mentorIdsFilter = {};
+  if (mentorIds && mentorIds.length) {
+    mentorIdsFilter['mentorSession.user.id'] = {
+      $in: mentorIds,
+    };
+  }
+  return [
+    {
+      $match: {
+        bookingDate: {
+          $gte: new Date(startDate),
+          $lte: new Date(endDate),
+        },
       },
     },
-  },
-  {
-    $project: {
-      id: 1,
-      bookingDate: 1,
-      sessionStartDate: 1,
-      sessionEndDate: 1,
-      sessionStatus: 1,
-      startMinutes: 1,
-      endMinutes: 1,
-      sessionMode: 1,
-      sessionRecordingLink: 1,
-      batch: 1,
-      topic: 1,
-      course: 1,
-      mentorSession: 1,
-      attendance: 1,
-      ...getSlotTimeFields(),
+    {
+      $project: {
+        id: 1,
+        bookingDate: 1,
+        sessionStartDate: 1,
+        sessionEndDate: 1,
+        sessionStatus: 1,
+        startMinutes: 1,
+        endMinutes: 1,
+        sessionMode: 1,
+        sessionRecordingLink: 1,
+        batch: 1,
+        topic: 1,
+        course: 1,
+        mentorSession: 1,
+        attendance: 1,
+        ...getSlotTimeFields(),
+      },
     },
-  },
-  {
-    $lookup: {
-      from: 'Batch',
-      let: { batchId: '$batch.typeId' },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: ['$id', '$$batchId'],
+    {
+      $lookup: {
+        from: 'Batch',
+        let: { batchId: '$batch.typeId' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$id', '$$batchId'],
+              },
             },
           },
-        },
-        {
-          $lookup: {
-            from: 'SchoolClass',
-            localField: 'classes.typeId',
-            foreignField: 'id',
-            as: 'classes',
+          {
+            $lookup: {
+              from: 'SchoolClass',
+              localField: 'classes.typeId',
+              foreignField: 'id',
+              as: 'classes',
+            },
           },
-        },
-        {
-          $project: {
-            id: 1,
-            code: 1,
-            classroomTitle: 1,
-            description: 1,
-            school: 1,
-            students: 1,
-            classes: {
+          {
+            $project: {
               id: 1,
-              grade: 1,
-              section: 1,
+              code: 1,
+              classroomTitle: 1,
+              description: 1,
+              school: 1,
+              students: 1,
+              classes: {
+                id: 1,
+                grade: 1,
+                section: 1,
+              },
+              documentType: 1,
             },
-            documentType: 1,
           },
-        },
-      ],
-      as: 'classroom',
+        ],
+        as: 'classroom',
+      },
     },
-  },
-  {
-    $lookup: {
-      from: 'Topic',
-      let: { topicId: '$topic.typeId' },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: ['$id', '$$topicId'],
+    {
+      $lookup: {
+        from: 'Topic',
+        let: { topicId: '$topic.typeId' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$id', '$$topicId'],
+              },
             },
           },
-        },
-        {
-          $lookup: {
-            from: 'File',
-            let: {
-              thumbnailId: '$thumbnailSmall.typeId',
-            },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: ['$id', '$$thumbnailId'],
+          {
+            $lookup: {
+              from: 'File',
+              let: {
+                thumbnailId: '$thumbnailSmall.typeId',
+              },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: ['$id', '$$thumbnailId'],
+                    },
                   },
                 },
-              },
-              {
-                $project: {
-                  id: 1,
-                  uri: 1,
-                  name: 1,
-                },
-              },
-            ],
-            as: 'thumbnailSmall',
-          },
-        },
-        {
-          $project: {
-            id: 1,
-            order: 1,
-            title: 1,
-            description: 1,
-            thumbnailSmall: {
-              $arrayElemAt: ['$thumbnailSmall', 0],
-            },
-          },
-        },
-      ],
-      as: 'topic',
-    },
-  },
-  {
-    $lookup: {
-      from: 'MentorSession',
-      let: { mentorSessionId: '$mentorSession.typeId' },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: ['$id', '$$mentorSessionId'],
-            },
-          },
-        },
-        {
-          $lookup: {
-            from: 'User',
-            let: { userId: '$user.typeId' },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: ['$id', '$$userId'],
+                {
+                  $project: {
+                    id: 1,
+                    uri: 1,
+                    name: 1,
                   },
                 },
-              },
-              {
-                $project: {
-                  id: 1,
-                  name: 1,
-                  role: 1,
-                  email: 1,
-                },
-              },
-            ],
-            as: 'mentorUser',
-          },
-        },
-        {
-          $project: {
-            user: {
-              $arrayElemAt: ['$mentorUser', 0],
+              ],
+              as: 'thumbnailSmall',
             },
           },
+          {
+            $project: {
+              id: 1,
+              order: 1,
+              title: 1,
+              description: 1,
+              thumbnailSmall: {
+                $arrayElemAt: ['$thumbnailSmall', 0],
+              },
+            },
+          },
+        ],
+        as: 'topic',
+      },
+    },
+    {
+      $lookup: {
+        from: 'MentorSession',
+        let: { mentorSessionId: '$mentorSession.typeId' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$id', '$$mentorSessionId'],
+              },
+            },
+          },
+          {
+            $lookup: {
+              from: 'User',
+              let: { userId: '$user.typeId' },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: ['$id', '$$userId'],
+                    },
+                  },
+                },
+                {
+                  $project: {
+                    id: 1,
+                    name: 1,
+                    role: 1,
+                    email: 1,
+                  },
+                },
+              ],
+              as: 'mentorUser',
+            },
+          },
+          {
+            $project: {
+              user: {
+                $arrayElemAt: ['$mentorUser', 0],
+              },
+            },
+          },
+        ],
+        as: 'mentorSession',
+      },
+    },
+    {
+      $match: {
+        ...mentorIdsFilter,
+        'classroom.documentType': documentType,
+      },
+    },
+    {
+      $project: {
+        id: 1,
+        bookingDate: 1,
+        sessionStartDate: 1,
+        sessionEndDate: 1,
+        sessionStatus: 1,
+        sessionMode: 1,
+        startMinutes: 1,
+        endMinutes: 1,
+        sessionRecordingLink: 1,
+        classroom: {
+          $arrayElemAt: ['$classroom', 0],
         },
-      ],
-      as: 'mentorSession',
-    },
-  },
-  {
-    $match: {
-      'mentorSession.user.id': mentorId,
-      'classroom.documentType': 'classroom',
-    },
-  },
-  {
-    $project: {
-      id: 1,
-      bookingDate: 1,
-      sessionStartDate: 1,
-      sessionEndDate: 1,
-      sessionStatus: 1,
-      sessionMode: 1,
-      startMinutes: 1,
-      endMinutes: 1,
-      sessionRecordingLink: 1,
-      classroom: {
-        $arrayElemAt: ['$classroom', 0],
+        mentorSession: {
+          $arrayElemAt: ['$mentorSession', 0],
+        },
+        topic: {
+          $arrayElemAt: ['$topic', 0],
+        },
+        course: 1,
+        attendance: 1,
+        ...getSlotTimeFields(),
       },
-      mentorSession: {
-        $arrayElemAt: ['$mentorSession', 0],
-      },
-      topic: {
-        $arrayElemAt: ['$topic', 0],
-      },
-      course: 1,
-      attendance: 1,
-      ...getSlotTimeFields(),
     },
-  },
-  {
-    $match: {
-      ...docFilters,
+    {
+      $match: {
+        ...docFilters,
+      },
     },
-  },
-];
+  ];
+};
 
 const getAdhocSessionAggregation = ({
   startDate,
   endDate,
-  mentorId,
+  mentorIds,
   docFilters = {},
-}) => [
-  {
-    $match: {
-      bookingDate: {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
+  documentType,
+}) => {
+  const mentorIdsFilter = {};
+  if (mentorIds && mentorIds.length) {
+    mentorIdsFilter['mentorSession.user.id'] = {
+      $in: mentorIds,
+    };
+  }
+  return [
+    {
+      $match: {
+        bookingDate: {
+          $gte: new Date(startDate),
+          $lte: new Date(endDate),
+        },
       },
     },
-  },
-  {
-    $project: {
-      id: 1,
-      bookingDate: 1,
-      sessionStartDate: 1,
-      sessionEndDate: 1,
-      sessionStatus: 1,
-      sessionMode: 1,
-      startMinutes: 1,
-      endMinutes: 1,
-      sessionRecordingLink: 1,
-      type: 1,
-      batch: 1,
-      previousTopic: 1,
-      course: 1,
-      mentorSession: 1,
-      attendance: 1,
-      ...getSlotTimeFields(),
+    {
+      $project: {
+        id: 1,
+        bookingDate: 1,
+        sessionStartDate: 1,
+        sessionEndDate: 1,
+        sessionStatus: 1,
+        sessionMode: 1,
+        startMinutes: 1,
+        endMinutes: 1,
+        sessionRecordingLink: 1,
+        type: 1,
+        batch: 1,
+        previousTopic: 1,
+        course: 1,
+        mentorSession: 1,
+        attendance: 1,
+        ...getSlotTimeFields(),
+      },
     },
-  },
-  {
-    $lookup: {
-      from: 'Batch',
-      let: { batchId: '$batch.typeId' },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: ['$id', '$$batchId'],
+    {
+      $lookup: {
+        from: 'Batch',
+        let: { batchId: '$batch.typeId' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$id', '$$batchId'],
+              },
             },
           },
-        },
-        {
-          $lookup: {
-            from: 'SchoolClass',
-            localField: 'classes.typeId',
-            foreignField: 'id',
-            as: 'classes',
+          {
+            $lookup: {
+              from: 'SchoolClass',
+              localField: 'classes.typeId',
+              foreignField: 'id',
+              as: 'classes',
+            },
           },
-        },
-        {
-          $project: {
-            id: 1,
-            code: 1,
-            classroomTitle: 1,
-            description: 1,
-            school: 1,
-            students: 1,
-            classes: {
+          {
+            $project: {
               id: 1,
-              grade: 1,
-              section: 1,
+              code: 1,
+              classroomTitle: 1,
+              description: 1,
+              school: 1,
+              students: 1,
+              classes: {
+                id: 1,
+                grade: 1,
+                section: 1,
+              },
+              documentType: 1,
             },
-            documentType: 1,
           },
-        },
-      ],
-      as: 'classroom',
+        ],
+        as: 'classroom',
+      },
     },
-  },
-  {
-    $lookup: {
-      from: 'Topic',
-      let: { topicId: '$previousTopic.typeId' },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: ['$id', '$$topicId'],
+    {
+      $lookup: {
+        from: 'Topic',
+        let: { topicId: '$previousTopic.typeId' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$id', '$$topicId'],
+              },
             },
           },
-        },
-        {
-          $lookup: {
-            from: 'File',
-            let: {
-              thumbnailId: '$thumbnailSmall.typeId',
-            },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: ['$id', '$$thumbnailId'],
+          {
+            $lookup: {
+              from: 'File',
+              let: {
+                thumbnailId: '$thumbnailSmall.typeId',
+              },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: ['$id', '$$thumbnailId'],
+                    },
                   },
                 },
-              },
-              {
-                $project: {
-                  id: 1,
-                  uri: 1,
-                  name: 1,
-                },
-              },
-            ],
-            as: 'thumbnailSmall',
-          },
-        },
-        {
-          $project: {
-            id: 1,
-            order: 1,
-            title: 1,
-            description: 1,
-            thumbnailSmall: {
-              $arrayElemAt: ['$thumbnailSmall', 0],
-            },
-          },
-        },
-      ],
-      as: 'previousTopic',
-    },
-  },
-  {
-    $lookup: {
-      from: 'MentorSession',
-      let: { mentorSessionId: '$mentorSession.typeId' },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: ['$id', '$$mentorSessionId'],
-            },
-          },
-        },
-        {
-          $lookup: {
-            from: 'User',
-            let: { userId: '$user.typeId' },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: ['$id', '$$userId'],
+                {
+                  $project: {
+                    id: 1,
+                    uri: 1,
+                    name: 1,
                   },
                 },
-              },
-              {
-                $project: {
-                  id: 1,
-                  name: 1,
-                  role: 1,
-                  email: 1,
-                },
-              },
-            ],
-            as: 'mentorUser',
-          },
-        },
-        {
-          $project: {
-            user: {
-              $arrayElemAt: ['$mentorUser', 0],
+              ],
+              as: 'thumbnailSmall',
             },
           },
+          {
+            $project: {
+              id: 1,
+              order: 1,
+              title: 1,
+              description: 1,
+              thumbnailSmall: {
+                $arrayElemAt: ['$thumbnailSmall', 0],
+              },
+            },
+          },
+        ],
+        as: 'previousTopic',
+      },
+    },
+    {
+      $lookup: {
+        from: 'MentorSession',
+        let: { mentorSessionId: '$mentorSession.typeId' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$id', '$$mentorSessionId'],
+              },
+            },
+          },
+          {
+            $lookup: {
+              from: 'User',
+              let: { userId: '$user.typeId' },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: ['$id', '$$userId'],
+                    },
+                  },
+                },
+                {
+                  $project: {
+                    id: 1,
+                    name: 1,
+                    role: 1,
+                    email: 1,
+                  },
+                },
+              ],
+              as: 'mentorUser',
+            },
+          },
+          {
+            $project: {
+              user: {
+                $arrayElemAt: ['$mentorUser', 0],
+              },
+            },
+          },
+        ],
+        as: 'mentorSession',
+      },
+    },
+    {
+      $match: {
+        ...mentorIdsFilter,
+        'classroom.documentType': documentType,
+      },
+    },
+    {
+      $project: {
+        id: 1,
+        bookingDate: 1,
+        sessionStartDate: 1,
+        sessionEndDate: 1,
+        sessionStatus: 1,
+        sessionMode: 1,
+        type: 1,
+        startMinutes: 1,
+        endMinutes: 1,
+        sessionRecordingLink: 1,
+        classroom: {
+          $arrayElemAt: ['$classroom', 0],
         },
-      ],
-      as: 'mentorSession',
-    },
-  },
-  {
-    $match: {
-      'mentorSession.user.id': mentorId,
-      'classroom.documentType': 'classroom',
-    },
-  },
-  {
-    $project: {
-      id: 1,
-      bookingDate: 1,
-      sessionStartDate: 1,
-      sessionEndDate: 1,
-      sessionStatus: 1,
-      sessionMode: 1,
-      type: 1,
-      startMinutes: 1,
-      endMinutes: 1,
-      sessionRecordingLink: 1,
-      classroom: {
-        $arrayElemAt: ['$classroom', 0],
+        mentorSession: {
+          $arrayElemAt: ['$mentorSession', 0],
+        },
+        previousTopic: {
+          $arrayElemAt: ['$previousTopic', 0],
+        },
+        course: 1,
+        attendance: 1,
+        ...getSlotTimeFields(),
       },
-      mentorSession: {
-        $arrayElemAt: ['$mentorSession', 0],
-      },
-      previousTopic: {
-        $arrayElemAt: ['$previousTopic', 0],
-      },
-      course: 1,
-      attendance: 1,
-      ...getSlotTimeFields(),
     },
-  },
-  {
-    $match: {
-      ...docFilters,
+    {
+      $match: {
+        ...docFilters,
+      },
     },
-  },
-];
+  ];
+};
 
 const getEventsScheduleAggregation = ({ startDate, endDate, schoolIds }) => [
   {
@@ -504,11 +523,11 @@ const constructDocFilters = (filters) => {
       $in: get(filters, 'sections', []),
     };
   }
-  // if (get(filters, 'schools', []).length) {
-  //   classroomFilters['classroom.schools.typeId'] = {
-  //     $in: get(filters, 'schools'),
-  //   };
-  // }
+  if (get(filters, 'schools', []).length) {
+    classroomFilters['classroom.school.typeId'] = {
+      $in: get(filters, 'schools'),
+    };
+  }
   if (get(filters, 'sessionStatus', []).length) {
     sessionFilters.sessionStatus = {
       $in: get(filters, 'sessionStatus', []).map((status) => {
@@ -646,10 +665,20 @@ const classroomSessions = (async (root, params, context) => {
   }
 
   const filters = get(params, 'filter', null);
-  const mentorId = get(filters, 'userId');
+  const mentorIds = get(filters, 'userIds');
+  const isAdmin = get(filters, 'isAdmin', 'false');
+  const documentType = get(filters, 'documentType', 'classroom');
   const startDate = get(filters, 'startDate');
   const endDate = get(filters, 'endDate');
   const schoolIds = get(filters, 'schools', []);
+
+  if ((isAdmin && !schoolIds.length) || (!isAdmin && !mentorIds.length)) {
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'MentorId or School Id is missing in filter.',
+      },
+    });
+  }
   const batchSessionModel = getTypeQueryController(
     'BatchSession',
     authentication,
@@ -675,8 +704,9 @@ const classroomSessions = (async (root, params, context) => {
     getBatchSessionAggregation({
       startDate,
       endDate,
-      mentorId,
+      mentorIds,
       docFilters,
+      documentType,
     }),
   );
 
@@ -684,8 +714,9 @@ const classroomSessions = (async (root, params, context) => {
     getAdhocSessionAggregation({
       startDate,
       endDate,
-      mentorId,
+      mentorIds,
       docFilters,
+      documentType,
     }),
   );
 

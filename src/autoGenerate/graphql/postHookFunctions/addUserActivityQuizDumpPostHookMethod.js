@@ -15,7 +15,7 @@ import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentCompon
 import getMasteryLevel from '../resolvers/utils/getMasteryLevel';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import validateTokenAndExtractInformation
-  from '../preHookFunctions/validation/utils/validateTokenAndExtractInformation';
+from '../preHookFunctions/validation/utils/validateTokenAndExtractInformation';
 import { MENTEE } from '../../../../constants/roles';
 import getNextComponent from './utils/getNextComponent';
 
