@@ -10,7 +10,7 @@ mutation{
     ${queryObj.productId ? `productId:"${queryObj.productId}",` : ''}
     ${queryObj.studentName ? `studentName: "${queryObj.studentName}",` : ''}
     ${queryObj.grade ? `grade: Grade${grade},` : ''}
-    ${queryObj.status ? `paymentStatus:"${queryObj.status}," ` : ''}
+    ${queryObj.status ? `paymentStatus:${queryObj.status}, ` : ''}
   }){
     id
   }
