@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { get } from 'lodash';
 import { log } from '../../../../../utils';
 import {
@@ -23,6 +24,9 @@ const getNextTopic = (courseId,
         order
         learningObjective{
           id
+          learningSlides(filter:{status:${PUBLISHED}}){
+            id
+          }
           messagesMeta{
             count
           }
@@ -30,6 +34,9 @@ const getNextTopic = (courseId,
             count
           }
           comicStripsMeta(filter:{status:${PUBLISHED}}){
+            count
+          }
+          learningSlidesMeta(filter:{status:${PUBLISHED}}){
             count
           }
         }
@@ -52,6 +59,7 @@ const updateUserCurrentTopicComponentStatusMutation = (
   videoQuery,
   blockBasedProjectQuery,
   nextCurrentTopicComponentType,
+  learningSlideQuery,
 ) => `
   mutation{
     updateUserCurrentTopicComponentStatus(id:"${currentTopicComponentId}",  input:{
@@ -61,6 +69,7 @@ const updateUserCurrentTopicComponentStatusMutation = (
     ${loQuery}
     ${videoQuery}
     ${blockBasedProjectQuery}
+    ${learningSlideQuery}
     ){
       id
     }
@@ -84,9 +93,11 @@ const updateCurrentComponentStatusOfNewCourse = async (
   topicOrder,
   completedQuestionCount,
   totalQuestions,
+  isLastLearningSlide,
+  learningSlideId,
 ) => {
   const {
-    video, message, practiceQuestion, comicStrip, quiz, blockBasedPractice, blockBasedProject,
+    video, message, practiceQuestion, comicStrip, quiz, blockBasedPractice, blockBasedProject, learningSlide,
   } = topicTypes;
   const { assignment, homeworkAssignment, homeworkPractice } = topicComponents;
   const sortedTopicComponentRule = topicComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
@@ -118,6 +129,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
   let updateUserCurrentTopicComponentStatus = false;
   let currentComponentIndex;
   let nextComponentIndex;
+  let toUpdateLearningSlide = false;
   // page wise conditions to check whether UserCurrentTopicComponentStatus should be updated
   switch (page) {
     case video:
@@ -230,6 +242,46 @@ const updateCurrentComponentStatusOfNewCourse = async (
         )
       ) {
         updateUserCurrentTopicComponentStatus = true;
+      }
+      break;
+    case learningSlide:
+      currentComponentIndex = sortedTopicComponentRule.findIndex((comp) => comp.learningObjective && comp.learningObjective.id === learningObjectiveId);
+      nextComponentIndex = currentComponentIndex + 1;
+      // logic for checking the next component, it will either be chat of next LO or quiz
+      if (!currentLearningObjective) {
+        log('Not able to fetch CurrentTopicComponentInfo.currentLearningObjective in addUserActivityChatDumpPostHookMethod');
+      }
+      currentLearningObjectiveId = get(currentLearningObjective, 'id');
+      /*
+      Checking whether user current topic status should be updated, below are the conditions:
+      -user is hitting next and
+      -all practice questions would be in completed state
+      -current topic component should be 'practiceQuestion'
+      -called topic in input should be equal to current topic and
+      -called learningObjective in input should be equal to current learningObjective
+      Above conditions covers the case that current component status will only get changed, if
+      called component is equal to current component and user has just consumed(next action) it
+      and current component status will not get changed when it is already consumed in past
+      */
+      if (
+        (
+          userAction === skip
+          && currentTopicId === topicId
+          && currentLearningObjectiveId === learningObjectiveId
+        )
+        || (
+          userAction === next
+          // && (currentTopicComponent === practiceQuestion
+          //   || currentTopicComponent === message
+          // ) /** Temporarily removed to bypass check and eventually update to next component / topic */
+          && currentTopicId === topicId
+          && currentLearningObjectiveId === learningObjectiveId
+        )
+      ) {
+        if (isLastLearningSlide) {
+          updateUserCurrentTopicComponentStatus = true;
+        }
+        toUpdateLearningSlide = true;
       }
       break;
     case assignment:
@@ -390,12 +442,15 @@ const updateCurrentComponentStatusOfNewCourse = async (
       const messageCount = get(nextCurrentTopicComponent, 'learningObjective.messagesMeta.count', 0);
       const pqCount = get(nextCurrentTopicComponent, 'learningObjective.questionBankMeta.count', 0);
       const comicStripCount = get(nextCurrentTopicComponent, 'learningObjective.comicStripsMeta.count', 0);
+      const learningSlidesCount = get(nextCurrentTopicComponent, 'learningObjective.learningSlidesMeta.count', 0);
       if (messageCount) {
         nextCurrentTopicComponentType = message;
       } else if (pqCount) {
         nextCurrentTopicComponentType = practiceQuestion;
       } else if (comicStripCount) {
         nextCurrentTopicComponentType = comicStrip;
+      } else if (learningSlidesCount) {
+        nextCurrentTopicComponentType = learningSlide;
       }
     } else if ((nextCurrentTopicComponent.componentName === 'assignment') || (nextCurrentTopicComponent.componentName === 'homeworkAssignment') || (nextCurrentTopicComponent.componentName === 'homeworkPractice')) {
       nextCurrentTopicComponentType = quiz;
@@ -416,6 +471,13 @@ const updateCurrentComponentStatusOfNewCourse = async (
     blockBasedProjectQuery = `currentBlockBasedProjectConnectId:"${nextCurrentTopicComponent.blockBasedProject.id}"`;
   }
 
+  if (toUpdateLearningSlide && learningSlideId) {
+    learningSlideQuery = `currentLearningSlideConnectId:"${learningSlideId}"`;
+  } else if (get(nextCurrentTopicComponent, 'learningObjective.learningSlides[0].id')) {
+    // while switching to next topic
+    learningSlideQuery = `currentLearningSlideConnectId:"${get(nextCurrentTopicComponent, 'learningObjective.learningSlides[0].id')}"`;
+  }
+
   /*
   updating UserCurrentTopicComponentStatus based on flag updateUserCurrentTopicComponentStatus
   which becomes only true according to page and conditions above
@@ -428,6 +490,18 @@ const updateCurrentComponentStatusOfNewCourse = async (
       videoQuery,
       blockBasedProjectQuery,
       nextCurrentTopicComponentType,
+      learningSlideQuery,
+    ));
+  } else if (toUpdateLearningSlide) {
+    // when we are switching between internal learningSlides in LO then this will execute;
+    callLocalGraphqlApi(updateUserCurrentTopicComponentStatusMutation(
+      currentTopicComponentId,
+      '',
+      '',
+      '',
+      '',
+      nextCurrentTopicComponentType,
+      learningSlideQuery,
     ));
   }
   return true;

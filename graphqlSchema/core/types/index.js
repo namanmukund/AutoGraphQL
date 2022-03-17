@@ -157,6 +157,9 @@ import ClassroomSession from './classroomSession';
 import Notice from './Notice';
 import StudentReviewByMentor from './StudentReviewByMentor';
 import ClassroomDetailResult from './classroomDetailResult';
+import LearningSlideContent from './learningSlideContent';
+import LearningSlide from './learningSlide';
+import UserActivityLearningSlideDump from './userActivityLearningSlideDump';
 import ShortLink from './shortLink';
 
 export default [
@@ -319,5 +322,8 @@ export default [
   ...Notice,
   ...StudentReviewByMentor,
   ...ClassroomDetailResult,
+  ...LearningSlideContent,
+  ...LearningSlide,
+  ...UserActivityLearningSlideDump,
   ...ShortLink,
 ];

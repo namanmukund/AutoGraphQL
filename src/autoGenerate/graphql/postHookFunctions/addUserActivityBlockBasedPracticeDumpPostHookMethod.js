@@ -46,6 +46,12 @@ const userBlockBasedPracticeQuery = (userId, topicId, blockBasedPracticeId, cour
             comicStripsMeta(filter:{status:${PUBLISHED}}){
               count
             }
+            learningSlidesMeta(filter:{status:${PUBLISHED}}){
+              count
+            }
+            learningSlides(filter:{status:${PUBLISHED}}){
+              id
+            }
           }
           blockBasedProject{
             id

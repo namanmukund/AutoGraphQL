@@ -40,7 +40,7 @@ const isComponentUnlockedForNewCourse = async (
   courseId,
 ) => {
   const {
-    video, message, practiceQuestion, comicStrip, quiz, blockBasedProject, blockBasedPractice,
+    video, message, practiceQuestion, comicStrip, quiz, blockBasedProject, blockBasedPractice, learningSlide,
   } = topicTypes;
   let currentTopicQuery = '';
   let currentLearningObjectiveQuery = '';
@@ -59,7 +59,7 @@ const isComponentUnlockedForNewCourse = async (
     userIdFromContext,
     appName,
   } = userAndAppInfo;
-  if (page === message || page === practiceQuestion || page === comicStrip) {
+  if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
     if (inputUserId && inputLearningObjectiveId) {
       userId = inputUserId;
       learningObjectiveId = inputLearningObjectiveId;
@@ -269,7 +269,7 @@ const isComponentUnlockedForNewCourse = async (
   if (mutationOrQueryName) {
     // initialising object to be passed in context to save query
     const userCurrentTopicComponentStatusData = {};
-    if (page === message || page === practiceQuestion || page === comicStrip) {
+    if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
       // passing data in context which can be used further in post hook methods
       // this will prevent a further query
       userCurrentTopicComponentStatusData[mutationOrQueryName] = {

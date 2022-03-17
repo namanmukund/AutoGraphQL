@@ -113,6 +113,44 @@ const addUserPracticeQuestionReportMutation = (
   }
   `;
 
+// mutation to update UserPracticeQuestionReport
+const updateUserPracticeQuestionReportMutation = (
+  pqReportId,
+) => `
+  mutation($input: UserPracticeQuestionReportUpdate) {
+  updateUserPracticeQuestionReport(id: "${pqReportId}", input: $input) {
+    id
+  }
+}
+  `;
+// get UserPracticeQuestionReport
+const getUserPracticeQuestionReportQuery = (
+  userId,
+  learningObjectiveId,
+  courseId,
+) => `
+  {
+  userPracticeQuestionReports(filter:{
+    and:[
+      {
+        user_some:{id:"${userId}"}
+      }
+      {
+        course_some:{
+          id:"${courseId}"
+        }
+      }
+      {
+        learningObjective_some:{
+          id:"${learningObjectiveId}"
+        }
+      }
+    ]
+  }){
+    id
+  }
+}
+  `;
 /*
 Current topic component status and
 UserLearningObjective(bookmark, practiceQuestionStatus etc) is updated based on-
@@ -399,6 +437,38 @@ And current component status will not get changed when it is already consumed in
     userLearningObjectiveId,
     pushManyQuery,
   ));
+  const pqReportInput = {
+    firstTryCount,
+    secondTryCount,
+    threeOrMoreTryCount,
+    helpUsedCount,
+    answerUsedCount,
+    detailedReport,
+  };
+  if (get(context, 'fromAddUserLSDump')) {
+    const pqReport = await callLocalGraphqlApi(getUserPracticeQuestionReportQuery(userId, learningObjectiveIdInResult, courseId));
+    if (get(pqReport, 'data.userPracticeQuestionReports', []).length) {
+      // if exist update pqReport
+      Object.assign(pqReportInput, {
+        detailedReport: {
+          replace: detailedReport,
+        },
+      });
+      await callLocalGraphqlApi(updateUserPracticeQuestionReportMutation(get(pqReport, 'data.userPracticeQuestionReports[0].id')), '', {
+        pqReportInput,
+      });
+    } else {
+      // adding pqReport
+      await callLocalGraphqlApi(addUserPracticeQuestionReportMutation(
+        userId,
+        learningObjectiveIdInResult,
+        courseId,
+      ), '', {
+        pqReportInput,
+      });
+    }
+    return true;
+  }
   // PQ report will be generated every time when user hits next
   if (pqAction === next && completedQuestionCount === totalQuestions) {
     await callLocalGraphqlApi(addUserPracticeQuestionReportMutation(
@@ -406,14 +476,7 @@ And current component status will not get changed when it is already consumed in
       learningObjectiveIdInResult,
       courseId,
     ), '', {
-      input: {
-        firstTryCount,
-        secondTryCount,
-        threeOrMoreTryCount,
-        helpUsedCount,
-        answerUsedCount,
-        detailedReport,
-      },
+      pqReportInput,
     });
   }
   return true;

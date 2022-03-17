@@ -156,6 +156,7 @@ const topicTypes = {
   quiz: 'quiz',
   blockBasedProject: 'blockBasedProject',
   blockBasedPractice: 'blockBasedPractice',
+  learningSlide: 'learningSlide',
 };
 
 const userActionType = {
@@ -358,6 +359,7 @@ const childTopicComponents = {
   practiceQuestion: 'practiceQuestion',
   comicStrip: 'comicStrip',
   chatbot: 'chatbot',
+  learningSlide: 'learningSlide',
 };
 
 const blockBasedProjectType = {

@@ -38,6 +38,9 @@ const userVideoQuery = (userId, topicId, courseId) => `
           learningObjective{
             id
             order
+            learningSlides(filter:{status:${PUBLISHED}}){
+              id
+            }
             messagesMeta{
               count
             }
@@ -45,6 +48,9 @@ const userVideoQuery = (userId, topicId, courseId) => `
               count
             }
             comicStripsMeta(filter:{status:${PUBLISHED}}){
+              count
+            }
+            learningSlidesMeta(filter:{status:${PUBLISHED}}){
               count
             }
           }
