@@ -11,7 +11,8 @@ import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
 import Raven from './Raven';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
 import { getParsedASTMap } from './autoGenerate/utils';
-import routes from './phonePeAPI/routes';
+import phonePeRoutes from './externalProductAPI/phonePe/routes';
+import iciciRoutes from './externalProductAPI/icici/routes';
 import typeformRoute from './typeformAPI';
 import redis from './redis';
 import pubsub from './pubsub';
@@ -27,7 +28,8 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-routes(app);
+phonePeRoutes(app);
+iciciRoutes(app);
 typeformRoute(app);
 
 const path = `/graphql/${application}`;

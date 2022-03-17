@@ -2,18 +2,18 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable radix */
 import { get } from 'lodash';
-import { dateInPast, log } from '../../utils';
-import callLocalGraphqlApi from '../api/callLocalGraphqlApi';
-import { commonUserValidation } from '../autoGenerate/graphql/preHookFunctions/validation/utils';
-import getHashDigest from './getHashDigest';
-import fetchDiscounts from './query/fetchDiscounts';
-import fetchProductsQuery from './query/fetchProducts';
-import fetchSalesOperations from './query/fetchSalesOperations';
-import fetchUsersQuery from './query/fetchUsers';
-import fetchUserMerchantsQuery from './query/fetchUserMerchants';
-import addUserMerchant from './mutation/addUserMerchant';
-import updateUserMerchant from './mutation/updateUserMerchant';
-import fetchCourseIdFromProduct from './query/fetchCourseIdFromProduct';
+import { dateInPast, log } from '../../../utils';
+import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
+import { commonUserValidation } from '../../autoGenerate/graphql/preHookFunctions/validation/utils';
+import getHashDigest from '../getHashDigest';
+import fetchDiscounts from '../query/fetchDiscounts';
+import fetchProductsQuery from '../query/fetchProducts';
+import fetchSalesOperations from '../query/fetchSalesOperations';
+import fetchUsersQuery from '../query/fetchUsers';
+import fetchUserMerchantsQuery from '../query/fetchUserMerchants';
+import addUserMerchant from '../mutation/addUserMerchant';
+import updateUserMerchant from '../mutation/updateUserMerchant';
+import fetchCourseIdFromProduct from '../query/fetchCourseIdFromProduct';
 
 /*
   fetchProducts endpoint
