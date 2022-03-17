@@ -253,7 +253,11 @@ const userFirstAndLatestQuizReportMutationResolver = async (
   // eslint-disable-next-line no-restricted-syntax
   for (const userId of userIds) {
     if (!userId) {
-      throw new UnauthenticatedUserError();
+      if (userReceivedFromContext) {
+        throw new UnauthenticatedUserError();
+      } else {
+        continue;
+      }
     }
 
     // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
@@ -274,8 +278,14 @@ const userFirstAndLatestQuizReportMutationResolver = async (
 
     const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
 
-    // calling method to validate user current topic component status
-    validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
+    if (userReceivedFromContext) {
+      // calling method to validate user current topic component status
+      validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
+    } else {
+      if (!currentTopicComponentInfo) {
+        continue;
+      }
+    }
 
     // calling API to get data of fetched topic
     /* eslint no-await-in-loop:0 */
@@ -287,11 +297,15 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     // getting info of called topic
     const topicInfo = get(topicRes, 'data.topic');
     if (!topicInfo) {
-      throw new DatabaseRecordNotFoundError({
-        data: {
-          error: 'Topic is not present',
-        },
-      });
+      if (userReceivedFromContext) {
+        throw new DatabaseRecordNotFoundError({
+          data: {
+            error: 'Topic is not present',
+          },
+        });
+      } else {
+        continue;
+      }
     }
     let currentRunningTopic;
     // let currentRunningTopicComponentType;
@@ -306,12 +320,20 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     if (!courseId || courseId === OLD_COURSE_ID) {
       /* eslint no-lonely-if:0 */
       if (topicInfo.order >= currentRunningTopic.order) {
-        throw new ComponentLockedError();
+        if (userReceivedFromContext) {
+          throw new ComponentLockedError();
+        } else {
+          continue;
+        }
       }
     } else {
       /* eslint no-lonely-if:0 */
       if (topicInfo.order > currentRunningTopic.order) {
-        throw new ComponentLockedError();
+        if (userReceivedFromContext) {
+          throw new ComponentLockedError();
+        } else {
+          continue;
+        }
       }
     }
     // else {
