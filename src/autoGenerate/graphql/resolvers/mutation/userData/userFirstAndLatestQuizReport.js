@@ -256,6 +256,7 @@ const userFirstAndLatestQuizReportMutationResolver = async (
       if (userReceivedFromContext) {
         throw new UnauthenticatedUserError();
       } else {
+        /* eslint no-continue:0 */
         continue;
       }
     }
@@ -283,6 +284,7 @@ const userFirstAndLatestQuizReportMutationResolver = async (
       validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
     } else {
       if (!currentTopicComponentInfo) {
+        /* eslint no-continue:0 */
         continue;
       }
     }
@@ -304,6 +306,7 @@ const userFirstAndLatestQuizReportMutationResolver = async (
           },
         });
       } else {
+        /* eslint no-continue:0 */
         continue;
       }
     }
@@ -323,6 +326,7 @@ const userFirstAndLatestQuizReportMutationResolver = async (
         if (userReceivedFromContext) {
           throw new ComponentLockedError();
         } else {
+          /* eslint no-continue:0 */
           continue;
         }
       }
@@ -332,6 +336,7 @@ const userFirstAndLatestQuizReportMutationResolver = async (
         if (userReceivedFromContext) {
           throw new ComponentLockedError();
         } else {
+          /* eslint no-continue:0 */
           continue;
         }
       }
