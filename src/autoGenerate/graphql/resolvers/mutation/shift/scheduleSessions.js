@@ -416,7 +416,7 @@ const scheduleSessionsMutationResolver = async (
       if (!(batchId && startDate && nonRecurringfilteredSlotsString && topicId && finalMentorSessionId && courseId)) {
         throw new InvalidScheduleParameters();
       }
-      createBatchSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId);
+      await createBatchSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId);
     } else if (timeTableRule) {
       let possibleDates = await getPossileDatesFromRule(startDate, endDate, daysRule);
       if (batchSessions && batchSessions.length) {
