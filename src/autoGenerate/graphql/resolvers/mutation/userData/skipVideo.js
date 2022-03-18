@@ -9,10 +9,10 @@ import {
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation
-  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import updateCurrentComponentStatus
-  from '../../../postHookFunctions/utils/updateCurrentComponentStatus';
+from '../../../postHookFunctions/utils/updateCurrentComponentStatus';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { validateMentorMenteePermission } from '../../../preHookFunctions/validation/utils';
 

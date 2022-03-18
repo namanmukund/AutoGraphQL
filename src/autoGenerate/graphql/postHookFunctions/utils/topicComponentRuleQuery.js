@@ -7,6 +7,9 @@ const topicComponentRuleQuery = `topicComponentRule{
   learningObjective{
     id
     order
+    learningSlides(filter:{status:${PUBLISHED}}){
+      id
+    }
     messagesMeta{
       count
     }
@@ -14,6 +17,9 @@ const topicComponentRuleQuery = `topicComponentRule{
       count
     }
     comicStripsMeta(filter:{status:${PUBLISHED}}){
+      count
+    }
+    learningSlidesMeta(filter:{status:${PUBLISHED}}){
       count
     }
   }

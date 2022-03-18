@@ -201,6 +201,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   context.batchTypeValue = get(batchSession, 'batch.type');
   context.currentUser = currentUser;
   context.appName = get(currentApp, 'name');
+  context.userRoleFromContext = userRoleFromContext;
   return true;
 };
 

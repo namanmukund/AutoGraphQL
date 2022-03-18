@@ -393,7 +393,7 @@ const scheduleSessionsMutationResolver = async (
     // check if sessions already exist at provided date and slot
     const sessionsExist = await sessionExistsCheck(nonRecurringslots, batchId, startDate);
     if (sessionsExist) {
-      if (!forceScheduleSessions) {
+      if (!forceScheduleSessions && !isRecurring) {
         throw new SlotsOccupiedError();
       } else {
         // TODO : schedule sessions by replacing existing sessions
@@ -418,6 +418,7 @@ const scheduleSessionsMutationResolver = async (
       }
       createBatchSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseId);
     } else if (timeTableRule) {
+      let possibleDates = await getPossileDatesFromRule(startDate, endDate, daysRule);
       if (batchSessions && batchSessions.length) {
         // sorting the existing batch sessions into started/completed and allotted
         const {
@@ -430,38 +431,23 @@ const scheduleSessionsMutationResolver = async (
           possibleSessionCount -= sessionsStartedOrCompleted.length;
         }
 
-        // let possibleDates = getPossibleDates(startDate, endDate, days);
-        let possibleDates = await getPossileDatesFromRule(startDate, endDate, daysRule);
-
         // for the sessions which are still in the allotted state, update them
         const allottedSessionsCount = sessionsAllotted.length;
         if (allottedSessionsCount > 0) {
           possibleSessionCount -= allottedSessionsCount;
-          updateAllottedBatchSessions(sessionsAllotted, possibleDates, mentorUserId, courseId, batchType).catch((err) => log('******* Error updating allotted batch sessions')).finally(() => {
-            if (possibleSessionCount > 0) {
-              // all the remaining sessions have to be created
-              const startFromIndex = allottedSessionsCount;
-              possibleDates = possibleDates.slice(startFromIndex);
-              const topicStartIndex = topicCount - possibleSessionCount;
-              topics = topics.splice(topicStartIndex);
-              createBatchSessions(batchId, possibleDates, possibleSessionCount, topics, mentorUserId, courseId, batchType);
-            }
-          });
-        } else {
-          if (possibleSessionCount > 0) {
-            // all the remaining sessions have to be created
-            const startFromIndex = allottedSessionsCount;
-            possibleDates = possibleDates.slice(startFromIndex);
-            const topicStartIndex = topicCount - possibleSessionCount;
-            topics = topics.splice(topicStartIndex);
-            createBatchSessions(batchId, possibleDates, possibleSessionCount, topics, mentorUserId, courseId, batchType);
-          }
+          updateAllottedBatchSessions(sessionsAllotted, possibleDates, mentorUserId, courseId, batchType);
+        }
+        if (possibleSessionCount > 0) {
+          // all the remaining sessions have to be created
+          const startFromIndex = allottedSessionsCount;
+          possibleDates = possibleDates.slice(startFromIndex);
+          const topicStartIndex = topicCount - possibleSessionCount;
+          topics = topics.splice(topicStartIndex);
+          createBatchSessions(batchId, possibleDates, possibleSessionCount, topics, mentorUserId, courseId, batchType);
         }
       } else {
         // if there are no exisiting batchSessions for the given batch id, create all of them
-        const possibleSessionCount = topicCount;
-        const possibleDates = getPossibleDates(startDate, endDate, days);
-        createBatchSessions(batchId, possibleDates, possibleSessionCount, topics, mentorUserId, courseId, batchType);
+        createBatchSessions(batchId, possibleDates, topicCount, topics, mentorUserId, courseId, batchType);
       }
     }
   } else {

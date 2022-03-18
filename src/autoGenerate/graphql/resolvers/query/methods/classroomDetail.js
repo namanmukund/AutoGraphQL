@@ -69,6 +69,9 @@ const getBatchSessionAggregation = ({
             title: 1,
             description: 1,
             topicComponentRule: 1,
+            tools: 1,
+            programming: 1,
+            theory: 1,
             questions: {
               id: 1,
             },
@@ -186,6 +189,9 @@ const getAdhocSessionAggregation = ({
             title: 1,
             description: 1,
             topicComponentRule: 1,
+            tools: 1,
+            programming: 1,
+            theory: 1,
             questions: {
               id: 1,
             },
@@ -233,6 +239,31 @@ const getBatchAggregation = ({ batchId }) => [
       localField: 'classes.typeId',
       foreignField: 'id',
       as: 'classes',
+    },
+  },
+  {
+    $lookup: {
+      from: 'User',
+      let: {
+        allottedMentorTypeId: '$allottedMentor.typeId',
+      },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: ['$id', '$$allottedMentorTypeId'],
+            },
+          },
+        },
+        {
+          $project: {
+            id: 1,
+            name: 1,
+            email: 1,
+          },
+        },
+      ],
+      as: 'allottedMentor',
     },
   },
   {
@@ -337,6 +368,9 @@ const getBatchAggregation = ({ batchId }) => [
       course: {
         $arrayElemAt: ['$course', 0],
       },
+      allottedMentor: {
+        $arrayElemAt: ['$allottedMentor', 0],
+      },
       createdAt: 1,
       thumbnailSmall: 1,
       customSessionLink: 1,
@@ -379,6 +413,9 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
           ...get(session, 'topic', null),
           questionsQuizCount: get(session, 'topic.questions', []).length,
           topicAssignmentQuestionsCount: get(session, 'topic.topicAssignmentQuestions', []).length,
+          tools: get(session, 'tools', []),
+          programming: get(session, 'programming', []),
+          theory: get(session, 'theory', []),
         },
         previousTopic: null,
         sessionOtp: get(session, 'schoolSessionOtp'),
@@ -441,6 +478,9 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
         ...topic,
         questionsQuizCount: get(topic, 'questions', []).length,
         topicAssignmentQuestionsCount: get(topic, 'topicAssignmentQuestions', []).length,
+        tools: get(topic, 'tools', []),
+        programming: get(topic, 'programming', []),
+        theory: get(topic, 'theory', []),
       },
       previousTopic: null,
     });
@@ -453,6 +493,7 @@ const transformMongoResults = (batchSessions, adhocSessions, batch) => {
       classroomTitle: get(batchDetail, 'classroomTitle', ''),
       description: get(batchDetail, 'description', ''),
       students: get(batchDetail, 'students'),
+      allottedMentor: get(batchDetail, 'allottedMentor'),
     },
     sessions: finalResult,
     learingCount: batchSessions ? batchSessions.length : 0,

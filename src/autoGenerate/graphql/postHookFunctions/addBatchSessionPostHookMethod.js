@@ -188,7 +188,6 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
       );
     }
   }
-
   // add students to the batch session and mark them absent as default
   if (students && students.length && topicId) {
     let pushManyQuery = 'attendance:{ pushMany: [';

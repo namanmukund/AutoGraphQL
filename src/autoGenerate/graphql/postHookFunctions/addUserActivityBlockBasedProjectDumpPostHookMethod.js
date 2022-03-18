@@ -46,6 +46,12 @@ const userBlockBasedProjectQuery = (userId, topicId, blockBasedProjectId, course
             comicStripsMeta(filter:{status:${PUBLISHED}}){
               count
             }
+            learningSlides(filter:{status:${PUBLISHED}}){
+              id
+            }
+            learningSlidesMeta(filter:{status:${PUBLISHED}}){
+              count
+            }
           }
           blockBasedProject{
             id

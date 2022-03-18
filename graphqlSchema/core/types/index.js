@@ -10,6 +10,7 @@ import LearningObjective from './learningObjective';
 import QuestionBank from './questionBank';
 import Message from './message';
 import Course from './course';
+import CoursePackage from './coursePackage';
 import UserActivityVideoDump from './userActivityVideoDump';
 import UserActivityChatDump from './userActivityChatDump';
 import UserActivityPQDump from './userActivityPQDump';
@@ -157,6 +158,10 @@ import Notice from './Notice';
 import StudentReviewByMentor from './StudentReviewByMentor';
 import ClassroomDetailResult from './classroomDetailResult';
 import MenteeCourseHomework from './menteeCourseHomework';
+import LearningSlideContent from './learningSlideContent';
+import LearningSlide from './learningSlide';
+import UserActivityLearningSlideDump from './userActivityLearningSlideDump';
+import ShortLink from './shortLink';
 
 export default [
   ...User,
@@ -171,6 +176,7 @@ export default [
   ...LearningObjective,
   ...Message,
   ...Course,
+  ...CoursePackage,
   ...UserActivityVideoDump,
   ...UserActivityChatDump,
   ...UserActivityPQDump,
@@ -318,4 +324,8 @@ export default [
   ...StudentReviewByMentor,
   ...ClassroomDetailResult,
   ...MenteeCourseHomework,
+  ...LearningSlideContent,
+  ...LearningSlide,
+  ...UserActivityLearningSlideDump,
+  ...ShortLink,
 ];

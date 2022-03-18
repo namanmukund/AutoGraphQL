@@ -28,6 +28,7 @@ import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOpera
 import scheduleB2BSessionMissed from '../../../../utils/scheduleJobs/scheduleB2BSessionMissed';
 import getSlotDifference from './utils/getTimeDifference';
 import generateOtpForBatchSession from './utils/generateOtpForBatchSession';
+import { MENTEE } from '../../../../constants/roles';
 // import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
@@ -237,10 +238,11 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     batchTopicOrder,
     batchTypeValue,
     appName,
+    userRoleFromContext,
   } = context;
   let courseId = get(context, 'courseId');
   // check if performed from TLA while marking student`s attendance
-  if (appName && appName === TWA) {
+  if (appName && appName === TWA && userRoleFromContext === MENTEE) {
     return;
   }
   /*
