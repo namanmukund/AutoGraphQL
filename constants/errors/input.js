@@ -231,3 +231,11 @@ export const InvalidScheduleParameters = createError('InvalidScheduleParameters'
 export const InvalidRescheduleParameters = createError('InvalidRescheduleParameters', {
   message: 'Please provide valid parameters for re-scheduling sessions.',
 });
+
+export const SectionFieldRequiredError = createError('SectionFieldRequiredError', {
+  message: 'Section field is mandatory in input',
+});
+
+export const StudentWithSimilarRollNoExist = createError('StudentWithSimilarRollNoExist', {
+  message: 'Student with similar roll no already exists',
+});

@@ -52,6 +52,9 @@ const learningObjectiveQuery = (learningObjectiveId, courseId) => `
       }){
         id
       }
+      learningSlides(filter:{status:${PUBLISHED}}){
+        id
+      }
     }
   }
   `;
@@ -63,6 +66,7 @@ const addUserLearningObjectiveMutation = (
   restQuery,
   practiceQuestionsQuery,
   courseId,
+  learningSlidesQuery,
 ) => `
   mutation{
     addUserLearningObjective(
@@ -72,6 +76,7 @@ const addUserLearningObjectiveMutation = (
     input:{
         ${restQuery}
         ${practiceQuestionsQuery}
+        ${learningSlidesQuery}
     }
     ){
       id
@@ -90,6 +95,13 @@ const addUserLearningObjectiveMutation = (
         isHintUsed
         isAnswerUsed
         attemptNumber
+      }
+       learningSlides {
+        learningSlide {
+          id
+          order
+        }
+        status
       }
       chatStatus
       isChatBookmarked
@@ -143,6 +155,7 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
   const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
   const {
     questionBank: practiceQuestionsInLO,
+    learningSlides: learningSlidesInLO,
   } = learningObjectiveInfo;
   const topicInfo = get(learningObjectiveInfo, 'topics[0]', null) || get(learningObjectiveInfo, 'topic');
   if (!topicInfo) {
@@ -162,6 +175,15 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
       practiceQuestionsQuery += `{ questionConnectId: "${practiceQuestionId}" }, `;
     });
     practiceQuestionsQuery += ']';
+  }
+  let learningSlidesQuery = '';
+  if (learningObjectiveInfo && learningSlidesInLO && learningSlidesInLO.length) {
+    learningSlidesQuery = 'learningSlides:[';
+    learningSlidesInLO.forEach((learningSlide) => {
+      const { id: learningSlideId } = learningSlide;
+      learningSlidesQuery += `{ learningSlideConnectId: "${learningSlideId}" }, `;
+    });
+    learningSlidesQuery += ']';
   }
 
   // obtaining next LO
@@ -197,6 +219,7 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
       restQuery,
       practiceQuestionsQuery,
       courseId,
+      learningSlidesQuery,
     ),
   );
   if (result) {

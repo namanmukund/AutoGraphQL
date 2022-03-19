@@ -7,6 +7,7 @@ import {
   SomethingWentWrongError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
+import { GradeFieldRequiredError, SectionFieldRequiredError } from '../../../../../../constants/errors/input';
 import { MENTEE, PARENT } from '../../../../../../constants/roles';
 import { generateCuid, getRandomNumber, log } from '../../../../../../utils';
 import { MutationController, QueryController } from '../../../controllers';
@@ -38,6 +39,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getUserPasswordObject from './utils/getUserPasswordObject';
 import { getNumberAndSendSms } from '../../../../../sms';
 // import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
+import checkForRollNumberInSchoolClass from './utils/checkForRollNumberInSchoolClass';
 
 const USER_TYPE = 'User';
 
@@ -263,6 +265,15 @@ const parentChildSignUpMutationResolver = async (
       });
     }
     parentId = parentUserData.id;
+  }
+  if (rollNo && schoolId) {
+    if (!grade) {
+      throw new GradeFieldRequiredError();
+    }
+    if (!section) {
+      throw new SectionFieldRequiredError();
+    }
+    await checkForRollNumberInSchoolClass(rollNo, grade, section, schoolId);
   }
 
   if (!parentProfileId) {
