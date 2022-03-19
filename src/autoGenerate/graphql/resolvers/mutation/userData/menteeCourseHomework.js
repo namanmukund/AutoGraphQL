@@ -666,7 +666,7 @@ const menteeCourseHomeworkMutationResolver = async (
   if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId) {
     batchCurrentComponentInfo = get(
       res,
-      "data.userCurrentTopicComponentStatuses[0].user.studentProfile.batch.currentComponent"
+      "[0].user.studentProfile.batch.currentComponent"
     );
   }
 
