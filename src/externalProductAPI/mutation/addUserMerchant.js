@@ -10,7 +10,14 @@ mutation{
     ${queryObj.productId ? `productId:"${queryObj.productId}",` : ''}
     ${queryObj.studentName ? `studentName: "${queryObj.studentName}",` : ''}
     ${queryObj.grade ? `grade: Grade${grade},` : ''}
-    ${queryObj.status ? `paymentStatus:${queryObj.status}, ` : ''}
+    ${typeof queryObj.status === 'boolean' ? `paymentStatus:${queryObj.status}, ` : ''}
+    ${queryObj.city ? `city: ${city},` : ''}
+    ${queryObj.state ? `state: ${state},` : ''}
+    ${queryObj.pincode ? `pincode: ${pincode},` : ''}
+    ${queryObj.joiningDate ? `joiningDate: "${joiningDate.toISOString()}",` : ''}
+    ${queryObj.externalProductId ? `externalProductId: ${externalProductId},` : ''}
+    ${queryObj.merchantSellingPrice ? `merchantSellingPrice: ${merchantSellingPrice},` : ''}
+    ${queryObj.purchaseDate ? `purchaseDate: "${purchaseDate.toISOString()}",` : ''}
   }){
     id
   }
