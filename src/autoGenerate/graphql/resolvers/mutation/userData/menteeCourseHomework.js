@@ -291,6 +291,7 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                             id: 1,
                           },
                         },
+                        chapter: 1,
                         topicComponentRule: 1,
                       },
                     },
@@ -387,6 +388,8 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                             id: 1,
                           },
                         },
+                        chapter: 1,
+                        topicComponentRule: 1,
                       },
                     },
                   ],
@@ -402,6 +405,30 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
     },
   },
   {
+    $lookup: {
+      from: "Topic",
+      let: {
+        currentTopicId: "$currentTopic.typeId",
+      },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: ["$id", "$$currentTopicId"],
+            },
+          },
+        },
+        {
+          $project: {
+            id: 1,
+            order: 1,
+          },
+        },
+      ],
+      as: "currentTopic",
+    },
+  },
+  {
     $project: {
       id: 1,
       currentTopicComponentType: 1,
@@ -409,7 +436,9 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
       currentCourse: {
         $arrayElemAt: ["$currentCourse", 0],
       },
-      currentTopic: 1,
+      currentTopic: {
+        $arrayElemAt: ["$currentTopic", 0],
+      },
       user: 1,
     },
   },
@@ -660,7 +689,7 @@ const menteeCourseHomeworkMutationResolver = async (
 
   const batchCurrentComponentCourseId = get(
     res,
-    "[0].user.studentProfile.batch.currentComponent.currentCourse.id"
+    "[0].user.studentProfile.batch.currentComponent.currentCourse.typeId"
   );
 
   if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId) {
@@ -679,7 +708,7 @@ const menteeCourseHomeworkMutationResolver = async (
   if (batchCurrentComponentInfo) {
     currentTopicOrder = get(batchCurrentComponentInfo, "currentTopic.order");
   } else {
-    currentTopicOrder = get(res, "currentTopic.order");
+    currentTopicOrder = get(currentTopicComponentInfo, "currentTopic.order");
   }
 
   const { currentCourse } = currentTopicComponentInfo;
