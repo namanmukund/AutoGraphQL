@@ -92,18 +92,6 @@ const createScheduler = (schedulerName) => {
         await scheduleEventSessionRemainder();
       });
       break;
-    case 'updateLeadSource':
-      rule.tz = 'Asia/Kolkata';
-      rule.hour = 6;
-      rule.minute = 0;
-      rule.dayOfWeek = new schedule.Range(0, 6);
-      // eslint-disable-next-line no-unused-vars
-      schedule.scheduleJob(rule, async () => {
-        // eslint-disable-next-line no-console
-        console.log('scheduler started for: ', schedulerName);
-        await scheduleUpdateLeadSource();
-      });
-      break;
     case 'batchSessionOtpGeneration':
       rule.tz = 'Asia/Kolkata';
       rule.minute = 25;
@@ -118,6 +106,7 @@ const createScheduler = (schedulerName) => {
     case 'updateLeadSource':
       rule.tz = 'Asia/Kolkata';
       rule.hour = 6;
+      rule.minute = 0;
       rule.dayOfWeek = new schedule.Range(0, 6);
       // eslint-disable-next-line no-unused-vars
       schedule.scheduleJob(rule, async () => {
