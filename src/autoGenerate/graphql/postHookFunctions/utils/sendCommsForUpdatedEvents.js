@@ -2,13 +2,11 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import parsedHtmlFromTemplateFileAndObject from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
-import getEmailObject from '../../../../../services/email/utils/getEmailObject';
-import sendEmail from '../../../../../services/email/utils/sendEmail';
 import getIntlDateTime from '../../../../../utils/timeZoneDiff';
 import getSelectedSlotsStringArray from './getSelectedSlotsStringArray';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import callSendWhatsappTemplateInQueue from '../../../../../utils/scheduleJobs/jobs/callSendWhatsappTemplateInQueue';
+import sendMailModoTemplate from '../../../utils/sendMailModoTemplate';
 
 const getEvent = async (eventId) => {
   const query = `
@@ -53,20 +51,6 @@ const getEvent = async (eventId) => {
   return get(res, 'data.event');
 };
 
-const sendEmailCommsForUpdatedEvents = (email, templateFileName, sendEmailObject, subject) => {
-  const templateString = parsedHtmlFromTemplateFileAndObject(
-    templateFileName, sendEmailObject,
-  );
-  const emailTo = [email];
-  templateString.then((html) => {
-    const ccEmail = '';
-    const bccEmail = '';
-    const text = '';
-    const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
-    sendEmail(emailMsgObject);
-  });
-};
-
 const deleteJobQuery = (id) => `
   mutation {
     deleteScheduleJob(id: "${id}") {
@@ -94,9 +78,9 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
     const event = await getEvent(eventId);
     const {
       registeredUsers = [], timeZone, eventTimeTableRule, name: eventName,
-      locationType, meetingId, meetingPassword, sessionLink, geoLocation,
+      locationType,
+      sessionLink, geoLocation,
       address, state, city, pincode,
-      isEmailCommsEnabled,
     } = event;
     const {
       startDate, endDate, ...slots
@@ -194,42 +178,31 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
             triggeredAt: new Date(),
           },
         );
-        if (isEmailCommsEnabled) {
-          let sendEmailObj = {};
-          if (locationType === 'online') {
-            sendEmailObj = {
-              eventName,
-              meetingId,
-              meetingPassword,
-              sessionLink,
-              studentName,
-              eventUpdateReason,
-              eventStartdate,
-              eventEndDate,
-              startTime,
-            };
-          }
-          if (locationType === 'venue') {
-            sendEmailObj = {
-              eventName,
-              studentName,
-              geoLocation,
-              address,
-              state,
-              city,
-              pincode,
-              timeZone,
-              eventUpdateReason,
-              eventStartdate,
-              eventEndDate,
-              startTime,
-            };
-          }
-          sendEmailCommsForUpdatedEvents(parentEmail,
-            'eventRescheduleOnline',
-            sendEmailObj,
-            'Tekie Event Rescheduled');
+        let sendEmailObj = {};
+        if (locationType === 'online') {
+          sendEmailObj = {
+            eventName,
+            studentName,
+            eventDate: eventStartdate,
+            eventTime: startTime,
+          };
         }
+        if (locationType === 'venue') {
+          sendEmailObj = {
+            eventName,
+            studentName,
+            eventDate: eventStartdate,
+            eventTime: startTime,
+          };
+        }
+        sendMailModoTemplate('6821bf9a-d3db-48d1-8e7f-5343ccefabd2', {
+          toEmail: parentEmail,
+          senderEmail: 'hello@tekie.in',
+          subject: 'Event Rescheduled',
+          senderName: 'Tekie',
+          campaignName: '',
+          data: sendEmailObj,
+        });
       }
       if (eventUpdateStatus === 'canceled') {
         let parameters = [];
@@ -282,38 +255,31 @@ const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdate
             triggeredAt: new Date(),
           },
         );
-        if (isEmailCommsEnabled) {
-          let sendEmailObj = {};
-          if (locationType === 'online') {
-            sendEmailObj = {
-              eventName,
-              meetingId,
-              studentName,
-              eventUpdateReason,
-              eventStartdate,
-              eventEndDate,
-            };
-          }
-          if (locationType === 'venue') {
-            sendEmailObj = {
-              eventName,
-              studentName,
-              geoLocation,
-              address,
-              state,
-              city,
-              pincode,
-              timeZone,
-              eventUpdateReason,
-              eventStartdate,
-              eventEndDate,
-            };
-          }
-          sendEmailCommsForUpdatedEvents(parentEmail,
-            'eventCancelMailTemplate',
-            sendEmailObj,
-            'Tekie Event Canceled');
+        let sendEmailObj = {};
+        if (locationType === 'online') {
+          sendEmailObj = {
+            eventName,
+            studentName,
+            eventDate: eventStartdate,
+            eventTime: startTime,
+          };
         }
+        if (locationType === 'venue') {
+          sendEmailObj = {
+            eventName,
+            studentName,
+            eventDate: eventStartdate,
+            eventTime: startTime,
+          };
+        }
+        sendMailModoTemplate('0fc48595-8432-486f-995c-00262de24b26', {
+          toEmail: parentEmail,
+          senderEmail: 'hello@tekie.in',
+          subject: 'Event Cancelled',
+          senderName: 'Tekie',
+          campaignName: '',
+          data: sendEmailObj,
+        });
       }
     }
   }

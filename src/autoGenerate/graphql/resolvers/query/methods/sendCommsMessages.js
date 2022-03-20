@@ -89,6 +89,7 @@ const sendCommsMessage = async (root, params, context) => {
     if (!parentEmail) {
       throw new EmailFieldRequiredError();
     }
+    // console.log('check');
     const templateObject = {};
     Object.keys(mapCommsWithDataFields).forEach((key) => {
       if (get(params, `input.${key}`) && mapCommsWithDataFields[key]) {
@@ -109,9 +110,11 @@ const sendCommsMessage = async (root, params, context) => {
       'Content-Type': 'application/json',
     };
     const url = process.env.MAIL_MODO_URL + templateName;
-
+    // console.log(url, templateObject, JSON.stringify(bodyJson));
+    // sendMailModoTemplate(templateName, bodyJson);
     await fetch(url, { method: 'POST', headers, body: JSON.stringify(bodyJson) }).then((res) => {
       res.json().then((resp) => {
+        // console.log(resp);
         if (!get(resp, 'success')) {
           throw new CommsError();
         }

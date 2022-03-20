@@ -10,6 +10,7 @@ import LearningObjective from './learningObjective';
 import QuestionBank from './questionBank';
 import Message from './message';
 import Course from './course';
+import CoursePackage from './coursePackage';
 import UserActivityVideoDump from './userActivityVideoDump';
 import UserActivityChatDump from './userActivityChatDump';
 import UserActivityPQDump from './userActivityPQDump';
@@ -148,6 +149,7 @@ import SenseiMentorTeam from './senseiMentorTeam';
 import Notification from './notification';
 import Task from './task';
 import UserOtpLog from './userOtpLog';
+import SchoolSessionOtp from './schoolSessionOtp';
 import UserDeviceLog from './UserDeviceLog';
 import GenerateMentorChild from './generateMentorChild';
 import TimetableSchedule from './timetableSchedule';
@@ -170,6 +172,7 @@ export default [
   ...LearningObjective,
   ...Message,
   ...Course,
+  ...CoursePackage,
   ...UserActivityVideoDump,
   ...UserActivityChatDump,
   ...UserActivityPQDump,
@@ -308,6 +311,7 @@ export default [
   ...Notification,
   ...Task,
   ...UserOtpLog,
+  ...SchoolSessionOtp,
   ...UserDeviceLog,
   ...GenerateMentorChild,
   ...TimetableSchedule,

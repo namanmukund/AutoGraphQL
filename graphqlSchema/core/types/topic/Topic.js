@@ -73,6 +73,9 @@ const Topic = `
     blockBasedProjects: [BlockBasedProject] @relation(name: "TopicBlockBasedProject")
     videoContent: [Video] @relation(name: "TopicVideoContent")
     topicComponentRule: [TopicComponentsRule]
+    tools: [ArrayValue]
+    programming: [ArrayValue]
+    theory: [ArrayValue]
   }
 `;
 

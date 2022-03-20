@@ -17,6 +17,7 @@ const ClassroomSessionDocumentType = `
     batchSession
     adhocSession
     notYetBooked
+    event
   }
 `;
 
@@ -35,12 +36,29 @@ const ClassroomSessionTopic = `
 
 const ClassroomDetails = `
   type ClassroomDetails {
-    code: String! @uniqueOrEmpty @trim @uppercase
+    id: ID
+    code: String @uniqueOrEmpty @trim @uppercase
     classroomTitle: String!
     description: String
     classes: [SchoolClass] @relation(name: "ClassroomSchoolClass", direction: "OneWay")
     school: School @relation(name: "ClassroomSchool", direction: "OneWay")
     students: [StudentProfile] @relation(name: "ClassroomStudentProfile", direction: "OneWay")
+  }
+`;
+
+const SessionOtpResult = `
+type SessionOtpResult {
+    grade: Grade
+    section: Section
+    otp: Int
+  }`;
+
+const ClassroomSessionStatus = `
+  enum ClassroomSessionStatus {
+    started
+    completed
+    allotted
+    unattended
   }
 `;
 
@@ -53,15 +71,17 @@ const ClassroomSessionResult = `
     endMinutes: Int @defaultValue(value: "0")
     sessionStartDate: Date
     sessionEndDate: Date
-    sessionStatus: SessionStatus! @defaultValue(value: "allotted")
+    sessionStatus: ClassroomSessionStatus @defaultValue(value: "allotted")
     sessionMode: SessionMode @defaultValue(value: "online")
     sessionRecordingLink: String
     sessionType: ClassroomSessionType @defaultValue(value: "learning")
+    eventType: TimetableScheduleEventType
     documentType: ClassroomSessionDocumentType @defaultValue(value: "batchSession")
     attendance: [BatchAttendanceType]
     classroom: ClassroomDetails
     topic: ClassroomSessionTopic
     previousTopic: ClassroomSessionTopic
+    sessionOtp: [SessionOtpResult]
   }
 `;
 
@@ -71,4 +91,6 @@ export default [
   ClassroomSessionTopic,
   ClassroomSessionType,
   ClassroomDetails,
+  SessionOtpResult,
+  ClassroomSessionStatus,
 ];

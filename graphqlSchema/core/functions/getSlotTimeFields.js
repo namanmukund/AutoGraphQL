@@ -6,7 +6,7 @@ const getSlotTimeFields = (
 ) => {
   let slotTimeFields = '';
   slotTimes.forEach((slotTime) => {
-    slotTimeFields += excludeType ? `${slotTime}` : `${slotTime}: ${fieldType} `;
+    slotTimeFields += excludeType ? `${slotTime}\n` : `${slotTime}: ${fieldType} `;
   });
   return slotTimeFields;
 };

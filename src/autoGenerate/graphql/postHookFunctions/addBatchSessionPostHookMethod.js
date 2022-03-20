@@ -16,6 +16,8 @@ import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import isTrialSession from '../resolvers/utils/isTrialSession';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
+import generateOtpForBatchSession from './utils/generateOtpForBatchSession';
+import getSlotDifference from './utils/getTimeDifference';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -40,6 +42,8 @@ const getBatchQuery = (batchId) => `
         type
         students{
           id
+          section
+          grade
           user{
             id
             source
@@ -94,7 +98,6 @@ const updateBatchSessionQuery = (
     }
   }
   `;
-
 /*
   Post hook of addBatchSession
 */
@@ -185,7 +188,6 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
       );
     }
   }
-
   // add students to the batch session and mark them absent as default
   if (students && students.length && topicId) {
     let pushManyQuery = 'attendance:{ pushMany: [';
@@ -204,6 +206,8 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
       pushManyQuery,
     ), context);
   }
+  const isBetweenTwoHrs = getSlotDifference(get(slotTimeStringArray, '[0]'), bookingDate, 2);
+  if (isBetweenTwoHrs) generateOtpForBatchSession(batchSessionId, students);
   const studentsId = (students && students.length) ? students.map((student) => get(student, 'id')) : [];
   extractBatchSessionAndSendB2BC(batchSessionId, studentsId, false);
   extractBatchSessionAndSendB2B(batchSessionId);

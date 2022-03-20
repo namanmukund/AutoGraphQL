@@ -27,7 +27,7 @@ const getEventWinners = async (eventId) => {
 }
 `;
   const result = await callLocalGraphqlApi(query);
-  return get(result, 'data.eventSpeakerProfiles', []);
+  return get(result, 'data.eventWinners', []);
 };
 
 const getEventWinner = (async (root, params, context, info) => {

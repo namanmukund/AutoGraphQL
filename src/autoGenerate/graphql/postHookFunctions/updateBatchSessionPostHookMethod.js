@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import { get } from 'lodash';
 import moment from 'moment';
 import {
@@ -25,6 +26,9 @@ import isTrialSession from '../resolvers/utils/isTrialSession';
 import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import scheduleB2BSessionMissed from '../../../../utils/scheduleJobs/scheduleB2BSessionMissed';
+import getSlotDifference from './utils/getTimeDifference';
+import generateOtpForBatchSession from './utils/generateOtpForBatchSession';
+import { MENTEE } from '../../../../constants/roles';
 // import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
@@ -49,6 +53,9 @@ const getBatchQuery = (batchId) => `
         code
         type
         students{
+          id
+          grade
+          section
           user{
             id
             source
@@ -206,6 +213,8 @@ const batchSessionQuery = (id) => `{
     }
   }
 }`;
+
+// mutation to update batch sessions
 /*
   Post hook of addBatchSession
 */
@@ -229,10 +238,11 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     batchTopicOrder,
     batchTypeValue,
     appName,
+    userRoleFromContext,
   } = context;
   let courseId = get(context, 'courseId');
   // check if performed from TLA while marking student`s attendance
-  if (appName && appName === TWA) {
+  if (appName && appName === TWA && userRoleFromContext === MENTEE) {
     return;
   }
   /*
@@ -376,6 +386,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         (bookingDate && bookingDateFromInput && bookingDate.getTime() !== bookingDateFromInputParsed.getTime())
         || ((slotTimeArray.length > 0 && inputSlotTimeArray.length > 0) && get(slotTimeArray, '0') !== get(inputSlotTimeArray, '0'))
       ) {
+        const isBetweenTwoHrs = getSlotDifference(`slot${get(inputSlotTimeArray, '[0]')}`, bookingDateFromInputParsed, 2);
+        if (isBetweenTwoHrs) generateOtpForBatchSession(batchSessionId, students);
         toUpdateMenteeSession = true;
       }
       if (((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || newStudentsArray.length > 0)

@@ -306,6 +306,8 @@ Create student and their user profile
     }
   }
 
+  if (get(params, 'batchId')) batchId = get(params, 'batchId');
+
   const studentProfileId = await addStudentProfile(
     studentProfileInput,
     childUserId,

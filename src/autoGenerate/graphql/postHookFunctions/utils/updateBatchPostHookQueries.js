@@ -22,11 +22,18 @@ const getTopics = async (courseId) => {
   return get(topicMeta, 'data.topics');
 };
 
-// query to get batch sessions (started, completed)
-const getBatchSessions = async (batchId) => {
+// query to get batch sessions
+const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus) => {
   const query = `
           {
-            batchSessions(filter: {batch_some: {id: "${batchId}"}}, orderBy:bookingDate_ASC){
+            batchSessions(filter: {
+              and: [
+                {batch_some: {id: "${batchId}"}}
+                ${bookingDate ? `{bookingDate: "${bookingDate}"}` : ''}
+                ${slot ? `{slot${slot}: true}` : ''}
+                ${sessionStatus ? `{sessionStatus: ${sessionStatus}}` : ''}
+              ]
+            }, orderBy:bookingDate_ASC){
               id
               bookingDate
               sessionStatus
@@ -38,6 +45,31 @@ const getBatchSessions = async (batchId) => {
           `;
   const batches = await callLocalGraphqlApi(query);
   return get(batches, 'data.batchSessions');
+};
+
+// query to get adhoc sessions
+const getAdhocSessions = async (batchId, bookingDate, slot, sessionStatus) => {
+  const query = `
+          {
+            adhocSessions(filter: {
+              and: [
+                {batch_some: {id: "${batchId}"}}
+                ${bookingDate ? `{bookingDate: "${bookingDate}"}` : ''}
+                ${slot ? `{slot${slot}: true}` : ''}
+                ${sessionStatus ? `{sessionStatus: ${sessionStatus}}` : ''}
+              ]
+            }, orderBy:bookingDate_ASC){
+              id
+              bookingDate
+              sessionStatus
+              previousTopic{
+                order
+              }
+            }
+          }
+          `;
+  const sessions = await callLocalGraphqlApi(query);
+  return get(sessions, 'data.adhocSessions');
 };
 
 // query to get batch sessions (started, completed)
@@ -127,11 +159,32 @@ const updateBatchSession = async (sessionId, slots, date, mentorSessionId, cours
   return true;
 };
 
-const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId, courseId) => {
+const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId, courseId, adhocSessionType) => {
   const query = `
           mutation{
             addAdhocSession(batchConnectId: "${batchId}",
-            ${topicId ? `topicConnectId: "${topicId}"` : ''}
+            ${topicId ? `previousTopicConnectId: "${topicId}"` : ''}
+            ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
+            ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            input:{
+              bookingDate:"${date}",
+              type: ${adhocSessionType}
+              ${slots}
+            }
+            ){
+              id
+            }
+          }
+          `;
+  await callLocalGraphqlApi(query);
+  return true;
+};
+
+const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, courseId) => {
+  const query = `
+          mutation{
+            updateAdhocSession(
+            id: "${sessionId}",
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             ${courseId ? `courseConnectId: "${courseId}"` : ''}
             input:{
@@ -147,5 +200,35 @@ const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId
   return true;
 };
 
+const getBatchSession = (batchId,
+  topicId) => `
+  {
+    batchSessions(filter:{
+      and:[
+        {batch_some:{id:"${batchId}"}}
+        {topic_some:{id: "${topicId}"}}
+      ]
+    }){
+      id
+      bookingDate
+    }
+  }
+`;
+
+const getAdhocSession = (batchId,
+  topicId) => `
+  {
+    adhocSessions(filter:{
+      and:[
+        {batch_some:{id:"${batchId}"}}
+        {previousTopic_some:{id: "${topicId}"}}
+      ]
+    }){
+      id
+      bookingDate
+    }
+  }
+`;
+
 /* eslint-disable object-curly-newline */
-export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession };
+export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession, getAdhocSessions, updateAdhocSession, getBatchSession, getAdhocSession };

@@ -7,7 +7,7 @@ import validateMentorMenteePermission from './utils/validateMentorMenteePermissi
 import {
   SessionTopicAndTopicConnectIdMismatchError,
 } from '../../../../../constants/errors/input';
-import { ConnectIdRequiredError, DatabaseRecordNotFoundError } from '../../../../../constants/errors';
+import { ConnectIdRequiredError, DatabaseRecordNotFoundError, MentorIsInactiveError } from '../../../../../constants/errors';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetailsInParams';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
@@ -67,6 +67,9 @@ query{
     id
     user{
       id
+      mentorProfile{
+        isMentorActive
+      }
     }
   }
 }`;
@@ -95,6 +98,7 @@ const validateMenteeStartSessionData = (menteeSession, topicConnectId, params) =
   //   // }
   return true;
 };
+
 // prehook logic to check if added MentorSession(user id and availabilityDate) already exists
 const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   /* check if user has permission to hit API according to his role, if user is mentee and there is
@@ -140,6 +144,10 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
   const { bookingDate } = menteeSession;
+  const isMentorActive = get(fetchMentorRes,'data.mentorSession.user.mentorProfile.isMentorActive')
+  if(!isMentorActive){
+    throw new MentorIsInactiveError()
+  }
   if (mentorUserId && bookingDate) {
     const getMentorSessionsRes = await callLocalGraphqlApi(
       getMentorSessions(

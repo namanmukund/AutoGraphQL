@@ -19,7 +19,7 @@ const ClassroomSessionFilter = `
     courses: [ID]
 
     # Filter By Session Status
-    sessionStatus: [SessionStatus]
+    sessionStatus: [ClassroomSessionStatus]
 
     # Filter By Schools
     schools: [ID]

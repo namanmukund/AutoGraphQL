@@ -21,6 +21,7 @@ const MentorPricing = `
   )
   {
     course: Course! @relation(name: "CourseMentorPricing")
+    package: CoursePackage @relation(name: "CoursePackageMentorPricing")
     sessionPrice: PriceInputType!
     bonusAmount: PriceInputType
     modelType: ProductType! @defaultValue(value: "oneToOne")

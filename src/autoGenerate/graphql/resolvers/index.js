@@ -47,6 +47,7 @@ import getQuizReport from './mutation/methods/getQuizReport';
 import getPaymentRequest from './mutation/methods/getPaymentRequest';
 import loginViaOtp from './mutation/methods/loginViaOtp';
 import signupOrLoginViaOtp from './mutation/methods/signupOrLoginViaOtp';
+import schoolLiveClassLoginViaOtp from './mutation/methods/schoolLiveClassLoginViaOtp';
 import sendForgotPasswordLink from './mutation/methods/sendForgotPasswordLink';
 import getUnlockedUserBadge from './mutation/methods/getUnlockedUserBadge';
 import userBadge from './mutation/methods/userBadge';
@@ -108,6 +109,8 @@ import classroomSessions from './query/methods/classroomSessions';
 import updateEventSessionAttendance from './mutation/methods/updateEventSessionAttendance';
 import getNextOrPrevClassroomSessions from './query/methods/getNextOrPrevClassroomSessions';
 import classroomDetail from './query/methods/classroomDetail';
+import scheduleSessions from './mutation/shift/scheduleSessions';
+import getSchoolAndBatchDetail from './query/methods/getSchoolAndBatchDetail';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -600,6 +603,7 @@ resolvers.Mutation.menteeCourseSyllabus = menteeCourseSyllabus;
 resolvers.Mutation.userTopicJourney = userTopicJourney;
 // Resolver for custom quiz reports for user
 resolvers.Mutation.userFirstAndLatestQuizReport = userFirstAndLatestQuizReport;
+resolvers.Mutation.userFirstAndLatestQuizReports = userFirstAndLatestQuizReport;
 // Resolver for custom skip video by user
 resolvers.Mutation.skipVideo = skipVideo;
 // Resolver for custom skip practice question by user
@@ -619,6 +623,7 @@ resolvers.Mutation.updateParentChildDetail = updateParentChildDetail;
 resolvers.Mutation.loginViaPassword = loginViaPassword;
 resolvers.Mutation.loginViaOtp = loginViaOtp;
 resolvers.Mutation.signupOrLoginViaOtp = signupOrLoginViaOtp;
+resolvers.Mutation.schoolLiveClassLoginViaOtp = schoolLiveClassLoginViaOtp;
 resolvers.Mutation.validateUserOTP = validateUserOTP;
 // Resolver for a custom get user payment information, when user buys a product
 resolvers.Mutation.getPaymentRequest = getPaymentRequest;
@@ -638,6 +643,7 @@ resolvers.Mutation.validateMagicLink = validateMagicLink;
 resolvers.Mutation.resetPasswordAndLogin = resetPasswordAndLogin;
 resolvers.Mutation.generateMentorChild = generateMentorChild;
 resolvers.Mutation.updateEventSessionAttendance = updateEventSessionAttendance;
+resolvers.Mutation.scheduleSessions = scheduleSessions;
 
 // queries
 resolvers.Query.me = me;
@@ -677,6 +683,8 @@ resolvers.Query.classroomSessions = classroomSessions;
 resolvers.Query.getNextOrPrevClassroomSessions = getNextOrPrevClassroomSessions;
 // Resolver to get classroom sessions
 resolvers.Query.classroomDetail = classroomDetail;
+// Resolver to get classroom sessions
+resolvers.Query.getSchoolAndBatchDetail = getSchoolAndBatchDetail;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 

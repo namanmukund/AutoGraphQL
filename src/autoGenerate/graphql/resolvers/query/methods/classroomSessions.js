@@ -1,8 +1,10 @@
+/* eslint-disable no-plusplus */
+import { isBefore, isToday } from 'date-fns';
 import { get, sortBy } from 'lodash';
+import moment from 'moment';
 import { slotTimes } from '../../../../../../constants';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
-import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
-import { ifAuthorized, log } from '../../../../../../utils';
+import { ifAuthorized } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
 
 const getSlotTimeFields = (session) => {
@@ -20,6 +22,7 @@ const getSlotTimeFields = (session) => {
 const getBatchSessionAggregation = ({
   startDate,
   endDate,
+  mentorId,
   docFilters = {},
 }) => [
   {
@@ -71,10 +74,12 @@ const getBatchSessionAggregation = ({
         },
         {
           $project: {
+            id: 1,
             code: 1,
             classroomTitle: 1,
             description: 1,
             school: 1,
+            students: 1,
             classes: {
               id: 1,
               grade: 1,
@@ -186,12 +191,12 @@ const getBatchSessionAggregation = ({
       as: 'mentorSession',
     },
   },
-  // {
-  //   $match: {
-  //     'mentorSession.user.id': mentorId,
-  //     'classroom.documentType': 'classroom',
-  //   },
-  // },
+  {
+    $match: {
+      'mentorSession.user.id': mentorId,
+      'classroom.documentType': 'classroom',
+    },
+  },
   {
     $project: {
       id: 1,
@@ -227,6 +232,7 @@ const getBatchSessionAggregation = ({
 const getAdhocSessionAggregation = ({
   startDate,
   endDate,
+  mentorId,
   docFilters = {},
 }) => [
   {
@@ -279,10 +285,12 @@ const getAdhocSessionAggregation = ({
         },
         {
           $project: {
+            id: 1,
             code: 1,
             classroomTitle: 1,
             description: 1,
             school: 1,
+            students: 1,
             classes: {
               id: 1,
               grade: 1,
@@ -394,12 +402,12 @@ const getAdhocSessionAggregation = ({
       as: 'mentorSession',
     },
   },
-  // {
-  //   $match: {
-  //     'mentorSession.user.id': mentorId,
-  //     'classroom.documentType': 'classroom',
-  //   },
-  // },
+  {
+    $match: {
+      'mentorSession.user.id': mentorId,
+      'classroom.documentType': 'classroom',
+    },
+  },
   {
     $project: {
       id: 1,
@@ -433,6 +441,41 @@ const getAdhocSessionAggregation = ({
   },
 ];
 
+const getEventsScheduleAggregation = ({ startDate, endDate, schoolIds }) => [
+  {
+    $match: {
+      startDate: {
+        $gte: new Date(moment(startDate).subtract({ days: 1 })),
+      },
+      endDate: {
+        $lte: new Date(moment(endDate).add({ days: 1 })),
+      },
+      type: 'event',
+      'school.typeId': {
+        $in: schoolIds || [],
+      },
+    },
+  },
+  {
+    $project: {
+      id: 1,
+      eventType: 1,
+      type: 1,
+      startDate: 1,
+      endDate: 1,
+      ...getSlotTimeFields(),
+      school: 1,
+      batch: {
+        id: 1,
+        school: 1,
+        code: 1,
+        students: 1,
+        classroomTitle: 1,
+      },
+    },
+  },
+];
+
 const getTypeQueryController = (
   typeName,
   authentication = {
@@ -461,14 +504,19 @@ const constructDocFilters = (filters) => {
       $in: get(filters, 'sections', []),
     };
   }
-  if (get(filters, 'schools', []).length) {
-    classroomFilters['classroom.schools.typeId'] = {
-      $in: get(filters, 'schools'),
-    };
-  }
-  if (get(filters, 'sessionStatusFilter', []).length) {
+  // if (get(filters, 'schools', []).length) {
+  //   classroomFilters['classroom.schools.typeId'] = {
+  //     $in: get(filters, 'schools'),
+  //   };
+  // }
+  if (get(filters, 'sessionStatus', []).length) {
     sessionFilters.sessionStatus = {
-      $in: ['allotted', 'completed'],
+      $in: get(filters, 'sessionStatus', []).map((status) => {
+        if (status === 'unattended') {
+          return 'allotted';
+        }
+        return status;
+      }),
     };
   }
   if (get(filters, 'courses', []).length) {
@@ -482,7 +530,33 @@ const constructDocFilters = (filters) => {
   };
 };
 
-const transformMongoResults = (batchSessions, adhocSessions) => {
+const getSessionStatus = (session) => {
+  const sessionStatus = get(session, 'sessionStatus', 'allotted');
+  if (sessionStatus === 'allotted') {
+    /**
+     * Checking If allotted session lies before current date.
+     */
+    if (isBefore(get(session, 'bookingDate'), new Date())) {
+      if (isToday(get(session, 'bookingDate'))) {
+        const currentSlot = new Date().getHours() || 0;
+        let sessionSlot = 23;
+        for (let i = 0; i < 24; i++) {
+          if (session[`slot${i}`]) {
+            sessionSlot = i;
+          }
+        }
+        if (currentSlot < sessionSlot) {
+          return sessionStatus;
+        }
+      }
+      return 'unattended';
+    }
+    return sessionStatus;
+  }
+  return sessionStatus;
+};
+
+const transformMongoResults = (batchSessions, adhocSessions, events) => {
   const finalResult = [];
   if (batchSessions && batchSessions.length) {
     batchSessions.forEach((session) => {
@@ -491,7 +565,7 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
         bookingDate: get(session, 'bookingDate', null),
         sessionStartDate: get(session, 'sessionStartDate', null),
         sessionEndDate: get(session, 'sessionEndDate', null),
-        sessionStatus: get(session, 'sessionStatus', 'allotted'),
+        sessionStatus: getSessionStatus(session),
         sessionMode: get(session, 'sessionMode', 'online'),
         sessionRecordingLink: get(session, 'sessionRecordingLink', null),
         attendance: get(session, 'attendance', []),
@@ -500,8 +574,10 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
         startMinutes: get(session, 'startMinutes', 0),
         endMinutes: get(session, 'endMinutes', 0),
         classroom: {
+          id: get(session, 'classroom.id', ''),
           code: get(session, 'classroom.code', ''),
           classroomTitle: get(session, 'classroom.classroomTitle', ''),
+          students: get(session, 'classroom.students', []),
           description: get(session, 'classroom.description', null),
           classes: get(session, 'classroom.classes', null),
           school: get(session, 'classroom.school', null),
@@ -519,7 +595,7 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
         bookingDate: get(session, 'bookingDate', null),
         sessionStartDate: get(session, 'sessionStartDate', null),
         sessionEndDate: get(session, 'sessionEndDate', null),
-        sessionStatus: get(session, 'sessionStatus', 'allotted'),
+        sessionStatus: getSessionStatus(session),
         sessionMode: get(session, 'sessionMode', 'online'),
         sessionRecordingLink: get(session, 'sessionRecordingLink', null),
         attendance: get(session, 'attendance', []),
@@ -528,8 +604,10 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
         startMinutes: get(session, 'startMinutes', 0),
         endMinutes: get(session, 'endMinutes', 0),
         classroom: {
+          id: get(session, 'classroom.id', ''),
           code: get(session, 'classroom.code', ''),
           classroomTitle: get(session, 'classroom.classroomTitle', ''),
+          students: get(session, 'classroom.students', []),
           description: get(session, 'classroom.description', null),
           classes: get(session, 'classroom.classes', null),
           school: get(session, 'classroom.school', null),
@@ -540,11 +618,27 @@ const transformMongoResults = (batchSessions, adhocSessions) => {
       });
     });
   }
+  if (events && events.length) {
+    events.forEach((event) => {
+      finalResult.push({
+        id: get(event, 'id'),
+        bookingDate: get(event, 'startDate', null),
+        eventType: get(event, 'eventType', 'holiday'),
+        documentType: 'event',
+        startMinutes: get(event, 'startMinutes', 0),
+        endMinutes: get(event, 'endMinutes', 0),
+        classroom: {
+          code: get(event, 'batch.code', ''),
+          classroomTitle: get(event, 'batch.classroomTitle', ''),
+        },
+        ...getSlotTimeFields(event),
+      });
+    });
+  }
   return sortBy(finalResult, ['bookingDate']);
 };
 
 const classroomSessions = (async (root, params, context) => {
-  const startTime = process.hrtime();
   const authentication = ifAuthorized(context);
 
   if (!(authentication && authentication.app && authentication.user)) {
@@ -555,20 +649,17 @@ const classroomSessions = (async (root, params, context) => {
   const mentorId = get(filters, 'userId');
   const startDate = get(filters, 'startDate');
   const endDate = get(filters, 'endDate');
-  if (!mentorId || !startDate || !endDate) {
-    throw new MissingMandatoryInputInRequestError({
-      data: {
-        message: 'userId/startDate/endDate is missing in filter',
-      },
-    });
-  }
-
+  const schoolIds = get(filters, 'schools', []);
   const batchSessionModel = getTypeQueryController(
     'BatchSession',
     authentication,
   );
   const adhocSessionModel = getTypeQueryController(
     'AdhocSession',
+    authentication,
+  );
+  const timetableScheduleModel = getTypeQueryController(
+    'TimetableSchedule',
     authentication,
   );
 
@@ -584,6 +675,7 @@ const classroomSessions = (async (root, params, context) => {
     getBatchSessionAggregation({
       startDate,
       endDate,
+      mentorId,
       docFilters,
     }),
   );
@@ -592,7 +684,16 @@ const classroomSessions = (async (root, params, context) => {
     getAdhocSessionAggregation({
       startDate,
       endDate,
+      mentorId,
       docFilters,
+    }),
+  );
+
+  const events = await timetableScheduleModel.aggregate(
+    getEventsScheduleAggregation({
+      startDate,
+      endDate,
+      schoolIds,
     }),
   );
 
@@ -602,11 +703,24 @@ const classroomSessions = (async (root, params, context) => {
   const transformedClassroomResult = transformMongoResults(
     batchSessionRes,
     adhocSessionRes,
+    events,
   );
 
-  log(`Total Doc Returned ---> ${transformedClassroomResult.length}`);
-  const stopTime = process.hrtime(startTime);
-  log(`Total Time Taken ---> ${(stopTime[0] * 1e9 + stopTime[1]) / 1e9} seconds`);
+  if (
+    filters
+    && get(filters, 'sessionStatus', []).length
+    && (get(filters, 'sessionStatus', []).includes('unattended') || get(filters, 'sessionStatus', []).includes('allotted'))
+  ) {
+    return (transformedClassroomResult || []).filter((session) => {
+      if (get(session, 'documentType') === 'event') {
+        return true;
+      }
+      if (get(filters, 'sessionStatus', []).includes(get(session, 'sessionStatus'))) {
+        return true;
+      }
+      return false;
+    });
+  }
   return transformedClassroomResult || [];
 });
 
