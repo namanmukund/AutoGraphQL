@@ -293,6 +293,7 @@ const getAdhocSessionAggregation = ({
         course: 1,
         mentorSession: 1,
         attendance: 1,
+        schoolSessionsOtp: 1,
         ...getSlotTimeFields(),
       },
     },
