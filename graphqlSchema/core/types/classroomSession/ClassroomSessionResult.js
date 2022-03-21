@@ -34,6 +34,7 @@ const ClassroomSessionTopic = `
     tools: [ArrayValue]
     programming: [ArrayValue]
     theory: [ArrayValue]
+    classType: ClassType @defaultValue(value: "lab")
   }
 `;
 
