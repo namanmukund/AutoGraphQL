@@ -58,6 +58,7 @@ const getBatchSessionAggregation = ({
         course: 1,
         mentorSession: 1,
         attendance: 1,
+        schoolSessionsOtp: 1,
         ...getSlotTimeFields(),
       },
     },
@@ -144,6 +145,7 @@ const getBatchSessionAggregation = ({
               order: 1,
               title: 1,
               description: 1,
+              classType: 1,
               thumbnailSmall: {
                 $arrayElemAt: ['$thumbnailSmall', 0],
               },
@@ -201,6 +203,14 @@ const getBatchSessionAggregation = ({
       },
     },
     {
+      $lookup: {
+        from: 'SchoolSessionOtp',
+        localField: 'schoolSessionsOtp.typeId',
+        foreignField: 'id',
+        as: 'schoolSessionOtp',
+      },
+    },
+    {
       $match: {
         ...mentorIdsFilter,
         'classroom.documentType': documentType,
@@ -225,6 +235,11 @@ const getBatchSessionAggregation = ({
         },
         topic: {
           $arrayElemAt: ['$topic', 0],
+        },
+        schoolSessionOtp: {
+          grade: 1,
+          section: 1,
+          otp: 1,
         },
         course: 1,
         attendance: 1,
@@ -364,6 +379,7 @@ const getAdhocSessionAggregation = ({
               order: 1,
               title: 1,
               description: 1,
+              classType: 1,
               thumbnailSmall: {
                 $arrayElemAt: ['$thumbnailSmall', 0],
               },
@@ -421,6 +437,14 @@ const getAdhocSessionAggregation = ({
       },
     },
     {
+      $lookup: {
+        from: 'SchoolSessionOtp',
+        localField: 'schoolSessionsOtp.typeId',
+        foreignField: 'id',
+        as: 'schoolSessionOtp',
+      },
+    },
+    {
       $match: {
         ...mentorIdsFilter,
         'classroom.documentType': documentType,
@@ -448,6 +472,11 @@ const getAdhocSessionAggregation = ({
           $arrayElemAt: ['$previousTopic', 0],
         },
         course: 1,
+        schoolSessionOtp: {
+          grade: 1,
+          section: 1,
+          otp: 1,
+        },
         attendance: 1,
         ...getSlotTimeFields(),
       },
@@ -601,6 +630,7 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
           classes: get(session, 'classroom.classes', null),
           school: get(session, 'classroom.school', null),
         },
+        sessionOtp: get(session, 'schoolSessionOtp', []),
         ...getSlotTimeFields(session),
         topic: get(session, 'topic', null),
         previousTopic: null,
@@ -631,6 +661,7 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
           classes: get(session, 'classroom.classes', null),
           school: get(session, 'classroom.school', null),
         },
+        sessionOtp: get(session, 'schoolSessionOtp', null),
         ...getSlotTimeFields(session),
         topic: null,
         previousTopic: get(session, 'previousTopic', null),
