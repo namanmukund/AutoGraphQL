@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { get } from 'lodash';
 import { MENTOR } from '../constants/roles';
 
@@ -39,7 +38,6 @@ export const ifAuthorized = (context, userToken) => {
   const app = authenticateApp(context);
   const user = authenticateUser(context, userToken);
   const mentor = authenticateMentor(context);
-  console.log('user from inside', user);
   const obj = {};
   // no need to show mentor tag inn context if it has no value
   if (mentor) {

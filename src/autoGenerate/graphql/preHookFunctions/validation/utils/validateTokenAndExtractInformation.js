@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { ifAuthorized } from '../../../../../../utils';
 import MasterController from '../../../controllers/MasterController';
 import { frontEndApps } from '../../../../../../constants';
@@ -10,7 +9,6 @@ user and app info
 */
 const validateTokenAndExtractInformation = (context, skipUserValidation) => {
   const authentication = ifAuthorized(context);
-  console.log(skipUserValidation, 'skipUserValidation');
   if (skipUserValidation === true && authentication && !authentication.user) {
     validateSpecificAppToken(
       authentication,

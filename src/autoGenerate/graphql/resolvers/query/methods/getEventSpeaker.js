@@ -32,7 +32,6 @@ const getEventSpeaker = (async (root, params, context, info) => {
     throw new MissingMandatoryInputInRequestError();
   }
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
-  console.log('userAndAppInfo', userAndAppInfo);
   validateAuthentication(context, 'app');
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
@@ -43,6 +42,7 @@ const getEventSpeaker = (async (root, params, context, info) => {
   if (!userIdFromContext) {
     if (get(fieldsFetched, 'user')) {
       const isValidField = await validateIncomingFields(get(fieldsFetched, 'user'), ['profilePic', 'name', 'id', 'profilePic.uri']);
+      console.log('isValidField', isValidField);
       if (isValidField) {
         throw new UnauthenticatedUserError();
       }

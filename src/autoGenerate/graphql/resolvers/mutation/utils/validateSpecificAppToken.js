@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { backendApps } from '../../../../../../constants';
 import {
   UnauthenticatedAppError,
@@ -12,7 +11,6 @@ const validateSpecificAppToken = (
   isBackendAppAllowed = true,
 ) => {
   const { user, app } = authentication;
-  console.log('user=========>', user, isUserTokenReq);
   if (app && app.name && isBackendAppAllowed && backendApps.includes(app.name)) {
     return true;
   }
