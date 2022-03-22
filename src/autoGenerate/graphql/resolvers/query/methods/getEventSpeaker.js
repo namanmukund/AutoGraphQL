@@ -17,6 +17,10 @@ const getSpeakers = async (eventId) => {
     about
     user {
       id
+      name
+      profilePic{
+        uri
+      }
     }
   }
 }
@@ -55,7 +59,8 @@ const getEventSpeaker = (async (root, params, context, info) => {
         roleAtOrganization: get(speaker, 'roleAtOrganization'),
         organization: get(speaker, 'organization'),
         about: get(speaker, 'about'),
-        user: { type: 'User', typeId: `${get(speaker, 'user.id')}` },
+        name: get(speaker, 'user.name'),
+        profilePic: get(speaker, 'user.profilePic.uri'),
       });
     });
   }
