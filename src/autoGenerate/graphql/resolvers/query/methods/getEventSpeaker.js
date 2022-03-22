@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { get } from 'lodash';
 import { UnauthenticatedUserError } from '../../../../../../constants/errors';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
@@ -31,6 +32,7 @@ const getEventSpeaker = (async (root, params, context, info) => {
     throw new MissingMandatoryInputInRequestError();
   }
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
+  console.log('userAndAppInfo', userAndAppInfo);
   validateAuthentication(context, 'app');
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
