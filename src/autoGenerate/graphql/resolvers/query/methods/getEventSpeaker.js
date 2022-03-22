@@ -42,7 +42,6 @@ const getEventSpeaker = (async (root, params, context, info) => {
   if (!userIdFromContext) {
     if (get(fieldsFetched, 'user')) {
       const isValidField = await validateIncomingFields(get(fieldsFetched, 'user'), ['profilePic', 'name', 'id', 'profilePic.uri']);
-      console.log('isValidField', isValidField);
       if (isValidField) {
         throw new UnauthenticatedUserError();
       }
