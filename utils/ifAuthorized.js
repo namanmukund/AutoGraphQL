@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { get } from 'lodash';
 import { MENTOR } from '../constants/roles';
 
