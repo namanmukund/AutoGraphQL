@@ -111,6 +111,7 @@ import getNextOrPrevClassroomSessions from './query/methods/getNextOrPrevClassro
 import classroomDetail from './query/methods/classroomDetail';
 import scheduleSessions from './mutation/shift/scheduleSessions';
 import getSchoolAndBatchDetail from './query/methods/getSchoolAndBatchDetail';
+import getSessionComponentMeta from './query/methods/getSessionComponentMeta';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -685,6 +686,8 @@ resolvers.Query.getNextOrPrevClassroomSessions = getNextOrPrevClassroomSessions;
 resolvers.Query.classroomDetail = classroomDetail;
 // Resolver to get classroom sessions
 resolvers.Query.getSchoolAndBatchDetail = getSchoolAndBatchDetail;
+// Resolver to get classroom session Details
+resolvers.Query.getSessionComponentMeta = getSessionComponentMeta;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 
