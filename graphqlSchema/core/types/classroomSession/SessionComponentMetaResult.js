@@ -1,6 +1,6 @@
 const SessionComponentMetaResult = `
   type SessionComponentMetaResult {
-    id: String!
+    id: String
     topicId: ID
     classroomId: ID
     classroomTitle: String
@@ -9,7 +9,7 @@ const SessionComponentMetaResult = `
     completedQuizMeta: Int
     completedAssignmentMeta: Int
     completedPracticeMeta: Int
-    sessionStatus: SessionStatus! @defaultValue(value: "allotted")
+    sessionStatus: SessionStatus @defaultValue(value: "allotted")
   }
 `;
 
