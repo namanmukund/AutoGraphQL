@@ -22,6 +22,7 @@ const customQueryString = `
     getNextOrPrevClassroomSessions (input: [NextOrPrevClassroomSessionInput]!): [NextOrPrevClassroomSessionResult]
     classroomDetail (batchId: String): ClassroomDetailResult
     getSchoolAndBatchDetail (schoolId: String, batchId: String): BatchAndSchoolResult
+    getClassroomHomeworkReport (batchId: String, topicId: String): ClassroomHomeworkReportOutput
 `;
 
 export default customQueryString;
