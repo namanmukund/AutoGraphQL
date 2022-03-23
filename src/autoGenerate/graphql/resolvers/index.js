@@ -112,6 +112,7 @@ import classroomDetail from './query/methods/classroomDetail';
 import scheduleSessions from './mutation/shift/scheduleSessions';
 import getSchoolAndBatchDetail from './query/methods/getSchoolAndBatchDetail';
 import getSessionComponentMeta from './query/methods/getSessionComponentMeta';
+import getClassroomHomeworkReport from './query/methods/getClassroomHomeworkReport';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -688,6 +689,8 @@ resolvers.Query.classroomDetail = classroomDetail;
 resolvers.Query.getSchoolAndBatchDetail = getSchoolAndBatchDetail;
 // Resolver to get classroom session Details
 resolvers.Query.getSessionComponentMeta = getSessionComponentMeta;
+// Resolver to get classroom homework report
+resolvers.Query.getClassroomHomeworkReport = getClassroomHomeworkReport;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 

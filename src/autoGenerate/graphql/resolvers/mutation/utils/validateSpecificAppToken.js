@@ -11,7 +11,6 @@ const validateSpecificAppToken = (
   isBackendAppAllowed = true,
 ) => {
   const { user, app } = authentication;
-
   if (app && app.name && isBackendAppAllowed && backendApps.includes(app.name)) {
     return true;
   }

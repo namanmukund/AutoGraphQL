@@ -3,11 +3,12 @@ import { TBA, TMS } from '../../../../constants';
 const GetSpeakerProfile = `
   type GetEventSpeaker
   {
-    user: User! @relation(name: "GetEventSpeakerUser")
     linkedInLink: String
     roleAtOrganization: String
     organization: String
     about: String
+    name: String
+    profilePic: String
 }`;
 
 const EventSpeakerProfile = `

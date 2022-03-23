@@ -23,6 +23,7 @@ const customQueryString = `
     classroomDetail (batchId: String): ClassroomDetailResult
     getSchoolAndBatchDetail (schoolId: String, batchId: String): BatchAndSchoolResult
     getSessionComponentMeta (sessionId: ID!): SessionComponentMetaResult
+    getClassroomHomeworkReport (batchId: String, topicId: String): ClassroomHomeworkReportOutput
 `;
 
 export default customQueryString;

@@ -140,6 +140,9 @@ const signupOrLoginViaOtp = async (
   const grade = get(otpExist, '[0].grade');
   const section = get(otpExist, '[0].section');
   const batchId = get(otpExist, '[0].batchSession.batch[0].id');
+  Object.assign(authentication, {
+    bypass: true,
+  });
   const modelQueries = new QueryController('StudentProfile', authentication);
   const studentProfile = await fetchUserForGradeSectionAndRollNum({
     grade, section, rollNo, 'batch.typeId': batchId,
