@@ -161,6 +161,7 @@ import LearningSlideContent from './learningSlideContent';
 import LearningSlide from './learningSlide';
 import UserActivityLearningSlideDump from './userActivityLearningSlideDump';
 import ShortLink from './shortLink';
+import ClassroomHomeworkReport from './classroomHomeworkReport';
 
 export default [
   ...User,
@@ -326,4 +327,5 @@ export default [
   ...LearningSlide,
   ...UserActivityLearningSlideDump,
   ...ShortLink,
+  ...ClassroomHomeworkReport,
 ];
