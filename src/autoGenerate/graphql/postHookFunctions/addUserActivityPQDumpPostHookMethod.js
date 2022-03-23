@@ -454,8 +454,8 @@ And current component status will not get changed when it is already consumed in
           replace: detailedReport,
         },
       });
-      await callLocalGraphqlApi(updateUserPracticeQuestionReportMutation(get(pqReport, 'data.userPracticeQuestionReports[0].id')), '', {
-        pqReportInput,
+      await callLocalGraphqlApi(updateUserPracticeQuestionReportMutation(get(pqReport, 'data.userPracticeQuestionReports[0].id')), context, {
+        input: pqReportInput,
       });
     } else {
       // adding pqReport
@@ -463,8 +463,8 @@ And current component status will not get changed when it is already consumed in
         userId,
         learningObjectiveIdInResult,
         courseId,
-      ), '', {
-        pqReportInput,
+      ), context, {
+        input: pqReportInput,
       });
     }
     return true;
@@ -475,8 +475,8 @@ And current component status will not get changed when it is already consumed in
       userId,
       learningObjectiveIdInResult,
       courseId,
-    ), '', {
-      pqReportInput,
+    ), context, {
+      input: pqReportInput,
     });
   }
   return true;
