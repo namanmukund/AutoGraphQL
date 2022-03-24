@@ -11,13 +11,13 @@ mutation{
     ${queryObj.studentName ? `studentName: "${queryObj.studentName}",` : ''}
     ${queryObj.grade ? `grade: Grade${grade},` : ''}
     ${typeof queryObj.status === 'boolean' ? `paymentStatus:${queryObj.status}, ` : ''}
-    ${queryObj.city ? `city: ${city},` : ''}
-    ${queryObj.state ? `state: ${state},` : ''}
-    ${queryObj.pincode ? `pincode: ${pincode},` : ''}
-    ${queryObj.joiningDate ? `joiningDate: "${joiningDate.toISOString()}",` : ''}
-    ${queryObj.externalProductId ? `externalProductId: ${externalProductId},` : ''}
-    ${queryObj.merchantSellingPrice ? `merchantSellingPrice: ${merchantSellingPrice},` : ''}
-    ${queryObj.purchaseDate ? `purchaseDate: "${purchaseDate.toISOString()}",` : ''}
+    ${queryObj.city ? `city: "${queryObj.city}",` : ''}
+    ${queryObj.state ? `state: "${queryObj.state}",` : ''}
+    ${queryObj.pincode ? `pincode: "${queryObj.pincode}",` : ''}
+    ${queryObj.joiningDate ? `joiningDate: "${queryObj.joiningDate.toISOString()}",` : ''}
+    ${queryObj.externalProductId ? `externalProductId: "${queryObj.externalProductId}",` : ''}
+    ${queryObj.merchantSellingPrice ? `merchantSellingPrice: ${queryObj.merchantSellingPrice},` : ''}
+    ${queryObj.purchaseDate ? `purchaseDate: "${queryObj.purchaseDate.toISOString()}",` : ''}
   }){
     id
   }
