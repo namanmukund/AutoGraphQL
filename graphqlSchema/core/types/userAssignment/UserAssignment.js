@@ -4,6 +4,7 @@ const assignmentType = `
    assignmentQuestionDisplayOrder: Int
    isAttempted: Boolean @defaultValue(value: "false")
    userAnswerCodeSnippet: String @trim
+   result: EvaluationResult @defaultValue(value: "pending")
  }`;
 
 const UserAssignment = `

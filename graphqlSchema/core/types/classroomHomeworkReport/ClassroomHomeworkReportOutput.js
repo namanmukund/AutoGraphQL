@@ -1,20 +1,20 @@
 const OverallReportType = `
   type OverallReportType {
-    submittedPercentage: Int
-    attemptedPercentage: Int
-    unattemptedPercentage: Int
+    submittedPercentage: Float
+    attemptedPercentage: Float
+    unattemptedPercentage: Float
   }`;
 
 const PartialReportType = `
   type PartialReportType {
-    submittedPercentage: Int
-    attemptedPercentage: Int
-    unattemptedPercentage: Int
+    submittedPercentage: Float
+    attemptedPercentage: Float
+    unattemptedPercentage: Float
     totalQuestions: Int
-    averageScore: Int
-    averageCorrect: Int
-    averageIncorrect: Int
-    averagePartiallyCorrect: Int
+    averageScore: Float
+    averageCorrect: Float
+    averageIncorrect: Float
+    averagePartiallyCorrect: Float
   }`;
 
 const ClassroomHomeworkReportOutput = `
