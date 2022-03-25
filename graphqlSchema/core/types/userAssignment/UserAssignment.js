@@ -14,6 +14,7 @@ const UserAssignment = `
     assignment: [AssignmentType]
     topic: Topic! @relation(name: "TopicUserAssignment", direction: "OneWay")
     course: Course @relation(name: "UserAssignmentCourse", direction: "OneWay")
+    evaluationStatus: TaskCompletionStatus
   }
 `;
 

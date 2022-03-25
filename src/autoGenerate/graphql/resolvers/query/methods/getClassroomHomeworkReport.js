@@ -332,6 +332,14 @@ const classroomHomeworkReport = (async (root, params, context) => {
     }),
   );
 
+  if (!(batchSessionRes && batchSessionRes.length)) {
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'Topic Id or Batch Id passed is incorrect.',
+      },
+    });
+  }
+
   const students = get(batchSessionRes, '[0].batch.students');
   const courseId = get(batchSessionRes, '[0].course.typeId');
   const obj = {
@@ -407,6 +415,8 @@ const classroomHomeworkReport = (async (root, params, context) => {
       const userAssignment = get(userAssignmentRes, '[0]');
       obj.assignmentTotalQuestions = get(userAssignment, 'assignment', []).length;
     }
+
+    // TODO : add user block based practice aggregation
   }
 
   /**
