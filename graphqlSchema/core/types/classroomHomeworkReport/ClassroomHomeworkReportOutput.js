@@ -1,20 +1,28 @@
 const OverallReportType = `
   type OverallReportType {
-    submittedPercentage: Int
-    attemptedPercentage: Int
-    unattemptedPercentage: Int
+    submittedPercentage: Float
+    attemptedPercentage: Float
+    unattemptedPercentage: Float
   }`;
+
+const IndividualQuestionsScoreType = `
+  type IndividualQuestionsScoreType {
+    questionId: String
+    percentageCorrect: Float 
+  }
+`;
 
 const PartialReportType = `
   type PartialReportType {
-    submittedPercentage: Int
-    attemptedPercentage: Int
-    unattemptedPercentage: Int
+    submittedPercentage: Float
+    attemptedPercentage: Float
+    unattemptedPercentage: Float
     totalQuestions: Int
-    averageScore: Int
-    averageCorrect: Int
-    averageIncorrect: Int
-    averagePartiallyCorrect: Int
+    averageScore: Float
+    averageCorrect: Float
+    averageIncorrect: Float
+    averagePartiallyCorrect: Float
+    questions: [IndividualQuestionsScoreType]
   }`;
 
 const ClassroomHomeworkReportOutput = `
@@ -25,4 +33,9 @@ const ClassroomHomeworkReportOutput = `
     pq: PartialReportType
   }`;
 
-export default [ClassroomHomeworkReportOutput, OverallReportType, PartialReportType];
+export default [
+  ClassroomHomeworkReportOutput,
+  OverallReportType,
+  PartialReportType,
+  IndividualQuestionsScoreType,
+];

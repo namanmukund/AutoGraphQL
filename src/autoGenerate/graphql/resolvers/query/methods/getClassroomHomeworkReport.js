@@ -1,26 +1,14 @@
+/* eslint-disable arrow-body-style */
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-unreachable */
 /* eslint-disable implicit-arrow-linebreak */
 /* eslint-disable no-plusplus */
-import { isBefore, isToday } from 'date-fns';
-import { get, sortBy } from 'lodash';
-// import moment from 'moment';
-import { slotTimes } from '../../../../../../constants';
+import { get } from 'lodash';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { ifAuthorized } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
-
-const getSlotTimeFields = (session) => {
-  const slotTimeObj = {};
-  slotTimes.forEach((slotTime) => {
-    if (session) {
-      slotTimeObj[`${slotTime}`] = get(session, slotTime, false);
-    } else {
-      slotTimeObj[`${slotTime}`] = 1;
-    }
-  });
-  return slotTimeObj;
-};
 
 const getBatchSessionAggregation = ({ batchId, topicId }) =>
   [{
@@ -216,11 +204,7 @@ const getMentorMenteeSessionAggregation = ({ userId, topicId }) =>
 const getUserQuizReportAggregation = ({ userId, topicId }) =>
   [{
     $match: {
-      'user.typeId': {
-        $in: [
-          userId,
-        ],
-      },
+      'user.typeId': userId,
       'topic.typeId': topicId,
     },
   }, {
@@ -236,6 +220,102 @@ const getUserQuizReportAggregation = ({ userId, topicId }) =>
     },
   }];
 
+const getUserAssignmentAggregation = ({
+  userId,
+  topicId,
+  courseId,
+}) => [{
+  $match: {
+    'user.typeId': userId,
+    'topic.typeId': topicId,
+    'course.typeId': courseId,
+  },
+}, {
+  $project: {
+    assignmentStatus: 1,
+    assignment: {
+      $arrayElemAt: [
+        '$assignment',
+        0,
+      ],
+    },
+  },
+}, {
+  $lookup: {
+    from: 'AssignmentQuestion',
+    let: {
+      assignmentQuestionId: '$assignment.assignmentQuestion.typeId',
+    },
+    pipeline: [
+      {
+        $match: {
+          $expr: {
+            $eq: [
+              '$id',
+              '$$assignmentQuestionId',
+            ],
+          },
+          isHomework: false,
+        },
+      },
+    ],
+    as: 'assignmentQuestion',
+  },
+}, {
+  $project: {
+    assignmentStatus: 1,
+    assignment: 1,
+    assignmentQuestion: {
+      $arrayElemAt: [
+        '$assignmentQuestion',
+        0,
+      ],
+    },
+  },
+}];
+
+const getUserBlockBasedPracticeAggregation = ({
+  userId,
+  topicId,
+  courseId,
+}) => [{
+  $match: {
+    'user.typeId': userId,
+    'topic.typeId': topicId,
+    'course.typeId': courseId,
+  },
+}, {
+  $lookup: {
+    from: 'BlockBasedProject',
+    let: {
+      questionId: '$blockBasedPractice.typeId',
+    },
+    pipeline: [
+      {
+        $match: {
+          $expr: {
+            $eq: [
+              '$id',
+              '$$questionId',
+            ],
+          },
+          isHomework: true,
+        },
+      },
+    ],
+    as: 'blockBasedPractice',
+  },
+}, {
+  $project: {
+    blockBasedPractice: {
+      $arrayElemAt: [
+        '$blockBasedPractice',
+        0,
+      ],
+    },
+  },
+}];
+
 const getTypeQueryController = (
   typeName,
   authentication = {
@@ -243,161 +323,63 @@ const getTypeQueryController = (
   },
 ) => new QueryController(typeName, authentication);
 
-// const constructDocFilters = (filters) => {
-//   /**
-//    * Example Filters ->
-//    *  grades: [ 'Grade1', 'Grade2' ],
-//    *  sections: [ 'A', 'B' ],
-//    *  courses: [ 'ID1', 'ID2' ],
-//    *  sessionStatus: [ 'started', 'completed' ]
-//    *  schools: ['ID']
-//    */
-//   const sessionFilters = {};
-//   const classroomFilters = {};
-//   if (get(filters, 'grades', []).length) {
-//     classroomFilters['classroom.classes.grade'] = {
-//       $in: get(filters, 'grades'),
-//     };
-//   }
-//   if (get(filters, 'sections', []).length) {
-//     classroomFilters['classroom.classes.section'] = {
-//       $in: get(filters, 'sections', []),
-//     };
-//   }
-//   if (get(filters, 'schools', []).length) {
-//     classroomFilters['classroom.school.typeId'] = {
-//       $in: get(filters, 'schools'),
-//     };
-//   }
-//   if (get(filters, 'sessionStatus', []).length) {
-//     sessionFilters.sessionStatus = {
-//       $in: get(filters, 'sessionStatus', []).map((status) => {
-//         if (status === 'unattended') {
-//           return 'allotted';
-//         }
-//         return status;
-//       }),
-//     };
-//   }
-//   if (get(filters, 'courses', []).length) {
-//     sessionFilters['course.typeId'] = {
-//       $in: get(filters, 'courses'),
-//     };
-//   }
-//   return {
-//     ...sessionFilters,
-//     ...classroomFilters,
-//   };
-// };
-
-const getSessionStatus = (session) => {
-  const sessionStatus = get(session, 'sessionStatus', 'allotted');
-  if (sessionStatus === 'allotted') {
-    /**
-     * Checking If allotted session lies before current date.
-     */
-    if (isBefore(get(session, 'bookingDate'), new Date())) {
-      if (isToday(get(session, 'bookingDate'))) {
-        const currentSlot = new Date().getHours() || 0;
-        let sessionSlot = 23;
-        for (let i = 0; i < 24; i++) {
-          if (session[`slot${i}`]) {
-            sessionSlot = i;
-          }
-        }
-        if (currentSlot < sessionSlot) {
-          return sessionStatus;
-        }
-      }
-      return 'unattended';
-    }
-    return sessionStatus;
-  }
-  return sessionStatus;
-};
-
-const transformMongoResults = (batchSessions, adhocSessions, events) => {
-  const finalResult = [];
-  if (batchSessions && batchSessions.length) {
-    batchSessions.forEach((session) => {
-      finalResult.push({
-        id: get(session, 'id'),
-        bookingDate: get(session, 'bookingDate', null),
-        sessionStartDate: get(session, 'sessionStartDate', null),
-        sessionEndDate: get(session, 'sessionEndDate', null),
-        sessionStatus: getSessionStatus(session),
-        sessionMode: get(session, 'sessionMode', 'online'),
-        sessionRecordingLink: get(session, 'sessionRecordingLink', null),
-        attendance: get(session, 'attendance', []),
-        sessionType: 'learning',
-        documentType: 'batchSession',
-        startMinutes: get(session, 'startMinutes', 0),
-        endMinutes: get(session, 'endMinutes', 0),
-        classroom: {
-          id: get(session, 'classroom.id', ''),
-          code: get(session, 'classroom.code', ''),
-          classroomTitle: get(session, 'classroom.classroomTitle', ''),
-          students: get(session, 'classroom.students', []),
-          description: get(session, 'classroom.description', null),
-          classes: get(session, 'classroom.classes', null),
-          school: get(session, 'classroom.school', null),
-        },
-        sessionOtp: get(session, 'schoolSessionOtp', []),
-        ...getSlotTimeFields(session),
-        topic: get(session, 'topic', null),
-        previousTopic: null,
-      });
-    });
-  }
-  if (adhocSessions && adhocSessions.length) {
-    adhocSessions.forEach((session) => {
-      finalResult.push({
-        id: get(session, 'id'),
-        bookingDate: get(session, 'bookingDate', null),
-        sessionStartDate: get(session, 'sessionStartDate', null),
-        sessionEndDate: get(session, 'sessionEndDate', null),
-        sessionStatus: getSessionStatus(session),
-        sessionMode: get(session, 'sessionMode', 'online'),
-        sessionRecordingLink: get(session, 'sessionRecordingLink', null),
-        attendance: get(session, 'attendance', []),
-        sessionType: get(session, 'type', null),
-        documentType: 'adhocSession',
-        startMinutes: get(session, 'startMinutes', 0),
-        endMinutes: get(session, 'endMinutes', 0),
-        classroom: {
-          id: get(session, 'classroom.id', ''),
-          code: get(session, 'classroom.code', ''),
-          classroomTitle: get(session, 'classroom.classroomTitle', ''),
-          students: get(session, 'classroom.students', []),
-          description: get(session, 'classroom.description', null),
-          classes: get(session, 'classroom.classes', null),
-          school: get(session, 'classroom.school', null),
-        },
-        sessionOtp: get(session, 'schoolSessionOtp', null),
-        ...getSlotTimeFields(session),
-        topic: null,
-        previousTopic: get(session, 'previousTopic', null),
-      });
-    });
-  }
-  if (events && events.length) {
-    events.forEach((event) => {
-      finalResult.push({
-        id: get(event, 'id'),
-        bookingDate: get(event, 'startDate', null),
-        eventType: get(event, 'eventType', 'holiday'),
-        documentType: 'event',
-        startMinutes: get(event, 'startMinutes', 0),
-        endMinutes: get(event, 'endMinutes', 0),
-        classroom: {
-          code: get(event, 'batch.code', ''),
-          classroomTitle: get(event, 'batch.classroomTitle', ''),
-        },
-        ...getSlotTimeFields(event),
-      });
-    });
-  }
-  return sortBy(finalResult, ['bookingDate']);
+const transformMongoResults = (obj) => {
+  const finalResult = {
+    overall: {
+      submittedPercentage: ((obj.submittedCount * 100) / obj.studentsCount).toFixed(2),
+      attemptedPercentage: ((obj.attemptedCount * 100) / obj.studentsCount).toFixed(2),
+      unattemptedPercentage: ((obj.unattemptedCount * 100) / obj.studentsCount).toFixed(2),
+    },
+    quiz: {
+      submittedPercentage: ((obj.quizSubmittedCount * 100) / obj.studentsCount).toFixed(2),
+      unattemptedPercentage: (100 - ((obj.quizSubmittedCount * 100) / obj.studentsCount).toFixed(2)).toFixed(2),
+      totalQuestions: obj.quizTotalQuestions,
+      averageScore: ((obj.quizCorrectSum * 100) / (obj.studentsCount * 10)).toFixed(2),
+      averageCorrect: (obj.quizCorrectSum / obj.studentsCount).toFixed(2),
+      averageIncorrect: (obj.quizIncorrectSum / obj.studentsCount).toFixed(2),
+      averagePartiallyCorrect: null,
+      questions: [],
+    },
+    coding: {
+      submittedPercentage: ((obj.assignmentSubmittedCount * 100) / obj.studentsCount).toFixed(2),
+      unattemptedPercentage: (100 - ((obj.assignmentSubmittedCount * 100) / obj.studentsCount).toFixed(2)).toFixed(2),
+      totalQuestions: obj.assignmentTotalQuestions,
+      averageScore: ((obj.assignmentCorrectSum * 100) / (obj.studentsCount * 10)).toFixed(2),
+      averageCorrect: (obj.assignmentCorrectSum / obj.studentsCount).toFixed(2),
+      averageIncorrect: (obj.assignmentIncorrectSum / obj.studentsCount).toFixed(2),
+      averagePartiallyCorrect: (obj.assignmentPartiallyCorrectSum / obj.studentsCount).toFixed(2),
+      questions: [],
+    },
+    pq: {
+      submittedPercentage: ((obj.pqSubmittedCount * 100) / obj.studentsCount).toFixed(2),
+      unattemptedPercentage: (100 - ((obj.pqSubmittedCount * 100) / obj.studentsCount).toFixed(2)).toFixed(2),
+      totalQuestions: obj.pqTotalQuestions,
+      averageScore: ((obj.pqCorrectSum * 100) / (obj.studentsCount * 10)).toFixed(2),
+      averageCorrect: (obj.pqCorrectSum / obj.studentsCount).toFixed(2),
+      averageIncorrect: (obj.pqIncorrectSum / obj.studentsCount).toFixed(2),
+      averagePartiallyCorrect: null,
+      questions: [],
+    },
+  };
+  finalResult.quiz.questions = Object.entries(obj.quizQuestions).map(([k, v]) => {
+    return {
+      questionId: k,
+      percentageCorrect: ((v * 100) / obj.studentsCount).toFixed(2),
+    };
+  });
+  finalResult.coding.questions = Object.entries(obj.assignmentQuestions).map(([k, v]) => {
+    return {
+      questionId: k,
+      percentageCorrect: ((v * 100) / obj.studentsCount).toFixed(2),
+    };
+  });
+  finalResult.pq.questions = Object.entries(obj.pqQuestions).map(([k, v]) => {
+    return {
+      questionId: k,
+      percentageCorrect: ((v * 100) / obj.studentsCount).toFixed(2),
+    };
+  });
+  return finalResult;
 };
 
 const classroomHomeworkReport = (async (root, params, context) => {
@@ -406,44 +388,6 @@ const classroomHomeworkReport = (async (root, params, context) => {
   if (!(authentication && authentication.app && authentication.user)) {
     throw new UnauthorizedOperationError();
   }
-
-  return {
-    overall: {
-      submittedPercentage: 78,
-      attemptedPercentage: 10,
-      unattemptedPercentage: 12,
-    },
-    quiz: {
-      submittedPercentage: 56,
-      attemptedPercentage: 12,
-      unattemptedPercentage: 32,
-      totalQuestions: 10,
-      averageScore: 8,
-      averageCorrect: 6,
-      averageIncorrect: 3,
-      averagePartiallyCorrect: 2,
-    },
-    coding: {
-      submittedPercentage: 56,
-      attemptedPercentage: 12,
-      unattemptedPercentage: 32,
-      totalQuestions: 10,
-      averageScore: 8,
-      averageCorrect: 6,
-      averageIncorrect: 3,
-      averagePartiallyCorrect: 2,
-    },
-    pq: {
-      submittedPercentage: 56,
-      attemptedPercentage: 12,
-      unattemptedPercentage: 32,
-      totalQuestions: 10,
-      averageScore: 8,
-      averageCorrect: 6,
-      averageIncorrect: 3,
-      averagePartiallyCorrect: 2,
-    },
-  };
 
   const { batchId, topicId } = params;
 
@@ -470,6 +414,16 @@ const classroomHomeworkReport = (async (root, params, context) => {
     authentication,
   );
 
+  const userAssignmentModel = getTypeQueryController(
+    'UserAssignment',
+    authentication,
+  );
+
+  const userBlockBasedPracticeModel = getTypeQueryController(
+    'UserBlockBasedPractice',
+    authentication,
+  );
+
   /**
    * Aggregation Queries for batchSession & adhocSessions
    */
@@ -480,9 +434,47 @@ const classroomHomeworkReport = (async (root, params, context) => {
     }),
   );
 
-  const students = get(batchSessionRes[0], 'batch.students');
-  const mmsArray = [];
-  students.forEach(async (student) => {
+  if (!(batchSessionRes && batchSessionRes.length)) {
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'Topic Id or Batch Id passed is incorrect.',
+      },
+    });
+  }
+
+  const students = get(batchSessionRes, '[0].batch.students');
+  const courseId = get(batchSessionRes, '[0].course.typeId');
+  const obj = {
+    studentsCount: students.length,
+    submittedCount: 0,
+    attemptedCount: 0,
+    unattemptedCount: 0,
+    quizTotalQuestions: 0,
+    quizCorrectSum: 0,
+    quizIncorrectSum: 0,
+    quizPartiallyCorrectSum: 0,
+    quizSubmittedCount: 0,
+    quizUnattemptedCount: 0,
+    quizQuestions: new Map(),
+    assignmentTotalQuestions: 0,
+    assignmentCorrectSum: 0,
+    assignmentIncorrectSum: 0,
+    assignmentPartiallyCorrectSum: 0,
+    assignmentUnevaluated: 0,
+    assignmentSubmittedCount: 0,
+    assignmentUnattemptedCount: 0,
+    assignmentQuestions: new Map(),
+    pqTotalQuestions: 0,
+    pqCorrectSum: 0,
+    pqIncorrectSum: 0,
+    pqPartiallyCorrectSum: 0,
+    pqUnevaluated: 0,
+    pqSubmittedCount: 0,
+    pqUnattemptedCount: 0,
+    pqQuestions: new Map(),
+  };
+
+  for (const student of students) {
     const userId = get(student, 'user.id');
     const mentorMenteeSessionRes = await mentorMenteeSessionModel.aggregate(
       getMentorMenteeSessionAggregation({
@@ -490,43 +482,97 @@ const classroomHomeworkReport = (async (root, params, context) => {
         topicId,
       }),
     );
-    const userQuizReportAggregation = await userQuizReportModel.aggregate(
+    const userQuizReportRes = await userQuizReportModel.aggregate(
       getUserQuizReportAggregation({
         userId,
         topicId,
       }),
     );
+    const userAssignmentRes = await userAssignmentModel.aggregate(
+      getUserAssignmentAggregation({
+        userId,
+        topicId,
+        courseId,
+      }),
+    );
+    const userBlockbasedPracticeRes = await userBlockBasedPracticeModel.aggregate(
+      getUserBlockBasedPracticeAggregation({
+        userId,
+        topicId,
+        courseId,
+      }),
+    );
+
     if (mentorMenteeSessionRes.length) {
-      mmsArray.push(mentorMenteeSessionRes);
+      const mms = get(mentorMenteeSessionRes, '[0]');
+      if (get(mms, 'isSubmittedForReview')) {
+        obj.submittedCount += 1;
+      } else if (get(mms, 'isQuizSubmitted')
+        || get(mms, 'isAssignmentSubmitted')
+        || get(mms, 'isPracticeSubmitted')) {
+        obj.attemptedCount += 1;
+      } else {
+        obj.unattemptedCount += 1;
+      }
+      if (get(mms, 'isQuizSubmitted')) {
+        obj.quizSubmittedCount += 1;
+      } else {
+        obj.quizUnattemptedCount += 1;
+      }
     }
-    if (userQuizReportAggregation.length) {
-      mmsArray.push(userQuizReportAggregation);
+
+    if (userQuizReportRes.length) {
+      const userQuizReport = get(userQuizReportRes, '[0].latest');
+      obj.quizTotalQuestions = get(userQuizReport, 'quizReport.totalQuestionCount');
+      obj.quizCorrectSum = get(userQuizReport, 'quizReport.correctQuestionCount');
+      obj.quizIncorrectSum = get(userQuizReport, 'quizReport.inCorrectQuestionCount');
+      for (const quizAnswer of get(userQuizReport, 'quizAnswers')) {
+        if (obj.quizQuestions.has(get(quizAnswer, 'question.typeId'))
+          && get(quizAnswer, 'isCorrect')) {
+          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), obj.quizQuestions.get(get(quizAnswer, 'question.typeId')) + 1);
+        } else {
+          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), 1);
+        }
+      }
     }
-  });
+
+    if (userAssignmentRes.length) {
+      obj.assignmentTotalQuestions = userAssignmentRes.length;
+      for (const assignmentQuestion of userAssignmentRes) {
+        if (get(assignmentQuestion, 'assignment.result') === 'correct') {
+          obj.assignmentCorrectSum += 1;
+        } else if (get(assignmentQuestion, 'assignment.result') === 'incorrect') {
+          obj.assignmentIncorrectSum += 1;
+        } else if (get(assignmentQuestion, 'assignment.result') === 'partiallyCorrect') {
+          obj.assignmentPartiallyCorrectSum += 1;
+        } else {
+          obj.assignmentUnevaluated += 1;
+        }
+      }
+    }
+
+    if (get(userBlockbasedPracticeRes, 'blockBasedPractice')) {
+      obj.pqTotalQuestions = 1;
+      if (get(userBlockbasedPracticeRes, 'result') === 'correct') {
+        obj.pqCorrectSum += 1;
+      } else if (get(userBlockbasedPracticeRes, 'result') === 'incorrect') {
+        obj.pqIncorrectSum += 1;
+      } else if (get(userBlockbasedPracticeRes, 'result') === 'partiallyCorrect') {
+        obj.pqPartiallyCorrectSum += 1;
+      } else {
+        obj.pqUnevaluated += 1;
+      }
+    }
+  }
 
   /**
    * Transforming aggregation result into required format i.e ClassroomSessionResult Type
    */
   const transformedClassroomResult = transformMongoResults(
-    batchSessionRes,
+    obj,
   );
 
-  if (
-    filters
-    && get(filters, 'sessionStatus', []).length
-    && (get(filters, 'sessionStatus', []).includes('unattended') || get(filters, 'sessionStatus', []).includes('allotted'))
-  ) {
-    return (transformedClassroomResult || []).filter((session) => {
-      if (get(session, 'documentType') === 'event') {
-        return true;
-      }
-      if (get(filters, 'sessionStatus', []).includes(get(session, 'sessionStatus'))) {
-        return true;
-      }
-      return false;
-    });
-  }
-  return transformedClassroomResult || [];
+  return transformedClassroomResult;
 });
 
 export default classroomHomeworkReport;
