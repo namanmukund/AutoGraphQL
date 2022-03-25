@@ -5,6 +5,13 @@ const OverallReportType = `
     unattemptedPercentage: Float
   }`;
 
+const IndividualQuestionsScoreType = `
+  type IndividualQuestionsScoreType {
+    questionId: String
+    percentageCorrect: Float 
+  }
+`;
+
 const PartialReportType = `
   type PartialReportType {
     submittedPercentage: Float
@@ -15,6 +22,7 @@ const PartialReportType = `
     averageCorrect: Float
     averageIncorrect: Float
     averagePartiallyCorrect: Float
+    questions: [IndividualQuestionsScoreType]
   }`;
 
 const ClassroomHomeworkReportOutput = `
@@ -25,4 +33,9 @@ const ClassroomHomeworkReportOutput = `
     pq: PartialReportType
   }`;
 
-export default [ClassroomHomeworkReportOutput, OverallReportType, PartialReportType];
+export default [
+  ClassroomHomeworkReportOutput,
+  OverallReportType,
+  PartialReportType,
+  IndividualQuestionsScoreType,
+];
