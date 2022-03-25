@@ -53,8 +53,6 @@ const menteeCourseSyllabusCourse = `
    badgeDescription: String
    chapterCount: Int
    topicCount: Int
-   projectCount: Int
-   practiceCount: Int
    courseCompletionPercentage: Float
  }`;
 
