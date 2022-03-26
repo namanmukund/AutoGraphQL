@@ -23,6 +23,7 @@ const PartialReportType = `
     averageIncorrect: Float
     averagePartiallyCorrect: Float
     questions: [IndividualQuestionsScoreType]
+    notEvaluatedCount: Int
   }`;
 
 const ClassroomHomeworkReportOutput = `
