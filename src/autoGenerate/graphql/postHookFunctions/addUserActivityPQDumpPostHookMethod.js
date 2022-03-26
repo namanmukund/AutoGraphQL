@@ -363,7 +363,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
                    }`;
 
   // check if all PQ questions are sent in input in case pq action is "next"
-  if (pqAction && pqAction === next && completedQuestionCount !== totalQuestions) {
+  if (pqAction && pqAction === next && (!get(context, 'fromAddUserLSDump', false) && (completedQuestionCount !== totalQuestions))) {
     log('PracticeQuestions are not present in input in addUserActivityPQDumpPostHookMethod');
     throw new PracticeQuestionsNotPresentError();
   }
