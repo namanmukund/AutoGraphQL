@@ -23,6 +23,7 @@ import TimestampTag from './TimestampTag';
 import ProductFeature from './ProductFeature';
 import UrlResult from './UrlResult';
 import ScheduleSessionsInput from './ScheduleSessions';
+import CodeEditorConfig from './CodeEditorConfig';
 
 export default [
   ...Enum,
@@ -50,4 +51,5 @@ export default [
   ...ProductFeature,
   ...UrlResult,
   ...ScheduleSessionsInput,
+  ...CodeEditorConfig,
 ];
