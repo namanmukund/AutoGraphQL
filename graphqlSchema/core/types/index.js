@@ -164,6 +164,7 @@ import ShortLink from './shortLink';
 import BatchDetailsResult from './BatchDetailsResult/BatchDetailsResult';
 import BatchStudentResult from './BatchStudentResult/BatchStudentResult';
 import ClassroomHomeworkReport from './classroomHomeworkReport';
+import PracticeQuestionReportOutput from './practiceQuestionReportOutput';
 
 export default [
   ...User,
@@ -332,4 +333,5 @@ export default [
   ...BatchDetailsResult,
   ...BatchStudentResult,
   ...ClassroomHomeworkReport,
+  ...PracticeQuestionReportOutput,
 ];
