@@ -72,3 +72,6 @@ export const PasswordMismatchMessageError = createError('PasswordMismatchMessage
 export const RollNumberMismatchMessageError = createError('RollNumberMismatchMessageError', {
   message: 'Incorrect Roll Number',
 });
+export const InvalidUserIdError = createError('InvalidUserIdError', {
+  message: 'Invalid User',
+});
