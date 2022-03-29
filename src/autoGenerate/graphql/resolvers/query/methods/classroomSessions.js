@@ -146,6 +146,7 @@ const getBatchSessionAggregation = ({
               title: 1,
               description: 1,
               classType: 1,
+              topicComponentRule: 1,
               thumbnailSmall: {
                 $arrayElemAt: ['$thumbnailSmall', 0],
               },
@@ -211,6 +212,29 @@ const getBatchSessionAggregation = ({
       },
     },
     {
+      $lookup: {
+        from: 'Course',
+        let: { courseId: '$course.typeId' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$id', '$$courseId'],
+              },
+            },
+          },
+          {
+            $project: {
+              id: 1,
+              title: 1,
+              defaultLoComponentRule: 1,
+            },
+          },
+        ],
+        as: 'course',
+      },
+    },
+    {
       $match: {
         ...mentorIdsFilter,
         'classroom.documentType': documentType,
@@ -236,12 +260,14 @@ const getBatchSessionAggregation = ({
         topic: {
           $arrayElemAt: ['$topic', 0],
         },
+        course: {
+          $arrayElemAt: ['$course', 0],
+        },
         schoolSessionOtp: {
           grade: 1,
           section: 1,
           otp: 1,
         },
-        course: 1,
         attendance: 1,
         ...getSlotTimeFields(),
       },
@@ -381,6 +407,7 @@ const getAdhocSessionAggregation = ({
               title: 1,
               description: 1,
               classType: 1,
+              topicComponentRule: 1,
               thumbnailSmall: {
                 $arrayElemAt: ['$thumbnailSmall', 0],
               },
@@ -446,6 +473,29 @@ const getAdhocSessionAggregation = ({
       },
     },
     {
+      $lookup: {
+        from: 'Course',
+        let: { courseId: '$course.typeId' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$id', '$$courseId'],
+              },
+            },
+          },
+          {
+            $project: {
+              id: 1,
+              title: 1,
+              defaultLoComponentRule: 1,
+            },
+          },
+        ],
+        as: 'course',
+      },
+    },
+    {
       $match: {
         ...mentorIdsFilter,
         'classroom.documentType': documentType,
@@ -472,7 +522,9 @@ const getAdhocSessionAggregation = ({
         previousTopic: {
           $arrayElemAt: ['$previousTopic', 0],
         },
-        course: 1,
+        course: {
+          $arrayElemAt: ['$course', 0],
+        },
         schoolSessionOtp: {
           grade: 1,
           section: 1,
@@ -634,6 +686,7 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
         sessionOtp: get(session, 'schoolSessionOtp', []),
         ...getSlotTimeFields(session),
         topic: get(session, 'topic', null),
+        course: get(session, 'course', null),
         previousTopic: null,
       });
     });
@@ -665,6 +718,7 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
         sessionOtp: get(session, 'schoolSessionOtp', null),
         ...getSlotTimeFields(session),
         topic: null,
+        course: get(session, 'course', null),
         previousTopic: get(session, 'previousTopic', null),
       });
     });
