@@ -2527,6 +2527,7 @@ const menteeCourseSyllabusMutationResolver = async (
       } else {
         const topicRes = await fetchOrCacheQueryRes({
           hkey: `mcs_tQNC_${bookedTopicId}`,
+          maxAge: 86400,
           dbCallback: () => callLocalGraphqlApi(
             getTopicQueryNewCourse(bookedTopicId),
             context,
@@ -2581,11 +2582,15 @@ const menteeCourseSyllabusMutationResolver = async (
           const prevCompletedSession = completedSession.filter((session) => get(session, 'topicOrder') === (bookedTopicOrder - 1));
           if (prevCompletedSession && prevCompletedSession.length) {
             const prevSessionTopicId = prevCompletedSession[0].topicId || '';
-            const prevTopicRes = await callLocalGraphqlApi(
-              getTopicQueryNewCourse(prevSessionTopicId),
-              context,
-              '',
-            );
+            const prevTopicRes = await fetchOrCacheQueryRes({
+              hkey: `mcs_PtQNC_${prevSessionTopicId}`,
+              maxAge: 86400,
+              dbCallback: () => callLocalGraphqlApi(
+                getTopicQueryNewCourse(prevSessionTopicId),
+                context,
+                '',
+              ),
+            });
             const prevTopicInfo = get(prevTopicRes, 'data.topic');
             // getting info of called prev topic
             if (prevTopicInfo && prevTopicInfo.topicComponentRule) {

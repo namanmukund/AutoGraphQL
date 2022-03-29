@@ -85,6 +85,7 @@ const ClassroomSessionResult = `
     attendance: [BatchAttendanceType]
     classroom: ClassroomDetails
     topic: ClassroomSessionTopic
+    course: Course
     previousTopic: ClassroomSessionTopic
     sessionOtp: [SessionOtpResult]
   }
