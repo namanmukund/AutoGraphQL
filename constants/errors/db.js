@@ -332,6 +332,11 @@ export const CannotScheduleOutsideWorkingHoursError = createError('CannotSchedul
 export const MentorHasExistingSessionsError = createError('MentorHasExistingSessionsError', {
   message: 'Mentor has existing sessions',
 });
+
 export const MentorIsInactiveError = createError(' MentorIsInactiveError', {
   message: 'Mentor is not active',
+});
+
+export const PracticeQuestionsNotFound = createError(' PracticeQuestionsNotFound', {
+  message: 'Practice Questions were not found for the given document',
 });

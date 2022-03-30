@@ -239,3 +239,7 @@ export const SectionFieldRequiredError = createError('SectionFieldRequiredError'
 export const StudentWithSimilarRollNoExist = createError('StudentWithSimilarRollNoExist', {
   message: 'Student with similar roll no already exists',
 });
+
+export const InvalidLearningObjectiveComponent = createError('InvalidLearningObjectiveComponent', {
+  message: 'LearningObjectiveComponent passed is invalid',
+});
