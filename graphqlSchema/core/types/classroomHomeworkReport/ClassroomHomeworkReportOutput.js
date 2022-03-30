@@ -31,7 +31,7 @@ const ClassroomHomeworkReportOutput = `
     overall: OverallReportType
     quiz: PartialReportType
     coding: PartialReportType
-    pq: PartialReportType
+    blockBasedPractice: PartialReportType
   }`;
 
 export default [

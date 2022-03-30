@@ -352,7 +352,7 @@ const transformMongoResults = (obj) => {
       notEvaluatedCount: obj.assignmentTotalQuestions === 0 ? 0 : obj.assignmentUnevaluated / obj.assignmentTotalQuestions,
       questions: [],
     },
-    pq: {
+    blockBasedPractice: {
       submittedPercentage: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqSubmittedCount * 100) / obj.studentsCount).toFixed(2),
       unattemptedPercentage: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqUnattemptedCount * 100) / obj.studentsCount).toFixed(2),
       totalQuestions: obj.pqTotalQuestions,
@@ -376,7 +376,7 @@ const transformMongoResults = (obj) => {
       percentageCorrect: ((v * 100) / obj.studentsCount).toFixed(2),
     };
   });
-  finalResult.pq.questions = Array.from(obj.pqQuestions.entries(), ([k, v]) => {
+  finalResult.blockBasedPractice.questions = Array.from(obj.pqQuestions.entries(), ([k, v]) => {
     return {
       questionId: k,
       percentageCorrect: ((v * 100) / obj.studentsCount).toFixed(2),

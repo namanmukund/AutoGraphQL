@@ -5,9 +5,13 @@
 /* eslint-disable implicit-arrow-linebreak */
 /* eslint-disable no-plusplus */
 import { get } from 'lodash';
-import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { ifAuthorized } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
+import {
+  InvalidLearningObjectiveComponent,
+  UnauthorizedOperationError,
+  PracticeQuestionsNotFound,
+} from '../../../../../../constants/errors';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 
 const getBatchSessionAggregation = ({ batchId, topicId }) =>
@@ -113,206 +117,77 @@ const getBatchSessionAggregation = ({ batchId, topicId }) =>
   },
   ];
 
-const getMentorMenteeSessionAggregation = ({ userId, topicId }) =>
-  [{
-    $match: {
-      'topic.typeId': topicId,
-    },
-  }, {
-    $lookup: {
-      from: 'MenteeSession',
-      let: {
-        menteeSessionId: '$menteeSession.typeId',
-      },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: [
-                '$id',
-                '$$menteeSessionId',
-              ],
-            },
-          },
-        },
-        {
-          $lookup: {
-            from: 'User',
-            let: {
-              userId: '$user.typeId',
-            },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: [
-                      '$id',
-                      '$$userId',
-                    ],
-                  },
-                },
-              },
-              {
-                $project: {
-                  id: 1,
-                },
-              },
-            ],
-            as: 'user',
-          },
-        },
-        {
-          $project: {
-            id: 1,
-            user: {
-              $arrayElemAt: [
-                '$user',
-                0,
-              ],
-            },
-          },
-        },
-      ],
-      as: 'menteeSession',
-    },
-  }, {
-    $project: {
-      id: 1,
-      menteeSession: {
-        $arrayElemAt: [
-          '$menteeSession',
-          0,
-        ],
-      },
-      isAssignmentAttempted: 1,
-      isAssignmentSubmitted: 1,
-      isSubmittedForReview: 1,
-      isQuizSubmitted: 1,
-      isPracticeSubmitted: 1,
-    },
-  }, {
-    $match: {
-      $expr: {
-        $eq: [
-          '$menteeSession.user.id',
-          userId,
-        ],
-      },
-    },
-  }];
-
-const getUserQuizReportAggregation = ({ userId, topicId }) =>
-  [{
-    $match: {
-      'user.typeId': userId,
-      'topic.typeId': topicId,
-    },
-  }, {
-    $sort: {
-      createdAt: -1,
-    },
-  }, {
-    $group: {
-      _id: '$latestGroup',
-      latest: {
-        $first: '$$ROOT',
-      },
-    },
-  }];
-
-const getUserAssignmentAggregation = ({
-  userId,
-  topicId,
-  courseId,
+const getLearningSlideAggregation = ({
+  learningSlideId,
 }) => [{
   $match: {
-    'user.typeId': userId,
-    'topic.typeId': topicId,
-    'course.typeId': courseId,
+    id: learningSlideId,
   },
 }, {
   $project: {
-    assignmentStatus: 1,
-    assignment: {
-      $arrayElemAt: [
-        '$assignment',
-        0,
-      ],
-    },
-  },
-}, {
-  $lookup: {
-    from: 'AssignmentQuestion',
-    let: {
-      assignmentQuestionId: '$assignment.assignmentQuestion.typeId',
-    },
-    pipeline: [
-      {
-        $match: {
-          $expr: {
-            $eq: [
-              '$id',
-              '$$assignmentQuestionId',
-            ],
-          },
-          isHomework: true,
-        },
-      },
-    ],
-    as: 'assignmentQuestion',
-  },
-}, {
-  $project: {
-    assignmentStatus: 1,
-    assignment: 1,
-    assignmentQuestion: {
-      $arrayElemAt: [
-        '$assignmentQuestion',
-        0,
-      ],
-    },
+    id: 1,
+    practiceQuestions: 1,
+    learningObjectives: 1,
   },
 }];
 
-const getUserBlockBasedPracticeAggregation = ({
-  userId,
-  topicId,
-  courseId,
+const getLearningObjectiveAggregation = ({
+  learningObjectiveId,
 }) => [{
   $match: {
-    'user.typeId': userId,
-    'topic.typeId': topicId,
-    'course.typeId': courseId,
+    id: learningObjectiveId,
+  },
+}, {
+  $project: {
+    id: 1,
+    learningSlides: 1,
+    questionBank: 1,
   },
 }, {
   $lookup: {
-    from: 'BlockBasedProject',
+    from: 'LearningSlide',
     let: {
-      questionId: '$blockBasedPractice.typeId',
+      learningSlideId: '$learningSlides.typeId',
     },
     pipeline: [
       {
         $match: {
           $expr: {
-            $eq: [
+            $in: [
               '$id',
-              '$$questionId',
+              '$$learningSlideId',
             ],
           },
-          isHomework: true,
+        },
+      },
+      {
+        $project: {
+          id: 1,
+          practiceQuestions: 1,
         },
       },
     ],
-    as: 'blockBasedPractice',
+    as: 'learningSlides',
+  },
+}];
+
+const getUserPracticeQuestionReportAggregation = ({
+  userId,
+  loId,
+}) => [{
+  $match: {
+    'learningObjective.typeId': loId,
+    'user.typeId': userId,
   },
 }, {
   $project: {
-    blockBasedPractice: {
-      $arrayElemAt: [
-        '$blockBasedPractice',
-        0,
-      ],
-    },
+    firstTryCount: 1,
+    secondTryCount: 1,
+    threeOrMoreTryCount: 1,
+    helpUsedCount: 1,
+    answerUsedCount: 1,
+    id: 1,
+    detailedReport: 1,
   },
 }];
 
@@ -325,69 +200,28 @@ const getTypeQueryController = (
 
 const transformMongoResults = (obj) => {
   const finalResult = {
-    overall: {
-      submittedPercentage: ((obj.submittedCount * 100) / obj.studentsCount).toFixed(2),
-      attemptedPercentage: ((obj.attemptedCount * 100) / obj.studentsCount).toFixed(2),
-      unattemptedPercentage: ((obj.unattemptedCount * 100) / obj.studentsCount).toFixed(2),
-    },
-    quiz: {
-      submittedPercentage: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizSubmittedCount * 100) / obj.studentsCount).toFixed(2),
-      unattemptedPercentage: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizUnattemptedCount * 100) / obj.studentsCount).toFixed(2),
-      totalQuestions: obj.quizTotalQuestions,
-      averageScore: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizCorrectSum * 100) / (obj.studentsCount * obj.quizTotalQuestions)).toFixed(2),
-      averageCorrect: obj.quizTotalQuestions === 0 ? 0 : (obj.quizCorrectSum / obj.studentsCount).toFixed(2),
-      averageIncorrect: obj.quizTotalQuestions === 0 ? 0 : (obj.quizIncorrectSum / obj.studentsCount).toFixed(2),
-      averagePartiallyCorrect: null,
-      notEvaluatedCount: null,
-      questions: [],
-    },
-    coding: {
-      submittedPercentage: obj.assignmentTotalQuestions === 0 ? 0 : ((obj.assignmentSubmittedCount * 100) / obj.studentsCount).toFixed(2),
-      unattemptedPercentage: obj.assignmentTotalQuestions === 0 ? 0 : (((obj.assignmentUnattemptedCount * 100) / obj.studentsCount).toFixed(2)),
-      totalQuestions: obj.assignmentTotalQuestions,
-      averageScore: obj.assignmentTotalQuestions === 0 ? 0 : ((obj.assignmentCorrectSum * 100) / (obj.studentsCount * obj.assignmentTotalQuestions)).toFixed(2),
-      averageCorrect: obj.assignmentTotalQuestions === 0 ? 0 : (obj.assignmentCorrectSum / obj.studentsCount).toFixed(2),
-      averageIncorrect: obj.assignmentTotalQuestions === 0 ? 0 : (obj.assignmentIncorrectSum / obj.studentsCount).toFixed(2),
-      averagePartiallyCorrect: obj.assignmentTotalQuestions === 0 ? 0 : (obj.assignmentPartiallyCorrectSum / obj.studentsCount).toFixed(2),
-      notEvaluatedCount: obj.assignmentTotalQuestions === 0 ? 0 : obj.assignmentUnevaluated / obj.assignmentTotalQuestions,
-      questions: [],
-    },
-    pq: {
-      submittedPercentage: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqSubmittedCount * 100) / obj.studentsCount).toFixed(2),
-      unattemptedPercentage: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqUnattemptedCount * 100) / obj.studentsCount).toFixed(2),
-      totalQuestions: obj.pqTotalQuestions,
-      averageScore: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqCorrectSum * 100) / (obj.studentsCount * obj.pqTotalQuestions)).toFixed(2),
-      averageCorrect: obj.pqTotalQuestions === 0 ? 0 : (obj.pqCorrectSum / obj.studentsCount).toFixed(2),
-      averageIncorrect: obj.pqTotalQuestions === 0 ? 0 : (obj.pqIncorrectSum / obj.studentsCount).toFixed(2),
-      averagePartiallyCorrect: obj.pqTotalQuestions === 0 ? 0 : (obj.pqPartiallyCorrectSum / obj.studentsCount).toFixed(2),
-      notEvaluatedCount: obj.pqTotalQuestions === 0 ? 0 : obj.pqUnevaluated / obj.pqTotalQuestions,
-      questions: [],
+    practiceQuestionOverallReport: {
+      submittedPercentage: ((obj.submittedCountSum * 100) / obj.studentsCount).toFixed(2),
+      attemptedPercentage: ((obj.attemptedCountSum * 100) / obj.studentsCount).toFixed(2),
+      unattemptedPercentage: ((obj.unattemptedCountSum * 100) / obj.studentsCount).toFixed(2),
+      firstTryPercentage: ((obj.firstTryCountSum * 100) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
+      secondTryPercentage: ((obj.secondTryCountSum * 100) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
+      thirdTryPercentage: ((obj.thirdTryCountSum * 100) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
+      avgTriesPerQuestion: ((obj.firstTryCountSum + obj.secondTryCountSum + obj.thirdTryCountSum) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
+      avgTimePerQuestion: null,
     },
   };
-  finalResult.quiz.questions = Array.from(obj.quizQuestions.entries(), ([k, v]) => {
+  finalResult.pqIndividualQuestionReport = Array.from(obj.questions.entries(), ([k, v]) => {
     return {
       questionId: k,
-      percentageCorrect: ((v * 100) / obj.studentsCount).toFixed(2),
-    };
-  });
-  finalResult.coding.questions = Array.from(obj.assignmentQuestions.entries(), ([k, v]) => {
-    return {
-      questionId: k,
-      percentageCorrect: ((v * 100) / obj.studentsCount).toFixed(2),
-    };
-  });
-  finalResult.pq.questions = Array.from(obj.pqQuestions.entries(), ([k, v]) => {
-    return {
-      questionId: k,
-      percentageCorrect: ((v * 100) / obj.studentsCount).toFixed(2),
+      firstTryPercentage: ((get(v, 'firstTryCountSum') * 100) / obj.studentsCount).toFixed(2),
+      secondTryPercentage: ((get(v, 'secondTryCountSum') * 100) / obj.studentsCount).toFixed(2),
+      thirdTryPercentage: ((get(v, 'thirdTryCountSum') * 100) / obj.studentsCount).toFixed(2),
+      avgTries: ((get(v, 'firstTryCountSum') + (2 * get(v, 'secondTryCountSum')) + (3 * get(v, 'thirdTryCountSum'))) / (studentCount)).toFixed(2),
     };
   });
   return finalResult;
 };
-
-/**
-NOTE : THIS FILE IS INCOMPLETE! DUMMY DATA RETURNED
-*/
 
 const practiceQuestionReport = (async (root, params, context) => {
   const authentication = ifAuthorized(context);
@@ -412,15 +246,41 @@ const practiceQuestionReport = (async (root, params, context) => {
       firstTryPercentage: 20,
       secondTryPercentage: 25,
       thirdTryPercentage: 55,
+      avgTries: 1.2,
     }],
   };
 
-  const { batchId, topicId } = params;
+  /**
+   * Validation Steps:
+   * * Get batch students
+   * * If loComponent is learning slide and learning slide id is passed
+   *   * check if learning slide has pq in it
+   *   * then loop through userPracticeQuestionReport and calculate required data
+   * * if loComponent is practiceQuestion and learning objective id is passed
+   *   * directly get userPracticeQuestionReport for all users and calculate
+   * * if loComponent is learningSlide and learning objectice id is passed
+   *   * check if lerning object has learning slide in it and that has pq in it
+   *   * if yes then get userPracticeQuestionReport for all users and calculate
+   * * if individual userId is passed, directly get userPrcaticeQuestionReport
+   *
+   * Assumptions:
+   * (1) learning objective is connected to only one learning slide
+   * (2) learning slide is connected to only one learning objective
+   */
 
-  if (!(batchId && topicId)) {
+  const {
+    batchId,
+    topicId,
+    learningObjectiveId,
+    learningSlideId,
+    learningObjectiveComponent,
+    userId,
+  } = params;
+
+  if (!((batchId && topicId) || userId)) {
     throw new MissingMandatoryInputInRequestError({
       data: {
-        message: 'Topic Id or Batch Id is missing in input.',
+        message: 'Topic Id or Batch Id or User Id is missing in input.',
       },
     });
   }
@@ -430,176 +290,223 @@ const practiceQuestionReport = (async (root, params, context) => {
     authentication,
   );
 
-  const mentorMenteeSessionModel = getTypeQueryController(
-    'MentorMenteeSession',
+  const learningObjectiveModel = getTypeQueryController(
+    'LearningObjective',
     authentication,
   );
 
-  const userQuizReportModel = getTypeQueryController(
-    'UserQuizReport',
+  const learningSlideModel = getTypeQueryController(
+    'LearningSlide',
     authentication,
   );
 
-  const userAssignmentModel = getTypeQueryController(
-    'UserAssignment',
+  const userPracticeQuestionReportModel = getTypeQueryController(
+    'UserPracticeQuestionReport',
     authentication,
   );
 
-  const userBlockBasedPracticeModel = getTypeQueryController(
-    'UserBlockBasedPractice',
-    authentication,
-  );
+  let batchSessionRes = null;
+  if (batchId && topicId) {
+    batchSessionRes = await batchSessionModel.aggregate(
+      getBatchSessionAggregation({
+        batchId,
+        topicId,
+      }),
+    );
 
-  const batchSessionRes = await batchSessionModel.aggregate(
-    getBatchSessionAggregation({
-      batchId,
-      topicId,
-    }),
-  );
-
-  if (!(batchSessionRes && batchSessionRes.length)) {
-    throw new MissingMandatoryInputInRequestError({
-      data: {
-        message: 'Topic Id or Batch Id passed is incorrect.',
-      },
-    });
+    if (!(batchSessionRes && batchSessionRes.length)) {
+      throw new MissingMandatoryInputInRequestError({
+        data: {
+          message: 'Topic Id or Batch Id passed is incorrect.',
+        },
+      });
+    }
   }
 
-  const students = get(batchSessionRes, '[0].batch.students');
+  const students = get(batchSessionRes, '[0].batch.students', []);
   const courseId = get(batchSessionRes, '[0].course.typeId');
   const obj = {
     studentsCount: students.length,
-    submittedCount: 0,
-    attemptedCount: 0,
-    unattemptedCount: 0,
-    quizTotalQuestions: 0,
-    quizCorrectSum: 0,
-    quizIncorrectSum: 0,
-    quizPartiallyCorrectSum: 0,
-    quizSubmittedCount: 0,
-    quizUnattemptedCount: 0,
-    quizQuestions: new Map(),
-    assignmentTotalQuestions: 0,
-    assignmentCorrectSum: 0,
-    assignmentIncorrectSum: 0,
-    assignmentPartiallyCorrectSum: 0,
-    assignmentUnevaluated: 0,
-    assignmentSubmittedCount: 0,
-    assignmentUnattemptedCount: 0,
-    assignmentQuestions: new Map(),
-    pqTotalQuestions: 0,
-    pqCorrectSum: 0,
-    pqIncorrectSum: 0,
-    pqPartiallyCorrectSum: 0,
-    pqUnevaluated: 0,
-    pqSubmittedCount: 0,
-    pqUnattemptedCount: 0,
-    pqQuestions: new Map(),
+    submittedCountSum: 0,
+    attemptedCountSum: 0,
+    unattemptedCountSum: 0,
+    firstTryCountSum: 0,
+    secondTryCountSum: 0,
+    thirdTryCountSum: 0,
+    avgTriesPerQuestion: 0,
+    avgTimePerQuestion: null,
+    questions: new Map(),
+    questionsCount: 0,
   };
 
+  let learningObjectiveIdFromLearningSlide = null;
+
+  /**
+   * Validate input params
+   */
+  if (learningObjectiveComponent === 'learningSlide') {
+    if (learningSlideId) {
+      const learningSlideRes = await learningSlideModel.aggregate(
+        getLearningSlideAggregation({
+          learningSlideId,
+        }),
+      );
+      if (get(learningSlideRes, '[0].practiceQuestions', []).length === 0) {
+        throw new PracticeQuestionsNotFound();
+      }
+      learningObjectiveIdFromLearningSlide = get(learningSlideRes, '[0].learningObjectives[0].typeId');
+      obj.questionsCount = get(learningSlideRes, '[0].practiceQuestions', []).length;
+    } else if (learningObjectiveId) {
+      const learningObjectiveRes = await learningObjectiveModel.aggregate(
+        getLearningObjectiveAggregation({
+          learningObjectiveId,
+        }),
+      );
+      if (!get(learningObjectiveRes, '[0].learningSlides[0].practiceQuestions', []).length === 0) {
+        throw new PracticeQuestionsNotFound();
+      }
+      obj.questionsCount = get(learningObjectiveRes, '[0].learningSlides[0].practiceQuestions', []).length;
+    } else {
+      throw new MissingMandatoryInputInRequestError({
+        data: {
+          message: 'Learning objective Id or Learning slide id not passed in input',
+        },
+      });
+    }
+  } else if (learningObjectiveComponent === 'practiceQuestion') {
+    if (learningObjectiveId) {
+      const learningObjectiveRes = await learningObjectiveModel.aggregate(
+        getLearningObjectiveAggregation({
+          learningObjectiveId,
+        }),
+      );
+      if (!get(learningObjectiveRes, '[0].learningSlides[0].practiceQuestions', []).length === 0) {
+        throw new PracticeQuestionsNotFound();
+      }
+      obj.questionsCount = get(learningObjectiveRes, '[0].learningSlides[0].practiceQuestions', []).length;
+    } else {
+      throw new MissingMandatoryInputInRequestError({
+        data: {
+          message: 'User id or learning objective Id not passed in input',
+        },
+      });
+    }
+  } else if (!(userId && learningObjectiveId && courseId)) {
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'Learning objectiive Id not passed in input',
+      },
+    });
+  } else {
+    throw new InvalidLearningObjectiveComponent();
+  }
+
+  /**
+  * All students of batch
+  */
+
   for (const student of students) {
-    const userId = get(student, 'user.id');
-    const mentorMenteeSessionRes = await mentorMenteeSessionModel.aggregate(
-      getMentorMenteeSessionAggregation({
-        userId,
-        topicId,
-      }),
-    );
-    const userQuizReportRes = await userQuizReportModel.aggregate(
-      getUserQuizReportAggregation({
-        userId,
-        topicId,
-      }),
-    );
-    const userAssignmentRes = await userAssignmentModel.aggregate(
-      getUserAssignmentAggregation({
-        userId,
-        topicId,
-        courseId,
-      }),
-    );
-    const userBlockbasedPracticeRes = await userBlockBasedPracticeModel.aggregate(
-      getUserBlockBasedPracticeAggregation({
-        userId,
-        topicId,
-        courseId,
+    const studentUserId = get(student, 'user.id');
+    const loId = learningObjectiveId || learningObjectiveIdFromLearningSlide;
+    const userPracticeQuestionReportRes = await userPracticeQuestionReportModel.aggregate(
+      getUserPracticeQuestionReportAggregation({
+        studentUserId,
+        loId,
       }),
     );
 
-    if (mentorMenteeSessionRes.length) {
-      const mms = get(mentorMenteeSessionRes, '[0]');
-      if (get(mms, 'isSubmittedForReview')) {
-        obj.submittedCount += 1;
-      } else if (get(mms, 'isQuizSubmitted')
-        || get(mms, 'isAssignmentSubmitted')
-        || get(mms, 'isPracticeSubmitted')) {
-        obj.attemptedCount += 1;
-      } else {
-        obj.unattemptedCount += 1;
-      }
-      if (get(mms, 'isQuizSubmitted')) {
-        obj.quizSubmittedCount += 1;
-      } else {
-        obj.quizUnattemptedCount += 1;
-      }
-      if (get(mms, 'isAssignmentSubmitted')) {
-        obj.assignmentSubmittedCount += 1;
-      } else {
-        obj.assignmentUnattemptedCount += 1;
-      }
-      if (get(mms, 'isPracticeSubmitted')) {
-        obj.pqSubmittedCount += 1;
-      } else {
-        obj.pqUnattemptedCount += 1;
-      }
-    }
+    // why multiple userPracticeQuestionReports per user per lo??
 
-    if (userQuizReportRes.length && get(userQuizReportRes, '[0].latest')) {
-      const userQuizReport = get(userQuizReportRes, '[0].latest');
-      obj.quizTotalQuestions = get(userQuizReport, 'quizReport.totalQuestionCount');
-      obj.quizCorrectSum = get(userQuizReport, 'quizReport.correctQuestionCount');
-      obj.quizIncorrectSum = get(userQuizReport, 'quizReport.inCorrectQuestionCount');
-      for (const quizAnswer of get(userQuizReport, 'quizAnswers')) {
-        if (obj.quizQuestions.has(get(quizAnswer, 'question.typeId'))
-          && get(quizAnswer, 'isCorrect')) {
-          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), obj.quizQuestions.get(get(quizAnswer, 'question.typeId')) + 1);
-        } else if (get(quizAnswer, 'isCorrect')) {
-          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), 1);
-        }
-      }
-    }
-
-    if (userAssignmentRes.length) {
-      obj.assignmentTotalQuestions = userAssignmentRes.length;
-      for (const assignmentQuestion of userAssignmentRes) {
-        if (get(assignmentQuestion, 'assignment.result') === 'correct') {
-          obj.assignmentCorrectSum += 1;
-        } else if (get(assignmentQuestion, 'assignment.result') === 'incorrect') {
-          obj.assignmentIncorrectSum += 1;
-        } else if (get(assignmentQuestion, 'assignment.result') === 'partiallyCorrect') {
-          obj.assignmentPartiallyCorrectSum += 1;
+    if (userPracticeQuestionReportRes.length) {
+      obj.submittedCountSum += 1;
+      obj.firstTryCountSum += get(userPracticeQuestionReportRes, '[0].firstTryCount');
+      obj.secondTryCountSum += get(userPracticeQuestionReportRes, '[0].secondTryCount');
+      obj.thirdTryCountSum += get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount');
+      for (const report of get(userPracticeQuestionReportRes, '[0].detailedReport')) {
+        const tempObj = {
+          firstTryCount: 0,
+          secondTryCount: 0,
+          thirdTryCount: 0,
+        };
+        if (get(report, 'firstTry')) {
+          tempObj.firstTryCount += 1;
+        } else if (get(report, 'secondTry')) {
+          tempObj.secondTryCount += 1;
         } else {
-          obj.assignmentUnevaluated += 1;
+          tempObj.thirdTryCount += 1;
+        }
+        if (obj.questions.get(get(report, 'question.typeId'))) {
+          const newObj = {
+            firstTryCountSum: obj.questions.get(get(report, 'question.typeId')).firstTryCountSum + tempObj.firstTryCount,
+            secondTryCountSum: obj.questions.get(get(report, 'question.typeId')).secondTryCountSum + tempObj.secondTryCount,
+            thirdTryCountSum: obj.questions.get(get(report, 'question.typeId')).thirdTryCountSum + tempObj.thirdTryCount,
+          };
+          obj.questions.set(get(report, 'question.typeId'), newObj);
+        } else {
+          obj.questions.set(get(report, 'question.typeId'), {
+            firstTryCountSum: tempObj.firstTryCount,
+            secondTryCountSum: tempObj.secondTryCount,
+            thirdTryCountSum: tempObj.thirdTryCount,
+          });
         }
       }
-    }
-
-    if (get(userBlockbasedPracticeRes, '[0].blockBasedPractice')) {
-      obj.pqTotalQuestions = 1;
-      if (get(userBlockbasedPracticeRes, 'result') === 'correct') {
-        obj.pqCorrectSum += 1;
-      } else if (get(userBlockbasedPracticeRes, 'result') === 'incorrect') {
-        obj.pqIncorrectSum += 1;
-      } else if (get(userBlockbasedPracticeRes, 'result') === 'partiallyCorrect') {
-        obj.pqPartiallyCorrectSum += 1;
-      } else {
-        obj.pqUnevaluated += 1;
-      }
+    } else {
+      obj.unattemptedCountSum += 1;
     }
   }
 
   /**
-   * Transforming aggregation result into required format i.e ClassroomSessionResult Type
+   * Individual Students
+   */
+
+  if (userId && learningObjectiveId && !students.length) {
+    obj.studentsCount = 1;
+    const userPracticeQuestionReportRes = await userPracticeQuestionReportModel.aggregate(
+      getUserPracticeQuestionReportAggregation({
+        userId,
+        learningObjectiveId,
+      }),
+    );
+    if (userPracticeQuestionReportRes.length) {
+      obj.submittedCountSum += 1;
+      obj.firstTryCountSum += get(userPracticeQuestionReportRes, '[0].firstTryCount');
+      obj.secondTryCountSum += get(userPracticeQuestionReportRes, '[0].secondTryCount');
+      obj.thirdTryCountSum += get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount');
+      for (const report of get(userPracticeQuestionReportRes, '[0].detailedReport')) {
+        const tempObj = {
+          firstTryCount: 0,
+          secondTryCount: 0,
+          thirdTryCount: 0,
+        };
+        if (get(report, 'firstTry')) {
+          tempObj.firstTryCount += 1;
+        } else if (get(report, 'secondTry')) {
+          tempObj.secondTryCount += 1;
+        } else {
+          tempObj.thirdTryCount += 1;
+        }
+        if (obj.questions.get(get(report, 'question.typeId'))) {
+          const newObj = {
+            firstTryCountSum: obj.questions.get(get(report, 'question.typeId')).firstTryCountSum + tempObj.firstTryCount,
+            secondTryCountSum: obj.questions.get(get(report, 'question.typeId')).secondTryCountSum + tempObj.secondTryCount,
+            thirdTryCountSum: obj.questions.get(get(report, 'question.typeId')).thirdTryCountSum + tempObj.thirdTryCount,
+          };
+          obj.questions.set(get(report, 'question.typeId'), newObj);
+        } else {
+          obj.questions.set(get(report, 'question.typeId'), {
+            firstTryCountSum: tempObj.firstTryCount,
+            secondTryCountSum: tempObj.secondTryCount,
+            thirdTryCountSum: tempObj.thirdTryCount,
+          });
+        }
+      }
+    } else {
+      obj.unattemptedCountSum += 1;
+    }
+  }
+
+  /**
+   * Transforming aggregation result into required format i.e getPracticeQuestionReportOutput Type
    */
   const transformedClassroomResult = transformMongoResults(
     obj,
