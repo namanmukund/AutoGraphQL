@@ -140,7 +140,9 @@ const getLearningObjectiveAggregation = ({
 }, {
   $project: {
     id: 1,
-    learningSlides: 1,
+    learningSlides: {
+      $ifNull: ['$learningSlides', []],
+    },
     questionBank: 1,
   },
 }, {
@@ -169,6 +171,27 @@ const getLearningObjectiveAggregation = ({
     ],
     as: 'learningSlides',
   },
+}, {
+  $lookup: {
+    from: 'QuestionBank',
+    let: {
+      questionBankId: '$questionBank.typeId',
+    },
+    pipeline: [{
+      $match: {
+        $expr: {
+          $in: ['$id', '$$questionBankId'],
+        },
+        status: 'published',
+      },
+    }, {
+      $project: {
+        id: 1,
+        status: 1,
+      },
+    }],
+    as: 'questionBank',
+  },
 }];
 
 const getUserPracticeQuestionReportAggregation = ({
@@ -189,6 +212,10 @@ const getUserPracticeQuestionReportAggregation = ({
     id: 1,
     detailedReport: 1,
   },
+}, {
+  $sort: {
+    createdAt: -1,
+  },
 }];
 
 const getTypeQueryController = (
@@ -199,25 +226,39 @@ const getTypeQueryController = (
 ) => new QueryController(typeName, authentication);
 
 const transformMongoResults = (obj) => {
+  if (obj.studentsCount === 0) {
+    return {
+      practiceQuestionOverallReport: {
+        submittedPercentage: 0,
+        attemptedPercentage: 0,
+        unattemptedPercentage: 0,
+        firstTryPercentage: 0,
+        secondTryPercentage: 0,
+        thirdTryPercentage: 0,
+        avgTriesPerQuestion: 0,
+        avgTimePerQuestion: null,
+      },
+    };
+  }
   const finalResult = {
     practiceQuestionOverallReport: {
-      submittedPercentage: ((obj.submittedCountSum * 100) / obj.studentsCount).toFixed(2),
-      attemptedPercentage: ((obj.attemptedCountSum * 100) / obj.studentsCount).toFixed(2),
-      unattemptedPercentage: ((obj.unattemptedCountSum * 100) / obj.studentsCount).toFixed(2),
-      firstTryPercentage: ((obj.firstTryCountSum * 100) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
-      secondTryPercentage: ((obj.secondTryCountSum * 100) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
-      thirdTryPercentage: ((obj.thirdTryCountSum * 100) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
-      avgTriesPerQuestion: ((obj.firstTryCountSum + obj.secondTryCountSum + obj.thirdTryCountSum) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
+      submittedPercentage: obj.questionsCount === 0 ? 0 : ((obj.submittedCountSum * 100) / obj.studentsCount).toFixed(2),
+      attemptedPercentage: obj.questionsCount === 0 ? 0 : ((obj.attemptedCountSum * 100) / obj.studentsCount).toFixed(2),
+      unattemptedPercentage: obj.questionsCount === 0 ? 0 : ((obj.unattemptedCountSum * 100) / obj.studentsCount).toFixed(2),
+      firstTryPercentage: obj.questionsCount === 0 ? 0 : ((obj.firstTryCountSum * 100) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
+      secondTryPercentage: obj.questionsCount === 0 ? 0 : ((obj.secondTryCountSum * 100) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
+      thirdTryPercentage: obj.questionsCount === 0 ? 0 : ((obj.thirdTryCountSum * 100) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
+      avgTriesPerQuestion: obj.questionsCount === 0 ? 0 : ((obj.firstTryCountSum + (2 * obj.secondTryCountSum) + (3 * obj.thirdTryCountSum)) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
       avgTimePerQuestion: null,
     },
   };
   finalResult.pqIndividualQuestionReport = Array.from(obj.questions.entries(), ([k, v]) => {
     return {
       questionId: k,
-      firstTryPercentage: ((get(v, 'firstTryCountSum') * 100) / obj.studentsCount).toFixed(2),
-      secondTryPercentage: ((get(v, 'secondTryCountSum') * 100) / obj.studentsCount).toFixed(2),
-      thirdTryPercentage: ((get(v, 'thirdTryCountSum') * 100) / obj.studentsCount).toFixed(2),
-      avgTries: ((get(v, 'firstTryCountSum') + (2 * get(v, 'secondTryCountSum')) + (3 * get(v, 'thirdTryCountSum'))) / (studentCount)).toFixed(2),
+      firstTryPercentage: obj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') * 100) / obj.studentsCount).toFixed(2),
+      secondTryPercentage: obj.questionsCount === 0 ? 0 : ((get(v, 'secondTryCountSum') * 100) / obj.studentsCount).toFixed(2),
+      thirdTryPercentage: obj.questionsCount === 0 ? 0 : ((get(v, 'thirdTryCountSum') * 100) / obj.studentsCount).toFixed(2),
+      avgTries: obj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') + (2 * get(v, 'secondTryCountSum')) + (3 * get(v, 'thirdTryCountSum'))) / (obj.studentsCount)).toFixed(2),
     };
   });
   return finalResult;
@@ -230,25 +271,25 @@ const practiceQuestionReport = (async (root, params, context) => {
     throw new UnauthorizedOperationError();
   }
 
-  return {
-    practiceQuestionOverallReport: {
-      submittedPercentage: 80,
-      attemptedPercentage: 5,
-      unattemptedPercentage: 15,
-      firstTryPercentage: 30,
-      secondTryPercentage: 45,
-      thirdTryPercentage: 25,
-      avgTriesPerQuestion: 2.3,
-      avgTimePerQuestion: 2,
-    },
-    pqIndividualQuestionReport: [{
-      questionId: null,
-      firstTryPercentage: 20,
-      secondTryPercentage: 25,
-      thirdTryPercentage: 55,
-      avgTries: 1.2,
-    }],
-  };
+  // return {
+  //   practiceQuestionOverallReport: {
+  //     submittedPercentage: 80,
+  //     attemptedPercentage: 5,
+  //     unattemptedPercentage: 15,
+  //     firstTryPercentage: 30,
+  //     secondTryPercentage: 45,
+  //     thirdTryPercentage: 25,
+  //     avgTriesPerQuestion: 2.3,
+  //     avgTimePerQuestion: 2,
+  //   },
+  //   pqIndividualQuestionReport: [{
+  //     questionId: null,
+  //     firstTryPercentage: 20,
+  //     secondTryPercentage: 25,
+  //     thirdTryPercentage: 55,
+  //     avgTries: 1.2,
+  //   }],
+  // };
 
   /**
    * Validation Steps:
@@ -324,7 +365,6 @@ const practiceQuestionReport = (async (root, params, context) => {
   }
 
   const students = get(batchSessionRes, '[0].batch.students', []);
-  const courseId = get(batchSessionRes, '[0].course.typeId');
   const obj = {
     studentsCount: students.length,
     submittedCountSum: 0,
@@ -362,9 +402,9 @@ const practiceQuestionReport = (async (root, params, context) => {
           learningObjectiveId,
         }),
       );
-      if (!get(learningObjectiveRes, '[0].learningSlides[0].practiceQuestions', []).length === 0) {
-        throw new PracticeQuestionsNotFound();
-      }
+      // if (get(learningObjectiveRes, '[0].learningSlides[0].practiceQuestions', []).length === 0) {
+      //   throw new PracticeQuestionsNotFound();
+      // }
       obj.questionsCount = get(learningObjectiveRes, '[0].learningSlides[0].practiceQuestions', []).length;
     } else {
       throw new MissingMandatoryInputInRequestError({
@@ -380,10 +420,10 @@ const practiceQuestionReport = (async (root, params, context) => {
           learningObjectiveId,
         }),
       );
-      if (!get(learningObjectiveRes, '[0].learningSlides[0].practiceQuestions', []).length === 0) {
+      if (get(learningObjectiveRes, '[0].questionBank', []).length === 0) {
         throw new PracticeQuestionsNotFound();
       }
-      obj.questionsCount = get(learningObjectiveRes, '[0].learningSlides[0].practiceQuestions', []).length;
+      obj.questionsCount = get(learningObjectiveRes, '[0].questionBank', []).length;
     } else {
       throw new MissingMandatoryInputInRequestError({
         data: {
@@ -391,12 +431,6 @@ const practiceQuestionReport = (async (root, params, context) => {
         },
       });
     }
-  } else if (!(userId && learningObjectiveId && courseId)) {
-    throw new MissingMandatoryInputInRequestError({
-      data: {
-        message: 'Learning objectiive Id not passed in input',
-      },
-    });
   } else {
     throw new InvalidLearningObjectiveComponent();
   }
@@ -410,18 +444,19 @@ const practiceQuestionReport = (async (root, params, context) => {
     const loId = learningObjectiveId || learningObjectiveIdFromLearningSlide;
     const userPracticeQuestionReportRes = await userPracticeQuestionReportModel.aggregate(
       getUserPracticeQuestionReportAggregation({
-        studentUserId,
+        userId: studentUserId,
         loId,
       }),
     );
 
-    // why multiple userPracticeQuestionReports per user per lo??
+    // since multiple userPracticeQuestionReports per user per lo, we get latest one created
 
     if (userPracticeQuestionReportRes.length) {
       obj.submittedCountSum += 1;
       obj.firstTryCountSum += get(userPracticeQuestionReportRes, '[0].firstTryCount');
       obj.secondTryCountSum += get(userPracticeQuestionReportRes, '[0].secondTryCount');
       obj.thirdTryCountSum += get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount');
+      obj.questionsCount = get(userPracticeQuestionReportRes, '[0].detailedReport', []).length;
       for (const report of get(userPracticeQuestionReportRes, '[0].detailedReport')) {
         const tempObj = {
           firstTryCount: 0,
@@ -464,7 +499,7 @@ const practiceQuestionReport = (async (root, params, context) => {
     const userPracticeQuestionReportRes = await userPracticeQuestionReportModel.aggregate(
       getUserPracticeQuestionReportAggregation({
         userId,
-        learningObjectiveId,
+        loId: learningObjectiveId,
       }),
     );
     if (userPracticeQuestionReportRes.length) {
