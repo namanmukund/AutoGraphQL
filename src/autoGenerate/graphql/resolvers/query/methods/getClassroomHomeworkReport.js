@@ -555,12 +555,15 @@ const classroomHomeworkReport = (async (root, params, context) => {
       obj.quizTotalQuestions = get(userQuizReport, 'quizReport.totalQuestionCount');
       obj.quizCorrectSum = get(userQuizReport, 'quizReport.correctQuestionCount');
       obj.quizIncorrectSum = get(userQuizReport, 'quizReport.inCorrectQuestionCount');
-      for (const quizAnswer of get(userQuizReport, 'quizAnswers')) {
+      const quizAnswers = get(userQuizReport, 'quizAnswers', []);
+      for (const quizAnswer of quizAnswers) {
         if (obj.quizQuestions.has(get(quizAnswer, 'question.typeId'))
           && get(quizAnswer, 'isCorrect')) {
           obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), obj.quizQuestions.get(get(quizAnswer, 'question.typeId')) + 1);
         } else if (get(quizAnswer, 'isCorrect')) {
           obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), 1);
+        } else {
+          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), 0);
         }
       }
     }
