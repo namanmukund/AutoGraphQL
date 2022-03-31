@@ -241,5 +241,5 @@ export const StudentWithSimilarRollNoExist = createError('StudentWithSimilarRoll
 });
 
 export const InvalidLearningObjectiveComponent = createError('InvalidLearningObjectiveComponent', {
-  message: 'LearningObjectiveComponent passed is invalid',
+  message: 'Learning Objective Component passed is invalid',
 });
