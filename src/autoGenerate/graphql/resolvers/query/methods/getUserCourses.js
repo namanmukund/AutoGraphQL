@@ -452,7 +452,6 @@ const getUserBatchDetails = (userId) => [
   },
   {
     $project: {
-      _id: 0,
       id: 1,
       batch: {
         $arrayElemAt: ['$batch', 0],

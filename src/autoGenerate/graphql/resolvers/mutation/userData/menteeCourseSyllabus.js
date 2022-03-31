@@ -1807,6 +1807,18 @@ const menteeCourseSyllabusMutationResolver = async (
         },
       },
       {
+        $project: {
+          id: 1,
+          isSubmittedForReview: 1,
+          topic: 1,
+          sessionEndDate: 1,
+          sessionStartDate: 1,
+          sessionStatus: 1,
+          menteeSession: 1,
+          mentorSession: 1,
+        },
+      },
+      {
         $lookup: {
           from: 'MenteeSession',
           let: {
