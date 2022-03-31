@@ -16,6 +16,7 @@ const PQIndividualQuestionReport = `
     firstTryPercentage: Float
     secondTryPercentage: Float
     thirdTryPercentage: Float
+    avgTries: Float
   }
 `;
 

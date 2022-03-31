@@ -89,6 +89,7 @@ import {
   CannotScheduleOutsideWorkingHoursError,
   MentorHasExistingSessionsError,
   MentorIsInactiveError,
+  PracticeQuestionsNotFound,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -154,6 +155,7 @@ import {
   CanNotStartSessionWithoutMentorError,
   InvalidScheduleParameters,
   InvalidRescheduleParameters,
+  InvalidLearningObjectiveComponent,
 } from './input';
 
 // assessment validation sqs  profile apolloErrorPackageTest maxSync transcoder
@@ -335,4 +337,6 @@ export {
   MentorIsInactiveError,
   InvalidScheduleParameters,
   InvalidRescheduleParameters,
+  InvalidLearningObjectiveComponent,
+  PracticeQuestionsNotFound,
 };

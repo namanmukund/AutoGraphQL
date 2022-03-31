@@ -313,6 +313,13 @@ const getUserBlockBasedPracticeAggregation = ({
         0,
       ],
     },
+    result: 1,
+  },
+}, {
+  $match: {
+    $expr: {
+      $eq: ['$blockBasedPractice.isHomework', true],
+    },
   },
 }];
 
@@ -324,6 +331,18 @@ const getTypeQueryController = (
 ) => new QueryController(typeName, authentication);
 
 const transformMongoResults = (obj) => {
+  if (obj.studentsCount === 0) {
+    return {
+      overall: {
+        submittedPercentage: 0,
+        attemptedPercentage: 0,
+        unattemptedPercentage: 0,
+      },
+      quiz: null,
+      coding: null,
+      blockBasedPractice: null,
+    };
+  }
   const finalResult = {
     overall: {
       submittedPercentage: ((obj.submittedCount * 100) / obj.studentsCount).toFixed(2),
@@ -352,7 +371,7 @@ const transformMongoResults = (obj) => {
       notEvaluatedCount: obj.assignmentTotalQuestions === 0 ? 0 : obj.assignmentUnevaluated / obj.assignmentTotalQuestions,
       questions: [],
     },
-    pq: {
+    blockBasedPractice: {
       submittedPercentage: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqSubmittedCount * 100) / obj.studentsCount).toFixed(2),
       unattemptedPercentage: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqUnattemptedCount * 100) / obj.studentsCount).toFixed(2),
       totalQuestions: obj.pqTotalQuestions,
@@ -376,7 +395,7 @@ const transformMongoResults = (obj) => {
       percentageCorrect: ((v * 100) / obj.studentsCount).toFixed(2),
     };
   });
-  finalResult.pq.questions = Array.from(obj.pqQuestions.entries(), ([k, v]) => {
+  finalResult.blockBasedPractice.questions = Array.from(obj.pqQuestions.entries(), ([k, v]) => {
     return {
       questionId: k,
       percentageCorrect: ((v * 100) / obj.studentsCount).toFixed(2),
@@ -536,12 +555,15 @@ const classroomHomeworkReport = (async (root, params, context) => {
       obj.quizTotalQuestions = get(userQuizReport, 'quizReport.totalQuestionCount');
       obj.quizCorrectSum = get(userQuizReport, 'quizReport.correctQuestionCount');
       obj.quizIncorrectSum = get(userQuizReport, 'quizReport.inCorrectQuestionCount');
-      for (const quizAnswer of get(userQuizReport, 'quizAnswers')) {
+      const quizAnswers = get(userQuizReport, 'quizAnswers', []);
+      for (const quizAnswer of quizAnswers) {
         if (obj.quizQuestions.has(get(quizAnswer, 'question.typeId'))
           && get(quizAnswer, 'isCorrect')) {
           obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), obj.quizQuestions.get(get(quizAnswer, 'question.typeId')) + 1);
         } else if (get(quizAnswer, 'isCorrect')) {
           obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), 1);
+        } else {
+          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), 0);
         }
       }
     }
@@ -563,11 +585,11 @@ const classroomHomeworkReport = (async (root, params, context) => {
 
     if (get(userBlockbasedPracticeRes, '[0].blockBasedPractice')) {
       obj.pqTotalQuestions = 1;
-      if (get(userBlockbasedPracticeRes, 'result') === 'correct') {
+      if (get(userBlockbasedPracticeRes, '[0].result') === 'correct') {
         obj.pqCorrectSum += 1;
-      } else if (get(userBlockbasedPracticeRes, 'result') === 'incorrect') {
+      } else if (get(userBlockbasedPracticeRes, '[0].result') === 'incorrect') {
         obj.pqIncorrectSum += 1;
-      } else if (get(userBlockbasedPracticeRes, 'result') === 'partiallyCorrect') {
+      } else if (get(userBlockbasedPracticeRes, '[0].result') === 'partiallyCorrect') {
         obj.pqPartiallyCorrectSum += 1;
       } else {
         obj.pqUnevaluated += 1;
