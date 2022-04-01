@@ -33,7 +33,8 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import addOrUpdateUsersInBulk from '../scriptMethods/addOrUpdateUsersInBulk';
 // import updateLeadAnalyticsForPastLeads from '../scriptMethods/updateLeadAnalyticsForPastLeads';
 // import updateMentorMenteeSessionIsAssignmentAttempted from '../scriptMethods/updateMentorMenteeSessionIsAssignmentAttempted';
-import updateStudentHomework from '../scriptMethods/updateStudentHomework';
+// import updateStudentHomework from '../scriptMethods/updateStudentHomework';
+import addQuestionBankMessageMapping from '../scriptMethods/addQuestionBankMessageMapping';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -90,7 +91,8 @@ const temporaryScript = (async (root, params, context) => {
   // await addOrUpdateUsersInBulk();
   // await updateLeadAnalyticsForPastLeads();
   // await updateMentorMenteeSessionIsAssignmentAttempted();
-  await updateStudentHomework();
+  // await updateStudentHomework();
+  await addQuestionBankMessageMapping();
   return {
     result: true,
   };
