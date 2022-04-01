@@ -26,6 +26,7 @@ const b2bFormFields = `
 const BatchSession = `
   type BatchSession @model {
     course: Course @relation(name: "BatchSessionCourse", direction: "OneWay")
+    coursePackage: CoursePackage @relation(name: "BatchSessionCoursePackage", direction: "OneWay")
     batch: Batch! @relation(name: "BatchSessionBatch", direction: "OneWay")
     topic: Topic @relation(name: "BatchSessionTopic", direction: "OneWay")
     mentorSession: MentorSession @relation(name: "BatchSessionMentorSession")

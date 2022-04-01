@@ -10,6 +10,13 @@ import {
   PRE_SALES,
 } from '../../../../constants/roles';
 
+const TopicRule = `
+  type TopicRule {
+    order: Int!
+    topic: Topic @relation(name: "CoursePackageTopic", direction: "OneWay")
+  }
+`;
+
 const CoursePackage = `
   type CoursePackage @model
   @appPermissions(
@@ -41,15 +48,14 @@ const CoursePackage = `
     category: CourseCategory!
     description: String @length(min: 6, max: 1000) @trim
     status: ContentStatus! @defaultValue(value: "unpublished")
-    mentorPricings: [MentorPricing] @relation(name: "CoursePackageMentorPricing")
     thumbnail: File @relation(name: "CourseThumbnail", direction: "OneWay")
     bannerThumbnail: File @relation(name: "CourseBannerThumbnail", direction: "OneWay")
     courses: [Course] @relation(name: "CoursePackageCourses", direction: "OneWay")
-    topics: [Topic] @relation(name: "CoursePackageTopic", direction: "OneWay")
+    topics: [TopicRule]
     secondaryCategory: String
     minGrade: Int
     maxGrade: Int
   }
 `;
 
-export default [CoursePackage];
+export default [CoursePackage, TopicRule];
