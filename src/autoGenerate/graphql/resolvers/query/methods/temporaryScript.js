@@ -34,7 +34,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateLeadAnalyticsForPastLeads from '../scriptMethods/updateLeadAnalyticsForPastLeads';
 // import updateMentorMenteeSessionIsAssignmentAttempted from '../scriptMethods/updateMentorMenteeSessionIsAssignmentAttempted';
 // import updateStudentHomework from '../scriptMethods/updateStudentHomework';
-import addQuestionBankMessageMapping from '../scriptMethods/addQuestionBankMessageMapping';
+// import addQuestionBankMessageMapping from '../scriptMethods/addQuestionBankMessageMapping';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -92,7 +92,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateLeadAnalyticsForPastLeads();
   // await updateMentorMenteeSessionIsAssignmentAttempted();
   // await updateStudentHomework();
-  await addQuestionBankMessageMapping();
+  // await addQuestionBankMessageMapping();
   return {
     result: true,
   };
