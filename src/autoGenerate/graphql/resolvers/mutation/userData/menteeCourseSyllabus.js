@@ -1876,12 +1876,11 @@ const getTopicOrderFromCoursePackage = (coursePackage, currentTopic) => {
 
 const getTopicsArrFromCoursePackages = (coursePackage = {}) => {
   const packageTopics = get(coursePackage, 'topicsArr', []);
-  const packageTopicOrderArr = get(coursePackage, 'topics', []);
   const updatedTopicsArr = [];
   (packageTopics || []).forEach((topic) => {
     updatedTopicsArr.push({
         ...topic,
-        order: get(packageTopicOrderArr.filter((el) => get(el, 'topic.typeId') === get(topic, 'id')), '0.order'),
+        order: getTopicOrderFromCoursePackage(coursePackage, topic),
       });
   });
   return updatedTopicsArr.sort((a, b) => a.order - b.order);
