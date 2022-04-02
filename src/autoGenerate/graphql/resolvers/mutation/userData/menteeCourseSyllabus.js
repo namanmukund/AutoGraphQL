@@ -1841,24 +1841,13 @@ const getUserBatchDetails = (userId) => [
   },
   {
     $project: {
+      _id: 0,
       id: 1,
       batch: {
         $arrayElemAt: ['$batch', 0],
       },
       school: {
         $arrayElemAt: ['$school', 0],
-      },
-    },
-  },
-  {
-    $project: {
-      _id: 0,
-      id: 1,
-      batch: {
-        $ifNull: ['$batch', null],
-      },
-      school: {
-        $ifNull: ['$school', null],
       },
     },
   },
@@ -2067,7 +2056,6 @@ const menteeCourseSyllabusMutationResolver = async (
   ast,
   context,
 ) => {
-  const mcsMRTime = process.hrtime();
   /*
   Calling method to validate token and return userId.
   we will compare this userId against userId passed in input
@@ -2313,6 +2301,13 @@ const menteeCourseSyllabusMutationResolver = async (
                       },
                     },
                   },
+                  {
+                    $project: {
+                      id: 1,
+                      order: 1,
+                      title: 1,
+                    },
+                  },
                 ],
                 as: 'chapter',
               },
@@ -2493,7 +2488,7 @@ const menteeCourseSyllabusMutationResolver = async (
   let totalTopics = 0;
   const { chapters } = currentCourse;
   let packageTopics = [];
-  if (coursePackage && coursePackage.id) {
+  if (coursePackage && get(coursePackage, 'id')) {
     packageTopics = getTopicsArrFromCoursePackages(coursePackage);
   }
   if ((!chapters || !chapters.length) && !(packageTopics || []).length) {
@@ -2517,7 +2512,7 @@ const menteeCourseSyllabusMutationResolver = async (
     totalChapters += chapters.length;
     // iterating over chapters to construct data for homepage
 
-    if (coursePackage && coursePackage.id) {
+    if (coursePackage && get(coursePackage, 'id')) {
       lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic);
       packageTopics.forEach((topic) => {
         const constructedSessionsArr = constructSessionsArr({
@@ -2899,8 +2894,6 @@ const menteeCourseSyllabusMutationResolver = async (
       topicId: prevTopicId,
     },
   });
-  const mcsMRTimeStop = process.hrtime(mcsMRTime);
-  log(`Time Taken to execute mcsMR : ${(mcsMRTimeStop[0] * 1e9 + mcsMRTimeStop[1]) / 1e9} seconds`);
   return currentUserSyllabus;
 };
 
