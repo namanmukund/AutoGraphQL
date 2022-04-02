@@ -245,20 +245,20 @@ const transformMongoResults = (obj) => {
       submittedPercentage: obj.questionsCount === 0 ? 0 : ((obj.submittedCountSum * 100) / obj.studentsCount).toFixed(2),
       attemptedPercentage: obj.questionsCount === 0 ? 0 : ((obj.attemptedCountSum * 100) / obj.studentsCount).toFixed(2),
       unattemptedPercentage: obj.questionsCount === 0 ? 0 : ((obj.unattemptedCountSum * 100) / obj.studentsCount).toFixed(2),
-      firstTryPercentage: obj.questionsCount === 0 ? 0 : ((obj.firstTryCountSum * 100) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
-      secondTryPercentage: obj.questionsCount === 0 ? 0 : ((obj.secondTryCountSum * 100) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
-      thirdTryPercentage: obj.questionsCount === 0 ? 0 : ((obj.thirdTryCountSum * 100) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
-      avgTriesPerQuestion: obj.questionsCount === 0 ? 0 : ((obj.firstTryCountSum + (2 * obj.secondTryCountSum) + (3 * obj.thirdTryCountSum)) / (obj.studentsCount * obj.questionsCount)).toFixed(2),
+      firstTryPercentage: obj.questionsCount === 0 ? 0 : ((obj.firstTryCountSum * 100) / (obj.submittedCountSum * obj.questionsCount)).toFixed(2),
+      secondTryPercentage: obj.questionsCount === 0 ? 0 : ((obj.secondTryCountSum * 100) / (obj.submittedCountSum * obj.questionsCount)).toFixed(2),
+      thirdTryPercentage: obj.questionsCount === 0 ? 0 : ((obj.thirdTryCountSum * 100) / (obj.submittedCountSum * obj.questionsCount)).toFixed(2),
+      avgTriesPerQuestion: obj.questionsCount === 0 ? 0 : ((obj.firstTryCountSum + (2 * obj.secondTryCountSum) + (3 * obj.thirdTryCountSum)) / (obj.submittedCountSum * obj.questionsCount)).toFixed(2),
       avgTimePerQuestion: null,
     },
   };
   finalResult.pqIndividualQuestionReport = Array.from(obj.questions.entries(), ([k, v]) => {
     return {
       questionId: k,
-      firstTryPercentage: obj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') * 100) / obj.studentsCount).toFixed(2),
-      secondTryPercentage: obj.questionsCount === 0 ? 0 : ((get(v, 'secondTryCountSum') * 100) / obj.studentsCount).toFixed(2),
-      thirdTryPercentage: obj.questionsCount === 0 ? 0 : ((get(v, 'thirdTryCountSum') * 100) / obj.studentsCount).toFixed(2),
-      avgTries: obj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') + (2 * get(v, 'secondTryCountSum')) + (3 * get(v, 'thirdTryCountSum'))) / (obj.studentsCount)).toFixed(2),
+      firstTryPercentage: obj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') * 100) / obj.submittedCountSum).toFixed(2),
+      secondTryPercentage: obj.questionsCount === 0 ? 0 : ((get(v, 'secondTryCountSum') * 100) / obj.submittedCountSum).toFixed(2),
+      thirdTryPercentage: obj.questionsCount === 0 ? 0 : ((get(v, 'thirdTryCountSum') * 100) / obj.submittedCountSum).toFixed(2),
+      avgTries: obj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') + (2 * get(v, 'secondTryCountSum')) + (3 * get(v, 'thirdTryCountSum'))) / (obj.submittedCountSum)).toFixed(2),
     };
   });
   return finalResult;
