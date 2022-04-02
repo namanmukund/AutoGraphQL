@@ -448,11 +448,11 @@ const getCourseAggregation = (courseId) => [
   },
 ];
 // query to get mentee Sessions
-const getMenteeSessionAggregation = (userId, courseId) => [
+const getMenteeSessionAggregation = (userId, courseId, courseOrPackageFilter = {}) => [
   {
     $match: {
       'user.typeId': userId,
-      'course.typeId': courseId || OLD_COURSE_ID,
+      ...courseOrPackageFilter,
     },
   },
   {
@@ -578,11 +578,11 @@ const getMenteeSessionAggregation = (userId, courseId) => [
   },
 ];
 
-const getBatchSessionsAggregation = (batchId, courseId) => [
+const getBatchSessionsAggregation = (batchId, courseId, courseOrPackageFilter = {}) => [
   {
     $match: {
       'batch.typeId': batchId,
-      'course.typeId': courseId || OLD_COURSE_ID,
+      ...courseOrPackageFilter,
     },
   },
   {
@@ -909,10 +909,10 @@ const allotedMentorAggregation = (userId, courseId) => [
 ];
 
 // query to get mentor from MMS
-const allotedMentorFromMMSAggregation = (userId, courseId) => [
+const allotedMentorFromMMSAggregation = (userId, courseId, courseOrPackageFilter = {}) => [
   {
     $match: {
-      'course.typeId': courseId || OLD_COURSE_ID,
+      ...courseOrPackageFilter,
     },
   },
   {
@@ -1128,7 +1128,7 @@ const fetchOrCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => {}
   return finalRes;
 };
 
-/** Fitler DefaultLoComponentRule based on Lo meta */
+/** Filter DefaultLoComponentRule based on Lo meta */
 const getFilteredLoComponentRule = (learningObjective, loComponentRule) => {
   if (loComponentRule && loComponentRule.length && learningObjective) {
     return (
@@ -1167,6 +1167,17 @@ const getFilteredLoComponentRule = (learningObjective, loComponentRule) => {
 };
 
 const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
+  {
+    $project: {
+      id: 1,
+      currentTopicComponentType: 1,
+      enrollmentType: 1,
+      currentLearningObjective: 1,
+      currentCourse: 1,
+      currentTopic: 1,
+      user: 1,
+    },
+  },
   {
     $match: {
       'user.typeId': userId,
@@ -1402,6 +1413,7 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
       id: 1,
       currentTopicComponentType: 1,
       enrollmentType: 1,
+      currentLearningObjective: 1,
       currentCourse: {
         $arrayElemAt: [
           '$currentCourse',
@@ -1414,36 +1426,47 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
           0,
         ],
       },
+    },
+  }];
+
+const getUserBatchDetails = (userId) => [
+  {
+    $project: {
+      id: 1,
+      batch: 1,
+      school: 1,
       user: 1,
     },
-  }, {
+  },
+  {
+    $match: {
+      'user.typeId': userId,
+    },
+  },
+  {
     $lookup: {
-      from: 'User',
-      let: {
-        userId: '$user.typeId',
-      },
+      from: 'Batch',
+      let: { batchId: '$batch.typeId' },
       pipeline: [
         {
           $match: {
             $expr: {
-              $eq: [
-                '$id',
-                '$$userId',
-              ],
+              $eq: ['$id', '$$batchId'],
             },
           },
         },
         {
           $project: {
             id: 1,
-            studentProfile: 1,
+            currentComponent: 1,
+            coursePackage: 1,
           },
         },
         {
           $lookup: {
-            from: 'StudentProfile',
+            from: 'BatchCurrentComponentStatus',
             let: {
-              studentProfileId: '$studentProfile.typeId',
+              ccId: '$currentComponent.typeId',
             },
             pipeline: [
               {
@@ -1451,23 +1474,24 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                   $expr: {
                     $eq: [
                       '$id',
-                      '$$studentProfileId',
+                      '$$ccId',
                     ],
                   },
                 },
               },
               {
                 $project: {
-                  id: 1,
-                  batch: 1,
-                  school: 1,
+                  currentCourse: {
+                    id: '$currentCourse.typeId',
+                  },
+                  currentTopic: 1,
                 },
               },
               {
                 $lookup: {
-                  from: 'Batch',
+                  from: 'Topic',
                   let: {
-                    batchId: '$batch.typeId',
+                    currentTopicId: '$currentTopic.typeId',
                   },
                   pipeline: [
                     {
@@ -1475,16 +1499,174 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                         $expr: {
                           $eq: [
                             '$id',
-                            '$$batchId',
+                            '$$currentTopicId',
                           ],
                         },
                       },
                     },
                     {
+                      $project: {
+                        id: 1,
+                        order: 1,
+                      },
+                    },
+                  ],
+                  as: 'currentTopic',
+                },
+              },
+              {
+                $project: {
+                  currentCourse: 1,
+                  enrollmentType: 1,
+                  currentTopic: {
+                    $arrayElemAt: [
+                      '$currentTopic',
+                      0,
+                    ],
+                  },
+                  latestSessionStatus: 1,
+                },
+              },
+            ],
+            as: 'currentComponent',
+          },
+        },
+        {
+          $lookup: {
+            from: 'User',
+            let: { allottedMentorId: '$allottedMentor.typeId' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$id', '$$allottedMentorId'],
+                  },
+                },
+              },
+              {
+                $lookup: {
+                  from: 'File',
+                  localField: 'profilePic.typeId',
+                  foreignField: 'id',
+                  as: 'profilePic',
+                },
+              },
+              {
+                $lookup: {
+                  from: 'MentorProfile',
+                  localField: 'mentorProfile.typeId',
+                  foreignField: 'id',
+                  as: 'mentorProfile',
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  name: 1,
+                  profilePic: {
+                    $arrayElemAt: ['$profilePic', 0],
+                  },
+                  mentorProfile: {
+                    $arrayElemAt: ['$mentorProfile', 0],
+                  },
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  name: 1,
+                  profilePic: {
+                    id: 1,
+                    uri: 1,
+                    name: 1,
+                  },
+                  mentorProfile: {
+                    description: 1,
+                    sessionLink: 1,
+                    googleMeetLink: 1,
+                    pythonCourseRating5: 1,
+                    pythonCourseRating4: 1,
+                    pythonCourseRating3: 1,
+                    pythonCourseRating2: 1,
+                    pythonCourseRating1: 1,
+                    gitHubLink: 1,
+                    linkedInLink: 1,
+                    portfolioLink: 1,
+                    experienceYear: 1,
+                  },
+                },
+              },
+            ],
+            as: 'allottedMentor',
+          },
+        },
+        {
+          $lookup: {
+            from: 'CoursePackage',
+            let: { coursePackageId: '$coursePackage.typeId' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$id', '$$coursePackageId'],
+                  },
+                },
+              },
+              {
+                $project: {
+                  _id: 0,
+                  courses: 1,
+                  id: 1,
+                  status: 1,
+                  title: 1,
+                  topics: 1,
+                },
+              },
+              {
+                $lookup: {
+                  from: 'Topic',
+                  let: {
+                    topicIds: '$topics.topic.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $in: ['$id', '$$topicIds'],
+                        },
+                      },
+                    },
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: ['$status', 'published'],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        title: 1,
+                        order: 1,
+                        isTrial: 1,
+                        description: 1,
+                        topicQuestions: 1,
+                        thumbnail: 1,
+                        thumbnailSmall: 1,
+                        topicAssignmentQuestions: {
+                          assignmentQuestions: {
+                            id: 1,
+                          },
+                        },
+                        chapter: 1,
+                        topicComponentRule: 1,
+                      },
+                    },
+                    {
                       $lookup: {
-                        from: 'BatchCurrentComponentStatus',
+                        from: 'File',
                         let: {
-                          ccId: '$currentComponent.typeId',
+                          thumbnailId: '$thumbnail.typeId',
                         },
                         pipeline: [
                           {
@@ -1492,228 +1674,369 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                               $expr: {
                                 $eq: [
                                   '$id',
-                                  '$$ccId',
+                                  '$$thumbnailId',
                                 ],
                               },
                             },
                           },
                           {
                             $project: {
-                              currentCourse: {
-                                id: '$currentCourse.typeId',
-                              },
-                              currentTopic: 1,
-                            },
-                          },
-                          {
-                            $lookup: {
-                              from: 'Topic',
-                              let: {
-                                currentTopicId: '$currentTopic.typeId',
-                              },
-                              pipeline: [
-                                {
-                                  $match: {
-                                    $expr: {
-                                      $eq: [
-                                        '$id',
-                                        '$$currentTopicId',
-                                      ],
-                                    },
-                                  },
-                                },
-                                {
-                                  $project: {
-                                    id: 1,
-                                    order: 1,
-                                  },
-                                },
-                              ],
-                              as: 'currentTopic',
-                            },
-                          },
-                          {
-                            $project: {
-                              currentCourse: 1,
-                              enrollmentType: 1,
-                              currentTopic: {
-                                $arrayElemAt: [
-                                  '$currentTopic',
-                                  0,
-                                ],
-                              },
-                              latestSessionStatus: 1,
+                              id: 1,
+                              uri: 1,
+                              name: 1,
                             },
                           },
                         ],
-                        as: 'currentComponent',
+                        as: 'thumbnail',
                       },
                     },
                     {
                       $lookup: {
-                        from: 'User',
-                        let: { allottedMentorId: '$allottedMentor.typeId' },
+                        from: 'File',
+                        let: {
+                          thumbnailSmallId: '$thumbnailSmall.typeId',
+                        },
                         pipeline: [
                           {
                             $match: {
                               $expr: {
-                                $eq: ['$id', '$$allottedMentorId'],
-                              },
-                            },
-                          },
-                          {
-                            $lookup: {
-                              from: 'File',
-                              localField: 'profilePic.typeId',
-                              foreignField: 'id',
-                              as: 'profilePic',
-                            },
-                          },
-                          {
-                            $lookup: {
-                              from: 'MentorProfile',
-                              localField: 'mentorProfile.typeId',
-                              foreignField: 'id',
-                              as: 'mentorProfile',
-                            },
-                          },
-                          {
-                            $project: {
-                              id: 1,
-                              name: 1,
-                              profilePic: {
-                                $arrayElemAt: ['$profilePic', 0],
-                              },
-                              mentorProfile: {
-                                $arrayElemAt: ['$mentorProfile', 0],
+                                $eq: [
+                                  '$id',
+                                  '$$thumbnailSmallId',
+                                ],
                               },
                             },
                           },
                           {
                             $project: {
                               id: 1,
+                              uri: 1,
                               name: 1,
-                              profilePic: {
-                                id: 1,
-                                uri: 1,
-                                name: 1,
-                              },
-                              mentorProfile: {
-                                description: 1,
-                                sessionLink: 1,
-                                googleMeetLink: 1,
-                                pythonCourseRating5: 1,
-                                pythonCourseRating4: 1,
-                                pythonCourseRating3: 1,
-                                pythonCourseRating2: 1,
-                                pythonCourseRating1: 1,
-                                gitHubLink: 1,
-                                linkedInLink: 1,
-                                portfolioLink: 1,
-                                experienceYear: 1,
-                              },
                             },
                           },
                         ],
-                        as: 'allottedMentor',
+                        as: 'thumbnailSmall',
+                      },
+                    },
+                    {
+                      $lookup: {
+                        from: 'Chapter',
+                        let: {
+                          chapterId: '$chapter.typeId',
+                        },
+                        pipeline: [
+                          {
+                            $match: {
+                              $expr: {
+                                $eq: [
+                                  '$id',
+                                  '$$chapterId',
+                                ],
+                              },
+                            },
+                          },
+                          {
+                            $match: {
+                              $expr: {
+                                $eq: ['$status', 'published'],
+                              },
+                            },
+                          },
+                          {
+                            $project: {
+                              id: 1,
+                              title: 1,
+                              order: 1,
+                            },
+                          },
+                        ],
+                        as: 'chapter',
                       },
                     },
                     {
                       $project: {
                         id: 1,
-                        type: 1,
-                        allottedMentor: {
-                          $arrayElemAt: ['$allottedMentor', 0],
-                        },
-                        currentComponent: {
+                        title: 1,
+                        order: 1,
+                        isTrial: 1,
+                        description: 1,
+                        thumbnail: {
                           $arrayElemAt: [
-                            '$currentComponent',
+                            '$thumbnail',
                             0,
                           ],
                         },
-                      },
-                    },
-                  ],
-                  as: 'batch',
-                },
-              },
-              {
-                $lookup: {
-                  from: 'School',
-                  let: {
-                    schoolId: '$school.typeId',
-                  },
-                  pipeline: [
-                    {
-                      $match: {
-                        $expr: {
-                          $eq: [
-                            '$id',
-                            '$$schoolId',
+                        thumbnailSmall: {
+                          $arrayElemAt: [
+                            '$thumbnailSmall',
+                            0,
                           ],
                         },
-                      },
-                    },
-                    {
-                      $project: {
-                        id: 1,
-                        enrollmentType: 1,
+                        topicAssignmentQuestions: {
+                          assignmentQuestions: {
+                            id: 1,
+                          },
+                        },
+                        chapter: {
+                          $arrayElemAt: [
+                            '$chapter',
+                            0,
+                          ],
+                        },
+                        topicComponentRule: 1,
                       },
                     },
                   ],
-                  as: 'school',
-                },
-              },
-              {
-                $project: {
-                  batch: {
-                    $arrayElemAt: [
-                      '$batch',
-                      0,
-                    ],
-                  },
-                  school: {
-                    $arrayElemAt: [
-                      '$school',
-                      0,
-                    ],
-                  },
+                  as: 'topicsArr',
                 },
               },
             ],
-            as: 'studentProfile',
+            as: 'coursePackage',
           },
         },
         {
           $project: {
-            studentProfile: {
-              $arrayElemAt: [
-                '$studentProfile',
-                0,
-              ],
+            id: 1,
+            coursePackage: {
+              $arrayElemAt: ['$coursePackage', 0],
+            },
+            allottedMentor: {
+              $arrayElemAt: ['$allottedMentor', 0],
+            },
+            currentComponent: {
+              $arrayElemAt: ['$currentComponent', 0],
             },
           },
         },
       ],
-      as: 'user',
+      as: 'batch',
     },
-  }, {
+  },
+  {
+    $lookup: {
+      from: 'School',
+      let: {
+        schoolId: '$school.typeId',
+      },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: [
+                '$id',
+                '$$schoolId',
+              ],
+            },
+          },
+        },
+        {
+          $project: {
+            id: 1,
+            enrollmentType: 1,
+          },
+        },
+      ],
+      as: 'school',
+    },
+  },
+  {
     $project: {
       _id: 0,
       id: 1,
-      currentCourse: 1,
-      currentLearningObjective: 1,
-      currentTopic: 1,
-      enrollmentType: 1,
-      currentTopicComponentType: 1,
-      user: {
-        $arrayElemAt: [
-          '$user',
-          0,
-        ],
+      batch: {
+        $arrayElemAt: ['$batch', 0],
+      },
+      school: {
+        $arrayElemAt: ['$school', 0],
       },
     },
-  }];
+  },
+];
+
+const getTopicOrderFromCoursePackage = (coursePackage, currentTopic) => {
+  if (currentTopic) {
+    const currentTopicId = get(currentTopic, 'id');
+    const packageTopics = get(coursePackage, 'topics', []);
+    const packageTopicOrder = get(packageTopics.filter((el) => get(el, 'topic.typeId') === currentTopicId)[0], 'order', 0);
+    return packageTopicOrder;
+  }
+  return 0;
+};
+
+const getTopicsArrFromCoursePackages = (coursePackage = {}) => {
+  const packageTopics = get(coursePackage, 'topicsArr', []);
+  const updatedTopicsArr = [];
+  (packageTopics || []).forEach((topic) => {
+    updatedTopicsArr.push({
+        ...topic,
+        order: getTopicOrderFromCoursePackage(coursePackage, topic),
+      });
+  });
+  return updatedTopicsArr.sort((a, b) => a.order - b.order);
+};
+
+const constructSessionsArr = ({
+  lastTopicBookedOrder,
+  lastTopicSessionStatus,
+  chapter,
+  topic,
+  batchSessions,
+  combinedEnrollmentType,
+  mentorMenteeSessions,
+  bookedSession,
+}) => {
+  const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
+  // if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
+  // if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
+  // if (topic.projects && topic.projects.length) {
+  //   topic.projects.forEach((project) => {
+  //     projects.push(project);
+  //   });
+  // }
+
+  const {
+    order: topicOrder,
+    id: topicId,
+    title: topicTitle,
+    description: topicDescription,
+    thumbnail: topicThumbnail,
+    thumbnailSmall: topicThumbnailSmall,
+    isTrial,
+  } = topic;
+  let completedSessionObj;
+  let bookedSessionObj;
+  let upComingSessionObj;
+  let mentorData;
+  const isAccessible = isTopicAccessible(combinedEnrollmentType, isTrial);
+  // checking logic for topics which are yet not booked by mentee
+  if (
+    topicOrder >= lastTopicBookedOrder
+  ) {
+    const batchSessionArray = batchSessions && batchSessions.filter((item) => item.topic && item.topic.id === topicId);
+    if (batchSessionArray && batchSessionArray.length) {
+      const batchSession = batchSessionArray[0];
+      let slotTime = null;
+      const {
+        bookingDate,
+        mentorSession,
+        sessionEndDate,
+      } = batchSession;
+      const {
+        order: batchSessionTopicOrder,
+        id: batchSessionTopicId,
+        title: batchSessionTopicTitle,
+        description: batchSessionTopicDescription,
+        thumbnail: batchSessionTopicThumbnail,
+        thumbnailSmall: batchSessionTopicThumbnailSmall,
+        isTrial: batchSessionIsTrial,
+      } = batchSession.topic;
+
+      const isBatchTopicAccessible = isTopicAccessible(combinedEnrollmentType, batchSessionIsTrial);
+
+      slotTimes.forEach((time, index) => {
+        if (batchSession[time]) {
+          slotTime = index;
+        }
+      });
+      // checking logic if topic is already consumed or yet to be watched
+      if (topicOrder === lastTopicBookedOrder && lastTopicSessionStatus === sessionStatus.completed) {
+        const completedMenteeSession = {
+          topicId,
+          topicOrder,
+          topicTitle,
+          topicThumbnail,
+          topicThumbnailSmall,
+          topicDescription,
+          isAccessible,
+          chapterId,
+          chapterTitle,
+          chapterOrder,
+          endingDate: sessionEndDate,
+          mentorId: mentorSession && mentorSession.user && mentorSession.user.id,
+          mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
+          mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
+        };
+        completedSessionObj = completedMenteeSession;
+      } else {
+        const bookedMenteeSession = {
+          topicId: batchSessionTopicId,
+          topicOrder: batchSessionTopicOrder,
+          topicTitle: batchSessionTopicTitle,
+          topicThumbnail: batchSessionTopicThumbnail,
+          topicThumbnailSmall: batchSessionTopicThumbnailSmall,
+          topicDescription: batchSessionTopicDescription,
+          bookingDate,
+          slotTime,
+          isAccessible: isBatchTopicAccessible,
+          chapterId,
+          chapterTitle,
+          chapterOrder,
+        };
+        if (get(mentorSession, 'user')) {
+          mentorData = getMentorData(get(mentorSession, 'user'));
+        }
+        if (bookedSession.length) {
+          upComingSessionObj = bookedMenteeSession;
+        } else {
+          bookedSessionObj = bookedMenteeSession;
+        }
+      }
+    } else {
+      const upComingMenteeSession = {
+        topicId,
+        topicOrder,
+        topicTitle,
+        topicThumbnail,
+        topicThumbnailSmall,
+        topicDescription,
+        isAccessible,
+        chapterId,
+        chapterTitle,
+        chapterOrder,
+      };
+      if (bookedSession.length) {
+        upComingSessionObj = upComingMenteeSession;
+      } else {
+        bookedSessionObj = upComingMenteeSession;
+      }
+    }
+  } else {
+    let mentorSession;
+    let sessionDate;
+    let isSubmittedForReview = false;
+    mentorMenteeSessions.forEach((mentorMenteeSession) => {
+      if (mentorMenteeSession.topic && mentorMenteeSession.topic.id === topicId) {
+        mentorSession = mentorMenteeSession.mentorSession;
+        isSubmittedForReview = mentorMenteeSession.isSubmittedForReview || false;
+        sessionDate = mentorMenteeSession.sessionEndDate || mentorMenteeSession.sessionStartDate;
+      }
+    });
+    const completedMenteeSession = {
+      topicId,
+      topicOrder,
+      topicTitle,
+      topicThumbnail,
+      topicThumbnailSmall,
+      topicDescription,
+      isAccessible,
+      isSubmittedForReview,
+      chapterId,
+      chapterTitle,
+      chapterOrder,
+      endingDate: sessionDate,
+      mentorId: mentorSession && mentorSession.user && mentorSession.user.id,
+      mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
+      mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
+    };
+    completedSessionObj = completedMenteeSession;
+  }
+  return {
+    completedSessionObj,
+    upComingSessionObj,
+    bookedSessionObj,
+    mentorData,
+  };
+};
 
 /*
 This is called when mentee tries to load homepage
@@ -1733,7 +2056,6 @@ const menteeCourseSyllabusMutationResolver = async (
   ast,
   context,
 ) => {
-  const mcsMRTime = process.hrtime();
   /*
   Calling method to validate token and return userId.
   we will compare this userId against userId passed in input
@@ -1759,6 +2081,7 @@ const menteeCourseSyllabusMutationResolver = async (
   let lastTopicBookedOrder = 0;
   let lastCompletedTopicOrder = 0;
   let isPaid = false;
+  let coursePackage;
   // let currentTopicOrder;
   // const projects = [];
   let mentorData = {};
@@ -1774,27 +2097,39 @@ const menteeCourseSyllabusMutationResolver = async (
     //   '',
     // );
 
+    const userBatchDetailsRes = new QueryController('StudentProfile', { bypass: true });
+    const userBatchDetails = await userBatchDetailsRes.aggregate(getUserBatchDetails(userId));
+    let courseOrPackageFilter = {
+      'course.typeId': courseId || OLD_COURSE_ID,
+    };
+    if (get(userBatchDetails, '0.batch.coursePackage.id')) {
+      coursePackage = get(userBatchDetails, '0.batch.coursePackage', {});
+      courseOrPackageFilter = {
+        'coursePackage.typeId': get(coursePackage, 'id'),
+      };
+    }
     // currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
     currentTopicComponentInfo = userCurrentTopicComponentStatusesRes[0] || {};
     // calling method to validate user current topic component status
-    validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
+    if (!coursePackage) {
+      validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
+    }
     // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
     // const batchRes = await callLocalGraphqlApi(
     //   getBatchStatus(userId),
     //   context,
     //   '',
     // );
-    const batchCurrentComponentCourseId = get(userCurrentTopicComponentStatusesRes, '0.user.studentProfile.batch.currentComponent.currentCourse.id');
+    const batchCurrentComponentCourseId = get(userBatchDetails, '0.batch.currentComponent.currentCourse.id');
 
     if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId) {
-      batchCurrentComponentInfo = get(userCurrentTopicComponentStatusesRes, '0.user.studentProfile.batch.currentComponent');
-      schoolInfo = get(userCurrentTopicComponentStatusesRes, '0.user.studentProfile.school');
-      const allottedMentor = get(userCurrentTopicComponentStatusesRes, '0.user.studentProfile.batch.allottedMentor');
+      batchCurrentComponentInfo = get(userBatchDetails, '0.batch.currentComponent');
+      schoolInfo = get(userBatchDetails, '0.school');
+      const allottedMentor = get(userBatchDetails, '0.batch.allottedMentor');
       if (allottedMentor && allottedMentor.name) {
         mentorData = getMentorData(allottedMentor);
       }
     }
-
     // const getMentorMenteeSessionsRes = await callLocalGraphqlApi(getMentorMenteeSessions(userId, courseId));
     // mentorMenteeSessions = get(getMentorMenteeSessionsRes, 'data.mentorMenteeSessions');
 
@@ -1803,7 +2138,7 @@ const menteeCourseSyllabusMutationResolver = async (
       {
         $match: {
           sessionStatus: 'completed',
-          'course.typeId': courseId || OLD_COURSE_ID,
+          ...courseOrPackageFilter,
         },
       },
       {
@@ -1966,6 +2301,13 @@ const menteeCourseSyllabusMutationResolver = async (
                       },
                     },
                   },
+                  {
+                    $project: {
+                      id: 1,
+                      order: 1,
+                      title: 1,
+                    },
+                  },
                 ],
                 as: 'chapter',
               },
@@ -2049,16 +2391,16 @@ const menteeCourseSyllabusMutationResolver = async (
     // log(`DATA ${JSON.stringify(mongoData)}`);
     // menteeSessions and mentorMenteeSessions will be called if user is not from batch
     if (batchCurrentComponentInfo) {
-      const batchId = get(userCurrentTopicComponentStatusesRes, '0.user.studentProfile.batch.id');
+      const batchId = get(userBatchDetails, '0.batch.id');
       const batchSessionModel = new QueryController('BatchSession', {
         bypass: true,
       });
-      batchSessions = await batchSessionModel.aggregate(getBatchSessionsAggregation(batchId, courseId));
+      batchSessions = await batchSessionModel.aggregate(getBatchSessionsAggregation(batchId, courseId, courseOrPackageFilter));
       // currentTopicOrder = get(batchCurrentComponentInfo, 'currentTopic.order');
     } else {
       // const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId, courseId));
       const menteeSessionsModel = new QueryController('MenteeSession', { bypass: true });
-      menteeSessions = await menteeSessionsModel.aggregate(getMenteeSessionAggregation(userId, courseId));
+      menteeSessions = await menteeSessionsModel.aggregate(getMenteeSessionAggregation(userId, courseId, courseOrPackageFilter));
       // currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
 
       if (mentorMenteeSessions && mentorMenteeSessions.length) {
@@ -2066,7 +2408,7 @@ const menteeCourseSyllabusMutationResolver = async (
           bypass: true,
         });
         const allottedMentorRes = await allottedMentorModel.aggregate(allotedMentorAggregation(userId, courseId));
-        const allottedMentor = get(allottedMentorRes, 'allottedMentor');
+        const allottedMentor = get(allottedMentorRes, '0.allottedMentor');
         if (allottedMentor && allottedMentor.name) {
           mentorData = getMentorData(allottedMentor);
         }
@@ -2076,7 +2418,7 @@ const menteeCourseSyllabusMutationResolver = async (
         const allottedMentorFromMMSModel = new QueryController('MentorMenteeSession', {
           bypass: true,
         });
-        const allottedMentorFromMMSQueryRes = await allottedMentorFromMMSModel.aggregate(allotedMentorFromMMSAggregation(userId, courseId));
+        const allottedMentorFromMMSQueryRes = await allottedMentorFromMMSModel.aggregate(allotedMentorFromMMSAggregation(userId, courseId, courseOrPackageFilter));
         const allottedMentor = get(allottedMentorFromMMSQueryRes[0], 'mentorSession.user');
         if (allottedMentor && allottedMentor.name) {
           mentorData = getMentorData(allottedMentor);
@@ -2145,7 +2487,11 @@ const menteeCourseSyllabusMutationResolver = async (
   let totalChapters = 0;
   let totalTopics = 0;
   const { chapters } = currentCourse;
-  if (!chapters || !chapters.length) {
+  let packageTopics = [];
+  if (coursePackage && get(coursePackage, 'id')) {
+    packageTopics = getTopicsArrFromCoursePackages(coursePackage);
+  }
+  if ((!chapters || !chapters.length) && !(packageTopics || []).length) {
     throw new DatabaseRecordNotFoundError({
       data: {
         error: 'CurrentCourse.chapters: is not present',
@@ -2156,7 +2502,7 @@ const menteeCourseSyllabusMutationResolver = async (
     chapters.sort((a, b) => a.order - b.order);
   }
   // if user belongs to a batch, the syllbaus will be calculated on basis of batchCurrentComponentStatus
-  if (batchCurrentComponentInfo) {
+  if (batchCurrentComponentInfo || coursePackage) {
     const {
       currentTopic,
       latestSessionStatus,
@@ -2165,163 +2511,80 @@ const menteeCourseSyllabusMutationResolver = async (
     const lastTopicSessionStatus = latestSessionStatus;
     totalChapters += chapters.length;
     // iterating over chapters to construct data for homepage
-    chapters.forEach((chapter) => {
-      if (!chapter || !chapter.topics || !chapter.topics.length) {
-        throw new DatabaseRecordNotFoundError({
-          data: {
-            error: 'CurrentCourse.chapter.topics: is not present',
+
+    if (coursePackage && get(coursePackage, 'id')) {
+      lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic);
+      packageTopics.forEach((topic) => {
+        const constructedSessionsArr = constructSessionsArr({
+          lastTopicBookedOrder,
+          lastTopicSessionStatus,
+          chapter: {
+            id: get(coursePackage, 'id'),
+            title: get(coursePackage, 'title', 'Package'),
+            order: 1,
           },
+          topic,
+          batchSessions,
+          combinedEnrollmentType,
+          mentorMenteeSessions,
+          completedSession,
+          upComingSession,
+          bookedSession,
         });
-      }
-      const chapterTopics = chapter.topics;
-      chapterTopics.sort((a, b) => a.order - b.order);
-      totalTopics += chapterTopics.length;
-      // iterating over topics of each chapter  and setting isUnlocked field
-      chapterTopics.forEach((topic) => {
-        const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
-        // if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
-        // if (topic.practiceCount && topic.practiceCount.count) practiceCount += topic.practiceCount.count;
-        // if (topic.projects && topic.projects.length) {
-        //   topic.projects.forEach((project) => {
-        //     projects.push(project);
-        //   });
-        // }
-
-        const {
-          order: topicOrder,
-          id: topicId,
-          title: topicTitle,
-          description: topicDescription,
-          thumbnail: topicThumbnail,
-          thumbnailSmall: topicThumbnailSmall,
-          isTrial,
-        } = topic;
-
-        const isAccessible = isTopicAccessible(combinedEnrollmentType, isTrial);
-        // checking logic for topics which are yet not booked by mentee
-        if (
-          topicOrder >= lastTopicBookedOrder
-        ) {
-          const batchSessionArray = batchSessions && batchSessions.filter((item) => item.topic && item.topic.id === topicId);
-          if (batchSessionArray && batchSessionArray.length) {
-            const batchSession = batchSessionArray[0];
-            let slotTime = null;
-            const {
-              bookingDate,
-              mentorSession,
-              sessionEndDate,
-            } = batchSession;
-            const {
-              order: batchSessionTopicOrder,
-              id: batchSessionTopicId,
-              title: batchSessionTopicTitle,
-              description: batchSessionTopicDescription,
-              thumbnail: batchSessionTopicThumbnail,
-              thumbnailSmall: batchSessionTopicThumbnailSmall,
-              isTrial: batchSessionIsTrial,
-            } = batchSession.topic;
-
-            const isBatchTopicAccessible = isTopicAccessible(combinedEnrollmentType, batchSessionIsTrial);
-
-            slotTimes.forEach((time, index) => {
-              if (batchSession[time]) {
-                slotTime = index;
-              }
-            });
-            // checking logic if topic is already consumed or yet to be watched
-            if (topicOrder === lastTopicBookedOrder && lastTopicSessionStatus === sessionStatus.completed) {
-              const completedMenteeSession = {
-                topicId,
-                topicOrder,
-                topicTitle,
-                topicThumbnail,
-                topicThumbnailSmall,
-                topicDescription,
-                isAccessible,
-                chapterId,
-                chapterTitle,
-                chapterOrder,
-                endingDate: sessionEndDate,
-                mentorId: mentorSession && mentorSession.user && mentorSession.user.id,
-                mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
-                mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
-              };
-              completedSession.push(completedMenteeSession);
-            } else {
-              const bookedMenteeSession = {
-                topicId: batchSessionTopicId,
-                topicOrder: batchSessionTopicOrder,
-                topicTitle: batchSessionTopicTitle,
-                topicThumbnail: batchSessionTopicThumbnail,
-                topicThumbnailSmall: batchSessionTopicThumbnailSmall,
-                topicDescription: batchSessionTopicDescription,
-                bookingDate,
-                slotTime,
-                isAccessible: isBatchTopicAccessible,
-                chapterId,
-                chapterTitle,
-                chapterOrder,
-              };
-              if (get(mentorSession, 'user')) {
-                mentorData = getMentorData(get(mentorSession, 'user'));
-              }
-              if (bookedSession.length) {
-                upComingSession.push(bookedMenteeSession);
-              } else {
-                bookedSession.push(bookedMenteeSession);
-              }
-            }
-          } else {
-            const upComingMenteeSession = {
-              topicId,
-              topicOrder,
-              topicTitle,
-              topicThumbnail,
-              topicThumbnailSmall,
-              topicDescription,
-              isAccessible,
-              chapterId,
-              chapterTitle,
-              chapterOrder,
-            };
-            if (bookedSession.length) {
-              upComingSession.push(upComingMenteeSession);
-            } else {
-              bookedSession.push(upComingMenteeSession);
-            }
-          }
-        } else {
-          let mentorSession;
-          let sessionDate;
-          let isSubmittedForReview = false;
-          mentorMenteeSessions.forEach((mentorMenteeSession) => {
-            if (mentorMenteeSession.topic && mentorMenteeSession.topic.id === topicId) {
-              mentorSession = mentorMenteeSession.mentorSession;
-              isSubmittedForReview = mentorMenteeSession.isSubmittedForReview || false;
-              sessionDate = mentorMenteeSession.sessionEndDate || mentorMenteeSession.sessionStartDate;
-            }
-          });
-          const completedMenteeSession = {
-            topicId,
-            topicOrder,
-            topicTitle,
-            topicThumbnail,
-            topicThumbnailSmall,
-            topicDescription,
-            isAccessible,
-            isSubmittedForReview,
-            chapterId,
-            chapterTitle,
-            chapterOrder,
-            endingDate: sessionDate,
-            mentorId: mentorSession && mentorSession.user && mentorSession.user.id,
-            mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
-            mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
-          };
-          completedSession.push(completedMenteeSession);
+        if (get(constructedSessionsArr, 'completedSessionObj')) {
+          completedSession.push(get(constructedSessionsArr, 'completedSessionObj', {}));
+        }
+        if (get(constructedSessionsArr, 'upComingSessionObj')) {
+          upComingSession.push(get(constructedSessionsArr, 'upComingSessionObj', {}));
+        }
+        if (get(constructedSessionsArr, 'bookedSessionObj')) {
+          bookedSession.push(get(constructedSessionsArr, 'bookedSessionObj', {}));
+        }
+        if (get(constructedSessionsArr, 'mentorData')) {
+          mentorData = get(constructedSessionsArr, 'mentorData');
         }
       });
-    });
+    } else {
+      chapters.forEach((chapter) => {
+        if (!chapter || !chapter.topics || !chapter.topics.length) {
+          throw new DatabaseRecordNotFoundError({
+            data: {
+              error: 'CurrentCourse.chapter.topics: is not present',
+            },
+          });
+        }
+        const chapterTopics = chapter.topics;
+        chapterTopics.sort((a, b) => a.order - b.order);
+        totalTopics += chapterTopics.length;
+        // iterating over topics of each chapter  and setting isUnlocked field
+        chapterTopics.forEach((topic) => {
+          const constructedSessionsArr = constructSessionsArr({
+            lastTopicBookedOrder,
+            lastTopicSessionStatus,
+            chapter,
+            topic,
+            batchSessions,
+            combinedEnrollmentType,
+            mentorMenteeSessions,
+            completedSession,
+            upComingSession,
+            bookedSession,
+          });
+          if (get(constructedSessionsArr, 'completedSessionObj')) {
+            completedSession.push(get(constructedSessionsArr, 'completedSessionObj', {}));
+          }
+          if (get(constructedSessionsArr, 'upComingSessionObj')) {
+            upComingSession.push(get(constructedSessionsArr, 'upComingSessionObj', {}));
+          }
+          if (get(constructedSessionsArr, 'bookedSessionObj')) {
+            bookedSession.push(get(constructedSessionsArr, 'bookedSessionObj', {}));
+          }
+          if (get(constructedSessionsArr, 'mentorData')) {
+            mentorData = get(constructedSessionsArr, 'mentorData');
+          }
+        });
+      });
+    }
   } else {
     // iterating over each of mentorMenteeSessions to send sessions that are already completed by mentee
     if (mentorMenteeSessions && mentorMenteeSessions.length) {
@@ -2631,8 +2894,6 @@ const menteeCourseSyllabusMutationResolver = async (
       topicId: prevTopicId,
     },
   });
-  const mcsMRTimeStop = process.hrtime(mcsMRTime);
-  log(`Time Taken to execute mcsMR : ${(mcsMRTimeStop[0] * 1e9 + mcsMRTimeStop[1]) / 1e9} seconds`);
   return currentUserSyllabus;
 };
 
