@@ -230,5 +230,25 @@ const getAdhocSession = (batchId,
   }
 `;
 
+const getTopicsFromCoursePackage = async (coursePackageId) => {
+  const query = `
+  query{
+  coursePackage(id: "${coursePackageId}"){
+    topics{
+      order
+      topic{
+        courses{
+          id
+        }
+        id
+      }
+    }
+  }
+}
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.coursePackage');
+};
+
 /* eslint-disable object-curly-newline */
-export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession, getAdhocSessions, updateAdhocSession, getBatchSession, getAdhocSession };
+export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession, getAdhocSessions, updateAdhocSession, getBatchSession, getAdhocSession, getTopicsFromCoursePackage };
