@@ -1,3 +1,4 @@
+/* eslint-disable no-lonely-if */
 /* eslint-disable arrow-body-style */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
@@ -353,9 +354,9 @@ const transformMongoResults = (obj) => {
       submittedPercentage: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizSubmittedCount * 100) / obj.studentsCount).toFixed(2),
       unattemptedPercentage: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizUnattemptedCount * 100) / obj.studentsCount).toFixed(2),
       totalQuestions: obj.quizTotalQuestions,
-      averageScore: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizCorrectSum * 100) / (obj.studentsCount * obj.quizTotalQuestions)).toFixed(2),
-      averageCorrect: obj.quizTotalQuestions === 0 ? 0 : (obj.quizCorrectSum / obj.studentsCount).toFixed(2),
-      averageIncorrect: obj.quizTotalQuestions === 0 ? 0 : (obj.quizIncorrectSum / obj.studentsCount).toFixed(2),
+      averageScore: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizCorrectSum * 100) / (obj.quizSubmittedCount * obj.quizTotalQuestions)).toFixed(2),
+      averageCorrect: obj.quizTotalQuestions === 0 ? 0 : (obj.quizCorrectSum / obj.quizSubmittedCount).toFixed(2),
+      averageIncorrect: obj.quizTotalQuestions === 0 ? 0 : (obj.quizIncorrectSum / obj.quizSubmittedCount).toFixed(2),
       averagePartiallyCorrect: null,
       notEvaluatedCount: null,
       questions: [],
@@ -364,10 +365,10 @@ const transformMongoResults = (obj) => {
       submittedPercentage: obj.assignmentTotalQuestions === 0 ? 0 : ((obj.assignmentSubmittedCount * 100) / obj.studentsCount).toFixed(2),
       unattemptedPercentage: obj.assignmentTotalQuestions === 0 ? 0 : (((obj.assignmentUnattemptedCount * 100) / obj.studentsCount).toFixed(2)),
       totalQuestions: obj.assignmentTotalQuestions,
-      averageScore: obj.assignmentTotalQuestions === 0 ? 0 : ((obj.assignmentCorrectSum * 100) / (obj.studentsCount * obj.assignmentTotalQuestions)).toFixed(2),
-      averageCorrect: obj.assignmentTotalQuestions === 0 ? 0 : (obj.assignmentCorrectSum / obj.studentsCount).toFixed(2),
-      averageIncorrect: obj.assignmentTotalQuestions === 0 ? 0 : (obj.assignmentIncorrectSum / obj.studentsCount).toFixed(2),
-      averagePartiallyCorrect: obj.assignmentTotalQuestions === 0 ? 0 : (obj.assignmentPartiallyCorrectSum / obj.studentsCount).toFixed(2),
+      averageScore: obj.assignmentTotalQuestions === 0 ? 0 : ((obj.assignmentCorrectSum * 100) / (obj.assignmentSubmittedCount * obj.assignmentTotalQuestions)).toFixed(2),
+      averageCorrect: obj.assignmentTotalQuestions === 0 ? 0 : (obj.assignmentCorrectSum / obj.assignmentSubmittedCount).toFixed(2),
+      averageIncorrect: obj.assignmentTotalQuestions === 0 ? 0 : (obj.assignmentIncorrectSum / obj.assignmentSubmittedCount).toFixed(2),
+      averagePartiallyCorrect: obj.assignmentTotalQuestions === 0 ? 0 : (obj.assignmentPartiallyCorrectSum / obj.assignmentSubmittedCount).toFixed(2),
       notEvaluatedCount: obj.assignmentTotalQuestions === 0 ? 0 : obj.assignmentUnevaluated / obj.assignmentTotalQuestions,
       questions: [],
     },
@@ -375,10 +376,10 @@ const transformMongoResults = (obj) => {
       submittedPercentage: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqSubmittedCount * 100) / obj.studentsCount).toFixed(2),
       unattemptedPercentage: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqUnattemptedCount * 100) / obj.studentsCount).toFixed(2),
       totalQuestions: obj.pqTotalQuestions,
-      averageScore: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqCorrectSum * 100) / (obj.studentsCount * obj.pqTotalQuestions)).toFixed(2),
-      averageCorrect: obj.pqTotalQuestions === 0 ? 0 : (obj.pqCorrectSum / obj.studentsCount).toFixed(2),
-      averageIncorrect: obj.pqTotalQuestions === 0 ? 0 : (obj.pqIncorrectSum / obj.studentsCount).toFixed(2),
-      averagePartiallyCorrect: obj.pqTotalQuestions === 0 ? 0 : (obj.pqPartiallyCorrectSum / obj.studentsCount).toFixed(2),
+      averageScore: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqCorrectSum * 100) / (obj.pqSubmittedCount * obj.pqTotalQuestions)).toFixed(2),
+      averageCorrect: obj.pqTotalQuestions === 0 ? 0 : (obj.pqCorrectSum / obj.pqSubmittedCount).toFixed(2),
+      averageIncorrect: obj.pqTotalQuestions === 0 ? 0 : (obj.pqIncorrectSum / obj.pqSubmittedCount).toFixed(2),
+      averagePartiallyCorrect: obj.pqTotalQuestions === 0 ? 0 : (obj.pqPartiallyCorrectSum / obj.pqSubmittedCount).toFixed(2),
       notEvaluatedCount: obj.pqTotalQuestions === 0 ? 0 : obj.pqUnevaluated / obj.pqTotalQuestions,
       questions: [],
     },
@@ -553,17 +554,20 @@ const classroomHomeworkReport = (async (root, params, context) => {
     if (userQuizReportRes.length && get(userQuizReportRes, '[0].latest')) {
       const userQuizReport = get(userQuizReportRes, '[0].latest');
       obj.quizTotalQuestions = get(userQuizReport, 'quizReport.totalQuestionCount');
-      obj.quizCorrectSum = get(userQuizReport, 'quizReport.correctQuestionCount');
-      obj.quizIncorrectSum = get(userQuizReport, 'quizReport.inCorrectQuestionCount');
+      obj.quizCorrectSum += get(userQuizReport, 'quizReport.correctQuestionCount');
+      obj.quizIncorrectSum += get(userQuizReport, 'quizReport.inCorrectQuestionCount');
       const quizAnswers = get(userQuizReport, 'quizAnswers', []);
       for (const quizAnswer of quizAnswers) {
-        if (obj.quizQuestions.has(get(quizAnswer, 'question.typeId'))
-          && get(quizAnswer, 'isCorrect')) {
-          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), obj.quizQuestions.get(get(quizAnswer, 'question.typeId')) + 1);
-        } else if (get(quizAnswer, 'isCorrect')) {
-          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), 1);
+        if (obj.quizQuestions.has(get(quizAnswer, 'question.typeId'))) {
+          if (get(quizAnswer, 'isCorrect')) {
+            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), obj.quizQuestions.get(get(quizAnswer, 'question.typeId')) + 1);
+          }
         } else {
-          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), 0);
+          if (get(quizAnswer, 'isCorrect')) {
+            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), 1);
+          } else {
+            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), 0);
+          }
         }
       }
     }
