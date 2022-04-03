@@ -226,7 +226,7 @@ const getTypeQueryController = (
 ) => new QueryController(typeName, authentication);
 
 const withFallbackValue = (value) => {
-  if (typeof value === 'string') {
+  if (value === 'NaN') {
     return 0;
   }
   return value;
