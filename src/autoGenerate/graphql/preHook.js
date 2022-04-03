@@ -124,6 +124,7 @@ import updateEventValidation from './preHookFunctions/validation/updateEventVali
 import addWeekDayForOneDayEvent from './preHookFunctions/validation/utils/addWeekDayForOneDayEvent';
 import addTimetableScheduleValidation from './preHookFunctions/validation/addTimetableScheduleValidation';
 import updateTimetableScheduleValidation from './preHookFunctions/validation/updateTimetableScheduleValidation';
+import addUserLearningSlideDumpValidation from './preHookFunctions/validation/addUserLearningSlideDumpValidation ';
 // import updateEventSessionValidation from './preHookFunctions/validation/updateEventSessionValidation';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
@@ -950,6 +951,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'updateTimetableSchedule': {
       updateTimetableScheduleValidation(params);
+      break;
+    }
+    case 'addUserActivityLearningSlideDump': {
+      await addUserLearningSlideDumpValidation(params, mutationOrQueryName, context);
       break;
     }
     // case 'updateEventSession': {

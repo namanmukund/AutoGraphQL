@@ -14,4 +14,6 @@ main.py
 .env*
 __pycache__/
 # Excluding this because Porter deployment fails due to package-lock.json
-package-lock.json 
+package-lock.json
+.graphqlconfig
+schema.graphql

@@ -13,6 +13,7 @@ const NextOrPrevClassroomSession = `
     endMinutes: Int @defaultValue(value: "0")
     totalStudents: Int
     completedHomeworkMeta: String
+    completedQuizMeta: String
     thumbnailSmall: File
     recordType: ClassroomSessionDocumentType @defaultValue(value: "batchSession")
     sessionMode: SessionMode @defaultValue(value: "online")

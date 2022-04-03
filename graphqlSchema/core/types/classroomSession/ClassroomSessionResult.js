@@ -31,6 +31,10 @@ const ClassroomSessionTopic = `
     topicComponentRule: [TopicComponentsRule]
     topicAssignmentQuestionsCount: Int
     questionsQuizCount: Int
+    tools: [ArrayValue]
+    programming: [ArrayValue]
+    theory: [ArrayValue]
+    classType: ClassType @defaultValue(value: "lab")
   }
 `;
 
@@ -40,6 +44,7 @@ const ClassroomDetails = `
     code: String @uniqueOrEmpty @trim @uppercase
     classroomTitle: String!
     description: String
+    allottedMentor: User
     classes: [SchoolClass] @relation(name: "ClassroomSchoolClass", direction: "OneWay")
     school: School @relation(name: "ClassroomSchool", direction: "OneWay")
     students: [StudentProfile] @relation(name: "ClassroomStudentProfile", direction: "OneWay")
@@ -80,6 +85,7 @@ const ClassroomSessionResult = `
     attendance: [BatchAttendanceType]
     classroom: ClassroomDetails
     topic: ClassroomSessionTopic
+    course: Course
     previousTopic: ClassroomSessionTopic
     sessionOtp: [SessionOtpResult]
   }

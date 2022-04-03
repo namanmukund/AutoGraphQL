@@ -15,6 +15,12 @@ const userLearningObjectivenextComponentType = `
    blockBasedProject: BlockBasedProject @relation(name: "UserLearningObjectiveNextComponentTypeProject", direction: "OneWay")
  }`;
 
+const UserLearningSlideType = `
+  type UserLearningSlideType {
+    learningSlide: LearningSlide @relation(name: "UserLearningSlideTypeLearningSlide", direction: "OneWay")
+    status: UserTopicTypeStatus @defaultValue(value: "incomplete")
+  }`;
+
 const UserLearningObjective = `
   type UserLearningObjective @model {
     user: User! @relation(name: "UserLearningObjective", direction: "OneWay")
@@ -26,10 +32,13 @@ const UserLearningObjective = `
     isPracticeQuestionBookmarked: Boolean @defaultValue(value: "false")
     comicStripStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
     isComicStripBookmarked: Boolean @defaultValue(value: "false")
+    learningSlideStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
+    isLearningSlideBookmarked: Boolean @defaultValue(value: "false")
     nextComponent: UserLearningObjectiveNextComponentType
     course: Course @relation(name: "UserLearningObjectiveCourse", direction: "OneWay")
+    learningSlides: [UserLearningSlideType]
   }
 `;
 
 export default [UserLearningObjective, practiceQuestionsUserLearningObjectiveType,
-  userLearningObjectivenextComponentType];
+  userLearningObjectivenextComponentType, UserLearningSlideType];

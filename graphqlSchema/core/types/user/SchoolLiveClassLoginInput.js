@@ -1,7 +1,6 @@
 const SchoolLiveClassLoginInput = `
   input SchoolLiveClassLoginInput {
-      rollNo: String
-      otp: Int
+      userId: ID
   }`;
 
 export default [SchoolLiveClassLoginInput];

@@ -15,7 +15,7 @@ import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentCompon
 import getMasteryLevel from '../resolvers/utils/getMasteryLevel';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import validateTokenAndExtractInformation
-  from '../preHookFunctions/validation/utils/validateTokenAndExtractInformation';
+from '../preHookFunctions/validation/utils/validateTokenAndExtractInformation';
 import { MENTEE } from '../../../../constants/roles';
 import getNextComponent from './utils/getNextComponent';
 
@@ -58,6 +58,9 @@ const userQuizQuery = (
           learningObjective{
             id
             order
+            learningSlides(filter:{status:${PUBLISHED}}){
+              id
+            }
             messagesMeta{
               count
             }
@@ -65,6 +68,9 @@ const userQuizQuery = (
               count
             }
             comicStripsMeta(filter:{status:${PUBLISHED}}){
+              count
+            }
+            learningSlidesMeta(filter:{status:${PUBLISHED}}){
               count
             }
           }

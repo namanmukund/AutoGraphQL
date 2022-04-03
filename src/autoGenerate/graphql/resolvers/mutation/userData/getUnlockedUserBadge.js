@@ -8,7 +8,7 @@ import {
   UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation
-  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 

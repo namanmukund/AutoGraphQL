@@ -111,6 +111,11 @@ import getNextOrPrevClassroomSessions from './query/methods/getNextOrPrevClassro
 import classroomDetail from './query/methods/classroomDetail';
 import scheduleSessions from './mutation/shift/scheduleSessions';
 import getSchoolAndBatchDetail from './query/methods/getSchoolAndBatchDetail';
+import getBatchDetails from './query/methods/getBatchDetails';
+import getBatchStudent from './query/methods/getBatchStudent';
+import getSessionComponentMeta from './query/methods/getSessionComponentMeta';
+import getClassroomHomeworkReport from './query/methods/getClassroomHomeworkReport';
+import getPracticeQuestionReport from './query/methods/getPracticeQuestionReport';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -685,6 +690,16 @@ resolvers.Query.getNextOrPrevClassroomSessions = getNextOrPrevClassroomSessions;
 resolvers.Query.classroomDetail = classroomDetail;
 // Resolver to get classroom sessions
 resolvers.Query.getSchoolAndBatchDetail = getSchoolAndBatchDetail;
+// Resolver to fetch Batch Details from OTP and School Code
+resolvers.Query.getBatchDetails = getBatchDetails;
+// Resolver to fetch Batch Details from OTP and School Code
+resolvers.Query.getBatchStudent = getBatchStudent;
+// Resolver to get classroom session Details
+resolvers.Query.getSessionComponentMeta = getSessionComponentMeta;
+// Resolver to get classroom homework report
+resolvers.Query.getClassroomHomeworkReport = getClassroomHomeworkReport;
+// Resolver to get classroom homework report
+resolvers.Query.getPracticeQuestionReport = getPracticeQuestionReport;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 

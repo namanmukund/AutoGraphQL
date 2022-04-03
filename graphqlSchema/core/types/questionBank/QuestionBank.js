@@ -43,6 +43,8 @@ const QuestionBank = `
     status: ContentStatus! @defaultValue(value: "unpublished")
     courses: [Course] @relation(name: "CourseQuestionBank", direction: "OneWay")
     tags: [ContentTag] @relation(name: "ContentTagQuestionBank")
+    message: Message @relation(name: "QuestionBankMessage")
+    learningSlides: [LearningSlide] @relation(name: "LearningSlideQuestionBank")
   }
 `;
 

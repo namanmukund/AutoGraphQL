@@ -5,7 +5,6 @@ import { get } from 'lodash';
 import { log } from '..';
 import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
 import { QueryController } from '../../src/autoGenerate/graphql/controllers';
-import findSectionAndGradeCombination from '../../src/autoGenerate/graphql/postHookFunctions/utils/findSectionAndGradeCombination';
 import arrayCombinations from '../../src/autoGenerate/graphql/postHookFunctions/utils/generateOtpMap';
 
 const deleteSchoolSessionOtp = async (schoolSessionOtpIn) => {
@@ -20,11 +19,11 @@ const deleteSchoolSessionOtp = async (schoolSessionOtpIn) => {
 };
 
 const addSchoolSessionOtp = async ({
-  otp, grade, section, batchSessionId,
+  otp, batchSessionId,
 }) => {
   const addQuery = `mutation {
     addSchoolSessionOtp(
-        input: { otp: ${otp}, grade: ${grade}, section: ${section} }
+        input: { otp: ${otp} }
         batchSessionConnectId: "${batchSessionId}"
     ) {
         id
@@ -62,6 +61,14 @@ const getBatchSessionAggregation = ({
   },
   {
     $lookup: {
+      from: 'Batch',
+      localField: 'batch.typeId',
+      foreignField: 'id',
+      as: 'batch',
+    },
+  },
+  {
+    $lookup: {
       from: 'SchoolSessionOtp',
       localField: 'schoolSessionsOtp.typeId',
       foreignField: 'id',
@@ -73,13 +80,13 @@ const getBatchSessionAggregation = ({
       id: 1,
       bookingDate: 1,
       students: {
-        grade: 1,
-        section: 1,
+        id: 1,
+      },
+      batch: {
+        id: 1,
       },
       schoolSessionOtp: {
         id: 1,
-        grade: 1,
-        section: 1,
         otp: 1,
       },
     },
@@ -112,44 +119,19 @@ const scheduleBatchSessionOtpGenerator = async () => {
       slot: deleteOtpSlot,
     }),
   );
+  const batchIdsMap = {};
   for (const batchSession of addOtpBatchSessions) {
+    const schoolSessionOtpArray = get(batchSession, 'schoolSessionOtp', []);
     if (get(batchSession, 'students', []).length) {
-      const uniqueGradesArray = [];
-      const uniqueSectionsArray = [];
-      const otpMapArray = [];
-      const schoolSessionOtpArray = get(batchSession, 'schoolSessionOtp', []);
-      for (const student of get(batchSession, 'students', [])) {
-        if (get(student, 'grade') && get(student, 'section')) {
-          if (!uniqueGradesArray.includes(get(student, 'grade'))) uniqueGradesArray.push(get(student, 'grade'));
-          if (!uniqueSectionsArray.includes(get(student, 'section'))) uniqueSectionsArray.push(get(student, 'section'));
-          const gradeSectionCombination = findSectionAndGradeCombination(get(student, 'section'), get(student, 'grade'));
-          const isExist = otpMapArray.find((otpObj) => otpObj.gradeSectionCombination === gradeSectionCombination);
-          const isAlreadyCreated = schoolSessionOtpArray.find((sessionOtp) => findSectionAndGradeCombination(get(sessionOtp, 'section'), get(sessionOtp, 'grade'))
-          === gradeSectionCombination);
-          if (!isExist && !isAlreadyCreated) {
-            otpMapArray.push({
-              grade: get(student, 'grade'),
-              section: get(student, 'section'),
-              otp: 0,
-              gradeSectionCombination,
-            });
-          }
-        }
-      }
-      if (otpMapArray.length) {
-        const finalOtpMap = await arrayCombinations(uniqueGradesArray, uniqueSectionsArray);
-        otpMapArray.forEach((otpObj) => {
-          if (finalOtpMap[get(otpObj, 'gradeSectionCombination')]) {
-            otpObj.otp = finalOtpMap[get(otpObj, 'gradeSectionCombination')];
-          }
-        });
-        otpMapArray.forEach((otpObj) => {
-          addSchoolSessionOtp({ ...otpObj, batchSessionId: get(batchSession, 'id') });
-          log(`Creating schoolSessionOtp for grade ${otpObj.grade}, section ${otpObj.section} with OTP: ${otpObj.otp} for batchSession: ${get(batchSession, 'id')}`);
-        });
-      }
+      const batchId = get(batchSession, 'batch[0].id');
+      if (!schoolSessionOtpArray.length && !batchIdsMap[batchId] && batchId) batchIdsMap[batchId] = get(batchSession, 'id');
     }
   }
+  const finalOtpMap = await arrayCombinations(Object.keys(batchIdsMap));
+  Object.keys(finalOtpMap).forEach((batchId) => {
+    addSchoolSessionOtp({ otp: finalOtpMap[batchId], batchSessionId: batchIdsMap[batchId] });
+    log(`Creating schoolSessionOtp for batch ${batchId}, with OTP: ${finalOtpMap[batchId]} for batchSession: ${batchIdsMap[batchId]}`);
+  });
   for (const batchSession of deleteOtpBatchSessions) {
     if (get(batchSession, 'schoolSessionOtp', []).length) {
       for (const sessionOtp of get(batchSession, 'schoolSessionOtp', [])) {
