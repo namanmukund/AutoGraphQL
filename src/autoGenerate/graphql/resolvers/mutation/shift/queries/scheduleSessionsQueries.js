@@ -14,6 +14,9 @@ const fetchBatch = async (batchId) => {
         allottedMentor {
           id
         }
+        coursePackage{
+          id
+        }
         type
         timeTableRule {
           ${slotTimeFields}
@@ -131,6 +134,9 @@ const fetchBatchSession = async (batchSessionId) => {
         allottedMentor{
           id
         }
+        coursePackage{
+          id
+        }
         course{
           id
         }
@@ -168,6 +174,9 @@ const fetchAdhocSession = async (adhocSessionId) => {
       batch {
         id
         allottedMentor{
+          id
+        }
+        coursePackage{
           id
         }
         type

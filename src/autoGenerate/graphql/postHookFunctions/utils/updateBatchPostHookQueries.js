@@ -37,6 +37,9 @@ const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus) => {
               id
               bookingDate
               sessionStatus
+              course{
+                id
+              }
               topic{
                 order
               }
@@ -250,5 +253,19 @@ const getTopicsFromCoursePackage = async (coursePackageId) => {
   return get(res, 'data.coursePackage');
 };
 
+const getCourseIdFromTopic = async (topicId) => {
+  const query = `
+  {
+  topic(id: "${topicId}"){
+    courses{
+      id
+    }
+  }
+}
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.topic.courses[0].id');
+};
+
 /* eslint-disable object-curly-newline */
-export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession, getAdhocSessions, updateAdhocSession, getBatchSession, getAdhocSession, getTopicsFromCoursePackage };
+export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession, getAdhocSessions, updateAdhocSession, getBatchSession, getAdhocSession, getTopicsFromCoursePackage, getCourseIdFromTopic };
