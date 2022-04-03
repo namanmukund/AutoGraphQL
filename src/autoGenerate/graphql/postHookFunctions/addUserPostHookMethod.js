@@ -6,7 +6,13 @@ const addUserPostHookMethod = async (input, params) => {
   if (get(params, 'input.role') === MENTOR) {
     const mentorId = get(input, 'id');
     const mentorName = get(input, 'name');
-    await generateMentorChild(mentorId, mentorName);
+    const { mentorConnectId } = await generateMentorChild(mentorId, mentorName);
+    Object.assign(input, {
+      mentorProfile: {
+        type: 'MentorProfile',
+        typeId: mentorConnectId,
+      },
+    });
   }
 };
 
