@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-restricted-syntax */
 import { get } from 'lodash';
 import moment from 'moment';
@@ -29,6 +30,8 @@ import scheduleB2BSessionMissed from '../../../../utils/scheduleJobs/scheduleB2B
 import getSlotDifference from './utils/getTimeDifference';
 import generateOtpForBatchSession from './utils/generateOtpForBatchSession';
 import { MENTEE } from '../../../../constants/roles';
+import { getTopicsFromCoursePackage } from './utils/updateBatchPostHookQueries';
+import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
 // import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
@@ -241,6 +244,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     userRoleFromContext,
   } = context;
   let courseId = get(context, 'courseId');
+  const coursePackageId = get(input, 'coursePackage.typeId');
   // check if performed from TLA while marking student`s attendance
   if (appName && appName === TWA && userRoleFromContext === MENTEE) {
     return;
@@ -248,7 +252,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   /*
   get Course Id
   */
-  if (!courseId) {
+  if (!courseId && !coursePackageId) {
     const courseResult = await callLocalGraphqlApi(getCourseQuery());
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
@@ -326,8 +330,15 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         });
         // console.log('scheduleB2BSessionMissed', scheduleB2BSessionMissed)
         scheduleB2BSessionMissed(batchSessionId);
-        const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
-        const topicsList = get(nextTopicQueryRes, 'data.topics');
+        let topicsList = [];
+        if (coursePackageId) {
+          const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+          const topicRules = get(coursePackage, 'topics', []);
+          topicsList = getSortedTopics(topicRules);
+        } else {
+          const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
+          topicsList = get(nextTopicQueryRes, 'data.topics', []);
+        }
 
         let currentTopicIndex;
         topicsList.forEach((topic, index) => {
@@ -390,28 +401,28 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         if (isBetweenTwoHrs) generateOtpForBatchSession(batchSessionId, students);
         toUpdateMenteeSession = true;
       }
-      if (((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || newStudentsArray.length > 0)
-        && !get(context, 'fromAddBatchSession', false)) {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const student of students) {
-          if (student.user && student.user.id) {
-            addMentorMenteeSessionForBatch(
-              context,
-              student.user.id,
-              '',
-              topicId,
-              bookingDateFromInput || bookingDate,
-              inputSlotTimeArray[0] || slotTimeArray[0],
-              mentorSessionConnectId || mentorSessionId,
-              courseId,
-              sessionStatusFromInput || sessionStatus.allotted,
-              student.user.source,
-              'updateBatchSession',
-              toUpdateMenteeSession,
-            );
-          }
-        }
-      }
+      // if (((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || newStudentsArray.length > 0)
+      //   && !get(context, 'fromAddBatchSession', false)) {
+      //   // eslint-disable-next-line no-restricted-syntax
+      //   for (const student of students) {
+      //     if (student.user && student.user.id) {
+      //       addMentorMenteeSessionForBatch(
+      //         context,
+      //         student.user.id,
+      //         '',
+      //         topicId,
+      //         bookingDateFromInput || bookingDate,
+      //         inputSlotTimeArray[0] || slotTimeArray[0],
+      //         mentorSessionConnectId || mentorSessionId,
+      //         courseId,
+      //         sessionStatusFromInput || sessionStatus.allotted,
+      //         student.user.source,
+      //         'updateBatchSession',
+      //         toUpdateMenteeSession,
+      //       );
+      //     }
+      //   }
+      // }
 
       // adding session logs when booking date or time is changed
       if (inputSlotTimeArray && inputSlotTimeArray.length && slotTimeArray && slotTimeArray.length) {
