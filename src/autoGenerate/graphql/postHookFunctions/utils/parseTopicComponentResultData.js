@@ -7,6 +7,8 @@ const parseTopicComponentResultData = (result, page) => {
   let learningObjective;
   const practiceQuestions = [];
   let practiceQuestionsRes;
+  let learningSlidesRes;
+  const learningSlides = [];
   const quiz = [];
   let quizRes;
   const assignment = [];
@@ -16,6 +18,7 @@ const parseTopicComponentResultData = (result, page) => {
       learningObjective = { type: 'LearningObjective', typeId: `${parsedData.learningObjective.id}` };
       parsedData.learningObjective = learningObjective;
       practiceQuestionsRes = parsedData.practiceQuestions;
+      learningSlidesRes = parsedData.learningSlides;
       // parsing practice questions to be returned first time
       if (practiceQuestionsRes) {
         practiceQuestionsRes.forEach((practiceQuestion) => {
@@ -32,6 +35,19 @@ const parseTopicComponentResultData = (result, page) => {
           practiceQuestions.push(question);
         });
       }
+      if (learningSlidesRes) {
+        learningSlidesRes.forEach((slide) => {
+          const learningSlideObj = {
+            learningSlide: {
+              type: 'LearningSlide',
+              typeId: `${slide.learningSlide.id}`,
+            },
+            status: slide.status,
+          };
+          learningSlides.push(learningSlideObj);
+        });
+      }
+      parsedData.learningSlides = learningSlides;
       parsedData.practiceQuestions = practiceQuestions;
       break;
     case 'quiz':
