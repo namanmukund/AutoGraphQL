@@ -122,13 +122,14 @@ const getBatch = async (batchId) => {
   return get(currBatch, 'data.batch');
 };
 
-const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId, courseId) => {
+const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId, courseId, coursePackageId) => {
   const query = `
           mutation{
             addBatchSession(batchConnectId: "${batchId}",
             ${topicId ? `topicConnectId: "${topicId}"` : ''}
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
               ${slots}
@@ -142,13 +143,14 @@ const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId
   return true;
 };
 
-const updateBatchSession = async (sessionId, slots, date, mentorSessionId, courseId) => {
+const updateBatchSession = async (sessionId, slots, date, mentorSessionId, courseId, coursePackageId) => {
   const query = `
           mutation{
             updateBatchSession(
             id: "${sessionId}",
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
               ${slots}
@@ -162,13 +164,14 @@ const updateBatchSession = async (sessionId, slots, date, mentorSessionId, cours
   return true;
 };
 
-const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId, courseId, adhocSessionType) => {
+const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId, courseId, adhocSessionType, coursePackageId) => {
   const query = `
           mutation{
             addAdhocSession(batchConnectId: "${batchId}",
             ${topicId ? `previousTopicConnectId: "${topicId}"` : ''}
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
               type: ${adhocSessionType}

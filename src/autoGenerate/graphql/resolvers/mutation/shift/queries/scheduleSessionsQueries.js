@@ -84,9 +84,11 @@ const fetchMentorSessions = (bookingDate, mentorId, sessionType) => `
   `;
 
 // update mentor Session
-const updateMentorSession = (mentorSessionId, sessionsBookingDateInDB, slot) => `
+const updateMentorSession = (mentorSessionId, sessionsBookingDateInDB, slot, coursePackageId) => `
   mutation{
-    updateMentorSession(id: "${mentorSessionId}", input: {
+    updateMentorSession(id: "${mentorSessionId}", 
+    ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
+    input: {
       availabilityDate:"${sessionsBookingDateInDB}",
       ${slot}: true
     }) {
@@ -96,11 +98,12 @@ const updateMentorSession = (mentorSessionId, sessionsBookingDateInDB, slot) => 
   `;
 
 // add mentor Session
-const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot, sessionType) => `
+const addMentorSession = (mentorUserId, courseId, sessionsBookingDateInDB, slot, sessionType, coursePackageId) => `
   mutation {
     addMentorSession(
       userConnectId: "${mentorUserId}",
       courseConnectId: "${courseId}",
+      ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}",` : ''}
     input:{
       availabilityDate:"${sessionsBookingDateInDB}",
       ${slot}: true,
