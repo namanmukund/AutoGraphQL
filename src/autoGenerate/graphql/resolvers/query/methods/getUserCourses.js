@@ -421,6 +421,12 @@ const getUserBatchDetails = (userId) => [
                       $project: {
                         _id: 0,
                         id: 1,
+                        order: 1,
+                        title: 1,
+                        secondaryCategory: 1,
+                        codingLanguages: {
+                          value: 1,
+                        },
                       },
                     },
                   ],
@@ -544,7 +550,7 @@ const getUserCourses = (async (root, params, context, info) => {
     const studentProfileModel = getTypeQueryController('StudentProfile');
     const studentProfileRes = await studentProfileModel.aggregate(getUserBatchDetails(userId));
     if (studentProfileRes && get(studentProfileRes, '0.batch.currentComponent.currentCourse.id')) {
-      return [{ id: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id') }];
+      return [get(studentProfileRes, '0.batch.currentComponent.currentCourse', {})];
     }
     const userCoursesModel = getTypeQueryController('UserCourse');
     const userCoursesRes = await userCoursesModel.aggregate(getUserCoursesAggregation(userId, courseProgress));
