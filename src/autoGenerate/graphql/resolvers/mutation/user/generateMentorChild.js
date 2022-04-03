@@ -42,7 +42,7 @@ const generateMentorChildMutationResolver = async (
   }
 
   const mentorName = get(usersDoc[0], 'name');
-  const childId = await generateMentorChild(mentorId, mentorName);
+  const { childUserId: childId } = await generateMentorChild(mentorId, mentorName);
 
   return {
     mentorChildId: childId,
