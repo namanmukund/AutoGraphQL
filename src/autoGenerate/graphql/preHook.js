@@ -77,7 +77,7 @@ import updateSchoolClassValidation from './preHookFunctions/validation/updateSch
 import deleteSchoolValidation from './preHookFunctions/validation/deleteSchoolValidation';
 import deleteSchoolClassValidation from './preHookFunctions/validation/deleteSchoolClassValidation';
 import deleteCourseValidation from './preHookFunctions/validation/deleteCourseValidation';
-import deleteCoursePackageValidation from './preHookFunctions/validation/deleteCoursePackageValidation'
+import deleteCoursePackageValidation from './preHookFunctions/validation/deleteCoursePackageValidation';
 import updateBatchValidation from './preHookFunctions/validation/updateBatchValidation';
 import updateCampaignValidation from './preHookFunctions/validation/updateCampaignValidation';
 import generateInviteCode from '../../../utils/generateInviteCode';
@@ -787,7 +787,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await deleteCourseValidation(params, mutationOrQueryName, context);
       break;
     }
-    case 'deleteCoursePackage' : {
+    case 'deleteCoursePackage': {
       await deleteCoursePackageValidation(params, mutationOrQueryName, context);
       break;
     }
