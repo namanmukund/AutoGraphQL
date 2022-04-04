@@ -12,7 +12,7 @@ import {
 
 const TopicRule = `
   type TopicRule {
-    order: Int @unique
+    order: Int
     topic: Topic @relation(name: "CoursePackageTopic", direction: "OneWay")
   }
 `;
