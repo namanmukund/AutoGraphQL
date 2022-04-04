@@ -387,19 +387,19 @@ const transformMongoResults = (obj) => {
   finalResult.quiz.questions = Array.from(obj.quizQuestions.entries(), ([k, v]) => {
     return {
       questionId: k,
-      percentageCorrect: ((v * 100) / obj.studentsCount).toFixed(2),
+      percentageCorrect: obj.quizSubmittedCount === 0 ? 0 : ((v * 100) / obj.quizSubmittedCount).toFixed(2),
     };
   });
   finalResult.coding.questions = Array.from(obj.assignmentQuestions.entries(), ([k, v]) => {
     return {
       questionId: k,
-      percentageCorrect: ((v * 100) / obj.studentsCount).toFixed(2),
+      percentageCorrect: obj.assignmentSubmittedCount === 0 ? 0 : ((v * 100) / obj.assignmentSubmittedCount).toFixed(2),
     };
   });
   finalResult.blockBasedPractice.questions = Array.from(obj.pqQuestions.entries(), ([k, v]) => {
     return {
       questionId: k,
-      percentageCorrect: ((v * 100) / obj.studentsCount).toFixed(2),
+      percentageCorrect: obj.pqSubmittedCount === 0 ? 0 : ((v * 100) / obj.pqSubmittedCount).toFixed(2),
     };
   });
   return finalResult;
@@ -549,6 +549,9 @@ const classroomHomeworkReport = (async (root, params, context) => {
       } else {
         obj.pqUnattemptedCount += 1;
       }
+    } else {
+      // check if mms is absent
+      obj.unattemptedCount += 1;
     }
 
     if (userQuizReportRes.length && get(userQuizReportRes, '[0].latest')) {
