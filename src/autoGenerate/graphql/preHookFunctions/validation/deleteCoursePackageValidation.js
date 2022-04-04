@@ -12,7 +12,7 @@ const fetchCoursePackageStatus = async (id) => {
           }
           `;
   const coursePackage = await callLocalGraphqlApi(query);
-  return get(coursePackage, 'data.coursePackage.status', []);
+  return get(coursePackage, 'data.coursePackage.status', null);
 };
 
 const deleteCoursePackageValidation = async (params) => {
