@@ -128,6 +128,9 @@ export const ProductTypeAlreadyAdded = createError('ProductTypeAlreadyAdded', {
 export const ProductIsPublishedError = createError('ProductIsPublishedError', {
   message: 'Cannot perform the current operation as product is published',
 });
+export const CoursePackageIsPublishedError = createError('ProductIsPublishedError', {
+  message: 'Cannot perform the current operation as course package is published',
+});
 
 export const ProductWithSimilarTypeAlreadyPublished = createError('ProductWithSimilarTypeAlreadyPublished', {
   message: 'Product with similar type already published',
