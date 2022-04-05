@@ -136,6 +136,8 @@ import SpokenLanguage from './SpokenLanguage';
 import LearningSlideContentType from './LearningSlideContentType';
 import LayoutType from './LayoutType';
 import LearningSlideType from './LearningSlideType';
+import ClassType from './ClassType';
+import EvaluationResult from './EvaluationResult';
 
 export default [
   Status,
@@ -277,4 +279,6 @@ export default [
   LearningSlideContentType,
   LayoutType,
   LearningSlideType,
+  ClassType,
+  EvaluationResult,
 ];

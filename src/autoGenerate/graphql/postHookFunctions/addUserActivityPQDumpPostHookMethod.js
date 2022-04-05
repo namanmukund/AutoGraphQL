@@ -363,7 +363,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
                    }`;
 
   // check if all PQ questions are sent in input in case pq action is "next"
-  if (pqAction && pqAction === next && completedQuestionCount !== totalQuestions) {
+  if (pqAction && pqAction === next && (!get(context, 'fromAddUserLSDump', false) && (completedQuestionCount !== totalQuestions))) {
     log('PracticeQuestions are not present in input in addUserActivityPQDumpPostHookMethod');
     throw new PracticeQuestionsNotPresentError();
   }
@@ -454,8 +454,8 @@ And current component status will not get changed when it is already consumed in
           replace: detailedReport,
         },
       });
-      await callLocalGraphqlApi(updateUserPracticeQuestionReportMutation(get(pqReport, 'data.userPracticeQuestionReports[0].id')), '', {
-        pqReportInput,
+      await callLocalGraphqlApi(updateUserPracticeQuestionReportMutation(get(pqReport, 'data.userPracticeQuestionReports[0].id')), context, {
+        input: pqReportInput,
       });
     } else {
       // adding pqReport
@@ -463,8 +463,8 @@ And current component status will not get changed when it is already consumed in
         userId,
         learningObjectiveIdInResult,
         courseId,
-      ), '', {
-        pqReportInput,
+      ), context, {
+        input: pqReportInput,
       });
     }
     return true;
@@ -475,8 +475,8 @@ And current component status will not get changed when it is already consumed in
       userId,
       learningObjectiveIdInResult,
       courseId,
-    ), '', {
-      pqReportInput,
+    ), context, {
+      input: pqReportInput,
     });
   }
   return true;

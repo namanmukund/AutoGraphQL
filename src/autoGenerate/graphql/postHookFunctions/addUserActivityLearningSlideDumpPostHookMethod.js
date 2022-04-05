@@ -33,14 +33,14 @@ const userLearningObjectiveQuery = (userId, learningObjectiveId, courseId, learn
           order
           ${topicComponentRuleQuery}
         }
-      }
-      learningSlides(orderBy:order_ASC){
-        id
-        order
-      }
-      learningSlideData: learningSlides(filter:{id:"${learningSlideId}"}){
-        id
-        type
+        learningSlides(orderBy:order_ASC){
+          id
+          order
+        }
+        learningSlideData: learningSlides(filter:{id:"${learningSlideId}"}){
+          id
+          type
+        }
       }
     }
   }
@@ -58,7 +58,7 @@ const updateUserLearningObjectiveMutation = (userLearningObjectiveId,
           status: ${learningSlideStatus}
         }
         updateWhere:{
-          learningSlidesConnectId: ${learningSlideId}
+          learningSlideReferenceId: "${learningSlideId}"
         }
       }
     }){
@@ -67,15 +67,12 @@ const updateUserLearningObjectiveMutation = (userLearningObjectiveId,
   }
   `;
 
-const addUserActivityPQDumpQUery = (userId, courseId, learningObjectiveId) => `mutation addUserActivityPQDump($input: [PracticeQuestionsTypeInput]!){
+const addUserActivityPQDumpQuery = (userId, courseId, learningObjectiveId) => `mutation ($input:UserActivityPQDumpInput!){
         addUserActivityPQDump(
           userConnectId: "${userId}"
           learningObjectiveConnectId: "${learningObjectiveId}"
           ${courseId ? `courseConnectId: "${courseId}"` : ''}
-          input: {
-             pqAction: next
-             practiceQuestionsDump: $input
-          }
+          input: $input
         ) {
           id
         }
@@ -101,15 +98,15 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
     log('Not able to fetch LearningObjectiveInfo in addUserActivityPQDumpPostHookMethod');
   }
   const userLearningObjectiveQueryRes = await callLocalGraphqlApi(
-    userLearningObjectiveQuery(userId, learningObjectiveId, courseId),
+    userLearningObjectiveQuery(userId, learningObjectiveId, courseId, learningSlideId),
   );
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
     id: userLearningObjectiveId,
-    learningSlides,
-    learningSlideData,
     learningSlideStatus: existinglearningSlideStatus,
   } = userLearningObjectiveInfo;
+  const learningSlides = get(userLearningObjectiveInfo, 'learningObjective.learningSlides', []);
+  const learningSlideData = get(userLearningObjectiveInfo, 'learningObjective.learningSlideData', []);
   const topicComponentRule = get(userLearningObjectiveInfo, 'learningObjective.topics[0].topicComponentRule', null) || get(userLearningObjectiveInfo, 'learningObjective.topic.topicComponentRule', []);
   const topicOrder = get(userLearningObjectiveInfo, 'learningObjective.topics[0].order', null) || get(userLearningObjectiveInfo, 'learningObjective.topic.order');
   const { next, skip } = userActionType;
@@ -153,9 +150,14 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
   isChatBookmarked, user action(next, back etc) in input
   */
   const learningSlideType = get(learningSlideData, '[0].type');
-  if (learningSlideType === 'practiceQuestion' && get(params, 'input')) {
+  if (learningSlideType === 'practiceQuestion' && get(params, 'input.practiceQuestions', []).length) {
     context.fromAddUserLSDump = true;
-    await callLocalGraphqlApi(addUserActivityPQDumpQUery(userId, courseId, learningObjectiveId), '', { input: get(params, 'input') });
+    await callLocalGraphqlApi(addUserActivityPQDumpQuery(userId, courseId, learningObjectiveId), context, {
+      input: {
+        pqAction: 'next',
+        practiceQuestionsDump: get(params, 'input.practiceQuestions'),
+      },
+    });
   }
   await callLocalGraphqlApi(updateUserLearningObjectiveMutation(
     userLearningObjectiveId,

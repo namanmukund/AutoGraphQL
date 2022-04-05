@@ -3,7 +3,6 @@
 import { rangeOTP } from '../../../../../constants';
 import { getRandomNumber } from '../../../../../utils';
 import checkIfOtpPresent from './checkIfOtpPresent';
-import findSectionAndGradeCombination from './findSectionAndGradeCombination';
 
 // recursive function which checks if the otp already exists
 const finalOtp = async (otpMap = {}) => {
@@ -16,13 +15,10 @@ const finalOtp = async (otpMap = {}) => {
 };
 
 // finding all combinations on the basis of grade and section combination
-const arrayCombinations = async (uniqueGradesArray = [], uniqueSectionsArray = []) => {
+const arrayCombinations = async (uniqueBatchIdsArray = []) => {
   const otpMap = {};
-  for (let sectionPointer = 0; sectionPointer < uniqueSectionsArray.length; sectionPointer += 1) {
-    for (let gradePointer = 0; gradePointer < uniqueGradesArray.length; gradePointer += 1) {
-      const gradeSectionCombination = findSectionAndGradeCombination(uniqueSectionsArray[sectionPointer], uniqueGradesArray[gradePointer]);
-      otpMap[gradeSectionCombination] = await finalOtp(otpMap);
-    }
+  for (let batchIdPointer = 0; batchIdPointer < uniqueBatchIdsArray.length; batchIdPointer += 1) {
+    otpMap[uniqueBatchIdsArray[batchIdPointer]] = await finalOtp(otpMap);
   }
   return otpMap;
 };

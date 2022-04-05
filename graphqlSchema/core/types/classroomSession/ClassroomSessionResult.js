@@ -34,6 +34,7 @@ const ClassroomSessionTopic = `
     tools: [ArrayValue]
     programming: [ArrayValue]
     theory: [ArrayValue]
+    classType: ClassType @defaultValue(value: "lab")
   }
 `;
 
@@ -84,6 +85,7 @@ const ClassroomSessionResult = `
     attendance: [BatchAttendanceType]
     classroom: ClassroomDetails
     topic: ClassroomSessionTopic
+    course: Course
     previousTopic: ClassroomSessionTopic
     sessionOtp: [SessionOtpResult]
   }

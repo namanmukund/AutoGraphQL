@@ -17,8 +17,8 @@ const addStudentProfilePostHookMethod = async (input, params) => {
       input.id,
     );
     Object.assign(input, { schoolClass: { type: 'SchoolClass', typeId: schoolClassId } });
-    if (batchId && currentGrade && currentSection) {
-      addSchoolSessionOtpInBatchSession(batchId, currentGrade, currentSection);
+    if (batchId) {
+      addSchoolSessionOtpInBatchSession(batchId);
     }
   }
 };

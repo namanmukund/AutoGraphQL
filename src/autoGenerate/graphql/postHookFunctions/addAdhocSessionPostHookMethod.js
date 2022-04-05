@@ -106,13 +106,14 @@ const addAdhocSessionPostHookMethod = async (input, params, mutationName, contex
   const batchId = get(params, 'batchConnectId');
   // const topicId = get(params, 'topicConnectId');
   let courseId = get(params, 'courseConnectId');
+  const coursePackageId = get(params, 'coursePackageConnectId');
   const { id: adhocSessionId } = input;
   const addAdhocInput = get(params, 'input', {});
   const { bookingDate, ...slots } = addAdhocInput;
   /*
     get Course Id
   */
-  if (!courseId) {
+  if (!courseId && !coursePackageId) {
     const courseResult = await callLocalGraphqlApi(getCourseQuery());
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {

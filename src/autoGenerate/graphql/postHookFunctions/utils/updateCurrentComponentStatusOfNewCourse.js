@@ -130,6 +130,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
   let currentComponentIndex;
   let nextComponentIndex;
   let toUpdateLearningSlide = false;
+  let learningSlideQuery = '';
   // page wise conditions to check whether UserCurrentTopicComponentStatus should be updated
   switch (page) {
     case video:
