@@ -133,6 +133,11 @@ import ReviewType from './ReviewType';
 import ScheduleSessionType from './ScheduleSessionType';
 import SchoolTeacherAccessType from './SchoolTeacherAccessType';
 import SpokenLanguage from './SpokenLanguage';
+import LearningSlideContentType from './LearningSlideContentType';
+import LayoutType from './LayoutType';
+import LearningSlideType from './LearningSlideType';
+import ClassType from './ClassType';
+import EvaluationResult from './EvaluationResult';
 
 export default [
   Status,
@@ -271,4 +276,9 @@ export default [
   ScheduleSessionType,
   SchoolTeacherAccessType,
   SpokenLanguage,
+  LearningSlideContentType,
+  LayoutType,
+  LearningSlideType,
+  ClassType,
+  EvaluationResult,
 ];

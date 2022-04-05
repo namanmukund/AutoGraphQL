@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { get } from 'lodash';
 import { UnauthenticatedUserError } from '../../../../../../constants/errors';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';

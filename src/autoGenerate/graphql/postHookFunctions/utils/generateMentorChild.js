@@ -55,7 +55,10 @@ const generateMentorChild = async (mentorId, mentorName) => {
     const childUserData = await addUserData(newAuthentication, childDataWithId);
     const { id: childUserId } = childUserData;
     await callLocalGraphqlApi(addStudentProfileQuery(childUserId, mentorConnectId));
-    return childUserId;
+    return {
+      childUserId,
+      mentorConnectId,
+    };
   }
 };
 

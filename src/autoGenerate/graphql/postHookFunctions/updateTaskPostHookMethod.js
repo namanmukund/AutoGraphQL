@@ -11,7 +11,7 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
 import sendWhatsappMessageForBookingConfirmedByLeadPartner
-  from './utils/sendWhatsappMessageForBookingConfirmedByLeadPartner';
+from './utils/sendWhatsappMessageForBookingConfirmedByLeadPartner';
 import getMenteeInfo from './utils/getMenteeInfo';
 import addToSchedule from '../../../../utils/scheduleJobs/addToSchedule';
 

@@ -1,9 +1,11 @@
 import { get } from 'lodash';
 import extractSlotsFromInput from '../../../../utils/extractSlotsFromInput';
+import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
 import getSelectedDays from './utils/getSelectedDays';
 import getPossibleDates from '../../../../utils/getPossibleDates';
 import {
   getTopics, getBatchSessions, createBatchSession, updateBatchSession,
+  getTopicsFromCoursePackage,
 } from './utils/updateBatchPostHookQueries';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
@@ -255,6 +257,7 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
   const { id: batchId, studentsConnectIds, allottedMentorConnectId } = params;
   const mentorUserId = get(input, 'allottedMentor.typeId', '');
   const courseId = get(input, 'course.typeId', '');
+  const coursePackageId = get(input, 'coursePackage.typeId');
   const timeTableRule = get(params, 'input.timeTableRule', null);
   const batchType = get(input, 'type', '');
   /*
@@ -286,9 +289,19 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
       }
     }
 
-    // topic count
-    let topics = await getTopics(courseId);
-    const topicCount = topics && topics.length;
+    let topics;
+    let topicCount;
+    if (coursePackageId) {
+      // topic count
+      const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+      const topicRules = get(coursePackage, 'topics');
+      topics = getSortedTopics(topicRules);
+      topicCount = topics && topics.length;
+    } else {
+      // topic count
+      topics = await getTopics(courseId);
+      topicCount = topics && topics.length;
+    }
     // batch sessions
     const batchSessions = await getBatchSessions(batchId);
 

@@ -10,7 +10,7 @@ import {
   PaidComponentLockedError,
 } from '../../../../../../constants/errors';
 import getUserCurrentTopicComponentStatusForNewCourse
-  from '../../../../utils/getUserCurrentTopicComponentStatusForNewCourse';
+from '../../../../utils/getUserCurrentTopicComponentStatusForNewCourse';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
 import {
   backendApps,
@@ -20,9 +20,9 @@ import {
 import getTopicForValidation from './getTopicForValidation';
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
 import getBatchCurrentComponentStatus
-  from '../../../../utils/getBatchCurrentComponentStatus';
+from '../../../../utils/getBatchCurrentComponentStatus';
 import validateMentorMenteePermissionForComponentForNewCourse
-  from './validateMentorMenteePermissionForComponentForNewCourse';
+from './validateMentorMenteePermissionForComponentForNewCourse';
 import { getMentorMenteeSessionForValidation } from './index';
 
 /*
@@ -40,7 +40,7 @@ const isComponentUnlockedForNewCourse = async (
   courseId,
 ) => {
   const {
-    video, message, practiceQuestion, comicStrip, quiz, blockBasedProject, blockBasedPractice,
+    video, message, practiceQuestion, comicStrip, quiz, blockBasedProject, blockBasedPractice, learningSlide,
   } = topicTypes;
   let currentTopicQuery = '';
   let currentLearningObjectiveQuery = '';
@@ -59,7 +59,7 @@ const isComponentUnlockedForNewCourse = async (
     userIdFromContext,
     appName,
   } = userAndAppInfo;
-  if (page === message || page === practiceQuestion || page === comicStrip) {
+  if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
     if (inputUserId && inputLearningObjectiveId) {
       userId = inputUserId;
       learningObjectiveId = inputLearningObjectiveId;
@@ -269,7 +269,7 @@ const isComponentUnlockedForNewCourse = async (
   if (mutationOrQueryName) {
     // initialising object to be passed in context to save query
     const userCurrentTopicComponentStatusData = {};
-    if (page === message || page === practiceQuestion || page === comicStrip) {
+    if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
       // passing data in context which can be used further in post hook methods
       // this will prevent a further query
       userCurrentTopicComponentStatusData[mutationOrQueryName] = {

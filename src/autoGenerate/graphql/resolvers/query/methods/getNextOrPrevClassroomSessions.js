@@ -487,15 +487,18 @@ const getHomeworkCompletedMeta = async (session, model, queryType = 'next') => {
   }
   const topicId = get(session, 'topic.id');
   const userIds = get(session, 'classroom.students', []).map((el) => get(el, 'user.typeId'));
-  let homeworkCount = 0;
+  let homeworkCompletedCount = 0;
+  let quizSubmittedCount = 0;
   if (topicId && userIds.length) {
     const mmsData = await model.aggregate(mentorMentorMenteeSessionAggregation(topicId, userIds));
     if (mmsData && mmsData.length) {
       const filteredResult = mmsData.filter((el) => get(el, 'isSubmittedForReview') === true);
-      homeworkCount = filteredResult.length || 0;
+      const filteredQuizResult = mmsData.filter((el) => get(el, 'isQuizSubmitted') === true);
+      homeworkCompletedCount = filteredResult.length || 0;
+      quizSubmittedCount = filteredQuizResult.length || 0;
     }
   }
-  return homeworkCount;
+  return { homeworkCompletedCount, quizSubmittedCount };
 };
 
 const transformMongoResults = async (batchSessions, adhocSessions, queryType) => {
@@ -504,7 +507,7 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
   if (batchSessions && batchSessions.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const batchSession of batchSessions) {
-      const completedHomeworkMeta = await getHomeworkCompletedMeta(batchSession, mentorMenteeSessionModel, queryType);
+      const homeworkMeta = await getHomeworkCompletedMeta(batchSession, mentorMenteeSessionModel, queryType);
       finalResult.push({
         id: get(batchSession, 'id'),
         bookingDate: get(batchSession, 'bookingDate', null),
@@ -522,14 +525,15 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
         topicOrder: get(batchSession, 'topic.order', null),
         thumbnailSmall: get(batchSession, 'topic.thumbnailSmall', null),
         totalStudents: get(batchSession, 'classroom.students', []).length,
-        completedHomeworkMeta,
+        completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
+        completedQuizMeta: homeworkMeta.quizSubmittedCount,
       });
     }
   }
   if (adhocSessions && adhocSessions.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const adhocSession of adhocSessions) {
-      const completedHomeworkMeta = await getHomeworkCompletedMeta(adhocSession, mentorMenteeSessionModel, queryType);
+      const homeworkMeta = await getHomeworkCompletedMeta(adhocSession, mentorMenteeSessionModel, queryType);
       finalResult.push({
         id: get(adhocSession, 'id'),
         bookingDate: get(adhocSession, 'bookingDate', null),
@@ -546,7 +550,8 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
         topicOrder: get(adhocSession, 'topic.order', null),
         thumbnailSmall: get(adhocSession, 'topic.thumbnailSmall', null),
         totalStudents: get(adhocSession, 'classroom.students', []).length,
-        completedHomeworkMeta,
+        completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
+        completedQuizMeta: homeworkMeta.quizSubmittedCount,
       });
     }
   }
