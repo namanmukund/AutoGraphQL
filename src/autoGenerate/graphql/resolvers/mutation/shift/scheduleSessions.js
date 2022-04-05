@@ -106,7 +106,11 @@ const createBatchSessions = async (batchId, possibleDates, possibleSessionCount,
       // eslint-disable-next-line no-await-in-loop
       const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDate.date, slotObj, finalCourseId, sessionType, coursePackageId);
 
-      createBatchSession(batchId, possibleDate.date.toISOString(), filteredSlotsString, topics[index].id, finalMentorSessionId, finalCourseId, coursePackageId);
+      const startTime = possibleDate.startTime;
+      const endTime = possibleDate.endTime;
+      const sessionMode = possibleDate.mode;
+
+      createBatchSession(batchId, possibleDate.date.toISOString(), filteredSlotsString, topics[index].id, finalMentorSessionId, finalCourseId, coursePackageId, startTime, endTime, sessionMode);
     }
   } else {
     for (let i = 0; i < possibleSessionCount; i += 1) {
@@ -124,7 +128,11 @@ const createBatchSessions = async (batchId, possibleDates, possibleSessionCount,
       const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i].date, slotObj, finalCourseId, sessionType, coursePackageId);
       const { filteredSlotsString } = extractSlotsFromInput(slotObj);
 
-      createBatchSession(batchId, possibleDates[i].date.toISOString(), filteredSlotsString, topics[i].id, finalMentorSessionId, finalCourseId, coursePackageId);
+      const startTime = possibleDates[i].startTime;
+      const endTime = possibleDates[i].endTime;
+      const sessionMode = possibleDates[i].mode;
+
+      createBatchSession(batchId, possibleDates[i].date.toISOString(), filteredSlotsString, topics[i].id, finalMentorSessionId, finalCourseId, coursePackageId, startTime, endTime, sessionMode);
     }
   }
   return true;
@@ -153,7 +161,10 @@ const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, allo
 
     /* eslint-disable array-callback-return */
     const date = possibleDates[i].date.toISOString();
-    updateBatchSession(session.id, filteredSlotsString, date, finalMentorSessionId, finalCourseId, coursePackageId);
+    const startTime = possibleDates[i].startTime;
+    const endTime = possibleDates[i].endTime;
+    const sessionMode = possibleDates[i].mode;
+    updateBatchSession(session.id, filteredSlotsString, date, finalMentorSessionId, finalCourseId, coursePackageId, startTime, endTime, sessionMode);
     i += 1;
   }
 };
@@ -190,7 +201,12 @@ const getPossileDatesFromRule = async (startDate, endDate, daysRule) => {
       for (const key in daysRule[dayMapping[currentDate.getDay()]]) {
         if (key.includes('slot') && key) {
           dateObj.slot = key;
-          break;
+        }
+        if (key.includes('Time')) {
+          dateObj[key] = daysRule[dayMapping[currentDate.getDay()]][key];
+        }
+        if (key.includes('Mode')) {
+          dateObj.mode = daysRule[dayMapping[currentDate.getDay()]][key];
         }
       }
       dates.push(dateObj);
@@ -274,6 +290,14 @@ const scheduleSessionsMutationResolver = async (
   // for non recurring cases, we only consider first object in array as input
   const { ...nonRecurringslots } = get(scheduleSessionsRules, '[0]', {});
   const { filteredSlotsString: nonRecurringfilteredSlotsString, filteredSlotsStringForFilterQuery } = extractSlotsFromInput(nonRecurringslots);
+  const startMinutes = get(nonRecurringslots, 'startTime', 0);
+  const endMinutes = get(nonRecurringslots, 'endTime', 0);
+  let classMode;
+  for (const key in nonRecurringslots) {
+    if (key.includes('Mode')) {
+      classMode = nonRecurringslots[key];
+    }
+  }
 
   // combine school and batch timetableschedules
   const { combinedWorkingDaySchedule, combinedEventScheduleArray } = getCombinedSchedules(batch);
@@ -322,9 +346,9 @@ const scheduleSessionsMutationResolver = async (
         });
       }
       if (adhocSessionId) {
-        await updateAdhocSession(adhocSessionId, nonRecurringfilteredSlotsString, startDate);
+        await updateAdhocSession(adhocSessionId, nonRecurringfilteredSlotsString, startDate, startMinutes, endMinutes, classMode);
       } else {
-        await updateBatchSession(batchSessionId, nonRecurringfilteredSlotsString, startDate);
+        await updateBatchSession(batchSessionId, nonRecurringfilteredSlotsString, startDate, startMinutes, endMinutes, classMode);
       }
     }
     return {
@@ -433,7 +457,7 @@ const scheduleSessionsMutationResolver = async (
       if (!(batchId && startDate && nonRecurringfilteredSlotsString && topicId && finalMentorSessionId && courseIdFromTopic)) {
         throw new InvalidScheduleParameters();
       }
-      await createBatchSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseIdFromTopic, coursePackageId);
+      await createBatchSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseIdFromTopic, coursePackageId, startMinutes, endMinutes, classMode);
     } else if (timeTableRule) {
       let possibleDates = await getPossileDatesFromRule(startDate, endDate, daysRule);
       if (batchSessions && batchSessions.length) {
@@ -473,7 +497,7 @@ const scheduleSessionsMutationResolver = async (
       throw new InvalidScheduleParameters();
     }
     const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseIdFromTopic, 'batch', coursePackageId);
-    await createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseIdFromTopic, adhocSessionType, coursePackageId);
+    await createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseIdFromTopic, adhocSessionType, coursePackageId, startMinutes, endMinutes, classMode);
   }
   return {
     result: true,
