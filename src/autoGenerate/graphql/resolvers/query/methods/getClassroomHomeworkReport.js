@@ -224,12 +224,10 @@ const getUserQuizReportAggregation = ({ userId, topicId }) =>
 const getUserAssignmentAggregation = ({
   userId,
   topicId,
-  courseId,
 }) => [{
   $match: {
     'user.typeId': userId,
     'topic.typeId': topicId,
-    'course.typeId': courseId,
   },
 }, {
   $project: {
@@ -278,12 +276,10 @@ const getUserAssignmentAggregation = ({
 const getUserBlockBasedPracticeAggregation = ({
   userId,
   topicId,
-  courseId,
 }) => [{
   $match: {
     'user.typeId': userId,
     'topic.typeId': topicId,
-    'course.typeId': courseId,
   },
 }, {
   $lookup: {
@@ -354,33 +350,33 @@ const transformMongoResults = (obj) => {
       submittedPercentage: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizSubmittedCount * 100) / obj.studentsCount).toFixed(2),
       unattemptedPercentage: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizUnattemptedCount * 100) / obj.studentsCount).toFixed(2),
       totalQuestions: obj.quizTotalQuestions,
-      averageScore: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizCorrectSum * 100) / (obj.quizSubmittedCount * obj.quizTotalQuestions)).toFixed(2),
-      averageCorrect: obj.quizTotalQuestions === 0 ? 0 : (obj.quizCorrectSum / obj.quizSubmittedCount).toFixed(2),
-      averageIncorrect: obj.quizTotalQuestions === 0 ? 0 : (obj.quizIncorrectSum / obj.quizSubmittedCount).toFixed(2),
+      averageScore: (obj.quizTotalQuestions === 0 || obj.quizSubmittedCount === 0) ? 0 : ((obj.quizCorrectSum * 100) / (obj.quizSubmittedCount * obj.quizTotalQuestions)).toFixed(2),
+      averageCorrect: (obj.quizTotalQuestions === 0 || obj.quizSubmittedCount === 0) ? 0 : (obj.quizCorrectSum / obj.quizSubmittedCount).toFixed(2),
+      averageIncorrect: (obj.quizTotalQuestions === 0 || obj.quizSubmittedCount === 0) ? 0 : (obj.quizIncorrectSum / obj.quizSubmittedCount).toFixed(2),
       averagePartiallyCorrect: null,
       notEvaluatedCount: null,
       questions: [],
     },
     coding: {
-      submittedPercentage: obj.assignmentTotalQuestions === 0 ? 0 : ((obj.assignmentSubmittedCount * 100) / obj.studentsCount).toFixed(2),
-      unattemptedPercentage: obj.assignmentTotalQuestions === 0 ? 0 : (((obj.assignmentUnattemptedCount * 100) / obj.studentsCount).toFixed(2)),
+      submittedPercentage: (obj.assignmentTotalQuestions === 0) ? 0 : ((obj.assignmentSubmittedCount * 100) / obj.studentsCount).toFixed(2),
+      unattemptedPercentage: (obj.assignmentTotalQuestions === 0) ? 0 : (((obj.assignmentUnattemptedCount * 100) / obj.studentsCount).toFixed(2)),
       totalQuestions: obj.assignmentTotalQuestions,
-      averageScore: obj.assignmentTotalQuestions === 0 ? 0 : ((obj.assignmentCorrectSum * 100) / (obj.assignmentSubmittedCount * obj.assignmentTotalQuestions)).toFixed(2),
-      averageCorrect: obj.assignmentTotalQuestions === 0 ? 0 : (obj.assignmentCorrectSum / obj.assignmentSubmittedCount).toFixed(2),
-      averageIncorrect: obj.assignmentTotalQuestions === 0 ? 0 : (obj.assignmentIncorrectSum / obj.assignmentSubmittedCount).toFixed(2),
-      averagePartiallyCorrect: obj.assignmentTotalQuestions === 0 ? 0 : (obj.assignmentPartiallyCorrectSum / obj.assignmentSubmittedCount).toFixed(2),
-      notEvaluatedCount: obj.assignmentTotalQuestions === 0 ? 0 : obj.assignmentUnevaluated / obj.assignmentTotalQuestions,
+      averageScore: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : ((obj.assignmentCorrectSum * 100) / (obj.assignmentSubmittedCount * obj.assignmentTotalQuestions)).toFixed(2),
+      averageCorrect: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : (obj.assignmentCorrectSum / obj.assignmentSubmittedCount).toFixed(2),
+      averageIncorrect: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : (obj.assignmentIncorrectSum / obj.assignmentSubmittedCount).toFixed(2),
+      averagePartiallyCorrect: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : (obj.assignmentPartiallyCorrectSum / obj.assignmentSubmittedCount).toFixed(2),
+      notEvaluatedCount: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : obj.assignmentUnevaluated / obj.assignmentTotalQuestions,
       questions: [],
     },
     blockBasedPractice: {
       submittedPercentage: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqSubmittedCount * 100) / obj.studentsCount).toFixed(2),
       unattemptedPercentage: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqUnattemptedCount * 100) / obj.studentsCount).toFixed(2),
       totalQuestions: obj.pqTotalQuestions,
-      averageScore: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqCorrectSum * 100) / (obj.pqSubmittedCount * obj.pqTotalQuestions)).toFixed(2),
-      averageCorrect: obj.pqTotalQuestions === 0 ? 0 : (obj.pqCorrectSum / obj.pqSubmittedCount).toFixed(2),
-      averageIncorrect: obj.pqTotalQuestions === 0 ? 0 : (obj.pqIncorrectSum / obj.pqSubmittedCount).toFixed(2),
-      averagePartiallyCorrect: obj.pqTotalQuestions === 0 ? 0 : (obj.pqPartiallyCorrectSum / obj.pqSubmittedCount).toFixed(2),
-      notEvaluatedCount: obj.pqTotalQuestions === 0 ? 0 : obj.pqUnevaluated / obj.pqTotalQuestions,
+      averageScore: (obj.pqTotalQuestions === 0 || obj.pqSubmittedCount === 0) ? 0 : ((obj.pqCorrectSum * 100) / (obj.pqSubmittedCount * obj.pqTotalQuestions)).toFixed(2),
+      averageCorrect: (obj.pqTotalQuestions === 0 || obj.pqSubmittedCount === 0) ? 0 : (obj.pqCorrectSum / obj.pqSubmittedCount).toFixed(2),
+      averageIncorrect: (obj.pqTotalQuestions === 0 || obj.pqSubmittedCount === 0) ? 0 : (obj.pqIncorrectSum / obj.pqSubmittedCount).toFixed(2),
+      averagePartiallyCorrect: (obj.pqTotalQuestions === 0 || obj.pqSubmittedCount === 0) ? 0 : (obj.pqPartiallyCorrectSum / obj.pqSubmittedCount).toFixed(2),
+      notEvaluatedCount: (obj.pqTotalQuestions === 0 || obj.pqSubmittedCount === 0) ? 0 : obj.pqUnevaluated / obj.pqTotalQuestions,
       questions: [],
     },
   };
@@ -463,7 +459,6 @@ const classroomHomeworkReport = (async (root, params, context) => {
   }
 
   const students = get(batchSessionRes, '[0].batch.students');
-  const courseId = get(batchSessionRes, '[0].course.typeId');
   const obj = {
     studentsCount: students.length,
     submittedCount: 0,
@@ -512,18 +507,19 @@ const classroomHomeworkReport = (async (root, params, context) => {
       getUserAssignmentAggregation({
         userId,
         topicId,
-        courseId,
       }),
     );
     const userBlockbasedPracticeRes = await userBlockBasedPracticeModel.aggregate(
       getUserBlockBasedPracticeAggregation({
         userId,
         topicId,
-        courseId,
       }),
     );
 
+    let isMmsPresent = false;
+
     if (mentorMenteeSessionRes.length) {
+      isMmsPresent = true;
       const mms = get(mentorMenteeSessionRes, '[0]');
       if (get(mms, 'isSubmittedForReview')) {
         obj.submittedCount += 1;
@@ -546,6 +542,7 @@ const classroomHomeworkReport = (async (root, params, context) => {
       }
       if (get(mms, 'isPracticeSubmitted')) {
         obj.pqSubmittedCount += 1;
+        obj.pqTotalQuestions = 1;
       } else {
         obj.pqUnattemptedCount += 1;
       }
@@ -576,6 +573,7 @@ const classroomHomeworkReport = (async (root, params, context) => {
     }
 
     if (userAssignmentRes.length) {
+      let isAtleastOneAssignmentSubmitted = false;
       obj.assignmentTotalQuestions = userAssignmentRes.length;
       for (const assignmentQuestion of userAssignmentRes) {
         if (get(assignmentQuestion, 'assignment.result') === 'correct') {
@@ -587,10 +585,31 @@ const classroomHomeworkReport = (async (root, params, context) => {
         } else {
           obj.assignmentUnevaluated += 1;
         }
+        // individual questions
+        if (get(assignmentQuestion, 'assignmentStatus', '') === 'complete') {
+          if (obj.assignmentQuestions.has(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''))) {
+            if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '').length) {
+              obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), obj.assignmentQuestions.get(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', '')) + 1);
+            }
+          } else {
+            if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '').length) {
+              obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 1);
+              isAtleastOneAssignmentSubmitted = true;
+            } else {
+              obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 0);
+            }
+          }
+        }
+      }
+      if (!isMmsPresent && isAtleastOneAssignmentSubmitted) {
+        obj.assignmentSubmittedCount += 1;
       }
     }
 
     if (get(userBlockbasedPracticeRes, '[0].blockBasedPractice')) {
+      if (!isMmsPresent) {
+        obj.pqSubmittedCount += 1;
+      }
       obj.pqTotalQuestions = 1;
       if (get(userBlockbasedPracticeRes, '[0].result') === 'correct') {
         obj.pqCorrectSum += 1;
@@ -600,6 +619,18 @@ const classroomHomeworkReport = (async (root, params, context) => {
         obj.pqPartiallyCorrectSum += 1;
       } else {
         obj.pqUnevaluated += 1;
+      }
+      // individual questions
+      if (obj.pqQuestions.has(get(userBlockbasedPracticeRes, '[0].blockBasedPractice.id'))) {
+        if (get(userBlockbasedPracticeRes, '[0].blockBasedPractice.isSubmitAnswer')) {
+          obj.pqQuestions.set(get(userBlockbasedPracticeRes, '[0].blockBasedPractice.id'), obj.pqQuestions.get(get(userBlockbasedPracticeRes, '[0].blockBasedPractice.id')) + 1);
+        }
+      } else {
+        if (get(userBlockbasedPracticeRes, '[0].blockBasedPractice.isSubmitAnswer')) {
+          obj.pqQuestions.set(get(userBlockbasedPracticeRes, '[0].blockBasedPractice.id'), 1);
+        } else {
+          obj.pqQuestions.set(get(userBlockbasedPracticeRes, '[0].blockBasedPractice.id'), 0);
+        }
       }
     }
   }
