@@ -1481,6 +1481,8 @@ const getUserBatchDetails = (userId) => [
               },
               {
                 $project: {
+                  enrollmentType: 1,
+                  latestSessionStatus: 1,
                   currentCourse: {
                     id: '$currentCourse.typeId',
                   },
