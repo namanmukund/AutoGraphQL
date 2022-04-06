@@ -346,9 +346,9 @@ const scheduleSessionsMutationResolver = async (
         });
       }
       if (adhocSessionId) {
-        await updateAdhocSession(adhocSessionId, nonRecurringfilteredSlotsString, startDate, startMinutes, endMinutes, classMode);
+        await updateAdhocSession(adhocSessionId, nonRecurringfilteredSlotsString, startDate, null, null, null, startMinutes, endMinutes, classMode);
       } else {
-        await updateBatchSession(batchSessionId, nonRecurringfilteredSlotsString, startDate, startMinutes, endMinutes, classMode);
+        await updateBatchSession(batchSessionId, nonRecurringfilteredSlotsString, startDate, null, null, null, startMinutes, endMinutes, classMode);
       }
     }
     return {
