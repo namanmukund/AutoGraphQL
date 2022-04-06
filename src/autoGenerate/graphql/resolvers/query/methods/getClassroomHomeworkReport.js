@@ -230,45 +230,17 @@ const getUserAssignmentAggregation = ({
     'topic.typeId': topicId,
   },
 }, {
+  $unwind: {
+    path: '$assignment',
+  },
+}, {
   $project: {
     assignmentStatus: 1,
     assignment: {
-      $arrayElemAt: [
-        '$assignment',
-        0,
-      ],
-    },
-  },
-}, {
-  $lookup: {
-    from: 'AssignmentQuestion',
-    let: {
-      assignmentQuestionId: '$assignment.assignmentQuestion.typeId',
-    },
-    pipeline: [
-      {
-        $match: {
-          $expr: {
-            $eq: [
-              '$id',
-              '$$assignmentQuestionId',
-            ],
-          },
-          isHomework: true,
-        },
-      },
-    ],
-    as: 'assignmentQuestion',
-  },
-}, {
-  $project: {
-    assignmentStatus: 1,
-    assignment: 1,
-    assignmentQuestion: {
-      $arrayElemAt: [
-        '$assignmentQuestion',
-        0,
-      ],
+      isAttempted: 1,
+      assignmentQuestion: 1,
+      userAnswerCodeSnippet: 1,
+      result: 1,
     },
   },
 }];

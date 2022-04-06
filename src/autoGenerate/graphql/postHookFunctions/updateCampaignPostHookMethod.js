@@ -10,6 +10,7 @@ const updateCampaignPostHookMethod = async (input, params, mutationName, context
   let { batchRules } = campaignInput;
 
   const courseId = get(input, 'course.typeId');
+  const coursePackageId = get(input, 'coursePackage.typeId');
   const schoolId = get(input, 'school.typeId');
 
   const prevBatchCreationStatus = get(context, 'prevBatchCreationStatus');
@@ -30,9 +31,9 @@ const updateCampaignPostHookMethod = async (input, params, mutationName, context
 
   // update campaign only when campaign type is b2b and batch creation status is todo
   if (type === campaignTypes.b2b && prevBatchCreationStatus === batchCreationStatus.todo) {
-    createB2BBatchesBasedOnBatchRules(campaignId, courseId, batchRules, classesConnectIds, schoolId);
+    createB2BBatchesBasedOnBatchRules(campaignId, courseId, batchRules, classesConnectIds, schoolId, coursePackageId);
   } else if (type === campaignTypes.b2b2cEvent) {
-    createB2B2CEventBatchesBasedOnBatchRules(campaignId, courseId, batchRules, timeTableRules, schoolId, classesConnectIds, context);
+    createB2B2CEventBatchesBasedOnBatchRules(campaignId, courseId, batchRules, timeTableRules, schoolId, classesConnectIds, context, coursePackageId);
   }
 };
 
