@@ -195,13 +195,14 @@ const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId
   return true;
 };
 
-const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, courseId, startTime, endTime, sessionMode) => {
+const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, courseId, coursePackageId, startTime, endTime, sessionMode) => {
   const query = `
           mutation{
             updateAdhocSession(
             id: "${sessionId}",
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
               ${startTime ? `startMinutes: ${startTime},` : ''}
