@@ -1108,7 +1108,7 @@ query{
 }
 `;
 
-const fetchOrCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => {} }) => {
+const fetchOrCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => { } }) => {
   const redisClient = new RedisController({
     bypass: true,
   });
@@ -1853,7 +1853,7 @@ const getUserBatchDetails = (userId) => [
   },
 ];
 
-const getTopicOrderFromCoursePackage = (coursePackage, currentTopic) => {
+export const getTopicOrderFromCoursePackage = (coursePackage, currentTopic) => {
   if (currentTopic) {
     const currentTopicId = get(currentTopic, 'id');
     const packageTopics = get(coursePackage, 'topics', []);
@@ -1863,14 +1863,14 @@ const getTopicOrderFromCoursePackage = (coursePackage, currentTopic) => {
   return 0;
 };
 
-const getTopicsArrFromCoursePackages = (coursePackage = {}) => {
+export const getTopicsArrFromCoursePackages = (coursePackage = {}) => {
   const packageTopics = get(coursePackage, 'topicsArr', []);
   const updatedTopicsArr = [];
   (packageTopics || []).forEach((topic) => {
     updatedTopicsArr.push({
-        ...topic,
-        order: getTopicOrderFromCoursePackage(coursePackage, topic),
-      });
+      ...topic,
+      order: getTopicOrderFromCoursePackage(coursePackage, topic),
+    });
   });
   return updatedTopicsArr.sort((a, b) => a.order - b.order);
 };
