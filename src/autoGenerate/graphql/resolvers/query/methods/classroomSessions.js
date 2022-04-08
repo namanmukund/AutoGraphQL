@@ -640,6 +640,7 @@ const getSessionStatus = (session) => {
     if (isBefore(get(session, 'bookingDate'), new Date())) {
       if (isToday(get(session, 'bookingDate'))) {
         const currentSlot = new Date().getHours() || 0;
+        const currentMinutes = new Date().getMinutes() || 0;
         let sessionSlot = 23;
         for (let i = 0; i < 24; i++) {
           if (session[`slot${i}`]) {
@@ -647,7 +648,7 @@ const getSessionStatus = (session) => {
           }
         }
         if (currentSlot <= sessionSlot) {
-          return sessionStatus;
+          if (currentMinutes <= get(session, 'endMinutes')) return sessionStatus;
         }
       }
       return 'unattended';
