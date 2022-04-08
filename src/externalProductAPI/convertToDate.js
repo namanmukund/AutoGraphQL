@@ -8,7 +8,12 @@ const convertToDate = (dateString) => {
   }
 
   if (dateParts.length !== 2) return null;
-  const dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
+  let dateObject = null;
+  try {
+    dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
+  } catch (err) {
+    return null;
+  }
 
   return dateObject.toString();
 };

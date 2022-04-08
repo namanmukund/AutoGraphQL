@@ -58,6 +58,7 @@ const getBatchSessionAggregation = ({
         course: 1,
         mentorSession: 1,
         attendance: 1,
+        schoolSessionsOtp: 1,
         ...getSlotTimeFields(),
       },
     },
@@ -144,6 +145,8 @@ const getBatchSessionAggregation = ({
               order: 1,
               title: 1,
               description: 1,
+              classType: 1,
+              topicComponentRule: 1,
               thumbnailSmall: {
                 $arrayElemAt: ['$thumbnailSmall', 0],
               },
@@ -201,6 +204,37 @@ const getBatchSessionAggregation = ({
       },
     },
     {
+      $lookup: {
+        from: 'SchoolSessionOtp',
+        localField: 'schoolSessionsOtp.typeId',
+        foreignField: 'id',
+        as: 'schoolSessionOtp',
+      },
+    },
+    {
+      $lookup: {
+        from: 'Course',
+        let: { courseId: '$course.typeId' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$id', '$$courseId'],
+              },
+            },
+          },
+          {
+            $project: {
+              id: 1,
+              title: 1,
+              defaultLoComponentRule: 1,
+            },
+          },
+        ],
+        as: 'course',
+      },
+    },
+    {
       $match: {
         ...mentorIdsFilter,
         'classroom.documentType': documentType,
@@ -226,7 +260,14 @@ const getBatchSessionAggregation = ({
         topic: {
           $arrayElemAt: ['$topic', 0],
         },
-        course: 1,
+        course: {
+          $arrayElemAt: ['$course', 0],
+        },
+        schoolSessionOtp: {
+          grade: 1,
+          section: 1,
+          otp: 1,
+        },
         attendance: 1,
         ...getSlotTimeFields(),
       },
@@ -278,6 +319,7 @@ const getAdhocSessionAggregation = ({
         course: 1,
         mentorSession: 1,
         attendance: 1,
+        schoolSessionsOtp: 1,
         ...getSlotTimeFields(),
       },
     },
@@ -364,6 +406,8 @@ const getAdhocSessionAggregation = ({
               order: 1,
               title: 1,
               description: 1,
+              classType: 1,
+              topicComponentRule: 1,
               thumbnailSmall: {
                 $arrayElemAt: ['$thumbnailSmall', 0],
               },
@@ -421,6 +465,37 @@ const getAdhocSessionAggregation = ({
       },
     },
     {
+      $lookup: {
+        from: 'SchoolSessionOtp',
+        localField: 'schoolSessionsOtp.typeId',
+        foreignField: 'id',
+        as: 'schoolSessionOtp',
+      },
+    },
+    {
+      $lookup: {
+        from: 'Course',
+        let: { courseId: '$course.typeId' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$id', '$$courseId'],
+              },
+            },
+          },
+          {
+            $project: {
+              id: 1,
+              title: 1,
+              defaultLoComponentRule: 1,
+            },
+          },
+        ],
+        as: 'course',
+      },
+    },
+    {
       $match: {
         ...mentorIdsFilter,
         'classroom.documentType': documentType,
@@ -447,7 +522,14 @@ const getAdhocSessionAggregation = ({
         previousTopic: {
           $arrayElemAt: ['$previousTopic', 0],
         },
-        course: 1,
+        course: {
+          $arrayElemAt: ['$course', 0],
+        },
+        schoolSessionOtp: {
+          grade: 1,
+          section: 1,
+          otp: 1,
+        },
         attendance: 1,
         ...getSlotTimeFields(),
       },
@@ -558,14 +640,15 @@ const getSessionStatus = (session) => {
     if (isBefore(get(session, 'bookingDate'), new Date())) {
       if (isToday(get(session, 'bookingDate'))) {
         const currentSlot = new Date().getHours() || 0;
+        const currentMinutes = new Date().getMinutes() || 0;
         let sessionSlot = 23;
         for (let i = 0; i < 24; i++) {
           if (session[`slot${i}`]) {
             sessionSlot = i;
           }
         }
-        if (currentSlot < sessionSlot) {
-          return sessionStatus;
+        if (currentSlot <= sessionSlot) {
+          if (currentMinutes <= get(session, 'endMinutes')) return sessionStatus;
         }
       }
       return 'unattended';
@@ -601,8 +684,10 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
           classes: get(session, 'classroom.classes', null),
           school: get(session, 'classroom.school', null),
         },
+        sessionOtp: get(session, 'schoolSessionOtp', []),
         ...getSlotTimeFields(session),
         topic: get(session, 'topic', null),
+        course: get(session, 'course', null),
         previousTopic: null,
       });
     });
@@ -631,8 +716,10 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
           classes: get(session, 'classroom.classes', null),
           school: get(session, 'classroom.school', null),
         },
+        sessionOtp: get(session, 'schoolSessionOtp', null),
         ...getSlotTimeFields(session),
         topic: null,
+        course: get(session, 'course', null),
         previousTopic: get(session, 'previousTopic', null),
       });
     });

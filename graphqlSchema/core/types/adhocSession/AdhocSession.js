@@ -5,6 +5,7 @@ const slotTimeFields = getSlotTimeFields('Boolean', false);
 const AdhocSession = `
   type AdhocSession @model {
     course: Course @relation(name: "AdhocSessionCourse", direction: "OneWay")
+    coursePackage: CoursePackage @relation(name: "AdhocSessionCoursePackage", direction: "OneWay")
     batch: Batch! @relation(name: "AdhocSessionBatch", direction: "OneWay")
     previousTopic: Topic @relation(name: "AdhocSessionTopic", direction: "OneWay")
     type: AdhocSessionType!

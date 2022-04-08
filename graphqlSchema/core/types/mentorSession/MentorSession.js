@@ -56,6 +56,7 @@ const MentorSession = `
   {
     user: User! @relation(name: "MentorSessionUser", direction: "OneWay")
     course: Course @relation(name: "MentorSessionCourse", direction: "OneWay")
+    coursePackage: CoursePackage @relation(name: "MentorSessionCoursePackage", direction: "OneWay")
     availabilityDate: Date!
     sessionType: SessionType @defaultValue(value: "trial")
     ${slotTimeFields}

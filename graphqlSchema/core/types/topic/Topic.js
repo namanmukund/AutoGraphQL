@@ -77,6 +77,7 @@ const Topic = `
     programming: [ArrayValue]
     theory: [ArrayValue]
     learningSlides: [LearningSlide] @relation(name: "LearningSlideTopic")
+    classType: ClassType @defaultValue(value: "lab")
   }
 `;
 

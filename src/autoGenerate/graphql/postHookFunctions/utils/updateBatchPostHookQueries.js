@@ -23,7 +23,7 @@ const getTopics = async (courseId) => {
 };
 
 // query to get batch sessions
-const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus) => {
+const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus, slotInput, dateInput) => {
   const query = `
           {
             batchSessions(filter: {
@@ -32,11 +32,41 @@ const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus) => {
                 ${bookingDate ? `{bookingDate: "${bookingDate}"}` : ''}
                 ${slot ? `{slot${slot}: true}` : ''}
                 ${sessionStatus ? `{sessionStatus: ${sessionStatus}}` : ''}
+                ${!slotInput ? '' : slotInput}
+                ${!dateInput ? '' : dateInput}
               ]
             }, orderBy:bookingDate_ASC){
               id
               bookingDate
               sessionStatus
+              course{
+                id
+              }
+              startMinutes
+              endMinutes
+              slot0
+              slot1
+              slot2
+              slot3
+              slot4
+              slot5
+              slot6
+              slot7
+              slot8
+              slot9
+              slot11
+              slot12
+              slot13
+              slot14
+              slot15
+              slot16
+              slot17
+              slot18
+              slot19
+              slot20
+              slot21
+              slot22
+              slot23
               topic{
                 order
               }
@@ -44,11 +74,11 @@ const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus) => {
           }
           `;
   const batches = await callLocalGraphqlApi(query);
-  return get(batches, 'data.batchSessions');
+  return get(batches, 'data.batchSessions', []);
 };
 
 // query to get adhoc sessions
-const getAdhocSessions = async (batchId, bookingDate, slot, sessionStatus) => {
+const getAdhocSessions = async (batchId, bookingDate, slot, sessionStatus, slotInput, dateInput) => {
   const query = `
           {
             adhocSessions(filter: {
@@ -57,11 +87,38 @@ const getAdhocSessions = async (batchId, bookingDate, slot, sessionStatus) => {
                 ${bookingDate ? `{bookingDate: "${bookingDate}"}` : ''}
                 ${slot ? `{slot${slot}: true}` : ''}
                 ${sessionStatus ? `{sessionStatus: ${sessionStatus}}` : ''}
+                ${!slotInput ? '' : slotInput}
+                ${!dateInput ? '' : dateInput}
               ]
             }, orderBy:bookingDate_ASC){
               id
               bookingDate
               sessionStatus
+              startMinutes
+              slot0
+              slot1
+              slot2
+              slot3
+              slot4
+              slot5
+              slot6
+              slot7
+              slot8
+              slot9
+              slot11
+              slot12
+              slot13
+              slot14
+              slot15
+              slot16
+              slot17
+              slot18
+              slot19
+              slot20
+              slot21
+              slot22
+              slot23
+              endMinutes
               previousTopic{
                 order
               }
@@ -69,7 +126,7 @@ const getAdhocSessions = async (batchId, bookingDate, slot, sessionStatus) => {
           }
           `;
   const sessions = await callLocalGraphqlApi(query);
-  return get(sessions, 'data.adhocSessions');
+  return get(sessions, 'data.adhocSessions', []);
 };
 
 // query to get batch sessions (started, completed)
@@ -119,15 +176,19 @@ const getBatch = async (batchId) => {
   return get(currBatch, 'data.batch');
 };
 
-const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId, courseId) => {
+const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId, courseId, coursePackageId, startTime, endTime, sessionMode) => {
   const query = `
           mutation{
             addBatchSession(batchConnectId: "${batchId}",
             ${topicId ? `topicConnectId: "${topicId}"` : ''}
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
+              ${startTime ? `startMinutes: ${startTime},` : ''}
+              ${endTime ? `endMinutes: ${endTime},` : ''}
+              ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
               ${slots}
             }
             ){
@@ -139,15 +200,19 @@ const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId
   return true;
 };
 
-const updateBatchSession = async (sessionId, slots, date, mentorSessionId, courseId) => {
+const updateBatchSession = async (sessionId, slots, date, mentorSessionId, courseId, coursePackageId, startTime, endTime, sessionMode) => {
   const query = `
           mutation{
             updateBatchSession(
             id: "${sessionId}",
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
+              ${startTime ? `startMinutes: ${startTime},` : ''}
+              ${endTime ? `endMinutes: ${endTime},` : ''}
+              ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
               ${slots}
             }
             ){
@@ -159,16 +224,20 @@ const updateBatchSession = async (sessionId, slots, date, mentorSessionId, cours
   return true;
 };
 
-const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId, courseId, adhocSessionType) => {
+const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId, courseId, adhocSessionType, coursePackageId, startTime, endTime, sessionMode) => {
   const query = `
           mutation{
             addAdhocSession(batchConnectId: "${batchId}",
             ${topicId ? `previousTopicConnectId: "${topicId}"` : ''}
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
               type: ${adhocSessionType}
+              ${startTime ? `startMinutes: ${startTime},` : ''}
+              ${endTime ? `endMinutes: ${endTime},` : ''}
+              ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
               ${slots}
             }
             ){
@@ -180,15 +249,19 @@ const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId
   return true;
 };
 
-const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, courseId) => {
+const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, courseId, coursePackageId, startTime, endTime, sessionMode) => {
   const query = `
           mutation{
             updateAdhocSession(
             id: "${sessionId}",
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
+              ${startTime ? `startMinutes: ${startTime},` : ''}
+              ${endTime ? `endMinutes: ${endTime},` : ''}
+              ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
               ${slots}
             }
             ){
@@ -230,5 +303,39 @@ const getAdhocSession = (batchId,
   }
 `;
 
+const getTopicsFromCoursePackage = async (coursePackageId) => {
+  const query = `
+  query{
+  coursePackage(id: "${coursePackageId}"){
+    topics{
+      order
+      topic{
+        courses{
+          id
+        }
+        id
+      }
+    }
+  }
+}
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.coursePackage');
+};
+
+const getCourseIdFromTopic = async (topicId) => {
+  const query = `
+  {
+  topic(id: "${topicId}"){
+    courses{
+      id
+    }
+  }
+}
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.topic.courses[0].id');
+};
+
 /* eslint-disable object-curly-newline */
-export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession, getAdhocSessions, updateAdhocSession, getBatchSession, getAdhocSession };
+export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession, getAdhocSessions, updateAdhocSession, getBatchSession, getAdhocSession, getTopicsFromCoursePackage, getCourseIdFromTopic };

@@ -155,7 +155,7 @@ const createB2B2CBatch = async (batchCode, schoolId, campaignId, courseId, booki
   return get(addBatchResponse, 'data.addBatch', {});
 };
 
-const createB2BBatch = async (batchCode, schoolId, classIds, campaignId, studentIds, courseId) => {
+const createB2BBatch = async (batchCode, schoolId, classIds, campaignId, studentIds, courseId, coursePackageId) => {
   const classIdsString = JSON.stringify(classIds);
   const studentIdsString = JSON.stringify(studentIds);
   const mutation = `
@@ -163,7 +163,10 @@ const createB2BBatch = async (batchCode, schoolId, classIds, campaignId, student
                 addBatch(input: {
                   code: "${batchCode}",
                   type: ${batchType.b2b},
-                }, schoolConnectId:"${schoolId}", classesConnectIds:${classIdsString}, campaignConnectId:"${campaignId}", studentsConnectIds:${studentIdsString}, courseConnectId: "${courseId}") {
+                }, schoolConnectId:"${schoolId}", classesConnectIds:${classIdsString}, campaignConnectId:"${campaignId}", studentsConnectIds:${studentIdsString},
+                ${courseId ? `courseConnectId: "${courseId}"` : ''}
+                ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
+                ) {
                   id
                   course {
                     createdAt
@@ -191,7 +194,7 @@ const createB2BBatch = async (batchCode, schoolId, classIds, campaignId, student
   return get(addBatchResponse, 'data.addBatch', {});
 };
 
-const updateB2BBatch = async (existingBatchId, classIds, campaignId, studentIds, courseId) => {
+const updateB2BBatch = async (existingBatchId, classIds, campaignId, studentIds, courseId, coursePackageId) => {
   const classIdsString = JSON.stringify(classIds);
   const studentIdsString = JSON.stringify(studentIds);
   const mutation = `
@@ -201,7 +204,8 @@ const updateB2BBatch = async (existingBatchId, classIds, campaignId, studentIds,
                   classesConnectIds:${classIdsString},
                   campaignConnectId:"${campaignId}",
                   ${studentIdsString ? `studentsConnectIds:${studentIdsString}` : ''},
-                  courseConnectId: "${courseId}",
+                  ${courseId ? `courseConnectId: "${courseId}"` : ''}
+                  ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
                   input: {
                     type: ${batchType.b2b},
                   }){
@@ -268,7 +272,7 @@ const getClassesGroupByGrade = (classes) => {
   return classesMap;
 };
 
-const createBatchGroupByGrade = async (classesGroupByGrade, campaignId, courseId, campaignSchoolId) => {
+const createBatchGroupByGrade = async (classesGroupByGrade, campaignId, courseId, campaignSchoolId, coursePackageId) => {
   // classIds and studentIds to pass in input
   let classIds = [];
   let studentIds = [];
@@ -306,14 +310,14 @@ const createBatchGroupByGrade = async (classesGroupByGrade, campaignId, courseId
       // update exisiting batch
       const existingBatchId = get(exisitingBatches[0], 'id', '');
       /* eslint-disable no-await-in-loop */
-      await updateB2BBatch(existingBatchId, classIds, campaignId, studentIds, courseId);
+      await updateB2BBatch(existingBatchId, classIds, campaignId, studentIds, courseId, coursePackageId);
     } else {
       // tries batchCodes on fail for max. 5 times before moving on
       /* eslint-disable no-await-in-loop */
       let batchCode = `${schoolCode}-BBS${numeric}`;
       for (let i = 0; i < ADD_BATCH_TRY_LIMIT; i += 1) {
         try {
-          await createB2BBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId);
+          await createB2BBatch(batchCode, schoolId, classIds, campaignId, studentIds, courseId, coursePackageId);
           numeric += 1;
           log(`Batch ${batchCode} added`);
           break;
@@ -331,7 +335,7 @@ const createBatchGroupByGrade = async (classesGroupByGrade, campaignId, courseId
   return true;
 };
 
-const createBatchGroupBySection = async (classes, campaignId, courseId) => {
+const createBatchGroupBySection = async (classes, campaignId, courseId, coursePackageId) => {
   // classIds and studentIds to pass in input
   let studentIds = [];
   const schoolId = classes[0].school.id;
@@ -365,14 +369,14 @@ const createBatchGroupBySection = async (classes, campaignId, courseId) => {
         // update exisiting batch
         const existingBatchId = get(exisitingBatches[0], 'id', '');
         /* eslint-disable no-await-in-loop */
-        await updateB2BBatch(existingBatchId, classes[i].id, campaignId, studentIds, courseId);
+        await updateB2BBatch(existingBatchId, classes[i].id, campaignId, studentIds, courseId, coursePackageId);
       } else {
         let batchCode = `${schoolCode}-BBS${numeric}`;
         /* eslint-disable no-await-in-loop */
         // tries batchCodes on fail for max. 5 times before moving on
         for (let j = 0; j < ADD_BATCH_TRY_LIMIT; j += 1) {
           try {
-            await createB2BBatch(batchCode, schoolId, classes[i].id, campaignId, studentIds, courseId);
+            await createB2BBatch(batchCode, schoolId, classes[i].id, campaignId, studentIds, courseId, coursePackageId);
             numeric += 1;
             log(`Batch ${batchCode} added`);
             break;
@@ -404,7 +408,7 @@ const getSectionExists = (classes) => {
   return noSectionInAnyClass;
 };
 // eslint-disable-next-line no-unused-vars
-const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolId, classesConnectIds, context) => {
+const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolId, classesConnectIds, context, coursePackageId) => {
   // update batchCreation status to in-progress
   await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
   // handle the batch code increments
@@ -419,6 +423,9 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
     logic to add batch Session
     the first published topic will get populated in the document
     */
+  /*
+    TODO : change logic for fetching topics from coursePackage if applicable
+  */
   const topic = await getFirstTopicAndLearningObjective('', courseId);
   const firstTopicId = get(topic, 'data.topics[0].id');
 

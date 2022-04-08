@@ -11,11 +11,13 @@ import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfter
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import validateMenteeSessionInput, { getHoursDiff } from './utils/validateMenteeSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
-import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
+import { SimilarDocumentAlreadyExistError, SlotsOccupiedError } from '../../../../../constants/errors/db';
 import isTrialSession from '../../resolvers/utils/isTrialSession';
 import getUserSource from './utils/getUserSource';
 import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetailsInParams';
 import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelectedSlotsStringArray';
+import validateMenteeSession from './utils/validateMenteeSession';
+import isMentorChild from '../../postHookFunctions/utils/isMentorChild';
 
 // query to get mentee Sessions
 const getMenteeSessions = (userId, topicId) => `
@@ -81,8 +83,8 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
   Object.assign(params.input, {
     bookedAt: `${new Date()}`,
   });
+  const slotTimeStringArray = getSelectedSlotsStringArray(get(params, 'input'));
   if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext) && get(context, 'isTrialSession', false)) {
-    const slotTimeStringArray = getSelectedSlotsStringArray(get(params, 'input'));
     if (slotTimeStringArray.length > 0) {
       const timeDiff = getHoursDiff(slotTimeStringArray[0].split('slot')[1], get(params, 'input.bookingDate'));
       if (timeDiff) {
@@ -124,6 +126,13 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
     throw new SimilarDocumentAlreadyExistError();
   }
 
+  const mentorChild = await isMentorChild(userId);
+  if (!mentorChild && slotTimeStringArray && slotTimeStringArray.length > 0) {
+    const validationFailed = await validateMenteeSession(slotTimeStringArray[0], userId, get(params, 'input.bookingDate'));
+    if (validationFailed) {
+      throw new SlotsOccupiedError();
+    }
+  }
   // update source & country in menteeSession
   const userData = await getUserSource(userId);
   updateUserSpecificDetailsInParams(userData, params);

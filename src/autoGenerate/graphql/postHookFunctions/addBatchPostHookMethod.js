@@ -6,6 +6,10 @@ import {
 import { log } from '../../../../utils';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getFirstTopicAndLearningObjective from '../../utils/getFirstTopicAndLearningObjective';
+import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
+import {
+  getTopicsFromCoursePackage,
+} from './utils/updateBatchPostHookQueries';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -47,14 +51,25 @@ const addBatchCurrentComponentStatus = (
 const addBatchPostHookMethod = async (input) => {
   const { id: batchId } = input;
   let courseId = get(input, 'course.typeId');
+  const coursePackageId = get(input, 'coursePackage.typeId');
+  let topic;
+  let firstTopicId;
   /*
     logic to add current batch component status
     the first published topic will get populated in the document
     */
-  const topic = await getFirstTopicAndLearningObjective('', courseId);
-  const firstTopicId = get(topic, 'data.topics[0].id');
+  if (coursePackageId) {
+    const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+    const topicRules = get(coursePackage, 'topics');
+    const topics = getSortedTopics(topicRules);
+    firstTopicId = get(topics, '[0].id');
+    courseId = get(topics, '[0].courses[0].id');
+  } else {
+    topic = await getFirstTopicAndLearningObjective('', courseId);
+    firstTopicId = get(topic, 'data.topics[0].id');
+  }
 
-  if (!courseId) {
+  if (!courseId && !coursePackageId) {
     const courseResult = await callLocalGraphqlApi(getCourseQuery());
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
