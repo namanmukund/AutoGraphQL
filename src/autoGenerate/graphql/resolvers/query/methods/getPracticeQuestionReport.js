@@ -456,7 +456,7 @@ const practiceQuestionReport = (async (root, params, context) => {
       }),
     );
 
-    // since multiple userPracticeQuestionReports per user per lo, we get latest one created
+    // since multiple userPracticeQuestionReports per user per lo, we get the latest one created
 
     if (userPracticeQuestionReportRes.length) {
       obj.submittedCountSum += 1;
