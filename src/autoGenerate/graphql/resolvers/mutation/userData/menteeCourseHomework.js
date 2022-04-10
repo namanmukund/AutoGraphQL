@@ -21,7 +21,7 @@ let defaultMentorMenteeSessionObject = {
   isHomeworkCheckedByMentor: false,
   isReviewSubmittedOnTime: false,
 };
-const mentorMenteeSessionAggregation = (coursePackageFilter) => [
+const mentorMenteeSessionAggregation = (coursePackageFilter, userId) => [
   {
     $match: {
       ...coursePackageFilter
@@ -949,7 +949,6 @@ const menteeCourseHomeworkMutationResolver = async (
     }
   );
   const res = await userCurrentTopicComponentStatusesModel.aggregate(getUserCurrentTopicComponentStatusAggregation(userId, courseId));
-
   currentTopicComponentInfo = res[0];
   const userBatchDetailsRes = new QueryController('StudentProfile', { bypass: true });
   const userBatchDetails = await userBatchDetailsRes.aggregate(getUserBatchDetails(userId));
@@ -976,7 +975,7 @@ const menteeCourseHomeworkMutationResolver = async (
     bypass: true,
   });
   mentorMenteeSessions = await modelQuery.aggregate(
-    mentorMenteeSessionAggregation(courseOrPackageFilter)
+    mentorMenteeSessionAggregation(courseOrPackageFilter, userId)
   );
   if (batchCurrentComponentInfo || coursePackage) {
     currentTopicOrder = get(batchCurrentComponentInfo, "currentTopic.order");
@@ -1007,7 +1006,13 @@ const menteeCourseHomeworkMutationResolver = async (
         topic.id
       );
       if (!mentorMenteeSession && get(topic, "order") > lastTopicBookedOrder) return;
-      constructHomeworkArr(finalTopicBasedHomeworkArray, mentorMenteeSession, topic)
+      constructHomeworkArr(finalTopicBasedHomeworkArray, mentorMenteeSession, {
+        ...topic, chapter: {
+          id: get(coursePackage, 'id'),
+          title: get(coursePackage, 'title', 'Package'),
+          order: 1,
+        }
+      })
     });
   }
   else {
@@ -1027,13 +1032,7 @@ const menteeCourseHomeworkMutationResolver = async (
           topic.id
         );
         if (!mentorMenteeSession && get(topic, "order") > currentTopicOrder) return;
-        constructHomeworkArr(finalTopicBasedHomeworkArray, mentorMenteeSession, {
-          ...topic, chapter: {
-            id: get(coursePackage, 'id'),
-            title: get(coursePackage, 'title', 'Package'),
-            order: 1,
-          }
-        })
+        constructHomeworkArr(finalTopicBasedHomeworkArray, mentorMenteeSession, topic)
       });
     })
   }
@@ -1042,4 +1041,3 @@ const menteeCourseHomeworkMutationResolver = async (
 };
 
 export default menteeCourseHomeworkMutationResolver;
- 
