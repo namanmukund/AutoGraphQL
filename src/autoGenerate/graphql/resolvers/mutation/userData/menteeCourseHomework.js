@@ -1,14 +1,12 @@
-/* eslint-disable */
+import { get } from 'lodash';
+import { OLD_COURSE_ID } from '../../../../../../constants';
+import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
+import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
+import { QueryController } from '../../../controllers';
+import { getTopicsArrFromCoursePackages, getTopicOrderFromCoursePackage } from './menteeCourseSyllabus';
 
-import { get } from "lodash";
-import { OLD_COURSE_ID, PUBLISHED } from "../../../../../../constants";
-import { DatabaseRecordNotFoundError } from "../../../../../../constants/errors";
-import getUserIdandAppNameAfterValidation from "../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation";
-import validateCurrentTopicComponent from "../../utils/validateCurrentTopicComponent";
-import { QueryController } from "../../../controllers";
-import { getTopicsArrFromCoursePackages, getTopicOrderFromCoursePackage } from "./menteeCourseSyllabus";
-
-let defaultMentorMenteeSessionObject = {
+const defaultMentorMenteeSessionObject = {
   sessionStatus: null,
   assignmentSubmitDate: null,
   quizSubmitDate: null,
@@ -25,83 +23,83 @@ const mentorMenteeSessionAggregation = (coursePackageFilter, userId) => [
   {
     $match: {
       ...coursePackageFilter,
-      sessionStatus: 'completed'
+      sessionStatus: 'completed',
     },
   },
   {
     $lookup: {
-      from: "MenteeSession",
+      from: 'MenteeSession',
       let: {
-        menteeSession: "$menteeSession.typeId",
+        menteeSession: '$menteeSession.typeId',
       },
       pipeline: [
         {
           $match: {
             $expr: {
-              $eq: ["$id", "$$menteeSession"],
+              $eq: ['$id', '$$menteeSession'],
             },
           },
         },
         {
           $lookup: {
-            from: "User",
+            from: 'User',
             let: {
-              user: "$user.typeId",
+              user: '$user.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ["$id", "$$user"],
+                    $eq: ['$id', '$$user'],
                   },
                 },
               },
             ],
-            as: "user",
+            as: 'user',
           },
         },
         {
           $project: {
             id: 1,
             user: {
-              $arrayElemAt: ["$user", 0],
+              $arrayElemAt: ['$user', 0],
             },
           },
         },
       ],
-      as: "menteeSession",
+      as: 'menteeSession',
     },
   },
   {
     $match: {
-      "menteeSession.user.id": userId,
+      'menteeSession.user.id': userId,
     },
   },
   {
     $lookup: {
-      from: "Topic",
+      from: 'Topic',
       let: {
-        topic: "$topic.typeId",
+        topic: '$topic.typeId',
       },
       pipeline: [
         {
           $match: {
             $expr: {
-              $eq: ["$id", "$$topic"],
+              $eq: ['$id', '$$topic'],
             },
           },
         },
         {
           $lookup: {
-            from: "Chapter",
+            from: 'Chapter',
             let: {
-              chapter: "$chapter.typeId",
+              chapter: '$chapter.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ["$id", "$$chapter"],
+                    $eq: ['$id', '$$chapter'],
                   },
                 },
               },
@@ -111,45 +109,20 @@ const mentorMenteeSessionAggregation = (coursePackageFilter, userId) => [
                 },
               },
             ],
-            as: "chapter",
+            as: 'chapter',
           },
         },
         {
           $lookup: {
-            from: "File",
+            from: 'File',
             let: {
-              thumbnail: "$thumbnail.typeId",
+              thumbnail: '$thumbnail.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ["$id", "$$thumbnail"],
-                  },
-                },
-              },
-              {
-                $project: {
-                  id: 1,
-                  uri: 1,
-                  name: 1,
-                },
-              },
-            ],
-            as: "thumbnail",
-          },
-        },
-        {
-          $lookup: {
-            from: "File",
-            let: {
-              thumbnailSmall: "$thumbnailSmall.typeId",
-            },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: ["$id", "$$thumbnailSmall"],
+                    $eq: ['$id', '$$thumbnail'],
                   },
                 },
               },
@@ -161,7 +134,32 @@ const mentorMenteeSessionAggregation = (coursePackageFilter, userId) => [
                 },
               },
             ],
-            as: "thumbnailSmall",
+            as: 'thumbnail',
+          },
+        },
+        {
+          $lookup: {
+            from: 'File',
+            let: {
+              thumbnailSmall: '$thumbnailSmall.typeId',
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$id', '$$thumbnailSmall'],
+                  },
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  uri: 1,
+                  name: 1,
+                },
+              },
+            ],
+            as: 'thumbnailSmall',
           },
         },
         {
@@ -170,19 +168,19 @@ const mentorMenteeSessionAggregation = (coursePackageFilter, userId) => [
             title: 1,
             order: 1,
             chapter: {
-              $arrayElemAt: ["$chapter", 0],
+              $arrayElemAt: ['$chapter', 0],
             },
             thumbnail: {
-              $arrayElemAt: ["$thumbnail", 0],
+              $arrayElemAt: ['$thumbnail', 0],
             },
             thumbnailSmall: {
-              $arrayElemAt: ["$thumbnailSmall", 0],
+              $arrayElemAt: ['$thumbnailSmall', 0],
             },
             description: 1,
           },
         },
       ],
-      as: "topic",
+      as: 'topic',
     },
   },
   {
@@ -202,7 +200,7 @@ const mentorMenteeSessionAggregation = (coursePackageFilter, userId) => [
       isReviewSubmittedOnTime: 1,
       mentorMenteeSessionAvailable: true,
       topic: {
-        $arrayElemAt: ["$topic", 0],
+        $arrayElemAt: ['$topic', 0],
       },
     },
   },
@@ -211,21 +209,21 @@ const mentorMenteeSessionAggregation = (coursePackageFilter, userId) => [
 const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
   {
     $match: {
-      "user.typeId": userId,
-      "currentCourse.typeId": courseId,
+      'user.typeId': userId,
+      'currentCourse.typeId': courseId,
     },
   },
   {
     $lookup: {
-      from: "Course",
+      from: 'Course',
       let: {
-        courseId: "$currentCourse.typeId",
+        courseId: '$currentCourse.typeId',
       },
       pipeline: [
         {
           $match: {
             $expr: {
-              $eq: ["$id", "$$courseId"],
+              $eq: ['$id', '$$courseId'],
             },
           },
         },
@@ -243,21 +241,21 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
         },
         {
           $lookup: {
-            from: "Chapter",
+            from: 'Chapter',
             let: {
-              chapterId: "$chapters.typeId",
+              chapterId: '$chapters.typeId',
             },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $in: ["$id", "$$chapterId"],
+                    $in: ['$id', '$$chapterId'],
                   },
                 },
               },
               {
                 $match: {
-                  status: 'published'
+                  status: 'published',
                 },
               },
               {
@@ -270,21 +268,21 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
               },
               {
                 $lookup: {
-                  from: "Topic",
+                  from: 'Topic',
                   let: {
-                    topicsId: "$topics.typeId",
+                    topicsId: '$topics.typeId',
                   },
                   pipeline: [
                     {
                       $match: {
                         $expr: {
-                          $in: ["$id", "$$topicsId"],
+                          $in: ['$id', '$$topicsId'],
                         },
                       },
                     },
                     {
                       $match: {
-                        status: 'published'
+                        status: 'published',
                       },
                     },
                     {
@@ -308,15 +306,15 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                     },
                     {
                       $lookup: {
-                        from: "File",
+                        from: 'File',
                         let: {
-                          thumbnailId: "$thumbnail.typeId",
+                          thumbnailId: '$thumbnail.typeId',
                         },
                         pipeline: [
                           {
                             $match: {
                               $expr: {
-                                $eq: ["$id", "$$thumbnailId"],
+                                $eq: ['$id', '$$thumbnailId'],
                               },
                             },
                           },
@@ -328,20 +326,20 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                             },
                           },
                         ],
-                        as: "thumbnail",
+                        as: 'thumbnail',
                       },
                     },
                     {
                       $lookup: {
-                        from: "File",
+                        from: 'File',
                         let: {
-                          thumbnailId: "$thumbnail.typeId",
+                          thumbnailId: '$thumbnail.typeId',
                         },
                         pipeline: [
                           {
                             $match: {
                               $expr: {
-                                $eq: ["$id", "$$thumbnailId"],
+                                $eq: ['$id', '$$thumbnailId'],
                               },
                             },
                           },
@@ -353,20 +351,20 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                             },
                           },
                         ],
-                        as: "thumbnail",
+                        as: 'thumbnail',
                       },
                     },
                     {
                       $lookup: {
-                        from: "File",
+                        from: 'File',
                         let: {
-                          thumbnailSmallId: "$thumbnailSmall.typeId",
+                          thumbnailSmallId: '$thumbnailSmall.typeId',
                         },
                         pipeline: [
                           {
                             $match: {
                               $expr: {
-                                $eq: ["$id", "$$thumbnailSmallId"],
+                                $eq: ['$id', '$$thumbnailSmallId'],
                               },
                             },
                           },
@@ -378,7 +376,7 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                             },
                           },
                         ],
-                        as: "thumbnailSmall",
+                        as: 'thumbnailSmall',
                       },
                     },
                     {
@@ -389,10 +387,10 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                         isTrial: 1,
                         description: 1,
                         thumbnail: {
-                          $arrayElemAt: ["$thumbnail", 0],
+                          $arrayElemAt: ['$thumbnail', 0],
                         },
                         thumbnailSmall: {
-                          $arrayElemAt: ["$thumbnailSmall", 0],
+                          $arrayElemAt: ['$thumbnailSmall', 0],
                         },
                         topicAssignmentQuestions: {
                           assignmentQuestions: {
@@ -404,28 +402,28 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                       },
                     },
                   ],
-                  as: "topics",
+                  as: 'topics',
                 },
               },
             ],
-            as: "chapters",
+            as: 'chapters',
           },
         },
       ],
-      as: "currentCourse",
+      as: 'currentCourse',
     },
   },
   {
     $lookup: {
-      from: "Topic",
+      from: 'Topic',
       let: {
-        currentTopicId: "$currentTopic.typeId",
+        currentTopicId: '$currentTopic.typeId',
       },
       pipeline: [
         {
           $match: {
             $expr: {
-              $eq: ["$id", "$$currentTopicId"],
+              $eq: ['$id', '$$currentTopicId'],
             },
           },
         },
@@ -436,7 +434,7 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
           },
         },
       ],
-      as: "currentTopic",
+      as: 'currentTopic',
     },
   },
   {
@@ -445,11 +443,11 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
       currentTopicComponentType: 1,
       enrollmentType: 1,
       currentCourse: {
-        $arrayElemAt: ["$currentCourse", 0],
+        $arrayElemAt: ['$currentCourse', 0],
       },
       currentLearningObjective: 1,
       currentTopic: {
-        $arrayElemAt: ["$currentTopic", 0],
+        $arrayElemAt: ['$currentTopic', 0],
       },
       // user: 1,
     },
@@ -886,11 +884,11 @@ const isMentorMenteeSessionAvailable = (mentorMenteeSessions, topicId) => {
   for (
     let mentorMenteeSessionPointer = 0;
     mentorMenteeSessionPointer < mentorMenteeSessions.length;
-    mentorMenteeSessionPointer++
+    mentorMenteeSessionPointer += 1
   ) {
     if (
-      get(mentorMenteeSessions[mentorMenteeSessionPointer], "topic.id") ===
-      topicId
+      get(mentorMenteeSessions[mentorMenteeSessionPointer], 'topic.id')
+      === topicId
     ) {
       return mentorMenteeSessions[mentorMenteeSessionPointer];
     }
@@ -900,8 +898,8 @@ const isMentorMenteeSessionAvailable = (mentorMenteeSessions, topicId) => {
 
 const constructHomeworkArr = (finalTopicBasedHomeworkArray, mentorMenteeSession, topic) => {
   if (
-    mentorMenteeSession &&
-    get(mentorMenteeSession, "sessionStatus") === "completed"
+    mentorMenteeSession
+    && get(mentorMenteeSession, 'sessionStatus') === 'completed'
   ) {
     finalTopicBasedHomeworkArray.push({
       ...mentorMenteeSession,
@@ -909,14 +907,14 @@ const constructHomeworkArr = (finalTopicBasedHomeworkArray, mentorMenteeSession,
       topic,
     });
   } else if (
-    mentorMenteeSession &&
-    get(mentorMenteeSession, "sessionStatus") !== "completed"
+    mentorMenteeSession
+    && get(mentorMenteeSession, 'sessionStatus') !== 'completed'
   ) {
     finalTopicBasedHomeworkArray.push({
       ...defaultMentorMenteeSessionObject,
       id: mentorMenteeSession.id,
       mentorMenteeSessionAvailable: true,
-      sessionStatus: get(mentorMenteeSession, "sessionStatus"),
+      sessionStatus: get(mentorMenteeSession, 'sessionStatus'),
       topic,
     });
   } else {
@@ -927,7 +925,7 @@ const constructHomeworkArr = (finalTopicBasedHomeworkArray, mentorMenteeSession,
       topic,
     });
   }
-}
+};
 
 const menteeCourseHomeworkMutationResolver = async (
   root,
@@ -936,7 +934,7 @@ const menteeCourseHomeworkMutationResolver = async (
   info,
   mutationName,
   ast,
-  context
+  context,
 ) => {
   /*
   Calling method to validate token and return userId.
@@ -948,20 +946,18 @@ const menteeCourseHomeworkMutationResolver = async (
   const { userIdFromContext: userId } = userAndAppInfo;
   let batchCurrentComponentInfo;
   let currentTopicOrder;
-  let currentTopicComponentInfo;
-  let mentorMenteeSessions;
-  let finalTopicBasedHomeworkArray = [];
-  let coursePackage
-  let currentTopic
+  const finalTopicBasedHomeworkArray = [];
+  let coursePackage;
+  let currentTopic;
 
   const userCurrentTopicComponentStatusesModel = new QueryController(
-    "UserCurrentTopicComponentStatus",
+    'UserCurrentTopicComponentStatus',
     {
       bypass: true,
-    }
+    },
   );
   const res = await userCurrentTopicComponentStatusesModel.aggregate(getUserCurrentTopicComponentStatusAggregation(userId, courseId));
-  currentTopicComponentInfo = res[0];
+  const currentTopicComponentInfo = res[0];
   const userBatchDetailsRes = new QueryController('StudentProfile', { bypass: true });
   const userBatchDetails = await userBatchDetailsRes.aggregate(getUserBatchDetails(userId));
   let courseOrPackageFilter = {
@@ -982,18 +978,18 @@ const menteeCourseHomeworkMutationResolver = async (
   if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId || coursePackage) {
     batchCurrentComponentInfo = get(userBatchDetails, '0.batch.currentComponent');
   }
-  const modelQuery = new QueryController("MentorMenteeSession", {
+  const modelQuery = new QueryController('MentorMenteeSession', {
     bypass: true,
   });
-  mentorMenteeSessions = await modelQuery.aggregate(
-    mentorMenteeSessionAggregation(courseOrPackageFilter, userId)
+  const mentorMenteeSessions = await modelQuery.aggregate(
+    mentorMenteeSessionAggregation(courseOrPackageFilter, userId),
   );
   if (batchCurrentComponentInfo || coursePackage) {
-    currentTopicOrder = get(batchCurrentComponentInfo, "currentTopic.order");
-    currentTopic = get(batchCurrentComponentInfo, "currentTopic")
+    currentTopicOrder = get(batchCurrentComponentInfo, 'currentTopic.order');
+    currentTopic = get(batchCurrentComponentInfo, 'currentTopic');
   } else {
-    currentTopicOrder = get(currentTopicComponentInfo, "currentTopic.order");
-    currentTopic = get(batchCurrentComponentInfo, "currentTopic")
+    currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
+    currentTopic = get(batchCurrentComponentInfo, 'currentTopic');
   }
   let packageTopics = [];
   if (coursePackage && get(coursePackage, 'id')) {
@@ -1004,7 +1000,7 @@ const menteeCourseHomeworkMutationResolver = async (
   if ((!chapters || !chapters.length) && !(packageTopics || []).length) {
     throw new DatabaseRecordNotFoundError({
       data: {
-        error: "CurrentCourse.chapters: is not present",
+        error: 'CurrentCourse.chapters: is not present',
       },
     });
   }
@@ -1012,44 +1008,44 @@ const menteeCourseHomeworkMutationResolver = async (
     chapters.sort((a, b) => a.order - b.order);
   }
   if (coursePackage && get(coursePackage, 'id')) {
-    let lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic);
+    const lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic);
     packageTopics.forEach((topic) => {
-      let mentorMenteeSession = isMentorMenteeSessionAvailable(
+      const mentorMenteeSession = isMentorMenteeSessionAvailable(
         mentorMenteeSessions,
-        topic.id
+        topic.id,
       );
-      if (!mentorMenteeSession && get(topic, "order") >= lastTopicBookedOrder) return;
+      if (!mentorMenteeSession && get(topic, 'order') >= lastTopicBookedOrder) return;
       constructHomeworkArr(finalTopicBasedHomeworkArray, mentorMenteeSession, {
-        ...topic, chapter: {
+        ...topic,
+        chapter: {
           id: get(coursePackage, 'id'),
           title: get(coursePackage, 'title', 'Package'),
           order: 1,
-        }
-      })
+        },
+      });
     });
-  }
-  else {
+  } else {
     chapters.forEach((chapter) => {
       if (!chapter || !chapter.topics || !chapter.topics.length) {
         throw new DatabaseRecordNotFoundError({
           data: {
-            error: "CurrentCourse.chapter.topics: is not present",
+            error: 'CurrentCourse.chapter.topics: is not present',
           },
         });
       }
-      let { topics: chapterTopics, ...chapterData } = chapter
+      const { topics: chapterTopics, ...chapterData } = chapter;
       chapterTopics.sort((a, b) => a.order - b.order);
       chapterTopics.forEach((topic) => {
-        let mentorMenteeSession = isMentorMenteeSessionAvailable(
+        const mentorMenteeSession = isMentorMenteeSessionAvailable(
           mentorMenteeSessions,
-          topic.id
+          topic.id,
         );
-        if (!mentorMenteeSession && get(topic, "order") >= currentTopicOrder) return;
+        if (!mentorMenteeSession && get(topic, 'order') >= currentTopicOrder) return;
         constructHomeworkArr(finalTopicBasedHomeworkArray, mentorMenteeSession, {
-          ...topic, chapter: { ...chapterData }
-        })
+          ...topic, chapter: { ...chapterData },
+        });
       });
-    })
+    });
   }
 
   return finalTopicBasedHomeworkArray;
