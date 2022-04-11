@@ -450,9 +450,36 @@ const mentorMentorMenteeSessionAggregation = (topicId, userIds) => [
     },
   },
   {
+    $lookup: {
+      from: 'Topic',
+      let: { topicId: '$topic.typeId' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: ['$id', '$$topicId'],
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            id: 1,
+            title: 1,
+            topicComponentRule: 1,
+          },
+        },
+      ],
+      as: 'topic',
+    },
+  },
+  {
     $project: {
       menteeSession: {
         $arrayElemAt: ['$menteeSession', 0],
+      },
+      topic: {
+        $arrayElemAt: ['$topic', 0],
       },
       bookingDate: 1,
       isSubmittedForReview: 1,
@@ -488,17 +515,30 @@ const getHomeworkCompletedMeta = async (session, model, queryType = 'next') => {
   const topicId = get(session, 'topic.id');
   const userIds = get(session, 'classroom.students', []).map((el) => get(el, 'user.typeId'));
   let homeworkCompletedCount = 0;
+  let isHomeworkExists = false;
+  let isQuizExists = false;
   let quizSubmittedCount = 0;
   if (topicId && userIds.length) {
     const mmsData = await model.aggregate(mentorMentorMenteeSessionAggregation(topicId, userIds));
     if (mmsData && mmsData.length) {
+      const topicComponentRule = get(mmsData, '0.topic.topicComponentRule', []);
+      topicComponentRule.forEach((rule) => {
+        if (['quiz', 'homeworkAssignment', 'homeworkPractice'].includes(get(rule, 'componentName'))) {
+          isHomeworkExists = true;
+        }
+        if (['quiz'].includes(get(rule, 'componentName'))) {
+          isQuizExists = true;
+        }
+      });
       const filteredResult = mmsData.filter((el) => get(el, 'isSubmittedForReview') === true);
       const filteredQuizResult = mmsData.filter((el) => get(el, 'isQuizSubmitted') === true);
       homeworkCompletedCount = filteredResult.length || 0;
       quizSubmittedCount = filteredQuizResult.length || 0;
     }
   }
-  return { homeworkCompletedCount, quizSubmittedCount };
+  return {
+    homeworkCompletedCount, quizSubmittedCount, isHomeworkExists, isQuizExists,
+  };
 };
 
 const transformMongoResults = async (batchSessions, adhocSessions, queryType) => {
@@ -527,6 +567,8 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
         totalStudents: get(batchSession, 'classroom.students', []).length,
         completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
         completedQuizMeta: homeworkMeta.quizSubmittedCount,
+        isHomeworkExists: homeworkMeta.isHomeworkExists,
+        isQuizExists: homeworkMeta.isQuizExists,
       });
     }
   }
@@ -552,6 +594,8 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
         totalStudents: get(adhocSession, 'classroom.students', []).length,
         completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
         completedQuizMeta: homeworkMeta.quizSubmittedCount,
+        isHomeworkExists: homeworkMeta.isHomeworkExists,
+        isQuizExists: homeworkMeta.isQuizExists,
       });
     }
   }

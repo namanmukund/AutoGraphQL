@@ -12,6 +12,8 @@ const NextOrPrevClassroomSession = `
     startMinutes: Int @defaultValue(value: "0")
     endMinutes: Int @defaultValue(value: "0")
     totalStudents: Int
+    isHomeworkExists: Boolean @default(value: "false")
+    isQuizExists: Boolean @default(value: "false")
     completedHomeworkMeta: String
     completedQuizMeta: String
     thumbnailSmall: File
