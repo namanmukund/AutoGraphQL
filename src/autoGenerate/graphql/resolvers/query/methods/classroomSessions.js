@@ -700,7 +700,10 @@ const getSessionStatus = (session) => {
             sessionSlot = i;
           }
         }
-        if (currentSlot <= sessionSlot) {
+        if (currentSlot < sessionSlot) {
+          return sessionStatus;
+        }
+        if (currentSlot === sessionSlot) {
           if (currentMinutes <= get(session, 'endMinutes')) return sessionStatus;
         }
       }
