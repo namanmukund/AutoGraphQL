@@ -1863,8 +1863,37 @@ const getTopicOrderFromCoursePackage = (coursePackage, currentTopic) => {
   return 0;
 };
 
-const getTopicsArrFromCoursePackages = (coursePackage = {}) => {
+const getTopicsArrFromCoursePackages = (coursePackage = {}, returnType = 'topics') => {
   const packageTopics = get(coursePackage, 'topicsArr', []);
+  /** 
+   * if returnType is chapters we construct chapters array 
+   * with topics mapped to that chapter from package. 
+   */
+  if (returnType === 'chapters') {
+    const chapterToTopicMap = {};
+    (packageTopics || []).forEach((topic) => {
+      if (chapterToTopicMap[get(topic, 'chapter.id')]) {
+        chapterToTopicMap[get(topic, 'chapter.id')].push({
+          ...topic,
+          order: getTopicOrderFromCoursePackage(coursePackage, topic),
+        });
+      } else {
+        chapterToTopicMap[get(topic, 'chapter.id')] = [{
+          ...topic,
+          order: getTopicOrderFromCoursePackage(coursePackage, topic),
+        }];
+      }
+    });
+    return Object.keys(chapterToTopicMap).map((chapterId) => ({
+      id: chapterId,
+      title: get(chapterToTopicMap[chapterId], '0.chapter.title'),
+      order: get(chapterToTopicMap[chapterId], '0.chapter.order'),
+      topics: (chapterToTopicMap[chapterId] || []),
+    }));
+  }
+  /** 
+   * if returnType is topics we just return topics array from package. 
+   */
   const updatedTopicsArr = [];
   (packageTopics || []).forEach((topic) => {
     updatedTopicsArr.push({
