@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 import { get } from "lodash";
-import { OLD_COURSE_ID } from "../../../../../../constants";
+import { OLD_COURSE_ID, PUBLISHED } from "../../../../../../constants";
 import { DatabaseRecordNotFoundError } from "../../../../../../constants/errors";
 import getUserIdandAppNameAfterValidation from "../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation";
 import validateCurrentTopicComponent from "../../utils/validateCurrentTopicComponent";
@@ -24,7 +24,8 @@ let defaultMentorMenteeSessionObject = {
 const mentorMenteeSessionAggregation = (coursePackageFilter, userId) => [
   {
     $match: {
-      ...coursePackageFilter
+      ...coursePackageFilter,
+      sessionStatus: 'completed'
     },
   },
   {
@@ -255,6 +256,11 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                 },
               },
               {
+                $match: {
+                  status: 'published'
+                },
+              },
+              {
                 $project: {
                   id: 1,
                   title: 1,
@@ -274,6 +280,11 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                         $expr: {
                           $in: ["$id", "$$topicsId"],
                         },
+                      },
+                    },
+                    {
+                      $match: {
+                        status: 'published'
                       },
                     },
                     {
@@ -941,6 +952,7 @@ const menteeCourseHomeworkMutationResolver = async (
   let mentorMenteeSessions;
   let finalTopicBasedHomeworkArray = [];
   let coursePackage
+  let currentTopic
 
   const userCurrentTopicComponentStatusesModel = new QueryController(
     "UserCurrentTopicComponentStatus",
@@ -967,10 +979,9 @@ const menteeCourseHomeworkMutationResolver = async (
 
   const batchCurrentComponentCourseId = get(userBatchDetails, '0.batch.currentComponent.currentCourse.id');
 
-  if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId) {
+  if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId || coursePackage) {
     batchCurrentComponentInfo = get(userBatchDetails, '0.batch.currentComponent');
   }
-
   const modelQuery = new QueryController("MentorMenteeSession", {
     bypass: true,
   });
@@ -979,8 +990,10 @@ const menteeCourseHomeworkMutationResolver = async (
   );
   if (batchCurrentComponentInfo || coursePackage) {
     currentTopicOrder = get(batchCurrentComponentInfo, "currentTopic.order");
+    currentTopic = get(batchCurrentComponentInfo, "currentTopic")
   } else {
     currentTopicOrder = get(currentTopicComponentInfo, "currentTopic.order");
+    currentTopic = get(batchCurrentComponentInfo, "currentTopic")
   }
   let packageTopics = [];
   if (coursePackage && get(coursePackage, 'id')) {
@@ -999,13 +1012,13 @@ const menteeCourseHomeworkMutationResolver = async (
     chapters.sort((a, b) => a.order - b.order);
   }
   if (coursePackage && get(coursePackage, 'id')) {
-    lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic);
+    let lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic);
     packageTopics.forEach((topic) => {
       let mentorMenteeSession = isMentorMenteeSessionAvailable(
         mentorMenteeSessions,
         topic.id
       );
-      if (!mentorMenteeSession && get(topic, "order") > lastTopicBookedOrder) return;
+      if (!mentorMenteeSession && get(topic, "order") >= lastTopicBookedOrder) return;
       constructHomeworkArr(finalTopicBasedHomeworkArray, mentorMenteeSession, {
         ...topic, chapter: {
           id: get(coursePackage, 'id'),
@@ -1024,15 +1037,17 @@ const menteeCourseHomeworkMutationResolver = async (
           },
         });
       }
-      const chapterTopics = chapter.topics;
+      let { topics: chapterTopics, ...chapterData } = chapter
       chapterTopics.sort((a, b) => a.order - b.order);
       chapterTopics.forEach((topic) => {
         let mentorMenteeSession = isMentorMenteeSessionAvailable(
           mentorMenteeSessions,
           topic.id
         );
-        if (!mentorMenteeSession && get(topic, "order") > currentTopicOrder) return;
-        constructHomeworkArr(finalTopicBasedHomeworkArray, mentorMenteeSession, topic)
+        if (!mentorMenteeSession && get(topic, "order") >= currentTopicOrder) return;
+        constructHomeworkArr(finalTopicBasedHomeworkArray, mentorMenteeSession, {
+          ...topic, chapter: { ...chapterData }
+        })
       });
     })
   }
