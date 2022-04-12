@@ -246,7 +246,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   let courseId = get(context, 'courseId');
   const coursePackageId = get(input, 'coursePackage.typeId');
   // check if performed from TLA while marking student`s attendance
-  if (appName && appName === TWA && userRoleFromContext === MENTEE) {
+  if (appName && appName === TWA && userRoleFromContext === MENTEE
+    && prevSessionStatus === sessionStatusFromInput && prevSessionStatus === sessionStatus.started) {
     return;
   }
   /*
