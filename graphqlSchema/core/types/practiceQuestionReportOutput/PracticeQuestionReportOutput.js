@@ -10,6 +10,13 @@ const PracticeQuestionOverallReport = `
     avgTimePerQuestion: Int
   }`;
 
+const PQStudentSubmissions = `
+  type PQStudentSubmissions {
+    userId: String
+    updatedAt: Date
+  }
+`;
+
 const PQIndividualQuestionReport = `
   type PQIndividualQuestionReport {
     questionId: String
@@ -17,6 +24,8 @@ const PQIndividualQuestionReport = `
     secondTryPercentage: Float
     thirdTryPercentage: Float
     avgTries: Float
+    submissionsCount: Int
+    submissions: [PQStudentSubmissions]
   }
 `;
 
@@ -30,4 +39,5 @@ export default [
   PracticeQuestionReportOutput,
   PracticeQuestionOverallReport,
   PQIndividualQuestionReport,
+  PQStudentSubmissions,
 ];
