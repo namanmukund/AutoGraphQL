@@ -4,6 +4,7 @@ import { slotTimes } from '../../../../../../constants';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { ifAuthorized, log } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
+import { getTopicOrderFromCoursePackage } from '../../mutation/userData/menteeCourseSyllabus';
 
 const getSlotTimeFields = (session) => {
   const slotTimeObj = {};
@@ -97,11 +98,38 @@ const getBatchSessionAggregation = ({
             },
           },
           {
+            $lookup: {
+              from: 'CoursePackage',
+              let: { coursePackageId: '$coursePackage.typeId' },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: ['$id', '$$coursePackageId'],
+                    },
+                  },
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    id: 1,
+                    title: 1,
+                    topics: 1,
+                  },
+                },
+              ],
+              as: 'coursePackage',
+            },
+          },
+          {
             $project: {
               code: 1,
               classroomTitle: 1,
               description: 1,
               school: 1,
+              coursePackage: {
+                $arrayElemAt: ['$coursePackage', 0],
+              },
               students: {
                 grade: 1,
                 section: 1,
@@ -289,6 +317,30 @@ const getAdhocSessionAggregation = ({
             },
           },
           {
+            $lookup: {
+              from: 'CoursePackage',
+              let: { coursePackageId: '$coursePackage.typeId' },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: ['$id', '$$coursePackageId'],
+                    },
+                  },
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    id: 1,
+                    title: 1,
+                    topics: 1,
+                  },
+                },
+              ],
+              as: 'coursePackage',
+            },
+          },
+          {
             $project: {
               code: 1,
               classroomTitle: 1,
@@ -303,6 +355,9 @@ const getAdhocSessionAggregation = ({
                 id: 1,
                 grade: 1,
                 section: 1,
+              },
+              coursePackage: {
+                $arrayElemAt: ['$coursePackage', 0],
               },
               documentType: 1,
             },
@@ -562,7 +617,7 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
         endMinutes: get(batchSession, 'endMinutes', 0),
         topicId: get(batchSession, 'topic.id', null),
         topicTitle: get(batchSession, 'topic.title', null),
-        topicOrder: get(batchSession, 'topic.order', null),
+        topicOrder: getTopicOrderFromCoursePackage(get(batchSession, 'classroom.coursePackage'), get(batchSession, 'topic')),
         thumbnailSmall: get(batchSession, 'topic.thumbnailSmall', null),
         totalStudents: get(batchSession, 'classroom.students', []).length,
         completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
@@ -589,7 +644,7 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
         endMinutes: get(adhocSession, 'endMinutes', 0),
         ...getSlotTimeFields(adhocSession),
         topicTitle: get(adhocSession, 'topic.title', null),
-        topicOrder: get(adhocSession, 'topic.order', null),
+        topicOrder: getTopicOrderFromCoursePackage(get(adhocSession, 'classroom.coursePackage'), get(adhocSession, 'topic.order')),
         thumbnailSmall: get(adhocSession, 'topic.thumbnailSmall', null),
         totalStudents: get(adhocSession, 'classroom.students', []).length,
         completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
