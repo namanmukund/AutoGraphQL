@@ -10,6 +10,9 @@ const getBatchSessionAggregation = ({
   {
     $match: {
       'batch.typeId': batchId,
+      sessionStatus: {
+        $in: ['completed'],
+      },
     },
   },
   {
@@ -82,15 +85,15 @@ const transformMongoResults = (batchSessions, batch) => {
   let sessionProgress = 0;
   let averageAttendance = 0;
   if (batchSessions && batchSessions.length && coursePackageTopics) {
-    sessionProgress = (batchSessions.length / coursePackageTopics.length) * 100;
-    const overallPresentStudents = 0;
-    const totalStudents = 0;
+    sessionProgress = Math.round((batchSessions.length / coursePackageTopics.length) * 100);
+    let overallPresentStudents = 0;
+    let totalStudents = 0;
     batchSessions.forEach(session => {
       let presentStudentsCount = get(session, 'attendance', []).filter(el => get(el, 'status') === 'present').length;
       overallPresentStudents += presentStudentsCount;
       totalStudents += get(session, 'attendance', []).length;
     })
-    averageAttendance = (overallPresentStudents / totalStudents) * 100;
+    averageAttendance = Math.round((overallPresentStudents / totalStudents) * 100);
   }
   const returnedObj = {
     id: get(batchDetail, 'id'),
@@ -110,7 +113,7 @@ const getClassroomDetails = (async (root, params, context) => {
     throw new UnauthorizedOperationError();
   }
   const batchIds = get(params, 'batchIds');
-  if (!batchId || !batchIds.length) {
+  if (!batchIds || !batchIds.length) {
     throw new MissingMandatoryInputInRequestError();
   }
 
@@ -125,7 +128,8 @@ const getClassroomDetails = (async (root, params, context) => {
   );
 
   const transformedRes = [];
-  batchIds.forEach(async (batchId) => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const batchId of batchIds) {
     /**
      * Aggregation Queries for batchSession & adhocSessions
      */
@@ -145,7 +149,7 @@ const getClassroomDetails = (async (root, params, context) => {
       batchSessionRes,
       batchnRes,
     ));
-  })
+  }
   return transformedRes;
 });
 

@@ -1858,6 +1858,10 @@ export const getTopicOrderFromCoursePackage = (coursePackage, currentTopic) => {
     const currentTopicId = get(currentTopic, 'id');
     const packageTopics = get(coursePackage, 'topics', []);
     const packageTopicOrder = get(packageTopics.filter((el) => get(el, 'topic.typeId') === currentTopicId)[0], 'order', 0);
+    console.log({
+      topicOrder: get(currentTopic, 'order'),
+      packageTopicOrder,
+    })
     return packageTopicOrder;
   }
   return get(currentTopic, 'order', 0);
