@@ -5,8 +5,8 @@ const practiceQuestionsUserLearningObjectiveType = `
    isAnswerUsed: Boolean @defaultValue(value: "false")
    attemptNumber: Int @defaultValue(value: 0)
    status: UserTopicTypeStatus @defaultValue(value: "incomplete")
-   activityStartTime: Date
-   activityEndTime: Date
+   startTime: Date
+   endTime: Date
  }`;
 
 const userLearningObjectivenextComponentType = `
@@ -21,8 +21,8 @@ const UserLearningSlideType = `
   type UserLearningSlideType {
     learningSlide: LearningSlide @relation(name: "UserLearningSlideTypeLearningSlide", direction: "OneWay")
     status: UserTopicTypeStatus @defaultValue(value: "incomplete")
-    activityStartTime: Date
-    activityEndTime: Date
+    startTime: Date
+    endTime: Date
   }`;
 
 const UserLearningObjective = `

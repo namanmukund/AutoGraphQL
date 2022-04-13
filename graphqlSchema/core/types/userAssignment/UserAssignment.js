@@ -5,8 +5,8 @@ const assignmentType = `
    isAttempted: Boolean @defaultValue(value: "false")
    userAnswerCodeSnippet: String @trim
    result: EvaluationResult @defaultValue(value: "pending")
-   activityStartTime: Date
-   activityEndTime: Date
+   startTime: Date
+   endTime: Date
  }`;
 
 const UserAssignment = `
