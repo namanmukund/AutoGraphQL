@@ -190,14 +190,14 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   if (prevSessionStatus === sessionStatus.completed && sessionStatusInInput && sessionStatusInInput !== sessionStatus.completed) {
     throw new CanNotChangeSessionStatusError();
   }
-  if (sessionStatusInInput === 'started'
+  if (sessionStatusInInput === sessionStatus.started
     && get(batch, 'type') === 'b2b') {
     if (userRoleFromContext === MENTOR) {
       Object.assign(params.input, {
         sessionStartedByMentorAt: new Date().toISOString(),
       });
     }
-    if (prevSessionStatus !== 'started' && userRoleFromContext === MENTEE) {
+    if (prevSessionStatus === sessionStatus.allotted && userRoleFromContext === MENTEE) {
       Object.assign(params.input, {
         startSessionByMentee: new Date().toISOString(),
       });
