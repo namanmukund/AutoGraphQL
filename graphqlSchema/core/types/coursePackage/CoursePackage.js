@@ -14,6 +14,7 @@ const TopicReshuffledGroup = `
   type TopicReshuffledGroup {
     order: Int
     batch: Batch @relation(name: "TopicReshuffledGroupBatch", direction: "OneWay")
+    description: String
   }
 `;
 
