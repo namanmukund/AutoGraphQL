@@ -1853,17 +1853,21 @@ const getUserBatchDetails = (userId) => [
   },
 ];
 
-const getTopicOrderFromCoursePackage = (coursePackage, currentTopic) => {
+export const getTopicOrderFromCoursePackage = (coursePackage, currentTopic) => {
   if (currentTopic) {
     const currentTopicId = get(currentTopic, 'id');
     const packageTopics = get(coursePackage, 'topics', []);
     const packageTopicOrder = get(packageTopics.filter((el) => get(el, 'topic.typeId') === currentTopicId)[0], 'order', 0);
+    console.log({
+      topicOrder: get(currentTopic, 'order'),
+      packageTopicOrder,
+    })
     return packageTopicOrder;
   }
-  return 0;
+  return get(currentTopic, 'order', 0);
 };
 
-const getTopicsArrFromCoursePackages = (coursePackage = {}, returnType = 'topics') => {
+export const getTopicsArrFromCoursePackages = (coursePackage = {}, returnType = 'topics') => {
   const packageTopics = get(coursePackage, 'topicsArr', []);
   /** 
    * if returnType is chapters we construct chapters array 

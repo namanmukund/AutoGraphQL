@@ -367,8 +367,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
             context,
           );
         }
-        const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
-        addToSchedule('postCarnivalMail', postCarnivalFeedbackDate, { batchSessionId });
+        // const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
+        // addToSchedule('postCarnivalMail', postCarnivalFeedbackDate, { batchSessionId });
       } else {
         context.shouldUpdateMentorMentee = false;
         await updateBatchCurrentComponentStatus(
