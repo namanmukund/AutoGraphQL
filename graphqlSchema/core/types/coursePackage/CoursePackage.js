@@ -19,7 +19,7 @@ const TopicReshuffledGroup = `
 `;
 
 const CoursePackageTopicRule = `
-  type CoursePackageTopicRule @model {
+  type CoursePackageTopicRule {
     order: Int
     topic: Topic @relation(name: "CoursePackageTopic", direction: "OneWay")
     coursePackage: CoursePackage @relation(name: "TopicRuleCoursePackage")
@@ -62,7 +62,7 @@ const CoursePackage = `
     thumbnail: File @relation(name: "CourseThumbnail", direction: "OneWay")
     bannerThumbnail: File @relation(name: "CourseBannerThumbnail", direction: "OneWay")
     courses: [Course] @relation(name: "CoursePackageCourses", direction: "OneWay")
-    topics: [CoursePackageTopicRule]  @relation(name: "CoursePackageTopics")
+    topics: [CoursePackageTopicRule]
     secondaryCategory: String
     minGrade: Int
     maxGrade: Int
