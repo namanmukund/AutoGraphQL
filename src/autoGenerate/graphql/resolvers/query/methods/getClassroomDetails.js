@@ -1,12 +1,11 @@
+/* eslint-disable no-await-in-loop */
 import { get } from 'lodash';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 import { ifAuthorized } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
 
-const getBatchSessionAggregation = ({
-  batchId,
-}) => [
+const getBatchSessionAggregation = ({ batchId }) => [
   {
     $match: {
       'batch.typeId': batchId,
@@ -88,25 +87,25 @@ const transformMongoResults = (batchSessions, batch) => {
     sessionProgress = Math.round((batchSessions.length / coursePackageTopics.length) * 100);
     let overallPresentStudents = 0;
     let totalStudents = 0;
-    batchSessions.forEach(session => {
-      let presentStudentsCount = get(session, 'attendance', []).filter(el => get(el, 'status') === 'present').length;
+    batchSessions.forEach((session) => {
+      const presentStudentsCount = get(session, 'attendance', []).filter((el) => get(el, 'status') === 'present').length;
       overallPresentStudents += presentStudentsCount;
       totalStudents += get(session, 'attendance', []).length;
-    })
+    });
     averageAttendance = Math.round((overallPresentStudents / totalStudents) * 100);
   }
   const returnedObj = {
     id: get(batchDetail, 'id'),
     code: get(batchDetail, 'code'),
     classroomTitle: get(batchDetail, 'classroomTitle', ''),
-    totalStudents: get(batchDetail, 'students', []).length, 
+    totalStudents: get(batchDetail, 'students', []).length,
     sessionProgress,
-    averageAttendance
+    averageAttendance,
   };
   return returnedObj;
 };
 
-const getClassroomDetails = (async (root, params, context) => {
+const getClassroomDetails = async (root, params, context) => {
   const authentication = ifAuthorized(context);
 
   if (!(authentication && authentication.app && authentication.user)) {
@@ -122,10 +121,7 @@ const getClassroomDetails = (async (root, params, context) => {
     authentication,
   );
 
-  const batchModel = getTypeQueryController(
-    'Batch',
-    authentication,
-  );
+  const batchModel = getTypeQueryController('Batch', authentication);
 
   const transformedRes = [];
   // eslint-disable-next-line no-restricted-syntax
@@ -138,19 +134,16 @@ const getClassroomDetails = (async (root, params, context) => {
         batchId,
       }),
     );
-  
+
     const batchnRes = await batchModel.aggregate(
       getBatchAggregation({
         batchId,
       }),
     );
-  
-    transformedRes.push(transformMongoResults(
-      batchSessionRes,
-      batchnRes,
-    ));
+
+    transformedRes.push(transformMongoResults(batchSessionRes, batchnRes));
   }
   return transformedRes;
-});
+};
 
 export default getClassroomDetails;

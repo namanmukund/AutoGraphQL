@@ -15,7 +15,6 @@ type BatchClass {
   section: Section
 }`;
 
-
 const BatchAndSchoolResult = `
   type BatchAndSchoolResult {
     batchId: ID

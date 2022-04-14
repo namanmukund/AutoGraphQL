@@ -2,10 +2,9 @@ import { get } from 'lodash';
 import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
-  sessionStatus,
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
+// import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
 import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 
 // query to topics between 2 orders
@@ -55,7 +54,7 @@ const updateBatchCurrentComponentStatusPostHookMethod = async (input, params, mu
     topicDoc,
   } = context;
   const studentsList = get(batchCurrentComponentStatusDoc, 'batch.students');
-  const mentorId = get(batchCurrentComponentStatusDoc, 'batch.allottedMentor.id');
+  // const mentorId = get(batchCurrentComponentStatusDoc, 'batch.allottedMentor.id');
   const topicStartOrder = get(batchCurrentComponentStatusDoc, 'currentTopic.order');
   const topicEndOrder = get(topicDoc, 'order');
   let courseId = get(input, 'currentCourse.typeId', '');
