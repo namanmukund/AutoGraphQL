@@ -18,10 +18,11 @@ const TopicReshuffledGroup = `
   }
 `;
 
-const TopicRule = `
-  type TopicRule @model {
+const CoursePackageTopicRule = `
+  type CoursePackageTopicRule @model {
     order: Int
     topic: Topic @relation(name: "CoursePackageTopic", direction: "OneWay")
+    coursePackage: CoursePackage @relation(name: "TopicRuleCoursePackage")
     description: String
     topicReshuffledGroup: [TopicReshuffledGroup]
   }
@@ -61,11 +62,11 @@ const CoursePackage = `
     thumbnail: File @relation(name: "CourseThumbnail", direction: "OneWay")
     bannerThumbnail: File @relation(name: "CourseBannerThumbnail", direction: "OneWay")
     courses: [Course] @relation(name: "CoursePackageCourses", direction: "OneWay")
-    topics: [TopicRule]  @relation(name: "CoursePackageTopics", direction: "OneWay")
+    topics: [CoursePackageTopicRule]  @relation(name: "CoursePackageTopics")
     secondaryCategory: String
     minGrade: Int
     maxGrade: Int
   }
 `;
 
-export default [CoursePackage, TopicRule, TopicReshuffledGroup];
+export default [CoursePackage, CoursePackageTopicRule, TopicReshuffledGroup];
