@@ -116,16 +116,12 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
   const { next, skip } = userActionType;
   const { complete, incomplete, skip: skipStatus } = userTopicTypeStatus;
   let learningSlideStatus = incomplete;
-  let lsStartTime;
-  let lsEndTime;
   const {
     pqAction: userActionValue, isBookmarked, startTime, endTime,
   } = input;
   const isLastLearningSlide = get(sortBy(learningSlides, 'order', []), `[${learningSlides.length - 1}].id`) === learningSlideId;
   if (userActionValue && userActionValue === next) {
     learningSlideStatus = complete;
-    lsStartTime = startTime;
-    lsEndTime = endTime;
   } else if (userActionValue && userActionValue === skip) {
     learningSlideStatus = skipStatus;
   }
@@ -174,8 +170,8 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
     isBookmarked,
     learningSlideStatus,
     learningSlideId,
-    lsStartTime,
-    lsEndTime,
+    startTime,
+    endTime,
   ));
   return true;
 };
