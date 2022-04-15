@@ -266,6 +266,8 @@ const transformMongoResults = (obj) => {
       secondTryPercentage: withFallbackValue(obj.questionsCount === 0 ? 0 : ((get(v, 'secondTryCountSum') * 100) / obj.submittedCountSum).toFixed(2)),
       thirdTryPercentage: withFallbackValue(obj.questionsCount === 0 ? 0 : ((get(v, 'thirdTryCountSum') * 100) / obj.submittedCountSum).toFixed(2)),
       avgTries: withFallbackValue(obj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') + (2 * get(v, 'secondTryCountSum')) + (3 * get(v, 'thirdTryCountSum'))) / (obj.submittedCountSum)).toFixed(2)),
+      submissionsCount: obj.submittedCountSum,
+      submissions: Array.from(obj.students.values()),
     };
   });
   return finalResult;
@@ -384,6 +386,7 @@ const practiceQuestionReport = (async (root, params, context) => {
     avgTimePerQuestion: null,
     questions: new Map(),
     questionsCount: 0,
+    students: new Map(),
   };
 
   let learningObjectiveIdFromLearningSlide = null;
@@ -409,9 +412,6 @@ const practiceQuestionReport = (async (root, params, context) => {
           learningObjectiveId,
         }),
       );
-      // if (get(learningObjectiveRes, '[0].learningSlides[0].practiceQuestions', []).length === 0) {
-      //   throw new PracticeQuestionsNotFound();
-      // }
       obj.questionsCount = get(learningObjectiveRes, '[0].learningSlides[0].practiceQuestions', []).length;
     } else {
       throw new MissingMandatoryInputInRequestError({
@@ -460,6 +460,14 @@ const practiceQuestionReport = (async (root, params, context) => {
 
     if (userPracticeQuestionReportRes.length) {
       obj.submittedCountSum += 1;
+
+      // handling individual student submissions
+      const studentObj = {
+        userId: studentUserId,
+        updatedAt: get(userPracticeQuestionReportRes, '[0].updatedAt', new Date().toISOString()),
+      };
+      obj.students.set(studentUserId, studentObj);
+
       obj.firstTryCountSum += get(userPracticeQuestionReportRes, '[0].firstTryCount');
       obj.secondTryCountSum += get(userPracticeQuestionReportRes, '[0].secondTryCount');
       obj.thirdTryCountSum += get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount');

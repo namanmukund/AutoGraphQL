@@ -7,6 +7,7 @@ const NextOrPrevClassroomSession = `
     id: String!
     topicTitle: String
     topicOrder: Int
+    topicComponentRule: [TopicComponentsRule]
     bookingDate: Date
     ${slotTimeFields}
     startMinutes: Int @defaultValue(value: "0")

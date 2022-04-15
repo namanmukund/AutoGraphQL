@@ -4,6 +4,7 @@ import { slotTimes } from '../../../../../../constants';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { ifAuthorized, log } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
+import { getTopicOrderFromCoursePackage } from '../../mutation/userData/menteeCourseSyllabus';
 
 const getSlotTimeFields = (session) => {
   const slotTimeObj = {};
@@ -22,13 +23,8 @@ const getBatchSessionAggregation = ({
   bookingDate,
   queryType = '',
   limit,
-  documentType,
 }) => {
   const matchQuery = { 'batch.typeId': classroomId };
-  const classroomMatchQuery = {};
-  if (documentType === 'classroom') {
-    classroomMatchQuery['classroom.documentType'] = 'classroom';
-  }
   if (queryType === 'next') {
     matchQuery.bookingDate = {
       $gte: new Date(bookingDate),
@@ -97,11 +93,38 @@ const getBatchSessionAggregation = ({
             },
           },
           {
+            $lookup: {
+              from: 'CoursePackage',
+              let: { coursePackageId: '$coursePackage.typeId' },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: ['$id', '$$coursePackageId'],
+                    },
+                  },
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    id: 1,
+                    title: 1,
+                    topics: 1,
+                  },
+                },
+              ],
+              as: 'coursePackage',
+            },
+          },
+          {
             $project: {
               code: 1,
               classroomTitle: 1,
               description: 1,
               school: 1,
+              coursePackage: {
+                $arrayElemAt: ['$coursePackage', 0],
+              },
               students: {
                 grade: 1,
                 section: 1,
@@ -162,6 +185,7 @@ const getBatchSessionAggregation = ({
               order: 1,
               title: 1,
               description: 1,
+              topicComponentRule: 1,
               thumbnailSmall: {
                 $arrayElemAt: ['$thumbnailSmall', 0],
               },
@@ -169,11 +193,6 @@ const getBatchSessionAggregation = ({
           },
         ],
         as: 'topic',
-      },
-    },
-    {
-      $match: {
-        ...classroomMatchQuery,
       },
     },
     {
@@ -213,13 +232,8 @@ const getAdhocSessionAggregation = ({
   bookingDate,
   queryType = '',
   limit,
-  documentType,
 }) => {
   const matchQuery = { 'batch.typeId': classroomId };
-  const classroomMatchQuery = {};
-  if (documentType === 'classroom') {
-    classroomMatchQuery['classroom.documentType'] = 'classroom';
-  }
   if (queryType === 'next') {
     matchQuery.bookingDate = {
       $gte: new Date(bookingDate),
@@ -289,6 +303,30 @@ const getAdhocSessionAggregation = ({
             },
           },
           {
+            $lookup: {
+              from: 'CoursePackage',
+              let: { coursePackageId: '$coursePackage.typeId' },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: ['$id', '$$coursePackageId'],
+                    },
+                  },
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    id: 1,
+                    title: 1,
+                    topics: 1,
+                  },
+                },
+              ],
+              as: 'coursePackage',
+            },
+          },
+          {
             $project: {
               code: 1,
               classroomTitle: 1,
@@ -303,6 +341,9 @@ const getAdhocSessionAggregation = ({
                 id: 1,
                 grade: 1,
                 section: 1,
+              },
+              coursePackage: {
+                $arrayElemAt: ['$coursePackage', 0],
               },
               documentType: 1,
             },
@@ -354,6 +395,7 @@ const getAdhocSessionAggregation = ({
               order: 1,
               title: 1,
               description: 1,
+              topicComponentRule: 1,
               thumbnailSmall: {
                 $arrayElemAt: ['$thumbnailSmall', 0],
               },
@@ -361,11 +403,6 @@ const getAdhocSessionAggregation = ({
           },
         ],
         as: 'previousTopic',
-      },
-    },
-    {
-      $match: {
-        ...classroomMatchQuery,
       },
     },
     {
@@ -562,7 +599,8 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
         endMinutes: get(batchSession, 'endMinutes', 0),
         topicId: get(batchSession, 'topic.id', null),
         topicTitle: get(batchSession, 'topic.title', null),
-        topicOrder: get(batchSession, 'topic.order', null),
+        topicOrder: getTopicOrderFromCoursePackage(get(batchSession, 'classroom.coursePackage'), get(batchSession, 'topic')),
+        topicComponentRule: get(batchSession, 'topic.topicComponentRule', null),
         thumbnailSmall: get(batchSession, 'topic.thumbnailSmall', null),
         totalStudents: get(batchSession, 'classroom.students', []).length,
         completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
@@ -589,7 +627,8 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
         endMinutes: get(adhocSession, 'endMinutes', 0),
         ...getSlotTimeFields(adhocSession),
         topicTitle: get(adhocSession, 'topic.title', null),
-        topicOrder: get(adhocSession, 'topic.order', null),
+        topicOrder: getTopicOrderFromCoursePackage(get(adhocSession, 'classroom.coursePackage'), get(adhocSession, 'topic.order')),
+        topicComponentRule: get(batchSession, 'topic.topicComponentRule', null),
         thumbnailSmall: get(adhocSession, 'topic.thumbnailSmall', null),
         totalStudents: get(adhocSession, 'classroom.students', []).length,
         completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
@@ -616,12 +655,8 @@ const getNextOrPrevClassroomSessions = async (root, params, context) => {
     for (const input of inputArr) {
       const classroomId = get(input, 'classroomId');
       const bookingDate = get(input, 'bookingDate');
-      const documentType = get(input, 'documentType');
-      const limit = get(input, 'limit', 0);
+      const limit = get(input, 'limit', 1);
       const queryType = get(input, 'queryType');
-      if (limit < 1 || limit > 3) {
-        throw new Error('Limit should be less than or equal to 3');
-      }
 
       const batchSessionModel = getTypeQueryController(
         'BatchSession',
@@ -641,7 +676,6 @@ const getNextOrPrevClassroomSessions = async (root, params, context) => {
           bookingDate,
           queryType,
           limit,
-          documentType,
         }),
       );
 
@@ -651,7 +685,6 @@ const getNextOrPrevClassroomSessions = async (root, params, context) => {
           bookingDate,
           queryType,
           limit,
-          documentType,
         }),
       );
 
@@ -678,7 +711,6 @@ const getNextOrPrevClassroomSessions = async (root, params, context) => {
           classroomId,
           limit,
           queryType,
-          documentType,
           sessions: sortBy(transformedClassroomResult, ['bookingDate']).slice(0, limit),
         });
       } else {
@@ -686,7 +718,6 @@ const getNextOrPrevClassroomSessions = async (root, params, context) => {
           classroomId,
           limit,
           queryType,
-          documentType,
           sessions: orderBy(transformedClassroomResult, ['bookingDate'], ['desc']).slice(
             0,
             limit,

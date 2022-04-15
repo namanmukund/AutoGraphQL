@@ -23,4 +23,4 @@ TAG="$(git rev-parse --short HEAD)"
 echo "- Setting Github Commit Tag : $TAG"
 
 echo "- Updating porter"
-# porter update --app $APPNAME --tag $TAG 
+porter update --app $APPNAME --tag $TAG 

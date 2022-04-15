@@ -108,7 +108,7 @@ import getEventWinner from './query/methods/getEventWinner';
 import classroomSessions from './query/methods/classroomSessions';
 import updateEventSessionAttendance from './mutation/methods/updateEventSessionAttendance';
 import getNextOrPrevClassroomSessions from './query/methods/getNextOrPrevClassroomSessions';
-import classroomDetail from './query/methods/classroomDetail';
+import getClassroomDetails from './query/methods/getClassroomDetails';
 import scheduleSessions from './mutation/shift/scheduleSessions';
 import getSchoolAndBatchDetail from './query/methods/getSchoolAndBatchDetail';
 import getBatchDetails from './query/methods/getBatchDetails';
@@ -687,7 +687,7 @@ resolvers.Query.classroomSessions = classroomSessions;
 // Resolver to get next or prev classroom sessions
 resolvers.Query.getNextOrPrevClassroomSessions = getNextOrPrevClassroomSessions;
 // Resolver to get classroom sessions
-resolvers.Query.classroomDetail = classroomDetail;
+resolvers.Query.getClassroomDetails = getClassroomDetails;
 // Resolver to get classroom sessions
 resolvers.Query.getSchoolAndBatchDetail = getSchoolAndBatchDetail;
 // Resolver to fetch Batch Details from OTP and School Code

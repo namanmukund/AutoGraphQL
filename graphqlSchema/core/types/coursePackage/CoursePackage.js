@@ -10,10 +10,21 @@ import {
   PRE_SALES,
 } from '../../../../constants/roles';
 
-const TopicRule = `
-  type TopicRule {
+const TopicReshuffledGroup = `
+  type TopicReshuffledGroup {
+    order: Int
+    batch: Batch @relation(name: "TopicReshuffledGroupBatch", direction: "OneWay")
+    description: String
+  }
+`;
+
+const CoursePackageTopicRule = `
+  type CoursePackageTopicRule {
     order: Int
     topic: Topic @relation(name: "CoursePackageTopic", direction: "OneWay")
+    coursePackage: CoursePackage @relation(name: "TopicRuleCoursePackage")
+    description: String
+    topicReshuffledGroup: [TopicReshuffledGroup]
   }
 `;
 
@@ -51,11 +62,11 @@ const CoursePackage = `
     thumbnail: File @relation(name: "CourseThumbnail", direction: "OneWay")
     bannerThumbnail: File @relation(name: "CourseBannerThumbnail", direction: "OneWay")
     courses: [Course] @relation(name: "CoursePackageCourses", direction: "OneWay")
-    topics: [TopicRule]
+    topics: [CoursePackageTopicRule]
     secondaryCategory: String
     minGrade: Int
     maxGrade: Int
   }
 `;
 
-export default [CoursePackage, TopicRule];
+export default [CoursePackage, CoursePackageTopicRule, TopicReshuffledGroup];
