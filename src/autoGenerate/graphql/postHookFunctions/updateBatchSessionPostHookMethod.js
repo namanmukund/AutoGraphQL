@@ -55,6 +55,7 @@ const getBatchQuery = (batchId) => `
         id
         code
         type
+        documentType
         students{
           id
           grade
@@ -307,6 +308,10 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     });
   }
 
+  if (coursePackageId) {
+    context.usesCoursePackage = true;
+  }
+
   if (topicId) {
     /*
       get batch info
@@ -369,6 +374,46 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         }
         const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
         addToSchedule('postCarnivalMail', postCarnivalFeedbackDate, { batchSessionId });
+      } else if (sessionStatusFromInput === sessionStatus.started
+        && get(batchInfo, 'documentType') === 'classroom'
+        && Math.abs(moment(new Date()).hours() - slotTimeArray[0]) === 0) {
+        let topicsList = [];
+        if (coursePackageId) {
+          const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+          const topicRules = get(coursePackage, 'topics', []);
+          topicsList = getSortedTopics(topicRules);
+        } else {
+          const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
+          topicsList = get(nextTopicQueryRes, 'data.topics', []);
+        }
+
+        let currentTopicIndex;
+        topicsList.forEach((topic, index) => {
+          if (topic.id === topicId) {
+            currentTopicIndex = index;
+          }
+        });
+        let nextTopicId = '';
+        if (currentTopicIndex + 1 < topicsList.length) {
+          nextTopicId = topicsList[currentTopicIndex + 1].id;
+        }
+        if (nextTopicId) {
+          context.shouldUpdateMentorMentee = false;
+          await updateBatchCurrentComponentStatus(
+            batchCurrentComponentId,
+            sessionStatusFromInput,
+            nextTopicId,
+            context,
+          );
+        } else {
+          context.shouldUpdateMentorMentee = false;
+          await updateBatchCurrentComponentStatus(
+            batchCurrentComponentId,
+            sessionStatusFromInput,
+            null,
+            context,
+          );
+        }
       } else {
         context.shouldUpdateMentorMentee = false;
         await updateBatchCurrentComponentStatus(
