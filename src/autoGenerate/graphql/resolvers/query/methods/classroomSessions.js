@@ -60,6 +60,7 @@ const getBatchSessionAggregation = ({
         attendance: 1,
         schoolSessionsOtp: 1,
         coursePackage: 1,
+        sessionStartedByMentorAt: 1,
         ...getSlotTimeFields(),
       },
     },
@@ -275,6 +276,7 @@ const getBatchSessionAggregation = ({
         startMinutes: 1,
         endMinutes: 1,
         sessionRecordingLink: 1,
+        sessionStartedByMentorAt: 1,
         classroom: {
           $arrayElemAt: ['$classroom', 0],
         },
@@ -686,7 +688,8 @@ const constructDocFilters = (filters) => {
 
 const getSessionStatus = (session) => {
   const sessionStatus = get(session, 'sessionStatus', 'allotted');
-  if (sessionStatus === 'allotted') {
+  if ((sessionStatus === 'allotted')
+    || ((sessionStatus === 'started') && !get(session, 'sessionStartedByMentorAt'))) {
     /**
      * Checking If allotted session lies before current date.
      */
@@ -743,6 +746,7 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
         bookingDate: get(session, 'bookingDate', null),
         sessionStartDate: get(session, 'sessionStartDate', null),
         sessionEndDate: get(session, 'sessionEndDate', null),
+        sessionStartedByMentorAt: get(session, 'sessionStartedByMentorAt', null),
         sessionStatus: getSessionStatus(session),
         sessionMode: get(session, 'sessionMode', 'online'),
         sessionRecordingLink: get(session, 'sessionRecordingLink', null),
@@ -775,6 +779,7 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
         bookingDate: get(session, 'bookingDate', null),
         sessionStartDate: get(session, 'sessionStartDate', null),
         sessionEndDate: get(session, 'sessionEndDate', null),
+        sessionStartedByMentorAt: get(session, 'sessionStartedByMentorAt', null),
         sessionStatus: getSessionStatus(session),
         sessionMode: get(session, 'sessionMode', 'online'),
         sessionRecordingLink: get(session, 'sessionRecordingLink', null),

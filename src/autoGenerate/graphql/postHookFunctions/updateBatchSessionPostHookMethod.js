@@ -372,8 +372,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
             context,
           );
         }
-        const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
-        addToSchedule('postCarnivalMail', postCarnivalFeedbackDate, { batchSessionId });
+        // const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
+        // addToSchedule('postCarnivalMail', postCarnivalFeedbackDate, { batchSessionId });
       } else if (sessionStatusFromInput === sessionStatus.started
         && get(batchInfo, 'documentType') === 'classroom'
         && Math.abs(moment(new Date()).hours() - slotTimeArray[0]) === 0) {
