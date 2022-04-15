@@ -1853,17 +1853,31 @@ const getUserBatchDetails = (userId) => [
   },
 ];
 
-export const getTopicOrderFromCoursePackage = (coursePackage, currentTopic) => {
+export const getTopicOrderFromCoursePackage = (coursePackage, currentTopic, userBatchDetails) => {
   if (currentTopic) {
     const currentTopicId = get(currentTopic, 'id');
     const packageTopics = get(coursePackage, 'topics', []);
-    const packageTopicOrder = get(packageTopics.filter((el) => get(el, 'topic.typeId') === currentTopicId)[0], 'order', 0);
-    return packageTopicOrder;
+    const filteredTopic = packageTopics.find((el) => get(el, 'topic.typeId') === currentTopicId);
+    let packageTopicOrder = get(filteredTopic, 'order', 0);
+    let packageTopicDescription = get(currentTopic, 'description');
+    if (get(filteredTopic, 'description')) {
+      packageTopicDescription = get(filteredTopic, 'description');
+    }
+    if (userBatchDetails) {
+      const topicReshuffledGroup = get(filteredTopic, 'topicReshuffledGroup', []).find((group) => (get(group, 'batch.typeId') === get(userBatchDetails, 'id')));
+      if (topicReshuffledGroup) {
+        if (get(topicReshuffledGroup, 'description')) {
+          packageTopicDescription = get(filteredTopic, 'description');
+        }
+        packageTopicOrder = get(topicReshuffledGroup, 'order', 0);
+      }
+    }
+    return { order: packageTopicOrder, description: packageTopicDescription };
   }
-  return get(currentTopic, 'order', 0);
+  return { order: get(currentTopic, 'order', 0), description: get(currentTopic, 'description', '') };
 };
 
-export const getTopicsArrFromCoursePackages = (coursePackage = {}, returnType = 'topics') => {
+export const getTopicsArrFromCoursePackages = (coursePackage = {}, returnType = 'topics', userBatchDetails) => {
   const packageTopics = get(coursePackage, 'topicsArr', []);
   /**
    * if returnType is chapters we construct chapters array
@@ -1875,12 +1889,12 @@ export const getTopicsArrFromCoursePackages = (coursePackage = {}, returnType = 
       if (chapterToTopicMap[get(topic, 'chapter.id')]) {
         chapterToTopicMap[get(topic, 'chapter.id')].push({
           ...topic,
-          order: getTopicOrderFromCoursePackage(coursePackage, topic),
+          ...getTopicOrderFromCoursePackage(coursePackage, topic, userBatchDetails),
         });
       } else {
         chapterToTopicMap[get(topic, 'chapter.id')] = [{
           ...topic,
-          order: getTopicOrderFromCoursePackage(coursePackage, topic),
+          ...getTopicOrderFromCoursePackage(coursePackage, topic, userBatchDetails),
         }];
       }
     });
@@ -1898,7 +1912,7 @@ export const getTopicsArrFromCoursePackages = (coursePackage = {}, returnType = 
   (packageTopics || []).forEach((topic) => {
     updatedTopicsArr.push({
       ...topic,
-      order: getTopicOrderFromCoursePackage(coursePackage, topic),
+      ...getTopicOrderFromCoursePackage(coursePackage, topic, userBatchDetails),
     });
   });
   return updatedTopicsArr.sort((a, b) => a.order - b.order);
@@ -2100,6 +2114,7 @@ const menteeCourseSyllabusMutationResolver = async (
   let schoolInfo;
   let currentTopicComponentInfo;
   let menteeSessions;
+  let userBatchDetails;
   let mentorMenteeSessions;
   let batchSessions;
   const upComingSession = [];
@@ -2127,7 +2142,7 @@ const menteeCourseSyllabusMutationResolver = async (
     // );
 
     const userBatchDetailsRes = new QueryController('StudentProfile', { bypass: true });
-    const userBatchDetails = await userBatchDetailsRes.aggregate(getUserBatchDetails(userId));
+    userBatchDetails = await userBatchDetailsRes.aggregate(getUserBatchDetails(userId));
     let courseOrPackageFilter = {
       'course.typeId': courseId || OLD_COURSE_ID,
     };
@@ -2518,7 +2533,7 @@ const menteeCourseSyllabusMutationResolver = async (
   const { chapters } = currentCourse;
   let packageTopics = [];
   if (coursePackage && get(coursePackage, 'id')) {
-    packageTopics = getTopicsArrFromCoursePackages(coursePackage);
+    packageTopics = getTopicsArrFromCoursePackages(coursePackage, 'topics', get(userBatchDetails, '0.batch'));
   }
   if ((!chapters || !chapters.length) && !(packageTopics || []).length) {
     throw new DatabaseRecordNotFoundError({
@@ -2542,7 +2557,7 @@ const menteeCourseSyllabusMutationResolver = async (
     // iterating over chapters to construct data for homepage
 
     if (coursePackage && get(coursePackage, 'id')) {
-      lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic);
+      lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic, get(userBatchDetails, '0.batch')).order;
       packageTopics.forEach((topic) => {
         const constructedSessionsArr = constructSessionsArr({
           lastTopicBookedOrder,
