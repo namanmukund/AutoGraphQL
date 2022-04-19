@@ -1481,6 +1481,8 @@ const getUserBatchDetails = (userId) => [
               },
               {
                 $project: {
+                  enrollmentType: 1,
+                  latestSessionStatus: 1,
                   currentCourse: {
                     id: '$currentCourse.typeId',
                   },
@@ -1927,6 +1929,7 @@ const constructSessionsArr = ({
   combinedEnrollmentType,
   mentorMenteeSessions,
   bookedSession,
+  packageLastTopicId,
 }) => {
   const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
   // if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
@@ -1952,18 +1955,13 @@ const constructSessionsArr = ({
   let mentorData;
   const isAccessible = isTopicAccessible(combinedEnrollmentType, isTrial);
   // checking logic for topics which are yet not booked by mentee
-  if (
-    topicOrder >= lastTopicBookedOrder
-  ) {
-    const batchSessionArray = batchSessions && batchSessions.filter((item) => item.topic && item.topic.id === topicId);
+  if (topicOrder >= lastTopicBookedOrder) {
+    const batchSessionArray = batchSessions
+      && batchSessions.filter((item) => item.topic && item.topic.id === topicId);
     if (batchSessionArray && batchSessionArray.length) {
       const batchSession = batchSessionArray[0];
       let slotTime = null;
-      const {
-        bookingDate,
-        mentorSession,
-        sessionEndDate,
-      } = batchSession;
+      const { bookingDate, mentorSession, sessionEndDate } = batchSession;
       const {
         order: batchSessionTopicOrder,
         id: batchSessionTopicId,
@@ -1974,7 +1972,10 @@ const constructSessionsArr = ({
         isTrial: batchSessionIsTrial,
       } = batchSession.topic;
 
-      const isBatchTopicAccessible = isTopicAccessible(combinedEnrollmentType, batchSessionIsTrial);
+      const isBatchTopicAccessible = isTopicAccessible(
+        combinedEnrollmentType,
+        batchSessionIsTrial,
+      );
 
       slotTimes.forEach((time, index) => {
         if (batchSession[time]) {
@@ -1982,7 +1983,10 @@ const constructSessionsArr = ({
         }
       });
       // checking logic if topic is already consumed or yet to be watched
-      if (topicOrder === lastTopicBookedOrder && lastTopicSessionStatus === sessionStatus.completed) {
+      if (
+        topicOrder === lastTopicBookedOrder
+        && lastTopicSessionStatus === sessionStatus.completed
+      ) {
         const completedMenteeSession = {
           topicId,
           topicOrder,
@@ -1995,9 +1999,14 @@ const constructSessionsArr = ({
           chapterTitle,
           chapterOrder,
           endingDate: sessionEndDate,
-          mentorId: mentorSession && mentorSession.user && mentorSession.user.id,
-          mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
-          mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
+          mentorId:
+            mentorSession && mentorSession.user && mentorSession.user.id,
+          mentorName:
+            mentorSession && mentorSession.user && mentorSession.user.name,
+          mentorProfilePic:
+            mentorSession
+            && mentorSession.user
+            && mentorSession.user.profilePic,
         };
         completedSessionObj = completedMenteeSession;
       } else {
@@ -2037,7 +2046,12 @@ const constructSessionsArr = ({
         chapterTitle,
         chapterOrder,
       };
-      if (bookedSession.length) {
+      if (
+        topicId === packageLastTopicId
+        && lastTopicSessionStatus === sessionStatus.completed
+      ) {
+        completedSessionObj = upComingMenteeSession;
+      } else if (bookedSession.length) {
         upComingSessionObj = upComingMenteeSession;
       } else {
         bookedSessionObj = upComingMenteeSession;
@@ -2048,10 +2062,14 @@ const constructSessionsArr = ({
     let sessionDate;
     let isSubmittedForReview = false;
     mentorMenteeSessions.forEach((mentorMenteeSession) => {
-      if (mentorMenteeSession.topic && mentorMenteeSession.topic.id === topicId) {
+      if (
+        mentorMenteeSession.topic
+        && mentorMenteeSession.topic.id === topicId
+      ) {
         mentorSession = mentorMenteeSession.mentorSession;
         isSubmittedForReview = mentorMenteeSession.isSubmittedForReview || false;
-        sessionDate = mentorMenteeSession.sessionEndDate || mentorMenteeSession.sessionStartDate;
+        sessionDate = mentorMenteeSession.sessionEndDate
+          || mentorMenteeSession.sessionStartDate;
       }
     });
     const completedMenteeSession = {
@@ -2068,8 +2086,10 @@ const constructSessionsArr = ({
       chapterOrder,
       endingDate: sessionDate,
       mentorId: mentorSession && mentorSession.user && mentorSession.user.id,
-      mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
-      mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
+      mentorName:
+        mentorSession && mentorSession.user && mentorSession.user.name,
+      mentorProfilePic:
+        mentorSession && mentorSession.user && mentorSession.user.profilePic,
     };
     completedSessionObj = completedMenteeSession;
   }
@@ -2558,6 +2578,7 @@ const menteeCourseSyllabusMutationResolver = async (
 
     if (coursePackage && get(coursePackage, 'id')) {
       lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic, get(userBatchDetails, '0.batch')).order;
+      const packageLastTopicId = get(packageTopics[packageTopics.length - 1], 'id');
       packageTopics.forEach((topic) => {
         const constructedSessionsArr = constructSessionsArr({
           lastTopicBookedOrder,
@@ -2574,6 +2595,7 @@ const menteeCourseSyllabusMutationResolver = async (
           completedSession,
           upComingSession,
           bookedSession,
+          packageLastTopicId,
         });
         if (get(constructedSessionsArr, 'completedSessionObj')) {
           completedSession.push(get(constructedSessionsArr, 'completedSessionObj', {}));

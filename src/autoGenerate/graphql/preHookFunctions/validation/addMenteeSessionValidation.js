@@ -11,12 +11,12 @@ import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfter
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import validateMenteeSessionInput, { getHoursDiff } from './utils/validateMenteeSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
-import { SimilarDocumentAlreadyExistError, SlotsOccupiedError } from '../../../../../constants/errors/db';
+import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import isTrialSession from '../../resolvers/utils/isTrialSession';
 import getUserSource from './utils/getUserSource';
 import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetailsInParams';
 import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelectedSlotsStringArray';
-import validateMenteeSession from './utils/validateMenteeSession';
+// import validateMenteeSession from './utils/validateMenteeSession';
 import isMentorChild from '../../postHookFunctions/utils/isMentorChild';
 
 // query to get mentee Sessions
@@ -128,10 +128,10 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
 
   const mentorChild = await isMentorChild(userId);
   if (!mentorChild && slotTimeStringArray && slotTimeStringArray.length > 0) {
-    const validationFailed = await validateMenteeSession(slotTimeStringArray[0], userId, get(params, 'input.bookingDate'));
-    if (validationFailed) {
-      throw new SlotsOccupiedError();
-    }
+    // const validationFailed = await validateMenteeSession(slotTimeStringArray[0], userId, get(params, 'input.bookingDate'));
+    // if (validationFailed) {
+    //   throw new SlotsOccupiedError();
+    // }
   }
   // update source & country in menteeSession
   const userData = await getUserSource(userId);
