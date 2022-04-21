@@ -8,6 +8,8 @@ const UserActivityBlockBasedProjectDump = `
     isHomework: Boolean @defaultValue(value: "false")
     topic: Topic @relation(name: "TopicUserActivityBlockBasedProjectDump", direction: "OneWay")
     course: Course @relation(name: "UserActivityBlockBasedProjectDumpCourse", direction: "OneWay")
+    startTime: Date
+    endTime: Date
   }
 `;
 
