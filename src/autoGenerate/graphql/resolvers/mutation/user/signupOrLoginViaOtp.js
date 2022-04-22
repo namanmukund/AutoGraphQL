@@ -5,6 +5,7 @@ import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import {
   BlockedOperationError,
   DatabaseRecordNotFoundError,
+  UserAlreadyExistsError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
 import { MutationController, QueryController } from '../../../controllers';
@@ -109,6 +110,7 @@ const signupOrLoginViaOtp = async (
   });
 
   if (get(input, 'shouldAddInWaitingList')) {
+    const waitListModelQueries = new QueryController('UserWaitlist', authentication);
     const waitingListInput = { role: 'parent' };
     if (get(input, 'name')) {
       waitingListInput.name = get(input, 'name');
@@ -118,6 +120,10 @@ const signupOrLoginViaOtp = async (
     }
     if (get(input, 'email')) {
       waitingListInput.email = get(input, 'email');
+    }
+    const userWaitData = await getUserFromDBQuery(waitingListInput, waitListModelQueries);
+    if (userWaitData) {
+      throw new UserAlreadyExistsError();
     }
     await addDetailsToWaitingList(waitingListInput, context);
     return {
