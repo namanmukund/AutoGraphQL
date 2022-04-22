@@ -9,8 +9,8 @@ if [ "$1" = "" ]; then
     ./deploy appname
 
     appname can be 
-    1. tekie-web-staging
-    2. tekie-web-preprod
+    1. tekie-backend-staging
+    2. tekie-backend-preprod
     3. tekie-backend-scheduler 
     "
     exit

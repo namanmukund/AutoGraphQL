@@ -4,6 +4,8 @@ const assignmentQuestionsType = `
    assignmentQuestionDisplayOrder: Int
    isAttempted: Boolean @defaultValue(value: "false")
    userAnswerCodeSnippet: String @trim
+   startTime: Date
+   endTime: Date
  }`;
 
 const UserActivityAssignmentDump = `

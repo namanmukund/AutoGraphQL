@@ -186,6 +186,7 @@ const getBatchSessionAggregation = ({
               title: 1,
               description: 1,
               topicComponentRule: 1,
+              classType: 1,
               thumbnailSmall: {
                 $arrayElemAt: ['$thumbnailSmall', 0],
               },
@@ -395,6 +396,7 @@ const getAdhocSessionAggregation = ({
               order: 1,
               title: 1,
               description: 1,
+              classType: 1,
               topicComponentRule: 1,
               thumbnailSmall: {
                 $arrayElemAt: ['$thumbnailSmall', 0],
@@ -601,6 +603,7 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
         topicTitle: get(batchSession, 'topic.title', null),
         topicOrder: getTopicOrderFromCoursePackage(get(batchSession, 'classroom.coursePackage'), get(batchSession, 'topic'), get(batchSession, 'classroom')).order,
         topicComponentRule: get(batchSession, 'topic.topicComponentRule', null),
+        classType: get(batchSession, 'topic.classType', 'lab'),
         thumbnailSmall: get(batchSession, 'topic.thumbnailSmall', null),
         totalStudents: get(batchSession, 'classroom.students', []).length,
         completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
@@ -630,6 +633,7 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
         topicOrder: getTopicOrderFromCoursePackage(get(adhocSession, 'classroom.coursePackage'), get(adhocSession, 'topic'), get(adhocSession, 'classroom')).order,
         topicComponentRule: get(batchSession, 'topic.topicComponentRule', null),
         thumbnailSmall: get(adhocSession, 'topic.thumbnailSmall', null),
+        classType: get(adhocSession, 'topic.classType', 'lab'),
         totalStudents: get(adhocSession, 'classroom.students', []).length,
         completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
         completedQuizMeta: homeworkMeta.quizSubmittedCount,

@@ -12,6 +12,8 @@ const practiceQuestionsUserActivityLearningSlideType = `
     userFibInputAnswer: [FibInputAnswer]
     userFibBlockAnswer: [FibBlocksAnswer]
     userArrangeAnswer: [ArrangeAnswer]
+    startTime: Date
+    endTime: Date
  }`;
 
 const UserActivityLearningSlideDump = `
@@ -27,6 +29,8 @@ const UserActivityLearningSlideDump = `
     practiceQuestions: [practiceQuestionsUserActivityLearningSlideType]
     topic: Topic @relation(name: "TopicUserActivityLearningSlideDump", direction: "OneWay")
     course: Course @relation(name: "UserActivityLearningSlideDumpCourse", direction: "OneWay")
+    startTime: Date
+    endTime: Date
   }
 `;
 
