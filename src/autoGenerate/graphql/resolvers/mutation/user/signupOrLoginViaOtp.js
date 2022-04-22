@@ -55,12 +55,33 @@ const fetchEventUtm = async (eventId) => {
   const result = await callLocalGraphqlApi(eventQuery);
   return get(result, 'data.event.utm[0]', null);
 };
-const addDetailsToWaitingList = async (input, context) => {
-  const addDetailQuery = `mutation($input:WaitingListInput!){
-    addWaitingList(input:$input){
-      id
+
+const fetchUserWaitList = async (email, phone, context) => {
+  const query = `{
+  userWaitlists(filter:{
+  or:[
+    ${email ? `{
+      email:"${email}"
+    }` : ''}
+    ${phone ? `{
+      phone_number_subDoc:"${phone.number}"
     }
-  }`;
+    {
+      phone_countryCode_subDoc:"${phone.countryCode}"
+    }` : ''}
+  ]
+  }){
+    id
+  }
+}`;
+  const result = await callLocalGraphqlApi(query, context);
+};
+const addDetailsToWaitingList = async (input, context) => {
+  const addDetailQuery = `mutation($input: UserWaitlistInput!){
+  addUserWaitlist(input:$input){
+    id
+  }
+}`;
   await callLocalGraphqlApi(addDetailQuery, context, { input });
 };
 
@@ -122,6 +143,7 @@ const signupOrLoginViaOtp = async (
       waitingListInput.email = get(input, 'email');
     }
     const userWaitData = await getUserFromDBQuery(waitingListInput, waitListModelQueries);
+    console.log(userWaitData)
     if (userWaitData) {
       throw new UserAlreadyExistsError();
     }

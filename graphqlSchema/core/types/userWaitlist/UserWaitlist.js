@@ -2,8 +2,8 @@ const UserWaitlist = `
   type UserWaitlist @model 
   {
     name: String
-    email: String @uniqueOrEmpty @trim
-    phone: Phone @uniqueOrEmpty
+    email: String @trim
+    phone: Phone
     role: UserRole! @defaultValue(value: "parent")
     studentName: String
     grade: Grade
