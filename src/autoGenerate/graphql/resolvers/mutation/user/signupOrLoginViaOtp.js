@@ -54,6 +54,14 @@ const fetchEventUtm = async (eventId) => {
   const result = await callLocalGraphqlApi(eventQuery);
   return get(result, 'data.event.utm[0]', null);
 };
+const addDetailsToWaitingList = async (input, context) => {
+  const addDetailQuery = `mutation($input:WaitingListInput!){
+    addWaitingList(input:$input){
+      id
+    }
+  }`;
+  await callLocalGraphqlApi(addDetailQuery, context, { input });
+};
 
 const updateExistingUserOTP = (
   searchObj,
@@ -99,6 +107,23 @@ const signupOrLoginViaOtp = async (
   Object.assign(authentication, {
     bypass: true,
   });
+
+  if (get(input, 'shouldAddInWaitingList')) {
+    const waitingListInput = { role: 'parent' };
+    if (get(input, 'name')) {
+      waitingListInput.name = get(input, 'name');
+    }
+    if (get(input, 'phone')) {
+      waitingListInput.phone = get(input, 'phone');
+    }
+    if (get(input, 'email')) {
+      waitingListInput.email = get(input, 'email');
+    }
+    await addDetailsToWaitingList(waitingListInput, context);
+    return {
+      result: true,
+    };
+  }
 
   const modelQueries = new QueryController(USER_TYPE, authentication);
   let userData = await getUserFromDBQuery(input, modelQueries);
