@@ -114,7 +114,7 @@ import getSchoolAndBatchDetail from './query/methods/getSchoolAndBatchDetail';
 import getBatchDetails from './query/methods/getBatchDetails';
 import getBatchStudent from './query/methods/getBatchStudent';
 import getSessionComponentMeta from './query/methods/getSessionComponentMeta';
-import getClassroomHomeworkReport from './query/methods/getClassroomHomeworkReport';
+import getClassroomReport from './query/methods/getClassroomReport';
 import getPracticeQuestionReport from './query/methods/getPracticeQuestionReport';
 
 const parsedASTMap = getParsedASTMap(types);
@@ -697,7 +697,7 @@ resolvers.Query.getBatchStudent = getBatchStudent;
 // Resolver to get classroom session Details
 resolvers.Query.getSessionComponentMeta = getSessionComponentMeta;
 // Resolver to get classroom homework report
-resolvers.Query.getClassroomHomeworkReport = getClassroomHomeworkReport;
+resolvers.Query.getClassroomReport = getClassroomReport;
 // Resolver to get classroom homework report
 resolvers.Query.getPracticeQuestionReport = getPracticeQuestionReport;
 // Resolver for a custom scalar type 'Date'
