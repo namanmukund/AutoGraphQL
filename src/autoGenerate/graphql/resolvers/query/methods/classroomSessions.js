@@ -524,7 +524,7 @@ const getAdhocSessionAggregation = ({
         as: 'course',
       },
     },
-        {
+    {
       $lookup: {
         from: 'CoursePackage',
         let: { coursePackageId: '$coursePackage.typeId' },

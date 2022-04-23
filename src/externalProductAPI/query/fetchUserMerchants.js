@@ -1,10 +1,17 @@
-const fetchUserMerchants = (phone, email, id) => `
+const fetchUserMerchants = (phone, email, id, productId) => `
 {
   userMerchants(filter: {
     or:[
-      {parentPhone_number_subDoc:"${phone}"},
-      {parentEmail:"${email}"},
-      {id: "${id}"}
+      {and: [
+        {
+          or: [
+            {parentPhone_number_subDoc:"${phone}"},
+            {parentEmail:"${email}"},
+          ]
+        },
+        ${productId ? `{productId: "${productId}"},` : ''}
+      ]},
+      ${id ? `{id: "${id}"},` : ''}
     ]
   }){
     id

@@ -1,11 +1,11 @@
 import { get } from 'lodash';
 import validateMenteeSessionInput, { getHoursDiff } from './utils/validateMenteeSessionInput';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { DatabaseRecordNotFoundError, SlotsOccupiedError } from '../../../../../constants/errors';
+import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import menteeSessionQuery from '../../graphqlQueries/menteeSessionQuery';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
-import validateMenteeSession from './utils/validateMenteeSession';
+// import validateMenteeSession from './utils/validateMenteeSession';
 import getMentorMenteeSession from '../../postHookFunctions/utils/getMentorMenteeSession';
 import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, TMS, TBA } from '../../../../../constants';
 import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelectedSlotsStringArray';
@@ -74,10 +74,10 @@ const updateMenteeSessionValidation = async (params, mutationOrQueryName, contex
   const userId = get(menteeSession, 'user.id', '');
   const mentorChild = await isMentorChild(userId);
   if (!mentorChild && slotTimeStringArray && slotTimeStringArray.length > 0 && appName !== TBA) {
-    const validationFailed = await validateMenteeSession(slotTimeStringArray[0], userId, get(params, 'input.bookingDate'));
-    if (validationFailed) {
-      throw new SlotsOccupiedError();
-    }
+    // const validationFailed = await validateMenteeSession(slotTimeStringArray[0], userId, get(params, 'input.bookingDate'));
+    // if (validationFailed) {
+    //   throw new SlotsOccupiedError();
+    // }
   }
   return true;
 };

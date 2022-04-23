@@ -7,6 +7,8 @@ const UserBlockBasedProject = `
     savedBlocks: String
     topic: Topic! @relation(name: "TopicUserBlockBasedProject", direction: "OneWay")
     course: Course @relation(name: "UserBlockBasedProjectCourse", direction: "OneWay")
+    startTime: Date
+    endTime: Date
   }
 `;
 

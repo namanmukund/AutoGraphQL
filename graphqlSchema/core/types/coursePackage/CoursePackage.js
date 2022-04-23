@@ -10,21 +10,11 @@ import {
   PRE_SALES,
 } from '../../../../constants/roles';
 
-const TopicReshuffledGroup = `
-  type TopicReshuffledGroup {
-    order: Int
-    batch: Batch @relation(name: "TopicReshuffledGroupBatch", direction: "OneWay")
-    description: String
-  }
-`;
-
 const CoursePackageTopicRule = `
   type CoursePackageTopicRule {
     order: Int
     topic: Topic @relation(name: "CoursePackageTopic", direction: "OneWay")
-    coursePackage: CoursePackage @relation(name: "TopicRuleCoursePackage")
     description: String
-    topicReshuffledGroup: [TopicReshuffledGroup]
   }
 `;
 
@@ -69,4 +59,4 @@ const CoursePackage = `
   }
 `;
 
-export default [CoursePackage, CoursePackageTopicRule, TopicReshuffledGroup];
+export default [CoursePackage, CoursePackageTopicRule];
