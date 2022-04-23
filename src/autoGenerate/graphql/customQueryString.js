@@ -25,7 +25,7 @@ const customQueryString = `
     getBatchDetails(otp: Int, schoolCode: String): BatchDetailsResult
     getBatchStudent(batchId: ID, studentRoll: String): [BatchStudentResult]
     getSessionComponentMeta (sessionId: ID!): SessionComponentMetaResult
-    getClassroomHomeworkReport (batchId: String, topicId: String): ClassroomHomeworkReportOutput
+    getClassroomReport (batchId: String, topicId: String, isHomework: Boolean): ClassroomHomeworkReportOutput
     getPracticeQuestionReport (batchId: String, topicId: String, learningObjectiveId: String, learningSlideId: String, learningObjectiveComponent: String, userId: String): PracticeQuestionReportOutput
 `;
 
