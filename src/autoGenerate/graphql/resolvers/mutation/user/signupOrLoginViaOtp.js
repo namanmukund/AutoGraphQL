@@ -64,17 +64,22 @@ const fetchUserWaitList = async (email, phone, context) => {
       email:"${email}"
     }` : ''}
     ${phone ? `{
-      phone_number_subDoc:"${phone.number}"
-    }
-    {
-      phone_countryCode_subDoc:"${phone.countryCode}"
+      and:[
+        {
+        phone_number_subDoc:"${phone.number}"
+      }
+      {
+        phone_countryCode_subDoc:"${phone.countryCode}"
+      }
+      ]
     }` : ''}
   ]
   }){
     id
   }
 }`;
-  const result = await callLocalGraphqlApi(query, context);
+  const waitListResult = await callLocalGraphqlApi(query, context);
+  return waitListResult;
 };
 const addDetailsToWaitingList = async (input, context) => {
   const addDetailQuery = `mutation($input: UserWaitlistInput!){
@@ -131,7 +136,6 @@ const signupOrLoginViaOtp = async (
   });
 
   if (get(input, 'shouldAddInWaitingList')) {
-    const waitListModelQueries = new QueryController('UserWaitlist', authentication);
     const waitingListInput = { role: 'parent' };
     if (get(input, 'name')) {
       waitingListInput.name = get(input, 'name');
@@ -142,9 +146,8 @@ const signupOrLoginViaOtp = async (
     if (get(input, 'email')) {
       waitingListInput.email = get(input, 'email');
     }
-    const userWaitData = await getUserFromDBQuery(waitingListInput, waitListModelQueries);
-    console.log(userWaitData)
-    if (userWaitData) {
+    const waitList = await fetchUserWaitList(get(input, 'email'), get(input, 'phone'), context);
+    if (get(waitList, 'data.userWaitlists', []).length) {
       throw new UserAlreadyExistsError();
     }
     await addDetailsToWaitingList(waitingListInput, context);
