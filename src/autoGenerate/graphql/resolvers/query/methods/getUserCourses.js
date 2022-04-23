@@ -536,6 +536,7 @@ const getUserCourses = (async (root, params, context, info) => {
   if (input && get(input, 'userId')) {
     const userId = get(input, 'userId');
     const courseProgress = get(input, 'courseProgress', false);
+    let updatedCourseArr = [];
     /** Check if data exists in redis */
     // const cachedUserCourses = await redisClient.get(`userCourses_${userId}`);
     // let userCoursesRes = null;
@@ -550,7 +551,7 @@ const getUserCourses = (async (root, params, context, info) => {
     const studentProfileModel = getTypeQueryController('StudentProfile');
     const studentProfileRes = await studentProfileModel.aggregate(getUserBatchDetails(userId));
     if (studentProfileRes && get(studentProfileRes, '0.batch.currentComponent.currentCourse.id')) {
-      return [get(studentProfileRes, '0.batch.currentComponent.currentCourse', {})];
+      updatedCourseArr.push(get(studentProfileRes, '0.batch.currentComponent.currentCourse', {}));
     }
     const userCoursesModel = getTypeQueryController('UserCourse');
     const userCoursesRes = await userCoursesModel.aggregate(getUserCoursesAggregation(userId, courseProgress));
@@ -563,7 +564,6 @@ const getUserCourses = (async (root, params, context, info) => {
       const userCourses = get(userCoursesRes[0], 'courses', []);
       let newPythonCourseExists = false;
       let oldPythonCourseExists = false;
-      let updatedCourseArr = [];
       let userCourseCompletions = [];
       let userCurrentTopicComponentStatuses = [];
       if (userCourses && userCourses.length && courseProgress) {
@@ -617,7 +617,15 @@ const getUserCourses = (async (root, params, context, info) => {
       if (newPythonCourseExists && oldPythonCourseExists) {
         updatedCourseArr = updatedCourseArr.filter((course) => get(course, 'id') !== OLD_COURSE_ID);
       }
-      return updatedCourseArr;
+      const tempUniqueCourseIds = [];
+      return (updatedCourseArr || []).filter((el) => {
+        const isDuplicate = tempUniqueCourseIds.includes(el.id);
+        if (!isDuplicate) {
+          tempUniqueCourseIds.push(el.id);
+          return true;
+        }
+        return false;
+      });
     }
   }
   return [];
