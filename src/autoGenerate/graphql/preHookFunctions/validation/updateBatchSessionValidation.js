@@ -8,7 +8,7 @@ import {
 } from '../../../../../constants/errors/input';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import {
-  ALLOWED_ROLE_FOR_MANUAL_SESSIONS, sessionStatus, TMS, TWA,
+  ALLOWED_ROLE_FOR_MANUAL_SESSIONS, sessionStatus, TWA,
 } from '../../../../../constants';
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
@@ -18,6 +18,7 @@ import extractSlotsFromInput from '../../../../../utils/extractSlotsFromInput';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import isTrialSession from '../../resolvers/utils/isTrialSession';
 import { getHoursDiff } from './utils/validateMenteeSessionInput';
+import { MENTOR, MENTEE } from '../../../../../constants/roles';
 
 // query to get mentor from mentorSessionConnectId
 const fetchMentor = (id) => `
@@ -189,11 +190,18 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   if (prevSessionStatus === sessionStatus.completed && sessionStatusInInput && sessionStatusInInput !== sessionStatus.completed) {
     throw new CanNotChangeSessionStatusError();
   }
-  if (get(currentApp, 'name') === TMS && sessionStatusInInput === 'started'
-    && get(batch, 'type') === 'b2b' && get(batch, 'customSessionLink')) {
-    Object.assign(params.input, {
-      sessionJoinedByMentorAt: new Date().toISOString(),
-    });
+  if (sessionStatusInInput === sessionStatus.started
+    && get(batch, 'type') === 'b2b') {
+    if (userRoleFromContext === MENTOR) {
+      Object.assign(params.input, {
+        sessionStartedByMentorAt: new Date().toISOString(),
+      });
+    }
+    if (prevSessionStatus === sessionStatus.allotted && userRoleFromContext === MENTEE) {
+      Object.assign(params.input, {
+        startSessionByMentee: new Date().toISOString(),
+      });
+    }
   }
 
   context.prevIsAudit = get(batchSession, 'isAudit', false);

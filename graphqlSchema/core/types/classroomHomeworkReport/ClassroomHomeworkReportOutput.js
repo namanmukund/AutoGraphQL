@@ -24,6 +24,8 @@ const PartialReportType = `
     averagePartiallyCorrect: Float
     questions: [IndividualQuestionsScoreType]
     notEvaluatedCount: Int
+    submissionsCount: Int
+    submissions: [StudentSubmissions]
   }`;
 
 const ClassroomHomeworkReportOutput = `

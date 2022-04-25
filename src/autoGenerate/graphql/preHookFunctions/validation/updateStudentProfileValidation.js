@@ -30,6 +30,11 @@ const updateStudentProfileValidation = async (params, _, context) => {
   if (!get(studentProfileData, 'id')) {
     throw new DatabaseRecordNotFoundError();
   }
+  if (get(params, 'input.rollNo')) {
+    Object.assign(params.input, {
+      rollNo: get(params, 'input.rollNo').toLowerCase(),
+    });
+  }
   context.previousDocument = studentProfileData;
 };
 

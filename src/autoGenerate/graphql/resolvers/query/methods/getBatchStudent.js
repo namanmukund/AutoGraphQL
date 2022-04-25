@@ -64,7 +64,7 @@ const getBatchStudent = async (
   const studentProfilesArray = await studentProfileModal.aggregate(
     getStudentProfileAggregation({
       batchId,
-      studentRoll,
+      studentRoll: studentRoll.toLowerCase(),
     }),
   );
 

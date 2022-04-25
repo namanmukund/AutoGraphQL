@@ -69,7 +69,7 @@ const paymentStatus = async (req, res) => {
     res.status(400).send('Invalid token');
   }
 
-  if (!(Name && Email && MobileNo && City && State && Pincode)) {
+  if (!(Name && Email && MobileNo)) {
     res.status(400).send('Mandatory fields not passed.');
   }
 
@@ -90,7 +90,7 @@ const paymentStatus = async (req, res) => {
   };
 
   // check if userMerchant document is present and paymentStatus is not paid
-  const userMerchantsRes = await callLocalGraphqlApi(fetchUserMerchantsQuery(MobileNo, Email));
+  const userMerchantsRes = await callLocalGraphqlApi(fetchUserMerchantsQuery(MobileNo, Email, null, ESPProductID));
   const userMerchantsFound = get(userMerchantsRes, 'data.userMerchants', []);
   let isAmountValid = false;
   let pmtStatus = true;

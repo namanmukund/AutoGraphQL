@@ -10,10 +10,11 @@ import {
   PRE_SALES,
 } from '../../../../constants/roles';
 
-const TopicRule = `
-  type TopicRule {
+const CoursePackageTopicRule = `
+  type CoursePackageTopicRule {
     order: Int
     topic: Topic @relation(name: "CoursePackageTopic", direction: "OneWay")
+    description: String
   }
 `;
 
@@ -51,11 +52,11 @@ const CoursePackage = `
     thumbnail: File @relation(name: "CourseThumbnail", direction: "OneWay")
     bannerThumbnail: File @relation(name: "CourseBannerThumbnail", direction: "OneWay")
     courses: [Course] @relation(name: "CoursePackageCourses", direction: "OneWay")
-    topics: [TopicRule]
+    topics: [CoursePackageTopicRule]
     secondaryCategory: String
     minGrade: Int
     maxGrade: Int
   }
 `;
 
-export default [CoursePackage, TopicRule];
+export default [CoursePackage, CoursePackageTopicRule];
