@@ -224,26 +224,31 @@ const getUserQuizReportAggregation = ({ userId, topicId }) =>
 const getUserAssignmentAggregation = ({
   userId,
   topicId,
+  isHomework,
 }) => [{
   $match: {
     'user.typeId': userId,
     'topic.typeId': topicId,
   },
 }, {
+  $unwind: {
+    path: '$assignment',
+  },
+}, {
   $project: {
     assignmentStatus: 1,
     assignment: {
-      $arrayElemAt: [
-        '$assignment',
-        0,
-      ],
+      isAttempted: 1,
+      assignmentQuestion: 1,
+      userAnswerCodeSnippet: 1,
+      result: 1,
     },
   },
 }, {
   $lookup: {
     from: 'AssignmentQuestion',
     let: {
-      assignmentQuestionId: '$assignment.assignmentQuestion.typeId',
+      questionId: '$assignment.assignmentQuestion.typeId',
     },
     pipeline: [
       {
@@ -251,31 +256,30 @@ const getUserAssignmentAggregation = ({
           $expr: {
             $eq: [
               '$id',
-              '$$assignmentQuestionId',
+              '$$questionId',
             ],
           },
-          isHomework: true,
+        },
+      },
+      {
+        $project: {
+          isHomework: 1,
+          id: 1,
         },
       },
     ],
     as: 'assignmentQuestion',
   },
 }, {
-  $project: {
-    assignmentStatus: 1,
-    assignment: 1,
-    assignmentQuestion: {
-      $arrayElemAt: [
-        '$assignmentQuestion',
-        0,
-      ],
-    },
+  $match: {
+    'assignmentQuestion.isHomework': isHomework,
   },
 }];
 
 const getUserBlockBasedPracticeAggregation = ({
   userId,
   topicId,
+  isHomeworkParam,
 }) => [{
   $match: {
     'user.typeId': userId,
@@ -296,7 +300,11 @@ const getUserBlockBasedPracticeAggregation = ({
               '$$questionId',
             ],
           },
-          isHomework: true,
+        },
+      },
+      {
+        $match: {
+          isHomework: isHomeworkParam,
         },
       },
     ],
@@ -315,7 +323,7 @@ const getUserBlockBasedPracticeAggregation = ({
 }, {
   $match: {
     $expr: {
-      $eq: ['$blockBasedPractice.isHomework', true],
+      $eq: ['$blockBasedPractice.isHomework', isHomeworkParam],
     },
   },
 }];
@@ -351,8 +359,8 @@ const transformMongoResults = (obj) => {
       unattemptedPercentage: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizUnattemptedCount * 100) / obj.studentsCount).toFixed(2),
       totalQuestions: obj.quizTotalQuestions,
       averageScore: (obj.quizTotalQuestions === 0 || obj.quizSubmittedCount === 0) ? 0 : ((obj.quizCorrectSum * 100) / (obj.quizSubmittedCount * obj.quizTotalQuestions)).toFixed(2),
-      averageCorrect: (obj.quizTotalQuestions === 0 || obj.quizSubmittedCount === 0) ? 0 : (obj.quizCorrectSum / obj.quizSubmittedCount).toFixed(2),
-      averageIncorrect: (obj.quizTotalQuestions === 0 || obj.quizSubmittedCount === 0) ? 0 : (obj.quizIncorrectSum / obj.quizSubmittedCount).toFixed(2),
+      averageCorrect: (obj.quizTotalQuestions === 0 || obj.quizSubmittedCount === 0) ? 0 : (obj.quizCorrectSum).toFixed(2),
+      averageIncorrect: (obj.quizTotalQuestions === 0 || obj.quizSubmittedCount === 0) ? 0 : (obj.quizIncorrectSum).toFixed(2),
       averagePartiallyCorrect: null,
       notEvaluatedCount: null,
       questions: [],
@@ -401,14 +409,14 @@ const transformMongoResults = (obj) => {
   return finalResult;
 };
 
-const classroomHomeworkReport = (async (root, params, context) => {
+const classroomReport = (async (root, params, context) => {
   const authentication = ifAuthorized(context);
 
   if (!(authentication && authentication.app && authentication.user)) {
     throw new UnauthorizedOperationError();
   }
 
-  const { batchId, topicId } = params;
+  const { batchId, topicId, isHomework = false } = params;
 
   if (!(batchId && topicId)) {
     throw new MissingMandatoryInputInRequestError({
@@ -497,22 +505,27 @@ const classroomHomeworkReport = (async (root, params, context) => {
         topicId,
       }),
     );
-    const userQuizReportRes = await userQuizReportModel.aggregate(
-      getUserQuizReportAggregation({
-        userId,
-        topicId,
-      }),
-    );
+    let userQuizReportRes = [];
+    if (isHomework) {
+      userQuizReportRes = await userQuizReportModel.aggregate(
+        getUserQuizReportAggregation({
+          userId,
+          topicId,
+        }),
+      );
+    }
     const userAssignmentRes = await userAssignmentModel.aggregate(
       getUserAssignmentAggregation({
         userId,
         topicId,
+        isHomework,
       }),
     );
     const userBlockbasedPracticeRes = await userBlockBasedPracticeModel.aggregate(
       getUserBlockBasedPracticeAggregation({
         userId,
         topicId,
+        isHomework,
       }),
     );
 
@@ -552,7 +565,9 @@ const classroomHomeworkReport = (async (root, params, context) => {
     }
 
     if (userQuizReportRes.length && get(userQuizReportRes, '[0].latest')) {
+      // TODO : add separation for various learning objectives
       const userQuizReport = get(userQuizReportRes, '[0].latest');
+      // const individualLoReports = get(userQuizReport, 'learningObjectiveReport');
       obj.quizTotalQuestions = get(userQuizReport, 'quizReport.totalQuestionCount');
       obj.quizCorrectSum += get(userQuizReport, 'quizReport.correctQuestionCount');
       obj.quizIncorrectSum += get(userQuizReport, 'quizReport.inCorrectQuestionCount');
@@ -645,4 +660,4 @@ const classroomHomeworkReport = (async (root, params, context) => {
   return transformedClassroomResult;
 });
 
-export default classroomHomeworkReport;
+export default classroomReport;

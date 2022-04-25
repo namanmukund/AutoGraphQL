@@ -20,12 +20,12 @@ const customQueryString = `
     getEventWinner (eventId: String): [GetEventWinner]
     classroomSessions (filter: ClassroomSessionFilter!): [ClassroomSessionResult]
     getNextOrPrevClassroomSessions (input: [NextOrPrevClassroomSessionInput]!): [NextOrPrevClassroomSessionResult]
-    classroomDetail (batchId: String): ClassroomDetailResult
+    getClassroomDetails (batchIds: [String]): [ClassroomDetailResult]
     getSchoolAndBatchDetail (schoolId: String, batchId: String): BatchAndSchoolResult
     getBatchDetails(otp: Int, schoolCode: String): BatchDetailsResult
     getBatchStudent(batchId: ID, studentRoll: String): [BatchStudentResult]
     getSessionComponentMeta (sessionId: ID!): SessionComponentMetaResult
-    getClassroomHomeworkReport (batchId: String, topicId: String): ClassroomHomeworkReportOutput
+    getClassroomReport (batchId: String, topicId: String, isHomework: Boolean): ClassroomHomeworkReportOutput
     getPracticeQuestionReport (batchId: String, topicId: String, learningObjectiveId: String, learningSlideId: String, learningObjectiveComponent: String, userId: String): PracticeQuestionReportOutput
 `;
 

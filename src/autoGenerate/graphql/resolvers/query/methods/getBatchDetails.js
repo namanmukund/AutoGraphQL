@@ -4,6 +4,7 @@ import { slotTimes } from '../../../../../../constants';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 import { OTPMismatchError } from '../../../../../../constants/errors';
 import { QueryController } from '../../../controllers';
+import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 
 const getTypeQueryController = (
   typeName,
@@ -25,16 +26,24 @@ const getSlotTimeFields = (session) => {
 };
 
 const findSessionStartTime = (data) => {
-  let slotTime
-  Object.keys(data).map((key) => {
-    if (typeof data[key] !== 'boolean') return
-    if (!data[key]) return
-    slotTime = key
-  })
-  slotTime = parseInt(slotTime.split('t')[1])
-  if (slotTime === 24) return `00:00 AM`
-  if (slotTime > 12) return `${slotTime - 12}:00 PM`
-  return `${slotTime}:00 AM`
+  let startTime, endTime
+  startTime = new Date(get(data, 'bookingDate'))
+  endTime = new Date(get(data, 'bookingDate'));
+  const { startMinutes, endMinutes } = data
+  const startTimeHour = getSelectedSlotsTime(data)
+  if (startTimeHour.length) {
+    startTime.setHours(startTimeHour[0], 0, 0, 0)
+
+    endTime = startTime.getTime() + endMinutes * 60 * 1000
+    
+    startTime.setHours(startTimeHour[0], startMinutes, 0, 0)
+    endTime = new Date(endTime)
+    if (startTime.getTime() >= endTime.getTime()) {
+        let endTimeNumber = startTimeHour[0] + 1
+        endTime.setHours(endTimeNumber)
+    }
+  }
+  return { startTime, endTime }
 }
 
 const getBatchSessionAggregation = ({
@@ -108,6 +117,8 @@ const getBatchSessionAggregation = ({
           $project: {
             id: 1,
             bookingDate: 1,
+            startMinutes: 1,
+            endMinutes: 1,
             topic: {
               id: 1,
               title: 1,
@@ -164,14 +175,16 @@ const getBatchDetails = async (
     throw new OTPMismatchError()
   }
   const batchDetails = get(batchSessionsArray, '[0].batchSession')
-  let sessionStartTime = findSessionStartTime(batchDetails)
+  let { startTime, endTime } = findSessionStartTime(batchDetails)
   batchSessionData = {
     batchId: get(batchDetails, 'batch.id'),
     batchCode: get(batchDetails, 'batch.code'),
     topicTitle: get(batchDetails, 'topic[0].title'),
     classroomTitle: get(batchDetails, 'batch.classroomTitle'),
     sessionStartDate: new Date(get(batchDetails, 'bookingDate')),
-    sessionStartTime: sessionStartTime
+    startTime,
+    endTime,
+    sessionStartTime: ''
   }
   return batchSessionData
 };

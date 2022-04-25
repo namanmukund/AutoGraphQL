@@ -59,6 +59,8 @@ const getBatchSessionAggregation = ({
         mentorSession: 1,
         attendance: 1,
         schoolSessionsOtp: 1,
+        coursePackage: 1,
+        sessionStartedByMentorAt: 1,
         ...getSlotTimeFields(),
       },
     },
@@ -235,6 +237,29 @@ const getBatchSessionAggregation = ({
       },
     },
     {
+      $lookup: {
+        from: 'CoursePackage',
+        let: { coursePackageId: '$coursePackage.typeId' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$id', '$$coursePackageId'],
+              },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              id: 1,
+              topics: 1,
+            },
+          },
+        ],
+        as: 'coursePackage',
+      },
+    },
+    {
       $match: {
         ...mentorIdsFilter,
         'classroom.documentType': documentType,
@@ -251,6 +276,7 @@ const getBatchSessionAggregation = ({
         startMinutes: 1,
         endMinutes: 1,
         sessionRecordingLink: 1,
+        sessionStartedByMentorAt: 1,
         classroom: {
           $arrayElemAt: ['$classroom', 0],
         },
@@ -262,6 +288,9 @@ const getBatchSessionAggregation = ({
         },
         course: {
           $arrayElemAt: ['$course', 0],
+        },
+        coursePackage: {
+          $arrayElemAt: ['$coursePackage', 0],
         },
         schoolSessionOtp: {
           grade: 1,
@@ -496,6 +525,29 @@ const getAdhocSessionAggregation = ({
       },
     },
     {
+      $lookup: {
+        from: 'CoursePackage',
+        let: { coursePackageId: '$coursePackage.typeId' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$id', '$$coursePackageId'],
+              },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              id: 1,
+              topics: 1,
+            },
+          },
+        ],
+        as: 'coursePackage',
+      },
+    },
+    {
       $match: {
         ...mentorIdsFilter,
         'classroom.documentType': documentType,
@@ -524,6 +576,9 @@ const getAdhocSessionAggregation = ({
         },
         course: {
           $arrayElemAt: ['$course', 0],
+        },
+        coursePackage: {
+          $arrayElemAt: ['$coursePackage', 0],
         },
         schoolSessionOtp: {
           grade: 1,
@@ -633,21 +688,26 @@ const constructDocFilters = (filters) => {
 
 const getSessionStatus = (session) => {
   const sessionStatus = get(session, 'sessionStatus', 'allotted');
-  if (sessionStatus === 'allotted') {
+  if ((sessionStatus === 'allotted')
+    || ((sessionStatus === 'started') && !get(session, 'sessionStartedByMentorAt'))) {
     /**
      * Checking If allotted session lies before current date.
      */
     if (isBefore(get(session, 'bookingDate'), new Date())) {
       if (isToday(get(session, 'bookingDate'))) {
         const currentSlot = new Date().getHours() || 0;
+        const currentMinutes = new Date().getMinutes() || 0;
         let sessionSlot = 23;
         for (let i = 0; i < 24; i++) {
           if (session[`slot${i}`]) {
             sessionSlot = i;
           }
         }
-        if (currentSlot <= sessionSlot) {
+        if (currentSlot < sessionSlot) {
           return sessionStatus;
+        }
+        if (currentSlot === sessionSlot) {
+          if (currentMinutes <= get(session, 'endMinutes')) return sessionStatus;
         }
       }
       return 'unattended';
@@ -655,6 +715,26 @@ const getSessionStatus = (session) => {
     return sessionStatus;
   }
   return sessionStatus;
+};
+
+const getTopicOrderOrPackageTopicOrder = (topic, coursePackage) => {
+  if (coursePackage && topic) {
+    const currentTopicId = get(topic, 'id');
+    const packageTopics = get(coursePackage, 'topics', []);
+    const packageTopicOrder = get(packageTopics.filter((el) => get(el, 'topic.typeId') === currentTopicId)[0], 'order', 0);
+    return packageTopicOrder;
+  }
+  return get(topic, 'order', 0);
+};
+
+const getTopicDocument = (topic, session) => {
+  if (!topic) return {};
+  const coursePackage = get(session, 'coursePackage', {});
+  const topicOrder = getTopicOrderOrPackageTopicOrder(topic, coursePackage);
+  return {
+    ...topic,
+    order: topicOrder,
+  };
 };
 
 const transformMongoResults = (batchSessions, adhocSessions, events) => {
@@ -666,6 +746,7 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
         bookingDate: get(session, 'bookingDate', null),
         sessionStartDate: get(session, 'sessionStartDate', null),
         sessionEndDate: get(session, 'sessionEndDate', null),
+        sessionStartedByMentorAt: get(session, 'sessionStartedByMentorAt', null),
         sessionStatus: getSessionStatus(session),
         sessionMode: get(session, 'sessionMode', 'online'),
         sessionRecordingLink: get(session, 'sessionRecordingLink', null),
@@ -685,7 +766,7 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
         },
         sessionOtp: get(session, 'schoolSessionOtp', []),
         ...getSlotTimeFields(session),
-        topic: get(session, 'topic', null),
+        topic: getTopicDocument(get(session, 'topic', null), session),
         course: get(session, 'course', null),
         previousTopic: null,
       });
@@ -698,6 +779,7 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
         bookingDate: get(session, 'bookingDate', null),
         sessionStartDate: get(session, 'sessionStartDate', null),
         sessionEndDate: get(session, 'sessionEndDate', null),
+        sessionStartedByMentorAt: get(session, 'sessionStartedByMentorAt', null),
         sessionStatus: getSessionStatus(session),
         sessionMode: get(session, 'sessionMode', 'online'),
         sessionRecordingLink: get(session, 'sessionRecordingLink', null),
@@ -719,7 +801,7 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
         ...getSlotTimeFields(session),
         topic: null,
         course: get(session, 'course', null),
-        previousTopic: get(session, 'previousTopic', null),
+        previousTopic: getTopicDocument(get(session, 'previousTopic', null), session),
       });
     });
   }

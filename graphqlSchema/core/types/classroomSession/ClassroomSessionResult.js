@@ -76,6 +76,7 @@ const ClassroomSessionResult = `
     endMinutes: Int @defaultValue(value: "0")
     sessionStartDate: Date
     sessionEndDate: Date
+    sessionStartedByMentorAt: Date
     sessionStatus: ClassroomSessionStatus @defaultValue(value: "allotted")
     sessionMode: SessionMode @defaultValue(value: "online")
     sessionRecordingLink: String

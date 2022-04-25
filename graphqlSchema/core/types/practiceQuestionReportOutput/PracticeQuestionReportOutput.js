@@ -1,5 +1,7 @@
 const PracticeQuestionOverallReport = `
   type PracticeQuestionOverallReport {
+    loId: String
+    loTitle: String
     submittedPercentage: Float
     attemptedPercentage: Float
     unattemptedPercentage: Float
@@ -8,7 +10,15 @@ const PracticeQuestionOverallReport = `
     thirdTryPercentage: Float
     avgTriesPerQuestion: Float
     avgTimePerQuestion: Int
+    pqIndividualQuestionReport: [PQIndividualQuestionReport]
   }`;
+
+const StudentSubmissions = `
+  type StudentSubmissions {
+    userId: String
+    updatedAt: Date
+  }
+`;
 
 const PQIndividualQuestionReport = `
   type PQIndividualQuestionReport {
@@ -17,17 +27,19 @@ const PQIndividualQuestionReport = `
     secondTryPercentage: Float
     thirdTryPercentage: Float
     avgTries: Float
+    submissionsCount: Int
+    submissions: [StudentSubmissions]
   }
 `;
 
 const PracticeQuestionReportOutput = `
   type PracticeQuestionReportOutput {
-    practiceQuestionOverallReport: PracticeQuestionOverallReport
-    pqIndividualQuestionReport: [PQIndividualQuestionReport]
+    practiceQuestionOverallReport: [PracticeQuestionOverallReport]
   }`;
 
 export default [
   PracticeQuestionReportOutput,
   PracticeQuestionOverallReport,
   PQIndividualQuestionReport,
+  StudentSubmissions,
 ];

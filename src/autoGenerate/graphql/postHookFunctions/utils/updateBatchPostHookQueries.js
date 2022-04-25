@@ -23,7 +23,7 @@ const getTopics = async (courseId) => {
 };
 
 // query to get batch sessions
-const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus) => {
+const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus, slotInput, dateInput) => {
   const query = `
           {
             batchSessions(filter: {
@@ -32,6 +32,8 @@ const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus) => {
                 ${bookingDate ? `{bookingDate: "${bookingDate}"}` : ''}
                 ${slot ? `{slot${slot}: true}` : ''}
                 ${sessionStatus ? `{sessionStatus: ${sessionStatus}}` : ''}
+                ${!slotInput ? '' : slotInput}
+                ${!dateInput ? '' : dateInput}
               ]
             }, orderBy:bookingDate_ASC){
               id
@@ -40,6 +42,31 @@ const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus) => {
               course{
                 id
               }
+              startMinutes
+              endMinutes
+              slot0
+              slot1
+              slot2
+              slot3
+              slot4
+              slot5
+              slot6
+              slot7
+              slot8
+              slot9
+              slot11
+              slot12
+              slot13
+              slot14
+              slot15
+              slot16
+              slot17
+              slot18
+              slot19
+              slot20
+              slot21
+              slot22
+              slot23
               topic{
                 order
               }
@@ -47,11 +74,11 @@ const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus) => {
           }
           `;
   const batches = await callLocalGraphqlApi(query);
-  return get(batches, 'data.batchSessions');
+  return get(batches, 'data.batchSessions', []);
 };
 
 // query to get adhoc sessions
-const getAdhocSessions = async (batchId, bookingDate, slot, sessionStatus) => {
+const getAdhocSessions = async (batchId, bookingDate, slot, sessionStatus, slotInput, dateInput) => {
   const query = `
           {
             adhocSessions(filter: {
@@ -60,11 +87,38 @@ const getAdhocSessions = async (batchId, bookingDate, slot, sessionStatus) => {
                 ${bookingDate ? `{bookingDate: "${bookingDate}"}` : ''}
                 ${slot ? `{slot${slot}: true}` : ''}
                 ${sessionStatus ? `{sessionStatus: ${sessionStatus}}` : ''}
+                ${!slotInput ? '' : slotInput}
+                ${!dateInput ? '' : dateInput}
               ]
             }, orderBy:bookingDate_ASC){
               id
               bookingDate
               sessionStatus
+              startMinutes
+              slot0
+              slot1
+              slot2
+              slot3
+              slot4
+              slot5
+              slot6
+              slot7
+              slot8
+              slot9
+              slot11
+              slot12
+              slot13
+              slot14
+              slot15
+              slot16
+              slot17
+              slot18
+              slot19
+              slot20
+              slot21
+              slot22
+              slot23
+              endMinutes
               previousTopic{
                 order
               }
@@ -72,7 +126,7 @@ const getAdhocSessions = async (batchId, bookingDate, slot, sessionStatus) => {
           }
           `;
   const sessions = await callLocalGraphqlApi(query);
-  return get(sessions, 'data.adhocSessions');
+  return get(sessions, 'data.adhocSessions', []);
 };
 
 // query to get batch sessions (started, completed)
@@ -132,8 +186,8 @@ const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId
             ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
-              ${startTime ? `startMinutes: ${startTime},` : ''}
-              ${endTime ? `endMinutes: ${endTime},` : ''}
+              ${typeof startTime === 'number' ? `startMinutes: ${startTime},` : ''}
+              ${typeof endTime === 'number' ? `endMinutes: ${endTime},` : ''}
               ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
               ${slots}
             }
@@ -156,8 +210,8 @@ const updateBatchSession = async (sessionId, slots, date, mentorSessionId, cours
             ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
-              ${startTime ? `startMinutes: ${startTime},` : ''}
-              ${endTime ? `endMinutes: ${endTime},` : ''}
+              ${typeof startTime === 'number' ? `startMinutes: ${startTime},` : ''}
+              ${typeof endTime === 'number' ? `endMinutes: ${endTime},` : ''}
               ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
               ${slots}
             }
@@ -181,8 +235,8 @@ const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId
             input:{
               bookingDate:"${date}",
               type: ${adhocSessionType}
-              ${startTime ? `startMinutes: ${startTime},` : ''}
-              ${endTime ? `endMinutes: ${endTime},` : ''}
+              ${typeof startTime === 'number' ? `startMinutes: ${startTime},` : ''}
+              ${typeof endTime === 'number' ? `endMinutes: ${endTime},` : ''}
               ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
               ${slots}
             }
@@ -195,17 +249,18 @@ const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId
   return true;
 };
 
-const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, courseId, startTime, endTime, sessionMode) => {
+const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, courseId, coursePackageId, startTime, endTime, sessionMode) => {
   const query = `
           mutation{
             updateAdhocSession(
             id: "${sessionId}",
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
-              ${startTime ? `startMinutes: ${startTime},` : ''}
-              ${endTime ? `endMinutes: ${endTime},` : ''}
+              ${typeof startTime === 'number' ? `startMinutes: ${startTime},` : ''}
+              ${typeof endTime === 'number' ? `endMinutes: ${endTime},` : ''}
               ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
               ${slots}
             }

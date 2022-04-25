@@ -356,7 +356,7 @@ const parentChildSignUpMutationResolver = async (
     studentProfileInputData.section = section;
   }
   if (rollNo) {
-    studentProfileInputData.rollNo = rollNo;
+    studentProfileInputData.rollNo = rollNo.toLowerCase();
   }
   if (section) {
     studentProfileInputData.branch = branch;

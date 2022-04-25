@@ -257,6 +257,8 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
           isAnswerUsed,
           attemptNumber,
           questionAction,
+          startTime,
+          endTime,
         } = inputPracticeQuestion;
         /*
         As we are iterating over each question from userLearningObjective and input
@@ -312,6 +314,12 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
               Object.assign(newPracticeQuestionInUserLearningObjective, { attemptNumber });
             }
           }
+          if (startTime) {
+            Object.assign(newPracticeQuestionInUserLearningObjective, { startTime });
+          }
+          if (endTime) {
+            Object.assign(newPracticeQuestionInUserLearningObjective, { endTime });
+          }
         }
       });
       /*
@@ -323,6 +331,8 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
         isAnswerUsed: updatedIsAnswerUsed,
         attemptNumber: updatedAttemptNumber,
         status: updatedStatus,
+        startTime: updatedStartTime,
+        endTime: updatedEndTime,
       } = newPracticeQuestionInUserLearningObjective;
       /*
       Storing count of all questions in completed state. We will use this in validating
@@ -336,7 +346,9 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
       pushManyQuery += `isHintUsed: ${updatedIsHintUsed}, 
                                                isAnswerUsed: ${updatedIsAnswerUsed}, 
                                                attemptNumber: ${updatedAttemptNumber}, 
-                                               status: ${updatedStatus}, 
+                                               status: ${updatedStatus},
+                                               ${updatedStartTime ? `startTime: "${updatedStartTime}"` : ''}
+                                               ${updatedEndTime ? `endTime: "${updatedEndTime}"` : ''}
                                               }, `;
 
       /*

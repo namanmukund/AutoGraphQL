@@ -1,8 +1,10 @@
 /* eslint-disable no-await-in-loop */
-import { get } from 'lodash';
+/* eslint-disable no-restricted-syntax */
+import { get, sortBy } from 'lodash';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { ifAuthorized } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
+import { callLocalGraphqlApi } from '../../../../../api';
 
 const getBatchSessionAggregation = ({
   sessionId,
@@ -137,6 +139,20 @@ const mentorMentorMenteeSessionAggregation = (topicId, userIds) => [
   },
 ];
 
+const getUserPracticeQuestionReportAggregation = ({
+  userId,
+  loId,
+}) => [{
+  $match: {
+    'learningObjective.typeId': loId,
+    'user.typeId': userId,
+  },
+}, {
+  $project: {
+    id: 1,
+  },
+}];
+
 const getTypeQueryController = (
   typeName,
   authentication = {
@@ -172,12 +188,69 @@ const getHomeworkCompletedMeta = async (session, model) => {
   };
 };
 
+const getPQCompletedMeta = async (session, model, loId) => {
+  let PQCompletedCount = 0;
+  const userIds = get(session, 'classroom.students', []).map((el) => get(el, 'user.typeId'));
+
+  if (userIds.length && loId) {
+    for (const userId of userIds) {
+      const userPQReports = await model.aggregate(
+        getUserPracticeQuestionReportAggregation({
+          userId,
+          loId,
+        }),
+      );
+      if (userPQReports && userPQReports.length) PQCompletedCount += 1;
+    }
+  }
+  return PQCompletedCount;
+};
+
+const TOPIC_QUERY = (topicId) => `
+query{
+  topic(id: "${topicId}") {
+    id 
+    topicComponentRule {
+      componentName
+      order
+      learningObjective {
+        id
+        questionBankMeta {
+          count
+        }
+      }
+    }
+  }
+}
+`;
+
+const getLearningObjectiveIdIfPQExists = async (topic) => {
+  const topicRes = await callLocalGraphqlApi(TOPIC_QUERY(get(topic, 'typeId')));
+  const topicComponentRule = get(topicRes, 'data.topic.topicComponentRule', []);
+  let loId;
+  if (topicComponentRule && topicComponentRule.length) {
+    const sortedToicComponentRule = sortBy(topicComponentRule, 'order');
+    const learningObjective = get(sortedToicComponentRule.find((el) => get(el, 'componentName') === 'learningObjective'), 'learningObjective');
+    if (get(learningObjective, 'questionBankMeta.count', 0) > 0) {
+      loId = get(learningObjective, 'id');
+    }
+  }
+  return loId;
+};
+
 const transformMongoResults = async (batchSessions) => {
   const finalResult = [];
   const mentorMenteeSessionModel = getTypeQueryController('MentorMenteeSession');
+  const UserPracticeQuestionReportModel = getTypeQueryController('UserPracticeQuestionReport');
   if (batchSessions && batchSessions.length) {
     const batchSession = batchSessions[0] || {};
+    const topic = get(batchSession, 'topic', null);
+    const loId = await getLearningObjectiveIdIfPQExists(topic);
     const homeworkMeta = await getHomeworkCompletedMeta(batchSession, mentorMenteeSessionModel);
+    let PQMeta = 0;
+    if (loId) {
+      PQMeta = await getPQCompletedMeta(batchSession, UserPracticeQuestionReportModel, loId);
+    }
     finalResult.push({
       id: get(batchSession, 'id'),
       topicId: get(batchSession, 'topic.typeId', null),
@@ -186,6 +259,8 @@ const transformMongoResults = async (batchSessions) => {
       totalStudents: get(batchSession, 'classroom.students', []).length,
       completedHomeworkMeta: get(homeworkMeta, 'homeworkCompletedCount', 0),
       completedQuizMeta: get(homeworkMeta, 'quizSubmittedCount', 0),
+      completedPQMeta: PQMeta || 0,
+      isPQComponentExists: !!loId,
       completedAssignmentMeta: get(homeworkMeta, 'assignmentSubmittedCount', 0),
       completedPracticeMeta: get(homeworkMeta, 'practiceSubmittedCount', 0),
       sessionStatus: get(batchSession, 'sessionStatus', 'allotted'),

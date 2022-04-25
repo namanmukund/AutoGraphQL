@@ -1,6 +1,5 @@
 import { get } from 'lodash';
 import {
-  GLOBAL_COURSE_TITLE,
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
   masteryLevels,
@@ -12,50 +11,123 @@ import {
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation
-from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import { QueryController } from '../../../controllers';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = (userId, courseId) => `
-  query{
-    userCurrentTopicComponentStatuses(filter:{
-      and:[
-        {user_some:{
-        id:"${userId}"
-        }},
-      {currentCourse_some:{
-        and:[
-          ${courseId ? `{id: "${courseId}"},` : `{title: "${GLOBAL_COURSE_TITLE}"},`}
-        ]
-      }}
-      ]
-    }){
-      id
-      currentTopic{
-        id
-        order
-      }
-      currentLearningObjective{
-        id
-        order
-      }
-      currentTopicComponentType
-      enrollmentType
-    }
-  }
-  `;
+// const getUserCurrentTopicComponentStatus = (userId, courseId) => `
+//   query{
+//     userCurrentTopicComponentStatuses(filter:{
+//       and:[
+//         {user_some:{
+//         id:"${userId}"
+//         }},
+//       {currentCourse_some:{
+//         and:[
+//           ${courseId ? `{id: "${courseId}"},` : `{title: "${GLOBAL_COURSE_TITLE}"},`}
+//         ]
+//       }}
+//       ]
+//     }){
+//       id
+//       currentTopic{
+//         id
+//         order
+//       }
+//       currentLearningObjective{
+//         id
+//         order
+//       }
+//       currentTopicComponentType
+//       enrollmentType
+//     }
+//   }
+//   `;
 
+const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
+  {
+    $project: {
+      id: 1,
+      currentTopicComponentType: 1,
+      enrollmentType: 1,
+      currentLearningObjective: 1,
+      currentCourse: 1,
+      currentTopic: 1,
+      user: 1,
+    },
+  },
+  {
+    $match: {
+      'user.typeId': userId,
+      'currentCourse.typeId': courseId || OLD_COURSE_ID,
+    },
+  }, {
+    $lookup: {
+      from: 'Topic',
+      let: {
+        currentTopicId: '$currentTopic.typeId',
+      },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: [
+                '$id',
+                '$$currentTopicId',
+              ],
+            },
+          },
+        },
+        {
+          $project: {
+            id: 1,
+            order: 1,
+          },
+        },
+      ],
+      as: 'currentTopic',
+    },
+  }, {
+    $project: {
+      id: 1,
+      currentTopicComponentType: 1,
+      enrollmentType: 1,
+      currentLearningObjective: 1,
+      currentTopic: {
+        $arrayElemAt: [
+          '$currentTopic',
+          0,
+        ],
+      },
+    },
+  }];
 // query to get topic and it's order
-const getTopicQuery = (topicId) => `
-  query{
-    topic(id:"${topicId}"){
-      id
-      order
-      title
-    }
-  }
-  `;
+// const getTopicQuery = (topicId) => `
+//   query{
+//     topic(id:"${topicId}"){
+//       id
+//       order
+//       title
+//     }
+//   }
+//   `;
+
+const TOPIC_AGGREGATION = (topicId) => [
+  {
+    $match: {
+      id: topicId,
+    },
+  },
+  {
+    $project: {
+      id: 1,
+      order: 1,
+      title: 1,
+    },
+  },
+];
 
 // query to get user quiz to get next component
 const userQuizQuery = (userId, topicId) => `
@@ -81,72 +153,228 @@ const userQuizQuery = (userId, topicId) => `
   `;
 
 // query to get user quiz report of a topic
-const getQuizReportQuery = (userId, topicId) => `
-  query{
-    userQuizReports(
-      filter:{
-      and:[
-        {
-          user_some:{
-            id: "${userId}"
-          }
-        },
-        {
-          topic_some:{
-            id:"${topicId}"
-          }
-        }
-      ]
-    }
-    orderBy: createdAt_DESC
-    ){
-      id
-      quizReport {
-        totalQuestionCount
-        correctQuestionCount
-        inCorrectQuestionCount
-        unansweredQuestionCount
-        masteryLevel
-      }
-      learningObjectiveReport {
-        learningObjective {
-          id
-          order
-          title
-        }
-        totalQuestionCount
-        correctQuestionCount
-        inCorrectQuestionCount
-        unansweredQuestionCount
-      }
-    }
-  }
-  `;
+// const getQuizReportQuery = (userId, topicId) => `
+//   query{
+//     userQuizReports(
+//       filter:{
+//       and:[
+//         {
+//           user_some:{
+//             id: "${userId}"
+//           }
+//         },
+//         {
+//           topic_some:{
+//             id:"${topicId}"
+//           }
+//         }
+//       ]
+//     }
+//     orderBy: createdAt_DESC
+//     ){
+//       id
+//       quizReport {
+//         totalQuestionCount
+//         correctQuestionCount
+//         inCorrectQuestionCount
+//         unansweredQuestionCount
+//         masteryLevel
+//       }
+//       learningObjectiveReport {
+//         learningObjective {
+//           id
+//           order
+//           title
+//         }
+//         totalQuestionCount
+//         correctQuestionCount
+//         inCorrectQuestionCount
+//         unansweredQuestionCount
+//       }
+//     }
+//   }
+//   `;
+
+const getUserQuizAggregation = (userId, topicId) => [
+  {
+    $match: {
+      'user.typeId': userId,
+      'topic.typeId': topicId,
+    },
+  },
+  {
+    $project: {
+      id: 1,
+      quizReport: {
+        totalQuestionCount: 1,
+        correctQuestionCount: 1,
+        inCorrectQuestionCount: 1,
+        unansweredQuestionCount: 1,
+        masteryLevel: 1,
+      },
+      learningObjectiveReport: {
+        learningObjective: 1,
+        totalQuestionCount: 1,
+        correctQuestionCount: 1,
+        inCorrectQuestionCount: 1,
+        unansweredQuestionCount: 1,
+      },
+    },
+  },
+  {
+    $sort: {
+      createdAt: -1,
+    },
+  },
+];
 
 // query to get batch status
-const getBatchStatus = (userId) => `
-  query{
-    user(id: "${userId}"){
-      studentProfile{
-        batch{
-          id
-          type
-          currentComponent{
-            currentCourse{
-              id
-              order
-            }
-            currentTopic{
-              id
-              order
-            }
-            latestSessionStatus
-          }
-        }
-      }
-    }
-  }
-  `;
+// const getBatchStatus = (userId) => `
+//   query{
+//     user(id: "${userId}"){
+//       studentProfile{
+//         batch{
+//           id
+//           type
+//           currentComponent{
+//             currentCourse{
+//               id
+//               order
+//             }
+//             currentTopic{
+//               id
+//               order
+//             }
+//             latestSessionStatus
+//           }
+//         }
+//       }
+//     }
+//   }
+//   `;
+
+const getUserBatchDetails = (userId) => [
+  {
+    $project: {
+      id: 1,
+      batch: 1,
+      user: 1,
+    },
+  },
+  {
+    $match: {
+      'user.typeId': userId,
+    },
+  },
+  {
+    $lookup: {
+      from: 'Batch',
+      let: { batchId: '$batch.typeId' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: ['$id', '$$batchId'],
+            },
+          },
+        },
+        {
+          $project: {
+            id: 1,
+            currentComponent: 1,
+          },
+        },
+        {
+          $lookup: {
+            from: 'BatchCurrentComponentStatus',
+            let: {
+              ccId: '$currentComponent.typeId',
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: [
+                      '$id',
+                      '$$ccId',
+                    ],
+                  },
+                },
+              },
+              {
+                $project: {
+                  latestSessionStatus: 1,
+                  currentCourse: {
+                    id: '$currentCourse.typeId',
+                  },
+                  currentTopic: 1,
+                },
+              },
+              {
+                $lookup: {
+                  from: 'Topic',
+                  let: {
+                    currentTopicId: '$currentTopic.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: [
+                            '$id',
+                            '$$currentTopicId',
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        order: 1,
+                      },
+                    },
+                  ],
+                  as: 'currentTopic',
+                },
+              },
+              {
+                $project: {
+                  currentCourse: 1,
+                  currentTopic: {
+                    $arrayElemAt: [
+                      '$currentTopic',
+                      0,
+                    ],
+                  },
+                  latestSessionStatus: 1,
+                },
+              },
+            ],
+            as: 'currentComponent',
+          },
+        },
+        {
+          $project: {
+            id: 1,
+            currentComponent: {
+              $arrayElemAt: ['$currentComponent', 0],
+            },
+          },
+        },
+      ],
+      as: 'batch',
+    },
+  },
+  {
+    $project: {
+      _id: 0,
+      id: 1,
+      batch: {
+        $arrayElemAt: ['$batch', 0],
+      },
+    },
+  },
+];
 
 /*
   parsing data of user quiz report so that the logic implemented ahead can read data in
@@ -179,7 +407,7 @@ const parseQuizReport = async (
       let loRecommendationText = '';
       let masteryLevelText = '';
       let percentage = 0;
-      Object.assign(quizReport.learningObjectiveReport[index].learningObjective, { type: 'LearningObjective', typeId: `${loReport.learningObjective.id}` });
+      Object.assign(quizReport.learningObjectiveReport[index].learningObjective, { type: 'LearningObjective', typeId: `${loReport.learningObjective.typeId}` });
       if (loReport.totalQuestionCount > 0) {
         percentage = (loReport.correctQuestionCount / loReport.totalQuestionCount) * 100;
       }
@@ -263,21 +491,24 @@ const userFirstAndLatestQuizReportMutationResolver = async (
 
     // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
     /* eslint no-await-in-loop:0 */
-    const batchRes = await callLocalGraphqlApi(
-      getBatchStatus(userId),
-      context,
-      '',
-    );
+    const studentProfileModel = new QueryController('StudentProfile', { bypass: true });
+    const batchRes = await studentProfileModel.aggregate(getUserBatchDetails(userId));
+    // const batchRes = await callLocalGraphqlApi(
+    //   getBatchStatus(userId),
+    //   context,
+    //   '',
+    // );
 
-    const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+    const batchCurrentComponentInfo = get(batchRes, '0.batch.currentComponent');
     /* eslint no-await-in-loop:0 */
-    const res = await callLocalGraphqlApi(
-      getUserCurrentTopicComponentStatus(userId, courseId),
-      context,
-      '',
-    );
-
-    const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
+    // const res = await callLocalGraphqlApi(
+    //   getUserCurrentTopicComponentStatus(userId, courseId),
+    //   context,
+    //   '',
+    // );
+    const userCurrentTopicCompModel = new QueryController('UserCurrentTopicComponentStatus', { bypass: true });
+    const res = await userCurrentTopicCompModel.aggregate(getUserCurrentTopicComponentStatusAggregation(userId, courseId));
+    const currentTopicComponentInfo = res[0];
 
     if (userReceivedFromContext) {
       // calling method to validate user current topic component status
@@ -291,13 +522,15 @@ const userFirstAndLatestQuizReportMutationResolver = async (
 
     // calling API to get data of fetched topic
     /* eslint no-await-in-loop:0 */
-    const topicRes = await callLocalGraphqlApi(
-      getTopicQuery(topicId),
-      context,
-      '',
-    );
+    const topicModel = new QueryController('Topic', { bypass: true });
+    // const topicRes = await callLocalGraphqlApi(
+    //   getTopicQuery(topicId),
+    //   context,
+    //   '',
+    // );
+    const topicRes = await topicModel.aggregate(TOPIC_AGGREGATION(topicId));
     // getting info of called topic
-    const topicInfo = get(topicRes, 'data.topic');
+    const topicInfo = topicRes[0];
     if (!topicInfo) {
       if (userReceivedFromContext) {
         throw new DatabaseRecordNotFoundError({
@@ -356,12 +589,13 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     let parsedLatestQuizReport;
     let parsedFirstQuizReport;
     /* eslint no-await-in-loop:0 */
-    const quizRes = await callLocalGraphqlApi(
-      getQuizReportQuery(userId, topicId),
-      context,
-      '',
-    );
-    const quizInfo = get(quizRes, 'data.userQuizReports');
+    // const quizRes = await callLocalGraphqlApi(
+    //   getQuizReportQuery(userId, topicId),
+    //   context,
+    //   '',
+    // );
+    const quizModel = new QueryController('UserQuizReport', { bypass: true });
+    const quizInfo = await quizModel.aggregate(getUserQuizAggregation(userId, topicId));
     // Constructing data for first and latest quiz report
     if (quizInfo.length) {
       const latestQuizReport = quizInfo[0];
