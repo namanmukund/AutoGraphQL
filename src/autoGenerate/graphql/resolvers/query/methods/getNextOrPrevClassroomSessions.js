@@ -187,6 +187,9 @@ const getBatchSessionAggregation = ({
               description: 1,
               topicComponentRule: 1,
               classType: 1,
+              topicQuestions: 1,
+              topicAssignmentQuestions: 1,
+              topicHomeworkAssignmentQuestion: 1,
               thumbnailSmall: {
                 $arrayElemAt: ['$thumbnailSmall', 0],
               },
@@ -398,6 +401,9 @@ const getAdhocSessionAggregation = ({
               description: 1,
               classType: 1,
               topicComponentRule: 1,
+              topicQuestions: 1,
+              topicAssignmentQuestions: 1,
+              topicHomeworkAssignmentQuestion: 1,
               thumbnailSmall: {
                 $arrayElemAt: ['$thumbnailSmall', 0],
               },
@@ -610,6 +616,9 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
         completedQuizMeta: homeworkMeta.quizSubmittedCount,
         isHomeworkExists: homeworkMeta.isHomeworkExists,
         isQuizExists: homeworkMeta.isQuizExists,
+        classworkAssignmentMeta: get(batchSession, 'topic.topicAssignmentQuestions', []).length,
+        homeworkAssignmentMeta: get(batchSession, 'topic.topicHomeworkAssignmentQuestion', []).length,
+        homeworkQuizMeta: get(batchSession, 'topic.topicQuestions', []).length,
       });
     }
   }
@@ -639,6 +648,9 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
         completedQuizMeta: homeworkMeta.quizSubmittedCount,
         isHomeworkExists: homeworkMeta.isHomeworkExists,
         isQuizExists: homeworkMeta.isQuizExists,
+        classworkAssignmentMeta: get(batchSession, 'topic.topicAssignmentQuestions', []).length,
+        homeworkAssignmentMeta: get(batchSession, 'topic.topicHomeworkAssignmentQuestion', []).length,
+        homeworkQuizMeta: get(batchSession, 'topic.topicQuestions', []).length,
       });
     }
   }

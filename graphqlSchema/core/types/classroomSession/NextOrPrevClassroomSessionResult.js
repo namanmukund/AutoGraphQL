@@ -25,6 +25,9 @@ const NextOrPrevClassroomSession = `
     sessionEndDate: Date
     sessionStatus: SessionStatus! @defaultValue(value: "allotted")
     sessionRecordingLink: String
+    classworkAssignmentMeta: Int
+    homeworkAssignmentMeta: Int
+    homeworkQuizMeta: Int
   }
 `;
 
