@@ -108,13 +108,13 @@ import getEventWinner from './query/methods/getEventWinner';
 import classroomSessions from './query/methods/classroomSessions';
 import updateEventSessionAttendance from './mutation/methods/updateEventSessionAttendance';
 import getNextOrPrevClassroomSessions from './query/methods/getNextOrPrevClassroomSessions';
-import classroomDetail from './query/methods/classroomDetail';
+import getClassroomDetails from './query/methods/getClassroomDetails';
 import scheduleSessions from './mutation/shift/scheduleSessions';
 import getSchoolAndBatchDetail from './query/methods/getSchoolAndBatchDetail';
 import getBatchDetails from './query/methods/getBatchDetails';
 import getBatchStudent from './query/methods/getBatchStudent';
 import getSessionComponentMeta from './query/methods/getSessionComponentMeta';
-import getClassroomHomeworkReport from './query/methods/getClassroomHomeworkReport';
+import getClassroomReport from './query/methods/getClassroomReport';
 import getPracticeQuestionReport from './query/methods/getPracticeQuestionReport';
 
 const parsedASTMap = getParsedASTMap(types);
@@ -687,7 +687,7 @@ resolvers.Query.classroomSessions = classroomSessions;
 // Resolver to get next or prev classroom sessions
 resolvers.Query.getNextOrPrevClassroomSessions = getNextOrPrevClassroomSessions;
 // Resolver to get classroom sessions
-resolvers.Query.classroomDetail = classroomDetail;
+resolvers.Query.getClassroomDetails = getClassroomDetails;
 // Resolver to get classroom sessions
 resolvers.Query.getSchoolAndBatchDetail = getSchoolAndBatchDetail;
 // Resolver to fetch Batch Details from OTP and School Code
@@ -697,7 +697,7 @@ resolvers.Query.getBatchStudent = getBatchStudent;
 // Resolver to get classroom session Details
 resolvers.Query.getSessionComponentMeta = getSessionComponentMeta;
 // Resolver to get classroom homework report
-resolvers.Query.getClassroomHomeworkReport = getClassroomHomeworkReport;
+resolvers.Query.getClassroomReport = getClassroomReport;
 // Resolver to get classroom homework report
 resolvers.Query.getPracticeQuestionReport = getPracticeQuestionReport;
 // Resolver for a custom scalar type 'Date'

@@ -5,6 +5,7 @@ import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import {
   BlockedOperationError,
   DatabaseRecordNotFoundError,
+  UserAlreadyExistsError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
 import { MutationController, QueryController } from '../../../controllers';
@@ -55,6 +56,40 @@ const fetchEventUtm = async (eventId) => {
   return get(result, 'data.event.utm[0]', null);
 };
 
+const fetchUserWaitList = async (email, phone, context) => {
+  const query = `{
+  userWaitlists(filter:{
+  or:[
+    ${email ? `{
+      email:"${email}"
+    }` : ''}
+    ${phone ? `{
+      and:[
+        {
+        phone_number_subDoc:"${phone.number}"
+      }
+      {
+        phone_countryCode_subDoc:"${phone.countryCode}"
+      }
+      ]
+    }` : ''}
+  ]
+  }){
+    id
+  }
+}`;
+  const waitListResult = await callLocalGraphqlApi(query, context);
+  return waitListResult;
+};
+const addDetailsToWaitingList = async (input, context) => {
+  const addDetailQuery = `mutation($input: UserWaitlistInput!){
+  addUserWaitlist(input:$input){
+    id
+  }
+}`;
+  await callLocalGraphqlApi(addDetailQuery, context, { input });
+};
+
 const updateExistingUserOTP = (
   searchObj,
   updateObj,
@@ -99,6 +134,27 @@ const signupOrLoginViaOtp = async (
   Object.assign(authentication, {
     bypass: true,
   });
+
+  if (get(input, 'shouldAddInWaitingList')) {
+    const waitingListInput = { role: 'parent' };
+    if (get(input, 'name')) {
+      waitingListInput.name = get(input, 'name');
+    }
+    if (get(input, 'phone')) {
+      waitingListInput.phone = get(input, 'phone');
+    }
+    if (get(input, 'email')) {
+      waitingListInput.email = get(input, 'email');
+    }
+    const waitList = await fetchUserWaitList(get(input, 'email'), get(input, 'phone'), context);
+    if (get(waitList, 'data.userWaitlists', []).length) {
+      throw new UserAlreadyExistsError();
+    }
+    await addDetailsToWaitingList(waitingListInput, context);
+    return {
+      result: true,
+    };
+  }
 
   const modelQueries = new QueryController(USER_TYPE, authentication);
   let userData = await getUserFromDBQuery(input, modelQueries);

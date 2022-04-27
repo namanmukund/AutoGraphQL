@@ -1,36 +1,19 @@
-const ClassroomCourse = `  
-type ClassroomCourse {
-  id: String!
-  order: Int
-  description: String
-  thumbnail: String
-  title: String
-  tools: [ArrayValue]
-  programming: [ArrayValue]
-  theory: [ArrayValue]
-}`;
+const ClassroomDetailResult = `
+  type ClassroomDetailResult {
+    id: ID
+    code: String
+    classroomTitle: String!
+    totalStudents: Int
+    averageAttendance: Int
+    sessionProgress: Int
+  }
+`;
 
 const BatchClass = `
 type BatchClass {
   grade: Grade
   section: Section
 }`;
-
-const ClassroomDetailResult = `
-  type ClassroomDetailResult {
-    id: String!
-    classroomDetail: ClassroomDetails
-    sessions: [ClassroomSessionResult]
-    learingCount: Int
-    testCount: Int
-    revisionCount: Int
-    assignmentCount: Int
-    classroomCourse: ClassroomCourse
-    createdAt: Date
-    batchThumbnail:String
-    customSessionLink: String
-  }
-`;
 
 const BatchAndSchoolResult = `
   type BatchAndSchoolResult {
@@ -42,7 +25,6 @@ const BatchAndSchoolResult = `
 
 export default [
   ClassroomDetailResult,
-  ClassroomCourse,
   BatchAndSchoolResult,
   BatchClass,
 ];

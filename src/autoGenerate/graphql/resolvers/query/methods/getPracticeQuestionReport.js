@@ -194,6 +194,22 @@ const getLearningObjectiveAggregation = ({
   },
 }];
 
+const getLearningObjectivesFromTopicAggregation = ({
+  topicId,
+}) => [{
+  $unwind: {
+    path: '$topics',
+  },
+}, {
+  $match: {
+    'topics.typeId': topicId,
+  },
+}, {
+  $match: {
+    status: 'published',
+  },
+}];
+
 const getUserPracticeQuestionReportAggregation = ({
   userId,
   loId,
@@ -248,26 +264,33 @@ const transformMongoResults = (obj) => {
     };
   }
   const finalResult = {
-    practiceQuestionOverallReport: {
-      submittedPercentage: withFallbackValue(obj.questionsCount === 0 ? 0 : ((obj.submittedCountSum * 100) / obj.studentsCount).toFixed(2)),
-      attemptedPercentage: withFallbackValue(obj.questionsCount === 0 ? 0 : ((obj.attemptedCountSum * 100) / obj.studentsCount).toFixed(2)),
-      unattemptedPercentage: withFallbackValue(obj.questionsCount === 0 ? 0 : ((obj.unattemptedCountSum * 100) / obj.studentsCount).toFixed(2)),
-      firstTryPercentage: withFallbackValue(obj.questionsCount === 0 ? 0 : ((obj.firstTryCountSum * 100) / (obj.submittedCountSum * obj.questionsCount)).toFixed(2)),
-      secondTryPercentage: withFallbackValue(obj.questionsCount === 0 ? 0 : ((obj.secondTryCountSum * 100) / (obj.submittedCountSum * obj.questionsCount)).toFixed(2)),
-      thirdTryPercentage: withFallbackValue(obj.questionsCount === 0 ? 0 : ((obj.thirdTryCountSum * 100) / (obj.submittedCountSum * obj.questionsCount)).toFixed(2)),
-      avgTriesPerQuestion: withFallbackValue(obj.questionsCount === 0 ? 0 : ((obj.firstTryCountSum + (2 * obj.secondTryCountSum) + (3 * obj.thirdTryCountSum)) / (obj.submittedCountSum * obj.questionsCount)).toFixed(2)),
-      avgTimePerQuestion: null,
-    },
+    practiceQuestionOverallReport: obj.learningObjectives.map((innerObj) => {
+      const overallReportObj = {
+        loId: innerObj.id,
+        loTitle: innerObj.title,
+        submittedPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.submittedCountSum * 100) / obj.studentsCount).toFixed(2)),
+        attemptedPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.attemptedCountSum * 100) / obj.studentsCount).toFixed(2)),
+        unattemptedPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.unattemptedCountSum * 100) / obj.studentsCount).toFixed(2)),
+        firstTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.firstTryCountSum * 100) / (innerObj.submittedCountSum * innerObj.questionsCount)).toFixed(2)),
+        secondTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.secondTryCountSum * 100) / (innerObj.submittedCountSum * innerObj.questionsCount)).toFixed(2)),
+        thirdTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.thirdTryCountSum * 100) / (innerObj.submittedCountSum * innerObj.questionsCount)).toFixed(2)),
+        avgTriesPerQuestion: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.firstTryCountSum + (2 * innerObj.secondTryCountSum) + (3 * innerObj.thirdTryCountSum)) / (innerObj.submittedCountSum * innerObj.questionsCount)).toFixed(2)),
+        avgTimePerQuestion: null,
+      };
+      overallReportObj.pqIndividualQuestionReport = Array.from(innerObj.questions.entries(), ([k, v]) => {
+        return {
+          questionId: k,
+          firstTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') * 100) / innerObj.submittedCountSum).toFixed(2)),
+          secondTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((get(v, 'secondTryCountSum') * 100) / innerObj.submittedCountSum).toFixed(2)),
+          thirdTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((get(v, 'thirdTryCountSum') * 100) / innerObj.submittedCountSum).toFixed(2)),
+          avgTries: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') + (2 * get(v, 'secondTryCountSum')) + (3 * get(v, 'thirdTryCountSum'))) / (innerObj.submittedCountSum)).toFixed(2)),
+          submissionsCount: innerObj.submittedCountSum,
+          submissions: Array.from(innerObj.students.values()),
+        };
+      });
+      return overallReportObj;
+    }),
   };
-  finalResult.pqIndividualQuestionReport = Array.from(obj.questions.entries(), ([k, v]) => {
-    return {
-      questionId: k,
-      firstTryPercentage: withFallbackValue(obj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') * 100) / obj.submittedCountSum).toFixed(2)),
-      secondTryPercentage: withFallbackValue(obj.questionsCount === 0 ? 0 : ((get(v, 'secondTryCountSum') * 100) / obj.submittedCountSum).toFixed(2)),
-      thirdTryPercentage: withFallbackValue(obj.questionsCount === 0 ? 0 : ((get(v, 'thirdTryCountSum') * 100) / obj.submittedCountSum).toFixed(2)),
-      avgTries: withFallbackValue(obj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') + (2 * get(v, 'secondTryCountSum')) + (3 * get(v, 'thirdTryCountSum'))) / (obj.submittedCountSum)).toFixed(2)),
-    };
-  });
   return finalResult;
 };
 
@@ -288,14 +311,14 @@ const practiceQuestionReport = (async (root, params, context) => {
   //     thirdTryPercentage: 25,
   //     avgTriesPerQuestion: 2.3,
   //     avgTimePerQuestion: 2,
+  //     pqIndividualQuestionReport: [{
+  //       questionId: null,
+  //       firstTryPercentage: 20,
+  //       secondTryPercentage: 25,
+  //       thirdTryPercentage: 55,
+  //       avgTries: 1.2,
+  //     }],
   //   },
-  //   pqIndividualQuestionReport: [{
-  //     questionId: null,
-  //     firstTryPercentage: 20,
-  //     secondTryPercentage: 25,
-  //     thirdTryPercentage: 55,
-  //     avgTries: 1.2,
-  //   }],
   // };
 
   /**
@@ -374,20 +397,10 @@ const practiceQuestionReport = (async (root, params, context) => {
   const students = get(batchSessionRes, '[0].batch.students', []);
   const obj = {
     studentsCount: students.length,
-    submittedCountSum: 0,
-    attemptedCountSum: 0,
-    unattemptedCountSum: 0,
-    firstTryCountSum: 0,
-    secondTryCountSum: 0,
-    thirdTryCountSum: 0,
-    avgTriesPerQuestion: 0,
-    avgTimePerQuestion: null,
-    questions: new Map(),
-    questionsCount: 0,
+    learningObjectives: [],
   };
 
-  let learningObjectiveIdFromLearningSlide = null;
-
+  const los = [];
   /**
    * Validate input params
    */
@@ -401,18 +414,18 @@ const practiceQuestionReport = (async (root, params, context) => {
       if (get(learningSlideRes, '[0].practiceQuestions', []).length === 0) {
         throw new PracticeQuestionsNotFound();
       }
-      learningObjectiveIdFromLearningSlide = get(learningSlideRes, '[0].learningObjectives[0].typeId');
-      obj.questionsCount = get(learningSlideRes, '[0].practiceQuestions', []).length;
+      los.push({
+        id: get(learningSlideRes, '[0].learningObjectives[0].typeId'),
+      });
     } else if (learningObjectiveId) {
       const learningObjectiveRes = await learningObjectiveModel.aggregate(
         getLearningObjectiveAggregation({
           learningObjectiveId,
         }),
       );
-      // if (get(learningObjectiveRes, '[0].learningSlides[0].practiceQuestions', []).length === 0) {
-      //   throw new PracticeQuestionsNotFound();
-      // }
-      obj.questionsCount = get(learningObjectiveRes, '[0].learningSlides[0].practiceQuestions', []).length;
+      los.push({
+        id: get(learningObjectiveRes, '[0].id'),
+      });
     } else {
       throw new MissingMandatoryInputInRequestError({
         data: {
@@ -431,70 +444,105 @@ const practiceQuestionReport = (async (root, params, context) => {
         throw new PracticeQuestionsNotFound();
       }
       obj.questionsCount = get(learningObjectiveRes, '[0].questionBank', []).length;
+      los.push({ id: learningObjectiveId });
     } else {
-      throw new MissingMandatoryInputInRequestError({
-        data: {
-          message: 'User id or learning objective Id not passed in input',
-        },
-      });
+      const learningObjectiveRes = await learningObjectiveModel.aggregate(
+        getLearningObjectivesFromTopicAggregation({
+          topicId,
+        }),
+      );
+      if (learningObjectiveRes && learningObjectiveRes.length) {
+        for (const lo of learningObjectiveRes) {
+          los.push(lo);
+        }
+      }
     }
   } else {
     throw new InvalidLearningObjectiveComponent();
   }
 
   /**
-  * All students of batch
-  */
+   * For all LoIDs
+   */
+  for (const lo of los) {
+    const learningObjectiveIdFromArray = get(lo, 'id');
+    /**
+    * All students of batch
+    */
+    const loObj = {
+      id: learningObjectiveIdFromArray,
+      title: get(lo, 'title', ''),
+      submittedCountSum: 0,
+      attemptedCountSum: 0,
+      unattemptedCountSum: 0,
+      firstTryCountSum: 0,
+      secondTryCountSum: 0,
+      thirdTryCountSum: 0,
+      avgTriesPerQuestion: 0,
+      avgTimePerQuestion: null,
+      students: new Map(),
+      questions: new Map(),
+      questionsCount: 0,
+    };
+    for (const student of students) {
+      const studentUserId = get(student, 'user.id');
+      const loId = learningObjectiveIdFromArray;
+      const userPracticeQuestionReportRes = await userPracticeQuestionReportModel.aggregate(
+        getUserPracticeQuestionReportAggregation({
+          userId: studentUserId,
+          loId,
+        }),
+      );
 
-  for (const student of students) {
-    const studentUserId = get(student, 'user.id');
-    const loId = learningObjectiveId || learningObjectiveIdFromLearningSlide;
-    const userPracticeQuestionReportRes = await userPracticeQuestionReportModel.aggregate(
-      getUserPracticeQuestionReportAggregation({
-        userId: studentUserId,
-        loId,
-      }),
-    );
+      // since multiple userPracticeQuestionReports per user per lo, we get the latest one created
 
-    // since multiple userPracticeQuestionReports per user per lo, we get latest one created
+      if (userPracticeQuestionReportRes.length) {
+        loObj.submittedCountSum += 1;
 
-    if (userPracticeQuestionReportRes.length) {
-      obj.submittedCountSum += 1;
-      obj.firstTryCountSum += get(userPracticeQuestionReportRes, '[0].firstTryCount');
-      obj.secondTryCountSum += get(userPracticeQuestionReportRes, '[0].secondTryCount');
-      obj.thirdTryCountSum += get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount');
-      obj.questionsCount = get(userPracticeQuestionReportRes, '[0].detailedReport', []).length;
-      for (const report of get(userPracticeQuestionReportRes, '[0].detailedReport')) {
-        const tempObj = {
-          firstTryCount: 0,
-          secondTryCount: 0,
-          thirdTryCount: 0,
+        // handling individual student submissions
+        const studentObj = {
+          userId: studentUserId,
+          updatedAt: get(userPracticeQuestionReportRes, '[0].updatedAt', new Date().toISOString()),
         };
-        if (get(report, 'firstTry')) {
-          tempObj.firstTryCount += 1;
-        } else if (get(report, 'secondTry')) {
-          tempObj.secondTryCount += 1;
-        } else {
-          tempObj.thirdTryCount += 1;
-        }
-        if (obj.questions.get(get(report, 'question.typeId'))) {
-          const newObj = {
-            firstTryCountSum: obj.questions.get(get(report, 'question.typeId')).firstTryCountSum + tempObj.firstTryCount,
-            secondTryCountSum: obj.questions.get(get(report, 'question.typeId')).secondTryCountSum + tempObj.secondTryCount,
-            thirdTryCountSum: obj.questions.get(get(report, 'question.typeId')).thirdTryCountSum + tempObj.thirdTryCount,
+        loObj.students.set(studentUserId, studentObj);
+
+        loObj.firstTryCountSum += get(userPracticeQuestionReportRes, '[0].firstTryCount');
+        loObj.secondTryCountSum += get(userPracticeQuestionReportRes, '[0].secondTryCount');
+        loObj.thirdTryCountSum += get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount');
+        loObj.questionsCount = get(userPracticeQuestionReportRes, '[0].detailedReport', []).length;
+        for (const report of get(userPracticeQuestionReportRes, '[0].detailedReport')) {
+          const tempObj = {
+            firstTryCount: 0,
+            secondTryCount: 0,
+            thirdTryCount: 0,
           };
-          obj.questions.set(get(report, 'question.typeId'), newObj);
-        } else {
-          obj.questions.set(get(report, 'question.typeId'), {
-            firstTryCountSum: tempObj.firstTryCount,
-            secondTryCountSum: tempObj.secondTryCount,
-            thirdTryCountSum: tempObj.thirdTryCount,
-          });
+          if (get(report, 'firstTry')) {
+            tempObj.firstTryCount += 1;
+          } else if (get(report, 'secondTry')) {
+            tempObj.secondTryCount += 1;
+          } else {
+            tempObj.thirdTryCount += 1;
+          }
+          if (loObj.questions.get(get(report, 'question.typeId'))) {
+            const newObj = {
+              firstTryCountSum: loObj.questions.get(get(report, 'question.typeId')).firstTryCountSum + tempObj.firstTryCount,
+              secondTryCountSum: loObj.questions.get(get(report, 'question.typeId')).secondTryCountSum + tempObj.secondTryCount,
+              thirdTryCountSum: loObj.questions.get(get(report, 'question.typeId')).thirdTryCountSum + tempObj.thirdTryCount,
+            };
+            loObj.questions.set(get(report, 'question.typeId'), newObj);
+          } else {
+            loObj.questions.set(get(report, 'question.typeId'), {
+              firstTryCountSum: tempObj.firstTryCount,
+              secondTryCountSum: tempObj.secondTryCount,
+              thirdTryCountSum: tempObj.thirdTryCount,
+            });
+          }
         }
+      } else {
+        loObj.unattemptedCountSum += 1;
       }
-    } else {
-      obj.unattemptedCountSum += 1;
     }
+    obj.learningObjectives.push(loObj);
   }
 
   /**
@@ -503,6 +551,21 @@ const practiceQuestionReport = (async (root, params, context) => {
 
   if (userId && learningObjectiveId && !students.length) {
     obj.studentsCount = 1;
+    const loObj = {
+      id: learningObjectiveId,
+      title: '',
+      submittedCountSum: 0,
+      attemptedCountSum: 0,
+      unattemptedCountSum: 0,
+      firstTryCountSum: 0,
+      secondTryCountSum: 0,
+      thirdTryCountSum: 0,
+      avgTriesPerQuestion: 0,
+      avgTimePerQuestion: null,
+      students: new Map(),
+      questions: new Map(),
+      questionsCount: 0,
+    };
     const userPracticeQuestionReportRes = await userPracticeQuestionReportModel.aggregate(
       getUserPracticeQuestionReportAggregation({
         userId,
@@ -510,10 +573,10 @@ const practiceQuestionReport = (async (root, params, context) => {
       }),
     );
     if (userPracticeQuestionReportRes.length) {
-      obj.submittedCountSum += 1;
-      obj.firstTryCountSum += get(userPracticeQuestionReportRes, '[0].firstTryCount');
-      obj.secondTryCountSum += get(userPracticeQuestionReportRes, '[0].secondTryCount');
-      obj.thirdTryCountSum += get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount');
+      loObj.submittedCountSum += 1;
+      loObj.firstTryCountSum += get(userPracticeQuestionReportRes, '[0].firstTryCount');
+      loObj.secondTryCountSum += get(userPracticeQuestionReportRes, '[0].secondTryCount');
+      loObj.thirdTryCountSum += get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount');
       for (const report of get(userPracticeQuestionReportRes, '[0].detailedReport')) {
         const tempObj = {
           firstTryCount: 0,
@@ -527,15 +590,15 @@ const practiceQuestionReport = (async (root, params, context) => {
         } else {
           tempObj.thirdTryCount += 1;
         }
-        if (obj.questions.get(get(report, 'question.typeId'))) {
+        if (loObj.questions.get(get(report, 'question.typeId'))) {
           const newObj = {
-            firstTryCountSum: obj.questions.get(get(report, 'question.typeId')).firstTryCountSum + tempObj.firstTryCount,
-            secondTryCountSum: obj.questions.get(get(report, 'question.typeId')).secondTryCountSum + tempObj.secondTryCount,
-            thirdTryCountSum: obj.questions.get(get(report, 'question.typeId')).thirdTryCountSum + tempObj.thirdTryCount,
+            firstTryCountSum: loObj.questions.get(get(report, 'question.typeId')).firstTryCountSum + tempObj.firstTryCount,
+            secondTryCountSum: loObj.questions.get(get(report, 'question.typeId')).secondTryCountSum + tempObj.secondTryCount,
+            thirdTryCountSum: loObj.questions.get(get(report, 'question.typeId')).thirdTryCountSum + tempObj.thirdTryCount,
           };
-          obj.questions.set(get(report, 'question.typeId'), newObj);
+          loObj.questions.set(get(report, 'question.typeId'), newObj);
         } else {
-          obj.questions.set(get(report, 'question.typeId'), {
+          loObj.questions.set(get(report, 'question.typeId'), {
             firstTryCountSum: tempObj.firstTryCount,
             secondTryCountSum: tempObj.secondTryCount,
             thirdTryCountSum: tempObj.thirdTryCount,
@@ -543,8 +606,9 @@ const practiceQuestionReport = (async (root, params, context) => {
         }
       }
     } else {
-      obj.unattemptedCountSum += 1;
+      loObj.unattemptedCountSum += 1;
     }
+    obj.learningObjectives.push(loObj);
   }
 
   /**

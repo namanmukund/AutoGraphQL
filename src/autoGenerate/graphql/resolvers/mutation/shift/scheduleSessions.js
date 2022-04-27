@@ -170,13 +170,68 @@ const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, allo
 };
 
 // check if sessions already exist at provided date and slot
-const sessionExistsCheck = async (rescheduleSlots, batchId, startDate) => {
+const sessionExistsCheck = async (rescheduleSlots, batchId, startDate, startMinutes, endMinutes) => {
   const sentSlotsArray = getSelectedSlotsTime(rescheduleSlots);
-  const batchSessionsOnSameDateAndSlot = await getBatchSessions(batchId, startDate, sentSlotsArray[0], 'allotted');
-  const adhocSessionsOnSameDateAndSlot = await getAdhocSessions(batchId, startDate, sentSlotsArray[0], 'allotted');
-  if (batchSessionsOnSameDateAndSlot.length > 0 || adhocSessionsOnSameDateAndSlot.length > 0) {
-    return true;
+  const dates = [];
+  dates.push(startDate);
+  if (endMinutes) {
+    if (endMinutes > 60) {
+      let i = 1;
+      let tempEndMinutes = endMinutes;
+      while (tempEndMinutes > 60) {
+        let laterSlot = sentSlotsArray[0] + i;
+        if (laterSlot > 23) {
+          dates.push(moment(new Date(startDate)).addDays(1).toDate());
+          laterSlot -= 23;
+        }
+        sentSlotsArray.push(laterSlot);
+        i += 1;
+        tempEndMinutes -= 60;
+      }
+    }
   }
+  if (sentSlotsArray[0] - 1 >= 0) {
+    sentSlotsArray.push(sentSlotsArray[0] - 1);
+  }
+  if (sentSlotsArray[0] - 2 >= 0) {
+    sentSlotsArray.push(sentSlotsArray[0] - 2);
+  }
+  let slotInput = '{or: [';
+  let dateInput = '{or: [';
+  sentSlotsArray.forEach((slot) => { slotInput += `{slot${slot}: true}`; });
+  dates.forEach((date) => { dateInput += `{bookingDate: "${date.toISOString()}"}`; });
+  slotInput += ']}';
+  dateInput += ']}';
+
+  const batchSessionsOnSameDateAndSlot = await getBatchSessions(batchId, startDate, null, 'allotted', slotInput, dateInput);
+  const adhocSessionsOnSameDateAndSlot = await getAdhocSessions(batchId, startDate, null, 'allotted', slotInput, dateInput);
+
+  if (typeof startMinutes === 'number' && typeof endMinutes === 'number') {
+    const inputSlot = sentSlotsArray[0];
+    const inputStartMinutes = (inputSlot * 60) + startMinutes;
+    const inputEndMinutes = (inputSlot * 60) + endMinutes;
+    for (const batchSession of batchSessionsOnSameDateAndSlot) {
+      const sessionSlot = getSelectedSlotsTime(batchSession);
+      const sessionStartMinutes = (sessionSlot * 60) + get(batchSession, 'startMinutes', 0);
+      const sessionEndMinutes = (sessionSlot * 60) + get(batchSession, 'endMinutes', 0);
+      if (!(inputEndMinutes <= sessionStartMinutes || inputStartMinutes >= sessionEndMinutes)) {
+        return true;
+      }
+    }
+    for (const adhocSession of adhocSessionsOnSameDateAndSlot) {
+      const sessionSlot = getSelectedSlotsTime(adhocSession);
+      const sessionStartMinutes = (sessionSlot * 60) + get(adhocSession, 'startMinutes', 0);
+      const sessionEndMinutes = (sessionSlot * 60) + get(adhocSession, 'endMinutes', 0);
+      if (!(inputEndMinutes <= sessionStartMinutes || inputStartMinutes >= sessionEndMinutes)) {
+        return true;
+      }
+    }
+  } else {
+    if (batchSessionsOnSameDateAndSlot.length > 0 || adhocSessionsOnSameDateAndSlot.length > 0) {
+      return true;
+    }
+  }
+
   return false;
 };
 
@@ -292,6 +347,11 @@ const scheduleSessionsMutationResolver = async (
   const { filteredSlotsString: nonRecurringfilteredSlotsString, filteredSlotsStringForFilterQuery } = extractSlotsFromInput(nonRecurringslots);
   const startMinutes = get(nonRecurringslots, 'startTime', 0);
   const endMinutes = get(nonRecurringslots, 'endTime', 0);
+
+  if ((endMinutes - startMinutes > 120) || (endMinutes < startMinutes) || (startMinutes > 59)) {
+    throw new InvalidScheduleParameters();
+  }
+
   let classMode;
   for (const key in nonRecurringslots) {
     if (key.includes('Mode')) {
@@ -325,7 +385,7 @@ const scheduleSessionsMutationResolver = async (
       throw new InvalidRescheduleParameters();
     } else {
       // check if sessions already exist at provided date and slot and have to reschedule batch session
-      const sessionsExist = await sessionExistsCheck(nonRecurringslots, batchId, startDate);
+      const sessionsExist = await sessionExistsCheck(nonRecurringslots, batchId, startDate, startMinutes, endMinutes);
       if (sessionsExist && batchSessionId) {
         throw new SlotsOccupiedError();
       }
@@ -346,9 +406,9 @@ const scheduleSessionsMutationResolver = async (
         });
       }
       if (adhocSessionId) {
-        await updateAdhocSession(adhocSessionId, nonRecurringfilteredSlotsString, startDate, startMinutes, endMinutes, classMode);
+        await updateAdhocSession(adhocSessionId, nonRecurringfilteredSlotsString, startDate, null, null, null, startMinutes, endMinutes, classMode);
       } else {
-        await updateBatchSession(batchSessionId, nonRecurringfilteredSlotsString, startDate, startMinutes, endMinutes, classMode);
+        await updateBatchSession(batchSessionId, nonRecurringfilteredSlotsString, startDate, null, null, null, startMinutes, endMinutes, classMode);
       }
     }
     return {
@@ -434,7 +494,7 @@ const scheduleSessionsMutationResolver = async (
   // if force schedule, we can schedule anywhere irrespective of working day or event schedule
   if (sessionType === 'batch') {
     // check if sessions already exist at provided date and slot
-    const sessionsExist = await sessionExistsCheck(nonRecurringslots, batchId, startDate);
+    const sessionsExist = await sessionExistsCheck(nonRecurringslots, batchId, startDate, startMinutes, endMinutes);
     if (sessionsExist) {
       if (!forceScheduleSessions && !isRecurring) {
         throw new SlotsOccupiedError();

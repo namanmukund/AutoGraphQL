@@ -34,6 +34,7 @@ const Batch = `
   {
     course: Course! @relation(name: "BatchCurrentComponentStatusCourse", direction: "OneWay")
     coursePackage: CoursePackage @relation(name: "BatchCoursePackage", direction: "OneWay")
+    coursePackageTopicRule: [CoursePackageTopicRule]
     allottedMentor: User @relation(name:"BatchMentor")
     code: String! @uniqueOrEmpty @trim @uppercase
     classroomTitle: String
