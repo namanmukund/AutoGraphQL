@@ -251,16 +251,7 @@ const withFallbackValue = (value) => {
 const transformMongoResults = (obj) => {
   if (obj.studentsCount === 0) {
     return {
-      practiceQuestionOverallReport: {
-        submittedPercentage: 0,
-        attemptedPercentage: 0,
-        unattemptedPercentage: 0,
-        firstTryPercentage: 0,
-        secondTryPercentage: 0,
-        thirdTryPercentage: 0,
-        avgTriesPerQuestion: 0,
-        avgTimePerQuestion: null,
-      },
+      practiceQuestionOverallReport: [],
     };
   }
   const finalResult = {
