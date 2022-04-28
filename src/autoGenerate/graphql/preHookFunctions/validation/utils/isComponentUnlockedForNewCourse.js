@@ -9,8 +9,7 @@ import {
   UserOrTopicNotPresentError,
   PaidComponentLockedError,
 } from '../../../../../../constants/errors';
-import getUserCurrentTopicComponentStatusForNewCourse
-from '../../../../utils/getUserCurrentTopicComponentStatusForNewCourse';
+import getUserCurrentTopicComponentStatusForNewCourse from '../../../../utils/getUserCurrentTopicComponentStatusForNewCourse';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
 import {
   backendApps,
@@ -19,11 +18,11 @@ import {
 } from '../../../../../../constants';
 import getTopicForValidation from './getTopicForValidation';
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
-import getBatchCurrentComponentStatus
-from '../../../../utils/getBatchCurrentComponentStatus';
-import validateMentorMenteePermissionForComponentForNewCourse
-from './validateMentorMenteePermissionForComponentForNewCourse';
+import getBatchCurrentComponentStatus from '../../../../utils/getBatchCurrentComponentStatus';
+import validateMentorMenteePermissionForComponentForNewCourse from './validateMentorMenteePermissionForComponentForNewCourse';
 import { getMentorMenteeSessionForValidation } from './index';
+import { ifAuthorized } from '../../../../../../utils';
+import { MENTOR, SCHOOL_TEACHER } from '../../../../../../constants/roles';
 
 /*
 This is a common method to check whether the called topic component is locked or not
@@ -136,7 +135,10 @@ const isComponentUnlockedForNewCourse = async (
                                 order
                              }`;
   }
-  if (!backendApps.includes(appName) && userIdFromContext !== userId && page !== 'quiz') {
+  const authentication = ifAuthorized(context);
+  const userRole = get(authentication, 'user.role');
+  const isNotMentorOrTeacher = !(userRole === MENTOR || userRole === SCHOOL_TEACHER);
+  if ((!backendApps.includes(appName) && userIdFromContext !== userId && page !== 'quiz') && isNotMentorOrTeacher) {
     throw new UserMismatchError();
   }
   if (!topicInfo) {
