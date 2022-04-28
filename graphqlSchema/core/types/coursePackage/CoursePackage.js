@@ -15,6 +15,7 @@ const CoursePackageTopicRule = `
     order: Int
     topic: Topic @relation(name: "CoursePackageTopic", direction: "OneWay")
     description: String
+    isRevision: Boolean @defaultValue(value: "false")
   }
 `;
 
@@ -53,6 +54,7 @@ const CoursePackage = `
     bannerThumbnail: File @relation(name: "CourseBannerThumbnail", direction: "OneWay")
     courses: [Course] @relation(name: "CoursePackageCourses", direction: "OneWay")
     topics: [CoursePackageTopicRule]
+    revisionSessionCount: Int
     secondaryCategory: String
     minGrade: Int
     maxGrade: Int
