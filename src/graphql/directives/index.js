@@ -50,6 +50,11 @@ directive @cacheControl(
 
 # Create index for a field
 directive @createIndex on FIELD
+
+# Define optimization mode for querying database.
+directive @optimization(
+  mode: OptimizationMode
+) on SCHEMA | FIELD
 `;
 
 export default directive;

@@ -24,7 +24,9 @@ const b2bFormFields = `
 `;
 
 const BatchSession = `
-  type BatchSession @model {
+  type BatchSession @model
+  @optimization(mode: "projectedAggregation")
+  {
     course: Course @relation(name: "BatchSessionCourse", direction: "OneWay")
     coursePackage: CoursePackage @relation(name: "BatchSessionCoursePackage", direction: "OneWay")
     batch: Batch! @relation(name: "BatchSessionBatch", direction: "OneWay")
