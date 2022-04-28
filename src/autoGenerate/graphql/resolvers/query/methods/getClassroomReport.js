@@ -406,6 +406,9 @@ const transformMongoResults = (obj) => {
       percentageCorrect: obj.pqSubmittedCount === 0 ? 0 : ((v * 100) / obj.pqSubmittedCount).toFixed(2),
     };
   });
+  finalResult.quiz.submissions = Array.from(obj.quizSubmissions.values());
+  finalResult.coding.submissions = Array.from(obj.assignmentSubmissions.values());
+  finalResult.blockBasedPractice.submissions = Array.from(obj.pqSubmissions.values());
   return finalResult;
 };
 
@@ -479,6 +482,7 @@ const classroomReport = (async (root, params, context) => {
     quizSubmittedCount: 0,
     quizUnattemptedCount: 0,
     quizQuestions: new Map(),
+    quizSubmissions: new Map(),
     assignmentTotalQuestions: 0,
     assignmentCorrectSum: 0,
     assignmentIncorrectSum: 0,
@@ -487,6 +491,7 @@ const classroomReport = (async (root, params, context) => {
     assignmentSubmittedCount: 0,
     assignmentUnattemptedCount: 0,
     assignmentQuestions: new Map(),
+    assignmentSubmissions: new Map(),
     pqTotalQuestions: 0,
     pqCorrectSum: 0,
     pqIncorrectSum: 0,
@@ -495,6 +500,7 @@ const classroomReport = (async (root, params, context) => {
     pqSubmittedCount: 0,
     pqUnattemptedCount: 0,
     pqQuestions: new Map(),
+    pqSubmissions: new Map(),
   };
 
   for (const student of students) {
@@ -550,12 +556,18 @@ const classroomReport = (async (root, params, context) => {
       }
       if (get(mms, 'isAssignmentSubmitted')) {
         obj.assignmentSubmittedCount += 1;
+        obj.assignmentSubmissions.set(userId, {
+          userId,
+        });
       } else {
         obj.assignmentUnattemptedCount += 1;
       }
       if (get(mms, 'isPracticeSubmitted')) {
         obj.pqSubmittedCount += 1;
         obj.pqTotalQuestions = 1;
+        obj.pqSubmissions.set(userId, {
+          userId,
+        });
       } else {
         obj.pqUnattemptedCount += 1;
       }
@@ -565,12 +577,14 @@ const classroomReport = (async (root, params, context) => {
     }
 
     if (userQuizReportRes.length && get(userQuizReportRes, '[0].latest')) {
-      // TODO : add separation for various learning objectives
       const userQuizReport = get(userQuizReportRes, '[0].latest');
-      // const individualLoReports = get(userQuizReport, 'learningObjectiveReport');
       obj.quizTotalQuestions = get(userQuizReport, 'quizReport.totalQuestionCount');
       obj.quizCorrectSum += get(userQuizReport, 'quizReport.correctQuestionCount');
       obj.quizIncorrectSum += get(userQuizReport, 'quizReport.inCorrectQuestionCount');
+      obj.quizSubmissions.set(userId, {
+        userId,
+        quizScore: get(userQuizReport, 'quizReport.correctQuestionCount'),
+      });
       const quizAnswers = get(userQuizReport, 'quizAnswers', []);
       for (const quizAnswer of quizAnswers) {
         if (obj.quizQuestions.has(get(quizAnswer, 'question.typeId'))) {

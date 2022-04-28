@@ -17,6 +17,8 @@ const StudentSubmissions = `
   type StudentSubmissions {
     userId: String
     updatedAt: Date
+    averageTries: Float
+    quizScore: Int
   }
 `;
 
