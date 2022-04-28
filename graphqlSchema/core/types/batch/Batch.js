@@ -43,6 +43,7 @@ const Batch = `
     currentComponent: BatchCurrentComponentStatus @relation(name: "BatchCurrentComponentStatusBatch", isSubset: true)
     documentType: SessionDocumentType @defaultValue(value: "batch")
     type: BatchType @defaultValue(value: "normal")
+    isTeacherTraining: Boolean @defaultValue(value: "false")
     campaign: Campaign @relation(name: "CampaignBatch")
     classes: [SchoolClass] @relation(name: "BatchSchoolClass", direction: "OneWay")
     school: School @relation(name: "BatchSchool", direction: "OneWay")

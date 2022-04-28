@@ -4,6 +4,7 @@ const AdhocSessionType = `
     homework
     assessment
     project
+    teacherTraining
   }`;
 
 export default AdhocSessionType;

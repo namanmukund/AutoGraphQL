@@ -44,6 +44,8 @@ const BatchSession = `
     sessionRecordingLink: String
     sessionCommentByMentor: String
     attendance: [BatchAttendanceType]
+    mentorStartAttendance: Date
+    mentorSavesAttendance: Date
     isFeedbackSubmitted: Boolean @defauly(value: "false")
     mentorPaymentStatus: MentorPaymentStatus @defaultValue(value: "declined")
     mentorPaymentJustification: String
@@ -56,8 +58,6 @@ const BatchSession = `
     videoLinkClickByMentee: Date
     startSessionByMentee: Date
     endSessionByMentee: Date
-    mentorStartAttendance: Date
-    mentorSavesAttendance: Date
     videoLinkClickByMenteePlatform: Platform
     startSessionByMenteePlatform: Platform
     schoolSessionsOtp: [SchoolSessionOtp] @relation(name:"SchoolSessionOtpBatchSession")

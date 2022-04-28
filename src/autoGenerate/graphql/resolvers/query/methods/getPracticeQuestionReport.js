@@ -362,7 +362,7 @@ const practiceQuestionReport = (async (root, params, context) => {
       }),
     );
 
-    if (!(batchSessionRes && batchSessionRes.length)) {
+    if (!(batchSessionRes && batchSessionRes.length) && batchId) {
       throw new MissingMandatoryInputInRequestError({
         data: {
           message: 'Topic Id or Batch Id passed is incorrect.',

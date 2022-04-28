@@ -45,6 +45,7 @@ class MasterController {
       throw new UnauthenticatedAppError();
     }
     // validate user.
+    console.log(userTokenNotRequiredModels.includes(this.modelName), this.modelName);
     if (!userTokenNotRequiredModels.includes(this.modelName) && !this.user) {
       throw new UnauthenticatedUserError();
     }
