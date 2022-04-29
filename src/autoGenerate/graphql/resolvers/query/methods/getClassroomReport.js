@@ -376,17 +376,27 @@ const transformMongoResults = (obj) => {
       notEvaluatedCount: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : obj.assignmentUnevaluated / obj.assignmentTotalQuestions,
       questions: [],
     },
-    blockBasedPractice: {
-      submittedPercentage: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqSubmittedCount * 100) / obj.studentsCount).toFixed(2),
-      unattemptedPercentage: obj.pqTotalQuestions === 0 ? 0 : ((obj.pqUnattemptedCount * 100) / obj.studentsCount).toFixed(2),
-      totalQuestions: obj.pqTotalQuestions,
-      averageScore: (obj.pqTotalQuestions === 0 || obj.pqSubmittedCount === 0) ? 0 : ((obj.pqCorrectSum * 100) / (obj.pqSubmittedCount * obj.pqTotalQuestions)).toFixed(2),
-      averageCorrect: (obj.pqTotalQuestions === 0 || obj.pqSubmittedCount === 0) ? 0 : (obj.pqCorrectSum / obj.pqSubmittedCount).toFixed(2),
-      averageIncorrect: (obj.pqTotalQuestions === 0 || obj.pqSubmittedCount === 0) ? 0 : (obj.pqIncorrectSum / obj.pqSubmittedCount).toFixed(2),
-      averagePartiallyCorrect: (obj.pqTotalQuestions === 0 || obj.pqSubmittedCount === 0) ? 0 : (obj.pqPartiallyCorrectSum / obj.pqSubmittedCount).toFixed(2),
-      notEvaluatedCount: (obj.pqTotalQuestions === 0 || obj.pqSubmittedCount === 0) ? 0 : obj.pqUnevaluated / obj.pqTotalQuestions,
-      questions: [],
-    },
+    // eslint-disable-next-line no-unused-vars
+    blockBasedPractice: Array.from(obj.blockBasedPractice.entries(), ([k, v]) => {
+      return {
+        blockBasedPracticeTitle: get(v, 'title'),
+        submittedPercentage: v.pqTotalQuestions === 0 ? 0 : ((v.pqSubmittedCount * 100) / obj.studentsCount).toFixed(2),
+        unattemptedPercentage: v.pqTotalQuestions === 0 ? 0 : ((v.pqUnattemptedCount * 100) / obj.studentsCount).toFixed(2),
+        totalQuestions: v.pqTotalQuestions,
+        averageScore: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : ((v.pqCorrectSum * 100) / (v.pqSubmittedCount * v.pqTotalQuestions)).toFixed(2),
+        averageCorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqCorrectSum / v.pqSubmittedCount).toFixed(2),
+        averageIncorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqIncorrectSum / v.pqSubmittedCount).toFixed(2),
+        averagePartiallyCorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqPartiallyCorrectSum / v.pqSubmittedCount).toFixed(2),
+        notEvaluatedCount: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : v.pqUnevaluated / v.pqTotalQuestions,
+        questions: Array.from(v.pqQuestions.entries(), ([key, value]) => {
+          return {
+            questionId: key,
+            percentageCorrect: v.pqSubmittedCount === 0 ? 0 : ((value * 100) / v.pqSubmittedCount).toFixed(2),
+          };
+        }),
+        submissions: Array.from(v.pqSubmissions.values()),
+      };
+    }),
   };
   finalResult.quiz.questions = Array.from(obj.quizQuestions.entries(), ([k, v]) => {
     return {
@@ -400,15 +410,10 @@ const transformMongoResults = (obj) => {
       percentageCorrect: obj.assignmentSubmittedCount === 0 ? 0 : ((v * 100) / obj.assignmentSubmittedCount).toFixed(2),
     };
   });
-  finalResult.blockBasedPractice.questions = Array.from(obj.pqQuestions.entries(), ([k, v]) => {
-    return {
-      questionId: k,
-      percentageCorrect: obj.pqSubmittedCount === 0 ? 0 : ((v * 100) / obj.pqSubmittedCount).toFixed(2),
-    };
-  });
+
   finalResult.quiz.submissions = Array.from(obj.quizSubmissions.values());
   finalResult.coding.submissions = Array.from(obj.assignmentSubmissions.values());
-  finalResult.blockBasedPractice.submissions = Array.from(obj.pqSubmissions.values());
+
   return finalResult;
 };
 
@@ -492,15 +497,7 @@ const classroomReport = (async (root, params, context) => {
     assignmentUnattemptedCount: 0,
     assignmentQuestions: new Map(),
     assignmentSubmissions: new Map(),
-    pqTotalQuestions: 0,
-    pqCorrectSum: 0,
-    pqIncorrectSum: 0,
-    pqPartiallyCorrectSum: 0,
-    pqUnevaluated: 0,
-    pqSubmittedCount: 0,
-    pqUnattemptedCount: 0,
-    pqQuestions: new Map(),
-    pqSubmissions: new Map(),
+    blockBasedPractice: new Map(),
   };
 
   for (const student of students) {
@@ -561,15 +558,6 @@ const classroomReport = (async (root, params, context) => {
         });
       } else {
         obj.assignmentUnattemptedCount += 1;
-      }
-      if (get(mms, 'isPracticeSubmitted')) {
-        obj.pqSubmittedCount += 1;
-        obj.pqTotalQuestions = 1;
-        obj.pqSubmissions.set(userId, {
-          userId,
-        });
-      } else {
-        obj.pqUnattemptedCount += 1;
       }
     } else {
       // check if mms is absent
@@ -635,32 +623,50 @@ const classroomReport = (async (root, params, context) => {
       }
     }
 
-    if (get(userBlockbasedPracticeRes, '[0].blockBasedPractice')) {
-      if (!isMmsPresent) {
-        obj.pqSubmittedCount += 1;
-      }
-      obj.pqTotalQuestions = 1;
-      if (get(userBlockbasedPracticeRes, '[0].result') === 'correct') {
-        obj.pqCorrectSum += 1;
-      } else if (get(userBlockbasedPracticeRes, '[0].result') === 'incorrect') {
-        obj.pqIncorrectSum += 1;
-      } else if (get(userBlockbasedPracticeRes, '[0].result') === 'partiallyCorrect') {
-        obj.pqPartiallyCorrectSum += 1;
-      } else {
-        obj.pqUnevaluated += 1;
-      }
-      // individual questions
-      if (obj.pqQuestions.has(get(userBlockbasedPracticeRes, '[0].blockBasedPractice.id'))) {
-        if (get(userBlockbasedPracticeRes, '[0].blockBasedPractice.isSubmitAnswer')) {
-          obj.pqQuestions.set(get(userBlockbasedPracticeRes, '[0].blockBasedPractice.id'), obj.pqQuestions.get(get(userBlockbasedPracticeRes, '[0].blockBasedPractice.id')) + 1);
-        }
-      } else {
-        if (get(userBlockbasedPracticeRes, '[0].blockBasedPractice.isSubmitAnswer')) {
-          obj.pqQuestions.set(get(userBlockbasedPracticeRes, '[0].blockBasedPractice.id'), 1);
+    for (const userbbPractice of userBlockbasedPracticeRes) {
+      const innerObj = {
+        title: '',
+        pqTotalQuestions: 1,
+        pqCorrectSum: 0,
+        pqIncorrectSum: 0,
+        pqPartiallyCorrectSum: 0,
+        pqUnevaluated: 0,
+        pqSubmittedCount: 0,
+        pqUnattemptedCount: 0,
+        pqQuestions: new Map(),
+        pqSubmissions: new Map(),
+      };
+      if (get(userbbPractice, 'blockBasedPractice')) {
+        innerObj.pqSubmittedCount += 1;
+        innerObj.pqSubmissions.set(userId, {
+          userId,
+        });
+        innerObj.title = get(userbbPractice, 'blockBasedPractice.title', '');
+        if (get(userbbPractice, 'result') === 'correct') {
+          innerObj.pqCorrectSum += 1;
+        } else if (get(userbbPractice, 'result') === 'incorrect') {
+          innerObj.pqIncorrectSum += 1;
+        } else if (get(userbbPractice, 'result') === 'partiallyCorrect') {
+          innerObj.pqPartiallyCorrectSum += 1;
         } else {
-          obj.pqQuestions.set(get(userBlockbasedPracticeRes, '[0].blockBasedPractice.id'), 0);
+          innerObj.pqUnevaluated += 1;
         }
+        // individual questions
+        if (innerObj.pqQuestions.has(get(userbbPractice, 'blockBasedPractice.id'))) {
+          if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
+            innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), innerObj.pqQuestions.get(get(userbbPractice, 'blockBasedPractice.id')) + 1);
+          }
+        } else {
+          if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
+            innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), 1);
+          } else {
+            innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), 0);
+          }
+        }
+      } else {
+        innerObj.pqUnattemptedCount += 1;
       }
+      obj.blockBasedPractice.set(get(userbbPractice, 'blockBasedPractice.id'), innerObj);
     }
   }
 
