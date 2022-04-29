@@ -26,6 +26,7 @@ const PartialReportType = `
     notEvaluatedCount: Int
     submissionsCount: Int
     submissions: [StudentSubmissions]
+    blockBasedPracticeTitle: String
   }`;
 
 const ClassroomHomeworkReportOutput = `
@@ -33,7 +34,7 @@ const ClassroomHomeworkReportOutput = `
     overall: OverallReportType
     quiz: PartialReportType
     coding: PartialReportType
-    blockBasedPractice: PartialReportType
+    blockBasedPractice: [PartialReportType]
   }`;
 
 export default [
