@@ -29,9 +29,9 @@ const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
   `;
 
 /*
-In this method we are going to append next component in user PQ report.
-To achieve this we are getting nextComponent from userLearningObjective and then
-will add that to PQ report
+  In this method we are going to append next component in user PQ report.
+  To achieve this we are getting nextComponent from userLearningObjective and then
+  will add that to PQ report
 */
 const userPracticeQuestionReportPostHookMethod = async (input, params) => {
   const {

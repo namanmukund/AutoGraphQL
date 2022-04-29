@@ -273,6 +273,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
             firstTry: attemptNumber === 1,
             secondTry: attemptNumber === 2,
             thirdOrMoreTry: attemptNumber > 2,
+            attemptNumber,
           });
           Object.assign(newPracticeQuestionInUserLearningObjective, { questionConnectId });
           /*

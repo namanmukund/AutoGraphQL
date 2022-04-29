@@ -12,6 +12,7 @@ const PracticeQuestionDetailedReport = `
    firstTry: Boolean
    secondTry: Boolean
    thirdOrMoreTry: Boolean
+   attemptNumber: Int
    isAnswerUsed: Boolean
    isHintUsed: Boolean
  }`;
