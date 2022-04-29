@@ -87,7 +87,7 @@ Sample paramsForFetch argument
   "skip": 1
 }
  */
-  fetchMany(paramsForFetch = {}) {
+  fetchMany(paramsForFetch = {}, pipelineStages = []) {
     let inputParams = { ...paramsForFetch };
     return this.validatePermissions(inputParams, true)
       .then((isAllowedParam) => {
@@ -169,6 +169,22 @@ Sample paramsForFetch argument
            */
             const data = query;
             if (afterId) { data.id = { $gt: `${afterId}` }; } else if (beforeId) { data.id = { $lt: `${beforeId}` }; }
+            /**
+             * @TODO Append more stages i.e match, skip, first......
+             */
+            if (pipelineStages && pipelineStages.length) {
+              return this.Model.aggregate(pipelineStages)
+                .then((res) => {
+                  // if model history params sent in arg then append history to result
+                  const isModelHistoryInParams = checkIfModelHistoryInParams(params);
+                  if (isModelHistoryInParams) {
+                    const resultWithAppendedHistory = appendModelHistoryToQueriedResult(res,
+                      this.modelName);
+                    return resultWithAppendedHistory;
+                  }
+                  return res;
+                });
+            }
             if (lastValue) {
               return getQueriedResultFromLast(this.Model, data, lastValue, skipValue, querySort)
                 .then((res) => {
@@ -194,6 +210,12 @@ Sample paramsForFetch argument
                 return res;
               });
           });
+        }
+        if (pipelineStages && pipelineStages.length) {
+          /**
+           * @TODO Append more stages i.e match, skip, first......
+           */
+          return this.Model.aggregate(pipelineStages);
         }
         if (lastValue) {
           return getQueriedResultFromLast(this.Model, params, lastValue, skipValue, querySort);

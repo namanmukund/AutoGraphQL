@@ -86,11 +86,12 @@ const fetchListQueryResolver = (
   const typeOptimizationMode = getTypeDirectiveArgumentValue(directives, 'optimization', 'mode');
 
   if (!Object.keys(remoteFields).length) {
+    let pipelineStages = [];
     if (typeOptimizationMode !== optimizationModes.cascade) {
       // @TODO Build Aggregation Pipeline
-      // return modelQueries.aggregate(pipelineStages);
+      pipelineStages = [];
     }
-    return modelQueries.fetchMany(params);
+    return modelQueries.fetchMany(params, pipelineStages);
   }
 
   // If there are remote fields
