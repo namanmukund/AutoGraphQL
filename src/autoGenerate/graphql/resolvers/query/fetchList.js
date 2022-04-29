@@ -5,6 +5,8 @@ import { toObject } from '../../../../../utils';
 import { validate } from '../../validation';
 import { getFieldsBeingFetched, filterRemoteFields } from '../../../utils';
 import { PLURAL } from '../../../../../constants/graphqlOperations';
+import { getTypeDirectiveArgumentValue } from '../../../utils/getDirectiveArgumentValue';
+import { optimizationModes } from '../../../../../constants';
 
 // To find if filters have remote fields.
 // @TODO this function assumes only one parameter in filter,
@@ -48,7 +50,7 @@ const fetchListQueryResolver = (
   parsedASTMap,
   authentication,
 ) => {
-  const { remoteFields, remoteFieldsApplicationWise } = parsedASTMap[typeName];
+  const { remoteFields, remoteFieldsApplicationWise, directives } = parsedASTMap[typeName];
   const queryName = info.fieldName;
   const { fieldNodes } = info; // Fields which are requested.
   /*
@@ -77,7 +79,17 @@ const fetchListQueryResolver = (
   // If there are no remote fields, return the result.
   const modelQueries = new QueryController(typeName, authentication);
 
+  /**
+   * Get Optimization Mode from Type Definition
+   * and build aggregation pipeline if required.
+   */
+  const typeOptimizationMode = getTypeDirectiveArgumentValue(directives, 'optimization', 'mode');
+
   if (!Object.keys(remoteFields).length) {
+    if (typeOptimizationMode !== optimizationModes.cascade) {
+      // @TODO Build Aggregation Pipeline
+      // return modelQueries.aggregate(pipelineStages);
+    }
     return modelQueries.fetchMany(params);
   }
 
