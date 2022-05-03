@@ -15,6 +15,8 @@ const PracticeQuestionDetailedReport = `
    attemptNumber: Int
    isAnswerUsed: Boolean
    isHintUsed: Boolean
+   startTime: Date
+   endTime: Date
  }`;
 
 const UserPracticeQuestionReport = `
