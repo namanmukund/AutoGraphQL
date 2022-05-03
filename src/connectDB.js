@@ -28,7 +28,6 @@ db.on('error', (err) => {
     createScheduler('mentorReport');
     createScheduler('sessionReport');
     createScheduler('sessionCourseReport');
-    createScheduler('eventSessionRemainder');
     createScheduler('batchSessionOtpGeneration');
     createScheduler('updateLeadSource');
     reRunJobsFromDB();

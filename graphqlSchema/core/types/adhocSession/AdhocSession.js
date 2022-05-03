@@ -8,6 +8,7 @@ const AdhocSession = `
     coursePackage: CoursePackage @relation(name: "AdhocSessionCoursePackage", direction: "OneWay")
     batch: Batch! @relation(name: "AdhocSessionBatch", direction: "OneWay")
     previousTopic: Topic @relation(name: "AdhocSessionTopic", direction: "OneWay")
+    revisionTopics: [Topic] @relation(name: "AdhocSessionRevisionTopics", direction: "OneWay")
     type: AdhocSessionType!
     sessionMode: SessionMode @defaultValue(value: "online")
     order: Int
