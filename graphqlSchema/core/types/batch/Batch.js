@@ -32,7 +32,7 @@ const Batch = `
     rule: allow
   )
   {
-    course: Course! @relation(name: "BatchCurrentComponentStatusCourse", direction: "OneWay")
+    course: Course @relation(name: "BatchCurrentComponentStatusCourse", direction: "OneWay")
     coursePackage: CoursePackage @relation(name: "BatchCoursePackage", direction: "OneWay")
     coursePackageTopicRule: [CoursePackageTopicRule]
     allottedMentor: User @relation(name:"BatchMentor")
