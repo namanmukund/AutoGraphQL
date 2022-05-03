@@ -5,6 +5,7 @@ import {
 import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import { MENTEE } from '../../../../constants/roles';
 
 // query to add UserBlockBasedPractice if it is not already present for user, blockBasedProjectId and topic id
 const addUserBlockBasedPracticeMutation = (
@@ -52,6 +53,9 @@ const userBlockBasedPracticePostHookMethod = async (input, params) => {
   if it is not already present, we will add a new document with default data
   */
   if (input && input.length) {
+    return input;
+  }
+  if (get(context, 'userRoleFromContext') && get(context, 'userRoleFromContext') !== MENTEE) {
     return input;
   }
   const resultArray = [];
