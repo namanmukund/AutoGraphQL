@@ -410,6 +410,13 @@ const transformMongoResults = (obj) => {
       percentageCorrect: obj.assignmentSubmittedCount === 0 ? 0 : ((v * 100) / obj.assignmentSubmittedCount).toFixed(2),
     };
   });
+  finalResult.quiz.learningObjectiveReport = Array.from(obj.quizLearningObjectiveReport.entries(), ([k, v]) => {
+    return {
+      questionId: k,
+      percentageCorrect: ((get(v, 'correctQuestionCount', 0) * 100) / get(v, 'totalQuestionCount', 1)),
+      title: (get(v, 'learningObjective.title', '')),
+    };
+  });
 
   finalResult.quiz.submissions = Array.from(obj.quizSubmissions.values());
   finalResult.coding.submissions = Array.from(obj.assignmentSubmissions.values());
@@ -487,6 +494,7 @@ const classroomReport = (async (root, params, context) => {
     quizSubmittedCount: 0,
     quizUnattemptedCount: 0,
     quizQuestions: new Map(),
+    quizLearningObjectiveReport: new Map(),
     quizSubmissions: new Map(),
     assignmentTotalQuestions: 0,
     assignmentCorrectSum: 0,
@@ -586,6 +594,10 @@ const classroomReport = (async (root, params, context) => {
             obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), 0);
           }
         }
+      }
+      // for each LO
+      for (const loReport of get(userQuizReport, 'learningObjectiveReport', [])) {
+        obj.quizLearningObjectiveReport.set(get(loReport, 'learningObjective.typeId'), loReport);
       }
     }
 
