@@ -8,7 +8,8 @@ const OverallReportType = `
 const IndividualQuestionsScoreType = `
   type IndividualQuestionsScoreType {
     questionId: String
-    percentageCorrect: Float 
+    percentageCorrect: Float
+    title: String
   }
 `;
 
@@ -23,6 +24,7 @@ const PartialReportType = `
     averageIncorrect: Float
     averagePartiallyCorrect: Float
     questions: [IndividualQuestionsScoreType]
+    learningObjectiveReport: [IndividualQuestionsScoreType]
     notEvaluatedCount: Int
     submissionsCount: Int
     submissions: [StudentSubmissions]
