@@ -23,6 +23,8 @@ import { validateMentorMenteePermissionForComponent, getMentorMenteeSessionForVa
 import getBatchCurrentComponentStatus
 from '../../../../utils/getBatchCurrentComponentStatus';
 import getSortedTopics from '../../../../../../utils/getSortedTopicsFromCoursePackageOrder';
+import { ifAuthorized } from '../../../../../../utils';
+import { MENTOR, SCHOOL_TEACHER } from '../../../../../../constants/roles';
 
 /*
 This is a common method to check whether the called topic component is locked or not
@@ -138,7 +140,10 @@ const isComponentUnlocked = async (
                                 order
                              }`;
   }
-  if (!backendApps.includes(appName) && userIdFromContext !== userId) {
+  const authentication = ifAuthorized(context);
+  const userRole = get(authentication, 'user.role');
+  const isNotMentorOrTeacher = !(userRole === MENTOR || userRole === SCHOOL_TEACHER);
+  if ((!backendApps.includes(appName) && userIdFromContext !== userId) && isNotMentorOrTeacher) {
     throw new UserMismatchError();
   }
   if (!topicInfo) {

@@ -46,7 +46,7 @@ It will be created and returned to tekie app.
 Document contains all the necessary information needed on page along
 with the next component.
 */
-const userBlockBasedProjectPostHookMethod = async (input, params) => {
+const userBlockBasedProjectPostHookMethod = async (input, params, context) => {
   /*
   checking if document is already present in collection for user and topic id,
   returning input in that case
