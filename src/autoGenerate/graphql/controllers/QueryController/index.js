@@ -87,7 +87,7 @@ Sample paramsForFetch argument
   "skip": 1
 }
  */
-  fetchMany(paramsForFetch = {}, pipelineStages = []) {
+  fetchMany(paramsForFetch = {}, aggregationBuilder ) {
     let inputParams = { ...paramsForFetch };
     return this.validatePermissions(inputParams, true)
       .then((isAllowedParam) => {
@@ -172,8 +172,8 @@ Sample paramsForFetch argument
             /**
              * @TODO Append more stages i.e match, skip, first......
              */
-            if (pipelineStages && pipelineStages.length) {
-              return this.Model.aggregate(pipelineStages)
+            if (aggregationBuilder && aggregationBuilder.getPipeline) {
+              return this.Model.aggregate(aggregationBuilder.getPipeline())
                 .then((res) => {
                   // if model history params sent in arg then append history to result
                   const isModelHistoryInParams = checkIfModelHistoryInParams(params);
@@ -211,11 +211,11 @@ Sample paramsForFetch argument
               });
           });
         }
-        if (pipelineStages && pipelineStages.length) {
+        if (aggregationBuilder && aggregationBuilder.getPipeline) {
           /**
            * @TODO Append more stages i.e match, skip, first......
            */
-          return this.Model.aggregate(pipelineStages);
+          return this.Model.aggregate(aggregationBuilder.getPipeline());
         }
         if (lastValue) {
           return getQueriedResultFromLast(this.Model, params, lastValue, skipValue, querySort);

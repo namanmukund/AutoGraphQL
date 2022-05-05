@@ -17,6 +17,7 @@ const TopicComponentsRule = `
 
 const Topic = `
   type Topic @model
+  @optimization(mode: "aggregation")
   @cacheControl(maxAge: 86400)
   @appPermissions(
     permissions:[

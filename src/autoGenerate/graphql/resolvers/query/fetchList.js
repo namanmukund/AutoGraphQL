@@ -5,8 +5,7 @@ import { toObject } from '../../../../../utils';
 import { validate } from '../../validation';
 import { getFieldsBeingFetched, filterRemoteFields } from '../../../utils';
 import { PLURAL } from '../../../../../constants/graphqlOperations';
-import { getTypeDirectiveArgumentValue } from '../../../utils/getDirectiveArgumentValue';
-import { optimizationModes } from '../../../../../constants';
+import getPipelineBuilderInstance from '../utils/getPipelineBuilderInstance';
 
 // To find if filters have remote fields.
 // @TODO this function assumes only one parameter in filter,
@@ -50,7 +49,7 @@ const fetchListQueryResolver = (
   parsedASTMap,
   authentication,
 ) => {
-  const { remoteFields, remoteFieldsApplicationWise, directives } = parsedASTMap[typeName];
+  const { remoteFields, remoteFieldsApplicationWise } = parsedASTMap[typeName];
   const queryName = info.fieldName;
   const { fieldNodes } = info; // Fields which are requested.
   /*
@@ -79,19 +78,15 @@ const fetchListQueryResolver = (
   // If there are no remote fields, return the result.
   const modelQueries = new QueryController(typeName, authentication);
 
-  /**
-   * Get Optimization Mode from Type Definition
-   * and build aggregation pipeline if required.
-   */
-  const typeOptimizationMode = getTypeDirectiveArgumentValue(directives, 'optimization', 'mode');
+  
+  const aggregationBuilder = getPipelineBuilderInstance({
+    typeName,
+    parsedASTMap,
+    info,
+  });
 
   if (!Object.keys(remoteFields).length) {
-    let pipelineStages = [];
-    if (typeOptimizationMode !== optimizationModes.cascade) {
-      // @TODO Build Aggregation Pipeline
-      pipelineStages = [];
-    }
-    return modelQueries.fetchMany(params, pipelineStages);
+    return modelQueries.fetchMany(params, aggregationBuilder);
   }
 
   // If there are remote fields
@@ -122,7 +117,7 @@ const fetchListQueryResolver = (
             id_in: idArray,
           },
         };
-        return modelQueries.fetchMany(localParams).then((localValues) => {
+        return modelQueries.fetchMany(localParams, aggregationBuilder).then((localValues) => {
           if (localValues.length > 0) {
             return localValues.map((localValue) => {
               const remoteValue = find(values, ['id', localValue.id]);
@@ -137,7 +132,7 @@ const fetchListQueryResolver = (
   }
 
   // If filter param does not have remote fields
-  return modelQueries.fetchMany(params).then((results) => {
+  return modelQueries.fetchMany(params, aggregationBuilder).then((results) => {
     // @TODO can implement a better method using list queries,
     // to avoid multiple calls.
     const promiseArray = results.map((result) => {
