@@ -26,6 +26,27 @@ const checkIfModelHistoryInParams = (params) => {
 };
 
 class QueryController extends MasterController {
+  getQueriedResultFromController = async (params, limitValue, skipValue, querySort, isLast = false, aggregationBuilder) => {
+    if (aggregationBuilder) {
+      let skipCount = skipValue;
+      if (isLast) {
+        const totalDocCount = await Model.find(params).count().exec();
+        skipCount = totalDocCount - limitValue - skipValue > 0 ? totalDocCount - limitValue - skipValue : 0;
+      }
+      const aggregateQuery = aggregationBuilder
+        .Match(data)
+        .Limit(firstValue)
+        .Skip(skipCount)
+        .Sort(querySort)
+        .getPipeline();
+      return this.Model.aggregate(aggregateQuery);
+    }
+    if (isLast) {
+      return getQueriedResultFromLast(this.Model, params, limitValue, skipValue, querySort);
+    }
+    return getQueriedResult(this.Model, params, limitValue, skipValue, querySort);
+  }
+
   fetchById(id) {
     return this.validatePermissions({ id }, true)
       .then((isAllowedParam) => {
@@ -87,7 +108,7 @@ Sample paramsForFetch argument
   "skip": 1
 }
  */
-  fetchMany(paramsForFetch = {}, aggregationBuilder ) {
+  fetchMany(paramsForFetch = {}, aggregationBuilder) {
     let inputParams = { ...paramsForFetch };
     return this.validatePermissions(inputParams, true)
       .then((isAllowedParam) => {
@@ -136,6 +157,9 @@ Sample paramsForFetch argument
           firstValue = defaultLimitValue;
         }
         firstValue = firstValue > defaultLimitValue ? defaultLimitValue : firstValue;
+
+        let limitValue = firstValue;
+        if (lastValue) limitValue = lastValue;
         /* querySort for above example will be
            {
             "order": 1
@@ -169,36 +193,8 @@ Sample paramsForFetch argument
            */
             const data = query;
             if (afterId) { data.id = { $gt: `${afterId}` }; } else if (beforeId) { data.id = { $lt: `${beforeId}` }; }
-            /**
-             * @TODO Append more stages i.e match, skip, first......
-             */
-            if (aggregationBuilder && aggregationBuilder.getPipeline) {
-              return this.Model.aggregate(aggregationBuilder.getPipeline())
-                .then((res) => {
-                  // if model history params sent in arg then append history to result
-                  const isModelHistoryInParams = checkIfModelHistoryInParams(params);
-                  if (isModelHistoryInParams) {
-                    const resultWithAppendedHistory = appendModelHistoryToQueriedResult(res,
-                      this.modelName);
-                    return resultWithAppendedHistory;
-                  }
-                  return res;
-                });
-            }
-            if (lastValue) {
-              return getQueriedResultFromLast(this.Model, data, lastValue, skipValue, querySort)
-                .then((res) => {
-                  // if model history params sent in arg then append history to result
-                  const isModelHistoryInParams = checkIfModelHistoryInParams(params);
-                  if (isModelHistoryInParams) {
-                    const resultWithAppendedHistory = appendModelHistoryToQueriedResult(res,
-                      this.modelName);
-                    return resultWithAppendedHistory;
-                  }
-                  return res;
-                });
-            }
-            return getQueriedResult(this.Model, data, firstValue, skipValue, querySort)
+
+            return this.getQueriedResultFromController(data, limitValue, skipValue, querySort, lastValue, aggregationBuilder)
               .then((res) => {
                 // if model history params sent in arg then append history to result
                 const isModelHistoryInParams = checkIfModelHistoryInParams(params);
@@ -211,16 +207,7 @@ Sample paramsForFetch argument
               });
           });
         }
-        if (aggregationBuilder && aggregationBuilder.getPipeline) {
-          /**
-           * @TODO Append more stages i.e match, skip, first......
-           */
-          return this.Model.aggregate(aggregationBuilder.getPipeline());
-        }
-        if (lastValue) {
-          return getQueriedResultFromLast(this.Model, params, lastValue, skipValue, querySort);
-        }
-        return getQueriedResult(this.Model, params, firstValue, skipValue, querySort);
+        return this.getQueriedResultFromController(params, limitValue, skipValue, querySort, lastValue, aggregationBuilder);
       });
   }
 
