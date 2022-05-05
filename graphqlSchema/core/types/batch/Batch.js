@@ -32,7 +32,7 @@ const Batch = `
     rule: allow
   )
   {
-    course: Course! @relation(name: "BatchCurrentComponentStatusCourse", direction: "OneWay")
+    course: Course @relation(name: "BatchCurrentComponentStatusCourse", direction: "OneWay")
     coursePackage: CoursePackage @relation(name: "BatchCoursePackage", direction: "OneWay")
     coursePackageTopicRule: [CoursePackageTopicRule]
     allottedMentor: User @relation(name:"BatchMentor")
@@ -44,6 +44,7 @@ const Batch = `
     currentComponent: BatchCurrentComponentStatus @relation(name: "BatchCurrentComponentStatusBatch", isSubset: true)
     documentType: SessionDocumentType @defaultValue(value: "batch")
     type: BatchType @defaultValue(value: "normal")
+    isTeacherTraining: Boolean @defaultValue(value: "false")
     campaign: Campaign @relation(name: "CampaignBatch")
     classes: [SchoolClass] @relation(name: "BatchSchoolClass", direction: "OneWay")
     school: School @relation(name: "BatchSchool", direction: "OneWay")

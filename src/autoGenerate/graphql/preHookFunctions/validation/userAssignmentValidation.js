@@ -2,6 +2,7 @@ import isComponentUnlocked from './utils/isComponentUnlocked';
 import { OLD_COURSE_ID, topicTypes } from '../../../../../constants';
 import isComponentUnlockedForNewCourse from './utils/isComponentUnlockedForNewCourse';
 import getInfoFromParams from '../../postHookFunctions/utils/getInfoFromParams';
+import { validateTokenAndExtractInformation } from './utils';
 
 // prehook logic to check if requested userAssignment(user and topic id) is unlocked
 const userAssignmentValidation = async (params, context, mutationOrQueryName) => {
@@ -33,6 +34,12 @@ const userAssignmentValidation = async (params, context, mutationOrQueryName) =>
       courseId,
     );
   }
+
+  const userInfo = validateTokenAndExtractInformation(context, false);
+  const {
+    currentUser,
+  } = userInfo;
+  context.userRoleFromContext = currentUser && currentUser.role;
   return true;
 };
 

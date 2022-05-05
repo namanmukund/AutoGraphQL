@@ -1,6 +1,7 @@
 import { topicTypes } from '../../../../../constants';
 import isComponentUnlockedForNewCourse from './utils/isComponentUnlockedForNewCourse';
 import getInfoFromParams from '../../postHookFunctions/utils/getInfoFromParams';
+import { validateTokenAndExtractInformation } from './utils';
 
 // prehook logic to check if requested UserQuiz(user and topic id) is unlocked
 const userBlockBasedPracticeValidation = async (params, context) => {
@@ -19,6 +20,11 @@ const userBlockBasedPracticeValidation = async (params, context) => {
     '',
     courseId,
   );
+  const userInfo = validateTokenAndExtractInformation(context, false);
+  const {
+    currentUser,
+  } = userInfo;
+  context.userRoleFromContext = currentUser && currentUser.role;
   return true;
 };
 

@@ -8,6 +8,7 @@ const AdhocSession = `
     coursePackage: CoursePackage @relation(name: "AdhocSessionCoursePackage", direction: "OneWay")
     batch: Batch! @relation(name: "AdhocSessionBatch", direction: "OneWay")
     previousTopic: Topic @relation(name: "AdhocSessionTopic", direction: "OneWay")
+    revisionTopics: [Topic] @relation(name: "AdhocSessionRevisionTopics", direction: "OneWay")
     type: AdhocSessionType!
     sessionMode: SessionMode @defaultValue(value: "online")
     order: Int
@@ -18,6 +19,8 @@ const AdhocSession = `
     ${slotTimeFields}
     sessionStartDate: Date
     sessionEndDate: Date
+    mentorStartAttendance: Date
+    mentorSavesAttendance: Date
     sessionStatus: SessionStatus! @defaultValue(value: "allotted")
     sessionRecordingLink: String
     sessionCommentByMentor: String
@@ -25,6 +28,7 @@ const AdhocSession = `
     mentorPaymentStatus: MentorPaymentStatus @defaultValue(value: "declined")
     paymentApprovedBy: User @relation(name: "MentorMenteeSessionPaymentApprovedUser", direction: "OneWay")
     isAudit: Boolean @defaultValue(value: "false")
+    title: String
 }`;
 
 export default [AdhocSession];
