@@ -5,6 +5,7 @@ import { paginationKeys } from './paginate';
 import { PermissionDeniedError } from '../../../../../constants/errors';
 import { defaultPermissionErrorMsg, defaultLimitValue, historyFieldName } from '../../../../../constants';
 import appendModelHistoryToQueriedResult from '../utils/appendModelHistoryToQueriedResult';
+import getAggregationControllerInstance, { checkIfAggregationEnabled } from '../../resolvers/utils/getAggregationControllerInstance';
 
 const getQueriedResult = (Model, params, limitValue, skipValue, querySort) => Model.find(params).limit(limitValue).skip(skipValue).sort(querySort)
   .exec()
@@ -26,20 +27,20 @@ const checkIfModelHistoryInParams = (params) => {
 };
 
 class QueryController extends MasterController {
-  getQueriedResultFromController = async (params, limitValue, skipValue, querySort, isLast = false, aggregationBuilder) => {
-    if (aggregationBuilder) {
+  getQueriedResultFromController = async (params, limitValue, skipValue, querySort, isLast = false, requestOptions) => {
+    if (requestOptions && checkIfAggregationEnabled(requestOptions)) {
       let skipCount = skipValue;
       if (isLast) {
         const totalDocCount = await Model.find(params).count().exec();
         skipCount = totalDocCount - limitValue - skipValue > 0 ? totalDocCount - limitValue - skipValue : 0;
       }
-      const aggregateQuery = aggregationBuilder
-        .Match(data)
-        .Limit(firstValue)
-        .Skip(skipCount)
-        .Sort(querySort)
-        .getPipeline();
-      return this.Model.aggregate(aggregateQuery);
+      const aggregationController = getAggregationControllerInstance(requestOptions, {
+        filters: params,
+        limit: limitValue,
+        skip: skipCount,
+        sort: querySort,
+      });
+      return this.Model.aggregate(aggregationController.getPipeline());
     }
     if (isLast) {
       return getQueriedResultFromLast(this.Model, params, limitValue, skipValue, querySort);
@@ -108,7 +109,7 @@ Sample paramsForFetch argument
   "skip": 1
 }
  */
-  fetchMany(paramsForFetch = {}, aggregationBuilder) {
+  fetchMany(paramsForFetch = {}, requestOptions = {}) {
     let inputParams = { ...paramsForFetch };
     return this.validatePermissions(inputParams, true)
       .then((isAllowedParam) => {
@@ -194,7 +195,7 @@ Sample paramsForFetch argument
             const data = query;
             if (afterId) { data.id = { $gt: `${afterId}` }; } else if (beforeId) { data.id = { $lt: `${beforeId}` }; }
 
-            return this.getQueriedResultFromController(data, limitValue, skipValue, querySort, lastValue, aggregationBuilder)
+            return this.getQueriedResultFromController(data, limitValue, skipValue, querySort, lastValue, requestOptions)
               .then((res) => {
                 // if model history params sent in arg then append history to result
                 const isModelHistoryInParams = checkIfModelHistoryInParams(params);
@@ -207,7 +208,7 @@ Sample paramsForFetch argument
               });
           });
         }
-        return this.getQueriedResultFromController(params, limitValue, skipValue, querySort, lastValue, aggregationBuilder);
+        return this.getQueriedResultFromController(params, limitValue, skipValue, querySort, lastValue, requestOptions);
       });
   }
 

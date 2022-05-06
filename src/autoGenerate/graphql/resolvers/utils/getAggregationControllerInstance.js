@@ -7,12 +7,20 @@ import { getFieldsBeingFetched } from '../../../utils';
 
 /**
  * TODO
- * - 1. RE-STRUCTURE CODE
- * - 2. PROJECTION LOGIC
- * - 3. NESTED OBJECT LOOKUP ??
+ * - 1. RE-FACTOR CODE.                                  [DONE]
+ * - 2. RE-STRUCTURE CODE.
+ * - 3. PROJECTION LOGIC.
+ *      - Convert Lookup Arr O/P into
+ *        Object Result.
+ *      - Consider Variables which are in filters
+ *        too i.e local / Relational / Meta.
+ * - 4. Nested Filters if applied on
+ *      relational fields ??
+ * - 5. Nested Object Lookup ??
+ * - 6. Resolver for Meta Fields ??
  */
 
-const buildPipelineStages = ({
+export const buildPipelineStages = ({
   fieldsForFetch,
   parsedASTMap,
   typeName,
@@ -60,35 +68,51 @@ const buildPipelineStages = ({
   return builderInstance;
 };
 
-const getPipelineBuilderInstance = ({
+export const checkIfAggregationEnabled = ({ parsedASTMap, typeName }) => {
+  if (parsedASTMap && typeName) {
+    const { directives } = parsedASTMap[typeName];
+    /**
+     * Get Optimization Mode from Type Definition
+     * and build aggregation pipeline if required.
+     */
+    const typeOptimizationMode = getTypeDirectiveArgumentValue(
+      directives,
+      'optimization',
+      'mode',
+    ) || 'cascade';
+
+    if (typeOptimizationMode !== optimizationModes.cascade) {
+      return true;
+    }
+  }
+  return false;
+};
+const getAggregationControllerInstance = ({
   typeName,
   parsedASTMap,
   info,
-}) => {
-  const { directives } = parsedASTMap[typeName];
+}, additionalParams) => {
   const { fieldNodes } = info;
   const fieldsForFetch = getFieldsBeingFetched(fieldNodes);
+  let aggregationController = new AggregationBuilder(typeName);
 
-  /**
-   * Get Optimization Mode from Type Definition
-   * and build aggregation pipeline if required.
-   */
-  const typeOptimizationMode = getTypeDirectiveArgumentValue(
-    directives,
-    'optimization',
-    'mode',
-  ) || 'cascade';
-
-  if (typeOptimizationMode !== optimizationModes.cascade) {
-    const builderInstance = new AggregationBuilder(typeName);
-    return buildPipelineStages({
+  if (checkIfAggregationEnabled({ parsedASTMap, typeName })) {
+    aggregationController = buildPipelineStages({
       fieldsForFetch,
       parsedASTMap,
       typeName,
       builderInstance,
     });
+    if (additionalParams) {
+      aggregationController
+        .Match(params)
+        .Limit(limitValue)
+        .Skip(skipCount)
+        .Sort(querySort)
+        .getPipeline();
+    }
   }
-  return null;
+  return aggregationController;
 };
 
-export default getPipelineBuilderInstance;
+export default getAggregationControllerInstance;

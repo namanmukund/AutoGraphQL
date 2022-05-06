@@ -5,7 +5,6 @@ import { toObject } from '../../../../../utils';
 import { validate } from '../../validation';
 import { getFieldsBeingFetched, filterRemoteFields } from '../../../utils';
 import { PLURAL } from '../../../../../constants/graphqlOperations';
-import getPipelineBuilderInstance from '../utils/getPipelineBuilderInstance';
 
 // To find if filters have remote fields.
 // @TODO this function assumes only one parameter in filter,
@@ -78,15 +77,14 @@ const fetchListQueryResolver = (
   // If there are no remote fields, return the result.
   const modelQueries = new QueryController(typeName, authentication);
 
-  
-  const aggregationBuilder = getPipelineBuilderInstance({
+  const requestOptions = {
     typeName,
     parsedASTMap,
     info,
-  });
+  };
 
   if (!Object.keys(remoteFields).length) {
-    return modelQueries.fetchMany(params, aggregationBuilder);
+    return modelQueries.fetchMany(params, requestOptions);
   }
 
   // If there are remote fields
@@ -117,7 +115,7 @@ const fetchListQueryResolver = (
             id_in: idArray,
           },
         };
-        return modelQueries.fetchMany(localParams, aggregationBuilder).then((localValues) => {
+        return modelQueries.fetchMany(localParams, requestOptions).then((localValues) => {
           if (localValues.length > 0) {
             return localValues.map((localValue) => {
               const remoteValue = find(values, ['id', localValue.id]);
@@ -132,7 +130,7 @@ const fetchListQueryResolver = (
   }
 
   // If filter param does not have remote fields
-  return modelQueries.fetchMany(params, aggregationBuilder).then((results) => {
+  return modelQueries.fetchMany(params, requestOptions).then((results) => {
     // @TODO can implement a better method using list queries,
     // to avoid multiple calls.
     const promiseArray = results.map((result) => {
