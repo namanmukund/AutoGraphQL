@@ -40,7 +40,7 @@ class QueryController extends MasterController {
         skip: skipCount,
         sort: querySort,
       });
-      return this.Model.aggregate(aggregationController.getPipeline());
+      return this.Model.aggregate(aggregationController.getPipeline()).exec();
     }
     if (isLast) {
       return getQueriedResultFromLast(this.Model, params, limitValue, skipValue, querySort);
