@@ -104,12 +104,14 @@ const getAggregationControllerInstance = ({
       builderInstance,
     });
     if (additionalParams) {
+      const {
+        filters, limit, skip, sort,
+      } = additionalParams;
       aggregationController
-        .Match(params)
-        .Limit(limitValue)
-        .Skip(skipCount)
-        .Sort(querySort)
-        .getPipeline();
+        .Match(filters)
+        .Limit(limit)
+        .Skip(skip)
+        .Sort(sort);
     }
   }
   return aggregationController;
