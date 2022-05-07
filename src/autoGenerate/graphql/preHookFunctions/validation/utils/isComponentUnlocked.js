@@ -22,6 +22,9 @@ import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValida
 import { validateMentorMenteePermissionForComponent, getMentorMenteeSessionForValidation } from './index';
 import getBatchCurrentComponentStatus
 from '../../../../utils/getBatchCurrentComponentStatus';
+import getSortedTopics from '../../../../../../utils/getSortedTopicsFromCoursePackageOrder';
+import { ifAuthorized } from '../../../../../../utils';
+import { MENTOR, SCHOOL_TEACHER } from '../../../../../../constants/roles';
 
 /*
 This is a common method to check whether the called topic component is locked or not
@@ -137,7 +140,10 @@ const isComponentUnlocked = async (
                                 order
                              }`;
   }
-  if (!backendApps.includes(appName) && userIdFromContext !== userId) {
+  const authentication = ifAuthorized(context);
+  const userRole = get(authentication, 'user.role');
+  const isNotMentorOrTeacher = !(userRole === MENTOR || userRole === SCHOOL_TEACHER);
+  if ((!backendApps.includes(appName) && userIdFromContext !== userId) && isNotMentorOrTeacher) {
     throw new UserMismatchError();
   }
   if (!topicInfo) {
@@ -162,8 +168,11 @@ const isComponentUnlocked = async (
     });
   }
   const {
-    order: topicOrder,
     isTrial,
+  } = topicInfo;
+
+  let {
+    order: topicOrder,
   } = topicInfo;
 
   topicId = topicInfo && topicInfo.id;
@@ -201,6 +210,13 @@ const isComponentUnlocked = async (
   );
   const batchCurrentComponentInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.currentComponent');
   const schoolInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.school');
+  const isCoursePackageBatch = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.id');
+
+  if (isCoursePackageBatch) {
+    const coursePackageTopics = getSortedTopics(get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.topics'));
+    const topicFound = coursePackageTopics.find((o) => o.id === topicId);
+    topicOrder = get(topicFound, 'coursePackageOrder');
+  }
 
   const { free, pro } = enrollmentTypes;
 

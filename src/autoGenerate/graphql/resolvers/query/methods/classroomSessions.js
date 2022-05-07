@@ -721,10 +721,10 @@ const getTopicOrderOrPackageTopicOrder = (topic, coursePackage) => {
   if (coursePackage && topic) {
     const currentTopicId = get(topic, 'id');
     const packageTopics = get(coursePackage, 'topics', []);
-    const packageTopicOrder = get(packageTopics.filter((el) => get(el, 'topic.typeId') === currentTopicId)[0], 'order', 0);
-    return packageTopicOrder;
+    const packageTopicOrder = get(packageTopics.find((el) => get(el, 'topic.typeId') === currentTopicId), 'order', 0);
+    if (packageTopicOrder) return packageTopicOrder;
   }
-  return get(topic, 'order', 0);
+  return get(topic, 'order');
 };
 
 const getTopicDocument = (topic, session) => {

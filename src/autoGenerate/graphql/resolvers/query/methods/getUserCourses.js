@@ -617,6 +617,8 @@ const getUserCourses = (async (root, params, context, info) => {
       if (newPythonCourseExists && oldPythonCourseExists) {
         updatedCourseArr = updatedCourseArr.filter((course) => get(course, 'id') !== OLD_COURSE_ID);
       }
+    }
+    if (updatedCourseArr && updatedCourseArr.length) {
       const tempUniqueCourseIds = [];
       return (updatedCourseArr || []).filter((el) => {
         const isDuplicate = tempUniqueCourseIds.includes(el.id);

@@ -10,11 +10,62 @@ import {
   PRE_SALES,
 } from '../../../../constants/roles';
 
+/**
+ * LOGIC for revision order:
+ * revision objects in topic rule are given revisionOrder: Int, title: String, description: String (optional), previousTopicOrder: Int and isRevision: true
+ * revision objects always have an previousTopicOrder field equal to the order of the topic that is immediately earlier to them in schedule (NOTE : revision sessions cannot be taken as the first class in the curriculum)
+ * For example: consider the ordering of topics learning1, learning2, revision1, revision2, learning3, revision3..
+ * they stored as : coursePackage.topics = [
+ *  {
+ *    order: 1,
+ *    topic: {
+ *      title: learning1,
+ *    },
+ *    isRevision: false
+ *  },
+ * {
+ *    order: 2,
+ *    topic: {
+ *      title: learning2,
+ *    },
+ *    isRevision: false
+ *  },
+ * {
+ *    previousTopicOrder: 2,
+ *    title: revision1,
+ *    isRevision: true,
+ *    revisionOrder: 1
+ *  },
+ * {
+ *    previousTopicOrder: 2,
+ *    title: revision2,
+ *    isRevision: true,
+ *    revisionOrder: 2
+ *  },
+ * {
+ *    order: 3,
+ *    topic: {
+ *      title: learning3,
+ *    }
+ *  },
+ * {
+ *    previousTopicOrder: 3,
+ *    title: revision3,
+ *    isRevision: true,
+ *    revisionOrder: 3
+ *  }
+ * ]
+ */
+
 const CoursePackageTopicRule = `
   type CoursePackageTopicRule {
     order: Int
     topic: Topic @relation(name: "CoursePackageTopic", direction: "OneWay")
+    title: String
     description: String
+    isRevision: Boolean @defaultValue(value: "false")
+    previousTopicOrder: Int
+    revisionOrder: Int
   }
 `;
 
@@ -53,6 +104,7 @@ const CoursePackage = `
     bannerThumbnail: File @relation(name: "CourseBannerThumbnail", direction: "OneWay")
     courses: [Course] @relation(name: "CoursePackageCourses", direction: "OneWay")
     topics: [CoursePackageTopicRule]
+    revisionSessionCount: Int
     secondaryCategory: String
     minGrade: Int
     maxGrade: Int

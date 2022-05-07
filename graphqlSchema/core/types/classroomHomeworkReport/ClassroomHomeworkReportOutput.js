@@ -8,7 +8,11 @@ const OverallReportType = `
 const IndividualQuestionsScoreType = `
   type IndividualQuestionsScoreType {
     questionId: String
-    percentageCorrect: Float 
+    percentageCorrect: Float
+    percentageIncorrect: Float
+    percentageUnattempted: Float
+    submissionsCount: Int
+    title: String
   }
 `;
 
@@ -23,9 +27,11 @@ const PartialReportType = `
     averageIncorrect: Float
     averagePartiallyCorrect: Float
     questions: [IndividualQuestionsScoreType]
+    learningObjectiveReport: [IndividualQuestionsScoreType]
     notEvaluatedCount: Int
     submissionsCount: Int
     submissions: [StudentSubmissions]
+    blockBasedPracticeTitle: String
   }`;
 
 const ClassroomHomeworkReportOutput = `
@@ -33,7 +39,7 @@ const ClassroomHomeworkReportOutput = `
     overall: OverallReportType
     quiz: PartialReportType
     coding: PartialReportType
-    blockBasedPractice: PartialReportType
+    blockBasedPractice: [PartialReportType]
   }`;
 
 export default [
