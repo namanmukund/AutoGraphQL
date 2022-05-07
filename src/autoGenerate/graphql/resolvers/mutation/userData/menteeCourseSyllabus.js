@@ -1429,6 +1429,44 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
     },
   }];
 
+/**
+ * Below Aggregation can now be replaced with following library
+ * const pipeline = new AggregationBuilder('SP')
+    .Project(OnlyPayload('id', 'batch', 'school', 'user'))
+    .Match({ 'user.typeId': userId })
+    .Lookup(ConditionPayload('Batch', 'batch',
+      {
+        variableList: [{
+          var: 'batchId',
+          source: 'batch.typeId',
+          key: 'primary',
+        }],
+        nestedAggregation: new AggregationBuilder('Batch')
+          .Project(OnlyPayload('id', 'currentComponent', 'coursePackage'))
+          .Project({
+            id: 1,
+            batch: ArrayElemAt('$batch', 0),
+            allottedMentor: ArrayElemAt('$allottedMentor', 0),
+            currentComponent: ArrayElemAt('$currentComponent', 0),
+          }),
+      }))
+    .Lookup(ConditionPayload('School', 'school',
+      {
+        project: { ...OnlyPayload('id', 'enrollmentType') },
+        variableList: [{
+          var: 'schoolId',
+          source: 'school.typeId',
+          key: 'primary',
+        }],
+      }))
+    .Project({
+      id: 1,
+      coursePackage: ArrayElemAt('$coursePackage', 0),
+      school: ArrayElemAt('$school', 0),
+    })
+    .getPipeline();
+ */
+
 const getUserBatchDetails = (userId) => [
   {
     $project: {

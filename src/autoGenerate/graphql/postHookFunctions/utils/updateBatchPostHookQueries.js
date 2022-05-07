@@ -309,6 +309,7 @@ const getTopicsFromCoursePackage = async (coursePackageId) => {
   coursePackage(id: "${coursePackageId}"){
     topics{
       order
+      isRevision
       topic{
         courses{
           id

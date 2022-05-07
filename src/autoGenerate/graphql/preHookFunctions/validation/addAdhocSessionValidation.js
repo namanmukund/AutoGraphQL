@@ -9,7 +9,6 @@ import validateTokenAndExtractInformation from './utils/validateTokenAndExtractI
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import {
   SessionMustBeCompletedError,
-  MissingMandatoryInputInRequestError,
   PermissionDeniedError,
   MentorIsInactiveError,
 } from '../../../../../constants/errors';
@@ -89,13 +88,13 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
     });
   }
 
-  if (!previousTopicConnectId) {
-    throw new MissingMandatoryInputInRequestError({
-      data: {
-        message: 'previousTopicConnectId is missing in input',
-      },
-    });
-  }
+  // if (!previousTopicConnectId) {
+  //   throw new MissingMandatoryInputInRequestError({
+  //     data: {
+  //       message: 'previousTopicConnectId is missing in input',
+  //     },
+  //   });
+  // }
 
   // getting user role from context. We will allow adding batchSession if logged in user is admin
   const userInfo = validateTokenAndExtractInformation(context, false);
@@ -151,11 +150,14 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
     throw new SimilarDocumentAlreadyExistError();
   }
 
-  // confirm if the previous topic batch session is complete before proceeding
-  const batchSessionPreviousTopicRes = await callLocalGraphqlApi(getBatchSessions(previousTopicConnectId, batchId));
-  const batchSessionPreviousTopicStatus = get(batchSessionPreviousTopicRes, 'data.batchSessions[0].sessionStatus', '');
-  if (batchSessionPreviousTopicStatus !== 'completed') {
-    throw new SessionMustBeCompletedError();
+  // ignore check in case of teacher Training
+  if (type !== 'teacherTraining') {
+    // confirm if the previous topic batch session is complete before proceeding
+    const batchSessionPreviousTopicRes = await callLocalGraphqlApi(getBatchSessions(previousTopicConnectId, batchId));
+    const batchSessionPreviousTopicStatus = get(batchSessionPreviousTopicRes, 'data.batchSessions[0].sessionStatus', '');
+    if (batchSessionPreviousTopicStatus !== 'completed') {
+      throw new SessionMustBeCompletedError();
+    }
   }
 
   return true;

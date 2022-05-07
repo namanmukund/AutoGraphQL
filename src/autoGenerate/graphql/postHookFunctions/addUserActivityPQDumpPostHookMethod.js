@@ -265,7 +265,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
         So, checking here for same question in both
         */
         if (questionConnectId === inputQuestionConnectId) {
-          detailedReport.push({
+          const detailedReportObj = {
             questionConnectId,
             isCorrect,
             isAnswerUsed,
@@ -273,7 +273,11 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
             firstTry: attemptNumber === 1,
             secondTry: attemptNumber === 2,
             thirdOrMoreTry: attemptNumber > 2,
-          });
+            attemptNumber,
+          };
+          if (startTime) detailedReportObj.startTime = startTime;
+          if (endTime) detailedReportObj.endTime = endTime;
+          detailedReport.push({ ...detailedReportObj });
           Object.assign(newPracticeQuestionInUserLearningObjective, { questionConnectId });
           /*
           Case: When individual question is incomplete and whole PQ is also incomplete.

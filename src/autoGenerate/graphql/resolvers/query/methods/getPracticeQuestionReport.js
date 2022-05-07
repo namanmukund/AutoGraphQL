@@ -251,16 +251,7 @@ const withFallbackValue = (value) => {
 const transformMongoResults = (obj) => {
   if (obj.studentsCount === 0) {
     return {
-      practiceQuestionOverallReport: {
-        submittedPercentage: 0,
-        attemptedPercentage: 0,
-        unattemptedPercentage: 0,
-        firstTryPercentage: 0,
-        secondTryPercentage: 0,
-        thirdTryPercentage: 0,
-        avgTriesPerQuestion: 0,
-        avgTimePerQuestion: null,
-      },
+      practiceQuestionOverallReport: [],
     };
   }
   const finalResult = {
@@ -385,7 +376,7 @@ const practiceQuestionReport = (async (root, params, context) => {
       }),
     );
 
-    if (!(batchSessionRes && batchSessionRes.length)) {
+    if (!(batchSessionRes && batchSessionRes.length) && batchId) {
       throw new MissingMandatoryInputInRequestError({
         data: {
           message: 'Topic Id or Batch Id passed is incorrect.',
@@ -503,6 +494,7 @@ const practiceQuestionReport = (async (root, params, context) => {
         const studentObj = {
           userId: studentUserId,
           updatedAt: get(userPracticeQuestionReportRes, '[0].updatedAt', new Date().toISOString()),
+          averageTries: withFallbackValue((get(userPracticeQuestionReportRes, '[0].firstTryCount') + (2 * get(userPracticeQuestionReportRes, '[0].secondTryCount')) + (3 * get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount'))) / (get(userPracticeQuestionReportRes, '[0].firstTryCount') + get(userPracticeQuestionReportRes, '[0].secondTryCount') + get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount'))),
         };
         loObj.students.set(studentUserId, studentObj);
 
