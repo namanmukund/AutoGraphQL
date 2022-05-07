@@ -154,7 +154,7 @@ const commonFunctionForRelationAndMeta = async (
   const model = models[typeName];
   const { typeId } = result;
 
-  if (!typeName && !isMetaType) {
+  if (result && !typeName && !isMetaType) {
     return result;
   }
 
