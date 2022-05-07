@@ -401,7 +401,10 @@ const transformMongoResults = (obj) => {
   finalResult.quiz.questions = Array.from(obj.quizQuestions.entries(), ([k, v]) => {
     return {
       questionId: k,
-      percentageCorrect: obj.quizSubmittedCount === 0 ? 0 : ((v * 100) / obj.quizSubmittedCount).toFixed(2),
+      percentageCorrect: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'correct', 0) * 100) / obj.quizSubmittedCount).toFixed(2),
+      percentageIncorrect: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'incorrect', 0) * 100) / obj.quizSubmittedCount).toFixed(2),
+      percentageUnattempted: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'unattempted', 0) * 100) / obj.quizSubmittedCount).toFixed(2),
+      submissionsCount: obj.quizSubmittedCount,
     };
   });
   finalResult.coding.questions = Array.from(obj.assignmentQuestions.entries(), ([k, v]) => {
@@ -584,14 +587,35 @@ const classroomReport = (async (root, params, context) => {
       const quizAnswers = get(userQuizReport, 'quizAnswers', []);
       for (const quizAnswer of quizAnswers) {
         if (obj.quizQuestions.has(get(quizAnswer, 'question.typeId'))) {
-          if (get(quizAnswer, 'isCorrect')) {
-            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), obj.quizQuestions.get(get(quizAnswer, 'question.typeId')) + 1);
+          if (!get(quizAnswer, 'isAttempted')) {
+            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+              ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
+              unattempted: (unattempted || 0) + 1,
+            });
+          } else if (get(quizAnswer, 'isCorrect')) {
+            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+              ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
+              correct: (correct || 0) + 1,
+            });
+          } else {
+            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+              ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
+              incorrect: (incorrect || 0) + 1,
+            });
           }
         } else {
-          if (get(quizAnswer, 'isCorrect')) {
-            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), 1);
+          if (!get(quizAnswer, 'isAttempted')) {
+            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+              unattempted: 1,
+            });
+          } else if (get(quizAnswer, 'isCorrect')) {
+            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+              correct: 1,
+            });
           } else {
-            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), 0);
+            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+              incorrect: 1,
+            });
           }
         }
       }
