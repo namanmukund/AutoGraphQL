@@ -27,14 +27,14 @@ const checkIfModelHistoryInParams = (params) => {
 };
 
 class QueryController extends MasterController {
-  getQueriedResultFromController = async (params, limitValue, skipValue, querySort, isLast = false, requestOptions) => {
-    if (requestOptions && checkIfAggregationEnabled(requestOptions)) {
+  getQueriedResultFromController = async (params, limitValue, skipValue, querySort, isLast = false, resolverParams) => {
+    if (resolverParams && checkIfAggregationEnabled(resolverParams)) {
       let skipCount = skipValue;
       if (isLast) {
         const totalDocCount = await Model.find(params).count().exec();
         skipCount = totalDocCount - limitValue - skipValue > 0 ? totalDocCount - limitValue - skipValue : 0;
       }
-      const aggregationController = buildAggregationControllerInstance(requestOptions, {
+      const aggregationController = buildAggregationControllerInstance(resolverParams, {
         filters: params,
         limit: limitValue,
         skip: skipCount,
@@ -109,7 +109,7 @@ Sample paramsForFetch argument
   "skip": 1
 }
  */
-  fetchMany(paramsForFetch = {}, requestOptions = {}) {
+  fetchMany(paramsForFetch = {}, resolverParams = {}) {
     let inputParams = { ...paramsForFetch };
     return this.validatePermissions(inputParams, true)
       .then((isAllowedParam) => {
@@ -195,7 +195,7 @@ Sample paramsForFetch argument
             const data = query;
             if (afterId) { data.id = { $gt: `${afterId}` }; } else if (beforeId) { data.id = { $lt: `${beforeId}` }; }
 
-            return this.getQueriedResultFromController(data, limitValue, skipValue, querySort, lastValue, requestOptions)
+            return this.getQueriedResultFromController(data, limitValue, skipValue, querySort, lastValue, resolverParams)
               .then((res) => {
                 // if model history params sent in arg then append history to result
                 const isModelHistoryInParams = checkIfModelHistoryInParams(params);
@@ -208,7 +208,7 @@ Sample paramsForFetch argument
               });
           });
         }
-        return this.getQueriedResultFromController(params, limitValue, skipValue, querySort, lastValue, requestOptions);
+        return this.getQueriedResultFromController(params, limitValue, skipValue, querySort, lastValue, resolverParams);
       });
   }
 

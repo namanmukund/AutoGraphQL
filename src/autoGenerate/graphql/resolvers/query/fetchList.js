@@ -77,14 +77,14 @@ const fetchListQueryResolver = (
   // If there are no remote fields, return the result.
   const modelQueries = new QueryController(typeName, authentication);
 
-  const requestOptions = {
+  const resolverParams = {
     typeName,
     parsedASTMap,
     info,
   };
 
   if (!Object.keys(remoteFields).length) {
-    return modelQueries.fetchMany(params, requestOptions);
+    return modelQueries.fetchMany(params, resolverParams);
   }
 
   // If there are remote fields
@@ -115,7 +115,7 @@ const fetchListQueryResolver = (
             id_in: idArray,
           },
         };
-        return modelQueries.fetchMany(localParams, requestOptions).then((localValues) => {
+        return modelQueries.fetchMany(localParams, resolverParams).then((localValues) => {
           if (localValues.length > 0) {
             return localValues.map((localValue) => {
               const remoteValue = find(values, ['id', localValue.id]);
@@ -130,7 +130,7 @@ const fetchListQueryResolver = (
   }
 
   // If filter param does not have remote fields
-  return modelQueries.fetchMany(params, requestOptions).then((results) => {
+  return modelQueries.fetchMany(params, resolverParams).then((results) => {
     // @TODO can implement a better method using list queries,
     // to avoid multiple calls.
     const promiseArray = results.map((result) => {

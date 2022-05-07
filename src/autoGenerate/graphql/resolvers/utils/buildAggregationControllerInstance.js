@@ -28,6 +28,8 @@ import { getFieldsBeingFetched } from '../../../utils';
  */
 const buildProjectionMapStage = ({
   builderInstance,
+  fieldsForFetch,
+  field,
 }) => {
   const aggregationBuilder = builderInstance;
   const projectionMap = {};
@@ -132,7 +134,7 @@ export const buildAggregationPipeline = ({
         // Build Lookup Stage to resolve required relational fields.
         aggregationBuilder = buildLookupStage({
           nestedPipeline,
-          aggregationBuilder,
+          builderInstance: aggregationBuilder,
           relationalTypeName,
           fieldName,
           fieldParams,
@@ -145,6 +147,8 @@ export const buildAggregationPipeline = ({
     // Build Projection Stage to constraint required data from DB.
     aggregationBuilder = buildProjectionMapStage({
       builderInstance: aggregationBuilder,
+      fieldsForFetch,
+      field,
     });
   }
   return aggregationBuilder;
