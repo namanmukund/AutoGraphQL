@@ -153,6 +153,11 @@ const commonFunctionForRelationAndMeta = async (
   const typeName = result.type;
   const model = models[typeName];
   const { typeId } = result;
+
+  if (!typeName && !isMetaType) {
+    return result;
+  }
+
   // if result is null or empty doc,i.e. reference doesnt exist, then return null
   if (!model) {
     return null;
