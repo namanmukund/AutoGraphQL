@@ -5,7 +5,7 @@ import { paginationKeys } from './paginate';
 import { PermissionDeniedError } from '../../../../../constants/errors';
 import { defaultPermissionErrorMsg, defaultLimitValue, historyFieldName } from '../../../../../constants';
 import appendModelHistoryToQueriedResult from '../utils/appendModelHistoryToQueriedResult';
-import getAggregationControllerInstance, { checkIfAggregationEnabled } from '../../resolvers/utils/getAggregationControllerInstance';
+import buildAggregationControllerInstance, { checkIfAggregationEnabled } from '../../resolvers/utils/buildAggregationControllerInstance';
 
 const getQueriedResult = (Model, params, limitValue, skipValue, querySort) => Model.find(params).limit(limitValue).skip(skipValue).sort(querySort)
   .exec()
@@ -34,7 +34,7 @@ class QueryController extends MasterController {
         const totalDocCount = await Model.find(params).count().exec();
         skipCount = totalDocCount - limitValue - skipValue > 0 ? totalDocCount - limitValue - skipValue : 0;
       }
-      const aggregationController = getAggregationControllerInstance(requestOptions, {
+      const aggregationController = buildAggregationControllerInstance(requestOptions, {
         filters: params,
         limit: limitValue,
         skip: skipCount,

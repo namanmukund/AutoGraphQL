@@ -528,7 +528,7 @@ const DAY_BEFORE_DEMO_COMPLETED = 5;
 
 const LEAD_PARTNERS_TO_CHECK_FOR_DEMO = ['virgo_india', 'ICCS'];
 
-const optimizationModes = {
+const dbControllerModes = {
   aggregation: 'aggregation',
   projectedAggregation: 'projectedAggregation',
   cascade: 'cascade',
@@ -626,5 +626,5 @@ export {
   TIME_BEFORE_EVENT_CREATION,
   DAY_BEFORE_DEMO_COMPLETED,
   LEAD_PARTNERS_TO_CHECK_FOR_DEMO,
-  optimizationModes,
+  dbControllerModes,
 };

@@ -138,7 +138,7 @@ import LayoutType from './LayoutType';
 import LearningSlideType from './LearningSlideType';
 import ClassType from './ClassType';
 import EvaluationResult from './EvaluationResult';
-import OptimizationMode from './OptimizationMode';
+import DatabaseControllerMode from './DatabaseControllerMode';
 
 export default [
   Status,
@@ -282,5 +282,5 @@ export default [
   LearningSlideType,
   ClassType,
   EvaluationResult,
-  OptimizationMode,
+  DatabaseControllerMode,
 ];
