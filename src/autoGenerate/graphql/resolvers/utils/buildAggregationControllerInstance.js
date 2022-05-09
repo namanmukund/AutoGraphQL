@@ -4,18 +4,20 @@ import { get } from 'lodash';
 import { getTypeDirectiveArgumentValue } from '../../../utils/getDirectiveArgumentValue';
 import { META, dbControllerModes } from '../../../../../constants';
 import { getFieldsBeingFetched } from '../../../utils';
+import parseGraphqlResolveInfo from '../../../../../utils/parseGraphqlResolveInfo';
 
 /**
  * TODO
- * - 1. RE-FACTOR CODE...................................[DONE]
- * - 2. RE-STRUCTURE CODE................................[DONE]
- * - 3. PROJECTION LOGIC.................................[PARTIAL]
- *      - Convert Lookup Arr O/P into Object Result........[PARTIAL]!
+ * - 1. Condition to check if aggregation enabled........[DONE]
+ * - 1. Generic Lookup for Relational Fields.............[DONE]
+ * - 1. Nested Lookup for Relational Fields..............[DONE]
+ * - 2. Projection Logic.................................[PARTIAL]
+ *      - Convert Lookup Arr O/P into Object Result........[DONE]
  *      - Consider Variables which are in filters
  *        too i.e local / Relational / Meta................TODO
- * - 4. Nested OR relational filters ??..................TODO
- * - 5. Nested Object Lookup ??..........................TODO [V2]
- * - 6. Resolver for Meta Fields ??......................TODO [V2]
+ * - 3. Nested or relational filters ??..................TODO
+ * - 4. Nested Object Lookup ............................TODO [V2]
+ * - 5. Resolver for Meta Fields ........................TODO [V2]
  */
 
 /**
@@ -92,23 +94,33 @@ const buildLookupStage = ({
 export const buildAggregationPipeline = ({
   fieldsForFetch,
   parsedASTMap,
+  parsedInfoMap,
   typeName,
   builderInstance,
-  // eslint-disable-next-line no-unused-vars
   nestedInstance = false,
 }) => {
   let aggregationBuilder = builderInstance;
   if (aggregationBuilder && aggregationBuilder.getPipeline) {
     const { field } = parsedASTMap[typeName];
+
+    // Check if Filter Params exists for nested pipeline.
+    if (nestedInstance && Object.keys(parsedInfoMap.args || {}).length) {
+      /**
+       * @TODO
+       * 1. Extract pagination keys and
+       *    get filters for nested lookup `Match` Stage.
+       * 2. Apply Match + Pagination Stages for nested Aggregation.
+       */
+      aggregationBuilder.Match(parsedInfoMap.args.filter);
+    }
+
     // Loop through all the requested fields to build Lookup and Projection Stages.
     Object.keys(fieldsForFetch).forEach((fieldName) => {
       const fieldParams = field[fieldName];
-
       // Check if it is a relational field
       if (get(fieldParams, 'directive.relation')) {
         // Get Relational Field Collection Name
         const relationalTypeName = fieldParams.type.dataType;
-
         /**
          * Recursively building aggregation pipeline to...
          * resolve nested fields.
@@ -126,6 +138,8 @@ export const buildAggregationPipeline = ({
         const nestedPipeline = buildAggregationPipeline({
           fieldsForFetch: fieldsForFetch[fieldName],
           parsedASTMap,
+          parsedInfoMap:
+            parsedInfoMap ? parsedInfoMap.fieldsByTypeName[typeName][fieldName] : {},
           typeName: relationalTypeName,
           builderInstance: nestedBuilder,
           nestedInstance: true,
@@ -181,6 +195,7 @@ const buildAggregationControllerInstance = ({
 }, additionalParams) => {
   const { fieldNodes } = info;
   const fieldsForFetch = getFieldsBeingFetched(fieldNodes);
+  const parsedInfoMap = parseGraphqlResolveInfo(info);
   let aggregationController = new AggregationBuilder(typeName);
 
   if (checkIfAggregationEnabled({ parsedASTMap, typeName })) {
@@ -196,6 +211,7 @@ const buildAggregationControllerInstance = ({
     aggregationController = buildAggregationPipeline({
       fieldsForFetch,
       parsedASTMap,
+      parsedInfoMap,
       typeName,
       builderInstance: aggregationController,
     });

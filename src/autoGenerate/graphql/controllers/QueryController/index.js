@@ -159,8 +159,7 @@ Sample paramsForFetch argument
         }
         firstValue = firstValue > defaultLimitValue ? defaultLimitValue : firstValue;
 
-        let limitValue = firstValue;
-        if (lastValue) limitValue = lastValue;
+        const limitValue = lastValue || firstValue;
         /* querySort for above example will be
            {
             "order": 1
