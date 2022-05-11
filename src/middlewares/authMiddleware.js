@@ -1,6 +1,6 @@
 import base64 from 'base-64';
 import { verifyToken, verifyAppToken } from '../auth';
-import { QueryController } from '../autoGenerate/graphql/controllers';
+import { QueryController, RedisController } from '../autoGenerate/graphql/controllers';
 import { toObject, log } from '../../utils';
 import { STATIC } from '../../constants';
 import { DatabaseRecordNotFoundError } from '../../constants/errors';
@@ -26,14 +26,23 @@ const fetchUser = (id) => {
 };
 
 // Function to verify if static token is valid or not
-const verifyIfStaticTokenIsValidOrNot = (appToken) => {
+const verifyIfStaticTokenIsValidOrNot = async (appToken) => {
   const typeName = 'AppToken';
   const newAuthentication = {
     bypass: true,
   };
+  const redisClient = new RedisController(newAuthentication);
+  const cachedAppTokenRes = await redisClient.get(`appToken::cache::${appToken}`);
+  if (cachedAppTokenRes) {
+    return true;
+  }
   const modelQueries = new QueryController(typeName, newAuthentication);
   return modelQueries.fetchOne({ token: appToken })
     .then((result) => {
+      redisClient.set(result, {
+        hkey: `appToken::cache::${appToken}`,
+        maxAge: 3600,
+      });
       if (!result) {
         return false;
       }
@@ -62,7 +71,20 @@ const validateForBlackListedToken = (encodedToken) => {
 const handleUserToken = async (id, currentApp, currentUser) => {
   const userInfo = {};
   // Get user by id
-  const user = await fetchUser(id);
+  const redisClient = new RedisController({
+    bypass: true,
+  });
+  let user = {};
+  const cachedUserRes = await redisClient.get(`user::cache::${id}`);
+  if (cachedUserRes) {
+    user = cachedUserRes;
+  } else {
+    user = await fetchUser(id);
+    redisClient.set(user, {
+      hkey: `user::cache::${id}`,
+      maxAge: 3600,
+    });
+  }
   // Get status
   let { status } = user;
   const { role } = user;
