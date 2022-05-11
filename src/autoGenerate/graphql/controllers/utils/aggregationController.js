@@ -1,24 +1,93 @@
+/* eslint-disable no-await-in-loop */
 import { AggregationBuilder } from 'mongodb-aggregation-builder';
 import { ConditionPayload, EqualityPayload } from 'mongodb-aggregation-builder/helpers';
 import { get } from 'lodash';
 import { getTypeDirectiveArgumentValue } from '../../../utils/getDirectiveArgumentValue';
-import { META, dbControllerModes } from '../../../../../constants';
-import { getFieldsBeingFetched } from '../../../utils';
+import { META, dbControllerModes, defaultLimitValue } from '../../../../../constants';
+import { getFieldsBeingFetched, getParsedASTMap } from '../../../utils';
+import { types } from '../../../../../utils';
 import parseGraphqlResolveInfo from '../../../../../utils/parseGraphqlResolveInfo';
+import { paginationKeys } from '../QueryController/paginate';
+import getSortOrder from '../QueryController/sorts';
+import getQueryParams from '../QueryController/filters';
+
+const parsedASTMap = getParsedASTMap(types);
 
 /**
  * TODO
- * - 1. Condition to check if aggregation enabled........[DONE]
- * - 1. Generic Lookup for Relational Fields.............[DONE]
- * - 1. Nested Lookup for Relational Fields..............[DONE]
- * - 2. Projection Logic.................................[PARTIAL]
- *      - Convert Lookup Arr O/P into Object Result........[DONE]
- *      - Consider Variables which are in filters
- *        too i.e local / Relational / Meta................TODO
- * - 3. Nested or relational filters ??..................TODO
- * - 4. Nested Object Lookup ............................TODO [V2]
- * - 5. Resolver for Meta Fields ........................TODO [V2]
+ * - 1. Condition to check if aggregation allowed........[DONE]
+ * - 2. Generic Nested Lookup for Relational Fields......[DONE]
+ * - 2. Projection Logic.................................[DONE]
+ * - 3. Nested Relational filters ??.....................[DONE]
+ * - 4. Top Level Relational filters ....................TODO
+ * - 5. Nested Object Lookup ............................TODO [V2]
+ * - 6. Resolver for Meta Fields ........................TODO [V2]
  */
+
+// Extract pagination and filter params from requested fields.
+const getPaginationAndFilterParams = async ({
+  inputParams,
+  modelName,
+  allowDefault = false,
+}) => {
+  // Parsed inputParams post paginationKeys method execution
+  const allParams = paginationKeys(inputParams);
+  const {
+    lastValue, skipValue, afterId, beforeId,
+  } = allParams;
+  let { firstValue } = allParams;
+  const params = allParams.inputParams;
+  if (!firstValue && allowDefault) {
+    firstValue = defaultLimitValue;
+  }
+  if (allowDefault) firstValue = firstValue > defaultLimitValue ? defaultLimitValue : firstValue;
+
+  const limitValue = lastValue || firstValue || 0;
+
+  let querySort = params && params.orderBy ? getSortOrder(params.orderBy) : {};
+  if (Object.keys(querySort).length === 0 && (firstValue || lastValue || skipValue
+    || afterId || beforeId) && allowDefault) {
+    querySort = { createdAt: 1 };
+  }
+  delete params.orderBy;
+  if (afterId) { params.id = { $gt: `${afterId}` }; } else if (beforeId) { params.id = { $lt: `${beforeId}` }; }
+
+  if (params.filter) {
+    const data = await getQueryParams(params, modelName);
+    if (afterId) { data.id = { $gt: `${afterId}` }; } else if (beforeId) { data.id = { $lt: `${beforeId}` }; }
+
+    return {
+      filter: data, limit: limitValue, skip: skipValue, sort: querySort,
+    };
+  }
+  return {
+    filter: {},
+    limit: limitValue,
+    skip: skipValue,
+    sort: querySort,
+  };
+};
+
+// Add filters and pagination params to current aggregation instance.
+const buildPaginationStage = async ({
+  params,
+  typeName,
+  aggregationBuilder,
+}) => {
+  const {
+    filter, limit, skip, sort,
+  } = await getPaginationAndFilterParams({
+    inputParams: params,
+    modelName: typeName,
+  });
+
+  if (filter && Object.keys(filter).length) aggregationBuilder.Match(filter);
+  if (sort && Object.keys(sort).length) aggregationBuilder.Sort(sort);
+  if (skip) aggregationBuilder.Skip(skip);
+  if (limit) aggregationBuilder.Limit(limit);
+
+  return aggregationBuilder;
+};
 
 /**
  * Building Projection Stage
@@ -91,9 +160,8 @@ const buildLookupStage = ({
   return builderInstance;
 };
 
-export const buildAggregationPipeline = ({
+const buildAggregationPipeline = async ({
   fieldsForFetch,
-  parsedASTMap,
   parsedInfoMap,
   typeName,
   builderInstance,
@@ -105,17 +173,16 @@ export const buildAggregationPipeline = ({
 
     // Check if Filter Params exists for nested pipeline.
     if (nestedInstance && Object.keys(parsedInfoMap.args || {}).length) {
-      /**
-       * @TODO
-       * 1. Extract pagination keys and
-       *    get filters for nested lookup `Match` Stage.
-       * 2. Apply Match + Pagination Stages for nested Aggregation.
-       */
-      aggregationBuilder.Match(parsedInfoMap.args.filter);
+      aggregationBuilder = await buildPaginationStage({
+        params: parsedInfoMap.args || {},
+        typeName,
+        aggregationBuilder,
+      });
     }
 
     // Loop through all the requested fields to build Lookup and Projection Stages.
-    Object.keys(fieldsForFetch).forEach((fieldName) => {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const fieldName of Object.keys(fieldsForFetch)) {
       const fieldParams = field[fieldName];
       // Check if it is a relational field
       if (get(fieldParams, 'directive.relation')) {
@@ -135,9 +202,8 @@ export const buildAggregationPipeline = ({
          * }
          */
         const nestedBuilder = new AggregationBuilder(relationalTypeName);
-        const nestedPipeline = buildAggregationPipeline({
+        const nestedPipeline = await buildAggregationPipeline({
           fieldsForFetch: fieldsForFetch[fieldName],
-          parsedASTMap,
           parsedInfoMap:
             parsedInfoMap ? parsedInfoMap.fieldsByTypeName[typeName][fieldName] : {},
           typeName: relationalTypeName,
@@ -146,7 +212,7 @@ export const buildAggregationPipeline = ({
         });
 
         // Build Lookup Stage to resolve required relational fields.
-        aggregationBuilder = buildLookupStage({
+        aggregationBuilder = await buildLookupStage({
           nestedPipeline,
           builderInstance: aggregationBuilder,
           relationalTypeName,
@@ -154,12 +220,10 @@ export const buildAggregationPipeline = ({
           fieldParams,
         });
       }
-
-      return aggregationBuilder;
-    });
+    }
 
     // Build Projection Stage to constraint required data from DB.
-    aggregationBuilder = buildProjectionMapStage({
+    aggregationBuilder = await buildProjectionMapStage({
       builderInstance: aggregationBuilder,
       fieldsForFetch,
       field,
@@ -168,7 +232,7 @@ export const buildAggregationPipeline = ({
   return aggregationBuilder;
 };
 
-export const checkIfAggregationEnabled = ({ parsedASTMap, typeName }) => {
+const checkIfAggregationAllowed = ({ typeName }) => {
   if (parsedASTMap && typeName) {
     const { directives } = parsedASTMap[typeName];
     /**
@@ -188,35 +252,37 @@ export const checkIfAggregationEnabled = ({ parsedASTMap, typeName }) => {
   return false;
 };
 
-const buildAggregationControllerInstance = ({
+const constructAggregationQuery = async ({
   typeName,
-  parsedASTMap,
   info,
-}, additionalParams) => {
+}, additionalParams = {}) => {
   const { fieldNodes } = info;
   const fieldsForFetch = getFieldsBeingFetched(fieldNodes);
   const parsedInfoMap = parseGraphqlResolveInfo(info);
   let aggregationController = new AggregationBuilder(typeName);
 
-  if (checkIfAggregationEnabled({ parsedASTMap, typeName })) {
+  if (checkIfAggregationAllowed({ typeName })) {
     const {
-      filters, limit, skip, sort,
+      filters = {}, limit = 0, skip = 0, sort = {},
     } = additionalParams;
 
     if (filters && Object.keys(filters).length) aggregationController.Match(filters);
-    if (sort) aggregationController.Sort(sort);
+    if (sort && Object.keys(sort).length) aggregationController.Sort(sort);
     if (skip) aggregationController.Skip(skip);
     if (limit) aggregationController.Limit(limit);
 
-    aggregationController = buildAggregationPipeline({
+    aggregationController = await buildAggregationPipeline({
       fieldsForFetch,
-      parsedASTMap,
       parsedInfoMap,
       typeName,
       builderInstance: aggregationController,
     });
   }
-  return aggregationController;
+  return {
+    controller: aggregationController,
+    pipelineStages: aggregationController.getPipeline({ allowEmpty: true }),
+    name: typeName,
+  };
 };
 
-export default buildAggregationControllerInstance;
+export { constructAggregationQuery, checkIfAggregationAllowed };

@@ -127,7 +127,11 @@ const fetchSingleQueryResolver = (
   }
   // If params is not remote field, first query db then,
   // query remote using id.
-  return modelQueries.fetchOne(params).then((result) => {
+  return modelQueries.fetchOne(params, {
+    typeName,
+    parsedASTMap: ast,
+    info,
+  }).then((result) => {
     // If there are no remote fields, return the result.
     if (!Object.keys(remoteFields).length) {
       return result;
