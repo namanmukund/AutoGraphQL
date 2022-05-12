@@ -77,6 +77,7 @@ const fetchListQueryResolver = (
   // If there are no remote fields, return the result.
   const modelQueries = new QueryController(typeName, authentication);
 
+  // TypeName and Info Params are required to build aggregation pipeline if allowed.
   const resolverInfoParams = {
     typeName,
     parsedASTMap,

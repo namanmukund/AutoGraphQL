@@ -124,6 +124,9 @@ const buildProjectionMapStage = ({
   return aggregationBuilder;
 };
 
+/**
+ * Building Lookup Stages based on nested pipeline
+ */
 const buildLookupStage = ({
   nestedPipeline,
   builderInstance,

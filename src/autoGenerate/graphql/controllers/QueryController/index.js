@@ -30,10 +30,12 @@ class QueryController extends MasterController {
   getQueriedResultFromController = async (params, limitValue, skipValue, querySort, isLast = false, resolverInfoParams) => {
     if (resolverInfoParams && checkIfAggregationAllowed(resolverInfoParams)) {
       let skipCount = skipValue;
+      // If last document are requested calculate total count and skip accordingly.
       if (isLast) {
         const totalDocCount = await Model.find(params).count().exec();
         skipCount = totalDocCount - limitValue - skipValue > 0 ? totalDocCount - limitValue - skipValue : 0;
       }
+      // Building Aggregation Pipeline Stages with Filter and requested fields.
       const { pipelineStages: aggregationQuery } = await constructAggregationQuery(resolverInfoParams, {
         filters: params,
         limit: limitValue,
@@ -42,6 +44,7 @@ class QueryController extends MasterController {
       });
       return this.Model.aggregate(aggregationQuery).exec();
     }
+    // If Aggregation is not allowed only fetch data for particular type.
     if (isLast) {
       return getQueriedResultFromLast(this.Model, params, limitValue, skipValue, querySort);
     }

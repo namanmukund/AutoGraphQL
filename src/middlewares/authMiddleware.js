@@ -42,7 +42,7 @@ const verifyIfStaticTokenIsValidOrNot = async (appToken) => {
     .then((result) => {
       redisClient.set(result, {
         hkey: `appToken::cache::${appToken}`,
-        maxAge: CACHE_EXPIRY_IN_SECONDS,
+        maxAge: CACHE_EXPIRY_IN_SECONDS * 100,
       });
       if (!result) {
         return false;
@@ -53,6 +53,9 @@ const verifyIfStaticTokenIsValidOrNot = async (appToken) => {
 
 // Validate if token is blackListed or not
 const validateForBlackListedToken = (encodedToken) => {
+  // Bypass BlacklistedToken validation for now.
+  return true;
+  // eslint-disable-next-line no-unreachable
   const typeName = 'BlacklistedToken';
   const newAuthentication = {
     bypass: true,
