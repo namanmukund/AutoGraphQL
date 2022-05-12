@@ -29,6 +29,7 @@ const getPaginationAndFilterParams = async ({
   inputParams,
   modelName,
   allowDefault = false,
+  allowDefaultSort = false,
 }) => {
   // Parsed inputParams post paginationKeys method execution
   const allParams = paginationKeys(inputParams);
@@ -46,7 +47,7 @@ const getPaginationAndFilterParams = async ({
 
   let querySort = params && params.orderBy ? getSortOrder(params.orderBy) : {};
   if (Object.keys(querySort).length === 0 && (firstValue || lastValue || skipValue
-    || afterId || beforeId) && allowDefault) {
+    || afterId || beforeId) && allowDefaultSort) {
     querySort = { createdAt: 1 };
   }
   delete params.orderBy;
@@ -79,6 +80,7 @@ const buildPaginationStage = async ({
   } = await getPaginationAndFilterParams({
     inputParams: params,
     modelName: typeName,
+    allowDefaultSort: true,
   });
 
   if (filter && Object.keys(filter).length) aggregationBuilder.Match(filter);

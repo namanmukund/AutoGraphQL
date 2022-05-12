@@ -7,6 +7,7 @@ import { DatabaseRecordNotFoundError } from '../../constants/errors';
 import appSpecificAuthTokens from '../../constants/appSpecificAuthTokens';
 
 const application = process.env.APPLICATION || 'core';
+const CACHE_EXPIRY_IN_SECONDS = 3600;
 
 const fetchUser = (id) => {
   const typeName = 'User';
@@ -41,7 +42,7 @@ const verifyIfStaticTokenIsValidOrNot = async (appToken) => {
     .then((result) => {
       redisClient.set(result, {
         hkey: `appToken::cache::${appToken}`,
-        maxAge: 3600,
+        maxAge: CACHE_EXPIRY_IN_SECONDS,
       });
       if (!result) {
         return false;
@@ -82,7 +83,7 @@ const handleUserToken = async (id, currentApp, currentUser) => {
     user = await fetchUser(id);
     redisClient.set(user, {
       hkey: `user::cache::${id}`,
-      maxAge: 3600,
+      maxAge: CACHE_EXPIRY_IN_SECONDS,
     });
   }
   // Get status
