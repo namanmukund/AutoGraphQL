@@ -4,7 +4,7 @@ import { ConditionPayload, EqualityPayload } from 'mongodb-aggregation-builder/h
 import { get } from 'lodash';
 import { getTypeDirectiveArgumentValue } from '../../../utils/getDirectiveArgumentValue';
 import { META, dbControllerModes, defaultLimitValue } from '../../../../../constants';
-import { getFieldsBeingFetched, getParsedASTMap } from '../../../utils';
+import { getParsedASTMap } from '../../../utils';
 import { types } from '../../../../../utils';
 import parseGraphqlResolveInfo from '../../../../../utils/parseGraphqlResolveInfo';
 import { paginationKeys } from '../QueryController/paginate';
@@ -91,9 +91,27 @@ const buildPaginationStage = async ({
   return aggregationBuilder;
 };
 
+const getFieldsArrBeingFetched = ({ fieldsRequestedForFetch, field }) => {
+  const metaFields = [];
+  const primitiveFields = [];
+  const aliasFields = [];
+  Object.keys(fieldsRequestedForFetch).forEach((fieldName) => {
+    const fieldInfo = fieldsRequestedForFetch[fieldName];
+    const fieldParams = field[fieldInfo.name];
+    if (get(fieldParams, 'directive.relationalMeta')) {
+      metaFields.push(fieldName);
+    } else if (fieldInfo.name !== fieldInfo.alias) {
+      aliasFields.push(fieldName);
+    } else {
+      primitiveFields.push(fieldName);
+    }
+  });
+  return [...metaFields, ...aliasFields, ...primitiveFields];
+};
+
 /**
  * Building Projection Stage
- * @example_1 fieldName -> { id: "..." }
+ * @example_1 fieldName -> { id: '...' }
  *    OR { fieldName : [{....}] } [Relational List Field]
  * Output -> { fieldName: 1 }
  * @example_2 fieldName -> { fieldName: {...} } [Relational Object Field]
@@ -101,21 +119,24 @@ const buildPaginationStage = async ({
  */
 const buildProjectionMapStage = ({
   builderInstance,
-  fieldsForFetch,
+  fieldsRequestedForFetch,
   field,
 }) => {
   const aggregationBuilder = builderInstance;
   const projectionMap = {};
 
-  Object.keys(fieldsForFetch).forEach((fieldName) => {
-    const fieldParams = field[fieldName];
+  getFieldsArrBeingFetched({ fieldsRequestedForFetch, field }).forEach((fieldName) => {
+    const fieldInfo = fieldsRequestedForFetch[fieldName];
+    const fieldParams = field[fieldInfo.name];
     if (get(fieldParams, 'directive.relationalMeta')) {
-      const relationalFieldName = fieldName.split(META)[0];
-      projectionMap[fieldName] = 1;
-      projectionMap[relationalFieldName] = 1;
+      const relationalFieldName = fieldInfo.name.split(META)[0];
+      projectionMap[fieldInfo.name] = 1;
+      projectionMap[`${relationalFieldName}MetaDocument`] = 1;
     } else if (get(fieldParams, 'directive.relation') && !get(fieldParams, 'type.isList', false)) {
-      projectionMap[fieldName] = { $arrayElemAt: [`$${fieldName}`, 0] };
-    } else { projectionMap[fieldName] = 1; }
+      projectionMap[fieldInfo.name] = { $arrayElemAt: [`$${fieldInfo.name}`, 0] };
+    } else if (get(fieldParams, 'directive.relation') && (fieldName !== fieldInfo.name)) {
+      projectionMap[fieldName] = 1;
+    } else { projectionMap[fieldInfo.name] = 1; }
   });
 
   if (projectionMap && Object.keys(projectionMap).length) {
@@ -133,6 +154,7 @@ const buildLookupStage = ({
   relationalTypeName,
   fieldName,
   fieldParams,
+  alias,
 }) => {
   const nestedPipelineStages = nestedPipeline.getPipeline({
     allowEmpty: true,
@@ -140,7 +162,7 @@ const buildLookupStage = ({
 
   if (nestedPipelineStages && nestedPipelineStages.length) {
     builderInstance.Lookup(
-      ConditionPayload(relationalTypeName, fieldName, {
+      ConditionPayload(relationalTypeName, alias || fieldName, {
         variableList: [
           {
             var: `${fieldName}Id`,
@@ -156,7 +178,7 @@ const buildLookupStage = ({
     builderInstance.Lookup(
       EqualityPayload(
         relationalTypeName,
-        fieldName,
+        alias || fieldName,
         `${fieldName}.typeId`,
         'id',
       ),
@@ -165,8 +187,19 @@ const buildLookupStage = ({
   return builderInstance;
 };
 
+const checkIfRelationalMetaFieldExists = ({
+  fieldsRequestedForFetch,
+  field,
+}) => Object.keys(fieldsRequestedForFetch).some((fieldName) => {
+  const fieldInfo = fieldsRequestedForFetch[fieldName];
+  const fieldParams = field[fieldInfo.name];
+  if (get(fieldParams, 'directive.relationalMeta')) {
+    return true;
+  }
+  return false;
+});
+
 const buildAggregationPipeline = async ({
-  fieldsForFetch,
   parsedInfoMap,
   typeName,
   builderInstance,
@@ -175,7 +208,7 @@ const buildAggregationPipeline = async ({
   let aggregationBuilder = builderInstance;
   if (aggregationBuilder && aggregationBuilder.getPipeline) {
     const { field } = parsedASTMap[typeName];
-
+    const fieldsRequestedForFetch = parsedInfoMap.fieldsByTypeName[typeName];
     // Check if Filter Params exists for nested pipeline.
     if (nestedInstance && Object.keys(parsedInfoMap.args || {}).length) {
       aggregationBuilder = await buildPaginationStage({
@@ -185,10 +218,25 @@ const buildAggregationPipeline = async ({
       });
     }
 
+    if (checkIfRelationalMetaFieldExists({ fieldsRequestedForFetch, field })) {
+      const projectionMap = {};
+      getFieldsArrBeingFetched({ fieldsRequestedForFetch, field }).forEach((fieldName) => {
+        const fieldInfo = fieldsRequestedForFetch[fieldName];
+        const fieldParams = field[fieldInfo.name];
+        if (get(fieldParams, 'directive.relationalMeta')) {
+          const relationalFieldName = fieldInfo.name.split(META)[0];
+          projectionMap[`${fieldInfo.name}Document`] = `$${relationalFieldName}`;
+        }
+        projectionMap[fieldInfo.name] = 1;
+      });
+      if (projectionMap && Object.keys(projectionMap).length) aggregationBuilder.Project(projectionMap);
+    }
+
     // Loop through all the requested fields to build Lookup and Projection Stages.
     // eslint-disable-next-line no-restricted-syntax
-    for (const fieldName of Object.keys(fieldsForFetch)) {
-      const fieldParams = field[fieldName];
+    for (const fieldName of getFieldsArrBeingFetched({ fieldsRequestedForFetch, field })) {
+      const fieldInfo = fieldsRequestedForFetch[fieldName];
+      const fieldParams = field[fieldInfo.name];
       // Check if it is a relational field
       if (get(fieldParams, 'directive.relation')) {
         // Get Relational Field Collection Name
@@ -208,9 +256,9 @@ const buildAggregationPipeline = async ({
          */
         const nestedBuilder = new AggregationBuilder(relationalTypeName);
         const nestedPipeline = await buildAggregationPipeline({
-          fieldsForFetch: fieldsForFetch[fieldName],
-          parsedInfoMap:
-            parsedInfoMap ? parsedInfoMap.fieldsByTypeName[typeName][fieldName] : {},
+          parsedInfoMap: parsedInfoMap
+            ? parsedInfoMap.fieldsByTypeName[typeName][fieldName]
+            : {},
           typeName: relationalTypeName,
           builderInstance: nestedBuilder,
           nestedInstance: true,
@@ -221,8 +269,9 @@ const buildAggregationPipeline = async ({
           nestedPipeline,
           builderInstance: aggregationBuilder,
           relationalTypeName,
-          fieldName,
+          fieldName: fieldInfo.name,
           fieldParams,
+          alias: fieldName,
         });
       }
     }
@@ -230,7 +279,7 @@ const buildAggregationPipeline = async ({
     // Build Projection Stage to constraint required data from DB.
     aggregationBuilder = await buildProjectionMapStage({
       builderInstance: aggregationBuilder,
-      fieldsForFetch,
+      fieldsRequestedForFetch,
       field,
     });
   }
@@ -261,8 +310,6 @@ const constructAggregationQuery = async ({
   typeName,
   info,
 }, additionalParams = {}) => {
-  const { fieldNodes } = info;
-  const fieldsForFetch = getFieldsBeingFetched(fieldNodes);
   const parsedInfoMap = parseGraphqlResolveInfo(info);
   let aggregationController = new AggregationBuilder(typeName);
 
@@ -277,7 +324,6 @@ const constructAggregationQuery = async ({
     if (limit) aggregationController.Limit(limit);
 
     aggregationController = await buildAggregationPipeline({
-      fieldsForFetch,
       parsedInfoMap,
       typeName,
       builderInstance: aggregationController,
