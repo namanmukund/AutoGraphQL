@@ -136,6 +136,10 @@ const buildProjectionMapStage = ({
       projectionMap[fieldInfo.name] = { $arrayElemAt: [`$${fieldInfo.name}`, 0] };
     } else if (get(fieldParams, 'directive.relation') && (fieldName !== fieldInfo.name)) {
       projectionMap[fieldName] = 1;
+    } else if (get(fieldParams, 'directive.defaultValue')) {
+      let defaultFieldValue = get(fieldParams, 'directive.defaultValue.argument.value.value.value');
+      if (get(fieldParams, 'type.dataType') === 'Boolean') defaultFieldValue = Boolean(defaultFieldValue);
+      projectionMap[fieldName] = { $ifNull: [`$${fieldInfo.name}`, defaultFieldValue || ''] };
     } else { projectionMap[fieldInfo.name] = 1; }
   });
 
