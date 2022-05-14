@@ -9,6 +9,9 @@ const IndividualQuestionsScoreType = `
   type IndividualQuestionsScoreType {
     questionId: String
     percentageCorrect: Float
+    percentageIncorrect: Float
+    percentageUnattempted: Float
+    submissionsCount: Int
     title: String
   }
 `;
