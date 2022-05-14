@@ -157,7 +157,7 @@ const commonFunctionForRelationAndMeta = async (
 
   // if result exists and model is not defined i.e resulting relation
   // is already resolved so return result.
-  if (result && !model) {
+  if (result && result.id && !typeId && !model) {
     return result;
   }
 

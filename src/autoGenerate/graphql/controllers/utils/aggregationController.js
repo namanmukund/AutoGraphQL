@@ -19,7 +19,7 @@ const parsedASTMap = getParsedASTMap(types);
  * - 2. Generic Nested Lookup for Relational Fields......[DONE]
  * - 2. Projection Logic.................................[DONE]
  * - 3. Nested Relational filters ??.....................[DONE]
- * - 4. Top Level Relational filters ....................TODO
+ * - 4. Top Level Relational filters ....................TODO [V2]
  * - 5. Nested Object Lookup ............................TODO [V2]
  * - 6. Resolver for Meta Fields ........................TODO [V2]
  */
@@ -143,9 +143,12 @@ const buildProjectionMapStage = ({
     } else if (get(fieldParams, 'directive.defaultValue')) {
       let defaultFieldValue = get(fieldParams, 'directive.defaultValue.argument.value.value.value');
       if (get(fieldParams, 'type.dataType') === 'Boolean') defaultFieldValue = Boolean(defaultFieldValue);
-      projectionMap[fieldName] = { $ifNull: [`$${fieldInfo.name}`, defaultFieldValue || ''] };
+      projectionMap[fieldInfo.name] = { $ifNull: [`$${fieldInfo.name}`, defaultFieldValue || ''] };
     } else { projectionMap[fieldInfo.name] = 1; }
   });
+
+  // By Default project id field to ensure conditions do not fail in directive resolver.
+  projectionMap.id = 1;
 
   if (projectionMap && Object.keys(projectionMap).length) {
     aggregationBuilder.Project(projectionMap);
