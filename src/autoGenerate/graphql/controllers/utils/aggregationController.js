@@ -132,10 +132,14 @@ const buildProjectionMapStage = ({
       const relationalFieldName = fieldInfo.name.split(META)[0];
       projectionMap[fieldInfo.name] = 1;
       projectionMap[`${relationalFieldName}MetaDocument`] = 1;
-    } else if (get(fieldParams, 'directive.relation') && !get(fieldParams, 'type.isList', false)) {
-      projectionMap[fieldInfo.name] = { $arrayElemAt: [`$${fieldInfo.name}`, 0] };
-    } else if (get(fieldParams, 'directive.relation') && (fieldName !== fieldInfo.name)) {
-      projectionMap[fieldName] = 1;
+    } else if (get(fieldParams, 'directive.relation')) {
+      let aliasOrPrimitiveName = fieldInfo.name;
+      if (fieldName !== fieldInfo.name) aliasOrPrimitiveName = fieldName;
+      if (!get(fieldParams, 'type.isList', false)) {
+        projectionMap[aliasOrPrimitiveName] = { $arrayElemAt: [`$${aliasOrPrimitiveName}`, 0] };
+      } else {
+        projectionMap[aliasOrPrimitiveName] = 1;
+      }
     } else if (get(fieldParams, 'directive.defaultValue')) {
       let defaultFieldValue = get(fieldParams, 'directive.defaultValue.argument.value.value.value');
       if (get(fieldParams, 'type.dataType') === 'Boolean') defaultFieldValue = Boolean(defaultFieldValue);
