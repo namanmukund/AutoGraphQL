@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import { AggregationBuilder } from 'mongodb-aggregation-builder';
 import { ConditionPayload, EqualityPayload } from 'mongodb-aggregation-builder/helpers';
-import { get } from 'lodash';
+import { get, truncate } from 'lodash';
 import { getTypeDirectiveArgumentValue } from '../../../utils/getDirectiveArgumentValue';
 import { META, dbControllerModes, defaultLimitValue } from '../../../../../constants';
 import { getParsedASTMap } from '../../../utils';
@@ -265,7 +265,12 @@ const buildAggregationPipeline = async ({
          *   }
          * }
          */
-        const nestedBuilder = new AggregationBuilder(relationalTypeName);
+        const nestedBuilder = new AggregationBuilder(truncate(
+          relationalTypeName, {
+            length: 30,
+            omission: '',
+          },
+        ));
         const nestedPipeline = await buildAggregationPipeline({
           parsedInfoMap: parsedInfoMap
             ? parsedInfoMap.fieldsByTypeName[typeName][fieldName]
@@ -322,7 +327,12 @@ const constructAggregationQuery = async ({
   info,
 }, additionalParams = {}) => {
   const parsedInfoMap = parseGraphqlResolveInfo(info);
-  let aggregationController = new AggregationBuilder(typeName);
+  let aggregationController = new AggregationBuilder(truncate(
+    typeName, {
+      length: 30,
+      omission: '',
+    },
+  ));
 
   if (checkIfAggregationAllowed({ typeName })) {
     const {
