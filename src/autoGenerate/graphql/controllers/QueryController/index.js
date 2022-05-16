@@ -5,7 +5,7 @@ import { paginationKeys } from './paginate';
 import { PermissionDeniedError } from '../../../../../constants/errors';
 import { defaultPermissionErrorMsg, defaultLimitValue, historyFieldName } from '../../../../../constants';
 import appendModelHistoryToQueriedResult from '../utils/appendModelHistoryToQueriedResult';
-import { constructAggregationQuery, checkIfAggregationAllowed } from '../utils/aggregationController';
+import { constructAggregationQuery, checkIfAggregationAllowedOnType } from '../utils/aggregationController';
 
 const getQueriedResult = (Model, params, limitValue, skipValue, querySort) => Model.find(params).limit(limitValue).skip(skipValue).sort(querySort)
   .exec()
@@ -28,7 +28,7 @@ const checkIfModelHistoryInParams = (params) => {
 
 class QueryController extends MasterController {
   getQueriedResultFromController = async (params, limitValue, skipValue, querySort, isLast = false, resolverInfoParams) => {
-    if (resolverInfoParams && checkIfAggregationAllowed(resolverInfoParams)) {
+    if (resolverInfoParams && checkIfAggregationAllowedOnType(resolverInfoParams)) {
       let skipCount = skipValue;
       // If last document are requested calculate total count and skip accordingly.
       if (isLast) {
@@ -88,7 +88,7 @@ class QueryController extends MasterController {
             },
           });
         }
-        if (resolverInfoParams && checkIfAggregationAllowed(resolverInfoParams)) {
+        if (resolverInfoParams && checkIfAggregationAllowedOnType(resolverInfoParams)) {
           return constructAggregationQuery(resolverInfoParams, {
             filters: param,
           }).then(async ({ pipelineStages: aggregationQuery }) => {
