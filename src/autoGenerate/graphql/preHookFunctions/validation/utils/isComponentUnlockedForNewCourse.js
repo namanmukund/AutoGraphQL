@@ -23,6 +23,7 @@ import validateMentorMenteePermissionForComponentForNewCourse from './validateMe
 import { getMentorMenteeSessionForValidation } from './index';
 import { ifAuthorized } from '../../../../../../utils';
 import { MENTOR, SCHOOL_TEACHER } from '../../../../../../constants/roles';
+import getSortedTopics from '../../../../../../utils/getSortedTopicsFromCoursePackageOrder';
 
 /*
 This is a common method to check whether the called topic component is locked or not
@@ -164,8 +165,11 @@ const isComponentUnlockedForNewCourse = async (
     });
   }
   const {
-    order: topicOrder,
     isTrial,
+  } = topicInfo;
+
+  let {
+    order: topicOrder,
   } = topicInfo;
 
   topicId = topicInfo && topicInfo.id;
@@ -203,6 +207,14 @@ const isComponentUnlockedForNewCourse = async (
   );
   const batchCurrentComponentInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.currentComponent');
   const schoolInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.school');
+
+  const isCoursePackageBatch = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.id');
+
+  if (isCoursePackageBatch) {
+    const coursePackageTopics = getSortedTopics(get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.topics'));
+    const topicFound = coursePackageTopics.find((o) => o.id === topicId);
+    topicOrder = get(topicFound, 'coursePackageOrder');
+  }
 
   const { free, pro } = enrollmentTypes;
 
