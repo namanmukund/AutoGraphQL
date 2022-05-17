@@ -111,6 +111,7 @@ import getNextOrPrevClassroomSessions from './query/methods/getNextOrPrevClassro
 import getClassroomDetails from './query/methods/getClassroomDetails';
 import scheduleSessions from './mutation/shift/scheduleSessions';
 import getSchoolAndBatchDetail from './query/methods/getSchoolAndBatchDetail';
+import menteeCourseHomework from './mutation/methods/menteeCourseHomework';
 import getBatchDetails from './query/methods/getBatchDetails';
 import getBatchStudent from './query/methods/getBatchStudent';
 import getSessionComponentMeta from './query/methods/getSessionComponentMeta';
@@ -703,6 +704,8 @@ resolvers.Query.getClassroomReport = getClassroomReport;
 resolvers.Query.getPracticeQuestionReport = getPracticeQuestionReport;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
+// Resolver to retrieve homework status based on filters
+resolvers.Mutation.menteeCourseHomework = menteeCourseHomework;
 
 // subscriptions
 resolvers.Subscription.userUpdated = injectSubscriptionWithCommonAsyncIterator(['USER_UPDATED']);

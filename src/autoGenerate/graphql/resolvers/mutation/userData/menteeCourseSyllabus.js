@@ -1108,7 +1108,7 @@ query{
 }
 `;
 
-const fetchOrCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => {} }) => {
+const fetchOrCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => { } }) => {
   const redisClient = new RedisController({
     bypass: true,
   });
@@ -2001,7 +2001,6 @@ const constructSessionsArr = ({
       let slotTime = null;
       const { bookingDate, mentorSession, sessionEndDate } = batchSession;
       const {
-        order: batchSessionTopicOrder,
         id: batchSessionTopicId,
         title: batchSessionTopicTitle,
         description: batchSessionTopicDescription,
@@ -2050,7 +2049,7 @@ const constructSessionsArr = ({
       } else {
         const bookedMenteeSession = {
           topicId: batchSessionTopicId,
-          topicOrder: batchSessionTopicOrder,
+          topicOrder,
           topicTitle: batchSessionTopicTitle,
           topicThumbnail: batchSessionTopicThumbnail,
           topicThumbnailSmall: batchSessionTopicThumbnailSmall,
