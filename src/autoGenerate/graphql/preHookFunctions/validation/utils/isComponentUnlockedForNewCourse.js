@@ -201,7 +201,8 @@ const isComponentUnlockedForNewCourse = async (
   }
   // condition to check if topic is free, if not then user should be pro
   // type to access that topic
-  const { order: currentTopicOrder } = currentTopic;
+  let { order: currentTopicOrder } = currentTopic;
+  const { id: currentTopicId } = currentTopic;
   const batchCurrentComponentStatusRes = await getBatchCurrentComponentStatus(
     userId,
   );
@@ -212,8 +213,15 @@ const isComponentUnlockedForNewCourse = async (
 
   if (isCoursePackageBatch) {
     const coursePackageTopics = getSortedTopics(get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.topics'));
+    // topic we send in input
     const topicFound = coursePackageTopics.find((o) => o.id === topicId);
     topicOrder = get(topicFound, 'coursePackageOrder');
+    // current topic we get from userCurrentComponentStatus
+    const currentTopicFound = coursePackageTopics.find((o) => o.id === currentTopicId);
+    currentTopicOrder = get(currentTopicFound, 'coursePackageOrder');
+    // current Topic we get from batchCurrentComponentStatus
+    const currentTopicInBatch = coursePackageTopics.find((o) => o.id === get(batchCurrentComponentInfo, 'currentTopic.id'));
+    batchCurrentComponentInfo.currentTopic.order = get(currentTopicInBatch, 'coursePackageOrder');
   }
 
   const { free, pro } = enrollmentTypes;
@@ -241,6 +249,7 @@ const isComponentUnlockedForNewCourse = async (
     page,
     checkForPaidLogic,
     batchCurrentComponentInfo,
+    isCoursePackageBatch,
   )) {
     // placing logic to send correct message if a paid video is locked coz free user is trying to access it
     if (batchCurrentComponentInfo) {
