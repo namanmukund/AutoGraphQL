@@ -993,7 +993,7 @@ const menteeCourseHomeworkMutationResolver = async (
   }
   let packageTopics = [];
   if (coursePackage && get(coursePackage, 'id')) {
-    packageTopics = getTopicsArrFromCoursePackages(coursePackage);
+    packageTopics = getTopicsArrFromCoursePackages(coursePackage, 'topics', get(userBatchDetails, '0.batch'));
   }
   const { currentCourse } = currentTopicComponentInfo;
   const { chapters } = currentCourse;
@@ -1008,7 +1008,7 @@ const menteeCourseHomeworkMutationResolver = async (
     chapters.sort((a, b) => a.order - b.order);
   }
   if (coursePackage && get(coursePackage, 'id')) {
-    const lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic);
+    const lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic, get(userBatchDetails, '0.batch'));
     packageTopics.forEach((topic) => {
       const mentorMenteeSession = isMentorMenteeSessionAvailable(
         mentorMenteeSessions,
