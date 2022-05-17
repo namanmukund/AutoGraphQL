@@ -1,7 +1,7 @@
-import { ifAuthorized } from "../../../../../../utils";
-import MasterController from "../../../controllers/MasterController";
-import { frontEndApps } from "../../../../../../constants";
-import validateSpecificAppToken from "../../../resolvers/mutation/utils/validateSpecificAppToken";
+import { ifAuthorized } from '../../../../../../utils';
+import MasterController from '../../../controllers/MasterController';
+import { frontEndApps } from '../../../../../../constants';
+import validateSpecificAppToken from '../../../resolvers/mutation/utils/validateSpecificAppToken';
 
 /*
 this method validates user and app passed in the token and then returns
@@ -12,7 +12,7 @@ const validateTokenAndExtractInformation = (context, skipUserValidation) => {
   if (skipUserValidation === true && authentication && !authentication.user) {
     validateSpecificAppToken(authentication, frontEndApps, false);
   } else {
-    const ms = new MasterController("", authentication);
+    const ms = new MasterController('', authentication);
     ms.validate();
   }
   const currentUser = authentication && authentication.user;

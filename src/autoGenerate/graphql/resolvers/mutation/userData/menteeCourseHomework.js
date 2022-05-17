@@ -295,11 +295,8 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                         topicQuestions: 1,
                         thumbnail: 1,
                         thumbnailSmall: 1,
-                        topicAssignmentQuestions: {
-                          assignmentQuestions: {
-                            id: 1,
-                          },
-                        },
+                        topicAssignmentQuestions: 1,
+                        topicHomeworkAssignmentQuestion: 1,
                         chapter: 1,
                         topicComponentRule: 1,
                       },
@@ -392,11 +389,9 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                         thumbnailSmall: {
                           $arrayElemAt: ['$thumbnailSmall', 0],
                         },
-                        topicAssignmentQuestions: {
-                          assignmentQuestions: {
-                            id: 1,
-                          },
-                        },
+                        topicQuestions: 1,
+                        topicAssignmentQuestions: 1,
+                        topicHomeworkAssignmentQuestion: 1,
                         chapter: 1,
                         topicComponentRule: 1,
                       },
@@ -680,11 +675,8 @@ const getUserBatchDetails = (userId) => [
                         topicQuestions: 1,
                         thumbnail: 1,
                         thumbnailSmall: 1,
-                        topicAssignmentQuestions: {
-                          assignmentQuestions: {
-                            id: 1,
-                          },
-                        },
+                        topicAssignmentQuestions: 1,
+                        topicHomeworkAssignmentQuestion: 1,
                         chapter: 1,
                         topicComponentRule: 1,
                       },
@@ -799,11 +791,9 @@ const getUserBatchDetails = (userId) => [
                             0,
                           ],
                         },
-                        topicAssignmentQuestions: {
-                          assignmentQuestions: {
-                            id: 1,
-                          },
-                        },
+                        topicQuestions: 1,
+                        topicAssignmentQuestions: 1,
+                        topicHomeworkAssignmentQuestion: 1,
                         chapter: {
                           $arrayElemAt: [
                             '$chapter',
@@ -1008,13 +998,13 @@ const menteeCourseHomeworkMutationResolver = async (
     chapters.sort((a, b) => a.order - b.order);
   }
   if (coursePackage && get(coursePackage, 'id')) {
-    const lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic, get(userBatchDetails, '0.batch'));
+    const lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic, get(userBatchDetails, '0.batch')).order;
     packageTopics.forEach((topic) => {
       const mentorMenteeSession = isMentorMenteeSessionAvailable(
         mentorMenteeSessions,
         topic.id,
       );
-      if (!mentorMenteeSession && get(topic, 'order') >= lastTopicBookedOrder) return;
+      if (!mentorMenteeSession && (get(topic, 'order') >= lastTopicBookedOrder)) return;
       constructHomeworkArr(finalTopicBasedHomeworkArray, mentorMenteeSession, {
         ...topic,
         chapter: {
