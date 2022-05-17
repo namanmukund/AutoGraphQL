@@ -99,6 +99,7 @@ function buildFieldTreeFromAST(
             name,
             alias,
             args,
+            typeName: fieldGqlType.name,
             fieldsByTypeName: isCompositeType(fieldGqlType)
               ? {
                 [fieldGqlType.name]: {},

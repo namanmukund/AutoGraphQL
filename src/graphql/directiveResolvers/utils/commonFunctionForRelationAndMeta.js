@@ -1,6 +1,6 @@
 // the resolvers for the directives defined in your schema
 import pluralize from 'pluralize';
-import { camelCase } from 'lodash';
+import { camelCase, get } from 'lodash';
 import models from '../../../autoGenerate/models';
 import { fetchListQueryResolver, fetchSingleQueryResolver } from '../../../autoGenerate/graphql/resolvers/query';
 import { getParsedASTMap } from '../../../autoGenerate/utils';
@@ -13,6 +13,7 @@ import fetchListAggregationQueryResolver from '../../../autoGenerate/graphql/res
 import addAdditionalRelationFieldsToResponse from './addAdditionalRelationFieldsToResponse';
 import { prehook } from '../../../autoGenerate/graphql/preHook';
 import { posthook } from '../../../autoGenerate/graphql/postHook';
+import parseGraphqlResolveInfo from '../../../../utils/parseGraphqlResolveInfo';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -24,6 +25,7 @@ const commonFunctionForRelationAndMeta = async (
   info,
   isMetaType = false,
 ) => {
+  const parsedInfoMap = parseGraphqlResolveInfo(info);
   const countDoc = {
     count: 0,
   };
@@ -94,6 +96,12 @@ const commonFunctionForRelationAndMeta = async (
       if (isMetaType) {
         return countDoc;
       }
+      if (result && result.length && get(result, '0.id')) {
+        if (parsedInfoMap && parsedInfoMap.typeName) {
+          const postHookResult = await posthook(result, camelCase(parsedInfoMap.typeName), context, params, info);
+          return postHookResult;
+        }
+      }
       return result;
     }
     const allTypeIds = result.map((element) => element.typeId);
@@ -158,6 +166,10 @@ const commonFunctionForRelationAndMeta = async (
   // if result exists and model is not defined i.e resulting relation
   // is already resolved so return result.
   if (result && result.id && !typeId && !model) {
+    if (parsedInfoMap && parsedInfoMap.typeName) {
+      const postHookResult = await posthook(result, camelCase(parsedInfoMap.typeName), context, params, info);
+      return postHookResult;
+    }
     return result;
   }
 
