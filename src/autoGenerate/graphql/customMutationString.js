@@ -51,6 +51,7 @@ const customMutationString = `
    updateEventSessionAttendance (input: EventAttendanceInput): BooleanResult
    scheduleSessions (input: ScheduleSessionsInput): BooleanResult
    schoolLiveClassLoginViaOtp ( input: SchoolLiveClassLoginInput ): ParentChildToken,
+   menteeCourseHomework (courseId: ID): [MenteeCourseHomework]
    `;
 
 export default customMutationString;

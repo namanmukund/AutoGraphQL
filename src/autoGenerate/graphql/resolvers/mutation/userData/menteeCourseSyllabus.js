@@ -1108,7 +1108,7 @@ query{
 }
 `;
 
-const fetchOrCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => {} }) => {
+const fetchOrCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => { } }) => {
   const redisClient = new RedisController({
     bypass: true,
   });
