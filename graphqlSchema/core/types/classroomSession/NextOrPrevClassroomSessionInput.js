@@ -11,7 +11,6 @@ const NextOrPrevClassroomSessionInput = `
     limit: Int!
     queryType: NextOrPrevSessionType!
     bookingDate: Date!
-    documentType: SessionDocumentType! @defaultValue(value: "batch")
   }
 `;
 

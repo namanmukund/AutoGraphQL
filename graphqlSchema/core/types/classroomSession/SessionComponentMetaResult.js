@@ -9,6 +9,8 @@ const SessionComponentMetaResult = `
     completedQuizMeta: Int
     completedAssignmentMeta: Int
     completedPracticeMeta: Int
+    completedPQMeta: Int @defaultValue(value: "0")
+    isPQComponentExists: Boolean @defaultValue(value: "false")
     sessionStatus: SessionStatus @defaultValue(value: "allotted")
   }
 `;

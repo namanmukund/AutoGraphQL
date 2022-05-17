@@ -13,6 +13,15 @@ const batchCurrentComponentStatusQuery = (
         batch{
           id
           type
+          coursePackage{
+            id
+            topics{
+              order
+              topic{
+                id
+              }
+            }
+          }
           currentComponent{
             currentCourse{
               id

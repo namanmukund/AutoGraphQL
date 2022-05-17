@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { get } from 'lodash';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
@@ -32,6 +33,9 @@ const getTopicOrderQuery = (topicId) => `
       topic(id:"${topicId}"){
         id
         order
+        courses{
+          id
+        }
       }
     }
 `;
@@ -49,7 +53,10 @@ const updateBatchCurrentComponentStatusValidation = async (params, mutationOrQue
   if (currentTopicConnectId) {
     const topicResult = await callLocalGraphqlApi(getTopicOrderQuery(currentTopicConnectId));
     const topicDoc = get(topicResult, 'data.topic');
-    // eslint-disable-next-line no-param-reassign
+    // if coursePackage, update current course also
+    if (context.usesCoursePackage) {
+      params.currentCourseConnectId = get(topicDoc, 'courses[0].id');
+    }
     context.batchCurrentComponentStatusDoc = batchCurrentComponentStatusDoc;
     context.topicDoc = topicDoc;
   }

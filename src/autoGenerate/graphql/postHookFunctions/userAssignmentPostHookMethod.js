@@ -8,6 +8,7 @@ import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { log } from '../../../../utils';
+import { MENTEE } from '../../../../constants/roles';
 
 // query to get assignment questions associated with topic
 const topicQuery = (topicId) => `
@@ -93,6 +94,9 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
   if it is not already present, we will add a new document with default data
   */
   if (input && input.length) {
+    return input;
+  }
+  if (get(context, 'userRoleFromContext') && get(context, 'userRoleFromContext') !== MENTEE) {
     return input;
   }
   const {

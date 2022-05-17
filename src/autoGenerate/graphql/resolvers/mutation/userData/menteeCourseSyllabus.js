@@ -1429,6 +1429,44 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
     },
   }];
 
+/**
+ * Below Aggregation can now be replaced with following library
+ * const pipeline = new AggregationBuilder('SP')
+    .Project(OnlyPayload('id', 'batch', 'school', 'user'))
+    .Match({ 'user.typeId': userId })
+    .Lookup(ConditionPayload('Batch', 'batch',
+      {
+        variableList: [{
+          var: 'batchId',
+          source: 'batch.typeId',
+          key: 'primary',
+        }],
+        nestedAggregation: new AggregationBuilder('Batch')
+          .Project(OnlyPayload('id', 'currentComponent', 'coursePackage'))
+          .Project({
+            id: 1,
+            batch: ArrayElemAt('$batch', 0),
+            allottedMentor: ArrayElemAt('$allottedMentor', 0),
+            currentComponent: ArrayElemAt('$currentComponent', 0),
+          }),
+      }))
+    .Lookup(ConditionPayload('School', 'school',
+      {
+        project: { ...OnlyPayload('id', 'enrollmentType') },
+        variableList: [{
+          var: 'schoolId',
+          source: 'school.typeId',
+          key: 'primary',
+        }],
+      }))
+    .Project({
+      id: 1,
+      coursePackage: ArrayElemAt('$coursePackage', 0),
+      school: ArrayElemAt('$school', 0),
+    })
+    .getPipeline();
+ */
+
 const getUserBatchDetails = (userId) => [
   {
     $project: {
@@ -1481,6 +1519,8 @@ const getUserBatchDetails = (userId) => [
               },
               {
                 $project: {
+                  enrollmentType: 1,
+                  latestSessionStatus: 1,
                   currentCourse: {
                     id: '$currentCourse.typeId',
                   },
@@ -1853,23 +1893,66 @@ const getUserBatchDetails = (userId) => [
   },
 ];
 
-export const getTopicOrderFromCoursePackage = (coursePackage, currentTopic) => {
+export const getTopicOrderFromCoursePackage = (coursePackage, currentTopic, userBatchDetails) => {
   if (currentTopic) {
     const currentTopicId = get(currentTopic, 'id');
     const packageTopics = get(coursePackage, 'topics', []);
-    const packageTopicOrder = get(packageTopics.filter((el) => get(el, 'topic.typeId') === currentTopicId)[0], 'order', 0);
-    return packageTopicOrder;
+    const filteredTopic = packageTopics.find((el) => get(el, 'topic.typeId') === currentTopicId);
+    let packageTopicOrder = get(filteredTopic, 'order', 0);
+    let packageTopicDescription = get(currentTopic, 'description');
+    if (get(filteredTopic, 'description')) {
+      packageTopicDescription = get(filteredTopic, 'description');
+    }
+    if (userBatchDetails) {
+      const topicReshuffledGroup = get(filteredTopic, 'topicReshuffledGroup', []).find((group) => (get(group, 'batch.typeId') === get(userBatchDetails, 'id')));
+      if (topicReshuffledGroup) {
+        if (get(topicReshuffledGroup, 'description')) {
+          packageTopicDescription = get(filteredTopic, 'description');
+        }
+        packageTopicOrder = get(topicReshuffledGroup, 'order', 0);
+      }
+    }
+    return { order: packageTopicOrder, description: packageTopicDescription };
   }
-  return 0;
+  return { order: get(currentTopic, 'order', 0), description: get(currentTopic, 'description', '') };
 };
 
-export const getTopicsArrFromCoursePackages = (coursePackage = {}) => {
+export const getTopicsArrFromCoursePackages = (coursePackage = {}, returnType = 'topics', userBatchDetails) => {
   const packageTopics = get(coursePackage, 'topicsArr', []);
+  /**
+   * if returnType is chapters we construct chapters array
+   * with topics mapped to that chapter from package.
+   */
+  if (returnType === 'chapters') {
+    const chapterToTopicMap = {};
+    (packageTopics || []).forEach((topic) => {
+      if (chapterToTopicMap[get(topic, 'chapter.id')]) {
+        chapterToTopicMap[get(topic, 'chapter.id')].push({
+          ...topic,
+          ...getTopicOrderFromCoursePackage(coursePackage, topic, userBatchDetails),
+        });
+      } else {
+        chapterToTopicMap[get(topic, 'chapter.id')] = [{
+          ...topic,
+          ...getTopicOrderFromCoursePackage(coursePackage, topic, userBatchDetails),
+        }];
+      }
+    });
+    return Object.keys(chapterToTopicMap).map((chapterId) => ({
+      id: chapterId,
+      title: get(chapterToTopicMap[chapterId], '0.chapter.title'),
+      order: get(chapterToTopicMap[chapterId], '0.chapter.order'),
+      topics: (chapterToTopicMap[chapterId] || []),
+    }));
+  }
+  /**
+   * if returnType is topics we just return topics array from package.
+   */
   const updatedTopicsArr = [];
   (packageTopics || []).forEach((topic) => {
     updatedTopicsArr.push({
       ...topic,
-      order: getTopicOrderFromCoursePackage(coursePackage, topic),
+      ...getTopicOrderFromCoursePackage(coursePackage, topic, userBatchDetails),
     });
   });
   return updatedTopicsArr.sort((a, b) => a.order - b.order);
@@ -1884,6 +1967,7 @@ const constructSessionsArr = ({
   combinedEnrollmentType,
   mentorMenteeSessions,
   bookedSession,
+  packageLastTopicId,
 }) => {
   const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
   // if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
@@ -1909,20 +1993,14 @@ const constructSessionsArr = ({
   let mentorData;
   const isAccessible = isTopicAccessible(combinedEnrollmentType, isTrial);
   // checking logic for topics which are yet not booked by mentee
-  if (
-    topicOrder >= lastTopicBookedOrder
-  ) {
-    const batchSessionArray = batchSessions && batchSessions.filter((item) => item.topic && item.topic.id === topicId);
+  if (topicOrder >= lastTopicBookedOrder) {
+    const batchSessionArray = batchSessions
+      && batchSessions.filter((item) => item.topic && item.topic.id === topicId);
     if (batchSessionArray && batchSessionArray.length) {
       const batchSession = batchSessionArray[0];
       let slotTime = null;
+      const { bookingDate, mentorSession, sessionEndDate } = batchSession;
       const {
-        bookingDate,
-        mentorSession,
-        sessionEndDate,
-      } = batchSession;
-      const {
-        order: batchSessionTopicOrder,
         id: batchSessionTopicId,
         title: batchSessionTopicTitle,
         description: batchSessionTopicDescription,
@@ -1931,7 +2009,10 @@ const constructSessionsArr = ({
         isTrial: batchSessionIsTrial,
       } = batchSession.topic;
 
-      const isBatchTopicAccessible = isTopicAccessible(combinedEnrollmentType, batchSessionIsTrial);
+      const isBatchTopicAccessible = isTopicAccessible(
+        combinedEnrollmentType,
+        batchSessionIsTrial,
+      );
 
       slotTimes.forEach((time, index) => {
         if (batchSession[time]) {
@@ -1939,7 +2020,10 @@ const constructSessionsArr = ({
         }
       });
       // checking logic if topic is already consumed or yet to be watched
-      if (topicOrder === lastTopicBookedOrder && lastTopicSessionStatus === sessionStatus.completed) {
+      if (
+        topicOrder === lastTopicBookedOrder
+        && lastTopicSessionStatus === sessionStatus.completed
+      ) {
         const completedMenteeSession = {
           topicId,
           topicOrder,
@@ -1952,15 +2036,20 @@ const constructSessionsArr = ({
           chapterTitle,
           chapterOrder,
           endingDate: sessionEndDate,
-          mentorId: mentorSession && mentorSession.user && mentorSession.user.id,
-          mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
-          mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
+          mentorId:
+            mentorSession && mentorSession.user && mentorSession.user.id,
+          mentorName:
+            mentorSession && mentorSession.user && mentorSession.user.name,
+          mentorProfilePic:
+            mentorSession
+            && mentorSession.user
+            && mentorSession.user.profilePic,
         };
         completedSessionObj = completedMenteeSession;
       } else {
         const bookedMenteeSession = {
           topicId: batchSessionTopicId,
-          topicOrder: batchSessionTopicOrder,
+          topicOrder,
           topicTitle: batchSessionTopicTitle,
           topicThumbnail: batchSessionTopicThumbnail,
           topicThumbnailSmall: batchSessionTopicThumbnailSmall,
@@ -1994,7 +2083,12 @@ const constructSessionsArr = ({
         chapterTitle,
         chapterOrder,
       };
-      if (bookedSession.length) {
+      if (
+        topicId === packageLastTopicId
+        && lastTopicSessionStatus === sessionStatus.completed
+      ) {
+        completedSessionObj = upComingMenteeSession;
+      } else if (bookedSession.length) {
         upComingSessionObj = upComingMenteeSession;
       } else {
         bookedSessionObj = upComingMenteeSession;
@@ -2005,10 +2099,14 @@ const constructSessionsArr = ({
     let sessionDate;
     let isSubmittedForReview = false;
     mentorMenteeSessions.forEach((mentorMenteeSession) => {
-      if (mentorMenteeSession.topic && mentorMenteeSession.topic.id === topicId) {
+      if (
+        mentorMenteeSession.topic
+        && mentorMenteeSession.topic.id === topicId
+      ) {
         mentorSession = mentorMenteeSession.mentorSession;
         isSubmittedForReview = mentorMenteeSession.isSubmittedForReview || false;
-        sessionDate = mentorMenteeSession.sessionEndDate || mentorMenteeSession.sessionStartDate;
+        sessionDate = mentorMenteeSession.sessionEndDate
+          || mentorMenteeSession.sessionStartDate;
       }
     });
     const completedMenteeSession = {
@@ -2025,8 +2123,10 @@ const constructSessionsArr = ({
       chapterOrder,
       endingDate: sessionDate,
       mentorId: mentorSession && mentorSession.user && mentorSession.user.id,
-      mentorName: mentorSession && mentorSession.user && mentorSession.user.name,
-      mentorProfilePic: mentorSession && mentorSession.user && mentorSession.user.profilePic,
+      mentorName:
+        mentorSession && mentorSession.user && mentorSession.user.name,
+      mentorProfilePic:
+        mentorSession && mentorSession.user && mentorSession.user.profilePic,
     };
     completedSessionObj = completedMenteeSession;
   }
@@ -2071,6 +2171,7 @@ const menteeCourseSyllabusMutationResolver = async (
   let schoolInfo;
   let currentTopicComponentInfo;
   let menteeSessions;
+  let userBatchDetails;
   let mentorMenteeSessions;
   let batchSessions;
   const upComingSession = [];
@@ -2098,7 +2199,7 @@ const menteeCourseSyllabusMutationResolver = async (
     // );
 
     const userBatchDetailsRes = new QueryController('StudentProfile', { bypass: true });
-    const userBatchDetails = await userBatchDetailsRes.aggregate(getUserBatchDetails(userId));
+    userBatchDetails = await userBatchDetailsRes.aggregate(getUserBatchDetails(userId));
     let courseOrPackageFilter = {
       'course.typeId': courseId || OLD_COURSE_ID,
     };
@@ -2489,7 +2590,7 @@ const menteeCourseSyllabusMutationResolver = async (
   const { chapters } = currentCourse;
   let packageTopics = [];
   if (coursePackage && get(coursePackage, 'id')) {
-    packageTopics = getTopicsArrFromCoursePackages(coursePackage);
+    packageTopics = getTopicsArrFromCoursePackages(coursePackage, 'topics', get(userBatchDetails, '0.batch'));
   }
   if ((!chapters || !chapters.length) && !(packageTopics || []).length) {
     throw new DatabaseRecordNotFoundError({
@@ -2513,7 +2614,8 @@ const menteeCourseSyllabusMutationResolver = async (
     // iterating over chapters to construct data for homepage
 
     if (coursePackage && get(coursePackage, 'id')) {
-      lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic);
+      lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic, get(userBatchDetails, '0.batch')).order;
+      const packageLastTopicId = get(packageTopics[packageTopics.length - 1], 'id');
       packageTopics.forEach((topic) => {
         const constructedSessionsArr = constructSessionsArr({
           lastTopicBookedOrder,
@@ -2530,6 +2632,7 @@ const menteeCourseSyllabusMutationResolver = async (
           completedSession,
           upComingSession,
           bookedSession,
+          packageLastTopicId,
         });
         if (get(constructedSessionsArr, 'completedSessionObj')) {
           completedSession.push(get(constructedSessionsArr, 'completedSessionObj', {}));

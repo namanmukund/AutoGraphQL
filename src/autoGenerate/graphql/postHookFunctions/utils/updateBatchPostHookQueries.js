@@ -186,8 +186,8 @@ const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId
             ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
-              ${startTime ? `startMinutes: ${startTime},` : ''}
-              ${endTime ? `endMinutes: ${endTime},` : ''}
+              ${typeof startTime === 'number' ? `startMinutes: ${startTime},` : ''}
+              ${typeof endTime === 'number' ? `endMinutes: ${endTime},` : ''}
               ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
               ${slots}
             }
@@ -210,8 +210,8 @@ const updateBatchSession = async (sessionId, slots, date, mentorSessionId, cours
             ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
-              ${startTime ? `startMinutes: ${startTime},` : ''}
-              ${endTime ? `endMinutes: ${endTime},` : ''}
+              ${typeof startTime === 'number' ? `startMinutes: ${startTime},` : ''}
+              ${typeof endTime === 'number' ? `endMinutes: ${endTime},` : ''}
               ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
               ${slots}
             }
@@ -235,8 +235,8 @@ const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId
             input:{
               bookingDate:"${date}",
               type: ${adhocSessionType}
-              ${startTime ? `startMinutes: ${startTime},` : ''}
-              ${endTime ? `endMinutes: ${endTime},` : ''}
+              ${typeof startTime === 'number' ? `startMinutes: ${startTime},` : ''}
+              ${typeof endTime === 'number' ? `endMinutes: ${endTime},` : ''}
               ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
               ${slots}
             }
@@ -259,8 +259,8 @@ const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, cours
             ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
-              ${startTime ? `startMinutes: ${startTime},` : ''}
-              ${endTime ? `endMinutes: ${endTime},` : ''}
+              ${typeof startTime === 'number' ? `startMinutes: ${startTime},` : ''}
+              ${typeof endTime === 'number' ? `endMinutes: ${endTime},` : ''}
               ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
               ${slots}
             }
@@ -309,6 +309,7 @@ const getTopicsFromCoursePackage = async (coursePackageId) => {
   coursePackage(id: "${coursePackageId}"){
     topics{
       order
+      isRevision
       topic{
         courses{
           id

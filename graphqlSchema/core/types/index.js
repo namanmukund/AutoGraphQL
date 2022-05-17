@@ -166,6 +166,7 @@ import BatchDetailsResult from './BatchDetailsResult/BatchDetailsResult';
 import BatchStudentResult from './BatchStudentResult/BatchStudentResult';
 import ClassroomHomeworkReport from './classroomHomeworkReport';
 import PracticeQuestionReportOutput from './practiceQuestionReportOutput';
+import UserWaitlist from './userWaitlist';
 
 export default [
   ...User,
@@ -330,6 +331,7 @@ export default [
   ...MenteeCourseHomework,
   ...LearningSlideContent,
   ...LearningSlide,
+  ...UserWaitlist,
   ...UserActivityLearningSlideDump,
   ...ShortLink,
   ...BatchDetailsResult,

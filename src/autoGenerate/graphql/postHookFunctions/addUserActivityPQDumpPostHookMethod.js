@@ -257,13 +257,15 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
           isAnswerUsed,
           attemptNumber,
           questionAction,
+          startTime,
+          endTime,
         } = inputPracticeQuestion;
         /*
         As we are iterating over each question from userLearningObjective and input
         So, checking here for same question in both
         */
         if (questionConnectId === inputQuestionConnectId) {
-          detailedReport.push({
+          const detailedReportObj = {
             questionConnectId,
             isCorrect,
             isAnswerUsed,
@@ -271,7 +273,11 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
             firstTry: attemptNumber === 1,
             secondTry: attemptNumber === 2,
             thirdOrMoreTry: attemptNumber > 2,
-          });
+            attemptNumber,
+          };
+          if (startTime) detailedReportObj.startTime = startTime;
+          if (endTime) detailedReportObj.endTime = endTime;
+          detailedReport.push({ ...detailedReportObj });
           Object.assign(newPracticeQuestionInUserLearningObjective, { questionConnectId });
           /*
           Case: When individual question is incomplete and whole PQ is also incomplete.
@@ -312,6 +318,12 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
               Object.assign(newPracticeQuestionInUserLearningObjective, { attemptNumber });
             }
           }
+          if (startTime) {
+            Object.assign(newPracticeQuestionInUserLearningObjective, { startTime });
+          }
+          if (endTime) {
+            Object.assign(newPracticeQuestionInUserLearningObjective, { endTime });
+          }
         }
       });
       /*
@@ -323,6 +335,8 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
         isAnswerUsed: updatedIsAnswerUsed,
         attemptNumber: updatedAttemptNumber,
         status: updatedStatus,
+        startTime: updatedStartTime,
+        endTime: updatedEndTime,
       } = newPracticeQuestionInUserLearningObjective;
       /*
       Storing count of all questions in completed state. We will use this in validating
@@ -336,7 +350,9 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
       pushManyQuery += `isHintUsed: ${updatedIsHintUsed}, 
                                                isAnswerUsed: ${updatedIsAnswerUsed}, 
                                                attemptNumber: ${updatedAttemptNumber}, 
-                                               status: ${updatedStatus}, 
+                                               status: ${updatedStatus},
+                                               ${updatedStartTime ? `startTime: "${updatedStartTime}"` : ''}
+                                               ${updatedEndTime ? `endTime: "${updatedEndTime}"` : ''}
                                               }, `;
 
       /*
