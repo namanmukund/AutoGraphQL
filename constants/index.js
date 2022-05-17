@@ -530,7 +530,6 @@ const LEAD_PARTNERS_TO_CHECK_FOR_DEMO = ['virgo_india', 'ICCS'];
 
 const dbControllerModes = {
   aggregation: 'aggregation',
-  projectedAggregation: 'projectedAggregation',
   cascade: 'cascade',
 };
 
