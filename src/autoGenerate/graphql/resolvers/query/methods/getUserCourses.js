@@ -418,12 +418,38 @@ const getUserBatchDetails = (userId) => [
                       },
                     },
                     {
+                      $lookup: {
+                        from: 'File',
+                        let: {
+                          thumbnailId: '$thumbnail.typeId',
+                        },
+                        pipeline: [
+                          {
+                            $match: {
+                              $expr: {
+                                $eq: ['$id', '$$thumbnailId'],
+                              },
+                            },
+                          },
+                          {
+                            $project: {
+                              _id: 0,
+                              id: 1,
+                              uri: 1,
+                            },
+                          },
+                        ],
+                        as: 'thumbnail',
+                      },
+                    },
+                    {
                       $project: {
                         _id: 0,
                         id: 1,
                         order: 1,
                         title: 1,
                         secondaryCategory: 1,
+                        thumbnail: { $arrayElemAt: ['$thumbnail', 0] },
                         codingLanguages: {
                           value: 1,
                         },
@@ -620,7 +646,7 @@ const getUserCourses = (async (root, params, context, info) => {
     }
     if (updatedCourseArr && updatedCourseArr.length) {
       const tempUniqueCourseIds = [];
-      return (updatedCourseArr || []).filter((el) => {
+      return (updatedCourseArr || []).reverse().filter((el) => {
         const isDuplicate = tempUniqueCourseIds.includes(el.id);
         if (!isDuplicate) {
           tempUniqueCourseIds.push(el.id);
