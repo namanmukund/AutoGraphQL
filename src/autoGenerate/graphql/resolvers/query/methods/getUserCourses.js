@@ -607,7 +607,7 @@ const getUserCourses = (async (root, params, context, info) => {
     if (studentProfileRes && get(studentProfileRes, '0.batch.coursePackage.id')) {
       const coursePackage = get(studentProfileRes, '0.batch.coursePackage');
       return [{
-        id: get(coursePackage, 'id'),
+        id: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
         title: get(coursePackage, 'title'),
         thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
         currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
