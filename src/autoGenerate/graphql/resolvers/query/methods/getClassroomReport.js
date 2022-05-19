@@ -574,17 +574,17 @@ const classroomReport = (async (root, params, context) => {
           if (!get(quizAnswer, 'isAttempted')) {
             obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
               ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
-              unattempted: (unattempted || 0) + 1,
+              unattempted: get(obj.quizQuestions.get(get(quizAnswer, 'question.typeId')), 'unattempted', 0) + 1,
             });
           } else if (get(quizAnswer, 'isCorrect')) {
             obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
               ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
-              correct: (correct || 0) + 1,
+              correct: get(obj.quizQuestions.get(get(quizAnswer, 'question.typeId')), 'correct', 0) + 1,
             });
           } else {
             obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
               ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
-              incorrect: (incorrect || 0) + 1,
+              incorrect: get(obj.quizQuestions.get(get(quizAnswer, 'question.typeId')), 'incorrect', 0) + 1,
             });
           }
         } else {
