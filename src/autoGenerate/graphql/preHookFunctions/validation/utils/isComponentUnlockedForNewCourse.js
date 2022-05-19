@@ -249,7 +249,6 @@ const isComponentUnlockedForNewCourse = async (
     page,
     checkForPaidLogic,
     batchCurrentComponentInfo,
-    isCoursePackageBatch,
   )) {
     // placing logic to send correct message if a paid video is locked coz free user is trying to access it
     if (batchCurrentComponentInfo) {
