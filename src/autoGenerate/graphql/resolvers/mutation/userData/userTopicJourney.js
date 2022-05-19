@@ -189,6 +189,7 @@ const getUserLearningObjectiveQuery = (userId, learningObjectiveId) => `
     }){
       id
       practiceQuestionStatus
+      learningSlideStatus
       chatStatus
     }
   }
@@ -238,6 +239,7 @@ const getUpdatedLearningObjectivesData = async (userId, learningObjectivesData, 
     if (userLearningObjectiveInfo) {
       loInArray.practiceQuestionStatus = userLearningObjectiveInfo.practiceQuestionStatus;
       loInArray.chatStatus = userLearningObjectiveInfo.chatStatus;
+      loInArray.learningSlideStatus = userLearningObjectiveInfo.learningSlideStatus;
     }
   }
   return clonedLearningObjectivesData;
@@ -366,6 +368,7 @@ const userTopicJourneyMutationResolver = async (
         thumbnail,
         practiceQuestionStatus: incomplete,
         chatStatus: incomplete,
+        learningSlideStatus: incomplete,
       });
     });
     // constructing data for quiz component
@@ -529,6 +532,7 @@ const userTopicJourneyMutationResolver = async (
                 if (userLearningObjectiveInfo) {
                   loInArray.practiceQuestionStatus = userLearningObjectiveInfo.practiceQuestionStatus;
                   loInArray.chatStatus = userLearningObjectiveInfo.chatStatus;
+                  loInArray.learningSlideStatus = userLearningObjectiveInfo.learningSlideStatus;
                 }
               } else {
                 loInArray.isUnlocked = false;
@@ -602,6 +606,7 @@ const userTopicJourneyMutationResolver = async (
           comicStripStatus: incomplete,
           practiceQuestionStatus: incomplete,
           chatStatus: incomplete,
+          learningSlideStatus: incomplete,
         });
       } else if (topicComponent.componentName === blockBasedPractice) {
         blockBasedPracticeData.push({
@@ -655,6 +660,7 @@ const userTopicJourneyMutationResolver = async (
         learningObjective.comicStripStatus = complete;
         learningObjective.practiceQuestionStatus = complete;
         learningObjective.chatStatus = complete;
+        learningObjective.learningSlideStatus = complete;
       }
 
       for (const blockBasedPracticeElem of blockBasedPracticeData) {
@@ -678,6 +684,7 @@ const userTopicJourneyMutationResolver = async (
         learningObjective.comicStripStatus = complete;
         learningObjective.practiceQuestionStatus = complete;
         learningObjective.chatStatus = complete;
+        learningObjective.learningSlideStatus = complete;
       }
 
       for (const blockBasedPracticeElem of blockBasedPracticeData) {
@@ -716,6 +723,7 @@ const userTopicJourneyMutationResolver = async (
             learningObjective.comicStripStatus = complete;
             learningObjective.practiceQuestionStatus = complete;
             learningObjective.chatStatus = complete;
+            learningObjective.learningSlideStatus = complete;
           }
 
           for (const blockBasedPracticeElem of blockBasedPracticeData) {
@@ -776,11 +784,13 @@ const userTopicJourneyMutationResolver = async (
             learningObjective.comicStripStatus = incomplete;
             learningObjective.practiceQuestionStatus = incomplete;
             learningObjective.chatStatus = incomplete;
+            learningObjective.learningSlideStatus = incomplete;
           } else {
             learningObjective.isUnlocked = true;
             learningObjective.comicStripStatus = complete;
             learningObjective.practiceQuestionStatus = complete;
             learningObjective.chatStatus = complete;
+            learningObjective.learningSlideStatus = complete;
           }
         }
 

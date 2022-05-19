@@ -1108,7 +1108,7 @@ query{
 }
 `;
 
-const fetchOrCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => {} }) => {
+const fetchOrCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => { } }) => {
   const redisClient = new RedisController({
     bypass: true,
   });
@@ -2001,7 +2001,6 @@ const constructSessionsArr = ({
       let slotTime = null;
       const { bookingDate, mentorSession, sessionEndDate } = batchSession;
       const {
-        order: batchSessionTopicOrder,
         id: batchSessionTopicId,
         title: batchSessionTopicTitle,
         description: batchSessionTopicDescription,
@@ -2050,7 +2049,7 @@ const constructSessionsArr = ({
       } else {
         const bookedMenteeSession = {
           topicId: batchSessionTopicId,
-          topicOrder: batchSessionTopicOrder,
+          topicOrder,
           topicTitle: batchSessionTopicTitle,
           topicThumbnail: batchSessionTopicThumbnail,
           topicThumbnailSmall: batchSessionTopicThumbnailSmall,
@@ -2224,7 +2223,11 @@ const menteeCourseSyllabusMutationResolver = async (
     // );
     const batchCurrentComponentCourseId = get(userBatchDetails, '0.batch.currentComponent.currentCourse.id');
 
-    if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId) {
+    if (
+      (courseId && batchCurrentComponentCourseId === courseId)
+      || !courseId
+      || get(coursePackage, 'id')
+    ) {
       batchCurrentComponentInfo = get(userBatchDetails, '0.batch.currentComponent');
       schoolInfo = get(userBatchDetails, '0.school');
       const allottedMentor = get(userBatchDetails, '0.batch.allottedMentor');
@@ -2604,7 +2607,7 @@ const menteeCourseSyllabusMutationResolver = async (
     chapters.sort((a, b) => a.order - b.order);
   }
   // if user belongs to a batch, the syllbaus will be calculated on basis of batchCurrentComponentStatus
-  if (batchCurrentComponentInfo || coursePackage) {
+  if (batchCurrentComponentInfo) {
     const {
       currentTopic,
       latestSessionStatus,
