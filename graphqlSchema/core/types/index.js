@@ -157,6 +157,7 @@ import ClassroomSession from './classroomSession';
 import Notice from './Notice';
 import StudentReviewByMentor from './StudentReviewByMentor';
 import ClassroomDetailResult from './classroomDetailResult';
+import MenteeCourseHomework from './menteeCourseHomework';
 import LearningSlideContent from './learningSlideContent';
 import LearningSlide from './learningSlide';
 import UserActivityLearningSlideDump from './userActivityLearningSlideDump';
@@ -327,6 +328,7 @@ export default [
   ...Notice,
   ...StudentReviewByMentor,
   ...ClassroomDetailResult,
+  ...MenteeCourseHomework,
   ...LearningSlideContent,
   ...LearningSlide,
   ...UserWaitlist,
