@@ -302,7 +302,7 @@ const buildAggregationPipeline = async ({
   return aggregationBuilder;
 };
 
-const checkIfAggregationAllowedOnType = ({ typeName }) => {
+const checkIfDatabaseAggregationAllowedOnType = ({ typeName }) => {
   if (parsedASTMap && typeName) {
     const { directives } = parsedASTMap[typeName];
     /**
@@ -315,7 +315,7 @@ const checkIfAggregationAllowedOnType = ({ typeName }) => {
       'mode',
     ) || 'cascade';
 
-    if (typeControllerMode !== dbControllerModes.cascade) {
+    if (typeControllerMode === dbControllerModes.aggregation) {
       return true;
     }
   }
@@ -334,7 +334,7 @@ const constructAggregationQuery = async ({
     },
   ));
 
-  if (checkIfAggregationAllowedOnType({ typeName })) {
+  if (checkIfDatabaseAggregationAllowedOnType({ typeName })) {
     const {
       filters = {}, limit = 0, skip = 0, sort = {},
     } = additionalParams;
@@ -357,4 +357,4 @@ const constructAggregationQuery = async ({
   };
 };
 
-export { constructAggregationQuery, checkIfAggregationAllowedOnType };
+export { constructAggregationQuery, checkIfDatabaseAggregationAllowedOnType };

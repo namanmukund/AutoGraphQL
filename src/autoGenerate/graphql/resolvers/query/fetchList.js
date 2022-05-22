@@ -5,7 +5,7 @@ import { toObject } from '../../../../../utils';
 import { validate } from '../../validation';
 import { getFieldsBeingFetched, filterRemoteFields } from '../../../utils';
 import { PLURAL } from '../../../../../constants/graphqlOperations';
-import { checkIfAggregationAllowedOnType } from '../../controllers/utils/aggregationController';
+import { checkIfDatabaseAggregationAllowedOnType } from '../../controllers/utils/aggregationController';
 import { prehook } from '../../preHook';
 
 const prehookValidation = async ({
@@ -98,7 +98,7 @@ const fetchListQueryResolver = async (
    */
   const fieldsForFetch = getFieldsBeingFetched(fieldNodes);
 
-  if (checkIfAggregationAllowedOnType({ typeName })) {
+  if (checkIfDatabaseAggregationAllowedOnType({ typeName })) {
     await prehookValidation({
       typeName,
       parsedASTMap,
