@@ -211,12 +211,14 @@ const getLearningObjectivesFromTopicAggregation = ({
 }];
 
 const getUserPracticeQuestionReportAggregation = ({
-  userId,
+  userIds,
   loId,
 }) => [{
   $match: {
     'learningObjective.typeId': loId,
-    'user.typeId': userId,
+    'user.typeId': {
+      $in: userIds || [],
+    },
   },
 }, {
   $project: {
@@ -226,6 +228,7 @@ const getUserPracticeQuestionReportAggregation = ({
     helpUsedCount: 1,
     answerUsedCount: 1,
     id: 1,
+    user: 1,
     detailedReport: 1,
   },
 }, {
@@ -475,17 +478,18 @@ const practiceQuestionReport = (async (root, params, context) => {
       questions: new Map(),
       questionsCount: 0,
     };
+    const userIds = (students || []).map((student) => get(student, 'user.id'));
+    const loId = learningObjectiveIdFromArray;
+    const usersPracticeQuestionReportRes = await userPracticeQuestionReportModel.aggregate(
+      getUserPracticeQuestionReportAggregation({
+        userIds,
+        loId,
+      }),
+    );
     for (const student of students) {
       const studentUserId = get(student, 'user.id');
-      const loId = learningObjectiveIdFromArray;
-      const userPracticeQuestionReportRes = await userPracticeQuestionReportModel.aggregate(
-        getUserPracticeQuestionReportAggregation({
-          userId: studentUserId,
-          loId,
-        }),
-      );
-
       // since multiple userPracticeQuestionReports per user per lo, we get the latest one created
+      const userPracticeQuestionReportRes = (usersPracticeQuestionReportRes || []).filter((el) => get(el, 'user.typeId') === studentUserId);
 
       if (userPracticeQuestionReportRes.length) {
         loObj.submittedCountSum += 1;
