@@ -114,7 +114,7 @@ const getBatchSessionAggregation = ({ batchId, topicId }) =>
   },
   ];
 
-const getMentorMenteeSessionAggregation = ({ userId, topicId }) =>
+const getMentorMenteeSessionAggregation = ({ userIds = [], topicId }) =>
   [{
     $match: {
       'topic.typeId': topicId,
@@ -137,40 +137,9 @@ const getMentorMenteeSessionAggregation = ({ userId, topicId }) =>
           },
         },
         {
-          $lookup: {
-            from: 'User',
-            let: {
-              userId: '$user.typeId',
-            },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: [
-                      '$id',
-                      '$$userId',
-                    ],
-                  },
-                },
-              },
-              {
-                $project: {
-                  id: 1,
-                },
-              },
-            ],
-            as: 'user',
-          },
-        },
-        {
           $project: {
             id: 1,
-            user: {
-              $arrayElemAt: [
-                '$user',
-                0,
-              ],
-            },
+            user: 1,
           },
         },
       ],
@@ -193,19 +162,18 @@ const getMentorMenteeSessionAggregation = ({ userId, topicId }) =>
     },
   }, {
     $match: {
-      $expr: {
-        $eq: [
-          '$menteeSession.user.id',
-          userId,
-        ],
+      'menteeSession.user.typeId': {
+        $in: userIds,
       },
     },
   }];
 
-const getUserQuizReportAggregation = ({ userId, topicId }) =>
+const getUserQuizReportAggregation = ({ userIds, topicId }) =>
   [{
     $match: {
-      'user.typeId': userId,
+      'user.typeId': {
+        $in: userIds || [],
+      },
       'topic.typeId': topicId,
     },
   }, {
@@ -214,7 +182,7 @@ const getUserQuizReportAggregation = ({ userId, topicId }) =>
     },
   }, {
     $group: {
-      _id: '$latestGroup',
+      _id: '$user.typeId',
       latest: {
         $first: '$$ROOT',
       },
@@ -222,12 +190,14 @@ const getUserQuizReportAggregation = ({ userId, topicId }) =>
   }];
 
 const getUserAssignmentAggregation = ({
-  userId,
+  userIds,
   topicId,
   isHomework,
 }) => [{
   $match: {
-    'user.typeId': userId,
+    'user.typeId': {
+      $in: userIds,
+    },
     'topic.typeId': topicId,
   },
 }, {
@@ -237,6 +207,7 @@ const getUserAssignmentAggregation = ({
 }, {
   $project: {
     assignmentStatus: 1,
+    user: 1,
     assignment: {
       isAttempted: 1,
       assignmentQuestion: 1,
@@ -277,12 +248,14 @@ const getUserAssignmentAggregation = ({
 }];
 
 const getUserBlockBasedPracticeAggregation = ({
-  userId,
+  userIds,
   topicId,
   isHomeworkParam,
 }) => [{
   $match: {
-    'user.typeId': userId,
+    'user.typeId': {
+      $in: userIds,
+    },
     'topic.typeId': topicId,
   },
 }, {
@@ -312,6 +285,7 @@ const getUserBlockBasedPracticeAggregation = ({
   },
 }, {
   $project: {
+    user: 1,
     blockBasedPractice: {
       $arrayElemAt: [
         '$blockBasedPractice',
@@ -511,37 +485,47 @@ const classroomReport = (async (root, params, context) => {
     blockBasedPractice: new Map(),
   };
 
-  for (const student of students) {
-    const userId = get(student, 'user.id');
-    const mentorMenteeSessionRes = await mentorMenteeSessionModel.aggregate(
+  const userIds = (students || []).map((student) => get(student, 'user.id'));
+  let mentorMenteeSessionsRes = [];
+  let usersAssignmentRes = [];
+  let usersQuizReportRes = [];
+  let usersBlockbasedPracticeRes = [];
+  if (userIds && userIds.length) {
+    mentorMenteeSessionsRes = await mentorMenteeSessionModel.aggregate(
       getMentorMenteeSessionAggregation({
-        userId,
+        userIds,
         topicId,
       }),
     );
-    let userQuizReportRes = [];
     if (isHomework) {
-      userQuizReportRes = await userQuizReportModel.aggregate(
+      usersQuizReportRes = await userQuizReportModel.aggregate(
         getUserQuizReportAggregation({
-          userId,
+          userIds,
           topicId,
         }),
       );
     }
-    const userAssignmentRes = await userAssignmentModel.aggregate(
+    usersAssignmentRes = await userAssignmentModel.aggregate(
       getUserAssignmentAggregation({
-        userId,
+        userIds,
         topicId,
         isHomework,
       }),
     );
-    const userBlockbasedPracticeRes = await userBlockBasedPracticeModel.aggregate(
+    usersBlockbasedPracticeRes = await userBlockBasedPracticeModel.aggregate(
       getUserBlockBasedPracticeAggregation({
-        userId,
+        userIds,
         topicId,
         isHomework,
       }),
     );
+  }
+  for (const student of students) {
+    const userId = get(student, 'user.id');
+    const mentorMenteeSessionRes = (mentorMenteeSessionsRes || []).filter((mms) => get(mms, 'menteeSession.user.typeId') === userId);
+    const userQuizReportRes = (usersQuizReportRes || []).filter((quizReport) => get(quizReport, '_id') === userId);
+    const userAssignmentRes = (usersAssignmentRes || []).filter((userAssignment) => get(userAssignment, 'user.typeId') === userId);
+    const userBlockbasedPracticeRes = (usersBlockbasedPracticeRes || []).filter((userPractice) => get(userPractice, 'user.typeId') === userId);
 
     let isMmsPresent = false;
 
@@ -590,17 +574,17 @@ const classroomReport = (async (root, params, context) => {
           if (!get(quizAnswer, 'isAttempted')) {
             obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
               ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
-              unattempted: (unattempted || 0) + 1,
+              unattempted: get(obj.quizQuestions.get(get(quizAnswer, 'question.typeId')), 'unattempted', 0) + 1,
             });
           } else if (get(quizAnswer, 'isCorrect')) {
             obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
               ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
-              correct: (correct || 0) + 1,
+              correct: get(obj.quizQuestions.get(get(quizAnswer, 'question.typeId')), 'correct', 0) + 1,
             });
           } else {
             obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
               ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
-              incorrect: (incorrect || 0) + 1,
+              incorrect: get(obj.quizQuestions.get(get(quizAnswer, 'question.typeId')), 'incorrect', 0) + 1,
             });
           }
         } else {

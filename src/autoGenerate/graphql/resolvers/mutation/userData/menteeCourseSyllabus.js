@@ -2223,7 +2223,11 @@ const menteeCourseSyllabusMutationResolver = async (
     // );
     const batchCurrentComponentCourseId = get(userBatchDetails, '0.batch.currentComponent.currentCourse.id');
 
-    if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId) {
+    if (
+      (courseId && batchCurrentComponentCourseId === courseId)
+      || !courseId
+      || get(coursePackage, 'id')
+    ) {
       batchCurrentComponentInfo = get(userBatchDetails, '0.batch.currentComponent');
       schoolInfo = get(userBatchDetails, '0.school');
       const allottedMentor = get(userBatchDetails, '0.batch.allottedMentor');
@@ -2603,7 +2607,7 @@ const menteeCourseSyllabusMutationResolver = async (
     chapters.sort((a, b) => a.order - b.order);
   }
   // if user belongs to a batch, the syllbaus will be calculated on basis of batchCurrentComponentStatus
-  if (batchCurrentComponentInfo || coursePackage) {
+  if (batchCurrentComponentInfo) {
     const {
       currentTopic,
       latestSessionStatus,

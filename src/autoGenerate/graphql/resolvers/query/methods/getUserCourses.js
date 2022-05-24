@@ -390,6 +390,7 @@ const getUserBatchDetails = (userId) => [
         {
           $project: {
             id: 1,
+            coursePackage: 1,
             currentComponent: 1,
           },
         },
@@ -418,12 +419,38 @@ const getUserBatchDetails = (userId) => [
                       },
                     },
                     {
+                      $lookup: {
+                        from: 'File',
+                        let: {
+                          thumbnailId: '$thumbnail.typeId',
+                        },
+                        pipeline: [
+                          {
+                            $match: {
+                              $expr: {
+                                $eq: ['$id', '$$thumbnailId'],
+                              },
+                            },
+                          },
+                          {
+                            $project: {
+                              _id: 0,
+                              id: 1,
+                              uri: 1,
+                            },
+                          },
+                        ],
+                        as: 'thumbnail',
+                      },
+                    },
+                    {
                       $project: {
                         _id: 0,
                         id: 1,
                         order: 1,
                         title: 1,
                         secondaryCategory: 1,
+                        thumbnail: { $arrayElemAt: ['$thumbnail', 0] },
                         codingLanguages: {
                           value: 1,
                         },
@@ -438,6 +465,7 @@ const getUserBatchDetails = (userId) => [
                   currentCourse: {
                     $arrayElemAt: ['$currentCourse', 0],
                   },
+                  currentTopic: 1,
                 },
               },
             ],
@@ -445,8 +473,34 @@ const getUserBatchDetails = (userId) => [
           },
         },
         {
+          $lookup: {
+            from: 'CoursePackage',
+            let: { coursePackageId: '$coursePackage.typeId' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$id', '$$coursePackageId'],
+                  },
+                },
+              },
+              {
+                $project: {
+                  _id: 0,
+                  id: 1,
+                  title: 1,
+                },
+              },
+            ],
+            as: 'coursePackage',
+          },
+        },
+        {
           $project: {
             id: 1,
+            coursePackage: {
+              $arrayElemAt: ['$coursePackage', 0],
+            },
             currentComponent: {
               $arrayElemAt: ['$currentComponent', 0],
             },
@@ -550,6 +604,16 @@ const getUserCourses = (async (root, params, context, info) => {
      * */
     const studentProfileModel = getTypeQueryController('StudentProfile');
     const studentProfileRes = await studentProfileModel.aggregate(getUserBatchDetails(userId));
+    if (studentProfileRes && get(studentProfileRes, '0.batch.coursePackage.id')) {
+      const coursePackage = get(studentProfileRes, '0.batch.coursePackage');
+      return [{
+        id: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
+        title: get(coursePackage, 'title'),
+        thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
+        currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
+        isCourseCompleted: false,
+      }];
+    }
     if (studentProfileRes && get(studentProfileRes, '0.batch.currentComponent.currentCourse.id')) {
       updatedCourseArr.push(get(studentProfileRes, '0.batch.currentComponent.currentCourse', {}));
     }
@@ -620,7 +684,7 @@ const getUserCourses = (async (root, params, context, info) => {
     }
     if (updatedCourseArr && updatedCourseArr.length) {
       const tempUniqueCourseIds = [];
-      return (updatedCourseArr || []).filter((el) => {
+      return (updatedCourseArr || []).reverse().filter((el) => {
         const isDuplicate = tempUniqueCourseIds.includes(el.id);
         if (!isDuplicate) {
           tempUniqueCourseIds.push(el.id);
