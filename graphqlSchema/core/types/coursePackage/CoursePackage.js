@@ -108,6 +108,7 @@ const CoursePackage = `
     secondaryCategory: String
     minGrade: Int
     maxGrade: Int
+    packageType: CoursePackageType! @defaultValue(value: "normal")
   }
 `;
 
