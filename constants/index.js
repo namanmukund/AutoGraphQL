@@ -528,6 +528,11 @@ const DAY_BEFORE_DEMO_COMPLETED = 5;
 
 const LEAD_PARTNERS_TO_CHECK_FOR_DEMO = ['virgo_india', 'ICCS'];
 
+const DEFAULT_CLAMP_VALUE = {
+  MIN: 0,
+  MAX: 100,
+};
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -620,4 +625,5 @@ export {
   TIME_BEFORE_EVENT_CREATION,
   DAY_BEFORE_DEMO_COMPLETED,
   LEAD_PARTNERS_TO_CHECK_FOR_DEMO,
+  DEFAULT_CLAMP_VALUE,
 };
