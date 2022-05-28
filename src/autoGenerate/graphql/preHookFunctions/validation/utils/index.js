@@ -1,5 +1,5 @@
 import getFinalConnectedRecordsForARelationFromInput
-  from './getFinalConnectedRecordsForARelationFromInput';
+from './getFinalConnectedRecordsForARelationFromInput';
 import getHookValidationFunctionName from '../../../../utils/getHookValidationFunctionName';
 import { callAddUpdateHookValidationFunction, callConnectHookValidationFunction } from '../../../../utils/callHookValidationFunction';
 import commonUserValidation from './commonUserValidation';
