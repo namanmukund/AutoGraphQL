@@ -324,29 +324,29 @@ const transformMongoResults = (obj) => {
   }
   const finalResult = {
     overall: {
-      submittedPercentage: ((obj.submittedCount * 100) / obj.studentsCount).toFixed(2),
-      attemptedPercentage: ((obj.attemptedCount * 100) / obj.studentsCount).toFixed(2),
-      unattemptedPercentage: ((obj.unattemptedCount * 100) / obj.studentsCount).toFixed(2),
+      submittedPercentage: ((obj.submittedCount * 100) / obj.studentsCount).toFixed(),
+      attemptedPercentage: ((obj.attemptedCount * 100) / obj.studentsCount).toFixed(),
+      unattemptedPercentage: ((obj.unattemptedCount * 100) / obj.studentsCount).toFixed(),
     },
     quiz: {
-      submittedPercentage: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizSubmittedCount * 100) / obj.studentsCount).toFixed(2),
-      unattemptedPercentage: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizUnattemptedCount * 100) / obj.studentsCount).toFixed(2),
+      submittedPercentage: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizSubmittedCount * 100) / obj.studentsCount).toFixed(),
+      unattemptedPercentage: obj.quizTotalQuestions === 0 ? 0 : ((obj.quizUnattemptedCount * 100) / obj.studentsCount).toFixed(),
       totalQuestions: obj.quizTotalQuestions,
-      averageScore: (obj.quizTotalQuestions === 0 || obj.quizSubmittedCount === 0) ? 0 : ((obj.quizCorrectSum * 100) / (obj.quizSubmittedCount * obj.quizTotalQuestions)).toFixed(2),
-      averageCorrect: (obj.quizTotalQuestions === 0 || obj.quizSubmittedCount === 0) ? 0 : (obj.quizCorrectSum).toFixed(2),
-      averageIncorrect: (obj.quizTotalQuestions === 0 || obj.quizSubmittedCount === 0) ? 0 : (obj.quizIncorrectSum).toFixed(2),
+      averageScore: (obj.quizTotalQuestions === 0 || obj.quizSubmittedCount === 0) ? 0 : ((obj.quizCorrectSum * 100) / (obj.quizSubmittedCount * obj.quizTotalQuestions)).toFixed(),
+      averageCorrect: (obj.quizTotalQuestions === 0 || obj.quizSubmittedCount === 0) ? 0 : (obj.quizCorrectSum).toFixed(),
+      averageIncorrect: (obj.quizTotalQuestions === 0 || obj.quizSubmittedCount === 0) ? 0 : (obj.quizIncorrectSum).toFixed(),
       averagePartiallyCorrect: null,
       notEvaluatedCount: null,
       questions: [],
     },
     coding: {
-      submittedPercentage: (obj.assignmentTotalQuestions === 0) ? 0 : ((obj.assignmentSubmittedCount * 100) / obj.studentsCount).toFixed(2),
-      unattemptedPercentage: (obj.assignmentTotalQuestions === 0) ? 0 : (((obj.assignmentUnattemptedCount * 100) / obj.studentsCount).toFixed(2)),
+      submittedPercentage: (obj.assignmentTotalQuestions === 0) ? 0 : ((obj.assignmentSubmittedCount * 100) / obj.studentsCount).toFixed(),
+      unattemptedPercentage: (obj.assignmentTotalQuestions === 0) ? 0 : (((obj.assignmentUnattemptedCount * 100) / obj.studentsCount).toFixed()),
       totalQuestions: obj.assignmentTotalQuestions,
-      averageScore: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : ((obj.assignmentCorrectSum * 100) / (obj.assignmentSubmittedCount * obj.assignmentTotalQuestions)).toFixed(2),
-      averageCorrect: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : (obj.assignmentCorrectSum / obj.assignmentSubmittedCount).toFixed(2),
-      averageIncorrect: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : (obj.assignmentIncorrectSum / obj.assignmentSubmittedCount).toFixed(2),
-      averagePartiallyCorrect: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : (obj.assignmentPartiallyCorrectSum / obj.assignmentSubmittedCount).toFixed(2),
+      averageScore: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : ((obj.assignmentCorrectSum * 100) / (obj.assignmentSubmittedCount * obj.assignmentTotalQuestions)).toFixed(),
+      averageCorrect: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : (obj.assignmentCorrectSum / obj.assignmentSubmittedCount).toFixed(),
+      averageIncorrect: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : (obj.assignmentIncorrectSum / obj.assignmentSubmittedCount).toFixed(),
+      averagePartiallyCorrect: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : (obj.assignmentPartiallyCorrectSum / obj.assignmentSubmittedCount).toFixed(),
       notEvaluatedCount: (obj.assignmentTotalQuestions === 0 || obj.assignmentSubmittedCount === 0) ? 0 : obj.assignmentUnevaluated / obj.assignmentTotalQuestions,
       questions: [],
     },
@@ -354,18 +354,18 @@ const transformMongoResults = (obj) => {
     blockBasedPractice: Array.from(obj.blockBasedPractice.entries(), ([k, v]) => {
       return {
         blockBasedPracticeTitle: get(v, 'title'),
-        submittedPercentage: v.pqTotalQuestions === 0 ? 0 : ((v.pqSubmittedCount * 100) / obj.studentsCount).toFixed(2),
-        unattemptedPercentage: v.pqTotalQuestions === 0 ? 0 : ((v.pqUnattemptedCount * 100) / obj.studentsCount).toFixed(2),
+        submittedPercentage: v.pqTotalQuestions === 0 ? 0 : ((v.pqSubmittedCount * 100) / obj.studentsCount).toFixed(),
+        unattemptedPercentage: v.pqTotalQuestions === 0 ? 0 : ((v.pqUnattemptedCount * 100) / obj.studentsCount).toFixed(),
         totalQuestions: v.pqTotalQuestions,
-        averageScore: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : ((v.pqCorrectSum * 100) / (v.pqSubmittedCount * v.pqTotalQuestions)).toFixed(2),
-        averageCorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqCorrectSum / v.pqSubmittedCount).toFixed(2),
-        averageIncorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqIncorrectSum / v.pqSubmittedCount).toFixed(2),
-        averagePartiallyCorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqPartiallyCorrectSum / v.pqSubmittedCount).toFixed(2),
+        averageScore: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : ((v.pqCorrectSum * 100) / (v.pqSubmittedCount * v.pqTotalQuestions)).toFixed(),
+        averageCorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqCorrectSum / v.pqSubmittedCount).toFixed(),
+        averageIncorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqIncorrectSum / v.pqSubmittedCount).toFixed(),
+        averagePartiallyCorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqPartiallyCorrectSum / v.pqSubmittedCount).toFixed(),
         notEvaluatedCount: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : v.pqUnevaluated / v.pqTotalQuestions,
         questions: Array.from(v.pqQuestions.entries(), ([key, value]) => {
           return {
             questionId: key,
-            percentageCorrect: v.pqSubmittedCount === 0 ? 0 : ((value * 100) / v.pqSubmittedCount).toFixed(2),
+            percentageCorrect: v.pqSubmittedCount === 0 ? 0 : ((value * 100) / v.pqSubmittedCount).toFixed(),
           };
         }),
         submissions: Array.from(v.pqSubmissions.values()),
@@ -375,16 +375,16 @@ const transformMongoResults = (obj) => {
   finalResult.quiz.questions = Array.from(obj.quizQuestions.entries(), ([k, v]) => {
     return {
       questionId: k,
-      percentageCorrect: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'correct', 0) * 100) / obj.quizSubmittedCount).toFixed(2),
-      percentageIncorrect: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'incorrect', 0) * 100) / obj.quizSubmittedCount).toFixed(2),
-      percentageUnattempted: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'unattempted', 0) * 100) / obj.quizSubmittedCount).toFixed(2),
+      percentageCorrect: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'correct', 0) * 100) / obj.quizSubmittedCount).toFixed(),
+      percentageIncorrect: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'incorrect', 0) * 100) / obj.quizSubmittedCount).toFixed(),
+      percentageUnattempted: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'unattempted', 0) * 100) / obj.quizSubmittedCount).toFixed(),
       submissionsCount: obj.quizSubmittedCount,
     };
   });
   finalResult.coding.questions = Array.from(obj.assignmentQuestions.entries(), ([k, v]) => {
     return {
       questionId: k,
-      percentageCorrect: obj.assignmentSubmittedCount === 0 ? 0 : ((v * 100) / obj.assignmentSubmittedCount).toFixed(2),
+      percentageCorrect: obj.assignmentSubmittedCount === 0 ? 0 : ((v * 100) / obj.assignmentSubmittedCount).toFixed(),
     };
   });
   finalResult.quiz.learningObjectiveReport = Array.from(obj.quizLearningObjectiveReport.entries(), ([k, v]) => {
