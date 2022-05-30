@@ -61,7 +61,8 @@ const isComponentUnlockedForNewCourse = async (
     appName,
   } = userAndAppInfo;
   // Bypassing component validation incase if schoolTeacher is accessing the content.
-  if (userIdFromContext && isUserInheritedFromMentor(userIdFromContext, true)) return true;
+  const checkForMentorChild = await isUserInheritedFromMentor(userIdFromContext, true);
+  if (userIdFromContext && typeof checkForMentorChild === 'boolean' && checkForMentorChild) return true;
   if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
     if (inputUserId && inputLearningObjectiveId) {
       userId = inputUserId;
