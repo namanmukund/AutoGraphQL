@@ -1,4 +1,6 @@
 // the resolvers for the directives defined in your schema
+import { get } from 'lodash';
+import { DEFAULT_CLAMP_VALUE } from '../../../constants';
 import commonFunctionForRelationAndMeta from './utils/commonFunctionForRelationAndMeta';
 
 const directiveResolvers = {
@@ -128,6 +130,12 @@ const directiveResolvers = {
       return resultString.charAt(0).toUpperCase() + resultString.substring(1);
     }
     return result;
+  },
+  async clamp(result, _root, params) {
+    if (!result) return result;
+    const minValue = get(params, 'min', DEFAULT_CLAMP_VALUE.MIN);
+    const maxValue = get(params, 'max', DEFAULT_CLAMP_VALUE.MAX);
+    return Math.min(Math.max(result, minValue), maxValue);
   },
 };
 
