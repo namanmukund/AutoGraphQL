@@ -51,7 +51,7 @@ const internetSpeed = `
 }`;
 
 const MentorMenteeSession = `
-  type MentorMenteeSession @model @databaseController(mode: "aggregation") {
+  type MentorMenteeSession @model {
     course: Course @relation(name: "MentorMenteeSessionCourse", direction: "OneWay")
     coursePackage: CoursePackage @relation(name: "MentorMenteeSessionCoursePackage", direction: "OneWay")
     topic: Topic! @relation(name: "MentorMenteeSessionTopic", direction: "OneWay")
