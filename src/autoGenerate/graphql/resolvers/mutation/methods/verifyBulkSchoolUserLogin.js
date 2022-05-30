@@ -1,40 +1,72 @@
-/* eslint-disable guard-for-in */
-/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop, no-console */
+import { get } from 'lodash';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 import getGoogleSpreadsheetData from '../../../../../../utils/getGoogleSpreadsheetData';
 import getUserFromDBQuery from '../user/utils/getUserFromDBQuery';
 import { QueryController } from '../../../controllers';
 import { checkPasswordAndReturnUserWithToken } from '../utils/checkPasswordAndReturnUserWithToken';
+import { callLocalGraphqlApi } from '../../../../../api';
+
+const getSchoolUsers = async (schoolName) => {
+  const query = `
+    {
+      users(filter:{
+        studentProfile_some: {
+          school_some: {
+            name_contains: "${schoolName}"
+          }
+        }
+      }) {
+        name
+        studentProfile {
+          rollNo
+          parents {
+            user {
+              name
+              email
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.users');
+};
+
+const verifyLogin = async ({ parentEmail, modelQueries }) => {
+  console.log(`Processing........ ${parentEmail}`);
+  const password = parentEmail && parentEmail.trim().toLowerCase().split('@')[0];
+  await getUserFromDBQuery(
+    { email: parentEmail },
+    modelQueries,
+  // eslint-disable-next-line no-loop-func
+  ).then(async (fetchedUser) => {
+    if (!fetchedUser) {
+      throw new Error('User not Found');
+    }
+    await checkPasswordAndReturnUserWithToken(fetchedUser, {
+      email: parentEmail, password,
+    }, { bypass: true, user: true });
+  });
+};
 
 const verifyBulkSchoolUserLogin = async (_root, params, context) => {
   validateAuthentication(context);
   const { sheetId, schoolName } = params;
-  if (schoolName) {
+  if (!schoolName && !sheetId) {
     throw new MissingMandatoryInputInRequestError();
   }
+  const modelQueries = new QueryController('User', { bypass: true, user: true });
   const errorLogs = [];
   if (sheetId) {
     const sheetDataRows = await getGoogleSpreadsheetData(sheetId);
-    const modelQueries = new QueryController('User', { bypass: true, user: true });
     // eslint-disable-next-line no-restricted-syntax
     for (const [index, row] of sheetDataRows.entries()) {
       try {
-        console.log('Processing row number........', index + 2);
-        const password = row.parentEmail && row.parentEmail.trim().toLowerCase().split('@')[0];
-        await getUserFromDBQuery(
-          { email: row.parentEmail },
-          modelQueries,
-        // eslint-disable-next-line no-loop-func
-        ).then(async (fetchedUser) => {
-          if (!fetchedUser) {
-            throw new Error('User not Found');
-          }
-          await checkPasswordAndReturnUserWithToken(fetchedUser, {
-            email: row.parentEmail, password,
-          }, { bypass: true, user: true });
-        });
+        await verifyLogin({ parentEmail: row.parentEmail, modelQueries });
       } catch (e) {
         console.log('Error........', e);
         errorLogs.push({
@@ -45,6 +77,25 @@ const verifyBulkSchoolUserLogin = async (_root, params, context) => {
           phoneNumber: row.phoneNumber,
           error: e.message || e,
         });
+      }
+    }
+  } else if (schoolName) {
+    const users = await getSchoolUsers(schoolName);
+    if (users && users.length) {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const user of users) {
+        try {
+          const parentEmail = get(user, 'studentProfile.parents.0.user.email');
+          await verifyLogin({ parentEmail, modelQueries });
+        } catch (e) {
+          console.log('Error........', e);
+          errorLogs.push({
+            parentEmail: get(user, 'studentProfile.parents.0.user.email'),
+            childName: get(user, 'name'),
+            parentName: get(user, 'studentProfile.parents.0.user.name'),
+            error: e.message || e,
+          });
+        }
       }
     }
   }
