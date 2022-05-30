@@ -138,6 +138,7 @@ import LayoutType from './LayoutType';
 import LearningSlideType from './LearningSlideType';
 import ClassType from './ClassType';
 import EvaluationResult from './EvaluationResult';
+import CoursePackageType from './CoursePackageType';
 
 export default [
   Status,
@@ -281,4 +282,5 @@ export default [
   LearningSlideType,
   ClassType,
   EvaluationResult,
+  CoursePackageType,
 ];

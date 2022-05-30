@@ -1,22 +1,26 @@
 import { get } from 'lodash';
+import { SCHOOL_TEACHER } from '../../../../../constants/roles';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const mentorChildCheckQuery = (userId) => `
+const mentorChildCheckQuery = (userId, fetchSecondaryRole = false) => `
 {
     user(id: "${userId}") {
       studentProfile {
         mentor {
           id
+          ${fetchSecondaryRole ? 'user { role secondaryRole }' : ''}
         }
       }
     }
   }
 `;
 
-const isUserIsMentorChild = async (userId) => {
-  const userData = await callLocalGraphqlApi(mentorChildCheckQuery(userId));
+const isUserIsMentorChild = async (userId, checkIfSchoolTeacher = false) => {
+  const userData = await callLocalGraphqlApi(mentorChildCheckQuery(userId, checkIfSchoolTeacher));
   const mentorChildId = get(userData, 'data.user.studentProfile.mentor.id', null);
-
+  if (checkIfSchoolTeacher
+    && get(userData, 'data.user.studentProfile.mentor.user.secondaryRole', null) !== SCHOOL_TEACHER
+  ) return false;
   return Boolean(mentorChildId);
 };
 

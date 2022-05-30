@@ -93,7 +93,7 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
   const learningObjectiveInfo = get(context, `${mutation}.learningObjective`);
   const topicId = (get(learningObjectiveInfo, 'topics') && get(learningObjectiveInfo, 'topics[0].id')) || get(learningObjectiveInfo, 'topic.id');
   if (!topicId) {
-    log('Not able to fetch LearningObjective.topic in addUserActivityPQDumpPostHookMethod');
+    log('Not able to fetch LearningObjective.topic in addUserActivityLearningSlidePostHookMethod');
   }
   const {
     id: learningObjectiveIdInResult,
