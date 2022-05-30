@@ -30,6 +30,7 @@ const addBatchCurrentComponentStatus = (
   batchId,
   courseId,
   topicId,
+  isClassroom = false,
 ) => `
   mutation{
     addBatchCurrentComponentStatus(
@@ -38,6 +39,7 @@ const addBatchCurrentComponentStatus = (
       currentTopicConnectId: "${topicId}",
       input: {
         latestSessionStatus:allotted
+        ${isClassroom ? 'enrollmentType: pro' : ''} 
       }
     ){
       id
@@ -52,6 +54,7 @@ const addBatchPostHookMethod = async (input) => {
   const { id: batchId } = input;
   let courseId = get(input, 'course.typeId');
   const coursePackageId = get(input, 'coursePackage.typeId');
+  const documentType = get(input, 'documentType', 'batch');
   let topic;
   let firstTopicId;
   /*
@@ -85,7 +88,7 @@ const addBatchPostHookMethod = async (input) => {
   // firstTopicId and courseId and batchId is not present. Just adding log
   if (batchId && courseId && firstTopicId) {
     await callLocalGraphqlApi(addBatchCurrentComponentStatus(
-      batchId, courseId, firstTopicId,
+      batchId, courseId, firstTopicId, documentType === 'classroom',
     ));
   } else {
     log('Failed to get first published topic or published course or batch id corresponding to it in addBatchPostHookMethod');
