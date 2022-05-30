@@ -24,6 +24,7 @@ import { getMentorMenteeSessionForValidation } from './index';
 import { ifAuthorized } from '../../../../../../utils';
 import { MENTOR, SCHOOL_TEACHER } from '../../../../../../constants/roles';
 import getSortedTopics from '../../../../../../utils/getSortedTopicsFromCoursePackageOrder';
+import isUserInheritedFromMentor from '../../../postHookFunctions/utils/isMentorChild';
 
 /*
 This is a common method to check whether the called topic component is locked or not
@@ -59,6 +60,8 @@ const isComponentUnlockedForNewCourse = async (
     userIdFromContext,
     appName,
   } = userAndAppInfo;
+  // Bypassing component validation incase if schoolTeacher is accessing the content.
+  if (userIdFromContext && isUserInheritedFromMentor(userIdFromContext, true)) return true;
   if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
     if (inputUserId && inputLearningObjectiveId) {
       userId = inputUserId;
