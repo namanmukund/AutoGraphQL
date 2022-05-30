@@ -55,6 +55,12 @@ directive @createIndex on FIELD
 directive @databaseController(
   mode: DatabaseControllerMode
 ) on SCHEMA | FIELD
+
+# Clamp Integer to minimum or maximum value.
+directive @clamp(
+  min: Int
+  max: Int
+) on FIELD
 `;
 
 export default directive;

@@ -533,6 +533,11 @@ const dbControllerModes = {
   cascade: 'cascade',
 };
 
+const DEFAULT_CLAMP_VALUE = {
+  MIN: 0,
+  MAX: 100,
+};
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -626,4 +631,5 @@ export {
   DAY_BEFORE_DEMO_COMPLETED,
   LEAD_PARTNERS_TO_CHECK_FOR_DEMO,
   dbControllerModes,
+  DEFAULT_CLAMP_VALUE,
 };

@@ -1,16 +1,16 @@
 const OverallReportType = `
   type OverallReportType {
-    submittedPercentage: Float
-    attemptedPercentage: Float
-    unattemptedPercentage: Float
+    submittedPercentage: Float @clamp
+    attemptedPercentage: Float @clamp
+    unattemptedPercentage: Float @clamp
   }`;
 
 const IndividualQuestionsScoreType = `
   type IndividualQuestionsScoreType {
     questionId: String
-    percentageCorrect: Float
-    percentageIncorrect: Float
-    percentageUnattempted: Float
+    percentageCorrect: Float @clamp
+    percentageIncorrect: Float @clamp
+    percentageUnattempted: Float @clamp
     submissionsCount: Int
     title: String
   }
@@ -18,9 +18,9 @@ const IndividualQuestionsScoreType = `
 
 const PartialReportType = `
   type PartialReportType {
-    submittedPercentage: Float
-    attemptedPercentage: Float
-    unattemptedPercentage: Float
+    submittedPercentage: Float @clamp
+    attemptedPercentage: Float @clamp
+    unattemptedPercentage: Float @clamp
     totalQuestions: Int
     averageScore: Float
     averageCorrect: Float

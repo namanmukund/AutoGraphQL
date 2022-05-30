@@ -13,6 +13,9 @@ const GetSchoolDetailsResult = `
     logo: File @relation(name: "GetSchoolDetailsResultFile", direction: "OneWay")
     bgImage: File @relation(name: "GetSchoolDetailsResultPictureFile", direction: "OneWay")
     batchId: String
+    isOtpLoginEnabled: Boolean @defaultValue(value: "false")
+    isBuddyLoginEnabled: Boolean @defaultValue(value: "false")
+    buddyLoginLimit: Int
   }
 `;
 

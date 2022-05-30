@@ -139,6 +139,7 @@ import LearningSlideType from './LearningSlideType';
 import ClassType from './ClassType';
 import EvaluationResult from './EvaluationResult';
 import DatabaseControllerMode from './DatabaseControllerMode';
+import CoursePackageType from './CoursePackageType';
 
 export default [
   Status,
@@ -283,4 +284,5 @@ export default [
   ClassType,
   EvaluationResult,
   DatabaseControllerMode,
+  CoursePackageType,
 ];
