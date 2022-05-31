@@ -16,9 +16,7 @@ const b2bFormFields = `
   interactionCount: AttentionAmount @defaultValue(value: "all")
   interactionAmount: Int @length(min: 1, max: 10)
   studentBehaviour: String
-  ableToCompleteContent: Boolean
-  contentWasLengthy: Boolean
-  kidsEnjoyedContent: Boolean
+  lengthOfContent: LengthOfContent @defaultValue(value: "brief")
   learningObjectiveComponent: LearningObjectiveComponentsB2B @defaultValue(value: "practice")
   contentImprovementSuggestion: String
   functionalitySuggestion: String
@@ -28,13 +26,17 @@ const b2bFormFields = `
 const BatchSession = `
   type BatchSession @model {
     course: Course @relation(name: "BatchSessionCourse", direction: "OneWay")
+    coursePackage: CoursePackage @relation(name: "BatchSessionCoursePackage", direction: "OneWay")
     batch: Batch! @relation(name: "BatchSessionBatch", direction: "OneWay")
     topic: Topic @relation(name: "BatchSessionTopic", direction: "OneWay")
     mentorSession: MentorSession @relation(name: "BatchSessionMentorSession")
     bookingDate: Date!
     scheduleRunStatus: ScheduleRunStatus
+    startMinutes: Int @defaultValue(value: "0")
+    endMinutes: Int @defaultValue(value: "0")
     ${slotTimeFields}
     ${b2bFormFields}
+    sessionMode: SessionMode @defaultValue(value: "online")
     sessionAllotmentDate: Date
     sessionStartDate: Date
     sessionEndDate: Date
@@ -42,6 +44,8 @@ const BatchSession = `
     sessionRecordingLink: String
     sessionCommentByMentor: String
     attendance: [BatchAttendanceType]
+    mentorStartAttendance: Date
+    mentorSavesAttendance: Date
     isFeedbackSubmitted: Boolean @defauly(value: "false")
     mentorPaymentStatus: MentorPaymentStatus @defaultValue(value: "declined")
     mentorPaymentJustification: String
@@ -54,10 +58,10 @@ const BatchSession = `
     videoLinkClickByMentee: Date
     startSessionByMentee: Date
     endSessionByMentee: Date
-    mentorStartAttendance: Date
-    mentorSavesAttendance: Date
     videoLinkClickByMenteePlatform: Platform
     startSessionByMenteePlatform: Platform
+    schoolSessionsOtp: [SchoolSessionOtp] @relation(name:"SchoolSessionOtpBatchSession")
+    sessionStartedByMentorAt: Date
 }`;
 
 export default [BatchSession, batchAttendanceType];

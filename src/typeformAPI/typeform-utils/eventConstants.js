@@ -23,9 +23,9 @@ const EVENTS = {
       preprod: 'ckw5wg9rj0000gtin1st0hry6',
       staging: 'ckw4unvyp0000kpinc2515c88',
     },
-    eventDate: '8 January',
+    eventDate: '06 February',
     eventTime: '03:00 pm',
-    eventDateTime: '2022-01-08 09:30:00',
+    eventDateTime: '2022-02-06 09:30:00',
   },
   GENZENVIRONMENT: {
     registrationFormId: 'GganG5WQ',
@@ -58,19 +58,19 @@ const EVENTS = {
     },
     eventDate: {
       dec24: '24 December',
-      dec25: '16 January',
+      dec25: '30 January',
       dec25RS: '25 December',
       dec26: '26 December',
     },
     eventTime: {
       dec24: '06:00 pm',
-      dec25: '03:00 pm',
+      dec25: '11:00 am',
       dec25RS: '03:00 pm',
       dec26: '03:00 pm',
     },
     eventDateTime: {
       dec24: '2021-12-24 12:30:00',
-      dec25: '2022-01-16 09:30:00',
+      dec25: '2022-01-30 05:30:00',
       dec25RS: '2021-12-25 09:30:00',
       dec26: '2021-12-26 09:30:00',
     },
@@ -83,9 +83,9 @@ const EVENTS = {
       preprod: 'ckx8sau1d0000lrinb526hp0v',
       staging: 'ckyaeenu10001ncuj0yyedyqj',
     },
-    eventDate: '16th January',
-    eventTime: '03:00 pm',
-    eventDateTime: '2022-01-16 09:30:00',
+    eventDate: '06 February',
+    eventTime: '11:00 am',
+    eventDateTime: '2022-02-06 05:30:00',
   },
 };
 

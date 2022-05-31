@@ -58,6 +58,9 @@ const userQuizQuery = (
           learningObjective{
             id
             order
+            learningSlides(filter:{status:${PUBLISHED}}){
+              id
+            }
             messagesMeta{
               count
             }
@@ -65,6 +68,9 @@ const userQuizQuery = (
               count
             }
             comicStripsMeta(filter:{status:${PUBLISHED}}){
+              count
+            }
+            learningSlidesMeta(filter:{status:${PUBLISHED}}){
               count
             }
           }

@@ -215,3 +215,31 @@ export const EitherPhoneOrEmailIsMandatory = createError('EitherPhoneOrEmailIsMa
 export const GradeFieldRequiredError = createError('GradeFieldRequiredError', {
   message: 'Grade field is mandatory in input',
 });
+
+export const EmailFieldRequiredError = createError('EmailFieldRequiredError', {
+  message: 'Email field is mandatory in input',
+});
+
+export const InvalidStartTimeError = createError('InvalidStartTimeError', {
+  message: 'Time has to be 1 hour more than selected start time',
+});
+
+export const InvalidScheduleParameters = createError('InvalidScheduleParameters', {
+  message: 'Please provide valid parameters for scheduling sessions.',
+});
+
+export const InvalidRescheduleParameters = createError('InvalidRescheduleParameters', {
+  message: 'Please provide valid parameters for re-scheduling sessions.',
+});
+
+export const SectionFieldRequiredError = createError('SectionFieldRequiredError', {
+  message: 'Section field is mandatory in input',
+});
+
+export const StudentWithSimilarRollNoExist = createError('StudentWithSimilarRollNoExist', {
+  message: 'Student with similar roll no already exists',
+});
+
+export const InvalidLearningObjectiveComponent = createError('InvalidLearningObjectiveComponent', {
+  message: 'Learning Objective Component passed is invalid',
+});

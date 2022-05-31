@@ -46,6 +46,12 @@ const userBlockBasedProjectQuery = (userId, topicId, blockBasedProjectId, course
             comicStripsMeta(filter:{status:${PUBLISHED}}){
               count
             }
+            learningSlides(filter:{status:${PUBLISHED}}){
+              id
+            }
+            learningSlidesMeta(filter:{status:${PUBLISHED}}){
+              count
+            }
           }
           blockBasedProject{
             id
@@ -63,12 +69,14 @@ const userBlockBasedProjectQuery = (userId, topicId, blockBasedProjectId, course
 // query to update user LO based on activity done by user
 const updateUserBlockBasedProjectMutation = (userBlockBasedProjectId,
   blockBasedProjectStatus,
-  answerLink, savedBlocks) => `
+  answerLink, savedBlocks, startTime, endTime) => `
   mutation{
     updateUserBlockBasedProject(id:"${userBlockBasedProjectId}",  input:{
       ${answerLink ? `answerLink: "${answerLink}"` : ''}
       ${savedBlocks ? `savedBlocks: "${savedBlocks}"` : ''}
       status: ${blockBasedProjectStatus}
+      ${startTime ? `startTime: "${startTime}"` : ''}
+      ${endTime ? `endTime: "${endTime}"` : ''}
     }){
       id
       status
@@ -108,6 +116,8 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
   const {
     answerLink,
     savedBlocks,
+    startTime,
+    endTime,
   } = input;
 
   const topicComponentRule = get(userBlockBasedProjectInfo, 'topic.topicComponentRule', []);
@@ -161,6 +171,8 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
     blockBasedProjectStatus,
     answerLink,
     savedBlocks,
+    startTime,
+    endTime,
   ));
   return true;
 };

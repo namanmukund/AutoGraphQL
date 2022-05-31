@@ -156,6 +156,7 @@ const topicTypes = {
   quiz: 'quiz',
   blockBasedProject: 'blockBasedProject',
   blockBasedPractice: 'blockBasedPractice',
+  learningSlide: 'learningSlide',
 };
 
 const userActionType = {
@@ -358,6 +359,7 @@ const childTopicComponents = {
   practiceQuestion: 'practiceQuestion',
   comicStrip: 'comicStrip',
   chatbot: 'chatbot',
+  learningSlide: 'learningSlide',
 };
 
 const blockBasedProjectType = {
@@ -472,7 +474,7 @@ export const GILROY_EXTRA_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/c
 
 const ALLOWED_MIME_TYPES = ['html', 'css', 'javascript'];
 
-const MASTER_OTP = 1101;
+const MASTER_OTP = 1902;
 
 const BLOCKED = 'blocked';
 
@@ -519,6 +521,12 @@ const newTekieWebLinks = {
   preProd: 'https://tekie-web-pre-prod-dd811f1acf374a8c.onporter.run',
 };
 const EXCLUDE_NUMBER = ['7000287388'];
+
+const TIME_BEFORE_EVENT_CREATION = 1;
+
+const DAY_BEFORE_DEMO_COMPLETED = 5;
+
+const LEAD_PARTNERS_TO_CHECK_FOR_DEMO = ['virgo_india', 'ICCS'];
 
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
@@ -609,4 +617,7 @@ export {
   TIME_DIFF_FOR_MANUAL_SESSION,
   newTekieWebLinks,
   EXCLUDE_NUMBER,
+  TIME_BEFORE_EVENT_CREATION,
+  DAY_BEFORE_DEMO_COMPLETED,
+  LEAD_PARTNERS_TO_CHECK_FOR_DEMO,
 };

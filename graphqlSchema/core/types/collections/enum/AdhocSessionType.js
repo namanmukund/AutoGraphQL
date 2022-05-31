@@ -1,7 +1,10 @@
 const AdhocSessionType = `
   enum AdhocSessionType {
-    revision,
+    revision
     homework
+    assessment
+    project
+    teacherTraining
   }`;
 
 export default AdhocSessionType;

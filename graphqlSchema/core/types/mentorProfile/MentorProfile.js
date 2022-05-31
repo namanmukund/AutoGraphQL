@@ -1,3 +1,43 @@
+const ScheduleManagement = `
+ type ScheduleManagement {
+    isSchedulingLearningClass: Boolean @defaultValue(value: "false")
+    isSchedulingAdhocClass: Boolean @defaultValue(value: "false")
+    isReschedulingClasses: Boolean @defaultValue(value: "false")
+    isSchedulingTestClass: Boolean @defaultValue(value: "false")
+    isDeleteSessions: Boolean @defaultValue(value: "false")
+ }
+`;
+
+const ClassroomControl = `
+ type ClassroomControl {
+    isCreatingClass: Boolean @defaultValue(value: "false")
+    isSendingNotice: Boolean @defaultValue(value: "false")
+    shouldAddOrInviteStudent: Boolean @defaultValue(value: "false")
+    isAccessRecording: Boolean @defaultValue(value: "false")
+    isAccessLiveSessionProgress: Boolean @defaultValue(value: "false")
+ }
+`;
+const CourseControl = `
+ type CourseControl {
+    shouldAccessCourse: Boolean @defaultValue(value: "false")
+    shouldCreateTest: Boolean @defaultValue(value: "false")
+    shouldEvaluateTest: Boolean @defaultValue(value: "false")
+    shouldAddToQuestionBank: Boolean @defaultValue(value: "false")
+ }
+`;
+const SessionReporting = `
+ type SessionReporting {
+    shouldAccessReports: Boolean @defaultValue(value: "false")
+    shouldDownloadReports: Boolean @defaultValue(value: "false")
+    shouldShareReports: Boolean @defaultValue(value: "false")
+ }
+`;
+
+const KnownLanguage = `
+type KnownLanguage{
+   value: SpokenLanguage
+}`;
+
 const MentorProfile = `
   type MentorProfile @model {
     user: User! @relation(name: "MentorProfileUser")
@@ -20,6 +60,15 @@ const MentorProfile = `
     linkedInLink: String
     portfolioLink: String
     senseiProfile: SenseiProfile @relation(name: "SenseiProfileMentorProfile")
+    studentProfile: StudentProfile @relation(name: "MentorStudentProfile")
+    schools: [School] @relation(name: "MentorProfileSchool")
+    scheduleManagement: ScheduleManagement
+    classroomControl: ClassroomControl
+    courseControl: CourseControl
+    sessionReporting: SessionReporting
+    accessType: SchoolTeacherAccessType @defaultValue(value: "teacher")
+    schoolClasses: [SchoolClass] @relation(name: "MentorProfileSchoolClass", direction: "OneWay")
+    knownLanguages:[KnownLanguage]
 }`;
 
-export default [MentorProfile];
+export default [MentorProfile, ScheduleManagement, ClassroomControl, CourseControl, SessionReporting, KnownLanguage];

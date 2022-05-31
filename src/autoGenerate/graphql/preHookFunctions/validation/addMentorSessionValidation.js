@@ -2,6 +2,7 @@ import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import {
   UserMismatchError,
+  MentorIsInactiveError,
 } from '../../../../../constants/errors';
 import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
@@ -18,6 +19,7 @@ const getMentorProfile = async (mentorId) => {
   const query = `{
   mentorProfiles(filter: { user_some: { id: "${mentorId}" } }) {
     id
+    isMentorActive
   }
 }
 `;
@@ -34,9 +36,13 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
   */
 
   // getting user role from context. We will allow adding mentorSession if logged in user is admin
+  const mentorId = get(params, 'userConnectId');
+  const mentorProfile = await getMentorProfile(mentorId);
+  const isMentorActive = get(mentorProfile, '[0].isMentorActive');
+  if (!isMentorActive) {
+    throw new MentorIsInactiveError();
+  }
   if (get(params, 'input.acceptanceObjects', []).length > 0) {
-    const mentorId = get(params, 'userConnectId');
-    const mentorProfile = await getMentorProfile(mentorId);
     const mentorProfileId = get(mentorProfile, '[0].id');
     const acceptanceObjectsArray = get(params, 'input.acceptanceObjects', []);
     // eslint-disable-next-line no-restricted-syntax

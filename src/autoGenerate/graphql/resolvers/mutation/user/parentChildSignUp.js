@@ -7,6 +7,7 @@ import {
   SomethingWentWrongError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
+import { GradeFieldRequiredError, SectionFieldRequiredError } from '../../../../../../constants/errors/input';
 import { MENTEE, PARENT } from '../../../../../../constants/roles';
 import { generateCuid, getRandomNumber, log } from '../../../../../../utils';
 import { MutationController, QueryController } from '../../../controllers';
@@ -37,7 +38,8 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 // import sendBookingReminderOrConfirmationB2B from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import getUserPasswordObject from './utils/getUserPasswordObject';
 import { getNumberAndSendSms } from '../../../../../sms';
-import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
+// import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
+import checkForRollNumberInSchoolClass from './utils/checkForRollNumberInSchoolClass';
 
 const USER_TYPE = 'User';
 
@@ -264,6 +266,15 @@ const parentChildSignUpMutationResolver = async (
     }
     parentId = parentUserData.id;
   }
+  if (rollNo && schoolId) {
+    if (!grade) {
+      throw new GradeFieldRequiredError();
+    }
+    if (!section) {
+      throw new SectionFieldRequiredError();
+    }
+    await checkForRollNumberInSchoolClass(rollNo, grade, section, schoolId);
+  }
 
   if (!parentProfileId) {
     const parentProfileInputData = {};
@@ -345,7 +356,7 @@ const parentChildSignUpMutationResolver = async (
     studentProfileInputData.section = section;
   }
   if (rollNo) {
-    studentProfileInputData.rollNo = rollNo;
+    studentProfileInputData.rollNo = rollNo.toLowerCase();
   }
   if (section) {
     studentProfileInputData.branch = branch;
@@ -495,26 +506,26 @@ If coming from campaign and the type os b2b allocate the user to the right batch
       phoneOtpCreationDate: new Date(),
     };
 
-    setTimeout(() => {
-      updateLeadSquared({
-        Phone: get(parentPhone, 'number'),
-        mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '16 January' : '16 January',
-        mx_Event_Time: utmCampaign.includes('doodling') || utmSource.includes('communityevent') ? '03:00 pm' : '11:00 am',
-        mx_Event_Date_Time: utmCampaign.includes('doodling') || utmSource.includes('communityevent') ? '2022-01-16 09:30:00' : '2022-01-16 05:30:00',
-      }, false, {
-        ActivityEvent: 208,
-        Fields: [
-          {
-            SchemaName: 'mx_Custom_1',
-            Value: utmSource,
-          },
-          {
-            SchemaName: 'mx_Custom_2',
-            Value: utmCampaign,
-          },
-        ],
-      });
-    }, 1000 * 60 * 2);
+    // setTimeout(() => {
+    //   updateLeadSquared({
+    //     Phone: get(parentPhone, 'number'),
+    //     mx_Event_Date: utmSource.includes('SpySquadCamp') || utmSource.includes('communityevent') ? '06 February' : '06 February',
+    //     mx_Event_Time: utmCampaign.includes('doodling') || utmSource.includes('communityevent') ? '11:00 am' : '03:00 pm',
+    //     mx_Event_Date_Time: utmCampaign.includes('doodling') || utmSource.includes('communityevent') ? '2022-02-06 05:30:00' : '2022-02-06 09:30:00',
+    //   }, false, {
+    //     ActivityEvent: 208,
+    //     Fields: [
+    //       {
+    //         SchemaName: 'mx_Custom_1',
+    //         Value: utmSource,
+    //       },
+    //       {
+    //         SchemaName: 'mx_Custom_2',
+    //         Value: utmCampaign,
+    //       },
+    //     ],
+    //   });
+    // }, 1000 * 60 * 2);
 
     // update phoneOtp in db
     await updateExistingUserOTP({ id: parentId }, updateObj, modelMutations);

@@ -6,7 +6,7 @@ import {
   ADMIN, UMS_ADMIN, MENTOR, UMS_VIEWER, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN,
   LEAD_PARTNER,
 } from '../../../../../constants/roles';
-import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, backendApps } from '../../../../../constants';
+import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, backendApps, TWA } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import validateMenteeSessionInput, { getHoursDiff } from './utils/validateMenteeSessionInput';
@@ -16,6 +16,8 @@ import isTrialSession from '../../resolvers/utils/isTrialSession';
 import getUserSource from './utils/getUserSource';
 import updateUserSpecificDetailsInParams from './utils/updateUserSpecificDetailsInParams';
 import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelectedSlotsStringArray';
+// import validateMenteeSession from './utils/validateMenteeSession';
+import isMentorChild from '../../postHookFunctions/utils/isMentorChild';
 
 // query to get mentee Sessions
 const getMenteeSessions = (userId, topicId) => `
@@ -81,8 +83,8 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
   Object.assign(params.input, {
     bookedAt: `${new Date()}`,
   });
+  const slotTimeStringArray = getSelectedSlotsStringArray(get(params, 'input'));
   if (ALLOWED_ROLE_FOR_MANUAL_SESSIONS.includes(userRoleFromContext) && get(context, 'isTrialSession', false)) {
-    const slotTimeStringArray = getSelectedSlotsStringArray(get(params, 'input'));
     if (slotTimeStringArray.length > 0) {
       const timeDiff = getHoursDiff(slotTimeStringArray[0].split('slot')[1], get(params, 'input.bookingDate'));
       if (timeDiff) {
@@ -90,8 +92,10 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
       }
     }
   }
-  // validate input
-  await validateMenteeSessionInput(params, context, userRoleFromContext);
+  // validate input if call is not from TMS, allowing user to add session, added flow for batch student
+  if (appName !== TWA) {
+    await validateMenteeSessionInput(params, context, userRoleFromContext);
+  }
   const allowedRoles = [ADMIN, UMS_ADMIN, UMS_VIEWER, MENTOR, TRANSFORMATION_TEAM, TRANSFORMATION_ADMIN, LEAD_PARTNER];
 
   context.userIdFromContext = userIdFromContext;
@@ -122,6 +126,13 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
     throw new SimilarDocumentAlreadyExistError();
   }
 
+  const mentorChild = await isMentorChild(userId);
+  if (!mentorChild && slotTimeStringArray && slotTimeStringArray.length > 0) {
+    // const validationFailed = await validateMenteeSession(slotTimeStringArray[0], userId, get(params, 'input.bookingDate'));
+    // if (validationFailed) {
+    //   throw new SlotsOccupiedError();
+    // }
+  }
   // update source & country in menteeSession
   const userData = await getUserSource(userId);
   updateUserSpecificDetailsInParams(userData, params);

@@ -77,6 +77,7 @@ import updateSchoolClassValidation from './preHookFunctions/validation/updateSch
 import deleteSchoolValidation from './preHookFunctions/validation/deleteSchoolValidation';
 import deleteSchoolClassValidation from './preHookFunctions/validation/deleteSchoolClassValidation';
 import deleteCourseValidation from './preHookFunctions/validation/deleteCourseValidation';
+import deleteCoursePackageValidation from './preHookFunctions/validation/deleteCoursePackageValidation';
 import updateBatchValidation from './preHookFunctions/validation/updateBatchValidation';
 import updateCampaignValidation from './preHookFunctions/validation/updateCampaignValidation';
 import generateInviteCode from '../../../utils/generateInviteCode';
@@ -116,6 +117,16 @@ import updateFileValidation from './preHookFunctions/validation/updateFileValida
 import addLeadPartnerValidation from './preHookFunctions/validation/addLeadPartnerValidation';
 import updateLeadPartnerValidation from './preHookFunctions/validation/updateLeadPartnerValidation';
 import addSenseiProfileValidation from './preHookFunctions/validation/addSenseiProfileValidation';
+import addEventCategoryValidation from './preHookFunctions/validation/addEventCategoryValidation';
+import addContentTagValidation from './preHookFunctions/validation/addContentTagValidation';
+import addEventSpeakerProfileValidation from './preHookFunctions/validation/addEventSpeakerProfileValidation';
+import addCommsVariableValidation from './preHookFunctions/validation/addCommsVariableValidation';
+import updateEventValidation from './preHookFunctions/validation/updateEventValidation';
+import addWeekDayForOneDayEvent from './preHookFunctions/validation/utils/addWeekDayForOneDayEvent';
+import addTimetableScheduleValidation from './preHookFunctions/validation/addTimetableScheduleValidation';
+import updateTimetableScheduleValidation from './preHookFunctions/validation/updateTimetableScheduleValidation';
+import addUserLearningSlideDumpValidation from './preHookFunctions/validation/addUserLearningSlideDumpValidation ';
+// import updateEventSessionValidation from './preHookFunctions/validation/updateEventSessionValidation';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
@@ -776,6 +787,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await deleteCourseValidation(params, mutationOrQueryName, context);
       break;
     }
+    case 'deleteCoursePackage': {
+      await deleteCoursePackageValidation(params, mutationOrQueryName, context);
+      break;
+    }
     case 'updateBatch': {
       await updateBatchValidation(params, mutationOrQueryName, context);
       break;
@@ -907,9 +922,50 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await addSenseiProfileValidation(params, mutationOrQueryName, context);
       break;
     }
+    case 'addEventSpeakerProfile': {
+      await addEventSpeakerProfileValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addCommsVariable': {
+      await addCommsVariableValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addEventCategory': {
+      await addEventCategoryValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addContentTag': {
+      await addContentTagValidation(params, mutationOrQueryName, context);
+      break;
+    }
     case 'addSchool': {
       return hook({ ...input, schoolCampaignCode: generateInviteCode(8) }, mutationOrQueryName, 'PreHook');
     }
+    case 'addEvent': {
+      addWeekDayForOneDayEvent(params);
+      break;
+    }
+    case 'updateEvent': {
+      addWeekDayForOneDayEvent(params);
+      await updateEventValidation(params, input, mutationOrQueryName, context);
+      break;
+    }
+    case 'addTimetableSchedule': {
+      addTimetableScheduleValidation(params);
+      break;
+    }
+    case 'updateTimetableSchedule': {
+      updateTimetableScheduleValidation(params);
+      break;
+    }
+    case 'addUserActivityLearningSlideDump': {
+      await addUserLearningSlideDumpValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    // case 'updateEventSession': {
+    //   await updateEventSessionValidation(params, input, mutationOrQueryName, context);
+    //   break;
+    // }
     default: {
       /* If context is not present then it means user is not authenticated and the
       user won't be able to make any db query

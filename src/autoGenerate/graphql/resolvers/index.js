@@ -47,6 +47,7 @@ import getQuizReport from './mutation/methods/getQuizReport';
 import getPaymentRequest from './mutation/methods/getPaymentRequest';
 import loginViaOtp from './mutation/methods/loginViaOtp';
 import signupOrLoginViaOtp from './mutation/methods/signupOrLoginViaOtp';
+import schoolLiveClassLoginViaOtp from './mutation/methods/schoolLiveClassLoginViaOtp';
 import sendForgotPasswordLink from './mutation/methods/sendForgotPasswordLink';
 import getUnlockedUserBadge from './mutation/methods/getUnlockedUserBadge';
 import userBadge from './mutation/methods/userBadge';
@@ -76,6 +77,7 @@ import salesOperationReport from './query/methods/salesOperationReport';
 import temporaryScript from './query/methods/temporaryScript';
 import sendTransactionalMessage from './query/methods/sendTransactionalMessage';
 import sendTextMessage from './query/methods/sendTextMessage';
+import sendCommsMessage from './query/methods/sendCommsMessages';
 import getTotalAmountCollected from './query/methods/getTotalAmountCollected';
 import addUpdateBulkSchoolUserData from './mutation/methods/addUpdateBulkSchoolUserData';
 import updateVisitorReactionOnUserApprovedCode from './mutation/methods/updateVisitorReactionOnUserApprovedCode';
@@ -96,9 +98,25 @@ import shiftBatchSessionsAfterGivenDate from './mutation/methods/shiftBatchSessi
 import sendCertificateInMail from './mutation/methods/sendCertificateInMail';
 import sendJourneySnapshotInMail from './mutation/methods/sendJourneySnapshotInMail';
 import generateCertificate from './mutation/methods/generateCertificate';
+import generateCertificateInBulk from './mutation/methods/generateCertificateInBulk';
 import getMagicLink from './query/methods/getMagicLink';
 import validateMagicLink from './mutation/methods/validateMagicLink';
 import resetPasswordAndLogin from './mutation/methods/resetPasswordAndLogin';
+import getEventSpeaker from './query/methods/getEventSpeaker';
+import generateMentorChild from './mutation/methods/generateMentorChild';
+import getEventWinner from './query/methods/getEventWinner';
+import classroomSessions from './query/methods/classroomSessions';
+import updateEventSessionAttendance from './mutation/methods/updateEventSessionAttendance';
+import getNextOrPrevClassroomSessions from './query/methods/getNextOrPrevClassroomSessions';
+import getClassroomDetails from './query/methods/getClassroomDetails';
+import scheduleSessions from './mutation/shift/scheduleSessions';
+import getSchoolAndBatchDetail from './query/methods/getSchoolAndBatchDetail';
+import menteeCourseHomework from './mutation/methods/menteeCourseHomework';
+import getBatchDetails from './query/methods/getBatchDetails';
+import getBatchStudent from './query/methods/getBatchStudent';
+import getSessionComponentMeta from './query/methods/getSessionComponentMeta';
+import getClassroomReport from './query/methods/getClassroomReport';
+import getPracticeQuestionReport from './query/methods/getPracticeQuestionReport';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -158,7 +176,7 @@ const defaultMutationsResolverWrapper = async (
     } else {
       newResult = toObject(result);
     }
-    const dbData = await posthook(newResult, mutationName, context, params);
+    const dbData = await posthook(newResult, mutationName, context, params, info);
     // allow subscription on defined events
     subscribeToEvents(
       typeName,
@@ -295,7 +313,7 @@ Object.keys(parsedASTMap).forEach((type) => {
           authentication,
         ).then(async (result) => {
           const newResult = toObject(result);
-          const postHookResult = await posthook(newResult, modelSingular, context, params);
+          const postHookResult = await posthook(newResult, modelSingular, context, params, info);
           return postHookResult;
         });
       });
@@ -322,7 +340,7 @@ Object.keys(parsedASTMap).forEach((type) => {
           authentication,
         ).then(async (result) => {
           const newResult = toObject(result);
-          const postHookResult = await posthook(newResult, modelSingular, context, params);
+          const postHookResult = await posthook(newResult, modelSingular, context, params, info);
           return postHookResult;
         });
       });
@@ -525,7 +543,7 @@ Object.keys(parsedASTMap).forEach((type) => {
               connectedTypeName: relatedType,
               connectedFieldName: relatedTypeField,
             });
-            return posthook(newResult, addRelationMutationName, context, params);
+            return posthook(newResult, addRelationMutationName, context, params, info);
           });
         },
         [removeRelationMutationName]: async (root, params, context, info) => {
@@ -558,7 +576,7 @@ Object.keys(parsedASTMap).forEach((type) => {
               connectedFieldName: relatedTypeField,
             });
 
-            return posthook(newResult, removeRelationMutationName, context, params);
+            return posthook(newResult, removeRelationMutationName, context, params, info);
           });
         },
       };
@@ -591,6 +609,7 @@ resolvers.Mutation.menteeCourseSyllabus = menteeCourseSyllabus;
 resolvers.Mutation.userTopicJourney = userTopicJourney;
 // Resolver for custom quiz reports for user
 resolvers.Mutation.userFirstAndLatestQuizReport = userFirstAndLatestQuizReport;
+resolvers.Mutation.userFirstAndLatestQuizReports = userFirstAndLatestQuizReport;
 // Resolver for custom skip video by user
 resolvers.Mutation.skipVideo = skipVideo;
 // Resolver for custom skip practice question by user
@@ -610,6 +629,7 @@ resolvers.Mutation.updateParentChildDetail = updateParentChildDetail;
 resolvers.Mutation.loginViaPassword = loginViaPassword;
 resolvers.Mutation.loginViaOtp = loginViaOtp;
 resolvers.Mutation.signupOrLoginViaOtp = signupOrLoginViaOtp;
+resolvers.Mutation.schoolLiveClassLoginViaOtp = schoolLiveClassLoginViaOtp;
 resolvers.Mutation.validateUserOTP = validateUserOTP;
 // Resolver for a custom get user payment information, when user buys a product
 resolvers.Mutation.getPaymentRequest = getPaymentRequest;
@@ -624,8 +644,12 @@ resolvers.Mutation.sendCertificateInMail = sendCertificateInMail;
 resolvers.Mutation.shiftBatchSessionsAfterGivenDate = shiftBatchSessionsAfterGivenDate;
 resolvers.Mutation.sendJourneySnapshotInMail = sendJourneySnapshotInMail;
 resolvers.Mutation.generateCertificate = generateCertificate;
+resolvers.Mutation.generateCertificateInBulk = generateCertificateInBulk;
 resolvers.Mutation.validateMagicLink = validateMagicLink;
 resolvers.Mutation.resetPasswordAndLogin = resetPasswordAndLogin;
+resolvers.Mutation.generateMentorChild = generateMentorChild;
+resolvers.Mutation.updateEventSessionAttendance = updateEventSessionAttendance;
+resolvers.Mutation.scheduleSessions = scheduleSessions;
 
 // queries
 resolvers.Query.me = me;
@@ -634,6 +658,7 @@ resolvers.Query.salesOperationReport = salesOperationReport;
 resolvers.Query.temporaryScript = temporaryScript;
 resolvers.Query.sendTransactionalMessage = sendTransactionalMessage;
 resolvers.Query.sendTextMessage = sendTextMessage;
+resolvers.Query.sendCommsMessage = sendCommsMessage;
 // Resolver to get total sell amount and amount colected
 resolvers.Query.getTotalAmountCollected = getTotalAmountCollected;
 // Resolver to get the cheatsheets
@@ -654,8 +679,32 @@ resolvers.Query.getUserCourses = getUserCourses;
 resolvers.Query.getSchoolCampaignSlots = getSchoolCampaignSlots;
 // Resolver to get magic link
 resolvers.Query.getMagicLink = getMagicLink;
+// Resolver to get event Speaker
+resolvers.Query.getEventSpeaker = getEventSpeaker;
+// Resolver to get event winner
+resolvers.Query.getEventWinner = getEventWinner;
+// Resolver to get classroom sessions
+resolvers.Query.classroomSessions = classroomSessions;
+// Resolver to get next or prev classroom sessions
+resolvers.Query.getNextOrPrevClassroomSessions = getNextOrPrevClassroomSessions;
+// Resolver to get classroom sessions
+resolvers.Query.getClassroomDetails = getClassroomDetails;
+// Resolver to get classroom sessions
+resolvers.Query.getSchoolAndBatchDetail = getSchoolAndBatchDetail;
+// Resolver to fetch Batch Details from OTP and School Code
+resolvers.Query.getBatchDetails = getBatchDetails;
+// Resolver to fetch Batch Details from OTP and School Code
+resolvers.Query.getBatchStudent = getBatchStudent;
+// Resolver to get classroom session Details
+resolvers.Query.getSessionComponentMeta = getSessionComponentMeta;
+// Resolver to get classroom homework report
+resolvers.Query.getClassroomReport = getClassroomReport;
+// Resolver to get classroom homework report
+resolvers.Query.getPracticeQuestionReport = getPracticeQuestionReport;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
+// Resolver to retrieve homework status based on filters
+resolvers.Mutation.menteeCourseHomework = menteeCourseHomework;
 
 // subscriptions
 resolvers.Subscription.userUpdated = injectSubscriptionWithCommonAsyncIterator(['USER_UPDATED']);

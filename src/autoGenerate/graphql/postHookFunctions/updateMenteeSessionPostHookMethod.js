@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { difference, get } from 'lodash';
+import moment from 'moment';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 // import reduceParticularAvailableSlotOfADate from './utils/reduceParticularAvailableSlotOfADate';
 // import increaseParticularAvailableSlotOfADate from './utils/increaseParticularAvailableSlotOfADate';
@@ -23,6 +24,7 @@ import getCourseInfo from './utils/getCourseInfo';
 import getSlotLabel from '../../../../utils/getSlotLabel';
 import { log } from '../../../../utils';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import isMentorChild from './utils/isMentorChild';
 
 const fetchTasks = (menteeSessionId) => `
 {
@@ -80,6 +82,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const { appName } = context;
   const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
   const isBookedByMentee = get(context, 'userIdFromContext') === get(input, 'user.typeId');
+  const isItMentorChild = await isMentorChild(get(userInfo, 'data.user.id', ''));
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
   const task = get(await callLocalGraphqlApi(fetchTasks(menteeSessionId)), 'data.tasks[0]');
   // if call is from backend we will not update the availability slots, same for paid sessions
@@ -87,11 +90,15 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     const courseInfo = await getCourseInfo(get(input, 'course.typeId'));
     const prevBroadCastedMentors = get(previousDocument, 'broadCastedMentors', []).map((mentor) => get(mentor, 'id'));
     const newBroadcastedmentors = get(input, 'broadCastedMentors', []);
+    let hasBroadcasted = false;
+    let startTime = '';
+    let time = '';
     // eslint-disable-next-line no-restricted-syntax
     for (const mentorProfile of newBroadcastedmentors) {
       if (!prevBroadCastedMentors.includes(get(mentorProfile, 'typeId'))) {
-        const time = get(slotTimeStringArray, '0').split('slot')[1];
-        const startTime = getSlotLabel(time).startTime;
+        time = get(slotTimeStringArray, '0').split('slot')[1];
+        startTime = getSlotLabel(time).startTime;
+        hasBroadcasted = true;
         sendMailAndWhatsappMessageForSupplyRequest(get(mentorProfile, 'typeId'),
           {
             date: bookingDate,
@@ -103,13 +110,23 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
       }
     }
     // update "Task" with broadcast count
-    if (get(task, 'id')) {
+    if (get(task, 'id') && hasBroadcasted) {
+      const previousBcastCount = get(task, 'broadcastCount', 0);
       const variables = {
         input: {
-          broadcastCount: get(task, 'broadcastCount', 0) + 1,
+          broadcastCount: previousBcastCount + 1,
         },
       };
-      console.log('variables', variables);
+      if (previousBcastCount >= 5) {
+        variables.input.status = 'failedToAssign';
+      }
+      // "high priority" if start time is less than two hours from current time
+      const bookingDateTime = new Date(moment(bookingDate).toDate().setHours(time, 0, 0, 0)).toISOString();
+
+      const hoursLeftForSession = Math.abs(moment(bookingDateTime).diff(moment(), 'hours'));
+      if (hoursLeftForSession <= 2) {
+        variables.input.isHighPriority = true;
+      }
       await updateTaskMutation(get(task, 'id'), variables);
     }
     if (bookingDate && bookingDate.getTime() !== prevBookingDate.getTime()) {
@@ -211,8 +228,11 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     if (get(context, 'userIdFromContext')) {
       updateUserBookingAgent(menteeSessionId, get(context, 'userIdFromContext'), bookingDate, get(slotTimeStringArray, '0'));
     }
+
+    if (!isItMentorChild) {
     // update booking time on leadsquared
-    rescheduleMenteeBookingLeadsquared(input, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, get(context, 'userIdFromContext'));
+      rescheduleMenteeBookingLeadsquared(input, slotTimeStringArray, userInfo, topicInfo, isBookedByMentee, get(context, 'userIdFromContext'));
+    }
     // update session log entry
     const courseId = get(input, 'course.typeId', '');
     const clientId = get(userInfo, 'data.user.id', '');

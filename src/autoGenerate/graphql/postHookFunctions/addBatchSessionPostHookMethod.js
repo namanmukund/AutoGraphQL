@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { get } from 'lodash';
 import {
   GLOBAL_COURSE_TITLE,
@@ -10,11 +11,16 @@ import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentCompone
 import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
 import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 import extractBatchSessionAndSendB2BC from './utils/extractBatchSessionAndSendB2BC';
+import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 import addSessionLog from './utils/addSessionLog';
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import isTrialSession from '../resolvers/utils/isTrialSession';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
 import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
+import generateOtpForBatchSession from './utils/generateOtpForBatchSession';
+import getSlotDifference from './utils/getTimeDifference';
+import { getTopicsFromCoursePackage } from './utils/updateBatchPostHookQueries';
+import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -39,6 +45,8 @@ const getBatchQuery = (batchId) => `
         type
         students{
           id
+          section
+          grade
           user{
             id
             source
@@ -93,14 +101,16 @@ const updateBatchSessionQuery = (
     }
   }
   `;
-
 /*
   Post hook of addBatchSession
+  UPDATED LOGIC:
+  - if coursePackageConnectId is present in params, update current component to reflect next topic from coursePackage, not course
 */
 const addBatchSessionPostHookMethod = async (input, params, mutationName, context) => {
   const batchId = get(params, 'batchConnectId');
   const topicId = get(params, 'topicConnectId');
   let courseId = get(params, 'courseConnectId');
+  const coursePackageId = get(params, 'coursePackageConnectId');
   const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
   const { id: batchSessionId } = input;
   const { bookingDate, sessionStatus: sessionStatusFromInput, ...slots } = params && params.input;
@@ -110,7 +120,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   /*
     get Course Id
   */
-  if (!courseId) {
+  if (!courseId && !coursePackageId) {
     const courseResult = await callLocalGraphqlApi(getCourseQuery());
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
@@ -156,8 +166,15 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
       We are getting published topics list through this query.
       Then we will get next published topic
       */
-      const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
-      const topicsList = get(nextTopicQueryRes, 'data.topics');
+      let topicsList = [];
+      if (coursePackageId) {
+        const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+        const topicRules = get(coursePackage, 'topics');
+        topicsList = getSortedTopics(topicRules);
+      } else {
+        const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
+        topicsList = get(nextTopicQueryRes, 'data.topics');
+      }
 
       let currentTopicIndex;
       topicsList.forEach((topic, index) => {
@@ -184,7 +201,6 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
       );
     }
   }
-
   // add students to the batch session and mark them absent as default
   if (students && students.length && topicId) {
     let pushManyQuery = 'attendance:{ pushMany: [';
@@ -203,30 +219,33 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
       pushManyQuery,
     ), context);
   }
+  const isBetweenTwoHrs = getSlotDifference(get(slotTimeStringArray, '[0]'), bookingDate, 2);
+  if (isBetweenTwoHrs) generateOtpForBatchSession(batchSessionId, students);
   const studentsId = (students && students.length) ? students.map((student) => get(student, 'id')) : [];
   extractBatchSessionAndSendB2BC(batchSessionId, studentsId, false);
+  extractBatchSessionAndSendB2B(batchSessionId);
 
   // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
   // mentorSessionConnectId made non-mandatory
-  if (topicId) {
-    // eslint-disable-next-line no-restricted-syntax
-    for (const student of students) {
-      if (student.user && student.user.id) {
-        addMentorMenteeSessionForBatch(
-          context,
-          student.user.id,
-          '',
-          topicId,
-          bookingDate,
-          slotTimeArray[0],
-          mentorSessionConnectId,
-          courseId,
-          sessionStatusFromInput || sessionStatus.allotted,
-          student.user.source,
-        );
-      }
-    }
-  }
+  // if (topicId) {
+  // eslint-disable-next-line no-restricted-syntax
+  //   for (const student of students) {
+  //     if (student.user && student.user.id) {
+  //       addMentorMenteeSessionForBatch(
+  //         context,
+  //         student.user.id,
+  //         '',
+  //         topicId,
+  //         bookingDate,
+  //         slotTimeArray[0],
+  //         mentorSessionConnectId,
+  //         courseId,
+  //         sessionStatusFromInput || sessionStatus.allotted,
+  //         student.user.source,
+  //       );
+  //     }
+  //   }
+  // }
 
   if (topicId) {
     // update session log entry

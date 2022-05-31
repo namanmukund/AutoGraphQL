@@ -7,6 +7,9 @@ const UserBlockBasedPractice = `
     savedBlocks: String
     topic: Topic! @relation(name: "TopicUserBlockBasedPractice", direction: "OneWay")
     course: Course @relation(name: "UserBlockBasedPracticeCourse", direction: "OneWay")
+    result: EvaluationResult @defaultValue(value: "pending")
+    startTime: Date
+    endTime: Date
   }
 `;
 

@@ -1,13 +1,15 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { DatabaseRecordNotFoundError, MentorMandatoryError } from '../../../../../constants/errors';
+import { DatabaseRecordNotFoundError, MentorMandatoryError, UnauthorizedOperationError } from '../../../../../constants/errors';
 import batchSessionQuery from '../../graphqlQueries/batchSessionQuery';
 import {
   CanNotChangeSessionStatusError,
   MissingMandatoryInputInRequestError,
 } from '../../../../../constants/errors/input';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
-import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, sessionStatus } from '../../../../../constants';
+import {
+  ALLOWED_ROLE_FOR_MANUAL_SESSIONS, sessionStatus, TWA,
+} from '../../../../../constants';
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getMentorSessions from '../../../utils/getMentorSessions';
@@ -16,6 +18,7 @@ import extractSlotsFromInput from '../../../../../utils/extractSlotsFromInput';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import isTrialSession from '../../resolvers/utils/isTrialSession';
 import { getHoursDiff } from './utils/validateMenteeSessionInput';
+import { MENTOR, MENTEE } from '../../../../../constants/roles';
 
 // query to get mentor from mentorSessionConnectId
 const fetchMentor = (id) => `
@@ -48,6 +51,17 @@ const getBatchSession = (batchId,
   }
 `;
 
+const getCurrentUser = async (userId) => {
+  const query = `{
+  studentProfiles(filter: { user_some: { id: "${userId}" } }) {
+    id
+  }
+}
+`;
+  const result = await callLocalGraphqlApi(query);
+  return get(result, 'data.studentProfiles[0].id');
+};
+
 const updateBatchSessionValidation = async (params, mutationOrQueryName, context) => {
   const {
     id: batchSessionId, topicConnectId, mentorSessionConnectId, input: { sessionStatus: sessionStatusInInput, bookingDate: bookingDateFromInput, ...inputSlot },
@@ -65,6 +79,13 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     currentApp,
   } = userInfo;
   const userRoleFromContext = currentUser && currentUser.role;
+  if (get(params, 'input.attendance.updateWhere.studentReferenceId')
+    && get(currentApp, 'name') === TWA) {
+    const studentProfileId = await getCurrentUser(get(currentUser, 'id'));
+    if (studentProfileId !== get(params, 'input.attendance.updateWhere.studentReferenceId')) {
+      throw new UnauthorizedOperationError();
+    }
+  }
 
   const {
     sessionStatus: prevSessionStatus,
@@ -169,12 +190,26 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   if (prevSessionStatus === sessionStatus.completed && sessionStatusInInput && sessionStatusInInput !== sessionStatus.completed) {
     throw new CanNotChangeSessionStatusError();
   }
+  if (sessionStatusInInput === sessionStatus.started
+    && get(batch, 'type') === 'b2b') {
+    if (userRoleFromContext === MENTOR) {
+      Object.assign(params.input, {
+        sessionStartedByMentorAt: new Date().toISOString(),
+      });
+    }
+    if (prevSessionStatus === sessionStatus.allotted && userRoleFromContext === MENTEE) {
+      Object.assign(params.input, {
+        startSessionByMentee: new Date().toISOString(),
+      });
+    }
+  }
 
   context.prevIsAudit = get(batchSession, 'isAudit', false);
   context.batchTopicOrder = get(batchSession, 'topic.order');
   context.batchTypeValue = get(batchSession, 'batch.type');
   context.currentUser = currentUser;
   context.appName = get(currentApp, 'name');
+  context.userRoleFromContext = userRoleFromContext;
   return true;
 };
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { get } from 'lodash';
 import {
   enrollmentTypes,
@@ -2089,6 +2088,7 @@ export const getTopicOrderFromCoursePackage = (coursePackage, currentTopic, user
 };
 
 export const getTopicsArrFromCoursePackages = (coursePackage = {}, returnType = 'topics', userBatchDetails) => {
+  // If coursePackageTopicRule is present in userBatchDetails package Topic is updated with it
   let packageTopics = get(coursePackage, 'topicsArr', []);
   if (get(userBatchDetails, 'coursePackageTopicRule', []).length) {
     packageTopics = get(userBatchDetails, 'coursePackageTopicArr', []);

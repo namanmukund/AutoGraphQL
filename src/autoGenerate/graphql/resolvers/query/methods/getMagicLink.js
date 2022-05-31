@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-lonely-if */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-tabs */
 /* eslint-disable no-unused-vars */
@@ -110,6 +112,7 @@ const getMagicLinkLogs = async (userId, linkToken) => {
       if (visitedCount < linkVisitLimit) {
         // eslint-disable-next-line no-await-in-loop
         await updateMagicLinkLog(get(linkLog, 'id'), linkVisitLimit);
+        log(`updating link Log with ID: ${get(linkLog, 'id')}`);
       }
     }
   }
@@ -121,7 +124,9 @@ const generateAndReturnToken = async (user, addMagicLinkLogQuery = '', index, {
 }) => {
   const linkToken = getTokenForLoginLink(user, new Date(), expiresIn);
   let linkUri = `?authToken=${linkToken}`;
-  if (!byPassMenteeValidationApps.includes(appName)) {
+  if (byPassMenteeValidationApps.includes(appName) && isLeadLogin) {
+    linkUri = `login${linkUri}&isLeadLogin=${isLeadLogin}`;
+  } else {
     if (parents.length && get(parents, '[0].user.email')) {
       if (get(school, 'id') && get(school, 'code')) {
         // if user is of school will send link with school domain
@@ -142,8 +147,6 @@ const generateAndReturnToken = async (user, addMagicLinkLogQuery = '', index, {
         linkUri = getLoginLinkUri(linkUri);
       }
     }
-  } else if (byPassMenteeValidationApps.includes(appName) && isLeadLogin) {
-    linkUri = `login${linkUri}&isLeadLogin=${isLeadLogin}`;
   }
   addMagicLinkLogQuery = `addMagicLinkLog${index}: addMagicLinkLog(
     input: {
@@ -179,6 +182,7 @@ const getMagicLink = (async (root, params, context) => {
     input: {
       schoolId, grade, section, userId, email, phone, expiresIn,
       linkVisitLimit = 2, isLeadLogin = false, isDownloadExcel = false,
+      studentIds,
     },
   } = params;
   // getting input from params
@@ -217,6 +221,10 @@ const getMagicLink = (async (root, params, context) => {
         }`;
     }
   }
+  if (studentIds && studentIds.length) {
+    const studentIdsString = studentIds.map((student) => `"${student}"`);
+    fetchQueryFilter = `{ id_in: [${studentIdsString}] }`;
+  }
   if (!fetchQueryFilter) {
     throw new MissingMandatoryInputInRequestError();
   } else {
@@ -246,7 +254,7 @@ const getMagicLink = (async (root, params, context) => {
             school,
             isDownloadExcel,
           });
-          getMagicLinkLogs(get(user, 'id'), linkToken);
+          await getMagicLinkLogs(get(user, 'id'), linkToken);
           if (!byPassMenteeValidationApps.includes(appName)) {
             if (!isDownloadExcel) {
               if (linkUri) {

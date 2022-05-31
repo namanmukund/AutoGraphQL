@@ -9,8 +9,8 @@ import validateTokenAndExtractInformation from './utils/validateTokenAndExtractI
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import {
   SessionMustBeCompletedError,
-  MissingMandatoryInputInRequestError,
   PermissionDeniedError,
+  MentorIsInactiveError,
 } from '../../../../../constants/errors';
 import getMentorSessions from '../../../utils/getMentorSessions';
 import { checkIfSlotCanBeOpenedValidation } from './utils';
@@ -49,6 +49,9 @@ query{
     id
     user{
       id
+      mentorProfile{
+        isMentorActive
+      }
     }
   }
 }`;
@@ -85,13 +88,13 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
     });
   }
 
-  if (!previousTopicConnectId) {
-    throw new MissingMandatoryInputInRequestError({
-      data: {
-        message: 'previousTopicConnectId is missing in input',
-      },
-    });
-  }
+  // if (!previousTopicConnectId) {
+  //   throw new MissingMandatoryInputInRequestError({
+  //     data: {
+  //       message: 'previousTopicConnectId is missing in input',
+  //     },
+  //   });
+  // }
 
   // getting user role from context. We will allow adding batchSession if logged in user is admin
   const userInfo = validateTokenAndExtractInformation(context, false);
@@ -118,6 +121,10 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
   const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
   const bookingDate = get(params, 'input.bookingDate', '');
+  const isMentorActive = get(fetchMentorRes, 'data.mentorSession.user.mentorProfile.isMentorActive');
+  if (!isMentorActive) {
+    throw new MentorIsInactiveError();
+  }
   if (mentorUserId && bookingDate) {
     const getMentorSessionsRes = await callLocalGraphqlApi(
       getMentorSessions(
@@ -143,11 +150,14 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
     throw new SimilarDocumentAlreadyExistError();
   }
 
-  // confirm if the previous topic batch session is complete before proceeding
-  const batchSessionPreviousTopicRes = await callLocalGraphqlApi(getBatchSessions(previousTopicConnectId, batchId));
-  const batchSessionPreviousTopicStatus = get(batchSessionPreviousTopicRes, 'data.batchSessions[0].sessionStatus', '');
-  if (batchSessionPreviousTopicStatus !== 'completed') {
-    throw new SessionMustBeCompletedError();
+  // ignore check in case of teacher Training
+  if (type !== 'teacherTraining') {
+    // confirm if the previous topic batch session is complete before proceeding
+    const batchSessionPreviousTopicRes = await callLocalGraphqlApi(getBatchSessions(previousTopicConnectId, batchId));
+    const batchSessionPreviousTopicStatus = get(batchSessionPreviousTopicRes, 'data.batchSessions[0].sessionStatus', '');
+    if (batchSessionPreviousTopicStatus !== 'completed') {
+      throw new SessionMustBeCompletedError();
+    }
   }
 
   return true;

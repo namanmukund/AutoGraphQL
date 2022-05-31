@@ -111,8 +111,33 @@ import TaskLeadStatusReason from './TaskLeadStatusReason';
 import TaskBookingStatus from './TaskBookingStatus';
 import TaskBookingStatusReason from './TaskBookingStatusReason';
 import TaskContactReason from './TaskContactReason';
+import CacheControlScope from './CacheControlScope';
 import AttentionAmount from './AttentionAmount';
 import LearningObjectiveComponentsB2B from './LearningObjectiveComponentsB2B';
+import EventTypes from './EventTypes';
+import EventStatus from './EventStatus';
+import CommsDataField from './CommsDataField';
+import LocationType from './LocationType';
+import EventOrganizer from './EventOrganizer';
+import DurationType from './DurationType';
+import AttendanceFilter from './AttendanceFilter';
+import LengthOfContent from './LengthOfContent';
+import TriedToReachParent from './TriedToReachParent';
+import TimetableScheduleType from './TimetableScheduleType';
+import ClassMode from './ClassMode';
+import TimetableScheduleEventType from './TimetableScheduleEventType';
+import SessionMode from './SessionMode';
+import SessionDocumentType from './SessionDocumentType';
+import NoticeType from './NoticeType';
+import ReviewType from './ReviewType';
+import ScheduleSessionType from './ScheduleSessionType';
+import SchoolTeacherAccessType from './SchoolTeacherAccessType';
+import SpokenLanguage from './SpokenLanguage';
+import LearningSlideContentType from './LearningSlideContentType';
+import LayoutType from './LayoutType';
+import LearningSlideType from './LearningSlideType';
+import ClassType from './ClassType';
+import EvaluationResult from './EvaluationResult';
 
 export default [
   Status,
@@ -229,6 +254,31 @@ export default [
   TaskBookingStatus,
   TaskBookingStatusReason,
   TaskContactReason,
+  CacheControlScope,
   AttentionAmount,
   LearningObjectiveComponentsB2B,
+  EventTypes,
+  EventStatus,
+  CommsDataField,
+  LocationType,
+  EventOrganizer,
+  DurationType,
+  AttendanceFilter,
+  LengthOfContent,
+  TriedToReachParent,
+  TimetableScheduleType,
+  ClassMode,
+  TimetableScheduleEventType,
+  SessionMode,
+  SessionDocumentType,
+  NoticeType,
+  ReviewType,
+  ScheduleSessionType,
+  SchoolTeacherAccessType,
+  SpokenLanguage,
+  LearningSlideContentType,
+  LayoutType,
+  LearningSlideType,
+  ClassType,
+  EvaluationResult,
 ];

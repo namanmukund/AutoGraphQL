@@ -17,6 +17,7 @@ const TopicComponentsRule = `
 
 const Topic = `
   type Topic @model
+  @cacheControl(maxAge: 86400)
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
@@ -72,6 +73,11 @@ const Topic = `
     blockBasedProjects: [BlockBasedProject] @relation(name: "TopicBlockBasedProject")
     videoContent: [Video] @relation(name: "TopicVideoContent")
     topicComponentRule: [TopicComponentsRule]
+    tools: [ArrayValue]
+    programming: [ArrayValue]
+    theory: [ArrayValue]
+    learningSlides: [LearningSlide] @relation(name: "LearningSlideTopic")
+    classType: ClassType @defaultValue(value: "lab")
   }
 `;
 

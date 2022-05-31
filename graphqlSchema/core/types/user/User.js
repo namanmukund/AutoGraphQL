@@ -31,7 +31,7 @@ const User = `
     phoneOtpCreationDate: Date @writeOnly
     emailOtp: Int @writeOnly
     emailOtpCreationDate: Date @writeOnly
-    name: String @trim
+    name: String @trim @nameCase
     role: UserRole! @defaultValue(value: "selfLearner") ${getPermissionSchemaString('User', 'role')}
     status: Status! @defaultValue(value: "active") @readOnly
     username: String @uniqueOrEmpty @trim
@@ -66,7 +66,7 @@ const User = `
     utmContent: String
     utmMedium: String
     source: UserOriginSource @defaultValue(value: "website")
-    ${affilateInfo}  
+    ${affilateInfo}
     ${socialInfo}
     ${promotionalInfo}
     verificationStatus: VerificationStatus @defaultValue(value: "unverified")
@@ -78,7 +78,9 @@ const User = `
     eventAttandances: [EventAttendance] @relation(name:"EventAttendanceUser")
     resetPasswordFromLink: Boolean @defaultValue(value: "false")
     senseiProfile: SenseiProfile @relation(name:"SenseiProfileUser", isSubset: true)
+    userBankDetail: UserBankDetail @relation(name:"UserBankDetailUser")
     lastActive: Date
+    eventSpeakerProfile: EventSpeakerProfile @relation(name: "EventSpeakerProfileUser",  isSubset: true)
   }
 `;
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import schedule from 'node-schedule';
 import moment from 'moment';
 import { get } from 'lodash';
@@ -9,6 +10,12 @@ import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
 import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
 import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
+import sendMentorVerifyBookingReminder from './jobs/sendMentorVerifyBookingReminder';
+import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
+import scheduleB2BSessionHomeworkRemainder from './scheduleB2BSessionHomeworkRemainder';
+import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
+import sendEventCommunication from './jobs/sendEventCommunication';
+// import addStudentToEventSession from './jobs/addStudentsToEventSession';
 
 const FETCH_JOBS = `{
   scheduleJobs {
@@ -32,6 +39,20 @@ const FETCH_JOBS = `{
     sessionLink
     mentorUserId
     mentorPhoneNumber
+    taskId
+    eventId
+    commsVariables{
+      dataField
+      whatsappVariableName
+      emailVariableName
+    }
+    studentProfileId
+    templateName
+    isEmailRule
+    condition
+    attendanceFilter
+    unit
+    value
   }
 }`;
 
@@ -45,8 +66,8 @@ const deleteJobQuery = (id) => `
 
 const reRunJobsFromDB = async () => {
   const res = await callLocalGraphqlApi(FETCH_JOBS);
-
   const scheduledJobs = get(res, 'data.scheduleJobs', []);
+  console.log('jobs length', scheduledJobs.length);
   scheduledJobs.forEach(async (scheduledJob) => {
     const {
       jobType,
@@ -67,11 +88,41 @@ const reRunJobsFromDB = async () => {
       sessionLink,
       mentorUserId,
       mentorPhoneNumber,
+      taskId,
+      eventId,
+      commsVariables,
+      studentProfileId,
+      templateName,
+      isEmailRule,
+      condition,
+      attendanceFilter,
+      unit,
+      value,
     } = scheduledJob;
     const deleteJob = () => callLocalGraphqlApi(deleteJobQuery(id));
     const isPast = moment().isAfter(scheduledDate);
     const userId = get(parent, 'id');
     switch (jobType) {
+      case 'sendB2BReminder': {
+        if (isPast) {
+          scheduleB2BSessionReminder(batchSessionId, deleteJob);
+        } else {
+          schedule.scheduleJob(new Date(scheduledDate), () => {
+            scheduleB2BSessionReminder(batchSessionId, deleteJob);
+          });
+        }
+        break;
+      }
+      case 'sendB2BHomeworkReminder': {
+        if (isPast) {
+          scheduleB2BSessionHomeworkRemainder(batchSessionId, deleteJob);
+        } else {
+          schedule.scheduleJob(new Date(scheduledDate), () => {
+            scheduleB2BSessionHomeworkRemainder(batchSessionId, deleteJob);
+          });
+        }
+        break;
+      }
       case 'sendNextDayBookReminder': {
         if (isPast) {
           sendB2B2CBookReminderNextDay({ userId: get(parent, 'id'), code }, deleteJob);
@@ -191,6 +242,76 @@ const reRunJobsFromDB = async () => {
             mentorPhoneNumber,
           }, deleteJob);
         });
+        break;
+      }
+      case 'sendMentorVerifyBookingReminder': {
+        schedule.scheduleJob(new Date(scheduledDate), () => {
+          sendMentorVerifyBookingReminder({
+            taskId, mentorUserId, jobType,
+          }, deleteJob);
+        });
+        break;
+      }
+      case 'eventCommsJob': {
+        // eslint-disable-next-line no-console
+        console.log('scheduler', jobType);
+        if (isPast) {
+          sendEventCommunication({
+            eventId,
+            jobType,
+            commsVariables,
+            templateName,
+            isEmailRule,
+            condition,
+            attendanceFilter,
+            value,
+            unit,
+            jobId: id,
+            isPast,
+          }, deleteJob);
+        } else {
+          schedule.scheduleJob(new Date(scheduledDate), () => {
+            sendEventCommunication({
+              eventId,
+              jobType,
+              commsVariables,
+              templateName,
+              isEmailRule,
+              condition,
+              attendanceFilter,
+              value,
+              unit,
+              jobId: id,
+              isPast,
+            }, deleteJob);
+          });
+        }
+        break;
+      }
+      case 'eventNewRegistrationReminder': {
+        // eslint-disable-next-line no-console
+        console.log('scheduler regi', jobType, isPast);
+        if (isPast) {
+          eventNewRegistrationReminder({
+            eventId,
+            jobType,
+            studentProfileId,
+            commsVariables,
+            templateName,
+            isEmailRule,
+          }, deleteJob);
+        } else {
+          schedule.scheduleJob(new Date(scheduledDate), () => {
+            eventNewRegistrationReminder({
+              eventId,
+              jobType,
+              studentProfileId,
+              commsVariables,
+              templateName,
+              isEmailRule,
+            }, deleteJob);
+          });
+        }
         break;
       }
       default:

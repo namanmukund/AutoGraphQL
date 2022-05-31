@@ -10,6 +10,7 @@ import LearningObjective from './learningObjective';
 import QuestionBank from './questionBank';
 import Message from './message';
 import Course from './course';
+import CoursePackage from './coursePackage';
 import UserActivityVideoDump from './userActivityVideoDump';
 import UserActivityChatDump from './userActivityChatDump';
 import UserActivityPQDump from './userActivityPQDump';
@@ -111,6 +112,7 @@ import RebookMenteeSessionInput from './rebookMenteeSessionInput';
 import sendJourneySnapshotInMailInput from './sendJourneySnapshotInMailInput';
 import sendCertificateInMailInput from './sendCertificateInMailInput';
 import GenerateCertificate from './generateCertificate';
+import GenerateCertificateInBulk from './generateCertificateInBulk';
 import TopicQuestions from './topicQuestions';
 import TopicAssignmentQuestion from './topicAssignmentQuestion';
 import AuditQuestion from './auditQuestion';
@@ -125,7 +127,6 @@ import GetUserCourses from './getUserCourses';
 import UserMerchant from './userMerchant';
 import MentorSupplyPaySlab from './mentorSupplyPaySlab';
 import MentorDemandSlot from './mentorDemandSlot';
-import MentorDemandSingleSlot from './mentorDemandSingleSlot';
 import MentorAvailabilitySlot from './mentorAvailabilitySlot';
 import MentorAuditReport from './mentorAuditReport';
 import ShiftBatchSessionsInput from './shiftBatchSessionsInput';
@@ -139,6 +140,7 @@ import Event from './event';
 import UtmDetail from './utmDetail';
 import IqaReport from './iqaReport';
 import getMagicLink from './getMagicLink';
+import commsInput from './commsMessage';
 import magicLinkLog from './magicLinkLog';
 import LeadPartner from './leadPartner';
 import DemoWowAudit from './demoWowAudits';
@@ -147,7 +149,24 @@ import SenseiMentorTeam from './senseiMentorTeam';
 import Notification from './notification';
 import Task from './task';
 import UserOtpLog from './userOtpLog';
+import SchoolSessionOtp from './schoolSessionOtp';
 import UserDeviceLog from './UserDeviceLog';
+import GenerateMentorChild from './generateMentorChild';
+import TimetableSchedule from './timetableSchedule';
+import ClassroomSession from './classroomSession';
+import Notice from './Notice';
+import StudentReviewByMentor from './StudentReviewByMentor';
+import ClassroomDetailResult from './classroomDetailResult';
+import MenteeCourseHomework from './menteeCourseHomework';
+import LearningSlideContent from './learningSlideContent';
+import LearningSlide from './learningSlide';
+import UserActivityLearningSlideDump from './userActivityLearningSlideDump';
+import ShortLink from './shortLink';
+import BatchDetailsResult from './BatchDetailsResult/BatchDetailsResult';
+import BatchStudentResult from './BatchStudentResult/BatchStudentResult';
+import ClassroomHomeworkReport from './classroomHomeworkReport';
+import PracticeQuestionReportOutput from './practiceQuestionReportOutput';
+import UserWaitlist from './userWaitlist';
 
 export default [
   ...User,
@@ -162,6 +181,7 @@ export default [
   ...LearningObjective,
   ...Message,
   ...Course,
+  ...CoursePackage,
   ...UserActivityVideoDump,
   ...UserActivityChatDump,
   ...UserActivityPQDump,
@@ -274,13 +294,13 @@ export default [
   ...UserMerchant,
   ...MentorSupplyPaySlab,
   ...MentorDemandSlot,
-  ...MentorDemandSingleSlot,
   ...MentorAvailabilitySlot,
   ...MentorAuditReport,
   ...ShiftBatchSessionsInput,
   ...sendJourneySnapshotInMailInput,
   ...sendCertificateInMailInput,
   ...GenerateCertificate,
+  ...GenerateCertificateInBulk,
   ...EventCertificate,
   ...QuestionBankImage,
   ...SessionGradeReport,
@@ -292,6 +312,7 @@ export default [
   ...IqaReport,
   ...getMagicLink,
   ...magicLinkLog,
+  ...commsInput,
   ...LeadPartner,
   ...DemoWowAudit,
   ...SenseiProfile,
@@ -299,5 +320,22 @@ export default [
   ...Notification,
   ...Task,
   ...UserOtpLog,
+  ...SchoolSessionOtp,
   ...UserDeviceLog,
+  ...GenerateMentorChild,
+  ...TimetableSchedule,
+  ...ClassroomSession,
+  ...Notice,
+  ...StudentReviewByMentor,
+  ...ClassroomDetailResult,
+  ...MenteeCourseHomework,
+  ...LearningSlideContent,
+  ...LearningSlide,
+  ...UserWaitlist,
+  ...UserActivityLearningSlideDump,
+  ...ShortLink,
+  ...BatchDetailsResult,
+  ...BatchStudentResult,
+  ...ClassroomHomeworkReport,
+  ...PracticeQuestionReportOutput,
 ];

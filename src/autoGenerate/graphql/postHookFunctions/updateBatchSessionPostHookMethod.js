@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-restricted-syntax */
 import { get } from 'lodash';
 import moment from 'moment';
 import {
@@ -7,6 +9,7 @@ import {
   sessionStatus,
   auditType as auditTypeValues,
   sessionType as sessionTypeValue,
+  TWA,
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateBatchCurrentComponentStatus from './utils/updateBatchCurrentComponentStatus';
@@ -23,6 +26,13 @@ import addSalesAudit from './utils/addSalesAudit';
 import isTrialSession from '../resolvers/utils/isTrialSession';
 import { getMentorProfileFromMentorSession } from './utils/getMentorProfile';
 import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
+import scheduleB2BSessionMissed from '../../../../utils/scheduleJobs/scheduleB2BSessionMissed';
+import getSlotDifference from './utils/getTimeDifference';
+import generateOtpForBatchSession from './utils/generateOtpForBatchSession';
+import { MENTEE } from '../../../../constants/roles';
+import { getTopicsFromCoursePackage } from './utils/updateBatchPostHookQueries';
+import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
+// import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -45,7 +55,11 @@ const getBatchQuery = (batchId) => `
         id
         code
         type
+        documentType
         students{
+          id
+          grade
+          section
           user{
             id
             source
@@ -203,6 +217,8 @@ const batchSessionQuery = (id) => `{
     }
   }
 }`;
+
+// mutation to update batch sessions
 /*
   Post hook of addBatchSession
 */
@@ -225,12 +241,20 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     prevIsAudit,
     batchTopicOrder,
     batchTypeValue,
+    appName,
+    userRoleFromContext,
   } = context;
   let courseId = get(context, 'courseId');
+  const coursePackageId = get(input, 'coursePackage.typeId');
+  // check if performed from TLA while marking student`s attendance
+  if (appName && appName === TWA && userRoleFromContext === MENTEE
+    && prevSessionStatus === sessionStatusFromInput && prevSessionStatus === sessionStatus.started) {
+    return;
+  }
   /*
   get Course Id
   */
-  if (!courseId) {
+  if (!courseId && !coursePackageId) {
     const courseResult = await callLocalGraphqlApi(getCourseQuery());
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
@@ -285,6 +309,10 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     });
   }
 
+  if (coursePackageId) {
+    context.usesCoursePackage = true;
+  }
+
   if (topicId) {
     /*
       get batch info
@@ -295,6 +323,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     const code = batchInfo && batchInfo.code;
     const batchCurrentComponentId = currentComponent && currentComponent.id;
     const currentComponentTopicId = get(currentComponent, 'currentTopic.id');
+    const reminderDateTime = moment(new Date()).add(1, 'days').toDate();
     // logic to change current component status if topic is completed
     if (batchCurrentComponentId && sessionStatusFromInput && topicId === currentComponentTopicId) {
       if (sessionStatusFromInput === sessionStatus.completed) {
@@ -302,9 +331,20 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         We are getting published topics list through this query.
         Then we will get next published topic
         */
-
-        const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
-        const topicsList = get(nextTopicQueryRes, 'data.topics');
+        addToSchedule('sendB2BHomeworkReminder', reminderDateTime, {
+          batchSessionId,
+        });
+        // console.log('scheduleB2BSessionMissed', scheduleB2BSessionMissed)
+        scheduleB2BSessionMissed(batchSessionId);
+        let topicsList = [];
+        if (coursePackageId) {
+          const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+          const topicRules = get(coursePackage, 'topics', []);
+          topicsList = getSortedTopics(topicRules);
+        } else {
+          const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
+          topicsList = get(nextTopicQueryRes, 'data.topics', []);
+        }
 
         let currentTopicIndex;
         topicsList.forEach((topic, index) => {
@@ -333,8 +373,48 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
             context,
           );
         }
-        const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
-        addToSchedule('postCarnivalMail', postCarnivalFeedbackDate, { batchSessionId });
+        // const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
+        // addToSchedule('postCarnivalMail', postCarnivalFeedbackDate, { batchSessionId });
+      } else if (sessionStatusFromInput === sessionStatus.started
+        && get(batchInfo, 'documentType') === 'classroom'
+        && Math.abs(moment(new Date()).hours() - slotTimeArray[0]) === 0) {
+        let topicsList = [];
+        if (coursePackageId) {
+          const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+          const topicRules = get(coursePackage, 'topics', []);
+          topicsList = getSortedTopics(topicRules);
+        } else {
+          const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
+          topicsList = get(nextTopicQueryRes, 'data.topics', []);
+        }
+
+        let currentTopicIndex;
+        topicsList.forEach((topic, index) => {
+          if (topic.id === topicId) {
+            currentTopicIndex = index;
+          }
+        });
+        let nextTopicId = '';
+        if (currentTopicIndex + 1 < topicsList.length) {
+          nextTopicId = topicsList[currentTopicIndex + 1].id;
+        }
+        if (nextTopicId) {
+          context.shouldUpdateMentorMentee = false;
+          await updateBatchCurrentComponentStatus(
+            batchCurrentComponentId,
+            sessionStatusFromInput,
+            nextTopicId,
+            context,
+          );
+        } else {
+          context.shouldUpdateMentorMentee = false;
+          await updateBatchCurrentComponentStatus(
+            batchCurrentComponentId,
+            sessionStatusFromInput,
+            null,
+            context,
+          );
+        }
       } else {
         context.shouldUpdateMentorMentee = false;
         await updateBatchCurrentComponentStatus(
@@ -363,30 +443,32 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         (bookingDate && bookingDateFromInput && bookingDate.getTime() !== bookingDateFromInputParsed.getTime())
         || ((slotTimeArray.length > 0 && inputSlotTimeArray.length > 0) && get(slotTimeArray, '0') !== get(inputSlotTimeArray, '0'))
       ) {
+        const isBetweenTwoHrs = getSlotDifference(`slot${get(inputSlotTimeArray, '[0]')}`, bookingDateFromInputParsed, 2);
+        if (isBetweenTwoHrs) generateOtpForBatchSession(batchSessionId, students);
         toUpdateMenteeSession = true;
       }
-      if (((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || newStudentsArray.length > 0)
-        && !get(context, 'fromAddBatchSession', false)) {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const student of students) {
-          if (student.user && student.user.id) {
-            addMentorMenteeSessionForBatch(
-              context,
-              student.user.id,
-              '',
-              topicId,
-              bookingDateFromInput || bookingDate,
-              inputSlotTimeArray[0] || slotTimeArray[0],
-              mentorSessionConnectId || mentorSessionId,
-              courseId,
-              sessionStatusFromInput || sessionStatus.allotted,
-              student.user.source,
-              'updateBatchSession',
-              toUpdateMenteeSession,
-            );
-          }
-        }
-      }
+      // if (((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || newStudentsArray.length > 0)
+      //   && !get(context, 'fromAddBatchSession', false)) {
+      //   // eslint-disable-next-line no-restricted-syntax
+      //   for (const student of students) {
+      //     if (student.user && student.user.id) {
+      //       addMentorMenteeSessionForBatch(
+      //         context,
+      //         student.user.id,
+      //         '',
+      //         topicId,
+      //         bookingDateFromInput || bookingDate,
+      //         inputSlotTimeArray[0] || slotTimeArray[0],
+      //         mentorSessionConnectId || mentorSessionId,
+      //         courseId,
+      //         sessionStatusFromInput || sessionStatus.allotted,
+      //         student.user.source,
+      //         'updateBatchSession',
+      //         toUpdateMenteeSession,
+      //       );
+      //     }
+      //   }
+      // }
 
       // adding session logs when booking date or time is changed
       if (inputSlotTimeArray && inputSlotTimeArray.length && slotTimeArray && slotTimeArray.length) {
@@ -411,6 +493,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   }
   const students = get(context, 'inputSlot.attendance.pushMany', []).map((attendance) => get(attendance, 'studentConnectId'));
   extractBatchSessionAndSendB2BC(batchSessionId, students, context.isBookedByMentee, context.prevStudentsAttendanceCount === 0);
+  // console.log('extractBatchSessionAndSendB2B', extractBatchSessionAndSendB2B)
+  // extractBatchSessionAndSendB2B(batchSessionId);
   if (mentorSessionConnectId) {
     const mentorUser = await getMentor(mentorSessionConnectId);
     const { id: mentorUserId, phone } = mentorUser;

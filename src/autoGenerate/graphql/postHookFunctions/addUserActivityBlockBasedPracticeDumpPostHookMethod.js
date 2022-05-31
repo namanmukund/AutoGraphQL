@@ -46,6 +46,12 @@ const userBlockBasedPracticeQuery = (userId, topicId, blockBasedPracticeId, cour
             comicStripsMeta(filter:{status:${PUBLISHED}}){
               count
             }
+            learningSlidesMeta(filter:{status:${PUBLISHED}}){
+              count
+            }
+            learningSlides(filter:{status:${PUBLISHED}}){
+              id
+            }
           }
           blockBasedProject{
             id
@@ -63,12 +69,14 @@ const userBlockBasedPracticeQuery = (userId, topicId, blockBasedPracticeId, cour
 // query to update user LO based on activity done by user
 const updateUserBlockBasedPracticeMutation = (userBlockBasedPracticeId,
   blockBasedPracticeStatus,
-  answerLink, savedBlocks) => `
+  answerLink, savedBlocks, startTime, endTime) => `
   mutation{
     updateUserBlockBasedPractice(id:"${userBlockBasedPracticeId}",  input:{
       ${answerLink ? `answerLink: "${answerLink}"` : ''}
       ${savedBlocks ? `savedBlocks: "${savedBlocks}"` : ''}
       status: ${blockBasedPracticeStatus}
+      ${startTime ? `startTime: "${startTime}"` : ''}
+      ${endTime ? `endTime: "${endTime}"` : ''}
     }){
       id
       status
@@ -107,6 +115,8 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
   const {
     answerLink,
     savedBlocks,
+    startTime,
+    endTime,
   } = input;
   const isHomework = get(input, 'isHomework');
   const topicComponentRule = get(userBlockBasedPracticeInfo, 'topic.topicComponentRule', []);
@@ -161,6 +171,8 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
     blockBasedPracticeStatus,
     answerLink,
     savedBlocks,
+    startTime,
+    endTime,
   ));
   return true;
 };

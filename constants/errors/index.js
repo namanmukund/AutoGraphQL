@@ -57,6 +57,9 @@ import {
   BatchFullError,
   MentorMandatoryError,
   MentorProfileAlreadyExist,
+  CategoryAlreadyExist,
+  CommsVariableAlreadyExist,
+  ContentTagTitleAlreadyExist,
   OrderAndAuditTypeExists,
   MCQOptionNotProvided,
   MaxRatingAndDisplayTypeNotFound,
@@ -82,6 +85,11 @@ import {
   FileNameAlreadyExists,
   LeadPartnerWithSimilarTitleAlreadyExist,
   SenseiProfileAlreadyExist,
+  SpeakerProfileAlreadyExist,
+  CannotScheduleOutsideWorkingHoursError,
+  MentorHasExistingSessionsError,
+  MentorIsInactiveError,
+  PracticeQuestionsNotFound,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -116,6 +124,11 @@ import {
   InvalidDateFormatError,
   UnsupportedListFieldInsideSubDocumentObjectError,
   InvalidRuleValueError,
+  CommsError,
+  MultipleRegistrationError,
+  AlreadyRegisteredForEvent,
+  RegistrationClosedForEvent,
+  EventCancelledError,
 } from './types';
 import {
   EitherEmailOrPhoneRequiredError, InvalidEmailError, InvalidPhoneError,
@@ -140,6 +153,9 @@ import {
   BannerFieldRequiredError,
   CanNotDeleteCompletedSessionError,
   CanNotStartSessionWithoutMentorError,
+  InvalidScheduleParameters,
+  InvalidRescheduleParameters,
+  InvalidLearningObjectiveComponent,
 } from './input';
 
 // assessment validation sqs  profile apolloErrorPackageTest maxSync transcoder
@@ -239,6 +255,7 @@ export {
   UnauthorizedFieldOrTypeAccessByAppError,
   InsufficientPermissionError,
   InvalidRuleValueError,
+  CommsError,
   InvalidGmailTokenError,
   InvalidFacebookTokenError,
   InvalidPasswordLengthError,
@@ -277,6 +294,9 @@ export {
   BatchFullError,
   MentorMandatoryError,
   MentorProfileAlreadyExist,
+  ContentTagTitleAlreadyExist,
+  CategoryAlreadyExist,
+  CommsVariableAlreadyExist,
   CanNotDeleteCompletedSessionError,
   OrderAndAuditTypeExists,
   MCQOptionNotProvided,
@@ -307,4 +327,16 @@ export {
   SenseiProfileAlreadyExist,
   PhoneOtpMaxRetryTimeLimitError,
   PhoneOtpPerDayLimitError,
+  SpeakerProfileAlreadyExist,
+  MultipleRegistrationError,
+  AlreadyRegisteredForEvent,
+  RegistrationClosedForEvent,
+  EventCancelledError,
+  CannotScheduleOutsideWorkingHoursError,
+  MentorHasExistingSessionsError,
+  MentorIsInactiveError,
+  InvalidScheduleParameters,
+  InvalidRescheduleParameters,
+  InvalidLearningObjectiveComponent,
+  PracticeQuestionsNotFound,
 };

@@ -1,13 +1,20 @@
 import { get } from 'lodash';
 import extractSlotsFromInput from '../../../../utils/extractSlotsFromInput';
+import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
 import getSelectedDays from './utils/getSelectedDays';
 import getPossibleDates from '../../../../utils/getPossibleDates';
 import {
   getTopics, getBatchSessions, createBatchSession, updateBatchSession,
+  getTopicsFromCoursePackage,
 } from './utils/updateBatchPostHookQueries';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
+import getCombinedSchedules from './utils/getCombinedSchedulesForBatch';
+import { fetchBatch } from '../resolvers/mutation/shift/queries/scheduleSessionsQueries';
+import { CannotScheduleOutsideWorkingHoursError } from '../../../../constants/errors';
+import checkIfOutsideWorkingSchedule from './utils/checkIfOutsideWorkingSchedule';
+import getScheduleSessionsRulesGroupedByDay from './utils/getScheduledSessionsRulesGroupedByDay';
 
 // query to get all not completed batchSessions of a batch to update student
 const getBatchSessionsQuery = (batchId) => `
@@ -250,6 +257,7 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
   const { id: batchId, studentsConnectIds, allottedMentorConnectId } = params;
   const mentorUserId = get(input, 'allottedMentor.typeId', '');
   const courseId = get(input, 'course.typeId', '');
+  const coursePackageId = get(input, 'coursePackage.typeId');
   const timeTableRule = get(params, 'input.timeTableRule', null);
   const batchType = get(input, 'type', '');
   /*
@@ -260,10 +268,40 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
     -> if there are no batchSessions in the Db, create batchSessions for all the dates in the date array
     -> if there are some batchSessions, update the remaining batchSessions with the new passed values and create batchSessions if necessary.
   */
+
   if (timeTableRule) {
-    // topic count
-    let topics = await getTopics(courseId);
-    const topicCount = topics && topics.length;
+    const batch = await fetchBatch(batchId);
+    const sessionRules = [];
+    sessionRules.push(timeTableRule);
+    const daysRule = getScheduleSessionsRulesGroupedByDay(sessionRules);
+
+    // combine school and batch timetableschedules
+    const { combinedWorkingDaySchedule, combinedEventScheduleArray } = getCombinedSchedules(batch);
+
+    if (combinedWorkingDaySchedule.startDate && combinedWorkingDaySchedule.endDate) {
+      const { isOutsideWorkingSchedule, errorMessage } = checkIfOutsideWorkingSchedule(combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule);
+      if (isOutsideWorkingSchedule) {
+        throw new CannotScheduleOutsideWorkingHoursError({
+          data: {
+            message: errorMessage,
+          },
+        });
+      }
+    }
+
+    let topics;
+    let topicCount;
+    if (coursePackageId) {
+      // topic count
+      const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+      const topicRules = get(coursePackage, 'topics');
+      topics = getSortedTopics(topicRules);
+      topicCount = topics && topics.length;
+    } else {
+      // topic count
+      topics = await getTopics(courseId);
+      topicCount = topics && topics.length;
+    }
     // batch sessions
     const batchSessions = await getBatchSessions(batchId);
 

@@ -14,6 +14,8 @@ const SignupOrLoginUserInput = `
     city: String
     timezone: String
     role: UserRole @defaultValue(value: "parent")
+    eventId: String
+    shouldAddInWaitingList: Boolean @defaultValue(value: "false")
   }`;
 
 export default SignupOrLoginUserInput;

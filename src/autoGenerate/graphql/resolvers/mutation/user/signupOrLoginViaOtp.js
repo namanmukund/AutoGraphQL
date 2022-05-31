@@ -5,6 +5,7 @@ import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import {
   BlockedOperationError,
   DatabaseRecordNotFoundError,
+  UserAlreadyExistsError,
   UserTokenNotRequiredError,
 } from '../../../../../../constants/errors';
 import { MutationController, QueryController } from '../../../controllers';
@@ -22,6 +23,7 @@ import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentCh
 // import sendBookingReminderOrConfirmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import userLogsActivity from '../utils/userLogsActivity';
+import getUserOriginSource from './utils/getUserOriginSource';
 
 const USER_TYPE = 'User';
 
@@ -37,6 +39,56 @@ const FETCH_CAMPAIGN = (campaignId) => `{
     }
   }
 }`;
+
+const fetchEventUtm = async (eventId) => {
+  const eventQuery = `{
+    event(id:"${eventId}"){
+      utm{
+        utmSource
+        utmCampaign
+        utmContent
+        utmMedium
+        utmTerm
+      }
+    }
+  }`;
+  const result = await callLocalGraphqlApi(eventQuery);
+  return get(result, 'data.event.utm[0]', null);
+};
+
+const fetchUserWaitList = async (email, phone, context) => {
+  const query = `{
+  userWaitlists(filter:{
+  or:[
+    ${email ? `{
+      email:"${email}"
+    }` : ''}
+    ${phone ? `{
+      and:[
+        {
+        phone_number_subDoc:"${phone.number}"
+      }
+      {
+        phone_countryCode_subDoc:"${phone.countryCode}"
+      }
+      ]
+    }` : ''}
+  ]
+  }){
+    id
+  }
+}`;
+  const waitListResult = await callLocalGraphqlApi(query, context);
+  return waitListResult;
+};
+const addDetailsToWaitingList = async (input, context) => {
+  const addDetailQuery = `mutation($input: UserWaitlistInput!){
+  addUserWaitlist(input:$input){
+    id
+  }
+}`;
+  await callLocalGraphqlApi(addDetailQuery, context, { input });
+};
 
 const updateExistingUserOTP = (
   searchObj,
@@ -82,6 +134,27 @@ const signupOrLoginViaOtp = async (
   Object.assign(authentication, {
     bypass: true,
   });
+
+  if (get(input, 'shouldAddInWaitingList')) {
+    const waitingListInput = { role: 'parent' };
+    if (get(input, 'name')) {
+      waitingListInput.name = get(input, 'name');
+    }
+    if (get(input, 'phone')) {
+      waitingListInput.phone = get(input, 'phone');
+    }
+    if (get(input, 'email')) {
+      waitingListInput.email = get(input, 'email');
+    }
+    const waitList = await fetchUserWaitList(get(input, 'email'), get(input, 'phone'), context);
+    if (get(waitList, 'data.userWaitlists', []).length) {
+      throw new UserAlreadyExistsError();
+    }
+    await addDetailsToWaitingList(waitingListInput, context);
+    return {
+      result: true,
+    };
+  }
 
   const modelQueries = new QueryController(USER_TYPE, authentication);
   let userData = await getUserFromDBQuery(input, modelQueries);
@@ -142,9 +215,34 @@ const signupOrLoginViaOtp = async (
       if (input.utmMedium) {
         newUser.utmMedium = input.utmMedium;
       }
+      if (get(input, 'eventId') && !(get(input, 'utmSource') || get(input, 'utmCampaign')
+        || get(input, 'utmTerm') || get(input, 'utmContent') || get(input, 'utmMedium'))) {
+        const eventUtms = await fetchEventUtm(get(input, 'eventId'));
+        if (eventUtms) {
+          if (eventUtms.utmSource) {
+            newUser.utmSource = eventUtms.utmSource;
+          }
+          if (eventUtms.utmCampaign) {
+            newUser.utmCampaign = eventUtms.utmCampaign;
+          }
+          if (eventUtms.utmTerm) {
+            newUser.utmTerm = eventUtms.utmTerm;
+          }
+          if (eventUtms.utmContent) {
+            newUser.utmContent = eventUtms.utmContent;
+          }
+          if (eventUtms.utmMedium) {
+            newUser.utmMedium = eventUtms.utmMedium;
+          }
+        }
+      }
       newUser.country = input.country || 'india';
       newUser.timezone = input.timezone || 'Asia/Kolkata';
       input.country = input.country ? input.country : 'india';
+      if (!get(newUser, 'source')) {
+        const source = getUserOriginSource(get(newUser, 'utmSource'), '', '', '', '');
+        newUser.source = source;
+      }
       input.leadStatus = 'New Lead';
       input.unVerifiedLead = true;
       // fetch campaign type early to modfiy newUser obj with vertical

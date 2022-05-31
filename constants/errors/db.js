@@ -128,6 +128,9 @@ export const ProductTypeAlreadyAdded = createError('ProductTypeAlreadyAdded', {
 export const ProductIsPublishedError = createError('ProductIsPublishedError', {
   message: 'Cannot perform the current operation as product is published',
 });
+export const CoursePackageIsPublishedError = createError('ProductIsPublishedError', {
+  message: 'Cannot perform the current operation as course package is published',
+});
 
 export const ProductWithSimilarTypeAlreadyPublished = createError('ProductWithSimilarTypeAlreadyPublished', {
   message: 'Product with similar type already published',
@@ -299,4 +302,44 @@ export const UserWithSimilarNumberAlreadyExist = createError('UserWithSimilarNum
 
 export const UserWithSimilarEmailAlreadyExist = createError('UserWithSimilarEmailAlreadyExist', {
   message: 'User with similar email already exist.',
+});
+
+export const CurrentChildIsMentorChild = createError('CurrentChildIsMentorChild', {
+  message: 'Sales Operation is not permitted for Mentor.',
+});
+
+export const MentorIdIsMandatoryError = createError('MentorIdIsMandatoryError', {
+  message: 'Input mentorId is Mandatory!',
+});
+
+export const SpeakerProfileAlreadyExist = createError('SpeakerProfileAlreadyExist', {
+  message: 'Speaker Profile already exist for the user',
+});
+
+export const CommsVariableAlreadyExist = createError('CommsVariableAlreadyExist', {
+  message: 'Variables with similar data field already exist',
+});
+
+export const CategoryAlreadyExist = createError('CategoryAlreadyExist', {
+  message: 'Category with similar title already exist',
+});
+
+export const EmailOrUsernameRequired = createError('EmailOrUsernameRequired', {
+  message: 'Either Email or Username is required',
+});
+
+export const CannotScheduleOutsideWorkingHoursError = createError('CannotScheduleOutsideWorkingHoursError', {
+  message: 'Cannot Schedule Sessions outside working hours.',
+});
+
+export const MentorHasExistingSessionsError = createError('MentorHasExistingSessionsError', {
+  message: 'Mentor has existing sessions',
+});
+
+export const MentorIsInactiveError = createError(' MentorIsInactiveError', {
+  message: 'Mentor is not active',
+});
+
+export const PracticeQuestionsNotFound = createError(' PracticeQuestionsNotFound', {
+  message: 'Practice Questions were not found for the given document',
 });
