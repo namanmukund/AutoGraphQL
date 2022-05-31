@@ -216,7 +216,12 @@ const isComponentUnlockedForNewCourse = async (
   const isCoursePackageBatch = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.id');
 
   if (isCoursePackageBatch) {
-    const coursePackageTopics = getSortedTopics(get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.topics'));
+    let coursePackageTopics = [];
+    if (get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackageTopicRule', []).length) {
+      coursePackageTopics = getSortedTopics(get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackageTopicRule', []));
+    } else {
+      coursePackageTopics = getSortedTopics(get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.topics', []));
+    }
     // topic we send in input
     const topicFound = coursePackageTopics.find((o) => o.id === topicId);
     topicOrder = get(topicFound, 'coursePackageOrder');
