@@ -24,7 +24,7 @@ import { getMentorMenteeSessionForValidation } from './index';
 import { ifAuthorized } from '../../../../../../utils';
 import { MENTOR, SCHOOL_TEACHER } from '../../../../../../constants/roles';
 import getSortedTopics from '../../../../../../utils/getSortedTopicsFromCoursePackageOrder';
-import isUserInheritedFromMentor from '../../../postHookFunctions/utils/isMentorChild';
+// import isUserInheritedFromMentor from '../../../postHookFunctions/utils/isMentorChild';
 
 /*
 This is a common method to check whether the called topic component is locked or not
@@ -61,7 +61,8 @@ const isComponentUnlockedForNewCourse = async (
     appName,
   } = userAndAppInfo;
   // Bypassing component validation incase if schoolTeacher is accessing the content.
-  if (userIdFromContext && isUserInheritedFromMentor(userIdFromContext, true)) return true;
+  // const checkForMentorChild = await isUserInheritedFromMentor(userIdFromContext, true);
+  // if (userIdFromContext && typeof checkForMentorChild === 'boolean' && checkForMentorChild) return true;
   if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
     if (inputUserId && inputLearningObjectiveId) {
       userId = inputUserId;
@@ -215,7 +216,12 @@ const isComponentUnlockedForNewCourse = async (
   const isCoursePackageBatch = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.id');
 
   if (isCoursePackageBatch) {
-    const coursePackageTopics = getSortedTopics(get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.topics'));
+    let coursePackageTopics = [];
+    if (get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackageTopicRule', []).length) {
+      coursePackageTopics = getSortedTopics(get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackageTopicRule', []));
+    } else {
+      coursePackageTopics = getSortedTopics(get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.topics', []));
+    }
     // topic we send in input
     const topicFound = coursePackageTopics.find((o) => o.id === topicId);
     topicOrder = get(topicFound, 'coursePackageOrder');
