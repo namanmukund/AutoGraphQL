@@ -66,10 +66,10 @@ forEachField(schema, (field) => {
         } else if (directiveName === 'relationalMeta') {
           /**
            * In case where aggregation is allowed for a type
-           * result is stored in a different field called fieldNameDocument
+           * result is stored in a different field called fieldName_DocumentForMeta
            * i.e to avoid any conflict if same field is requested with some filter.
            */
-          if (root[`${field.name}Document`]) resolverPromise = root[`${field.name}Document`];
+          if (root[`${field.name}_DocumentForMeta`]) resolverPromise = root[`${field.name}_DocumentForMeta`];
           /* relationalMeta will send the result same as that of relation
           for fetching count from query
            */

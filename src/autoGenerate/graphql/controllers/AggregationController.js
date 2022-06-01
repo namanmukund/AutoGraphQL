@@ -190,9 +190,9 @@ class AggregationController {
         const fieldInfo = fieldsRequestedForFetch[fieldName];
         const fieldParams = field[fieldInfo.name];
         if (get(fieldParams, 'directive.relationalMeta')) {
-          const relationalFieldName = fieldInfo.name.split(META)[0];
+          // const relationalFieldName = fieldInfo.name.split(META)[0];
           projectionMap[fieldInfo.name] = 1;
-          projectionMap[`${relationalFieldName}MetaDocument`] = 1;
+          projectionMap[`${fieldInfo.name}_DocumentForMeta`] = 1;
         } else if (get(fieldParams, 'directive.relation')) {
           let aliasOrPrimitiveName = fieldInfo.name;
           if (fieldName !== fieldInfo.name) aliasOrPrimitiveName = fieldName;
@@ -288,7 +288,7 @@ class AggregationController {
           const fieldParams = field[fieldInfo.name];
           if (get(fieldParams, 'directive.relationalMeta')) {
             const relationalFieldName = fieldInfo.name.split(META)[0];
-            projectionMap[`${fieldInfo.name}Document`] = `$${relationalFieldName}`;
+            projectionMap[`${fieldInfo.name}_DocumentForMeta`] = `$${relationalFieldName}`;
           }
           projectionMap[fieldInfo.name] = 1;
         });
