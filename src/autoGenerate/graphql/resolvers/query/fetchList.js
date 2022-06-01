@@ -5,7 +5,7 @@ import { toObject } from '../../../../../utils';
 import { validate } from '../../validation';
 import { getFieldsBeingFetched, filterRemoteFields } from '../../../utils';
 import { PLURAL } from '../../../../../constants/graphqlOperations';
-import { checkIfDatabaseAggregationAllowedOnType } from '../../controllers/utils/aggregationController';
+import { checkIfDatabaseAggregationAllowedOnType } from '../../controllers/AggregationController';
 import prehookValidationForNestedFields from '../utils/prehookValidationForNestedFields';
 
 // To find if filters have remote fields.

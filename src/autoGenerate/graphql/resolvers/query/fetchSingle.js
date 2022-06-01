@@ -5,7 +5,7 @@ import { toObject } from '../../../../../utils';
 import { validate } from '../../validation';
 import { InvalidParamsError } from '../../../../../constants/errors';
 import { SINGULAR } from '../../../../../constants/graphqlOperations';
-import { checkIfDatabaseAggregationAllowedOnType } from '../../controllers/utils/aggregationController';
+import { checkIfDatabaseAggregationAllowedOnType } from '../../controllers/AggregationController';
 import prehookValidationForNestedFields from '../utils/prehookValidationForNestedFields';
 // Validate that the params used for single fetch are unique.
 const validateParamsUniqueness = (paramKey, typeAST) => {
