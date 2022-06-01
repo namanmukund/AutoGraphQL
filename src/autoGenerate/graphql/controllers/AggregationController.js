@@ -13,13 +13,11 @@ import getQueryParams from './QueryController/filters';
 
 const parsedASTMap = getParsedASTMap(types);
 
+// Allow Aggregation if databaseController directive
+// exists on Type with mode as aggregation.
 export const checkIfDatabaseAggregationAllowedOnType = ({ typeName }) => {
   if (parsedASTMap && typeName) {
     const { directives } = parsedASTMap[typeName];
-    /**
-     * Get Controller Mode from Type Definition
-     * and build aggregation pipeline if required.
-     */
     const typeControllerMode = getTypeDirectiveArgumentValue(
       directives,
       'databaseController',
@@ -44,14 +42,23 @@ export const checkIfDatabaseAggregationAllowedOnType = ({ typeName }) => {
  * - 6. Resolver for Meta Fields ........................TODO [V2]
  */
 
+/**
+ * AggregationController allows to construct
+ * mongoDB pipeline stages from requested fields.
+ * Example Usage:
+ *    new AggregationController({
+ *      typeName,
+ *      info,
+ *    }).constructQuery({ ....params })
+ */
 class AggregationController {
-  #info;
+  #graphQLInfoMap;
 
   #controller;
 
   constructor({ typeName, info }) {
     this.typeName = typeName;
-    this.#info = info;
+    this.#graphQLInfoMap = info;
     this.#controller = new AggregationBuilder(
       truncate(typeName, {
         length: 30,
@@ -163,7 +170,7 @@ class AggregationController {
   };
 
   /**
-   * Building Projection Stage
+   * Projecting fields in mongodb based on Type
    * @example_1 fieldName -> { id: '...' }
    *    OR { fieldName : [{....}] } [Relational List Field]
    * Output -> { fieldName: 1 }
@@ -211,7 +218,8 @@ class AggregationController {
   };
 
   /**
-   * Building Lookup Stages based on nested pipeline
+   * Adding Lookup Stage based on nested pipeline
+   * similar to performing joins in SQL.
    */
   #buildLookupStage = ({
     nestedPipeline,
@@ -347,8 +355,9 @@ class AggregationController {
     return aggregationBuilder;
   };
 
+  // This method is used get controller along with pipeline stages constructed.
   constructQuery = async (additionalParams = {}) => {
-    const parsedInfoMap = parseGraphqlResolveInfo(this.#info);
+    const parsedInfoMap = parseGraphqlResolveInfo(this.#graphQLInfoMap);
     const typeName = this.typeName;
     if (checkIfDatabaseAggregationAllowedOnType({ typeName })) {
       const {
