@@ -620,6 +620,7 @@ export {
   courseToGradeMapping,
   courseToGradeMappingForStaging,
   iqaTags,
+  dbControllerModes,
   BLOCKED,
   PHONE_OTP_LIMIT_PER_DAY,
   PHONE_OTP_MAX_RETRY_WAIT_SECOND,
@@ -630,6 +631,5 @@ export {
   TIME_BEFORE_EVENT_CREATION,
   DAY_BEFORE_DEMO_COMPLETED,
   LEAD_PARTNERS_TO_CHECK_FOR_DEMO,
-  dbControllerModes,
   DEFAULT_CLAMP_VALUE,
 };
