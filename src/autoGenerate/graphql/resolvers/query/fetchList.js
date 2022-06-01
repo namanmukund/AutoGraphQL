@@ -6,38 +6,7 @@ import { validate } from '../../validation';
 import { getFieldsBeingFetched, filterRemoteFields } from '../../../utils';
 import { PLURAL } from '../../../../../constants/graphqlOperations';
 import { checkIfDatabaseAggregationAllowedOnType } from '../../controllers/utils/aggregationController';
-import { prehook } from '../../preHook';
-
-const prehookValidation = async ({
-  typeName,
-  parsedASTMap,
-  fieldsForFetch,
-  context,
-  params,
-}) => {
-  const queryFieldKeys = Object.keys(fieldsForFetch);
-  // eslint-disable-next-line no-restricted-syntax
-  for (const key of queryFieldKeys) {
-    /* if field key is relation field then recursive strategy will be used
-    to check the permission and throw error at once
-    */
-    if (Object.keys(parsedASTMap[typeName].relationFields)
-      .includes(key)) {
-      const subTypeName = parsedASTMap[typeName].field[key].type.dataType;
-      // eslint-disable-next-line no-await-in-loop
-      await prehook('', camelCase(subTypeName), context, params);
-
-      // eslint-disable-next-line no-await-in-loop
-      await prehookValidation({
-        typeName: subTypeName,
-        parsedASTMap,
-        fieldsForFetch: fieldsForFetch[key],
-        context,
-        params,
-      });
-    }
-  }
-};
+import prehookValidationForNestedFields from '../utils/prehookValidationForNestedFields';
 
 // To find if filters have remote fields.
 // @TODO this function assumes only one parameter in filter,
@@ -99,7 +68,7 @@ const fetchListQueryResolver = async (
   const fieldsForFetch = getFieldsBeingFetched(fieldNodes);
 
   if (checkIfDatabaseAggregationAllowedOnType({ typeName })) {
-    await prehookValidation({
+    await prehookValidationForNestedFields({
       typeName,
       parsedASTMap,
       fieldsForFetch,

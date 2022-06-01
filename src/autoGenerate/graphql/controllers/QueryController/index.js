@@ -36,12 +36,17 @@ class QueryController extends MasterController {
         skipCount = totalDocCount - limitValue - skipValue > 0 ? totalDocCount - limitValue - skipValue : 0;
       }
       // Building Aggregation Pipeline Stages with Filter and requested fields.
-      const { pipelineStages: aggregationQuery } = await constructAggregationQuery(resolverInfoParams, {
-        filters: params,
-        limit: limitValue,
-        skip: skipCount,
-        sort: querySort,
-      });
+      const {
+        pipelineStages: aggregationQuery,
+      } = await constructAggregationQuery(
+        resolverInfoParams,
+        {
+          filters: params,
+          limit: limitValue,
+          skip: skipCount,
+          sort: querySort,
+        },
+      );
       return this.Model.aggregate(aggregationQuery).exec();
     }
     // If Aggregation is not allowed only fetch data for particular type.

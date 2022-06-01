@@ -152,6 +152,7 @@ const commonFunctionForRelationAndMeta = async (
       info,
       parsedASTMap,
       authentication,
+      context,
     ).then(async (res) => {
       const finalRelationValue = addAdditionalRelationFieldsToResponse(result, res);
       const postHookResult = await posthook(finalRelationValue, modelSingular, context, params, info);
@@ -198,6 +199,7 @@ const commonFunctionForRelationAndMeta = async (
     parsedASTMap,
     authentication,
     true, // Allow multiple
+    context,
   ).then(async (res) => {
     const finalRelationValue = addAdditionalRelationFieldsToResponse([result], [res]);
     const postHookResult = await posthook(finalRelationValue[0], modelSingular, context, params, info);
