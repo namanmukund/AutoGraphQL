@@ -8,6 +8,7 @@ const BatchDetailsResult = `
     classroomTitle: String
     batchId: ID
     sessionStartDate: Date
+    sessionId: ID
     batchStudents: [BatchStudentResult]
   }
 `;

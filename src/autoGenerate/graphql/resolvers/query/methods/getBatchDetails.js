@@ -228,6 +228,7 @@ const getBatchDetails = async (
     });
   });
   batchSessionData = {
+    sessionId: get(batchDetails, 'id'),
     batchId: get(batchDetails, 'batch.id'),
     batchCode: get(batchDetails, 'batch.code'),
     topicTitle: get(batchDetails, 'topic[0].title'),
