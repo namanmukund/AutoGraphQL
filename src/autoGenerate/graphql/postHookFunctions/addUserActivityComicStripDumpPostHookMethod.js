@@ -86,7 +86,7 @@ const addUserActivityComicStripDumpPostHookMethod = async (input, mutationName, 
     in that case if he is hitting back after chat consumption, status will not get updated
     if it is already completed
   */
-  const userLearningObjectiveQueryRes = await callLocalGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId, courseId));
+  const userLearningObjectiveQueryRes = await callLocalGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId, courseId), context);
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
     id: userLearningObjectiveId,
@@ -114,6 +114,7 @@ const addUserActivityComicStripDumpPostHookMethod = async (input, mutationName, 
   Calling method to update current user Topic Component status
   */
   await updateCurrentComponentStatusOfNewCourse(
+    userId,
     courseId,
     currentTopicComponentInfo,
     comicStripAction,

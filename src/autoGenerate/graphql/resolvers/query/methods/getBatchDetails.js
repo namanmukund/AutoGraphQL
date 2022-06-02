@@ -92,13 +92,52 @@ const getBatchSessionAggregation = ({
                 },
               },
               {
+                $lookup: {
+                  from: 'StudentProfile',
+                  let: {
+                    studentProfileId: '$students.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $in: ['$id', '$$studentProfileId'],
+                        },
+                      },
+                    },
+                    {
+                      $lookup: {
+                        from: 'User',
+                        localField: 'user.typeId',
+                        foreignField: 'id',
+                        as: 'user',
+                      }
+                    },
+                    {
+                      $project: {
+                        grade: 1,
+                        section: 1,
+                        rollNo: 1,
+                        profileAvatarCode: 1,
+                        user: {
+                          id: 1,
+                          name: 1,
+                        },
+                      },
+                    },
+                  ],
+                  as: 'students',
+                },
+              },
+              {
                 $project: {
                   id: 1,
                   code: 1,
                   classroomTitle: 1,
                   school: {
                     code: 1,
-                  }
+                  },
+                  students: 1,
                 },
               },
             ],
@@ -176,7 +215,20 @@ const getBatchDetails = async (
   }
   const batchDetails = get(batchSessionsArray, '[0].batchSession')
   let { startTime, endTime } = findSessionStartTime(batchDetails)
+  const students = get(batchDetails, 'batch.students', [])
+  const batchStudentResult = []
+  students.map((studentData) => {
+    batchStudentResult.push({
+      userId: get(studentData, 'user[0].id'),
+      name: get(studentData, 'user[0].name'),
+      grade: get(studentData, 'grade'),
+      section: get(studentData, 'section'),
+      rollNo: get(studentData, 'rollNo', ''),
+      profileAvatar: get(studentData, 'profileAvatarCode'),
+    });
+  });
   batchSessionData = {
+    sessionId: get(batchDetails, 'id'),
     batchId: get(batchDetails, 'batch.id'),
     batchCode: get(batchDetails, 'batch.code'),
     topicTitle: get(batchDetails, 'topic[0].title'),
@@ -184,7 +236,8 @@ const getBatchDetails = async (
     sessionStartDate: new Date(get(batchDetails, 'bookingDate')),
     startTime,
     endTime,
-    sessionStartTime: ''
+    sessionStartTime: '',
+    batchStudents: batchStudentResult,
   }
   return batchSessionData
 };
