@@ -24,7 +24,7 @@ import { getMentorMenteeSessionForValidation } from './index';
 import { ifAuthorized } from '../../../../../../utils';
 import { MENTOR, SCHOOL_TEACHER } from '../../../../../../constants/roles';
 import getSortedTopics from '../../../../../../utils/getSortedTopicsFromCoursePackageOrder';
-// import isUserInheritedFromMentor from '../../../postHookFunctions/utils/isMentorChild';
+import isUserInheritedFromMentor from '../../../postHookFunctions/utils/isMentorChild';
 
 /*
 This is a common method to check whether the called topic component is locked or not
@@ -60,9 +60,6 @@ const isComponentUnlockedForNewCourse = async (
     userIdFromContext,
     appName,
   } = userAndAppInfo;
-  // Bypassing component validation incase if schoolTeacher is accessing the content.
-  // const checkForMentorChild = await isUserInheritedFromMentor(userIdFromContext, true);
-  // if (userIdFromContext && typeof checkForMentorChild === 'boolean' && checkForMentorChild) return true;
   if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
     if (inputUserId && inputLearningObjectiveId) {
       userId = inputUserId;
@@ -153,6 +150,25 @@ const isComponentUnlockedForNewCourse = async (
       },
     });
   }
+
+  // Bypassing component validation incase if schoolTeacher is accessing the content.
+  const checkForMentorChild = await isUserInheritedFromMentor(userIdFromContext, true);
+  if (userIdFromContext && typeof checkForMentorChild === 'boolean' && checkForMentorChild) {
+    if (mutationOrQueryName) {
+    // initialising object to be passed in context to save query
+      if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
+      // passing data in context which can be used further in post hook methods
+      // this will prevent a further query
+        Object.assign(context, {
+          [mutationOrQueryName]: {
+            learningObjective: learningObjectiveInfo,
+          },
+        });
+      }
+    }
+    return true;
+  }
+
   const userCurrentTopicComponentStatusRes = await getUserCurrentTopicComponentStatusForNewCourse(
     courseId,
     userId,

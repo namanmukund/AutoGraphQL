@@ -868,7 +868,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   -we get userQuiz id , which will be used further to update the document
   -we get next component from the document and update user current topic component status with same
   */
-  const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId, courseId));
+  const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId, courseId), context);
   const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
   const quizQuestionsInUserQuiz = get(userQuizInfo, 'quiz');
   const nextTopicId = get(userQuizInfo, 'nextComponent.topic.id');
@@ -903,6 +903,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     const topicOrder = get(userQuizInfo, 'topic.order');
 
     await updateCurrentComponentStatusOfNewCourse(
+      userId,
       courseId,
       currentTopicComponentInfo,
       quizAction,

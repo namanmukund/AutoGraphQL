@@ -5,6 +5,7 @@ import {
   PUBLISHED, topicComponents, topicTypes, userActionType,
 } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import isUserInheritedFromMentor from './isMentorChild';
 
 // query to get next topic
 const getNextTopic = (courseId,
@@ -81,6 +82,7 @@ Method to check whether user current topic status should be updated,
 Conditions are written in switchblocks
 */
 const updateCurrentComponentStatusOfNewCourse = async (
+  userId,
   courseId,
   currentTopicComponentInfo,
   userAction,
@@ -96,6 +98,8 @@ const updateCurrentComponentStatusOfNewCourse = async (
   isLastLearningSlide,
   learningSlideId,
 ) => {
+  const checkForMentorChild = await isUserInheritedFromMentor(userId, true);
+  if (checkForMentorChild) return true;
   const {
     video, message, practiceQuestion, comicStrip, quiz, blockBasedPractice, blockBasedProject, learningSlide,
   } = topicTypes;

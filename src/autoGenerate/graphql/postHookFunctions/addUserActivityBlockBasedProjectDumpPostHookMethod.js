@@ -106,7 +106,7 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
     in that case if he is hitting back after blockBasedProject consumption, status will not get updated
     if it is already completed
   */
-  const userBlockBasedProjectQueryRes = await callLocalGraphqlApi(userBlockBasedProjectQuery(userId, topicId, blockBasedProjectId, courseId));
+  const userBlockBasedProjectQueryRes = await callLocalGraphqlApi(userBlockBasedProjectQuery(userId, topicId, blockBasedProjectId, courseId), context);
   const userBlockBasedProjectInfo = get(userBlockBasedProjectQueryRes, 'data.userBlockBasedProjects[0]');
 
   const {
@@ -142,6 +142,7 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
   Calling method to update current user Topic Component status
   */
   await updateCurrentComponentStatusOfNewCourse(
+    userId,
     courseId,
     currentTopicComponentInfo,
     blockBasedProjectAction,
