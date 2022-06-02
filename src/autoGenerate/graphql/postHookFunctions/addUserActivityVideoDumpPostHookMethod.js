@@ -119,7 +119,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
   in that case if he is hitting back after video consumption, status will not get updated
   if it is already completed
   */
-  const userVideoQueryRes = await callLocalGraphqlApi(userVideoQuery(userId, topicId, courseId));
+  const userVideoQueryRes = await callLocalGraphqlApi(userVideoQuery(userId, topicId, courseId), context);
   const userVideoInfo = get(userVideoQueryRes, 'data.userVideos[0]');
   const {
     id: userVideoId,
@@ -155,6 +155,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
     const topicOrder = get(userVideoInfo, 'topic.order');
 
     await updateCurrentComponentStatusOfNewCourse(
+      userId,
       courseId,
       currentTopicComponentInfo,
       videoAction,

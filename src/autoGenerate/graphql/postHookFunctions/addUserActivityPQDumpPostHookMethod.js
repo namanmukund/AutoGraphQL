@@ -199,7 +199,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   -we get next component from the document and update user current topic component status with same
   */
   const userLearningObjectiveQueryRes = await callLocalGraphqlApi(
-    userLearningObjectiveQuery(userId, learningObjectiveId, courseId),
+    userLearningObjectiveQuery(userId, learningObjectiveId, courseId), context,
   );
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
@@ -441,6 +441,7 @@ And current component status will not get changed when it is already consumed in
     );
   } else {
     await updateCurrentComponentStatusOfNewCourse(
+      userId,
       courseId,
       currentTopicComponentInfo,
       pqAction,

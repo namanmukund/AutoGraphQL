@@ -1498,6 +1498,176 @@ const getUserBatchDetails = (userId) => [
             id: 1,
             currentComponent: 1,
             coursePackage: 1,
+            coursePackageTopicRule: 1,
+            allottedMentor: 1,
+          },
+        },
+        {
+          $lookup: {
+            from: 'Topic',
+            let: {
+              topicIds: '$coursePackageTopicRule.topic.typeId',
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $in: ['$id', '$$topicIds'],
+                  },
+                },
+              },
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$status', 'published'],
+                  },
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  title: 1,
+                  order: 1,
+                  isTrial: 1,
+                  description: 1,
+                  topicQuestions: 1,
+                  thumbnail: 1,
+                  thumbnailSmall: 1,
+                  topicAssignmentQuestions: {
+                    assignmentQuestions: {
+                      id: 1,
+                    },
+                  },
+                  chapter: 1,
+                  topicComponentRule: 1,
+                },
+              },
+              {
+                $lookup: {
+                  from: 'File',
+                  let: {
+                    thumbnailId: '$thumbnail.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: [
+                            '$id',
+                            '$$thumbnailId',
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        uri: 1,
+                        name: 1,
+                      },
+                    },
+                  ],
+                  as: 'thumbnail',
+                },
+              },
+              {
+                $lookup: {
+                  from: 'File',
+                  let: {
+                    thumbnailSmallId: '$thumbnailSmall.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: [
+                            '$id',
+                            '$$thumbnailSmallId',
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        uri: 1,
+                        name: 1,
+                      },
+                    },
+                  ],
+                  as: 'thumbnailSmall',
+                },
+              },
+              {
+                $lookup: {
+                  from: 'Chapter',
+                  let: {
+                    chapterId: '$chapter.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: [
+                            '$id',
+                            '$$chapterId',
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: ['$status', 'published'],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        title: 1,
+                        order: 1,
+                      },
+                    },
+                  ],
+                  as: 'chapter',
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  title: 1,
+                  order: 1,
+                  isTrial: 1,
+                  description: 1,
+                  thumbnail: {
+                    $arrayElemAt: [
+                      '$thumbnail',
+                      0,
+                    ],
+                  },
+                  thumbnailSmall: {
+                    $arrayElemAt: [
+                      '$thumbnailSmall',
+                      0,
+                    ],
+                  },
+                  topicAssignmentQuestions: {
+                    assignmentQuestions: {
+                      id: 1,
+                    },
+                  },
+                  chapter: {
+                    $arrayElemAt: [
+                      '$chapter',
+                      0,
+                    ],
+                  },
+                  topicComponentRule: 1,
+                },
+              },
+            ],
+            as: 'coursePackageTopicArr',
           },
         },
         {
@@ -1846,6 +2016,8 @@ const getUserBatchDetails = (userId) => [
             currentComponent: {
               $arrayElemAt: ['$currentComponent', 0],
             },
+            coursePackageTopicRule: 1,
+            coursePackageTopicArr: 1,
           },
         },
       ],
@@ -1896,29 +2068,31 @@ const getUserBatchDetails = (userId) => [
 export const getTopicOrderFromCoursePackage = (coursePackage, currentTopic, userBatchDetails) => {
   if (currentTopic) {
     const currentTopicId = get(currentTopic, 'id');
-    const packageTopics = get(coursePackage, 'topics', []);
+    let packageTopics = get(coursePackage, 'topics', []);
+    if (userBatchDetails && get(userBatchDetails, 'coursePackageTopicRule', []).length) {
+      packageTopics = get(userBatchDetails, 'coursePackageTopicRule', []);
+    }
     const filteredTopic = packageTopics.find((el) => get(el, 'topic.typeId') === currentTopicId);
-    let packageTopicOrder = get(filteredTopic, 'order', 0);
+    const packageTopicOrder = get(filteredTopic, 'order', 0);
+    let packageTopicTitle = get(currentTopic, 'title');
     let packageTopicDescription = get(currentTopic, 'description');
+    if (get(filteredTopic, 'title')) {
+      packageTopicTitle = get(filteredTopic, 'title');
+    }
     if (get(filteredTopic, 'description')) {
       packageTopicDescription = get(filteredTopic, 'description');
     }
-    if (userBatchDetails) {
-      const topicReshuffledGroup = get(filteredTopic, 'topicReshuffledGroup', []).find((group) => (get(group, 'batch.typeId') === get(userBatchDetails, 'id')));
-      if (topicReshuffledGroup) {
-        if (get(topicReshuffledGroup, 'description')) {
-          packageTopicDescription = get(filteredTopic, 'description');
-        }
-        packageTopicOrder = get(topicReshuffledGroup, 'order', 0);
-      }
-    }
-    return { order: packageTopicOrder, description: packageTopicDescription };
+    return { order: packageTopicOrder, title: packageTopicTitle, description: packageTopicDescription };
   }
-  return { order: get(currentTopic, 'order', 0), description: get(currentTopic, 'description', '') };
+  return { order: get(currentTopic, 'order', 0), title: get(currentTopic, 'title', ''), description: get(currentTopic, 'description', '') };
 };
 
 export const getTopicsArrFromCoursePackages = (coursePackage = {}, returnType = 'topics', userBatchDetails) => {
-  const packageTopics = get(coursePackage, 'topicsArr', []);
+  // a batch can have a seperate course Package rule which if exists overrides the course package .
+  let packageTopics = get(coursePackage, 'topicsArr', []);
+  if (get(userBatchDetails, 'coursePackageTopicRule', []).length) {
+    packageTopics = get(userBatchDetails, 'coursePackageTopicArr', []);
+  }
   /**
    * if returnType is chapters we construct chapters array
    * with topics mapped to that chapter from package.
