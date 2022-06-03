@@ -61,7 +61,7 @@ const sortBatchSessions = (batchSessions) => {
 };
 
 // get mentor session if after updating / adding mentor session
-const getMentorSessionId = async (allottedMentorId, date, slotsInInput, courseId, sessionType, coursePackageId) => {
+const getMentorSessionId = async (allottedMentorId, date, slotsInInput, courseId, sessionType, coursePackageId, startTime, endTime) => {
   let finalMentorSessionId = '';
   if (allottedMentorId) {
     const sentSlotsArray = getSelectedSlotsTime(slotsInInput);
@@ -103,12 +103,11 @@ const createBatchSessions = async (batchId, possibleDates, possibleSessionCount,
       slotObj[possibleDate.slot] = true;
       const { filteredSlotsString } = extractSlotsFromInput(slotObj);
       const finalCourseId = isCoursePackageBatch ? get(topics[index], 'courses[0].id') : courseId;
-      // eslint-disable-next-line no-await-in-loop
-      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDate.date, slotObj, finalCourseId, sessionType, coursePackageId);
-
       const startTime = possibleDate.startTime;
       const endTime = possibleDate.endTime;
       const sessionMode = possibleDate.mode;
+      // eslint-disable-next-line no-await-in-loop
+      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDate.date, slotObj, finalCourseId, sessionType, coursePackageId, startTime, endTime);
 
       createBatchSession(batchId, possibleDate.date.toISOString(), filteredSlotsString, topics[index].id, finalMentorSessionId, finalCourseId, coursePackageId, startTime, endTime, sessionMode);
     }
@@ -124,13 +123,12 @@ const createBatchSessions = async (batchId, possibleDates, possibleSessionCount,
       const slotObj = {};
       slotObj[possibleDates[i].slot] = true;
       const finalCourseId = isCoursePackageBatch ? get(topics[i], 'courses[0].id') : courseId;
-      // eslint-disable-next-line no-await-in-loop
-      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i].date, slotObj, finalCourseId, sessionType, coursePackageId);
-      const { filteredSlotsString } = extractSlotsFromInput(slotObj);
-
       const startTime = possibleDates[i].startTime;
       const endTime = possibleDates[i].endTime;
       const sessionMode = possibleDates[i].mode;
+      // eslint-disable-next-line no-await-in-loop
+      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i].date, slotObj, finalCourseId, sessionType, coursePackageId, startTime, endTime);
+      const { filteredSlotsString } = extractSlotsFromInput(slotObj);
 
       createBatchSession(batchId, possibleDates[i].date.toISOString(), filteredSlotsString, topics[i].id, finalMentorSessionId, finalCourseId, coursePackageId, startTime, endTime, sessionMode);
     }
@@ -155,15 +153,15 @@ const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, allo
     const slotObj = {};
     slotObj[possibleDates[i].slot] = true;
     const finalCourseId = isCoursePackageBatch ? get(session, 'course.id') : courseId;
-    // eslint-disable-next-line no-await-in-loop
-    const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i].date, slotObj, finalCourseId, sessionType, coursePackageId);
-    const { filteredSlotsString } = extractSlotsFromInput(slotObj);
-
     /* eslint-disable array-callback-return */
     const date = possibleDates[i].date.toISOString();
     const startTime = possibleDates[i].startTime;
     const endTime = possibleDates[i].endTime;
     const sessionMode = possibleDates[i].mode;
+    // eslint-disable-next-line no-await-in-loop
+    const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i].date, slotObj, finalCourseId, sessionType, coursePackageId, startTime, endTime);
+    const { filteredSlotsString } = extractSlotsFromInput(slotObj);
+
     updateBatchSession(session.id, filteredSlotsString, date, finalMentorSessionId, finalCourseId, coursePackageId, startTime, endTime, sessionMode);
     i += 1;
   }
@@ -513,7 +511,7 @@ const scheduleSessionsMutationResolver = async (
           },
         });
       }
-      const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseIdFromTopic, 'batch', coursePackageId);
+      const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseIdFromTopic, 'batch', coursePackageId, startMinutes, endMinutes);
       if (!(batchId && startDate && nonRecurringfilteredSlotsString && topicId && finalMentorSessionId && courseIdFromTopic)) {
         throw new InvalidScheduleParameters();
       }
@@ -556,7 +554,7 @@ const scheduleSessionsMutationResolver = async (
     if (isRecurring) {
       throw new InvalidScheduleParameters();
     }
-    const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseIdFromTopic, 'batch', coursePackageId);
+    const finalMentorSessionId = await getMentorSessionId(mentorUserId, startDate, nonRecurringslots, courseIdFromTopic, 'batch', coursePackageId, startMinutes, endMinutes);
     await createAdhocSession(batchId, startDate, nonRecurringfilteredSlotsString, topicId, finalMentorSessionId, courseIdFromTopic, adhocSessionType, coursePackageId, startMinutes, endMinutes, classMode);
   }
   return {

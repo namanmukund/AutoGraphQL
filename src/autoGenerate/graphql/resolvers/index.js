@@ -110,7 +110,7 @@ import classroomSessions from './query/methods/classroomSessions';
 import updateEventSessionAttendance from './mutation/methods/updateEventSessionAttendance';
 import getNextOrPrevClassroomSessions from './query/methods/getNextOrPrevClassroomSessions';
 import getClassroomDetails from './query/methods/getClassroomDetails';
-import scheduleSessions from './mutation/shift/scheduleSessions';
+import scheduleSessions from './mutation/methods/scheduleSessions';
 import getSchoolAndBatchDetail from './query/methods/getSchoolAndBatchDetail';
 import menteeCourseHomework from './mutation/methods/menteeCourseHomework';
 import getBatchDetails from './query/methods/getBatchDetails';
