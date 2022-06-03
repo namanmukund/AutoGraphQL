@@ -28,6 +28,8 @@ const getMentorSessions = (userId, availabilityDate) => `query{
         }
       batchSessions{
         id
+        startMinutes
+        endMinutes
         batch {
           id
           type
@@ -40,6 +42,8 @@ const getMentorSessions = (userId, availabilityDate) => `query{
       }
       adhocSessions{
         id
+        startMinutes
+        endMinutes
         batch {
           type
           code

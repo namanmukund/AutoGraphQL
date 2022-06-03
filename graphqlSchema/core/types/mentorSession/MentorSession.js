@@ -67,6 +67,8 @@ const MentorSession = `
     mentorAvailabilitySlots: [MentorAvailabilitySlot] @relation(name:"MentorAvailabilitySlotMentorSession")
     acceptanceObjects: [AcceptanceObject]
     rejectionObjects: [RejectionObject]
+    startMinutes: Int @defaultValue(value: "0")
+    endMinutes: Int @defaultValue(value: "0")
 }`;
 
 export default [MentorSession, AcceptanceObject, RejectionObject];
