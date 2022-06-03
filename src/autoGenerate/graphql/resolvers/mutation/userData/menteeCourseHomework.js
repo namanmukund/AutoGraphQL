@@ -979,14 +979,13 @@ const menteeCourseHomeworkMutationResolver = async (
     currentTopic = get(batchCurrentComponentInfo, 'currentTopic');
   } else {
     currentTopicOrder = get(currentTopicComponentInfo, 'currentTopic.order');
-    currentTopic = get(batchCurrentComponentInfo, 'currentTopic');
+    currentTopic = get(currentTopicComponentInfo, 'currentTopic');
   }
   let packageTopics = [];
   if (coursePackage && get(coursePackage, 'id')) {
     packageTopics = getTopicsArrFromCoursePackages(coursePackage, 'topics', get(userBatchDetails, '0.batch'));
   }
-  const { currentCourse } = currentTopicComponentInfo;
-  const { chapters } = currentCourse;
+  const { chapters } = get(currentTopicComponentInfo, 'currentCourse', {});
   if ((!chapters || !chapters.length) && !(packageTopics || []).length) {
     throw new DatabaseRecordNotFoundError({
       data: {
