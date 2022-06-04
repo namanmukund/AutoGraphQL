@@ -35,6 +35,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateMentorMenteeSessionIsAssignmentAttempted from '../scriptMethods/updateMentorMenteeSessionIsAssignmentAttempted';
 // import updateStudentHomework from '../scriptMethods/updateStudentHomework';
 // import addQuestionBankMessageMapping from '../scriptMethods/addQuestionBankMessageMapping';
+// import RemappingBatchStudentInSchool from './RemappingBatchStudentInSchool';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -93,6 +94,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateMentorMenteeSessionIsAssignmentAttempted();
   // await updateStudentHomework();
   // await addQuestionBankMessageMapping();
+  // await RemappingBatchStudentInSchool(root, params, context);
   return {
     result: true,
   };
