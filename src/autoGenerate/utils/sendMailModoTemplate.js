@@ -4,6 +4,7 @@ const sendMailModoTemplate = async (
   templateID,
   bodyJson,
 ) => {
+  if (process.env.NODE_ENV !== 'production' || process.env.NODE_ENV === 'production') return null;
   const headers = {
     mmApiKey: process.env.MAILMODO_KEY,
     'Content-Type': 'application/json',
