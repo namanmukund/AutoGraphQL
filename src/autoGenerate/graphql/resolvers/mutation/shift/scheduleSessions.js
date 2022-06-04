@@ -79,7 +79,7 @@ const getMentorSessionId = async (allottedMentorId, date, slotsInInput, courseId
     } else {
       if (sentSlotsArray && sentSlotsArray.length) {
         // eslint-disable-next-line no-await-in-loop
-        const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, date, `slot${sentSlotsArray[0]}`, sessionType, coursePackageId));
+        const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, date, `slot${sentSlotsArray[0]}`, sessionType, coursePackageId, startTime, endTime));
         finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
       }
     }
