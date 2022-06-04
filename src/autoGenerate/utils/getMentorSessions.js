@@ -10,6 +10,8 @@ const getMentorSessions = (userId, availabilityDate) => `query{
     }){
       id
       sessionType
+      startMinutes
+      endMinutes
       mentorMenteeSessions{
           id
           menteeSession{
