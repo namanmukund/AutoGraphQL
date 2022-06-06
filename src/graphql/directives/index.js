@@ -50,6 +50,12 @@ directive @cacheControl(
 
 # Create index for a field
 directive @createIndex on FIELD
+
+# Clamp Integer to minimum or maximum value.
+directive @clamp(
+  min: Int
+  max: Int
+) on FIELD
 `;
 
 export default directive;

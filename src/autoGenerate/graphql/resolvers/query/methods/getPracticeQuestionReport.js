@@ -14,6 +14,8 @@ import {
 } from '../../../../../../constants/errors';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 
+const FRACTION_DIGITS = 1;
+
 const getBatchSessionAggregation = ({ batchId, topicId }) =>
   [{
     $match: {
@@ -262,22 +264,22 @@ const transformMongoResults = (obj) => {
       const overallReportObj = {
         loId: innerObj.id,
         loTitle: innerObj.title,
-        submittedPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.submittedCountSum * 100) / obj.studentsCount).toFixed(2)),
-        attemptedPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.attemptedCountSum * 100) / obj.studentsCount).toFixed(2)),
-        unattemptedPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.unattemptedCountSum * 100) / obj.studentsCount).toFixed(2)),
-        firstTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.firstTryCountSum * 100) / (innerObj.submittedCountSum * innerObj.questionsCount)).toFixed(2)),
-        secondTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.secondTryCountSum * 100) / (innerObj.submittedCountSum * innerObj.questionsCount)).toFixed(2)),
-        thirdTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.thirdTryCountSum * 100) / (innerObj.submittedCountSum * innerObj.questionsCount)).toFixed(2)),
-        avgTriesPerQuestion: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.firstTryCountSum + (2 * innerObj.secondTryCountSum) + (3 * innerObj.thirdTryCountSum)) / (innerObj.submittedCountSum * innerObj.questionsCount)).toFixed(2)),
+        submittedPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.submittedCountSum * 100) / obj.studentsCount).toFixed()),
+        attemptedPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.attemptedCountSum * 100) / obj.studentsCount).toFixed()),
+        unattemptedPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.unattemptedCountSum * 100) / obj.studentsCount).toFixed()),
+        firstTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.firstTryCountSum * 100) / (innerObj.submittedCountSum * innerObj.questionsCount)).toFixed()),
+        secondTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.secondTryCountSum * 100) / (innerObj.submittedCountSum * innerObj.questionsCount)).toFixed()),
+        thirdTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.thirdTryCountSum * 100) / (innerObj.submittedCountSum * innerObj.questionsCount)).toFixed()),
+        avgTriesPerQuestion: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((innerObj.firstTryCountSum + (2 * innerObj.secondTryCountSum) + (3 * innerObj.thirdTryCountSum)) / (innerObj.submittedCountSum * innerObj.questionsCount)).toFixed(FRACTION_DIGITS)),
         avgTimePerQuestion: null,
       };
       overallReportObj.pqIndividualQuestionReport = Array.from(innerObj.questions.entries(), ([k, v]) => {
         return {
           questionId: k,
-          firstTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') * 100) / innerObj.submittedCountSum).toFixed(2)),
-          secondTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((get(v, 'secondTryCountSum') * 100) / innerObj.submittedCountSum).toFixed(2)),
-          thirdTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((get(v, 'thirdTryCountSum') * 100) / innerObj.submittedCountSum).toFixed(2)),
-          avgTries: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') + (2 * get(v, 'secondTryCountSum')) + (3 * get(v, 'thirdTryCountSum'))) / (innerObj.submittedCountSum)).toFixed(2)),
+          firstTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') * 100) / innerObj.submittedCountSum).toFixed()),
+          secondTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((get(v, 'secondTryCountSum') * 100) / innerObj.submittedCountSum).toFixed()),
+          thirdTryPercentage: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((get(v, 'thirdTryCountSum') * 100) / innerObj.submittedCountSum).toFixed()),
+          avgTries: withFallbackValue(innerObj.questionsCount === 0 ? 0 : ((get(v, 'firstTryCountSum') + (2 * get(v, 'secondTryCountSum')) + (3 * get(v, 'thirdTryCountSum'))) / (innerObj.submittedCountSum)).toFixed(FRACTION_DIGITS)),
           submissionsCount: innerObj.submittedCountSum,
           submissions: Array.from(innerObj.students.values()),
         };

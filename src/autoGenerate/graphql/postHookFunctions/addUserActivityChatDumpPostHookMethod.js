@@ -88,7 +88,7 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
     in that case if he is hitting back after chat consumption, status will not get updated
     if it is already completed
   */
-  const userLearningObjectiveQueryRes = await callLocalGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId, courseId));
+  const userLearningObjectiveQueryRes = await callLocalGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId, courseId), context);
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
     id: userLearningObjectiveId,
@@ -125,6 +125,7 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
     );
   } else {
     await updateCurrentComponentStatusOfNewCourse(
+      userId,
       courseId,
       currentTopicComponentInfo,
       chatAction,

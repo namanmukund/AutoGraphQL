@@ -2,12 +2,12 @@ const PracticeQuestionOverallReport = `
   type PracticeQuestionOverallReport {
     loId: String
     loTitle: String
-    submittedPercentage: Float
-    attemptedPercentage: Float
-    unattemptedPercentage: Float
-    firstTryPercentage: Float
-    secondTryPercentage: Float
-    thirdTryPercentage: Float
+    submittedPercentage: Float @clamp
+    attemptedPercentage: Float @clamp
+    unattemptedPercentage: Float @clamp
+    firstTryPercentage: Float @clamp
+    secondTryPercentage: Float @clamp
+    thirdTryPercentage: Float @clamp
     avgTriesPerQuestion: Float
     avgTimePerQuestion: Int
     pqIndividualQuestionReport: [PQIndividualQuestionReport]
@@ -25,9 +25,9 @@ const StudentSubmissions = `
 const PQIndividualQuestionReport = `
   type PQIndividualQuestionReport {
     questionId: String
-    firstTryPercentage: Float
-    secondTryPercentage: Float
-    thirdTryPercentage: Float
+    firstTryPercentage: Float @clamp
+    secondTryPercentage: Float @clamp
+    thirdTryPercentage: Float @clamp
     avgTries: Float
     submissionsCount: Int
     submissions: [StudentSubmissions]

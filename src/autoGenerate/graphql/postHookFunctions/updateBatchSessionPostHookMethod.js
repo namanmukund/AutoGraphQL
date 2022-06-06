@@ -56,6 +56,16 @@ const getBatchQuery = (batchId) => `
         code
         type
         documentType
+        coursePackageTopicRule{
+          order
+          isRevision
+          topic{
+            courses{
+              id
+            }
+            id
+          }
+        }
         students{
           id
           grade
@@ -337,9 +347,15 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         // console.log('scheduleB2BSessionMissed', scheduleB2BSessionMissed)
         scheduleB2BSessionMissed(batchSessionId);
         let topicsList = [];
+        // a batch can have own package topic rule. if it exist in a batch we will select it over the course package.
         if (coursePackageId) {
-          const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
-          const topicRules = get(coursePackage, 'topics', []);
+          let topicRules;
+          if (get(batchResult, 'coursePackageTopicRule', []).length) {
+            topicRules = get(batchResult, 'coursePackageTopicRule.topics', []);
+          } else {
+            const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+            topicRules = get(coursePackage, 'topics', []);
+          }
           topicsList = getSortedTopics(topicRules);
         } else {
           const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
@@ -380,8 +396,14 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         && Math.abs(moment(new Date()).hours() - slotTimeArray[0]) === 0) {
         let topicsList = [];
         if (coursePackageId) {
-          const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
-          const topicRules = get(coursePackage, 'topics', []);
+          let topicRules;
+          // a batch can have own package topic rule. if it exist in a batch we will select it over the course package.
+          if (get(batchResult, 'coursePackageTopicRule', []).length) {
+            topicRules = get(batchResult, 'coursePackageTopicRule.topics', []);
+          } else {
+            const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+            topicRules = get(coursePackage, 'topics', []);
+          }
           topicsList = getSortedTopics(topicRules);
         } else {
           const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
