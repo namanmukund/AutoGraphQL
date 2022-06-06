@@ -1,7 +1,7 @@
 import insertSubString from '../../../../utils/insertSubString';
 
 const updateSchemaWithUserToken = (schemaTypes) => {
-  const tokenString = ',token: String!';
+  const tokenString = ',token: String!, isPrimaryUser: Boolean';
   const totalSchemaTypes = schemaTypes.length;
   schemaTypes.some((type) => {
     if (type.includes('User @model')) {
