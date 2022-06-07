@@ -1506,7 +1506,9 @@ const getUserBatchDetails = (userId) => [
           $lookup: {
             from: 'Topic',
             let: {
-              topicIds: '$coursePackageTopicRule.topic.typeId',
+              topicIds: {
+                $ifNull: ['$coursePackageTopicRule.topic.typeId', []],
+              },
             },
             pipeline: [
               {
@@ -2088,7 +2090,7 @@ export const getTopicOrderFromCoursePackage = (coursePackage, currentTopic, user
 };
 
 export const getTopicsArrFromCoursePackages = (coursePackage = {}, returnType = 'topics', userBatchDetails) => {
-  // If coursePackageTopicRule is present in userBatchDetails package Topic is updated with it
+  // a batch can have a seperate course Package rule which if exists overrides the course package .
   let packageTopics = get(coursePackage, 'topicsArr', []);
   if (get(userBatchDetails, 'coursePackageTopicRule', []).length) {
     packageTopics = get(userBatchDetails, 'coursePackageTopicArr', []);

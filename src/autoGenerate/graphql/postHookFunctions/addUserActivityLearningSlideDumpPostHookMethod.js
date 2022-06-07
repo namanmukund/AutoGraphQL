@@ -93,7 +93,7 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
   const learningObjectiveInfo = get(context, `${mutation}.learningObjective`);
   const topicId = (get(learningObjectiveInfo, 'topics') && get(learningObjectiveInfo, 'topics[0].id')) || get(learningObjectiveInfo, 'topic.id');
   if (!topicId) {
-    log('Not able to fetch LearningObjective.topic in addUserActivityPQDumpPostHookMethod');
+    log('Not able to fetch LearningObjective.topic in addUserActivityLearningSlidePostHookMethod');
   }
   const {
     id: learningObjectiveIdInResult,
@@ -102,7 +102,7 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
     log('Not able to fetch LearningObjectiveInfo in addUserActivityPQDumpPostHookMethod');
   }
   const userLearningObjectiveQueryRes = await callLocalGraphqlApi(
-    userLearningObjectiveQuery(userId, learningObjectiveId, courseId, learningSlideId),
+    userLearningObjectiveQuery(userId, learningObjectiveId, courseId, learningSlideId), context,
   );
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
@@ -127,6 +127,7 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
   }
   const currentTopicComponentInfo = get(context, `${mutation}.userCurrentTopicComponentStatuses`);
   await updateCurrentComponentStatusOfNewCourse(
+    userId,
     courseId,
     currentTopicComponentInfo,
     learningSlideStatus,

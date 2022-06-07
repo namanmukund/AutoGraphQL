@@ -2,12 +2,14 @@ import { get } from 'lodash';
 import getSelectedSlotsTime from './getSelectedSlotsTime';
 import { sessionType } from '../../../../../../constants';
 import { SlotsOccupiedError } from '../../../../../../constants/errors/db';
+import checkSessionsWithStartAndEndTime from './checkSessionsWithStartAndEndTime';
 
 const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsInPrevDoc, userBatchCode = '') => {
   const { input } = params;
   const bookingDate = get(input, 'bookingDate');
   let batchCode = null;
   let batchId = null;
+  let findSession = null;
   const { ...slots } = input;
   // const isToday = moment(finalBookingDate).diff(moment(new Date()), 'days') === 0;
   let slotTimeArray = getSelectedSlotsTime(slots);
@@ -52,6 +54,7 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
               batchCode = get(session, 'batch.code', '');
               batchId = get(session, 'batch.id', '');
               customError += `${get(session, 'batch.code', '')} `;
+              findSession = session;
             }
           }
         }
@@ -100,6 +103,24 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
       errorMessage += ' are already present and booked for ';
       errorMessage += customError;
       if (!bypassValidation) {
+        const { startMinutes, endMinutes } = input;
+        if (findSession && bookingDate && typeof startMinutes === 'number' && typeof endMinutes === 'number') {
+          const sessionExists = checkSessionsWithStartAndEndTime(startMinutes, endMinutes, bookingDate, slots, findSession);
+          if (sessionExists) {
+            throw new SlotsOccupiedError({
+              data: {
+                message: errorMessage,
+                batchInfo: {
+                  slots: slotsObj,
+                  bookingDate,
+                  code: batchCode,
+                  id: batchId,
+                },
+              },
+            });
+          }
+          return true;
+        }
         throw new SlotsOccupiedError({
           data: {
             message: errorMessage,

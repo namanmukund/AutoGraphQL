@@ -148,6 +148,20 @@ const getUserPracticeQuestionReportQuery = (
     ]
   }){
     id
+    detailedReport{
+      question{
+        id
+      }
+      attemptNumber
+      isCorrect
+      firstTry
+      secondTry
+      thirdOrMoreTry
+      isAnswerUsed
+      isHintUsed
+      startTime
+      endTime
+    }
   }
 }
   `;
@@ -185,7 +199,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   -we get next component from the document and update user current topic component status with same
   */
   const userLearningObjectiveQueryRes = await callLocalGraphqlApi(
-    userLearningObjectiveQuery(userId, learningObjectiveId, courseId),
+    userLearningObjectiveQuery(userId, learningObjectiveId, courseId), context,
   );
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
@@ -427,6 +441,7 @@ And current component status will not get changed when it is already consumed in
     );
   } else {
     await updateCurrentComponentStatusOfNewCourse(
+      userId,
       courseId,
       currentTopicComponentInfo,
       pqAction,
@@ -464,7 +479,31 @@ And current component status will not get changed when it is already consumed in
   if (get(context, 'fromAddUserLSDump')) {
     const pqReport = await callLocalGraphqlApi(getUserPracticeQuestionReportQuery(userId, learningObjectiveIdInResult, courseId));
     if (get(pqReport, 'data.userPracticeQuestionReports', []).length) {
-      // if exist update pqReport
+      const prevDetailedReport = get(pqReport, 'data.userPracticeQuestionReports[0].detailedReport', []);
+      prevDetailedReport.forEach((questionReport) => {
+        const isAlreadyAdded = detailedReport.find((detailReport) => get(detailReport, 'questionConnectId') === get(questionReport, 'question.id'));
+        if (!isAlreadyAdded) {
+          const questionConnectId = get(questionReport, 'question.id');
+          const {
+            attemptNumber, isCorrect, firstTry, secondTry,
+            thirdOrMoreTry, isAnswerUsed, isHintUsed, startTime, endTime,
+          } = questionReport;
+          const detailedReportObj = {
+            questionConnectId,
+            isCorrect,
+            isAnswerUsed,
+            isHintUsed,
+            firstTry,
+            secondTry,
+            thirdOrMoreTry,
+            attemptNumber,
+          };
+          if (startTime) detailedReportObj.startTime = startTime;
+          if (endTime) detailedReportObj.endTime = endTime;
+          detailedReport.push({ ...detailedReportObj });
+        }
+      });
+      // if pqReport exist update pqReport
       Object.assign(pqReportInput, {
         detailedReport: {
           replace: detailedReport,
