@@ -106,7 +106,7 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
     in that case if he is hitting back after blockBasedPractice consumption, status will not get updated
     if it is already completed
   */
-  const userBlockBasedPracticeQueryRes = await callLocalGraphqlApi(userBlockBasedPracticeQuery(userId, topicId, blockBasedPracticeId, courseId));
+  const userBlockBasedPracticeQueryRes = await callLocalGraphqlApi(userBlockBasedPracticeQuery(userId, topicId, blockBasedPracticeId, courseId), context);
   const userBlockBasedPracticeInfo = get(userBlockBasedPracticeQueryRes, 'data.userBlockBasedPractices[0]');
   const {
     id: userBlockBasedPracticeId,
@@ -142,6 +142,7 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
   */
   const page = isHomework ? 'homeworkPractice' : 'blockBasedPractice';
   await updateCurrentComponentStatusOfNewCourse(
+    userId,
     courseId,
     currentTopicComponentInfo,
     blockBasedPracticeAction,

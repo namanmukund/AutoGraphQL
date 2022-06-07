@@ -449,7 +449,6 @@ const classroomReport = (async (root, params, context) => {
       topicId,
     }),
   );
-
   if (!(batchSessionRes && batchSessionRes.length)) {
     throw new MissingMandatoryInputInRequestError({
       data: {
@@ -546,14 +545,6 @@ const classroomReport = (async (root, params, context) => {
       } else {
         obj.quizUnattemptedCount += 1;
       }
-      if (get(mms, 'isAssignmentSubmitted')) {
-        obj.assignmentSubmittedCount += 1;
-        obj.assignmentSubmissions.set(userId, {
-          userId,
-        });
-      } else {
-        obj.assignmentUnattemptedCount += 1;
-      }
     } else {
       // check if mms is absent
       obj.unattemptedCount += 1;
@@ -612,6 +603,7 @@ const classroomReport = (async (root, params, context) => {
     if (userAssignmentRes.length) {
       let isAtleastOneAssignmentSubmitted = false;
       obj.assignmentTotalQuestions = userAssignmentRes.length;
+      let isAssignmentAttemptedAndSubmitted = 0;
       for (const assignmentQuestion of userAssignmentRes) {
         if (get(assignmentQuestion, 'assignment.result') === 'correct') {
           obj.assignmentCorrectSum += 1;
@@ -625,18 +617,28 @@ const classroomReport = (async (root, params, context) => {
         // individual questions
         if (get(assignmentQuestion, 'assignmentStatus', '') === 'complete') {
           if (obj.assignmentQuestions.has(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''))) {
-            if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '').length) {
+            if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '') !== 'null' && get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '')) {
               obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), obj.assignmentQuestions.get(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', '')) + 1);
+              isAssignmentAttemptedAndSubmitted += 1;
             }
           } else {
-            if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '').length) {
+            if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '') !== 'null' && get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '')) {
               obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 1);
               isAtleastOneAssignmentSubmitted = true;
+              isAssignmentAttemptedAndSubmitted += 1;
             } else {
               obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 0);
             }
           }
         }
+      }
+      if (isAssignmentAttemptedAndSubmitted) {
+        obj.assignmentSubmittedCount += 1;
+        obj.assignmentSubmissions.set(userId, {
+          userId,
+        });
+      } else {
+        obj.assignmentUnattemptedCount += 1;
       }
       if (!isMmsPresent && isAtleastOneAssignmentSubmitted) {
         obj.assignmentSubmittedCount += 1;

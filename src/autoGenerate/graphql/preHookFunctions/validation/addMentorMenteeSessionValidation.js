@@ -37,6 +37,8 @@ query{
   menteeSession(id:"${menteeSessionId}"){
     id
     bookingDate
+    startMinutes
+    endMinutes
     mentorAvailabilitySlot{
       id
     }
