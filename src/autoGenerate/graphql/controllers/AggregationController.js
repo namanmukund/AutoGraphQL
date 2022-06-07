@@ -167,7 +167,7 @@ class AggregationController {
     const aggregationBuilder = builderInstance;
     const projectionMap = {};
 
-    // Looping through all the requested fielda and appending it to projection stage.
+    // Looping through all the requested fields and appending it to projection stage.
     this.#getRequestedGraphQLFieldsArray({
       fieldsRequestedForFetch,
       field,
