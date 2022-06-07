@@ -30,7 +30,7 @@ const commonFunctionForRelationAndMeta = async (
     count: 0,
   };
   if (isMetaType && (!params || !params.filter)) {
-    countDoc.count = result.length || 0;
+    countDoc.count = get(result, 'length') || 0;
     return countDoc;
   }
   if (params && params.first && params.last) {
@@ -96,6 +96,7 @@ const commonFunctionForRelationAndMeta = async (
       if (isMetaType) {
         return countDoc;
       }
+      // If result already exists, call postHook and return updated result
       if (result && result.length && get(result, '0.id')) {
         if (parsedInfoMap && parsedInfoMap.typeName) {
           const postHookResult = await posthook(result, camelCase(parsedInfoMap.typeName), context, params, info);
@@ -164,8 +165,8 @@ const commonFunctionForRelationAndMeta = async (
   const model = models[typeName];
   const { typeId } = result;
 
-  // if result exists and model is not defined i.e resulting relation
-  // is already resolved so return result.
+  // if result already exists and model is not defined i.e resulting relation
+  // is already resolved so call postHook and return updated result.
   if (result && result.id && !typeId && !model) {
     if (parsedInfoMap && parsedInfoMap.typeName) {
       const postHookResult = await posthook(result, camelCase(parsedInfoMap.typeName), context, params, info);

@@ -528,6 +528,18 @@ const DAY_BEFORE_DEMO_COMPLETED = 5;
 
 const LEAD_PARTNERS_TO_CHECK_FOR_DEMO = ['virgo_india', 'ICCS'];
 
+/**
+ * Mode allow us to query database in a specified manner.
+ * 1. Aggregation [Optimized approach but unstable currently] -
+ *    Build aggregation pipeline for requested graphQL query at once.
+ *    Note: Relation Fields in Nested Object/Array is not
+ *          suppported yet (fallbacks to cascade mode).
+ * 2. cascade [Stable version] -
+ *    Query database recursively using graphQL's field.resolve method.
+ *    i.e first query root collection and then querying db for requested
+ *    Relational and Meta fields.
+ *    Note: Takes longer period to resolve fields due N+1 problem.
+ */
 const dbControllerModes = {
   aggregation: 'aggregation',
   cascade: 'cascade',

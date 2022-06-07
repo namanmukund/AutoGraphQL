@@ -1,6 +1,11 @@
 import { camelCase } from 'lodash';
 import { prehook } from '../../preHook';
 
+// TODO: Pass updated input params from prehook.
+/**
+ * If Aggregation mode is enabled prehooks are not invoked for nested fields.
+ * so we are looping over and calling prehook for each nested fields.
+ * */
 const prehookValidationForNestedFields = async ({
   typeName,
   parsedASTMap,

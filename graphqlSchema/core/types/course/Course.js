@@ -48,7 +48,6 @@ const CourseTargetUserType = `
 
 const Course = `
   type Course @model
-  @databaseController(mode: "aggregation")
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
