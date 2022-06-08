@@ -12,7 +12,7 @@ const batchAttendanceType = `
 
 const batchLoginStatusType = `
   type BatchLoginStatusType {
-   student: StudentProfile! @relation(name:"BatchSessionLoginStudentProfile", direction: "OneWay")
+   user: User! @relation(name:"BatchSessionLoginUser", direction: "OneWay")
    isLoggedIn: Boolean
    systemId: String
  }`;
