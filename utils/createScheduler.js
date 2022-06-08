@@ -8,6 +8,7 @@ import scheduleB2BSessionHomeworkRemainder from './scheduleJobs/scheduleB2BSessi
 import scheduleEventSessionRemainder from './scheduleJobs/scheduleEventSessionRemainder';
 import scheduleBatchSessionOtpGenerator from './scheduleJobs/secheduleBatchSessionOtpGenerator';
 import scheduleUpdateLeadSource from './scheduleJobs/scheduleUpdateLeadSource';
+import scheduleUpdateTheoryClassStatus from './scheduleJobs/scheduleUpdateTheoryClassStatus'
 
 // create scheduler for different functionalities
 const createScheduler = (schedulerName) => {
@@ -115,6 +116,18 @@ const createScheduler = (schedulerName) => {
         await scheduleUpdateLeadSource();
       });
       break;
+    case 'autoCompleteTheoryClass':
+      rule.tz = 'Asia/Kolkata';
+      rule.hour = 2;
+      rule.minute = 0;
+      rule.dayOfWeek = new schedule.Range(0, 6);
+      // eslint-disable-next-line no-unused-vars
+      schedule.scheduleJob(rule, async () => {
+        // eslint-disable-next-line no-console
+        console.log('scheduler started for: ', schedulerName);
+        await scheduleUpdateTheoryClassStatus();
+      });
+        break;
     default:
   }
   return true;
