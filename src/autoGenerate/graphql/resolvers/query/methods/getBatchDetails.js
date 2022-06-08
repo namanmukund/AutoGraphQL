@@ -1,4 +1,5 @@
-/* eslint-disable */
+/* eslint-disable no-unused-vars */
+/* eslint-disable prefer-const */
 import { get } from 'lodash';
 import { slotTimes } from '../../../../../../constants';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
@@ -26,36 +27,37 @@ const getSlotTimeFields = (session) => {
 };
 
 const findSessionStartTime = (data) => {
-  let startTime, endTime
-  startTime = new Date(get(data, 'bookingDate'))
+  let startTime;
+  let endTime;
+  startTime = new Date(get(data, 'bookingDate'));
   endTime = new Date(get(data, 'bookingDate'));
-  const { startMinutes, endMinutes } = data
-  const startTimeHour = getSelectedSlotsTime(data)
+  const { startMinutes, endMinutes } = data;
+  const startTimeHour = getSelectedSlotsTime(data);
   if (startTimeHour.length) {
-    startTime.setHours(startTimeHour[0], 0, 0, 0)
+    startTime.setHours(startTimeHour[0], 0, 0, 0);
 
-    endTime = startTime.getTime() + endMinutes * 60 * 1000
-    
-    startTime.setHours(startTimeHour[0], startMinutes, 0, 0)
-    endTime = new Date(endTime)
+    endTime = startTime.getTime() + endMinutes * 60 * 1000;
+
+    startTime.setHours(startTimeHour[0], startMinutes, 0, 0);
+    endTime = new Date(endTime);
     if (startTime.getTime() >= endTime.getTime()) {
-        let endTimeNumber = startTimeHour[0] + 1
-        endTime.setHours(endTimeNumber)
+      const endTimeNumber = startTimeHour[0] + 1;
+      endTime.setHours(endTimeNumber);
     }
   }
-  return { startTime, endTime }
-}
+  return { startTime, endTime };
+};
 
 const getBatchSessionAggregation = ({
   schoolCode,
-  otp
+  otp,
 }) => [
-    {
-      $match: {
-        otp
-      },
+  {
+    $match: {
+      otp,
     },
-    {
+  },
+  {
     $lookup: {
       from: 'BatchSession',
       let: {
@@ -111,7 +113,7 @@ const getBatchSessionAggregation = ({
                         localField: 'user.typeId',
                         foreignField: 'id',
                         as: 'user',
-                      }
+                      },
                     },
                     {
                       $project: {
@@ -171,20 +173,20 @@ const getBatchSessionAggregation = ({
       ],
       as: 'batchSession',
     },
-    },
-    {
-      $project: {
-        batchSession: {
-          $arrayElemAt: ['$batchSession', 0],
-        },
+  },
+  {
+    $project: {
+      batchSession: {
+        $arrayElemAt: ['$batchSession', 0],
       },
     },
-    {
-      $match: {
-        'batchSession.batch.school.code': schoolCode
-      },
+  },
+  {
+    $match: {
+      'batchSession.batch.school.code': schoolCode,
     },
-  ]
+  },
+];
 
 const getBatchDetails = async (
   root,
@@ -194,12 +196,12 @@ const getBatchDetails = async (
   info,
   mutationName,
   ast,
-  authentication
+  authentication,
 ) => {
-  let batchSessionData = {}
-  const { otp, schoolCode } = params
+  let batchSessionData = {};
+  const { otp, schoolCode } = params;
   if (!otp || !schoolCode) {
-    throw new MissingMandatoryInputInRequestError()
+    throw new MissingMandatoryInputInRequestError();
   }
   const batchSessionModel = getTypeQueryController(
     'SchoolSessionOtp',
@@ -207,17 +209,17 @@ const getBatchDetails = async (
   const batchSessionsArray = await batchSessionModel.aggregate(
     getBatchSessionAggregation({
       schoolCode,
-      otp
+      otp,
     }),
   );
   if (!batchSessionsArray || !batchSessionsArray.length) {
-    throw new OTPMismatchError()
+    throw new OTPMismatchError();
   }
-  const batchDetails = get(batchSessionsArray, '[0].batchSession')
-  let { startTime, endTime } = findSessionStartTime(batchDetails)
-  const students = get(batchDetails, 'batch.students', [])
-  const batchStudentResult = []
-  students.map((studentData) => {
+  const batchDetails = get(batchSessionsArray, '[0].batchSession');
+  const { startTime, endTime } = findSessionStartTime(batchDetails);
+  const students = get(batchDetails, 'batch.students', []);
+  const batchStudentResult = [];
+  students.forEach((studentData) => {
     batchStudentResult.push({
       userId: get(studentData, 'user[0].id'),
       name: get(studentData, 'user[0].name'),
@@ -238,8 +240,8 @@ const getBatchDetails = async (
     endTime,
     sessionStartTime: '',
     batchStudents: batchStudentResult,
-  }
-  return batchSessionData
+  };
+  return batchSessionData;
 };
 
 export default getBatchDetails;
