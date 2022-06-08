@@ -8,7 +8,7 @@ import scheduleB2BSessionHomeworkRemainder from './scheduleJobs/scheduleB2BSessi
 import scheduleEventSessionRemainder from './scheduleJobs/scheduleEventSessionRemainder';
 import scheduleBatchSessionOtpGenerator from './scheduleJobs/secheduleBatchSessionOtpGenerator';
 import scheduleUpdateLeadSource from './scheduleJobs/scheduleUpdateLeadSource';
-import scheduleUpdateTheoryClassStatus from './scheduleJobs/scheduleUpdateTheoryClassStatus'
+import scheduleUpdateTheoryClassStatus from './scheduleJobs/scheduleUpdateTheoryClassStatus';
 
 // create scheduler for different functionalities
 const createScheduler = (schedulerName) => {
@@ -126,7 +126,7 @@ const createScheduler = (schedulerName) => {
         console.log('scheduler started for: ', schedulerName);
         await scheduleUpdateTheoryClassStatus();
       });
-        break;
+      break;
     default:
   }
   return true;

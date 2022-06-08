@@ -1,11 +1,11 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
-
 import moment from 'moment';
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
 
 const getPreviousYetToCompleteTheorySessions = async (date) => {
-    const query = `{
+  const query = `{
         batchSessions(filter:{
             and:[
               { batch_some: { documentType:classroom } }
@@ -20,12 +20,12 @@ const getPreviousYetToCompleteTheorySessions = async (date) => {
             }
         }        
     }`;
-    const result = await callLocalGraphqlApi(query);
-    return get(result, 'data.batchSessions');
+  const result = await callLocalGraphqlApi(query);
+  return get(result, 'data.batchSessions');
 };
 
 const completedTheoryClass = async (id) => {
-    const updateQuery = `mutation{
+  const updateQuery = `mutation{
         updateBatchSession(id: "${id}" input: {
             sessionStatus: completed
         }) {
@@ -33,16 +33,16 @@ const completedTheoryClass = async (id) => {
         }
     }
     `;
-    const updatedResult = await callLocalGraphqlApi(updateQuery);
-    return get(updatedResult, 'data.updateBatchSession')
+  const updatedResult = await callLocalGraphqlApi(updateQuery);
+  return get(updatedResult, 'data.updateBatchSession');
 };
 
-const scheduleUpdateTheoryClassStatus = async() => {
-    const oneHourBeforeDate = moment().subtract(1, 'hours').toISOString()
-    const batchSessions = await getPreviousYetToCompleteTheorySessions(oneHourBeforeDate)
-    for (const session of batchSessions) {
-        await completedTheoryClass(get(session, 'id'))
-    }
-}
+const scheduleUpdateTheoryClassStatus = async () => {
+  const oneHourBeforeDate = moment().subtract(1, 'hours').toISOString();
+  const batchSessions = await getPreviousYetToCompleteTheorySessions(oneHourBeforeDate);
+  for (const session of batchSessions) {
+    await completedTheoryClass(get(session, 'id'));
+  }
+};
 
 export default scheduleUpdateTheoryClassStatus;
