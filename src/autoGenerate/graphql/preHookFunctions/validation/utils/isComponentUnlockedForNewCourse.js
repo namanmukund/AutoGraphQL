@@ -151,24 +151,6 @@ const isComponentUnlockedForNewCourse = async (
     });
   }
 
-  // Bypassing component validation incase if schoolTeacher is accessing the content.
-  const checkForMentorChild = await isUserInheritedFromMentor(userIdFromContext, true);
-  if (userIdFromContext && typeof checkForMentorChild === 'boolean' && checkForMentorChild) {
-    if (mutationOrQueryName) {
-    // initialising object to be passed in context to save query
-      if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
-      // passing data in context which can be used further in post hook methods
-      // this will prevent a further query
-        Object.assign(context, {
-          [mutationOrQueryName]: {
-            learningObjective: learningObjectiveInfo,
-          },
-        });
-      }
-    }
-    return true;
-  }
-
   const userCurrentTopicComponentStatusRes = await getUserCurrentTopicComponentStatusForNewCourse(
     courseId,
     userId,
@@ -177,6 +159,27 @@ const isComponentUnlockedForNewCourse = async (
     'enrollmentType',
   );
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
+  // Bypassing component validation incase if schoolTeacher is accessing the content.
+  const checkForMentorChild = await isUserInheritedFromMentor(userIdFromContext, true);
+  if (userIdFromContext && typeof checkForMentorChild === 'boolean' && checkForMentorChild) {
+    if (mutationOrQueryName) {
+      const userCurrentTopicComponentStatusData = {};
+      if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
+      // passing data in context which can be used further in post hook methods
+      // this will prevent a further query
+        userCurrentTopicComponentStatusData[mutationOrQueryName] = {
+          userCurrentTopicComponentStatuses: currentTopicComponentInfo,
+          learningObjective: learningObjectiveInfo,
+        };
+      } else if (page === video || page === quiz || page === blockBasedProject || page === blockBasedPractice) {
+        userCurrentTopicComponentStatusData[mutationOrQueryName] = {
+          userCurrentTopicComponentStatuses: currentTopicComponentInfo,
+        };
+      }
+      Object.assign(context, userCurrentTopicComponentStatusData);
+    }
+    return true;
+  }
   if (!currentTopicComponentInfo) {
     throw new DatabaseRecordNotFoundError({
       data: {
