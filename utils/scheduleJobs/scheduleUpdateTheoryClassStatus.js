@@ -4,7 +4,7 @@ import moment from 'moment';
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
 
-const getUnCompletedTheoryClasses = async (date) => {
+const getPreviousYetToCompleteTheorySessions = async (date) => {
     const query = `{
         batchSessions(filter:{
             and:[
@@ -38,8 +38,8 @@ const completedTheoryClass = async (id) => {
 };
 
 const scheduleUpdateTheoryClassStatus = async() => {
-    const oneHourBeforeDate = moment().subtract(1, 'hours').format()
-    const batchSessions = await getUnCompletedTheoryClasses(oneHourBeforeDate)
+    const oneHourBeforeDate = moment().subtract(1, 'hours').toISOString()
+    const batchSessions = await getPreviousYetToCompleteTheorySessions(oneHourBeforeDate)
     for (const session of batchSessions) {
         await completedTheoryClass(get(session, 'id'))
     }
