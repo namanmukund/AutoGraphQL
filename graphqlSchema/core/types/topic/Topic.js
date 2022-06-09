@@ -17,6 +17,7 @@ const TopicComponentsRule = `
 
 const Topic = `
   type Topic @model
+  @databaseController(mode: "aggregation")
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },

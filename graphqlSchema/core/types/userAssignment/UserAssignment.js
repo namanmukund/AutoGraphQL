@@ -10,7 +10,7 @@ const assignmentType = `
  }`;
 
 const UserAssignment = `
-  type UserAssignment @model {
+  type UserAssignment @model @databaseController(mode: "aggregation") {
     user: User! @relation(name: "UserAssignment", direction: "OneWay")
     assignmentStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
     assignment: [AssignmentType]

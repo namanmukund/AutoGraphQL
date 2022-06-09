@@ -550,6 +550,8 @@ const DEFAULT_CLAMP_VALUE = {
   MAX: 100,
 };
 
+const FORCE_DB_AGGREGATION_MODE = false;
+
 export {
   scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
   operationName, sortBy, allFilters, BYPASS, rangeOTP,
@@ -644,4 +646,5 @@ export {
   DAY_BEFORE_DEMO_COMPLETED,
   LEAD_PARTNERS_TO_CHECK_FOR_DEMO,
   DEFAULT_CLAMP_VALUE,
+  FORCE_DB_AGGREGATION_MODE,
 };

@@ -26,7 +26,7 @@ const UserLearningSlideType = `
   }`;
 
 const UserLearningObjective = `
-  type UserLearningObjective @model {
+  type UserLearningObjective @model @databaseController(mode: "aggregation") {
     user: User! @relation(name: "UserLearningObjective", direction: "OneWay")
     learningObjective: LearningObjective! @relation(name: "UserLearningObjectiveLearningObjective", direction: "OneWay")
     chatStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
