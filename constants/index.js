@@ -534,7 +534,7 @@ const LEAD_PARTNERS_TO_CHECK_FOR_DEMO = ['virgo_india', 'ICCS'];
  *    Build aggregation pipeline for requested graphQL query at once.
  *    Note: Relation Fields in Nested Object/Array is not
  *          suppported yet (fallbacks to cascade mode).
- * 2. cascade [Stable version] -
+ * 2. Cascade [Stable version] -
  *    Query database recursively using graphQL's field.resolve method.
  *    i.e first query root collection and then querying db for requested
  *    Relational and Meta fields.

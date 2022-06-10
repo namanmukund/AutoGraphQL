@@ -178,7 +178,7 @@ class AggregationController {
       if (get(fieldParams, 'directive.relationalMeta')) {
         // const relationalFieldName = fieldInfo.name.split(META)[0];
         projectionMap[fieldInfo.name] = 1;
-        // In Meta Field we also proejct `${fieldInfo.name}_DocumentForMeta`
+        // In Meta Field we also project `${fieldInfo.name}_DocumentForMeta`
         // as this custom field contains all the result data from DB
         // without any filters or pagination.
         projectionMap[`${fieldInfo.name}_DocumentForMeta`] = 1;
@@ -328,7 +328,7 @@ class AggregationController {
           const fieldParams = field[fieldInfo.name];
           if (get(fieldParams, 'directive.relationalMeta')) {
             const relationalFieldName = fieldInfo.name.split(META)[0];
-            // Assigning corresponding relational field to custom variables
+            // Assigning corresponding relational field to custom variable
             // this helps us in total meta count for relationalMeta field
             // if no filters are applied to meta field.
             // Example:
