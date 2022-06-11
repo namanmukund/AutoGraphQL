@@ -8,6 +8,7 @@ type MenteeCourseHomeworkTopicChapter{
 
 const MenteeCourseHomeworkTopic = `
   type MenteeCourseHomeworkTopic{
+    id: ID
     order: Int! 
     title: String!  @trim
     description: String @trim
