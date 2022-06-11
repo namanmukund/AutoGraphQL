@@ -7,10 +7,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 const getAllUsers = [
   {
     $match: {
-      'id': {
-        $exists: true,
-      },
-      'name': {
+      'username': {
         $exists: true,
       }
     },
@@ -82,8 +79,8 @@ const updateUserNameEmailPassword = async () => {
   const getAllUsersData = await allUsers.aggregate(getAllUsers);
 
   // set school id, code and weather to update emails or not
-  const schoolId = "ckhnniyu700050vtn1o6x9016"
-  const schoolCode = 'eureka'
+  const schoolId = "ckibm4bax003m0vvi90th4glw"
+  const schoolCode = 'gm'
   const updateEmail = false
   const schoolStudents = await fetchSchoolStudents(schoolId);
   const nameMap = {}
@@ -91,19 +88,28 @@ const updateUserNameEmailPassword = async () => {
   for (const student of schoolStudents) {
     const firstName = get(student, 'studentProfile.parents[0].user.name').split(' ')[0]
     if (firstName) {
-      const findname = getAllUsersData.filter(item => get(item, 'name').toLowerCase() === firstName.toLowerCase())
+      const findname = getAllUsersData.filter(item => get(item, 'username') === firstName.toLowerCase())
       let finalname
       if (findname.length > 0) {
         if (findname.length === 1) {
           finalname = firstName
+          nameMap[firstName] = 1
         } else {
           if (nameMap[firstName]) {
             nameMap[firstName] += 1
             finalname = firstName + nameMap[firstName]
           } else {
             nameMap[firstName] = 1
-            finalname = firstName +1
+            finalname = firstName
           }
+        }
+      } else {
+        if (nameMap[firstName]) {
+          nameMap[firstName] += 1
+          finalname = firstName + nameMap[firstName]
+        } else {
+          nameMap[firstName] = 1
+          finalname = firstName
         }
       }
       let finalmail = ''
