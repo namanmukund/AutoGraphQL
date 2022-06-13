@@ -480,6 +480,177 @@ const getUserBatchDetails = (userId) => [
             id: 1,
             currentComponent: 1,
             coursePackage: 1,
+            coursePackageTopicRule: 1,
+          },
+        },
+        {
+          $lookup: {
+            from: 'Topic',
+            let: {
+              topicIds: {
+                $ifNull: ['$coursePackageTopicRule.topic.typeId', []],
+              },
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $in: ['$id', '$$topicIds'],
+                  },
+                },
+              },
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$status', 'published'],
+                  },
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  title: 1,
+                  order: 1,
+                  isTrial: 1,
+                  description: 1,
+                  topicQuestions: 1,
+                  thumbnail: 1,
+                  thumbnailSmall: 1,
+                  topicAssignmentQuestions: {
+                    assignmentQuestions: {
+                      id: 1,
+                    },
+                  },
+                  chapter: 1,
+                  topicComponentRule: 1,
+                },
+              },
+              {
+                $lookup: {
+                  from: 'File',
+                  let: {
+                    thumbnailId: '$thumbnail.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: [
+                            '$id',
+                            '$$thumbnailId',
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        uri: 1,
+                        name: 1,
+                      },
+                    },
+                  ],
+                  as: 'thumbnail',
+                },
+              },
+              {
+                $lookup: {
+                  from: 'File',
+                  let: {
+                    thumbnailSmallId: '$thumbnailSmall.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: [
+                            '$id',
+                            '$$thumbnailSmallId',
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        uri: 1,
+                        name: 1,
+                      },
+                    },
+                  ],
+                  as: 'thumbnailSmall',
+                },
+              },
+              {
+                $lookup: {
+                  from: 'Chapter',
+                  let: {
+                    chapterId: '$chapter.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: [
+                            '$id',
+                            '$$chapterId',
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: ['$status', 'published'],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        title: 1,
+                        order: 1,
+                      },
+                    },
+                  ],
+                  as: 'chapter',
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  title: 1,
+                  order: 1,
+                  isTrial: 1,
+                  description: 1,
+                  thumbnail: {
+                    $arrayElemAt: [
+                      '$thumbnail',
+                      0,
+                    ],
+                  },
+                  thumbnailSmall: {
+                    $arrayElemAt: [
+                      '$thumbnailSmall',
+                      0,
+                    ],
+                  },
+                  topicAssignmentQuestions: {
+                    assignmentQuestions: {
+                      id: 1,
+                    },
+                  },
+                  chapter: {
+                    $arrayElemAt: [
+                      '$chapter',
+                      0,
+                    ],
+                  },
+                  topicComponentRule: 1,
+                },
+              },
+            ],
+            as: 'coursePackageTopicArr',
           },
         },
         {
@@ -823,6 +994,8 @@ const getUserBatchDetails = (userId) => [
             currentComponent: {
               $arrayElemAt: ['$currentComponent', 0],
             },
+            coursePackageTopicRule: 1,
+            coursePackageTopicArr: 1,
           },
         },
       ],
