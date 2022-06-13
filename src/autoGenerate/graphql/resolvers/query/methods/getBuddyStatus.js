@@ -8,10 +8,11 @@ const BATCHSESSION_TYPE = 'BatchSession';
 
 const STUDENTPROFILE_TYPE = 'StudentProfile';
 
-const checkIfExistInArray = (userId, arrayData = []) => {
+const checkIfExistInArray = (userId, arrayData = [], systemId) => {
   if (!userId || !arrayData.length) return false;
   const findInArray = arrayData.find((data) => get(data, 'user.typeId') === userId);
   if (!findInArray) return false;
+  if (systemId && findInArray && get(findInArray, 'systemId') === systemId) return false;
   return true;
 };
 
@@ -147,7 +148,7 @@ const getBuddyStatus = async (
   const updateLoginStatusModal = new MutationController(BATCHSESSION_TYPE, authentication);
   if (action === 'check') {
     // Returns true if exist else returns false;
-    result = checkIfExistInArray(userId, addedStudentsArray);
+    result = checkIfExistInArray(userId, addedStudentsArray, systemId);
   } else if (action === 'add') {
     const isAlreadyAdded = checkIfExistInArray(userId, addedStudentsArray);
     // If alreadyAdded then it returns false, else it updates in the list and returns true;
@@ -157,6 +158,10 @@ const getBuddyStatus = async (
         loggedInUserStatus: addedStudentsArray,
       });
       result = true;
+    }
+    if (!result) {
+      const findInArray = addedStudentsArray.find((data) => get(data, 'user.typeId') === userId);
+      if (systemId && findInArray && get(findInArray, 'systemId') === systemId) result = true;
     }
   } else if (action === 'delete') {
     const isAdded = checkIfExistInArray(userId, addedStudentsArray);
