@@ -160,6 +160,7 @@ const getBatchSessionAggregation = ({
             bookingDate: 1,
             startMinutes: 1,
             endMinutes: 1,
+            sessionStatus: 1,
             topic: {
               id: 1,
               title: 1,
@@ -240,6 +241,7 @@ const getBatchDetails = async (
     endTime,
     sessionStartTime: '',
     batchStudents: batchStudentResult,
+    sessionStatus: get(batchDetails, 'sessionStatus'),
   };
   return batchSessionData;
 };

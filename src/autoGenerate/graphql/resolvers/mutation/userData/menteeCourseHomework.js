@@ -893,6 +893,7 @@ const constructHomeworkArr = (finalTopicBasedHomeworkArray, mentorMenteeSession,
   ) {
     finalTopicBasedHomeworkArray.push({
       ...mentorMenteeSession,
+      id: get(topic, 'id'),
       mentorMenteeSessionAvailable: true,
       topic,
     });
@@ -902,7 +903,7 @@ const constructHomeworkArr = (finalTopicBasedHomeworkArray, mentorMenteeSession,
   ) {
     finalTopicBasedHomeworkArray.push({
       ...defaultMentorMenteeSessionObject,
-      id: mentorMenteeSession.id,
+      id: get(topic, 'id'),
       mentorMenteeSessionAvailable: true,
       sessionStatus: get(mentorMenteeSession, 'sessionStatus'),
       topic,
@@ -910,7 +911,7 @@ const constructHomeworkArr = (finalTopicBasedHomeworkArray, mentorMenteeSession,
   } else {
     finalTopicBasedHomeworkArray.push({
       ...defaultMentorMenteeSessionObject,
-      id: mentorMenteeSession.id,
+      id: get(topic, 'id'),
       mentorMenteeSessionAvailable: false,
       topic,
     });
