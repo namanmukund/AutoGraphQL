@@ -3,12 +3,13 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const fetchTimetableSchedules = async (schoolConnectId, batchConnectIds) => {
+const fetchTimetableSchedules = async (schoolConnectId, batchConnectIds, id) => {
   const query = `
     {
       timetableSchedules(filter: {
         and: [
           {type: workingDay}
+          {id_not: "${id}"}
           ${batchConnectIds ? `{batch_some: {id_in: ${batchConnectIds}}}` : ''}
           ${schoolConnectId ? `{school_some: {id: "${schoolConnectId}"}}` : ''}
         ]
@@ -34,7 +35,7 @@ const deleteTimetableSchedule = async (scheduleId) => {
 };
 
 const updateTimetableScheduleValidation = async (params) => {
-  const { batchConnectIds = [], schoolConnectId, input: { type } } = params;
+  const { batchConnectIds = [], schoolConnectId, input: { type }, id } = params;
   // check if working day connect id is passed and if one of the batches/schools has working day already in it
   if (type !== 'workingDay') return true;
   if (batchConnectIds.length > 0) {
@@ -47,7 +48,7 @@ const updateTimetableScheduleValidation = async (params) => {
     }
   }
   if (schoolConnectId) {
-    const timetableSchedules = await fetchTimetableSchedules(schoolConnectId);
+    const timetableSchedules = await fetchTimetableSchedules(schoolConnectId, null, id);
     if (timetableSchedules.length > 0) {
       // delete all existing schedules
       for (const schedule of timetableSchedules) {
