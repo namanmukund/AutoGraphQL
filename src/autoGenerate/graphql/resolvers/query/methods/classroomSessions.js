@@ -1,5 +1,5 @@
 /* eslint-disable no-plusplus */
-import { isBefore, isToday } from 'date-fns';
+import { isAfter, isBefore, isToday } from 'date-fns';
 import { get, sortBy } from 'lodash';
 import moment from 'moment';
 import { slotTimes } from '../../../../../../constants';
@@ -688,6 +688,21 @@ const constructDocFilters = (filters) => {
 
 const getSessionStatus = (session) => {
   const sessionStatus = get(session, 'sessionStatus', 'allotted');
+  let sessionSlot = 23;
+  const currentSlot = new Date().getHours() || 0;
+  for (let i = 0; i < 24; i++) {
+    if (session[`slot${i}`]) {
+      sessionSlot = i;
+    }
+  }
+
+  if ((get(session, 'topic.classType', 'lab') === 'theory')
+    && (
+      isAfter(get(session, 'bookingDate'), new Date())
+      || (isToday(get(session, 'bookingDate')) && (currentSlot > (sessionSlot + 1)))
+    )) {
+    return 'completed';
+  }
   if ((sessionStatus === 'allotted')
     || ((sessionStatus === 'started') && !get(session, 'sessionStartedByMentorAt'))) {
     /**
@@ -695,14 +710,7 @@ const getSessionStatus = (session) => {
      */
     if (isBefore(get(session, 'bookingDate'), new Date())) {
       if (isToday(get(session, 'bookingDate'))) {
-        const currentSlot = new Date().getHours() || 0;
         const currentMinutes = new Date().getMinutes() || 0;
-        let sessionSlot = 23;
-        for (let i = 0; i < 24; i++) {
-          if (session[`slot${i}`]) {
-            sessionSlot = i;
-          }
-        }
         if (currentSlot < sessionSlot) {
           return sessionStatus;
         }
