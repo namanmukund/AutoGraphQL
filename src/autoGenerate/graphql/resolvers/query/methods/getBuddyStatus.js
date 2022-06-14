@@ -24,7 +24,7 @@ const getTypeQueryController = (
 ) => new QueryController(typeName, authentication);
 
 const getStudentLoggedInStatus = ({
-  sessionId,
+  sessionId, project = {},
 }) => [
   {
     $match: {
@@ -32,10 +32,7 @@ const getStudentLoggedInStatus = ({
     },
   },
   {
-    $project: {
-      id: 1,
-      loggedInUserStatus: 1,
-    },
+    $project: project,
   },
 ];
 
@@ -95,9 +92,9 @@ const getBuddyStatus = async (
   params,
 ) => {
   const {
-    sessionId, userId, systemId, action, password,
+    sessionId, userId, systemId, action, password, studentIds = [],
   } = params;
-  if (!sessionId || !action || !['add', 'delete', 'check', 'confirmPassword'].includes(action)) {
+  if (!sessionId || !action || !['add', 'delete', 'check', 'confirmPassword', 'markAttendance'].includes(action)) {
     throw new MissingMandatoryInputInRequestError({
       data: {
         message: 'Either SessionId or action type or all missing in input',
@@ -132,6 +129,21 @@ const getBuddyStatus = async (
       },
     });
   }
+  if (action === 'markAttendance' && !studentIds.length) {
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'studentProfile Id`s is missing in input',
+      },
+    });
+  }
+  const project = {
+    id: 1,
+  };
+  if (action === 'markAttendance' && studentIds.length) {
+    project.attendance = 1;
+  } else {
+    project.loggedInUserStatus = 1;
+  }
   const authentication = {
     bypass: true,
   };
@@ -140,7 +152,7 @@ const getBuddyStatus = async (
   );
   const batchSessionData = await batchSessionModel.aggregate(
     getStudentLoggedInStatus({
-      sessionId,
+      sessionId, project,
     }),
   );
   const addedStudentsArray = get(batchSessionData, '[0].loggedInUserStatus', []);
@@ -192,6 +204,26 @@ const getBuddyStatus = async (
     const valid = bcrypt.compareSync(password, get(userData, '[0].parents.user[0].password'));
     if (!valid) {
       throw new PasswordMismatchError();
+    }
+    result = true;
+  } else if (action === 'markAttendance' && studentIds && studentIds.length) {
+    const attendanceArray = get(batchSessionData, '[0].attendance', []) || [];
+    let isUpdated = false;
+    studentIds.forEach((studentProfileId) => {
+      const findStudentDataIndex = attendanceArray.findIndex((student) => get(student, 'student.typeId') === studentProfileId);
+      if (findStudentDataIndex !== -1) {
+        const attendanceDoc = attendanceArray[findStudentDataIndex];
+        if (get(attendanceDoc, 'status') !== 'present' && !get(attendanceDoc, 'isPresent', false)) {
+          isUpdated = true;
+          attendanceArray[findStudentDataIndex].status = 'present';
+          attendanceArray[findStudentDataIndex].isPresent = true;
+        }
+      }
+    });
+    if (isUpdated) {
+      updateLoginStatusModal.updateOne({ id: sessionId }, {
+        attendance: attendanceArray,
+      });
     }
     result = true;
   }
