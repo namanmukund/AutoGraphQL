@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { OLD_COURSE_ID } from '../../../../../../constants';
+// import { OLD_COURSE_ID } from '../../../../../../constants';
 import { DatabaseRecordNotFoundError } from '../../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
@@ -19,10 +19,9 @@ const defaultMentorMenteeSessionObject = {
   isHomeworkCheckedByMentor: false,
   isReviewSubmittedOnTime: false,
 };
-const mentorMenteeSessionAggregation = (coursePackageFilter, userId) => [
+const mentorMenteeSessionAggregation = (userId) => [
   {
     $match: {
-      ...coursePackageFilter,
       sessionStatus: 'completed',
     },
   },
@@ -1124,14 +1123,14 @@ const menteeCourseHomeworkMutationResolver = async (
   const currentTopicComponentInfo = res[0];
   const userBatchDetailsRes = new QueryController('StudentProfile', { bypass: true });
   const userBatchDetails = await userBatchDetailsRes.aggregate(getUserBatchDetails(userId));
-  let courseOrPackageFilter = {
-    'course.typeId': courseId || OLD_COURSE_ID,
-  };
+  // let courseOrPackageFilter = {
+  //   'course.typeId': courseId || OLD_COURSE_ID,
+  // };
   if (get(userBatchDetails, '0.batch.coursePackage.id')) {
     coursePackage = get(userBatchDetails, '0.batch.coursePackage', {});
-    courseOrPackageFilter = {
-      'coursePackage.typeId': get(coursePackage, 'id'),
-    };
+    // courseOrPackageFilter = {
+    //   'coursePackage.typeId': get(coursePackage, 'id'),
+    // };
   }
 
   // calling method to validate user current topic component status
@@ -1146,7 +1145,7 @@ const menteeCourseHomeworkMutationResolver = async (
     bypass: true,
   });
   const mentorMenteeSessions = await modelQuery.aggregate(
-    mentorMenteeSessionAggregation(courseOrPackageFilter, userId),
+    mentorMenteeSessionAggregation(userId),
   );
   if (batchCurrentComponentInfo || coursePackage) {
     currentTopicOrder = get(batchCurrentComponentInfo, 'currentTopic.order');
