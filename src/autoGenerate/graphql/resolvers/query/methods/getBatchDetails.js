@@ -51,143 +51,152 @@ const findSessionStartTime = (data) => {
 const getBatchSessionAggregation = ({
   schoolCode,
   otp,
-}) => [
-  {
-    $match: {
-      otp,
-    },
-  },
-  {
-    $lookup: {
-      from: 'BatchSession',
-      let: {
-        batchSessionId: '$batchSession.typeId',
-      },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: ['$id', '$$batchSessionId'],
-            },
-          },
-        },
-        {
-          $lookup: {
-            from: 'Batch',
-            let: {
-              batchId: '$batch.typeId',
-            },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: ['$id', '$$batchId'],
-                  },
-                },
-              },
-              {
-                $lookup: {
-                  from: 'School',
-                  localField: 'school.typeId',
-                  foreignField: 'id',
-                  as: 'school',
-                },
-              },
-              {
-                $lookup: {
-                  from: 'StudentProfile',
-                  let: {
-                    studentProfileId: '$students.typeId',
-                  },
-                  pipeline: [
-                    {
-                      $match: {
-                        $expr: {
-                          $in: ['$id', '$$studentProfileId'],
-                        },
-                      },
-                    },
-                    {
-                      $lookup: {
-                        from: 'User',
-                        localField: 'user.typeId',
-                        foreignField: 'id',
-                        as: 'user',
-                      },
-                    },
-                    {
-                      $project: {
-                        grade: 1,
-                        section: 1,
-                        rollNo: 1,
-                        profileAvatarCode: 1,
-                        user: {
-                          id: 1,
-                          name: 1,
-                        },
-                      },
-                    },
-                  ],
-                  as: 'students',
-                },
-              },
-              {
-                $project: {
-                  id: 1,
-                  code: 1,
-                  classroomTitle: 1,
-                  school: {
-                    code: 1,
-                  },
-                  students: 1,
-                },
-              },
-            ],
-            as: 'batch',
-          },
-        },
-        {
-          $lookup: {
-            from: 'Topic',
-            localField: 'topic.typeId',
-            foreignField: 'id',
-            as: 'topic',
-          },
-        },
-        {
-          $project: {
-            id: 1,
-            bookingDate: 1,
-            startMinutes: 1,
-            endMinutes: 1,
-            sessionStatus: 1,
-            topic: {
-              id: 1,
-              title: 1,
-            },
-            batch: {
-              $arrayElemAt: ['$batch', 0],
-            },
-            ...getSlotTimeFields(),
-          },
-        },
-      ],
-      as: 'batchSession',
-    },
-  },
-  {
-    $project: {
-      batchSession: {
-        $arrayElemAt: ['$batchSession', 0],
-      },
-    },
-  },
-  {
-    $match: {
+}) => {
+  let schoolCodeMatchStage = {};
+  if (schoolCode) {
+    schoolCodeMatchStage = {
       'batchSession.batch.school.code': schoolCode,
+    };
+  }
+
+  return [
+    {
+      $match: {
+        otp,
+      },
     },
-  },
-];
+    {
+      $lookup: {
+        from: 'BatchSession',
+        let: {
+          batchSessionId: '$batchSession.typeId',
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$id', '$$batchSessionId'],
+              },
+            },
+          },
+          {
+            $lookup: {
+              from: 'Batch',
+              let: {
+                batchId: '$batch.typeId',
+              },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: ['$id', '$$batchId'],
+                    },
+                  },
+                },
+                {
+                  $lookup: {
+                    from: 'School',
+                    localField: 'school.typeId',
+                    foreignField: 'id',
+                    as: 'school',
+                  },
+                },
+                {
+                  $lookup: {
+                    from: 'StudentProfile',
+                    let: {
+                      studentProfileId: '$students.typeId',
+                    },
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: {
+                            $in: ['$id', '$$studentProfileId'],
+                          },
+                        },
+                      },
+                      {
+                        $lookup: {
+                          from: 'User',
+                          localField: 'user.typeId',
+                          foreignField: 'id',
+                          as: 'user',
+                        },
+                      },
+                      {
+                        $project: {
+                          grade: 1,
+                          section: 1,
+                          rollNo: 1,
+                          profileAvatarCode: 1,
+                          user: {
+                            id: 1,
+                            name: 1,
+                          },
+                        },
+                      },
+                    ],
+                    as: 'students',
+                  },
+                },
+                {
+                  $project: {
+                    id: 1,
+                    code: 1,
+                    classroomTitle: 1,
+                    school: {
+                      code: 1,
+                    },
+                    students: 1,
+                  },
+                },
+              ],
+              as: 'batch',
+            },
+          },
+          {
+            $lookup: {
+              from: 'Topic',
+              localField: 'topic.typeId',
+              foreignField: 'id',
+              as: 'topic',
+            },
+          },
+          {
+            $project: {
+              id: 1,
+              bookingDate: 1,
+              startMinutes: 1,
+              endMinutes: 1,
+              sessionStatus: 1,
+              topic: {
+                id: 1,
+                title: 1,
+              },
+              batch: {
+                $arrayElemAt: ['$batch', 0],
+              },
+              ...getSlotTimeFields(),
+            },
+          },
+        ],
+        as: 'batchSession',
+      },
+    },
+    {
+      $project: {
+        batchSession: {
+          $arrayElemAt: ['$batchSession', 0],
+        },
+      },
+    },
+    {
+      $match: {
+        ...schoolCodeMatchStage,
+      },
+    },
+  ];
+};
 
 const getBatchDetails = async (
   root,
@@ -201,7 +210,7 @@ const getBatchDetails = async (
 ) => {
   let batchSessionData = {};
   const { otp, schoolCode } = params;
-  if (!otp || !schoolCode) {
+  if (!otp) {
     throw new MissingMandatoryInputInRequestError();
   }
   const batchSessionModel = getTypeQueryController(
