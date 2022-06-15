@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import { get } from 'lodash';
@@ -7,9 +8,9 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 const getAllUsers = [
   {
     $match: {
-      'username': {
+      username: {
         $exists: true,
-      }
+      },
     },
   },
   {
@@ -68,7 +69,7 @@ const updateUser = async (id, input) => {
   }
 `;
   const updatedResult = await callLocalGraphqlApi(updateQuery, '', { input });
-  return get(updatedResult, 'data.updateUser')
+  return get(updatedResult, 'data.updateUser');
 };
 
 const updateUserNameEmailPassword = async () => {
@@ -79,61 +80,54 @@ const updateUserNameEmailPassword = async () => {
   const getAllUsersData = await allUsers.aggregate(getAllUsers);
 
   // set school id, code and weather to update emails or not
-  const schoolId = "ckibm4bax003m0vvi90th4glw"
-  const schoolCode = 'gm'
-  const updateEmail = false
+  const schoolId = 'ckibm4bax003m0vvi90th4glw';
+  const schoolCode = 'gm';
+  const updateEmail = false;
   const schoolStudents = await fetchSchoolStudents(schoolId);
-  const nameMap = {}
+  const nameMap = {};
 
   for (const student of schoolStudents) {
-    const firstName = get(student, 'studentProfile.parents[0].user.name').split(' ')[0]
+    const firstName = get(student, 'studentProfile.parents[0].user.name').split(' ')[0];
     if (firstName) {
-      const findname = getAllUsersData.filter(item => get(item, 'username') === firstName.toLowerCase())
-      let finalname
-      if (findname.length > 0) {
-        if (findname.length === 1) {
-          finalname = firstName
-          nameMap[firstName] = 1
-        } else {
-          if (nameMap[firstName]) {
-            nameMap[firstName] += 1
-            finalname = firstName + nameMap[firstName]
-          } else {
-            nameMap[firstName] = 1
-            finalname = firstName
-          }
-        }
-      } else {
+      const findname = getAllUsersData.filter((item) => get(item, 'username') === firstName.toLowerCase());
+      let finalname;
+      if (findname.length) {
         if (nameMap[firstName]) {
-          nameMap[firstName] += 1
-          finalname = firstName + nameMap[firstName]
+          nameMap[firstName] += findname.length;
+          finalname = firstName + nameMap[firstName];
         } else {
-          nameMap[firstName] = 1
-          finalname = firstName
+          nameMap[firstName] = 1;
+          finalname = firstName + nameMap[firstName];
         }
+      } else if (nameMap[firstName]) {
+        nameMap[firstName] += 1;
+        finalname = firstName + nameMap[firstName];
+      } else {
+        nameMap[firstName] = 1;
+        finalname = firstName;
       }
-      let finalmail = ''
-      let input = {
-        'username': finalname,
-        'password': finalname,
-      }
+      let finalmail = '';
+      const input = {
+        username: finalname,
+        password: finalname,
+      };
       if (updateEmail) {
-        let firstEmail = get(student, 'studentProfile.parents[0].user.email').split('@')[0]
+        const firstEmail = get(student, 'studentProfile.parents[0].user.email').split('@')[0];
         if (firstEmail) {
-          const firstEmailChars = firstEmail.split('')
-          let finalLastNumber = ''
-          for (let i = firstEmailChars.length - 1; i>=0; i--) {
+          const firstEmailChars = firstEmail.split('');
+          let finalLastNumber = '';
+          for (let i = firstEmailChars.length - 1; i >= 0; i--) {
             if (!isNaN(firstEmailChars[i])) {
-              finalLastNumber = firstEmailChars[i] + finalLastNumber
+              finalLastNumber = firstEmailChars[i] + finalLastNumber;
             }
           }
-          finalmail = `${schoolCode}${finalLastNumber}@tekie.in`
-          input['email'] = finalmail
+          finalmail = `${schoolCode}${finalLastNumber}@tekie.in`;
+          input.email = finalmail;
         }
       }
       if (finalname) {
-        const id = get(student, 'studentProfile.parents[0].user.id')
-        await updateUser(id, input)
+        const id = get(student, 'studentProfile.parents[0].user.id');
+        await updateUser(id, input);
       }
     }
   }
