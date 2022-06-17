@@ -550,19 +550,51 @@ const DEFAULT_CLAMP_VALUE = {
   MAX: 100,
 };
 
-const FORCE_DB_AGGREGATION_MODE = false;
+/**
+ * Options:
+ * 1. ALLOWED - allows aggregation if directive exists for the type.
+ * 1. FORCE - force aggregation mode on all types.
+ * 1. BLOCK - Fallback to default DB Mode (i.e Cascade).
+ */
+const DB_AGGREGATION_MODE_STATUS_OPTIONS = {
+  ALLOWED: 'ALLOWED',
+  FORCE: 'FORCE',
+  BLOCK: 'BLOCK',
+};
+
+const DB_AGGREGATION_MODE_STATUS = {
+  ACTIVE: DB_AGGREGATION_MODE_STATUS_OPTIONS.ALLOWED,
+  OPTIONS: DB_AGGREGATION_MODE_STATUS_OPTIONS,
+};
 
 export {
-  scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
-  operationName, sortBy, allFilters, BYPASS, rangeOTP,
-  relationDirections, errors, randomNumberRangeForUsername, nameRules,
-  usernameRules, smsOTPMessage, frontEndApps,
+  scalarTypes,
+  defaultFields,
+  backendApps,
+  connectMutationsArgumentsSuffix,
+  operationName,
+  sortBy,
+  allFilters,
+  BYPASS,
+  rangeOTP,
+  relationDirections,
+  errors,
+  randomNumberRangeForUsername,
+  nameRules,
+  usernameRules,
+  smsOTPMessage,
+  frontEndApps,
   defaultLimitValue,
   fromEmail,
-  STATIC, permissionIntegratedApps,
-  resizePicDimensions, fileSizeLimitInMB, fileExtensions, fetchRetries,
+  STATIC,
+  permissionIntegratedApps,
+  resizePicDimensions,
+  fileSizeLimitInMB,
+  fileExtensions,
+  fetchRetries,
   fetchRetryDelay,
-  firebaseExcludedApps, defaultPermissionErrorMsg,
+  firebaseExcludedApps,
+  defaultPermissionErrorMsg,
   SUPER_ADMIN,
   timeZones,
   defaultDeleteLimitValue,
@@ -646,5 +678,5 @@ export {
   DAY_BEFORE_DEMO_COMPLETED,
   LEAD_PARTNERS_TO_CHECK_FOR_DEMO,
   DEFAULT_CLAMP_VALUE,
-  FORCE_DB_AGGREGATION_MODE,
+  DB_AGGREGATION_MODE_STATUS,
 };

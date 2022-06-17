@@ -3,7 +3,7 @@ import { AggregationBuilder } from 'mongodb-aggregation-builder';
 import { ConditionPayload, EqualityPayload } from 'mongodb-aggregation-builder/helpers';
 import { get, truncate } from 'lodash';
 import { getTypeDirectiveArgumentValue } from '../../utils/getDirectiveArgumentValue';
-import { META, dbControllerModes, FORCE_DB_AGGREGATION_MODE } from '../../../../constants';
+import { META, dbControllerModes, DB_AGGREGATION_MODE_STATUS } from '../../../../constants';
 import { getParsedASTMap } from '../../utils';
 import { types } from '../../../../utils';
 import parseGraphqlResolveInfo from '../../../../utils/parseGraphqlResolveInfo';
@@ -14,7 +14,8 @@ const parsedASTMap = getParsedASTMap(types);
 // Allow Aggregation if databaseController directive
 // exists on Type with mode as aggregation.
 export const checkIfDatabaseAggregationAllowedOnType = ({ typeName }) => {
-  if (FORCE_DB_AGGREGATION_MODE) return true;
+  if (DB_AGGREGATION_MODE_STATUS.ACTIVE === DB_AGGREGATION_MODE_STATUS.OPTIONS.FORCE) return true;
+  if (DB_AGGREGATION_MODE_STATUS.ACTIVE === DB_AGGREGATION_MODE_STATUS.OPTIONS.BLOCK) return false;
   if (parsedASTMap && typeName) {
     const { directives } = parsedASTMap[typeName];
     const typeControllerMode = getTypeDirectiveArgumentValue(
