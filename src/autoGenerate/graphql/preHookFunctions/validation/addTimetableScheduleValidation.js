@@ -50,9 +50,9 @@ const addTimetableScheduleValidation = async (params) => {
     const timetableSchedules = await fetchTimetableSchedules(schoolConnectId);
     if (timetableSchedules.length > 0) {
       // delete all existing schedules
-      for (const schedule of timetableSchedules) {
-        await deleteTimetableSchedule(schedule.id);
-      }
+      // for (const schedule of timetableSchedules) {
+      //   await deleteTimetableSchedule(schedule.id);
+      // }
     }
   }
   return true;
