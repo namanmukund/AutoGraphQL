@@ -1,5 +1,5 @@
 /* eslint-disable no-plusplus */
-import { isAfter, isBefore, isToday } from 'date-fns';
+import { isBefore, isToday } from 'date-fns';
 import { get, sortBy } from 'lodash';
 import moment from 'moment';
 import { slotTimes } from '../../../../../../constants';
