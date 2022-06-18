@@ -384,7 +384,7 @@ const transformMongoResults = (obj) => {
   finalResult.coding.questions = Array.from(obj.assignmentQuestions.entries(), ([k, v]) => {
     return {
       questionId: k,
-      percentageCorrect: obj.assignmentSubmittedCount === 0 ? 0 : ((v * 100) / obj.assignmentSubmittedCount).toFixed(),
+      percentageCorrect: obj.assignmentSubmittedCount === 0 ? 0 : ((v * 100) / obj.studentsCount).toFixed(),
     };
   });
   finalResult.quiz.learningObjectiveReport = Array.from(obj.quizLearningObjectiveReport.entries(), ([k, v]) => {
