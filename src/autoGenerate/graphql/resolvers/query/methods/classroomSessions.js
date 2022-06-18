@@ -698,7 +698,7 @@ const getSessionStatus = (session) => {
 
   if ((get(session, 'topic.classType', 'lab') === 'theory')
     && (
-      isAfter(get(session, 'bookingDate'), new Date())
+      isBefore(get(session, 'bookingDate'), new Date())
       || (isToday(get(session, 'bookingDate')) && (currentSlot > (sessionSlot + 1)))
     )) {
     return 'completed';
