@@ -91,7 +91,8 @@ const commonFunctionForRelationAndMeta = async (
       return result;
     }
     // get model name
-    const typeName = result[0].type;
+    // Checking if type and typeId both exists in result and extracting relational type.
+    const typeName = (result[0].type && result[0].typeId) ? result[0].type : null;
     if (!typeName) {
       if (isMetaType) {
         return countDoc;
