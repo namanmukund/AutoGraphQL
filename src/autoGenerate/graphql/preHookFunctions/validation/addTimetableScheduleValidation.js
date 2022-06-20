@@ -21,17 +21,17 @@ const fetchTimetableSchedules = async (schoolConnectId, batchConnectIds) => {
   return get(res, 'data.timetableSchedules', []);
 };
 
-const deleteTimetableSchedule = async (scheduleId) => {
-  const query = `
-  mutation{
-    deleteTimetableSchedule(id: "${scheduleId}"){
-      id
-    }
-  }
-  `;
-  const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.deleteTimetableSchedule.id', '');
-};
+// const deleteTimetableSchedule = async (scheduleId) => {
+//   const query = `
+//   mutation{
+//     deleteTimetableSchedule(id: "${scheduleId}"){
+//       id
+//     }
+//   }
+//   `;
+//   const res = await callLocalGraphqlApi(query);
+//   return get(res, 'data.deleteTimetableSchedule.id', '');
+// };
 
 const addTimetableScheduleValidation = async (params) => {
   const { batchConnectIds = [], schoolConnectId, input: { type } } = params;
@@ -41,18 +41,18 @@ const addTimetableScheduleValidation = async (params) => {
     const timetableSchedules = await fetchTimetableSchedules(null, JSON.stringify(batchConnectIds));
     if (timetableSchedules.length > 0) {
       // delete all existing schedules
-      for (const schedule of timetableSchedules) {
-        await deleteTimetableSchedule(schedule.id);
-      }
+      // for (const schedule of timetableSchedules) {
+      //   await deleteTimetableSchedule(schedule.id);
+      // }
     }
   }
   if (schoolConnectId) {
     const timetableSchedules = await fetchTimetableSchedules(schoolConnectId);
     if (timetableSchedules.length > 0) {
       // delete all existing schedules
-      for (const schedule of timetableSchedules) {
-        await deleteTimetableSchedule(schedule.id);
-      }
+      // for (const schedule of timetableSchedules) {
+      //   await deleteTimetableSchedule(schedule.id);
+      // }
     }
   }
   return true;
