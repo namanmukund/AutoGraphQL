@@ -9,7 +9,7 @@ export const UnknownUserError = createError('UnknownUserError', {
 });
 
 export const PasswordMismatchError = createError('PasswordMismatchError', {
-  message: 'Incorrect password',
+  message: 'Incorrect Password',
 });
 
 export const OTPMismatchError = createError('OTPMismatchError', {

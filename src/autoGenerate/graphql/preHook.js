@@ -123,8 +123,8 @@ import addEventSpeakerProfileValidation from './preHookFunctions/validation/addE
 import addCommsVariableValidation from './preHookFunctions/validation/addCommsVariableValidation';
 import updateEventValidation from './preHookFunctions/validation/updateEventValidation';
 import addWeekDayForOneDayEvent from './preHookFunctions/validation/utils/addWeekDayForOneDayEvent';
-import addTimetableScheduleValidation from './preHookFunctions/validation/addTimetableScheduleValidation';
-import updateTimetableScheduleValidation from './preHookFunctions/validation/updateTimetableScheduleValidation';
+// import addTimetableScheduleValidation from './preHookFunctions/validation/addTimetableScheduleValidation';
+// import updateTimetableScheduleValidation from './preHookFunctions/validation/updateTimetableScheduleValidation';
 import addUserLearningSlideDumpValidation from './preHookFunctions/validation/addUserLearningSlideDumpValidation ';
 // import updateEventSessionValidation from './preHookFunctions/validation/updateEventSessionValidation';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
@@ -950,14 +950,14 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await updateEventValidation(params, input, mutationOrQueryName, context);
       break;
     }
-    case 'addTimetableSchedule': {
-      addTimetableScheduleValidation(params);
-      break;
-    }
-    case 'updateTimetableSchedule': {
-      updateTimetableScheduleValidation(params);
-      break;
-    }
+    // case 'addTimetableSchedule': {
+    //   addTimetableScheduleValidation(params);
+    //   break;
+    // }
+    // case 'updateTimetableSchedule': {
+    //   updateTimetableScheduleValidation(params);
+    //   break;
+    // }
     case 'addUserActivityLearningSlideDump': {
       await addUserLearningSlideDumpValidation(params, mutationOrQueryName, context);
       break;

@@ -9,6 +9,7 @@ const BatchDetailsResult = `
     batchId: ID
     sessionStartDate: Date
     sessionId: ID
+    sessionStatus: SessionStatus! @defaultValue(value: "allotted")
     batchStudents: [BatchStudentResult]
   }
 `;
