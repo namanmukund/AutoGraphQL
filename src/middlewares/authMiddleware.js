@@ -105,7 +105,7 @@ const handleUserToken = async (id, currentApp, currentUser) => {
   }
   // Put status info in userInfo object
   userInfo.status = status;
-  if (role || role.length) {
+  if (role && role.length) {
     userInfo.role = role;
   }
 
