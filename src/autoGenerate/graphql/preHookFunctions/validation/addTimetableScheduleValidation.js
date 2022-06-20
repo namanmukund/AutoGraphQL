@@ -21,17 +21,17 @@ const fetchTimetableSchedules = async (schoolConnectId, batchConnectIds) => {
   return get(res, 'data.timetableSchedules', []);
 };
 
-const deleteTimetableSchedule = async (scheduleId) => {
-  const query = `
-  mutation{
-    deleteTimetableSchedule(id: "${scheduleId}"){
-      id
-    }
-  }
-  `;
-  const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.deleteTimetableSchedule.id', '');
-};
+// const deleteTimetableSchedule = async (scheduleId) => {
+//   const query = `
+//   mutation{
+//     deleteTimetableSchedule(id: "${scheduleId}"){
+//       id
+//     }
+//   }
+//   `;
+//   const res = await callLocalGraphqlApi(query);
+//   return get(res, 'data.deleteTimetableSchedule.id', '');
+// };
 
 const addTimetableScheduleValidation = async (params) => {
   const { batchConnectIds = [], schoolConnectId, input: { type } } = params;
