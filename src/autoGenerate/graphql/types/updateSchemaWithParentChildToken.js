@@ -1,7 +1,7 @@
 import insertSubString from '../../../../utils/insertSubString';
 
 const updateSchemaWithParentChildToken = (schemaTypes) => {
-  const tokenString = ',token: String, children:[ChildrenToken]';
+  const tokenString = ',token: String, children:[ChildrenToken], buddyDetails: [UserToken]'; // added support for buddy login
   const totalSchemaTypes = schemaTypes.length;
   schemaTypes.some((type) => {
     if (type.includes('User @model')) {

@@ -10,6 +10,13 @@ const batchAttendanceType = `
    absentReason: String
  }`;
 
+const batchLoginStatusType = `
+  type BatchLoginStatusType {
+   user: User! @relation(name:"BatchSessionLoginUser", direction: "OneWay")
+   isLoggedIn: Boolean
+   systemId: String
+ }`;
+
 const b2bFormFields = `
   attentionCount: AttentionAmount @defaultValue(value: "all")
   attentionAmount: Int @length(min: 1, max: 10)
@@ -62,6 +69,7 @@ const BatchSession = `
     startSessionByMenteePlatform: Platform
     schoolSessionsOtp: [SchoolSessionOtp] @relation(name:"SchoolSessionOtpBatchSession")
     sessionStartedByMentorAt: Date
+    loggedInUserStatus: [BatchLoginStatusType]
 }`;
 
-export default [BatchSession, batchAttendanceType];
+export default [BatchSession, batchAttendanceType, batchLoginStatusType];
