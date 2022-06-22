@@ -35,7 +35,9 @@ const fetchTimetableSchedules = async (schoolConnectId, batchConnectIds, id) => 
 // };
 
 const updateTimetableScheduleValidation = async (params) => {
-  const { batchConnectIds = [], schoolConnectId, input: { type }, id } = params;
+  const {
+    batchConnectIds = [], schoolConnectId, input: { type }, id,
+  } = params;
   // check if working day connect id is passed and if one of the batches/schools has working day already in it
   if (type !== 'workingDay') return true;
   if (batchConnectIds.length > 0) {
