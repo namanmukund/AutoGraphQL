@@ -33,6 +33,8 @@ const BlockBasedProject = `
     type: BlockBasedProjectType!
     courses: [Course] @relation(name: "CourseBlockBasedProject", direction: "OneWay")
     tags: [ContentTag] @relation(name: "BlockBasedProjectTag")
+    externalDescriptionEnabled: Boolean @defaultValue(value: "false")
+    embedViewHeight: Int @defaultValue(value: "100")
   }
 `;
 

@@ -53,6 +53,7 @@ const customMutationString = `
    scheduleSessions (input: ScheduleSessionsInput): BooleanResult
    schoolLiveClassLoginViaOtp ( input: SchoolLiveClassLoginInput ): ParentChildToken,
    menteeCourseHomework (courseId: ID): [MenteeCourseHomework]
+   advanceBatchCurrentSession(schoolName: String, classroomTitle: String, batchId: String, latestTopicOrder: Int!): BooleanResult
    `;
 
 export default customMutationString;

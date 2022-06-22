@@ -113,6 +113,7 @@ import getClassroomDetails from './query/methods/getClassroomDetails';
 import scheduleSessions from './mutation/methods/scheduleSessions';
 import getSchoolAndBatchDetail from './query/methods/getSchoolAndBatchDetail';
 import menteeCourseHomework from './mutation/methods/menteeCourseHomework';
+import advanceBatchCurrentSession from './mutation/methods/advanceBatchCurrentSession';
 import getBatchDetails from './query/methods/getBatchDetails';
 import getBatchStudent from './query/methods/getBatchStudent';
 import getSessionComponentMeta from './query/methods/getSessionComponentMeta';
@@ -710,6 +711,8 @@ resolvers.Query.getBuddyStatus = getBuddyStatus;
 resolvers.Date = scalarDate;
 // Resolver to retrieve homework status based on filters
 resolvers.Mutation.menteeCourseHomework = menteeCourseHomework;
+// Resolver to retrieve homework status based on filters
+resolvers.Mutation.advanceBatchCurrentSession = advanceBatchCurrentSession;
 
 // subscriptions
 resolvers.Subscription.userUpdated = injectSubscriptionWithCommonAsyncIterator(['USER_UPDATED']);
