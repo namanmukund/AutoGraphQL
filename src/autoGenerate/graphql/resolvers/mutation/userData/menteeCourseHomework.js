@@ -5,6 +5,7 @@ import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/valida
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import { QueryController } from '../../../controllers';
 import { getTopicsArrFromCoursePackages, getTopicOrderFromCoursePackage } from './menteeCourseSyllabus';
+import { OLD_COURSE_ID } from '../../../../../../constants';
 
 const defaultMentorMenteeSessionObject = {
   sessionStatus: null,
@@ -209,7 +210,7 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
   {
     $match: {
       'user.typeId': userId,
-      'currentCourse.typeId': courseId,
+      'currentCourse.typeId': courseId || OLD_COURSE_ID,
     },
   },
   {
@@ -436,14 +437,14 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
       id: 1,
       currentTopicComponentType: 1,
       enrollmentType: 1,
+      currentLearningObjective: 1,
       currentCourse: {
         $arrayElemAt: ['$currentCourse', 0],
       },
-      currentLearningObjective: 1,
       currentTopic: {
         $arrayElemAt: ['$currentTopic', 0],
       },
-      // user: 1,
+      user: 1,
     },
   },
 ];
