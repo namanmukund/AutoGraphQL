@@ -13,6 +13,7 @@ import {
   PracticeQuestionsNotFound,
 } from '../../../../../../constants/errors';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
+import { callLocalGraphqlApi } from '../../../../../api';
 
 const FRACTION_DIGITS = 1;
 
@@ -167,6 +168,7 @@ const getLearningObjectiveAggregation = ({
       {
         $project: {
           id: 1,
+          type: 1,
           practiceQuestions: 1,
         },
       },
@@ -238,6 +240,38 @@ const getUserPracticeQuestionReportAggregation = ({
     createdAt: -1,
   },
 }];
+
+const getLoQuestionCount = async (loId, context, usersPracticeQuestionReportRes) => {
+  const query = `
+    {
+      learningObjective(id:"${loId}") {
+        id
+        learningSlidesPQMeta: learningSlidesMeta(filter:{
+          type: practiceQuestion
+        }) {
+          count
+        }
+        chatbotPQMeta: messagesMeta(filter:{
+          type: question
+        }) {
+          count
+        }
+      }
+    }
+  `;
+  const res = await callLocalGraphqlApi(query, context);
+  let questionCount = 0;
+  if (get(res, 'learningSlidesPQMeta')) questionCount = get(res, 'learningSlidesPQMeta');
+  if (get(res, 'chatbotPQMeta')) questionCount = get(res, 'chatbotPQMeta');
+  if (!questionCount && usersPracticeQuestionReportRes && usersPracticeQuestionReportRes.length) {
+    usersPracticeQuestionReportRes.forEach((report) => {
+      if (questionCount < get(report, 'detailedReport', []).length) {
+        questionCount = get(report, 'detailedReport', []).length;
+      }
+    });
+  }
+  return questionCount;
+};
 
 const getTypeQueryController = (
   typeName,
@@ -422,6 +456,8 @@ const practiceQuestionReport = (async (root, params, context) => {
       los.push({
         id: get(learningObjectiveRes, '[0].id'),
       });
+      const practiceQuestions = get(learningObjectiveRes, '[0].learningSlides', []).filter((el) => get(el, 'type') === 'practiceQuestion');
+      obj.questionsCount = practiceQuestions.length || 0;
     } else {
       throw new MissingMandatoryInputInRequestError({
         data: {
@@ -488,12 +524,15 @@ const practiceQuestionReport = (async (root, params, context) => {
         loId,
       }),
     );
+    loObj.questionsCount = await getLoQuestionCount(loId, context, usersPracticeQuestionReportRes);
+
     for (const student of students) {
       const studentUserId = get(student, 'user.id');
       // since multiple userPracticeQuestionReports per user per lo, we get the latest one created
       const userPracticeQuestionReportRes = (usersPracticeQuestionReportRes || []).filter((el) => get(el, 'user.typeId') === studentUserId);
 
-      if (userPracticeQuestionReportRes.length) {
+      const hasStudentAttemptedAllQuestions = get(userPracticeQuestionReportRes, '0.detailedReport', []).length === loObj.questionsCount;
+      if (userPracticeQuestionReportRes.length && hasStudentAttemptedAllQuestions) {
         loObj.submittedCountSum += 1;
 
         // handling individual student submissions
@@ -507,7 +546,6 @@ const practiceQuestionReport = (async (root, params, context) => {
         loObj.firstTryCountSum += get(userPracticeQuestionReportRes, '[0].firstTryCount');
         loObj.secondTryCountSum += get(userPracticeQuestionReportRes, '[0].secondTryCount');
         loObj.thirdTryCountSum += get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount');
-        loObj.questionsCount = get(userPracticeQuestionReportRes, '[0].detailedReport', []).length;
         for (const report of get(userPracticeQuestionReportRes, '[0].detailedReport')) {
           const tempObj = {
             firstTryCount: 0,
@@ -603,6 +641,7 @@ const practiceQuestionReport = (async (root, params, context) => {
           });
         }
       }
+      loObj.attemptedCountSum += 1;
     } else {
       loObj.unattemptedCountSum += 1;
     }

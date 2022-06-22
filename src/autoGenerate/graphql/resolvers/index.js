@@ -118,6 +118,7 @@ import getBatchStudent from './query/methods/getBatchStudent';
 import getSessionComponentMeta from './query/methods/getSessionComponentMeta';
 import getClassroomReport from './query/methods/getClassroomReport';
 import getPracticeQuestionReport from './query/methods/getPracticeQuestionReport';
+import getBuddyStatus from './query/methods/getBuddyStatus';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -703,6 +704,8 @@ resolvers.Query.getSessionComponentMeta = getSessionComponentMeta;
 resolvers.Query.getClassroomReport = getClassroomReport;
 // Resolver to get classroom homework report
 resolvers.Query.getPracticeQuestionReport = getPracticeQuestionReport;
+// Resolver to check for the loggedIn status of buddies in buddy login flow
+resolvers.Query.getBuddyStatus = getBuddyStatus;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 // Resolver to retrieve homework status based on filters
