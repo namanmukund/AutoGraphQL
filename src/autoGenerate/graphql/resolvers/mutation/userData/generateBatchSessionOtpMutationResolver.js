@@ -89,7 +89,11 @@ const generateBatchSessionOtp = async (root, params, authentication) => {
     const batchId = get(batchSession, 'batch[0].id');
     if (!schoolSessionOtpArray.length && !batchIdsMap[batchId] && batchId) batchIdsMap[batchId] = get(batchSession, 'id');
   }
-  if (!Object.keys(batchIdsMap).length) return [];
+  const modelQuery = new QueryController(BATCHSESSION_TYPE, { bypass: true });
+  if (!Object.keys(batchIdsMap).length) {
+    const modelQueryRes = await modelQuery.fetchMultiple({ id: { $in: batchSessionIds } });
+    return modelQueryRes;
+  }
   const finalOtpMap = await arrayCombinations(Object.keys(batchIdsMap));
   let addSchoolSessionOtpQuery = '';
   for (const batchId of Object.keys(finalOtpMap)) {
@@ -105,7 +109,6 @@ const generateBatchSessionOtp = async (root, params, authentication) => {
   }
   addSchoolSessionOtpQuery = `mutation{ ${addSchoolSessionOtpQuery} }`;
   await callLocalGraphqlApi(addSchoolSessionOtpQuery);
-  const modelQuery = new QueryController(BATCHSESSION_TYPE, { bypass: true });
   const modelQueryRes = await modelQuery.fetchMultiple({ id: { $in: batchSessionIds } });
   return modelQueryRes;
 };
