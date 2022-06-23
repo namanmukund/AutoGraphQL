@@ -48,6 +48,15 @@ const getCourseQuery = () => `
     }
   `;
 
+const deleteBatchScheduleSession = async (batchSessionId) => {
+  const deleteQuery = `mutation{
+  deleteSchoolSessionOtps(filter:{batchSession_some:{id:"${batchSessionId}"}}){
+    id
+  }
+}`;
+  await callLocalGraphqlApi(deleteQuery);
+};
+
 // query to get chapters and topics belomngin to a course
 const getBatchQuery = (batchId) => `
     query{
@@ -451,7 +460,12 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     // console.log('bookingDateFromInput before if', bookingDateFromInput);
     const bookingDateFromInputParsed = new Date(bookingDateFromInput);
     // console.log('bookingDateFromInputParsed', bookingDateFromInputParsed);
-
+    if (prevSessionStatus !== sessionStatusFromInput
+      && sessionStatusFromInput === sessionStatus.completed
+      && bookingDate && moment().isAfter(bookingDate) && batchTypeValue === batchType.b2b) {
+      // Deleting BatchSession Otp for past unattended sessions on completing session
+      deleteBatchScheduleSession(batchSessionId);
+    }
     const newStudentsArray = get(context, 'inputSlot.attendance.pushMany', []);
     // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
     // this should only happen if we are changing sessionStatus or bookingDateFromInput
@@ -466,7 +480,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         || ((slotTimeArray.length > 0 && inputSlotTimeArray.length > 0) && get(slotTimeArray, '0') !== get(inputSlotTimeArray, '0'))
       ) {
         const isBetweenTwoHrs = getSlotDifference(`slot${get(inputSlotTimeArray, '[0]')}`, bookingDateFromInputParsed, 2);
-        if (isBetweenTwoHrs) generateOtpForBatchSession(batchSessionId, students);
+        if (isBetweenTwoHrs && batchTypeValue === batchType.b2b) generateOtpForBatchSession(batchSessionId, students);
         toUpdateMenteeSession = true;
       }
       // if (((sessionStatusFromInput && sessionStatusFromInput !== sessionStatus.allotted) || bookingDateFromInput || newStudentsArray.length > 0)

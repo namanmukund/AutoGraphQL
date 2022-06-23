@@ -54,6 +54,7 @@ const customMutationString = `
    schoolLiveClassLoginViaOtp ( input: SchoolLiveClassLoginInput ): ParentChildToken,
    menteeCourseHomework (courseId: ID): [MenteeCourseHomework]
    advanceBatchCurrentSession(schoolName: String, classroomTitle: String, batchId: String, latestTopicOrder: Int!): BooleanResult
+   generateBatchSessionOtp (batchSessionIds: [ID]): [BatchSession]
    `;
 
 export default customMutationString;
