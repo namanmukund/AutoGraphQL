@@ -15,6 +15,16 @@ const getClassroomOrBatchDetails = async (classroomTitle, batchId, latestTopicOr
       id
       code
       classroomTitle
+      coursePackageTopicRule {
+        order
+        topic {
+          id
+          order
+          courses {
+            id
+          }
+        }
+      }
       coursePackage {
         id 
         topics {
@@ -51,13 +61,16 @@ const getClassroomOrBatchDetails = async (classroomTitle, batchId, latestTopicOr
   return get(res, 'data.batches.0');
 };
 
-const getPreviousBatchSessions = async (classroomTitle, batchId) => {
+const getPreviousBatchSessions = async (classroomTitle, batchId, schoolName) => {
   const query = `
     { 
       batchSessions(filter:{
         and: [
           {batch_some:{
-            ${classroomTitle ? `classroomTitle: "${classroomTitle}"` : `id: "${batchId}"`}
+            and: [
+              ${classroomTitle ? `{classroomTitle: "${classroomTitle}"}` : `{id: "${batchId}"}`}
+              ${schoolName ? `{school_some: { name_contains: "${schoolName}" } }` : ''}
+            ]
           }}
           { sessionStatus_not: completed }
         ]
@@ -117,11 +130,6 @@ const advanceBatchCurrentSessionMutationResolver = async (
   root,
   params,
 ) => {
-  /*
-  Calling method to validate token and return userId.
-  we will compare this userId against userId passed in input
-  both should be equal to perform further action
-  */
   const {
     schoolName, latestTopicOrder, batchId, classroomTitle,
   } = params;
@@ -135,8 +143,12 @@ const advanceBatchCurrentSessionMutationResolver = async (
   try {
     if (classroomOrBatch) {
       const coursePackage = get(classroomOrBatch, 'coursePackage');
+      const batchPackageTopicRule = get(classroomOrBatch, 'coursePackageTopicRule', []);
       if (coursePackage) {
-        const latestTopic = (get(coursePackage, 'topics') || []).find((topicRule) => get(topicRule, 'order') === latestTopicOrder);
+        let latestTopic = (get(coursePackage, 'topics') || []).find((topicRule) => get(topicRule, 'order') === latestTopicOrder);
+        if (batchPackageTopicRule && batchPackageTopicRule.length) {
+          latestTopic = (batchPackageTopicRule || []).find((topicRule) => get(topicRule, 'order') === latestTopicOrder);
+        }
         currentTopicId = get(latestTopic, 'topic.id');
         currentCourseId = get(latestTopic, 'topic.courses.0.id');
       } else {
@@ -147,11 +159,14 @@ const advanceBatchCurrentSessionMutationResolver = async (
 
       await updateBatchCurrentComponentStatus(get(classroomOrBatch, 'currentComponent.id'), currentTopicId, currentCourseId);
 
-      const batchSessions = await getPreviousBatchSessions(classroomTitle, batchId);
+      const batchSessions = await getPreviousBatchSessions(classroomTitle, batchId, schoolName);
       let previousSessions = [];
       if (coursePackage) {
         previousSessions = batchSessions.filter((session) => {
-          const filteredTopic = get(coursePackage, 'topics', []).find((el) => get(el, 'topic.id') === session.topic.id);
+          let filteredTopic = get(coursePackage, 'topics', []).find((el) => get(el, 'topic.id') === session.topic.id);
+          if (batchPackageTopicRule && batchPackageTopicRule.length) {
+            filteredTopic = (batchPackageTopicRule || []).find((el) => get(el, 'topic.id') === session.topic.id);
+          }
           const currentTopicOrder = get(filteredTopic, 'order');
           if (currentTopicOrder && (currentTopicOrder < latestTopicOrder)) {
             return true;
