@@ -138,8 +138,8 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   */
   const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
   const isTrial = await isTrialSession(get(input, 'topic.typeId'));
+  const batchType = get(batchResult, 'data.batch.type');
   if (isTrial) {
-    const batchType = get(batchResult, 'data.batch.type');
     let mentorProfile;
     if (mentorSessionConnectId) {
       mentorProfile = await getMentorProfileFromMentorSession(mentorSessionConnectId);
@@ -220,7 +220,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     ), context);
   }
   const isBetweenTwoHrs = getSlotDifference(get(slotTimeStringArray, '[0]'), bookingDate, 2);
-  if (isBetweenTwoHrs) generateOtpForBatchSession(batchSessionId, students);
+  if (isBetweenTwoHrs && batchType === 'b2b') generateOtpForBatchSession(batchSessionId, students);
   const studentsId = (students && students.length) ? students.map((student) => get(student, 'id')) : [];
   extractBatchSessionAndSendB2BC(batchSessionId, studentsId, false);
   extractBatchSessionAndSendB2B(batchSessionId);
