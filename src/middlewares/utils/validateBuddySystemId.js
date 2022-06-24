@@ -39,10 +39,9 @@ const validateBuddySystem = async (sessionId, systemId, req) => {
   const findInArray = addedStudentsArray.find((data) => get(data, 'user.typeId') === get(req, 'currentUser.id'));
   if (findInArray && get(findInArray, 'systemId') !== systemId) {
     req.currentUser.isBuddyTokenValid = false;
-    return true;
+  } else {
+    req.currentUser.isBuddyTokenValid = true;
   }
-  req.currentUser.isBuddyTokenValid = true;
-  return true;
 };
 
 export default validateBuddySystem;
