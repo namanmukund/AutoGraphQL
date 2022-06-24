@@ -5,6 +5,7 @@ import { toObject, log } from '../../utils';
 import { STATIC } from '../../constants';
 import { DatabaseRecordNotFoundError } from '../../constants/errors';
 import appSpecificAuthTokens from '../../constants/appSpecificAuthTokens';
+import validateBuddySystemId from './utils/validateBuddySystemId';
 
 const application = process.env.APPLICATION || 'core';
 
@@ -166,6 +167,11 @@ const authMiddleware = async (req, res, next) => {
   // Verify User
   if (userToken && isValidToken) {
     await extractAndUpdateUserTokenInfoInRequest(req, userToken, 'currentUser');
+  }
+  if (req.headers['system-id'] && req.headers['session-id'] && req.currentUser) {
+    req.currentUser.isBuddyLoginFlowActive = true;
+    // To Validate Buddy SystemId when buddy login is active
+    await validateBuddySystemId(req.headers['session-id'], req.headers['system-id'], req);
   }
   next();
 };

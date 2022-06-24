@@ -75,3 +75,7 @@ export const RollNumberMismatchMessageError = createError('RollNumberMismatchMes
 export const InvalidUserIdError = createError('InvalidUserIdError', {
   message: 'Invalid User',
 });
+
+export const UserAlreadyLoggedInError = createError('UserAlreadyLoggedInError', {
+  message: 'User is already loggedIn',
+});
