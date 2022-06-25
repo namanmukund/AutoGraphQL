@@ -1,6 +1,13 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-console */
+/* eslint-disable guard-for-in */
+/* eslint-disable no-restricted-syntax */
 import get from 'lodash/get';
+import moment from 'moment';
+import { log } from '../../../../../../utils';
 import getSlotTimesInString from '../../../../../../utils/getSlotTimesInString';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
+import getSelectedSlotsTime from '../../../preHookFunctions/validation/utils/getSelectedSlotsTime';
 
 const getBatchDetails = async (batchCode) => {
   const batchQuery = `{
@@ -34,24 +41,9 @@ const getBatchDetails = async (batchCode) => {
   return get(result, 'data.batches[0]', null);
 };
 
-const getBatchSessionForBatch = async (batchId) => {
-  const batchSessionQuery = `{
-  batchSessions(filter:{batch_some:{id:"${batchId}"}}, orderBy:bookingDate_DESC, first:1){
-    id
-    topic{
-        id
-        order
-        title
-    }
-  }
-}
-`;
-  const batchSessionRes = await callLocalGraphqlApi(batchSessionQuery);
-  return get(batchSessionRes, 'data.batchSessions', []);
-};
-
-const getMentorSession = async (userId, availabilityDate) => {
-  const mentorSessionQuery = `mentorSessions(filter:{
+const getMentorSession = async (userId, availabilityDate, sessionType) => {
+  const mentorSessionQuery = `{
+    mentorSessions(filter:{
     and:[
       {
         user_some:{id:"${userId}"}
@@ -59,17 +51,40 @@ const getMentorSession = async (userId, availabilityDate) => {
       {
         availabilityDate:"${availabilityDate}"
       }
+      ${sessionType ? `{sessionType:${sessionType}}` : '{sessionType:batch}'}
     ]
   }){
     id
     ${getSlotTimesInString()}
+  }
   }`;
   const mentorSessionRes = await callLocalGraphqlApi(mentorSessionQuery);
-  return get(mentorSessionRes, 'data.mentorSessions[0].id', null);
+  return get(mentorSessionRes, 'data.mentorSessions[0]', null);
+};
+
+const getBatchSession = async (batchId, topicId) => {
+  const batchSessionQuery = `{
+  batchSessions(filter:{and:[
+    {
+      batch_some:{
+        id:"${batchId}"
+      }
+    }
+    {
+      topic_some:{
+        id:"${topicId}"
+      }
+    }
+  ]}){
+    id
+  }
+}`;
+  const batchSessionRes = await callLocalGraphqlApi(batchSessionQuery);
+  return get(batchSessionRes, 'data.batchSessions', []).length;
 };
 
 const addMentorSession = async (userId, courseId, input) => {
-  const addMentorSessionQuery = `mutation addmentorsession ($input: MentorSessionInput!) {
+  const addMentorSessionQuery = `mutation ($input: MentorSessionInput!) {
   addMentorSession(input: $input,
     userConnectId: "${userId}",
     ${courseId ? `courseConnectId: "${courseId}"` : ''}
@@ -79,6 +94,20 @@ const addMentorSession = async (userId, courseId, input) => {
 }`;
   const addMentorSessionRes = await callLocalGraphqlApi(addMentorSessionQuery, '', { input });
   return get(addMentorSessionRes, 'data.addMentorSession.id');
+};
+
+const updateMentorSession = async (mentorSessionId, courseId, input) => {
+  const updateMentorSessionQuery = `mutation($input: MentorSessionUpdate){
+  updateMentorSession(
+    id:"${mentorSessionId}",
+    ${courseId ? `courseConnectId: "${courseId}"` : ''}
+    input:$input
+  ){
+    id
+  }
+}`;
+  const updateMentorSessionRes = await callLocalGraphqlApi(updateMentorSessionQuery, '', { input });
+  return get(updateMentorSessionRes, 'data.updateMentorSession.id');
 };
 
 const addBatchSession = async (batchId, topicId, mentorSessionId, courseId, input) => {
@@ -95,186 +124,82 @@ const addBatchSession = async (batchId, topicId, mentorSessionId, courseId, inpu
   const addBatchSessionRes = await callLocalGraphqlApi(addBatchSessionQuery, '', { input });
   return get(addBatchSessionRes, 'data.addBatchSession.id');
 };
-
+// Before running this script, get the batchSessions data that needs to be created
+// Format for the batchSession data is below
 const generateBulkBatchSession = async () => {
   const batchesData = [
-    {
-      batchCode: 'TK-A3402',
-      bookingDate: '25-Jun-22',
-      slotTime: 18,
-      topicOrder: 37,
-      topicTitle: 'Break & Continue - I',
-    },
-    {
-      batchCode: 'TK-A3402',
-      bookingDate: '28-Jun-22',
-      slotTime: 16,
-      topicOrder: 38,
-      topicTitle: 'Break & Continue - II',
-    },
-    {
-      batchCode: 'TK-A3402',
-      bookingDate: '02-Jul-22',
-      slotTime: 18,
-      topicOrder: 39,
-      topicTitle: 'Event Registration App - I',
-    },
-    {
-      batchCode: 'TK-A3402',
-      bookingDate: '06-Jul-22',
-      slotTime: 16,
-      topicOrder: 40,
-      topicTitle: 'Event Registration App - II',
-    },
-    {
-      batchCode: 'TK-A3362',
-      bookingDate: '25-Jun-22',
-      slotTime: 11,
-      topicOrder: 36,
-      topicTitle: 'Nested Loop - II',
-    },
-    {
-      batchCode: 'TK-A3362',
-      bookingDate: '27-Jun-22',
-      slotTime: 15,
-      topicOrder: 37,
-      topicTitle: 'Break & Continue - I',
-    },
-    {
-      batchCode: 'TK-A3362',
-      bookingDate: '29-Jun-22',
-      slotTime: 11,
-      topicOrder: 38,
-      topicTitle: 'Break & Continue - II',
-    },
-    {
-      batchCode: 'TK-A3362',
-      bookingDate: '01-Jul-22',
-      slotTime: 18,
-      topicOrder: 39,
-      topicTitle: 'Event Registration App - I',
-    },
-    {
-      batchCode: 'TK-A3362',
-      bookingDate: '03-Jul-22',
-      slotTime: 20,
-      topicOrder: 40,
-      topicTitle: 'Event Registration App - II',
-    },
-    {
-      batchCode: 'TK-A3316',
-      bookingDate: '25-Jun-22',
-      slotTime: 10,
-      topicOrder: 14,
-      topicTitle: 'Input & Embedding - I',
-    },
-    {
-      batchCode: 'TK-A3316',
-      bookingDate: '26-Jun-22',
-      slotTime: 12,
-      topicOrder: 15,
-      topicTitle: 'Input & Embedding - II',
-    },
-    {
-      batchCode: 'TK-A3316',
-      bookingDate: '26-Jun-22',
-      slotTime: 18,
-      topicOrder: 16,
-      topicTitle: 'String Indexing - I',
-    },
-    {
-      batchCode: 'TK-A3316',
-      bookingDate: '27-Jun-22',
-      slotTime: 10,
-      topicOrder: 17,
-      topicTitle: 'String Indexing - II',
-    },
-    {
-      batchCode: 'TK-A3316',
-      bookingDate: '30-Jun-22',
-      slotTime: 12,
-      topicOrder: 18,
-      topicTitle: 'Find & Replace - I',
-    },
-    {
-      batchCode: 'TK-A3429',
-      bookingDate: '28-Jun-22',
-      slotTime: 20,
-      topicOrder: 18,
-      topicTitle: 'Find & Replace - I',
-    },
-    {
-      batchCode: 'TK-A3429',
-      bookingDate: '30-Jun-22',
-      slotTime: 16,
-      topicOrder: 19,
-      topicTitle: 'Find & Replace - II',
-    },
-    {
-      batchCode: 'TK-A3429',
-      bookingDate: '02-Jul-22',
-      slotTime: 20,
-      topicOrder: 20,
-      topicTitle: 'Calculator - I',
-    },
-    {
-      batchCode: 'TK-A3429',
-      bookingDate: '04-Jul-22',
-      slotTime: 16,
-      topicOrder: 21,
-      topicTitle: 'Calculator - II',
-    },
-    {
-      batchCode: 'TK-A3429',
-      bookingDate: '08-Jul-22',
-      slotTime: 20,
-      topicOrder: 22,
-      topicTitle: 'Conditions: Comparison Operators',
-    },
-    {
-      batchCode: 'TK-A3303',
-      bookingDate: '28-Jun-22',
-      slotTime: 16,
-      topicOrder: 24,
-      topicTitle: 'If-Else - I',
-    },
-    {
-      batchCode: 'TK-A3303',
-      bookingDate: '30-Jun-22',
-      slotTime: 11,
-      topicOrder: 25,
-      topicTitle: 'If-Else - II',
-    },
-    {
-      batchCode: 'TK-A3303',
-      bookingDate: '02-Jul-22',
-      slotTime: 15,
-      topicOrder: 26,
-      topicTitle: 'Nested If-else',
-    },
-    {
-      batchCode: 'TK-A3303',
-      bookingDate: '04-Jul-22',
-      slotTime: 11,
-      topicOrder: 27,
-      topicTitle: 'Elif',
-    },
-    {
-      batchCode: 'TK-A3303',
-      bookingDate: '08-Jul-22',
-      slotTime: 18,
-      topicOrder: 28,
-      topicTitle: 'Rock Paper Scissors - I',
-    },
+    // {
+    //   batchCode: 'TK-A3402',
+    //   bookingDate: '25-Jun-22',
+    //   slotTime: 18,
+    //   topicOrder: 37,
+    //   topicTitle: 'Break & Continue - I',
+    // },
   ];
-  const batchCode = 'TK-A3629';
-  const batchDetails = await getBatchDetails(batchCode);
-  const batchId = get(batchDetails, 'id');
-  const batchType = get(batchDetails, 'type');
-  const allottedMentorId = get(batchDetails, 'allottedMentor.id');
-  const currentCourseId = get(batchDetails, 'currentComponent.currentCourse.id');
-  const topics = get(batchDetails, 'currentComponent.currentCourse.topics', []);
-  const batchSession = await getBatchSessionForBatch(batchId);
+  // const batchId = get(batchDetails, 'id');
+  // const batchType = get(batchDetails, 'type');
+  const groupedBatchSessions = batchesData.reduce((accumulator, currentValue) => {
+    accumulator[get(currentValue, 'batchCode')] = accumulator[get(currentValue, 'batchCode')] || [];
+    accumulator[get(currentValue, 'batchCode')].push(currentValue);
+    return accumulator;
+  }, {});
+  const createdBatchSessionIds = [];
+  for (const batchCode in groupedBatchSessions) {
+    const batchDetails = await getBatchDetails(batchCode);
+    const allottedMentorId = get(batchDetails, 'allottedMentor.id');
+    const batchCurrentCourseId = get(batchDetails, 'currentComponent.currentCourse.id');
+    const batchId = get(batchDetails, 'id');
+    const batchType = get(batchDetails, 'type');
+    if (batchType !== 'b2b') {
+      const topics = get(batchDetails, 'currentComponent.currentCourse.topics', []);
+      const batchSessionsData = groupedBatchSessions[batchCode];
+      for (const batchSession of batchSessionsData) {
+        const topicDetail = topics.find((topic) => get(topic, 'title') === batchSession.topicTitle && get(topic, 'order') === batchSession.topicOrder);
+        const bookingDate = moment(batchSession.bookingDate).startOf('day').toISOString();
+        const topicId = get(topicDetail, 'id');
+        const isBatchSessionExists = await getBatchSession(batchId, topicId);
+        if (!isBatchSessionExists && moment().isBefore(bookingDate)) {
+          let sessionType = '';
+          if (batchType === 'b2b2c' && get(topicDetail, 'order') === 1) sessionType = 'trial';
+          else sessionType = 'batch';
+          const mentorSessionResponse = await getMentorSession(allottedMentorId, bookingDate, sessionType);
+          const mentorSessionInput = {
+            availabilityDate: bookingDate,
+            sessionType,
+          };
+          const batchSessionInput = {
+            bookingDate,
+          };
+          batchSessionInput[`slot${batchSession.slotTime}`] = true;
+          if (mentorSessionResponse) {
+            const slotTimeArray = getSelectedSlotsTime(mentorSessionResponse);
+            const mentorSessionId = get(mentorSessionResponse, 'id');
+            if (slotTimeArray.includes(batchSession.slotTime)) {
+              const createdBatchSessionId = await addBatchSession(batchId, topicId, mentorSessionId, batchCurrentCourseId, batchSessionInput);
+              log(`Created BatchSession ${createdBatchSessionId} for batch : ${batchCode} with topic: ${topicId} and course ${batchCurrentCourseId}`);
+              createdBatchSessionIds.push(createdBatchSessionId);
+            } else {
+              mentorSessionInput[`slot${batchSession.slotTime}`] = true;
+              const updatedMentorSessionId = await updateMentorSession(mentorSessionId, batchCurrentCourseId, mentorSessionInput);
+              log(`Updated MentorSession: ${updatedMentorSessionId}`);
+              const createdBatchSessionId = await addBatchSession(batchId, topicId, mentorSessionId, batchCurrentCourseId, batchSessionInput);
+              log(`Created BatchSession ${createdBatchSessionId} for batch : ${batchCode} with topic: ${topicId} and course ${batchCurrentCourseId}`);
+              createdBatchSessionIds.push(createdBatchSessionId);
+            }
+          } else {
+            mentorSessionInput[`slot${batchSession.slotTime}`] = true;
+            const mentorSessionId = await addMentorSession(allottedMentorId, batchCurrentCourseId, mentorSessionInput);
+            log(`Added MentorSession: ${mentorSessionId}`);
+            const createdBatchSessionId = await addBatchSession(batchId, topicId, mentorSessionId, batchCurrentCourseId, batchSessionInput);
+            log(`Created BatchSession ${createdBatchSessionId} for batch : ${batchCode} with topic: ${topicId} and course ${batchCurrentCourseId}`);
+            createdBatchSessionIds.push(createdBatchSessionId);
+          }
+        }
+      }
+    }
+  }
+  console.log('Created BatchSessions', JSON.stringify(createdBatchSessionIds));
+  console.log('Created All batchSessions successfully', createdBatchSessionIds.length, batchesData.length, createdBatchSessionIds.length === batchesData.length);
 };
 
 export default generateBulkBatchSession;
