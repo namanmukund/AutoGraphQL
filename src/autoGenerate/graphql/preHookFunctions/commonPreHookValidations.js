@@ -3,7 +3,6 @@ import validateBuddyAuth from './commonPreHookValidations/validateBuddyAuth';
 
 const commonPreHookValidations = async (input, mutationOrQueryName, context, params) => {
   const { currentUser, currentApp } = context;
-  if (!currentUser) return true;
   validateBuddyAuth(currentApp, currentUser);
   return true;
 };

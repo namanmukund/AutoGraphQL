@@ -76,6 +76,6 @@ export const InvalidUserIdError = createError('InvalidUserIdError', {
   message: 'Invalid User',
 });
 
-export const UserAlreadyLoggedInError = createError('UserAlreadyLoggedInError', {
-  message: 'User is already loggedIn',
+export const UserAlreadyLoggedInIntoAnotherSystemError = createError('UserAlreadyLoggedInIntoAnotherSystemError', {
+  message: 'User is already loggedIn into another system',
 });

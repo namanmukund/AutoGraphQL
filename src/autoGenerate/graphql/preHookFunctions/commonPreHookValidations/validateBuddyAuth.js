@@ -1,15 +1,15 @@
 import { get } from 'lodash';
 import { byPassMenteeValidationApps } from '../../../../../constants';
-import { UserAlreadyLoggedInError } from '../../../../../constants/errors';
+import { UserAlreadyLoggedInIntoAnotherSystemError } from '../../../../../constants/errors';
 
 const validateBuddyAuth = (currentApp, currentUser) => {
   if (byPassMenteeValidationApps.includes(get(currentApp, 'name'))) return true;
-  // Check if buddyLogin flow is active and validates if the currentUser is valid buddy
+  // Check if buddyLogin flow is active and validate if the currentUser is valid buddy
   if (currentUser && get(currentUser, 'isBuddyLoginFlowActive')
   && !get(currentUser, 'isBuddyTokenValid', false)) {
-    throw new UserAlreadyLoggedInError({
+    throw new UserAlreadyLoggedInIntoAnotherSystemError({
       data: {
-        message: 'User is already LoggedIn in another system',
+        message: 'User is already LoggedIn into another system',
         userId: get(currentUser, 'id'),
       },
     });

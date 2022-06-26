@@ -61,7 +61,7 @@ app.use(authMiddleware);
 const corsOptions = {
   origin: '*',
   optionsSuccessStatus: 200,
-  allowedHeaders: ['Content-Type', 'Authorization', 'Content-Length', 'X-Requested-With', 'X-Forwarded-By', 'System-Id', 'Session-Id'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Content-Length', 'X-Requested-With', 'X-Forwarded-By', 'User-Device-Id', 'BatchSession-Id'],
 };
 
 app.use(cors(corsOptions));

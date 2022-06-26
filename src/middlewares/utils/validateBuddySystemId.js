@@ -1,21 +1,15 @@
 import get from 'lodash/get';
+import { ifAuthorized } from '../../../utils';
 import { QueryController } from '../../autoGenerate/graphql/controllers';
 
 const BATCHSESSION_TYPE = 'BatchSession';
 
-const getTypeQueryController = (
-  typeName,
-  authentication = {
-    bypass: true,
-  },
-) => new QueryController(typeName, authentication);
-
-const getStudentLoggedInStatus = ({
-  sessionId,
+const batchSessionCondition = ({
+  batchSessionId,
 }) => [
   {
     $match: {
-      id: sessionId,
+      id: batchSessionId,
     },
   },
   {
@@ -26,22 +20,25 @@ const getStudentLoggedInStatus = ({
   },
 ];
 
-const validateBuddySystem = async (sessionId, systemId, req) => {
-  const batchSessionModel = getTypeQueryController(
-    BATCHSESSION_TYPE,
-  );
-  const batchSessionData = await batchSessionModel.aggregate(
-    getStudentLoggedInStatus({
-      sessionId,
-    }),
-  );
-  const addedStudentsArray = get(batchSessionData, '[0].loggedInUserStatus', []);
-  const findInArray = addedStudentsArray.find((data) => get(data, 'user.typeId') === get(req, 'currentUser.id'));
-  if (findInArray && get(findInArray, 'systemId') !== systemId) {
-    req.currentUser.isBuddyTokenValid = false;
-  } else {
-    req.currentUser.isBuddyTokenValid = true;
+const validateBuddySystemId = async (batchSessionId, systemId, req) => {
+  const authentication = ifAuthorized(req);
+
+  const modelQueries = new QueryController(BATCHSESSION_TYPE, authentication);
+
+  const batchSessionRes = await modelQueries.aggregate(batchSessionCondition({
+    batchSessionId,
+  }));
+
+  const loggedInUserStatuses = get(batchSessionRes, '[0].loggedInUserStatus', []);
+  // Finds LoggedIn details for the currentUser
+  const loggedInUserStatus = loggedInUserStatuses.find((data) => get(data, 'user.typeId') === get(req, 'currentUser.id'));
+  let isBuddyTokenValid = false;
+  if (loggedInUserStatus && get(loggedInUserStatus, 'systemId') === systemId) {
+    isBuddyTokenValid = true;
   }
+  Object.assign(req.currentUser, {
+    isBuddyTokenValid,
+  });
 };
 
-export default validateBuddySystem;
+export default validateBuddySystemId;

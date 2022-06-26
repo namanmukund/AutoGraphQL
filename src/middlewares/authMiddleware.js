@@ -168,10 +168,15 @@ const authMiddleware = async (req, res, next) => {
   if (userToken && isValidToken) {
     await extractAndUpdateUserTokenInfoInRequest(req, userToken, 'currentUser');
   }
-  if (req.headers['system-id'] && req.headers['session-id'] && req.currentUser) {
-    req.currentUser.isBuddyLoginFlowActive = true;
+  const userDeviceId = req.headers['user-device-id'];
+  const batchSessionId = req.headers['batchsession-id'];
+  if (userDeviceId && batchSessionId && req.currentUser) {
+    // Setting buddyLogin flow active when userDeviceId and batchSessionId is passed in headers
+    Object.assign(req.currentUser, {
+      isBuddyLoginFlowActive: true,
+    });
     // To Validate Buddy SystemId when buddy login is active
-    await validateBuddySystemId(req.headers['session-id'], req.headers['system-id'], req);
+    await validateBuddySystemId(batchSessionId, userDeviceId, req);
   }
   next();
 };
