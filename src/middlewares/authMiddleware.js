@@ -5,7 +5,7 @@ import { toObject, log } from '../../utils';
 import { STATIC } from '../../constants';
 import { DatabaseRecordNotFoundError } from '../../constants/errors';
 import appSpecificAuthTokens from '../../constants/appSpecificAuthTokens';
-import validateBuddySystemId from './utils/validateBuddySystemId';
+import validateBuddyToken from './utils/validateBuddyToken';
 
 const application = process.env.APPLICATION || 'core';
 
@@ -175,8 +175,8 @@ const authMiddleware = async (req, res, next) => {
     Object.assign(req.currentUser, {
       isBuddyLoginFlowActive: true,
     });
-    // To Validate Buddy SystemId when buddy login is active
-    await validateBuddySystemId(batchSessionId, userDeviceId, req);
+    // To Validate if the buddy token is valid
+    await validateBuddyToken(batchSessionId, userDeviceId, req);
   }
   next();
 };

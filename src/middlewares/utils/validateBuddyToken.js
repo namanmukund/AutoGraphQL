@@ -20,7 +20,7 @@ const batchSessionCondition = ({
   },
 ];
 
-const validateBuddySystemId = async (batchSessionId, systemId, req) => {
+const validateBuddyToken = async (batchSessionId, systemId, req) => {
   const authentication = ifAuthorized(req);
 
   const modelQueries = new QueryController(BATCHSESSION_TYPE, authentication);
@@ -41,4 +41,4 @@ const validateBuddySystemId = async (batchSessionId, systemId, req) => {
   });
 };
 
-export default validateBuddySystemId;
+export default validateBuddyToken;
