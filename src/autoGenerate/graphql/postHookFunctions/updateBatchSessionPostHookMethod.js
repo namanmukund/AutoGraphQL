@@ -360,7 +360,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         if (coursePackageId) {
           let topicRules;
           if (get(batchResult, 'coursePackageTopicRule', []).length) {
-            topicRules = get(batchResult, 'coursePackageTopicRule.topics', []);
+            topicRules = get(batchResult, 'coursePackageTopicRule', []);
           } else {
             const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
             topicRules = get(coursePackage, 'topics', []);
@@ -408,7 +408,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
           let topicRules;
           // a batch can have own package topic rule. if it exist in a batch we will select it over the course package.
           if (get(batchResult, 'coursePackageTopicRule', []).length) {
-            topicRules = get(batchResult, 'coursePackageTopicRule.topics', []);
+            topicRules = get(batchResult, 'coursePackageTopicRule', []);
           } else {
             const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
             topicRules = get(coursePackage, 'topics', []);
