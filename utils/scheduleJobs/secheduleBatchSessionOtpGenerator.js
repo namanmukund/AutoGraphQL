@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import { get } from 'lodash';
 import { log } from '..';
@@ -93,6 +91,32 @@ const getBatchSessionAggregation = ({
   },
 ];
 
+const getSchoolSessionOtpAggregation = ({ sessionStatus }) => [
+  {
+    $lookup: {
+      from: 'BatchSession',
+      localField: 'batchSession.typeId',
+      foreignField: 'id',
+      as: 'batchSession',
+    },
+  },
+  {
+    $match: {
+      'batchSession.sessionStatus': sessionStatus,
+    },
+  },
+  {
+    $project: {
+      id: 1,
+      batchSession: {
+        id: 1,
+        bookingDate: 1,
+        sessionStatus: 1,
+      },
+    },
+  },
+];
+
 const scheduleBatchSessionOtpGenerator = async () => {
   const dt = new Date().setHours(0, 0, 0, 0);
   const todayParsedDate = new Date(dt).toISOString();
@@ -103,9 +127,11 @@ const scheduleBatchSessionOtpGenerator = async () => {
   tomorrow.setDate(tomorrow.getDate() + 1);
   yesterDayDate.setDate(yesterDayDate.getDate() - 1);
   const tomorrowParsedDate = tomorrow.toISOString();
-  const deleteOtpSlot = (hourValue - 2) < 0 ? 23 : hourValue - 2;
   const batchSessionModel = getTypeQueryController(
     'BatchSession',
+  );
+  const schoolSessionOtpModal = getTypeQueryController(
+    'SchoolSessionOtp',
   );
   const addOtpBatchSessions = await batchSessionModel.aggregate(
     getBatchSessionAggregation({
@@ -113,12 +139,7 @@ const scheduleBatchSessionOtpGenerator = async () => {
       slot: addOtpSlot,
     }),
   );
-  const deleteOtpBatchSessions = await batchSessionModel.aggregate(
-    getBatchSessionAggregation({
-      bookingDate: deleteOtpSlot === 23 ? yesterDayDate : todayParsedDate,
-      slot: deleteOtpSlot,
-    }),
-  );
+  const schoolSessionOtps = await schoolSessionOtpModal.aggregate(getSchoolSessionOtpAggregation({ sessionStatus: 'completed' }));
   const batchIdsMap = {};
   for (const batchSession of addOtpBatchSessions) {
     const schoolSessionOtpArray = get(batchSession, 'schoolSessionOtp', []);
@@ -132,12 +153,10 @@ const scheduleBatchSessionOtpGenerator = async () => {
     addSchoolSessionOtp({ otp: finalOtpMap[batchId], batchSessionId: batchIdsMap[batchId] });
     log(`Creating schoolSessionOtp for batch ${batchId}, with OTP: ${finalOtpMap[batchId]} for batchSession: ${batchIdsMap[batchId]}`);
   });
-  for (const batchSession of deleteOtpBatchSessions) {
-    if (get(batchSession, 'schoolSessionOtp', []).length) {
-      for (const sessionOtp of get(batchSession, 'schoolSessionOtp', [])) {
-        deleteSchoolSessionOtp(get(sessionOtp, 'id'));
-        log(`Deleting schoolSessionOtp: ${get(sessionOtp, 'id')} in batchSession ${get(batchSession, 'id')}`);
-      }
+  for (const schoolSessionOtp of schoolSessionOtps) {
+    if (get(schoolSessionOtp, 'batchSession', []).length) {
+      deleteSchoolSessionOtp(get(schoolSessionOtp, 'id'));
+      log(`Deleting schoolSessionOtp: ${get(schoolSessionOtp, 'id')} for batchSession ${get(schoolSessionOtp, 'batchSession[0].id', '')}`);
     }
   }
 };
