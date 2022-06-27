@@ -136,8 +136,6 @@ const generateBulkBatchSession = async () => {
     //   topicTitle: 'Break & Continue - I',
     // },
   ];
-  // const batchId = get(batchDetails, 'id');
-  // const batchType = get(batchDetails, 'type');
   const groupedBatchSessions = batchesData.reduce((accumulator, currentValue) => {
     accumulator[get(currentValue, 'batchCode')] = accumulator[get(currentValue, 'batchCode')] || [];
     accumulator[get(currentValue, 'batchCode')].push(currentValue);
