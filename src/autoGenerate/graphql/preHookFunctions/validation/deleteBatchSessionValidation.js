@@ -33,8 +33,12 @@ const deleteBatchSessionValidation = async (params, mutationOrQueryName, context
       date.getHours() + slotTimeArray[0],
     );
     const currentDate = new Date();
-    if (dateTime <= currentDate) {
-      throw new PastDateOrSlotError();
+    // REVERT TEMP BYPASS CHECK
+    // eslint-disable-next-line no-constant-condition
+    if (false) {
+      if (dateTime <= currentDate) {
+        throw new PastDateOrSlotError();
+      }
     }
   }
 

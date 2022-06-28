@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import generateBulkBatchSession from '../scriptMethods/generateBulkBatchSession';
 // import uploadUsersToMailModo from '../scriptMethods/uploadUsersToMailModo';
 // import updateNetPromoterScoresWithCourseAndMmSession from '../scriptMethods/updateNetPromoterScoresWithCourseAndMmSession';
 // import updateQuestionBankOfPythonCourseWithCorrectPostion from '../scriptMethods/updateQuestionBankOfPythonCourseWithCorrectPostion';
@@ -36,6 +37,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateStudentHomework from '../scriptMethods/updateStudentHomework';
 // import addQuestionBankMessageMapping from '../scriptMethods/addQuestionBankMessageMapping';
 // import updateUserNameEmailPassword from '../scriptMethods/updateUserNameEmailPassword';
+// import RemappingBatchStudentInSchool from './RemappingBatchStudentInSchool';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -95,6 +97,8 @@ const temporaryScript = (async (root, params, context) => {
   // await updateStudentHomework();
   // await addQuestionBankMessageMapping();
   // await updateUserNameEmailPassword();
+  // await RemappingBatchStudentInSchool(root, params, context);
+  // await generateBulkBatchSession();
   return {
     result: true,
   };

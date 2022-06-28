@@ -113,12 +113,14 @@ import getClassroomDetails from './query/methods/getClassroomDetails';
 import scheduleSessions from './mutation/methods/scheduleSessions';
 import getSchoolAndBatchDetail from './query/methods/getSchoolAndBatchDetail';
 import menteeCourseHomework from './mutation/methods/menteeCourseHomework';
+import advanceBatchCurrentSession from './mutation/methods/advanceBatchCurrentSession';
 import getBatchDetails from './query/methods/getBatchDetails';
 import getBatchStudent from './query/methods/getBatchStudent';
 import getSessionComponentMeta from './query/methods/getSessionComponentMeta';
 import getClassroomReport from './query/methods/getClassroomReport';
 import getPracticeQuestionReport from './query/methods/getPracticeQuestionReport';
 import getBuddyStatus from './query/methods/getBuddyStatus';
+import generateBatchSessionOtp from './mutation/methods/generateBatchSessionOtp';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -710,6 +712,10 @@ resolvers.Query.getBuddyStatus = getBuddyStatus;
 resolvers.Date = scalarDate;
 // Resolver to retrieve homework status based on filters
 resolvers.Mutation.menteeCourseHomework = menteeCourseHomework;
+// Resolver to retrieve homework status based on filters
+resolvers.Mutation.advanceBatchCurrentSession = advanceBatchCurrentSession;
+// Resolver to generate batchSession Otp
+resolvers.Mutation.generateBatchSessionOtp = generateBatchSessionOtp;
 
 // subscriptions
 resolvers.Subscription.userUpdated = injectSubscriptionWithCommonAsyncIterator(['USER_UPDATED']);

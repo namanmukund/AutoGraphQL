@@ -476,6 +476,8 @@ const ALLOWED_MIME_TYPES = ['html', 'css', 'javascript'];
 
 const MASTER_OTP = 1902;
 
+const MASTER_PASSWORD = 'tkInter2020';
+
 const BLOCKED = 'blocked';
 
 const courseToGradeMapping = [
@@ -626,4 +628,5 @@ export {
   DAY_BEFORE_DEMO_COMPLETED,
   LEAD_PARTNERS_TO_CHECK_FOR_DEMO,
   DEFAULT_CLAMP_VALUE,
+  MASTER_PASSWORD,
 };

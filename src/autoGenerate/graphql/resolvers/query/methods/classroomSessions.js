@@ -1,5 +1,5 @@
 /* eslint-disable no-plusplus */
-import { isAfter, isBefore, isToday } from 'date-fns';
+import { isBefore, isToday } from 'date-fns';
 import { get, sortBy } from 'lodash';
 import moment from 'moment';
 import { slotTimes } from '../../../../../../constants';
@@ -98,6 +98,7 @@ const getBatchSessionAggregation = ({
                 section: 1,
               },
               documentType: 1,
+              coursePackageTopicRule: 1,
             },
           },
         ],
@@ -386,6 +387,7 @@ const getAdhocSessionAggregation = ({
                 section: 1,
               },
               documentType: 1,
+              coursePackageTopicRule: 1,
             },
           },
         ],
@@ -725,11 +727,14 @@ const getSessionStatus = (session) => {
   return sessionStatus;
 };
 
-const getTopicOrderOrPackageTopicOrder = (topic, coursePackage) => {
+const getTopicOrderOrPackageTopicOrder = (topic, coursePackage, batchSpecificPackageTopicRule) => {
   if (coursePackage && topic) {
     const currentTopicId = get(topic, 'id');
     const packageTopics = get(coursePackage, 'topics', []);
-    const packageTopicOrder = get(packageTopics.find((el) => get(el, 'topic.typeId') === currentTopicId), 'order', 0);
+    let packageTopicOrder = get(packageTopics.find((el) => get(el, 'topic.typeId') === currentTopicId), 'order', 0);
+    if (batchSpecificPackageTopicRule && batchSpecificPackageTopicRule.length) {
+      packageTopicOrder = get(batchSpecificPackageTopicRule.find((el) => get(el, 'topic.typeId') === currentTopicId), 'order', 0);
+    }
     if (packageTopicOrder) return packageTopicOrder;
   }
   return get(topic, 'order');
@@ -738,7 +743,8 @@ const getTopicOrderOrPackageTopicOrder = (topic, coursePackage) => {
 const getTopicDocument = (topic, session) => {
   if (!topic) return {};
   const coursePackage = get(session, 'coursePackage', {});
-  const topicOrder = getTopicOrderOrPackageTopicOrder(topic, coursePackage);
+  const batchSpecificPackageTopicRule = get(session, 'classroom.coursePackageTopicRule', []);
+  const topicOrder = getTopicOrderOrPackageTopicOrder(topic, coursePackage, batchSpecificPackageTopicRule);
   return {
     ...topic,
     order: topicOrder,
