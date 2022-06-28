@@ -292,11 +292,15 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                         order: 1,
                         isTrial: 1,
                         description: 1,
-                        topicQuestions: 1,
+                        topicQuestions: {
+                          $ifNull: ['$topicQuestions', []],
+                        },
                         thumbnail: 1,
                         thumbnailSmall: 1,
                         topicAssignmentQuestions: 1,
-                        topicHomeworkAssignmentQuestion: 1,
+                        topicHomeworkAssignmentQuestion: {
+                          $ifNull: ['$topicHomeworkAssignmentQuestion', []],
+                        },
                         chapter: 1,
                         topicComponentRule: 1,
                       },
@@ -389,7 +393,9 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                         thumbnailSmall: {
                           $arrayElemAt: ['$thumbnailSmall', 0],
                         },
-                        topicQuestions: 1,
+                        topicQuestions: {
+                          $ifNull: ['$topicQuestions', []],
+                        },
                         topicAssignmentQuestions: 1,
                         topicHomeworkAssignmentQuestion: 1,
                         chapter: 1,
@@ -513,13 +519,18 @@ const getUserBatchDetails = (userId) => [
                   order: 1,
                   isTrial: 1,
                   description: 1,
-                  topicQuestions: 1,
+                  topicQuestions: {
+                    $ifNull: ['$topicQuestions', []],
+                  },
                   thumbnail: 1,
                   thumbnailSmall: 1,
                   topicAssignmentQuestions: {
                     assignmentQuestions: {
                       id: 1,
                     },
+                  },
+                  topicHomeworkAssignmentQuestion: {
+                    $ifNull: ['$topicHomeworkAssignmentQuestion', []],
                   },
                   chapter: 1,
                   topicComponentRule: 1,
@@ -647,6 +658,8 @@ const getUserBatchDetails = (userId) => [
                     ],
                   },
                   topicComponentRule: 1,
+                  topicQuestions: 1,
+                  topicHomeworkAssignmentQuestion: 1,
                 },
               },
             ],
@@ -843,11 +856,15 @@ const getUserBatchDetails = (userId) => [
                         order: 1,
                         isTrial: 1,
                         description: 1,
-                        topicQuestions: 1,
+                        topicQuestions: {
+                          $ifNull: ['$topicQuestions', []],
+                        },
                         thumbnail: 1,
                         thumbnailSmall: 1,
                         topicAssignmentQuestions: 1,
-                        topicHomeworkAssignmentQuestion: 1,
+                        topicHomeworkAssignmentQuestion: {
+                          $ifNull: ['$topicHomeworkAssignmentQuestion', []],
+                        },
                         chapter: 1,
                         topicComponentRule: 1,
                       },
@@ -962,7 +979,9 @@ const getUserBatchDetails = (userId) => [
                             0,
                           ],
                         },
-                        topicQuestions: 1,
+                        topicQuestions: {
+                          $ifNull: ['$topicQuestions', []],
+                        },
                         topicAssignmentQuestions: 1,
                         topicHomeworkAssignmentQuestion: 1,
                         chapter: {
