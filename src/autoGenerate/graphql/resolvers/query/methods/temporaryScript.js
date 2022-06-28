@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import generateBulkBatchSession from '../scriptMethods/generateBulkBatchSession';
 // import uploadUsersToMailModo from '../scriptMethods/uploadUsersToMailModo';
 // import updateNetPromoterScoresWithCourseAndMmSession from '../scriptMethods/updateNetPromoterScoresWithCourseAndMmSession';
 // import updateQuestionBankOfPythonCourseWithCorrectPostion from '../scriptMethods/updateQuestionBankOfPythonCourseWithCorrectPostion';
@@ -97,6 +98,7 @@ const temporaryScript = (async (root, params, context) => {
   // await addQuestionBankMessageMapping();
   // await updateUserNameEmailPassword();
   // await RemappingBatchStudentInSchool(root, params, context);
+  // await generateBulkBatchSession();
   return {
     result: true,
   };
