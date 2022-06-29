@@ -31,6 +31,7 @@ db.on('error', (err) => {
     createScheduler('batchSessionOtpGeneration');
     createScheduler('updateLeadSource');
     createScheduler('autoCompleteThoeryClassroomSessions');
+    createScheduler('b2cBatchSessionReport');
     reRunJobsFromDB();
   }
 });

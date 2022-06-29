@@ -421,7 +421,10 @@ const scheduleSessionsMutationResolver = async (
   if (coursePackageId) {
     isCoursePackageBatch = true;
     const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
-    const topicRules = get(coursePackage, 'topics', []);
+    let topicRules = get(coursePackage, 'topics', []);
+    if (get(batch, 'coursePackageTopicRule', []).length) {
+      topicRules = get(batch, 'coursePackageTopicRule', []);
+    }
     topics = getSortedTopics(topicRules);
     topicCount = topics && topics.length;
   } else {

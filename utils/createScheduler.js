@@ -9,6 +9,7 @@ import scheduleEventSessionRemainder from './scheduleJobs/scheduleEventSessionRe
 import scheduleBatchSessionOtpGenerator from './scheduleJobs/secheduleBatchSessionOtpGenerator';
 import scheduleUpdateLeadSource from './scheduleJobs/scheduleUpdateLeadSource';
 import scheduleUpdateTheoryClassStatus from './scheduleJobs/scheduleUpdateTheoryClassStatus';
+import scheduleB2cBatchSessionReport from './scheduleJobs/scheduleB2cBatchSessionReport';
 
 // create scheduler for different functionalities
 const createScheduler = (schedulerName) => {
@@ -125,6 +126,17 @@ const createScheduler = (schedulerName) => {
         // eslint-disable-next-line no-console
         console.log('scheduler started for: ', schedulerName);
         await scheduleUpdateTheoryClassStatus();
+      });
+      break;
+    case 'b2cBatchSessionReport':
+      rule.tz = 'Asia/Kolkata';
+      rule.hour = 3;
+      rule.dayOfWeek = new schedule.Range(0, 6);
+      // eslint-disable-next-line no-unused-vars
+      schedule.scheduleJob(rule, async () => {
+        // eslint-disable-next-line no-console
+        console.log('scheduler started for: ', schedulerName);
+        await scheduleB2cBatchSessionReport();
       });
       break;
     default:

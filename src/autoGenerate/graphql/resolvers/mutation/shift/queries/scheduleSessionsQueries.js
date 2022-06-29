@@ -18,6 +18,16 @@ const fetchBatch = async (batchId) => {
           id
         }
         type
+        coursePackageTopicRule {
+          order
+          isRevision
+          topic{
+            courses{
+              id
+            }
+            id
+          }
+        }
         timeTableRule {
           ${slotTimeFields}
           ${weekDaysFields}
@@ -139,6 +149,16 @@ const fetchBatchSession = async (batchSessionId) => {
         allottedMentor{
           id
         }
+        coursePackageTopicRule {
+          order
+          isRevision
+          topic{
+            courses{
+              id
+            }
+            id
+          }
+        }
         coursePackage{
           id
         }
@@ -180,6 +200,16 @@ const fetchAdhocSession = async (adhocSessionId) => {
         id
         allottedMentor{
           id
+        }
+        coursePackageTopicRule {
+          order
+          isRevision
+          topic{
+            courses{
+              id
+            }
+            id
+          }
         }
         coursePackage{
           id
