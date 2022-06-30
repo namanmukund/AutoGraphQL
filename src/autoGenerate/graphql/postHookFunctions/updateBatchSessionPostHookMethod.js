@@ -344,7 +344,29 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     const currentComponentTopicId = get(currentComponent, 'currentTopic.id');
     const reminderDateTime = moment(new Date()).add(1, 'days').toDate();
     // logic to change current component status if topic is completed
-    if (batchCurrentComponentId && sessionStatusFromInput && topicId === currentComponentTopicId) {
+    let topicsList = [];
+    // a batch can have own package topic rule. if it exist in a batch we will select it over the course package.
+    let currentComponentTopicOrder = null;
+    let currentTopicOrder = null;
+    if (coursePackageId) {
+      let topicRules;
+      if (get(batchResult, 'coursePackageTopicRule', []).length) {
+        topicRules = get(batchResult, 'coursePackageTopicRule', []);
+      } else {
+        const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+        topicRules = get(coursePackage, 'topics', []);
+      }
+      topicsList = getSortedTopics(topicRules);
+      currentComponentTopicOrder = get((topicsList || []).find((topic) => get(topic, 'id') === currentComponentTopicId), 'coursePackageOrder');
+      currentTopicOrder = get((topicsList || []).find((topic) => get(topic, 'id') === topicId), 'coursePackageOrder');
+    } else {
+      const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
+      topicsList = get(nextTopicQueryRes, 'data.topics', []);
+    }
+
+    const shouldUpdateCurrentComponent = (coursePackageId && currentTopicOrder && currentComponentTopicOrder) ? ((currentTopicOrder >= currentComponentTopicOrder) || currentComponentTopicId === topicId) : (currentComponentTopicId === topicId);
+
+    if (batchCurrentComponentId && sessionStatusFromInput && shouldUpdateCurrentComponent) {
       if (sessionStatusFromInput === sessionStatus.completed) {
         /*
         We are getting published topics list through this query.
@@ -355,21 +377,6 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         });
         // console.log('scheduleB2BSessionMissed', scheduleB2BSessionMissed)
         scheduleB2BSessionMissed(batchSessionId);
-        let topicsList = [];
-        // a batch can have own package topic rule. if it exist in a batch we will select it over the course package.
-        if (coursePackageId) {
-          let topicRules;
-          if (get(batchResult, 'coursePackageTopicRule', []).length) {
-            topicRules = get(batchResult, 'coursePackageTopicRule', []);
-          } else {
-            const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
-            topicRules = get(coursePackage, 'topics', []);
-          }
-          topicsList = getSortedTopics(topicRules);
-        } else {
-          const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
-          topicsList = get(nextTopicQueryRes, 'data.topics', []);
-        }
 
         let currentTopicIndex;
         topicsList.forEach((topic, index) => {
@@ -400,52 +407,6 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         }
         // const postCarnivalFeedbackDate = moment().add(1, 'hour').toDate();
         // addToSchedule('postCarnivalMail', postCarnivalFeedbackDate, { batchSessionId });
-      } else if (sessionStatusFromInput === sessionStatus.started
-        && get(batchInfo, 'documentType') === 'classroom'
-        && Math.abs(moment(new Date()).hours() - slotTimeArray[0]) === 0) {
-        let topicsList = [];
-        if (coursePackageId) {
-          let topicRules;
-          // a batch can have own package topic rule. if it exist in a batch we will select it over the course package.
-          if (get(batchResult, 'coursePackageTopicRule', []).length) {
-            topicRules = get(batchResult, 'coursePackageTopicRule', []);
-          } else {
-            const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
-            topicRules = get(coursePackage, 'topics', []);
-          }
-          topicsList = getSortedTopics(topicRules);
-        } else {
-          const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
-          topicsList = get(nextTopicQueryRes, 'data.topics', []);
-        }
-
-        let currentTopicIndex;
-        topicsList.forEach((topic, index) => {
-          if (topic.id === topicId) {
-            currentTopicIndex = index;
-          }
-        });
-        let nextTopicId = '';
-        if (currentTopicIndex + 1 < topicsList.length) {
-          nextTopicId = topicsList[currentTopicIndex + 1].id;
-        }
-        if (nextTopicId) {
-          context.shouldUpdateMentorMentee = false;
-          await updateBatchCurrentComponentStatus(
-            batchCurrentComponentId,
-            sessionStatusFromInput,
-            nextTopicId,
-            context,
-          );
-        } else {
-          context.shouldUpdateMentorMentee = false;
-          await updateBatchCurrentComponentStatus(
-            batchCurrentComponentId,
-            sessionStatusFromInput,
-            null,
-            context,
-          );
-        }
       } else {
         context.shouldUpdateMentorMentee = false;
         await updateBatchCurrentComponentStatus(
@@ -455,6 +416,52 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
           context,
         );
       }
+      // else if (sessionStatusFromInput === sessionStatus.started
+      //   && get(batchInfo, 'documentType') === 'classroom'
+      //   && Math.abs(moment(new Date()).hours() - slotTimeArray[0]) === 0) {
+      //   if (coursePackageId) {
+      //     let topicRules;
+      //     // a batch can have own package topic rule. if it exist in a batch we will select it over the course package.
+      //     if (get(batchResult, 'coursePackageTopicRule', []).length) {
+      //       topicRules = get(batchResult, 'coursePackageTopicRule', []);
+      //     } else {
+      //       const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+      //       topicRules = get(coursePackage, 'topics', []);
+      //     }
+      //     topicsList = getSortedTopics(topicRules);
+      //   } else {
+      //     const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
+      //     topicsList = get(nextTopicQueryRes, 'data.topics', []);
+      //   }
+
+      //   let currentTopicIndex;
+      //   topicsList.forEach((topic, index) => {
+      //     if (topic.id === topicId) {
+      //       currentTopicIndex = index;
+      //     }
+      //   });
+      //   let nextTopicId = '';
+      //   if (currentTopicIndex + 1 < topicsList.length) {
+      //     nextTopicId = topicsList[currentTopicIndex + 1].id;
+      //   }
+      //   if (nextTopicId) {
+      //     context.shouldUpdateMentorMentee = false;
+      //     await updateBatchCurrentComponentStatus(
+      //       batchCurrentComponentId,
+      //       sessionStatusFromInput,
+      //       nextTopicId,
+      //       context,
+      //     );
+      //   } else {
+      //     context.shouldUpdateMentorMentee = false;
+      //     await updateBatchCurrentComponentStatus(
+      //       batchCurrentComponentId,
+      //       sessionStatusFromInput,
+      //       null,
+      //       context,
+      //     );
+      //   }
+      // }
     }
     // console.log('bookingDate before if', bookingDate);
     // console.log('bookingDateFromInput before if', bookingDateFromInput);

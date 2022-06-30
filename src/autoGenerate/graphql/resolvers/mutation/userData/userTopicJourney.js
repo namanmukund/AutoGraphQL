@@ -206,6 +206,9 @@ const getBatchStatus = (userId) => `
         batch{
           id
           type
+          coursePackage {
+            id
+          }
           currentComponent{
             enrollmentType
             currentCourse{
@@ -302,8 +305,9 @@ const userTopicJourneyMutationResolver = async (
   );
 
   const batchCurrentComponentCourseId = get(batchRes, 'data.user.studentProfile.batch.currentComponent.currentCourse.id');
+  const coursePackageId = get(batchRes, 'data.user.studentProfile.batch.coursePackage.id');
   let batchCurrentComponentInfo;
-  if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId) {
+  if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId || coursePackageId) {
     batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
   }
 
@@ -398,7 +402,7 @@ const userTopicJourneyMutationResolver = async (
       currentRunningTopicOrder = currentRunningTopic.order;
     }
 
-    if (topicInfo.order < currentRunningTopicOrder) {
+    if ((topicInfo.order < currentRunningTopicOrder) || coursePackageId) {
       if (topicInfo.isTrial || combinedEnrollmentType === pro) {
         videoData.isUnlocked = true;
       } else {
@@ -644,7 +648,7 @@ const userTopicJourneyMutationResolver = async (
     } else {
       currentRunningTopicOrder = currentRunningTopic.order;
     }
-    if (topicInfo.order < currentRunningTopicOrder) {
+    if ((topicInfo.order < currentRunningTopicOrder) || coursePackageId) {
       if (topicInfo.isTrial || combinedEnrollmentType === pro) {
         for (const videoElem of videoData) {
           videoElem.isUnlocked = true;

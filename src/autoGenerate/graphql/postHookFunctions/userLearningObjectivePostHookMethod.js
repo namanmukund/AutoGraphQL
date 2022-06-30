@@ -52,7 +52,7 @@ const learningObjectiveQuery = (learningObjectiveId, courseId) => `
       }){
         id
       }
-      learningSlides(filter:{status:${PUBLISHED}}){
+      learningSlides(filter:{status:${PUBLISHED}}, orderBy:order_ASC,){
         id
       }
     }
