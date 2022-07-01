@@ -194,7 +194,9 @@ class AggregationController {
             $arrayElemAt: [`$${aliasOrPrimitiveName}`, 0],
           };
         } else {
-          projectionMap[aliasOrPrimitiveName] = 1;
+          projectionMap[aliasOrPrimitiveName] = {
+            $ifNull: [`$${aliasOrPrimitiveName}`, []],
+          };
         }
       } else if (get(fieldParams, 'directive.defaultValue')) {
         // DefautValue directive only works with mongoose so
@@ -207,7 +209,11 @@ class AggregationController {
           defaultFieldValue = Boolean(defaultFieldValue);
         }
         projectionMap[fieldInfo.name] = {
-          $ifNull: [`$${fieldInfo.name}`, defaultFieldValue || ''],
+          $ifNull: [`$${fieldInfo.name}`, defaultFieldValue],
+        };
+      } else if (get(fieldParams, 'type.isList', false)) {
+        projectionMap[fieldInfo.name] = {
+          $ifNull: [`$${fieldInfo.name}`, []],
         };
       } else {
         projectionMap[fieldInfo.name] = 1;
