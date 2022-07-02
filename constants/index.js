@@ -510,7 +510,7 @@ const courseToGradeMappingForStaging = [
   },
 ];
 
-const PHONE_OTP_LIMIT_PER_DAY = 5;
+const PHONE_OTP_LIMIT_PER_DAY = 20;
 
 const PHONE_OTP_MAX_RETRY_WAIT_SECOND = 60;
 
