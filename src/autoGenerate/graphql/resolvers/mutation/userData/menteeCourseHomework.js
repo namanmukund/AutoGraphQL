@@ -212,7 +212,6 @@ const getMentorMenteeSessions = async (userId) => {
       mentorMenteeSessions(filter: {
         and: [
           { menteeSession_some: { user_some: { id: "${userId}" } } }
-          { sessionStatus: completed }
         ]
       }) {
         id
