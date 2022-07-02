@@ -15,6 +15,7 @@ import { log } from '../../../../../../utils';
 import getMasteryLevel from '../../utils/getMasteryLevel';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import validateCurrentTopicComponentForNewCourse from '../../utils/validateCurrentTopicComponentForNewCourse';
+import isUserIsMentorChild from '../../../postHookFunctions/utils/isMentorChild';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = (userId, courseId) => `
@@ -289,6 +290,9 @@ const userTopicJourneyMutationResolver = async (
     context,
     '',
   );
+  // Bypassing component validation incase if schoolTeacher is accessing the content.
+  let checkForMentorChild = await isUserIsMentorChild(userId, true);
+  checkForMentorChild = typeof checkForMentorChild === 'boolean' && checkForMentorChild;
   const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
   // calling method to validate user current topic component status
   if (!courseId || (courseId === OLD_COURSE_ID)) {
@@ -323,6 +327,8 @@ const userTopicJourneyMutationResolver = async (
     const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', free);
     combinedEnrollmentType = (combinedEnrollmentType === free && schoolEnrollmentType === free ? free : pro);
   }
+  // Assigning enrollmentType with pro for school Teachers.
+  if (checkForMentorChild) combinedEnrollmentType = pro;
 
   const userTopicData = {};
   if (!courseId || (courseId === OLD_COURSE_ID)) {
@@ -402,7 +408,7 @@ const userTopicJourneyMutationResolver = async (
       currentRunningTopicOrder = currentRunningTopic.order;
     }
 
-    if ((topicInfo.order < currentRunningTopicOrder) || coursePackageId) {
+    if ((topicInfo.order < currentRunningTopicOrder) || coursePackageId || checkForMentorChild) {
       if (topicInfo.isTrial || combinedEnrollmentType === pro) {
         videoData.isUnlocked = true;
       } else {
@@ -648,7 +654,7 @@ const userTopicJourneyMutationResolver = async (
     } else {
       currentRunningTopicOrder = currentRunningTopic.order;
     }
-    if ((topicInfo.order < currentRunningTopicOrder) || coursePackageId) {
+    if ((topicInfo.order < currentRunningTopicOrder) || coursePackageId || checkForMentorChild) {
       if (topicInfo.isTrial || combinedEnrollmentType === pro) {
         for (const videoElem of videoData) {
           videoElem.isUnlocked = true;
