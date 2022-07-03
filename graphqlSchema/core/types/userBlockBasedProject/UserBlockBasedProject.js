@@ -1,5 +1,5 @@
 const UserBlockBasedProject = `
-  type UserBlockBasedProject @model @databaseController(mode: "aggregation") {
+  type UserBlockBasedProject @model {
     user: User! @relation(name: "UserBlockBasedProject", direction: "OneWay")
     status: UserTopicTypeStatus @defaultValue(value: "incomplete")
     blockBasedProject: BlockBasedProject! @relation(name: "ProjectUserBlockBasedProject", direction: "OneWay")

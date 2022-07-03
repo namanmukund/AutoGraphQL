@@ -7,7 +7,7 @@ const userVideoNextComponentType = `
  }`;
 
 const UserVideo = `
-  type UserVideo @model @databaseController(mode: "aggregation") {
+  type UserVideo @model {
     user: User! @relation(name: "UserVideo", direction: "OneWay")
     topic: Topic! @relation(name: "UserVideoTopic", direction: "OneWay")
     course: Course @relation(name: "UserVideoCourse", direction: "OneWay")
