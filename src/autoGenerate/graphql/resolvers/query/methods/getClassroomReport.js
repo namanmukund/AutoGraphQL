@@ -250,7 +250,7 @@ const getUserAssignmentAggregation = ({
 const getUserBlockBasedPracticeAggregation = ({
   userIds,
   topicId,
-  isHomeworkParam,
+  isHomework: isHomeworkParam,
 }) => [{
   $match: {
     'user.typeId': {
