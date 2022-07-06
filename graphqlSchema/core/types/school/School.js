@@ -26,7 +26,7 @@ const School = `
     timetableSchedule: [TimetableSchedule] @relation(name: "SchoolTimetableSchedule")
     teachers: [MentorProfile] @relation(name: "MentorProfileSchool")
     isBuddyLoginEnabled: Boolean @defaultValue(value: "false")
-    buddyLoginLimit: Int
+    buddyLoginLimit: Int @defaultValue(value: "5")
   }
 `;
 export default [School];

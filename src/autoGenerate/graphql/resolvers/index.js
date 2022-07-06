@@ -315,6 +315,8 @@ Object.keys(parsedASTMap).forEach((type) => {
           info,
           parsedASTMap,
           authentication,
+          false,
+          context,
         ).then(async (result) => {
           const newResult = toObject(result);
           const postHookResult = await posthook(newResult, modelSingular, context, params, info);
@@ -342,6 +344,7 @@ Object.keys(parsedASTMap).forEach((type) => {
           info,
           parsedASTMap,
           authentication,
+          context,
         ).then(async (result) => {
           const newResult = toObject(result);
           const postHookResult = await posthook(newResult, modelSingular, context, params, info);
@@ -428,7 +431,7 @@ Object.keys(parsedASTMap).forEach((type) => {
       resolvers.Mutation = {
         ...resolvers.Mutation,
         [mutationNames.updateMultipleMutation]: (root, params, context, info) => {
-          const mutationName = mutationNames.updateMutation;
+          const mutationName = mutationNames.updateMultipleMutation;
           const mutationResolverName = 'updateMutationResolver';
           const isMultiple = true;
           return defaultMutationsResolverWrapper(

@@ -10,6 +10,7 @@ import {
   InvalidToken,
   SomethingWentWrongError,
   ResetPasswordLinkExpired,
+  UserAlreadyLoggedInIntoAnotherSystemError,
 } from './auth';
 
 import {
@@ -339,4 +340,5 @@ export {
   InvalidRescheduleParameters,
   InvalidLearningObjectiveComponent,
   PracticeQuestionsNotFound,
+  UserAlreadyLoggedInIntoAnotherSystemError,
 };

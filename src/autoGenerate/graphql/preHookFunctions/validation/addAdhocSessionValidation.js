@@ -8,7 +8,7 @@ import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfter
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import {
-  SessionMustBeCompletedError,
+  // SessionMustBeCompletedError,
   PermissionDeniedError,
   MentorIsInactiveError,
 } from '../../../../../constants/errors';
@@ -57,20 +57,20 @@ query{
 }`;
 
 // query to get batch sessions with previous topic
-const getBatchSessions = (previousTopicConnectId, batchId) => `
-query{
-  batchSessions(filter: {
-    and: [
-      {batch_some: {
-        id: "${batchId}"
-      }}
-      {topic_some: { id: "${previousTopicConnectId}" }}
-    ]
-  }){
-    id
-    sessionStatus
-  }
-}`;
+// const getBatchSessions = (previousTopicConnectId, batchId) => `
+// query{
+//   batchSessions(filter: {
+//     and: [
+//       {batch_some: {
+//         id: "${batchId}"
+//       }}
+//       {topic_some: { id: "${previousTopicConnectId}" }}
+//     ]
+//   }){
+//     id
+//     sessionStatus
+//   }
+// }`;
 
 // prehook logic to check if added Adhoc session(batch and order) is already present
 const addAdhocSessionValidation = async (params, mutationOrQueryName, context) => {
@@ -153,11 +153,11 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
   // ignore check in case of teacher Training
   if (type !== 'teacherTraining') {
     // confirm if the previous topic batch session is complete before proceeding
-    const batchSessionPreviousTopicRes = await callLocalGraphqlApi(getBatchSessions(previousTopicConnectId, batchId));
-    const batchSessionPreviousTopicStatus = get(batchSessionPreviousTopicRes, 'data.batchSessions[0].sessionStatus', '');
-    if (batchSessionPreviousTopicStatus !== 'completed') {
-      throw new SessionMustBeCompletedError();
-    }
+    // const batchSessionPreviousTopicRes = await callLocalGraphqlApi(getBatchSessions(previousTopicConnectId, batchId));
+    // const batchSessionPreviousTopicStatus = get(batchSessionPreviousTopicRes, 'data.batchSessions[0].sessionStatus', '');
+    // if (batchSessionPreviousTopicStatus !== 'completed') {
+    //   throw new SessionMustBeCompletedError();
+    // }
   }
 
   return true;

@@ -9,6 +9,7 @@ import {
   subscription, subscriptionPayloadTypes,
 } from '../autoGenerate';
 import { META } from '../../constants';
+import parseGraphqlResolveInfo from '../../utils/parseGraphqlResolveInfo';
 
 const graphqlTypes = [...typesWithRelationFilters, ...relationTypes, sort, ...filterTypes, ...groupByTypes, ...subscriptionPayloadTypes];
 const SchemaDefinition = `
@@ -55,6 +56,7 @@ forEachField(schema, (field) => {
       }
       /* eslint-disable no-param-reassign */
       field.resolve = (root, args, context, info) => {
+        const fieldInfo = parseGraphqlResolveInfo(info);
         /* eslint-enable no-param-reassign */
         const finalArgs = { ...argumentValues, ...args };
         let resolverPromise;
@@ -62,10 +64,32 @@ forEachField(schema, (field) => {
         if (oldResolve) {
           resolverPromise = oldResolve.call(field, root, finalArgs, context, info);
         } else if (directiveName === 'relationalMeta') {
+          /**
+           * In case where aggregation is allowed for a type
+           * result is stored in a different field called fieldName_DocumentForMeta
+           * i.e to avoid any conflict if same field is requested with some filter.
+           * Example: if { coursesMeta { count } } is requested
+           * we assign courses field data from DB into coursesMeta_DocumentForMeta.
+           */
+          if (root[`${field.name}_DocumentForMeta`]) resolverPromise = root[`${field.name}_DocumentForMeta`];
           /* relationalMeta will send the result same as that of relation
           for fetching count from query
            */
-          resolverPromise = root[field.name.split(META)[0]];
+          else resolverPromise = root[field.name.split(META)[0]];
+        } else if (
+          /**
+           * Checking if field is relational and
+           * alias is different from field name
+           * i.e {  newCourses: courses { title }  }
+           * then return data of aliasName field from root result.
+           * This case only arises when using Aggregation Mode for Type.
+           */
+          (directiveName === 'relation')
+          && fieldInfo
+          && (fieldInfo.alias !== field.name)
+          && root[fieldInfo.alias]
+        ) {
+          resolverPromise = root[fieldInfo.alias];
         } else {
           resolverPromise = root[field.name];
         }

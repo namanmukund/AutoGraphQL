@@ -6,6 +6,7 @@ import validateCurrentTopicComponent from '../../utils/validateCurrentTopicCompo
 import { QueryController } from '../../../controllers';
 import { getTopicsArrFromCoursePackages, getTopicOrderFromCoursePackage } from './menteeCourseSyllabus';
 import { OLD_COURSE_ID } from '../../../../../../constants';
+import { callLocalGraphqlApi } from '../../../../../api';
 
 const defaultMentorMenteeSessionObject = {
   sessionStatus: null,
@@ -20,191 +21,243 @@ const defaultMentorMenteeSessionObject = {
   isHomeworkCheckedByMentor: false,
   isReviewSubmittedOnTime: false,
 };
-const mentorMenteeSessionAggregation = (userId) => [
-  {
-    $match: {
-      sessionStatus: 'completed',
-    },
-  },
-  {
-    $lookup: {
-      from: 'MenteeSession',
-      let: {
-        menteeSession: '$menteeSession.typeId',
-      },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: ['$id', '$$menteeSession'],
-            },
-          },
-        },
-        {
-          $lookup: {
-            from: 'User',
-            let: {
-              user: '$user.typeId',
-            },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: ['$id', '$$user'],
-                  },
-                },
-              },
-            ],
-            as: 'user',
-          },
-        },
-        {
-          $project: {
-            id: 1,
-            user: {
-              $arrayElemAt: ['$user', 0],
-            },
-          },
-        },
-      ],
-      as: 'menteeSession',
-    },
-  },
-  {
-    $match: {
-      'menteeSession.user.id': userId,
-    },
-  },
-  {
-    $lookup: {
-      from: 'Topic',
-      let: {
-        topic: '$topic.typeId',
-      },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: ['$id', '$$topic'],
-            },
-          },
-        },
-        {
-          $lookup: {
-            from: 'Chapter',
-            let: {
-              chapter: '$chapter.typeId',
-            },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: ['$id', '$$chapter'],
-                  },
-                },
-              },
-              {
-                $project: {
-                  id: 1,
-                },
-              },
-            ],
-            as: 'chapter',
-          },
-        },
-        {
-          $lookup: {
-            from: 'File',
-            let: {
-              thumbnail: '$thumbnail.typeId',
-            },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: ['$id', '$$thumbnail'],
-                  },
-                },
-              },
-              {
-                $project: {
-                  id: 1,
-                  uri: 1,
-                  name: 1,
-                },
-              },
-            ],
-            as: 'thumbnail',
-          },
-        },
-        {
-          $lookup: {
-            from: 'File',
-            let: {
-              thumbnailSmall: '$thumbnailSmall.typeId',
-            },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: ['$id', '$$thumbnailSmall'],
-                  },
-                },
-              },
-              {
-                $project: {
-                  id: 1,
-                  uri: 1,
-                  name: 1,
-                },
-              },
-            ],
-            as: 'thumbnailSmall',
-          },
-        },
-        {
-          $project: {
-            id: 1,
-            title: 1,
-            order: 1,
-            chapter: {
-              $arrayElemAt: ['$chapter', 0],
-            },
-            thumbnail: {
-              $arrayElemAt: ['$thumbnail', 0],
-            },
-            thumbnailSmall: {
-              $arrayElemAt: ['$thumbnailSmall', 0],
-            },
-            description: 1,
-          },
-        },
-      ],
-      as: 'topic',
-    },
-  },
-  {
-    $project: {
-      id: 1,
-      sessionStatus: 1,
-      assignmentSubmitDate: 1,
-      quizSubmitDate: 1,
-      isSubmittedForReview: 1,
-      sessionJoinedByMenteeAt: 1,
-      isQuizSubmitted: 1,
-      isAssignmentSubmitted: 1,
-      isAssignmentAttempted: 1,
-      isPracticeSubmitted: 1,
-      practiceSubmitDate: 1,
-      isHomeworkCheckedByMentor: 1,
-      isReviewSubmittedOnTime: 1,
-      mentorMenteeSessionAvailable: true,
-      topic: {
-        $arrayElemAt: ['$topic', 0],
-      },
-    },
-  },
-];
+// const mentorMenteeSessionAggregation = (userId) => [
+//   {
+//     $match: {
+//       sessionStatus: 'completed',
+//     },
+//   },
+//   {
+//     $lookup: {
+//       from: 'MenteeSession',
+//       let: {
+//         menteeSession: '$menteeSession.typeId',
+//       },
+//       pipeline: [
+//         {
+//           $match: {
+//             $expr: {
+//               $eq: ['$id', '$$menteeSession'],
+//             },
+//           },
+//         },
+//         {
+//           $lookup: {
+//             from: 'User',
+//             let: {
+//               user: '$user.typeId',
+//             },
+//             pipeline: [
+//               {
+//                 $match: {
+//                   $expr: {
+//                     $eq: ['$id', '$$user'],
+//                   },
+//                 },
+//               },
+//             ],
+//             as: 'user',
+//           },
+//         },
+//         {
+//           $project: {
+//             id: 1,
+//             user: {
+//               $arrayElemAt: ['$user', 0],
+//             },
+//           },
+//         },
+//       ],
+//       as: 'menteeSession',
+//     },
+//   },
+//   {
+//     $match: {
+//       'menteeSession.user.id': userId,
+//     },
+//   },
+//   {
+//     $lookup: {
+//       from: 'Topic',
+//       let: {
+//         topic: '$topic.typeId',
+//       },
+//       pipeline: [
+//         {
+//           $match: {
+//             $expr: {
+//               $eq: ['$id', '$$topic'],
+//             },
+//           },
+//         },
+//         {
+//           $lookup: {
+//             from: 'Chapter',
+//             let: {
+//               chapter: '$chapter.typeId',
+//             },
+//             pipeline: [
+//               {
+//                 $match: {
+//                   $expr: {
+//                     $eq: ['$id', '$$chapter'],
+//                   },
+//                 },
+//               },
+//               {
+//                 $project: {
+//                   id: 1,
+//                 },
+//               },
+//             ],
+//             as: 'chapter',
+//           },
+//         },
+//         {
+//           $lookup: {
+//             from: 'File',
+//             let: {
+//               thumbnail: '$thumbnail.typeId',
+//             },
+//             pipeline: [
+//               {
+//                 $match: {
+//                   $expr: {
+//                     $eq: ['$id', '$$thumbnail'],
+//                   },
+//                 },
+//               },
+//               {
+//                 $project: {
+//                   id: 1,
+//                   uri: 1,
+//                   name: 1,
+//                 },
+//               },
+//             ],
+//             as: 'thumbnail',
+//           },
+//         },
+//         {
+//           $lookup: {
+//             from: 'File',
+//             let: {
+//               thumbnailSmall: '$thumbnailSmall.typeId',
+//             },
+//             pipeline: [
+//               {
+//                 $match: {
+//                   $expr: {
+//                     $eq: ['$id', '$$thumbnailSmall'],
+//                   },
+//                 },
+//               },
+//               {
+//                 $project: {
+//                   id: 1,
+//                   uri: 1,
+//                   name: 1,
+//                 },
+//               },
+//             ],
+//             as: 'thumbnailSmall',
+//           },
+//         },
+//         {
+//           $project: {
+//             id: 1,
+//             title: 1,
+//             order: 1,
+//             chapter: {
+//               $arrayElemAt: ['$chapter', 0],
+//             },
+//             thumbnail: {
+//               $arrayElemAt: ['$thumbnail', 0],
+//             },
+//             thumbnailSmall: {
+//               $arrayElemAt: ['$thumbnailSmall', 0],
+//             },
+//             description: 1,
+//           },
+//         },
+//       ],
+//       as: 'topic',
+//     },
+//   },
+//   {
+//     $project: {
+//       id: 1,
+//       sessionStatus: 1,
+//       assignmentSubmitDate: 1,
+//       quizSubmitDate: 1,
+//       isSubmittedForReview: 1,
+//       sessionJoinedByMenteeAt: 1,
+//       isQuizSubmitted: 1,
+//       isAssignmentSubmitted: 1,
+//       isAssignmentAttempted: 1,
+//       isPracticeSubmitted: 1,
+//       practiceSubmitDate: 1,
+//       isHomeworkCheckedByMentor: 1,
+//       isReviewSubmittedOnTime: 1,
+//       mentorMenteeSessionAvailable: true,
+//       topic: {
+//         $arrayElemAt: ['$topic', 0],
+//       },
+//     },
+//   },
+// ];
+const getMentorMenteeSessions = async (userId) => {
+  const query = `
+    {
+      mentorMenteeSessions(filter: {
+        and: [
+          { menteeSession_some: { user_some: { id: "${userId}" } } }
+        ]
+      }) {
+        id
+        sessionStatus
+        assignmentSubmitDate
+        quizSubmitDate
+        isSubmittedForReview
+        sessionJoinedByMenteeAt
+        isQuizSubmitted
+        isAssignmentSubmitted
+        isAssignmentAttempted
+        isPracticeSubmitted
+        practiceSubmitDate
+        isHomeworkCheckedByMentor
+        isReviewSubmittedOnTime
+        menteeSession {
+          id 
+          user {
+            id
+            name
+          }
+        }
+        topic {
+          id
+          title
+          order
+          chapter {
+            id
+            title
+          }
+          thumbnail {
+            id
+            uri
+          }
+          thumbnailSmall {
+            id
+            uri
+          }
+          description
+        }
+      }
+    }
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.mentorMenteeSessions', []);
+};
 
 const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
   {
@@ -1161,12 +1214,8 @@ const menteeCourseHomeworkMutationResolver = async (
   if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId || coursePackage) {
     batchCurrentComponentInfo = get(userBatchDetails, '0.batch.currentComponent');
   }
-  const modelQuery = new QueryController('MentorMenteeSession', {
-    bypass: true,
-  });
-  const mentorMenteeSessions = await modelQuery.aggregate(
-    mentorMenteeSessionAggregation(userId),
-  );
+
+  const mentorMenteeSessions = await getMentorMenteeSessions(userId);
   if (batchCurrentComponentInfo || coursePackage) {
     currentTopicOrder = get(batchCurrentComponentInfo, 'currentTopic.order');
     currentTopic = get(batchCurrentComponentInfo, 'currentTopic');

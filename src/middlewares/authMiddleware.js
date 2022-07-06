@@ -1,12 +1,14 @@
 import base64 from 'base-64';
 import { verifyToken, verifyAppToken } from '../auth';
-import { QueryController } from '../autoGenerate/graphql/controllers';
+import { QueryController, RedisController } from '../autoGenerate/graphql/controllers';
 import { toObject, log } from '../../utils';
 import { STATIC } from '../../constants';
 import { DatabaseRecordNotFoundError } from '../../constants/errors';
 import appSpecificAuthTokens from '../../constants/appSpecificAuthTokens';
+import validateBuddyToken from './utils/validateBuddyToken';
 
 const application = process.env.APPLICATION || 'core';
+const CACHE_EXPIRY_IN_SECONDS = 3600;
 
 const fetchUser = (id) => {
   const typeName = 'User';
@@ -26,14 +28,23 @@ const fetchUser = (id) => {
 };
 
 // Function to verify if static token is valid or not
-const verifyIfStaticTokenIsValidOrNot = (appToken) => {
+const verifyIfStaticTokenIsValidOrNot = async (appToken) => {
   const typeName = 'AppToken';
   const newAuthentication = {
     bypass: true,
   };
+  const redisClient = new RedisController(newAuthentication);
+  const cachedAppTokenRes = await redisClient.get(`appToken::cache::${appToken}`);
+  if (cachedAppTokenRes) {
+    return true;
+  }
   const modelQueries = new QueryController(typeName, newAuthentication);
   return modelQueries.fetchOne({ token: appToken })
     .then((result) => {
+      redisClient.set(result, {
+        hkey: `appToken::cache::${appToken}`,
+        maxAge: CACHE_EXPIRY_IN_SECONDS * 100,
+      });
       if (!result) {
         return false;
       }
@@ -43,6 +54,9 @@ const verifyIfStaticTokenIsValidOrNot = (appToken) => {
 
 // Validate if token is blackListed or not
 const validateForBlackListedToken = (encodedToken) => {
+  // Bypass BlacklistedToken validation for now.
+  return true;
+  // eslint-disable-next-line no-unreachable
   const typeName = 'BlacklistedToken';
   const newAuthentication = {
     bypass: true,
@@ -62,7 +76,20 @@ const validateForBlackListedToken = (encodedToken) => {
 const handleUserToken = async (id, currentApp, currentUser) => {
   const userInfo = {};
   // Get user by id
-  const user = await fetchUser(id);
+  const redisClient = new RedisController({
+    bypass: true,
+  });
+  let user = {};
+  const cachedUserRes = await redisClient.get(`user::cache::${id}`);
+  if (cachedUserRes) {
+    user = cachedUserRes;
+  } else {
+    user = await fetchUser(id);
+    redisClient.set(user, {
+      hkey: `user::cache::${id}`,
+      maxAge: CACHE_EXPIRY_IN_SECONDS,
+    });
+  }
   // Get status
   let { status } = user;
   const { role } = user;
@@ -79,7 +106,7 @@ const handleUserToken = async (id, currentApp, currentUser) => {
   }
   // Put status info in userInfo object
   userInfo.status = status;
-  if (role || role.length) {
+  if (role && role.length) {
     userInfo.role = role;
   }
 
@@ -166,6 +193,16 @@ const authMiddleware = async (req, res, next) => {
   // Verify User
   if (userToken && isValidToken) {
     await extractAndUpdateUserTokenInfoInRequest(req, userToken, 'currentUser');
+  }
+  const userDeviceId = req.headers['user-device-id'];
+  const batchSessionId = req.headers['batchsession-id'];
+  if (userDeviceId && batchSessionId && req.currentUser) {
+    // Setting buddyLogin flow active when userDeviceId and batchSessionId is passed in headers
+    Object.assign(req.currentUser, {
+      isBuddyLoginFlowActive: true,
+    });
+    // To Validate if the buddy token is valid
+    await validateBuddyToken(batchSessionId, userDeviceId, req);
   }
   next();
 };

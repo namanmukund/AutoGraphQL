@@ -126,10 +126,12 @@ import addWeekDayForOneDayEvent from './preHookFunctions/validation/utils/addWee
 // import addTimetableScheduleValidation from './preHookFunctions/validation/addTimetableScheduleValidation';
 // import updateTimetableScheduleValidation from './preHookFunctions/validation/updateTimetableScheduleValidation';
 import addUserLearningSlideDumpValidation from './preHookFunctions/validation/addUserLearningSlideDumpValidation ';
+import commonPreHookValidations from './preHookFunctions/commonPreHookValidations';
 // import updateEventSessionValidation from './preHookFunctions/validation/updateEventSessionValidation';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
 const prehook = async (input, mutationOrQueryName, context, params) => {
+  await commonPreHookValidations(input, mutationOrQueryName, context, params);
   switch (mutationOrQueryName) {
     case 'updateTopic': {
       // await isUniqueOrderField(params, mutationOrQueryName);
