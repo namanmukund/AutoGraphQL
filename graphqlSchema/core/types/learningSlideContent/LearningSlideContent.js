@@ -4,7 +4,7 @@ const LearningSlideContent = `
     type: LearningSlideContentType!
     gridPlacement: String
     media: File @relation(name: "LearningSlideContentFile", direction: "OneWay")
-    statement: String @length(min: 3, max: 2000) @trim
+    statement: String @trim
     url: String 
     codeInput: String
     codeOutput: String

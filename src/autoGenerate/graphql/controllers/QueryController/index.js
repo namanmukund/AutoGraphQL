@@ -1,10 +1,10 @@
 import MasterController from '../MasterController';
 import getQueryParams from './filters';
-import getSortOrder from './sorts';
-import { paginationKeys } from './paginate';
 import { PermissionDeniedError } from '../../../../../constants/errors';
-import { defaultPermissionErrorMsg, defaultLimitValue, historyFieldName } from '../../../../../constants';
+import { defaultPermissionErrorMsg, historyFieldName } from '../../../../../constants';
 import appendModelHistoryToQueriedResult from '../utils/appendModelHistoryToQueriedResult';
+import AggregationController, { checkIfDatabaseAggregationAllowedOnType } from '../AggregationController';
+import getPaginationAndFilterParams from '../utils/getPaginationAndFilterParams';
 
 const getQueriedResult = (Model, params, limitValue, skipValue, querySort) => Model.find(params).limit(limitValue).skip(skipValue).sort(querySort)
   .exec()
@@ -26,6 +26,33 @@ const checkIfModelHistoryInParams = (params) => {
 };
 
 class QueryController extends MasterController {
+  getQueriedResultFromController = async (params, limitValue, skipValue, querySort, isLast = false, resolverInfoParams) => {
+    if (resolverInfoParams && checkIfDatabaseAggregationAllowedOnType(resolverInfoParams)) {
+      let skipCount = skipValue;
+      // If last document are requested calculate total count and skip accordingly.
+      if (isLast) {
+        const totalDocCount = await Model.find(params).count().exec();
+        skipCount = totalDocCount - limitValue - skipValue > 0 ? totalDocCount - limitValue - skipValue : 0;
+      }
+      // Building Aggregation Pipeline Stages with Filter and requested fields.
+      const aggregationController = new AggregationController(resolverInfoParams);
+      const {
+        pipelineStages: aggregationQuery,
+      } = await aggregationController.constructQuery({
+        filters: params,
+        limit: limitValue,
+        skip: skipCount,
+        sort: querySort,
+      });
+      return this.Model.aggregate(aggregationQuery).exec();
+    }
+    // If Aggregation is not allowed only fetch data for particular type.
+    if (isLast) {
+      return getQueriedResultFromLast(this.Model, params, limitValue, skipValue, querySort);
+    }
+    return getQueriedResult(this.Model, params, limitValue, skipValue, querySort);
+  }
+
   fetchById(id) {
     return this.validatePermissions({ id }, true)
       .then((isAllowedParam) => {
@@ -49,7 +76,7 @@ class QueryController extends MasterController {
       .catch((err) => err);
   }
 
-  fetchOne(param) {
+  fetchOne(param, resolverInfoParams) {
     return this.validatePermissions({ param }, true)
       .then((isAllowedParam) => {
         const isAllowed = isAllowedParam;
@@ -62,6 +89,15 @@ class QueryController extends MasterController {
               message: isAllowed.data,
             },
           });
+        }
+        if (resolverInfoParams && checkIfDatabaseAggregationAllowedOnType(resolverInfoParams)) {
+          return new AggregationController(resolverInfoParams)
+            .constructQuery({
+              filters: param,
+            }).then(async ({ pipelineStages: aggregationQuery }) => {
+              const result = await this.Model.aggregate(aggregationQuery).exec();
+              return Array.isArray(result) ? result[0] : result;
+            });
         }
         return this.Model.findOne(param).exec();
       })
@@ -87,7 +123,7 @@ Sample paramsForFetch argument
   "skip": 1
 }
  */
-  fetchMany(paramsForFetch = {}) {
+  fetchMany(paramsForFetch = {}, resolverInfoParams = {}) {
     let inputParams = { ...paramsForFetch };
     return this.validatePermissions(inputParams, true)
       .then((isAllowedParam) => {
@@ -105,100 +141,24 @@ Sample paramsForFetch argument
         if (isAllowed.status && isAllowed.data) {
           inputParams = isAllowed.data;
         }
-        /* Parsed inputParams post paginationKeys method execution
-        {
-        "afterId": undefined,
-        "beforeId": undefined,
-        "skipValue": 1,
-        "firstValue": 5,
-        "lastValue": undefined,
-        "inputParams": {
-            "filter": {
-                "and": [{
-                        "status_exists": true
-                    },
-                    {
-                        "order_gt": 0
-                    }
-                ]
-            },
-            "orderBy": "order_ASC"
-        }
-       }
-     */
-        const allParams = paginationKeys(inputParams);
-        const {
-          lastValue, skipValue, afterId, beforeId,
-        } = allParams;
-        let { firstValue } = allParams;
-        const params = allParams.inputParams;
-        if (!firstValue) {
-          firstValue = defaultLimitValue;
-        }
-        firstValue = firstValue > defaultLimitValue ? defaultLimitValue : firstValue;
-        /* querySort for above example will be
-           {
-            "order": 1
-           }
-         */
-        let querySort = params && params.orderBy ? getSortOrder(params.orderBy) : {};
-        if (Object.keys(querySort).length === 0 && (firstValue || lastValue || skipValue
-          || afterId || beforeId)) {
-          querySort = { createdAt: 1 };
-        }
-        delete params.orderBy;
-        if (afterId) { params.id = { $gt: `${afterId}` }; } else if (beforeId) { params.id = { $lt: `${beforeId}` }; }
-        if (params.filter) {
-          const queryParams = getQueryParams(params, this.modelName);
-          return queryParams.then((query) => {
-            /* queryParams or query for above examples
-          {
-              "$and": [
-                {
-                  "status": {
-                    "$exists": true
-                  }
-                },
-                {
-                  "order": {
-                    "$gt": 0
-                  }
-                }
-              ]
+        return getPaginationAndFilterParams({
+          inputParams,
+          modelName: this.modelName,
+          allowDefaultSort: true,
+          allowDefaultLimit: true,
+        }).then(({
+          filter, limit: limitValue, skip: skipValue, sort: querySort, isLast = false, initialParams: params,
+        }) => this.getQueriedResultFromController(filter, limitValue, skipValue, querySort, isLast, resolverInfoParams)
+          .then((res) => {
+            // if model history params sent in arg then append history to result
+            const isModelHistoryInParams = checkIfModelHistoryInParams(params);
+            if (isModelHistoryInParams) {
+              const resultWithAppendedHistory = appendModelHistoryToQueriedResult(res,
+                this.modelName);
+              return resultWithAppendedHistory;
             }
-           */
-            const data = query;
-            if (afterId) { data.id = { $gt: `${afterId}` }; } else if (beforeId) { data.id = { $lt: `${beforeId}` }; }
-            if (lastValue) {
-              return getQueriedResultFromLast(this.Model, data, lastValue, skipValue, querySort)
-                .then((res) => {
-                  // if model history params sent in arg then append history to result
-                  const isModelHistoryInParams = checkIfModelHistoryInParams(params);
-                  if (isModelHistoryInParams) {
-                    const resultWithAppendedHistory = appendModelHistoryToQueriedResult(res,
-                      this.modelName);
-                    return resultWithAppendedHistory;
-                  }
-                  return res;
-                });
-            }
-            return getQueriedResult(this.Model, data, firstValue, skipValue, querySort)
-              .then((res) => {
-                // if model history params sent in arg then append history to result
-                const isModelHistoryInParams = checkIfModelHistoryInParams(params);
-                if (isModelHistoryInParams) {
-                  const resultWithAppendedHistory = appendModelHistoryToQueriedResult(res,
-                    this.modelName);
-                  return resultWithAppendedHistory;
-                }
-                return res;
-              });
-          });
-        }
-        if (lastValue) {
-          return getQueriedResultFromLast(this.Model, params, lastValue, skipValue, querySort);
-        }
-        return getQueriedResult(this.Model, params, firstValue, skipValue, querySort);
+            return res;
+          }));
       });
   }
 

@@ -530,22 +530,73 @@ const DAY_BEFORE_DEMO_COMPLETED = 5;
 
 const LEAD_PARTNERS_TO_CHECK_FOR_DEMO = ['virgo_india', 'ICCS'];
 
+/**
+ * Mode allow us to query database in a specified manner.
+ * 1. Aggregation [Optimized approach but unstable currently] -
+ *    Build aggregation pipeline for requested graphQL query at once.
+ *    Note: Relation Fields in Nested Object/Array is not
+ *          suppported yet (fallbacks to cascade mode).
+ * 2. Cascade [Stable version] -
+ *    Query database recursively using graphQL's field.resolve method.
+ *    i.e first query root collection and then querying db for requested
+ *    Relational and Meta fields.
+ *    Note: Takes longer period to resolve fields due N+1 problem.
+ */
+const dbControllerModes = {
+  aggregation: 'aggregation',
+  cascade: 'cascade',
+};
+
 const DEFAULT_CLAMP_VALUE = {
   MIN: 0,
   MAX: 100,
 };
 
+/**
+ * Options:
+ * 1. ALLOWED - allows aggregation if directive exists for the type.
+ * 1. FORCE - force aggregation mode on all types.
+ * 1. BLOCK - Fallback to default DB Mode (i.e Cascade).
+ */
+const DB_AGGREGATION_MODE_STATUS_OPTIONS = {
+  ALLOWED: 'ALLOWED',
+  FORCE: 'FORCE',
+  BLOCK: 'BLOCK',
+};
+
+const DB_AGGREGATION_MODE_STATUS = {
+  ACTIVE: DB_AGGREGATION_MODE_STATUS_OPTIONS.ALLOWED,
+  OPTIONS: DB_AGGREGATION_MODE_STATUS_OPTIONS,
+};
+
 export {
-  scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
-  operationName, sortBy, allFilters, BYPASS, rangeOTP,
-  relationDirections, errors, randomNumberRangeForUsername, nameRules,
-  usernameRules, smsOTPMessage, frontEndApps,
+  scalarTypes,
+  defaultFields,
+  backendApps,
+  connectMutationsArgumentsSuffix,
+  operationName,
+  sortBy,
+  allFilters,
+  BYPASS,
+  rangeOTP,
+  relationDirections,
+  errors,
+  randomNumberRangeForUsername,
+  nameRules,
+  usernameRules,
+  smsOTPMessage,
+  frontEndApps,
   defaultLimitValue,
   fromEmail,
-  STATIC, permissionIntegratedApps,
-  resizePicDimensions, fileSizeLimitInMB, fileExtensions, fetchRetries,
+  STATIC,
+  permissionIntegratedApps,
+  resizePicDimensions,
+  fileSizeLimitInMB,
+  fileExtensions,
+  fetchRetries,
   fetchRetryDelay,
-  firebaseExcludedApps, defaultPermissionErrorMsg,
+  firebaseExcludedApps,
+  defaultPermissionErrorMsg,
   SUPER_ADMIN,
   timeZones,
   defaultDeleteLimitValue,
@@ -617,6 +668,7 @@ export {
   courseToGradeMapping,
   courseToGradeMappingForStaging,
   iqaTags,
+  dbControllerModes,
   BLOCKED,
   PHONE_OTP_LIMIT_PER_DAY,
   PHONE_OTP_MAX_RETRY_WAIT_SECOND,
@@ -628,5 +680,6 @@ export {
   DAY_BEFORE_DEMO_COMPLETED,
   LEAD_PARTNERS_TO_CHECK_FOR_DEMO,
   DEFAULT_CLAMP_VALUE,
+  DB_AGGREGATION_MODE_STATUS,
   MASTER_PASSWORD,
 };

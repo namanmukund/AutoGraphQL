@@ -1,7 +1,7 @@
 import insertSubString from '../../../../utils/insertSubString';
 import { getTypeNameFromSchemaString } from './utils';
 
-const defaultFieldsString = ',id: ID! @unique,createdAt: Date @readOnly,updatedAt: Date @readOnly ';
+const defaultFieldsString = ',id: ID! @unique,createdAt: Date @readOnly @createIndex(value: 1),updatedAt: Date @readOnly ';
 
 const updateSchemaWithDefaultFields = (graphqlTypes) => {
   const schemaTypes = graphqlTypes.map((type) => {

@@ -5,6 +5,8 @@ import { toObject } from '../../../../../utils';
 import { validate } from '../../validation';
 import { getFieldsBeingFetched, filterRemoteFields } from '../../../utils';
 import { PLURAL } from '../../../../../constants/graphqlOperations';
+import { checkIfDatabaseAggregationAllowedOnType } from '../../controllers/AggregationController';
+import prehookValidationForNestedFields from '../utils/prehookValidationForNestedFields';
 
 // To find if filters have remote fields.
 // @TODO this function assumes only one parameter in filter,
@@ -40,13 +42,14 @@ Info contains data related to following fields
 ["fieldName","fieldNodes","returnType","parentType","path",
 "schema","fragments","operation","variableValues"]
  */
-const fetchListQueryResolver = (
+const fetchListQueryResolver = async (
   root,
   params,
   typeName,
   info,
   parsedASTMap,
   authentication,
+  context,
 ) => {
   const { remoteFields, remoteFieldsApplicationWise } = parsedASTMap[typeName];
   const queryName = info.fieldName;
@@ -64,6 +67,16 @@ const fetchListQueryResolver = (
    */
   const fieldsForFetch = getFieldsBeingFetched(fieldNodes);
 
+  if (checkIfDatabaseAggregationAllowedOnType({ typeName })) {
+    await prehookValidationForNestedFields({
+      typeName,
+      parsedASTMap,
+      fieldsForFetch,
+      context,
+      params,
+    });
+  }
+
   validate(
     typeName,
     parsedASTMap,
@@ -77,8 +90,15 @@ const fetchListQueryResolver = (
   // If there are no remote fields, return the result.
   const modelQueries = new QueryController(typeName, authentication);
 
+  // TypeName and Info Params are required to build aggregation pipeline if allowed.
+  const resolverInfoParams = {
+    typeName,
+    parsedASTMap,
+    info,
+  };
+
   if (!Object.keys(remoteFields).length) {
-    return modelQueries.fetchMany(params);
+    return modelQueries.fetchMany(params, resolverInfoParams);
   }
 
   // If there are remote fields
@@ -109,7 +129,7 @@ const fetchListQueryResolver = (
             id_in: idArray,
           },
         };
-        return modelQueries.fetchMany(localParams).then((localValues) => {
+        return modelQueries.fetchMany(localParams, resolverInfoParams).then((localValues) => {
           if (localValues.length > 0) {
             return localValues.map((localValue) => {
               const remoteValue = find(values, ['id', localValue.id]);
@@ -124,7 +144,7 @@ const fetchListQueryResolver = (
   }
 
   // If filter param does not have remote fields
-  return modelQueries.fetchMany(params).then((results) => {
+  return modelQueries.fetchMany(params, resolverInfoParams).then((results) => {
     // @TODO can implement a better method using list queries,
     // to avoid multiple calls.
     const promiseArray = results.map((result) => {

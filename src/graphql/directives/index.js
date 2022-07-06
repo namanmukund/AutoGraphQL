@@ -51,6 +51,11 @@ directive @cacheControl(
 # Create index for a field
 directive @createIndex on FIELD
 
+# Define controller mode for querying database.
+directive @databaseController(
+  mode: DatabaseControllerMode
+) on SCHEMA | FIELD
+
 # Clamp Integer to minimum or maximum value.
 directive @clamp(
   min: Int

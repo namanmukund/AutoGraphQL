@@ -17,7 +17,7 @@ const TopicComponentsRule = `
 
 const Topic = `
   type Topic @model
-  @cacheControl(maxAge: 86400)
+  @databaseController(mode: "aggregation")
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },

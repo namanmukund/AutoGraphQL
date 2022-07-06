@@ -15,7 +15,7 @@ import {
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 import { callLocalGraphqlApi } from '../../../../../api';
 
-const FRACTION_DIGITS = 1;
+const FRACTION_DIGITS = 0;
 
 const getBatchSessionAggregation = ({ batchId, topicId }) =>
   [{
@@ -539,7 +539,7 @@ const practiceQuestionReport = (async (root, params, context) => {
         const studentObj = {
           userId: studentUserId,
           updatedAt: get(userPracticeQuestionReportRes, '[0].updatedAt', new Date().toISOString()),
-          averageTries: withFallbackValue((get(userPracticeQuestionReportRes, '[0].firstTryCount') + (2 * get(userPracticeQuestionReportRes, '[0].secondTryCount')) + (3 * get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount'))) / (get(userPracticeQuestionReportRes, '[0].firstTryCount') + get(userPracticeQuestionReportRes, '[0].secondTryCount') + get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount'))),
+          averageTries: withFallbackValue(((get(userPracticeQuestionReportRes, '[0].firstTryCount') + (2 * get(userPracticeQuestionReportRes, '[0].secondTryCount')) + (3 * get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount'))) / (get(userPracticeQuestionReportRes, '[0].firstTryCount') + get(userPracticeQuestionReportRes, '[0].secondTryCount') + get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount'))).toFixed()),
         };
         loObj.students.set(studentUserId, studentObj);
 
