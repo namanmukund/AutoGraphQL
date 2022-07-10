@@ -1134,23 +1134,12 @@ const isMentorMenteeSessionAvailable = (mentorMenteeSessions, topicId) => {
 const constructHomeworkArr = (finalTopicBasedHomeworkArray, mentorMenteeSession, topic) => {
   if (
     mentorMenteeSession
-    && get(mentorMenteeSession, 'sessionStatus') === 'completed'
+    && get(mentorMenteeSession, 'sessionStatus')
   ) {
     finalTopicBasedHomeworkArray.push({
       ...mentorMenteeSession,
-      id: get(topic, 'id'),
+      id: get(mentorMenteeSession, 'id'),
       mentorMenteeSessionAvailable: true,
-      topic,
-    });
-  } else if (
-    mentorMenteeSession
-    && get(mentorMenteeSession, 'sessionStatus') !== 'completed'
-  ) {
-    finalTopicBasedHomeworkArray.push({
-      ...defaultMentorMenteeSessionObject,
-      id: get(topic, 'id'),
-      mentorMenteeSessionAvailable: true,
-      sessionStatus: get(mentorMenteeSession, 'sessionStatus'),
       topic,
     });
   } else {
