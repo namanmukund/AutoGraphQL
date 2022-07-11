@@ -6,6 +6,7 @@ const CodingLanguageType = `
     Csharp
     Swift
     Cplusplus
+    Blockly
   }`;
 
 export default CodingLanguageType;
