@@ -763,7 +763,7 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
   if (batchSessions && batchSessions.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const batchSession of batchSessions) {
-      if (get(batchSession, 'topic.classType') !== 'thoery') {
+      if (get(batchSession, 'topic.classType') !== 'theory') {
         const homeworkMeta = await getHomeworkCompletedMeta(batchSession, mentorMenteeSessionModel, queryType);
         finalResult.push({
           id: get(batchSession, 'id'),
@@ -798,7 +798,7 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
   if (adhocSessions && adhocSessions.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const adhocSession of adhocSessions) {
-      if (get(adhocSession, 'topic.classType') !== 'thoery') {
+      if (get(adhocSession, 'topic.classType') !== 'theory') {
         const homeworkMeta = await getHomeworkCompletedMeta(adhocSession, mentorMenteeSessionModel, queryType);
         finalResult.push({
           id: get(adhocSession, 'id'),
