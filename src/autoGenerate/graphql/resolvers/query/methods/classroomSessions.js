@@ -231,6 +231,7 @@ const getBatchSessionAggregation = ({
               id: 1,
               title: 1,
               defaultLoComponentRule: 1,
+              codingLanguages: 1,
             },
           },
         ],
@@ -520,6 +521,7 @@ const getAdhocSessionAggregation = ({
               id: 1,
               title: 1,
               defaultLoComponentRule: 1,
+              codingLanguages: 1,
             },
           },
         ],
@@ -705,8 +707,7 @@ const getSessionStatus = (session) => {
     )) {
     return 'completed';
   }
-  if ((sessionStatus === 'allotted')
-    || ((sessionStatus === 'started') && !get(session, 'sessionStartedByMentorAt'))) {
+  if (sessionStatus === 'allotted') {
     /**
      * Checking If allotted session lies before current date.
      */
