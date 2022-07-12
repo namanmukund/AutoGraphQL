@@ -4,6 +4,7 @@ const sessionDetailType = `
    menteeSessionId: ID
    chapterOrder: Int
    chapterTitle: String
+   classType: ClassType
    topicId: ID
    topicTitle: String
    topicThumbnail: File
@@ -21,6 +22,7 @@ const completedSessionDetailType = `
    menteeSessionId: ID
    chapterOrder: Int
    chapterTitle: String
+   classType: ClassType
    topicId: ID
    topicTitle: String
    topicThumbnail: File
