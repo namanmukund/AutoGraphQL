@@ -2170,7 +2170,6 @@ const constructSessionsArr = ({
     thumbnailSmall: topicThumbnailSmall,
     isTrial,
   } = topic;
-  console.log('topic....', JSON.stringify(topic, null, 2));
   let completedSessionObj;
   let bookedSessionObj;
   let upComingSessionObj;
