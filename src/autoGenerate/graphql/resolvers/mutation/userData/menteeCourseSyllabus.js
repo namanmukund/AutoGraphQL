@@ -1285,6 +1285,7 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                         },
                         chapter: 1,
                         topicComponentRule: 1,
+                        classType: 1,
                       },
                     },
                     {
@@ -1369,6 +1370,7 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
                         },
                         chapter: 1,
                         topicComponentRule: 1,
+                        classType: 1,
                       },
                     },
                   ],
@@ -1542,6 +1544,7 @@ const getUserBatchDetails = (userId) => [
                   },
                   chapter: 1,
                   topicComponentRule: 1,
+                  classType: 1,
                 },
               },
               {
@@ -1666,6 +1669,7 @@ const getUserBatchDetails = (userId) => [
                     ],
                   },
                   topicComponentRule: 1,
+                  classType: 1,
                 },
               },
             ],
@@ -1872,6 +1876,7 @@ const getUserBatchDetails = (userId) => [
                         },
                         chapter: 1,
                         topicComponentRule: 1,
+                        classType: 1,
                       },
                     },
                     {
@@ -1996,6 +2001,7 @@ const getUserBatchDetails = (userId) => [
                           ],
                         },
                         topicComponentRule: 1,
+                        classType: 1,
                       },
                     },
                   ],
@@ -2160,6 +2166,7 @@ const constructSessionsArr = ({
     title: topicTitle,
     description: topicDescription,
     thumbnail: topicThumbnail,
+    classType,
     thumbnailSmall: topicThumbnailSmall,
     isTrial,
   } = topic;
@@ -2211,6 +2218,7 @@ const constructSessionsArr = ({
           chapterId,
           chapterTitle,
           chapterOrder,
+          classType,
           endingDate: sessionEndDate,
           mentorId:
             mentorSession && mentorSession.user && mentorSession.user.id,
@@ -2227,6 +2235,7 @@ const constructSessionsArr = ({
           topicId: batchSessionTopicId,
           topicOrder,
           topicTitle: batchSessionTopicTitle,
+          classType,
           topicThumbnail: batchSessionTopicThumbnail,
           topicThumbnailSmall: batchSessionTopicThumbnailSmall,
           topicDescription: batchSessionTopicDescription,
@@ -2250,6 +2259,7 @@ const constructSessionsArr = ({
       const upComingMenteeSession = {
         topicId,
         topicOrder,
+        classType,
         topicTitle,
         topicThumbnail,
         topicThumbnailSmall,
@@ -2289,6 +2299,7 @@ const constructSessionsArr = ({
       topicId,
       topicOrder,
       topicTitle,
+      classType,
       topicThumbnail,
       topicThumbnailSmall,
       topicDescription,
