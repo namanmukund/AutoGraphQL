@@ -98,6 +98,7 @@ const Course = `
     minGrade: Int
     maxGrade: Int
     documentationUrl: String
+    thumbnailSmall: File @relation(name: "CourseThumbnailSmall", direction: "OneWay")
   }
 `;
 
