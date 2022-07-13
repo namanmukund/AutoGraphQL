@@ -27,6 +27,7 @@ const School = `
     teachers: [MentorProfile] @relation(name: "MentorProfileSchool")
     isBuddyLoginEnabled: Boolean @defaultValue(value: "false")
     buddyLoginLimit: Int @defaultValue(value: "5")
+    isTimeTableEnabled: Boolean @defaultValue(value: "false")
   }
 `;
 export default [School];
