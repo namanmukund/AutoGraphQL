@@ -286,6 +286,8 @@ const getUserBlockBasedPracticeAggregation = ({
 }, {
   $project: {
     user: 1,
+    answerLink: 1,
+    savedBlocks: 1,
     blockBasedPractice: {
       $arrayElemAt: [
         '$blockBasedPractice',
@@ -658,7 +660,7 @@ const classroomReport = (async (root, params, context) => {
         pqQuestions: new Map(),
         pqSubmissions: new Map(),
       };
-      if (get(userbbPractice, 'blockBasedPractice')) {
+      if (get(userbbPractice, 'blockBasedPractice') && (get(userbbPractice, 'answerLink') || get(userbbPractice, 'savedBlocks'))) {
         innerObj.pqSubmittedCount += 1;
         innerObj.pqSubmissions.set(userId, {
           userId,
