@@ -163,7 +163,7 @@ const signupOrLoginViaOtp = async (
     throw new BlockedOperationError();
   }
 
-  if (!input.email && !EXCLUDE_NUMBER.includes(get(input, 'phone.number'))) {
+  if ((!input.email || !input.username) && !EXCLUDE_NUMBER.includes(get(input, 'phone.number'))) {
     // setting nextAllowedPhoneOtpDate to that of 60 seconds otherwise throwing error
     await userLogsActivity(userData, '', 'phoneOTPTime');
   }
