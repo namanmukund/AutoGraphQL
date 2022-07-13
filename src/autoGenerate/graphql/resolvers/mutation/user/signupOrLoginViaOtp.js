@@ -163,12 +163,12 @@ const signupOrLoginViaOtp = async (
     throw new BlockedOperationError();
   }
 
-  if ((!input.email || !input.username) && !EXCLUDE_NUMBER.includes(get(input, 'phone.number'))) {
+  if (get(input, 'phone.number') && !EXCLUDE_NUMBER.includes(get(input, 'phone.number'))) {
     // setting nextAllowedPhoneOtpDate to that of 60 seconds otherwise throwing error
     await userLogsActivity(userData, '', 'phoneOTPTime');
   }
 
-  if (!input.email && get(userData, 'id') && !EXCLUDE_NUMBER.includes(get(input, 'phone.number'))) {
+  if (get(input, 'phone.number') && get(userData, 'id') && !EXCLUDE_NUMBER.includes(get(input, 'phone.number'))) {
     // action to fetch OTP log for user and to check if limit exceeds
     await userLogsActivity(userData, '', 'OTPLimit');
   }
@@ -287,7 +287,7 @@ const signupOrLoginViaOtp = async (
 
   // send otp to the client
   const { name, phone } = userData;
-  if (!input.email) {
+  if (get(input, 'phone.number')) {
     getNumberAndSendSms(phone, phoneOtp, name);
     await userLogsActivity(userData, phoneOtp, 'addOTPLog');
   }
