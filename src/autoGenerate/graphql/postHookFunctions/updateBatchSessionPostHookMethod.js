@@ -350,8 +350,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     let currentTopicOrder = null;
     if (coursePackageId) {
       let topicRules;
-      if (get(batchResult, 'coursePackageTopicRule', []).length) {
-        topicRules = get(batchResult, 'coursePackageTopicRule', []);
+      if (get(batchInfo, 'coursePackageTopicRule', []).length) {
+        topicRules = get(batchInfo, 'coursePackageTopicRule', []);
       } else {
         const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
         topicRules = get(coursePackage, 'topics', []);
