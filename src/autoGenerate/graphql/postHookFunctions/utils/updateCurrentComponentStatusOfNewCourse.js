@@ -454,8 +454,9 @@ const updateCurrentComponentStatusOfNewCourse = async (
       const learningSlidesCount = get(nextCurrentTopicComponent, 'learningObjective.learningSlidesMeta.count', 0);
       const learningObjectiveComponentsRule = (get(nextCurrentTopicComponent, 'learningObjectiveComponentsRule', []) || [])
         .sort((firstItem, secondItem) => firstItem.order - secondItem.order);
-      console.log({ learningObjectiveComponentsRule, fromPage: 'updateCurrentComponentStatusOfNewCourse' });
-      if (messageCount) {
+      if (learningObjectiveComponentsRule.length) {
+        nextCurrentTopicComponentType = get(learningObjectiveComponentsRule, '[0].componentName');
+      } else if (messageCount) {
         nextCurrentTopicComponentType = message;
       } else if (pqCount) {
         nextCurrentTopicComponentType = practiceQuestion;

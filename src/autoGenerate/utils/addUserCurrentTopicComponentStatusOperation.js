@@ -95,8 +95,9 @@ const addUserCurrentTopicComponentStatusOperation = async (courseId, clientId) =
         const learningSlidesCount = get(currentTopicComponent, 'learningObjective.learningSlidesMeta.count', 0);
         const learningObjectiveComponentsRule = (get(currentTopicComponent, 'learningObjectiveComponentsRule', []) || [])
           .sort((firstItem, secondItem) => firstItem.order - secondItem.order);
-        console.log({ learningObjectiveComponentsRule, fromPage: 'userCourseSyllabusMethod' });
-        if (messageCount) {
+        if (learningObjectiveComponentsRule.length) {
+          currentTopicComponentType = get(learningObjectiveComponentsRule, '[0].componentName');
+        } else if (messageCount) {
           currentTopicComponentType = message;
         } else if (pqCount) {
           currentTopicComponentType = practiceQuestion;

@@ -147,8 +147,9 @@ const userCourseSyllabusMethod = async (context, params) => {
           const learningSlidesCount = get(sortedTopicComponentRule[0], 'learningObjective.learningSlidesMeta.count', 0);
           const learningObjectiveComponentsRule = (get(sortedTopicComponentRule[0], 'learningObjectiveComponentsRule', []) || [])
             .sort((firstItem, secondItem) => firstItem.order - secondItem.order);
-          console.log({ learningObjectiveComponentsRule, fromPage: 'userCourseSyllabusMethod' });
-          if (messageCount) {
+          if (learningObjectiveComponentsRule.length) {
+            firstComponentName = get(learningObjectiveComponentsRule, '[0].componentName');
+          } else if (messageCount) {
             firstComponentName = message;
           } else if (pqCount) {
             firstComponentName = practiceQuestion;

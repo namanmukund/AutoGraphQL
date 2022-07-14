@@ -3134,7 +3134,6 @@ const menteeCourseSyllabusMutationResolver = async (
               const filteredLoComponent = getFilteredLoComponentRule(
                 sortedTopicComponentRule[0].learningObjective, get(currentCourse, 'defaultLoComponentRule', []), learningObjectiveComponentsRule,
               );
-              console.log({ learningObjectiveComponentsRule, fromPage: 'menteeCourseSyllabus', filteredLoComponent });
               if (filteredLoComponent && filteredLoComponent.length) {
                 childComponentName = get(filteredLoComponent[0], 'componentName', 'comicStrip');
               }
