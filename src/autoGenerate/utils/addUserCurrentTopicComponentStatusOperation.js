@@ -93,7 +93,7 @@ const addUserCurrentTopicComponentStatusOperation = async (courseId, clientId) =
         const pqCount = get(currentTopicComponent, 'learningObjective.questionBankMeta.count', 0);
         const comicStripCount = get(currentTopicComponent, 'learningObjective.comicStripsMeta.count', 0);
         const learningSlidesCount = get(currentTopicComponent, 'learningObjective.learningSlidesMeta.count', 0);
-        const learningObjectiveComponentsRule = get(currentTopicComponent, 'learningObjectiveComponentsRule', [])
+        const learningObjectiveComponentsRule = (get(currentTopicComponent, 'learningObjectiveComponentsRule', []) || [])
           .sort((firstItem, secondItem) => firstItem.order - secondItem.order);
         console.log({ learningObjectiveComponentsRule, fromPage: 'userCourseSyllabusMethod' });
         if (messageCount) {

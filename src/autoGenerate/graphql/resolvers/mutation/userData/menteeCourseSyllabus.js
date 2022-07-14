@@ -3130,7 +3130,7 @@ const menteeCourseSyllabusMutationResolver = async (
           } else if (sortedTopicComponentRule[0].componentName === 'learningObjective') {
             componentId = sortedTopicComponentRule[0].learningObjective && sortedTopicComponentRule[0].learningObjective.id;
             if (currentCourse && sortedTopicComponentRule[0].learningObjective && get(currentCourse, 'defaultLoComponentRule', []).length) {
-              const learningObjectiveComponentsRule = get(sortedTopicComponentRule[0], 'learningObjectiveComponentsRule', []);
+              const learningObjectiveComponentsRule = (get(sortedTopicComponentRule[0], 'learningObjectiveComponentsRule', []) || []);
               const filteredLoComponent = getFilteredLoComponentRule(
                 sortedTopicComponentRule[0].learningObjective, get(currentCourse, 'defaultLoComponentRule', []), learningObjectiveComponentsRule,
               );

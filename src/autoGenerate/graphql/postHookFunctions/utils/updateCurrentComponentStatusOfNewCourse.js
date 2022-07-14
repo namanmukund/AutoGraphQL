@@ -452,7 +452,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       const pqCount = get(nextCurrentTopicComponent, 'learningObjective.questionBankMeta.count', 0);
       const comicStripCount = get(nextCurrentTopicComponent, 'learningObjective.comicStripsMeta.count', 0);
       const learningSlidesCount = get(nextCurrentTopicComponent, 'learningObjective.learningSlidesMeta.count', 0);
-      const learningObjectiveComponentsRule = get(nextCurrentTopicComponent, 'learningObjectiveComponentsRule', [])
+      const learningObjectiveComponentsRule = (get(nextCurrentTopicComponent, 'learningObjectiveComponentsRule', []) || [])
         .sort((firstItem, secondItem) => firstItem.order - secondItem.order);
       console.log({ learningObjectiveComponentsRule, fromPage: 'updateCurrentComponentStatusOfNewCourse' });
       if (messageCount) {
