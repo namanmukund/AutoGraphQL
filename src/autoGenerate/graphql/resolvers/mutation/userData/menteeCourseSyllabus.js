@@ -1085,6 +1085,10 @@ query{
     topicComponentRule{
       order
       componentName
+      learningObjectiveComponentsRule {
+        componentName
+        order
+      }
       learningObjective{
         id
         messagesMeta{
@@ -1129,10 +1133,13 @@ const fetchOrCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => { 
 };
 
 /** Filter DefaultLoComponentRule based on Lo meta */
-const getFilteredLoComponentRule = (learningObjective, loComponentRule) => {
-  if (loComponentRule && loComponentRule.length && learningObjective) {
+const getFilteredLoComponentRule = (learningObjective, courseLoComponentRule, topicLoComponentRule = []) => {
+  if (topicLoComponentRule && topicLoComponentRule.length) {
+    return topicLoComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
+  }
+  if (courseLoComponentRule && courseLoComponentRule.length && learningObjective) {
     return (
-      loComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order)
+      courseLoComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order)
         .filter((componentRule) => {
           let componentExists = false;
           switch (get(componentRule, 'componentName')) {
@@ -3123,7 +3130,11 @@ const menteeCourseSyllabusMutationResolver = async (
           } else if (sortedTopicComponentRule[0].componentName === 'learningObjective') {
             componentId = sortedTopicComponentRule[0].learningObjective && sortedTopicComponentRule[0].learningObjective.id;
             if (currentCourse && sortedTopicComponentRule[0].learningObjective && get(currentCourse, 'defaultLoComponentRule', []).length) {
-              const filteredLoComponent = getFilteredLoComponentRule(sortedTopicComponentRule[0].learningObjective, get(currentCourse, 'defaultLoComponentRule', []));
+              const learningObjectiveComponentsRule = get(sortedTopicComponentRule[0], 'learningObjectiveComponentsRule', []);
+              const filteredLoComponent = getFilteredLoComponentRule(
+                sortedTopicComponentRule[0].learningObjective, get(currentCourse, 'defaultLoComponentRule', []), learningObjectiveComponentsRule,
+              );
+              console.log({ learningObjectiveComponentsRule, fromPage: 'menteeCourseSyllabus', filteredLoComponent });
               if (filteredLoComponent && filteredLoComponent.length) {
                 childComponentName = get(filteredLoComponent[0], 'componentName', 'comicStrip');
               }

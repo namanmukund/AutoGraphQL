@@ -6,7 +6,7 @@ import { log } from '../../../utils';
 import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
 
 const {
-  message, practiceQuestion, comicStrip, quiz,
+  message, practiceQuestion, comicStrip, quiz, learningSlide,
 } = topicTypes;
 
 const getTopicDetailsForCourse = async (courseId, oldCourse = false) => {
@@ -37,6 +37,10 @@ query{
       ${oldCourse ? `topicComponentRule{
         componentName
         order
+        learningObjectiveComponentsRule {
+          componentName
+          order
+        }
         learningObjective{
           id
           messagesMeta{
@@ -46,6 +50,9 @@ query{
             count
           }
           comicStripsMeta(filter:{status:${PUBLISHED}}){
+            count
+          }
+          learningSlidesMeta(filter:{status:${PUBLISHED}}){
             count
           }
         }
@@ -85,12 +92,18 @@ const addUserCurrentTopicComponentStatusOperation = async (courseId, clientId) =
         const messageCount = get(currentTopicComponent, 'learningObjective.messagesMeta.count', 0);
         const pqCount = get(currentTopicComponent, 'learningObjective.questionBankMeta.count', 0);
         const comicStripCount = get(currentTopicComponent, 'learningObjective.comicStripsMeta.count', 0);
+        const learningSlidesCount = get(currentTopicComponent, 'learningObjective.learningSlidesMeta.count', 0);
+        const learningObjectiveComponentsRule = get(currentTopicComponent, 'learningObjectiveComponentsRule', [])
+          .sort((firstItem, secondItem) => firstItem.order - secondItem.order);
+        console.log({ learningObjectiveComponentsRule, fromPage: 'userCourseSyllabusMethod' });
         if (messageCount) {
           currentTopicComponentType = message;
         } else if (pqCount) {
           currentTopicComponentType = practiceQuestion;
         } else if (comicStripCount) {
           currentTopicComponentType = comicStrip;
+        } else if (learningSlidesCount) {
+          currentTopicComponentType = learningSlide;
         }
       } else if ((currentTopicComponent.componentName === 'assignment') || (currentTopicComponent.componentName === 'homeworkAssignment') || (currentTopicComponent.componentName === 'homeworkPractice')) {
         currentTopicComponentType = quiz;

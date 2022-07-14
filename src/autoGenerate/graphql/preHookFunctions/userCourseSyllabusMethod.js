@@ -14,7 +14,7 @@ import getFirstTopicComponents from '../../utils/getFirstTopicComponents';
 import addUserCurrentTopicComponentStatusForNewCourse from '../../utils/addUserCurrentTopicComponentStatusForNewCourse';
 
 const {
-  message, practiceQuestion, comicStrip, quiz,
+  message, practiceQuestion, comicStrip, quiz, learningSlide,
 } = topicTypes;
 
 // query to get current component status of user
@@ -144,12 +144,18 @@ const userCourseSyllabusMethod = async (context, params) => {
           const messageCount = get(sortedTopicComponentRule[0], 'learningObjective.messagesMeta.count', 0);
           const pqCount = get(sortedTopicComponentRule[0], 'learningObjective.questionBankMeta.count', 0);
           const comicStripCount = get(sortedTopicComponentRule[0], 'learningObjective.comicStripsMeta.count', 0);
+          const learningSlidesCount = get(sortedTopicComponentRule[0], 'learningObjective.learningSlidesMeta.count', 0);
+          const learningObjectiveComponentsRule = get(sortedTopicComponentRule[0], 'learningObjectiveComponentsRule', [])
+            .sort((firstItem, secondItem) => firstItem.order - secondItem.order);
+          console.log({ learningObjectiveComponentsRule, fromPage: 'userCourseSyllabusMethod' });
           if (messageCount) {
             firstComponentName = message;
           } else if (pqCount) {
             firstComponentName = practiceQuestion;
           } else if (comicStripCount) {
             firstComponentName = comicStrip;
+          } else if (learningSlidesCount) {
+            firstComponentName = learningSlide;
           }
         } else if (['assignment', 'homeworkAssignment', 'homeworkPractice'].includes(firstComponentName)) {
           currentTopicComponentType = quiz;

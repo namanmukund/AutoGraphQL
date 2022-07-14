@@ -48,6 +48,10 @@ const userAssignmentQuery = (
             componentName
             order
             childComponentName
+            learningObjectiveComponentsRule {
+              componentName
+              order
+            }
             learningObjective{
               id
               order

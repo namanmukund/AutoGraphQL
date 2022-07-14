@@ -4,6 +4,10 @@ const topicComponentRuleQuery = `topicComponentRule{
   componentName
   order
   childComponentName
+  learningObjectiveComponentsRule {
+    componentName
+    order
+  }
   learningObjective{
     id
     order
