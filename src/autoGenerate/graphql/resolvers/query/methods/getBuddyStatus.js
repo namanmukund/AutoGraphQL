@@ -13,6 +13,7 @@ const checkIfExistInArray = (userId, arrayData = [], systemId) => {
   const findInArray = arrayData.find((data) => get(data, 'user.typeId') === userId);
   if (!findInArray) return false;
   if (systemId && findInArray && get(findInArray, 'systemId') === systemId) return false;
+  if (findInArray && !get(findInArray, 'isLoggedIn')) return false;
   return true;
 };
 
@@ -94,7 +95,7 @@ const getBuddyStatus = async (
   const {
     sessionId, userId, systemId, action, password, studentIds = [],
   } = params;
-  if (!sessionId || !action || !['add', 'delete', 'check', 'confirmPassword', 'markAttendance'].includes(action)) {
+  if (!sessionId || !action || !['add', 'delete', 'check', 'confirmPassword', 'markAttendance', 'logout'].includes(action)) {
     throw new MissingMandatoryInputInRequestError({
       data: {
         message: 'Either SessionId or action type or all missing in input',
@@ -136,6 +137,13 @@ const getBuddyStatus = async (
       },
     });
   }
+  if (action === 'logout' && !studentIds.length) {
+    throw new MissingMandatoryInputInRequestError({
+      data: {
+        message: 'studentProfile Id`s is missing in input',
+      },
+    });
+  }
   const project = {
     id: 1,
   };
@@ -165,7 +173,13 @@ const getBuddyStatus = async (
     const isAlreadyAdded = checkIfExistInArray(userId, addedStudentsArray);
     // If alreadyAdded then it returns false, else it updates in the list and returns true;
     if (!isAlreadyAdded) {
-      addedStudentsArray.push({ user: { typeId: userId, type: 'User' }, systemId });
+      const studentStatusIndex = addedStudentsArray.findIndex((student) => get(student, 'user.typeId') === userId);
+      if (studentStatusIndex !== -1) {
+        addedStudentsArray[studentStatusIndex].isLoggedIn = true;
+        addedStudentsArray[studentStatusIndex].systemId = systemId;
+      } else {
+        addedStudentsArray.push({ user: { typeId: userId, type: 'User' }, systemId, isLoggedIn: true });
+      }
       updateLoginStatusModal.updateOne({ id: sessionId }, {
         loggedInUserStatus: addedStudentsArray,
       });
@@ -223,6 +237,24 @@ const getBuddyStatus = async (
     if (isUpdated) {
       updateLoginStatusModal.updateOne({ id: sessionId }, {
         attendance: attendanceArray,
+      });
+    }
+    result = true;
+  } else if (action === 'logout' && studentIds && studentIds.length) {
+    let isUpdated = false;
+    studentIds.forEach((studentProfileId) => {
+      const findStudentDataIndex = addedStudentsArray.findIndex((student) => get(student, 'user.typeId') === studentProfileId);
+      if (findStudentDataIndex !== -1) {
+        const loginStatusOfUser = addedStudentsArray[findStudentDataIndex];
+        if (get(loginStatusOfUser, 'isLoggedIn')) {
+          isUpdated = true;
+          addedStudentsArray[findStudentDataIndex].isLoggedIn = false;
+        }
+      }
+    });
+    if (isUpdated) {
+      updateLoginStatusModal.updateOne({ id: sessionId }, {
+        loggedInUserStatus: addedStudentsArray,
       });
     }
     result = true;
