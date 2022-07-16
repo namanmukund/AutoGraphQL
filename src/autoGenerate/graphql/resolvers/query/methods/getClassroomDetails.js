@@ -68,6 +68,33 @@ const getBatchAggregation = ({ batchIds = [] }) => [
   },
   {
     $lookup: {
+      from: 'Topic',
+      let: {
+        topicIds: {
+          $ifNull: ['$coursePackageTopicRule.topic.typeId', []],
+        },
+      },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $in: ['$id', '$$topicIds'],
+            },
+          },
+        },
+        {
+          $project: {
+            id: 1,
+            title: 1,
+            classType: 1,
+          },
+        },
+      ],
+      as: 'coursePackageTopicRuleArr',
+    },
+  },
+  {
+    $lookup: {
       from: 'CoursePackage',
       let: { coursePackageId: '$coursePackage.typeId' },
       pipeline: [
@@ -79,11 +106,35 @@ const getBatchAggregation = ({ batchIds = [] }) => [
           },
         },
         {
+          $lookup: {
+            from: 'Topic',
+            let: { topicId: '$topics.topic.typeId' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $in: ['$id', '$$topicId'],
+                  },
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  title: 1,
+                  classType: 1,
+                },
+              },
+            ],
+            as: 'topicsArr',
+          },
+        },
+        {
           $project: {
             _id: 0,
             id: 1,
             title: 1,
             topics: 1,
+            topicsArr: 1,
           },
         },
       ],
@@ -97,6 +148,8 @@ const getBatchAggregation = ({ batchIds = [] }) => [
       classroomTitle: 1,
       course: 1,
       students: 1,
+      coursePackageTopicRule: 1,
+      coursePackageTopicRuleArr: 1,
       coursePackage: {
         $arrayElemAt: ['$coursePackage', 0],
       },
@@ -113,10 +166,24 @@ const getTypeQueryController = (
 
 const transformMongoResults = (batchSessions, batchDetail) => {
   const coursePackageTopics = get(batchDetail, 'coursePackage.topics', []);
+  const coursePackageTopicRule = get(batchDetail, 'coursePackageTopicRule', []);
   let sessionProgress = 0;
   let averageAttendance = 0;
-  if (batchSessions && batchSessions.length && coursePackageTopics) {
-    sessionProgress = Math.round((batchSessions.length / coursePackageTopics.length) * 100);
+  let totalTopicsLen = 0;
+  if (coursePackageTopicRule && coursePackageTopicRule.length) {
+    totalTopicsLen = coursePackageTopicRule.filter((topic) => {
+      const topicDetails = get(batchDetail, 'coursePackageTopicRuleArr', []).find((el) => el.id === get(topic, 'topic.typeId'));
+      return ((get(topicDetails, 'classType') !== 'theory') && !get(topic, 'isRevision'));
+    }).length;
+  } else {
+    totalTopicsLen = (coursePackageTopics || []).filter((topic) => {
+      const topicDetails = get(batchDetail, 'coursePackage.topicsArr', []).find((el) => el.id === get(topic, 'topic.typeId'));
+      return ((get(topicDetails, 'classType') !== 'theory') && !get(topic, 'isRevision'));
+    }).length;
+  }
+
+  if (batchSessions && batchSessions.length && totalTopicsLen) {
+    sessionProgress = Math.round((batchSessions.length / totalTopicsLen) * 100);
     let overallPresentStudents = 0;
     let totalStudents = 0;
     batchSessions.forEach((session) => {
