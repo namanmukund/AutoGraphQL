@@ -46,7 +46,10 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
             const intersection = slotTimeArray.filter((x) => occupiedSlotTimeArrayForBatch.includes(x));
             if (intersection && intersection.length) {
               // if called from mentorMenteeSession and BatchSesson, we will get a bookingDate
-              bypassValidation = false;
+              if (get(session, 'batch.documentType') !== 'classroom') {
+                // By pass the validation for classrooms
+                bypassValidation = false;
+              }
               if (!bsflag) {
                 bsflag = true;
                 customError += 'Batch(es) -> ';
@@ -71,7 +74,10 @@ const checkIfSlotCanBeOpenedValidation = (params, prevMentorSessions, timeSlotsI
               // eslint-disable no-loop-func
               const intersection = slotTimeArray.filter((x) => occupiedSlotTimeArrayForMMS.includes(x));
               if (intersection && intersection.length) {
-                bypassValidation = false;
+                if (get(menteeSession, 'user.studentProfile.batch.documentType') !== 'classroom') {
+                  // By pass the validation for classrooms
+                  bypassValidation = false;
+                }
                 if (!mmsflag) {
                   mmsflag = true;
                   customError += 'Mentee(s) -> ';
