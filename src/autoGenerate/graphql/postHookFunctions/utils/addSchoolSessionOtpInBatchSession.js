@@ -17,6 +17,9 @@ const getBatchSessions = async (batchId) => {
       }
     ) {
       id
+      batch{
+        type
+      }
       schoolSessionsOtp {
         id
         section
@@ -49,7 +52,8 @@ const addSchoolSessionOtpInBatchSession = async (batchId) => {
   const finalOtpMap = await arrayCombinations([batchId]);
   for (const batchSession of batchSessions) {
     const isAlreadyCreated = get(batchSession, 'schoolSessionsOtp', []).length;
-    if (!isAlreadyCreated && finalOtpMap[batchId]) {
+    const batchType = get(batchSession, 'batch.type');
+    if (!isAlreadyCreated && finalOtpMap[batchId] && batchType === 'b2b') {
       addSchoolSessionOtp({
         otp: finalOtpMap[batchId], batchSessionId: get(batchSession, 'id'),
       });
