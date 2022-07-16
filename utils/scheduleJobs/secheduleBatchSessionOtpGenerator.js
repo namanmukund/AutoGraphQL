@@ -82,6 +82,7 @@ const getBatchSessionAggregation = ({
       },
       batch: {
         id: 1,
+        type: 1,
       },
       schoolSessionOtp: {
         id: 1,
@@ -145,7 +146,8 @@ const scheduleBatchSessionOtpGenerator = async () => {
     const schoolSessionOtpArray = get(batchSession, 'schoolSessionOtp', []);
     if (get(batchSession, 'students', []).length) {
       const batchId = get(batchSession, 'batch[0].id');
-      if (!schoolSessionOtpArray.length && !batchIdsMap[batchId] && batchId) batchIdsMap[batchId] = get(batchSession, 'id');
+      const batchType = get(batchSession, 'batch[0].type');
+      if (!schoolSessionOtpArray.length && !batchIdsMap[batchId] && batchId && batchType === 'b2b') batchIdsMap[batchId] = get(batchSession, 'id');
     }
   }
   const finalOtpMap = await arrayCombinations(Object.keys(batchIdsMap));
