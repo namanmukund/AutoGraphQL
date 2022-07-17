@@ -22,6 +22,7 @@ const getMentorSessions = (userId, availabilityDate) => `query{
                 batch {
                   id
                   code
+                  documentType
                 }
               }
             }
@@ -36,6 +37,7 @@ const getMentorSessions = (userId, availabilityDate) => `query{
           id
           type
           code
+          documentType
           studentsMeta {
             count
           }
@@ -49,6 +51,7 @@ const getMentorSessions = (userId, availabilityDate) => `query{
         batch {
           type
           code
+          documentType
           studentsMeta {
             count
           }
