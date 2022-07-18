@@ -11,6 +11,7 @@ const BatchDetailsResult = `
     sessionId: ID
     sessionStatus: SessionStatus! @defaultValue(value: "allotted")
     batchStudents: [BatchStudentResult]
+    schoolDetail: GetSchoolDetailsResult
   }
 `;
 
