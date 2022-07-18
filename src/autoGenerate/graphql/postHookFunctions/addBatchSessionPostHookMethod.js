@@ -220,7 +220,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     ), context);
   }
   const isBetweenTwoHrs = getSlotDifference(get(slotTimeStringArray, '[0]'), bookingDate, 2);
-  if (isBetweenTwoHrs && batchType === 'b2b') generateOtpForBatchSession(batchSessionId, students);
+  // if (isBetweenTwoHrs && batchType === 'b2b') generateOtpForBatchSession(batchSessionId, students);
   const studentsId = (students && students.length) ? students.map((student) => get(student, 'id')) : [];
   extractBatchSessionAndSendB2BC(batchSessionId, studentsId, false);
   extractBatchSessionAndSendB2B(batchSessionId);

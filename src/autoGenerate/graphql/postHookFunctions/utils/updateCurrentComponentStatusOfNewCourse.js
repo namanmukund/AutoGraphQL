@@ -446,42 +446,44 @@ const updateCurrentComponentStatusOfNewCourse = async (
     }
   }
 
-  if (nextCurrentTopicComponent.componentName) {
-    if (nextCurrentTopicComponent.componentName === 'learningObjective') {
-      const messageCount = get(nextCurrentTopicComponent, 'learningObjective.messagesMeta.count', 0);
-      const pqCount = get(nextCurrentTopicComponent, 'learningObjective.questionBankMeta.count', 0);
-      const comicStripCount = get(nextCurrentTopicComponent, 'learningObjective.comicStripsMeta.count', 0);
-      const learningSlidesCount = get(nextCurrentTopicComponent, 'learningObjective.learningSlidesMeta.count', 0);
-      const learningObjectiveComponentsRule = (get(nextCurrentTopicComponent, 'learningObjectiveComponentsRule', []) || [])
-        .sort((firstItem, secondItem) => firstItem.order - secondItem.order);
-      if (learningObjectiveComponentsRule.length) {
-        nextCurrentTopicComponentType = get(learningObjectiveComponentsRule, '[0].componentName');
-      } else if (messageCount) {
-        nextCurrentTopicComponentType = message;
-      } else if (pqCount) {
-        nextCurrentTopicComponentType = practiceQuestion;
-      } else if (comicStripCount) {
-        nextCurrentTopicComponentType = comicStrip;
-      } else if (learningSlidesCount) {
-        nextCurrentTopicComponentType = learningSlide;
+  if (nextCurrentTopicComponent) {
+    if (nextCurrentTopicComponent.componentName) {
+      if (nextCurrentTopicComponent.componentName === 'learningObjective') {
+        const messageCount = get(nextCurrentTopicComponent, 'learningObjective.messagesMeta.count', 0);
+        const pqCount = get(nextCurrentTopicComponent, 'learningObjective.questionBankMeta.count', 0);
+        const comicStripCount = get(nextCurrentTopicComponent, 'learningObjective.comicStripsMeta.count', 0);
+        const learningSlidesCount = get(nextCurrentTopicComponent, 'learningObjective.learningSlidesMeta.count', 0);
+        const learningObjectiveComponentsRule = (get(nextCurrentTopicComponent, 'learningObjectiveComponentsRule', []) || [])
+          .sort((firstItem, secondItem) => firstItem.order - secondItem.order);
+        if (learningObjectiveComponentsRule.length) {
+          nextCurrentTopicComponentType = get(learningObjectiveComponentsRule, '[0].componentName');
+        } else if (messageCount) {
+          nextCurrentTopicComponentType = message;
+        } else if (pqCount) {
+          nextCurrentTopicComponentType = practiceQuestion;
+        } else if (comicStripCount) {
+          nextCurrentTopicComponentType = comicStrip;
+        } else if (learningSlidesCount) {
+          nextCurrentTopicComponentType = learningSlide;
+        }
+      } else if ((nextCurrentTopicComponent.componentName === 'assignment') || (nextCurrentTopicComponent.componentName === 'homeworkAssignment') || (nextCurrentTopicComponent.componentName === 'homeworkPractice')) {
+        nextCurrentTopicComponentType = quiz;
+      } else {
+        nextCurrentTopicComponentType = nextCurrentTopicComponent.componentName;
       }
-    } else if ((nextCurrentTopicComponent.componentName === 'assignment') || (nextCurrentTopicComponent.componentName === 'homeworkAssignment') || (nextCurrentTopicComponent.componentName === 'homeworkPractice')) {
-      nextCurrentTopicComponentType = quiz;
-    } else {
-      nextCurrentTopicComponentType = nextCurrentTopicComponent.componentName;
     }
-  }
 
-  if (nextCurrentTopicComponent.learningObjective && nextCurrentTopicComponent.learningObjective.id) {
-    loQuery = `currentLearningObjectiveConnectId:"${nextCurrentTopicComponent.learningObjective.id}"`;
-  }
+    if (nextCurrentTopicComponent.learningObjective && nextCurrentTopicComponent.learningObjective.id) {
+      loQuery = `currentLearningObjectiveConnectId:"${nextCurrentTopicComponent.learningObjective.id}"`;
+    }
 
-  if (nextCurrentTopicComponent.video && nextCurrentTopicComponent.video.id) {
-    videoQuery = `currentVideoConnectId:"${nextCurrentTopicComponent.video.id}"`;
-  }
+    if (nextCurrentTopicComponent.video && nextCurrentTopicComponent.video.id) {
+      videoQuery = `currentVideoConnectId:"${nextCurrentTopicComponent.video.id}"`;
+    }
 
-  if (nextCurrentTopicComponent.blockBasedProject && nextCurrentTopicComponent.blockBasedProject.id) {
-    blockBasedProjectQuery = `currentBlockBasedProjectConnectId:"${nextCurrentTopicComponent.blockBasedProject.id}"`;
+    if (nextCurrentTopicComponent.blockBasedProject && nextCurrentTopicComponent.blockBasedProject.id) {
+      blockBasedProjectQuery = `currentBlockBasedProjectConnectId:"${nextCurrentTopicComponent.blockBasedProject.id}"`;
+    }
   }
 
   if (toUpdateLearningSlide && learningSlideId) {

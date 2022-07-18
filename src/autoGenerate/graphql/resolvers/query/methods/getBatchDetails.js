@@ -146,6 +146,11 @@ const getBatchSessionAggregation = ({
                     classroomTitle: 1,
                     school: {
                       code: 1,
+                      id: 1,
+                      name: 1,
+                      isOtpLoginEnabled: 1,
+                      isBuddyLoginEnabled: 1,
+                      buddyLoginLimit: 1,
                     },
                     students: 1,
                   },
@@ -239,6 +244,15 @@ const getBatchDetails = async (
       profileAvatar: get(studentData, 'profileAvatarCode'),
     });
   });
+  const school = get(batchDetails, 'batch.school[0]');
+  const schoolDetail = {
+    id: get(school, 'id'),
+    code: get(school, 'code'),
+    name: get(school, 'name'),
+    isOtpLoginEnabled: get(school, 'isOtpLoginEnabled', false),
+    isBuddyLoginEnabled: get(school, 'isBuddyLoginEnabled', false),
+    buddyLoginLimit: get(school, 'buddyLoginLimit', false),
+  };
   batchSessionData = {
     sessionId: get(batchDetails, 'id'),
     batchId: get(batchDetails, 'batch.id'),
@@ -251,6 +265,7 @@ const getBatchDetails = async (
     sessionStartTime: '',
     batchStudents: batchStudentResult,
     sessionStatus: get(batchDetails, 'sessionStatus'),
+    schoolDetail,
   };
   return batchSessionData;
 };
