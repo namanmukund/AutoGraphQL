@@ -26,6 +26,10 @@ const topicQuery = (courseId) => `
         componentName
         order
         childComponentName
+        learningObjectiveComponentsRule {
+          componentName
+          order
+        }
         learningObjective{
           id
           order
@@ -36,6 +40,9 @@ const topicQuery = (courseId) => `
             count
           }
           comicStripsMeta(filter:{status:${PUBLISHED}}){
+            count
+          }
+          learningSlidesMeta(filter:{status:${PUBLISHED}}){
             count
           }
         }

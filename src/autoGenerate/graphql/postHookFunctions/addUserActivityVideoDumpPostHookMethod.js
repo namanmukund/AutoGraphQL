@@ -35,6 +35,10 @@ const userVideoQuery = (userId, topicId, courseId) => `
           componentName
           order
           childComponentName
+          learningObjectiveComponentsRule {
+            componentName
+            order
+          }
           learningObjective{
             id
             order

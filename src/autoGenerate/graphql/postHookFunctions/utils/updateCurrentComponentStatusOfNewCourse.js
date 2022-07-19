@@ -23,6 +23,10 @@ const getNextTopic = (courseId,
       topicComponentRule{
         componentName
         order
+        learningObjectiveComponentsRule {
+          componentName
+          order
+        }
         learningObjective{
           id
           learningSlides(filter:{status:${PUBLISHED}}){
@@ -449,7 +453,11 @@ const updateCurrentComponentStatusOfNewCourse = async (
         const pqCount = get(nextCurrentTopicComponent, 'learningObjective.questionBankMeta.count', 0);
         const comicStripCount = get(nextCurrentTopicComponent, 'learningObjective.comicStripsMeta.count', 0);
         const learningSlidesCount = get(nextCurrentTopicComponent, 'learningObjective.learningSlidesMeta.count', 0);
-        if (messageCount) {
+        const learningObjectiveComponentsRule = (get(nextCurrentTopicComponent, 'learningObjectiveComponentsRule', []) || [])
+          .sort((firstItem, secondItem) => firstItem.order - secondItem.order);
+        if (learningObjectiveComponentsRule.length) {
+          nextCurrentTopicComponentType = get(learningObjectiveComponentsRule, '[0].componentName');
+        } else if (messageCount) {
           nextCurrentTopicComponentType = message;
         } else if (pqCount) {
           nextCurrentTopicComponentType = practiceQuestion;

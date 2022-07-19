@@ -109,6 +109,10 @@ query{
       topicComponentRule{
       order
       componentName
+      learningObjectiveComponentsRule {
+        componentName
+        order
+      }
       learningObjective{
         id
         order

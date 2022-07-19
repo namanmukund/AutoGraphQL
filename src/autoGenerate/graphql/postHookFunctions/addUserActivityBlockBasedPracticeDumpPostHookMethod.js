@@ -34,6 +34,10 @@ const userBlockBasedPracticeQuery = (userId, topicId, blockBasedPracticeId, cour
           componentName
           order
           childComponentName
+          learningObjectiveComponentsRule {
+            componentName
+            order
+          }
           learningObjective{
             id
             order
