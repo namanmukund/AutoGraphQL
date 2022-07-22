@@ -311,6 +311,7 @@ const getTopicsFromCoursePackage = async (coursePackageId) => {
       order
       isRevision
       topic{
+        classType 
         courses{
           id
         }
