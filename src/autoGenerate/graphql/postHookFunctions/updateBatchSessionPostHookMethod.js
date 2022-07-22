@@ -69,6 +69,7 @@ const getBatchQuery = (batchId) => `
           order
           isRevision
           topic{
+            classType
             courses{
               id
             }
@@ -359,6 +360,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       topicsList = getSortedTopics(topicRules);
       currentComponentTopicOrder = get((topicsList || []).find((topic) => get(topic, 'id') === currentComponentTopicId), 'coursePackageOrder');
       currentTopicOrder = get((topicsList || []).find((topic) => get(topic, 'id') === topicId), 'coursePackageOrder');
+      topicsList = (topicsList || []).filter((topic) => get(topic, 'classType') !== 'theory');
     } else {
       const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
       topicsList = get(nextTopicQueryRes, 'data.topics', []);
