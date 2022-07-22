@@ -140,6 +140,7 @@ import ClassType from './ClassType';
 import EvaluationResult from './EvaluationResult';
 import DatabaseControllerMode from './DatabaseControllerMode';
 import CoursePackageType from './CoursePackageType';
+import CoursePackageTopicRuleType from './CoursePackageTopicRuleType';
 
 export default [
   Status,
@@ -285,4 +286,5 @@ export default [
   EvaluationResult,
   DatabaseControllerMode,
   CoursePackageType,
+  CoursePackageTopicRuleType,
 ];

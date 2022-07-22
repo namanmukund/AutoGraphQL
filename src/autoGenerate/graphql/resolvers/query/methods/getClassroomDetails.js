@@ -169,24 +169,25 @@ const transformMongoResults = (batchSessions, batchDetail) => {
   const coursePackageTopicRule = get(batchDetail, 'coursePackageTopicRule', []);
   let sessionProgress = 0;
   let averageAttendance = 0;
-  let totalTopicsLen = 0;
+  let filteredTopics = [];
   if (coursePackageTopicRule && coursePackageTopicRule.length) {
-    totalTopicsLen = coursePackageTopicRule.filter((topic) => {
+    filteredTopics = coursePackageTopicRule.filter((topic) => {
       const topicDetails = get(batchDetail, 'coursePackageTopicRuleArr', []).find((el) => el.id === get(topic, 'topic.typeId'));
       return ((get(topicDetails, 'classType') !== 'theory') && !get(topic, 'isRevision'));
-    }).length;
+    });
   } else {
-    totalTopicsLen = (coursePackageTopics || []).filter((topic) => {
+    filteredTopics = (coursePackageTopics || []).filter((topic) => {
       const topicDetails = get(batchDetail, 'coursePackage.topicsArr', []).find((el) => el.id === get(topic, 'topic.typeId'));
       return ((get(topicDetails, 'classType') !== 'theory') && !get(topic, 'isRevision'));
-    }).length;
+    });
   }
 
-  if (batchSessions && batchSessions.length && totalTopicsLen) {
-    sessionProgress = Math.round((batchSessions.length / totalTopicsLen) * 100);
+  const topicIds = filteredTopics.map((topic) => get(topic, 'topic.typeId'));
+  if (batchSessions && batchSessions.length && filteredTopics.length) {
+    sessionProgress = Math.round((batchSessions.length / filteredTopics.length) * 100);
     let overallPresentStudents = 0;
     let totalStudents = 0;
-    batchSessions.forEach((session) => {
+    batchSessions.filter((session) => topicIds.includes(get(session, 'topic.typeId'))).forEach((session) => {
       const presentStudentsCount = get(session, 'attendance', []).filter((el) => get(el, 'status') === 'present').length;
       overallPresentStudents += presentStudentsCount;
       totalStudents += get(session, 'attendance', []).length;

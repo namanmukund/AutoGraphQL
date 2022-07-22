@@ -18,6 +18,10 @@ const topicQuery = (topicId) => `
       topicComponentRule{
         componentName
         order
+        learningObjectiveComponentsRule {
+          componentName
+          order
+        }
         video{
           id
         }

@@ -392,6 +392,11 @@ const getBatchSessionAggregation = ({
       },
     },
     {
+      $match: {
+        'topic.classType': { $ne: 'theory' },
+      },
+    },
+    {
       $sort: {
         bookingDate: queryType === 'next' ? 1 : -1,
       },
@@ -607,6 +612,11 @@ const getAdhocSessionAggregation = ({
       },
     },
     {
+      $match: {
+        'topic.classType': { $ne: 'theory' },
+      },
+    },
+    {
       $sort: {
         bookingDate: queryType === 'next' ? 1 : -1,
       },
@@ -763,70 +773,66 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
   if (batchSessions && batchSessions.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const batchSession of batchSessions) {
-      if (get(batchSession, 'topic.classType') !== 'theory') {
-        const homeworkMeta = await getHomeworkCompletedMeta(batchSession, mentorMenteeSessionModel, queryType);
-        finalResult.push({
-          id: get(batchSession, 'id'),
-          bookingDate: get(batchSession, 'bookingDate', null),
-          sessionStartDate: get(batchSession, 'sessionStartDate', null),
-          sessionEndDate: get(batchSession, 'sessionEndDate', null),
-          sessionStatus: get(batchSession, 'sessionStatus', 'allotted'),
-          sessionMode: get(batchSession, 'sessionMode', 'online'),
-          sessionRecordingLink: get(batchSession, 'sessionRecordingLink', null),
-          recordType: 'batchSession',
-          ...getSlotTimeFields(batchSession),
-          startMinutes: get(batchSession, 'startMinutes', 0),
-          endMinutes: get(batchSession, 'endMinutes', 0),
-          topicId: get(batchSession, 'topic.id', null),
-          topicTitle: get(batchSession, 'topic.title', null),
-          topicOrder: getTopicOrderFromCoursePackage(get(batchSession, 'classroom.coursePackage'), get(batchSession, 'topic'), get(batchSession, 'classroom')).order,
-          topicComponentRule: get(batchSession, 'topic.topicComponentRule', null),
-          classType: get(batchSession, 'topic.classType', 'lab'),
-          thumbnailSmall: get(batchSession, 'topic.thumbnailSmall', null),
-          totalStudents: get(batchSession, 'classroom.students', []).length,
-          completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
-          completedQuizMeta: homeworkMeta.quizSubmittedCount,
-          isHomeworkExists: homeworkMeta.isHomeworkExists,
-          isQuizExists: homeworkMeta.isQuizExists,
-          classworkAssignmentMeta: get(batchSession, 'topic.topicAssignmentQuestions', []).length,
-          homeworkAssignmentMeta: get(batchSession, 'topic.topicHomeworkAssignmentQuestion', []).length,
-          homeworkQuizMeta: get(batchSession, 'topic.topicQuestions', []).length,
-        });
-      }
+      const homeworkMeta = await getHomeworkCompletedMeta(batchSession, mentorMenteeSessionModel, queryType);
+      finalResult.push({
+        id: get(batchSession, 'id'),
+        bookingDate: get(batchSession, 'bookingDate', null),
+        sessionStartDate: get(batchSession, 'sessionStartDate', null),
+        sessionEndDate: get(batchSession, 'sessionEndDate', null),
+        sessionStatus: get(batchSession, 'sessionStatus', 'allotted'),
+        sessionMode: get(batchSession, 'sessionMode', 'online'),
+        sessionRecordingLink: get(batchSession, 'sessionRecordingLink', null),
+        recordType: 'batchSession',
+        ...getSlotTimeFields(batchSession),
+        startMinutes: get(batchSession, 'startMinutes', 0),
+        endMinutes: get(batchSession, 'endMinutes', 0),
+        topicId: get(batchSession, 'topic.id', null),
+        topicTitle: get(batchSession, 'topic.title', null),
+        topicOrder: getTopicOrderFromCoursePackage(get(batchSession, 'classroom.coursePackage'), get(batchSession, 'topic'), get(batchSession, 'classroom')).order,
+        topicComponentRule: get(batchSession, 'topic.topicComponentRule', null),
+        classType: get(batchSession, 'topic.classType', 'lab'),
+        thumbnailSmall: get(batchSession, 'topic.thumbnailSmall', null),
+        totalStudents: get(batchSession, 'classroom.students', []).length,
+        completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
+        completedQuizMeta: homeworkMeta.quizSubmittedCount,
+        isHomeworkExists: homeworkMeta.isHomeworkExists,
+        isQuizExists: homeworkMeta.isQuizExists,
+        classworkAssignmentMeta: get(batchSession, 'topic.topicAssignmentQuestions', []).length,
+        homeworkAssignmentMeta: get(batchSession, 'topic.topicHomeworkAssignmentQuestion', []).length,
+        homeworkQuizMeta: get(batchSession, 'topic.topicQuestions', []).length,
+      });
     }
   }
   if (adhocSessions && adhocSessions.length) {
     // eslint-disable-next-line no-restricted-syntax
     for (const adhocSession of adhocSessions) {
-      if (get(adhocSession, 'topic.classType') !== 'theory') {
-        const homeworkMeta = await getHomeworkCompletedMeta(adhocSession, mentorMenteeSessionModel, queryType);
-        finalResult.push({
-          id: get(adhocSession, 'id'),
-          bookingDate: get(adhocSession, 'bookingDate', null),
-          sessionStartDate: get(adhocSession, 'sessionStartDate', null),
-          sessionEndDate: get(adhocSession, 'sessionEndDate', null),
-          sessionStatus: get(adhocSession, 'sessionStatus', 'allotted'),
-          sessionMode: get(adhocSession, 'sessionMode', 'online'),
-          sessionRecordingLink: get(adhocSession, 'sessionRecordingLink', null),
-          recordType: 'adhocSession',
-          startMinutes: get(adhocSession, 'startMinutes', 0),
-          endMinutes: get(adhocSession, 'endMinutes', 0),
-          ...getSlotTimeFields(adhocSession),
-          topicTitle: get(adhocSession, 'topic.title', null),
-          topicOrder: getTopicOrderFromCoursePackage(get(adhocSession, 'classroom.coursePackage'), get(adhocSession, 'topic'), get(adhocSession, 'classroom')).order,
-          topicComponentRule: get(batchSession, 'topic.topicComponentRule', null),
-          thumbnailSmall: get(adhocSession, 'topic.thumbnailSmall', null),
-          classType: get(adhocSession, 'topic.classType', 'lab'),
-          totalStudents: get(adhocSession, 'classroom.students', []).length,
-          completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
-          completedQuizMeta: homeworkMeta.quizSubmittedCount,
-          isHomeworkExists: homeworkMeta.isHomeworkExists,
-          isQuizExists: homeworkMeta.isQuizExists,
-          classworkAssignmentMeta: get(batchSession, 'topic.topicAssignmentQuestions', []).length,
-          homeworkAssignmentMeta: get(batchSession, 'topic.topicHomeworkAssignmentQuestion', []).length,
-          homeworkQuizMeta: get(batchSession, 'topic.topicQuestions', []).length,
-        });
-      }
+      const homeworkMeta = await getHomeworkCompletedMeta(adhocSession, mentorMenteeSessionModel, queryType);
+      finalResult.push({
+        id: get(adhocSession, 'id'),
+        bookingDate: get(adhocSession, 'bookingDate', null),
+        sessionStartDate: get(adhocSession, 'sessionStartDate', null),
+        sessionEndDate: get(adhocSession, 'sessionEndDate', null),
+        sessionStatus: get(adhocSession, 'sessionStatus', 'allotted'),
+        sessionMode: get(adhocSession, 'sessionMode', 'online'),
+        sessionRecordingLink: get(adhocSession, 'sessionRecordingLink', null),
+        recordType: 'adhocSession',
+        startMinutes: get(adhocSession, 'startMinutes', 0),
+        endMinutes: get(adhocSession, 'endMinutes', 0),
+        ...getSlotTimeFields(adhocSession),
+        topicTitle: get(adhocSession, 'topic.title', null),
+        topicOrder: getTopicOrderFromCoursePackage(get(adhocSession, 'classroom.coursePackage'), get(adhocSession, 'topic'), get(adhocSession, 'classroom')).order,
+        topicComponentRule: get(batchSession, 'topic.topicComponentRule', null),
+        thumbnailSmall: get(adhocSession, 'topic.thumbnailSmall', null),
+        classType: get(adhocSession, 'topic.classType', 'lab'),
+        totalStudents: get(adhocSession, 'classroom.students', []).length,
+        completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
+        completedQuizMeta: homeworkMeta.quizSubmittedCount,
+        isHomeworkExists: homeworkMeta.isHomeworkExists,
+        isQuizExists: homeworkMeta.isQuizExists,
+        classworkAssignmentMeta: get(batchSession, 'topic.topicAssignmentQuestions', []).length,
+        homeworkAssignmentMeta: get(batchSession, 'topic.topicHomeworkAssignmentQuestion', []).length,
+        homeworkQuizMeta: get(batchSession, 'topic.topicQuestions', []).length,
+      });
     }
   }
   return finalResult;

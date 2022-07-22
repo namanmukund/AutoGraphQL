@@ -66,6 +66,8 @@ const CoursePackageTopicRule = `
     isRevision: Boolean @defaultValue(value: "false")
     previousTopicOrder: Int
     revisionOrder: Int
+    term: String
+    type: CoursePackageTopicRuleType @defaultValue(value: "classwork")
   }
 `;
 

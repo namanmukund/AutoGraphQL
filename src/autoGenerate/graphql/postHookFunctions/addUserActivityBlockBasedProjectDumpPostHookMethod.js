@@ -34,6 +34,10 @@ const userBlockBasedProjectQuery = (userId, topicId, blockBasedProjectId, course
           componentName
           order
           childComponentName
+          learningObjectiveComponentsRule {
+            componentName
+            order
+          }
           learningObjective{
             id
             order
