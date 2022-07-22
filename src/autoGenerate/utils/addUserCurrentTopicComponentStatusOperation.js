@@ -4,10 +4,9 @@ import { OLD_COURSE_ID, PUBLISHED, topicTypes } from '../../../constants';
 import addUserCurrentTopicComponentStatusForNewCourse from './addUserCurrentTopicComponentStatusForNewCourse';
 import { log } from '../../../utils';
 import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
+import getNextLoComponent from './getNextLoComponent';
 
-const {
-  message, practiceQuestion, comicStrip, quiz, learningSlide,
-} = topicTypes;
+const { quiz } = topicTypes;
 
 const getTopicDetailsForCourse = async (courseId, oldCourse = false) => {
   const query = `
@@ -89,23 +88,7 @@ const addUserCurrentTopicComponentStatusOperation = async (courseId, clientId) =
     let blockBasedPracticeId = '';
     if (currentTopicComponent.componentName) {
       if (currentTopicComponent.componentName === 'learningObjective') {
-        const messageCount = get(currentTopicComponent, 'learningObjective.messagesMeta.count', 0);
-        const pqCount = get(currentTopicComponent, 'learningObjective.questionBankMeta.count', 0);
-        const comicStripCount = get(currentTopicComponent, 'learningObjective.comicStripsMeta.count', 0);
-        const learningSlidesCount = get(currentTopicComponent, 'learningObjective.learningSlidesMeta.count', 0);
-        const learningObjectiveComponentsRule = (get(currentTopicComponent, 'learningObjectiveComponentsRule', []) || [])
-          .sort((firstItem, secondItem) => firstItem.order - secondItem.order);
-        if (learningObjectiveComponentsRule.length) {
-          currentTopicComponentType = get(learningObjectiveComponentsRule, '[0].componentName');
-        } else if (messageCount) {
-          currentTopicComponentType = message;
-        } else if (pqCount) {
-          currentTopicComponentType = practiceQuestion;
-        } else if (comicStripCount) {
-          currentTopicComponentType = comicStrip;
-        } else if (learningSlidesCount) {
-          currentTopicComponentType = learningSlide;
-        }
+        currentTopicComponentType = getNextLoComponent(currentTopicComponent);
       } else if ((currentTopicComponent.componentName === 'assignment') || (currentTopicComponent.componentName === 'homeworkAssignment') || (currentTopicComponent.componentName === 'homeworkPractice')) {
         currentTopicComponentType = quiz;
       } else {
