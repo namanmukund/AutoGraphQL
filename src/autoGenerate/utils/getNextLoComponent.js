@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import { topicTypes } from '../../../constants';
 
 const {
