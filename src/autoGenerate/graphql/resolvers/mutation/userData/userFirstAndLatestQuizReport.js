@@ -205,6 +205,7 @@ const getUserQuizAggregation = (userId, topicId) => [
   {
     $project: {
       id: 1,
+      createdAt: 1,
       quizReport: {
         totalQuestionCount: 1,
         correctQuestionCount: 1,
