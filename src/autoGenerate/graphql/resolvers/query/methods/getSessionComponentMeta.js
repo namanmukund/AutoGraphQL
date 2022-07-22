@@ -213,6 +213,10 @@ query{
     topicComponentRule {
       componentName
       order
+      learningObjectiveComponentsRule {
+        componentName
+        order
+      }
       learningObjective {
         id
         questionBankMeta {

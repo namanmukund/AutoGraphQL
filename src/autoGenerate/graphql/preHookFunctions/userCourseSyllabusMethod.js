@@ -14,7 +14,7 @@ import getFirstTopicComponents from '../../utils/getFirstTopicComponents';
 import addUserCurrentTopicComponentStatusForNewCourse from '../../utils/addUserCurrentTopicComponentStatusForNewCourse';
 
 const {
-  message, practiceQuestion, comicStrip, quiz,
+  message, practiceQuestion, comicStrip, quiz, learningSlide,
 } = topicTypes;
 
 // query to get current component status of user
@@ -107,83 +107,90 @@ const userCourseSyllabusMethod = async (context, params) => {
           });
         }
         // returning error if there is no component in the published topic
-        if (!topicComponentRule || (topicComponentRule && !topicComponentRule.length)) {
-          throw new DatabaseRecordNotFoundError({
-            data: {
-              error: 'Component rule is not present in topic',
-            },
-          });
-        }
-
-        const sortedTopicComponentRule = topicComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
-        let firstComponentName = sortedTopicComponentRule[0].componentName;
         let isVideoPresent = false;
         let firstVideoId = '';
         let isLearningObjectivePresent = false;
         let firstLearningObjectiveId = '';
         let isBlockedBasedProjectPresent = false;
         let firstBlockedBasedProjectId = '';
+        let firstComponentName = 'video';
+        if (topicComponentRule && topicComponentRule.length) {
+          // throw new DatabaseRecordNotFoundError({
+          //   data: {
+          //     error: 'Component rule is not present in topic',
+          //   },
+          // });
+          const sortedTopicComponentRule = topicComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
+          firstComponentName = sortedTopicComponentRule[0].componentName;
 
-        sortedTopicComponentRule.forEach((topicComponent) => {
-          if (topicComponent.componentName === video && !firstVideoId) {
-            isVideoPresent = true;
-            firstVideoId = topicComponent.video && topicComponent.video.id;
-          } else if (topicComponent.componentName === 'learningObjective' && !firstLearningObjectiveId) {
-            isLearningObjectivePresent = true;
-            firstLearningObjectiveId = topicComponent.learningObjective && topicComponent.learningObjective.id;
-          } else if (topicComponent.componentName === blockBasedPractice && !firstBlockedBasedProjectId) {
-            isBlockedBasedProjectPresent = true;
-            firstBlockedBasedProjectId = topicComponent.blockBasedProject && topicComponent.blockBasedProject.id;
-          } else if (topicComponent.componentName === blockBasedProject && !firstBlockedBasedProjectId) {
-            isBlockedBasedProjectPresent = true;
-            firstBlockedBasedProjectId = topicComponent.blockBasedProject && topicComponent.blockBasedProject.id;
+          sortedTopicComponentRule.forEach((topicComponent) => {
+            if (topicComponent.componentName === video && !firstVideoId) {
+              isVideoPresent = true;
+              firstVideoId = topicComponent.video && topicComponent.video.id;
+            } else if (topicComponent.componentName === 'learningObjective' && !firstLearningObjectiveId) {
+              isLearningObjectivePresent = true;
+              firstLearningObjectiveId = topicComponent.learningObjective && topicComponent.learningObjective.id;
+            } else if (topicComponent.componentName === blockBasedPractice && !firstBlockedBasedProjectId) {
+              isBlockedBasedProjectPresent = true;
+              firstBlockedBasedProjectId = topicComponent.blockBasedProject && topicComponent.blockBasedProject.id;
+            } else if (topicComponent.componentName === blockBasedProject && !firstBlockedBasedProjectId) {
+              isBlockedBasedProjectPresent = true;
+              firstBlockedBasedProjectId = topicComponent.blockBasedProject && topicComponent.blockBasedProject.id;
+            }
+          });
+
+          if (firstComponentName === 'learningObjective') {
+            const messageCount = get(sortedTopicComponentRule[0], 'learningObjective.messagesMeta.count', 0);
+            const pqCount = get(sortedTopicComponentRule[0], 'learningObjective.questionBankMeta.count', 0);
+            const comicStripCount = get(sortedTopicComponentRule[0], 'learningObjective.comicStripsMeta.count', 0);
+            const learningSlidesCount = get(sortedTopicComponentRule[0], 'learningObjective.learningSlidesMeta.count', 0);
+            const learningObjectiveComponentsRule = (get(sortedTopicComponentRule[0], 'learningObjectiveComponentsRule', []) || [])
+              .sort((firstItem, secondItem) => firstItem.order - secondItem.order);
+            if (learningObjectiveComponentsRule.length) {
+              firstComponentName = get(learningObjectiveComponentsRule, '[0].componentName');
+            } else if (messageCount) {
+              firstComponentName = message;
+            } else if (pqCount) {
+              firstComponentName = practiceQuestion;
+            } else if (comicStripCount) {
+              firstComponentName = comicStrip;
+            } else if (learningSlidesCount) {
+              firstComponentName = learningSlide;
+            }
+          } else if (['assignment', 'homeworkAssignment', 'homeworkPractice'].includes(firstComponentName)) {
+            currentTopicComponentType = quiz;
           }
-        });
 
-        if (firstComponentName === 'learningObjective') {
-          const messageCount = get(sortedTopicComponentRule[0], 'learningObjective.messagesMeta.count', 0);
-          const pqCount = get(sortedTopicComponentRule[0], 'learningObjective.questionBankMeta.count', 0);
-          const comicStripCount = get(sortedTopicComponentRule[0], 'learningObjective.comicStripsMeta.count', 0);
-          if (messageCount) {
-            firstComponentName = message;
-          } else if (pqCount) {
-            firstComponentName = practiceQuestion;
-          } else if (comicStripCount) {
-            firstComponentName = comicStrip;
+          // returning error if there is no published video
+          if (isVideoPresent && !firstVideoId) {
+            throw new DatabaseRecordNotFoundError({
+              data: {
+                error: 'firstVideoId is not present',
+              },
+            });
           }
-        } else if (['assignment', 'homeworkAssignment', 'homeworkPractice'].includes(firstComponentName)) {
-          currentTopicComponentType = quiz;
+
+          // returning error if there is no published firstLearningObjective
+          if (isLearningObjectivePresent && !firstLearningObjectiveId) {
+            throw new DatabaseRecordNotFoundError({
+              data: {
+                error: 'firstLearningObjectiveId is not present',
+              },
+            });
+          }
+
+          // returning error if there is no published firstBlockedBasedProjectId
+          if (isBlockedBasedProjectPresent && !firstBlockedBasedProjectId) {
+            throw new DatabaseRecordNotFoundError({
+              data: {
+                error: 'firstBlockedBasedProjectId is not present',
+              },
+            });
+          }
         }
 
-        // returning error if there is no published video
-        if (isVideoPresent && !firstVideoId) {
-          throw new DatabaseRecordNotFoundError({
-            data: {
-              error: 'firstVideoId is not present',
-            },
-          });
-        }
-
-        // returning error if there is no published firstLearningObjective
-        if (isLearningObjectivePresent && !firstLearningObjectiveId) {
-          throw new DatabaseRecordNotFoundError({
-            data: {
-              error: 'firstLearningObjectiveId is not present',
-            },
-          });
-        }
-
-        // returning error if there is no published firstBlockedBasedProjectId
-        if (isBlockedBasedProjectPresent && !firstBlockedBasedProjectId) {
-          throw new DatabaseRecordNotFoundError({
-            data: {
-              error: 'firstBlockedBasedProjectId is not present',
-            },
-          });
-        }
         // mutation to create current component status of user with current topic as first topic and courseId
         // and current LO as first LO of topic and video as current component type
-
         await addUserCurrentTopicComponentStatusForNewCourse(
           userId, courseId, firstTopicId, firstLearningObjectiveId, firstVideoId, firstBlockedBasedProjectId, firstComponentName,
         );

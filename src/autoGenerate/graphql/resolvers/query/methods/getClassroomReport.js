@@ -660,7 +660,8 @@ const classroomReport = (async (root, params, context) => {
         pqQuestions: new Map(),
         pqSubmissions: new Map(),
       };
-      if (get(userbbPractice, 'blockBasedPractice') && (get(userbbPractice, 'answerLink') || get(userbbPractice, 'savedBlocks'))) {
+      const hasUserSubmittedPracticeLink = get(userbbPractice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(userbbPractice, 'answerLink') || get(userbbPractice, 'savedBlocks')) : true;
+      if (get(userbbPractice, 'blockBasedPractice') && hasUserSubmittedPracticeLink) {
         innerObj.pqSubmittedCount += 1;
         innerObj.pqSubmissions.set(userId, {
           userId,
