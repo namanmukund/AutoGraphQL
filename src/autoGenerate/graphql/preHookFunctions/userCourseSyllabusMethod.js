@@ -12,10 +12,9 @@ from './validation/utils/getUserIdandAppNameAfterValidation';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getFirstTopicComponents from '../../utils/getFirstTopicComponents';
 import addUserCurrentTopicComponentStatusForNewCourse from '../../utils/addUserCurrentTopicComponentStatusForNewCourse';
+import getNextLoComponent from '../../utils/getNextLoComponent';
 
-const {
-  message, practiceQuestion, comicStrip, quiz, learningSlide,
-} = topicTypes;
+const { quiz } = topicTypes;
 
 // query to get current component status of user
 const userCurrentTopicComponentStatusesQuery = (userId, courseId) => `
@@ -140,23 +139,7 @@ const userCourseSyllabusMethod = async (context, params) => {
           });
 
           if (firstComponentName === 'learningObjective') {
-            const messageCount = get(sortedTopicComponentRule[0], 'learningObjective.messagesMeta.count', 0);
-            const pqCount = get(sortedTopicComponentRule[0], 'learningObjective.questionBankMeta.count', 0);
-            const comicStripCount = get(sortedTopicComponentRule[0], 'learningObjective.comicStripsMeta.count', 0);
-            const learningSlidesCount = get(sortedTopicComponentRule[0], 'learningObjective.learningSlidesMeta.count', 0);
-            const learningObjectiveComponentsRule = (get(sortedTopicComponentRule[0], 'learningObjectiveComponentsRule', []) || [])
-              .sort((firstItem, secondItem) => firstItem.order - secondItem.order);
-            if (learningObjectiveComponentsRule.length) {
-              firstComponentName = get(learningObjectiveComponentsRule, '[0].componentName');
-            } else if (messageCount) {
-              firstComponentName = message;
-            } else if (pqCount) {
-              firstComponentName = practiceQuestion;
-            } else if (comicStripCount) {
-              firstComponentName = comicStrip;
-            } else if (learningSlidesCount) {
-              firstComponentName = learningSlide;
-            }
+            firstComponentName = getNextLoComponent(sortedTopicComponentRule[0]);
           } else if (['assignment', 'homeworkAssignment', 'homeworkPractice'].includes(firstComponentName)) {
             currentTopicComponentType = quiz;
           }
