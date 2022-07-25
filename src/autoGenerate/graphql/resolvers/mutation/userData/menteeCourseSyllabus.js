@@ -3158,7 +3158,12 @@ const menteeCourseSyllabusMutationResolver = async (
         /** getting topicComponentRule of previous topic homework */
         if (completedSession && completedSession.length) {
           const bookedTopicOrder = bookedSession[0].topicOrder || '';
-          const prevCompletedSession = completedSession.filter((session) => get(session, 'topicOrder') === (bookedTopicOrder - 1));
+          let prevCompletedSession = {};
+          if (coursePackage) {
+            prevCompletedSession = completedSession.sort((a, b) => get(b, 'topicOrder') - get(a, 'topicOrder')).filter((session) => get(session, 'classType') !== 'theory');
+          } else {
+            prevCompletedSession = completedSession.filter((session) => get(session, 'topicOrder') === (bookedTopicOrder - 1));
+          }
           if (prevCompletedSession && prevCompletedSession.length) {
             const prevSessionTopicId = prevCompletedSession[0].topicId || '';
             const prevTopicRes = await fetchOrCacheQueryRes({
