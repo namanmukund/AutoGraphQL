@@ -71,6 +71,7 @@ const BatchSession = `
     schoolSessionsOtp: [SchoolSessionOtp] @relation(name:"SchoolSessionOtpBatchSession")
     sessionStartedByMentorAt: Date
     loggedInUserStatus: [BatchLoginStatusType]
+    sessionCreatedBy: User @relation(name: "BatchSessionSessionCreatedBy", direction: "OneWay")
 }`;
 
 export default [BatchSession, batchAttendanceType, batchLoginStatusType];
