@@ -21,6 +21,13 @@ const B2b2cTimeTable = `
    mentorSession: MentorSession @relation(name: "BatchMentorSession")
  }`;
 
+const AcademicDuration = `
+  type AcademicDuration {
+   term: String
+   startDate: Date
+   endDate: Date
+ }`;
+
 const Batch = `
   type Batch @model
   @appPermissions(
@@ -54,7 +61,9 @@ const Batch = `
     timetableSchedule: [TimetableSchedule] @relation(name: "BatchTimetableSchedule")
     studentReviewsByMentor: [StudentReviewByMentor] @relation(name: "BatchStudentReviewByMentor")
     notices: [Notice] @relation(name: "BatchNotice")
+    academicDuration: [AcademicDuration]
+    academicYearTitle: String
   }
 `;
 
-export default [Batch, BatchTimeTableRule, B2b2cTimeTable];
+export default [Batch, BatchTimeTableRule, B2b2cTimeTable, AcademicDuration];
