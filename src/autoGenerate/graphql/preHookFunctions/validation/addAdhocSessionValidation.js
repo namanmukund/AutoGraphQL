@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import {
-  ADMIN, UMS_ADMIN, UMS_VIEWER,
+  ADMIN, MENTOR, UMS_ADMIN, UMS_VIEWER,
 } from '../../../../../constants/roles';
 import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
@@ -138,7 +138,8 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
 
   if (
     !backendApps.includes(appName)
-    && !(userRoleFromContext === ADMIN || userRoleFromContext === UMS_ADMIN || userRoleFromContext === UMS_VIEWER)
+    && !(userRoleFromContext === ADMIN || userRoleFromContext === UMS_ADMIN
+      || userRoleFromContext === UMS_VIEWER || userRoleFromContext === MENTOR)
   ) {
     throw new PermissionDeniedError();
   }
