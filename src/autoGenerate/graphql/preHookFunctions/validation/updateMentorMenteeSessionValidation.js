@@ -63,19 +63,21 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
 
   const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id);
 
-  // check if mentor already has another session in same slot
-  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
-  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
-  if (mentorUserId && bookingDate) {
-    const getMentorSessionsRes = await callLocalGraphqlApi(
-      getMentorSessions(
-        mentorUserId,
-        bookingDate,
-      ),
-    );
-    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-    const menteeSessionSlots = { input: { bookingDate, ...get(mentorMenteeSessionDoc, 'menteeSession', {}) } };
-    checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions, null, get(mentorMenteeSessionDoc, 'menteeSession.user.studentProfile.batch.code'));
+  if (mentorSessionConnectId) {
+    // check if mentor already has another session in same slot
+    const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+    const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
+    if (mentorUserId && bookingDate) {
+      const getMentorSessionsRes = await callLocalGraphqlApi(
+        getMentorSessions(
+          mentorUserId,
+          bookingDate,
+        ),
+      );
+      const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+      const menteeSessionSlots = { input: { bookingDate, ...get(mentorMenteeSessionDoc, 'menteeSession', {}) } };
+      checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions, null, get(mentorMenteeSessionDoc, 'menteeSession.user.studentProfile.batch.code'));
+    }
   }
 
   if (!(mentorMenteeSessionDoc && mentorMenteeSessionDoc.id)) {
