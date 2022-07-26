@@ -142,25 +142,26 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   validateMenteeStartSessionData(menteeSession, topicConnectId, params);
 
   // check if mentor already has another session in same slot
-
-  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
-  const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
-  const { bookingDate } = menteeSession;
-  const isMentorActive = get(fetchMentorRes,'data.mentorSession.user.mentorProfile.isMentorActive')
-  if(!isMentorActive){
-    throw new MentorIsInactiveError()
-  }
-  if (mentorUserId && bookingDate) {
-    const getMentorSessionsRes = await callLocalGraphqlApi(
-      getMentorSessions(
-        mentorUserId,
-        bookingDate,
-      ),
-    );
-    const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-    // constucting data in appropriate format
-    const menteeSessionSlots = { input: { ...menteeSession } };
-    checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions, null, get(menteeSession, 'user.studentProfile.batch.code'));
+  if (mentorSessionConnectId) {
+    const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+    const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
+    const { bookingDate } = menteeSession;
+    const isMentorActive = get(fetchMentorRes,'data.mentorSession.user.mentorProfile.isMentorActive')
+    if(!isMentorActive){
+      throw new MentorIsInactiveError()
+    }
+    if (mentorUserId && bookingDate) {
+      const getMentorSessionsRes = await callLocalGraphqlApi(
+        getMentorSessions(
+          mentorUserId,
+          bookingDate,
+        ),
+      );
+      const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+      // constucting data in appropriate format
+      const menteeSessionSlots = { input: { ...menteeSession } };
+      checkIfSlotCanBeOpenedValidation(menteeSessionSlots, mentorSessions, null, get(menteeSession, 'user.studentProfile.batch.code'));
+    }
   }
 
   //update source & country in mentorMenteeSession
