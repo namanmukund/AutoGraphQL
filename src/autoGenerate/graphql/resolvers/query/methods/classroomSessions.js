@@ -85,6 +85,14 @@ const getBatchSessionAggregation = ({
             },
           },
           {
+            $lookup: {
+              from: 'BatchCurrentComponentStatus',
+              localField: 'currentComponent.typeId',
+              foreignField: 'id',
+              as: 'currentComponent',
+            },
+          },
+          {
             $project: {
               id: 1,
               code: 1,
@@ -99,6 +107,9 @@ const getBatchSessionAggregation = ({
               },
               documentType: 1,
               coursePackageTopicRule: 1,
+              currentComponent: {
+                $arrayElemAt: ['$currentComponent', 0],
+              },
             },
           },
         ],
@@ -375,6 +386,14 @@ const getAdhocSessionAggregation = ({
             },
           },
           {
+            $lookup: {
+              from: 'BatchCurrentComponentStatus',
+              localField: 'currentComponent.typeId',
+              foreignField: 'id',
+              as: 'currentComponent',
+            },
+          },
+          {
             $project: {
               id: 1,
               code: 1,
@@ -389,6 +408,9 @@ const getAdhocSessionAggregation = ({
               },
               documentType: 1,
               coursePackageTopicRule: 1,
+              currentComponent: {
+                $arrayElemAt: ['$currentComponent', 0],
+              },
             },
           },
         ],
@@ -756,6 +778,9 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
   const finalResult = [];
   if (batchSessions && batchSessions.length) {
     batchSessions.forEach((session) => {
+      const currentComponentTopicOrder = get(getTopicDocument({
+        id: get(session, 'classroom.currentComponent.currentTopic.typeId', null),
+      }, session), 'order');
       finalResult.push({
         id: get(session, 'id'),
         bookingDate: get(session, 'bookingDate', null),
@@ -778,6 +803,8 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
           description: get(session, 'classroom.description', null),
           classes: get(session, 'classroom.classes', null),
           school: get(session, 'classroom.school', null),
+          currentComponent: get(session, 'classroom.currentComponent', null),
+          currentComponentTopicOrder,
         },
         sessionOtp: get(session, 'schoolSessionOtp', []),
         ...getSlotTimeFields(session),
@@ -789,6 +816,9 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
   }
   if (adhocSessions && adhocSessions.length) {
     adhocSessions.forEach((session) => {
+      const currentComponentTopicOrder = get(getTopicDocument({
+        id: get(session, 'classroom.currentComponent.currentTopic.typeId', null),
+      }, session), 'order');
       finalResult.push({
         id: get(session, 'id'),
         bookingDate: get(session, 'bookingDate', null),
@@ -811,6 +841,8 @@ const transformMongoResults = (batchSessions, adhocSessions, events) => {
           description: get(session, 'classroom.description', null),
           classes: get(session, 'classroom.classes', null),
           school: get(session, 'classroom.school', null),
+          currentComponent: get(session, 'classroom.currentComponent', null),
+          currentComponentTopicOrder,
         },
         sessionOtp: get(session, 'schoolSessionOtp', null),
         ...getSlotTimeFields(session),
