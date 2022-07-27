@@ -1,7 +1,7 @@
 import { topicTypes } from '../../../../../constants';
 
 const {
-  video, message, practiceQuestion, comicStrip, quiz, blockBasedProject, blockBasedPractice,
+  video, message, practiceQuestion, comicStrip, quiz, blockBasedProject, blockBasedPractice, learningSlide,
 } = topicTypes;
 const CurrentTopicComponentType = `
   enum CurrentTopicComponentType {
@@ -12,6 +12,7 @@ const CurrentTopicComponentType = `
       ${quiz}
       ${blockBasedProject}
       ${blockBasedPractice}
+      ${learningSlide}
   }`;
 
 export default CurrentTopicComponentType;
