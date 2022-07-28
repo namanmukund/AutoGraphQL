@@ -288,5 +288,5 @@ export default [
   DatabaseControllerMode,
   CoursePackageType,
   CoursePackageTopicRuleType,
-  BlockBasedPracticeAnswerType
+  BlockBasedPracticeAnswerType,
 ];
