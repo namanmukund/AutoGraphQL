@@ -35,6 +35,8 @@ const BlockBasedProject = `
     tags: [ContentTag] @relation(name: "BlockBasedProjectTag")
     externalDescriptionEnabled: Boolean @defaultValue(value: "false")
     embedViewHeight: Int @defaultValue(value: "100")
+    answerFormat: BlockBasedPracticeAnswerType @defaultValue(value: "answerLink")
+    answerFormatDescription: String @trim
   }
 `;
 
