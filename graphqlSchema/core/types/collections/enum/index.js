@@ -141,6 +141,7 @@ import EvaluationResult from './EvaluationResult';
 import DatabaseControllerMode from './DatabaseControllerMode';
 import CoursePackageType from './CoursePackageType';
 import CoursePackageTopicRuleType from './CoursePackageTopicRuleType';
+import BlockBasedPracticeAnswerType from './BlockBasedPracticeAnswerType';
 
 export default [
   Status,
@@ -287,4 +288,5 @@ export default [
   DatabaseControllerMode,
   CoursePackageType,
   CoursePackageTopicRuleType,
+  BlockBasedPracticeAnswerType
 ];

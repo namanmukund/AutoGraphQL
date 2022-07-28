@@ -28,7 +28,7 @@ const School = `
     isBuddyLoginEnabled: Boolean @defaultValue(value: "false")
     buddyLoginLimit: Int @defaultValue(value: "5")
     isTimeTableEnabled: Boolean @defaultValue(value: "false")
-    isClassroomEnabled: Boolean @defaultValue(value: "false")
+    isClassroomEnabled: Boolean @defaultValue(value: "true")
   }
 `;
 export default [School];
