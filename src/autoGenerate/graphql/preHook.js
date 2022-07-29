@@ -79,6 +79,7 @@ import deleteSchoolClassValidation from './preHookFunctions/validation/deleteSch
 import deleteCourseValidation from './preHookFunctions/validation/deleteCourseValidation';
 import deleteCoursePackageValidation from './preHookFunctions/validation/deleteCoursePackageValidation';
 import updateBatchValidation from './preHookFunctions/validation/updateBatchValidation';
+import addBatchValidation from './preHookFunctions/validation/addBatchValidation';
 import updateCampaignValidation from './preHookFunctions/validation/updateCampaignValidation';
 import generateInviteCode from '../../../utils/generateInviteCode';
 import deleteBatchValidation from './preHookFunctions/validation/deleteBatchValidation';
@@ -791,6 +792,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'deleteCoursePackage': {
       await deleteCoursePackageValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addBatch': {
+      await addBatchValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'updateBatch': {

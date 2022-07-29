@@ -43,11 +43,12 @@ const Batch = `
     coursePackage: CoursePackage @relation(name: "BatchCoursePackage", direction: "OneWay")
     coursePackageTopicRule: [CoursePackageTopicRule]
     allottedMentor: User @relation(name:"BatchMentor")
-    code: String! @uniqueOrEmpty @trim @uppercase
+    code: String! @trim @uppercase
     classroomTitle: String
     description: String
     thumbnailSmall: String
     students: [StudentProfile] @relation(name: "BatchStudentProfile")
+    batchStudents: [StudentProfile] @relation(name: "BatchesStudentProfile")
     currentComponent: BatchCurrentComponentStatus @relation(name: "BatchCurrentComponentStatusBatch", isSubset: true)
     documentType: SessionDocumentType @defaultValue(value: "batch")
     type: BatchType @defaultValue(value: "normal")
