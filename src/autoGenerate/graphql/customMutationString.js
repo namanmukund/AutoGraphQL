@@ -55,6 +55,7 @@ const customMutationString = `
    menteeCourseHomework (courseId: ID): [MenteeCourseHomework]
    advanceBatchCurrentSession(schoolName: String, classroomTitle: String, batchId: String, latestTopicOrder: Int!): BooleanResult
    generateBatchSessionOtp (batchSessionIds: [ID]): [BatchSession]
+   updateSchoolStudentEmail (schoolId: ID): BooleanResult
    `;
 
 export default customMutationString;
