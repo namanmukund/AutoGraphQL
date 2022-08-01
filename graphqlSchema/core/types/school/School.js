@@ -1,3 +1,16 @@
+const StudentsDraftCSV = `
+  type StudentsDraftCSV {
+    childName: String
+    parentName: String
+    rollNo: String
+    grade: String
+    section: String
+    parentEmail: String
+    status: String
+    error: String
+  }
+`;
+
 const School = `
   type School @model {
     name: String! @unique
@@ -29,6 +42,7 @@ const School = `
     buddyLoginLimit: Int @defaultValue(value: "5")
     isTimeTableEnabled: Boolean @defaultValue(value: "false")
     isClassroomEnabled: Boolean @defaultValue(value: "true")
+    studentsDraftCSV: [StudentsDraftCSV]  
   }
 `;
-export default [School];
+export default [School, StudentsDraftCSV];
