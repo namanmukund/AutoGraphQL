@@ -34,7 +34,7 @@ const customMutationString = `
    validateUserOTP ( input: ValidateUserInput  ): ParentChildToken,
    getPaymentRequest ( productId: ID!, discountCode: String, isCreditUsed: Boolean): PaymentRequest,
    getPaymentResponse ( id: ID!, hash: String!, status: String!, payuMoneyId: String!): BooleanResult,
-   addUpdateBulkSchoolUserData (sheetId: String!, schoolName: String!, setPassword: Boolean, booking: Boolean): AddUpdateBulkSchoolUserDataOutput,
+   addUpdateBulkSchoolUserData (sheetId: String, schoolName: String!, setPassword: Boolean, booking: Boolean): AddUpdateBulkSchoolUserDataOutput,
    verifyBulkSchoolUserLogin (sheetId: String, schoolName: String): AddUpdateBulkSchoolUserDataOutput,
    updateVisitorReactionOnUserApprovedCode(reactedByID: ID!, userApprovedCodeID: ID!, heart: Boolean, celebrate: Boolean, hot: Boolean): BooleanResult,
    addBulkMentorSession ( input: BulkMentorSessionInput ): [MentorSession],
@@ -55,6 +55,7 @@ const customMutationString = `
    menteeCourseHomework (courseId: ID): [MenteeCourseHomework]
    advanceBatchCurrentSession(schoolName: String, classroomTitle: String, batchId: String, latestTopicOrder: Int!): BooleanResult
    generateBatchSessionOtp (batchSessionIds: [ID]): [BatchSession]
+   updateSchoolStudentEmail (schoolId: ID): BooleanResult
    `;
 
 export default customMutationString;
