@@ -6,6 +6,7 @@ import {
 } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import isUserInheritedFromMentor from './isMentorChild';
+import getNextLoComponent from '../../../utils/getNextLoComponent';
 
 // query to get next topic
 const getNextTopic = (courseId,
@@ -449,23 +450,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
   if (nextCurrentTopicComponent) {
     if (nextCurrentTopicComponent.componentName) {
       if (nextCurrentTopicComponent.componentName === 'learningObjective') {
-        const messageCount = get(nextCurrentTopicComponent, 'learningObjective.messagesMeta.count', 0);
-        const pqCount = get(nextCurrentTopicComponent, 'learningObjective.questionBankMeta.count', 0);
-        const comicStripCount = get(nextCurrentTopicComponent, 'learningObjective.comicStripsMeta.count', 0);
-        const learningSlidesCount = get(nextCurrentTopicComponent, 'learningObjective.learningSlidesMeta.count', 0);
-        const learningObjectiveComponentsRule = (get(nextCurrentTopicComponent, 'learningObjectiveComponentsRule', []) || [])
-          .sort((firstItem, secondItem) => firstItem.order - secondItem.order);
-        if (learningObjectiveComponentsRule.length) {
-          nextCurrentTopicComponentType = get(learningObjectiveComponentsRule, '[0].componentName');
-        } else if (messageCount) {
-          nextCurrentTopicComponentType = message;
-        } else if (pqCount) {
-          nextCurrentTopicComponentType = practiceQuestion;
-        } else if (comicStripCount) {
-          nextCurrentTopicComponentType = comicStrip;
-        } else if (learningSlidesCount) {
-          nextCurrentTopicComponentType = learningSlide;
-        }
+        nextCurrentTopicComponentType = getNextLoComponent(nextCurrentTopicComponent);
       } else if ((nextCurrentTopicComponent.componentName === 'assignment') || (nextCurrentTopicComponent.componentName === 'homeworkAssignment') || (nextCurrentTopicComponent.componentName === 'homeworkPractice')) {
         nextCurrentTopicComponentType = quiz;
       } else {
