@@ -178,39 +178,38 @@ const updateSchoolStudentEmail = async (root, params, authentication, context) =
         const updatedStudentObj = {};
         const students = groupedStudentProfiles[key];
         for (let i = 0; i < students.length; i += 1) {
-          if (i > 0) {
-            const student = students[i];
-            if (!get(student, 'user.email')) {
-              let emailPreFix = get(student, 'parent.email', '').split('@')[0];
-              if (!emailPreFix) {
-                const studentNamesArray = get(student, 'user.name', '').split(' ');
-                emailPreFix = studentNamesArray[0];
-                if (emailPreFix.length <= 2) emailPreFix = `${emailPreFix}${get(student, 'rollNo')}`;
-              }
-              const newEmailPrefix = `${emailPreFix}${i}`;
-              const newEmail = `${newEmailPrefix}@${schoolCode}.com`.toLowerCase();
-              const email = await getUniqueEmail(newEmail, updatedStudentsProfiles, i, emailPreFix, context);
-              if (email) {
-                const updatedEmailPrefix = email.split('@')[0];
-                const userInput = {
-                  email,
-                  password: updatedEmailPrefix,
-                  savedPassword: updatedEmailPrefix,
-                };
-                const updatedUserId = await updateMenteeUser(get(student, 'user.id'), userInput, context);
-                if (updatedUserId) {
-                  log(`User Successfully updated with email: ${email} and password: ${userInput.password}`);
-                  updatedStudentObj['Student Name'] = get(student, 'user.name');
-                  updatedStudentObj.Grade = get(student, 'grade');
-                  updatedStudentObj.Section = get(student, 'section');
-                  updatedStudentObj['Roll No.'] = get(student, 'rollNo');
-                  updatedStudentObj['Parent Name'] = get(student, 'parent.name');
-                  updatedStudentObj['Parent Email'] = get(student, 'parent.email');
-                  updatedStudentObj['Old Email'] = get(student, 'parent.email');
-                  updatedStudentObj['New Email'] = email;
-                  updatedStudentsProfiles.push({ ...updatedStudentObj });
-                } else log(`Something went wrong for student: ${get(student, 'user.name')} with old email:${get(student, 'parent.email')} `);
-              }
+          const student = students[i];
+          if (!get(student, 'user.email')) {
+            let emailPreFix = get(student, 'parent.email', '').split('@')[0];
+            if (!emailPreFix) {
+              const studentNamesArray = get(student, 'user.name', '').split(' ');
+              emailPreFix = studentNamesArray[0];
+              if (emailPreFix.length <= 2) emailPreFix = `${emailPreFix}${get(student, 'rollNo')}`;
+            }
+            const newIndex = i + 1;
+            const newEmailPrefix = `${emailPreFix}${newIndex}`;
+            const newEmail = `${newEmailPrefix}@${schoolCode}.com`.toLowerCase();
+            const email = await getUniqueEmail(newEmail, updatedStudentsProfiles, newIndex, emailPreFix, context);
+            if (email) {
+              const updatedEmailPrefix = email.split('@')[0];
+              const userInput = {
+                email,
+                password: updatedEmailPrefix,
+                savedPassword: updatedEmailPrefix,
+              };
+              const updatedUserId = await updateMenteeUser(get(student, 'user.id'), userInput, context);
+              if (updatedUserId) {
+                log(`Student: ${get(student, 'user.name')} of grade: ${get(student, 'grade')} Successfully updated with email: ${email} and password: ${userInput.password}`);
+                updatedStudentObj['Student Name'] = get(student, 'user.name');
+                updatedStudentObj.Grade = get(student, 'grade');
+                updatedStudentObj.Section = get(student, 'section');
+                updatedStudentObj['Roll No.'] = get(student, 'rollNo');
+                updatedStudentObj['Parent Name'] = get(student, 'parent.name');
+                updatedStudentObj['Parent Email'] = get(student, 'parent.email');
+                updatedStudentObj['Old Email'] = get(student, 'parent.email');
+                updatedStudentObj['New Email'] = email;
+                updatedStudentsProfiles.push({ ...updatedStudentObj });
+              } else log(`Something went wrong for student: ${get(student, 'user.name')} with old email:${get(student, 'parent.email')} `);
             }
           }
         }
