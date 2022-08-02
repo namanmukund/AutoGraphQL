@@ -48,6 +48,8 @@ const ClassroomDetails = `
     classes: [SchoolClass] @relation(name: "ClassroomSchoolClass", direction: "OneWay")
     school: School @relation(name: "ClassroomSchool", direction: "OneWay")
     students: [StudentProfile] @relation(name: "ClassroomStudentProfile", direction: "OneWay")
+    currentComponent: BatchCurrentComponentStatus @relation(name: "BatchCurrentComponentStatusClassroom", direction: "OneWay")
+    currentComponentTopicOrder: Int
   }
 `;
 

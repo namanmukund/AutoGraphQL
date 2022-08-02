@@ -121,6 +121,7 @@ import getClassroomReport from './query/methods/getClassroomReport';
 import getPracticeQuestionReport from './query/methods/getPracticeQuestionReport';
 import getBuddyStatus from './query/methods/getBuddyStatus';
 import generateBatchSessionOtp from './mutation/methods/generateBatchSessionOtp';
+import updateSchoolStudentEmail from './mutation/methods/updateSchoolStudentEmail';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -719,6 +720,8 @@ resolvers.Mutation.menteeCourseHomework = menteeCourseHomework;
 resolvers.Mutation.advanceBatchCurrentSession = advanceBatchCurrentSession;
 // Resolver to generate batchSession Otp
 resolvers.Mutation.generateBatchSessionOtp = generateBatchSessionOtp;
+// Resolver to Update School Student Emails
+resolvers.Mutation.updateSchoolStudentEmail = updateSchoolStudentEmail;
 
 // subscriptions
 resolvers.Subscription.userUpdated = injectSubscriptionWithCommonAsyncIterator(['USER_UPDATED']);
