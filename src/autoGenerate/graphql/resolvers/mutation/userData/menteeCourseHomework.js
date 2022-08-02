@@ -1214,7 +1214,7 @@ const menteeCourseHomeworkMutationResolver = async (
   }
   let packageTopics = [];
   if (coursePackage && get(coursePackage, 'id')) {
-    packageTopics = getTopicsArrFromCoursePackages(coursePackage, 'topics', get(userBatchDetails, '0.batch'));
+    packageTopics = getTopicsArrFromCoursePackages(coursePackage, get(userBatchDetails, '0.batch'));
   }
   const { chapters } = get(currentTopicComponentInfo, 'currentCourse', {});
   if ((!chapters || !chapters.length) && !(packageTopics || []).length) {

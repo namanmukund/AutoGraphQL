@@ -1550,6 +1550,7 @@ const getUserBatchDetails = (userId) => [
                     },
                   },
                   chapter: 1,
+                  courses: 1,
                   topicComponentRule: 1,
                   classType: 1,
                 },
@@ -1646,6 +1647,33 @@ const getUserBatchDetails = (userId) => [
                 },
               },
               {
+                $lookup: {
+                  from: 'Course',
+                  let: {
+                    coursesId: '$courses.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $in: [
+                            '$id',
+                            '$$coursesId',
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        title: 1,
+                      },
+                    },
+                  ],
+                  as: 'courses',
+                },
+              },
+              {
                 $project: {
                   id: 1,
                   title: 1,
@@ -1675,6 +1703,7 @@ const getUserBatchDetails = (userId) => [
                       0,
                     ],
                   },
+                  courses: 1,
                   topicComponentRule: 1,
                   classType: 1,
                 },
@@ -1882,6 +1911,7 @@ const getUserBatchDetails = (userId) => [
                           },
                         },
                         chapter: 1,
+                        courses: 1,
                         topicComponentRule: 1,
                         classType: 1,
                       },
@@ -1978,6 +2008,33 @@ const getUserBatchDetails = (userId) => [
                       },
                     },
                     {
+                      $lookup: {
+                        from: 'Course',
+                        let: {
+                          coursesId: '$courses.typeId',
+                        },
+                        pipeline: [
+                          {
+                            $match: {
+                              $expr: {
+                                $in: [
+                                  '$id',
+                                  '$$coursesId',
+                                ],
+                              },
+                            },
+                          },
+                          {
+                            $project: {
+                              id: 1,
+                              title: 1,
+                            },
+                          },
+                        ],
+                        as: 'courses',
+                      },
+                    },
+                    {
                       $project: {
                         id: 1,
                         title: 1,
@@ -2007,6 +2064,7 @@ const getUserBatchDetails = (userId) => [
                             0,
                           ],
                         },
+                        courses: 1,
                         topicComponentRule: 1,
                         classType: 1,
                       },
@@ -2102,41 +2160,12 @@ export const getTopicOrderFromCoursePackage = (coursePackage, currentTopic, user
   return { order: get(currentTopic, 'order', 0), title: get(currentTopic, 'title', ''), description: get(currentTopic, 'description', '') };
 };
 
-export const getTopicsArrFromCoursePackages = (coursePackage = {}, returnType = 'topics', userBatchDetails) => {
+export const getTopicsArrFromCoursePackages = (coursePackage = {}, userBatchDetails) => {
   // a batch can have a seperate course Package rule which if exists overrides the course package .
   let packageTopics = get(coursePackage, 'topicsArr', []);
   if (get(userBatchDetails, 'coursePackageTopicRule', []).length) {
     packageTopics = get(userBatchDetails, 'coursePackageTopicArr', []);
   }
-  /**
-   * if returnType is chapters we construct chapters array
-   * with topics mapped to that chapter from package.
-   */
-  if (returnType === 'chapters') {
-    const chapterToTopicMap = {};
-    (packageTopics || []).forEach((topic) => {
-      if (chapterToTopicMap[get(topic, 'chapter.id')]) {
-        chapterToTopicMap[get(topic, 'chapter.id')].push({
-          ...topic,
-          ...getTopicOrderFromCoursePackage(coursePackage, topic, userBatchDetails),
-        });
-      } else {
-        chapterToTopicMap[get(topic, 'chapter.id')] = [{
-          ...topic,
-          ...getTopicOrderFromCoursePackage(coursePackage, topic, userBatchDetails),
-        }];
-      }
-    });
-    return Object.keys(chapterToTopicMap).map((chapterId) => ({
-      id: chapterId,
-      title: get(chapterToTopicMap[chapterId], '0.chapter.title'),
-      order: get(chapterToTopicMap[chapterId], '0.chapter.order'),
-      topics: (chapterToTopicMap[chapterId] || []),
-    }));
-  }
-  /**
-   * if returnType is topics we just return topics array from package.
-   */
   const updatedTopicsArr = [];
   (packageTopics || []).forEach((topic) => {
     updatedTopicsArr.push({
@@ -2157,6 +2186,7 @@ const constructSessionsArr = ({
   mentorMenteeSessions,
   bookedSession,
   packageLastTopicId,
+  course = {},
 }) => {
   const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
   // if (topic.projectCount && topic.projectCount.count) projectCount += topic.projectCount.count;
@@ -2226,6 +2256,7 @@ const constructSessionsArr = ({
           chapterTitle,
           chapterOrder,
           classType,
+          course,
           endingDate: sessionEndDate,
           mentorId:
             mentorSession && mentorSession.user && mentorSession.user.id,
@@ -2252,6 +2283,7 @@ const constructSessionsArr = ({
           chapterId,
           chapterTitle,
           chapterOrder,
+          course,
         };
         if (get(mentorSession, 'user')) {
           mentorData = getMentorData(get(mentorSession, 'user'));
@@ -2275,6 +2307,7 @@ const constructSessionsArr = ({
         chapterId,
         chapterTitle,
         chapterOrder,
+        course,
       };
       if (
         topicId === packageLastTopicId
@@ -2314,6 +2347,7 @@ const constructSessionsArr = ({
       isSubmittedForReview,
       chapterId,
       chapterTitle,
+      course,
       chapterOrder,
       endingDate: sessionDate,
       mentorId: mentorSession && mentorSession.user && mentorSession.user.id,
@@ -2788,7 +2822,7 @@ const menteeCourseSyllabusMutationResolver = async (
   const { chapters } = currentCourse;
   let packageTopics = [];
   if (coursePackage && get(coursePackage, 'id')) {
-    packageTopics = getTopicsArrFromCoursePackages(coursePackage, 'chapters', get(userBatchDetails, '0.batch'));
+    packageTopics = getTopicsArrFromCoursePackages(coursePackage, get(userBatchDetails, '0.batch'));
   }
   if ((!chapters || !chapters.length) && !(packageTopics || []).length) {
     throw new DatabaseRecordNotFoundError({
@@ -2818,11 +2852,8 @@ const menteeCourseSyllabusMutationResolver = async (
         const constructedSessionsArr = constructSessionsArr({
           lastTopicBookedOrder,
           lastTopicSessionStatus,
-          chapter: {
-            id: get(coursePackage, 'id'),
-            title: get(coursePackage, 'title', 'Package'),
-            order: 1,
-          },
+          chapter: get(topic, 'chapter'),
+          course: get(topic, 'courses', [])[0],
           topic,
           batchSessions,
           combinedEnrollmentType,

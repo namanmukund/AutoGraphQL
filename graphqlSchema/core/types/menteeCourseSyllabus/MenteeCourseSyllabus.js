@@ -14,6 +14,7 @@ const sessionDetailType = `
    bookingDate: Date
    slotTime: Int
    isAccessible: Boolean
+   course: Course
  }`;
 
 const completedSessionDetailType = `
@@ -34,6 +35,7 @@ const completedSessionDetailType = `
    mentorId: String
    mentorName: String
    mentorProfilePic: File
+   course: Course
  }`;
 
 const menteeCourseSyllabusSkills = `
