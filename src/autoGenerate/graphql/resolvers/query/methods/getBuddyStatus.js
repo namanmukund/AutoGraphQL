@@ -2,11 +2,26 @@ import get from 'lodash/get';
 import bcrypt from 'bcryptjs';
 import { PasswordMismatchError, UnknownUserError, UserPasswordNotSetError } from '../../../../../../constants/errors';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
-import { QueryController, MutationController } from '../../../controllers';
+import { QueryController } from '../../../controllers';
+import { callLocalGraphqlApi } from '../../../../../api';
 
 const BATCHSESSION_TYPE = 'BatchSession';
 
 const STUDENTPROFILE_TYPE = 'StudentProfile';
+
+const updateBatchSession = async (input) => {
+  const query = `mutation($input: [BatchSessionsUpdate]!) {
+  updateBatchSessions(
+    input: $input
+  ) {
+    id
+  }
+}
+`;
+  const res = await callLocalGraphqlApi(query, '', { input: [input] });
+  // eslint-disable-next-line no-console
+  console.log('updated Batch Session', JSON.stringify(res), JSON.stringify(input));
+};
 
 const checkIfExistInArray = (userId, arrayData = [], systemId) => {
   if (!userId || !arrayData.length) return false;
@@ -152,9 +167,6 @@ const getBuddyStatus = async (
   } else {
     project.loggedInUserStatus = 1;
   }
-  const authentication = {
-    bypass: true,
-  };
   const batchSessionModel = getTypeQueryController(
     BATCHSESSION_TYPE,
   );
@@ -165,7 +177,6 @@ const getBuddyStatus = async (
   );
   const addedStudentsArray = get(batchSessionData, '[0].loggedInUserStatus', []);
   let result = false;
-  const updateLoginStatusModal = new MutationController(BATCHSESSION_TYPE, authentication);
   if (action === 'check') {
     // Returns true if exist else returns false;
     result = checkIfExistInArray(userId, addedStudentsArray, systemId);
@@ -175,14 +186,23 @@ const getBuddyStatus = async (
     if (!isAlreadyAdded) {
       const studentStatusIndex = addedStudentsArray.findIndex((student) => get(student, 'user.typeId') === userId);
       if (studentStatusIndex !== -1) {
-        addedStudentsArray[studentStatusIndex].isLoggedIn = true;
-        addedStudentsArray[studentStatusIndex].systemId = systemId;
+        const input = {
+          id: sessionId,
+          fields: {
+            loggedInUserStatus: {
+              updateWhere: { userReferenceId: userId },
+              updateWith: { systemId, isLoggedIn: true },
+            },
+          },
+        };
+        updateBatchSession(input);
       } else {
-        addedStudentsArray.push({ user: { typeId: userId, type: 'User' }, systemId, isLoggedIn: true });
+        const input = {
+          id: sessionId,
+          fields: { loggedInUserStatus: { pushMany: [{ userConnectId: userId, systemId, isLoggedIn: true }] } },
+        };
+        updateBatchSession(input);
       }
-      updateLoginStatusModal.updateOne({ id: sessionId }, {
-        loggedInUserStatus: addedStudentsArray,
-      });
       result = true;
     }
     if (!result) {
@@ -193,10 +213,11 @@ const getBuddyStatus = async (
     const isAdded = checkIfExistInArray(userId, addedStudentsArray);
     // If alreadyAdded then it removes it from the list and returns true, else it returns false;
     if (isAdded) {
-      const newStudentsArray = addedStudentsArray.filter((data) => get(data, 'user.typeId') !== userId);
-      updateLoginStatusModal.updateOne({ id: sessionId }, {
-        loggedInUserStatus: newStudentsArray,
-      });
+      const input = {
+        id: sessionId,
+        fields: { loggedInUserStatus: { pop: { userReferenceId: userId } } },
+      };
+      updateBatchSession(input);
       result = true;
     }
   } else if (action === 'confirmPassword') {
@@ -223,39 +244,54 @@ const getBuddyStatus = async (
   } else if (action === 'markAttendance' && studentIds && studentIds.length) {
     const attendanceArray = get(batchSessionData, '[0].attendance', []) || [];
     let isUpdated = false;
+    const attendancePromiseArray = [];
     studentIds.forEach((studentProfileId) => {
       const findStudentDataIndex = attendanceArray.findIndex((student) => get(student, 'student.typeId') === studentProfileId);
       if (findStudentDataIndex !== -1) {
         const attendanceDoc = attendanceArray[findStudentDataIndex];
         if (get(attendanceDoc, 'status') !== 'present' && !get(attendanceDoc, 'isPresent', false)) {
+          const input = {
+            id: sessionId,
+            fields: {
+              attendance: {
+                updateWhere: { studentReferenceId: studentProfileId },
+                updateWith: { status: 'present', isPresent: true },
+              },
+            },
+          };
+          attendancePromiseArray.push(updateBatchSession(input));
           isUpdated = true;
-          attendanceArray[findStudentDataIndex].status = 'present';
-          attendanceArray[findStudentDataIndex].isPresent = true;
         }
       }
     });
     if (isUpdated) {
-      updateLoginStatusModal.updateOne({ id: sessionId }, {
-        attendance: attendanceArray,
-      });
+      Promise.all(attendancePromiseArray);
     }
     result = true;
   } else if (action === 'logout' && studentIds && studentIds.length) {
     let isUpdated = false;
+    const updateLoginsPromiseArray = [];
     studentIds.forEach((studentProfileId) => {
       const findStudentDataIndex = addedStudentsArray.findIndex((student) => get(student, 'user.typeId') === studentProfileId);
       if (findStudentDataIndex !== -1) {
         const loginStatusOfUser = addedStudentsArray[findStudentDataIndex];
         if (get(loginStatusOfUser, 'isLoggedIn')) {
+          const input = {
+            id: sessionId,
+            fields: {
+              loggedInUserStatus: {
+                updateWhere: { userReferenceId: studentProfileId },
+                updateWith: { isLoggedIn: false },
+              },
+            },
+          };
           isUpdated = true;
-          addedStudentsArray[findStudentDataIndex].isLoggedIn = false;
+          updateLoginsPromiseArray.push(updateBatchSession(input));
         }
       }
     });
     if (isUpdated) {
-      updateLoginStatusModal.updateOne({ id: sessionId }, {
-        loggedInUserStatus: addedStudentsArray,
-      });
+      Promise.all(updateLoginsPromiseArray);
     }
     result = true;
   }
