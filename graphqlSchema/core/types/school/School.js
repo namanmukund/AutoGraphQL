@@ -42,7 +42,8 @@ const School = `
     buddyLoginLimit: Int @defaultValue(value: "5")
     isTimeTableEnabled: Boolean @defaultValue(value: "false")
     isClassroomEnabled: Boolean @defaultValue(value: "true")
-    studentsDraftCSV: [StudentsDraftCSV]  
+    studentsDraftCSV: [StudentsDraftCSV]
+    studentsUploadStatus: BatchCreationStatus @defaultValue(value: "todo")
   }
 `;
 export default [School, StudentsDraftCSV];
