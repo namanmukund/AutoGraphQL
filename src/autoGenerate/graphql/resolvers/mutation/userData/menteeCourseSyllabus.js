@@ -2168,10 +2168,12 @@ export const getTopicsArrFromCoursePackages = (coursePackage = {}, userBatchDeta
   }
   const updatedTopicsArr = [];
   (packageTopics || []).forEach((topic) => {
-    updatedTopicsArr.push({
-      ...topic,
-      ...getTopicOrderFromCoursePackage(coursePackage, topic, userBatchDetails),
-    });
+    if (get(topic, 'classType') !== 'theory' && get(topic, 'order')) {
+      updatedTopicsArr.push({
+        ...topic,
+        ...getTopicOrderFromCoursePackage(coursePackage, topic, userBatchDetails),
+      });
+    }
   });
   return updatedTopicsArr.sort((a, b) => a.order - b.order);
 };
