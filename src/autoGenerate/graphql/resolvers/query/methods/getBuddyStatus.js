@@ -179,7 +179,8 @@ const getBuddyStatus = async (
   let result = false;
   if (action === 'check') {
     // Returns true if exist else returns false;
-    result = checkIfExistInArray(userId, addedStudentsArray, systemId);
+    // result = checkIfExistInArray(userId, addedStudentsArray, systemId);
+    result = false;
   } else if (action === 'add') {
     const isAlreadyAdded = checkIfExistInArray(userId, addedStudentsArray);
     // If alreadyAdded then it returns false, else it updates in the list and returns true;
@@ -203,8 +204,22 @@ const getBuddyStatus = async (
         };
         updateBatchSession(input);
       }
-      result = true;
+    } else {
+      const studentStatusIndex = addedStudentsArray.findIndex((student) => get(student, 'user.typeId') === userId);
+      if (studentStatusIndex !== -1) {
+        const input = {
+          id: sessionId,
+          fields: {
+            loggedInUserStatus: {
+              updateWhere: { userReferenceId: userId },
+              updateWith: { systemId, isLoggedIn: true },
+            },
+          },
+        };
+        updateBatchSession(input);
+      }
     }
+    result = true;
     if (!result) {
       const findInArray = addedStudentsArray.find((data) => get(data, 'user.typeId') === userId);
       if (systemId && findInArray && get(findInArray, 'systemId') === systemId) result = true;
