@@ -78,7 +78,7 @@ const userBlockBasedProjectPostHookMethod = async (input, params, context) => {
     topicId,
     courseId,
     blockBasedProjectId,
-  ));
+  ), context);
   if (result) {
     /*
       parsing data 'addUserBlockBasedProject so that the logic implemented ahead can read data is

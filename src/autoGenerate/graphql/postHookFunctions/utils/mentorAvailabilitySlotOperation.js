@@ -25,7 +25,7 @@ export const getMentorAvailabilitySlots = async ({
         }
     }
     }`;
-  const mentorAvailabilitySlotData = await callLocalGraphqlApi(query);
+  const mentorAvailabilitySlotData = await callLocalGraphqlApi(query, {});
   return get(mentorAvailabilitySlotData, 'data.mentorAvailabilitySlots');
 };
 
@@ -36,7 +36,7 @@ const getMentorDemandSlot = async (date) => {
     }
   }
   `;
-  const mentorDemandSlot = await callLocalGraphqlApi(query);
+  const mentorDemandSlot = await callLocalGraphqlApi(query, {});
   return get(mentorDemandSlot, 'data.mentorDemandSlots');
 };
 
@@ -49,7 +49,7 @@ const updateMentorDemandSlot = async (id, slotId, mentorProfileId) => {
       id
     }
   }`;
-  const updateMentorDemandSlotData = await callLocalGraphqlApi(mutationQuery);
+  const updateMentorDemandSlotData = await callLocalGraphqlApi(mutationQuery, {});
   return get(updateMentorDemandSlotData, 'data.updateMentorDemandSlot');
 };
 
@@ -64,7 +64,7 @@ const addMentorDemandSlot = async (slotId, mentorProfileId, input) => {
   }
 }
 `;
-  const addMentorDemandSlotData = await callLocalGraphqlApi(mutationQuery, '', { input });
+  const addMentorDemandSlotData = await callLocalGraphqlApi(mutationQuery, {}, { input });
   return get(addMentorDemandSlotData, 'data.addMentorDemandSlot');
 };
 
@@ -80,7 +80,7 @@ const addMentorAvailabilitySlot = async (sessionId, mentorProfileId, paySlabId, 
       id
     }
   }`;
-  const addMentorAvailabilitySlotData = await callLocalGraphqlApi(mutationQuery, '', { input });
+  const addMentorAvailabilitySlotData = await callLocalGraphqlApi(mutationQuery, {}, { input });
   return get(addMentorAvailabilitySlotData, 'data.addMentorAvailabilitySlot');
 };
 
@@ -96,7 +96,7 @@ export const updateMentorAvailabilitySlot = async (mentorAvailabilitySlotId, ses
       id
     }
   }`;
-  const result = await callLocalGraphqlApi(query, '', { input });
+  const result = await callLocalGraphqlApi(query, {}, { input });
   return get(result, 'data.updateMentorAvailabilitySlot');
 };
 
@@ -106,7 +106,7 @@ const getPaySlabDetails = async () => {
     id
   }
 }`;
-  const paySlab = await callLocalGraphqlApi(query);
+  const paySlab = await callLocalGraphqlApi(query, {});
   return get(paySlab, 'data.mentorSupplyPaySlabs');
 };
 
@@ -137,7 +137,7 @@ export const removeFromMentorAvailabilitySlot = async (mentorAvailabilitySlotId,
     }
   }` : ''}
   }`;
-  await callLocalGraphqlApi(query);
+  await callLocalGraphqlApi(query, {});
 };
 
 const addUpdateMentorAvailabilitySlots = async ({

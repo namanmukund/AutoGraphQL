@@ -34,13 +34,13 @@ mutation {
 `;
 
 const generateMentorChild = async (mentorId, mentorName) => {
-  const mentorProfilesRes = await callLocalGraphqlApi(fetchMentorProfile(mentorId));
+  const mentorProfilesRes = await callLocalGraphqlApi(fetchMentorProfile(mentorId), {});
   const mentorProfiles = get(mentorProfilesRes, 'data.mentorProfiles');
   const mentorProfileExists = get(mentorProfiles[0], 'id');
 
   let mentorConnectId = mentorProfileExists;
   if (!mentorProfileExists) {
-    const res = await callLocalGraphqlApi(addMentorProfileQuery(mentorId));
+    const res = await callLocalGraphqlApi(addMentorProfileQuery(mentorId), {});
     mentorConnectId = get(res.data, 'addMentorProfile.id');
   }
   if (mentorConnectId) {
@@ -54,7 +54,7 @@ const generateMentorChild = async (mentorId, mentorName) => {
     const childDataWithId = generateCuid(childData);
     const childUserData = await addUserData(newAuthentication, childDataWithId);
     const { id: childUserId } = childUserData;
-    await callLocalGraphqlApi(addStudentProfileQuery(childUserId, mentorConnectId));
+    await callLocalGraphqlApi(addStudentProfileQuery(childUserId, mentorConnectId), {});
     return {
       childUserId,
       mentorConnectId,

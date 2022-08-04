@@ -155,7 +155,7 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
     userLearningObjectiveId,
     isChatBookmarked,
     chatStatus,
-  ));
+  ), context);
   return true;
 };
 

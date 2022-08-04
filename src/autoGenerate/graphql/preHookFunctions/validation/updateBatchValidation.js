@@ -9,7 +9,7 @@ import batchQuery from '../../graphqlQueries/batchQuery';
 /* eslint-disable no-unused-vars */
 const updateBatchValidation = async (params, mutationName, context) => {
   const { id: batchId } = params;
-  const batchData = await callLocalGraphqlApi(batchQuery(batchId));
+  const batchData = await callLocalGraphqlApi(batchQuery(batchId), context);
   const batchFetched = get(batchData, 'data.batch');
   if (batchFetched && !batchFetched) {
     throw new DatabaseRecordNotFoundError();

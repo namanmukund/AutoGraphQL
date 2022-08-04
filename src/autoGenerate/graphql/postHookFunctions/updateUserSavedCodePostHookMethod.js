@@ -3,7 +3,7 @@ import { userSavedCodeStatus } from '../../../../constants';
 import sendSavedCodeSubmittedMailIfRequestedByMentee from './utils/sendSavedCodeSubmittedMailIfRequestedByMentee';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
-const addUserApprovedCodeQuery = async (input, userConnectId, userSavedCodeConnectId) => {
+const addUserApprovedCodeQuery = async (input, userConnectId, userSavedCodeConnectId, context) => {
   const query = `
     mutation($input:UserApprovedCodeInput!){
       addUserApprovedCode(
@@ -17,11 +17,11 @@ const addUserApprovedCodeQuery = async (input, userConnectId, userSavedCodeConne
   const variables = {
     input,
   };
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.addUserApprovedCode');
 };
 
-const userQuery = async (userId) => {
+const userQuery = async (userId, context) => {
   const query = `
       query{
         user(id:"${userId}"){
@@ -34,7 +34,7 @@ const userQuery = async (userId) => {
           }
         }
       }`;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.user');
 };
 
@@ -54,7 +54,7 @@ const updateUserSavedCodePostHookMethod = async (input, params, mutationName, co
         user: { typeId: userConnectId }, code, fileName, description,
       } = input;
 
-      const userData = await userQuery(userConnectId);
+      const userData = await userQuery(userConnectId, context);
       const doc = {
         studentName: get(userData, 'name') || '',
         studentGrade: get(userData, 'studentProfile.grade'),
@@ -64,7 +64,7 @@ const updateUserSavedCodePostHookMethod = async (input, params, mutationName, co
         approvedDescription: description || '',
 
       };
-      const userApprovedData = await addUserApprovedCodeQuery(doc, userConnectId, userSavedCodeConnectId);
+      const userApprovedData = await addUserApprovedCodeQuery(doc, userConnectId, userSavedCodeConnectId, context);
       if (userApprovedData && userApprovedData.id) {
         Object.assign(input, {
           userApprovedCode: {

@@ -143,7 +143,7 @@ const addUserActivityComicStripDumpPostHookMethod = async (input, mutationName, 
     userLearningObjectiveId,
     isComicStripBookmarked,
     comicStripStatus,
-  ));
+  ), context);
   return true;
 };
 

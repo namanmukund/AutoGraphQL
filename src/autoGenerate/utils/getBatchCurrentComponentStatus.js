@@ -49,8 +49,9 @@ const batchCurrentComponentStatusQuery = (
 // query to get current batch component status
 const getBatchCurrentComponentStatus = (
   userId,
+  context,
 ) => callLocalGraphqlApi(batchCurrentComponentStatusQuery(
   userId,
-));
+), context);
 
 export default getBatchCurrentComponentStatus;

@@ -33,7 +33,7 @@ import addToSchedule from '../../../../utils/scheduleJobs/addToSchedule';
 //   return get(res, 'data.updateTask.id');
 // };
 
-const updateUser = async (id, input) => {
+const updateUser = async (id, input, context) => {
   const query = `
 mutation($input: UserUpdate!){
   updateUser(
@@ -47,7 +47,7 @@ mutation($input: UserUpdate!){
   const variables = {
     input,
   };
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.updateUser.id');
 };
 
@@ -102,14 +102,14 @@ const updateTaskPostHookMethod = async (input, params, mutationName, context) =>
   } = input;
   console.log('leadStatus', leadStatus);
   console.log('bookingStatus', bookingStatus);
-  const menteeSession = await callLocalGraphqlApi(menteeSessionQuery(get(input, 'menteeSession.typeId')));
+  const menteeSession = await callLocalGraphqlApi(menteeSessionQuery(get(input, 'menteeSession.typeId')), context);
   console.log('menteeSession', menteeSession);
-  const mentorMenteeSession = await callLocalGraphqlApi(mmsQuery(get(input, 'mentorMenteeSession.typeId')));
+  const mentorMenteeSession = await callLocalGraphqlApi(mmsQuery(get(input, 'mentorMenteeSession.typeId')), context);
   console.log('mentorMenteeSession', mentorMenteeSession);
   const mentorUserId = get(mentorMenteeSession, 'data.mentorMenteeSession.mentorSession.user.id', '');
   console.log('mentorUserId', mentorUserId);
   const userId = get(menteeSession, 'data.menteeSession.user.id');
-  const userInfo = await getMenteeInfo(userId);
+  const userInfo = await getMenteeInfo(userId, context);
   // const topicInfo = await getTopicInfo(get(params, 'topicConnectId'));
   // const courseInfo = await getCourseInfo(get(params, 'courseConnectId'));
   const slotTimeStringArray = getSelectedSlotsTime(get(menteeSession, 'data.menteeSession', []));
@@ -144,7 +144,7 @@ const updateTaskPostHookMethod = async (input, params, mutationName, context) =>
   // console.log('updateTaskInput', updateTaskInput);
   console.log('updateMenteeInput', updateMenteeInput);
   // await updateTask(taskId, updateTaskInput);
-  await updateUser(userId, updateMenteeInput);
+  await updateUser(userId, updateMenteeInput, context);
 };
 
 export default updateTaskPostHookMethod;

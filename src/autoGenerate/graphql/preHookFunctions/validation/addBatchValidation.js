@@ -39,11 +39,11 @@ query{
 `;
 
 /* eslint-disable no-unused-vars */
-const addBatchValidation = async (params) => {
+const addBatchValidation = async (params, _mutationOrQueryName, context) => {
   const {
     allottedMentorConnectId, courseConnectId, coursePackageConnectId, input = {},
   } = params;
-  const batchData = await callLocalGraphqlApi(batchQuery(allottedMentorConnectId, courseConnectId, coursePackageConnectId));
+  const batchData = await callLocalGraphqlApi(batchQuery(allottedMentorConnectId, courseConnectId, coursePackageConnectId), context);
   const batchFetched = get(batchData, 'data.batches', []);
   const batchWithSameCode = batchFetched.find((batch) => get(batch, 'code') === get(input, 'code'));
   if (batchWithSameCode && get(input, 'documentType') !== 'classroom') {

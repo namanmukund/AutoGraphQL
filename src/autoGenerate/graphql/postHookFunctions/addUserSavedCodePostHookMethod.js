@@ -3,7 +3,7 @@ import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import sendSavedCodeSubmittedMailIfRequestedByMentee from './utils/sendSavedCodeSubmittedMailIfRequestedByMentee';
 
-const userQuery = async (id) => {
+const userQuery = async (id, context) => {
   const query = `
 query{
     user(id:"${id}"){
@@ -19,13 +19,13 @@ query{
         }
     }
 }`;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.user');
 };
 
-const addUserSavedCodePostHookMethod = async (input, params) => {
+const addUserSavedCodePostHookMethod = async (input, params, _mutationName, context) => {
   if (get(params, 'input.hasRequestedByMentee')) {
-    const userData = await userQuery(get(input, 'user.typeId'));
+    const userData = await userQuery(get(input, 'user.typeId'), context);
     if (!get(userData, 'id')) {
       throw new DatabaseRecordNotFoundError();
     }

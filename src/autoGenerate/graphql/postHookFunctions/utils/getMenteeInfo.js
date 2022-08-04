@@ -39,8 +39,8 @@ const menteeInfoQuery = (userId) => `
   }
 `;
 
-const getMenteeInfo = async (userId) => {
-  const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId));
+const getMenteeInfo = async (userId, context) => {
+  const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId), context);
   return userInfo;
 };
 

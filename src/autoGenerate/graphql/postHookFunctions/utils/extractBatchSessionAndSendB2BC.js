@@ -116,7 +116,7 @@ const getRating = (pythonCourseRating1, pythonCourseRating2, pythonCourseRating3
 };
 
 const extractBatchSessionAndSendB2BC = async (batchSessionId, studentsId, isBookedByMentee, shouldSendMentorComms = true) => {
-  const batchSessionRes = await callLocalGraphqlApi(BATCH_SESSION(batchSessionId));
+  const batchSessionRes = await callLocalGraphqlApi(BATCH_SESSION(batchSessionId), {});
   // Don't proceed if it is not the first topic
   if (get(batchSessionRes, 'data.batchSession.topic.order') !== 1) return;
   const mentorUser = get(batchSessionRes, 'data.batchSession.batch.allottedMentor', {});

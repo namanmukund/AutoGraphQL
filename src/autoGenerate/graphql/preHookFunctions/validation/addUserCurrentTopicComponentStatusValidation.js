@@ -73,6 +73,7 @@ const addUserCurrentTopicComponentStatusValidation = async (params, context) => 
 
   const userCurrentTopicComponentStatusData = await callLocalGraphqlApi(
     userCurrentTopicComponentStatusQuery(userId, courseId),
+    context,
   );
   // Fetching userCurrentTopicComponentStatus to check if it already exists or not
   const userCurrentTopicComponentStatusesResult = get(
@@ -93,6 +94,7 @@ const addUserCurrentTopicComponentStatusValidation = async (params, context) => 
     */
     const learningObjectiveData = await callLocalGraphqlApi(
       learningObjectiveQuery(topicId, learningObjectiveId),
+      context,
     );
     const learningObjectiveCount = get(
       learningObjectiveData,

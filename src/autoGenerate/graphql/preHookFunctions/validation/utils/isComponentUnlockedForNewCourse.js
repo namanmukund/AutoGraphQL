@@ -157,6 +157,7 @@ const isComponentUnlockedForNewCourse = async (
     currentTopicQuery,
     currentLearningObjectiveQuery,
     'enrollmentType',
+    context,
   );
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
   // Bypassing component validation incase if schoolTeacher is accessing the content.
@@ -228,6 +229,7 @@ const isComponentUnlockedForNewCourse = async (
   const { id: currentTopicId } = currentTopic;
   const batchCurrentComponentStatusRes = await getBatchCurrentComponentStatus(
     userId,
+    context,
   );
   const batchCurrentComponentInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.currentComponent');
   const schoolInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.school');
@@ -304,7 +306,7 @@ const isComponentUnlockedForNewCourse = async (
   // no mentor token, he should not be able to hit API
   // this will be checked for normal flow and not for batch
   if (!batchCurrentComponentInfo) {
-    const mentorMenteeSessionQueryRes = await getMentorMenteeSessionForValidation(userId, topicId);
+    const mentorMenteeSessionQueryRes = await getMentorMenteeSessionForValidation(userId, topicId, context);
     const mentorMenteeSessionStatus = get(mentorMenteeSessionQueryRes, 'data.mentorMenteeSessions[0].sessionStatus', '');
 
     validateMentorMenteePermissionForComponentForNewCourse(

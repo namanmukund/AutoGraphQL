@@ -6,7 +6,7 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 import getSelectedSlotsStringArray from './getSelectedSlotsStringArray';
 
-const closeMentorMenteeAndBatchSessionsForInactiveMentor = async (input) => {
+const closeMentorMenteeAndBatchSessionsForInactiveMentor = async (input, context) => {
   const query = `{
     mentorMenteeSessions(
       filter: {
@@ -53,18 +53,18 @@ const closeMentorMenteeAndBatchSessionsForInactiveMentor = async (input) => {
   }
       `;
 
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
 
   const mentorMenteeSessions = get(res, 'data.mentorMenteeSessions', []);
   const batchSessions = get(res, 'data.batchSessions', []);
 
   for (let i = 0; i < mentorMenteeSessions.length; i += 1) {
-    await callLocalGraphqlApi(deleteMentorMenteeSessionQuery(get(mentorMenteeSessions[i], 'id')));
+    await callLocalGraphqlApi(deleteMentorMenteeSessionQuery(get(mentorMenteeSessions[i], 'id')), context);
     log(`deleted mentorMenteeSession id ${get(mentorMenteeSessions[i], 'id')}`);
   }
 
   for (let i = 0; i < batchSessions.length; i += 1) {
-    await callLocalGraphqlApi(deleteBatchSessionQuery(get(batchSessions[i], 'id')));
+    await callLocalGraphqlApi(deleteBatchSessionQuery(get(batchSessions[i], 'id')), context);
     log(`deleted batchSession id ${get(batchSessions[i], 'id')}`);
   }
 
@@ -98,12 +98,12 @@ const closeMentorMenteeAndBatchSessionsForInactiveMentor = async (input) => {
   }
       `;
 
-  const mentorSessionsData = await callLocalGraphqlApi(mentorSessionQuery);
+  const mentorSessionsData = await callLocalGraphqlApi(mentorSessionQuery, context);
   const mentorSessions = get(mentorSessionsData, 'data.mentorSessions', []);
   for (let i = 0; i < mentorSessions.length; i += 1) {
     const listOfTrueSlots = getSelectedSlotsStringArray(mentorSessions[i]);
     if (listOfTrueSlots.length) {
-      await callLocalGraphqlApi(deleteMentorSessionQuery(get(mentorSessions[i], 'id')));
+      await callLocalGraphqlApi(deleteMentorSessionQuery(get(mentorSessions[i], 'id')), context);
       log(`deleted session id ${get(mentorSessions[i], 'id')}`);
     }
   }

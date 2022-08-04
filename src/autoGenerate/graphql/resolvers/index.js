@@ -216,7 +216,7 @@ Object.keys(parsedASTMap).forEach((type) => {
             const { pubsub } = context;
             return pubsub.asyncIterator([modelSingular]);
           },
-          async (payload, variables) => {
+          async (payload, variables, context) => {
             const { typeId } = payload;
             const { filter: subscriptionFilter } = variables;
             // Return result only if updated payload exists for the the supplied filter.
@@ -226,7 +226,7 @@ Object.keys(parsedASTMap).forEach((type) => {
                   id
                 }
               }`;
-              const result = await callLocalGraphqlApi(query, null, {
+              const result = await callLocalGraphqlApi(query, context, {
                 subscriptionFilter: {
                   and: [
                     subscriptionFilter,
@@ -279,7 +279,7 @@ Object.keys(parsedASTMap).forEach((type) => {
                           ${stringFields}
                         }
                       }`;
-            const result = await callLocalGraphqlApi(query);
+            const result = await callLocalGraphqlApi(query, context);
             const finalResultWithRelationalFields = get(result, `data.${modelSingular}`);
             // return subscriptionPayload
             return {

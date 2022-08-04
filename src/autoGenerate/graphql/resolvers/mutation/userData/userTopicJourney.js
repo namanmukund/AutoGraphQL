@@ -295,7 +295,7 @@ const userTopicJourneyMutationResolver = async (
     '',
   );
   // Bypassing component validation incase if schoolTeacher is accessing the content.
-  let checkForMentorChild = await isUserIsMentorChild(userId, true);
+  let checkForMentorChild = await isUserIsMentorChild(userId, true, context);
   checkForMentorChild = typeof checkForMentorChild === 'boolean' && checkForMentorChild;
   const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
   // calling method to validate user current topic component status

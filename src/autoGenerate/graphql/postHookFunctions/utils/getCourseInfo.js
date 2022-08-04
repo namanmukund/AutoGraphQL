@@ -11,7 +11,7 @@ const courseInfoQuery = (courseId) => `
 `;
 
 const getCourseInfo = async (courseId) => {
-  const topicInfo = await callLocalGraphqlApi(courseInfoQuery(courseId));
+  const topicInfo = await callLocalGraphqlApi(courseInfoQuery(courseId), {});
   return topicInfo;
 };
 

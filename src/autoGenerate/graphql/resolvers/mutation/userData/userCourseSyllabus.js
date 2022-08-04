@@ -194,7 +194,7 @@ const userCourseSyllabusMutationResolver = async (
         },
       });
     }
-    const courseResult = await callLocalGraphqlApi(getCourseQuery());
+    const courseResult = await callLocalGraphqlApi(getCourseQuery(), context);
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
       throw new DatabaseRecordNotFoundError({

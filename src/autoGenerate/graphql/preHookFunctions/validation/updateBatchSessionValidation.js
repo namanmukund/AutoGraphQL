@@ -51,14 +51,14 @@ const getBatchSession = (batchId,
   }
 `;
 
-const getCurrentUser = async (userId) => {
+const getCurrentUser = async (userId, context) => {
   const query = `{
   studentProfiles(filter: { user_some: { id: "${userId}" } }) {
     id
   }
 }
 `;
-  const result = await callLocalGraphqlApi(query);
+  const result = await callLocalGraphqlApi(query, context);
   return get(result, 'data.studentProfiles[0].id');
 };
 
@@ -66,7 +66,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   const {
     id: batchSessionId, topicConnectId, mentorSessionConnectId, input: { sessionStatus: sessionStatusInInput, bookingDate: bookingDateFromInput, ...inputSlot },
   } = params;
-  const batchSessionData = await callLocalGraphqlApi(batchSessionQuery(batchSessionId));
+  const batchSessionData = await callLocalGraphqlApi(batchSessionQuery(batchSessionId), context);
   const batchSession = get(batchSessionData, 'data.batchSession');
   if (!batchSession || !batchSession.id) {
     throw new DatabaseRecordNotFoundError();
@@ -81,7 +81,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   const userRoleFromContext = currentUser && currentUser.role;
   if (get(params, 'input.attendance.updateWhere.studentReferenceId')
     && get(currentApp, 'name') === TWA) {
-    const studentProfileId = await getCurrentUser(get(currentUser, 'id'));
+    const studentProfileId = await getCurrentUser(get(currentUser, 'id'), context);
     if (studentProfileId !== get(params, 'input.attendance.updateWhere.studentReferenceId')) {
       throw new UnauthorizedOperationError();
     }
@@ -108,7 +108,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
   const slotTimeArray = getSelectedSlotsTime(slots);
 
   // check if mentor already has another session in same slot
-  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId || get(mentorSession, 'id', '')));
+  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId || get(mentorSession, 'id', '')), context);
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
   if (mentorUserId && bookingDateFromInput) {
     const finalBookingDate = bookingDateFromInput || bookingDate;
@@ -117,6 +117,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
         mentorUserId,
         finalBookingDate,
       ),
+      context,
     );
     let tempObj = { ...inputSlot };
     if (inputSlotTimeArray.length === 0) {
@@ -142,7 +143,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
         }
       }
       const { filteredSlotsStringForFilterQuery } = extractSlotsFromInput(inputSlot);
-      const batchSessionRes = await callLocalGraphqlApi(getBatchSession(batchId, bookingDateFromInput, filteredSlotsStringForFilterQuery));
+      const batchSessionRes = await callLocalGraphqlApi(getBatchSession(batchId, bookingDateFromInput, filteredSlotsStringForFilterQuery), context);
       const existingBatchSessions = get(batchSessionRes, 'data.batchSessions', []);
       if (existingBatchSessions.length) {
         throw new SimilarDocumentAlreadyExistError();

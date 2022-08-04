@@ -9,7 +9,7 @@ import { UserWithSimilarEmailAlreadyExist, UserWithSimilarNumberAlreadyExist } f
 
 const allowedRoles = [ADMIN, UMS_ADMIN];
 
-const fetchUser = async (id) => {
+const fetchUser = async (id, context) => {
   const query = `
     {
       user(id: "${id}") {
@@ -29,11 +29,11 @@ const fetchUser = async (id) => {
       }
     }
   `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.user');
 };
 
-const fetchUserDetail = async (emailOrPhoneNumber = '', userId, shouldCheckPhone = false) => {
+const fetchUserDetail = async (emailOrPhoneNumber = '', userId, shouldCheckPhone = false, context) => {
   const query = `{
   users(
     filter: {
@@ -47,7 +47,7 @@ const fetchUserDetail = async (emailOrPhoneNumber = '', userId, shouldCheckPhone
   }
 }
 `;
-  const user = await callLocalGraphqlApi(query);
+  const user = await callLocalGraphqlApi(query, context);
   return get(user, 'data.users', []).length;
 };
 
@@ -74,17 +74,17 @@ const updateUserValidation = async (params, context, mutationOrQueryName) => {
   const {
     currentUser,
   } = userInfo;
-  const user = await fetchUser(userId);
+  const user = await fetchUser(userId, context);
   // if the user vertical is unassigned, try to change it
   // check if vertical can be determined, first from source, then campaign type, and then lastly batch type
   if (email) {
-    const isUserExistWithEmail = await fetchUserDetail(email, userId);
+    const isUserExistWithEmail = await fetchUserDetail(email, userId, false, context);
     if (isUserExistWithEmail) {
       throw new UserWithSimilarEmailAlreadyExist();
     }
   }
   if (get(phone, 'number')) {
-    const isUserExistWithNumber = await fetchUserDetail(get(phone, 'number'), userId, true);
+    const isUserExistWithNumber = await fetchUserDetail(get(phone, 'number'), userId, true, context);
     if (isUserExistWithNumber) {
       throw new UserWithSimilarNumberAlreadyExist();
     }

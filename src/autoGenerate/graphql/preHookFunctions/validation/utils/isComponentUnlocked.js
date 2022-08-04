@@ -207,6 +207,7 @@ const isComponentUnlocked = async (
   const { order: currentTopicOrder } = currentTopic;
   const batchCurrentComponentStatusRes = await getBatchCurrentComponentStatus(
     userId,
+    context,
   );
   const batchCurrentComponentInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.currentComponent');
   const schoolInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.school');
@@ -272,7 +273,7 @@ const isComponentUnlocked = async (
   // no mentor token, he should not be able to hit API
   // this will be checked for normal flow and not for batch
   if (!batchCurrentComponentInfo) {
-    const mentorMenteeSessionQueryRes = await getMentorMenteeSessionForValidation(userId, topicId);
+    const mentorMenteeSessionQueryRes = await getMentorMenteeSessionForValidation(userId, topicId, context);
     const mentorMenteeSessionStatus = get(mentorMenteeSessionQueryRes, 'data.mentorMenteeSessions[0].sessionStatus', '');
 
     validateMentorMenteePermissionForComponent(

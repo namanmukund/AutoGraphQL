@@ -206,7 +206,7 @@ const defaultMentorMenteeSessionObject = {
 //     },
 //   },
 // ];
-const getMentorMenteeSessions = async (userId) => {
+const getMentorMenteeSessions = async (userId, context) => {
   const query = `
     {
       mentorMenteeSessions(filter: {
@@ -255,7 +255,7 @@ const getMentorMenteeSessions = async (userId) => {
       }
     }
   `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.mentorMenteeSessions', []);
 };
 
@@ -1204,7 +1204,7 @@ const menteeCourseHomeworkMutationResolver = async (
     batchCurrentComponentInfo = get(userBatchDetails, '0.batch.currentComponent');
   }
 
-  const mentorMenteeSessions = await getMentorMenteeSessions(userId);
+  const mentorMenteeSessions = await getMentorMenteeSessions(userId, context);
   if (batchCurrentComponentInfo || coursePackage) {
     currentTopicOrder = get(batchCurrentComponentInfo, 'currentTopic.order');
     currentTopic = get(batchCurrentComponentInfo, 'currentTopic');

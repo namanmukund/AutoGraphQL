@@ -615,7 +615,7 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     let nextComponentData = {};
     if (!courseId || courseId === OLD_COURSE_ID) {
       /* eslint no-await-in-loop:0 */
-      const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId));
+      const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId), context);
       const nextTopicId = get(userQuizQueryRes, 'data.userQuizs[0].nextComponent.topic.id');
 
       const { video } = topicTypes;

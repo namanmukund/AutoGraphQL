@@ -23,13 +23,14 @@ const fetchUserQuery = (mentorId) => `
 const generateMentorChildMutationResolver = async (
   root,
   params,
+  context,
 ) => {
   const { mentorId } = params;
 
   if (!mentorId) {
     throw new MentorIdIsMandatoryError();
   }
-  const usersRes = await callLocalGraphqlApi(fetchUserQuery(mentorId));
+  const usersRes = await callLocalGraphqlApi(fetchUserQuery(mentorId), context);
   const usersDoc = get(usersRes, 'data.users');
   const userExists = get(usersDoc[0], 'id');
 

@@ -77,7 +77,7 @@ const extractMentorMenteeSessionAndSendMessage = async (
   };
   menteeObj.topicTitle = get(topic, 'data.topic.title');
 
-  const mentorInfo = await callLocalGraphqlApi(mentorInfoQuery(mentorSessionId));
+  const mentorInfo = await callLocalGraphqlApi(mentorInfoQuery(mentorSessionId), {});
   const mentorSession = get(mentorInfo, 'mentorSession', {});
   const mentorProfile = get(mentorSession, 'mentorProfile', {});
   const mentorObj = {

@@ -19,7 +19,7 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   const { bookingDate, ...slots } = previousDocument;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
   const isTrial = await isTrialSession(input.topic.typeId);
-  const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
+  const userInfo = await getMenteeInfo(get(input, 'user.typeId'), context);
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
   const clientId = get(userInfo, 'data.user.id', '');
   const isItMentorChild = await isMentorChild(clientId);

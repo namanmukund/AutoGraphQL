@@ -69,10 +69,10 @@ const shiftBatchSessionsMutationResolver = async (
   const { input: { date: inputDate, batchId, ...slots } } = params;
   const inputSlotTimeArray = getSelectedSlotsTime(slots);
   try {
-    const batchSessions = await fetchAllottedBatchSessions(batchId);
+    const batchSessions = await fetchAllottedBatchSessions(batchId, context);
     // console.log('batchSessions', batchSessions)
     // fetch courseId here
-    const batchesRes = await callLocalGraphqlApi(fetchBatch(batchId));
+    const batchesRes = await callLocalGraphqlApi(fetchBatch(batchId), context);
     const batches = get(batchesRes, 'data.batches', []);
     const courseId = get(batches, '[0].course.id', '');
     let firstTopicOrderToBeDeleted = null;
@@ -99,7 +99,7 @@ const shiftBatchSessionsMutationResolver = async (
         }
         // add variable in context to bypass slots in past error
         context.previousDocument = 'shiftBatch';
-        await callLocalGraphqlApi(deleteBatchSession(sessionId, context));
+        await callLocalGraphqlApi(deleteBatchSession(sessionId, context), context);
         log(`Deleted batch session with sessionId ${sessionId} and order ${get(batchSession, 'topic.order')}`);
       } else {
         // if firstTopicOrderToBeDeleted = null, we can assume we haven't deleted any sessions
@@ -109,12 +109,12 @@ const shiftBatchSessionsMutationResolver = async (
         }
         // fetch topics (if not already feched), starting from firstTopicOrderToBeDeleted
         if (!topicsRemaining) {
-          const topicsRemainingRes = await callLocalGraphqlApi(fetchTopics(firstTopicOrderToBeDeleted, courseId));
+          const topicsRemainingRes = await callLocalGraphqlApi(fetchTopics(firstTopicOrderToBeDeleted, courseId), context);
           topicsRemaining = get(topicsRemainingRes, 'data.topics', []);
           log('Fetched Topics');
         }
         const topicIdToUpdate = get(topicsRemaining, `[${topicsUpdatedCounter}].id`);
-        await callLocalGraphqlApi(updateBatchSession(sessionId, topicIdToUpdate));
+        await callLocalGraphqlApi(updateBatchSession(sessionId, topicIdToUpdate), context);
         log(`Updated session ${sessionId} with topicConnectId ${topicIdToUpdate}`);
         topicsUpdatedCounter += 1;
       }

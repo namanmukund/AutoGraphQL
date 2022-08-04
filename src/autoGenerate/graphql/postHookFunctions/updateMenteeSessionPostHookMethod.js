@@ -42,6 +42,7 @@ const fetchTasks = (menteeSessionId) => `
 const updateTaskMutation = async (
   taskId,
   variables,
+  context,
 ) => {
   const query = `
 mutation($input: TaskUpdate!){
@@ -53,7 +54,7 @@ mutation($input: TaskUpdate!){
   }
 }
 `;
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.updateTask.id');
 };
 
@@ -80,11 +81,11 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
   // console.log('previousDocument', previousDocument);
   const isTrial = await isTrialSession(input.topic.typeId);
   const { appName } = context;
-  const userInfo = await getMenteeInfo(get(input, 'user.typeId'));
+  const userInfo = await getMenteeInfo(get(input, 'user.typeId'), context);
   const isBookedByMentee = get(context, 'userIdFromContext') === get(input, 'user.typeId');
   const isItMentorChild = await isMentorChild(get(userInfo, 'data.user.id', ''));
   const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
-  const task = get(await callLocalGraphqlApi(fetchTasks(menteeSessionId)), 'data.tasks[0]');
+  const task = get(await callLocalGraphqlApi(fetchTasks(menteeSessionId), context), 'data.tasks[0]');
   // if call is from backend we will not update the availability slots, same for paid sessions
   if (typeof isTrial === 'boolean' && isTrial && !byPassMenteeValidationApps.includes(appName)) {
     const courseInfo = await getCourseInfo(get(input, 'course.typeId'));
@@ -127,7 +128,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
       if (hoursLeftForSession <= 2) {
         variables.input.isHighPriority = true;
       }
-      await updateTaskMutation(get(task, 'id'), variables);
+      await updateTaskMutation(get(task, 'id'), variables, context);
     }
     if (bookingDate && bookingDate.getTime() !== prevBookingDate.getTime()) {
       // ---------------------commenting out the previous availableSlots flow--------------

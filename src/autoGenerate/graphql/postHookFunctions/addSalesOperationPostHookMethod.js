@@ -31,6 +31,7 @@ const addSalesOperationPostHookMethod = async (input, params, mutationName, cont
       addSalesOperationActivityQuery(
         loggedByConnectId, input.id, 'leadStatus', leadStatus,
       ),
+      context,
     );
     // update leadStatus in MentorMenteeSession
     const firstMentorMenteeSessionId = get(input, 'firstMentorMenteeSession.typeId');
@@ -43,6 +44,7 @@ const addSalesOperationPostHookMethod = async (input, params, mutationName, cont
       addSalesOperationActivityQuery(
         loggedByConnectId, input.id, 'nextSteps', nextSteps,
       ),
+      context,
     );
   }
   if (nextCallOn) {
@@ -50,10 +52,11 @@ const addSalesOperationPostHookMethod = async (input, params, mutationName, cont
       addSalesOperationActivityQuery(
         loggedByConnectId, input.id, 'nextCallOn', nextCallOn,
       ),
+      context,
     );
   }
-  const userInfo = await getMenteeInfo(get(input, 'client.typeId'));
-  addUserCurrentTopicComponentStatusOperation(get(input, 'course.typeId'), get(input, 'client.typeId'));
+  const userInfo = await getMenteeInfo(get(input, 'client.typeId'), context);
+  addUserCurrentTopicComponentStatusOperation(get(input, 'course.typeId'), get(input, 'client.typeId'), context);
   updateSalesOperationLeadsquared(input.id, userInfo);
 };
 

@@ -66,7 +66,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
     blockBasedPracticeId,
   } = getInfoFromParams(params, 'blockBasedPractice');
   // In case there is no topic id, empty data will be sent
-  if (!topicId) {
+  if (!topicId || !blockBasedPracticeId) {
     return resultArray;
   }
 
@@ -78,7 +78,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
     topicId,
     courseId,
     blockBasedPracticeId,
-  ));
+  ), context);
   if (result) {
     /*
       parsing data 'addUserBlockBasedPractice' so that the logic implemented ahead can read data is

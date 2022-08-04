@@ -8,7 +8,7 @@ import getMentorSessions from '../../../utils/getMentorSessions';
 import { checkIfSlotCanBeOpenedValidation, getUserIdandAppNameAfterValidation } from './utils';
 import { TMS } from '../../../../../constants';
 
-const getMentorMenteeSessionData = async (id) => {
+const getMentorMenteeSessionData = async (id, context) => {
   const query = `
     query{
       mentorMenteeSession(id:"${id}"){
@@ -41,7 +41,7 @@ const getMentorMenteeSessionData = async (id) => {
       }
     }
   `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.mentorMenteeSession');
 };
 
@@ -61,11 +61,11 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
     id, menteeSessionConnectId, mentorSessionConnectId, input: { sessionStatus, bookingDate, isPostSalesAudit: isPostSalesAuditFromInput },
   } = newParams;
 
-  const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id);
+  const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id, context);
 
   if (mentorSessionConnectId) {
     // check if mentor already has another session in same slot
-    const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+    const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId), context);
     const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
     if (mentorUserId && bookingDate) {
       const getMentorSessionsRes = await callLocalGraphqlApi(
@@ -73,6 +73,7 @@ const updateMentorMenteeSessionValidation = async (newParams, mutationOrQueryNam
           mentorUserId,
           bookingDate,
         ),
+        context,
       );
       const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
       const menteeSessionSlots = { input: { bookingDate, ...get(mentorMenteeSessionDoc, 'menteeSession', {}) } };

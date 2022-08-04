@@ -121,6 +121,7 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
       menteeSessionConnectId,
       mentorSessionConnectId,
     ),
+    context,
   );
 
   const mentorMenteeSessions = get(mentorMenteeSessionsData, 'data.mentorMenteeSessions');
@@ -130,6 +131,7 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
   // validate date and time of starting the session
   const menteeSessionData = await callLocalGraphqlApi(
     menteeSessionQuery(menteeSessionConnectId),
+    context,
   );
   const menteeSession = get(menteeSessionData, 'data.menteeSession');
   if (!mentorMenteeSessions || !menteeSession.id) {
@@ -143,7 +145,7 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
 
   // check if mentor already has another session in same slot
   if (mentorSessionConnectId) {
-    const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+    const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId), context);
     const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
     const { bookingDate } = menteeSession;
     const isMentorActive = get(fetchMentorRes,'data.mentorSession.user.mentorProfile.isMentorActive')
@@ -156,6 +158,7 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
           mentorUserId,
           bookingDate,
         ),
+        context,
       );
       const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
       // constucting data in appropriate format
@@ -184,6 +187,7 @@ const addMentorMenteeSessionValidation = async (params, mutationOrQueryName, con
         mentorMenteeSessionsQuery(
           menteeSessionConnectId,
         ),
+        context,
       );
       if (get(mentorMenteeSessionsData, 'data.mentorMenteeSessions', []).length > 0) {
         throw new SimilarDocumentAlreadyExistError();

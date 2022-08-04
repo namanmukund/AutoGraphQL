@@ -6,7 +6,7 @@ import { log } from '../../../../../utils';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import arrayCombinations from './generateOtpMap';
 
-const getBatchSessions = async (batchId) => {
+const getBatchSessions = async (batchId, context) => {
   const query = `{
     batchSessions(
       filter: {
@@ -27,12 +27,12 @@ const getBatchSessions = async (batchId) => {
       }
     }
   }`;
-  const batchSessions = await callLocalGraphqlApi(query);
+  const batchSessions = await callLocalGraphqlApi(query, context);
   return get(batchSessions, 'data.batchSessions', []);
 };
 
 const addSchoolSessionOtp = async ({
-  otp, batchSessionId,
+  otp, batchSessionId, context,
 }) => {
   const addQuery = `mutation {
     addSchoolSessionOtp(
@@ -43,12 +43,12 @@ const addSchoolSessionOtp = async ({
     }
     }
     `;
-  const result = await callLocalGraphqlApi(addQuery);
+  const result = await callLocalGraphqlApi(addQuery, context);
   return get(result, 'data.addSchoolSessionOtp', null);
 };
 
-const addSchoolSessionOtpInBatchSession = async (batchId) => {
-  const batchSessions = await getBatchSessions(batchId);
+const addSchoolSessionOtpInBatchSession = async (batchId, context = {}) => {
+  const batchSessions = await getBatchSessions(batchId, context);
   const finalOtpMap = await arrayCombinations([batchId]);
   for (const batchSession of batchSessions) {
     const isAlreadyCreated = get(batchSession, 'schoolSessionsOtp', []).length;
@@ -56,6 +56,7 @@ const addSchoolSessionOtpInBatchSession = async (batchId) => {
     if (!isAlreadyCreated && finalOtpMap[batchId] && batchType === 'b2b') {
       addSchoolSessionOtp({
         otp: finalOtpMap[batchId], batchSessionId: get(batchSession, 'id'),
+        context,
       });
       log(`Creating schoolSessionOtp for batch ${batchId} with OTP: ${finalOtpMap[batchId]} for batchSession: ${get(batchSession, 'id')} from addStudentProfile postHook method`);
     }

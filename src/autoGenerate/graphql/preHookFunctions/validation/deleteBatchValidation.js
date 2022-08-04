@@ -6,7 +6,7 @@ import getBatchSessionForBatch from '../../graphqlQueries/getBatchSessionsForBat
 
 const deleteBatchValidation = async (params, mutationOrQueryName, context) => {
   const { id: batchId } = params;
-  const batchData = await callLocalGraphqlApi(batchQuery(batchId));
+  const batchData = await callLocalGraphqlApi(batchQuery(batchId), context);
   const batch = get(batchData, 'data.batch');
 
   if (!batch || !batch.id) {
@@ -17,7 +17,7 @@ const deleteBatchValidation = async (params, mutationOrQueryName, context) => {
   if (studentsMeta && studentsMeta.count !== 0) {
     throw new StudentsLinked();
   }
-  const batchSessions = await callLocalGraphqlApi(getBatchSessionForBatch(batchId));
+  const batchSessions = await callLocalGraphqlApi(getBatchSessionForBatch(batchId), context);
   context.batchSessions = get(batchSessions, 'data.batchSessions');
   return true;
 };

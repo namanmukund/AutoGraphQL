@@ -151,7 +151,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       //   throw new ConnectIdRequiredError({ data: { message: 'Chapter Id is required' } });
       // }
       // await isUniqueOrderField(params, mutationOrQueryName);
-      await addTopicValidation(params);
+      await addTopicValidation(params, mutationOrQueryName, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
@@ -320,7 +320,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'deleteTopic': {
-      await deleteTopicValidation(params);
+      await deleteTopicValidation(params, context);
       break;
     }
     case 'deleteLearningObjective': {
@@ -372,7 +372,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addLearningObjective': {
-      await addLearningObjectiveValidation(params);
+      await addLearningObjectiveValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'userTopicJourney': {

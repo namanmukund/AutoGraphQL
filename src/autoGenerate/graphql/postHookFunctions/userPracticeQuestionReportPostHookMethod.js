@@ -33,7 +33,7 @@ const userLearningObjectiveQuery = (userId, learningObjectiveId) => `
   To achieve this we are getting nextComponent from userLearningObjective and then
   will add that to PQ report
 */
-const userPracticeQuestionReportPostHookMethod = async (input, params) => {
+const userPracticeQuestionReportPostHookMethod = async (input, params, _mutationName, context) => {
   const {
     userId,
     learningObjectiveId,
@@ -41,7 +41,7 @@ const userPracticeQuestionReportPostHookMethod = async (input, params) => {
   } = getInfoFromParams(params, 'learningObjective');
   if (input.length && courseId === OLD_COURSE_ID) {
     // getting next topicId, learningObjectiveId and component from userLearningObjective
-    const userLearningObjectiveRes = await callLocalGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId));
+    const userLearningObjectiveRes = await callLocalGraphqlApi(userLearningObjectiveQuery(userId, learningObjectiveId), context);
     const nextTopicId = get(userLearningObjectiveRes, 'data.userLearningObjectives[0].nextComponent.topic.id');
     const nextLearningObjectiveId = get(userLearningObjectiveRes, 'data.userLearningObjectives[0].nextComponent.learningObjective.id');
     const nextComponent = get(userLearningObjectiveRes, 'data.userLearningObjectives[0].nextComponent.nextComponentType');

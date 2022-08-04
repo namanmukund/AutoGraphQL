@@ -47,7 +47,7 @@ const getEvent = async (eventId) => {
         }
     }
     `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, {});
   return get(res, 'data.event');
 };
 
@@ -67,10 +67,10 @@ const deleteJobsForCancelledEvents = async (eventId) => {
     }
   }
   `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, {});
   const scheduleJobs = get(res, 'data.scheduleJobs');
   scheduleJobs.forEach((job) => {
-    callLocalGraphqlApi(deleteJobQuery(get(job, 'id')));
+    callLocalGraphqlApi(deleteJobQuery(get(job, 'id')), {});
   });
 };
 const sendCommsForUpdatedEvents = async (eventId, eventUpdateReason, eventUpdateStatus, shouldSendComms = false) => {

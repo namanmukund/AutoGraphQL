@@ -6,7 +6,7 @@ import getSlotLabel from '../../../../utils/getSlotLabel';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import sendMailAndWhatsappMessageForSupplyRequest from '../../utils/sendMailAndWhatsappMessageForSupplyRequest';
 
-const getmentorAvailabilitySlot = async (id) => {
+const getmentorAvailabilitySlot = async (id, context) => {
   const query = `{
   mentorAvailabilitySlot(id: "${id}") {
     id
@@ -15,7 +15,7 @@ const getmentorAvailabilitySlot = async (id) => {
   }
 }
 `;
-  const result = await callLocalGraphqlApi(query);
+  const result = await callLocalGraphqlApi(query, context);
   return get(result, 'data.mentorAvailabilitySlot');
 };
 
@@ -28,7 +28,7 @@ const addMentorDemandSlotPostHookMethod = async (input, params, mutationName, co
   let slotsTime = '';
   if (slots.length > 0) {
     for (const slot of slots) {
-      const slotDetails = await getmentorAvailabilitySlot(get(slot, 'typeId'));
+      const slotDetails = await getmentorAvailabilitySlot(get(slot, 'typeId'), context);
       const time = get(slotDetails, 'slotName').split('slot')[1];
       const startTime = getSlotLabel(time).startTime;
       slotsTime += `${startTime} `;
