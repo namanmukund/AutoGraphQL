@@ -37,6 +37,7 @@ const BlockBasedProject = `
     embedViewHeight: Int @defaultValue(value: "100")
     answerFormat: BlockBasedPracticeAnswerType @defaultValue(value: "answerContent")
     answerFormatDescription: String @trim
+    answerFormatViewHeight: Int @defaultValue(value: "100")
   }
 `;
 
