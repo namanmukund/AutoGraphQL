@@ -26,6 +26,7 @@ import { log } from '../../../../utils';
 import getTopicInfo from './utils/getTopicInfo';
 import getCourseInfo from './utils/getCourseInfo';
 import sendDemoCompletionCertificate from './utils/sendDemoCompletionCertificate';
+import getUserActiveClassroom from '../../../../utils/getUserActiveClassroom';
 
 const { postSales, demoWow } = auditType;
 // import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
@@ -294,7 +295,8 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       await extractMentorMenteeSessionAndSendMessage(bookingDate, slotTimeStringArray, context.mentorSessionConnectId, userInfo, topicInfo, input.id, courseInfo);
     }
     const mentorSessionId = get(input, 'mentorSession.typeId');
-    const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    const classroom = await getUserActiveClassroom(context, { courseId, studentProfile: get(userInfo, 'data.user.studentProfile') }, get(userInfo, 'data.user.studentProfile.batch.id', ''));
+    const batchCode = get(classroom, 'code', '');
     // adding logs when menteeSession is changed or mentorSession is changed or status is changed
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMentorMenteeSession', batchCode, mentorSessionId, sessionStatus, input);
   }

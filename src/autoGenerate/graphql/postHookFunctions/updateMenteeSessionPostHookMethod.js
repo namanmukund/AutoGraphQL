@@ -25,6 +25,7 @@ import getSlotLabel from '../../../../utils/getSlotLabel';
 import { log } from '../../../../utils';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import isMentorChild from './utils/isMentorChild';
+import getUserActiveClassroom, { getActiveClassroomId } from '../../../../utils/getUserActiveClassroom';
 
 const fetchTasks = (menteeSessionId) => `
 {
@@ -200,7 +201,7 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     const slotsToBeIncreasedInUpdate = difference(slotTimeStringArray, prevSlotTimeStringArray);
     const prevMentorAvailabilitySlot = get(input, 'mentorAvailabilitySlot.typeId');
     const isNotSourceSchool = get(userInfo, 'data.user.source') !== userSourceOrigin.school;
-    const isBatchExist = get(userInfo, 'data.user.studentProfile.batch', false);
+    const isBatchExist = await getActiveClassroomId(context, { courseId: get(input, 'course.typeId') });
     if (isNotSourceSchool && !isBatchExist && slotsToBeIncreasedInUpdate.length > 0) {
       await mentorAvailabilitySlotOperation({
         slotTimeStringArray,
@@ -238,7 +239,8 @@ const updateMenteeSessionPostHookMethod = async (input, mutationName, context) =
     const courseId = get(input, 'course.typeId', '');
     const clientId = get(userInfo, 'data.user.id', '');
     const topicId = get(topicInfo, 'data.topic.id', '');
-    const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    const classroom = await getUserActiveClassroom(context, { courseId, studentProfile: get(userInfo, 'data.user.studentProfile') }, get(userInfo, 'data.user.studentProfile.batch.id', ''));
+    const batchCode = get(classroom, 'code', '');
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMenteeSession', batchCode, '', '', updateMentorMenteeSessionInput, get(context, 'isManualSession', false));
   }
 };

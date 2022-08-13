@@ -6,6 +6,7 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { ADMIN, UMS_ADMIN } from '../../../../../constants/roles';
 import { InsufficientPermissionError } from '../../../../../constants/errors';
 import { UserWithSimilarEmailAlreadyExist, UserWithSimilarNumberAlreadyExist } from '../../../../../constants/errors/db';
+import getUserActiveClassroom from '../../../../../utils/getUserActiveClassroom';
 
 const allowedRoles = [ADMIN, UMS_ADMIN];
 
@@ -89,18 +90,19 @@ const updateUserValidation = async (params, context, mutationOrQueryName) => {
       throw new UserWithSimilarNumberAlreadyExist();
     }
   }
+  const activeClassroom = await getUserActiveClassroom(context, null, get(user, 'studentProfile.batch.id'));
   let userVertical = 'unassigned';
   if (get(user, 'vertical') === 'unassigned'
   && (get(user, 'role') === 'mentee' || get(user, 'role') === 'parent')) {
     if (get(user, 'source') !== 'school') {
       userVertical = 'b2c';
-    } else if (get(user, 'studentProfile.batch.type')) {
+    } else if (get(activeClassroom, 'type')) {
       /* eslint-disable no-lonely-if */
-      if (get(user, 'studentProfile.batch.type') === 'normal') {
+      if (get(activeClassroom, 'type') === 'normal') {
         userVertical = 'b2c';
-      } else if (get(user, 'studentProfile.batch.type') === 'b2b') {
+      } else if (get(activeClassroom, 'type') === 'b2b') {
         userVertical = 'b2b';
-      } else if (get(user, 'studentProfile.batch.type') === 'b2b2c') {
+      } else if (get(activeClassroom, 'type') === 'b2b2c') {
         userVertical = 'b2b2c';
       }
     } else {

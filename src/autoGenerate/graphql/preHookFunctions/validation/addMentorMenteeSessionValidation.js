@@ -49,6 +49,27 @@ query{
       studentProfile {
         batch {
           code
+          id
+          course {
+            id
+          }
+          coursePackage {
+            courses {
+              id
+            }
+          }
+        }
+        batches {
+          code
+          id 
+          course {
+            id
+          }
+          coursePackage {
+            courses {
+              id
+            }
+          }
         }
       }
       id

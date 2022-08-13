@@ -13,6 +13,7 @@ import getCourseInfo from './utils/getCourseInfo';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
 import isMentorChild from './utils/isMentorChild';
+import getUserActiveClassroom from '../../../../utils/getUserActiveClassroom';
 
 const getMentorMenteeSessionData = async (id, context) => {
   const query = `
@@ -32,7 +33,28 @@ const getMentorMenteeSessionData = async (id, context) => {
           user {
             studentProfile {
               batch {
+                id
                 code
+                course {
+                  id
+                }
+                coursePackage {
+                  course {
+                    id
+                  }
+                }
+              }
+              batches {
+                id
+                code
+                course {
+                  id
+                }
+                coursePackage {
+                  course {
+                    id
+                  }
+                }
               }
             }
           }
@@ -85,7 +107,8 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
     }
 
     // update session log entry
-    const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    const activeClassroom = await getUserActiveClassroom(context, { courseId: get(params, 'courseConnectId'), userBatches: get(userInfo, 'data.user.studentProfile', '') }, get(userInfo, 'data.user.studentProfile.batch.id'));
+    const batchCode = get(activeClassroom, 'code');
     const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
     const bookingAgentId = get(userInfo, 'data.user.studentProfile.bookingAgent.id');
     if (studentProfileId) addToMentorMenteeSessionStudentProfile(mentorMenteeSessionId, studentProfileId, bookingAgentId);

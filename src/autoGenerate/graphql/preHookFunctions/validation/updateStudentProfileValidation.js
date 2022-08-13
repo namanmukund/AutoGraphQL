@@ -13,6 +13,29 @@ const studentProfileQuery = async (id, context) => {
         user {
           id
         }
+        batch {
+          id
+          course {
+            id
+          }
+          coursePackage {
+            courses {
+              id
+            }
+          }
+        }
+        batches {
+          id
+          course {
+            id
+          }
+          coursePackage {
+            courses {
+              id
+            }
+          }
+        }
+
         schoolClass {
         id
         grade

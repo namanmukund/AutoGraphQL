@@ -12,6 +12,7 @@ import updateLeadSquared from '../../../../../services/leadsquared/updateLeadSqu
 import addToSchedule from '../../../../../utils/scheduleJobs/addToSchedule';
 import getMentorCodingLanguages from '../../resolvers/utils/getMentorCodingLanguages';
 import getFullFilePath from '../../../../../utils/getFullFilePath';
+import { getActiveClassroomId } from '../../../../../utils/getUserActiveClassroom';
 
 const minCap = (num, cap) => (num > cap ? num : cap);
 
@@ -58,7 +59,8 @@ const extractMentorMenteeSessionAndSendMessage = async (
   mentorMenteeSessionId,
   course,
 ) => {
-  if (get(user, 'data.user.studentProfile.batch.id')) return;
+  const classroomId = getActiveClassroomId(null, { courseId: get(course, 'data.course.id') }, get(user, 'data.user.studentProfile.batch.id'));
+  if (classroomId) return;
   const slotNumber = slotTimeStringArray[0].split('slot')[1];
   const { startTime, endTime } = getSlotLabel(slotNumber);
   const menteeInfo = get(user, 'data.user');

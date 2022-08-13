@@ -14,6 +14,7 @@ import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOpera
 import updateMenteeSessionQuery from './utils/updateMenteeSessionQuery';
 import sendWhatsappMessageForBookingConfirmedByLeadParnter from './utils/sendWhatsappMessageForBookingConfirmedByLeadPartner';
 import IsMentorChild from './utils/isMentorChild';
+import getActiveClassroom, { getActiveClassroomId } from '../../../../utils/getUserActiveClassroom';
 // import createTaskAndAssignAvailableMentor from './utils/createTaskAndAssignAvailableMentor';
 
 const getUserCourses = async (userId, context) => {
@@ -67,7 +68,7 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     const userInfo = await getMenteeInfo(get(input, 'user.typeId'), context);
     const topicInfo = await getTopicInfo(get(input, 'topic.typeId'));
     const isNotSourceSchool = get(userInfo, 'data.user.source') !== userSourceOrigin.school;
-    const isBatchExist = get(userInfo, 'data.user.studentProfile.batch', false);
+    const isBatchExist = await getActiveClassroomId(context, { courseId: get(input, 'course.typeId', '') });
     const isMentorChild = await IsMentorChild(get(userInfo, 'data.user.id'));
     if (typeof isTrialSession === 'boolean' && isTrialSession && isNotSourceSchool && !isBatchExist) {
       await mentorAvailabilitySlotOperation({
@@ -91,7 +92,8 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     // create a Task corresponding to the new lead and auto-assign available mentor
     // createTaskAndAssignAvailableMentor(context, userInfo, topicInfo, input);
     // update user booking on leadsquared
-    if (!get(userInfo, 'data.user.studentProfile.batch.id') && !isMentorChild) {
+    const activeBatchId = await getActiveClassroomId(context, { courseId: get(input, 'course.typeId', '') });
+    if (!activeBatchId && !isMentorChild) {
       addMenteeBookingLeadsquared(
         input,
         params,
@@ -124,7 +126,11 @@ const addMenteeSessionPostHookMethod = async (input, mutationName, context, para
     const courseId = get(input, 'course.typeId', '');
     const clientId = get(userInfo, 'data.user.id', '');
     const topicId = get(topicInfo, 'data.topic.id', '');
-    const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    const activeClassroom = await getActiveClassroom(context, {
+      courseId: get(input, 'course.typeId', ''),
+      studentProfile: get(userInfo, 'data.user.studentProfile', ''),
+    }, get(userInfo, 'data.user.studentProfile.batch.id'));
+    const batchCode = get(activeClassroom, 'code', '');
     /**
      * Add course into UserCourse Collection if not present already
      */

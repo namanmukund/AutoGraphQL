@@ -175,7 +175,7 @@ const userCourseSyllabusMethod = async (context, params) => {
         // mutation to create current component status of user with current topic as first topic and courseId
         // and current LO as first LO of topic and video as current component type
         await addUserCurrentTopicComponentStatusForNewCourse(
-          userId, courseId, firstTopicId, firstLearningObjectiveId, firstVideoId, firstBlockedBasedProjectId, firstComponentName, context
+          userId, courseId, firstTopicId, firstLearningObjectiveId, firstVideoId, firstBlockedBasedProjectId, firstComponentName, context,
         );
       }
     }

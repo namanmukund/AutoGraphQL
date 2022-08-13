@@ -18,6 +18,26 @@ const menteeInfoQuery = (userId) => `
         batch {
           id
           code
+          course {
+            id
+          }
+          coursePackage {
+            courses {
+              id
+            }
+          }
+        }
+        batches {
+          id 
+          code
+          course {
+            id
+          }
+          coursePackage {
+            courses {
+              id
+            }
+          }
         }
         bookingAgent {
           id

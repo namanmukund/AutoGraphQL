@@ -10,6 +10,7 @@ import addSessionLog from './utils/addSessionLog';
 import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
 import deleteMentorMenteeSessionQuery from './utils/deleteMentorMenteeSessionQuery';
 import isMentorChild from './utils/isMentorChild';
+import getUserActiveClassroom from '../../../../utils/getUserActiveClassroom';
 
 const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) => {
   /*
@@ -53,7 +54,9 @@ const deleteMenteeSessionPostHookMethod = async (input, mutationName, context) =
   // update session log entry
   const courseId = get(input, 'course.typeId', '');
   const topicId = get(topicInfo, 'data.topic.id', '');
-  const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+  const activeClassroom = await getUserActiveClassroom(context, { courseId }, get(userInfo, 'data.user.studentProfile.batch.id'));
+  // const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+  const batchCode = get(activeClassroom, 'code', '');
   addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'deleteMenteeSession', batchCode, '', '');
 
   if (!isItMentorChild) {

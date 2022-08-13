@@ -25,6 +25,7 @@ import { ifAuthorized } from '../../../../../../utils';
 import { MENTOR, SCHOOL_TEACHER } from '../../../../../../constants/roles';
 import getSortedTopics from '../../../../../../utils/getSortedTopicsFromCoursePackageOrder';
 import isUserInheritedFromMentor from '../../../postHookFunctions/utils/isMentorChild';
+import getUserActiveClassroom from '../../../../../../utils/getUserActiveClassroom';
 
 /*
 This is a common method to check whether the called topic component is locked or not
@@ -231,17 +232,20 @@ const isComponentUnlockedForNewCourse = async (
     userId,
     context,
   );
-  const batchCurrentComponentInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.currentComponent');
+  const activeClassroom = await getUserActiveClassroom(context, {
+    studentProfile: get(batchCurrentComponentStatusRes, 'data.user.studentProfile'),
+  }, get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.id'));
+  const batchCurrentComponentInfo = get(activeClassroom, 'currentComponent');
   const schoolInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.school');
 
-  const isCoursePackageBatch = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.id');
+  const isCoursePackageBatch = get(activeClassroom, 'coursePackage.id');
 
   if (isCoursePackageBatch) {
     let coursePackageTopics = [];
-    if (get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackageTopicRule', []).length) {
-      coursePackageTopics = getSortedTopics(get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackageTopicRule', []));
+    if (get(activeClassroom, 'coursePackageTopicRule', []).length) {
+      coursePackageTopics = getSortedTopics(get(activeClassroom, 'coursePackageTopicRule', []));
     } else {
-      coursePackageTopics = getSortedTopics(get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.topics', []));
+      coursePackageTopics = getSortedTopics(get(activeClassroom, 'coursePackage.topics', []));
     }
     // topic we send in input
     const topicFound = coursePackageTopics.find((o) => o.id === topicId);

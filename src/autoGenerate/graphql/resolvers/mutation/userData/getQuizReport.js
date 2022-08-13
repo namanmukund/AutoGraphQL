@@ -17,6 +17,7 @@ import getUserIdandAppNameAfterValidation
 from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import { log } from '../../../../../../utils';
+import getUserActiveClassroom from '../../../../../../utils/getUserActiveClassroom';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = (userId, courseId) => `
@@ -160,6 +161,37 @@ const getBatchStatus = (userId) => `
         batch{
           id
           type
+          course {
+            id
+          }
+          coursePackge {
+            courses {
+              id
+            }
+          }
+          currentComponent{
+            currentCourse{
+              id
+              order
+            }
+            currentTopic{
+              id
+              order
+            }
+            latestSessionStatus
+          }
+        }
+        batches {
+          id
+          type
+          course {
+            id
+          }
+          coursePackge {
+            courses {
+              id
+            }
+          }
           currentComponent{
             currentCourse{
               id
@@ -296,7 +328,8 @@ const getQuizReportMutationResolver = async (
     '',
   );
 
-  const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+  const activeClassroom = getUserActiveClassroom(context, { courseId, studentProfile: get(batchRes, 'data.user.studentProfile') }, get(batchRes, 'data.user.studentProfile.batch.id'));
+  const batchCurrentComponentInfo = get(activeClassroom, 'currentComponent');
 
   // calling API to get data of fetched topic
   const topicRes = await callGraphqlApi(

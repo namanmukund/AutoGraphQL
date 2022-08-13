@@ -55,7 +55,8 @@ const addSchoolSessionOtpInBatchSession = async (batchId, context = {}) => {
     const batchType = get(batchSession, 'batch.type');
     if (!isAlreadyCreated && finalOtpMap[batchId] && batchType === 'b2b') {
       addSchoolSessionOtp({
-        otp: finalOtpMap[batchId], batchSessionId: get(batchSession, 'id'),
+        otp: finalOtpMap[batchId],
+        batchSessionId: get(batchSession, 'id'),
         context,
       });
       log(`Creating schoolSessionOtp for batch ${batchId} with OTP: ${finalOtpMap[batchId]} for batchSession: ${get(batchSession, 'id')} from addStudentProfile postHook method`);
