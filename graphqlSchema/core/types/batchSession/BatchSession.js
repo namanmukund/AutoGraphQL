@@ -32,8 +32,9 @@ const b2bFormFields = `
 
 const retakeSessionRecord = `
   type RetakeSessionRecord {
-   retakeCount: Int
-   sessionResumeDate: Date
+   sessionStatus: SessionStatus
+   otpGenerationDate: Date
+   sessionStartDate: Date
    sessionEndDate: Date
  }`;
 
@@ -79,7 +80,6 @@ const BatchSession = `
     sessionStartedByMentorAt: Date
     loggedInUserStatus: [BatchLoginStatusType]
     sessionCreatedBy: User @relation(name: "BatchSessionSessionCreatedBy", direction: "OneWay")
-    currentResumeCount: Int @defaultValue(value: "1")
     retakeSessionRecords: [RetakeSessionRecord]
 }`;
 
