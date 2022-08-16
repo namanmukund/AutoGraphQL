@@ -223,7 +223,7 @@ const updateSchoolStudentEmail = async (root, params, authentication, context) =
                 updatedStudentObj['Parent Email'] = get(student, 'parent.email');
                 updatedStudentObj['Old Email'] = get(student, 'parent.email');
                 updatedStudentObj['New Email'] = email;
-                updatedStudentObj.Username = updatedEmailPrefix;
+                updatedStudentObj.Username = username;
                 updatedStudentsProfiles.push({ ...updatedStudentObj });
               } else log(`Something went wrong for student: ${get(student, 'user.name')} with old email:${get(student, 'parent.email')} `);
             }
