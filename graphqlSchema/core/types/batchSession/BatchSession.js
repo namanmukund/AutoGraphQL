@@ -30,6 +30,13 @@ const b2bFormFields = `
   generalSuggestion: String
 `;
 
+const retakeSessionRecord = `
+  type RetakeSessionRecord {
+   retakeCount: Int
+   sessionResumeDate: Date
+   sessionEndDate: Date
+ }`;
+
 const BatchSession = `
   type BatchSession @model
   {
@@ -72,6 +79,8 @@ const BatchSession = `
     sessionStartedByMentorAt: Date
     loggedInUserStatus: [BatchLoginStatusType]
     sessionCreatedBy: User @relation(name: "BatchSessionSessionCreatedBy", direction: "OneWay")
+    currentResumeCount: Int @defaultValue(value: "1")
+    retakeSessionRecords: [RetakeSessionRecord]
 }`;
 
-export default [BatchSession, batchAttendanceType, batchLoginStatusType];
+export default [BatchSession, batchAttendanceType, batchLoginStatusType, retakeSessionRecord];

@@ -21,6 +21,7 @@ query{
       code
       type
       customSessionLink
+      documentType
       allottedMentor{
         id
       }
