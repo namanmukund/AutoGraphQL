@@ -6,22 +6,18 @@ query{
   batches(filter:{
     and:[
       {
-        allocatedMentor_some:{
+        allottedMentor_some:{
           id:"${allottedMentorId}"
         }
       }
       ${courseId ? `{
-        {
-          course_some:{
-            id: "${courseId}"
-          }
+        course_some:{
+          id: "${courseId}"
         }
       }` : ''}
       ${packageId ? `{
-        {
-          coursePackage_some:{
-            id: "${packageId}"
-          }
+        coursePackage_some:{
+          id: "${packageId}"
         }
       }` : ''}
     ]
@@ -45,11 +41,7 @@ const addBatchValidation = async (params, _mutationOrQueryName, context) => {
   } = params;
   const batchData = await callLocalGraphqlApi(batchQuery(allottedMentorConnectId, courseConnectId, coursePackageConnectId), context);
   const batchFetched = get(batchData, 'data.batches', []);
-  const batchWithSameCode = batchFetched.find((batch) => get(batch, 'code') === get(input, 'code'));
-  if (batchWithSameCode && get(input, 'documentType') !== 'classroom') {
-    throw new Error('Batch already exists with same code');
-  }
-  if (batchFetched && !batchFetched.length) {
+  if (batchFetched && batchFetched.length) {
     throw new Error('Batch already exists with same mentor and course/coursePackage');
   }
 };
