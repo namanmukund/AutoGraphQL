@@ -11,6 +11,17 @@ const StudentsDraftCSV = `
   }
 `;
 
+const DraftCSVConfig = `
+  type DraftCSVConfig {
+    title: String
+    parentNameHeader: String
+    rollNoHeader: String
+    gradeHeader: String
+    sectionHeader: String
+    parentEmailHeader: String
+  }
+`;
+
 const School = `
   type School @model {
     name: String! @unique
@@ -42,8 +53,9 @@ const School = `
     buddyLoginLimit: Int @defaultValue(value: "5")
     isTimeTableEnabled: Boolean @defaultValue(value: "false")
     isClassroomEnabled: Boolean @defaultValue(value: "true")
+    studentsDraftCSVConfig: DraftCSVConfig
     studentsDraftCSV: [StudentsDraftCSV]
     studentsUploadStatus: BatchCreationStatus @defaultValue(value: "todo")
   }
 `;
-export default [School, StudentsDraftCSV];
+export default [School, StudentsDraftCSV, DraftCSVConfig];
