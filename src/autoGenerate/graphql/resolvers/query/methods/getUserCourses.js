@@ -374,6 +374,8 @@ const batchPipeline = [
   {
     $project: {
       id: 1,
+      code: 1,
+      classroomTitle: 1,
       coursePackage: 1,
       currentComponent: 1,
     },
@@ -482,6 +484,8 @@ const batchPipeline = [
   {
     $project: {
       id: 1,
+      code: 1,
+      classroomTitle: 1,
       coursePackage: {
         $arrayElemAt: ['$coursePackage', 0],
       },
@@ -624,8 +628,8 @@ const getUserCourses = (async (root, params, context, info) => {
         title: get(batch, 'coursePackage.title') || get(batch, 'course.title'),
         thumbnail: get(batch, 'currentComponent.currentCourse.thumbnail'),
         currentTopic: get(batch, 'currentComponent.currentTopic', null),
+        classroomCode: get(batch, 'code'),
         isCourseCompleted: false,
-        isClassroom: true,
       })).reverse();
       if (get(studentProfileRes, '0.batch.id') && !allBatches.find((batch) => get(batch, 'id') === get(get(studentProfileRes, '0.batch.id')))) {
         allBatches.push({
@@ -633,8 +637,8 @@ const getUserCourses = (async (root, params, context, info) => {
           title: get(studentProfileRes, '0.batch.coursePackage.title'),
           thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
           currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
+          classroomCode: get(studentProfileRes, '0.batch.code'),
           isCourseCompleted: false,
-          isClassroom: true,
         });
       }
       return allBatches.reverse().map((batch, index) => {
@@ -649,7 +653,7 @@ const getUserCourses = (async (root, params, context, info) => {
         title: get(coursePackage, 'title'),
         thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
         currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
-        isClassroom: true,
+        classroomCode: get(studentProfileRes, '0.batch.code', null),
         activeClassroom: true,
         isCourseCompleted: false,
       }];

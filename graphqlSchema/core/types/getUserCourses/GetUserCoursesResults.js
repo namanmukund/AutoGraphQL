@@ -6,7 +6,7 @@ const GetUserCoursesResults = `
     thumbnail: File @relation(name: "UserCourseThumbnail", direction: "OneWay")
     currentTopic: Topic @relation(name: "UserCourseTopic", direction: "OneWay")
     isCourseCompleted: Boolean
-    isClassroom: Boolean
+    classroomCode: String
     activeClassroom: Boolean
   }
 `;
