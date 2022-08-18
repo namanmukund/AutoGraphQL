@@ -121,6 +121,7 @@ import getClassroomReport from './query/methods/getClassroomReport';
 import getPracticeQuestionReport from './query/methods/getPracticeQuestionReport';
 import getBuddyStatus from './query/methods/getBuddyStatus';
 import generateBatchSessionOtp from './mutation/methods/generateBatchSessionOtp';
+import removeBatchStudents from './mutation/methods/removeBatchStudents';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -722,5 +723,7 @@ resolvers.Mutation.generateBatchSessionOtp = generateBatchSessionOtp;
 
 // subscriptions
 resolvers.Subscription.userUpdated = injectSubscriptionWithCommonAsyncIterator(['USER_UPDATED']);
+// Resolver to remove batchstudets and students from batch
+resolvers.Mutation.removeBatchStudents = removeBatchStudents;
 
 export default resolvers;
