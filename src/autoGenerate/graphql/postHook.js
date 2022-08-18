@@ -67,6 +67,7 @@ import updateTaskPostHookMethod from './postHookFunctions/updateTaskPostHookMeth
 import updateEventPostHookMethod from './postHookFunctions/updateEventPostHookMethod';
 import addEventPostHookMethod from './postHookFunctions/addEventPostHookMethod';
 import fetchEventPostHookMethod from './postHookFunctions/fetchEventPostHookMethod';
+import fetchBatchPostHookMethod from './postHookFunctions/fetchBatchPostHookMethod';
 import updateMentorProfilePostHookMethod from './postHookFunctions/updateMentorProfilePostHookMethod';
 import addUserActivityLearningSlideDumpPostHookMethod from './postHookFunctions/addUserActivityLearningSlideDumpPostHookMethod';
 // import updateEventSessionPostHookMethod from './postHookFunctions/updateEventSessionPostHookMethod';
@@ -366,6 +367,10 @@ const posthook = async (input, mutationName, context, params, info) => {
     }
     case 'event': {
       await fetchEventPostHookMethod(input, params, mutationName, context, info);
+      break;
+    }
+    case 'batch': {
+      await fetchBatchPostHookMethod(input, params, mutationName, context, info);
       break;
     }
     case 'addUserActivityLearningSlideDump': {
