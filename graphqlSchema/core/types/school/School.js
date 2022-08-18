@@ -19,6 +19,7 @@ const DraftCSVConfig = `
     gradeHeader: String
     sectionHeader: String
     parentEmailHeader: String
+    studentNameHeader: String
   }
 `;
 
