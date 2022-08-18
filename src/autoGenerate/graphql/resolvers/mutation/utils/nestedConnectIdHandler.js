@@ -60,18 +60,22 @@ const nestedConnectIdHandler = (
       const arrayObjects = [];
       const mappingInfo = {};
       finalInput[inputFieldName].forEach((doc) => {
-        const modifiedInput = {};
-        updateInputInCaseOfNestedConnect(
-          ast,
-          typeName,
-          inputFieldName,
-          modifiedInput,
-          arrayObjects,
-          doc,
-          mappingInfo,
-          isArrayUpdate,
-        );
-        typeTypeIdArray.push(modifiedInput);
+        if (typeof doc === 'string') {
+          typeTypeIdArray.push(doc);
+        } else {
+          const modifiedInput = {};
+          updateInputInCaseOfNestedConnect(
+            ast,
+            typeName,
+            inputFieldName,
+            modifiedInput,
+            arrayObjects,
+            doc,
+            mappingInfo,
+            isArrayUpdate,
+          );
+          typeTypeIdArray.push(modifiedInput);
+        }
       });
       allRelationObjectsArray1toMData.push(arrayObjects);
       finalInput[inputFieldName] = typeTypeIdArray;
