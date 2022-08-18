@@ -1080,33 +1080,8 @@ const getUserBatchDetails = (userId) => [
           },
         },
         {
-          $lookup: {
-            from: 'Course',
-            let: { courseId: '$course.typeId' },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: ['$id', '$$courseId'],
-                  },
-                },
-              },
-              {
-                $project: {
-                  id: 1,
-                  title: 1,
-                },
-              },
-            ],
-            as: 'course',
-          },
-        },
-        {
           $project: {
             id: 1,
-            course: {
-              $arrayElemAt: ['$course', 0],
-            },
             coursePackage: {
               $arrayElemAt: ['$coursePackage', 0],
             },
@@ -1865,7 +1840,7 @@ const menteeCourseHomeworkMutationResolver = async (
   }
   let packageTopics = [];
   if (coursePackage && get(coursePackage, 'id')) {
-    packageTopics = getTopicsArrFromCoursePackages(coursePackage, 'topics', userActiveClassroom);
+    packageTopics = getTopicsArrFromCoursePackages(coursePackage, userActiveClassroom);
   }
   const { chapters } = get(currentTopicComponentInfo, 'currentCourse', {});
   if ((!chapters || !chapters.length) && !(packageTopics || []).length) {

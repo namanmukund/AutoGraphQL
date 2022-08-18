@@ -8,6 +8,7 @@ const FileBucket = `
     codeOrg
     blockly
     temp
+    topicThumbnail
   }`;
 
 export default FileBucket;
