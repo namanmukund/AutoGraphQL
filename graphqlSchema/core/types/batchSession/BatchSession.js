@@ -30,14 +30,6 @@ const b2bFormFields = `
   generalSuggestion: String
 `;
 
-const retakeSessionRecord = `
-  type RetakeSessionRecord {
-   sessionStatus: SessionStatus
-   otpGenerationDate: Date
-   sessionStartDate: Date
-   sessionEndDate: Date
- }`;
-
 const BatchSession = `
   type BatchSession @model
   {
@@ -80,7 +72,8 @@ const BatchSession = `
     sessionStartedByMentorAt: Date
     loggedInUserStatus: [BatchLoginStatusType]
     sessionCreatedBy: User @relation(name: "BatchSessionSessionCreatedBy", direction: "OneWay")
-    retakeSessionRecords: [RetakeSessionRecord]
+    isRetakingSession: Boolean @defaultValue(value: "false")
+    retakeSessions: [RetakeSession] @relation(name:"RetakeSessionBatchSession")
 }`;
 
-export default [BatchSession, batchAttendanceType, batchLoginStatusType, retakeSessionRecord];
+export default [BatchSession, batchAttendanceType, batchLoginStatusType];
