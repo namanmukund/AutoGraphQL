@@ -188,7 +188,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
 
   // if session is complete and user is trying to change the status then throw error
   if (prevSessionStatus === sessionStatus.completed && sessionStatusInInput && sessionStatusInInput !== sessionStatus.completed) {
-    if (get(batch, 'documentType') !== 'classroom') throw new CanNotChangeSessionStatusError();
+    throw new CanNotChangeSessionStatusError();
   }
   if (sessionStatusInInput === sessionStatus.started
     && get(batch, 'type') === 'b2b') {
