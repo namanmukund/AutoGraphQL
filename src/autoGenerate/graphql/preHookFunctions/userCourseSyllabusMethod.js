@@ -141,7 +141,7 @@ const userCourseSyllabusMethod = async (context, params) => {
           if (firstComponentName === 'learningObjective') {
             firstComponentName = getNextLoComponent(sortedTopicComponentRule[0]);
           } else if (['assignment', 'homeworkAssignment', 'homeworkPractice'].includes(firstComponentName)) {
-            currentTopicComponentType = quiz;
+            firstComponentName = quiz;
           }
 
           // returning error if there is no published video
