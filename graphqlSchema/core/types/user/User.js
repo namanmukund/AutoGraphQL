@@ -81,6 +81,7 @@ const User = `
     userBankDetail: UserBankDetail @relation(name:"UserBankDetailUser")
     lastActive: Date
     eventSpeakerProfile: EventSpeakerProfile @relation(name: "EventSpeakerProfileUser",  isSubset: true)
+    isEmailGenerated: Boolean @defaultValue(value: "false")
   }
 `;
 
