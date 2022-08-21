@@ -113,6 +113,7 @@ const getSchoolSessionOtpAggregation = ({ sessionStatus }) => [
         id: 1,
         bookingDate: 1,
         sessionStatus: 1,
+        isRetakingSession: 1,
       },
     },
   },
@@ -157,8 +158,10 @@ const scheduleBatchSessionOtpGenerator = async () => {
   });
   for (const schoolSessionOtp of schoolSessionOtps) {
     if (get(schoolSessionOtp, 'batchSession', []).length) {
-      deleteSchoolSessionOtp(get(schoolSessionOtp, 'id'));
-      log(`Deleting schoolSessionOtp: ${get(schoolSessionOtp, 'id')} for batchSession ${get(schoolSessionOtp, 'batchSession[0].id', '')}`);
+      if (!get(schoolSessionOtp, 'batchSession[0].isRetakingSession')) {
+        deleteSchoolSessionOtp(get(schoolSessionOtp, 'id'));
+        log(`Deleting schoolSessionOtp: ${get(schoolSessionOtp, 'id')} for batchSession ${get(schoolSessionOtp, 'batchSession[0].id', '')}`);
+      }
     }
   }
 };
