@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { get } from 'lodash';
+import { sessionStatus } from '../../../../constants';
 import { callLocalGraphqlApi } from '../../../api';
 
 const deleteBatchScheduleSession = async (retakeSessionId, context) => {
@@ -17,10 +18,9 @@ const deleteBatchScheduleSession = async (retakeSessionId, context) => {
 const updateRetakeSessionPostHookMethod = async (input, params, mutationName, context) => {
   const retakeSessionId = get(input, 'id');
   const retakeSessionStatusFromInput = get(params, 'input.sessionStatus', 'allotted');
-  if (retakeSessionStatusFromInput === 'completed') {
+  if (retakeSessionStatusFromInput === sessionStatus.completed) {
     const { prevRetakeSessionStatus } = context;
     if (prevRetakeSessionStatus && prevRetakeSessionStatus !== retakeSessionStatusFromInput) {
-      console.log('Deleting Otp for retake sessions');
       deleteBatchScheduleSession(retakeSessionId, context);
     }
   }

@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import { sessionStatus } from '../../../../../constants';
 import { callLocalGraphqlApi } from '../../../../api';
 
 const getRetakeSession = async (retakeSessionId, context) => {
@@ -14,7 +15,7 @@ const getRetakeSession = async (retakeSessionId, context) => {
 
 const updateRetakeSessionValidation = async (params, input, mutationName, context) => {
   const { id: retakeSessionId } = params;
-  if (get(input, 'sessionStatus', 'allotted') === 'completed') {
+  if (get(input, 'sessionStatus', 'allotted') === sessionStatus.completed) {
     const prevRetakeSessionStatus = await getRetakeSession(retakeSessionId, context);
     context.prevRetakeSessionStatus = prevRetakeSessionStatus;
   }
