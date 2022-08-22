@@ -1,3 +1,12 @@
+const previousSchoolClass = `
+  type PreviousSchoolClass {
+  batch: Batch @relation(name:"StudentProfilePreviousSchoolClassBatch", direction: "OneWay")
+  grade: Grade
+  section: Section
+  rollNo: String
+  school: School @relation(name:"StudentProfilePreviousSchoolClassSchool", direction: "OneWay")
+ }`;
+
 const StudentProfile = `
   type StudentProfile @model {
     grade: Grade @groupBy
@@ -17,6 +26,7 @@ const StudentProfile = `
     mentor: MentorProfile @relation(name: "MentorStudentProfile")
     events: [Event] @relation(name:"EventStudentProfile")
     wonEvents: [EventWinner] @relation(name:"EventWinnerStudentProfile")
+    previousSchoolClass: [PreviousSchoolClass]
 }`;
 
-export default [StudentProfile];
+export default [StudentProfile, previousSchoolClass];
