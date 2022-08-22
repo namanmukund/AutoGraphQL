@@ -1,5 +1,5 @@
 const fileExtensions = {
-  imageExtensions: ['jpg', 'jpeg', 'png', 'gif'],
+  imageExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
   audioExtensions: ['mp3', 'mpeg'],
   videoExtensions: ['mp4'],
   excelExtensions: ['xlsx'],
