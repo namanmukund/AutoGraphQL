@@ -72,7 +72,7 @@ const BatchSession = `
     sessionStartedByMentorAt: Date
     loggedInUserStatus: [BatchLoginStatusType]
     sessionCreatedBy: User @relation(name: "BatchSessionSessionCreatedBy", direction: "OneWay")
-    isRetakingSession: Boolean @defaultValue(value: "false")
+    isRetakeSession: Boolean @defaultValue(value: "false")
     retakeSessions: [RetakeSession] @relation(name:"RetakeSessionBatchSession")
 }`;
 
