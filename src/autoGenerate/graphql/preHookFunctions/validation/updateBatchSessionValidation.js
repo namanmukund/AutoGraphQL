@@ -183,7 +183,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
 
   // while starting/completing a batchSession, mentor should be there in batch
   if (!allottedMentorId && (sessionStatusInInput === sessionStatus.started || sessionStatusInInput === sessionStatus.completed)) {
-    throw new MentorMandatoryError();
+    if (get(batch, 'documentType') !== 'classroom') throw new MentorMandatoryError();
   }
 
   // if session is complete and user is trying to change the status then throw error

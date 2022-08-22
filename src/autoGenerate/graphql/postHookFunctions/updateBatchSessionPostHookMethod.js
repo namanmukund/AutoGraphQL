@@ -378,7 +378,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
           batchSessionId,
         });
         // console.log('scheduleB2BSessionMissed', scheduleB2BSessionMissed)
-        scheduleB2BSessionMissed(batchSessionId);
+        // scheduleB2BSessionMissed(batchSessionId);
 
         let currentTopicIndex;
         topicsList.forEach((topic, index) => {
@@ -434,7 +434,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     // console.log('bookingDateFromInputParsed', bookingDateFromInputParsed);
     if (prevSessionStatus !== sessionStatusFromInput
       && sessionStatusFromInput === sessionStatus.completed
-      && bookingDate && moment().isAfter(bookingDate) && batchTypeValue === batchType.b2b) {
+      && bookingDate && moment().isAfter(bookingDate) && batchTypeValue === batchType.b2b && get(batchInfo, 'documentType') === 'classroom') {
       // Deleting BatchSession Otp for past unattended sessions on completing session
       deleteBatchScheduleSession(batchSessionId);
     }
