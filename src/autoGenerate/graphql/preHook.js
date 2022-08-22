@@ -128,6 +128,7 @@ import addWeekDayForOneDayEvent from './preHookFunctions/validation/utils/addWee
 // import updateTimetableScheduleValidation from './preHookFunctions/validation/updateTimetableScheduleValidation';
 import addUserLearningSlideDumpValidation from './preHookFunctions/validation/addUserLearningSlideDumpValidation ';
 import commonPreHookValidations from './preHookFunctions/commonPreHookValidations';
+import updateRetakeSessionValidation from './preHookFunctions/validation/updateRetakeSessionValidation';
 // import updateEventSessionValidation from './preHookFunctions/validation/updateEventSessionValidation';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
@@ -968,6 +969,33 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     case 'addUserActivityLearningSlideDump': {
       await addUserLearningSlideDumpValidation(params, mutationOrQueryName, context);
       break;
+    }
+    case 'updateRetakeSession': {
+      const sessionStatus = get(input, 'sessionStatus', '');
+      const newInput = {
+        ...input,
+      };
+      if (sessionStatus) {
+        switch (sessionStatus) {
+          case 'started': {
+            newInput.sessionStartDate = new Date().toISOString();
+            break;
+          }
+          case 'completed': {
+            newInput.sessionEndDate = new Date().toISOString();
+            break;
+          }
+          default:
+        }
+      }
+      const newParams = {
+        ...params,
+        input: {
+          ...newInput,
+        },
+      };
+      await updateRetakeSessionValidation(newParams, newParams.input, mutationOrQueryName, context);
+      return hook(newParams.input, mutationOrQueryName, 'PreHook');
     }
     // case 'updateEventSession': {
     //   await updateEventSessionValidation(params, input, mutationOrQueryName, context);
