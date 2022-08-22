@@ -61,9 +61,9 @@ const nestedConnectIdHandler = (
       const mappingInfo = {};
       finalInput[inputFieldName].forEach((doc) => {
         // Check if Doc is Scalar Type i.e String, Int, Float...
-        const isScalarType = scalarTypes.some((types) => types.toLowerCase() === (typeof doc).toLowerCase()) || (typeof doc === 'number');
+        const isDocAScalarType = scalarTypes.some((types) => types.toLowerCase() === (typeof doc).toLowerCase()) || (typeof doc === 'number');
         // If Scalar Type then push value of doc as it is to the input.
-        if (isScalarType) {
+        if (isDocAScalarType) {
           typeTypeIdArray.push(doc);
         } else {
           const modifiedInput = {};
