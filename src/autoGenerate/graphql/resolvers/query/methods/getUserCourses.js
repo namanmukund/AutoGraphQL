@@ -628,7 +628,11 @@ const getUserCourses = (async (root, params, context, info) => {
         title: get(batch, 'coursePackage.title') || get(batch, 'course.title'),
         thumbnail: get(batch, 'currentComponent.currentCourse.thumbnail'),
         currentTopic: get(batch, 'currentComponent.currentTopic', null),
-        classroomCode: get(batch, 'code'),
+        classroom: {
+          id: get(batch, 'id'),
+          code: get(batch, 'code'),
+          title: get(batch, 'classroomTitle'),
+        },
         isCourseCompleted: false,
       })).reverse();
       if (get(studentProfileRes, '0.batch.id') && !allBatches.find((batch) => get(batch, 'id') === get(get(studentProfileRes, '0.batch.id')))) {
@@ -637,7 +641,11 @@ const getUserCourses = (async (root, params, context, info) => {
           title: get(studentProfileRes, '0.batch.coursePackage.title'),
           thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
           currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
-          classroomCode: get(studentProfileRes, '0.batch.code'),
+          classroom: {
+            id: get(studentProfileRes, '0.batch.id'),
+            code: get(studentProfileRes, '0.batch.code'),
+            title: get(studentProfileRes, '0.batch.classroomTitle'),
+          },
           isCourseCompleted: false,
         });
       }
@@ -653,7 +661,11 @@ const getUserCourses = (async (root, params, context, info) => {
         title: get(coursePackage, 'title'),
         thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
         currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
-        classroomCode: get(studentProfileRes, '0.batch.code', null),
+        classroom: {
+          id: get(studentProfileRes, '0.batch.id'),
+          code: get(studentProfileRes, '0.batch.code'),
+          title: get(studentProfileRes, '0.batch.classroomTitle'),
+        },
         activeClassroom: true,
         isCourseCompleted: false,
       }];

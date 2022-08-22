@@ -1,3 +1,11 @@
+const ClassroomDetails = `
+  type UserClassroomDetails {
+    id: ID
+    code: String
+    title: String
+  }
+`;
+
 const GetUserCoursesResults = `
   type GetUserCoursesResults {
     id: ID
@@ -6,9 +14,9 @@ const GetUserCoursesResults = `
     thumbnail: File @relation(name: "UserCourseThumbnail", direction: "OneWay")
     currentTopic: Topic @relation(name: "UserCourseTopic", direction: "OneWay")
     isCourseCompleted: Boolean
-    classroomCode: String
+    classroom: UserClassroomDetails
     activeClassroom: Boolean
   }
 `;
 
-export default [GetUserCoursesResults];
+export default [GetUserCoursesResults, ClassroomDetails];
