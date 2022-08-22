@@ -28,12 +28,6 @@ const AcademicDuration = `
    endDate: Date
  }`;
 
-const DemoENUM = `
-  enum DemoENUM {
-    ENUM1
-    ENUM2
- }`;
-
 const Batch = `
   type Batch @model
   @appPermissions(
@@ -63,17 +57,13 @@ const Batch = `
     school: School @relation(name: "BatchSchool", direction: "OneWay")
     timeTableRule: BatchTimeTableRule
     b2b2ctimeTable: B2b2cTimeTable
-    b2b2ctimeTableArr: [B2b2cTimeTable]
     customSessionLink: String
     timetableSchedule: [TimetableSchedule] @relation(name: "BatchTimetableSchedule")
     studentReviewsByMentor: [StudentReviewByMentor] @relation(name: "BatchStudentReviewByMentor")
     notices: [Notice] @relation(name: "BatchNotice")
     academicDuration: [AcademicDuration]
     academicYearTitle: String
-    DemoENUM: [DemoENUM]
-    DemoStringArr: [String]
-    DemoStringNumber: [Float]
   }
 `;
 
-export default [Batch, BatchTimeTableRule, B2b2cTimeTable, AcademicDuration, DemoENUM];
+export default [Batch, BatchTimeTableRule, B2b2cTimeTable, AcademicDuration];
