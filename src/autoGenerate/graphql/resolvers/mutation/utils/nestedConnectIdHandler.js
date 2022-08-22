@@ -1,5 +1,5 @@
 import updateInputInCaseOfNestedConnect from './updateInputInCaseOfNestedConnect';
-import { arrayUpdateAddTypes, arrayUpdateRemoveTypes } from '../../../../../../constants';
+import { arrayUpdateAddTypes, arrayUpdateRemoveTypes, scalarTypes } from '../../../../../../constants';
 import generateObjectToBeDisconnected from './generateObjectToBeDisconnected';
 
 const nestedConnectIdHandler = (
@@ -60,7 +60,10 @@ const nestedConnectIdHandler = (
       const arrayObjects = [];
       const mappingInfo = {};
       finalInput[inputFieldName].forEach((doc) => {
-        if (typeof doc === 'string') {
+        // Check if Doc is Scalar Type i.e String, Int, Float...
+        const isScalarType = scalarTypes.some((types) => types.toLowerCase() === (typeof doc).toLowerCase()) || (typeof doc === 'number');
+        // If Scalar Type then push value of doc as it is to the input.
+        if (isScalarType) {
           typeTypeIdArray.push(doc);
         } else {
           const modifiedInput = {};
