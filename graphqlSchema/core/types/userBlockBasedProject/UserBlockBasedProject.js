@@ -5,6 +5,7 @@ const UserBlockBasedProject = `
     blockBasedProject: BlockBasedProject! @relation(name: "ProjectUserBlockBasedProject", direction: "OneWay")
     answerLink: String
     savedBlocks: String
+    attachments: [File] @relation(name: "UserBlockBasedProjectAttachment", direction: "OneWay")
     topic: Topic! @relation(name: "TopicUserBlockBasedProject", direction: "OneWay")
     course: Course @relation(name: "UserBlockBasedProjectCourse", direction: "OneWay")
     startTime: Date

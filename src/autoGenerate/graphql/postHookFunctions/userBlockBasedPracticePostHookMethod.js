@@ -35,6 +35,10 @@ const addUserBlockBasedPracticeMutation = (
         id
       }
       answerLink
+      attachments {
+        id
+        uri
+      }
       savedBlocks
     }
     }
