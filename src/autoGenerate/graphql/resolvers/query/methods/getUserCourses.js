@@ -363,11 +363,11 @@ const getUserCourseCompletionAggregation = (userId) => [
   },
 ];
 
-const batchPipeline = [
+const batchPipeline = (batchIdVariable, isArray) => [
   {
     $match: {
       $expr: {
-        $eq: ['$id', '$$batchId'],
+        [`${isArray ? '$in' : '$eq'}`]: ['$id', `$$${batchIdVariable}`],
       },
     },
   },
@@ -513,15 +513,15 @@ const getUserBatchDetails = (userId) => [
     $lookup: {
       from: 'Batch',
       let: { batchId: '$batch.typeId' },
-      pipeline: batchPipeline,
+      pipeline: batchPipeline('batchId', false),
       as: 'batch',
     },
   },
   {
     $lookup: {
       from: 'Batch',
-      let: { batchId: '$batches.typeId' },
-      pipeline: batchPipeline,
+      let: { batchesIds: '$batches.typeId' },
+      pipeline: batchPipeline('batchesIds', true),
       as: 'batches',
     },
   },
@@ -538,7 +538,7 @@ const getUserBatchDetails = (userId) => [
 
 const validateIncomingFields = (fieldsFetched = {}) => {
   const whiteListedFields = ['id', 'title', 'order', 'thumbnail',
-    'secondaryCategory', 'currentTopic', 'isCourseCompleted', '__typename'];
+    'secondaryCategory', 'currentTopic', 'isCourseCompleted', '__typename', 'classroom', 'activeClassroom'];
 
   const fieldsFetchedArr = Object.keys(fieldsFetched);
   if (fieldsFetchedArr && fieldsFetchedArr.length) {
@@ -635,7 +635,7 @@ const getUserCourses = (async (root, params, context, info) => {
         },
         isCourseCompleted: false,
       })).reverse();
-      if (get(studentProfileRes, '0.batch.id') && !allBatches.find((batch) => get(batch, 'id') === get(get(studentProfileRes, '0.batch.id')))) {
+      if (get(studentProfileRes, '0.batch.id') && !allBatches.find((batch) => get(batch, 'classroom.id') === get(studentProfileRes, '0.batch.id'))) {
         allBatches.push({
           id: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
           title: get(studentProfileRes, '0.batch.coursePackage.title'),
