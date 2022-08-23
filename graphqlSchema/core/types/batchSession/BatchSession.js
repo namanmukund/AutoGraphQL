@@ -72,6 +72,8 @@ const BatchSession = `
     sessionStartedByMentorAt: Date
     loggedInUserStatus: [BatchLoginStatusType]
     sessionCreatedBy: User @relation(name: "BatchSessionSessionCreatedBy", direction: "OneWay")
+    isRetakeSession: Boolean @defaultValue(value: "false")
+    retakeSessions: [RetakeSession] @relation(name:"RetakeSessionBatchSession")
 }`;
 
 export default [BatchSession, batchAttendanceType, batchLoginStatusType];

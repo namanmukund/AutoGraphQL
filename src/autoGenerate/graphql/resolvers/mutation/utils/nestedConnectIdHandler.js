@@ -1,5 +1,5 @@
 import updateInputInCaseOfNestedConnect from './updateInputInCaseOfNestedConnect';
-import { arrayUpdateAddTypes, arrayUpdateRemoveTypes } from '../../../../../../constants';
+import { arrayUpdateAddTypes, arrayUpdateRemoveTypes, scalarTypes } from '../../../../../../constants';
 import generateObjectToBeDisconnected from './generateObjectToBeDisconnected';
 
 const nestedConnectIdHandler = (
@@ -60,18 +60,25 @@ const nestedConnectIdHandler = (
       const arrayObjects = [];
       const mappingInfo = {};
       finalInput[inputFieldName].forEach((doc) => {
-        const modifiedInput = {};
-        updateInputInCaseOfNestedConnect(
-          ast,
-          typeName,
-          inputFieldName,
-          modifiedInput,
-          arrayObjects,
-          doc,
-          mappingInfo,
-          isArrayUpdate,
-        );
-        typeTypeIdArray.push(modifiedInput);
+        // Check if Doc is Scalar Type i.e String, Int, Float...
+        const isDocAScalarType = scalarTypes.some((types) => types.toLowerCase() === (typeof doc).toLowerCase()) || (typeof doc === 'number');
+        // If Scalar Type then push value of doc as it is to the input.
+        if (isDocAScalarType) {
+          typeTypeIdArray.push(doc);
+        } else {
+          const modifiedInput = {};
+          updateInputInCaseOfNestedConnect(
+            ast,
+            typeName,
+            inputFieldName,
+            modifiedInput,
+            arrayObjects,
+            doc,
+            mappingInfo,
+            isArrayUpdate,
+          );
+          typeTypeIdArray.push(modifiedInput);
+        }
       });
       allRelationObjectsArray1toMData.push(arrayObjects);
       finalInput[inputFieldName] = typeTypeIdArray;
