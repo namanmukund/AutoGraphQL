@@ -624,7 +624,7 @@ const getUserCourses = (async (root, params, context, info) => {
     if (batches.length) {
       let allBatches = [];
       allBatches = batches.map((batch) => ({
-        id: get(batch, 'currentComponent.currentCourse.id'),
+        id: get(batch, 'id'),
         title: get(batch, 'coursePackage.title') || get(batch, 'course.title'),
         thumbnail: get(batch, 'currentComponent.currentCourse.thumbnail'),
         currentTopic: get(batch, 'currentComponent.currentTopic', null),
@@ -637,7 +637,7 @@ const getUserCourses = (async (root, params, context, info) => {
       })).reverse();
       if (get(studentProfileRes, '0.batch.id') && !allBatches.find((batch) => get(batch, 'classroom.id') === get(studentProfileRes, '0.batch.id'))) {
         allBatches.push({
-          id: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
+          id: get(studentProfileRes, '0.batch.id'),
           title: get(studentProfileRes, '0.batch.coursePackage.title'),
           thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
           currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
