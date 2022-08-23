@@ -538,7 +538,7 @@ const getUserBatchDetails = (userId) => [
 
 const validateIncomingFields = (fieldsFetched = {}) => {
   const whiteListedFields = ['id', 'title', 'order', 'thumbnail',
-    'secondaryCategory', 'currentTopic', 'isCourseCompleted', '__typename', 'classroom', 'activeClassroom'];
+    'secondaryCategory', 'currentTopic', 'isCourseCompleted', '__typename', 'classroom', 'activeClassroom', 'courseId'];
 
   const fieldsFetchedArr = Object.keys(fieldsFetched);
   if (fieldsFetchedArr && fieldsFetchedArr.length) {
@@ -660,6 +660,7 @@ const getUserCourses = (async (root, params, context, info) => {
       const coursePackage = get(studentProfileRes, '0.batch.coursePackage');
       return [{
         id: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
+        courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
         title: get(coursePackage, 'title'),
         thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
         currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
@@ -673,7 +674,7 @@ const getUserCourses = (async (root, params, context, info) => {
       }];
     }
     if (studentProfileRes && get(studentProfileRes, '0.batch.currentComponent.currentCourse.id')) {
-      updatedCourseArr.push(get(studentProfileRes, '0.batch.currentComponent.currentCourse', {}));
+      updatedCourseArr.push({ ...get(studentProfileRes, '0.batch.currentComponent.currentCourse', {}), courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id') });
     }
     const userCoursesModel = getTypeQueryController('UserCourse');
     const userCoursesRes = await userCoursesModel.aggregate(getUserCoursesAggregation(userId, courseProgress));
@@ -702,6 +703,7 @@ const getUserCourses = (async (root, params, context, info) => {
       // eslint-disable-next-line no-restricted-syntax
       for (const userCourseDoc of userCourses) {
         userCourseDoc.isCourseCompleted = false;
+        userCourseDoc.courseId = get(userCourseDoc, 'id');
         if (courseProgress) {
           /** Checking if Course if Completed */
           const courseCompletion = (userCourseCompletions || []).filter((el) => get(el, 'course.id') === get(userCourseDoc, 'id'));
