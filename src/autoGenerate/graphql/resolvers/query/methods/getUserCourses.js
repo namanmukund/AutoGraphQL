@@ -626,7 +626,7 @@ const getUserCourses = (async (root, params, context, info) => {
       allBatches = batches.map((batch) => ({
         id: get(batch, 'id'),
         courseId: get(batch, 'currentComponent.currentCourse.id'),
-        title: get(batch, 'coursePackage.title') || get(batch, 'course.title'),
+        title: get(batch, 'currentComponent.currentCourse.title') || get(batch, 'coursePackage.title') || get(batch, 'course.title'),
         thumbnail: get(batch, 'currentComponent.currentCourse.thumbnail'),
         currentTopic: get(batch, 'currentComponent.currentTopic', null),
         classroom: {
@@ -640,7 +640,7 @@ const getUserCourses = (async (root, params, context, info) => {
         allBatches.push({
           id: get(studentProfileRes, '0.batch.id'),
           courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
-          title: get(studentProfileRes, '0.batch.coursePackage.title'),
+          title: get(studentProfileRes, '0.batch.currentComponent.currentCourse.title') || get(studentProfileRes, '0.batch.coursePackage.title'),
           thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
           currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
           classroom: {
