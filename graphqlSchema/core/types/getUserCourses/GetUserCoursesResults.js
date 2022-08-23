@@ -10,6 +10,7 @@ const GetUserCoursesResults = `
   type GetUserCoursesResults {
     id: ID
     title: String
+    courseId: ID
     secondaryCategory: String
     thumbnail: File @relation(name: "UserCourseThumbnail", direction: "OneWay")
     currentTopic: Topic @relation(name: "UserCourseTopic", direction: "OneWay")
