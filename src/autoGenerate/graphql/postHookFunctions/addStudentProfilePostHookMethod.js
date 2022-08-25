@@ -53,10 +53,10 @@ const addStudentProfilePostHookMethod = async (input, params) => {
     if (batchId) {
       addSchoolSessionOtpInBatchSession(batchId);
     }
-    const batches = await userBatchQuery(schoolId, currentGrade, currentSection)
+    const batches = await userBatchQuery(schoolId, currentGrade, currentSection);
     if (batches && batches.length > 0) {
-      const studentId = get(input, 'id')
-      updateStudentProfile(studentId, get(batches, '[0].id'))
+      const studentId = get(input, 'id');
+      updateStudentProfile(studentId, get(batches, '[0].id'));
     }
   }
 };
