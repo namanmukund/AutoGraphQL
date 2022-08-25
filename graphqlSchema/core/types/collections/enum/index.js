@@ -290,5 +290,5 @@ export default [
   CoursePackageType,
   CoursePackageTopicRuleType,
   BlockBasedPracticeAnswerType,
-  McqType
+  McqType,
 ];
