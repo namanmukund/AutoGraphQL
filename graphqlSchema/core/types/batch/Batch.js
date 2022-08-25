@@ -64,6 +64,7 @@ const Batch = `
     notices: [Notice] @relation(name: "BatchNotice")
     academicDuration: [AcademicDuration]
     academicYearTitle: String
+    inheritedFrom: Batch @relation(name: "BatchInheritedFrom", direction: "OneWay")
   }
 `;
 
