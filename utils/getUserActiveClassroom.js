@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import { callLocalGraphqlApi } from '../src/api';
 
-export const activeClassroomIdFromContext = (context) => get(context, 'activeClassroom.id');
+export const activeClassroomIdFromContext = (context) => get(context, 'activeClassroom');
 
 const getStudentProfile = async (context) => {
   const { currentUser } = context;
