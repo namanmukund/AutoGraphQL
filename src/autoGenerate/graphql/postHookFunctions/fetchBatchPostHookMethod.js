@@ -1,8 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { get } from 'lodash';
-
-// Combine batchStudents into students and also filter out if duplicates
-const getStudentsCombinedArray = (input) => [...(input.students || []), ...(input.batchStudents || [])].filter((batch, index, restBatchArray) => (restBatchArray || []).findIndex((restBatch) => (get(restBatch, 'id') === get(batch, 'id'))) === index);
+import getStudentsCombinedArray from '../../../../utils/getStudentsCombinedArray';
 
 const fetchBatchPostHookMethod = async (input) => {
   if (input && (get(input, 'students', []) || get(input, 'batchStudents', []))) {
