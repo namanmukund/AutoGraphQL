@@ -77,13 +77,17 @@ const addStudentProfilePostHookMethod = async (input, params, mutationName, cont
     if (batches && batches.length > 0) {
       const studentId = get(input, 'id');
       const inHeritedBatch = batches.filter((batch) => get(batch, 'inheritedFrom.id', null) !== null);
+      let masterbatchId = '';
+      let batchesConnectIds = [];
       if (inHeritedBatch.length > 0) {
         const masterBatch = batches.filter((batch) => get(batch, 'id') === get(inHeritedBatch, '[0].inheritedFrom.id'));
-        const MasterbatchId = get(masterBatch, '[0].id');
-        const remainingInheritedBatches = batches.filter((batch) => get(batch, 'inheritedFrom.id', null) === MasterbatchId);
-        const batchesConnectIds = remainingInheritedBatches.length > 0 && remainingInheritedBatches.map((item) => get(item, 'id'));
-        updateStudentProfile(studentId, MasterbatchId, batchesConnectIds);
+        masterbatchId = get(masterBatch, '[0].id');
+        const remainingInheritedBatches = batches.filter((batch) => get(batch, 'inheritedFrom.id', null) === masterbatchId);
+        batchesConnectIds = remainingInheritedBatches.length > 0 && remainingInheritedBatches.map((item) => get(item, 'id'));
+      } else {
+        masterbatchId = get(batches, '[0].id');
       }
+      updateStudentProfile(studentId, masterbatchId, batchesConnectIds);
     }
   }
 };
