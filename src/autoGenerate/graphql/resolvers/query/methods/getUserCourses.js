@@ -363,11 +363,11 @@ const getUserCourseCompletionAggregation = (userId) => [
   },
 ];
 
-const batchPipeline = [
+const batchPipeline = (batchIdVariable, isArray) => [
   {
     $match: {
       $expr: {
-        $eq: ['$id', '$$batchId'],
+        [`${isArray ? '$in' : '$eq'}`]: ['$id', `$$${batchIdVariable}`],
       },
     },
   },
@@ -513,15 +513,19 @@ const getUserBatchDetails = (userId) => [
     $lookup: {
       from: 'Batch',
       let: { batchId: '$batch.typeId' },
-      pipeline: batchPipeline,
+      pipeline: batchPipeline('batchId', false),
       as: 'batch',
     },
   },
   {
     $lookup: {
       from: 'Batch',
-      let: { batchId: '$batches.typeId' },
-      pipeline: batchPipeline,
+      let: {
+        batchesIds: {
+          $ifNull: ['$batches.typeId', []],
+        },
+      },
+      pipeline: batchPipeline('batchesIds', true),
       as: 'batches',
     },
   },
@@ -538,7 +542,7 @@ const getUserBatchDetails = (userId) => [
 
 const validateIncomingFields = (fieldsFetched = {}) => {
   const whiteListedFields = ['id', 'title', 'order', 'thumbnail',
-    'secondaryCategory', 'currentTopic', 'isCourseCompleted', '__typename'];
+    'secondaryCategory', 'currentTopic', 'isCourseCompleted', '__typename', 'classroom', 'activeClassroom', 'courseId'];
 
   const fieldsFetchedArr = Object.keys(fieldsFetched);
   if (fieldsFetchedArr && fieldsFetchedArr.length) {
@@ -624,8 +628,9 @@ const getUserCourses = (async (root, params, context, info) => {
     if (batches.length) {
       let allBatches = [];
       allBatches = batches.map((batch) => ({
-        id: get(batch, 'currentComponent.currentCourse.id'),
-        title: get(batch, 'coursePackage.title') || get(batch, 'course.title'),
+        id: get(batch, 'id'),
+        courseId: get(batch, 'currentComponent.currentCourse.id'),
+        title: get(batch, 'currentComponent.currentCourse.title') || get(batch, 'coursePackage.title') || get(batch, 'course.title'),
         thumbnail: get(batch, 'currentComponent.currentCourse.thumbnail'),
         currentTopic: get(batch, 'currentComponent.currentTopic', null),
         classroom: {
@@ -635,10 +640,11 @@ const getUserCourses = (async (root, params, context, info) => {
         },
         isCourseCompleted: false,
       })).reverse();
-      if (get(studentProfileRes, '0.batch.id') && !allBatches.find((batch) => get(batch, 'id') === get(get(studentProfileRes, '0.batch.id')))) {
+      if (get(studentProfileRes, '0.batch.id') && !allBatches.find((batch) => get(batch, 'classroom.id') === get(studentProfileRes, '0.batch.id'))) {
         allBatches.push({
-          id: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
-          title: get(studentProfileRes, '0.batch.coursePackage.title'),
+          id: get(studentProfileRes, '0.batch.id'),
+          courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
+          title: get(studentProfileRes, '0.batch.currentComponent.currentCourse.title') || get(studentProfileRes, '0.batch.coursePackage.title'),
           thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
           currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
           classroom: {
@@ -658,6 +664,7 @@ const getUserCourses = (async (root, params, context, info) => {
       const coursePackage = get(studentProfileRes, '0.batch.coursePackage');
       return [{
         id: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
+        courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
         title: get(coursePackage, 'title'),
         thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
         currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
@@ -671,7 +678,7 @@ const getUserCourses = (async (root, params, context, info) => {
       }];
     }
     if (studentProfileRes && get(studentProfileRes, '0.batch.currentComponent.currentCourse.id')) {
-      updatedCourseArr.push(get(studentProfileRes, '0.batch.currentComponent.currentCourse', {}));
+      updatedCourseArr.push({ ...get(studentProfileRes, '0.batch.currentComponent.currentCourse', {}), courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id') });
     }
     const userCoursesModel = getTypeQueryController('UserCourse');
     const userCoursesRes = await userCoursesModel.aggregate(getUserCoursesAggregation(userId, courseProgress));
@@ -700,6 +707,7 @@ const getUserCourses = (async (root, params, context, info) => {
       // eslint-disable-next-line no-restricted-syntax
       for (const userCourseDoc of userCourses) {
         userCourseDoc.isCourseCompleted = false;
+        userCourseDoc.courseId = get(userCourseDoc, 'id');
         if (courseProgress) {
           /** Checking if Course if Completed */
           const courseCompletion = (userCourseCompletions || []).filter((el) => get(el, 'course.id') === get(userCourseDoc, 'id'));
