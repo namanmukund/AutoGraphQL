@@ -75,11 +75,11 @@ const addStudentProfilePostHookMethod = async (input, params, mutationName, cont
     const batches = await userBatchQuery(schoolId, currentGrade, currentSection);
     if (batches && batches.length > 0) {
       const studentId = get(input, 'id');
-      const masterBatch = batches.filter(batch => get(batch, 'inheritedFrom.id', null) === null)
-      const batchId = get(masterBatch, '[0].id')
-      const inHeritedBatch = batches.filter(batch => get(batch, 'inheritedFrom.id', null) === batchId)
-      const batchesConnectIds = inHeritedBatch.length > 0 && inHeritedBatch.map(item => get(item, 'id'))
-      updateStudentProfile(studentId, batchId, batchesConnectIds);
+      const masterBatch = batches.filter((batch) => get(batch, 'inheritedFrom.id', null) === null);
+      const MasterbatchId = get(masterBatch, '[0].id');
+      const inHeritedBatch = batches.filter((batch) => get(batch, 'inheritedFrom.id', null) === MasterbatchId);
+      const batchesConnectIds = inHeritedBatch.length > 0 && inHeritedBatch.map((item) => get(item, 'id'));
+      updateStudentProfile(studentId, MasterbatchId, batchesConnectIds);
     }
   }
 };
