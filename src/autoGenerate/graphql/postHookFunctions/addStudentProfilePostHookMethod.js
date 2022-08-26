@@ -3,6 +3,19 @@ import addUpdateSchoolClass from './utils/addUpdateSchoolClass';
 import addSchoolSessionOtpInBatchSession from './utils/addSchoolSessionOtpInBatchSession';
 import { callLocalGraphqlApi } from '../../../api';
 
+const getIdArrForQuery = (idArr) => {
+  let arr = '';
+  if (idArr) {
+    idArr.forEach((id) => {
+      arr += `"${id}",`;
+    });
+    if (arr.length && arr[arr.length - 1] === ',') {
+      arr.substring(0, arr.length - 1);
+    }
+  }
+  return arr;
+};
+
 const userBatchQuery = async (schoolId, currentGrade, currentSection) => {
   const query = `
   query{
@@ -13,6 +26,10 @@ const userBatchQuery = async (schoolId, currentGrade, currentSection) => {
     ]
   }){
     id
+    code
+    inheritedFrom {
+      id
+    }
   }
 }
   `;
@@ -20,12 +37,13 @@ const userBatchQuery = async (schoolId, currentGrade, currentSection) => {
   return get(res, 'data.batches');
 };
 
-const updateStudentProfile = async (studentId, batchConnectId) => {
+const updateStudentProfile = async (studentId, batchConnectId, batchesConnectIds) => {
   const query = `
   mutation{
     updateStudentProfile(
       id: "${studentId}"
       batchConnectId:"${batchConnectId}"
+      ${(batchesConnectIds && batchesConnectIds.length) ? `batchesConnectIds: [${getIdArrForQuery(batchesConnectIds)}]` : ''}
     ){
       id
     }
@@ -57,7 +75,11 @@ const addStudentProfilePostHookMethod = async (input, params, mutationName, cont
     const batches = await userBatchQuery(schoolId, currentGrade, currentSection);
     if (batches && batches.length > 0) {
       const studentId = get(input, 'id');
-      updateStudentProfile(studentId, get(batches, '[0].id'));
+      const masterBatch = batches.filter(batch => get(batch, 'inheritedFrom.id', null) === null)
+      const batchId = get(masterBatch, '[0].id')
+      const inHeritedBatch = batches.filter(batch => get(batch, 'inheritedFrom.id', null) === batchId)
+      const batchesConnectIds = inHeritedBatch.length > 0 && inHeritedBatch.map(item => get(item, 'id'))
+      updateStudentProfile(studentId, batchId, batchesConnectIds);
     }
   }
 };
