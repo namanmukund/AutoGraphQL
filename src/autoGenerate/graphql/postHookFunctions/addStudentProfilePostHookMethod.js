@@ -23,6 +23,7 @@ const userBatchQuery = async (schoolId, currentGrade, currentSection) => {
     and: [
       { school_some: { id: "${schoolId}" } }
       { classes_some: { and: [{ grade: ${currentGrade} }, { section: ${currentSection} }] } }
+      { documentType: classroom }
     ]
   }){
     id
@@ -75,11 +76,14 @@ const addStudentProfilePostHookMethod = async (input, params, mutationName, cont
     const batches = await userBatchQuery(schoolId, currentGrade, currentSection);
     if (batches && batches.length > 0) {
       const studentId = get(input, 'id');
-      const masterBatch = batches.filter((batch) => get(batch, 'inheritedFrom.id', null) === null);
-      const MasterbatchId = get(masterBatch, '[0].id');
-      const inHeritedBatch = batches.filter((batch) => get(batch, 'inheritedFrom.id', null) === MasterbatchId);
-      const batchesConnectIds = inHeritedBatch.length > 0 && inHeritedBatch.map((item) => get(item, 'id'));
-      updateStudentProfile(studentId, MasterbatchId, batchesConnectIds);
+      const inHeritedBatch = batches.filter((batch) => get(batch, 'inheritedFrom.id', null) !== null);
+      if (inHeritedBatch.length > 0) {
+        const masterBatch = batches.filter((batch) => get(batch, 'id') === get(inHeritedBatch, '[0].inheritedFrom.id'));
+        const MasterbatchId = get(masterBatch, '[0].id');
+        const remainingInheritedBatches = batches.filter((batch) => get(batch, 'inheritedFrom.id', null) === MasterbatchId);
+        const batchesConnectIds = remainingInheritedBatches.length > 0 && remainingInheritedBatches.map((item) => get(item, 'id'));
+        updateStudentProfile(studentId, MasterbatchId, batchesConnectIds);
+      }
     }
   }
 };
