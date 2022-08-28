@@ -287,6 +287,7 @@ const getUserBlockBasedPracticeAggregation = ({
   $project: {
     user: 1,
     answerLink: 1,
+    attachments: 1,
     savedBlocks: 1,
     blockBasedPractice: {
       $arrayElemAt: [
@@ -661,7 +662,7 @@ const classroomReport = (async (root, params, context) => {
         pqQuestions: new Map(),
         pqSubmissions: get(previousBlockBasedObj, 'pqSubmissions', new Map()) || new Map(),
       };
-      const hasUserSubmittedPracticeLink = get(userbbPractice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(userbbPractice, 'answerLink') || get(userbbPractice, 'savedBlocks')) : true;
+      const hasUserSubmittedPracticeLink = get(userbbPractice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(userbbPractice, 'answerLink') || get(userbbPractice, 'savedBlocks') || get(userbbPractice, 'attachments', []).length) : true;
       innerObj.title = get(userbbPractice, 'blockBasedPractice.title', '');
       // individual questions
       if (innerObj.pqQuestions.has(get(userbbPractice, 'blockBasedPractice.id'))) {

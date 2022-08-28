@@ -5,6 +5,7 @@ const UserActivityBlockBasedProjectDump = `
     blockBasedProjectAction: UserActionType
     answerLink: String
     savedBlocks: String
+    attachments: [File] @relation(name: "UserActivityBlockBasedProjectDumpAttachment", direction: "OneWay")
     isHomework: Boolean @defaultValue(value: "false")
     topic: Topic @relation(name: "TopicUserActivityBlockBasedProjectDump", direction: "OneWay")
     course: Course @relation(name: "UserActivityBlockBasedProjectDumpCourse", direction: "OneWay")
