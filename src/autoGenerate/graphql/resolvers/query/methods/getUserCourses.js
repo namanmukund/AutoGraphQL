@@ -375,6 +375,7 @@ const batchPipeline = (batchIdVariable, isArray) => [
     $project: {
       id: 1,
       code: 1,
+      allottedMentor: 1,
       classroomTitle: 1,
       coursePackage: 1,
       currentComponent: 1,
@@ -482,10 +483,19 @@ const batchPipeline = (batchIdVariable, isArray) => [
     },
   },
   {
+    $lookup: {
+      from: 'User',
+      localField: 'allottedMentor.typeId',
+      foreignField: 'id',
+      as: 'allottedMentor',
+    },
+  },
+  {
     $project: {
       id: 1,
       code: 1,
       classroomTitle: 1,
+      allottedMentor: { $arrayElemAt: ['$allottedMentor', 0] },
       coursePackage: {
         $arrayElemAt: ['$coursePackage', 0],
       },
@@ -604,24 +614,10 @@ const getUserCourses = (async (root, params, context, info) => {
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
   await validateIncomingFields(fieldsFetched);
 
-  // const redisClient = new RedisController({
-  //   bypass: true,
-  // });
   if (input && get(input, 'userId')) {
     const userId = get(input, 'userId');
     const courseProgress = get(input, 'courseProgress', false);
     let updatedCourseArr = [];
-    /** Check if data exists in redis */
-    // const cachedUserCourses = await redisClient.get(`userCourses_${userId}`);
-    // let userCoursesRes = null;
-    // if (cachedUserCourses && false) {
-    //   log(`[USER_COURSES] CACHE_HIT: ${`userCourses_${userId}`}`);
-    //   userCoursesRes = cachedUserCourses;
-    // } else {
-    // log(`[USER_COURSES] CACHE_MISS: ${`userCourses_${userId}`}`);
-    /**
-     * Checking if user is enrolled into a batch.
-     * */
     const studentProfileModel = getTypeQueryController('StudentProfile');
     const studentProfileRes = await studentProfileModel.aggregate(getUserBatchDetails(userId));
     const batches = get(studentProfileRes, '0.batches', []);
@@ -630,9 +626,10 @@ const getUserCourses = (async (root, params, context, info) => {
       allBatches = batches.map((batch) => ({
         id: get(batch, 'id'),
         courseId: get(batch, 'currentComponent.currentCourse.id'),
-        title: get(batch, 'currentComponent.currentCourse.title') || get(batch, 'coursePackage.title') || get(batch, 'course.title'),
+        title: `${get(batch, 'classroomTitle')}`,
         thumbnail: get(batch, 'currentComponent.currentCourse.thumbnail'),
         currentTopic: get(batch, 'currentComponent.currentTopic', null),
+        allottedMentor: get(batch, 'allottedMentor', null),
         classroom: {
           id: get(batch, 'id'),
           code: get(batch, 'code'),
@@ -644,9 +641,10 @@ const getUserCourses = (async (root, params, context, info) => {
         allBatches.push({
           id: get(studentProfileRes, '0.batch.id'),
           courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
-          title: get(studentProfileRes, '0.batch.currentComponent.currentCourse.title') || get(studentProfileRes, '0.batch.coursePackage.title'),
+          title: `${get(studentProfileRes, '0.batch.classroomTitle')}`,
           thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
           currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
+          allottedMentor: get(studentProfileRes, '0.batch.allottedMentor', null),
           classroom: {
             id: get(studentProfileRes, '0.batch.id'),
             code: get(studentProfileRes, '0.batch.code'),
@@ -668,6 +666,7 @@ const getUserCourses = (async (root, params, context, info) => {
         title: get(coursePackage, 'title'),
         thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
         currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
+        allottedMentor: get(studentProfileRes, '0.batch.allottedMentor', null),
         classroom: {
           id: get(studentProfileRes, '0.batch.id'),
           code: get(studentProfileRes, '0.batch.code'),

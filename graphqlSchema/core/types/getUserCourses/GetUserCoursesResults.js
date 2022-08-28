@@ -14,6 +14,7 @@ const GetUserCoursesResults = `
     secondaryCategory: String
     thumbnail: File @relation(name: "UserCourseThumbnail", direction: "OneWay")
     currentTopic: Topic @relation(name: "UserCourseTopic", direction: "OneWay")
+    allottedMentor: User
     isCourseCompleted: Boolean
     classroom: UserClassroomDetails
     activeClassroom: Boolean

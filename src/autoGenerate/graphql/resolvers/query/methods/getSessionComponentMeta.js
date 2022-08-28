@@ -5,6 +5,7 @@ import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { ifAuthorized } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
 import { callLocalGraphqlApi } from '../../../../../api';
+import getStudentsCombinedArray from '../../../../../../utils/getStudentsCombinedArray';
 
 const getBatchSessionAggregation = ({
   sessionId,
@@ -43,10 +44,22 @@ const getBatchSessionAggregation = ({
           },
         },
         {
+          $lookup: {
+            from: 'StudentProfile',
+            localField: 'batchStudents.typeId',
+            foreignField: 'id',
+            as: 'batchStudents',
+          },
+        },
+        {
           $project: {
             id: 1,
             classroomTitle: 1,
             students: {
+              id: 1,
+              user: 1,
+            },
+            batchStudents: {
               id: 1,
               user: 1,
             },
@@ -260,7 +273,7 @@ const transformMongoResults = async (batchSessions) => {
       topicId: get(batchSession, 'topic.typeId', null),
       classroomId: get(batchSession, 'classroom.id', null),
       classroomTitle: get(batchSession, 'classroom.classroomTitle', ''),
-      totalStudents: get(batchSession, 'classroom.students', []).length,
+      totalStudents: (getStudentsCombinedArray(get(batchSession, 'classroom')) || []).length,
       completedHomeworkMeta: get(homeworkMeta, 'homeworkCompletedCount', 0),
       completedQuizMeta: get(homeworkMeta, 'quizSubmittedCount', 0),
       completedPQMeta: PQMeta || 0,
