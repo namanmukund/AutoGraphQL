@@ -379,6 +379,7 @@ const batchPipeline = (batchIdVariable, isArray) => [
       classroomTitle: 1,
       coursePackage: 1,
       currentComponent: 1,
+      coursePackageCourses: 1,
     },
   },
   {
@@ -491,11 +492,20 @@ const batchPipeline = (batchIdVariable, isArray) => [
     },
   },
   {
+    $lookup: {
+      from: 'Course',
+      localField: 'coursePackageCourses.typeId',
+      foreignField: 'id',
+      as: 'coursePackageCourses',
+    },
+  },
+  {
     $project: {
       id: 1,
       code: 1,
       classroomTitle: 1,
       allottedMentor: { $arrayElemAt: ['$allottedMentor', 0] },
+      coursePackageCourses: 1,
       coursePackage: {
         $arrayElemAt: ['$coursePackage', 0],
       },
@@ -608,6 +618,15 @@ const getUserCurrentTopic = async (
 
 const getTypeQueryController = (typeName) => new QueryController(typeName, { bypass: true });
 
+const getMultipleBatchTitle = (batch) => {
+  const title = get(batch, 'classroomTitle', '');
+  if (get(batch, 'coursePackageCourses', []).length) {
+    const coursesString = get(batch, 'coursePackageCourses', []).map((course) => get(course, 'title', '')).join(', ');
+    return `${title} (${coursesString})`;
+  }
+  return title;
+};
+
 const getUserCourses = (async (root, params, context, info) => {
   const { input } = params;
   const { fieldNodes } = info;
@@ -626,7 +645,7 @@ const getUserCourses = (async (root, params, context, info) => {
       allBatches = batches.map((batch) => ({
         id: get(batch, 'id'),
         courseId: get(batch, 'currentComponent.currentCourse.id'),
-        title: `${get(batch, 'classroomTitle')}`,
+        title: getMultipleBatchTitle(batch),
         thumbnail: get(batch, 'currentComponent.currentCourse.thumbnail'),
         currentTopic: get(batch, 'currentComponent.currentTopic', null),
         allottedMentor: get(batch, 'allottedMentor', null),
@@ -641,7 +660,7 @@ const getUserCourses = (async (root, params, context, info) => {
         allBatches.push({
           id: get(studentProfileRes, '0.batch.id'),
           courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
-          title: `${get(studentProfileRes, '0.batch.classroomTitle')}`,
+          title: getMultipleBatchTitle(get(studentProfileRes, '0.batch')),
           thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
           currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
           allottedMentor: get(studentProfileRes, '0.batch.allottedMentor', null),
@@ -663,7 +682,7 @@ const getUserCourses = (async (root, params, context, info) => {
       return [{
         id: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
         courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
-        title: get(coursePackage, 'title'),
+        title: getMultipleBatchTitle(get(studentProfileRes, '0.batch')),
         thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
         currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
         allottedMentor: get(studentProfileRes, '0.batch.allottedMentor', null),
