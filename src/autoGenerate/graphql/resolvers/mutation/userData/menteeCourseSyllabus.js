@@ -2168,7 +2168,8 @@ export const getTopicsArrFromCoursePackages = (coursePackage = {}, userBatchDeta
   }
   const updatedTopicsArr = [];
   (packageTopics || []).forEach((topic) => {
-    if (get(topic, 'classType') !== 'theory' && get(topic, 'order')) {
+    // if (get(topic, 'classType') !== 'theory' && get(topic, 'order')) {
+    if (get(topic, 'order')) {
       updatedTopicsArr.push({
         ...topic,
         ...getTopicOrderFromCoursePackage(coursePackage, topic, userBatchDetails),
