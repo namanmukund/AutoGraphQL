@@ -569,6 +569,10 @@ const DB_AGGREGATION_MODE_STATUS = {
   OPTIONS: DB_AGGREGATION_MODE_STATUS_OPTIONS,
 };
 
+const ALLOWED_FILE_UPLOAD_TYPES = [
+  'UserBlockBasedPractice',
+];
+
 export {
   scalarTypes,
   defaultFields,
@@ -682,4 +686,5 @@ export {
   DEFAULT_CLAMP_VALUE,
   DB_AGGREGATION_MODE_STATUS,
   MASTER_PASSWORD,
+  ALLOWED_FILE_UPLOAD_TYPES,
 };

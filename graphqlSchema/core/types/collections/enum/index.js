@@ -142,6 +142,7 @@ import DatabaseControllerMode from './DatabaseControllerMode';
 import CoursePackageType from './CoursePackageType';
 import CoursePackageTopicRuleType from './CoursePackageTopicRuleType';
 import BlockBasedPracticeAnswerType from './BlockBasedPracticeAnswerType';
+import McqType from './McqType';
 
 export default [
   Status,
@@ -289,4 +290,5 @@ export default [
   CoursePackageType,
   CoursePackageTopicRuleType,
   BlockBasedPracticeAnswerType,
+  McqType,
 ];

@@ -22,6 +22,8 @@ const BlockBasedProject = `
     projectThumbnail: File @relation(name: "BlockBasedProjectThumbnail", direction: "OneWay")
     externalPlatformLogo: File @relation(name: "BlockBasedProjectExternalPlatformLogo", direction: "OneWay")
     externalPlatformLink: String
+    platFormLinkLabel: String
+    fileUploadFormats: [String]
     layout: BlockBasedProjectLayout! @defaultValue(value: "externalPlatform")
     initialBlocks: String
     answerDescription: String @trim
