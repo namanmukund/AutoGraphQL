@@ -562,7 +562,8 @@ const getUserBatchDetails = (userId) => [
 
 const validateIncomingFields = (fieldsFetched = {}) => {
   const whiteListedFields = ['id', 'title', 'order', 'thumbnail',
-    'secondaryCategory', 'currentTopic', 'isCourseCompleted', '__typename', 'classroom', 'activeClassroom', 'courseId'];
+    'secondaryCategory', 'currentTopic', 'isCourseCompleted', '__typename', 'classroom', 'activeClassroom',
+    'courseId', 'allottedMentor'];
 
   const fieldsFetchedArr = Object.keys(fieldsFetched);
   if (fieldsFetchedArr && fieldsFetchedArr.length) {
@@ -678,7 +679,6 @@ const getUserCourses = (async (root, params, context, info) => {
       });
     }
     if (studentProfileRes && get(studentProfileRes, '0.batch.coursePackage.id')) {
-      const coursePackage = get(studentProfileRes, '0.batch.coursePackage');
       return [{
         id: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
         courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
