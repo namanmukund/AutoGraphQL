@@ -217,30 +217,45 @@ const updateUserPassword = async (userId, variables) => {
 };
  */
 
-const updateUserStatusInSchoolDraftCSV = async (context, row, schoolData, status, error) => {
-  const {
-    parentEmail,
-  } = row;
-  const query = `
-    mutation($updateObj: StudentsDraftCSVUpdate) {
-      updateSchool(id:"${get(schoolData, 'id')}", input:{
-        studentsDraftCSV:{
-          updateWhere: {
-            parentEmail: "${parentEmail}"
-          }
-          updateWith: $updateObj
+const updateUserStatusInSchoolDraftCSV = async (context, row, schoolData, status, error, uploadStatus) => {
+  let query = '';
+  let variables = {};
+  if (uploadStatus) {
+    query = `
+      mutation {
+        updateSchool(id:"${get(schoolData, 'id')}", input:{
+          studentsUploadStatus: ${uploadStatus}
+        }){
+          id
         }
-      }){
-        id
       }
-    }
-`;
-  const res = await callLocalGraphqlApi(query, context, {
-    updateObj: {
-      status,
-      error,
-    },
-  });
+    `;
+  } else {
+    const {
+      parentEmail,
+    } = row;
+    query = `
+      mutation($updateObj: StudentsDraftCSVUpdate) {
+        updateSchool(id:"${get(schoolData, 'id')}", input:{
+          studentsDraftCSV:{
+            updateWhere: {
+              parentEmail: "${parentEmail}"
+            }
+            updateWith: $updateObj
+          }
+        }){
+          id
+        }
+      }
+  `;
+    variables = {
+      updateObj: {
+        status,
+        error,
+      },
+    };
+  }
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.updateSchool');
 };
 
@@ -296,6 +311,7 @@ const addUpdateBulkSchoolUserData = async (root, params, context) => {
     sheetDataRows = get(schoolData, 'studentsDraftCSV');
   }
   const errorLogs = [];
+  if (schoolData) await updateUserStatusInSchoolDraftCSV(context, null, schoolData, null, null, 'inProgress');
   // eslint-disable-next-line no-restricted-syntax
   for (const [index, row] of sheetDataRows.entries()) {
     try {
@@ -410,6 +426,7 @@ temp code
       });
     }
   }
+  if (schoolData) await updateUserStatusInSchoolDraftCSV(context, null, schoolData, null, null, 'complete');
   return {
     status: 'completed',
     errorLogs,

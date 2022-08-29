@@ -45,6 +45,7 @@ const QuestionBank = `
     tags: [ContentTag] @relation(name: "ContentTagQuestionBank")
     message: Message @relation(name: "QuestionBankMessage")
     learningSlides: [LearningSlide] @relation(name: "LearningSlideQuestionBank")
+    mcqType: McqType @defaultValue(value: "multiChoice")
   }
 `;
 

@@ -7,6 +7,7 @@ const fileSizeLimitInMB = {
   lottie: 1,
   pdf: 12,
   programFiles: 1,
+  others: 15,
 };
 
 export default fileSizeLimitInMB;

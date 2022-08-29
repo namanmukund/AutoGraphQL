@@ -35,6 +35,9 @@ const addUserBlockBasedProjectMutation = (
         id
       }
       answerLink
+      attachments {
+        id
+      }
       savedBlocks
     }
     }
