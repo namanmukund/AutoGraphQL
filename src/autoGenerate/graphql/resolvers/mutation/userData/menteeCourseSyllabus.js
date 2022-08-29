@@ -2854,7 +2854,11 @@ const menteeCourseSyllabusMutationResolver = async (
         const constructedSessionsArr = constructSessionsArr({
           lastTopicBookedOrder,
           lastTopicSessionStatus,
-          chapter: get(topic, 'chapter'),
+          chapter: {
+            id: get(coursePackage, 'id'),
+            title: get(coursePackage, 'title', 'Package'),
+            order: 1,
+          },
           course: get(topic, 'courses', [])[0],
           topic,
           batchSessions,
