@@ -90,7 +90,7 @@ const updateUserValidation = async (params, context, mutationOrQueryName) => {
       throw new UserWithSimilarNumberAlreadyExist();
     }
   }
-  const activeClassroom = await getUserActiveClassroom(context, null, get(user, 'studentProfile.batch.id'));
+  const activeClassroom = await getUserActiveClassroom(context, {}, get(user, 'studentProfile.batch.id'));
   let userVertical = 'unassigned';
   if (get(user, 'vertical') === 'unassigned'
   && (get(user, 'role') === 'mentee' || get(user, 'role') === 'parent')) {
