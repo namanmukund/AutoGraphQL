@@ -696,7 +696,18 @@ const getUserCourses = (async (root, params, context, info) => {
       }];
     }
     if (studentProfileRes && get(studentProfileRes, '0.batch.currentComponent.currentCourse.id')) {
-      updatedCourseArr.push({ ...get(studentProfileRes, '0.batch.currentComponent.currentCourse', {}), courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id') });
+      updatedCourseArr.push({
+        ...get(studentProfileRes, '0.batch.currentComponent.currentCourse', {}),
+        allottedMentor: get(studentProfileRes, '0.batch.allottedMentor', null),
+        classroom: {
+          id: get(studentProfileRes, '0.batch.id', {}),
+          code: get(studentProfileRes, '0.batch.code'),
+          title: get(studentProfileRes, '0.batch.classroomTitle'),
+        },
+        activeClassroom: true,
+        isCourseCompleted: false,
+        courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
+      });
     }
     const userCoursesModel = getTypeQueryController('UserCourse');
     const userCoursesRes = await userCoursesModel.aggregate(getUserCoursesAggregation(userId, courseProgress));
