@@ -15,7 +15,7 @@ import { validateTokenAndExtractInformation } from './utils';
 
 const updateMentorSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: mentorSessionId } = params;
-  const mentorSessionData = await callLocalGraphqlApi(mentorSessionQuery(mentorSessionId));
+  const mentorSessionData = await callLocalGraphqlApi(mentorSessionQuery(mentorSessionId), context);
   const mentorSession = get(mentorSessionData, 'data.mentorSession');
   if (mentorSession && !mentorSession) {
     throw new DatabaseRecordNotFoundError();
@@ -60,6 +60,7 @@ const updateMentorSessionValidation = async (params, mutationOrQueryName, contex
         mentorUserId,
         availabilityDate,
       ),
+      context,
     );
     // if a slot is true from before we do not need to validate that
     const timeSlotsInPrevDoc = getSelectedSlotsTime(mentorSession);

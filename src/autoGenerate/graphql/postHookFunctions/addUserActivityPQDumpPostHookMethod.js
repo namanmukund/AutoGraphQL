@@ -462,12 +462,12 @@ And current component status will not get changed when it is already consumed in
     isPracticeQuestionBookmarked,
     practiceQuestionStatus,
     popAllQuery,
-  ));
+  ), context);
   // pushing new array of objects(updated questions)
   await callLocalGraphqlApi(updateUserLearningObjectiveMutationPracticeQuestions(
     userLearningObjectiveId,
     pushManyQuery,
-  ));
+  ), context);
   const pqReportInput = {
     firstTryCount,
     secondTryCount,
@@ -477,7 +477,7 @@ And current component status will not get changed when it is already consumed in
     detailedReport,
   };
   if (get(context, 'fromAddUserLSDump')) {
-    const pqReport = await callLocalGraphqlApi(getUserPracticeQuestionReportQuery(userId, learningObjectiveIdInResult, courseId));
+    const pqReport = await callLocalGraphqlApi(getUserPracticeQuestionReportQuery(userId, learningObjectiveIdInResult, courseId), context);
     if (get(pqReport, 'data.userPracticeQuestionReports', []).length) {
       const prevDetailedReport = get(pqReport, 'data.userPracticeQuestionReports[0].detailedReport', []);
       prevDetailedReport.forEach((questionReport) => {

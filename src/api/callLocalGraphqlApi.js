@@ -1,11 +1,12 @@
 import { graphql } from 'graphql';
 import schema from '../graphql/index';
-import { createAndThrowApolloError } from '../../utils';
+import { createAndThrowApolloError, log } from '../../utils';
 
 const callLocalGraphqlApi = (query, context, variables) => {
   const argsOrSchema = schema;
   const source = query;
   const rootValue = {};
+  if (!context) log('Context is not defined!', 'warn');
   const contextValue = context || {};
   let variableValues = variables || {};
 

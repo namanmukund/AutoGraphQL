@@ -11,7 +11,7 @@ const getUser = async (phoneNumber) => {
     users(filter: { phone_number_subDoc: "${phoneNumber}" }) {
       timezone
     }
-  }`);
+  }`, {});
   return get(user, 'data.users[0]', {});
 };
 
@@ -45,7 +45,7 @@ const getLeadPartnerType = async (leadPartnerId, term, medium, source, campaign,
     title
   }
 }`;
-  const leadPartnerType = await callLocalGraphqlApi(query);
+  const leadPartnerType = await callLocalGraphqlApi(query, {});
   return get(leadPartnerType, 'data.leadPartners[0]');
 };
 

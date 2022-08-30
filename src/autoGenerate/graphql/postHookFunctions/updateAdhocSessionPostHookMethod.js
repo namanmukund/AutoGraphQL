@@ -109,7 +109,7 @@ const updateAdhocSessionPostHookMethod = async (input, params, mutationName, con
   get Course Id
   */
   if (!courseId) {
-    const courseResult = await callLocalGraphqlApi(getCourseQuery());
+    const courseResult = await callLocalGraphqlApi(getCourseQuery(), context);
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
       throw new DatabaseRecordNotFoundError({
@@ -131,20 +131,20 @@ const updateAdhocSessionPostHookMethod = async (input, params, mutationName, con
     let finalMentorSessionId = '';
     const { bookingDate: sessionsBookingDateInDB, ...slotsInDB } = input;
     const slotTimeInDBArray = getSelectedSlotsTime(slotsInDB);
-    const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(sessionsBookingDateInDB, allottedMentorId, sessionType));
+    const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(sessionsBookingDateInDB, allottedMentorId, sessionType), context);
     const mentorSession = get(mentorSessionsRes, 'data.mentorSessions[0]');
     if (mentorSession && mentorSession.id) {
       const { id: mentorSessionIdOfAllottedMentor, ...slotsInMentorSession } = mentorSession;
       finalMentorSessionId = mentorSessionIdOfAllottedMentor;
       const slotsInMentorSessionArray = getSelectedSlotsTime(slotsInMentorSession);
       if (slotTimeInDBArray && slotTimeInDBArray.length && slotsInMentorSessionArray && slotsInMentorSessionArray.length && slotTimeInDBArray[0] !== slotsInMentorSessionArray[0]) {
-        await callLocalGraphqlApi(updateMentorSession(mentorSessionIdOfAllottedMentor, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`));
+        await callLocalGraphqlApi(updateMentorSession(mentorSessionIdOfAllottedMentor, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`), context);
       }
     } else {
-      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`, sessionType));
+      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, sessionsBookingDateInDB, `slot${slotTimeInDBArray[0]}`, sessionType), context);
       finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
     }
-    await callLocalGraphqlApi(updateAdhocSession(adhocSessionId, finalMentorSessionId));
+    await callLocalGraphqlApi(updateAdhocSession(adhocSessionId, finalMentorSessionId), context);
   }
 
   // TODO : add audit for adhoc

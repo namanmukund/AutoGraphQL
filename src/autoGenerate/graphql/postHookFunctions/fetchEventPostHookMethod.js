@@ -6,14 +6,14 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getFieldsBeingFetched from '../../utils/getFieldsBeingFetched';
 import { getUserIdandAppNameAfterValidation, validateTokenAndExtractInformation } from '../preHookFunctions/validation/utils';
 
-const getStudentProfile = async (userId) => {
+const getStudentProfile = async (userId, context) => {
   const query = `{
   studentProfiles(filter: { user_some: { id: "${userId}" } }) {
     id
   }
 }
 `;
-  const result = await callLocalGraphqlApi(query);
+  const result = await callLocalGraphqlApi(query, context);
   return get(result, 'data.studentProfiles[0].id');
 };
 
@@ -54,7 +54,7 @@ const fetchEventPostHookMethod = async (input, params, mutationName, context, in
       }
     }
     if (userIdFromContext && userRoleFromContext === MENTEE) {
-      const studentProfileId = await getStudentProfile(userIdFromContext);
+      const studentProfileId = await getStudentProfile(userIdFromContext, context);
       if (Array.isArray(input) && input.length) {
         input.forEach((elem) => {
           elem.registeredUsers = get(elem, 'registeredUsers', []).filter((user) => get(user, 'typeId') === studentProfileId);

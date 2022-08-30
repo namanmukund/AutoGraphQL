@@ -6,7 +6,7 @@ import {
 } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-export const fetchProject = async (courseIds, title, order, type, projectFilter) => {
+export const fetchProject = async (courseIds, title, order, type, projectFilter, context) => {
   const query = `{
   blockBasedProjects(
     filter: { and: [
@@ -21,11 +21,11 @@ export const fetchProject = async (courseIds, title, order, type, projectFilter)
   }
 }
 `;
-  const projectData = await callLocalGraphqlApi(query);
+  const projectData = await callLocalGraphqlApi(query, context);
   return get(projectData, 'data.blockBasedProjects');
 };
 
-const addBlockBasedProjectValidation = async (params) => {
+const addBlockBasedProjectValidation = async (params, _mutationOrQueryName, context) => {
   const { coursesConnectIds = [], input = {} } = params;
   const title = get(input, 'title');
   const order = get(input, 'order');
@@ -34,7 +34,7 @@ const addBlockBasedProjectValidation = async (params) => {
     let courseIds = '';
     coursesConnectIds.forEach((courseId) => { courseIds += `"${courseId}"`; });
     if (title) {
-      const projectDataArray = await fetchProject(courseIds, title, null, type);
+      const projectDataArray = await fetchProject(courseIds, title, null, type, null, context);
       if (projectDataArray && projectDataArray.length > 0) {
         throw new ProjectWithSimilarTitleAlreadyExist();
       }

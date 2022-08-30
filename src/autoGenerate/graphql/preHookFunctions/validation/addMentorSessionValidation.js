@@ -15,7 +15,7 @@ import checkIfSlotCanBeOpenedValidation from './utils/checkIfSlotCanBeOpenedVali
 import getMentorSessions from '../../../utils/getMentorSessions';
 import addAcceptedSlotRequestByMentorLogCheck from './utils/addAcceptedSlotRequestByMentorLogCheck';
 
-const getMentorProfile = async (mentorId) => {
+const getMentorProfile = async (mentorId, context) => {
   const query = `{
   mentorProfiles(filter: { user_some: { id: "${mentorId}" } }) {
     id
@@ -23,7 +23,7 @@ const getMentorProfile = async (mentorId) => {
   }
 }
 `;
-  const result = await callLocalGraphqlApi(query);
+  const result = await callLocalGraphqlApi(query, context);
   return get(result, 'data.mentorProfiles', []);
 };
 
@@ -37,7 +37,7 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
 
   // getting user role from context. We will allow adding mentorSession if logged in user is admin
   const mentorId = get(params, 'userConnectId');
-  const mentorProfile = await getMentorProfile(mentorId);
+  const mentorProfile = await getMentorProfile(mentorId, context);
   const isMentorActive = get(mentorProfile, '[0].isMentorActive');
   if (!isMentorActive) {
     throw new MentorIsInactiveError();
@@ -98,6 +98,7 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
       userId,
       availabilityDate,
     ),
+    context,
   );
 
   // there can be a max of 3 mentorSessions for an availability date of type(batch/trial/paid)

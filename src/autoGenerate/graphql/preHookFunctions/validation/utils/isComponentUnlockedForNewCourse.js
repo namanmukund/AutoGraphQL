@@ -25,6 +25,7 @@ import { ifAuthorized } from '../../../../../../utils';
 import { MENTOR, SCHOOL_TEACHER } from '../../../../../../constants/roles';
 import getSortedTopics from '../../../../../../utils/getSortedTopicsFromCoursePackageOrder';
 import isUserInheritedFromMentor from '../../../postHookFunctions/utils/isMentorChild';
+import getUserActiveClassroom from '../../../../../../utils/getUserActiveClassroom';
 
 /*
 This is a common method to check whether the called topic component is locked or not
@@ -157,6 +158,7 @@ const isComponentUnlockedForNewCourse = async (
     currentTopicQuery,
     currentLearningObjectiveQuery,
     'enrollmentType',
+    context,
   );
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
   // Bypassing component validation incase if schoolTeacher is accessing the content.
@@ -228,18 +230,22 @@ const isComponentUnlockedForNewCourse = async (
   const { id: currentTopicId } = currentTopic;
   const batchCurrentComponentStatusRes = await getBatchCurrentComponentStatus(
     userId,
+    context,
   );
-  const batchCurrentComponentInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.currentComponent');
+  const activeClassroom = await getUserActiveClassroom(context, {
+    studentProfile: get(batchCurrentComponentStatusRes, 'data.user.studentProfile'),
+  }, get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.id'));
+  const batchCurrentComponentInfo = get(activeClassroom, 'currentComponent');
   const schoolInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.school');
 
-  const isCoursePackageBatch = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.id');
+  const isCoursePackageBatch = get(activeClassroom, 'coursePackage.id');
 
   if (isCoursePackageBatch) {
     let coursePackageTopics = [];
-    if (get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackageTopicRule', []).length) {
-      coursePackageTopics = getSortedTopics(get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackageTopicRule', []));
+    if (get(activeClassroom, 'coursePackageTopicRule', []).length) {
+      coursePackageTopics = getSortedTopics(get(activeClassroom, 'coursePackageTopicRule', []));
     } else {
-      coursePackageTopics = getSortedTopics(get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.topics', []));
+      coursePackageTopics = getSortedTopics(get(activeClassroom, 'coursePackage.topics', []));
     }
     // topic we send in input
     const topicFound = coursePackageTopics.find((o) => o.id === topicId);
@@ -304,7 +310,7 @@ const isComponentUnlockedForNewCourse = async (
   // no mentor token, he should not be able to hit API
   // this will be checked for normal flow and not for batch
   if (!batchCurrentComponentInfo) {
-    const mentorMenteeSessionQueryRes = await getMentorMenteeSessionForValidation(userId, topicId);
+    const mentorMenteeSessionQueryRes = await getMentorMenteeSessionForValidation(userId, topicId, context);
     const mentorMenteeSessionStatus = get(mentorMenteeSessionQueryRes, 'data.mentorMenteeSessions[0].sessionStatus', '');
 
     validateMentorMenteePermissionForComponentForNewCourse(

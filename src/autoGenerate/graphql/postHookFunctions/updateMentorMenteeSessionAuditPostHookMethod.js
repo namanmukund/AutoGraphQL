@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
-const updateMentorMenteeSessionAudit = async (mentorMenteeSessionAuditId, input) => {
+const updateMentorMenteeSessionAudit = async (mentorMenteeSessionAuditId, input, context) => {
   const query = `
     mutation($input:MentorMenteeSessionAuditUpdate!){
       updateMentorMenteeSessionAudit(
@@ -15,11 +15,11 @@ const updateMentorMenteeSessionAudit = async (mentorMenteeSessionAuditId, input)
   const variables = {
     input,
   };
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.updateMentorMenteeSessionAudit');
 };
 
-const updateMentorMenteeSessionAuditPostHookMethod = async (input, _mutationName, _context, params) => {
+const updateMentorMenteeSessionAuditPostHookMethod = async (input, _mutationName, context, params) => {
   const { auditorConnectId } = params;
   /**
    * Check if prev status is not started and auditorConnectId not provided then update status to started
@@ -27,7 +27,7 @@ const updateMentorMenteeSessionAuditPostHookMethod = async (input, _mutationName
    * */
   if (get(params, 'input.status', false) !== 'completed') {
     if (get(input, 'status', false) !== 'started' && !auditorConnectId) {
-      const updateMentorMenteeSessionAuditData = await updateMentorMenteeSessionAudit(get(input, 'id'), { status: 'started' });
+      const updateMentorMenteeSessionAuditData = await updateMentorMenteeSessionAudit(get(input, 'id'), { status: 'started' }, context);
       if (updateMentorMenteeSessionAuditData && updateMentorMenteeSessionAuditData.id) {
         Object.assign(input, {
           status: updateMentorMenteeSessionAuditData.status,

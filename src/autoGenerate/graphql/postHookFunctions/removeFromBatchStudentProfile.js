@@ -16,22 +16,22 @@ import {
 const removeFromBatchStudentProfilePosthookMethod = async (input, params, mutationName, context) => {
   const { studentProfileId, batchId } = params;
   // fetch the batch sessions (allotted) which are linked to the given batchId
-  const batchSessions = await fetchAllottedBatchSessions(batchId);
+  const batchSessions = await fetchAllottedBatchSessions(batchId, context);
   if (batchSessions && batchSessions.length > 0) {
     // call to remove student for each batch
     /*  eslint-disable no-restricted-syntax */
     for (const batchSession of batchSessions) {
-      removeStudentFromBatchSessionAttendance(batchSession, studentProfileId);
+      removeStudentFromBatchSessionAttendance(batchSession, studentProfileId, context);
     }
   }
   // update userCurrTopicComponent to BatchCurrTopicComponent data
   // fetch student profile which provide current component status
-  const studentProfiles = await fetchStudentProfile(studentProfileId, batchId);
+  const studentProfiles = await fetchStudentProfile(studentProfileId, batchId, context);
   const studentProfile = studentProfiles && studentProfiles[0];
 
   // fetch the userCurrentComponent from the userId
   const userId = get(studentProfile, 'user.id', '');
-  const userCurrentComponent = await fetchUserCurrentTopicComponentStatuses(userId);
+  const userCurrentComponent = await fetchUserCurrentTopicComponentStatuses(userId, context);
 
   // proceed to update only if the current topic in batch is greater than current topic in user
   const courseId = get(studentProfile, 'batch.course.id', '');
@@ -45,12 +45,12 @@ const removeFromBatchStudentProfilePosthookMethod = async (input, params, mutati
     if (latestSessionStatus !== sessionStatus.completed) {
       const batchCurrentTopicId = get(studentProfile, 'batch.currentComponent.currentTopic.id', '');
       const batchCurrentLOId = get(studentProfile, 'batch.currentComponent.currentLearningObjective.id', '');
-      await updateUserCurrentTopicComponentStatus(userCurrentComponentId, batchCurrentTopicId, batchCurrentTopicComponentType, batchCurrentLOId);
+      await updateUserCurrentTopicComponentStatus(userCurrentComponentId, batchCurrentTopicId, batchCurrentTopicComponentType, batchCurrentLOId, context);
     } else {
-      const topics = await fetchNextTopicId(batchCurrentTopicOrder, courseId);
+      const topics = await fetchNextTopicId(batchCurrentTopicOrder, courseId, context);
       const nextTopicId = get(topics[0], 'id');
       const firstLearningObjectiveId = get(topics[0], 'learningObjectives[0].id', '');
-      await updateUserCurrentTopicComponentStatus(userCurrentComponentId, nextTopicId, 'video', firstLearningObjectiveId);
+      await updateUserCurrentTopicComponentStatus(userCurrentComponentId, nextTopicId, 'video', firstLearningObjectiveId, context);
     }
   }
 };

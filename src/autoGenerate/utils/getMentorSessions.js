@@ -19,7 +19,13 @@ const getMentorSessions = (userId, availabilityDate) => `query{
             user {
               name
               studentProfile {
+                id
                 batch {
+                  id
+                  code
+                  documentType
+                }
+                batches {
                   id
                   code
                   documentType

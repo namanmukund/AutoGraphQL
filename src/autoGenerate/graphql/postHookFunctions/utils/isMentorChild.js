@@ -15,8 +15,8 @@ const mentorChildCheckQuery = (userId, fetchSecondaryRole = false) => `
   }
 `;
 
-const isUserIsMentorChild = async (userId, checkIfSchoolTeacher = false) => {
-  const userData = await callLocalGraphqlApi(mentorChildCheckQuery(userId, checkIfSchoolTeacher));
+const isUserIsMentorChild = async (userId, checkIfSchoolTeacher = false, context) => {
+  const userData = await callLocalGraphqlApi(mentorChildCheckQuery(userId, checkIfSchoolTeacher), context);
   const mentorChildId = get(userData, 'data.user.studentProfile.mentor.id', null);
   if (checkIfSchoolTeacher
     && get(userData, 'data.user.studentProfile.mentor.user.secondaryRole', null) !== SCHOOL_TEACHER

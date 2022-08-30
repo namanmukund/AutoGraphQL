@@ -110,7 +110,7 @@ It will be created and returned to tekie app with all the questions.
 Document contains all the necessary information needed on page along
 with the next component.
 */
-const userQuizPostHookMethod = async (input, params) => {
+const userQuizPostHookMethod = async (input, params, mutationName, context) => {
   /*
   checking if document is already present in collection for user and topic id,
   returning input in that case
@@ -134,7 +134,7 @@ const userQuizPostHookMethod = async (input, params) => {
     we are getting below fields in topicQuery:
     -all published quiz questions of the topic
     */
-  const topicQueryRes = await callLocalGraphqlApi(topicQuery(topicId));
+  const topicQueryRes = await callLocalGraphqlApi(topicQuery(topicId), context);
   const topicInfo = get(topicQueryRes, 'data.topic');
   // adding quiz questions in the document
   // this logic will be changed based on question sets
@@ -166,7 +166,7 @@ const userQuizPostHookMethod = async (input, params) => {
     We are getting published topics list through this query.
     Then we will get next published topic
     */
-  const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery());
+  const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(), context);
   const topicsList = get(nextTopicQueryRes, 'data.topics');
 
   let currentTopicIndex;
@@ -194,7 +194,7 @@ const userQuizPostHookMethod = async (input, params) => {
     restQuery,
     quizQuery,
     courseId,
-  ));
+  ), context);
   if (result) {
     /*
       parsing data 'addUserQuiz' so that the logic implemented ahead can read data is

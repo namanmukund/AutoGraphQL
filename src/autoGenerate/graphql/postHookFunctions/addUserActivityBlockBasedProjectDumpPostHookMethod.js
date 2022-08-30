@@ -178,7 +178,7 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
     savedBlocks,
     startTime,
     endTime,
-  ));
+  ), context);
   return true;
 };
 

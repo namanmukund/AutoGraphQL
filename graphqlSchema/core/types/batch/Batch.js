@@ -41,6 +41,7 @@ const Batch = `
   {
     course: Course @relation(name: "BatchCurrentComponentStatusCourse", direction: "OneWay")
     coursePackage: CoursePackage @relation(name: "BatchCoursePackage", direction: "OneWay")
+    coursePackageCourses: [Course] @relation(name: "BatchCoursePackageCourses", direction: "OneWay")
     coursePackageTopicRule: [CoursePackageTopicRule]
     allottedMentor: User @relation(name:"BatchMentor")
     code: String! @trim @uppercase
@@ -48,6 +49,7 @@ const Batch = `
     description: String
     thumbnailSmall: String
     students: [StudentProfile] @relation(name: "BatchStudentProfile")
+    batchStudents: [StudentProfile] @relation(name: "BatchesStudentProfile")
     currentComponent: BatchCurrentComponentStatus @relation(name: "BatchCurrentComponentStatusBatch", isSubset: true)
     documentType: SessionDocumentType @defaultValue(value: "batch")
     type: BatchType @defaultValue(value: "normal")
@@ -63,6 +65,7 @@ const Batch = `
     notices: [Notice] @relation(name: "BatchNotice")
     academicDuration: [AcademicDuration]
     academicYearTitle: String
+    inheritedFrom: Batch @relation(name: "BatchInheritedFrom", direction: "OneWay")
   }
 `;
 

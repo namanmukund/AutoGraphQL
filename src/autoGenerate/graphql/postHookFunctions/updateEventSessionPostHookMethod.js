@@ -6,7 +6,7 @@ import {
 import eventsLSQActions from './utils/eventsLSQActions';
 // import addToSchedule from '../../../../utils/scheduleJobs/addToSchedule';
 
-const generateEventCertificate = async (userId, eventId) => {
+const generateEventCertificate = async (userId, eventId, context) => {
   const query = `
     mutation {
     generateCertificate(
@@ -17,11 +17,11 @@ const generateEventCertificate = async (userId, eventId) => {
         tekieUrl
     }
     }`;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.generateCertificate');
 };
 
-const getUserCertificate = async (userId, eventId) => {
+const getUserCertificate = async (userId, eventId, context) => {
   const query = `{
   eventCertificates(
     filter: { and: [{ user_some: { id: "${userId}" } }, { event_some: { id: "${eventId}" } }] }
@@ -31,7 +31,7 @@ const getUserCertificate = async (userId, eventId) => {
   }
 }
 `;
-  const certificate = await callLocalGraphqlApi(query);
+  const certificate = await callLocalGraphqlApi(query, context);
   return get(certificate, 'data.eventCertificates', []).length;
 };
 
@@ -42,9 +42,9 @@ const updateEventSessionPostHookMethod = async (input, params, mutationName, con
   } = context;
   // const { id: eventSessionId } = input;
   if (currentApp === TWA && currentUserId && eventId) {
-    const userCertificate = await getUserCertificate(currentUserId, eventId);
+    const userCertificate = await getUserCertificate(currentUserId, eventId, context);
     if (!userCertificate) {
-      generateEventCertificate(currentUserId, eventId);
+      generateEventCertificate(currentUserId, eventId, context);
       eventsLSQActions(eventId, studentProfileId, 'eventCompletion');
     }
   }

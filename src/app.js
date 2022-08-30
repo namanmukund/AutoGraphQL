@@ -16,6 +16,7 @@ import iciciRoutes from './externalProductAPI/icici/routes';
 import typeformRoute from './typeformAPI';
 import redis from './redis';
 import pubsub from './pubsub';
+import { ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER, ALLOWED_HEADERS } from '../constants';
 
 const http = require('http');
 
@@ -61,7 +62,7 @@ app.use(authMiddleware);
 const corsOptions = {
   origin: '*',
   optionsSuccessStatus: 200,
-  allowedHeaders: ['Content-Type', 'Authorization', 'Content-Length', 'X-Requested-With', 'X-Forwarded-By', 'User-Device-Id', 'BatchSession-Id'],
+  allowedHeaders: ALLOWED_HEADERS,
 };
 
 app.use(cors(corsOptions));
@@ -100,6 +101,13 @@ const server = new ApolloServer({
     };
   },
   context: ({ req, connection }) => {
+    const additionalContextDataFromHeader = {};
+    if (req && req.headers) {
+      ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER
+        .forEach(({ contextLabel: key, headerLabel: label }) => {
+          if (req.headers[label]) additionalContextDataFromHeader[key] = req.headers[label];
+        });
+    }
     if (connection) {
       // context comes in connection in case WS
       return {
@@ -107,6 +115,7 @@ const server = new ApolloServer({
         pubsub,
         parsedASTMap,
         redis,
+        ...additionalContextDataFromHeader,
       };
     }
     // file info from middleware
@@ -162,6 +171,7 @@ const server = new ApolloServer({
       pubsub,
       parsedASTMap,
       redis,
+      ...additionalContextDataFromHeader,
     };
   },
 });

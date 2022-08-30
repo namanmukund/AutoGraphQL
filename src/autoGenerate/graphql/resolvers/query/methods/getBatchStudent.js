@@ -16,7 +16,14 @@ const getStudentProfileAggregation = ({
 }) => [
     {
       $match: {
-        'batch.typeId': batchId,
+        $or: [
+          {
+            'batch.typeId': batchId,
+          },
+          {
+            'batches.typeId': batchId,
+          },
+        ],
         rollNo: studentRoll,
       },
     },

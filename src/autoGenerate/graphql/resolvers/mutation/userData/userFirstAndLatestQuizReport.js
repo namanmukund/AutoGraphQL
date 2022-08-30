@@ -15,6 +15,7 @@ from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidat
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { QueryController } from '../../../controllers';
+import getUserActiveClassroom from '../../../../../../utils/getUserActiveClassroom';
 
 // query to get current component status of user
 // const getUserCurrentTopicComponentStatus = (userId, courseId) => `
@@ -259,6 +260,7 @@ const getUserBatchDetails = (userId) => [
     $project: {
       id: 1,
       batch: 1,
+      batches: 1,
       user: 1,
     },
   },
@@ -282,6 +284,8 @@ const getUserBatchDetails = (userId) => [
         {
           $project: {
             id: 1,
+            course: 1,
+            coursePackage: 1,
             currentComponent: 1,
           },
         },
@@ -355,8 +359,83 @@ const getUserBatchDetails = (userId) => [
           },
         },
         {
+          $lookup: {
+            from: 'Course',
+            let: { courseId: '$course.typeId' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$id', '$$courseId'],
+                  },
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  title: 1,
+                },
+              },
+            ],
+            as: 'course',
+          },
+        },
+        {
+          $lookup: {
+            from: 'CoursePackage',
+            let: { coursePackageId: '$coursePackage.typeId' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$id', '$$coursePackageId'],
+                  },
+                },
+              },
+              {
+                $project: {
+                  _id: 0,
+                  courses: 1,
+                  id: 1,
+                  status: 1,
+                  title: 1,
+                },
+              },
+              {
+                $lookup: {
+                  from: 'Course',
+                  let: { coursesId: '$courses.typeId' },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $in: ['$id', '$$coursesId'],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        title: 1,
+                      },
+                    },
+                  ],
+                  as: 'courses',
+                },
+              },
+            ],
+            as: 'coursePackage',
+          },
+        },
+        {
           $project: {
             id: 1,
+            course: {
+              $arrayElemAt: ['$course', 0],
+            },
+            coursePackage: {
+              $arrayElemAt: ['$coursePackage', 0],
+            },
             currentComponent: {
               $arrayElemAt: ['$currentComponent', 0],
             },
@@ -367,12 +446,191 @@ const getUserBatchDetails = (userId) => [
     },
   },
   {
+    $lookup: {
+      from: 'Batch',
+      let: { batchId: '$batches.typeId' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: ['$id', '$$batchId'],
+            },
+          },
+        },
+        {
+          $project: {
+            id: 1,
+            course: 1,
+            currentComponent: 1,
+            coursePackage: 1,
+          },
+        },
+        {
+          $lookup: {
+            from: 'BatchCurrentComponentStatus',
+            let: {
+              ccId: '$currentComponent.typeId',
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: [
+                      '$id',
+                      '$$ccId',
+                    ],
+                  },
+                },
+              },
+              {
+                $project: {
+                  currentCourse: {
+                    id: '$currentCourse.typeId',
+                  },
+                  enrollmentType: 1,
+                  latestSessionStatus: 1,
+                  currentTopic: 1,
+                },
+              },
+              {
+                $lookup: {
+                  from: 'Topic',
+                  let: {
+                    currentTopicId: '$currentTopic.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: [
+                            '$id',
+                            '$$currentTopicId',
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        order: 1,
+                      },
+                    },
+                  ],
+                  as: 'currentTopic',
+                },
+              },
+              {
+                $project: {
+                  currentCourse: 1,
+                  enrollmentType: 1,
+                  currentTopic: {
+                    $arrayElemAt: [
+                      '$currentTopic',
+                      0,
+                    ],
+                  },
+                  latestSessionStatus: 1,
+                },
+              },
+            ],
+            as: 'currentComponent',
+          },
+        },
+        {
+          $lookup: {
+            from: 'CoursePackage',
+            let: { coursePackageId: '$coursePackage.typeId' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$id', '$$coursePackageId'],
+                  },
+                },
+              },
+              {
+                $project: {
+                  _id: 0,
+                  courses: 1,
+                  id: 1,
+                  status: 1,
+                  title: 1,
+                },
+              },
+              {
+                $lookup: {
+                  from: 'Course',
+                  let: { coursesId: '$courses.typeId' },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $in: ['$id', '$$coursesId'],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        title: 1,
+                      },
+                    },
+                  ],
+                  as: 'courses',
+                },
+              },
+            ],
+            as: 'coursePackage',
+          },
+        },
+        {
+          $lookup: {
+            from: 'Course',
+            let: { courseId: '$course.typeId' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$id', '$$courseId'],
+                  },
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  title: 1,
+                },
+              },
+            ],
+            as: 'course',
+          },
+        },
+        {
+          $project: {
+            id: 1,
+            course: {
+              $arrayElemAt: ['$course', 0],
+            },
+            coursePackage: {
+              $arrayElemAt: ['$coursePackage', 0],
+            },
+            currentComponent: {
+              $arrayElemAt: ['$currentComponent', 0],
+            },
+          },
+        },
+      ],
+      as: 'batches',
+    },
+  },
+  {
     $project: {
       _id: 0,
       id: 1,
       batch: {
         $arrayElemAt: ['$batch', 0],
       },
+      batches: 1,
     },
   },
 ];
@@ -500,7 +758,12 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     //   '',
     // );
 
-    const batchCurrentComponentInfo = get(batchRes, '0.batch.currentComponent');
+    const userActiveClassroom = await getUserActiveClassroom(
+      context,
+      { courseId, studentProfile: batchRes[0] },
+      get(batchRes, '0.batch.id'),
+    );
+    const batchCurrentComponentInfo = get(userActiveClassroom, 'currentComponent');
     /* eslint no-await-in-loop:0 */
     // const res = await callLocalGraphqlApi(
     //   getUserCurrentTopicComponentStatus(userId, courseId),
@@ -615,7 +878,7 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     let nextComponentData = {};
     if (!courseId || courseId === OLD_COURSE_ID) {
       /* eslint no-await-in-loop:0 */
-      const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId));
+      const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId), context);
       const nextTopicId = get(userQuizQueryRes, 'data.userQuizs[0].nextComponent.topic.id');
 
       const { video } = topicTypes;

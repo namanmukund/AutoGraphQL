@@ -7,7 +7,7 @@ import {
 } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-export const fetchLO = async (courseIds, order, title, LoFilter) => {
+export const fetchLO = async (courseIds, order, title, LoFilter, context) => {
   const query = `{
     learningObjectives(
       filter: { and: [
@@ -20,11 +20,11 @@ export const fetchLO = async (courseIds, order, title, LoFilter) => {
       id
     }
   }`;
-  const loData = await callLocalGraphqlApi(query);
+  const loData = await callLocalGraphqlApi(query, context);
   return get(loData, 'data.learningObjectives');
 };
 
-const addLearningObjectiveValidation = async (params) => {
+const addLearningObjectiveValidation = async (params, _mutationOrQueryName, context) => {
   const { topicConnectId: id, coursesConnectIds = [], input = {} } = params;
   // if (!id) {
   //   throw new TopicIdRequiredError();
@@ -41,7 +41,7 @@ const addLearningObjectiveValidation = async (params) => {
   }
   `;
 
-    const res = await callLocalGraphqlApi(query);
+    const res = await callLocalGraphqlApi(query, context);
     const learningObjectives = get(res, 'data.topic.learningObjectives');
     if (learningObjectives) {
       for (const learningObjective of learningObjectives) {
@@ -58,13 +58,13 @@ const addLearningObjectiveValidation = async (params) => {
     let courseIds = '';
     coursesConnectIds.forEach((courseId) => { courseIds += `"${courseId}"`; });
     if (order) {
-      const LoData = await fetchLO(courseIds, order);
+      const LoData = await fetchLO(courseIds, order, null, null, context);
       if (LoData && LoData.length > 0) {
         throw new OrderAlreadyExistsError();
       }
     }
     if (title) {
-      const LoData = await fetchLO(courseIds, null, title);
+      const LoData = await fetchLO(courseIds, null, title, null, context);
       if (LoData && LoData.length > 0) {
         throw new LOWithSimilarTitleAlreadyExist();
       }

@@ -173,7 +173,7 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
     learningSlideId,
     startTime,
     endTime,
-  ));
+  ), context);
   return true;
 };
 

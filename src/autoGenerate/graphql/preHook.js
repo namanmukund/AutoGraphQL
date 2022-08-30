@@ -79,6 +79,7 @@ import deleteSchoolClassValidation from './preHookFunctions/validation/deleteSch
 import deleteCourseValidation from './preHookFunctions/validation/deleteCourseValidation';
 import deleteCoursePackageValidation from './preHookFunctions/validation/deleteCoursePackageValidation';
 import updateBatchValidation from './preHookFunctions/validation/updateBatchValidation';
+import addBatchValidation from './preHookFunctions/validation/addBatchValidation';
 import updateCampaignValidation from './preHookFunctions/validation/updateCampaignValidation';
 import generateInviteCode from '../../../utils/generateInviteCode';
 import deleteBatchValidation from './preHookFunctions/validation/deleteBatchValidation';
@@ -151,7 +152,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       //   throw new ConnectIdRequiredError({ data: { message: 'Chapter Id is required' } });
       // }
       // await isUniqueOrderField(params, mutationOrQueryName);
-      await addTopicValidation(params);
+      await addTopicValidation(params, mutationOrQueryName, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
 
@@ -320,7 +321,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       break;
     }
     case 'deleteTopic': {
-      await deleteTopicValidation(params);
+      await deleteTopicValidation(params, context);
       break;
     }
     case 'deleteLearningObjective': {
@@ -372,7 +373,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       return hook(input, mutationOrQueryName, 'PreHook');
     }
     case 'addLearningObjective': {
-      await addLearningObjectiveValidation(params);
+      await addLearningObjectiveValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'userTopicJourney': {
@@ -792,6 +793,10 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'deleteCoursePackage': {
       await deleteCoursePackageValidation(params, mutationOrQueryName, context);
+      break;
+    }
+    case 'addBatch': {
+      await addBatchValidation(params, mutationOrQueryName, context);
       break;
     }
     case 'updateBatch': {

@@ -50,7 +50,7 @@ const addBatchCurrentComponentStatus = (
 /*
   Post hook of add batch
 */
-const addBatchPostHookMethod = async (input) => {
+const addBatchPostHookMethod = async (input, _params, _mutationName, context) => {
   const { id: batchId } = input;
   let courseId = get(input, 'course.typeId');
   const coursePackageId = get(input, 'coursePackage.typeId');
@@ -62,7 +62,7 @@ const addBatchPostHookMethod = async (input) => {
     the first published topic will get populated in the document
     */
   if (coursePackageId) {
-    const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+    const coursePackage = await getTopicsFromCoursePackage(coursePackageId, context);
     const topicRules = get(coursePackage, 'topics');
     const topics = getSortedTopics(topicRules);
     firstTopicId = get(topics, '[0].id');
@@ -73,12 +73,13 @@ const addBatchPostHookMethod = async (input) => {
   }
 
   if (!courseId && !coursePackageId) {
-    const courseResult = await callLocalGraphqlApi(getCourseQuery());
+    const courseResult = await callLocalGraphqlApi(getCourseQuery(), context);
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
       throw new DatabaseRecordNotFoundError({
         data: {
-          error: 'Published course is not present with title as python from component addBatchPostHookMethod',
+          error:
+            'Published course is not present with title as python from component addBatchPostHookMethod',
         },
       });
     }
@@ -87,11 +88,19 @@ const addBatchPostHookMethod = async (input) => {
   // we are not throwing any error here because it will seem that create batch failed if
   // firstTopicId and courseId and batchId is not present. Just adding log
   if (batchId && courseId && firstTopicId) {
-    await callLocalGraphqlApi(addBatchCurrentComponentStatus(
-      batchId, courseId, firstTopicId, documentType === 'classroom',
-    ));
+    await callLocalGraphqlApi(
+      addBatchCurrentComponentStatus(
+        batchId,
+        courseId,
+        firstTopicId,
+        documentType === 'classroom',
+      ),
+      context,
+    );
   } else {
-    log('Failed to get first published topic or published course or batch id corresponding to it in addBatchPostHookMethod');
+    log(
+      'Failed to get first published topic or published course or batch id corresponding to it in addBatchPostHookMethod',
+    );
   }
 };
 

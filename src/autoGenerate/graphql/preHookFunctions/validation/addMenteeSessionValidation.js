@@ -120,7 +120,7 @@ const addMenteeSessionValidation = async (params, mutationOrQueryName, context) 
   }
 
   // throw error if document already exists
-  const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId, topicId));
+  const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId, topicId), context);
   const menteeSessions = get(getMenteeSessionsRes, 'data.menteeSessions');
   if (menteeSessions && menteeSessions.length) {
     throw new SimilarDocumentAlreadyExistError();

@@ -48,9 +48,9 @@ const updateUserCurrentTopicComponentStatus = (
   `;
 
 // menthod starts from here
-const updateUserEnrollmentTypeToPro = async (userId) => {
+const updateUserEnrollmentTypeToPro = async (userId, context) => {
   // get UserCurrentTopicComponentStatus to get its id and enrollment type
-  const userCurrentTopicComponentStatusRes = await callLocalGraphqlApi(getUserCurrentTopicComponentStatus(userId));
+  const userCurrentTopicComponentStatusRes = await callLocalGraphqlApi(getUserCurrentTopicComponentStatus(userId), context);
 
   const currentTopicComponentInfoId = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0].id');
   const userEnrollmentType = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0].enrollmentType');
@@ -66,7 +66,7 @@ const updateUserEnrollmentTypeToPro = async (userId) => {
   if (userEnrollmentType === enrollmentTypes.free) {
     await callLocalGraphqlApi(updateUserCurrentTopicComponentStatus(
       currentTopicComponentInfoId,
-    ));
+    ), context);
   }
 
   return true;

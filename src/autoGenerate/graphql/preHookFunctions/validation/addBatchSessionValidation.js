@@ -115,7 +115,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   // check if mentor already has another session in same slot
   console.log('change1 *** addBatchSessionValidation')
   if (mentorSessionConnectId) {
-    const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+    const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId), context);
     const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
     const bookingDate = get(params, 'input.bookingDate', '');
     const isMentorActive = get(fetchMentorRes,'data.mentorSession.user.mentorProfile.isMentorActive')
@@ -129,6 +129,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
           mentorUserId,
           bookingDate,
         ),
+        context,
       );
       const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
       checkIfSlotCanBeOpenedValidation(params, mentorSessions);
@@ -145,7 +146,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
 
   // throw error if document already exists
   if (topicId) {
-    const getBatchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, topicId));
+    const getBatchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, topicId), context);
     const batchSessions = get(getBatchSessionsRes, 'data.batchSessions');
     if (batchSessions && batchSessions.length) {
       throw new SimilarDocumentAlreadyExistError();

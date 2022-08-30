@@ -46,7 +46,7 @@ export const leadStatusNextStepOptions = [
 ];
 
 const updateSalesOperationLeadSquared = async (salesOperationId, userInfo) => {
-  const salesOperation = await callLocalGraphqlApi(salesOperationQuery(salesOperationId));
+  const salesOperation = await callLocalGraphqlApi(salesOperationQuery(salesOperationId), {});
   const data = get(salesOperation, 'data.salesOperation');
   const phoneNumber = get(userInfo, 'data.user.studentProfile.parents[0].user.phone.number');
   const reasons = [

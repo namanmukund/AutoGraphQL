@@ -41,7 +41,7 @@ const getSchoolDetails = (async (root, params, context) => {
   // this will be sent in output
   const result = {};
 
-  const getSchoolRes = await callLocalGraphqlApi(getSchoolData(code));
+  const getSchoolRes = await callLocalGraphqlApi(getSchoolData(code), context);
   const schoolId = get(getSchoolRes, 'data.school.id', '');
   const schoolLogoId = get(getSchoolRes, 'data.school.logo.id', '');
   const schoolPictureId = get(getSchoolRes, 'data.school.schoolPicture.id', '');
