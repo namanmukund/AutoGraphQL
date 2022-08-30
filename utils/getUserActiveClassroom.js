@@ -6,63 +6,70 @@ export const activeClassroomIdFromContext = (context) => get(context, 'activeCla
 
 const getStudentProfile = async (context) => {
   const { currentUser } = context;
-  const redisCon = new RedisController({ bypass: true });
-  const cachedData = await redisCon.get('user_active_classroom_student_profile');
-  if (cachedData && get(cachedData, 'id')) return cachedData;
-  const studentProfile = await callLocalGraphqlApi(
-    `{
-      studentProfiles(filter: {
-        user_some:{
-          id: "${get(currentUser, 'id')}"
-        }
-      }) {
-        id 
-        batches {
-          id
-          type
-          documentType
-          code
-          classroomTitle
-          course {
-            id
+  if (get(currentUser, 'id')) {
+    const redisCon = new RedisController({ bypass: true });
+    const cachedData = await redisCon.get(`user_active_classroom_student_profile_${get(currentUser, 'id')}`);
+    if (cachedData && get(cachedData, 'id')) return cachedData;
+    const studentProfile = await callLocalGraphqlApi(
+      `{
+        studentProfiles(filter: {
+          user_some:{
+            id: "${get(currentUser, 'id')}"
           }
-          coursePackage {
+        }) {
+          id 
+          batches {
             id
-            courses {
+            type
+            documentType
+            code
+            classroomTitle
+            course {
               id
+            }
+            coursePackage {
+              id
+              courses {
+                id
+              }
+            }
+          }
+          batch {
+            id
+            code
+            type
+            documentType
+            classroomTitle
+            course {
+              id
+            }
+            coursePackage {
+              id
+              courses {
+                id
+              }
             }
           }
         }
-        batch {
-          id
-          code
-          type
-          documentType
-          classroomTitle
-          course {
-            id
-          }
-          coursePackage {
-            id
-            courses {
-              id
-            }
-          }
-        }
-      }
-    }`,
-    context,
-  );
-  redisCon.set(get(studentProfile, 'data.studentProfiles[0]'), { hkey: 'user_active_classroom_student_profile', maxAge: 60 });
-  return get(studentProfile, 'data.studentProfiles[0]');
+      }`,
+      context,
+    );
+    redisCon.set(get(studentProfile, 'data.studentProfiles[0]'), { hkey: `user_active_classroom_student_profile_${get(currentUser, 'id')}`, maxAge: 60 });
+    return get(studentProfile, 'data.studentProfiles[0]');
+  }
+  return null;
 };
 
 const getUserBatchesArray = async (context, studentProfileData) => {
-  let studentProfile = studentProfileData;
-  if (!studentProfile) studentProfile = await getStudentProfile(context);
-  const userBatches = [...get(studentProfile, 'batches', [])];
-  if (get(studentProfile, 'batch') && !userBatches.find((batch) => get(batch, 'id') === get(studentProfile, 'batch.id'))) userBatches.push({ ...get(studentProfile, 'batch'), isDefault: true });
-  return userBatches || [];
+  try {
+    let studentProfile = studentProfileData;
+    if (!studentProfile) studentProfile = await getStudentProfile(context);
+    const userBatches = [...get(studentProfile, 'batches', [])];
+    if (get(studentProfile, 'batch') && !userBatches.find((batch) => get(batch, 'id') === get(studentProfile, 'batch.id'))) userBatches.push({ ...get(studentProfile, 'batch'), isDefault: true });
+    return userBatches || [];
+  } catch {
+    return [];
+  }
 };
 
 const getActiveClassroomBasedOnCourses = async (context, { courseId, userBatches: batches }, defaultClassroomId) => {
@@ -83,12 +90,16 @@ const getActiveClassroomBasedOnCourses = async (context, { courseId, userBatches
 };
 
 export const getActiveClassroomId = async (context, { courseId, userBatches }, defaultClassroomId) => {
-  let classroomId = activeClassroomIdFromContext(context);
-  if (!classroomId) {
-    const classroom = await getActiveClassroomBasedOnCourses(context, { courseId, userBatches }, defaultClassroomId);
-    classroomId = get(classroom, 'id');
+  try {
+    let classroomId = activeClassroomIdFromContext(context);
+    if (!classroomId) {
+      const classroom = await getActiveClassroomBasedOnCourses(context, { courseId, userBatches }, defaultClassroomId);
+      classroomId = get(classroom, 'id');
+    }
+    return classroomId || defaultClassroomId;
+  } catch {
+    return defaultClassroomId;
   }
-  return classroomId || defaultClassroomId;
 };
 
 const getUserActiveClassroom = async (context, { courseId, studentProfile }, defaultClassroomId) => {
