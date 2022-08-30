@@ -163,7 +163,8 @@ const isComponentUnlockedForNewCourse = async (
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
   // Bypassing component validation incase if schoolTeacher is accessing the content.
   const checkForMentorChild = await isUserInheritedFromMentor(userIdFromContext, true);
-  if (userIdFromContext && typeof checkForMentorChild === 'boolean' && checkForMentorChild) {
+
+  if (userIdFromContext && ((typeof checkForMentorChild === 'boolean' && checkForMentorChild) || !isNotMentorOrTeacher)) {
     if (mutationOrQueryName) {
       const userCurrentTopicComponentStatusData = {};
       if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
