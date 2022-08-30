@@ -766,7 +766,7 @@ const getHomeworkCompletedMeta = async (session, model, queryType = 'next') => {
     return 'NA';
   }
   const topicId = get(session, 'topic.id');
-  const students = getStudentsCombinedArray(get(sessions, 'classroom'));
+  const students = getStudentsCombinedArray(get(session, 'classroom'), true);
   const userIds = (students || []).map((el) => get(el, 'user.typeId'));
   let homeworkCompletedCount = 0;
   let isHomeworkExists = false;
@@ -802,7 +802,7 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
     // eslint-disable-next-line no-restricted-syntax
     for (const batchSession of batchSessions) {
       const homeworkMeta = await getHomeworkCompletedMeta(batchSession, mentorMenteeSessionModel, queryType);
-      const students = getStudentsCombinedArray(get(batchSession, 'classroom'));
+      const students = getStudentsCombinedArray(get(batchSession, 'classroom'), true);
       finalResult.push({
         id: get(batchSession, 'id'),
         bookingDate: get(batchSession, 'bookingDate', null),
@@ -836,7 +836,7 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
     // eslint-disable-next-line no-restricted-syntax
     for (const adhocSession of adhocSessions) {
       const homeworkMeta = await getHomeworkCompletedMeta(adhocSession, mentorMenteeSessionModel, queryType);
-      const students = getStudentsCombinedArray(get(adhocSession, 'classroom'));
+      const students = getStudentsCombinedArray(get(adhocSession, 'classroom'), true);
       finalResult.push({
         id: get(adhocSession, 'id'),
         bookingDate: get(adhocSession, 'bookingDate', null),

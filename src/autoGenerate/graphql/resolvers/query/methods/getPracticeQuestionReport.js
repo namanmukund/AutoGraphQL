@@ -485,7 +485,7 @@ const practiceQuestionReport = (async (root, params, context) => {
   }
 
   // const students = get(batchSessionRes, '[0].batch.students', []);
-  const students = getStudentsCombinedArray(get(batchSessionRes, '[0].batch'));
+  const students = getStudentsCombinedArray(get(batchSessionRes, '[0].batch'), true);
   const obj = {
     studentsCount: students.length,
     learningObjectives: [],

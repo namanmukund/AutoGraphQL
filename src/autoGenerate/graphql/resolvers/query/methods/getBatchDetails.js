@@ -276,7 +276,7 @@ const getBatchDetails = async (
   const batchDetails = get(batchSessionsArray, '[0].batchSession');
   const { startTime, endTime } = findSessionStartTime(batchDetails);
   const batchStudentResult = [];
-  const students = getStudentsCombinedArray(get(batchDetails, 'batch'));
+  const students = getStudentsCombinedArray(get(batchDetails, 'batch'), true);
   students.forEach((studentData) => {
     batchStudentResult.push({
       userId: get(studentData, 'user[0].id'),
