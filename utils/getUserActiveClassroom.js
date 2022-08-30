@@ -1,10 +1,14 @@
 import { get } from 'lodash';
 import { callLocalGraphqlApi } from '../src/api';
+import { RedisController } from '../src/autoGenerate/graphql/controllers';
 
 export const activeClassroomIdFromContext = (context) => get(context, 'activeClassroom');
 
 const getStudentProfile = async (context) => {
   const { currentUser } = context;
+  const redisCon = new RedisController({ bypass: true });
+  const cachedData = await redisCon.get('user_active_classroom_student_profile');
+  if (cachedData && get(cachedData, 'id')) return cachedData;
   const studentProfile = await callLocalGraphqlApi(
     `{
       studentProfiles(filter: {
@@ -49,6 +53,7 @@ const getStudentProfile = async (context) => {
     }`,
     context,
   );
+  redisCon.set(get(studentProfile, 'data.studentProfiles[0]'), { hkey: 'user_active_classroom_student_profile', maxAge: 60 });
   return get(studentProfile, 'data.studentProfiles[0]');
 };
 
@@ -56,18 +61,25 @@ const getUserBatchesArray = async (context, studentProfileData) => {
   let studentProfile = studentProfileData;
   if (!studentProfile) studentProfile = await getStudentProfile(context);
   const userBatches = [...get(studentProfile, 'batches', [])];
-  if (get(studentProfile, 'batch') && !userBatches.find((batch) => get(batch, 'id') === get(studentProfile, 'batch.id'))) userBatches.push(get(studentProfile, 'batch'));
+  if (get(studentProfile, 'batch') && !userBatches.find((batch) => get(batch, 'id') === get(studentProfile, 'batch.id'))) userBatches.push({ ...get(studentProfile, 'batch'), isDefault: true });
   return userBatches || [];
 };
 
 const getActiveClassroomBasedOnCourses = async (context, { courseId, userBatches: batches }, defaultClassroomId) => {
   let userBatches = batches;
   if (!batches) userBatches = await getUserBatchesArray(context);
-  if (!courseId && !defaultClassroomId) return userBatches[0];
-  if (get(userBatches, 'coursePackage.courses', []).length) {
-    return userBatches.find((batch) => get(batch, 'coursePackage.courses', []).includes(courseId));
+
+  const defaultBatchFromId = (userBatches || []).find((batch) => get(batch, 'id') === defaultClassroomId);
+  const defaultBatch = (userBatches || []).find((batch) => get(batch, 'isDefault'));
+  if (!courseId && !defaultClassroomId) {
+    return defaultBatch || userBatches[0];
   }
-  return userBatches.find((batch) => get(batch, 'course.id') === courseId);
+  let batchBasedOnCourse = userBatches.find((batch) => get(batch, 'course.id') === courseId);
+  (userBatches || []).forEach((batch) => {
+    const doesCourseExists = get(batch, 'coursePackage.courses', []).map((course) => get(course, 'id')).includes(courseId);
+    if (doesCourseExists) batchBasedOnCourse = batch;
+  });
+  return batchBasedOnCourse || defaultBatchFromId || defaultBatch || userBatches[0];
 };
 
 export const getActiveClassroomId = async (context, { courseId, userBatches }, defaultClassroomId) => {
