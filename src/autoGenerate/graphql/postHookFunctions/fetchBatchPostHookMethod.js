@@ -1,9 +1,8 @@
 /* eslint-disable no-param-reassign */
-import { get } from 'lodash';
 import getStudentsCombinedArray from '../../../../utils/getStudentsCombinedArray';
 
 const fetchBatchPostHookMethod = async (input) => {
-  if (input && (get(input, 'students', []) || get(input, 'batchStudents', []))) {
+  if (input) {
     if (Array.isArray(input) && input.length) {
       input.forEach((elem) => {
         elem.students = getStudentsCombinedArray(elem);
