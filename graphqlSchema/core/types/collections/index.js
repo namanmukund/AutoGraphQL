@@ -24,6 +24,7 @@ import ProductFeature from './ProductFeature';
 import UrlResult from './UrlResult';
 import ScheduleSessionsInput from './ScheduleSessions';
 import CodeEditorConfig from './CodeEditorConfig';
+import EvaluationTag from './EvaluationTag';
 
 export default [
   ...Enum,
@@ -52,4 +53,5 @@ export default [
   ...UrlResult,
   ...ScheduleSessionsInput,
   ...CodeEditorConfig,
+  ...EvaluationTag,
 ];
