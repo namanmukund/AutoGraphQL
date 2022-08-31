@@ -65,8 +65,11 @@ const addBatchPostHookMethod = async (input, _params, _mutationName, context) =>
     const coursePackage = await getTopicsFromCoursePackage(coursePackageId, context);
     const topicRules = get(coursePackage, 'topics');
     const topics = getSortedTopics(topicRules);
-    firstTopicId = get(topics, '[0].id');
-    courseId = get(topics, '[0].courses[0].id');
+    if (courseId) {
+      firstTopicId = get((topics || []).find((topicRes) => get(topicRes, 'courses[0].id') === courseId), 'id');
+    }
+    firstTopicId = firstTopicId || get(topics, '[0].id');
+    courseId = courseId || get(topics, '[0].courses[0].id');
   } else {
     topic = await getFirstTopicAndLearningObjective('', courseId);
     firstTopicId = get(topic, 'data.topics[0].id');

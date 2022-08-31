@@ -24,10 +24,13 @@ const getStudentProfile = async (context) => {
             documentType
             code
             classroomTitle
-            course {
+            coursePackageCourses {
               id
             }
-            coursePackage {
+            batchCourse: course {
+              id
+            }
+            batchCoursePackage: coursePackage {
               id
               courses {
                 id
@@ -40,10 +43,10 @@ const getStudentProfile = async (context) => {
             type
             documentType
             classroomTitle
-            course {
+            batchCourse: course {
               id
             }
-            coursePackage {
+            batchCoursePackage: coursePackage {
               id
               courses {
                 id
@@ -60,12 +63,24 @@ const getStudentProfile = async (context) => {
   return null;
 };
 
+const getBatchArrayFromStudentProfile = (studentProfile) => {
+  const userBatches = [...get(studentProfile, 'batches', [])];
+  if (get(studentProfile, 'batch') && !userBatches.find((batch) => get(batch, 'id') === get(studentProfile, 'batch.id'))) userBatches.push({ ...get(studentProfile, 'batch'), isDefault: true });
+  return userBatches;
+};
+
 const getUserBatchesArray = async (context, studentProfileData) => {
   try {
-    let studentProfile = studentProfileData;
-    if (!studentProfile) studentProfile = await getStudentProfile(context);
-    const userBatches = [...get(studentProfile, 'batches', [])];
-    if (get(studentProfile, 'batch') && !userBatches.find((batch) => get(batch, 'id') === get(studentProfile, 'batch.id'))) userBatches.push({ ...get(studentProfile, 'batch'), isDefault: true });
+    const studentProfile = await getStudentProfile(context);
+    let userBatches = getBatchArrayFromStudentProfile(studentProfile);
+    const userBatchesArrayFromProfile = getBatchArrayFromStudentProfile(studentProfileData);
+    if (studentProfileData) {
+      userBatches = userBatches.map((batch) => {
+        const batchFromProfile = userBatchesArrayFromProfile.find((batchFromProfileRes) => get(batchFromProfileRes, 'id') === get(batch, 'id'));
+        if (batchFromProfile) return { ...batch, ...batchFromProfile };
+        return batch;
+      });
+    }
     return userBatches || [];
   } catch {
     return [];
@@ -81,10 +96,11 @@ const getActiveClassroomBasedOnCourses = async (context, { courseId, userBatches
   if (!courseId && !defaultClassroomId) {
     return defaultBatch || defaultBatchFromId || userBatches[0];
   }
-  let batchBasedOnCourse = userBatches.find((batch) => get(batch, 'course.id') === courseId);
+  let batchBasedOnCourse = userBatches.find((batch) => get(batch, 'batchCourse.id') === courseId);
   (userBatches || []).forEach((batch) => {
-    const doesCourseExists = get(batch, 'coursePackage.courses', []).map((course) => get(course, 'id')).includes(courseId);
-    if (doesCourseExists) batchBasedOnCourse = batch;
+    const doesCourseExistsInBatchRule = get(batch, 'coursePackageCourses', []).map((course) => get(course, 'id')).includes(courseId);
+    const doesCourseExists = get(batch, 'batchCoursePackage.courses', []).map((course) => get(course, 'id')).includes(courseId);
+    if (doesCourseExists || doesCourseExistsInBatchRule) batchBasedOnCourse = batch;
   });
   return batchBasedOnCourse || defaultBatchFromId || defaultBatch || userBatches[0];
 };
