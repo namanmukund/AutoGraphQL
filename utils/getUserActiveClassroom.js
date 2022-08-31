@@ -79,7 +79,7 @@ const getActiveClassroomBasedOnCourses = async (context, { courseId, userBatches
   const defaultBatchFromId = (userBatches || []).find((batch) => get(batch, 'id') === defaultClassroomId);
   const defaultBatch = (userBatches || []).find((batch) => get(batch, 'isDefault'));
   if (!courseId && !defaultClassroomId) {
-    return defaultBatch || userBatches[0];
+    return defaultBatch || defaultBatchFromId || userBatches[0];
   }
   let batchBasedOnCourse = userBatches.find((batch) => get(batch, 'course.id') === courseId);
   (userBatches || []).forEach((batch) => {
