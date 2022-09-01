@@ -1,4 +1,4 @@
-const customQueryString = `
+const customQueries = `
     me: User,
     getPythonByteCode (pythonCode: String!): PythonByteCode
     salesOperationReport (fromDate: Date, toDate: Date, country: Country):  [SalesOperationReport]
@@ -29,5 +29,12 @@ const customQueryString = `
     getPracticeQuestionReport (batchId: String, topicId: String, learningObjectiveId: String, learningSlideId: String, learningObjectiveComponent: String, userId: String): PracticeQuestionReportOutput
     getBuddyStatus (sessionId: ID!, userId: ID, systemId: String, action: String, password: String, studentIds: [ID]): BooleanResult
 `;
+
+const redisCustomQueries = `
+    cacheKeys (pattern: String!): [String]
+    purgeCache (pattern: String): BooleanResult
+`;
+
+const customQueryString = customQueries + redisCustomQueries;
 
 export default customQueryString;

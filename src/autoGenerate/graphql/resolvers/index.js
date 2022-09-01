@@ -123,6 +123,7 @@ import getBuddyStatus from './query/methods/getBuddyStatus';
 import generateBatchSessionOtp from './mutation/methods/generateBatchSessionOtp';
 import updateSchoolStudentEmail from './mutation/methods/updateSchoolStudentEmail';
 import removeBatchStudents from './mutation/methods/removeBatchStudents';
+import redisUtils from './query/redisUtils';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -660,6 +661,16 @@ resolvers.Mutation.resetPasswordAndLogin = resetPasswordAndLogin;
 resolvers.Mutation.generateMentorChild = generateMentorChild;
 resolvers.Mutation.updateEventSessionAttendance = updateEventSessionAttendance;
 resolvers.Mutation.scheduleSessions = scheduleSessions;
+// Resolver to retrieve homework status based on filters
+resolvers.Mutation.menteeCourseHomework = menteeCourseHomework;
+// Resolver to retrieve homework status based on filters
+resolvers.Mutation.advanceBatchCurrentSession = advanceBatchCurrentSession;
+// Resolver to generate batchSession Otp
+resolvers.Mutation.generateBatchSessionOtp = generateBatchSessionOtp;
+// Resolver to Update School Student Emails
+resolvers.Mutation.updateSchoolStudentEmail = updateSchoolStudentEmail;
+// Resolver to remove batchstudets and students from batch
+resolvers.Mutation.removeBatchStudents = removeBatchStudents;
 
 // queries
 resolvers.Query.me = me;
@@ -713,20 +724,14 @@ resolvers.Query.getClassroomReport = getClassroomReport;
 resolvers.Query.getPracticeQuestionReport = getPracticeQuestionReport;
 // Resolver to check for the loggedIn status of buddies in buddy login flow
 resolvers.Query.getBuddyStatus = getBuddyStatus;
+// Redis utility queries
+resolvers.Query.cacheKeys = redisUtils.cacheKeys;
+resolvers.Query.purgeCache = redisUtils.purgeCache;
+
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
-// Resolver to retrieve homework status based on filters
-resolvers.Mutation.menteeCourseHomework = menteeCourseHomework;
-// Resolver to retrieve homework status based on filters
-resolvers.Mutation.advanceBatchCurrentSession = advanceBatchCurrentSession;
-// Resolver to generate batchSession Otp
-resolvers.Mutation.generateBatchSessionOtp = generateBatchSessionOtp;
-// Resolver to Update School Student Emails
-resolvers.Mutation.updateSchoolStudentEmail = updateSchoolStudentEmail;
 
 // subscriptions
 resolvers.Subscription.userUpdated = injectSubscriptionWithCommonAsyncIterator(['USER_UPDATED']);
-// Resolver to remove batchstudets and students from batch
-resolvers.Mutation.removeBatchStudents = removeBatchStudents;
 
 export default resolvers;
