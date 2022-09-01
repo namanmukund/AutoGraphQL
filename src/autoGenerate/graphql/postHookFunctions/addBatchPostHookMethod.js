@@ -55,6 +55,7 @@ const addBatchPostHookMethod = async (input, _params, _mutationName, context) =>
   let courseId = get(input, 'course.typeId');
   const coursePackageId = get(input, 'coursePackage.typeId');
   const documentType = get(input, 'documentType', 'batch');
+  const batchStudents = get(_params, 'batchStudentsConnectIds', []);
   let topic;
   let firstTopicId;
   /*
@@ -87,6 +88,17 @@ const addBatchPostHookMethod = async (input, _params, _mutationName, context) =>
       });
     }
     courseId = course[0].id;
+  }
+
+  if (batchStudents && batchStudents.length) {
+    // Purging Student Profile Cache to avoid data mismatch.
+    await callLocalGraphqlApi(`
+      query{
+        purgeCache(pattern: "userProfile::activeClassroom::*") {
+          result
+        }
+      }
+    `, context);
   }
   // we are not throwing any error here because it will seem that create batch failed if
   // firstTopicId and courseId and batchId is not present. Just adding log
