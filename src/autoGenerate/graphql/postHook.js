@@ -67,6 +67,7 @@ import updateTaskPostHookMethod from './postHookFunctions/updateTaskPostHookMeth
 import updateEventPostHookMethod from './postHookFunctions/updateEventPostHookMethod';
 import addEventPostHookMethod from './postHookFunctions/addEventPostHookMethod';
 import fetchEventPostHookMethod from './postHookFunctions/fetchEventPostHookMethod';
+import fetchBatchPostHookMethod from './postHookFunctions/fetchBatchPostHookMethod';
 import updateMentorProfilePostHookMethod from './postHookFunctions/updateMentorProfilePostHookMethod';
 import addUserActivityLearningSlideDumpPostHookMethod from './postHookFunctions/addUserActivityLearningSlideDumpPostHookMethod';
 import updateRetakeSessionPostHookMethod from './postHookFunctions/updateRetakeSessionPostHookMethod';
@@ -106,19 +107,19 @@ const posthook = async (input, mutationName, context, params, info) => {
       break;
     }
     case 'userVideo': {
-      const resultArray = await userVideoPostHookMethod(input, params);
+      const resultArray = await userVideoPostHookMethod(input, params, mutationName, context);
       return hook(resultArray, mutationName, 'PostHook');
     }
     case 'userLearningObjective': {
-      const resultArray = await userLearningObjectivePostHookMethod(input, params);
+      const resultArray = await userLearningObjectivePostHookMethod(input, params, mutationName, context);
       return hook(resultArray, mutationName, 'PostHook');
     }
     case 'userQuiz': {
-      const resultArray = await userQuizPostHookMethod(input, params);
+      const resultArray = await userQuizPostHookMethod(input, params, mutationName, context);
       return hook(resultArray, mutationName, 'PostHook');
     }
     case 'userProfile': {
-      const resultArray = await userProfilePostHookMethod(input, params);
+      const resultArray = await userProfilePostHookMethod(input, params, mutationName, context);
       return hook(resultArray, mutationName, 'PostHook');
     }
     case 'addUserActivityVideoDump': {
@@ -138,7 +139,7 @@ const posthook = async (input, mutationName, context, params, info) => {
       break;
     }
     case 'userPracticeQuestionReport': {
-      const resultArray = await userPracticeQuestionReportPostHookMethod(input, params);
+      const resultArray = await userPracticeQuestionReportPostHookMethod(input, params, mutationName, context);
       return hook(resultArray, mutationName, 'PostHook');
     }
     case 'userAssignment': {
@@ -166,7 +167,7 @@ const posthook = async (input, mutationName, context, params, info) => {
       break;
     }
     case 'updateMentorProfile': {
-      await updateMentorProfilePostHookMethod(input, params);
+      await updateMentorProfilePostHookMethod(input, params, context);
       break;
     }
     case 'addStudentProfile': {
@@ -367,6 +368,10 @@ const posthook = async (input, mutationName, context, params, info) => {
     }
     case 'event': {
       await fetchEventPostHookMethod(input, params, mutationName, context, info);
+      break;
+    }
+    case 'batch': {
+      await fetchBatchPostHookMethod(input, params, mutationName, context, info);
       break;
     }
     case 'addUserActivityLearningSlideDump': {

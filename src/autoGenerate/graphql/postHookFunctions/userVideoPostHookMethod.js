@@ -84,7 +84,7 @@ It will be created and returned to tekie app.
 Document contains all the necessary information needed on page along
 with the next component.
 */
-const userVideoPostHookMethod = async (input, params) => {
+const userVideoPostHookMethod = async (input, params, mutationName, context) => {
   /*
   checking if document is already present in collection for user and topic id,
   returning input in that case
@@ -111,7 +111,7 @@ const userVideoPostHookMethod = async (input, params) => {
     we are getting below fields in topicQuery:
     -first published learning objective of the query to be populated in next component
     */
-  const topicQueryRes = await callLocalGraphqlApi(topicQuery(topicId));
+  const topicQueryRes = await callLocalGraphqlApi(topicQuery(topicId), context);
   const topicInfo = get(topicQueryRes, 'data.topic');
   const learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
   const topicComponentRule = get(topicInfo, 'topicComponentRule');
@@ -145,7 +145,7 @@ const userVideoPostHookMethod = async (input, params) => {
     restQuery,
     courseId,
     finalVideoId,
-  ));
+  ), context);
   if (result) {
     /*
       parsing data 'addUserVideo' so that the logic implemented ahead can read data is

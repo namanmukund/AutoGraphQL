@@ -22,7 +22,7 @@ export const fetchAllAuditQuestion = async (auditType, filterQuery) => {
       }
     }
   `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, {});
   return get(res, 'data.auditQuestions');
 };
 
@@ -146,23 +146,23 @@ const addSalesAudit = async ({
   });
   if (auditQuestionsIds) {
     if (auditType === preSales) {
-      callLocalGraphqlApi(addPreSalesAuditQuery(auditQuestionsIds, clientId, questionSectionsQuery, totalScore));
+      callLocalGraphqlApi(addPreSalesAuditQuery(auditQuestionsIds, clientId, questionSectionsQuery, totalScore), {});
     } else if (auditType === postSales) {
-      callLocalGraphqlApi(addPostSalesAuditQuery(auditQuestionsIds, mentorMenteeSessionId, questionSectionsQuery, totalScore));
+      callLocalGraphqlApi(addPostSalesAuditQuery(auditQuestionsIds, mentorMenteeSessionId, questionSectionsQuery, totalScore), {});
     } else if (isBatchAudit) {
       callLocalGraphqlApi(addMentorMenteeSessionAuditForBatchQuery(
         batchSessionId,
         auditQuestionsIds,
         questionSectionsQuery,
         totalScore,
-      ));
+      ), {});
     } else if (auditType === demoWow) {
       callLocalGraphqlApi(addDemoWowAuditQuery(
         mentorMenteeSessionId,
         auditQuestionsIds,
         questionSectionsQuery,
         totalScore,
-      ));
+      ), {});
     }
   }
 };

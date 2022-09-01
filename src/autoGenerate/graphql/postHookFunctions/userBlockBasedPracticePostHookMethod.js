@@ -56,7 +56,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
   returning input in that case
   if it is not already present, we will add a new document with default data
   */
-  if (input && (input.length || (typeof input === 'object'))) {
+  if (input && (input.length)) {
     return input;
   }
   if (get(context, 'userRoleFromContext') && get(context, 'userRoleFromContext') !== MENTEE) {
@@ -82,7 +82,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
     topicId,
     courseId,
     blockBasedPracticeId,
-  ));
+  ), context);
   if (result) {
     /*
       parsing data 'addUserBlockBasedPractice' so that the logic implemented ahead can read data is

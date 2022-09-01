@@ -133,7 +133,7 @@ const updateUserPaymentPlanWorkFlow = async (userPaymentPlanData) => {
   This method sends invoice on mail to users depending upon the intallments and
   whether that is paid or pending
   */
-const updateUserPaymentInstallmentPostHookMethod = async (input, params) => {
+const updateUserPaymentInstallmentPostHookMethod = async (input, params, _mutationName, context) => {
   const userPaymentInstallmentId = get(params, 'id');
   const { status: inputPaymentStatus, paymentRequestedCount, isPaymentRequested } = input;
 
@@ -149,7 +149,7 @@ const updateUserPaymentInstallmentPostHookMethod = async (input, params) => {
   // mail will only be sent if there are fields inputPaymentStatus or
   // paymentRequestedCount in the input fields
   if (isPaymentRequested && (inputPaymentStatus === paid || paymentRequestedCount)) {
-    const userPaymentInstallmentQueryRes = await callLocalGraphqlApi(userPaymentInstallmentQuery(userPaymentInstallmentId));
+    const userPaymentInstallmentQueryRes = await callLocalGraphqlApi(userPaymentInstallmentQuery(userPaymentInstallmentId), context);
     const userPaymentInstallmentInfo = get(userPaymentInstallmentQueryRes, 'data.userPaymentInstallment');
     if (!userPaymentInstallmentInfo) {
       throw new DatabaseRecordNotFoundError({

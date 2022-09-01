@@ -182,7 +182,7 @@ const updateCurrentComponentStatus = (
       loQuery,
       topicQuery,
       nextCurrentTopicComponentType,
-    ));
+    ), {});
   }
   return true;
 };

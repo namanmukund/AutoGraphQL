@@ -121,7 +121,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     get Course Id
   */
   if (!courseId && !coursePackageId) {
-    const courseResult = await callLocalGraphqlApi(getCourseQuery());
+    const courseResult = await callLocalGraphqlApi(getCourseQuery(), context);
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
       throw new DatabaseRecordNotFoundError({
@@ -136,7 +136,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   /*
     get batch info
   */
-  const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
+  const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId), context);
   const isTrial = await isTrialSession(get(input, 'topic.typeId'));
   const batchType = get(batchResult, 'data.batch.type');
   if (isTrial) {
@@ -168,11 +168,11 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
       */
       let topicsList = [];
       if (coursePackageId) {
-        const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+        const coursePackage = await getTopicsFromCoursePackage(coursePackageId, context);
         const topicRules = get(coursePackage, 'topics');
         topicsList = getSortedTopics(topicRules);
       } else {
-        const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
+        const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId), context);
         topicsList = get(nextTopicQueryRes, 'data.topics');
       }
 

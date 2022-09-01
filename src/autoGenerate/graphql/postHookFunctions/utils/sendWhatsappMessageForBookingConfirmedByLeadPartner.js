@@ -14,7 +14,7 @@ const getMagicLinkForUser = async (userId) => {
   }
 }
 `;
-  const magicLinkResp = await callLocalGraphqlApi(query);
+  const magicLinkResp = await callLocalGraphqlApi(query, {});
   const magicLink = get(magicLinkResp, 'data.getMagicLink', []);
   return magicLink;
 };
@@ -24,7 +24,7 @@ const getUser = async (phoneNumber) => {
     users(filter: { phone_number_subDoc: "${phoneNumber}" }) {
       timezone
     }
-  }`);
+  }`, {});
   return get(user, 'data.users[0]', {});
 };
 

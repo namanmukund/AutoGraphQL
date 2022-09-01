@@ -25,6 +25,7 @@ from '../../../../utils/getBatchCurrentComponentStatus';
 import getSortedTopics from '../../../../../../utils/getSortedTopicsFromCoursePackageOrder';
 import { ifAuthorized } from '../../../../../../utils';
 import { MENTOR, SCHOOL_TEACHER } from '../../../../../../constants/roles';
+import getUserActiveClassroom from '../../../../../../utils/getUserActiveClassroom';
 
 /*
 This is a common method to check whether the called topic component is locked or not
@@ -207,13 +208,17 @@ const isComponentUnlocked = async (
   const { order: currentTopicOrder } = currentTopic;
   const batchCurrentComponentStatusRes = await getBatchCurrentComponentStatus(
     userId,
+    context,
   );
-  const batchCurrentComponentInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.currentComponent');
+  const activeClassroom = await getUserActiveClassroom(context, {
+    studentProfile: get(batchCurrentComponentStatusRes, 'data.user.studentProfile'),
+  }, get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.id'));
+  const batchCurrentComponentInfo = get(activeClassroom, 'currentComponent');
   const schoolInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.school');
-  const isCoursePackageBatch = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.id');
+  const isCoursePackageBatch = get(activeClassroom, 'coursePackage.id');
 
   if (isCoursePackageBatch) {
-    const coursePackageTopics = getSortedTopics(get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.coursePackage.topics'));
+    const coursePackageTopics = getSortedTopics(get(activeClassroom, 'coursePackage.topics'));
     const topicFound = coursePackageTopics.find((o) => o.id === topicId);
     topicOrder = get(topicFound, 'coursePackageOrder');
   }
@@ -272,7 +277,7 @@ const isComponentUnlocked = async (
   // no mentor token, he should not be able to hit API
   // this will be checked for normal flow and not for batch
   if (!batchCurrentComponentInfo) {
-    const mentorMenteeSessionQueryRes = await getMentorMenteeSessionForValidation(userId, topicId);
+    const mentorMenteeSessionQueryRes = await getMentorMenteeSessionForValidation(userId, topicId, context);
     const mentorMenteeSessionStatus = get(mentorMenteeSessionQueryRes, 'data.mentorMenteeSessions[0].sessionStatus', '');
 
     validateMentorMenteePermissionForComponent(

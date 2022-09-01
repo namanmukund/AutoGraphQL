@@ -8,7 +8,7 @@ const deleteBatchPostHookMethod = async (input, params, mutationName, context) =
     // eslint-disable-next-line no-restricted-syntax
     for (const batchSession of batchSessions) {
       if (batchSession && batchSession.id) {
-        deleteBatchSessionsQuery(batchSession.id);
+        deleteBatchSessionsQuery(batchSession.id, context);
       }
     }
   }

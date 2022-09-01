@@ -392,7 +392,7 @@ const getPaymentRequestMutationResolver = async (
     // update UserCurrentTopicComponentStatus, change user to pro
     await callLocalGraphqlApi(updateUserCurrentTopicComponentStatus(
       currentTopicComponentInfoId,
-    ));
+    ), context);
     const payuMoneyId = '00000';
     // update status of userPayment document
     await callLocalGraphqlApi(updateUserPayment(

@@ -187,7 +187,7 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
     videoCurrentTime,
     isBookmarked,
     isLiked,
-    status));
+    status), context);
   return true;
 };
 

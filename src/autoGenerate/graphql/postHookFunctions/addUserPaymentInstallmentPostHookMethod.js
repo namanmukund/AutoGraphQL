@@ -105,7 +105,7 @@ query {
   This method sends invoice on mail to users depending upon the intallments and
   whether that is paid or pending
   */
-const addUserPaymentInstallmentPostHookMethod = async (input, params) => {
+const addUserPaymentInstallmentPostHookMethod = async (_input, params, _mutationName, context) => {
   const userId = get(params, 'userConnectId');
   const paymentPlanId = get(params, 'userPaymentPlanConnectId');
 
@@ -117,7 +117,7 @@ const addUserPaymentInstallmentPostHookMethod = async (input, params) => {
     pending,
     paid,
   } = installmentStatus;
-  const userPaymentInstallmentQueryRes = await callLocalGraphqlApi(userPaymentInstallmentQuery(userId, paymentPlanId));
+  const userPaymentInstallmentQueryRes = await callLocalGraphqlApi(userPaymentInstallmentQuery(userId, paymentPlanId), context);
   let userPaymentInstallmentsInfo = get(userPaymentInstallmentQueryRes, 'data.userPaymentInstallments');
 
   if (!userPaymentInstallmentsInfo || (userPaymentInstallmentsInfo && !userPaymentInstallmentsInfo.length)) {

@@ -17,7 +17,7 @@ const reduceParticularAvailableSlotOfADate = async (slotTimeStringArray, date, c
   }
 
   if (!availableSlots || !availableSlots.length) {
-    const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(date));
+    const availableSlotsRes = await callLocalGraphqlApi(availableSlotsQuery(date), context);
     // eslint-disable-next-line no-param-reassign
     availableSlots = get(availableSlotsRes, 'data.availableSlots');
   }

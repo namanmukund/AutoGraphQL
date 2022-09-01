@@ -19,7 +19,7 @@ const fetchMsmUsers = async () => {
       }
     }
     `;
-  const users = await callLocalGraphqlApi(query);
+  const users = await callLocalGraphqlApi(query, {});
   return get(users, 'data.users', []);
 };
 

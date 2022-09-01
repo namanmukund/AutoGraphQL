@@ -56,7 +56,7 @@ const userCourseSyllabusMethod = async (context, params) => {
   any document in Db and will return default data with first topic as unlocked
   */
   if (userId) {
-    const userCurrentTopicComponentStatusesRes = await callLocalGraphqlApi(userCurrentTopicComponentStatusesQuery(userId, courseId));
+    const userCurrentTopicComponentStatusesRes = await callLocalGraphqlApi(userCurrentTopicComponentStatusesQuery(userId, courseId), context);
 
     /*
     Ideally each user will have 1 document in the collection. Fetching the same document
@@ -175,7 +175,7 @@ const userCourseSyllabusMethod = async (context, params) => {
         // mutation to create current component status of user with current topic as first topic and courseId
         // and current LO as first LO of topic and video as current component type
         await addUserCurrentTopicComponentStatusForNewCourse(
-          userId, courseId, firstTopicId, firstLearningObjectiveId, firstVideoId, firstBlockedBasedProjectId, firstComponentName,
+          userId, courseId, firstTopicId, firstLearningObjectiveId, firstVideoId, firstBlockedBasedProjectId, firstComponentName, context,
         );
       }
     }

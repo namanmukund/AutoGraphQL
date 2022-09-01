@@ -122,6 +122,8 @@ import getPracticeQuestionReport from './query/methods/getPracticeQuestionReport
 import getBuddyStatus from './query/methods/getBuddyStatus';
 import generateBatchSessionOtp from './mutation/methods/generateBatchSessionOtp';
 import updateSchoolStudentEmail from './mutation/methods/updateSchoolStudentEmail';
+import removeBatchStudents from './mutation/methods/removeBatchStudents';
+import redisUtils from './query/redisUtils';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -217,7 +219,7 @@ Object.keys(parsedASTMap).forEach((type) => {
             const { pubsub } = context;
             return pubsub.asyncIterator([modelSingular]);
           },
-          async (payload, variables) => {
+          async (payload, variables, context) => {
             const { typeId } = payload;
             const { filter: subscriptionFilter } = variables;
             // Return result only if updated payload exists for the the supplied filter.
@@ -227,7 +229,7 @@ Object.keys(parsedASTMap).forEach((type) => {
                   id
                 }
               }`;
-              const result = await callLocalGraphqlApi(query, null, {
+              const result = await callLocalGraphqlApi(query, context, {
                 subscriptionFilter: {
                   and: [
                     subscriptionFilter,
@@ -280,7 +282,7 @@ Object.keys(parsedASTMap).forEach((type) => {
                           ${stringFields}
                         }
                       }`;
-            const result = await callLocalGraphqlApi(query);
+            const result = await callLocalGraphqlApi(query, context);
             const finalResultWithRelationalFields = get(result, `data.${modelSingular}`);
             // return subscriptionPayload
             return {
@@ -659,6 +661,16 @@ resolvers.Mutation.resetPasswordAndLogin = resetPasswordAndLogin;
 resolvers.Mutation.generateMentorChild = generateMentorChild;
 resolvers.Mutation.updateEventSessionAttendance = updateEventSessionAttendance;
 resolvers.Mutation.scheduleSessions = scheduleSessions;
+// Resolver to retrieve homework status based on filters
+resolvers.Mutation.menteeCourseHomework = menteeCourseHomework;
+// Resolver to retrieve homework status based on filters
+resolvers.Mutation.advanceBatchCurrentSession = advanceBatchCurrentSession;
+// Resolver to generate batchSession Otp
+resolvers.Mutation.generateBatchSessionOtp = generateBatchSessionOtp;
+// Resolver to Update School Student Emails
+resolvers.Mutation.updateSchoolStudentEmail = updateSchoolStudentEmail;
+// Resolver to remove batchstudets and students from batch
+resolvers.Mutation.removeBatchStudents = removeBatchStudents;
 
 // queries
 resolvers.Query.me = me;
@@ -712,16 +724,13 @@ resolvers.Query.getClassroomReport = getClassroomReport;
 resolvers.Query.getPracticeQuestionReport = getPracticeQuestionReport;
 // Resolver to check for the loggedIn status of buddies in buddy login flow
 resolvers.Query.getBuddyStatus = getBuddyStatus;
+// Redis utility queries
+resolvers.Query.cacheKeys = redisUtils.cacheKeys;
+resolvers.Query.purgeCache = redisUtils.purgeCache;
+resolvers.Query.getCache = redisUtils.getCache;
+
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
-// Resolver to retrieve homework status based on filters
-resolvers.Mutation.menteeCourseHomework = menteeCourseHomework;
-// Resolver to retrieve homework status based on filters
-resolvers.Mutation.advanceBatchCurrentSession = advanceBatchCurrentSession;
-// Resolver to generate batchSession Otp
-resolvers.Mutation.generateBatchSessionOtp = generateBatchSessionOtp;
-// Resolver to Update School Student Emails
-resolvers.Mutation.updateSchoolStudentEmail = updateSchoolStudentEmail;
 
 // subscriptions
 resolvers.Subscription.userUpdated = injectSubscriptionWithCommonAsyncIterator(['USER_UPDATED']);

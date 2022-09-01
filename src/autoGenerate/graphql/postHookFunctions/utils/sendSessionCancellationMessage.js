@@ -18,7 +18,7 @@ const mentorSessionQuery = (id) => `{
 }`;
 
 const sendSessionCancellationMessage = async (mentorSessionId, bookingDate, slotTimeStringArray, studentName, parentName, parentNumber) => {
-  const mentorSession = await callLocalGraphqlApi(mentorSessionQuery(mentorSessionId));
+  const mentorSession = await callLocalGraphqlApi(mentorSessionQuery(mentorSessionId), {});
   const slotNumber = Number(get(slotTimeStringArray, '0', '').replace('slot', ''));
   const sessionTime = getSlotLabel(slotNumber).startTime;
   const sessionDate = moment(bookingDate).format('dddd, Do MMMM');

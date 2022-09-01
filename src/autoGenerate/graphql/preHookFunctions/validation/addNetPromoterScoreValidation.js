@@ -4,7 +4,7 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import { courseToGradeMapping, courseToGradeMappingForStaging } from '../../../../../constants';
 
-const getNetPromoterScoreByAUser = async (userId, courseId, mentorMenteeSessionConnectId, batchSessionConnectId) => {
+const getNetPromoterScoreByAUser = async (userId, courseId, mentorMenteeSessionConnectId, batchSessionConnectId, context) => {
   const query = `
         query{
           netPromoterScores(filter:{
@@ -17,11 +17,11 @@ const getNetPromoterScoreByAUser = async (userId, courseId, mentorMenteeSessionC
           }
         }`;
 
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.netPromoterScores');
 };
 
-const fetchUserDetails = async (userId) => {
+const fetchUserDetails = async (userId, context) => {
   const query = `{
   user(id: "${userId}") {
     id
@@ -32,11 +32,11 @@ const fetchUserDetails = async (userId) => {
   }
 }
 `;
-  const result = await callLocalGraphqlApi(query);
+  const result = await callLocalGraphqlApi(query, context);
   return get(result, 'data.user');
 };
 
-const addNetPromoterScoreValidation = async (params) => {
+const addNetPromoterScoreValidation = async (params, mutationOrQueryName, context) => {
   const {
     userConnectId, courseConnectId, mentorMenteeSessionConnectId, batchSessionConnectId,
   } = params;
@@ -45,7 +45,7 @@ const addNetPromoterScoreValidation = async (params) => {
   }
   let courseId = courseConnectId;
   if (!courseConnectId) {
-    const userData = await fetchUserDetails(userConnectId);
+    const userData = await fetchUserDetails(userConnectId, context);
     let grade = get(userData, 'studentProfile.grade', '').replace('Grade', '');
     grade = Number(grade);
     let defaultCourse = courseToGradeMappingForStaging.find((mapping) => mapping.grade.includes(grade));
@@ -57,7 +57,7 @@ const addNetPromoterScoreValidation = async (params) => {
     });
     courseId = get(defaultCourse, 'courseId');
   }
-  const netPromoterScores = await getNetPromoterScoreByAUser(userConnectId, courseId, mentorMenteeSessionConnectId, batchSessionConnectId);
+  const netPromoterScores = await getNetPromoterScoreByAUser(userConnectId, courseId, mentorMenteeSessionConnectId, batchSessionConnectId, context);
   if (netPromoterScores && netPromoterScores.length) {
     throw new SimilarDocumentAlreadyExistError();
   }

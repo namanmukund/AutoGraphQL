@@ -8,7 +8,7 @@ import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS } from '../../../../../constants';
 import { getHoursDiff } from './utils/validateMenteeSessionInput';
 import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelectedSlotsStringArray';
 
-const getMentorMenteeSessionData = async (id) => {
+const getMentorMenteeSessionData = async (id, context) => {
   const query = `
     query{
       mentorMenteeSession(id:"${id}"){
@@ -46,7 +46,7 @@ const getMentorMenteeSessionData = async (id) => {
       }
     }
   `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.mentorMenteeSession');
 };
 
@@ -83,8 +83,8 @@ const menteeSessionQuery = (menteeSessionId) => `{
 const deleteMentorMenteeSessionValidation = async (newParams, mutationOrQueryName, context) => {
   const { id, mentorSessionConnectId } = newParams;
 
-  const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id);
-  const menteeSessionDoc = await callLocalGraphqlApi(menteeSessionQuery(get(mentorMenteeSessionDoc, 'menteeSession.id')));
+  const mentorMenteeSessionDoc = await getMentorMenteeSessionData(id, context);
+  const menteeSessionDoc = await callLocalGraphqlApi(menteeSessionQuery(get(mentorMenteeSessionDoc, 'menteeSession.id')), context);
   context.menteeSession = menteeSessionDoc;
   context.prevMenteeSessionDoc = context.previousDocument;
   if (!(mentorMenteeSessionDoc && mentorMenteeSessionDoc.id)) {

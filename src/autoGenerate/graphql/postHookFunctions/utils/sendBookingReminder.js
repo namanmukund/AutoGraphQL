@@ -34,6 +34,7 @@ const sendBookingReminder = async (input, params) => {
   );
   const res = await callLocalGraphqlApi(
     menteeSessionQuery(studentId),
+    {},
   );
   const menteeSessions = get(res, 'data.menteeSessions', []);
   // const phone = get(input, 'phone.countryCode', '').replace('+', '') + get(input, 'phone.number');

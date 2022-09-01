@@ -43,7 +43,7 @@ const getTopicOrderQuery = (topicId) => `
 const updateBatchCurrentComponentStatusValidation = async (params, mutationOrQueryName, context) => {
   const { id: batchCurrentComponentStatusId, currentTopicConnectId } = params;
 
-  const batchCurrentComponentResult = await callLocalGraphqlApi(getBatchCurrentComponentQuery(batchCurrentComponentStatusId));
+  const batchCurrentComponentResult = await callLocalGraphqlApi(getBatchCurrentComponentQuery(batchCurrentComponentStatusId), context);
   const batchCurrentComponentStatusDoc = get(batchCurrentComponentResult, 'data.batchCurrentComponentStatus');
 
   if (!(batchCurrentComponentStatusDoc && batchCurrentComponentStatusDoc.id)) {
@@ -51,7 +51,7 @@ const updateBatchCurrentComponentStatusValidation = async (params, mutationOrQue
   }
 
   if (currentTopicConnectId) {
-    const topicResult = await callLocalGraphqlApi(getTopicOrderQuery(currentTopicConnectId));
+    const topicResult = await callLocalGraphqlApi(getTopicOrderQuery(currentTopicConnectId), context);
     const topicDoc = get(topicResult, 'data.topic');
     // if coursePackage, update current course also
     if (context.usesCoursePackage) {

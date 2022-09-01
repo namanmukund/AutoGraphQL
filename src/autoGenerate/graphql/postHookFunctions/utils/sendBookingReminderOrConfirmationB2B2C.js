@@ -344,7 +344,7 @@ const sendBookingReminderOrConfirmationB2BC = async (userId, isBookSlot = false)
   // If booking mail execute immediately or wait for TIMEOUT
   const timeout = isBookSlot ? 0 : TIMEOUT;
   setTimeout(async () => {
-    const res = await callLocalGraphqlApi(USER_QUERY(userId));
+    const res = await callLocalGraphqlApi(USER_QUERY(userId), {});
     const user = get(res, 'data.user', {}) || {};
     const campaign = get(user, 'campaign.id')
       ? get(user, 'campaign', {})

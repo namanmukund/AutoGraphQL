@@ -65,7 +65,7 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
       ...inputSlot
     },
   } = params;
-  const adhocSessionData = await callLocalGraphqlApi(adhocSessionQuery(adhocSessionId));
+  const adhocSessionData = await callLocalGraphqlApi(adhocSessionQuery(adhocSessionId), context);
   const adhocSession = get(adhocSessionData, 'data.adhocSession');
   if (!adhocSession || !adhocSession.id) {
     throw new DatabaseRecordNotFoundError();
@@ -87,7 +87,7 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
   if (typeFromInput) {
     // const differentMentor = get(mentorSession, 'user.id') !== mentorSessionConnectId;
     const differentType = type !== typeFromInput;
-    const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(get(batch, 'id'), previousTopicConnectId, typeFromInput));
+    const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(get(batch, 'id'), previousTopicConnectId, typeFromInput), context);
     const adhocSessions = get(getAdhocSessionRes, 'data.adhocSessions');
     if (adhocSessions && adhocSessions.length
       && typeFromInput && differentType) {
@@ -99,7 +99,7 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
   const slotTimeArray = getSelectedSlotsTime(slots);
 
   // check if mentor already has another session in same slot
-  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId || get(mentorSession, 'id', '')));
+  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId || get(mentorSession, 'id', '')), context);
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
   if (mentorUserId && bookingDateFromInput
     && (inputSlotTimeArray[0] !== slotTimeArray[0] || new Date(bookingDateFromInput).getTime() !== new Date(bookingDate).getTime())) {
@@ -109,6 +109,7 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
         mentorUserId,
         finalBookingDate,
       ),
+      context,
     );
     let tempObj = { ...inputSlot };
     if (inputSlotTimeArray.length === 0) {
@@ -120,7 +121,7 @@ const updateAdhocSessionValidation = async (params, mutationOrQueryName, context
     // check if batch session already exists
     const batchId = get(batch, 'id');
     const { filteredSlotsStringForFilterQuery } = extractSlotsFromInput(inputSlot);
-    const adhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, null, null, bookingDateFromInput, filteredSlotsStringForFilterQuery));
+    const adhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, null, null, bookingDateFromInput, filteredSlotsStringForFilterQuery), context);
     const existingAdhocSessions = get(adhocSessionRes, 'data.adhocSessions', []);
     if (existingAdhocSessions.length) {
       throw new SimilarDocumentAlreadyExistError();

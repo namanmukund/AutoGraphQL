@@ -3,7 +3,7 @@ import { LOWithSimilarTitleAlreadyExist, OrderAlreadyExistsError } from '../../.
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { fetchLO } from './addLearningObjectiveValidation';
 
-const fetchCourseForLo = async (loId) => {
+const fetchCourseForLo = async (loId, context) => {
   const query = `{
   learningObjective(id: "${loId}") {
     courses {
@@ -12,16 +12,16 @@ const fetchCourseForLo = async (loId) => {
   }
 }
 `;
-  const loData = await callLocalGraphqlApi(query);
+  const loData = await callLocalGraphqlApi(query, context);
   return get(loData, 'data.learningObjective');
 };
 
-const updateLearningObjectiveValidation = async (params) => {
+const updateLearningObjectiveValidation = async (params, mutationOrQueryName, context) => {
   const { input = {}, id: loId } = params;
   const order = get(input, 'order');
   const title = get(input, 'title');
   if (title || order) {
-    const loData = await fetchCourseForLo(loId);
+    const loData = await fetchCourseForLo(loId, context);
     const courses = get(loData, 'courses', []);
     let courseIds = '';
     courses.forEach((course) => { courseIds += `"${get(course, 'id')}"`; });

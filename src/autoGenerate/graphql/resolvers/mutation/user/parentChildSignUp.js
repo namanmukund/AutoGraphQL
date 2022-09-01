@@ -403,6 +403,7 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     studentSchoolId,
     batchId,
     bookingAgentConnectId,
+    context,
   );
 
   if (!studentProfileId) {

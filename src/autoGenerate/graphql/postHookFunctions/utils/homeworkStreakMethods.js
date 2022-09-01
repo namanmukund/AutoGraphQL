@@ -3,7 +3,7 @@ import { GLOBAL_COURSE_TITLE, OLD_COURSE_ID } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { log } from '../../../../../utils';
 
-export const fetchCourseData = async (courseId) => {
+export const fetchCourseData = async (courseId, context) => {
   const query = `{
     courses(filter:{
       ${courseId ? `id:"${courseId}"` : `title: "${GLOBAL_COURSE_TITLE}"`}
@@ -18,12 +18,12 @@ export const fetchCourseData = async (courseId) => {
       }
     }
   }`;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   const data = get(res, 'data.courses[0]', null);
   return data;
 };
 
-const fetchMentorMenteeSession = async (userId, topicId, courseId) => {
+const fetchMentorMenteeSession = async (userId, topicId, courseId, context) => {
   const query = `{
     mentorMenteeSessions(filter:{
       and:[
@@ -42,12 +42,12 @@ const fetchMentorMenteeSession = async (userId, topicId, courseId) => {
       }
     }
   }`;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   const data = get(res, 'data.mentorMenteeSessions');
   return data;
 };
 
-const fetchUserCourse = async (userId, courseId) => {
+const fetchUserCourse = async (userId, courseId, context) => {
   const query = `{
     userCourses(filter:{
       and:[
@@ -67,12 +67,12 @@ const fetchUserCourse = async (userId, courseId) => {
       }
     }
   }`;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   const data = get(res, 'data.userCourses[0]', null);
   return data;
 };
 
-const updateMentorMenteeSession = async (id, isReviewSubmittedOnTime) => {
+const updateMentorMenteeSession = async (id, isReviewSubmittedOnTime, context) => {
   const query = `mutation {
     updateMentorMenteeSession(id: "${id}", input: {
       isReviewSubmittedOnTime: ${isReviewSubmittedOnTime}
@@ -80,12 +80,12 @@ const updateMentorMenteeSession = async (id, isReviewSubmittedOnTime) => {
       id
     }
   }`;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   const data = get(res, 'data.updateMentorMenteeSession', null);
   return data;
 };
 
-const updateUserCourseDoc = async (id, input) => {
+const updateUserCourseDoc = async (id, input, context) => {
   const query = `mutation updateUserCourse($input: UserCourseUpdate!){
     updateUserCourse(id: "${id}", input: $input) {
       id
@@ -94,15 +94,15 @@ const updateUserCourseDoc = async (id, input) => {
   const variables = {
     input,
   };
-  const res = await callLocalGraphqlApi(query, null, variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   const data = get(res, 'data.updateUserCourse', null);
   return data;
 };
 
 const addOrDeleteHomeworkStreaks = async (context, userCourseRes, input, isReviewSubmittedOnTime = false) => {
   if (userCourseRes && get(userCourseRes, 'courses', []).length) {
-    await updateMentorMenteeSession(get(context, 'previousDocument.id', ''), isReviewSubmittedOnTime);
-    await updateUserCourseDoc(get(userCourseRes, 'id'), input);
+    await updateMentorMenteeSession(get(context, 'previousDocument.id', ''), isReviewSubmittedOnTime, context);
+    await updateUserCourseDoc(get(userCourseRes, 'id'), input, context);
   }
 };
 
@@ -120,7 +120,7 @@ export const submittedForReviewStreaksFlow = async (topics, userId, courseId, co
   const currentTopicIndex = sortedTopics.findIndex((topic) => topic.id === topicId);
   const nextTopicId = get(sortedTopics[currentTopicIndex + 1], 'id');
   // log(`.............Next Topic, ${JSON.stringify(sortedTopics[currentTopicIndex + 1], null, 2)}`);
-  const userCourseRes = await fetchUserCourse(userId, courseId);
+  const userCourseRes = await fetchUserCourse(userId, courseId, context);
   const streaksInput = {
     push: {
       courseConnectId: courseId || OLD_COURSE_ID,
@@ -129,7 +129,7 @@ export const submittedForReviewStreaksFlow = async (topics, userId, courseId, co
     },
   };
   if (nextTopicId) {
-    const nextMentorMenteeSession = await fetchMentorMenteeSession(userId, nextTopicId, courseId);
+    const nextMentorMenteeSession = await fetchMentorMenteeSession(userId, nextTopicId, courseId, context);
     // log(`.............Next MMS, ${JSON.stringify(nextMentorMenteeSession, null, 2)}`);
     // Checking if next MMS exists
     if (nextMentorMenteeSession && nextMentorMenteeSession.length) {
@@ -178,10 +178,10 @@ export const sessionStartedStreaksFlow = async (topics, userId, courseId, contex
   const prevTopicId = get(sortedTopics[currentTopicIndex - 1], 'id');
   // log(`.............Prev Topic, ${JSON.stringify(get(sortedTopics[currentTopicIndex - 1], 'id'), null, 2)}`);
   if (prevTopicId) {
-    const prevMentorMenteeSession = await fetchMentorMenteeSession(userId, prevTopicId, courseId);
+    const prevMentorMenteeSession = await fetchMentorMenteeSession(userId, prevTopicId, courseId, context);
     // log(`.............Prev MMS, ${JSON.stringify(prevMentorMenteeSession, null, 2)}`);
     if (prevMentorMenteeSession && prevMentorMenteeSession.length && (get(prevMentorMenteeSession[0], 'isSubmittedForReview') === false)) {
-      const userCourseRes = await fetchUserCourse(userId, courseId);
+      const userCourseRes = await fetchUserCourse(userId, courseId, context);
       let streakExistsForCurrentCourse = false;
       if (userCourseRes && get(userCourseRes, 'homeworkStreaks', []).length) {
         const courseStreaksDoc = get(userCourseRes, 'homeworkStreaks', []).filter((el) => el.course && (el.course.id === courseId));
@@ -215,7 +215,7 @@ export const sessionStartedStreaksFlow = async (topics, userId, courseId, contex
 
 export const updateHomeworkStreaksMethod = async (userId, context, topicId, input) => {
   const courseTypeId = get(input, 'course.typeId', '');
-  const courseData = await fetchCourseData(courseTypeId);
+  const courseData = await fetchCourseData(courseTypeId, context);
   const topics = get(courseData, 'topics', []);
   const filteredTopics = topics.filter((topic) => {
     if (courseTypeId !== OLD_COURSE_ID) {

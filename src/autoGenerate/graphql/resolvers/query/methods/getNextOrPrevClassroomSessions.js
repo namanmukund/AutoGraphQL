@@ -3,6 +3,7 @@ import { get, sortBy, orderBy } from 'lodash';
 import { slotTimes } from '../../../../../../constants';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { ifAuthorized, log } from '../../../../../../utils';
+import getStudentsCombinedArray from '../../../../../../utils/getStudentsCombinedArray';
 import { QueryController } from '../../../controllers';
 import { getTopicOrderFromCoursePackage } from '../../mutation/userData/menteeCourseSyllabus';
 
@@ -94,6 +95,14 @@ const getBatchSessionAggregation = ({
           },
           {
             $lookup: {
+              from: 'StudentProfile',
+              localField: 'batchStudents.typeId',
+              foreignField: 'id',
+              as: 'batchStudents',
+            },
+          },
+          {
+            $lookup: {
               from: 'CoursePackage',
               let: { coursePackageId: '$coursePackage.typeId' },
               pipeline: [
@@ -126,6 +135,11 @@ const getBatchSessionAggregation = ({
                 $arrayElemAt: ['$coursePackage', 0],
               },
               students: {
+                grade: 1,
+                section: 1,
+                user: 1,
+              },
+              batchStudents: {
                 grade: 1,
                 section: 1,
                 user: 1,
@@ -484,6 +498,14 @@ const getAdhocSessionAggregation = ({
           },
           {
             $lookup: {
+              from: 'StudentProfile',
+              localField: 'batchStudents.typeId',
+              foreignField: 'id',
+              as: 'batchStudents',
+            },
+          },
+          {
+            $lookup: {
               from: 'CoursePackage',
               let: { coursePackageId: '$coursePackage.typeId' },
               pipeline: [
@@ -513,6 +535,11 @@ const getAdhocSessionAggregation = ({
               description: 1,
               school: 1,
               students: {
+                grade: 1,
+                section: 1,
+                user: 1,
+              },
+              batchStudents: {
                 grade: 1,
                 section: 1,
                 user: 1,
@@ -739,7 +766,8 @@ const getHomeworkCompletedMeta = async (session, model, queryType = 'next') => {
     return 'NA';
   }
   const topicId = get(session, 'topic.id');
-  const userIds = get(session, 'classroom.students', []).map((el) => get(el, 'user.typeId'));
+  const students = getStudentsCombinedArray(get(session, 'classroom'), true);
+  const userIds = (students || []).map((el) => get(el, 'user.typeId'));
   let homeworkCompletedCount = 0;
   let isHomeworkExists = false;
   let isQuizExists = false;
@@ -774,6 +802,7 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
     // eslint-disable-next-line no-restricted-syntax
     for (const batchSession of batchSessions) {
       const homeworkMeta = await getHomeworkCompletedMeta(batchSession, mentorMenteeSessionModel, queryType);
+      const students = getStudentsCombinedArray(get(batchSession, 'classroom'), true);
       finalResult.push({
         id: get(batchSession, 'id'),
         bookingDate: get(batchSession, 'bookingDate', null),
@@ -792,7 +821,7 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
         topicComponentRule: get(batchSession, 'topic.topicComponentRule', null),
         classType: get(batchSession, 'topic.classType', 'lab'),
         thumbnailSmall: get(batchSession, 'topic.thumbnailSmall', null),
-        totalStudents: get(batchSession, 'classroom.students', []).length,
+        totalStudents: (students || []).length,
         completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
         completedQuizMeta: homeworkMeta.quizSubmittedCount,
         isHomeworkExists: homeworkMeta.isHomeworkExists,
@@ -807,6 +836,7 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
     // eslint-disable-next-line no-restricted-syntax
     for (const adhocSession of adhocSessions) {
       const homeworkMeta = await getHomeworkCompletedMeta(adhocSession, mentorMenteeSessionModel, queryType);
+      const students = getStudentsCombinedArray(get(adhocSession, 'classroom'), true);
       finalResult.push({
         id: get(adhocSession, 'id'),
         bookingDate: get(adhocSession, 'bookingDate', null),
@@ -824,7 +854,7 @@ const transformMongoResults = async (batchSessions, adhocSessions, queryType) =>
         topicComponentRule: get(batchSession, 'topic.topicComponentRule', null),
         thumbnailSmall: get(adhocSession, 'topic.thumbnailSmall', null),
         classType: get(adhocSession, 'topic.classType', 'lab'),
-        totalStudents: get(adhocSession, 'classroom.students', []).length,
+        totalStudents: (students || []).length,
         completedHomeworkMeta: homeworkMeta.homeworkCompletedCount,
         completedQuizMeta: homeworkMeta.quizSubmittedCount,
         isHomeworkExists: homeworkMeta.isHomeworkExists,

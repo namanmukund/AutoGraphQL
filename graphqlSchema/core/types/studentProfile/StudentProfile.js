@@ -21,6 +21,7 @@ const StudentProfile = `
     schoolClass: SchoolClass @relation(name: "SchoolClassStudentProfile")
     parents: [ParentProfile] @relation(name: "StudentProfileParentProfile")
     batch: Batch @relation(name: "BatchStudentProfile")
+    batches: [Batch] @relation(name: "BatchesStudentProfile")
     eventAttendances: [EventAttendance] @relation(name:"EventAttendanceStudentProfile")
     bookingAgent: User @relation(name: "BookingAgentStudentProfile", direction: "OneWay")
     mentor: MentorProfile @relation(name: "MentorStudentProfile")

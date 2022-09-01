@@ -13,9 +13,9 @@ import isMentorChild from '../../postHookFunctions/utils/isMentorChild';
 
 const updateMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: menteeSessionId } = params;
-  const menteeSessionData = await callLocalGraphqlApi(menteeSessionQuery(menteeSessionId));
+  const menteeSessionData = await callLocalGraphqlApi(menteeSessionQuery(menteeSessionId), context);
   const menteeSession = get(menteeSessionData, 'data.menteeSession');
-  const mentorMenteeSession = await getMentorMenteeSession(menteeSessionId);
+  const mentorMenteeSession = await getMentorMenteeSession(menteeSessionId, context);
   const { mentorSessionId, id: mmsId } = mentorMenteeSession;
 
   context.mentorSessionId = mentorSessionId;

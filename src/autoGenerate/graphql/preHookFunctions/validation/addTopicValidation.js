@@ -5,7 +5,7 @@ import {
 } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-export const getTopicsData = async (courseIds, title, order, topicFilter) => {
+export const getTopicsData = async (courseIds, title, order, topicFilter, context) => {
   const query = `{
   topics(filter:{ and:[ ${courseIds ? `{ courses_some:{ id_in:[${courseIds}] } }` : ''}
   ${title ? `{ title: "${title}" }` : ''}
@@ -15,11 +15,11 @@ export const getTopicsData = async (courseIds, title, order, topicFilter) => {
     id
   }
     }`;
-  const topicsData = await callLocalGraphqlApi(query);
+  const topicsData = await callLocalGraphqlApi(query, context);
   return get(topicsData, 'data.topics');
 };
 
-const addTopicValidation = async (params) => {
+const addTopicValidation = async (params, mutationOrQueryName, context) => {
   const { coursesConnectIds = [], input: { title, order } } = params;
   if (coursesConnectIds.length > 0) {
     if (title || order) {
@@ -27,14 +27,14 @@ const addTopicValidation = async (params) => {
       coursesConnectIds.forEach((courseId) => { courseIds += `"${courseId}"`; });
       // check if the topic with similar title exist
       if (title) {
-        const topicsDataForTitle = await getTopicsData(courseIds, title);
+        const topicsDataForTitle = await getTopicsData(courseIds, title, null, null, context);
         if (topicsDataForTitle && topicsDataForTitle.length > 0) {
           throw new TopicWithSimilarTitleAlreadyExist();
         }
       }
       // check if the topic with similar order exist
       if (order) {
-        const topicsDataForTitle = await getTopicsData(courseIds, null, order);
+        const topicsDataForTitle = await getTopicsData(courseIds, null, order, null, context);
         if (topicsDataForTitle && topicsDataForTitle.length > 0) {
           throw new TopicWithSimilarOrderAlreadyExist();
         }

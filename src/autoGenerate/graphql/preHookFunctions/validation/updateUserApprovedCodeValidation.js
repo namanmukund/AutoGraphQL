@@ -2,7 +2,7 @@ import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 
-const userApprovedCodeQuery = async (id) => {
+const userApprovedCodeQuery = async (id, context) => {
   const query = `
     query{
       userApprovedCode(id:"${id}"){
@@ -18,13 +18,13 @@ const userApprovedCodeQuery = async (id) => {
         }
       }
     }`;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.userApprovedCode');
 };
 
 const updateUserApprovedCodeValidation = async (params, _, context) => {
   const { id } = params;
-  const userApprovedCodeData = await userApprovedCodeQuery(id);
+  const userApprovedCodeData = await userApprovedCodeQuery(id, context);
   if (!get(userApprovedCodeData, 'id')) {
     throw new DatabaseRecordNotFoundError();
   }

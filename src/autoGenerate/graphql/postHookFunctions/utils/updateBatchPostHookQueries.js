@@ -3,7 +3,7 @@ import { GLOBAL_COURSE_TITLE } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 // query to get published topics count
-const getTopics = async (courseId) => {
+const getTopics = async (courseId, context) => {
   const query = `
           {
             topics(filter: 
@@ -18,12 +18,12 @@ const getTopics = async (courseId) => {
             }
           }
           `;
-  const topicMeta = await callLocalGraphqlApi(query);
+  const topicMeta = await callLocalGraphqlApi(query, context);
   return get(topicMeta, 'data.topics');
 };
 
 // query to get batch sessions
-const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus, slotInput, dateInput) => {
+const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus, slotInput, dateInput, context) => {
   const query = `
           {
             batchSessions(filter: {
@@ -73,12 +73,12 @@ const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus, slotI
             }
           }
           `;
-  const batches = await callLocalGraphqlApi(query);
+  const batches = await callLocalGraphqlApi(query, context);
   return get(batches, 'data.batchSessions', []);
 };
 
 // query to get adhoc sessions
-const getAdhocSessions = async (batchId, bookingDate, slot, sessionStatus, slotInput, dateInput) => {
+const getAdhocSessions = async (batchId, bookingDate, slot, sessionStatus, slotInput, dateInput, context) => {
   const query = `
           {
             adhocSessions(filter: {
@@ -125,12 +125,12 @@ const getAdhocSessions = async (batchId, bookingDate, slot, sessionStatus, slotI
             }
           }
           `;
-  const sessions = await callLocalGraphqlApi(query);
+  const sessions = await callLocalGraphqlApi(query, context);
   return get(sessions, 'data.adhocSessions', []);
 };
 
 // query to get batch sessions (started, completed)
-const getBatch = async (batchId) => {
+const getBatch = async (batchId, context) => {
   const query = `
           {
             batch(id:"${batchId}"){
@@ -172,11 +172,11 @@ const getBatch = async (batchId) => {
             }
           }
           `;
-  const currBatch = await callLocalGraphqlApi(query);
+  const currBatch = await callLocalGraphqlApi(query, context);
   return get(currBatch, 'data.batch');
 };
 
-const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId, courseId, coursePackageId, startTime, endTime, sessionMode) => {
+const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId, courseId, coursePackageId, startTime, endTime, sessionMode, context) => {
   const query = `
           mutation{
             addBatchSession(batchConnectId: "${batchId}",
@@ -196,11 +196,11 @@ const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId
             }
           }
           `;
-  await callLocalGraphqlApi(query);
+  await callLocalGraphqlApi(query, context);
   return true;
 };
 
-const updateBatchSession = async (sessionId, slots, date, mentorSessionId, courseId, coursePackageId, startTime, endTime, sessionMode) => {
+const updateBatchSession = async (sessionId, slots, date, mentorSessionId, courseId, coursePackageId, startTime, endTime, sessionMode, context) => {
   const query = `
           mutation{
             updateBatchSession(
@@ -220,11 +220,11 @@ const updateBatchSession = async (sessionId, slots, date, mentorSessionId, cours
             }
           }
           `;
-  await callLocalGraphqlApi(query);
+  await callLocalGraphqlApi(query, context);
   return true;
 };
 
-const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId, courseId, adhocSessionType, coursePackageId, startTime, endTime, sessionMode) => {
+const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId, courseId, adhocSessionType, coursePackageId, startTime, endTime, sessionMode, context) => {
   const query = `
           mutation{
             addAdhocSession(batchConnectId: "${batchId}",
@@ -245,11 +245,11 @@ const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId
             }
           }
           `;
-  await callLocalGraphqlApi(query);
+  await callLocalGraphqlApi(query, context);
   return true;
 };
 
-const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, courseId, coursePackageId, startTime, endTime, sessionMode) => {
+const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, courseId, coursePackageId, startTime, endTime, sessionMode, context) => {
   const query = `
           mutation{
             updateAdhocSession(
@@ -269,7 +269,7 @@ const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, cours
             }
           }
           `;
-  await callLocalGraphqlApi(query);
+  await callLocalGraphqlApi(query, context);
   return true;
 };
 
@@ -303,7 +303,7 @@ const getAdhocSession = (batchId,
   }
 `;
 
-const getTopicsFromCoursePackage = async (coursePackageId) => {
+const getTopicsFromCoursePackage = async (coursePackageId, context) => {
   const query = `
   query{
   coursePackage(id: "${coursePackageId}"){
@@ -321,11 +321,11 @@ const getTopicsFromCoursePackage = async (coursePackageId) => {
   }
 }
   `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.coursePackage');
 };
 
-const getCourseIdFromTopic = async (topicId) => {
+const getCourseIdFromTopic = async (topicId, context) => {
   const query = `
   {
   topic(id: "${topicId}"){
@@ -335,7 +335,7 @@ const getCourseIdFromTopic = async (topicId) => {
   }
 }
   `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.topic.courses[0].id');
 };
 

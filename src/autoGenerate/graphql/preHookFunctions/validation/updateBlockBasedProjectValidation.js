@@ -8,7 +8,7 @@ import {
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { fetchProject } from './addBlockBasedProjectValidation';
 
-const fetchCourseForProject = async (projectId) => {
+const fetchCourseForProject = async (projectId, context) => {
   const query = `{
   blockBasedProject(id: "${projectId}") {
     courses {
@@ -17,18 +17,18 @@ const fetchCourseForProject = async (projectId) => {
   }
 }
 `;
-  const projectData = await callLocalGraphqlApi(query);
+  const projectData = await callLocalGraphqlApi(query, context);
   return get(projectData, 'data.blockBasedProject');
 };
 
-const updateBlockBasedProjectValidation = async (params) => {
+const updateBlockBasedProjectValidation = async (params, mutationOrQueryName, context) => {
   const { input = {}, id: projectId } = params;
   const title = get(input, 'title');
   const order = get(input, 'order');
   const type = get(input, 'type');
   if ((title || order) && type) {
     let courseIds = '';
-    const projectData = await fetchCourseForProject(projectId);
+    const projectData = await fetchCourseForProject(projectId, context);
     const courses = get(projectData, 'courses', []);
     courses.forEach((course) => { courseIds += `"${get(course, 'id')}"`; });
     if (title) {

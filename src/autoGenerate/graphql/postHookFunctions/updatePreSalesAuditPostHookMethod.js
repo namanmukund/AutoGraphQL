@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
-const updatePreSalesAudit = async (preSalesAuditId, input) => {
+const updatePreSalesAudit = async (preSalesAuditId, input, context) => {
   const query = `
     mutation($input: PreSalesAuditUpdate) {
         updatePreSalesAudit(id: "${preSalesAuditId}", input: $input) {
@@ -12,11 +12,11 @@ const updatePreSalesAudit = async (preSalesAuditId, input) => {
   const variables = {
     input,
   };
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.updatePreSalesAudit');
 };
 
-const updatePreSalesAuditPostHookMethod = async (input, _mutationName, _context, params) => {
+const updatePreSalesAuditPostHookMethod = async (input, _mutationName, context, params) => {
   const { auditorConnectId, preSalesUserConnectId } = params;
   /**
    * Check if prev status is not started and auditorConnectId not provided then update status to started
@@ -24,7 +24,7 @@ const updatePreSalesAuditPostHookMethod = async (input, _mutationName, _context,
    * */
   if (get(params, 'input.status', false) !== 'completed') {
     if (get(input, 'status', false) !== 'started' && !auditorConnectId && !preSalesUserConnectId) {
-      const updatePreSalesAuditPostHookMethodData = await updatePreSalesAudit(get(input, 'id'), { status: 'started' });
+      const updatePreSalesAuditPostHookMethodData = await updatePreSalesAudit(get(input, 'id'), { status: 'started' }, context);
       if (updatePreSalesAuditPostHookMethodData && updatePreSalesAuditPostHookMethodData.id) {
         Object.assign(input, {
           status: updatePreSalesAuditPostHookMethodData.status,

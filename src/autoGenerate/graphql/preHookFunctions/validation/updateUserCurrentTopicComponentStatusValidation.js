@@ -47,9 +47,10 @@ const updateUserCurrentTopicComponentStatusValidation = async (params, context) 
   */
   const userCurrentTopicComponentStatusData = await callLocalGraphqlApi(
     userCurrentTopicComponentStatusQuery(userCurrentTopicComponentStatusId),
+    context,
   );
   if (topicId) {
-    const topicData = await callLocalGraphqlApi(topicQuery(topicId));
+    const topicData = await callLocalGraphqlApi(topicQuery(topicId), context);
     const topicOrder = get(topicData, 'data.topic.order');
     // Fetching userCurrentTopicComponentStatus to get order of current topic
     const userCurrentTopicComponentTopicOrder = get(

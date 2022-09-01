@@ -573,6 +573,24 @@ const ALLOWED_FILE_UPLOAD_TYPES = [
   'UserBlockBasedPractice',
 ];
 
+const ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER = [
+  {
+    contextLabel: 'activeClassroom',
+    headerLabel: 'x-classroom-uid',
+  },
+];
+
+const ALLOWED_HEADERS = [
+  'Content-Type',
+  'Authorization',
+  'Content-Length',
+  'X-Requested-With',
+  'X-Forwarded-By',
+  'User-Device-Id',
+  'BatchSession-Id',
+  ...ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER.map((VAR) => VAR.headerLabel),
+];
+
 export {
   scalarTypes,
   defaultFields,
@@ -687,4 +705,6 @@ export {
   DB_AGGREGATION_MODE_STATUS,
   MASTER_PASSWORD,
   ALLOWED_FILE_UPLOAD_TYPES,
+  ALLOWED_HEADERS,
+  ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER,
 };

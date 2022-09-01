@@ -26,6 +26,7 @@ import { log } from '../../../../utils';
 import getTopicInfo from './utils/getTopicInfo';
 import getCourseInfo from './utils/getCourseInfo';
 import sendDemoCompletionCertificate from './utils/sendDemoCompletionCertificate';
+import getUserActiveClassroom from '../../../../utils/getUserActiveClassroom';
 
 const { postSales, demoWow } = auditType;
 // import sendSessionCancellationMessage from './utils/sendSessionCancellationMessage';
@@ -66,17 +67,17 @@ const userIdQuery = (menteeSessionId) => `{
   }
 }`;
 
-const updateUserVerificationStatus = async (userId) => {
+const updateUserVerificationStatus = async (userId, context) => {
   const updateQuery = `mutation {
   updateUser(id: "${userId}", input: { verificationStatus: verified }) {
     id
   }
 }
 `;
-  await callLocalGraphqlApi(updateQuery);
+  await callLocalGraphqlApi(updateQuery, context);
 };
 
-const mentorMenteeSessionsQuery = async (userId, orderBy = 'latest') => {
+const mentorMenteeSessionsQuery = async (userId, orderBy = 'latest', context) => {
   let orderByString = '';
   if (orderBy === 'latest') {
     orderByString = 'orderBy:sessionStartDate_DESC';
@@ -113,12 +114,12 @@ query{
   }
 }
 `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   const data = get(res, 'data.mentorMenteeSessions[0]');
   return data;
 };
 
-const userPaymentPlanQuery = async (filterQuery) => {
+const userPaymentPlanQuery = async (filterQuery, context) => {
   const query = `
     query{
       userPaymentPlans(filter:{and:[
@@ -129,7 +130,7 @@ const userPaymentPlanQuery = async (filterQuery) => {
       }
     }
 `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   const data = get(res, 'data.userPaymentPlans[0]');
   return data;
 };
@@ -156,9 +157,9 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
     },
   } = context;
   const { sessionStartDate, isFeedbackSubmitted, sessionStatus: currentSessionStatus } = input;
-  const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')));
+  const menteeSession = await callLocalGraphqlApi(userIdQuery(get(input, 'menteeSession.typeId')), context);
   const userId = get(menteeSession, 'data.menteeSession.user.id');
-  const userInfo = await getMenteeInfo(userId);
+  const userInfo = await getMenteeInfo(userId, context);
   const topicInfo = await getTopicInfo(get(params, 'topicConnectId'));
   const courseInfo = await getCourseInfo(get(params, 'courseConnectId'));
 
@@ -214,7 +215,7 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   }
 
   const menteeId = get(menteeSession, 'data.menteeSession.user.id');
-  const mmsFirstData = await mentorMenteeSessionsQuery(menteeId, 'first');
+  const mmsFirstData = await mentorMenteeSessionsQuery(menteeId, 'first', context);
 
   if (currentUser && currentUser.id) {
     if (
@@ -294,7 +295,8 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       await extractMentorMenteeSessionAndSendMessage(bookingDate, slotTimeStringArray, context.mentorSessionConnectId, userInfo, topicInfo, input.id, courseInfo);
     }
     const mentorSessionId = get(input, 'mentorSession.typeId');
-    const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    const classroom = await getUserActiveClassroom(context, { courseId, studentProfile: get(userInfo, 'data.user.studentProfile') }, get(userInfo, 'data.user.studentProfile.batch.id', ''));
+    const batchCode = get(classroom, 'code', '');
     // adding logs when menteeSession is changed or mentorSession is changed or status is changed
     addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'updateMentorMenteeSession', batchCode, mentorSessionId, sessionStatus, input);
   }
@@ -304,10 +306,10 @@ const updateMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   }
   /** Update MenteeMentorSession If Session Completed  */
   if (prevSessionStatus === 'completed' || get(input, 'sessionStatus') === 'completed') {
-    const userPaymentPlanData = await userPaymentPlanQuery(`{user_some:{id:"${menteeId}"}}`);
+    const userPaymentPlanData = await userPaymentPlanQuery(`{user_some:{id:"${menteeId}"}}`, context);
     if (get(menteeSession, 'data.menteeSession.bookedBy') === 'leadPartner'
       && get(userInfo, 'data.user.verificationStatus') !== 'verified') {
-      updateUserVerificationStatus(userId);
+      updateUserVerificationStatus(userId, context);
     }
     if (userPaymentPlanData && userPaymentPlanData.id) {
       const updateObject = {};

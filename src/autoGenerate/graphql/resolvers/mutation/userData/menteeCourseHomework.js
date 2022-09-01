@@ -7,6 +7,7 @@ import { QueryController } from '../../../controllers';
 import { getTopicsArrFromCoursePackages, getTopicOrderFromCoursePackage } from './menteeCourseSyllabus';
 import { OLD_COURSE_ID } from '../../../../../../constants';
 import { callLocalGraphqlApi } from '../../../../../api';
+import getUserActiveClassroom from '../../../../../../utils/getUserActiveClassroom';
 
 const defaultMentorMenteeSessionObject = {
   sessionStatus: null,
@@ -206,7 +207,7 @@ const defaultMentorMenteeSessionObject = {
 //     },
 //   },
 // ];
-const getMentorMenteeSessions = async (userId) => {
+const getMentorMenteeSessions = async (userId, context) => {
   const query = `
     {
       mentorMenteeSessions(filter: {
@@ -255,7 +256,7 @@ const getMentorMenteeSessions = async (userId) => {
       }
     }
   `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.mentorMenteeSessions', []);
 };
 
@@ -513,6 +514,7 @@ const getUserBatchDetails = (userId) => [
     $project: {
       id: 1,
       batch: 1,
+      batches: 1,
       school: 1,
       user: 1,
     },
@@ -537,6 +539,7 @@ const getUserBatchDetails = (userId) => [
         {
           $project: {
             id: 1,
+            course: 1,
             currentComponent: 1,
             coursePackage: 1,
             coursePackageTopicRule: 1,
@@ -883,6 +886,28 @@ const getUserBatchDetails = (userId) => [
               },
               {
                 $lookup: {
+                  from: 'Course',
+                  let: { coursesId: '$courses.typeId' },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $in: ['$id', '$$coursesId'],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        title: 1,
+                      },
+                    },
+                  ],
+                  as: 'courses',
+                },
+              },
+              {
+                $lookup: {
                   from: 'Topic',
                   let: {
                     topicIds: '$topics.topic.typeId',
@@ -1076,6 +1101,606 @@ const getUserBatchDetails = (userId) => [
   },
   {
     $lookup: {
+      from: 'Batch',
+      let: { batchesId: '$batches.typeId' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $in: ['$id', '$$batchesId'],
+            },
+          },
+        },
+        {
+          $project: {
+            id: 1,
+            course: 1,
+            currentComponent: 1,
+            coursePackage: 1,
+            coursePackageTopicRule: 1,
+          },
+        },
+        {
+          $lookup: {
+            from: 'Topic',
+            let: {
+              topicIds: {
+                $ifNull: ['$coursePackageTopicRule.topic.typeId', []],
+              },
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $in: ['$id', '$$topicIds'],
+                  },
+                },
+              },
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$status', 'published'],
+                  },
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  title: 1,
+                  order: 1,
+                  isTrial: 1,
+                  description: 1,
+                  topicQuestions: {
+                    $ifNull: ['$topicQuestions', []],
+                  },
+                  thumbnail: 1,
+                  thumbnailSmall: 1,
+                  topicAssignmentQuestions: {
+                    assignmentQuestions: {
+                      id: 1,
+                    },
+                  },
+                  topicHomeworkAssignmentQuestion: {
+                    $ifNull: ['$topicHomeworkAssignmentQuestion', []],
+                  },
+                  chapter: 1,
+                  topicComponentRule: 1,
+                },
+              },
+              {
+                $lookup: {
+                  from: 'File',
+                  let: {
+                    thumbnailId: '$thumbnail.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: [
+                            '$id',
+                            '$$thumbnailId',
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        uri: 1,
+                        name: 1,
+                      },
+                    },
+                  ],
+                  as: 'thumbnail',
+                },
+              },
+              {
+                $lookup: {
+                  from: 'File',
+                  let: {
+                    thumbnailSmallId: '$thumbnailSmall.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: [
+                            '$id',
+                            '$$thumbnailSmallId',
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        uri: 1,
+                        name: 1,
+                      },
+                    },
+                  ],
+                  as: 'thumbnailSmall',
+                },
+              },
+              {
+                $lookup: {
+                  from: 'Chapter',
+                  let: {
+                    chapterId: '$chapter.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: [
+                            '$id',
+                            '$$chapterId',
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: ['$status', 'published'],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        title: 1,
+                        order: 1,
+                      },
+                    },
+                  ],
+                  as: 'chapter',
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  title: 1,
+                  order: 1,
+                  isTrial: 1,
+                  description: 1,
+                  thumbnail: {
+                    $arrayElemAt: [
+                      '$thumbnail',
+                      0,
+                    ],
+                  },
+                  thumbnailSmall: {
+                    $arrayElemAt: [
+                      '$thumbnailSmall',
+                      0,
+                    ],
+                  },
+                  topicAssignmentQuestions: {
+                    assignmentQuestions: {
+                      id: 1,
+                    },
+                  },
+                  chapter: {
+                    $arrayElemAt: [
+                      '$chapter',
+                      0,
+                    ],
+                  },
+                  topicComponentRule: 1,
+                  topicQuestions: 1,
+                  topicHomeworkAssignmentQuestion: 1,
+                },
+              },
+            ],
+            as: 'coursePackageTopicArr',
+          },
+        },
+        {
+          $lookup: {
+            from: 'BatchCurrentComponentStatus',
+            let: {
+              ccId: '$currentComponent.typeId',
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: [
+                      '$id',
+                      '$$ccId',
+                    ],
+                  },
+                },
+              },
+              {
+                $project: {
+                  currentCourse: {
+                    id: '$currentCourse.typeId',
+                  },
+                  enrollmentType: 1,
+                  latestSessionStatus: 1,
+                  currentTopic: 1,
+                },
+              },
+              {
+                $lookup: {
+                  from: 'Topic',
+                  let: {
+                    currentTopicId: '$currentTopic.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: [
+                            '$id',
+                            '$$currentTopicId',
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        order: 1,
+                      },
+                    },
+                  ],
+                  as: 'currentTopic',
+                },
+              },
+              {
+                $project: {
+                  currentCourse: 1,
+                  enrollmentType: 1,
+                  currentTopic: {
+                    $arrayElemAt: [
+                      '$currentTopic',
+                      0,
+                    ],
+                  },
+                  latestSessionStatus: 1,
+                },
+              },
+            ],
+            as: 'currentComponent',
+          },
+        },
+        {
+          $lookup: {
+            from: 'User',
+            let: { allottedMentorId: '$allottedMentor.typeId' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$id', '$$allottedMentorId'],
+                  },
+                },
+              },
+              {
+                $lookup: {
+                  from: 'File',
+                  localField: 'profilePic.typeId',
+                  foreignField: 'id',
+                  as: 'profilePic',
+                },
+              },
+              {
+                $lookup: {
+                  from: 'MentorProfile',
+                  localField: 'mentorProfile.typeId',
+                  foreignField: 'id',
+                  as: 'mentorProfile',
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  name: 1,
+                  profilePic: {
+                    $arrayElemAt: ['$profilePic', 0],
+                  },
+                  mentorProfile: {
+                    $arrayElemAt: ['$mentorProfile', 0],
+                  },
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  name: 1,
+                  profilePic: {
+                    id: 1,
+                    uri: 1,
+                    name: 1,
+                  },
+                  mentorProfile: {
+                    description: 1,
+                    sessionLink: 1,
+                    googleMeetLink: 1,
+                    pythonCourseRating5: 1,
+                    pythonCourseRating4: 1,
+                    pythonCourseRating3: 1,
+                    pythonCourseRating2: 1,
+                    pythonCourseRating1: 1,
+                    gitHubLink: 1,
+                    linkedInLink: 1,
+                    portfolioLink: 1,
+                    experienceYear: 1,
+                  },
+                },
+              },
+            ],
+            as: 'allottedMentor',
+          },
+        },
+        {
+          $lookup: {
+            from: 'CoursePackage',
+            let: { coursePackageId: '$coursePackage.typeId' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$id', '$$coursePackageId'],
+                  },
+                },
+              },
+              {
+                $project: {
+                  _id: 0,
+                  courses: 1,
+                  id: 1,
+                  status: 1,
+                  title: 1,
+                  topics: 1,
+                },
+              },
+              {
+                $lookup: {
+                  from: 'Course',
+                  let: { coursesId: '$courses.typeId' },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $in: ['$id', '$$coursesId'],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        title: 1,
+                      },
+                    },
+                  ],
+                  as: 'courses',
+                },
+              },
+              {
+                $lookup: {
+                  from: 'Topic',
+                  let: {
+                    topicIds: '$topics.topic.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $in: ['$id', '$$topicIds'],
+                        },
+                      },
+                    },
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: ['$status', 'published'],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        title: 1,
+                        order: 1,
+                        isTrial: 1,
+                        description: 1,
+                        topicQuestions: {
+                          $ifNull: ['$topicQuestions', []],
+                        },
+                        thumbnail: 1,
+                        thumbnailSmall: 1,
+                        topicAssignmentQuestions: 1,
+                        topicHomeworkAssignmentQuestion: {
+                          $ifNull: ['$topicHomeworkAssignmentQuestion', []],
+                        },
+                        chapter: 1,
+                        topicComponentRule: 1,
+                      },
+                    },
+                    {
+                      $lookup: {
+                        from: 'File',
+                        let: {
+                          thumbnailId: '$thumbnail.typeId',
+                        },
+                        pipeline: [
+                          {
+                            $match: {
+                              $expr: {
+                                $eq: [
+                                  '$id',
+                                  '$$thumbnailId',
+                                ],
+                              },
+                            },
+                          },
+                          {
+                            $project: {
+                              id: 1,
+                              uri: 1,
+                              name: 1,
+                            },
+                          },
+                        ],
+                        as: 'thumbnail',
+                      },
+                    },
+                    {
+                      $lookup: {
+                        from: 'File',
+                        let: {
+                          thumbnailSmallId: '$thumbnailSmall.typeId',
+                        },
+                        pipeline: [
+                          {
+                            $match: {
+                              $expr: {
+                                $eq: [
+                                  '$id',
+                                  '$$thumbnailSmallId',
+                                ],
+                              },
+                            },
+                          },
+                          {
+                            $project: {
+                              id: 1,
+                              uri: 1,
+                              name: 1,
+                            },
+                          },
+                        ],
+                        as: 'thumbnailSmall',
+                      },
+                    },
+                    {
+                      $lookup: {
+                        from: 'Chapter',
+                        let: {
+                          chapterId: '$chapter.typeId',
+                        },
+                        pipeline: [
+                          {
+                            $match: {
+                              $expr: {
+                                $eq: [
+                                  '$id',
+                                  '$$chapterId',
+                                ],
+                              },
+                            },
+                          },
+                          {
+                            $match: {
+                              $expr: {
+                                $eq: ['$status', 'published'],
+                              },
+                            },
+                          },
+                          {
+                            $project: {
+                              id: 1,
+                              title: 1,
+                              order: 1,
+                            },
+                          },
+                        ],
+                        as: 'chapter',
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                        title: 1,
+                        order: 1,
+                        isTrial: 1,
+                        description: 1,
+                        thumbnail: {
+                          $arrayElemAt: [
+                            '$thumbnail',
+                            0,
+                          ],
+                        },
+                        thumbnailSmall: {
+                          $arrayElemAt: [
+                            '$thumbnailSmall',
+                            0,
+                          ],
+                        },
+                        topicQuestions: {
+                          $ifNull: ['$topicQuestions', []],
+                        },
+                        topicAssignmentQuestions: 1,
+                        topicHomeworkAssignmentQuestion: 1,
+                        chapter: {
+                          $arrayElemAt: [
+                            '$chapter',
+                            0,
+                          ],
+                        },
+                        topicComponentRule: 1,
+                      },
+                    },
+                  ],
+                  as: 'topicsArr',
+                },
+              },
+            ],
+            as: 'coursePackage',
+          },
+        },
+        {
+          $lookup: {
+            from: 'Course',
+            let: { courseId: '$course.typeId' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$id', '$$courseId'],
+                  },
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  title: 1,
+                },
+              },
+            ],
+            as: 'course',
+          },
+        },
+        {
+          $project: {
+            id: 1,
+            course: {
+              $arrayElemAt: ['$course', 0],
+            },
+            coursePackage: {
+              $arrayElemAt: ['$coursePackage', 0],
+            },
+            allottedMentor: {
+              $arrayElemAt: ['$allottedMentor', 0],
+            },
+            currentComponent: {
+              $arrayElemAt: ['$currentComponent', 0],
+            },
+            coursePackageTopicRule: 1,
+            coursePackageTopicArr: 1,
+          },
+        },
+      ],
+      as: 'batches',
+    },
+  },
+  {
+    $lookup: {
       from: 'School',
       let: {
         schoolId: '$school.typeId',
@@ -1108,6 +1733,7 @@ const getUserBatchDetails = (userId) => [
       batch: {
         $arrayElemAt: ['$batch', 0],
       },
+      batches: 1,
       school: {
         $arrayElemAt: ['$school', 0],
       },
@@ -1185,26 +1811,26 @@ const menteeCourseHomeworkMutationResolver = async (
   const currentTopicComponentInfo = res[0];
   const userBatchDetailsRes = new QueryController('StudentProfile', { bypass: true });
   const userBatchDetails = await userBatchDetailsRes.aggregate(getUserBatchDetails(userId));
-  // let courseOrPackageFilter = {
-  //   'course.typeId': courseId || OLD_COURSE_ID,
-  // };
-  if (get(userBatchDetails, '0.batch.coursePackage.id')) {
-    coursePackage = get(userBatchDetails, '0.batch.coursePackage', {});
-    // courseOrPackageFilter = {
-    //   'coursePackage.typeId': get(coursePackage, 'id'),
-    // };
+
+  const userActiveClassroom = await getUserActiveClassroom(
+    context,
+    { courseId, studentProfile: userBatchDetails[0] },
+    get(userBatchDetails, '0.batch.id'),
+  );
+  if (get(userActiveClassroom, 'coursePackage.id')) {
+    coursePackage = get(userActiveClassroom, 'coursePackage', {});
   }
 
   // calling method to validate user current topic component status
   if (!coursePackage) validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
 
-  const batchCurrentComponentCourseId = get(userBatchDetails, '0.batch.currentComponent.currentCourse.id');
+  const batchCurrentComponentCourseId = get(userActiveClassroom, 'currentComponent.currentCourse.id');
 
   if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId || coursePackage) {
-    batchCurrentComponentInfo = get(userBatchDetails, '0.batch.currentComponent');
+    batchCurrentComponentInfo = get(userActiveClassroom, 'currentComponent');
   }
 
-  const mentorMenteeSessions = await getMentorMenteeSessions(userId);
+  const mentorMenteeSessions = await getMentorMenteeSessions(userId, context);
   if (batchCurrentComponentInfo || coursePackage) {
     currentTopicOrder = get(batchCurrentComponentInfo, 'currentTopic.order');
     currentTopic = get(batchCurrentComponentInfo, 'currentTopic');
@@ -1214,7 +1840,7 @@ const menteeCourseHomeworkMutationResolver = async (
   }
   let packageTopics = [];
   if (coursePackage && get(coursePackage, 'id')) {
-    packageTopics = getTopicsArrFromCoursePackages(coursePackage, get(userBatchDetails, '0.batch'));
+    packageTopics = getTopicsArrFromCoursePackages(coursePackage, userActiveClassroom);
   }
   const { chapters } = get(currentTopicComponentInfo, 'currentCourse', {});
   if ((!chapters || !chapters.length) && !(packageTopics || []).length) {
@@ -1228,7 +1854,7 @@ const menteeCourseHomeworkMutationResolver = async (
     chapters.sort((a, b) => a.order - b.order);
   }
   if (coursePackage && get(coursePackage, 'id')) {
-    const lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic, get(userBatchDetails, '0.batch')).order;
+    const lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic, userActiveClassroom).order;
     packageTopics.forEach((topic) => {
       const mentorMenteeSession = isMentorMenteeSessionAvailable(
         mentorMenteeSessions,

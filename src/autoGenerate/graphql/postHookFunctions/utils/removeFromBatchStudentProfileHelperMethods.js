@@ -3,7 +3,7 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { GLOBAL_COURSE_TITLE } from '../../../../../constants';
 import getSlotTimesInString from '../../../../../utils/getSlotTimesInString';
 
-const fetchStudentProfile = async (studentProfileId, batchId) => {
+const fetchStudentProfile = async (studentProfileId, batchId, context) => {
   const query = `
     {
       studentProfiles(filter:
@@ -37,11 +37,11 @@ const fetchStudentProfile = async (studentProfileId, batchId) => {
       }
     }
   `;
-  const studentProfiles = await callLocalGraphqlApi(query);
+  const studentProfiles = await callLocalGraphqlApi(query, context);
   return get(studentProfiles, 'data.batchSessions', []);
 };
 
-const fetchUserCurrentTopicComponentStatuses = async (userId) => {
+const fetchUserCurrentTopicComponentStatuses = async (userId, context) => {
   const query = `
     {
     userCurrentTopicComponentStatuses(
@@ -62,11 +62,11 @@ const fetchUserCurrentTopicComponentStatuses = async (userId) => {
     }
   }
   `;
-  const currentTopicComponent = await callLocalGraphqlApi(query);
+  const currentTopicComponent = await callLocalGraphqlApi(query, context);
   return get(currentTopicComponent, 'data.userCurrentTopicComponentStatuses', []);
 };
 
-const fetchNextTopicId = async (topicOrder, courseId) => {
+const fetchNextTopicId = async (topicOrder, courseId, context) => {
   const query = `
     {
       topics(filter: {
@@ -90,11 +90,11 @@ const fetchNextTopicId = async (topicOrder, courseId) => {
       }
 }
   `;
-  const topics = await callLocalGraphqlApi(query);
+  const topics = await callLocalGraphqlApi(query, context);
   return get(topics, 'data.topics', []);
 };
 
-const updateUserCurrentTopicComponentStatus = async (userCurrentComponentId, topicId, topicComponentType, loId) => {
+const updateUserCurrentTopicComponentStatus = async (userCurrentComponentId, topicId, topicComponentType, loId, context) => {
   const mutation = `
     mutation{
     updateUserCurrentTopicComponentStatus(id: "${userCurrentComponentId}",
@@ -111,11 +111,11 @@ const updateUserCurrentTopicComponentStatus = async (userCurrentComponentId, top
     }
   }
   `;
-  const updateResult = await callLocalGraphqlApi(mutation);
+  const updateResult = await callLocalGraphqlApi(mutation, context);
   return get(updateResult, 'data.updateUserCurrentTopicComponentStatus', {});
 };
 
-const fetchAllottedBatchSessions = async (batchId) => {
+const fetchAllottedBatchSessions = async (batchId, context) => {
   const query = `
           {
             batchSessions(filter: {and: [{sessionStatus: allotted}, {batch_some: {id: "${batchId}"}}]}) {
@@ -144,11 +144,11 @@ const fetchAllottedBatchSessions = async (batchId) => {
             }
           }
           `;
-  const batchSessions = await callLocalGraphqlApi(query);
+  const batchSessions = await callLocalGraphqlApi(query, context);
   return get(batchSessions, 'data.batchSessions', []);
 };
 
-const updateAttendanceArray = async (batchSession, newArrString) => {
+const updateAttendanceArray = async (batchSession, newArrString, context) => {
   const mutation = `
             mutation{
                   updateBatchSession(id:"${batchSession}", input:{
@@ -172,11 +172,11 @@ const updateAttendanceArray = async (batchSession, newArrString) => {
                   }
                 }
                 `;
-  const updateBatchSessionResponse = await callLocalGraphqlApi(mutation);
+  const updateBatchSessionResponse = await callLocalGraphqlApi(mutation, context);
   return get(updateBatchSessionResponse, 'data.updateBatchSession', {});
 };
 
-const removeStudentFromBatchSessionAttendance = async (batchSession, studentProfileId) => {
+const removeStudentFromBatchSessionAttendance = async (batchSession, studentProfileId, context) => {
   const attendanceArray = get(batchSession, 'attendance', []);
   const batchId = get(batchSession, 'id', '');
   if (attendanceArray.length > 0) {
@@ -197,7 +197,7 @@ const removeStudentFromBatchSessionAttendance = async (batchSession, studentProf
     newArrString += ']';
     // console.log('********** string passed in replace *******');
     // console.log(newArrString);
-    await updateAttendanceArray(batchId, newArrString);
+    await updateAttendanceArray(batchId, newArrString, context);
     // console.log('********** result *******');
   }
 };

@@ -102,6 +102,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
   totalQuestions,
   isLastLearningSlide,
   learningSlideId,
+  context,
 ) => {
   const checkForMentorChild = await isUserInheritedFromMentor(userId, true);
   if (checkForMentorChild && !currentTopicComponentInfo) return true;
@@ -436,7 +437,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
   if (nextComponentIndex < sortedTopicComponentRule.length) {
     nextCurrentTopicComponent = sortedTopicComponentRule && sortedTopicComponentRule.length > nextComponentIndex && sortedTopicComponentRule[nextComponentIndex];
   } else {
-    const nextTopicRes = await callLocalGraphqlApi(getNextTopic(courseId, topicOrder));
+    const nextTopicRes = await callLocalGraphqlApi(getNextTopic(courseId, topicOrder), context);
     const nextTopic = get(nextTopicRes, 'data.topics[0]');
     const nextTopicComponentRule = get(nextTopic, 'topicComponentRule', []);
     const sortedNextTopicComponentRule = nextTopicComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
@@ -491,7 +492,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       blockBasedProjectQuery,
       nextCurrentTopicComponentType,
       learningSlideQuery,
-    ));
+    ), context);
   } else if (toUpdateLearningSlide) {
     // when we are switching between internal learningSlides in LO then this will execute;
     callLocalGraphqlApi(updateUserCurrentTopicComponentStatusMutation(
@@ -502,7 +503,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
       '',
       nextCurrentTopicComponentType,
       learningSlideQuery,
-    ));
+    ), context);
   }
   return true;
 };

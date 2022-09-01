@@ -37,11 +37,22 @@ class RedisController extends MasterController {
     return hkey;
   }
 
+  async keys(pattern) {
+    try {
+      if (this.validateRedisConn()) {
+        return await this.redis.keys(pattern);
+      }
+    } catch (e) {
+      log(e);
+    }
+    return [];
+  }
+
   async destroy(hkey) {
     if (this.validateRedisConn()) await this.redis.del(hkey);
   }
 
-  async flush() {
+  async flushall() {
     if (this.validateRedisConn()) await redis.flushall();
   }
 }

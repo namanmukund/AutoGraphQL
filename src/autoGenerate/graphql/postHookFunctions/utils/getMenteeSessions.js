@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const getMenteeSessions = async (userId) => {
+const getMenteeSessions = async (userId, context) => {
   const menteeSessionQuery = `
     query {
       menteeSessions(
@@ -25,7 +25,7 @@ const getMenteeSessions = async (userId) => {
         ${new Array(24).fill('').map((_, i) => `slot${i}`).join('\n')}
       }
     }`;
-  const res = await callLocalGraphqlApi(menteeSessionQuery);
+  const res = await callLocalGraphqlApi(menteeSessionQuery, context);
   const menteeSessions = get(res, 'data.menteeSessions', []);
   return menteeSessions;
 };

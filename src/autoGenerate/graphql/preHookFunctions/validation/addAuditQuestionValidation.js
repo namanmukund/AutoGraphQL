@@ -39,9 +39,9 @@ const addAuditQuestionValidation = async (params, mutationOrQueryName, context) 
   // check if previous question exists with the same order and auditType
   let auditQuestionQueryRes = null;
   if (auditType === mentor && auditSubType) {
-    auditQuestionQueryRes = await callLocalGraphqlApi(auditQuestionQuery(order, auditType, auditSubType));
+    auditQuestionQueryRes = await callLocalGraphqlApi(auditQuestionQuery(order, auditType, auditSubType), context);
   } else {
-    auditQuestionQueryRes = await callLocalGraphqlApi(auditQuestionQuery(order, auditType));
+    auditQuestionQueryRes = await callLocalGraphqlApi(auditQuestionQuery(order, auditType), context);
   }
   const auditQuestions = get(auditQuestionQueryRes, 'data.auditQuestions', []);
   if (auditQuestions.length > 0) {

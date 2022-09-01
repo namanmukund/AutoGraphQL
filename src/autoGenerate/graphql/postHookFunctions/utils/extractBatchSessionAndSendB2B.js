@@ -17,7 +17,7 @@ const BATCH_SESSION = (batchSessionId) => `{
 }`;
 
 const extractBatchSessionAndSendB2B = async (batchSessionId) => {
-  const batchSessionRes = await callLocalGraphqlApi(BATCH_SESSION(batchSessionId));
+  const batchSessionRes = await callLocalGraphqlApi(BATCH_SESSION(batchSessionId), {});
   const studentBatchType = get(batchSessionRes, 'data.batchSession.batch.type');
   if (studentBatchType !== batchType.b2b) return;
   // schedule new student reminder

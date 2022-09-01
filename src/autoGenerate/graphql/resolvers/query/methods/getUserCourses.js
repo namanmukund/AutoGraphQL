@@ -363,6 +363,161 @@ const getUserCourseCompletionAggregation = (userId) => [
   },
 ];
 
+const batchPipeline = (batchIdVariable, isArray) => [
+  {
+    $match: {
+      $expr: {
+        [`${isArray ? '$in' : '$eq'}`]: ['$id', `$$${batchIdVariable}`],
+      },
+    },
+  },
+  {
+    $project: {
+      id: 1,
+      code: 1,
+      allottedMentor: 1,
+      classroomTitle: 1,
+      coursePackage: 1,
+      currentComponent: 1,
+      coursePackageCourses: 1,
+      createdAt: 1,
+    },
+  },
+  {
+    $lookup: {
+      from: 'BatchCurrentComponentStatus',
+      let: { currentComponentId: '$currentComponent.typeId' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: ['$id', '$$currentComponentId'],
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: 'Course',
+            let: { currentCourseId: '$currentCourse.typeId' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$id', '$$currentCourseId'],
+                  },
+                },
+              },
+              {
+                $lookup: {
+                  from: 'File',
+                  let: {
+                    thumbnailId: '$thumbnail.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: ['$id', '$$thumbnailId'],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        _id: 0,
+                        id: 1,
+                        uri: 1,
+                      },
+                    },
+                  ],
+                  as: 'thumbnail',
+                },
+              },
+              {
+                $project: {
+                  _id: 0,
+                  id: 1,
+                  order: 1,
+                  title: 1,
+                  secondaryCategory: 1,
+                  thumbnail: { $arrayElemAt: ['$thumbnail', 0] },
+                  codingLanguages: {
+                    value: 1,
+                  },
+                },
+              },
+            ],
+            as: 'currentCourse',
+          },
+        },
+        {
+          $project: {
+            currentCourse: {
+              $arrayElemAt: ['$currentCourse', 0],
+            },
+            currentTopic: 1,
+          },
+        },
+      ],
+      as: 'currentComponent',
+    },
+  },
+  {
+    $lookup: {
+      from: 'CoursePackage',
+      let: { coursePackageId: '$coursePackage.typeId' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: ['$id', '$$coursePackageId'],
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            id: 1,
+            title: 1,
+          },
+        },
+      ],
+      as: 'coursePackage',
+    },
+  },
+  {
+    $lookup: {
+      from: 'User',
+      localField: 'allottedMentor.typeId',
+      foreignField: 'id',
+      as: 'allottedMentor',
+    },
+  },
+  {
+    $lookup: {
+      from: 'Course',
+      localField: 'coursePackageCourses.typeId',
+      foreignField: 'id',
+      as: 'coursePackageCourses',
+    },
+  },
+  {
+    $project: {
+      id: 1,
+      code: 1,
+      classroomTitle: 1,
+      allottedMentor: { $arrayElemAt: ['$allottedMentor', 0] },
+      coursePackageCourses: 1,
+      createdAt: 1,
+      coursePackage: {
+        $arrayElemAt: ['$coursePackage', 0],
+      },
+      currentComponent: {
+        $arrayElemAt: ['$currentComponent', 0],
+      },
+    },
+  },
+];
+
 const getUserBatchDetails = (userId) => [
   {
     $match: {
@@ -373,146 +528,33 @@ const getUserBatchDetails = (userId) => [
     $project: {
       id: 1,
       batch: 1,
+      batches: 1,
     },
   },
   {
     $lookup: {
       from: 'Batch',
       let: { batchId: '$batch.typeId' },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: ['$id', '$$batchId'],
-            },
-          },
-        },
-        {
-          $project: {
-            id: 1,
-            coursePackage: 1,
-            currentComponent: 1,
-          },
-        },
-        {
-          $lookup: {
-            from: 'BatchCurrentComponentStatus',
-            let: { currentComponentId: '$currentComponent.typeId' },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: ['$id', '$$currentComponentId'],
-                  },
-                },
-              },
-              {
-                $lookup: {
-                  from: 'Course',
-                  let: { currentCourseId: '$currentCourse.typeId' },
-                  pipeline: [
-                    {
-                      $match: {
-                        $expr: {
-                          $eq: ['$id', '$$currentCourseId'],
-                        },
-                      },
-                    },
-                    {
-                      $lookup: {
-                        from: 'File',
-                        let: {
-                          thumbnailId: '$thumbnail.typeId',
-                        },
-                        pipeline: [
-                          {
-                            $match: {
-                              $expr: {
-                                $eq: ['$id', '$$thumbnailId'],
-                              },
-                            },
-                          },
-                          {
-                            $project: {
-                              _id: 0,
-                              id: 1,
-                              uri: 1,
-                            },
-                          },
-                        ],
-                        as: 'thumbnail',
-                      },
-                    },
-                    {
-                      $project: {
-                        _id: 0,
-                        id: 1,
-                        order: 1,
-                        title: 1,
-                        secondaryCategory: 1,
-                        thumbnail: { $arrayElemAt: ['$thumbnail', 0] },
-                        codingLanguages: {
-                          value: 1,
-                        },
-                      },
-                    },
-                  ],
-                  as: 'currentCourse',
-                },
-              },
-              {
-                $project: {
-                  currentCourse: {
-                    $arrayElemAt: ['$currentCourse', 0],
-                  },
-                  currentTopic: 1,
-                },
-              },
-            ],
-            as: 'currentComponent',
-          },
-        },
-        {
-          $lookup: {
-            from: 'CoursePackage',
-            let: { coursePackageId: '$coursePackage.typeId' },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $eq: ['$id', '$$coursePackageId'],
-                  },
-                },
-              },
-              {
-                $project: {
-                  _id: 0,
-                  id: 1,
-                  title: 1,
-                },
-              },
-            ],
-            as: 'coursePackage',
-          },
-        },
-        {
-          $project: {
-            id: 1,
-            coursePackage: {
-              $arrayElemAt: ['$coursePackage', 0],
-            },
-            currentComponent: {
-              $arrayElemAt: ['$currentComponent', 0],
-            },
-          },
-        },
-      ],
+      pipeline: batchPipeline('batchId', false),
       as: 'batch',
+    },
+  },
+  {
+    $lookup: {
+      from: 'Batch',
+      let: {
+        batchesIds: {
+          $ifNull: ['$batches.typeId', []],
+        },
+      },
+      pipeline: batchPipeline('batchesIds', true),
+      as: 'batches',
     },
   },
   {
     $project: {
       id: 1,
+      batches: 1,
       batch: {
         $arrayElemAt: ['$batch', 0],
       },
@@ -522,7 +564,8 @@ const getUserBatchDetails = (userId) => [
 
 const validateIncomingFields = (fieldsFetched = {}) => {
   const whiteListedFields = ['id', 'title', 'order', 'thumbnail',
-    'secondaryCategory', 'currentTopic', 'isCourseCompleted', '__typename'];
+    'secondaryCategory', 'currentTopic', 'isCourseCompleted', '__typename', 'classroom', 'activeClassroom',
+    'courseId', 'allottedMentor'];
 
   const fieldsFetchedArr = Object.keys(fieldsFetched);
   if (fieldsFetchedArr && fieldsFetchedArr.length) {
@@ -578,44 +621,103 @@ const getUserCurrentTopic = async (
 
 const getTypeQueryController = (typeName) => new QueryController(typeName, { bypass: true });
 
+const getMultipleBatchTitle = (batch) => {
+  const title = get(batch, 'classroomTitle', '');
+  if (title) {
+    if (get(batch, 'coursePackageCourses', []).length) {
+      const coursesString = get(batch, 'coursePackageCourses', []).map((course) => get(course, 'title', '')).join(', ');
+      return `${title} (${coursesString})`;
+    }
+    return `${title} (${get(batch, 'coursePackage.title', '')})`;
+  }
+  if (get(batch, 'currentComponent.currentCourse.title')) {
+    return `${get(batch, 'code')} (${get(batch, 'currentComponent.currentCourse.title')})`;
+  }
+  return get(batch, 'code');
+};
+
 const getUserCourses = (async (root, params, context, info) => {
   const { input } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
   await validateIncomingFields(fieldsFetched);
 
-  // const redisClient = new RedisController({
-  //   bypass: true,
-  // });
   if (input && get(input, 'userId')) {
     const userId = get(input, 'userId');
     const courseProgress = get(input, 'courseProgress', false);
     let updatedCourseArr = [];
-    /** Check if data exists in redis */
-    // const cachedUserCourses = await redisClient.get(`userCourses_${userId}`);
-    // let userCoursesRes = null;
-    // if (cachedUserCourses && false) {
-    //   log(`[USER_COURSES] CACHE_HIT: ${`userCourses_${userId}`}`);
-    //   userCoursesRes = cachedUserCourses;
-    // } else {
-    // log(`[USER_COURSES] CACHE_MISS: ${`userCourses_${userId}`}`);
-    /**
-     * Checking if user is enrolled into a batch.
-     * */
     const studentProfileModel = getTypeQueryController('StudentProfile');
     const studentProfileRes = await studentProfileModel.aggregate(getUserBatchDetails(userId));
+    const batches = get(studentProfileRes, '0.batches', []);
+    if (batches.length) {
+      let allBatches = [];
+      allBatches = batches.map((batch) => ({
+        id: get(batch, 'id'),
+        courseId: get(batch, 'currentComponent.currentCourse.id'),
+        title: getMultipleBatchTitle(batch),
+        thumbnail: get(batch, 'currentComponent.currentCourse.thumbnail'),
+        currentTopic: get(batch, 'currentComponent.currentTopic', null),
+        allottedMentor: get(batch, 'allottedMentor', null),
+        classroom: {
+          id: get(batch, 'id'),
+          code: get(batch, 'code'),
+          title: get(batch, 'classroomTitle'),
+        },
+        isCourseCompleted: false,
+        createdAt: get(batch, 'createdAt'),
+      })).sort((a, b) => new Date(get(b, 'createdAt')) - new Date(get(a, 'createdAt'))).reverse();
+      if (get(studentProfileRes, '0.batch.id') && !allBatches.find((batch) => get(batch, 'classroom.id') === get(studentProfileRes, '0.batch.id'))) {
+        allBatches.push({
+          id: get(studentProfileRes, '0.batch.id'),
+          courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
+          title: getMultipleBatchTitle(get(studentProfileRes, '0.batch')),
+          thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
+          currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
+          allottedMentor: get(studentProfileRes, '0.batch.allottedMentor', null),
+          classroom: {
+            id: get(studentProfileRes, '0.batch.id'),
+            code: get(studentProfileRes, '0.batch.code'),
+            title: get(studentProfileRes, '0.batch.classroomTitle'),
+          },
+          isCourseCompleted: false,
+          createdAt: get(studentProfileRes, '0.batch.createdAt'),
+        });
+      }
+      return allBatches.reverse().map((batch, index) => {
+        if (index === 0) return { ...batch, activeClassroom: true };
+        return batch;
+      });
+    }
     if (studentProfileRes && get(studentProfileRes, '0.batch.coursePackage.id')) {
-      const coursePackage = get(studentProfileRes, '0.batch.coursePackage');
       return [{
         id: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
-        title: get(coursePackage, 'title'),
+        courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
+        title: getMultipleBatchTitle(get(studentProfileRes, '0.batch')),
         thumbnail: get(studentProfileRes, '0.batch.currentComponent.currentCourse.thumbnail'),
         currentTopic: get(studentProfileRes, '0.batch.currentComponent.currentTopic', null),
+        allottedMentor: get(studentProfileRes, '0.batch.allottedMentor', null),
+        classroom: {
+          id: get(studentProfileRes, '0.batch.id'),
+          code: get(studentProfileRes, '0.batch.code'),
+          title: get(studentProfileRes, '0.batch.classroomTitle'),
+        },
+        activeClassroom: true,
         isCourseCompleted: false,
       }];
     }
     if (studentProfileRes && get(studentProfileRes, '0.batch.currentComponent.currentCourse.id')) {
-      updatedCourseArr.push(get(studentProfileRes, '0.batch.currentComponent.currentCourse', {}));
+      updatedCourseArr.push({
+        ...get(studentProfileRes, '0.batch.currentComponent.currentCourse', {}),
+        allottedMentor: get(studentProfileRes, '0.batch.allottedMentor', null),
+        classroom: {
+          id: get(studentProfileRes, '0.batch.id', {}),
+          code: get(studentProfileRes, '0.batch.code'),
+          title: get(studentProfileRes, '0.batch.classroomTitle'),
+        },
+        activeClassroom: true,
+        isCourseCompleted: false,
+        courseId: get(studentProfileRes, '0.batch.currentComponent.currentCourse.id'),
+      });
     }
     const userCoursesModel = getTypeQueryController('UserCourse');
     const userCoursesRes = await userCoursesModel.aggregate(getUserCoursesAggregation(userId, courseProgress));
@@ -644,6 +746,7 @@ const getUserCourses = (async (root, params, context, info) => {
       // eslint-disable-next-line no-restricted-syntax
       for (const userCourseDoc of userCourses) {
         userCourseDoc.isCourseCompleted = false;
+        userCourseDoc.courseId = get(userCourseDoc, 'id');
         if (courseProgress) {
           /** Checking if Course if Completed */
           const courseCompletion = (userCourseCompletions || []).filter((el) => get(el, 'course.id') === get(userCourseDoc, 'id'));
@@ -684,7 +787,7 @@ const getUserCourses = (async (root, params, context, info) => {
     }
     if (updatedCourseArr && updatedCourseArr.length) {
       const tempUniqueCourseIds = [];
-      return (updatedCourseArr || []).reverse().filter((el) => {
+      return (updatedCourseArr || []).filter((el) => {
         const isDuplicate = tempUniqueCourseIds.includes(el.id);
         if (!isDuplicate) {
           tempUniqueCourseIds.push(el.id);

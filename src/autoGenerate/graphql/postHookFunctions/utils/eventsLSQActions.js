@@ -18,7 +18,7 @@ const getUserNumber = async (studentProfileId) => {
   }
 }
 `;
-  const studentProfile = await callLocalGraphqlApi(query);
+  const studentProfile = await callLocalGraphqlApi(query, {});
   return get(studentProfile, 'data.studentProfile.parents[0].user');
 };
 
@@ -33,7 +33,7 @@ const getEventDetails = async (eventId) => {
 }
 
 `;
-  const eventDetail = await callLocalGraphqlApi(query);
+  const eventDetail = await callLocalGraphqlApi(query, {});
   return get(eventDetail, 'data.event.utm[0]');
 };
 
