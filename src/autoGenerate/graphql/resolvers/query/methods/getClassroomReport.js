@@ -10,6 +10,7 @@ import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { ifAuthorized } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
+import getStudentsCombinedArray from '../../../../../../utils/getStudentsCombinedArray';
 
 const getBatchSessionAggregation = ({ batchId, topicId }) =>
   [{
@@ -93,9 +94,65 @@ const getBatchSessionAggregation = ({ batchId, topicId }) =>
           },
         },
         {
+          $lookup: {
+            from: 'StudentProfile',
+            let: {
+              batchstudentProfileId: '$batchStudents.typeId',
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $in: ['$id', '$$batchstudentProfileId'],
+                  },
+                },
+              },
+              {
+                $lookup: {
+                  from: 'User',
+                  let: {
+                    userId: '$user.typeId',
+                  },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: [
+                            '$id',
+                            '$$userId',
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      $project: {
+                        id: 1,
+                      },
+                    },
+                  ],
+                  as: 'user',
+                },
+              },
+              {
+                $project: {
+                  id: 1,
+                  user: {
+                    $arrayElemAt: [
+                      '$user',
+                      0,
+                    ],
+                  },
+                },
+              },
+            ],
+            as: 'batchStudents',
+          },
+        },
+        {
           $project: {
             id: 1,
             students: 1,
+            batchStudents: 1,
           },
         },
       ],
@@ -460,7 +517,8 @@ const classroomReport = (async (root, params, context) => {
     });
   }
 
-  const students = get(batchSessionRes, '[0].batch.students');
+  // const students = get(batchSessionRes, '[0].batch.students');
+  const students = getStudentsCombinedArray(get(batchSessionRes, '[0].batch'), true);
   const obj = {
     studentsCount: students.length,
     submittedCount: 0,

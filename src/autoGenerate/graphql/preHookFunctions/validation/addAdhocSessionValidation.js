@@ -118,7 +118,7 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
   await validateBatchSessionInput(params, context, 'addBatch');
 
   // check if mentor already has another session in same slot
-  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+  const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId), context);
   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
   const bookingDate = get(params, 'input.bookingDate', '');
   const isMentorActive = get(fetchMentorRes, 'data.mentorSession.user.mentorProfile.isMentorActive');
@@ -131,6 +131,7 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
         mentorUserId,
         bookingDate,
       ),
+      context,
     );
     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
     checkIfSlotCanBeOpenedValidation(params, mentorSessions);
@@ -145,7 +146,7 @@ const addAdhocSessionValidation = async (params, mutationOrQueryName, context) =
   }
 
   // check is for given previous topic and type, if adhoc session exists from before throw err
-  const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, previousTopicConnectId, type));
+  const getAdhocSessionRes = await callLocalGraphqlApi(getAdhocSession(batchId, previousTopicConnectId, type), context);
   const adhocSessions = get(getAdhocSessionRes, 'data.adhocSessions');
   if (adhocSessions && adhocSessions.length) {
     throw new SimilarDocumentAlreadyExistError();

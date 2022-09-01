@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const updateMenteeSessionQuery = async (menteeSessionId, studentProfileId, input = {}, bookingAgentId = '') => {
+const updateMenteeSessionQuery = async (menteeSessionId, studentProfileId, input = {}, bookingAgentId = '', context) => {
 //   input with bookingDate is mandatory
   const query = `
 mutation($input: MenteeSessionUpdate) {
@@ -14,7 +14,7 @@ mutation($input: MenteeSessionUpdate) {
   const variable = {
     input,
   };
-  const result = await callLocalGraphqlApi(query, '', variable);
+  const result = await callLocalGraphqlApi(query, context, variable);
   return get(result, 'data.updateMenteeSession', {});
 };
 

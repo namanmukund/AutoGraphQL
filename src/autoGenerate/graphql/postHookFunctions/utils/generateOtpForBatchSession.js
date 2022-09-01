@@ -19,7 +19,7 @@ const addSchoolSessionOtp = async ({
     }
     }
     `;
-  const result = await callLocalGraphqlApi(addQuery);
+  const result = await callLocalGraphqlApi(addQuery, {});
   return get(result, 'data.addSchoolSessionOtp', null);
 };
 

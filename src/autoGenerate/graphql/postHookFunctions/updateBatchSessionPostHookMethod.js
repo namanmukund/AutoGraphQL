@@ -48,13 +48,13 @@ const getCourseQuery = () => `
     }
   `;
 
-const deleteBatchScheduleSession = async (batchSessionId) => {
+const deleteBatchScheduleSession = async (batchSessionId, context) => {
   const deleteQuery = `mutation{
   deleteSchoolSessionOtps(filter:{batchSession_some:{id:"${batchSessionId}"}}){
     id
   }
 }`;
-  await callLocalGraphqlApi(deleteQuery);
+  await callLocalGraphqlApi(deleteQuery, context);
 };
 
 // query to get chapters and topics belomngin to a course
@@ -197,7 +197,7 @@ const nextTopicQuery = (courseId) => `
 //   }
 //   `;
 
-const getMentor = async (mentorSessionId) => {
+const getMentor = async (mentorSessionId, context) => {
   const mentorSession = await callLocalGraphqlApi(`{
     mentorSession(id: "${mentorSessionId}") {
       user {
@@ -212,7 +212,7 @@ const getMentor = async (mentorSessionId) => {
         }
       }
     }
-  }`);
+  }`, context);
   return get(mentorSession, 'data.mentorSession.user', {});
 };
 
@@ -275,7 +275,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   get Course Id
   */
   if (!courseId && !coursePackageId) {
-    const courseResult = await callLocalGraphqlApi(getCourseQuery());
+    const courseResult = await callLocalGraphqlApi(getCourseQuery(), context);
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
       throw new DatabaseRecordNotFoundError({
@@ -314,7 +314,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   // }
 
   const isTrial = await isTrialSession(get(input, 'topic.typeId'));
-  const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
+  const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId), context);
   if (isTrial) {
     const mentorProfile = await getMentorProfileFromMentorSession(finalMentorSessionId);
     await mentorAvailabilitySlotOperation({
@@ -354,7 +354,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       if (get(batchInfo, 'coursePackageTopicRule', []).length) {
         topicRules = get(batchInfo, 'coursePackageTopicRule', []);
       } else {
-        const coursePackage = await getTopicsFromCoursePackage(coursePackageId);
+        const coursePackage = await getTopicsFromCoursePackage(coursePackageId, context);
         topicRules = get(coursePackage, 'topics', []);
       }
       topicsList = getSortedTopics(topicRules);
@@ -362,7 +362,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       currentTopicOrder = get((topicsList || []).find((topic) => get(topic, 'id') === topicId), 'coursePackageOrder');
       topicsList = (topicsList || []).filter((topic) => get(topic, 'classType') !== 'theory');
     } else {
-      const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId));
+      const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(courseId), context);
       topicsList = get(nextTopicQueryRes, 'data.topics', []);
     }
 
@@ -436,7 +436,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       && sessionStatusFromInput === sessionStatus.completed
       && bookingDate && moment().isAfter(bookingDate) && batchTypeValue === batchType.b2b && get(batchInfo, 'documentType') === 'classroom') {
       // Deleting BatchSession Otp for past unattended sessions on completing session
-      deleteBatchScheduleSession(batchSessionId);
+      deleteBatchScheduleSession(batchSessionId, context);
     }
     const newStudentsArray = get(context, 'inputSlot.attendance.pushMany', []);
     // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
@@ -504,7 +504,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   // console.log('extractBatchSessionAndSendB2B', extractBatchSessionAndSendB2B)
   // extractBatchSessionAndSendB2B(batchSessionId);
   if (mentorSessionConnectId) {
-    const mentorUser = await getMentor(mentorSessionConnectId);
+    const mentorUser = await getMentor(mentorSessionConnectId, context);
     const { id: mentorUserId, phone } = mentorUser;
     const prevMentorUserId = get(prevMentor, 'id');
     const prevMentorPhoneNumber = get(prevMentor, 'phone.countryCode', '').replace('+', '') + get(prevMentor, 'phone.number', '');
@@ -512,7 +512,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     // If mentor is changed
     if (mentorUserId !== prevMentorUserId) {
       // send prev mentor cancellation message
-      const batchSessionRes = await callLocalGraphqlApi(batchSessionQuery(batchSessionId));
+      const batchSessionRes = await callLocalGraphqlApi(batchSessionQuery(batchSessionId), context);
       if (get(batchSessionRes, 'data.batchSession.batch.type') !== batchType.b2b2c) return;
       const sessionDate = moment(bookingDate).format('dddd, Do MMMM');
       const sessionTime = getSlotLabel(slotTimeArray[0]).startTime;

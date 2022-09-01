@@ -287,7 +287,7 @@ const getPaymentResponseMutationResolver = async (
     // update UserCurrentTopicComponentStatus, change user to pro
     await callLocalGraphqlApi(updateUserCurrentTopicComponentStatus(
       currentTopicComponentInfoId,
-    ));
+    ), context);
 
     // update referrer credits as per referral program
     try {

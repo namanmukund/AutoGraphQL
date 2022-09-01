@@ -10,7 +10,7 @@ const getUser = async (phoneNumber) => {
     users(filter: { phone_number_subDoc: "${phoneNumber}" }) {
       timezone
     }
-  }`);
+  }`, {});
   return get(user, 'data.users[0]', {});
 };
 

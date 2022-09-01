@@ -24,7 +24,7 @@ const fetchSchoolClasses = async (schoolClassIds) => {
             }
           }
           `;
-  const schoolClasses = await callLocalGraphqlApi(query);
+  const schoolClasses = await callLocalGraphqlApi(query, {});
   return get(schoolClasses, 'data.schoolClasses', []);
 };
 
@@ -39,7 +39,7 @@ const fetchLastBatchCode = async (type, schoolId) => {
             }
           }
           `;
-  const lastBatch = await callLocalGraphqlApi(query);
+  const lastBatch = await callLocalGraphqlApi(query, {});
   return get(lastBatch, 'data.batches', []);
 };
 
@@ -85,7 +85,7 @@ const fetchExisitingBatchForGivenData = async (grade, section, schoolId) => {
             }
           }
           `;
-  const exisitingBatches = await callLocalGraphqlApi(query);
+  const exisitingBatches = await callLocalGraphqlApi(query, {});
   return get(exisitingBatches, 'data.batches', []);
 };
 
@@ -107,7 +107,7 @@ const updateBatchCreationStatus = async (campaignId, status) => {
                   }
                 }
                 `;
-  const updateCampaignResponse = await callLocalGraphqlApi(mutation);
+  const updateCampaignResponse = await callLocalGraphqlApi(mutation, {});
   return get(updateCampaignResponse, 'data.updateCampaign', {});
 };
 
@@ -151,7 +151,7 @@ const createB2B2CBatch = async (batchCode, schoolId, campaignId, courseId, booki
                 }
               }
                 `;
-  const addBatchResponse = await callLocalGraphqlApi(mutation);
+  const addBatchResponse = await callLocalGraphqlApi(mutation, {});
   return get(addBatchResponse, 'data.addBatch', {});
 };
 
@@ -190,7 +190,7 @@ const createB2BBatch = async (batchCode, schoolId, classIds, campaignId, student
                 }
               }
                 `;
-  const addBatchResponse = await callLocalGraphqlApi(mutation);
+  const addBatchResponse = await callLocalGraphqlApi(mutation, {});
   return get(addBatchResponse, 'data.addBatch', {});
 };
 
@@ -232,7 +232,7 @@ const updateB2BBatch = async (existingBatchId, classIds, campaignId, studentIds,
                 }
               }
                 `;
-  const updateBatchResponse = await callLocalGraphqlApi(mutation);
+  const updateBatchResponse = await callLocalGraphqlApi(mutation, {});
   return get(updateBatchResponse, 'data.updateBatch', {});
 };
 
@@ -252,7 +252,7 @@ const addB2B2CBatchSession = async (batchId, mentorSessionConnectId, firstTopicI
       }
     }
   `;
-  const updateCampaignResponse = await callLocalGraphqlApi(mutation);
+  const updateCampaignResponse = await callLocalGraphqlApi(mutation, {});
   return get(updateCampaignResponse, 'data.updateCampaign', {});
 };
 
@@ -277,7 +277,7 @@ const createBatchGroupByGrade = async (classesGroupByGrade, campaignId, courseId
   let classIds = [];
   let studentIds = [];
   // handle the batch code increments
-  const schoolCodeRes = await callLocalGraphqlApi(fetchSchoolCode(campaignSchoolId));
+  const schoolCodeRes = await callLocalGraphqlApi(fetchSchoolCode(campaignSchoolId), {});
   const schoolCode = get(schoolCodeRes, 'data.school.code', '');
   // get b2b2c batch attached t school to get last batch code
   const lastBatchCodeRes = await fetchLastBatchCode(batchType.b2b, campaignSchoolId);
@@ -341,7 +341,7 @@ const createBatchGroupBySection = async (classes, campaignId, courseId, coursePa
   const schoolId = classes[0].school.id;
   // handle the batch code increments
   // handle the batch code increments
-  const schoolCodeRes = await callLocalGraphqlApi(fetchSchoolCode(schoolId));
+  const schoolCodeRes = await callLocalGraphqlApi(fetchSchoolCode(schoolId), {});
   const schoolCode = get(schoolCodeRes, 'data.school.code', '');
   // get b2b2c batch attached t school to get last batch code
   const lastBatchCodeRes = await fetchLastBatchCode(batchType.b2b, schoolId);
@@ -412,7 +412,7 @@ const createBatchForB2B2C = async (timeTableRules, campaignId, courseId, schoolI
   // update batchCreation status to in-progress
   await updateBatchCreationStatus(campaignId, batchCreationStatus.inProgress);
   // handle the batch code increments
-  const schoolCodeRes = await callLocalGraphqlApi(fetchSchoolCode(schoolId));
+  const schoolCodeRes = await callLocalGraphqlApi(fetchSchoolCode(schoolId), {});
   const schoolCode = get(schoolCodeRes, 'data.school.code', '');
   // get b2b2c batch attached t school to get last batch code
   const lastBatchCodeRes = await fetchLastBatchCode(batchType.b2b2c, schoolId);

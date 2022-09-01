@@ -142,7 +142,7 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
     we are getting below fields in topicQuery:
     -all published assignment questions of the topic
     */
-  const topicQueryRes = await callLocalGraphqlApi(topicQuery(topicId));
+  const topicQueryRes = await callLocalGraphqlApi(topicQuery(topicId), context);
   const topicInfo = get(topicQueryRes, 'data.topic');
   // adding assignment questions in the document
   // this logic will be changed based on assignment question sets
@@ -370,7 +370,7 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
     topicId,
     assignmentQuery,
     courseId,
-  ));
+  ), context);
 
   log('addUserAssignmentMutation result: ', result);
   if (result) {

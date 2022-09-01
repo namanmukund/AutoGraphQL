@@ -10,7 +10,7 @@ const getMentorProfile = async (userId) => {
         }
     }
   }`;
-  const mentorProfile = await callLocalGraphqlApi(query);
+  const mentorProfile = await callLocalGraphqlApi(query, {});
   return get(mentorProfile, 'data.user', {});
 };
 
@@ -26,7 +26,7 @@ export const getMentorProfileFromMentorSession = async (mentorSessionId) => {
     }
   }
 }`;
-  const mentorSession = await callLocalGraphqlApi(query);
+  const mentorSession = await callLocalGraphqlApi(query, {});
   return get(mentorSession, 'data.mentorSession', {});
 };
 

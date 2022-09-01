@@ -9,7 +9,7 @@ import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelect
 
 const deleteBatchSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: batchSessionId } = params;
-  const batchSessionData = await callLocalGraphqlApi(batchSessionQuery(batchSessionId));
+  const batchSessionData = await callLocalGraphqlApi(batchSessionQuery(batchSessionId), context);
   const batchSession = get(batchSessionData, 'data.batchSession');
 
   if (!batchSession || !batchSession.id) {
@@ -57,7 +57,7 @@ const deleteBatchSessionValidation = async (params, mutationOrQueryName, context
   const {
     currentUser,
   } = userInfo;
-  const schoolSessionOtp = await callLocalGraphqlApi(schoolSessionOtpQuery(batchSessionId));
+  const schoolSessionOtp = await callLocalGraphqlApi(schoolSessionOtpQuery(batchSessionId), context);
   context.schoolSessionOtpArray = get(schoolSessionOtp, 'data.schoolSessionOtps');
   context.currentUser = currentUser;
 };

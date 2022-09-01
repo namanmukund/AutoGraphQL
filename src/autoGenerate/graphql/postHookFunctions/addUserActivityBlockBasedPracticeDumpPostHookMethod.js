@@ -178,7 +178,7 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
     savedBlocks,
     startTime,
     endTime,
-  ));
+  ), context);
   return true;
 };
 

@@ -82,7 +82,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
     topicId,
     courseId,
     blockBasedPracticeId,
-  ));
+  ), context);
   if (result) {
     /*
       parsing data 'addUserBlockBasedPractice' so that the logic implemented ahead can read data is

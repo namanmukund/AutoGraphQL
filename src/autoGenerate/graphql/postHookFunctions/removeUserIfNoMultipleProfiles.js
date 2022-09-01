@@ -29,7 +29,7 @@ const removeUserIfNoMultipleProfiles = (userId, currentProfile) => {
     }
     if (shouldRemoveUser) {
       // graphql call so that everything related to user can get deleted
-      await callLocalGraphqlApi(deleteUserMutation(userId));
+      await callLocalGraphqlApi(deleteUserMutation(userId), {});
     }
     return null;
   });

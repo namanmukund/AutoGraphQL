@@ -9,7 +9,7 @@ import { sessionType } from '../../../../../constants';
 
 const deleteMentorSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: mentorSessionId } = params;
-  const mentorSessionData = await callLocalGraphqlApi(mentorSessionQuery(mentorSessionId));
+  const mentorSessionData = await callLocalGraphqlApi(mentorSessionQuery(mentorSessionId), context);
   const mentorSession = get(mentorSessionData, 'data.mentorSession');
   if (!mentorSession || !mentorSession.id) {
     throw new DatabaseRecordNotFoundError();

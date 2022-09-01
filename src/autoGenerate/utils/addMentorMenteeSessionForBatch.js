@@ -131,6 +131,7 @@ const callAddMentorSession = async (
   userConnectId,
   courseConnectId,
   variables,
+  context,
 ) => {
   const query = `
 mutation ($input: MentorSessionInput!) {
@@ -278,7 +279,7 @@ const addMentorMenteeSessionForBatch = async (context, menteeUserId, mentorUserI
           );
           log('------------------------added mentorMenteeId after updating MenteeSession');
         } else {
-          await callUpdateMentorMenteeSession(mentorMenteeId, mentorSessionIdFromInput, { input: { sessionStatus } });
+          await callUpdateMentorMenteeSession(mentorMenteeId, mentorSessionIdFromInput, { input: { sessionStatus } }, context);
           log(`------------------------updated mentorMenteeId ${mentorMenteeId}`);
         }
         return true;
@@ -336,6 +337,7 @@ const addMentorMenteeSessionForBatch = async (context, menteeUserId, mentorUserI
         await callUpdateMentorSession(
           mentorSessionId,
           variables,
+          context,
         );
       } catch (err) {
         log(`Mentor session update failed for mentorSessionId: ${mentorSessionId}`);

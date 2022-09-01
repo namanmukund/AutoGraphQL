@@ -125,7 +125,7 @@ It will be created and returned.
 Document contains all the necessary information needed on page along
 with the next component.
 */
-const userLearningObjectivePostHookMethod = async (input, params) => {
+const userLearningObjectivePostHookMethod = async (input, params, _mutationName, context) => {
   /*
   checking if document is already present in collection for user and LO id,
   returning input in that case
@@ -151,6 +151,7 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
   }
   const learningObjectiveQueryRes = await callLocalGraphqlApi(
     learningObjectiveQuery(learningObjectiveId, courseId),
+    context,
   );
   const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
   const {
@@ -221,6 +222,7 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
       courseId,
       learningSlidesQuery,
     ),
+    context,
   );
   if (result) {
     /*

@@ -8,7 +8,9 @@ import updateUserApprovedCodeReactionsCount from './updateUserApprovedCodeReacti
 
 const fetchUserApprovedCodeReactionLogs = async (
   reactedByID,
-  userApprovedCodeID) => {
+  userApprovedCodeID,
+  context,
+) => {
   const query = `{
       userApprovedCodeReactionLogs(filter:{and:[
           {reactedBy_some:{id:"${reactedByID}"}},
@@ -26,13 +28,14 @@ const fetchUserApprovedCodeReactionLogs = async (
         }
       }
     }`;
-  const response = await callLocalGraphqlApi(query);
+  const response = await callLocalGraphqlApi(query, context);
   return get(response, 'data.userApprovedCodeReactionLogs[0]');
 };
 
 const updateUserApprovedCodeReactionLog = async (
   userApprovedCodeReactionLogId,
   variables,
+  context,
 ) => {
   const query = `
   mutation($input:UserApprovedCodeReactionLogUpdate!) {
@@ -42,7 +45,7 @@ const updateUserApprovedCodeReactionLog = async (
         id
       }
     }`;
-  const response = await callLocalGraphqlApi(query, '', variables);
+  const response = await callLocalGraphqlApi(query, context, variables);
   return get(response, 'data.updateUserApprovedCodeReactionLog.id');
 };
 
@@ -50,6 +53,7 @@ const addUserApprovedCodeReactionLog = async (
   reactedByID,
   userApprovedCodeID,
   variables,
+  context,
 ) => {
   const query = `
   mutation($input:UserApprovedCodeReactionLogInput!){
@@ -62,7 +66,7 @@ const addUserApprovedCodeReactionLog = async (
         id
       }
     }`;
-  const response = await callLocalGraphqlApi(query, '', variables);
+  const response = await callLocalGraphqlApi(query, context, variables);
   return get(response, 'data.addUserApprovedCodeReactionLog');
 };
 
@@ -79,6 +83,7 @@ const updateVisitorReactionOnUserApprovedCode = async (root, params, context) =>
     const reactionLog = await fetchUserApprovedCodeReactionLogs(
       reactedByID,
       userApprovedCodeID,
+      context,
     );
 
     const reactionVariables = { input: {} };
@@ -92,6 +97,7 @@ const updateVisitorReactionOnUserApprovedCode = async (root, params, context) =>
       const updateReactionLogResponseId = await updateUserApprovedCodeReactionLog(
         get(reactionLog, 'id'),
         reactionVariables,
+        context,
       );
       /** To ReactionLog update successfull then update UserApprovedCode reaction counts */
       if (updateReactionLogResponseId) {
@@ -106,7 +112,7 @@ const updateVisitorReactionOnUserApprovedCode = async (root, params, context) =>
       /**
         * if ReactionLog Record not exists Create a new Record
         */
-      await addUserApprovedCodeReactionLog(reactedByID, userApprovedCodeID, reactionVariables);
+      await addUserApprovedCodeReactionLog(reactedByID, userApprovedCodeID, reactionVariables, context);
       /** Mapping Boolean Reaction Input to Actual Counts */
       await updateUserApprovedCodeReactionsCount(
         null,

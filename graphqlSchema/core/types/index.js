@@ -167,6 +167,7 @@ import BatchStudentResult from './BatchStudentResult/BatchStudentResult';
 import ClassroomHomeworkReport from './classroomHomeworkReport';
 import PracticeQuestionReportOutput from './practiceQuestionReportOutput';
 import UserWaitlist from './userWaitlist';
+import RemoveBatchStudents from './removeBatchStudents';
 import RetakeSession from './retakeSession';
 
 export default [
@@ -339,5 +340,6 @@ export default [
   ...BatchStudentResult,
   ...ClassroomHomeworkReport,
   ...PracticeQuestionReportOutput,
+  ...RemoveBatchStudents,
   ...RetakeSession,
 ];

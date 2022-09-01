@@ -16,6 +16,7 @@ import getMasteryLevel from '../../utils/getMasteryLevel';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import validateCurrentTopicComponentForNewCourse from '../../utils/validateCurrentTopicComponentForNewCourse';
 import isUserIsMentorChild from '../../../postHookFunctions/utils/isMentorChild';
+import getUserActiveClassroom from '../../../../../../utils/getUserActiveClassroom';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = (userId, courseId) => `
@@ -211,8 +212,39 @@ const getBatchStatus = (userId) => `
         batch{
           id
           type
+          course {
+            id
+          }
           coursePackage {
             id
+            courses {
+              id
+            }
+          }
+          currentComponent{
+            enrollmentType
+            currentCourse{
+              id
+              order
+            }
+            currentTopic{
+              id
+              order
+            }
+            latestSessionStatus
+          }
+        }
+        batches {
+          id
+          type
+          course {
+            id
+          }
+          coursePackage {
+            id
+            courses {
+              id
+            }
           }
           currentComponent{
             enrollmentType
@@ -295,7 +327,7 @@ const userTopicJourneyMutationResolver = async (
     '',
   );
   // Bypassing component validation incase if schoolTeacher is accessing the content.
-  let checkForMentorChild = await isUserIsMentorChild(userId, true);
+  let checkForMentorChild = await isUserIsMentorChild(userId, true, context);
   checkForMentorChild = typeof checkForMentorChild === 'boolean' && checkForMentorChild;
   const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
   // calling method to validate user current topic component status
@@ -312,11 +344,12 @@ const userTopicJourneyMutationResolver = async (
     '',
   );
 
-  const batchCurrentComponentCourseId = get(batchRes, 'data.user.studentProfile.batch.currentComponent.currentCourse.id');
-  const coursePackageId = get(batchRes, 'data.user.studentProfile.batch.coursePackage.id');
+  const activeClassroom = await getUserActiveClassroom(context, { courseId, studentProfile: get(batchRes, 'data.user.studentProfile') }, get(batchRes, 'data.user.studentProfile.batch.id'));
+  const batchCurrentComponentCourseId = get(activeClassroom, 'currentComponent.currentCourse.id');
+  const coursePackageId = get(activeClassroom, 'coursePackage.id');
   let batchCurrentComponentInfo;
   if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId || coursePackageId) {
-    batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+    batchCurrentComponentInfo = get(activeClassroom, 'currentComponent');
   }
 
   const { free, pro } = enrollmentTypes;

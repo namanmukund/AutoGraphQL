@@ -9,7 +9,7 @@ import adhocSessionQuery from '../../graphqlQueries/adhocSessionQuery';
 
 const deleteAdhocSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: adhocSessionId } = params;
-  const adhocSessionData = await callLocalGraphqlApi(adhocSessionQuery(adhocSessionId));
+  const adhocSessionData = await callLocalGraphqlApi(adhocSessionQuery(adhocSessionId), context);
   const adhocSession = get(adhocSessionData, 'data.adhocSession');
 
   if (!adhocSession || !adhocSession.id) {

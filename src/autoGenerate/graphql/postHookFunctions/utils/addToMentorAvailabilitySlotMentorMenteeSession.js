@@ -15,7 +15,7 @@ const addToMentorAvailabilitySlotMentorMenteeSession = async (mentorMenteeSessio
 }
 
   `;
-  const result = await callLocalGraphqlApi(query);
+  const result = await callLocalGraphqlApi(query, {});
   return get(result, 'data.addToMentorAvailabilitySlotMentorMenteeSession', {});
 };
 

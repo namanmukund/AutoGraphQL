@@ -56,7 +56,7 @@ const getCourseCertificate = (async (root, params, context) => {
   // this will be sent in output
   const result = {};
 
-  const getUserCourseCompletionRes = await callLocalGraphqlApi(getUserCourseCompletion(code));
+  const getUserCourseCompletionRes = await callLocalGraphqlApi(getUserCourseCompletion(code), context);
   const completionId = get(getUserCourseCompletionRes, 'data.userCourseCompletion.id', null);
 
   if (!completionId) {

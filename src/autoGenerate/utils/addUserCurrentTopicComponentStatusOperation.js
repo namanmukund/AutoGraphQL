@@ -69,7 +69,7 @@ query{
   return get(result, 'data.topics', []);
 };
 
-const addUserCurrentTopicComponentStatusOperation = async (courseId, clientId) => {
+const addUserCurrentTopicComponentStatusOperation = async (courseId, clientId, context) => {
   log(`adding currentTopicComponent for user ${clientId} with course ${courseId}`);
   if (courseId === OLD_COURSE_ID) {
     const topicDetail = await getTopicDetailsForCourse(courseId, false);
@@ -106,7 +106,7 @@ const addUserCurrentTopicComponentStatusOperation = async (courseId, clientId) =
     if (currentTopicComponent.blockBasedProject && currentTopicComponent.blockBasedProject.id) {
       blockBasedPracticeId = currentTopicComponent.blockBasedProject.id;
     }
-    addUserCurrentTopicComponentStatusForNewCourse(clientId, courseId, firstTopicId, learningObjectiveId, videoId, blockBasedPracticeId, currentTopicComponentType);
+    addUserCurrentTopicComponentStatusForNewCourse(clientId, courseId, firstTopicId, learningObjectiveId, videoId, blockBasedPracticeId, currentTopicComponentType, context);
   }
 };
 

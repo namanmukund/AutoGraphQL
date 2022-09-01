@@ -32,7 +32,7 @@ const addUserProfileMutation = (userId) => `
   `;
 
 // We have logic to create a new document if it does not exist for UserProfile
-const userProfilePostHookMethod = async (input, params) => {
+const userProfilePostHookMethod = async (input, params, mutationName, context) => {
   /*
   checking if document is already present in collection for user,
   returning input in that case
@@ -48,7 +48,7 @@ const userProfilePostHookMethod = async (input, params) => {
   }
   // userProfileResult is the document returned by the query
   // so we are adding new document if document is not already present
-  const result = await callLocalGraphqlApi(addUserProfileMutation(userId));
+  const result = await callLocalGraphqlApi(addUserProfileMutation(userId), context);
   if (result) {
     const data = get(result, 'data.addUserProfile');
     if (data) {

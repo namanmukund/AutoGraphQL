@@ -104,6 +104,7 @@ const updateUserAssignment = async (
   userAssignmentId,
   assignmentAction,
   assignmentStatusInUserAssignment,
+  context,
 ) => {
   const { next } = userActionType;
   const { complete, incomplete } = userTopicTypeStatus;
@@ -162,9 +163,9 @@ const updateUserAssignment = async (
 
   const popAllQuery = 'assignment:{  popAll: true }';
   // pop all the elements in the assignment array in userAssignment
-  await callLocalGraphqlApi(updateUserAssignmentMutation(userAssignmentId, popAllQuery));
+  await callLocalGraphqlApi(updateUserAssignmentMutation(userAssignmentId, popAllQuery), context);
   // push all the existing elements with updated data in the assignment array in userAssignment
-  await callLocalGraphqlApi(updateUserAssignmentMutation(userAssignmentId, pushManyQuery));
+  await callLocalGraphqlApi(updateUserAssignmentMutation(userAssignmentId, pushManyQuery), context);
 
   return true;
 };
@@ -222,6 +223,7 @@ const addUserActivityAssignmentDumpPostHookMethod = async (input, mutationName, 
     userAssignmentId,
     assignmentAction,
     assignmentStatusInUserAssignment,
+    context,
   );
 
   const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);

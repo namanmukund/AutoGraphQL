@@ -111,13 +111,13 @@ const generateCertificateMutationResolver = async (
   } = input;
   let userRes;
   if (!isEventCertificate) {
-    userRes = await callLocalGraphqlApi(fetchUser(userId));
+    userRes = await callLocalGraphqlApi(fetchUser(userId), context);
   } else {
-    userRes = await callLocalGraphqlApi(fetchUser(userId, eventId));
+    userRes = await callLocalGraphqlApi(fetchUser(userId, eventId), context);
   }
   const users = get(userRes, 'data.users');
   // get eventCertificate based on event type
-  const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(userId, eventId));
+  const eventCertificatesRes = await callLocalGraphqlApi(fetchEventCertificate(userId, eventId), context);
   const eventCertificates = get(eventCertificatesRes, 'data.eventCertificates');
   let tekieUrl = '';
   if (!regenerateCertificate && eventCertificates && eventCertificates.length) {
@@ -217,10 +217,10 @@ const generateCertificateMutationResolver = async (
     if (fetchedUrl) {
       if (eventCertificates && eventCertificates.length) {
         const eventCertificateId = get(eventCertificates, '[0].id');
-        const eventCertificateCreatedRes = await callLocalGraphqlApi(updateEventCertificate(eventCertificateId, fetchedUrl, eventType, eventName));
+        const eventCertificateCreatedRes = await callLocalGraphqlApi(updateEventCertificate(eventCertificateId, fetchedUrl, eventType, eventName), context);
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.updateEventCertificate');
       } else {
-        const eventCertificateCreatedRes = await callLocalGraphqlApi(addEventCertificate(userId, fetchedUrl, eventType, eventName, isBulkGenerate ? eventId : ''));
+        const eventCertificateCreatedRes = await callLocalGraphqlApi(addEventCertificate(userId, fetchedUrl, eventType, eventName, isBulkGenerate ? eventId : ''), context);
         eventCertificateCreated = get(eventCertificateCreatedRes, 'data.addEventCertificate');
       }
     }

@@ -60,14 +60,14 @@ const updateBatchCurrentComponentStatusPostHookMethod = async (input, params, mu
   let courseId = get(input, 'currentCourse.typeId', '');
 
   if (studentsList && studentsList.length && topicStartOrder && topicEndOrder && topicEndOrder > topicStartOrder) {
-    const topicsListResult = await callLocalGraphqlApi(getTopicSList(topicStartOrder, topicEndOrder, courseId));
+    const topicsListResult = await callLocalGraphqlApi(getTopicSList(topicStartOrder, topicEndOrder, courseId), context);
     const topicsList = get(topicsListResult, 'data.topics');
     if (topicsList && topicsList.length) {
       /*
         get Course Id
       */
       if (!courseId) {
-        const courseResult = await callLocalGraphqlApi(getCourseQuery());
+        const courseResult = await callLocalGraphqlApi(getCourseQuery(), context);
         const course = get(courseResult, 'data.courses');
         if (course.length <= 0) {
           throw new DatabaseRecordNotFoundError({

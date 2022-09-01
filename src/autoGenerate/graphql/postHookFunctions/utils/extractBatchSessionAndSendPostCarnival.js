@@ -52,7 +52,7 @@ const BATCH_SESSION = (batchSessionId) => `{
 
 // TODO : HANDLE FOR NORMAL BATCH TRIAL
 const extractBatchSessionAndPostCarnival = async ({ batchSessionId }, deleteJob, ls = false) => {
-  const batchSessionRes = await callLocalGraphqlApi(BATCH_SESSION(batchSessionId));
+  const batchSessionRes = await callLocalGraphqlApi(BATCH_SESSION(batchSessionId), {});
   // Don't proceed if it is not the first topic
   deleteJob();
   if (get(batchSessionRes, 'data.batchSession.topic.order') !== 1) return;

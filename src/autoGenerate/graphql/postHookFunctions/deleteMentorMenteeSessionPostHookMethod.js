@@ -5,6 +5,7 @@ import sendSessionCancellationMessage from './utils/sendSessionCancellationMessa
 import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 import { TBA } from '../../../../constants';
 import isMentorChild from './utils/isMentorChild';
+import getUserActiveClassroom from '../../../../utils/getUserActiveClassroom';
 /*
   - check if the user if from referral
   - check if the session is the first session
@@ -20,7 +21,7 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
   } = context;
   const menteeSession = context.menteeSession;
   const userId = get(menteeSession, 'data.menteeSession.user.id');
-  const userInfo = await getMenteeInfo(userId);
+  const userInfo = await getMenteeInfo(userId, context);
   const topicId = get(input, 'topic.typeId', '');
   const mentorSessionId = get(input, 'mentorSession.typeId', '');
   if (currentUser && currentUser.id) {
@@ -38,7 +39,11 @@ const deleteMentorMenteeSessionPostHookMethod = async (input, mutationName, cont
       bookingDate = get(menteeSessionDoc, 'bookingDate');
       slotTimeStringArray = getSelectedSlotsStringArray(menteeSessionDoc);
     }
-    const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    const activeClassroom = await getUserActiveClassroom(context, {
+      courseId,
+      studentProfile: get(userInfo, 'data.user.studentProfile', ''),
+    }, get(userInfo, 'data.user.studentProfile.batch.id'));
+    const batchCode = get(activeClassroom, 'code');
     if (context.currentAppName !== TBA
       || (context.currentAppName === TBA && prevMenteeSessionDoc)) {
       const updateMentorMenteeSessionInput = {};
