@@ -6,7 +6,19 @@ const cacheKeys = async (_root, params) => {
     bypass: true,
   });
   const cachKeys = await redisClient.keys(pattern);
-  return cachKeys;
+  return {
+    meta: cachKeys.length || 0,
+    keys: cachKeys,
+  };
+};
+
+const getCache = async (_root, params) => {
+  const { key } = params;
+  const redisClient = new RedisController({
+    bypass: true,
+  });
+  const cacheData = await redisClient.get(key);
+  return JSON.stringify(cacheData);
 };
 
 const purgeCache = async (_root, params) => {
@@ -33,4 +45,4 @@ const purgeCache = async (_root, params) => {
   }
 };
 
-export default { cacheKeys, purgeCache };
+export default { cacheKeys, purgeCache, getCache };

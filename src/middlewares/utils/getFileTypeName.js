@@ -25,8 +25,8 @@ const getFileTypeName = (type) => {
     fileType = 'javascript';
   } else {
     // if invalid fileType then graphql will give the required error
-    log('File Type is not defined');
-    fileType = '';
+    log('File Type is not defined, setting others as default');
+    fileType = 'others';
   }
   return fileType;
 };

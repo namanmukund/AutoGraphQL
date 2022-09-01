@@ -31,7 +31,8 @@ const customQueries = `
 `;
 
 const redisCustomQueries = `
-    cacheKeys (pattern: String!): [String]
+    cacheKeys (pattern: String!): CacheKeyResult
+    getCache (key: String!): String
     purgeCache (pattern: String): BooleanResult
 `;
 

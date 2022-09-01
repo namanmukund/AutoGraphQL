@@ -727,6 +727,7 @@ resolvers.Query.getBuddyStatus = getBuddyStatus;
 // Redis utility queries
 resolvers.Query.cacheKeys = redisUtils.cacheKeys;
 resolvers.Query.purgeCache = redisUtils.purgeCache;
+resolvers.Query.getCache = redisUtils.getCache;
 
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;

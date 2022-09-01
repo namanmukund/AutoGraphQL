@@ -9,6 +9,7 @@ const FileType = `
     html
     css
     javascript
+    others
   }`;
 
 export default FileType;
