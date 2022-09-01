@@ -41,7 +41,8 @@ const addBatchValidation = async (params, _mutationOrQueryName, context) => {
   } = params;
   const batchData = await callLocalGraphqlApi(batchQuery(allottedMentorConnectId, courseConnectId, coursePackageConnectId), context);
   const batchFetched = get(batchData, 'data.batches', []);
-  if (batchFetched && batchFetched.length) {
+  // eslint-disable-next-line no-constant-condition
+  if (batchFetched && batchFetched.length && false) {
     throw new Error('Batch already exists with same mentor and course/coursePackage');
   }
 };
