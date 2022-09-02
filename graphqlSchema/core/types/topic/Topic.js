@@ -79,6 +79,7 @@ const Topic = `
     theory: [ArrayValue]
     learningSlides: [LearningSlide] @relation(name: "LearningSlideTopic")
     classType: ClassType @defaultValue(value: "lab")
+    referenceContent: String
   }
 `;
 
