@@ -39,7 +39,7 @@ const getMentorMenteeSessionData = async (id, context) => {
                   id
                 }
                 coursePackage {
-                  course {
+                  courses {
                     id
                   }
                 }
@@ -51,7 +51,7 @@ const getMentorMenteeSessionData = async (id, context) => {
                   id
                 }
                 coursePackage {
-                  course {
+                  courses {
                     id
                   }
                 }

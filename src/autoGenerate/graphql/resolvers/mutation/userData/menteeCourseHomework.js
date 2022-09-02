@@ -1102,7 +1102,11 @@ const getUserBatchDetails = (userId) => [
   {
     $lookup: {
       from: 'Batch',
-      let: { batchesId: '$batches.typeId' },
+      let: {
+        batchesId: {
+          $ifNull: ['$batches.typeId', []],
+        },
+      },
       pipeline: [
         {
           $match: {

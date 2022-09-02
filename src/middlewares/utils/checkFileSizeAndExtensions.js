@@ -1,4 +1,4 @@
-import { includes } from 'lodash';
+import { includes, get } from 'lodash';
 import { fileSizeLimitInMB, fileExtensions, ALLOWED_FILE_UPLOAD_TYPES } from '../../../constants';
 
 const checkFileSizeAndExtensions = (fileType, size, ext, connectInput) => {
