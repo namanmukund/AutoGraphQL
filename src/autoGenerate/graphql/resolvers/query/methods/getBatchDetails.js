@@ -127,6 +127,7 @@ const getBatchSessionAggregation = ({
                       {
                         $project: {
                           grade: 1,
+                          id: 1,
                           section: 1,
                           rollNo: 1,
                           profileAvatarCode: 1,
@@ -144,7 +145,9 @@ const getBatchSessionAggregation = ({
                   $lookup: {
                     from: 'StudentProfile',
                     let: {
-                      batchstudentProfileId: '$batchStudents.typeId',
+                      batchstudentProfileId: {
+                        $ifNull: ['$batchStudents.typeId', []],
+                      },
                     },
                     pipeline: [
                       {
@@ -166,6 +169,7 @@ const getBatchSessionAggregation = ({
                         $project: {
                           grade: 1,
                           section: 1,
+                          id: 1,
                           rollNo: 1,
                           profileAvatarCode: 1,
                           user: {
