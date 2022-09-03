@@ -103,7 +103,9 @@ const getBatchSessionAggregation = ({ batchId, topicId }) =>
           $lookup: {
             from: 'StudentProfile',
             let: {
-              batchStudentsId: '$batchStudents.typeId',
+              batchStudentsId: {
+                $ifNull: ['$batchStudents.typeId', []],
+              },
             },
             pipeline: [
               {
