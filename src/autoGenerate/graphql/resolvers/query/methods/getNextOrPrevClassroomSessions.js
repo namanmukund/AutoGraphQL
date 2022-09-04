@@ -135,11 +135,13 @@ const getBatchSessionAggregation = ({
                 $arrayElemAt: ['$coursePackage', 0],
               },
               students: {
+                id: 1,
                 grade: 1,
                 section: 1,
                 user: 1,
               },
               batchStudents: {
+                id: 1,
                 grade: 1,
                 section: 1,
                 user: 1,
@@ -535,11 +537,13 @@ const getAdhocSessionAggregation = ({
               description: 1,
               school: 1,
               students: {
+                id: 1,
                 grade: 1,
                 section: 1,
                 user: 1,
               },
               batchStudents: {
+                id: 1,
                 grade: 1,
                 section: 1,
                 user: 1,
