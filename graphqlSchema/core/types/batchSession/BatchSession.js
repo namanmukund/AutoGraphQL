@@ -31,7 +31,7 @@ const b2bFormFields = `
 `;
 
 const BatchSession = `
-  type BatchSession @model
+  type BatchSession @model @subscribe(events: "*")
   {
     course: Course @relation(name: "BatchSessionCourse", direction: "OneWay")
     coursePackage: CoursePackage @relation(name: "BatchSessionCoursePackage", direction: "OneWay")
@@ -74,6 +74,7 @@ const BatchSession = `
     sessionCreatedBy: User @relation(name: "BatchSessionSessionCreatedBy", direction: "OneWay")
     isRetakeSession: Boolean @defaultValue(value: "false")
     retakeSessions: [RetakeSession] @relation(name:"RetakeSessionBatchSession")
+    logoutAllStudents: Boolean @defaultValue(value: "false")
 }`;
 
 export default [BatchSession, batchAttendanceType, batchLoginStatusType];
