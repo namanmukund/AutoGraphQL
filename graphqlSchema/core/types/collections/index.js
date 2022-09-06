@@ -25,6 +25,7 @@ import UrlResult from './UrlResult';
 import ScheduleSessionsInput from './ScheduleSessions';
 import CodeEditorConfig from './CodeEditorConfig';
 import EvaluationTag from './EvaluationTag';
+import CacheKeyResult from './CacheKeyResult';
 
 export default [
   ...Enum,
@@ -53,5 +54,6 @@ export default [
   ...UrlResult,
   ...ScheduleSessionsInput,
   ...CodeEditorConfig,
+  CacheKeyResult,
   ...EvaluationTag,
 ];

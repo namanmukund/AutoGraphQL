@@ -55,6 +55,7 @@ const addBatchPostHookMethod = async (input, _params, _mutationName, context) =>
   let courseId = get(input, 'course.typeId');
   const coursePackageId = get(input, 'coursePackage.typeId');
   const documentType = get(input, 'documentType', 'batch');
+  const batchStudents = get(_params, 'batchStudentsConnectIds', []);
   let topic;
   let firstTopicId;
   /*
@@ -65,8 +66,11 @@ const addBatchPostHookMethod = async (input, _params, _mutationName, context) =>
     const coursePackage = await getTopicsFromCoursePackage(coursePackageId, context);
     const topicRules = get(coursePackage, 'topics');
     const topics = getSortedTopics(topicRules);
-    firstTopicId = get(topics, '[0].id');
-    courseId = get(topics, '[0].courses[0].id');
+    if (courseId) {
+      firstTopicId = get((topics || []).find((topicRes) => get(topicRes, 'courses[0].id') === courseId), 'id');
+    }
+    firstTopicId = firstTopicId || get(topics, '[0].id');
+    courseId = courseId || get(topics, '[0].courses[0].id');
   } else {
     topic = await getFirstTopicAndLearningObjective('', courseId);
     firstTopicId = get(topic, 'data.topics[0].id');
@@ -84,6 +88,17 @@ const addBatchPostHookMethod = async (input, _params, _mutationName, context) =>
       });
     }
     courseId = course[0].id;
+  }
+
+  if (batchStudents && batchStudents.length) {
+    // Purging Student Profile Cache to avoid data mismatch.
+    await callLocalGraphqlApi(`
+      query{
+        purgeCache(pattern: "userProfile::activeClassroom::*") {
+          result
+        }
+      }
+    `, context);
   }
   // we are not throwing any error here because it will seem that create batch failed if
   // firstTopicId and courseId and batchId is not present. Just adding log

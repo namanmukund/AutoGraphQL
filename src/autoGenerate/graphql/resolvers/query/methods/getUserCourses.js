@@ -380,6 +380,7 @@ const batchPipeline = (batchIdVariable, isArray) => [
       coursePackage: 1,
       currentComponent: 1,
       coursePackageCourses: 1,
+      createdAt: 1,
     },
   },
   {
@@ -506,6 +507,7 @@ const batchPipeline = (batchIdVariable, isArray) => [
       classroomTitle: 1,
       allottedMentor: { $arrayElemAt: ['$allottedMentor', 0] },
       coursePackageCourses: 1,
+      createdAt: 1,
       coursePackage: {
         $arrayElemAt: ['$coursePackage', 0],
       },
@@ -621,11 +623,17 @@ const getTypeQueryController = (typeName) => new QueryController(typeName, { byp
 
 const getMultipleBatchTitle = (batch) => {
   const title = get(batch, 'classroomTitle', '');
-  if (get(batch, 'coursePackageCourses', []).length) {
-    const coursesString = get(batch, 'coursePackageCourses', []).map((course) => get(course, 'title', '')).join(', ');
-    return `${title} (${coursesString})`;
+  if (title) {
+    if (get(batch, 'coursePackageCourses', []).length) {
+      const coursesString = get(batch, 'coursePackageCourses', []).map((course) => get(course, 'title', '')).join(', ');
+      return `${title} (${coursesString})`;
+    }
+    return `${title} (${get(batch, 'coursePackage.title', '')})`;
   }
-  return title;
+  if (get(batch, 'currentComponent.currentCourse.title')) {
+    return `${get(batch, 'code')} (${get(batch, 'currentComponent.currentCourse.title')})`;
+  }
+  return get(batch, 'code');
 };
 
 const getUserCourses = (async (root, params, context, info) => {
@@ -656,7 +664,8 @@ const getUserCourses = (async (root, params, context, info) => {
           title: get(batch, 'classroomTitle'),
         },
         isCourseCompleted: false,
-      })).reverse();
+        createdAt: get(batch, 'createdAt'),
+      })).sort((a, b) => new Date(get(b, 'createdAt')) - new Date(get(a, 'createdAt'))).reverse();
       if (get(studentProfileRes, '0.batch.id') && !allBatches.find((batch) => get(batch, 'classroom.id') === get(studentProfileRes, '0.batch.id'))) {
         allBatches.push({
           id: get(studentProfileRes, '0.batch.id'),
@@ -671,6 +680,7 @@ const getUserCourses = (async (root, params, context, info) => {
             title: get(studentProfileRes, '0.batch.classroomTitle'),
           },
           isCourseCompleted: false,
+          createdAt: get(studentProfileRes, '0.batch.createdAt'),
         });
       }
       return allBatches.reverse().map((batch, index) => {
@@ -777,7 +787,7 @@ const getUserCourses = (async (root, params, context, info) => {
     }
     if (updatedCourseArr && updatedCourseArr.length) {
       const tempUniqueCourseIds = [];
-      return (updatedCourseArr || []).reverse().filter((el) => {
+      return (updatedCourseArr || []).filter((el) => {
         const isDuplicate = tempUniqueCourseIds.includes(el.id);
         if (!isDuplicate) {
           tempUniqueCourseIds.push(el.id);
