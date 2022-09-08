@@ -30,15 +30,15 @@ const addAssignmentQuestionValidation = async (params, _mutationOrQueryName, con
   if (statement || order) {
     let courseIds = '';
     coursesConnectIds.forEach((courseId) => { courseIds += `"${courseId}"`; });
-    // check if the assignmentQuestion with similar statement exist
+    // check if the assignmentQuestion with similar statement exista
     if (statement) {
-      const assignmentQuestionsData = await getAssignmentQuestion(courseIds, statement, isHomework, context);
+      const assignmentQuestionsData = await getAssignmentQuestion(courseIds, statement, isHomework, order, '', context);
       if (assignmentQuestionsData && assignmentQuestionsData.length > 0) {
         throw new AssignmentWithSimilarStatementAlreadyExist();
       }
     }
     if (order) {
-      const assignmentQuestionsData = await getAssignmentQuestion(courseIds, null, isHomework, order, context);
+      const assignmentQuestionsData = await getAssignmentQuestion(courseIds, null, isHomework, order, '', context);
       if (assignmentQuestionsData && assignmentQuestionsData.length > 0) {
         throw new OrderAlreadyExistsError();
       }
