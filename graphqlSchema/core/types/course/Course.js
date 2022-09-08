@@ -71,6 +71,7 @@ const Course = `
   ) 
   {
     order: Int
+    courseDisplayName: String
     title: String! @length(min: 3, max: 100) @trim
     bannerTitle: String
     bannerDescription: String
