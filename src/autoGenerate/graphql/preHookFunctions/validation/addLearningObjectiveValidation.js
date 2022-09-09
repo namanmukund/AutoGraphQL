@@ -65,9 +65,9 @@ const addLearningObjectiveValidation = async (params, _mutationOrQueryName, cont
     }
     if (title) {
       const LoData = await fetchLO(courseIds, null, title, null, context);
-      if (LoData && LoData.length > 0) {
-        throw new LOWithSimilarTitleAlreadyExist();
-      }
+      // if (LoData && LoData.length > 0) {
+      //   throw new LOWithSimilarTitleAlreadyExist();
+      // }
     }
   }
   return true;
