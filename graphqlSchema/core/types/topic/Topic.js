@@ -80,6 +80,7 @@ const Topic = `
     learningSlides: [LearningSlide] @relation(name: "LearningSlideTopic")
     classType: ClassType @defaultValue(value: "lab")
     referenceContent: String
+    referenceContentWidth: Int
   }
 `;
 
