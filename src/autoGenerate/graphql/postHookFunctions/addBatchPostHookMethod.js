@@ -10,6 +10,7 @@ import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageO
 import {
   getTopicsFromCoursePackage,
 } from './utils/updateBatchPostHookQueries';
+import purgeUserActiveProfileCache from './utils/purgeUserActiveProfileCache';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -92,13 +93,7 @@ const addBatchPostHookMethod = async (input, _params, _mutationName, context) =>
 
   if (batchStudents && batchStudents.length) {
     // Purging Student Profile Cache to avoid data mismatch.
-    await callLocalGraphqlApi(`
-      query{
-        purgeCache(pattern: "userProfile::activeClassroom::*") {
-          result
-        }
-      }
-    `, context);
+    await purgeUserActiveProfileCache(context);
   }
   // we are not throwing any error here because it will seem that create batch failed if
   // firstTopicId and courseId and batchId is not present. Just adding log

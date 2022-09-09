@@ -1,6 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import addUpdateSchoolClass from './utils/addUpdateSchoolClass';
+import purgeUserActiveProfileCache from './utils/purgeUserActiveProfileCache';
 
 const updateUserApprovedCodeQuery = async (userApprovedCodeID, input, context) => {
   const query = `
@@ -118,6 +119,8 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
       Object.assign(input, { schoolClass: { type: 'SchoolClass', typeId: schoolClassId } });
     }
   }
+
+  await purgeUserActiveProfileCache(context);
 };
 
 export default updateStudentProfilePostHookMethod;
