@@ -15,6 +15,7 @@ import { fetchBatch } from '../resolvers/mutation/shift/queries/scheduleSessions
 import { CannotScheduleOutsideWorkingHoursError } from '../../../../constants/errors';
 import checkIfOutsideWorkingSchedule from './utils/checkIfOutsideWorkingSchedule';
 import getScheduleSessionsRulesGroupedByDay from './utils/getScheduledSessionsRulesGroupedByDay';
+import purgeUserActiveProfileCache from './utils/purgeUserActiveProfileCache';
 
 // query to get all not completed batchSessions of a batch to update student
 const getBatchSessionsQuery = (batchId) => `
@@ -404,6 +405,8 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
       callLocalGraphqlApi(updateUser(userId, vertical), context);
     }
   }
+
+  await purgeUserActiveProfileCache(context);
 };
 
 export default updateBatchPostHookMethod;

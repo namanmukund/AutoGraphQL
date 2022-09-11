@@ -183,7 +183,16 @@ const isComponentUnlockedForNewCourse = async (
     }
     return true;
   }
-  if (!currentTopicComponentInfo) {
+  const batchCurrentComponentStatusRes = await getBatchCurrentComponentStatus(
+    userId,
+    context,
+  );
+  const activeClassroom = await getUserActiveClassroom(context, {
+    studentProfile: get(batchCurrentComponentStatusRes, 'data.user.studentProfile'),
+  }, get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.id'));
+  const batchCurrentComponentInfo = get(activeClassroom, 'currentComponent');
+
+  if (!currentTopicComponentInfo && !batchCurrentComponentInfo) {
     throw new DatabaseRecordNotFoundError({
       data: {
         error: 'CurrentTopicComponentInfo: is not present',
@@ -229,14 +238,6 @@ const isComponentUnlockedForNewCourse = async (
   // type to access that topic
   let { order: currentTopicOrder } = currentTopic;
   const { id: currentTopicId } = currentTopic;
-  const batchCurrentComponentStatusRes = await getBatchCurrentComponentStatus(
-    userId,
-    context,
-  );
-  const activeClassroom = await getUserActiveClassroom(context, {
-    studentProfile: get(batchCurrentComponentStatusRes, 'data.user.studentProfile'),
-  }, get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.id'));
-  const batchCurrentComponentInfo = get(activeClassroom, 'currentComponent');
   const schoolInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.school');
 
   const isCoursePackageBatch = get(activeClassroom, 'coursePackage.id');
