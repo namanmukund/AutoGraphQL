@@ -4,6 +4,8 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import { ApolloServer } from 'apollo-server-express';
 import { BaseRedisCache } from 'apollo-server-cache-redis';
+import { WebSocketServer } from 'ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
 import schema from './graphql';
 import { log, types } from '../utils';
 import { authMiddleware, graphqlUpload } from './middlewares';
@@ -16,7 +18,8 @@ import iciciRoutes from './externalProductAPI/icici/routes';
 import typeformRoute from './typeformAPI';
 import redis from './redis';
 import pubsub from './pubsub';
-import { ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER, ALLOWED_HEADERS } from '../constants';
+import { ALLOWED_HEADERS } from '../constants';
+import getAdditionalContextData from '../utils/getAdditionalContextData';
 
 const http = require('http');
 
@@ -67,12 +70,46 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Create the schema, which will be used separately by ApolloServer and
+// the WebSocket server.
+
 app.use(path, bodyParser.json(), graphqlUpload({ uploadDir: '/tmp/uploads' }));
 // To pass parsedASTMap in context
 const parsedASTMap = getParsedASTMap(types);
-// using apollo-server
+
+const httpServer = http.createServer(app);
+
+const wsServer = new WebSocketServer({
+  server: httpServer,
+  path,
+});
+
+const serverCleanup = useServer({
+  schema,
+  context: (ctx) => {
+    let additionalContextDataFromHeader = {};
+    if (get(ctx, 'extra.request.headers')) {
+      additionalContextDataFromHeader = getAdditionalContextData({ headers: get(ctx, 'extra.request.headers') });
+    }
+    return {
+      ...ctx,
+      pubsub,
+      parsedASTMap,
+      redis,
+      ...additionalContextDataFromHeader,
+    };
+  },
+  onConnect: () => {
+    log('Client Socket subscribed Successfully');
+  },
+  onError: () => {
+    log('Something went wrong while subscribing');
+  },
+}, wsServer);
+  // using apollo-server
 const server = new ApolloServer({
   schema,
+  csrfPrevention: true,
   introspection: process.env.ENABLE_GRAPHQL_INTROSPECTION,
   playground: {
     endpoint: `http://0.0.0.0:${port}${path}`,
@@ -101,12 +138,9 @@ const server = new ApolloServer({
     };
   },
   context: ({ req, connection }) => {
-    const additionalContextDataFromHeader = {};
+    let additionalContextDataFromHeader = {};
     if (req && req.headers) {
-      ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER
-        .forEach(({ contextLabel: key, headerLabel: label }) => {
-          if (req.headers[label]) additionalContextDataFromHeader[key] = req.headers[label];
-        });
+      additionalContextDataFromHeader = getAdditionalContextData({ headers: req.headers });
     }
     if (connection) {
       // context comes in connection in case WS
@@ -174,12 +208,22 @@ const server = new ApolloServer({
       ...additionalContextDataFromHeader,
     };
   },
+  plugins: [
+    {
+      async serverWillStart() {
+        return {
+          async drainServer() {
+            await serverCleanup.dispose();
+          },
+        };
+      },
+    },
+  ],
 });
 
 server.applyMiddleware({ app });
 
-const httpServer = http.createServer(app);
-server.installSubscriptionHandlers(httpServer);
+// server.installSubscriptionHandlers(httpServer); Commented as it is causing graphql-ws subscription
 
 httpServer.listen(port, '0.0.0.0', () => {
   log(`End time:${new Date()}`);
