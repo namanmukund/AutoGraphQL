@@ -33,10 +33,10 @@ const updateLearningObjectiveValidation = async (params, mutationOrQueryName, co
       }
     }
     // if (title) {
-      // const LoData = await fetchLO(courseIds, null, title, LoFilter);
-      // if (LoData && LoData.length > 0) {
-      //   throw new LOWithSimilarTitleAlreadyExist();
-      // }
+    // const LoData = await fetchLO(courseIds, null, title, LoFilter);
+    // if (LoData && LoData.length > 0) {
+    //   throw new LOWithSimilarTitleAlreadyExist();
+    // }
     // }
   }
   return true;
