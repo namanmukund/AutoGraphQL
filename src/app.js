@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import { ApolloServer } from 'apollo-server-express';
 import { BaseRedisCache } from 'apollo-server-cache-redis';
 import { WebSocketServer } from 'ws';
-import { useServer } from 'graphql-ws/lib/use/ws';
+import { useServer as useSocketServer } from 'graphql-ws/lib/use/ws';
 import schema from './graphql';
 import { log, types } from '../utils';
 import { authMiddleware, graphqlUpload } from './middlewares';
@@ -79,12 +79,12 @@ const parsedASTMap = getParsedASTMap(types);
 
 const httpServer = http.createServer(app);
 
-const wsServer = new WebSocketServer({
+const webSocketServer = new WebSocketServer({
   server: httpServer,
   path,
 });
 
-const serverCleanup = useServer({
+const socketServer = useSocketServer({
   schema,
   context: (ctx) => {
     let additionalContextDataFromHeader = {};
@@ -99,17 +99,10 @@ const serverCleanup = useServer({
       ...additionalContextDataFromHeader,
     };
   },
-  onConnect: () => {
-    log('Client Socket subscribed Successfully');
-  },
-  onError: () => {
-    log('Something went wrong while subscribing');
-  },
-}, wsServer);
+}, webSocketServer);
   // using apollo-server
 const server = new ApolloServer({
   schema,
-  csrfPrevention: true,
   introspection: process.env.ENABLE_GRAPHQL_INTROSPECTION,
   playground: {
     endpoint: `http://0.0.0.0:${port}${path}`,
@@ -213,7 +206,7 @@ const server = new ApolloServer({
       async serverWillStart() {
         return {
           async drainServer() {
-            await serverCleanup.dispose();
+            await socketServer.dispose();
           },
         };
       },
@@ -222,8 +215,6 @@ const server = new ApolloServer({
 });
 
 server.applyMiddleware({ app });
-
-// server.installSubscriptionHandlers(httpServer); Commented as it is causing graphql-ws subscription
 
 httpServer.listen(port, '0.0.0.0', () => {
   log(`End time:${new Date()}`);
