@@ -1,10 +1,7 @@
 /* eslint no-restricted-syntax: ["error", "FunctionExpression", "WithStatement",
 "BinaryExpression[operator='in']"] */
 import { get } from 'lodash';
-import {
-  LOWithSimilarTitleAlreadyExist,
-  OrderAlreadyExistsError,
-} from '../../../../../constants/errors';
+import { OrderAlreadyExistsError } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 export const fetchLO = async (courseIds, order, title, LoFilter, context) => {
@@ -63,12 +60,12 @@ const addLearningObjectiveValidation = async (params, _mutationOrQueryName, cont
         throw new OrderAlreadyExistsError();
       }
     }
-    if (title) {
-      const LoData = await fetchLO(courseIds, null, title, null, context);
+    // if (title) {
+      // const LoData = await fetchLO(courseIds, null, title, null, context);
       // if (LoData && LoData.length > 0) {
       //   throw new LOWithSimilarTitleAlreadyExist();
       // }
-    }
+    // }
   }
   return true;
 };
