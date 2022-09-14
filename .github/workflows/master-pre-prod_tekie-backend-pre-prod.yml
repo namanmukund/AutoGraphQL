@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: '14.x'
 
-      - name: npm install, build, and test
+      - name: npm install, build
         run: |
           npm install
           npm run build:cloudProd
@@ -32,6 +32,7 @@ jobs:
           name: node-app
           path: |
             ./build
+            node_modules
             package.json
             package-lock.json
 
