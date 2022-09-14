@@ -358,7 +358,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         topicRules = get(coursePackage, 'topics', []);
       }
       topicsList = getSortedTopics(topicRules);
-      currentComponentTopicOrder = get((topicsList || []).find((topic) => get(topic, 'id') === currentComponentTopicId), 'coursePackageOrder');
+      currentComponentTopicOrder = get((topicsList || []).find((topic) => get(topic, 'id') === currentComponentTopicId), 'coursePackageOrder', 0) || 0;
       currentTopicOrder = get((topicsList || []).find((topic) => get(topic, 'id') === topicId), 'coursePackageOrder');
       topicsList = (topicsList || []).filter((topic) => get(topic, 'classType') !== 'theory');
     } else {
@@ -366,7 +366,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       topicsList = get(nextTopicQueryRes, 'data.topics', []);
     }
 
-    const shouldUpdateCurrentComponent = (coursePackageId && currentTopicOrder && currentComponentTopicOrder) ? ((currentTopicOrder >= currentComponentTopicOrder) || currentComponentTopicId === topicId) : (currentComponentTopicId === topicId);
+    const shouldUpdateCurrentComponent = (coursePackageId && currentTopicOrder && (currentComponentTopicOrder || currentComponentTopicOrder === 0)) ? ((currentTopicOrder >= currentComponentTopicOrder) || currentComponentTopicId === topicId) : (currentComponentTopicId === topicId);
 
     if (batchCurrentComponentId && sessionStatusFromInput && shouldUpdateCurrentComponent) {
       if (sessionStatusFromInput === sessionStatus.completed) {
