@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import get from 'lodash/get';
-import { MASTER_PASSWORD } from '../../../../../../constants';
+import { STUDENT_MASTER_PASSWORD, TEACHER_MASTER_PASSWORD } from '../../../../../../constants';
 import {
   PasswordMismatchError,
   PhoneNotVerifiedError,
@@ -35,7 +35,7 @@ const checkPasswordAndReturnUserWithToken = (fetchedUser, input, authentication)
   }
 
   const valid = bcrypt.compareSync(password, fetchedUser.password);
-  if (!(get(fetchedUser, 'role') === MENTOR && password === MASTER_PASSWORD)) {
+  if (!((get(fetchedUser, 'role') === MENTOR && password === TEACHER_MASTER_PASSWORD) || (get(fetchedUser, 'role') === MENTEE && password === STUDENT_MASTER_PASSWORD))) {
     if (!valid) {
       throw new PasswordMismatchError();
     }
