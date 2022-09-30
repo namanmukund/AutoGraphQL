@@ -1,13 +1,13 @@
 import bcrypt from 'bcryptjs';
 import get from 'lodash/get';
-import { MASTER_PASSWORD } from '../../../../../../constants';
+import { STUDENT_MASTER_PASSWORD, TEACHER_MASTER_PASSWORD } from '../../../../../../constants';
 import {
   PasswordMismatchError,
   PhoneNotVerifiedError,
   UnknownUserError,
   UserPasswordNotSetError,
 } from '../../../../../../constants/errors';
-import { MENTOR } from '../../../../../../constants/roles';
+import { MENTEE, MENTOR, PARENT } from '../../../../../../constants/roles';
 import { createUserTokenTypeData } from './createUserTokenTypeData';
 
 const checkPasswordAndReturnUserWithToken = (fetchedUser, input, authentication) => {
@@ -35,7 +35,8 @@ const checkPasswordAndReturnUserWithToken = (fetchedUser, input, authentication)
   }
 
   const valid = bcrypt.compareSync(password, fetchedUser.password);
-  if (!(get(fetchedUser, 'role') === MENTOR && password === MASTER_PASSWORD)) {
+  if (!((get(fetchedUser, 'role') === MENTOR && password === TEACHER_MASTER_PASSWORD)
+    || ((get(fetchedUser, 'role') === MENTEE || get(fetchedUser, 'role') === PARENT) && password === STUDENT_MASTER_PASSWORD))) {
     if (!valid) {
       throw new PasswordMismatchError();
     }
